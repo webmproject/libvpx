@@ -26,7 +26,6 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     pbi->dequant.idct    = vp8_dequant_idct_neon;
     pbi->dequant.idct_dc = vp8_dequant_dc_idct_neon;
     pbi->dboolhuff.start = vp8dx_start_decode_c;
-    pbi->dboolhuff.stop  = vp8dx_stop_decode_c;
     pbi->dboolhuff.fill  = vp8dx_bool_decoder_fill_c;
     pbi->dboolhuff.debool = vp8dx_decode_bool_c;
     pbi->dboolhuff.devalue = vp8dx_decode_value_c;
@@ -36,7 +35,6 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     pbi->dequant.idct    = vp8_dequant_idct_v6;
     pbi->dequant.idct_dc = vp8_dequant_dc_idct_v6;
     pbi->dboolhuff.start = vp8dx_start_decode_c;
-    pbi->dboolhuff.stop  = vp8dx_stop_decode_c;
     pbi->dboolhuff.fill  = vp8dx_bool_decoder_fill_c;
     pbi->dboolhuff.debool = vp8dx_decode_bool_c;
     pbi->dboolhuff.devalue = vp8dx_decode_value_c;

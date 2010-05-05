@@ -80,7 +80,6 @@ void vp8_kfread_modes(VP8D_COMP *pbi)
         {
             MB_PREDICTION_MODE y_mode;
 
-            vp8dx_bool_decoder_fill(bc);
             // Read the Macroblock segmentation map if it is being updated explicitly this frame (reset to 0 above by default)
             // By default on a key frame reset all MBs to segment 0
             m->mbmi.segment_id = 0;

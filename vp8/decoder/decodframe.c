@@ -455,7 +455,6 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         else
         pbi->debugoutput =0;
         */
-        vp8dx_bool_decoder_fill(xd->current_bc);
         vp8_decode_macroblock(pbi, xd);
 
 
@@ -563,18 +562,7 @@ static void stop_token_decoder(VP8D_COMP *pbi)
     VP8_COMMON *pc = &pbi->common;
 
     if (pc->multi_token_partition != ONE_PARTITION)
-    {
-        int num_part = (1 << pc->multi_token_partition);
-
-        for (i = 0; i < num_part; i++)
-        {
-            vp8dx_stop_decode(&pbi->mbc[i]);
-        }
-
         vpx_free(pbi->mbc);
-    }
-    else
-        vp8dx_stop_decode(& pbi->bc2);
 }
 
 static void init_frame(VP8D_COMP *pbi)
@@ -883,7 +871,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
 
-    vp8dx_bool_decoder_fill(bc);
     {
         // read coef probability tree
 
@@ -969,8 +956,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
 
     stop_token_decoder(pbi);
-
-    vp8dx_stop_decode(bc);
 
     // vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes  \n",bc->pos+pbi->bc2.pos);
 

@@ -15,7 +15,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
 
-#define BR_COUNT 8
 #define BOOL_DATA UINT8
 
 #define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
@@ -105,6 +104,10 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
     }
 }
 DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
+#define FILL \
+    if(count < 0) \
+        VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
+
 #define NORMALIZE \
     /*if(range < 0x80)*/                            \
     { \
@@ -112,17 +115,13 @@ DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
         range <<= shift; \
         value <<= shift; \
         count -= shift; \
-        if(count <= 0) \
-        { \
-            count += BR_COUNT ; \
-            value |= (*bufptr) << (BR_COUNT-count); \
-            bufptr = br_ptr_advance(bufptr, 1); \
-        } \
     }
 
 #define DECODE_AND_APPLYSIGN(value_to_sign) \
     split = (range + 1) >> 1; \
-    if ( (value >> 8) < split ) \
+    bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
+    FILL \
+    if ( value < bigsplit ) \
     { \
         range = split; \
         v= value_to_sign; \
@@ -130,28 +129,25 @@ DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
     else \
     { \
         range = range-split; \
-        value = value-(split<<8); \
+        value = value-bigsplit; \
         v = -value_to_sign; \
     } \
     range +=range;                   \
     value +=value;                   \
-    if (!--count) \
-    { \
-        count = BR_COUNT; \
-        value |= *bufptr; \
-        bufptr = br_ptr_advance(bufptr, 1); \
-    }
+    count--;
 
 #define DECODE_AND_BRANCH_IF_ZERO(probability,branch) \
     { \
         split = 1 +  ((( probability*(range-1) ) )>> 8); \
-        if ( (value >> 8) < split ) \
+        bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
+        FILL \
+        if ( value < bigsplit ) \
         { \
             range = split; \
             NORMALIZE \
             goto branch; \
         } \
-        value -= (split<<8); \
+        value -= bigsplit; \
         range = range - split; \
         NORMALIZE \
     }
@@ -159,7 +155,9 @@ DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
 #define DECODE_AND_LOOP_IF_ZERO(probability,branch) \
     { \
         split = 1 + ((( probability*(range-1) ) ) >> 8); \
-        if ( (value >> 8) < split ) \
+        bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
+        FILL \
+        if ( value < bigsplit ) \
         { \
             range = split; \
             NORMALIZE \
@@ -170,7 +168,7 @@ DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
             goto branch; \
             } goto BLOCK_FINISHED; /*for malformed input */\
         } \
-        value -= (split<<8); \
+        value -= bigsplit; \
         range = range - split; \
         NORMALIZE \
     }
@@ -188,10 +186,12 @@ DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
 
 #define DECODE_EXTRABIT_AND_ADJUST_VAL(t,bits_count)\
     split = 1 +  (((range-1) * vp8d_token_extra_bits2[t].Probs[bits_count]) >> 8); \
-    if(value >= (split<<8))\
+    bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
+    FILL \
+    if(value >= bigsplit)\
     {\
         range = range-split;\
-        value = value-(split<<8);\
+        value = value-bigsplit;\
         val += ((UINT16)1<<bits_count);\
     }\
     else\
@@ -217,11 +217,13 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
     register int count;
 
     const BOOL_DATA *bufptr;
+    const BOOL_DATA *bufend;
     register unsigned int range;
-    register unsigned int value;
+    VP8_BD_VALUE value;
     const int *scan;
     register unsigned int shift;
     UINT32 split;
+    VP8_BD_VALUE bigsplit;
     INT16 *qcoeff_ptr;
 
     const vp8_prob *coef_probs;
@@ -253,10 +255,11 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
         qcoeff_ptr = &x->qcoeff[0];
     }
 
+    bufend  = bc->user_buffer_end;
+    bufptr  = bc->user_buffer;
+    value   = bc->value;
     count   = bc->count;
     range   = bc->range;
-    value   = bc->value;
-    bufptr  = bc->read_ptr;
 
 
     coef_probs = oc->fc.coef_probs [type] [ 0 ] [0];
@@ -384,10 +387,11 @@ BLOCK_FINISHED:
         goto BLOCK_LOOP;
     }
 
-    bc->count = count;
+    FILL
+    bc->user_buffer = bufptr;
     bc->value = value;
+    bc->count = count;
     bc->range = range;
-    bc->read_ptr = bufptr;
     return eobtotal;
 
 }

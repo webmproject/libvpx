@@ -202,7 +202,6 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
 
                     vp8_build_uvmvs(xd, pc->full_pixel);
 
-                    vp8dx_bool_decoder_fill(xd->current_bc);
                     vp8_decode_macroblock(pbi, xd);
 
 
