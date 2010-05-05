@@ -24,7 +24,7 @@ extern  void vp8_init_scan_order_mask();
 void vp8_update_mode_info_border(MODE_INFO *mi, int rows, int cols)
 {
     int i;
-    vpx_memset(mi - cols - 1, 0, sizeof(MODE_INFO) * cols + 1);
+    vpx_memset(mi - cols - 2, 0, sizeof(MODE_INFO) * (cols + 1));
 
     for (i = 0; i < rows; i++)
     {
