@@ -1,0 +1,143 @@
+@TEMPLATE encoder_tmpl.c
+VP8 Scalable Frame Patterns
+===========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ INTRODUCTION
+This is an example demonstrating how to control the VP8 encoder's
+reference frame selection and update mechanism for video applications
+that benefit from a scalable bitstream.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ INTRODUCTION
+
+
+Configuration
+-------------
+Scalable frame patterns are most useful in an error resilient context,
+so error resiliency mode is enabled, as in the `error_resilient.c`
+example. In addition, we want to disable automatic keyframe selection,
+so we force an interval of 1000 frames.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ENC_SET_CFG2
+
+/* Enable error resilient mode */
+cfg.g_error_resilient = 1;
+cfg.g_lag_in_frames   = 0;
+cfg.kf_mode           = VPX_KF_FIXED;
+
+/* Disable automatic keyframe placement */
+cfg.kf_min_dist = cfg.kf_max_dist = 1000;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ENC_SET_CFG2
+
+This example uses the following frame pattern (L->last_frame,
+G->golden_frame, A->alt_ref_frame):
+
+*  Frame  0  Intra, use none,  update L&G&A
+*  Frame  1  Inter, use LGA,   update none
+*  Frame  2  Inter, use LGA,   update L
+*  Frame  3  Inter, use LGA,   update none
+*  Frame  4  Inter, use GA,    update L&G
+*  Frame  5  Inter, use LGA,   update none
+*  Frame  6  Inter, use LGA,   update L
+*  Frame  7  Inter, use LGA,   update none
+*  Frame  8  Inter, use A,     update L&G&A
+*  Frame  9  Inter, use LGA,   update none
+*  Frame 10  Inter, use LGA,   update L
+*  Frame 11  Inter, use LGA,   update none
+*  Frame 12  Inter, use GA,    update L&G
+*  Frame 13  Inter, use LGA,   update none
+*  Frame 14  Inter, use LGA,   update L
+*  Frame 15  Inter, use LGA,   update none
+*  ...Repeats the pattern from frame 0
+
+Change this variable to test the 3 decodable streams case.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TWOPASS_VARS
+int                  num_streams = 5;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TWOPASS_VARS
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PER_FRAME_CFG
+flags = 0;
+if(num_streams == 5)
+{
+    switch(frame_cnt % 16) {
+        case 0:
+            flags |= VPX_EFLAG_FORCE_KF;
+            flags |= VP8_EFLAG_FORCE_GF;
+            flags |= VP8_EFLAG_FORCE_ARF;
+            break;
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 9:
+        case 11:
+        case 13:
+        case 15:
+            flags |= VP8_EFLAG_NO_UPD_LAST;
+            flags |= VP8_EFLAG_NO_UPD_GF;
+            flags |= VP8_EFLAG_NO_UPD_ARF;
+            break;
+        case 2:
+        case 6:
+        case 10:
+        case 14:
+            break;
+        case 4:
+            flags |= VP8_EFLAG_NO_REF_LAST;
+            flags |= VP8_EFLAG_FORCE_GF;
+            break;
+        case 8:
+            flags |= VP8_EFLAG_NO_REF_LAST;
+            flags |= VP8_EFLAG_NO_REF_GF;
+            flags |= VP8_EFLAG_FORCE_GF;
+            flags |= VP8_EFLAG_FORCE_ARF;
+            break;
+        case 12:
+            flags |= VP8_EFLAG_NO_REF_LAST;
+            flags |= VP8_EFLAG_FORCE_GF;
+            break;
+    }
+}
+else
+{
+    switch(frame_cnt % 9) {
+        case 0:
+            if(frame_cnt==0)
+            {
+                flags |= VPX_EFLAG_FORCE_KF;
+            }
+            else
+            {
+                cfg.rc_max_quantizer = 26;
+                cfg.rc_min_quantizer = 0;
+                cfg.rc_target_bitrate = 300;
+                flags |= VP8_EFLAG_NO_REF_LAST;
+                flags |= VP8_EFLAG_NO_REF_ARF;
+            }
+            flags |= VP8_EFLAG_FORCE_GF;
+            flags |= VP8_EFLAG_FORCE_ARF;
+            break;
+        case 1:
+        case 2:
+        case 4:
+        case 5:
+        case 7:
+        case 8:
+            cfg.rc_max_quantizer = 45;
+            cfg.rc_min_quantizer = 0;
+            cfg.rc_target_bitrate = 230;
+            break;
+        case 3:
+        case 6:
+            cfg.rc_max_quantizer = 45;
+            cfg.rc_min_quantizer = 0;
+            cfg.rc_target_bitrate = 215;
+            flags |= VP8_EFLAG_NO_REF_LAST;
+            flags |= VP8_EFLAG_FORCE_ARF;
+            break;
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PER_FRAME_CFG
+
+Observing The Effects
+---------------------
+Use the `decode_with_drops` example to decode with various dropped frame
+patterns. Good patterns to start with are 1/2, 3/4, 7/8, and 15/16
+drops.

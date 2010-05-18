@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="armasm"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="ARMASM"
+			DisplayName="Armasm Assembler"
+			CommandLine="armasm -o &quot;$(IntDir)\$(InputName).obj&quot; $(InputPath) -32 -cpu XSCALE&#x0D;&#x0A;"
+			Outputs="$(IntDir)\$(InputName).obj"
+			FileExtensions="*.asm"
+			ExecutionDescription="Assembling $(InputName).asm"
+			ShowOnlyRuleProperties="false"
+			>
+			<Properties>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

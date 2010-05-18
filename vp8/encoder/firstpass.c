@@ -1,0 +1,2512 @@
+/*
+ *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license and patent
+ *  grant that can be found in the LICENSE file in the root of the source
+ *  tree. All contributing project authors may be found in the AUTHORS
+ *  file in the root of the source tree.
+ */
+
+
+#include "math.h"
+#include "limits.h"
+#include "block.h"
+#include "onyx_int.h"
+#include "variance.h"
+#include "encodeintra.h"
+#include "setupintrarecon.h"
+#include "mcomp.h"
+#include "vpx_scale/vpxscale.h"
+#include "encodemb.h"
+#include "extend.h"
+#include "systemdependent.h"
+#include "vpx_scale/yv12extend.h"
+#include "vpx_mem/vpx_mem.h"
+#include "swapyv12buffer.h"
+#include <stdio.h>
+#include "rdopt.h"
+#include "quant_common.h"
+#include "encodemv.h"
+
+//#define OUTPUT_FPF 1
+//#define FIRSTPASS_MM 1
+
+#if CONFIG_RUNTIME_CPU_DETECT
+#define IF_RTCD(x) (x)
+#else
+#define IF_RTCD(x) NULL
+#endif
+
+extern void vp8_build_block_offsets(MACROBLOCK *x);
+extern void vp8_setup_block_ptrs(MACROBLOCK *x);
+extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
+extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, MV *mv);
+extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
+
+//#define GFQ_ADJUSTMENT (40 + ((15*Q)/10))
+//#define GFQ_ADJUSTMENT (80 + ((15*Q)/10))
+#define GFQ_ADJUSTMENT vp8_gf_boost_qadjustment[Q]
+extern int vp8_kf_boost_qadjustment[QINDEX_RANGE];
+
+extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
+
+#define IIFACTOR   1.4
+#define IIKFACTOR1 1.40
+#define IIKFACTOR2 1.5
+#define RMAX    14.0
+#define GF_RMAX 48.0        // 128.0
+
+#define DOUBLE_DIVIDE_CHECK(X) ((X)<0?(X)-.000001:(X)+.000001)
+
+#define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
+#define POW2 (double)cpi->oxcf.two_pass_vbrbias/100.0
+
+static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
+static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
+
+
+void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
+int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps);
+
+int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
+{
+
+    int i;
+    int intra_pred_var = 0;
+    (void) cpi;
+
+    if (use_dc_pred)
+    {
+        x->e_mbd.mbmi.mode = DC_PRED;
+        x->e_mbd.mbmi.uv_mode = DC_PRED;
+        x->e_mbd.mbmi.ref_frame = INTRA_FRAME;
+
+        vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+    }
+    else
+    {
+        for (i = 0; i < 16; i++)
+        {
+            BLOCKD *b = &x->e_mbd.block[i];
+            BLOCK  *be = &x->block[i];
+
+            vp8_encode_intra4x4block(IF_RTCD(&cpi->rtcd), x, be, b, B_DC_PRED);
+        }
+    }
+
+    intra_pred_var = VARIANCE_INVOKE(&cpi->rtcd.variance, getmbss)(x->src_diff);
+
+    return intra_pred_var;
+}
+
+// Resets the first pass file to the given position using a relative seek from the current position
+static void reset_fpf_position(VP8_COMP *cpi, FIRSTPASS_STATS *Position)
+{
+    cpi->stats_in = Position;
+}
+
+static int lookup_next_frame_stats(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
+{
+    /*FIRSTPASS_STATS * start_pos;
+    int ret_val;
+
+    start_pos = cpi->stats_in;
+    ret_val = vp8_input_stats(cpi, next_frame);
+    reset_fpf_position(cpi, start_pos);
+
+    return ret_val;*/
+
+    if (cpi->stats_in >= cpi->stats_in_end)
+        return EOF;
+
+    *next_frame = *cpi->stats_in;
+    return 1;
+}
+
+// Calculate a modified Error used in distributing bits between easier and harder frames
+static double calculate_modified_err(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
+{
+    double av_err = cpi->total_stats.ssim_weighted_pred_err;
+    double this_err = this_frame->ssim_weighted_pred_err;
+    double modified_err;
+
+    //double relative_next_iiratio;
+    //double next_iiratio;
+    //double sum_iiratio;
+    //int i;
+
+    //FIRSTPASS_STATS next_frame;
+    //FIRSTPASS_STATS *start_pos;
+
+    /*start_pos = cpi->stats_in;
+    sum_iiratio = 0.0;
+    i = 0;
+    while ( (i < 1) && vp8_input_stats(cpi,&next_frame) != EOF )
+    {
+
+        next_iiratio = next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error);
+        next_iiratio = ( next_iiratio < 1.0 ) ? 1.0 : (next_iiratio > 20.0) ? 20.0 : next_iiratio;
+        sum_iiratio += next_iiratio;
+        i++;
+    }
+    if ( i > 0 )
+    {
+        relative_next_iiratio = sum_iiratio / DOUBLE_DIVIDE_CHECK(cpi->avg_iiratio * (double)i);
+    }
+    else
+    {
+        relative_next_iiratio = 1.0;
+    }
+    reset_fpf_position(cpi, start_pos);*/
+
+    if (this_err > av_err)
+        modified_err = av_err * pow((this_err / DOUBLE_DIVIDE_CHECK(av_err)), POW1);
+    else
+        modified_err = av_err * pow((this_err / DOUBLE_DIVIDE_CHECK(av_err)), POW2);
+
+    /*
+    relative_next_iiratio = pow(relative_next_iiratio,0.25);
+    modified_err = modified_err * relative_next_iiratio;
+    */
+
+    return modified_err;
+}
+
+double vp8_simple_weight(YV12_BUFFER_CONFIG *source)
+{
+    int i, j;
+    int Total = 0;
+
+    unsigned char *src = source->y_buffer;
+    unsigned char value;
+    double sum_weights = 0.0;
+    double Weight;
+
+    // Loop throught the Y plane raw examining levels and creating a weight for the image
+    for (i = 0; i < source->y_height; i++)
+    {
+        for (j = 0; j < source->y_width; j++)
+        {
+            value = src[j];
+
+            if (value >= 64)
+                Weight = 1.0;
+            else if (value > 32)
+                Weight = (value - 32.0f) / 32.0f;
+            else
+                Weight = 0.02;
+
+            sum_weights += Weight;
+        }
+
+        src += source->y_stride;
+    }
+
+    sum_weights /= (source->y_height * source->y_width);
+
+    return sum_weights;
+}
+
+// This function returns the current per frame maximum bitrate target
+int frame_max_bits(VP8_COMP *cpi)
+{
+    // Max allocation for a single frame based on the max section guidelines passed in and how many bits are left
+    int max_bits;
+
+    // For CBR we need to also consider buffer fullness.
+    // If we are running below the optimal level then we need to gradually tighten up on max_bits.
+    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+    {
+        double buffer_fullness_ratio = (double)DOUBLE_DIVIDE_CHECK(cpi->buffer_level) / (double)cpi->oxcf.optimal_buffer_level;
+
+        // For CBR base this on the target average bits per frame plus the maximum sedction rate passed in by the user
+        max_bits = (int)(cpi->av_per_frame_bandwidth * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
+
+        // If our buffer is below the optimum level
+        if (buffer_fullness_ratio < 1.0)
+        {
+            // The lower of max_bits / 4 or cpi->av_per_frame_bandwidth / 4.
+            int min_max_bits = ((cpi->av_per_frame_bandwidth >> 2) < (max_bits >> 2)) ? cpi->av_per_frame_bandwidth >> 2 : max_bits >> 2;
+
+            max_bits = (int)(max_bits * buffer_fullness_ratio);
+
+            if (max_bits < min_max_bits)
+                max_bits = min_max_bits;       // Lowest value we will set ... which should allow the buffer to refil.
+        }
+    }
+    // VBR
+    else
+    {
+        // For VBR base this on the bits and frames left plus the two_pass_vbrmax_section rate passed in by the user
+        max_bits = (int)(((double)cpi->bits_left / (cpi->total_stats.count - (double)cpi->common.current_video_frame)) * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
+    }
+
+    // Trap case where we are out of bits
+    if (max_bits < 0)
+        max_bits = 0;
+
+    return max_bits;
+}
+
+void vp8_output_stats(struct vpx_codec_pkt_list *pktlist,
+                      FIRSTPASS_STATS            *stats)
+{
+    struct vpx_codec_cx_pkt pkt;
+    pkt.kind = VPX_CODEC_STATS_PKT;
+    pkt.data.twopass_stats.buf = stats;
+    pkt.data.twopass_stats.sz = sizeof(*stats);
+    vpx_codec_pkt_list_add(pktlist, &pkt);
+
+// TEMP debug code
+#ifdef OUTPUT_FPF
+    {
+        FILE *fpfile;
+        fpfile = fopen("firstpass.stt", "a");
+
+        fprintf(fpfile, "%12.0f %12.0f %12.0f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.0f\n",
+                stats->frame,
+                stats->intra_error,
+                stats->coded_error,
+                stats->ssim_weighted_pred_err,
+                stats->pcnt_inter,
+                stats->pcnt_motion,
+                stats->pcnt_second_ref,
+                stats->MVr,
+                stats->mvr_abs,
+                stats->MVc,
+                stats->mvc_abs,
+                stats->MVrv,
+                stats->MVcv,
+                stats->mv_in_out_count,
+                stats->count);
+        fclose(fpfile);
+    }
+#endif
+}
+
+int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps)
+{
+    if (cpi->stats_in >= cpi->stats_in_end)
+        return EOF;
+
+    *fps = *cpi->stats_in++;
+    return 1;
+}
+
+void vp8_zero_stats(FIRSTPASS_STATS *section)
+{
+    section->frame      = 0.0;
+    section->intra_error = 0.0;
+    section->coded_error = 0.0;
+    section->ssim_weighted_pred_err = 0.0;
+    section->pcnt_inter  = 0.0;
+    section->pcnt_motion  = 0.0;
+    section->pcnt_second_ref = 0.0;
+    section->MVr        = 0.0;
+    section->mvr_abs     = 0.0;
+    section->MVc        = 0.0;
+    section->mvc_abs     = 0.0;
+    section->MVrv       = 0.0;
+    section->MVcv       = 0.0;
+    section->mv_in_out_count  = 0.0;
+    section->count      = 0.0;
+    section->duration   = 1.0;
+}
+void vp8_accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
+{
+    section->frame += frame->frame;
+    section->intra_error += frame->intra_error;
+    section->coded_error += frame->coded_error;
+    section->ssim_weighted_pred_err += frame->ssim_weighted_pred_err;
+    section->pcnt_inter  += frame->pcnt_inter;
+    section->pcnt_motion += frame->pcnt_motion;
+    section->pcnt_second_ref += frame->pcnt_second_ref;
+    section->MVr        += frame->MVr;
+    section->mvr_abs     += frame->mvr_abs;
+    section->MVc        += frame->MVc;
+    section->mvc_abs     += frame->mvc_abs;
+    section->MVrv       += frame->MVrv;
+    section->MVcv       += frame->MVcv;
+    section->mv_in_out_count  += frame->mv_in_out_count;
+    section->count      += frame->count;
+    section->duration   += frame->duration;
+}
+void vp8_avg_stats(FIRSTPASS_STATS *section)
+{
+    if (section->count < 1.0)
+        return;
+
+    section->intra_error /= section->count;
+    section->coded_error /= section->count;
+    section->ssim_weighted_pred_err /= section->count;
+    section->pcnt_inter  /= section->count;
+    section->pcnt_second_ref /= section->count;
+    section->pcnt_motion /= section->count;
+    section->MVr        /= section->count;
+    section->mvr_abs     /= section->count;
+    section->MVc        /= section->count;
+    section->mvc_abs     /= section->count;
+    section->MVrv       /= section->count;
+    section->MVcv       /= section->count;
+    section->mv_in_out_count   /= section->count;
+    section->duration   /= section->count;
+}
+
+int vp8_fpmm_get_pos(VP8_COMP *cpi)
+{
+    return ftell(cpi->fp_motion_mapfile);
+}
+void vp8_fpmm_reset_pos(VP8_COMP *cpi, int target_pos)
+{
+    int Offset;
+
+    if (cpi->fp_motion_mapfile)
+    {
+        Offset = ftell(cpi->fp_motion_mapfile) - target_pos;
+        fseek(cpi->fp_motion_mapfile, (int) - Offset, SEEK_CUR);
+    }
+}
+
+void vp8_advance_fpmm(VP8_COMP *cpi, int count)
+{
+#ifdef FIRSTPASS_MM
+    fseek(cpi->fp_motion_mapfile, (int)(count * cpi->common.MBs), SEEK_CUR);
+#endif
+}
+
+void vp8_input_fpmm(VP8_COMP *cpi, int count)
+{
+#ifdef FIRSTPASS_MM
+
+    unsigned char *tmp_motion_map;
+    int i, j;
+
+    if (!cpi->fp_motion_mapfile)
+        return;                 // Error
+
+    // Create the first pass motion map structure and set to 0
+    CHECK_MEM_ERROR(tmp_motion_map, vpx_calloc(cpi->common.MBs, 1));
+
+    // Reset the state of the global map
+    vpx_memset(cpi->fp_motion_map, 0, cpi->common.MBs);
+
+    // Read the specified number of frame maps and set the global map to the highest value seen for each mb.
+    for (i = 0; i < count; i++)
+    {
+        if (fread(tmp_motion_map, 1, cpi->common.MBs, cpi->fp_motion_mapfile) == cpi->common.MBs)
+        {
+            for (j = 0; j < cpi->common.MBs; j++)
+            {
+                if (tmp_motion_map[j] > 1)
+                    cpi->fp_motion_map[j] += 5;   // Intra is flagged
+                else
+                    cpi->fp_motion_map[j] += tmp_motion_map[j];
+            }
+        }
+        else
+            break;  // Read error
+
+    }
+
+    if (tmp_motion_map != 0)
+        vpx_free(tmp_motion_map);
+
+#endif
+
+}
+
+void vp8_init_first_pass(VP8_COMP *cpi)
+{
+    vp8_zero_stats(&cpi->total_stats);
+
+#ifdef FIRSTPASS_MM
+    cpi->fp_motion_mapfile = fopen("fpmotionmap.stt", "wb");
+#endif
+
+// TEMP debug code
+#ifdef OUTPUT_FPF
+    {
+        FILE *fpfile;
+        fpfile = fopen("firstpass.stt", "w");
+        fclose(fpfile);
+    }
+#endif
+
+}
+
+void vp8_end_first_pass(VP8_COMP *cpi)
+{
+    vp8_output_stats(cpi->output_pkt_list, &cpi->total_stats);
+
+#ifdef FIRSTPASS_MM
+
+    if (cpi->fp_motion_mapfile)
+        fclose(cpi->fp_motion_mapfile);
+
+#endif
+
+}
+void vp8_zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG * recon_buffer, int * best_motion_err, int recon_yoffset )
+{
+    MACROBLOCKD * const xd = & x->e_mbd;
+    BLOCK *b = &x->block[0];
+    BLOCKD *d = &x->e_mbd.block[0];
+
+    unsigned char *src_ptr = (*(b->base_src) + b->src);
+    int src_stride = b->src_stride;
+    unsigned char *ref_ptr;
+    int ref_stride=d->pre_stride;
+
+    // Set up pointers for this macro block recon buffer
+    xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
+
+    ref_ptr = (unsigned char *)(*(d->base_pre) + d->pre );
+
+    VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16) ( src_ptr, src_stride, ref_ptr, ref_stride, (unsigned int *)(best_motion_err));
+}
+
+
+void vp8_first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *best_mv, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset )
+{
+    MACROBLOCKD *const xd = & x->e_mbd;
+    BLOCK *b = &x->block[0];
+    BLOCKD *d = &x->e_mbd.block[0];
+    int num00;
+
+    MV tmp_mv = {0, 0};
+
+    int tmp_err;
+    int step_param = 3;                                       //3;          // Dont search over full range for first pass
+    int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param; //3;
+    int n;
+    vp8_variance_fn_ptr_t v_fn_ptr;
+    int new_mv_mode_penalty = 256;
+
+    v_fn_ptr.vf    = VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16);
+    v_fn_ptr.sdf   = cpi->fn_ptr.sdf;
+    v_fn_ptr.sdx4df = cpi->fn_ptr.sdx4df;
+
+    // Set up pointers for this macro block recon buffer
+    xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
+
+    // Initial step/diamond search centred on best mv
+    tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param, x->errorperbit, &num00, &v_fn_ptr, x->mvsadcost, x->mvcost);
+    if ( tmp_err < INT_MAX-new_mv_mode_penalty )
+        tmp_err += new_mv_mode_penalty;
+
+    if (tmp_err < *best_motion_err)
+    {
+        *best_motion_err = tmp_err;
+        best_mv->row = tmp_mv.row;
+        best_mv->col = tmp_mv.col;
+    }
+
+    // Further step/diamond searches as necessary
+    n = num00;
+    num00 = 0;
+
+    while (n < further_steps)
+    {
+        n++;
+
+        if (num00)
+            num00--;
+        else
+        {
+            tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param + n, x->errorperbit, &num00, &v_fn_ptr, x->mvsadcost, x->mvcost);
+            if ( tmp_err < INT_MAX-new_mv_mode_penalty )
+                tmp_err += new_mv_mode_penalty;
+
+            if (tmp_err < *best_motion_err)
+            {
+                *best_motion_err = tmp_err;
+                best_mv->row = tmp_mv.row;
+                best_mv->col = tmp_mv.col;
+            }
+        }
+    }
+}
+
+void vp8_first_pass(VP8_COMP *cpi)
+{
+    int mb_row, mb_col;
+    MACROBLOCK *const x = & cpi->mb;
+    VP8_COMMON *const cm = & cpi->common;
+    MACROBLOCKD *const xd = & x->e_mbd;
+
+    int col_blocks = 4 * cm->mb_cols;
+    int recon_yoffset, recon_uvoffset;
+    int recon_y_stride = cm->last_frame.y_stride;
+    int recon_uv_stride = cm->last_frame.uv_stride;
+    int intra_error = 0;
+    int coded_error = 0;
+
+    int sum_mvr = 0, sum_mvc = 0;
+    int sum_mvr_abs = 0, sum_mvc_abs = 0;
+    int sum_mvrs = 0, sum_mvcs = 0;
+    int mvcount = 0;
+    int intercount = 0;
+    int second_ref_count = 0;
+    int intrapenalty = 256;
+
+    int sum_in_vectors = 0;
+
+    MV best_ref_mv = {0, 0};
+    MV zero_ref_mv = {0, 0};
+
+    unsigned char *fp_motion_map_ptr = cpi->fp_motion_map;
+
+    vp8_clear_system_state();  //__asm emms;
+
+    x->src = * cpi->Source;
+    xd->pre = cm->last_frame;
+    xd->dst = cm->new_frame;
+
+    vp8_build_block_offsets(x);
+
+    vp8_setup_block_dptrs(&x->e_mbd);
+
+    vp8_setup_block_ptrs(x);
+
+    // set up frame new frame for intra coded blocks
+    vp8_setup_intra_recon(&cm->new_frame);
+    vp8cx_frame_init_quantizer(cpi);
+
+    // Initialise the MV cost table to the defaults
+    //if( cm->current_video_frame == 0)
+    //if ( 0 )
+    {
+        int flag[2] = {1, 1};
+        vp8_initialize_rd_consts(cpi, vp8_dc_quant(cm->base_qindex, cm->y1dc_delta_q));
+        vpx_memcpy(cm->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
+        vp8_build_component_cost_table(cpi->mb.mvcost, cpi->mb.mvsadcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
+    }
+
+    // for each macroblock row in image
+    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+    {
+        MV best_ref_mv = {0, 0};
+
+        // reset above block coeffs
+        xd->up_available = (mb_row != 0);
+        recon_yoffset = (mb_row * recon_y_stride * 16);
+        recon_uvoffset = (mb_row * recon_uv_stride * 8);
+
+        // for each macroblock col in image
+        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+        {
+            int this_error;
+            int gf_motion_error = INT_MAX;
+            int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
+
+            xd->dst.y_buffer = cm->new_frame.y_buffer + recon_yoffset;
+            xd->dst.u_buffer = cm->new_frame.u_buffer + recon_uvoffset;
+            xd->dst.v_buffer = cm->new_frame.v_buffer + recon_uvoffset;
+            xd->left_available = (mb_col != 0);
+
+            // do intra 16x16 prediction
+            this_error = vp8_encode_intra(cpi, x, use_dc_pred);
+
+            // "intrapenalty" below deals with situations where the intra and inter error scores are very low (eg a plain black frame)
+            // We do not have special cases in first pass for 0,0 and nearest etc so all inter modes carry an overhead cost estimate fot the mv.
+            // When the error score is very low this causes us to pick all or lots of INTRA modes and throw lots of key frames.
+            // This penalty adds a cost matching that of a 0,0 mv to the intra case.
+            this_error += intrapenalty;
+
+            // Cumulative intra error total
+            intra_error += this_error;
+
+            // Indicate default assumption of intra in the motion map
+            *fp_motion_map_ptr = 2;
+
+            // Set up limit values for motion vectors to prevent them extending outside the UMV borders
+            x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
+            x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + (VP8BORDERINPIXELS - 16);
+            x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
+            x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
+
+            // Other than for the first frame do a motion search
+            if (cm->current_video_frame > 0)
+            {
+                BLOCK *b = &x->block[0];
+                BLOCKD *d = &x->e_mbd.block[0];
+                MV tmp_mv = {0, 0};
+                int tmp_err;
+                int motion_error = INT_MAX;
+
+                // Simple 0,0 motion with no mv overhead
+                vp8_zz_motion_search( cpi, x, &cm->last_frame, &motion_error, recon_yoffset );
+                d->bmi.mv.as_mv.row = 0;
+                d->bmi.mv.as_mv.col = 0;
+
+                // Test last reference frame using the previous best mv as the starting point (best reference) for the search
+                vp8_first_pass_motion_search(cpi, x, &best_ref_mv, &d->bmi.mv.as_mv, &cm->last_frame, &motion_error, recon_yoffset);
+
+                // If the current best reference mv is not centred on 0,0 then do a 0,0 based search as well
+                if ((best_ref_mv.col != 0) || (best_ref_mv.row != 0))
+                {
+                   tmp_err = INT_MAX;
+                   vp8_first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv, &cm->last_frame, &motion_error, recon_yoffset);
+
+                   if ( tmp_err < motion_error )
+                   {
+                        motion_error = tmp_err;
+                        d->bmi.mv.as_mv.row = tmp_mv.row;
+                        d->bmi.mv.as_mv.col = tmp_mv.col;
+                   }
+
+                }
+
+                // Experimental search in a second reference frame ((0,0) based only)
+                if (cm->current_video_frame > 1)
+                {
+                    vp8_first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv, &cm->golden_frame, &gf_motion_error, recon_yoffset);
+
+                    if ((gf_motion_error < motion_error) && (gf_motion_error < this_error))
+                    {
+                        second_ref_count++;
+                        //motion_error = gf_motion_error;
+                        //d->bmi.mv.as_mv.row = tmp_mv.row;
+                        //d->bmi.mv.as_mv.col = tmp_mv.col;
+                    }
+                    /*else
+                    {
+                        xd->pre.y_buffer = cm->last_frame.y_buffer + recon_yoffset;
+                        xd->pre.u_buffer = cm->last_frame.u_buffer + recon_uvoffset;
+                        xd->pre.v_buffer = cm->last_frame.v_buffer + recon_uvoffset;
+                    }*/
+
+
+                    // Reset to last frame as reference buffer
+                    xd->pre.y_buffer = cm->last_frame.y_buffer + recon_yoffset;
+                    xd->pre.u_buffer = cm->last_frame.u_buffer + recon_uvoffset;
+                    xd->pre.v_buffer = cm->last_frame.v_buffer + recon_uvoffset;
+                }
+
+                if (motion_error <= this_error)
+                {
+                    d->bmi.mv.as_mv.row <<= 3;
+                    d->bmi.mv.as_mv.col <<= 3;
+                    this_error = motion_error;
+                    vp8_set_mbmode_and_mvs(x, NEWMV, &d->bmi.mv.as_mv);
+                    vp8_encode_inter16x16y(IF_RTCD(&cpi->rtcd), x);
+                    sum_mvr += d->bmi.mv.as_mv.row;
+                    sum_mvr_abs += abs(d->bmi.mv.as_mv.row);
+                    sum_mvc += d->bmi.mv.as_mv.col;
+                    sum_mvc_abs += abs(d->bmi.mv.as_mv.col);
+                    sum_mvrs += d->bmi.mv.as_mv.row * d->bmi.mv.as_mv.row;
+                    sum_mvcs += d->bmi.mv.as_mv.col * d->bmi.mv.as_mv.col;
+                    intercount++;
+
+                    best_ref_mv.row = d->bmi.mv.as_mv.row;
+                    best_ref_mv.col = d->bmi.mv.as_mv.col;
+                    //best_ref_mv.row = 0;
+                    //best_ref_mv.col = 0;
+
+                    // Was the vector non-zero
+                    if (d->bmi.mv.as_mv.row || d->bmi.mv.as_mv.col)
+                    {
+                        mvcount++;
+
+                        *fp_motion_map_ptr = 1;
+
+                        // Does the Row vector point inwards or outwards
+                        if (mb_row < cm->mb_rows / 2)
+                        {
+                            if (d->bmi.mv.as_mv.row > 0)
+                                sum_in_vectors--;
+                            else if (d->bmi.mv.as_mv.row < 0)
+                                sum_in_vectors++;
+                        }
+                        else if (mb_row > cm->mb_rows / 2)
+                        {
+                            if (d->bmi.mv.as_mv.row > 0)
+                                sum_in_vectors++;
+                            else if (d->bmi.mv.as_mv.row < 0)
+                                sum_in_vectors--;
+                        }
+
+                        // Does the Row vector point inwards or outwards
+                        if (mb_col < cm->mb_cols / 2)
+                        {
+                            if (d->bmi.mv.as_mv.col > 0)
+                                sum_in_vectors--;
+                            else if (d->bmi.mv.as_mv.col < 0)
+                                sum_in_vectors++;
+                        }
+                        else if (mb_col > cm->mb_cols / 2)
+                        {
+                            if (d->bmi.mv.as_mv.col > 0)
+                                sum_in_vectors++;
+                            else if (d->bmi.mv.as_mv.col < 0)
+                                sum_in_vectors--;
+                        }
+                    }
+                    else
+                        *fp_motion_map_ptr = 0;    // 0,0 mv was best
+                }
+                else
+                {
+                    best_ref_mv.row = 0;
+                    best_ref_mv.col = 0;
+                }
+            }
+
+            coded_error += this_error;
+
+            // adjust to the next column of macroblocks
+            x->src.y_buffer += 16;
+            x->src.u_buffer += 8;
+            x->src.v_buffer += 8;
+
+            recon_yoffset += 16;
+            recon_uvoffset += 8;
+
+            // Update the motion map
+            fp_motion_map_ptr++;
+        }
+
+        // adjust to the next row of mbs
+        x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
+        x->src.u_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
+        x->src.v_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
+
+        //extend the recon for intra prediction
+        vp8_extend_mb_row(&cm->new_frame, xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
+        vp8_clear_system_state();  //__asm emms;
+    }
+
+    vp8_clear_system_state();  //__asm emms;
+    {
+        double weight = 0.0;
+        double weigth2 = 0.0;
+
+        FIRSTPASS_STATS fps;
+
+        fps.frame      = cm->current_video_frame ;
+        fps.intra_error = intra_error >> 8;
+        fps.coded_error = coded_error >> 8;
+        weight = vp8_simple_weight(cpi->Source);
+
+        if (weight < 0.1)
+            weight = 0.1;
+
+        fps.ssim_weighted_pred_err = fps.coded_error * weight;
+
+        fps.pcnt_inter  = 0.0;
+        fps.pcnt_motion = 0.0;
+        fps.MVr        = 0.0;
+        fps.mvr_abs     = 0.0;
+        fps.MVc        = 0.0;
+        fps.mvc_abs     = 0.0;
+        fps.MVrv       = 0.0;
+        fps.MVcv       = 0.0;
+        fps.mv_in_out_count  = 0.0;
+        fps.count      = 1.0;
+
+        fps.pcnt_inter   = 1.0 * (double)intercount / cm->MBs;
+        fps.pcnt_second_ref = 1.0 * (double)second_ref_count / cm->MBs;
+
+        if (mvcount > 0)
+        {
+            fps.MVr = (double)sum_mvr / (double)mvcount;
+            fps.mvr_abs = (double)sum_mvr_abs / (double)mvcount;
+            fps.MVc = (double)sum_mvc / (double)mvcount;
+            fps.mvc_abs = (double)sum_mvc_abs / (double)mvcount;
+            fps.MVrv = ((double)sum_mvrs - (fps.MVr * fps.MVr / (double)mvcount)) / (double)mvcount;
+            fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / (double)mvcount)) / (double)mvcount;
+            fps.mv_in_out_count = (double)sum_in_vectors / (double)(mvcount * 2);
+
+            fps.pcnt_motion = 1.0 * (double)mvcount / cpi->common.MBs;
+        }
+
+        // TODO:  handle the case when duration is set to 0, or something less
+        // than the full time between subsequent cpi->source_time_stamp s  .
+        fps.duration = cpi->source_end_time_stamp - cpi->source_time_stamp;
+
+        // don't want to do outputstats with a stack variable!
+        cpi->this_frame_stats = fps;
+        vp8_output_stats(cpi->output_pkt_list, &cpi->this_frame_stats);
+        vp8_accumulate_stats(&cpi->total_stats, &fps);
+
+#ifdef FIRSTPASS_MM
+        fwrite(cpi->fp_motion_map, 1, cpi->common.MBs, cpi->fp_motion_mapfile);
+#endif
+    }
+
+    // Copy the previous Last Frame into the GF buffer if specific conditions for doing so are met
+    if ((cm->current_video_frame > 0) &&
+        (cpi->this_frame_stats.pcnt_inter > 0.20) &&
+        ((cpi->this_frame_stats.intra_error / cpi->this_frame_stats.coded_error) > 2.0))
+    {
+        vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->golden_frame);
+    }
+
+    // swap frame pointers so last frame refers to the frame we just compressed
+    vp8_swap_yv12_buffer(&cm->last_frame, &cm->new_frame);
+    vp8_yv12_extend_frame_borders(&cm->last_frame);
+
+    // Special case for the first frame. Copy into the GF buffer as a second reference.
+    if (cm->current_video_frame == 0)
+    {
+        vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->golden_frame);
+    }
+
+
+    // use this to see what the first pass reconstruction looks like
+    if (0)
+    {
+        char filename[512];
+        FILE *recon_file;
+        sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
+
+        if (cm->current_video_frame == 0)
+            recon_file = fopen(filename, "wb");
+        else
+            recon_file = fopen(filename, "ab");
+
+        fwrite(cm->last_frame.buffer_alloc, cm->last_frame.frame_size, 1, recon_file);
+        fclose(recon_file);
+    }
+
+    cm->current_video_frame++;
+
+}
+extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
+
+#define BASE_ERRPERMB   150
+static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width)
+{
+    int Q;
+    int num_mbs = ((Height * Width) / (16 * 16));
+    int target_norm_bits_per_mb;
+
+    double err_per_mb = section_err / num_mbs;
+    double correction_factor;
+    double corr_high;
+    double speed_correction = 1.0;
+    double rolling_ratio;
+
+    double pow_highq = 0.90;
+    double pow_lowq = 0.40;
+
+    if (section_target_bandwitdh <= 0)
+        return MAXQ;
+
+    target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
+
+    // Calculate a corrective factor based on a rolling ratio of bits spent vs target bits
+    if ((cpi->rolling_target_bits > 0.0) && (cpi->active_worst_quality < cpi->worst_quality))
+    {
+        //double adjustment_rate = 0.985 + (0.00005 * cpi->active_worst_quality);
+        double adjustment_rate = 0.99;
+
+        rolling_ratio = (double)cpi->rolling_actual_bits / (double)cpi->rolling_target_bits;
+
+        //if ( cpi->est_max_qcorrection_factor > rolling_ratio )
+        if (rolling_ratio < 0.95)
+            //cpi->est_max_qcorrection_factor *= adjustment_rate;
+            cpi->est_max_qcorrection_factor -= 0.005;
+        //else if ( cpi->est_max_qcorrection_factor < rolling_ratio )
+        else if (rolling_ratio > 1.05)
+            cpi->est_max_qcorrection_factor += 0.005;
+
+        //cpi->est_max_qcorrection_factor /= adjustment_rate;
+
+        cpi->est_max_qcorrection_factor = (cpi->est_max_qcorrection_factor < 0.1) ? 0.1 : (cpi->est_max_qcorrection_factor > 10.0) ? 10.0 : cpi->est_max_qcorrection_factor;
+    }
+
+    // Corrections for higher compression speed settings (reduced compression expected)
+    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    {
+        if (cpi->oxcf.cpu_used <= 5)
+            speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
+        else
+            speed_correction = 1.25;
+    }
+
+    // Correction factor used for Q values >= 20
+    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
+    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
+
+    // Try and pick a Q that should be high enough to encode the content at the given rate.
+    for (Q = 0; Q < MAXQ; Q++)
+    {
+        int bits_per_mb_at_this_q;
+
+        if (Q < 50)
+        {
+            correction_factor = pow(err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
+            correction_factor = (correction_factor < 0.05) ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
+        }
+        else
+            correction_factor = corr_high;
+
+        bits_per_mb_at_this_q = (int)(.5 + correction_factor * speed_correction * cpi->est_max_qcorrection_factor * cpi->section_max_qfactor * (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+        //bits_per_mb_at_this_q = (int)(.5 + correction_factor * speed_correction * cpi->est_max_qcorrection_factor * (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+
+        if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
+            break;
+    }
+
+    return Q;
+}
+static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width)
+{
+    int Q;
+    int num_mbs = ((Height * Width) / (16 * 16));
+    int target_norm_bits_per_mb;
+
+    double err_per_mb = section_err / num_mbs;
+    double correction_factor;
+    double corr_high;
+    double speed_correction = 1.0;
+    double pow_highq = 0.90;
+    double pow_lowq = 0.40;
+
+    target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
+
+    // Corrections for higher compression speed settings (reduced compression expected)
+    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    {
+        if (cpi->oxcf.cpu_used <= 5)
+            speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
+        else
+            speed_correction = 1.25;
+    }
+
+    // Correction factor used for Q values >= 20
+    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
+    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
+
+    // Try and pick a Q that can encode the content at the given rate.
+    for (Q = 0; Q < MAXQ; Q++)
+    {
+        int bits_per_mb_at_this_q;
+
+        if (Q < 50)
+        {
+            correction_factor = pow(err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
+            correction_factor = (correction_factor < 0.05) ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
+        }
+        else
+            correction_factor = corr_high;
+
+        bits_per_mb_at_this_q = (int)(.5 + correction_factor * speed_correction * cpi->est_max_qcorrection_factor * (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+
+        if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
+            break;
+    }
+
+    return Q;
+}
+
+// Estimate a worst case Q for a KF group
+static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width, double group_iiratio)
+{
+    int Q;
+    int num_mbs = ((Height * Width) / (16 * 16));
+    int target_norm_bits_per_mb = (512 * section_target_bandwitdh) / num_mbs;
+    int bits_per_mb_at_this_q;
+
+    double err_per_mb = section_err / num_mbs;
+    double err_correction_factor;
+    double corr_high;
+    double speed_correction = 1.0;
+    double current_spend_ratio = 1.0;
+
+    double pow_highq = (POW1 < 0.6) ? POW1 + 0.3 : 0.90;
+    double pow_lowq = (POW1 < 0.7) ? POW1 + 0.1 : 0.80;
+
+    double iiratio_correction_factor = 1.0;
+
+    double combined_correction_factor;
+
+    // Trap special case where the target is <= 0
+    if (target_norm_bits_per_mb <= 0)
+        return MAXQ * 2;
+
+    // Calculate a corrective factor based on a rolling ratio of bits spent vs target bits
+    // This is clamped to the range 0.1 to 10.0
+    if (cpi->long_rolling_target_bits <= 0)
+        current_spend_ratio = 10.0;
+    else
+    {
+        current_spend_ratio = (double)cpi->long_rolling_actual_bits / (double)cpi->long_rolling_target_bits;
+        current_spend_ratio = (current_spend_ratio > 10.0) ? 10.0 : (current_spend_ratio < 0.1) ? 0.1 : current_spend_ratio;
+    }
+
+    // Calculate a correction factor based on the quality of prediction in the sequence as indicated by intra_inter error score ratio (IIRatio)
+    // The idea here is to favour subsampling in the hardest sections vs the easyest.
+    iiratio_correction_factor = 1.0 - ((group_iiratio - 6.0) * 0.1);
+
+    if (iiratio_correction_factor < 0.5)
+        iiratio_correction_factor = 0.5;
+
+    // Corrections for higher compression speed settings (reduced compression expected)
+    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    {
+        if (cpi->oxcf.cpu_used <= 5)
+            speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
+        else
+            speed_correction = 1.25;
+    }
+
+    // Combine the various factors calculated above
+    combined_correction_factor = speed_correction * iiratio_correction_factor * current_spend_ratio;
+
+    // Correction factor used for Q values >= 20
+    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
+    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
+
+    // Try and pick a Q that should be high enough to encode the content at the given rate.
+    for (Q = 0; Q < MAXQ; Q++)
+    {
+        // Q values < 20 treated as a special case
+        if (Q < 20)
+        {
+            err_correction_factor = pow(err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
+            err_correction_factor = (err_correction_factor < 0.05) ? 0.05 : (err_correction_factor > 5.0) ? 5.0 : err_correction_factor;
+        }
+        else
+            err_correction_factor = corr_high;
+
+        bits_per_mb_at_this_q = (int)(.5 + err_correction_factor * combined_correction_factor * (double)vp8_bits_per_mb[INTER_FRAME][Q]);
+
+        if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
+            break;
+    }
+
+    // If we could not hit the target even at Max Q then estimate what Q would have bee required
+    while ((bits_per_mb_at_this_q > target_norm_bits_per_mb)  && (Q < (MAXQ * 2)))
+    {
+
+        bits_per_mb_at_this_q = (int)(0.96 * bits_per_mb_at_this_q);
+        Q++;
+    }
+
+    if (0)
+    {
+        FILE *f = fopen("estkf_q.stt", "a");
+        fprintf(f, "%8d %8d %8d %8.2f %8.3f %8.2f %8.3f %8.3f %8.3f %8d\n", cpi->common.current_video_frame, bits_per_mb_at_this_q,
+                target_norm_bits_per_mb, err_per_mb, err_correction_factor,
+                current_spend_ratio, group_iiratio, iiratio_correction_factor,
+                (double)cpi->buffer_level / (double)cpi->oxcf.optimal_buffer_level, Q);
+        fclose(f);
+    }
+
+    return Q;
+}
+extern void vp8_new_frame_rate(VP8_COMP *cpi, double framerate);
+
+void vp8_init_second_pass(VP8_COMP *cpi)
+{
+    FIRSTPASS_STATS this_frame;
+    FIRSTPASS_STATS *start_pos;
+
+    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
+
+    vp8_zero_stats(&cpi->total_stats);
+
+    if (!cpi->stats_in_end)
+        return;
+
+    cpi->total_stats = *cpi->stats_in_end;
+
+    cpi->total_error_left = cpi->total_stats.ssim_weighted_pred_err;
+    cpi->total_intra_error_left = cpi->total_stats.intra_error;
+    cpi->total_coded_error_left = cpi->total_stats.coded_error;
+    cpi->start_tot_err_left = cpi->total_error_left;
+
+    //cpi->bits_left = (long long)(cpi->total_stats.count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+    //cpi->bits_left -= (long long)(cpi->total_stats.count * two_pass_min_rate / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+
+    // each frame can have a different duration, as the frame rate in the source
+    // isn't guaranteed to be constant.   The frame rate prior to the first frame
+    // encoded in the second pass is a guess.  However the sum duration is not.
+    // Its calculated based on the actual durations of all frames from the first
+    // pass.
+    vp8_new_frame_rate(cpi, 10000000.0 * cpi->total_stats.count / cpi->total_stats.duration);
+
+    cpi->output_frame_rate = cpi->oxcf.frame_rate;
+    cpi->bits_left = (long long)(cpi->total_stats.duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
+    cpi->bits_left -= (long long)(cpi->total_stats.duration * two_pass_min_rate / 10000000.0);
+
+    vp8_avg_stats(&cpi->total_stats);
+
+    // Scan the first pass file and calculate an average Intra / Inter error score ratio for the sequence
+    {
+        double sum_iiratio = 0.0;
+        double IIRatio;
+
+        start_pos = cpi->stats_in;               // Note starting "file" position
+
+        while (vp8_input_stats(cpi, &this_frame) != EOF)
+        {
+            IIRatio = this_frame.intra_error / DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
+            IIRatio = (IIRatio < 1.0) ? 1.0 : (IIRatio > 20.0) ? 20.0 : IIRatio;
+            sum_iiratio += IIRatio;
+        }
+
+        cpi->avg_iiratio = sum_iiratio / DOUBLE_DIVIDE_CHECK((double)cpi->total_stats.count);
+
+        // Reset file position
+        reset_fpf_position(cpi, start_pos);
+    }
+
+    // Scan the first pass file and calculate a modified total error based upon the bias/power function
+    // used to allocate bits
+    {
+        start_pos = cpi->stats_in;               // Note starting "file" position
+
+        cpi->modified_total_error_left = 0.0;
+
+        while (vp8_input_stats(cpi, &this_frame) != EOF)
+        {
+            cpi->modified_total_error_left += calculate_modified_err(cpi, &this_frame);
+        }
+
+        reset_fpf_position(cpi, start_pos);            // Reset file position
+
+    }
+
+#ifdef FIRSTPASS_MM
+    cpi->fp_motion_mapfile = 0;
+    cpi->fp_motion_mapfile = fopen("fpmotionmap.stt", "rb");
+#endif
+
+}
+
+void vp8_end_second_pass(VP8_COMP *cpi)
+{
+#ifdef FIRSTPASS_MM
+
+    if (cpi->fp_motion_mapfile)
+        fclose(cpi->fp_motion_mapfile);
+
+#endif
+}
+
+// Analyse and define a gf/arf group .
+static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
+{
+    FIRSTPASS_STATS next_frame;
+    FIRSTPASS_STATS *start_pos;
+    int i;
+    int count = 0;
+    int image_size = cpi->common.last_frame.y_width  * cpi->common.last_frame.y_height;
+    double boost_score = 0.0;
+    double old_boost_score = 0.0;
+    double gf_group_err = 0.0;
+    double gf_first_frame_err = 0.0;
+    double mod_frame_err = 0.0;
+
+    double mv_accumulator_rabs  = 0.0;
+    double mv_accumulator_cabs  = 0.0;
+    double this_mv_rabs;
+    double this_mv_cabs;
+    double mv_ratio_accumulator = 0.0;
+    double distance_factor = 0.0;
+    double decay_accumulator = 1.0;
+
+    double boost_factor = IIFACTOR;
+    double loop_decay_rate = 1.00;        // Starting decay rate
+
+    double this_frame_mv_in_out = 0.0;
+    double mv_in_out_accumulator = 0.0;
+    double abs_mv_in_out_accumulator = 0.0;
+    double mod_err_per_mb_accumulator = 0.0;
+
+    int max_bits = frame_max_bits(cpi);    // Max for a single frame
+
+#ifdef FIRSTPASS_MM
+    int fpmm_pos;
+#endif
+
+    cpi->gf_group_bits = 0;
+    cpi->gf_decay_rate = 0;
+
+    vp8_clear_system_state();  //__asm emms;
+
+#ifdef FIRSTPASS_MM
+    fpmm_pos = vp8_fpmm_get_pos(cpi);
+#endif
+
+    start_pos = cpi->stats_in;
+
+    // Preload the stats for the next frame.
+    mod_frame_err = calculate_modified_err(cpi, this_frame);
+
+    // Note the error of the frame at the start of the group (this will be the GF frame error if we code a normal gf
+    gf_first_frame_err = mod_frame_err;
+
+    // Special treatment if the current frame is a key frame (which is also a gf).
+    // If it is then its error score (and hence bit allocation) need to be subtracted out
+    // from the calculation for the GF group
+    if (cpi->common.frame_type == KEY_FRAME)
+        gf_group_err -= gf_first_frame_err;
+
+    // Scan forward to try and work out how many frames the next gf group should contain and
+    // what level of boost is appropriate for the GF or ARF that will be coded with the group
+    i = 0;
+
+    while (((i < cpi->max_gf_interval) || ((cpi->frames_to_key - i) < MIN_GF_INTERVAL)) && (i < cpi->frames_to_key))
+    {
+        double r;
+        double motion_factor;
+        double this_frame_mvr_ratio;
+        double this_frame_mvc_ratio;
+
+        i++;                                                    // Increment the loop counter
+
+        // Accumulate error score of frames in this gf group
+        mod_frame_err = calculate_modified_err(cpi, this_frame);
+
+        gf_group_err += mod_frame_err;
+
+        mod_err_per_mb_accumulator += mod_frame_err / DOUBLE_DIVIDE_CHECK((double)cpi->common.MBs);
+
+        if (EOF == vp8_input_stats(cpi, &next_frame))
+            break;
+
+        // Accumulate motion stats.
+        motion_factor = next_frame.pcnt_motion;
+        this_mv_rabs = fabs(next_frame.mvr_abs * motion_factor);
+        this_mv_cabs = fabs(next_frame.mvc_abs * motion_factor);
+
+        mv_accumulator_rabs += fabs(next_frame.mvr_abs * motion_factor);
+        mv_accumulator_cabs += fabs(next_frame.mvc_abs * motion_factor);
+
+        //Accumulate Motion In/Out of frame stats
+        this_frame_mv_in_out = next_frame.mv_in_out_count * next_frame.pcnt_motion;
+        mv_in_out_accumulator += next_frame.mv_in_out_count * next_frame.pcnt_motion;
+        abs_mv_in_out_accumulator += fabs(next_frame.mv_in_out_count * next_frame.pcnt_motion);
+
+        // If there is a significant amount of motion
+        if (motion_factor > 0.05)
+        {
+            this_frame_mvr_ratio = fabs(next_frame.mvr_abs) / DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVr));
+            this_frame_mvc_ratio = fabs(next_frame.mvc_abs) / DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVc));
+
+            mv_ratio_accumulator += (this_frame_mvr_ratio < next_frame.mvr_abs) ? (this_frame_mvr_ratio * motion_factor) : next_frame.mvr_abs * motion_factor;
+            mv_ratio_accumulator += (this_frame_mvc_ratio < next_frame.mvc_abs) ? (this_frame_mvc_ratio * motion_factor) : next_frame.mvc_abs * motion_factor;
+        }
+        else
+        {
+            mv_ratio_accumulator += 0.0;
+            this_frame_mvr_ratio = 1.0;
+            this_frame_mvc_ratio = 1.0;
+        }
+
+        // Underlying boost factor is based on inter intra error ratio
+        r = (boost_factor * (next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error)));
+
+        // Increase boost for frames where new data coming into frame (eg zoom out)
+        // Slightly reduce boost if there is a net balance of motion out of the frame (zoom in)
+        // The range for this_frame_mv_in_out is -1.0 to +1.0
+        if (this_frame_mv_in_out > 0.0)
+            r += r * (this_frame_mv_in_out * 2.0);
+        else
+            r += r * (this_frame_mv_in_out / 2.0);  // In extreme case boost is halved
+
+        if (r > GF_RMAX)
+            r = GF_RMAX;
+
+        // Adjust loop decay rate
+        //if ( next_frame.pcnt_inter < loop_decay_rate )
+        loop_decay_rate = next_frame.pcnt_inter;
+
+        // High % motion -> somewhat higher decay rate
+        if ((1.0 - (next_frame.pcnt_motion / 10.0)) < loop_decay_rate)
+            loop_decay_rate = (1.0 - (next_frame.pcnt_motion / 10.0));
+
+        distance_factor = sqrt((this_mv_rabs * this_mv_rabs) + (this_mv_cabs * this_mv_cabs)) / 300.0;
+        distance_factor = ((distance_factor > 1.0) ? 0.0 : (1.0 - distance_factor));
+
+        if (distance_factor < loop_decay_rate)
+            loop_decay_rate = distance_factor;
+
+        // Cumulative effect of decay
+        decay_accumulator = decay_accumulator * loop_decay_rate;
+        decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
+        //decay_accumulator = ( loop_decay_rate < decay_accumulator ) ? loop_decay_rate : decay_accumulator;
+
+        boost_score += (decay_accumulator * r);
+
+        // Break out conditions.
+        if (   /* i>4 || */
+            (
+                (i > MIN_GF_INTERVAL) &&                            // Dont break out with a very short interval
+                ((cpi->frames_to_key - i) >= MIN_GF_INTERVAL) &&      // Dont break out very close to a key frame
+                ((boost_score > 20.0) || (next_frame.pcnt_inter < 0.75)) &&
+                ((mv_ratio_accumulator > 100.0) ||
+                 (abs_mv_in_out_accumulator > 3.0) ||
+                 (mv_in_out_accumulator < -2.0) ||
+                 ((boost_score - old_boost_score) < 2.0)
+                )
+            )
+        )
+        {
+            boost_score = old_boost_score;
+            break;
+        }
+
+        vpx_memcpy(this_frame, &next_frame, sizeof(*this_frame));
+
+        old_boost_score = boost_score;
+    }
+
+    cpi->gf_decay_rate = (i > 0) ? (int)(100.0 * (1.0 - decay_accumulator)) / i : 0;
+
+    // When using CBR apply additional buffer related upper limits
+    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+    {
+        double max_boost;
+
+        // For cbr apply buffer related limits
+        if (cpi->drop_frames_allowed)
+        {
+            int df_buffer_level = cpi->oxcf.drop_frames_water_mark * (cpi->oxcf.optimal_buffer_level / 100);
+
+            if (cpi->buffer_level > df_buffer_level)
+                max_boost = ((double)((cpi->buffer_level - df_buffer_level) * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
+            else
+                max_boost = 0.0;
+        }
+        else if (cpi->buffer_level > 0)
+        {
+            max_boost = ((double)(cpi->buffer_level * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
+        }
+        else
+        {
+            max_boost = 0.0;
+        }
+
+        if (boost_score > max_boost)
+            boost_score = max_boost;
+    }
+
+    cpi->gfu_boost = (int)(boost_score * 100.0) >> 4;
+
+    // Should we use the alternate refernce frame
+    if (cpi->oxcf.play_alternate &&
+        (i >= MIN_GF_INTERVAL) &&
+        (i <= (cpi->frames_to_key - MIN_GF_INTERVAL)) &&          // dont use ARF very near next kf
+        (((next_frame.pcnt_inter > 0.75) &&
+          ((mv_in_out_accumulator / (double)i > -0.2) || (mv_in_out_accumulator > -2.0)) &&
+          //(cpi->gfu_boost>150) &&
+          (cpi->gfu_boost > 100) &&
+          //(cpi->gfu_boost>AF_THRESH2) &&
+          //((cpi->gfu_boost/i)>AF_THRESH) &&
+          //(decay_accumulator > 0.5) &&
+          (cpi->gf_decay_rate <= (ARF_DECAY_THRESH + (cpi->gfu_boost / 200)))
+         )
+        )
+       )
+    {
+        int Boost;
+        int allocation_chunks;
+        int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
+        int tmp_q;
+        int arf_frame_bits = 0;
+        int group_bits;
+
+        // Estimate the bits to be allocated to the group as a whole
+        if ((cpi->kf_group_bits > 0) && (cpi->kf_group_error_left > 0))
+            group_bits = (int)((double)cpi->kf_group_bits * (gf_group_err / (double)cpi->kf_group_error_left));
+        else
+            group_bits = 0;
+
+        // Boost for arf frame
+        Boost = (cpi->gfu_boost * 3 * GFQ_ADJUSTMENT) / (2 * 100);
+        Boost += (cpi->baseline_gf_interval * 50);
+        allocation_chunks = (i * 100) + Boost;
+
+        // Normalize Altboost and allocations chunck down to prevent overflow
+        while (Boost > 1000)
+        {
+            Boost /= 2;
+            allocation_chunks /= 2;
+        }
+
+        // Calculate the number of bits to be spent on the arf based on the boost number
+        arf_frame_bits = (int)((double)Boost * (group_bits / (double)allocation_chunks));
+
+        // Estimate if there are enough bits available to make worthwhile use of an arf.
+        tmp_q = estimate_q(cpi, mod_frame_err, (int)arf_frame_bits, cpi->common.Height, cpi->common.Width);
+
+        // Only use an arf if it is likely we will be able to code it at a lower Q than the surrounding frames.
+        if (tmp_q < cpi->worst_quality)
+        {
+            cpi->source_alt_ref_pending = TRUE;
+
+            // For alt ref frames the error score for the end frame of the group (the alt ref frame) should not contribute to the group total and hence
+            // the number of bit allocated to the group. Rather it forms part of the next group (it is the GF at the start of the next group)
+            gf_group_err -= mod_frame_err;
+
+            // Set the interval till the next gf or arf. For ARFs this is the number of frames to be coded before the future frame that is coded as an ARF.
+            // The future frame itself is part of the next group
+            cpi->baseline_gf_interval = i - 1;
+
+#ifdef FIRSTPASS_MM
+            // Read through the motion map to load up the entry for the ARF
+            {
+                int j;
+
+                // Advance to the region of interest
+                // Current default 2 frames before to 2 frames after the ARF frame itsef
+                vp8_fpmm_reset_pos(cpi, cpi->fpmm_pos);
+
+                for (j = 0; j < cpi->baseline_gf_interval - 2; j++)
+                    vp8_advance_fpmm(cpi, 1);
+
+                // Read / create a motion map for the region of interest
+                vp8_input_fpmm(cpi, 5);
+            }
+#endif
+        }
+        else
+        {
+            cpi->source_alt_ref_pending = FALSE;
+            cpi->baseline_gf_interval = i;
+        }
+    }
+    else
+    {
+        cpi->source_alt_ref_pending = FALSE;
+        cpi->baseline_gf_interval = i;
+    }
+
+    // Conventional GF
+    if (!cpi->source_alt_ref_pending)
+    {
+        // Dont allow conventional gf too near the next kf
+        if ((cpi->frames_to_key - cpi->baseline_gf_interval) < MIN_GF_INTERVAL)
+        {
+            while (cpi->baseline_gf_interval < cpi->frames_to_key)
+            {
+                if (EOF == vp8_input_stats(cpi, this_frame))
+                    break;
+
+                cpi->baseline_gf_interval++;
+
+                if (cpi->baseline_gf_interval < cpi->frames_to_key)
+                    gf_group_err += calculate_modified_err(cpi, this_frame);
+            }
+        }
+    }
+
+    // Now decide how many bits should be allocated to the GF group as  a proportion of those remaining in the kf group.
+    // The final key frame group in the clip is treated as a special case where cpi->kf_group_bits is tied to cpi->bits_left.
+    // This is also important for short clips where there may only be one key frame.
+    if (cpi->frames_to_key >= (int)(cpi->total_stats.count - cpi->common.current_video_frame))
+    {
+        cpi->kf_group_bits = (cpi->bits_left > 0) ? cpi->bits_left : 0;
+    }
+
+    // Calculate the bits to be allocated to the group as a whole
+    if ((cpi->kf_group_bits > 0) && (cpi->kf_group_error_left > 0))
+        cpi->gf_group_bits = (int)((double)cpi->kf_group_bits * (gf_group_err / (double)cpi->kf_group_error_left));
+    else
+        cpi->gf_group_bits = 0;
+
+    cpi->gf_group_bits = (cpi->gf_group_bits < 0) ? 0 : (cpi->gf_group_bits > cpi->kf_group_bits) ? cpi->kf_group_bits : cpi->gf_group_bits;
+
+    // Clip cpi->gf_group_bits based on user supplied data rate variability limit (cpi->oxcf.two_pass_vbrmax_section)
+    if (cpi->gf_group_bits > max_bits * cpi->baseline_gf_interval)
+        cpi->gf_group_bits = max_bits * cpi->baseline_gf_interval;
+
+    // Reset the file position
+    reset_fpf_position(cpi, start_pos);
+
+    // Assign  bits to the arf or gf.
+    {
+        int Boost;
+        int frames_in_section;
+        int allocation_chunks;
+        int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
+
+        // For ARF frames
+        if (cpi->source_alt_ref_pending)
+        {
+            Boost = (cpi->gfu_boost * 3 * GFQ_ADJUSTMENT) / (2 * 100);
+            //Boost += (cpi->baseline_gf_interval * 25);
+            Boost += (cpi->baseline_gf_interval * 50);
+
+            // Set max and minimum boost and hence minimum allocation
+            if (Boost > ((cpi->baseline_gf_interval + 1) * 200))
+                Boost = ((cpi->baseline_gf_interval + 1) * 200);
+            else if (Boost < 125)
+                Boost = 125;
+
+            frames_in_section = cpi->baseline_gf_interval + 1;
+            allocation_chunks = (frames_in_section * 100) + Boost;
+        }
+        // Else for standard golden frames
+        else
+        {
+            // boost based on inter / intra ratio of subsequent frames
+            Boost = (cpi->gfu_boost * GFQ_ADJUSTMENT) / 100;
+
+            // Set max and minimum boost and hence minimum allocation
+            if (Boost > (cpi->baseline_gf_interval * 150))
+                Boost = (cpi->baseline_gf_interval * 150);
+            else if (Boost < 125)
+                Boost = 125;
+
+            frames_in_section = cpi->baseline_gf_interval;
+            allocation_chunks = (frames_in_section * 100) + (Boost - 100);
+        }
+
+        // Normalize Altboost and allocations chunck down to prevent overflow
+        while (Boost > 1000)
+        {
+            Boost /= 2;
+            allocation_chunks /= 2;
+        }
+
+        // Calculate the number of bits to be spent on the gf or arf based on the boost number
+        cpi->gf_bits = (int)((double)Boost * (cpi->gf_group_bits / (double)allocation_chunks));
+
+        // If the frame that is to be boosted is simpler than the average for the gf/arf group then use an alternative calculation
+        // based on the error score of the frame itself
+        if (mod_frame_err < gf_group_err / (double)cpi->baseline_gf_interval)
+        {
+            double  alt_gf_grp_bits;
+            int     alt_gf_bits;
+
+            alt_gf_grp_bits = ((double)cpi->kf_group_bits  * (mod_frame_err * (double)cpi->baseline_gf_interval) / (double)cpi->kf_group_error_left) ;
+            alt_gf_bits = (int)((double)Boost * (alt_gf_grp_bits / (double)allocation_chunks));
+
+            if (cpi->gf_bits > alt_gf_bits)
+            {
+                cpi->gf_bits = alt_gf_bits;
+            }
+        }
+        // Else if it is harder than other frames in the group make sure it at least receives an allocation in keeping with
+        // its relative error score, otherwise it may be worse off than an "un-boosted" frame
+        else
+        {
+            int alt_gf_bits = (int)((double)cpi->kf_group_bits * (mod_frame_err / (double)cpi->kf_group_error_left));
+
+            if (alt_gf_bits > cpi->gf_bits)
+            {
+                cpi->gf_bits = alt_gf_bits;
+            }
+        }
+
+        // Apply an additional limit for CBR
+        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+        {
+            if (cpi->gf_bits > (cpi->buffer_level >> 1))
+                cpi->gf_bits = cpi->buffer_level >> 1;
+        }
+
+        // Dont allow a negative value for gf_bits
+        if (cpi->gf_bits < 0)
+            cpi->gf_bits = 0;
+
+        // Adjust KF group bits and error remainin
+        cpi->kf_group_error_left -= gf_group_err;
+        cpi->kf_group_bits -= cpi->gf_group_bits;
+
+        if (cpi->kf_group_bits < 0)
+            cpi->kf_group_bits = 0;
+
+        // Note the error score left in the remaining frames of the group.
+        // For normal GFs we want to remove the error score for the first frame of the group (except in Key frame case where this has already happened)
+        if (!cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME)
+            cpi->gf_group_error_left = gf_group_err - gf_first_frame_err;
+        else
+            cpi->gf_group_error_left = gf_group_err;
+
+        cpi->gf_group_bits -= cpi->gf_bits;
+
+        if (cpi->gf_group_bits < 0)
+            cpi->gf_group_bits = 0;
+
+        // Set aside some bits for a mid gf sequence boost
+        if ((cpi->gfu_boost > 150) && (cpi->baseline_gf_interval > 5))
+        {
+            int pct_extra = (cpi->gfu_boost - 100) / 50;
+            pct_extra = (pct_extra > 10) ? 10 : pct_extra;
+
+            cpi->mid_gf_extra_bits = (cpi->gf_group_bits * pct_extra) / 100;
+            cpi->gf_group_bits -= cpi->mid_gf_extra_bits;
+        }
+        else
+            cpi->mid_gf_extra_bits = 0;
+
+        cpi->gf_bits += cpi->min_frame_bandwidth;                                              // Add in minimum for a frame
+    }
+
+    if (!cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME))                  // Normal GF and not a KF
+    {
+        cpi->per_frame_bandwidth = cpi->gf_bits;                                               // Per frame bit target for this frame
+    }
+
+    // Adjustment to estimate_max_q based on a measure of complexity of the section
+    if (cpi->common.frame_type != KEY_FRAME)
+    {
+        FIRSTPASS_STATS sectionstats;
+        double Ratio;
+
+        vp8_zero_stats(&sectionstats);
+        reset_fpf_position(cpi, start_pos);
+
+        for (i = 0 ; i < cpi->baseline_gf_interval ; i++)
+        {
+            vp8_input_stats(cpi, &next_frame);
+            vp8_accumulate_stats(&sectionstats, &next_frame);
+        }
+
+        vp8_avg_stats(&sectionstats);
+
+        if (sectionstats.pcnt_motion < .17)
+            cpi->section_is_low_motion = 1;
+        else
+            cpi->section_is_low_motion = 0;
+
+        if (sectionstats.mvc_abs + sectionstats.mvr_abs > 45)
+            cpi->section_is_fast_motion = 1;
+        else
+            cpi->section_is_fast_motion = 0;
+
+        cpi->section_intra_rating = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
+
+        Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
+        //if( (Ratio > 11) ) //&& (sectionstats.pcnt_second_ref < .20) )
+        //{
+        cpi->section_max_qfactor = 1.0 - ((Ratio - 10.0) * 0.025);
+
+        if (cpi->section_max_qfactor < 0.80)
+            cpi->section_max_qfactor = 0.80;
+
+        //}
+        //else
+        //    cpi->section_max_qfactor = 1.0;
+
+        reset_fpf_position(cpi, start_pos);
+    }
+
+#ifdef FIRSTPASS_MM
+    // Reset the First pass motion map file position
+    vp8_fpmm_reset_pos(cpi, fpmm_pos);
+#endif
+}
+
+// Allocate bits to a normal frame that is neither a gf an arf or a key frame.
+static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
+{
+    int    target_frame_size;                                                             // gf_group_error_left
+
+    double modified_err;
+    double err_fraction;                                                                 // What portion of the remaining GF group error is used by this frame
+
+    int max_bits = frame_max_bits(cpi);    // Max for a single frame
+
+    // The final few frames have special treatment
+    if (cpi->frames_till_gf_update_due >= (int)(cpi->total_stats.count - cpi->common.current_video_frame))
+    {
+        cpi->gf_group_bits = (cpi->bits_left > 0) ? cpi->bits_left : 0;;
+    }
+
+    // Calculate modified prediction error used in bit allocation
+    modified_err = calculate_modified_err(cpi, this_frame);
+
+    if (cpi->gf_group_error_left > 0)
+        err_fraction = modified_err / cpi->gf_group_error_left;                              // What portion of the remaining GF group error is used by this frame
+    else
+        err_fraction = 0.0;
+
+    target_frame_size = (int)((double)cpi->gf_group_bits * err_fraction);                    // How many of those bits available for allocation should we give it?
+
+    // Clip to target size to 0 - max_bits (or cpi->gf_group_bits) at the top end.
+    if (target_frame_size < 0)
+        target_frame_size = 0;
+    else
+    {
+        if (target_frame_size > max_bits)
+            target_frame_size = max_bits;
+
+        if (target_frame_size > cpi->gf_group_bits)
+            target_frame_size = cpi->gf_group_bits;
+    }
+
+    cpi->gf_group_error_left -= modified_err;                                               // Adjust error remaining
+    cpi->gf_group_bits -= target_frame_size;                                                // Adjust bits remaining
+
+    if (cpi->gf_group_bits < 0)
+        cpi->gf_group_bits = 0;
+
+    target_frame_size += cpi->min_frame_bandwidth;                                          // Add in the minimum number of bits that is set aside for every frame.
+
+    // Special case for the frame that lies half way between two gfs
+    if (cpi->common.frames_since_golden == cpi->baseline_gf_interval / 2)
+        target_frame_size += cpi->mid_gf_extra_bits;
+
+    cpi->per_frame_bandwidth = target_frame_size;                                           // Per frame bit target for this frame
+}
+
+void vp8_second_pass(VP8_COMP *cpi)
+{
+    int tmp_q;
+    int frames_left = (int)(cpi->total_stats.count - cpi->common.current_video_frame);
+
+    FIRSTPASS_STATS this_frame;
+    FIRSTPASS_STATS this_frame_copy;
+
+    VP8_COMMON *cm = &cpi->common;
+
+    double this_frame_error;
+    double this_frame_intra_error;
+    double this_frame_coded_error;
+
+    FIRSTPASS_STATS *start_pos;
+
+    if (!cpi->stats_in)
+    {
+        return ;
+    }
+
+    vp8_clear_system_state();
+
+    if (EOF == vp8_input_stats(cpi, &this_frame))
+        return;
+
+#ifdef FIRSTPASS_MM
+    vpx_memset(cpi->fp_motion_map, 0, cpi->common.MBs);
+    cpi->fpmm_pos = vp8_fpmm_get_pos(cpi);
+    vp8_advance_fpmm(cpi, 1);         // Read this frame's first pass motion map
+#endif
+
+    this_frame_error = this_frame.ssim_weighted_pred_err;
+    this_frame_intra_error = this_frame.intra_error;
+    this_frame_coded_error = this_frame.coded_error;
+
+    // Store information regarding level of motion etc for use mode decisions.
+    cpi->motion_speed = (int)(fabs(this_frame.MVr) + fabs(this_frame.MVc));
+    cpi->motion_var = (int)(fabs(this_frame.MVrv) + fabs(this_frame.MVcv));
+    cpi->inter_lvl = (int)(this_frame.pcnt_inter * 100);
+    cpi->intra_lvl = (int)((1.0 - this_frame.pcnt_inter) * 100);
+    cpi->motion_lvl = (int)(this_frame.pcnt_motion * 100);
+
+    start_pos = cpi->stats_in;
+
+    // keyframe and section processing !
+    if (cpi->frames_to_key == 0)
+    {
+        // Define next KF group and assign bits to it
+        vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+        vp8_find_next_key_frame(cpi, &this_frame_copy);
+
+        // Special case: Error error_resilient_mode mode does not make much sense for two pass but with its current meaning but this code is designed to stop
+        // outlandish behaviour if someone does set it when using two pass. It effectively disables GF groups.
+        // This is temporary code till we decide what should really happen in this case.
+        if (cpi->oxcf.error_resilient_mode)
+        {
+            cpi->gf_group_bits = cpi->kf_group_bits;
+            cpi->gf_group_error_left = cpi->kf_group_error_left;
+            cpi->baseline_gf_interval = cpi->frames_to_key;
+            cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
+            cpi->source_alt_ref_pending = FALSE;
+        }
+
+    }
+
+    // Is this a GF / ARF (Note that a KF is always also a GF)
+    if (cpi->frames_till_gf_update_due == 0)
+    {
+        // Define next gf group and assign bits to it
+        vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+        define_gf_group(cpi, &this_frame_copy);
+
+        // If we are going to code an altref frame at the end of the group and the current frame is not a key frame....
+        // If the previous group used an arf this frame has already benefited from that arf boost and it should not be given extra bits
+        // If the previous group was NOT coded using arf we may want to apply some boost to this GF as well
+        if (cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME))
+        {
+            // Assign a standard frames worth of bits from those allocated to the GF group
+            vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+            assign_std_frame_bits(cpi, &this_frame_copy);
+
+            // If appropriate (we are switching into ARF active but it was not previously active) apply a boost for the gf at the start of the group.
+            //if ( !cpi->source_alt_ref_active && (cpi->gfu_boost > 150) )
+            if (FALSE)
+            {
+                int extra_bits;
+                int pct_extra = (cpi->gfu_boost - 100) / 50;
+
+                pct_extra = (pct_extra > 20) ? 20 : pct_extra;
+
+                extra_bits = (cpi->gf_group_bits * pct_extra) / 100;
+                cpi->gf_group_bits -= extra_bits;
+                cpi->per_frame_bandwidth += extra_bits;
+            }
+        }
+    }
+
+    // Otherwise this is an ordinary frame
+    else
+    {
+        // Special case: Error error_resilient_mode mode does not make much sense for two pass but with its current meaning but this code is designed to stop
+        // outlandish behaviour if someone does set it when using two pass. It effectively disables GF groups.
+        // This is temporary code till we decide what should really happen in this case.
+        if (cpi->oxcf.error_resilient_mode)
+        {
+            cpi->frames_till_gf_update_due = cpi->frames_to_key;
+
+            if (cpi->common.frame_type != KEY_FRAME)
+            {
+                // Assign bits from those allocated to the GF group
+                vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+                assign_std_frame_bits(cpi, &this_frame_copy);
+            }
+        }
+        else
+        {
+            // Assign bits from those allocated to the GF group
+            vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+            assign_std_frame_bits(cpi, &this_frame_copy);
+        }
+    }
+
+    // Set nominal per second bandwidth for this frame
+    cpi->target_bandwidth = cpi->per_frame_bandwidth * cpi->output_frame_rate;
+    if (cpi->target_bandwidth < 0)
+        cpi->target_bandwidth = 0;
+
+    if (cpi->common.current_video_frame == 0)
+    {
+        // guess at 2nd pass q
+        cpi->est_max_qcorrection_factor = 1.0;
+        tmp_q = estimate_max_q(cpi, (cpi->total_coded_error_left / frames_left), (int)(cpi->bits_left / frames_left), cpi->common.Height, cpi->common.Width);
+
+        if (tmp_q < cpi->worst_quality)
+        {
+            cpi->active_worst_quality         = tmp_q;
+            cpi->ni_av_qi                     = tmp_q;
+        }
+        else
+        {
+            cpi->active_worst_quality         = cpi->worst_quality;
+            cpi->ni_av_qi                     = cpi->worst_quality;
+        }
+    }
+    else
+    {
+        if (frames_left < 1)
+            frames_left = 1;
+
+        tmp_q = estimate_max_q(cpi, (cpi->total_coded_error_left / frames_left), (int)(cpi->bits_left / frames_left), cpi->common.Height, cpi->common.Width);
+
+        // Move active_worst_quality but in a damped way
+        if (tmp_q > cpi->active_worst_quality)
+            cpi->active_worst_quality ++;
+        else if (tmp_q < cpi->active_worst_quality)
+            cpi->active_worst_quality --;
+
+        cpi->active_worst_quality = ((cpi->active_worst_quality * 3) + tmp_q + 2) / 4;
+
+        // Clamp to user set limits
+        if (cpi->active_worst_quality > cpi->worst_quality)
+            cpi->active_worst_quality = cpi->worst_quality;
+        else if (cpi->active_worst_quality < cpi->best_quality)
+            cpi->active_worst_quality = cpi->best_quality;
+
+    }
+
+    cpi->frames_to_key --;
+    cpi->total_error_left      -= this_frame_error;
+    cpi->total_intra_error_left -= this_frame_intra_error;
+    cpi->total_coded_error_left -= this_frame_coded_error;
+}
+
+
+static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRSTPASS_STATS *this_frame, FIRSTPASS_STATS *next_frame)
+{
+    BOOL is_viable_kf = FALSE;
+
+    // Does the frame satisfy the primary criteria of a key frame
+    //      If so, then examine how well it predicts subsequent frames
+    if ((this_frame->pcnt_second_ref < 0.10) &&
+        (next_frame->pcnt_second_ref < 0.10) &&
+        ((this_frame->pcnt_inter < 0.05) ||
+         (
+             (this_frame->pcnt_inter < .25) &&
+             ((this_frame->intra_error / DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) < 2.5) &&
+             ((fabs(last_frame->coded_error - this_frame->coded_error) / DOUBLE_DIVIDE_CHECK(this_frame->coded_error) > .40) ||
+              (fabs(last_frame->intra_error - this_frame->intra_error) / DOUBLE_DIVIDE_CHECK(this_frame->intra_error) > .40) ||
+              ((next_frame->intra_error / DOUBLE_DIVIDE_CHECK(next_frame->coded_error)) > 3.5)
+             )
+         )
+        )
+       )
+    {
+        int i;
+        FIRSTPASS_STATS *start_pos;
+
+        FIRSTPASS_STATS local_next_frame;
+
+        double boost_score = 0.0;
+        double old_boost_score = 0.0;
+        double decay_accumulator = 1.0;
+        double next_iiratio;
+
+        vpx_memcpy(&local_next_frame, next_frame, sizeof(*next_frame));
+
+        // Note the starting file position so we can reset to it
+        start_pos = cpi->stats_in;
+
+        // Examine how well the key frame predicts subsequent frames
+        for (i = 0 ; i < 16; i++)
+        {
+            next_iiratio = (IIKFACTOR1 * local_next_frame.intra_error / DOUBLE_DIVIDE_CHECK(local_next_frame.coded_error)) ;
+
+            if (next_iiratio > RMAX)
+                next_iiratio = RMAX;
+
+            // Cumulative effect of decay in prediction quality
+            if (local_next_frame.pcnt_inter > 0.85)
+                decay_accumulator = decay_accumulator * local_next_frame.pcnt_inter;
+            else
+                decay_accumulator = decay_accumulator * ((0.85 + local_next_frame.pcnt_inter) / 2.0);
+
+            //decay_accumulator = decay_accumulator * local_next_frame.pcnt_inter;
+
+            // Keep a running total
+            boost_score += (decay_accumulator * next_iiratio);
+
+            // Test various breakout clauses
+            if ((local_next_frame.pcnt_inter < 0.05) ||
+                (next_iiratio < 1.5) ||
+                ((local_next_frame.pcnt_inter < 0.20) && (next_iiratio < 3.0)) ||
+                ((boost_score - old_boost_score) < 0.5) ||
+                (local_next_frame.intra_error < 200)
+               )
+            {
+                break;
+            }
+
+            old_boost_score = boost_score;
+
+            // Get the next frame details
+            if (EOF == vp8_input_stats(cpi, &local_next_frame))
+                break;
+        }
+
+        // If there is tolerable prediction for at least the next 3 frames then break out else discard this pottential key frame and move on
+        if (boost_score > 5.0 && (i > 3))
+            is_viable_kf = TRUE;
+        else
+        {
+            // Reset the file position
+            reset_fpf_position(cpi, start_pos);
+
+            is_viable_kf = FALSE;
+        }
+    }
+
+    return is_viable_kf;
+}
+void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
+{
+    int i;
+    FIRSTPASS_STATS last_frame;
+    FIRSTPASS_STATS first_frame;
+    FIRSTPASS_STATS next_frame;
+    FIRSTPASS_STATS *start_position;
+
+    double decay_accumulator = 0;
+    double boost_score = 0;
+    double old_boost_score = 0.0;
+    double loop_decay_rate;
+
+    double kf_mod_err = 0.0;
+    double kf_group_err = 0.0;
+    double kf_group_intra_err = 0.0;
+    double kf_group_coded_err = 0.0;
+    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
+
+    vp8_clear_system_state();  //__asm emms;
+    start_position = cpi->stats_in;
+
+    cpi->common.frame_type = KEY_FRAME;
+
+    // Clear the alt ref active flag as this can never be active on a key frame
+    cpi->source_alt_ref_active = FALSE;
+
+    // Kf is always a gf so clear frames till next gf counter
+    cpi->frames_till_gf_update_due = 0;
+
+    cpi->frames_to_key = 1;
+
+    // Take a copy of the initial frame details
+    vpx_memcpy(&first_frame, this_frame, sizeof(*this_frame));
+
+    cpi->kf_group_bits = 0;       // Estimate of total bits avaialable to kf group
+    cpi->kf_group_error_left = 0;  // Group modified error score.
+
+    kf_mod_err = calculate_modified_err(cpi, this_frame);
+
+    // find the next keyframe
+    while (cpi->stats_in < cpi->stats_in_end)
+    {
+        // Accumulate kf group error
+        kf_group_err += calculate_modified_err(cpi, this_frame);
+
+        // These figures keep intra and coded error counts for all frames including key frames in the group.
+        // The effect of the key frame itself can be subtracted out using the first_frame data collected above
+        kf_group_intra_err += this_frame->intra_error;
+        kf_group_coded_err += this_frame->coded_error;
+
+        vpx_memcpy(&last_frame, this_frame, sizeof(*this_frame));
+
+        // Provided that we are not at the end of the file...
+        if (EOF != vp8_input_stats(cpi, this_frame))
+        {
+            if (lookup_next_frame_stats(cpi, &next_frame) != EOF)
+            {
+                if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
+                    break;
+            }
+        }
+
+        // Step on to the next frame
+        cpi->frames_to_key ++;
+
+        // If we don't have a real key frame within the next two
+        // forcekeyframeevery intervals then break out of the loop.
+        if (cpi->frames_to_key >= 2 *(int)cpi->key_frame_frequency)
+            break;
+
+    }
+
+    // If there is a max kf interval set by the user we must obey it.
+    // We already breakout of the loop above at 2x max.
+    // This code centers the extra kf if the actual natural
+    // interval is between 1x and 2x
+    if ( cpi->frames_to_key > (int)cpi->key_frame_frequency )
+    {
+        cpi->frames_to_key /= 2;
+
+        // Estimate corrected kf group error
+        kf_group_err /= 2.0;
+        kf_group_intra_err /= 2.0;
+        kf_group_coded_err /= 2.0;
+    }
+
+    // Special case for the last frame of the file
+    if (cpi->stats_in >= cpi->stats_in_end)
+    {
+        // Accumulate kf group error
+        kf_group_err += calculate_modified_err(cpi, this_frame);
+
+        // These figures keep intra and coded error counts for all frames including key frames in the group.
+        // The effect of the key frame itself can be subtracted out using the first_frame data collected above
+        kf_group_intra_err += this_frame->intra_error;
+        kf_group_coded_err += this_frame->coded_error;
+    }
+
+    // Calculate the number of bits that should be assigned to the kf group.
+    if ((cpi->bits_left > 0) && ((int)cpi->modified_total_error_left > 0))
+    {
+        int max_bits = frame_max_bits(cpi);    // Max for a single normal frame (not key frame)
+
+        // Default allocation based on bits left and relative complexity of the section
+        cpi->kf_group_bits = (int)(cpi->bits_left * (kf_group_err / cpi->modified_total_error_left));
+
+        // Clip based on maximum per frame rate defined by the user.
+        if (cpi->kf_group_bits > max_bits * cpi->frames_to_key)
+            cpi->kf_group_bits = max_bits * cpi->frames_to_key;
+
+        // Additional special case for CBR if buffer is getting full.
+        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+        {
+            // If the buffer is near or above the optimal and this kf group is not being allocated much
+            // then increase the allocation a bit.
+            if (cpi->buffer_level >= cpi->oxcf.optimal_buffer_level)
+            {
+                int high_water_mark = (cpi->oxcf.optimal_buffer_level + cpi->oxcf.maximum_buffer_size) >> 1;
+                int min_group_bits;
+
+                // We are at or above the maximum.
+                if (cpi->buffer_level >= high_water_mark)
+                {
+                    min_group_bits = (cpi->av_per_frame_bandwidth * cpi->frames_to_key) + (cpi->buffer_level - high_water_mark);
+
+                    if (cpi->kf_group_bits < min_group_bits)
+                        cpi->kf_group_bits = min_group_bits;
+                }
+                // We are above optimal but below the maximum
+                else if (cpi->kf_group_bits < (cpi->av_per_frame_bandwidth * cpi->frames_to_key))
+                {
+                    int bits_below_av = (cpi->av_per_frame_bandwidth * cpi->frames_to_key) - cpi->kf_group_bits;
+                    cpi->kf_group_bits += (int)((double)bits_below_av * (double)(cpi->buffer_level - cpi->oxcf.optimal_buffer_level) /
+                                                (double)(high_water_mark - cpi->oxcf.optimal_buffer_level));
+                }
+            }
+        }
+    }
+    else
+        cpi->kf_group_bits = 0;
+
+    // Reset the first pass file position
+    reset_fpf_position(cpi, start_position);
+
+    // determine how big to make this keyframe based on how well the subsequent frames use inter blocks
+    decay_accumulator = 1.0;
+    boost_score = 0.0;
+    loop_decay_rate = 1.00;       // Starting decay rate
+
+    for (i = 0 ; i < cpi->frames_to_key ; i++)
+    {
+        double r;
+
+        if (EOF == vp8_input_stats(cpi, &next_frame))
+            break;
+
+        r = (IIKFACTOR2 * next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error)) ;
+
+        if (r > RMAX)
+            r = RMAX;
+
+        // Adjust loop decay rate
+        //if ( next_frame.pcnt_inter < loop_decay_rate )
+        loop_decay_rate = next_frame.pcnt_inter;
+
+        if ((1.0 - (next_frame.pcnt_motion / 10.0)) < loop_decay_rate)
+            loop_decay_rate = (1.0 - (next_frame.pcnt_motion / 10.0));
+
+        decay_accumulator = decay_accumulator * loop_decay_rate;
+
+        boost_score += (decay_accumulator * r);
+
+        if ((i > MIN_GF_INTERVAL) &&
+            ((boost_score - old_boost_score) < 1.0))
+        {
+            break;
+        }
+
+        old_boost_score = boost_score;
+    }
+
+    if (1)
+    {
+        FIRSTPASS_STATS sectionstats;
+        double Ratio;
+
+        vp8_zero_stats(&sectionstats);
+        reset_fpf_position(cpi, start_position);
+
+        for (i = 0 ; i < cpi->frames_to_key ; i++)
+        {
+            vp8_input_stats(cpi, &next_frame);
+            vp8_accumulate_stats(&sectionstats, &next_frame);
+        }
+
+        vp8_avg_stats(&sectionstats);
+
+        if (sectionstats.pcnt_motion < .17)
+            cpi->section_is_low_motion = 1;
+        else
+            cpi->section_is_low_motion = 0;
+
+        if (sectionstats.mvc_abs + sectionstats.mvr_abs > 45)
+            cpi->section_is_fast_motion = 1;
+        else
+            cpi->section_is_fast_motion = 0;
+
+        cpi->section_intra_rating = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
+
+        Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
+        // if( (Ratio > 11) ) //&& (sectionstats.pcnt_second_ref < .20) )
+        //{
+        cpi->section_max_qfactor = 1.0 - ((Ratio - 10.0) * 0.025);
+
+        if (cpi->section_max_qfactor < 0.80)
+            cpi->section_max_qfactor = 0.80;
+
+        //}
+        //else
+        //    cpi->section_max_qfactor = 1.0;
+    }
+
+    // When using CBR apply additional buffer fullness related upper limits
+    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+    {
+        double max_boost;
+
+        if (cpi->drop_frames_allowed)
+        {
+            int df_buffer_level = cpi->oxcf.drop_frames_water_mark * (cpi->oxcf.optimal_buffer_level / 100);
+
+            if (cpi->buffer_level > df_buffer_level)
+                max_boost = ((double)((cpi->buffer_level - df_buffer_level) * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
+            else
+                max_boost = 0.0;
+        }
+        else if (cpi->buffer_level > 0)
+        {
+            max_boost = ((double)(cpi->buffer_level * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
+        }
+        else
+        {
+            max_boost = 0.0;
+        }
+
+        if (boost_score > max_boost)
+            boost_score = max_boost;
+    }
+
+    // Reset the first pass file position
+    reset_fpf_position(cpi, start_position);
+
+    // Work out how many bits to allocate for the key frame itself
+    if (1)
+    {
+        int kf_boost = boost_score;
+        int allocation_chunks;
+        int Counter = cpi->frames_to_key;
+        int alt_kf_bits;
+
+        // Min boost based on kf interval
+#if 0
+
+        while ((kf_boost < 48) && (Counter > 0))
+        {
+            Counter -= 2;
+            kf_boost ++;
+        }
+
+#endif
+
+        if (kf_boost < 48)
+        {
+            kf_boost += ((Counter + 1) >> 1);
+
+            if (kf_boost > 48) kf_boost = 48;
+        }
+
+        // bigger frame sizes need larger kf boosts, smaller frames smaller boosts...
+        if ((cpi->common.last_frame.y_width  * cpi->common.last_frame.y_height) > (320 * 240))
+            kf_boost += 2 * (cpi->common.last_frame.y_width  * cpi->common.last_frame.y_height) / (320 * 240);
+        else if ((cpi->common.last_frame.y_width  * cpi->common.last_frame.y_height) < (320 * 240))
+            kf_boost -= 4 * (320 * 240) / (cpi->common.last_frame.y_width  * cpi->common.last_frame.y_height);
+
+        kf_boost = (int)((double)kf_boost * 100.0) >> 4;                          // Scale 16 to 100
+
+        // Adjustment to boost based on recent average q
+        kf_boost = kf_boost * vp8_kf_boost_qadjustment[cpi->ni_av_qi] / 100;
+
+        if (kf_boost < 250)                                                      // Min KF boost
+            kf_boost = 250;
+
+        // We do three calculations for kf size.
+        // The first is based on the error score for the whole kf group.
+        // The second (optionaly) on the key frames own error if this is smaller than the average for the group.
+        // The final one insures that the frame receives at least the allocation it would have received based on its own error score vs the error score remaining
+
+        allocation_chunks = ((cpi->frames_to_key - 1) * 100) + kf_boost;           // cpi->frames_to_key-1 because key frame itself is taken care of by kf_boost
+
+        // Normalize Altboost and allocations chunck down to prevent overflow
+        while (kf_boost > 1000)
+        {
+            kf_boost /= 2;
+            allocation_chunks /= 2;
+        }
+
+        cpi->kf_group_bits = (cpi->kf_group_bits < 0) ? 0 : cpi->kf_group_bits;
+
+        // Calculate the number of bits to be spent on the key frame
+        cpi->kf_bits  = (int)((double)kf_boost * ((double)cpi->kf_group_bits / (double)allocation_chunks));
+
+        // Apply an additional limit for CBR
+        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+        {
+            if (cpi->kf_bits > ((3 * cpi->buffer_level) >> 2))
+                cpi->kf_bits = (3 * cpi->buffer_level) >> 2;
+        }
+
+        // If the key frame is actually easier than the average for the kf group (which does sometimes happen... eg a blank intro frame)
+        // Then use an alternate calculation based on the kf error score which should give a smaller key frame.
+        if (kf_mod_err < kf_group_err / cpi->frames_to_key)
+        {
+            double  alt_kf_grp_bits = ((double)cpi->bits_left * (kf_mod_err * (double)cpi->frames_to_key) / cpi->modified_total_error_left) ;
+
+            alt_kf_bits = (int)((double)kf_boost * (alt_kf_grp_bits / (double)allocation_chunks));
+
+            if (cpi->kf_bits > alt_kf_bits)
+            {
+                cpi->kf_bits = alt_kf_bits;
+            }
+        }
+        // Else if it is much harder than other frames in the group make sure it at least receives an allocation in keeping with its relative error score
+        else
+        {
+            alt_kf_bits = (int)((double)cpi->bits_left * (kf_mod_err / cpi->modified_total_error_left));
+
+            if (alt_kf_bits > cpi->kf_bits)
+            {
+                cpi->kf_bits = alt_kf_bits;
+            }
+        }
+
+        cpi->kf_group_bits -= cpi->kf_bits;
+        cpi->kf_bits += cpi->min_frame_bandwidth;                                          // Add in the minimum frame allowance
+
+        cpi->per_frame_bandwidth = cpi->kf_bits;                                           // Peer frame bit target for this frame
+        cpi->target_bandwidth = cpi->kf_bits * cpi->output_frame_rate;                      // Convert to a per second bitrate
+    }
+
+    // Note the total error score of the kf group minus the key frame itself
+    cpi->kf_group_error_left = (int)(kf_group_err - kf_mod_err);
+
+    // Adjust the count of total modified error left.
+    // The count of bits left is adjusted elsewhere based on real coded frame sizes
+    cpi->modified_total_error_left -= kf_group_err;
+
+    if (cpi->oxcf.allow_spatial_resampling)
+    {
+        int resample_trigger = FALSE;
+        int last_kf_resampled = FALSE;
+        int kf_q;
+        int scale_val = 0;
+        int hr, hs, vr, vs;
+        int new_width = cpi->oxcf.Width;
+        int new_height = cpi->oxcf.Height;
+
+        int projected_buffer_level = cpi->buffer_level;
+        int tmp_q;
+
+        double projected_bits_perframe;
+        double group_iiratio = (kf_group_intra_err - first_frame.intra_error) / (kf_group_coded_err - first_frame.coded_error);
+        double err_per_frame = kf_group_err / cpi->frames_to_key;
+        double bits_per_frame;
+        double av_bits_per_frame;
+        double effective_size_ratio;
+
+        if ((cpi->common.Width != cpi->oxcf.Width) || (cpi->common.Height != cpi->oxcf.Height))
+            last_kf_resampled = TRUE;
+
+        // Set back to unscaled by defaults
+        cpi->common.horiz_scale = NORMAL;
+        cpi->common.vert_scale = NORMAL;
+
+        // Calculate Average bits per frame.
+        //av_bits_per_frame = cpi->bits_left/(double)(cpi->total_stats.count - cpi->common.current_video_frame);
+        av_bits_per_frame = cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate);
+        //if ( av_bits_per_frame < 0.0 )
+        //  av_bits_per_frame = 0.0
+
+        // CBR... Use the clip average as the target for deciding resample
+        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+        {
+            bits_per_frame = av_bits_per_frame;
+        }
+
+        // In VBR we want to avoid downsampling in easy section unless we are under extreme pressure
+        // So use the larger of target bitrate for this sectoion or average bitrate for sequence
+        else
+        {
+            bits_per_frame = cpi->kf_group_bits / cpi->frames_to_key;     // This accounts for how hard the section is...
+
+            if (bits_per_frame < av_bits_per_frame)                      // Dont turn to resampling in easy sections just because they have been assigned a small number of bits
+                bits_per_frame = av_bits_per_frame;
+        }
+
+        // bits_per_frame should comply with our minimum
+        if (bits_per_frame < (cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100))
+            bits_per_frame = (cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
+
+        // Work out if spatial resampling is necessary
+        kf_q = estimate_kf_group_q(cpi, err_per_frame, bits_per_frame, new_height, new_width, group_iiratio);
+
+        // If we project a required Q higher than the maximum allowed Q then make a guess at the actual size of frames in this section
+        projected_bits_perframe = bits_per_frame;
+        tmp_q = kf_q;
+
+        while (tmp_q > cpi->worst_quality)
+        {
+            projected_bits_perframe *= 1.04;
+            tmp_q--;
+        }
+
+        // Guess at buffer level at the end of the section
+        projected_buffer_level = cpi->buffer_level - (int)((projected_bits_perframe - av_bits_per_frame) * cpi->frames_to_key);
+
+        if (0)
+        {
+            FILE *f = fopen("Subsamle.stt", "a");
+            fprintf(f, " %8d %8d %8d %8d %12.0f %8d %8d %8d\n",  cpi->common.current_video_frame, kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, cpi->kf_group_bits / cpi->frames_to_key, new_height, new_width);
+            fclose(f);
+        }
+
+        // The trigger for spatial resampling depends on the various parameters such as whether we are streaming (CBR) or VBR.
+        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+        {
+            // Trigger resample if we are projected to fall below down sample level or
+            // resampled last time and are projected to remain below the up sample level
+            if ((projected_buffer_level < (cpi->oxcf.resample_down_water_mark * cpi->oxcf.optimal_buffer_level / 100)) ||
+                (last_kf_resampled && (projected_buffer_level < (cpi->oxcf.resample_up_water_mark * cpi->oxcf.optimal_buffer_level / 100))))
+                //( ((cpi->buffer_level < (cpi->oxcf.resample_down_water_mark * cpi->oxcf.optimal_buffer_level / 100))) &&
+                //  ((projected_buffer_level < (cpi->oxcf.resample_up_water_mark * cpi->oxcf.optimal_buffer_level / 100))) ))
+                resample_trigger = TRUE;
+            else
+                resample_trigger = FALSE;
+        }
+        else
+        {
+            long long clip_bits = (long long)(cpi->total_stats.count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+            long long over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;
+            long long over_spend2 = cpi->oxcf.starting_buffer_level - projected_buffer_level;
+
+            if ((last_kf_resampled && (kf_q > cpi->worst_quality)) ||                                               // If triggered last time the threshold for triggering again is reduced
+                ((kf_q > cpi->worst_quality) &&                                                                  // Projected Q higher than allowed and ...
+                 (over_spend > clip_bits / 20)))                                                               // ... Overspend > 5% of total bits
+                resample_trigger = TRUE;
+            else
+                resample_trigger = FALSE;
+
+        }
+
+        if (resample_trigger)
+        {
+            while ((kf_q >= cpi->worst_quality) && (scale_val < 6))
+            {
+                scale_val ++;
+
+                cpi->common.vert_scale   = vscale_lookup[scale_val];
+                cpi->common.horiz_scale  = hscale_lookup[scale_val];
+
+                Scale2Ratio(cpi->common.horiz_scale, &hr, &hs);
+                Scale2Ratio(cpi->common.vert_scale, &vr, &vs);
+
+                new_width = ((hs - 1) + (cpi->oxcf.Width * hr)) / hs;
+                new_height = ((vs - 1) + (cpi->oxcf.Height * vr)) / vs;
+
+                // Reducing the area to 1/4 does not reduce the complexity (err_per_frame) to 1/4...
+                // effective_sizeratio attempts to provide a crude correction for this
+                effective_size_ratio = (double)(new_width * new_height) / (double)(cpi->oxcf.Width * cpi->oxcf.Height);
+                effective_size_ratio = (1.0 + (3.0 * effective_size_ratio)) / 4.0;
+
+                // Now try again and see what Q we get with the smaller image size
+                kf_q = estimate_kf_group_q(cpi, err_per_frame * effective_size_ratio, bits_per_frame, new_height, new_width, group_iiratio);
+
+                if (0)
+                {
+                    FILE *f = fopen("Subsamle.stt", "a");
+                    fprintf(f, "******** %8d %8d %8d %12.0f %8d %8d %8d\n",  kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, cpi->kf_group_bits / cpi->frames_to_key, new_height, new_width);
+                    fclose(f);
+                }
+            }
+        }
+
+        if ((cpi->common.Width != new_width) || (cpi->common.Height != new_height))
+        {
+            cpi->common.Width = new_width;
+            cpi->common.Height = new_height;
+            vp8_alloc_compressor_data(cpi);
+        }
+    }
+}

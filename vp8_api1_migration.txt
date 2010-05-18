@@ -1,0 +1,198 @@
+Version 2.x of this library has deprecated or removed a number of interfaces to
+the VP8 codec. Where possible, the old interfaces have been left in place in a
+deprecated state, and will generate compiler warnings when they are referenced.
+All users are encouraged to update their code to the new interfaces as soon as
+possible. To assist in this effort, the `VPX_CODEC_DISABLE_COMPAT` symbol can
+be #defined to 1 prior to including vpx headers. This will disable the
+backwards compatability workarounds and ensure that you are using only the
+latest API.
+
+The *TWO-PASS STATISTICS* sections detail the one section of code which is not
+backwards compatable and will require code changes.
+
+
+HEADER FILES
+============
+The following header files were renamed:
+
+    vp8.h  -> vp8dx.h
+    vp8e.h -> vp8cx.h
+
+
+INTERFACE SYMBOLS
+=================
+The following interface symbols were renamed:
+
+    vpx_codec_vp8_algo -> vpx_codec_vp8_dx_algo
+    vpx_enc_vp8_algo   -> vpx_codec_vp8_cx_algo
+
+
+TWO-PASS STATISTICS
+===================
+Two-pass statistics are handled significantly differently. The version 1 API
+stored statistics in a file, and the application passed the name of that file
+in the `vpx_codec_enc_cfg` structure. In this version, statistics are returned
+though the application though the `vpx_codec_get_cx_data()` interface. The
+application must concatenate these packets into a contiguous buffer and then
+pass that buffer to the encoder through the `vpx_codec_enc_cfg` structure on
+the second pass initialization. The application may choose to keep these packets
+in memory or write them to disk. Statistics packets are approximately 112 bytes
+per frame. See the example code for more detailed examples.
+
+
+ENCODER CONTROLS
+================
+
+Renames
+-------
+The following controls are duplicated between the encoder and the decoder, but
+the encoder unnecessarily introduced unique identifiers for them. These
+identifiers were removed in favor of the ones used by the decoder:
+
+    VP8E_SET_REFERENCE  -> VP8_SET_REFERENCE
+    VP8E_COPY_REFERENCE -> VP8_COPY_REFERENCE
+    VP8E_SET_PREVIEWPP  -> VP8_SET_POSTPROC
+
+
+VP8E_SET_FRAMETYPE
+------------------
+This control was removed in favor of the `flags` parameter to
+`vpx_codec_encode()`. Existing code such as:
+
+~~~
+    vpx_codec_control(&encoder, VP8E_SET_FRAMETYPE, KEY_FRAME);
+    ...
+    vpx_codec_encode(&encoder, img, pts, 1, 0, 0);
+~~~
+
+becomes:
+
+~~~
+    vpx_codec_encode(&encoder, img, pts, 1, VPX_EFLAG_FORCE_KF,
+    VPX_DL_REALTIME);
+~~~
+
+
+
+VP8E_SET_FLUSHFLAG
+------------------
+Flush is handled by passing `NULL` to the `img` parameter of
+`vpx_codec_encode()`. You must do this at least once, regardless of your encoder
+configuration. i.e. it's not specific to g_lag_in_frames. This control was
+removed.
+
+~~~
+    while(...) {
+       ...
+       vpx_codec_encode(&encoder, img, pts, 1, 0, 0);
+       while( (pkt = vpx_codec_get_cx_data(&encoder, &iter)) ) {
+          ...
+       }
+    }
+    vpx_codec_control(&encoder, VP8E_SET_FLUSHFLAG, 1);
+    while( (pkt = vpx_codec_get_cx_data(&encoder, &iter)) ) {
+       ...
+    }
+    vpx_codec_encode(&encoder, img, pts, 1, 0, 0);
+~~~
+
+becomes
+
+~~~
+    while(new_image && ...) {
+       ...
+       vpx_codec_encode(&encoder, new_image?img:NULL, pts, 1, 0, 0);
+       while( (pkt = vpx_codec_get_cx_data(&encoder, &iter)) ) {
+          ...
+       }
+    }
+~~~
+
+
+
+VP8E_SET_ENCODING_MODE
+----------------------
+This control was removed in favor of the `deadline` parameter to
+`vpx_codec_encode()`. There are three macros that can be used to get the
+equivalent behavior: VPX_DL_REALTIME, VPX_DL_GOOD_QUALITY,
+VPX_DL_BEST_QUALITY. Existing code such as:
+
+~~~
+    vpx_codec_control(&encoder, VP8E_SET_ENCODING_MODE, VP8_REAL_TIME_ENCODING);
+    ...
+    vpx_codec_encode(&encoder, img, pts, 1, 0, 0);
+~~~
+
+becomes:
+
+~~~
+    vpx_codec_encode(&encoder, img, pts, 1, 0, VPX_DL_REALTIME);
+~~~
+
+
+VP8E_UPD_ENTROPY
+------------------
+This control was deprecated in favor of the `flags` parameter to
+`vpx_codec_encode()`. Existing code such as:
+
+~~~
+    vpx_codec_control(&encoder, VP8E_UPD_ENTROPY, 0);
+~~~
+
+becomes:
+
+~~~
+    vpx_codec_encode(&encoder, img, pts, 1, VP8_EFLAG_NO_UPD_ENTROPY,
+                     VPX_DL_REALTIME);
+~~~
+
+
+VP8E_UPD_REFERENCE
+------------------
+This control was deprecated in favor of the `flags` parameter to
+`vpx_codec_encode()`. A set bit on the VP8E_UPD_REFERENCE bitfield is
+analogous to setting the VP8_EFLAG_FORCE_* flag. A cleared bit is analogous
+to setting the VP8_EFLAG_NO_UPD_* flag. If neither the FORCE or NO_UPD bit
+is set, the encoder will make its decision automatically, as usual. Setting
+both bits will result in an error being returned. Existing code such as:
+
+~~~
+    vpx_codec_control(&encoder, VP8E_UPD_REFERENCE,
+                      VP8_LAST_FRAME | VP8_GOLD_FRAME);
+    vpx_codec_control(&encoder, VP8E_UPD_REFERENCE, 0);
+    ...
+    vpx_codec_encode(&encoder, img, pts, 1, 0, VPX_DL_REALTIME);
+~~~
+
+becomes:
+
+~~~
+    vpx_codec_encode(&encoder, img, pts, 1, VP8_EFLAG_FORCE_GF,
+                     VPX_DL_REALTIME);
+    vpx_codec_encode(&encoder, img, pts, 1, VP8_EFLAG_NO_UPD_LAST
+                     | VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF,
+                     VPX_DL_REALTIME);
+~~~
+
+
+VP8E_USE_REFERENCE
+------------------
+This control was deprecated in favor of the `flags` parameter to
+`vpx_codec_encode()`. A cleared bit on the VP8E_USE_REFERENCE bitfield is
+analogous to setting the VP8_EFLAG_NO_REF* flag. A set bit indicates that
+the encoder will make its decision automatically, as usual.
+Existing code such as:
+
+~~~
+    vpx_codec_control(&encoder, VP8E_USE_REFERENCE,
+                      VP8_ALTR_FRAME | VP8_GOLD_FRAME);
+    ...
+    vpx_codec_encode(&encoder, img, pts, 1, 0, VPX_DL_REALTIME);
+~~~
+
+becomes
+
+~~~
+    vpx_codec_encode(&encoder, img, pts, 1, VP8_EFLAG_NO_REF_LAST,
+                     VPX_DL_REALTIME);
+~~~

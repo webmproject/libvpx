@@ -1,0 +1,105 @@
+/*
+ *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license and patent
+ *  grant that can be found in the LICENSE file in the root of the source
+ *  tree. All contributing project authors may be found in the AUTHORS
+ *  file in the root of the source tree.
+ */
+
+
+#ifndef VARIANCE_ARM_H
+#define VARIANCE_ARM_H
+
+#if HAVE_ARMV7
+extern prototype_sad(vp8_sad4x4_neon);
+extern prototype_sad(vp8_sad8x8_neon);
+extern prototype_sad(vp8_sad8x16_neon);
+extern prototype_sad(vp8_sad16x8_neon);
+extern prototype_sad(vp8_sad16x16_neon);
+
+//extern prototype_variance(vp8_variance4x4_c);
+extern prototype_variance(vp8_variance8x8_neon);
+extern prototype_variance(vp8_variance8x16_neon);
+extern prototype_variance(vp8_variance16x8_neon);
+extern prototype_variance(vp8_variance16x16_neon);
+
+//extern prototype_subpixvariance(vp8_sub_pixel_variance4x4_c);
+extern prototype_subpixvariance(vp8_sub_pixel_variance8x8_neon);
+//extern prototype_subpixvariance(vp8_sub_pixel_variance8x16_c);
+//extern prototype_subpixvariance(vp8_sub_pixel_variance16x8_c);
+extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon);
+
+//extern prototype_getmbss(vp8_get_mb_ss_c);
+extern prototype_variance(vp8_mse16x16_neon);
+extern prototype_sad(vp8_get16x16pred_error_neon);
+//extern prototype_variance2(vp8_get8x8var_c);
+//extern prototype_variance2(vp8_get16x16var_c);
+extern prototype_sad(vp8_get4x4sse_cs_neon);
+
+#undef  vp8_variance_sad4x4
+#define vp8_variance_sad4x4 vp8_sad4x4_neon
+
+#undef  vp8_variance_sad8x8
+#define vp8_variance_sad8x8 vp8_sad8x8_neon
+
+#undef  vp8_variance_sad8x16
+#define vp8_variance_sad8x16 vp8_sad8x16_neon
+
+#undef  vp8_variance_sad16x8
+#define vp8_variance_sad16x8 vp8_sad16x8_neon
+
+#undef  vp8_variance_sad16x16
+#define vp8_variance_sad16x16 vp8_sad16x16_neon
+
+//#undef  vp8_variance_var4x4
+//#define vp8_variance_var4x4 vp8_variance4x4_c
+
+#undef  vp8_variance_var8x8
+#define vp8_variance_var8x8 vp8_variance8x8_neon
+
+#undef  vp8_variance_var8x16
+#define vp8_variance_var8x16 vp8_variance8x16_neon
+
+#undef  vp8_variance_var16x8
+#define vp8_variance_var16x8 vp8_variance16x8_neon
+
+#undef  vp8_variance_var16x16
+#define vp8_variance_var16x16 vp8_variance16x16_neon
+
+//#undef  vp8_variance_subpixvar4x4
+//#define vp8_variance_subpixvar4x4 vp8_sub_pixel_variance4x4_c
+
+#undef  vp8_variance_subpixvar8x8
+#define vp8_variance_subpixvar8x8 vp8_sub_pixel_variance8x8_neon
+
+//#undef  vp8_variance_subpixvar8x16
+//#define vp8_variance_subpixvar8x16 vp8_sub_pixel_variance8x16_c
+
+//#undef  vp8_variance_subpixvar16x8
+//#define vp8_variance_subpixvar16x8 vp8_sub_pixel_variance16x8_c
+
+#undef  vp8_variance_subpixvar16x16
+#define vp8_variance_subpixvar16x16 vp8_sub_pixel_variance16x16_neon
+
+//#undef  vp8_variance_getmbss
+//#define vp8_variance_getmbss vp8_get_mb_ss_c
+
+#undef  vp8_variance_mse16x16
+#define vp8_variance_mse16x16 vp8_mse16x16_neon
+
+#undef  vp8_variance_get16x16prederror
+#define vp8_variance_get16x16prederror vp8_get16x16pred_error_neon
+
+//#undef  vp8_variance_get8x8var
+//#define vp8_variance_get8x8var vp8_get8x8var_c
+
+//#undef  vp8_variance_get16x16var
+//#define vp8_variance_get16x16var vp8_get16x16var_c
+
+#undef  vp8_variance_get4x4sse_cs
+#define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_neon
+
+#endif
+
+#endif

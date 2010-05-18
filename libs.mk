@@ -1,0 +1,225 @@
+##
+##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+##
+##  Use of this source code is governed by a BSD-style license and patent
+##  grant that can be found in the LICENSE file in the root of the source
+##  tree. All contributing project authors may be found in the AUTHORS
+##  file in the root of the source tree.
+##
+
+
+ASM:=$(if $(filter yes,$(CONFIG_GCC)),.asm.s,.asm)
+
+include $(SRC_PATH_BARE)/vpx_codec/vpx_codec.mk
+CODEC_SRCS-yes += $(addprefix vpx_codec/,$(call enabled,API_SRCS))
+
+include $(SRC_PATH_BARE)/vpx_mem/vpx_mem.mk
+CODEC_SRCS-yes += $(addprefix vpx_mem/,$(call enabled,MEM_SRCS))
+
+include $(SRC_PATH_BARE)/vpx_scale/vpx_scale.mk
+CODEC_SRCS-yes += $(addprefix vpx_scale/,$(call enabled,SCALE_SRCS))
+
+# Add vpx_codec/ to the include path to allow vp_n[cd]x.h to reference
+# vpx_codec_impl_*.h without extra ifdeffery
+CFLAGS += -I$(SRC_PATH_BARE)/vpx_codec
+
+ifeq ($(CONFIG_VP8_ENCODER),yes)
+  VP8_PREFIX=vp8/
+  include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx.mk
+  CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
+  CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
+  CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk
+  INSTALL_MAPS += include/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
+  CODEC_DOC_SRCS += vp8/vp8.h vp8/vp8cx.h
+  CODEC_DOC_SECTIONS += vp8 vp8_encoder
+endif
+
+ifeq ($(CONFIG_VP8_DECODER),yes)
+  VP8_PREFIX=vp8/
+  include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx.mk
+  CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
+  CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
+  CODEC_SRCS-yes += $(VP8_PREFIX)vp8dx.mk
+  INSTALL_MAPS += include/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
+  CODEC_DOC_SRCS += vp8/vp8.h vp8/vp8dx.h
+  CODEC_DOC_SECTIONS += vp8 vp8_decoder
+endif
+
+
+ifeq ($(CONFIG_ENCODERS),yes)
+  CODEC_DOC_SECTIONS += encoder
+endif
+ifeq ($(CONFIG_DECODERS),yes)
+  CODEC_DOC_SECTIONS += decoder
+endif
+
+
+ifeq ($(CONFIG_MSVS),yes)
+CODEC_LIB=$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd)
+# This variable uses deferred expansion intentionally, since the results of
+# $(wildcard) may change during the course of the Make.
+VS_PLATFORMS = $(foreach d,$(wildcard */Release/$(CODEC_LIB).lib),$(word 1,$(subst /, ,$(d))))
+CODEC_SRCS-yes += $(SRC_PATH_BARE)/libs.mk # to show up in the msvs workspace
+endif
+
+# The following pairs define a mapping of locations in the distribution
+# tree to locations in the source/build trees.
+INSTALL_MAPS += include/% $(SRC_PATH_BARE)/vpx_codec/%
+INSTALL_MAPS += include/% $(SRC_PATH_BARE)/vpx_ports/%
+INSTALL_MAPS += lib/%     %
+INSTALL_MAPS += src/%     $(SRC_PATH_BARE)/%
+ifeq ($(CONFIG_MSVS),yes)
+INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),lib/$(p)/%  $(p)/Release/%)
+INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),lib/$(p)/%  $(p)/Debug/%)
+endif
+
+# If this is a universal (fat) binary, then all the subarchitectures have
+# already been built and our job is to stitch them together. The
+# BUILD_LIBVPX variable indicates whether we should be building
+# (compiling, linking) the library. The LIPO_LIBVPX variable indicates
+# that we're stitching.
+$(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
+
+CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_integer.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_timer.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem.h
+CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
+INSTALL-SRCS-no += $(BUILD_PFX)vpx_config.c
+ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emms.asm
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
+endif
+CODEC_SRCS-$(ARCH_ARM) += $(BUILD_PFX)vpx_config.asm
+CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx_codec/exports
+
+INSTALL-LIBS-yes += include/vpx_codec.h
+INSTALL-LIBS-yes += include/vpx_image.h
+INSTALL-LIBS-yes += include/vpx_integer.h
+INSTALL-LIBS-yes += include/vpx_codec_impl_top.h
+INSTALL-LIBS-yes += include/vpx_codec_impl_bottom.h
+INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx_decoder.h
+INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx_decoder_compat.h
+INSTALL-LIBS-$(CONFIG_ENCODERS) += include/vpx_encoder.h
+ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
+ifeq ($(CONFIG_MSVS),yes)
+INSTALL-LIBS-yes                  += $(foreach p,$(VS_PLATFORMS),lib/$(p)/$(CODEC_LIB).lib)
+INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(foreach p,$(VS_PLATFORMS),lib/$(p)/$(CODEC_LIB)d.lib)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),lib/$(p)/vpx.dll)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),lib/$(p)/vpx.exp)
+endif
+else
+INSTALL-LIBS-yes += lib/libvpx.a
+INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += lib/libvpx_g.a
+endif
+
+CODEC_SRCS=$(call enabled,CODEC_SRCS)
+INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(CODEC_SRCS)
+INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
+
+ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
+ifeq ($(CONFIG_MSVS),yes)
+
+ifeq ($(ARCH_ARM),yes)
+ifeq ($(HAVE_ARMV5TE),yes)
+ARM_ARCH=v5
+endif
+ifeq ($(HAVE_ARMV6),yes)
+ARM_ARCH=v6
+endif
+obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
+	@cp $(SRC_PATH_BARE)/build/arm-wince-vs8/obj_int_extract.bat .
+	@cp $(SRC_PATH_BARE)/build/arm-wince-vs8/armasm$(ARM_ARCH).rules .
+	@echo "    [CREATE] $@"
+	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
+			--exe\
+			--target=$(TOOLCHAIN)\
+            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --name=obj_int_extract\
+            --proj-guid=E1360C65-D375-4335-8057-7ED99CC3F9B2\
+            --out=$@ $^\
+            -I".&quot;;&quot;$(SRC_PATH_BARE)"
+
+PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
+PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
+PROJECTS-$(BUILD_LIBVPX) += armasm$(ARM_ARCH).rules
+endif
+
+vpx.def: $(call enabled,CODEC_EXPORTS)
+	@echo "    [CREATE] $@"
+	$(SRC_PATH_BARE)/build/make/gen_msvs_def.sh\
+            --name=vpx\
+            --out=$@ $^
+CLEAN-OBJS += vpx.def
+
+vpx.vcproj: $(CODEC_SRCS) vpx.def
+	@echo "    [CREATE] $@"
+	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
+			--lib\
+			--target=$(TOOLCHAIN)\
+            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --name=vpx\
+            --proj-guid=DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74\
+            --module-def=vpx.def\
+            --ver=$(CONFIG_VS_VERSION)\
+            --out=$@ $(CFLAGS) $^\
+
+PROJECTS-$(BUILD_LIBVPX) += vpx.vcproj
+
+vpx.vcproj: vpx_config.asm
+
+endif
+else
+LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
+OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
+LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
+$(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
+endif
+
+LIBS-$(LIPO_LIBVPX) += libvpx.a
+$(eval $(if $(LIPO_LIBVPX),$(call lipo_lib_template,libvpx.a)))
+
+#
+# Rule to make assembler configuration file from C configuration file
+#
+ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
+# YASM
+$(BUILD_PFX)vpx_config.asm: $(BUILD_PFX)vpx_config.h
+	@echo "    [CREATE] $@"
+	@egrep "#define [A-Z0-9_]+ [01]" $< \
+	    | awk '{print $$2 " equ " $$3}' > $@
+else
+ADS2GAS=$(if $(filter yes,$(CONFIG_GCC)),| $(ASM_CONVERSION))
+$(BUILD_PFX)vpx_config.asm: $(BUILD_PFX)vpx_config.h
+	@echo "    [CREATE] $@"
+	@egrep "#define [A-Z0-9_]+ [01]" $< \
+	    | awk '{print $$2 " EQU " $$3}' $(ADS2GAS) > $@
+	@echo "        END" $(ADS2GAS) >> $@
+CLEAN-OBJS += $(BUILD_PFX)vpx_config.asm
+endif
+
+#
+# Add assembler dependencies for configuration and offsets
+#
+#$(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm $(BUILD_PFX)vpx_asm_offsets.asm
+$(filter %.s.o,$(OBJS-yes)):   $(BUILD_PFX)vpx_config.asm
+$(filter %.asm.o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
+
+$(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
+CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
+
+CODEC_DOC_SRCS += vpx_codec/vpx_codec.h \
+                  vpx_codec/vpx_decoder.h \
+                  vpx_codec/vpx_encoder.h \
+                  vpx_codec/vpx_image.h
+
+CLEAN-OBJS += libs.doxy
+DOCS-yes += libs.doxy
+libs.doxy: $(CODEC_DOC_SRCS)
+	@echo "    [CREATE] $@"
+	@rm -f $@
+	@echo "INPUT += $^" >> $@
+	@echo "PREDEFINED = VPX_CODEC_DISABLE_COMPAT" >> $@
+	@echo "INCLUDE_PATH += ." >> $@;
+	@echo "ENABLED_SECTIONS += $(sort $(CODEC_DOC_SECTIONS))" >> $@
