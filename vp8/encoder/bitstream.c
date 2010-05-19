@@ -1385,8 +1385,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     // every keyframe send startcode, width, height, scale factor, clamp and color type
     if (oh.type == KEY_FRAME)
     {
-        int w, h, hs, vs;
-
         // Start / synch code
         cx_data[0] = 0x9D;
         cx_data[1] = 0x01;

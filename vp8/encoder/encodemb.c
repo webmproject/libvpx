@@ -718,7 +718,6 @@ void vp8_optimize_y2b(MACROBLOCK *x, int i, int type, ENTROPY_CONTEXT *a, ENTROP
 
 void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
-    int cost = 0;
     int b;
     TEMP_CONTEXT t, t2;
     int type = 0;
@@ -957,7 +956,6 @@ static void vp8_find_mb_skip_coef(MACROBLOCK *x)
 
 void vp8_optimize_mb_slow(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
-    int cost = 0;
     int b;
     TEMP_CONTEXT t, t2;
     int type = 0;
@@ -994,7 +992,6 @@ void vp8_optimize_mb_slow(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
 void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
-    int cost = 0;
     int b;
     TEMP_CONTEXT t;
     int type = 0;
@@ -1019,10 +1016,8 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
 void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
-    int cost = 0;
     int b;
     TEMP_CONTEXT t, t2;
-    int type = 0;
 
     if (!x->e_mbd.above_context[UCONTEXT])
         return;

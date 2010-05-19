@@ -281,7 +281,6 @@ static void segmentation_test_function(VP8_PTR ptr)
 
     unsigned char *seg_map;
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
-    int i, j;
 
     // Create a temporary map for segmentation data.
     CHECK_MEM_ERROR(seg_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
@@ -5402,7 +5401,7 @@ int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, co
     {
         for (j = 0; j < source->y_width; j += 16)
         {
-            unsigned int sse, sse2, sum2;
+            unsigned int sse;
             VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
 
             if (sse < 8096)

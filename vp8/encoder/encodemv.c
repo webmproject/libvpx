@@ -282,8 +282,6 @@ static void write_component_probs(
 
     //j=0
     {
-        int j = 0;
-
         const int c = events [mv_max];
 
         is_short_ct [0] += c;     // Short vector

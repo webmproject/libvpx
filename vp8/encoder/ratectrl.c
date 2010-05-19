@@ -1063,7 +1063,6 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
 
         if (cpi->common.refresh_golden_frame == TRUE)
         {
-            int isize_adjustment = 0;
 #if 0
 
             if (0)   // p_gw

@@ -175,7 +175,6 @@ static double calculate_modified_err(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 double vp8_simple_weight(YV12_BUFFER_CONFIG *source)
 {
     int i, j;
-    int Total = 0;
 
     unsigned char *src = source->y_buffer;
     unsigned char value;
@@ -779,7 +778,6 @@ void vp8_first_pass(VP8_COMP *cpi)
     vp8_clear_system_state();  //__asm emms;
     {
         double weight = 0.0;
-        double weigth2 = 0.0;
 
         FIRSTPASS_STATS fps;
 
@@ -1193,7 +1191,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     FIRSTPASS_STATS next_frame;
     FIRSTPASS_STATS *start_pos;
     int i;
-    int count = 0;
     int image_size = cpi->common.last_frame.y_width  * cpi->common.last_frame.y_height;
     double boost_score = 0.0;
     double old_boost_score = 0.0;
