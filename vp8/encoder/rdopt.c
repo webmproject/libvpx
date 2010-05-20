@@ -265,7 +265,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
             if (oq_factor > (1.0 + ((double)cpi->zbin_over_quant / 64.0)))
                 oq_factor = (1.0 + (double)cpi->zbin_over_quant / 64.0);
 
-            cpi->RDMULT *= (int)oq_factor;
+            cpi->RDMULT = (int)(oq_factor * cpi->RDMULT);
         }
     }
 

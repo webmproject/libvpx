@@ -1170,7 +1170,8 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var)
         while (Z > 0)
         {
             Z --;
-            projected_size_based_on_q *= (int)Factor;
+            projected_size_based_on_q =
+                (int)(Factor * projected_size_based_on_q);
             Factor += factor_adjustment;
 
             if (Factor  >= 0.999)
@@ -1361,7 +1362,9 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
                 if (cpi->zbin_over_quant > zbin_oqmax)
                     cpi->zbin_over_quant = zbin_oqmax;
 
-                bits_per_mb_at_this_q *= (int)Factor;                   // Each over-ruin step is assumed to equate to approximately 3% reduction in bitrate
+                // Each over-run step is assumed to equate to approximately
+                // 3% reduction in bitrate
+                bits_per_mb_at_this_q = (int)(Factor * bits_per_mb_at_this_q);
                 Factor += factor_adjustment;
 
                 if (Factor  >= 0.999)
