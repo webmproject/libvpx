@@ -11,9 +11,7 @@
 #ifndef __VPXTYPES_H__
 #define __VPXTYPES_H__
 
-#ifdef   HAVE_CONFIG_H
-#include HAVE_CONFIG_H
-#endif
+#include "vpx_ports/config.h"
 
 //#include <sys/types.h>
 #ifdef _MSC_VER

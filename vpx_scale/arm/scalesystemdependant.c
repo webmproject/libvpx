@@ -8,11 +8,9 @@
  */
 
 
+#include "vpx_ports/config.h"
 #include "vpx_scale/vpxscale.h"
 
-#ifdef HAVE_CONFIG_H
-#include "vpx_config.h"
-#endif
 
 void (*vp8_yv12_extend_frame_borders_ptr)(YV12_BUFFER_CONFIG *ybf);
 extern void vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf);

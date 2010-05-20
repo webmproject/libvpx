@@ -17,10 +17,8 @@
 #include <string.h>
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx_decoder.h"
-#if CONFIG_VP8_DECODER && !defined(interface)
 #include "vp8dx.h"
 #define interface (&vpx_codec_vp8_dx_algo)
-#endif
 @EXTRA_INCLUDES
 
 

@@ -41,14 +41,7 @@ extern "C" {
 
 #ifndef VPX_CODEC_H
 #define VPX_CODEC_H
-#ifdef HAVE_CONFIG_H
-#  include "vpx_config.h"
-#endif
-#if defined(HAVE_VPX_PORTS) && HAVE_VPX_PORTS
-#  include "vpx_ports/vpx_integer.h"
-#else
-#  include "vpx_integer.h"
-#endif
+#include "vpx_integer.h"
 #include "vpx_image.h"
 
     /*!\brief Decorator indicating a function is deprecated */

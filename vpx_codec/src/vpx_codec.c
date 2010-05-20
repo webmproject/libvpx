@@ -14,6 +14,7 @@
  */
 #include <stdlib.h>
 #include <string.h>
+#include "vpx_ports/vpx_integer.h"
 #include "vpx_codec/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 

@@ -6,14 +6,4 @@
  *  tree. All contributing project authors may be found in the AUTHORS
  *  file in the root of the source tree.
  */
-
-
-/* This file uses some preprocessor magic to expand the value of HAVE_CONFIG_H,
- * as defined by the build system, so that different projects can use the file
- * name for config.h that suits them.
- */
-#define QUOTE_(x) #x
-#define QUOTE(x) QUOTE_(x)
-#include QUOTE(HAVE_CONFIG_H)
-#undef QUOTE
-#undef QUOTE_
+#include "vpx_config.h"

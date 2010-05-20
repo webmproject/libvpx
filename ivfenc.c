@@ -11,7 +11,11 @@
 /* This is a simple program that encodes YV12 files and generates ivf
  * files using the new interface.
  */
-#define USE_POSIX_MMAP HAVE_SYS_MMAN_H
+#if defined(_MSC_VER)
+#define USE_POSIX_MMAP 0
+#else
+#define USE_POSIX_MMAP 1
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,9 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
-#if CONFIG_VP8_ENCODER
 #include "vp8cx.h"
-#endif
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
 

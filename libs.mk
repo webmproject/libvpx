@@ -20,8 +20,10 @@ include $(SRC_PATH_BARE)/vpx_scale/vpx_scale.mk
 CODEC_SRCS-yes += $(addprefix vpx_scale/,$(call enabled,SCALE_SRCS))
 
 # Add vpx_codec/ to the include path to allow vp_n[cd]x.h to reference
-# vpx_codec_impl_*.h without extra ifdeffery
+# vpx_codec_impl_*.h without extra ifdeffery. vpx_ports to pick up
+# vpx_integer.h
 CFLAGS += -I$(SRC_PATH_BARE)/vpx_codec
+CFLAGS += -I$(SRC_PATH_BARE)/vpx_ports
 
 ifeq ($(CONFIG_VP8_ENCODER),yes)
   VP8_PREFIX=vp8/

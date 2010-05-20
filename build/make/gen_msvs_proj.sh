@@ -385,7 +385,7 @@ generate_vcproj() {
                              ExecutionBucket="7" \
                              Optimization="0" \
                              AdditionalIncludeDirectories="$incs" \
-                             PreprocessorDefinitions="_DEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;DEBUG;_LIB;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;HAVE_CONFIG_H" \
+                             PreprocessorDefinitions="_DEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;DEBUG;_LIB;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;" \
                              MinimalRebuild="true" \
                              RuntimeLibrary="1" \
                              BufferSecurityCheck="false" \
@@ -404,7 +404,7 @@ generate_vcproj() {
                              ExecutionBucket="7" \
                              Optimization="0" \
                              AdditionalIncludeDirectories="$incs" \
-                             PreprocessorDefinitions="_DEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;DEBUG;_CONSOLE;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;HAVE_CONFIG_H" \
+                             PreprocessorDefinitions="_DEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;DEBUG;_CONSOLE;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;" \
                              MinimalRebuild="true" \
                              RuntimeLibrary="1" \
                              BufferSecurityCheck="false" \
@@ -544,7 +544,7 @@ generate_vcproj() {
                                              Optimization="2" \
                                              FavorSizeOrSpeed="1" \
                                              AdditionalIncludeDirectories="$incs" \
-                                             PreprocessorDefinitions="NDEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;_LIB;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;HAVE_CONFIG_H" \
+                                             PreprocessorDefinitions="NDEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;_LIB;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;" \
                                              RuntimeLibrary="0" \
                                              BufferSecurityCheck="false" \
                                              UsePrecompiledHeader="0" \
@@ -563,7 +563,7 @@ generate_vcproj() {
                              Optimization="2" \
                              FavorSizeOrSpeed="1" \
                              AdditionalIncludeDirectories="$incs" \
-                             PreprocessorDefinitions="NDEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;_CONSOLE;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;HAVE_CONFIG_H" \
+                             PreprocessorDefinitions="NDEBUG;_WIN32_WCE=\$(CEVER);UNDER_CE;\$(PLATFORMDEFINES);WINCE;_CONSOLE;\$(ARCHFAM);\$(_ARCHFAM_);_UNICODE;UNICODE;" \
                              RuntimeLibrary="0" \
                              BufferSecurityCheck="false" \
                              UsePrecompiledHeader="0" \

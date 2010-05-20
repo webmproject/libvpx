@@ -8,6 +8,7 @@
  */
 
 
+#include "vpx_ports/config.h"
 #include "blockd.h"
 #include "vpx_mem/vpx_mem.h"
 #include "onyxc_int.h"
@@ -16,9 +17,6 @@
 #include "systemdependent.h"
 #include "vpxerrors.h"
 
-#ifdef HAVE_CONFIG_H
-#include "vpx_config.h"
-#endif
 
 extern  void vp8_init_scan_order_mask();
 

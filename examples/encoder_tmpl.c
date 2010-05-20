@@ -17,11 +17,9 @@
 #include <string.h>
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx_encoder.h"
-#if CONFIG_VP8_ENCODER && !defined(interface)
 #include "vp8cx.h"
 #define interface (&vpx_codec_vp8_cx_algo)
 #define fourcc    0x30385056
-#endif
 @EXTRA_INCLUDES
 
 #define IVF_FILE_HDR_SZ  (32)

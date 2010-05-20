@@ -348,7 +348,6 @@ true
 }
 
 write_common_target_config_mk() {
-    [ -n "$2" ] && local have_config_h="-DHAVE_CONFIG_H=\"${2##*/}\""
     local CC=${CC}
     enabled ccache && CC="ccache ${CC}"
 
@@ -367,7 +366,7 @@ AS=${AS}
 STRIP=${STRIP}
 NM=${NM}
 
-CFLAGS  = ${CFLAGS} ${have_config_h}
+CFLAGS  = ${CFLAGS}
 ARFLAGS = -rus\$(if \$(quiet),c,v)
 LDFLAGS = ${LDFLAGS}
 ASFLAGS = ${ASFLAGS}
