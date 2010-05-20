@@ -196,7 +196,7 @@ extern "C" {
      * may reference the 'name' member to get a printable description of the
      * algorithm.
      */
-    typedef struct
+    typedef struct vpx_codec_ctx
     {
         const char              *name;        /**< Printable interface name */
         vpx_codec_iface_t       *iface;       /**< Interface pointers */

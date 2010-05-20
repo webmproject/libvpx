@@ -314,7 +314,7 @@ struct vpx_codec_iface
 };
 
 /*!\brief Callback function pointer / user data pair storage */
-typedef struct
+typedef struct vpx_codec_priv_cb_pair
 {
     union
     {

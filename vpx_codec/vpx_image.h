@@ -60,7 +60,7 @@ extern "C" {
 
 
     /**\brief Image Descriptor */
-    typedef struct
+    typedef struct vpx_image
     {
         img_fmt_t     fmt; /**< Image Format */
 

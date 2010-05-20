@@ -68,7 +68,7 @@ extern "C" {
      * stream. Algorithms may extend this structure with data specific
      * to their bitstream by setting the sz member appropriately.
      */
-    typedef struct
+    typedef struct vpx_codec_stream_info
     {
         unsigned int sz;     /**< Size of this structure */
         unsigned int w;      /**< Width (or 0 for unknown/default) */
