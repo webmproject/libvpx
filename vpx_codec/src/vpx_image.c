@@ -13,7 +13,7 @@
 #include "vpx_codec/vpx_image.h"
 
 static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
-                                     img_fmt_t     fmt,
+                                     vpx_img_fmt_t fmt,
                                      unsigned int  d_w,
                                      unsigned int  d_h,
                                      unsigned int  stride_align,
@@ -34,29 +34,29 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     /* Get sample size for this format */
     switch (fmt)
     {
-    case IMG_FMT_RGB32:
-    case IMG_FMT_RGB32_LE:
-    case IMG_FMT_ARGB:
-    case IMG_FMT_ARGB_LE:
+    case VPX_IMG_FMT_RGB32:
+    case VPX_IMG_FMT_RGB32_LE:
+    case VPX_IMG_FMT_ARGB:
+    case VPX_IMG_FMT_ARGB_LE:
         bps = 32;
         break;
-    case IMG_FMT_RGB24:
-    case IMG_FMT_BGR24:
+    case VPX_IMG_FMT_RGB24:
+    case VPX_IMG_FMT_BGR24:
         bps = 24;
         break;
-    case IMG_FMT_RGB565:
-    case IMG_FMT_RGB565_LE:
-    case IMG_FMT_RGB555:
-    case IMG_FMT_RGB555_LE:
-    case IMG_FMT_UYVY:
-    case IMG_FMT_YUY2:
-    case IMG_FMT_YVYU:
+    case VPX_IMG_FMT_RGB565:
+    case VPX_IMG_FMT_RGB565_LE:
+    case VPX_IMG_FMT_RGB555:
+    case VPX_IMG_FMT_RGB555_LE:
+    case VPX_IMG_FMT_UYVY:
+    case VPX_IMG_FMT_YUY2:
+    case VPX_IMG_FMT_YVYU:
         bps = 16;
         break;
-    case IMG_FMT_I420:
-    case IMG_FMT_YV12:
-    case IMG_FMT_VPXI420:
-    case IMG_FMT_VPXYV12:
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_YV12:
+    case VPX_IMG_FMT_VPXI420:
+    case VPX_IMG_FMT_VPXYV12:
         bps = 12;
         break;
     default:
@@ -67,10 +67,10 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     /* Get chroma shift values for this format */
     switch (fmt)
     {
-    case IMG_FMT_I420:
-    case IMG_FMT_YV12:
-    case IMG_FMT_VPXI420:
-    case IMG_FMT_VPXYV12:
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_YV12:
+    case VPX_IMG_FMT_VPXI420:
+    case VPX_IMG_FMT_VPXYV12:
         xcs = 1;
         break;
     default:
@@ -80,10 +80,10 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
 
     switch (fmt)
     {
-    case IMG_FMT_I420:
-    case IMG_FMT_YV12:
-    case IMG_FMT_VPXI420:
-    case IMG_FMT_VPXYV12:
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_YV12:
+    case VPX_IMG_FMT_VPXI420:
+    case VPX_IMG_FMT_VPXYV12:
         ycs = 1;
         break;
     default:
@@ -96,7 +96,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     w = (d_w + align) & ~align;
     align = (1 << ycs) - 1;
     h = (d_h + align) & ~align;
-    s = (fmt & IMG_FMT_PLANAR) ? w : bps * w / 8;
+    s = (fmt & VPX_IMG_FMT_PLANAR) ? w : bps * w / 8;
     s = (s + stride_align - 1) & ~(stride_align - 1);
 
     /* Allocate the new image */
@@ -118,7 +118,7 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
 
     if (!img_data)
     {
-        img->img_data = malloc((fmt & IMG_FMT_PLANAR) ? h * w * bps / 8 : h * s);
+        img->img_data = malloc((fmt & VPX_IMG_FMT_PLANAR) ? h * w * bps / 8 : h * s);
         img->img_data_owner = 1;
     }
 
@@ -146,7 +146,7 @@ fail:
 }
 
 vpx_image_t *vpx_img_alloc(vpx_image_t  *img,
-                           img_fmt_t     fmt,
+                           vpx_img_fmt_t fmt,
                            unsigned int  d_w,
                            unsigned int  d_h,
                            unsigned int  stride_align)
@@ -155,7 +155,7 @@ vpx_image_t *vpx_img_alloc(vpx_image_t  *img,
 }
 
 vpx_image_t *vpx_img_wrap(vpx_image_t  *img,
-                          img_fmt_t     fmt,
+                          vpx_img_fmt_t fmt,
                           unsigned int  d_w,
                           unsigned int  d_h,
                           unsigned int  stride_align,
@@ -178,7 +178,7 @@ int vpx_img_set_rect(vpx_image_t  *img,
         img->d_h = h;
 
         /* Calculate plane pointers */
-        if (!(img->fmt & IMG_FMT_PLANAR))
+        if (!(img->fmt & VPX_IMG_FMT_PLANAR))
         {
             img->planes[PLANE_PACKED] =
                 img->img_data + x * img->bps / 8 + y * img->stride[PLANE_PACKED];
@@ -187,7 +187,7 @@ int vpx_img_set_rect(vpx_image_t  *img,
         {
             data = img->img_data;
 
-            if (img->fmt & IMG_FMT_HAS_ALPHA)
+            if (img->fmt & VPX_IMG_FMT_HAS_ALPHA)
             {
                 img->planes[PLANE_ALPHA] =
                     data + x + y * img->stride[PLANE_ALPHA];
@@ -197,7 +197,7 @@ int vpx_img_set_rect(vpx_image_t  *img,
             img->planes[PLANE_Y] = data + x + y * img->stride[PLANE_Y];
             data += img->h * img->stride[PLANE_Y];
 
-            if (!(img->fmt & IMG_FMT_UV_FLIP))
+            if (!(img->fmt & VPX_IMG_FMT_UV_FLIP))
             {
                 img->planes[PLANE_U] = data
                                        + (x >> img->x_chroma_shift)

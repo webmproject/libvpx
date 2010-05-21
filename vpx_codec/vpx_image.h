@@ -30,39 +30,39 @@ extern "C" {
 #define VPX_IMAGE_ABI_VERSION (1) /**<\hideinitializer*/
 
 
-#define IMG_FMT_PLANAR     0x100  /**< Image is a planar format */
-#define IMG_FMT_UV_FLIP    0x200  /**< V plane precedes U plane in memory */
-#define IMG_FMT_HAS_ALPHA  0x400  /**< Image has an alpha channel componnent */
+#define VPX_IMG_FMT_PLANAR     0x100  /**< Image is a planar format */
+#define VPX_IMG_FMT_UV_FLIP    0x200  /**< V plane precedes U plane in memory */
+#define VPX_IMG_FMT_HAS_ALPHA  0x400  /**< Image has an alpha channel componnent */
 
 
     /*!\brief List of supported image formats */
-    typedef enum img_fmt {
-        IMG_FMT_NONE,
-        IMG_FMT_RGB24,   /**< 24 bit per pixel packed RGB */
-        IMG_FMT_RGB32,   /**< 32 bit per pixel packed 0RGB */
-        IMG_FMT_RGB565,  /**< 16 bit per pixel, 565 */
-        IMG_FMT_RGB555,  /**< 16 bit per pixel, 555 */
-        IMG_FMT_UYVY,    /**< UYVY packed YUV */
-        IMG_FMT_YUY2,    /**< YUYV packed YUV */
-        IMG_FMT_YVYU,    /**< YVYU packed YUV */
-        IMG_FMT_BGR24,   /**< 24 bit per pixel packed BGR */
-        IMG_FMT_RGB32_LE, /**< 32 bit packed BGR0 */
-        IMG_FMT_ARGB,     /**< 32 bit packed ARGB, alpha=255 */
-        IMG_FMT_ARGB_LE,  /**< 32 bit packed BGRA, alpha=255 */
-        IMG_FMT_RGB565_LE,  /**< 16 bit per pixel, gggbbbbb rrrrrggg */
-        IMG_FMT_RGB555_LE,  /**< 16 bit per pixel, gggbbbbb 0rrrrrgg */
-        IMG_FMT_YV12    = IMG_FMT_PLANAR | IMG_FMT_UV_FLIP | 1, /**< planar YVU */
-        IMG_FMT_I420    = IMG_FMT_PLANAR | 2,
-        IMG_FMT_VPXYV12 = IMG_FMT_PLANAR | IMG_FMT_UV_FLIP | 3, /** < planar 4:2:0 format with vpx color space */
-        IMG_FMT_VPXI420 = IMG_FMT_PLANAR | 4,  /** < planar 4:2:0 format with vpx color space */
+    typedef enum vpx_img_fmt {
+        VPX_IMG_FMT_NONE,
+        VPX_IMG_FMT_RGB24,   /**< 24 bit per pixel packed RGB */
+        VPX_IMG_FMT_RGB32,   /**< 32 bit per pixel packed 0RGB */
+        VPX_IMG_FMT_RGB565,  /**< 16 bit per pixel, 565 */
+        VPX_IMG_FMT_RGB555,  /**< 16 bit per pixel, 555 */
+        VPX_IMG_FMT_UYVY,    /**< UYVY packed YUV */
+        VPX_IMG_FMT_YUY2,    /**< YUYV packed YUV */
+        VPX_IMG_FMT_YVYU,    /**< YVYU packed YUV */
+        VPX_IMG_FMT_BGR24,   /**< 24 bit per pixel packed BGR */
+        VPX_IMG_FMT_RGB32_LE, /**< 32 bit packed BGR0 */
+        VPX_IMG_FMT_ARGB,     /**< 32 bit packed ARGB, alpha=255 */
+        VPX_IMG_FMT_ARGB_LE,  /**< 32 bit packed BGRA, alpha=255 */
+        VPX_IMG_FMT_RGB565_LE,  /**< 16 bit per pixel, gggbbbbb rrrrrggg */
+        VPX_IMG_FMT_RGB555_LE,  /**< 16 bit per pixel, gggbbbbb 0rrrrrgg */
+        VPX_IMG_FMT_YV12    = VPX_IMG_FMT_PLANAR | VPX_IMG_FMT_UV_FLIP | 1, /**< planar YVU */
+        VPX_IMG_FMT_I420    = VPX_IMG_FMT_PLANAR | 2,
+        VPX_IMG_FMT_VPXYV12 = VPX_IMG_FMT_PLANAR | VPX_IMG_FMT_UV_FLIP | 3, /** < planar 4:2:0 format with vpx color space */
+        VPX_IMG_FMT_VPXI420 = VPX_IMG_FMT_PLANAR | 4,  /** < planar 4:2:0 format with vpx color space */
     }
-    img_fmt_t; /**< alias for enum img_fmt */
+    vpx_img_fmt_t; /**< alias for enum vpx_img_fmt */
 
 
     /**\brief Image Descriptor */
     typedef struct vpx_image
     {
-        img_fmt_t     fmt; /**< Image Format */
+        vpx_img_fmt_t fmt; /**< Image Format */
 
         /* Image storage dimensions */
         unsigned int  w;   /**< Stored image width */
@@ -126,7 +126,7 @@ extern "C" {
      *         returned.
      */
     vpx_image_t *vpx_img_alloc(vpx_image_t  *img,
-                               img_fmt_t fmt,
+                               vpx_img_fmt_t fmt,
                                unsigned int d_w,
                                unsigned int d_h,
                                unsigned int align);
@@ -151,7 +151,7 @@ extern "C" {
      *         returned.
      */
     vpx_image_t *vpx_img_wrap(vpx_image_t  *img,
-                              img_fmt_t fmt,
+                              vpx_img_fmt_t fmt,
                               unsigned int d_w,
                               unsigned int d_h,
                               unsigned int align,

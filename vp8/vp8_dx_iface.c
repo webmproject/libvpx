@@ -434,7 +434,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             unsigned int a_w = (sd.y_width + 15) & ~15;
             unsigned int a_h = (sd.y_height + 15) & ~15;
 
-            vpx_img_wrap(&ctx->img, IMG_FMT_I420,
+            vpx_img_wrap(&ctx->img, VPX_IMG_FMT_I420,
                          a_w + 2 * VP8BORDERINPIXELS,
                          a_h + 2 * VP8BORDERINPIXELS,
                          1,
@@ -570,7 +570,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
     yv12->uv_stride = img->stride[PLANE_U];
 
     yv12->border  = (img->stride[PLANE_Y] - img->d_w) / 2;
-    yv12->clrtype = (img->fmt == IMG_FMT_VPXI420 || img->fmt == IMG_FMT_VPXYV12);
+    yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12);
 
     return res;
 }

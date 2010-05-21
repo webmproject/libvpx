@@ -211,10 +211,10 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
 {
     switch (img->fmt)
     {
-    case IMG_FMT_YV12:
-    case IMG_FMT_I420:
-    case IMG_FMT_VPXI420:
-    case IMG_FMT_VPXYV12:
+    case VPX_IMG_FMT_YV12:
+    case VPX_IMG_FMT_I420:
+    case VPX_IMG_FMT_VPXI420:
+    case VPX_IMG_FMT_VPXYV12:
         break;
     default:
         ERROR("Invalid image format. Only YV12 and I420 images are supported");
@@ -549,7 +549,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
     yv12->uv_stride = img->stride[PLANE_U];
 
     yv12->border  = (img->stride[PLANE_Y] - img->w) / 2;
-    yv12->clrtype = (img->fmt == IMG_FMT_VPXI420 || img->fmt == IMG_FMT_VPXYV12); //REG_YUV = 0
+    yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12); //REG_YUV = 0
     return res;
 }
 
@@ -846,7 +846,7 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx)
     {
 
         /*
-        vpx_img_wrap(&ctx->preview_img, IMG_FMT_YV12,
+        vpx_img_wrap(&ctx->preview_img, VPX_IMG_FMT_YV12,
             sd.y_width + 2*VP8BORDERINPIXELS,
             sd.y_height + 2*VP8BORDERINPIXELS,
             1,
@@ -862,9 +862,9 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx)
         ctx->preview_img.planes[PLANE_V] = sd.v_buffer;
 
         if (sd.clrtype == REG_YUV)
-            ctx->preview_img.fmt = IMG_FMT_I420;
+            ctx->preview_img.fmt = VPX_IMG_FMT_I420;
         else
-            ctx->preview_img.fmt = IMG_FMT_VPXI420;
+            ctx->preview_img.fmt = VPX_IMG_FMT_VPXI420;
 
         ctx->preview_img.x_chroma_shift = 1;
         ctx->preview_img.y_chroma_shift = 1;

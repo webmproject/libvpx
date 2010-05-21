@@ -247,10 +247,10 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int is_ivf)
         switch (plane)
         {
         case 1:
-            ptr = img->planes[img->fmt==IMG_FMT_YV12? PLANE_V : PLANE_U];
+            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? PLANE_V : PLANE_U];
             break;
         case 2:
-            ptr = img->planes[img->fmt==IMG_FMT_YV12?PLANE_U : PLANE_V];
+            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?PLANE_U : PLANE_V];
             break;
         default:
             ptr = img->planes[plane];
@@ -869,7 +869,7 @@ int main(int argc, const char **argv_)
         SHOW(kf_max_dist);
     }
 
-    vpx_img_alloc(&raw, arg_use_i420 ? IMG_FMT_I420 : IMG_FMT_YV12,
+    vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
                   cfg.g_w, cfg.g_h, 1);
 
     // This was added so that ivfenc will create monotically increasing
