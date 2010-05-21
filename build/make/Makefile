@@ -37,7 +37,7 @@ install:
 	@if [ -d "$(DIST_DIR)/src" ]; then \
             mkdir -p "$(DIST_DIR)/build"; \
             cd "$(DIST_DIR)/build"; \
-            if [ $(TGT_CC) = "rvct" ] ; then \
+            if [ "$(TGT_CC)" = "rvct" ] ; then \
 				echo "../src/configure --target=$(TOOLCHAIN) --libc=$(ALT_LIBC)"; \
 				../src/configure --target=$(TOOLCHAIN) --libc=$(ALT_LIBC); \
 			else \
