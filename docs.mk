@@ -47,8 +47,8 @@ docs/html/index.html: doxyfile $(CODEC_DOX) $(TXT_DOX)
 	@doxygen $<
 DOCS-yes += docs/html/index.html
 
-INSTALL-DOCS-yes = $(wildcard docs/html/*)
-INSTALL-DOCS-$(CONFIG_CODEC_SRCS) += $(addprefix src/,$(CODEC_DOX))
-INSTALL-DOCS-$(CONFIG_CODEC_SRCS) += src/libs.doxy_template
-INSTALL-DOCS-yes                  += CHANGELOG
-INSTALL-DOCS-yes                  += README
+DIST-DOCS-yes = $(wildcard docs/html/*)
+DIST-DOCS-$(CONFIG_CODEC_SRCS) += $(addprefix src/,$(CODEC_DOX))
+DIST-DOCS-$(CONFIG_CODEC_SRCS) += src/libs.doxy_template
+DIST-DOCS-yes                  += CHANGELOG
+DIST-DOCS-yes                  += README

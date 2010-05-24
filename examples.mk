@@ -23,9 +23,11 @@ ivfenc.SRCS                 += args.c args.h vpx_ports/config.h
 ivfenc.SRCS                 += vpx_ports/mem_ops.h vpx_ports/mem_ops_aligned.h
 ivfenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 ivfenc.DESCRIPTION           = Full featured encoder
-UTILS-$(CONFIG_DECODERS)    += example_xma.c
-example_xma.GUID             = A955FC4A-73F1-44F7-135E-30D84D32F022
-example_xma.DESCRIPTION      = External Memory Allocation mode usage
+
+# XMA example disabled for now, not used in VP8
+#UTILS-$(CONFIG_DECODERS)    += example_xma.c
+#example_xma.GUID             = A955FC4A-73F1-44F7-135E-30D84D32F022
+#example_xma.DESCRIPTION      = External Memory Allocation mode usage
 
 GEN_EXAMPLES-$(CONFIG_DECODERS) += simple_decoder.c
 simple_decoder.GUID              = D3BBF1E9-2427-450D-BBFF-B2843C1D44CC
@@ -99,6 +101,7 @@ LDFLAGS += $(addprefix -L,$(LIB_PATH))
 UTILS           = $(call enabled,UTILS)
 GEN_EXAMPLES    = $(call enabled,GEN_EXAMPLES)
 ALL_EXAMPLES    = $(UTILS) $(GEN_EXAMPLES)
+UTIL_SRCS       = $(foreach ex,$(UTILS),$($(ex:.c=).SRCS))
 ALL_SRCS        = $(foreach ex,$(ALL_EXAMPLES),$($(ex:.c=).SRCS))
 CODEC_EXTRA_LIBS=$(sort $(call enabled,CODEC_EXTRA_LIBS))
 
@@ -120,8 +123,10 @@ $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_OBJS,BUILD_OBJS):=yes)
 # Create build/install dependencies for all examples. The common case
 # is handled here. The MSVS case is handled below.
 NOT_MSVS = $(if $(CONFIG_MSVS),,yes)
-INSTALL-BINS-$(NOT_MSVS)   += $(addprefix bin/,$(ALL_EXAMPLES:.c=))
-INSTALL-SRCS-yes           += $(ALL_SRCS)
+DIST-BINS-$(NOT_MSVS)      += $(addprefix bin/,$(ALL_EXAMPLES:.c=))
+INSTALL-BINS-$(NOT_MSVS)   += $(addprefix bin/,$(UTILS:.c=))
+DIST-SRCS-yes              += $(ALL_SRCS)
+INSTALL-SRCS-yes           += $(UTIL_SRCS)
 OBJS-$(NOT_MSVS)           += $(if $(BUILD_OBJS),$(call objs,$(ALL_SRCS)))
 BINS-$(NOT_MSVS)           += $(addprefix $(BUILD_PFX),$(ALL_EXAMPLES:.c=))
 

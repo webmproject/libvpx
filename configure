@@ -135,11 +135,12 @@ if [ ${doxy_major:-0} -ge 1 ]; then
     [ $doxy_minor -eq 5 ] && [ $doxy_patch -ge 3 ] && enable doxygen
 fi
 
-# install everything, by default
+# install everything except the sources, by default. sources will have
+# to be enabled when doing dist builds, since that's no longer a common
+# case.
 enabled doxygen && php -v >/dev/null 2>&1 && enable install_docs
 enable install_bins
 enable install_libs
-enable install_srcs
 
 enable optimizations
 enable fast_unaligned #allow unaligned accesses, if supported by hw
@@ -366,7 +367,14 @@ process_targets() {
         local ver=`"$source_path/build/make/version.sh" --bare $source_path`
         DIST_DIR="${DIST_DIR}-${ver}"
     fi
-    enabled child || echo "DIST_DIR?=${DIST_DIR}" >> config.mk
+    enabled child || cat <<EOF >> config.mk
+ifeq (\$(MAKECMDGOALS),dist)
+DESTDIR?=${DIST_DIR}
+else
+DESTDIR?=/usr/local
+endif
+DIST_DIR?=\$(DESTDIR)
+EOF
     enabled child || echo "CONFIGURE_ARGS?=${CONFIGURE_ARGS}" >> config.mk
 
     #

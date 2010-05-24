@@ -18,6 +18,7 @@ ifeq ($(target),)
         done
 all: .DEFAULT
 clean:: .DEFAULT
+install:: .DEFAULT
 
 
 # Note: md5sum is not installed on OS X, but openssl is. Openssl may not be
@@ -29,7 +30,7 @@ md5sum := $(firstword $(wildcard \
 md5sum := $(if $(filter %openssl,$(md5sum)),$(md5sum) dgst -md5,$(md5sum))
 
 TGT_CC:=$(word 3, $(subst -, ,$(TOOLCHAIN)))
-install:
+dist:
 	@for t in $(ALL_TARGETS); do \
 	     $(MAKE) --no-print-directory target=$$t $(MAKECMDGOALS) || exit $$?;\
         done
@@ -94,10 +95,10 @@ clean::
 	rm -f $(OBJS-yes) $(OBJS-yes:.o=.d) $(OBJS-yes:.asm.s.o=.asm.s)
 	rm -f $(CLEAN-OBJS)
 
+.PHONY: dist
+dist:
 .PHONY: install
-install:
-.PHONY: install-helper
-install-helper:
+install::
 
 $(BUILD_PFX)%.c.d: %.c
 	$(if $(quiet),@echo "    [DEP] $@")
@@ -254,6 +255,9 @@ DOCS=$(call cond_enabled,CONFIG_INSTALL_DOCS,DOCS)
 	@touch $@
 
 INSTALL-DOCS=$(call cond_enabled,CONFIG_INSTALL_DOCS,INSTALL-DOCS)
+ifeq ($(MAKECMDGOALS),dist)
+INSTALL-DOCS+=$(call cond_enabled,CONFIG_INSTALL_DOCS,DIST-DOCS)
+endif
 .install-docs: .docs $(addprefix $(DIST_DIR)/,$(INSTALL-DOCS))
 	@touch $@
 
@@ -265,6 +269,9 @@ BINS=$(call enabled,BINS)
 	@touch $@
 
 INSTALL-BINS=$(call cond_enabled,CONFIG_INSTALL_BINS,INSTALL-BINS)
+ifeq ($(MAKECMDGOALS),dist)
+INSTALL-BINS+=$(call cond_enabled,CONFIG_INSTALL_BINS,DIST-BINS)
+endif
 .install-bins: .bins $(addprefix $(DIST_DIR)/,$(INSTALL-BINS))
 	@touch $@
 
@@ -277,6 +284,9 @@ LIBS=$(call enabled,LIBS)
 $(foreach lib,$(filter %_g.a,$(LIBS)),$(eval $(call archive_template,$(lib))))
 
 INSTALL-LIBS=$(call cond_enabled,CONFIG_INSTALL_LIBS,INSTALL-LIBS)
+ifeq ($(MAKECMDGOALS),dist)
+INSTALL-LIBS+=$(call cond_enabled,CONFIG_INSTALL_LIBS,DIST-LIBS)
+endif
 .install-libs: .libs $(addprefix $(DIST_DIR)/,$(INSTALL-LIBS))
 	@touch $@
 
@@ -289,6 +299,9 @@ PROJECTS=$(call enabled,PROJECTS)
 	@touch $@
 
 INSTALL-PROJECTS=$(call cond_enabled,CONFIG_INSTALL_PROJECTS,INSTALL-PROJECTS)
+ifeq ($(MAKECMDGOALS),dist)
+INSTALL-PROJECTS+=$(call cond_enabled,CONFIG_INSTALL_PROJECTS,DIST-PROJECTS)
+endif
 .install-projects: .projects $(addprefix $(DIST_DIR)/,$(INSTALL-PROJECTS))
 	@touch $@
 
@@ -296,26 +309,29 @@ clean::
 	rm -f .projects .install-projects $(PROJECTS)
 endif
 
-# If there are any source files to be installed, then include the build
+# If there are any source files to be distributed, then include the build
 # system too.
-ifneq ($(call enabled,INSTALL-SRCS),)
-    INSTALL-SRCS-yes            += configure
-    INSTALL-SRCS-yes            += build/make/configure.sh
-    INSTALL-SRCS-yes            += build/make/gen_asm_deps.sh
-    INSTALL-SRCS-yes            += build/make/Makefile
-    INSTALL-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_def.sh
-    INSTALL-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_proj.sh
-    INSTALL-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_sln.sh
-    INSTALL-SRCS-$(CONFIG_RVCT) += build/make/armlink_adapter.sh
+ifneq ($(call enabled,DIST-SRCS),)
+    DIST-SRCS-yes            += configure
+    DIST-SRCS-yes            += build/make/configure.sh
+    DIST-SRCS-yes            += build/make/gen_asm_deps.sh
+    DIST-SRCS-yes            += build/make/Makefile
+    DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_def.sh
+    DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_proj.sh
+    DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_sln.sh
+    DIST-SRCS-$(CONFIG_RVCT) += build/make/armlink_adapter.sh
     #
     # This isn't really ARCH_ARM dependent, it's dependant on whether we're
     # using assembly code or not (CONFIG_OPTIMIZATIONS maybe). Just use
     # this for now.
-    INSTALL-SRCS-$(ARCH_ARM)    += build/make/obj_int_extract.c
-    INSTALL-SRCS-$(ARCH_ARM)    += build/make/ads2gas.pl
-    INSTALL-SRCS-yes            += $(target:-$(TOOLCHAIN)=).mk
+    DIST-SRCS-$(ARCH_ARM)    += build/make/obj_int_extract.c
+    DIST-SRCS-$(ARCH_ARM)    += build/make/ads2gas.pl
+    DIST-SRCS-yes            += $(target:-$(TOOLCHAIN)=).mk
 endif
 INSTALL-SRCS := $(call cond_enabled,CONFIG_INSTALL_SRCS,INSTALL-SRCS)
+ifeq ($(MAKECMDGOALS),dist)
+INSTALL-SRCS += $(call cond_enabled,CONFIG_INSTALL_SRCS,DIST-SRCS)
+endif
 .install-srcs: $(addprefix $(DIST_DIR)/src/,$(INSTALL-SRCS))
 	@touch $@
 
@@ -329,7 +345,8 @@ endif
 BUILD_TARGETS += .docs .libs .bins
 INSTALL_TARGETS += .install-docs .install-srcs .install-libs .install-bins
 all-$(target): $(BUILD_TARGETS)
-install: $(INSTALL_TARGETS)
+install:: $(INSTALL_TARGETS)
+dist: $(INSTALL_TARGETS)
 
 #
 # Development helper targets
