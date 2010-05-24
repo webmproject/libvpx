@@ -18,7 +18,7 @@ ifeq ($(ARCH_ARM),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx_arm.mk
 endif
 
-VP8_DX_SRCS-yes += vp8dx.h vp8_dx_iface.c
+VP8_DX_SRCS-yes += vp8_dx_iface.c
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 
@@ -68,8 +68,6 @@ VP8_DX_SRCS-yes += decoder/onyxd_if.c
 VP8_DX_SRCS-yes += decoder/threading.c
 
 VP8_DX_SRCS-yes := $(filter-out $(VP8_DX_SRCS_REMOVE-yes),$(VP8_DX_SRCS-yes))
-
-INSTALL-LIBS-yes += include/vp8.h include/vp8dx.h
 
 VP8_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/dequantize_x86.h
 VP8_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/x86_dsystemdependent.c

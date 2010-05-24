@@ -18,7 +18,7 @@ ifeq ($(ARCH_ARM),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx_arm.mk
 endif
 
-VP8_CX_SRCS-yes += vp8cx.h vp8e.h vp8_cx_iface.c
+VP8_CX_SRCS-yes += vp8_cx_iface.c
 
 # encoder
 #INCLUDES += algo/vpx_common/vpx_mem/include
@@ -100,5 +100,3 @@ VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_mmx.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodeopt.asm
 
 VP8_CX_SRCS-yes := $(filter-out $(VP8_CX_SRCS_REMOVE-yes),$(VP8_CX_SRCS-yes))
-
-INSTALL-LIBS-yes += include/vp8.h include/vp8e.h include/vp8cx.h

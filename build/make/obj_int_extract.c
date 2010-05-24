@@ -16,7 +16,7 @@
 #if defined(_MSC_VER)
 #include <io.h>
 #include <share.h>
-#include "vpx_ports/vpx_integer.h"
+#include "vpx/vpx_integer.h"
 #else
 #include <stdint.h>
 #include <unistd.h>

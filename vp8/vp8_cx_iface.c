@@ -8,11 +8,11 @@
  */
 
 
-#include "vpx_codec/vpx_codec.h"
-#include "vpx_codec/internal/vpx_codec_internal.h"
+#include "vpx/vpx_codec.h"
+#include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 #include "onyx_int.h"
-#include "vp8e.h"
+#include "vpx/vp8e.h"
 #include "onyx.h"
 #include <stdlib.h>
 #include <string.h>

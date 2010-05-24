@@ -15,10 +15,10 @@
 #include <string.h>
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx_config.h"
-#include "vpx_decoder.h"
-#include "vpx_integer.h"
+#include "vpx/vpx_decoder.h"
+#include "vpx/vpx_integer.h"
 #if CONFIG_VP8_DECODER
-#include "vp8dx.h"
+#include "vpx/vp8dx.h"
 #endif
 
 static char *exec_name;

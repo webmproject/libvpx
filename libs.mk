@@ -10,8 +10,8 @@
 
 ASM:=$(if $(filter yes,$(CONFIG_GCC)),.asm.s,.asm)
 
-include $(SRC_PATH_BARE)/vpx_codec/vpx_codec.mk
-CODEC_SRCS-yes += $(addprefix vpx_codec/,$(call enabled,API_SRCS))
+include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
+CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
 
 include $(SRC_PATH_BARE)/vpx_mem/vpx_mem.mk
 CODEC_SRCS-yes += $(addprefix vpx_mem/,$(call enabled,MEM_SRCS))
@@ -19,20 +19,16 @@ CODEC_SRCS-yes += $(addprefix vpx_mem/,$(call enabled,MEM_SRCS))
 include $(SRC_PATH_BARE)/vpx_scale/vpx_scale.mk
 CODEC_SRCS-yes += $(addprefix vpx_scale/,$(call enabled,SCALE_SRCS))
 
-# Add vpx_codec/ to the include path to allow vp_n[cd]x.h to reference
-# vpx_codec_impl_*.h without extra ifdeffery. vpx_ports to pick up
-# vpx_integer.h
-CFLAGS += -I$(SRC_PATH_BARE)/vpx_codec
-CFLAGS += -I$(SRC_PATH_BARE)/vpx_ports
 
 ifeq ($(CONFIG_VP8_ENCODER),yes)
   VP8_PREFIX=vp8/
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
-  CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk
-  INSTALL_MAPS += include/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SRCS += vp8/vp8.h vp8/vp8cx.h
+  CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk vpx/vp8.h vpx/vp8cx.h vpx/vp8e.h
+  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8e.h include/vpx/vp8cx.h
+  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
+  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
   CODEC_DOC_SECTIONS += vp8 vp8_encoder
 endif
 
@@ -41,9 +37,10 @@ ifeq ($(CONFIG_VP8_DECODER),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
-  CODEC_SRCS-yes += $(VP8_PREFIX)vp8dx.mk
-  INSTALL_MAPS += include/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
-  CODEC_DOC_SRCS += vp8/vp8.h vp8/vp8dx.h
+  CODEC_SRCS-yes += $(VP8_PREFIX)vp8dx.mk vpx/vp8.h vpx/vp8dx.h
+  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
+  INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
+  CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
   CODEC_DOC_SECTIONS += vp8 vp8_decoder
 endif
 
@@ -66,8 +63,8 @@ endif
 
 # The following pairs define a mapping of locations in the distribution
 # tree to locations in the source/build trees.
-INSTALL_MAPS += include/% $(SRC_PATH_BARE)/vpx_codec/%
-INSTALL_MAPS += include/% $(SRC_PATH_BARE)/vpx_ports/%
+INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/vpx/%
+INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/vpx_ports/%
 INSTALL_MAPS += lib/%     %
 INSTALL_MAPS += src/%     $(SRC_PATH_BARE)/%
 ifeq ($(CONFIG_MSVS),yes)
@@ -83,7 +80,7 @@ endif
 $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
 
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
-CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_integer.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx/vpx_integer.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_timer.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
@@ -94,16 +91,16 @@ CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
 endif
 CODEC_SRCS-$(ARCH_ARM) += $(BUILD_PFX)vpx_config.asm
-CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx_codec/exports
+CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports
 
-INSTALL-LIBS-yes += include/vpx_codec.h
-INSTALL-LIBS-yes += include/vpx_image.h
-INSTALL-LIBS-yes += include/vpx_integer.h
-INSTALL-LIBS-yes += include/vpx_codec_impl_top.h
-INSTALL-LIBS-yes += include/vpx_codec_impl_bottom.h
-INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx_decoder.h
-INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx_decoder_compat.h
-INSTALL-LIBS-$(CONFIG_ENCODERS) += include/vpx_encoder.h
+INSTALL-LIBS-yes += include/vpx/vpx_codec.h
+INSTALL-LIBS-yes += include/vpx/vpx_image.h
+INSTALL-LIBS-yes += include/vpx/vpx_integer.h
+INSTALL-LIBS-yes += include/vpx/vpx_codec_impl_top.h
+INSTALL-LIBS-yes += include/vpx/vpx_codec_impl_bottom.h
+INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx/vpx_decoder.h
+INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx/vpx_decoder_compat.h
+INSTALL-LIBS-$(CONFIG_ENCODERS) += include/vpx/vpx_encoder.h
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 INSTALL-LIBS-yes                  += $(foreach p,$(VS_PLATFORMS),lib/$(p)/$(CODEC_LIB).lib)
@@ -211,10 +208,10 @@ $(filter %.asm.o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 $(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
 CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
 
-CODEC_DOC_SRCS += vpx_codec/vpx_codec.h \
-                  vpx_codec/vpx_decoder.h \
-                  vpx_codec/vpx_encoder.h \
-                  vpx_codec/vpx_image.h
+CODEC_DOC_SRCS += vpx/vpx_codec.h \
+                  vpx/vpx_decoder.h \
+                  vpx/vpx_encoder.h \
+                  vpx/vpx_image.h
 
 CLEAN-OBJS += libs.doxy
 DOCS-yes += libs.doxy

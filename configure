@@ -158,8 +158,8 @@ if ! enabled alt_tree_layout; then
 [ -d ${source_path}/vp8 ] && CODECS="${CODECS} vp8_encoder vp8_decoder"
 else
 # customer environment
-[ -f ${source_path}/../include/vp8cx.h ] && CODECS="${CODECS} vp8_encoder"
-[ -f ${source_path}/../include/vp8dx.h ] && CODECS="${CODECS} vp8_decoder"
+[ -f ${source_path}/../include/vpx/vp8cx.h ] && CODECS="${CODECS} vp8_encoder"
+[ -f ${source_path}/../include/vpx/vp8dx.h ] && CODECS="${CODECS} vp8_decoder"
 
 [ -f ${source_path}/../lib/*/*mt.lib ] && soft_enable static_msvcrt
 fi
@@ -427,7 +427,7 @@ EOF
     check_header pthread.h
     check_header sys/mman.h
 
-    check_header vpx_ports/vpx_integer.h -I${source_path} && enable vpx_ports
+    check_header vpx/vpx_integer.h -I${source_path} && enable vpx_ports
 }
 
 process_toolchain() {

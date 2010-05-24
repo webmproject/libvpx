@@ -13,7 +13,7 @@
  */
 #ifndef VP8E_H
 #define VP8E_H
-#include "vpx_codec_impl_top.h"
+#include "vpx/vpx_codec_impl_top.h"
 
 #if defined(VPX_CODEC_DISABLE_COMPAT) && VPX_CODEC_DISABLE_COMPAT
 #error "Backwards compatibility disabled: don't include vp8e.h"
@@ -58,5 +58,5 @@ VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_SET_FRAMETYPE,          int)
  * #VPX_DL_BEST_QUALITY constants to that parameter instead.
  */
 VPX_CTRL_USE_TYPE_DEPRECATED(VP8E_SET_ENCODING_MODE, vp8e_encoding_mode)
-#include "vpx_codec_impl_bottom.h"
+#include "vpx/vpx_codec_impl_bottom.h"
 #endif

@@ -21,7 +21,7 @@
  */
 #ifndef VP8CX_H
 #define VP8CX_H
-#include "vpx_codec_impl_top.h"
+#include "vpx/vpx_codec_impl_top.h"
 
 /*!\brief Algorithm interface for VP8
  *
@@ -257,5 +257,5 @@ VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
 
 /*! @} - end defgroup vp8_encoder */
-#include "vpx_codec_impl_bottom.h"
+#include "vpx/vpx_codec_impl_bottom.h"
 #endif

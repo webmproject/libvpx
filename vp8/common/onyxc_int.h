@@ -11,8 +11,8 @@
 #ifndef __INC_VP8C_INT_H
 #define __INC_VP8C_INT_H
 
-#include "vpx_ports/config.h"
-#include "vpx_codec/internal/vpx_codec_internal.h"
+#include "vpx_config.h"
+#include "vpx/internal/vpx_codec_internal.h"
 #include "loopfilter.h"
 #include "entropymv.h"
 #include "entropy.h"

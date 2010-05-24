@@ -14,7 +14,7 @@
 UTILS-$(CONFIG_DECODERS)    += ivfdec.c
 ivfdec.SRCS                 += md5_utils.c md5_utils.h
 ivfdec.SRCS                 += vpx_ports/vpx_timer.h
-ivfdec.SRCS                 += vpx_ports/vpx_integer.h
+ivfdec.SRCS                 += vpx/vpx_integer.h
 ivfdec.SRCS                 += args.c args.h vpx_ports/config.h
 ivfdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
 ivfdec.DESCRIPTION           = Full featured decoder
@@ -86,8 +86,6 @@ ifeq ($(HAVE_ALT_TREE_LAYOUT),yes)
     INC_PATH := $(SRC_PATH_BARE)/../include
 else
     LIB_PATH-yes                     += $(if $(BUILD_PFX),$(BUILD_PFX),.)
-    INC_PATH-yes                     += $(SRC_PATH_BARE)/vpx_codec
-    INC_PATH-yes                     += $(SRC_PATH_BARE)/vpx_ports
     INC_PATH-$(CONFIG_VP8_DECODER)   += $(SRC_PATH_BARE)/vp8
     INC_PATH-$(CONFIG_VP8_ENCODER)   += $(SRC_PATH_BARE)/vp8
     LIB_PATH := $(call enabled,LIB_PATH)

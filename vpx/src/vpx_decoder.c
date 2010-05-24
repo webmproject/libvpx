@@ -13,7 +13,7 @@
  *
  */
 #include <stdlib.h>
-#include "vpx_codec/internal/vpx_codec_internal.h"
+#include "vpx/internal/vpx_codec_internal.h"
 
 #define SAVE_STATUS(ctx,var) (ctx?(ctx->err = var):var)
 

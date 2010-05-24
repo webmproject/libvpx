@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "vpx_codec/vpx_image.h"
+#include "vpx/vpx_image.h"
 
 static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
                                      vpx_img_fmt_t fmt,

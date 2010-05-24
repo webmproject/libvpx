@@ -14,8 +14,8 @@
  */
 #include <stdlib.h>
 #include <string.h>
-#include "vpx_codec/vpx_decoder.h"
-#include "vpx_codec/internal/vpx_codec_internal.h"
+#include "vpx/vpx_decoder.h"
+#include "vpx/internal/vpx_codec_internal.h"
 
 #define SAVE_STATUS(ctx,var) (ctx?(ctx->err = var):var)
 

@@ -17,10 +17,10 @@
 #include <string.h>
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx_config.h"
-#include "vpx_decoder.h"
+#include "vpx/vpx_decoder.h"
 #include "vpx_ports/vpx_timer.h"
 #if CONFIG_VP8_DECODER
-#include "vp8dx.h"
+#include "vpx/vp8dx.h"
 #endif
 #if CONFIG_MD5
 #include "md5_utils.h"

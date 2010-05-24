@@ -10,9 +10,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "vpx_codec/vpx_decoder.h"
-#include "vp8dx.h"
-#include "vpx_codec/internal/vpx_codec_internal.h"
+#include "vpx/vpx_decoder.h"
+#include "vpx/vp8dx.h"
+#include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 #include "onyxd.h"
 #include "onyxd_int.h"

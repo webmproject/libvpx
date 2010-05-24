@@ -25,7 +25,7 @@
 #include "entropy.h"
 #include "threading.h"
 #include "vpx_ports/mem.h"
-#include "vpx_codec/internal/vpx_codec_internal.h"
+#include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
 
 #define INTRARDOPT

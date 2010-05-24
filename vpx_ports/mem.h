@@ -11,7 +11,7 @@
 #ifndef VPX_PORTS_MEM_H
 #define VPX_PORTS_MEM_H
 #include "vpx_config.h"
-#include "vpx_integer.h"
+#include "vpx/vpx_integer.h"
 
 #if defined(__GNUC__) && __GNUC__
 #define DECLARE_ALIGNED(n,typ,val)  typ val __attribute__ ((aligned (n)))

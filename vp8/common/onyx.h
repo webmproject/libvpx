@@ -16,7 +16,7 @@ extern "C"
 {
 #endif
 
-#include "vpx_codec/internal/vpx_codec_internal.h"
+#include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_scale/yv12config.h"
 #include "type_aliases.h"
 #include "ppflags.h"

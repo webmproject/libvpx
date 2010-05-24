@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "vpx_encoder.h"
+#include "vpx/vpx_encoder.h"
 #if USE_POSIX_MMAP
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
-#include "vp8cx.h"
+#include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
 

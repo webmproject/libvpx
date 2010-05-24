@@ -12,7 +12,7 @@
 #define DBOOLHUFF_H
 #include "vpx_ports/config.h"
 #include "vpx_ports/mem.h"
-#include "vpx_ports/vpx_integer.h"
+#include "vpx/vpx_integer.h"
 
 /* Size of the bool decoder backing storage
  *
