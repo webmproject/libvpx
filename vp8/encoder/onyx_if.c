@@ -4738,7 +4738,6 @@ void vp8_check_gf_quality(VP8_COMP *cpi)
 #if !(CONFIG_REALTIME_ONLY)
 static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags)
 {
-    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
 
     if (!cpi->common.refresh_alt_ref_frame)
         vp8_second_pass(cpi);
@@ -4747,7 +4746,11 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     cpi->bits_left -= 8 * *size;
 
     if (!cpi->common.refresh_alt_ref_frame)
+    {
+        double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
+            *cpi->oxcf.two_pass_vbrmin_section / 100);
         cpi->bits_left += (long long)(two_pass_min_rate / cpi->oxcf.frame_rate);
+    }
 }
 #endif
 
