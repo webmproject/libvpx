@@ -1137,7 +1137,6 @@ int vp8_diamond_search_sadx4
 }
 
 
-#if !(CONFIG_REALTIME_ONLY)
 int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int error_per_bit, int distance, vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2], int *mvsadcost[2])
 {
     unsigned char *what = (*(b->base_src) + b->src);
@@ -1350,7 +1349,6 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     else
         return INT_MAX;
 }
-#endif
 
 #ifdef ENTROPY_STATS
 void print_mode_context(void)
