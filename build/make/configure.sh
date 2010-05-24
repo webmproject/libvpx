@@ -780,6 +780,7 @@ process_common_toolchain() {
     ;;
     universal*|*-gcc|generic-gnu)
         link_with_cc=gcc
+        enable gcc
     setup_gnu_toolchain
     ;;
     esac
