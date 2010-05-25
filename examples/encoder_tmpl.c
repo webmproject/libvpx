@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
     height = strtol(argv[2], NULL, 0);
     if(width < 16 || width%2 || height <16 || height%2)
         die("Invalid resolution: %ldx%ld", width, height);
-    if(!vpx_img_alloc(&raw, VPX_IMG_FMT_YV12, width, height, 1))
+    if(!vpx_img_alloc(&raw, VPX_IMG_FMT_I420, width, height, 1))
         die("Faile to allocate image", width, height);
     if(!(outfile = fopen(argv[4], "wb")))
         die("Failed to open %s for writing", argv[4]);
