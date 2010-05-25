@@ -478,6 +478,42 @@ setup_gnu_toolchain() {
 }
 
 process_common_toolchain() {
+    if [ -z "$toolchain" ]; then
+        uname="$(uname -a)"
+
+        # detect tgt_isa
+        case "$uname" in
+            *x86_64*)
+                tgt_isa=x86_64
+                ;;
+            *i[3456]86*)
+                tgt_isa=x86
+                ;;
+        esac
+
+        # detect tgt_os
+        case "$uname" in
+            *Darwin\ Kernel\ Version\ 8*)
+                tgt_isa=universal
+                tgt_os=darwin8
+                ;;
+            *Darwin\ Kernel\ Version\ 9*)
+                tgt_isa=universal
+                tgt_os=darwin9
+                ;;
+            *Msys*|*Cygwin*)
+                tgt_os=win32
+                ;;
+            *Linux*|*BSD*)
+                tgt_os=linux
+                ;;
+        esac
+
+        if [ -n "$tgt_isa" ] && [ -n "$tgt_os" ]; then
+            toolchain=${tgt_isa}-${tgt_os}-gcc
+        fi
+    fi
+
     toolchain=${toolchain:-generic-gnu}
 
     is_in ${toolchain} ${all_platforms} || enabled force_toolchain \
