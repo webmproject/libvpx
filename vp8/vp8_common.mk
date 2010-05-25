@@ -11,9 +11,6 @@
 #add this file to the installed sources list
 VP8_COMMON_SRCS-yes += vp8_common.mk
 
-#common interface
-VP8_COMMON_SRCS-yes += vp8.h
-
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
 VP8_COMMON_SRCS-yes += common/type_aliases.h
 VP8_COMMON_SRCS-yes += common/pragmas.h
