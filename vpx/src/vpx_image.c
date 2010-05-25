@@ -133,8 +133,8 @@ static vpx_image_t *img_alloc_helper(vpx_image_t  *img,
     img->bps = bps;
 
     /* Calculate strides */
-    img->stride[PLANE_Y] = img->stride[PLANE_ALPHA] = s;
-    img->stride[PLANE_U] = img->stride[PLANE_V] = s >> xcs;
+    img->stride[VPX_PLANE_Y] = img->stride[VPX_PLANE_ALPHA] = s;
+    img->stride[VPX_PLANE_U] = img->stride[VPX_PLANE_V] = s >> xcs;
 
     /* Default viewport to entire image */
     if (!vpx_img_set_rect(img, 0, 0, d_w, d_h))
@@ -180,8 +180,8 @@ int vpx_img_set_rect(vpx_image_t  *img,
         /* Calculate plane pointers */
         if (!(img->fmt & VPX_IMG_FMT_PLANAR))
         {
-            img->planes[PLANE_PACKED] =
-                img->img_data + x * img->bps / 8 + y * img->stride[PLANE_PACKED];
+            img->planes[VPX_PLANE_PACKED] =
+                img->img_data + x * img->bps / 8 + y * img->stride[VPX_PLANE_PACKED];
         }
         else
         {
@@ -189,33 +189,33 @@ int vpx_img_set_rect(vpx_image_t  *img,
 
             if (img->fmt & VPX_IMG_FMT_HAS_ALPHA)
             {
-                img->planes[PLANE_ALPHA] =
-                    data + x + y * img->stride[PLANE_ALPHA];
-                data += img->h * img->stride[PLANE_ALPHA];
+                img->planes[VPX_PLANE_ALPHA] =
+                    data + x + y * img->stride[VPX_PLANE_ALPHA];
+                data += img->h * img->stride[VPX_PLANE_ALPHA];
             }
 
-            img->planes[PLANE_Y] = data + x + y * img->stride[PLANE_Y];
-            data += img->h * img->stride[PLANE_Y];
+            img->planes[VPX_PLANE_Y] = data + x + y * img->stride[VPX_PLANE_Y];
+            data += img->h * img->stride[VPX_PLANE_Y];
 
             if (!(img->fmt & VPX_IMG_FMT_UV_FLIP))
             {
-                img->planes[PLANE_U] = data
+                img->planes[VPX_PLANE_U] = data
                                        + (x >> img->x_chroma_shift)
-                                       + (y >> img->y_chroma_shift) * img->stride[PLANE_U];
-                data += (img->h >> img->y_chroma_shift) * img->stride[PLANE_U];
-                img->planes[PLANE_V] = data
+                                       + (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_U];
+                data += (img->h >> img->y_chroma_shift) * img->stride[VPX_PLANE_U];
+                img->planes[VPX_PLANE_V] = data
                                        + (x >> img->x_chroma_shift)
-                                       + (y >> img->y_chroma_shift) * img->stride[PLANE_V];
+                                       + (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
             }
             else
             {
-                img->planes[PLANE_V] = data
+                img->planes[VPX_PLANE_V] = data
                                        + (x >> img->x_chroma_shift)
-                                       + (y >> img->y_chroma_shift) * img->stride[PLANE_V];
-                data += (img->h >> img->y_chroma_shift) * img->stride[PLANE_V];
-                img->planes[PLANE_U] = data
+                                       + (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
+                data += (img->h >> img->y_chroma_shift) * img->stride[VPX_PLANE_V];
+                img->planes[VPX_PLANE_U] = data
                                        + (x >> img->x_chroma_shift)
-                                       + (y >> img->y_chroma_shift) * img->stride[PLANE_U];
+                                       + (y >> img->y_chroma_shift) * img->stride[VPX_PLANE_U];
             }
         }
 
@@ -233,19 +233,19 @@ void vpx_img_flip(vpx_image_t *img)
      * stride parameter will be promoted to unsigned, causing errors when
      * the lhs is a larger type than the rhs.
      */
-    img->planes[PLANE_Y] += (signed)(img->d_h - 1) * img->stride[PLANE_Y];
-    img->stride[PLANE_Y] = -img->stride[PLANE_Y];
+    img->planes[VPX_PLANE_Y] += (signed)(img->d_h - 1) * img->stride[VPX_PLANE_Y];
+    img->stride[VPX_PLANE_Y] = -img->stride[VPX_PLANE_Y];
 
-    img->planes[PLANE_U] += (signed)((img->d_h >> img->y_chroma_shift) - 1)
-                            * img->stride[PLANE_U];
-    img->stride[PLANE_U] = -img->stride[PLANE_U];
+    img->planes[VPX_PLANE_U] += (signed)((img->d_h >> img->y_chroma_shift) - 1)
+                            * img->stride[VPX_PLANE_U];
+    img->stride[VPX_PLANE_U] = -img->stride[VPX_PLANE_U];
 
-    img->planes[PLANE_V] += (signed)((img->d_h >> img->y_chroma_shift) - 1)
-                            * img->stride[PLANE_V];
-    img->stride[PLANE_V] = -img->stride[PLANE_V];
+    img->planes[VPX_PLANE_V] += (signed)((img->d_h >> img->y_chroma_shift) - 1)
+                            * img->stride[VPX_PLANE_V];
+    img->stride[VPX_PLANE_V] = -img->stride[VPX_PLANE_V];
 
-    img->planes[PLANE_ALPHA] += (signed)(img->d_h - 1) * img->stride[PLANE_ALPHA];
-    img->stride[PLANE_ALPHA] = -img->stride[PLANE_ALPHA];
+    img->planes[VPX_PLANE_ALPHA] += (signed)(img->d_h - 1) * img->stride[VPX_PLANE_ALPHA];
+    img->stride[VPX_PLANE_ALPHA] = -img->stride[VPX_PLANE_ALPHA];
 }
 
 void vpx_img_free(vpx_image_t *img)

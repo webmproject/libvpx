@@ -110,11 +110,18 @@ extern "C" {
         unsigned int  y_chroma_shift;   /**< subsampling order, Y */
 
         /* Image data pointers. */
-#define PLANE_PACKED 0   /**< To be used for all packed formats */
-#define PLANE_Y   0      /**< Y (Luminance) plane */
-#define PLANE_U   1      /**< U (Chroma) plane */
-#define PLANE_V   2      /**< V (Chroma) plane */
-#define PLANE_ALPHA 3    /**< A (Transparancy) plane */
+#define VPX_PLANE_PACKED 0   /**< To be used for all packed formats */
+#define VPX_PLANE_Y      0   /**< Y (Luminance) plane */
+#define VPX_PLANE_U      1   /**< U (Chroma) plane */
+#define VPX_PLANE_V      2   /**< V (Chroma) plane */
+#define VPX_PLANE_ALPHA  3   /**< A (Transparancy) plane */
+#if !defined(VPX_CODEC_DISABLE_COMPAT) || !VPX_CODEC_DISABLE_COMPAT
+#define PLANE_PACKED     VPX_PLANE_PACKED 
+#define PLANE_Y          VPX_PLANE_Y
+#define PLANE_U          VPX_PLANE_U
+#define PLANE_V          VPX_PLANE_V
+#define PLANE_ALPHA      VPX_PLANE_ALPHA 
+#endif
         unsigned char *planes[4];  /**< pointer to the top left pixel for each plane */
         int      stride[4];  /**< stride between rows for each plane */
 
