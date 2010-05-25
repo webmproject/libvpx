@@ -534,28 +534,28 @@ int main(int argc, const char **argv_)
                     out = out_open(out_fn, do_md5);
                 }
 
-                buf = img->planes[PLANE_Y];
+                buf = img->planes[VPX_PLANE_Y];
 
                 for (y = 0; y < img->d_h; y++)
                 {
                     out_put(out, buf, img->d_w, do_md5);
-                    buf += img->stride[PLANE_Y];
+                    buf += img->stride[VPX_PLANE_Y];
                 }
 
-                buf = img->planes[flipuv?PLANE_V:PLANE_U];
+                buf = img->planes[flipuv?VPX_PLANE_V:VPX_PLANE_U];
 
                 for (y = 0; y < (1 + img->d_h) / 2; y++)
                 {
                     out_put(out, buf, (1 + img->d_w) / 2, do_md5);
-                    buf += img->stride[PLANE_U];
+                    buf += img->stride[VPX_PLANE_U];
                 }
 
-                buf = img->planes[flipuv?PLANE_U:PLANE_V];
+                buf = img->planes[flipuv?VPX_PLANE_U:VPX_PLANE_V];
 
                 for (y = 0; y < (1 + img->d_h) / 2; y++)
                 {
                     out_put(out, buf, (1 + img->d_w) / 2, do_md5);
-                    buf += img->stride[PLANE_V];
+                    buf += img->stride[VPX_PLANE_V];
                 }
 
                 if (!fn2)

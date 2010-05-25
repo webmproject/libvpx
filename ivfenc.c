@@ -247,10 +247,10 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int is_ivf)
         switch (plane)
         {
         case 1:
-            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? PLANE_V : PLANE_U];
+            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? VPX_PLANE_V : VPX_PLANE_U];
             break;
         case 2:
-            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?PLANE_U : PLANE_V];
+            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?VPX_PLANE_U : VPX_PLANE_V];
             break;
         default:
             ptr = img->planes[plane];

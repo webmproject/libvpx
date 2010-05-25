@@ -557,19 +557,19 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
                                        YV12_BUFFER_CONFIG  *yv12)
 {
     vpx_codec_err_t        res = VPX_CODEC_OK;
-    yv12->y_buffer = img->planes[PLANE_Y];
-    yv12->u_buffer = img->planes[PLANE_U];
-    yv12->v_buffer = img->planes[PLANE_V];
+    yv12->y_buffer = img->planes[VPX_PLANE_Y];
+    yv12->u_buffer = img->planes[VPX_PLANE_U];
+    yv12->v_buffer = img->planes[VPX_PLANE_V];
 
     yv12->y_width  = img->d_w;
     yv12->y_height = img->d_h;
     yv12->uv_width = yv12->y_width / 2;
     yv12->uv_height = yv12->y_height / 2;
 
-    yv12->y_stride = img->stride[PLANE_Y];
-    yv12->uv_stride = img->stride[PLANE_U];
+    yv12->y_stride = img->stride[VPX_PLANE_Y];
+    yv12->uv_stride = img->stride[VPX_PLANE_U];
 
-    yv12->border  = (img->stride[PLANE_Y] - img->d_w) / 2;
+    yv12->border  = (img->stride[VPX_PLANE_Y] - img->d_w) / 2;
     yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12);
 
     return res;
