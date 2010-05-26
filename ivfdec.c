@@ -62,8 +62,10 @@ static const arg_def_t postprocarg = ARG_DEF(NULL, "postproc", 0,
                                      "Postprocess decoded frames");
 static const arg_def_t summaryarg = ARG_DEF(NULL, "summary", 0,
                                     "Show timing summary");
-static const arg_def_t outputfile = ARG_DEF("o", "output-raw-file", 1,
+static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
                                     "Output raw yv12 file instead of images");
+static const arg_def_t usey4marg = ARG_DEF("y", "y4m", 0,
+                                    "Output file is YUV4MPEG2");
 static const arg_def_t threadsarg = ARG_DEF("t", "threads", 1,
                                     "Max threads to use");
 static const arg_def_t quietarg = ARG_DEF("q", "quiet", 0,
@@ -77,7 +79,7 @@ static const arg_def_t *all_args[] =
 {
     &codecarg, &prefixarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
     &progressarg, &limitarg, &postprocarg, &summaryarg, &outputfile,
-    &threadsarg, &quietarg,
+    &usey4marg, &threadsarg, &quietarg,
 #if CONFIG_MD5
     &md5arg,
 #endif
@@ -288,7 +290,12 @@ void out_close(void *out, const char *out_fn, int do_md5)
     }
 }
 
-unsigned int file_is_ivf(FILE *infile, unsigned int *fourcc)
+unsigned int file_is_ivf(FILE *infile,
+                         unsigned int *fourcc,
+                         unsigned int *width,
+                         unsigned int *height,
+                         unsigned int *timebase_num,
+                         unsigned int *timebase_den)
 {
     char raw_hdr[32];
     int is_ivf = 0;
@@ -305,6 +312,10 @@ unsigned int file_is_ivf(FILE *infile, unsigned int *fourcc)
                         " decode properly.");
 
             *fourcc = mem_get_le32(raw_hdr + 8);
+            *width = mem_get_le16(raw_hdr + 12);
+            *height = mem_get_le16(raw_hdr + 14);
+            *timebase_den = mem_get_le32(raw_hdr + 16);
+            *timebase_num = mem_get_le32(raw_hdr + 20);
         }
     }
 
@@ -330,6 +341,11 @@ int main(int argc, const char **argv_)
     struct arg               arg;
     char                   **argv, **argi, **argj;
     const char                   *fn2 = 0;
+    int                     use_y4m = 0;
+    unsigned int            width;
+    unsigned int            height;
+    unsigned int            timebase_num;
+    unsigned int            timebase_den;
     void                   *out = NULL;
     vpx_codec_dec_cfg_t     cfg = {0};
 #if CONFIG_VP8_DECODER
@@ -361,6 +377,8 @@ int main(int argc, const char **argv_)
         }
         else if (arg_match(&arg, &outputfile, argi))
             fn2 = arg.val;
+        else if (arg_match(&arg, &usey4marg, argi))
+            use_y4m = 1;
         else if (arg_match(&arg, &prefixarg, argi))
             prefix = strdup(arg.val);
         else if (arg_match(&arg, &use_yv12, argi))
@@ -446,10 +464,31 @@ int main(int argc, const char **argv_)
     if (fn2)
         out = out_open(fn2, do_md5);
 
-    is_ivf = file_is_ivf(infile, &fourcc);
+    is_ivf = file_is_ivf(infile, &fourcc, &width, &height,
+                         &timebase_num, &timebase_den);
 
     if (is_ivf)
     {
+        if (use_y4m)
+        {
+            char buffer[128];
+            if (!fn2)
+            {
+                fprintf(stderr, "YUV4MPEG2 output only supported with -o.\n");
+                return EXIT_FAILURE;
+            }
+            /*Correct for the factor of 2 applied to the timebase in the
+               encoder.*/
+            if(timebase_den&1)timebase_num<<=1;
+            else timebase_den>>=1;
+            /*Note: We can't output an aspect ratio here because IVF doesn't
+               store one, and neither does VP8.
+              That will have to wait until these tools support WebM natively.*/
+            sprintf(buffer, "YUV4MPEG2 C%s W%u H%u F%u:%u I%c\n",
+                    "420jpeg", width, height, timebase_den, timebase_num, 'p');
+            out_put(out, (unsigned char *)buffer, strlen(buffer), do_md5);
+        }
+
         /* Try to determine the codec from the fourcc. */
         for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
             if ((fourcc & ifaces[i].fourcc_mask) == ifaces[i].fourcc)
@@ -464,6 +503,11 @@ int main(int argc, const char **argv_)
 
                 break;
             }
+    }
+    else if(use_y4m)
+    {
+        fprintf(stderr, "YUV4MPEG2 output only supported from IVF input.\n");
+        return EXIT_FAILURE;
     }
 
     if (vpx_codec_dec_init(&decoder, iface ? iface :  ifaces[0].iface, &cfg,
@@ -533,6 +577,8 @@ int main(int argc, const char **argv_)
                             prefix, img->d_w, img->d_h, frame_in, sfx);
                     out = out_open(out_fn, do_md5);
                 }
+                else if(use_y4m)
+                    out_put(out, (unsigned char *)"FRAME\n", 6, do_md5);
 
                 buf = img->planes[VPX_PLANE_Y];
 
