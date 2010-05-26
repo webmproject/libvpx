@@ -12,8 +12,7 @@
  * \brief Provides the high level interface to wrap decoder algorithms.
  *
  */
-#include <stdlib.h>
-#include <string.h>
+#include <stdarg.h>
 #include "vpx/vpx_integer.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
@@ -84,53 +83,6 @@ const char *vpx_codec_error_detail(vpx_codec_ctx_t  *ctx)
         return ctx->priv ? ctx->priv->err_detail : ctx->err_detail;
 
     return NULL;
-}
-
-
-vpx_codec_err_t vpx_codec_dec_init_ver(vpx_codec_ctx_t      *ctx,
-                                       vpx_codec_iface_t    *iface,
-                                       vpx_codec_dec_cfg_t  *cfg,
-                                       vpx_codec_flags_t     flags,
-                                       int                   ver)
-{
-    vpx_codec_err_t res;
-
-    if (ver != VPX_DECODER_ABI_VERSION)
-        res = VPX_CODEC_ABI_MISMATCH;
-    else if (!ctx || !iface)
-        res = VPX_CODEC_INVALID_PARAM;
-    else if (iface->abi_version != VPX_CODEC_INTERNAL_ABI_VERSION)
-        res = VPX_CODEC_ABI_MISMATCH;
-    else if ((flags & VPX_CODEC_USE_XMA) && !(iface->caps & VPX_CODEC_CAP_XMA))
-        res = VPX_CODEC_INCAPABLE;
-    else if ((flags & VPX_CODEC_USE_POSTPROC) && !(iface->caps & VPX_CODEC_CAP_POSTPROC))
-        res = VPX_CODEC_INCAPABLE;
-    else
-    {
-        memset(ctx, 0, sizeof(*ctx));
-        ctx->iface = iface;
-        ctx->name = iface->name;
-        ctx->priv = NULL;
-        ctx->init_flags = flags;
-        ctx->config.dec = cfg;
-        res = VPX_CODEC_OK;
-
-        if (!(flags & VPX_CODEC_USE_XMA))
-        {
-            res = ctx->iface->init(ctx);
-
-            if (res)
-            {
-                ctx->err_detail = ctx->priv ? ctx->priv->err_detail : NULL;
-                vpx_codec_destroy(ctx);
-            }
-
-            if (ctx->priv)
-                ctx->priv->iface = ctx->iface;
-        }
-    }
-
-    return SAVE_STATUS(ctx, res);
 }
 
 
