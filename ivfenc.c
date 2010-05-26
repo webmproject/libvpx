@@ -32,6 +32,7 @@
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
+#include "y4minput.h"
 
 static const char *exec_name;
 
@@ -217,55 +218,85 @@ vpx_fixed_buf_t stats_get(stats_io_t *stats)
     return stats->buf;
 }
 
+enum video_file_type
+{
+    FILE_TYPE_RAW,
+    FILE_TYPE_IVF,
+    FILE_TYPE_Y4M
+};
+
 #define IVF_FRAME_HDR_SZ (4+8) /* 4 byte size + 8 byte timestamp */
-static int read_frame(FILE *f, vpx_image_t *img, unsigned int is_ivf)
+static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
+                      y4m_input *y4m)
 {
     int plane = 0;
 
-    if (is_ivf)
+    if (file_type == FILE_TYPE_Y4M)
     {
-        char junk[IVF_FRAME_HDR_SZ];
-
-        /* Skip the frame header. We know how big the frame should be. See
-         * write_ivf_frame_header() for documentation on the frame header
-         * layout.
-         */
-        fread(junk, 1, IVF_FRAME_HDR_SZ, f);
+        if (y4m_input_fetch_frame(y4m, f, img) < 0)
+           return 0;
     }
-
-    for (plane = 0; plane < 3; plane++)
+    else
     {
-        unsigned char *ptr;
-        int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
-        int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
-        int r;
-
-        /* Determine the correct plane based on the image format. The for-loop
-         * always counts in Y,U,V order, but this may not match the order of
-         * the data on disk.
-         */
-        switch (plane)
+        if (file_type == FILE_TYPE_IVF)
         {
-        case 1:
-            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? VPX_PLANE_V : VPX_PLANE_U];
-            break;
-        case 2:
-            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?VPX_PLANE_U : VPX_PLANE_V];
-            break;
-        default:
-            ptr = img->planes[plane];
+            char junk[IVF_FRAME_HDR_SZ];
+
+            /* Skip the frame header. We know how big the frame should be. See
+             * write_ivf_frame_header() for documentation on the frame header
+             * layout.
+             */
+            fread(junk, 1, IVF_FRAME_HDR_SZ, f);
         }
 
-        for (r = 0; r < h; r++)
+        for (plane = 0; plane < 3; plane++)
         {
-            fread(ptr, 1, w, f);
-            ptr += img->stride[plane];
+            unsigned char *ptr;
+            int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
+            int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
+            int r;
+
+            /* Determine the correct plane based on the image format. The for-loop
+             * always counts in Y,U,V order, but this may not match the order of
+             * the data on disk.
+             */
+            switch (plane)
+            {
+            case 1:
+                ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? VPX_PLANE_V : VPX_PLANE_U];
+                break;
+            case 2:
+                ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?VPX_PLANE_U : VPX_PLANE_V];
+                break;
+            default:
+                ptr = img->planes[plane];
+            }
+
+            for (r = 0; r < h; r++)
+            {
+                fread(ptr, 1, w, f);
+                ptr += img->stride[plane];
+            }
         }
     }
 
     return !feof(f);
 }
 
+
+unsigned int file_is_y4m(FILE *infile,
+                         y4m_input *y4m)
+{
+    char raw_hdr[4];
+    if (fread(raw_hdr, 1, 4, infile) == 4 &&
+        memcmp(raw_hdr, "YUV4", 4) == 0 &&
+        y4m_input_open(y4m, infile, raw_hdr, 4) >= 0)
+    {
+        return 1;
+    }
+    rewind(infile);
+    return 0;
+}
 
 #define IVF_FILE_HDR_SZ (32)
 unsigned int file_is_ivf(FILE *infile,
@@ -568,8 +599,10 @@ int main(int argc, const char **argv_)
     static const int        *ctrl_args_map = NULL;
     int                      verbose = 0, show_psnr = 0;
     int                      arg_use_i420 = 1;
+    int                      arg_have_timebase = 0;
     unsigned long            cx_time = 0;
-    unsigned int             is_ivf, fourcc;
+    unsigned int             file_type, fourcc;
+    y4m_input                y4m;
 
     exec_name = argv_[0];
 
@@ -686,7 +719,10 @@ int main(int argc, const char **argv_)
         else if (arg_match(&arg, &height, argi))
             cfg.g_h = arg_parse_uint(&arg);
         else if (arg_match(&arg, &timebase, argi))
+        {
             cfg.g_timebase = arg_parse_rational(&arg);
+            arg_have_timebase = 1;
+        }
         else if (arg_match(&arg, &error_resilient, argi))
             cfg.g_error_resilient = arg_parse_uint(&arg);
         else if (arg_match(&arg, &lag_in_frames, argi))
@@ -808,10 +844,24 @@ int main(int argc, const char **argv_)
         return EXIT_FAILURE;
     }
 
-    is_ivf = file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h);
-
-    if (is_ivf)
+    if (file_is_y4m(infile, &y4m))
     {
+        file_type = FILE_TYPE_Y4M;
+        cfg.g_w = y4m.pic_w;
+        cfg.g_h = y4m.pic_h;
+        /* Use the frame rate from the file only if none was specified on the
+         *  command-line.
+         */
+        if (!arg_have_timebase)
+        {
+            cfg.g_timebase.num = y4m.fps_d;
+            cfg.g_timebase.den = y4m.fps_n;
+        }
+        arg_use_i420 = 0;
+    }
+    else if (file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h))
+    {
+        file_type = FILE_TYPE_IVF;
         switch (fourcc)
         {
         case 0x32315659:
@@ -825,6 +875,8 @@ int main(int argc, const char **argv_)
             return EXIT_FAILURE;
         }
     }
+    else
+        file_type = FILE_TYPE_RAW;
 
     fclose(infile);
 
@@ -869,8 +921,14 @@ int main(int argc, const char **argv_)
         SHOW(kf_max_dist);
     }
 
-    vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
-                  cfg.g_w, cfg.g_h, 1);
+    if (file_type == FILE_TYPE_Y4M)
+        /*The Y4M reader does its own allocation.
+          Just initialize this here to avoid problems if we never read any
+           frames.*/
+        memset(&raw, 0, sizeof(raw));
+    else
+        vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
+                      cfg.g_w, cfg.g_h, 1);
 
     // This was added so that ivfenc will create monotically increasing
     // timestamps.  Since we create new timestamps for alt-reference frames
@@ -892,6 +950,18 @@ int main(int argc, const char **argv_)
         {
             printf("Failed to open input file");
             return EXIT_FAILURE;
+        }
+
+        /*Skip the file header.*/
+        if (file_type == FILE_TYPE_IVF)
+        {
+            char raw_hdr[IVF_FILE_HDR_SZ];
+            (void)fread(raw_hdr, 1, IVF_FILE_HDR_SZ, infile);
+        }
+        else if(file_type == FILE_TYPE_Y4M)
+        {
+            char buffer[80];
+            (void)fgets(buffer, sizeof(buffer)/sizeof(*buffer) - 1, infile);
         }
 
         outfile = fopen(out_fn, "wb");
@@ -966,7 +1036,7 @@ int main(int argc, const char **argv_)
 
             if (!arg_limit || frames_in < arg_limit)
             {
-                frame_avail = read_frame(infile, &raw, is_ivf);
+                frame_avail = read_frame(infile, &raw, file_type, &y4m);
 
                 if (frame_avail)
                     frames_in++;

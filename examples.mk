@@ -19,8 +19,9 @@ ivfdec.SRCS                 += args.c args.h vpx_ports/config.h
 ivfdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
 ivfdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += ivfenc.c
-ivfenc.SRCS                 += args.c args.h vpx_ports/config.h
-ivfenc.SRCS                 += vpx_ports/mem_ops.h vpx_ports/mem_ops_aligned.h
+ivfenc.SRCS                 += args.c args.h y4minput.c y4minput.h
+ivfenc.SRCS                 += vpx_ports/config.h vpx_ports/mem_ops.h
+ivfenc.SRCS                 += vpx_ports/mem_ops_aligned.h
 ivfenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 ivfenc.DESCRIPTION           = Full featured encoder
 
