@@ -442,7 +442,13 @@ process_common_cmdline() {
         disable builtin_libc
         alt_libc="${optval}"
         ;;
-        --libc)
+        --prefix=*)
+        prefix="${optval}"
+        ;;
+        --libdir=*)
+        libdir="${optval}"
+        ;;
+        --libc|--prefix|--libdir)
         die "Option ${opt} requires argument"
         ;;
         --help|-h) show_help
@@ -462,6 +468,18 @@ process_cmdline() {
         esac
     done
 }
+
+
+post_process_common_cmdline() {
+    prefix="${prefix:-/usr/local}"
+    prefix="${prefix%/}"
+    libdir="${libdir:-${prefix}/lib}"
+    libdir="${libdir%/}"
+    if [ "${libdir#${prefix}}" == "${libdir}" ]; then
+        die "Libdir ${libdir} must be a subdirectory of ${prefix}"
+    fi
+}
+
 
 post_process_cmdline() {
     true;
@@ -880,8 +898,8 @@ process_toolchain() {
 }
 
 print_config_mk() {
-    prefix=$1
-    makefile=$2
+    local prefix=$1
+    local makefile=$2
     shift 2
     for cfg; do
         upname="`toupper $cfg`"
@@ -892,8 +910,8 @@ print_config_mk() {
 }
 
 print_config_h() {
-    prefix=$1
-    header=$2
+    local prefix=$1
+    local header=$2
     shift 2
     for cfg; do
         upname="`toupper $cfg`"
@@ -924,6 +942,7 @@ process() {
     else
         echo "# ${self} $@" > ${logfile}
     fi
+    post_process_common_cmdline
     post_process_cmdline
     process_toolchain
     process_detect

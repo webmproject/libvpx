@@ -8,7 +8,6 @@
 ##  file in the root of the source tree.
 ##
 
-
 #source_path="`dirname \"$0\"`"
 source_path=${0%/*}
 . "${source_path}/build/make/configure.sh"
@@ -369,11 +368,11 @@ process_targets() {
     fi
     enabled child || cat <<EOF >> config.mk
 ifeq (\$(MAKECMDGOALS),dist)
-DESTDIR?=${DIST_DIR}
+DIST_DIR?=${DIST_DIR}
 else
-DESTDIR?=/usr/local
+DIST_DIR?=\$(DESTDIR)${prefix}
 endif
-DIST_DIR?=\$(DESTDIR)
+LIBSUBDIR=${libdir##${prefix}/}
 EOF
     enabled child || echo "CONFIGURE_ARGS?=${CONFIGURE_ARGS}" >> config.mk
 

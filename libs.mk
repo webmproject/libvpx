@@ -65,11 +65,11 @@ endif
 # tree to locations in the source/build trees.
 INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/vpx/%
 INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/vpx_ports/%
-INSTALL_MAPS += lib/%     %
+INSTALL_MAPS += $(LIBSUBDIR)/%     %
 INSTALL_MAPS += src/%     $(SRC_PATH_BARE)/%
 ifeq ($(CONFIG_MSVS),yes)
-INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),lib/$(p)/%  $(p)/Release/%)
-INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),lib/$(p)/%  $(p)/Debug/%)
+INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Release/%)
+INSTALL_MAPS += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/%  $(p)/Debug/%)
 endif
 
 # If this is a universal (fat) binary, then all the subarchitectures have
@@ -103,14 +103,14 @@ INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx/vpx_decoder_compat.h
 INSTALL-LIBS-$(CONFIG_ENCODERS) += include/vpx/vpx_encoder.h
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
-INSTALL-LIBS-yes                  += $(foreach p,$(VS_PLATFORMS),lib/$(p)/$(CODEC_LIB).lib)
-INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(foreach p,$(VS_PLATFORMS),lib/$(p)/$(CODEC_LIB)d.lib)
-INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),lib/$(p)/vpx.dll)
-INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),lib/$(p)/vpx.exp)
+INSTALL-LIBS-yes                  += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/$(CODEC_LIB).lib)
+INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/$(CODEC_LIB)d.lib)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/vpx.dll)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/vpx.exp)
 endif
 else
-INSTALL-LIBS-yes += lib/libvpx.a
-INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += lib/libvpx_g.a
+INSTALL-LIBS-yes += $(LIBSUBDIR)/libvpx.a
+INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
 CODEC_SRCS=$(call enabled,CODEC_SRCS)
