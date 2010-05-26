@@ -1118,8 +1118,9 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                     cpi->this_frame_target = (baseline_bits_at_q(1, Q, cpi->common.MBs) * cpi->last_boost) / 100;
 
             }
-            // If there is an active ARF at this location use the minimum bits on this frame
-            else
+            // If there is an active ARF at this location use the minimum
+            // bits on this frame unless it was a contructed arf.
+            else if (cpi->oxcf.arnr_max_frames == 0)
             {
                 cpi->this_frame_target = 0;           // Minimial spend on gf that is replacing an arf
             }
