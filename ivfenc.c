@@ -991,7 +991,6 @@ int main(int argc, const char **argv_)
             while ((pkt = vpx_codec_get_cx_data(&encoder, &iter)))
             {
                 got_data = 1;
-                nbytes += pkt->data.raw.sz;
 
                 switch (pkt->kind)
                 {
@@ -1001,6 +1000,7 @@ int main(int argc, const char **argv_)
                            (unsigned long)pkt->data.frame.sz);
                     write_ivf_frame_header(outfile, pkt);
                     fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile);
+                    nbytes += pkt->data.raw.sz;
                     break;
                 case VPX_CODEC_STATS_PKT:
                     frames_out++;
@@ -1009,6 +1009,7 @@ int main(int argc, const char **argv_)
                     stats_write(&stats,
                                 pkt->data.twopass_stats.buf,
                                 pkt->data.twopass_stats.sz);
+                    nbytes += pkt->data.raw.sz;
                     break;
                 case VPX_CODEC_PSNR_PKT:
 
@@ -1035,7 +1036,7 @@ int main(int argc, const char **argv_)
         printf("\rPass %d/%d frame %4d/%-4d %7ldB %7ldb/f %7"PRId64"b/s"
                " %7lu %s (%.2f fps)\033[K", pass + 1,
                arg_passes, frames_in, frames_out, nbytes, nbytes * 8 / frames_in,
-               nbytes * 8 *(int64_t)cfg.g_timebase.den / cfg.g_timebase.num / frames_in,
+               nbytes * 8 *(int64_t)cfg.g_timebase.den/2/ cfg.g_timebase.num / frames_in,
                cx_time > 9999999 ? cx_time / 1000 : cx_time,
                cx_time > 9999999 ? "ms" : "us",
                (float)frames_in * 1000000.0 / (float)cx_time);
