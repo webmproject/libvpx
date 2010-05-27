@@ -81,7 +81,7 @@ struct vpx_codec_alg_priv
     vpx_image_t             preview_img;
     unsigned int            next_frame_flag;
     vp8_postproc_cfg_t      preview_ppcfg;
-    vpx_codec_pkt_list_decl(26) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
+    vpx_codec_pkt_list_decl(64) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
     int                         deprecated_mode;
     unsigned int                fixed_kf_cntr;
 };
