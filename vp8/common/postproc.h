@@ -87,4 +87,11 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
                   int                         low_var_thresh,
                   int                         flag,
                   vp8_postproc_rtcd_vtable_t *rtcd);
+
+void vp8_deblock(YV12_BUFFER_CONFIG         *source,
+                 YV12_BUFFER_CONFIG         *post,
+                 int                         q,
+                 int                         low_var_thresh,
+                 int                         flag,
+                 vp8_postproc_rtcd_vtable_t *rtcd);
 #endif

@@ -274,7 +274,7 @@ static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
 
 }
 
-extern void vp8_deblock(YV12_BUFFER_CONFIG         *source,
+void vp8_deblock(YV12_BUFFER_CONFIG         *source,
                         YV12_BUFFER_CONFIG         *post,
                         int                         q,
                         int                         low_var_thresh,
