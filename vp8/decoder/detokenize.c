@@ -67,23 +67,42 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
     ENTROPY_CONTEXT *l;
     int i;
 
-    for (i = 0; i < 24; i++)
-    {
+    /* Clear entropy contexts for Y blocks */
+    a = A[Y1CONTEXT];
+    l = L[Y1CONTEXT];
+    *a = 0;
+    *(a+1) = 0;
+    *(a+2) = 0;
+    *(a+3) = 0;
+    *l = 0;
+    *(l+1) = 0;
+    *(l+2) = 0;
+    *(l+3) = 0;
 
-        a = A[ vp8_block2context[i] ] + vp8_block2above[i];
-        l = L[ vp8_block2context[i] ] + vp8_block2left[i];
+    /* Clear entropy contexts for U blocks */
+    a = A[UCONTEXT];
+    l = L[UCONTEXT];
+    *a = 0;
+    *(a+1) = 0;
+    *l = 0;
+    *(l+1) = 0;
 
-        *a = *l = 0;
-    }
+    /* Clear entropy contexts for V blocks */
+    a = A[VCONTEXT];
+    l = L[VCONTEXT];
+    *a = 0;
+    *(a+1) = 0;
+    *l = 0;
+    *(l+1) = 0;
 
+    /* Clear entropy contexts for Y2 blocks */
     if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
     {
-        a = A[Y2CONTEXT] + vp8_block2above[24];
-        l = L[Y2CONTEXT] + vp8_block2left[24];
-        *a = *l = 0;
+        a = A[Y2CONTEXT];
+        l = L[Y2CONTEXT];
+        *a = 0;
+        *l = 0;
     }
-
-
 }
 DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
 #define NORMALIZE \
