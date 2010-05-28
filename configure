@@ -1,11 +1,15 @@
 #!/bin/bash
 ##
-##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+##  configure
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  This script is the front-end to the build system. It provides a similar
+##  interface to standard configure scripts with some extra bits for dealing
+##  with toolchains that differ from the standard POSIX interface and
+##  for extracting subsets of the source tree. In theory, reusable parts
+##  of this script were intended to live in build/make/configure.sh,
+##  but in practice, the line is pretty blurry.
+##
+##  This build system is based in part on the FFmpeg configure script.
 ##
 
 #source_path="`dirname \"$0\"`"
