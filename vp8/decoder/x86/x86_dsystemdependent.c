@@ -43,8 +43,6 @@ void vp8_arch_x86_decode_init(VP8D_COMP *pbi)
     if (flags & HAS_MMX)
     {
         pbi->dequant.block   = vp8_dequantize_b_mmx;
-        pbi->dequant.idct    = vp8_dequant_idct_mmx;
-        pbi->dequant.idct_dc = vp8_dequant_dc_idct_mmx;
     }
 
 #endif

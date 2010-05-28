@@ -126,7 +126,6 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
     }
 }
 
-
 static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
 {
     /* If the MV points so far into the UMV border that no visible pixels
@@ -182,110 +181,6 @@ static void clamp_mvs(MACROBLOCKD *xd)
 
 }
 
-static void reconstruct_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
-{
-    if (xd->frame_type == KEY_FRAME  ||  xd->mbmi.ref_frame == INTRA_FRAME)
-    {
-        vp8_build_intra_predictors_mbuv(xd);
-
-        if (xd->mbmi.mode != B_PRED)
-        {
-            vp8_build_intra_predictors_mby_ptr(xd);
-            vp8_recon16x16mb(RTCD_VTABLE(recon), xd);
-        }
-        else
-        {
-            vp8_recon_intra4x4mb(RTCD_VTABLE(recon), xd);
-        }
-    }
-    else
-    {
-        vp8_build_inter_predictors_mb(xd);
-        vp8_recon16x16mb(RTCD_VTABLE(recon), xd);
-    }
-}
-
-
-static void de_quantand_idct(VP8D_COMP *pbi, MACROBLOCKD *xd)
-{
-    int i;
-    BLOCKD *b = &xd->block[24];
-
-
-    if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV)
-    {
-        DEQUANT_INVOKE(&pbi->dequant, block)(b);
-
-        // do 2nd order transform on the dc block
-        if (b->eob > 1)
-        {
-            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
-            ((int *)b->qcoeff)[0] = 0;
-            ((int *)b->qcoeff)[1] = 0;
-            ((int *)b->qcoeff)[2] = 0;
-            ((int *)b->qcoeff)[3] = 0;
-            ((int *)b->qcoeff)[4] = 0;
-            ((int *)b->qcoeff)[5] = 0;
-            ((int *)b->qcoeff)[6] = 0;
-            ((int *)b->qcoeff)[7] = 0;
-        }
-        else
-        {
-            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh1)(&b->dqcoeff[0], b->diff);
-            ((int *)b->qcoeff)[0] = 0;
-        }
-
-
-        for (i = 0; i < 16; i++)
-        {
-
-            b = &xd->block[i];
-
-            if (b->eob > 1)
-            {
-                DEQUANT_INVOKE(&pbi->dequant, idct_dc)(b->qcoeff, &b->dequant[0][0], b->diff, 32, xd->block[24].diff[i]);
-            }
-            else
-            {
-                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar)(xd->block[24].diff[i], b->diff, 32);
-            }
-        }
-
-        for (i = 16; i < 24; i++)
-        {
-            b = &xd->block[i];
-
-            if (b->eob > 1)
-            {
-                DEQUANT_INVOKE(&pbi->dequant, idct)(b->qcoeff, &b->dequant[0][0], b->diff, 16);
-            }
-            else
-            {
-                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar)(b->qcoeff[0] * b->dequant[0][0], b->diff, 16);
-                ((int *)b->qcoeff)[0] = 0;
-            }
-        }
-    }
-    else
-    {
-        for (i = 0; i < 24; i++)
-        {
-
-            b = &xd->block[i];
-
-            if (b->eob > 1)
-            {
-                DEQUANT_INVOKE(&pbi->dequant, idct)(b->qcoeff, &b->dequant[0][0], b->diff, (32 - (i & 16)));
-            }
-            else
-            {
-                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar)(b->qcoeff[0] * b->dequant[0][0], b->diff, (32 - (i & 16)));
-                ((int *)b->qcoeff)[0] = 0;
-            }
-        }
-    }
-}
-
 void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     int eobtotal = 0;
@@ -321,27 +216,122 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
     {
         xd->mode_info_context->mbmi.dc_diff = 0;
         skip_recon_mb(pbi, xd);
+        return;
+    }
+
+    if (xd->segmentation_enabled)
+        mb_init_dequantizer(pbi, xd);
+
+    // do prediction
+    if (xd->frame_type == KEY_FRAME  ||  xd->mbmi.ref_frame == INTRA_FRAME)
+    {
+        vp8_build_intra_predictors_mbuv(xd);
+
+        if (xd->mbmi.mode != B_PRED)
+        {
+            vp8_build_intra_predictors_mby_ptr(xd);
+        } else {
+            vp8_intra_prediction_down_copy(xd);
+        }
     }
     else
     {
-        if (xd->segmentation_enabled)
-            mb_init_dequantizer(pbi, xd);
-
-        de_quantand_idct(pbi, xd);
-        reconstruct_mb(pbi, xd);
+        vp8_build_inter_predictors_mb(xd);
     }
 
-
-    /* Restore the original MV so as not to affect the entropy context. */
-    if (do_clamp)
+    // dequantization and idct
+    if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV)
     {
-        if (xd->mbmi.mode == SPLITMV)
-            for (i=0; i<24; i++)
-                xd->block[i].bmi.mv.as_mv = orig_mvs[i];
+        BLOCKD *b = &xd->block[24];
+        DEQUANT_INVOKE(&pbi->dequant, block)(b);
+
+        // do 2nd order transform on the dc block
+        if (b->eob > 1)
+        {
+            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
+            ((int *)b->qcoeff)[0] = 0;
+            ((int *)b->qcoeff)[1] = 0;
+            ((int *)b->qcoeff)[2] = 0;
+            ((int *)b->qcoeff)[3] = 0;
+            ((int *)b->qcoeff)[4] = 0;
+            ((int *)b->qcoeff)[5] = 0;
+            ((int *)b->qcoeff)[6] = 0;
+            ((int *)b->qcoeff)[7] = 0;
+        }
         else
         {
-            xd->mbmi.mv.as_mv = orig_mvs[0];
-            xd->block[16].bmi.mv.as_mv = orig_mvs[1];
+            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh1)(&b->dqcoeff[0], b->diff);
+            ((int *)b->qcoeff)[0] = 0;
+        }
+
+
+        for (i = 0; i < 16; i++)
+        {
+
+            b = &xd->block[i];
+
+            if (b->eob > 1)
+            {
+                DEQUANT_INVOKE(&pbi->dequant, idct_dc_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride,
+                        xd->block[24].diff[i]);
+            }
+            else
+            {
+                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(xd->block[24].diff[i], b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
+            }
+        }
+    }
+    else if ((xd->frame_type == KEY_FRAME  ||  xd->mbmi.ref_frame == INTRA_FRAME) && xd->mbmi.mode == B_PRED)
+    {
+        for (i = 0; i < 16; i++)
+        {
+
+            BLOCKD *b = &xd->block[i];
+            vp8_predict_intra4x4(b, b->bmi.mode, b->predictor);
+
+            if (b->eob > 1)
+            {
+                DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
+            }
+            else
+            {
+                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(b->qcoeff[0] * b->dequant[0][0], b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
+                ((int *)b->qcoeff)[0] = 0;
+            }
+        }
+
+    }
+    else
+    {
+        for (i = 0; i < 16; i++)
+        {
+            BLOCKD *b = &xd->block[i];
+
+            if (b->eob > 1)
+            {
+                DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
+            }
+            else
+            {
+                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(b->qcoeff[0] * b->dequant[0][0], b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
+                ((int *)b->qcoeff)[0] = 0;
+            }
+        }
+    }
+
+    for (i = 16; i < 24; i++)
+    {
+
+        BLOCKD *b = &xd->block[i];
+
+        if (b->eob > 1)
+        {
+            DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 8, b->dst_stride);
+        }
+        else
+        {
+            IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(b->qcoeff[0] * b->dequant[0][0], b->predictor, *(b->base_dst) + b->dst, 8, b->dst_stride);
+            ((int *)b->qcoeff)[0] = 0;
         }
     }
 }

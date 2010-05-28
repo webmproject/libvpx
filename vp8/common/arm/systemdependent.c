@@ -43,7 +43,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 
     rtcd->idct.idct1        = vp8_short_idct4x4llm_1_neon;
     rtcd->idct.idct16       = vp8_short_idct4x4llm_neon;
-    rtcd->idct.idct1_scalar = vp8_dc_only_idct_neon;
     rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_neon;
     rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_neon;
 
@@ -75,7 +74,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 
     rtcd->idct.idct1        = vp8_short_idct4x4llm_1_v6;
     rtcd->idct.idct16       = vp8_short_idct4x4llm_v6_dual;
-    rtcd->idct.idct1_scalar = vp8_dc_only_idct_armv6;
     rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_armv6;
     rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_armv6;
 
