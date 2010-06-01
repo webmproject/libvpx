@@ -174,7 +174,16 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
 }
 void vp8_setup_version(VP8_COMMON *cm)
 {
-    switch (cm->version)
+    if (cm->version & 0x4)
+    {
+        if (!CONFIG_EXPERIMENTAL)
+            vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
+                               "Bitstream was created by an experimental "
+                               "encoder");        
+        cm->experimental = 1;
+    }
+    
+    switch (cm->version & 0x3)
     {
     case 0:
         cm->no_lpf = 0;
@@ -199,13 +208,6 @@ void vp8_setup_version(VP8_COMMON *cm)
         cm->simpler_lpf = 1;
         cm->use_bilinear_mc_filter = 1;
         cm->full_pixel = 1;
-        break;
-    default:
-        //4,5,6,7 are reserved for future use
-        cm->no_lpf = 0;
-        cm->simpler_lpf = 0;
-        cm->use_bilinear_mc_filter = 0;
-        cm->full_pixel = 0;
         break;
     }
 }

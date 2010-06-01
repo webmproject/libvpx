@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+#include "vpx_config.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
@@ -42,6 +43,9 @@ static const struct codec_item
     unsigned int             fourcc;
 } codecs[] =
 {
+#if CONFIG_EXPERIMENTAL && CONFIG_VP8_ENCODER
+    {"vp8x",  &vpx_codec_vp8x_cx_algo, 0x78385056},
+#endif
 #if CONFIG_VP8_ENCODER
     {"vp8",  &vpx_codec_vp8_cx_algo, 0x30385056},
 #endif

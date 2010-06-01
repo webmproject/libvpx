@@ -31,6 +31,16 @@
 extern vpx_codec_iface_t vpx_codec_vp8_cx_algo;
 
 
+#if CONFIG_EXPERIMENTAL
+/*!\brief Algorithm interface for VP8 experimental branch
+ *
+ * This interface provides the ability to encode using the "experimental"
+ * VP8 variant, which is bitstream incompatible with the default VP8 encoder.
+ */
+extern vpx_codec_iface_t vpx_codec_vp8x_cx_algo;
+#endif
+
+
 /*
  * Algorithm Flags
  */

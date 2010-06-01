@@ -203,6 +203,8 @@ HAVE_LIST="
     pthread_h
     sys_mman_h
 "
+EXPERIMENT_LIST="
+"
 CONFIG_LIST="
     external_build
     install_docs
@@ -242,6 +244,9 @@ CONFIG_LIST="
     static_msvcrt
     spatial_resampling
     realtime_only
+
+    experimental
+    ${EXPERIMENT_LIST}
 "
 CMDLINE_SELECT="
     extra_warnings
@@ -280,6 +285,7 @@ CMDLINE_SELECT="
     mem_tracker
     spatial_resampling
     realtime_only
+    experimental
 "
 
 process_cmdline() {
@@ -287,6 +293,18 @@ process_cmdline() {
         optval="${opt#*=}"
         case "$opt" in
         --disable-codecs) for c in ${CODECS}; do disable $c; done ;;
+        --enable-?*|--disable-?*)
+        eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
+        if echo "${EXPERIMENT_LIST}" | grep "^ *$option\$" >/dev/null; then
+            if enabled experimental; then
+                $action $option
+            else
+                log_echo "Ignoring $opt -- not in experimental mode."
+            fi
+        else
+            process_common_cmdline $opt
+        fi
+        ;;
         *) process_common_cmdline $opt
         ;;
         esac

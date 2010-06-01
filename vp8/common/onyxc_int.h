@@ -113,6 +113,7 @@ typedef struct VP8Common
     int mode_info_stride;
 
     // prfile settings
+    int experimental;
     int mb_no_coeff_skip;
     int no_lpf;
     int simpler_lpf;

@@ -35,7 +35,7 @@ struct vp8_extracfg
     unsigned int                arnr_max_frames;    /* alt_ref Noise Reduction Max Frame Count */
     unsigned int                arnr_strength;    /* alt_ref Noise Reduction Strength */
     unsigned int                arnr_type;        /* alt_ref filter type */
-
+    unsigned int                experimental;
 };
 
 struct extraconfig_map
@@ -65,6 +65,7 @@ static const struct extraconfig_map extracfg_map[] =
             0, /* arnr_max_frames */
             0, /* arnr_strength */
             0, /* arnr_type*/
+            0,                          /* experimental mode */
         }
     }
 };
@@ -232,7 +233,8 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
                                        struct vp8_extracfg vp8_cfg)
 {
     oxcf->multi_threaded         = cfg.g_threads;
-    oxcf->Version               = cfg.g_profile;
+    oxcf->Version               = cfg.g_profile;    
+    oxcf->Version              |= vp8_cfg.experimental? 0x4 : 0;
 
     oxcf->Width                 = cfg.g_w;
     oxcf->Height                = cfg.g_h;
@@ -453,7 +455,10 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
     return res;
 #undef MAP
 }
-static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
+
+
+static vpx_codec_err_t vp8e_common_init(vpx_codec_ctx_t *ctx,
+                                        int              experimental)
 {
     vpx_codec_err_t        res = VPX_DEC_OK;
     struct vpx_codec_alg_priv *priv;
@@ -495,6 +500,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
 
             priv->vp8_cfg = extracfg_map[i].cfg;
             priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
+            priv->vp8_cfg.experimental = experimental;
 
             priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
 
@@ -522,6 +528,21 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
 
     return res;
 }
+
+
+static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
+{
+    return vp8e_common_init(ctx, 0);
+}
+
+
+#if CONFIG_EXPERIMENTAL
+static vpx_codec_err_t vp8e_exp_init(vpx_codec_ctx_t *ctx)
+{
+    return vp8e_common_init(ctx, 1);
+}
+#endif
+
 
 static vpx_codec_err_t vp8e_destroy(vpx_codec_alg_priv_t *ctx)
 {
@@ -1091,6 +1112,36 @@ vpx_codec_iface_t vpx_codec_vp8_cx_algo =
         vp8e_get_preview,
     } /* encoder functions */
 };
+
+
+#if CONFIG_EXPERIMENTAL
+vpx_codec_iface_t vpx_codec_vp8x_cx_algo =
+{
+    "VP8 Experimental Encoder" VERSION_STRING,
+    VPX_CODEC_INTERNAL_ABI_VERSION,
+    VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,
+    /* vpx_codec_caps_t          caps; */
+    vp8e_exp_init,      /* vpx_codec_init_fn_t       init; */
+    vp8e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
+    vp8e_ctf_maps,      /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
+    NOT_IMPLEMENTED,    /* vpx_codec_get_mmap_fn_t   get_mmap; */
+    NOT_IMPLEMENTED,    /* vpx_codec_set_mmap_fn_t   set_mmap; */
+    {
+        NOT_IMPLEMENTED,    /* vpx_codec_peek_si_fn_t    peek_si; */
+        NOT_IMPLEMENTED,    /* vpx_codec_get_si_fn_t     get_si; */
+        NOT_IMPLEMENTED,    /* vpx_codec_decode_fn_t     decode; */
+        NOT_IMPLEMENTED,    /* vpx_codec_frame_get_fn_t  frame_get; */
+    },
+    {
+        vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
+        vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
+        vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
+        vp8e_set_config,
+        NOT_IMPLEMENTED,
+        vp8e_get_preview,
+    } /* encoder functions */
+};
+#endif
 
 
 /*
