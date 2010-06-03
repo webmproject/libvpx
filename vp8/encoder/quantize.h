@@ -46,8 +46,5 @@ typedef struct
 extern void vp8_quantize_mb(MACROBLOCK *x);
 extern void vp8_quantize_mbuv(MACROBLOCK *x);
 extern void vp8_quantize_mby(MACROBLOCK *x);
-extern void vp8_quantize_mbyrd(MACROBLOCK *x);
-extern void vp8_quantize_mbuvrd(MACROBLOCK *x);
-extern void vp8_quantize_mbrd(MACROBLOCK *x);
 
 #endif

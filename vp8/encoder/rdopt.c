@@ -1038,7 +1038,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
 
             // set to 0 no way to account for 2nd order DC so discount
             //be->coeff[0] = 0;
-            x->quantize_brd(be, bd);
+            x->quantize_b(be, bd);
 
             distortion += ENCODEMB_INVOKE(rtcd, berr)(be->coeff, bd->dqcoeff);
         }
@@ -1076,7 +1076,7 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp
     // Quantization
     for (b = 0; b < 16; b++)
     {
-        mb->quantize_brd(&mb->block[b], &mb->e_mbd.block[b]);
+        mb->quantize_b(&mb->block[b], &mb->e_mbd.block[b]);
     }
 
     // DC predication and Quantization of 2nd Order block
@@ -1084,7 +1084,7 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp
     {
 
         {
-            mb->quantize_brd(mb_y2, x_y2);
+            mb->quantize_b(mb_y2, x_y2);
         }
     }
 

@@ -1150,12 +1150,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     if (cpi->sf.improved_quant)
     {
         cpi->mb.quantize_b    = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb);
-        cpi->mb.quantize_brd  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb);
     }
     else
     {
         cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
-        cpi->mb.quantize_brd    = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
     }
 
 #if CONFIG_RUNTIME_CPU_DETECT

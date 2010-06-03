@@ -68,7 +68,7 @@ void vp8_encode_intra4x4block_rd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BL
 
     x->short_fdct4x4rd(be->src_diff, be->coeff, 32);
 
-    x->quantize_brd(be, b);
+    x->quantize_b(be, b);
 
     x->e_mbd.mbmi.mb_skip_coeff &= (!b->eob);
 
@@ -160,8 +160,7 @@ void vp8_encode_intra16x16mbyrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     x->e_mbd.mbmi.mb_skip_coeff = 1;
 
-    vp8_quantize_mbyrd(x);
-
+    vp8_quantize_mby(x);
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
@@ -227,9 +226,7 @@ void vp8_encode_intra16x16mbuvrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_transform_mbuvrd(x);
 
-    vp8_quantize_mbuvrd(x);
-
-
+    vp8_quantize_mbuv(x);
 
     vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
