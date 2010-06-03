@@ -92,7 +92,9 @@ CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
 endif
 CODEC_SRCS-$(ARCH_ARM) += $(BUILD_PFX)vpx_config.asm
-CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports
+CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
+CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
+CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
 
 INSTALL-LIBS-yes += include/vpx/vpx_codec.h
 INSTALL-LIBS-yes += include/vpx/vpx_image.h
@@ -175,6 +177,31 @@ LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
 LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
+
+BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
+LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
+LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)
+$(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
+$(BUILD_PFX)$(LIBVPX_SO): LDFLAGS += -lm -pthread
+$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
+$(BUILD_PFX)$(LIBVPX_SO): SO_VERSION_SCRIPT = libvpx.ver
+LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
+                             libvpx.so libvpx.so.$(VERSION_MAJOR) \
+                             libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR))
+
+libvpx.ver: $(call enabled,CODEC_EXPORTS)
+	@echo "    [CREATE] $@"
+	$(qexec)echo "{ global:" > $@
+	$(qexec)for f in $?; do awk '{print $$2";"}' < $$f >>$@; done
+	$(qexec)echo "local: *; };" >> $@
+CLEAN-OBJS += libvpx.ver
+
+$(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)):
+	@echo "    [LN]      $@"
+	$(qexec)ln -sf $(LIBVPX_SO) $@
+
+INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
 endif
 
 LIBS-$(LIPO_LIBVPX) += libvpx.a

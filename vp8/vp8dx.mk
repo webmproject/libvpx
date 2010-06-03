@@ -10,6 +10,9 @@
 
 
 include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
+
+VP8_DX_EXPORTS += exports_dec
+
 VP8_DX_SRCS-yes += $(VP8_COMMON_SRCS-yes)
 VP8_DX_SRCS-no  += $(VP8_COMMON_SRCS-no)
 VP8_DX_SRCS_REMOVE-yes += $(VP8_COMMON_SRCS_REMOVE-yes)

@@ -220,6 +220,20 @@ $(1):
 	$(qexec)$$(AR) $$(ARFLAGS) $$@ $$?
 endef
 
+define so_template
+# Not using a pattern rule here because we don't want to generate empty
+# archives when they are listed as a dependency in files not responsible
+# for creating them.
+#
+# This needs further abstraction for dealing with non-GNU linkers.
+$(1):
+	$(if $(quiet),@echo "    [LD] $$@")
+	$(qexec)$$(LD) -shared $$(LDFLAGS) \
+            -Wl,--no-undefined -Wl,-soname,$$(SONAME) \
+            -Wl,--version-script,$$(SO_VERSION_SCRIPT) -o $$@ \
+            $$(filter %.o,$$?)
+endef
+
 define lipo_lib_template
 $(1): $(addsuffix /$(1),$(FAT_ARCHS))
 	$(if $(quiet),@echo "    [LIPO] $$@")
@@ -283,6 +297,7 @@ LIBS=$(call enabled,LIBS)
 .libs: $(LIBS)
 	@touch $@
 $(foreach lib,$(filter %_g.a,$(LIBS)),$(eval $(call archive_template,$(lib))))
+$(foreach lib,$(filter %so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH),$(LIBS)),$(eval $(call so_template,$(lib))))
 
 INSTALL-LIBS=$(call cond_enabled,CONFIG_INSTALL_LIBS,INSTALL-LIBS)
 ifeq ($(MAKECMDGOALS),dist)

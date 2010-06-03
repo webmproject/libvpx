@@ -39,6 +39,7 @@ Advanced options:
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_runtime_cpu_detect}    runtime cpu detection
+  ${toggle_shared}                shared library support
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -242,6 +243,7 @@ CONFIG_LIST="
     static_msvcrt
     spatial_resampling
     realtime_only
+    shared
 "
 CMDLINE_SELECT="
     extra_warnings
@@ -280,6 +282,7 @@ CMDLINE_SELECT="
     mem_tracker
     spatial_resampling
     realtime_only
+    shared
 "
 
 process_cmdline() {
@@ -369,6 +372,12 @@ process_targets() {
     if [ -f "${source_path}/build/make/version.sh" ]; then
         local ver=`"$source_path/build/make/version.sh" --bare $source_path`
         DIST_DIR="${DIST_DIR}-${ver}"
+        ver=${ver%%-*}
+        VERSION_PATCH=${ver##*.}
+        ver=${ver%.*}
+        VERSION_MINOR=${ver##*.}
+        ver=${ver#v}
+        VERSION_MAJOR=${ver%.*}
     fi
     enabled child || cat <<EOF >> config.mk
 ifeq (\$(MAKECMDGOALS),dist)
@@ -377,6 +386,11 @@ else
 DIST_DIR?=\$(DESTDIR)${prefix}
 endif
 LIBSUBDIR=${libdir##${prefix}/}
+
+VERSION_MAJOR=${VERSION_MAJOR}
+VERSION_MINOR=${VERSION_MINOR}
+VERSION_PATCH=${VERSION_PATCH}
+
 EOF
     enabled child || echo "CONFIGURE_ARGS?=${CONFIGURE_ARGS}" >> config.mk
 
@@ -396,6 +410,12 @@ EOF
 }
 
 process_detect() {
+    if enabled shared; then
+        # Can only build shared libs on a subset of platforms. Doing this check
+        # here rather than at option parse time because the target auto-detect
+        # magic happens after the command line has been parsed.
+	enabled linux || die "--enable-shared only supported on ELF for now"
+    fi
     if [ -z "$CC" ]; then
         echo "Bypassing toolchain for environment detection."
         enable external_build
