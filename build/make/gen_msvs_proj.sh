@@ -12,6 +12,7 @@
 
 self=$0
 self_basename=${self##*/}
+self_dirname=$(dirname "$0")
 EOL=$'\n'
 
 show_help() {
@@ -292,8 +293,8 @@ case "$target" in
     x86*)
         platforms[0]="Win32"
         # these are only used by vs7
-        asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} \$(InputPath)"
-        asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} \$(InputPath)"
+        asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
+        asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
     ;;
     arm*|iwmmx*)
         case "${name}" in
@@ -343,19 +344,19 @@ generate_vcproj() {
 
     open_tag  ToolFiles
     case "$target" in
-        x86*) $uses_asm && tag DefaultToolFile FileName="yasm.rules"
+        x86*) $uses_asm && tag ToolFile RelativePath="$self_dirname/../x86-msvs/yasm.rules"
         ;;
         arm*|iwmmx*)
             if [ "$name" == "vpx_decoder" ];then
             case "$target" in
                 armv5*)
-                    tag DefaultToolFile FileName="armasmv5.rules"
+                    tag ToolFile RelativePath="$self_dirname/../arm-wince-vs8/armasmv5.rules"
                 ;;
                 armv6*)
-                    tag DefaultToolFile FileName="armasmv6.rules"
+                    tag ToolFile RelativePath="$self_dirname/../arm-wince-vs8/armasmv6.rules"
                 ;;
                 iwmmxt*)
-                    tag DefaultToolFile FileName="armasmxscale.rules"
+                    tag ToolFile RelativePath="$self_dirname/../arm-wince-vs8/armasmxscale.rules"
                 ;;
             esac
             fi

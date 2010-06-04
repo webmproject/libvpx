@@ -132,7 +132,6 @@ ARM_ARCH=v6
 endif
 obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
 	@cp $(SRC_PATH_BARE)/build/arm-wince-vs8/obj_int_extract.bat .
-	@cp $(SRC_PATH_BARE)/build/arm-wince-vs8/armasm$(ARM_ARCH).rules .
 	@echo "    [CREATE] $@"
 	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
 			--exe\
