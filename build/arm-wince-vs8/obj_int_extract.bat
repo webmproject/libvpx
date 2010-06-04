@@ -1,10 +1,11 @@
 @echo off
 REM   Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 REM 
-REM   Use of this source code is governed by a BSD-style license and patent
-REM   grant that can be found in the LICENSE file in the root of the source
-REM   tree. All contributing project authors may be found in the AUTHORS
-REM   file in the root of the source tree.
+REM   Use of this source code is governed by a BSD-style license 
+REM   that can be found in the LICENSE file in the root of the source
+REM   tree. An additional intellectual property rights grant can be found
+REM   in the file PATENTS.  All contributing project authors may 
+REM   be found in the AUTHORS file in the root of the source tree.    
 echo on
 
 
