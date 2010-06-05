@@ -120,8 +120,8 @@ EOF
 
 show_targets() {
     while [ -n "$*" ]; do
-        if [ "${1%%-*}" == "${2%%-*}" ]; then
-            if [ "${2%%-*}" == "${3%%-*}" ]; then
+        if [ "${1%%-*}" = "${2%%-*}" ]; then
+            if [ "${2%%-*}" = "${3%%-*}" ]; then
                 printf "    %-24s %-24s %-24s\n" "$1" "$2" "$3"
                 shift; shift; shift
             else
@@ -475,7 +475,7 @@ post_process_common_cmdline() {
     prefix="${prefix%/}"
     libdir="${libdir:-${prefix}/lib}"
     libdir="${libdir%/}"
-    if [ "${libdir#${prefix}}" == "${libdir}" ]; then
+    if [ "${libdir#${prefix}}" = "${libdir}" ]; then
         die "Libdir ${libdir} must be a subdirectory of ${prefix}"
     fi
 }

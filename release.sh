@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
@@ -21,7 +21,7 @@ for opt; do
     esac
 done
 
-TAB=$'\t'
+TAB="$(printf '\t')"
 cat > release.mk << EOF
 %\$(BUILD_SFX).tar.bz2: %/.done
 ${TAB}@echo "\$(subst .tar.bz2,,\$@): tarball"
@@ -186,7 +186,7 @@ for cfg in $CONFIGS; do
     esac
     opts="$opts --enable-postproc"
 
-    [ "x${clean}" == "xyes" ] \
+    [ "x${clean}" = "xyes" ] \
         && rm -rf ${full_cfg}${BUILD_SFX}${TAR_SFX} \
         && rm -rf logs/${full_cfg}${BUILD_SFX}.log.bz2
 
