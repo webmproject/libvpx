@@ -1869,6 +1869,14 @@ void vp8_second_pass(VP8_COMP *cpi)
         }
     }
 
+    // Keep a globally available copy of this frames iiratio and the next.
+    cpi->this_iiratio = this_frame_intra_error / DOUBLE_DIVIDE_CHECK(this_frame_coded_error);
+    {
+        FIRSTPASS_STATS next_frame;
+        if ( lookup_next_frame_stats(cpi, &next_frame) != EOF )
+            cpi->next_iiratio = next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error);
+    }
+
     // Set nominal per second bandwidth for this frame
     cpi->target_bandwidth = cpi->per_frame_bandwidth * cpi->output_frame_rate;
     if (cpi->target_bandwidth < 0)

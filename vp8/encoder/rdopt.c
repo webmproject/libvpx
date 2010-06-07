@@ -171,13 +171,11 @@ static void fill_token_costs(
 
 }
 
-static int rd_iifactor [ 32 ] =  {    16,  16,  16,  12,   8,   4,   2,   0,
+static int rd_iifactor [ 32 ] =  {    4,   4,   3,   2,   1,   0,   0,   0,
                                       0,   0,   0,   0,   0,   0,   0,   0,
                                       0,   0,   0,   0,   0,   0,   0,   0,
                                       0,   0,   0,   0,   0,   0,   0,   0,
                                  };
-
-
 
 
 // The values in this table should be reviewed
@@ -238,36 +236,32 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
 
     vp8_clear_system_state();  //__asm emms;
 
-    cpi->RDMULT = (int)((0.00007 * (capped_q * capped_q * capped_q * capped_q)) - (0.0125 * (capped_q * capped_q * capped_q)) +
-                        (2.25 * (capped_q * capped_q)) - (12.5 * capped_q) + 25.0);
+    cpi->RDMULT = (int)( (0.0001 * (capped_q * capped_q * capped_q * capped_q))
+                        -(0.0125 * (capped_q * capped_q * capped_q))
+                        +(3.25 * (capped_q * capped_q))
+                        -(12.5 * capped_q) + 50.0);
 
-    if (cpi->RDMULT < 25)
-        cpi->RDMULT = 25;
+    if (cpi->RDMULT < 50)
+        cpi->RDMULT = 50;
 
-    if (cpi->pass == 2)
+    if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME))
     {
-        if (cpi->common.frame_type == KEY_FRAME)
-            cpi->RDMULT += (cpi->RDMULT * rd_iifactor[0]) / 16;
-        else if (cpi->next_iiratio > 31)
-            cpi->RDMULT += (cpi->RDMULT * rd_iifactor[31]) / 16;
+        if (cpi->next_iiratio > 31)
+            cpi->RDMULT += (cpi->RDMULT * rd_iifactor[31]) >> 4;
         else
-            cpi->RDMULT += (cpi->RDMULT * rd_iifactor[cpi->next_iiratio]) / 16;
+            cpi->RDMULT += (cpi->RDMULT * rd_iifactor[cpi->next_iiratio]) >> 4;
     }
 
 
     // Extend rate multiplier along side quantizer zbin increases
     if (cpi->zbin_over_quant  > 0)
     {
-        // Extend rate multiplier along side quantizer zbin increases
-        if (cpi->zbin_over_quant  > 0)
-        {
-            double oq_factor = pow(1.006,  cpi->zbin_over_quant);
+        double oq_factor = pow(1.006,  cpi->zbin_over_quant);
 
-            if (oq_factor > (1.0 + ((double)cpi->zbin_over_quant / 64.0)))
-                oq_factor = (1.0 + (double)cpi->zbin_over_quant / 64.0);
+        if (oq_factor > (1.0 + ((double)cpi->zbin_over_quant / 64.0)))
+            oq_factor = (1.0 + (double)cpi->zbin_over_quant / 64.0);
 
-            cpi->RDMULT = (int)(oq_factor * cpi->RDMULT);
-        }
+        cpi->RDMULT = (int)(oq_factor * cpi->RDMULT);
     }
 
     cpi->mb.errorperbit = (cpi->RDMULT / 100);
