@@ -497,10 +497,10 @@ setup_gnu_toolchain() {
 
 process_common_toolchain() {
     if [ -z "$toolchain" ]; then
-        uname="$(uname -a)"
+	gcctarget="$(gcc -dumpmachine 2> /dev/null)"
 
         # detect tgt_isa
-        case "$uname" in
+        case "$gcctarget" in
             *x86_64*)
                 tgt_isa=x86_64
                 ;;
@@ -510,19 +510,19 @@ process_common_toolchain() {
         esac
 
         # detect tgt_os
-        case "$uname" in
-            *Darwin\ Kernel\ Version\ 8*)
+        case "$gcctarget" in
+            *darwin8*)
                 tgt_isa=universal
                 tgt_os=darwin8
                 ;;
-            *Darwin\ Kernel\ Version\ 9*)
+            *darwin9*)
                 tgt_isa=universal
                 tgt_os=darwin9
                 ;;
-            *Msys*|*Cygwin*)
+            *msys*|*cygwin*)
                 tgt_os=win32
                 ;;
-            *Linux*|*BSD*)
+            *linux*|*bsd*)
                 tgt_os=linux
                 ;;
         esac
