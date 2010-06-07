@@ -528,7 +528,7 @@ static vpx_codec_err_t vp8_xma_set_mmap(vpx_codec_ctx_t         *ctx,
 
     done = 1;
 
-    if (ctx->priv->alg_priv)
+    if (!res && ctx->priv->alg_priv)
     {
         for (i = 0; i < NELEMENTS(vp8_mem_req_segs); i++)
         {
