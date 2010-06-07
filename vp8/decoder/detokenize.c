@@ -66,7 +66,6 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 
     ENTROPY_CONTEXT *a;
     ENTROPY_CONTEXT *l;
-    int i;
 
     /* Clear entropy contexts for Y blocks */
     a = A[Y1CONTEXT];
