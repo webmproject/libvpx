@@ -223,11 +223,12 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx)
         res = vp8_mmap_alloc(&mmap);
 
         if (!res)
+        {
             vp8_init_ctx(ctx, &mmap);
 
-        ctx->priv->alg_priv->defer_alloc = 1;
-        /*post processing level initialized to do nothing */
-
+            ctx->priv->alg_priv->defer_alloc = 1;
+            /*post processing level initialized to do nothing */
+        }
     }
 
     return res;
