@@ -106,7 +106,6 @@ typedef struct
     void (*short_walsh4x4)(short *input, short *output, int pitch);
 
     void (*quantize_b)(BLOCK *b, BLOCKD *d);
-    void (*quantize_brd)(BLOCK *b, BLOCKD *d);
 
 
 
