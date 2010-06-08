@@ -56,9 +56,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
             }
         }
     }
-
     d->eob = eob + 1;
-
 }
 
 void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
@@ -112,61 +110,40 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
 
     d->eob = eob + 1;
 }
+
 void vp8_quantize_mby(MACROBLOCK *x)
 {
     int i;
+    int has_2nd_order = (x->e_mbd.mbmi.mode != B_PRED
+        && x->e_mbd.mbmi.mode != SPLITMV);
 
-    if (x->e_mbd.mbmi.mode != B_PRED && x->e_mbd.mbmi.mode != SPLITMV)
+    for (i = 0; i < 16; i++)
     {
-        for (i = 0; i < 16; i++)
-        {
-            x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-            x->e_mbd.mbmi.mb_skip_coeff &= (x->e_mbd.block[i].eob < 2);
-        }
+        x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+        x->e_mbd.mbmi.mb_skip_coeff &=
+            (x->e_mbd.block[i].eob <= has_2nd_order);
+    }
 
+    if(has_2nd_order)
+    {
         x->quantize_b(&x->block[24], &x->e_mbd.block[24]);
         x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[24].eob);
-
-    }
-    else
-    {
-        for (i = 0; i < 16; i++)
-        {
-            x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-            x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
-        }
     }
 }
 
 void vp8_quantize_mb(MACROBLOCK *x)
 {
     int i;
+    int has_2nd_order=(x->e_mbd.mbmi.mode != B_PRED
+        && x->e_mbd.mbmi.mode != SPLITMV);
 
     x->e_mbd.mbmi.mb_skip_coeff = 1;
-
-    if (x->e_mbd.mbmi.mode != B_PRED && x->e_mbd.mbmi.mode != SPLITMV)
+    for (i = 0; i < 24+has_2nd_order; i++)
     {
-        for (i = 0; i < 16; i++)
-        {
-            x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-            x->e_mbd.mbmi.mb_skip_coeff &= (x->e_mbd.block[i].eob < 2);
-        }
-
-        for (i = 16; i < 25; i++)
-        {
-            x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-            x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
-        }
+        x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+        x->e_mbd.mbmi.mb_skip_coeff &=
+            (x->e_mbd.block[i].eob <= (has_2nd_order && i<16));
     }
-    else
-    {
-        for (i = 0; i < 24; i++)
-        {
-            x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-            x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
-        }
-    }
-
 }
 
 

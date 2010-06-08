@@ -1144,7 +1144,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         cpi->mb.short_fdct4x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
     }
 
-    cpi->mb.vp8_short_fdct4x4_ptr = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
     cpi->mb.short_walsh4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, walsh_short4x4);
 
     if (cpi->sf.improved_quant)
