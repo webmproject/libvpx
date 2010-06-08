@@ -760,7 +760,7 @@ void vp8_encode_inter16x16uv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_transform_mbuv(x);
 
-    vp8_quantize_mb(x);
+    vp8_quantize_mbuv(x);
 
     vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
