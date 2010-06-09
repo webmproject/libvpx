@@ -174,9 +174,8 @@ typedef struct
     int dc_diff;
     unsigned char   segment_id;                  // Which set of segmentation parameters should be used for this MB
     int force_no_skip;
-
+    int need_to_clamp_mvs;
     B_MODE_INFO partition_bmi[16];
-
 } MB_MODE_INFO;
 
 

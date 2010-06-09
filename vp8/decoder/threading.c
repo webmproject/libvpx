@@ -1,10 +1,10 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license 
+ *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
  *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may 
+ *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
@@ -154,7 +154,9 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                     }
 
                     // Take a copy of the mode and Mv information for this macroblock into the xd->mbmi
-                    vpx_memcpy(&xd->mbmi, &xd->mode_info_context->mbmi, 32); //sizeof(MB_MODE_INFO) );
+                    // the partition_bmi array is unused in the decoder, so don't copy it.
+                    vpx_memcpy(&xd->mbmi, &xd->mode_info_context->mbmi,
+                               sizeof(MB_MODE_INFO) - sizeof(xd->mbmi.partition_bmi));
 
                     if (xd->mbmi.mode == SPLITMV || xd->mbmi.mode == B_PRED)
                     {
