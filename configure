@@ -242,6 +242,7 @@ CONFIG_LIST="
     spatial_resampling
     realtime_only
     shared
+    dixie
 "
 CMDLINE_SELECT="
     extra_warnings
@@ -280,6 +281,7 @@ CMDLINE_SELECT="
     spatial_resampling
     realtime_only
     shared
+    dixie
 "
 
 process_cmdline() {

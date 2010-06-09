@@ -29,6 +29,10 @@
 
 static const char *exec_name;
 
+#if CONFIG_DIXIE
+extern vpx_codec_iface_t vpx_codec_vp8_dixie_algo;
+#endif
+
 static const struct
 {
     char const *name;
@@ -39,6 +43,9 @@ static const struct
 {
 #if CONFIG_VP8_DECODER
     {"vp8",  &vpx_codec_vp8_dx_algo,   0x00385056, 0x00FFFFFF},
+#endif
+#if CONFIG_DIXIE
+    {"dixie", &vpx_codec_vp8_dixie_algo, 0x00385056, 0x00FFFFFF},
 #endif
 };
 
