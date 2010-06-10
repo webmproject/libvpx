@@ -182,7 +182,7 @@ BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
 LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)
 $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
-$(BUILD_PFX)$(LIBVPX_SO): LDFLAGS += -lm -pthread
+$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm -pthread
 $(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
 $(BUILD_PFX)$(LIBVPX_SO): SO_VERSION_SCRIPT = libvpx.ver
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \

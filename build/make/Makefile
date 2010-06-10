@@ -231,7 +231,7 @@ $(1):
 	$(qexec)$$(LD) -shared $$(LDFLAGS) \
             -Wl,--no-undefined -Wl,-soname,$$(SONAME) \
             -Wl,--version-script,$$(SO_VERSION_SCRIPT) -o $$@ \
-            $$(filter %.o,$$?)
+            $$(filter %.o,$$?) $$(extralibs)
 endef
 
 define lipo_lib_template
