@@ -149,6 +149,19 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
         mv->row = xd->mb_to_bottom_edge + (16 << 3);
 }
 
+/* A version of the above function for chroma block MVs.*/
+static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
+{
+    if (2*mv->col < (xd->mb_to_left_edge - (19 << 3)))
+        mv->col = (xd->mb_to_left_edge - (16 << 3)) >> 1;
+    else if (2*mv->col > xd->mb_to_right_edge + (18 << 3))
+        mv->col = (xd->mb_to_right_edge + (16 << 3)) >> 1;
+
+    if (2*mv->row < (xd->mb_to_top_edge - (19 << 3)))
+        mv->row = (xd->mb_to_top_edge - (16 << 3)) >> 1;
+    else if (2*mv->row > xd->mb_to_bottom_edge + (18 << 3))
+        mv->row = (xd->mb_to_bottom_edge + (16 << 3)) >> 1;
+}
 
 static void clamp_mvs(MACROBLOCKD *xd)
 {
@@ -158,11 +171,13 @@ static void clamp_mvs(MACROBLOCKD *xd)
 
         for (i=0; i<16; i++)
             clamp_mv_to_umv_border(&xd->block[i].bmi.mv.as_mv, xd);
+        for (i=16; i<24; i++)
+            clamp_uvmv_to_umv_border(&xd->block[i].bmi.mv.as_mv, xd);
     }
     else
     {
         clamp_mv_to_umv_border(&xd->mbmi.mv.as_mv, xd);
-        clamp_mv_to_umv_border(&xd->block[16].bmi.mv.as_mv, xd);
+        clamp_uvmv_to_umv_border(&xd->block[16].bmi.mv.as_mv, xd);
     }
 
 }
