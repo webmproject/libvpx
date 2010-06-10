@@ -68,6 +68,17 @@ extern void vp8_filter_block1d8_v6_sse2
     unsigned int output_width,
     const short    *vp8_filter
 );
+extern void vp8_filter_block1d16_v6_sse2
+(
+    unsigned short *src_ptr,
+    unsigned char *output_ptr,
+    int dst_ptich,
+    unsigned int pixels_per_line,
+    unsigned int pixel_step,
+    unsigned int output_height,
+    unsigned int output_width,
+    const short    *vp8_filter
+);
 extern void vp8_unpack_block1d16_h6_sse2
 (
     unsigned char  *src_ptr,
@@ -76,31 +87,32 @@ extern void vp8_unpack_block1d16_h6_sse2
     unsigned int    output_height,
     unsigned int    output_width
 );
-extern void vp8_unpack_block1d8_h6_sse2
+extern void vp8_filter_block1d8_h6_only_sse2
 (
     unsigned char  *src_ptr,
-    unsigned short *output_ptr,
     unsigned int    src_pixels_per_line,
+    unsigned char  *output_ptr,
+    int dst_ptich,
     unsigned int    output_height,
-    unsigned int    output_width
+    const short    *vp8_filter
 );
-extern void vp8_pack_block1d8_v6_sse2
+extern void vp8_filter_block1d16_h6_only_sse2
 (
-    unsigned short *src_ptr,
+    unsigned char  *src_ptr,
+    unsigned int    src_pixels_per_line,
+    unsigned char  *output_ptr,
+    int dst_ptich,
+    unsigned int    output_height,
+    const short    *vp8_filter
+);
+extern void vp8_filter_block1d8_v6_only_sse2
+(
+    unsigned char *src_ptr,
+    unsigned int   src_pixels_per_line,
     unsigned char *output_ptr,
     int dst_ptich,
-    unsigned int pixels_per_line,
-    unsigned int output_height,
-    unsigned int output_width
-);
-extern void vp8_pack_block1d16_v6_sse2
-(
-    unsigned short *src_ptr,
-    unsigned char *output_ptr,
-    int dst_ptich,
-    unsigned int pixels_per_line,
-    unsigned int output_height,
-    unsigned int output_width
+    unsigned int   output_height,
+    const short   *vp8_filter
 );
 extern prototype_subpixel_predict(vp8_bilinear_predict8x8_mmx);
 
@@ -247,23 +259,26 @@ void vp8_sixtap_predict16x16_sse2
 
     if (xoffset)
     {
-        HFilter = vp8_six_tap_mmx[xoffset];
-        vp8_filter_block1d16_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 1, 21, 32, HFilter);
+        if (yoffset)
+        {
+            HFilter = vp8_six_tap_mmx[xoffset];
+            vp8_filter_block1d16_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 1, 21, 32, HFilter);
+            VFilter = vp8_six_tap_mmx[yoffset];
+            vp8_filter_block1d16_v6_sse2(FData2 + 32, dst_ptr,   dst_pitch, 32, 16 , 16, dst_pitch, VFilter);
+        }
+        else
+        {
+            // First-pass only
+            HFilter = vp8_six_tap_mmx[xoffset];
+            vp8_filter_block1d16_h6_only_sse2(src_ptr, src_pixels_per_line, dst_ptr, dst_pitch, 16, HFilter);
+        }
     }
     else
     {
-        vp8_unpack_block1d16_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 21, 32);
-    }
-
-    if (yoffset)
-    {
+        // Second-pass only
         VFilter = vp8_six_tap_mmx[yoffset];
-        vp8_filter_block1d8_v6_sse2(FData2 + 32, dst_ptr,   dst_pitch, 32, 16 , 16, 16, VFilter);
-        vp8_filter_block1d8_v6_sse2(FData2 + 40, dst_ptr + 8, dst_pitch, 32, 16 , 16, 16, VFilter);
-    }
-    else
-    {
-        vp8_pack_block1d16_v6_sse2(FData2 + 32, dst_ptr,   dst_pitch, 32,  16, 16);
+        vp8_unpack_block1d16_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 21, 32);
+        vp8_filter_block1d16_v6_sse2(FData2 + 32, dst_ptr,   dst_pitch, 32, 16 , 16, dst_pitch, VFilter);
     }
 }
 
@@ -283,25 +298,26 @@ void vp8_sixtap_predict8x8_sse2
 
     if (xoffset)
     {
-        HFilter = vp8_six_tap_mmx[xoffset];
-        vp8_filter_block1d8_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 1, 13, 16, HFilter);
+        if (yoffset)
+        {
+            HFilter = vp8_six_tap_mmx[xoffset];
+            vp8_filter_block1d8_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 1, 13, 16, HFilter);
+            VFilter = vp8_six_tap_mmx[yoffset];
+            vp8_filter_block1d8_v6_sse2(FData2 + 16, dst_ptr,   dst_pitch, 16, 8 , 8, dst_pitch, VFilter);
+        }
+        else
+        {
+            // First-pass only
+            HFilter = vp8_six_tap_mmx[xoffset];
+            vp8_filter_block1d8_h6_only_sse2(src_ptr, src_pixels_per_line, dst_ptr, dst_pitch, 8, HFilter);
+        }
     }
     else
     {
-        vp8_unpack_block1d8_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 13, 16);
-    }
-
-    if (yoffset)
-    {
+        // Second-pass only
         VFilter = vp8_six_tap_mmx[yoffset];
-        vp8_filter_block1d8_v6_sse2(FData2 + 16, dst_ptr,   dst_pitch, 16, 8 , 8, dst_pitch, VFilter);
+        vp8_filter_block1d8_v6_only_sse2(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, dst_ptr, dst_pitch, 8, VFilter);
     }
-    else
-    {
-        vp8_pack_block1d8_v6_sse2(FData2 + 16, dst_ptr,   dst_pitch, 16,  8, dst_pitch);
-    }
-
-
 }
 
 
@@ -320,24 +336,26 @@ void vp8_sixtap_predict8x4_sse2
 
     if (xoffset)
     {
-        HFilter = vp8_six_tap_mmx[xoffset];
-        vp8_filter_block1d8_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 1, 9, 16, HFilter);
+        if (yoffset)
+        {
+            HFilter = vp8_six_tap_mmx[xoffset];
+            vp8_filter_block1d8_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 1, 9, 16, HFilter);
+            VFilter = vp8_six_tap_mmx[yoffset];
+            vp8_filter_block1d8_v6_sse2(FData2 + 16, dst_ptr,   dst_pitch, 16, 8 , 4, dst_pitch, VFilter);
+        }
+        else
+        {
+            // First-pass only
+            HFilter = vp8_six_tap_mmx[xoffset];
+            vp8_filter_block1d8_h6_only_sse2(src_ptr, src_pixels_per_line, dst_ptr, dst_pitch, 4, HFilter);
+        }
     }
     else
     {
-        vp8_unpack_block1d8_h6_sse2(src_ptr - (2 * src_pixels_per_line), FData2,   src_pixels_per_line, 9, 16);
-    }
-
-    if (yoffset)
-    {
+        // Second-pass only
         VFilter = vp8_six_tap_mmx[yoffset];
-        vp8_filter_block1d8_v6_sse2(FData2 + 16, dst_ptr,   dst_pitch, 16, 8 , 4, dst_pitch, VFilter);
+        vp8_filter_block1d8_v6_only_sse2(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, dst_ptr, dst_pitch, 4, VFilter);
     }
-    else
-    {
-        vp8_pack_block1d8_v6_sse2(FData2 + 16, dst_ptr,   dst_pitch, 16,  4, dst_pitch);
-    }
-
-
 }
+
 #endif
