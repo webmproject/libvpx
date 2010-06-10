@@ -519,7 +519,7 @@ process_common_toolchain() {
                 tgt_isa=universal
                 tgt_os=darwin9
                 ;;
-            *msys*|*cygwin*)
+            *mingw32*|*cygwin*)
                 tgt_os=win32
                 ;;
             *linux*|*bsd*)
