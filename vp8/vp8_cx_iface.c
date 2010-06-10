@@ -1068,7 +1068,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 #endif
 vpx_codec_iface_t vpx_codec_vp8_cx_algo =
 {
-    "vpx Technologies VP8 Encoder" VERSION_STRING,
+    "WebM Project VP8 Encoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,
     /* vpx_codec_caps_t          caps; */
@@ -1157,7 +1157,7 @@ static vpx_codec_err_t api1_encode(vpx_codec_alg_priv_t  *ctx,
 
 vpx_codec_iface_t vpx_enc_vp8_algo =
 {
-    "vpx Technologies VP8 Encoder (Deprecated API)" VERSION_STRING,
+    "WebM Project VP8 Encoder (Deprecated API)" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_ENCODER,
     /* vpx_codec_caps_t          caps; */

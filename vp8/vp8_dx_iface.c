@@ -657,7 +657,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
 #endif
 vpx_codec_iface_t vpx_codec_vp8_dx_algo =
 {
-    "vpx Technologies VP8 Decoder" VERSION_STRING,
+    "WebM Project VP8 Decoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC,
     /* vpx_codec_caps_t          caps; */
@@ -680,7 +680,7 @@ vpx_codec_iface_t vpx_codec_vp8_dx_algo =
  */
 vpx_codec_iface_t vpx_codec_vp8_algo =
 {
-    "vpx Technologies VP8 Decoder (Deprecated API)" VERSION_STRING,
+    "WebM Project VP8 Decoder (Deprecated API)" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC,
     /* vpx_codec_caps_t          caps; */
