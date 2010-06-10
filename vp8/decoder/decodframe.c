@@ -317,20 +317,19 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
 
     xd->mode_info_context->mbmi.dc_diff = 1;
 
-    do {
-        if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV && eobtotal == 0)
-        {
-            xd->mode_info_context->mbmi.dc_diff = 0;
-            skip_recon_mb(pbi, xd);
-            break;
-        }
-
+    if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV && eobtotal == 0)
+    {
+        xd->mode_info_context->mbmi.dc_diff = 0;
+        skip_recon_mb(pbi, xd);
+    }
+    else
+    {
         if (xd->segmentation_enabled)
             mb_init_dequantizer(pbi, xd);
 
         de_quantand_idct(pbi, xd);
         reconstruct_mb(pbi, xd);
-    } while(0);
+    }
 
 
     /* Restore the original MV so as not to affect the entropy context. */
