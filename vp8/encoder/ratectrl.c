@@ -1364,8 +1364,7 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
                 if (cpi->zbin_over_quant > zbin_oqmax)
                     cpi->zbin_over_quant = zbin_oqmax;
 
-                // Each over-run step is assumed to equate to approximately
-                // 3% reduction in bitrate
+                // Adjust bits_per_mb_at_this_q estimate
                 bits_per_mb_at_this_q = (int)(Factor * bits_per_mb_at_this_q);
                 Factor += factor_adjustment;
 
