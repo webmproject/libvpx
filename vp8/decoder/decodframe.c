@@ -450,7 +450,7 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         vp8_build_uvmvs(xd, pc->full_pixel);
 
         /*
-        if(pbi->common.current_video_frame==0 &&mb_col==1 && mb_row==0)
+        if(pc->current_video_frame==0 &&mb_col==1 && mb_row==0)
         pbi->debugoutput =1;
         else
         pbi->debugoutput =0;
@@ -699,7 +699,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                                    "Invalid frame height");
             }
 
-            if (vp8_alloc_frame_buffers(&pbi->common, pc->Width, pc->Height))
+            if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
                 vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                    "Failed to allocate frame buffers");
         }
@@ -936,17 +936,17 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vpx_memcpy(&xd->block[0].bmi, &xd->mode_info_context->bmi[0], sizeof(B_MODE_INFO));
 
 
-    if (pbi->b_multithreaded_lf && pbi->common.filter_level != 0)
+    if (pbi->b_multithreaded_lf && pc->filter_level != 0)
         vp8_start_lfthread(pbi);
 
-    if (pbi->b_multithreaded_rd && pbi->common.multi_token_partition != ONE_PARTITION)
+    if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {
         vp8_mtdecode_mb_rows(pbi, xd);
     }
     else
     {
         int ibc = 0;
-        int num_part = 1 << pbi->common.multi_token_partition;
+        int num_part = 1 << pc->multi_token_partition;
 
         // Decode the individual macro block
         for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
@@ -975,8 +975,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     // vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes  \n",bc->pos+pbi->bc2.pos);
 
     // If this was a kf or Gf note the Q used
-    if ((pc->frame_type == KEY_FRAME) || (pc->refresh_golden_frame) || pbi->common.refresh_alt_ref_frame)
+    if ((pc->frame_type == KEY_FRAME) ||
+         pc->refresh_golden_frame || pc->refresh_alt_ref_frame)
+    {
         pc->last_kf_gf_q = pc->base_qindex;
+    }
 
     if (pc->refresh_entropy_probs == 0)
     {
