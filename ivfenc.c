@@ -12,7 +12,7 @@
 /* This is a simple program that encodes YV12 files and generates ivf
  * files using the new interface.
  */
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 #define USE_POSIX_MMAP 0
 #else
 #define USE_POSIX_MMAP 1
