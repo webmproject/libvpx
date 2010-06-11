@@ -501,7 +501,7 @@ process_common_toolchain() {
 
         # detect tgt_isa
         case "$gcctarget" in
-            *x86_64*)
+            *x86_64*|*amd64*)
                 tgt_isa=x86_64
                 ;;
             *i[3456]86*)
