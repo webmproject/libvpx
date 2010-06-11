@@ -25,6 +25,7 @@ struct vpx_codec_alg_priv
     vpx_codec_priv_t        base;
     vpx_codec_dec_cfg_t     cfg;
     vp8_stream_info_t       si;
+    struct vp8_decoder_ctx  decoder_ctx;
     vpx_image_t             img;
     int                     img_setup;
     int                     img_avail;
@@ -142,9 +143,11 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 {
     vpx_codec_err_t res = VPX_CODEC_OK;
 
+    res = vp8_dixie_decode_frame(&ctx->decoder_ctx, data, data_sz);
+    if(res)
+        update_error_state(ctx, &ctx->decoder_ctx.error);
+
     ctx->img_avail = 0;
-
-
     return res;
 }
 

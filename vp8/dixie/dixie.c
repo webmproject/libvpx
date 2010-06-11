@@ -11,6 +11,35 @@
 #include "bit_ops.h"
 #include "dixie.h"
 
+
+void
+decode_frame(struct vp8_decoder_ctx *ctx,
+             const unsigned char    *data,
+             unsigned int            sz)
+{
+    vpx_codec_err_t  res;
+
+    if ((res = vp8_parse_frame_header(data, sz, &ctx->frame_hdr)))
+        vpx_internal_error(&ctx->error, res, "Failed to parse frame header");
+
+    if (ctx->frame_hdr.is_experimental)
+        vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Experimental bitstreams not supported.");
+
+    if (ctx->frame_hdr.version != 0)
+        vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
+                           "Unsupported version %d", ctx->frame_hdr.version);
+
+    if (ctx->frame_hdr.is_keyframe)
+        if (ctx->frame_hdr.kf.scale_w || ctx->frame_hdr.kf.scale_h)
+            vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
+                               "Spatial resampling not supported.");
+
+
+
+}
+
+
 vpx_codec_err_t
 vp8_parse_frame_header(const unsigned char   *data,
                        unsigned int           sz,
@@ -51,4 +80,21 @@ vp8_parse_frame_header(const unsigned char   *data,
     }
 
     return VPX_CODEC_OK;
+}
+
+
+vpx_codec_err_t
+vp8_dixie_decode_frame(struct vp8_decoder_ctx *ctx,
+                       const unsigned char    *data,
+                       unsigned int            sz)
+{
+    volatile struct vp8_decoder_ctx *ctx_ = ctx;
+
+    ctx->error.error_code = VPX_CODEC_OK;
+    ctx->error.has_detail = 0;
+
+    if (!setjmp(ctx->error.jmp))
+        decode_frame(ctx, data, sz);
+
+    return ctx_->error.error_code;
 }

@@ -27,9 +27,25 @@ struct vp8_frame_hdr
     } kf;
 };
 
+
+struct vp8_decoder_ctx
+{
+    struct vpx_internal_error_info  error;
+
+    struct vp8_frame_hdr            frame_hdr;
+};
+
+
 vpx_codec_err_t
 vp8_parse_frame_header(const unsigned char   *data,
                        unsigned int           sz,
                        struct vp8_frame_hdr  *hdr);
+
+
+vpx_codec_err_t
+vp8_dixie_decode_frame(struct vp8_decoder_ctx *ctx,
+                       const unsigned char    *data,
+                       unsigned int            sz);
+
 
 #endif
