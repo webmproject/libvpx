@@ -109,7 +109,7 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
     } while(0)
 
 #define RANGE_CHECK(p,memb,lo,hi) do {\
-        if(!((p)->memb >= (lo) && (p)->memb <= hi)) \
+        if(!(((p)->memb == lo || (p)->memb > (lo)) && (p)->memb <= hi)) \
             ERROR(#memb " out of range ["#lo".."#hi"]");\
     } while(0)
 

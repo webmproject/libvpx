@@ -1125,6 +1125,9 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
     MV bmvs[16];
     int beobs[16];
 
+    vpx_memset(beobs, 0, sizeof(beobs));
+
+
     for (segmentation = 0; segmentation < VP8_NUMMBSPLITS; segmentation++)
     {
         int label_count;
@@ -1458,6 +1461,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     int force_no_skip = 0;
 
     *returnintra = INT_MAX;
+
+    vpx_memset(&best_mbmode, 0, sizeof(best_mbmode)); // clean
 
     cpi->mbs_tested_so_far++;          // Count of the number of MBs tested so far this frame
 

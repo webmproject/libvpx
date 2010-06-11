@@ -1232,6 +1232,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     start_pos = cpi->stats_in;
 
+    vpx_memset(&next_frame, 0, sizeof(next_frame)); // assure clean
+
     // Preload the stats for the next frame.
     mod_frame_err = calculate_modified_err(cpi, this_frame);
 
@@ -2037,6 +2039,8 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     double kf_group_intra_err = 0.0;
     double kf_group_coded_err = 0.0;
     double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
+
+    vpx_memset(&next_frame, 0, sizeof(next_frame)); // assure clean
 
     vp8_clear_system_state();  //__asm emms;
     start_position = cpi->stats_in;

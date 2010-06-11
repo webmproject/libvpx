@@ -454,6 +454,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
     vpx_memset(mode_mv, 0, sizeof(mode_mv));
     vpx_memset(nearest_mv, 0, sizeof(nearest_mv));
     vpx_memset(near_mv, 0, sizeof(near_mv));
+    vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
 
 
     // set up all the refframe dependent pointers.
