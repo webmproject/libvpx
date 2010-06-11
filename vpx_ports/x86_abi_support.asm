@@ -215,6 +215,25 @@
   %define UNSHADOW_ARGS mov rsp, rbp
 %endif
 
+; must keep XMM6:XMM15 (libvpx uses XMM6 and XMM7) on Win64 ABI
+; rsp register has to be aligned
+%ifidn __OUTPUT_FORMAT__,x64
+%macro SAVE_XMM 0
+  sub rsp, 32
+  movdqa XMMWORD PTR [rsp], xmm6
+  movdqa XMMWORD PTR [rsp+16], xmm7
+%endmacro
+%macro RESTORE_XMM 0
+  movdqa xmm6, XMMWORD PTR [rsp]
+  movdqa xmm7, XMMWORD PTR [rsp+16]
+  add rsp, 32
+%endmacro
+%else
+%macro SAVE_XMM 0
+%endmacro
+%macro RESTORE_XMM 0
+%endmacro
+%endif
 
 ; Name of the rodata section
 ;

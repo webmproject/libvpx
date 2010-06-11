@@ -37,6 +37,7 @@ sym(vp8_filter_block1d8_h6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
+    SAVE_XMM
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -129,6 +130,7 @@ filter_block1d8_h6_rowloop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -155,6 +157,7 @@ sym(vp8_filter_block1d16_h6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
+    SAVE_XMM
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -304,6 +307,7 @@ filter_block1d16_h6_sse2_rowloop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -329,6 +333,7 @@ sym(vp8_filter_block1d8_v6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 8
+    SAVE_XMM
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -397,6 +402,7 @@ vp8_filter_block1d8_v6_sse2_loop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -510,6 +516,7 @@ vp8_filter_block1d16_v6_sse2_loop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -641,6 +648,7 @@ sym(vp8_filter_block1d16_h6_only_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -876,6 +884,7 @@ vp8_filter_block1d8_v6_only_sse2_loop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -894,6 +903,7 @@ sym(vp8_unpack_block1d16_h6_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
+    SAVE_XMM
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -933,6 +943,7 @@ unpack_block1d16_h6_sse2_rowloop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -953,6 +964,7 @@ sym(vp8_bilinear_predict16x16_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM
     GET_GOT     rbx
     push        rsi
     push        rdi
