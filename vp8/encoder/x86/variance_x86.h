@@ -241,7 +241,7 @@ extern prototype_sad_multi_dif_address(vp8_sad4x4x4d_sse3);
 #define vp8_variance_sad4x4x3 vp8_sad4x4x3_sse3
 
 #undef  vp8_variance_sad16x16x4d
-#define vp8_variance_sad16x16x4 vp8_sad16x16x4d_sse3
+#define vp8_variance_sad16x16x4d vp8_sad16x16x4d_sse3
 
 #undef  vp8_variance_sad16x8x4d
 #define vp8_variance_sad16x8x4d vp8_sad16x8x4d_sse3
