@@ -258,12 +258,12 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
 
     vpx_codec_err_t res = VPX_CODEC_OK;
     {
-        /*Parse from VP8 compressed data, the implies knowledge of the
-         *VP8 bitsteam.
-         * First 3 byte header including version, frame type and an offset
-         * Next 3 bytes are image sizewith 12 bit each for width and height
+        /* Parse uncompresssed part of key frame header.
+         * 3 bytes:- including version, frame type and an offset
+         * 3 bytes:- sync code (0x9d, 0x01, 0x2a)
+         * 4 bytes:- including image width and height in the lowest 14 bits
+         *           of each 2-byte value.
          */
-
         si->is_kf = 0;
 
         if (data_sz >= 10 && !(data[0] & 0x01))  /* I-Frame */
