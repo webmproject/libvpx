@@ -237,12 +237,12 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
     vp8_clear_system_state();  //__asm emms;
 
     cpi->RDMULT = (int)( (0.0001 * (capped_q * capped_q * capped_q * capped_q))
-                        -(0.0125 * (capped_q * capped_q * capped_q))
+                        -(0.015 * (capped_q * capped_q * capped_q))
                         +(3.25 * (capped_q * capped_q))
-                        -(12.5 * capped_q) + 50.0);
+                        -(17.5 * capped_q) + 125.0);
 
-    if (cpi->RDMULT < 50)
-        cpi->RDMULT = 50;
+    if (cpi->RDMULT < 125)
+        cpi->RDMULT = 125;
 
     if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME))
     {
