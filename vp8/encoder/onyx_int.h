@@ -523,8 +523,8 @@ typedef struct
     int motion_lvl;
     int motion_speed;
     int motion_var;
-    int next_iiratio;
-    int this_iiratio;
+    unsigned int next_iiratio;
+    unsigned int this_iiratio;
     int this_frame_modified_error;
 
     double norm_intra_err_per_mb;
