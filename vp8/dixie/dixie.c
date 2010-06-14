@@ -20,6 +20,26 @@ enum
 
 
 static void
+decode_reference_header(struct vp8_decoder_ctx    *ctx,
+                        struct bool_decoder       *bool,
+                        struct vp8_reference_hdr  *hdr)
+{
+    unsigned int key = ctx->frame_hdr.is_keyframe;
+
+    hdr->refresh_gf    = key ? 1 : bool_get_bit(bool);
+    hdr->refresh_arf   = key ? 1 : bool_get_bit(bool);
+    hdr->copy_gf       = key ? 0 : !hdr->refresh_gf
+                         ? bool_get_uint(bool, 2) : 0;
+    hdr->copy_arf      = key ? 0 : !hdr->refresh_arf
+                         ? bool_get_uint(bool, 2) : 0;
+    hdr->sign_bias_gf  = key ? 0 : bool_get_bit(bool);
+    hdr->sign_bias_arf = key ? 0 : bool_get_bit(bool);
+    hdr->refresh_entropy = bool_get_bit(bool);
+    hdr->refresh_last  = key ? 1 : bool_get_bit(bool);
+}
+
+
+static void
 decode_quantizer_header(struct vp8_decoder_ctx    *ctx,
                         struct bool_decoder       *bool,
                         struct vp8_quant_hdr      *hdr)
@@ -199,6 +219,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
                                      sz - ctx->frame_hdr.part0_sz,
                                      &ctx->token_hdr);
     decode_quantizer_header(ctx, &bool, &ctx->quant_hdr);
+    decode_reference_header(ctx, &bool, &ctx->reference_hdr);
 }
 
 

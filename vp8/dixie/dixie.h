@@ -88,6 +88,19 @@ struct vp8_quant_hdr
 };
 
 
+struct vp8_reference_hdr
+{
+    unsigned int refresh_last;
+    unsigned int refresh_gf;
+    unsigned int refresh_arf;
+    unsigned int copy_gf;
+    unsigned int copy_arf;
+    unsigned int sign_bias_gf;
+    unsigned int sign_bias_arf;
+    unsigned int refresh_entropy;
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
@@ -97,6 +110,7 @@ struct vp8_decoder_ctx
     struct vp8_loopfilter_hdr       loopfilter_hdr;
     struct vp8_token_hdr            token_hdr;
     struct vp8_quant_hdr            quant_hdr;
+    struct vp8_reference_hdr        reference_hdr;
 
     struct bool_decoder             bool[MAX_PARTITIONS];
 };
