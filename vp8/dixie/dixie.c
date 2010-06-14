@@ -21,6 +21,32 @@ enum
 
 
 static void
+decode_loopfilter_header(struct vp8_decoder_ctx    *ctx,
+                         struct bool_decoder       *bool,
+                         struct vp8_loopfilter_hdr *hdr)
+{
+    if (ctx->frame_hdr.is_keyframe)
+        memset(hdr, 0, sizeof(*hdr));
+
+    hdr->use_simple    = bool_get_bit(bool);
+    hdr->level         = bool_get_uint(bool, 6);
+    hdr->sharpness     = bool_get_uint(bool, 3);
+    hdr->delta_enabled = bool_get_bit(bool);
+
+    if (hdr->delta_enabled && bool_get_bit(bool))
+    {
+        int i;
+
+        for (i = 0; i < BLOCK_CONTEXTS; i++)
+            hdr->ref_delta[i] = bool_get_bit(bool) ? bool_get_int(bool, 6) : 0;
+
+        for (i = 0; i < BLOCK_CONTEXTS; i++)
+            hdr->mode_delta[i] = bool_get_bit(bool) ? bool_get_int(bool, 6) : 0;
+    }
+}
+
+
+static void
 decode_segmentation_header(struct vp8_decoder_ctx *ctx,
                            struct bool_decoder    *bool,
                            struct vp8_segment_hdr *hdr)
@@ -107,7 +133,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
                                "Reserved bits not supported.");
 
     decode_segmentation_header(ctx, &bool, &ctx->segment_hdr);
-
+    decode_loopfilter_header(ctx, &bool, &ctx->loopfilter_hdr);
 }
 
 

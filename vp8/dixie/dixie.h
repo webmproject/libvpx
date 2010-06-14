@@ -47,12 +47,30 @@ struct vp8_segment_hdr
 };
 
 
+enum
+{
+    BLOCK_CONTEXTS = 4
+};
+
+
+struct vp8_loopfilter_hdr
+{
+    unsigned int         use_simple;
+    unsigned int         level;
+    unsigned int         sharpness;
+    unsigned int         delta_enabled;
+    int                  ref_delta[BLOCK_CONTEXTS];
+    int                  mode_delta[BLOCK_CONTEXTS];
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
 
     struct vp8_frame_hdr            frame_hdr;
     struct vp8_segment_hdr          segment_hdr;
+    struct vp8_loopfilter_hdr       loopfilter_hdr;
 };
 
 
