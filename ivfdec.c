@@ -235,9 +235,9 @@ void *out_open(const char *out_fn, int do_md5)
     if (do_md5)
     {
 #if CONFIG_MD5
-        md5_ctx_t *md5_ctx = out = malloc(sizeof(md5_ctx_t));
+        MD5Context *md5_ctx = out = malloc(sizeof(MD5Context));
         (void)out_fn;
-        md5_init(md5_ctx);
+        MD5Init(md5_ctx);
 #endif
     }
     else
@@ -259,7 +259,7 @@ void out_put(void *out, const uint8_t *buf, unsigned int len, int do_md5)
     if (do_md5)
     {
 #if CONFIG_MD5
-        md5_update(out, buf, len);
+        MD5Update(out, buf, len);
 #endif
     }
     else
@@ -276,7 +276,7 @@ void out_close(void *out, const char *out_fn, int do_md5)
         uint8_t md5[16];
         int i;
 
-        md5_finalize(out, md5);
+        MD5Final(md5, out);
         free(out);
 
         for (i = 0; i < 16; i++)
