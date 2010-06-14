@@ -27,6 +27,8 @@ VP8_DX_SRCS-$(CONFIG_DIXIE) += vp8_dixie_iface.c
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/bit_ops.h
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/dixie.h
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/dixie.c
+VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/bool_decoder.c
+VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/bool_decoder.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 

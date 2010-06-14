@@ -10,14 +10,67 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "bit_ops.h"
 #include "dixie.h"
+#include "bool_decoder.h"
+#include <string.h>
+
+enum
+{
+    FRAME_HEADER_SZ = 3,
+    KEYFRAME_HEADER_SZ = 7
+};
 
 
-void
+static void
+decode_segmentation_header(struct vp8_decoder_ctx *ctx,
+                           struct bool_decoder    *bool,
+                           struct vp8_segment_hdr *hdr)
+{
+    if (ctx->frame_hdr.is_keyframe)
+        memset(hdr, 0, sizeof(*hdr));
+
+    hdr->enabled = bool_get_bit(bool);
+
+    if (hdr->enabled)
+    {
+        int i;
+
+        hdr->update_map = bool_get_bit(bool);
+        hdr->update_data = bool_get_bit(bool);
+
+        if (hdr->update_data)
+        {
+            hdr->abs = bool_get_bit(bool);
+
+            for (i = 0; i < MAX_MB_SEGMENTS; i++)
+                hdr->quant_idx[i] = bool_get_bit(bool) ? bool_get_int(bool, 7) : 0;
+
+            for (i = 0; i < MAX_MB_SEGMENTS; i++)
+                hdr->lf_level[i] = bool_get_bit(bool) ? bool_get_int(bool, 6) : 0;
+        }
+
+        if (hdr->update_map)
+        {
+            for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+                hdr->tree_probs[i] = bool_get_bit(bool)
+                                     ? bool_get_uint(bool, 8)
+                                     : 255;
+        }
+    }
+    else
+    {
+        hdr->update_map = 0;
+        hdr->update_data = 0;
+    }
+}
+
+
+static void
 decode_frame(struct vp8_decoder_ctx *ctx,
              const unsigned char    *data,
              unsigned int            sz)
 {
     vpx_codec_err_t  res;
+    struct bool_decoder  bool;
 
     if ((res = vp8_parse_frame_header(data, sz, &ctx->frame_hdr)))
         vpx_internal_error(&ctx->error, res, "Failed to parse frame header");
@@ -30,12 +83,30 @@ decode_frame(struct vp8_decoder_ctx *ctx,
         vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "Unsupported version %d", ctx->frame_hdr.version);
 
+    data += FRAME_HEADER_SZ;
+    sz -= FRAME_HEADER_SZ;
+
     if (ctx->frame_hdr.is_keyframe)
+    {
         if (ctx->frame_hdr.kf.scale_w || ctx->frame_hdr.kf.scale_h)
             vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
                                "Spatial resampling not supported.");
 
+        data += KEYFRAME_HEADER_SZ;
+        sz -= KEYFRAME_HEADER_SZ;
+    }
 
+
+    /* Start the bitreader for the header/entropy partition */
+    vp8dx_bool_init(&bool, data, ctx->frame_hdr.part0_sz);
+
+    /* Skip the colorspace and clamping bits */
+    if (ctx->frame_hdr.is_keyframe)
+        if (bool_get_uint(&bool, 2))
+            vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
+                               "Reserved bits not supported.");
+
+    decode_segmentation_header(ctx, &bool, &ctx->segment_hdr);
 
 }
 

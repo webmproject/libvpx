@@ -28,11 +28,31 @@ struct vp8_frame_hdr
 };
 
 
+enum
+{
+    MB_FEATURE_TREE_PROBS = 3,
+    MAX_MB_SEGMENTS = 4
+};
+
+
+struct vp8_segment_hdr
+{
+    unsigned int         enabled;
+    unsigned int         update_data;
+    unsigned int         update_map;
+    unsigned int         abs;    /* 0=deltas, 1=absolute values */
+    unsigned int         tree_probs[MB_FEATURE_TREE_PROBS];
+    int                  lf_level[MAX_MB_SEGMENTS];
+    int                  quant_idx[MAX_MB_SEGMENTS];
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
 
     struct vp8_frame_hdr            frame_hdr;
+    struct vp8_segment_hdr          segment_hdr;
 };
 
 
