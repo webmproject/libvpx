@@ -120,4 +120,21 @@ static int bool_get_int(struct bool_decoder *br, int bits)
 
     return bool_get_bit(br) ? -z : z;
 }
+
+
+static int bool_maybe_get_int(struct bool_decoder *br, int bits)
+{
+    int z = 0;
+    int bit;
+
+    if (!bool_get_bit(br))
+        return 0;
+
+    for (bit = bits - 1; bit >= 0; bit--)
+    {
+        z |= (bool_get_bit(br) << bit);
+    }
+
+    return bool_get_bit(br) ? -z : z;
+}
 #endif

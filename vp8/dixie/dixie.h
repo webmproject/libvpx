@@ -77,6 +77,17 @@ struct vp8_token_hdr
 };
 
 
+struct vp8_quant_hdr
+{
+    unsigned int       q_index;
+    int                y1_dc_delta_q;
+    int                y2_dc_delta_q;
+    int                y2_ac_delta_q;
+    int                uv_dc_delta_q;
+    int                uv_ac_delta_q;
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
@@ -85,6 +96,7 @@ struct vp8_decoder_ctx
     struct vp8_segment_hdr          segment_hdr;
     struct vp8_loopfilter_hdr       loopfilter_hdr;
     struct vp8_token_hdr            token_hdr;
+    struct vp8_quant_hdr            quant_hdr;
 
     struct bool_decoder             bool[MAX_PARTITIONS];
 };

@@ -20,6 +20,24 @@ enum
 
 
 static void
+decode_quantizer_header(struct vp8_decoder_ctx    *ctx,
+                        struct bool_decoder       *bool,
+                        struct vp8_quant_hdr      *hdr)
+{
+    int update;
+    int last_q = hdr->q_index;
+
+    hdr->q_index = bool_get_uint(bool, 7);
+    update = last_q != hdr->q_index;
+    update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
+    update |= (hdr->y2_dc_delta_q = bool_maybe_get_int(bool, 4));
+    update |= (hdr->y2_ac_delta_q = bool_maybe_get_int(bool, 4));
+    update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
+    update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
+}
+
+
+static void
 decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
                                  struct bool_decoder       *bool,
                                  const unsigned char       *data,
@@ -78,10 +96,10 @@ decode_loopfilter_header(struct vp8_decoder_ctx    *ctx,
         int i;
 
         for (i = 0; i < BLOCK_CONTEXTS; i++)
-            hdr->ref_delta[i] = bool_get_bit(bool) ? bool_get_int(bool, 6) : 0;
+            hdr->ref_delta[i] = bool_maybe_get_int(bool, 6);
 
         for (i = 0; i < BLOCK_CONTEXTS; i++)
-            hdr->mode_delta[i] = bool_get_bit(bool) ? bool_get_int(bool, 6) : 0;
+            hdr->mode_delta[i] = bool_maybe_get_int(bool, 6);
     }
 }
 
@@ -108,10 +126,10 @@ decode_segmentation_header(struct vp8_decoder_ctx *ctx,
             hdr->abs = bool_get_bit(bool);
 
             for (i = 0; i < MAX_MB_SEGMENTS; i++)
-                hdr->quant_idx[i] = bool_get_bit(bool) ? bool_get_int(bool, 7) : 0;
+                hdr->quant_idx[i] = bool_maybe_get_int(bool, 7);
 
             for (i = 0; i < MAX_MB_SEGMENTS; i++)
-                hdr->lf_level[i] = bool_get_bit(bool) ? bool_get_int(bool, 6) : 0;
+                hdr->lf_level[i] = bool_maybe_get_int(bool, 6);
         }
 
         if (hdr->update_map)
@@ -180,8 +198,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
                                      data + ctx->frame_hdr.part0_sz,
                                      sz - ctx->frame_hdr.part0_sz,
                                      &ctx->token_hdr);
-
-
+    decode_quantizer_header(ctx, &bool, &ctx->quant_hdr);
 }
 
 
