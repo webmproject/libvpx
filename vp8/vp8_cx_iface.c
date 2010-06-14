@@ -53,15 +53,15 @@ static const struct extraconfig_map extracfg_map[] =
             NULL,
 #if !(CONFIG_REALTIME_ONLY)
             VP8_BEST_QUALITY_ENCODING,  /* Encoding Mode */
-            -4,                         /* cpu_used      */
+            0,                          /* cpu_used      */
 #else
             VP8_REAL_TIME_ENCODING,     /* Encoding Mode */
-            -8,                         /* cpu_used      */
+            4,                          /* cpu_used      */
 #endif
             0,                          /* enable_auto_alt_ref */
             0,                          /* noise_sensitivity */
             0,                          /* Sharpness */
-            800,                        /* static_thresh */
+            0,                          /* static_thresh */
             VP8_ONE_TOKENPARTITION,     /* token_partitions */
             0, /* arnr_max_frames */
             0, /* arnr_strength */
