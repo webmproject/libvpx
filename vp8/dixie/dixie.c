@@ -10,7 +10,6 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "bit_ops.h"
 #include "dixie.h"
-#include "bool_decoder.h"
 #include <string.h>
 
 enum
@@ -18,6 +17,47 @@ enum
     FRAME_HEADER_SZ = 3,
     KEYFRAME_HEADER_SZ = 7
 };
+
+
+static void
+decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
+                                 struct bool_decoder       *bool,
+                                 const unsigned char       *data,
+                                 unsigned int               sz,
+                                 struct vp8_token_hdr      *hdr)
+{
+    int i;
+
+    hdr->partitions = 1 << bool_get_uint(bool, 2);
+
+    if (sz < 3 *(hdr->partitions - 1))
+        vpx_internal_error(&ctx->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Truncated packet found parsing partition lengths.");
+
+    sz -= 3 * (hdr->partitions - 1);
+
+    for (i = 0; i < hdr->partitions; i++)
+    {
+        if (i < hdr->partitions - 1)
+            hdr->partition_sz[i] = (data[2] << 16) | (data[1] << 8) | data[0];
+        else
+            hdr->partition_sz[i] = sz;
+
+        if (sz < hdr->partition_sz[i])
+            vpx_internal_error(&ctx->error, VPX_CODEC_CORRUPT_FRAME,
+                               "Truncated partition %d", i);
+
+        data += 3;
+        sz -= hdr->partition_sz[i];
+    }
+
+
+    for (i = 0; i < ctx->token_hdr.partitions; i++)
+    {
+        vp8dx_bool_init(&ctx->bool[i], data, ctx->token_hdr.partition_sz[i]);
+        data += ctx->token_hdr.partition_sz[i];
+    }
+}
 
 
 static void
@@ -97,6 +137,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 {
     vpx_codec_err_t  res;
     struct bool_decoder  bool;
+    int                  i;
 
     if ((res = vp8_parse_frame_header(data, sz, &ctx->frame_hdr)))
         vpx_internal_error(&ctx->error, res, "Failed to parse frame header");
@@ -134,6 +175,13 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 
     decode_segmentation_header(ctx, &bool, &ctx->segment_hdr);
     decode_loopfilter_header(ctx, &bool, &ctx->loopfilter_hdr);
+    decode_and_init_token_partitions(ctx,
+                                     &bool,
+                                     data + ctx->frame_hdr.part0_sz,
+                                     sz - ctx->frame_hdr.part0_sz,
+                                     &ctx->token_hdr);
+
+
 }
 
 

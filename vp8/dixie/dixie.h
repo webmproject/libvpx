@@ -9,6 +9,7 @@
  */
 #ifndef DIXIE_H
 #define DIXIE_H
+#include "bool_decoder.h"
 
 struct vp8_frame_hdr
 {
@@ -64,6 +65,18 @@ struct vp8_loopfilter_hdr
 };
 
 
+enum
+{
+    MAX_PARTITIONS = 8
+};
+
+struct vp8_token_hdr
+{
+    unsigned int        partitions;
+    unsigned int        partition_sz[MAX_PARTITIONS];
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
@@ -71,6 +84,9 @@ struct vp8_decoder_ctx
     struct vp8_frame_hdr            frame_hdr;
     struct vp8_segment_hdr          segment_hdr;
     struct vp8_loopfilter_hdr       loopfilter_hdr;
+    struct vp8_token_hdr            token_hdr;
+
+    struct bool_decoder             bool[MAX_PARTITIONS];
 };
 
 
