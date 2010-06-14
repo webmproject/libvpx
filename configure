@@ -27,13 +27,11 @@ Advanced options:
                                   supported by hardware [auto]
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
-  ${toggle_eval_limit}            enable limited evaluation build
   ${toggle_md5}                   support for output of checksum data
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
   ${toggle_vp8}                   VP8 codec support
   ${toggle_psnr}                  output of PSNR data, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
-  ${toggle_eval_limit}            decoder limitted to 500 frames
   ${toggle_postproc}              postprocessing
   ${toggle_multithread}           multithreaded encoding and decoding.
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
@@ -230,7 +228,6 @@ CONFIG_LIST="
     dequant_tokens
     dc_recon
     new_tokens
-    eval_limit
     runtime_cpu_detect
     postproc
     postproc_generic
@@ -271,7 +268,6 @@ CMDLINE_SELECT="
     dequant_tokens
     dc_recon
     new_tokens
-    eval_limit
     postproc
     postproc_generic
     multithread
@@ -361,7 +357,6 @@ process_targets() {
     enabled codec_srcs && DIST_DIR="${DIST_DIR}-src"
     ! enabled postproc && DIST_DIR="${DIST_DIR}-nopost"
     ! enabled multithread && DIST_DIR="${DIST_DIR}-nomt"
-    enabled eval_limit && DIST_DIR="${DIST_DIR}-eval"
     ! enabled install_docs && DIST_DIR="${DIST_DIR}-nodocs"
     DIST_DIR="${DIST_DIR}-${tgt_isa}-${tgt_os}"
     case "${tgt_os}" in

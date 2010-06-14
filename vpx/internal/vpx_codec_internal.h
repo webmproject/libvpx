@@ -56,7 +56,7 @@
  * types, removing or reassigning enums, adding/removing/rearranging
  * fields to structures
  */
-#define VPX_CODEC_INTERNAL_ABI_VERSION (2) /**<\hideinitializer*/
+#define VPX_CODEC_INTERNAL_ABI_VERSION (3) /**<\hideinitializer*/
 
 typedef struct vpx_codec_alg_priv  vpx_codec_alg_priv_t;
 
@@ -340,7 +340,6 @@ struct vpx_codec_priv
     vpx_codec_iface_t              *iface;
     struct vpx_codec_alg_priv      *alg_priv;
     const char                     *err_detail;
-    unsigned int                    eval_counter;
     vpx_codec_flags_t               init_flags;
     struct
     {

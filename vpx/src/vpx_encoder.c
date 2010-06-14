@@ -127,15 +127,6 @@ vpx_codec_err_t  vpx_codec_encode(vpx_codec_ctx_t            *ctx,
         res = VPX_CODEC_ERROR;
     else if (!(ctx->iface->caps & VPX_CODEC_CAP_ENCODER))
         res = VPX_CODEC_INCAPABLE;
-
-#if CONFIG_EVAL_LIMIT
-    else if (ctx->priv->eval_counter >= 500)
-    {
-        ctx->priv->err_detail = "Evaluation limit exceeded.";
-        res = VPX_CODEC_ERROR;
-    }
-
-#endif
     else
     {
         /* Execute in a normalized floating point environment, if the platform
@@ -145,10 +136,6 @@ vpx_codec_err_t  vpx_codec_encode(vpx_codec_ctx_t            *ctx,
         res = ctx->iface->enc.encode(ctx->priv->alg_priv, img, pts,
                                      duration, flags, deadline);
         FLOATING_POINT_RESTORE();
-
-#if CONFIG_EVAL_LIMIT
-        ctx->priv->eval_counter++;
-#endif
     }
 
     return SAVE_STATUS(ctx, res);
