@@ -199,16 +199,13 @@
         push r9
     %endif
     %if %1 > 6
-        mov rax,[rbp+16]
+      %assign i %1-6
+      %assign off 16
+      %rep i
+        mov rax,[rbp+off]
         push rax
-    %endif
-    %if %1 > 7
-        mov rax,[rbp+24]
-        push rax
-    %endif
-    %if %1 > 8
-        mov rax,[rbp+32]
-        push rax
+        %assign off off+8
+      %endrep
     %endif
   %endm
 %endif

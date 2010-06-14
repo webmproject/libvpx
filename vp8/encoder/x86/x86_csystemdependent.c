@@ -121,6 +121,40 @@ void vp8_fast_quantize_b_sse(BLOCK *b, BLOCKD *d)
              );
 }
 
+int vp8_regular_quantize_b_impl_sse2(short *coeff_ptr, short *zbin_ptr,
+                               short *qcoeff_ptr,short *dequant_ptr,
+                               const int *default_zig_zag, short *round_ptr,
+                               short *quant_ptr, short *dqcoeff_ptr,
+                               unsigned short zbin_oq_value,
+                               short *zbin_boost_ptr);
+
+void vp8_regular_quantize_b_sse2(BLOCK *b,BLOCKD *d)
+{
+    short *zbin_boost_ptr = &b->zrun_zbin_boost[0];
+    short *coeff_ptr  = &b->coeff[0];
+    short *zbin_ptr   = &b->zbin[0][0];
+    short *round_ptr  = &b->round[0][0];
+    short *quant_ptr  = &b->quant[0][0];
+    short *qcoeff_ptr = d->qcoeff;
+    short *dqcoeff_ptr = d->dqcoeff;
+    short *dequant_ptr = &d->dequant[0][0];
+    short zbin_oq_value = b->zbin_extra;
+
+    d->eob = vp8_regular_quantize_b_impl_sse2(
+        coeff_ptr,
+        zbin_ptr,
+        qcoeff_ptr,
+        dequant_ptr,
+        vp8_default_zig_zag1d,
+
+        round_ptr,
+        quant_ptr,
+        dqcoeff_ptr,
+        zbin_oq_value,
+        zbin_boost_ptr
+        );
+}
+
 int vp8_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
 int vp8_mbblock_error_xmm(MACROBLOCK *mb, int dc)
 {
@@ -251,6 +285,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         /* cpi->rtcd.encodemb.sub* not implemented for wmt */
 
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse;
+        cpi->rtcd.quantize.quantb            = vp8_regular_quantize_b_sse2;
     }
 
 #endif
