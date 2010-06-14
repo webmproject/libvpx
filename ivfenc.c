@@ -950,7 +950,7 @@ int main(int argc, const char **argv_)
             SHOW(kf_max_dist);
         }
 
-        if(pass == 0) {
+        if(pass == (one_pass_only ? one_pass_only - 1 : 0)) {
             if (file_type == FILE_TYPE_Y4M)
                 /*The Y4M reader does its own allocation.
                   Just initialize this here to avoid problems if we never read any
