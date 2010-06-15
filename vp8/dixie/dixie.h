@@ -101,6 +101,39 @@ struct vp8_reference_hdr
 };
 
 
+enum
+{
+    BLOCK_TYPES        = 4,
+    PREV_COEF_CONTEXTS = 3,
+    COEF_BANDS         = 8,
+    ENTROPY_NODES      = 11,
+};
+typedef unsigned char coeff_probs_table_t[BLOCK_TYPES][COEF_BANDS]
+[PREV_COEF_CONTEXTS]
+[ENTROPY_NODES];
+
+
+enum
+{
+    MV_PROB_CNT = 2 + 8 - 1 + 10 /* from entropymv.h */
+};
+typedef unsigned char mv_component_probs_t[MV_PROB_CNT];
+
+
+struct vp8_entropy_hdr
+{
+    coeff_probs_table_t   coeff_probs;
+    mv_component_probs_t  mv_probs[2];
+    unsigned int          coeff_skip_enabled;
+    unsigned char         coeff_skip_prob;
+    unsigned char         y_mode_probs[4];
+    unsigned char         uv_mode_probs[3];
+    unsigned char         prob_intra;
+    unsigned char         prob_last;
+    unsigned char         prob_gf;
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
@@ -111,8 +144,11 @@ struct vp8_decoder_ctx
     struct vp8_token_hdr            token_hdr;
     struct vp8_quant_hdr            quant_hdr;
     struct vp8_reference_hdr        reference_hdr;
+    struct vp8_entropy_hdr          entropy_hdr;
 
     struct bool_decoder             bool[MAX_PARTITIONS];
+    struct vp8_entropy_hdr          saved_entropy;
+    unsigned int                    saved_entropy_valid;
 };
 
 

@@ -10,13 +10,73 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "bit_ops.h"
 #include "dixie.h"
+#include "vp8_prob_data.h"
 #include <string.h>
+#include <assert.h>
 
 enum
 {
     FRAME_HEADER_SZ = 3,
     KEYFRAME_HEADER_SZ = 7
 };
+
+
+#define ARRAY_COPY(a,b) {assert(sizeof(a)==sizeof(b));memcpy(a,b,sizeof(a));}
+static void
+decode_entropy_header(struct vp8_decoder_ctx    *ctx,
+                      struct bool_decoder       *bool,
+                      struct vp8_entropy_hdr    *hdr)
+{
+    int i, j, k, l;
+
+    /* Set keyframe entropy defaults */
+    if (ctx->frame_hdr.is_keyframe)
+    {
+        ARRAY_COPY(hdr->coeff_probs, k_default_coeff_probs);
+        ARRAY_COPY(hdr->mv_probs, k_default_mv_probs);
+        ARRAY_COPY(hdr->y_mode_probs, k_default_y_mode_probs);
+        ARRAY_COPY(hdr->uv_mode_probs, k_default_uv_mode_probs);
+    }
+
+    /* Read coefficient probability updates */
+    for (i = 0; i < BLOCK_TYPES; i++)
+        for (j = 0; j < COEF_BANDS; j++)
+            for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                for (l = 0; l < ENTROPY_NODES; l++)
+                    if (bool_get(bool,
+                                 k_coeff_entropy_update_probs[i][j][k][l]))
+                        hdr->coeff_probs[i][j][k][l] = bool_get_uint(bool, 8);
+
+    /* Read coefficient skip mode probability */
+    hdr->coeff_skip_enabled = bool_get_bit(bool);
+
+    if (hdr->coeff_skip_enabled)
+        hdr->coeff_skip_prob = bool_get_uint(bool, 8);
+
+    /* Parse interframe probability updates */
+    if (!ctx->frame_hdr.is_keyframe)
+    {
+        hdr->prob_intra = bool_get_uint(bool, 8);
+        hdr->prob_last  = bool_get_uint(bool, 8);
+        hdr->prob_gf    = bool_get_uint(bool, 8);
+
+        if (bool_get_bit(bool))
+            for (i = 0; i < 4; i++)
+                hdr->y_mode_probs[i] = bool_get_uint(bool, 8);
+
+        if (bool_get_bit(bool))
+            for (i = 0; i < 3; i++)
+                hdr->uv_mode_probs[i] = bool_get_uint(bool, 8);
+
+        for (i = 0; i < 2; i++)
+            for (j = 0; j < MV_PROB_CNT; j++)
+                if (bool_get(bool, k_mv_entropy_update_probs[i][j]))
+                {
+                    int x = bool_get_uint(bool, 7);
+                    hdr->mv_probs[i][j] = x ? x << 1 : 1;
+                }
+    }
+}
 
 
 static void
@@ -177,6 +237,8 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     struct bool_decoder  bool;
     int                  i;
 
+    ctx->saved_entropy_valid = 0;
+
     if ((res = vp8_parse_frame_header(data, sz, &ctx->frame_hdr)))
         vpx_internal_error(&ctx->error, res, "Failed to parse frame header");
 
@@ -220,6 +282,14 @@ decode_frame(struct vp8_decoder_ctx *ctx,
                                      &ctx->token_hdr);
     decode_quantizer_header(ctx, &bool, &ctx->quant_hdr);
     decode_reference_header(ctx, &bool, &ctx->reference_hdr);
+
+    if (!ctx->reference_hdr.refresh_entropy)
+    {
+        ctx->saved_entropy = ctx->entropy_hdr;
+        ctx->saved_entropy_valid = 1;
+    }
+
+    decode_entropy_header(ctx, &bool, &ctx->entropy_hdr);
 }
 
 
