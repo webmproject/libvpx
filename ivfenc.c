@@ -299,12 +299,11 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
 }
 
 
-unsigned int file_is_y4m(FILE *infile,
+unsigned int file_is_y4m(FILE      *infile,
                          y4m_input *y4m,
                          char       detect[4])
 {
-    if(memcmp(detect, "YUV4", 4) == 0 &&
-        y4m_input_open(y4m, infile, detect, 4) >= 0)
+    if(memcmp(detect, "YUV4", 4) == 0)
     {
         return 1;
     }
@@ -875,18 +874,26 @@ int main(int argc, const char **argv_)
 
         if (file_is_y4m(infile, &y4m, detect.buf))
         {
-            file_type = FILE_TYPE_Y4M;
-            cfg.g_w = y4m.pic_w;
-            cfg.g_h = y4m.pic_h;
-            /* Use the frame rate from the file only if none was specified on the
-             *  command-line.
-             */
-            if (!arg_have_timebase)
+            if (y4m_input_open(&y4m, infile, detect.buf, 4) >= 0)
             {
-                cfg.g_timebase.num = y4m.fps_d;
-                cfg.g_timebase.den = y4m.fps_n;
+                file_type = FILE_TYPE_Y4M;
+                cfg.g_w = y4m.pic_w;
+                cfg.g_h = y4m.pic_h;
+                /* Use the frame rate from the file only if none was specified
+                 * on the command-line.
+                 */
+                if (!arg_have_timebase)
+                {
+                    cfg.g_timebase.num = y4m.fps_d;
+                    cfg.g_timebase.den = y4m.fps_n;
+                }
+                arg_use_i420 = 0;
             }
-            arg_use_i420 = 0;
+            else
+            {
+                fprintf(stderr, "Unsupported Y4M stream.\n");
+                return EXIT_FAILURE;
+            }
         }
         else if (file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, detect.buf))
         {
