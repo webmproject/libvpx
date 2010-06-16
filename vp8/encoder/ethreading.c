@@ -257,9 +257,6 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
 
     z->vp8_short_fdct4x4     = x->vp8_short_fdct4x4;
     z->vp8_short_fdct8x4     = x->vp8_short_fdct8x4;
-    z->short_fdct4x4rd   = x->short_fdct4x4rd;
-    z->short_fdct8x4rd   = x->short_fdct8x4rd;
-    z->short_fdct8x4rd   = x->short_fdct8x4rd;
     z->short_walsh4x4    = x->short_walsh4x4;
     z->quantize_b        = x->quantize_b;
 

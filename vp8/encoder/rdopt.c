@@ -1028,7 +1028,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
 
             vp8_build_inter_predictors_b(bd, 16, x->e_mbd.subpixel_predict);
             ENCODEMB_INVOKE(rtcd, subb)(be, bd, 16);
-            x->short_fdct4x4rd(be->src_diff, be->coeff, 32);
+            x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
 
             // set to 0 no way to account for 2nd order DC so discount
             //be->coeff[0] = 0;
@@ -1056,7 +1056,7 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp
     // Fdct and building the 2nd order block
     for (beptr = mb->block; beptr < mb->block + 16; beptr += 2)
     {
-        mb->short_fdct8x4rd(beptr->src_diff, beptr->coeff, 32);
+        mb->vp8_short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
         *Y2DCPtr++ = beptr->coeff[0];
         *Y2DCPtr++ = beptr->coeff[16];
     }

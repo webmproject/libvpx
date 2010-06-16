@@ -100,13 +100,8 @@ typedef struct
 
     void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
     void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
-    void (*short_fdct4x4rd)(short *input, short *output, int pitch);
-    void (*short_fdct8x4rd)(short *input, short *output, int pitch);
     void (*short_walsh4x4)(short *input, short *output, int pitch);
-
     void (*quantize_b)(BLOCK *b, BLOCKD *d);
-
-
 
 } MACROBLOCK;
 

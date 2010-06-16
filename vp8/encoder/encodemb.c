@@ -130,7 +130,8 @@ void vp8_transform_mbuvrd(MACROBLOCK *x)
 
     for (i = 16; i < 24; i += 2)
     {
-        x->short_fdct8x4rd(&x->block[i].src_diff[0], &x->block[i].coeff[0], 16);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 16);
     }
 }
 
@@ -140,14 +141,16 @@ void vp8_transform_intra_mby(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0], &x->block[i].coeff[0], 32);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
     }
 
     // build dc block from 16 y dc values
     vp8_build_dcblock(x);
 
     // do 2nd order transform on the dc block
-    x->short_walsh4x4(&x->block[24].src_diff[0], &x->block[24].coeff[0], 8);
+    x->short_walsh4x4(&x->block[24].src_diff[0],
+        &x->block[24].coeff[0], 8);
 
 }
 
@@ -157,14 +160,16 @@ void vp8_transform_intra_mbyrd(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->short_fdct8x4rd(&x->block[i].src_diff[0], &x->block[i].coeff[0], 32);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
     }
 
     // build dc block from 16 y dc values
     vp8_build_dcblock(x);
 
     // do 2nd order transform on the dc block
-    x->short_walsh4x4(&x->block[24].src_diff[0], &x->block[24].coeff[0], 8);
+    x->short_walsh4x4(&x->block[24].src_diff[0],
+        &x->block[24].coeff[0], 8);
 }
 
 void vp8_transform_mb(MACROBLOCK *x)
@@ -173,7 +178,8 @@ void vp8_transform_mb(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0], &x->block[i].coeff[0], 32);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
     }
 
     // build dc block from 16 y dc values
@@ -182,12 +188,14 @@ void vp8_transform_mb(MACROBLOCK *x)
 
     for (i = 16; i < 24; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0], &x->block[i].coeff[0], 16);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 16);
     }
 
     // do 2nd order transform on the dc block
     if (x->e_mbd.mbmi.mode != SPLITMV)
-        x->short_walsh4x4(&x->block[24].src_diff[0], &x->block[24].coeff[0], 8);
+        x->short_walsh4x4(&x->block[24].src_diff[0],
+        &x->block[24].coeff[0], 8);
 
 }
 
@@ -197,14 +205,16 @@ void vp8_transform_mby(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0], &x->block[i].coeff[0], 32);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
     }
 
     // build dc block from 16 y dc values
     if (x->e_mbd.mbmi.mode != SPLITMV)
     {
         vp8_build_dcblock(x);
-        x->short_walsh4x4(&x->block[24].src_diff[0], &x->block[24].coeff[0], 8);
+        x->short_walsh4x4(&x->block[24].src_diff[0],
+            &x->block[24].coeff[0], 8);
     }
 }
 
@@ -214,7 +224,8 @@ void vp8_transform_mbrd(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->short_fdct8x4rd(&x->block[i].src_diff[0], &x->block[i].coeff[0], 32);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
     }
 
     // build dc block from 16 y dc values
@@ -223,12 +234,14 @@ void vp8_transform_mbrd(MACROBLOCK *x)
 
     for (i = 16; i < 24; i += 2)
     {
-        x->short_fdct8x4rd(&x->block[i].src_diff[0], &x->block[i].coeff[0], 16);
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 16);
     }
 
     // do 2nd order transform on the dc block
     if (x->e_mbd.mbmi.mode != SPLITMV)
-        x->short_walsh4x4(&x->block[24].src_diff[0], &x->block[24].coeff[0], 8);
+        x->short_walsh4x4(&x->block[24].src_diff[0],
+            &x->block[24].coeff[0], 8);
 }
 
 void vp8_stuff_inter16x16(MACROBLOCK *x)

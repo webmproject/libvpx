@@ -181,10 +181,17 @@ void vp8_cmachine_specific_config(void)
         // Willamette instruction set available:
         vp8_mbuverror                = vp8_mbuverror_xmm;
         vp8_fast_quantize_b            = vp8_fast_quantize_b_sse;
+#if 0 //new fdct
         vp8_short_fdct4x4             = vp8_short_fdct4x4_mmx;
         vp8_short_fdct8x4             = vp8_short_fdct8x4_mmx;
-        vp8_fast_fdct4x4              = vp8_fast_fdct4x4_mmx;
-        vp8_fast_fdct8x4              = vp8_fast_fdct8x4_wmt;
+        vp8_fast_fdct4x4              = vp8_short_fdct4x4_mmx;
+        vp8_fast_fdct8x4              = vp8_short_fdct8x4_wmt;
+#else
+        vp8_short_fdct4x4             = vp8_short_fdct4x4_c;
+        vp8_short_fdct8x4             = vp8_short_fdct8x4_c;
+        vp8_fast_fdct4x4              = vp8_short_fdct4x4_c;
+        vp8_fast_fdct8x4              = vp8_fast_fdct8x4_c;
+#endif
         vp8_subtract_b                = vp8_subtract_b_mmx;
         vp8_subtract_mbuv             = vp8_subtract_mbuv_mmx;
         vp8_variance4x4              = vp8_variance4x4_mmx;
@@ -218,10 +225,17 @@ void vp8_cmachine_specific_config(void)
         // MMX instruction set available:
         vp8_mbuverror                = vp8_mbuverror_mmx;
         vp8_fast_quantize_b            = vp8_fast_quantize_b_mmx;
+#if 0 // new fdct
         vp8_short_fdct4x4             = vp8_short_fdct4x4_mmx;
         vp8_short_fdct8x4             = vp8_short_fdct8x4_mmx;
-        vp8_fast_fdct4x4              = vp8_fast_fdct4x4_mmx;
-        vp8_fast_fdct8x4              = vp8_fast_fdct8x4_mmx;
+        vp8_fast_fdct4x4              = vp8_short_fdct4x4_mmx;
+        vp8_fast_fdct8x4              = vp8_short_fdct8x4_mmx;
+#else
+        vp8_short_fdct4x4             = vp8_short_fdct4x4_c;
+        vp8_short_fdct8x4             = vp8_short_fdct8x4_c;
+        vp8_fast_fdct4x4              = vp8_short_fdct4x4_c;
+        vp8_fast_fdct8x4              = vp8_fast_fdct8x4_c;
+#endif
         vp8_subtract_b                = vp8_subtract_b_mmx;
         vp8_subtract_mbuv             = vp8_subtract_mbuv_mmx;
         vp8_variance4x4              = vp8_variance4x4_mmx;
@@ -254,10 +268,10 @@ void vp8_cmachine_specific_config(void)
     {
         // Pure C:
         vp8_mbuverror                = vp8_mbuverror_c;
-        vp8_fast_quantize_b            = vp8_fast_quantize_b_c;
+        vp8_fast_quantize_b          = vp8_fast_quantize_b_c;
         vp8_short_fdct4x4             = vp8_short_fdct4x4_c;
         vp8_short_fdct8x4             = vp8_short_fdct8x4_c;
-        vp8_fast_fdct4x4              = vp8_fast_fdct4x4_c;
+        vp8_fast_fdct4x4              = vp8_short_fdct4x4_c;
         vp8_fast_fdct8x4              = vp8_fast_fdct8x4_c;
         vp8_subtract_b                = vp8_subtract_b_c;
         vp8_subtract_mbuv             = vp8_subtract_mbuv_c;

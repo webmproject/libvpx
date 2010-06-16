@@ -13,8 +13,7 @@
 
 section .text
     global sym(vp8_short_fdct4x4_mmx)
-    global sym(vp8_fast_fdct4x4_mmx)
-    global sym(vp8_fast_fdct8x4_wmt)
+    global sym(vp8_short_fdct8x4_wmt)
 
 
 %define         DCTCONSTANTSBITS         (16)
@@ -24,339 +23,8 @@ section .text
 %define         x_c3                      (25080)          ; cos(pi*3/8) * (1<<15)
 
 
-%define _1STSTAGESHIFT           14
-%define _2NDSTAGESHIFT           16
-
-; using matrix multiply with source and destbuffer has a pitch
 ;void vp8_short_fdct4x4_mmx(short *input, short *output, int pitch)
 sym(vp8_short_fdct4x4_mmx):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 3
-    GET_GOT     rbx
-    push rsi
-    push rdi
-    ; end prolog
-
-        mov         rsi,    arg(0) ;input
-        mov         rdi,    arg(1) ;output
-
-        movsxd      rax,    dword ptr arg(2) ;pitch
-        lea         rdx,    [dct_matrix GLOBAL]
-
-        movq        mm0,    [rsi   ]
-        movq        mm1,    [rsi + rax]
-
-        movq        mm2,    [rsi + rax*2]
-        lea         rsi,    [rsi + rax*2]
-
-        movq        mm3,    [rsi + rax]
-
-        ; first column
-        movq        mm4,    mm0
-        movq        mm7,    [rdx]
-
-        pmaddwd     mm4,    mm7
-        movq        mm5,    mm1
-
-        pmaddwd     mm5,    mm7
-        movq        mm6,    mm4
-
-        punpckldq   mm4,    mm5
-        punpckhdq   mm6,    mm5
-
-        paddd       mm4,    mm6
-        movq        mm5,    mm2
-
-
-        pmaddwd     mm5,    mm7
-        movq        mm6,    mm3
-
-        pmaddwd     mm6,    mm7
-        movq        mm7,    mm5
-
-        punpckldq   mm5,    mm6
-        punpckhdq   mm7,    mm6
-
-        paddd       mm5,    mm7
-        movq        mm6,    [dct1st_stage_rounding_mmx GLOBAL]
-
-        paddd       mm4,    mm6
-        paddd       mm5,    mm6
-
-        psrad       mm4,    _1STSTAGESHIFT
-        psrad       mm5,    _1STSTAGESHIFT
-
-        packssdw    mm4,    mm5
-        movq        [rdi],  mm4
-
-        ;second column
-        movq        mm4,    mm0
-
-        pmaddwd     mm4,    [rdx+8]
-        movq        mm5,    mm1
-
-        pmaddwd     mm5,    [rdx+8]
-        movq        mm6,    mm4
-
-        punpckldq   mm4,    mm5
-        punpckhdq   mm6,    mm5
-
-        paddd       mm4,    mm6
-        movq        mm5,    mm2
-
-        pmaddwd     mm5,    [rdx+8]
-        movq        mm6,    mm3
-
-        pmaddwd     mm6,    [rdx+8]
-        movq        mm7,    mm5
-
-        punpckldq   mm5,    mm6
-        punpckhdq   mm7,    mm6
-
-        paddd       mm5,    mm7
-        movq        mm6,    [dct1st_stage_rounding_mmx GLOBAL]
-
-        paddd       mm4,    mm6
-        paddd       mm5,    mm6
-
-        psrad       mm4,    _1STSTAGESHIFT
-        psrad       mm5,    _1STSTAGESHIFT
-
-        packssdw    mm4,    mm5
-        movq        [rdi+8],  mm4
-
-
-        ;third column
-        movq        mm4,    mm0
-
-        pmaddwd     mm4,    [rdx+16]
-        movq        mm5,    mm1
-
-        pmaddwd     mm5,    [rdx+16]
-        movq        mm6,    mm4
-
-        punpckldq   mm4,    mm5
-        punpckhdq   mm6,    mm5
-
-        paddd       mm4,    mm6
-        movq        mm5,    mm2
-
-        pmaddwd     mm5,    [rdx+16]
-        movq        mm6,    mm3
-
-        pmaddwd     mm6,    [rdx+16]
-        movq        mm7,    mm5
-
-        punpckldq   mm5,    mm6
-        punpckhdq   mm7,    mm6
-
-        paddd       mm5,    mm7
-        movq        mm6,    [dct1st_stage_rounding_mmx GLOBAL]
-
-        paddd       mm4,    mm6
-        paddd       mm5,    mm6
-
-        psrad       mm4,    _1STSTAGESHIFT
-        psrad       mm5,    _1STSTAGESHIFT
-
-        packssdw    mm4,    mm5
-        movq        [rdi+16],  mm4
-
-        ;fourth column (this is the last column, so we do not have save the source any more)
-
-        pmaddwd     mm0,    [rdx+24]
-
-        pmaddwd     mm1,    [rdx+24]
-        movq        mm6,    mm0
-
-        punpckldq   mm0,    mm1
-        punpckhdq   mm6,    mm1
-
-        paddd       mm0,    mm6
-
-        pmaddwd     mm2,    [rdx+24]
-
-        pmaddwd     mm3,    [rdx+24]
-        movq        mm7,    mm2
-
-        punpckldq   mm2,    mm3
-        punpckhdq   mm7,    mm3
-
-        paddd       mm2,    mm7
-        movq        mm6,    [dct1st_stage_rounding_mmx GLOBAL]
-
-        paddd       mm0,    mm6
-        paddd       mm2,    mm6
-
-        psrad       mm0,    _1STSTAGESHIFT
-        psrad       mm2,    _1STSTAGESHIFT
-
-        packssdw    mm0,    mm2
-
-        movq        mm3,    mm0
-
-        ; done with one pass
-        ; now start second pass
-        movq        mm0,    [rdi   ]
-        movq        mm1,    [rdi+ 8]
-        movq        mm2,    [rdi+ 16]
-
-        movq        mm4,    mm0
-
-        pmaddwd     mm4,    [rdx]
-        movq        mm5,    mm1
-
-        pmaddwd     mm5,    [rdx]
-        movq        mm6,    mm4
-
-        punpckldq   mm4,    mm5
-        punpckhdq   mm6,    mm5
-
-        paddd       mm4,    mm6
-        movq        mm5,    mm2
-
-        pmaddwd     mm5,    [rdx]
-        movq        mm6,    mm3
-
-        pmaddwd     mm6,    [rdx]
-        movq        mm7,    mm5
-
-        punpckldq   mm5,    mm6
-        punpckhdq   mm7,    mm6
-
-        paddd       mm5,    mm7
-        movq        mm6,    [dct2nd_stage_rounding_mmx GLOBAL]
-
-        paddd       mm4,    mm6
-        paddd       mm5,    mm6
-
-        psrad       mm4,    _2NDSTAGESHIFT
-        psrad       mm5,    _2NDSTAGESHIFT
-
-        packssdw    mm4,    mm5
-        movq        [rdi],  mm4
-
-        ;second column
-        movq        mm4,    mm0
-
-        pmaddwd     mm4,    [rdx+8]
-        movq        mm5,    mm1
-
-        pmaddwd     mm5,    [rdx+8]
-        movq        mm6,    mm4
-
-        punpckldq   mm4,    mm5
-        punpckhdq   mm6,    mm5
-
-        paddd       mm4,    mm6
-        movq        mm5,    mm2
-
-        pmaddwd     mm5,    [rdx+8]
-        movq        mm6,    mm3
-
-        pmaddwd     mm6,    [rdx+8]
-        movq        mm7,    mm5
-
-        punpckldq   mm5,    mm6
-        punpckhdq   mm7,    mm6
-
-        paddd       mm5,    mm7
-        movq        mm6,    [dct2nd_stage_rounding_mmx GLOBAL]
-
-        paddd       mm4,    mm6
-        paddd       mm5,    mm6
-
-        psrad       mm4,    _2NDSTAGESHIFT
-        psrad       mm5,    _2NDSTAGESHIFT
-
-        packssdw    mm4,    mm5
-        movq        [rdi+8],  mm4
-
-
-        ;third column
-        movq        mm4,    mm0
-
-        pmaddwd     mm4,    [rdx+16]
-        movq        mm5,    mm1
-
-        pmaddwd     mm5,    [rdx+16]
-        movq        mm6,    mm4
-
-        punpckldq   mm4,    mm5
-        punpckhdq   mm6,    mm5
-
-        paddd       mm4,    mm6
-        movq        mm5,    mm2
-
-        pmaddwd     mm5,    [rdx+16]
-        movq        mm6,    mm3
-
-        pmaddwd     mm6,    [rdx+16]
-        movq        mm7,    mm5
-
-        punpckldq   mm5,    mm6
-        punpckhdq   mm7,    mm6
-
-        paddd       mm5,    mm7
-        movq        mm6,    [dct2nd_stage_rounding_mmx GLOBAL]
-
-        paddd       mm4,    mm6
-        paddd       mm5,    mm6
-
-        psrad       mm4,    _2NDSTAGESHIFT
-        psrad       mm5,    _2NDSTAGESHIFT
-
-        packssdw    mm4,    mm5
-        movq        [rdi+16],  mm4
-
-        ;fourth column
-        movq        mm4,    mm0
-
-        pmaddwd     mm4,    [rdx+24]
-        movq        mm5,    mm1
-
-        pmaddwd     mm5,    [rdx+24]
-        movq        mm6,    mm4
-
-        punpckldq   mm4,    mm5
-        punpckhdq   mm6,    mm5
-
-        paddd       mm4,    mm6
-        movq        mm5,    mm2
-
-        pmaddwd     mm5,    [rdx+24]
-        movq        mm6,    mm3
-
-        pmaddwd     mm6,    [rdx+24]
-        movq        mm7,    mm5
-
-        punpckldq   mm5,    mm6
-        punpckhdq   mm7,    mm6
-
-        paddd       mm5,    mm7
-        movq        mm6,    [dct2nd_stage_rounding_mmx GLOBAL]
-
-        paddd       mm4,    mm6
-        paddd       mm5,    mm6
-
-        psrad       mm4,    _2NDSTAGESHIFT
-        psrad       mm5,    _2NDSTAGESHIFT
-
-        packssdw    mm4,    mm5
-        movq        [rdi+24],  mm4
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-
-;void vp8_fast_fdct4x4_mmx(short *input, short *output, int pitch)
-sym(vp8_fast_fdct4x4_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -379,11 +47,11 @@ sym(vp8_fast_fdct4x4_mmx):
         movq    mm3,    [rcx + rax]
         ; get the constants
         ;shift to left by 1 for prescision
-        paddw   mm0,    mm0
-        paddw   mm1,    mm1
+        psllw   mm0,    3
+        psllw   mm1,    3
 
-        psllw   mm2,    1
-        psllw   mm3,    1
+        psllw   mm2,    3
+        psllw   mm3,    3
 
         ; transpose for the second stage
         movq    mm4,    mm0         ; 00 01 02 03
@@ -531,20 +199,23 @@ sym(vp8_fast_fdct4x4_mmx):
         movq    mm3,    mm5
         ; done with vertical
 
-		pcmpeqw	mm4,	mm4
-		pcmpeqw	mm5,	mm5
-		psrlw	mm4,	15
-		psrlw	mm5,	15
+        pcmpeqw mm4,    mm4
+        pcmpeqw mm5,    mm5
+        psrlw   mm4,    15
+        psrlw   mm5,    15
+
+        psllw   mm4,    2
+        psllw   mm5,    2
 
         paddw   mm0,    mm4
         paddw   mm1,    mm5
         paddw   mm2,    mm4
         paddw   mm3,    mm5
 
-        psraw   mm0, 1
-        psraw   mm1, 1
-        psraw   mm2, 1
-        psraw   mm3, 1
+        psraw   mm0, 3
+        psraw   mm1, 3
+        psraw   mm2, 3
+        psraw   mm3, 3
 
         movq        [rdi   ],   mm0
         movq        [rdi+ 8],   mm1
@@ -560,8 +231,8 @@ sym(vp8_fast_fdct4x4_mmx):
     ret
 
 
-;void vp8_fast_fdct8x4_wmt(short *input, short *output, int pitch)
-sym(vp8_fast_fdct8x4_wmt):
+;void vp8_short_fdct8x4_wmt(short *input, short *output, int pitch)
+sym(vp8_short_fdct8x4_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
@@ -584,11 +255,11 @@ sym(vp8_fast_fdct8x4_wmt):
         movdqa      xmm3,       [rcx + rax]
         ; get the constants
         ;shift to left by 1 for prescision
-        psllw       xmm0,        1
-        psllw       xmm2,        1
+        psllw       xmm0,        3
+        psllw       xmm2,        3
 
-        psllw       xmm4,        1
-        psllw       xmm3,        1
+        psllw       xmm4,        3
+        psllw       xmm3,        3
 
         ; transpose for the second stage
         movdqa      xmm1,       xmm0         ; 00 01 02 03 04 05 06 07
@@ -758,20 +429,23 @@ sym(vp8_fast_fdct8x4_wmt):
         ; done with vertical
 
 
-        pcmpeqw		xmm4,		xmm4
-        pcmpeqw		xmm5,		xmm5;
-        psrlw		xmm4,		15
-        psrlw		xmm5,		15
+        pcmpeqw     xmm4,       xmm4
+        pcmpeqw     xmm5,       xmm5;
+        psrlw       xmm4,       15
+        psrlw       xmm5,       15
+
+        psllw       xmm4,       2
+        psllw       xmm5,       2
 
         paddw       xmm0,       xmm4
         paddw       xmm1,       xmm5
         paddw       xmm2,       xmm4
         paddw       xmm3,       xmm5
 
-        psraw       xmm0,       1
-        psraw       xmm1,       1
-        psraw       xmm2,       1
-        psraw       xmm3,       1
+        psraw       xmm0,       3
+        psraw       xmm1,       3
+        psraw       xmm2,       3
+        psraw       xmm3,       3
 
         movq        QWORD PTR[rdi   ],   xmm0
         movq        QWORD PTR[rdi+ 8],   xmm1

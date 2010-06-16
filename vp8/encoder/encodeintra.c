@@ -66,7 +66,7 @@ void vp8_encode_intra4x4block_rd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BL
 
     ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
-    x->short_fdct4x4rd(be->src_diff, be->coeff, 32);
+    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
 
     x->quantize_b(be, b);
 

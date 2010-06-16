@@ -137,8 +137,6 @@ extern unsigned int inter_b_modes[15];
 
 extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
 extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
-extern void (*vp8_fast_fdct4x4)(short *input, short *output, int pitch);
-extern void (*vp8_fast_fdct8x4)(short *input, short *output, int pitch);
 
 extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
@@ -1136,15 +1134,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     {
         cpi->mb.vp8_short_fdct8x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
         cpi->mb.vp8_short_fdct4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
-        cpi->mb.short_fdct8x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
-        cpi->mb.short_fdct4x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
     }
     else
     {
         cpi->mb.vp8_short_fdct8x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
         cpi->mb.vp8_short_fdct4x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
-        cpi->mb.short_fdct8x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
-        cpi->mb.short_fdct4x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
     }
 
     cpi->mb.short_walsh4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, walsh_short4x4);
