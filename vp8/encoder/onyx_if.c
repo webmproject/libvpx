@@ -4588,13 +4588,13 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
 
     if (cpi->gold_is_last)
-        cpi->ref_frame_flags &= !VP8_GOLD_FLAG;
+        cpi->ref_frame_flags &= ~VP8_GOLD_FLAG;
 
     if (cpi->alt_is_last)
-        cpi->ref_frame_flags &= !VP8_ALT_FLAG;
+        cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
 
     if (cpi->gold_is_alt)
-        cpi->ref_frame_flags &= !VP8_ALT_FLAG;
+        cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
 
 
     if (cpi->oxcf.error_resilient_mode)
