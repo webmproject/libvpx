@@ -217,7 +217,7 @@ int frame_max_bits(VP8_COMP *cpi)
     // If we are running below the optimal level then we need to gradually tighten up on max_bits.
     if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
     {
-        double buffer_fullness_ratio = (double)DOUBLE_DIVIDE_CHECK(cpi->buffer_level) / (double)cpi->oxcf.optimal_buffer_level;
+        double buffer_fullness_ratio = (double)cpi->buffer_level / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.optimal_buffer_level);
 
         // For CBR base this on the target average bits per frame plus the maximum sedction rate passed in by the user
         max_bits = (int)(cpi->av_per_frame_bandwidth * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
