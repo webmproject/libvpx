@@ -1,10 +1,10 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license 
+ *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
  *  tree. An additional intellectual property rights grant can be found
- *  in the file PATENTS.  All contributing project authors may 
+ *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
@@ -468,7 +468,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
 #if 0
     // Experimental code
-    cpi->frame_distortion = 0;     
+    cpi->frame_distortion = 0;
     cpi->last_mb_distortion = 0;
 #endif
 
