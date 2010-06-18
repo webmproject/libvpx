@@ -172,8 +172,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             MACROBLOCKD *xd = &pbi->mb;
 
             mbmi->need_to_clamp_mvs = 0;
-            vp8dx_bool_decoder_fill(bc);
-
             // Distance of Mb to the various image edges.
             // These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
             xd->mb_to_left_edge = -((mb_col * 16) << 3);

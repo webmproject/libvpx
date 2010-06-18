@@ -24,7 +24,6 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     pbi->dequant.idct    = vp8_dequant_idct_c;
     pbi->dequant.idct_dc = vp8_dequant_dc_idct_c;
     pbi->dboolhuff.start = vp8dx_start_decode_c;
-    pbi->dboolhuff.stop  = vp8dx_stop_decode_c;
     pbi->dboolhuff.fill  = vp8dx_bool_decoder_fill_c;
 #if 0 //For use with RTCD, when implemented
     pbi->dboolhuff.debool = vp8dx_decode_bool_c;
