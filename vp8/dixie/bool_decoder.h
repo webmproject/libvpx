@@ -137,4 +137,17 @@ static int bool_maybe_get_int(struct bool_decoder *br, int bits)
 
     return bool_get_bit(br) ? -z : z;
 }
+
+
+static int
+bool_read_tree(struct bool_decoder *bool,
+               const int           *t,
+               const unsigned char *p)
+{
+    int i = 0;
+
+    while ((i = t[ i + bool_get(bool, p[i>>1])]) > 0) ;
+
+    return -i;
+}
 #endif

@@ -9,6 +9,7 @@
  */
 #ifndef DIXIE_H
 #define DIXIE_H
+#include "vpx/internal/vpx_codec_internal.h"
 #include "bool_decoder.h"
 
 struct vp8_frame_hdr
@@ -134,6 +135,59 @@ struct vp8_entropy_hdr
 };
 
 
+enum prediction_mode
+{
+    /* 16x16 intra modes */
+    DC_PRED, V_PRED, H_PRED, TM_PRED, B_PRED,
+
+    /* 16x16 inter modes */
+    NEARESTMV, NEARMV, ZEROMV, NEWMV, SPLITMV,
+
+    MB_MODE_COUNT,
+
+    /* 4x4 intra modes */
+    B_DC_PRED = 0, B_TM_PRED, B_VE_PRED, B_HE_PRED, B_LD_PRED, B_RD_PRED,
+    B_VR_PRED, B_VL_PRED, B_HD_PRED, B_HU_PRED,
+
+    /* 4x4 inter modes */
+    LEFT4X4, ABOVE4X4, ZERO4X4, NEW4X4,
+
+    B_MODE_COUNT
+};
+
+
+union mv
+{
+    struct
+    {
+        int16_t x, y;
+    }  d;
+    uint32_t               raw;
+};
+
+
+struct mb_base_info
+{
+    unsigned char y_mode     : 4;
+    unsigned char uv_mode    : 4;
+    unsigned char segment_id : 3;
+    unsigned char ref_frame  : 2;
+    unsigned char skip_coeff : 1;
+    union mv      mv;
+};
+
+
+struct mb_info
+{
+    struct mb_base_info base;
+    union
+    {
+        union mv              mvs[16];
+        enum prediction_mode  modes[16];
+    } split;
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
@@ -149,6 +203,12 @@ struct vp8_decoder_ctx
     struct bool_decoder             bool[MAX_PARTITIONS];
     struct vp8_entropy_hdr          saved_entropy;
     unsigned int                    saved_entropy_valid;
+
+    unsigned int                    mb_rows;
+    unsigned int                    mb_cols;
+    struct mb_info                 *mb_info_storage;
+    struct mb_info                **mb_info_rows_storage;
+    struct mb_info                **mb_info_rows;
 };
 
 
@@ -162,6 +222,5 @@ vpx_codec_err_t
 vp8_dixie_decode_frame(struct vp8_decoder_ctx *ctx,
                        const unsigned char    *data,
                        unsigned int            sz);
-
 
 #endif

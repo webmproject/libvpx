@@ -11,6 +11,7 @@
 #include "bit_ops.h"
 #include "dixie.h"
 #include "vp8_prob_data.h"
+#include "modemv.h"
 #include <string.h>
 #include <assert.h>
 
@@ -235,7 +236,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 {
     vpx_codec_err_t  res;
     struct bool_decoder  bool;
-    int                  i;
+    int                  i, row;
 
     ctx->saved_entropy_valid = 0;
 
@@ -261,8 +262,9 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 
         data += KEYFRAME_HEADER_SZ;
         sz -= KEYFRAME_HEADER_SZ;
+        ctx->mb_cols = ctx->frame_hdr.kf.w / 16;
+        ctx->mb_rows = ctx->frame_hdr.kf.h / 16;
     }
-
 
     /* Start the bitreader for the header/entropy partition */
     vp8dx_bool_init(&bool, data, ctx->frame_hdr.part0_sz);
@@ -290,6 +292,13 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     }
 
     decode_entropy_header(ctx, &bool, &ctx->entropy_hdr);
+
+    vp8_dixie_modemv_init(ctx);
+
+    for (row = 0; row < ctx->mb_rows; row++)
+    {
+        vp8_dixie_modemv_process_row(ctx, &bool, row, 0, ctx->mb_cols);
+    }
 }
 
 
