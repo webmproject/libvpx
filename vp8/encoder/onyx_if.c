@@ -545,7 +545,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_NEWG     ] = INT_MAX;
             sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
         }
-        else if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
+
+        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
         {
             sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
             sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
@@ -597,7 +598,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
             sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
         }
-        else if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
+
+        if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
         {
             sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
             sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
@@ -605,7 +607,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_NEWG     ] = INT_MAX;
             sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
         }
-        else if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
+
+        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
         {
             sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
             sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
@@ -763,7 +766,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEWA] = 4;
             }
 
-            if (cpi->ref_frame_flags & VP8_LAST_FLAG & VP8_GOLD_FLAG)
+            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
                 sf->thresh_mult[THR_NEARESTG ] = 2000;
                 sf->thresh_mult[THR_ZEROG    ] = 2000;
@@ -771,7 +774,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWG     ] = 4000;
             }
 
-            if (cpi->ref_frame_flags & VP8_LAST_FLAG & VP8_ALT_FLAG)
+            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
             {
                 sf->thresh_mult[THR_NEARESTA ] = 2000;
                 sf->thresh_mult[THR_ZEROA    ] = 2000;
