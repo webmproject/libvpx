@@ -57,7 +57,6 @@ dist:
         fi
 
 
-svnstat: ALL_TARGETS:=$(firstword $(ALL_TARGETS))
 endif
 
 ifneq ($(target),)
@@ -363,12 +362,3 @@ INSTALL_TARGETS += .install-docs .install-srcs .install-libs .install-bins
 all-$(target): $(BUILD_TARGETS)
 install:: $(INSTALL_TARGETS)
 dist: $(INSTALL_TARGETS)
-
-#
-# Development helper targets
-#
-ifneq ($(SRC_PATH_BARE),)
-.PHONY: svnstat
-svnstat:
-	svn stat $(SRC_PATH_BARE)
-endif
