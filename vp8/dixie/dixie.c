@@ -30,15 +30,6 @@ decode_entropy_header(struct vp8_decoder_ctx    *ctx,
 {
     int i, j, k, l;
 
-    /* Set keyframe entropy defaults */
-    if (ctx->frame_hdr.is_keyframe)
-    {
-        ARRAY_COPY(hdr->coeff_probs, k_default_coeff_probs);
-        ARRAY_COPY(hdr->mv_probs, k_default_mv_probs);
-        ARRAY_COPY(hdr->y_mode_probs, k_default_y_mode_probs);
-        ARRAY_COPY(hdr->uv_mode_probs, k_default_uv_mode_probs);
-    }
-
     /* Read coefficient probability updates */
     for (i = 0; i < BLOCK_TYPES; i++)
         for (j = 0; j < COEF_BANDS; j++)
@@ -57,7 +48,7 @@ decode_entropy_header(struct vp8_decoder_ctx    *ctx,
     /* Parse interframe probability updates */
     if (!ctx->frame_hdr.is_keyframe)
     {
-        hdr->prob_intra = bool_get_uint(bool, 8);
+        hdr->prob_inter = bool_get_uint(bool, 8);
         hdr->prob_last  = bool_get_uint(bool, 8);
         hdr->prob_gf    = bool_get_uint(bool, 8);
 
@@ -93,8 +84,8 @@ decode_reference_header(struct vp8_decoder_ctx    *ctx,
                          ? bool_get_uint(bool, 2) : 0;
     hdr->copy_arf      = key ? 0 : !hdr->refresh_arf
                          ? bool_get_uint(bool, 2) : 0;
-    hdr->sign_bias_gf  = key ? 0 : bool_get_bit(bool);
-    hdr->sign_bias_arf = key ? 0 : bool_get_bit(bool);
+    hdr->sign_bias[GOLDEN_FRAME] = key ? 0 : bool_get_bit(bool);
+    hdr->sign_bias[ALTREF_FRAME] = key ? 0 : bool_get_bit(bool);
     hdr->refresh_entropy = bool_get_bit(bool);
     hdr->refresh_last  = key ? 1 : bool_get_bit(bool);
 }
@@ -262,8 +253,8 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 
         data += KEYFRAME_HEADER_SZ;
         sz -= KEYFRAME_HEADER_SZ;
-        ctx->mb_cols = ctx->frame_hdr.kf.w / 16;
-        ctx->mb_rows = ctx->frame_hdr.kf.h / 16;
+        ctx->mb_cols = (ctx->frame_hdr.kf.w + 15) / 16;
+        ctx->mb_rows = (ctx->frame_hdr.kf.h + 15) / 16;
     }
 
     /* Start the bitreader for the header/entropy partition */
@@ -285,6 +276,17 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     decode_quantizer_header(ctx, &bool, &ctx->quant_hdr);
     decode_reference_header(ctx, &bool, &ctx->reference_hdr);
 
+    /* Set keyframe entropy defaults. These get updated on keyframes
+     * regardless of the refresh_entropy setting.
+     */
+    if (ctx->frame_hdr.is_keyframe)
+    {
+        ARRAY_COPY(ctx->entropy_hdr.coeff_probs, k_default_coeff_probs);
+        ARRAY_COPY(ctx->entropy_hdr.mv_probs, k_default_mv_probs);
+        ARRAY_COPY(ctx->entropy_hdr.y_mode_probs, k_default_y_mode_probs);
+        ARRAY_COPY(ctx->entropy_hdr.uv_mode_probs, k_default_uv_mode_probs);
+    }
+
     if (!ctx->reference_hdr.refresh_entropy)
     {
         ctx->saved_entropy = ctx->entropy_hdr;
@@ -298,6 +300,12 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     for (row = 0; row < ctx->mb_rows; row++)
     {
         vp8_dixie_modemv_process_row(ctx, &bool, row, 0, ctx->mb_cols);
+    }
+
+    if (!ctx->reference_hdr.refresh_entropy)
+    {
+        ctx->entropy_hdr = ctx->saved_entropy;
+        ctx->saved_entropy_valid = 0;
     }
 }
 

@@ -143,6 +143,13 @@ static const int kf_y_mode_tree[] =
     -DC_PRED, -V_PRED,
     -H_PRED, -TM_PRED
 };
+static const int y_mode_tree[] =
+{
+    -DC_PRED, 2,
+    4, 6,
+    -V_PRED, -H_PRED,
+    -TM_PRED, -B_PRED
+};
 static const int uv_mode_tree[6] =
 {
     -DC_PRED, 2,
@@ -161,6 +168,84 @@ static const int b_mode_tree[18] =
     -B_VL_PRED, 16,                      /* 7 = VL_NODE */
     -B_HD_PRED, -B_HU_PRED             /* 8 = HD_NODE */
 };
+static const int small_mv_tree[14] =
+{
+    2, 8,
+    4, 6,
+    -0, -1,
+    -2, -3,
+    10, 12,
+    -4, -5,
+    -6, -7
+};
+static const int mv_ref_tree[8] =
+{
+    -ZEROMV, 2,
+    -NEARESTMV, 4,
+    -NEARMV, 6,
+    -NEWMV, -SPLITMV
+};
+static const int submv_ref_tree[6] =
+{
+    -LEFT4X4, 2,
+    -ABOVE4X4, 4,
+    -ZERO4X4, -NEW4X4
+};
+static const int split_mv_tree[6] =
+{
+    -3, 2,
+    -2, 4,
+    -0, -1
+};
+static const unsigned char default_b_mode_probs[] =
+{ 120,  90,  79, 133,  87,  85,  80, 111, 151};
+static const unsigned char mv_counts_to_probs[6][4] =
+{
+    {   7,   1,   1, 143 },
+    {  14,  18,  14, 107 },
+    { 135,  64,  57,  68 },
+    {  60,  56, 128,  65 },
+    { 159, 134, 128,  34 },
+    { 234, 188, 128,  28 }
+
+};
+static const unsigned char split_mv_probs[3] =
+{ 110, 111, 150};
+static const unsigned char submv_ref_probs2[5][3] =
+{
+    { 147, 136, 18 },
+    { 106, 145,  1 },
+    { 179, 121,  1 },
+    { 223,   1, 34 },
+    { 208,   1,  1 }
+};
+
+const static int mv_partitions[4][16] =
+{
+    {0, 0, 0, 0, 0, 0, 0, 0, 1, 1,  1,  1,  1,  1,  1,  1 },
+    {0, 0, 1, 1, 0, 0, 1, 1, 0, 0,  1,  1,  0,  0,  1,  1 },
+    {0, 0, 1, 1, 0, 0, 1, 1, 2, 2,  3,  3,  2,  2,  3,  3 },
+    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }
+};
+
+
+struct mv_clamp_rect
+{
+    int to_left, to_right, to_top, to_bottom;
+};
+
+
+static union mv
+        clamp_mv(union mv raw, const struct mv_clamp_rect *bounds)
+{
+    union mv newmv;
+
+    newmv.d.x = (raw.d.x < bounds->to_left) ? bounds->to_left : raw.d.x;
+    newmv.d.x = (raw.d.x > bounds->to_right) ? bounds->to_right : newmv.d.x;
+    newmv.d.y = (raw.d.y < bounds->to_top) ? bounds->to_top : raw.d.y;
+    newmv.d.y = (raw.d.y > bounds->to_bottom) ? bounds->to_bottom : newmv.d.y;
+    return newmv;
+}
 
 
 static int
@@ -262,6 +347,390 @@ decode_kf_mb_mode(struct mb_info      *this,
 }
 
 
+static void
+decode_intra_mb_mode(struct mb_info         *this,
+                     struct vp8_entropy_hdr *hdr,
+                     struct bool_decoder    *bool)
+{
+    /* Like decode_kf_mb_mode, but with probabilities transmitted in the
+     * bitstream and no context on the above/left block mode.
+     */
+    int y_mode, uv_mode;
+
+    y_mode = bool_read_tree(bool, y_mode_tree, hdr->y_mode_probs);
+
+    if (y_mode == B_PRED)
+    {
+        unsigned int i;
+
+        for (i = 0; i < 16; i++)
+        {
+            enum prediction_mode b;
+
+            b = bool_read_tree(bool, b_mode_tree, default_b_mode_probs);
+            this->split.modes[i] = b;
+        }
+    }
+
+    uv_mode = bool_read_tree(bool, uv_mode_tree, hdr->uv_mode_probs);
+
+    this->base.y_mode = y_mode;
+    this->base.uv_mode = uv_mode;
+    this->base.mv.raw = 0;
+    this->base.ref_frame = CURRENT_FRAME;
+}
+
+
+static int
+read_mv_component(struct bool_decoder *bool,
+                  const unsigned char  mvc[MV_PROB_CNT])
+{
+    enum {IS_SHORT, SIGN, SHORT, BITS = SHORT + 8 - 1, LONG_WIDTH = 10};
+    int x = 0;
+
+    if (bool_get(bool, mvc[IS_SHORT])) /* Large */
+    {
+        int i = 0;
+
+        for (i = 0; i < 3; i++)
+            x += bool_get(bool, mvc[BITS + i]) << i;
+
+        /* Skip bit 3, which is sometimes implicit */
+        for (i = LONG_WIDTH - 1; i > 3; i--)
+            x += bool_get(bool, mvc[BITS + i]) << i;
+
+        if (!(x & 0xFFF0)  ||  bool_get(bool, mvc[BITS + 3]))
+            x += 8;
+    }
+    else   /* small */
+        x = bool_read_tree(bool, small_mv_tree, mvc + SHORT);
+
+    if (x && bool_get(bool, mvc[SIGN]))
+        x = -x;
+
+    return x << 1;
+}
+
+
+static mv_t
+above_block_mv(const struct mb_info *this,
+               const struct mb_info *above,
+               unsigned int          b)
+{
+    if (b < 4)
+    {
+        if (above->base.y_mode == SPLITMV)
+            return above->split.mvs[b+12];
+
+        return above->base.mv;
+    }
+
+    return this->split.mvs[b-4];
+}
+
+
+static mv_t
+left_block_mv(const struct mb_info *this,
+              const struct mb_info *left,
+              unsigned int          b)
+{
+    if (!(b & 3))
+    {
+        if (left->base.y_mode == SPLITMV)
+            return left->split.mvs[b+3];
+
+        return left->base.mv;
+    }
+
+    return this->split.mvs[b-1];
+}
+
+
+static enum prediction_mode
+submv_ref(struct bool_decoder *bool, union mv l, union mv a)
+{
+    enum subblock_mv_ref
+    {
+        SUBMVREF_NORMAL,
+        SUBMVREF_LEFT_ZED,
+        SUBMVREF_ABOVE_ZED,
+        SUBMVREF_LEFT_ABOVE_SAME,
+        SUBMVREF_LEFT_ABOVE_ZED
+    };
+
+    int lez = !(l.raw);
+    int aez = !(a.raw);
+    int lea = l.raw == a.raw;
+    enum subblock_mv_ref ctx = SUBMVREF_NORMAL;
+
+    if (lea && lez)
+        ctx = SUBMVREF_LEFT_ABOVE_ZED;
+    else if (lea)
+        ctx = SUBMVREF_LEFT_ABOVE_SAME;
+    else if (aez)
+        ctx = SUBMVREF_ABOVE_ZED;
+    else if (lez)
+        ctx = SUBMVREF_LEFT_ZED;
+
+    return bool_read_tree(bool, submv_ref_tree, submv_ref_probs2[ctx]);
+}
+
+
+static void
+read_mv(struct bool_decoder  *bool,
+        union mv             *mv,
+        mv_component_probs_t  mvc[2])
+{
+    mv->d.y = read_mv_component(bool, mvc[0]);
+    mv->d.x = read_mv_component(bool, mvc[1]);
+}
+
+
+static void
+mv_bias(const struct mb_info *mb,
+        const unsigned int   sign_bias[3],
+        enum reference_frame ref_frame,
+        union mv             *mv)
+{
+    if (sign_bias[mb->base.ref_frame] ^ sign_bias[ref_frame])
+    {
+        mv->d.x *= -1;
+        mv->d.y *= -1;
+    }
+}
+
+
+enum near_mv_v
+{
+    CNT_BEST = 0,
+    CNT_ZEROZERO = 0,
+    CNT_NEAREST,
+    CNT_NEAR,
+    CNT_SPLITMV
+};
+
+
+static void
+find_near_mvs(const struct mb_info   *this,
+              const struct mb_info   *left,
+              const struct mb_info   *above,
+              const unsigned int      sign_bias[3],
+              union  mv               near_mvs[4],
+              int                     cnt[4])
+{
+    const struct mb_info *aboveleft = above - 1;
+    union  mv             *mv = near_mvs;
+    int                   *cntx = cnt;
+
+    /* Zero accumulators */
+    mv[0].raw = mv[1].raw = mv[2].raw = 0;
+    cnt[0] = cnt[1] = cnt[2] = cnt[3] = 0;
+
+    /* Process above */
+    if (above->base.ref_frame != CURRENT_FRAME)
+    {
+        if (above->base.mv.raw)
+        {
+            (++mv)->raw = above->base.mv.raw;
+            mv_bias(above, sign_bias, this->base.ref_frame, mv);
+            ++cntx;
+        }
+
+        *cntx += 2;
+    }
+
+    /* Process left */
+    if (left->base.ref_frame != CURRENT_FRAME)
+    {
+        if (left->base.mv.raw)
+        {
+            union mv this_mv;
+
+            this_mv.raw = left->base.mv.raw;
+            mv_bias(left, sign_bias, this->base.ref_frame, &this_mv);
+
+            if (this_mv.raw != mv->raw)
+            {
+                (++mv)->raw = this_mv.raw;
+                ++cntx;
+            }
+
+            *cntx += 2;
+        }
+        else
+            cnt[CNT_ZEROZERO] += 2;
+    }
+
+    /* Process above left */
+    if (aboveleft->base.ref_frame != CURRENT_FRAME)
+    {
+        if (aboveleft->base.mv.raw)
+        {
+            union mv this_mv;
+
+            this_mv.raw = aboveleft->base.mv.raw;
+            mv_bias(aboveleft, sign_bias, this->base.ref_frame, &this_mv);
+
+            if (this_mv.raw != mv->raw)
+            {
+                (++mv)->raw = this_mv.raw;
+                ++cntx;
+            }
+
+            *cntx += 1;
+        }
+        else
+            cnt[CNT_ZEROZERO] += 1;
+    }
+
+    /* If we have three distinct MV's ... */
+    if (cnt[CNT_SPLITMV])
+    {
+        /* See if above-left MV can be merged with NEAREST */
+        if (mv->raw == near_mvs[CNT_NEAREST].raw)
+            cnt[CNT_NEAREST] += 1;
+    }
+
+    cnt[CNT_SPLITMV] = ((above->base.y_mode == SPLITMV)
+                        + (left->base.y_mode == SPLITMV)) * 2
+                       + (aboveleft->base.y_mode == SPLITMV);
+
+    /* Swap near and nearest if necessary */
+    if (cnt[CNT_NEAR] > cnt[CNT_NEAREST])
+    {
+        int tmp;
+        tmp = cnt[CNT_NEAREST];
+        cnt[CNT_NEAREST] = cnt[CNT_NEAR];
+        cnt[CNT_NEAR] = tmp;
+        tmp = near_mvs[CNT_NEAREST].raw;
+        near_mvs[CNT_NEAREST].raw = near_mvs[CNT_NEAR].raw;
+        near_mvs[CNT_NEAR].raw = tmp;
+    }
+
+    /* Use near_mvs[CNT_BEST] to store the "best" MV. Note that this storage
+     * shares the same address as near_mvs[CNT_ZEROZERO].
+     */
+    if (cnt[CNT_NEAREST] >= cnt[CNT_BEST])
+        near_mvs[CNT_BEST] = near_mvs[CNT_NEAREST];
+}
+
+
+static void
+decode_split_mv(struct mb_info         *this,
+                const struct mb_info   *left,
+                const struct mb_info   *above,
+                struct vp8_entropy_hdr *hdr,
+                union  mv              *best_mv,
+                struct bool_decoder    *bool)
+{
+    const int *partition;
+    int        j, k, mask, partition_id;
+
+    partition_id = bool_read_tree(bool, split_mv_tree, split_mv_probs);
+    partition = mv_partitions[partition_id];
+
+    for (j = 0, mask = 0; mask < 65535; j++)
+    {
+        union mv mv, left_mv, above_mv;
+        enum prediction_mode subblock_mode;
+
+        /* Find the first subblock in this partition. */
+        for (k = 0; j != partition[k]; k++);
+
+        /* Decode the next MV */
+        left_mv = left_block_mv(this, left, k);
+        above_mv = above_block_mv(this, above, k);
+        subblock_mode = submv_ref(bool, left_mv,  above_mv);
+
+        switch (subblock_mode)
+        {
+        case LEFT4X4:
+            mv = left_mv;
+            break;
+        case ABOVE4X4:
+            mv = above_mv;
+            break;
+        case ZERO4X4:
+            mv.raw = 0;
+            break;
+        case NEW4X4:
+            read_mv(bool, &mv, hdr->mv_probs);
+            mv.d.x += best_mv->d.x;
+            mv.d.y += best_mv->d.y;
+            break;
+        default:
+            assert(0);
+        }
+
+        /* Fill the MV's for this partition */
+        for (; k < 16; k++)
+            if (j == partition[k])
+            {
+                this->split.mvs[k] = mv;
+                mask |= 1 << k;
+            }
+    }
+}
+
+
+static void
+decode_mvs(struct vp8_decoder_ctx       *ctx,
+           struct mb_info               *this,
+           const struct mb_info         *left,
+           const struct mb_info         *above,
+           const struct mv_clamp_rect   *bounds,
+           struct bool_decoder          *bool)
+{
+    struct vp8_entropy_hdr *hdr = &ctx->entropy_hdr;
+    union mv          near_mvs[4];
+    union mv          clamped_best_mv;
+    int               mv_cnts[4];
+    unsigned char     probs[4];
+    enum {BEST, NEAREST, NEAR};
+    int ref_frame;
+
+    this->base.ref_frame = bool_get(bool, hdr->prob_last)
+                           ? 2 + bool_get(bool, hdr->prob_gf)
+                           : 1;
+
+    find_near_mvs(this, this - 1, above, ctx->reference_hdr.sign_bias,
+                  near_mvs, mv_cnts);
+    probs[0] = mv_counts_to_probs[mv_cnts[0]][0];
+    probs[1] = mv_counts_to_probs[mv_cnts[1]][1];
+    probs[2] = mv_counts_to_probs[mv_cnts[2]][2];
+    probs[3] = mv_counts_to_probs[mv_cnts[3]][3];
+
+    this->base.y_mode = bool_read_tree(bool, mv_ref_tree, probs);
+    this->base.uv_mode = this->base.y_mode;
+
+    switch (this->base.y_mode)
+    {
+    case NEARESTMV:
+        this->base.mv = clamp_mv(near_mvs[NEAREST], bounds);
+        break;
+    case NEARMV:
+        this->base.mv = clamp_mv(near_mvs[NEAR], bounds);
+        break;
+    case ZEROMV:
+        this->base.mv.raw = 0;
+        break;
+    case NEWMV:
+        clamped_best_mv = clamp_mv(near_mvs[BEST], bounds);
+        read_mv(bool, &this->base.mv, hdr->mv_probs);
+        this->base.mv.d.x += clamped_best_mv.d.x;
+        this->base.mv.d.y += clamped_best_mv.d.y;
+        break;
+    case SPLITMV:
+        clamped_best_mv = clamp_mv(near_mvs[BEST], bounds);
+        decode_split_mv(this, left, above, hdr, &clamped_best_mv, bool);
+        this->base.mv = this->split.mvs[15];
+        break;
+    default:
+        assert(0);
+    }
+}
+
+
 void
 vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
                              struct bool_decoder    *bool,
@@ -269,16 +738,21 @@ vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
                              unsigned int            start_col,
                              unsigned int            num_cols)
 {
-    struct mb_info *above, *this;
-    unsigned int    col;
+    struct mb_info       *above, *this;
+    unsigned int          col;
+    struct mv_clamp_rect  bounds;
 
     this = ctx->mb_info_rows[row];
     above = ctx->mb_info_rows[row - 1];
 
+    /* Calculate the eighth-pel MV bounds using a 1 MB border. */
+    bounds.to_left   = -((start_col + 1) << 7);
+    bounds.to_right  = (ctx->mb_cols - start_col) << 7;
+    bounds.to_top    = -((row + 1) << 7);
+    bounds.to_bottom = (ctx->mb_rows - row) << 7;
+
     for (col = start_col; col < start_col + num_cols; col++)
     {
-        if (!row) assert(!above->base.y_mode);
-
         if (ctx->segment_hdr.update_map)
             this->base.segment_id = read_segment_id(bool,
                                                     &ctx->segment_hdr);
@@ -295,7 +769,15 @@ vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
             decode_kf_mb_mode(this, this - 1, above, bool);
         }
         else
-            assert(0);
+        {
+            if (bool_get(bool, ctx->entropy_hdr.prob_inter))
+                decode_mvs(ctx, this, this - 1, above, &bounds, bool);
+            else
+                decode_intra_mb_mode(this, &ctx->entropy_hdr, bool);
+
+            bounds.to_left -= 16 << 3;
+            bounds.to_right -= 16 << 3;
+        }
 
         /* Advance to next mb */
         this++;

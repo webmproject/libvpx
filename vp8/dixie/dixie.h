@@ -96,8 +96,7 @@ struct vp8_reference_hdr
     unsigned int refresh_arf;
     unsigned int copy_gf;
     unsigned int copy_arf;
-    unsigned int sign_bias_gf;
-    unsigned int sign_bias_arf;
+    unsigned int sign_bias[4];
     unsigned int refresh_entropy;
 };
 
@@ -129,9 +128,18 @@ struct vp8_entropy_hdr
     unsigned char         coeff_skip_prob;
     unsigned char         y_mode_probs[4];
     unsigned char         uv_mode_probs[3];
-    unsigned char         prob_intra;
+    unsigned char         prob_inter;
     unsigned char         prob_last;
     unsigned char         prob_gf;
+};
+
+
+enum reference_frame
+{
+    CURRENT_FRAME,
+    LAST_FRAME,
+    GOLDEN_FRAME,
+    ALTREF_FRAME
 };
 
 
@@ -156,14 +164,14 @@ enum prediction_mode
 };
 
 
-union mv
+typedef union mv
 {
     struct
     {
         int16_t x, y;
     }  d;
     uint32_t               raw;
-};
+} mv_t;
 
 
 struct mb_base_info
