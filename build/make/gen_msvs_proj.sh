@@ -437,7 +437,7 @@ generate_vcproj() {
                 Name="VCCLCompilerTool" \
                 Optimization="0" \
                 AdditionalIncludeDirectories="$incs" \
-                PreprocessorDefinitions="WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;$defines" \
+                PreprocessorDefinitions="WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
                 RuntimeLibrary="$debug_runtime" \
                 UsePrecompiledHeader="0" \
                 WarningLevel="3" \
@@ -595,7 +595,7 @@ generate_vcproj() {
         x86*) tag       Tool \
                       Name="VCCLCompilerTool" \
                       AdditionalIncludeDirectories="$incs" \
-                      PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;$defines" \
+                      PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
                       RuntimeLibrary="$release_runtime" \
                       UsePrecompiledHeader="0" \
                       WarningLevel="3" \
