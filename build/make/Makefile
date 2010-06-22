@@ -334,6 +334,7 @@ ifneq ($(call enabled,DIST-SRCS),)
     DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_def.sh
     DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_proj.sh
     DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_sln.sh
+    DIST-SRCS-$(CONFIG_MSVS)  += build/x86-msvs/yasm.rules
     DIST-SRCS-$(CONFIG_RVCT) += build/make/armlink_adapter.sh
     #
     # This isn't really ARCH_ARM dependent, it's dependant on whether we're
