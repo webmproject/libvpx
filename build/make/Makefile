@@ -39,13 +39,8 @@ dist:
 	@if [ -d "$(DIST_DIR)/src" ]; then \
             mkdir -p "$(DIST_DIR)/build"; \
             cd "$(DIST_DIR)/build"; \
-            if [ "$(TGT_CC)" = "rvct" ] ; then \
-				echo "../src/configure --target=$(TOOLCHAIN) --libc=$(ALT_LIBC)"; \
-				../src/configure --target=$(TOOLCHAIN) --libc=$(ALT_LIBC); \
-			else \
-				echo "../src/configure --target=$(TOOLCHAIN)"; \
-				../src/configure --target=$(TOOLCHAIN); \
-			fi; \
+            echo "Rerunning configure $(CONFIGURE_ARGS)"; \
+            ../src/configure $(CONFIGURE_ARGS); \
             $(if $(filter vs%,$(TGT_CC)),make NO_LAUNCH_DEVENV=1;) \
         fi
 	@if [ -d "$(DIST_DIR)" ]; then \
