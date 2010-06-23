@@ -31,6 +31,7 @@ VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/bool_decoder.c
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/bool_decoder.h
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/modemv.c
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/modemv.h
+VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/modemv_data.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 
