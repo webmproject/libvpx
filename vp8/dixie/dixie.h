@@ -27,6 +27,8 @@ struct vp8_frame_hdr
         unsigned int scale_w;  /* Scaling factor, Width */
         unsigned int scale_h;  /* Scaling factor, Height */
     } kf;
+
+    unsigned int frame_size_updated; /* Flag to indicate a resolution update */
 };
 
 
@@ -196,6 +198,16 @@ struct mb_info
 };
 
 
+/* A "token entropy context" has 4 Y values, 2 U, 2 V, and 1 Y2 */
+typedef int token_entropy_ctx_t[4 + 2 + 2 + 1];
+
+struct token_decoder
+{
+    struct bool_decoder  bool;
+    token_entropy_ctx_t  left_token_entropy_ctx;
+    short               *coeffs;
+};
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
@@ -208,7 +220,6 @@ struct vp8_decoder_ctx
     struct vp8_reference_hdr        reference_hdr;
     struct vp8_entropy_hdr          entropy_hdr;
 
-    struct bool_decoder             bool[MAX_PARTITIONS];
     struct vp8_entropy_hdr          saved_entropy;
     unsigned int                    saved_entropy_valid;
 
@@ -217,6 +228,9 @@ struct vp8_decoder_ctx
     struct mb_info                 *mb_info_storage;
     struct mb_info                **mb_info_rows_storage;
     struct mb_info                **mb_info_rows;
+
+    token_entropy_ctx_t            *above_token_entropy_ctx;
+    struct token_decoder            tokens[MAX_PARTITIONS];
 };
 
 

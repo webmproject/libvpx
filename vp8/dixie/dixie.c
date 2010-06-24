@@ -12,6 +12,7 @@
 #include "dixie.h"
 #include "vp8_prob_data.h"
 #include "modemv.h"
+#include "tokens.h"
 #include <string.h>
 #include <assert.h>
 
@@ -129,7 +130,10 @@ decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
     for (i = 0; i < hdr->partitions; i++)
     {
         if (i < hdr->partitions - 1)
+        {
             hdr->partition_sz[i] = (data[2] << 16) | (data[1] << 8) | data[0];
+            data += 3;
+        }
         else
             hdr->partition_sz[i] = sz;
 
@@ -137,14 +141,14 @@ decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
             vpx_internal_error(&ctx->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated partition %d", i);
 
-        data += 3;
         sz -= hdr->partition_sz[i];
     }
 
 
     for (i = 0; i < ctx->token_hdr.partitions; i++)
     {
-        vp8dx_bool_init(&ctx->bool[i], data, ctx->token_hdr.partition_sz[i]);
+        vp8dx_bool_init(&ctx->tokens[i].bool, data,
+                        ctx->token_hdr.partition_sz[i]);
         data += ctx->token_hdr.partition_sz[i];
     }
 }
@@ -227,7 +231,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 {
     vpx_codec_err_t  res;
     struct bool_decoder  bool;
-    int                  i, row;
+    int                  i, row, partition;
 
     ctx->saved_entropy_valid = 0;
 
@@ -296,10 +300,15 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     decode_entropy_header(ctx, &bool, &ctx->entropy_hdr);
 
     vp8_dixie_modemv_init(ctx);
+    vp8_dixie_tokens_init(ctx);
 
-    for (row = 0; row < ctx->mb_rows; row++)
+    for (row = 0, partition = 0; row < ctx->mb_rows; row++)
     {
         vp8_dixie_modemv_process_row(ctx, &bool, row, 0, ctx->mb_cols);
+        vp8_dixie_tokens_process_row(ctx, partition, row, 0, ctx->mb_cols);
+
+        if (++partition == ctx->token_hdr.partitions)
+            partition = 0;
     }
 
     if (!ctx->reference_hdr.refresh_entropy)
@@ -309,6 +318,11 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     }
 }
 
+
+#define CHECK_FOR_UPDATE(lval,rval,update_flag) do {\
+        unsigned int old = lval; \
+        update_flag |= (old != (lval = rval)); \
+    } while(0)
 
 vpx_codec_err_t
 vp8_parse_frame_header(const unsigned char   *data,
@@ -321,7 +335,7 @@ vp8_parse_frame_header(const unsigned char   *data,
         return VPX_CODEC_CORRUPT_FRAME;
 
     /* The frame header is defined as a three byte little endian value */
-    raw = data[0] | (data[1] << 8) | (data[2] << 3);
+    raw = data[0] | (data[1] << 8) | (data[2] << 16);
     hdr->is_keyframe     = !BITS_GET(raw, 0, 1);
     hdr->version         = BITS_GET(raw, 1, 2);
     hdr->is_experimental = BITS_GET(raw, 3, 1);
@@ -331,8 +345,12 @@ vp8_parse_frame_header(const unsigned char   *data,
     if (sz <= hdr->part0_sz + 10)
         return VPX_CODEC_CORRUPT_FRAME;
 
+    hdr->frame_size_updated = 0;
+
     if (hdr->is_keyframe)
     {
+        unsigned int update = 0;
+
         /* Keyframe header consists of a three byte sync code followed by the
          * width and height and associated scaling factors.
          */
@@ -340,10 +358,12 @@ vp8_parse_frame_header(const unsigned char   *data,
             return VPX_CODEC_UNSUP_BITSTREAM;
 
         raw = data[6] | (data[7] << 8) | (data[8] << 16) | (data[9] << 24);
-        hdr->kf.w       = BITS_GET(raw,  0, 14);
-        hdr->kf.scale_w = BITS_GET(raw, 14, 2);
-        hdr->kf.h       = BITS_GET(raw, 16, 14);
-        hdr->kf.scale_h = BITS_GET(raw, 30, 2);
+        CHECK_FOR_UPDATE(hdr->kf.w,       BITS_GET(raw,  0, 14), update);
+        CHECK_FOR_UPDATE(hdr->kf.scale_w, BITS_GET(raw, 14,  2), update);
+        CHECK_FOR_UPDATE(hdr->kf.h,       BITS_GET(raw, 16, 14), update);
+        CHECK_FOR_UPDATE(hdr->kf.scale_h, BITS_GET(raw, 30,  2), update);
+
+        hdr->frame_size_updated = update;
 
         if (!hdr->kf.w || !hdr->kf.h)
             return VPX_CODEC_UNSUP_BITSTREAM;
