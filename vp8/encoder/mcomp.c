@@ -997,7 +997,7 @@ int vp8_diamond_search_sadx4
     int tot_steps;
     MV this_mv;
 
-    unsigned int bestsad = UINT_MAX;
+    int bestsad = INT_MAX;
     int best_site = 0;
     int last_site = 0;
 
