@@ -51,7 +51,7 @@ struct vpx_usec_timer
 };
 
 
-static INLINE void
+static void
 vpx_usec_timer_start(struct vpx_usec_timer *t)
 {
 #if defined(_MSC_VER)
@@ -62,7 +62,7 @@ vpx_usec_timer_start(struct vpx_usec_timer *t)
 }
 
 
-static INLINE void
+static void
 vpx_usec_timer_mark(struct vpx_usec_timer *t)
 {
 #if defined(_MSC_VER)
@@ -73,7 +73,7 @@ vpx_usec_timer_mark(struct vpx_usec_timer *t)
 }
 
 
-static INLINE long
+static long
 vpx_usec_timer_elapsed(struct vpx_usec_timer *t)
 {
 #if defined(_MSC_VER)
