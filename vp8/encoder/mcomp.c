@@ -1238,7 +1238,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     unsigned char *bestaddress;
     MV *best_mv = &d->bmi.mv.as_mv;
     MV this_mv;
-    unsigned int bestsad = UINT_MAX;
+    int bestsad = INT_MAX;
     int r, c;
 
     unsigned char *check_here;
