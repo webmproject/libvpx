@@ -231,7 +231,6 @@ CONFIG_LIST="
     new_tokens
     runtime_cpu_detect
     postproc
-    postproc_generic
     multithread
     psnr
     ${CODECS}
@@ -270,7 +269,6 @@ CMDLINE_SELECT="
     dc_recon
     new_tokens
     postproc
-    postproc_generic
     multithread
     psnr
     ${CODECS}
