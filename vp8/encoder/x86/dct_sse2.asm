@@ -11,251 +11,179 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-global sym(vp8_short_fdct4x4_wmt)
-
-%define         DCTCONSTANTSBITS         (16)
-%define         DCTROUNDINGVALUE         (1<< (DCTCONSTANTSBITS-1))
-%define         x_c1                      (60547)          ; cos(pi  /8) * (1<<15)
-%define         x_c2                      (46341)          ; cos(pi*2/8) * (1<<15)
-%define         x_c3                      (25080)          ; cos(pi*3/8) * (1<<15)
-
-%define _1STSTAGESHIFT           14
-%define _2NDSTAGESHIFT           16
-
-
-;; using matrix multiply
-;void vp8_short_fdct4x4_wmt(short *input, short *output)
-sym(vp8_short_fdct4x4_wmt):
+;void vp8_short_fdct4x4_sse2(short *input, short *output, int pitch)
+global sym(vp8_short_fdct4x4_sse2)
+sym(vp8_short_fdct4x4_sse2):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 2
+    SHADOW_ARGS_TO_STACK 3
+;;    SAVE_XMM
     GET_GOT     rbx
+    push        rsi
+    push        rdi
     ; end prolog
 
-        mov         rax,        arg(0) ;input
-        mov         rcx,        arg(1) ;output
+    mov         rsi, arg(0)
+    movsxd      rax, DWORD PTR arg(2)
+    lea         rdi, [rsi + rax*2]
 
-        lea         rdx,        [dct_matrix_sse2 GLOBAL]
+    movq        xmm0, MMWORD PTR[rsi   ]        ;03 02 01 00
+    movq        xmm2, MMWORD PTR[rsi + rax]     ;13 12 11 10
+    movq        xmm1, MMWORD PTR[rsi + rax*2]   ;23 22 21 20
+    movq        xmm3, MMWORD PTR[rdi + rax]     ;33 32 31 30
 
-        movdqu      xmm0,       [rax   ]
-        movdqu      xmm1,       [rax+16]
+    punpcklqdq  xmm0, xmm2                      ;13 12 11 10 03 02 01 00
+    punpcklqdq  xmm1, xmm3                      ;33 32 31 30 23 22 21 20
 
-        ; first column
-        movdqa      xmm2,       xmm0
-        movdqa      xmm7,       [rdx]
+    mov         rdi, arg(1)
 
-        pmaddwd     xmm2,       xmm7
-        movdqa      xmm3,       xmm1
+    movdqa      xmm2, xmm0
+    punpckldq   xmm0, xmm1                      ;23 22 03 02 21 20 01 00
+    punpckhdq   xmm2, xmm1                      ;33 32 13 12 31 30 11 10
+    movdqa      xmm1, xmm0
+    punpckldq   xmm0, xmm2                      ;31 21 30 20 11 10 01 00
+    pshufhw     xmm1, xmm1, 0b1h                ;22 23 02 03 xx xx xx xx
+    pshufhw     xmm2, xmm2, 0b1h                ;32 33 12 13 xx xx xx xx
 
-        pmaddwd     xmm3,       xmm7
-        movdqa      xmm4,       xmm2
+    punpckhdq   xmm1, xmm2                      ;32 33 22 23 12 13 02 03
+    movdqa      xmm3, xmm0
+    paddw       xmm0, xmm1                      ;b1 a1 b1 a1 b1 a1 b1 a1
+    psubw       xmm3, xmm1                      ;c1 d1 c1 d1 c1 d1 c1 d1
+    psllw       xmm0, 3                         ;b1 <<= 3 a1 <<= 3
+    psllw       xmm3, 3                         ;c1 <<= 3 d1 <<= 3
+    movdqa      xmm1, xmm0
+    pmaddwd     xmm0, XMMWORD PTR[_mult_add GLOBAL]     ;a1 + b1
+    pmaddwd     xmm1, XMMWORD PTR[_mult_sub GLOBAL]     ;a1 - b1
+    movdqa      xmm4, xmm3
+    pmaddwd     xmm3, XMMWORD PTR[_5352_2217 GLOBAL]    ;c1*2217 + d1*5352
+    pmaddwd     xmm4, XMMWORD PTR[_2217_neg5352 GLOBAL] ;d1*2217 - c1*5352
 
-        punpckldq   xmm2,       xmm3
-        punpckhdq   xmm4,       xmm3
+    paddd       xmm3, XMMWORD PTR[_14500 GLOBAL]
+    paddd       xmm4, XMMWORD PTR[_7500 GLOBAL]
+    psrad       xmm3, 12            ;(c1 * 2217 + d1 * 5352 +  14500)>>12
+    psrad       xmm4, 12            ;(d1 * 2217 - c1 * 5352 +   7500)>>12
 
-        movdqa      xmm3,       xmm2
-        punpckldq   xmm2,       xmm4
+    packssdw    xmm0, xmm1                      ;op[2] op[0]
+    packssdw    xmm3, xmm4                      ;op[3] op[1]
+    ; 23 22 21 20 03 02 01 00
+    ;
+    ; 33 32 31 30 13 12 11 10
+    ;
+    movdqa      xmm2, xmm0
+    punpcklqdq  xmm0, xmm3                      ;13 12 11 10 03 02 01 00
+    punpckhqdq  xmm2, xmm3                      ;23 22 21 20 33 32 31 30
 
-        punpckhdq   xmm3,       xmm4
-        paddd       xmm2,       xmm3
+    movdqa      xmm3, xmm0
+    punpcklwd   xmm0, xmm2                      ;32 30 22 20 12 10 02 00
+    punpckhwd   xmm3, xmm2                      ;33 31 23 21 13 11 03 01
+    movdqa      xmm2, xmm0
+    punpcklwd   xmm0, xmm3                      ;13 12 11 10 03 02 01 00
+    punpckhwd   xmm2, xmm3                      ;33 32 31 30 23 22 21 20
 
+    movdqa      xmm5, XMMWORD PTR[_7 GLOBAL]
+    pshufd      xmm2, xmm2, 04eh
+    movdqa      xmm3, xmm0
+    paddw       xmm0, xmm2                      ;b1 b1 b1 b1 a1 a1 a1 a1
+    psubw       xmm3, xmm2                      ;c1 c1 c1 c1 d1 d1 d1 d1
 
-        paddd       xmm2,       XMMWORD PTR [dct1st_stage_rounding_sse2 GLOBAL]
-        psrad       xmm2,       _1STSTAGESHIFT
-        ;second column
-        movdqa      xmm3,       xmm0
-        pmaddwd     xmm3,       [rdx+16]
+    pshufd      xmm0, xmm0, 0d8h                ;b1 b1 a1 a1 b1 b1 a1 a1
+    movdqa      xmm2, xmm3                      ;save d1 for compare
+    pshufd      xmm3, xmm3, 0d8h                ;c1 c1 d1 d1 c1 c1 d1 d1
+    pshuflw     xmm0, xmm0, 0d8h                ;b1 b1 a1 a1 b1 a1 b1 a1
+    pshuflw     xmm3, xmm3, 0d8h                ;c1 c1 d1 d1 c1 d1 c1 d1
+    pshufhw     xmm0, xmm0, 0d8h                ;b1 a1 b1 a1 b1 a1 b1 a1
+    pshufhw     xmm3, xmm3, 0d8h                ;c1 d1 c1 d1 c1 d1 c1 d1
+    movdqa      xmm1, xmm0
+    pmaddwd     xmm0, XMMWORD PTR[_mult_add GLOBAL] ;a1 + b1
+    pmaddwd     xmm1, XMMWORD PTR[_mult_sub GLOBAL] ;a1 - b1
 
-        movdqa      xmm4,       xmm1
-        pmaddwd     xmm4,       [rdx+16]
+    pxor        xmm4, xmm4                      ;zero out for compare
+    paddd       xmm0, xmm5
+    paddd       xmm1, xmm5
+    pcmpeqw     xmm2, xmm4
+    psrad       xmm0, 4                         ;(a1 + b1 + 7)>>4
+    psrad       xmm1, 4                         ;(a1 - b1 + 7)>>4
+    pandn       xmm2, XMMWORD PTR[_cmp_mask GLOBAL] ;clear upper,
+                                                    ;and keep bit 0 of lower
 
-        movdqa      xmm5,       xmm3
-        punpckldq   xmm3,       xmm4
+    movdqa      xmm4, xmm3
+    pmaddwd     xmm3, XMMWORD PTR[_5352_2217 GLOBAL]    ;c1*2217 + d1*5352
+    pmaddwd     xmm4, XMMWORD PTR[_2217_neg5352 GLOBAL] ;d1*2217 - c1*5352
+    paddd       xmm3, XMMWORD PTR[_12000 GLOBAL]
+    paddd       xmm4, XMMWORD PTR[_51000 GLOBAL]
+    packssdw    xmm0, xmm1                      ;op[8] op[0]
+    psrad       xmm3, 16                ;(c1 * 2217 + d1 * 5352 +  12000)>>16
+    psrad       xmm4, 16                ;(d1 * 2217 - c1 * 5352 +  51000)>>16
 
-        punpckhdq   xmm5,       xmm4
-        movdqa      xmm4,       xmm3
+    packssdw    xmm3, xmm4                      ;op[12] op[4]
+    movdqa      xmm1, xmm0
+    paddw       xmm3, xmm2                      ;op[4] += (d1!=0)
+    punpcklqdq  xmm0, xmm3                      ;op[4] op[0]
+    punpckhqdq  xmm1, xmm3                      ;op[12] op[8]
 
-        punpckldq   xmm3,       xmm5
-        punpckhdq   xmm4,       xmm5
+    movdqa      XMMWORD PTR[rdi + 0], xmm0
+    movdqa      XMMWORD PTR[rdi + 16], xmm1
 
-        paddd       xmm3,       xmm4
-        paddd       xmm3,       XMMWORD PTR [dct1st_stage_rounding_sse2 GLOBAL]
-
-
-        psrad       xmm3,       _1STSTAGESHIFT
-        packssdw    xmm2,       xmm3
-
-        ;third column
-        movdqa      xmm3,       xmm0
-        pmaddwd     xmm3,       [rdx+32]
-
-        movdqa      xmm4,       xmm1
-        pmaddwd     xmm4,       [rdx+32]
-
-        movdqa      xmm5,       xmm3
-        punpckldq   xmm3,       xmm4
-
-        punpckhdq   xmm5,       xmm4
-        movdqa      xmm4,       xmm3
-
-        punpckldq   xmm3,       xmm5
-        punpckhdq   xmm4,       xmm5
-
-        paddd       xmm3,       xmm4
-        paddd       xmm3,       XMMWORD PTR [dct1st_stage_rounding_sse2 GLOBAL]
-
-        psrad       xmm3,       _1STSTAGESHIFT
-
-        ;fourth column (this is the last column, so we do not have save the source any more)
-        pmaddwd     xmm0,       [rdx+48]
-        pmaddwd     xmm1,       [rdx+48]
-
-        movdqa      xmm4,       xmm0
-        punpckldq   xmm0,       xmm1
-
-        punpckhdq   xmm4,       xmm1
-        movdqa      xmm1,       xmm0
-
-        punpckldq   xmm0,       xmm4
-        punpckhdq   xmm1,       xmm4
-
-        paddd       xmm0,       xmm1
-        paddd       xmm0,       XMMWORD PTR [dct1st_stage_rounding_sse2 GLOBAL]
-
-
-        psrad       xmm0,       _1STSTAGESHIFT
-        packssdw    xmm3,       xmm0
-        ; done with one pass
-        ; now start second pass
-        movdqa      xmm0,       xmm2
-        movdqa      xmm1,       xmm3
-
-        pmaddwd     xmm2,       xmm7
-        pmaddwd     xmm3,       xmm7
-
-        movdqa      xmm4,       xmm2
-        punpckldq   xmm2,       xmm3
-
-        punpckhdq   xmm4,       xmm3
-        movdqa      xmm3,       xmm2
-
-        punpckldq   xmm2,       xmm4
-        punpckhdq   xmm3,       xmm4
-
-        paddd       xmm2,       xmm3
-        paddd       xmm2,       XMMWORD PTR [dct2nd_stage_rounding_sse2 GLOBAL]
-
-        psrad       xmm2,       _2NDSTAGESHIFT
-
-        ;second column
-        movdqa      xmm3,       xmm0
-        pmaddwd     xmm3,       [rdx+16]
-
-        movdqa      xmm4,       xmm1
-        pmaddwd     xmm4,       [rdx+16]
-
-        movdqa      xmm5,       xmm3
-        punpckldq   xmm3,       xmm4
-
-        punpckhdq   xmm5,       xmm4
-        movdqa      xmm4,       xmm3
-
-        punpckldq   xmm3,       xmm5
-        punpckhdq   xmm4,       xmm5
-
-        paddd       xmm3,       xmm4
-        paddd       xmm3,       XMMWORD PTR [dct2nd_stage_rounding_sse2 GLOBAL]
-
-        psrad       xmm3,       _2NDSTAGESHIFT
-        packssdw    xmm2,       xmm3
-
-        movdqu      [rcx],      xmm2
-        ;third column
-        movdqa      xmm3,       xmm0
-        pmaddwd     xmm3,       [rdx+32]
-
-        movdqa      xmm4,       xmm1
-        pmaddwd     xmm4,       [rdx+32]
-
-        movdqa      xmm5,       xmm3
-        punpckldq   xmm3,       xmm4
-
-        punpckhdq   xmm5,       xmm4
-        movdqa      xmm4,       xmm3
-
-        punpckldq   xmm3,       xmm5
-        punpckhdq   xmm4,       xmm5
-
-        paddd       xmm3,       xmm4
-        paddd       xmm3,       XMMWORD PTR [dct2nd_stage_rounding_sse2 GLOBAL]
-
-        psrad       xmm3,       _2NDSTAGESHIFT
-        ;fourth column
-        pmaddwd     xmm0,       [rdx+48]
-        pmaddwd     xmm1,       [rdx+48]
-
-        movdqa      xmm4,       xmm0
-        punpckldq   xmm0,       xmm1
-
-        punpckhdq   xmm4,       xmm1
-        movdqa      xmm1,       xmm0
-
-        punpckldq   xmm0,       xmm4
-        punpckhdq   xmm1,       xmm4
-
-        paddd       xmm0,       xmm1
-        paddd       xmm0,       XMMWORD PTR [dct2nd_stage_rounding_sse2 GLOBAL]
-
-        psrad       xmm0,       _2NDSTAGESHIFT
-        packssdw    xmm3,       xmm0
-
-        movdqu     [rcx+16],   xmm3
-
-    mov rsp, rbp
     ; begin epilog
+    pop rdi
+    pop rsi
     RESTORE_GOT
+;;    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
 
-
 SECTION_RODATA
-;static unsigned int dct1st_stage_rounding_sse2[4] =
 align 16
-dct1st_stage_rounding_sse2:
-    times 4 dd 8192
-
-
-;static unsigned int dct2nd_stage_rounding_sse2[4] =
+_5352_2217:
+    dw 5352
+    dw 2217
+    dw 5352
+    dw 2217
+    dw 5352
+    dw 2217
+    dw 5352
+    dw 2217
 align 16
-dct2nd_stage_rounding_sse2:
-    times 4 dd 32768
-
-;static short dct_matrix_sse2[4][8]=
+_2217_neg5352:
+    dw 2217
+    dw -5352
+    dw 2217
+    dw -5352
+    dw 2217
+    dw -5352
+    dw 2217
+    dw -5352
 align 16
-dct_matrix_sse2:
-    times 8 dw 23170
+_mult_add:
+    times 8 dw 1
+align 16
+_cmp_mask:
+    times 4 dw 1
+    times 4 dw 0
 
-    dw  30274
-    dw  12540
-    dw -12540
-    dw -30274
-    dw  30274
-    dw  12540
-    dw -12540
-    dw -30274
-
-    dw  23170
-    times 2 dw -23170
-    times 2 dw  23170
-    times 2 dw -23170
-    dw  23170
-
-    dw  12540
-    dw -30274
-    dw  30274
-    dw -12540
-    dw  12540
-    dw -30274
-    dw  30274
-    dw -12540
+align 16
+_mult_sub:
+    dw 1
+    dw -1
+    dw 1
+    dw -1
+    dw 1
+    dw -1
+    dw 1
+    dw -1
+align 16
+_7:
+    times 4 dd 7
+align 16
+_14500:
+    times 4 dd 14500
+align 16
+_7500:
+    times 4 dd 7500
+align 16
+_12000:
+    times 4 dd 12000
+align 16
+_51000:
+    times 4 dd 51000

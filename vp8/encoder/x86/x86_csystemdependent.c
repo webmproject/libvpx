@@ -82,6 +82,11 @@ void vp8_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch)
 #endif
 
 #if HAVE_SSE2
+void vp8_short_fdct8x4_sse2(short *input, short *output, int pitch)
+{
+    vp8_short_fdct4x4_sse2(input,   output,    pitch);
+    vp8_short_fdct4x4_sse2(input + 4, output + 16, pitch);
+}
 
 int vp8_fast_quantize_b_impl_sse(short *coeff_ptr, short *zbin_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
@@ -268,13 +273,11 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.get16x16var           = vp8_get16x16var_sse2;
         /* cpi->rtcd.variance.get4x4sse_cs  not implemented for wmt */;
 
-#if 0 //new fdct
-        /* short SSE2 DCT currently disabled, does not match the MMX version */
-        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_wmt;
-        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_wmt;
-        /* cpi->rtcd.fdct.fast4x4  not implemented for wmt */;
-        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_wmt;
-#endif
+        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_sse2;
+        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_sse2;
+        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_sse2;
+        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_sse2;
+
         cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_sse2;
 
         cpi->rtcd.encodemb.berr                  = vp8_block_error_xmm;
