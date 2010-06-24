@@ -45,6 +45,30 @@ int  vp8dx_bool_init(struct bool_decoder *br, const unsigned char *source,
 void vp8dx_bool_fill(struct bool_decoder *br);
 
 
+/*The refill loop is used in several places, so define it in a macro to make
+   sure they're all consistent.
+  An inline function would be cleaner, but has a significant penalty, because
+   multiple BOOL_DECODER fields must be modified, and the compiler is not smart
+   enough to eliminate the stores to those fields and the subsequent reloads
+   from them when inlining the function.*/
+#define VP8DX_BOOL_DECODER_FILL(_count,_value,_bufptr,_bufend) \
+    do \
+    { \
+        int shift; \
+        for(shift = VP8_BD_VALUE_SIZE - 8 - ((_count) + 8); shift >= 0; ) \
+        { \
+            if((_bufptr) >= (_bufend)) { \
+                (_count) = VP8_LOTS_OF_BITS; \
+                break; \
+            } \
+            (_count) += 8; \
+            (_value) |= (vp8_bool_value_t)*(_bufptr)++ << shift; \
+            shift -= 8; \
+        } \
+    } \
+    while(0)
+
+
 static int bool_get(struct bool_decoder *br, int probability)
 {
     unsigned int bit = 0;
@@ -81,7 +105,7 @@ static int bool_get(struct bool_decoder *br, int probability)
     br->count = count;
     br->range = range;
 
-    if (count < 8)
+    if (count < 0)
         vp8dx_bool_fill(br);
 
     return bit;

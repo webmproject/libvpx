@@ -29,7 +29,7 @@ int vp8dx_bool_init(struct bool_decoder *br, const unsigned char *source,
     br->user_buffer_end = source + source_sz;
     br->user_buffer     = source;
     br->value    = 0;
-    br->count    = 0;
+    br->count    = -8;
     br->range    = 255;
 
     if (source_sz && !source)
@@ -44,31 +44,18 @@ int vp8dx_bool_init(struct bool_decoder *br, const unsigned char *source,
 
 void vp8dx_bool_fill(struct bool_decoder *br)
 {
-    const unsigned char *ptr;
-    const unsigned char *end;
+    const unsigned char *bufptr;
+    const unsigned char *bufend;
     vp8_bool_value_t     value;
     int                  count;
-    end = br->user_buffer_end;
-    ptr = br->user_buffer;
+    bufend = br->user_buffer_end;
+    bufptr = br->user_buffer;
     value = br->value;
     count = br->count;
 
-    for (;;)
-    {
-        if (ptr >= end)
-        {
-            count = VP8_LOTS_OF_BITS;
-            break;
-        }
+    VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
 
-        if (count > VP8_BD_VALUE_SIZE - 8)
-            break;
-
-        count += 8;
-        value |= (vp8_bool_value_t) * ptr++ << (VP8_BD_VALUE_SIZE - count);
-    }
-
-    br->user_buffer = ptr;
+    br->user_buffer = bufptr;
     br->value = value;
     br->count = count;
 }
