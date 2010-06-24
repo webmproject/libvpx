@@ -505,9 +505,11 @@ static const arg_def_t kf_min_dist = ARG_DEF(NULL, "kf-min-dist", 1,
                                      "Minimum keyframe interval (frames)");
 static const arg_def_t kf_max_dist = ARG_DEF(NULL, "kf-max-dist", 1,
                                      "Maximum keyframe interval (frames)");
+static const arg_def_t kf_disabled = ARG_DEF(NULL, "disable-kf", 0,
+                                     "Disable keyframe placement");
 static const arg_def_t *kf_args[] =
 {
-    &kf_min_dist, &kf_max_dist, NULL
+    &kf_min_dist, &kf_max_dist, &kf_disabled, NULL
 };
 
 
@@ -800,6 +802,8 @@ int main(int argc, const char **argv_)
             cfg.kf_min_dist = arg_parse_uint(&arg);
         else if (arg_match(&arg, &kf_max_dist, argi))
             cfg.kf_max_dist = arg_parse_uint(&arg);
+        else if (arg_match(&arg, &kf_disabled, argi))
+            cfg.kf_mode = VPX_KF_DISABLED;
         else
             argj++;
     }
@@ -1016,9 +1020,6 @@ int main(int argc, const char **argv_)
 
 
         /* Construct Encoder Context */
-        if (cfg.kf_min_dist == cfg.kf_max_dist)
-            cfg.kf_mode = VPX_KF_FIXED;
-
         vpx_codec_enc_init(&encoder, codec->iface, &cfg,
                            show_psnr ? VPX_CODEC_USE_PSNR : 0);
         ctx_exit_on_error(&encoder, "Failed to initialize encoder");
