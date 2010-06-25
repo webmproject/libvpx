@@ -117,5 +117,14 @@ typedef struct
 #define LF_INVOKE(ctx,fn) vp8_lf_##fn
 #endif
 
+typedef void loop_filter_uvfunction
+(
+    unsigned char *u,   // source pointer
+    int p,              // pitch
+    const signed char *flimit,
+    const signed char *limit,
+    const signed char *thresh,
+    unsigned char *v
+);
 
 #endif

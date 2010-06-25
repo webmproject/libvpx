@@ -14,16 +14,6 @@
 #include "loopfilter.h"
 #include "onyxc_int.h"
 
-typedef void loop_filter_uvfunction
-(
-    unsigned char *u,   // source pointer
-    int p,              // pitch
-    const signed char *flimit,
-    const signed char *limit,
-    const signed char *thresh,
-    unsigned char *v
-);
-
 extern prototype_loopfilter(vp8_loop_filter_horizontal_edge_armv6);
 extern prototype_loopfilter(vp8_loop_filter_vertical_edge_armv6);
 extern prototype_loopfilter(vp8_mbloop_filter_horizontal_edge_armv6);
