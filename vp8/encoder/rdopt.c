@@ -231,18 +231,29 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
     int i;
     int *thresh;
     int threshmult;
-
-    int capped_q = (Qvalue < 160) ? Qvalue : 160;
+    double capped_q = (Qvalue < 160) ? (double)Qvalue : 160.0;
+    double rdconst = 3.00;
 
     vp8_clear_system_state();  //__asm emms;
 
-    cpi->RDMULT = (int)( (0.0001 * (capped_q * capped_q * capped_q * capped_q))
-                        -(0.015 * (capped_q * capped_q * capped_q))
-                        +(3.25 * (capped_q * capped_q))
-                        -(17.5 * capped_q) + 125.0);
+    // Further tests required to see if optimum is different
+    // for key frames, golden frames and arf frames.
+    // if (cpi->common.refresh_golden_frame ||
+    //     cpi->common.refresh_alt_ref_frame)
+    cpi->RDMULT = (int)(rdconst * (capped_q * capped_q));
 
-    if (cpi->RDMULT < 125)
-        cpi->RDMULT = 125;
+    // Extend rate multiplier along side quantizer zbin increases
+    if (cpi->zbin_over_quant  > 0)
+    {
+        double oq_factor;
+        double modq;
+
+        // Experimental code using the same basic equation as used for Q above
+        // The units of cpi->zbin_over_quant are 1/128 of Q bin size
+        oq_factor = 1.0 + ((double)0.0015625 * cpi->zbin_over_quant);
+        modq = (int)((double)capped_q * oq_factor);
+        cpi->RDMULT = (int)(rdconst * (modq * modq));
+    }
 
     if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME))
     {
@@ -252,17 +263,8 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
             cpi->RDMULT += (cpi->RDMULT * rd_iifactor[cpi->next_iiratio]) >> 4;
     }
 
-
-    // Extend rate multiplier along side quantizer zbin increases
-    if (cpi->zbin_over_quant  > 0)
-    {
-        double oq_factor = pow(1.006,  cpi->zbin_over_quant);
-
-        if (oq_factor > (1.0 + ((double)cpi->zbin_over_quant / 64.0)))
-            oq_factor = (1.0 + (double)cpi->zbin_over_quant / 64.0);
-
-        cpi->RDMULT = (int)(oq_factor * cpi->RDMULT);
-    }
+    if (cpi->RDMULT < 125)
+        cpi->RDMULT = 125;
 
     cpi->mb.errorperbit = (cpi->RDMULT / 100);
 
