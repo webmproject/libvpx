@@ -347,7 +347,7 @@ generate_vcproj() {
         x86*) $uses_asm && tag ToolFile RelativePath="$self_dirname/../x86-msvs/yasm.rules"
         ;;
         arm*|iwmmx*)
-            if [ "$name" == "vpx_decoder" ];then
+            if [ "$name" == "vpx" ];then
             case "$target" in
                 armv5*)
                     tag ToolFile RelativePath="$self_dirname/../arm-wince-vs8/armasmv5.rules"
@@ -376,7 +376,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag Tool \
+                vpx)         tag Tool \
                              Name="VCPreBuildEventTool" \
                              CommandLine="call obj_int_extract.bat \$(ConfigurationName)"
                              tag Tool \
@@ -510,7 +510,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag DeploymentTool \
+                vpx)         tag DeploymentTool \
                              ForceDirty="-1" \
                              RegisterOutput="0"
                                 ;;
@@ -534,7 +534,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag Tool \
+                vpx)         tag Tool \
                                      Name="VCPreBuildEventTool" \
                                      CommandLine="call obj_int_extract.bat \$(ConfigurationName)"
                              tag Tool \
@@ -672,7 +672,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag DeploymentTool \
+                vpx)         tag DeploymentTool \
                              ForceDirty="-1" \
                              RegisterOutput="0"
                 ;;

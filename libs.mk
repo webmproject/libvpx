@@ -144,7 +144,6 @@ obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
 
 PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
 PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
-PROJECTS-$(BUILD_LIBVPX) += armasm$(ARM_ARCH).rules
 endif
 
 vpx.def: $(call enabled,CODEC_EXPORTS)
