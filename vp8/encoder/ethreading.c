@@ -286,6 +286,7 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
     for (i = 0; i < 25; i++)
     {
         z->block[i].quant           = x->block[i].quant;
+        z->block[i].quant_shift     = x->block[i].quant_shift;
         z->block[i].zbin            = x->block[i].zbin;
         z->block[i].zrun_zbin_boost   = x->block[i].zrun_zbin_boost;
         z->block[i].round           = x->block[i].round;

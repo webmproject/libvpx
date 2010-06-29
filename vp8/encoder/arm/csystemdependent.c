@@ -63,7 +63,7 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_neon;
 
     cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;
-    cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;
+    /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;*/
 #elif HAVE_ARMV6
     cpi->rtcd.variance.sad16x16              = vp8_sad16x16_c;
     cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;
