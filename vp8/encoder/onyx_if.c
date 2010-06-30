@@ -3231,7 +3231,7 @@ static void vp8cx_temp_blur1_c
     unsigned char block_size
 )
 {
-    int byte = 0;           // Buffer offset for the current pixel value being filtered
+    int byte = 0;         // Buffer offset for current pixel being filtered
     int frame = 0;
     int modifier = 0;
     int i, j, k;
@@ -3264,9 +3264,9 @@ static void vp8cx_temp_blur1_c
                     for (frame = 0; frame < frame_count; frame++)
                     {
                         // get current frame pixel value
-                        int pixel_value = frames[frame][byte];       // int pixel_value = *frameptr;
+                        int pixel_value = frames[frame][byte];
 
-                        modifier   = src_byte;                       // modifier   = s[byte];
+                        modifier   = src_byte;
                         modifier  -= pixel_value;
                         modifier  *= modifier;
                         modifier >>= strength;
@@ -3283,10 +3283,10 @@ static void vp8cx_temp_blur1_c
                     }
 
                     accumulator += (count >> 1);
-                    accumulator *= fixed_divide[count];          // accumulator *= ppi->fixed_divide[count];
+                    accumulator *= fixed_divide[count];
                     accumulator >>= 16;
 
-                    dst[byte] = accumulator;        // d[byte] = accumulator;
+                    dst[byte] = accumulator;
 
                     // move to next pixel
                     byte++;
@@ -3392,7 +3392,8 @@ static void vp8cx_temp_filter_c
         {
             if ((frames_to_blur_backward + frames_to_blur_forward) >= max_frames)
             {
-                frames_to_blur_backward = max_frames - frames_to_blur_forward - 1;
+                frames_to_blur_backward 
+                    = max_frames - frames_to_blur_forward - 1;
             }
         }
         else
@@ -3449,7 +3450,7 @@ static void vp8cx_temp_filter_c
 
     for (frame = 0; frame < frames_to_blur; frame++)
     {
-        int which_buffer =  cpi->last_alt_ref_sei - frame;
+        int which_buffer =  start_frame - frame;
 
         if (which_buffer < 0)
             which_buffer += cpi->oxcf.lag_in_frames;
@@ -3473,7 +3474,7 @@ static void vp8cx_temp_filter_c
 
     for (frame = 0; frame < frames_to_blur; frame++)
     {
-        int which_buffer =  cpi->last_alt_ref_sei - frame;
+        int which_buffer =  start_frame - frame;
 
         if (which_buffer < 0)
             which_buffer += cpi->oxcf.lag_in_frames;
