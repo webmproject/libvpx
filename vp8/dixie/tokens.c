@@ -114,6 +114,7 @@ static const unsigned int zigzag[16] =
         value = value-bigsplit; \
         v = -value_to_sign; \
     } \
+    v *= dqf[!!c]; \
     range +=range;                   \
     value +=value;                   \
     count--;
@@ -188,17 +189,18 @@ decode_mb_tokens(struct bool_decoder  *bool,
                  token_entropy_ctx_t   left,
                  token_entropy_ctx_t   above,
                  short                *tokens,
-                 int                  *eobs,
                  enum prediction_mode  mode,
-                 coeff_probs_table_t   probs)
+                 coeff_probs_table_t   probs,
+                 short                 factor[TOKEN_BLOCK_TYPES][2])
 {
     int            i, stop, type;
     int            c, t, v;
     int            val, bits_count;
-    int            eob_total;
+    int            eob_mask;
     short         *b_tokens;   /* tokens for this block */
     unsigned char *type_probs; /* probabilities for this block type */
     unsigned char *prob;
+    short         *dqf;
 
     /* Unpack bool decoder to local variables */
     const unsigned char *bufend = bool->user_buffer_end;
@@ -210,13 +212,15 @@ decode_mb_tokens(struct bool_decoder  *bool,
     vp8_bool_value_t     bigsplit;
     unsigned int shift;
 
+    eob_mask = 0;
+
     if (mode != B_PRED && mode != SPLITMV)
     {
         i = 24;
         stop = 24;
         type = 1;
         b_tokens = tokens + 24 * 16;
-        eob_total = -16;
+        dqf = factor[TOKEN_BLOCK_Y2];
     }
     else
     {
@@ -224,7 +228,7 @@ decode_mb_tokens(struct bool_decoder  *bool,
         stop = 16;
         type = 3;
         b_tokens = tokens;
-        eob_total = 0;
+        dqf = factor[TOKEN_BLOCK_Y1];
     }
 
     /* Save a pointer to the coefficient probs for the current type. Need
@@ -324,7 +328,7 @@ ONE_CONTEXT_NODE_0_:
 
     b_tokens[zigzag[15]] = v;
 BLOCK_FINISHED:
-    eob_total += eobs[i] = c;
+    eob_mask |= (c > 1) << i;
     t = (c != !type);   // any nonzero data?
 
     left[left_context_index[i]] = above[above_context_index[i]] = t;
@@ -342,6 +346,7 @@ BLOCK_FINISHED:
         stop = 16;
         type_probs = probs[type][0][0];
         b_tokens = tokens;
+        dqf = factor[TOKEN_BLOCK_Y1];
         goto BLOCK_LOOP;
     }
 
@@ -350,6 +355,7 @@ BLOCK_FINISHED:
         type = 2;
         type_probs = probs[type][0][0];
         stop = 24;
+        dqf = factor[TOKEN_BLOCK_UV];
         goto BLOCK_LOOP;
     }
 
@@ -358,7 +364,7 @@ BLOCK_FINISHED:
     bool->value = value;
     bool->count = count;
     bool->range = range;
-    return eob_total;
+    return eob_mask;
 }
 
 
@@ -418,19 +424,24 @@ vp8_dixie_tokens_process_row(struct vp8_decoder_ctx *ctx,
 
     for (col = start_col; col < start_col + num_cols; col++)
     {
-        int eob_cnt, eobs[25];
+        memset(coeffs, 0, 25 * 16 * sizeof(short));
 
         if (mbi->base.skip_coeff)
+        {
             reset_mb_context(left, above, mbi->base.y_mode);
+            mbi->base.eob_mask = 0;
+        }
         else
         {
-            memset(coeffs, 0, 25 * 16 * sizeof(short));
-            eob_cnt = decode_mb_tokens(&tokens->bool,
-                                       *left, *above,
-                                       coeffs,
-                                       eobs,
-                                       mbi->base.y_mode,
-                                       ctx->entropy_hdr.coeff_probs);
+            struct dequant_factors *dqf;
+
+            dqf = ctx->dequant_factors  + mbi->base.segment_id;
+            mbi->base.eob_mask = decode_mb_tokens(&tokens->bool,
+                                                  *left, *above,
+                                                  coeffs,
+                                                  mbi->base.y_mode,
+                                                  ctx->entropy_hdr.coeff_probs,
+                                                  dqf->factor);
         }
 
         above++;

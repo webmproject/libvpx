@@ -83,6 +83,7 @@ struct vp8_token_hdr
 struct vp8_quant_hdr
 {
     unsigned int       q_index;
+    int                delta_update;
     int                y1_dc_delta_q;
     int                y2_dc_delta_q;
     int                y2_ac_delta_q;
@@ -184,6 +185,7 @@ struct mb_base_info
     unsigned char ref_frame  : 2;
     unsigned char skip_coeff : 1;
     union mv      mv;
+    unsigned int  eob_mask;
 };
 
 
@@ -208,9 +210,24 @@ struct token_decoder
     short               *coeffs;
 };
 
+enum token_block_type
+{
+    TOKEN_BLOCK_Y1,
+    TOKEN_BLOCK_UV,
+    TOKEN_BLOCK_Y2,
+    TOKEN_BLOCK_TYPES,
+};
+
+struct dequant_factors
+{
+    int   quant_idx;
+    short factor[TOKEN_BLOCK_TYPES][2]; /* [ Y1, UV, Y2 ] [ DC, AC ] */
+};
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
+    unsigned int                    frame_cnt;
 
     struct vp8_frame_hdr            frame_hdr;
     struct vp8_segment_hdr          segment_hdr;
@@ -231,7 +248,12 @@ struct vp8_decoder_ctx
 
     token_entropy_ctx_t            *above_token_entropy_ctx;
     struct token_decoder            tokens[MAX_PARTITIONS];
+    struct dequant_factors          dequant_factors[MAX_MB_SEGMENTS];
 };
+
+
+void
+vp8_dixie_decode_init(struct vp8_decoder_ctx *ctx);
 
 
 vpx_codec_err_t

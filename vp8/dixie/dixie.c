@@ -11,6 +11,7 @@
 #include "bit_ops.h"
 #include "dixie.h"
 #include "vp8_prob_data.h"
+#include "dequant_data.h"
 #include "modemv.h"
 #include "tokens.h"
 #include <string.h>
@@ -107,6 +108,7 @@ decode_quantizer_header(struct vp8_decoder_ctx    *ctx,
     update |= (hdr->y2_ac_delta_q = bool_maybe_get_int(bool, 4));
     update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
     update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
+    hdr->delta_update = update;
 }
 
 
@@ -225,6 +227,77 @@ decode_segmentation_header(struct vp8_decoder_ctx *ctx,
 
 
 static void
+dequant_global_init(struct dequant_factors dqf[MAX_MB_SEGMENTS])
+{
+    int i;
+
+    for (i = 0; i < MAX_MB_SEGMENTS; i++)
+        dqf[i].quant_idx = -1;
+}
+
+
+static int
+clamp_q(int q)
+{
+    if (q < 0) return 0;
+    else if (q > 127) return 127;
+
+    return q;
+}
+
+
+static int
+dc_q(int q)
+{
+    return dc_q_lookup[clamp_q(q)];
+}
+
+
+static int
+ac_q(int q)
+{
+    return ac_q_lookup[clamp_q(q)];
+}
+
+
+static void
+dequant_init(struct dequant_factors        dqf[MAX_MB_SEGMENTS],
+             const struct vp8_segment_hdr *seg,
+             const struct vp8_quant_hdr   *quant_hdr)
+{
+    int i, q;
+
+    for (i = 0; i < (seg->enabled ? MAX_MB_SEGMENTS : 1); i++)
+    {
+        q = quant_hdr->q_index;
+
+        if (seg->enabled)
+            q = (!seg->abs) ? q + seg->quant_idx[i] : seg->quant_idx[i];
+
+        if (dqf->quant_idx != q || quant_hdr->delta_update)
+        {
+            dqf->factor[TOKEN_BLOCK_Y1][0] = dc_q(q + quant_hdr->y1_dc_delta_q);
+            dqf->factor[TOKEN_BLOCK_Y1][1] = ac_q(q);
+            dqf->factor[TOKEN_BLOCK_UV][0] = dc_q(q + quant_hdr->uv_dc_delta_q);
+            dqf->factor[TOKEN_BLOCK_UV][1] = ac_q(q + quant_hdr->uv_ac_delta_q);
+            dqf->factor[TOKEN_BLOCK_Y2][0] = dc_q(q + quant_hdr->y2_dc_delta_q)
+                                             * 2;
+            dqf->factor[TOKEN_BLOCK_Y2][1] = ac_q(q + quant_hdr->y2_ac_delta_q)
+                                             * 155 / 100;
+
+            if (dqf->factor[TOKEN_BLOCK_Y2][1] < 8)
+                dqf->factor[TOKEN_BLOCK_Y2][1] = 8;
+
+            if (dqf->factor[TOKEN_BLOCK_UV][0] > 132)
+                dqf->factor[TOKEN_BLOCK_UV][0] = 132;
+
+            dqf->quant_idx = q;
+        }
+    }
+}
+
+
+static void
 decode_frame(struct vp8_decoder_ctx *ctx,
              const unsigned char    *data,
              unsigned int            sz)
@@ -301,6 +374,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 
     vp8_dixie_modemv_init(ctx);
     vp8_dixie_tokens_init(ctx);
+    dequant_init(ctx->dequant_factors, &ctx->segment_hdr, &ctx->quant_hdr);
 
     for (row = 0, partition = 0; row < ctx->mb_rows; row++)
     {
@@ -311,11 +385,20 @@ decode_frame(struct vp8_decoder_ctx *ctx,
             partition = 0;
     }
 
+    ctx->frame_cnt++;
+
     if (!ctx->reference_hdr.refresh_entropy)
     {
         ctx->entropy_hdr = ctx->saved_entropy;
         ctx->saved_entropy_valid = 0;
     }
+}
+
+
+void
+vp8_dixie_decode_init(struct vp8_decoder_ctx *ctx)
+{
+    dequant_global_init(ctx->dequant_factors);
 }
 
 
