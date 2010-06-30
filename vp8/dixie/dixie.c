@@ -14,6 +14,7 @@
 #include "dequant_data.h"
 #include "modemv.h"
 #include "tokens.h"
+#include "predict.h"
 #include <string.h>
 #include <assert.h>
 
@@ -374,12 +375,14 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 
     vp8_dixie_modemv_init(ctx);
     vp8_dixie_tokens_init(ctx);
+    vp8_dixie_predict_init(ctx);
     dequant_init(ctx->dequant_factors, &ctx->segment_hdr, &ctx->quant_hdr);
 
     for (row = 0, partition = 0; row < ctx->mb_rows; row++)
     {
         vp8_dixie_modemv_process_row(ctx, &bool, row, 0, ctx->mb_cols);
         vp8_dixie_tokens_process_row(ctx, partition, row, 0, ctx->mb_cols);
+        vp8_dixie_predict_process_row(ctx, row, 0, ctx->mb_cols);
 
         if (++partition == ctx->token_hdr.partitions)
             partition = 0;

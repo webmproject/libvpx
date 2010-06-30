@@ -142,7 +142,8 @@ enum reference_frame
     CURRENT_FRAME,
     LAST_FRAME,
     GOLDEN_FRAME,
-    ALTREF_FRAME
+    ALTREF_FRAME,
+    NUM_REF_FRAMES
 };
 
 
@@ -224,6 +225,14 @@ struct dequant_factors
     short factor[TOKEN_BLOCK_TYPES][2]; /* [ Y1, UV, Y2 ] [ DC, AC ] */
 };
 
+
+struct ref_cnt_img
+{
+    vpx_image_t  img;
+    unsigned int ref_cnt;
+};
+
+
 struct vp8_decoder_ctx
 {
     struct vpx_internal_error_info  error;
@@ -249,6 +258,10 @@ struct vp8_decoder_ctx
     token_entropy_ctx_t            *above_token_entropy_ctx;
     struct token_decoder            tokens[MAX_PARTITIONS];
     struct dequant_factors          dequant_factors[MAX_MB_SEGMENTS];
+
+    struct ref_cnt_img              frame_strg[NUM_REF_FRAMES];
+    struct ref_cnt_img             *ref_frames[NUM_REF_FRAMES];
+    ptrdiff_t                       ref_frame_offsets[4];
 };
 
 
@@ -266,5 +279,8 @@ vpx_codec_err_t
 vp8_dixie_decode_frame(struct vp8_decoder_ctx *ctx,
                        const unsigned char    *data,
                        unsigned int            sz);
+
+
+#define CLAMP_255(x) ((x)<0?0:((x)>255?255:(x)))
 
 #endif

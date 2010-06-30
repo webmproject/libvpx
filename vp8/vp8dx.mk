@@ -34,6 +34,8 @@ VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/modemv.h
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/modemv_data.h
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/tokens.c
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/tokens.h
+VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/predict.c
+VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/predict.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 
