@@ -281,10 +281,10 @@ THREAD_FUNCTION vp8_thread_loop_filter(void *p_data)
 
                 YV12_BUFFER_CONFIG *post = &cm->new_frame;
                 loop_filter_info *lfi = cm->lf_info;
+                int frame_type = cm->frame_type;
 
                 int mb_row;
                 int mb_col;
-
 
                 int baseline_filter_level[MAX_MB_SEGMENTS];
                 int filter_level;
@@ -319,7 +319,10 @@ THREAD_FUNCTION vp8_thread_loop_filter(void *p_data)
                 }
 
                 // Initialize the loop filter for this frame.
-                vp8_init_loop_filter(cm);
+                if ((cm->last_filter_type != cm->filter_type) || (cm->last_sharpness_level != cm->sharpness_level))
+                    vp8_init_loop_filter(cm);
+                else if (frame_type != cm->last_frame_type)
+                    vp8_frame_init_loop_filter(lfi, frame_type);
 
                 // Set up the buffer pointers
                 y_ptr = post->y_buffer;
