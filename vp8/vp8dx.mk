@@ -30,7 +30,6 @@ CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 # common
 #define ARM
 #define DISABLE_THREAD
-#define INLINE=__forceinline
 
 #INCLUDES += algo/vpx_common/vpx_mem/include
 #INCLUDES += common
@@ -44,7 +43,6 @@ CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 # decoder
 #define ARM
 #define DISABLE_THREAD
-#define INLINE=__forceinline
 
 #INCLUDES += algo/vpx_common/vpx_mem/include
 #INCLUDES += common

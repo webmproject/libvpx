@@ -519,8 +519,6 @@ process_toolchain() {
              enable solution
              vs_version=${tgt_cc##vs}
              all_targets="${all_targets} solution"
-             INLINE=__inline
-             FORCEINLINE=__forceinline
         ;;
     esac
 

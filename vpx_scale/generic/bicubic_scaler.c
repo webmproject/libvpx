@@ -46,7 +46,7 @@ static float a = -0.6;
 //         3     2
 // C0 = a*t - a*t
 //
-static INLINE short c0_fixed(unsigned int t)
+static short c0_fixed(unsigned int t)
 {
     // put t in Q16 notation
     unsigned short v1, v2;
@@ -67,7 +67,7 @@ static INLINE short c0_fixed(unsigned int t)
 //                     2          3
 // C1 = a*t + (3-2*a)*t  - (2-a)*t
 //
-static INLINE short c1_fixed(unsigned int t)
+static short c1_fixed(unsigned int t)
 {
     unsigned short v1, v2, v3;
     unsigned short two, three;
@@ -96,7 +96,7 @@ static INLINE short c1_fixed(unsigned int t)
 //                 2          3
 // C2 = 1 - (3-a)*t  + (2-a)*t
 //
-static INLINE short c2_fixed(unsigned int t)
+static short c2_fixed(unsigned int t)
 {
     unsigned short v1, v2, v3;
     unsigned short two, three;
@@ -124,7 +124,7 @@ static INLINE short c2_fixed(unsigned int t)
 //                 2      3
 // C3 = a*t - 2*a*t  + a*t
 //
-static INLINE short c3_fixed(unsigned int t)
+static short c3_fixed(unsigned int t)
 {
     int v1, v2, v3;
 
