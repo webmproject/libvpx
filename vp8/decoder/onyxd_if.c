@@ -293,16 +293,15 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         // Apply the loop filter if appropriate.
 
         if (cm->filter_level > 0)
-        {
             vp8_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
-            cm->last_frame_type = cm->frame_type;
-            cm->last_filter_type = cm->filter_type;
-            cm->last_sharpness_level = cm->sharpness_level;
-
-        }
 
         vpx_usec_timer_mark(&lpftimer);
         pbi->time_loop_filtering += vpx_usec_timer_elapsed(&lpftimer);
+    }
+    if (cm->filter_level > 0) {
+        cm->last_frame_type = cm->frame_type;
+        cm->last_filter_type = cm->filter_type;
+        cm->last_sharpness_level = cm->sharpness_level;
     }
 
     vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
