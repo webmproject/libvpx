@@ -713,7 +713,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             int step_param;
             int further_steps;
             int n = 0;
-            int sadpb = x->sadperbit16;
+            int sadpb = x->sadperbit16/2;
 
             int col_min;
             int col_max;
@@ -760,12 +760,17 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             if (cpi->sf.search_method == HEX)
             {
-                bestsme = vp8_hex_search(x, b, d, &mvp, &d->bmi.mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv);
+                bestsme = vp8_hex_search(x, b, d, &mvp, &d->bmi.mv, step_param,
+                                      sadpb, &num00, &cpi->fn_ptr[BLOCK_16X16],
+                                      x->mvsadcost, x->mvcost, &best_ref_mv);
                 mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
             }
             else
             {
-                bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb < 9
+                bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv,
+                                      step_param, sadpb, &num00,
+                                      &cpi->fn_ptr[BLOCK_16X16],
+                                      x->mvcost, &best_ref_mv);
                 mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
                 // Further step/diamond searches as necessary
@@ -787,7 +792,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                         cpi->diamond_search_sad(x, b, d, &mvp,
                                                 &d->bmi.mv,
                                                 step_param + n,
-                                                sadpb / 4, &num00,
+                                                sadpb, &num00,
                                                 &cpi->fn_ptr[BLOCK_16X16],
                                                 x->mvcost, &best_ref_mv);
                         if (thissme < bestsme)
