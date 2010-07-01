@@ -639,14 +639,18 @@ void vp8_first_pass(VP8_COMP *cpi)
                 d->bmi.mv.as_mv.row = 0;
                 d->bmi.mv.as_mv.col = 0;
 
-                // Test last reference frame using the previous best mv as the starting point (best reference) for the search
-                vp8_first_pass_motion_search(cpi, x, &best_ref_mv, &d->bmi.mv.as_mv, &cm->last_frame, &motion_error, recon_yoffset);
+                // Test last reference frame using the previous best mv as the
+                // starting point (best reference) for the search
+                vp8_first_pass_motion_search(cpi, x, &best_ref_mv,
+                                        &d->bmi.mv.as_mv, &cm->last_frame,
+                                        &motion_error, recon_yoffset);
 
                 // If the current best reference mv is not centred on 0,0 then do a 0,0 based search as well
                 if ((best_ref_mv.col != 0) || (best_ref_mv.row != 0))
                 {
                    tmp_err = INT_MAX;
-                   vp8_first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv, &cm->last_frame, &motion_error, recon_yoffset);
+                   vp8_first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv,
+                                     &cm->last_frame, &tmp_err, recon_yoffset);
 
                    if ( tmp_err < motion_error )
                    {
