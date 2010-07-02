@@ -64,11 +64,6 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
 
-extern const TOKENEXTRA vp8_dct_value_tokens[DCT_MAX_VALUE*2];
-extern const TOKENEXTRA *vp8_dct_value_tokens_ptr;
-extern int vp8_dct_value_cost[DCT_MAX_VALUE*2];
-extern int *vp8_dct_value_cost_ptr;
-
 
 const int vp8_auto_speed_thresh[17] =
 {

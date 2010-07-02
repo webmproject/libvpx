@@ -47,6 +47,8 @@ typedef struct
 #define QUANTIZE_INVOKE(ctx,fn) vp8_quantize_##fn
 #endif
 
+extern void vp8_strict_quantize_b(BLOCK *b,BLOCKD *d);
+
 extern void vp8_quantize_mb(MACROBLOCK *x);
 extern void vp8_quantize_mbuv(MACROBLOCK *x);
 extern void vp8_quantize_mby(MACROBLOCK *x);

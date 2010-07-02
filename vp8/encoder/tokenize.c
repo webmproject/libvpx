@@ -27,9 +27,9 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 void vp8_fix_contexts(VP8_COMP *cpi, MACROBLOCKD *x);
 
 TOKENEXTRA vp8_dct_value_tokens[DCT_MAX_VALUE*2];
-TOKENEXTRA *vp8_dct_value_tokens_ptr;
+const TOKENEXTRA *vp8_dct_value_tokens_ptr;
 int vp8_dct_value_cost[DCT_MAX_VALUE*2];
-int *vp8_dct_value_cost_ptr;
+const int *vp8_dct_value_cost_ptr;
 #if 0
 int skip_true_count = 0;
 int skip_false_count = 0;

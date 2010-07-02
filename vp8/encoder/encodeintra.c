@@ -109,7 +109,6 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
 #if !(CONFIG_REALTIME_ONLY)
 #if 1
-
     if (x->optimize && x->rddiv > 1)
         vp8_optimize_mby(x, rtcd);
 
