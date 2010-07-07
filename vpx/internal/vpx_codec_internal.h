@@ -138,7 +138,7 @@ typedef vpx_codec_err_t (*vpx_codec_get_si_fn_t)(vpx_codec_alg_priv_t    *ctx,
  * provide type safety for the exchanged data or assign meanings to the
  * control codes. Those details should be specified in the algorithm's
  * header file. In particular, the ctrl_id parameter is guaranteed to exist
- * in the algorithm's control mapping table, and the data paramter may be NULL.
+ * in the algorithm's control mapping table, and the data parameter may be NULL.
  *
  *
  * \param[in]     ctx              Pointer to this instance's context
