@@ -9,6 +9,7 @@
  */
 #include "dixie.h"
 #include "predict.h"
+#include "idct_add.h"
 #include <assert.h>
 #include <string.h>
 
@@ -495,6 +496,9 @@ b_pred(unsigned char  *predict,
             assert(0);
         }
 
+        vp8_dixie_idct_add(b_predict, stride, coeffs, mbi, i);
+        coeffs += 16;
+
         if ((i & 3) == 3)
         {
             predict += stride * 4;
@@ -534,6 +538,32 @@ predict_intra_luma(unsigned char   *predict,
             assert(0);
         }
 
+        /* TODO: clean up, this will be dup'd for inter */
+        if (mbi->base.eob_mask & (1 << 24))
+        {
+            vp8_dixie_walsh(coeffs + 24 * 16, y2);
+
+            for (i = 0; i < 16; i++)
+                coeffs[i*16] = y2[i];
+        }
+        else
+        {
+            int dc = ((coeffs[24*16] + 3) >> 3);
+
+            for (i = 0; i < 16; i++)
+                coeffs[i*16] = dc;
+        }
+
+        for (i = 0; i < 16; i++)
+        {
+            vp8_dixie_idct_add(predict, stride, coeffs, mbi, i);
+            coeffs += 16;
+            predict += 4;
+
+            if ((i & 3) == 3)
+                predict += stride * 4 - 16;
+        }
+
     }
 }
 
@@ -566,10 +596,32 @@ predict_intra_chroma(unsigned char   *predict_u,
         predict_tm_8x8(predict_u, stride);
         predict_tm_8x8(predict_v, stride);
         break;
-
     default:
         assert(0);
     }
+
+    coeffs += 16 * 16;
+
+    for (i = 16; i < 20; i++)
+    {
+        vp8_dixie_idct_add(predict_u, stride, coeffs, mbi, i);
+        coeffs += 16;
+        predict_u += 4;
+
+        if (i & 1)
+            predict_u += stride * 4 - 8;
+    }
+
+    for (i = 20; i < 24; i++)
+    {
+        vp8_dixie_idct_add(predict_v, stride, coeffs, mbi, i);
+        coeffs += 16;
+        predict_v += 4;
+
+        if (i & 1)
+            predict_v += stride * 4 - 8;
+    }
+
 }
 
 static void
