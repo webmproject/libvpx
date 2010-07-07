@@ -102,7 +102,7 @@ typedef struct VP8Common
     YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG temp_scale_frame;
 
-    FRAME_TYPE last_frame_type;  //Add to check if vp8_frame_init_loop_filter() can be skiped.
+    FRAME_TYPE last_frame_type;  //Add to check if vp8_frame_init_loop_filter() can be skipped.
     FRAME_TYPE frame_type;
 
     int show_frame;
