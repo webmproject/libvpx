@@ -330,6 +330,7 @@ ONE_CONTEXT_NODE_0_:
 BLOCK_FINISHED:
     eob_mask |= (c > 1) << i;
     t = (c != !type);   // any nonzero data?
+    eob_mask |= t << 31;
 
     left[left_context_index[i]] = above[above_context_index[i]] = t;
     b_tokens += 16;

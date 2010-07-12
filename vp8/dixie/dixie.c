@@ -15,6 +15,7 @@
 #include "modemv.h"
 #include "tokens.h"
 #include "predict.h"
+#include "dixie_loopfilter.h"
 #include <string.h>
 #include <assert.h>
 
@@ -384,9 +385,15 @@ decode_frame(struct vp8_decoder_ctx *ctx,
         vp8_dixie_tokens_process_row(ctx, partition, row, 0, ctx->mb_cols);
         vp8_dixie_predict_process_row(ctx, row, 0, ctx->mb_cols);
 
+        if (ctx->loopfilter_hdr.level && row)
+            vp8_dixie_loopfilter_process_row(ctx, row - 1, 0, ctx->mb_cols);
+
         if (++partition == ctx->token_hdr.partitions)
             partition = 0;
     }
+
+    if (ctx->loopfilter_hdr.level)
+        vp8_dixie_loopfilter_process_row(ctx, row - 1, 0, ctx->mb_cols);
 
     ctx->frame_cnt++;
 

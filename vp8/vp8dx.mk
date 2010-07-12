@@ -38,6 +38,8 @@ VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/predict.c
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/predict.h
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/idct_add.c
 VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/idct_add.h
+VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/dixie_loopfilter.c
+VP8_DX_SRCS-$(CONFIG_DIXIE) += dixie/dixie_loopfilter.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 
