@@ -261,8 +261,6 @@ sym(vp8_dequant_dc_idct_add_mmx):
         mov         rax,    arg(0) ;input
         mov         rdx,    arg(1) ;dq
 
-        movsxd      rcx,    dword ptr arg(6) ;Dc
-
         movq        mm0,    [rax   ]
         pmullw      mm0,    [rdx]
 
@@ -286,8 +284,13 @@ sym(vp8_dequant_dc_idct_add_mmx):
         movq        [rax+16],mm7
         movq        [rax+24],mm7
 
+        ; move lower word of Dc to lower word of mm0
+        psrlq       mm0,    16
+        movzx       rcx,    word ptr arg(6) ;Dc
+        psllq       mm0,    16
+        movd        mm7,    rcx
+        por         mm0,    mm7
 
-        pinsrw      mm0,    rcx,  0
         movsxd      rax,            dword ptr arg(4) ;pitch
         movsxd      rdi,            dword ptr arg(5) ;stride
 
