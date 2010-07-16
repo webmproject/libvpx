@@ -3218,6 +3218,7 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 #if VP8_TEMPORAL_ALT_REF
 static void vp8cx_temp_blur1_c
 (
+    VP8_COMP *cpi,
     unsigned char **frames,
     int frame_count,
     unsigned char *src,
@@ -3236,17 +3237,16 @@ static void vp8cx_temp_blur1_c
     int modifier = 0;
     int i, j, k;
     int block_ofset;
-    int Cols, Rows;
+    int cols;
     unsigned char Shift = (block_size == 16) ? 4 : 3;
 
-    Cols = width / block_size;
-    Rows = height / block_size;
+    cols = cpi->common.mb_cols;
 
     for (i = 0; i < height; i++)
     {
-        block_ofset = (i >> Shift) * Cols;
+        block_ofset = (i >> Shift) * cols;
 
-        for (j = 0; j < Cols; j ++)
+        for (j = 0; j < cols; j ++)
         {
             if (motion_map_ptr[block_ofset] > 2)
             {
@@ -3436,6 +3436,7 @@ static void vp8cx_temp_filter_c
 
     // Blur Y
     vp8cx_temp_blur1_c(
+        cpi,
         cpi->frames,
         frames_to_blur,
         temp_source_buffer->y_buffer,  // cpi->Source->y_buffer,
@@ -3460,6 +3461,7 @@ static void vp8cx_temp_filter_c
 
     // Blur U
     vp8cx_temp_blur1_c(
+        cpi,
         cpi->frames,
         frames_to_blur,
         temp_source_buffer->u_buffer,
@@ -3484,6 +3486,7 @@ static void vp8cx_temp_filter_c
 
     // Blur V
     vp8cx_temp_blur1_c(
+        cpi,
         cpi->frames,
         frames_to_blur,
         temp_source_buffer->v_buffer,
