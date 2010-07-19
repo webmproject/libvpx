@@ -3214,8 +3214,21 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 }
 #endif
 // return of 0 means drop frame
-
+#define USE_FILTER_LUT 1
 #if VP8_TEMPORAL_ALT_REF
+
+#if USE_FILTER_LUT
+static int modifier_lut[7][19] =
+{
+16, 13, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,         // Strength=0
+16, 15, 10, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,        // Strength=1
+16, 15, 13, 9, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,        // Strength=2
+16, 16, 15, 13, 10, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,      // Strength=3
+16, 16, 15, 14, 13, 11, 9, 7, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,     // Strength=4
+16, 16, 16, 15, 15, 14, 13, 11, 10, 8, 7, 5, 3, 0, 0, 0, 0, 0, 0,  // Strength=5
+16, 16, 16, 16, 15, 15, 14, 14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 2, 1// Strength=6
+};
+#endif
 static void vp8cx_temp_blur1_c
 (
     VP8_COMP *cpi,
@@ -3239,6 +3252,9 @@ static void vp8cx_temp_blur1_c
     int block_ofset;
     int cols;
     unsigned char Shift = (block_size == 16) ? 4 : 3;
+#if USE_FILTER_LUT
+    int *lut = modifier_lut[strength];
+#endif
 
     cols = cpi->common.mb_cols;
 
@@ -3265,7 +3281,12 @@ static void vp8cx_temp_blur1_c
                     {
                         // get current frame pixel value
                         int pixel_value = frames[frame][byte];
-
+#if USE_FILTER_LUT
+                        // LUT implementation --
+                        // improves precision of filter
+                        modifier = abs(src_byte-pixel_value);
+                        modifier = modifier>18 ? 0 : lut[modifier];
+#else
                         modifier   = src_byte;
                         modifier  -= pixel_value;
                         modifier  *= modifier;
@@ -3276,7 +3297,7 @@ static void vp8cx_temp_blur1_c
                             modifier = 16;
 
                         modifier = 16 - modifier;
-
+#endif
                         accumulator += modifier * pixel_value;
 
                         count += modifier;
