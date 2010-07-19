@@ -69,17 +69,18 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
     short *ip = input;
     short *op = output;
 
+
     for (i = 0; i < 4; i++)
     {
-        a1 = ip[0] + ip[3];
-        b1 = ip[1] + ip[2];
-        c1 = ip[1] - ip[2];
-        d1 = ip[0] - ip[3];
+        a1 = ((ip[0] + ip[2])<<2);
+        d1 = ((ip[1] + ip[3])<<2);
+        c1 = ((ip[1] - ip[3])<<2);
+        b1 = ((ip[0] - ip[2])<<2);
 
-        op[0] = a1 + b1;
-        op[1] = c1 + d1;
-        op[2] = a1 - b1;
-        op[3] = d1 - c1;
+        op[0] = a1 + d1 + (a1!=0);
+        op[1] = b1 + c1;
+        op[2] = b1 - c1;
+        op[3] = a1 - d1;
         ip += pitch / 2;
         op += 4;
     }
@@ -89,25 +90,25 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
 
     for (i = 0; i < 4; i++)
     {
-        a1 = ip[0] + ip[12];
-        b1 = ip[4] + ip[8];
-        c1 = ip[4] - ip[8];
-        d1 = ip[0] - ip[12];
+        a1 = ip[0] + ip[8];
+        d1 = ip[4] + ip[12];
+        c1 = ip[4] - ip[12];
+        b1 = ip[0] - ip[8];
 
-        a2 = a1 + b1;
-        b2 = c1 + d1;
-        c2 = a1 - b1;
-        d2 = d1 - c1;
+        a2 = a1 + d1;
+        b2 = b1 + c1;
+        c2 = b1 - c1;
+        d2 = a1 - d1;
 
-        a2 += (a2 > 0);
-        b2 += (b2 > 0);
-        c2 += (c2 > 0);
-        d2 += (d2 > 0);
+        a2 += a2<0;
+        b2 += b2<0;
+        c2 += c2<0;
+        d2 += d2<0;
 
-        op[0] = (a2) >> 1;
-        op[4] = (b2) >> 1;
-        op[8] = (c2) >> 1;
-        op[12] = (d2) >> 1;
+        op[0] = (a2+3) >> 3;
+        op[4] = (b2+3) >> 3;
+        op[8] = (c2+3) >> 3;
+        op[12]= (d2+3) >> 3;
 
         ip++;
         op++;
