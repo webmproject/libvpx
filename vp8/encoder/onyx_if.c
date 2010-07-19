@@ -4960,20 +4960,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             {
                 if (cpi->source_encode_index ==  cpi->last_alt_ref_sei)
                 {
-#if VP8_TEMPORAL_ALT_REF
-
-                    if (cpi->oxcf.arnr_max_frames == 0)
-                    {
-                        cpi->is_src_frame_alt_ref = 1; // copy alt ref
-                    }
-                    else
-                    {
-                        cpi->is_src_frame_alt_ref = 0;
-                    }
-
-#else
                     cpi->is_src_frame_alt_ref = 1;
-#endif
                     cpi->last_alt_ref_sei    = -1;
                 }
                 else
