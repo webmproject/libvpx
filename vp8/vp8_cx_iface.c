@@ -178,7 +178,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
     RANGE_CHECK(vp8_cfg, Sharpness,         0, 7);
-    RANGE_CHECK(vp8_cfg, arnr_max_frames,    0, 25);
+    RANGE_CHECK(vp8_cfg, arnr_max_frames,    0, 15);
     RANGE_CHECK(vp8_cfg, arnr_strength,     0, 6);
     RANGE_CHECK(vp8_cfg, arnr_type,         0, 0xffffffff);
 
