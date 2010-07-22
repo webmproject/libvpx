@@ -5209,8 +5209,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     {
 
         // return to normal state
-        cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
-
         cm->refresh_entropy_probs = 1;
         cm->refresh_alt_ref_frame = 0;
         cm->refresh_golden_frame = 0;
