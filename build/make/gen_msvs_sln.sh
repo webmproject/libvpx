@@ -193,11 +193,11 @@ ${TAB}rm -rf "$platform"/"$config"
 ifneq (\$(found_devenv),)
   ifeq (\$(CONFIG_VS_VERSION),7)
 $nows_sln_config: $outfile
-${TAB}devenv.com $outfile /build "$config"
+${TAB}devenv.com $outfile -build "$config"
 
   else
 $nows_sln_config: $outfile
-${TAB}devenv.com $outfile /build "$sln_config"
+${TAB}devenv.com $outfile -build "$sln_config"
 
   endif
 else
