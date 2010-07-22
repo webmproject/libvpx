@@ -1652,13 +1652,6 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
         cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
 
-    // force play_alternate to 0 if allow_lag is 0, lag_in_frames is too small, Mode is real time or one pass compress enabled.
-    if (cpi->oxcf.allow_lag == 0 || cpi->oxcf.lag_in_frames <= 5 || (cpi->oxcf.Mode < MODE_SECONDPASS))
-    {
-        cpi->oxcf.play_alternate = 0;
-        cpi->ref_frame_flags = cpi->ref_frame_flags & ~VP8_ALT_FLAG;
-    }
-
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
     cpi->is_src_frame_alt_ref = 0;
@@ -1936,13 +1929,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // Limit on lag buffers as these are not currently dynamically allocated
     else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
         cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
-
-    // force play_alternate to 0 if allow_lag is 0, lag_in_frames is too small, Mode is real time or one pass compress enabled.
-    if (cpi->oxcf.allow_lag == 0 || cpi->oxcf.lag_in_frames <= 5 || (cpi->oxcf.Mode < MODE_SECONDPASS))
-    {
-        cpi->oxcf.play_alternate = 0;
-        cpi->ref_frame_flags = cpi->ref_frame_flags & ~VP8_ALT_FLAG;
-    }
 
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
