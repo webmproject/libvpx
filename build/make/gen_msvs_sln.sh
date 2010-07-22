@@ -25,7 +25,7 @@ files.
 Options:
     --help                      Print this message
     --out=outfile               Redirect output to a file
-    --ver=version               Version (7,8) of visual studio to generate for
+    --ver=version               Version (7,8,9) of visual studio to generate for
     --target=isa-os-cc          Target specifier
 EOF
     exit 1
@@ -224,7 +224,7 @@ for opt in "$@"; do
     ;;
     --ver=*) vs_ver="$optval"
              case $optval in
-             [78])
+             [789])
              ;;
              *) die Unrecognized Visual Studio Version in $opt
              ;;
@@ -235,7 +235,7 @@ for opt in "$@"; do
              7) sln_vers="8.00"
                 sln_vers_str="Visual Studio .NET 2003"
              ;;
-             8)
+             [89])
              ;;
              *) die "Unrecognized Visual Studio Version '$optval' in $opt"
              ;;
@@ -256,6 +256,9 @@ case "${vs_ver:-8}" in
     ;;
     8) sln_vers="9.00"
        sln_vers_str="Visual Studio 2005"
+    ;;
+    9) sln_vers="10.00"
+       sln_vers_str="Visual Studio 2008"
     ;;
 esac
 

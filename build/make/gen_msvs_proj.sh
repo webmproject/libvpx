@@ -206,7 +206,7 @@ for opt in "$@"; do
     ;;
     --ver=*) vs_ver="$optval"
              case $optval in
-             [78])
+             [789])
              ;;
              *) die Unrecognized Visual Studio Version in $opt
              ;;
@@ -247,6 +247,8 @@ case "${vs_ver:-8}" in
        asm_use_custom_step=$uses_asm
     ;;
     8) vs_ver_id="8.00"
+    ;;
+    9) vs_ver_id="9.00"
     ;;
 esac
 
