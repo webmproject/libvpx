@@ -33,6 +33,7 @@ void vp8_initialize_common(void);
 #define MAXQ 127
 #define QINDEX_RANGE (MAXQ + 1)
 
+#define NUM_YV12_BUFFERS 4
 
 typedef struct frame_contexts
 {
@@ -94,11 +95,12 @@ typedef struct VP8Common
     YUV_TYPE clr_type;
     CLAMP_TYPE  clamp_type;
 
-    YV12_BUFFER_CONFIG last_frame;
-    YV12_BUFFER_CONFIG golden_frame;
-    YV12_BUFFER_CONFIG alt_ref_frame;
-    YV12_BUFFER_CONFIG new_frame;
     YV12_BUFFER_CONFIG *frame_to_show;
+
+    YV12_BUFFER_CONFIG yv12_fb[NUM_YV12_BUFFERS];
+    int fb_idx_ref_cnt[NUM_YV12_BUFFERS];
+    int new_fb_idx, lst_fb_idx, gld_fb_idx, alt_fb_idx;
+
     YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG temp_scale_frame;
 

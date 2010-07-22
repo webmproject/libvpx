@@ -277,8 +277,10 @@ void encode_mb_row(VP8_COMP *cpi,
     int i;
     int recon_yoffset, recon_uvoffset;
     int mb_col;
-    int recon_y_stride = cm->last_frame.y_stride;
-    int recon_uv_stride = cm->last_frame.uv_stride;
+    int ref_fb_idx = cm->lst_fb_idx;
+    int dst_fb_idx = cm->new_fb_idx;
+    int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
+    int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int seg_map_index = (mb_row * cpi->common.mb_cols);
 
 
@@ -311,9 +313,9 @@ void encode_mb_row(VP8_COMP *cpi,
         x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
         x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
 
-        xd->dst.y_buffer = cm->new_frame.y_buffer + recon_yoffset;
-        xd->dst.u_buffer = cm->new_frame.u_buffer + recon_uvoffset;
-        xd->dst.v_buffer = cm->new_frame.v_buffer + recon_uvoffset;
+        xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+        xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+        xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
         xd->left_available = (mb_col != 0);
 
         // Is segmentation enabled
@@ -419,7 +421,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
     //extend the recon for intra prediction
     vp8_extend_mb_row(
-        &cm->new_frame,
+        &cm->yv12_fb[dst_fb_idx],
         xd->dst.y_buffer + 16,
         xd->dst.u_buffer + 8,
         xd->dst.v_buffer + 8);
@@ -531,12 +533,12 @@ void vp8_encode_frame(VP8_COMP *cpi)
     // Copy data over into macro block data sturctures.
 
     x->src = * cpi->Source;
-    xd->pre = cm->last_frame;
-    xd->dst = cm->new_frame;
+    xd->pre = cm->yv12_fb[cm->lst_fb_idx];
+    xd->dst = cm->yv12_fb[cm->new_fb_idx];
 
     // set up frame new frame for intra coded blocks
 
-    vp8_setup_intra_recon(&cm->new_frame);
+    vp8_setup_intra_recon(&cm->yv12_fb[cm->new_fb_idx]);
 
     vp8_build_block_offsets(x);
 
@@ -1157,34 +1159,23 @@ int vp8cx_encode_inter_macroblock
         MV best_ref_mv;
         MV nearest, nearby;
         int mdcounts[4];
+        int ref_fb_idx;
 
         vp8_find_near_mvs(xd, xd->mode_info_context,
                           &nearest, &nearby, &best_ref_mv, mdcounts, xd->mbmi.ref_frame, cpi->common.ref_frame_sign_bias);
 
         vp8_build_uvmvs(xd, cpi->common.full_pixel);
 
-        // store motion vectors in our motion vector list
         if (xd->mbmi.ref_frame == LAST_FRAME)
-        {
-            // Set up pointers for this macro block into the previous frame recon buffer
-            xd->pre.y_buffer = cpi->common.last_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = cpi->common.last_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = cpi->common.last_frame.v_buffer + recon_uvoffset;
-        }
+            ref_fb_idx = cpi->common.lst_fb_idx;
         else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
-        {
-            // Set up pointers for this macro block into the golden frame recon buffer
-            xd->pre.y_buffer = cpi->common.golden_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = cpi->common.golden_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = cpi->common.golden_frame.v_buffer + recon_uvoffset;
-        }
+            ref_fb_idx = cpi->common.gld_fb_idx;
         else
-        {
-            // Set up pointers for this macro block into the alternate reference frame recon buffer
-            xd->pre.y_buffer = cpi->common.alt_ref_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = cpi->common.alt_ref_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = cpi->common.alt_ref_frame.v_buffer + recon_uvoffset;
-        }
+            ref_fb_idx = cpi->common.alt_fb_idx;
+
+        xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
+        xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
+        xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
         if (xd->mbmi.mode == SPLITMV)
         {

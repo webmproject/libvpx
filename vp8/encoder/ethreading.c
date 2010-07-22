@@ -56,8 +56,10 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     int i;
                     int recon_yoffset, recon_uvoffset;
                     int mb_col;
-                    int recon_y_stride = cm->last_frame.y_stride;
-                    int recon_uv_stride = cm->last_frame.uv_stride;
+                    int ref_fb_idx = cm->lst_fb_idx;
+                    int dst_fb_idx = cm->new_fb_idx;
+                    int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
+                    int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
                     volatile int *last_row_current_mb_col;
 
                     if (ithread > 0)
@@ -107,9 +109,9 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
                         x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
 
-                        xd->dst.y_buffer = cm->new_frame.y_buffer + recon_yoffset;
-                        xd->dst.u_buffer = cm->new_frame.u_buffer + recon_uvoffset;
-                        xd->dst.v_buffer = cm->new_frame.v_buffer + recon_uvoffset;
+                        xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+                        xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+                        xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
                         xd->left_available = (mb_col != 0);
 
                         // Is segmentation enabled
@@ -195,7 +197,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                     //extend the recon for intra prediction
                     vp8_extend_mb_row(
-                        &cm->new_frame,
+                        &cm->yv12_fb[dst_fb_idx],
                         xd->dst.y_buffer + 16,
                         xd->dst.u_buffer + 8,
                         xd->dst.v_buffer + 8);
@@ -386,8 +388,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mbd->frames_till_alt_ref_frame = cm->frames_till_alt_ref_frame;
 
         mb->src = * cpi->Source;
-        mbd->pre = cm->last_frame;
-        mbd->dst = cm->new_frame;
+        mbd->pre = cm->yv12_fb[cm->lst_fb_idx];
+        mbd->dst = cm->yv12_fb[cm->new_fb_idx];
 
         mb->src.y_buffer += 16 * x->src.y_stride * (i + 1);
         mb->src.u_buffer +=  8 * x->src.uv_stride * (i + 1);

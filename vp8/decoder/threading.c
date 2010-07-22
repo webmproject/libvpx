@@ -59,11 +59,8 @@ void vp8_setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC 
         mbd->frames_since_golden      = pc->frames_since_golden;
         mbd->frames_till_alt_ref_frame  = pc->frames_till_alt_ref_frame;
 
-        mbd->pre = pc->last_frame;
-        mbd->dst = pc->new_frame;
-
-
-
+        mbd->pre = pc->yv12_fb[pc->lst_fb_idx];
+        mbd->dst = pc->yv12_fb[pc->new_fb_idx];
 
         vp8_setup_block_dptrs(mbd);
         vp8_build_block_doffsets(mbd);
@@ -119,8 +116,10 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                 int i;
                 int recon_yoffset, recon_uvoffset;
                 int mb_col;
-                int recon_y_stride = pc->last_frame.y_stride;
-                int recon_uv_stride = pc->last_frame.uv_stride;
+                int ref_fb_idx = pc->lst_fb_idx;
+                int dst_fb_idx = pc->new_fb_idx;
+                int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
+                int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
 
                 volatile int *last_row_current_mb_col;
 
@@ -172,33 +171,23 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                     xd->mb_to_left_edge = -((mb_col * 16) << 3);
                     xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
-                    xd->dst.y_buffer = pc->new_frame.y_buffer + recon_yoffset;
-                    xd->dst.u_buffer = pc->new_frame.u_buffer + recon_uvoffset;
-                    xd->dst.v_buffer = pc->new_frame.v_buffer + recon_uvoffset;
+                    xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+                    xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+                    xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
                     xd->left_available = (mb_col != 0);
 
                     // Select the appropriate reference frame for this MB
                     if (xd->mbmi.ref_frame == LAST_FRAME)
-                    {
-                        xd->pre.y_buffer = pc->last_frame.y_buffer + recon_yoffset;
-                        xd->pre.u_buffer = pc->last_frame.u_buffer + recon_uvoffset;
-                        xd->pre.v_buffer = pc->last_frame.v_buffer + recon_uvoffset;
-                    }
+                        ref_fb_idx = pc->lst_fb_idx;
                     else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
-                    {
-                        // Golden frame reconstruction buffer
-                        xd->pre.y_buffer = pc->golden_frame.y_buffer + recon_yoffset;
-                        xd->pre.u_buffer = pc->golden_frame.u_buffer + recon_uvoffset;
-                        xd->pre.v_buffer = pc->golden_frame.v_buffer + recon_uvoffset;
-                    }
+                        ref_fb_idx = pc->gld_fb_idx;
                     else
-                    {
-                        // Alternate reference frame reconstruction buffer
-                        xd->pre.y_buffer = pc->alt_ref_frame.y_buffer + recon_yoffset;
-                        xd->pre.u_buffer = pc->alt_ref_frame.u_buffer + recon_uvoffset;
-                        xd->pre.v_buffer = pc->alt_ref_frame.v_buffer + recon_uvoffset;
-                    }
+                        ref_fb_idx = pc->alt_fb_idx;
+
+                    xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
+                    xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
+                    xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
                     vp8_build_uvmvs(xd, pc->full_pixel);
 
@@ -222,7 +211,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
 
                 // adjust to the next row of mbs
                 vp8_extend_mb_row(
-                    &pc->new_frame,
+                    &pc->yv12_fb[dst_fb_idx],
                     xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8
                 );
 
@@ -279,7 +268,7 @@ THREAD_FUNCTION vp8_thread_loop_filter(void *p_data)
                 MACROBLOCKD *mbd = &pbi->lpfmb;
                 int default_filt_lvl = pbi->common.filter_level;
 
-                YV12_BUFFER_CONFIG *post = &cm->new_frame;
+                YV12_BUFFER_CONFIG *post = &cm->yv12_fb[cm->new_fb_idx];
                 loop_filter_info *lfi = cm->lf_info;
                 int frame_type = cm->frame_type;
 

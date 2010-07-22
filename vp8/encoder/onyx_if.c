@@ -1123,11 +1123,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     if (cpi->sf.search_method == NSTEP)
     {
-        vp8_init3smotion_compensation(&cpi->mb, cm->last_frame.y_stride);
+        vp8_init3smotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
     }
     else if (cpi->sf.search_method == DIAMOND)
     {
-        vp8_init_dsmotion_compensation(&cpi->mb, cm->last_frame.y_stride);
+        vp8_init_dsmotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
     }
 
     if (cpi->sf.improved_dct)
@@ -1564,9 +1564,9 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
 
-    if (((cm->Width + 15) & 0xfffffff0) != cm->last_frame.y_width ||
-        ((cm->Height + 15) & 0xfffffff0) != cm->last_frame.y_height ||
-        cm->last_frame.y_width == 0)
+    if (((cm->Width + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_width ||
+        ((cm->Height + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_height ||
+        cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
         alloc_raw_frame_buffers(cpi);
         vp8_alloc_compressor_data(cpi);
@@ -1843,9 +1843,9 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
 
-    if (((cm->Width + 15) & 0xfffffff0) != cm->last_frame.y_width ||
-        ((cm->Height + 15) & 0xfffffff0) != cm->last_frame.y_height ||
-        cm->last_frame.y_width == 0)
+    if (((cm->Width + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_width ||
+        ((cm->Height + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_height ||
+        cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
         alloc_raw_frame_buffers(cpi);
         vp8_alloc_compressor_data(cpi);
@@ -2241,7 +2241,8 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
             if (cpi->b_calculate_psnr)
             {
-                double samples = 3.0 / 2 * cpi->count * cpi->common.last_frame.y_width * cpi->common.last_frame.y_height;
+                YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
+                double samples = 3.0 / 2 * cpi->count * lst_yv12->y_width * lst_yv12->y_height;
                 double total_psnr = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error);
                 double total_psnr2 = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error2);
                 double total_ssim = 100 * pow(cpi->summed_quality / cpi->summed_weights, 8.0);
@@ -2580,18 +2581,18 @@ int vp8_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
+    int ref_fb_idx;
 
     if (ref_frame_flag == VP8_LAST_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->last_frame, sd);
-
+        ref_fb_idx = cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->golden_frame, sd);
-
+        ref_fb_idx = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->alt_ref_frame, sd);
-
+        ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
+
+    vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
 
     return 0;
 }
@@ -2600,17 +2601,18 @@ int vp8_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
 
+    int ref_fb_idx;
+
     if (ref_frame_flag == VP8_LAST_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->last_frame);
-
+        ref_fb_idx = cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->golden_frame);
-
+        ref_fb_idx = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->alt_ref_frame);
-
+        ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
+
+    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[ref_fb_idx]);
 
     return 0;
 }
@@ -2686,8 +2688,8 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 #endif
     }
     // we may need to copy to a buffer so we can extend the image...
-    else if (cm->Width != cm->last_frame.y_width ||
-             cm->Height != cm->last_frame.y_height)
+    else if (cm->Width != cm->yv12_fb[cm->lst_fb_idx].y_width ||
+             cm->Height != cm->yv12_fb[cm->lst_fb_idx].y_height)
     {
         //vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
 #if HAVE_ARMV7
@@ -2840,7 +2842,7 @@ static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
 
     // Update the golden frame buffer
-    vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->alt_ref_frame);
+    vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
 
     // Select an interval before next GF or altref
     if (!cpi->auto_gold)
@@ -2882,7 +2884,7 @@ static void update_golden_frame_and_stats(VP8_COMP *cpi)
     if (cm->refresh_golden_frame)
     {
         // Update the golden frame buffer
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->golden_frame);
+        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
 
         // Select an interval before next GF
         if (!cpi->auto_gold)
@@ -4317,11 +4319,11 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
 
     if (cm->refresh_last_frame)
     {
-        vp8_swap_yv12_buffer(&cm->last_frame, &cm->new_frame);
-        cm->frame_to_show = &cm->last_frame;
+        vp8_swap_yv12_buffer(&cm->yv12_fb[cm->lst_fb_idx], &cm->yv12_fb[cm->new_fb_idx]);
+        cm->frame_to_show = &cm->yv12_fb[cm->lst_fb_idx];
     }
     else
-        cm->frame_to_show = &cm->new_frame;
+        cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
 
 
@@ -4371,43 +4373,48 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
         }
     }
 
-
-    // At this point the new frame has been encoded coded.
-    // If any buffer copy / swaping is signalled it should be done here.
-    if (cm->frame_type == KEY_FRAME)
     {
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->golden_frame);
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->alt_ref_frame);
-    }
-    else    // For non key frames
-    {
-        // Code to copy between reference buffers
-        if (cm->copy_buffer_to_arf)
+        YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
+        YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
+        YV12_BUFFER_CONFIG *gld_yv12 = &cm->yv12_fb[cm->gld_fb_idx];
+        YV12_BUFFER_CONFIG *alt_yv12 = &cm->yv12_fb[cm->alt_fb_idx];
+        // At this point the new frame has been encoded coded.
+        // If any buffer copy / swaping is signalled it should be done here.
+        if (cm->frame_type == KEY_FRAME)
         {
-            if (cm->copy_buffer_to_arf == 1)
-            {
-                if (cm->refresh_last_frame)
-                    // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                    vp8_yv12_copy_frame_ptr(&cm->new_frame, &cm->alt_ref_frame);
-                else
-                    vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->alt_ref_frame);
-            }
-            else if (cm->copy_buffer_to_arf == 2)
-                vp8_yv12_copy_frame_ptr(&cm->golden_frame, &cm->alt_ref_frame);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, gld_yv12);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, alt_yv12);
         }
-
-        if (cm->copy_buffer_to_gf)
+        else    // For non key frames
         {
-            if (cm->copy_buffer_to_gf == 1)
+            // Code to copy between reference buffers
+            if (cm->copy_buffer_to_arf)
             {
-                if (cm->refresh_last_frame)
-                    // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                    vp8_yv12_copy_frame_ptr(&cm->new_frame, &cm->golden_frame);
-                else
-                    vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->golden_frame);
+                if (cm->copy_buffer_to_arf == 1)
+                {
+                    if (cm->refresh_last_frame)
+                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
+                        vp8_yv12_copy_frame_ptr(new_yv12, alt_yv12);
+                    else
+                        vp8_yv12_copy_frame_ptr(lst_yv12, alt_yv12);
+                }
+                else if (cm->copy_buffer_to_arf == 2)
+                    vp8_yv12_copy_frame_ptr(gld_yv12, alt_yv12);
             }
-            else if (cm->copy_buffer_to_gf == 2)
-                vp8_yv12_copy_frame_ptr(&cm->alt_ref_frame, &cm->golden_frame);
+
+            if (cm->copy_buffer_to_gf)
+            {
+                if (cm->copy_buffer_to_gf == 1)
+                {
+                    if (cm->refresh_last_frame)
+                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
+                        vp8_yv12_copy_frame_ptr(new_yv12, gld_yv12);
+                    else
+                        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
+                }
+                else if (cm->copy_buffer_to_gf == 2)
+                    vp8_yv12_copy_frame_ptr(alt_yv12, gld_yv12);
+            }
         }
     }
 
@@ -4623,10 +4630,10 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     {
         // Is this an alternate reference update
         if (cpi->common.refresh_alt_ref_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->alt_ref_frame);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
 
         if (cpi->common.refresh_golden_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->golden_frame);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
     }
     else
     {
@@ -4678,7 +4685,8 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
         FILE *recon_file;
         sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
         recon_file = fopen(filename, "wb");
-        fwrite(cm->last_frame.buffer_alloc, cm->last_frame.frame_size, 1, recon_file);
+        fwrite(cm->yv12_fb[cm->lst_fb_idx].buffer_alloc,
+               cm->yv12_fb[cm->lst_fb_idx].frame_size, 1, recon_file);
         fclose(recon_file);
     }
 

@@ -1578,18 +1578,21 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
         if (x->e_mbd.mbmi.ref_frame == LAST_FRAME)
         {
+            YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
+
             if (!(cpi->ref_frame_flags & VP8_LAST_FLAG))
                 continue;
 
             lf_or_gf = 0;  // Local last frame vs Golden frame flag
 
             // Set up pointers for this macro block into the previous frame recon buffer
-            x->e_mbd.pre.y_buffer = cpi->common.last_frame.y_buffer + recon_yoffset;
-            x->e_mbd.pre.u_buffer = cpi->common.last_frame.u_buffer + recon_uvoffset;
-            x->e_mbd.pre.v_buffer = cpi->common.last_frame.v_buffer + recon_uvoffset;
+            x->e_mbd.pre.y_buffer = lst_yv12->y_buffer + recon_yoffset;
+            x->e_mbd.pre.u_buffer = lst_yv12->u_buffer + recon_uvoffset;
+            x->e_mbd.pre.v_buffer = lst_yv12->v_buffer + recon_uvoffset;
         }
         else if (x->e_mbd.mbmi.ref_frame == GOLDEN_FRAME)
         {
+            YV12_BUFFER_CONFIG *gld_yv12 = &cpi->common.yv12_fb[cpi->common.gld_fb_idx];
 
             // not supposed to reference gold frame
             if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
@@ -1598,12 +1601,14 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             lf_or_gf = 1;  // Local last frame vs Golden frame flag
 
             // Set up pointers for this macro block into the previous frame recon buffer
-            x->e_mbd.pre.y_buffer = cpi->common.golden_frame.y_buffer + recon_yoffset;
-            x->e_mbd.pre.u_buffer = cpi->common.golden_frame.u_buffer + recon_uvoffset;
-            x->e_mbd.pre.v_buffer = cpi->common.golden_frame.v_buffer + recon_uvoffset;
+            x->e_mbd.pre.y_buffer = gld_yv12->y_buffer + recon_yoffset;
+            x->e_mbd.pre.u_buffer = gld_yv12->u_buffer + recon_uvoffset;
+            x->e_mbd.pre.v_buffer = gld_yv12->v_buffer + recon_uvoffset;
         }
         else if (x->e_mbd.mbmi.ref_frame == ALTREF_FRAME)
         {
+            YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
+
             // not supposed to reference alt ref frame
             if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
                 continue;
@@ -1614,9 +1619,9 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             lf_or_gf = 1;  // Local last frame vs Golden frame flag
 
             // Set up pointers for this macro block into the previous frame recon buffer
-            x->e_mbd.pre.y_buffer = cpi->common.alt_ref_frame.y_buffer + recon_yoffset;
-            x->e_mbd.pre.u_buffer = cpi->common.alt_ref_frame.u_buffer + recon_uvoffset;
-            x->e_mbd.pre.v_buffer = cpi->common.alt_ref_frame.v_buffer + recon_uvoffset;
+            x->e_mbd.pre.y_buffer = alt_yv12->y_buffer + recon_yoffset;
+            x->e_mbd.pre.u_buffer = alt_yv12->u_buffer + recon_uvoffset;
+            x->e_mbd.pre.v_buffer = alt_yv12->v_buffer + recon_uvoffset;
         }
 
         vp8_find_near_mvs(&x->e_mbd,

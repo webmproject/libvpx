@@ -31,13 +31,15 @@ void vp8_update_mode_info_border(MODE_INFO *mi, int rows, int cols)
         vpx_memset(&mi[i*cols-1], 0, sizeof(MODE_INFO));
     }
 }
+
 void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
 {
+    int i;
+
+    for (i = 0; i < NUM_YV12_BUFFERS; i++)
+        vp8_yv12_de_alloc_frame_buffer(&oci->yv12_fb[i]);
+
     vp8_yv12_de_alloc_frame_buffer(&oci->temp_scale_frame);
-    vp8_yv12_de_alloc_frame_buffer(&oci->new_frame);
-    vp8_yv12_de_alloc_frame_buffer(&oci->last_frame);
-    vp8_yv12_de_alloc_frame_buffer(&oci->golden_frame);
-    vp8_yv12_de_alloc_frame_buffer(&oci->alt_ref_frame);
     vp8_yv12_de_alloc_frame_buffer(&oci->post_proc_buffer);
 
     vpx_free(oci->above_context[Y1CONTEXT]);
@@ -61,6 +63,8 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
 
 int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
 {
+    int i;
+
     vp8_de_alloc_frame_buffers(oci);
 
     // our internal buffers are always multiples of 16
@@ -71,32 +75,28 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
         height += 16 - (height & 0xf);
 
 
+    for (i = 0; i < NUM_YV12_BUFFERS; i++)
+    {
+      oci->fb_idx_ref_cnt[0] = 0;
+
+      if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i],  width, height, VP8BORDERINPIXELS) < 0)
+        {
+            vp8_de_alloc_frame_buffers(oci);
+            return ALLOC_FAILURE;
+        }
+    }
+
+    oci->new_fb_idx = 0;
+    oci->lst_fb_idx = 1;
+    oci->gld_fb_idx = 2;
+    oci->alt_fb_idx = 3;
+
+    oci->fb_idx_ref_cnt[0] = 1;
+    oci->fb_idx_ref_cnt[1] = 1;
+    oci->fb_idx_ref_cnt[2] = 1;
+    oci->fb_idx_ref_cnt[3] = 1;
+
     if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame,   width, 16, VP8BORDERINPIXELS) < 0)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-
-    if (vp8_yv12_alloc_frame_buffer(&oci->new_frame,   width, height, VP8BORDERINPIXELS) < 0)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-    if (vp8_yv12_alloc_frame_buffer(&oci->last_frame,  width, height, VP8BORDERINPIXELS) < 0)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-    if (vp8_yv12_alloc_frame_buffer(&oci->golden_frame, width, height, VP8BORDERINPIXELS) < 0)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-    if (vp8_yv12_alloc_frame_buffer(&oci->alt_ref_frame, width, height, VP8BORDERINPIXELS) < 0)
     {
         vp8_de_alloc_frame_buffers(oci);
         return ALLOC_FAILURE;

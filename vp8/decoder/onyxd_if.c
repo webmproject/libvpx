@@ -180,18 +180,18 @@ int vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
+    int ref_fb_idx;
 
     if (ref_frame_flag == VP8_LAST_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->last_frame, sd);
-
+        ref_fb_idx = cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->golden_frame, sd);
-
+        ref_fb_idx = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->alt_ref_frame, sd);
-
+        ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
+
+    vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
 
     return 0;
 }
@@ -199,18 +199,18 @@ int vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
+    int ref_fb_idx;
 
     if (ref_frame_flag == VP8_LAST_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->last_frame);
-
+        ref_fb_idx = cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->golden_frame);
-
+        ref_fb_idx = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->alt_ref_frame);
-
+        ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
+
+    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[ref_fb_idx]);
 
     return 0;
 }
@@ -221,12 +221,95 @@ extern void vp8_push_neon(INT64 *store);
 extern void vp8_pop_neon(INT64 *store);
 static INT64 dx_store_reg[8];
 #endif
+
+static int get_free_fb (VP8_COMMON *cm)
+{
+    int i;
+    for (i = 0; i < NUM_YV12_BUFFERS; i++)
+        if (cm->fb_idx_ref_cnt[i] == 0)
+            break;
+
+    cm->fb_idx_ref_cnt[i] = 1;
+    return i;
+}
+
+static void ref_cnt_fb (int *buf, int *idx, int new_idx)
+{
+    if (buf[*idx] > 0)
+        buf[*idx]--;
+
+    *idx = new_idx;
+
+    buf[new_idx]++;
+}
+
+// If any buffer copy / swapping is signalled it should be done here.
+static int swap_frame_buffers (VP8_COMMON *cm)
+{
+    int fb_to_update_with, err = 0;
+
+    if (cm->refresh_last_frame)
+        fb_to_update_with = cm->lst_fb_idx;
+    else
+        fb_to_update_with = cm->new_fb_idx;
+
+    // The alternate reference frame or golden frame can be updated
+    //  using the new, last, or golden/alt ref frame.  If it
+    //  is updated using the newly decoded frame it is a refresh.
+    //  An update using the last or golden/alt ref frame is a copy.
+    if (cm->copy_buffer_to_arf)
+    {
+        int new_fb = 0;
+
+        if (cm->copy_buffer_to_arf == 1)
+            new_fb = fb_to_update_with;
+        else if (cm->copy_buffer_to_arf == 2)
+            new_fb = cm->gld_fb_idx;
+        else
+            err = -1;
+
+        ref_cnt_fb (cm->fb_idx_ref_cnt, &cm->alt_fb_idx, new_fb);
+    }
+
+    if (cm->copy_buffer_to_gf)
+    {
+        int new_fb = 0;
+
+        if (cm->copy_buffer_to_gf == 1)
+            new_fb = fb_to_update_with;
+        else if (cm->copy_buffer_to_gf == 2)
+            new_fb = cm->alt_fb_idx;
+        else
+            err = -1;
+
+        ref_cnt_fb (cm->fb_idx_ref_cnt, &cm->gld_fb_idx, new_fb);
+    }
+
+    if (cm->refresh_golden_frame)
+        ref_cnt_fb (cm->fb_idx_ref_cnt, &cm->gld_fb_idx, cm->new_fb_idx);
+
+    if (cm->refresh_alt_ref_frame)
+        ref_cnt_fb (cm->fb_idx_ref_cnt, &cm->alt_fb_idx, cm->new_fb_idx);
+
+    if (cm->refresh_last_frame)
+    {
+        ref_cnt_fb (cm->fb_idx_ref_cnt, &cm->lst_fb_idx, cm->new_fb_idx);
+
+        cm->frame_to_show = &cm->yv12_fb[cm->lst_fb_idx];
+    }
+    else
+        cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
+
+    cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+
+    return err;
+}
+
 int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, INT64 time_stamp)
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
     int retcode = 0;
-
     struct vpx_usec_timer timer;
 
 //  if(pbi->ready_for_new_data == 0)
@@ -257,6 +340,8 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     pbi->Source = source;
     pbi->source_sz = size;
 
+    cm->new_fb_idx = get_free_fb (cm);
+
     retcode = vp8_decode_frame(pbi);
 
     if (retcode < 0)
@@ -275,15 +360,11 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     if (pbi->b_multithreaded_lf && pbi->common.filter_level != 0)
         vp8_stop_lfthread(pbi);
 
-    if (cm->refresh_last_frame)
+    if (swap_frame_buffers (cm))
     {
-        vp8_swap_yv12_buffer(&cm->last_frame, &cm->new_frame);
-
-        cm->frame_to_show = &cm->last_frame;
-    }
-    else
-    {
-        cm->frame_to_show = &cm->new_frame;
+        pbi->common.error.error_code = VPX_CODEC_ERROR;
+        pbi->common.error.setjmp = 0;
+        return -1;
     }
 
     if (!pbi->b_multithreaded_lf)
@@ -312,49 +393,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     if (cm->current_video_frame <= 5)
         write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
 #endif
-
-    // If any buffer copy / swaping is signalled it should be done here.
-    if (cm->copy_buffer_to_arf)
-    {
-        if (cm->copy_buffer_to_arf == 1)
-        {
-            if (cm->refresh_last_frame)
-                vp8_yv12_copy_frame_ptr(&cm->new_frame, &cm->alt_ref_frame);
-            else
-                vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->alt_ref_frame);
-        }
-        else if (cm->copy_buffer_to_arf == 2)
-            vp8_yv12_copy_frame_ptr(&cm->golden_frame, &cm->alt_ref_frame);
-    }
-
-    if (cm->copy_buffer_to_gf)
-    {
-        if (cm->copy_buffer_to_gf == 1)
-        {
-            if (cm->refresh_last_frame)
-                vp8_yv12_copy_frame_ptr(&cm->new_frame, &cm->golden_frame);
-            else
-                vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->golden_frame);
-        }
-        else if (cm->copy_buffer_to_gf == 2)
-            vp8_yv12_copy_frame_ptr(&cm->alt_ref_frame, &cm->golden_frame);
-    }
-
-    // Should the golden or alternate reference frame be refreshed?
-    if (cm->refresh_golden_frame || cm->refresh_alt_ref_frame)
-    {
-        if (cm->refresh_golden_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->golden_frame);
-
-        if (cm->refresh_alt_ref_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->alt_ref_frame);
-
-        //vpx_log("Decoder: recovery frame received \n");
-
-        // Update data structures that monitors GF useage
-        vpx_memset(cm->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-        cm->gf_active_count = cm->mb_rows * cm->mb_cols;
-    }
 
     vp8_clear_system_state();
 

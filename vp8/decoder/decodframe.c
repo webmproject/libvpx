@@ -381,8 +381,10 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
     int i;
     int recon_yoffset, recon_uvoffset;
     int mb_col;
-    int recon_y_stride = pc->last_frame.y_stride;
-    int recon_uv_stride = pc->last_frame.uv_stride;
+    int ref_fb_idx = pc->lst_fb_idx;
+    int dst_fb_idx = pc->new_fb_idx;
+    int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
+    int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
 
     vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
     recon_yoffset = mb_row * recon_y_stride * 16;
@@ -419,33 +421,23 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         xd->mb_to_left_edge = -((mb_col * 16) << 3);
         xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
-        xd->dst.y_buffer = pc->new_frame.y_buffer + recon_yoffset;
-        xd->dst.u_buffer = pc->new_frame.u_buffer + recon_uvoffset;
-        xd->dst.v_buffer = pc->new_frame.v_buffer + recon_uvoffset;
+        xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+        xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+        xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
 
         xd->left_available = (mb_col != 0);
 
         // Select the appropriate reference frame for this MB
         if (xd->mbmi.ref_frame == LAST_FRAME)
-        {
-            xd->pre.y_buffer = pc->last_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = pc->last_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = pc->last_frame.v_buffer + recon_uvoffset;
-        }
+            ref_fb_idx = pc->lst_fb_idx;
         else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
-        {
-            // Golden frame reconstruction buffer
-            xd->pre.y_buffer = pc->golden_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = pc->golden_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = pc->golden_frame.v_buffer + recon_uvoffset;
-        }
+            ref_fb_idx = pc->gld_fb_idx;
         else
-        {
-            // Alternate reference frame reconstruction buffer
-            xd->pre.y_buffer = pc->alt_ref_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = pc->alt_ref_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = pc->alt_ref_frame.v_buffer + recon_uvoffset;
-        }
+            ref_fb_idx = pc->alt_fb_idx;
+
+        xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
+        xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
+        xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
         vp8_build_uvmvs(xd, pc->full_pixel);
 
@@ -475,7 +467,7 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
 
     // adjust to the next row of mbs
     vp8_extend_mb_row(
-        &pc->new_frame,
+        &pc->yv12_fb[dst_fb_idx],
         xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8
     );
 
@@ -890,11 +882,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     }
     }
 
-    vpx_memcpy(&xd->pre, &pc->last_frame, sizeof(YV12_BUFFER_CONFIG));
-    vpx_memcpy(&xd->dst, &pc->new_frame, sizeof(YV12_BUFFER_CONFIG));
+    vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
+    vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
     // set up frame new frame for intra coded blocks
-    vp8_setup_intra_recon(&pc->new_frame);
+    vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
 
     vp8_setup_block_dptrs(xd);
 
