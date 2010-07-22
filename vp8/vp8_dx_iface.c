@@ -196,9 +196,6 @@ static void vp8_finalize_mmaps(vpx_codec_alg_priv_t *ctx)
     ctx->pbi->fb_storage_ptr[0] = mmap_lkup(ctx, VP6_SEG_IMG0_STRG);
     ctx->pbi->fb_storage_ptr[1] = mmap_lkup(ctx, VP6_SEG_IMG1_STRG);
     ctx->pbi->fb_storage_ptr[2] = mmap_lkup(ctx, VP6_SEG_IMG2_STRG);
-    #if CONFIG_NEW_TOKENS
-    ctx->pbi->token_graph = mmap_lkup(ctx, VP6_SEG_TOKEN_GRAPH);
-    #endif
     #if CONFIG_POSTPROC
     ctx->pbi->postproc.deblock.fragment_variances = mmap_lkup(ctx, VP6_SEG_DEBLOCKER);
     ctx->pbi->fb_storage_ptr[3] = mmap_lkup(ctx, VP6_SEG_PP_IMG_STRG);

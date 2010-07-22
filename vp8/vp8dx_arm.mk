@@ -32,14 +32,3 @@ VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequantize_v6$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequantdcidct_neon$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequantidct_neon$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequantizeb_neon$(ASM)
-
-
-#for new token test
-ifeq ($(ARCH_ARM),yes)
-VP8_DX_SRCS-$(CONFIG_NEW_TOKENS)  += decoder/arm/detokenize_arm_sjl.c
-VP8_DX_SRCS-$(CONFIG_NEW_TOKENS)  += decoder/arm/detokenize_arm_v6$(ASM)
-VP8_DX_SRCS-$(CONFIG_NEW_TOKENS)  += decoder/onyxd_if_sjl.c
-
-VP8_DX_SRCS_REMOVE-$(CONFIG_NEW_TOKENS)  += decoder/arm/detokenize_arm.c
-VP8_DX_SRCS_REMOVE-$(CONFIG_NEW_TOKENS)  += decoder/onyxd_if.c
-endif
