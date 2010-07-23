@@ -33,6 +33,7 @@ typedef struct
 
     // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
     short(*quant)[4];
+    short(*quant_shift)[4];
     short(*zbin)[4];
     short(*zrun_zbin_boost);
     short(*round)[4];

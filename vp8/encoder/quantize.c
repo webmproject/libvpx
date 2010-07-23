@@ -25,6 +25,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     short *zbin_ptr   = &b->zbin[0][0];
     short *round_ptr  = &b->round[0][0];
     short *quant_ptr  = &b->quant[0][0];
+    short *quant_shift_ptr = &b->quant_shift[0][0];
     short *qcoeff_ptr = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = &d->dequant[0][0];
@@ -45,7 +46,9 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 
         if (x >= zbin)
         {
-            y  = ((x + round_ptr[rc]) * quant_ptr[rc]) >> 16; // quantize (x)
+            x += round_ptr[rc];
+            y  = (((x * quant_ptr[rc]) >> 16) + x)
+                 >> quant_shift_ptr[rc];                // quantize (x)
             x  = (y ^ sz) - sz;                         // get the sign back
             qcoeff_ptr[rc] = x;                          // write to destination
             dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
@@ -69,6 +72,7 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
     short *zbin_ptr   = &b->zbin[0][0];
     short *round_ptr  = &b->round[0][0];
     short *quant_ptr  = &b->quant[0][0];
+    short *quant_shift_ptr = &b->quant_shift[0][0];
     short *qcoeff_ptr = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = &d->dequant[0][0];
@@ -95,7 +99,9 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
 
         if (x >= zbin)
         {
-            y  = ((x + round_ptr[rc]) * quant_ptr[rc]) >> 16; // quantize (x)
+            x += round_ptr[rc];
+            y  = (((x * quant_ptr[rc]) >> 16) + x)
+                 >> quant_shift_ptr[rc];                // quantize (x)
             x  = (y ^ sz) - sz;                         // get the sign back
             qcoeff_ptr[rc]  = x;                         // write to destination
             dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
