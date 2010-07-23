@@ -9,25 +9,42 @@
 ;
 
 
-    EXPORT  |vp8_dequant_idct_neon|
+    EXPORT  |vp8_dequant_dc_idct_add_neon|
     ARM
     REQUIRE8
     PRESERVE8
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
-;void vp8_dequant_idct_c(short *input, short *dq, short *output, int pitch);
+;void vp8_dequant_dc_idct_add_neon(short *input, short *dq, unsigned char *pred,
+;                                  unsigned char *dest, int pitch, int stride,
+;                                  int Dc);
 ; r0    short *input,
 ; r1    short *dq,
-; r2    short *output,
-; r3    int pitch,
-|vp8_dequant_idct_neon| PROC
+; r2    unsigned char *pred
+; r3    unsigned char *dest
+; sp    int pitch
+; sp+4  int stride
+; sp+8  int Dc
+|vp8_dequant_dc_idct_add_neon| PROC
     vld1.16         {q3, q4}, [r0]
     vld1.16         {q5, q6}, [r1]
 
-    ldr             r12, _didct_coeff_
+    ldr             r1, [sp, #8]            ;load Dc from stack
+
+    ldr             r12, _CONSTANTS_
 
     vmul.i16        q1, q3, q5              ;input for short_idct4x4llm_neon
     vmul.i16        q2, q4, q6
+
+    vmov.16         d2[0], r1
+
+    ldr             r1, [sp]                ; pitch
+    vld1.32         {d14[0]}, [r2], r1
+    vld1.32         {d14[1]}, [r2], r1
+    vld1.32         {d15[0]}, [r2], r1
+    vld1.32         {d15[1]}, [r2]
+
+    ldr             r1, [sp, #4]            ; stride
 
 ;|short_idct4x4llm_neon| PROC
     vld1.16         {d0}, [r12]
@@ -42,13 +59,8 @@
     vshr.s16        q3, q3, #1
     vshr.s16        q4, q4, #1
 
-    vqadd.s16       q3, q3, q2              ;modify since sinpi8sqrt2 > 65536/2 (negtive number)
+    vqadd.s16       q3, q3, q2
     vqadd.s16       q4, q4, q2
-
-    ;d6 - c1:temp1
-    ;d7 - d1:temp2
-    ;d8 - d1:temp1
-    ;d9 - c1:temp2
 
     vqsub.s16       d10, d6, d9             ;c1
     vqadd.s16       d11, d7, d8             ;d1
@@ -78,7 +90,7 @@
     vshr.s16        q3, q3, #1
     vshr.s16        q4, q4, #1
 
-    vqadd.s16       q3, q3, q2              ;modify since sinpi8sqrt2 > 65536/2 (negtive number)
+    vqadd.s16       q3, q3, q2
     vqadd.s16       q4, q4, q2
 
     vqsub.s16       d10, d6, d9             ;c1
@@ -96,34 +108,29 @@
     vrshr.s16       d4, d4, #3
     vrshr.s16       d5, d5, #3
 
-    add             r1, r2, r3
-    add             r12, r1, r3
-    add             r0, r12, r3
-
     vtrn.32         d2, d4
     vtrn.32         d3, d5
     vtrn.16         d2, d3
     vtrn.16         d4, d5
 
-    vst1.16         {d2}, [r2]
-    vst1.16         {d3}, [r1]
-    vst1.16         {d4}, [r12]
-    vst1.16         {d5}, [r0]
+    vaddw.u8        q1, q1, d14
+    vaddw.u8        q2, q2, d15
+
+    vqmovun.s16     d0, q1
+    vqmovun.s16     d1, q2
+
+    vst1.32         {d0[0]}, [r3], r1
+    vst1.32         {d0[1]}, [r3], r1
+    vst1.32         {d1[0]}, [r3], r1
+    vst1.32         {d1[1]}, [r3]
 
     bx             lr
 
-    ENDP
+    ENDP           ; |vp8_dequant_dc_idct_add_neon|
 
-;-----------------
-    AREA    didct4x4_dat, DATA, READWRITE           ;read/write by default
-;Data section with name data_area is specified. DCD reserves space in memory for 48 data.
-;One word each is reserved. Label filter_coeff can be used to access the data.
-;Data address: filter_coeff, filter_coeff+4, filter_coeff+8 ...
-_didct_coeff_
-    DCD     didct_coeff
-didct_coeff
-    DCD     0x4e7b4e7b, 0x8a8c8a8c
-
-;20091, 20091, 35468, 35468
+; Constant Pool
+_CONSTANTS_       DCD cospi8sqrt2minus1
+cospi8sqrt2minus1 DCD 0x4e7b4e7b
+sinpi8sqrt2       DCD 0x8a8c8a8c
 
     END

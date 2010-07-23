@@ -8,8 +8,8 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT |vp8_short_inv_walsh4x4_armv6|
-    EXPORT |vp8_short_inv_walsh4x4_1_armv6|
+    EXPORT |vp8_short_inv_walsh4x4_v6|
+    EXPORT |vp8_short_inv_walsh4x4_1_v6|
 
     ARM
     REQUIRE8
@@ -17,8 +17,8 @@
 
     AREA    |.text|, CODE, READONLY  ; name this block of code
 
-;short vp8_short_inv_walsh4x4_armv6(short *input, short *output)
-|vp8_short_inv_walsh4x4_armv6| PROC
+;short vp8_short_inv_walsh4x4_v6(short *input, short *output)
+|vp8_short_inv_walsh4x4_v6| PROC
 
     stmdb       sp!, {r4 - r11, lr}
 
@@ -123,11 +123,11 @@
     str         r5, [r1]
 
     ldmia       sp!, {r4 - r11, pc}
-    ENDP        ; |vp8_short_inv_walsh4x4_armv6|
+    ENDP        ; |vp8_short_inv_walsh4x4_v6|
 
 
-;short vp8_short_inv_walsh4x4_1_armv6(short *input, short *output)
-|vp8_short_inv_walsh4x4_1_armv6| PROC
+;short vp8_short_inv_walsh4x4_1_v6(short *input, short *output)
+|vp8_short_inv_walsh4x4_1_v6| PROC
 
     ldrsh       r2, [r0]             ; [0]
     add         r2, r2, #3           ; [0] + 3
@@ -145,7 +145,7 @@
     str         r2, [r1]
 
     bx          lr
-    ENDP        ; |vp8_short_inv_walsh4x4_1_armv6|
+    ENDP        ; |vp8_short_inv_walsh4x4_1_v6|
 
 ; Constant Pool
 c0x00030003 DCD 0x00030003

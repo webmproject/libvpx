@@ -23,12 +23,12 @@ VP8_DX_SRCS_REMOVE-$(HAVE_ARMV6)  += decoder/generic/dsystemdependent.c
 
 #File list for armv6
 # decoder
-VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequantdcidct_v6$(ASM)
-VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequantidct_v6$(ASM)
+VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequant_dc_idct_v6$(ASM)
+VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequant_idct_v6$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequantize_v6$(ASM)
 
 #File list for neon
 # decoder
-VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequantdcidct_neon$(ASM)
-VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequantidct_neon$(ASM)
+VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequant_dc_idct_neon$(ASM)
+VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequant_idct_neon$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequantizeb_neon$(ASM)
