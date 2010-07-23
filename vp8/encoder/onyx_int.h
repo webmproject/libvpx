@@ -356,9 +356,14 @@ typedef struct
     int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
     int mid_gf_extra_bits;             // A few extra bits for the frame half way between two gfs.
 
-    int kf_group_bits;                // Projected total bits available for a key frame group of frames
-    int kf_group_error_left;           // Error score of frames still to be coded in kf group
-    int kf_bits;                     // Bits for the key frame in a key frame group - 2 pass only
+    // Projected total bits available for a key frame group of frames
+    long long kf_group_bits;
+
+    // Error score of frames still to be coded in kf group
+    long long kf_group_error_left;
+
+    // Bits for the key frame in a key frame group - 2 pass only
+    int kf_bits;
 
     int non_gf_bitrate_adjustment;     // Used in the few frames following a GF to recover the extra bits spent in that GF
     int initial_gf_use;               // percentage use of gf 2 frames after gf
