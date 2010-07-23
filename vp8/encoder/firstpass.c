@@ -1572,26 +1572,36 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // Calculate the number of bits to be spent on the gf or arf based on the boost number
         cpi->gf_bits = (int)((double)Boost * (cpi->gf_group_bits / (double)allocation_chunks));
 
-        // If the frame that is to be boosted is simpler than the average for the gf/arf group then use an alternative calculation
+        // If the frame that is to be boosted is simpler than the average for
+        // the gf/arf group then use an alternative calculation
         // based on the error score of the frame itself
         if (mod_frame_err < gf_group_err / (double)cpi->baseline_gf_interval)
         {
             double  alt_gf_grp_bits;
             int     alt_gf_bits;
 
-            alt_gf_grp_bits = ((double)cpi->kf_group_bits  * (mod_frame_err * (double)cpi->baseline_gf_interval) / (double)cpi->kf_group_error_left) ;
-            alt_gf_bits = (int)((double)Boost * (alt_gf_grp_bits / (double)allocation_chunks));
+            alt_gf_grp_bits =
+                (double)cpi->kf_group_bits  *
+                (mod_frame_err * (double)cpi->baseline_gf_interval) /
+                DOUBLE_DIVIDE_CHECK((double)cpi->kf_group_error_left);
+
+            alt_gf_bits = (int)((double)Boost * (alt_gf_grp_bits /
+                                                 (double)allocation_chunks));
 
             if (cpi->gf_bits > alt_gf_bits)
             {
                 cpi->gf_bits = alt_gf_bits;
             }
         }
-        // Else if it is harder than other frames in the group make sure it at least receives an allocation in keeping with
-        // its relative error score, otherwise it may be worse off than an "un-boosted" frame
+        // Else if it is harder than other frames in the group make sure it at
+        // least receives an allocation in keeping with its relative error
+        // score, otherwise it may be worse off than an "un-boosted" frame
         else
         {
-            int alt_gf_bits = (int)((double)cpi->kf_group_bits * (mod_frame_err / (double)cpi->kf_group_error_left));
+            int alt_gf_bits =
+                (int)((double)cpi->kf_group_bits *
+                      mod_frame_err /
+                      DOUBLE_DIVIDE_CHECK((double)cpi->kf_group_error_left));
 
             if (alt_gf_bits > cpi->gf_bits)
             {
@@ -2062,7 +2072,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     // Take a copy of the initial frame details
     vpx_memcpy(&first_frame, this_frame, sizeof(*this_frame));
 
-    cpi->kf_group_bits = 0;       // Estimate of total bits avaialable to kf group
+    cpi->kf_group_bits = 0;        // Total bits avaialable to kf group
     cpi->kf_group_error_left = 0;  // Group modified error score.
 
     kf_mod_err = calculate_modified_err(cpi, this_frame);
@@ -2129,39 +2139,64 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     // Calculate the number of bits that should be assigned to the kf group.
     if ((cpi->bits_left > 0) && ((int)cpi->modified_total_error_left > 0))
     {
-        int max_bits = frame_max_bits(cpi);    // Max for a single normal frame (not key frame)
+        // Max for a single normal frame (not key frame)
+        int max_bits = frame_max_bits(cpi);
 
-        // Default allocation based on bits left and relative complexity of the section
-        cpi->kf_group_bits = (int)(cpi->bits_left * (kf_group_err / cpi->modified_total_error_left));
+        // Maximum bits for the kf group
+        long long max_grp_bits;
+
+        // Default allocation based on bits left and relative
+        // complexity of the section
+        cpi->kf_group_bits = (long long)( cpi->bits_left *
+                                          ( kf_group_err /
+                                            cpi->modified_total_error_left ));
 
         // Clip based on maximum per frame rate defined by the user.
-        if (cpi->kf_group_bits > max_bits * cpi->frames_to_key)
-            cpi->kf_group_bits = max_bits * cpi->frames_to_key;
+        max_grp_bits = (long long)max_bits * (long long)cpi->frames_to_key;
+        if (cpi->kf_group_bits > max_grp_bits)
+            cpi->kf_group_bits = max_grp_bits;
 
         // Additional special case for CBR if buffer is getting full.
         if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
         {
-            // If the buffer is near or above the optimal and this kf group is not being allocated much
-            // then increase the allocation a bit.
-            if (cpi->buffer_level >= cpi->oxcf.optimal_buffer_level)
+            int opt_buffer_lvl = cpi->oxcf.optimal_buffer_level;
+            int buffer_lvl = cpi->buffer_level;
+
+            // If the buffer is near or above the optimal and this kf group is
+            // not being allocated much then increase the allocation a bit.
+            if (buffer_lvl >= opt_buffer_lvl)
             {
-                int high_water_mark = (cpi->oxcf.optimal_buffer_level + cpi->oxcf.maximum_buffer_size) >> 1;
-                int min_group_bits;
+                int high_water_mark = (opt_buffer_lvl +
+                                       cpi->oxcf.maximum_buffer_size) >> 1;
+
+                long long av_group_bits;
+
+                // Av bits per frame * number of frames
+                av_group_bits = (long long)cpi->av_per_frame_bandwidth *
+                                (long long)cpi->frames_to_key;
 
                 // We are at or above the maximum.
                 if (cpi->buffer_level >= high_water_mark)
                 {
-                    min_group_bits = (cpi->av_per_frame_bandwidth * cpi->frames_to_key) + (cpi->buffer_level - high_water_mark);
+                    long long min_group_bits;
+
+                    min_group_bits = av_group_bits +
+                                     (long long)(buffer_lvl -
+                                                 high_water_mark);
 
                     if (cpi->kf_group_bits < min_group_bits)
                         cpi->kf_group_bits = min_group_bits;
                 }
                 // We are above optimal but below the maximum
-                else if (cpi->kf_group_bits < (cpi->av_per_frame_bandwidth * cpi->frames_to_key))
+                else if (cpi->kf_group_bits < av_group_bits)
                 {
-                    int bits_below_av = (cpi->av_per_frame_bandwidth * cpi->frames_to_key) - cpi->kf_group_bits;
-                    cpi->kf_group_bits += (int)((double)bits_below_av * (double)(cpi->buffer_level - cpi->oxcf.optimal_buffer_level) /
-                                                (double)(high_water_mark - cpi->oxcf.optimal_buffer_level));
+                    long long bits_below_av = av_group_bits -
+                                              cpi->kf_group_bits;
+
+                    cpi->kf_group_bits +=
+                       (long long)((double)bits_below_av *
+                                   (double)(buffer_lvl - opt_buffer_lvl) /
+                                   (double)(high_water_mark - opt_buffer_lvl));
                 }
             }
         }
