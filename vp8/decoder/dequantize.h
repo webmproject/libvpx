@@ -16,11 +16,16 @@
 #define prototype_dequant_block(sym) \
     void sym(BLOCKD *x)
 
-#define prototype_dequant_idct(sym) \
-    void sym(short *input, short *dq, short *output, int pitch)
+#define prototype_dequant_idct_add(sym) \
+    void sym(short *input, short *dq, \
+             unsigned char *pred, unsigned char *output, \
+             int pitch, int stride)
 
-#define prototype_dequant_idct_dc(sym) \
-    void sym(short *input, short *dq, short *output, int pitch, int dc)
+#define prototype_dequant_idct_dc_add(sym) \
+    void sym(short *input, short *dq, \
+             unsigned char *pred, unsigned char *output, \
+             int pitch, int stride, \
+             int dc)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/dequantize_x86.h"
@@ -35,25 +40,26 @@
 #endif
 extern prototype_dequant_block(vp8_dequant_block);
 
-#ifndef vp8_dequant_idct
-#define vp8_dequant_idct vp8_dequant_idct_c
+#ifndef vp8_dequant_idct_add
+#define vp8_dequant_idct_add vp8_dequant_idct_add_c
 #endif
-extern prototype_dequant_idct(vp8_dequant_idct);
+extern prototype_dequant_idct_add(vp8_dequant_idct_add);
 
-#ifndef vp8_dequant_idct_dc
-#define vp8_dequant_idct_dc vp8_dequant_dc_idct_c
+#ifndef vp8_dequant_idct_dc_add
+#define vp8_dequant_idct_dc_add vp8_dequant_dc_idct_add_c
 #endif
-extern prototype_dequant_idct_dc(vp8_dequant_idct_dc);
-
+extern prototype_dequant_idct_dc_add(vp8_dequant_idct_dc_add);
 
 typedef prototype_dequant_block((*vp8_dequant_block_fn_t));
-typedef prototype_dequant_idct((*vp8_dequant_idct_fn_t));
-typedef prototype_dequant_idct_dc((*vp8_dequant_idct_dc_fn_t));
+
+typedef prototype_dequant_idct_add((*vp8_dequant_idct_add_fn_t));
+typedef prototype_dequant_idct_dc_add((*vp8_dequant_idct_dc_add_fn_t));
+
 typedef struct
 {
-    vp8_dequant_block_fn_t    block;
-    vp8_dequant_idct_fn_t     idct;
-    vp8_dequant_idct_dc_fn_t  idct_dc;
+    vp8_dequant_block_fn_t        block;
+    vp8_dequant_idct_add_fn_t     idct_add;
+    vp8_dequant_idct_dc_add_fn_t  idct_dc_add;
 } vp8_dequant_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

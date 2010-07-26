@@ -32,7 +32,7 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 
     rtcd->idct.idct1        = vp8_short_idct4x4llm_1_c;
     rtcd->idct.idct16       = vp8_short_idct4x4llm_c;
-    rtcd->idct.idct1_scalar = vp8_dc_only_idct_c;
+    rtcd->idct.idct1_scalar_add = vp8_dc_only_idct_add_c;
     rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_c;
     rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_c;
 
