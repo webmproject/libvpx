@@ -22,7 +22,7 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     pbi->mb.rtcd         = &pbi->common.rtcd;
     pbi->dequant.block   = vp8_dequantize_b_c;
     pbi->dequant.idct_add    = vp8_dequant_idct_add_c;
-    pbi->dequant.idct_dc_add    = vp8_dequant_dc_idct_add_c;
+    pbi->dequant.dc_idct_add    = vp8_dequant_dc_idct_add_c;
     pbi->dboolhuff.start = vp8dx_start_decode_c;
     pbi->dboolhuff.fill  = vp8dx_bool_decoder_fill_c;
 #if 0 //For use with RTCD, when implemented

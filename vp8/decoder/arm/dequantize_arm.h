@@ -14,14 +14,32 @@
 
 #if HAVE_ARMV6
 extern prototype_dequant_block(vp8_dequantize_b_v6);
+extern prototype_dequant_idct_add(vp8_dequant_idct_add_v6);
+extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_v6);
 
 #undef  vp8_dequant_block
 #define vp8_dequant_block vp8_dequantize_b_v6
 
+#undef vp8_dequant_idct_add
+#define vp8_dequant_idct_add vp8_dequant_idct_add_v6
+
+#undef vp8_dequant_dc_idct_add
+#define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_v6
+#endif
+
 #if HAVE_ARMV7
 extern prototype_dequant_block(vp8_dequantize_b_neon);
+extern prototype_dequant_idct_add(vp8_dequant_idct_add_neon);
+extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_neon);
 
 #undef  vp8_dequant_block
 #define vp8_dequant_block vp8_dequantize_b_neon
+
+#undef vp8_dequant_idct_add
+#define vp8_dequant_idct_add vp8_dequant_idct_add_neon
+
+#undef vp8_dequant_dc_idct_add
+#define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_neon
+#endif
 
 #endif

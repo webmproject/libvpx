@@ -15,8 +15,6 @@
     EXPORT  |vp8_short_idct4x4llm_v6_scott|
     EXPORT  |vp8_short_idct4x4llm_v6_dual|
 
-    EXPORT  |vp8_dc_only_idct_armv6|
-
     AREA    |.text|, CODE, READONLY
 
 ;********************************************************************************
@@ -343,35 +341,5 @@ loop2_dual
             ;
     ldmia   sp!, {r4 - r11, pc} ; replace vars, return                      restore
     ENDP
-
-
-; sjl added 10/17/08
-;void dc_only_idct_armv6(short input_dc, short *output, int pitch)
-|vp8_dc_only_idct_armv6| PROC
-    stmdb       sp!, {r4 - r6, lr}
-
-    add         r0, r0, #0x4
-    add         r4, r1, r2                      ; output + shortpitch
-    mov         r0, r0, ASR #0x3    ;aka a1
-    add         r5, r1, r2, LSL #1              ; output + shortpitch * 2
-    pkhbt       r0, r0, r0, lsl #16             ; a1 | a1
-    add         r6, r5, r2                      ; output + shortpitch * 3
-
-    str         r0, [r1, #0]
-    str         r0, [r1, #4]
-
-    str         r0, [r4, #0]
-    str         r0, [r4, #4]
-
-    str         r0, [r5, #0]
-    str         r0, [r5, #4]
-
-    str         r0, [r6, #0]
-    str         r0, [r6, #4]
-
-
-    ldmia       sp!, {r4 - r6, pc}
-
-    ENDP  ; |vp8_dc_only_idct_armv6|
 
     END

@@ -21,7 +21,7 @@
              unsigned char *pred, unsigned char *output, \
              int pitch, int stride)
 
-#define prototype_dequant_idct_dc_add(sym) \
+#define prototype_dequant_dc_idct_add(sym) \
     void sym(short *input, short *dq, \
              unsigned char *pred, unsigned char *output, \
              int pitch, int stride, \
@@ -45,21 +45,21 @@ extern prototype_dequant_block(vp8_dequant_block);
 #endif
 extern prototype_dequant_idct_add(vp8_dequant_idct_add);
 
-#ifndef vp8_dequant_idct_dc_add
-#define vp8_dequant_idct_dc_add vp8_dequant_dc_idct_add_c
+#ifndef vp8_dequant_dc_idct_add
+#define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_c
 #endif
-extern prototype_dequant_idct_dc_add(vp8_dequant_idct_dc_add);
+extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add);
 
 typedef prototype_dequant_block((*vp8_dequant_block_fn_t));
 
 typedef prototype_dequant_idct_add((*vp8_dequant_idct_add_fn_t));
-typedef prototype_dequant_idct_dc_add((*vp8_dequant_idct_dc_add_fn_t));
+typedef prototype_dequant_dc_idct_add((*vp8_dequant_dc_idct_add_fn_t));
 
 typedef struct
 {
     vp8_dequant_block_fn_t        block;
     vp8_dequant_idct_add_fn_t     idct_add;
-    vp8_dequant_idct_dc_add_fn_t  idct_dc_add;
+    vp8_dequant_dc_idct_add_fn_t  dc_idct_add;
 } vp8_dequant_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

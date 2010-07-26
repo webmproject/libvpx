@@ -272,8 +272,10 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
 
             if (b->eob > 1)
             {
-                DEQUANT_INVOKE(&pbi->dequant, idct_dc_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride,
-                        xd->block[24].diff[i]);
+                DEQUANT_INVOKE(&pbi->dequant, dc_idct_add)
+                    (b->qcoeff, &b->dequant[0][0], b->predictor,
+                     *(b->base_dst) + b->dst, 16, b->dst_stride,
+                     xd->block[24].diff[i]);
             }
             else
             {

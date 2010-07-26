@@ -22,7 +22,7 @@
 #if HAVE_MMX
 extern prototype_dequant_block(vp8_dequantize_b_mmx);
 extern prototype_dequant_idct_add(vp8_dequant_idct_add_mmx);
-extern prototype_dequant_idct_dc_add(vp8_dequant_dc_idct_add_mmx);
+extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_mmx);
 
 
 #if !CONFIG_RUNTIME_CPU_DETECT
@@ -30,10 +30,10 @@ extern prototype_dequant_idct_dc_add(vp8_dequant_dc_idct_add_mmx);
 #define vp8_dequant_block vp8_dequantize_b_mmx
 
 #undef  vp8_dequant_idct_add
-#define vp8_dequant_idct_add vp8_dequant_idct_add_mmx
+#define vp8_dequant_idct_add vp8_dequant_idct_mmx
 
-#undef  vp8_dequant_idct_dc
-#define vp8_dequant_idct_add_dc vp8_dequant_dc_idct_add_mmx
+#undef  vp8_dequant_dc_idct_add
+#define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_mmx
 
 #endif
 #endif

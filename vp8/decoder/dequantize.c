@@ -32,10 +32,10 @@ void vp8_dequantize_b_c(BLOCKD *d)
     }
 }
 
-void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride)
+void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
+                            unsigned char *dest, int pitch, int stride)
 {
-    // output needs to be at least pitch * 4 for vp8_short_idct4x4llm_c to work properly
-    short output[16*4];
+    short output[16];
     short *diff_ptr = output;
     int r, c;
     int i;
@@ -45,7 +45,8 @@ void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred, unsign
         input[i] = dq[i] * input[i];
     }
 
-    vp8_short_idct4x4llm_c(input, output, pitch*2);
+    // the idct halves ( >> 1) the pitch
+    vp8_short_idct4x4llm_c(input, output, 4 << 1);
 
     vpx_memset(input, 0, 32);
 
@@ -65,16 +66,17 @@ void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred, unsign
         }
 
         dest += stride;
-        diff_ptr += pitch;
+        diff_ptr += 4;
         pred += pitch;
     }
 }
 
-void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc)
+void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
+                               unsigned char *dest, int pitch, int stride,
+                               int Dc)
 {
     int i;
-    // output needs to be at least pitch * 4 for vp8_short_idct4x4llm_c to work properly
-    short output[16*4];
+    short output[16];
     short *diff_ptr = output;
     int r, c;
 
@@ -85,7 +87,8 @@ void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred, uns
         input[i] = dq[i] * input[i];
     }
 
-    vp8_short_idct4x4llm_c(input, output, pitch*2);
+    // the idct halves ( >> 1) the pitch
+    vp8_short_idct4x4llm_c(input, output, 4 << 1);
 
     vpx_memset(input, 0, 32);
 
@@ -105,7 +108,7 @@ void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred, uns
         }
 
         dest += stride;
-        diff_ptr += pitch;
+        diff_ptr += 4;
         pred += pitch;
     }
 }
