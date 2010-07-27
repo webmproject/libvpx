@@ -23,6 +23,15 @@ vp8_dixie_idct_add(unsigned char        *predict,
 
 
 void
+vp8_dixie_idct_add_inter(unsigned char        *recon,
+                         const unsigned char  *predict,
+                         int                   stride,
+                         const short          *coeffs,
+                         struct mb_info       *mbi,
+                         int                   block);
+
+
+void
 vp8_dixie_walsh(const short *in, short *out);
 
 

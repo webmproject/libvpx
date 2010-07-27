@@ -20,4 +20,13 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
                               unsigned int            start_col,
                               unsigned int            num_cols);
 
+void
+vp8_dixie_release_ref_frame(struct ref_cnt_img *rcimg);
+
+struct ref_cnt_img *
+vp8_dixie_ref_frame(struct ref_cnt_img *rcimg);
+
+struct ref_cnt_img *
+vp8_dixie_find_free_ref_frame(struct ref_cnt_img *frames);
+
 #endif

@@ -19,6 +19,20 @@ enum
 };
 
 
+static const short sixtap_filters[8][6] =
+{
+
+    { 0,  0,  128,    0,   0,  0 },         // note that 1/8 pel positions are just as per alpha -0.5 bicubic
+    { 0, -6,  123,   12,  -1,  0 },
+    { 2, -11, 108,   36,  -8,  1 },         // New 1/4 pel 6 tap filter
+    { 0, -9,   93,   50,  -6,  0 },
+    { 3, -16,  77,   77, -16,  3 },         // New 1/2 pel 6 tap filter
+    { 0, -6,   50,   93,  -9,  0 },
+    { 1, -8,   36,  108, -11,  2 },         // New 1/4 pel 6 tap filter
+    { 0, -1,   12,  123,  -6,  0 },
+};
+
+
 static void
 predict_h_nxn(unsigned char *predict,
               int            stride,
@@ -506,18 +520,41 @@ b_pred(unsigned char  *predict,
     }
 }
 
+
+static void
+fixup_dc_coeffs(struct mb_info *mbi,
+                short          *coeffs)
+{
+    short y2[16];
+    int   i;
+
+    if (mbi->base.eob_mask & (1 << 24))
+    {
+        vp8_dixie_walsh(coeffs + 24 * 16, y2);
+
+        for (i = 0; i < 16; i++)
+            coeffs[i*16] = y2[i];
+    }
+    else
+    {
+        int dc = ((coeffs[24*16] + 3) >> 3);
+
+        for (i = 0; i < 16; i++)
+            coeffs[i*16] = dc;
+    }
+}
+
+
 static void
 predict_intra_luma(unsigned char   *predict,
                    int              stride,
                    struct mb_info  *mbi,
-                   const ptrdiff_t  reference_offsets[4],
                    short           *coeffs)
 {
     if (mbi->base.y_mode == B_PRED)
         b_pred(predict, stride, mbi, coeffs);
     else
     {
-        short y2[16];
         int i;
 
         switch (mbi->base.y_mode)
@@ -538,21 +575,7 @@ predict_intra_luma(unsigned char   *predict,
             assert(0);
         }
 
-        /* TODO: clean up, this will be dup'd for inter */
-        if (mbi->base.eob_mask & (1 << 24))
-        {
-            vp8_dixie_walsh(coeffs + 24 * 16, y2);
-
-            for (i = 0; i < 16; i++)
-                coeffs[i*16] = y2[i];
-        }
-        else
-        {
-            int dc = ((coeffs[24*16] + 3) >> 3);
-
-            for (i = 0; i < 16; i++)
-                coeffs[i*16] = dc;
-        }
+        fixup_dc_coeffs(mbi, coeffs);
 
         for (i = 0; i < 16; i++)
         {
@@ -573,7 +596,6 @@ predict_intra_chroma(unsigned char   *predict_u,
                      unsigned char   *predict_v,
                      int              stride,
                      struct mb_info  *mbi,
-                     const ptrdiff_t  reference_offsets[4],
                      short           *coeffs)
 {
     int i;
@@ -624,8 +646,548 @@ predict_intra_chroma(unsigned char   *predict_u,
 
 }
 
+
 static void
-release_ref_frame(struct ref_cnt_img *rcimg)
+sixtap_horiz(unsigned char       *output,
+             int                  output_stride,
+             const unsigned char *reference,
+             int                  reference_stride,
+             int                  cols,
+             int                  rows,
+             int                  mx,
+             int                  my
+            )
+{
+    const short *filter_x = sixtap_filters[mx];
+    const short *filter_y = sixtap_filters[my];
+    int r, c, temp;
+
+    for (r = 0; r < rows; r++)
+    {
+        for (c = 0; c < cols; c++)
+        {
+            temp = (reference[-2] * filter_x[0]) +
+                   (reference[-1] * filter_x[1]) +
+                   (reference[ 0] * filter_x[2]) +
+                   (reference[ 1] * filter_x[3]) +
+                   (reference[ 2] * filter_x[4]) +
+                   (reference[ 3] * filter_x[5]) +
+                   64;
+            temp >>= 7;
+            output[c] = CLAMP_255(temp);
+            reference++;
+        }
+
+        reference += reference_stride - cols;
+        output += output_stride;
+    }
+}
+
+
+static void
+sixtap_vert(unsigned char       *output,
+            int                  output_stride,
+            const unsigned char *reference,
+            int                  reference_stride,
+            int                  cols,
+            int                  rows,
+            int                  mx,
+            int                  my
+           )
+{
+    const short *filter_x = sixtap_filters[mx];
+    const short *filter_y = sixtap_filters[my];
+    int r, c, temp;
+
+    for (r = 0; r < rows; r++)
+    {
+        for (c = 0; c < cols; c++)
+        {
+            temp = (reference[-2*reference_stride] * filter_y[0]) +
+                   (reference[-1*reference_stride] * filter_y[1]) +
+                   (reference[ 0*reference_stride] * filter_y[2]) +
+                   (reference[ 1*reference_stride] * filter_y[3]) +
+                   (reference[ 2*reference_stride] * filter_y[4]) +
+                   (reference[ 3*reference_stride] * filter_y[5]) +
+                   64;
+            temp >>= 7;
+            output[c] = CLAMP_255(temp);
+            reference++;
+        }
+
+        reference += reference_stride - cols;
+        output += output_stride;
+    }
+}
+
+static void
+fourtap_horiz(unsigned char       *output,
+              int                  output_stride,
+              const unsigned char *reference,
+              int                  reference_stride,
+              int                  cols,
+              int                  rows,
+              int                  mx,
+              int                  my
+             )
+{
+    const short *filter_x = &sixtap_filters[mx][1];
+    const short *filter_y = &sixtap_filters[my][1];
+    int r, c, temp;
+
+    for (r = 0; r < rows; r++)
+    {
+        for (c = 0; c < cols; c++)
+        {
+            temp = (reference[-1] * filter_x[0]) +
+                   (reference[ 0] * filter_x[1]) +
+                   (reference[ 1] * filter_x[2]) +
+                   (reference[ 2] * filter_x[3]) +
+                   64;
+            temp >>= 7;
+            output[c] = CLAMP_255(temp);
+            reference++;
+        }
+
+        reference += reference_stride - cols;
+        output += output_stride;
+    }
+}
+
+
+static void
+fourtap_vert(unsigned char       *output,
+             int                  output_stride,
+             const unsigned char *reference,
+             int                  reference_stride,
+             int                  cols,
+             int                  rows,
+             int                  mx,
+             int                  my
+            )
+{
+    const short *filter_x = &sixtap_filters[mx][1];
+    const short *filter_y = &sixtap_filters[my][1];
+    int r, c, temp;
+
+    for (r = 0; r < rows; r++)
+    {
+        for (c = 0; c < cols; c++)
+        {
+            temp = (reference[-1*reference_stride] * filter_y[0]) +
+                   (reference[ 0*reference_stride] * filter_y[1]) +
+                   (reference[ 1*reference_stride] * filter_y[2]) +
+                   (reference[ 2*reference_stride] * filter_y[3]) +
+                   64;
+            temp >>= 7;
+            output[c] = CLAMP_255(temp);
+            reference++;
+        }
+
+        reference += reference_stride - cols;
+        output += output_stride;
+    }
+}
+
+
+#if 1
+#define DEFINE_FILTER(kind, w, h)\
+    static void kind##_h_##w##x##h##_c(const unsigned char *reference,\
+                                       int                  reference_stride,\
+                                       int                  mx,\
+                                       int                  my,\
+                                       unsigned char       *output,\
+                                       int                  output_stride)\
+    {\
+        kind##_horiz(output, output_stride,\
+                     reference, reference_stride,\
+                     w, h, mx, my);\
+    }\
+    static void kind##_v_##w##x##h##_c(const unsigned char *reference,\
+                                       int                  reference_stride,\
+                                       int                  mx,\
+                                       int                  my,\
+                                       unsigned char       *output,\
+                                       int                  output_stride)\
+    {\
+        kind##_vert(output, output_stride,\
+                    reference, reference_stride,\
+                    w, h, mx, my);\
+    }\
+    static void kind##_hv_##w##x##h##_c(const unsigned char *reference,\
+                                        int                  reference_stride,\
+                                        int                  mx,\
+                                        int                  my,\
+                                        unsigned char       *output,\
+                                        int                  output_stride)\
+    {\
+        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
+        \
+        kind##_horiz(temp, 16,\
+                     reference - 2 * reference_stride, reference_stride,\
+                     w, h + 5, mx, my);\
+        kind##_vert(output, output_stride,\
+                    temp + 2 * 16, 16,\
+                    w, h, mx, my);\
+    }
+#else
+/* DEBUG -- always do 2d filter */
+#define DEFINE_FILTER(kind, w, h)\
+    static void kind##_h_##w##x##h##_c(const unsigned char *reference,\
+                                       int                  reference_stride,\
+                                       int                  mx,\
+                                       int                  my,\
+                                       unsigned char       *output,\
+                                       int                  output_stride)\
+    {\
+        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
+        \
+        kind##_horiz(temp, 16,\
+                     reference - 2 * reference_stride, reference_stride,\
+                     w, h + 5, mx, my);\
+        kind##_vert(output, output_stride,\
+                    temp + 2 * 16, 16,\
+                    w, h, mx, my);\
+    }\
+    static void kind##_v_##w##x##h##_c(const unsigned char *reference,\
+                                       int                  reference_stride,\
+                                       int                  mx,\
+                                       int                  my,\
+                                       unsigned char       *output,\
+                                       int                  output_stride)\
+    {\
+        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
+        \
+        kind##_horiz(temp, 16,\
+                     reference - 2 * reference_stride, reference_stride,\
+                     w, h + 5, mx, my);\
+        kind##_vert(output, output_stride,\
+                    temp + 2 * 16, 16,\
+                    w, h, mx, my);\
+    }\
+    static void kind##_hv_##w##x##h##_c(const unsigned char *reference,\
+                                        int                  reference_stride,\
+                                        int                  mx,\
+                                        int                  my,\
+                                        unsigned char       *output,\
+                                        int                  output_stride)\
+    {\
+        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
+        \
+        kind##_horiz(temp, 16,\
+                     reference - 2 * reference_stride, reference_stride,\
+                     w, h + 5, mx, my);\
+        kind##_vert(output, output_stride,\
+                    temp + 2 * 16, 16,\
+                    w, h, mx, my);\
+    }
+#endif
+
+DEFINE_FILTER(sixtap, 16, 16)
+DEFINE_FILTER(fourtap, 16, 16)
+DEFINE_FILTER(sixtap, 8, 8)
+DEFINE_FILTER(fourtap, 8, 8)
+DEFINE_FILTER(sixtap, 8, 4)
+DEFINE_FILTER(fourtap, 8, 4)
+DEFINE_FILTER(sixtap, 4, 4)
+DEFINE_FILTER(fourtap, 4, 4)
+
+
+struct img_index
+{
+    unsigned char *y, *u, *v;
+    int            stride, uv_stride;
+};
+
+
+static const unsigned char *
+filter_block(unsigned char        *output,
+             const unsigned char  *reference,
+             int                   stride,
+             const union mv       *mv,
+             mc_fn_t              *mc)
+{
+    int mx, my;
+
+    /* Handle 0,0 as a special case. TODO: does this make it any faster? */
+    if (!mv->raw)
+        return reference;
+
+    mx = mv->d.x & 7;
+    my = mv->d.y & 7;
+    reference += ((mv->d.y >> 3) * stride) + (mv->d.x >> 3);
+
+    if (mx | my)
+    {
+        /* Index is composed of whether to use 4-tap and whether the component
+         * is non-zero. 0/4-tap/6-tap
+         */
+        int idx_x = !!mx + (mx & 1);
+        int idx_y = !!my + (my & 1);
+        mc[idx_y * 4 + idx_x](reference, stride, mx, my, output, stride);
+        reference = output;
+    }
+
+    return reference;
+}
+
+
+static void
+recon_16_blocks(unsigned char        *output,
+                const unsigned char  *reference,
+                int                   stride,
+                const union mv       *mv,
+                mc_fn_t              *mc,
+                short                *coeffs,
+                struct mb_info       *mbi
+               )
+{
+    const unsigned char *predict;
+    int b;
+
+    predict = filter_block(output, reference, stride, mv, mc);
+
+    for (b = 0; b < 16; b++)
+    {
+        vp8_dixie_idct_add_inter(output, predict, stride,
+                                 coeffs, mbi, b);
+        output += 4;
+        predict += 4;
+
+        if ((b & 3) == 3)
+        {
+            output += 4 * stride - 16;
+            predict += 4 * stride - 16;
+        }
+    }
+}
+
+
+static void
+recon_4_blocks(unsigned char        *output,
+               const unsigned char  *reference,
+               int                   stride,
+               const union mv       *mv,
+               mc_fn_t              *mc,
+               short                *coeffs,
+               struct mb_info       *mbi,
+               int                   start_b
+              )
+{
+    const unsigned char *predict;
+    int                  b = start_b;
+
+    predict = filter_block(output, reference, stride, mv, mc);
+    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+
+    output += stride * 4;
+    predict += stride * 4;
+    b += (start_b < 16) ? 4 : 2;
+
+    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+}
+
+
+static void
+recon_2_blocks(unsigned char        *output,
+               const unsigned char  *reference,
+               int                   stride,
+               const union mv       *mv,
+               mc_fn_t              *mc,
+               short                *coeffs,
+               struct mb_info       *mbi,
+               int                   start_b
+              )
+{
+    const unsigned char *predict;
+    int                  b = start_b;
+
+    predict = filter_block(output, reference, stride, mv, mc);
+    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+}
+
+
+static void
+recon_1_block(unsigned char        *output,
+              const unsigned char  *reference,
+              int                   stride,
+              const union mv       *mv,
+              mc_fn_t              *mc,
+              short                *coeffs,
+              struct mb_info       *mbi,
+              int                   b
+             )
+{
+    const unsigned char *predict;
+
+    predict = filter_block(output, reference, stride, mv, mc);
+    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+}
+
+
+static mv_t
+calculate_chroma_splitmv(struct mb_info *mbi,
+                         int             b,
+                         int             full_pixel)
+{
+    int temp;
+    union mv mv;
+
+    temp = mbi->split.mvs[b].d.x +
+           mbi->split.mvs[b+1].d.x +
+           mbi->split.mvs[b+4].d.x +
+           mbi->split.mvs[b+5].d.x;
+
+    if (temp < 0)
+        temp -= 4;
+    else
+        temp += 4;
+
+    mv.d.x = temp / 8;
+
+    temp = mbi->split.mvs[b].d.y +
+           mbi->split.mvs[b+1].d.y +
+           mbi->split.mvs[b+4].d.y +
+           mbi->split.mvs[b+5].d.y;
+
+    if (temp < 0)
+        temp -= 4;
+    else
+        temp += 4;
+
+    mv.d.y = temp / 8;
+
+    if (full_pixel)
+    {
+        mv.d.x &= ~7;
+        mv.d.y &= ~7;
+    }
+
+    return mv;
+}
+
+
+static void
+predict_inter(struct vp8_decoder_ctx  *ctx,
+              struct img_index        *img,
+              short                   *coeffs,
+              struct mb_info          *mbi,
+              int                      mb_col,
+              int                      mb_row)
+{
+    ptrdiff_t            reference_offset;
+    union mv             uvmv;
+
+
+    reference_offset = ctx->ref_frame_offsets[mbi->base.ref_frame];
+
+    if (mbi->base.y_mode != SPLITMV)
+    {
+        recon_16_blocks(img->y, img->y + reference_offset, img->stride,
+                        &mbi->base.mv, ctx->mc_functions[MC_16X16],
+                        coeffs, mbi);
+        uvmv = mbi->base.mv;
+        uvmv.d.x = (uvmv.d.x + 1 + (uvmv.d.x >> 31) * 2) / 2;
+        uvmv.d.y = (uvmv.d.y + 1 + (uvmv.d.y >> 31) * 2) / 2;
+
+        if (ctx->frame_hdr.version == 3)
+        {
+            uvmv.d.x &= ~7;
+            uvmv.d.y &= ~7;
+        }
+
+        recon_4_blocks(img->u, img->u + reference_offset, img->uv_stride,
+                       &uvmv, ctx->mc_functions[MC_8X8],
+                       coeffs, mbi, 16);
+        recon_4_blocks(img->v, img->v + reference_offset, img->uv_stride,
+                       &uvmv, ctx->mc_functions[MC_8X8],
+                       coeffs, mbi, 20);
+    }
+    else
+    {
+        unsigned char *y = img->y;
+        unsigned char *u = img->u;
+        unsigned char *v = img->v;
+        union mv       chroma_mv[4];
+        int            full_pixel = ctx->frame_hdr.version == 3;
+        int            b;
+
+        if (mbi->base.partitioning < 3)
+        {
+            recon_4_blocks(y, y + reference_offset,
+                           img->stride, &mbi->split.mvs[0],
+                           ctx->mc_functions[MC_8X8], coeffs, mbi, 0);
+            recon_4_blocks(y + 8, y + reference_offset + 8,
+                           img->stride, &mbi->split.mvs[2],
+                           ctx->mc_functions[MC_8X8], coeffs, mbi, 2);
+            y += 8 * img->stride;
+            recon_4_blocks(y, y + reference_offset,
+                           img->stride, &mbi->split.mvs[8],
+                           ctx->mc_functions[MC_8X8], coeffs, mbi, 8);
+            recon_4_blocks(y + 8, y + reference_offset + 8,
+                           img->stride, &mbi->split.mvs[10],
+                           ctx->mc_functions[MC_8X8], coeffs, mbi, 10);
+        }
+        else
+        {
+
+            for (b = 0; b < 16; b += 2)
+            {
+                if (mbi->split.mvs[b].raw == mbi->split.mvs[b+1].raw)
+                {
+                    recon_2_blocks(y, y + reference_offset,
+                                   img->stride, &mbi->split.mvs[b],
+                                   ctx->mc_functions[MC_8X4], coeffs, mbi, b);
+                }
+                else
+                {
+                    recon_1_block(y, y + reference_offset,
+                                  img->stride, &mbi->split.mvs[b],
+                                  ctx->mc_functions[MC_4X4], coeffs, mbi, b);
+                    recon_1_block(y + 4, y + reference_offset + 4,
+                                  img->stride, &mbi->split.mvs[b+1],
+                                  ctx->mc_functions[MC_4X4], coeffs, mbi, b + 1);
+                }
+
+                y += 8;
+
+                if ((b & 3) == 2)
+                    y += 4 * img->stride - 16;
+            }
+        }
+
+        chroma_mv[0] = calculate_chroma_splitmv(mbi,  0, full_pixel);
+        chroma_mv[1] = calculate_chroma_splitmv(mbi,  2, full_pixel);
+        chroma_mv[2] = calculate_chroma_splitmv(mbi,  8, full_pixel);
+        chroma_mv[3] = calculate_chroma_splitmv(mbi, 10, full_pixel);
+
+        for (b = 0; b < 4; b++)
+        {
+            /* TODO: Could do 2/1 like we do for Y here */
+            recon_1_block(u, u + reference_offset,
+                          img->uv_stride, &chroma_mv[b],
+                          ctx->mc_functions[MC_4X4], coeffs, mbi, b + 16);
+            recon_1_block(v, v + reference_offset,
+                          img->uv_stride, &chroma_mv[b],
+                          ctx->mc_functions[MC_4X4], coeffs, mbi, b + 20);
+            u += 4;
+            v += 4;
+
+            if (b & 1)
+            {
+                u += 4 * img->uv_stride - 8;
+                v += 4 * img->uv_stride - 8;
+            }
+        }
+    }
+}
+
+
+void
+vp8_dixie_release_ref_frame(struct ref_cnt_img *rcimg)
 {
     if (rcimg)
     {
@@ -635,16 +1197,16 @@ release_ref_frame(struct ref_cnt_img *rcimg)
 }
 
 
-static struct ref_cnt_img *
-ref_frame(struct ref_cnt_img *rcimg)
+struct ref_cnt_img *
+vp8_dixie_ref_frame(struct ref_cnt_img *rcimg)
 {
     rcimg->ref_cnt++;
     return rcimg;
 }
 
 
-static struct ref_cnt_img *
-find_free_ref_frame(struct ref_cnt_img *frames)
+struct ref_cnt_img *
+vp8_dixie_find_free_ref_frame(struct ref_cnt_img *frames)
 {
     int i;
 
@@ -768,9 +1330,10 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
 
     /* Find a free framebuffer to predict into */
     if (ctx->ref_frames[CURRENT_FRAME])
-        release_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+        vp8_dixie_release_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
 
-    ctx->ref_frames[CURRENT_FRAME] = find_free_ref_frame(ctx->frame_strg);
+    ctx->ref_frames[CURRENT_FRAME] =
+        vp8_dixie_find_free_ref_frame(ctx->frame_strg);
     this_frame_base = ctx->ref_frames[CURRENT_FRAME]->img.img_data;
 
     /* Calculate offsets to the other reference frames */
@@ -781,6 +1344,81 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
         ctx->ref_frame_offsets[i] = ref ? ref->img.img_data - this_frame_base
                                     : 0;
     }
+
+    /* TODO: No need to do this on every frame... */
+#if 1
+    ctx->mc_functions[MC_16X16][MC_4H0V] = fourtap_h_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_0H4V] = fourtap_v_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_4H4V] = fourtap_hv_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_6H4V] = sixtap_hv_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_4H6V] = sixtap_hv_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
+
+    ctx->mc_functions[MC_8X8][MC_4H0V]   = fourtap_h_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_0H4V]   = fourtap_v_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_4H4V]   = fourtap_hv_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_6H4V]   = sixtap_hv_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_4H6V]   = sixtap_hv_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
+
+    ctx->mc_functions[MC_8X4][MC_4H0V]   = fourtap_h_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_0H4V]   = fourtap_v_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_4H4V]   = fourtap_hv_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_6H4V]   = sixtap_hv_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_4H6V]   = sixtap_hv_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
+
+    ctx->mc_functions[MC_4X4][MC_4H0V]   = fourtap_h_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_0H4V]   = fourtap_v_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_4H4V]   = fourtap_hv_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_6H4V]   = sixtap_hv_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_4H6V]   = sixtap_hv_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
+#else
+    ctx->mc_functions[MC_16X16][MC_4H0V] = sixtap_h_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_0H4V] = sixtap_v_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_4H4V] = sixtap_hv_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_6H4V] = sixtap_hv_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_4H6V] = sixtap_hv_16x16_c;
+    ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
+
+    ctx->mc_functions[MC_8X8][MC_4H0V]   = sixtap_h_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_0H4V]   = sixtap_v_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_4H4V]   = sixtap_hv_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_6H4V]   = sixtap_hv_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_4H6V]   = sixtap_hv_8x8_c;
+    ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
+
+    ctx->mc_functions[MC_4X4][MC_4H0V]   = sixtap_h_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_0H4V]   = sixtap_v_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_4H4V]   = sixtap_hv_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_6H4V]   = sixtap_hv_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_4H6V]   = sixtap_hv_4x4_c;
+    ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
+
+    ctx->mc_functions[MC_8X4][MC_4H0V]   = sixtap_h_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_0H4V]   = sixtap_v_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_4H4V]   = sixtap_hv_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_6H4V]   = sixtap_hv_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_4H6V]   = sixtap_hv_8x4_c;
+    ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
+#endif
 }
 
 
@@ -790,58 +1428,61 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
                               unsigned int            start_col,
                               unsigned int            num_cols)
 {
-    unsigned char  *y, *u, *v;
-    int             stride, uv_stride;
+    struct img_index img;
     struct mb_info *mbi;
     unsigned int    col;
     short          *coeffs;
 
     /* Adjust pointers based on row, start_col */
-    stride    = ctx->ref_frames[CURRENT_FRAME]->img.stride[PLANE_Y];
-    uv_stride = ctx->ref_frames[CURRENT_FRAME]->img.stride[PLANE_U];
-    y = ctx->ref_frames[CURRENT_FRAME]->img.planes[PLANE_Y];
-    u = ctx->ref_frames[CURRENT_FRAME]->img.planes[PLANE_U];
-    v = ctx->ref_frames[CURRENT_FRAME]->img.planes[PLANE_V];
-    y += (stride * row + start_col) * 16;
-    u += (uv_stride * row + start_col) * 8;
-    v += (uv_stride * row + start_col) * 8;
+    img.stride    = ctx->ref_frames[CURRENT_FRAME]->img.stride[PLANE_Y];
+    img.uv_stride = ctx->ref_frames[CURRENT_FRAME]->img.stride[PLANE_U];
+    img.y = ctx->ref_frames[CURRENT_FRAME]->img.planes[PLANE_Y];
+    img.u = ctx->ref_frames[CURRENT_FRAME]->img.planes[PLANE_U];
+    img.v = ctx->ref_frames[CURRENT_FRAME]->img.planes[PLANE_V];
+    img.y += (img.stride * row + start_col) * 16;
+    img.u += (img.uv_stride * row + start_col) * 8;
+    img.v += (img.uv_stride * row + start_col) * 8;
     mbi = ctx->mb_info_rows[row] + start_col;
     coeffs = ctx->tokens[row & (ctx->token_hdr.partitions - 1)].coeffs;
 
     /* Fix up the out-of-frame pixels */
     if (start_col == 0)
     {
-        fixup_left(y, 16, stride, row, mbi->base.y_mode);
-        fixup_left(u, 8, uv_stride, row, mbi->base.uv_mode);
-        fixup_left(v, 8, uv_stride, row, mbi->base.uv_mode);
+        fixup_left(img.y, 16, img.stride, row, mbi->base.y_mode);
+        fixup_left(img.u, 8, img.uv_stride, row, mbi->base.uv_mode);
+        fixup_left(img.v, 8, img.uv_stride, row, mbi->base.uv_mode);
 
         if (row == 0)
-            *(y - stride - 1) = 127;
+            *(img.y - img.stride - 1) = 127;
     }
 
     for (col = start_col; col < start_col + num_cols; col++)
     {
         if (row == 0)
         {
-            fixup_above(y, 16, stride, col, mbi->base.y_mode);
-            fixup_above(u, 8, uv_stride, col, mbi->base.uv_mode);
-            fixup_above(v, 8, uv_stride, col, mbi->base.uv_mode);
+            fixup_above(img.y, 16, img.stride, col, mbi->base.y_mode);
+            fixup_above(img.u, 8, img.uv_stride, col, mbi->base.uv_mode);
+            fixup_above(img.v, 8, img.uv_stride, col, mbi->base.uv_mode);
         }
 
         if (mbi->base.y_mode <= B_PRED)
         {
-            predict_intra_luma(y, stride, mbi, ctx->ref_frame_offsets, coeffs);
-            predict_intra_chroma(u, v, uv_stride, mbi, ctx->ref_frame_offsets,
-                                 coeffs);
+            predict_intra_luma(img.y, img.stride, mbi, coeffs);
+            predict_intra_chroma(img.u, img.v, img.uv_stride, mbi, coeffs);
         }
         else
-            assert(0);
+        {
+            if (mbi->base.y_mode != SPLITMV) // && != BPRED
+                fixup_dc_coeffs(mbi, coeffs);
+
+            predict_inter(ctx, &img, coeffs, mbi, col, row);
+        }
 
         /* Advance to the next macroblock */
         mbi++;
-        y += 16;
-        u += 8;
-        v += 8;
+        img.y += 16;
+        img.u += 8;
+        img.v += 8;
         coeffs += 25 * 16;
     }
 
@@ -850,8 +1491,8 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
         /* Extend the last row by four pixels for intra prediction. This will
          * be propagated later by copy_down.
          */
-        uint32_t *extend = (uint32_t *)(y + 15 * stride);
-        uint32_t  val = 0x01010101 * y[-1 + 15 * stride];
+        uint32_t *extend = (uint32_t *)(img.y + 15 * img.stride);
+        uint32_t  val = 0x01010101 * img.y[-1 + 15 * img.stride];
         *extend = val;
     }
 }

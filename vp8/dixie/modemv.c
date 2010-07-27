@@ -412,6 +412,7 @@ decode_split_mv(struct mb_info         *this,
 
     partition_id = bool_read_tree(bool, split_mv_tree, split_mv_probs);
     partition = mv_partitions[partition_id];
+    this->base.partitioning = partition_id;
 
     for (j = 0, mask = 0; mask < 65535; j++)
     {

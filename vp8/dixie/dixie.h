@@ -168,6 +168,48 @@ enum prediction_mode
 };
 
 
+enum splitmv_partitioning
+{
+    SPLITMV_16X8,
+    SPLITMV_8X16,
+    SPLITMV_8X8,
+    SPLITMV_4X4
+};
+
+
+/* This prototype is used to match the libvpx reference assembly */
+typedef void (*mc_fn_t)(const unsigned char *reference,
+                        int                  reference_stride,
+                        int                  mx,
+                        int                  my,
+                        unsigned char       *output,
+                        int                  output_stride);
+
+enum mc_block_sz
+{
+    MC_16X16,
+    MC_8X8,
+    MC_8X4,
+    MC_4X4,
+    NUM_MC_BLOCKS
+};
+
+
+enum mc_mode
+{
+    MC_0H0V = 0,
+    MC_6H0V = 1,
+    MC_4H0V = 2,
+    MC_0H6V = 4 + 0,
+    MC_6H6V = 4 + 1,
+    MC_4H6V = 4 + 2,
+    MC_0H4V = 8 + 0,
+    MC_6H4V = 8 + 1,
+    MC_4H4V = 8 + 2,
+    NUM_MC_MODES
+};
+
+
 typedef union mv
 {
     struct
@@ -185,6 +227,7 @@ struct mb_base_info
     unsigned char segment_id : 3;
     unsigned char ref_frame  : 2;
     unsigned char skip_coeff : 1;
+    enum splitmv_partitioning  partitioning : 2;
     union mv      mv;
     unsigned int  eob_mask;
 };
@@ -262,6 +305,8 @@ struct vp8_decoder_ctx
     struct ref_cnt_img              frame_strg[NUM_REF_FRAMES];
     struct ref_cnt_img             *ref_frames[NUM_REF_FRAMES];
     ptrdiff_t                       ref_frame_offsets[4];
+
+    mc_fn_t                         mc_functions[NUM_MC_BLOCKS][NUM_MC_MODES];
 };
 
 

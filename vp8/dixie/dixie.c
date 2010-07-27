@@ -299,6 +299,55 @@ dequant_init(struct dequant_factors        dqf[MAX_MB_SEGMENTS],
 }
 
 
+enum
+{
+    BORDER_PIXELS = 8
+};
+
+
+static void
+extend_frame_borders(vpx_image_t *img)
+{
+    int r, border, p;
+    unsigned char *left, *right;
+
+    for (p = 0; p < 3; p++)
+    {
+        border = BORDER_PIXELS * (p ? 1 : 2); // note same border for y and uv
+
+        /* extend row 0 left and right */
+        right = img->planes[p] + (img->d_w >> (p ? 1 : 0));
+        left = img->planes[p] - border;
+        memset(left, left[border], border);
+        memset(right, right[-1], border);
+
+        /* extend row 0 up */
+        for (r = 0 - border; r < 0; r++)
+        {
+            memcpy(left + r * img->stride[p], left, (img->d_w >> (p ? 1 : 0)) + 2 * border);
+        }
+
+        /* extend body left and right */
+        for (r = 1; r < (img->d_h >> (p ? 1 : 0)); r++)
+        {
+            left += img->stride[p];
+            right += img->stride[p];
+            memset(left, left[border], border);
+            memset(right, right[-1], border);
+        }
+
+        /* extend row n down. use right to point to row n */
+        right = left;
+
+        for (r = 0; r < border; r++)
+        {
+            left += img->stride[p];
+            memcpy(left, right, (img->d_w >> (p ? 1 : 0)) + 2 * border);
+        }
+    }
+}
+
+
 static void
 decode_frame(struct vp8_decoder_ctx *ctx,
              const unsigned char    *data,
@@ -395,6 +444,8 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     if (ctx->loopfilter_hdr.level)
         vp8_dixie_loopfilter_process_row(ctx, row - 1, 0, ctx->mb_cols);
 
+    extend_frame_borders(&ctx->ref_frames[CURRENT_FRAME]->img);
+
     ctx->frame_cnt++;
 
     if (!ctx->reference_hdr.refresh_entropy)
@@ -402,6 +453,65 @@ decode_frame(struct vp8_decoder_ctx *ctx,
         ctx->entropy_hdr = ctx->saved_entropy;
         ctx->saved_entropy_valid = 0;
     }
+
+    /* TODO: This logic can be condensed for readability. */
+    if (ctx->reference_hdr.copy_arf == 1)
+    {
+        vp8_dixie_release_ref_frame(ctx->ref_frames[ALTREF_FRAME]);
+
+        if (ctx->reference_hdr.refresh_last)
+            ctx->ref_frames[ALTREF_FRAME] =
+                vp8_dixie_ref_frame(ctx->ref_frames[LAST_FRAME]);
+        else
+            ctx->ref_frames[ALTREF_FRAME] =
+                vp8_dixie_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+    }
+    else if (ctx->reference_hdr.copy_arf == 2)
+    {
+        vp8_dixie_release_ref_frame(ctx->ref_frames[ALTREF_FRAME]);
+        ctx->ref_frames[ALTREF_FRAME] =
+            vp8_dixie_ref_frame(ctx->ref_frames[GOLDEN_FRAME]);
+    }
+
+    if (ctx->reference_hdr.copy_gf == 1)
+    {
+        vp8_dixie_release_ref_frame(ctx->ref_frames[GOLDEN_FRAME]);
+
+        if (ctx->reference_hdr.refresh_last)
+            ctx->ref_frames[GOLDEN_FRAME] =
+                vp8_dixie_ref_frame(ctx->ref_frames[LAST_FRAME]);
+        else
+            ctx->ref_frames[GOLDEN_FRAME] =
+                vp8_dixie_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+    }
+    else if (ctx->reference_hdr.copy_gf == 2)
+    {
+        vp8_dixie_release_ref_frame(ctx->ref_frames[GOLDEN_FRAME]);
+        ctx->ref_frames[GOLDEN_FRAME] =
+            vp8_dixie_ref_frame(ctx->ref_frames[ALTREF_FRAME]);
+    }
+
+    if (ctx->reference_hdr.refresh_gf)
+    {
+        vp8_dixie_release_ref_frame(ctx->ref_frames[GOLDEN_FRAME]);
+        ctx->ref_frames[GOLDEN_FRAME] =
+            vp8_dixie_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+    }
+
+    if (ctx->reference_hdr.refresh_arf)
+    {
+        vp8_dixie_release_ref_frame(ctx->ref_frames[ALTREF_FRAME]);
+        ctx->ref_frames[ALTREF_FRAME] =
+            vp8_dixie_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+    }
+
+    if (ctx->reference_hdr.refresh_last)
+    {
+        vp8_dixie_release_ref_frame(ctx->ref_frames[LAST_FRAME]);
+        ctx->ref_frames[LAST_FRAME] =
+            vp8_dixie_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+    }
+
 }
 
 

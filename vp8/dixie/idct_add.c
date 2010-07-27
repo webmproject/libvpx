@@ -273,6 +273,44 @@ idct_block(unsigned char        *predict,
 
 
 static void
+idct_block_inter(unsigned char        *recon,
+                 const unsigned char  *predict,
+                 int                   stride,
+                 const short          *coeffs)
+{
+    int i;
+    int a1, b1, c1, d1, temp1, temp2;
+    short tmp[16];
+
+    idct_columns(coeffs, tmp);
+    coeffs = tmp;
+
+    for (i = 0; i < 4; i++)
+    {
+        a1 = coeffs[0] + coeffs[2];
+        b1 = coeffs[0] - coeffs[2];
+
+        temp1 = (coeffs[1] * sinpi8sqrt2 + rounding) >> 16;
+        temp2 = coeffs[3] + ((coeffs[3] * cospi8sqrt2minus1 + rounding) >> 16);
+        c1 = temp1 - temp2;
+
+        temp1 = coeffs[1] + ((coeffs[1] * cospi8sqrt2minus1 + rounding) >> 16);
+        temp2 = (coeffs[3] * sinpi8sqrt2 + rounding) >> 16;
+        d1 = temp1 + temp2;
+
+        recon[0] = CLAMP_255(predict[0] + ((a1 + d1 + 4) >> 3));
+        recon[3] = CLAMP_255(predict[3] + ((a1 - d1 + 4) >> 3));
+        recon[1] = CLAMP_255(predict[1] + ((b1 + c1 + 4) >> 3));
+        recon[2] = CLAMP_255(predict[2] + ((b1 - c1 + 4) >> 3));
+
+        coeffs += 4;
+        recon += stride;
+        predict += stride;
+    }
+}
+
+
+static void
 fill_dc_dc(unsigned char        *predict,
            int                   stride,
            int                   dc,
@@ -353,6 +391,41 @@ fill_dc_block(unsigned char        *predict,
     }
 }
 
+
+static void
+fill_dc_block_inter(unsigned char        *recon,
+                    const unsigned char  *predict,
+                    int                   stride,
+                    int                   dc)
+{
+    int i;
+
+    for (i = 0; i < 4; i++)
+    {
+        recon[0] = CLAMP_255(predict[0] + dc);
+        recon[1] = CLAMP_255(predict[1] + dc);
+        recon[2] = CLAMP_255(predict[2] + dc);
+        recon[3] = CLAMP_255(predict[3] + dc);
+        recon += stride;
+        predict += stride;
+    }
+}
+
+
+static void
+copy_block(unsigned char        *recon_,
+           const unsigned char  *predict_,
+           int                   stride)
+{
+    uint32_t       *recon   = (uint32_t *)recon_;
+    const uint32_t *predict = (const uint32_t *)predict_;
+
+    stride >>= 2;
+    recon[0] = predict[0];
+    recon[stride] = predict[stride];
+    recon[stride * 2] = predict[stride * 2];
+    recon[stride * 3] = predict[stride * 3];
+}
 
 /* TODO: can this map be eliminated by reorering the B_ modes? */
 static const enum prediction_mode map_prediction_mode[MB_MODE_COUNT] =
@@ -450,6 +523,36 @@ vp8_dixie_idct_add(unsigned char        *predict,
         }
     }
 }
+
+
+void
+vp8_dixie_idct_add_inter(unsigned char        *recon,
+                         const unsigned char  *predict,
+                         int                   stride,
+                         const short          *coeffs,
+                         struct mb_info       *mbi,
+                         int                   block)
+{
+    int                  do_whole_block;
+    enum prediction_mode mode;
+
+    do_whole_block = mbi->base.eob_mask & (1 << block);
+    coeffs += 16 * block;
+
+    if (!do_whole_block)
+    {
+        if (coeffs[0])
+            fill_dc_block_inter(recon, predict, stride, (coeffs[0] + 4) >> 3);
+        else if (recon != predict)
+            copy_block(recon, predict, stride);
+
+    }
+    else
+    {
+        idct_block_inter(recon, predict, stride, coeffs);
+    }
+}
+
 
 void
 vp8_dixie_idct_add_process_row(struct vp8_decoder_ctx *ctx,
