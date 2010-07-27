@@ -11,6 +11,8 @@
 
 ASM:=$(if $(filter yes,$(CONFIG_GCC)),.asm.s,.asm)
 
+CODEC_SRCS-yes += libs.mk
+
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
 CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
 
@@ -59,7 +61,6 @@ CODEC_LIB=$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd)
 # This variable uses deferred expansion intentionally, since the results of
 # $(wildcard) may change during the course of the Make.
 VS_PLATFORMS = $(foreach d,$(wildcard */Release/$(CODEC_LIB).lib),$(word 1,$(subst /, ,$(d))))
-CODEC_SRCS-yes += $(SRC_PATH_BARE)/libs.mk # to show up in the msvs workspace
 endif
 
 # The following pairs define a mapping of locations in the distribution
