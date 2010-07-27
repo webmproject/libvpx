@@ -180,7 +180,10 @@ void vp8_cmachine_specific_config(void)
     {
         // Willamette instruction set available:
         vp8_mbuverror                = vp8_mbuverror_xmm;
-        vp8_fast_quantize_b            = vp8_fast_quantize_b_sse;
+        /* The sse quantizer has not been updated to match the new exact
+         * quantizer introduced in commit e04e2935
+         */
+        vp8_fast_quantize_b            = vp8_fast_quantize_b_c;
 #if 0 //new fdct
         vp8_short_fdct4x4             = vp8_short_fdct4x4_mmx;
         vp8_short_fdct8x4             = vp8_short_fdct8x4_mmx;
@@ -224,7 +227,10 @@ void vp8_cmachine_specific_config(void)
     {
         // MMX instruction set available:
         vp8_mbuverror                = vp8_mbuverror_mmx;
-        vp8_fast_quantize_b            = vp8_fast_quantize_b_mmx;
+        /* The mmx quantizer has not been updated to match the new exact
+         * quantizer introduced in commit e04e2935
+         */
+        vp8_fast_quantize_b            = vp8_fast_quantize_b_c;
 #if 0 // new fdct
         vp8_short_fdct4x4             = vp8_short_fdct4x4_mmx;
         vp8_short_fdct8x4             = vp8_short_fdct8x4_mmx;
