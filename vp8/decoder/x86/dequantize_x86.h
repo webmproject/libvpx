@@ -30,10 +30,10 @@ extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_mmx);
 #define vp8_dequant_block vp8_dequantize_b_mmx
 
 #undef  vp8_dequant_idct_add
-#define vp8_dequant_idct_add vp8_dequant_idct_mmx
+#define vp8_dequant_idct_add vp8_dequant_idct_add_mmx
 
 #undef  vp8_dequant_dc_idct_add
-#define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_mmx
+#define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_mmx
 
 #endif
 #endif
