@@ -330,13 +330,6 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
 
 }
 
-
-//Notes: It is better to change CHAR to unsigned or signed to
-//avoid error on ARM platform.
-char vp8_an[8][64][3072];
-int vp8_cd[8][64];
-
-
 double vp8_gaussian(double sigma, double mu, double x)
 {
     return 1 / (sigma * sqrt(2.0 * 3.14159265)) *
