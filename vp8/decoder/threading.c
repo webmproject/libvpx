@@ -12,6 +12,9 @@
 #ifndef WIN32
 # include <unistd.h>
 #endif
+#ifdef __APPLE__
+#include <mach/mach_init.h>
+#endif
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "threading.h"
