@@ -102,7 +102,8 @@ static const int qzbin_factors[129] =
     80, 80, 80, 80, 80, 80, 80, 80,
     80,
 };
-
+//#define EXACT_QUANT
+#ifdef EXACT_QUANT
 static void vp8cx_invert_quant(short *quant, short *shift, short d)
 {
     unsigned t;
@@ -184,7 +185,71 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
         }
     }
 }
+#else
+void vp8cx_init_quantizer(VP8_COMP *cpi)
+{
+    int r, c;
+    int i;
+    int quant_val;
+    int Q;
 
+    int zbin_boost[16] = {0, 0, 8, 10, 12, 14, 16, 20, 24, 28, 32, 36, 40, 44, 44, 44};
+
+    for (Q = 0; Q < QINDEX_RANGE; Q++)
+    {
+        // dc values
+        quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
+        cpi->Y1quant[Q][0][0] = (1 << 16) / quant_val;
+        cpi->Y1zbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+        cpi->Y1round[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->common.Y1dequant[Q][0][0] = quant_val;
+        cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+
+        quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
+        cpi->Y2quant[Q][0][0] = (1 << 16) / quant_val;
+        cpi->Y2zbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+        cpi->Y2round[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->common.Y2dequant[Q][0][0] = quant_val;
+        cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+
+        quant_val = vp8_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
+        cpi->UVquant[Q][0][0] = (1 << 16) / quant_val;
+        cpi->UVzbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;;
+        cpi->UVround[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->common.UVdequant[Q][0][0] = quant_val;
+        cpi->zrun_zbin_boost_uv[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+
+        // all the ac values = ;
+        for (i = 1; i < 16; i++)
+        {
+            int rc = vp8_default_zig_zag1d[i];
+            r = (rc >> 2);
+            c = (rc & 3);
+
+            quant_val = vp8_ac_yquant(Q);
+            cpi->Y1quant[Q][r][c] = (1 << 16) / quant_val;
+            cpi->Y1zbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+            cpi->Y1round[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->common.Y1dequant[Q][r][c] = quant_val;
+            cpi->zrun_zbin_boost_y1[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+
+            quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
+            cpi->Y2quant[Q][r][c] = (1 << 16) / quant_val;
+            cpi->Y2zbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+            cpi->Y2round[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->common.Y2dequant[Q][r][c] = quant_val;
+            cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+
+            quant_val = vp8_ac_uv_quant(Q, cpi->common.uvac_delta_q);
+            cpi->UVquant[Q][r][c] = (1 << 16) / quant_val;
+            cpi->UVzbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+            cpi->UVround[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->common.UVdequant[Q][r][c] = quant_val;
+            cpi->zrun_zbin_boost_uv[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+        }
+    }
+}
+#endif
 void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
 {
     int i;
