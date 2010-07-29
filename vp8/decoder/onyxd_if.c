@@ -367,6 +367,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         return -1;
     }
 
+/*
     if (!pbi->b_multithreaded_lf)
     {
         struct vpx_usec_timer lpftimer;
@@ -378,8 +379,38 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
         vpx_usec_timer_mark(&lpftimer);
         pbi->time_loop_filtering += vpx_usec_timer_elapsed(&lpftimer);
+    }else{
+      struct vpx_usec_timer lpftimer;
+      vpx_usec_timer_start(&lpftimer);
+      // Apply the loop filter if appropriate.
+
+      if (cm->filter_level > 0)
+          vp8_mt_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
+
+      vpx_usec_timer_mark(&lpftimer);
+      pbi->time_loop_filtering += vpx_usec_timer_elapsed(&lpftimer);
     }
     if (cm->filter_level > 0) {
+        cm->last_frame_type = cm->frame_type;
+        cm->last_filter_type = cm->filter_type;
+        cm->last_sharpness_level = cm->sharpness_level;
+    }
+*/
+
+    if(pbi->common.filter_level)
+    {
+        struct vpx_usec_timer lpftimer;
+        vpx_usec_timer_start(&lpftimer);
+        // Apply the loop filter if appropriate.
+
+        if (pbi->b_multithreaded_lf && cm->multi_token_partition != ONE_PARTITION)
+            vp8_mt_loop_filter_frame(pbi);   //cm, &pbi->mb, cm->filter_level);
+        else
+            vp8_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
+
+        vpx_usec_timer_mark(&lpftimer);
+        pbi->time_loop_filtering += vpx_usec_timer_elapsed(&lpftimer);
+
         cm->last_frame_type = cm->frame_type;
         cm->last_filter_type = cm->filter_type;
         cm->last_sharpness_level = cm->sharpness_level;
