@@ -15,7 +15,7 @@
 ;                            unsigned short *diff, unsigned char *Predictor,
 ;                            int pitch);
 global sym(vp8_subtract_b_mmx_impl)
-sym(vp8_subtract_b_mmx_impl)
+sym(vp8_subtract_b_mmx_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -151,7 +151,7 @@ submby_loop:
 
 ;void vp8_subtract_mbuv_mmx(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride)
 global sym(vp8_subtract_mbuv_mmx)
-sym(vp8_subtract_mbuv_mmx)
+sym(vp8_subtract_mbuv_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
