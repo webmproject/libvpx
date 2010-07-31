@@ -42,8 +42,8 @@ sym(vp8_regular_quantize_b_impl_sse2):
 
     sub         rsp, vp8_regularquantizeb_stack_size
 
-    movdqa      DQWORD PTR[rsp + save_xmm6], xmm6
-    movdqa      DQWORD PTR[rsp + save_xmm7], xmm7
+    movdqa      OWORD PTR[rsp + save_xmm6], xmm6
+    movdqa      OWORD PTR[rsp + save_xmm7], xmm7
 
     mov         rdx, arg(0)                 ;coeff_ptr
     mov         eax, arg(8)                 ;zbin_oq_value
@@ -51,8 +51,8 @@ sym(vp8_regular_quantize_b_impl_sse2):
     mov         rcx, arg(1)                 ;zbin_ptr
     movd        xmm7, eax
 
-    movdqa      xmm0, DQWORD PTR[rdx]
-    movdqa      xmm4, DQWORD PTR[rdx + 16]
+    movdqa      xmm0, OWORD PTR[rdx]
+    movdqa      xmm4, OWORD PTR[rdx + 16]
 
     movdqa      xmm1, xmm0
     movdqa      xmm5, xmm4
@@ -63,8 +63,8 @@ sym(vp8_regular_quantize_b_impl_sse2):
     pxor        xmm1, xmm0
     pxor        xmm5, xmm4
 
-    movdqa      xmm2, DQWORD PTR[rcx]       ;load zbin_ptr
-    movdqa      xmm3, DQWORD PTR[rcx + 16]  ;load zbin_ptr
+    movdqa      xmm2, OWORD PTR[rcx]        ;load zbin_ptr
+    movdqa      xmm3, OWORD PTR[rcx + 16]   ;load zbin_ptr
 
     pshuflw     xmm7, xmm7, 0
     psubw       xmm1, xmm0                  ;x = abs(z)
@@ -81,17 +81,17 @@ sym(vp8_regular_quantize_b_impl_sse2):
     mov         rdi, arg(5)                 ;round_ptr
     mov         rsi, arg(6)                 ;quant_ptr
 
-    movdqa      DQWORD PTR[rsp + abs_minus_zbin_lo], xmm1
-    movdqa      DQWORD PTR[rsp + abs_minus_zbin_hi], xmm5
+    movdqa      OWORD PTR[rsp + abs_minus_zbin_lo], xmm1
+    movdqa      OWORD PTR[rsp + abs_minus_zbin_hi], xmm5
 
     paddw       xmm1, xmm2                  ;add (zbin_ptr + zbin_oq_value) back
     paddw       xmm5, xmm3                  ;add (zbin_ptr + zbin_oq_value) back
 
-    movdqa      xmm2, DQWORD PTR[rdi]
-    movdqa      xmm3, DQWORD PTR[rsi]
+    movdqa      xmm2, OWORD PTR[rdi]
+    movdqa      xmm3, OWORD PTR[rsi]
 
-    movdqa      xmm6, DQWORD PTR[rdi + 16]
-    movdqa      xmm7, DQWORD PTR[rsi + 16]
+    movdqa      xmm6, OWORD PTR[rdi + 16]
+    movdqa      xmm7, OWORD PTR[rsi + 16]
 
     paddw       xmm1, xmm2
     paddw       xmm5, xmm6
@@ -108,11 +108,11 @@ sym(vp8_regular_quantize_b_impl_sse2):
     psubw       xmm1, xmm0
     psubw       xmm5, xmm4
 
-    movdqa      DQWORD PTR[rsp + temp_qcoeff_lo], xmm1
-    movdqa      DQWORD PTR[rsp + temp_qcoeff_hi], xmm5
+    movdqa      OWORD PTR[rsp + temp_qcoeff_lo], xmm1
+    movdqa      OWORD PTR[rsp + temp_qcoeff_hi], xmm5
 
-    movdqa      DQWORD PTR[rsi], xmm6       ;zero qcoeff
-    movdqa      DQWORD PTR[rsi + 16], xmm6  ;zero qcoeff
+    movdqa      OWORD PTR[rsi], xmm6        ;zero qcoeff
+    movdqa      OWORD PTR[rsi + 16], xmm6   ;zero qcoeff
 
     xor         rax, rax
     mov         rcx, -1
@@ -223,22 +223,22 @@ rq_zigzag_1c:
     mov         rcx, arg(3)                 ;dequant_ptr
     mov         rsi, arg(7)                 ;dqcoeff_ptr
 
-    movdqa      xmm2, DQWORD PTR[rdi]
-    movdqa      xmm3, DQWORD PTR[rdi + 16]
+    movdqa      xmm2, OWORD PTR[rdi]
+    movdqa      xmm3, OWORD PTR[rdi + 16]
 
-    movdqa      xmm0, DQWORD PTR[rcx]
-    movdqa      xmm1, DQWORD PTR[rcx + 16]
+    movdqa      xmm0, OWORD PTR[rcx]
+    movdqa      xmm1, OWORD PTR[rcx + 16]
 
     pmullw      xmm0, xmm2
     pmullw      xmm1, xmm3
 
-    movdqa      DQWORD PTR[rsi], xmm0       ;store dqcoeff
-    movdqa      DQWORD PTR[rsi + 16], xmm1  ;store dqcoeff
+    movdqa      OWORD PTR[rsi], xmm0        ;store dqcoeff
+    movdqa      OWORD PTR[rsi + 16], xmm1   ;store dqcoeff
 
     mov         rax, [rsp + eob]
 
-    movdqa      xmm6, DQWORD PTR[rsp + save_xmm6]
-    movdqa      xmm7, DQWORD PTR[rsp + save_xmm7]
+    movdqa      xmm6, OWORD PTR[rsp + save_xmm6]
+    movdqa      xmm7, OWORD PTR[rsp + save_xmm7]
 
     add         rax, 1
 
