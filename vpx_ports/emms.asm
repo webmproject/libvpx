@@ -9,7 +9,7 @@
 ;
 
 
-%include "x86_abi_support.asm"
+%include "vpx_ports/x86_abi_support.asm"
 
 section .text
     global sym(vpx_reset_mmx_state)
