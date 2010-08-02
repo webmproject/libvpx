@@ -39,7 +39,10 @@ static void extend_plane_borders
 
     for (i = 0; i < h - 0 + 1; i++)
     {
-        vpx_memset(dest_ptr1, src_ptr1[0], el);
+        // Some linkers will complain if we call vpx_memset with el set to a
+        // constant 0.
+        if (el)
+            vpx_memset(dest_ptr1, src_ptr1[0], el);
         vpx_memset(dest_ptr2, src_ptr2[0], er);
         src_ptr1  += sp;
         src_ptr2  += sp;
