@@ -378,7 +378,7 @@ EOF
 fmt_deps = sed -e 's;^__image.axf;\$(dir \$@)\$(notdir \$<).o \$@;' #hide
 EOF
     else cat >> $1 << EOF
-fmt_deps = sed -e 's;^\(.*\)\.o;\$(dir \$@)\1\$(suffix \$<).o \$@;' #hide
+fmt_deps = sed -e 's;^\([a-zA-Z0-9_]*\)\.o;\$(dir \$@)\1\$(suffix \$<).o \$@;'
 EOF
     fi
 
