@@ -578,9 +578,9 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
 void
 vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
                              struct bool_decoder    *bool,
-                             unsigned int            row,
-                             unsigned int            start_col,
-                             unsigned int            num_cols)
+                             int                     row,
+                             int                     start_col,
+                             int                     num_cols)
 {
     struct mb_info       *above, *this;
     unsigned int          col;
