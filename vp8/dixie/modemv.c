@@ -458,6 +458,22 @@ decode_split_mv(struct mb_info         *this,
 }
 
 
+static int
+need_mc_border(union mv mv, int l, int t, int b_w, int w, int h)
+{
+    int b, r;
+
+    /* Get distance to edge for top-left pixel */
+    l += (mv.d.x >> 3);
+    t += (mv.d.y >> 3);
+
+    /* Get distance to edge for bottom-right pixel */
+    r = w - (l + b_w);
+    b = h - (t + b_w);
+
+    return (l >> 1 < 2 || r >> 1 < 3 || t >> 1 < 2 || b >> 1 < 3);
+}
+
 static void
 decode_mvs(struct vp8_decoder_ctx       *ctx,
            struct mb_info               *this,
@@ -472,7 +488,7 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
     int               mv_cnts[4];
     unsigned char     probs[4];
     enum {BEST, NEAREST, NEAR};
-    int ref_frame;
+    int ref_frame, x, y, w, h, b;
 
     this->base.ref_frame = bool_get(bool, hdr->prob_last)
                            ? 2 + bool_get(bool, hdr->prob_gf)
@@ -488,6 +504,12 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
     this->base.y_mode = bool_read_tree(bool, mv_ref_tree, probs);
     this->base.uv_mode = this->base.y_mode;
 
+    this->base.need_mc_border = 0;
+    x = (-bounds->to_left - 128) >> 3;
+    y = (-bounds->to_top - 128) >> 3;
+    w = ctx->mb_cols * 16;
+    h = ctx->mb_rows * 16;
+
     switch (this->base.y_mode)
     {
     case NEARESTMV:
@@ -498,7 +520,7 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
         break;
     case ZEROMV:
         this->base.mv.raw = 0;
-        break;
+        return; //skip need_mc_border check
     case NEWMV:
         clamped_best_mv = clamp_mv(near_mvs[BEST], bounds);
         read_mv(bool, &this->base.mv, hdr->mv_probs);
@@ -506,13 +528,50 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
         this->base.mv.d.y += clamped_best_mv.d.y;
         break;
     case SPLITMV:
+    {
+        union mv          chroma_mv[4] = {{{0}}};
+
         clamped_best_mv = clamp_mv(near_mvs[BEST], bounds);
         decode_split_mv(this, left, above, hdr, &clamped_best_mv, bool);
         this->base.mv = this->split.mvs[15];
-        break;
+
+        for (b = 0; b < 16; b++)
+        {
+            chroma_mv[(b>>1&1) + (b>>2&2)].d.x += this->split.mvs[b].d.x;
+            chroma_mv[(b>>1&1) + (b>>2&2)].d.y += this->split.mvs[b].d.y;
+
+            if (need_mc_border(this->split.mvs[b],
+            x + (b & 3) * 4, y + (b & ~3), 4, w, h))
+            {
+                this->base.need_mc_border = 1;
+                break;
+            }
+        }
+
+        for (b = 0; b < 4; b++)
+        {
+            chroma_mv[b].d.x += 4 + 8 * (chroma_mv[b].d.x >> 31);
+            chroma_mv[b].d.y += 4 + 8 * (chroma_mv[b].d.y >> 31);
+            chroma_mv[b].d.x /= 4;
+            chroma_mv[b].d.y /= 4;
+
+            //note we're passing in non-subsampled coordinates
+            if (need_mc_border(chroma_mv[b],
+            x + (b & 1) * 8, y + (b >> 1) * 8, 16, w, h))
+            {
+                this->base.need_mc_border = 1;
+                break;
+            }
+        }
+
+        return; //skip need_mc_border check
+    }
     default:
         assert(0);
     }
+
+    if (need_mc_border(this->base.mv, x, y, 16, w, h))
+        this->base.need_mc_border = 1;
 }
 
 

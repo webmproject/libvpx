@@ -1070,13 +1070,294 @@ calculate_chroma_splitmv(struct mb_info *mbi,
 }
 
 
+/* Note: We rely on the reconstructed border having the same stride as the
+ * reference buffer because the filter_block can't adjust the stride with
+ * its return value, only the reference pointer.
+ */
+static void
+build_mc_border(unsigned char       *dst,
+                const unsigned char *src,
+                int                  stride,
+                int                  x,
+                int                  y,
+                int                  b_w,
+                int                  b_h,
+                int                  w,
+                int                  h
+               )
+{
+    const unsigned char *plane, *ref_row;
+
+
+    /* Get a pointer to the start of the real data for this row */
+    plane = src - x - y * stride;
+    ref_row = plane;
+
+    if (y >= h)
+        ref_row += (h - 1) * stride;
+    else if (y > 0)
+        ref_row += y * stride;
+
+    do
+    {
+        int left, right = 0, copy;
+
+        left = x < 0 ? -x : 0;
+
+        if (left > b_w)
+            left = b_w;
+
+        if (x + b_w > w)
+            right = x + b_w - w;
+
+        if (right > b_w)
+            right = b_w;
+
+        copy = b_w - left - right;
+
+        if (left)
+            memset(dst, ref_row[0], left);
+
+        if (copy)
+            memcpy(dst + left, ref_row + x + left, copy);
+
+        if (right)
+            memset(dst + left + copy, ref_row[w-1], right);
+
+        dst += stride;
+        y++;
+
+        if (y < h && y > 0)
+            ref_row += stride;
+    }
+    while (--b_h);
+}
+
+
+static void
+recon_4_edge_blocks(unsigned char        *output,
+                    unsigned char        *emul_block,
+                    const unsigned char  *reference,
+                    int                   stride,
+                    const union mv       *mv,
+                    mc_fn_t              *mc,
+                    short                *coeffs,
+                    struct mb_info       *mbi,
+                    int                   x,
+                    int                   y,
+                    int                   w,
+                    int                   h,
+                    int                   start_b
+                   )
+{
+    const unsigned char *predict;
+    int                  b = start_b;
+    const int            b_w = 8;
+    const int            b_h = 8;
+
+    x += mv->d.x >> 3;
+    y += mv->d.y >> 3;
+
+    /* Need two pixels left/above, 3 right/below for 6-tap */
+    if (x < 2 || x + b_w - 1 + 3 >= w || y < 2 || y + b_h - 1 + 3 >= h)
+    {
+        reference += (mv->d.x >> 3) + (mv->d.y >> 3) * stride;
+        build_mc_border(emul_block,
+                        reference - 2 - 2 * stride, stride,
+                        x - 2, y - 2, b_w + 5, b_h + 5, w, h);
+        reference = emul_block + 2 * stride + 2;
+        reference -= (mv->d.x >> 3) + (mv->d.y >> 3) * stride;
+    }
+
+    predict = filter_block(output, reference, stride, mv, mc);
+    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+
+    output += stride * 4;
+    predict += stride * 4;
+    b += (start_b < 16) ? 4 : 2;
+
+    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+}
+
+
+static void
+recon_1_edge_block(unsigned char        *output,
+                   unsigned char        *emul_block,
+                   const unsigned char  *reference,
+                   int                   stride,
+                   const union mv       *mv,
+                   mc_fn_t              *mc,
+                   short                *coeffs,
+                   struct mb_info       *mbi,
+                   int                   x,
+                   int                   y,
+                   int                   w,
+                   int                   h,
+                   int                   start_b
+                  )
+{
+    const unsigned char *predict;
+    int                  b = start_b;
+    const int            b_w = 4;
+    const int            b_h = 4;
+
+    x += mv->d.x >> 3;
+    y += mv->d.y >> 3;
+
+    /* Need two pixels left/above, 3 right/below for 6-tap */
+    if (x < 2 || x + b_w - 1 + 3 >= w || y < 2 || y + b_h - 1 + 3 >= h)
+    {
+        reference += (mv->d.x >> 3) + (mv->d.y >> 3) * stride;
+        build_mc_border(emul_block,
+                        reference - 2 - 2 * stride, stride,
+                        x - 2, y - 2, b_w + 5, b_h + 5, w, h);
+        reference = emul_block + 2 * stride + 2;
+        reference -= (mv->d.x >> 3) + (mv->d.y >> 3) * stride;
+    }
+
+    predict = filter_block(output, reference, stride, mv, mc);
+    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+}
+
+
+static void
+predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
+                            struct img_index        *img,
+                            short                   *coeffs,
+                            struct mb_info          *mbi,
+                            int                      mb_col,
+                            int                      mb_row)
+{
+    /* TODO: move this into its own buffer. This only works because we
+     * still have a border allocated.
+     */
+    unsigned char *emul_block = ctx->frame_strg[0].img.img_data;
+    unsigned char *reference;
+    unsigned char *output;
+    ptrdiff_t      reference_offset;
+    int            w, h, x, y, b;
+    union mv       chroma_mv[4];
+    unsigned char *u = img->u, *v = img->v;
+
+
+    x = mb_col * 16;
+    y = mb_row * 16;
+    w = ctx->mb_cols * 16;
+    h = ctx->mb_rows * 16;
+    output = img->y;
+    reference_offset = ctx->ref_frame_offsets[mbi->base.ref_frame];
+    reference = output + reference_offset;
+
+    if (mbi->base.y_mode != SPLITMV)
+    {
+        union mv uvmv;
+
+        mbi->split.mvs[0] = mbi->base.mv;
+        mbi->split.mvs[2] = mbi->base.mv;
+        mbi->split.mvs[8] = mbi->base.mv;
+        mbi->split.mvs[10] = mbi->base.mv;
+        mbi->base.partitioning = SPLITMV_8X8;
+
+        uvmv = mbi->base.mv;
+        uvmv.d.x = (uvmv.d.x + 1 + (uvmv.d.x >> 31) * 2) / 2;
+        uvmv.d.y = (uvmv.d.y + 1 + (uvmv.d.y >> 31) * 2) / 2;
+        chroma_mv[0] = uvmv;
+        chroma_mv[1] = uvmv;
+        chroma_mv[2] = uvmv;
+        chroma_mv[3] = uvmv;
+    }
+    else
+    {
+        int full_pixel = ctx->frame_hdr.version == 3;
+
+        chroma_mv[0] = calculate_chroma_splitmv(mbi,  0, full_pixel);
+        chroma_mv[1] = calculate_chroma_splitmv(mbi,  2, full_pixel);
+        chroma_mv[2] = calculate_chroma_splitmv(mbi,  8, full_pixel);
+        chroma_mv[3] = calculate_chroma_splitmv(mbi, 10, full_pixel);
+    }
+
+
+    /* Luma */
+    if (mbi->base.partitioning < SPLITMV_4X4)
+    {
+        recon_4_edge_blocks(output, emul_block, reference, img->stride,
+                            &mbi->split.mvs[0], ctx->mc_functions[MC_8X8],
+                            coeffs, mbi, x, y, w, h, 0);
+        recon_4_edge_blocks(output + 8, emul_block, reference + 8, img->stride,
+                            &mbi->split.mvs[2], ctx->mc_functions[MC_8X8],
+                            coeffs, mbi, x + 8, y, w, h, 2);
+        output += 8 * img->stride;
+        reference += 8 * img->stride;
+        recon_4_edge_blocks(output, emul_block, reference, img->stride,
+                            &mbi->split.mvs[8], ctx->mc_functions[MC_8X8],
+                            coeffs, mbi, x, y + 8, w, h, 8);
+        recon_4_edge_blocks(output + 8, emul_block, reference + 8, img->stride,
+                            &mbi->split.mvs[10], ctx->mc_functions[MC_8X8],
+                            coeffs, mbi, x + 8, y + 8, w, h, 10);
+    }
+    else
+    {
+        for (b = 0; b < 16; b++)
+        {
+            recon_1_edge_block(output, emul_block, reference, img->stride,
+                               &mbi->split.mvs[b], ctx->mc_functions[MC_4X4],
+                               coeffs, mbi, x, y, w, h, b);
+
+            x += 4;
+            output += 4;
+            reference += 4;
+
+            if ((b & 3) == 3)
+            {
+                x -= 16;
+                y += 4;
+                output += 4 * img->stride - 16;
+                reference += 4 * img->stride - 16;
+            }
+        }
+
+        x = mb_col * 16;
+        y = mb_row * 16;
+    }
+
+    /* Chroma */
+    x >>= 1;
+    y >>= 1;
+    w >>= 1;
+    h >>= 1;
+
+    for (b = 0; b < 4; b++)
+    {
+        recon_1_edge_block(u, emul_block, u + reference_offset,
+                           img->uv_stride,
+                           &chroma_mv[b], ctx->mc_functions[MC_4X4],
+                           coeffs, mbi, x, y, w, h, b + 16);
+        recon_1_edge_block(v, emul_block, v + reference_offset,
+                           img->uv_stride,
+                           &chroma_mv[b], ctx->mc_functions[MC_4X4],
+                           coeffs, mbi, x, y, w, h, b + 20);
+        u += 4;
+        v += 4;
+        x += 4;
+
+        if (b & 1)
+        {
+            x -= 8;
+            y += 4;
+            u += 4 * img->uv_stride - 8;
+            v += 4 * img->uv_stride - 8;
+        }
+    }
+
+}
+
 static void
 predict_inter(struct vp8_decoder_ctx  *ctx,
               struct img_index        *img,
               short                   *coeffs,
-              struct mb_info          *mbi,
-              int                      mb_col,
-              int                      mb_row)
+              struct mb_info          *mbi)
 {
     ptrdiff_t            reference_offset;
     union mv             uvmv;
@@ -1475,7 +1756,10 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
             if (mbi->base.y_mode != SPLITMV) // && != BPRED
                 fixup_dc_coeffs(mbi, coeffs);
 
-            predict_inter(ctx, &img, coeffs, mbi, col, row);
+            if (mbi->base.need_mc_border)
+                predict_inter_emulated_edge(ctx, &img, coeffs, mbi, col, row);
+            else
+                predict_inter(ctx, &img, coeffs, mbi);
         }
 
         /* Advance to the next macroblock */

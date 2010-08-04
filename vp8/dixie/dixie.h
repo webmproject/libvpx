@@ -224,9 +224,10 @@ struct mb_base_info
 {
     unsigned char y_mode     : 4;
     unsigned char uv_mode    : 4;
-    unsigned char segment_id : 3;
+    unsigned char segment_id : 2;
     unsigned char ref_frame  : 2;
     unsigned char skip_coeff : 1;
+    unsigned char need_mc_border : 1;
     enum splitmv_partitioning  partitioning : 2;
     union mv      mv;
     unsigned int  eob_mask;

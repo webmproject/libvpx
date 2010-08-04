@@ -299,55 +299,6 @@ dequant_init(struct dequant_factors        dqf[MAX_MB_SEGMENTS],
 }
 
 
-enum
-{
-    BORDER_PIXELS = 8
-};
-
-
-static void
-extend_frame_borders(vpx_image_t *img)
-{
-    int r, border, p;
-    unsigned char *left, *right;
-
-    for (p = 0; p < 3; p++)
-    {
-        border = BORDER_PIXELS * (p ? 1 : 2); // note same border for y and uv
-
-        /* extend row 0 left and right */
-        right = img->planes[p] + (img->d_w >> (p ? 1 : 0));
-        left = img->planes[p] - border;
-        memset(left, left[border], border);
-        memset(right, right[-1], border);
-
-        /* extend row 0 up */
-        for (r = 0 - border; r < 0; r++)
-        {
-            memcpy(left + r * img->stride[p], left, (img->d_w >> (p ? 1 : 0)) + 2 * border);
-        }
-
-        /* extend body left and right */
-        for (r = 1; r < (img->d_h >> (p ? 1 : 0)); r++)
-        {
-            left += img->stride[p];
-            right += img->stride[p];
-            memset(left, left[border], border);
-            memset(right, right[-1], border);
-        }
-
-        /* extend row n down. use right to point to row n */
-        right = left;
-
-        for (r = 0; r < border; r++)
-        {
-            left += img->stride[p];
-            memcpy(left, right, (img->d_w >> (p ? 1 : 0)) + 2 * border);
-        }
-    }
-}
-
-
 static void
 decode_frame(struct vp8_decoder_ctx *ctx,
              const unsigned char    *data,
@@ -443,8 +394,6 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 
     if (ctx->loopfilter_hdr.level)
         vp8_dixie_loopfilter_process_row(ctx, row - 1, 0, ctx->mb_cols);
-
-    extend_frame_borders(&ctx->ref_frames[CURRENT_FRAME]->img);
 
     ctx->frame_cnt++;
 
