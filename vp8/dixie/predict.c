@@ -892,6 +892,44 @@ DEFINE_FILTER(fourtap, 8, 4)
 DEFINE_FILTER(sixtap, 4, 4)
 DEFINE_FILTER(fourtap, 4, 4)
 
+#define DEFINE_SPLIT_FILTER(w, h)\
+    static void filter_6h4v_##w##x##h##_c(const unsigned char *reference,\
+                                          int                  ref_stride,\
+                                          int                  mx,\
+                                          int                  my,\
+                                          unsigned char       *output,\
+                                          int                  output_stride)\
+    {\
+        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
+        \
+        sixtap_horiz(temp, 16,\
+                     reference - 1 * ref_stride, ref_stride,\
+                     w, h + 3, mx, my);\
+        fourtap_vert(output, output_stride,\
+                     temp + 1 * 16, 16,\
+                     w, h, mx, my);\
+    }\
+    static void filter_4h6v_##w##x##h##_c(const unsigned char *reference,\
+                                          int                  ref_stride,\
+                                          int                  mx,\
+                                          int                  my,\
+                                          unsigned char       *output,\
+                                          int                  output_stride)\
+    {\
+        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
+        \
+        fourtap_horiz(temp, 16,\
+                      reference - 2 * ref_stride, ref_stride,\
+                      w, h + 5, mx, my);\
+        sixtap_vert(output, output_stride,\
+                    temp + 2 * 16, 16,\
+                    w, h, mx, my);\
+    }
+
+DEFINE_SPLIT_FILTER(16, 16)
+DEFINE_SPLIT_FILTER(8, 8)
+DEFINE_SPLIT_FILTER(8, 4)
+DEFINE_SPLIT_FILTER(4, 4)
 
 struct img_index
 {
@@ -1607,6 +1645,43 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
                              ctx->frame_hdr.kf.w, ctx->frame_hdr.kf.h);
 
         }
+
+        /* TODO: Move the rest of this out of this function */
+        ctx->mc_functions[MC_16X16][MC_4H0V] = fourtap_h_16x16_c;
+        ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
+        ctx->mc_functions[MC_16X16][MC_0H4V] = fourtap_v_16x16_c;
+        ctx->mc_functions[MC_16X16][MC_4H4V] = fourtap_hv_16x16_c;
+        ctx->mc_functions[MC_16X16][MC_6H4V] = filter_6h4v_16x16_c;
+        ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
+        ctx->mc_functions[MC_16X16][MC_4H6V] = filter_4h6v_16x16_c;
+        ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
+
+        ctx->mc_functions[MC_8X8][MC_4H0V]   = fourtap_h_8x8_c;
+        ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
+        ctx->mc_functions[MC_8X8][MC_0H4V]   = fourtap_v_8x8_c;
+        ctx->mc_functions[MC_8X8][MC_4H4V]   = fourtap_hv_8x8_c;
+        ctx->mc_functions[MC_8X8][MC_6H4V]   = filter_6h4v_8x8_c;
+        ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
+        ctx->mc_functions[MC_8X8][MC_4H6V]   = filter_4h6v_8x8_c;
+        ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
+
+        ctx->mc_functions[MC_8X4][MC_4H0V]   = fourtap_h_8x4_c;
+        ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
+        ctx->mc_functions[MC_8X4][MC_0H4V]   = fourtap_v_8x4_c;
+        ctx->mc_functions[MC_8X4][MC_4H4V]   = fourtap_hv_8x4_c;
+        ctx->mc_functions[MC_8X4][MC_6H4V]   = filter_6h4v_8x4_c;
+        ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
+        ctx->mc_functions[MC_8X4][MC_4H6V]   = filter_4h6v_8x4_c;
+        ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
+
+        ctx->mc_functions[MC_4X4][MC_4H0V]   = fourtap_h_4x4_c;
+        ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
+        ctx->mc_functions[MC_4X4][MC_0H4V]   = fourtap_v_4x4_c;
+        ctx->mc_functions[MC_4X4][MC_4H4V]   = fourtap_hv_4x4_c;
+        ctx->mc_functions[MC_4X4][MC_6H4V]   = filter_6h4v_4x4_c;
+        ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
+        ctx->mc_functions[MC_4X4][MC_4H6V]   = filter_4h6v_4x4_c;
+        ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
     }
 
     /* Find a free framebuffer to predict into */
@@ -1627,79 +1702,6 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
     }
 
     /* TODO: No need to do this on every frame... */
-#if 1
-    ctx->mc_functions[MC_16X16][MC_4H0V] = fourtap_h_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_0H4V] = fourtap_v_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_4H4V] = fourtap_hv_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_6H4V] = sixtap_hv_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_4H6V] = sixtap_hv_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
-
-    ctx->mc_functions[MC_8X8][MC_4H0V]   = fourtap_h_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_0H4V]   = fourtap_v_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_4H4V]   = fourtap_hv_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_6H4V]   = sixtap_hv_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_4H6V]   = sixtap_hv_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
-
-    ctx->mc_functions[MC_8X4][MC_4H0V]   = fourtap_h_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_0H4V]   = fourtap_v_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_4H4V]   = fourtap_hv_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_6H4V]   = sixtap_hv_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_4H6V]   = sixtap_hv_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
-
-    ctx->mc_functions[MC_4X4][MC_4H0V]   = fourtap_h_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_0H4V]   = fourtap_v_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_4H4V]   = fourtap_hv_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_6H4V]   = sixtap_hv_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_4H6V]   = sixtap_hv_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
-#else
-    ctx->mc_functions[MC_16X16][MC_4H0V] = sixtap_h_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_0H4V] = sixtap_v_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_4H4V] = sixtap_hv_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_6H4V] = sixtap_hv_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_4H6V] = sixtap_hv_16x16_c;
-    ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
-
-    ctx->mc_functions[MC_8X8][MC_4H0V]   = sixtap_h_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_0H4V]   = sixtap_v_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_4H4V]   = sixtap_hv_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_6H4V]   = sixtap_hv_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_4H6V]   = sixtap_hv_8x8_c;
-    ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
-
-    ctx->mc_functions[MC_4X4][MC_4H0V]   = sixtap_h_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_0H4V]   = sixtap_v_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_4H4V]   = sixtap_hv_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_6H4V]   = sixtap_hv_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_4H6V]   = sixtap_hv_4x4_c;
-    ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
-
-    ctx->mc_functions[MC_8X4][MC_4H0V]   = sixtap_h_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_0H4V]   = sixtap_v_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_4H4V]   = sixtap_hv_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_6H4V]   = sixtap_hv_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_4H6V]   = sixtap_hv_8x4_c;
-    ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
-#endif
 }
 
 
