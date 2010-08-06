@@ -586,8 +586,8 @@ vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
     unsigned int          col;
     struct mv_clamp_rect  bounds;
 
-    this = ctx->mb_info_rows[row];
-    above = ctx->mb_info_rows[row - 1];
+    this = ctx->mb_info_rows[row] + start_col;
+    above = ctx->mb_info_rows[row - 1] + start_col;
 
     /* Calculate the eighth-pel MV bounds using a 1 MB border. */
     bounds.to_left   = -((start_col + 1) << 7);

@@ -411,7 +411,7 @@ vp8_dixie_tokens_process_row(struct vp8_decoder_ctx *ctx,
                              unsigned int            num_cols)
 {
     struct token_decoder *tokens = &ctx->tokens[partition];
-    short                *coeffs = tokens->coeffs;
+    short                *coeffs = tokens->coeffs + 25 * 16 * start_col;
     unsigned int          col;
     token_entropy_ctx_t  *above = ctx->above_token_entropy_ctx + start_col;
     token_entropy_ctx_t  *left = &tokens->left_token_entropy_ctx;

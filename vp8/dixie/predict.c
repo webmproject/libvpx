@@ -1726,7 +1726,8 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
     img.u += (img.uv_stride * row + start_col) * 8;
     img.v += (img.uv_stride * row + start_col) * 8;
     mbi = ctx->mb_info_rows[row] + start_col;
-    coeffs = ctx->tokens[row & (ctx->token_hdr.partitions - 1)].coeffs;
+    coeffs = ctx->tokens[row & (ctx->token_hdr.partitions - 1)].coeffs
+             + 25 * 16 * start_col;
 
     /* Fix up the out-of-frame pixels */
     if (start_col == 0)
