@@ -47,6 +47,12 @@ void vp8_tokens_from_tree(struct vp8_token_struct *p, vp8_tree t)
     tree2tok(p, t, 0, 0, 0);
 }
 
+void vp8_tokens_from_tree_offset(struct vp8_token_struct *p, vp8_tree t,
+                                 int offset)
+{
+    tree2tok(p - offset, t, 0, 0, 0);
+}
+
 static void branch_counts(
     int n,                      /* n = size of alphabet */
     vp8_token tok               [ /* n */ ],

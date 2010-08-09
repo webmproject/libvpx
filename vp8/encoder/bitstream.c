@@ -792,7 +792,8 @@ static void write_mv_ref
 
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
 
-    vp8_write_token(w, vp8_mv_ref_tree, p, VP8_MVREFENCODINGS + m);
+    vp8_write_token(w, vp8_mv_ref_tree, p,
+                    vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
 
 static void write_sub_mv_ref
@@ -802,7 +803,8 @@ static void write_sub_mv_ref
 {
     assert(LEFT4X4 <= m  &&  m <= NEW4X4);
 
-    vp8_write_token(w, vp8_sub_mv_ref_tree, p, VP8_SUBMVREFENCODINGS + m);
+    vp8_write_token(w, vp8_sub_mv_ref_tree, p,
+                    vp8_sub_mv_ref_encoding_array - LEFT4X4 + m);
 }
 
 static void write_mv

@@ -54,10 +54,6 @@ extern struct vp8_token_struct vp8_mbsplit_encodings  [VP8_NUMMBSPLITS];
 extern struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
 extern struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
-#define VP8_MVREFENCODINGS      (vp8_mv_ref_encoding_array - NEARESTMV)
-#define VP8_SUBMVREFENCODINGS   (vp8_sub_mv_ref_encoding_array - LEFT4X4)
-
-
 extern const vp8_tree_index vp8_small_mvtree[];
 
 extern struct vp8_token_struct vp8_small_mvencodings [8];

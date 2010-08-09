@@ -54,6 +54,8 @@ typedef const struct vp8_token_struct
 /* Construct encoding array from tree. */
 
 void vp8_tokens_from_tree(struct vp8_token_struct *, vp8_tree);
+void vp8_tokens_from_tree_offset(struct vp8_token_struct *, vp8_tree,
+                                 int offset);
 
 
 /* Convert array of token occurrence counts into a table of probabilities

@@ -264,8 +264,10 @@ void vp8_entropy_mode_init()
     vp8_tokens_from_tree(vp8_uv_mode_encodings,  vp8_uv_mode_tree);
     vp8_tokens_from_tree(vp8_mbsplit_encodings, vp8_mbsplit_tree);
 
-    vp8_tokens_from_tree(VP8_MVREFENCODINGS,   vp8_mv_ref_tree);
-    vp8_tokens_from_tree(VP8_SUBMVREFENCODINGS, vp8_sub_mv_ref_tree);
+    vp8_tokens_from_tree_offset(vp8_mv_ref_encoding_array,
+                                vp8_mv_ref_tree, NEARESTMV);
+    vp8_tokens_from_tree_offset(vp8_sub_mv_ref_encoding_array,
+                                vp8_sub_mv_ref_tree, LEFT4X4);
 
     vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
 }
