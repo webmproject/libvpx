@@ -123,7 +123,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_ssse3;
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_ssse3;
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_ssse3;
-//        rtcd->subpix.sixtap4x4     = vp8_sixtap_predict4x4_ssse3;
+        rtcd->subpix.sixtap4x4     = vp8_sixtap_predict4x4_ssse3;
     }
 #endif
 

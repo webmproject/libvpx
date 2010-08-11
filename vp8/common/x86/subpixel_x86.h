@@ -104,8 +104,8 @@ extern prototype_subpixel_predict(vp8_sixtap_predict4x4_ssse3);
 #undef  vp8_subpix_sixtap8x4
 #define vp8_subpix_sixtap8x4 vp8_sixtap_predict8x4_ssse3
 
-//#undef  vp8_subpix_sixtap4x4
-//#define vp8_subpix_sixtap4x4 vp8_sixtap_predict4x4_ssse3
+#undef  vp8_subpix_sixtap4x4
+#define vp8_subpix_sixtap4x4 vp8_sixtap_predict4x4_ssse3
 
 
 //#undef  vp8_subpix_bilinear16x16
