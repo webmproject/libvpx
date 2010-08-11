@@ -164,7 +164,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                         cpi->tplist[mb_row].stop = *tp;
 
-                        xd->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
+                        x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
 
                         // store macroblock mode info into context array
                         vpx_memcpy(&xd->mode_info_context->mbmi, &xd->mbmi, sizeof(xd->mbmi));
@@ -371,7 +371,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 #if CONFIG_RUNTIME_CPU_DETECT
         mbd->rtcd                   = xd->rtcd;
 #endif
-        mbd->gf_active_ptr            = xd->gf_active_ptr;
+        mb->gf_active_ptr            = x->gf_active_ptr;
 
         mb->vector_range             = 32;
 

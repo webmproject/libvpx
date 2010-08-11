@@ -133,8 +133,6 @@ typedef struct VP8Common
 
     unsigned int frames_since_golden;
     unsigned int frames_till_alt_ref_frame;
-    unsigned char *gf_active_flags;   // Record of which MBs still refer to last golden frame either directly or through 0,0
-    int gf_active_count;
 
     /* We allocate a MODE_INFO struct for each macroblock, together with
        an extra row on top and column on the left to simplify prediction. */

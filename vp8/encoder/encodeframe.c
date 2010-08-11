@@ -454,7 +454,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
         cpi->tplist[mb_row].stop = *tp;
 
-        xd->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
+        x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
 
         // store macroblock mode info into context array
         vpx_memcpy(&xd->mode_info_context->mbmi, &xd->mbmi, sizeof(xd->mbmi));
@@ -536,7 +536,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     //}
 
 
-    xd->gf_active_ptr = (signed char *)cm->gf_active_flags;     // Point to base of GF active flags data structure
+    x->gf_active_ptr = (signed char *)cpi->gf_active_flags;     // Point to base of GF active flags data structure
 
     x->vector_range = 32;
 

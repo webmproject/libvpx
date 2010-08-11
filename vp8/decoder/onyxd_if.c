@@ -24,7 +24,7 @@
 #include "threading.h"
 #include "decoderthreading.h"
 #include <stdio.h>
-#include "segmentation_common.h"
+
 #include "quant_common.h"
 #include "vpx_scale/vpxscale.h"
 #include "systemdependent.h"
@@ -353,9 +353,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         pbi->common.error.setjmp = 0;
         return retcode;
     }
-
-    // Update the GF useage maps.
-    vp8_update_gf_useage_maps(cm, &pbi->mb);
 
     if (pbi->b_multithreaded_lf && pbi->common.filter_level != 0)
         vp8_stop_lfthread(pbi);

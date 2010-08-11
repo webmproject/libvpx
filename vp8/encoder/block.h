@@ -93,6 +93,9 @@ typedef struct
 
     int encode_breakout;
 
+    //char * gf_active_ptr;
+    signed char *gf_active_ptr;
+
     unsigned char *active_ptr;
     MV_CONTEXT *mvc;
 

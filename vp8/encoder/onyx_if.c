@@ -224,6 +224,12 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->tok);
     cpi->tok = 0;
 
+    // Structure used to minitor GF useage
+    if (cpi->gf_active_flags != 0)
+        vpx_free(cpi->gf_active_flags);
+
+    cpi->gf_active_flags = 0;
+
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -1256,6 +1262,15 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     cpi->inter_zz_count = 0;
     cpi->gf_bad_count = 0;
     cpi->gf_update_recommended = 0;
+
+
+    // Structures used to minitor GF usage
+    if (cpi->gf_active_flags != 0)
+        vpx_free(cpi->gf_active_flags);
+
+    CHECK_MEM_ERROR(cpi->gf_active_flags, vpx_calloc(1, cm->mb_rows * cm->mb_cols));
+
+    cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 }
 
 
@@ -2862,8 +2877,8 @@ static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
     }
 
     // Update data structure that monitors level of reference to last GF
-    vpx_memset(cm->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-    cm->gf_active_count = cm->mb_rows * cm->mb_cols;
+    vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+    cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
     // this frame refreshes means next frames don't unless specified by user
 
     cpi->common.frames_since_golden = 0;
@@ -2910,8 +2925,8 @@ static void update_golden_frame_and_stats(VP8_COMP *cpi)
         }
 
         // Update data structure that monitors level of reference to last GF
-        vpx_memset(cm->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-        cm->gf_active_count = cm->mb_rows * cm->mb_cols;
+        vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+        cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
         // this frame refreshes means next frames don't unless specified by user
         cm->refresh_golden_frame = 0;
@@ -3415,7 +3430,7 @@ static void vp8cx_temp_filter_c
         {
             if ((frames_to_blur_backward + frames_to_blur_forward) >= max_frames)
             {
-                frames_to_blur_backward 
+                frames_to_blur_backward
                     = max_frames - frames_to_blur_forward - 1;
             }
         }
@@ -4298,7 +4313,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
 
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
-    vp8_update_gf_useage_maps(cm, &cpi->mb.e_mbd);
+    vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
 
     if (cm->frame_type == KEY_FRAME)
         cm->refresh_last_frame = 1;
@@ -4306,7 +4321,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     if (0)
     {
         FILE *f = fopen("gfactive.stt", "a");
-        fprintf(f, "%8d %8d %8d %8d %8d\n", cm->current_video_frame, (100 * cpi->common.gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols), cpi->this_iiratio, cpi->next_iiratio, cm->refresh_golden_frame);
+        fprintf(f, "%8d %8d %8d %8d %8d\n", cm->current_video_frame, (100 * cpi->gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols), cpi->this_iiratio, cpi->next_iiratio, cm->refresh_golden_frame);
         fclose(f);
     }
 
@@ -4710,7 +4725,7 @@ int vp8_is_gf_update_needed(VP8_PTR ptr)
 void vp8_check_gf_quality(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
-    int gf_active_pct = (100 * cm->gf_active_count) / (cm->mb_rows * cm->mb_cols);
+    int gf_active_pct = (100 * cpi->gf_active_count) / (cm->mb_rows * cm->mb_cols);
     int gf_ref_usage_pct = (cpi->count_mb_ref_frame_usage[GOLDEN_FRAME] * 100) / (cm->mb_rows * cm->mb_cols);
     int last_ref_zz_useage = (cpi->inter_zz_count * 100) / (cm->mb_rows * cm->mb_cols);
 

@@ -646,6 +646,12 @@ typedef struct
     int b_calculate_ssimg;
 #endif
     int b_calculate_psnr;
+
+
+    unsigned char *gf_active_flags;   // Record of which MBs still refer to last golden frame either directly or through 0,0
+    int gf_active_count;
+
+
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);

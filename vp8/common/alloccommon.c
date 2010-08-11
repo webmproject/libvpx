@@ -54,11 +54,6 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
     oci->above_context[Y2CONTEXT] = 0;
     oci->mip = 0;
 
-    // Structure used to minitor GF useage
-    if (oci->gf_active_flags != 0)
-        vpx_free(oci->gf_active_flags);
-
-    oci->gf_active_flags = 0;
 }
 
 int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
@@ -156,20 +151,6 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     }
 
     vp8_update_mode_info_border(oci->mi, oci->mb_rows, oci->mb_cols);
-
-    // Structures used to minitor GF usage
-    if (oci->gf_active_flags != 0)
-        vpx_free(oci->gf_active_flags);
-
-    oci->gf_active_flags = (unsigned char *)vpx_calloc(oci->mb_rows * oci->mb_cols, 1);
-
-    if (!oci->gf_active_flags)
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-    oci->gf_active_count = oci->mb_rows * oci->mb_cols;
 
     return 0;
 }

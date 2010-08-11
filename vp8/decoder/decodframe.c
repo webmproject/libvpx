@@ -21,7 +21,7 @@
 #include "alloccommon.h"
 #include "entropymode.h"
 #include "quant_common.h"
-#include "segmentation_common.h"
+
 #include "setupintrarecon.h"
 #include "demode.h"
 #include "decodemv.h"
@@ -446,8 +446,6 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         recon_uvoffset += 8;
 
         ++xd->mode_info_context;  /* next mb */
-
-        xd->gf_active_ptr++;      // GF useage flag for next MB
 
         xd->above_context[Y1CONTEXT] += 4;
         xd->above_context[UCONTEXT ] += 2;
@@ -900,9 +898,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vpx_memset(pc->above_context[UCONTEXT ], 0, sizeof(ENTROPY_CONTEXT) * pc->mb_cols * 2);
     vpx_memset(pc->above_context[VCONTEXT ], 0, sizeof(ENTROPY_CONTEXT) * pc->mb_cols * 2);
     vpx_memset(pc->above_context[Y2CONTEXT], 0, sizeof(ENTROPY_CONTEXT) * pc->mb_cols);
-
-    xd->gf_active_ptr = (signed char *)pc->gf_active_flags;     // Point to base of GF active flags data structure
-
 
     vpx_memcpy(&xd->block[0].bmi, &xd->mode_info_context->bmi[0], sizeof(B_MODE_INFO));
 

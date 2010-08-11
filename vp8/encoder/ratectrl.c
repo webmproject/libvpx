@@ -408,7 +408,7 @@ static void calc_gf_params(VP8_COMP *cpi)
                   cpi->recent_ref_frame_usage[GOLDEN_FRAME] +
                   cpi->recent_ref_frame_usage[ALTREF_FRAME];
 
-    int pct_gf_active = (100 * cpi->common.gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
+    int pct_gf_active = (100 * cpi->gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
 
     // Reset the last boost indicator
     //cpi->last_boost = 100;
@@ -1022,7 +1022,7 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                       cpi->recent_ref_frame_usage[GOLDEN_FRAME] +
                       cpi->recent_ref_frame_usage[ALTREF_FRAME];
 
-        int pct_gf_active = (100 * cpi->common.gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
+        int pct_gf_active = (100 * cpi->gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
 
         // Reset the last boost indicator
         //cpi->last_boost = 100;

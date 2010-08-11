@@ -51,7 +51,6 @@ void vp8_setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC 
         mbd->subpixel_predict8x4     = xd->subpixel_predict8x4;
         mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
-        mbd->gf_active_ptr            = xd->gf_active_ptr;
 
         mbd->mode_info        = pc->mi - 1;
         mbd->mode_info_context = pc->mi   + pc->mode_info_stride * (i + 1);
@@ -108,7 +107,6 @@ void vp8_setup_loop_filter_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         //mbd->subpixel_predict8x4     = xd->subpixel_predict8x4;
         //mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         //mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
-        //mbd->gf_active_ptr            = xd->gf_active_ptr;
 
         mbd->mode_info        = pc->mi - 1;
         mbd->mode_info_context = pc->mi   + pc->mode_info_stride * (i + 1);
@@ -269,8 +267,6 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                         recon_uvoffset += 8;
 
                         ++xd->mode_info_context;  /* next mb */
-
-                        xd->gf_active_ptr++;      // GF useage flag for next MB
 
                         xd->above_context[Y1CONTEXT] += 4;
                         xd->above_context[UCONTEXT ] += 2;
@@ -688,8 +684,6 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
                 recon_uvoffset += 8;
 
                 ++xd->mode_info_context;  /* next mb */
-
-                xd->gf_active_ptr++;      // GF useage flag for next MB
 
                 xd->above_context[Y1CONTEXT] += 4;
                 xd->above_context[UCONTEXT ] += 2;
