@@ -60,10 +60,9 @@ unsigned int uv_modes[4]  = {0, 0, 0, 0};
 unsigned int b_modes[14]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
-// The first four entries are dummy values
 static const int qrounding_factors[129] =
 {
-    56, 56, 56, 56, 56, 56, 56, 56,
+    56, 56, 56, 56, 48, 48, 56, 56,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
@@ -84,7 +83,7 @@ static const int qrounding_factors[129] =
 
 static const int qzbin_factors[129] =
 {
-    64, 64, 64, 64, 80, 80, 80, 80,
+    72, 72, 72, 72, 80, 80, 72, 72,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
