@@ -316,21 +316,21 @@ sym(vp8_filter_block1d4_h6_ssse3):
     ; end prolog
 
     movsxd      rdx, DWORD PTR arg(5)   ;table index
-    mov         rsi, arg(0)             ;src_ptr
+    xor         rsi, rsi
     shl         rdx, 4      ;
 
     lea         rax, [k0_k5 GLOBAL]
     add         rax, rdx
     movdqa      xmm7, [rd GLOBAL]
 
-
-
-
+    cmp         esi, DWORD PTR [rax]
+    je          vp8_filter_block1d4_h4_ssse3
 
     movdqa      xmm4, XMMWORD PTR [rax]         ;k0_k5
     movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
     movdqa      xmm6, XMMWORD PTR [rax+128]     ;k1_k3
 
+    mov         rsi, arg(0)             ;src_ptr
     mov         rdi, arg(2)             ;output_ptr
     movsxd      rax, dword ptr arg(1)   ;src_pixels_per_line
     movsxd      rcx, dword ptr arg(4)   ;output_height
@@ -362,10 +362,8 @@ filter_block1d4_h6_rowloop_ssse3:
     psraw       xmm0, 7
     packuswb    xmm0, xmm0
 
-;
-    punpcklbw   xmm0, xmm1
+    movd        DWORD PTR [rdi], xmm0
 
-    movq        MMWORD PTR [rdi], xmm0
     add         rdi, rdx
     dec         rcx
     jnz         filter_block1d4_h6_rowloop_ssse3
@@ -377,6 +375,53 @@ filter_block1d4_h6_rowloop_ssse3:
     UNSHADOW_ARGS
     pop         rbp
     ret
+
+vp8_filter_block1d4_h4_ssse3:
+    movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
+    movdqa      xmm6, XMMWORD PTR [rax+128]     ;k1_k3
+    movdqa      xmm0, XMMWORD PTR [shuf2b GLOBAL]
+    movdqa      xmm3, XMMWORD PTR [shuf3b GLOBAL]
+
+    mov         rsi, arg(0)             ;src_ptr
+    mov         rdi, arg(2)             ;output_ptr
+    movsxd      rax, dword ptr arg(1)   ;src_pixels_per_line
+    movsxd      rcx, dword ptr arg(4)   ;output_height
+
+    movsxd      rdx, dword ptr arg(3)   ;output_pitch
+
+filter_block1d4_h4_rowloop_ssse3:
+    movdqu      xmm1,   XMMWORD PTR [rsi - 2]
+
+    movdqa      xmm2, xmm1
+    pshufb      xmm1, xmm0 ;;[shuf2b GLOBAL]
+    pshufb      xmm2, xmm3 ;;[shuf3b GLOBAL]
+    pmaddubsw   xmm1, xmm5
+
+;--
+    pmaddubsw   xmm2, xmm6
+
+    lea         rsi,    [rsi + rax]
+;--
+    paddsw      xmm1, xmm7
+    paddsw      xmm1, xmm2
+    psraw       xmm1, 7
+    packuswb    xmm1, xmm1
+
+    movd        DWORD PTR [rdi], xmm1
+
+    add         rdi, rdx
+    dec         rcx
+    jnz         filter_block1d4_h4_rowloop_ssse3
+
+    ; begin epilog
+    pop rdi
+    pop rsi
+    RESTORE_GOT
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+
 
 ;void vp8_filter_block1d16_v6_ssse3
 ;(
@@ -700,81 +745,88 @@ vp8_filter_block1d8_v4_ssse3_loop:
     UNSHADOW_ARGS
     pop         rbp
     ret
-
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-global sym(vp8_filter_block1d8_h6_ssse3_slow)
-sym(vp8_filter_block1d8_h6_ssse3_slow):
+;void vp8_filter_block1d4_v6_ssse3
+;(
+;    unsigned char *src_ptr,
+;    unsigned int   src_pitch,
+;    unsigned char *output_ptr,
+;    unsigned int   out_pitch,
+;    unsigned int   output_height,
+;    unsigned int   vp8_filter_index
+;)
+global sym(vp8_filter_block1d4_v6_ssse3)
+sym(vp8_filter_block1d4_v6_ssse3):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 7
+    SHADOW_ARGS_TO_STACK 6
     GET_GOT     rbx
     push        rsi
     push        rdi
     ; end prolog
 
-    mov         rdx, arg(6) ;vp8_filter
-    mov         rsi, arg(0) ;src_ptr
+    movsxd      rdx, DWORD PTR arg(5)   ;table index
+    xor         rsi, rsi
+    shl         rdx, 4      ;
 
-    mov         rdi, arg(1) ;output_ptr
+    lea         rax, [k0_k5 GLOBAL]
+    add         rax, rdx
 
-    movsxd      rcx, dword ptr arg(4) ;output_height
-    movsxd      rax, dword ptr arg(2) ;src_pixels_per_line
+    movsxd      rdx, DWORD PTR arg(1)   ;pixels_per_line
+    mov         rdi, arg(2)             ;output_ptr
+%if ABI_IS_32BIT=0
+    movsxd      r8, DWORD PTR arg(3)    ; out_pitch
+%endif
+    movsxd      rcx, DWORD PTR arg(4)   ;[output_height]
 
-    movq        xmm7, [rdx]
-    pxor        xmm4, xmm4
-    movdqa      xmm5, XMMWORD PTR [shuf1 GLOBAL]
-    movdqa      xmm6, XMMWORD PTR [shuf2 GLOBAL]
+    cmp         esi, DWORD PTR [rax]
+    je          vp8_filter_block1d4_v4_ssse3
 
-    movsxd      rdx, dword ptr arg(5) ;output_width
+    movq        mm5, MMWORD PTR [rax]         ;k0_k5
+    movq        mm6, MMWORD PTR [rax+256]     ;k2_k4
+    movq        mm7, MMWORD PTR [rax+128]     ;k1_k3
 
-    punpcklqdq  xmm7, xmm7          ;copy filter constants to upper 8 bytes
+    mov         rsi, arg(0)             ;src_ptr
 
-filter_block1d8_h6_rowloop3_slow:
-    movdqu      xmm0,   XMMWORD PTR [rsi - 2]
+    mov         rax, rsi
+    add         rax, rdx
 
-    lea         rsi,    [rsi + rax]
+vp8_filter_block1d4_v6_ssse3_loop:
+    movd        mm1, DWORD PTR [rsi]                  ;A
+    movd        mm2, DWORD PTR [rsi + rdx]            ;B
+    movd        mm3, DWORD PTR [rsi + rdx * 2]        ;C
+    movd        mm4, DWORD PTR [rax + rdx * 2]        ;D
+    movd        mm0, DWORD PTR [rsi + rdx * 4]        ;E
 
-    movdqa      xmm1, xmm0
-    pshufb      xmm0, XMMWORD PTR [shuf1 GLOBAL]
+    punpcklbw   mm2, mm4                  ;B D
+    punpcklbw   mm3, mm0                  ;C E
 
-    movdqa      xmm2, xmm1
-    pmaddubsw   xmm0, xmm7
-    pshufb      xmm1, XMMWORD PTR [shuf2 GLOBAL]
+    movd        mm0, DWORD PTR [rax + rdx * 4]        ;F
 
-    movdqa      xmm3, xmm2
-    pmaddubsw   xmm1, xmm7
-    pshufb      xmm2, XMMWORD PTR [shuf3 GLOBAL]
+    movq        mm4, [rd GLOBAL]
 
-    pshufb      xmm3, XMMWORD PTR [shuf4 GLOBAL]
+    pmaddubsw   mm3, mm6
+    punpcklbw   mm1, mm0                  ;A F
+    pmaddubsw   mm2, mm7
+    pmaddubsw   mm1, mm5
+    add         rsi,  rdx
+    add         rax,  rdx
+;--
+;--
+    paddsw      mm2, mm3
+    paddsw      mm2, mm1
+    paddsw      mm2, mm4
+    psraw       mm2, 7
+    packuswb    mm2, mm2
 
-    pmaddubsw   xmm2, xmm7
-    pmaddubsw   xmm3, xmm7
-;4 cycles
+    movd        DWORD PTR [rdi], mm2
 
-    phaddsw     xmm0, xmm1
-    phaddsw     xmm2, xmm3
-;7 cycles
-    phaddsw     xmm0, xmm2
-;7 cycles
-
-
-    paddsw      xmm0, [rd GLOBAL]
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
-
-;
-    punpcklbw   xmm0, xmm4
-
-    movdqa      XMMWORD Ptr [rdi], xmm0
-    add         rdi, rdx
+%if ABI_IS_32BIT
+    add         rdi,        DWORD PTR arg(3) ;[out_pitch]
+%else
+    add         rdi,        r8
+%endif
     dec         rcx
-    jnz         filter_block1d8_h6_rowloop3_slow                ; next row
+    jnz         vp8_filter_block1d4_v6_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -783,111 +835,46 @@ filter_block1d8_h6_rowloop3_slow:
     UNSHADOW_ARGS
     pop         rbp
     ret
-;void vp8_filter_block1d16_h6_ssse3
-;(
-;    unsigned char  *src_ptr,
-;    unsigned short *output_ptr,
-;    unsigned int    src_pixels_per_line,
-;    unsigned int    pixel_step,
-;    unsigned int    output_height,
-;    unsigned int    output_width,
-;    short           *vp8_filter
-;)
-global sym(vp8_filter_block1d16_h6_ssse3_slow)
-sym(vp8_filter_block1d16_h6_ssse3_slow):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-    mov         rdx, arg(6) ;vp8_filter
-    mov         rsi, arg(0) ;src_ptr
 
-    mov         rdi, arg(1) ;output_ptr
+vp8_filter_block1d4_v4_ssse3:
+    movq        mm6, MMWORD PTR [rax+256]     ;k2_k4
+    movq        mm7, MMWORD PTR [rax+128]     ;k1_k3
+    movq        mm5, MMWORD PTR [rd GLOBAL]
 
-    movsxd      rcx, dword ptr arg(4) ;output_height
-    movsxd      rax, dword ptr arg(2) ;src_pixels_per_line
+    mov         rsi, arg(0)             ;src_ptr
 
-    movq        xmm7, [rdx]
-    pxor        xmm4, xmm4
-    movdqa      xmm5, XMMWORD PTR [shuf1 GLOBAL]
-    movdqa      xmm6, XMMWORD PTR [shuf2 GLOBAL]
+    mov         rax, rsi
+    add         rax, rdx
 
-    movsxd      rdx, dword ptr arg(5) ;output_width
+vp8_filter_block1d4_v4_ssse3_loop:
+    movd        mm2, DWORD PTR [rsi + rdx]            ;B
+    movd        mm3, DWORD PTR [rsi + rdx * 2]        ;C
+    movd        mm4, DWORD PTR [rax + rdx * 2]        ;D
+    movd        mm0, DWORD PTR [rsi + rdx * 4]        ;E
 
-    punpcklqdq  xmm7, xmm7          ;copy filter constants to upper 8 bytes
-    sub         rdi, rdx
+    punpcklbw   mm2, mm4                  ;B D
+    punpcklbw   mm3, mm0                  ;C E
 
-filter_block1d16_h6_rowloop3_slow:
-    movdqu      xmm0,   XMMWORD PTR [rsi - 2]
+    pmaddubsw   mm3, mm6
+    pmaddubsw   mm2, mm7
+    add         rsi,  rdx
+    add         rax,  rdx
+;--
+;--
+    paddsw      mm2, mm3
+    paddsw      mm2, mm5
+    psraw       mm2, 7
+    packuswb    mm2, mm2
 
-    movdqa      xmm1, xmm0
-    pshufb      xmm0, xmm5
+    movd        DWORD PTR [rdi], mm2
 
-    movdqa      xmm2, xmm1
-    pmaddubsw   xmm0, xmm7
-    pshufb      xmm1, xmm6
-
-    movdqa      xmm3, xmm2
-    pmaddubsw   xmm1, xmm7
-    pshufb      xmm2, XMMWORD PTR [shuf3 GLOBAL]
-    movdqu      xmm4,   XMMWORD PTR [rsi + 6]
-    pshufb      xmm3, XMMWORD PTR [shuf4 GLOBAL]
-    lea         rsi,    [rsi + rax]
-    pmaddubsw   xmm2, xmm7
-    phaddsw     xmm0, xmm1
-
-    pmaddubsw   xmm3, xmm7
-    movdqa      xmm1, xmm4
-    pshufb      xmm4, xmm5
-    movdqa      xmm5, xmm1
-    pmaddubsw   xmm4, xmm7
-    pshufb      xmm1, xmm6
-    phaddsw     xmm2, xmm3
-    pmaddubsw   xmm1, xmm7
-    movdqa      xmm3, xmm5
-    pshufb      xmm5, XMMWORD PTR [shuf3 GLOBAL]
-    add         rdi, rdx
-    pmaddubsw   xmm5, xmm7
-    pshufb      xmm3, XMMWORD PTR [shuf4 GLOBAL]
-    phaddsw     xmm4, xmm1
+%if ABI_IS_32BIT
+    add         rdi,        DWORD PTR arg(3) ;[out_pitch]
+%else
+    add         rdi,        r8
+%endif
     dec         rcx
-    phaddsw     xmm0, xmm2
-    pmaddubsw   xmm3, xmm7
-
-
-    paddsw      xmm0, [rd GLOBAL]
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
-    phaddsw     xmm5, xmm3
-    pxor        xmm3, xmm3
-    punpcklbw   xmm0, xmm3
-;--
-;--
-;--
-;--
-
-    phaddsw     xmm4, xmm5
-    movdqa      xmm5, XMMWORD PTR [shuf1 GLOBAL]
-    movdqa      XMMWORD Ptr [rdi], xmm0
-;--
-;--
-;--
-;--
-;--
-    paddsw      xmm4, [rd GLOBAL]
-    psraw       xmm4, 7
-    packuswb    xmm4, xmm4
-;
-    punpcklbw   xmm4, xmm3
-
-    movdqa      XMMWORD Ptr [rdi+16], xmm4
-
-    jnz         filter_block1d16_h6_rowloop3_slow                ; next row
-
+    jnz         vp8_filter_block1d4_v4_ssse3_loop
 
     ; begin epilog
     pop rdi
@@ -899,22 +886,6 @@ filter_block1d16_h6_rowloop3_slow:
 
 SECTION_RODATA
 align 16
-shuf1:
-    db 0, 1, 2, 4, 3, 5, 128, 128, 1, 2, 3, 5, 4, 6, 128, 128
-shuf2:
-    db 2, 3, 4, 6, 5, 7, 128, 128, 3, 4, 5, 7, 6, 8, 128, 128
-shuf3:
-    db 4, 5, 6, 8, 7, 9, 128, 128, 5, 6, 7, 9, 8, 10, 128, 128
-shuf4:
-    db 6, 7, 8, 10, 9, 11, 128, 128, 7, 8, 9, 11, 10, 12, 128, 128
-
-shuf1a:
-    db 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8
-shuf2a:
-    db 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 11
-shuf3a:
-    db 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 11, 10, 12
-
 shuf1b:
     db 0, 5, 1, 6, 2, 7, 3, 8, 4, 9, 5, 10, 6, 11, 7, 12
 shuf2b:
