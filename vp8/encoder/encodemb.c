@@ -121,20 +121,11 @@ void vp8_transform_mbuv(MACROBLOCK *x)
 
     for (i = 16; i < 24; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0], &x->block[i].coeff[0], 16);
-    }
-}
-
-void vp8_transform_mbuvrd(MACROBLOCK *x)
-{
-    int i;
-
-    for (i = 16; i < 24; i += 2)
-    {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0], 
             &x->block[i].coeff[0], 16);
     }
 }
+
 
 void vp8_transform_intra_mby(MACROBLOCK *x)
 {
@@ -155,23 +146,6 @@ void vp8_transform_intra_mby(MACROBLOCK *x)
 
 }
 
-void vp8_transform_intra_mbyrd(MACROBLOCK *x)
-{
-    int i;
-
-    for (i = 0; i < 16; i += 2)
-    {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
-            &x->block[i].coeff[0], 32);
-    }
-
-    // build dc block from 16 y dc values
-    vp8_build_dcblock(x);
-
-    // do 2nd order transform on the dc block
-    x->short_walsh4x4(&x->block[24].src_diff[0],
-        &x->block[24].coeff[0], 8);
-}
 
 void vp8_transform_mb(MACROBLOCK *x)
 {
@@ -219,31 +193,6 @@ void vp8_transform_mby(MACROBLOCK *x)
     }
 }
 
-void vp8_transform_mbrd(MACROBLOCK *x)
-{
-    int i;
-
-    for (i = 0; i < 16; i += 2)
-    {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
-            &x->block[i].coeff[0], 32);
-    }
-
-    // build dc block from 16 y dc values
-    if (x->e_mbd.mbmi.mode != SPLITMV)
-        vp8_build_dcblock(x);
-
-    for (i = 16; i < 24; i += 2)
-    {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
-            &x->block[i].coeff[0], 16);
-    }
-
-    // do 2nd order transform on the dc block
-    if (x->e_mbd.mbmi.mode != SPLITMV)
-        x->short_walsh4x4(&x->block[24].src_diff[0],
-            &x->block[24].coeff[0], 8);
-}
 
 void vp8_stuff_inter16x16(MACROBLOCK *x)
 {
@@ -744,7 +693,7 @@ void vp8_encode_inter16x16uvrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     vp8_build_inter_predictors_mbuv(&x->e_mbd);
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 
-    vp8_transform_mbuvrd(x);
+    vp8_transform_mbuv(x);
 
     vp8_quantize_mbuv(x);
 

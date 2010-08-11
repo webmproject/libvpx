@@ -155,7 +155,7 @@ void vp8_encode_intra16x16mbyrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
 
-    vp8_transform_intra_mbyrd(x);
+    vp8_transform_intra_mby(x);
 
     x->e_mbd.mbmi.mb_skip_coeff = 1;
 
@@ -223,7 +223,7 @@ void vp8_encode_intra16x16mbuvrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 
-    vp8_transform_mbuvrd(x);
+    vp8_transform_mbuv(x);
 
     vp8_quantize_mbuv(x);
 
