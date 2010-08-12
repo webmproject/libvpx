@@ -95,7 +95,7 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
     *(l+1) = 0;
 
     /* Clear entropy contexts for Y2 blocks */
-    if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
         a = A[Y2CONTEXT];
         l = L[Y2CONTEXT];
@@ -240,7 +240,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
     i = 0;
     stop = 16;
 
-    if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
         i = 24;
         stop = 24;

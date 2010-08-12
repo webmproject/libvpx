@@ -113,7 +113,7 @@ static void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
 // to dst buffer, we can write the result directly to dst buffer. This eliminates unnecessary copy.
 static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
-    if (xd->frame_type == KEY_FRAME  ||  xd->mbmi.ref_frame == INTRA_FRAME)
+    if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
 
         vp8_build_intra_predictors_mbuv_s(xd);
@@ -164,7 +164,7 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
 
 static void clamp_mvs(MACROBLOCKD *xd)
 {
-    if (xd->mbmi.mode == SPLITMV)
+    if (xd->mode_info_context->mbmi.mode == SPLITMV)
     {
         int i;
 
@@ -175,7 +175,7 @@ static void clamp_mvs(MACROBLOCKD *xd)
     }
     else
     {
-        clamp_mv_to_umv_border(&xd->mbmi.mv.as_mv, xd);
+        clamp_mv_to_umv_border(&xd->mode_info_context->mbmi.mv.as_mv, xd);
         clamp_uvmv_to_umv_border(&xd->block[16].bmi.mv.as_mv, xd);
     }
 
@@ -184,10 +184,9 @@ static void clamp_mvs(MACROBLOCKD *xd)
 void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     int eobtotal = 0;
-    MV  orig_mvs[24];
-    int i, do_clamp = xd->mbmi.need_to_clamp_mvs;
+    int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
 
-    if (xd->mbmi.mb_skip_coeff)
+    if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
         vp8_reset_mb_tokens_context(xd);
     }
@@ -199,20 +198,12 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
     /* Perform temporary clamping of the MV to be used for prediction */
     if (do_clamp)
     {
-        if (xd->mbmi.mode == SPLITMV)
-            for (i=0; i<24; i++)
-                orig_mvs[i] = xd->block[i].bmi.mv.as_mv;
-        else
-        {
-            orig_mvs[0] = xd->mbmi.mv.as_mv;
-            orig_mvs[1] = xd->block[16].bmi.mv.as_mv;
-        }
         clamp_mvs(xd);
     }
 
     xd->mode_info_context->mbmi.dc_diff = 1;
 
-    if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV && eobtotal == 0)
+    if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV && eobtotal == 0)
     {
         xd->mode_info_context->mbmi.dc_diff = 0;
         skip_recon_mb(pbi, xd);
@@ -223,11 +214,11 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
         mb_init_dequantizer(pbi, xd);
 
     // do prediction
-    if (xd->frame_type == KEY_FRAME  ||  xd->mbmi.ref_frame == INTRA_FRAME)
+    if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
         vp8_build_intra_predictors_mbuv(xd);
 
-        if (xd->mbmi.mode != B_PRED)
+        if (xd->mode_info_context->mbmi.mode != B_PRED)
         {
             vp8_build_intra_predictors_mby_ptr(xd);
         } else {
@@ -240,7 +231,7 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
     }
 
     // dequantization and idct
-    if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV)
+    if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
     {
         BLOCKD *b = &xd->block[24];
         DEQUANT_INVOKE(&pbi->dequant, block)(b);
@@ -283,7 +274,7 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
             }
         }
     }
-    else if ((xd->frame_type == KEY_FRAME  ||  xd->mbmi.ref_frame == INTRA_FRAME) && xd->mbmi.mode == B_PRED)
+    else if ((xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) && xd->mode_info_context->mbmi.mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
         {
@@ -394,12 +385,8 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
 
     for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
     {
-        // Take a copy of the mode and Mv information for this macroblock into the xd->mbmi
-        // the partition_bmi array is unused in the decoder, so don't copy it.
-        vpx_memcpy(&xd->mbmi, &xd->mode_info_context->mbmi,
-                   sizeof(MB_MODE_INFO) - sizeof(xd->mbmi.partition_bmi));
 
-        if (xd->mbmi.mode == SPLITMV || xd->mbmi.mode == B_PRED)
+        if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
         {
             for (i = 0; i < 16; i++)
             {
@@ -420,9 +407,9 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         xd->left_available = (mb_col != 0);
 
         // Select the appropriate reference frame for this MB
-        if (xd->mbmi.ref_frame == LAST_FRAME)
+        if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
             ref_fb_idx = pc->lst_fb_idx;
-        else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
+        else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
             ref_fb_idx = pc->gld_fb_idx;
         else
             ref_fb_idx = pc->alt_fb_idx;
@@ -608,7 +595,7 @@ static void init_frame(VP8D_COMP *pbi)
     xd->left_context = pc->left_context;
     xd->mode_info_context = pc->mi;
     xd->frame_type = pc->frame_type;
-    xd->mbmi.mode = DC_PRED;
+    xd->mode_info_context->mbmi.mode = DC_PRED;
     xd->mode_info_stride = pc->mode_info_stride;
 }
 

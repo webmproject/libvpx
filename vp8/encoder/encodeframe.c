@@ -254,7 +254,6 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     int i;
     int QIndex;
     MACROBLOCKD *xd = &x->e_mbd;
-    MB_MODE_INFO *mbmi = &xd->mbmi;
     int zbin_extra;
 
     // Select the baseline MB Q index.
@@ -262,12 +261,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     {
         // Abs Value
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
-            QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
 
+            QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
         // Delta Value
         else
         {
-            QIndex = cpi->common.base_qindex + xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
+            QIndex = cpi->common.base_qindex + xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    // Clamp to valid range
         }
     }
@@ -388,14 +387,14 @@ void encode_mb_row(VP8_COMP *cpi,
         {
             // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
             if (cpi->segmentation_map[seg_map_index+mb_col] <= 3)
-                xd->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
+                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
             else
-                xd->mbmi.segment_id = 0;
+                xd->mode_info_context->mbmi.segment_id = 0;
 
             vp8cx_mb_init_quantizer(cpi, x);
         }
         else
-            xd->mbmi.segment_id = 0;         // Set to Segment 0 by default
+            xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
 
         x->active_ptr = cpi->active_map + seg_map_index + mb_col;
 
@@ -426,7 +425,7 @@ void encode_mb_row(VP8_COMP *cpi,
 #endif
 
             // Count of last ref frame 0,0 useage
-            if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
+            if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 cpi->inter_zz_count ++;
 
             // Special case code for cyclic refresh
@@ -434,14 +433,14 @@ void encode_mb_row(VP8_COMP *cpi,
             // during vp8cx_encode_inter_macroblock()) back into the global sgmentation map
             if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
             {
-                cpi->segmentation_map[seg_map_index+mb_col] = xd->mbmi.segment_id;
+                cpi->segmentation_map[seg_map_index+mb_col] = xd->mode_info_context->mbmi.segment_id;
 
                 // If the block has been refreshed mark it as clean (the magnitude of the -ve influences how long it will be before we consider another refresh):
                 // Else if it was coded (last frame 0,0) and has not already been refreshed then mark it as a candidate for cleanup next time (marked 0)
                 // else mark it as dirty (1).
-                if (xd->mbmi.segment_id)
+                if (xd->mode_info_context->mbmi.segment_id)
                     cpi->cyclic_refresh_map[seg_map_index+mb_col] = -1;
-                else if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
+                else if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 {
                     if (cpi->cyclic_refresh_map[seg_map_index+mb_col] == 1)
                         cpi->cyclic_refresh_map[seg_map_index+mb_col] = 0;
@@ -456,9 +455,6 @@ void encode_mb_row(VP8_COMP *cpi,
 
         x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
 
-        // store macroblock mode info into context array
-        vpx_memcpy(&xd->mode_info_context->mbmi, &xd->mbmi, sizeof(xd->mbmi));
-
         for (i = 0; i < 16; i++)
             vpx_memcpy(&xd->mode_info_context->bmi[i], &xd->block[i].bmi, sizeof(xd->block[i].bmi));
 
@@ -471,7 +467,7 @@ void encode_mb_row(VP8_COMP *cpi,
         recon_uvoffset += 8;
 
         // Keep track of segment useage
-        segment_counts[xd->mbmi.segment_id] ++;
+        segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
 
         // skip to next mb
         xd->mode_info_context++;
@@ -627,8 +623,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
     //x->rdmult = (int)(cpi->RDMULT * pow( (cpi->rate_correction_factor * 2.0), 0.75 ));
 #endif
 
-    xd->mbmi.mode = DC_PRED;
-    xd->mbmi.uv_mode = DC_PRED;
+    xd->mode_info_context->mbmi.mode = DC_PRED;
+    xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 
     xd->left_context = cm->left_context;
 
@@ -982,8 +978,8 @@ void vp8_build_block_offsets(MACROBLOCK *x)
 static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 {
     const MACROBLOCKD *xd = & x->e_mbd;
-    const MB_PREDICTION_MODE m = xd->mbmi.mode;
-    const MB_PREDICTION_MODE uvm = xd->mbmi.uv_mode;
+    const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
+    const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
 
 #ifdef MODE_STATS
     const int is_key = cpi->common.frame_type == KEY_FRAME;
@@ -1021,7 +1017,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
     int rateuv_tokenonly = 0;
     int i;
 
-    x->e_mbd.mbmi.ref_frame = INTRA_FRAME;
+    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
 #if !(CONFIG_REALTIME_ONLY)
 
@@ -1037,7 +1033,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
         error_uv = vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
 
-        x->e_mbd.mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
 
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
         rate += rateuv;
@@ -1045,7 +1041,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         if (Error4x4 < Error16x16)
         {
             rate += rate4x4;
-            x->e_mbd.mbmi.mode = B_PRED;
+            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
 
             // get back the intra block modes
             for (i = 0; i < 16; i++)
@@ -1085,7 +1081,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
         for (mode = DC_PRED; mode <= TM_PRED; mode ++)
         {
-            x->e_mbd.mbmi.mode = mode;
+            x->e_mbd.mode_info_context->mbmi.mode = mode;
             vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
             distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
             rate2  = x->mbmode_cost[x->e_mbd.frame_type][mode];
@@ -1105,17 +1101,17 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         else
             Error4x4 = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
 
-        x->e_mbd.mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
 
         if (Error4x4 < Error16x16)
         {
-            x->e_mbd.mbmi.mode = B_PRED;
+            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
             cpi->prediction_error += Error4x4;
         }
         else
         {
-            x->e_mbd.mbmi.mode = best_mode;
+            x->e_mbd.mode_info_context->mbmi.mode = best_mode;
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
             cpi->prediction_error += Error16x16;
         }
@@ -1149,7 +1145,7 @@ int vp8cx_encode_inter_macroblock
     x->skip = 0;
 
     if (xd->segmentation_enabled)
-        x->encode_breakout = cpi->segment_encode_breakout[xd->mbmi.segment_id];
+        x->encode_breakout = cpi->segment_encode_breakout[xd->mode_info_context->mbmi.segment_id];
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
@@ -1180,17 +1176,17 @@ int vp8cx_encode_inter_macroblock
         if (cpi->cyclic_refresh_mode_enabled)
         {
             // Clear segment_id back to 0 if not coded (last frame 0,0)
-            if ((xd->mbmi.segment_id == 1) &&
-                ((xd->mbmi.ref_frame != LAST_FRAME) || (xd->mbmi.mode != ZEROMV)))
+            if ((xd->mode_info_context->mbmi.segment_id == 1) &&
+                ((xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) || (xd->mode_info_context->mbmi.mode != ZEROMV)))
             {
-                xd->mbmi.segment_id = 0;
+                xd->mode_info_context->mbmi.segment_id = 0;
             }
         }
 
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)
         {
-            if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame != LAST_FRAME))
+            if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME))
                 cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
             else
                 cpi->zbin_mode_boost = 0;
@@ -1199,15 +1195,15 @@ int vp8cx_encode_inter_macroblock
         vp8cx_mb_init_quantizer(cpi,  x);
     }
 
-    cpi->count_mb_ref_frame_usage[xd->mbmi.ref_frame] ++;
+    cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
 
-    if (xd->mbmi.ref_frame == INTRA_FRAME)
+    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        x->e_mbd.mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
 
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
 
-        if (xd->mbmi.mode == B_PRED)
+        if (xd->mode_info_context->mbmi.mode == B_PRED)
         {
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
         }
@@ -1226,13 +1222,13 @@ int vp8cx_encode_inter_macroblock
         int ref_fb_idx;
 
         vp8_find_near_mvs(xd, xd->mode_info_context,
-                          &nearest, &nearby, &best_ref_mv, mdcounts, xd->mbmi.ref_frame, cpi->common.ref_frame_sign_bias);
+                          &nearest, &nearby, &best_ref_mv, mdcounts, xd->mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias);
 
         vp8_build_uvmvs(xd, cpi->common.full_pixel);
 
-        if (xd->mbmi.ref_frame == LAST_FRAME)
+        if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
             ref_fb_idx = cpi->common.lst_fb_idx;
-        else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
+        else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
             ref_fb_idx = cpi->common.gld_fb_idx;
         else
             ref_fb_idx = cpi->common.alt_fb_idx;
@@ -1241,7 +1237,7 @@ int vp8cx_encode_inter_macroblock
         xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
         xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
-        if (xd->mbmi.mode == SPLITMV)
+        if (xd->mode_info_context->mbmi.mode == SPLITMV)
         {
             int i;
 
@@ -1254,19 +1250,19 @@ int vp8cx_encode_inter_macroblock
                 }
             }
         }
-        else if (xd->mbmi.mode == NEWMV)
+        else if (xd->mode_info_context->mbmi.mode == NEWMV)
         {
             cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv.row) >> 1)]++;
             cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv.col) >> 1)]++;
         }
 
-        if (!x->skip && !x->e_mbd.mbmi.force_no_skip)
+        if (!x->skip && !x->e_mbd.mode_info_context->mbmi.force_no_skip)
         {
             vp8_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
 
             // Clear mb_skip_coeff if mb_no_coeff_skip is not set
             if (!cpi->common.mb_no_coeff_skip)
-                xd->mbmi.mb_skip_coeff = 0;
+                xd->mode_info_context->mbmi.mb_skip_coeff = 0;
 
         }
         else
@@ -1279,19 +1275,19 @@ int vp8cx_encode_inter_macroblock
     {
         if (cpi->common.mb_no_coeff_skip)
         {
-            if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV)
-                xd->mbmi.dc_diff = 0;
+            if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
+                xd->mode_info_context->mbmi.dc_diff = 0;
             else
-                xd->mbmi.dc_diff = 1;
+                xd->mode_info_context->mbmi.dc_diff = 1;
 
-            xd->mbmi.mb_skip_coeff = 1;
+            xd->mode_info_context->mbmi.mb_skip_coeff = 1;
             cpi->skip_true_count ++;
             vp8_fix_contexts(cpi, xd);
         }
         else
         {
             vp8_stuff_mb(cpi, xd, t);
-            xd->mbmi.mb_skip_coeff = 0;
+            xd->mode_info_context->mbmi.mb_skip_coeff = 0;
             cpi->skip_false_count ++;
         }
     }

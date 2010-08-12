@@ -120,14 +120,14 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         {
                             // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
                             if (cpi->segmentation_map[seg_map_index+mb_col] <= 3)
-                                xd->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
+                                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
                             else
-                                xd->mbmi.segment_id = 0;
+                                xd->mode_info_context->mbmi.segment_id = 0;
 
                             vp8cx_mb_init_quantizer(cpi, x);
                         }
                         else
-                            xd->mbmi.segment_id = 0;         // Set to Segment 0 by default
+                            xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
 
 
                         if (cm->frame_type == KEY_FRAME)
@@ -157,7 +157,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 #endif
 
                             // Count of last ref frame 0,0 useage
-                            if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
+                            if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                                 cpi->inter_zz_count ++;
 
                         }
@@ -165,9 +165,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         cpi->tplist[mb_row].stop = *tp;
 
                         x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
-
-                        // store macroblock mode info into context array
-                        vpx_memcpy(&xd->mode_info_context->mbmi, &xd->mbmi, sizeof(xd->mbmi));
 
                         for (i = 0; i < 16; i++)
                             vpx_memcpy(&xd->mode_info_context->bmi[i], &xd->block[i].bmi, sizeof(xd->block[i].bmi));
@@ -181,7 +178,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         recon_uvoffset += 8;
 
                         // Keep track of segment useage
-                        segment_counts[xd->mbmi.segment_id] ++;
+                        segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
 
                         // skip to next mb
                         xd->mode_info_context++;
@@ -404,9 +401,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 
         mb->rddiv = cpi->RDDIV;
         mb->rdmult = cpi->RDMULT;
-
-        mbd->mbmi.mode = DC_PRED;
-        mbd->mbmi.uv_mode = DC_PRED;
 
         mbd->left_context = cm->left_context;
         mb->mvc = cm->fc.mvc;

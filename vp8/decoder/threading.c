@@ -69,9 +69,6 @@ void vp8_setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC 
         mbd->mb_segement_abs_delta     = xd->mb_segement_abs_delta;
         vpx_memcpy(mbd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
 
-        mbd->mbmi.mode = DC_PRED;
-        mbd->mbmi.uv_mode = DC_PRED;
-
         mbd->current_bc = &pbi->bc2;
 
         for (j = 0; j < 25; j++)
@@ -222,12 +219,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                             }
                         }
 
-                        // Take a copy of the mode and Mv information for this macroblock into the xd->mbmi
-                        // the partition_bmi array is unused in the decoder, so don't copy it.
-                        vpx_memcpy(&xd->mbmi, &xd->mode_info_context->mbmi,
-                                   sizeof(MB_MODE_INFO) - sizeof(xd->mbmi.partition_bmi));
-
-                        if (xd->mbmi.mode == SPLITMV || xd->mbmi.mode == B_PRED)
+                        if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
                         {
                             for (i = 0; i < 16; i++)
                             {
@@ -248,9 +240,9 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                         xd->left_available = (mb_col != 0);
 
                         // Select the appropriate reference frame for this MB
-                        if (xd->mbmi.ref_frame == LAST_FRAME)
+                        if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
                             ref_fb_idx = pc->lst_fb_idx;
-                        else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
+                        else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
                             ref_fb_idx = pc->gld_fb_idx;
                         else
                             ref_fb_idx = pc->alt_fb_idx;
@@ -639,12 +631,7 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
 
                 }
 
-                // Take a copy of the mode and Mv information for this macroblock into the xd->mbmi
-                // the partition_bmi array is unused in the decoder, so don't copy it.
-                vpx_memcpy(&xd->mbmi, &xd->mode_info_context->mbmi,
-                           sizeof(MB_MODE_INFO) - sizeof(xd->mbmi.partition_bmi));
-
-                if (xd->mbmi.mode == SPLITMV || xd->mbmi.mode == B_PRED)
+                if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
                 {
                     for (i = 0; i < 16; i++)
                     {
@@ -665,9 +652,9 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
                 xd->left_available = (mb_col != 0);
 
                 // Select the appropriate reference frame for this MB
-                if (xd->mbmi.ref_frame == LAST_FRAME)
+                if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
                     ref_fb_idx = pc->lst_fb_idx;
-                else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
+                else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
                     ref_fb_idx = pc->gld_fb_idx;
                 else
                     ref_fb_idx = pc->alt_fb_idx;

@@ -276,7 +276,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     TOKENEXTRA *start = *t;
     TOKENEXTRA *tp = *t;
 
-    x->mbmi.dc_diff = 1;
+    x->mode_info_context->mbmi.dc_diff = 1;
 
 #if 0
 
@@ -291,7 +291,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
 #if 1
 
-    if (x->mbmi.mb_skip_coeff)
+    if (x->mode_info_context->mbmi.mb_skip_coeff)
     {
 
         cpi->skip_true_count++;
@@ -303,10 +303,10 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
             vp8_fix_contexts(cpi, x);
         }
 
-        if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
-            x->mbmi.dc_diff = 0;
+        if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
+            x->mode_info_context->mbmi.dc_diff = 0;
         else
-            x->mbmi.dc_diff = 1;
+            x->mode_info_context->mbmi.dc_diff = 1;
 
 
         return;
@@ -347,7 +347,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     vpx_memcpy(cpi->coef_counts_backup, cpi->coef_counts, sizeof(cpi->coef_counts));
 #endif
 
-    if (x->mbmi.mode == B_PRED || x->mbmi.mode == SPLITMV)
+    if (x->mode_info_context->mbmi.mode == B_PRED || x->mode_info_context->mbmi.mode == SPLITMV)
     {
         plane_type = 3;
     }
@@ -592,10 +592,10 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     plane_type = 0;
 
 
-    if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
-        x->mbmi.dc_diff = 0;
+    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
+        x->mode_info_context->mbmi.dc_diff = 0;
     else
-        x->mbmi.dc_diff = 1;
+        x->mode_info_context->mbmi.dc_diff = 1;
 
 
     for (b = 0; b < 16; b++)
@@ -629,7 +629,7 @@ void vp8_fix_contexts(VP8_COMP *cpi, MACROBLOCKD *x)
     x->above_context[UCONTEXT][1]  = 0;
     x->above_context[VCONTEXT][1]  = 0;
 
-    if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
         x->left_context[Y2CONTEXT][0] = 0;
         x->above_context[Y2CONTEXT][0] = 0;

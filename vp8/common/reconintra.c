@@ -43,7 +43,7 @@ void vp8_build_intra_predictors_mby(MACROBLOCKD *x)
     }
 
     // for Y
-    switch (x->mbmi.mode)
+    switch (x->mode_info_context->mbmi.mode)
     {
     case DC_PRED:
     {
@@ -164,7 +164,7 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
     }
 
     // for Y
-    switch (x->mbmi.mode)
+    switch (x->mode_info_context->mbmi.mode)
     {
     case DC_PRED:
     {
@@ -290,7 +290,7 @@ void vp8_build_intra_predictors_mbuv(MACROBLOCKD *x)
         vleft_col[i] = x->dst.v_buffer [i* x->dst.uv_stride -1];
     }
 
-    switch (x->mbmi.uv_mode)
+    switch (x->mode_info_context->mbmi.uv_mode)
     {
     case DC_PRED:
     {
@@ -430,7 +430,7 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
         vleft_col[i] = x->dst.v_buffer [i* x->dst.uv_stride -1];
     }
 
-    switch (x->mbmi.uv_mode)
+    switch (x->mode_info_context->mbmi.uv_mode)
     {
     case DC_PRED:
     {

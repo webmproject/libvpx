@@ -78,9 +78,9 @@ int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
 
     if (use_dc_pred)
     {
-        x->e_mbd.mbmi.mode = DC_PRED;
-        x->e_mbd.mbmi.uv_mode = DC_PRED;
-        x->e_mbd.mbmi.ref_frame = INTRA_FRAME;
+        x->e_mbd.mode_info_context->mbmi.mode = DC_PRED;
+        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+        x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
     }
@@ -564,6 +564,8 @@ void vp8_first_pass(VP8_COMP *cpi)
     x->src = * cpi->Source;
     xd->pre = *lst_yv12;
     xd->dst = *new_yv12;
+
+    xd->mode_info_context = cm->mi;
 
     vp8_build_block_offsets(x);
 

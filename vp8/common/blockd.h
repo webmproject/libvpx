@@ -215,7 +215,7 @@ typedef struct
 {
     DECLARE_ALIGNED(16, short, diff[400]);      // from idct diff
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
-    DECLARE_ALIGNED(16, short, reference[384]);
+//not used    DECLARE_ALIGNED(16, short, reference[384]);
     DECLARE_ALIGNED(16, short, qcoeff[400]);
     DECLARE_ALIGNED(16, short, dqcoeff[400]);
 
@@ -231,8 +231,6 @@ typedef struct
     int mode_info_stride;
 
     FRAME_TYPE frame_type;
-
-    MB_MODE_INFO mbmi;
 
     int up_available;
     int left_available;

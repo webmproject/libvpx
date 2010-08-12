@@ -121,7 +121,7 @@ void vp8_transform_mbuv(MACROBLOCK *x)
 
     for (i = 16; i < 24; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0], 
+        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
             &x->block[i].coeff[0], 16);
     }
 }
@@ -158,7 +158,7 @@ void vp8_transform_mb(MACROBLOCK *x)
     }
 
     // build dc block from 16 y dc values
-    if (x->e_mbd.mbmi.mode != SPLITMV)
+    if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
         vp8_build_dcblock(x);
 
     for (i = 16; i < 24; i += 2)
@@ -168,7 +168,7 @@ void vp8_transform_mb(MACROBLOCK *x)
     }
 
     // do 2nd order transform on the dc block
-    if (x->e_mbd.mbmi.mode != SPLITMV)
+    if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
         x->short_walsh4x4(&x->block[24].src_diff[0],
         &x->block[24].coeff[0], 8);
 
@@ -185,7 +185,7 @@ void vp8_transform_mby(MACROBLOCK *x)
     }
 
     // build dc block from 16 y dc values
-    if (x->e_mbd.mbmi.mode != SPLITMV)
+    if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
     {
         vp8_build_dcblock(x);
         x->short_walsh4x4(&x->block[24].src_diff[0],
@@ -494,8 +494,8 @@ void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
     vp8_setup_temp_context(&t, x->e_mbd.above_context[Y1CONTEXT],
         x->e_mbd.left_context[Y1CONTEXT], 4);
-    has_2nd_order = (x->e_mbd.mbmi.mode != B_PRED
-        && x->e_mbd.mbmi.mode != SPLITMV);
+    has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? 0 : 3;
 
     for (b = 0; b < 16; b++)
@@ -538,25 +538,25 @@ static void vp8_find_mb_skip_coef(MACROBLOCK *x)
 {
     int i;
 
-    x->e_mbd.mbmi.mb_skip_coeff = 1;
+    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = 1;
 
-    if (x->e_mbd.mbmi.mode != B_PRED && x->e_mbd.mbmi.mode != SPLITMV)
+    if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
     {
         for (i = 0; i < 16; i++)
         {
-            x->e_mbd.mbmi.mb_skip_coeff &= (x->e_mbd.block[i].eob < 2);
+            x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (x->e_mbd.block[i].eob < 2);
         }
 
         for (i = 16; i < 25; i++)
         {
-            x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
+            x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
         }
     }
     else
     {
         for (i = 0; i < 24; i++)
         {
-            x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
+            x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
         }
     }
 }
@@ -576,8 +576,8 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
         return;
     vp8_setup_temp_context(&t, x->e_mbd.above_context[Y1CONTEXT],
         x->e_mbd.left_context[Y1CONTEXT], 4);
-    has_2nd_order = (x->e_mbd.mbmi.mode != B_PRED
-        && x->e_mbd.mbmi.mode != SPLITMV);
+    has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? 0 : 3;
 
     for (b = 0; b < 16; b++)

@@ -277,34 +277,34 @@ void vp8_strict_quantize_b(BLOCK *b, BLOCKD *d)
 void vp8_quantize_mby(MACROBLOCK *x)
 {
     int i;
-    int has_2nd_order = (x->e_mbd.mbmi.mode != B_PRED
-        && x->e_mbd.mbmi.mode != SPLITMV);
+    int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
     for (i = 0; i < 16; i++)
     {
         x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-        x->e_mbd.mbmi.mb_skip_coeff &=
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &=
             (x->e_mbd.block[i].eob <= has_2nd_order);
     }
 
     if(has_2nd_order)
     {
         x->quantize_b(&x->block[24], &x->e_mbd.block[24]);
-        x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[24].eob);
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!x->e_mbd.block[24].eob);
     }
 }
 
 void vp8_quantize_mb(MACROBLOCK *x)
 {
     int i;
-    int has_2nd_order=(x->e_mbd.mbmi.mode != B_PRED
-        && x->e_mbd.mbmi.mode != SPLITMV);
+    int has_2nd_order=(x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
-    x->e_mbd.mbmi.mb_skip_coeff = 1;
+    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = 1;
     for (i = 0; i < 24+has_2nd_order; i++)
     {
         x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-        x->e_mbd.mbmi.mb_skip_coeff &=
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &=
             (x->e_mbd.block[i].eob <= (has_2nd_order && i<16));
     }
 }
@@ -317,6 +317,6 @@ void vp8_quantize_mbuv(MACROBLOCK *x)
     for (i = 16; i < 24; i++)
     {
         x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
-        x->e_mbd.mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
     }
 }
