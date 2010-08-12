@@ -51,7 +51,6 @@ DEFINE(mb_dst_y_stride,                         offsetof(MACROBLOCKD, dst.y_stri
 DEFINE(mb_dst_y_buffer,                         offsetof(MACROBLOCKD, dst.y_buffer));
 DEFINE(mb_dst_u_buffer,                         offsetof(MACROBLOCKD, dst.u_buffer));
 DEFINE(mb_dst_v_buffer,                         offsetof(MACROBLOCKD, dst.v_buffer));
-DEFINE(mb_mbmi_mode,                            offsetof(MACROBLOCKD, mbmi.mode));
 DEFINE(mb_up_available,                         offsetof(MACROBLOCKD, up_available));
 DEFINE(mb_left_available,                       offsetof(MACROBLOCKD, left_available));
 
