@@ -29,13 +29,11 @@
 #include "vpx_scale/vpxscale.h"
 #include "systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
-
+#include "detokenize.h"
 
 extern void vp8_init_loop_filter(VP8_COMMON *cm);
-
 extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 
-// DEBUG code
 #if CONFIG_DEBUG
 void vp8_recon_write_yuv_frame(unsigned char *name, YV12_BUFFER_CONFIG *s)
 {
@@ -129,6 +127,9 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
         cm->last_sharpness_level = cm->sharpness_level;
     }
 
+#if CONFIG_ARM_ASM_DETOK
+    vp8_init_detokenizer(pbi);
+#endif
     pbi->common.error.setjmp = 0;
     return (VP8D_PTR) pbi;
 }

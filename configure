@@ -38,6 +38,7 @@ Advanced options:
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
+  ${toggle_arm_asm_detok}         assembly version of the detokenizer (ARM platforms only)
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -242,6 +243,7 @@ CONFIG_LIST="
     spatial_resampling
     realtime_only
     shared
+    arm_asm_detok
 "
 CMDLINE_SELECT="
     extra_warnings
@@ -278,6 +280,7 @@ CMDLINE_SELECT="
     spatial_resampling
     realtime_only
     shared
+    arm_asm_detok
 "
 
 process_cmdline() {

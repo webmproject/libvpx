@@ -14,6 +14,7 @@
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"
+#include "detokenize.h"
 
 #define BOOL_DATA UINT8
 
@@ -103,6 +104,34 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
         *l = 0;
     }
 }
+
+#if CONFIG_ARM_ASM_DETOK
+DECLARE_ALIGNED(16, const UINT8, vp8_block2context_leftabove[25*3]) =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, //end of vp8_block2context
+    0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 1, 1, 0, 0, 1, 1, 0, //end of vp8_block2left
+    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 0, 1, 0, 1, 0, 1, 0  //end of vp8_block2above
+};
+
+void vp8_init_detokenizer(VP8D_COMP *dx)
+{
+    const VP8_COMMON *const oc = & dx->common;
+    MACROBLOCKD *x = & dx->mb;
+
+    dx->detoken.vp8_coef_tree_ptr = vp8_coef_tree;
+    dx->detoken.ptr_onyxblock2context_leftabove = vp8_block2context_leftabove;
+    dx->detoken.ptr_onyx_coef_bands_x = vp8_coef_bands_x;
+    dx->detoken.scan = vp8_default_zig_zag1d;
+    dx->detoken.teb_base_ptr = vp8d_token_extra_bits2;
+    dx->detoken.qcoeff_start_ptr = &x->qcoeff[0];
+
+    dx->detoken.coef_probs[0] = (oc->fc.coef_probs [0] [ 0 ] [0]);
+    dx->detoken.coef_probs[1] = (oc->fc.coef_probs [1] [ 0 ] [0]);
+    dx->detoken.coef_probs[2] = (oc->fc.coef_probs [2] [ 0 ] [0]);
+    dx->detoken.coef_probs[3] = (oc->fc.coef_probs [3] [ 0 ] [0]);
+}
+#endif
+
 DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
 #define FILL \
     if(count < 0) \
@@ -200,6 +229,35 @@ DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
     }\
     NORMALIZE
 
+#if CONFIG_ARM_ASM_DETOK
+int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
+{
+    int eobtotal = 0;
+    int i, type;
+
+    dx->detoken.current_bc = x->current_bc;
+    dx->detoken.A = x->above_context;
+    dx->detoken.L = x->left_context;
+
+    type = 3;
+
+    if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
+    {
+        type = 1;
+        eobtotal -= 16;
+    }
+
+    vp8_decode_mb_tokens_v6(&dx->detoken, type);
+
+    for (i = 0; i < 25; i++)
+    {
+        x->block[i].eob = dx->detoken.eob[i];
+        eobtotal += dx->detoken.eob[i];
+    }
+
+    return eobtotal;
+}
+#else
 int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 {
     ENTROPY_CONTEXT **const A = x->above_context;
@@ -395,3 +453,4 @@ BLOCK_FINISHED:
     return eobtotal;
 
 }
+#endif //!CONFIG_ASM_DETOK
