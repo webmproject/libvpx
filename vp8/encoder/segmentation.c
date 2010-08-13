@@ -9,7 +9,7 @@
  */
 
 
-#include "segmentation_common.h"
+#include "segmentation.h"
 #include "vpx_mem/vpx_mem.h"
 
 void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)

@@ -27,7 +27,6 @@ VP8_COMMON_SRCS-yes += common/onyxd.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
 
-VP8_COMMON_SRCS-yes += common/segmentation_common.c
 VP8_COMMON_SRCS-yes += common/alloccommon.c
 VP8_COMMON_SRCS-yes += common/blockd.c
 VP8_COMMON_SRCS-yes += common/coefupdateprobs.h
@@ -64,7 +63,6 @@ VP8_COMMON_SRCS-yes += common/recon.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
 VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
-VP8_COMMON_SRCS-yes += common/segmentation_common.h
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
 VP8_COMMON_SRCS-yes += common/subpixel.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h

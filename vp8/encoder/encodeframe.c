@@ -17,7 +17,7 @@
 #include "extend.h"
 #include "entropymode.h"
 #include "quant_common.h"
-#include "segmentation_common.h"
+#include "segmentation.h"
 #include "setupintrarecon.h"
 #include "encodeintra.h"
 #include "reconinter.h"

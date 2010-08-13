@@ -21,7 +21,7 @@
 #include "extend.h"
 #include "ratectrl.h"
 #include "quant_common.h"
-#include "segmentation_common.h"
+#include "segmentation.h"
 #include "g_common.h"
 #include "vpx_scale/yv12extend.h"
 #include "postproc.h"
