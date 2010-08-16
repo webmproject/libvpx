@@ -309,7 +309,7 @@ pstep       RN  r1
 
     bne         simple_vnext8
 
-    ldmia       sp!, {r4 - r12, pc}
+    ldmia       sp!, {r4 - r11, pc}
     ENDP        ; |vp8_loop_filter_simple_vertical_edge_armv6|
 
 ; Constant Pool
