@@ -14,6 +14,7 @@
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/dequantize_arm.c
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/dsystemdependent.c
 VP8_DX_SRCS_REMOVE-$(HAVE_ARMV6)  += decoder/generic/dsystemdependent.c
+VP8_DX_SRCS_REMOVE-$(HAVE_ARMV6)  += decoder/dequantize.c
 VP8_DX_SRCS-$(CONFIG_ARM_ASM_DETOK)  += decoder/arm/detokenize$(ASM)
 
 #File list for armv6
