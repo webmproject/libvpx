@@ -360,3 +360,194 @@ void vp8_sixtap_predict8x4_sse2
 
 #endif
 
+#if HAVE_SSSE3
+
+extern void vp8_filter_block1d8_h6_ssse3
+(
+    unsigned char  *src_ptr,
+    unsigned int    src_pixels_per_line,
+    unsigned char  *output_ptr,
+    unsigned int    output_pitch,
+    unsigned int    output_height,
+    unsigned int    vp8_filter_index
+);
+
+extern void vp8_filter_block1d16_h6_ssse3
+(
+    unsigned char  *src_ptr,
+    unsigned int    src_pixels_per_line,
+    unsigned char  *output_ptr,
+    unsigned int    output_pitch,
+    unsigned int    output_height,
+    unsigned int    vp8_filter_index
+);
+
+extern void vp8_filter_block1d16_v6_ssse3
+(
+    unsigned char *src_ptr,
+    unsigned int   src_pitch,
+    unsigned char *output_ptr,
+    unsigned int   out_pitch,
+    unsigned int   output_height,
+    unsigned int   vp8_filter_index
+);
+
+extern void vp8_filter_block1d8_v6_ssse3
+(
+    unsigned char *src_ptr,
+    unsigned int   src_pitch,
+    unsigned char *output_ptr,
+    unsigned int   out_pitch,
+    unsigned int   output_height,
+    unsigned int   vp8_filter_index
+);
+
+extern void vp8_filter_block1d4_h6_ssse3
+(
+    unsigned char  *src_ptr,
+    unsigned int    src_pixels_per_line,
+    unsigned char  *output_ptr,
+    unsigned int    output_pitch,
+    unsigned int    output_height,
+    unsigned int    vp8_filter_index
+);
+
+extern void vp8_filter_block1d4_v6_ssse3
+(
+    unsigned char *src_ptr,
+    unsigned int   src_pitch,
+    unsigned char *output_ptr,
+    unsigned int   out_pitch,
+    unsigned int   output_height,
+    unsigned int   vp8_filter_index
+);
+
+void vp8_sixtap_predict16x16_ssse3
+(
+    unsigned char  *src_ptr,
+    int   src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int dst_pitch
+
+)
+{
+    DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 24*24);
+
+    if (xoffset)
+    {
+        if (yoffset)
+        {
+            vp8_filter_block1d16_h6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, FData2, 16, 21, xoffset);
+            vp8_filter_block1d16_v6_ssse3(FData2 , 16, dst_ptr, dst_pitch, 16, yoffset);
+        }
+        else
+        {
+            // First-pass only
+            vp8_filter_block1d16_h6_ssse3(src_ptr, src_pixels_per_line, dst_ptr, dst_pitch, 16, xoffset);
+        }
+    }
+    else
+    {
+        // Second-pass only
+        vp8_filter_block1d16_v6_ssse3(src_ptr - (2 * src_pixels_per_line) , src_pixels_per_line, dst_ptr, dst_pitch, 16, yoffset);
+    }
+}
+
+void vp8_sixtap_predict8x8_ssse3
+(
+    unsigned char  *src_ptr,
+    int   src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int dst_pitch
+)
+{
+    DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 256);
+
+    if (xoffset)
+    {
+        if (yoffset)
+        {
+            vp8_filter_block1d8_h6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, FData2, 8, 13, xoffset);
+            vp8_filter_block1d8_v6_ssse3(FData2, 8, dst_ptr, dst_pitch, 8, yoffset);
+        }
+        else
+        {
+            vp8_filter_block1d8_h6_ssse3(src_ptr, src_pixels_per_line, dst_ptr, dst_pitch, 8, xoffset);
+        }
+    }
+    else
+    {
+        // Second-pass only
+        vp8_filter_block1d8_v6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, dst_ptr, dst_pitch, 8, yoffset);
+    }
+}
+
+
+void vp8_sixtap_predict8x4_ssse3
+(
+    unsigned char  *src_ptr,
+    int   src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int dst_pitch
+)
+{
+    DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 256);
+
+    if (xoffset)
+    {
+        if (yoffset)
+        {
+            vp8_filter_block1d8_h6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, FData2, 8, 9, xoffset);
+            vp8_filter_block1d8_v6_ssse3(FData2, 8, dst_ptr, dst_pitch, 4, yoffset);
+        }
+        else
+        {
+            // First-pass only
+            vp8_filter_block1d8_h6_ssse3(src_ptr, src_pixels_per_line, dst_ptr, dst_pitch, 4, xoffset);
+        }
+    }
+    else
+    {
+        // Second-pass only
+        vp8_filter_block1d8_v6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, dst_ptr, dst_pitch, 4, yoffset);
+    }
+}
+
+void vp8_sixtap_predict4x4_ssse3
+(
+    unsigned char  *src_ptr,
+    int   src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int dst_pitch
+)
+{
+  DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 4*9);
+
+  if (xoffset)
+  {
+      if (yoffset)
+      {
+          vp8_filter_block1d4_h6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, FData2, 4, 9, xoffset);
+          vp8_filter_block1d4_v6_ssse3(FData2, 4, dst_ptr, dst_pitch, 4, yoffset);
+      }
+      else
+      {
+          vp8_filter_block1d4_h6_ssse3(src_ptr, src_pixels_per_line, dst_ptr, dst_pitch, 4, xoffset);
+      }
+  }
+  else
+  {
+      vp8_filter_block1d4_v6_ssse3(src_ptr - (2 * src_pixels_per_line), src_pixels_per_line, dst_ptr, dst_pitch, 4, yoffset);
+  }
+
+}
+
+#endif
