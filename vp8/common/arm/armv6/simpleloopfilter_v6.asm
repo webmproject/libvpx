@@ -55,8 +55,8 @@ pstep       RN  r1
 ;stack  const char *thresh,
 ;stack  int  count
 
-;Note: All 16 elements in flimit are equal. So, in the code, only one load is needed
-;for flimit. Same way applies to limit and thresh.
+; All 16 elements in flimit are equal. So, in the code, only one load is needed
+; for flimit. Same applies to limit. thresh is not used in simple looopfilter
 
 ;-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 |vp8_loop_filter_simple_horizontal_edge_armv6| PROC
@@ -65,23 +65,19 @@ pstep       RN  r1
 
     ldr         r12, [r3]                   ; limit
     ldr         r3, [src, -pstep, lsl #1]   ; p1
-
-    ldr         r9, [sp, #40]               ; count for 8-in-parallel
     ldr         r4, [src, -pstep]           ; p0
-
-    ldr         r7, [r2]                    ; flimit
     ldr         r5, [src]                   ; q0
-    ldr         r2, c0x80808080
-
     ldr         r6, [src, pstep]            ; q1
-
+    ldr         r7, [r2]                    ; flimit
+    ldr         r2, c0x80808080
+    ldr         r9, [sp, #40]               ; count for 8-in-parallel
     uadd8       r7, r7, r7                  ; flimit * 2
     mov         r9, r9, lsl #1              ; double the count. we're doing 4 at a time
     uadd8       r12, r7, r12                ; flimit * 2 + limit
-    mov         lr, #0
+    mov         lr, #0                      ; need 0 in a couple places
 
 |simple_hnext8|
-    ; vp8_simple_filter_mask() function
+    ; vp8_simple_filter_mask()
 
     uqsub8      r7, r3, r6                  ; p1 - q1
     uqsub8      r8, r6, r3                  ; q1 - p1
@@ -89,58 +85,50 @@ pstep       RN  r1
     uqsub8      r11, r5, r4                 ; q0 - p0
     orr         r8, r8, r7                  ; abs(p1 - q1)
     orr         r10, r10, r11               ; abs(p0 - q0)
-    uhadd8      r8, r8, lr                  ; abs(p1 - q2) >> 1
     uqadd8      r10, r10, r10               ; abs(p0 - q0) * 2
-    ; STALL waiting on r10
+    uhadd8      r8, r8, lr                  ; abs(p1 - q2) >> 1
     uqadd8      r10, r10, r8                ; abs(p0 - q0)*2 + abs(p1 - q1)/2
-    ; STALL waiting on r10
     mvn         r8, #0
-    uqsub8      r10, r10, r12               ; compare to flimit. need to do this twice because uqsub8 doesn't set GE flags
-                                            ; and usub8 doesn't saturate
-    usub8       r10, lr, r10                ; set GE flags for each byte
+    usub8       r10, r12, r10               ; compare to flimit. usub8 sets GE flags
     sel         r10, r8, lr                 ; filter mask: F or 0
     cmp         r10, #0
-    beq         simple_hskip_filter         ; skip filtering if we're &ing with 0s. would just write out the same values
+    beq         simple_hskip_filter         ; skip filtering if all masks are 0x00
 
-    ;vp8_simple_filter() function
+    ;vp8_simple_filter()
 
     eor         r3, r3, r2                  ; p1 offset to convert to a signed value
     eor         r6, r6, r2                  ; q1 offset to convert to a signed value
     eor         r4, r4, r2                  ; p0 offset to convert to a signed value
     eor         r5, r5, r2                  ; q0 offset to convert to a signed value
 
-    qsub8       r3, r3, r6                  ; vp8_signed_char_clamp(p1-q1)
-    qsub8       r6, r5, r4                  ; vp8_signed_char_clamp(q0-p0)
-    qadd8       r3, r3, r6                  ; += q0-p0
-    qadd8       r3, r3, r6                  ; += q0-p0
-    qadd8       r3, r3, r6                  ; p1-q1 + 3*(q0-p0))
-    and         r3, r3, r10                 ; &= mask
-
+    qsub8       r3, r3, r6                  ; vp8_filter = p1 - q1
+    qsub8       r6, r5, r4                  ; q0 - p0
+    qadd8       r3, r3, r6                  ; += q0 - p0
     ldr         r7, c0x04040404
+    qadd8       r3, r3, r6                  ; += q0 - p0
     ldr         r8, c0x03030303
+    qadd8       r3, r3, r6                  ; vp8_filter = p1-q1 + 3*(q0-p0))
+    ;STALL
+    and         r3, r3, r10                 ; vp8_filter &= mask
 
-    ;save bottom 3 bits so that we round one side +4 and the other +3
-    qadd8       r7 , r3 , r7                ; Filter1 (r3) = vp8_signed_char_clamp(vp8_filter+4)
-    qadd8       r8 , r3 , r8                ; Filter2 (r8) = vp8_signed_char_clamp(vp8_filter+3)
+    qadd8       r7 , r3 , r7                ; Filter1 = vp8_filter + 4
+    qadd8       r8 , r3 , r8                ; Filter2 = vp8_filter + 3
 
-    mov         r3, #0
-    shadd8      r7 , r7 , r3
-    shadd8      r8 , r8 , r3
-    shadd8      r7 , r7 , r3
-    shadd8      r8 , r8 , r3
-    shadd8      r7 , r7 , r3                ; Filter1 >>= 3
-    shadd8      r8 , r8 , r3                ; Filter2 >>= 3
+    shadd8      r7 , r7 , lr
+    shadd8      r8 , r8 , lr
+    shadd8      r7 , r7 , lr
+    shadd8      r8 , r8 , lr
+    shadd8      r7 , r7 , lr                ; Filter1 >>= 3
+    shadd8      r8 , r8 , lr                ; Filter2 >>= 3
 
-
-    qsub8       r5 ,r5, r7                  ; u = vp8_signed_char_clamp(q0 - Filter1)
-    qadd8       r4, r4, r8                  ; u = vp8_signed_char_clamp(p0 + Filter2)
+    qsub8       r5 ,r5, r7                  ; u = q0 - Filter1
+    qadd8       r4, r4, r8                  ; u = p0 + Filter2
     eor         r5, r5, r2                  ; *oq0 = u^0x80
     str         r5, [src]                   ; store oq0 result
     eor         r4, r4, r2                  ; *op0 = u^0x80
     str         r4, [src, -pstep]           ; store op0 result
 
 |simple_hskip_filter|
-
     subs        r9, r9, #1
     addne       src, src, #4                ; next row
 
@@ -204,9 +192,8 @@ pstep       RN  r1
     uhadd8      r7, r7, r8                  ; abs(p1 - q1) / 2
     uqadd8      r7, r7, r9                  ; abs(p0 - q0)*2 + abs(p1 - q1)/2
     mvn         r10, #0                     ; r10 == -1
-    uqsub8      r7, r7, r12                 ; compare to flimit
 
-    usub8       r7, r8, r7
+    usub8       r7, r12, r7                 ; compare to flimit
     sel         lr, r10, r8                 ; filter mask
 
     cmp         lr, #0
@@ -218,35 +205,34 @@ pstep       RN  r1
     eor         r4, r4, r2                  ; p0 offset to convert to a signed value
     eor         r5, r5, r2                  ; q0 offset to convert to a signed value
 
-    qsub8       r3, r3, r6                  ; vp8_filter (r3) = vp8_signed_char_clamp(p1-q1)
-    qsub8       r6, r5, r4                  ; vp8_filter = vp8_signed_char_clamp(vp8_filter + 3 * ( q0 - p0))
+    qsub8       r3, r3, r6                  ; vp8_filter = p1 - q1
+    qsub8       r6, r5, r4                  ; q0 - p0
 
-    qadd8       r3, r3, r6
-    ldr         r8, c0x03030303             ; r8 = 3
+    qadd8       r3, r3, r6                  ; vp8_filter += q0 - p0
+    ldr         r9, c0x03030303             ; r9 = 3
 
-    qadd8       r3, r3, r6
+    qadd8       r3, r3, r6                  ; vp8_filter += q0 - p0
     ldr         r7, c0x04040404
 
-    qadd8       r3, r3, r6
+    qadd8       r3, r3, r6                  ; vp8_filter = p1-q1 + 3*(q0-p0))
+    ;STALL
     and         r3, r3, lr                  ; vp8_filter &= mask
 
-    ;save bottom 3 bits so that we round one side +4 and the other +3
-    qadd8       r8 , r3 , r8                ; Filter2 (r8) = vp8_signed_char_clamp(vp8_filter+3)
-    qadd8       r3 , r3 , r7                ; Filter1 (r3) = vp8_signed_char_clamp(vp8_filter+4)
+    qadd8       r9 , r3 , r9                ; Filter2 = vp8_filter + 3
+    qadd8       r3 , r3 , r7                ; Filter1 = vp8_filter + 4
 
-    mov         r7, #0
-    shadd8      r8 , r8 , r7                ; Filter2 >>= 3
-    shadd8      r3 , r3 , r7                ; Filter1 >>= 3
-    shadd8      r8 , r8 , r7
-    shadd8      r3 , r3 , r7
-    shadd8      r8 , r8 , r7                ; r8: filter2
-    shadd8      r3 , r3 , r7                ; r7: filter1
+    shadd8      r9 , r9 , r8
+    shadd8      r3 , r3 , r8
+    shadd8      r9 , r9 , r8
+    shadd8      r3 , r3 , r8
+    shadd8      r9 , r9 , r8                ; Filter2 >>= 3
+    shadd8      r3 , r3 , r8                ; Filter1 >>= 3
 
     ;calculate output
     sub         src, src, pstep, lsl #2
 
-    qadd8       r4, r4, r8                  ; u = vp8_signed_char_clamp(p0 + Filter2)
-    qsub8       r5, r5, r3                  ; u = vp8_signed_char_clamp(q0 - Filter1)
+    qadd8       r4, r4, r9                  ; u = p0 + Filter2
+    qsub8       r5, r5, r3                  ; u = q0 - Filter1
     eor         r4, r4, r2                  ; *op0 = u^0x80
     eor         r5, r5, r2                  ; *oq0 = u^0x80
 
