@@ -1326,6 +1326,18 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     }
 }
 
+
+static int
+rescale(int val, int num, int denom)
+{
+    int64_t llnum = num;
+    int64_t llden = denom;
+    int64_t llval = val;
+
+    return llval * llnum / llden;
+}
+
+
 void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
@@ -1353,9 +1365,9 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->oxcf.worst_allowed_q           = MAXQ;
 
         cpi->oxcf.end_usage                = USAGE_STREAM_FROM_SERVER;
-        cpi->oxcf.starting_buffer_level     =   4;
-        cpi->oxcf.optimal_buffer_level      =   5;
-        cpi->oxcf.maximum_buffer_size       =   6;
+        cpi->oxcf.starting_buffer_level     =   4000;
+        cpi->oxcf.optimal_buffer_level      =   5000;
+        cpi->oxcf.maximum_buffer_size       =   6000;
         cpi->oxcf.under_shoot_pct           =  90;
         cpi->oxcf.allow_df                 =   0;
         cpi->oxcf.drop_frames_water_mark     =  20;
@@ -1504,26 +1516,32 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // local file playback mode == really big buffer
     if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
     {
-        cpi->oxcf.starting_buffer_level   = 60;
-        cpi->oxcf.optimal_buffer_level    = 60;
-        cpi->oxcf.maximum_buffer_size     = 240;
+        cpi->oxcf.starting_buffer_level   = 60000;
+        cpi->oxcf.optimal_buffer_level    = 60000;
+        cpi->oxcf.maximum_buffer_size     = 240000;
 
     }
 
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
-    cpi->oxcf.starting_buffer_level   *= cpi->oxcf.target_bandwidth;
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.optimal_buffer_level *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.optimal_buffer_level =
+            rescale(cpi->oxcf.optimal_buffer_level,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.maximum_buffer_size == 0)
         cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.maximum_buffer_size     *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.maximum_buffer_size =
+            rescale(cpi->oxcf.maximum_buffer_size,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
@@ -1783,26 +1801,32 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // local file playback mode == really big buffer
     if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
     {
-        cpi->oxcf.starting_buffer_level   = 60;
-        cpi->oxcf.optimal_buffer_level    = 60;
-        cpi->oxcf.maximum_buffer_size     = 240;
+        cpi->oxcf.starting_buffer_level   = 60000;
+        cpi->oxcf.optimal_buffer_level    = 60000;
+        cpi->oxcf.maximum_buffer_size     = 240000;
 
     }
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
 
-    cpi->oxcf.starting_buffer_level   *= cpi->oxcf.target_bandwidth;
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.optimal_buffer_level *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.optimal_buffer_level =
+            rescale(cpi->oxcf.optimal_buffer_level,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.maximum_buffer_size == 0)
         cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.maximum_buffer_size     *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.maximum_buffer_size =
+            rescale(cpi->oxcf.maximum_buffer_size,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;

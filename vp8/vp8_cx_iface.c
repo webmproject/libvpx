@@ -296,9 +296,9 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->under_shoot_pct         = cfg.rc_undershoot_pct;
     //oxcf->over_shoot_pct        = cfg.rc_overshoot_pct;
 
-    oxcf->maximum_buffer_size     = cfg.rc_buf_sz / 1000;
-    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz / 1000;
-    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz / 1000;
+    oxcf->maximum_buffer_size     = cfg.rc_buf_sz;
+    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz;
+    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz;
 
     oxcf->two_pass_vbrbias        = cfg.rc_2pass_vbr_bias_pct;
     oxcf->two_pass_vbrmin_section  = cfg.rc_2pass_vbr_minsection_pct;
