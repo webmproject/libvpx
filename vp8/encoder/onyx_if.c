@@ -2818,23 +2818,17 @@ static int pick_frame_size(VP8_COMP *cpi)
         cm->frame_type = KEY_FRAME;
 
     }
-    // Auto key frames (Only two pass will enter here)
+    // Special case for forced key frames
+    // The frame sizing here is still far from ideal for 2 pass.
+    else if (cm->frame_flags & FRAMEFLAGS_KEY)
+    {
+        cm->frame_type = KEY_FRAME;
+        resize_key_frame(cpi);
+        vp8_calc_iframe_target_size(cpi);
+    }
     else if (cm->frame_type == KEY_FRAME)
     {
         vp8_calc_auto_iframe_target_size(cpi);
-    }
-    // Forced key frames (by interval or an external signal)
-    else if ((cm->frame_flags & FRAMEFLAGS_KEY) ||
-             (cpi->oxcf.auto_key && (cpi->frames_since_key % cpi->key_frame_frequency == 0)))
-    {
-        // Key frame from VFW/auto-keyframe/first frame
-        cm->frame_type = KEY_FRAME;
-
-        resize_key_frame(cpi);
-
-        // Compute target frame size
-        if (cpi->pass != 2)
-            vp8_calc_iframe_target_size(cpi);
     }
     else
     {
