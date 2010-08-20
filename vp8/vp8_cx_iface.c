@@ -826,7 +826,9 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
         int ctr_id,
         va_list args)
 {
+#if CONFIG_POSTPROC
     vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
+    (void)ctr_id;
 
     if (data)
     {
@@ -835,6 +837,12 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
     }
     else
         return VPX_CODEC_INVALID_PARAM;
+#else
+    (void)ctx;
+    (void)ctr_id;
+    (void)args;
+    return VPX_CODEC_INCAPABLE;
+#endif
 }
 
 
