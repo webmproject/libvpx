@@ -16,6 +16,9 @@
 extern prototype_dequant_block(vp8_dequantize_b_v6);
 extern prototype_dequant_idct_add(vp8_dequant_idct_add_v6);
 extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_v6);
+extern prototype_dequant_dc_idct_add_y_block(vp8_dequant_dc_idct_add_y_block_v6);
+extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block_v6);
+extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_v6);
 
 #undef  vp8_dequant_block
 #define vp8_dequant_block vp8_dequantize_b_v6
@@ -25,12 +28,24 @@ extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_v6);
 
 #undef vp8_dequant_dc_idct_add
 #define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_v6
+
+#undef vp8_dequant_dc_idct_add_y_block
+#define vp8_dequant_dc_idct_add_y_block vp8_dequant_dc_idct_add_y_block_v6
+
+#undef vp8_dequant_idct_add_y_block
+#define vp8_dequant_idct_add_y_block vp8_dequant_idct_add_y_block_v6
+
+#undef vp8_dequant_idct_add_uv_block
+#define vp8_dequant_idct_add_uv_block vp8_dequant_idct_add_uv_block_v6
 #endif
 
 #if HAVE_ARMV7
 extern prototype_dequant_block(vp8_dequantize_b_neon);
 extern prototype_dequant_idct_add(vp8_dequant_idct_add_neon);
 extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_neon);
+extern prototype_dequant_dc_idct_add_y_block(vp8_dequant_dc_idct_add_y_block_neon);
+extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block_neon);
+extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_neon);
 
 #undef  vp8_dequant_block
 #define vp8_dequant_block vp8_dequantize_b_neon
@@ -40,6 +55,15 @@ extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_neon);
 
 #undef vp8_dequant_dc_idct_add
 #define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_neon
+
+#undef vp8_dequant_dc_idct_add_y_block
+#define vp8_dequant_dc_idct_add_y_block vp8_dequant_dc_idct_add_y_block_neon
+
+#undef vp8_dequant_idct_add_y_block
+#define vp8_dequant_idct_add_y_block vp8_dequant_idct_add_y_block_neon
+
+#undef vp8_dequant_idct_add_uv_block
+#define vp8_dequant_idct_add_uv_block vp8_dequant_idct_add_uv_block_neon
 #endif
 
 #endif

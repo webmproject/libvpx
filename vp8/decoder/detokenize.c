@@ -266,6 +266,8 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 
     BOOL_DECODER *bc = x->current_bc;
 
+    char *eobs = x->eobs;
+
     ENTROPY_CONTEXT *a;
     ENTROPY_CONTEXT *l;
     int i;
@@ -416,8 +418,8 @@ ONE_CONTEXT_NODE_0_:
 
     qcoeff_ptr [ scan[15] ] = (INT16) v;
 BLOCK_FINISHED:
-    t = ((x->block[i].eob = c) != !type);   // any nonzero data?
-    eobtotal += x->block[i].eob;
+    t = ((eobs[i] = c) != !type);   // any nonzero data?
+    eobtotal += c;
     *a = *l = t;
     qcoeff_ptr += 16;
 

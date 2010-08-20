@@ -218,6 +218,7 @@ typedef struct
 //not used    DECLARE_ALIGNED(16, short, reference[384]);
     DECLARE_ALIGNED(16, short, qcoeff[400]);
     DECLARE_ALIGNED(16, short, dqcoeff[400]);
+    DECLARE_ALIGNED(16, char,  eobs[25]);
 
     // 16 Y blocks, 4 U, 4 V, 1 DC 2nd order block, each with 16 entries.
     BLOCKD block[25];

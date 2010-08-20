@@ -237,7 +237,7 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
         DEQUANT_INVOKE(&pbi->dequant, block)(b);
 
         // do 2nd order transform on the dc block
-        if (b->eob > 1)
+        if (xd->eobs[24] > 1)
         {
             IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
             ((int *)b->qcoeff)[0] = 0;
@@ -255,24 +255,10 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
             ((int *)b->qcoeff)[0] = 0;
         }
 
-
-        for (i = 0; i < 16; i++)
-        {
-
-            b = &xd->block[i];
-
-            if (b->eob > 1)
-            {
-                DEQUANT_INVOKE(&pbi->dequant, dc_idct_add)
-                    (b->qcoeff, &b->dequant[0][0], b->predictor,
-                     *(b->base_dst) + b->dst, 16, b->dst_stride,
-                     xd->block[24].diff[i]);
-            }
-            else
-            {
-                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(xd->block[24].diff[i], b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
-            }
-        }
+        DEQUANT_INVOKE (&pbi->dequant, dc_idct_add_y_block)
+                        (xd->qcoeff, &xd->block[0].dequant[0][0],
+                         xd->predictor, xd->dst.y_buffer,
+                         xd->dst.y_stride, xd->eobs, xd->block[24].diff);
     }
     else if ((xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) && xd->mode_info_context->mbmi.mode == B_PRED)
     {
@@ -282,13 +268,17 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
             BLOCKD *b = &xd->block[i];
             vp8_predict_intra4x4(b, b->bmi.mode, b->predictor);
 
-            if (b->eob > 1)
+            if (xd->eobs[i] > 1)
             {
-                DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
+                DEQUANT_INVOKE(&pbi->dequant, idct_add)
+                    (b->qcoeff, &b->dequant[0][0],  b->predictor,
+                    *(b->base_dst) + b->dst, 16, b->dst_stride);
             }
             else
             {
-                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(b->qcoeff[0] * b->dequant[0][0], b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
+                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
+                    (b->qcoeff[0] * b->dequant[0][0], b->predictor,
+                    *(b->base_dst) + b->dst, 16, b->dst_stride);
                 ((int *)b->qcoeff)[0] = 0;
             }
         }
@@ -296,37 +286,16 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
     }
     else
     {
-        for (i = 0; i < 16; i++)
-        {
-            BLOCKD *b = &xd->block[i];
-
-            if (b->eob > 1)
-            {
-                DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
-            }
-            else
-            {
-                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(b->qcoeff[0] * b->dequant[0][0], b->predictor, *(b->base_dst) + b->dst, 16, b->dst_stride);
-                ((int *)b->qcoeff)[0] = 0;
-            }
-        }
+        DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
+                        (xd->qcoeff, &xd->block[0].dequant[0][0],
+                         xd->predictor, xd->dst.y_buffer,
+                         xd->dst.y_stride, xd->eobs);
     }
 
-    for (i = 16; i < 24; i++)
-    {
-
-        BLOCKD *b = &xd->block[i];
-
-        if (b->eob > 1)
-        {
-            DEQUANT_INVOKE(&pbi->dequant, idct_add)(b->qcoeff, &b->dequant[0][0],  b->predictor, *(b->base_dst) + b->dst, 8, b->dst_stride);
-        }
-        else
-        {
-            IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)(b->qcoeff[0] * b->dequant[0][0], b->predictor, *(b->base_dst) + b->dst, 8, b->dst_stride);
-            ((int *)b->qcoeff)[0] = 0;
-        }
-    }
+    DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
+                    (xd->qcoeff+16*16, &xd->block[16].dequant[0][0],
+                     xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
+                     xd->dst.uv_stride, xd->eobs+16);
 }
 
 static int get_delta_q(vp8_reader *bc, int prev, int *q_update)
