@@ -241,7 +241,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 
     type = 3;
 
-    if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
         type = 1;
         eobtotal -= 16;
@@ -251,7 +251,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 
     for (i = 0; i < 25; i++)
     {
-        x->block[i].eob = dx->detoken.eob[i];
+        x->eobs[i] = dx->detoken.eob[i];
         eobtotal += dx->detoken.eob[i];
     }
 
