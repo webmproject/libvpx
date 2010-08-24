@@ -48,21 +48,20 @@ typedef struct
 
 typedef struct
 {
-    int *scan;
-    UINT8 *ptr_onyxblock2context_leftabove;
-    vp8_tree_index *vp8_coef_tree_ptr;  //onyx_coef_tree_ptr; ???
-    TOKENEXTRABITS *teb_base_ptr;
+    int const *scan;
+    UINT8 const *ptr_onyxblock2context_leftabove;
+    vp8_tree_index const *vp8_coef_tree_ptr;
+    TOKENEXTRABITS const *teb_base_ptr;
     unsigned char *norm_ptr;
-//  UINT16 *ptr_onyx_coef_bands_x;
-    UINT8 *ptr_onyx_coef_bands_x;
+    UINT16 *ptr_onyx_coef_bands_x;
 
-    ENTROPY_CONTEXT   **A;
-    ENTROPY_CONTEXT(*L)[4];
+    ENTROPY_CONTEXT **A;
+    ENTROPY_CONTEXT (*L)[4];
 
     INT16 *qcoeff_start_ptr;
     BOOL_DECODER *current_bc;
 
-    UINT8 *coef_probs[4];
+    vp8_prob const *coef_probs[4];
 
     UINT8 eob[25];
 
