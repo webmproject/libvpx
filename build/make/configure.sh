@@ -797,11 +797,21 @@ process_common_toolchain() {
                 add_ldflags -i-static
                 enabled x86_64 && add_cflags -ipo -no-prec-div -static -xSSE3 -axSSE3
                 enabled x86_64 && AR=xiar
+                case ${tune_cpu} in
+                    atom*)
+                        tune_cflags="-x"
+                        tune_cpu="SSE3_ATOM"
+                    ;;
+                    *)
+                        tune_cflags="-march="
+                    ;;
+                esac
                 ;;
             gcc*)
                 add_cflags  -m${bits}
                 add_ldflags -m${bits}
                 link_with_cc=gcc
+                tune_cflags="-march="
             setup_gnu_toolchain
                 ;;
         esac
