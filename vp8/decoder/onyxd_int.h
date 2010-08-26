@@ -49,14 +49,14 @@ typedef struct
 typedef struct
 {
     int const *scan;
-    UINT8 const *ptr_onyxblock2context_leftabove;
+    UINT8 const *ptr_block2leftabove;
     vp8_tree_index const *vp8_coef_tree_ptr;
     TOKENEXTRABITS const *teb_base_ptr;
     unsigned char *norm_ptr;
-    UINT16 *ptr_onyx_coef_bands_x;
+    UINT8 *ptr_coef_bands_x;
 
-    ENTROPY_CONTEXT **A;
-    ENTROPY_CONTEXT (*L)[4];
+    ENTROPY_CONTEXT_PLANES *A;
+    ENTROPY_CONTEXT_PLANES *L;
 
     INT16 *qcoeff_start_ptr;
     BOOL_DECODER *current_bc;

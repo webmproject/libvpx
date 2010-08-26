@@ -75,11 +75,14 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 }
 
 #if CONFIG_ARM_ASM_DETOK
-DECLARE_ALIGNED(16, const UINT8, vp8_block2context_leftabove[25*3]) =
+// mashup of vp8_block2left and vp8_block2above so we only need one pointer
+// for the assembly version.
+DECLARE_ALIGNED(16, const UINT8, vp8_block2leftabove[25*2]) =
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, //end of vp8_block2context
-    0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 1, 1, 0, 0, 1, 1, 0, //end of vp8_block2left
-    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 0, 1, 0, 1, 0, 1, 0  //end of vp8_block2above
+    //vp8_block2left
+    0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
+    //vp8_block2above
+    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 4, 5, 4, 5, 6, 7, 6, 7, 8
 };
 
 void vp8_init_detokenizer(VP8D_COMP *dx)
@@ -88,8 +91,8 @@ void vp8_init_detokenizer(VP8D_COMP *dx)
     MACROBLOCKD *x = & dx->mb;
 
     dx->detoken.vp8_coef_tree_ptr = vp8_coef_tree;
-    dx->detoken.ptr_onyxblock2context_leftabove = vp8_block2context_leftabove;
-    dx->detoken.ptr_onyx_coef_bands_x = vp8_coef_bands_x;
+    dx->detoken.ptr_block2leftabove = vp8_block2leftabove;
+    dx->detoken.ptr_coef_bands_x = vp8_coef_bands_x;
     dx->detoken.scan = vp8_default_zig_zag1d;
     dx->detoken.teb_base_ptr = vp8d_token_extra_bits2;
     dx->detoken.qcoeff_start_ptr = &x->qcoeff[0];

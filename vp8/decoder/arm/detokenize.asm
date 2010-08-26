@@ -28,8 +28,7 @@ l_stacksize EQU     64
 
 
 ;; constant offsets -- these should be created at build time
-c_onyxblock2left_offset      EQU 25
-c_onyxblock2above_offset     EQU 50
+c_block2above_offset         EQU 25
 c_entropy_nodes              EQU 11
 c_dct_eob_token              EQU 11
 
@@ -42,12 +41,12 @@ c_dct_eob_token              EQU 11
     ldr         r1, [r9, #detok_current_bc]
     ldr         r0, [r9, #detok_qcoeff_start_ptr]
     mov         r11, #0                     ; i
-    mov         r3, #0x10                   ; stop
+    mov         r3, #16                     ; stop
 
     cmp         r7, #1                      ; type ?= 1
     addeq       r11, r11, #24               ; i = 24
     addeq       r3, r3, #8                  ; stop = 24
-    addeq       r0, r0, #3, 24              ; qcoefptr += 24*16 ?CHECKME
+    addeq       r0, r0, #3, 24              ; qcoefptr += 24*16
 
     str         r0, [sp, #l_qcoeff]
     str         r11, [sp, #l_i]
@@ -59,61 +58,50 @@ c_dct_eob_token              EQU 11
 
     ldr         r8, [r1, #bool_decoder_user_buffer]
 
-    ldr         r10, [lr, #detok_coef_probs] ; coef_probs[type]
+    ldr         r10, [lr, #detok_coef_probs]
     ldr         r5, [r1, #bool_decoder_count]
     ldr         r6, [r1, #bool_decoder_range]
     ldr         r4, [r1, #bool_decoder_value]
 
     str         r10, [sp, #l_coef_ptr]
 
-    ;align 4
 BLOCK_LOOP
-    ldr         r3, [r9, #detok_ptr_onyxblock2context_leftabove]
-    ldr         r2, [r9, #detok_A]
+    ldr         r3, [r9, #detok_ptr_block2leftabove]
     ldr         r1, [r9, #detok_L]
-    ldrb        r12, [r3, r11]!             ; onyxblock2context[i]
+    ldr         r2, [r9, #detok_A]
+    ldrb        r12, [r3, r11]!             ; block2left[i]
+    ldrb        r3, [r3, #c_block2above_offset]; block2above[i]
 
     cmp         r7, #0                      ; c = !type
     moveq       r7, #1
     movne       r7, #0
 
-    ldr         r0, [r2, r12, lsl #2]       ; A[onyxblock2context[i]]
-    add         r1, r1, r12, lsl #4         ; L + onyxblock2context[i] << 4
-      ; A is ptr to ptr (**)
-      ; L is ptr to data (*[4])
-
-    ldrb        r2, [r3, #c_onyxblock2above_offset] ; + above offset
-    ldrb        r3, [r3, #c_onyxblock2left_offset] ; + left offset
+    ldrb        r0, [r1, r12]!              ; *(L += block2left[i])
+    ldrb        r3, [r2, r3]!               ; *(A += block2above[i])
     mov         lr, #c_entropy_nodes        ; ENTROPY_NODES = 11
-;;  ;++
 
-    ldr         r2, [r0, r2, lsl #2]!       ; A + above offset
-    ldr         r3, [r1, r3, lsl #2]!       ; L + left offset
 ; VP8_COMBINEENTROPYCONTETEXTS(t, *a, *l) => t = ((*a) != 0) + ((*l) !=0)
-    cmp         r2, #0                      ; *a ?= 0
-    movne       r2, #1                      ; haha if a == 0 no need to set up another var to state that pretty sweet :)
-    cmp         r3, #0                      ; *l ?= 0
-    addne       r2, r2, #1                  ; t
+    cmp         r0, #0                      ; *l ?= 0
+    movne       r0, #1
+    cmp         r3, #0                      ; *a ?= 0
+    addne       r0, r0, #1                  ; t
 
     str         r1, [sp, #l_l_ptr]          ; save &l
-    str         r0, [sp, #l_a_ptr]          ; save &a
-    smlabb      r0, r2, lr, r10             ; Prob = coef_probs + (t * ENTROPY_NODES)
+    str         r2, [sp, #l_a_ptr]          ; save &a
+    smlabb      r0, r0, lr, r10             ; Prob = coef_probs + (t * ENTROPY_NODES)
     mov         r1, #0                      ; t = 0
     str         r7, [sp, #l_c]
 
     ;align 4
 COEFF_LOOP
-    ldr         r3, [r9, #detok_ptr_onyx_coef_bands_x]
-    ldr         lr, [r9, #detok_onyx_coef_tree_ptr]
-
-      ; onyx_coef_bands_x is UINT16
-    add         r3, r3, r7, lsl #1            ; coef_bands_x[c]
-    ldrh        r3, [r3]                      ; UINT16
-
-    ;++
+    ldr         r3, [r9, #detok_ptr_coef_bands_x]
+    ldr         lr, [r9, #detok_coef_tree_ptr]
+    ;STALL
+    ldrb        r3, [r3, r7]                ; coef_bands_x[c]
+    ;STALL
+    ;STALL
     add         r0, r0, r3                  ; Prob += coef_bands_x[c]
 
-    ;align 4
 get_token_loop
     ldrb        r2, [r0, +r1, asr #1]       ; Prob[t >> 1]
     mov         r3, r6, lsl #8              ; range << 8
@@ -221,14 +209,14 @@ SKIP_EXTRABITS
     mov         r4, r4, lsl r3              ; value <<= shift
     ldrleb      r2, [r8], #1                ; *(bufptr++)
     addle       r5, r5, #8                  ; count += 8
-    rsble       r3, r5, #24                  ; BR_COUNT - count
+    rsble       r3, r5, #24                 ; BR_COUNT - count
     orrle       r4, r4, r2, lsl r3          ; value |= *bufptr << (BR_COUNT - count)
 
-    add         r0, r0, #0xB                ; Prob += ENTROPY_NODES (11)
+    add         r0, r0, #11                 ; Prob += ENTROPY_NODES (11)
 
     cmn         r1, #1                      ; t < -ONE_TOKEN
 
-    addlt       r0, r0, #0xB                ; Prob += ENTROPY_NODES (11)
+    addlt       r0, r0, #11                 ; Prob += ENTROPY_NODES (11)
 
     mvn         r1, #1                      ; t = -1 ???? C is -2
 
@@ -236,7 +224,7 @@ SKIP_EOB_CHECK
     ldr         r7, [sp, #l_c]              ; c
     ldr         r3, [r9, #detok_scan]
     add         r1, r1, #2                  ; t+= 2
-    cmp         r7, #(0x10 - 1)             ; c should will be one higher
+    cmp         r7, #15                     ; c should will be one higher
 
     ldr         r3, [r3, +r7, lsl #2]       ; scan[c] this needs pre-inc c value
     add         r7, r7, #1                  ; c++
@@ -247,7 +235,7 @@ SKIP_EOB_CHECK
 
     blt         COEFF_LOOP
 
-    sub         r7, r7, #1                  ; if(t != -DCT_EOB_TOKEN) --c ; never stored! no condition!
+    sub         r7, r7, #1                  ; if(t != -DCT_EOB_TOKEN) --c
 
 END_OF_BLOCK
     ldr         r3, [sp, #l_type]           ; type
@@ -269,50 +257,49 @@ END_OF_BLOCK
     movne       r3, #1                      ; t
     moveq       r3, #0
 
-    add         r0, r0, #0x20               ; qcoeff += 32 (16 * 2?)
+    add         r0, r0, #32                 ; qcoeff += 32 (16 * 2?)
     add         r11, r11, #1                ; i++
-    str         r3, [r7]                    ; *l = t
-    str         r3, [r2]                    ; *a = t
+    strb        r3, [r7]                    ; *l = t
+    strb        r3, [r2]                    ; *a = t
     str         r0, [sp, #l_qcoeff]         ; qcoeff
     str         r11, [sp, #l_i]             ; i
 
-    cmp         r11, r12                    ; i >= stop ? VERIFY should be strictly LT(<)?
+    cmp         r11, r12                    ; i < stop
     ldr         r7, [sp, #l_type]           ; type
-    mov         lr, #0xB                    ; 11 (ENTORPY_NODES?)
 
     blt         BLOCK_LOOP
 
-    cmp         r11, #0x19                  ; i ?= 25
+    cmp         r11, #25                    ; i ?= 25
     bne         ln2_decode_mb_to
 
     ldr         r12, [r9, #detok_qcoeff_start_ptr]
     ldr         r10, [r9, #detok_coef_probs]
     mov         r7, #0                      ; type/i = 0
-    mov         r3, #0x10                   ; stop = 0
+    mov         r3, #16                     ; stop = 16
     str         r12, [sp, #l_qcoeff]        ; qcoeff_ptr = qcoeff_start_ptr
     str         r7, [sp, #l_i]
     str         r7, [sp, #l_type]
     str         r3, [sp, #l_stop]
 
-    str         r10, [sp, #l_coef_ptr]      ; coef_probs = coef_probs[type] (0)
+    str         r10, [sp, #l_coef_ptr]      ; coef_probs = coef_probs[type=0]
 
     b           BLOCK_LOOP
 
 ln2_decode_mb_to
-    cmp         r11, #0x10                  ; i ?= 16
+    cmp         r11, #16                    ; i ?= 16
     bne         ln1_decode_mb_to
 
     mov         r10, #detok_coef_probs
     add         r10, r10, #2*4              ; coef_probs[type]
-    ldr         r10, [r9, r10]              ; detok + 48 - THIS IS PROBABLY THE ISSUE: NEW STRUCTURE
+    ldr         r10, [r9, r10]              ; detok + detok_coef_probs[type]
 
     mov         r7, #2                      ; type = 2
-    mov         r3, #0x18                   ; stop = 24
+    mov         r3, #24                     ; stop = 24
 
     str         r7, [sp, #l_type]
     str         r3, [sp, #l_stop]
 
-    str         r10, [sp, #l_coef_ptr]      ; coef_probs = coef_probs[type] - didn't want to add 2 to coef_probs
+    str         r10, [sp, #l_coef_ptr]      ; coef_probs = coef_probs[type]
     b           BLOCK_LOOP
 
 ln1_decode_mb_to
