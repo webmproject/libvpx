@@ -611,15 +611,12 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
 
             for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
             {
-
                 if ( mb_row > 0 && (mb_col & 7) == 0){
-               //if ( mb_row > 0 ){
-                  while (mb_col > (*last_row_current_mb_col - 8) && *last_row_current_mb_col != pc->mb_cols - 1)
-                  {
-                      x86_pause_hint();
-                      thread_sleep(0);
-                  }
-
+                    while (mb_col > (*last_row_current_mb_col - 8) && *last_row_current_mb_col != pc->mb_cols - 1)
+                    {
+                        x86_pause_hint();
+                        thread_sleep(0);
+                    }
                 }
 
                 if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
@@ -762,7 +759,6 @@ void vp8_mt_loop_filter_frame( VP8D_COMP *pbi)
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int Segment = (alt_flt_enabled) ? mbd->mode_info_context->mbmi.segment_id : 0;
-
 
             if ( mb_row > 0 && (mb_col & 7) == 0){
             // if ( mb_row > 0 ){
