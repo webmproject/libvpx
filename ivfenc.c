@@ -890,6 +890,8 @@ int main(int argc, const char **argv_)
                 {
                     cfg.g_timebase.num = y4m.fps_d;
                     cfg.g_timebase.den = y4m.fps_n;
+                    /* And don't reset it in the second pass.*/
+                    arg_have_timebase = 1;
                 }
                 arg_use_i420 = 0;
             }
