@@ -348,10 +348,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
 
     // reset above block coeffs
-    xd->above_context[Y1CONTEXT] = cm->above_context[Y1CONTEXT];
-    xd->above_context[UCONTEXT ] = cm->above_context[UCONTEXT ];
-    xd->above_context[VCONTEXT ] = cm->above_context[VCONTEXT ];
-    xd->above_context[Y2CONTEXT] = cm->above_context[Y2CONTEXT];
+    xd->above_context = cm->above_context;
 
     xd->up_available = (mb_row != 0);
     recon_yoffset = (mb_row * recon_y_stride * 16);
@@ -472,10 +469,7 @@ void encode_mb_row(VP8_COMP *cpi,
         // skip to next mb
         xd->mode_info_context++;
 
-        xd->above_context[Y1CONTEXT] += 4;
-        xd->above_context[UCONTEXT ] += 2;
-        xd->above_context[VCONTEXT ] += 2;
-        xd->above_context[Y2CONTEXT] ++;
+        xd->above_context++;
         cpi->current_mb_col_main = mb_col;
     }
 
@@ -626,7 +620,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     xd->mode_info_context->mbmi.mode = DC_PRED;
     xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 
-    xd->left_context = cm->left_context;
+    xd->left_context = &cm->left_context;
 
     vp8_zero(cpi->count_mb_ref_frame_usage)
     vp8_zero(cpi->ymode_count)
@@ -634,17 +628,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     x->mvc = cm->fc.mvc;
 
-    // vp8_zero( entropy_stats)
-    {
-        ENTROPY_CONTEXT **p = cm->above_context;
-        const size_t L = cm->mb_cols;
-
-        vp8_zero_array(p [Y1CONTEXT], L * 4)
-        vp8_zero_array(p [ UCONTEXT], L * 2)
-        vp8_zero_array(p [ VCONTEXT], L * 2)
-        vp8_zero_array(p [Y2CONTEXT], L)
-    }
-
+    vpx_memset(cm->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
     {
         struct vpx_usec_timer  emr_timer;
@@ -1128,7 +1112,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 extern int cnt_pm;
 #endif
 
-extern void vp8_fix_contexts(VP8_COMP *cpi, MACROBLOCKD *x);
+extern void vp8_fix_contexts(MACROBLOCKD *x);
 
 int vp8cx_encode_inter_macroblock
 (
@@ -1282,7 +1266,7 @@ int vp8cx_encode_inter_macroblock
 
             xd->mode_info_context->mbmi.mb_skip_coeff = 1;
             cpi->skip_true_count ++;
-            vp8_fix_contexts(cpi, xd);
+            vp8_fix_contexts(xd);
         }
         else
         {

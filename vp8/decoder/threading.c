@@ -157,7 +157,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
     int ithread = ((DECODETHREAD_DATA *)p_data)->ithread;
     VP8D_COMP *pbi = (VP8D_COMP *)(((DECODETHREAD_DATA *)p_data)->ptr1);
     MB_ROW_DEC *mbrd = (MB_ROW_DEC *)(((DECODETHREAD_DATA *)p_data)->ptr2);
-    ENTROPY_CONTEXT mb_row_left_context[4][4];
+    ENTROPY_CONTEXT_PLANES mb_row_left_context;
 
     while (1)
     {
@@ -197,12 +197,9 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                     recon_uvoffset = mb_row * recon_uv_stride * 8;
                     // reset above block coeffs
 
-                    xd->above_context[Y1CONTEXT] = pc->above_context[Y1CONTEXT];
-                    xd->above_context[UCONTEXT ] = pc->above_context[UCONTEXT];
-                    xd->above_context[VCONTEXT ] = pc->above_context[VCONTEXT];
-                    xd->above_context[Y2CONTEXT] = pc->above_context[Y2CONTEXT];
-                    xd->left_context = mb_row_left_context;
-                    vpx_memset(mb_row_left_context, 0, sizeof(mb_row_left_context));
+                    xd->above_context = pc->above_context;
+                    xd->left_context = &mb_row_left_context;
+                    vpx_memset(&mb_row_left_context, 0, sizeof(mb_row_left_context));
                     xd->up_available = (mb_row != 0);
 
                     xd->mb_to_top_edge = -((mb_row * 16)) << 3;
@@ -260,10 +257,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
 
                         ++xd->mode_info_context;  /* next mb */
 
-                        xd->above_context[Y1CONTEXT] += 4;
-                        xd->above_context[UCONTEXT ] += 2;
-                        xd->above_context[VCONTEXT ] += 2;
-                        xd->above_context[Y2CONTEXT] ++;
+                        xd->above_context++;
 
                         //pbi->mb_row_di[ithread].current_mb_col = mb_col;
                         pbi->current_mb_col[mb_row] = mb_col;
@@ -604,15 +598,12 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
             if (mb_row > 0)
                 last_row_current_mb_col = &pbi->current_mb_col[mb_row -1];
 
-            vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
+            vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
             recon_yoffset = mb_row * recon_y_stride * 16;
             recon_uvoffset = mb_row * recon_uv_stride * 8;
             // reset above block coeffs
 
-            xd->above_context[Y1CONTEXT] = pc->above_context[Y1CONTEXT];
-            xd->above_context[UCONTEXT ] = pc->above_context[UCONTEXT];
-            xd->above_context[VCONTEXT ] = pc->above_context[VCONTEXT];
-            xd->above_context[Y2CONTEXT] = pc->above_context[Y2CONTEXT];
+            xd->above_context = pc->above_context;
             xd->up_available = (mb_row != 0);
 
             xd->mb_to_top_edge = -((mb_row * 16)) << 3;
@@ -672,10 +663,7 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
 
                 ++xd->mode_info_context;  /* next mb */
 
-                xd->above_context[Y1CONTEXT] += 4;
-                xd->above_context[UCONTEXT ] += 2;
-                xd->above_context[VCONTEXT ] += 2;
-                xd->above_context[Y2CONTEXT] ++;
+                xd->above_context++;
 
                 //pbi->current_mb_col_main = mb_col;
                 pbi->current_mb_col[mb_row] = mb_col;

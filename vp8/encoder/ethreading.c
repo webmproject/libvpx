@@ -28,7 +28,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
     int ithread = ((ENCODETHREAD_DATA *)p_data)->ithread;
     VP8_COMP *cpi   = (VP8_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr1);
     MB_ROW_COMP *mbri = (MB_ROW_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr2);
-    ENTROPY_CONTEXT mb_row_left_context[4][4];
+    ENTROPY_CONTEXT_PLANES mb_row_left_context;
 
     //printf("Started thread %d\n", ithread);
 
@@ -68,11 +68,8 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         last_row_current_mb_col = &cpi->current_mb_col_main;
 
                     // reset above block coeffs
-                    xd->above_context[Y1CONTEXT] = cm->above_context[Y1CONTEXT];
-                    xd->above_context[UCONTEXT ] = cm->above_context[UCONTEXT ];
-                    xd->above_context[VCONTEXT ] = cm->above_context[VCONTEXT ];
-                    xd->above_context[Y2CONTEXT] = cm->above_context[Y2CONTEXT];
-                    xd->left_context = mb_row_left_context;
+                    xd->above_context = cm->above_context;
+                    xd->left_context = &mb_row_left_context;
 
                     vp8_zero(mb_row_left_context);
 
@@ -183,10 +180,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         // skip to next mb
                         xd->mode_info_context++;
 
-                        xd->above_context[Y1CONTEXT] += 4;
-                        xd->above_context[UCONTEXT ] += 2;
-                        xd->above_context[VCONTEXT ] += 2;
-                        xd->above_context[Y2CONTEXT] ++;
+                        xd->above_context++;
 
                         cpi->mb_row_ei[ithread].current_mb_col = mb_col;
 
@@ -330,11 +324,6 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
         vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
 
-        /*
-        memcpy(zd->above_context,        xd->above_context, sizeof(xd->above_context));
-        memcpy(zd->mb_segment_tree_probs,  xd->mb_segment_tree_probs, sizeof(xd->mb_segment_tree_probs));
-        memcpy(zd->segment_feature_data,  xd->segment_feature_data, sizeof(xd->segment_feature_data));
-        */
         for (i = 0; i < 25; i++)
         {
             zd->block[i].dequant = xd->block[i].dequant;
@@ -402,7 +391,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mb->rddiv = cpi->RDDIV;
         mb->rdmult = cpi->RDMULT;
 
-        mbd->left_context = cm->left_context;
+        mbd->left_context = &cm->left_context;
         mb->mvc = cm->fc.mvc;
 
         setup_mbby_copy(&mbr_ei[i].mb, x);

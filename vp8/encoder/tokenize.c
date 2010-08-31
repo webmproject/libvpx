@@ -24,7 +24,7 @@
 _int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens];
 #endif
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
-void vp8_fix_contexts(VP8_COMP *cpi, MACROBLOCKD *x);
+void vp8_fix_contexts(MACROBLOCKD *x);
 
 TOKENEXTRA vp8_dct_value_tokens[DCT_MAX_VALUE*2];
 const TOKENEXTRA *vp8_dct_value_tokens_ptr;
@@ -197,79 +197,11 @@ static void tokenize1st_order_b
     *a = *l = pt;
 
 }
-#if 0
+
 void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 {
-    //int i;
-    ENTROPY_CONTEXT **const A = x->above_context;
-    ENTROPY_CONTEXT(* const L)[4] = x->left_context;
-    int plane_type;
-    int b;
-
-    TOKENEXTRA *start = *t;
-    TOKENEXTRA *tp = *t;
-
-    x->mbmi.dc_diff = 1;
-
-    vpx_memcpy(cpi->coef_counts_backup, cpi->coef_counts, sizeof(cpi->coef_counts));
-
-    if (x->mbmi.mode == B_PRED || x->mbmi.mode == SPLITMV)
-    {
-        plane_type = 3;
-    }
-    else
-    {
-        tokenize2nd_order_b(x->block + 24, t, 1, x->frame_type,
-                            A[Y2CONTEXT] + vp8_block2above[24], L[Y2CONTEXT] + vp8_block2left[24], cpi);
-        plane_type = 0;
-
-    }
-
-    for (b = 0; b < 16; b++)
-        tokenize1st_order_b(x->block + b, t, plane_type, x->frame_type,
-                            A[vp8_block2context[b]] + vp8_block2above[b],
-                            L[vp8_block2context[b]] + vp8_block2left[b], cpi);
-
-    for (b = 16; b < 24; b++)
-        tokenize1st_order_b(x->block + b, t, 2, x->frame_type,
-                            A[vp8_block2context[b]] + vp8_block2above[b],
-                            L[vp8_block2context[b]] + vp8_block2left[b], cpi);
-
-    if (cpi->common.mb_no_coeff_skip)
-    {
-        x->mbmi.mb_skip_coeff = 1;
-
-        while ((tp != *t) && x->mbmi.mb_skip_coeff)
-        {
-            x->mbmi.mb_skip_coeff = (x->mbmi.mb_skip_coeff && (tp->Token == DCT_EOB_TOKEN));
-            tp ++;
-        }
-
-        if (x->mbmi.mb_skip_coeff == 1)
-        {
-            x->mbmi.dc_diff = 0;
-            //redo the coutnts
-            vpx_memcpy(cpi->coef_counts, cpi->coef_counts_backup, sizeof(cpi->coef_counts));
-
-            *t = start;
-            cpi->skip_true_count++;
-
-            //skip_true_count++;
-        }
-        else
-        {
-
-            cpi->skip_false_count++;
-            //skip_false_count++;
-        }
-    }
-}
-#else
-void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
-{
-    //int i;
-    ENTROPY_CONTEXT **const A = x->above_context;
-    ENTROPY_CONTEXT(* const L)[4] = x->left_context;
+    ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
+    ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
     int plane_type;
     int b;
 
@@ -300,7 +232,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
             vp8_stuff_mb(cpi, x, t) ;
         else
         {
-            vp8_fix_contexts(cpi, x);
+            vp8_fix_contexts(x);
         }
 
         if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
@@ -354,20 +286,20 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     else
     {
         tokenize2nd_order_b(x->block + 24, t, 1, x->frame_type,
-                            A[Y2CONTEXT] + vp8_block2above[24], L[Y2CONTEXT] + vp8_block2left[24], cpi);
+                   A + vp8_block2above[24], L + vp8_block2left[24], cpi);
         plane_type = 0;
 
     }
 
     for (b = 0; b < 16; b++)
         tokenize1st_order_b(x->block + b, t, plane_type, x->frame_type,
-                            A[vp8_block2context[b]] + vp8_block2above[b],
-                            L[vp8_block2context[b]] + vp8_block2left[b], cpi);
+                            A + vp8_block2above[b],
+                            L + vp8_block2left[b], cpi);
 
     for (b = 16; b < 24; b++)
         tokenize1st_order_b(x->block + b, t, 2, x->frame_type,
-                            A[vp8_block2context[b]] + vp8_block2above[b],
-                            L[vp8_block2context[b]] + vp8_block2left[b], cpi);
+                            A + vp8_block2above[b],
+                            L + vp8_block2left[b], cpi);
 
 #if 0
 
@@ -406,7 +338,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
 #endif
 }
-#endif
+
 
 #ifdef ENTROPY_STATS
 
@@ -581,14 +513,13 @@ void stuff1st_order_buv
 
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 {
-    //int i;
-    ENTROPY_CONTEXT **const A = x->above_context;
-    ENTROPY_CONTEXT(* const L)[4] = x->left_context;
+    ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
+    ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
     int plane_type;
     int b;
 
     stuff2nd_order_b(x->block + 24, t, 1, x->frame_type,
-                     A[Y2CONTEXT] + vp8_block2above[24], L[Y2CONTEXT] + vp8_block2left[24], cpi);
+                     A + vp8_block2above[24], L + vp8_block2left[24], cpi);
     plane_type = 0;
 
 
@@ -600,38 +531,27 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
     for (b = 0; b < 16; b++)
         stuff1st_order_b(x->block + b, t, plane_type, x->frame_type,
-                         A[vp8_block2context[b]] + vp8_block2above[b],
-                         L[vp8_block2context[b]] + vp8_block2left[b], cpi);
+                         A + vp8_block2above[b],
+                         L + vp8_block2left[b], cpi);
 
     for (b = 16; b < 24; b++)
         stuff1st_order_buv(x->block + b, t, 2, x->frame_type,
-                           A[vp8_block2context[b]] + vp8_block2above[b],
-                           L[vp8_block2context[b]] + vp8_block2left[b], cpi);
+                           A + vp8_block2above[b],
+                           L + vp8_block2left[b], cpi);
 
 }
-void vp8_fix_contexts(VP8_COMP *cpi, MACROBLOCKD *x)
+void vp8_fix_contexts(MACROBLOCKD *x)
 {
-    x->left_context[Y1CONTEXT][0] = 0;
-    x->left_context[Y1CONTEXT][1] = 0;
-    x->left_context[Y1CONTEXT][2] = 0;
-    x->left_context[Y1CONTEXT][3] = 0;
-    x->left_context[UCONTEXT][0]  = 0;
-    x->left_context[VCONTEXT][0]  = 0;
-    x->left_context[UCONTEXT][1]  = 0;
-    x->left_context[VCONTEXT][1]  = 0;
-
-    x->above_context[Y1CONTEXT][0] = 0;
-    x->above_context[Y1CONTEXT][1] = 0;
-    x->above_context[Y1CONTEXT][2] = 0;
-    x->above_context[Y1CONTEXT][3] = 0;
-    x->above_context[UCONTEXT][0]  = 0;
-    x->above_context[VCONTEXT][0]  = 0;
-    x->above_context[UCONTEXT][1]  = 0;
-    x->above_context[VCONTEXT][1]  = 0;
-
+    /* Clear entropy contexts for Y2 blocks */
     if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
-        x->left_context[Y2CONTEXT][0] = 0;
-        x->above_context[Y2CONTEXT][0] = 0;
+        vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+        vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
     }
+    else
+    {
+        vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
+        vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
+    }
+
 }

@@ -49,19 +49,19 @@ typedef struct
 } POS;
 
 
-typedef int ENTROPY_CONTEXT;
-
+typedef char ENTROPY_CONTEXT;
 typedef struct
 {
-    ENTROPY_CONTEXT l[4];
-    ENTROPY_CONTEXT a[4];
-} TEMP_CONTEXT;
+    ENTROPY_CONTEXT y1[4];
+    ENTROPY_CONTEXT u[2];
+    ENTROPY_CONTEXT v[2];
+    ENTROPY_CONTEXT y2;
+} ENTROPY_CONTEXT_PLANES;
 
-extern void vp8_setup_temp_context(TEMP_CONTEXT *t, ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l, int count);
-extern const int vp8_block2left[25];
-extern const int vp8_block2above[25];
 extern const int vp8_block2type[25];
-extern const int vp8_block2context[25];
+
+extern const unsigned char vp8_block2left[25];
+extern const unsigned char vp8_block2above[25];
 
 #define VP8_COMBINEENTROPYCONTEXTS( Dest, A, B) \
     Dest = ((A)!=0) + ((B)!=0);
@@ -237,8 +237,8 @@ typedef struct
     int left_available;
 
     // Y,U,V,Y2
-    ENTROPY_CONTEXT *above_context[4];   // row of context for each plane
-    ENTROPY_CONTEXT(*left_context)[4];   // (up to) 4 contexts ""
+    ENTROPY_CONTEXT_PLANES *above_context;
+    ENTROPY_CONTEXT_PLANES *left_context;
 
     // 0 indicates segmentation at MB level is not enabled. Otherwise the individual bits indicate which features are active.
     unsigned char segmentation_enabled;

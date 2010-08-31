@@ -95,7 +95,7 @@ typedef struct vp8_dboolhuff_rtcd_vtable {
 #define IF_RTCD(x) NULL
 //#endif
 
-DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
+DECLARE_ALIGNED(16, extern const unsigned char, vp8dx_bitreader_norm[256]);
 
 /* wrapper functions to hide RTCD. static means inline means hopefully no
  * penalty

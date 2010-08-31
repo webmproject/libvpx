@@ -220,13 +220,20 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
 {
     MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
-    TEMP_CONTEXT t;
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int error = RD_ESTIMATE(mb->rdmult, mb->rddiv, cost, 0); // Rd estimate for the cost of the block prediction mode
     int distortion = 0;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
 
     vp8_intra_prediction_down_copy(xd);
-    vp8_setup_temp_context(&t, xd->above_context[Y1CONTEXT], xd->left_context[Y1CONTEXT], 4);
 
     for (i = 0; i < 16; i++)
     {
@@ -239,8 +246,8 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
 
         error += pick_intra4x4block(rtcd,
                                     mb, mb->block + i, xd->block + i, &best_mode, A, L,
-                                    t.a + vp8_block2above[i],
-                                    t.l + vp8_block2left[i], &r, &d);
+                                    ta + vp8_block2above[i],
+                                    tl + vp8_block2left[i], &r, &d);
 
         cost += r;
         distortion += d;
