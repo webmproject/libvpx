@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -233,14 +234,17 @@ typedef struct
 {
 
     DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, Y1quant_shift[QINDEX_RANGE][4][4]);
     DECLARE_ALIGNED(16, short, Y1zbin[QINDEX_RANGE][4][4]);
     DECLARE_ALIGNED(16, short, Y1round[QINDEX_RANGE][4][4]);
 
     DECLARE_ALIGNED(16, short, Y2quant[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, Y2quant_shift[QINDEX_RANGE][4][4]);
     DECLARE_ALIGNED(16, short, Y2zbin[QINDEX_RANGE][4][4]);
     DECLARE_ALIGNED(16, short, Y2round[QINDEX_RANGE][4][4]);
 
     DECLARE_ALIGNED(16, short, UVquant[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, UVquant_shift[QINDEX_RANGE][4][4]);
     DECLARE_ALIGNED(16, short, UVzbin[QINDEX_RANGE][4][4]);
     DECLARE_ALIGNED(16, short, UVround[QINDEX_RANGE][4][4]);
 
@@ -355,9 +359,14 @@ typedef struct
     int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
     int mid_gf_extra_bits;             // A few extra bits for the frame half way between two gfs.
 
-    int kf_group_bits;                // Projected total bits available for a key frame group of frames
-    int kf_group_error_left;           // Error score of frames still to be coded in kf group
-    int kf_bits;                     // Bits for the key frame in a key frame group - 2 pass only
+    // Projected total bits available for a key frame group of frames
+    long long kf_group_bits;
+
+    // Error score of frames still to be coded in kf group
+    long long kf_group_error_left;
+
+    // Bits for the key frame in a key frame group - 2 pass only
+    int kf_bits;
 
     int non_gf_bitrate_adjustment;     // Used in the few frames following a GF to recover the extra bits spent in that GF
     int initial_gf_use;               // percentage use of gf 2 frames after gf
@@ -522,8 +531,8 @@ typedef struct
     int motion_lvl;
     int motion_speed;
     int motion_var;
-    int next_iiratio;
-    int this_iiratio;
+    unsigned int next_iiratio;
+    unsigned int this_iiratio;
     int this_frame_modified_error;
 
     double norm_intra_err_per_mb;
@@ -637,6 +646,12 @@ typedef struct
     int b_calculate_ssimg;
 #endif
     int b_calculate_psnr;
+
+
+    unsigned char *gf_active_flags;   // Record of which MBs still refer to last golden frame either directly or through 0,0
+    int gf_active_count;
+
+
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);

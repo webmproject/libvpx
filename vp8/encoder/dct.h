@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -31,15 +32,14 @@ extern prototype_fdct(vp8_fdct_short4x4);
 #endif
 extern prototype_fdct(vp8_fdct_short8x4);
 
+// There is no fast4x4 (for now)
 #ifndef vp8_fdct_fast4x4
-#define vp8_fdct_fast4x4  vp8_fast_fdct4x4_c
+#define vp8_fdct_fast4x4  vp8_short_fdct4x4_c
 #endif
-extern prototype_fdct(vp8_fdct_fast4x4);
 
 #ifndef vp8_fdct_fast8x4
-#define vp8_fdct_fast8x4  vp8_fast_fdct8x4_c
+#define vp8_fdct_fast8x4  vp8_short_fdct8x4_c
 #endif
-extern prototype_fdct(vp8_fdct_fast8x4);
 
 #ifndef vp8_fdct_walsh_short4x4
 #define vp8_fdct_walsh_short4x4  vp8_short_walsh4x4_c

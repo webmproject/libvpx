@@ -16,9 +16,6 @@
 #undef vp8_dbool_start
 #define vp8_dbool_start vp8dx_start_decode_v6
 
-#undef vp8_dbool_stop
-#define vp8_dbool_stop vp8dx_stop_decode_v6
-
 #undef vp8_dbool_fill
 #define vp8_dbool_fill vp8_bool_decoder_fill_v6
 
@@ -32,9 +29,6 @@
 #if HAVE_ARMV7
 #undef vp8_dbool_start
 #define vp8_dbool_start vp8dx_start_decode_neon
-
-#undef vp8_dbool_stop
-#define vp8_dbool_stop vp8dx_stop_decode_neon
 
 #undef vp8_dbool_fill
 #define vp8_dbool_fill vp8_bool_decoder_fill_neon

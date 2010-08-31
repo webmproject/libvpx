@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -62,7 +63,11 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_neon;
 
     cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;
-    cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;
+    cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_c;
+    /* The neon quantizer has not been updated to match the new exact
+     * quantizer introduced in commit e04e2935
+     */
+    /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;*/
 #elif HAVE_ARMV6
     cpi->rtcd.variance.sad16x16              = vp8_sad16x16_c;
     cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;

@@ -1,10 +1,11 @@
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
@@ -19,8 +20,9 @@ ivfdec.SRCS                 += args.c args.h vpx_ports/config.h
 ivfdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
 ivfdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += ivfenc.c
-ivfenc.SRCS                 += args.c args.h vpx_ports/config.h
-ivfenc.SRCS                 += vpx_ports/mem_ops.h vpx_ports/mem_ops_aligned.h
+ivfenc.SRCS                 += args.c args.h y4minput.c y4minput.h
+ivfenc.SRCS                 += vpx_ports/config.h vpx_ports/mem_ops.h
+ivfenc.SRCS                 += vpx_ports/mem_ops_aligned.h
 ivfenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 ivfenc.DESCRIPTION           = Full featured encoder
 

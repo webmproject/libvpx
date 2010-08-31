@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -17,15 +18,10 @@
 #if HAVE_MMX
 void vp8_short_fdct8x4_mmx(short *input, short *output, int pitch)
 {
-    vp8_short_fdct4x4_mmx(input,   output,    pitch);
-    vp8_short_fdct4x4_mmx(input + 4, output + 16, pitch);
+    vp8_short_fdct4x4_c(input,   output,    pitch);
+    vp8_short_fdct4x4_c(input + 4, output + 16, pitch);
 }
 
-void vp8_fast_fdct8x4_mmx(short *input, short *output, int pitch)
-{
-    vp8_fast_fdct4x4_mmx(input,   output   , pitch);
-    vp8_fast_fdct4x4_mmx(input + 4, output + 16, pitch);
-}
 
 int vp8_fast_quantize_b_impl_mmx(short *coeff_ptr, short *zbin_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
@@ -86,10 +82,10 @@ void vp8_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch)
 #endif
 
 #if HAVE_SSE2
-void vp8_short_fdct8x4_wmt(short *input, short *output, int pitch)
+void vp8_short_fdct8x4_sse2(short *input, short *output, int pitch)
 {
-    vp8_short_fdct4x4_wmt(input,   output,    pitch);
-    vp8_short_fdct4x4_wmt(input + 4, output + 16, pitch);
+    vp8_short_fdct4x4_sse2(input,   output,    pitch);
+    vp8_short_fdct4x4_sse2(input + 4, output + 16, pitch);
 }
 
 int vp8_fast_quantize_b_impl_sse(short *coeff_ptr, short *zbin_ptr,
@@ -118,6 +114,40 @@ void vp8_fast_quantize_b_sse(BLOCK *b, BLOCKD *d)
                  quant_ptr,
                  dqcoeff_ptr
              );
+}
+
+int vp8_regular_quantize_b_impl_sse2(short *coeff_ptr, short *zbin_ptr,
+                               short *qcoeff_ptr,short *dequant_ptr,
+                               const int *default_zig_zag, short *round_ptr,
+                               short *quant_ptr, short *dqcoeff_ptr,
+                               unsigned short zbin_oq_value,
+                               short *zbin_boost_ptr);
+
+void vp8_regular_quantize_b_sse2(BLOCK *b,BLOCKD *d)
+{
+    short *zbin_boost_ptr = &b->zrun_zbin_boost[0];
+    short *coeff_ptr  = &b->coeff[0];
+    short *zbin_ptr   = &b->zbin[0][0];
+    short *round_ptr  = &b->round[0][0];
+    short *quant_ptr  = &b->quant[0][0];
+    short *qcoeff_ptr = d->qcoeff;
+    short *dqcoeff_ptr = d->dqcoeff;
+    short *dequant_ptr = &d->dequant[0][0];
+    short zbin_oq_value = b->zbin_extra;
+
+    d->eob = vp8_regular_quantize_b_impl_sse2(
+        coeff_ptr,
+        zbin_ptr,
+        qcoeff_ptr,
+        dequant_ptr,
+        vp8_default_zig_zag1d,
+
+        round_ptr,
+        quant_ptr,
+        dqcoeff_ptr,
+        zbin_oq_value,
+        zbin_boost_ptr
+        );
 }
 
 int vp8_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
@@ -186,11 +216,19 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.get8x8var             = vp8_get8x8var_mmx;
         cpi->rtcd.variance.get16x16var           = vp8_get16x16var_mmx;
         cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_mmx;
-
+#if 0 // new fdct
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_mmx;
         cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_mmx;
-        cpi->rtcd.fdct.fast4x4                   = vp8_fast_fdct4x4_mmx;
-        cpi->rtcd.fdct.fast8x4                   = vp8_fast_fdct8x4_mmx;
+        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_mmx;
+        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_mmx;
+#else
+        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
+        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
+        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
+        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
+
+#endif
+
         cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
 
         cpi->rtcd.encodemb.berr                  = vp8_block_error_mmx;
@@ -200,7 +238,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_mmx;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_mmx;
 
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_mmx;
+        /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_mmx;*/
     }
 
 #endif
@@ -235,21 +273,20 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.get16x16var           = vp8_get16x16var_sse2;
         /* cpi->rtcd.variance.get4x4sse_cs  not implemented for wmt */;
 
-#if 0
-        /* short SSE2 DCT currently disabled, does not match the MMX version */
-        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_wmt;
-        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_wmt;
-#endif
-        /* cpi->rtcd.fdct.fast4x4  not implemented for wmt */;
-        cpi->rtcd.fdct.fast8x4                   = vp8_fast_fdct8x4_wmt;
-        cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_sse2;
+        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_sse2;
+        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_sse2;
+        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_sse2;
+        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_sse2;
+
+        cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c ;
 
         cpi->rtcd.encodemb.berr                  = vp8_block_error_xmm;
         cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_xmm;
         cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_xmm;
         /* cpi->rtcd.encodemb.sub* not implemented for wmt */
 
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse;
+        /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse;
+        cpi->rtcd.quantize.quantb            = vp8_regular_quantize_b_sse2;*/
     }
 
 #endif

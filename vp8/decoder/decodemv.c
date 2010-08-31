@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -170,8 +171,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             VP8_COMMON *const pc = &pbi->common;
             MACROBLOCKD *xd = &pbi->mb;
 
-            vp8dx_bool_decoder_fill(bc);
-
+            mbmi->need_to_clamp_mvs = 0;
             // Distance of Mb to the various image edges.
             // These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
             xd->mb_to_left_edge = -((mb_col * 16) << 3);
@@ -226,13 +226,14 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                         int mv_contz;
 
                         while (j != L[++k])
-                            if (k >= 16)
+                        {
 #if CONFIG_DEBUG
+                            if (k >= 16)
+                            {
                                 assert(0);
-
-#else
-                                ;
+                            }
 #endif
+                        }
 
                         mv_contz = vp8_mv_cont(&(vp8_left_bmi(mi, k)->mv.as_mv), &(vp8_above_bmi(mi, k, mis)->mv.as_mv));
 
@@ -267,6 +268,17 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                         default:
                             break;
                         }
+
+                        if (mv->col < xd->mb_to_left_edge
+                                      - LEFT_TOP_MARGIN
+                            || mv->col > xd->mb_to_right_edge
+                                         + RIGHT_BOTTOM_MARGIN
+                            || mv->row < xd->mb_to_top_edge
+                                         - LEFT_TOP_MARGIN
+                            || mv->row > xd->mb_to_bottom_edge
+                                         + RIGHT_BOTTOM_MARGIN
+                            )
+                            mbmi->need_to_clamp_mvs = 1;
 
                         /* Fill (uniform) modes, mvs of jth subset.
                            Must do it here because ensuing subsets can
@@ -324,27 +336,18 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                     read_mv(bc, mv, (const MV_CONTEXT *) mvc);
                     mv->row += best_mv.row;
                     mv->col += best_mv.col;
-                    /* Encoder should not produce invalid motion vectors, but since
-                     * arbitrary length MVs can be parsed from the bitstream, we
-                     * need to clamp them here in case we're reading bad data to
-                     * avoid a crash.
+
+                    /* Don't need to check this on NEARMV and NEARESTMV modes
+                     * since those modes clamp the MV. The NEWMV mode does not,
+                     * so signal to the prediction stage whether special
+                     * handling may be required.
                      */
-#if CONFIG_DEBUG
-                    assert(mv->col >= (xd->mb_to_left_edge - LEFT_TOP_MARGIN));
-                    assert(mv->col <= (xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN));
-                    assert(mv->row >= (xd->mb_to_top_edge - LEFT_TOP_MARGIN));
-                    assert(mv->row <= (xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN));
-#endif
-
-                    if (mv->col < (xd->mb_to_left_edge - LEFT_TOP_MARGIN))
-                        mv->col = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-                    else if (mv->col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN)
-                        mv->col = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
-
-                    if (mv->row < (xd->mb_to_top_edge - LEFT_TOP_MARGIN))
-                        mv->row = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-                    else if (mv->row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN)
-                        mv->row = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+                    if (mv->col < xd->mb_to_left_edge - LEFT_TOP_MARGIN
+                        || mv->col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN
+                        || mv->row < xd->mb_to_top_edge - LEFT_TOP_MARGIN
+                        || mv->row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN
+                        )
+                        mbmi->need_to_clamp_mvs = 1;
 
                 propagate_mv:  /* same MV throughout */
                     {
@@ -380,7 +383,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                     assert(0);
 #endif
                 }
-
             }
             else
             {

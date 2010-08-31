@@ -1,14 +1,17 @@
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
 ASM:=$(if $(filter yes,$(CONFIG_GCC)),.asm.s,.asm)
+
+CODEC_SRCS-yes += libs.mk
 
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
 CODEC_SRCS-yes += $(addprefix vpx/,$(call enabled,API_SRCS))
@@ -58,7 +61,6 @@ CODEC_LIB=$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd)
 # This variable uses deferred expansion intentionally, since the results of
 # $(wildcard) may change during the course of the Make.
 VS_PLATFORMS = $(foreach d,$(wildcard */Release/$(CODEC_LIB).lib),$(word 1,$(subst /, ,$(d))))
-CODEC_SRCS-yes += $(SRC_PATH_BARE)/libs.mk # to show up in the msvs workspace
 endif
 
 # The following pairs define a mapping of locations in the distribution
@@ -91,7 +93,9 @@ CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
 endif
 CODEC_SRCS-$(ARCH_ARM) += $(BUILD_PFX)vpx_config.asm
-CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports
+CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
+CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
+CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
 
 INSTALL-LIBS-yes += include/vpx/vpx_codec.h
 INSTALL-LIBS-yes += include/vpx/vpx_image.h
@@ -129,7 +133,6 @@ ARM_ARCH=v6
 endif
 obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
 	@cp $(SRC_PATH_BARE)/build/arm-wince-vs8/obj_int_extract.bat .
-	@cp $(SRC_PATH_BARE)/build/arm-wince-vs8/armasm$(ARM_ARCH).rules .
 	@echo "    [CREATE] $@"
 	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
 			--exe\
@@ -142,7 +145,6 @@ obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
 
 PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
 PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
-PROJECTS-$(BUILD_LIBVPX) += armasm$(ARM_ARCH).rules
 endif
 
 vpx.def: $(call enabled,CODEC_EXPORTS)
@@ -174,6 +176,31 @@ LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
 LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
+
+BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
+LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
+LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)
+$(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
+$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm -pthread
+$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
+$(BUILD_PFX)$(LIBVPX_SO): SO_VERSION_SCRIPT = libvpx.ver
+LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
+                             libvpx.so libvpx.so.$(VERSION_MAJOR) \
+                             libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR))
+
+libvpx.ver: $(call enabled,CODEC_EXPORTS)
+	@echo "    [CREATE] $@"
+	$(qexec)echo "{ global:" > $@
+	$(qexec)for f in $?; do awk '{print $$2";"}' < $$f >>$@; done
+	$(qexec)echo "local: *; };" >> $@
+CLEAN-OBJS += libvpx.ver
+
+$(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)):
+	@echo "    [LN]      $@"
+	$(qexec)ln -sf $(LIBVPX_SO) $@
+
+INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
+INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
 endif
 
 LIBS-$(LIPO_LIBVPX) += libvpx.a

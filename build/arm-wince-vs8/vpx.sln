@@ -8,7 +8,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example", "example.vcproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "obj_int_extract", "obj_int_extract.vcproj", "{E1360C65-D375-4335-8057-7ED99CC3F9B2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vpx_decoder", "vpx_decoder.vcproj", "{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vpx", "vpx.vcproj", "{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E1360C65-D375-4335-8057-7ED99CC3F9B2} = {E1360C65-D375-4335-8057-7ED99CC3F9B2}
 	EndProjectSection

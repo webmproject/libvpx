@@ -1,14 +1,18 @@
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
 include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8_common.mk
+
+VP8_CX_EXPORTS += exports_enc
+
 VP8_CX_SRCS-yes += $(VP8_COMMON_SRCS-yes)
 VP8_CX_SRCS-no  += $(VP8_COMMON_SRCS-no)
 VP8_CX_SRCS_REMOVE-yes += $(VP8_COMMON_SRCS_REMOVE-yes)
@@ -70,7 +74,9 @@ VP8_CX_SRCS-yes += encoder/quantize.c
 VP8_CX_SRCS-yes += encoder/ratectrl.c
 VP8_CX_SRCS-yes += encoder/rdopt.c
 VP8_CX_SRCS-yes += encoder/sad_c.c
-VP8_CX_SRCS-yes += encoder/ssim.c
+VP8_CX_SRCS-yes += encoder/segmentation.c
+VP8_CX_SRCS-yes += encoder/segmentation.h
+VP8_CX_SRCS-$(CONFIG_PSNR) += encoder/ssim.c
 VP8_CX_SRCS-yes += encoder/tokenize.c
 VP8_CX_SRCS-yes += encoder/treewriter.c
 VP8_CX_SRCS-yes += encoder/variance_c.c
@@ -83,17 +89,19 @@ VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodemb_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/dct_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/mcomp_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/variance_x86.h
+VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/x86_csystemdependent.c
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/variance_mmx.c
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/variance_impl_mmx.asm
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/sad_mmx.asm
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/dct_mmx.asm
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/subtract_mmx.asm
+VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/variance_sse2.c
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/variance_impl_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/sad_sse2.asm
-VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/dct_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/fwalsh_sse2.asm
+VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/quantize_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE3) += encoder/x86/sad_sse3.asm
 VP8_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/sad_ssse3.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_mmx.asm

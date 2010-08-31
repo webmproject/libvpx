@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -67,8 +68,8 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 
     cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
     cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
-    cpi->rtcd.fdct.fast4x4                   = vp8_fast_fdct4x4_c;
-    cpi->rtcd.fdct.fast8x4                   = vp8_fast_fdct8x4_c;
+    cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
+    cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
     cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
 
     cpi->rtcd.encodemb.berr                  = vp8_block_error_c;

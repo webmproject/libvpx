@@ -1,10 +1,11 @@
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
@@ -26,7 +27,6 @@ VP8_COMMON_SRCS-yes += common/onyxd.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
 
-VP8_COMMON_SRCS-yes += common/segmentation_common.c
 VP8_COMMON_SRCS-yes += common/alloccommon.c
 VP8_COMMON_SRCS-yes += common/blockd.c
 VP8_COMMON_SRCS-yes += common/coefupdateprobs.h
@@ -63,7 +63,6 @@ VP8_COMMON_SRCS-yes += common/recon.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
 VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
-VP8_COMMON_SRCS-yes += common/segmentation_common.h
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
 VP8_COMMON_SRCS-yes += common/subpixel.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h
@@ -104,10 +103,12 @@ VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/iwalsh_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/recon_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/subpixel_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/loopfilter_mmx.asm
+VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/idctllm_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/recon_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/subpixel_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/iwalsh_sse2.asm
+VP8_COMMON_SRCS-$(HAVE_SSSE3) += common/x86/subpixel_ssse3.asm
 ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
@@ -124,6 +125,7 @@ VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/systemdependent.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/vpx_asm_offsets.c
 
 VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/filter_c.c
+VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/idctllm.c
 VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/recon.c
 VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/reconintra4x4.c
 VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/generic/systemdependent.c
@@ -133,6 +135,7 @@ VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/bilinearfilter_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem8x4_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem8x8_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem16x16_v6$(ASM)
+VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/dc_only_idct_add_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/iwalsh_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/filter_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/idct_v6$(ASM)
@@ -149,6 +152,7 @@ VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/bilinearpredict16x16_neon$(ASM
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/copymem8x4_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/copymem8x8_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/copymem16x16_neon$(ASM)
+VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/dc_only_idct_add_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/iwalsh_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/loopfiltersimplehorizontaledge_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/loopfiltersimpleverticaledge_neon$(ASM)

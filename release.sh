@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
@@ -20,7 +21,7 @@ for opt; do
     esac
 done
 
-TAB=$'\t'
+TAB="$(printf '\t')"
 cat > release.mk << EOF
 %\$(BUILD_SFX).tar.bz2: %/.done
 ${TAB}@echo "\$(subst .tar.bz2,,\$@): tarball"
@@ -185,7 +186,7 @@ for cfg in $CONFIGS; do
     esac
     opts="$opts --enable-postproc"
 
-    [ "x${clean}" == "xyes" ] \
+    [ "x${clean}" = "xyes" ] \
         && rm -rf ${full_cfg}${BUILD_SFX}${TAR_SFX} \
         && rm -rf logs/${full_cfg}${BUILD_SFX}.log.bz2
 

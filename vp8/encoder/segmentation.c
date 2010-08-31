@@ -1,29 +1,30 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
-#include "segmentation_common.h"
+#include "segmentation.h"
 #include "vpx_mem/vpx_mem.h"
 
-void vp8_update_gf_useage_maps(VP8_COMMON *cm, MACROBLOCKD *xd)
+void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
 {
     int mb_row, mb_col;
 
     MODE_INFO *this_mb_mode_info = cm->mi;
 
-    xd->gf_active_ptr = (signed char *)cm->gf_active_flags;
+    x->gf_active_ptr = (signed char *)cpi->gf_active_flags;
 
     if ((cm->frame_type == KEY_FRAME) || (cm->refresh_golden_frame))
     {
         // Reset Gf useage monitors
-        vpx_memset(cm->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-        cm->gf_active_count = cm->mb_rows * cm->mb_cols;
+        vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+        cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
     }
     else
     {
@@ -39,19 +40,19 @@ void vp8_update_gf_useage_maps(VP8_COMMON *cm, MACROBLOCKD *xd)
                 // else if using non 0,0 motion or intra modes then clear flag if it is currently set
                 if ((this_mb_mode_info->mbmi.ref_frame == GOLDEN_FRAME) || (this_mb_mode_info->mbmi.ref_frame == ALTREF_FRAME))
                 {
-                    if (*(xd->gf_active_ptr) == 0)
+                    if (*(x->gf_active_ptr) == 0)
                     {
-                        *(xd->gf_active_ptr) = 1;
-                        cm->gf_active_count ++;
+                        *(x->gf_active_ptr) = 1;
+                        cpi->gf_active_count ++;
                     }
                 }
-                else if ((this_mb_mode_info->mbmi.mode != ZEROMV) && *(xd->gf_active_ptr))
+                else if ((this_mb_mode_info->mbmi.mode != ZEROMV) && *(x->gf_active_ptr))
                 {
-                    *(xd->gf_active_ptr) = 0;
-                    cm->gf_active_count--;
+                    *(x->gf_active_ptr) = 0;
+                    cpi->gf_active_count--;
                 }
 
-                xd->gf_active_ptr++;          // Step onto next entry
+                x->gf_active_ptr++;          // Step onto next entry
                 this_mb_mode_info++;           // skip to next mb
 
             }

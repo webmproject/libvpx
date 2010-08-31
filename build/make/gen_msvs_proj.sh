@@ -2,15 +2,17 @@
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
 self=$0
 self_basename=${self##*/}
+self_dirname=$(dirname "$0")
 EOL=$'\n'
 
 show_help() {
@@ -204,7 +206,7 @@ for opt in "$@"; do
     ;;
     --ver=*) vs_ver="$optval"
              case $optval in
-             [78])
+             [789])
              ;;
              *) die Unrecognized Visual Studio Version in $opt
              ;;
@@ -245,6 +247,8 @@ case "${vs_ver:-8}" in
        asm_use_custom_step=$uses_asm
     ;;
     8) vs_ver_id="8.00"
+    ;;
+    9) vs_ver_id="9.00"
     ;;
 esac
 
@@ -291,8 +295,8 @@ case "$target" in
     x86*)
         platforms[0]="Win32"
         # these are only used by vs7
-        asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} \$(InputPath)"
-        asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} \$(InputPath)"
+        asm_Debug_cmdline="yasm -Xvc -g cv8 -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
+        asm_Release_cmdline="yasm -Xvc -f \$(PlatformName) ${yasmincs} &quot;\$(InputPath)&quot;"
     ;;
     arm*|iwmmx*)
         case "${name}" in
@@ -342,19 +346,19 @@ generate_vcproj() {
 
     open_tag  ToolFiles
     case "$target" in
-        x86*) $uses_asm && tag DefaultToolFile FileName="yasm.rules"
+        x86*) $uses_asm && tag ToolFile RelativePath="$self_dirname/../x86-msvs/yasm.rules"
         ;;
         arm*|iwmmx*)
-            if [ "$name" == "vpx_decoder" ];then
+            if [ "$name" == "vpx" ];then
             case "$target" in
                 armv5*)
-                    tag DefaultToolFile FileName="armasmv5.rules"
+                    tag ToolFile RelativePath="$self_dirname/../arm-wince-vs8/armasmv5.rules"
                 ;;
                 armv6*)
-                    tag DefaultToolFile FileName="armasmv6.rules"
+                    tag ToolFile RelativePath="$self_dirname/../arm-wince-vs8/armasmv6.rules"
                 ;;
                 iwmmxt*)
-                    tag DefaultToolFile FileName="armasmxscale.rules"
+                    tag ToolFile RelativePath="$self_dirname/../arm-wince-vs8/armasmxscale.rules"
                 ;;
             esac
             fi
@@ -374,7 +378,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag Tool \
+                vpx)         tag Tool \
                              Name="VCPreBuildEventTool" \
                              CommandLine="call obj_int_extract.bat \$(ConfigurationName)"
                              tag Tool \
@@ -435,7 +439,7 @@ generate_vcproj() {
                 Name="VCCLCompilerTool" \
                 Optimization="0" \
                 AdditionalIncludeDirectories="$incs" \
-                PreprocessorDefinitions="WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;$defines" \
+                PreprocessorDefinitions="WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
                 RuntimeLibrary="$debug_runtime" \
                 UsePrecompiledHeader="0" \
                 WarningLevel="3" \
@@ -508,7 +512,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag DeploymentTool \
+                vpx)         tag DeploymentTool \
                              ForceDirty="-1" \
                              RegisterOutput="0"
                                 ;;
@@ -532,7 +536,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag Tool \
+                vpx)         tag Tool \
                                      Name="VCPreBuildEventTool" \
                                      CommandLine="call obj_int_extract.bat \$(ConfigurationName)"
                              tag Tool \
@@ -593,7 +597,7 @@ generate_vcproj() {
         x86*) tag       Tool \
                       Name="VCCLCompilerTool" \
                       AdditionalIncludeDirectories="$incs" \
-                      PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;$defines" \
+                      PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
                       RuntimeLibrary="$release_runtime" \
                       UsePrecompiledHeader="0" \
                       WarningLevel="3" \
@@ -670,7 +674,7 @@ generate_vcproj() {
 
         if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
             case "$name" in
-                vpx_decoder) tag DeploymentTool \
+                vpx)         tag DeploymentTool \
                              ForceDirty="-1" \
                              RegisterOutput="0"
                 ;;

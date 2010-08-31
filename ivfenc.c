@@ -1,17 +1,18 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
 /* This is a simple program that encodes YV12 files and generates ivf
  * files using the new interface.
  */
-#if defined(_MSC_VER)
+#if defined(_WIN32)
 #define USE_POSIX_MMAP 0
 #else
 #define USE_POSIX_MMAP 1
@@ -33,6 +34,7 @@
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
+#include "y4minput.h"
 
 static const char *exec_name;
 
@@ -57,8 +59,8 @@ void die(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    vprintf(fmt, ap);
-    printf("\n");
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
     usage_exit();
 }
 
@@ -68,10 +70,10 @@ static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s)
     {
         const char *detail = vpx_codec_error_detail(ctx);
 
-        printf("%s: %s\n", s, vpx_codec_error(ctx));
+        fprintf(stderr, "%s: %s\n", s, vpx_codec_error(ctx));
 
         if (detail)
-            printf("    %s\n", detail);
+            fprintf(stderr, "    %s\n", detail);
 
         exit(EXIT_FAILURE);
     }
@@ -221,49 +223,79 @@ vpx_fixed_buf_t stats_get(stats_io_t *stats)
     return stats->buf;
 }
 
+enum video_file_type
+{
+    FILE_TYPE_RAW,
+    FILE_TYPE_IVF,
+    FILE_TYPE_Y4M
+};
+
+struct detect_buffer {
+    char buf[4];
+    int  valid;
+};
+
+
 #define IVF_FRAME_HDR_SZ (4+8) /* 4 byte size + 8 byte timestamp */
-static int read_frame(FILE *f, vpx_image_t *img, unsigned int is_ivf)
+static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
+                      y4m_input *y4m, struct detect_buffer *detect)
 {
     int plane = 0;
 
-    if (is_ivf)
+    if (file_type == FILE_TYPE_Y4M)
     {
-        char junk[IVF_FRAME_HDR_SZ];
-
-        /* Skip the frame header. We know how big the frame should be. See
-         * write_ivf_frame_header() for documentation on the frame header
-         * layout.
-         */
-        fread(junk, 1, IVF_FRAME_HDR_SZ, f);
+        if (y4m_input_fetch_frame(y4m, f, img) < 0)
+           return 0;
     }
-
-    for (plane = 0; plane < 3; plane++)
+    else
     {
-        unsigned char *ptr;
-        int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
-        int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
-        int r;
-
-        /* Determine the correct plane based on the image format. The for-loop
-         * always counts in Y,U,V order, but this may not match the order of
-         * the data on disk.
-         */
-        switch (plane)
+        if (file_type == FILE_TYPE_IVF)
         {
-        case 1:
-            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? VPX_PLANE_V : VPX_PLANE_U];
-            break;
-        case 2:
-            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?VPX_PLANE_U : VPX_PLANE_V];
-            break;
-        default:
-            ptr = img->planes[plane];
+            char junk[IVF_FRAME_HDR_SZ];
+
+            /* Skip the frame header. We know how big the frame should be. See
+             * write_ivf_frame_header() for documentation on the frame header
+             * layout.
+             */
+            fread(junk, 1, IVF_FRAME_HDR_SZ, f);
         }
 
-        for (r = 0; r < h; r++)
+        for (plane = 0; plane < 3; plane++)
         {
-            fread(ptr, 1, w, f);
-            ptr += img->stride[plane];
+            unsigned char *ptr;
+            int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
+            int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
+            int r;
+
+            /* Determine the correct plane based on the image format. The for-loop
+             * always counts in Y,U,V order, but this may not match the order of
+             * the data on disk.
+             */
+            switch (plane)
+            {
+            case 1:
+                ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? VPX_PLANE_V : VPX_PLANE_U];
+                break;
+            case 2:
+                ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?VPX_PLANE_U : VPX_PLANE_V];
+                break;
+            default:
+                ptr = img->planes[plane];
+            }
+
+            for (r = 0; r < h; r++)
+            {
+                if (detect->valid)
+                {
+                    memcpy(ptr, detect->buf, 4);
+                    fread(ptr+4, 1, w-4, f);
+                    detect->valid = 0;
+                }
+                else
+                    fread(ptr, 1, w, f);
+
+                ptr += img->stride[plane];
+            }
         }
     }
 
@@ -271,22 +303,36 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int is_ivf)
 }
 
 
+unsigned int file_is_y4m(FILE      *infile,
+                         y4m_input *y4m,
+                         char       detect[4])
+{
+    if(memcmp(detect, "YUV4", 4) == 0)
+    {
+        return 1;
+    }
+    return 0;
+}
+
 #define IVF_FILE_HDR_SZ (32)
 unsigned int file_is_ivf(FILE *infile,
                          unsigned int *fourcc,
                          unsigned int *width,
-                         unsigned int *height)
+                         unsigned int *height,
+                         char          detect[4])
 {
     char raw_hdr[IVF_FILE_HDR_SZ];
     int is_ivf = 0;
 
+    if(memcmp(detect, "DKIF", 4) != 0)
+        return 0;
+
     /* See write_ivf_file_header() for more documentation on the file header
      * layout.
      */
-    if (fread(raw_hdr, 1, IVF_FILE_HDR_SZ, infile) == IVF_FILE_HDR_SZ)
+    if (fread(raw_hdr + 4, 1, IVF_FILE_HDR_SZ - 4, infile)
+        == IVF_FILE_HDR_SZ - 4)
     {
-        if (raw_hdr[0] == 'D' && raw_hdr[1] == 'K'
-            && raw_hdr[2] == 'I' && raw_hdr[3] == 'F')
         {
             is_ivf = 1;
 
@@ -303,8 +349,6 @@ unsigned int file_is_ivf(FILE *infile,
         *width = mem_get_le16(raw_hdr + 12);
         *height = mem_get_le16(raw_hdr + 14);
     }
-    else
-        rewind(infile);
 
     return is_ivf;
 }
@@ -465,9 +509,11 @@ static const arg_def_t kf_min_dist = ARG_DEF(NULL, "kf-min-dist", 1,
                                      "Minimum keyframe interval (frames)");
 static const arg_def_t kf_max_dist = ARG_DEF(NULL, "kf-max-dist", 1,
                                      "Maximum keyframe interval (frames)");
+static const arg_def_t kf_disabled = ARG_DEF(NULL, "disable-kf", 0,
+                                     "Disable keyframe placement");
 static const arg_def_t *kf_args[] =
 {
-    &kf_min_dist, &kf_max_dist, NULL
+    &kf_min_dist, &kf_max_dist, &kf_disabled, NULL
 };
 
 
@@ -518,28 +564,28 @@ static void usage_exit()
 {
     int i;
 
-    printf("Usage: %s <options> src_filename dst_filename\n", exec_name);
+    fprintf(stderr, "Usage: %s <options> src_filename dst_filename\n", exec_name);
 
-    printf("\n_options:\n");
+    fprintf(stderr, "\n_options:\n");
     arg_show_usage(stdout, main_args);
-    printf("\n_encoder Global Options:\n");
+    fprintf(stderr, "\n_encoder Global Options:\n");
     arg_show_usage(stdout, global_args);
-    printf("\n_rate Control Options:\n");
+    fprintf(stderr, "\n_rate Control Options:\n");
     arg_show_usage(stdout, rc_args);
-    printf("\n_twopass Rate Control Options:\n");
+    fprintf(stderr, "\n_twopass Rate Control Options:\n");
     arg_show_usage(stdout, rc_twopass_args);
-    printf("\n_keyframe Placement Options:\n");
+    fprintf(stderr, "\n_keyframe Placement Options:\n");
     arg_show_usage(stdout, kf_args);
 #if CONFIG_VP8_ENCODER
-    printf("\n_vp8 Specific Options:\n");
+    fprintf(stderr, "\n_vp8 Specific Options:\n");
     arg_show_usage(stdout, vp8_args);
 #endif
-    printf("\n"
+    fprintf(stderr, "\n"
            "Included encoders:\n"
            "\n");
 
     for (i = 0; i < sizeof(codecs) / sizeof(codecs[0]); i++)
-        printf("    %-6s - %s\n",
+        fprintf(stderr, "    %-6s - %s\n",
                codecs[i].name,
                vpx_codec_iface_name(codecs[i].iface));
 
@@ -572,8 +618,10 @@ int main(int argc, const char **argv_)
     static const int        *ctrl_args_map = NULL;
     int                      verbose = 0, show_psnr = 0;
     int                      arg_use_i420 = 1;
+    int                      arg_have_timebase = 0;
     unsigned long            cx_time = 0;
-    unsigned int             is_ivf, fourcc;
+    unsigned int             file_type, fourcc;
+    y4m_input                y4m;
 
     exec_name = argv_[0];
 
@@ -657,7 +705,7 @@ int main(int argc, const char **argv_)
         /* DWIM: Assume the user meant passes=2 if pass=2 is specified */
         if (one_pass_only > arg_passes)
         {
-            printf("Warning: Assuming --pass=%d implies --passes=%d\n",
+            fprintf(stderr, "Warning: Assuming --pass=%d implies --passes=%d\n",
                    one_pass_only, one_pass_only);
             arg_passes = one_pass_only;
         }
@@ -671,7 +719,8 @@ int main(int argc, const char **argv_)
 
     if (res)
     {
-        printf("Failed to get config: %s\n", vpx_codec_err_to_string(res));
+        fprintf(stderr, "Failed to get config: %s\n",
+                vpx_codec_err_to_string(res));
         return EXIT_FAILURE;
     }
 
@@ -690,7 +739,10 @@ int main(int argc, const char **argv_)
         else if (arg_match(&arg, &height, argi))
             cfg.g_h = arg_parse_uint(&arg);
         else if (arg_match(&arg, &timebase, argi))
+        {
             cfg.g_timebase = arg_parse_rational(&arg);
+            arg_have_timebase = 1;
+        }
         else if (arg_match(&arg, &error_resilient, argi))
             cfg.g_error_resilient = arg_parse_uint(&arg);
         else if (arg_match(&arg, &lag_in_frames, argi))
@@ -728,29 +780,34 @@ int main(int argc, const char **argv_)
             cfg.rc_2pass_vbr_bias_pct = arg_parse_uint(&arg);
 
             if (arg_passes < 2)
-                printf("Warning: option %s ignored in one-pass mode.\n",
-                       arg.name);
+                fprintf(stderr,
+                        "Warning: option %s ignored in one-pass mode.\n",
+                        arg.name);
         }
         else if (arg_match(&arg, &minsection_pct, argi))
         {
             cfg.rc_2pass_vbr_minsection_pct = arg_parse_uint(&arg);
 
             if (arg_passes < 2)
-                printf("Warning: option %s ignored in one-pass mode.\n",
-                       arg.name);
+                fprintf(stderr,
+                        "Warning: option %s ignored in one-pass mode.\n",
+                        arg.name);
         }
         else if (arg_match(&arg, &maxsection_pct, argi))
         {
             cfg.rc_2pass_vbr_maxsection_pct = arg_parse_uint(&arg);
 
             if (arg_passes < 2)
-                printf("Warning: option %s ignored in one-pass mode.\n",
-                       arg.name);
+                fprintf(stderr,
+                        "Warning: option %s ignored in one-pass mode.\n",
+                        arg.name);
         }
         else if (arg_match(&arg, &kf_min_dist, argi))
             cfg.kf_min_dist = arg_parse_uint(&arg);
         else if (arg_match(&arg, &kf_max_dist, argi))
             cfg.kf_max_dist = arg_parse_uint(&arg);
+        else if (arg_match(&arg, &kf_disabled, argi))
+            cfg.kf_mode = VPX_KF_DISABLED;
         else
             argj++;
     }
@@ -794,7 +851,7 @@ int main(int argc, const char **argv_)
 
     /* Check for unrecognized options */
     for (argi = argv; *argi; argi++)
-        if (argi[0][0] == '-')
+        if (argi[0][0] == '-' && argi[0][1])
             die("Error: Unrecognized option %s\n", *argi);
 
     /* Handle non-option arguments */
@@ -804,106 +861,136 @@ int main(int argc, const char **argv_)
     if (!in_fn || !out_fn)
         usage_exit();
 
-    /* Parse certain options from the input file, if possible */
-    infile = fopen(in_fn, "rb");
-
-    if (!infile)
-    {
-        printf("Failed to open input file");
-        return EXIT_FAILURE;
-    }
-
-    is_ivf = file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h);
-
-    if (is_ivf)
-    {
-        switch (fourcc)
-        {
-        case 0x32315659:
-            arg_use_i420 = 0;
-            break;
-        case 0x30323449:
-            arg_use_i420 = 1;
-            break;
-        default:
-            printf("Unsupported fourcc (%08x) in IVF\n", fourcc);
-            return EXIT_FAILURE;
-        }
-    }
-
-    fclose(infile);
-
-
-#define SHOW(field) printf("    %-28s = %d\n", #field, cfg.field)
-
-    if (verbose)
-    {
-        printf("Codec: %s\n", vpx_codec_iface_name(codec->iface));
-        printf("Source file: %s Format: %s\n", in_fn, arg_use_i420 ? "I420" : "YV12");
-        printf("Destination file: %s\n", out_fn);
-        printf("Encoder parameters:\n");
-
-        SHOW(g_usage);
-        SHOW(g_threads);
-        SHOW(g_profile);
-        SHOW(g_w);
-        SHOW(g_h);
-        SHOW(g_timebase.num);
-        SHOW(g_timebase.den);
-        SHOW(g_error_resilient);
-        SHOW(g_pass);
-        SHOW(g_lag_in_frames);
-        SHOW(rc_dropframe_thresh);
-        SHOW(rc_resize_allowed);
-        SHOW(rc_resize_up_thresh);
-        SHOW(rc_resize_down_thresh);
-        SHOW(rc_end_usage);
-        SHOW(rc_target_bitrate);
-        SHOW(rc_min_quantizer);
-        SHOW(rc_max_quantizer);
-        SHOW(rc_undershoot_pct);
-        SHOW(rc_overshoot_pct);
-        SHOW(rc_buf_sz);
-        SHOW(rc_buf_initial_sz);
-        SHOW(rc_buf_optimal_sz);
-        SHOW(rc_2pass_vbr_bias_pct);
-        SHOW(rc_2pass_vbr_minsection_pct);
-        SHOW(rc_2pass_vbr_maxsection_pct);
-        SHOW(kf_mode);
-        SHOW(kf_min_dist);
-        SHOW(kf_max_dist);
-    }
-
-    vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
-                  cfg.g_w, cfg.g_h, 1);
-
-    // This was added so that ivfenc will create monotically increasing
-    // timestamps.  Since we create new timestamps for alt-reference frames
-    // we need to make room in the series of timestamps.  Since there can
-    // only be 1 alt-ref frame ( current bitstream) multiplying by 2
-    // gives us enough room.
-    cfg.g_timebase.den *= 2;
-
     memset(&stats, 0, sizeof(stats));
 
     for (pass = one_pass_only ? one_pass_only - 1 : 0; pass < arg_passes; pass++)
     {
         int frames_in = 0, frames_out = 0;
         unsigned long nbytes = 0;
+        struct detect_buffer detect;
 
-        infile = fopen(in_fn, "rb");
+        /* Parse certain options from the input file, if possible */
+        infile = strcmp(in_fn, "-") ? fopen(in_fn, "rb") : stdin;
 
         if (!infile)
         {
-            printf("Failed to open input file");
+            fprintf(stderr, "Failed to open input file\n");
             return EXIT_FAILURE;
         }
 
-        outfile = fopen(out_fn, "wb");
+        fread(detect.buf, 1, 4, infile);
+        detect.valid = 0;
+
+        if (file_is_y4m(infile, &y4m, detect.buf))
+        {
+            if (y4m_input_open(&y4m, infile, detect.buf, 4) >= 0)
+            {
+                file_type = FILE_TYPE_Y4M;
+                cfg.g_w = y4m.pic_w;
+                cfg.g_h = y4m.pic_h;
+                /* Use the frame rate from the file only if none was specified
+                 * on the command-line.
+                 */
+                if (!arg_have_timebase)
+                {
+                    cfg.g_timebase.num = y4m.fps_d;
+                    cfg.g_timebase.den = y4m.fps_n;
+                    /* And don't reset it in the second pass.*/
+                    arg_have_timebase = 1;
+                }
+                arg_use_i420 = 0;
+            }
+            else
+            {
+                fprintf(stderr, "Unsupported Y4M stream.\n");
+                return EXIT_FAILURE;
+            }
+        }
+        else if (file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, detect.buf))
+        {
+            file_type = FILE_TYPE_IVF;
+            switch (fourcc)
+            {
+            case 0x32315659:
+                arg_use_i420 = 0;
+                break;
+            case 0x30323449:
+                arg_use_i420 = 1;
+                break;
+            default:
+                fprintf(stderr, "Unsupported fourcc (%08x) in IVF\n", fourcc);
+                return EXIT_FAILURE;
+            }
+        }
+        else
+        {
+            file_type = FILE_TYPE_RAW;
+            detect.valid = 1;
+        }
+#define SHOW(field) fprintf(stderr, "    %-28s = %d\n", #field, cfg.field)
+
+        if (verbose && pass == 0)
+        {
+            fprintf(stderr, "Codec: %s\n", vpx_codec_iface_name(codec->iface));
+            fprintf(stderr, "Source file: %s Format: %s\n", in_fn,
+                    arg_use_i420 ? "I420" : "YV12");
+            fprintf(stderr, "Destination file: %s\n", out_fn);
+            fprintf(stderr, "Encoder parameters:\n");
+
+            SHOW(g_usage);
+            SHOW(g_threads);
+            SHOW(g_profile);
+            SHOW(g_w);
+            SHOW(g_h);
+            SHOW(g_timebase.num);
+            SHOW(g_timebase.den);
+            SHOW(g_error_resilient);
+            SHOW(g_pass);
+            SHOW(g_lag_in_frames);
+            SHOW(rc_dropframe_thresh);
+            SHOW(rc_resize_allowed);
+            SHOW(rc_resize_up_thresh);
+            SHOW(rc_resize_down_thresh);
+            SHOW(rc_end_usage);
+            SHOW(rc_target_bitrate);
+            SHOW(rc_min_quantizer);
+            SHOW(rc_max_quantizer);
+            SHOW(rc_undershoot_pct);
+            SHOW(rc_overshoot_pct);
+            SHOW(rc_buf_sz);
+            SHOW(rc_buf_initial_sz);
+            SHOW(rc_buf_optimal_sz);
+            SHOW(rc_2pass_vbr_bias_pct);
+            SHOW(rc_2pass_vbr_minsection_pct);
+            SHOW(rc_2pass_vbr_maxsection_pct);
+            SHOW(kf_mode);
+            SHOW(kf_min_dist);
+            SHOW(kf_max_dist);
+        }
+
+        if(pass == (one_pass_only ? one_pass_only - 1 : 0)) {
+            if (file_type == FILE_TYPE_Y4M)
+                /*The Y4M reader does its own allocation.
+                  Just initialize this here to avoid problems if we never read any
+                   frames.*/
+                memset(&raw, 0, sizeof(raw));
+            else
+                vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
+                              cfg.g_w, cfg.g_h, 1);
+
+            // This was added so that ivfenc will create monotically increasing
+            // timestamps.  Since we create new timestamps for alt-reference frames
+            // we need to make room in the series of timestamps.  Since there can
+            // only be 1 alt-ref frame ( current bitstream) multiplying by 2
+            // gives us enough room.
+            cfg.g_timebase.den *= 2;
+        }
+
+        outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb") : stdout;
 
         if (!outfile)
         {
-            printf("Failed to open output file");
+            fprintf(stderr, "Failed to open output file\n");
             return EXIT_FAILURE;
         }
 
@@ -911,7 +998,7 @@ int main(int argc, const char **argv_)
         {
             if (!stats_open_file(&stats, stats_fn, pass))
             {
-                printf("Failed to open statistics store\n");
+                fprintf(stderr, "Failed to open statistics store\n");
                 return EXIT_FAILURE;
             }
         }
@@ -919,7 +1006,7 @@ int main(int argc, const char **argv_)
         {
             if (!stats_open_mem(&stats, pass))
             {
-                printf("Failed to open statistics store\n");
+                fprintf(stderr, "Failed to open statistics store\n");
                 return EXIT_FAILURE;
             }
         }
@@ -940,9 +1027,6 @@ int main(int argc, const char **argv_)
 
 
         /* Construct Encoder Context */
-        if (cfg.kf_min_dist == cfg.kf_max_dist)
-            cfg.kf_mode = VPX_KF_FIXED;
-
         vpx_codec_enc_init(&encoder, codec->iface, &cfg,
                            show_psnr ? VPX_CODEC_USE_PSNR : 0);
         ctx_exit_on_error(&encoder, "Failed to initialize encoder");
@@ -954,8 +1038,8 @@ int main(int argc, const char **argv_)
         for (i = 0; i < arg_ctrl_cnt; i++)
         {
             if (vpx_codec_control_(&encoder, arg_ctrls[i][0], arg_ctrls[i][1]))
-                printf("Error: Tried to set control %d = %d\n",
-                       arg_ctrls[i][0], arg_ctrls[i][1]);
+                fprintf(stderr, "Error: Tried to set control %d = %d\n",
+                        arg_ctrls[i][0], arg_ctrls[i][1]);
 
             ctx_exit_on_error(&encoder, "Failed to control codec");
         }
@@ -971,13 +1055,15 @@ int main(int argc, const char **argv_)
 
             if (!arg_limit || frames_in < arg_limit)
             {
-                frame_avail = read_frame(infile, &raw, is_ivf);
+                frame_avail = read_frame(infile, &raw, file_type, &y4m,
+                                         &detect);
 
                 if (frame_avail)
                     frames_in++;
 
-                printf("\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
-                       arg_passes, frames_in, frames_out, nbytes);
+                fprintf(stderr,
+                        "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
+                        arg_passes, frames_in, frames_out, nbytes);
             }
             else
                 frame_avail = 0;
@@ -1001,15 +1087,15 @@ int main(int argc, const char **argv_)
                 {
                 case VPX_CODEC_CX_FRAME_PKT:
                     frames_out++;
-                    printf(" %6luF",
-                           (unsigned long)pkt->data.frame.sz);
+                    fprintf(stderr, " %6luF",
+                            (unsigned long)pkt->data.frame.sz);
                     write_ivf_frame_header(outfile, pkt);
                     fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile);
                     nbytes += pkt->data.raw.sz;
                     break;
                 case VPX_CODEC_STATS_PKT:
                     frames_out++;
-                    printf(" %6luS",
+                    fprintf(stderr, " %6luS",
                            (unsigned long)pkt->data.twopass_stats.sz);
                     stats_write(&stats,
                                 pkt->data.twopass_stats.buf,
@@ -1023,7 +1109,7 @@ int main(int argc, const char **argv_)
                         int i;
 
                         for (i = 0; i < 4; i++)
-                            printf("%.3lf ", pkt->data.psnr.psnr[i]);
+                            fprintf(stderr, "%.3lf ", pkt->data.psnr.psnr[i]);
                     }
 
                     break;
@@ -1038,7 +1124,8 @@ int main(int argc, const char **argv_)
         /* this bitrate calc is simplified and relies on the fact that this
          * application uses 1/timebase for framerate.
          */
-        printf("\rPass %d/%d frame %4d/%-4d %7ldB %7ldb/f %7"PRId64"b/s"
+        fprintf(stderr,
+               "\rPass %d/%d frame %4d/%-4d %7ldB %7ldb/f %7"PRId64"b/s"
                " %7lu %s (%.2f fps)\033[K", pass + 1,
                arg_passes, frames_in, frames_out, nbytes, nbytes * 8 / frames_in,
                nbytes * 8 *(int64_t)cfg.g_timebase.den/2/ cfg.g_timebase.num / frames_in,
@@ -1055,7 +1142,7 @@ int main(int argc, const char **argv_)
 
         fclose(outfile);
         stats_close(&stats);
-        printf("\n");
+        fprintf(stderr, "\n");
 
         if (one_pass_only)
             break;

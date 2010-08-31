@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -996,7 +997,7 @@ int vp8_diamond_search_sadx4
     int tot_steps;
     MV this_mv;
 
-    unsigned int bestsad = UINT_MAX;
+    int bestsad = INT_MAX;
     int best_site = 0;
     int last_site = 0;
 
@@ -1237,7 +1238,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     unsigned char *bestaddress;
     MV *best_mv = &d->bmi.mv.as_mv;
     MV this_mv;
-    unsigned int bestsad = UINT_MAX;
+    int bestsad = INT_MAX;
     int r, c;
 
     unsigned char *check_here;

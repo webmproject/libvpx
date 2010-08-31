@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -52,15 +53,15 @@ static const struct extraconfig_map extracfg_map[] =
             NULL,
 #if !(CONFIG_REALTIME_ONLY)
             VP8_BEST_QUALITY_ENCODING,  /* Encoding Mode */
-            -4,                         /* cpu_used      */
+            0,                          /* cpu_used      */
 #else
             VP8_REAL_TIME_ENCODING,     /* Encoding Mode */
-            -8,                         /* cpu_used      */
+            4,                          /* cpu_used      */
 #endif
             0,                          /* enable_auto_alt_ref */
             0,                          /* noise_sensitivity */
             0,                          /* Sharpness */
-            800,                        /* static_thresh */
+            0,                          /* static_thresh */
             VP8_ONE_TOKENPARTITION,     /* token_partitions */
             0, /* arnr_max_frames */
             0, /* arnr_strength */
@@ -109,7 +110,7 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
     } while(0)
 
 #define RANGE_CHECK(p,memb,lo,hi) do {\
-        if(!((p)->memb >= (lo) && (p)->memb <= hi)) \
+        if(!(((p)->memb == lo || (p)->memb > (lo)) && (p)->memb <= hi)) \
             ERROR(#memb " out of range ["#lo".."#hi"]");\
     } while(0)
 
@@ -178,7 +179,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
     RANGE_CHECK(vp8_cfg, Sharpness,         0, 7);
-    RANGE_CHECK(vp8_cfg, arnr_max_frames,    0, 25);
+    RANGE_CHECK(vp8_cfg, arnr_max_frames,    0, 15);
     RANGE_CHECK(vp8_cfg, arnr_strength,     0, 6);
     RANGE_CHECK(vp8_cfg, arnr_type,         0, 0xffffffff);
 
@@ -297,9 +298,9 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->under_shoot_pct         = cfg.rc_undershoot_pct;
     //oxcf->over_shoot_pct        = cfg.rc_overshoot_pct;
 
-    oxcf->maximum_buffer_size     = cfg.rc_buf_sz / 1000;
-    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz / 1000;
-    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz / 1000;
+    oxcf->maximum_buffer_size     = cfg.rc_buf_sz;
+    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz;
+    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz;
 
     oxcf->two_pass_vbrbias        = cfg.rc_2pass_vbr_bias_pct;
     oxcf->two_pass_vbrmin_section  = cfg.rc_2pass_vbr_minsection_pct;
@@ -1088,7 +1089,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 #endif
 vpx_codec_iface_t vpx_codec_vp8_cx_algo =
 {
-    "vpx Technologies VP8 Encoder" VERSION_STRING,
+    "WebM Project VP8 Encoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,
     /* vpx_codec_caps_t          caps; */
@@ -1207,7 +1208,7 @@ static vpx_codec_err_t api1_encode(vpx_codec_alg_priv_t  *ctx,
 
 vpx_codec_iface_t vpx_enc_vp8_algo =
 {
-    "vpx Technologies VP8 Encoder (Deprecated API)" VERSION_STRING,
+    "WebM Project VP8 Encoder (Deprecated API)" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_ENCODER,
     /* vpx_codec_caps_t          caps; */

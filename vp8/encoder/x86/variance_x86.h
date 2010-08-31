@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -240,7 +241,7 @@ extern prototype_sad_multi_dif_address(vp8_sad4x4x4d_sse3);
 #define vp8_variance_sad4x4x3 vp8_sad4x4x3_sse3
 
 #undef  vp8_variance_sad16x16x4d
-#define vp8_variance_sad16x16x4 vp8_sad16x16x4d_sse3
+#define vp8_variance_sad16x16x4d vp8_sad16x16x4d_sse3
 
 #undef  vp8_variance_sad16x8x4d
 #define vp8_variance_sad16x8x4d vp8_sad16x8x4d_sse3

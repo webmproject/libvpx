@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -45,7 +46,7 @@ static float a = -0.6;
 //         3     2
 // C0 = a*t - a*t
 //
-static INLINE short c0_fixed(unsigned int t)
+static short c0_fixed(unsigned int t)
 {
     // put t in Q16 notation
     unsigned short v1, v2;
@@ -66,7 +67,7 @@ static INLINE short c0_fixed(unsigned int t)
 //                     2          3
 // C1 = a*t + (3-2*a)*t  - (2-a)*t
 //
-static INLINE short c1_fixed(unsigned int t)
+static short c1_fixed(unsigned int t)
 {
     unsigned short v1, v2, v3;
     unsigned short two, three;
@@ -95,7 +96,7 @@ static INLINE short c1_fixed(unsigned int t)
 //                 2          3
 // C2 = 1 - (3-a)*t  + (2-a)*t
 //
-static INLINE short c2_fixed(unsigned int t)
+static short c2_fixed(unsigned int t)
 {
     unsigned short v1, v2, v3;
     unsigned short two, three;
@@ -123,7 +124,7 @@ static INLINE short c2_fixed(unsigned int t)
 //                 2      3
 // C3 = a*t - 2*a*t  + a*t
 //
-static INLINE short c3_fixed(unsigned int t)
+static short c3_fixed(unsigned int t)
 {
     int v1, v2, v3;
 

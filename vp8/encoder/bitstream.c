@@ -1,10 +1,11 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -791,7 +792,8 @@ static void write_mv_ref
 
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
 
-    vp8_write_token(w, vp8_mv_ref_tree, p, VP8_MVREFENCODINGS + m);
+    vp8_write_token(w, vp8_mv_ref_tree, p,
+                    vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
 
 static void write_sub_mv_ref
@@ -801,7 +803,8 @@ static void write_sub_mv_ref
 {
     assert(LEFT4X4 <= m  &&  m <= NEW4X4);
 
-    vp8_write_token(w, vp8_sub_mv_ref_tree, p, VP8_SUBMVREFENCODINGS + m);
+    vp8_write_token(w, vp8_sub_mv_ref_tree, p,
+                    vp8_sub_mv_ref_encoding_array - LEFT4X4 + m);
 }
 
 static void write_mv

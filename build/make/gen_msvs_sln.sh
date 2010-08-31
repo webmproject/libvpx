@@ -2,10 +2,11 @@
 ##
 ##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
@@ -24,7 +25,7 @@ files.
 Options:
     --help                      Print this message
     --out=outfile               Redirect output to a file
-    --ver=version               Version (7,8) of visual studio to generate for
+    --ver=version               Version (7,8,9) of visual studio to generate for
     --target=isa-os-cc          Target specifier
 EOF
     exit 1
@@ -192,11 +193,11 @@ ${TAB}rm -rf "$platform"/"$config"
 ifneq (\$(found_devenv),)
   ifeq (\$(CONFIG_VS_VERSION),7)
 $nows_sln_config: $outfile
-${TAB}devenv.com $outfile /build "$config"
+${TAB}devenv.com $outfile -build "$config"
 
   else
 $nows_sln_config: $outfile
-${TAB}devenv.com $outfile /build "$sln_config"
+${TAB}devenv.com $outfile -build "$sln_config"
 
   endif
 else
@@ -223,7 +224,7 @@ for opt in "$@"; do
     ;;
     --ver=*) vs_ver="$optval"
              case $optval in
-             [78])
+             [789])
              ;;
              *) die Unrecognized Visual Studio Version in $opt
              ;;
@@ -234,7 +235,7 @@ for opt in "$@"; do
              7) sln_vers="8.00"
                 sln_vers_str="Visual Studio .NET 2003"
              ;;
-             8)
+             [89])
              ;;
              *) die "Unrecognized Visual Studio Version '$optval' in $opt"
              ;;
@@ -255,6 +256,9 @@ case "${vs_ver:-8}" in
     ;;
     8) sln_vers="9.00"
        sln_vers_str="Visual Studio 2005"
+    ;;
+    9) sln_vers="10.00"
+       sln_vers_str="Visual Studio 2008"
     ;;
 esac
 
