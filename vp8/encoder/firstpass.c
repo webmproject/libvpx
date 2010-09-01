@@ -2095,33 +2095,34 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         kf_group_intra_err += this_frame->intra_error;
         kf_group_coded_err += this_frame->coded_error;
 
+        // load a the next frame's stats
         vpx_memcpy(&last_frame, this_frame, sizeof(*this_frame));
+        vp8_input_stats(cpi, this_frame);
 
         // Provided that we are not at the end of the file...
-        if (EOF != vp8_input_stats(cpi, this_frame))
+        if (cpi->oxcf.auto_key
+            && lookup_next_frame_stats(cpi, &next_frame) != EOF)
         {
-            if (lookup_next_frame_stats(cpi, &next_frame) != EOF)
-            {
-                if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
-                    break;
-            }
-        }
+            if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
+                break;
 
-        // Step on to the next frame
-        cpi->frames_to_key ++;
+            // Step on to the next frame
+            cpi->frames_to_key ++;
 
-        // If we don't have a real key frame within the next two
-        // forcekeyframeevery intervals then break out of the loop.
-        if (cpi->frames_to_key >= 2 *(int)cpi->key_frame_frequency)
-            break;
-
+            // If we don't have a real key frame within the next two
+            // forcekeyframeevery intervals then break out of the loop.
+            if (cpi->frames_to_key >= 2 *(int)cpi->key_frame_frequency)
+                break;
+        } else
+            cpi->frames_to_key ++;
     }
 
     // If there is a max kf interval set by the user we must obey it.
     // We already breakout of the loop above at 2x max.
     // This code centers the extra kf if the actual natural
     // interval is between 1x and 2x
-    if ( cpi->frames_to_key > (int)cpi->key_frame_frequency )
+    if (cpi->oxcf.auto_key
+        && cpi->frames_to_key > (int)cpi->key_frame_frequency )
     {
         cpi->frames_to_key /= 2;
 
@@ -2388,23 +2389,34 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 cpi->kf_bits = (3 * cpi->buffer_level) >> 2;
         }
 
-        // If the key frame is actually easier than the average for the kf group (which does sometimes happen... eg a blank intro frame)
-        // Then use an alternate calculation based on the kf error score which should give a smaller key frame.
+        // If the key frame is actually easier than the average for the
+        // kf group (which does sometimes happen... eg a blank intro frame)
+        // Then use an alternate calculation based on the kf error score
+        // which should give a smaller key frame.
         if (kf_mod_err < kf_group_err / cpi->frames_to_key)
         {
-            double  alt_kf_grp_bits = ((double)cpi->bits_left * (kf_mod_err * (double)cpi->frames_to_key) / cpi->modified_total_error_left) ;
+            double  alt_kf_grp_bits =
+                        ((double)cpi->bits_left *
+                         (kf_mod_err * (double)cpi->frames_to_key) /
+                         DOUBLE_DIVIDE_CHECK(cpi->modified_total_error_left));
 
-            alt_kf_bits = (int)((double)kf_boost * (alt_kf_grp_bits / (double)allocation_chunks));
+            alt_kf_bits = (int)((double)kf_boost *
+                                (alt_kf_grp_bits / (double)allocation_chunks));
 
             if (cpi->kf_bits > alt_kf_bits)
             {
                 cpi->kf_bits = alt_kf_bits;
             }
         }
-        // Else if it is much harder than other frames in the group make sure it at least receives an allocation in keeping with its relative error score
+        // Else if it is much harder than other frames in the group make sure
+        // it at least receives an allocation in keeping with its relative
+        // error score
         else
         {
-            alt_kf_bits = (int)((double)cpi->bits_left * (kf_mod_err / cpi->modified_total_error_left));
+            alt_kf_bits =
+                (int)((double)cpi->bits_left *
+                      (kf_mod_err /
+                       DOUBLE_DIVIDE_CHECK(cpi->modified_total_error_left)));
 
             if (alt_kf_bits > cpi->kf_bits)
             {
