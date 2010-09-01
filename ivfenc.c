@@ -815,8 +815,11 @@ int main(int argc, const char **argv_)
     /* Handle codec specific options */
 #if CONFIG_VP8_ENCODER
 
-    if (codec->iface == &vpx_codec_vp8_cx_algo ||
-        codec->iface == &vpx_codec_vp8x_cx_algo)
+    if (codec->iface == &vpx_codec_vp8_cx_algo
+#if CONFIG_EXPERIMENTAL
+        || codec->iface == &vpx_codec_vp8x_cx_algo
+#endif
+        )
     {
         ctrl_args = vp8_args;
         ctrl_args_map = vp8_arg_ctrl_map;
