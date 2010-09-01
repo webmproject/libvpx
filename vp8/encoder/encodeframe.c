@@ -258,8 +258,9 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_y_stride = cm->last_frame.y_stride;
     int recon_uv_stride = cm->last_frame.uv_stride;
     int seg_map_index = (mb_row * cpi->common.mb_cols);
-
-
+#if CONFIG_SEGMENTATION
+    int left_id, above_id;
+#endif
     // reset above block coeffs
     xd->above_context[Y1CONTEXT] = cm->above_context[Y1CONTEXT];
     xd->above_context[UCONTEXT ] = cm->above_context[UCONTEXT ];
@@ -305,6 +306,7 @@ void encode_mb_row(VP8_COMP *cpi,
                 xd->mbmi.segment_id = 0;
 
             vp8cx_mb_init_quantizer(cpi, x);
+
         }
         else
             xd->mbmi.segment_id = 0;         // Set to Segment 0 by default
@@ -382,9 +384,48 @@ void encode_mb_row(VP8_COMP *cpi,
         recon_yoffset += 16;
         recon_uvoffset += 8;
 
-        // Keep track of segment useage
-        segment_counts[xd->mbmi.segment_id] ++;
+#if CONFIG_SEGMENTATION
+    if(xd->left_available)
+        left_id = cpi->segmentation_map[seg_map_index+mb_col-1];
+    else
+        left_id = 0;
 
+    if(xd->up_available)
+        above_id = cpi->segmentation_map[seg_map_index+mb_col-cpi->common.mb_cols];
+    else
+        above_id = 0;
+
+    if ((xd->mbmi.segment_id == left_id) || (xd->mbmi.segment_id == above_id))
+    {
+        segment_counts[8]++;
+        if  (left_id != above_id)
+        {
+            if(xd->mbmi.segment_id == left_id)
+                segment_counts[10]++;
+            else
+                segment_counts[11]++;
+        }
+        else
+            segment_counts[10]++;
+    }
+    else
+    {
+        segment_counts[9]++;
+        for(i = 0; i < MAX_MB_SEGMENTS; i++)
+        {
+            if((left_id != i) && (above_id != i))
+            {
+                if(xd->mbmi.segment_id == i)
+                    segment_counts[i]++;
+                else
+                    segment_counts[MAX_MB_SEGMENTS + i]++;
+            }
+        }
+    }
+
+#else
+    segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
+#endif
         // skip to next mb
         xd->mode_info_context++;
 
@@ -406,10 +447,6 @@ void encode_mb_row(VP8_COMP *cpi,
     xd->mode_info_context++;
 }
 
-
-
-
-
 void vp8_encode_frame(VP8_COMP *cpi)
 {
     int mb_row;
@@ -419,7 +456,11 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     int i;
     TOKENEXTRA *tp = cpi->tok;
+#if CONFIG_SEGMENTATION
+    int segment_counts[MAX_MB_SEGMENTS + 8];
+#else
     int segment_counts[MAX_MB_SEGMENTS];
+#endif
     int totalrate;
 
     if (cm->frame_type != KEY_FRAME)
@@ -447,7 +488,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     //cpi->prob_intra_coded = 255;
     //}
 
-
     xd->gf_active_ptr = (signed char *)cm->gf_active_flags;     // Point to base of GF active flags data structure
 
     x->vector_range = 32;
@@ -467,7 +507,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
 #if 0
     // Experimental code
-    cpi->frame_distortion = 0;     
+    cpi->frame_distortion = 0;
     cpi->last_mb_distortion = 0;
 #endif
 
@@ -687,32 +727,64 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
         // Set to defaults
         vpx_memset(xd->mb_segment_tree_probs, 255 , sizeof(xd->mb_segment_tree_probs));
+#if CONFIG_SEGMENTATION
+        tot_count = segment_counts[8] + segment_counts[9];
 
+        if (tot_count)
+            xd->mb_segment_tree_probs[0] = (segment_counts[8] * 255) / tot_count;
+
+        tot_count = segment_counts[10] + segment_counts[11];
+
+        if (tot_count > 0)
+            xd->mb_segment_tree_probs[1] = (segment_counts[10] * 255) / tot_count;
+
+        tot_count = segment_counts[0] + segment_counts[4] ;
+
+        if (tot_count > 0)
+            xd->mb_segment_tree_probs[2] = (segment_counts[0]  * 255) / tot_count;
+
+        tot_count = segment_counts[1] + segment_counts[5];
+
+        if (tot_count > 0)
+            xd->mb_segment_tree_probs[3] = (segment_counts[1] * 255) / tot_count;
+
+        tot_count = segment_counts[2] + segment_counts[6];
+
+        if (tot_count > 0)
+            xd->mb_segment_tree_probs[4] = (segment_counts[2] * 255) / tot_count;
+
+        tot_count = segment_counts[3] + segment_counts[7];
+
+        if (tot_count > 0)
+            xd->mb_segment_tree_probs[5] = (segment_counts[3] * 255) / tot_count;
+
+#else
         tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
 
         if (tot_count)
-        {
             xd->mb_segment_tree_probs[0] = ((segment_counts[0] + segment_counts[1]) * 255) / tot_count;
 
-            tot_count = segment_counts[0] + segment_counts[1];
+        tot_count = segment_counts[0] + segment_counts[1];
 
-            if (tot_count > 0)
-            {
-                xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) / tot_count;
-            }
+        if (tot_count > 0)
+            xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) / tot_count;
 
-            tot_count = segment_counts[2] + segment_counts[3];
+        tot_count = segment_counts[2] + segment_counts[3];
 
-            if (tot_count > 0)
-                xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) / tot_count;
+        if (tot_count > 0)
+            xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) / tot_count;
 
-            // Zero probabilities not allowed
-            for (i = 0; i < MB_FEATURE_TREE_PROBS; i ++)
+#endif
+        // Zero probabilities not allowed
+#if CONFIG_SEGMENTATION
+            for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
+#else
+            for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+#endif
             {
                 if (xd->mb_segment_tree_probs[i] == 0)
                     xd->mb_segment_tree_probs[i] = 1;
             }
-        }
     }
 
     // 256 rate units to the bit

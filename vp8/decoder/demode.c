@@ -64,7 +64,10 @@ void vp8_kfread_modes(VP8D_COMP *pbi)
 
     MODE_INFO *m = cp->mi;
     const int ms = cp->mode_info_stride;
-
+#if CONFIG_SEGMENTATION
+    int left_id,above_id;
+    int i;
+#endif
     int mb_row = -1;
     vp8_prob prob_skip_false = 0;
 
@@ -78,16 +81,57 @@ void vp8_kfread_modes(VP8D_COMP *pbi)
         while (++mb_col < cp->mb_cols)
         {
             MB_PREDICTION_MODE y_mode;
-
             vp8dx_bool_decoder_fill(bc);
+
             // Read the Macroblock segmentation map if it is being updated explicitly this frame (reset to 0 above by default)
             // By default on a key frame reset all MBs to segment 0
             m->mbmi.segment_id = 0;
 
             if (pbi->mb.update_mb_segmentation_map)
-                vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
+            {
 
-            // Read the macroblock coeff skip flag if this feature is in use, else default to 0
+#if CONFIG_SEGMENTATION
+                MACROBLOCKD *xd = &pbi->mb;
+                xd->up_available = (mb_row != 0);
+                xd->left_available = (mb_col != 0);
+
+                if(xd->left_available)
+                    left_id = (m-1)->mbmi.segment_id;
+                else
+                    left_id = 0;
+
+                if(xd->up_available)
+                    above_id = (m-cp->mb_cols)->mbmi.segment_id;
+                else
+                    above_id = 0;
+
+                if (vp8_read(bc, xd->mb_segment_tree_probs[0]))
+                {
+                    for(i = 0; i < MAX_MB_SEGMENTS; i++)
+                    {
+                        if((left_id != i) && (above_id != i))
+                        {
+                            if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
+                            {
+                                m->mbmi.segment_id = i;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (vp8_read(bc, xd->mb_segment_tree_probs[1]))
+                        m->mbmi.segment_id = above_id;
+                    else
+                        m->mbmi.segment_id = left_id;
+
+                }
+#else
+                vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
+#endif
+            }
+
+        // Read the macroblock coeff skip flag if this feature is in use, else default to 0
             if (cp->mb_no_coeff_skip)
                 m->mbmi.mb_skip_coeff = vp8_read(bc, prob_skip_false);
             else

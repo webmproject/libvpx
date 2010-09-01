@@ -545,7 +545,7 @@ static void init_frame(VP8D_COMP *pbi)
         }
     }
 
-    xd->left_context = pc->left_context;
+    xd->left_context = &pc->left_context;
     xd->mode_info_context = pc->mi;
     xd->frame_type = pc->frame_type;
     xd->mbmi.mode = DC_PRED;
@@ -560,7 +560,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     const unsigned char *data = (const unsigned char *)pbi->Source;
     const unsigned char *const data_end = data + pbi->source_sz;
     int first_partition_length_in_bytes;
-
     int mb_row;
     int i, j, k, l;
     const int *const mb_feature_data_bits = vp8_mb_feature_data_bits;
@@ -669,9 +668,12 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         {
             // Which macro block level features are enabled
             vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
-
+#if CONFIG_SEGMENTATION
             // Read the probs used to decode the segment id for each macro block.
+            for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
+#else
             for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+#endif
             {
                 // If not explicitly set value is defaulted to 255 by memset above
                 if (vp8_read_bit(bc))

@@ -187,7 +187,11 @@ typedef struct
     MACROBLOCK  mb;
     int mb_row;
     TOKENEXTRA *tp;
+#if CONFIG_SEGMENTATION
+    int segment_counts[MAX_MB_SEGMENTS + 8];
+#else
     int segment_counts[MAX_MB_SEGMENTS];
+#endif
     int totalrate;
     int current_mb_col;
 } MB_ROW_COMP;

@@ -31,8 +31,8 @@ void vpx_log(const char *format, ...);
 #define UCONTEXT 1
 #define VCONTEXT 2
 #define Y2CONTEXT 3
-
 #define MB_FEATURE_TREE_PROBS   3
+
 #define MAX_MB_SEGMENTS         4
 
 #define MAX_REF_LF_DELTAS       4
@@ -255,8 +255,11 @@ typedef struct
 
     // Per frame flags that define which MB level features (such as quantizer or loop filter level)
     // are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO
-    vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];         // Probability Tree used to code Segment number
-
+#if CONFIG_SEGMENTATION
+    vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS + 3];         // Probability Tree used to code Segment number
+#else
+    vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
+#endif
     signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            // Segment parameters
 
     // mode_based Loop filter adjustment

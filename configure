@@ -204,6 +204,7 @@ HAVE_LIST="
     sys_mman_h
 "
 EXPERIMENT_LIST="
+    segmentation
 "
 CONFIG_LIST="
     external_build

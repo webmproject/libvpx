@@ -120,7 +120,10 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
     MV_CONTEXT *const mvc = pc->fc.mvc;
 
     int mb_row = -1;
-
+#if CONFIG_SEGMENTATION
+    int left_id, above_id;
+    int i;
+#endif
     vp8_prob prob_intra;
     vp8_prob prob_last;
     vp8_prob prob_gf;
@@ -171,7 +174,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             MACROBLOCKD *xd = &pbi->mb;
 
             vp8dx_bool_decoder_fill(bc);
-
             // Distance of Mb to the various image edges.
             // These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
             xd->mb_to_left_edge = -((mb_col * 16) << 3);
@@ -181,7 +183,44 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
             // If required read in new segmentation data for this MB
             if (pbi->mb.update_mb_segmentation_map)
-                vp8_read_mb_features(bc, mbmi, &pbi->mb);
+            {
+#if CONFIG_SEGMENTATION
+                xd->up_available = (mb_row != 0);
+                xd->left_available = (mb_col != 0);
+
+                if(xd->left_available)
+                    left_id = (mi-1)->mbmi.segment_id;
+                else
+                    left_id = 0;
+
+                if(xd->up_available)
+                    above_id = (mi-pc->mb_cols)->mbmi.segment_id;
+                else
+                    above_id = 0;
+
+                if (vp8_read(bc, xd->mb_segment_tree_probs[0]))
+                {
+                    for(i = 0; i < MAX_MB_SEGMENTS; i++)
+                    {
+                        if((left_id != i) && (above_id != i))
+                        {
+                            if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
+                              mbmi->segment_id = i;
+                        }
+                    }
+                }
+                else
+                {
+                    if (vp8_read(bc, xd->mb_segment_tree_probs[1]))
+                        mbmi->segment_id = above_id;
+                    else
+                        mbmi->segment_id = left_id;
+
+                }
+#else
+                vp8_read_mb_features(bc, &mi->mbmi, &pbi->mb);
+#endif
+            }
 
             // Read the macroblock coeff skip flag if this feature is in use, else default to 0
             if (pc->mb_no_coeff_skip)

@@ -86,7 +86,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
                     {
                         int seg_map_index = (mb_row * cm->mb_cols);
-
+   
                         while (mb_col > (*last_row_current_mb_col - 1) && *last_row_current_mb_col != cm->mb_cols - 1)
                         {
                             x86_pause_hint();

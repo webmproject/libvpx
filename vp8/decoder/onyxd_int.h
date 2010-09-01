@@ -94,7 +94,6 @@ typedef struct VP8Decompressor
     int current_mb_col_main;
     int decoding_thread_count;
     int allocated_decoding_thread_count;
-
     // variable for threading
     DECLARE_ALIGNED(16, MACROBLOCKD, lpfmb);
 #if CONFIG_MULTITHREAD

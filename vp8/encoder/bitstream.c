@@ -19,7 +19,9 @@
 #include "pragmas.h"
 #include "vpx_mem/vpx_mem.h"
 #include "bitstream.h"
-
+#if CONFIG_SEGMENTATION
+static int segment_cost = 0;
+#endif
 const int vp8cx_base_skip_false_prob[128] =
 {
     255, 255, 255, 255, 255, 255, 255, 255,
@@ -826,24 +828,29 @@ static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACRO
         case 0:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[1]);
+            segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[1]);
             break;
         case 1:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 1, x->mb_segment_tree_probs[1]);
+            segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_one(x->mb_segment_tree_probs[1]);
             break;
         case 2:
             vp8_write(w, 1, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[2]);
+            segment_cost += vp8_cost_one(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[2]);
             break;
         case 3:
             vp8_write(w, 1, x->mb_segment_tree_probs[0]);
             vp8_write(w, 1, x->mb_segment_tree_probs[2]);
+            segment_cost += vp8_cost_one(x->mb_segment_tree_probs[0]) + vp8_cost_one(x->mb_segment_tree_probs[2]);
             break;
 
             // TRAP.. This should not happen
         default:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[1]);
+            segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[1]);
             break;
         }
     }
@@ -855,7 +862,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     VP8_COMMON *const pc = & cpi->common;
     vp8_writer *const w = & cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
-
+#if CONFIG_SEGMENTATION
+    int left_id, above_id;
+    int i;
+#endif
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
@@ -929,13 +939,74 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
             xd->mb_to_top_edge = -((mb_row * 16)) << 3;
             xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
-
+            xd->up_available = (mb_row != 0);
+            xd->left_available = (mb_col != 0);
 #ifdef ENTROPY_STATS
             active_section = 9;
 #endif
 
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
+            {
+#if CONFIG_SEGMENTATION
+                if(xd->left_available)
+                    left_id = (m-1)->mbmi.segment_id;
+                else
+                    left_id = 0;
+
+                if(xd->up_available)
+                    above_id = (m-pc->mb_cols)->mbmi.segment_id;
+                else
+                    above_id = 0;
+
+                if ((m->mbmi.segment_id == left_id) || (m->mbmi.segment_id == above_id))
+                {
+                    vp8_write(w, 0, xd->mb_segment_tree_probs[0]);
+                    segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[0]);
+
+                    if  (left_id != above_id)
+                    {
+                        if(m->mbmi.segment_id == left_id)
+                        {
+                            vp8_write(w, 0, xd->mb_segment_tree_probs[1]);
+                            segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[1]);
+                        }
+                        else
+                        {
+                            vp8_write(w, 1, xd->mb_segment_tree_probs[1]);
+                            segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[1]);
+                        }
+                    }
+                    else
+                    {
+                        vp8_write(w, 0, xd->mb_segment_tree_probs[1]);
+                        segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[1]);
+                    }
+                }
+                else
+                {
+                    vp8_write(w, 1, xd->mb_segment_tree_probs[0]);
+                    segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[0]);
+                    for(i = 0; i < MAX_MB_SEGMENTS; i++)
+                    {
+                        if((left_id != i) && (above_id != i))
+                        {
+                            if(m->mbmi.segment_id == i)
+                            {
+                                vp8_write(w, 0, xd->mb_segment_tree_probs[2+i]);
+                                segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                            }
+                            else
+                            {
+                                vp8_write(w, 1, xd->mb_segment_tree_probs[2+i]);
+                                segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                            }
+                        }
+                    }
+                }
+#else
                 write_mb_features(w, mi, &cpi->mb.e_mbd);
+#endif
+                }
 
             if (pc->mb_no_coeff_skip)
                 vp8_encode_bool(w, m->mbmi.mb_skip_coeff, prob_skip_false);
@@ -1061,7 +1132,10 @@ static void write_kfmodes(VP8_COMP *cpi)
     const VP8_COMMON *const c = & cpi->common;
     /* const */
     MODE_INFO *m = c->mi;
-
+#if CONFIG_SEGMENTATION
+    int left_id, above_id;
+    int i;
+#endif
     int mb_row = -1;
     int prob_skip_false = 0;
 
@@ -1086,9 +1160,74 @@ static void write_kfmodes(VP8_COMP *cpi)
         while (++mb_col < c->mb_cols)
         {
             const int ym = m->mbmi.mode;
-
+#if CONFIG_SEGMENTATION
+            MACROBLOCKD *xd = &cpi->mb.e_mbd;
+            xd->up_available = (mb_row != 0);
+            xd->left_available = (mb_col != 0);
+#endif
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
-                write_mb_features(bc, &m->mbmi, &cpi->mb.e_mbd);
+            {
+#if CONFIG_SEGMENTATION
+                if(xd->left_available)
+                    left_id = (m-1)->mbmi.segment_id;
+                else
+                    left_id = 0;
+
+                if(xd->up_available)
+                    above_id = (m-c->mb_cols)->mbmi.segment_id;
+                else
+                    above_id = 0;
+
+                if ((m->mbmi.segment_id == left_id) || (m->mbmi.segment_id == above_id))
+                {
+                    vp8_write(bc, 0, xd->mb_segment_tree_probs[0]);
+                    segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[0]);
+                    if  (left_id != above_id)
+                    {
+                        if(m->mbmi.segment_id == left_id)
+                        {
+                            vp8_write(bc, 0, xd->mb_segment_tree_probs[1]);
+                            segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[1]);
+                        }
+                        else
+                        {
+                            vp8_write(bc, 1, xd->mb_segment_tree_probs[1]);
+                            segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[1]);
+                        }
+                    }
+                    else
+                    {
+                        vp8_write(bc, 0, xd->mb_segment_tree_probs[1]);
+                        segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[1]);
+                    }
+                }
+                else
+                {
+                    vp8_write(bc, 1, xd->mb_segment_tree_probs[0]);
+                    segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[0]);
+
+                    for(i = 0; i < MAX_MB_SEGMENTS; i++)
+                    {
+                        if((left_id != i) && (above_id != i))
+                        {
+                            if(m->mbmi.segment_id == i)
+                            {
+                                vp8_write(bc, 0, xd->mb_segment_tree_probs[2+i]);
+                                segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                            }
+                            else
+                            {
+                                vp8_write(bc, 1, xd->mb_segment_tree_probs[2+i]);
+                                segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                            }
+                            
+                        }
+                    }
+                }
+#else
+            write_mb_features(bc, &m->mbmi, &cpi->mb.e_mbd);
+#endif
+            }
 
             if (c->mb_no_coeff_skip)
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
@@ -1405,8 +1544,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     }
     else
         vp8_start_encode(bc, cx_data);
-
-
+//#if CONFIG_SEGMENTATION
+     //xd->segmentation_enabled =1;
+     xd->update_mb_segmentation_map = 1;
+//#endif
     // Signal whether or not Segmentation is enabled
     vp8_write_bit(bc, (xd->segmentation_enabled) ? 1 : 0);
 
@@ -1456,8 +1597,12 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
         if (xd->update_mb_segmentation_map)
         {
+ #if CONFIG_SEGMENTATION
             // Write the probs used to decode the segment id for each macro block.
+            for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
+#else
             for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+#endif
             {
                 int Data = xd->mb_segment_tree_probs[i];
 
@@ -1621,7 +1766,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         active_section = 1;
 #endif
     }
-
+#if CONFIG_SEGMENTATION
+    //printf("\nseg_cost is %d\n",segment_cost);
+#endif
     vp8_stop_encode(bc);
 
 

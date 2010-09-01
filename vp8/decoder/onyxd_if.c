@@ -85,7 +85,6 @@ void vp8dx_initialize()
     }
 }
 
-
 VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 {
     VP8D_COMP *pbi = vpx_memalign(32, sizeof(VP8D_COMP));
@@ -131,7 +130,6 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     pbi->common.error.setjmp = 0;
     return (VP8D_PTR) pbi;
 }
-
 
 void vp8dx_remove_decompressor(VP8D_PTR ptr)
 {
@@ -306,9 +304,11 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
 
-#if 0
+
     // DEBUG code
-    //vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
+#if 0
+    vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
+
     if (cm->current_video_frame <= 5)
         write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
 #endif
