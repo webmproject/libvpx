@@ -781,6 +781,9 @@ process_common_toolchain() {
         soft_enable ssse3
 
         case  ${tgt_os} in
+            win*)
+                enabled gcc && add_cflags -fno-common
+                ;;
             solaris*)
                 CC=${CC:-${CROSS}gcc}
                 LD=${LD:-${CROSS}gcc}
