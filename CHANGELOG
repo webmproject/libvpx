@@ -1,3 +1,53 @@
+2010-09-02 v0.9.2
+  - Enhancements:
+      Disable frame dropping by default
+      Improved multithreaded performance
+      Improved Force Key Frame Behaviour
+      Increased rate control buffer level precision
+      Fix bug in 1st pass motion compensation
+      ivfenc: correct fixed kf interval, --disable-kf
+  - Speed:
+      Changed above and left context data layout
+      Rework idct calling structure.
+      Removed unnecessary MB_MODE_INFO copies
+      x86: SSSE3 sixtap prediction
+      Reworked IDCT to include reconstruction (add) step
+      Swap alt/gold/new/last frame buffer ptrs instead of copying.
+      Improve SSE2 loopfilter functions
+      Change bitreader to use a larger window.
+      Avoid loopfilter reinitialization when possible
+  - Quality:
+      Normalize quantizer's zero bin and rounding factors
+      Add trellis quantization.
+      Make the quantizer exact.
+      Updates to ARNR filtering algorithm
+      Fix breakout thresh computation for golden & AltRef frames
+      Redo the forward 4x4 dct
+      Improve the accuracy of forward walsh-hadamard transform
+      Further adjustment of RD behaviour with Q and Zbin.
+  - Build System:
+      Allow linking of libs built with MinGW to MSVC
+      Fix target auto-detection on mingw32
+      Allow --cpu= to work for x86.
+      configure: pass original arguments through to make dist
+      Fix builds without runtime CPU detection
+      msvs: fix install of codec sources
+      msvs: Change devenv.com command line for better msys support
+      msvs: Add vs9 targets.
+      Add x86_64-linux-icc target
+  - Bugs:
+      Potential crashes on older MinGW builds
+      Fix two-pass framrate for Y4M input.
+      Fixed simple loop filter, other crashes on ARM v6
+      arm: fix missing dependency with --enable-shared
+      configure: support directories containing .o
+      Replace pinsrw (SSE) with MMX instructions
+      apple: include proper mach primatives
+      Fixed rate control bug with long key frame interval.
+      Fix DSO link errors on x86-64 when not using a version script
+      Fixed buffer selection for UV in AltRef filtering
+
+
 2010-06-17 v0.9.1
   - Enhancements:
       * ivfenc/ivfdec now support YUV4MPEG2 input and pipe I/O
