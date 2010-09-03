@@ -847,7 +847,9 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
         int ctr_id,
         va_list args)
 {
+#if CONFIG_POSTPROC
     vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
+    (void)ctr_id;
 
     if (data)
     {
@@ -856,6 +858,12 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
     }
     else
         return VPX_CODEC_INVALID_PARAM;
+#else
+    (void)ctx;
+    (void)ctr_id;
+    (void)args;
+    return VPX_CODEC_INCAPABLE;
+#endif
 }
 
 
@@ -1045,7 +1053,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 
         0,                  /* g_lag_in_frames */
 
-        70,                 /* rc_dropframe_thresh */
+        0,                  /* rc_dropframe_thresh */
         0,                  /* rc_resize_allowed */
         60,                 /* rc_resize_down_thresold */
         30,                 /* rc_resize_up_thresold */

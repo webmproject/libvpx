@@ -101,6 +101,49 @@ static const int qzbin_factors[129] =
     80, 80, 80, 80, 80, 80, 80, 80,
     80,
 };
+
+static const int qrounding_factors_y2[129] =
+{
+    56, 56, 56, 56, 48, 48, 56, 56,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48,
+};
+
+static const int qzbin_factors_y2[129] =
+{
+    72, 72, 72, 72, 80, 80, 72, 72,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80,
+};
+
 //#define EXACT_QUANT
 #ifdef EXACT_QUANT
 static void vp8cx_invert_quant(short *quant, short *shift, short d)
@@ -138,8 +181,8 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
         quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
         vp8cx_invert_quant(cpi->Y2quant[Q][0] + 0,
                            cpi->Y2quant_shift[Q][0] + 0, quant_val);
-        cpi->Y2zbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-        cpi->Y2round[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->Y2zbin[Q][0][0] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+        cpi->Y2round[Q][0][0] = (qrounding_factors_y2[Q] * quant_val) >> 7;
         cpi->common.Y2dequant[Q][0][0] = quant_val;
         cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
@@ -169,8 +212,8 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
             quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
             vp8cx_invert_quant(cpi->Y2quant[Q][r] + c,
                                cpi->Y2quant_shift[Q][r] + c, quant_val);
-            cpi->Y2zbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-            cpi->Y2round[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->Y2zbin[Q][r][c] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+            cpi->Y2round[Q][r][c] = (qrounding_factors_y2[Q] * quant_val) >> 7;
             cpi->common.Y2dequant[Q][r][c] = quant_val;
             cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 
@@ -206,8 +249,8 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
 
         quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
         cpi->Y2quant[Q][0][0] = (1 << 16) / quant_val;
-        cpi->Y2zbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-        cpi->Y2round[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->Y2zbin[Q][0][0] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+        cpi->Y2round[Q][0][0] = (qrounding_factors_y2[Q] * quant_val) >> 7;
         cpi->common.Y2dequant[Q][0][0] = quant_val;
         cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
@@ -234,8 +277,8 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
 
             quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
             cpi->Y2quant[Q][r][c] = (1 << 16) / quant_val;
-            cpi->Y2zbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-            cpi->Y2round[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->Y2zbin[Q][r][c] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+            cpi->Y2round[Q][r][c] = (qrounding_factors_y2[Q] * quant_val) >> 7;
             cpi->common.Y2dequant[Q][r][c] = quant_val;
             cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 

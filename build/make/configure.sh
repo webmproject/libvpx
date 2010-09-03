@@ -518,6 +518,7 @@ process_common_toolchain() {
                 tgt_os=darwin9
                 ;;
             *mingw32*|*cygwin*)
+                [ -z "$tgt_isa" ] && tgt_isa=x86
                 tgt_os=win32
                 ;;
             *linux*|*bsd*)
@@ -781,6 +782,9 @@ process_common_toolchain() {
         soft_enable ssse3
 
         case  ${tgt_os} in
+            win*)
+                enabled gcc && add_cflags -fno-common
+                ;;
             solaris*)
                 CC=${CC:-${CROSS}gcc}
                 LD=${LD:-${CROSS}gcc}
