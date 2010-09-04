@@ -147,7 +147,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                                 for (b = 0; b < xd->mbmi.partition_count; b++)
                                 {
-                                    inter_b_modes[xd->mbmi.partition_bmi[b].mode] ++;
+                                    inter_b_modes[x->partition->bmi[b].mode] ++;
                                 }
                             }
 
@@ -179,6 +179,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                         // skip to next mb
                         xd->mode_info_context++;
+                        x->partition_info++;
 
                         xd->above_context++;
 
@@ -195,12 +196,14 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                     // this is to account for the border
                     xd->mode_info_context++;
+                    x->partition_info++;
 
                     x->src.y_buffer += 16 * x->src.y_stride * (cpi->encoding_thread_count + 1) - 16 * cm->mb_cols;
                     x->src.u_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
                     x->src.v_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
 
                     xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
+                    x->partition_info += xd->mode_info_stride * cpi->encoding_thread_count;
 
                     if (ithread == (cpi->encoding_thread_count - 1) || mb_row == cm->mb_rows - 1)
                     {
@@ -364,7 +367,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         vpx_memset(mbr_ei[i].segment_counts, 0, sizeof(mbr_ei[i].segment_counts));
         mbr_ei[i].totalrate = 0;
 
-        mbd->mode_info        = cm->mi - 1;
+        mb->partition_info = x->pi + x->e_mbd.mode_info_stride * (i + 1);
+
         mbd->mode_info_context = cm->mi   + x->e_mbd.mode_info_stride * (i + 1);
         mbd->mode_info_stride  = cm->mode_info_stride;
 

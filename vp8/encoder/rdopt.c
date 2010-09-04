@@ -1439,9 +1439,9 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
     // save partitions
     labels = vp8_mbsplits[best_seg];
     x->e_mbd.mode_info_context->mbmi.partitioning = best_seg;
-    x->e_mbd.mode_info_context->mbmi.partition_count = vp8_count_labels(labels);
+    x->partition_info->count = vp8_count_labels(labels);
 
-    for (i = 0; i < x->e_mbd.mode_info_context->mbmi.partition_count; i++)
+    for (i = 0; i < x->partition_info->count; i++)
     {
         int j;
 
@@ -1451,8 +1451,8 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
                 break;
         }
 
-        x->e_mbd.mode_info_context->mbmi.partition_bmi[i].mode = x->e_mbd.block[j].bmi.mode;
-        x->e_mbd.mode_info_context->mbmi.partition_bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
+        x->partition_info->bmi[i].mode = x->e_mbd.block[j].bmi.mode;
+        x->partition_info->bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
     }
 
     return best_segment_rd;
@@ -1466,6 +1466,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     MACROBLOCKD *xd = &x->e_mbd;
     B_MODE_INFO best_bmodes[16];
     MB_MODE_INFO best_mbmode;
+    PARTITION_INFO best_partition;
     MV best_ref_mv;
     MV mode_mv[MB_MODE_COUNT];
     MB_PREDICTION_MODE this_mode;
@@ -1787,19 +1788,19 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             }
 
             // trap cases where the 8x8s can be promoted to 8x16s or 16x8s
-            if (0)//x->e_mbd.mbmi.partition_count == 4)
+            if (0)//x->partition_info->count == 4)
             {
 
-                if (x->e_mbd.mode_info_context->mbmi.partition_bmi[0].mv.as_int == x->e_mbd.mode_info_context->mbmi.partition_bmi[1].mv.as_int
-                    && x->e_mbd.mode_info_context->mbmi.partition_bmi[2].mv.as_int == x->e_mbd.mode_info_context->mbmi.partition_bmi[3].mv.as_int)
+                if (x->partition_info->bmi[0].mv.as_int == x->partition_info->bmi[1].mv.as_int
+                    && x->partition_info->bmi[2].mv.as_int == x->partition_info->bmi[3].mv.as_int)
                 {
                     const int *labels = vp8_mbsplits[2];
                     x->e_mbd.mode_info_context->mbmi.partitioning = 0;
                     rate -= vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + 2);
                     rate += vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings);
-                    //rate -=  x->inter_bmode_costs[  x->e_mbd.mbmi.partition_bmi[1]];
-                    //rate -=  x->inter_bmode_costs[  x->e_mbd.mbmi.partition_bmi[3]];
-                    x->e_mbd.mode_info_context->mbmi.partition_bmi[1] = x->e_mbd.mode_info_context->mbmi.partition_bmi[2];
+                    //rate -=  x->inter_bmode_costs[  x->partition_info->bmi[1]];
+                    //rate -=  x->inter_bmode_costs[  x->partition_info->bmi[3]];
+                    x->partition_info->bmi[1] = x->partition_info->bmi[2];
                 }
             }
 
@@ -2143,6 +2144,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             *returndistortion = distortion2;
             best_rd = this_rd;
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
+            vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
 
             for (i = 0; i < 16; i++)
             {
@@ -2224,6 +2226,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         best_mbmode.dc_diff = 0;
 
         vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+        vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
         for (i = 0; i < 16; i++)
         {
@@ -2238,6 +2241,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+    vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
     for (i = 0; i < 16; i++)
     {

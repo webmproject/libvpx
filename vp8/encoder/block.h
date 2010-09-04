@@ -52,6 +52,12 @@ typedef struct
 
 typedef struct
 {
+    int count;
+    B_MODE_INFO bmi[16];
+} PARTITION_INFO;
+
+typedef struct
+{
     DECLARE_ALIGNED(16, short, src_diff[400]);       // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
     DECLARE_ALIGNED(16, short, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
 
@@ -61,6 +67,9 @@ typedef struct
     YV12_BUFFER_CONFIG src;
 
     MACROBLOCKD e_mbd;
+    PARTITION_INFO *partition_info; /* work pointer */
+    PARTITION_INFO *pi;   /* Corresponds to upper left visible macroblock */
+    PARTITION_INFO *pip;  /* Base of allocated array */
 
     search_site *ss;
     int ss_count;

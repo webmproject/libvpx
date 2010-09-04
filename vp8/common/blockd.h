@@ -168,14 +168,15 @@ typedef struct
         int as_int;
         MV  as_mv;
     } mv;
-    int partitioning;
-    int partition_count;
-    int mb_skip_coeff;                                //does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens
-    int dc_diff;
-    unsigned char   segment_id;                  // Which set of segmentation parameters should be used for this MB
-    int force_no_skip;
-    int need_to_clamp_mvs;
-    B_MODE_INFO partition_bmi[16];
+
+    char partitioning;
+    unsigned char mb_skip_coeff;                                //does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens
+    unsigned char dc_diff;
+    unsigned char need_to_clamp_mvs;
+
+    unsigned char segment_id;                  // Which set of segmentation parameters should be used for this MB
+
+    unsigned char force_no_skip; //encoder only
 } MB_MODE_INFO;
 
 
@@ -227,8 +228,6 @@ typedef struct
     YV12_BUFFER_CONFIG dst;
 
     MODE_INFO *mode_info_context;
-    MODE_INFO *mode_info;
-
     int mode_info_stride;
 
     FRAME_TYPE frame_type;

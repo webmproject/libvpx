@@ -565,6 +565,8 @@ void vp8_first_pass(VP8_COMP *cpi)
     xd->pre = *lst_yv12;
     xd->dst = *new_yv12;
 
+    x->partition_info = x->pi;
+
     xd->mode_info_context = cm->mi;
 
     vp8_build_block_offsets(x);

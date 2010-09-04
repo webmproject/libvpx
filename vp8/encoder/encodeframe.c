@@ -458,7 +458,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
                 for (b = 0; b < xd->mbmi.partition_count; b++)
                 {
-                    inter_b_modes[xd->mbmi.partition_bmi[b].mode] ++;
+                    inter_b_modes[x->partition->bmi[b].mode] ++;
                 }
             }
 
@@ -511,6 +511,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
         // skip to next mb
         xd->mode_info_context++;
+        x->partition_info++;
 
         xd->above_context++;
         cpi->current_mb_col_main = mb_col;
@@ -525,6 +526,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
     // this is to account for the border
     xd->mode_info_context++;
+    x->partition_info++;
 }
 
 
@@ -594,7 +596,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     totalrate = 0;
 
-    xd->mode_info = cm->mi - 1;
+    x->partition_info = x->pi;
 
     xd->mode_info_context = cm->mi;
     xd->mode_info_stride = cm->mode_info_stride;
@@ -730,6 +732,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 x->src.v_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
 
                 xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
+                x->partition_info  += xd->mode_info_stride * cpi->encoding_thread_count;
 
                 if (mb_row < cm->mb_rows - 1)
                     //WaitForSingleObject(cpi->h_event_main, INFINITE);

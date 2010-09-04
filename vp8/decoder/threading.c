@@ -52,7 +52,6 @@ void vp8_setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC 
         mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
 
-        mbd->mode_info        = pc->mi - 1;
         mbd->mode_info_context = pc->mi   + pc->mode_info_stride * (i + 1);
         mbd->mode_info_stride  = pc->mode_info_stride;
 
@@ -105,7 +104,6 @@ void vp8_setup_loop_filter_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         //mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         //mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
 
-        mbd->mode_info        = pc->mi - 1;
         mbd->mode_info_context = pc->mi   + pc->mode_info_stride * (i + 1);
         mbd->mode_info_stride  = pc->mode_info_stride;
 

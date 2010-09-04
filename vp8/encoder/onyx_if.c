@@ -29,6 +29,8 @@
 #include "swapyv12buffer.h"
 #include "threading.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vpxerrors.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <limits.h>
@@ -229,6 +231,11 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
         vpx_free(cpi->gf_active_flags);
 
     cpi->gf_active_flags = 0;
+
+    if(cpi->mb.pip)
+        vpx_free(cpi->mb.pip);
+
+    cpi->mb.pip = 0;
 
 }
 
@@ -1221,6 +1228,20 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 
     cpi->source_buffer_count = 0;
 }
+
+static int vp8_alloc_partition_data(VP8_COMP *cpi)
+{
+    cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
+                                (cpi->common.mb_rows + 1),
+                                sizeof(PARTITION_INFO));
+    if(!cpi->mb.pip)
+        return ALLOC_FAILURE;
+
+    cpi->mb.pi = cpi->mb.pip + cpi->common.mode_info_stride + 1;
+
+    return 0;
+}
+
 void vp8_alloc_compressor_data(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = & cpi->common;
@@ -1231,6 +1252,11 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     if (vp8_alloc_frame_buffers(cm, width, height))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
+
+    if (vp8_alloc_partition_data(cpi))
+        vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate partition data");
+
 
     if ((width & 0xf) != 0)
         width += 16 - (width & 0xf);
