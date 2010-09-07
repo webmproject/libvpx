@@ -887,6 +887,573 @@ vp8_filter_block1d4_v4_ssse3_loop:
     pop         rbp
     ret
 
+;void vp8_bilinear_predict16x16_ssse3
+;(
+;    unsigned char  *src_ptr,
+;    int   src_pixels_per_line,
+;    int  xoffset,
+;    int  yoffset,
+;    unsigned char *dst_ptr,
+;    int dst_pitch
+;)
+global sym(vp8_bilinear_predict16x16_ssse3)
+sym(vp8_bilinear_predict16x16_ssse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM
+    GET_GOT     rbx
+    push        rsi
+    push        rdi
+    ; end prolog
+
+        lea         rcx,        [vp8_bilinear_filters_ssse3 GLOBAL]
+        movsxd      rax,        dword ptr arg(2)    ; xoffset
+
+        cmp         rax,        0                   ; skip first_pass filter if xoffset=0
+        je          b16x16_sp_only
+
+        shl         rax,        4
+        lea         rax,        [rax + rcx]         ; HFilter
+
+        mov         rdi,        arg(4)              ; dst_ptr
+        mov         rsi,        arg(0)              ; src_ptr
+        movsxd      rdx,        dword ptr arg(5)    ; dst_pitch
+
+        movdqa      xmm1,       [rax]
+
+        movsxd      rax,        dword ptr arg(3)    ; yoffset
+
+        cmp         rax,        0                   ; skip second_pass filter if yoffset=0
+        je          b16x16_fp_only
+
+        shl         rax,        4
+        lea         rax,        [rax + rcx]         ; VFilter
+
+        lea         rcx,        [rdi+rdx*8]
+        lea         rcx,        [rcx+rdx*8]
+        movsxd      rdx,        dword ptr arg(1)    ; src_pixels_per_line
+
+        movdqa      xmm2,       [rax]
+
+%if ABI_IS_32BIT=0
+        movsxd      r8,         dword ptr arg(5)    ; dst_pitch
+%endif
+        movdqu      xmm3,       [rsi]               ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+
+        movdqa      xmm4,       xmm3
+
+        movdqu      xmm5,       [rsi+1]             ; 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16
+        lea         rsi,        [rsi + rdx]         ; next line
+
+        punpcklbw   xmm3,       xmm5                ; 00 01 01 02 02 03 03 04 04 05 05 06 06 07 07 08
+        pmaddubsw   xmm3,       xmm1                ; 00 02 04 06 08 10 12 14
+
+        punpckhbw   xmm4,       xmm5                ; 08 09 09 10 10 11 11 12 12 13 13 14 14 15 15 16
+        pmaddubsw   xmm4,       xmm1                ; 01 03 05 07 09 11 13 15
+
+        paddw       xmm3,       [rd GLOBAL]         ; xmm3 += round value
+        psraw       xmm3,       VP8_FILTER_SHIFT    ; xmm3 /= 128
+
+        paddw       xmm4,       [rd GLOBAL]         ; xmm4 += round value
+        psraw       xmm4,       VP8_FILTER_SHIFT    ; xmm4 /= 128
+
+        movdqa      xmm7,       xmm3
+        packuswb    xmm7,       xmm4                ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+
+.next_row:
+        movdqu      xmm6,       [rsi]               ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+
+        movdqa      xmm4,       xmm6
+
+        movdqu      xmm5,       [rsi+1]             ; 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16
+        lea         rsi,        [rsi + rdx]         ; next line
+
+        punpcklbw   xmm6,       xmm5
+        pmaddubsw   xmm6,       xmm1
+
+        punpckhbw   xmm4,       xmm5
+        pmaddubsw   xmm4,       xmm1
+
+        paddw       xmm6,       [rd GLOBAL]         ; xmm6 += round value
+        psraw       xmm6,       VP8_FILTER_SHIFT    ; xmm6 /= 128
+
+        paddw       xmm4,       [rd GLOBAL]         ; xmm4 += round value
+        psraw       xmm4,       VP8_FILTER_SHIFT    ; xmm4 /= 128
+
+        packuswb    xmm6,       xmm4
+        movdqa      xmm5,       xmm7
+
+        punpcklbw   xmm5,       xmm6
+        pmaddubsw   xmm5,       xmm2
+
+        punpckhbw   xmm7,       xmm6
+        pmaddubsw   xmm7,       xmm2
+
+        paddw       xmm5,       [rd GLOBAL]         ; xmm5 += round value
+        psraw       xmm5,       VP8_FILTER_SHIFT    ; xmm5 /= 128
+
+        paddw       xmm7,       [rd GLOBAL]         ; xmm7 += round value
+        psraw       xmm7,       VP8_FILTER_SHIFT    ; xmm7 /= 128
+
+        packuswb    xmm5,       xmm7
+        movdqa      xmm7,       xmm6
+
+        movdqa      [rdi],      xmm5                ; store the results in the destination
+%if ABI_IS_32BIT
+        add         rdi,        DWORD PTR arg(5)    ; dst_pitch
+%else
+        add         rdi,        r8
+%endif
+
+        cmp         rdi,        rcx
+        jne         .next_row
+
+        jmp         done
+
+b16x16_sp_only:
+        movsxd      rax,        dword ptr arg(3)    ; yoffset
+        shl         rax,        4
+        lea         rax,        [rax + rcx]         ; VFilter
+
+        mov         rdi,        arg(4)              ; dst_ptr
+        mov         rsi,        arg(0)              ; src_ptr
+        movsxd      rdx,        dword ptr arg(5)    ; dst_pitch
+
+        movdqa      xmm1,       [rax]               ; VFilter
+
+        lea         rcx,        [rdi+rdx*8]
+        lea         rcx,        [rcx+rdx*8]
+        movsxd      rax,        dword ptr arg(1)    ; src_pixels_per_line
+
+        ; get the first horizontal line done
+        movdqu      xmm2,       [rsi]               ; load row 0
+
+        lea         rsi,        [rsi + rax]         ; next line
+.next_row:
+        movdqu      xmm3,       [rsi]               ; load row + 1
+
+        movdqu      xmm4,       xmm2
+        punpcklbw   xmm4,       xmm3
+
+        pmaddubsw   xmm4,       xmm1
+        movdqu      xmm7,       [rsi + rax]         ; load row + 2
+
+        punpckhbw   xmm2,       xmm3
+        movdqu      xmm6,       xmm3
+
+        pmaddubsw   xmm2,       xmm1
+        punpcklbw   xmm6,       xmm7
+
+        paddw       xmm4,       [rd GLOBAL]
+        pmaddubsw   xmm6,       xmm1
+
+        psraw       xmm4,       VP8_FILTER_SHIFT
+        punpckhbw   xmm3,       xmm7
+
+        paddw       xmm2,       [rd GLOBAL]
+        pmaddubsw   xmm3,       xmm1
+
+        psraw       xmm2,       VP8_FILTER_SHIFT
+        paddw       xmm6,       [rd GLOBAL]
+
+        packuswb    xmm4,       xmm2
+        psraw       xmm6,       VP8_FILTER_SHIFT
+
+        movdqa      [rdi],      xmm4                ; store row 0
+        paddw       xmm3,       [rd GLOBAL]
+
+        psraw       xmm3,       VP8_FILTER_SHIFT
+        lea         rsi,        [rsi + 2*rax]
+
+        packuswb    xmm6,       xmm3
+        movdqa      xmm2,       xmm7
+
+        movdqa      [rdi + rdx],xmm6                ; store row 1
+        lea         rdi,        [rdi + 2*rdx]
+
+        cmp         rdi,        rcx
+        jne         .next_row
+
+        jmp         done
+
+b16x16_fp_only:
+        lea         rcx,        [rdi+rdx*8]
+        lea         rcx,        [rcx+rdx*8]
+        movsxd      rax,        dword ptr arg(1)    ; src_pixels_per_line
+
+.next_row:
+        movdqu      xmm2,       [rsi]               ; row 0
+        movdqa      xmm3,       xmm2
+
+        movdqu      xmm4,       [rsi + 1]           ; row 0 + 1
+        lea         rsi,        [rsi + rax]         ; next line
+
+        punpcklbw   xmm2,       xmm4
+        movdqu      xmm5,       [rsi]               ; row 1
+
+        pmaddubsw   xmm2,       xmm1
+        movdqa      xmm6,       xmm5
+
+        punpckhbw   xmm3,       xmm4
+        movdqu      xmm7,       [rsi + 1]           ; row 1 + 1
+
+        pmaddubsw   xmm3,       xmm1
+        paddw       xmm2,       [rd GLOBAL]
+
+        psraw       xmm2,       VP8_FILTER_SHIFT
+        punpcklbw   xmm5,       xmm7
+
+        paddw       xmm3,       [rd GLOBAL]
+        pmaddubsw   xmm5,       xmm1
+
+        psraw       xmm3,       VP8_FILTER_SHIFT
+        punpckhbw   xmm6,       xmm7
+
+        packuswb    xmm2,       xmm3
+        pmaddubsw   xmm6,       xmm1
+
+        movdqa      [rdi],      xmm2                ; store the results in the destination
+        paddw       xmm5,       [rd GLOBAL]
+
+        lea         rdi,        [rdi + rdx]         ; dst_pitch
+        psraw       xmm5,       VP8_FILTER_SHIFT
+
+        paddw       xmm6,       [rd GLOBAL]
+        psraw       xmm6,       VP8_FILTER_SHIFT
+
+        packuswb    xmm5,       xmm6
+        lea         rsi,        [rsi + rax]         ; next line
+
+        movdqa      [rdi],      xmm5                ; store the results in the destination
+        lea         rdi,        [rdi + rdx]         ; dst_pitch
+
+        cmp         rdi,        rcx
+
+        jne         .next_row
+
+done:
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    RESTORE_GOT
+    RESTORE_XMM
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+;void vp8_bilinear_predict8x8_ssse3
+;(
+;    unsigned char  *src_ptr,
+;    int   src_pixels_per_line,
+;    int  xoffset,
+;    int  yoffset,
+;    unsigned char *dst_ptr,
+;    int dst_pitch
+;)
+global sym(vp8_bilinear_predict8x8_ssse3)
+sym(vp8_bilinear_predict8x8_ssse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM
+    GET_GOT     rbx
+    push        rsi
+    push        rdi
+    ; end prolog
+
+    ALIGN_STACK 16, rax
+    sub         rsp, 144                         ; reserve 144 bytes
+
+        lea         rcx,        [vp8_bilinear_filters_ssse3 GLOBAL]
+
+        mov         rsi,        arg(0) ;src_ptr
+        movsxd      rdx,        dword ptr arg(1) ;src_pixels_per_line
+
+    ;Read 9-line unaligned data in and put them on stack. This gives a big
+    ;performance boost.
+        movdqu      xmm0,       [rsi]
+        lea         rax,        [rdx + rdx*2]
+        movdqu      xmm1,       [rsi+rdx]
+        movdqu      xmm2,       [rsi+rdx*2]
+        add         rsi,        rax
+        movdqu      xmm3,       [rsi]
+        movdqu      xmm4,       [rsi+rdx]
+        movdqu      xmm5,       [rsi+rdx*2]
+        add         rsi,        rax
+        movdqu      xmm6,       [rsi]
+        movdqu      xmm7,       [rsi+rdx]
+
+        movdqa      XMMWORD PTR [rsp],            xmm0
+
+        movdqu      xmm0,       [rsi+rdx*2]
+
+        movdqa      XMMWORD PTR [rsp+16],         xmm1
+        movdqa      XMMWORD PTR [rsp+32],         xmm2
+        movdqa      XMMWORD PTR [rsp+48],         xmm3
+        movdqa      XMMWORD PTR [rsp+64],         xmm4
+        movdqa      XMMWORD PTR [rsp+80],         xmm5
+        movdqa      XMMWORD PTR [rsp+96],         xmm6
+        movdqa      XMMWORD PTR [rsp+112],        xmm7
+        movdqa      XMMWORD PTR [rsp+128],        xmm0
+
+        movsxd      rax,        dword ptr arg(2)    ; xoffset
+        cmp         rax,        0                   ; skip first_pass filter if xoffset=0
+        je          b8x8_sp_only
+
+        shl         rax,        4
+        add         rax,        rcx                 ; HFilter
+
+        mov         rdi,        arg(4)              ; dst_ptr
+        movsxd      rdx,        dword ptr arg(5)    ; dst_pitch
+
+        movdqa      xmm0,       [rax]
+
+        movsxd      rax,        dword ptr arg(3)    ; yoffset
+        cmp         rax,        0                   ; skip second_pass filter if yoffset=0
+        je          b8x8_fp_only
+
+        shl         rax,        4
+        lea         rax,        [rax + rcx]         ; VFilter
+
+        lea         rcx,        [rdi+rdx*8]
+
+        movdqa      xmm1,       [rax]
+
+        ; get the first horizontal line done
+        movdqa      xmm3,       [rsp]               ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+        movdqa      xmm5,       xmm3                ; 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 xx
+
+        psrldq      xmm5,       1
+        lea         rsp,        [rsp + 16]          ; next line
+
+        punpcklbw   xmm3,       xmm5                ; 00 01 01 02 02 03 03 04 04 05 05 06 06 07 07 08
+        pmaddubsw   xmm3,       xmm0                ; 00 02 04 06 08 10 12 14
+
+        paddw       xmm3,       [rd GLOBAL]         ; xmm3 += round value
+        psraw       xmm3,       VP8_FILTER_SHIFT    ; xmm3 /= 128
+
+        movdqa      xmm7,       xmm3
+        packuswb    xmm7,       xmm7                ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+
+.next_row:
+        movdqa      xmm6,       [rsp]               ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
+        lea         rsp,        [rsp + 16]          ; next line
+
+        movdqa      xmm5,       xmm6
+
+        psrldq      xmm5,       1
+
+        punpcklbw   xmm6,       xmm5
+        pmaddubsw   xmm6,       xmm0
+
+        paddw       xmm6,       [rd GLOBAL]         ; xmm6 += round value
+        psraw       xmm6,       VP8_FILTER_SHIFT    ; xmm6 /= 128
+
+        packuswb    xmm6,       xmm6
+
+        punpcklbw   xmm7,       xmm6
+        pmaddubsw   xmm7,       xmm1
+
+        paddw       xmm7,       [rd GLOBAL]         ; xmm7 += round value
+        psraw       xmm7,       VP8_FILTER_SHIFT    ; xmm7 /= 128
+
+        packuswb    xmm7,       xmm7
+
+        movq        [rdi],      xmm7                ; store the results in the destination
+        lea         rdi,        [rdi + rdx]
+
+        movdqa      xmm7,       xmm6
+
+        cmp         rdi,        rcx
+        jne         .next_row
+
+        jmp         done8x8
+
+b8x8_sp_only:
+        movsxd      rax,        dword ptr arg(3)    ; yoffset
+        shl         rax,        4
+        lea         rax,        [rax + rcx]         ; VFilter
+
+        mov         rdi,        arg(4) ;dst_ptr
+        movsxd      rdx,        dword ptr arg(5)    ; dst_pitch
+
+        movdqa      xmm0,       [rax]               ; VFilter
+
+        movq        xmm1,       XMMWORD PTR [rsp]
+        movq        xmm2,       XMMWORD PTR [rsp+16]
+
+        movq        xmm3,       XMMWORD PTR [rsp+32]
+        punpcklbw   xmm1,       xmm2
+
+        movq        xmm4,       XMMWORD PTR [rsp+48]
+        punpcklbw   xmm2,       xmm3
+
+        movq        xmm5,       XMMWORD PTR [rsp+64]
+        punpcklbw   xmm3,       xmm4
+
+        movq        xmm6,       XMMWORD PTR [rsp+80]
+        punpcklbw   xmm4,       xmm5
+
+        movq        xmm7,       XMMWORD PTR [rsp+96]
+        punpcklbw   xmm5,       xmm6
+
+        pmaddubsw   xmm1,       xmm0
+        pmaddubsw   xmm2,       xmm0
+
+        pmaddubsw   xmm3,       xmm0
+        pmaddubsw   xmm4,       xmm0
+
+        pmaddubsw   xmm5,       xmm0
+        punpcklbw   xmm6,       xmm7
+
+        pmaddubsw   xmm6,       xmm0
+        paddw       xmm1,       [rd GLOBAL]
+
+        paddw       xmm2,       [rd GLOBAL]
+        psraw       xmm1,       VP8_FILTER_SHIFT
+
+        paddw       xmm3,       [rd GLOBAL]
+        psraw       xmm2,       VP8_FILTER_SHIFT
+
+        paddw       xmm4,       [rd GLOBAL]
+        psraw       xmm3,       VP8_FILTER_SHIFT
+
+        paddw       xmm5,       [rd GLOBAL]
+        psraw       xmm4,       VP8_FILTER_SHIFT
+
+        paddw       xmm6,       [rd GLOBAL]
+        psraw       xmm5,       VP8_FILTER_SHIFT
+
+        psraw       xmm6,       VP8_FILTER_SHIFT
+        packuswb    xmm1,       xmm1
+
+        packuswb    xmm2,       xmm2
+        movq        [rdi],      xmm1
+
+        packuswb    xmm3,       xmm3
+        movq        [rdi+rdx],  xmm2
+
+        packuswb    xmm4,       xmm4
+        movq        xmm1,       XMMWORD PTR [rsp+112]
+
+        lea         rdi,        [rdi + 2*rdx]
+        movq        xmm2,       XMMWORD PTR [rsp+128]
+
+        packuswb    xmm5,       xmm5
+        movq        [rdi],      xmm3
+
+        packuswb    xmm6,       xmm6
+        movq        [rdi+rdx],  xmm4
+
+        lea         rdi,        [rdi + 2*rdx]
+        punpcklbw   xmm7,       xmm1
+
+        movq        [rdi],      xmm5
+        pmaddubsw   xmm7,       xmm0
+
+        movq        [rdi+rdx],  xmm6
+        punpcklbw   xmm1,       xmm2
+
+        pmaddubsw   xmm1,       xmm0
+        paddw       xmm7,       [rd GLOBAL]
+
+        psraw       xmm7,       VP8_FILTER_SHIFT
+        paddw       xmm1,       [rd GLOBAL]
+
+        psraw       xmm1,       VP8_FILTER_SHIFT
+        packuswb    xmm7,       xmm7
+
+        packuswb    xmm1,       xmm1
+        lea         rdi,        [rdi + 2*rdx]
+
+        movq        [rdi],      xmm7
+
+        movq        [rdi+rdx],  xmm1
+        lea         rsp,        [rsp + 144]
+
+        jmp         done8x8
+
+b8x8_fp_only:
+        lea         rcx,        [rdi+rdx*8]
+
+.next_row:
+        movdqa      xmm1,       XMMWORD PTR [rsp]
+        movdqa      xmm3,       XMMWORD PTR [rsp+16]
+
+        movdqa      xmm2,       xmm1
+        movdqa      xmm5,       XMMWORD PTR [rsp+32]
+
+        psrldq      xmm2,       1
+        movdqa      xmm7,       XMMWORD PTR [rsp+48]
+
+        movdqa      xmm4,       xmm3
+        psrldq      xmm4,       1
+
+        movdqa      xmm6,       xmm5
+        psrldq      xmm6,       1
+
+        punpcklbw   xmm1,       xmm2
+        pmaddubsw   xmm1,       xmm0
+
+        punpcklbw   xmm3,       xmm4
+        pmaddubsw   xmm3,       xmm0
+
+        punpcklbw   xmm5,       xmm6
+        pmaddubsw   xmm5,       xmm0
+
+        movdqa      xmm2,       xmm7
+        psrldq      xmm2,       1
+
+        punpcklbw   xmm7,       xmm2
+        pmaddubsw   xmm7,       xmm0
+
+        paddw       xmm1,       [rd GLOBAL]
+        psraw       xmm1,       VP8_FILTER_SHIFT
+
+        paddw       xmm3,       [rd GLOBAL]
+        psraw       xmm3,       VP8_FILTER_SHIFT
+
+        paddw       xmm5,       [rd GLOBAL]
+        psraw       xmm5,       VP8_FILTER_SHIFT
+
+        paddw       xmm7,       [rd GLOBAL]
+        psraw       xmm7,       VP8_FILTER_SHIFT
+
+        packuswb    xmm1,       xmm1
+        packuswb    xmm3,       xmm3
+
+        packuswb    xmm5,       xmm5
+        movq        [rdi],      xmm1
+
+        packuswb    xmm7,       xmm7
+        movq        [rdi+rdx],  xmm3
+
+        lea         rdi,        [rdi + 2*rdx]
+        movq        [rdi],      xmm5
+
+        lea         rsp,        [rsp + 4*16]
+        movq        [rdi+rdx],  xmm7
+
+        lea         rdi,        [rdi + 2*rdx]
+        cmp         rdi,        rcx
+
+        jne         .next_row
+
+        lea         rsp,        [rsp + 16]
+
+done8x8:
+    ;add rsp, 144
+    pop         rsp
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    RESTORE_GOT
+    RESTORE_XMM
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
 SECTION_RODATA
 align 16
 shuf1b:
@@ -928,4 +1495,14 @@ k2_k4:
     times 8 db  50,   -9
     times 8 db  36,  -11
     times 8 db  12,   -6
+align 16
+vp8_bilinear_filters_ssse3:
+    times 8 db 128, 0
+    times 8 db 112, 16
+    times 8 db 96,  32
+    times 8 db 80,  48
+    times 8 db 64,  64
+    times 8 db 48,  80
+    times 8 db 32,  96
+    times 8 db 16,  112
 
