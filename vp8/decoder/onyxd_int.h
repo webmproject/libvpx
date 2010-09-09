@@ -125,6 +125,12 @@ typedef struct VP8Decompressor
     struct vp8_dboolhuff_rtcd_vtable dboolhuff;
 #endif
 
+
+    vp8_prob prob_intra;
+    vp8_prob prob_last;
+    vp8_prob prob_gf;
+    vp8_prob prob_skip_false;
+
 } VP8D_COMP;
 
 int vp8_decode_frame(VP8D_COMP *cpi);
