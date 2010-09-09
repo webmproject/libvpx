@@ -1,5 +1,5 @@
 @echo off
-REM   Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+REM   Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 REM
 REM   Use of this source code is governed by a BSD-style license
 REM   that can be found in the LICENSE file in the root of the source
