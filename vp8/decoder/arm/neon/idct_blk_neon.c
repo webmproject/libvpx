@@ -82,8 +82,6 @@ void vp8_dequant_idct_add_uv_block_neon
             (short *q, short *dq, unsigned char *pre,
              unsigned char *dstu, unsigned char *dstv, int stride, char *eobs)
 {
-    int i;
-
     if (((short *)eobs)[0] & 0xfefe)
         idct_dequant_full_2x_neon (q, dq, pre, dstu, 8, stride);
     else

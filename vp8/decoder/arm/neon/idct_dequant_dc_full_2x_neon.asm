@@ -24,138 +24,151 @@
 ; sp    stride
 ; sp+4  *dc
 |idct_dequant_dc_full_2x_neon| PROC
-    vld1.16         {q3, q4}, [r0]          ; lo input
-    vld1.16         {q5, q6}, [r1]          ; use the same dq for both
+    vld1.16         {q0, q1}, [r1]          ; dq (same l/r)
+    vld1.16         {q2, q3}, [r0]          ; l q
     mov             r1, #16                 ; pitch
     add             r0, r0, #32
-    vld1.16         {q10, q11}, [r0]        ; hi input
+    vld1.16         {q4, q5}, [r0]          ; r q
     add             r12, r2, #4
-    vld1.32         {d14[0]}, [r2], r1      ; lo pred
-    vld1.32         {d14[1]}, [r2], r1
-    vld1.32         {d15[0]}, [r2], r1
-    vld1.32         {d15[1]}, [r2]
-    vld1.32         {d28[0]}, [r12], r1     ; hi pred
-    vld1.32         {d28[1]}, [r12], r1
-    vld1.32         {d29[0]}, [r12], r1
-    ldr             r1, [sp, #4]            ; dc
-    vld1.32         {d29[1]}, [r12]
+    ; interleave the predictors
+    vld1.32         {d28[0]}, [r2], r1      ; l pre
+    vld1.32         {d28[1]}, [r12], r1     ; r pre
+    vld1.32         {d29[0]}, [r2], r1
+    vld1.32         {d29[1]}, [r12], r1
+    vld1.32         {d30[0]}, [r2], r1
+    vld1.32         {d30[1]}, [r12], r1
+    vld1.32         {d31[0]}, [r2]
+    ldr             r1, [sp, #4]
+    vld1.32         {d31[1]}, [r12]
 
     ldr             r2, _CONSTANTS_
 
     ldrh            r12, [r1], #2           ; lo *dc
     ldrh            r1, [r1]                ; hi *dc
 
-    vmul.i16        q1, q3, q5              ; lo input * dq
-    vmul.i16        q2, q4, q6
-    vmul.i16        q8, q10, q5             ; hi input * dq
-    vmul.i16        q9, q11, q6
+    ; dequant: q[i] = q[i] * dq[i]
+    vmul.i16        q2, q2, q0
+    vmul.i16        q3, q3, q1
+    vmul.i16        q4, q4, q0
+    vmul.i16        q5, q5, q1
 
-    vmov.16         d2[0], r12              ; move lo dc up to neon, overwrite first element
-    vmov.16         d16[0], r1              ; move hi dc up to neon, overwrite first element
-
-    ldr             r1, [sp]                ; stride
+    ; move dc up to neon and overwrite first element
+    vmov.16         d4[0], r12
+    vmov.16         d8[0], r1
 
     vld1.16         {d0}, [r2]
-    vswp            d3, d4                  ; lo q2(vp[4] vp[12])
-    vswp            d17, d18                ; hi q2(vp[4] vp[12])
 
-    vqdmulh.s16     q3, q2, d0[2]           ; lo * constants
-    vqdmulh.s16     q4, q2, d0[0]
-    vqdmulh.s16     q10, q9, d0[2]          ; hi * constants
-    vqdmulh.s16     q11, q9, d0[0]
+    ; q2: l0r0  q3: l8r8
+    ; q4: l4r4  q5: l12r12
+    vswp            d5, d8
+    vswp            d7, d10
 
-    vqadd.s16       d12, d2, d3             ; lo a1
-    vqsub.s16       d13, d2, d3             ; lo b1
-    vqadd.s16       d26, d16, d17           ; hi a1
-    vqsub.s16       d27, d16, d17           ; hi b1
+    ; _CONSTANTS_ * 4,12 >> 16
+    ; q6:  4 * sinpi : c1/temp1
+    ; q7: 12 * sinpi : d1/temp2
+    ; q8:  4 * cospi
+    ; q9: 12 * cospi
+    vqdmulh.s16     q6, q4, d0[2]           ; sinpi8sqrt2
+    vqdmulh.s16     q7, q5, d0[2]
+    vqdmulh.s16     q8, q4, d0[0]           ; cospi8sqrt2minus1
+    vqdmulh.s16     q9, q5, d0[0]
 
-    vshr.s16        q3, q3, #1              ; lo
-    vshr.s16        q4, q4, #1
-    vshr.s16        q10, q10, #1            ; hi
+    vqadd.s16       q10, q2, q3             ; a1 = 0 + 8
+    vqsub.s16       q11, q2, q3             ; b1 = 0 - 8
+
+    ; vqdmulh only accepts signed values. this was a problem because
+    ; our constant had the high bit set, and was treated as a negative value.
+    ; vqdmulh also doubles the value before it shifts by 16. we need to
+    ; compensate for this. in the case of sinpi8sqrt2, the lowest bit is 0,
+    ; so we can shift the constant without losing precision. this avoids
+    ; shift again afterward, but also avoids the sign issue. win win!
+    ; for cospi8sqrt2minus1 the lowest bit is 1, so we lose precision if we
+    ; pre-shift it
+    vshr.s16        q8, q8, #1
+    vshr.s16        q9, q9, #1
+
+    ; q4:  4 +  4 * cospi : d1/temp1
+    ; q5: 12 + 12 * cospi : c1/temp2
+    vqadd.s16       q4, q4, q8
+    vqadd.s16       q5, q5, q9
+
+    ; c1 = temp1 - temp2
+    ; d1 = temp1 + temp2
+    vqsub.s16       q2, q6, q5
+    vqadd.s16       q3, q4, q7
+
+    ; [0]: a1+d1
+    ; [1]: b1+c1
+    ; [2]: b1-c1
+    ; [3]: a1-d1
+    vqadd.s16       q4, q10, q3
+    vqadd.s16       q5, q11, q2
+    vqsub.s16       q6, q11, q2
+    vqsub.s16       q7, q10, q3
+
+    ; rotate
+    vtrn.32         q4, q6
+    vtrn.32         q5, q7
+    vtrn.16         q4, q5
+    vtrn.16         q6, q7
+    ; idct loop 2
+    ; q4: l 0, 4, 8,12 r 0, 4, 8,12
+    ; q5: l 1, 5, 9,13 r 1, 5, 9,13
+    ; q6: l 2, 6,10,14 r 2, 6,10,14
+    ; q7: l 3, 7,11,15 r 3, 7,11,15
+
+    ; q8:  1 * sinpi : c1/temp1
+    ; q9:  3 * sinpi : d1/temp2
+    ; q10: 1 * cospi
+    ; q11: 3 * cospi
+    vqdmulh.s16     q8, q5, d0[2]           ; sinpi8sqrt2
+    vqdmulh.s16     q9, q7, d0[2]
+    vqdmulh.s16     q10, q5, d0[0]          ; cospi8sqrt2minus1
+    vqdmulh.s16     q11, q7, d0[0]
+
+    vqadd.s16       q2, q4, q6             ; a1 = 0 + 2
+    vqsub.s16       q3, q4, q6             ; b1 = 0 - 2
+
+    ; see note on shifting above
+    vshr.s16        q10, q10, #1
     vshr.s16        q11, q11, #1
 
-    vqadd.s16       q3, q3, q2              ; lo
-    vqadd.s16       q4, q4, q2
-    vqadd.s16       q10, q10, q9            ; hi
-    vqadd.s16       q11, q11, q9
+    ; q10: 1 + 1 * cospi : d1/temp1
+    ; q11: 3 + 3 * cospi : c1/temp2
+    vqadd.s16       q10, q5, q10
+    vqadd.s16       q11, q7, q11
 
-    vqsub.s16       d10, d6, d9             ; lo c1
-    vqadd.s16       d11, d7, d8             ; lo d1
-    vqsub.s16       d24, d20, d23           ; hi c1
-    vqadd.s16       d25, d21, d22           ; hi d1
+    ; q8: c1 = temp1 - temp2
+    ; q9: d1 = temp1 + temp2
+    vqsub.s16       q8, q8, q11
+    vqadd.s16       q9, q10, q9
 
-    vqadd.s16       d2, d12, d11            ; lo
-    vqadd.s16       d3, d13, d10
-    vqsub.s16       d4, d13, d10
-    vqsub.s16       d5, d12, d11
-    vqadd.s16       d16, d26, d25           ; hi
-    vqadd.s16       d17, d27, d24
-    vqsub.s16       d18, d27, d24
-    vqsub.s16       d19, d26, d25
+    ; a1+d1
+    ; b1+c1
+    ; b1-c1
+    ; a1-d1
+    vqadd.s16       q4, q2, q9
+    vqadd.s16       q5, q3, q8
+    vqsub.s16       q6, q3, q8
+    vqsub.s16       q7, q2, q9
 
-    vtrn.32         d2, d4                  ; lo
-    vtrn.32         d3, d5
-    vtrn.16         d2, d3
-    vtrn.16         d4, d5
-    vtrn.32         d16, d18                ; hi
-    vtrn.32         d17, d19
-    vtrn.16         d16, d17
-    vtrn.16         d18, d19
+    ; +4 >> 3 (rounding)
+    vrshr.s16       q4, q4, #3              ; lo
+    vrshr.s16       q5, q5, #3
+    vrshr.s16       q6, q6, #3              ; hi
+    vrshr.s16       q7, q7, #3
 
-    vswp            d3, d4                  ; lo
-    vqdmulh.s16     q3, q2, d0[2]
-    vqdmulh.s16     q4, q2, d0[0]
-    vswp            d17, d18                ; hi
-    vqdmulh.s16     q10, q9, d0[2]
-    vqdmulh.s16     q11, q9, d0[0]
+    vtrn.32         q4, q6
+    vtrn.32         q5, q7
+    vtrn.16         q4, q5
+    vtrn.16         q6, q7
 
-    vqadd.s16       d12, d2, d3             ; lo a1
-    vqsub.s16       d13, d2, d3             ; lo b1
-    vqadd.s16       d26, d16, d17           ; hi a1
-    vqsub.s16       d27, d16, d17           ; hi b1
-
-    vshr.s16        q3, q3, #1              ; lo
-    vshr.s16        q4, q4, #1
-    vshr.s16        q10, q10, #1            ; hi
-    vshr.s16        q11, q11, #1
-
-    vqadd.s16       q3, q3, q2              ; lo
-    vqadd.s16       q4, q4, q2
-    vqadd.s16       q10, q10, q9            ; hi
-    vqadd.s16       q11, q11, q9
-
-    vqsub.s16       d10, d6, d9             ; lo c1
-    vqadd.s16       d11, d7, d8             ; lo d1
-    vqsub.s16       d24, d20, d23           ; hi c1
-    vqadd.s16       d25, d21, d22           ; hi d1
-
-    vqadd.s16       d2, d12, d11            ; lo
-    vqadd.s16       d3, d13, d10
-    vqsub.s16       d4, d13, d10
-    vqsub.s16       d5, d12, d11
-    vqadd.s16       d16, d26, d25           ; hi
-    vqadd.s16       d17, d27, d24
-    vqsub.s16       d18, d27, d24
-    vqsub.s16       d19, d26, d25
-
-    vrshr.s16       q1, q1, #3              ; lo
-    vrshr.s16       q2, q2, #3
-    vrshr.s16       q8, q8, #3              ; hi
-    vrshr.s16       q9, q9, #3
-
-    vtrn.32         d2, d4                  ; lo
-    vtrn.32         d3, d5
-    vtrn.16         d2, d3
-    vtrn.16         d4, d5
-    vtrn.32         d16, d18                ; hi
-    vtrn.32         d17, d19
-    vtrn.16         d16, d17
-    vtrn.16         d18, d19
-
-    vaddw.u8        q1, q1, d14             ; lo
-    vaddw.u8        q2, q2, d15
-    vaddw.u8        q8, q8, d28             ; hi
-    vaddw.u8        q9, q9, d29
+    ; adding pre
+    ; input is still packed. pre was read interleaved
+    vaddw.u8        q4, q4, d28
+    vaddw.u8        q5, q5, d29
+    vaddw.u8        q6, q6, d30
+    vaddw.u8        q7, q7, d31
 
     vmov.i16        q14, #0
     vmov            q15, q14
@@ -163,19 +176,21 @@
     sub             r0, r0, #32
     vst1.16         {q14, q15}, [r0]        ; write over low input
 
-    vqmovun.s16     d0, q1                  ; lo
-    vqmovun.s16     d1, q2
-    vqmovun.s16     d2, q8                  ; hi
-    vqmovun.s16     d3, q9
+    ;saturate and narrow
+    vqmovun.s16     d0, q4                  ; lo
+    vqmovun.s16     d1, q5
+    vqmovun.s16     d2, q6                  ; hi
+    vqmovun.s16     d3, q7
 
+    ldr             r1, [sp]                ; stride
     add             r2, r3, #4              ; hi
     vst1.32         {d0[0]}, [r3], r1       ; lo
-    vst1.32         {d0[1]}, [r3], r1
+    vst1.32         {d0[1]}, [r2], r1       ; hi
     vst1.32         {d1[0]}, [r3], r1
-    vst1.32         {d1[1]}, [r3]
-    vst1.32         {d2[0]}, [r2], r1       ; hi
+    vst1.32         {d1[1]}, [r2], r1
+    vst1.32         {d2[0]}, [r3], r1
     vst1.32         {d2[1]}, [r2], r1
-    vst1.32         {d3[0]}, [r2], r1
+    vst1.32         {d3[0]}, [r3]
     vst1.32         {d3[1]}, [r2]
 
     bx             lr
@@ -184,7 +199,8 @@
 
 ; Constant Pool
 _CONSTANTS_       DCD cospi8sqrt2minus1
-cospi8sqrt2minus1 DCD 0x4e7b4e7b
-sinpi8sqrt2       DCD 0x8a8c8a8c
+cospi8sqrt2minus1 DCD 0x4e7b
+; because the lowest bit in 0x8a8c is 0, we can pre-shift this
+sinpi8sqrt2       DCD 0x4546
 
     END
