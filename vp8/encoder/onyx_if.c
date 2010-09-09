@@ -1344,8 +1344,8 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
         cpi->max_gf_interval = 12;
 
 
-    // Special conditions when altr ref frame enabled
-    if (cpi->oxcf.play_alternate)
+    // Special conditions when altr ref frame enabled in lagged compress mode
+    if (cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames)
     {
         if (cpi->max_gf_interval > cpi->oxcf.lag_in_frames - 1)
             cpi->max_gf_interval = cpi->oxcf.lag_in_frames - 1;
