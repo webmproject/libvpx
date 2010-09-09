@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -61,7 +61,7 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->loopfilter.simple_mb_h = vp8_loop_filter_mbhs_c;
     rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_c;
 
-#if CONFIG_POSTPROC || CONFIG_VP8_ENCODER
+#if CONFIG_POSTPROC || (CONFIG_VP8_ENCODER && CONFIG_PSNR)
     rtcd->postproc.down        = vp8_mbpost_proc_down_c;
     rtcd->postproc.across      = vp8_mbpost_proc_across_ip_c;
     rtcd->postproc.downacross  = vp8_post_proc_down_and_across_c;

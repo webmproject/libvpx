@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -296,9 +296,9 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->under_shoot_pct         = cfg.rc_undershoot_pct;
     //oxcf->over_shoot_pct        = cfg.rc_overshoot_pct;
 
-    oxcf->maximum_buffer_size     = cfg.rc_buf_sz / 1000;
-    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz / 1000;
-    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz / 1000;
+    oxcf->maximum_buffer_size     = cfg.rc_buf_sz;
+    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz;
+    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz;
 
     oxcf->two_pass_vbrbias        = cfg.rc_2pass_vbr_bias_pct;
     oxcf->two_pass_vbrmin_section  = cfg.rc_2pass_vbr_minsection_pct;
@@ -826,7 +826,9 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
         int ctr_id,
         va_list args)
 {
+#if CONFIG_POSTPROC
     vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
+    (void)ctr_id;
 
     if (data)
     {
@@ -835,6 +837,12 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
     }
     else
         return VPX_CODEC_INVALID_PARAM;
+#else
+    (void)ctx;
+    (void)ctr_id;
+    (void)args;
+    return VPX_CODEC_INCAPABLE;
+#endif
 }
 
 
@@ -1024,7 +1032,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 
         0,                  /* g_lag_in_frames */
 
-        70,                 /* rc_dropframe_thresh */
+        0,                  /* rc_dropframe_thresh */
         0,                  /* rc_resize_allowed */
         60,                 /* rc_resize_down_thresold */
         30,                 /* rc_resize_up_thresold */

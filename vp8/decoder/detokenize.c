@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -19,7 +19,7 @@
 #define BOOL_DATA UINT8
 
 #define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
-DECLARE_ALIGNED(16, UINT16, vp8_coef_bands_x[16]) = { 0, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X};
+DECLARE_ALIGNED(16, UINT8, vp8_coef_bands_x[16]) = { 0, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X};
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
 #define ONE_CONTEXT_NODE            2
@@ -61,56 +61,28 @@ DECLARE_ALIGNED(16, static const TOKENEXTRABITS, vp8d_token_extra_bits2[MAX_ENTR
 
 void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
-    ENTROPY_CONTEXT **const A = x->above_context;
-    ENTROPY_CONTEXT(* const L)[4] = x->left_context;
-
-    ENTROPY_CONTEXT *a;
-    ENTROPY_CONTEXT *l;
-
-    /* Clear entropy contexts for Y blocks */
-    a = A[Y1CONTEXT];
-    l = L[Y1CONTEXT];
-    *a = 0;
-    *(a+1) = 0;
-    *(a+2) = 0;
-    *(a+3) = 0;
-    *l = 0;
-    *(l+1) = 0;
-    *(l+2) = 0;
-    *(l+3) = 0;
-
-    /* Clear entropy contexts for U blocks */
-    a = A[UCONTEXT];
-    l = L[UCONTEXT];
-    *a = 0;
-    *(a+1) = 0;
-    *l = 0;
-    *(l+1) = 0;
-
-    /* Clear entropy contexts for V blocks */
-    a = A[VCONTEXT];
-    l = L[VCONTEXT];
-    *a = 0;
-    *(a+1) = 0;
-    *l = 0;
-    *(l+1) = 0;
-
     /* Clear entropy contexts for Y2 blocks */
     if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
-        a = A[Y2CONTEXT];
-        l = L[Y2CONTEXT];
-        *a = 0;
-        *l = 0;
+        vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+        vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    }
+    else
+    {
+        vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
+        vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
     }
 }
 
 #if CONFIG_ARM_ASM_DETOK
-DECLARE_ALIGNED(16, const UINT8, vp8_block2context_leftabove[25*3]) =
+// mashup of vp8_block2left and vp8_block2above so we only need one pointer
+// for the assembly version.
+DECLARE_ALIGNED(16, const UINT8, vp8_block2leftabove[25*2]) =
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, //end of vp8_block2context
-    0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 0, 0, 1, 1, 0, 0, 1, 1, 0, //end of vp8_block2left
-    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 0, 1, 0, 1, 0, 1, 0  //end of vp8_block2above
+    //vp8_block2left
+    0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8,
+    //vp8_block2above
+    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 4, 5, 4, 5, 6, 7, 6, 7, 8
 };
 
 void vp8_init_detokenizer(VP8D_COMP *dx)
@@ -119,8 +91,8 @@ void vp8_init_detokenizer(VP8D_COMP *dx)
     MACROBLOCKD *x = & dx->mb;
 
     dx->detoken.vp8_coef_tree_ptr = vp8_coef_tree;
-    dx->detoken.ptr_onyxblock2context_leftabove = vp8_block2context_leftabove;
-    dx->detoken.ptr_onyx_coef_bands_x = vp8_coef_bands_x;
+    dx->detoken.ptr_block2leftabove = vp8_block2leftabove;
+    dx->detoken.ptr_coef_bands_x = vp8_coef_bands_x;
     dx->detoken.scan = vp8_default_zig_zag1d;
     dx->detoken.teb_base_ptr = vp8d_token_extra_bits2;
     dx->detoken.qcoeff_start_ptr = &x->qcoeff[0];
@@ -132,7 +104,7 @@ void vp8_init_detokenizer(VP8D_COMP *dx)
 }
 #endif
 
-DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
+DECLARE_ALIGNED(16, extern const unsigned char, vp8dx_bitreader_norm[256]);
 #define FILL \
     if(count < 0) \
         VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
@@ -241,7 +213,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 
     type = 3;
 
-    if (x->mbmi.mode != B_PRED && x->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
         type = 1;
         eobtotal -= 16;
@@ -251,7 +223,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 
     for (i = 0; i < 25; i++)
     {
-        x->block[i].eob = dx->detoken.eob[i];
+        x->eobs[i] = dx->detoken.eob[i];
         eobtotal += dx->detoken.eob[i];
     }
 
@@ -260,8 +232,8 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 #else
 int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 {
-    ENTROPY_CONTEXT **const A = x->above_context;
-    ENTROPY_CONTEXT(* const L)[4] = x->left_context;
+    ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
+    ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
     const VP8_COMMON *const oc = & dx->common;
 
     BOOL_DECODER *bc = x->current_bc;
@@ -291,28 +263,23 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
     int stop;
     INT16 val, bits_count;
     INT16 c;
-    INT16 t;
     INT16 v;
     const vp8_prob *Prob;
 
-    //int *scan;
     type = 3;
     i = 0;
     stop = 16;
+
+    scan = vp8_default_zig_zag1d;
+    qcoeff_ptr = &x->qcoeff[0];
 
     if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
     {
         i = 24;
         stop = 24;
         type = 1;
-        qcoeff_ptr = &x->qcoeff[24*16];
-        scan = vp8_default_zig_zag1d;
+        qcoeff_ptr += 24*16;
         eobtotal -= 16;
-    }
-    else
-    {
-        scan = vp8_default_zig_zag1d;
-        qcoeff_ptr = &x->qcoeff[0];
     }
 
     bufend  = bc->user_buffer_end;
@@ -325,13 +292,15 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
     coef_probs = oc->fc.coef_probs [type] [ 0 ] [0];
 
 BLOCK_LOOP:
-    a = A[ vp8_block2context[i] ] + vp8_block2above[i];
-    l = L[ vp8_block2context[i] ] + vp8_block2left[i];
+    a = A + vp8_block2above[i];
+    l = L + vp8_block2left[i];
+
     c = (INT16)(!type);
 
-    VP8_COMBINEENTROPYCONTEXTS(t, *a, *l);
+//    Dest = ((A)!=0) + ((B)!=0);
+    VP8_COMBINEENTROPYCONTEXTS(v, *a, *l);
     Prob = coef_probs;
-    Prob += t * ENTROPY_NODES;
+    Prob += v * ENTROPY_NODES;
 
 DO_WHILE:
     Prob += vp8_coef_bands_x[c];
@@ -418,9 +387,8 @@ ONE_CONTEXT_NODE_0_:
 
     qcoeff_ptr [ scan[15] ] = (INT16) v;
 BLOCK_FINISHED:
-    t = ((eobs[i] = c) != !type);   // any nonzero data?
+    *a = *l = ((eobs[i] = c) != !type);   // any nonzero data?
     eobtotal += c;
-    *a = *l = t;
     qcoeff_ptr += 16;
 
     i++;
@@ -430,12 +398,11 @@ BLOCK_FINISHED:
 
     if (i == 25)
     {
-        scan = vp8_default_zig_zag1d;//x->scan_order1d;
         type = 0;
         i = 0;
         stop = 16;
         coef_probs = oc->fc.coef_probs [type] [ 0 ] [0];
-        qcoeff_ptr = &x->qcoeff[0];
+        qcoeff_ptr -= (24*16 + 16);
         goto BLOCK_LOOP;
     }
 

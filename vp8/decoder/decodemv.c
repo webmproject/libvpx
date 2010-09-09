@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -219,8 +219,8 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
                     do  /* for each subset j */
                     {
-                        B_MODE_INFO *const bmi = mbmi->partition_bmi + j;
-                        MV *const mv = & bmi->mv.as_mv;
+                        B_MODE_INFO bmi;
+                        MV *const mv = & bmi.mv.as_mv;
 
                         int k = -1;  /* first block in subset j */
                         int mv_contz;
@@ -237,7 +237,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
                         mv_contz = vp8_mv_cont(&(vp8_left_bmi(mi, k)->mv.as_mv), &(vp8_above_bmi(mi, k, mis)->mv.as_mv));
 
-                        switch (bmi->mode = (B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) //pc->fc.sub_mv_ref_prob))
+                        switch (bmi.mode = (B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) //pc->fc.sub_mv_ref_prob))
                         {
                         case NEW4X4:
                             read_mv(bc, mv, (const MV_CONTEXT *) mvc);
@@ -285,7 +285,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                            refer back to us via "left" or "above". */
                         do
                             if (j == L[k])
-                                mi->bmi[k] = *bmi;
+                                mi->bmi[k] = bmi;
 
                         while (++k < 16);
                     }

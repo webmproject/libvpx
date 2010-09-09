@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -872,6 +872,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int prob_skip_false = 0;
     ms = pc->mi - 1;
 
+    cpi->mb.partition_info = cpi->mb.pi;
+
     // Calculate the probabilities to be used to code the reference frame based on actual useage this frame
     if (!(cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter)))
         cpi->prob_intra_coded = 1;
@@ -1020,7 +1022,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                     do
                     {
-                        const B_MODE_INFO *const b = mi->partition_bmi + j;
+                        const B_MODE_INFO *const b = cpi->mb.partition_info->bmi + j;
                         const int *const  L = vp8_mbsplits [mi->partitioning];
                         int k = -1;  /* first block in subset j */
                         int mv_contz;
@@ -1042,7 +1044,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                             write_mv(w, &b->mv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
                         }
                     }
-                    while (++j < mi->partition_count);
+                    while (++j < cpi->mb.partition_info->count);
                 }
                 break;
                 default:
@@ -1051,9 +1053,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             }
 
             ++m;
+            cpi->mb.partition_info++;
         }
 
         ++m;  /* skip L prediction border */
+        cpi->mb.partition_info++;
     }
 }
 

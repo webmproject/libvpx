@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -52,7 +52,6 @@ void vp8_setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC 
         mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
 
-        mbd->mode_info        = pc->mi - 1;
         mbd->mode_info_context = pc->mi   + pc->mode_info_stride * (i + 1);
         mbd->mode_info_stride  = pc->mode_info_stride;
 
@@ -105,7 +104,6 @@ void vp8_setup_loop_filter_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         //mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         //mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
 
-        mbd->mode_info        = pc->mi - 1;
         mbd->mode_info_context = pc->mi   + pc->mode_info_stride * (i + 1);
         mbd->mode_info_stride  = pc->mode_info_stride;
 
@@ -157,10 +155,12 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
     int ithread = ((DECODETHREAD_DATA *)p_data)->ithread;
     VP8D_COMP *pbi = (VP8D_COMP *)(((DECODETHREAD_DATA *)p_data)->ptr1);
     MB_ROW_DEC *mbrd = (MB_ROW_DEC *)(((DECODETHREAD_DATA *)p_data)->ptr2);
-    ENTROPY_CONTEXT mb_row_left_context[4][4];
+    ENTROPY_CONTEXT_PLANES mb_row_left_context;
 
     while (1)
     {
+        int current_filter_level = 0;
+
         if (pbi->b_multithreaded_rd == 0)
             break;
 
@@ -197,12 +197,9 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                     recon_uvoffset = mb_row * recon_uv_stride * 8;
                     // reset above block coeffs
 
-                    xd->above_context[Y1CONTEXT] = pc->above_context[Y1CONTEXT];
-                    xd->above_context[UCONTEXT ] = pc->above_context[UCONTEXT];
-                    xd->above_context[VCONTEXT ] = pc->above_context[VCONTEXT];
-                    xd->above_context[Y2CONTEXT] = pc->above_context[Y2CONTEXT];
-                    xd->left_context = mb_row_left_context;
-                    vpx_memset(mb_row_left_context, 0, sizeof(mb_row_left_context));
+                    xd->above_context = pc->above_context;
+                    xd->left_context = &mb_row_left_context;
+                    vpx_memset(&mb_row_left_context, 0, sizeof(mb_row_left_context));
                     xd->up_available = (mb_row != 0);
 
                     xd->mb_to_top_edge = -((mb_row * 16)) << 3;
@@ -260,10 +257,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
 
                         ++xd->mode_info_context;  /* next mb */
 
-                        xd->above_context[Y1CONTEXT] += 4;
-                        xd->above_context[UCONTEXT ] += 2;
-                        xd->above_context[VCONTEXT ] += 2;
-                        xd->above_context[Y2CONTEXT] ++;
+                        xd->above_context++;
 
                         //pbi->mb_row_di[ithread].current_mb_col = mb_col;
                         pbi->current_mb_col[mb_row] = mb_col;
@@ -285,6 +279,11 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                 }
             }
         }
+
+        // If |pbi->common.filter_level| is 0 the value can change in-between
+        // the sem_post and the check to call vp8_thread_loop_filter.
+        current_filter_level = pbi->common.filter_level;
+
         //  add this to each frame
         if ((mbrd->mb_row == pbi->common.mb_rows-1) || ((mbrd->mb_row == pbi->common.mb_rows-2) && (pbi->common.mb_rows % (pbi->decoding_thread_count+1))==1))
         {
@@ -292,7 +291,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
             sem_post(&pbi->h_event_end_decoding);
         }
 
-        if ((pbi->b_multithreaded_lf) &&(pbi->common.filter_level))
+        if ((pbi->b_multithreaded_lf) && (current_filter_level))
             vp8_thread_loop_filter(pbi, mbrd, ithread);
 
     }
@@ -604,15 +603,12 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
             if (mb_row > 0)
                 last_row_current_mb_col = &pbi->current_mb_col[mb_row -1];
 
-            vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
+            vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
             recon_yoffset = mb_row * recon_y_stride * 16;
             recon_uvoffset = mb_row * recon_uv_stride * 8;
             // reset above block coeffs
 
-            xd->above_context[Y1CONTEXT] = pc->above_context[Y1CONTEXT];
-            xd->above_context[UCONTEXT ] = pc->above_context[UCONTEXT];
-            xd->above_context[VCONTEXT ] = pc->above_context[VCONTEXT];
-            xd->above_context[Y2CONTEXT] = pc->above_context[Y2CONTEXT];
+            xd->above_context = pc->above_context;
             xd->up_available = (mb_row != 0);
 
             xd->mb_to_top_edge = -((mb_row * 16)) << 3;
@@ -620,15 +616,12 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
 
             for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
             {
-
                 if ( mb_row > 0 && (mb_col & 7) == 0){
-               //if ( mb_row > 0 ){
-                  while (mb_col > (*last_row_current_mb_col - 8) && *last_row_current_mb_col != pc->mb_cols - 1)
-                  {
-                      x86_pause_hint();
-                      thread_sleep(0);
-                  }
-
+                    while (mb_col > (*last_row_current_mb_col - 8) && *last_row_current_mb_col != pc->mb_cols - 1)
+                    {
+                        x86_pause_hint();
+                        thread_sleep(0);
+                    }
                 }
 
                 if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
@@ -672,10 +665,7 @@ void vp8_mtdecode_mb_rows(VP8D_COMP *pbi,
 
                 ++xd->mode_info_context;  /* next mb */
 
-                xd->above_context[Y1CONTEXT] += 4;
-                xd->above_context[UCONTEXT ] += 2;
-                xd->above_context[VCONTEXT ] += 2;
-                xd->above_context[Y2CONTEXT] ++;
+                xd->above_context++;
 
                 //pbi->current_mb_col_main = mb_col;
                 pbi->current_mb_col[mb_row] = mb_col;
@@ -774,7 +764,6 @@ void vp8_mt_loop_filter_frame( VP8D_COMP *pbi)
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int Segment = (alt_flt_enabled) ? mbd->mode_info_context->mbmi.segment_id : 0;
-
 
             if ( mb_row > 0 && (mb_col & 7) == 0){
             // if ( mb_row > 0 ){

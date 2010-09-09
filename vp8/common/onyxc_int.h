@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -165,8 +165,8 @@ typedef struct VP8Common
     int ref_frame_sign_bias[MAX_REF_FRAMES];    // Two state 0, 1
 
     // Y,U,V,Y2
-    ENTROPY_CONTEXT *above_context[4];   // row of context for each plane
-    ENTROPY_CONTEXT left_context[4][4];  // (up to) 4 contexts ""
+    ENTROPY_CONTEXT_PLANES *above_context;   // row of context for each plane
+    ENTROPY_CONTEXT_PLANES left_context;  // (up to) 4 contexts ""
 
 
     // keyframe block modes are predicted by their above, left neighbors

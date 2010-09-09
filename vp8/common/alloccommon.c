@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -24,7 +24,7 @@ extern  void vp8_init_scan_order_mask();
 void vp8_update_mode_info_border(MODE_INFO *mi, int rows, int cols)
 {
     int i;
-    vpx_memset(mi - cols - 1, 0, sizeof(MODE_INFO) * cols + 1);
+    vpx_memset(mi - cols - 2, 0, sizeof(MODE_INFO) * (cols + 1));
 
     for (i = 0; i < rows; i++)
     {
@@ -42,16 +42,10 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
     vp8_yv12_de_alloc_frame_buffer(&oci->temp_scale_frame);
     vp8_yv12_de_alloc_frame_buffer(&oci->post_proc_buffer);
 
-    vpx_free(oci->above_context[Y1CONTEXT]);
-    vpx_free(oci->above_context[UCONTEXT]);
-    vpx_free(oci->above_context[VCONTEXT]);
-    vpx_free(oci->above_context[Y2CONTEXT]);
+    vpx_free(oci->above_context);
     vpx_free(oci->mip);
 
-    oci->above_context[Y1CONTEXT] = 0;
-    oci->above_context[UCONTEXT]  = 0;
-    oci->above_context[VCONTEXT]  = 0;
-    oci->above_context[Y2CONTEXT] = 0;
+    oci->above_context = 0;
     oci->mip = 0;
 
 }
@@ -118,33 +112,9 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     oci->mi = oci->mip + oci->mode_info_stride + 1;
 
 
-    oci->above_context[Y1CONTEXT] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * oci->mb_cols * 4 , 1);
+    oci->above_context = vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * oci->mb_cols, 1);
 
-    if (!oci->above_context[Y1CONTEXT])
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-    oci->above_context[UCONTEXT]  = vpx_calloc(sizeof(ENTROPY_CONTEXT) * oci->mb_cols * 2 , 1);
-
-    if (!oci->above_context[UCONTEXT])
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-    oci->above_context[VCONTEXT]  = vpx_calloc(sizeof(ENTROPY_CONTEXT) * oci->mb_cols * 2 , 1);
-
-    if (!oci->above_context[VCONTEXT])
-    {
-        vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
-    }
-
-    oci->above_context[Y2CONTEXT] = vpx_calloc(sizeof(ENTROPY_CONTEXT) * oci->mb_cols     , 1);
-
-    if (!oci->above_context[Y2CONTEXT])
+    if (!oci->above_context)
     {
         vp8_de_alloc_frame_buffers(oci);
         return ALLOC_FAILURE;

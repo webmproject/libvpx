@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -488,12 +488,18 @@ void vp8_optimize_b(MACROBLOCK *mb, int i, int type,
 void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
-    TEMP_CONTEXT t, t2;
     int type;
     int has_2nd_order;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
 
-    vp8_setup_temp_context(&t, x->e_mbd.above_context[Y1CONTEXT],
-        x->e_mbd.left_context[Y1CONTEXT], 4);
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? 0 : 3;
@@ -501,24 +507,19 @@ void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     for (b = 0; b < 16; b++)
     {
         vp8_optimize_b(x, b, type,
-            t.a + vp8_block2above[b], t.l + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
-
-    vp8_setup_temp_context(&t, x->e_mbd.above_context[UCONTEXT],
-        x->e_mbd.left_context[UCONTEXT], 2);
-    vp8_setup_temp_context(&t2, x->e_mbd.above_context[VCONTEXT],
-        x->e_mbd.left_context[VCONTEXT], 2);
 
     for (b = 16; b < 20; b++)
     {
         vp8_optimize_b(x, b, vp8_block2type[b],
-            t.a + vp8_block2above[b], t.l + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
     for (b = 20; b < 24; b++)
     {
         vp8_optimize_b(x, b, vp8_block2type[b],
-            t2.a + vp8_block2above[b], t2.l + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
 
@@ -565,17 +566,25 @@ static void vp8_find_mb_skip_coef(MACROBLOCK *x)
 void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
-    TEMP_CONTEXT t;
     int type;
     int has_2nd_order;
 
-    if (!x->e_mbd.above_context[Y1CONTEXT])
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    if (!x->e_mbd.above_context)
         return;
 
-    if (!x->e_mbd.left_context[Y1CONTEXT])
+    if (!x->e_mbd.left_context)
         return;
-    vp8_setup_temp_context(&t, x->e_mbd.above_context[Y1CONTEXT],
-        x->e_mbd.left_context[Y1CONTEXT], 4);
+
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? 0 : 3;
@@ -583,7 +592,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     for (b = 0; b < 16; b++)
     {
         vp8_optimize_b(x, b, type,
-            t.a + vp8_block2above[b], t.l + vp8_block2left[b], rtcd);
+        ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
     /*
@@ -599,33 +608,32 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
-    TEMP_CONTEXT t, t2;
-    if (!x->e_mbd.above_context[UCONTEXT])
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    if (!x->e_mbd.above_context)
         return;
 
-    if (!x->e_mbd.left_context[UCONTEXT])
+    if (!x->e_mbd.left_context)
         return;
 
-    if (!x->e_mbd.above_context[VCONTEXT])
-        return;
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
 
-    if (!x->e_mbd.left_context[VCONTEXT])
-        return;
-
-    vp8_setup_temp_context(&t, x->e_mbd.above_context[UCONTEXT], x->e_mbd.left_context[UCONTEXT], 2);
-    vp8_setup_temp_context(&t2, x->e_mbd.above_context[VCONTEXT], x->e_mbd.left_context[VCONTEXT], 2);
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
 
     for (b = 16; b < 20; b++)
     {
         vp8_optimize_b(x, b, vp8_block2type[b],
-                       t.a + vp8_block2above[b], t.l + vp8_block2left[b], rtcd);
-
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
     for (b = 20; b < 24; b++)
     {
         vp8_optimize_b(x, b, vp8_block2type[b],
-                       t2.a + vp8_block2above[b], t2.l + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -220,13 +220,20 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
 {
     MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
-    TEMP_CONTEXT t;
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int error = RD_ESTIMATE(mb->rdmult, mb->rddiv, cost, 0); // Rd estimate for the cost of the block prediction mode
     int distortion = 0;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
 
     vp8_intra_prediction_down_copy(xd);
-    vp8_setup_temp_context(&t, xd->above_context[Y1CONTEXT], xd->left_context[Y1CONTEXT], 4);
 
     for (i = 0; i < 16; i++)
     {
@@ -239,8 +246,8 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
 
         error += pick_intra4x4block(rtcd,
                                     mb, mb->block + i, xd->block + i, &best_mode, A, L,
-                                    t.a + vp8_block2above[i],
-                                    t.l + vp8_block2left[i], &r, &d);
+                                    ta + vp8_block2above[i],
+                                    tl + vp8_block2left[i], &r, &d);
 
         cost += r;
         distortion += d;
@@ -423,6 +430,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
     MACROBLOCKD *xd = &x->e_mbd;
     B_MODE_INFO best_bmodes[16];
     MB_MODE_INFO best_mbmode;
+    PARTITION_INFO best_partition;
     MV best_ref_mv1;
     MV mode_mv[MB_MODE_COUNT];
     MB_PREDICTION_MODE this_mode;
@@ -825,6 +833,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
             *returndistortion = distortion2;
             best_rd = this_rd;
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
+            vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
 
             if (this_mode == B_PRED || this_mode == SPLITMV)
                 for (i = 0; i < 16; i++)
@@ -899,6 +908,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
         best_mbmode.dc_diff = 0;
 
         vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+        vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
         for (i = 0; i < 16; i++)
         {
@@ -913,6 +923,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
 
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+    vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
     if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED || x->e_mbd.mode_info_context->mbmi.mode == SPLITMV)
         for (i = 0; i < 16; i++)

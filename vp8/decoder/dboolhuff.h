@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -95,7 +95,7 @@ typedef struct vp8_dboolhuff_rtcd_vtable {
 #define IF_RTCD(x) NULL
 //#endif
 
-DECLARE_ALIGNED(16, extern const unsigned int, vp8dx_bitreader_norm[256]);
+DECLARE_ALIGNED(16, extern const unsigned char, vp8dx_bitreader_norm[256]);
 
 /* wrapper functions to hide RTCD. static means inline means hopefully no
  * penalty

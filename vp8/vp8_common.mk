@@ -1,5 +1,5 @@
 ##
-##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+##  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ##
 ##  Use of this source code is governed by a BSD-style license
 ##  that can be found in the LICENSE file in the root of the source
@@ -96,8 +96,6 @@ VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp8_asm_stubs.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/loopfilter_x86.c
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC) += common/postproc.h
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC) += common/postproc.c
-VP8_COMMON_SRCS-$(CONFIG_VP8_ENCODER) += common/postproc.h
-VP8_COMMON_SRCS-$(CONFIG_VP8_ENCODER) += common/postproc.c
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/idctllm_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/iwalsh_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/recon_mmx.asm

@@ -1,5 +1,5 @@
 ##
-##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+##  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ##
 ##  Use of this source code is governed by a BSD-style license
 ##  that can be found in the LICENSE file in the root of the source
@@ -80,6 +80,8 @@ VP8_CX_SRCS-$(CONFIG_PSNR) += encoder/ssim.c
 VP8_CX_SRCS-yes += encoder/tokenize.c
 VP8_CX_SRCS-yes += encoder/treewriter.c
 VP8_CX_SRCS-yes += encoder/variance_c.c
+VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.h
+VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.c
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c

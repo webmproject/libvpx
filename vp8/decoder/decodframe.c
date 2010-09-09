@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -338,15 +338,12 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
     int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
     int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
 
-    vpx_memset(pc->left_context, 0, sizeof(pc->left_context));
+    vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
     recon_yoffset = mb_row * recon_y_stride * 16;
     recon_uvoffset = mb_row * recon_uv_stride * 8;
     // reset above block coeffs
 
-    xd->above_context[Y1CONTEXT] = pc->above_context[Y1CONTEXT];
-    xd->above_context[UCONTEXT ] = pc->above_context[UCONTEXT];
-    xd->above_context[VCONTEXT ] = pc->above_context[VCONTEXT];
-    xd->above_context[Y2CONTEXT] = pc->above_context[Y2CONTEXT];
+    xd->above_context = pc->above_context;
     xd->up_available = (mb_row != 0);
 
     xd->mb_to_top_edge = -((mb_row * 16)) << 3;
@@ -403,10 +400,7 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
 
         ++xd->mode_info_context;  /* next mb */
 
-        xd->above_context[Y1CONTEXT] += 4;
-        xd->above_context[UCONTEXT ] += 2;
-        xd->above_context[VCONTEXT ] += 2;
-        xd->above_context[Y2CONTEXT] ++;
+        xd->above_context++;
 
         pbi->current_mb_col_main = mb_col;
     }
@@ -561,7 +555,7 @@ static void init_frame(VP8D_COMP *pbi)
         }
     }
 
-    xd->left_context = pc->left_context;
+    xd->left_context = &pc->left_context;
     xd->mode_info_context = pc->mi;
     xd->frame_type = pc->frame_type;
     xd->mode_info_context->mbmi.mode = DC_PRED;
@@ -849,11 +843,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     else
         vp8_decode_mode_mvs(pbi);
 
-    // reset since these guys are used as iterators
-    vpx_memset(pc->above_context[Y1CONTEXT], 0, sizeof(ENTROPY_CONTEXT) * pc->mb_cols * 4);
-    vpx_memset(pc->above_context[UCONTEXT ], 0, sizeof(ENTROPY_CONTEXT) * pc->mb_cols * 2);
-    vpx_memset(pc->above_context[VCONTEXT ], 0, sizeof(ENTROPY_CONTEXT) * pc->mb_cols * 2);
-    vpx_memset(pc->above_context[Y2CONTEXT], 0, sizeof(ENTROPY_CONTEXT) * pc->mb_cols);
+    vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 
     vpx_memcpy(&xd->block[0].bmi, &xd->mode_info_context->bmi[0], sizeof(B_MODE_INFO));
 

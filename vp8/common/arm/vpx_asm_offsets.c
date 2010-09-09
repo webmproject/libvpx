@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -55,11 +55,11 @@ DEFINE(mb_up_available,                         offsetof(MACROBLOCKD, up_availab
 DEFINE(mb_left_available,                       offsetof(MACROBLOCKD, left_available));
 
 DEFINE(detok_scan,                              offsetof(DETOK, scan));
-DEFINE(detok_ptr_onyxblock2context_leftabove,   offsetof(DETOK, ptr_onyxblock2context_leftabove));
-DEFINE(detok_onyx_coef_tree_ptr,                offsetof(DETOK, vp8_coef_tree_ptr));
+DEFINE(detok_ptr_block2leftabove,               offsetof(DETOK, ptr_block2leftabove));
+DEFINE(detok_coef_tree_ptr,                     offsetof(DETOK, vp8_coef_tree_ptr));
 DEFINE(detok_teb_base_ptr,                      offsetof(DETOK, teb_base_ptr));
 DEFINE(detok_norm_ptr,                          offsetof(DETOK, norm_ptr));
-DEFINE(detok_ptr_onyx_coef_bands_x,             offsetof(DETOK, ptr_onyx_coef_bands_x));
+DEFINE(detok_ptr_coef_bands_x,                  offsetof(DETOK, ptr_coef_bands_x));
 
 DEFINE(detok_A,                                 offsetof(DETOK, A));
 DEFINE(detok_L,                                 offsetof(DETOK, L));

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -1444,6 +1444,9 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
     }
     else
     {
+        int last_kf_interval =
+                (cpi->frames_since_key > 0) ? cpi->frames_since_key : 1;
+
         // reset keyframe context and calculate weighted average of last KEY_FRAME_CONTEXT keyframes
         for (i = 0; i < KEY_FRAME_CONTEXT; i++)
         {
@@ -1454,8 +1457,8 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
             }
             else
             {
-                cpi->prior_key_frame_size[KEY_FRAME_CONTEXT - 1]     = cpi->projected_frame_size;
-                cpi->prior_key_frame_distance[KEY_FRAME_CONTEXT - 1] = cpi->frames_since_key;
+                cpi->prior_key_frame_size[i]     = cpi->projected_frame_size;
+                cpi->prior_key_frame_distance[i] = last_kf_interval;
             }
 
             av_key_frame_bits      += prior_key_frame_weight[i] * cpi->prior_key_frame_size[i];

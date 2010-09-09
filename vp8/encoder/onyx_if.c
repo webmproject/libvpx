@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -29,6 +29,8 @@
 #include "swapyv12buffer.h"
 #include "threading.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vpxerrors.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <limits.h>
@@ -229,6 +231,11 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
         vpx_free(cpi->gf_active_flags);
 
     cpi->gf_active_flags = 0;
+
+    if(cpi->mb.pip)
+        vpx_free(cpi->mb.pip);
+
+    cpi->mb.pip = 0;
 
 }
 
@@ -1221,6 +1228,20 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 
     cpi->source_buffer_count = 0;
 }
+
+static int vp8_alloc_partition_data(VP8_COMP *cpi)
+{
+    cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
+                                (cpi->common.mb_rows + 1),
+                                sizeof(PARTITION_INFO));
+    if(!cpi->mb.pip)
+        return ALLOC_FAILURE;
+
+    cpi->mb.pi = cpi->mb.pip + cpi->common.mode_info_stride + 1;
+
+    return 0;
+}
+
 void vp8_alloc_compressor_data(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = & cpi->common;
@@ -1231,6 +1252,11 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     if (vp8_alloc_frame_buffers(cm, width, height))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
+
+    if (vp8_alloc_partition_data(cpi))
+        vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate partition data");
+
 
     if ((width & 0xf) != 0)
         width += 16 - (width & 0xf);
@@ -1326,6 +1352,18 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     }
 }
 
+
+static int
+rescale(int val, int num, int denom)
+{
+    int64_t llnum = num;
+    int64_t llden = denom;
+    int64_t llval = val;
+
+    return llval * llnum / llden;
+}
+
+
 void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
@@ -1353,9 +1391,9 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->oxcf.worst_allowed_q           = MAXQ;
 
         cpi->oxcf.end_usage                = USAGE_STREAM_FROM_SERVER;
-        cpi->oxcf.starting_buffer_level     =   4;
-        cpi->oxcf.optimal_buffer_level      =   5;
-        cpi->oxcf.maximum_buffer_size       =   6;
+        cpi->oxcf.starting_buffer_level     =   4000;
+        cpi->oxcf.optimal_buffer_level      =   5000;
+        cpi->oxcf.maximum_buffer_size       =   6000;
         cpi->oxcf.under_shoot_pct           =  90;
         cpi->oxcf.allow_df                 =   0;
         cpi->oxcf.drop_frames_water_mark     =  20;
@@ -1504,26 +1542,32 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // local file playback mode == really big buffer
     if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
     {
-        cpi->oxcf.starting_buffer_level   = 60;
-        cpi->oxcf.optimal_buffer_level    = 60;
-        cpi->oxcf.maximum_buffer_size     = 240;
+        cpi->oxcf.starting_buffer_level   = 60000;
+        cpi->oxcf.optimal_buffer_level    = 60000;
+        cpi->oxcf.maximum_buffer_size     = 240000;
 
     }
 
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
-    cpi->oxcf.starting_buffer_level   *= cpi->oxcf.target_bandwidth;
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.optimal_buffer_level *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.optimal_buffer_level =
+            rescale(cpi->oxcf.optimal_buffer_level,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.maximum_buffer_size == 0)
         cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.maximum_buffer_size     *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.maximum_buffer_size =
+            rescale(cpi->oxcf.maximum_buffer_size,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
@@ -1607,13 +1651,6 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // Limit on lag buffers as these are not currently dynamically allocated
     else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
         cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
-
-    // force play_alternate to 0 if allow_lag is 0, lag_in_frames is too small, Mode is real time or one pass compress enabled.
-    if (cpi->oxcf.allow_lag == 0 || cpi->oxcf.lag_in_frames <= 5 || (cpi->oxcf.Mode < MODE_SECONDPASS))
-    {
-        cpi->oxcf.play_alternate = 0;
-        cpi->ref_frame_flags = cpi->ref_frame_flags & ~VP8_ALT_FLAG;
-    }
 
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
@@ -1783,26 +1820,32 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // local file playback mode == really big buffer
     if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
     {
-        cpi->oxcf.starting_buffer_level   = 60;
-        cpi->oxcf.optimal_buffer_level    = 60;
-        cpi->oxcf.maximum_buffer_size     = 240;
+        cpi->oxcf.starting_buffer_level   = 60000;
+        cpi->oxcf.optimal_buffer_level    = 60000;
+        cpi->oxcf.maximum_buffer_size     = 240000;
 
     }
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
 
-    cpi->oxcf.starting_buffer_level   *= cpi->oxcf.target_bandwidth;
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.optimal_buffer_level *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.optimal_buffer_level =
+            rescale(cpi->oxcf.optimal_buffer_level,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.maximum_buffer_size == 0)
         cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.maximum_buffer_size     *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.maximum_buffer_size =
+            rescale(cpi->oxcf.maximum_buffer_size,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
@@ -1886,13 +1929,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // Limit on lag buffers as these are not currently dynamically allocated
     else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
         cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
-
-    // force play_alternate to 0 if allow_lag is 0, lag_in_frames is too small, Mode is real time or one pass compress enabled.
-    if (cpi->oxcf.allow_lag == 0 || cpi->oxcf.lag_in_frames <= 5 || (cpi->oxcf.Mode < MODE_SECONDPASS))
-    {
-        cpi->oxcf.play_alternate = 0;
-        cpi->ref_frame_flags = cpi->ref_frame_flags & ~VP8_ALT_FLAG;
-    }
 
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
@@ -2794,23 +2830,17 @@ static int pick_frame_size(VP8_COMP *cpi)
         cm->frame_type = KEY_FRAME;
 
     }
-    // Auto key frames (Only two pass will enter here)
+    // Special case for forced key frames
+    // The frame sizing here is still far from ideal for 2 pass.
+    else if (cm->frame_flags & FRAMEFLAGS_KEY)
+    {
+        cm->frame_type = KEY_FRAME;
+        resize_key_frame(cpi);
+        vp8_calc_iframe_target_size(cpi);
+    }
     else if (cm->frame_type == KEY_FRAME)
     {
         vp8_calc_auto_iframe_target_size(cpi);
-    }
-    // Forced key frames (by interval or an external signal)
-    else if ((cm->frame_flags & FRAMEFLAGS_KEY) ||
-             (cpi->oxcf.auto_key && (cpi->frames_since_key % cpi->key_frame_frequency == 0)))
-    {
-        // Key frame from VFW/auto-keyframe/first frame
-        cm->frame_type = KEY_FRAME;
-
-        resize_key_frame(cpi);
-
-        // Compute target frame size
-        if (cpi->pass != 2)
-            vp8_calc_iframe_target_size(cpi);
     }
     else
     {
@@ -5179,8 +5209,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     {
 
         // return to normal state
-        cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
-
         cm->refresh_entropy_probs = 1;
         cm->refresh_alt_ref_frame = 0;
         cm->refresh_golden_frame = 0;

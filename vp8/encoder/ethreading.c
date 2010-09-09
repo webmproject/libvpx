@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -28,7 +28,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
     int ithread = ((ENCODETHREAD_DATA *)p_data)->ithread;
     VP8_COMP *cpi   = (VP8_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr1);
     MB_ROW_COMP *mbri = (MB_ROW_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr2);
-    ENTROPY_CONTEXT mb_row_left_context[4][4];
+    ENTROPY_CONTEXT_PLANES mb_row_left_context;
 
     //printf("Started thread %d\n", ithread);
 
@@ -68,11 +68,8 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         last_row_current_mb_col = &cpi->current_mb_col_main;
 
                     // reset above block coeffs
-                    xd->above_context[Y1CONTEXT] = cm->above_context[Y1CONTEXT];
-                    xd->above_context[UCONTEXT ] = cm->above_context[UCONTEXT ];
-                    xd->above_context[VCONTEXT ] = cm->above_context[VCONTEXT ];
-                    xd->above_context[Y2CONTEXT] = cm->above_context[Y2CONTEXT];
-                    xd->left_context = mb_row_left_context;
+                    xd->above_context = cm->above_context;
+                    xd->left_context = &mb_row_left_context;
 
                     vp8_zero(mb_row_left_context);
 
@@ -150,7 +147,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                                 for (b = 0; b < xd->mbmi.partition_count; b++)
                                 {
-                                    inter_b_modes[xd->mbmi.partition_bmi[b].mode] ++;
+                                    inter_b_modes[x->partition->bmi[b].mode] ++;
                                 }
                             }
 
@@ -182,11 +179,9 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                         // skip to next mb
                         xd->mode_info_context++;
+                        x->partition_info++;
 
-                        xd->above_context[Y1CONTEXT] += 4;
-                        xd->above_context[UCONTEXT ] += 2;
-                        xd->above_context[VCONTEXT ] += 2;
-                        xd->above_context[Y2CONTEXT] ++;
+                        xd->above_context++;
 
                         cpi->mb_row_ei[ithread].current_mb_col = mb_col;
 
@@ -201,12 +196,14 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                     // this is to account for the border
                     xd->mode_info_context++;
+                    x->partition_info++;
 
                     x->src.y_buffer += 16 * x->src.y_stride * (cpi->encoding_thread_count + 1) - 16 * cm->mb_cols;
                     x->src.u_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
                     x->src.v_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
 
                     xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
+                    x->partition_info += xd->mode_info_stride * cpi->encoding_thread_count;
 
                     if (ithread == (cpi->encoding_thread_count - 1) || mb_row == cm->mb_rows - 1)
                     {
@@ -330,11 +327,6 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
         vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
 
-        /*
-        memcpy(zd->above_context,        xd->above_context, sizeof(xd->above_context));
-        memcpy(zd->mb_segment_tree_probs,  xd->mb_segment_tree_probs, sizeof(xd->mb_segment_tree_probs));
-        memcpy(zd->segment_feature_data,  xd->segment_feature_data, sizeof(xd->segment_feature_data));
-        */
         for (i = 0; i < 25; i++)
         {
             zd->block[i].dequant = xd->block[i].dequant;
@@ -375,7 +367,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         vpx_memset(mbr_ei[i].segment_counts, 0, sizeof(mbr_ei[i].segment_counts));
         mbr_ei[i].totalrate = 0;
 
-        mbd->mode_info        = cm->mi - 1;
+        mb->partition_info = x->pi + x->e_mbd.mode_info_stride * (i + 1);
+
         mbd->mode_info_context = cm->mi   + x->e_mbd.mode_info_stride * (i + 1);
         mbd->mode_info_stride  = cm->mode_info_stride;
 
@@ -402,7 +395,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mb->rddiv = cpi->RDDIV;
         mb->rdmult = cpi->RDMULT;
 
-        mbd->left_context = cm->left_context;
+        mbd->left_context = &cm->left_context;
         mb->mvc = cm->fc.mvc;
 
         setup_mbby_copy(&mbr_ei[i].mb, x);

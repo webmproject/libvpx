@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -614,24 +614,28 @@ int vp8_rdcost_mby(MACROBLOCK *mb)
 {
     int cost = 0;
     int b;
-    TEMP_CONTEXT t, t2;
     int type = 0;
-
     MACROBLOCKD *x = &mb->e_mbd;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
 
-    vp8_setup_temp_context(&t, x->above_context[Y1CONTEXT], x->left_context[Y1CONTEXT], 4);
-    vp8_setup_temp_context(&t2, x->above_context[Y2CONTEXT], x->left_context[Y2CONTEXT], 1);
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
 
     if (x->mode_info_context->mbmi.mode == SPLITMV)
         type = 3;
 
     for (b = 0; b < 16; b++)
         cost += cost_coeffs(mb, x->block + b, type,
-                            t.a + vp8_block2above[b], t.l + vp8_block2left[b]);
+                    ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
     if (x->mode_info_context->mbmi.mode != SPLITMV)
         cost += cost_coeffs(mb, x->block + 24, 1,
-                            t2.a + vp8_block2above[24], t2.l + vp8_block2left[24]);
+                    ta + vp8_block2above[24], tl + vp8_block2left[24]);
 
     return cost;
 }
@@ -710,13 +714,20 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate, int 
 {
     MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
-    TEMP_CONTEXT t;
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int distortion = 0;
     int tot_rate_y = 0;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
 
     vp8_intra_prediction_down_copy(xd);
-    vp8_setup_temp_context(&t, xd->above_context[Y1CONTEXT], xd->left_context[Y1CONTEXT], 4);
 
     for (i = 0; i < 16; i++)
     {
@@ -729,8 +740,8 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate, int 
 
         rd_pick_intra4x4block(
             cpi, mb, mb->block + i, xd->block + i, &best_mode, A, L,
-            t.a + vp8_block2above[i],
-            t.l + vp8_block2left[i], &r, &ry, &d);
+            ta + vp8_block2above[i],
+            tl + vp8_block2left[i], &r, &ry, &d);
 
         cost += r;
         distortion += d;
@@ -792,21 +803,26 @@ int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi, MACROBLOCK *x, int *Rate, int 
 
 static int rd_cost_mbuv(MACROBLOCK *mb)
 {
-    TEMP_CONTEXT t, t2;
     int b;
     int cost = 0;
     MACROBLOCKD *x = &mb->e_mbd;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
 
-    vp8_setup_temp_context(&t, x->above_context[UCONTEXT], x->left_context[UCONTEXT], 2);
-    vp8_setup_temp_context(&t2, x->above_context[VCONTEXT], x->left_context[VCONTEXT], 2);
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
 
     for (b = 16; b < 20; b++)
         cost += cost_coeffs(mb, x->block + b, vp8_block2type[b],
-                            t.a + vp8_block2above[b], t.l + vp8_block2left[b]);
+                    ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
     for (b = 20; b < 24; b++)
         cost += cost_coeffs(mb, x->block + b, vp8_block2type[b],
-                            t2.a + vp8_block2above[b], t2.l + vp8_block2left[b]);
+                    ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
     return cost;
 }
@@ -995,18 +1011,19 @@ static int labels2mode(
     return cost;
 }
 
-static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels, int which_label, TEMP_CONTEXT *t)
+static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
+                              int which_label, ENTROPY_CONTEXT *ta,
+                              ENTROPY_CONTEXT *tl)
 {
     int cost = 0;
     int b;
     MACROBLOCKD *x = &mb->e_mbd;
 
-
     for (b = 0; b < 16; b++)
         if (labels[ b] == which_label)
             cost += cost_coeffs(mb, x->block + b, 3,
-                                t->a + vp8_block2above[b],
-                                t->l + vp8_block2left[b]);
+                                ta + vp8_block2above[b],
+                                tl + vp8_block2left[b]);
 
     return cost;
 
@@ -1139,9 +1156,20 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
 
         vp8_variance_fn_ptr_t v_fn_ptr;
 
-        TEMP_CONTEXT t;
-        TEMP_CONTEXT tb;
-        vp8_setup_temp_context(&t, xc->above_context[Y1CONTEXT], xc->left_context[Y1CONTEXT], 4);
+        ENTROPY_CONTEXT_PLANES t_above, t_left;
+        ENTROPY_CONTEXT *ta;
+        ENTROPY_CONTEXT *tl;
+        ENTROPY_CONTEXT_PLANES t_above_b, t_left_b;
+        ENTROPY_CONTEXT *ta_b;
+        ENTROPY_CONTEXT *tl_b;
+
+        vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+        vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+        ta = (ENTROPY_CONTEXT *)&t_above;
+        tl = (ENTROPY_CONTEXT *)&t_left;
+        ta_b = (ENTROPY_CONTEXT *)&t_above_b;
+        tl_b = (ENTROPY_CONTEXT *)&t_left_b;
 
         br = 0;
         bd = 0;
@@ -1226,9 +1254,15 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
                 int this_rd;
                 int num00;
                 int labelyrate;
+                ENTROPY_CONTEXT_PLANES t_above_s, t_left_s;
+                ENTROPY_CONTEXT *ta_s;
+                ENTROPY_CONTEXT *tl_s;
 
-                TEMP_CONTEXT ts;
-                vp8_setup_temp_context(&ts, &t.a[0], &t.l[0], 4);
+                vpx_memcpy(&t_above_s, &t_above, sizeof(ENTROPY_CONTEXT_PLANES));
+                vpx_memcpy(&t_left_s, &t_left, sizeof(ENTROPY_CONTEXT_PLANES));
+
+                ta_s = (ENTROPY_CONTEXT *)&t_above_s;
+                tl_s = (ENTROPY_CONTEXT *)&t_left_s;
 
                 if (this_mode == NEW4X4)
                 {
@@ -1313,7 +1347,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
 
                 distortion = vp8_encode_inter_mb_segment(x, labels, i, IF_RTCD(&cpi->rtcd.encodemb)) / 4;
 
-                labelyrate = rdcost_mbsegment_y(x, labels, i, &ts);
+                labelyrate = rdcost_mbsegment_y(x, labels, i, ta_s, tl_s);
                 rate += labelyrate;
 
                 this_rd = RDFUNC(x->rdmult, x->rddiv, rate, distortion, cpi->target_bits_per_mb);
@@ -1325,12 +1359,15 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
                     bestlabelyrate = labelyrate;
                     mode_selected = this_mode;
                     best_label_rd = this_rd;
-                    vp8_setup_temp_context(&tb, &ts.a[0], &ts.l[0], 4);
+
+                    vpx_memcpy(ta_b, ta_s, sizeof(ENTROPY_CONTEXT_PLANES));
+                    vpx_memcpy(tl_b, tl_s, sizeof(ENTROPY_CONTEXT_PLANES));
 
                 }
             }
 
-            vp8_setup_temp_context(&t, &tb.a[0], &tb.l[0], 4);
+            vpx_memcpy(ta, ta_b, sizeof(ENTROPY_CONTEXT_PLANES));
+            vpx_memcpy(tl, tl_b, sizeof(ENTROPY_CONTEXT_PLANES));
 
             labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected], best_ref_mv, mvcost);
 
@@ -1402,9 +1439,9 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
     // save partitions
     labels = vp8_mbsplits[best_seg];
     x->e_mbd.mode_info_context->mbmi.partitioning = best_seg;
-    x->e_mbd.mode_info_context->mbmi.partition_count = vp8_count_labels(labels);
+    x->partition_info->count = vp8_count_labels(labels);
 
-    for (i = 0; i < x->e_mbd.mode_info_context->mbmi.partition_count; i++)
+    for (i = 0; i < x->partition_info->count; i++)
     {
         int j;
 
@@ -1414,8 +1451,8 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
                 break;
         }
 
-        x->e_mbd.mode_info_context->mbmi.partition_bmi[i].mode = x->e_mbd.block[j].bmi.mode;
-        x->e_mbd.mode_info_context->mbmi.partition_bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
+        x->partition_info->bmi[i].mode = x->e_mbd.block[j].bmi.mode;
+        x->partition_info->bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
     }
 
     return best_segment_rd;
@@ -1429,6 +1466,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     MACROBLOCKD *xd = &x->e_mbd;
     B_MODE_INFO best_bmodes[16];
     MB_MODE_INFO best_mbmode;
+    PARTITION_INFO best_partition;
     MV best_ref_mv;
     MV mode_mv[MB_MODE_COUNT];
     MB_PREDICTION_MODE this_mode;
@@ -1750,19 +1788,19 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             }
 
             // trap cases where the 8x8s can be promoted to 8x16s or 16x8s
-            if (0)//x->e_mbd.mbmi.partition_count == 4)
+            if (0)//x->partition_info->count == 4)
             {
 
-                if (x->e_mbd.mode_info_context->mbmi.partition_bmi[0].mv.as_int == x->e_mbd.mode_info_context->mbmi.partition_bmi[1].mv.as_int
-                    && x->e_mbd.mode_info_context->mbmi.partition_bmi[2].mv.as_int == x->e_mbd.mode_info_context->mbmi.partition_bmi[3].mv.as_int)
+                if (x->partition_info->bmi[0].mv.as_int == x->partition_info->bmi[1].mv.as_int
+                    && x->partition_info->bmi[2].mv.as_int == x->partition_info->bmi[3].mv.as_int)
                 {
                     const int *labels = vp8_mbsplits[2];
                     x->e_mbd.mode_info_context->mbmi.partitioning = 0;
                     rate -= vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + 2);
                     rate += vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings);
-                    //rate -=  x->inter_bmode_costs[  x->e_mbd.mbmi.partition_bmi[1]];
-                    //rate -=  x->inter_bmode_costs[  x->e_mbd.mbmi.partition_bmi[3]];
-                    x->e_mbd.mode_info_context->mbmi.partition_bmi[1] = x->e_mbd.mode_info_context->mbmi.partition_bmi[2];
+                    //rate -=  x->inter_bmode_costs[  x->partition_info->bmi[1]];
+                    //rate -=  x->inter_bmode_costs[  x->partition_info->bmi[3]];
+                    x->partition_info->bmi[1] = x->partition_info->bmi[2];
                 }
             }
 
@@ -2106,6 +2144,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             *returndistortion = distortion2;
             best_rd = this_rd;
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
+            vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
 
             for (i = 0; i < 16; i++)
             {
@@ -2187,6 +2226,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         best_mbmode.dc_diff = 0;
 
         vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+        vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
         for (i = 0; i < 16; i++)
         {
@@ -2201,6 +2241,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+    vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
     for (i = 0; i < 16; i++)
     {

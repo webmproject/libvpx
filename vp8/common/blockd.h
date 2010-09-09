@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -49,19 +49,19 @@ typedef struct
 } POS;
 
 
-typedef int ENTROPY_CONTEXT;
-
+typedef char ENTROPY_CONTEXT;
 typedef struct
 {
-    ENTROPY_CONTEXT l[4];
-    ENTROPY_CONTEXT a[4];
-} TEMP_CONTEXT;
+    ENTROPY_CONTEXT y1[4];
+    ENTROPY_CONTEXT u[2];
+    ENTROPY_CONTEXT v[2];
+    ENTROPY_CONTEXT y2;
+} ENTROPY_CONTEXT_PLANES;
 
-extern void vp8_setup_temp_context(TEMP_CONTEXT *t, ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l, int count);
-extern const int vp8_block2left[25];
-extern const int vp8_block2above[25];
 extern const int vp8_block2type[25];
-extern const int vp8_block2context[25];
+
+extern const unsigned char vp8_block2left[25];
+extern const unsigned char vp8_block2above[25];
 
 #define VP8_COMBINEENTROPYCONTEXTS( Dest, A, B) \
     Dest = ((A)!=0) + ((B)!=0);
@@ -168,14 +168,15 @@ typedef struct
         int as_int;
         MV  as_mv;
     } mv;
-    int partitioning;
-    int partition_count;
-    int mb_skip_coeff;                                //does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens
-    int dc_diff;
-    unsigned char   segment_id;                  // Which set of segmentation parameters should be used for this MB
-    int force_no_skip;
-    int need_to_clamp_mvs;
-    B_MODE_INFO partition_bmi[16];
+
+    char partitioning;
+    unsigned char mb_skip_coeff;                                //does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens
+    unsigned char dc_diff;
+    unsigned char need_to_clamp_mvs;
+
+    unsigned char segment_id;                  // Which set of segmentation parameters should be used for this MB
+
+    unsigned char force_no_skip; //encoder only
 } MB_MODE_INFO;
 
 
@@ -227,8 +228,6 @@ typedef struct
     YV12_BUFFER_CONFIG dst;
 
     MODE_INFO *mode_info_context;
-    MODE_INFO *mode_info;
-
     int mode_info_stride;
 
     FRAME_TYPE frame_type;
@@ -237,8 +236,8 @@ typedef struct
     int left_available;
 
     // Y,U,V,Y2
-    ENTROPY_CONTEXT *above_context[4];   // row of context for each plane
-    ENTROPY_CONTEXT(*left_context)[4];   // (up to) 4 contexts ""
+    ENTROPY_CONTEXT_PLANES *above_context;
+    ENTROPY_CONTEXT_PLANES *left_context;
 
     // 0 indicates segmentation at MB level is not enabled. Otherwise the individual bits indicate which features are active.
     unsigned char segmentation_enabled;
