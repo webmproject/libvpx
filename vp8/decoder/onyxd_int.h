@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -124,6 +124,12 @@ typedef struct VP8Decompressor
     vp8_dequant_rtcd_vtable_t        dequant;
     struct vp8_dboolhuff_rtcd_vtable dboolhuff;
 #endif
+
+
+    vp8_prob prob_intra;
+    vp8_prob prob_last;
+    vp8_prob prob_gf;
+    vp8_prob prob_skip_false;
 
 } VP8D_COMP;
 

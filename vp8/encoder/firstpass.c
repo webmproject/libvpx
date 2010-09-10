@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -1403,6 +1403,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     // Should we use the alternate refernce frame
     if (cpi->oxcf.play_alternate &&
+        cpi->oxcf.lag_in_frames &&
         (i >= MIN_GF_INTERVAL) &&
         (i <= (cpi->frames_to_key - MIN_GF_INTERVAL)) &&          // dont use ARF very near next kf
         (((next_frame.pcnt_inter > 0.75) &&

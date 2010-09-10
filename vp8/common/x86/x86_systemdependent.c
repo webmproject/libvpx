@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -124,6 +124,8 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_ssse3;
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_ssse3;
         rtcd->subpix.sixtap4x4     = vp8_sixtap_predict4x4_ssse3;
+        rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_ssse3;
+        rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_ssse3;
     }
 #endif
 

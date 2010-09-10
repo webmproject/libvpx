@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -23,7 +23,7 @@
 #include "quant_common.h"
 
 #include "setupintrarecon.h"
-#include "demode.h"
+
 #include "decodemv.h"
 #include "extend.h"
 #include "vpx_mem/vpx_mem.h"
@@ -151,15 +151,11 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
 /* A version of the above function for chroma block MVs.*/
 static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
 {
-    if (2*mv->col < (xd->mb_to_left_edge - (19 << 3)))
-        mv->col = (xd->mb_to_left_edge - (16 << 3)) >> 1;
-    else if (2*mv->col > xd->mb_to_right_edge + (18 << 3))
-        mv->col = (xd->mb_to_right_edge + (16 << 3)) >> 1;
+    mv->col = (2*mv->col < (xd->mb_to_left_edge - (19 << 3))) ? (xd->mb_to_left_edge - (16 << 3)) >> 1 : mv->col;
+    mv->col = (2*mv->col > xd->mb_to_right_edge + (18 << 3)) ? (xd->mb_to_right_edge + (16 << 3)) >> 1 : mv->col;
 
-    if (2*mv->row < (xd->mb_to_top_edge - (19 << 3)))
-        mv->row = (xd->mb_to_top_edge - (16 << 3)) >> 1;
-    else if (2*mv->row > xd->mb_to_bottom_edge + (18 << 3))
-        mv->row = (xd->mb_to_bottom_edge + (16 << 3)) >> 1;
+    mv->row = (2*mv->row < (xd->mb_to_top_edge - (19 << 3))) ? (xd->mb_to_top_edge - (16 << 3)) >> 1 : mv->row;
+    mv->row = (2*mv->row > xd->mb_to_bottom_edge + (18 << 3)) ? (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
 static void clamp_mvs(MACROBLOCKD *xd)
@@ -838,10 +834,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     // Read the mb_no_coeff_skip flag
     pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
-    if (pc->frame_type == KEY_FRAME)
-        vp8_kfread_modes(pbi);
-    else
-        vp8_decode_mode_mvs(pbi);
+
+    vp8_decode_mode_mvs(pbi);
 
     vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 

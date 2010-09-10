@@ -1,5 +1,5 @@
 ##
-##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+##  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ##
 ##  Use of this source code is governed by a BSD-style license
 ##  that can be found in the LICENSE file in the root of the source
@@ -54,14 +54,12 @@ CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
 VP8_DX_SRCS-yes += decoder/dboolhuff.c
 VP8_DX_SRCS-yes += decoder/decodemv.c
 VP8_DX_SRCS-yes += decoder/decodframe.c
-VP8_DX_SRCS-yes += decoder/demode.c
 VP8_DX_SRCS-yes += decoder/dequantize.c
 VP8_DX_SRCS-yes += decoder/detokenize.c
 VP8_DX_SRCS-yes += decoder/generic/dsystemdependent.c
 VP8_DX_SRCS-yes += decoder/dboolhuff.h
 VP8_DX_SRCS-yes += decoder/decodemv.h
 VP8_DX_SRCS-yes += decoder/decoderthreading.h
-VP8_DX_SRCS-yes += decoder/demode.h
 VP8_DX_SRCS-yes += decoder/dequantize.h
 VP8_DX_SRCS-yes += decoder/detokenize.h
 VP8_DX_SRCS-yes += decoder/onyxd_int.h
