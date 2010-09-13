@@ -495,7 +495,7 @@ setup_gnu_toolchain() {
 
 process_common_toolchain() {
     if [ -z "$toolchain" ]; then
-	gcctarget="$(gcc -dumpmachine 2> /dev/null)"
+        gcctarget="$(gcc -dumpmachine 2> /dev/null)"
 
         # detect tgt_isa
         case "$gcctarget" in
@@ -902,8 +902,8 @@ EOF
 
     # glibc needs these
     if enabled linux; then
-	add_cflags -D_LARGEFILE_SOURCE
-	add_cflags -D_FILE_OFFSET_BITS=64
+        add_cflags -D_LARGEFILE_SOURCE
+        add_cflags -D_FILE_OFFSET_BITS=64
     fi
 }
 

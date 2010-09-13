@@ -412,7 +412,7 @@ process_detect() {
         # Can only build shared libs on a subset of platforms. Doing this check
         # here rather than at option parse time because the target auto-detect
         # magic happens after the command line has been parsed.
-	enabled linux || die "--enable-shared only supported on ELF for now"
+        enabled linux || die "--enable-shared only supported on ELF for now"
     fi
     if [ -z "$CC" ]; then
         echo "Bypassing toolchain for environment detection."
@@ -514,7 +514,7 @@ process_toolchain() {
     enabled gcc || soft_disable ccache
     if enabled mips; then
         enable dequant_tokens
-	enable dc_recon
+        enable dc_recon
     fi
 
     # Enable the postbuild target if building for visual studio.
