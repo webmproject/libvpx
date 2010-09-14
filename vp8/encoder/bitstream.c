@@ -986,19 +986,41 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 {
                     vp8_write(w, 1, xd->mb_segment_tree_probs[0]);
                     segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[0]);
+                    int count = 0;
                     for(i = 0; i < MAX_MB_SEGMENTS; i++)
                     {
                         if((left_id != i) && (above_id != i))
                         {
-                            if(m->mbmi.segment_id == i)
+                            if(left_id != above_id)
                             {
-                                vp8_write(w, 0, xd->mb_segment_tree_probs[2+i]);
-                                segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                                if(m->mbmi.segment_id == i)
+                                {
+                                    vp8_write(w, 0, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                                }
+                                else
+                                {
+                                    vp8_write(w, 1, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                                }
+                                break;
                             }
                             else
                             {
-                                vp8_write(w, 1, xd->mb_segment_tree_probs[2+i]);
-                                segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                                if(m->mbmi.segment_id == i)
+                                {
+                                    vp8_write(w, 0, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                                    break;
+                                }
+                                else
+                                {
+                                    count++;
+                                    vp8_write(w, 1, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                                    if(count == 2)
+                                        break;
+                                }
                             }
                         }
                     }
@@ -1205,22 +1227,43 @@ static void write_kfmodes(VP8_COMP *cpi)
                 {
                     vp8_write(bc, 1, xd->mb_segment_tree_probs[0]);
                     segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[0]);
-
+                    int count = 0;
                     for(i = 0; i < MAX_MB_SEGMENTS; i++)
                     {
                         if((left_id != i) && (above_id != i))
                         {
-                            if(m->mbmi.segment_id == i)
+                            if(left_id != above_id)
                             {
-                                vp8_write(bc, 0, xd->mb_segment_tree_probs[2+i]);
-                                segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                                if(m->mbmi.segment_id == i)
+                                {
+                                    vp8_write(bc, 0, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                                }
+                                else
+                                {
+                                    vp8_write(bc, 1, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                                }
+                                break;
                             }
                             else
                             {
-                                vp8_write(bc, 1, xd->mb_segment_tree_probs[2+i]);
-                                segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                                if(m->mbmi.segment_id == i)
+                                {
+                                    vp8_write(bc, 0, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[2+i]);
+                                    break;
+                                }
+                                else
+                                {
+                                    count++;
+                                    vp8_write(bc, 1, xd->mb_segment_tree_probs[2+i]);
+                                    segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[2+i]);
+                                    if(count == 2)
+                                        break;
+                                }
                             }
-                            
+
                         }
                     }
                 }
@@ -1544,10 +1587,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     }
     else
         vp8_start_encode(bc, cx_data);
-//#if CONFIG_SEGMENTATION
+#if CONFIG_SEGMENTATION
      //xd->segmentation_enabled =1;
      xd->update_mb_segmentation_map = 1;
-//#endif
+#endif
     // Signal whether or not Segmentation is enabled
     vp8_write_bit(bc, (xd->segmentation_enabled) ? 1 : 0);
 

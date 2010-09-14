@@ -94,7 +94,8 @@ void vp8_kfread_modes(VP8D_COMP *pbi)
                 MACROBLOCKD *xd = &pbi->mb;
                 xd->up_available = (mb_row != 0);
                 xd->left_available = (mb_col != 0);
-
+                int count = 0;
+                int j;
                 if(xd->left_available)
                     left_id = (m-1)->mbmi.segment_id;
                 else
@@ -111,9 +112,32 @@ void vp8_kfread_modes(VP8D_COMP *pbi)
                     {
                         if((left_id != i) && (above_id != i))
                         {
-                            if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
+                            if(left_id != above_id)
                             {
-                                m->mbmi.segment_id = i;
+                                if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
+                                    m->mbmi.segment_id = i;
+                                else
+                                    m->mbmi.segment_id = 6-left_id-above_id-i;
+                                break;
+                            }
+                            else
+                            {
+                                if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
+                                {
+                                    m->mbmi.segment_id = i;
+                                    break;
+                                }
+                                else
+                                {
+                                    count++;
+                                    if(count == 1)
+                                        j = i;
+                                    if(count == 2)
+                                    {
+                                        m->mbmi.segment_id = 6-left_id-j-i;
+                                        break;
+                                    }
+                                }
                             }
                         }
                     }

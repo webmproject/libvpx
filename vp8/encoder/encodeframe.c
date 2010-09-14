@@ -411,14 +411,34 @@ void encode_mb_row(VP8_COMP *cpi,
     else
     {
         segment_counts[9]++;
+        int count =0;
         for(i = 0; i < MAX_MB_SEGMENTS; i++)
         {
             if((left_id != i) && (above_id != i))
             {
-                if(xd->mbmi.segment_id == i)
-                    segment_counts[i]++;
+                if(above_id != left_id)
+                {
+                    if(xd->mbmi.segment_id == i)
+                        segment_counts[i]++;
+                    else
+                        segment_counts[MAX_MB_SEGMENTS + i]++;
+                    break;
+                }
                 else
-                    segment_counts[MAX_MB_SEGMENTS + i]++;
+                {
+                    if(xd->mbmi.segment_id == i)
+                    {
+                        segment_counts[i]++;
+                        break;
+                    }
+                    else
+                    {
+                        count++;
+                        segment_counts[MAX_MB_SEGMENTS + i]++;
+                        if(count == 2)
+                            break;
+                    }
+                }
             }
         }
     }
