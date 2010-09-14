@@ -196,12 +196,12 @@
         pxor        xmm7,                   [t80 GLOBAL]      ; q1 offset to convert to signed values
 
         psubsb      xmm2,                   xmm7              ; p1 - q1
-        pand        xmm2,                   xmm4              ; high var mask (hvm)(p1 - q1)
         pxor        xmm6,                   [t80 GLOBAL]      ; offset to convert to signed values
 
+        pand        xmm2,                   xmm4              ; high var mask (hvm)(p1 - q1)
         pxor        xmm0,                   [t80 GLOBAL]      ; offset to convert to signed values
-        movdqa      xmm3,                   xmm0              ; q0
 
+        movdqa      xmm3,                   xmm0              ; q0
         psubsb      xmm0,                   xmm6              ; q0 - p0
         paddsb      xmm2,                   xmm0              ; 1 * (q0 - p0) + hvm(p1 - q1)
         paddsb      xmm2,                   xmm0              ; 2 * (q0 - p0) + hvm(p1 - q1)
@@ -211,29 +211,28 @@
         paddsb      xmm1,                   [t4 GLOBAL]       ; 3* (q0 - p0) + hvm(p1 - q1) + 4
         paddsb      xmm2,                   [t3 GLOBAL]       ; 3* (q0 - p0) + hvm(p1 - q1) + 3
 
-        pxor        xmm0,                   xmm0
-        pxor        xmm5,                   xmm5
-        punpcklbw   xmm0,                   xmm2
-        punpckhbw   xmm5,                   xmm2
-        psraw       xmm0,                   11
-        psraw       xmm5,                   11
-        packsswb    xmm0,                   xmm5
-        movdqa      xmm2,                   xmm0              ; (3* (q0 - p0) + hvm(p1 - q1) + 3) >> 3;
+        punpckhbw   xmm5,                   xmm2              ; axbxcxdx
+        punpcklbw   xmm2,                   xmm2              ; exfxgxhx
 
-        pxor        xmm0,                   xmm0              ; 0
-        movdqa      xmm5,                   xmm1              ; abcdefgh
-        punpcklbw   xmm0,                   xmm1              ; e0f0g0h0
+        psraw       xmm5,                   11                ; sign extended shift right by 3
+        psraw       xmm2,                   11                ; sign extended shift right by 3
+        packsswb    xmm2,                   xmm5              ; (3* (q0 - p0) + hvm(p1 - q1) + 3) >> 3;
+
+        punpcklbw   xmm0,                   xmm1              ; exfxgxhx
+        punpckhbw   xmm1,                   xmm1              ; axbxcxdx
+
         psraw       xmm0,                   11                ; sign extended shift right by 3
-        pxor        xmm1,                   xmm1              ; 0
-        punpckhbw   xmm1,                   xmm5              ; a0b0c0d0
         psraw       xmm1,                   11                ; sign extended shift right by 3
-        movdqa      xmm5,                   xmm0              ; save results
 
+        movdqa      xmm5,                   xmm0              ; save results
         packsswb    xmm0,                   xmm1              ; (3* (q0 - p0) + hvm(p1 - q1) + 4) >>3
+
         paddsw      xmm5,                   [ones GLOBAL]
         paddsw      xmm1,                   [ones GLOBAL]
+
         psraw       xmm5,                   1                 ; partial shifted one more time for 2nd tap
         psraw       xmm1,                   1                 ; partial shifted one more time for 2nd tap
+
         packsswb    xmm5,                   xmm1              ; (3* (q0 - p0) + hvm(p1 - q1) + 4) >>4
         pandn       xmm4,                   xmm5              ; high edge variance additive
 %endmacro
@@ -433,29 +432,27 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
         pand        xmm2,                   xmm4;             ; Filter2 = vp8_filter & hev
 
         movdqa      xmm5,                   xmm2
-        paddsb      xmm5,                   [t3 GLOBAL]
+        paddsb      xmm5,                   [t3 GLOBAL]       ; vp8_signed_char_clamp(Filter2 + 3)
 
-        pxor        xmm0,                   xmm0              ; 0
-        pxor        xmm7,                   xmm7              ; 0
-        punpcklbw   xmm0,                   xmm5              ; e0f0g0h0
-        psraw       xmm0,                   11                ; sign extended shift right by 3
-        punpckhbw   xmm7,                   xmm5              ; a0b0c0d0
+        punpckhbw   xmm7,                   xmm5              ; axbxcxdx
+        punpcklbw   xmm5,                   xmm5              ; exfxgxhx
+
         psraw       xmm7,                   11                ; sign extended shift right by 3
-        packsswb    xmm0,                   xmm7              ; Filter2 >>=3;
-        movdqa      xmm5,                   xmm0              ; Filter2
-        paddsb      xmm2,                   [t4 GLOBAL]      ; vp8_signed_char_clamp(Filter2 + 4)
+        psraw       xmm5,                   11                ; sign extended shift right by 3
 
-        pxor        xmm0,                   xmm0              ; 0
-        pxor        xmm7,                   xmm7              ; 0
-        punpcklbw   xmm0,                   xmm2              ; e0f0g0h0
-        psraw       xmm0,                   11                ; sign extended shift right by 3
-        punpckhbw   xmm7,                   xmm2              ; a0b0c0d0
+        packsswb    xmm5,                   xmm7              ; Filter2 >>=3;
+        paddsb      xmm2,                   [t4 GLOBAL]       ; vp8_signed_char_clamp(Filter2 + 4)
+
+        punpckhbw   xmm7,                   xmm2              ; axbxcxdx
+        punpcklbw   xmm0,                   xmm2              ; exfxgxhx
+
         psraw       xmm7,                   11                ; sign extended shift right by 3
-        packsswb    xmm0,                   xmm7              ; Filter2 >>=3;
+        psraw       xmm0,                   11                ; sign extended shift right by 3
 
-        psubsb      xmm3,                   xmm0              ; qs0 =qs0 - filter1
+        packsswb    xmm0,                   xmm7              ; Filter2 >>=3;
         paddsb      xmm6,                   xmm5              ; ps0 =ps0 + Fitler2
 
+        psubsb      xmm3,                   xmm0              ; qs0 =qs0 - filter1
         pandn       xmm4,                   xmm1              ; vp8_filter&=~hev
 %endmacro
 
@@ -465,7 +462,6 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
         ; *oq0 = s^0x80;
         ; s = vp8_signed_char_clamp(ps0 + u);
         ; *op0 = s^0x80;
-        pxor        xmm0,                   xmm0
         pxor        xmm1,                   xmm1
 
         pxor        xmm2,                   xmm2
@@ -1022,27 +1018,18 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
         paddsb      xmm1,               [t4 GLOBAL]     ; 3* (q0 - p0) + hvm(p1 - q1) + 4
 
         paddsb      xmm2,               [t3 GLOBAL]     ; 3* (q0 - p0) + hvm(p1 - q1) + 3
-        pxor        xmm0,               xmm0
-
-        pxor        xmm5,               xmm5
-        punpcklbw   xmm0,               xmm2
 
         punpckhbw   xmm5,               xmm2
-        psraw       xmm0,               11
+        punpcklbw   xmm2,               xmm2
 
         psraw       xmm5,               11
-        packsswb    xmm0,               xmm5
+        psraw       xmm2,               11
 
-        movdqa      xmm2,               xmm0            ; (3* (q0 - p0) + hvm(p1 - q1) + 3) >> 3;
+        packsswb    xmm2,               xmm5            ; (3* (q0 - p0) + hvm(p1 - q1) + 3) >> 3;
+        punpcklbw   xmm0,               xmm1            ; exfxgxhx
 
-        pxor        xmm0,               xmm0            ; 0
-        movdqa      xmm5,               xmm1            ; abcdefgh
-
-        punpcklbw   xmm0,               xmm1            ; e0f0g0h0
+        punpckhbw   xmm1,               xmm1            ; axbxcxdx
         psraw       xmm0,               11              ; sign extended shift right by 3
-
-        pxor        xmm1,               xmm1            ; 0
-        punpckhbw   xmm1,               xmm5            ; a0b0c0d0
 
         psraw       xmm1,               11              ; sign extended shift right by 3
         movdqa      xmm5,               xmm0            ; save results
@@ -1308,28 +1295,22 @@ sym(vp8_loop_filter_vertical_edge_uv_sse2):
         movdqa      xmm5,               xmm2
         paddsb      xmm5,               [t3 GLOBAL]
 
-        pxor        xmm0,               xmm0            ; 0
-        pxor        xmm7,               xmm7            ; 0
+        punpckhbw   xmm7,               xmm5            ; axbxcxdx
+        punpcklbw   xmm5,               xmm5            ; exfxgxhx
 
-        punpcklbw   xmm0,               xmm5            ; e0f0g0h0
-        psraw       xmm0,               11              ; sign extended shift right by 3
-
-        punpckhbw   xmm7,               xmm5            ; a0b0c0d0
         psraw       xmm7,               11              ; sign extended shift right by 3
+        psraw       xmm5,               11              ; sign extended shift right by 3
 
-        packsswb    xmm0,               xmm7            ; Filter2 >>=3;
-        movdqa      xmm5,               xmm0            ; Filter2
+        packsswb    xmm5,               xmm7            ; Filter2 >>=3;
 
         paddsb      xmm2,               [t4 GLOBAL]     ; vp8_signed_char_clamp(Filter2 + 4)
-        pxor        xmm0,               xmm0            ; 0
 
-        pxor        xmm7,               xmm7            ; 0
-        punpcklbw   xmm0,               xmm2            ; e0f0g0h0
+        punpcklbw   xmm0,               xmm2            ; exfxgxhx
+        punpckhbw   xmm7,               xmm2            ; axbxcxdx
 
         psraw       xmm0,               11              ; sign extended shift right by 3
-        punpckhbw   xmm7,               xmm2            ; a0b0c0d0
-
         psraw       xmm7,               11              ; sign extended shift right by 3
+
         packsswb    xmm0,               xmm7            ; Filter2 >>=3;
 
         psubsb      xmm3,               xmm0            ; qs0 =qs0 - filter1
@@ -1344,7 +1325,6 @@ sym(vp8_loop_filter_vertical_edge_uv_sse2):
         ; *oq0 = s^0x80;
         ; s = vp8_signed_char_clamp(ps0 + u);
         ; *op0 = s^0x80;
-        pxor        xmm0,               xmm0
         pxor        xmm1,               xmm1
 
         pxor        xmm2,               xmm2
