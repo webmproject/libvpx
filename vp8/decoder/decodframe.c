@@ -21,7 +21,8 @@
 #include "alloccommon.h"
 #include "entropymode.h"
 #include "quant_common.h"
-
+#include "vpx_scale/vpxscale.h"
+#include "vpx_scale/yv12extend.h"
 #include "setupintrarecon.h"
 
 #include "decodemv.h"
@@ -64,7 +65,7 @@ void vp8cx_init_de_quantizer(VP8D_COMP *pbi)
     }
 }
 
-static void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
+void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     int i;
     int QIndex;
@@ -158,7 +159,7 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
     mv->row = (2*mv->row > xd->mb_to_bottom_edge + (18 << 3)) ? (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
-static void clamp_mvs(MACROBLOCKD *xd)
+void clamp_mvs(MACROBLOCKD *xd)
 {
     if (xd->mode_info_context->mbmi.mode == SPLITMV)
     {
@@ -294,6 +295,7 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
                      xd->dst.uv_stride, xd->eobs+16);
 }
 
+
 static int get_delta_q(vp8_reader *bc, int prev, int *q_update)
 {
     int ret_val = 0;
@@ -398,7 +400,6 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
 
         xd->above_context++;
 
-        pbi->current_mb_col_main = mb_col;
     }
 
     // adjust to the next row of mbs
@@ -408,8 +409,6 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
     );
 
     ++xd->mode_info_context;      /* skip prediction column */
-
-    pbi->last_mb_row_decoded = mb_row;
 }
 
 
@@ -601,6 +600,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
         if (Width != pc->Width  ||  Height != pc->Height)
         {
+            int prev_mb_rows = pc->mb_rows;
+
             if (pc->Width <= 0)
             {
                 pc->Width = Width;
@@ -618,6 +619,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
                 vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                    "Failed to allocate frame buffers");
+
+#if CONFIG_MULTITHREAD
+            if (pbi->b_multithreaded_rd)
+                vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
+#endif
         }
     }
 
@@ -822,7 +828,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
     // set up frame new frame for intra coded blocks
-    vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
+    if (!(pbi->b_multithreaded_rd) || pc->multi_token_partition == ONE_PARTITION || !(pc->filter_level))
+        vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
 
     vp8_setup_block_dptrs(xd);
 
@@ -841,13 +848,18 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     vpx_memcpy(&xd->block[0].bmi, &xd->mode_info_context->bmi[0], sizeof(B_MODE_INFO));
 
-
-    if (pbi->b_multithreaded_lf && pc->filter_level != 0)
-        vp8_start_lfthread(pbi);
-
     if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {
-        vp8_mtdecode_mb_rows(pbi, xd);
+        vp8mt_decode_mb_rows(pbi, xd);
+        if(pbi->common.filter_level)
+        {
+            //vp8_mt_loop_filter_frame(pbi);   //cm, &pbi->mb, cm->filter_level);
+
+            pc->last_frame_type = pc->frame_type;
+            pc->last_filter_type = pc->filter_type;
+            pc->last_sharpness_level = pc->sharpness_level;
+        }
+        vp8_yv12_extend_frame_borders_ptr(&pc->yv12_fb[pc->new_fb_idx]);    //cm->frame_to_show);
     }
     else
     {
@@ -869,8 +881,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
             vp8_decode_mb_row(pbi, pc, mb_row, xd);
         }
-
-        pbi->last_mb_row_decoded = mb_row;
     }
 
 
