@@ -90,7 +90,7 @@
 %macro ALIGN_STACK 2
     mov         %2, rsp
     and         rsp, -%1
-    sub         rsp, %1 - REG_SZ_BYTES
+    lea         rsp, [rsp - (%1 - REG_SZ_BYTES)]
     push        %2
 %endmacro
 
@@ -105,7 +105,6 @@
 %idefine XMMWORD
 %idefine MMWORD
 
-
 ; PIC macros
 ;
 %if ABI_IS_32BIT
@@ -116,9 +115,13 @@
       extern _GLOBAL_OFFSET_TABLE_
       push %1
       call %%get_got
+      %%sub_offset:
+      jmp %%exitGG
       %%get_got:
-      pop %1
-      add %1, _GLOBAL_OFFSET_TABLE_ + $$ - %%get_got wrt ..gotpc
+      mov %1, [esp]
+      add %1, _GLOBAL_OFFSET_TABLE_ + $$ - %%sub_offset wrt ..gotpc
+      ret
+      %%exitGG:
       %undef GLOBAL
       %define GLOBAL + %1 wrt ..gotoff
       %undef RESTORE_GOT
@@ -128,9 +131,13 @@
     %macro GET_GOT 1
       push %1
       call %%get_got
+      %%sub_offset:
+      jmp  %%exitGG
       %%get_got:
-      pop %1
-      add %1, fake_got - %%get_got
+      mov  %1, [esp]
+      add %1, fake_got - %%sub_offset
+      ret
+      %%exitGG:
       %undef GLOBAL
       %define GLOBAL + %1 - fake_got
       %undef RESTORE_GOT
