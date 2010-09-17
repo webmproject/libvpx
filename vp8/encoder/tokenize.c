@@ -26,8 +26,8 @@ _int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 void vp8_fix_contexts(MACROBLOCKD *x);
 
-TOKENEXTRA vp8_dct_value_tokens[DCT_MAX_VALUE*2];
-const TOKENEXTRA *vp8_dct_value_tokens_ptr;
+TOKENVALUE vp8_dct_value_tokens[DCT_MAX_VALUE*2];
+const TOKENVALUE *vp8_dct_value_tokens_ptr;
 int vp8_dct_value_cost[DCT_MAX_VALUE*2];
 const int *vp8_dct_value_cost_ptr;
 #if 0
@@ -37,7 +37,7 @@ int skip_false_count = 0;
 static void fill_value_tokens()
 {
 
-    TOKENEXTRA *const t = vp8_dct_value_tokens + DCT_MAX_VALUE;
+    TOKENVALUE *const t = vp8_dct_value_tokens + DCT_MAX_VALUE;
     vp8_extra_bit_struct *const e = vp8_extra_bits;
 
     int i = -DCT_MAX_VALUE;

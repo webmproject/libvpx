@@ -19,6 +19,12 @@ void vp8_tokenize_initialize();
 
 typedef struct
 {
+    short Token;
+    short Extra;
+} TOKENVALUE;
+
+typedef struct
+{
     int Token;
     int Extra;
     const vp8_prob *context_tree;
@@ -40,6 +46,6 @@ extern const int *vp8_dct_value_cost_ptr;
  *  improve cache locality, since it's needed for costing when the rest of the
  *  fields are not.
  */
-extern const TOKENEXTRA *vp8_dct_value_tokens_ptr;
+extern const TOKENVALUE *vp8_dct_value_tokens_ptr;
 
 #endif  /* tokenize_h */
