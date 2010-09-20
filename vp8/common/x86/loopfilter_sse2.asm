@@ -11,6 +11,8 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
+; Use of pmaxub instead of psubusb to compute filter mask was seen
+; in ffvp8
 
 %macro LFH_FILTER_MASK 1
 %if %1
@@ -33,8 +35,6 @@
         psubusb     xmm2,                   xmm6              ; q3-=q2
         por         xmm1,                   xmm2              ; abs(q3-q2)
 
-        psubusb     xmm1,                   xmm7
-
 %if %1
         movdqa      xmm4,                   [rsi+rax]         ; q1
 %else
@@ -49,9 +49,7 @@
         psubusb     xmm4,                   xmm6              ; q1-=q2
         psubusb     xmm6,                   xmm3              ; q2-=q1
         por         xmm4,                   xmm6              ; abs(q2-q1)
-        psubusb     xmm4,                   xmm7
-
-        por         xmm1,                   xmm4
+        pmaxub      xmm1,                   xmm4
 
 %if %1
         movdqa      xmm4,                   [rsi]             ; q0
@@ -67,9 +65,7 @@
         psubusb     xmm3,                   xmm0              ; q1-=q0
         por         xmm4,                   xmm3              ; abs(q0-q1)
         movdqa      t0,                     xmm4              ; save to t0
-
-        psubusb     xmm4,                   xmm7
-        por         xmm1,                   xmm4
+        pmaxub      xmm1,                   xmm4
 
 %if %1
         neg         rax                     ; negate pitch to deal with above border
@@ -95,9 +91,7 @@
         psubusb     xmm4,                   xmm2              ; p2-=p3
         psubusb     xmm2,                   xmm5              ; p3-=p2
         por         xmm4,                   xmm2              ; abs(p3 - p2)
-
-        psubusb     xmm4,                   xmm7
-        por         xmm1,                   xmm4
+        pmaxub      xmm1,                   xmm4
 
 %if %1
         movdqa      xmm4,                   [rsi+2*rax]       ; p1
@@ -113,9 +107,8 @@
         psubusb     xmm4,                   xmm5              ; p1-=p2
         psubusb     xmm5,                   xmm3              ; p2-=p1
         por         xmm4,                   xmm5              ; abs(p2 - p1)
-        psubusb     xmm4,                   xmm7
+        pmaxub      xmm1,                   xmm4
 
-        por         xmm1,                   xmm4
         movdqa      xmm2,                   xmm3              ; p1
 
 %if %1
@@ -133,8 +126,8 @@
         por         xmm4,                   xmm3              ; abs(p1 - p0)
         movdqa        t1,                   xmm4              ; save to t1
 
-        psubusb     xmm4,                   xmm7
-        por         xmm1,                   xmm4
+        pmaxub      xmm1,                   xmm4
+        psubusb     xmm1,                   xmm7
 
 %if %1
         movdqa      xmm3,                   [rdi]             ; q1
@@ -872,19 +865,18 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
         psubusb     xmm0,               xmm7            ; q2-q3
 
         psubusb     xmm7,               xmm6            ; q3-q2
-        por         xmm7,               xmm0            ; abs (q3-q2)
-
         movdqa      xmm4,               xmm5            ; q1
+
+        por         xmm7,               xmm0            ; abs (q3-q2)
         psubusb     xmm4,               xmm6            ; q1-q2
 
-        psubusb     xmm6,               xmm5            ; q2-q1
-        por         xmm6,               xmm4            ; abs (q2-q1)
-
         movdqa      xmm0,               xmm1
+        psubusb     xmm6,               xmm5            ; q2-q1
 
+        por         xmm6,               xmm4            ; abs (q2-q1)
         psubusb     xmm0,               xmm2            ; p2 - p3;
-        psubusb     xmm2,               xmm1            ; p3 - p2;
 
+        psubusb     xmm2,               xmm1            ; p3 - p2;
         por         xmm0,               xmm2            ; abs(p2-p3)
 %if %1
         movdqa      xmm2,               [rdx]           ; p1
@@ -892,30 +884,19 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
         movdqa      xmm2,               [rdx+32]        ; p1
 %endif
         movdqa      xmm5,               xmm2            ; p1
+        pmaxub      xmm0,               xmm7
 
         psubusb     xmm5,               xmm1            ; p1-p2
         psubusb     xmm1,               xmm2            ; p2-p1
 
-        por         xmm1,               xmm5            ; abs(p2-p1)
-
-        mov         rdx,                arg(3)          ; limit
-        movdqa      xmm4,               [rdx]           ; limit
-
-        psubusb     xmm7,               xmm4
-
-        psubusb     xmm0,               xmm4            ; abs(p3-p2) > limit
-        psubusb     xmm1,               xmm4            ; abs(p2-p1) > limit
-
-        psubusb     xmm6,               xmm4            ; abs(q2-q1) > limit
-        por         xmm7,               xmm6            ; or
-
-        por         xmm0,               xmm1
-        por         xmm0,               xmm7            ; abs(q3-q2) > limit || abs(p3-p2) > limit ||abs(p2-p1) > limit || abs(q2-q1) > limit
-
-        movdqa      xmm1,               xmm2            ; p1
-
         movdqa      xmm7,               xmm3            ; p0
         psubusb     xmm7,               xmm2            ; p0-p1
+
+        por         xmm1,               xmm5            ; abs(p2-p1)
+        pmaxub      xmm0,               xmm6
+
+        pmaxub      xmm0,               xmm1
+        movdqa      xmm1,               xmm2            ; p1
 
         psubusb     xmm2,               xmm3            ; p1-p0
         por         xmm2,               xmm7            ; abs(p1-p0)
@@ -923,8 +904,8 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
         movdqa      t0,                 xmm2            ; save abs(p1-p0)
         lea         rdx,                srct
 
-        psubusb     xmm2,               xmm4            ; abs(p1-p0)>limit
-        por         xmm0,               xmm2            ; mask
+        pmaxub      xmm0,               xmm2
+
 %if %1
         movdqa      xmm5,               [rdx+32]        ; q0
         movdqa      xmm7,               [rdx+48]        ; q1
@@ -940,9 +921,12 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
         por         xmm7,               xmm5            ; abs(q1-q0)
 
         movdqa      t1,                 xmm7            ; save abs(q1-q0)
-        psubusb     xmm7,               xmm4            ; abs(q1-q0)> limit
 
-        por         xmm0,               xmm7            ; mask
+        mov         rdx,                arg(3)          ; limit
+        movdqa      xmm4,               [rdx]           ; limit
+
+        pmaxub      xmm0,               xmm7
+        psubusb     xmm0,               xmm4
 
         movdqa      xmm5,               xmm2            ; q1
         psubusb     xmm5,               xmm1            ; q1-=p1
