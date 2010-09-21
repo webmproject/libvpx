@@ -70,27 +70,35 @@ sym(vp8_filter_block1d8_h6_ssse3):
     sub         rdi, rdx
 ;xmm3 free
 filter_block1d8_h6_rowloop_ssse3:
-    movdqu      xmm0,   XMMWORD PTR [rsi - 2]
+    movq        xmm0,   MMWORD PTR [rsi - 2]    ; -2 -1  0  1  2  3  4  5
 
-    movdqa      xmm1, xmm0
-    pshufb      xmm0, [shuf1b GLOBAL]
+    movq        xmm2,   MMWORD PTR [rsi + 3]    ;  3  4  5  6  7  8  9 10
 
-    movdqa      xmm2, xmm1
-    pshufb      xmm1, [shuf2b GLOBAL]
-    pmaddubsw   xmm0, xmm4
-    pmaddubsw   xmm1, xmm5
+    punpcklbw   xmm0,   xmm2                    ; -2  3 -1  4  0  5  1  6  2  7  3  8  4  9  5 10
 
-    pshufb      xmm2, [shuf3b GLOBAL]
-    add         rdi, rdx
-    pmaddubsw   xmm2, xmm6
+    movdqa      xmm1,   xmm0
+    pmaddubsw   xmm0,   xmm4
+
+    movdqa      xmm2,   xmm1
+    pshufb      xmm1,   [shuf2bfrom1 GLOBAL]
+
+    pshufb      xmm2,   [shuf3bfrom1 GLOBAL]
+    pmaddubsw   xmm1,   xmm5
+
+    lea         rdi,    [rdi + rdx]
+    pmaddubsw   xmm2,   xmm6
 
     lea         rsi,    [rsi + rax]
     dec         rcx
-    paddsw      xmm0, xmm1
-    paddsw      xmm0, xmm7
-    paddsw      xmm0, xmm2
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
+
+    paddsw      xmm0,   xmm1
+    paddsw      xmm2,   xmm7
+
+    paddsw      xmm0,   xmm2
+
+    psraw       xmm0,   7
+
+    packuswb    xmm0,   xmm0
 
     movq        MMWORD Ptr [rdi], xmm0
     jnz         filter_block1d8_h6_rowloop_ssse3
@@ -107,8 +115,8 @@ vp8_filter_block1d8_h4_ssse3:
     movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
     movdqa      xmm6, XMMWORD PTR [rax+128]     ;k1_k3
 
-    movdqa      xmm3, XMMWORD PTR [shuf2b GLOBAL]
-    movdqa      xmm4, XMMWORD PTR [shuf3b GLOBAL]
+    movdqa      xmm3, XMMWORD PTR [shuf2bfrom1 GLOBAL]
+    movdqa      xmm4, XMMWORD PTR [shuf3bfrom1 GLOBAL]
 
     mov         rsi, arg(0)             ;src_ptr
 
@@ -118,24 +126,33 @@ vp8_filter_block1d8_h4_ssse3:
     movsxd      rdx, dword ptr arg(3)   ;output_pitch
 
     sub         rdi, rdx
-;xmm3 free
+
 filter_block1d8_h4_rowloop_ssse3:
-    movdqu      xmm0,   XMMWORD PTR [rsi - 2]
+    movq        xmm0,   MMWORD PTR [rsi - 2]    ; -2 -1  0  1  2  3  4  5
 
-    movdqa      xmm2, xmm0
-    pshufb      xmm0, xmm3 ;[shuf2b GLOBAL]
-    pshufb      xmm2, xmm4 ;[shuf3b GLOBAL]
+    movq        xmm1,   MMWORD PTR [rsi + 3]    ;  3  4  5  6  7  8  9 10
 
-    pmaddubsw   xmm0, xmm5
-    add         rdi, rdx
-    pmaddubsw   xmm2, xmm6
+    punpcklbw   xmm0,   xmm1                    ; -2  3 -1  4  0  5  1  6  2  7  3  8  4  9  5 10
+
+    movdqa      xmm2,   xmm0
+    pshufb      xmm0,   xmm3
+
+    pshufb      xmm2,   xmm4
+    pmaddubsw   xmm0,   xmm5
+
+    lea         rdi,    [rdi + rdx]
+    pmaddubsw   xmm2,   xmm6
 
     lea         rsi,    [rsi + rax]
     dec         rcx
-    paddsw      xmm0, xmm7
-    paddsw      xmm0, xmm2
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
+
+    paddsw      xmm0,   xmm7
+
+    paddsw      xmm0,   xmm2
+
+    psraw       xmm0,   7
+
+    packuswb    xmm0,   xmm0
 
     movq        MMWORD Ptr [rdi], xmm0
 
@@ -168,73 +185,87 @@ sym(vp8_filter_block1d16_h6_ssse3):
     push        rdi
     ; end prolog
 
-    movsxd      rdx, DWORD PTR arg(5)   ;table index
+    movsxd      rdx, DWORD PTR arg(5)           ;table index
     xor         rsi, rsi
     shl         rdx, 4      ;
 
     lea         rax, [k0_k5 GLOBAL]
     add         rax, rdx
 
-    mov         rdi, arg(2)             ;output_ptr
-    movdqa      xmm7, [rd GLOBAL]
+    mov         rdi, arg(2)                     ;output_ptr
 
 ;;
 ;;    cmp         esi, DWORD PTR [rax]
 ;;    je          vp8_filter_block1d16_h4_ssse3
 
-    mov         rsi, arg(0)             ;src_ptr
+    mov         rsi, arg(0)                     ;src_ptr
 
     movdqa      xmm4, XMMWORD PTR [rax]         ;k0_k5
     movdqa      xmm5, XMMWORD PTR [rax+256]     ;k2_k4
     movdqa      xmm6, XMMWORD PTR [rax+128]     ;k1_k3
 
-    movsxd      rax, dword ptr arg(1)   ;src_pixels_per_line
-    movsxd      rcx, dword ptr arg(4)   ;output_height
-    movsxd      rdx, dword ptr arg(3)   ;output_pitch
+    movsxd      rax, dword ptr arg(1)           ;src_pixels_per_line
+    movsxd      rcx, dword ptr arg(4)           ;output_height
+    movsxd      rdx, dword ptr arg(3)           ;output_pitch
 
 filter_block1d16_h6_rowloop_ssse3:
-    movdqu      xmm0,   XMMWORD PTR [rsi - 2]
+    movq        xmm0,   MMWORD PTR [rsi - 2]    ; -2 -1  0  1  2  3  4  5
 
-    movdqa      xmm1, xmm0
-    pshufb      xmm0, [shuf1b GLOBAL]
-    movdqa      xmm2, xmm1
-    pmaddubsw   xmm0, xmm4
-    pshufb      xmm1, [shuf2b GLOBAL]
-    pshufb      xmm2, [shuf3b GLOBAL]
-    pmaddubsw   xmm1, xmm5
+    movq        xmm3,   MMWORD PTR [rsi + 3]    ;  3  4  5  6  7  8  9 10
 
-    movdqu      xmm3,   XMMWORD PTR [rsi + 6]
+    punpcklbw   xmm0,   xmm3                    ; -2  3 -1  4  0  5  1  6  2  7  3  8  4  9  5 10
 
-    pmaddubsw   xmm2, xmm6
-    paddsw      xmm0, xmm1
-    movdqa      xmm1, xmm3
-    pshufb      xmm3, [shuf1b GLOBAL]
-    paddsw      xmm0, xmm7
-    pmaddubsw   xmm3, xmm4
-    paddsw      xmm0, xmm2
-    movdqa      xmm2, xmm1
-    pshufb      xmm1, [shuf2b GLOBAL]
-    pshufb      xmm2, [shuf3b GLOBAL]
-    pmaddubsw   xmm1, xmm5
-    pmaddubsw   xmm2, xmm6
+    movdqa      xmm1,   xmm0
+    pmaddubsw   xmm0,   xmm4
 
-    psraw       xmm0, 7
-    packuswb    xmm0, xmm0
+    movdqa      xmm2,   xmm1
+    pshufb      xmm1,   [shuf2bfrom1 GLOBAL]
+
+    pshufb      xmm2,   [shuf3bfrom1 GLOBAL]
+    movq        xmm3,   MMWORD PTR [rsi +  6]
+
+    pmaddubsw   xmm1,   xmm5
+    movq        xmm7,   MMWORD PTR [rsi + 11]
+
+    pmaddubsw   xmm2,   xmm6
+    punpcklbw   xmm3,   xmm7
+
+    paddsw      xmm0,   xmm1
+    movdqa      xmm1,   xmm3
+
+    pmaddubsw   xmm3,   xmm4
+    paddsw      xmm0,   xmm2
+
+    movdqa      xmm2,   xmm1
+    paddsw      xmm0,   [rd GLOBAL]
+
+    pshufb      xmm1,   [shuf2bfrom1 GLOBAL]
+    pshufb      xmm2,   [shuf3bfrom1 GLOBAL]
+
+    psraw       xmm0,   7
+    pmaddubsw   xmm1,   xmm5
+
+    pmaddubsw   xmm2,   xmm6
+    packuswb    xmm0,   xmm0
+
     lea         rsi,    [rsi + rax]
-    paddsw      xmm3, xmm1
-    paddsw      xmm3, xmm7
-    paddsw      xmm3, xmm2
-    psraw       xmm3, 7
-    packuswb    xmm3, xmm3
+    paddsw      xmm3,   xmm1
 
-    punpcklqdq  xmm0, xmm3
+    paddsw      xmm3,   xmm2
+
+    paddsw      xmm3,   [rd GLOBAL]
+
+    psraw       xmm3,   7
+
+    packuswb    xmm3,   xmm3
+
+    punpcklqdq  xmm0,   xmm3
 
     movdqa      XMMWORD Ptr [rdi], xmm0
 
-    add         rdi, rdx
+    lea         rdi,    [rdi + rdx]
     dec         rcx
     jnz         filter_block1d16_h6_rowloop_ssse3
-
 
     ; begin epilog
     pop rdi
@@ -268,7 +299,7 @@ filter_block1d16_h4_rowloop_ssse3:
     pshufb      xmm3, [shuf3b GLOBAL]
     pshufb      xmm0, [shuf2b GLOBAL]
 
-    paddsw      xmm1, xmm7
+    paddsw      xmm1, [rd GLOBAL]
     paddsw      xmm1, xmm2
 
     pmaddubsw   xmm0, xmm5
@@ -278,7 +309,7 @@ filter_block1d16_h4_rowloop_ssse3:
     packuswb    xmm1, xmm1
     lea         rsi,    [rsi + rax]
     paddsw      xmm3, xmm0
-    paddsw      xmm3, xmm7
+    paddsw      xmm3, [rd GLOBAL]
     psraw       xmm3, 7
     packuswb    xmm3, xmm3
 
@@ -939,17 +970,19 @@ sym(vp8_bilinear_predict16x16_ssse3):
 %if ABI_IS_32BIT=0
         movsxd      r8,         dword ptr arg(5)    ; dst_pitch
 %endif
-        movdqu      xmm3,       [rsi]               ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
-
-        movdqa      xmm4,       xmm3
-
-        movdqu      xmm5,       [rsi+1]             ; 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16
-        lea         rsi,        [rsi + rdx]         ; next line
+        movq        xmm3,       [rsi]               ; 00 01 02 03 04 05 06 07
+        movq        xmm5,       [rsi+1]             ; 01 02 03 04 05 06 07 08
 
         punpcklbw   xmm3,       xmm5                ; 00 01 01 02 02 03 03 04 04 05 05 06 06 07 07 08
+        movq        xmm4,       [rsi+8]             ; 08 09 10 11 12 13 14 15
+
+        movq        xmm5,       [rsi+9]             ; 09 10 11 12 13 14 15 16
+
+        lea         rsi,        [rsi + rdx]         ; next line
+
         pmaddubsw   xmm3,       xmm1                ; 00 02 04 06 08 10 12 14
 
-        punpckhbw   xmm4,       xmm5                ; 08 09 09 10 10 11 11 12 12 13 13 14 14 15 15 16
+        punpcklbw   xmm4,       xmm5                ; 08 09 09 10 10 11 11 12 12 13 13 14 14 15 15 16
         pmaddubsw   xmm4,       xmm1                ; 01 03 05 07 09 11 13 15
 
         paddw       xmm3,       [rd GLOBAL]         ; xmm3 += round value
@@ -962,17 +995,18 @@ sym(vp8_bilinear_predict16x16_ssse3):
         packuswb    xmm7,       xmm4                ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
 
 .next_row:
-        movdqu      xmm6,       [rsi]               ; 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15
-
-        movdqa      xmm4,       xmm6
-
-        movdqu      xmm5,       [rsi+1]             ; 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16
-        lea         rsi,        [rsi + rdx]         ; next line
+        movq        xmm6,       [rsi]               ; 00 01 02 03 04 05 06 07
+        movq        xmm5,       [rsi+1]             ; 01 02 03 04 05 06 07 08
 
         punpcklbw   xmm6,       xmm5
+        movq        xmm4,       [rsi+8]             ; 08 09 10 11 12 13 14 15
+
+        movq        xmm5,       [rsi+9]             ; 09 10 11 12 13 14 15 16
+        lea         rsi,        [rsi + rdx]         ; next line
+
         pmaddubsw   xmm6,       xmm1
 
-        punpckhbw   xmm4,       xmm5
+        punpcklbw   xmm4,       xmm5
         pmaddubsw   xmm4,       xmm1
 
         paddw       xmm6,       [rd GLOBAL]         ; xmm6 += round value
@@ -1027,49 +1061,51 @@ b16x16_sp_only:
         movsxd      rax,        dword ptr arg(1)    ; src_pixels_per_line
 
         ; get the first horizontal line done
-        movdqu      xmm2,       [rsi]               ; load row 0
+        movq        xmm4,       [rsi]               ; load row 0
+        movq        xmm2,       [rsi + 8]           ; load row 0
 
         lea         rsi,        [rsi + rax]         ; next line
 .next_row:
-        movdqu      xmm3,       [rsi]               ; load row + 1
+        movq        xmm3,       [rsi]               ; load row + 1
+        movq        xmm5,       [rsi + 8]           ; load row + 1
 
-        movdqu      xmm4,       xmm2
         punpcklbw   xmm4,       xmm3
+        punpcklbw   xmm2,       xmm5
 
         pmaddubsw   xmm4,       xmm1
-        movdqu      xmm7,       [rsi + rax]         ; load row + 2
-
-        punpckhbw   xmm2,       xmm3
-        movdqu      xmm6,       xmm3
+        movq        xmm7,       [rsi + rax]         ; load row + 2
 
         pmaddubsw   xmm2,       xmm1
-        punpcklbw   xmm6,       xmm7
+        movq        xmm6,       [rsi + rax + 8]     ; load row + 2
 
+        punpcklbw   xmm3,       xmm7
+        punpcklbw   xmm5,       xmm6
+
+        pmaddubsw   xmm3,       xmm1
         paddw       xmm4,       [rd GLOBAL]
-        pmaddubsw   xmm6,       xmm1
+
+        pmaddubsw   xmm5,       xmm1
+        paddw       xmm2,       [rd GLOBAL]
 
         psraw       xmm4,       VP8_FILTER_SHIFT
-        punpckhbw   xmm3,       xmm7
-
-        paddw       xmm2,       [rd GLOBAL]
-        pmaddubsw   xmm3,       xmm1
-
         psraw       xmm2,       VP8_FILTER_SHIFT
-        paddw       xmm6,       [rd GLOBAL]
 
         packuswb    xmm4,       xmm2
-        psraw       xmm6,       VP8_FILTER_SHIFT
-
-        movdqa      [rdi],      xmm4                ; store row 0
         paddw       xmm3,       [rd GLOBAL]
 
+        movdqa      [rdi],      xmm4                ; store row 0
+        paddw       xmm5,       [rd GLOBAL]
+
         psraw       xmm3,       VP8_FILTER_SHIFT
+        psraw       xmm5,       VP8_FILTER_SHIFT
+
+        packuswb    xmm3,       xmm5
+        movdqa      xmm4,       xmm7
+
+        movdqa      [rdi + rdx],xmm3                ; store row 1
         lea         rsi,        [rsi + 2*rax]
 
-        packuswb    xmm6,       xmm3
-        movdqa      xmm2,       xmm7
-
-        movdqa      [rdi + rdx],xmm6                ; store row 1
+        movdqa      xmm2,       xmm6
         lea         rdi,        [rdi + 2*rdx]
 
         cmp         rdi,        rcx
@@ -1083,32 +1119,35 @@ b16x16_fp_only:
         movsxd      rax,        dword ptr arg(1)    ; src_pixels_per_line
 
 .next_row:
-        movdqu      xmm2,       [rsi]               ; row 0
-        movdqa      xmm3,       xmm2
-
-        movdqu      xmm4,       [rsi + 1]           ; row 0 + 1
-        lea         rsi,        [rsi + rax]         ; next line
+        movq        xmm2,       [rsi]               ; 00 01 02 03 04 05 06 07
+        movq        xmm4,       [rsi+1]             ; 01 02 03 04 05 06 07 08
 
         punpcklbw   xmm2,       xmm4
-        movdqu      xmm5,       [rsi]               ; row 1
+        movq        xmm3,       [rsi+8]             ; 08 09 10 11 12 13 14 15
 
         pmaddubsw   xmm2,       xmm1
-        movdqa      xmm6,       xmm5
+        movq        xmm4,       [rsi+9]             ; 09 10 11 12 13 14 15 16
 
-        punpckhbw   xmm3,       xmm4
-        movdqu      xmm7,       [rsi + 1]           ; row 1 + 1
+        lea         rsi,        [rsi + rax]         ; next line
+        punpcklbw   xmm3,       xmm4
 
         pmaddubsw   xmm3,       xmm1
-        paddw       xmm2,       [rd GLOBAL]
+        movq        xmm5,       [rsi]
 
+        paddw       xmm2,       [rd GLOBAL]
+        movq        xmm7,       [rsi+1]
+
+        movq        xmm6,       [rsi+8]
         psraw       xmm2,       VP8_FILTER_SHIFT
+
         punpcklbw   xmm5,       xmm7
+        movq        xmm7,       [rsi+9]
 
         paddw       xmm3,       [rd GLOBAL]
         pmaddubsw   xmm5,       xmm1
 
         psraw       xmm3,       VP8_FILTER_SHIFT
-        punpckhbw   xmm6,       xmm7
+        punpcklbw   xmm6,       xmm7
 
         packuswb    xmm2,       xmm3
         pmaddubsw   xmm6,       xmm1
@@ -1462,6 +1501,13 @@ shuf2b:
     db 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10, 9, 11
 shuf3b:
     db 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 9, 8, 10
+
+align 16
+shuf2bfrom1:
+    db  4, 8, 6, 1, 8, 3, 1, 5, 3, 7, 5, 9, 7,11, 9,13
+align 16
+shuf3bfrom1:
+    db  2, 6, 4, 8, 6, 1, 8, 3, 1, 5, 3, 7, 5, 9, 7,11
 
 align 16
 rd:
