@@ -38,6 +38,7 @@ Advanced options:
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
+  ${toggle_small}                 favor smaller size over speed
   ${toggle_arm_asm_detok}         assembly version of the detokenizer (ARM platforms only)
 
 Codecs:
@@ -244,6 +245,7 @@ CONFIG_LIST="
     spatial_resampling
     realtime_only
     shared
+    small
     arm_asm_detok
 "
 CMDLINE_SELECT="
@@ -281,6 +283,7 @@ CMDLINE_SELECT="
     spatial_resampling
     realtime_only
     shared
+    small
     arm_asm_detok
 "
 

@@ -880,9 +880,9 @@ process_common_toolchain() {
     enabled gcov &&
         check_add_cflags -fprofile-arcs -ftest-coverage &&
         check_add_ldflags -fprofile-arcs -ftest-coverage
-    enabled optimizations && check_add_cflags -O3
-    if enabled rvct; then
-        enabled optimizations && check_add_cflags -Otime
+    if enabled optimizations; then
+        enabled rvct && check_add_cflags -Otime
+        enabled small && check_add_cflags -O2 || check_add_cflags -O3
     fi
 
     # Position Independant Code (PIC) support, for building relocatable
