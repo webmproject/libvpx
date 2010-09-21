@@ -505,6 +505,12 @@ process_common_toolchain() {
             *i[3456]86*)
                 tgt_isa=x86
                 ;;
+            *powerpc64*)
+                tgt_isa=ppc64
+                ;;
+            *powerpc*)
+                tgt_isa=ppc32
+                ;;
         esac
 
         # detect tgt_os
@@ -755,8 +761,8 @@ process_common_toolchain() {
         link_with_cc=gcc
         setup_gnu_toolchain
         add_asflags -force_cpusubtype_ALL -I"\$(dir \$<)darwin"
-        add_cflags -maltivec -faltivec
         soft_enable altivec
+        enabled altivec && add_cflags -maltivec
 
         case "$tgt_os" in
         linux*)
@@ -768,6 +774,7 @@ process_common_toolchain() {
             add_cflags  ${darwin_arch} -m${bits} -fasm-blocks
             add_asflags ${darwin_arch} -force_cpusubtype_ALL -I"\$(dir \$<)darwin"
             add_ldflags ${darwin_arch} -m${bits}
+            enabled altivec && add_cflags -faltivec
         ;;
         esac
     ;;
