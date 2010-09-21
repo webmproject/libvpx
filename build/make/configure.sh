@@ -562,6 +562,9 @@ process_common_toolchain() {
     mips*)        enable mips;;
     esac
 
+    # PIC is probably what we want when building shared libs
+    enabled shared && soft_enable pic
+
     # Handle darwin variants
     case ${toolchain} in
         *-darwin8-gcc)
