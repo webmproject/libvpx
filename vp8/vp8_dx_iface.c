@@ -653,7 +653,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
 #ifndef VERSION_STRING
 #define VERSION_STRING
 #endif
-vpx_codec_iface_t vpx_codec_vp8_dx_algo =
+CODEC_INTERFACE(vpx_codec_vp8_dx) =
 {
     "WebM Project VP8 Decoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
