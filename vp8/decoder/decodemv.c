@@ -394,7 +394,7 @@ void vp8_read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     break;
                 }
 
-                mbmi->need_to_clamp_mvs = (mv->col < mb_to_left_edge) ? 1 : 0;
+                mbmi->need_to_clamp_mvs |= (mv->col < mb_to_left_edge) ? 1 : 0;
                 mbmi->need_to_clamp_mvs |= (mv->col > mb_to_right_edge) ? 1 : 0;
                 mbmi->need_to_clamp_mvs |= (mv->row < mb_to_top_edge) ? 1 : 0;
                 mbmi->need_to_clamp_mvs |= (mv->row > mb_to_bottom_edge) ? 1 : 0;
