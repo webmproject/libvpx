@@ -95,6 +95,7 @@ all_platforms="${all_platforms} armv7-linux-gcc"     #neon Cortex-A8
 all_platforms="${all_platforms} mips32-linux-gcc"
 all_platforms="${all_platforms} ppc32-darwin8-gcc"
 all_platforms="${all_platforms} ppc32-darwin9-gcc"
+all_platforms="${all_platforms} ppc32-linux-gcc"
 all_platforms="${all_platforms} ppc64-darwin8-gcc"
 all_platforms="${all_platforms} ppc64-darwin9-gcc"
 all_platforms="${all_platforms} ppc64-linux-gcc"

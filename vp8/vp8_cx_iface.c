@@ -114,6 +114,11 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
             ERROR(#memb " out of range ["#lo".."#hi"]");\
     } while(0)
 
+#define RANGE_CHECK_HI(p,memb,hi) do {\
+        if(!((p)->memb <= (hi))) \
+            ERROR(#memb " out of range [.."#hi"]");\
+    } while(0)
+
 #define RANGE_CHECK_LO(p,memb,lo) do {\
         if(!((p)->memb >= (lo))) \
             ERROR(#memb " out of range ["#lo"..]");\
@@ -131,24 +136,24 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(cfg, g_h,                   2, 16384);
     RANGE_CHECK(cfg, g_timebase.den,        1, 1000000000);
     RANGE_CHECK(cfg, g_timebase.num,        1, cfg->g_timebase.den);
-    RANGE_CHECK(cfg, g_profile,             0, 3);
-    RANGE_CHECK(cfg, rc_min_quantizer,      0, 63);
-    RANGE_CHECK(cfg, rc_max_quantizer,      0, 63);
-    RANGE_CHECK(cfg, g_threads,             0, 64);
+    RANGE_CHECK_HI(cfg, g_profile,          3);
+    RANGE_CHECK_HI(cfg, rc_min_quantizer,   63);
+    RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
+    RANGE_CHECK_HI(cfg, g_threads,          64);
 #if !(CONFIG_REALTIME_ONLY)
-    RANGE_CHECK(cfg, g_lag_in_frames,       0, 25);
+    RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
 #else
-    RANGE_CHECK(cfg, g_lag_in_frames,       0, 0);
+    RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
 #endif
     RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CBR);
-    RANGE_CHECK(cfg, rc_undershoot_pct,     0, 100);
-    RANGE_CHECK(cfg, rc_2pass_vbr_bias_pct, 0, 100);
+    RANGE_CHECK_HI(cfg, rc_undershoot_pct,  100);
+    RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
     RANGE_CHECK(cfg, kf_mode,               VPX_KF_DISABLED, VPX_KF_AUTO);
     //RANGE_CHECK_BOOL(cfg,                 g_delete_firstpassfile);
     RANGE_CHECK_BOOL(cfg,                   rc_resize_allowed);
-    RANGE_CHECK(cfg, rc_dropframe_thresh,   0, 100);
-    RANGE_CHECK(cfg, rc_resize_up_thresh,   0, 100);
-    RANGE_CHECK(cfg, rc_resize_down_thresh, 0, 100);
+    RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   100);
+    RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
+    RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
 #if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
 #else
@@ -167,7 +172,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 #if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_BEST_QUALITY_ENCODING, VP8_REAL_TIME_ENCODING);
     RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
-    RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 6);
+    RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
 #else
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_REAL_TIME_ENCODING, VP8_REAL_TIME_ENCODING);
 
@@ -178,10 +183,10 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 #endif
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
-    RANGE_CHECK(vp8_cfg, Sharpness,         0, 7);
-    RANGE_CHECK(vp8_cfg, arnr_max_frames,    0, 15);
-    RANGE_CHECK(vp8_cfg, arnr_strength,     0, 6);
-    RANGE_CHECK(vp8_cfg, arnr_type,         0, 0xffffffff);
+    RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
+    RANGE_CHECK_HI(vp8_cfg, arnr_max_frames, 15);
+    RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
+    RANGE_CHECK_HI(vp8_cfg, arnr_type,       0xffffffff);
 
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
