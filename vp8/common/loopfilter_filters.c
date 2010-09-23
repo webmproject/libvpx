@@ -13,9 +13,6 @@
 #include "loopfilter.h"
 #include "onyxc_int.h"
 
-
-#define NEW_LOOPFILTER_MASK
-
 typedef unsigned char uc;
 
 static __inline signed char vp8_signed_char_clamp(int t)
@@ -37,11 +34,7 @@ static __inline signed char vp8_filter_mask(signed char limit, signed char flimi
     mask |= (abs(q1 - q0) > limit) * -1;
     mask |= (abs(q2 - q1) > limit) * -1;
     mask |= (abs(q3 - q2) > limit) * -1;
-#ifndef NEW_LOOPFILTER_MASK
-    mask |= (abs(p0 - q0) > flimit) * -1;
-#else
     mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > flimit * 2 + limit) * -1;
-#endif
     mask = ~mask;
     return mask;
 }
@@ -286,11 +279,7 @@ static __inline signed char vp8_simple_filter_mask(signed char limit, signed cha
 // Why does this cause problems for win32?
 // error C2143: syntax error : missing ';' before 'type'
 //  (void) limit;
-#ifndef NEW_LOOPFILTER_MASK
-    signed char mask = (abs(p0 - q0) <= flimit) * -1;
-#else
     signed char mask = (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  <= flimit * 2 + limit) * -1;
-#endif
     return mask;
 }
 
