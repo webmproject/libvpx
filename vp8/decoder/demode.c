@@ -91,65 +91,8 @@ void vp8_kfread_modes(VP8D_COMP *pbi)
             {
 
 #if CONFIG_SEGMENTATION
-                MACROBLOCKD *xd = &pbi->mb;
-                xd->up_available = (mb_row != 0);
-                xd->left_available = (mb_col != 0);
-                int count = 0;
-                int j;
-                if(xd->left_available)
-                    left_id = (m-1)->mbmi.segment_id;
-                else
-                    left_id = 0;
-
-                if(xd->up_available)
-                    above_id = (m-cp->mb_cols)->mbmi.segment_id;
-                else
-                    above_id = 0;
-
-                if (vp8_read(bc, xd->mb_segment_tree_probs[0]))
-                {
-                    for(i = 0; i < MAX_MB_SEGMENTS; i++)
-                    {
-                        if((left_id != i) && (above_id != i))
-                        {
-                            if(left_id != above_id)
-                            {
-                                if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
-                                    m->mbmi.segment_id = i;
-                                else
-                                    m->mbmi.segment_id = 6-left_id-above_id-i;
-                                break;
-                            }
-                            else
-                            {
-                                if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
-                                {
-                                    m->mbmi.segment_id = i;
-                                    break;
-                                }
-                                else
-                                {
-                                    count++;
-                                    if(count == 1)
-                                        j = i;
-                                    if(count == 2)
-                                    {
-                                        m->mbmi.segment_id = 6-left_id-j-i;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (vp8_read(bc, xd->mb_segment_tree_probs[1]))
-                        m->mbmi.segment_id = above_id;
-                    else
-                        m->mbmi.segment_id = left_id;
-
-                }
+                vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
+                pbi->segmentation_map[(mb_row * cp->mb_cols) + mb_col] = m->mbmi.segment_id;
 #else
                 vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
 #endif

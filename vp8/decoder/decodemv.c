@@ -113,7 +113,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
     VP8_COMMON *const pc = & pbi->common;
     vp8_reader *const bc = & pbi->bc;
-
+    MACROBLOCKD *xd = &pbi->mb;
     MODE_INFO *mi = pc->mi, *ms;
     const int mis = pc->mode_info_stride;
 
@@ -123,6 +123,8 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 #if CONFIG_SEGMENTATION
     int left_id, above_id;
     int i;
+    int sum;
+    int index = 0;
 #endif
     vp8_prob prob_intra;
     vp8_prob prob_last;
@@ -161,7 +163,9 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
     }
 
     read_mvcontexts(bc, mvc);
-
+#if CONFIG_SEGMENTATION
+    xd->temporal_update = vp8_read_bit(bc);
+#endif
     while (++mb_row < pc->mb_rows)
     {
         int mb_col = -1;
@@ -171,7 +175,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             MB_MODE_INFO *const mbmi = & mi->mbmi;
             MV *const mv = & mbmi->mv.as_mv;
             VP8_COMMON *const pc = &pbi->common;
-            MACROBLOCKD *xd = &pbi->mb;
+            // MACROBLOCKD *xd = &pbi->mb;
 
             vp8dx_bool_decoder_fill(bc);
             // Distance of Mb to the various image edges.
@@ -185,68 +189,39 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             if (pbi->mb.update_mb_segmentation_map)
             {
 #if CONFIG_SEGMENTATION
-                xd->up_available = (mb_row != 0);
-                xd->left_available = (mb_col != 0);
-                int count = 0;
-                int j;
-                if(xd->left_available)
-                    left_id = (mi-1)->mbmi.segment_id;
-                else
-                    left_id = 0;
-
-                if(xd->up_available)
-                    above_id = (mi-pc->mb_cols)->mbmi.segment_id;
-                else
-                    above_id = 0;
-
-                if (vp8_read(bc, xd->mb_segment_tree_probs[0]))
+                if (xd->temporal_update)
                 {
-                    for(i = 0; i < MAX_MB_SEGMENTS; i++)
+                    sum = 0;
+
+                    if (mb_col != 0)
+                        sum += (mi-1)->mbmi.segment_flag;
+                    if (mb_row != 0)
+                        sum += (mi-pc->mb_cols)->mbmi.segment_flag;
+
+                    if (vp8_read(bc, xd->mb_segment_tree_probs[3+sum]) == 0)
                     {
-                        if((left_id != i) && (above_id != i))
-                        {
-                            if(left_id != above_id)
-                            {
-                                if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
-                                    mbmi->segment_id = i;
-                                else
-                                    mbmi->segment_id = 6-left_id-above_id-i;
-                                break;
-                            }
-                            else
-                            {
-                                if (vp8_read(bc, xd->mb_segment_tree_probs[2+i]) == 0)
-                                {
-                                    mbmi->segment_id = i;
-                                    break;
-                                }
-                                else
-                                {
-                                    count++;
-                                    if(count == 1)
-                                        j = i;
-                                    if(count == 2)
-                                    {
-                                        mbmi->segment_id = 6-left_id-j-i;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+                        mbmi->segment_id = pbi->segmentation_map[index];
+                        mbmi->segment_flag = 0;
                     }
+                    else
+                    {
+                        vp8_read_mb_features(bc, &mi->mbmi, &pbi->mb);
+                        mbmi->segment_flag = 1;
+                        pbi->segmentation_map[index] = mbmi->segment_id;
+                    }
+
                 }
                 else
                 {
-                    if (vp8_read(bc, xd->mb_segment_tree_probs[1]))
-                        mbmi->segment_id = above_id;
-                    else
-                        mbmi->segment_id = left_id;
-
+                    vp8_read_mb_features(bc, &mi->mbmi, &pbi->mb);
+                    pbi->segmentation_map[index] = mbmi->segment_id;
                 }
+                index++;
 #else
                 vp8_read_mb_features(bc, &mi->mbmi, &pbi->mb);
 #endif
             }
+
 
             // Read the macroblock coeff skip flag if this feature is in use, else default to 0
             if (pc->mb_no_coeff_skip)

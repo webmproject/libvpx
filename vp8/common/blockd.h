@@ -172,6 +172,7 @@ typedef struct
     int mb_skip_coeff;                                //does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens
     int dc_diff;
     unsigned char   segment_id;                  // Which set of segmentation parameters should be used for this MB
+    unsigned char segment_flag;
     int force_no_skip;
 
     B_MODE_INFO partition_bmi[16];
@@ -253,6 +254,7 @@ typedef struct
     // 0 (do not update) 1 (update) the macroblock segmentation feature data.
     unsigned char mb_segement_abs_delta;
 
+    unsigned char temporal_update;
     // Per frame flags that define which MB level features (such as quantizer or loop filter level)
     // are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO
 #if CONFIG_SEGMENTATION

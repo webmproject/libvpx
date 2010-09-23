@@ -29,6 +29,7 @@
 #include "subpixel.h"
 #include "vpx_ports/vpx_timer.h"
 
+
 #if CONFIG_RUNTIME_CPU_DETECT
 #define RTCD(x)     &cpi->common.rtcd.x
 #define IF_RTCD(x)  (x)
@@ -36,6 +37,13 @@
 #define RTCD(x)     NULL
 #define IF_RTCD(x)  NULL
 #endif
+
+#if CONFIG_SEGMENTATION
+#define SEEK_SEGID 12
+#define SEEK_SAMEID 4
+#define SEEK_DIFFID 7
+#endif
+
 extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 
 extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
@@ -260,6 +268,7 @@ void encode_mb_row(VP8_COMP *cpi,
     int seg_map_index = (mb_row * cpi->common.mb_cols);
 #if CONFIG_SEGMENTATION
     int left_id, above_id;
+    int sum;
 #endif
     // reset above block coeffs
     xd->above_context[Y1CONTEXT] = cm->above_context[Y1CONTEXT];
@@ -370,6 +379,11 @@ void encode_mb_row(VP8_COMP *cpi,
 
         xd->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
 
+        if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
+            xd->mbmi.segment_id = 0;
+        else
+            xd->mbmi.segment_id = 1;
+
         // store macroblock mode info into context array
         vpx_memcpy(&xd->mode_info_context->mbmi, &xd->mbmi, sizeof(xd->mbmi));
 
@@ -385,66 +399,40 @@ void encode_mb_row(VP8_COMP *cpi,
         recon_uvoffset += 8;
 
 #if CONFIG_SEGMENTATION
-    if(xd->left_available)
-        left_id = cpi->segmentation_map[seg_map_index+mb_col-1];
-    else
-        left_id = 0;
-
-    if(xd->up_available)
-        above_id = cpi->segmentation_map[seg_map_index+mb_col-cpi->common.mb_cols];
-    else
-        above_id = 0;
-
-    if ((xd->mbmi.segment_id == left_id) || (xd->mbmi.segment_id == above_id))
-    {
-        segment_counts[8]++;
-        if  (left_id != above_id)
+       //cpi->segmentation_map[mb_row * cm->mb_cols + mb_col] =  xd->mbmi.segment_id;
+        if (cm->frame_type == KEY_FRAME)
         {
-            if(xd->mbmi.segment_id == left_id)
-                segment_counts[10]++;
-            else
-                segment_counts[11]++;
+            segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
         }
         else
-            segment_counts[10]++;
-    }
-    else
-    {
-        segment_counts[9]++;
-        int count =0;
-        for(i = 0; i < MAX_MB_SEGMENTS; i++)
         {
-            if((left_id != i) && (above_id != i))
+            sum = 0;
+            if (mb_col != 0)
+                sum += (xd->mode_info_context-1)->mbmi.segment_flag;
+            if (mb_row != 0)
+                sum += (xd->mode_info_context-cm->mb_cols)->mbmi.segment_flag;
+
+            if (xd->mbmi.segment_id == cpi->segmentation_map[(mb_row*cm->mb_cols) + mb_col])
+                xd->mode_info_context->mbmi.segment_flag = 0;
+            else
+                xd->mode_info_context->mbmi.segment_flag = 1;
+
+            if (xd->mode_info_context->mbmi.segment_flag == 0)
             {
-                if(above_id != left_id)
-                {
-                    if(xd->mbmi.segment_id == i)
-                        segment_counts[i]++;
-                    else
-                        segment_counts[MAX_MB_SEGMENTS + i]++;
-                    break;
-                }
-                else
-                {
-                    if(xd->mbmi.segment_id == i)
-                    {
-                        segment_counts[i]++;
-                        break;
-                    }
-                    else
-                    {
-                        count++;
-                        segment_counts[MAX_MB_SEGMENTS + i]++;
-                        if(count == 2)
-                            break;
-                    }
-                }
+                segment_counts[SEEK_SAMEID + sum]++;
+                segment_counts[10]++;
+            }
+            else
+            {
+                segment_counts[SEEK_DIFFID + sum]++;
+                segment_counts[11]++;
+                //calculate individual segment ids
+                segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
             }
         }
-    }
-
+        segment_counts[SEEK_SEGID + xd->mbmi.segment_id] ++;
 #else
-    segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
+        segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
 #endif
         // skip to next mb
         xd->mode_info_context++;
@@ -477,7 +465,9 @@ void vp8_encode_frame(VP8_COMP *cpi)
     int i;
     TOKENEXTRA *tp = cpi->tok;
 #if CONFIG_SEGMENTATION
-    int segment_counts[MAX_MB_SEGMENTS + 8];
+    int segment_counts[MAX_MB_SEGMENTS + SEEK_SEGID];
+    int prob[3];
+    int new_cost, original_cost;
 #else
     int segment_counts[MAX_MB_SEGMENTS];
 #endif
@@ -738,61 +728,114 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     }
 
-
     // Work out the segment probabilites if segmentation is enabled
     if (xd->segmentation_enabled)
     {
         int tot_count;
-        int i;
+        int i,j;
+        int count1,count2,count3,count4;
 
         // Set to defaults
         vpx_memset(xd->mb_segment_tree_probs, 255 , sizeof(xd->mb_segment_tree_probs));
 #if CONFIG_SEGMENTATION
-        tot_count = segment_counts[8] + segment_counts[9];
+
+        tot_count = segment_counts[12] + segment_counts[13] + segment_counts[14] + segment_counts[15];
+        count1 = segment_counts[12] + segment_counts[13];
+        count2 = segment_counts[14] + segment_counts[15];
 
         if (tot_count)
-            xd->mb_segment_tree_probs[0] = (segment_counts[8] * 255) / tot_count;
+            prob[0] = (count1 * 255) / tot_count;
 
-        tot_count = segment_counts[10] + segment_counts[11];
+        if (count1 > 0)
+            prob[1] = (segment_counts[12] * 255) /count1;
+
+        if (count2 > 0)
+            prob[2] = (segment_counts[14] * 255) /count2;
+
+        if (cm->frame_type != KEY_FRAME)
+        {
+            tot_count = segment_counts[4] + segment_counts[7];
+            if (tot_count)
+                xd->mb_segment_tree_probs[3] = (segment_counts[4] * 255)/tot_count;
+
+            tot_count = segment_counts[5] + segment_counts[8];
+            if (tot_count)
+                xd->mb_segment_tree_probs[4] = (segment_counts[5] * 255)/tot_count;
+
+            tot_count = segment_counts[6] + segment_counts[9];
+            if (tot_count)
+                xd->mb_segment_tree_probs[5] = (segment_counts[6] * 255)/tot_count;
+        }
+
+        tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
+        count3 = segment_counts[0] + segment_counts[1];
+        count4 = segment_counts[2] + segment_counts[3];
+
+        if (tot_count)
+            xd->mb_segment_tree_probs[0] = (count3 * 255) / tot_count;
+
+        if (count3 > 0)
+            xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) /count3;
+
+        if (count4 > 0)
+            xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) /count4;
+
+        for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
+        {
+            if (xd->mb_segment_tree_probs[i] == 0)
+                xd->mb_segment_tree_probs[i] = 1;
+        }
+
+        original_cost = count1 * vp8_cost_zero(prob[0]) + count2 * vp8_cost_one(prob[0]);
+
+        if (count1 > 0)
+            original_cost += segment_counts[12] * vp8_cost_zero(prob[1]) + segment_counts[13] * vp8_cost_one(prob[1]);
+
+        if (count2 > 0)
+            original_cost += segment_counts[14] * vp8_cost_zero(prob[2]) + segment_counts[15] * vp8_cost_one(prob[2]) ;
+
+        new_cost = 0;
+
+        if (cm->frame_type != KEY_FRAME)
+        {
+            new_cost = segment_counts[4] * vp8_cost_zero(xd->mb_segment_tree_probs[3]) + segment_counts[7] *  vp8_cost_one(xd->mb_segment_tree_probs[3]);
+
+            new_cost += segment_counts[5] * vp8_cost_zero(xd->mb_segment_tree_probs[4]) + segment_counts[8] * vp8_cost_one(xd->mb_segment_tree_probs[4]);
+
+            new_cost += segment_counts[6] * vp8_cost_zero(xd->mb_segment_tree_probs[5]) + segment_counts[9] * vp8_cost_one (xd->mb_segment_tree_probs[5]);
+        }
 
         if (tot_count > 0)
-            xd->mb_segment_tree_probs[1] = (segment_counts[10] * 255) / tot_count;
+            new_cost += count3 * vp8_cost_zero(xd->mb_segment_tree_probs[0]) + count4 * vp8_cost_one(xd->mb_segment_tree_probs[0]);
 
-        tot_count = segment_counts[0] + segment_counts[4] ;
+        if (count3 > 0)
+            new_cost += segment_counts[0] * vp8_cost_zero(xd->mb_segment_tree_probs[1]) + segment_counts[1] * vp8_cost_one(xd->mb_segment_tree_probs[1]);
 
-        if (tot_count > 0)
-            xd->mb_segment_tree_probs[2] = (segment_counts[0]  * 255) / tot_count;
+        if (count4 > 0)
+            new_cost += segment_counts[2] * vp8_cost_zero(xd->mb_segment_tree_probs[2]) + segment_counts[3] * vp8_cost_one(xd->mb_segment_tree_probs[2]) ;
 
-        tot_count = segment_counts[1] + segment_counts[5];
-
-        if (tot_count > 0)
-            xd->mb_segment_tree_probs[3] = (segment_counts[1] * 255) / tot_count;
-
-        tot_count = segment_counts[2] + segment_counts[6];
-
-        if (tot_count > 0)
-            xd->mb_segment_tree_probs[4] = (segment_counts[2] * 255) / tot_count;
-
-        tot_count = segment_counts[3] + segment_counts[7];
-
-        if (tot_count > 0)
-            xd->mb_segment_tree_probs[5] = (segment_counts[3] * 255) / tot_count;
-
+        if (new_cost < original_cost)
+            xd->temporal_update = 1;
+        else
+        {
+            xd->temporal_update = 0;
+            xd->mb_segment_tree_probs[0] = prob[0];
+            xd->mb_segment_tree_probs[1] = prob[1];
+            xd->mb_segment_tree_probs[2] = prob[2];
+        }
 #else
         tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
+        count1 = segment_counts[0] + segment_counts[1];
+        count2 = segment_counts[2] + segment_counts[3];
 
         if (tot_count)
-            xd->mb_segment_tree_probs[0] = ((segment_counts[0] + segment_counts[1]) * 255) / tot_count;
+            xd->mb_segment_tree_probs[0] = (count1 * 255) / tot_count;
 
-        tot_count = segment_counts[0] + segment_counts[1];
+        if (count1 > 0)
+            xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) /count1;
 
-        if (tot_count > 0)
-            xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) / tot_count;
-
-        tot_count = segment_counts[2] + segment_counts[3];
-
-        if (tot_count > 0)
-            xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) / tot_count;
+        if (count2 > 0)
+            xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) /count2;
 
 #endif
         // Zero probabilities not allowed

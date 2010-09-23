@@ -137,7 +137,11 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
 
     if (!pbi)
         return;
-
+#if CONFIG_SEGMENTATION
+     // Delete sementation map
+    if (pbi->segmentation_map != 0)
+        vpx_free(pbi->segmentation_map);
+#endif
     vp8_decoder_remove_threads(pbi);
     vp8_remove_common(&pbi->common);
     vpx_free(pbi);

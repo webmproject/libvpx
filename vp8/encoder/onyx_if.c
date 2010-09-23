@@ -277,27 +277,10 @@ static void set_segment_data(VP8_PTR ptr, signed char *feature_data, unsigned ch
 static void segmentation_test_function(VP8_PTR ptr)
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
-#if CONFIG_SEGMENTATION
-    int i,j;
-#endif
     unsigned char *seg_map;
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
     CHECK_MEM_ERROR(seg_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
     // Create a temporary map for segmentation data.
-#if CONFIG_SEGMENTATION
-    // MB loop to set local segmentation map
-    for (i = 0; i < cpi->common.mb_rows; i++ )
-    {
-        for (j = 0; j < cpi->common.mb_cols; j++ )
-        {
-            if (j >= cpi->common.mb_cols/4 && j < (cpi->common.mb_cols*3)/4 )
-                seg_map[(i*cpi->common.mb_cols) + j] = 2;
-            else
-                seg_map[(i*cpi->common.mb_cols) + j] = 0;
-        }
-    }
-
-#endif
 
     // MB loop to set local segmentation map
     /*for ( i = 0; i < cpi->common.mb_rows; i++ )
@@ -3542,17 +3525,16 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     int drop_mark75 = drop_mark * 2 / 3;
     int drop_mark50 = drop_mark / 4;
     int drop_mark25 = drop_mark / 8;
-#if CONFIG_SEGMENTATION
-   int i;
-#endif
+
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
 
     // Test code for segmentation of gf/arf (0,0)
-#if CONFIG_SEGMENTATION
-    segmentation_test_function((VP8_PTR) cpi);
-#endif
     //segmentation_test_function((VP8_PTR) cpi);
+#if CONFIG_SEGMENTATION
+    cpi->mb.e_mbd.segmentation_enabled = 1;
+    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+#endif
 
     // For an alt ref frame in 2 pass we skip the call to the second pass function that sets the target bandwidth
 #if !(CONFIG_REALTIME_ONLY)
@@ -4057,28 +4039,6 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
             vp8_setup_key_frame(cpi);
 
         // transform / motion compensation build reconstruction frame
-#if CONFIG_SEGMENTATION
-   // MB loop to set local segmentation map
-    for (i = 0; i < cpi->common.mb_rows; i++ )
-    {
-        int j = (cpi->common.mb_cols/4);
-        int k = (cpi->common.mb_cols*3)/4;
-        if((cm->current_video_frame%2 == 0 && i<cpi->common.mb_rows/2)||(cm->current_video_frame%2 == 1 && i>cpi->common.mb_rows/2))
-        {
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + j] = 2;
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + j-1] = 2;
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + k] = 2;
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + k+1] = 2;
-        }
-        else if((cm->current_video_frame%2 == 1 && i<cpi->common.mb_rows/2)||(cm->current_video_frame%2 == 0 && i>cpi->common.mb_rows/2))
-        {
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + j] = 0;
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + j-1] = 0;
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + k] = 0;
-            cpi->segmentation_map[(i*cpi->common.mb_cols) + k+1] = 0;
-        }
-    }
-#endif
         vp8_encode_frame(cpi);
         cpi->projected_frame_size -= vp8_estimate_entropy_savings(cpi);
         cpi->projected_frame_size = (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;

@@ -632,7 +632,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     // Is segmentation enabled
     xd->segmentation_enabled = (unsigned char)vp8_read_bit(bc);
-
     if (xd->segmentation_enabled)
     {
         // Signal whether or not the segmentation map is being explicitly updated this frame.
@@ -794,7 +793,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         fclose(z);
     }
 
-
     vp8dx_bool_decoder_fill(bc);
     {
         // read coef probability tree
@@ -817,6 +815,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     vpx_memcpy(&xd->pre, &pc->last_frame, sizeof(YV12_BUFFER_CONFIG));
     vpx_memcpy(&xd->dst, &pc->new_frame, sizeof(YV12_BUFFER_CONFIG));
+
+#if CONFIG_SEGMENTATION
+     // Create the encoder segmentation map and set all entries to 0
+     CHECK_MEM_ERROR(pbi->segmentation_map, vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
+#endif
 
     // set up frame new frame for intra coded blocks
     vp8_setup_intra_recon(&pc->new_frame);
