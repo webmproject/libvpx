@@ -71,8 +71,7 @@
     ldr         r12, _mbvlfuv_coeff_
     vst1.u8     {q10}, [sp]!
 
-    ;vp8_filter_mask() function
-    ;vp8_hevmask() function
+    ; vp8_filter_mask
     vabd.u8     q11, q3, q4                 ; abs(p3 - p2)
     vabd.u8     q12, q4, q5                 ; abs(p2 - p1)
     vabd.u8     q13, q5, q6                 ; abs(p1 - p0)
@@ -80,37 +79,31 @@
     vabd.u8     q3, q9, q8                  ; abs(q2 - q1)
     vabd.u8     q0, q10, q9                 ; abs(q3 - q2)
 
-    vcge.u8     q15, q1, q11                ; (abs(p3 - p2) > limit)*-1
-    vcge.u8     q12, q1, q12                ; (abs(p2 - p1) > limit)*-1
-    vcge.u8     q10, q1, q13                ; (abs(p1 - p0) > limit)*-1
-    vcge.u8     q11, q1, q14                ; (abs(q1 - q0) > limit)*-1
-    vcge.u8     q3, q1, q3                  ; (abs(q2 - q1) > limit)*-1
-    vcge.u8     q0, q1, q0                  ; (abs(q3 - q2) > limit)*-1
-
-    vand        q15, q15, q12
+    vmax.u8     q11, q11, q12
+    vmax.u8     q12, q13, q14
+    vmax.u8     q3, q3, q0
+    vmax.u8     q15, q11, q12
 
     vabd.u8     q12, q6, q7                 ; abs(p0 - q0)
 
+    ; vp8_hevmask
     vcgt.u8     q13, q13, q2                ; (abs(p1 - p0) > thresh)*-1
     vcgt.u8     q14, q14, q2                ; (abs(q1 - q0) > thresh)*-1
+    vmax.u8     q15, q15, q3
 
     vld1.s8     {d4[], d5[]}, [r2]          ; flimit
-
-    vand        q10, q10, q11
-    vand        q3, q3, q0
 
     vld1.u8     {q0}, [r12]!
 
     vadd.u8     q2, q2, q2                  ; flimit * 2
     vadd.u8     q2, q2, q1                  ; flimit * 2 + limit
+    vcge.u8     q15, q1, q15
 
     vabd.u8     q1, q5, q8                  ; abs(p1 - q1)
     vqadd.u8    q12, q12, q12               ; abs(p0 - q0) * 2
     vshr.u8     q1, q1, #1                  ; abs(p1 - q1) / 2
     vqadd.u8    q12, q12, q1                ; abs(p0 - q0) * 2 + abs(p1 - q1) / 2
     vcge.u8     q12, q2, q12                ; (abs(p0 - q0)*2 + abs(p1 - q1)/2 > flimit*2 + limit)*-1
-
-    vand        q15, q15, q10
 
     ;vp8_filter() function
     veor        q7, q7, q0                  ; qs0: q0 offset to convert to a signed value
@@ -122,29 +115,23 @@
 ;;;;;;;;;;;;;
     vorr        q14, q13, q14               ; q14: vp8_hevmask
 
-    ;vqsub.s8   q2, q7, q6                  ; ( qs0 - ps0)
     vsubl.s8    q2, d14, d12                ; ( qs0 - ps0)
     vsubl.s8    q13, d15, d13
 
     vqsub.s8    q1, q5, q8                  ; vp8_filter = vp8_signed_char_clamp(ps1-qs1)
 
-    ;vadd.s8    q10, q2, q2                 ; 3 * ( qs0 - ps0)
     vadd.s16    q10, q2, q2                 ; 3 * ( qs0 - ps0)
     vadd.s16    q11, q13, q13
+    vand        q15, q15, q12               ; vp8_filter_mask
 
-    vand        q3, q3, q12
-
-    ;vadd.s8    q2, q2, q10
     vadd.s16    q2, q2, q10
     vadd.s16    q13, q13, q11
 
     vld1.u8     {q12}, [r12]!               ;#3
 
-    ;vqadd.s8   q1, q1, q2                  ; vp8_filter + 3 * ( qs0 - ps0)
     vaddw.s8    q2, q2, d2                  ; vp8_filter + 3 * ( qs0 - ps0)
     vaddw.s8    q13, q13, d3
 
-    vand        q15, q15, q3                ; q15: vp8_filter_mask
     vld1.u8     {q11}, [r12]!               ;#4
 
     vqmovn.s16  d2, q2                      ; vp8_filter = vp8_signed_char_clamp(vp8_filter + 3 * ( qs0 - ps0))
@@ -160,28 +147,6 @@
     vld1.u8     {d7}, [r12]!                ;#9
     ;
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Change for VP8 from VP7
-;   vand        q2, q13, q12                ; s = Filter2 & 7
-
-;   vqadd.s8    q13, q13, q11               ; Filter2 = vp8_signed_char_clamp(Filter2+4)
-;   vld1.u8     {d6}, [r12]!                ;#18
-
-;   sub         r0, r0, r1, lsl #3
-;   sub         r3, r3, r1, lsl #3
-;   sub         sp, sp, #32
-
-;   vshr.s8     q13, q13, #3                ; Filter2 >>= 3
-;   vceq.i8     q2, q2, q11                 ; s = (s==4)*-1
-
-;   vqsub.s8    q7, q7, q13                 ; qs0 = vp8_signed_char_clamp(qs0 - Filter2)
-;   vqadd.s8    q11, q2, q13                ; u = vp8_signed_char_clamp(s + Filter2)
-
-;   vld1.u8     {d5}, [r12]!                ;#27
-;   vmov        q10, q15
-;   vmov        q12, q15
-
-;   vqadd.s8    q6, q6, q11                 ; ps0 = vp8_signed_char_clamp(ps0 + u)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     vqadd.s8    q2, q13, q11                ; Filter1 = vp8_signed_char_clamp(Filter2+4)
     vqadd.s8    q13, q13, q12               ; Filter2 = vp8_signed_char_clamp(Filter2+3)
 
