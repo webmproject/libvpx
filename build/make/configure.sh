@@ -567,13 +567,13 @@ process_common_toolchain() {
 
     # Handle darwin variants
     case ${toolchain} in
-        *-darwin8-gcc)
+        *-darwin8-*)
             add_cflags  "-isysroot /Developer/SDKs/MacOSX10.4u.sdk"
             add_cflags  "-mmacosx-version-min=10.4"
             add_ldflags "-isysroot /Developer/SDKs/MacOSX10.4u.sdk"
             add_ldflags "-mmacosx-version-min=10.4"
             ;;
-        *-darwin9-gcc)
+        *-darwin9-*)
             add_cflags  "-isysroot /Developer/SDKs/MacOSX10.5.sdk"
             add_cflags  "-mmacosx-version-min=10.5"
             add_ldflags "-isysroot /Developer/SDKs/MacOSX10.5.sdk"
