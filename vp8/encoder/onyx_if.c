@@ -1330,11 +1330,6 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
-    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
-    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
-
-    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
-    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
     cpi->max_gf_interval = (int)(cpi->output_frame_rate / 2) + 2;
 
     //cpi->max_gf_interval = (int)(cpi->output_frame_rate * 2 / 3) + 1;
@@ -1580,6 +1575,10 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
+    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
+    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual        = 0;
@@ -1858,6 +1857,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
+    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
+    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual        = 0;
