@@ -29,7 +29,8 @@
  * This interface provides the capability to decode raw VP8 streams, as would
  * be found in AVI files and other non-Flash uses.
  */
-extern vpx_codec_iface_t vpx_codec_vp8_dx_algo;
+extern vpx_codec_iface_t  vpx_codec_vp8_dx_algo;
+extern vpx_codec_iface_t* vpx_codec_vp8_dx(void);
 
 /* Include controls common to both the encoder and decoder */
 #include "vp8.h"

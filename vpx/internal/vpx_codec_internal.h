@@ -389,6 +389,20 @@ struct vpx_codec_priv
 #define RECAST(id, x) id##__convert(x)
 
 
+/* CODEC_INTERFACE convenience macro
+ *
+ * By convention, each codec interface is a struct with extern linkage, where
+ * the symbol is suffixed with _algo. A getter function is also defined to
+ * return a pointer to the struct, since in some cases it's easier to work
+ * with text symbols than data symbols (see issue #169). This function has
+ * the same name as the struct, less the _algo suffix. The CODEC_INTERFACE
+ * macro is provided to define this getter function automatically.
+ */
+#define CODEC_INTERFACE(id)\
+vpx_codec_iface_t* id(void) { return &id##_algo; }\
+vpx_codec_iface_t  id##_algo
+
+
 /* Internal Utility Functions
  *
  * The following functions are indended to be used inside algorithms as

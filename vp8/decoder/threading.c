@@ -257,6 +257,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                 int mb_row;
                 int num_part = 1 << pbi->common.multi_token_partition;
                 volatile int *last_row_current_mb_col;
+                int nsync = pbi->sync_range;
 
                 for (mb_row = ithread+1; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
                 {
@@ -292,9 +293,9 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
 
                     for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
                     {
-                        if ((mb_col & 7) == 0)
+                        if ((mb_col & (nsync-1)) == 0)
                         {
-                            while (mb_col > (*last_row_current_mb_col - 8) && *last_row_current_mb_col != pc->mb_cols - 1)
+                            while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != pc->mb_cols - 1)
                             {
                                 x86_pause_hint();
                                 thread_sleep(0);
@@ -608,6 +609,11 @@ int vp8mt_alloc_temp_buffers(VP8D_COMP *pbi, int width, int prev_mb_rows)
         if ((width & 0xf) != 0)
             width += 16 - (width & 0xf);
 
+        if (width < 640) pbi->sync_range = 1;
+        else if (width <= 1280) pbi->sync_range = 8;
+        else if (width <= 2560) pbi->sync_range =16;
+        else pbi->sync_range = 32;
+
         uv_width = width >>1;
 
         // Allocate an int for each mb row.
@@ -764,6 +770,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
     int num_part = 1 << pbi->common.multi_token_partition;
     int i, j;
     volatile int *last_row_current_mb_col = NULL;
+    int nsync = pbi->sync_range;
 
     int filter_level;
     loop_filter_info *lfi = pc->lf_info;
@@ -832,8 +839,8 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
             for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
             {
-                if ( mb_row > 0 && (mb_col & 7) == 0){
-                    while (mb_col > (*last_row_current_mb_col - 8) && *last_row_current_mb_col != pc->mb_cols - 1)
+                if ( mb_row > 0 && (mb_col & (nsync-1)) == 0){
+                    while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != pc->mb_cols - 1)
                     {
                         x86_pause_hint();
                         thread_sleep(0);

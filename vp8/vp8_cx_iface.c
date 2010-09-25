@@ -1100,7 +1100,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 #ifndef VERSION_STRING
 #define VERSION_STRING
 #endif
-vpx_codec_iface_t vpx_codec_vp8_cx_algo =
+CODEC_INTERFACE(vpx_codec_vp8_cx) =
 {
     "WebM Project VP8 Encoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
