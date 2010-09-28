@@ -30,7 +30,7 @@
 #include "encodemv.h"
 
 //#define OUTPUT_FPF 1
-//#define FIRSTPASS_MM 1
+#define FIRSTPASS_MM 1
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
