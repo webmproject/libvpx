@@ -378,6 +378,7 @@ typedef struct
     int max_gf_interval;
     int baseline_gf_interval;
     int gf_decay_rate;
+    int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
 
     INT64 key_frame_count;
     INT64 tot_key_frame_bits;
@@ -616,9 +617,11 @@ typedef struct
 #endif
 #if VP8_TEMPORAL_ALT_REF
     SOURCE_SAMPLE alt_ref_buffer;
-    unsigned char *frames[MAX_LAG_BUFFERS];
-    int fixed_divide[255];
+    YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
+    int fixed_divide[512];
 #endif
+    // Flag to indicate temporal filter method
+    int use_weighted_temporal_filter;
 
 #if CONFIG_PSNR
     int    count;

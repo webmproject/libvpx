@@ -545,31 +545,29 @@ void vp8_encode_frame(VP8_COMP *cpi)
     int segment_counts[MAX_MB_SEGMENTS];
     int totalrate;
 
-    if (cm->frame_type != KEY_FRAME)
+    // Functions setup for all frame types so we can use MC in AltRef
+    if (cm->mcomp_filter_type == SIXTAP)
     {
-        if (cm->mcomp_filter_type == SIXTAP)
-        {
-            xd->subpixel_predict     = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap4x4);
-            xd->subpixel_predict8x4      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap8x4);
-            xd->subpixel_predict8x8      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap8x8);
-            xd->subpixel_predict16x16    = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap16x16);
-        }
-        else
-        {
-            xd->subpixel_predict     = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear4x4);
-            xd->subpixel_predict8x4      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear8x4);
-            xd->subpixel_predict8x8      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear8x8);
-            xd->subpixel_predict16x16    = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear16x16);
-        }
+        xd->subpixel_predict        = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap4x4);
+        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap8x4);
+        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap8x8);
+        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap16x16);
     }
-
-    //else  // Key Frame
-    //{
-    // For key frames make sure the intra ref frame probability value
-    // is set to "all intra"
-    //cpi->prob_intra_coded = 255;
-    //}
-
+    else
+    {
+        xd->subpixel_predict        = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, bilinear4x4);
+        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, bilinear8x4);
+        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, bilinear8x8);
+        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
+                                      &cpi->common.rtcd.subpix, bilinear16x16);
+    }
 
     x->gf_active_ptr = (signed char *)cpi->gf_active_flags;     // Point to base of GF active flags data structure
 
