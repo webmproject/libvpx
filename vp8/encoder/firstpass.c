@@ -258,7 +258,7 @@ void vp8_output_stats(struct vpx_codec_pkt_list *pktlist,
     vpx_codec_pkt_list_add(pktlist, &pkt);
 
 // TEMP debug code
-#ifdef OUTPUT_FPF
+#if OUTPUT_FPF
     {
         FILE *fpfile;
         fpfile = fopen("firstpass.stt", "a");
@@ -369,50 +369,33 @@ void vp8_fpmm_reset_pos(VP8_COMP *cpi, int target_pos)
 
 void vp8_advance_fpmm(VP8_COMP *cpi, int count)
 {
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
     fseek(cpi->fp_motion_mapfile, (int)(count * cpi->common.MBs), SEEK_CUR);
 #endif
 }
 
-void vp8_input_fpmm(VP8_COMP *cpi, int count)
+void vp8_input_fpmm(VP8_COMP *cpi)
 {
-#ifdef FIRSTPASS_MM
-
-    unsigned char *tmp_motion_map;
-    int i, j;
+#if FIRSTPASS_MM
+    int MBs = cpi->common.MBs;
+    int max_frames = cpi->active_arnr_frames;
 
     if (!cpi->fp_motion_mapfile)
         return;                 // Error
 
-    // Create the first pass motion map structure and set to 0
-    CHECK_MEM_ERROR(tmp_motion_map, vpx_calloc(cpi->common.MBs, 1));
-
-    // Reset the state of the global map
-    vpx_memset(cpi->fp_motion_map, 0, cpi->common.MBs);
-
-    // Read the specified number of frame maps and set the global map to the highest value seen for each mb.
-    for (i = 0; i < count; i++)
+    // Read the specified number of frame motion maps
+    if (fread(cpi->fp_motion_map, 1,
+              max_frames * MBs,
+              cpi->fp_motion_mapfile) != max_frames*MBs)
     {
-        if (fread(tmp_motion_map, 1, cpi->common.MBs, cpi->fp_motion_mapfile) == cpi->common.MBs)
-        {
-            for (j = 0; j < cpi->common.MBs; j++)
-            {
-                if (tmp_motion_map[j] > 1)
-                    cpi->fp_motion_map[j] += 5;   // Intra is flagged
-                else
-                    cpi->fp_motion_map[j] += tmp_motion_map[j];
-            }
-        }
-        else
-            break;  // Read error
-
+        // Read error
+        return;
     }
 
-    if (tmp_motion_map != 0)
-        vpx_free(tmp_motion_map);
+    // Flag the use of weights in the temporal filter
+    cpi->use_weighted_temporal_filter = 1;
 
 #endif
-
 }
 
 void vp8_init_first_pass(VP8_COMP *cpi)
@@ -438,7 +421,7 @@ void vp8_end_first_pass(VP8_COMP *cpi)
 {
     vp8_output_stats(cpi->output_pkt_list, &cpi->total_stats);
 
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
 
     if (cpi->fp_motion_mapfile)
         fclose(cpi->fp_motion_mapfile);
@@ -603,6 +586,8 @@ void vp8_first_pass(VP8_COMP *cpi)
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int this_error;
+            int zero_error;
+            int zz_to_best_ratio;
             int gf_motion_error = INT_MAX;
             int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
@@ -624,7 +609,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             intra_error += this_error;
 
             // Indicate default assumption of intra in the motion map
-            *fp_motion_map_ptr = 2;
+            *fp_motion_map_ptr = 0;
 
             // Set up limit values for motion vectors to prevent them extending outside the UMV borders
             x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
@@ -645,6 +630,9 @@ void vp8_first_pass(VP8_COMP *cpi)
                 vp8_zz_motion_search( cpi, x, lst_yv12, &motion_error, recon_yoffset );
                 d->bmi.mv.as_mv.row = 0;
                 d->bmi.mv.as_mv.col = 0;
+
+                // Save (0,0) error for later use
+                zero_error = motion_error;
 
                 // Test last reference frame using the previous best mv as the
                 // starting point (best reference) for the search
@@ -719,8 +707,6 @@ void vp8_first_pass(VP8_COMP *cpi)
                     {
                         mvcount++;
 
-                        *fp_motion_map_ptr = 1;
-
                         // Does the Row vector point inwards or outwards
                         if (mb_row < cm->mb_rows / 2)
                         {
@@ -752,12 +738,30 @@ void vp8_first_pass(VP8_COMP *cpi)
                             else if (d->bmi.mv.as_mv.col < 0)
                                 sum_in_vectors--;
                         }
+
+                        // Compute how close (0,0) predictor is to best
+                        // predictor in terms of their prediction error
+                        zz_to_best_ratio = (10*zero_error + this_error/2)
+                                            / (this_error+!this_error);
+
+                        if ((zero_error < 50000) &&
+                            (zz_to_best_ratio <= 11) )
+                            *fp_motion_map_ptr = 1;
+                        else
+                            *fp_motion_map_ptr = 0;
                     }
                     else
-                        *fp_motion_map_ptr = 0;    // 0,0 mv was best
+                    {
+                        // 0,0 mv was best
+                        if( zero_error<50000 )
+                            *fp_motion_map_ptr = 2;
+                        else
+                            *fp_motion_map_ptr = 1;
+                    }
                 }
                 else
                 {
+                    // Intra was best
                     best_ref_mv.row = 0;
                     best_ref_mv.col = 0;
                 }
@@ -839,7 +843,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         vp8_output_stats(cpi->output_pkt_list, &cpi->this_frame_stats);
         vp8_accumulate_stats(&cpi->total_stats, &fps);
 
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
         fwrite(cpi->fp_motion_map, 1, cpi->common.MBs, cpi->fp_motion_mapfile);
 #endif
     }
@@ -1180,7 +1184,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
 
     }
 
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
     cpi->fp_motion_mapfile = 0;
     cpi->fp_motion_mapfile = fopen("fpmotionmap.stt", "rb");
 #endif
@@ -1189,7 +1193,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
 
 void vp8_end_second_pass(VP8_COMP *cpi)
 {
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
 
     if (cpi->fp_motion_mapfile)
         fclose(cpi->fp_motion_mapfile);
@@ -1230,7 +1234,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     int max_bits = frame_max_bits(cpi);    // Max for a single frame
 
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
     int fpmm_pos;
 #endif
 
@@ -1239,7 +1243,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     vp8_clear_system_state();  //__asm emms;
 
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
     fpmm_pos = vp8_fpmm_get_pos(cpi);
 #endif
 
@@ -1452,6 +1456,11 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // Only use an arf if it is likely we will be able to code it at a lower Q than the surrounding frames.
         if (tmp_q < cpi->worst_quality)
         {
+            int half_gf_int;
+            int frames_after_arf;
+            int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
+            int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
+
             cpi->source_alt_ref_pending = TRUE;
 
             // For alt ref frames the error score for the end frame of the group (the alt ref frame) should not contribute to the group total and hence
@@ -1462,20 +1471,63 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             // The future frame itself is part of the next group
             cpi->baseline_gf_interval = i - 1;
 
-#ifdef FIRSTPASS_MM
-            // Read through the motion map to load up the entry for the ARF
-            {
-                int j;
+            // Define the arnr filter width for this group of frames:
+            // We only filter frames that lie within a distance of half
+            // the GF interval from the ARF frame. We also have to trap
+            // cases where the filter extends beyond the end of clip.
+            // Note: this_frame->frame has been updated in the loop
+            // so it now points at the ARF frame.
+            half_gf_int = cpi->baseline_gf_interval >> 1;
+            frames_after_arf = cpi->total_stats.count - this_frame->frame - 1;
 
-                // Advance to the region of interest
-                // Current default 2 frames before to 2 frames after the ARF frame itsef
+            switch (cpi->oxcf.arnr_type)
+            {
+            case 1: // Backward filter
+                frames_fwd = 0;
+                if (frames_bwd > half_gf_int)
+                    frames_bwd = half_gf_int;
+                break;
+
+            case 2: // Forward filter
+                if (frames_fwd > half_gf_int)
+                    frames_fwd = half_gf_int;
+                if (frames_fwd > frames_after_arf)
+                    frames_fwd = frames_after_arf;
+                frames_bwd = 0;
+                break;
+
+            case 3: // Centered filter
+            default:
+                frames_fwd >>= 1;
+                if (frames_fwd > frames_after_arf)
+                    frames_fwd = frames_after_arf;
+                if (frames_fwd > half_gf_int)
+                    frames_fwd = half_gf_int;
+
+                frames_bwd = frames_fwd;
+
+                // For even length filter there is one more frame backward
+                // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
+                if (frames_bwd < half_gf_int)
+                    frames_bwd += (cpi->oxcf.arnr_max_frames+1) & 0x1;
+                break;
+            }
+
+            cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
+
+#if FIRSTPASS_MM
+            {
+                // Advance to & read in the motion map for those frames
+                // to be considered for filtering based on the position
+                // of the ARF
                 vp8_fpmm_reset_pos(cpi, cpi->fpmm_pos);
 
-                for (j = 0; j < cpi->baseline_gf_interval - 2; j++)
-                    vp8_advance_fpmm(cpi, 1);
+                // Position at the 'earliest' frame to be filtered
+                vp8_advance_fpmm(cpi,
+                    cpi->baseline_gf_interval - frames_bwd);
 
                 // Read / create a motion map for the region of interest
-                vp8_input_fpmm(cpi, 5);
+                vp8_input_fpmm(cpi);
             }
 #endif
         }
@@ -1713,7 +1765,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         reset_fpf_position(cpi, start_pos);
     }
 
-#ifdef FIRSTPASS_MM
+#if FIRSTPASS_MM
     // Reset the First pass motion map file position
     vp8_fpmm_reset_pos(cpi, fpmm_pos);
 #endif
@@ -1798,10 +1850,13 @@ void vp8_second_pass(VP8_COMP *cpi)
     if (EOF == vp8_input_stats(cpi, &this_frame))
         return;
 
-#ifdef FIRSTPASS_MM
-    vpx_memset(cpi->fp_motion_map, 0, cpi->common.MBs);
+#if FIRSTPASS_MM
+    vpx_memset(cpi->fp_motion_map, 0,
+                cpi->oxcf.arnr_max_frames*cpi->common.MBs);
     cpi->fpmm_pos = vp8_fpmm_get_pos(cpi);
-    vp8_advance_fpmm(cpi, 1);         // Read this frame's first pass motion map
+
+    // Step over this frame's first pass motion map
+    vp8_advance_fpmm(cpi, 1);
 #endif
 
     this_frame_error = this_frame.ssim_weighted_pred_err;
