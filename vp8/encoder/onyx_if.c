@@ -1330,11 +1330,6 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
-    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
-    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
-
-    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
-    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
     cpi->max_gf_interval = (int)(cpi->output_frame_rate / 2) + 2;
 
     //cpi->max_gf_interval = (int)(cpi->output_frame_rate * 2 / 3) + 1;
@@ -1580,6 +1575,10 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
+    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
+    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual        = 0;
@@ -1858,6 +1857,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
+    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
+    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual        = 0;
@@ -2676,6 +2679,8 @@ int vp8_update_entropy(VP8_PTR comp, int update)
     return 0;
 }
 
+
+#if OUTPUT_YUV_SRC
 void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
 {
     FILE *yuv_file = fopen(name, "ab");
@@ -2711,6 +2716,8 @@ void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
 
     fclose(yuv_file);
 }
+#endif
+
 
 static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 {
@@ -4355,12 +4362,13 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     if (cm->frame_type == KEY_FRAME)
         cm->refresh_last_frame = 1;
 
-    if (0)
+#if 0
     {
         FILE *f = fopen("gfactive.stt", "a");
         fprintf(f, "%8d %8d %8d %8d %8d\n", cm->current_video_frame, (100 * cpi->gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols), cpi->this_iiratio, cpi->next_iiratio, cm->refresh_golden_frame);
         fclose(f);
     }
+#endif
 
     // For inter frames the current default behaviour is that when cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
     // This is purely an encoder descision at present.
@@ -4604,9 +4612,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
         }
     }
 
-#if CONFIG_PSNR
-
-    if (0)
+#if 0 && CONFIG_PSNR
     {
         FILE *f = fopen("tmp.stt", "a");
 
@@ -4731,7 +4737,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
 
 
 
-    if (0)
+#if 0
     {
         char filename[512];
         FILE *recon_file;
@@ -4741,6 +4747,7 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
                cm->yv12_fb[cm->lst_fb_idx].frame_size, 1, recon_file);
         fclose(recon_file);
     }
+#endif
 
     // DEBUG
     //vp8_write_yuv_frame("encoder_recon.yuv", cm->frame_to_show);
@@ -4800,8 +4807,6 @@ void vp8_check_gf_quality(VP8_COMP *cpi)
     }
 
 #if 0
-
-    if (0)
     {
         FILE *f = fopen("gfneeded.stt", "a");
         fprintf(f, "%10d %10d %10d %10d %10ld \n",
