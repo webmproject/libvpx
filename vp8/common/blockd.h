@@ -262,9 +262,9 @@ typedef struct
     unsigned char mode_ref_lf_delta_update;
 
     // Delta values have the range +/- MAX_LOOP_FILTER
-    //char ref_lf_deltas[MAX_REF_LF_DELTAS];                      // 0 = Intra, Last, GF, ARF
-    //char mode_lf_deltas[MAX_MODE_LF_DELTAS];                            // 0 = BPRED, ZERO_MV, MV, SPLIT
+    signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];                // 0 = Intra, Last, GF, ARF
     signed char ref_lf_deltas[MAX_REF_LF_DELTAS];                     // 0 = Intra, Last, GF, ARF
+    signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];                      // 0 = BPRED, ZERO_MV, MV, SPLIT
     signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];                           // 0 = BPRED, ZERO_MV, MV, SPLIT
 
     // Distance of MB away from frame edges
