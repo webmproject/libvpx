@@ -661,7 +661,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         break;
     case 1:
     case 3:
-        sf->optimize_coefficients = 0;
         sf->thresh_mult[THR_NEARESTMV] = 0;
         sf->thresh_mult[THR_ZEROMV   ] = 0;
         sf->thresh_mult[THR_DC       ] = 0;
@@ -722,6 +721,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         if (Speed > 0)
         {
+            // Disable coefficient optimization above speed 0
+            sf->optimize_coefficients = 0;
+
             cpi->mode_check_freq[THR_SPLITG] = 4;
             cpi->mode_check_freq[THR_SPLITA] = 4;
             cpi->mode_check_freq[THR_SPLITMV] = 2;
