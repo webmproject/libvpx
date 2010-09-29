@@ -400,21 +400,31 @@ void encode_mb_row(VP8_COMP *cpi,
     cpi->tplist[mb_row].start = *tp;
     //printf("Main mb_row = %d\n", mb_row);
 
+    // Distance of Mb to the top & bottom edges, specified in 1/8th pel
+    // units as they are always compared to values that are in 1/8th pel units
+    xd->mb_to_top_edge = -((mb_row * 16) << 3);
+    xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
+
+    // Set up limit values for vertical motion vector components
+    // to prevent them extending beyond the UMV borders
+    x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
+    x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) 
+                        + (VP8BORDERINPIXELS - 16);
+
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {
-        // Distance of Mb to the various image edges.
-        // These specified to 8th pel as they are always compared to values that are in 1/8th pel units
+        // Distance of Mb to the left & right edges, specified in 
+        // 1/8th pel units as they are always compared to values 
+        // that are in 1/8th pel units
         xd->mb_to_left_edge = -((mb_col * 16) << 3);
         xd->mb_to_right_edge = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
-        xd->mb_to_top_edge = -((mb_row * 16) << 3);
-        xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
 
-        // Set up limit values for motion vectors used to prevent them extending outside the UMV borders
+        // Set up limit values for horizontal motion vector components
+        // to prevent them extending beyond the UMV borders
         x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + (VP8BORDERINPIXELS - 16);
-        x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
+        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) 
+                            + (VP8BORDERINPIXELS - 16);
 
         xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
         xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
