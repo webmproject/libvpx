@@ -150,6 +150,95 @@ extern const int qzbin_factors[129];
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
 extern const int vp8cx_base_skip_false_prob[128];
 
+// Tables relating active max Q to active min Q
+static const int kf_low_motion_minq[QINDEX_RANGE] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+    5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 10,10,
+    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
+    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
+    27,27,28,28,29,29,30,30,31,32,33,34,35,36,37,38,
+};
+static const int kf_high_motion_minq[QINDEX_RANGE] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+    2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+    6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10,10,
+    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
+    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
+    27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,
+    35,35,36,36,37,38,39,40,41,42,43,44,45,46,47,48,
+};
+/*static const int kf_minq[QINDEX_RANGE] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 6, 6,
+    7, 7, 8, 8, 9, 9, 10,10,11,11,12,12,13,13,14,14,
+    15,15,16,16,17,17,18,18,19,19,20,20,21,21,22,22,
+    23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,
+    31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38
+};*/
+static const int gf_low_motion_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,
+    3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,
+    7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,
+    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
+    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
+    27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,
+    35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,
+    43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58
+};
+static const int gf_mid_motion_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,1,2,2,3,3,3,4,
+    4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,
+    9,10,10,10,10,11,11,11,12,12,12,12,13,13,13,14,
+    14,14,15,15,16,16,17,17,18,18,19,19,20,20,21,21,
+    22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,
+    30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,
+    38,39,39,40,40,41,41,42,42,43,43,44,45,46,47,48,
+    49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,
+};
+static const int gf_high_motion_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,2,2,2,3,3,3,4,
+    4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,
+    9,10,10,10,11,11,12,12,13,13,14,14,15,15,16,16,
+    17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,
+    25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,
+    33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,
+    41,41,42,42,43,44,45,46,47,48,49,50,51,52,53,54,
+    55,56,57,58,59,60,62,64,66,68,70,72,74,76,78,80,
+};
+/*static const int gf_arf_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,1,2,2,3,3,3,4,
+    4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,
+    9,10,10,10,11,11,11,12,12,12,13,13,13,14,14,14,
+    15,15,16,16,17,17,18,18,19,19,20,20,21,21,22,22,
+    23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,
+    31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,39,
+    39,40,40,41,41,42,42,43,43,44,45,46,47,48,49,50,
+    51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66
+};*/
+static const int inter_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,2,3,3,4,4,5,6,6,7,7,
+    8,8,9,9,10,11,11,12,12,13,13,14,14,15,15,16,
+    16,17,17,17,18,18,19,19,20,20,21,21,22,22,22,23,
+    23,24,24,24,25,25,26,27,28,28,29,30,31,32,33,34,
+    35,35,36,37,38,39,39,40,41,42,43,43,44,45,46,47,
+    47,48,49,49,51,52,53,54,54,55,56,56,57,57,58,58,
+    59,59,60,61,61,62,62,63,64,64,65,66,67,67,68,69,
+    69,70,71,71,72,73,74,75,76,76,77,78,79,80,81,81,
+};
 
 void vp8_initialize()
 {
@@ -4167,87 +4256,49 @@ static void encode_frame_to_data_rate
     // Set an active best quality and if necessary active worst quality
     if (cpi->pass == 2 || (cm->current_video_frame > 150))
     {
-        //if ( (cm->frame_type == KEY_FRAME) || cm->refresh_golden_frame  )
         int Q;
         int i;
         int bpm_target;
+        //int tmp;
+
+        vp8_clear_system_state();
 
         Q = cpi->active_worst_quality;
 
         if ((cm->frame_type == KEY_FRAME) || cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
         {
-            vp8_clear_system_state();
-
             if (cm->frame_type != KEY_FRAME)
             {
-                // Where a gf overlays an existing arf then allow active max Q to drift to highest allowed value.
-                //if ( cpi->common.refresh_golden_frame && cpi->source_alt_ref_active )
-                //cpi->active_worst_quality = cpi->worst_quality;
-
                 if (cpi->avg_frame_qindex < cpi->active_worst_quality)
                     Q = cpi->avg_frame_qindex;
 
-                if (cpi->section_is_low_motion)
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * ((Q * 3 / 2) + 128)) / 64;
-                else if (cpi->section_is_fast_motion)
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 128)) / 64;
+                if ( cpi->gfu_boost > 1000 )
+                    cpi->active_best_quality = gf_low_motion_minq[Q];
+                else if ( cpi->gfu_boost < 400 )
+                    cpi->active_best_quality = gf_high_motion_minq[Q];
                 else
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * ((Q * 5 / 4) + 128)) / 64;
-            }
-            // KEY FRAMES
-            else
-            {
-                if (cpi->section_is_low_motion)
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 240)) / 64; // Approx 2.5 to 4.5 where Q has the range 0-127
-                else
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 160)) / 64;
-            }
+                    cpi->active_best_quality = gf_mid_motion_minq[Q];
 
-            for (i = Q; i > 0; i--)
-            {
-                if (bpm_target <= vp8_bits_per_mb[cm->frame_type][i])
-                    break;
-            }
+                /*cpi->active_best_quality = gf_arf_minq[Q];
+                tmp = (cpi->gfu_boost > 1000) ? 600 : cpi->gfu_boost - 400;
+                //tmp = (cpi->gfu_boost > 1000) ? 600 :
+                          //(cpi->gfu_boost < 400) ? 0 : cpi->gfu_boost - 400;
+                tmp = 128 - (tmp >> 4);
+                cpi->active_best_quality = (cpi->active_best_quality * tmp)>>7;*/
 
-            cpi->active_best_quality = i;
-
-            // this entire section could be replaced by a look up table
-#if 0
-            {
-                int Q, best_q[128];
-
-                for (Q = 0; Q < 128; Q++)
-                {
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 160)) / 64; // Approx 2.5 to 4.5 where Q has the range 0-127
-
-                    for (i = Q; i > 0; i--)
-                    {
-                        if (bpm_target <= vp8_bits_per_mb[cm->frame_type][i])
-                            break;
-                    }
-
-                    best_q[Q] = i;
-                }
-
-                Q += 0;
-            }
-#endif
-
+           }
+           // KEY FRAMES
+           else
+           {
+               if (cpi->gfu_boost > 1000)
+                   cpi->active_best_quality = kf_low_motion_minq[Q];
+               else
+                   cpi->active_best_quality = kf_high_motion_minq[Q];
+           }
         }
         else
         {
-            vp8_clear_system_state();
-
-            //bpm_target = (vp8_bits_per_mb[cm->frame_type][Q]*(Q+128))/64; // Approx 2 to 4 where Q has the range 0-127
-            bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 192)) / 128; // Approx * 1.5 to 2.5 where Q has range 0-127
-
-            for (i = Q; i > 0; i--)
-            {
-                if (bpm_target <= vp8_bits_per_mb[cm->frame_type][i])
-                    break;
-            }
-
-            cpi->active_best_quality = i;
+            cpi->active_best_quality = inter_minq[Q];
         }
 
         // If CBR and the buffer is as full then it is reasonable to allow higher quality on the frames
@@ -4952,9 +5003,39 @@ static void encode_frame_to_data_rate
         vp8_clear_system_state();  //__asm emms;
 
         if (cpi->total_coded_error_left != 0.0)
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f %10.3f %8ld\n", cpi->common.current_video_frame, cpi->this_frame_target, cpi->projected_frame_size, (cpi->projected_frame_size - cpi->this_frame_target), (int)cpi->total_target_vs_actual, (cpi->oxcf.starting_buffer_level - cpi->bits_off_target), (int)cpi->total_actual_bits, cm->base_qindex, cpi->active_best_quality, cpi->active_worst_quality,  cpi->avg_frame_qindex, cpi->zbin_over_quant, cm->refresh_golden_frame, cm->refresh_alt_ref_frame, cm->frame_type, cpi->gfu_boost, cpi->est_max_qcorrection_factor, (int)cpi->bits_left, cpi->total_coded_error_left, (double)cpi->bits_left / cpi->total_coded_error_left,  cpi->tot_recode_hits);
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
+                       "%6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
+                       "%10.3f %8ld\n",
+                       cpi->common.current_video_frame, cpi->this_frame_target,
+                       cpi->projected_frame_size,
+                       (cpi->projected_frame_size - cpi->this_frame_target),
+                       (int)cpi->total_target_vs_actual,
+                       (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
+                       (int)cpi->total_actual_bits, cm->base_qindex,
+                       cpi->active_best_quality, cpi->active_worst_quality,
+                       cpi->avg_frame_qindex, cpi->zbin_over_quant,
+                       cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
+                       cm->frame_type, cpi->gfu_boost,
+                       cpi->est_max_qcorrection_factor, (int)cpi->bits_left,
+                       cpi->total_coded_error_left,
+                       (double)cpi->bits_left / cpi->total_coded_error_left,
+                       cpi->tot_recode_hits);
         else
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f %8ld\n", cpi->common.current_video_frame, cpi->this_frame_target, cpi->projected_frame_size, (cpi->projected_frame_size - cpi->this_frame_target), (int)cpi->total_target_vs_actual, (cpi->oxcf.starting_buffer_level - cpi->bits_off_target), (int)cpi->total_actual_bits, cm->base_qindex, cpi->active_best_quality, cpi->active_worst_quality,  cpi->avg_frame_qindex, cpi->zbin_over_quant, cm->refresh_golden_frame, cm->refresh_alt_ref_frame, cm->frame_type, cpi->gfu_boost, cpi->est_max_qcorrection_factor, (int)cpi->bits_left, cpi->total_coded_error_left,   cpi->tot_recode_hits);
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
+                       "%6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
+                       "%8ld\n",
+                       cpi->common.current_video_frame,
+                       cpi->this_frame_target, cpi->projected_frame_size,
+                       (cpi->projected_frame_size - cpi->this_frame_target),
+                       (int)cpi->total_target_vs_actual,
+                       (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
+                       (int)cpi->total_actual_bits, cm->base_qindex,
+                       cpi->active_best_quality, cpi->active_worst_quality,
+                       cpi->avg_frame_qindex, cpi->zbin_over_quant,
+                       cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
+                       cm->frame_type, cpi->gfu_boost,
+                       cpi->est_max_qcorrection_factor, (int)cpi->bits_left,
+                       cpi->total_coded_error_left, cpi->tot_recode_hits);
 
         fclose(f);
 
@@ -4962,7 +5043,10 @@ static void encode_frame_to_data_rate
             FILE *fmodes = fopen("Modes.stt", "a");
             int i;
 
-            fprintf(fmodes, "%6d:%1d:%1d:%1d ", cpi->common.current_video_frame, cm->frame_type, cm->refresh_golden_frame, cm->refresh_alt_ref_frame);
+            fprintf(fmodes, "%6d:%1d:%1d:%1d ",
+                        cpi->common.current_video_frame,
+                        cm->frame_type, cm->refresh_golden_frame,
+                        cm->refresh_alt_ref_frame);
 
             for (i = 0; i < MAX_MODES; i++)
                 fprintf(fmodes, "%5d ", cpi->mode_chosen_counts[i]);
