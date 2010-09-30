@@ -73,7 +73,7 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const 
 int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 
 
-static void mode_ref_lf_test_function(VP8_COMP *cpi);
+static void set_default_lf_deltas(VP8_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
@@ -275,8 +275,7 @@ static void setup_features(VP8_COMP *cpi)
     vpx_memset(cpi->mb.e_mbd.last_ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
     vpx_memset(cpi->mb.e_mbd.last_mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
 
-    // jbb trial !
-    mode_ref_lf_test_function(cpi);
+    set_default_lf_deltas(cpi);
 
 }
 
@@ -534,7 +533,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 
 }
 
-static void mode_ref_lf_test_function(VP8_COMP *cpi)
+static void set_default_lf_deltas(VP8_COMP *cpi)
 {
     cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 1;
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
@@ -2183,9 +2182,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     // Test function for segmentation
     //segmentation_test_function((VP8_PTR) cpi);
-
-    // Loop filter mode / ref deltas test function
-    //mode_ref_lf_test_function(cpi);
 
 #ifdef ENTROPY_STATS
     init_context_counters();
