@@ -1490,9 +1490,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     if (xd->mode_ref_lf_delta_enabled)
     {
         // Do the deltas need to be updated
-        vp8_write_bit(bc, (xd->mode_ref_lf_delta_update) ? 1 : 0);
+        int send_update = xd->mode_ref_lf_delta_update
+                          || cpi->oxcf.error_resilient_mode;
 
-        if (xd->mode_ref_lf_delta_update)
+        vp8_write_bit(bc, send_update);
+        if (send_update)
         {
             int Data;
 
@@ -1502,8 +1504,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 Data = xd->ref_lf_deltas[i];
 
                 // Frame level data
-                if (Data)
+                if (xd->ref_lf_deltas[i] != xd->last_ref_lf_deltas[i]
+                    || cpi->oxcf.error_resilient_mode)
                 {
+                    xd->last_ref_lf_deltas[i] = xd->ref_lf_deltas[i];
                     vp8_write_bit(bc, 1);
 
                     if (Data > 0)
@@ -1527,8 +1531,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
             {
                 Data = xd->mode_lf_deltas[i];
 
-                if (Data)
+                if (xd->mode_lf_deltas[i] != xd->last_mode_lf_deltas[i]
+                    || cpi->oxcf.error_resilient_mode)
                 {
+                    xd->last_mode_lf_deltas[i] = xd->mode_lf_deltas[i];
                     vp8_write_bit(bc, 1);
 
                     if (Data > 0)

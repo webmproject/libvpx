@@ -272,6 +272,8 @@ static void setup_features(VP8_COMP *cpi)
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
     vpx_memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
     vpx_memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+    vpx_memset(cpi->mb.e_mbd.last_ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
+    vpx_memset(cpi->mb.e_mbd.last_mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
 
     // jbb trial !
     mode_ref_lf_test_function(cpi);
@@ -4093,17 +4095,14 @@ static void encode_frame_to_data_rate
     {
         int i;
 
+        // Reset the loop filter deltas and segmentation map
+        setup_features(cpi);
+
         // If segmentation is enabled force a map update for key frames
         if (cpi->mb.e_mbd.segmentation_enabled)
         {
             cpi->mb.e_mbd.update_mb_segmentation_map = 1;
             cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-        }
-
-        // If mode or reference frame based loop filter deltas are enabled then force an update for key frames.
-        if (cpi->mb.e_mbd.mode_ref_lf_delta_enabled)
-        {
-            cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
         }
 
         // The alternate reference frame cannot be active for a key frame
@@ -4527,17 +4526,14 @@ static void encode_frame_to_data_rate
                 // Clear the Alt reference frame active flag when we have a key frame
                 cpi->source_alt_ref_active = FALSE;
 
+                // Reset the loop filter deltas and segmentation map
+                setup_features(cpi);
+
                 // If segmentation is enabled force a map update for key frames
                 if (cpi->mb.e_mbd.segmentation_enabled)
                 {
                     cpi->mb.e_mbd.update_mb_segmentation_map = 1;
                     cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-                }
-
-                // If mode or reference frame based loop filter deltas are enabled then force an update for key frames.
-                if (cpi->mb.e_mbd.mode_ref_lf_delta_enabled)
-                {
-                    cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
                 }
 
                 vp8_restore_coding_context(cpi);
