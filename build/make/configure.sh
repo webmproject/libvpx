@@ -532,6 +532,9 @@ process_common_toolchain() {
             *powerpc*)
                 tgt_isa=ppc32
                 ;;
+            *sparc*)
+                tgt_isa=sparc
+                ;;
         esac
 
         # detect tgt_os
@@ -550,6 +553,9 @@ process_common_toolchain() {
                 ;;
             *linux*|*bsd*)
                 tgt_os=linux
+                ;;
+            *solaris2.10)
+                tgt_os=solaris
                 ;;
         esac
 
@@ -599,6 +605,13 @@ process_common_toolchain() {
             add_cflags  "-mmacosx-version-min=10.5"
             add_ldflags "-isysroot /Developer/SDKs/MacOSX10.5.sdk"
             add_ldflags "-mmacosx-version-min=10.5"
+            ;;
+    esac
+
+    # Handle Solaris variants. Solaris 10 needs -lposix4
+    case ${toolchain} in
+        *-solaris-*)
+            add_extralibs -lposix4
             ;;
     esac
 
