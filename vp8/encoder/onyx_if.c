@@ -3916,6 +3916,7 @@ static void vp8cx_temp_filter_c
         break;
 
     case 3:
+    default:
         /////////////////////////////////////////
         // Center Blur
         frames_to_blur_forward = num_frames_forward;
@@ -3933,29 +3934,6 @@ static void vp8cx_temp_filter_c
 
         if (frames_to_blur_backward > (max_frames / 2))
             frames_to_blur_backward = (max_frames / 2);
-
-        frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
-        break;
-
-    default:
-        /////////////////////////////////////////
-        // At most 4 frames forward Blur
-        frames_to_blur_forward = 4;
-        frames_to_blur_backward = num_frames_backward;
-
-        if (max_frames > 5)
-        {
-            if ((frames_to_blur_backward + frames_to_blur_forward) >= max_frames)
-            {
-                frames_to_blur_backward
-                    = max_frames - frames_to_blur_forward - 1;
-            }
-        }
-        else
-        {
-            frames_to_blur_forward = max_frames - 1;
-            frames_to_blur_backward = 0;
-        }
 
         frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
         break;
