@@ -242,7 +242,20 @@ struct vp8_token_state{
   short         qc;
 };
 
-void vp8_optimize_b(MACROBLOCK *mb, int i, int type,
+// TODO: experiments to find optimal multiple numbers
+#define Y1_RD_MULT 1
+#define UV_RD_MULT 1
+#define Y2_RD_MULT 4
+
+static const int plane_rd_mult[4]=
+{
+    Y1_RD_MULT,
+    Y2_RD_MULT,
+    UV_RD_MULT,
+    Y1_RD_MULT
+};
+
+void vp8_optimize_b(MACROBLOCK *mb, int ib, int type,
                     ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                     const VP8_ENCODER_RTCD *rtcd)
 {
@@ -275,9 +288,11 @@ void vp8_optimize_b(MACROBLOCK *mb, int i, int type,
     int best;
     int band;
     int pt;
+    int i;
+    int err_mult = plane_rd_mult[type];
 
-    b = &mb->block[i];
-    d = &mb->e_mbd.block[i];
+    b = &mb->block[ib];
+    d = &mb->e_mbd.block[ib];
 
     /* Enable this to test the effect of RDO as a replacement for the dynamic
      *  zero bin instead of an augmentation of it.
@@ -295,7 +310,7 @@ void vp8_optimize_b(MACROBLOCK *mb, int i, int type,
 
     /* Now set up a Viterbi trellis to evaluate alternative roundings. */
     /* TODO: These should vary with the block type, since the quantizer does. */
-    rdmult = mb->rdmult << 2;
+    rdmult = (mb->rdmult << 2)*err_mult;
     rddiv = mb->rddiv;
     best_mask[0] = best_mask[1] = 0;
     /* Initialize the sentinel node of the trellis. */
@@ -523,14 +538,12 @@ void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     }
 
 
-    /*
     if (has_2nd_order)
     {
-        vp8_setup_temp_context(&t, x->e_mbd.above_context[Y2CONTEXT],
-            x->e_mbd.left_context[Y2CONTEXT], 1);
-        vp8_optimize_b(x, 24, 1, t.a, t.l, rtcd);
+        b=24;
+        vp8_optimize_b(x, b, vp8_block2type[b],
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
-    */
 }
 
 
@@ -595,14 +608,13 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
         ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
-    /*
+
     if (has_2nd_order)
     {
-        vp8_setup_temp_context(&t, x->e_mbd.above_context[Y2CONTEXT],
-            x->e_mbd.left_context[Y2CONTEXT], 1);
-        vp8_optimize_b(x, 24, 1, t.a, t.l, rtcd);
+        b=24;
+        vp8_optimize_b(x, b, vp8_block2type[b],
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
-    */
 }
 
 void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
