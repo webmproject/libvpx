@@ -63,11 +63,12 @@
     vtrn.8      q7, q8
     vtrn.8      q9, q10
 
-    vld1.s8     {d2[], d3[]}, [r3]          ; limit
-    vst1.u8     {q3}, [sp]!
     vld1.s8     {d4[], d5[]}, [r12]         ; thresh
+    vld1.s8     {d2[], d3[]}, [r3]          ; limit
+    mov         r12, sp
+    vst1.u8     {q3}, [r12]!
+    vst1.u8     {q10}, [r12]!
     ldr         r12, _mbvlfy_coeff_
-    vst1.u8     {q10}, [sp]!
 
     ; vp8_filter_mask
     vabd.u8     q11, q3, q4                 ; abs(p3 - p2)
@@ -150,7 +151,6 @@
 
     vld1.u8     {d6}, [r12]!                ;#18
     sub         r0, r0, r1, lsl #4
-    sub         sp, sp, #32
 
     add         r2, r0, r1
 

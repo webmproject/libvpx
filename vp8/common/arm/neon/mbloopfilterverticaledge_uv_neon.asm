@@ -67,9 +67,10 @@
 
     sub         sp, sp, #32
     vld1.s8     {d4[], d5[]}, [r12]         ; thresh
-    vst1.u8     {q3}, [sp]!
+    mov         r12, sp
+    vst1.u8     {q3}, [r12]!
+    vst1.u8     {q10}, [r12]!
     ldr         r12, _mbvlfuv_coeff_
-    vst1.u8     {q10}, [sp]!
 
     ; vp8_filter_mask
     vabd.u8     q11, q3, q4                 ; abs(p3 - p2)
@@ -164,8 +165,6 @@
     vqsub.s8    q7, q7, q2                  ; qs0 = vp8_signed_char_clamp(qs0 - Filter1)
 
     vld1.u8     {d5}, [r12]!                ;#27
-
-    sub         sp, sp, #32
 
     vqadd.s8    q6, q6, q13                 ; ps0 = vp8_signed_char_clamp(ps0 + Filter2)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
