@@ -4247,7 +4247,7 @@ static void encode_frame_to_data_rate
                 if (cpi->avg_frame_qindex < cpi->active_worst_quality)
                     Q = cpi->avg_frame_qindex;
 
-                if ( cpi->gfu_boost > 1000 )
+               if ( cpi->gfu_boost > 1000 )
                     cpi->active_best_quality = gf_low_motion_minq[Q];
                 else if ( cpi->gfu_boost < 400 )
                     cpi->active_best_quality = gf_high_motion_minq[Q];
@@ -4265,7 +4265,7 @@ static void encode_frame_to_data_rate
            // KEY FRAMES
            else
            {
-               if (cpi->gfu_boost > 1000)
+               if (cpi->gfu_boost > 600)
                    cpi->active_best_quality = kf_low_motion_minq[Q];
                else
                    cpi->active_best_quality = kf_high_motion_minq[Q];

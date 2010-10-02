@@ -1218,10 +1218,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     double mv_accumulator_rabs  = 0.0;
     double mv_accumulator_cabs  = 0.0;
-    double this_mv_rabs;
-    double this_mv_cabs;
     double mv_ratio_accumulator = 0.0;
-    double distance_factor = 0.0;
     double decay_accumulator = 1.0;
 
     double boost_factor = IIFACTOR;
@@ -1270,9 +1267,10 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     while (((i < cpi->max_gf_interval) || ((cpi->frames_to_key - i) < MIN_GF_INTERVAL)) && (i < cpi->frames_to_key))
     {
         double r;
-        double motion_factor;
         double this_frame_mvr_ratio;
         double this_frame_mvc_ratio;
+        double motion_decay;
+        double motion_pct = next_frame.pcnt_motion;
 
         i++;                                                    // Increment the loop counter
 
@@ -1287,12 +1285,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             break;
 
         // Accumulate motion stats.
-        motion_factor = next_frame.pcnt_motion;
-        this_mv_rabs = fabs(next_frame.mvr_abs * motion_factor);
-        this_mv_cabs = fabs(next_frame.mvc_abs * motion_factor);
-
-        mv_accumulator_rabs += fabs(next_frame.mvr_abs * motion_factor);
-        mv_accumulator_cabs += fabs(next_frame.mvc_abs * motion_factor);
+        mv_accumulator_rabs += fabs(next_frame.mvr_abs * motion_pct);
+        mv_accumulator_cabs += fabs(next_frame.mvc_abs * motion_pct);
 
         //Accumulate Motion In/Out of frame stats
         this_frame_mv_in_out = next_frame.mv_in_out_count * next_frame.pcnt_motion;
@@ -1300,13 +1294,23 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         abs_mv_in_out_accumulator += fabs(next_frame.mv_in_out_count * next_frame.pcnt_motion);
 
         // If there is a significant amount of motion
-        if (motion_factor > 0.05)
+        if (motion_pct > 0.05)
         {
-            this_frame_mvr_ratio = fabs(next_frame.mvr_abs) / DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVr));
-            this_frame_mvc_ratio = fabs(next_frame.mvc_abs) / DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVc));
+            this_frame_mvr_ratio = fabs(next_frame.mvr_abs) /
+                                   DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVr));
 
-            mv_ratio_accumulator += (this_frame_mvr_ratio < next_frame.mvr_abs) ? (this_frame_mvr_ratio * motion_factor) : next_frame.mvr_abs * motion_factor;
-            mv_ratio_accumulator += (this_frame_mvc_ratio < next_frame.mvc_abs) ? (this_frame_mvc_ratio * motion_factor) : next_frame.mvc_abs * motion_factor;
+            this_frame_mvc_ratio = fabs(next_frame.mvc_abs) /
+                                   DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVc));
+
+            mv_ratio_accumulator +=
+                (this_frame_mvr_ratio < next_frame.mvr_abs)
+                    ? (this_frame_mvr_ratio * motion_pct)
+                    : next_frame.mvr_abs * motion_pct;
+
+            mv_ratio_accumulator +=
+                (this_frame_mvc_ratio < next_frame.mvc_abs)
+                    ? (this_frame_mvc_ratio * motion_pct)
+                    : next_frame.mvc_abs * motion_pct;
         }
         else
         {
@@ -1334,14 +1338,26 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         loop_decay_rate = next_frame.pcnt_inter;
 
         // High % motion -> somewhat higher decay rate
-        if ((1.0 - (next_frame.pcnt_motion / 10.0)) < loop_decay_rate)
-            loop_decay_rate = (1.0 - (next_frame.pcnt_motion / 10.0));
+        motion_decay = (1.0 - (motion_pct / 20.0));
+        if (motion_decay < loop_decay_rate)
+            loop_decay_rate = motion_decay;
 
-        distance_factor = sqrt((this_mv_rabs * this_mv_rabs) + (this_mv_cabs * this_mv_cabs)) / 300.0;
-        distance_factor = ((distance_factor > 1.0) ? 0.0 : (1.0 - distance_factor));
+        // Adjustment to decay rate based on speed of motion
+        {
+            double this_mv_rabs;
+            double this_mv_cabs;
+            double distance_factor;
 
-        if (distance_factor < loop_decay_rate)
-            loop_decay_rate = distance_factor;
+            this_mv_rabs = fabs(next_frame.mvr_abs * motion_pct);
+            this_mv_cabs = fabs(next_frame.mvc_abs * motion_pct);
+
+            distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
+                                   (this_mv_cabs * this_mv_cabs)) / 250.0;
+            distance_factor = ((distance_factor > 1.0)
+                                    ? 0.0 : (1.0 - distance_factor));
+            if (distance_factor < loop_decay_rate)
+                loop_decay_rate = distance_factor;
+        }
 
         // Cumulative effect of decay
         decay_accumulator = decay_accumulator * loop_decay_rate;
@@ -2281,6 +2297,8 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     for (i = 0 ; i < cpi->frames_to_key ; i++)
     {
         double r;
+        double motion_decay;
+        double motion_pct = next_frame.pcnt_motion;
 
         if (EOF == vp8_input_stats(cpi, &next_frame))
             break;
@@ -2294,10 +2312,30 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         //if ( next_frame.pcnt_inter < loop_decay_rate )
         loop_decay_rate = next_frame.pcnt_inter;
 
-        if ((1.0 - (next_frame.pcnt_motion / 10.0)) < loop_decay_rate)
-            loop_decay_rate = (1.0 - (next_frame.pcnt_motion / 10.0));
+        // High % motion -> somewhat higher decay rate
+        motion_decay = (1.0 - (motion_pct / 20.0));
+        if (motion_decay < loop_decay_rate)
+            loop_decay_rate = motion_decay;
+
+        // Adjustment to decay rate based on speed of motion
+        {
+            double this_mv_rabs;
+            double this_mv_cabs;
+            double distance_factor;
+
+            this_mv_rabs = fabs(next_frame.mvr_abs * motion_pct);
+            this_mv_cabs = fabs(next_frame.mvc_abs * motion_pct);
+
+            distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
+                                   (this_mv_cabs * this_mv_cabs)) / 250.0;
+            distance_factor = ((distance_factor > 1.0)
+                                    ? 0.0 : (1.0 - distance_factor));
+            if (distance_factor < loop_decay_rate)
+                loop_decay_rate = distance_factor;
+        }
 
         decay_accumulator = decay_accumulator * loop_decay_rate;
+        decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
 
         boost_score += (decay_accumulator * r);
 
