@@ -75,7 +75,7 @@ x16x16sad_wmt_loop:
         psrldq          xmm7,       8
 
         paddw           xmm0,       xmm7
-        movd            rax,        xmm0
+        movq            rax,        xmm0
 
     ; begin epilog
     pop rdi
@@ -113,7 +113,7 @@ sym(vp8_sad8x16_wmt):
 
 x8x16sad_wmt_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              x8x16sad_wmt_early_exit
 
@@ -135,7 +135,7 @@ x8x16sad_wmt_loop:
         cmp             rsi,        rcx
         jne             x8x16sad_wmt_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 
 x8x16sad_wmt_early_exit:
 
@@ -174,7 +174,7 @@ sym(vp8_sad8x8_wmt):
 
 x8x8sad_wmt_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              x8x8sad_wmt_early_exit
 
@@ -190,7 +190,7 @@ x8x8sad_wmt_loop:
         cmp             rsi,        rcx
         jne             x8x8sad_wmt_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 x8x8sad_wmt_early_exit:
 
     ; begin epilog
@@ -246,7 +246,7 @@ sym(vp8_sad4x4_wmt):
         psadbw          mm4,        mm5
 
         paddw           mm0,        mm4
-        movd            rax,        mm0
+        movq            rax,        mm0
 
     ; begin epilog
     pop rdi
@@ -283,7 +283,7 @@ sym(vp8_sad16x8_wmt):
 
 x16x8sad_wmt_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              x16x8sad_wmt_early_exit
 
@@ -317,7 +317,7 @@ x16x8sad_wmt_loop:
         cmp             rsi,        rcx
         jne             x16x8sad_wmt_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 
 x16x8sad_wmt_early_exit:
 

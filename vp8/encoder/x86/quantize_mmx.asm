@@ -249,7 +249,7 @@ sym(vp8_fast_quantize_b_impl_mmx):
         paddd           mm0,        mm5
 
         ; eob adjustment begins here
-        movd            rcx,        mm0
+        movq            rcx,        mm0
         and             rcx,        0xffff
 
         xor             rdx,        rdx
@@ -262,7 +262,7 @@ sym(vp8_fast_quantize_b_impl_mmx):
         and             rax,        rdx
         ; Substitute the sse assembly for the old mmx mixed assembly/C. The
         ; following is kept as reference
-        ;    movd            rcx,        mm0
+        ;    movq            rcx,        mm0
         ;    bsr             rax,        rcx
         ;
         ;    mov             eob,        rax
@@ -418,7 +418,7 @@ sym(vp8_fast_quantize_b_impl_sse):
         psrldq          xmm0,       4
         paddd           xmm1,       xmm0
 
-        movd            rcx,        xmm1
+        movq            rcx,        xmm1
         and             rcx,        0xffff
 
         xor             rdx,        rdx

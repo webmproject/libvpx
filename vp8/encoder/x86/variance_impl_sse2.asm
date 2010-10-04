@@ -58,7 +58,7 @@ NEXTROW:
         movdqa      xmm3,xmm4
         psrldq      xmm4,4
         paddd       xmm4,xmm3
-        movd        rax,xmm4
+        movq        rax,xmm4
 
 
     ; begin epilog
@@ -471,7 +471,7 @@ sym(vp8_get8x8var_sse2):
         mov         rax,            arg(5) ;[Sum]
         mov         rdi,            arg(4) ;[SSE]
 
-        movd        rdx,            xmm7
+        movq        rdx,            xmm7
         movsx       rcx,            dx
 
         mov  dword ptr [rax],       ecx

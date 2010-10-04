@@ -36,6 +36,43 @@
 %define rsp esp
 %define rbp ebp
 %define movsxd mov
+%macro movq 2
+  %ifidn %1,eax
+    movd %1,%2
+  %elifidn %2,eax
+    movd %1,%2
+  %elifidn %1,ebx
+    movd %1,%2
+  %elifidn %2,ebx
+    movd %1,%2
+  %elifidn %1,ecx
+    movd %1,%2
+  %elifidn %2,ecx
+    movd %1,%2
+  %elifidn %1,edx
+    movd %1,%2
+  %elifidn %2,edx
+    movd %1,%2
+  %elifidn %1,esi
+    movd %1,%2
+  %elifidn %2,esi
+    movd %1,%2
+  %elifidn %1,edi
+    movd %1,%2
+  %elifidn %2,edi
+    movd %1,%2
+  %elifidn %1,esp
+    movd %1,%2
+  %elifidn %2,esp
+    movd %1,%2
+  %elifidn %1,ebp
+    movd %1,%2
+  %elifidn %2,ebp
+    movd %1,%2
+  %else
+    movq %1,%2
+  %endif
+%endmacro
 %endif
 
 

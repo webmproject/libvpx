@@ -100,7 +100,7 @@ x16x16sad_mmx_loop:
         psrlq           mm0,        32
         paddw           mm7,        mm0
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 
     pop rdi
     pop rsi
@@ -172,7 +172,7 @@ x8x16sad_mmx_loop:
         psrlq           mm0,        32
 
         paddw           mm7,        mm0
-        movd            rax,        mm7
+        movq            rax,        mm7
 
     pop rdi
     pop rsi
@@ -242,7 +242,7 @@ x8x8sad_mmx_loop:
         psrlq           mm0,        32
 
         paddw           mm7,        mm0
-        movd            rax,        mm7
+        movq            rax,        mm7
 
     pop rdi
     pop rsi
@@ -331,7 +331,7 @@ sym(vp8_sad4x4_mmx):
         psrlq           mm0,        32
         paddw           mm0,        mm1
 
-        movd            rax,        mm0
+        movq            rax,        mm0
 
     pop rdi
     pop rsi
@@ -418,7 +418,7 @@ x16x8sad_mmx_loop:
         psrlq           mm0,        32
 
         paddw           mm7,        mm0
-        movd            rax,        mm7
+        movq            rax,        mm7
 
     pop rdi
     pop rsi

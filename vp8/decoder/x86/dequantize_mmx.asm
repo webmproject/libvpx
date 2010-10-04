@@ -288,7 +288,7 @@ sym(vp8_dequant_dc_idct_add_mmx):
         psrlq       mm0,    16
         movzx       rcx,    word ptr arg(6) ;Dc
         psllq       mm0,    16
-        movd        mm7,    rcx
+        movq        mm7,    rcx
         por         mm0,    mm7
 
         movsxd      rax,            dword ptr arg(4) ;pitch

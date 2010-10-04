@@ -498,7 +498,7 @@ sym(vp8_get4x4sse_cs_mmx):
         psrlq       mm7,    32
 
         paddd       mm0,    mm7
-        movd        rax,    mm0
+        movq        rax,    mm0
 
 
     ; begin epilog

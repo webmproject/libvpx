@@ -530,7 +530,7 @@ sym(vp8_sad16x16_sse3):
 
 vp8_sad16x16_sse3_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              vp8_sad16x16_early_exit
 
@@ -564,7 +564,7 @@ vp8_sad16x16_sse3_loop:
         cmp             rsi,        rcx
         jne             vp8_sad16x16_sse3_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 
 vp8_sad16x16_early_exit:
 
