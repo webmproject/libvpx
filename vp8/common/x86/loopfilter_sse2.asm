@@ -1184,22 +1184,22 @@ sym(vp8_loop_filter_vertical_edge_uv_sse2):
 %endmacro
 
 %macro MBV_WRITEBACK_1 0
-        movq        QWORD PTR [rsi],    xmm0
-        movhps      QWORD PTR [rdi],    xmm0
+        movq        QWORD  PTR [rsi],   xmm0
+        movhps      MMWORD PTR [rdi],   xmm0
 
-        movq        QWORD PTR [rsi+2*rax], xmm6
-        movhps      QWORD PTR [rdi+2*rax], xmm6
+        movq        QWORD  PTR [rsi+2*rax], xmm6
+        movhps      MMWORD PTR [rdi+2*rax], xmm6
 
         movdqa      xmm0,               xmm3                ; 73 72 71 70 63 62 61 60 53 52 51 50 43 42 41 40
         punpckldq   xmm0,               xmm7                ; 57 56 55 54 53 52 51 50 47 46 45 44 43 42 41 40
 
         punpckhdq   xmm3,               xmm7                ; 77 76 75 74 73 72 71 70 67 66 65 64 63 62 61 60
 
-        movq        QWORD PTR [rsi+4*rax], xmm0
-        movhps      QWORD PTR [rdi+4*rax], xmm0
+        movq        QWORD  PTR [rsi+4*rax], xmm0
+        movhps      MMWORD PTR [rdi+4*rax], xmm0
 
-        movq        QWORD PTR [rsi+2*rcx], xmm3
-        movhps      QWORD PTR [rdi+2*rcx], xmm3
+        movq        QWORD  PTR [rsi+2*rcx], xmm3
+        movhps      MMWORD PTR [rdi+2*rcx], xmm3
 
         movdqa      xmm2,               [rdx+64]            ; f4 e4 d4 c4 b4 a4 94 84 74 64 54 44 34 24 14 04
         punpckhbw   xmm2,               [rdx+80]            ; f5 f4 e5 e4 d5 d4 c5 c4 b5 b4 a5 a4 95 94 85 84
@@ -1217,21 +1217,21 @@ sym(vp8_loop_filter_vertical_edge_uv_sse2):
 %endmacro
 
 %macro MBV_WRITEBACK_2 0
-        movq        QWORD PTR [rsi],    xmm1
-        movhps      QWORD PTR [rdi],    xmm1
+        movq        QWORD  PTR [rsi],   xmm1
+        movhps      MMWORD PTR [rdi],   xmm1
 
-        movq        QWORD PTR [rsi+2*rax], xmm5
-        movhps      QWORD PTR [rdi+2*rax], xmm5
+        movq        QWORD  PTR [rsi+2*rax], xmm5
+        movhps      MMWORD PTR [rdi+2*rax], xmm5
 
         movdqa      xmm1,               xmm4                ; f3 f2 f1 f0 e3 e2 e1 e0 d3 d2 d1 d0 c3 c2 c1 c0
         punpckldq   xmm1,               xmm2                ; d7 d6 d5 d4 d3 d2 d1 d0 c7 c6 c5 c4 c3 c2 c1 c0
         punpckhdq   xmm4,               xmm2                ; f7 f6 f4 f4 f3 f2 f1 f0 e7 e6 e5 e4 e3 e2 e1 e0
 
-        movq        QWORD PTR [rsi+4*rax], xmm1
-        movhps      QWORD PTR [rdi+4*rax], xmm1
+        movq        QWORD  PTR [rsi+4*rax], xmm1
+        movhps      MMWORD PTR [rdi+4*rax], xmm1
 
-        movq        QWORD PTR [rsi+2*rcx], xmm4
-        movhps      QWORD PTR [rdi+2*rcx], xmm4
+        movq        QWORD  PTR [rsi+2*rcx], xmm4
+        movhps      MMWORD PTR [rdi+2*rcx], xmm4
 %endmacro
 
 
