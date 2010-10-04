@@ -126,7 +126,7 @@
         movdqa      xmm4,                   XMMWORD PTR [rdx] ; flimit
 
         movdqa      xmm3,                   xmm0              ; q0
-        pand        xmm2,                   [tfe GLOBAL]      ; set lsb of each byte to zero
+        pand        xmm2,                   [GLOBAL(tfe)]     ; set lsb of each byte to zero
 
         mov         rdx,                    arg(4)            ; hev get thresh
 
@@ -182,14 +182,14 @@
         movdqa      xmm0,                   [rdx+32]          ; q0
 %endif
 
-        pxor        xmm2,                   [t80 GLOBAL]      ; p1 offset to convert to signed values
-        pxor        xmm7,                   [t80 GLOBAL]      ; q1 offset to convert to signed values
+        pxor        xmm2,                   [GLOBAL(t80)]     ; p1 offset to convert to signed values
+        pxor        xmm7,                   [GLOBAL(t80)]     ; q1 offset to convert to signed values
 
         psubsb      xmm2,                   xmm7              ; p1 - q1
-        pxor        xmm6,                   [t80 GLOBAL]      ; offset to convert to signed values
+        pxor        xmm6,                   [GLOBAL(t80)]     ; offset to convert to signed values
 
         pand        xmm2,                   xmm4              ; high var mask (hvm)(p1 - q1)
-        pxor        xmm0,                   [t80 GLOBAL]      ; offset to convert to signed values
+        pxor        xmm0,                   [GLOBAL(t80)]     ; offset to convert to signed values
 
         movdqa      xmm3,                   xmm0              ; q0
         psubsb      xmm0,                   xmm6              ; q0 - p0
@@ -204,8 +204,8 @@
 
         movdqa      xmm2,                   xmm1
 
-        paddsb      xmm1,                   [t4 GLOBAL]       ; 3* (q0 - p0) + hvm(p1 - q1) + 4
-        paddsb      xmm2,                   [t3 GLOBAL]       ; 3* (q0 - p0) + hvm(p1 - q1) + 3
+        paddsb      xmm1,                   [GLOBAL(t4)]      ; 3* (q0 - p0) + hvm(p1 - q1) + 4
+        paddsb      xmm2,                   [GLOBAL(t3)]      ; 3* (q0 - p0) + hvm(p1 - q1) + 3
 
         punpckhbw   xmm5,                   xmm2              ; axbxcxdx
         punpcklbw   xmm2,                   xmm2              ; exfxgxhx
@@ -223,9 +223,9 @@
         movdqa      xmm5,                   xmm0              ; save results
 
         packsswb    xmm0,                   xmm1              ; (3* (q0 - p0) + hvm(p1 - q1) + 4) >>3
-        paddsw      xmm5,                   [ones GLOBAL]
+        paddsw      xmm5,                   [GLOBAL(ones)]
 
-        paddsw      xmm1,                   [ones GLOBAL]
+        paddsw      xmm1,                   [GLOBAL(ones)]
         psraw       xmm5,                   1                 ; partial shifted one more time for 2nd tap
 
         psraw       xmm1,                   1                 ; partial shifted one more time for 2nd tap
@@ -241,18 +241,18 @@
         movdqa      xmm1,                   [rdx]             ; p1
 %endif
         pandn       xmm4,                   xmm5              ; high edge variance additive
-        pxor        xmm6,                   [t80 GLOBAL]      ; unoffset
+        pxor        xmm6,                   [GLOBAL(t80)]     ; unoffset
 
-        pxor        xmm1,                   [t80 GLOBAL]      ; reoffset
+        pxor        xmm1,                   [GLOBAL(t80)]     ; reoffset
         psubsb      xmm3,                   xmm0              ; q0-= q0 add
 
         paddsb      xmm1,                   xmm4              ; p1+= p1 add
-        pxor        xmm3,                   [t80 GLOBAL]      ; unoffset
+        pxor        xmm3,                   [GLOBAL(t80)]     ; unoffset
 
-        pxor        xmm1,                   [t80 GLOBAL]      ; unoffset
+        pxor        xmm1,                   [GLOBAL(t80)]     ; unoffset
         psubsb      xmm7,                   xmm4              ; q1-= q1 add
 
-        pxor        xmm7,                   [t80 GLOBAL]      ; unoffset
+        pxor        xmm7,                   [GLOBAL(t80)]     ; unoffset
 %if %1 == 0
         lea         rsi,                    [rsi + rcx*2]
         lea         rdi,                    [rdi + rcx*2]
@@ -401,10 +401,10 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
         movdqa      xmm0,                   [rdx+64]        ; q0
 %endif
 
-        pxor        xmm2,                   [t80 GLOBAL]    ; p1 offset to convert to signed values
-        pxor        xmm7,                   [t80 GLOBAL]    ; q1 offset to convert to signed values
-        pxor        xmm6,                   [t80 GLOBAL]    ; offset to convert to signed values
-        pxor        xmm0,                   [t80 GLOBAL]    ; offset to convert to signed values
+        pxor        xmm2,                   [GLOBAL(t80)]   ; p1 offset to convert to signed values
+        pxor        xmm7,                   [GLOBAL(t80)]   ; q1 offset to convert to signed values
+        pxor        xmm6,                   [GLOBAL(t80)]   ; offset to convert to signed values
+        pxor        xmm0,                   [GLOBAL(t80)]   ; offset to convert to signed values
 
         psubsb      xmm2,                   xmm7            ; p1 - q1
         movdqa      xmm3,                   xmm0            ; q0
@@ -431,14 +431,14 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
         movdqa      xmm5,                   xmm2
 
         punpckhbw   xmm1,                   xmm4            ; Filter 2 (lo)
-        paddsb      xmm5,                   [t3 GLOBAL]     ; vp8_signed_char_clamp(Filter2 + 3)
+        paddsb      xmm5,                   [GLOBAL(t3)]    ; vp8_signed_char_clamp(Filter2 + 3)
 
-        pmulhw      xmm1,                   [s9 GLOBAL]     ; Filter 2 (lo) * 9
+        pmulhw      xmm1,                   [GLOBAL(s9)]    ; Filter 2 (lo) * 9
 
-        pmulhw      xmm0,                   [s9 GLOBAL]     ; Filter 2 (hi) * 9
+        pmulhw      xmm0,                   [GLOBAL(s9)]    ; Filter 2 (hi) * 9
 
         punpckhbw   xmm7,                   xmm5            ; axbxcxdx
-        paddsb      xmm2,                   [t4 GLOBAL]     ; vp8_signed_char_clamp(Filter2 + 4)
+        paddsb      xmm2,                   [GLOBAL(t4)]    ; vp8_signed_char_clamp(Filter2 + 4)
 
         punpcklbw   xmm5,                   xmm5            ; exfxgxhx
         psraw       xmm7,                   11              ; sign extended shift right by 3
@@ -462,9 +462,9 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
         movdqa      xmm5,                   xmm0
 
         movdqa      xmm2,                   xmm5
-        paddw       xmm0,                   [s63 GLOBAL]    ; Filter 2 (hi) * 9 + 63
+        paddw       xmm0,                   [GLOBAL(s63)]   ; Filter 2 (hi) * 9 + 63
 
-        paddw       xmm1,                   [s63 GLOBAL]    ; Filter 2 (lo) * 9 + 63
+        paddw       xmm1,                   [GLOBAL(s63)]   ; Filter 2 (lo) * 9 + 63
         paddw       xmm5,                   xmm5            ; Filter 2 (hi) * 18
 
         paddw       xmm7,                   xmm7            ; Filter 2 (lo) * 18
@@ -510,26 +510,26 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
         movdqa      xmm7,                   XMMWORD PTR [rdx+16]    ; p2
 %endif
 
-        pxor        xmm3,                   [t80 GLOBAL]    ; *oq0 = sq^0x80
-        pxor        xmm6,                   [t80 GLOBAL]    ; *oq0 = sp^0x80
+        pxor        xmm3,                   [GLOBAL(t80)]   ; *oq0 = sq^0x80
+        pxor        xmm6,                   [GLOBAL(t80)]   ; *oq0 = sp^0x80
 
-        pxor        xmm1,                   [t80 GLOBAL]
-        pxor        xmm4,                   [t80 GLOBAL]
+        pxor        xmm1,                   [GLOBAL(t80)]
+        pxor        xmm4,                   [GLOBAL(t80)]
 
         psubsb      xmm1,                   xmm2            ; sq = vp8_signed_char_clamp(qs1 - u2)
         paddsb      xmm4,                   xmm2            ; sp = vp8_signed_char_clamp(ps1 - u2)
 
-        pxor        xmm1,                   [t80 GLOBAL]    ; *oq1 = sq^0x80;
-        pxor        xmm4,                   [t80 GLOBAL]    ; *op1 = sp^0x80;
+        pxor        xmm1,                   [GLOBAL(t80)]   ; *oq1 = sq^0x80;
+        pxor        xmm4,                   [GLOBAL(t80)]   ; *op1 = sp^0x80;
 
-        pxor        xmm7,                   [t80 GLOBAL]
-        pxor        xmm5,                   [t80 GLOBAL]
+        pxor        xmm7,                   [GLOBAL(t80)]
+        pxor        xmm5,                   [GLOBAL(t80)]
 
         paddsb      xmm7,                   xmm0            ; sp = vp8_signed_char_clamp(ps2 - u)
         psubsb      xmm5,                   xmm0            ; sq = vp8_signed_char_clamp(qs2 - u)
 
-        pxor        xmm7,                   [t80 GLOBAL]    ; *op2 = sp^0x80;
-        pxor        xmm5,                   [t80 GLOBAL]    ; *oq2 = sq^0x80;
+        pxor        xmm7,                   [GLOBAL(t80)]   ; *op2 = sp^0x80;
+        pxor        xmm5,                   [GLOBAL(t80)]   ; *oq2 = sq^0x80;
 
 %if %1 == 0
         lea         rsi,                    [rsi+rcx*2]
@@ -915,7 +915,7 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
         por         xmm5,               xmm1            ; abs(p1-q1)
         movdqa      xmm1,               xmm3            ; p0
 
-        pand        xmm5,               [tfe GLOBAL]    ; set lsb of each byte to zero
+        pand        xmm5,               [GLOBAL(tfe)]   ; set lsb of each byte to zero
         psubusb     xmm1,               xmm6            ; p0-q0
 
         psrlw       xmm5,               1               ; abs(p1-q1)/2
@@ -1415,7 +1415,7 @@ sym(vp8_loop_filter_simple_horizontal_edge_sse2):
         psubusb     xmm0, xmm1              ; q1-=p1
         psubusb     xmm1, xmm4              ; p1-=q1
         por         xmm1, xmm0              ; abs(p1-q1)
-        pand        xmm1, [tfe GLOBAL]      ; set lsb of each byte to zero
+        pand        xmm1, [GLOBAL(tfe)]     ; set lsb of each byte to zero
         psrlw       xmm1, 1                 ; abs(p1-q1)/2
 
         movdqu      xmm5, [rsi+rax]         ; p0
@@ -1433,12 +1433,12 @@ sym(vp8_loop_filter_simple_horizontal_edge_sse2):
         pcmpeqb     xmm5, xmm3
 
         ; start work on filters
-        pxor        xmm2, [t80 GLOBAL]      ; p1 offset to convert to signed values
-        pxor        xmm7, [t80 GLOBAL]      ; q1 offset to convert to signed values
+        pxor        xmm2, [GLOBAL(t80)]     ; p1 offset to convert to signed values
+        pxor        xmm7, [GLOBAL(t80)]     ; q1 offset to convert to signed values
         psubsb      xmm2, xmm7              ; p1 - q1
 
-        pxor        xmm6, [t80 GLOBAL]      ; offset to convert to signed values
-        pxor        xmm0, [t80 GLOBAL]      ; offset to convert to signed values
+        pxor        xmm6, [GLOBAL(t80)]     ; offset to convert to signed values
+        pxor        xmm0, [GLOBAL(t80)]     ; offset to convert to signed values
         movdqa      xmm3, xmm0              ; q0
         psubsb      xmm0, xmm6              ; q0 - p0
         paddsb      xmm2, xmm0              ; p1 - q1 + 1 * (q0 - p0)
@@ -1447,7 +1447,7 @@ sym(vp8_loop_filter_simple_horizontal_edge_sse2):
         pand        xmm5, xmm2              ; mask filter values we don't care about
 
         ; do + 4 side
-        paddsb      xmm5, [t4 GLOBAL]       ; 3* (q0 - p0) + (p1 - q1) + 4
+        paddsb      xmm5, [GLOBAL(t4)]      ; 3* (q0 - p0) + (p1 - q1) + 4
 
         movdqa      xmm0, xmm5              ; get a copy of filters
         psllw       xmm0, 8                 ; shift left 8
@@ -1460,11 +1460,11 @@ sym(vp8_loop_filter_simple_horizontal_edge_sse2):
         por         xmm0, xmm1              ; put the two together to get result
 
         psubsb      xmm3, xmm0              ; q0-= q0 add
-        pxor        xmm3, [t80 GLOBAL]      ; unoffset
+        pxor        xmm3, [GLOBAL(t80)]     ; unoffset
         movdqu      [rsi], xmm3             ; write back
 
         ; now do +3 side
-        psubsb      xmm5, [t1s GLOBAL]      ; +3 instead of +4
+        psubsb      xmm5, [GLOBAL(t1s)]     ; +3 instead of +4
 
         movdqa      xmm0, xmm5              ; get a copy of filters
         psllw       xmm0, 8                 ; shift left 8
@@ -1476,7 +1476,7 @@ sym(vp8_loop_filter_simple_horizontal_edge_sse2):
 
 
         paddsb      xmm6, xmm0              ; p0+= p0 add
-        pxor        xmm6, [t80 GLOBAL]      ; unoffset
+        pxor        xmm6, [GLOBAL(t80)]     ; unoffset
         movdqu      [rsi+rax], xmm6         ; write back
 
     ; begin epilog
@@ -1596,7 +1596,7 @@ sym(vp8_loop_filter_simple_vertical_edge_sse2):
         psubusb     xmm7,       xmm0                            ; q1-=p1
         psubusb     xmm6,       xmm3                            ; p1-=q1
         por         xmm6,       xmm7                            ; abs(p1-q1)
-        pand        xmm6,       [tfe GLOBAL]                    ; set lsb of each byte to zero
+        pand        xmm6,       [GLOBAL(tfe)]                   ; set lsb of each byte to zero
         psrlw       xmm6,       1                               ; abs(p1-q1)/2
 
         movdqa      xmm5,       xmm1                            ; p0
@@ -1622,16 +1622,16 @@ sym(vp8_loop_filter_simple_vertical_edge_sse2):
         movdqa        t0,        xmm0
         movdqa        t1,        xmm3
 
-        pxor        xmm0,        [t80 GLOBAL]                   ; p1 offset to convert to signed values
-        pxor        xmm3,        [t80 GLOBAL]                   ; q1 offset to convert to signed values
+        pxor        xmm0,        [GLOBAL(t80)]                  ; p1 offset to convert to signed values
+        pxor        xmm3,        [GLOBAL(t80)]                  ; q1 offset to convert to signed values
 
         psubsb      xmm0,        xmm3                           ; p1 - q1
         movdqa      xmm6,        xmm1                           ; p0
 
         movdqa      xmm7,        xmm2                           ; q0
-        pxor        xmm6,        [t80 GLOBAL]                   ; offset to convert to signed values
+        pxor        xmm6,        [GLOBAL(t80)]                  ; offset to convert to signed values
 
-        pxor        xmm7,        [t80 GLOBAL]                   ; offset to convert to signed values
+        pxor        xmm7,        [GLOBAL(t80)]                  ; offset to convert to signed values
         movdqa      xmm3,        xmm7                           ; offseted ; q0
 
         psubsb      xmm7,        xmm6                           ; q0 - p0
@@ -1643,7 +1643,7 @@ sym(vp8_loop_filter_simple_vertical_edge_sse2):
         pand        xmm5,        xmm0                           ; mask filter values we don't care about
 
 
-        paddsb      xmm5,        [t4 GLOBAL]                    ;  3* (q0 - p0) + (p1 - q1) + 4
+        paddsb      xmm5,        [GLOBAL(t4)]                   ;  3* (q0 - p0) + (p1 - q1) + 4
 
         movdqa      xmm0,        xmm5                           ; get a copy of filters
         psllw       xmm0,        8                              ; shift left 8
@@ -1658,10 +1658,10 @@ sym(vp8_loop_filter_simple_vertical_edge_sse2):
         por         xmm0,        xmm7                           ; put the two together to get result
 
         psubsb      xmm3,        xmm0                           ; q0-= q0sz add
-        pxor        xmm3,        [t80 GLOBAL]                   ; unoffset   q0
+        pxor        xmm3,        [GLOBAL(t80)]                  ; unoffset   q0
 
         ; now do +3 side
-        psubsb      xmm5,        [t1s GLOBAL]                   ; +3 instead of +4
+        psubsb      xmm5,        [GLOBAL(t1s)]                  ; +3 instead of +4
         movdqa      xmm0,        xmm5                           ; get a copy of filters
 
         psllw       xmm0,        8                              ; shift left 8
@@ -1674,7 +1674,7 @@ sym(vp8_loop_filter_simple_vertical_edge_sse2):
         por         xmm0,        xmm5                           ; put the two together to get result
 
         paddsb      xmm6,        xmm0                           ; p0+= p0 add
-        pxor        xmm6,        [t80 GLOBAL]                   ; unoffset   p0
+        pxor        xmm6,        [GLOBAL(t80)]                  ; unoffset   p0
 
         movdqa      xmm0,        t0                             ; p1
         movdqa      xmm4,        t1                             ; q1

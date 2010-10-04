@@ -160,7 +160,7 @@
       ret
       %%exitGG:
       %undef GLOBAL
-      %define GLOBAL + %1 wrt ..gotoff
+      %define GLOBAL(x) x + %1 wrt ..gotoff
       %undef RESTORE_GOT
       %define RESTORE_GOT pop %1
     %endmacro
@@ -176,7 +176,7 @@
       ret
       %%exitGG:
       %undef GLOBAL
-      %define GLOBAL + %1 - fake_got
+      %define GLOBAL(x) x + %1 - fake_got
       %undef RESTORE_GOT
       %define RESTORE_GOT pop %1
     %endmacro
@@ -186,7 +186,7 @@
 %else
   %macro GET_GOT 1
   %endmacro
-  %define GLOBAL wrt rip
+  %define GLOBAL(x) rel x
   %ifidn __OUTPUT_FORMAT__,elf64
     %define WRT_PLT wrt ..plt
     %define HIDDEN_DATA(x) x:data hidden
@@ -197,7 +197,7 @@
 %ifnmacro GET_GOT
     %macro GET_GOT 1
     %endmacro
-    %define GLOBAL
+    %define GLOBAL(x) x
 %endif
 %ifndef RESTORE_GOT
 %define RESTORE_GOT

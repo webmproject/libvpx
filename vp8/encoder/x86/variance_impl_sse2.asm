@@ -532,7 +532,7 @@ sym(vp8_filter_block2d_bil_var_sse2):
         pmullw          xmm3,           [rax+16]             ;
         paddw           xmm1,           xmm3                 ;
 
-        paddw           xmm1,           [xmm_bi_rd GLOBAL]   ;
+        paddw           xmm1,           [GLOBAL(xmm_bi_rd)]  ;
         psraw           xmm1,           xmm_filter_shift    ;
 
         movdqa          xmm5,           xmm1
@@ -554,7 +554,7 @@ filter_block2d_bil_var_sse2_loop:
         pmullw          xmm3,           [rax+16]             ;
 
         paddw           xmm1,           xmm3                 ;
-        paddw           xmm1,           [xmm_bi_rd GLOBAL]   ;
+        paddw           xmm1,           [GLOBAL(xmm_bi_rd)]  ;
 
         psraw           xmm1,           xmm_filter_shift    ;
         movdqa          xmm3,           xmm5                 ;
@@ -565,7 +565,7 @@ filter_block2d_bil_var_sse2_loop:
         pmullw          xmm1,           [rdx+16]             ;
         paddw           xmm1,           xmm3                 ;
 
-        paddw           xmm1,           [xmm_bi_rd GLOBAL]   ;
+        paddw           xmm1,           [GLOBAL(xmm_bi_rd)]  ;
         psraw           xmm1,           xmm_filter_shift    ;
 
         movq            xmm3,           QWORD PTR [rdi]               ;
