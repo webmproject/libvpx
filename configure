@@ -23,6 +23,7 @@ Advanced options:
   ${toggle_libs}                  don't build libraries
   ${toggle_examples}              don't build examples
   --libc=PATH                     path to alternate libc
+  --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   ${toggle_fast_unaligned}        don't use unaligned accesses, even when
                                   supported by hardware [auto]
   ${toggle_codec_srcs}            in/exclude codec library source code
@@ -266,6 +267,7 @@ CMDLINE_SELECT="
     libs
     examples
     libc
+    as
     fast_unaligned
     codec_srcs
     debug_libs

@@ -255,9 +255,10 @@ TMP_H="${TMPDIRx}/vpx-conf-$$-${RANDOM}.h"
 TMP_C="${TMPDIRx}/vpx-conf-$$-${RANDOM}.c"
 TMP_O="${TMPDIRx}/vpx-conf-$$-${RANDOM}.o"
 TMP_X="${TMPDIRx}/vpx-conf-$$-${RANDOM}.x"
+TMP_ASM="${TMPDIRx}/vpx-conf-$$-${RANDOM}.asm"
 
 clean_temp_files() {
-    rm -f ${TMP_C} ${TMP_H} ${TMP_O} ${TMP_X}
+    rm -f ${TMP_C} ${TMP_H} ${TMP_O} ${TMP_X} ${TMP_ASM}
 }
 
 #
@@ -320,6 +321,21 @@ check_add_asflags() {
 check_add_ldflags() {
     log add_ldflags "$@"
     add_ldflags "$@"
+}
+
+check_asm_align() {
+    log check_asm_align "$@"
+    cat >${TMP_ASM} <<EOF
+section .rodata
+align 16
+EOF
+    log_file ${TMP_ASM}
+    check_cmd ${AS} ${ASFLAGS} -o ${TMP_O} ${TMP_ASM}
+    readelf -WS ${TMP_O} >${TMP_X}
+    log_file ${TMP_X}
+    if ! grep -q '\.rodata .* 16$' ${TMP_X}; then
+        die "${AS} ${ASFLAGS} does not support section alignment (nasm <=2.08?)"
+    fi
 }
 
 write_common_config_banner() {
@@ -440,13 +456,18 @@ process_common_cmdline() {
         disable builtin_libc
         alt_libc="${optval}"
         ;;
+        --as=*)
+        [ "${optval}" = yasm -o "${optval}" = nasm -o "${optval}" = auto ] \
+            || die "Must be yasm, nasm or auto: ${optval}"
+        alt_as="${optval}"
+        ;;
         --prefix=*)
         prefix="${optval}"
         ;;
         --libdir=*)
         libdir="${optval}"
         ;;
-        --libc|--prefix|--libdir)
+        --libc|--as|--prefix|--libdir)
         die "Option ${opt} requires argument"
         ;;
         --help|-h) show_help
@@ -802,6 +823,7 @@ process_common_toolchain() {
                 ;;
         esac
 
+        AS="${alt_as:-${AS:-auto}}"
         case  ${tgt_cc} in
             icc*)
                 CC=${CC:-icc}
@@ -830,7 +852,16 @@ process_common_toolchain() {
                 ;;
         esac
 
-        AS=yasm
+        case "${AS}" in
+            auto|"")
+                which nasm >/dev/null 2>&1 && AS=nasm
+                which yasm >/dev/null 2>&1 && AS=yasm
+                [ "${AS}" = auto -o -z "${AS}" ] \
+                    && die "Neither yasm nor nasm have been found"
+                ;;
+        esac
+        log_echo "  using $AS"
+        [ "${AS##*/}" = nasm ] && add_asflags -Ox
         AS_SFX=.asm
         case  ${tgt_os} in
             win*)
@@ -839,7 +870,9 @@ process_common_toolchain() {
             ;;
             linux*|solaris*)
                 add_asflags -f elf${bits}
-                enabled debug && add_asflags -g dwarf2
+                enabled debug && [ "${AS}" = yasm ] && add_asflags -g dwarf2
+                enabled debug && [ "${AS}" = nasm ] && add_asflags -g
+                [ "${AS##*/}" = nasm ] && check_asm_align
             ;;
             darwin*)
                 add_asflags -f macho${bits}
@@ -852,7 +885,7 @@ process_common_toolchain() {
                 # enabled icc && ! enabled pic && add_cflags -fno-pic -mdynamic-no-pic
                 enabled icc && ! enabled pic && add_cflags -fno-pic
             ;;
-            *) log "Warning: Unknown os $tgt_os while setting up yasm flags"
+            *) log "Warning: Unknown os $tgt_os while setting up $AS flags"
             ;;
         esac
     ;;
