@@ -125,38 +125,29 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     int zbin;
     int x, y, z, sz;
     short *coeff_ptr  = &b->coeff[0];
-    short *zbin_ptr   = &b->zbin[0][0];
     short *round_ptr  = &b->round[0][0];
     short *quant_ptr  = &b->quant[0][0];
     short *qcoeff_ptr = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = &d->dequant[0][0];
 
-    vpx_memset(qcoeff_ptr, 0, 32);
-    vpx_memset(dqcoeff_ptr, 0, 32);
-
     eob = -1;
-
     for (i = 0; i < 16; i++)
     {
         rc   = vp8_default_zig_zag1d[i];
         z    = coeff_ptr[rc];
-        zbin = zbin_ptr[rc] ;
 
         sz = (z >> 31);                                 // sign of z
         x  = (z ^ sz) - sz;                             // x = abs(z)
 
-        if (x >= zbin)
-        {
-            y  = ((x + round_ptr[rc]) * quant_ptr[rc]) >> 16; // quantize (x)
-            x  = (y ^ sz) - sz;                         // get the sign back
-            qcoeff_ptr[rc] = x;                          // write to destination
-            dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
+        y  = ((x + round_ptr[rc]) * quant_ptr[rc]) >> 16; // quantize (x)
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc] = x;                          // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
 
-            if (y)
-            {
-                eob = i;                                // last nonzero coeffs
-            }
+        if (y)
+        {
+            eob = i;                                // last nonzero coeffs
         }
     }
     d->eob = eob + 1;
