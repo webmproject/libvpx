@@ -423,10 +423,12 @@ static const arg_def_t verbosearg       = ARG_DEF("v", "verbose", 0,
         "Show encoder parameters");
 static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
         "Show PSNR in status line");
+static const arg_def_t framerate        = ARG_DEF(NULL, "framerate", 1,
+        "Stream frame rate (rate/scale)");
 static const arg_def_t *main_args[] =
 {
     &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline, &best_dl, &good_dl, &rt_dl,
-    &verbosearg, &psnrarg,
+    &verbosearg, &psnrarg, &framerate,
     NULL
 };
 
@@ -450,7 +452,7 @@ static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
 static const arg_def_t *global_args[] =
 {
     &use_yv12, &use_i420, &usage, &threads, &profile,
-    &width, &height, &timebase, &error_resilient,
+    &width, &height, &timebase, &framerate, &error_resilient,
     &lag_in_frames, NULL
 };
 
@@ -614,10 +616,11 @@ int main(int argc, const char **argv_)
     static const int        *ctrl_args_map = NULL;
     int                      verbose = 0, show_psnr = 0;
     int                      arg_use_i420 = 1;
-    int                      arg_have_timebase = 0;
     unsigned long            cx_time = 0;
     unsigned int             file_type, fourcc;
     y4m_input                y4m;
+    struct vpx_rational      arg_framerate = {30, 1};
+    int                      arg_have_framerate = 0;
 
     exec_name = argv_[0];
 
@@ -689,6 +692,11 @@ int main(int argc, const char **argv_)
             arg_limit = arg_parse_uint(&arg);
         else if (arg_match(&arg, &psnrarg, argi))
             show_psnr = 1;
+        else if (arg_match(&arg, &framerate, argi))
+        {
+            arg_framerate = arg_parse_rational(&arg);
+            arg_have_framerate = 1;
+        }
         else
             argj++;
     }
@@ -720,6 +728,11 @@ int main(int argc, const char **argv_)
         return EXIT_FAILURE;
     }
 
+    /* Change the default timebase to a high enough value so that the encoder
+     * will always create strictly increasing timestamps.
+     */
+    cfg.g_timebase.den = 1000;
+
     /* Now parse the remainder of the parameters. */
     for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
     {
@@ -735,10 +748,7 @@ int main(int argc, const char **argv_)
         else if (arg_match(&arg, &height, argi))
             cfg.g_h = arg_parse_uint(&arg);
         else if (arg_match(&arg, &timebase, argi))
-        {
             cfg.g_timebase = arg_parse_rational(&arg);
-            arg_have_timebase = 1;
-        }
         else if (arg_match(&arg, &error_resilient, argi))
             cfg.g_error_resilient = arg_parse_uint(&arg);
         else if (arg_match(&arg, &lag_in_frames, argi))
@@ -883,16 +893,16 @@ int main(int argc, const char **argv_)
                 file_type = FILE_TYPE_Y4M;
                 cfg.g_w = y4m.pic_w;
                 cfg.g_h = y4m.pic_h;
+
                 /* Use the frame rate from the file only if none was specified
                  * on the command-line.
                  */
-                if (!arg_have_timebase)
+                if (!arg_have_framerate)
                 {
-                    cfg.g_timebase.num = y4m.fps_d;
-                    cfg.g_timebase.den = y4m.fps_n;
-                    /* And don't reset it in the second pass.*/
-                    arg_have_timebase = 1;
+                    arg_framerate.num = y4m.fps_n;
+                    arg_framerate.den = y4m.fps_d;
                 }
+
                 arg_use_i420 = 0;
             }
             else
@@ -972,13 +982,6 @@ int main(int argc, const char **argv_)
             else
                 vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
                               cfg.g_w, cfg.g_h, 1);
-
-            // This was added so that ivfenc will create monotically increasing
-            // timestamps.  Since we create new timestamps for alt-reference frames
-            // we need to make room in the series of timestamps.  Since there can
-            // only be 1 alt-ref frame ( current bitstream) multiplying by 2
-            // gives us enough room.
-            cfg.g_timebase.den *= 2;
         }
 
         outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb") : stdout;
@@ -1047,6 +1050,7 @@ int main(int argc, const char **argv_)
             vpx_codec_iter_t iter = NULL;
             const vpx_codec_cx_pkt_t *pkt;
             struct vpx_usec_timer timer;
+            int64_t frame_start;
 
             if (!arg_limit || frames_in < arg_limit)
             {
@@ -1065,10 +1069,12 @@ int main(int argc, const char **argv_)
 
             vpx_usec_timer_start(&timer);
 
-            // since we halved our timebase we need to double the timestamps
-            // and duration we pass in.
-            vpx_codec_encode(&encoder, frame_avail ? &raw : NULL, (frames_in - 1) * 2,
-                             2, 0, arg_deadline);
+            frame_start = (cfg.g_timebase.den * (int64_t)(frames_in - 1)
+                          * arg_framerate.den) / cfg.g_timebase.num / arg_framerate.num;
+            vpx_codec_encode(&encoder, frame_avail ? &raw : NULL, frame_start,
+                             cfg.g_timebase.den * arg_framerate.den
+                             / cfg.g_timebase.num / arg_framerate.num,
+                             0, arg_deadline);
             vpx_usec_timer_mark(&timer);
             cx_time += vpx_usec_timer_elapsed(&timer);
             ctx_exit_on_error(&encoder, "Failed to encode frame");
@@ -1116,14 +1122,11 @@ int main(int argc, const char **argv_)
             fflush(stdout);
         }
 
-        /* this bitrate calc is simplified and relies on the fact that this
-         * application uses 1/timebase for framerate.
-         */
         fprintf(stderr,
                "\rPass %d/%d frame %4d/%-4d %7ldB %7ldb/f %7"PRId64"b/s"
                " %7lu %s (%.2f fps)\033[K", pass + 1,
                arg_passes, frames_in, frames_out, nbytes, nbytes * 8 / frames_in,
-               nbytes * 8 *(int64_t)cfg.g_timebase.den/2/ cfg.g_timebase.num / frames_in,
+               nbytes * 8 *(int64_t)arg_framerate.num / arg_framerate.den / frames_in,
                cx_time > 9999999 ? cx_time / 1000 : cx_time,
                cx_time > 9999999 ? "ms" : "us",
                (float)frames_in * 1000000.0 / (float)cx_time);
