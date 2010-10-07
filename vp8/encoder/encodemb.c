@@ -547,35 +547,6 @@ void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 }
 
 
-
-static void vp8_find_mb_skip_coef(MACROBLOCK *x)
-{
-    int i;
-
-    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = 1;
-
-    if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
-    {
-        for (i = 0; i < 16; i++)
-        {
-            x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (x->e_mbd.block[i].eob < 2);
-        }
-
-        for (i = 16; i < 25; i++)
-        {
-            x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
-        }
-    }
-    else
-    {
-        for (i = 0; i < 24; i++)
-        {
-            x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!x->e_mbd.block[i].eob);
-        }
-    }
-}
-
-
 void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
@@ -663,10 +634,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
 #if !(CONFIG_REALTIME_ONLY)
     if (x->optimize && x->rddiv > 1)
-    {
         vp8_optimize_mb(x, rtcd);
-        vp8_find_mb_skip_coef(x);
-    }
 #endif
 
     vp8_inverse_transform_mb(IF_RTCD(&rtcd->common->idct), &x->e_mbd);

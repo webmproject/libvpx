@@ -1071,8 +1071,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
         error_uv = vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
 
-        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
-
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
         rate += rateuv;
 
@@ -1138,8 +1136,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
             Error4x4 = INT_MAX;
         else
             Error4x4 = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
-
-        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
 
         if (Error4x4 < Error16x16)
         {
@@ -1237,8 +1233,6 @@ int vp8cx_encode_inter_macroblock
 
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
-
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
 
         if (xd->mode_info_context->mbmi.mode == B_PRED)

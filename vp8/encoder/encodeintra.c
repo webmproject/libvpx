@@ -53,8 +53,6 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BLOCK
 
     x->quantize_b(be, b);
 
-    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!b->eob);
-
     vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
 
     RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
@@ -69,8 +67,6 @@ void vp8_encode_intra4x4block_rd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BL
     x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
 
     x->quantize_b(be, b);
-
-    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!b->eob);
 
     IDCT_INVOKE(&rtcd->common->idct, idct16)(b->dqcoeff, b->diff, 32);
 
@@ -156,8 +152,6 @@ void vp8_encode_intra16x16mbyrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
 
     vp8_transform_intra_mby(x);
-
-    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = 1;
 
     vp8_quantize_mby(x);
 
