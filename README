@@ -89,7 +89,7 @@ COMPILING THE APPLICATIONS/LIBRARIES:
   toolchain, the following command could be used (note, POSIX SH syntax, adapt
   to your shell as necessary):
 
-    $ CROSS=mipsel-linux-uclibc- ../libvpx/src/configure
+    $ CROSS=mipsel-linux-uclibc- ../libvpx/configure
 
   In addition, the executables to be invoked can be overridden by specifying the
   environment variables: CC, AR, LD, AS, STRIP, NM. Additional flags can be
