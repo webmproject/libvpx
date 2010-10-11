@@ -12,9 +12,9 @@
 #include <stdlib.h>
 
 unsigned int vp8_sad16x16_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     int max_sad)
 {
@@ -39,9 +39,9 @@ unsigned int vp8_sad16x16_c(
 
 static __inline
 unsigned int sad_mx_n_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     int m,
     int n)
@@ -66,9 +66,9 @@ unsigned int sad_mx_n_c(
 
 
 unsigned int vp8_sad8x8_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     int max_sad)
 {
@@ -78,9 +78,9 @@ unsigned int vp8_sad8x8_c(
 
 
 unsigned int vp8_sad16x8_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     int max_sad)
 {
@@ -91,9 +91,9 @@ unsigned int vp8_sad16x8_c(
 
 
 unsigned int vp8_sad8x16_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     int max_sad)
 {
@@ -103,9 +103,9 @@ unsigned int vp8_sad8x16_c(
 
 
 unsigned int vp8_sad4x4_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     int max_sad)
 {
@@ -114,9 +114,9 @@ unsigned int vp8_sad4x4_c(
 }
 
 void vp8_sad16x16x3_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     unsigned int *sad_array
 )
@@ -127,9 +127,9 @@ void vp8_sad16x16x3_c(
 }
 
 void vp8_sad16x8x3_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     unsigned int *sad_array
 )
@@ -140,9 +140,9 @@ void vp8_sad16x8x3_c(
 }
 
 void vp8_sad8x8x3_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     unsigned int *sad_array
 )
@@ -153,9 +153,9 @@ void vp8_sad8x8x3_c(
 }
 
 void vp8_sad8x16x3_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     unsigned int *sad_array
 )
@@ -166,9 +166,9 @@ void vp8_sad8x16x3_c(
 }
 
 void vp8_sad4x4x3_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  ref_stride,
     unsigned int *sad_array
 )
@@ -179,7 +179,7 @@ void vp8_sad4x4x3_c(
 }
 
 void vp8_sad16x16x4d_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
     unsigned char *ref_ptr[],
     int  ref_stride,
@@ -193,7 +193,7 @@ void vp8_sad16x16x4d_c(
 }
 
 void vp8_sad16x8x4d_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
     unsigned char *ref_ptr[],
     int  ref_stride,
@@ -207,7 +207,7 @@ void vp8_sad16x8x4d_c(
 }
 
 void vp8_sad8x8x4d_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
     unsigned char *ref_ptr[],
     int  ref_stride,
@@ -221,7 +221,7 @@ void vp8_sad8x8x4d_c(
 }
 
 void vp8_sad8x16x4d_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
     unsigned char *ref_ptr[],
     int  ref_stride,
@@ -235,7 +235,7 @@ void vp8_sad8x16x4d_c(
 }
 
 void vp8_sad4x4x4d_c(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  src_stride,
     unsigned char *ref_ptr[],
     int  ref_stride,
