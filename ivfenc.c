@@ -562,18 +562,18 @@ static void usage_exit()
 
     fprintf(stderr, "Usage: %s <options> src_filename dst_filename\n", exec_name);
 
-    fprintf(stderr, "\n_options:\n");
+    fprintf(stderr, "\nOptions:\n");
     arg_show_usage(stdout, main_args);
-    fprintf(stderr, "\n_encoder Global Options:\n");
+    fprintf(stderr, "\nEncoder Global Options:\n");
     arg_show_usage(stdout, global_args);
-    fprintf(stderr, "\n_rate Control Options:\n");
+    fprintf(stderr, "\nRate Control Options:\n");
     arg_show_usage(stdout, rc_args);
-    fprintf(stderr, "\n_twopass Rate Control Options:\n");
+    fprintf(stderr, "\nTwopass Rate Control Options:\n");
     arg_show_usage(stdout, rc_twopass_args);
-    fprintf(stderr, "\n_keyframe Placement Options:\n");
+    fprintf(stderr, "\nKeyframe Placement Options:\n");
     arg_show_usage(stdout, kf_args);
 #if CONFIG_VP8_ENCODER
-    fprintf(stderr, "\n_vp8 Specific Options:\n");
+    fprintf(stderr, "\nVP8 Specific Options:\n");
     arg_show_usage(stdout, vp8_args);
 #endif
     fprintf(stderr, "\n"

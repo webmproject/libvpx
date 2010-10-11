@@ -113,7 +113,7 @@ static void usage_exit()
             "Options:\n", exec_name);
     arg_show_usage(stderr, all_args);
 #if CONFIG_VP8_DECODER
-    fprintf(stderr, "\nvp8 Postprocessing Options:\n");
+    fprintf(stderr, "\nVP8 Postprocessing Options:\n");
     arg_show_usage(stderr, vp8_pp_args);
 #endif
     fprintf(stderr, "\nIncluded decoders:\n\n");
