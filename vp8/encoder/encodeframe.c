@@ -369,6 +369,62 @@ void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
 }
 
 
+/* activity_avg must be positive, or flat regions could get a zero weight
+ *  (infinite lambda), which confounds analysis.
+ * This also avoids the need for divide by zero checks in
+ *  vp8_activity_masking().
+ */
+#define VP8_ACTIVITY_AVG_MIN (64)
+
+/* This is used as a reference when computing the source variance for the
+ *  purposes of activity masking.
+ * Eventually this should be replaced by custom no-reference routines,
+ *  which will be faster.
+ */
+static const unsigned char VP8_VAR_OFFS[16]=
+{
+    128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128
+};
+
+unsigned int vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
+{
+    unsigned int act;
+    unsigned int sse;
+    int sum;
+    unsigned int a;
+    unsigned int b;
+    unsigned int d;
+    /* TODO: This could also be done over smaller areas (8x8), but that would
+     *  require extensive changes elsewhere, as lambda is assumed to be fixed
+     *  over an entire MB in most of the code.
+     * Another option is to compute four 8x8 variances, and pick a single
+     *  lambda using a non-linear combination (e.g., the smallest, or second
+     *  smallest, etc.).
+     */
+    VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)(x->src.y_buffer,
+     x->src.y_stride, VP8_VAR_OFFS, 0, &sse, &sum);
+    /* This requires a full 32 bits of precision. */
+    act = (sse<<8) - sum*sum;
+    /* Drop 4 to give us some headroom to work with. */
+    act = (act + 8) >> 4;
+    /* If the region is flat, lower the activity some more. */
+    if (act < 8<<12)
+        act = act < 5<<12 ? act : 5<<12;
+    /* TODO: For non-flat regions, edge regions should receive less masking
+     *  than textured regions, but identifying edge regions quickly and
+     *  reliably enough is still a subject of experimentation.
+     * This will be most noticable near edges with a complex shape (e.g.,
+     *  text), but the 4x4 transform size should make this less of a problem
+     *  than it would be for an 8x8 transform.
+     */
+    /* Apply the masking to the RD multiplier. */
+    a = act + 4*cpi->activity_avg;
+    b = 4*act + cpi->activity_avg;
+    x->rdmult = (unsigned int)(((INT64)x->rdmult*b + (a>>1))/a);
+    return act;
+}
+
+
 
 static
 void encode_mb_row(VP8_COMP *cpi,
@@ -380,6 +436,7 @@ void encode_mb_row(VP8_COMP *cpi,
                    int *segment_counts,
                    int *totalrate)
 {
+    INT64 activity_sum = 0;
     int i;
     int recon_yoffset, recon_uvoffset;
     int mb_col;
@@ -430,6 +487,11 @@ void encode_mb_row(VP8_COMP *cpi,
         xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
         xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
         xd->left_available = (mb_col != 0);
+
+        x->rddiv = cpi->RDDIV;
+        x->rdmult = cpi->RDMULT;
+
+        activity_sum += vp8_activity_masking(cpi, x);
 
         // Is segmentation enabled
         // MB level adjutment to quantizer
@@ -537,6 +599,7 @@ void encode_mb_row(VP8_COMP *cpi,
     // this is to account for the border
     xd->mode_info_context++;
     x->partition_info++;
+    x->activity_sum += activity_sum;
 }
 
 
@@ -653,8 +716,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     vp8_setup_block_ptrs(x);
 
-    x->rddiv = cpi->RDDIV;
-    x->rdmult = cpi->RDMULT;
+    x->activity_sum = 0;
 
 #if 0
     // Experimental rd code
@@ -709,11 +771,12 @@ void vp8_encode_frame(VP8_COMP *cpi)
         else
         {
 #if CONFIG_MULTITHREAD
+            int i;
+
             vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei, 1,  cpi->encoding_thread_count);
 
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row += (cpi->encoding_thread_count + 1))
             {
-                int i;
                 cpi->current_mb_col_main = -1;
 
                 for (i = 0; i < cpi->encoding_thread_count; i++)
@@ -789,6 +852,11 @@ void vp8_encode_frame(VP8_COMP *cpi)
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
                 totalrate += cpi->mb_row_ei[i].totalrate;
+            }
+
+            for (i = 0; i < cpi->encoding_thread_count; i++)
+            {
+                x->activity_sum += cpi->mb_row_ei[i].mb.activity_sum;
             }
 
 #endif
@@ -925,6 +993,14 @@ void vp8_encode_frame(VP8_COMP *cpi)
     // Keep record of the total distortion this time around for future use
     cpi->last_frame_distortion = cpi->frame_distortion;
 #endif
+
+    /* Update the average activity for the next frame.
+     * This is feed-forward for now; it could also be saved in two-pass, or
+     *  done during lookahead when that is eventually added.
+     */
+    cpi->activity_avg = (unsigned int )(x->activity_sum/cpi->common.MBs);
+    if (cpi->activity_avg < VP8_ACTIVITY_AVG_MIN)
+        cpi->activity_avg = VP8_ACTIVITY_AVG_MIN;
 
 }
 void vp8_setup_block_ptrs(MACROBLOCK *x)

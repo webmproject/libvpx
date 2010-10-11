@@ -81,6 +81,7 @@ typedef struct
     int errthresh;
     int rddiv;
     int rdmult;
+    INT64 activity_sum;
 
     int mvcosts[2][MVvals+1];
     int *mvcost[2];
