@@ -88,24 +88,22 @@ void vp8_short_fdct8x4_sse2(short *input, short *output, int pitch)
     vp8_short_fdct4x4_sse2(input + 4, output + 16, pitch);
 }
 
-int vp8_fast_quantize_b_impl_sse(short *coeff_ptr, short *zbin_ptr,
+int vp8_fast_quantize_b_impl_sse2(short *coeff_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
                                  short *scan_mask, short *round_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
-void vp8_fast_quantize_b_sse(BLOCK *b, BLOCKD *d)
+void vp8_fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
 {
     short *scan_mask    = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
     short *coeff_ptr  = &b->coeff[0];
-    short *zbin_ptr   = &b->zbin[0][0];
     short *round_ptr  = &b->round[0][0];
     short *quant_ptr  = &b->quant[0][0];
     short *qcoeff_ptr = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = &d->dequant[0][0];
 
-    d->eob = vp8_fast_quantize_b_impl_sse(
+    d->eob = vp8_fast_quantize_b_impl_ssse2(
                  coeff_ptr,
-                 zbin_ptr,
                  qcoeff_ptr,
                  dequant_ptr,
                  scan_mask,
@@ -115,6 +113,7 @@ void vp8_fast_quantize_b_sse(BLOCK *b, BLOCKD *d)
                  dqcoeff_ptr
              );
 }
+
 
 int vp8_regular_quantize_b_impl_sse2(short *coeff_ptr, short *zbin_ptr,
                                short *qcoeff_ptr,short *dequant_ptr,
@@ -285,8 +284,10 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_xmm;
         /* cpi->rtcd.encodemb.sub* not implemented for wmt */
 
-        /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse;
-        cpi->rtcd.quantize.quantb            = vp8_regular_quantize_b_sse2;*/
+        /*cpi->rtcd.quantize.quantb            = vp8_regular_quantize_b_sse2;*/
+
+        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
+
     }
 
 #endif
