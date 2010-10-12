@@ -13,16 +13,16 @@
 #include "pragmas.h"
 #include "vpx_ports/mem.h"
 
-extern void filter_block1d_h6_mmx(unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
-extern void filter_block1d_v6_mmx(short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
-extern void filter_block1d8_h6_sse2(unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
-extern void filter_block1d8_v6_sse2(short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
+extern void filter_block1d_h6_mmx(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
+extern void filter_block1d_v6_mmx(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
+extern void filter_block1d8_h6_sse2(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
+extern void filter_block1d8_v6_sse2(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
 
 extern void vp8_filter_block2d_bil4x4_var_mmx
 (
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_pixels_per_line,
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_pixels_per_line,
     const short *HFilter,
     const short *VFilter,
@@ -32,9 +32,9 @@ extern void vp8_filter_block2d_bil4x4_var_mmx
 
 extern unsigned int vp8_get4x4var_mmx
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     unsigned int *SSE,
     int *Sum
@@ -42,38 +42,38 @@ extern unsigned int vp8_get4x4var_mmx
 
 unsigned int vp8_get_mb_ss_sse2
 (
-    short *src_ptr
+    const short *src_ptr
 );
 unsigned int vp8_get16x16var_sse2
 (
-    unsigned char     *src_ptr,
-    int             source_stride,
-    unsigned char     *ref_ptr,
-    int             recon_stride,
-    unsigned int      *SSE,
-    int               *Sum
+    const unsigned char *src_ptr,
+    int source_stride,
+    const unsigned char *ref_ptr,
+    int recon_stride,
+    unsigned int *SSE,
+    int *Sum
 );
 unsigned int vp8_get16x16pred_error_sse2
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_stride
 );
 unsigned int vp8_get8x8var_sse2
 (
-    unsigned char     *src_ptr,
-    int             source_stride,
-    unsigned char     *ref_ptr,
-    int             recon_stride,
-    unsigned int      *SSE,
-    int               *Sum
+    const unsigned char *src_ptr,
+    int source_stride,
+    const unsigned char *ref_ptr,
+    int recon_stride,
+    unsigned int *SSE,
+    int *Sum
 );
 void vp8_filter_block2d_bil_var_sse2
 (
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_pixels_per_line,
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_pixels_per_line,
     unsigned int Height,
     const short *HFilter,
@@ -83,9 +83,9 @@ void vp8_filter_block2d_bil_var_sse2
 );
 void vp8_half_horiz_vert_variance16x_h_sse2
 (
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_pixels_per_line,
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_pixels_per_line,
     unsigned int Height,
     int *sum,
@@ -93,9 +93,9 @@ void vp8_half_horiz_vert_variance16x_h_sse2
 );
 void vp8_half_horiz_variance16x_h_sse2
 (
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_pixels_per_line,
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_pixels_per_line,
     unsigned int Height,
     int *sum,
@@ -103,9 +103,9 @@ void vp8_half_horiz_variance16x_h_sse2
 );
 void vp8_half_vert_variance16x_h_sse2
 (
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_pixels_per_line,
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_pixels_per_line,
     unsigned int Height,
     int *sum,
@@ -115,9 +115,9 @@ void vp8_half_vert_variance16x_h_sse2
 DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[8][8]);
 
 unsigned int vp8_variance4x4_wmt(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride)
 {
     unsigned int var;
@@ -132,9 +132,9 @@ unsigned int vp8_variance4x4_wmt(
 
 unsigned int vp8_variance8x8_wmt
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride)
 {
     unsigned int var;
@@ -149,9 +149,9 @@ unsigned int vp8_variance8x8_wmt
 
 unsigned int vp8_variance16x16_wmt
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     unsigned int *sse)
 {
@@ -164,9 +164,9 @@ unsigned int vp8_variance16x16_wmt
     return (sse0 - ((sum0 * sum0) >> 8));
 }
 unsigned int vp8_mse16x16_wmt(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     unsigned int *sse)
 {
@@ -182,9 +182,9 @@ unsigned int vp8_mse16x16_wmt(
 
 unsigned int vp8_variance16x8_wmt
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     unsigned int *sse)
 {
@@ -203,9 +203,9 @@ unsigned int vp8_variance16x8_wmt
 
 unsigned int vp8_variance8x16_wmt
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     unsigned int *sse)
 {
@@ -239,11 +239,11 @@ DECLARE_ALIGNED(16, const short, vp8_bilinear_filters_xmm[8][16]) =
 };
 unsigned int vp8_sub_pixel_variance4x4_wmt
 (
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 )
@@ -263,11 +263,11 @@ unsigned int vp8_sub_pixel_variance4x4_wmt
 
 unsigned int vp8_sub_pixel_variance8x8_wmt
 (
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 )
@@ -288,11 +288,11 @@ unsigned int vp8_sub_pixel_variance8x8_wmt
 
 unsigned int vp8_sub_pixel_variance16x16_wmt
 (
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 )
@@ -364,11 +364,11 @@ unsigned int vp8_sub_pixel_variance16x16_wmt
 }
 
 unsigned int vp8_sub_pixel_mse16x16_wmt(
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 )
@@ -379,11 +379,11 @@ unsigned int vp8_sub_pixel_mse16x16_wmt(
 
 unsigned int vp8_sub_pixel_variance16x8_wmt
 (
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 
@@ -417,11 +417,11 @@ unsigned int vp8_sub_pixel_variance16x8_wmt
 
 unsigned int vp8_sub_pixel_variance8x16_wmt
 (
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 )
@@ -440,9 +440,9 @@ unsigned int vp8_sub_pixel_variance8x16_wmt
 }
 
 unsigned int vp8_i_variance16x16_wmt(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     unsigned int *sse)
 {
@@ -464,9 +464,9 @@ unsigned int vp8_i_variance16x16_wmt(
 }
 
 unsigned int vp8_i_variance8x16_wmt(
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     unsigned int *sse)
 {
@@ -486,11 +486,11 @@ unsigned int vp8_i_variance8x16_wmt(
 
 unsigned int vp8_i_sub_pixel_variance16x16_wmt
 (
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 )
@@ -501,11 +501,11 @@ unsigned int vp8_i_sub_pixel_variance16x16_wmt
 
 unsigned int vp8_i_sub_pixel_variance8x16_wmt
 (
-    unsigned char  *src_ptr,
+    const unsigned char  *src_ptr,
     int  src_pixels_per_line,
     int  xoffset,
     int  yoffset,
-    unsigned char *dst_ptr,
+    const unsigned char *dst_ptr,
     int dst_pixels_per_line,
     unsigned int *sse
 )

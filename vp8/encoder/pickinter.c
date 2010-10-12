@@ -92,9 +92,9 @@ static int get_inter_mbpred_error(MACROBLOCK *mb, vp8_subpixvariance_fn_t svf, v
 
 unsigned int vp8_get16x16pred_error_c
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_stride,
     int max_sad
 )
@@ -125,9 +125,9 @@ unsigned int vp8_get16x16pred_error_c
 
 unsigned int vp8_get4x4sse_cs_c
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int  source_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int  recon_stride,
     int max_sad
 )

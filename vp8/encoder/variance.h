@@ -15,9 +15,9 @@
 #define prototype_sad(sym)\
     unsigned int (sym)\
     (\
-     unsigned char *src_ptr, \
+     const unsigned char *src_ptr, \
      int source_stride, \
-     unsigned char *ref_ptr, \
+     const unsigned char *ref_ptr, \
      int  ref_stride, \
      int max_sad\
     )
@@ -25,9 +25,9 @@
 #define prototype_sad_multi_same_address(sym)\
     void (sym)\
     (\
-     unsigned char *src_ptr, \
+     const unsigned char *src_ptr, \
      int source_stride, \
-     unsigned char *ref_ptr, \
+     const unsigned char *ref_ptr, \
      int  ref_stride, \
      unsigned int *sad_array\
     )
@@ -35,7 +35,7 @@
 #define prototype_sad_multi_dif_address(sym)\
     void (sym)\
     (\
-     unsigned char *src_ptr, \
+     const unsigned char *src_ptr, \
      int source_stride, \
      unsigned char *ref_ptr[4], \
      int  ref_stride, \
@@ -45,9 +45,9 @@
 #define prototype_variance(sym) \
     unsigned int (sym) \
     (\
-     unsigned char *src_ptr, \
+     const unsigned char *src_ptr, \
      int source_stride, \
-     unsigned char *ref_ptr, \
+     const unsigned char *ref_ptr, \
      int  ref_stride, \
      unsigned int *sse\
     )
@@ -55,9 +55,9 @@
 #define prototype_variance2(sym) \
     unsigned int (sym) \
     (\
-     unsigned char *src_ptr, \
+     const unsigned char *src_ptr, \
      int source_stride, \
-     unsigned char *ref_ptr, \
+     const unsigned char *ref_ptr, \
      int  ref_stride, \
      unsigned int *sse,\
      int *sum\
@@ -66,17 +66,17 @@
 #define prototype_subpixvariance(sym) \
     unsigned int (sym) \
     ( \
-      unsigned char  *src_ptr, \
+      const unsigned char  *src_ptr, \
       int  source_stride, \
       int  xoffset, \
       int  yoffset, \
-      unsigned char *ref_ptr, \
+      const unsigned char *ref_ptr, \
       int Refstride, \
       unsigned int *sse \
     );
 
 
-#define prototype_getmbss(sym) unsigned int (sym)(short *)
+#define prototype_getmbss(sym) unsigned int (sym)(const short *)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/variance_x86.h"
