@@ -14,6 +14,26 @@
 #include <stdlib.h>
 #include "config.h"
 
+typedef enum
+{
+    VPX_CPU_UNKNOWN = -1,
+    VPX_CPU_AMD,
+    VPX_CPU_AMD_OLD,
+    VPX_CPU_CENTAUR,
+    VPX_CPU_CYRIX,
+    VPX_CPU_INTEL,
+    VPX_CPU_NEXGEN,
+    VPX_CPU_NSC,
+    VPX_CPU_RISE,
+    VPX_CPU_SIS,
+    VPX_CPU_TRANSMETA,
+    VPX_CPU_TRANSMETA_OLD,
+    VPX_CPU_UMC,
+    VPX_CPU_VIA,
+
+    VPX_CPU_LAST
+}  vpx_cpu_t;
+
 #if defined(__GNUC__) && __GNUC__
 #if ARCH_X86_64
 #define cpuid(func,ax,bx,cx,dx)\
@@ -100,6 +120,7 @@ x86_simd_caps(void)
     return flags & mask;
 }
 
+vpx_cpu_t vpx_x86_vendor(void);
 
 #if ARCH_X86_64 && defined(_MSC_VER)
 unsigned __int64 __rdtsc(void);
