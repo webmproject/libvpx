@@ -24,12 +24,11 @@
 #else
 #define cpuid(func,ax,bx,cx,dx)\
     __asm__ __volatile__ (\
-                          "pushl %%ebx     \n\t" \
-                          "cpuid           \n\t" \
-                          "movl  %%ebx, %1 \n\t" \
-                          "popl  %%ebx     \n\t" \
-                          : "=a" (ax), "=r" (bx), "=c" (cx), "=d" (dx) \
-                          : "a"  (func));
+                          "mov %%ebx, %%edi   \n\t" \
+                          "cpuid              \n\t" \
+                          "xchg %%edi, %%ebx  \n\t" \
+                          : "=a" (ax), "=D" (bx), "=c" (cx), "=d" (dx) \
+                          : "a" (func));
 #endif
 #else
 #if ARCH_X86_64
