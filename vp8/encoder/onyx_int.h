@@ -29,7 +29,6 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
 
-#define INTRARDOPT
 //#define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4
 #define DEFAULT_GF_INTERVAL         7
@@ -310,15 +309,12 @@ typedef struct
     int subseqblockweight;
     int errthresh;
 
-#ifdef INTRARDOPT
     int RDMULT;
     int RDDIV ;
 
     TOKENEXTRA *rdtok;
-    int intra_rd_opt;
     vp8_writer rdbc;
     int intra_mode_costs[10];
-#endif
 
 
     CODING_CONTEXT coding_context;

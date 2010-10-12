@@ -2188,11 +2188,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 #endif
 
 
-#ifdef INTRARDOPT
-    cpi->intra_rd_opt = 1;
-
-#endif
-
     cpi->frames_since_key = 8;        // Give a sensible default for the first frame.
     cpi->key_frame_frequency = cpi->oxcf.key_freq;
 
