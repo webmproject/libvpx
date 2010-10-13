@@ -11,8 +11,6 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-%idefine QWORD
-
 ;unsigned int vp8_sad16x16_wmt(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
@@ -221,11 +219,11 @@ sym(vp8_sad4x4_wmt):
         movsxd          rax,        dword ptr arg(1) ;src_stride
         movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        movd            mm0,       QWORD PTR [rsi]
-        movd            mm1,       QWORD PTR [rdi]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm1,        DWORD PTR [rdi]
 
-        movd            mm2,       QWORD PTR [rsi+rax]
-        movd            mm3,       QWORD PTR [rdi+rdx]
+        movd            mm2,        DWORD PTR [rsi+rax]
+        movd            mm3,        DWORD PTR [rdi+rdx]
 
         punpcklbw       mm0,        mm2
         punpcklbw       mm1,        mm3
@@ -234,12 +232,12 @@ sym(vp8_sad4x4_wmt):
         lea             rsi,        [rsi+rax*2]
 
         lea             rdi,        [rdi+rdx*2]
-        movd            mm4,       QWORD PTR [rsi]
+        movd            mm4,        DWORD PTR [rsi]
 
-        movd            mm5,       QWORD PTR [rdi]
-        movd            mm6,       QWORD PTR [rsi+rax]
+        movd            mm5,        DWORD PTR [rdi]
+        movd            mm6,        DWORD PTR [rsi+rax]
 
-        movd            mm7,       QWORD PTR [rdi+rdx]
+        movd            mm7,        DWORD PTR [rdi+rdx]
         punpcklbw       mm4,        mm6
 
         punpcklbw       mm5,        mm7
