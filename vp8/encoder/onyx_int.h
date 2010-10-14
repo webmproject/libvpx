@@ -461,14 +461,14 @@ typedef struct
 
     int target_bandwidth;
     long long bits_left;
-    FIRSTPASS_STATS total_stats;
-    FIRSTPASS_STATS this_frame_stats;
+    FIRSTPASS_STATS *total_stats;
+    FIRSTPASS_STATS *this_frame_stats;
     FIRSTPASS_STATS *stats_in, *stats_in_end;
     struct vpx_codec_pkt_list  *output_pkt_list;
     int                          first_pass_done;
     unsigned char *fp_motion_map;
-    FILE *fp_motion_mapfile;
-    int fpmm_pos;
+
+    unsigned char *fp_motion_map_stats, *fp_motion_map_stats_save;
 
 #if 0
     // Experimental code for lagged and one pass

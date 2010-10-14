@@ -14,6 +14,7 @@
 #include "vpx_version.h"
 #include "onyx_int.h"
 #include "vpx/vp8e.h"
+#include "vp8/encoder/firstpass.h"
 #include "onyx.h"
 #include <stdlib.h>
 #include <string.h>
@@ -189,22 +190,25 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
-        int n_doubles = cfg->rc_twopass_stats_in.sz / sizeof(double);
-        int n_packets = cfg->rc_twopass_stats_in.sz / sizeof(FIRSTPASS_STATS);
-        double frames;
+        int              mb_r = (cfg->g_h + 15) / 16;
+        int              mb_c = (cfg->g_w + 15) / 16;
+        size_t           packet_sz = vp8_firstpass_stats_sz(mb_r * mb_c);
+        int              n_packets = cfg->rc_twopass_stats_in.sz / packet_sz;
+        FIRSTPASS_STATS *stats;
 
         if (!cfg->rc_twopass_stats_in.buf)
             ERROR("rc_twopass_stats_in.buf not set.");
 
-        if (cfg->rc_twopass_stats_in.sz % sizeof(FIRSTPASS_STATS))
+        if (cfg->rc_twopass_stats_in.sz % packet_sz)
             ERROR("rc_twopass_stats_in.sz indicates truncated packet.");
 
-        if (cfg->rc_twopass_stats_in.sz < 2 * sizeof(FIRSTPASS_STATS))
+        if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
             ERROR("rc_twopass_stats_in requires at least two packets.");
 
-        frames = ((double *)cfg->rc_twopass_stats_in.buf)[n_doubles - 1];
+        stats = (void*)((char *)cfg->rc_twopass_stats_in.buf
+                + (n_packets - 1) * packet_sz);
 
-        if ((int)(frames + 0.5) != n_packets - 1)
+        if ((int)(stats->count + 0.5) != n_packets - 1)
             ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
 

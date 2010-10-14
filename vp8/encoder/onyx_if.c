@@ -330,6 +330,8 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 
     cpi->mb.pip = 0;
 
+    vpx_free(cpi->total_stats);
+    vpx_free(cpi->this_frame_stats);
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -1392,6 +1394,12 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     CHECK_MEM_ERROR(cpi->gf_active_flags, vpx_calloc(1, cm->mb_rows * cm->mb_cols));
 
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
+
+    cpi->total_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+    cpi->this_frame_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+    if(!cpi->total_stats || !cpi->this_frame_stats)
+        vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate firstpass stats");
 }
 
 
@@ -2290,10 +2298,12 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     }
     else if (cpi->pass == 2)
     {
+        size_t packet_sz = vp8_firstpass_stats_sz(cpi->common.MBs);
+        int packets = oxcf->two_pass_stats_in.sz / packet_sz;
+
         cpi->stats_in = oxcf->two_pass_stats_in.buf;
-        cpi->stats_in_end = cpi->stats_in
-                            + oxcf->two_pass_stats_in.sz / sizeof(FIRSTPASS_STATS)
-                            - 1;
+        cpi->stats_in_end = (void*)((char *)cpi->stats_in
+                            + (packets - 1) * packet_sz);
         vp8_init_second_pass(cpi);
     }
 
@@ -3481,7 +3491,7 @@ static void apply_temporal_filter
             modifier = 16 - modifier;
 #endif
             modifier *= filter_weight;
-            
+
             count[k] += modifier;
             accumulator[k] += modifier * pixel_value;
 
@@ -3656,7 +3666,7 @@ static void vp8cx_temp_blur1_c
     YV12_BUFFER_CONFIG *f = cpi->frames[alt_ref_index];
     unsigned char *dst1, *dst2;
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
-    
+
     // Save input state
     unsigned char *y_buffer = mbd->pre.y_buffer;
     unsigned char *u_buffer = mbd->pre.u_buffer;
