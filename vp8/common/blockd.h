@@ -169,7 +169,7 @@ typedef struct
         MV  as_mv;
     } mv;
 
-    char partitioning;
+    unsigned char partitioning;
     unsigned char mb_skip_coeff;                                //does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens
     unsigned char dc_diff;
     unsigned char need_to_clamp_mvs;
