@@ -258,8 +258,8 @@ rq_zigzag_1c:
 ;                           short *qcoeff_ptr,short *dequant_ptr,
 ;                           short *scan_mask, short *round_ptr,
 ;                           short *quant_ptr, short *dqcoeff_ptr);
-global sym(vp8_fast_quantize_b_impl_ssse2)
-sym(vp8_fast_quantize_b_impl_ssse2):
+global sym(vp8_fast_quantize_b_impl_sse2)
+sym(vp8_fast_quantize_b_impl_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7

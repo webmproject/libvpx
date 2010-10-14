@@ -102,7 +102,7 @@ void vp8_fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = &d->dequant[0][0];
 
-    d->eob = vp8_fast_quantize_b_impl_ssse2(
+    d->eob = vp8_fast_quantize_b_impl_sse2(
                  coeff_ptr,
                  qcoeff_ptr,
                  dequant_ptr,
