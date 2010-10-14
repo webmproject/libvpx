@@ -1035,44 +1035,63 @@ int vp8_diamond_search_sadx4
 
     for (step = 0; step < tot_steps ; step++)
     {
-        int check_row_min, check_col_min, check_row_max, check_col_max;
+        int all_in = 1, t;
 
-        check_row_min = x->mv_row_min - best_mv->row;
-        check_row_max = x->mv_row_max - best_mv->row;
-        check_col_min = x->mv_col_min - best_mv->col;
-        check_col_max = x->mv_col_max - best_mv->col;
+        // To know if all neighbor points are within the bounds, 4 bounds checking are enough instead of
+        // checking 4 bounds for each points.
+        all_in &= ((best_mv->row + ss[i].mv.row)> x->mv_row_min);
+        all_in &= ((best_mv->row + ss[i+1].mv.row) < x->mv_row_max);
+        all_in &= ((best_mv->col + ss[i+2].mv.col) > x->mv_col_min);
+        all_in &= ((best_mv->col + ss[i+3].mv.col) < x->mv_col_max);
 
-        for (j = 0 ; j < x->searches_per_step ; j += 4)
+        if (all_in)
         {
-            unsigned char *block_offset[4];
-            unsigned int valid_block[4];
-            int all_in = 1, t;
+            unsigned int sad_array[4];
 
-            for (t = 0; t < 4; t++)
+            for (j = 0 ; j < x->searches_per_step ; j += 4)
             {
-                valid_block [t]  = (ss[t+i].mv.col > check_col_min);
-                valid_block [t] &= (ss[t+i].mv.col < check_col_max);
-                valid_block [t] &= (ss[t+i].mv.row > check_row_min);
-                valid_block [t] &= (ss[t+i].mv.row < check_row_max);
+                unsigned char *block_offset[4];
 
-                all_in &= valid_block[t];
-                block_offset[t] = ss[i+t].offset + best_address;
-            }
-
-            if (all_in)
-            {
-                unsigned int sad_array[4];
+                for (t = 0; t < 4; t++)
+                    block_offset[t] = ss[i+t].offset + best_address;
 
                 fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride, sad_array);
 
                 for (t = 0; t < 4; t++, i++)
                 {
-                    thissad = sad_array[t];
-
-                    if (thissad < bestsad)
+                    if (sad_array[t] < bestsad)
                     {
                         this_mv.row = (best_mv->row + ss[i].mv.row) << 3;
                         this_mv.col = (best_mv->col + ss[i].mv.col) << 3;
+                        sad_array[t] += vp8_mv_err_cost(&this_mv, ref_mv, mvsadcost, error_per_bit);
+
+                        if (sad_array[t] < bestsad)
+                        {
+                            bestsad = sad_array[t];
+                            best_site = i;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (j = 0 ; j < x->searches_per_step ; j++)
+            {
+                // Trap illegal vectors
+                this_row_offset = best_mv->row + ss[i].mv.row;
+                this_col_offset = best_mv->col + ss[i].mv.col;
+
+                if ((this_col_offset > x->mv_col_min) && (this_col_offset < x->mv_col_max) &&
+                (this_row_offset > x->mv_row_min) && (this_row_offset < x->mv_row_max))
+                {
+                    check_here = ss[i].offset + best_address;
+                    thissad = fn_ptr->sdf(what, what_stride, check_here , in_what_stride, bestsad);
+
+                    if (thissad < bestsad)
+                    {
+                        this_mv.row = this_row_offset << 3;
+                        this_mv.col = this_col_offset << 3;
                         thissad += vp8_mv_err_cost(&this_mv, ref_mv, mvsadcost, error_per_bit);
 
                         if (thissad < bestsad)
@@ -1082,37 +1101,7 @@ int vp8_diamond_search_sadx4
                         }
                     }
                 }
-            }
-            else
-            {
-                int t;
-
-                for (t = 0; t < 4; i++, t++)
-                {
-                    // Trap illegal vectors
-                    if (valid_block[t])
-
-                    {
-                        check_here = block_offset[t];
-                        thissad = fn_ptr->sdf(what, what_stride, check_here , in_what_stride, bestsad);
-
-                        if (thissad < bestsad)
-                        {
-                            this_row_offset = best_mv->row + ss[i].mv.row;
-                            this_col_offset = best_mv->col + ss[i].mv.col;
-
-                            this_mv.row = this_row_offset << 3;
-                            this_mv.col = this_col_offset << 3;
-                            thissad += vp8_mv_err_cost(&this_mv, ref_mv, mvsadcost, error_per_bit);
-
-                            if (thissad < bestsad)
-                            {
-                                bestsad = thissad;
-                                best_site = i;
-                            }
-                        }
-                    }
-                }
+                i++;
             }
         }
 
