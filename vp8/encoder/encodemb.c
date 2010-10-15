@@ -633,7 +633,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     vp8_quantize_mb(x);
 
 #if !(CONFIG_REALTIME_ONLY)
-    if (x->optimize && x->rddiv > 1)
+    if (x->optimize==2 ||(x->optimize && x->rddiv > 1))
         vp8_optimize_mb(x, rtcd);
 #endif
 

@@ -273,6 +273,7 @@ typedef struct
 
     int last_alt_ref_sei;
     int is_src_frame_alt_ref;
+    int is_next_src_alt_ref;
 
     int gold_is_last; // golden frame same as last frame ( short circuit gold searches)
     int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
