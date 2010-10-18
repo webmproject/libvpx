@@ -1155,7 +1155,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     int r, c;
 
     unsigned char *check_here;
-    int thissad;
+    unsigned int thissad;
 
     int ref_row = ref_mv->row >> 3;
     int ref_col = ref_mv->col >> 3;
@@ -1165,7 +1165,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     int col_min = ref_col - distance;
     int col_max = ref_col + distance;
 
-    int sad_array[3];
+    unsigned int sad_array[3];
 
     // Work out the mid point for the search
     in_what = *(d->base_pre) + d->pre;
