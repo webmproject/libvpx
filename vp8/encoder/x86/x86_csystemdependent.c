@@ -165,6 +165,18 @@ int vp8_mbuverror_xmm(MACROBLOCK *mb)
     return vp8_mbuverror_xmm_impl(s_ptr, d_ptr);
 }
 
+void vp8_subtract_b_sse2_impl(unsigned char *z,  int src_stride,
+                             short *diff, unsigned char *predictor,
+                             int pitch);
+void vp8_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
+{
+    unsigned char *z = *(be->base_src) + be->src;
+    unsigned int  src_stride = be->src_stride;
+    short *diff = &be->src_diff[0];
+    unsigned char *predictor = &bd->predictor[0];
+    vp8_subtract_b_sse2_impl(z, src_stride, diff, predictor, pitch);
+}
+
 #endif
 
 void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
@@ -282,12 +294,12 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.berr                  = vp8_block_error_xmm;
         cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_xmm;
         cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_xmm;
-        /* cpi->rtcd.encodemb.sub* not implemented for wmt */
+        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_sse2;
+        cpi->rtcd.encodemb.submby                = vp8_subtract_mby_sse2;
+        cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
 
         /*cpi->rtcd.quantize.quantb            = vp8_regular_quantize_b_sse2;*/
-
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
-
     }
 
 #endif

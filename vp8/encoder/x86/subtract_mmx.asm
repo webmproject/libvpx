@@ -12,7 +12,7 @@
 %include "vpx_ports/x86_abi_support.asm"
 
 ;void vp8_subtract_b_mmx_impl(unsigned char *z,  int src_stride,
-;                            unsigned short *diff, unsigned char *Predictor,
+;                            short *diff, unsigned char *Predictor,
 ;                            int pitch);
 global sym(vp8_subtract_b_mmx_impl)
 sym(vp8_subtract_b_mmx_impl):
