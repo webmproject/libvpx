@@ -1282,7 +1282,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     }
 
     if (cpi->sf.optimize_coefficients == 1)
-        cpi->mb.optimize = 1;
+        cpi->mb.optimize = 1 + cpi->is_next_src_alt_ref;
     else
         cpi->mb.optimize = 0;
 
@@ -1749,6 +1749,7 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
     cpi->is_src_frame_alt_ref = 0;
+    cpi->is_next_src_alt_ref = 0;
 
 #if 0
     // Experimental RD Code
@@ -2034,6 +2035,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
     cpi->is_src_frame_alt_ref = 0;
+    cpi->is_next_src_alt_ref = 0;
 
 #if 0
     // Experimental RD Code
@@ -5419,6 +5421,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             cm->show_frame = 0;
             cpi->source_alt_ref_pending = FALSE;   // Clear Pending altf Ref flag.
             cpi->is_src_frame_alt_ref = 0;
+            cpi->is_next_src_alt_ref = 0;
         }
         else
 #endif
@@ -5437,6 +5440,11 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                     cpi->is_src_frame_alt_ref = 0;
 
                 cpi->source_encode_index = (cpi->source_encode_index + 1) % cpi->oxcf.lag_in_frames;
+
+                if(cpi->source_encode_index == cpi->last_alt_ref_sei)
+                    cpi->is_next_src_alt_ref = 1;
+                else
+                    cpi->is_next_src_alt_ref = 0;
             }
 
 #endif
