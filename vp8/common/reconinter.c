@@ -669,11 +669,15 @@ void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
 
                 if (d0->bmi.mv.as_mv.row & 7 || d0->bmi.mv.as_mv.col & 7)
                 {
-                    x->subpixel_predict8x4(ptr, d0->pre_stride, d0->bmi.mv.as_mv.col & 7, d0->bmi.mv.as_mv.row & 7, dst_ptr, x->dst.y_stride);
+                    x->subpixel_predict8x4(ptr, d0->pre_stride,
+                        d0->bmi.mv.as_mv.col & 7,
+                        d0->bmi.mv.as_mv.row & 7,
+                        dst_ptr, x->dst.uv_stride);
                 }
                 else
                 {
-                    RECON_INVOKE(&x->rtcd->recon, copy8x4)(ptr, d0->pre_stride, dst_ptr, x->dst.y_stride);
+                    RECON_INVOKE(&x->rtcd->recon, copy8x4)(ptr,
+                        d0->pre_stride, dst_ptr, x->dst.uv_stride);
                 }
             }
             else
