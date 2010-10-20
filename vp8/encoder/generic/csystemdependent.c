@@ -15,6 +15,7 @@
 
 
 void vp8_arch_x86_encoder_init(VP8_COMP *cpi);
+void vp8_arch_arm_encoder_init(VP8_COMP *cpi);
 
 
 void (*vp8_fast_quantize_b)(BLOCK *b, BLOCKD *d);
@@ -92,6 +93,10 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 
 #if ARCH_X86 || ARCH_X86_64
     vp8_arch_x86_encoder_init(cpi);
+#endif
+
+#if ARCH_ARM
+    vp8_arch_arm_encoder_init(cpi);
 #endif
 
 }

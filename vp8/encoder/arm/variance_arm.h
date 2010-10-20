@@ -38,6 +38,7 @@ extern prototype_sad(vp8_get16x16pred_error_neon);
 //extern prototype_variance2(vp8_get16x16var_c);
 extern prototype_sad(vp8_get4x4sse_cs_neon);
 
+#if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_variance_sad4x4
 #define vp8_variance_sad4x4 vp8_sad4x4_neon
 
@@ -100,6 +101,7 @@ extern prototype_sad(vp8_get4x4sse_cs_neon);
 
 #undef  vp8_variance_get4x4sse_cs
 #define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_neon
+#endif
 
 #endif
 

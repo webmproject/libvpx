@@ -205,17 +205,10 @@ token_count_lt_zero_se
     ldr     r5, [r0, #vp8_writer_range]
     ldr     r3, [r0, #vp8_writer_count]
 
-    ; reverse the stream of bits to be packed.  Normally
-    ; the most significant bit is peeled off and compared
-    ; in the form of (v >> --n) & 1.  ARM architecture has
-    ; the ability to set a flag based on the value of the
-    ; bit shifted off the bottom of the register.  To make
-    ; that happen the bitstream is reversed.
-    rbit    r11, r1
     rsb     r4, r10, #32                 ; 32-n
 
     ; v is kept in r1 during the token pack loop
-    lsr     r1, r11, r4                 ; v >>= 32 - n
+    lsl     r1, r1, r4                  ; r1 = v << 32 - n
 
 encode_value_loop
     sub     r7, r5, #1                  ; range-1
@@ -223,7 +216,7 @@ encode_value_loop
     ; Decisions are made based on the bit value shifted
     ; off of v, so set a flag here based on this.
     ; This value is refered to as "bb"
-    lsrs    r1, r1, #1                  ; bit = v >> n
+    lsls    r1, r1, #1                  ; bit = v >> n
     mov     r4, r7, lsl #7              ; ((range-1) * 128)
 
     mov     r7, #1

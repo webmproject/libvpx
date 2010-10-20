@@ -30,6 +30,9 @@
 #include "systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"
+#if ARCH_ARM
+#include "vpx_ports/arm.h"
+#endif
 
 extern void vp8_init_loop_filter(VP8_COMMON *cm);
 extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
@@ -224,7 +227,6 @@ int vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
 #if HAVE_ARMV7
 extern void vp8_push_neon(INT64 *store);
 extern void vp8_pop_neon(INT64 *store);
-static INT64 dx_store_reg[8];
 #endif
 
 static int get_free_fb (VP8_COMMON *cm)
@@ -312,6 +314,9 @@ static int swap_frame_buffers (VP8_COMMON *cm)
 
 int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, INT64 time_stamp)
 {
+#if HAVE_ARMV7
+    INT64 dx_store_reg[8];
+#endif
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
     int retcode = 0;
@@ -327,10 +332,27 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->common.error.error_code = VPX_CODEC_OK;
 
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_push_neon(dx_store_reg);
+    }
+#endif
+
     cm->new_fb_idx = get_free_fb (cm);
 
     if (setjmp(pbi->common.error.jmp))
     {
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(dx_store_reg);
+        }
+#endif
         pbi->common.error.setjmp = 0;
         if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
           cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
@@ -338,10 +360,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     }
 
     pbi->common.error.setjmp = 1;
-
-#if HAVE_ARMV7
-    vp8_push_neon(dx_store_reg);
-#endif
 
     vpx_usec_timer_start(&timer);
 
@@ -354,7 +372,12 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     if (retcode < 0)
     {
 #if HAVE_ARMV7
-        vp8_pop_neon(dx_store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(dx_store_reg);
+        }
 #endif
         pbi->common.error.error_code = VPX_CODEC_ERROR;
         pbi->common.error.setjmp = 0;
@@ -367,6 +390,14 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     {
         if (swap_frame_buffers (cm))
         {
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+            if (cm->rtcd.flags & HAS_NEON)
+#endif
+            {
+                vp8_pop_neon(dx_store_reg);
+            }
+#endif
             pbi->common.error.error_code = VPX_CODEC_ERROR;
             pbi->common.error.setjmp = 0;
             return -1;
@@ -375,6 +406,14 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     {
         if (swap_frame_buffers (cm))
         {
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+            if (cm->rtcd.flags & HAS_NEON)
+#endif
+            {
+                vp8_pop_neon(dx_store_reg);
+            }
+#endif
             pbi->common.error.error_code = VPX_CODEC_ERROR;
             pbi->common.error.setjmp = 0;
             return -1;
@@ -455,7 +494,12 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #endif
 
 #if HAVE_ARMV7
-    vp8_pop_neon(dx_store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_pop_neon(dx_store_reg);
+    }
 #endif
     pbi->common.error.setjmp = 0;
     return retcode;

@@ -21,6 +21,7 @@ extern prototype_copy_block(vp8_copy_mem8x8_v6);
 extern prototype_copy_block(vp8_copy_mem8x4_v6);
 extern prototype_copy_block(vp8_copy_mem16x16_v6);
 
+#if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_recon_recon
 #define vp8_recon_recon vp8_recon_b_armv6
 
@@ -39,6 +40,7 @@ extern prototype_copy_block(vp8_copy_mem16x16_v6);
 #undef  vp8_recon_copy16x16
 #define vp8_recon_copy16x16 vp8_copy_mem16x16_v6
 #endif
+#endif
 
 #if HAVE_ARMV7
 extern prototype_recon_block(vp8_recon_b_neon);
@@ -49,6 +51,7 @@ extern prototype_copy_block(vp8_copy_mem8x8_neon);
 extern prototype_copy_block(vp8_copy_mem8x4_neon);
 extern prototype_copy_block(vp8_copy_mem16x16_neon);
 
+#if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_recon_recon
 #define vp8_recon_recon vp8_recon_b_neon
 
@@ -66,6 +69,7 @@ extern prototype_copy_block(vp8_copy_mem16x16_neon);
 
 #undef  vp8_recon_copy16x16
 #define vp8_recon_copy16x16 vp8_copy_mem16x16_neon
+#endif
 #endif
 
 #endif

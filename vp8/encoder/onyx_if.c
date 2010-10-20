@@ -31,6 +31,9 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vpxerrors.h"
 #include "temporal_filter.h"
+#if ARCH_ARM
+#include "vpx_ports/arm.h"
+#endif
 
 #include <math.h>
 #include <stdio.h>
@@ -2106,8 +2109,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     CHECK_MEM_ERROR(cpi->rdtok, vpx_calloc(256 * 3 / 2, sizeof(TOKENEXTRA)));
     CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
-    vp8_cmachine_specific_config(cpi);
     vp8_create_common(&cpi->common);
+    vp8_cmachine_specific_config(cpi);
 
     vp8_init_config((VP8_PTR)cpi, oxcf);
 
@@ -2852,9 +2855,20 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     {
         //vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
 #if HAVE_ARMV7
-        vp8_yv12_copy_src_frame_func_neon(sd, &cpi->scaled_source);
-#else
-        vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_yv12_copy_src_frame_func_neon(sd, &cpi->scaled_source);
+        }
+#if CONFIG_RUNTIME_CPU_DETECT
+        else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+        {
+            vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
+        }
 #endif
 
         cpi->Source = &cpi->scaled_source;
@@ -4624,10 +4638,10 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 #if HAVE_ARMV7
 extern void vp8_push_neon(INT64 *store);
 extern void vp8_pop_neon(INT64 *store);
-static INT64 store_reg[8];
 #endif
 int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, INT64 time_stamp, INT64 end_time)
 {
+    INT64 store_reg[8];
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  timer;
@@ -4636,7 +4650,12 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
         return -1;
 
 #if HAVE_ARMV7
-    vp8_push_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_push_neon(store_reg);
+    }
 #endif
 
     vpx_usec_timer_start(&timer);
@@ -4645,7 +4664,12 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
     if (cpi->source_buffer_count != 0 && cpi->source_buffer_count >= cpi->oxcf.lag_in_frames)
     {
 #if HAVE_ARMV7
-        vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(store_reg);
+        }
 #endif
         return -1;
     }
@@ -4686,9 +4710,20 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
         s->source_time_stamp = time_stamp;
         s->source_frame_flags = frame_flags;
 #if HAVE_ARMV7
-        vp8_yv12_copy_src_frame_func_neon(sd, &s->source_buffer);
-#else
-        vp8_yv12_copy_frame_ptr(sd, &s->source_buffer);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_yv12_copy_src_frame_func_neon(sd, &s->source_buffer);
+        }
+#if CONFIG_RUNTIME_CPU_DETECT
+        else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+        {
+            vp8_yv12_copy_frame_ptr(sd, &s->source_buffer);
+        }
 #endif
         cpi->source_buffer_count = 1;
     }
@@ -4697,14 +4732,19 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
     cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 
 #if HAVE_ARMV7
-    vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_pop_neon(store_reg);
+    }
 #endif
 
     return 0;
 }
 int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, INT64 *time_stamp, INT64 *time_end, int flush)
 {
-
+    INT64 store_reg[8];
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  tsctimer;
@@ -4715,7 +4755,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         return -1;
 
 #if HAVE_ARMV7
-    vp8_push_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_push_neon(store_reg);
+    }
 #endif
 
     vpx_usec_timer_start(&cmptimer);
@@ -4867,7 +4912,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 #endif
 
 #if HAVE_ARMV7
-        vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(store_reg);
+        }
 #endif
         return -1;
     }
@@ -4910,7 +4960,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     if (!cpi)
     {
 #if HAVE_ARMV7
-        vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(store_reg);
+        }
 #endif
         return 0;
     }
@@ -5099,7 +5154,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 #endif
 
 #if HAVE_ARMV7
-    vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_pop_neon(store_reg);
+    }
 #endif
 
     return 0;

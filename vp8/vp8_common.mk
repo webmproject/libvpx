@@ -112,6 +112,8 @@ VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
+
 # common (c)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/filter_arm.c
@@ -119,14 +121,7 @@ VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/recon_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/reconintra4x4_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/reconintra_arm.c
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/systemdependent.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/vpx_asm_offsets.c
-
-VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/filter_c.c
-VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/idctllm.c
-VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/recon.c
-VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/reconintra4x4.c
-VP8_COMMON_SRCS_REMOVE-$(HAVE_ARMV6)  += common/generic/systemdependent.c
 
 # common (armv6)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/bilinearfilter_v6$(ASM)

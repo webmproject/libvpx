@@ -9,7 +9,7 @@
 ;
 
 
-    EXPORT |vp8cx_pack_tokens_armv7|
+    EXPORT |vp8cx_pack_mb_row_tokens_armv5|
 
     INCLUDE vpx_vp8_enc_asm_offsets.asm
 
@@ -19,30 +19,51 @@
 
     AREA    |.text|, CODE, READONLY
 
-; r0 vp8_writer *w
-; r1 const TOKENEXTRA *p
-; r2 int xcount
-; r3 vp8_coef_encodings
-; s0 vp8_extra_bits
-; s1 vp8_coef_tree
-|vp8cx_pack_tokens_armv7| PROC
-    push    {r4-r11, lr}
+; r0 VP8_COMP *cpi
+; r1 vp8_writer *w
+; r2 vp8_coef_encodings
+; r3 vp8_extra_bits
+; s0 vp8_coef_tree
 
-    ; Add size of xcount * sizeof (TOKENEXTRA) to get stop
-    ;  sizeof (TOKENEXTRA) is 20
-    add     r2, r2, r2, lsl #2          ; xcount
-    sub     sp, sp, #12
-    add     r2, r1, r2, lsl #2          ; stop = p + xcount
-    str     r2, [sp, #0]
-    str     r3, [sp, #8]                ; save vp8_coef_encodings
+|vp8cx_pack_mb_row_tokens_armv5| PROC
+    push    {r4-r11, lr}
+    sub     sp, sp, #24
+
+    ; Compute address of cpi->common.mb_rows
+    ldr     r4, _VP8_COMP_common_
+    ldr     r6, _VP8_COMMON_MBrows_
+    add     r4, r0, r4
+
+    ldr     r5, [r4, r6]                ; load up mb_rows
+
+    str     r2, [sp, #20]               ; save vp8_coef_encodings
+    str     r5, [sp, #12]               ; save mb_rows
+    str     r3, [sp, #8]                ; save vp8_extra_bits
+
+    ldr     r4, _VP8_COMP_tplist_
+    add     r4, r0, r4
+    ldr     r7, [r4, #0]                ; dereference cpi->tp_list
+
+    mov     r0, r1                      ; keep same as other loops
+
     ldr     r2, [r0, #vp8_writer_lowvalue]
     ldr     r5, [r0, #vp8_writer_range]
     ldr     r3, [r0, #vp8_writer_count]
+
+mb_row_loop
+
+    ldr     r1, [r7, #tokenlist_start]
+    ldr     r9, [r7, #tokenlist_stop]
+    str     r9, [sp, #0]                ; save stop for later comparison
+    str     r7, [sp, #16]               ; tokenlist address for next time
+
     b       check_p_lt_stop
+
+    ; actuall work gets done here!
 
 while_p_lt_stop
     ldr     r6, [r1, #tokenextra_token] ; t
-    ldr     r4, [sp, #8]                ; vp8_coef_encodings
+    ldr     r4, [sp, #20]               ; vp8_coef_encodings
     mov     lr, #0
     add     r4, r4, r6, lsl #3          ; a = vp8_coef_encodings + t
     ldr     r9, [r1, #tokenextra_context_tree]   ; pp
@@ -57,18 +78,11 @@ while_p_lt_stop
     movne   lr, #2                      ; i = 2
     subne   r8, r8, #1                  ; --n
 
-    ; reverse the stream of bits to be packed.  Normally
-    ; the most significant bit is peeled off and compared
-    ; in the form of (v >> --n) & 1.  ARM architecture has
-    ; the ability to set a flag based on the value of the
-    ; bit shifted off the bottom of the register.  To make
-    ; that happen the bitstream is reversed.
-    rbit    r12, r6
     rsb     r4, r8, #32                 ; 32-n
-    ldr     r10, [sp, #52]              ; vp8_coef_tree
+    ldr     r10, [sp, #60]              ; vp8_coef_tree
 
     ; v is kept in r12 during the token pack loop
-    lsr     r12, r12, r4                ; v >>= 32 - n
+    lsl     r12, r6, r4                 ; r12 = v << 32 - n
 
 ; loop start
 token_loop
@@ -78,7 +92,7 @@ token_loop
     ; Decisions are made based on the bit value shifted
     ; off of v, so set a flag here based on this.
     ; This value is refered to as "bb"
-    lsrs    r12, r12, #1                ; bb = v >> n
+    lsls    r12, r12, #1                ; bb = v >> n
     mul     r4, r4, r7                  ; ((range-1) * pp[i>>1]))
 
     ; bb can only be 0 or 1.  So only execute this statement
@@ -141,7 +155,7 @@ token_high_bit_not_set
     ; r10 is used earlier in the loop, but r10 is used as
     ; temp variable here.  So after r10 is used, reload
     ; vp8_coef_tree_dcd into r10
-    ldr     r10, [sp, #52]              ; vp8_coef_tree
+    ldr     r10, [sp, #60]              ; vp8_coef_tree
 
 token_count_lt_zero
     lsl     r2, r2, r6                  ; lowvalue <<= shift
@@ -150,7 +164,7 @@ token_count_lt_zero
     bne     token_loop
 
     ldr     r6, [r1, #tokenextra_token] ; t
-    ldr     r7, [sp, #48]               ; vp8_extra_bits
+    ldr     r7, [sp, #8]                ; vp8_extra_bits
     ; Add t * sizeof (vp8_extra_bit_struct) to get the desired
     ;  element.  Here vp8_extra_bit_struct == 20
     add     r6, r6, r6, lsl #2          ; b = vp8_extra_bits + t
@@ -172,16 +186,15 @@ token_count_lt_zero
     ldr     r10, [r12, #vp8_extra_bit_struct_tree]
     str     r10, [sp, #4]               ; b->tree
 
-    rbit    r12, r7                     ; reverse v
     rsb     r4, r8, #32
-    lsr     r12, r12, r4
+    lsl     r12, r7, r4
 
     mov     lr, #0                      ; i = 0
 
 extra_bits_loop
     ldrb    r4, [r9, lr, asr #1]            ; pp[i>>1]
     sub     r7, r5, #1                  ; range-1
-    lsrs    r12, r12, #1                ; v >> n
+    lsls    r12, r12, #1                ; v >> n
     mul     r4, r4, r7                  ; (range-1) * pp[i>>1]
     addcs   lr, lr, #1                  ; i + bb
 
@@ -291,11 +304,25 @@ check_p_lt_stop
     cmp     r1, r4                      ; while( p < stop)
     bcc     while_p_lt_stop
 
+    ldr     r6, [sp, #12]               ; mb_rows
+    ldr     r7, [sp, #16]               ; tokenlist address
+    subs    r6, r6, #1
+    add     r7, r7, #TOKENLIST_SZ       ; next element in the array
+    str     r6, [sp, #12]
+    bne     mb_row_loop
+
     str     r2, [r0, #vp8_writer_lowvalue]
     str     r5, [r0, #vp8_writer_range]
     str     r3, [r0, #vp8_writer_count]
-    add     sp, sp, #12
+    add     sp, sp, #24
     pop     {r4-r11, pc}
     ENDP
+
+_VP8_COMP_common_
+    DCD     vp8_comp_common
+_VP8_COMMON_MBrows_
+    DCD     vp8_common_mb_rows
+_VP8_COMP_tplist_
+    DCD     vp8_comp_tplist
 
     END

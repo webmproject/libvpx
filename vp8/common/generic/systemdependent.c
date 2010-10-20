@@ -18,6 +18,7 @@
 #include "onyxc_int.h"
 
 extern void vp8_arch_x86_common_init(VP8_COMMON *ctx);
+extern void vp8_arch_arm_common_init(VP8_COMMON *ctx);
 
 void (*vp8_build_intra_predictors_mby_ptr)(MACROBLOCKD *x);
 extern void vp8_build_intra_predictors_mby(MACROBLOCKD *x);
@@ -75,6 +76,10 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 
 #if ARCH_X86 || ARCH_X86_64
     vp8_arch_x86_common_init(ctx);
+#endif
+
+#if ARCH_ARM
+    vp8_arch_arm_common_init(ctx);
 #endif
 
 }
