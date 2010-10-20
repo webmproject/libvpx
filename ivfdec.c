@@ -398,6 +398,41 @@ unsigned int file_is_ivf(FILE *infile,
 }
 
 
+unsigned int file_is_raw(FILE *infile,
+                         unsigned int *fourcc,
+                         unsigned int *width,
+                         unsigned int *height,
+                         unsigned int *fps_den,
+                         unsigned int *fps_num)
+{
+    unsigned char buf[32];
+    int is_raw = 0;
+    vpx_codec_stream_info_t si;
+
+    if (fread(buf, 1, 32, infile) == 32)
+    {
+        int i;
+
+        if(mem_get_le32(buf) < 256 * 1024 * 1024)
+            for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
+                if(!vpx_codec_peek_stream_info(ifaces[i].iface,
+                                               buf + 4, 32 - 4, &si))
+                {
+                    is_raw = 1;
+                    *fourcc = ifaces[i].fourcc;
+                    *width = si.w;
+                    *height = si.h;
+                    *fps_num = 30;
+                    *fps_den = 1;
+                    break;
+                }
+    }
+
+    rewind(infile);
+    return is_raw;
+}
+
+
 static int
 nestegg_read_cb(void *buffer, size_t length, void *userdata)
 {
@@ -686,53 +721,50 @@ int main(int argc, const char **argv_)
     if(file_is_ivf(infile, &fourcc, &width, &height, &fps_den,
                    &fps_num))
         input.kind = IVF_FILE;
-    else if(file_is_webm(&input, &fourcc, &width, &height, &fps_den,                                 &fps_num))
+    else if(file_is_webm(&input, &fourcc, &width, &height, &fps_den, &fps_num))
         input.kind = WEBM_FILE;
-    else
+    else if(file_is_raw(infile, &fourcc, &width, &height, &fps_den, &fps_num))
         input.kind = RAW_FILE;
-
-    if (input.kind != RAW_FILE)
+    else
     {
-        if (use_y4m)
-        {
-            char buffer[128];
-            if (!fn2)
-            {
-                fprintf(stderr, "YUV4MPEG2 output only supported with -o.\n");
-                return EXIT_FAILURE;
-            }
-
-            if(input.kind == WEBM_FILE)
-                webm_guess_framerate(&input, &fps_den, &fps_num);
-
-            /*Note: We can't output an aspect ratio here because IVF doesn't
-               store one, and neither does VP8.
-              That will have to wait until these tools support WebM natively.*/
-            sprintf(buffer, "YUV4MPEG2 C%s W%u H%u F%u:%u I%c\n",
-                    "420jpeg", width, height, fps_num, fps_den, 'p');
-            out_put(out, (unsigned char *)buffer, strlen(buffer), do_md5);
-        }
-
-        /* Try to determine the codec from the fourcc. */
-        for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
-            if ((fourcc & ifaces[i].fourcc_mask) == ifaces[i].fourcc)
-            {
-                vpx_codec_iface_t  *ivf_iface = ifaces[i].iface;
-
-                if (iface && iface != ivf_iface)
-                    fprintf(stderr, "Notice -- IVF header indicates codec: %s\n",
-                            ifaces[i].name);
-                else
-                    iface = ivf_iface;
-
-                break;
-            }
-    }
-    else if(use_y4m)
-    {
-        fprintf(stderr, "YUV4MPEG2 output not supported from raw input.\n");
+        fprintf(stderr, "Unrecognized input file type.\n");
         return EXIT_FAILURE;
     }
+
+    if (use_y4m)
+    {
+        char buffer[128];
+        if (!fn2)
+        {
+            fprintf(stderr, "YUV4MPEG2 output only supported with -o.\n");
+            return EXIT_FAILURE;
+        }
+
+        if(input.kind == WEBM_FILE)
+            webm_guess_framerate(&input, &fps_den, &fps_num);
+
+        /*Note: We can't output an aspect ratio here because IVF doesn't
+           store one, and neither does VP8.
+          That will have to wait until these tools support WebM natively.*/
+        sprintf(buffer, "YUV4MPEG2 C%s W%u H%u F%u:%u I%c\n",
+                "420jpeg", width, height, fps_num, fps_den, 'p');
+        out_put(out, (unsigned char *)buffer, strlen(buffer), do_md5);
+    }
+
+    /* Try to determine the codec from the fourcc. */
+    for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
+        if ((fourcc & ifaces[i].fourcc_mask) == ifaces[i].fourcc)
+        {
+            vpx_codec_iface_t  *ivf_iface = ifaces[i].iface;
+
+            if (iface && iface != ivf_iface)
+                fprintf(stderr, "Notice -- IVF header indicates codec: %s\n",
+                        ifaces[i].name);
+            else
+                iface = ivf_iface;
+
+            break;
+        }
 
     if (vpx_codec_dec_init(&decoder, iface ? iface :  ifaces[0].iface, &cfg,
                            postproc ? VPX_CODEC_USE_POSTPROC : 0))
