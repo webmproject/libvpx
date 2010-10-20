@@ -30,6 +30,9 @@ UTILS-$(CONFIG_ENCODERS)    += ivfenc.c
 ivfenc.SRCS                 += args.c args.h y4minput.c y4minput.h
 ivfenc.SRCS                 += vpx_ports/config.h vpx_ports/mem_ops.h
 ivfenc.SRCS                 += vpx_ports/mem_ops_aligned.h
+ivfenc.SRCS                 += libmkv/EbmlIDs.h
+ivfenc.SRCS                 += libmkv/EbmlWriter.c
+ivfenc.SRCS                 += libmkv/EbmlWriter.h
 ivfenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 ivfenc.DESCRIPTION           = Full featured encoder
 

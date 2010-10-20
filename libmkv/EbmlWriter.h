@@ -9,12 +9,12 @@
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
 
-
-//If you wish a different writer simply replace this
 //note: you must define write and serialize functions as well as your own EBML_GLOBAL
-#include <stddef.h>
-#include "EbmlBufferWriter.h"
 //These functions MUST be implemented
+#include <stddef.h>
+#include "vpx/vpx_integer.h"
+
+typedef struct EbmlGlobal EbmlGlobal;
 void  Ebml_Serialize(EbmlGlobal *glob, const void *, unsigned long);
 void  Ebml_Write(EbmlGlobal *glob, const void *, unsigned long);
 /////
@@ -24,7 +24,7 @@ void Ebml_WriteLen(EbmlGlobal *glob, long long val);
 void Ebml_WriteString(EbmlGlobal *glob, const char *str);
 void Ebml_WriteUTF8(EbmlGlobal *glob, const wchar_t *wstr);
 void Ebml_WriteID(EbmlGlobal *glob, unsigned long class_id);
-void Ebml_SerializeUnsigned64(EbmlGlobal *glob, unsigned long class_id, UInt64 ui);
+void Ebml_SerializeUnsigned64(EbmlGlobal *glob, unsigned long class_id, uint64_t ui);
 void Ebml_SerializeUnsigned(EbmlGlobal *glob, unsigned long class_id, unsigned long ui);
 void Ebml_SerializeBinary(EbmlGlobal *glob, unsigned long class_id, unsigned long ui);
 void Ebml_SerializeFloat(EbmlGlobal *glob, unsigned long class_id, double d);

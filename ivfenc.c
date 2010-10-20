@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <limits.h>
 #include "vpx/vpx_encoder.h"
 #if USE_POSIX_MMAP
 #include <sys/types.h>
@@ -30,10 +31,31 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+#include "vpx_version.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
 #include "y4minput.h"
+#include "libmkv/EbmlWriter.h"
+#include "libmkv/EbmlIDs.h"
+
+/* Need special handling of these functions on Windows */
+#if defined(_MSC_VER)
+/* MSVS doesn't define off_t, and uses _f{seek,tell}i64 */
+typedef __int64 off_t;
+#define fseeko _fseeki64
+#define ftello _ftelli64
+#elif defined(_WIN32)
+/* MinGW defines off_t, and uses f{seek,tell}o64 */
+#define fseeko fseeko64
+#define ftello ftello64
+#endif
+
+#if defined(_MSC_VER)
+#define LITERALU64(n) n
+#else
+#define LITERALU64(n) n##LLU
+#endif
 
 static const char *exec_name;
 
@@ -395,6 +417,327 @@ static void write_ivf_frame_header(FILE *outfile,
     fwrite(header, 1, 12, outfile);
 }
 
+
+typedef off_t EbmlLoc;
+
+
+struct cue_entry
+{
+    unsigned int time;
+    uint64_t     loc;
+};
+
+
+struct EbmlGlobal
+{
+    FILE    *stream;
+    uint64_t last_pts_ms;
+    vpx_rational_t  framerate;
+
+    /* These pointers are to the start of an element */
+    off_t    position_reference;
+    off_t    seek_info_pos;
+    off_t    segment_info_pos;
+    off_t    track_pos;
+    off_t    cue_pos;
+    off_t    cluster_pos;
+
+    /* These pointers are to the size field of the element */
+    EbmlLoc  startSegment;
+    EbmlLoc  startCluster;
+
+    uint32_t cluster_timecode;
+    int      cluster_open;
+
+    struct cue_entry *cue_list;
+    unsigned int      cues;
+
+};
+
+
+void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
+{
+    fwrite(buffer_in, 1, len, glob->stream);
+}
+
+
+void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
+{
+    const unsigned char *q = (const unsigned char *)buffer_in + len - 1;
+
+    for(; len; len--)
+        Ebml_Write(glob, q--, 1);
+}
+
+
+static void
+Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
+                          unsigned long class_id)
+{
+    //todo this is always taking 8 bytes, this may need later optimization
+    //this is a key that says lenght unknown
+    unsigned long long unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
+
+    Ebml_WriteID(glob, class_id);
+    *ebmlLoc = ftello(glob->stream);
+    Ebml_Serialize(glob, &unknownLen, 8);
+}
+
+static void
+Ebml_EndSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc)
+{
+    off_t pos;
+    uint64_t size;
+
+    /* Save the current stream pointer */
+    pos = ftello(glob->stream);
+
+    /* Calculate the size of this element */
+    size = pos - *ebmlLoc - 8;
+    size |=  LITERALU64(0x0100000000000000);
+
+    /* Seek back to the beginning of the element and write the new size */
+    fseeko(glob->stream, *ebmlLoc, SEEK_SET);
+    Ebml_Serialize(glob, &size, 8);
+
+    /* Reset the stream pointer */
+    fseeko(glob->stream, pos, SEEK_SET);
+}
+
+
+static void
+write_webm_seek_element(EbmlGlobal *ebml, unsigned long id, off_t pos)
+{
+    uint64_t offset = pos - ebml->position_reference;
+    EbmlLoc start;
+    Ebml_StartSubElement(ebml, &start, Seek);
+    Ebml_SerializeBinary(ebml, SeekID, id);
+    Ebml_SerializeUnsigned64(ebml, SeekPosition, offset);
+    Ebml_EndSubElement(ebml, &start);
+}
+
+
+static void
+write_webm_seek_info(EbmlGlobal *ebml)
+{
+
+    off_t pos;
+
+    /* Save the current stream pointer */
+    pos = ftello(ebml->stream);
+
+    if(ebml->seek_info_pos)
+        fseeko(ebml->stream, ebml->seek_info_pos, SEEK_SET);
+    else
+        ebml->seek_info_pos = pos;
+
+    {
+        EbmlLoc start;
+
+        Ebml_StartSubElement(ebml, &start, SeekHead);
+        write_webm_seek_element(ebml, Tracks, ebml->track_pos);
+        write_webm_seek_element(ebml, Cues,   ebml->cue_pos);
+        write_webm_seek_element(ebml, Info,   ebml->segment_info_pos);
+        Ebml_EndSubElement(ebml, &start);
+    }
+    {
+        //segment info
+        EbmlLoc startInfo;
+        uint64_t frame_time;
+
+        frame_time = (uint64_t)1000 * ebml->framerate.den
+                     / ebml->framerate.num;
+        ebml->segment_info_pos = ftello(ebml->stream);
+        Ebml_StartSubElement(ebml, &startInfo, Info);
+        Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
+        Ebml_SerializeFloat(ebml, Segment_Duration,
+                            ebml->last_pts_ms + frame_time);
+        Ebml_SerializeString(ebml, 0x4D80, "ivfenc" VERSION_STRING);
+        Ebml_SerializeString(ebml, 0x5741, "ivfenc" VERSION_STRING);
+        Ebml_EndSubElement(ebml, &startInfo);
+    }
+}
+
+
+static void
+write_webm_file_header(EbmlGlobal                *glob,
+                       const vpx_codec_enc_cfg_t *cfg,
+                       const struct vpx_rational *fps)
+{
+    {
+        EbmlLoc start;
+        Ebml_StartSubElement(glob, &start, EBML);
+        Ebml_SerializeUnsigned(glob, EBMLVersion, 1);
+        Ebml_SerializeUnsigned(glob, EBMLReadVersion, 1); //EBML Read Version
+        Ebml_SerializeUnsigned(glob, EBMLMaxIDLength, 4); //EBML Max ID Length
+        Ebml_SerializeUnsigned(glob, EBMLMaxSizeLength, 8); //EBML Max Size Length
+        Ebml_SerializeString(glob, DocType, "webm"); //Doc Type
+        Ebml_SerializeUnsigned(glob, DocTypeVersion, 2); //Doc Type Version
+        Ebml_SerializeUnsigned(glob, DocTypeReadVersion, 2); //Doc Type Read Version
+        Ebml_EndSubElement(glob, &start);
+    }
+    {
+        Ebml_StartSubElement(glob, &glob->startSegment, Segment); //segment
+        glob->position_reference = ftello(glob->stream);
+        glob->framerate = *fps;
+        write_webm_seek_info(glob);
+
+        {
+            EbmlLoc trackStart;
+            glob->track_pos = ftello(glob->stream);
+            Ebml_StartSubElement(glob, &trackStart, Tracks);
+            {
+                unsigned int trackNumber = 1;
+                uint64_t     trackID = 0;
+
+                EbmlLoc start;
+                Ebml_StartSubElement(glob, &start, TrackEntry);
+                Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
+                Ebml_SerializeUnsigned(glob, TrackUID, trackID);
+                Ebml_SerializeUnsigned(glob, TrackType, 1); //video is always 1
+                Ebml_SerializeString(glob, CodecID, "V_VP8");
+                {
+                    unsigned int pixelWidth = cfg->g_w;
+                    unsigned int pixelHeight = cfg->g_h;
+                    float        frameRate   = (float)fps->num/(float)fps->den;
+
+                    EbmlLoc videoStart;
+                    Ebml_StartSubElement(glob, &videoStart, Video);
+                    Ebml_SerializeUnsigned(glob, PixelWidth, pixelWidth);
+                    Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
+                    Ebml_SerializeFloat(glob, FrameRate, frameRate);
+                    Ebml_EndSubElement(glob, &videoStart); //Video
+                }
+                Ebml_EndSubElement(glob, &start); //Track Entry
+            }
+            Ebml_EndSubElement(glob, &trackStart);
+        }
+        // segment element is open
+    }
+}
+
+
+static void
+write_webm_block(EbmlGlobal                *glob,
+                 const vpx_codec_enc_cfg_t *cfg,
+                 const vpx_codec_cx_pkt_t  *pkt)
+{
+    unsigned long  block_length;
+    unsigned char  track_number;
+    unsigned short block_timecode = 0;
+    unsigned char  flags;
+    uint64_t       pts_ms;
+    int            start_cluster = 0, is_keyframe;
+
+    /* Calculate the PTS of this frame in milliseconds */
+    pts_ms = pkt->data.frame.pts * 1000
+             * (uint64_t)cfg->g_timebase.num / (uint64_t)cfg->g_timebase.den;
+    if(pts_ms <= glob->last_pts_ms)
+        pts_ms = glob->last_pts_ms + 1;
+    glob->last_pts_ms = pts_ms;
+
+    /* Calculate the relative time of this block */
+    if(pts_ms - glob->cluster_timecode > SHRT_MAX)
+        start_cluster = 1;
+    else
+        block_timecode = pts_ms - glob->cluster_timecode;
+
+    is_keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY);
+    if(start_cluster || is_keyframe)
+    {
+        if(glob->cluster_open)
+            Ebml_EndSubElement(glob, &glob->startCluster);
+
+        /* Open the new cluster */
+        block_timecode = 0;
+        glob->cluster_open = 1;
+        glob->cluster_timecode = pts_ms;
+        glob->cluster_pos = ftello(glob->stream);
+        Ebml_StartSubElement(glob, &glob->startCluster, Cluster); //cluster
+        Ebml_SerializeUnsigned(glob, Timecode, glob->cluster_timecode);
+
+        /* Save a cue point if this is a keyframe. */
+        if(is_keyframe)
+        {
+            struct cue_entry *cue;
+
+            glob->cue_list = realloc(glob->cue_list,
+                                     (glob->cues+1) * sizeof(struct cue_entry));
+            cue = &glob->cue_list[glob->cues];
+            cue->time = glob->cluster_timecode;
+            cue->loc = glob->cluster_pos;
+            glob->cues++;
+        }
+    }
+
+    /* Write the Simple Block */
+    Ebml_WriteID(glob, SimpleBlock);
+
+    block_length = pkt->data.frame.sz + 4;
+    block_length |= 0x10000000;
+    Ebml_Serialize(glob, &block_length, 4);
+
+    track_number = 1;
+    track_number |= 0x80;
+    Ebml_Write(glob, &track_number, 1);
+
+    Ebml_Serialize(glob, &block_timecode, 2);
+
+    flags = 0;
+    if(is_keyframe)
+        flags |= 0x80;
+    if(pkt->data.frame.flags & VPX_FRAME_IS_INVISIBLE)
+        flags |= 0x08;
+    Ebml_Write(glob, &flags, 1);
+
+    Ebml_Write(glob, pkt->data.frame.buf, pkt->data.frame.sz);
+}
+
+
+static void
+write_webm_file_footer(EbmlGlobal *glob)
+{
+
+    if(glob->cluster_open)
+        Ebml_EndSubElement(glob, &glob->startCluster);
+
+    {
+        EbmlLoc start;
+        int i;
+
+        glob->cue_pos = ftello(glob->stream);
+        Ebml_StartSubElement(glob, &start, Cues);
+        for(i=0; i<glob->cues; i++)
+        {
+            struct cue_entry *cue = &glob->cue_list[i];
+            EbmlLoc start;
+
+            Ebml_StartSubElement(glob, &start, CuePoint);
+            {
+                EbmlLoc start;
+
+                Ebml_SerializeUnsigned(glob, CueTime, cue->time);
+
+                Ebml_StartSubElement(glob, &start, CueTrackPositions);
+                Ebml_SerializeUnsigned(glob, CueTrack, 1);
+                Ebml_SerializeUnsigned64(glob, CueClusterPosition,
+                                         cue->loc - glob->position_reference);
+                //Ebml_SerializeUnsigned(glob, CueBlockNumber, cue->blockNumber);
+                Ebml_EndSubElement(glob, &start);
+            }
+            Ebml_EndSubElement(glob, &start);
+        }
+        Ebml_EndSubElement(glob, &start);
+    }
+
+    Ebml_EndSubElement(glob, &glob->startSegment);
+
+    /* Patch up the seek info block */
+    write_webm_seek_info(glob);
+    fseeko(glob->stream, 0, SEEK_END);
+}
+
+
 #include "args.h"
 
 static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
@@ -425,10 +768,12 @@ static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
         "Show PSNR in status line");
 static const arg_def_t framerate        = ARG_DEF(NULL, "framerate", 1,
         "Stream frame rate (rate/scale)");
+static const arg_def_t use_webm         = ARG_DEF(NULL, "webm", 0,
+        "Output WebM (default is IVF)");
 static const arg_def_t *main_args[] =
 {
     &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline, &best_dl, &good_dl, &rt_dl,
-    &verbosearg, &psnrarg, &framerate,
+    &verbosearg, &psnrarg, &use_webm, &framerate,
     NULL
 };
 
@@ -621,6 +966,8 @@ int main(int argc, const char **argv_)
     y4m_input                y4m;
     struct vpx_rational      arg_framerate = {30, 1};
     int                      arg_have_framerate = 0;
+    int                      write_webm = 0;
+    EbmlGlobal               ebml = {0};
 
     exec_name = argv_[0];
 
@@ -697,6 +1044,8 @@ int main(int argc, const char **argv_)
             arg_framerate = arg_parse_rational(&arg);
             arg_have_framerate = 1;
         }
+        else if (arg_match(&arg, &use_webm, argi))
+            write_webm = 1;
         else
             argj++;
     }
@@ -1021,7 +1370,13 @@ int main(int argc, const char **argv_)
 
 #endif
 
-        write_ivf_file_header(outfile, &cfg, codec->fourcc, 0);
+        if(write_webm)
+        {
+            ebml.stream = outfile;
+            write_webm_file_header(&ebml, &cfg, &arg_framerate);
+        }
+        else
+            write_ivf_file_header(outfile, &cfg, codec->fourcc, 0);
 
 
         /* Construct Encoder Context */
@@ -1090,8 +1445,15 @@ int main(int argc, const char **argv_)
                     frames_out++;
                     fprintf(stderr, " %6luF",
                             (unsigned long)pkt->data.frame.sz);
-                    write_ivf_frame_header(outfile, pkt);
-                    fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile);
+                    if(write_webm)
+                    {
+                        write_webm_block(&ebml, &cfg, pkt);
+                    }
+                    else
+                    {
+                        write_ivf_frame_header(outfile, pkt);
+                        fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile);
+                    }
                     nbytes += pkt->data.raw.sz;
                     break;
                 case VPX_CODEC_STATS_PKT:
@@ -1135,8 +1497,15 @@ int main(int argc, const char **argv_)
 
         fclose(infile);
 
-        if (!fseek(outfile, 0, SEEK_SET))
-            write_ivf_file_header(outfile, &cfg, codec->fourcc, frames_out);
+        if(write_webm)
+        {
+            write_webm_file_footer(&ebml);
+        }
+        else
+        {
+            if (!fseek(outfile, 0, SEEK_SET))
+                write_ivf_file_header(outfile, &cfg, codec->fourcc, frames_out);
+        }
 
         fclose(outfile);
         stats_close(&stats);
