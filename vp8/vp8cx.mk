@@ -82,6 +82,8 @@ VP8_CX_SRCS-yes += encoder/treewriter.c
 VP8_CX_SRCS-yes += encoder/variance_c.c
 VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.c
+VP8_CX_SRCS-yes += encoder/temporal_filter.c
+VP8_CX_SRCS-yes += encoder/temporal_filter.h
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
