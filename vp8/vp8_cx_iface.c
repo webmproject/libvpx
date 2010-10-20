@@ -184,7 +184,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
     RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
     RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
-    RANGE_CHECK(vp8_cfg, arnr_strength,   1, 6);
+    RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
 
     if (cfg->g_pass == VPX_RC_LAST_PASS)
