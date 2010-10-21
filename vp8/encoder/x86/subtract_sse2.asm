@@ -35,21 +35,21 @@ sym(vp8_subtract_b_sse2_impl):
         punpcklbw   mm0,    mm7
         punpcklbw   mm1,    mm7
         psubw   mm0,        mm1
-        movq    [rdi],      mm0
+        movq    MMWORD PTR [rdi],      mm0
 
         movd    mm0,        [rsi+rdx]
         movd    mm1,        [rax+rcx]
         punpcklbw   mm0,    mm7
         punpcklbw   mm1,    mm7
         psubw   mm0,        mm1
-        movq    [rdi+rcx*2],mm0
+        movq    MMWORD PTR [rdi+rcx*2], mm0
 
         movd    mm0,        [rsi+rdx*2]
         movd    mm1,        [rax+rcx*2]
         punpcklbw   mm0,    mm7
         punpcklbw   mm1,    mm7
         psubw   mm0,        mm1
-        movq    [rdi+rcx*4],        mm0
+        movq    MMWORD PTR [rdi+rcx*4], mm0
 
         lea     rsi,        [rsi+rdx*2]
         lea     rcx,        [rcx+rcx*2]
@@ -59,7 +59,7 @@ sym(vp8_subtract_b_sse2_impl):
         punpcklbw   mm0,    mm7
         punpcklbw   mm1,    mm7
         psubw   mm0,        mm1
-        movq    [rdi+rcx*2],        mm0
+        movq    MMWORD PTR [rdi+rcx*2], mm0
 
     ; begin epilog
     pop rdi
@@ -88,8 +88,8 @@ sym(vp8_subtract_mby_sse2):
             mov         rcx,            8      ; do two lines at one time
 
 submby_loop:
-            movdqa      xmm0,           [rsi]   ; src
-            movdqa      xmm1,           [rax]   ; pred
+            movdqa      xmm0,           XMMWORD PTR [rsi]   ; src
+            movdqa      xmm1,           XMMWORD PTR [rax]   ; pred
 
             movdqa      xmm2,           xmm0
             psubb       xmm0,           xmm1
@@ -103,11 +103,11 @@ submby_loop:
             punpcklbw   xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw   xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa      [rdi],   xmm0
-            movdqa      [rdi +16], xmm2
+            movdqa      XMMWORD PTR [rdi],   xmm0
+            movdqa      XMMWORD PTR [rdi +16], xmm2
 
-            movdqa      xmm4,           [rsi + rdx]
-            movdqa      xmm5,           [rax + 16]
+            movdqa      xmm4,           XMMWORD PTR [rsi + rdx]
+            movdqa      xmm5,           XMMWORD PTR [rax + 16]
 
             movdqa      xmm6,           xmm4
             psubb       xmm4,           xmm5
@@ -121,8 +121,8 @@ submby_loop:
             punpcklbw   xmm4,    xmm5            ; put sign back to subtraction
             punpckhbw   xmm6,    xmm7            ; put sign back to subtraction
 
-            movdqa      [rdi +32], xmm4
-            movdqa      [rdi +48], xmm6
+            movdqa      XMMWORD PTR [rdi +32], xmm4
+            movdqa      XMMWORD PTR [rdi +48], xmm6
 
             add         rdi,            64
             add         rax,            32
@@ -159,9 +159,9 @@ sym(vp8_subtract_mbuv_sse2):
 
             ;u
             ;line 0 1
-            movq       xmm0,    [rsi]  ; src
-            movq       xmm2,    [rsi+rdx]
-            movdqa     xmm1,    [rax]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rdx]
+            movdqa     xmm1,    XMMWORD PTR [rax]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -176,13 +176,13 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi],   xmm0
-            movdqa     [rdi +16],   xmm2
+            movdqa     XMMWORD PTR [rdi],   xmm0
+            movdqa     XMMWORD PTR [rdi +16],   xmm2
 
             ;line 2 3
-            movq       xmm0,    [rsi+rdx*2]  ; src
-            movq       xmm2,    [rsi+rcx]
-            movdqa     xmm1,    [rax+16]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi+rdx*2]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rcx]
+            movdqa     xmm1,    XMMWORD PTR [rax+16]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -197,15 +197,15 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi + 32],   xmm0
-            movdqa     [rdi + 48],   xmm2
+            movdqa     XMMWORD PTR [rdi + 32],   xmm0
+            movdqa     XMMWORD PTR [rdi + 48],   xmm2
 
             ;line 4 5
             lea        rsi,     [rsi + rdx*4]
 
-            movq       xmm0,    [rsi]  ; src
-            movq       xmm2,    [rsi+rdx]
-            movdqa     xmm1,    [rax + 32]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rdx]
+            movdqa     xmm1,    XMMWORD PTR [rax + 32]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -220,13 +220,13 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi + 64],   xmm0
-            movdqa     [rdi + 80],   xmm2
+            movdqa     XMMWORD PTR [rdi + 64],   xmm0
+            movdqa     XMMWORD PTR [rdi + 80],   xmm2
 
             ;line 6 7
-            movq       xmm0,    [rsi+rdx*2]  ; src
-            movq       xmm2,    [rsi+rcx]
-            movdqa     xmm1,    [rax+ 48]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi+rdx*2]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rcx]
+            movdqa     xmm1,    XMMWORD PTR [rax+ 48]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -241,8 +241,8 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi + 96],   xmm0
-            movdqa     [rdi + 112],  xmm2
+            movdqa     XMMWORD PTR [rdi + 96],   xmm0
+            movdqa     XMMWORD PTR [rdi + 112],  xmm2
 
             ;v
             mov     rsi,        arg(2) ;z = vsrc
@@ -250,9 +250,9 @@ sym(vp8_subtract_mbuv_sse2):
             add     rax,        64    ;Predictor = pred + 320
 
             ;line 0 1
-            movq       xmm0,    [rsi]  ; src
-            movq       xmm2,    [rsi+rdx]
-            movdqa     xmm1,    [rax]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rdx]
+            movdqa     xmm1,    XMMWORD PTR [rax]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -267,13 +267,13 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi],   xmm0
-            movdqa     [rdi +16],   xmm2
+            movdqa     XMMWORD PTR [rdi],   xmm0
+            movdqa     XMMWORD PTR [rdi +16],   xmm2
 
             ;line 2 3
-            movq       xmm0,    [rsi+rdx*2]  ; src
-            movq       xmm2,    [rsi+rcx]
-            movdqa     xmm1,    [rax+16]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi+rdx*2]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rcx]
+            movdqa     xmm1,    XMMWORD PTR [rax+16]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -288,15 +288,15 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi + 32],   xmm0
-            movdqa     [rdi + 48],   xmm2
+            movdqa     XMMWORD PTR [rdi + 32],   xmm0
+            movdqa     XMMWORD PTR [rdi + 48],   xmm2
 
             ;line 4 5
             lea        rsi,     [rsi + rdx*4]
 
-            movq       xmm0,    [rsi]  ; src
-            movq       xmm2,    [rsi+rdx]
-            movdqa     xmm1,    [rax + 32]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rdx]
+            movdqa     xmm1,    XMMWORD PTR [rax + 32]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -311,13 +311,13 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi + 64],   xmm0
-            movdqa     [rdi + 80],   xmm2
+            movdqa     XMMWORD PTR [rdi + 64],   xmm0
+            movdqa     XMMWORD PTR [rdi + 80],   xmm2
 
             ;line 6 7
-            movq       xmm0,    [rsi+rdx*2]  ; src
-            movq       xmm2,    [rsi+rcx]
-            movdqa     xmm1,    [rax+ 48]  ; pred
+            movq       xmm0,    MMWORD PTR [rsi+rdx*2]  ; src
+            movq       xmm2,    MMWORD PTR [rsi+rcx]
+            movdqa     xmm1,    XMMWORD PTR [rax+ 48]  ; pred
             punpcklqdq xmm0,    xmm2
 
             movdqa     xmm2,    xmm0
@@ -332,8 +332,8 @@ sym(vp8_subtract_mbuv_sse2):
             punpcklbw  xmm0,    xmm1            ; put sign back to subtraction
             punpckhbw  xmm2,    xmm3            ; put sign back to subtraction
 
-            movdqa     [rdi + 96],   xmm0
-            movdqa     [rdi + 112],  xmm2
+            movdqa     XMMWORD PTR [rdi + 96],   xmm0
+            movdqa     XMMWORD PTR [rdi + 112],  xmm2
 
     ; begin epilog
     pop rdi
