@@ -768,12 +768,12 @@ static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
         "Show PSNR in status line");
 static const arg_def_t framerate        = ARG_DEF(NULL, "framerate", 1,
         "Stream frame rate (rate/scale)");
-static const arg_def_t use_webm         = ARG_DEF(NULL, "webm", 0,
-        "Output WebM (default is IVF)");
+static const arg_def_t use_ivf          = ARG_DEF(NULL, "ivf", 0,
+        "Output IVF (default is WebM)");
 static const arg_def_t *main_args[] =
 {
     &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline, &best_dl, &good_dl, &rt_dl,
-    &verbosearg, &psnrarg, &use_webm, &framerate,
+    &verbosearg, &psnrarg, &use_ivf, &framerate,
     NULL
 };
 
@@ -966,7 +966,7 @@ int main(int argc, const char **argv_)
     y4m_input                y4m;
     struct vpx_rational      arg_framerate = {30, 1};
     int                      arg_have_framerate = 0;
-    int                      write_webm = 0;
+    int                      write_webm = 1;
     EbmlGlobal               ebml = {0};
 
     exec_name = argv_[0];
@@ -1044,8 +1044,8 @@ int main(int argc, const char **argv_)
             arg_framerate = arg_parse_rational(&arg);
             arg_have_framerate = 1;
         }
-        else if (arg_match(&arg, &use_webm, argi))
-            write_webm = 1;
+        else if (arg_match(&arg, &use_ivf, argi))
+            write_webm = 0;
         else
             argj++;
     }
