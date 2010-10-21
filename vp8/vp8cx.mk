@@ -104,6 +104,7 @@ VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/variance_impl_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/sad_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/fwalsh_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/quantize_sse2.asm
+VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/subtract_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE3) += encoder/x86/sad_sse3.asm
 VP8_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/sad_ssse3.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_mmx.asm
