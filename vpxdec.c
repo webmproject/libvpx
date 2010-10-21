@@ -367,7 +367,7 @@ unsigned int file_is_ivf(FILE *infile,
             *fps_num = mem_get_le32(raw_hdr + 16);
             *fps_den = mem_get_le32(raw_hdr + 20);
 
-            /* Some versions of ivfenc used 1/(2*fps) for the timebase, so
+            /* Some versions of vpxenc used 1/(2*fps) for the timebase, so
              * we can guess the framerate using only the timebase in this
              * case. Other files would require reading ahead to guess the
              * timebase, like we do for webm.

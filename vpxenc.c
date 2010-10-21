@@ -552,8 +552,8 @@ write_webm_seek_info(EbmlGlobal *ebml)
         Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
         Ebml_SerializeFloat(ebml, Segment_Duration,
                             ebml->last_pts_ms + frame_time);
-        Ebml_SerializeString(ebml, 0x4D80, "ivfenc" VERSION_STRING);
-        Ebml_SerializeString(ebml, 0x5741, "ivfenc" VERSION_STRING);
+        Ebml_SerializeString(ebml, 0x4D80, "vpxenc" VERSION_STRING);
+        Ebml_SerializeString(ebml, 0x5741, "vpxenc" VERSION_STRING);
         Ebml_EndSubElement(ebml, &startInfo);
     }
 }

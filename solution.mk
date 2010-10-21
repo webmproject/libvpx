@@ -22,7 +22,7 @@ else
 vpx.sln: $(wildcard *.vcproj)
 	@echo "    [CREATE] $@"
 	$(SRC_PATH_BARE)/build/make/gen_msvs_sln.sh \
-            $(if $(filter %vpx.vcproj,$^),--dep=ivfdec:vpx) \
+            $(if $(filter %vpx.vcproj,$^),--dep=vpxdec:vpx) \
             $(if $(filter %vpx.vcproj,$^),--dep=xma:vpx) \
             --ver=$(CONFIG_VS_VERSION)\
             --target=$(TOOLCHAIN)\
