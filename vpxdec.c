@@ -577,6 +577,15 @@ fail:
     return 0;
 }
 
+
+void show_progress(int frame_in, int frame_out, unsigned long dx_time)
+{
+    fprintf(stderr, "%d decoded frames/%d showed frames in %lu us (%.2f fps)\r",
+            frame_in, frame_out, dx_time,
+            (float)frame_out * 1000000.0 / (float)dx_time);
+}
+
+
 int main(int argc, const char **argv_)
 {
     vpx_codec_ctx_t          decoder;
@@ -812,11 +821,11 @@ int main(int argc, const char **argv_)
 
         ++frame_in;
 
-        if (progress)
-            fprintf(stderr, "decoded frame %d.\n", frame_in);
-
         if ((img = vpx_codec_get_frame(&decoder, &iter)))
             ++frame_out;
+
+        if (progress)
+            show_progress(frame_in, frame_out, dx_time);
 
         if (!noblit)
         {
@@ -869,10 +878,10 @@ int main(int argc, const char **argv_)
             break;
     }
 
-    if (summary)
+    if (summary || progress)
     {
-        fprintf(stderr, "%d decoded frames/%d showed frames in %lu us (%.2f fps)\n",
-                frame_in, frame_out, dx_time, (float)frame_out * 1000000.0 / (float)dx_time);
+        show_progress(frame_in, frame_out, dx_time);
+        fprintf(stderr, "\n");
     }
 
 fail:
