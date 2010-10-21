@@ -120,9 +120,13 @@ void arg_show_usage(FILE *fp, const struct arg_def *const *defs)
         char *long_val = def->has_val ? "=<arg>" : "";
 
         if (def->short_name && def->long_name)
-            snprintf(option_text, 37, "-%s%s, --%s%s",
-                     def->short_name, short_val,
+        {
+            char *comma = def->has_val ? "," : ",      ";
+
+            snprintf(option_text, 37, "-%s%s%s --%s%6s",
+                     def->short_name, short_val, comma,
                      def->long_name, long_val);
+        }
         else if (def->short_name)
             snprintf(option_text, 37, "-%s%s",
                      def->short_name, short_val);
