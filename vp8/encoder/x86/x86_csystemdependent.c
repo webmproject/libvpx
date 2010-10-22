@@ -29,14 +29,14 @@ int vp8_fast_quantize_b_impl_mmx(short *coeff_ptr, short *zbin_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
 void vp8_fast_quantize_b_mmx(BLOCK *b, BLOCKD *d)
 {
-    short *scan_mask    = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
-    short *coeff_ptr  = &b->coeff[0];
-    short *zbin_ptr   = &b->zbin[0][0];
-    short *round_ptr  = &b->round[0][0];
-    short *quant_ptr  = &b->quant[0][0];
-    short *qcoeff_ptr = d->qcoeff;
+    short *scan_mask   = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
+    short *coeff_ptr   = b->coeff;
+    short *zbin_ptr    = b->zbin;
+    short *round_ptr   = b->round;
+    short *quant_ptr   = b->quant;
+    short *qcoeff_ptr  = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
-    short *dequant_ptr = &d->dequant[0][0];
+    short *dequant_ptr = d->dequant;
 
     d->eob = vp8_fast_quantize_b_impl_mmx(
                  coeff_ptr,
@@ -94,13 +94,13 @@ int vp8_fast_quantize_b_impl_sse2(short *coeff_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
 void vp8_fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
 {
-    short *scan_mask    = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
-    short *coeff_ptr  = &b->coeff[0];
-    short *round_ptr  = &b->round[0][0];
-    short *quant_ptr  = &b->quant[0][0];
-    short *qcoeff_ptr = d->qcoeff;
+    short *scan_mask   = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
+    short *coeff_ptr   = b->coeff;
+    short *round_ptr   = b->round;
+    short *quant_ptr   = b->quant;
+    short *qcoeff_ptr  = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
-    short *dequant_ptr = &d->dequant[0][0];
+    short *dequant_ptr = d->dequant;
 
     d->eob = vp8_fast_quantize_b_impl_sse2(
                  coeff_ptr,
@@ -124,15 +124,15 @@ int vp8_regular_quantize_b_impl_sse2(short *coeff_ptr, short *zbin_ptr,
 
 void vp8_regular_quantize_b_sse2(BLOCK *b,BLOCKD *d)
 {
-    short *zbin_boost_ptr = &b->zrun_zbin_boost[0];
-    short *coeff_ptr  = &b->coeff[0];
-    short *zbin_ptr   = &b->zbin[0][0];
-    short *round_ptr  = &b->round[0][0];
-    short *quant_ptr  = &b->quant[0][0];
-    short *qcoeff_ptr = d->qcoeff;
-    short *dqcoeff_ptr = d->dqcoeff;
-    short *dequant_ptr = &d->dequant[0][0];
-    short zbin_oq_value = b->zbin_extra;
+    short *zbin_boost_ptr = b->zrun_zbin_boost;
+    short *coeff_ptr      = b->coeff;
+    short *zbin_ptr       = b->zbin;
+    short *round_ptr      = b->round;
+    short *quant_ptr      = b->quant;
+    short *qcoeff_ptr     = d->qcoeff;
+    short *dqcoeff_ptr    = d->dqcoeff;
+    short *dequant_ptr    = d->dequant;
+    short zbin_oq_value   = b->zbin_extra;
 
     d->eob = vp8_regular_quantize_b_impl_sse2(
         coeff_ptr,

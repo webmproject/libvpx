@@ -32,11 +32,11 @@ typedef struct
     short *coeff;
 
     // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-    short(*quant)[4];
-    short(*quant_shift)[4];
-    short(*zbin)[4];
-    short(*zrun_zbin_boost);
-    short(*round)[4];
+    short *quant;
+    short *quant_shift;
+    short *zbin;
+    short *zrun_zbin_boost;
+    short *round;
 
     // Zbin Over Quant value
     short zbin_extra;

@@ -232,20 +232,20 @@ typedef struct VP8_ENCODER_RTCD
 typedef struct
 {
 
-    DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y1quant_shift[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y1zbin[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y1round[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1quant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1zbin[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1round[QINDEX_RANGE][16]);
 
-    DECLARE_ALIGNED(16, short, Y2quant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y2quant_shift[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y2zbin[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y2round[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, Y2quant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2quant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2zbin[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2round[QINDEX_RANGE][16]);
 
-    DECLARE_ALIGNED(16, short, UVquant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, UVquant_shift[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, UVzbin[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, UVround[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, UVquant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVquant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVzbin[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVround[QINDEX_RANGE][16]);
 
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2[QINDEX_RANGE][16]);

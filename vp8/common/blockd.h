@@ -195,7 +195,7 @@ typedef struct
     short *diff;
     short *reference;
 
-    short(*dequant)[4];
+    short *dequant;
 
     // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
     unsigned char **base_pre;
