@@ -1349,6 +1349,12 @@ int main(int argc, const char **argv_)
             return EXIT_FAILURE;
         }
 
+        if(write_webm && fseek(outfile, 0, SEEK_CUR))
+        {
+            fprintf(stderr, "WebM output to pipes not supported.\n");
+            return EXIT_FAILURE;
+        }
+
         if (stats_fn)
         {
             if (!stats_open_file(&stats, stats_fn, pass))
