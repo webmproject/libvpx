@@ -76,7 +76,7 @@ const short vp8_rv[] =
 
 
 extern void vp8_blit_text(const char *msg, unsigned char *address, const int pitch);
-
+extern void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image, const int pitch);
 /***********************************************************************************************************
  */
 void vp8_post_proc_down_and_across_c
@@ -450,6 +450,45 @@ void vp8_plane_add_noise_c(unsigned char *Start, char *noise,
 #define RTCD_VTABLE(oci) NULL
 #endif
 
+static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int height)
+{
+    int dx = *x1 - x0;
+    int dy = *y1 - y0;
+
+    if (*x1 > width)
+    {
+        *x1 = width;
+        if (dy)
+            *y1 = ((width-x0)*dy)/dx + y0;
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+    }
+    if (*x1 < 0)
+    {
+        *x1 = 0;
+        if (dy)
+            *y1 = ((0-x0)*dy)/dx + y0;
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+    }
+    if (*y1 > height)
+    {
+        *y1 = height;
+        if (dx)
+            *x1 = ((height-y0)*dx)/dy + x0;
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+    }
+    if (*y1 < 0)
+    {
+        *y1 = 0;
+        if (dx)
+            *x1 = ((0-y0)*dx)/dy + x0;
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+    }
+}
+
 int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_level, int noise_level, int flags)
 {
     char message[512];
@@ -622,8 +661,37 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
 #endif
 
     }
+    else if (flags & VP8D_DEBUG_LEVEL5)
+    {
+        YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
+        int width  = post->y_width;
+        int height = post->y_height;
+        int mb_cols = width  >> 4;
+        unsigned char *y_buffer = oci->post_proc_buffer.y_buffer;
+        int y_stride = oci->post_proc_buffer.y_stride;
+        MODE_INFO *mi = oci->mi;
+        int x0, y0;
 
+        for (y0 = 8; y0 < (height + 8); y0 += 16)
+        {
+            for (x0 = 8; x0 < (width + 8); x0 += 16)
+            {
+               int x1, y1;
+               if (mi->mbmi.mode >= NEARESTMV)
+                {
+                    MV *mv = &mi->mbmi.mv.as_mv;
 
+                    x1 = x0 + (mv->col >> 3);
+                    y1 = y0 + (mv->row >> 3);
+
+                    constrain_line (x0, &x1, y0, &y1, width, height);
+                    vp8_blit_line (x0, x1, y0, y1, y_buffer, y_stride);
+                }
+                mi++;
+            }
+            mi++;
+        }
+    }
 
     *dest = oci->post_proc_buffer;
 
