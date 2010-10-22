@@ -740,6 +740,8 @@ write_webm_file_footer(EbmlGlobal *glob)
 
 #include "args.h"
 
+static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
+        "Output filename");
 static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
                                   "Input file is YV12 ");
 static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
@@ -772,7 +774,8 @@ static const arg_def_t use_ivf          = ARG_DEF(NULL, "ivf", 0,
         "Output IVF (default is WebM)");
 static const arg_def_t *main_args[] =
 {
-    &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline, &best_dl, &good_dl, &rt_dl,
+    &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline,
+    &best_dl, &good_dl, &rt_dl,
     &verbosearg, &psnrarg, &use_ivf, &framerate,
     NULL
 };
@@ -907,7 +910,8 @@ static void usage_exit()
 {
     int i;
 
-    fprintf(stderr, "Usage: %s <options> src_filename dst_filename\n", exec_name);
+    fprintf(stderr, "Usage: %s <options> -o dst_filename src_filename \n",
+            exec_name);
 
     fprintf(stderr, "\nOptions:\n");
     arg_show_usage(stdout, main_args);
@@ -1046,6 +1050,8 @@ int main(int argc, const char **argv_)
         }
         else if (arg_match(&arg, &use_ivf, argi))
             write_webm = 0;
+        else if (arg_match(&arg, &outputfile, argi))
+            out_fn = arg.val;
         else
             argj++;
     }
@@ -1210,10 +1216,12 @@ int main(int argc, const char **argv_)
 
     /* Handle non-option arguments */
     in_fn = argv[0];
-    out_fn = argv[1];
 
-    if (!in_fn || !out_fn)
+    if (!in_fn)
         usage_exit();
+
+    if(!out_fn)
+        die("Error: Output file is required (specify with -o)\n");
 
     memset(&stats, 0, sizeof(stats));
 
