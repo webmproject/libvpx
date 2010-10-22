@@ -16,6 +16,15 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <limits.h>
+#if defined(_WIN32)
+#include <io.h>
+#define snprintf _snprintf
+#define isatty   _isatty
+#define fileno   _fileno
+#else
+#include <unistd.h>
+#endif
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx_config.h"
 #include "vpx/vpx_decoder.h"
@@ -27,6 +36,10 @@
 #include "md5_utils.h"
 #endif
 #include "nestegg/include/nestegg/nestegg.h"
+
+#ifndef PATH_MAX
+#define PATH_MAX 256
+#endif
 
 static const char *exec_name;
 
@@ -47,14 +60,12 @@ static const struct
 #include "args.h"
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
                                   "Codec to use");
-static const arg_def_t prefixarg = ARG_DEF("p", "prefix", 1,
-                                   "Prefix to use when saving frames");
 static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
-                                  "Output file is YV12 ");
+                                  "Output raw YV12 frames");
 static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
-                                  "Output file is I420 (default)");
+                                  "Output raw I420 frames");
 static const arg_def_t flipuvarg = ARG_DEF(NULL, "flipuv", 0,
-                                   "Synonym for --yv12");
+                                   "Flip the chroma planes in the output");
 static const arg_def_t noblitarg = ARG_DEF(NULL, "noblit", 0,
                                    "Don't process the decoded frames");
 static const arg_def_t progressarg = ARG_DEF(NULL, "progress", 0,
@@ -66,9 +77,7 @@ static const arg_def_t postprocarg = ARG_DEF(NULL, "postproc", 0,
 static const arg_def_t summaryarg = ARG_DEF(NULL, "summary", 0,
                                     "Show timing summary");
 static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
-                                    "Output raw yv12 file instead of images");
-static const arg_def_t usey4marg = ARG_DEF("y", "y4m", 0,
-                                    "Output file is YUV4MPEG2");
+                                    "Output file name pattern (see below)");
 static const arg_def_t threadsarg = ARG_DEF("t", "threads", 1,
                                     "Max threads to use");
 static const arg_def_t verbosearg = ARG_DEF("v", "verbose", 0,
@@ -80,9 +89,9 @@ static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
 #endif
 static const arg_def_t *all_args[] =
 {
-    &codecarg, &prefixarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
+    &codecarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
     &progressarg, &limitarg, &postprocarg, &summaryarg, &outputfile,
-    &usey4marg, &threadsarg, &verbosearg,
+    &threadsarg, &verbosearg,
 #if CONFIG_MD5
     &md5arg,
 #endif
@@ -118,6 +127,20 @@ static void usage_exit()
     fprintf(stderr, "\nVP8 Postprocessing Options:\n");
     arg_show_usage(stderr, vp8_pp_args);
 #endif
+    fprintf(stderr,
+            "\nOutput File Patterns:\n\n"
+            "  The -o argument specifies the name of the file(s) to "
+            "write to. If the\n  argument does not include any escape "
+            "characters, the output will be\n  written to a single file. "
+            "Otherwise, the filename will be calculated by\n  expanding "
+            "the following escape characters:\n"
+            "\n\t%%w   - Frame width"
+            "\n\t%%h   - Frame height"
+            "\n\t%%<n> - Frame number, zero padded to <n> places (1..9)"
+            "\n\n  Pattern arguments are only supported in conjunction "
+            "with the --yv12 and\n  --i420 options. If the -o option is "
+            "not specified, the output will be\n  directed to stdout.\n"
+            );
     fprintf(stderr, "\nIncluded decoders:\n\n");
 
     for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
@@ -586,10 +609,74 @@ void show_progress(int frame_in, int frame_out, unsigned long dx_time)
 }
 
 
+void generate_filename(const char *pattern, char *out, size_t q_len,
+                       unsigned int d_w, unsigned int d_h,
+                       unsigned int frame_in)
+{
+    const char *p = pattern;
+    char *q = out;
+
+    do
+    {
+        char *next_pat = strchr(p, '%');
+
+        if(p == next_pat)
+        {
+            size_t pat_len;
+
+            // parse the pattern
+            q[q_len - 1] = '\0';
+            switch(p[1])
+            {
+            case 'w': snprintf(q, q_len - 1, "%d", d_w); break;
+            case 'h': snprintf(q, q_len - 1, "%d", d_h); break;
+            case '1': snprintf(q, q_len - 1, "%d", frame_in); break;
+            case '2': snprintf(q, q_len - 1, "%02d", frame_in); break;
+            case '3': snprintf(q, q_len - 1, "%03d", frame_in); break;
+            case '4': snprintf(q, q_len - 1, "%04d", frame_in); break;
+            case '5': snprintf(q, q_len - 1, "%05d", frame_in); break;
+            case '6': snprintf(q, q_len - 1, "%06d", frame_in); break;
+            case '7': snprintf(q, q_len - 1, "%07d", frame_in); break;
+            case '8': snprintf(q, q_len - 1, "%08d", frame_in); break;
+            case '9': snprintf(q, q_len - 1, "%09d", frame_in); break;
+            default:
+                die("Unrecognized pattern %%%c\n", p[1]);
+            }
+
+            pat_len = strlen(q);
+            if(pat_len >= q_len - 1)
+                die("Output filename too long.\n");
+            q += pat_len;
+            p += 2;
+            q_len -= pat_len;
+        }
+        else
+        {
+            size_t copy_len;
+
+            // copy the next segment
+            if(!next_pat)
+                copy_len = strlen(p);
+            else
+                copy_len = next_pat - p;
+
+            if(copy_len >= q_len - 1)
+                die("Output filename too long.\n");
+
+            memcpy(q, p, copy_len);
+            q[copy_len] = '\0';
+            q += copy_len;
+            p += copy_len;
+            q_len -= copy_len;
+        }
+    } while(*p);
+}
+
+
 int main(int argc, const char **argv_)
 {
     vpx_codec_ctx_t          decoder;
-    char                  *prefix = NULL, *fn = NULL;
+    char                  *fn = NULL;
     int                    i;
     uint8_t               *buf = NULL;
     size_t                 buf_sz = 0, buf_alloc_sz = 0;
@@ -601,8 +688,10 @@ int main(int argc, const char **argv_)
     unsigned long          dx_time = 0;
     struct arg               arg;
     char                   **argv, **argi, **argj;
-    const char                   *fn2 = 0;
-    int                     use_y4m = 0;
+    const char             *outfile_pattern = 0;
+    char                    outfile[PATH_MAX];
+    int                     single_file;
+    int                     use_y4m = 1;
     unsigned int            width;
     unsigned int            height;
     unsigned int            fps_den;
@@ -638,15 +727,17 @@ int main(int argc, const char **argv_)
                     arg.val);
         }
         else if (arg_match(&arg, &outputfile, argi))
-            fn2 = arg.val;
-        else if (arg_match(&arg, &usey4marg, argi))
-            use_y4m = 1;
-        else if (arg_match(&arg, &prefixarg, argi))
-            prefix = strdup(arg.val);
+            outfile_pattern = arg.val;
         else if (arg_match(&arg, &use_yv12, argi))
+        {
+            use_y4m = 0;
             flipuv = 1;
+        }
         else if (arg_match(&arg, &use_i420, argi))
+        {
+            use_y4m = 0;
             flipuv = 0;
+        }
         else if (arg_match(&arg, &flipuvarg, argi))
             flipuv = 1;
         else if (arg_match(&arg, &noblitarg, argi))
@@ -711,20 +802,24 @@ int main(int argc, const char **argv_)
     if (!fn)
         usage_exit();
 
-    if (!prefix)
-        prefix = strdup("img");
-
     /* Open file */
     infile = strcmp(fn, "-") ? fopen(fn, "rb") : stdin;
 
     if (!infile)
     {
-        fprintf(stderr, "Failed to open file");
+        fprintf(stderr, "Failed to open file '%s'",
+                strcmp(fn, "-") ? fn : "stdin");
         return EXIT_FAILURE;
     }
 
-    if (fn2)
-        out = out_open(fn2, do_md5);
+    /* Make sure we don't dump to the terminal, unless forced to with -o - */
+    if(!outfile_pattern && isatty(fileno(stdout)) && !do_md5)
+    {
+        fprintf(stderr,
+                "Not dumping raw video to your terminal. Use '-o -' to "
+                "override.\n");
+        return EXIT_FAILURE;
+    }
 
     input.infile = infile;
     if(file_is_ivf(infile, &fourcc, &width, &height, &fps_den,
@@ -740,12 +835,41 @@ int main(int argc, const char **argv_)
         return EXIT_FAILURE;
     }
 
-    if (use_y4m)
+    /* If the output file is not set or doesn't have a sequence number in
+     * it, then we only open it once.
+     */
+    outfile_pattern = outfile_pattern ? outfile_pattern : "-";
+    single_file = 1;
+    {
+        const char *p = outfile_pattern;
+        do
+        {
+            p = strchr(p, '%');
+            if(p && p[1] >= '1' && p[1] <= '9')
+            {
+                // pattern contains sequence number, so it's not unique.
+                single_file = 0;
+                break;
+            }
+            if(p)
+                p++;
+        } while(p);
+    }
+
+    if(single_file && !noblit)
+    {
+        generate_filename(outfile_pattern, outfile, sizeof(outfile)-1,
+                          width, height, 0);
+        out = out_open(outfile, do_md5);
+    }
+
+    if (use_y4m && !noblit)
     {
         char buffer[128];
-        if (!fn2)
+        if (!single_file)
         {
-            fprintf(stderr, "YUV4MPEG2 output only supported with -o.\n");
+            fprintf(stderr, "YUV4MPEG2 not supported with output patterns,"
+                            " try --i420 or --yv12.\n");
             return EXIT_FAILURE;
         }
 
@@ -832,14 +956,16 @@ int main(int argc, const char **argv_)
             if (img)
             {
                 unsigned int y;
-                char out_fn[128+24];
+                char out_fn[PATH_MAX];
                 uint8_t *buf;
-                const char *sfx = flipuv ? "yv12" : "i420";
 
-                if (!fn2)
+                if (!single_file)
                 {
-                    sprintf(out_fn, "%s-%dx%d-%04d.%s",
-                            prefix, img->d_w, img->d_h, frame_in, sfx);
+                    size_t len = sizeof(out_fn)-1;
+
+                    out_fn[len] = '\0';
+                    generate_filename(outfile_pattern, out_fn, len-1,
+                                      img->d_w, img->d_h, frame_in);
                     out = out_open(out_fn, do_md5);
                 }
                 else if(use_y4m)
@@ -869,7 +995,7 @@ int main(int argc, const char **argv_)
                     buf += img->stride[VPX_PLANE_V];
                 }
 
-                if (!fn2)
+                if (!single_file)
                     out_close(out, out_fn, do_md5);
             }
         }
@@ -892,15 +1018,14 @@ fail:
         return EXIT_FAILURE;
     }
 
-    if (fn2)
-        out_close(out, fn2, do_md5);
+    if (single_file && !noblit)
+        out_close(out, outfile, do_md5);
 
     if(input.nestegg_ctx)
         nestegg_destroy(input.nestegg_ctx);
     if(input.kind != WEBM_FILE)
         free(buf);
     fclose(infile);
-    free(prefix);
     free(argv);
 
     return EXIT_SUCCESS;
