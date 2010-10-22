@@ -71,8 +71,8 @@ static const arg_def_t usey4marg = ARG_DEF("y", "y4m", 0,
                                     "Output file is YUV4MPEG2");
 static const arg_def_t threadsarg = ARG_DEF("t", "threads", 1,
                                     "Max threads to use");
-static const arg_def_t quietarg = ARG_DEF("q", "quiet", 0,
-                                  "Suppress version string");
+static const arg_def_t verbosearg = ARG_DEF("v", "verbose", 0,
+                                  "Show version string");
 
 #if CONFIG_MD5
 static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
@@ -82,7 +82,7 @@ static const arg_def_t *all_args[] =
 {
     &codecarg, &prefixarg, &use_yv12, &use_i420, &flipuvarg, &noblitarg,
     &progressarg, &limitarg, &postprocarg, &summaryarg, &outputfile,
-    &usey4marg, &threadsarg, &quietarg,
+    &usey4marg, &threadsarg, &verbosearg,
 #if CONFIG_MD5
     &md5arg,
 #endif
@@ -595,7 +595,7 @@ int main(int argc, const char **argv_)
     size_t                 buf_sz = 0, buf_alloc_sz = 0;
     FILE                  *infile;
     int                    frame_in = 0, frame_out = 0, flipuv = 0, noblit = 0, do_md5 = 0, progress = 0;
-    int                    stop_after = 0, postproc = 0, summary = 0, quiet = 0;
+    int                    stop_after = 0, postproc = 0, summary = 0, quiet = 1;
     vpx_codec_iface_t       *iface = NULL;
     unsigned int           fourcc;
     unsigned long          dx_time = 0;
@@ -663,8 +663,8 @@ int main(int argc, const char **argv_)
             summary = 1;
         else if (arg_match(&arg, &threadsarg, argi))
             cfg.threads = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &quietarg, argi))
-            quiet = 1;
+        else if (arg_match(&arg, &verbosearg, argi))
+            quiet = 0;
 
 #if CONFIG_VP8_DECODER
         else if (arg_match(&arg, &addnoise_level, argi))
