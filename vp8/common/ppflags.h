@@ -21,6 +21,7 @@ enum
     VP8D_DEBUG_LEVEL2   = 16,
     VP8D_DEBUG_LEVEL3   = 32,
     VP8D_DEBUG_LEVEL4   = 64,
+    VP8D_DEBUG_LEVEL5   = 128,
 };
 
 #endif
