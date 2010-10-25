@@ -32,18 +32,7 @@
 #include "vpxerrors.h"
 
 #include <math.h>
-#include <stdio.h>
 #include <limits.h>
-
-/*
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#define RTCD(x) &cpi->common.rtcd.x
-#else
-#define IF_RTCD(x) NULL
-#define RTCD(x) NULL
-#endif
-*/
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
@@ -130,8 +119,8 @@ static void apply_temporal_filter
     unsigned int block_size,
     int strength,
     int filter_weight,
-    int *accumulator,
-    int *count
+    unsigned int *accumulator,
+    unsigned int *count
 )
 {
     int i, j, k;
@@ -168,7 +157,7 @@ static void apply_temporal_filter
             modifier = 16 - modifier;
 #endif
             modifier *= filter_weight;
-            
+
             count[k] += modifier;
             accumulator[k] += modifier * pixel_value;
 
@@ -343,7 +332,7 @@ static void vp8cx_temp_blur1_c
     YV12_BUFFER_CONFIG *f = cpi->frames[alt_ref_index];
     unsigned char *dst1, *dst2;
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
-    
+
     // Save input state
     unsigned char *y_buffer = mbd->pre.y_buffer;
     unsigned char *u_buffer = mbd->pre.u_buffer;
