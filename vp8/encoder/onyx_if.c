@@ -2529,6 +2529,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             }
 
             fprintf(fmode, "};\n");
+            fclose(fmode);
         }
 #endif
 
