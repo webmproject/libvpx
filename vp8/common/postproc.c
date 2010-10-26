@@ -618,7 +618,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
                 oci->mb_cols, oci->mb_rows);
         vp8_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
     }
-    else if (flags & VP8D_DEBUG_LEVEL2)
+
+    if (flags & VP8D_DEBUG_LEVEL2)
     {
         int i, j;
         unsigned char *y_ptr;
@@ -649,7 +650,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
 
         }
     }
-    else if (flags & VP8D_DEBUG_LEVEL3)
+
+    if (flags & VP8D_DEBUG_LEVEL3)
     {
         int i, j;
         unsigned char *y_ptr;
@@ -683,7 +685,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
 
         }
     }
-    else if (flags & VP8D_DEBUG_LEVEL4)
+
+    if (flags & VP8D_DEBUG_LEVEL4)
     {
         sprintf(message, "Bitrate: %10.2f frame_rate: %10.2f ", oci->bitrate, oci->framerate);
         vp8_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
@@ -719,7 +722,9 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
 #endif
 
     }
-    else if (flags & VP8D_DEBUG_LEVEL5)
+
+    // Draw motion vectors
+    if (flags & VP8D_DEBUG_LEVEL5)
     {
         YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
         int width  = post->y_width;
@@ -752,7 +757,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
     }
 
     // Color in block modes
-    else if (flags & VP8D_DEBUG_LEVEL6)
+    if (flags & VP8D_DEBUG_LEVEL6)
     {
         int i, j;
         YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
@@ -787,7 +792,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
     }
 
     // Color in frame reference blocks
-    else if (flags & VP8D_DEBUG_LEVEL7)
+    if (flags & VP8D_DEBUG_LEVEL7)
     {
         int i, j;
         YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;

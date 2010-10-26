@@ -783,7 +783,7 @@ int main(int argc, const char **argv_)
             vp8_pp_cfg.post_proc_flag &= ~0x7;
 
             if (level)
-                vp8_pp_cfg.post_proc_flag |= 8 << (level - 1);
+                vp8_pp_cfg.post_proc_flag |= level;
         }
 
 #endif
