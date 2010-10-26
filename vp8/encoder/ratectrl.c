@@ -1481,6 +1481,8 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
         // allocated than those following other gfs.
         cpi->kf_overspend_bits += (cpi->projected_frame_size - cpi->per_frame_bandwidth) * 7 / 8;
         cpi->gf_overspend_bits += (cpi->projected_frame_size - cpi->per_frame_bandwidth) * 1 / 8;
+        if(!av_key_frame_frequency)
+            av_key_frame_frequency = 60;
 
         // Work out how much to try and recover per frame.
         // For one pass we estimate the number of frames to spread it over based upon past history.

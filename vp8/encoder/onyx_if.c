@@ -1429,6 +1429,9 @@ int vp8_reverse_trans(int x)
 };
 void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
 {
+    if(framerate < .1)
+        framerate = 30;
+
     cpi->oxcf.frame_rate             = framerate;
     cpi->output_frame_rate            = cpi->oxcf.frame_rate;
     cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
