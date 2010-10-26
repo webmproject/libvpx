@@ -19,6 +19,7 @@ sym(vp8_subtract_b_sse2_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
+    GET_GOT     rbx
     push rsi
     push rdi
     ; end prolog
@@ -64,6 +65,7 @@ sym(vp8_subtract_b_sse2_impl):
     ; begin epilog
     pop rdi
     pop rsi
+    RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -75,6 +77,7 @@ sym(vp8_subtract_mby_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
+    GET_GOT     rbx
     push rsi
     push rdi
     ; end prolog
@@ -134,6 +137,7 @@ submby_loop:
     pop rdi
     pop rsi
     ; begin epilog
+    RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -145,6 +149,7 @@ sym(vp8_subtract_mbuv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
+    GET_GOT     rbx
     push rsi
     push rdi
     ; end prolog
@@ -338,6 +343,7 @@ sym(vp8_subtract_mbuv_sse2):
     ; begin epilog
     pop rdi
     pop rsi
+    RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp
     ret
