@@ -639,7 +639,8 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_inverse_transform_mb(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mb(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mb)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
 
 
@@ -656,7 +657,8 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mby(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mby)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
 
 

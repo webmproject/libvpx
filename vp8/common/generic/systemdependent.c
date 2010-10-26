@@ -40,9 +40,11 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->recon.copy16x16   = vp8_copy_mem16x16_c;
     rtcd->recon.copy8x8     = vp8_copy_mem8x8_c;
     rtcd->recon.copy8x4     = vp8_copy_mem8x4_c;
-    rtcd->recon.recon      = vp8_recon_b_c;
+    rtcd->recon.recon       = vp8_recon_b_c;
     rtcd->recon.recon2      = vp8_recon2b_c;
-    rtcd->recon.recon4     = vp8_recon4b_c;
+    rtcd->recon.recon4      = vp8_recon4b_c;
+    rtcd->recon.recon_mb    = vp8_recon_mb_c;
+    rtcd->recon.recon_mby   = vp8_recon_mby_c;
 
     rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_c;
     rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_c;

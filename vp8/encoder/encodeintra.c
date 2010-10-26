@@ -113,7 +113,8 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mby(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mby)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
     // make sure block modes are set the way we want them for context updates
     for (b = 0; b < 16; b++)
@@ -157,7 +158,8 @@ void vp8_encode_intra16x16mbyrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mby(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mby)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
     // make sure block modes are set the way we want them for context updates
     for (b = 0; b < 16; b++)
