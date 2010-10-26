@@ -50,14 +50,13 @@ extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, MV *mv);
 
 
-int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, vp8_subpixvariance_fn_t svf, vp8_variance_fn_t vf, int *mvcost[2])
+int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2])
 {
     (void) b;
     (void) d;
     (void) ref_mv;
     (void) error_per_bit;
-    (void) svf;
-    (void) vf;
+    (void) vfp;
     (void) mvcost;
     bestmv->row <<= 3;
     bestmv->col <<= 3;
@@ -65,7 +64,7 @@ int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv,
 }
 
 
-static int get_inter_mbpred_error(MACROBLOCK *mb, vp8_subpixvariance_fn_t svf, vp8_variance_fn_t vf, unsigned int *sse)
+static int get_inter_mbpred_error(MACROBLOCK *mb, const vp8_variance_fn_ptr_t *vfp, unsigned int *sse)
 {
 
     BLOCK *b = &mb->block[0];
@@ -81,11 +80,11 @@ static int get_inter_mbpred_error(MACROBLOCK *mb, vp8_subpixvariance_fn_t svf, v
 
     if (xoffset | yoffset)
     {
-        return svf(in_what, in_what_stride, xoffset, yoffset, what, what_stride, sse);
+        return vfp->svf(in_what, in_what_stride, xoffset, yoffset, what, what_stride, sse);
     }
     else
     {
-        return vf(what, what_stride, in_what, in_what_stride, sse);
+        return vfp->vf(what, what_stride, in_what, in_what_stride, sse);
     }
 
 }
@@ -719,13 +718,13 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
 
             if (cpi->sf.search_method == HEX)
             {
-                bestsme = vp8_hex_search(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, sadpb/*x->errorperbit*/, &num00, cpi->fn_ptr.vf, cpi->fn_ptr.sdf, x->mvsadcost, x->mvcost);
+                bestsme = vp8_hex_search(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost);
                 mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
                 mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
             }
             else
             {
-                bestsme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr, x->mvsadcost, x->mvcost); //sadpb < 9
+                bestsme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost); //sadpb < 9
                 mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
                 mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
 
@@ -744,7 +743,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
                         num00--;
                     else
                     {
-                        thissme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr, x->mvsadcost, x->mvcost); //sadpb = 9
+                        thissme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost); //sadpb = 9
 
                         if (thissme < bestsme)
                         {
@@ -765,7 +764,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
         }
 
         if (bestsme < INT_MAX)
-            cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv1, x->errorperbit, cpi->fn_ptr.svf, cpi->fn_ptr.vf, cpi->mb.mvcost);
+            cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv1, x->errorperbit, &cpi->fn_ptr[BLOCK_16X16], cpi->mb.mvcost);
 
         mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
         mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
@@ -795,7 +794,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
             x->e_mbd.block[0].bmi.mode = this_mode;
             x->e_mbd.block[0].bmi.mv.as_int = x->e_mbd.mode_info_context->mbmi.mv.as_int;
 
-            distortion2 = get_inter_mbpred_error(x, cpi->fn_ptr.svf, cpi->fn_ptr.vf, (unsigned int *)(&sse));
+            distortion2 = get_inter_mbpred_error(x, &cpi->fn_ptr[BLOCK_16X16], (unsigned int *)(&sse));
 
             this_rd = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
 

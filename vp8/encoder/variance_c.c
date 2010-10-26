@@ -24,7 +24,6 @@ const int vp8_six_tap[8][6] =
 };
 
 
-#ifdef USEBILINEAR
 const int VP8_FILTER_WEIGHT = 128;
 const int VP8_FILTER_SHIFT  =   7;
 const int vp8_bilinear_taps[8][2] =
@@ -461,6 +460,19 @@ unsigned int vp8_sub_pixel_variance16x16_c
     return vp8_variance16x16_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
 
+
+unsigned int vp8_half_pixel_variance16x16_c(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 4, 4,
+                                         ref_ptr, recon_stride, sse);
+}
+
+
 unsigned int vp8_sub_pixel_mse16x16_c
 (
     const unsigned char  *src_ptr,
@@ -525,4 +537,3 @@ unsigned int vp8_sub_pixel_variance8x16_c
 
     return vp8_variance8x16_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
 }
-#endif

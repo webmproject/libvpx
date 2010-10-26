@@ -234,7 +234,7 @@ static int find_matching_mb
             &best_ref_mv1, &d->bmi.mv.as_mv,
             step_param,
             sadpb/*x->errorperbit*/,
-            &num00, cpi->fn_ptr.vf, cpi->fn_ptr.sdf,
+            &num00, &cpi->fn_ptr[BLOCK_16X16],
             mvsadcost, mvcost);
     }
     else
@@ -245,7 +245,7 @@ static int find_matching_mb
             &best_ref_mv1, &d->bmi.mv.as_mv,
             step_param,
             sadpb / 2/*x->errorperbit*/,
-            &num00, &cpi->fn_ptr,
+            &num00, &cpi->fn_ptr[BLOCK_16X16],
             mvsadcost, mvcost); //sadpb < 9
 
         // Further step/diamond searches as necessary
@@ -267,7 +267,7 @@ static int find_matching_mb
                     &best_ref_mv1, &d->bmi.mv.as_mv,
                     step_param + n,
                     sadpb / 4/*x->errorperbit*/,
-                    &num00, &cpi->fn_ptr,
+                    &num00, &cpi->fn_ptr[BLOCK_16X16],
                     mvsadcost, mvcost); //sadpb = 9
 
                 if (thissme < bestsme)
@@ -291,8 +291,8 @@ static int find_matching_mb
     {
         bestsme = cpi->find_fractional_mv_step(x, b, d,
                     &d->bmi.mv.as_mv, &best_ref_mv1,
-                    x->errorperbit, cpi->fn_ptr.svf,
-                    cpi->fn_ptr.vf, cpi->mb.mvcost);
+                    x->errorperbit, &cpi->fn_ptr[BLOCK_16X16],
+                    cpi->mb.mvcost);
     }
 #endif
 

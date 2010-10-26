@@ -19,7 +19,6 @@ VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/encodemb_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/quantize_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/picklpf_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV5TE) += encoder/arm/boolhuff_arm.c
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/mcomp_arm.c
 
 VP8_CX_SRCS_REMOVE-$(HAVE_ARMV5TE)  += encoder/boolhuff.c
 

@@ -30,6 +30,9 @@ extern prototype_subpixvariance(vp8_sub_pixel_variance8x8_neon);
 //extern prototype_subpixvariance(vp8_sub_pixel_variance8x16_c);
 //extern prototype_subpixvariance(vp8_sub_pixel_variance16x8_c);
 extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon);
+extern prototype_variance(vp8_variance_halfpixvar16x16_h_neon);
+extern prototype_variance(vp8_variance_halfpixvar16x16_v_neon);
+extern prototype_variance(vp8_variance_halfpixvar16x16_hv_neon);
 
 //extern prototype_getmbss(vp8_get_mb_ss_c);
 extern prototype_variance(vp8_mse16x16_neon);
@@ -83,6 +86,15 @@ extern prototype_sad(vp8_get4x4sse_cs_neon);
 
 #undef  vp8_variance_subpixvar16x16
 #define vp8_variance_subpixvar16x16 vp8_sub_pixel_variance16x16_neon
+
+#undef  vp8_variance_halfpixvar16x16_h
+#define vp8_variance_halfpixvar16x16_h vp8_variance_halfpixvar16x16_h_neon
+
+#undef  vp8_variance_halfpixvar16x16_v
+#define vp8_variance_halfpixvar16x16_v vp8_variance_halfpixvar16x16_v_neon
+
+#undef  vp8_variance_halfpixvar16x16_hv
+#define vp8_variance_halfpixvar16x16_hv vp8_variance_halfpixvar16x16_hv_neon
 
 //#undef  vp8_variance_getmbss
 //#define vp8_variance_getmbss vp8_get_mb_ss_c

@@ -2334,11 +2334,50 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     vp8cx_create_encoder_threads(cpi);
 
-    cpi->fn_ptr.sdf   = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
-    cpi->fn_ptr.vf    = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16);
-    cpi->fn_ptr.svf   = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x16);
-    cpi->fn_ptr.sdx3f = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x3);
-    cpi->fn_ptr.sdx4df = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x4d);
+    cpi->fn_ptr[BLOCK_16X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
+    cpi->fn_ptr[BLOCK_16X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16);
+    cpi->fn_ptr[BLOCK_16X16].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x16);
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_h  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_h);
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_v  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_v);
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_hv = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_hv);
+    cpi->fn_ptr[BLOCK_16X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x3);
+    cpi->fn_ptr[BLOCK_16X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x4d);
+
+    cpi->fn_ptr[BLOCK_16X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8);
+    cpi->fn_ptr[BLOCK_16X8].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x8);
+    cpi->fn_ptr[BLOCK_16X8].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x8);
+    cpi->fn_ptr[BLOCK_16X8].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_16X8].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_16X8].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_16X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x3);
+    cpi->fn_ptr[BLOCK_16X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x4d);
+
+    cpi->fn_ptr[BLOCK_8X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16);
+    cpi->fn_ptr[BLOCK_8X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var8x16);
+    cpi->fn_ptr[BLOCK_8X16].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar8x16);
+    cpi->fn_ptr[BLOCK_8X16].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_8X16].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_8X16].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_8X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x3);
+    cpi->fn_ptr[BLOCK_8X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x4d);
+
+    cpi->fn_ptr[BLOCK_8X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8);
+    cpi->fn_ptr[BLOCK_8X8].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var8x8);
+    cpi->fn_ptr[BLOCK_8X8].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar8x8);
+    cpi->fn_ptr[BLOCK_8X8].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_8X8].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_8X8].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_8X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x3);
+    cpi->fn_ptr[BLOCK_8X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x4d);
+
+    cpi->fn_ptr[BLOCK_4X4].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4);
+    cpi->fn_ptr[BLOCK_4X4].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var4x4);
+    cpi->fn_ptr[BLOCK_4X4].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar4x4);
+    cpi->fn_ptr[BLOCK_4X4].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_4X4].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_4X4].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_4X4].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x3);
+    cpi->fn_ptr[BLOCK_4X4].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x4d);
 
 #if !(CONFIG_REALTIME_ONLY)
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
