@@ -444,6 +444,9 @@ struct EbmlGlobal
     off_t    cue_pos;
     off_t    cluster_pos;
 
+    /* This pointer is to a specific element to be serialized */
+    off_t    track_id_pos;
+
     /* These pointers are to the size field of the element */
     EbmlLoc  startSegment;
     EbmlLoc  startCluster;
@@ -469,6 +472,18 @@ void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
 
     for(; len; len--)
         Ebml_Write(glob, q--, 1);
+}
+
+
+/* Need a fixed size serializer for the track ID. libmkv provdes a 64 bit
+ * one, but not a 32 bit one.
+ */
+static void Ebml_SerializeUnsigned32(EbmlGlobal *glob, unsigned long class_id, uint64_t ui)
+{
+    unsigned char sizeSerialized = 4 | 0x80;
+    Ebml_WriteID(glob, class_id);
+    Ebml_Serialize(glob, &sizeSerialized, 1);
+    Ebml_Serialize(glob, &ui, 4);
 }
 
 
@@ -597,7 +612,8 @@ write_webm_file_header(EbmlGlobal                *glob,
                 EbmlLoc start;
                 Ebml_StartSubElement(glob, &start, TrackEntry);
                 Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
-                Ebml_SerializeUnsigned(glob, TrackUID, trackID);
+                glob->track_id_pos = ftello(glob->stream);
+                Ebml_SerializeUnsigned32(glob, TrackUID, trackID);
                 Ebml_SerializeUnsigned(glob, TrackType, 1); //video is always 1
                 Ebml_SerializeString(glob, CodecID, "V_VP8");
                 {
@@ -699,7 +715,7 @@ write_webm_block(EbmlGlobal                *glob,
 
 
 static void
-write_webm_file_footer(EbmlGlobal *glob)
+write_webm_file_footer(EbmlGlobal *glob, long hash)
 {
 
     if(glob->cluster_open)
@@ -738,7 +754,60 @@ write_webm_file_footer(EbmlGlobal *glob)
 
     /* Patch up the seek info block */
     write_webm_seek_info(glob);
+
+    /* Patch up the track id */
+    fseeko(glob->stream, glob->track_id_pos, SEEK_SET);
+    Ebml_SerializeUnsigned32(glob, TrackUID, glob->debug ? 0xDEADBEEF : hash);
+
     fseeko(glob->stream, 0, SEEK_END);
+}
+
+
+/* Murmur hash derived from public domain reference implementation at
+ *   http://sites.google.com/site/murmurhash/
+ */
+static unsigned int murmur ( const void * key, int len, unsigned int seed )
+{
+    const unsigned int m = 0x5bd1e995;
+    const int r = 24;
+
+    unsigned int h = seed ^ len;
+
+    const unsigned char * data = (const unsigned char *)key;
+
+    while(len >= 4)
+    {
+        unsigned int k;
+
+        k  = data[0];
+        k |= data[1] << 8;
+        k |= data[2] << 16;
+        k |= data[3] << 24;
+
+        k *= m;
+        k ^= k >> r;
+        k *= m;
+
+        h *= m;
+        h ^= k;
+
+        data += 4;
+        len -= 4;
+    }
+
+    switch(len)
+    {
+    case 3: h ^= data[2] << 16;
+    case 2: h ^= data[1] << 8;
+    case 1: h ^= data[0];
+            h *= m;
+    };
+
+    h ^= h >> 13;
+    h *= m;
+    h ^= h >> 15;
+
+    return h;
 }
 
 
@@ -979,6 +1048,7 @@ int main(int argc, const char **argv_)
     int                      arg_have_framerate = 0;
     int                      write_webm = 1;
     EbmlGlobal               ebml = {0};
+    uint32_t                 hash = 0;
 
     exec_name = argv_[0];
 
@@ -1468,8 +1538,14 @@ int main(int argc, const char **argv_)
                     frames_out++;
                     fprintf(stderr, " %6luF",
                             (unsigned long)pkt->data.frame.sz);
+
                     if(write_webm)
                     {
+                        /* Update the hash */
+                        if(!ebml.debug)
+                            hash = murmur(pkt->data.frame.buf,
+                                          pkt->data.frame.sz, hash);
+
                         write_webm_block(&ebml, &cfg, pkt);
                     }
                     else
@@ -1522,7 +1598,7 @@ int main(int argc, const char **argv_)
 
         if(write_webm)
         {
-            write_webm_file_footer(&ebml);
+            write_webm_file_footer(&ebml, hash);
         }
         else
         {
