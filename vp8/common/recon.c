@@ -106,7 +106,7 @@ void vp8_recon2b_c
     }
 }
 
-void vp8_recon16x16mby(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
+void vp8_recon_mby_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 {
 #if ARCH_ARM
     BLOCKD *b = &x->block[0];
@@ -135,7 +135,7 @@ void vp8_recon16x16mby(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 #endif
 }
 
-void vp8_recon16x16mb(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
+void vp8_recon_mb_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 {
 #if ARCH_ARM
     BLOCKD *b = &x->block[0];

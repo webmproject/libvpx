@@ -105,6 +105,8 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->recon.recon       = vp8_recon_b_neon;
         rtcd->recon.recon2      = vp8_recon2b_neon;
         rtcd->recon.recon4      = vp8_recon4b_neon;
+        rtcd->recon.recon_mb    = vp8_recon_mb_neon;
+
     }
 #endif
 

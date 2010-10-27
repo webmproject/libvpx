@@ -51,6 +51,8 @@ extern prototype_copy_block(vp8_copy_mem8x8_neon);
 extern prototype_copy_block(vp8_copy_mem8x4_neon);
 extern prototype_copy_block(vp8_copy_mem16x16_neon);
 
+extern prototype_recon_macroblock(vp8_recon_recon_mb_neon);
+
 #if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_recon_recon
 #define vp8_recon_recon vp8_recon_b_neon
@@ -69,6 +71,9 @@ extern prototype_copy_block(vp8_copy_mem16x16_neon);
 
 #undef  vp8_recon_copy16x16
 #define vp8_recon_copy16x16 vp8_copy_mem16x16_neon
+
+#undef  vp8_recon_recon_mb
+#define vp8_recon_recon_mb vp8_recon_mb_neon
 #endif
 #endif
 
