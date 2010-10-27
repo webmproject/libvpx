@@ -761,7 +761,15 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
 #define DIST(r,c,v) sf( src,src_stride,PRE(r,c),d->pre_stride, v) // returns sad error score.
 #define ERR(r,c,v) (MVC(r,c)+DIST(r,c,v)) // returns distortion + motion vector cost
 #define CHECK_BETTER(v,r,c) if ((v = ERR(r,c,besterr)) < besterr) { besterr = v; br=r; bc=c; } // checks if (r,c) has better score than previous best
-
+static const MV next_chkpts[6][3] =
+{
+    {{ -2, 0}, { -1, -2}, {1, -2}},
+    {{ -1, -2}, {1, -2}, {2, 0}},
+    {{1, -2}, {2, 0}, {1, 2}},
+    {{2, 0}, {1, 2}, { -1, 2}},
+    {{1, 2}, { -1, 2}, { -2, 0}},
+    {{ -1, 2}, { -2, 0}, { -1, -2}}
+};
 int vp8_hex_search
 (
     MACROBLOCK *x,
@@ -778,38 +786,67 @@ int vp8_hex_search
     int *mvcost[2]
 )
 {
-    MV hex[6] = { { -2, 0}, { -1, -2}, { -1, 2}, {2, 0}, {1, 2}, {1, -2} } ;
+    MV hex[6] = { { -1, -2}, {1, -2}, {2, 0}, {1, 2}, { -1, 2}, { -2, 0} } ;
     MV neighbors[8] = { { -1, -1}, { -1, 0}, { -1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1} } ;
     int i, j;
     unsigned char *src = (*(b->base_src) + b->src);
     int src_stride = b->src_stride;
-    int rr = ref_mv->row, rc = ref_mv->col, br = rr, bc = rc, tr, tc;
+    int rr = ref_mv->row, rc = ref_mv->col, br = rr >> 3, bc = rc >> 3, tr, tc;
     unsigned int besterr, thiserr = 0x7fffffff;
+    int k = -1, tk;
 
-    if (rc < x->mv_col_min) bc = x->mv_col_min;
+    if (bc < x->mv_col_min) bc = x->mv_col_min;
 
-    if (rc > x->mv_col_max) bc = x->mv_col_max;
+    if (bc > x->mv_col_max) bc = x->mv_col_max;
 
-    if (rr < x->mv_row_min) br = x->mv_row_min;
+    if (br < x->mv_row_min) br = x->mv_row_min;
 
-    if (rr > x->mv_row_max) br = x->mv_row_max;
+    if (br > x->mv_row_max) br = x->mv_row_max;
 
     rr >>= 1;
     rc >>= 1;
-    br >>= 3;
-    bc >>= 3;
 
     besterr = ERR(br, bc, thiserr);
 
-    // hex search  jbb changed to 127 to avoid max 256 problem steping by 2.
-    for (j = 0; j < 127; j++)
+    // hex search
+    //j=0
+    tr = br;
+    tc = bc;
+
+    for (i = 0; i < 6; i++)
+    {
+        int nr = tr + hex[i].row, nc = tc + hex[i].col;
+
+        if (nc < x->mv_col_min) continue;
+
+        if (nc > x->mv_col_max) continue;
+
+        if (nr < x->mv_row_min) continue;
+
+        if (nr > x->mv_row_max) continue;
+
+        //CHECK_BETTER(thiserr,nr,nc);
+        if ((thiserr = ERR(nr, nc, besterr)) < besterr)
+        {
+            besterr = thiserr;
+            br = nr;
+            bc = nc;
+            k = i;
+        }
+    }
+
+    if (tr == br && tc == bc)
+        goto cal_neighbors;
+
+    for (j = 1; j < 127; j++)
     {
         tr = br;
         tc = bc;
+        tk = k;
 
-        for (i = 0; i < 6; i++)
+        for (i = 0; i < 3; i++)
         {
-            int nr = tr + hex[i].row, nc = tc + hex[i].col;
+            int nr = tr + next_chkpts[tk][i].row, nc = tc + next_chkpts[tk][i].col;
 
             if (nc < x->mv_col_min) continue;
 
@@ -819,7 +856,17 @@ int vp8_hex_search
 
             if (nr > x->mv_row_max) continue;
 
-            CHECK_BETTER(thiserr, nr, nc);
+            //CHECK_BETTER(thiserr,nr,nc);
+            if ((thiserr = ERR(nr, nc, besterr)) < besterr)
+            {
+                besterr = thiserr;
+                br = nr;
+                bc = nc; //k=(tk+5+i)%6;}
+                k = tk + 5 + i;
+
+                if (k >= 12) k -= 12;
+                else if (k >= 6) k -= 6;
+            }
         }
 
         if (tr == br && tc == bc)
@@ -827,6 +874,7 @@ int vp8_hex_search
     }
 
     // check 8 1 away neighbors
+cal_neighbors:
     tr = br;
     tc = bc;
 
@@ -856,6 +904,8 @@ int vp8_hex_search
 #undef DIST
 #undef ERR
 #undef CHECK_BETTER
+
+
 int vp8_diamond_search_sad
 (
     MACROBLOCK *x,
