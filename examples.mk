@@ -41,8 +41,8 @@ ifeq ($(CONFIG_MSVS),yes)
 CLEAN-OBJS += $(foreach p,$(VS_PLATFORMS),$(p)/Release/ivfenc.exe)
 CLEAN-OBJS += $(foreach p,$(VS_PLATFORMS),$(p)/Release/ivfdec.exe)
 else
-CLEAN-OBJS += ivfenc{.c.o,.c.d,.dox,.exe}
-CLEAN-OBJS += ivfdec{.c.o,.c.d,.dox,.exe}
+CLEAN-OBJS += ivfenc{.c.o,.c.d,.dox,.exe,}
+CLEAN-OBJS += ivfdec{.c.o,.c.d,.dox,.exe,}
 endif
 
 # XMA example disabled for now, not used in VP8
