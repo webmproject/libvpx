@@ -61,8 +61,8 @@ if(vpx_codec_encode(&codec, frame_avail? &raw : NULL, frame_cnt,
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PROCESS_FRAME
 case VPX_CODEC_CX_FRAME_PKT:
     write_ivf_frame_header(outfile, pkt);
-    fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
-           outfile);
+    if(fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
+              outfile));
     break;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PROCESS_FRAME
 

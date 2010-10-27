@@ -73,7 +73,7 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 #endif
 
 #endif
-    // Pure C:
+    /* Pure C: */
     vp8_build_intra_predictors_mby_ptr = vp8_build_intra_predictors_mby;
     vp8_build_intra_predictors_mby_s_ptr = vp8_build_intra_predictors_mby_s;
 

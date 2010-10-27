@@ -23,7 +23,7 @@ enum
     VP8D_DEBUG_LEVEL4   = 1<<6,
     VP8D_DEBUG_LEVEL5   = 1<<7,
     VP8D_DEBUG_LEVEL6   = 1<<8,
-    VP8D_DEBUG_LEVEL7   = 1<<9,
+    VP8D_DEBUG_LEVEL7   = 1<<9
 };
 
 #endif

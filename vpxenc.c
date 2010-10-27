@@ -213,7 +213,7 @@ void stats_write(stats_io_t *stats, const void *pkt, size_t len)
 {
     if (stats->file)
     {
-        fwrite(pkt, 1, len, stats->file);
+        if(fwrite(pkt, 1, len, stats->file));
     }
     else
     {
@@ -259,10 +259,11 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
                       y4m_input *y4m, struct detect_buffer *detect)
 {
     int plane = 0;
+    int shortread = 0;
 
     if (file_type == FILE_TYPE_Y4M)
     {
-        if (y4m_input_fetch_frame(y4m, f, img) < 0)
+        if (y4m_input_fetch_frame(y4m, f, img) < 1)
            return 0;
     }
     else
@@ -275,7 +276,7 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
              * write_ivf_frame_header() for documentation on the frame header
              * layout.
              */
-            fread(junk, 1, IVF_FRAME_HDR_SZ, f);
+            if(fread(junk, 1, IVF_FRAME_HDR_SZ, f));
         }
 
         for (plane = 0; plane < 3; plane++)
@@ -306,18 +307,18 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
                 if (detect->valid)
                 {
                     memcpy(ptr, detect->buf, 4);
-                    fread(ptr+4, 1, w-4, f);
+                    shortread |= fread(ptr+4, 1, w-4, f) < w-4;
                     detect->valid = 0;
                 }
                 else
-                    fread(ptr, 1, w, f);
+                    shortread |= fread(ptr, 1, w, f) < w;
 
                 ptr += img->stride[plane];
             }
         }
     }
 
-    return !feof(f);
+    return !shortread;
 }
 
 
@@ -396,7 +397,7 @@ static void write_ivf_file_header(FILE *outfile,
     mem_put_le32(header + 24, frame_cnt);         /* length */
     mem_put_le32(header + 28, 0);                 /* unused */
 
-    fwrite(header, 1, 32, outfile);
+    if(fwrite(header, 1, 32, outfile));
 }
 
 
@@ -414,7 +415,7 @@ static void write_ivf_frame_header(FILE *outfile,
     mem_put_le32(header + 4, pts & 0xFFFFFFFF);
     mem_put_le32(header + 8, pts >> 32);
 
-    fwrite(header, 1, 12, outfile);
+    if(fwrite(header, 1, 12, outfile));
 }
 
 
@@ -462,7 +463,7 @@ struct EbmlGlobal
 
 void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
 {
-    fwrite(buffer_in, 1, len, glob->stream);
+    if(fwrite(buffer_in, 1, len, glob->stream));
 }
 
 
@@ -1329,6 +1330,7 @@ int main(int argc, const char **argv_)
     {
         int frames_in = 0, frames_out = 0;
         unsigned long nbytes = 0;
+        size_t detect_bytes;
         struct detect_buffer detect;
 
         /* Parse certain options from the input file, if possible */
@@ -1340,10 +1342,15 @@ int main(int argc, const char **argv_)
             return EXIT_FAILURE;
         }
 
-        fread(detect.buf, 1, 4, infile);
+        /* For RAW input sources, these bytes will applied on the first frame
+         *  in read_frame().
+         * We can always read 4 bytes because the minimum supported frame size
+         *  is 2x2.
+         */
+        detect_bytes = fread(detect.buf, 1, 4, infile);
         detect.valid = 0;
 
-        if (file_is_y4m(infile, &y4m, detect.buf))
+        if (detect_bytes == 4 && file_is_y4m(infile, &y4m, detect.buf))
         {
             if (y4m_input_open(&y4m, infile, detect.buf, 4) >= 0)
             {
@@ -1368,7 +1375,8 @@ int main(int argc, const char **argv_)
                 return EXIT_FAILURE;
             }
         }
-        else if (file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, detect.buf))
+        else if (detect_bytes == 4 &&
+                 file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, detect.buf))
         {
             file_type = FILE_TYPE_IVF;
             switch (fourcc)
@@ -1572,7 +1580,8 @@ int main(int argc, const char **argv_)
                     else
                     {
                         write_ivf_frame_header(outfile, pkt);
-                        fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz, outfile);
+                        if(fwrite(pkt->data.frame.buf, 1,
+                                  pkt->data.frame.sz, outfile));
                     }
                     nbytes += pkt->data.raw.sz;
                     break;

@@ -35,8 +35,8 @@ extern loop_filter_uvfunction vp8_mbloop_filter_vertical_edge_uv_neon;
 
 
 #if HAVE_ARMV6
-//ARMV6 loopfilter functions
-// Horizontal MB filtering
+/*ARMV6 loopfilter functions*/
+/* Horizontal MB filtering */
 void vp8_loop_filter_mbh_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                                int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
@@ -60,7 +60,7 @@ void vp8_loop_filter_mbhs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsi
     vp8_loop_filter_simple_horizontal_edge_armv6(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->mbthr, 2);
 }
 
-// Vertical MB Filtering
+/* Vertical MB Filtering */
 void vp8_loop_filter_mbv_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                                int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
@@ -84,7 +84,7 @@ void vp8_loop_filter_mbvs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsi
     vp8_loop_filter_simple_vertical_edge_armv6(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->mbthr, 2);
 }
 
-// Horizontal B Filtering
+/* Horizontal B Filtering */
 void vp8_loop_filter_bh_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
@@ -112,7 +112,7 @@ void vp8_loop_filter_bhs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsig
     vp8_loop_filter_simple_horizontal_edge_armv6(y_ptr + 12 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
 }
 
-// Vertical B Filtering
+/* Vertical B Filtering */
 void vp8_loop_filter_bv_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
@@ -142,8 +142,8 @@ void vp8_loop_filter_bvs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsig
 #endif
 
 #if HAVE_ARMV7
-// NEON loopfilter functions
-// Horizontal MB filtering
+/* NEON loopfilter functions */
+/* Horizontal MB filtering */
 void vp8_loop_filter_mbh_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
@@ -164,7 +164,7 @@ void vp8_loop_filter_mbhs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsig
     vp8_loop_filter_simple_horizontal_edge_neon(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->mbthr, 2);
 }
 
-// Vertical MB Filtering
+/* Vertical MB Filtering */
 void vp8_loop_filter_mbv_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
@@ -185,7 +185,7 @@ void vp8_loop_filter_mbvs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsig
     vp8_loop_filter_simple_vertical_edge_neon(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->mbthr, 2);
 }
 
-// Horizontal B Filtering
+/* Horizontal B Filtering */
 void vp8_loop_filter_bh_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
@@ -210,7 +210,7 @@ void vp8_loop_filter_bhs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsign
     vp8_loop_filter_simple_horizontal_edge_neon(y_ptr + 12 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
 }
 
-// Vertical B Filtering
+/* Vertical B Filtering */
 void vp8_loop_filter_bv_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {

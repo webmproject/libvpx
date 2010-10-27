@@ -93,18 +93,18 @@ typedef struct VP8Decompressor
     int decoding_thread_count;
     int allocated_decoding_thread_count;
 
-    // variable for threading
+    /* variable for threading */
 #if CONFIG_MULTITHREAD
     int mt_baseline_filter_level[MAX_MB_SEGMENTS];
     int sync_range;
-    int *mt_current_mb_col;                  // Each row remembers its already decoded column.
+    int *mt_current_mb_col;                  /* Each row remembers its already decoded column. */
 
-    unsigned char **mt_yabove_row;           // mb_rows x width
+    unsigned char **mt_yabove_row;           /* mb_rows x width */
     unsigned char **mt_uabove_row;
     unsigned char **mt_vabove_row;
-    unsigned char **mt_yleft_col;            // mb_rows x 16
-    unsigned char **mt_uleft_col;            // mb_rows x 8
-    unsigned char **mt_vleft_col;            // mb_rows x 8
+    unsigned char **mt_yleft_col;            /* mb_rows x 16 */
+    unsigned char **mt_uleft_col;            /* mb_rows x 8 */
+    unsigned char **mt_vleft_col;            /* mb_rows x 8 */
 
     MB_ROW_DEC           *mb_row_di;
     DECODETHREAD_DATA    *de_thread_data;
@@ -112,7 +112,7 @@ typedef struct VP8Decompressor
     pthread_t           *h_decoding_thread;
     sem_t               *h_event_start_decoding;
     sem_t                h_event_end_decoding;
-    // end of threading data
+    /* end of threading data */
 #endif
 
     vp8_reader *mbc;
