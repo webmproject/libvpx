@@ -472,7 +472,10 @@ void vp8_plane_add_noise_c(unsigned char *Start, char *noise,
     }
 }
 
-void vp8_blend_block_c (unsigned char *y, unsigned char *u, unsigned char *v,
+// Blend the macro block with a solid colored square.  Leave the
+// edges unblended to give distinction to macro blocks in areas
+// filled with the same color block.
+void vp8_blend_mb_c (unsigned char *y, unsigned char *u, unsigned char *v,
                         int y1, int u1, int v1, int alpha, int stride)
 {
     int i, j;
@@ -480,63 +483,73 @@ void vp8_blend_block_c (unsigned char *y, unsigned char *u, unsigned char *v,
     int u1_const = u1*((1<<16)-alpha);
     int v1_const = v1*((1<<16)-alpha);
 
-    for (i = 0; i < 16; i++)
+    y += stride + 2;
+    for (i = 0; i < 14; i++)
     {
-        for (j = 0; j < 16; j++)
+        for (j = 0; j < 14; j++)
         {
             y[j] = (y[j]*alpha + y1_const)>>16;
         }
         y += stride;
     }
 
-    for (i = 0; i < 8; i++)
+    stride >>= 1;
+
+    u += stride + 1;
+    v += stride + 1;
+
+    for (i = 0; i < 6; i++)
     {
-        for (j = 0; j < 8; j++)
+        for (j = 0; j < 6; j++)
         {
             u[j] = (u[j]*alpha + u1_const)>>16;
             v[j] = (v[j]*alpha + v1_const)>>16;
         }
-        u += stride/2;
-        v += stride/2;
+        u += stride;
+        v += stride;
     }
 }
 
 static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int height)
 {
-    int dx = *x1 - x0;
-    int dy = *y1 - y0;
+    int dx;
+    int dy;
 
     if (*x1 > width)
     {
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+
         *x1 = width;
         if (dy)
             *y1 = ((width-x0)*dy)/dx + y0;
-        dx = *x1 - x0;
-        dy = *y1 - y0;
     }
     if (*x1 < 0)
     {
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+
         *x1 = 0;
         if (dy)
             *y1 = ((0-x0)*dy)/dx + y0;
-        dx = *x1 - x0;
-        dy = *y1 - y0;
     }
     if (*y1 > height)
     {
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+
         *y1 = height;
         if (dx)
             *x1 = ((height-y0)*dx)/dy + x0;
-        dx = *x1 - x0;
-        dy = *y1 - y0;
     }
     if (*y1 < 0)
     {
+        dx = *x1 - x0;
+        dy = *y1 - y0;
+
         *y1 = 0;
         if (dx)
             *x1 = ((0-y0)*dx)/dy + x0;
-        dx = *x1 - x0;
-        dy = *y1 - y0;
     }
 }
 
@@ -747,8 +760,16 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
                     x1 = x0 + (mv->col >> 3);
                     y1 = y0 + (mv->row >> 3);
 
-                    constrain_line (x0, &x1, y0, &y1, width, height);
-                    vp8_blit_line (x0, x1, y0, y1, y_buffer, y_stride);
+                    if (x1 != x0 && y1 != y0)
+                    {
+                        constrain_line (x0, &x1, y0-1, &y1, width, height);
+                        vp8_blit_line  (x0,  x1, y0-1,  y1, y_buffer, y_stride);
+
+                        constrain_line (x0, &x1, y0+1, &y1, width, height);
+                        vp8_blit_line  (x0,  x1, y0+1,  y1, y_buffer, y_stride);
+                    }
+                    else
+                        vp8_blit_line  (x0,  x1, y0,  y1, y_buffer, y_stride);
                 }
                 mi++;
             }
@@ -779,7 +800,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
                 U = MB_PREDICTION_MODE_colors[mi->mbmi.mode][1];
                 V = MB_PREDICTION_MODE_colors[mi->mbmi.mode][2];
 
-                vp8_blend_block_c (&y_ptr[j], &u_ptr[j>>1], &v_ptr[j>>1], Y, U, V, 0xb000, y_stride);
+                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb)
+                    (&y_ptr[j], &u_ptr[j>>1], &v_ptr[j>>1], Y, U, V, 0xc000, y_stride);
 
                 mi++;
             }
@@ -814,7 +836,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
                 U = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][1];
                 V = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][2];
 
-                vp8_blend_block_c (&y_ptr[j], &u_ptr[j>>1], &v_ptr[j>>1], Y, U, V, 0xb000, y_stride);
+                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb)
+                    (&y_ptr[j], &u_ptr[j>>1], &v_ptr[j>>1], Y, U, V, 0xc000, y_stride);
 
                 mi++;
             }
