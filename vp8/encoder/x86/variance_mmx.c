@@ -595,3 +595,39 @@ unsigned int vp8_i_sub_pixel_variance8x16_mmx
     *sse = xxsum0;
     return (xxsum0 - ((xsum0 * xsum0) >> 7));
 }
+
+
+unsigned int vp8_variance_halfpixvar16x16_h_mmx(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 4, 0,
+                                           ref_ptr, recon_stride, sse);
+}
+
+
+unsigned int vp8_variance_halfpixvar16x16_v_mmx(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 0, 4,
+                                           ref_ptr, recon_stride, sse);
+}
+
+
+unsigned int vp8_variance_halfpixvar16x16_hv_mmx(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 4, 4,
+                                           ref_ptr, recon_stride, sse);
+}

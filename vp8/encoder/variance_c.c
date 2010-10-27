@@ -461,7 +461,31 @@ unsigned int vp8_sub_pixel_variance16x16_c
 }
 
 
-unsigned int vp8_half_pixel_variance16x16_c(
+unsigned int vp8_variance_halfpixvar16x16_h_c(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 4, 0,
+                                         ref_ptr, recon_stride, sse);
+}
+
+
+unsigned int vp8_variance_halfpixvar16x16_v_c(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 0, 4,
+                                         ref_ptr, recon_stride, sse);
+}
+
+
+unsigned int vp8_variance_halfpixvar16x16_hv_c(
     const unsigned char *src_ptr,
     int  source_stride,
     const unsigned char *ref_ptr,

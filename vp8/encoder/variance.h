@@ -220,17 +220,17 @@ extern prototype_subpixvariance(vp8_variance_subpixvar16x8);
 extern prototype_subpixvariance(vp8_variance_subpixvar16x16);
 
 #ifndef vp8_variance_halfpixvar16x16_h
-#define vp8_variance_halfpixvar16x16_h vp8_half_pixel_variance16x16_c
+#define vp8_variance_halfpixvar16x16_h vp8_variance_halfpixvar16x16_h_c
 #endif
 extern prototype_variance(vp8_variance_halfpixvar16x16_h);
 
 #ifndef vp8_variance_halfpixvar16x16_v
-#define vp8_variance_halfpixvar16x16_v vp8_half_pixel_variance16x16_c
+#define vp8_variance_halfpixvar16x16_v vp8_variance_halfpixvar16x16_v_c
 #endif
 extern prototype_variance(vp8_variance_halfpixvar16x16_v);
 
 #ifndef vp8_variance_halfpixvar16x16_hv
-#define vp8_variance_halfpixvar16x16_hv vp8_half_pixel_variance16x16_c
+#define vp8_variance_halfpixvar16x16_hv vp8_variance_halfpixvar16x16_hv_c
 #endif
 extern prototype_variance(vp8_variance_halfpixvar16x16_hv);
 

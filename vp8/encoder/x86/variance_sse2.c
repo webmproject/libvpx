@@ -513,3 +513,84 @@ unsigned int vp8_i_sub_pixel_variance8x16_wmt
 
     return vp8_sub_pixel_variance8x16_wmt(src_ptr, (src_pixels_per_line >> 1), xoffset, yoffset, dst_ptr, (dst_pixels_per_line >> 1), sse);
 }
+
+
+unsigned int vp8_variance_halfpixvar16x16_h_wmt(
+    const unsigned char *src_ptr,
+    int  src_pixels_per_line,
+    const unsigned char *dst_ptr,
+    int  dst_pixels_per_line,
+    unsigned int *sse)
+{
+    int xsum0, xsum1;
+    unsigned int xxsum0, xxsum1;
+
+    vp8_half_horiz_variance16x_h_sse2(
+        src_ptr, src_pixels_per_line,
+        dst_ptr, dst_pixels_per_line, 16,
+        &xsum0, &xxsum0);
+
+    vp8_half_horiz_variance16x_h_sse2(
+        src_ptr + 8, src_pixels_per_line,
+        dst_ptr + 8, dst_pixels_per_line, 16,
+        &xsum1, &xxsum1);
+
+    xsum0 += xsum1;
+    xxsum0 += xxsum1;
+    *sse = xxsum0;
+    return (xxsum0 - ((xsum0 * xsum0) >> 8));
+}
+
+
+unsigned int vp8_variance_halfpixvar16x16_v_wmt(
+    const unsigned char *src_ptr,
+    int  src_pixels_per_line,
+    const unsigned char *dst_ptr,
+    int  dst_pixels_per_line,
+    unsigned int *sse)
+{
+    int xsum0, xsum1;
+    unsigned int xxsum0, xxsum1;
+
+    vp8_half_vert_variance16x_h_sse2(
+        src_ptr, src_pixels_per_line,
+        dst_ptr, dst_pixels_per_line, 16,
+        &xsum0, &xxsum0);
+
+    vp8_half_vert_variance16x_h_sse2(
+        src_ptr + 8, src_pixels_per_line,
+        dst_ptr + 8, dst_pixels_per_line, 16,
+        &xsum1, &xxsum1);
+
+    xsum0 += xsum1;
+    xxsum0 += xxsum1;
+    *sse = xxsum0;
+    return (xxsum0 - ((xsum0 * xsum0) >> 8));
+}
+
+
+unsigned int vp8_variance_halfpixvar16x16_hv_wmt(
+    const unsigned char *src_ptr,
+    int  src_pixels_per_line,
+    const unsigned char *dst_ptr,
+    int  dst_pixels_per_line,
+    unsigned int *sse)
+{
+    int xsum0, xsum1;
+    unsigned int xxsum0, xxsum1;
+
+    vp8_half_horiz_vert_variance16x_h_sse2(
+        src_ptr, src_pixels_per_line,
+        dst_ptr, dst_pixels_per_line, 16,
+        &xsum0, &xxsum0);
+
+    vp8_half_horiz_vert_variance16x_h_sse2(
+        src_ptr + 8, src_pixels_per_line,
+        dst_ptr + 8, dst_pixels_per_line, 16,
+        &xsum1, &xxsum1);
+
+    xsum0 += xsum1;
+    xxsum0 += xxsum1;
+    *sse = xxsum0;
+    return (xxsum0 - ((xsum0 * xsum0) >> 8));
+}

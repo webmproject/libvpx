@@ -57,6 +57,9 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_c;
     cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;
     cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_c;
+    cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_c;
+    cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_c;
+    cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_c;
     cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_c;
 
     cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;

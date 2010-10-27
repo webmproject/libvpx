@@ -218,6 +218,9 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_mmx;
         cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_mmx;
         cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_mmx;
+        cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_mmx;
+        cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_mmx;
+        cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_mmx;
         cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_mmx;
 
         cpi->rtcd.variance.mse16x16              = vp8_mse16x16_mmx;
@@ -274,6 +277,9 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_wmt;
         cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_wmt;
         cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_wmt;
+        cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_wmt;
+        cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_wmt;
+        cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_wmt;
         cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_wmt;
 
         cpi->rtcd.variance.mse16x16              = vp8_mse16x16_wmt;
