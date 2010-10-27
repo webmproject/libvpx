@@ -813,7 +813,7 @@ int main(int argc, const char **argv_)
     }
 
     /* Make sure we don't dump to the terminal, unless forced to with -o - */
-    if(!outfile_pattern && isatty(fileno(stdout)) && !do_md5)
+    if(!outfile_pattern && isatty(fileno(stdout)) && !do_md5 && !noblit)
     {
         fprintf(stderr,
                 "Not dumping raw video to your terminal. Use '-o -' to "
