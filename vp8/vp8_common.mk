@@ -119,7 +119,6 @@ VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/filter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/recon_arm.c
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/reconintra4x4_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/reconintra_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/vpx_asm_offsets.c
 
