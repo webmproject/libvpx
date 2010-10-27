@@ -810,6 +810,23 @@ static unsigned int murmur ( const void * key, int len, unsigned int seed )
     return h;
 }
 
+#include "math.h"
+
+static double vp8_mse2psnr(double Samples, double Peak, double Mse)
+{
+    double psnr;
+
+    if ((double)Mse > 0.0)
+        psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
+    else
+        psnr = 60;      // Limit to prevent / 0
+
+    if (psnr > 60)
+        psnr = 60;
+
+    return psnr;
+}
+
 
 #include "args.h"
 
@@ -1049,6 +1066,10 @@ int main(int argc, const char **argv_)
     int                      write_webm = 1;
     EbmlGlobal               ebml = {0};
     uint32_t                 hash = 0;
+    uint64_t                 psnr_sse_total = 0;
+    uint64_t                 psnr_samples_total = 0;
+    double                   psnr_totals[4] = {0, 0, 0, 0};
+    int                      psnr_count = 0;
 
     exec_name = argv_[0];
 
@@ -1570,8 +1591,14 @@ int main(int argc, const char **argv_)
                     {
                         int i;
 
+                        psnr_sse_total += pkt->data.psnr.sse[0];
+                        psnr_samples_total += pkt->data.psnr.samples[0];
                         for (i = 0; i < 4; i++)
+                        {
                             fprintf(stderr, "%.3lf ", pkt->data.psnr.psnr[i]);
+                            psnr_totals[i] += pkt->data.psnr.psnr[i];
+                        }
+                        psnr_count++;
                     }
 
                     break;
@@ -1591,6 +1618,21 @@ int main(int argc, const char **argv_)
                cx_time > 9999999 ? cx_time / 1000 : cx_time,
                cx_time > 9999999 ? "ms" : "us",
                (float)frames_in * 1000000.0 / (float)cx_time);
+
+        if ( (show_psnr) && (psnr_count>0) )
+        {
+            int i;
+            double ovpsnr = vp8_mse2psnr(psnr_samples_total, 255.0,
+                                         psnr_sse_total);
+
+            fprintf(stderr, "\nPSNR (Overall/Avg/Y/U/V)");
+
+            fprintf(stderr, " %.3lf", ovpsnr);
+            for (i = 0; i < 4; i++)
+            {
+                fprintf(stderr, " %.3lf", psnr_totals[i]/psnr_count);
+            }
+        }
 
         vpx_codec_destroy(&encoder);
 
