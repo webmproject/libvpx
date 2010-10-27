@@ -35,7 +35,7 @@ void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
         pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_v6;
         pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_v6;
         pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_v6;
-#if 0 //For use with RTCD, when implemented
+#if 0 /*For use with RTCD, when implemented*/
         pbi->dboolhuff.start             = vp8dx_start_decode_c;
         pbi->dboolhuff.fill              = vp8dx_bool_decoder_fill_c;
         pbi->dboolhuff.debool            = vp8dx_decode_bool_c;
@@ -54,7 +54,7 @@ void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
         pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_neon;
         pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_neon;
         pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_neon;
-#if 0 //For use with RTCD, when implemented
+#if 0 /*For use with RTCD, when implemented*/
         pbi->dboolhuff.start             = vp8dx_start_decode_c;
         pbi->dboolhuff.fill              = vp8dx_bool_decoder_fill_c;
         pbi->dboolhuff.debool            = vp8dx_decode_bool_c;

@@ -18,10 +18,10 @@
     void sym(unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch)
 
 #define prototype_recon_block(sym) \
-    void sym(unsigned char *pred, short *diff, unsigned char *dst, int pitch);
+    void sym(unsigned char *pred, short *diff, unsigned char *dst, int pitch)
 
 #define prototype_recon_macroblock(sym) \
-    void sym(const struct vp8_recon_rtcd_vtable *rtcd, MACROBLOCKD *x);
+    void sym(const struct vp8_recon_rtcd_vtable *rtcd, MACROBLOCKD *x)
 
 struct vp8_recon_rtcd_vtable;
 

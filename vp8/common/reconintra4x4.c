@@ -56,7 +56,7 @@ void vp8_predict_intra4x4(BLOCKD *x,
     break;
     case B_TM_PRED:
     {
-        // prediction similar to true_motion prediction
+        /* prediction similar to true_motion prediction */
         for (r = 0; r < 4; r++)
         {
             for (c = 0; c < 4; c++)
@@ -295,8 +295,9 @@ void vp8_predict_intra4x4(BLOCKD *x,
 
     }
 }
-// copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
-// to the right prediction have filled in pixels to use.
+/* copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
+ * to the right prediction have filled in pixels to use.
+ */
 void vp8_intra_prediction_down_copy(MACROBLOCKD *x)
 {
     unsigned char *above_right = *(x->block[0].base_dst) + x->block[0].dst - x->block[0].dst_stride + 16;

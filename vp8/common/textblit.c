@@ -57,7 +57,7 @@ static void plot (const int x, const int y, unsigned char *image, const int pitc
     image [x+y*pitch] ^= 255;
 }
 
-// Bresenham line algorithm
+/* Bresenham line algorithm */
 void vp8_blit_line(int x0, int x1, int y0, int y1, unsigned char *image, const int pitch)
 {
     int steep = abs(y1 - y0) > abs(x1 - x0);

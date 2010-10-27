@@ -336,7 +336,7 @@ void out_put(void *out, const uint8_t *buf, unsigned int len, int do_md5)
     }
     else
     {
-        fwrite(buf, 1, len, out);
+        if(fwrite(buf, 1, len, out));
     }
 }
 
@@ -461,11 +461,13 @@ nestegg_read_cb(void *buffer, size_t length, void *userdata)
 {
     FILE *f = userdata;
 
-    fread(buffer, 1, length, f);
-    if (ferror(f))
-        return -1;
-    if (feof(f))
-        return 0;
+    if(fread(buffer, 1, length, f) < length)
+    {
+        if (ferror(f))
+            return -1;
+        if (feof(f))
+            return 0;
+    }
     return 1;
 }
 

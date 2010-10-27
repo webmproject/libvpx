@@ -291,7 +291,7 @@ void vp8_output_stats(const VP8_COMP            *cpi,
 
 
         fpfile = fopen("fpmotionmap.stt", "a");
-        fwrite(cpi->fp_motion_map, 1, cpi->common.MBs, fpfile);
+        if(fwrite(cpi->fp_motion_map, 1, cpi->common.MBs, fpfile));
         fclose(fpfile);
     }
 #endif
@@ -879,7 +879,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         else
             recon_file = fopen(filename, "ab");
 
-        fwrite(lst_yv12->buffer_alloc, lst_yv12->frame_size, 1, recon_file);
+        if(fwrite(lst_yv12->buffer_alloc, lst_yv12->frame_size, 1, recon_file));
         fclose(recon_file);
     }
 
@@ -2586,7 +2586,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (0)
         {
             FILE *f = fopen("Subsamle.stt", "a");
-            fprintf(f, " %8d %8d %8d %8d %12.0f %8d %8d %8d\n",  cpi->common.current_video_frame, kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, cpi->kf_group_bits / cpi->frames_to_key, new_height, new_width);
+            fprintf(f, " %8d %8d %8d %8d %12.0f %8d %8d %8d\n",  cpi->common.current_video_frame, kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, (int)(cpi->kf_group_bits / cpi->frames_to_key), new_height, new_width);
             fclose(f);
         }
 
@@ -2644,7 +2644,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 if (0)
                 {
                     FILE *f = fopen("Subsamle.stt", "a");
-                    fprintf(f, "******** %8d %8d %8d %12.0f %8d %8d %8d\n",  kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, cpi->kf_group_bits / cpi->frames_to_key, new_height, new_width);
+                    fprintf(f, "******** %8d %8d %8d %12.0f %8d %8d %8d\n",  kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, (int)(cpi->kf_group_bits / cpi->frames_to_key), new_height, new_width);
                     fclose(f);
                 }
             }
