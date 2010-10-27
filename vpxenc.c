@@ -430,6 +430,8 @@ struct cue_entry
 
 struct EbmlGlobal
 {
+    int debug;
+
     FILE    *stream;
     uint64_t last_pts_ms;
     vpx_rational_t  framerate;
@@ -552,8 +554,10 @@ write_webm_seek_info(EbmlGlobal *ebml)
         Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
         Ebml_SerializeFloat(ebml, Segment_Duration,
                             ebml->last_pts_ms + frame_time);
-        Ebml_SerializeString(ebml, 0x4D80, "vpxenc" VERSION_STRING);
-        Ebml_SerializeString(ebml, 0x5741, "vpxenc" VERSION_STRING);
+        Ebml_SerializeString(ebml, 0x4D80,
+            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
+        Ebml_SerializeString(ebml, 0x5741,
+            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
         Ebml_EndSubElement(ebml, &startInfo);
     }
 }
@@ -740,6 +744,8 @@ write_webm_file_footer(EbmlGlobal *glob)
 
 #include "args.h"
 
+static const arg_def_t debugmode = ARG_DEF("D", "debug", 0,
+        "Debug mode (makes output deterministic)");
 static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
         "Output filename");
 static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
@@ -774,6 +780,7 @@ static const arg_def_t use_ivf          = ARG_DEF(NULL, "ivf", 0,
         "Output IVF (default is WebM)");
 static const arg_def_t *main_args[] =
 {
+    &debugmode,
     &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline,
     &best_dl, &good_dl, &rt_dl,
     &verbosearg, &psnrarg, &use_ivf, &framerate,
@@ -1052,6 +1059,8 @@ int main(int argc, const char **argv_)
             write_webm = 0;
         else if (arg_match(&arg, &outputfile, argi))
             out_fn = arg.val;
+        else if (arg_match(&arg, &debugmode, argi))
+            ebml.debug = 1;
         else
             argj++;
     }
