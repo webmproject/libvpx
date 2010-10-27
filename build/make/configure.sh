@@ -824,6 +824,7 @@ process_common_toolchain() {
         soft_enable sse2
         soft_enable sse3
         soft_enable ssse3
+        soft_enable sse4_1
 
         case  ${tgt_os} in
             win*)

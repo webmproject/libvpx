@@ -199,6 +199,7 @@ ARCH_EXT_LIST="
     sse2
     sse3
     ssse3
+    sse4_1
 
     altivec
 "

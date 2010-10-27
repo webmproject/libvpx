@@ -93,6 +93,7 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
 typedef prototype_full_search_sad(*vp8_full_search_fn_t);
 extern prototype_full_search_sad(vp8_full_search_sad);
 extern prototype_full_search_sad(vp8_full_search_sadx3);
+extern prototype_full_search_sad(vp8_full_search_sadx8);
 
 typedef prototype_diamond_search_sad(*vp8_diamond_search_fn_t);
 extern prototype_diamond_search_sad(vp8_diamond_search_sad);

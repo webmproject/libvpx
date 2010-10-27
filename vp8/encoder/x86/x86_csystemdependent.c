@@ -188,6 +188,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
     int wmt_enabled = flags & HAS_SSE2;
     int SSE3Enabled = flags & HAS_SSE3;
     int SSSE3Enabled = flags & HAS_SSSE3;
+    int SSE4_1Enabled = flags & HAS_SSE4_1;
 
     /* Note:
      *
@@ -198,7 +199,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 
     /* Override default functions with fastest ones for this CPU. */
 #if HAVE_MMX
-
     if (mmx_enabled)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_mmx;
@@ -254,10 +254,9 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 
         /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_mmx;*/
     }
-
 #endif
-#if HAVE_SSE2
 
+#if HAVE_SSE2
     if (wmt_enabled)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_wmt;
@@ -307,10 +306,9 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         /*cpi->rtcd.quantize.quantb            = vp8_regular_quantize_b_sse2;*/
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
     }
-
 #endif
-#if HAVE_SSE3
 
+#if HAVE_SSE3
     if (SSE3Enabled)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_sse3;
@@ -328,16 +326,27 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.sad4x4x4d             = vp8_sad4x4x4d_sse3;
         cpi->rtcd.search.diamond_search          = vp8_diamond_search_sadx4;
     }
-
 #endif
-#if HAVE_SSSE3
 
+#if HAVE_SSSE3
     if (SSSE3Enabled)
     {
         cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_ssse3;
         cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_ssse3;
     }
-
 #endif
+
+#if HAVE_SSE4_1
+    if (SSE4_1Enabled)
+    {
+        cpi->rtcd.variance.sad16x16x8            = vp8_sad16x16x8_sse4;
+        cpi->rtcd.variance.sad16x8x8             = vp8_sad16x8x8_sse4;
+        cpi->rtcd.variance.sad8x16x8             = vp8_sad8x16x8_sse4;
+        cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_sse4;
+        cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_sse4;
+        cpi->rtcd.search.full_search             = vp8_full_search_sadx8;
+    }
+#endif
+
 #endif
 }

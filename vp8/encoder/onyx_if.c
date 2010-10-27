@@ -2341,6 +2341,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->fn_ptr[BLOCK_16X16].svf_halfpix_v  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_v);
     cpi->fn_ptr[BLOCK_16X16].svf_halfpix_hv = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_hv);
     cpi->fn_ptr[BLOCK_16X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x3);
+    cpi->fn_ptr[BLOCK_16X16].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x8);
     cpi->fn_ptr[BLOCK_16X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x4d);
 
     cpi->fn_ptr[BLOCK_16X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8);
@@ -2350,6 +2351,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_hv = NULL;
     cpi->fn_ptr[BLOCK_16X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x3);
+    cpi->fn_ptr[BLOCK_16X8].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x8);
     cpi->fn_ptr[BLOCK_16X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x4d);
 
     cpi->fn_ptr[BLOCK_8X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16);
@@ -2359,6 +2361,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_hv = NULL;
     cpi->fn_ptr[BLOCK_8X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x3);
+    cpi->fn_ptr[BLOCK_8X16].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x8);
     cpi->fn_ptr[BLOCK_8X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x4d);
 
     cpi->fn_ptr[BLOCK_8X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8);
@@ -2368,6 +2371,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_hv = NULL;
     cpi->fn_ptr[BLOCK_8X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x3);
+    cpi->fn_ptr[BLOCK_8X8].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x8);
     cpi->fn_ptr[BLOCK_8X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x4d);
 
     cpi->fn_ptr[BLOCK_4X4].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4);
@@ -2377,6 +2381,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_hv = NULL;
     cpi->fn_ptr[BLOCK_4X4].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x3);
+    cpi->fn_ptr[BLOCK_4X4].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x8);
     cpi->fn_ptr[BLOCK_4X4].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x4d);
 
 #if !(CONFIG_REALTIME_ONLY)

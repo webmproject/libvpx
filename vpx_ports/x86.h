@@ -74,6 +74,7 @@ void __cpuid(int CPUInfo[4], int info_type);
 #define HAS_SSE2  0x04
 #define HAS_SSE3  0x08
 #define HAS_SSSE3 0x10
+#define HAS_SSE4_1 0x20
 #ifndef BIT
 #define BIT(n) (1<<n)
 #endif
@@ -116,6 +117,8 @@ x86_simd_caps(void)
     if (reg_ecx & BIT(0))  flags |= HAS_SSE3;
 
     if (reg_ecx & BIT(9))  flags |= HAS_SSSE3;
+
+    if (reg_ecx & BIT(19)) flags |= HAS_SSE4_1;
 
     return flags & mask;
 }

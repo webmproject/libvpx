@@ -1323,7 +1323,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
         check_here = r * mv_stride + in_what + col_min;
         c = col_min;
 
-        while ((c + 3) < col_max)
+        while ((c + 2) < col_max)
         {
             int i;
 
@@ -1387,6 +1387,158 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
 }
 #endif
 
+
+int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int error_per_bit, int distance, vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2], int *mvsadcost[2])
+{
+    unsigned char *what = (*(b->base_src) + b->src);
+    int what_stride = b->src_stride;
+    unsigned char *in_what;
+    int in_what_stride = d->pre_stride;
+    int mv_stride = d->pre_stride;
+    unsigned char *bestaddress;
+    MV *best_mv = &d->bmi.mv.as_mv;
+    MV this_mv;
+    int bestsad = INT_MAX;
+    int r, c;
+
+    unsigned char *check_here;
+    unsigned int thissad;
+
+    int ref_row = ref_mv->row >> 3;
+    int ref_col = ref_mv->col >> 3;
+
+    int row_min = ref_row - distance;
+    int row_max = ref_row + distance;
+    int col_min = ref_col - distance;
+    int col_max = ref_col + distance;
+
+    unsigned short sad_array8[8];
+    unsigned int sad_array[3];
+
+    // Work out the mid point for the search
+    in_what = *(d->base_pre) + d->pre;
+    bestaddress = in_what + (ref_row * d->pre_stride) + ref_col;
+
+    best_mv->row = ref_row;
+    best_mv->col = ref_col;
+
+    // We need to check that the starting point for the search (as indicated by ref_mv) is within the buffer limits
+    if ((ref_col > x->mv_col_min) && (ref_col < x->mv_col_max) &&
+    (ref_row > x->mv_row_min) && (ref_row < x->mv_row_max))
+    {
+        // Baseline value at the centre
+        bestsad = fn_ptr->sdf(what, what_stride, bestaddress, in_what_stride, 0x7fffffff) + vp8_mv_err_cost(ref_mv, ref_mv, mvsadcost, error_per_bit);
+    }
+
+    // Apply further limits to prevent us looking using vectors that stretch beyiond the UMV border
+    if (col_min < x->mv_col_min)
+        col_min = x->mv_col_min;
+
+    if (col_max > x->mv_col_max)
+        col_max = x->mv_col_max;
+
+    if (row_min < x->mv_row_min)
+        row_min = x->mv_row_min;
+
+    if (row_max > x->mv_row_max)
+        row_max = x->mv_row_max;
+
+    for (r = row_min; r < row_max ; r++)
+    {
+        this_mv.row = r << 3;
+        check_here = r * mv_stride + in_what + col_min;
+        c = col_min;
+
+        while ((c + 7) < col_max)
+        {
+            int i;
+
+            fn_ptr->sdx8f(what, what_stride, check_here , in_what_stride, sad_array8);
+
+            for (i = 0; i < 8; i++)
+            {
+                thissad = (unsigned int)sad_array8[i];
+
+                if (thissad < bestsad)
+                {
+                    this_mv.col = c << 3;
+                    thissad  += vp8_mv_err_cost(&this_mv, ref_mv, mvsadcost, error_per_bit);
+
+                    if (thissad < bestsad)
+                    {
+                        bestsad = thissad;
+                        best_mv->row = r;
+                        best_mv->col = c;
+                        bestaddress = check_here;
+                    }
+                }
+
+                check_here++;
+                c++;
+            }
+        }
+
+        while ((c + 2) < col_max)
+        {
+            int i;
+
+            fn_ptr->sdx3f(what, what_stride, check_here , in_what_stride, sad_array);
+
+            for (i = 0; i < 3; i++)
+            {
+                thissad = sad_array[i];
+
+                if (thissad < bestsad)
+                {
+                    this_mv.col = c << 3;
+                    thissad  += vp8_mv_err_cost(&this_mv, ref_mv, mvsadcost, error_per_bit);
+
+                    if (thissad < bestsad)
+                    {
+                        bestsad = thissad;
+                        best_mv->row = r;
+                        best_mv->col = c;
+                        bestaddress = check_here;
+                    }
+                }
+
+                check_here++;
+                c++;
+            }
+        }
+
+        while (c < col_max)
+        {
+            thissad = fn_ptr->sdf(what, what_stride, check_here , in_what_stride, bestsad);
+
+            if (thissad < bestsad)
+            {
+                this_mv.col = c << 3;
+                thissad  += vp8_mv_err_cost(&this_mv, ref_mv, mvsadcost, error_per_bit);
+
+                if (thissad < bestsad)
+                {
+                    bestsad = thissad;
+                    best_mv->row = r;
+                    best_mv->col = c;
+                    bestaddress = check_here;
+                }
+            }
+
+            check_here ++;
+            c ++;
+        }
+    }
+
+    this_mv.row = best_mv->row << 3;
+    this_mv.col = best_mv->col << 3;
+
+    if (bestsad < INT_MAX)
+        return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride, (unsigned int *)(&thissad))
+        + vp8_mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
+    else
+        return INT_MAX;
+}
 
 #ifdef ENTROPY_STATS
 void print_mode_context(void)

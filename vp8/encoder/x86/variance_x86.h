@@ -297,4 +297,31 @@ extern prototype_sad_multi_same_address(vp8_sad16x8x3_ssse3);
 #endif
 #endif
 
+
+#if HAVE_SSE4_1
+extern prototype_sad_multi_same_address_1(vp8_sad16x16x8_sse4);
+extern prototype_sad_multi_same_address_1(vp8_sad16x8x8_sse4);
+extern prototype_sad_multi_same_address_1(vp8_sad8x16x8_sse4);
+extern prototype_sad_multi_same_address_1(vp8_sad8x8x8_sse4);
+extern prototype_sad_multi_same_address_1(vp8_sad4x4x8_sse4);
+
+#if !CONFIG_RUNTIME_CPU_DETECT
+#undef  vp8_variance_sad16x16x8
+#define vp8_variance_sad16x16x8 vp8_sad16x16x8_sse4
+
+#undef  vp8_variance_sad16x8x8
+#define vp8_variance_sad16x8x8 vp8_sad16x8x8_sse4
+
+#undef  vp8_variance_sad8x16x8
+#define vp8_variance_sad8x16x8 vp8_sad8x16x8_sse4
+
+#undef  vp8_variance_sad8x8x8
+#define vp8_variance_sad8x8x8 vp8_sad8x8x8_sse4
+
+#undef  vp8_variance_sad4x4x8
+#define vp8_variance_sad4x4x8 vp8_sad4x4x8_sse4
+
+#endif
+#endif
+
 #endif
