@@ -462,12 +462,11 @@ void vp8_first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *
     int step_param = 3;                                       //3;          // Dont search over full range for first pass
     int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param; //3;
     int n;
-    vp8_variance_fn_ptr_t v_fn_ptr;
+    vp8_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
     int new_mv_mode_penalty = 256;
 
+    // override the default variance function to use MSE
     v_fn_ptr.vf    = VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16);
-    v_fn_ptr.sdf   = cpi->fn_ptr.sdf;
-    v_fn_ptr.sdx4df = cpi->fn_ptr.sdx4df;
 
     // Set up pointers for this macro block recon buffer
     xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;

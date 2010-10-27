@@ -229,6 +229,16 @@ typedef struct VP8_ENCODER_RTCD
     vp8_search_rtcd_vtable_t    search;
 } VP8_ENCODER_RTCD;
 
+enum
+{
+    BLOCK_16X8,
+    BLOCK_8X16,
+    BLOCK_8X8,
+    BLOCK_4X4,
+    BLOCK_16X16,
+    BLOCK_MAX_SEGMENTS
+};
+
 typedef struct
 {
 
@@ -591,7 +601,7 @@ typedef struct
     fractional_mv_step_fp *find_fractional_mv_step;
     vp8_full_search_fn_t full_search_sad;
     vp8_diamond_search_fn_t diamond_search_sad;
-    vp8_variance_fn_ptr_t fn_ptr;
+    vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SEGMENTS];
     unsigned int time_receive_data;
     unsigned int time_compress_data;
     unsigned int time_pick_lpf;
