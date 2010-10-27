@@ -69,6 +69,7 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->postproc.across      = vp8_mbpost_proc_across_ip_c;
     rtcd->postproc.downacross  = vp8_post_proc_down_and_across_c;
     rtcd->postproc.addnoise    = vp8_plane_add_noise_c;
+    rtcd->postproc.blend_mb    = vp8_blend_mb_c;
 #endif
 
 #endif
