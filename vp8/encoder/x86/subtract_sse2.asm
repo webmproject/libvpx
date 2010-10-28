@@ -77,6 +77,7 @@ sym(vp8_subtract_mby_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
+    SAVE_XMM
     GET_GOT     rbx
     push rsi
     push rdi
@@ -138,6 +139,7 @@ submby_loop:
     pop rsi
     ; begin epilog
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
