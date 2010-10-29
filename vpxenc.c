@@ -978,11 +978,11 @@ static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
                                      "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(NULL, "arnr-maxframes", 1,
-                                        "alt_ref Max Frames");
+                                        "AltRef Max Frames");
 static const arg_def_t arnr_strength = ARG_DEF(NULL, "arnr-strength", 1,
-                                       "alt_ref Strength");
+                                       "AltRef Strength");
 static const arg_def_t arnr_type = ARG_DEF(NULL, "arnr-type", 1,
-                                   "alt_ref Type");
+                                   "AltRef Type");
 
 static const arg_def_t *vp8_args[] =
 {
