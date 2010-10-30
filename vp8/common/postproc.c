@@ -484,7 +484,7 @@ void vp8_blend_mb_c (unsigned char *y, unsigned char *u, unsigned char *v,
     int u1_const = u1*((1<<16)-alpha);
     int v1_const = v1*((1<<16)-alpha);
 
-    y += stride + 2;
+    y += stride + 1;
     for (i = 0; i < 14; i++)
     {
         for (j = 0; j < 14; j++)
@@ -522,7 +522,7 @@ static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int hei
         dy = *y1 - y0;
 
         *x1 = width;
-        if (dy)
+        if (dx)
             *y1 = ((width-x0)*dy)/dx + y0;
     }
     if (*x1 < 0)
@@ -531,7 +531,7 @@ static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int hei
         dy = *y1 - y0;
 
         *x1 = 0;
-        if (dy)
+        if (dx)
             *y1 = ((0-x0)*dy)/dx + y0;
     }
     if (*y1 > height)
@@ -540,7 +540,7 @@ static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int hei
         dy = *y1 - y0;
 
         *y1 = height;
-        if (dx)
+        if (dy)
             *x1 = ((height-y0)*dx)/dy + x0;
     }
     if (*y1 < 0)
@@ -549,7 +549,7 @@ static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int hei
         dy = *y1 - y0;
 
         *y1 = 0;
-        if (dx)
+        if (dy)
             *x1 = ((0-y0)*dx)/dy + x0;
     }
 }
@@ -753,8 +753,36 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
         {
             for (x0 = 8; x0 < (width + 8); x0 += 16)
             {
-               int x1, y1;
-               if (mi->mbmi.mode >= NEARESTMV)
+                int x1, y1;
+
+                if (mi->mbmi.mode == SPLITMV)
+                {
+                    int bx0, by0;
+
+                    B_MODE_INFO *bmi = mi->bmi;
+                    MV *mv = &bmi->mv.as_mv;
+
+                    for (by0 = (y0-8); by0 < y0+8; by0 += 4)
+                    {
+                        for (bx0 = (x0-8); bx0 < x0+8; bx0 += 4)
+                        {
+
+                            x1 = bx0 + (mv->col >> 3);
+                            y1 = by0 + (mv->row >> 3);
+
+                            if (x1 != bx0 && y1 != by0)
+                            {
+                                constrain_line (bx0, &x1, by0, &y1, width, height);
+                                vp8_blit_line  (bx0,  x1, by0,  y1, y_buffer, y_stride);
+                            }
+                            else
+                                vp8_blit_line  (bx0,  x1, by0,  y1, y_buffer, y_stride);
+
+                            mv++;
+                        }
+                    }
+                }
+                else if (mi->mbmi.mode >= NEARESTMV)
                 {
                     MV *mv = &mi->mbmi.mv.as_mv;
 
