@@ -918,21 +918,6 @@ void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, MV *mv)
 }
 
 #if !(CONFIG_REALTIME_ONLY)
-int vp8_count_labels(int const *labelings)
-{
-    int i;
-    int count = 0;
-
-    for (i = 0; i < 16; i++)
-    {
-        if (labelings[i] > count)
-            count = labelings[i];
-    }
-
-    return count + 1;
-}
-
-
 static int labels2mode(
     MACROBLOCK *x,
     int const *labelings, int which_label,
@@ -1112,15 +1097,19 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp
     *Rate = vp8_rdcost_mby(mb);
 }
 
+unsigned char vp8_mbsplit_offset2[4][16] = {
+    { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+    { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+    { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+    { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
+};
 static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *best_ref_mv, int best_rd, int *mdcounts, int *returntotrate, int *returnyrate, int *returndistortion, int compressor_speed, int *mvcost[2], int mvthresh, int fullpixel)
 {
     int i, segmentation;
     B_PREDICTION_MODE this_mode;
     MACROBLOCKD *xc = &x->e_mbd;
-    BLOCK *b = &x->block[0];
-    BLOCKD *d = &x->e_mbd.block[0];
-    BLOCK *c = &x->block[0];
-    BLOCKD *e = &x->e_mbd.block[0];
+    BLOCK *c;
+    BLOCKD *e;
     int const *labels;
     int best_segment_rd = INT_MAX;
     int best_seg = 0;
@@ -1179,7 +1168,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
         v_fn_ptr = &cpi->fn_ptr[segmentation];
         sseshift = segmentation_to_sseshift[segmentation];
         labels = vp8_mbsplits[segmentation];
-        label_count = vp8_count_labels(labels);
+        label_count = vp8_mbsplit_count[segmentation];
 
         // 64 makes this threshold really big effectively
         // making it so that we very rarely check mvs on
@@ -1203,14 +1192,9 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
             int j;
             int bestlabelyrate = 0;
 
-            b = &x->block[0];
-            d = &x->e_mbd.block[0];
-
 
             // find first label
-            for (j = 0; j < 16; j++)
-                if (labels[j] == i)
-                    break;
+            j = vp8_mbsplit_offset2[segmentation][i];
 
             c = &x->block[j];
             e = &x->e_mbd.block[j];
@@ -1378,46 +1362,20 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *bes
         bd->eob = beobs[i];
     }
 
-    // Trap cases where the best split mode has all vectors coded 0,0 (or all the same)
-    if (FALSE)
-    {
-        int allsame = 1;
-
-        for (i = 1; i < 16; i++)
-        {
-            if ((bmvs[i].col != bmvs[i-1].col) || (bmvs[i].row != bmvs[i-1].row))
-            {
-                allsame = 0;
-                break;
-            }
-        }
-
-        if (allsame)
-        {
-            best_segment_rd = INT_MAX;
-        }
-    }
-
     *returntotrate = bsr;
     *returndistortion = bsd;
     *returnyrate = bestsegmentyrate;
 
-
-
     // save partitions
     labels = vp8_mbsplits[best_seg];
     x->e_mbd.mode_info_context->mbmi.partitioning = best_seg;
-    x->partition_info->count = vp8_count_labels(labels);
+    x->partition_info->count = vp8_mbsplit_count[best_seg];
 
     for (i = 0; i < x->partition_info->count; i++)
     {
         int j;
 
-        for (j = 0; j < 16; j++)
-        {
-            if (labels[j] == i)
-                break;
-        }
+        j = vp8_mbsplit_offset2[best_seg][i];
 
         x->partition_info->bmi[i].mode = x->e_mbd.block[j].bmi.mode;
         x->partition_info->bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
