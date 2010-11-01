@@ -81,10 +81,10 @@ void vp8_predict_intra4x4(BLOCKD *x,
     {
 
         unsigned int ap[4];
-        ap[0] = (top_left  + 2 * Above[0] + Above[1] + 2) >> 2;
-        ap[1] = (Above[0] + 2 * Above[1] + Above[2] + 2) >> 2;
-        ap[2] = (Above[1] + 2 * Above[2] + Above[3] + 2) >> 2;
-        ap[3] = (Above[2] + 2 * Above[3] + Above[4] + 2) >> 2;
+        ap[0] = Above[0];
+        ap[1] = Above[1];
+        ap[2] = Above[2];
+        ap[3] = Above[3];
 
         for (r = 0; r < 4; r++)
         {
@@ -105,10 +105,10 @@ void vp8_predict_intra4x4(BLOCKD *x,
     {
 
         unsigned int lp[4];
-        lp[0] = (top_left + 2 * Left[0] + Left[1] + 2) >> 2;
-        lp[1] = (Left[0] + 2 * Left[1] + Left[2] + 2) >> 2;
-        lp[2] = (Left[1] + 2 * Left[2] + Left[3] + 2) >> 2;
-        lp[3] = (Left[2] + 2 * Left[3] + Left[3] + 2) >> 2;
+        lp[0] = Left[0];
+        lp[1] = Left[1];
+        lp[2] = Left[2];
+        lp[3] = Left[3];
 
         for (r = 0; r < 4; r++)
         {
