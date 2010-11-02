@@ -179,6 +179,25 @@ void vp8_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
 
 #endif
 
+#if HAVE_SSSE3
+int vp8_fast_quantize_b_impl_ssse3(short *coeff_ptr,
+                                 short *qcoeff_ptr, short *dequant_ptr,
+                                 short *round_ptr,
+                                 short *quant_ptr, short *dqcoeff_ptr);
+void vp8_fast_quantize_b_ssse3(BLOCK *b, BLOCKD *d)
+{
+    d->eob = vp8_fast_quantize_b_impl_ssse3(
+                    b->coeff,
+                    d->qcoeff,
+                    d->dequant,
+                    b->round,
+                    b->quant,
+                    d->dqcoeff
+               );
+}
+#endif
+
+
 void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -333,6 +352,9 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
     {
         cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_ssse3;
         cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_ssse3;
+
+        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
+
     }
 #endif
 
