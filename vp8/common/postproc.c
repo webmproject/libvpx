@@ -749,56 +749,136 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
         MODE_INFO *mi = oci->mi;
         int x0, y0;
 
-        for (y0 = 8; y0 < (height + 8); y0 += 16)
+        for (y0 = 0; y0 < height; y0 += 16)
         {
-            for (x0 = 8; x0 < (width + 8); x0 += 16)
+            for (x0 = 0; x0 < width; x0 += 16)
             {
                 int x1, y1;
 
                 if (mi->mbmi.mode == SPLITMV)
                 {
-                    int bx0, by0;
-
-                    B_MODE_INFO *bmi = mi->bmi;
-                    MV *mv = &bmi->mv.as_mv;
-
-                    for (by0 = (y0-8); by0 < y0+8; by0 += 4)
+                    switch (mi->mbmi.partitioning)
                     {
-                        for (bx0 = (x0-8); bx0 < x0+8; bx0 += 4)
+                        case 0 :    /* mv_top_bottom */
                         {
+                            B_MODE_INFO *bmi = &mi->bmi[0];
+                            MV *mv = &bmi->mv.as_mv;
 
-                            x1 = bx0 + (mv->col >> 3);
-                            y1 = by0 + (mv->row >> 3);
+                            x1 = x0 + 8 + (mv->col >> 3);
+                            y1 = y0 + 4 + (mv->row >> 3);
 
-                            if (x1 != bx0 && y1 != by0)
+                            constrain_line (x0+8, &x1, y0+4, &y1, width, height);
+                            vp8_blit_line  (x0+8,  x1, y0+4,  y1, y_buffer, y_stride);
+
+                            bmi = &mi->bmi[8];
+
+                            x1 = x0 + 8 + (mv->col >> 3);
+                            y1 = y0 +12 + (mv->row >> 3);
+
+                            constrain_line (x0+8, &x1, y0+12, &y1, width, height);
+                            vp8_blit_line  (x0+8,  x1, y0+12,  y1, y_buffer, y_stride);
+
+                            break;
+                        }
+                        case 1 :    /* mv_left_right */
+                        {
+                            B_MODE_INFO *bmi = &mi->bmi[0];
+                            MV *mv = &bmi->mv.as_mv;
+
+                            x1 = x0 + 4 + (mv->col >> 3);
+                            y1 = y0 + 8 + (mv->row >> 3);
+
+                            constrain_line (x0+4, &x1, y0+8, &y1, width, height);
+                            vp8_blit_line  (x0+4,  x1, y0+8,  y1, y_buffer, y_stride);
+
+                            bmi = &mi->bmi[2];
+
+                            x1 = x0 +12 + (mv->col >> 3);
+                            y1 = y0 + 8 + (mv->row >> 3);
+
+                            constrain_line (x0+12, &x1, y0+8, &y1, width, height);
+                            vp8_blit_line  (x0+12,  x1, y0+8,  y1, y_buffer, y_stride);
+
+                            break;
+                        }
+                        case 2 :    /* mv_quarters   */
+                        {
+                            B_MODE_INFO *bmi = &mi->bmi[0];
+                            MV *mv = &bmi->mv.as_mv;
+
+                            x1 = x0 + 4 + (mv->col >> 3);
+                            y1 = y0 + 4 + (mv->row >> 3);
+
+                            constrain_line (x0+4, &x1, y0+4, &y1, width, height);
+                            vp8_blit_line  (x0+4,  x1, y0+4,  y1, y_buffer, y_stride);
+
+                            bmi = &mi->bmi[2];
+
+                            x1 = x0 +12 + (mv->col >> 3);
+                            y1 = y0 + 4 + (mv->row >> 3);
+
+                            constrain_line (x0+12, &x1, y0+4, &y1, width, height);
+                            vp8_blit_line  (x0+12,  x1, y0+4,  y1, y_buffer, y_stride);
+
+                            bmi = &mi->bmi[8];
+
+                            x1 = x0 + 4 + (mv->col >> 3);
+                            y1 = y0 +12 + (mv->row >> 3);
+
+                            constrain_line (x0+4, &x1, y0+12, &y1, width, height);
+                            vp8_blit_line  (x0+4,  x1, y0+12,  y1, y_buffer, y_stride);
+
+                            bmi = &mi->bmi[10];
+
+                            x1 = x0 +12 + (mv->col >> 3);
+                            y1 = y0 +12 + (mv->row >> 3);
+
+                            constrain_line (x0+12, &x1, y0+12, &y1, width, height);
+                            vp8_blit_line  (x0+12,  x1, y0+12,  y1, y_buffer, y_stride);
+                            break;
+                        }
+                        default :
+                        {
+                            B_MODE_INFO *bmi = mi->bmi;
+                            int bx0, by0;
+
+                            for (by0 = y0; by0 < (y0+16); by0 += 4)
                             {
-                                constrain_line (bx0, &x1, by0, &y1, width, height);
-                                vp8_blit_line  (bx0,  x1, by0,  y1, y_buffer, y_stride);
-                            }
-                            else
-                                vp8_blit_line  (bx0,  x1, by0,  y1, y_buffer, y_stride);
+                                for (bx0 = x0; bx0 < (x0+16); bx0 += 4)
+                                {
+                                    MV *mv = &bmi->mv.as_mv;
 
-                            mv++;
+                                    x1 = bx0 + 2 + (mv->col >> 3);
+                                    y1 = by0 + 2 + (mv->row >> 3);
+
+                                    constrain_line (bx0+2, &x1, by0+2, &y1, width, height);
+                                    vp8_blit_line  (bx0+2,  x1, by0+2,  y1, y_buffer, y_stride);
+
+                                    bmi++;
+                                }
+                            }
                         }
                     }
                 }
                 else if (mi->mbmi.mode >= NEARESTMV)
                 {
                     MV *mv = &mi->mbmi.mv.as_mv;
+                    const int lx0 = x0 + 8;
+                    const int ly0 = y0 + 8;
 
-                    x1 = x0 + (mv->col >> 3);
-                    y1 = y0 + (mv->row >> 3);
+                    x1 = lx0 + (mv->col >> 3);
+                    y1 = ly0 + (mv->row >> 3);
 
-                    if (x1 != x0 && y1 != y0)
+                    if (x1 != lx0 && y1 != ly0)
                     {
-                        constrain_line (x0, &x1, y0-1, &y1, width, height);
-                        vp8_blit_line  (x0,  x1, y0-1,  y1, y_buffer, y_stride);
+                        constrain_line (lx0, &x1, ly0-1, &y1, width, height);
+                        vp8_blit_line  (lx0,  x1, ly0-1,  y1, y_buffer, y_stride);
 
-                        constrain_line (x0, &x1, y0+1, &y1, width, height);
-                        vp8_blit_line  (x0,  x1, y0+1,  y1, y_buffer, y_stride);
+                        constrain_line (lx0, &x1, ly0+1, &y1, width, height);
+                        vp8_blit_line  (lx0,  x1, ly0+1,  y1, y_buffer, y_stride);
                     }
                     else
-                        vp8_blit_line  (x0,  x1, y0,  y1, y_buffer, y_stride);
+                        vp8_blit_line  (lx0,  x1, ly0,  y1, y_buffer, y_stride);
                 }
                 mi++;
             }
