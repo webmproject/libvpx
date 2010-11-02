@@ -35,6 +35,7 @@
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
+#include "tools_common.h"
 #include "y4minput.h"
 #include "libmkv/EbmlWriter.h"
 #include "libmkv/EbmlIDs.h"
@@ -1334,7 +1335,8 @@ int main(int argc, const char **argv_)
         struct detect_buffer detect;
 
         /* Parse certain options from the input file, if possible */
-        infile = strcmp(in_fn, "-") ? fopen(in_fn, "rb") : stdin;
+        infile = strcmp(in_fn, "-") ? fopen(in_fn, "rb")
+                                    : set_binary_mode(stdin);
 
         if (!infile)
         {
@@ -1449,7 +1451,8 @@ int main(int argc, const char **argv_)
                               cfg.g_w, cfg.g_h, 1);
         }
 
-        outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb") : stdout;
+        outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb")
+                                      : set_binary_mode(stdout);
 
         if (!outfile)
         {
