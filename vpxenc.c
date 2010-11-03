@@ -1190,6 +1190,12 @@ int main(int argc, const char **argv_)
      */
     cfg.g_timebase.den = 1000;
 
+    /* Never use the library's default resolution, require it be parsed
+     * from the file or set on the command line.
+     */
+    cfg.g_w = 0;
+    cfg.g_h = 0;
+
     /* Now parse the remainder of the parameters. */
     for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
     {
@@ -1399,6 +1405,14 @@ int main(int argc, const char **argv_)
             file_type = FILE_TYPE_RAW;
             detect.valid = 1;
         }
+
+        if(!cfg.g_w || !cfg.g_h)
+        {
+            fprintf(stderr, "Specify stream dimensions with --width (-w) "
+                            " and --height (-h).\n");
+            return EXIT_FAILURE;
+        }
+
 #define SHOW(field) fprintf(stderr, "    %-28s = %d\n", #field, cfg.field)
 
         if (verbose && pass == 0)
