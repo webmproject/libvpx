@@ -1188,7 +1188,7 @@ int main(int argc, const char **argv_)
     /* Change the default timebase to a high enough value so that the encoder
      * will always create strictly increasing timestamps.
      */
-    cfg.g_timebase.den = 1000;
+    cfg.g_timebase.den = 100000;
 
     /* Never use the library's default resolution, require it be parsed
      * from the file or set on the command line.
