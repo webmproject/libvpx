@@ -35,6 +35,7 @@
 #if CONFIG_MD5
 #include "md5_utils.h"
 #endif
+#include "tools_common.h"
 #include "nestegg/include/nestegg/nestegg.h"
 
 #ifndef PATH_MAX
@@ -314,7 +315,8 @@ void *out_open(const char *out_fn, int do_md5)
     }
     else
     {
-        FILE *outfile = out = strcmp("-", out_fn) ? fopen(out_fn, "wb") : stdout;
+        FILE *outfile = out = strcmp("-", out_fn) ? fopen(out_fn, "wb")
+                                                  : set_binary_mode(stdout);
 
         if (!outfile)
         {
@@ -805,7 +807,7 @@ int main(int argc, const char **argv_)
         usage_exit();
 
     /* Open file */
-    infile = strcmp(fn, "-") ? fopen(fn, "rb") : stdin;
+    infile = strcmp(fn, "-") ? fopen(fn, "rb") : set_binary_mode(stdin);
 
     if (!infile)
     {
