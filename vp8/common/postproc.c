@@ -41,6 +41,24 @@ static const unsigned char MB_PREDICTION_MODE_colors[MB_MODE_COUNT][3] =
     { RGB_TO_YUV(0xFF0000) }    /* Red */
 };
 
+static const unsigned char B_PREDICTION_MODE_colors[B_MODE_COUNT][3] =
+{
+    { RGB_TO_YUV(0x6633ff) },   /* Purple */
+    { RGB_TO_YUV(0xcc33ff) },   /* Magenta */
+    { RGB_TO_YUV(0xff33cc) },   /* Pink */
+    { RGB_TO_YUV(0xff3366) },   /* Coral */
+    { RGB_TO_YUV(0x3366ff) },   /* Blue */
+    { RGB_TO_YUV(0xed00f5) },   /* Dark Blue */
+    { RGB_TO_YUV(0x2e00b8) },   /* Dark Purple */
+    { RGB_TO_YUV(0xff6633) },   /* Orange */
+    { RGB_TO_YUV(0x33ccff) },   /* Light Blue */
+    { RGB_TO_YUV(0x8ab800) },   /* Green */
+    { RGB_TO_YUV(0xffcc33) },   /* Light Orange */
+    { RGB_TO_YUV(0x33ffcc) },   /* Aqua */
+    { RGB_TO_YUV(0x66ff33) },   /* Light Green */
+    { RGB_TO_YUV(0xccff33) },   /* Yellow */
+};
+
 static const unsigned char MV_REFERENCE_FRAME_colors[MB_MODE_COUNT][3] =
 {
     { RGB_TO_YUV(0x00ff00) },   /* Blue */
@@ -476,7 +494,7 @@ void vp8_plane_add_noise_c(unsigned char *Start, char *noise,
  * edges unblended to give distinction to macro blocks in areas
  * filled with the same color block.
  */
-void vp8_blend_mb_c (unsigned char *y, unsigned char *u, unsigned char *v,
+void vp8_blend_mb_inner_c (unsigned char *y, unsigned char *u, unsigned char *v,
                         int y1, int u1, int v1, int alpha, int stride)
 {
     int i, j;
@@ -484,10 +502,10 @@ void vp8_blend_mb_c (unsigned char *y, unsigned char *u, unsigned char *v,
     int u1_const = u1*((1<<16)-alpha);
     int v1_const = v1*((1<<16)-alpha);
 
-    y += stride + 1;
-    for (i = 0; i < 14; i++)
+    y += 2*stride + 2;
+    for (i = 0; i < 12; i++)
     {
-        for (j = 0; j < 14; j++)
+        for (j = 0; j < 12; j++)
         {
             y[j] = (y[j]*alpha + y1_const)>>16;
         }
@@ -502,6 +520,104 @@ void vp8_blend_mb_c (unsigned char *y, unsigned char *u, unsigned char *v,
     for (i = 0; i < 6; i++)
     {
         for (j = 0; j < 6; j++)
+        {
+            u[j] = (u[j]*alpha + u1_const)>>16;
+            v[j] = (v[j]*alpha + v1_const)>>16;
+        }
+        u += stride;
+        v += stride;
+    }
+}
+
+/* Blend only the edge of the macro block.  Leave center
+ * unblended to allow for other visualizations to be layered.
+ */
+void vp8_blend_mb_outer_c (unsigned char *y, unsigned char *u, unsigned char *v,
+                        int y1, int u1, int v1, int alpha, int stride)
+{
+    int i, j;
+    int y1_const = y1*((1<<16)-alpha);
+    int u1_const = u1*((1<<16)-alpha);
+    int v1_const = v1*((1<<16)-alpha);
+
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 0; j < 16; j++)
+        {
+            y[j] = (y[j]*alpha + y1_const)>>16;
+        }
+        y += stride;
+    }
+
+    for (i = 0; i < 12; i++)
+    {
+        y[0]  = (y[0]*alpha  + y1_const)>>16;
+        y[1]  = (y[1]*alpha  + y1_const)>>16;
+        y[14] = (y[14]*alpha + y1_const)>>16;
+        y[15] = (y[15]*alpha + y1_const)>>16;
+        y += stride;
+    }
+
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 0; j < 16; j++)
+        {
+            y[j] = (y[j]*alpha + y1_const)>>16;
+        }
+        y += stride;
+    }
+
+    stride >>= 1;
+
+    for (j = 0; j < 8; j++)
+    {
+        u[j] = (u[j]*alpha + u1_const)>>16;
+        v[j] = (v[j]*alpha + v1_const)>>16;
+    }
+    u += stride;
+    v += stride;
+
+    for (i = 0; i < 6; i++)
+    {
+        u[0] = (u[0]*alpha + u1_const)>>16;
+        v[0] = (v[0]*alpha + v1_const)>>16;
+
+        u[7] = (u[7]*alpha + u1_const)>>16;
+        v[7] = (v[7]*alpha + v1_const)>>16;
+
+        u += stride;
+        v += stride;
+    }
+
+    for (j = 0; j < 8; j++)
+    {
+        u[j] = (u[j]*alpha + u1_const)>>16;
+        v[j] = (v[j]*alpha + v1_const)>>16;
+    }
+}
+
+void vp8_blend_b_c (unsigned char *y, unsigned char *u, unsigned char *v,
+                        int y1, int u1, int v1, int alpha, int stride)
+{
+    int i, j;
+    int y1_const = y1*((1<<16)-alpha);
+    int u1_const = u1*((1<<16)-alpha);
+    int v1_const = v1*((1<<16)-alpha);
+
+    for (i = 0; i < 4; i++)
+    {
+        for (j = 0; j < 4; j++)
+        {
+            y[j] = (y[j]*alpha + y1_const)>>16;
+        }
+        y += stride;
+    }
+
+    stride >>= 1;
+
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 0; j < 2; j++)
         {
             u[j] = (u[j]*alpha + u1_const)>>16;
             v[j] = (v[j]*alpha + v1_const)>>16;
@@ -738,7 +854,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
     }
 
     /* Draw motion vectors */
-    if (flags & VP8D_DEBUG_LEVEL5)
+    if (flags & VP8D_DEBUG_DRAW_MV)
     {
         YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
         int width  = post->y_width;
@@ -887,9 +1003,9 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
     }
 
     /* Color in block modes */
-    if (flags & VP8D_DEBUG_LEVEL6)
+    if (flags & VP8D_DEBUG_CLR_BLK_MODES)
     {
-        int i, j;
+        int y, x;
         YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
         int width  = post->y_width;
         int height = post->y_height;
@@ -899,19 +1015,50 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
         int y_stride = oci->post_proc_buffer.y_stride;
         MODE_INFO *mi = oci->mi;
 
-        for (i = 0; i < height; i += 16)
+        for (y = 0; y < height; y += 16)
         {
-            for (j = 0; j < width; j += 16)
+            for (x = 0; x < width; x += 16)
             {
                 int Y = 0, U = 0, V = 0;
 
-                Y = MB_PREDICTION_MODE_colors[mi->mbmi.mode][0];
-                U = MB_PREDICTION_MODE_colors[mi->mbmi.mode][1];
-                V = MB_PREDICTION_MODE_colors[mi->mbmi.mode][2];
+                if (mi->mbmi.mode == B_PRED)
+                {
+                    int by, bx;
+                    unsigned char *yl, *ul, *vl;
+                    B_MODE_INFO *bmi = mi->bmi;
 
-                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb)
-                    (&y_ptr[j], &u_ptr[j>>1], &v_ptr[j>>1], Y, U, V, 0xc000, y_stride);
+                    yl = y_ptr + x;
+                    ul = u_ptr + (x>>1);
+                    vl = v_ptr + (x>>1);
 
+                    for (by = 0; by < 16; by += 4)
+                    {
+                        for (bx = 0; bx < 16; bx += 4)
+                        {
+                            Y = B_PREDICTION_MODE_colors[bmi->mode][0];
+                            U = B_PREDICTION_MODE_colors[bmi->mode][1];
+                            V = B_PREDICTION_MODE_colors[bmi->mode][2];
+
+                            POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_b)
+                                (yl+bx, ul+(bx>>1), vl+(bx>>1), Y, U, V, 0xc000, y_stride);
+
+                            bmi++;
+                        }
+
+                        yl += y_stride*4;
+                        ul += y_stride*1;
+                        vl += y_stride*1;
+                    }
+                }
+                else
+                {
+                    Y = MB_PREDICTION_MODE_colors[mi->mbmi.mode][0];
+                    U = MB_PREDICTION_MODE_colors[mi->mbmi.mode][1];
+                    V = MB_PREDICTION_MODE_colors[mi->mbmi.mode][2];
+
+                    POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_inner)
+                        (y_ptr+x, u_ptr+(x>>1), v_ptr+(x>>1), Y, U, V, 0xc000, y_stride);
+                }
                 mi++;
             }
             y_ptr += y_stride*16;
@@ -923,9 +1070,9 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
     }
 
     /* Color in frame reference blocks */
-    if (flags & VP8D_DEBUG_LEVEL7)
+    if (flags & VP8D_DEBUG_CLR_FRM_REF_BLKS)
     {
-        int i, j;
+        int y, x;
         YV12_BUFFER_CONFIG *post = &oci->post_proc_buffer;
         int width  = post->y_width;
         int height = post->y_height;
@@ -935,9 +1082,9 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
         int y_stride = oci->post_proc_buffer.y_stride;
         MODE_INFO *mi = oci->mi;
 
-        for (i = 0; i < height; i += 16)
+        for (y = 0; y < height; y += 16)
         {
-            for (j = 0; j < width; j +=16)
+            for (x = 0; x < width; x +=16)
             {
                 int Y = 0, U = 0, V = 0;
 
@@ -945,8 +1092,8 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, int deblock_l
                 U = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][1];
                 V = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][2];
 
-                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb)
-                    (&y_ptr[j], &u_ptr[j>>1], &v_ptr[j>>1], Y, U, V, 0xc000, y_stride);
+                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_outer)
+                    (y_ptr+x, u_ptr+(x>>1), v_ptr+(x>>1), Y, U, V, 0xc000, y_stride);
 
                 mi++;
             }
