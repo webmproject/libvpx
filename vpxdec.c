@@ -108,11 +108,19 @@ static const arg_def_t demacroblock_level = ARG_DEF(NULL, "demacroblock-level", 
         "Enable VP8 demacroblocking, w/ level");
 static const arg_def_t pp_debug_info = ARG_DEF(NULL, "pp-debug-info", 1,
                                        "Enable VP8 visible debug info");
-
+static const arg_def_t pp_disp_ref_frame = ARG_DEF(NULL, "pp-dbg-ref-frame", 1,
+                                       "Display only selected reference frame per macro block");
+static const arg_def_t pp_disp_mb_modes = ARG_DEF(NULL, "pp-dbg-mb-modes", 1,
+                                       "Display only selected macro block modes");
+static const arg_def_t pp_disp_b_modes = ARG_DEF(NULL, "pp-dbg-b-modes", 1,
+                                       "Display only selected block modes");
+static const arg_def_t pp_disp_mvs = ARG_DEF(NULL, "pp-dbg-mvs", 1,
+                                       "Draw only selected motion vectors");
 
 static const arg_def_t *vp8_pp_args[] =
 {
     &addnoise_level, &deblock, &demacroblock_level, &pp_debug_info,
+    &pp_disp_ref_frame, &pp_disp_mb_modes, &pp_disp_b_modes, &pp_disp_mvs,
     NULL
 };
 #endif
@@ -705,6 +713,10 @@ int main(int argc, const char **argv_)
     vpx_codec_dec_cfg_t     cfg = {0};
 #if CONFIG_VP8_DECODER
     vp8_postproc_cfg_t      vp8_pp_cfg = {0};
+    int                     vp8_dbg_color_ref_frame = 0;
+    int                     vp8_dbg_color_mb_modes = 0;
+    int                     vp8_dbg_color_b_modes = 0;
+    int                     vp8_dbg_display_mv = 0;
 #endif
     struct input_ctx        input = {0};
 
@@ -789,6 +801,42 @@ int main(int argc, const char **argv_)
 
             if (level)
                 vp8_pp_cfg.post_proc_flag |= level;
+        }
+        else if (arg_match(&arg, &pp_disp_ref_frame, argi))
+        {
+            unsigned int flags = arg_parse_int(&arg);
+            if (flags)
+            {
+                postproc = 1;
+                vp8_dbg_color_ref_frame = flags;
+            }
+        }
+        else if (arg_match(&arg, &pp_disp_mb_modes, argi))
+        {
+            unsigned int flags = arg_parse_int(&arg);
+            if (flags)
+            {
+                postproc = 1;
+                vp8_dbg_color_mb_modes = flags;
+            }
+        }
+        else if (arg_match(&arg, &pp_disp_b_modes, argi))
+        {
+            unsigned int flags = arg_parse_int(&arg);
+            if (flags)
+            {
+                postproc = 1;
+                vp8_dbg_color_b_modes = flags;
+            }
+        }
+        else if (arg_match(&arg, &pp_disp_mvs, argi))
+        {
+            unsigned int flags = arg_parse_int(&arg);
+            if (flags)
+            {
+                postproc = 1;
+                vp8_dbg_display_mv = flags;
+            }
         }
 
 #endif
@@ -929,6 +977,33 @@ int main(int argc, const char **argv_)
         return EXIT_FAILURE;
     }
 
+    if (vp8_dbg_color_ref_frame
+        && vpx_codec_control(&decoder, VP8_SET_DBG_COLOR_REF_FRAME, vp8_dbg_color_ref_frame))
+    {
+        fprintf(stderr, "Failed to configure reference block visualizer: %s\n", vpx_codec_error(&decoder));
+        return EXIT_FAILURE;
+    }
+
+    if (vp8_dbg_color_mb_modes
+        && vpx_codec_control(&decoder, VP8_SET_DBG_COLOR_MB_MODES, vp8_dbg_color_mb_modes))
+    {
+        fprintf(stderr, "Failed to configure macro block visualizer: %s\n", vpx_codec_error(&decoder));
+        return EXIT_FAILURE;
+    }
+
+    if (vp8_dbg_color_b_modes
+        && vpx_codec_control(&decoder, VP8_SET_DBG_COLOR_B_MODES, vp8_dbg_color_b_modes))
+    {
+        fprintf(stderr, "Failed to configure block visualizer: %s\n", vpx_codec_error(&decoder));
+        return EXIT_FAILURE;
+    }
+
+    if (vp8_dbg_display_mv
+        && vpx_codec_control(&decoder, VP8_SET_DBG_DISPLAY_MV, vp8_dbg_display_mv))
+    {
+        fprintf(stderr, "Failed to configure motion vector visualizer: %s\n", vpx_codec_error(&decoder));
+        return EXIT_FAILURE;
+    }
 #endif
 
     /* Decode file */
