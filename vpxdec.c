@@ -542,6 +542,7 @@ webm_guess_framerate(struct input_ctx *input,
     *fps_den = tstamp / 1000;
     return 0;
 fail:
+    nestegg_destroy(input->nestegg_ctx);
     input->nestegg_ctx = NULL;
     rewind(input->infile);
     return 1;
@@ -878,7 +879,13 @@ int main(int argc, const char **argv_)
         }
 
         if(input.kind == WEBM_FILE)
-            webm_guess_framerate(&input, &fps_den, &fps_num);
+            if(webm_guess_framerate(&input, &fps_den, &fps_num))
+            {
+                fprintf(stderr, "Failed to guess framerate -- error parsing "
+                                "webm file?\n");
+                return EXIT_FAILURE;
+            }
+
 
         /*Note: We can't output an aspect ratio here because IVF doesn't
            store one, and neither does VP8.
