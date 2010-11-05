@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -28,7 +29,7 @@ extern int vp8_fast_quantize_b_neon_func(short *coeff_ptr, short *zbin_ptr, shor
 
 void vp8_fast_quantize_b_neon(BLOCK *b, BLOCKD *d)
 {
-    d->eob = vp8_fast_quantize_b_neon_func(b->coeff, &b->zbin[0][0], d->qcoeff, d->dqcoeff, d->dequant[0], vp8_rvsplus1_default_zig_zag1d, &b->round[0][0], &b->quant[0][0]);
+    d->eob = vp8_fast_quantize_b_neon_func(b->coeff, b->zbin, d->qcoeff, d->dqcoeff, d->dequant, vp8_rvsplus1_default_zig_zag1d, b->round, b->quant);
 }
 
 /*

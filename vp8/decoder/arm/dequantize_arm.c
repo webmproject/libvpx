@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -29,7 +30,7 @@ void vp8_dequantize_b_neon(BLOCKD *d)
     int i;
     short *DQ  = d->dqcoeff;
     short *Q   = d->qcoeff;
-    short *DQC = &d->dequant[0][0];
+    short *DQC = d->dequant;
 
     vp8_dequantize_b_loop_neon(Q, DQC, DQ);
 }
@@ -41,7 +42,7 @@ void vp8_dequantize_b_v6(BLOCKD *d)
     int i;
     short *DQ  = d->dqcoeff;
     short *Q   = d->qcoeff;
-    short *DQC = &d->dequant[0][0];
+    short *DQC = d->dequant;
 
     vp8_dequantize_b_loop_v6(Q, DQC, DQ);
 }

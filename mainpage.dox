@@ -11,7 +11,7 @@
   source codec deployed on millions of computers and devices worldwide.
 
   This distribution of the WebM VP8 Codec SDK includes the following support:
-  
+
   \if vp8_encoder    - \ref vp8_encoder   \endif
   \if vp8_decoder    - \ref vp8_decoder   \endif
 

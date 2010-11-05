@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -15,6 +16,9 @@
 #include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
 #include "alloccommon.h"
+#if ARCH_ARM
+#include "vpx_ports/arm.h"
+#endif
 
 extern void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val);
 extern void vp8_loop_filter_frame_yonly(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val, int sharpness_lvl);
@@ -305,9 +309,20 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     //  Make a copy of the unfiltered / processed recon buffer
 #if HAVE_ARMV7
-    vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(cm->frame_to_show, &cpi->last_frame_uf);
-#else
-    vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(cm->frame_to_show, &cpi->last_frame_uf);
+    }
+#if CONFIG_RUNTIME_CPU_DETECT
+    else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+    {
+        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf);
+    }
 #endif
 
     if (cm->frame_type == KEY_FRAME)
@@ -342,9 +357,20 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     //  Re-instate the unfiltered frame
 #if HAVE_ARMV7
-    vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
-#else
-    vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
+    }
+#if CONFIG_RUNTIME_CPU_DETECT
+    else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+    {
+        vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+    }
 #endif
 
     while (filter_step > 0)
@@ -371,9 +397,20 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
             //  Re-instate the unfiltered frame
 #if HAVE_ARMV7
-            vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
-#else
-            vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+#if CONFIG_RUNTIME_CPU_DETECT
+            if (cm->rtcd.flags & HAS_NEON)
+#endif
+            {
+                vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
+            }
+#if CONFIG_RUNTIME_CPU_DETECT
+            else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+            {
+                vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+            }
 #endif
 
             // If value is close to the best so far then bias towards a lower loop filter value.
@@ -400,9 +437,20 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
             //  Re-instate the unfiltered frame
 #if HAVE_ARMV7
-            vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
-#else
-            vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+#if CONFIG_RUNTIME_CPU_DETECT
+            if (cm->rtcd.flags & HAS_NEON)
+#endif
+            {
+                vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
+            }
+#if CONFIG_RUNTIME_CPU_DETECT
+            else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+            {
+                vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+            }
 #endif
 
             // Was it better than the previous best?

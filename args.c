@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -119,9 +120,13 @@ void arg_show_usage(FILE *fp, const struct arg_def *const *defs)
         char *long_val = def->has_val ? "=<arg>" : "";
 
         if (def->short_name && def->long_name)
-            snprintf(option_text, 37, "-%s%s, --%s%s",
-                     def->short_name, short_val,
+        {
+            char *comma = def->has_val ? "," : ",      ";
+
+            snprintf(option_text, 37, "-%s%s%s --%s%6s",
+                     def->short_name, short_val, comma,
                      def->long_name, long_val);
+        }
         else if (def->short_name)
             snprintf(option_text, 37, "-%s%s",
                      def->short_name, short_val);

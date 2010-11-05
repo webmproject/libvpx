@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -31,10 +32,11 @@ typedef struct
     short *coeff;
 
     // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
-    short(*quant)[4];
-    short(*zbin)[4];
-    short(*zrun_zbin_boost);
-    short(*round)[4];
+    short *quant;
+    short *quant_shift;
+    short *zbin;
+    short *zrun_zbin_boost;
+    short *round;
 
     // Zbin Over Quant value
     short zbin_extra;
@@ -50,6 +52,12 @@ typedef struct
 
 typedef struct
 {
+    int count;
+    B_MODE_INFO bmi[16];
+} PARTITION_INFO;
+
+typedef struct
+{
     DECLARE_ALIGNED(16, short, src_diff[400]);       // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
     DECLARE_ALIGNED(16, short, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
 
@@ -59,6 +67,9 @@ typedef struct
     YV12_BUFFER_CONFIG src;
 
     MACROBLOCKD e_mbd;
+    PARTITION_INFO *partition_info; /* work pointer */
+    PARTITION_INFO *pi;   /* Corresponds to upper left visible macroblock */
+    PARTITION_INFO *pip;  /* Base of allocated array */
 
     search_site *ss;
     int ss_count;
@@ -91,6 +102,9 @@ typedef struct
 
     int encode_breakout;
 
+    //char * gf_active_ptr;
+    signed char *gf_active_ptr;
+
     unsigned char *active_ptr;
     MV_CONTEXT *mvc;
 
@@ -99,15 +113,8 @@ typedef struct
 
     void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
     void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
-    void (*short_fdct4x4rd)(short *input, short *output, int pitch);
-    void (*short_fdct8x4rd)(short *input, short *output, int pitch);
-    void (*vp8_short_fdct4x4_ptr)(short *input, short *output, int pitch);
     void (*short_walsh4x4)(short *input, short *output, int pitch);
-
     void (*quantize_b)(BLOCK *b, BLOCKD *d);
-    void (*quantize_brd)(BLOCK *b, BLOCKD *d);
-
-
 
 } MACROBLOCK;
 

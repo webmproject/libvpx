@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -20,7 +21,7 @@
 #include "extend.h"
 #include "ratectrl.h"
 #include "quant_common.h"
-#include "segmentation_common.h"
+#include "segmentation.h"
 #include "g_common.h"
 #include "vpx_scale/yv12extend.h"
 #include "postproc.h"
@@ -28,6 +29,12 @@
 #include "swapyv12buffer.h"
 #include "threading.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vpxerrors.h"
+#include "temporal_filter.h"
+#if ARCH_ARM
+#include "vpx_ports/arm.h"
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <limits.h>
@@ -67,7 +74,7 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const 
 int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 
 
-static void mode_ref_lf_test_function(VP8_COMP *cpi);
+static void set_default_lf_deltas(VP8_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
@@ -136,8 +143,6 @@ extern unsigned int inter_b_modes[15];
 
 extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
 extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
-extern void (*vp8_fast_fdct4x4)(short *input, short *output, int pitch);
-extern void (*vp8_fast_fdct8x4)(short *input, short *output, int pitch);
 
 extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
@@ -146,6 +151,95 @@ extern const int qzbin_factors[129];
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
 extern const int vp8cx_base_skip_false_prob[128];
 
+// Tables relating active max Q to active min Q
+static const int kf_low_motion_minq[QINDEX_RANGE] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
+    5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 10,10,
+    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
+    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
+    27,27,28,28,29,29,30,30,31,32,33,34,35,36,37,38,
+};
+static const int kf_high_motion_minq[QINDEX_RANGE] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+    2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+    6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10,10,
+    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
+    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
+    27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,
+    35,35,36,36,37,38,39,40,41,42,43,44,45,46,47,48,
+};
+/*static const int kf_minq[QINDEX_RANGE] =
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 6, 6,
+    7, 7, 8, 8, 9, 9, 10,10,11,11,12,12,13,13,14,14,
+    15,15,16,16,17,17,18,18,19,19,20,20,21,21,22,22,
+    23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,
+    31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,38
+};*/
+static const int gf_low_motion_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,
+    3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,
+    7,7,7,7,8,8,8,8,9,9,9,9,10,10,10,10,
+    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
+    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
+    27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,
+    35,35,36,36,37,37,38,38,39,39,40,40,41,41,42,42,
+    43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58
+};
+static const int gf_mid_motion_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,1,2,2,3,3,3,4,
+    4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,
+    9,10,10,10,10,11,11,11,12,12,12,12,13,13,13,14,
+    14,14,15,15,16,16,17,17,18,18,19,19,20,20,21,21,
+    22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,
+    30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,
+    38,39,39,40,40,41,41,42,42,43,43,44,45,46,47,48,
+    49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,
+};
+static const int gf_high_motion_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,2,2,2,3,3,3,4,
+    4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,
+    9,10,10,10,11,11,12,12,13,13,14,14,15,15,16,16,
+    17,17,18,18,19,19,20,20,21,21,22,22,23,23,24,24,
+    25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,
+    33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,
+    41,41,42,42,43,44,45,46,47,48,49,50,51,52,53,54,
+    55,56,57,58,59,60,62,64,66,68,70,72,74,76,78,80,
+};
+/*static const int gf_arf_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,1,1,1,1,2,2,3,3,3,4,
+    4,4,5,5,5,6,6,6,7,7,7,8,8,8,9,9,
+    9,10,10,10,11,11,11,12,12,12,13,13,13,14,14,14,
+    15,15,16,16,17,17,18,18,19,19,20,20,21,21,22,22,
+    23,23,24,24,25,25,26,26,27,27,28,28,29,29,30,30,
+    31,31,32,32,33,33,34,34,35,35,36,36,37,37,38,39,
+    39,40,40,41,41,42,42,43,43,44,45,46,47,48,49,50,
+    51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66
+};*/
+static const int inter_minq[QINDEX_RANGE] =
+{
+    0,0,0,0,1,1,2,3,3,4,4,5,6,6,7,7,
+    8,8,9,9,10,11,11,12,12,13,13,14,14,15,15,16,
+    16,17,17,17,18,18,19,19,20,20,21,21,22,22,22,23,
+    23,24,24,24,25,25,26,27,28,28,29,30,31,32,33,34,
+    35,35,36,37,38,39,39,40,41,42,43,43,44,45,46,47,
+    47,48,49,49,51,52,53,54,54,55,56,56,57,57,58,58,
+    59,59,60,61,61,62,62,63,64,64,65,66,67,67,68,69,
+    69,70,71,71,72,73,74,75,76,76,77,78,79,80,81,81,
+};
 
 void vp8_initialize()
 {
@@ -179,9 +273,10 @@ static void setup_features(VP8_COMP *cpi)
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
     vpx_memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
     vpx_memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+    vpx_memset(cpi->mb.e_mbd.last_ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
+    vpx_memset(cpi->mb.e_mbd.last_mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
 
-    // jbb trial !
-    mode_ref_lf_test_function(cpi);
+    set_default_lf_deltas(cpi);
 
 }
 
@@ -225,6 +320,19 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->tok);
     cpi->tok = 0;
 
+    // Structure used to minitor GF useage
+    if (cpi->gf_active_flags != 0)
+        vpx_free(cpi->gf_active_flags);
+
+    cpi->gf_active_flags = 0;
+
+    if(cpi->mb.pip)
+        vpx_free(cpi->mb.pip);
+
+    cpi->mb.pip = 0;
+
+    vpx_free(cpi->total_stats);
+    vpx_free(cpi->this_frame_stats);
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -428,7 +536,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 
 }
 
-static void mode_ref_lf_test_function(VP8_COMP *cpi)
+static void set_default_lf_deltas(VP8_COMP *cpi)
 {
     cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 1;
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
@@ -544,7 +652,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_NEWG     ] = INT_MAX;
             sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
         }
-        else if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
+
+        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
         {
             sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
             sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
@@ -556,7 +665,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         break;
     case 1:
     case 3:
-        sf->optimize_coefficients = 0;
         sf->thresh_mult[THR_NEARESTMV] = 0;
         sf->thresh_mult[THR_ZEROMV   ] = 0;
         sf->thresh_mult[THR_DC       ] = 0;
@@ -596,7 +704,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
             sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
         }
-        else if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
+
+        if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
         {
             sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
             sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
@@ -604,7 +713,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_NEWG     ] = INT_MAX;
             sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
         }
-        else if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
+
+        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
         {
             sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
             sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
@@ -615,6 +725,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         if (Speed > 0)
         {
+            // Disable coefficient optimization above speed 0
+            sf->optimize_coefficients = 0;
+
             cpi->mode_check_freq[THR_SPLITG] = 4;
             cpi->mode_check_freq[THR_SPLITA] = 4;
             cpi->mode_check_freq[THR_SPLITMV] = 2;
@@ -762,7 +875,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEWA] = 4;
             }
 
-            if (cpi->ref_frame_flags & VP8_LAST_FLAG & VP8_GOLD_FLAG)
+            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
                 sf->thresh_mult[THR_NEARESTG ] = 2000;
                 sf->thresh_mult[THR_ZEROG    ] = 2000;
@@ -770,7 +883,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWG     ] = 4000;
             }
 
-            if (cpi->ref_frame_flags & VP8_LAST_FLAG & VP8_ALT_FLAG)
+            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
             {
                 sf->thresh_mult[THR_NEARESTA ] = 2000;
                 sf->thresh_mult[THR_ZEROA    ] = 2000;
@@ -810,7 +923,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->full_freq[1] = 31;
         sf->search_method = NSTEP;
 
-        if (!cpi->ref_frame_flags & VP8_LAST_FLAG)
+        if (!(cpi->ref_frame_flags & VP8_LAST_FLAG))
         {
             sf->thresh_mult[THR_NEWMV    ] = INT_MAX;
             sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
@@ -819,7 +932,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
         }
 
-        if (!cpi->ref_frame_flags & VP8_GOLD_FLAG)
+        if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
         {
             sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
             sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
@@ -828,7 +941,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
         }
 
-        if (!cpi->ref_frame_flags & VP8_ALT_FLAG)
+        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
         {
             sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
             sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
@@ -1121,40 +1234,33 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     if (cpi->sf.search_method == NSTEP)
     {
-        vp8_init3smotion_compensation(&cpi->mb, cm->last_frame.y_stride);
+        vp8_init3smotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
     }
     else if (cpi->sf.search_method == DIAMOND)
     {
-        vp8_init_dsmotion_compensation(&cpi->mb, cm->last_frame.y_stride);
+        vp8_init_dsmotion_compensation(&cpi->mb, cm->yv12_fb[cm->lst_fb_idx].y_stride);
     }
 
     if (cpi->sf.improved_dct)
     {
         cpi->mb.vp8_short_fdct8x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
         cpi->mb.vp8_short_fdct4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
-        cpi->mb.short_fdct8x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
-        cpi->mb.short_fdct4x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
     }
     else
     {
         cpi->mb.vp8_short_fdct8x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
         cpi->mb.vp8_short_fdct4x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
-        cpi->mb.short_fdct8x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
-        cpi->mb.short_fdct4x4rd = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
     }
 
-    cpi->mb.vp8_short_fdct4x4_ptr = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
     cpi->mb.short_walsh4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, walsh_short4x4);
 
     if (cpi->sf.improved_quant)
     {
         cpi->mb.quantize_b    = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb);
-        cpi->mb.quantize_brd  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb);
     }
     else
     {
         cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
-        cpi->mb.quantize_brd    = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
     }
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -1179,7 +1285,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     }
 
     if (cpi->sf.optimize_coefficients == 1)
-        cpi->mb.optimize = 1;
+        cpi->mb.optimize = 1 + cpi->is_next_src_alt_ref;
     else
         cpi->mb.optimize = 0;
 
@@ -1220,6 +1326,20 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 
     cpi->source_buffer_count = 0;
 }
+
+static int vp8_alloc_partition_data(VP8_COMP *cpi)
+{
+    cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
+                                (cpi->common.mb_rows + 1),
+                                sizeof(PARTITION_INFO));
+    if(!cpi->mb.pip)
+        return ALLOC_FAILURE;
+
+    cpi->mb.pi = cpi->mb.pip + cpi->common.mode_info_stride + 1;
+
+    return 0;
+}
+
 void vp8_alloc_compressor_data(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = & cpi->common;
@@ -1230,6 +1350,11 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     if (vp8_alloc_frame_buffers(cm, width, height))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate frame buffers");
+
+    if (vp8_alloc_partition_data(cpi))
+        vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate partition data");
+
 
     if ((width & 0xf) != 0)
         width += 16 - (width & 0xf);
@@ -1261,6 +1386,21 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     cpi->inter_zz_count = 0;
     cpi->gf_bad_count = 0;
     cpi->gf_update_recommended = 0;
+
+
+    // Structures used to minitor GF usage
+    if (cpi->gf_active_flags != 0)
+        vpx_free(cpi->gf_active_flags);
+
+    CHECK_MEM_ERROR(cpi->gf_active_flags, vpx_calloc(1, cm->mb_rows * cm->mb_cols));
+
+    cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
+
+    cpi->total_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+    cpi->this_frame_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+    if(!cpi->total_stats || !cpi->this_frame_stats)
+        vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate firstpass stats");
 }
 
 
@@ -1289,16 +1429,14 @@ int vp8_reverse_trans(int x)
 };
 void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
 {
+    if(framerate < .1)
+        framerate = 30;
+
     cpi->oxcf.frame_rate             = framerate;
     cpi->output_frame_rate            = cpi->oxcf.frame_rate;
     cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
-    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
-    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
-
-    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
-    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
     cpi->max_gf_interval = (int)(cpi->output_frame_rate / 2) + 2;
 
     //cpi->max_gf_interval = (int)(cpi->output_frame_rate * 2 / 3) + 1;
@@ -1308,13 +1446,25 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
         cpi->max_gf_interval = 12;
 
 
-    // Special conditions when altr ref frame enabled
-    if (cpi->oxcf.play_alternate)
+    // Special conditions when altr ref frame enabled in lagged compress mode
+    if (cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames)
     {
         if (cpi->max_gf_interval > cpi->oxcf.lag_in_frames - 1)
             cpi->max_gf_interval = cpi->oxcf.lag_in_frames - 1;
     }
 }
+
+
+static int
+rescale(int val, int num, int denom)
+{
+    int64_t llnum = num;
+    int64_t llden = denom;
+    int64_t llval = val;
+
+    return llval * llnum / llden;
+}
+
 
 void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 {
@@ -1343,9 +1493,9 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->oxcf.worst_allowed_q           = MAXQ;
 
         cpi->oxcf.end_usage                = USAGE_STREAM_FROM_SERVER;
-        cpi->oxcf.starting_buffer_level     =   4;
-        cpi->oxcf.optimal_buffer_level      =   5;
-        cpi->oxcf.maximum_buffer_size       =   6;
+        cpi->oxcf.starting_buffer_level     =   4000;
+        cpi->oxcf.optimal_buffer_level      =   5000;
+        cpi->oxcf.maximum_buffer_size       =   6000;
         cpi->oxcf.under_shoot_pct           =  90;
         cpi->oxcf.allow_df                 =   0;
         cpi->oxcf.drop_frames_water_mark     =  20;
@@ -1494,26 +1644,32 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // local file playback mode == really big buffer
     if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
     {
-        cpi->oxcf.starting_buffer_level   = 60;
-        cpi->oxcf.optimal_buffer_level    = 60;
-        cpi->oxcf.maximum_buffer_size     = 240;
+        cpi->oxcf.starting_buffer_level   = 60000;
+        cpi->oxcf.optimal_buffer_level    = 60000;
+        cpi->oxcf.maximum_buffer_size     = 240000;
 
     }
 
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
-    cpi->oxcf.starting_buffer_level   *= cpi->oxcf.target_bandwidth;
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.optimal_buffer_level *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.optimal_buffer_level =
+            rescale(cpi->oxcf.optimal_buffer_level,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.maximum_buffer_size == 0)
         cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.maximum_buffer_size     *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.maximum_buffer_size =
+            rescale(cpi->oxcf.maximum_buffer_size,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
@@ -1526,6 +1682,10 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
+    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
+    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual        = 0;
@@ -1569,9 +1729,9 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
 
-    if (((cm->Width + 15) & 0xfffffff0) != cm->last_frame.y_width ||
-        ((cm->Height + 15) & 0xfffffff0) != cm->last_frame.y_height ||
-        cm->last_frame.y_width == 0)
+    if (((cm->Width + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_width ||
+        ((cm->Height + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_height ||
+        cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
         alloc_raw_frame_buffers(cpi);
         vp8_alloc_compressor_data(cpi);
@@ -1598,16 +1758,10 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
         cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
 
-    // force play_alternate to 0 if allow_lag is 0, lag_in_frames is too small, Mode is real time or one pass compress enabled.
-    if (cpi->oxcf.allow_lag == 0 || cpi->oxcf.lag_in_frames <= 5 || (cpi->oxcf.Mode < MODE_SECONDPASS))
-    {
-        cpi->oxcf.play_alternate = 0;
-        cpi->ref_frame_flags = cpi->ref_frame_flags & ~VP8_ALT_FLAG;
-    }
-
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
     cpi->is_src_frame_alt_ref = 0;
+    cpi->is_next_src_alt_ref = 0;
 
 #if 0
     // Experimental RD Code
@@ -1616,13 +1770,16 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 #endif
 
 #if VP8_TEMPORAL_ALT_REF
+
+    cpi->use_weighted_temporal_filter = 0;
+
     {
         int i;
 
         cpi->fixed_divide[0] = 0;
 
-        for (i = 1; i < 255; i++)
-            cpi->fixed_divide[i] = 0x10000 / i;
+        for (i = 1; i < 512; i++)
+            cpi->fixed_divide[i] = 0x80000 / i;
     }
 #endif
 }
@@ -1773,26 +1930,32 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // local file playback mode == really big buffer
     if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
     {
-        cpi->oxcf.starting_buffer_level   = 60;
-        cpi->oxcf.optimal_buffer_level    = 60;
-        cpi->oxcf.maximum_buffer_size     = 240;
+        cpi->oxcf.starting_buffer_level   = 60000;
+        cpi->oxcf.optimal_buffer_level    = 60000;
+        cpi->oxcf.maximum_buffer_size     = 240000;
 
     }
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
 
-    cpi->oxcf.starting_buffer_level   *= cpi->oxcf.target_bandwidth;
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.optimal_buffer_level *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.optimal_buffer_level =
+            rescale(cpi->oxcf.optimal_buffer_level,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     if (cpi->oxcf.maximum_buffer_size == 0)
         cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
     else
-        cpi->oxcf.maximum_buffer_size     *= cpi->oxcf.target_bandwidth;
+        cpi->oxcf.maximum_buffer_size =
+            rescale(cpi->oxcf.maximum_buffer_size,
+                    cpi->oxcf.target_bandwidth, 1000);
 
     cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
@@ -1805,6 +1968,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
+    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
+    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual        = 0;
@@ -1848,9 +2015,9 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
 
-    if (((cm->Width + 15) & 0xfffffff0) != cm->last_frame.y_width ||
-        ((cm->Height + 15) & 0xfffffff0) != cm->last_frame.y_height ||
-        cm->last_frame.y_width == 0)
+    if (((cm->Width + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_width ||
+        ((cm->Height + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_height ||
+        cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
         alloc_raw_frame_buffers(cpi);
         vp8_alloc_compressor_data(cpi);
@@ -1877,16 +2044,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
         cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
 
-    // force play_alternate to 0 if allow_lag is 0, lag_in_frames is too small, Mode is real time or one pass compress enabled.
-    if (cpi->oxcf.allow_lag == 0 || cpi->oxcf.lag_in_frames <= 5 || (cpi->oxcf.Mode < MODE_SECONDPASS))
-    {
-        cpi->oxcf.play_alternate = 0;
-        cpi->ref_frame_flags = cpi->ref_frame_flags & ~VP8_ALT_FLAG;
-    }
-
     // YX Temp
     cpi->last_alt_ref_sei    = -1;
     cpi->is_src_frame_alt_ref = 0;
+    cpi->is_next_src_alt_ref = 0;
 
 #if 0
     // Experimental RD Code
@@ -1924,7 +2085,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         VP8_COMP *cpi;
         VP8_PTR   ptr;
     } ctx;
-    
+
     VP8_COMP *cpi;
     VP8_COMMON *cm;
 
@@ -1951,8 +2112,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     CHECK_MEM_ERROR(cpi->rdtok, vpx_calloc(256 * 3 / 2, sizeof(TOKENEXTRA)));
     CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
-    vp8_cmachine_specific_config(cpi);
     vp8_create_common(&cpi->common);
+    vp8_cmachine_specific_config(cpi);
 
     vp8_init_config((VP8_PTR)cpi, oxcf);
 
@@ -1993,7 +2154,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->active_map_enabled = 0;
 
     // Create the first pass motion map structure and set to 0
-    CHECK_MEM_ERROR(cpi->fp_motion_map, vpx_calloc(cpi->common.MBs, 1));
+    // Allocate space for maximum of 15 buffers
+    CHECK_MEM_ERROR(cpi->fp_motion_map, vpx_calloc(15*cpi->common.MBs, 1));
 
 #if 0
     // Experimental code for lagged and one pass
@@ -2035,18 +2197,10 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     // Test function for segmentation
     //segmentation_test_function((VP8_PTR) cpi);
 
-    // Loop filter mode / ref deltas test function
-    //mode_ref_lf_test_function(cpi);
-
 #ifdef ENTROPY_STATS
     init_context_counters();
 #endif
 
-
-#ifdef INTRARDOPT
-    cpi->intra_rd_opt = 1;
-
-#endif
 
     cpi->frames_since_key = 8;        // Give a sensible default for the first frame.
     cpi->key_frame_frequency = cpi->oxcf.key_freq;
@@ -2148,10 +2302,12 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     }
     else if (cpi->pass == 2)
     {
+        size_t packet_sz = vp8_firstpass_stats_sz(cpi->common.MBs);
+        int packets = oxcf->two_pass_stats_in.sz / packet_sz;
+
         cpi->stats_in = oxcf->two_pass_stats_in.buf;
-        cpi->stats_in_end = cpi->stats_in
-                            + oxcf->two_pass_stats_in.sz / sizeof(FIRSTPASS_STATS)
-                            - 1;
+        cpi->stats_in_end = (void*)((char *)cpi->stats_in
+                            + (packets - 1) * packet_sz);
         vp8_init_second_pass(cpi);
     }
 
@@ -2178,11 +2334,55 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     vp8cx_create_encoder_threads(cpi);
 
-    cpi->fn_ptr.sdf   = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
-    cpi->fn_ptr.vf    = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16);
-    cpi->fn_ptr.svf   = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x16);
-    cpi->fn_ptr.sdx3f = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x3);
-    cpi->fn_ptr.sdx4df = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x4d);
+    cpi->fn_ptr[BLOCK_16X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
+    cpi->fn_ptr[BLOCK_16X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16);
+    cpi->fn_ptr[BLOCK_16X16].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x16);
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_h  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_h);
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_v  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_v);
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_hv = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_hv);
+    cpi->fn_ptr[BLOCK_16X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x3);
+    cpi->fn_ptr[BLOCK_16X16].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x8);
+    cpi->fn_ptr[BLOCK_16X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x4d);
+
+    cpi->fn_ptr[BLOCK_16X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8);
+    cpi->fn_ptr[BLOCK_16X8].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x8);
+    cpi->fn_ptr[BLOCK_16X8].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x8);
+    cpi->fn_ptr[BLOCK_16X8].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_16X8].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_16X8].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_16X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x3);
+    cpi->fn_ptr[BLOCK_16X8].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x8);
+    cpi->fn_ptr[BLOCK_16X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x4d);
+
+    cpi->fn_ptr[BLOCK_8X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16);
+    cpi->fn_ptr[BLOCK_8X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var8x16);
+    cpi->fn_ptr[BLOCK_8X16].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar8x16);
+    cpi->fn_ptr[BLOCK_8X16].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_8X16].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_8X16].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_8X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x3);
+    cpi->fn_ptr[BLOCK_8X16].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x8);
+    cpi->fn_ptr[BLOCK_8X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x4d);
+
+    cpi->fn_ptr[BLOCK_8X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8);
+    cpi->fn_ptr[BLOCK_8X8].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var8x8);
+    cpi->fn_ptr[BLOCK_8X8].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar8x8);
+    cpi->fn_ptr[BLOCK_8X8].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_8X8].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_8X8].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_8X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x3);
+    cpi->fn_ptr[BLOCK_8X8].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x8);
+    cpi->fn_ptr[BLOCK_8X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x4d);
+
+    cpi->fn_ptr[BLOCK_4X4].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4);
+    cpi->fn_ptr[BLOCK_4X4].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var4x4);
+    cpi->fn_ptr[BLOCK_4X4].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar4x4);
+    cpi->fn_ptr[BLOCK_4X4].svf_halfpix_h  = NULL;
+    cpi->fn_ptr[BLOCK_4X4].svf_halfpix_v  = NULL;
+    cpi->fn_ptr[BLOCK_4X4].svf_halfpix_hv = NULL;
+    cpi->fn_ptr[BLOCK_4X4].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x3);
+    cpi->fn_ptr[BLOCK_4X4].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x8);
+    cpi->fn_ptr[BLOCK_4X4].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x4d);
 
 #if !(CONFIG_REALTIME_ONLY)
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
@@ -2246,7 +2446,8 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
             if (cpi->b_calculate_psnr)
             {
-                double samples = 3.0 / 2 * cpi->count * cpi->common.last_frame.y_width * cpi->common.last_frame.y_height;
+                YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
+                double samples = 3.0 / 2 * cpi->count * lst_yv12->y_width * lst_yv12->y_height;
                 double total_psnr = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error);
                 double total_psnr2 = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error2);
                 double total_ssim = 100 * pow(cpi->summed_quality / cpi->summed_weights, 8.0);
@@ -2375,6 +2576,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             }
 
             fprintf(fmode, "};\n");
+            fclose(fmode);
         }
 #endif
 
@@ -2585,18 +2787,18 @@ int vp8_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
+    int ref_fb_idx;
 
     if (ref_frame_flag == VP8_LAST_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->last_frame, sd);
-
+        ref_fb_idx = cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->golden_frame, sd);
-
+        ref_fb_idx = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        vp8_yv12_copy_frame_ptr(&cm->alt_ref_frame, sd);
-
+        ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
+
+    vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
 
     return 0;
 }
@@ -2605,17 +2807,18 @@ int vp8_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
 
+    int ref_fb_idx;
+
     if (ref_frame_flag == VP8_LAST_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->last_frame);
-
+        ref_fb_idx = cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->golden_frame);
-
+        ref_fb_idx = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        vp8_yv12_copy_frame_ptr(sd, &cm->alt_ref_frame);
-
+        ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
+
+    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[ref_fb_idx]);
 
     return 0;
 }
@@ -2628,6 +2831,8 @@ int vp8_update_entropy(VP8_PTR comp, int update)
     return 0;
 }
 
+
+#if OUTPUT_YUV_SRC
 void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
 {
     FILE *yuv_file = fopen(name, "ab");
@@ -2663,6 +2868,8 @@ void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
 
     fclose(yuv_file);
 }
+#endif
+
 
 static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 {
@@ -2691,14 +2898,25 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 #endif
     }
     // we may need to copy to a buffer so we can extend the image...
-    else if (cm->Width != cm->last_frame.y_width ||
-             cm->Height != cm->last_frame.y_height)
+    else if (cm->Width != cm->yv12_fb[cm->lst_fb_idx].y_width ||
+             cm->Height != cm->yv12_fb[cm->lst_fb_idx].y_height)
     {
         //vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
 #if HAVE_ARMV7
-        vp8_yv12_copy_src_frame_func_neon(sd, &cpi->scaled_source);
-#else
-        vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_yv12_copy_src_frame_func_neon(sd, &cpi->scaled_source);
+        }
+#if CONFIG_RUNTIME_CPU_DETECT
+        else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+        {
+            vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
+        }
 #endif
 
         cpi->Source = &cpi->scaled_source;
@@ -2782,23 +3000,17 @@ static int pick_frame_size(VP8_COMP *cpi)
         cm->frame_type = KEY_FRAME;
 
     }
-    // Auto key frames (Only two pass will enter here)
+    // Special case for forced key frames
+    // The frame sizing here is still far from ideal for 2 pass.
+    else if (cm->frame_flags & FRAMEFLAGS_KEY)
+    {
+        cm->frame_type = KEY_FRAME;
+        resize_key_frame(cpi);
+        vp8_calc_iframe_target_size(cpi);
+    }
     else if (cm->frame_type == KEY_FRAME)
     {
         vp8_calc_auto_iframe_target_size(cpi);
-    }
-    // Forced key frames (by interval or an external signal)
-    else if ((cm->frame_flags & FRAMEFLAGS_KEY) ||
-             (cpi->oxcf.auto_key && (cpi->frames_since_key % cpi->key_frame_frequency == 0)))
-    {
-        // Key frame from VFW/auto-keyframe/first frame
-        cm->frame_type = KEY_FRAME;
-
-        resize_key_frame(cpi);
-
-        // Compute target frame size
-        if (cpi->pass != 2)
-            vp8_calc_iframe_target_size(cpi);
     }
     else
     {
@@ -2845,7 +3057,7 @@ static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
 
     // Update the golden frame buffer
-    vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->alt_ref_frame);
+    vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
 
     // Select an interval before next GF or altref
     if (!cpi->auto_gold)
@@ -2865,8 +3077,8 @@ static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
     }
 
     // Update data structure that monitors level of reference to last GF
-    vpx_memset(cm->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-    cm->gf_active_count = cm->mb_rows * cm->mb_cols;
+    vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+    cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
     // this frame refreshes means next frames don't unless specified by user
 
     cpi->common.frames_since_golden = 0;
@@ -2887,7 +3099,7 @@ static void update_golden_frame_and_stats(VP8_COMP *cpi)
     if (cm->refresh_golden_frame)
     {
         // Update the golden frame buffer
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->golden_frame);
+        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
 
         // Select an interval before next GF
         if (!cpi->auto_gold)
@@ -2913,8 +3125,8 @@ static void update_golden_frame_and_stats(VP8_COMP *cpi)
         }
 
         // Update data structure that monitors level of reference to last GF
-        vpx_memset(cm->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-        cm->gf_active_count = cm->mb_rows * cm->mb_cols;
+        vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+        cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
         // this frame refreshes means next frames don't unless specified by user
         cm->refresh_golden_frame = 0;
@@ -3220,290 +3432,13 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 #endif
 // return of 0 means drop frame
 
-#if VP8_TEMPORAL_ALT_REF
-static void vp8cx_temp_blur1_c
+static void encode_frame_to_data_rate
 (
-    unsigned char **frames,
-    int frame_count,
-    unsigned char *src,
-    unsigned char *dst,
-    int width,
-    int stride,
-    int height,
-    int strength,
-    int *fixed_divide,
-    unsigned char *motion_map_ptr,
-    unsigned char block_size
+    VP8_COMP *cpi,
+    unsigned long *size,
+    unsigned char *dest,
+    unsigned int *frame_flags
 )
-{
-    int byte = 0;           // Buffer offset for the current pixel value being filtered
-    int frame = 0;
-    int modifier = 0;
-    int i, j, k;
-    int block_ofset;
-    int Cols, Rows;
-    unsigned char Shift = (block_size == 16) ? 4 : 3;
-
-    Cols = width / block_size;
-    Rows = height / block_size;
-
-    for (i = 0; i < height; i++)
-    {
-        block_ofset = (i >> Shift) * Cols;
-
-        for (j = 0; j < Cols; j ++)
-        {
-            if (motion_map_ptr[block_ofset] > 2)
-            {
-                vpx_memcpy(&dst[byte], &src[byte], block_size);
-                byte += block_size;
-            }
-            else
-            {
-                for (k = 0; k < block_size; k++)
-                {
-                    int accumulator = 0;
-                    int count = 0;
-                    int src_byte = src[byte];
-
-                    for (frame = 0; frame < frame_count; frame++)
-                    {
-                        // get current frame pixel value
-                        int pixel_value = frames[frame][byte];       // int pixel_value = *frameptr;
-
-                        modifier   = src_byte;                       // modifier   = s[byte];
-                        modifier  -= pixel_value;
-                        modifier  *= modifier;
-                        modifier >>= strength;
-                        modifier  *= 3;
-
-                        if (modifier > 16)
-                            modifier = 16;
-
-                        modifier = 16 - modifier;
-
-                        accumulator += modifier * pixel_value;
-
-                        count += modifier;
-                    }
-
-                    accumulator += (count >> 1);
-                    accumulator *= fixed_divide[count];          // accumulator *= ppi->fixed_divide[count];
-                    accumulator >>= 16;
-
-                    dst[byte] = accumulator;        // d[byte] = accumulator;
-
-                    // move to next pixel
-                    byte++;
-                }
-            }
-
-            block_ofset++;
-        }
-
-        // Step byte on over the UMV border to the start of the next line
-        byte += stride - width;
-    }
-}
-
-static void vp8cx_temp_filter_c
-(
-    VP8_COMP *cpi
-)
-{
-    YV12_BUFFER_CONFIG *temp_source_buffer;
-    int *fixed_divide = cpi->fixed_divide;
-
-    int frame = 0;
-    int max_frames = 11;
-
-    int num_frames_backward = 0;
-    int num_frames_forward = 0;
-    int frames_to_blur_backward = 0;
-    int frames_to_blur_forward = 0;
-    int frames_to_blur = 0;
-    int start_frame = 0;
-
-    int strength = cpi->oxcf.arnr_strength;
-
-    int blur_type = cpi->oxcf.arnr_type;
-
-    int new_max_frames = cpi->oxcf.arnr_max_frames;
-
-    if (new_max_frames > 0)
-        max_frames = new_max_frames;
-
-    num_frames_backward = cpi->last_alt_ref_sei - cpi->source_encode_index;
-
-    if (num_frames_backward < 0)
-        num_frames_backward += cpi->oxcf.lag_in_frames;
-
-    num_frames_forward = cpi->oxcf.lag_in_frames - (num_frames_backward + 1);
-
-    switch (blur_type)
-    {
-    case 1:
-        /////////////////////////////////////////
-        // Backward Blur
-
-        frames_to_blur_backward = num_frames_backward;
-
-        if (frames_to_blur_backward >= max_frames)
-            frames_to_blur_backward = max_frames - 1;
-
-        frames_to_blur = frames_to_blur_backward + 1;
-        break;
-
-    case 2:
-        /////////////////////////////////////////
-        // Forward Blur
-
-        frames_to_blur_forward = num_frames_forward;
-
-        if (frames_to_blur_forward >= max_frames)
-            frames_to_blur_forward = max_frames - 1;
-
-        frames_to_blur = frames_to_blur_forward + 1;
-        break;
-
-    case 3:
-        /////////////////////////////////////////
-        // Center Blur
-        frames_to_blur_forward = num_frames_forward;
-        frames_to_blur_backward = num_frames_backward;
-
-        if (frames_to_blur_forward > frames_to_blur_backward)
-            frames_to_blur_forward = frames_to_blur_backward;
-
-        if (frames_to_blur_backward > frames_to_blur_forward)
-            frames_to_blur_backward = frames_to_blur_forward;
-
-        if (frames_to_blur_forward > (max_frames / 2))
-            frames_to_blur_forward = (max_frames / 2);
-
-        if (frames_to_blur_backward > (max_frames / 2))
-            frames_to_blur_backward = (max_frames / 2);
-
-        frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
-        break;
-
-    default:
-        /////////////////////////////////////////
-        // At most 4 frames forward Blur
-        frames_to_blur_forward = 4;
-        frames_to_blur_backward = num_frames_backward;
-
-        if (max_frames > 5)
-        {
-            if ((frames_to_blur_backward + frames_to_blur_forward) >= max_frames)
-            {
-                frames_to_blur_backward = max_frames - frames_to_blur_forward - 1;
-            }
-        }
-        else
-        {
-            frames_to_blur_forward = max_frames - 1;
-            frames_to_blur_backward = 0;
-        }
-
-        frames_to_blur = frames_to_blur_backward + frames_to_blur_forward + 1;
-        break;
-    }
-
-    start_frame = (cpi->last_alt_ref_sei + frames_to_blur_forward) % cpi->oxcf.lag_in_frames;
-
-#ifdef DEBUGFWG
-    // DEBUG FWG
-    printf("max:%d FBCK:%d FFWD:%d ftb:%d ftbbck:%d ftbfwd:%d sei:%d lasei:%d start:%d"
-           , max_frames
-           , num_frames_backward
-           , num_frames_forward
-           , frames_to_blur
-           , frames_to_blur_backward
-           , frames_to_blur_forward
-           , cpi->source_encode_index
-           , cpi->last_alt_ref_sei
-           , start_frame);
-#endif
-
-    for (frame = 0; frame < frames_to_blur; frame++)
-    {
-        int which_buffer =  start_frame - frame;
-
-        if (which_buffer < 0)
-            which_buffer += cpi->oxcf.lag_in_frames;
-
-        cpi->frames[frame] = cpi->src_buffer[which_buffer].source_buffer.y_buffer;
-    }
-
-    temp_source_buffer = &cpi->src_buffer[cpi->last_alt_ref_sei].source_buffer;
-
-    // Blur Y
-    vp8cx_temp_blur1_c(
-        cpi->frames,
-        frames_to_blur,
-        temp_source_buffer->y_buffer,  // cpi->Source->y_buffer,
-        cpi->alt_ref_buffer.source_buffer.y_buffer,  // cpi->Source->y_buffer,
-        temp_source_buffer->y_width,
-        temp_source_buffer->y_stride,
-        temp_source_buffer->y_height,
-        //temp_source_buffer->y_height * temp_source_buffer->y_stride,
-        strength,
-        fixed_divide,
-        cpi->fp_motion_map, 16);
-
-    for (frame = 0; frame < frames_to_blur; frame++)
-    {
-        int which_buffer =  cpi->last_alt_ref_sei - frame;
-
-        if (which_buffer < 0)
-            which_buffer += cpi->oxcf.lag_in_frames;
-
-        cpi->frames[frame] = cpi->src_buffer[which_buffer].source_buffer.u_buffer;
-    }
-
-    // Blur U
-    vp8cx_temp_blur1_c(
-        cpi->frames,
-        frames_to_blur,
-        temp_source_buffer->u_buffer,
-        cpi->alt_ref_buffer.source_buffer.u_buffer,  // cpi->Source->u_buffer,
-        temp_source_buffer->uv_width,
-        temp_source_buffer->uv_stride,
-        temp_source_buffer->uv_height,
-        //temp_source_buffer->uv_height * temp_source_buffer->uv_stride,
-        strength,
-        fixed_divide,
-        cpi->fp_motion_map, 8);
-
-    for (frame = 0; frame < frames_to_blur; frame++)
-    {
-        int which_buffer =  cpi->last_alt_ref_sei - frame;
-
-        if (which_buffer < 0)
-            which_buffer += cpi->oxcf.lag_in_frames;
-
-        cpi->frames[frame] = cpi->src_buffer[which_buffer].source_buffer.v_buffer;
-    }
-
-    // Blur V
-    vp8cx_temp_blur1_c(
-        cpi->frames,
-        frames_to_blur,
-        temp_source_buffer->v_buffer,
-        cpi->alt_ref_buffer.source_buffer.v_buffer,  // cpi->Source->v_buffer,
-        temp_source_buffer->uv_width,
-        temp_source_buffer->uv_stride,
-        //temp_source_buffer->uv_height * temp_source_buffer->uv_stride,
-        temp_source_buffer->uv_height,
-        strength,
-        fixed_divide,
-        cpi->fp_motion_map, 8);
-}
-#endif
-
-
-static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags)
 {
     int Q;
     int frame_over_shoot_limit;
@@ -3588,17 +3523,14 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     {
         int i;
 
+        // Reset the loop filter deltas and segmentation map
+        setup_features(cpi);
+
         // If segmentation is enabled force a map update for key frames
         if (cpi->mb.e_mbd.segmentation_enabled)
         {
             cpi->mb.e_mbd.update_mb_segmentation_map = 1;
             cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-        }
-
-        // If mode or reference frame based loop filter deltas are enabled then force an update for key frames.
-        if (cpi->mb.e_mbd.mode_ref_lf_delta_enabled)
-        {
-            cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
         }
 
         // The alternate reference frame cannot be active for a key frame
@@ -3753,87 +3685,49 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     // Set an active best quality and if necessary active worst quality
     if (cpi->pass == 2 || (cm->current_video_frame > 150))
     {
-        //if ( (cm->frame_type == KEY_FRAME) || cm->refresh_golden_frame  )
         int Q;
         int i;
         int bpm_target;
+        //int tmp;
+
+        vp8_clear_system_state();
 
         Q = cpi->active_worst_quality;
 
         if ((cm->frame_type == KEY_FRAME) || cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
         {
-            vp8_clear_system_state();
-
             if (cm->frame_type != KEY_FRAME)
             {
-                // Where a gf overlays an existing arf then allow active max Q to drift to highest allowed value.
-                //if ( cpi->common.refresh_golden_frame && cpi->source_alt_ref_active )
-                //cpi->active_worst_quality = cpi->worst_quality;
-
                 if (cpi->avg_frame_qindex < cpi->active_worst_quality)
                     Q = cpi->avg_frame_qindex;
 
-                if (cpi->section_is_low_motion)
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * ((Q * 3 / 2) + 128)) / 64;
-                else if (cpi->section_is_fast_motion)
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 128)) / 64;
+               if ( cpi->gfu_boost > 1000 )
+                    cpi->active_best_quality = gf_low_motion_minq[Q];
+                else if ( cpi->gfu_boost < 400 )
+                    cpi->active_best_quality = gf_high_motion_minq[Q];
                 else
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * ((Q * 5 / 4) + 128)) / 64;
-            }
-            // KEY FRAMES
-            else
-            {
-                if (cpi->section_is_low_motion)
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 240)) / 64; // Approx 2.5 to 4.5 where Q has the range 0-127
-                else
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 160)) / 64;
-            }
+                    cpi->active_best_quality = gf_mid_motion_minq[Q];
 
-            for (i = Q; i > 0; i--)
-            {
-                if (bpm_target <= vp8_bits_per_mb[cm->frame_type][i])
-                    break;
-            }
+                /*cpi->active_best_quality = gf_arf_minq[Q];
+                tmp = (cpi->gfu_boost > 1000) ? 600 : cpi->gfu_boost - 400;
+                //tmp = (cpi->gfu_boost > 1000) ? 600 :
+                          //(cpi->gfu_boost < 400) ? 0 : cpi->gfu_boost - 400;
+                tmp = 128 - (tmp >> 4);
+                cpi->active_best_quality = (cpi->active_best_quality * tmp)>>7;*/
 
-            cpi->active_best_quality = i;
-
-            // this entire section could be replaced by a look up table
-#if 0
-            {
-                int Q, best_q[128];
-
-                for (Q = 0; Q < 128; Q++)
-                {
-                    bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 160)) / 64; // Approx 2.5 to 4.5 where Q has the range 0-127
-
-                    for (i = Q; i > 0; i--)
-                    {
-                        if (bpm_target <= vp8_bits_per_mb[cm->frame_type][i])
-                            break;
-                    }
-
-                    best_q[Q] = i;
-                }
-
-                Q += 0;
-            }
-#endif
-
+           }
+           // KEY FRAMES
+           else
+           {
+               if (cpi->gfu_boost > 600)
+                   cpi->active_best_quality = kf_low_motion_minq[Q];
+               else
+                   cpi->active_best_quality = kf_high_motion_minq[Q];
+           }
         }
         else
         {
-            vp8_clear_system_state();
-
-            //bpm_target = (vp8_bits_per_mb[cm->frame_type][Q]*(Q+128))/64; // Approx 2 to 4 where Q has the range 0-127
-            bpm_target = (vp8_bits_per_mb[cm->frame_type][Q] * (Q + 192)) / 128; // Approx * 1.5 to 2.5 where Q has range 0-127
-
-            for (i = Q; i > 0; i--)
-            {
-                if (bpm_target <= vp8_bits_per_mb[cm->frame_type][i])
-                    break;
-            }
-
-            cpi->active_best_quality = i;
+            cpi->active_best_quality = inter_minq[Q];
         }
 
         // If CBR and the buffer is as full then it is reasonable to allow higher quality on the frames
@@ -4060,17 +3954,14 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
                 // Clear the Alt reference frame active flag when we have a key frame
                 cpi->source_alt_ref_active = FALSE;
 
+                // Reset the loop filter deltas and segmentation map
+                setup_features(cpi);
+
                 // If segmentation is enabled force a map update for key frames
                 if (cpi->mb.e_mbd.segmentation_enabled)
                 {
                     cpi->mb.e_mbd.update_mb_segmentation_map = 1;
                     cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-                }
-
-                // If mode or reference frame based loop filter deltas are enabled then force an update for key frames.
-                if (cpi->mb.e_mbd.mode_ref_lf_delta_enabled)
-                {
-                    cpi->mb.e_mbd.mode_ref_lf_delta_update = 1;
                 }
 
                 vp8_restore_coding_context(cpi);
@@ -4276,17 +4167,18 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
 
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
-    vp8_update_gf_useage_maps(cm, &cpi->mb.e_mbd);
+    vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
 
     if (cm->frame_type == KEY_FRAME)
         cm->refresh_last_frame = 1;
 
-    if (0)
+#if 0
     {
         FILE *f = fopen("gfactive.stt", "a");
-        fprintf(f, "%8d %8d %8d %8d %8d\n", cm->current_video_frame, (100 * cpi->common.gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols), cpi->this_iiratio, cpi->next_iiratio, cm->refresh_golden_frame);
+        fprintf(f, "%8d %8d %8d %8d %8d\n", cm->current_video_frame, (100 * cpi->gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols), cpi->this_iiratio, cpi->next_iiratio, cm->refresh_golden_frame);
         fclose(f);
     }
+#endif
 
     // For inter frames the current default behaviour is that when cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
     // This is purely an encoder descision at present.
@@ -4297,11 +4189,11 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
 
     if (cm->refresh_last_frame)
     {
-        vp8_swap_yv12_buffer(&cm->last_frame, &cm->new_frame);
-        cm->frame_to_show = &cm->last_frame;
+        vp8_swap_yv12_buffer(&cm->yv12_fb[cm->lst_fb_idx], &cm->yv12_fb[cm->new_fb_idx]);
+        cm->frame_to_show = &cm->yv12_fb[cm->lst_fb_idx];
     }
     else
-        cm->frame_to_show = &cm->new_frame;
+        cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
 
 
@@ -4351,43 +4243,48 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
         }
     }
 
-
-    // At this point the new frame has been encoded coded.
-    // If any buffer copy / swaping is signalled it should be done here.
-    if (cm->frame_type == KEY_FRAME)
     {
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->golden_frame);
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->alt_ref_frame);
-    }
-    else    // For non key frames
-    {
-        // Code to copy between reference buffers
-        if (cm->copy_buffer_to_arf)
+        YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
+        YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
+        YV12_BUFFER_CONFIG *gld_yv12 = &cm->yv12_fb[cm->gld_fb_idx];
+        YV12_BUFFER_CONFIG *alt_yv12 = &cm->yv12_fb[cm->alt_fb_idx];
+        // At this point the new frame has been encoded coded.
+        // If any buffer copy / swaping is signalled it should be done here.
+        if (cm->frame_type == KEY_FRAME)
         {
-            if (cm->copy_buffer_to_arf == 1)
-            {
-                if (cm->refresh_last_frame)
-                    // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                    vp8_yv12_copy_frame_ptr(&cm->new_frame, &cm->alt_ref_frame);
-                else
-                    vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->alt_ref_frame);
-            }
-            else if (cm->copy_buffer_to_arf == 2)
-                vp8_yv12_copy_frame_ptr(&cm->golden_frame, &cm->alt_ref_frame);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, gld_yv12);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, alt_yv12);
         }
-
-        if (cm->copy_buffer_to_gf)
+        else    // For non key frames
         {
-            if (cm->copy_buffer_to_gf == 1)
+            // Code to copy between reference buffers
+            if (cm->copy_buffer_to_arf)
             {
-                if (cm->refresh_last_frame)
-                    // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                    vp8_yv12_copy_frame_ptr(&cm->new_frame, &cm->golden_frame);
-                else
-                    vp8_yv12_copy_frame_ptr(&cm->last_frame, &cm->golden_frame);
+                if (cm->copy_buffer_to_arf == 1)
+                {
+                    if (cm->refresh_last_frame)
+                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
+                        vp8_yv12_copy_frame_ptr(new_yv12, alt_yv12);
+                    else
+                        vp8_yv12_copy_frame_ptr(lst_yv12, alt_yv12);
+                }
+                else if (cm->copy_buffer_to_arf == 2)
+                    vp8_yv12_copy_frame_ptr(gld_yv12, alt_yv12);
             }
-            else if (cm->copy_buffer_to_gf == 2)
-                vp8_yv12_copy_frame_ptr(&cm->alt_ref_frame, &cm->golden_frame);
+
+            if (cm->copy_buffer_to_gf)
+            {
+                if (cm->copy_buffer_to_gf == 1)
+                {
+                    if (cm->refresh_last_frame)
+                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
+                        vp8_yv12_copy_frame_ptr(new_yv12, gld_yv12);
+                    else
+                        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
+                }
+                else if (cm->copy_buffer_to_gf == 2)
+                    vp8_yv12_copy_frame_ptr(alt_yv12, gld_yv12);
+            }
         }
     }
 
@@ -4525,18 +4422,46 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
         }
     }
 
-#if CONFIG_PSNR
-
-    if (0)
+#if 0 && CONFIG_PSNR
     {
         FILE *f = fopen("tmp.stt", "a");
 
         vp8_clear_system_state();  //__asm emms;
 
         if (cpi->total_coded_error_left != 0.0)
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f %10.3f %8ld\n", cpi->common.current_video_frame, cpi->this_frame_target, cpi->projected_frame_size, (cpi->projected_frame_size - cpi->this_frame_target), (int)cpi->total_target_vs_actual, (cpi->oxcf.starting_buffer_level - cpi->bits_off_target), (int)cpi->total_actual_bits, cm->base_qindex, cpi->active_best_quality, cpi->active_worst_quality,  cpi->avg_frame_qindex, cpi->zbin_over_quant, cm->refresh_golden_frame, cm->refresh_alt_ref_frame, cm->frame_type, cpi->gfu_boost, cpi->est_max_qcorrection_factor, (int)cpi->bits_left, cpi->total_coded_error_left, (double)cpi->bits_left / cpi->total_coded_error_left,  cpi->tot_recode_hits);
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
+                       "%6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
+                       "%10.3f %8ld\n",
+                       cpi->common.current_video_frame, cpi->this_frame_target,
+                       cpi->projected_frame_size,
+                       (cpi->projected_frame_size - cpi->this_frame_target),
+                       (int)cpi->total_target_vs_actual,
+                       (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
+                       (int)cpi->total_actual_bits, cm->base_qindex,
+                       cpi->active_best_quality, cpi->active_worst_quality,
+                       cpi->avg_frame_qindex, cpi->zbin_over_quant,
+                       cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
+                       cm->frame_type, cpi->gfu_boost,
+                       cpi->est_max_qcorrection_factor, (int)cpi->bits_left,
+                       cpi->total_coded_error_left,
+                       (double)cpi->bits_left / cpi->total_coded_error_left,
+                       cpi->tot_recode_hits);
         else
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f %8ld\n", cpi->common.current_video_frame, cpi->this_frame_target, cpi->projected_frame_size, (cpi->projected_frame_size - cpi->this_frame_target), (int)cpi->total_target_vs_actual, (cpi->oxcf.starting_buffer_level - cpi->bits_off_target), (int)cpi->total_actual_bits, cm->base_qindex, cpi->active_best_quality, cpi->active_worst_quality,  cpi->avg_frame_qindex, cpi->zbin_over_quant, cm->refresh_golden_frame, cm->refresh_alt_ref_frame, cm->frame_type, cpi->gfu_boost, cpi->est_max_qcorrection_factor, (int)cpi->bits_left, cpi->total_coded_error_left,   cpi->tot_recode_hits);
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
+                       "%6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
+                       "%8ld\n",
+                       cpi->common.current_video_frame,
+                       cpi->this_frame_target, cpi->projected_frame_size,
+                       (cpi->projected_frame_size - cpi->this_frame_target),
+                       (int)cpi->total_target_vs_actual,
+                       (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
+                       (int)cpi->total_actual_bits, cm->base_qindex,
+                       cpi->active_best_quality, cpi->active_worst_quality,
+                       cpi->avg_frame_qindex, cpi->zbin_over_quant,
+                       cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
+                       cm->frame_type, cpi->gfu_boost,
+                       cpi->est_max_qcorrection_factor, (int)cpi->bits_left,
+                       cpi->total_coded_error_left, cpi->tot_recode_hits);
 
         fclose(f);
 
@@ -4544,7 +4469,10 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
             FILE *fmodes = fopen("Modes.stt", "a");
             int i;
 
-            fprintf(fmodes, "%6d:%1d:%1d:%1d ", cpi->common.current_video_frame, cm->frame_type, cm->refresh_golden_frame, cm->refresh_alt_ref_frame);
+            fprintf(fmodes, "%6d:%1d:%1d:%1d ",
+                        cpi->common.current_video_frame,
+                        cm->frame_type, cm->refresh_golden_frame,
+                        cm->refresh_alt_ref_frame);
 
             for (i = 0; i < MAX_MODES; i++)
                 fprintf(fmodes, "%5d ", cpi->mode_chosen_counts[i]);
@@ -4590,23 +4518,23 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
     cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
 
     if (cpi->gold_is_last)
-        cpi->ref_frame_flags &= !VP8_GOLD_FLAG;
+        cpi->ref_frame_flags &= ~VP8_GOLD_FLAG;
 
     if (cpi->alt_is_last)
-        cpi->ref_frame_flags &= !VP8_ALT_FLAG;
+        cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
 
     if (cpi->gold_is_alt)
-        cpi->ref_frame_flags &= !VP8_ALT_FLAG;
+        cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
 
 
     if (cpi->oxcf.error_resilient_mode)
     {
         // Is this an alternate reference update
         if (cpi->common.refresh_alt_ref_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->alt_ref_frame);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
 
         if (cpi->common.refresh_golden_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->golden_frame);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
     }
     else
     {
@@ -4652,15 +4580,17 @@ static void encode_frame_to_data_rate(VP8_COMP *cpi, unsigned long *size, unsign
 
 
 
-    if (0)
+#if 0
     {
         char filename[512];
         FILE *recon_file;
         sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
         recon_file = fopen(filename, "wb");
-        fwrite(cm->last_frame.buffer_alloc, cm->last_frame.frame_size, 1, recon_file);
+        fwrite(cm->yv12_fb[cm->lst_fb_idx].buffer_alloc,
+               cm->yv12_fb[cm->lst_fb_idx].frame_size, 1, recon_file);
         fclose(recon_file);
     }
+#endif
 
     // DEBUG
     //vp8_write_yuv_frame("encoder_recon.yuv", cm->frame_to_show);
@@ -4682,7 +4612,7 @@ int vp8_is_gf_update_needed(VP8_PTR ptr)
 void vp8_check_gf_quality(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
-    int gf_active_pct = (100 * cm->gf_active_count) / (cm->mb_rows * cm->mb_cols);
+    int gf_active_pct = (100 * cpi->gf_active_count) / (cm->mb_rows * cm->mb_cols);
     int gf_ref_usage_pct = (cpi->count_mb_ref_frame_usage[GOLDEN_FRAME] * 100) / (cm->mb_rows * cm->mb_cols);
     int last_ref_zz_useage = (cpi->inter_zz_count * 100) / (cm->mb_rows * cm->mb_cols);
 
@@ -4720,8 +4650,6 @@ void vp8_check_gf_quality(VP8_COMP *cpi)
     }
 
 #if 0
-
-    if (0)
     {
         FILE *f = fopen("gfneeded.stt", "a");
         fprintf(f, "%10d %10d %10d %10d %10ld \n",
@@ -4758,10 +4686,10 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 #if HAVE_ARMV7
 extern void vp8_push_neon(INT64 *store);
 extern void vp8_pop_neon(INT64 *store);
-static INT64 store_reg[8];
 #endif
 int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, INT64 time_stamp, INT64 end_time)
 {
+    INT64 store_reg[8];
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  timer;
@@ -4770,7 +4698,12 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
         return -1;
 
 #if HAVE_ARMV7
-    vp8_push_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_push_neon(store_reg);
+    }
 #endif
 
     vpx_usec_timer_start(&timer);
@@ -4779,7 +4712,12 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
     if (cpi->source_buffer_count != 0 && cpi->source_buffer_count >= cpi->oxcf.lag_in_frames)
     {
 #if HAVE_ARMV7
-        vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(store_reg);
+        }
 #endif
         return -1;
     }
@@ -4820,9 +4758,20 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
         s->source_time_stamp = time_stamp;
         s->source_frame_flags = frame_flags;
 #if HAVE_ARMV7
-        vp8_yv12_copy_src_frame_func_neon(sd, &s->source_buffer);
-#else
-        vp8_yv12_copy_frame_ptr(sd, &s->source_buffer);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_yv12_copy_src_frame_func_neon(sd, &s->source_buffer);
+        }
+#if CONFIG_RUNTIME_CPU_DETECT
+        else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+        {
+            vp8_yv12_copy_frame_ptr(sd, &s->source_buffer);
+        }
 #endif
         cpi->source_buffer_count = 1;
     }
@@ -4831,14 +4780,19 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
     cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 
 #if HAVE_ARMV7
-    vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_pop_neon(store_reg);
+    }
 #endif
 
     return 0;
 }
 int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, INT64 *time_stamp, INT64 *time_end, int flush)
 {
-
+    INT64 store_reg[8];
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  tsctimer;
@@ -4849,7 +4803,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         return -1;
 
 #if HAVE_ARMV7
-    vp8_push_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_push_neon(store_reg);
+    }
 #endif
 
     vpx_usec_timer_start(&cmptimer);
@@ -4950,6 +4909,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             cm->show_frame = 0;
             cpi->source_alt_ref_pending = FALSE;   // Clear Pending altf Ref flag.
             cpi->is_src_frame_alt_ref = 0;
+            cpi->is_next_src_alt_ref = 0;
         }
         else
 #endif
@@ -4961,26 +4921,18 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             {
                 if (cpi->source_encode_index ==  cpi->last_alt_ref_sei)
                 {
-#if VP8_TEMPORAL_ALT_REF
-
-                    if (cpi->oxcf.arnr_max_frames == 0)
-                    {
-                        cpi->is_src_frame_alt_ref = 1; // copy alt ref
-                    }
-                    else
-                    {
-                        cpi->is_src_frame_alt_ref = 0;
-                    }
-
-#else
                     cpi->is_src_frame_alt_ref = 1;
-#endif
                     cpi->last_alt_ref_sei    = -1;
                 }
                 else
                     cpi->is_src_frame_alt_ref = 0;
 
                 cpi->source_encode_index = (cpi->source_encode_index + 1) % cpi->oxcf.lag_in_frames;
+
+                if(cpi->source_encode_index == cpi->last_alt_ref_sei)
+                    cpi->is_next_src_alt_ref = 1;
+                else
+                    cpi->is_next_src_alt_ref = 0;
             }
 
 #endif
@@ -5008,7 +4960,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 #endif
 
 #if HAVE_ARMV7
-        vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(store_reg);
+        }
 #endif
         return -1;
     }
@@ -5051,7 +5008,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     if (!cpi)
     {
 #if HAVE_ARMV7
-        vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+        if (cm->rtcd.flags & HAS_NEON)
+#endif
+        {
+            vp8_pop_neon(store_reg);
+        }
 #endif
         return 0;
     }
@@ -5142,8 +5104,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     {
 
         // return to normal state
-        cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
-
         cm->refresh_entropy_probs = 1;
         cm->refresh_alt_ref_frame = 0;
         cm->refresh_golden_frame = 0;
@@ -5242,7 +5202,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 #endif
 
 #if HAVE_ARMV7
-    vp8_pop_neon(store_reg);
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_pop_neon(store_reg);
+    }
 #endif
 
     return 0;

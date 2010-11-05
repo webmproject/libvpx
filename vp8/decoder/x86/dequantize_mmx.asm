@@ -1,10 +1,11 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
@@ -49,12 +50,12 @@ sym(vp8_dequantize_b_impl_mmx):
     ret
 
 
-;void dequant_idct_mmx(short *input, short *dq, short *output, int pitch)
-global sym(vp8_dequant_idct_mmx)
-sym(vp8_dequant_idct_mmx):
+;void dequant_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride)
+global sym(vp8_dequant_idct_add_mmx)
+sym(vp8_dequant_idct_add_mmx):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 4
+    SHADOW_ARGS_TO_STACK 6
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -76,7 +77,8 @@ sym(vp8_dequant_idct_mmx):
         movq        mm3,    [rax+24]
         pmullw      mm3,    [rdx+24]
 
-        mov         rdx,    arg(2) ;output
+        mov         rdx,    arg(3) ;dest
+        mov         rsi,    arg(2) ;pred
         pxor        mm7,    mm7
 
 
@@ -87,7 +89,8 @@ sym(vp8_dequant_idct_mmx):
         movq        [rax+24],mm7
 
 
-        movsxd      rax,            dword ptr arg(3) ;pitch
+        movsxd      rax,            dword ptr arg(4) ;pitch
+        movsxd      rdi,            dword ptr arg(5) ;stride
 
         psubw       mm0,            mm2             ; b1= 0-2
         paddw       mm2,            mm2             ;
@@ -95,11 +98,11 @@ sym(vp8_dequant_idct_mmx):
         movq        mm5,            mm1
         paddw       mm2,            mm0             ; a1 =0+2
 
-        pmulhw      mm5,            [x_s1sqr2 GLOBAL];
+        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
         paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
 
         movq        mm7,            mm3             ;
-        pmulhw      mm7,            [x_c1sqr2less1 GLOBAL];
+        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
 
         paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
         psubw       mm7,            mm5             ; c1
@@ -107,10 +110,10 @@ sym(vp8_dequant_idct_mmx):
         movq        mm5,            mm1
         movq        mm4,            mm3
 
-        pmulhw      mm5,            [x_c1sqr2less1 GLOBAL]
+        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
         paddw       mm5,            mm1
 
-        pmulhw      mm3,            [x_s1sqr2 GLOBAL]
+        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
         paddw       mm3,            mm4
 
         paddw       mm3,            mm5             ; d1
@@ -150,11 +153,11 @@ sym(vp8_dequant_idct_mmx):
         movq        mm5,            mm1
         paddw       mm2,            mm0             ; a1 =0+2
 
-        pmulhw      mm5,            [x_s1sqr2 GLOBAL];
+        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
         paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
 
         movq        mm7,            mm3             ;
-        pmulhw      mm7,            [x_c1sqr2less1 GLOBAL];
+        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
 
         paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
         psubw       mm7,            mm5             ; c1
@@ -162,16 +165,16 @@ sym(vp8_dequant_idct_mmx):
         movq        mm5,            mm1
         movq        mm4,            mm3
 
-        pmulhw      mm5,            [x_c1sqr2less1 GLOBAL]
+        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
         paddw       mm5,            mm1
 
-        pmulhw      mm3,            [x_s1sqr2 GLOBAL]
+        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
         paddw       mm3,            mm4
 
         paddw       mm3,            mm5             ; d1
-        paddw       mm0,            [fours GLOBAL]
+        paddw       mm0,            [GLOBAL(fours)]
 
-        paddw       mm2,            [fours GLOBAL]
+        paddw       mm2,            [GLOBAL(fours)]
         movq        mm6,            mm2             ; a1
 
         movq        mm4,            mm0             ; b1
@@ -206,13 +209,34 @@ sym(vp8_dequant_idct_mmx):
         punpckldq   mm2,            mm4             ; 32 22 12 02
         punpckhdq   mm5,            mm4             ; 33 23 13 03
 
-        movq        [rdx],          mm0
+        pxor        mm7,            mm7
 
-        movq        [rdx+rax],      mm1
-        movq        [rdx+rax*2],    mm2
+        movd        mm4,            [rsi]
+        punpcklbw   mm4,            mm7
+        paddsw      mm0,            mm4
+        packuswb    mm0,            mm7
+        movd        [rdx],          mm0
 
-        add         rdx,            rax
-        movq        [rdx+rax*2],    mm5
+        movd        mm4,            [rsi+rax]
+        punpcklbw   mm4,            mm7
+        paddsw      mm1,            mm4
+        packuswb    mm1,            mm7
+        movd        [rdx+rdi],      mm1
+
+        movd        mm4,            [rsi+2*rax]
+        punpcklbw   mm4,            mm7
+        paddsw      mm2,            mm4
+        packuswb    mm2,            mm7
+        movd        [rdx+rdi*2],    mm2
+
+        add         rdx,            rdi
+        add         rsi,            rax
+
+        movd        mm4,            [rsi+2*rax]
+        punpcklbw   mm4,            mm7
+        paddsw      mm5,            mm4
+        packuswb    mm5,            mm7
+        movd        [rdx+rdi*2],    mm5
 
     ; begin epilog
     pop rdi
@@ -223,12 +247,12 @@ sym(vp8_dequant_idct_mmx):
     ret
 
 
-;void dequant_dc_idct_mmx(short *input, short *dq, short *output, int pitch, int Dc)
-global sym(vp8_dequant_dc_idct_mmx)
-sym(vp8_dequant_dc_idct_mmx):
+;void dequant_dc_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc)
+global sym(vp8_dequant_dc_idct_add_mmx)
+sym(vp8_dequant_dc_idct_add_mmx):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 5
+    SHADOW_ARGS_TO_STACK 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -236,8 +260,6 @@ sym(vp8_dequant_dc_idct_mmx):
 
         mov         rax,    arg(0) ;input
         mov         rdx,    arg(1) ;dq
-
-        movsxd      rcx,    dword ptr arg(4) ;Dc
 
         movq        mm0,    [rax   ]
         pmullw      mm0,    [rdx]
@@ -251,7 +273,8 @@ sym(vp8_dequant_dc_idct_mmx):
         movq        mm3,    [rax+24]
         pmullw      mm3,    [rdx+24]
 
-        mov         rdx,    arg(2) ;output
+        mov         rdx,    arg(3) ;dest
+        mov         rsi,    arg(2) ;pred
         pxor        mm7,    mm7
 
 
@@ -261,8 +284,15 @@ sym(vp8_dequant_dc_idct_mmx):
         movq        [rax+16],mm7
         movq        [rax+24],mm7
 
-        pinsrw      mm0,    rcx,  0
-        movsxd      rax,            dword ptr arg(3) ;pitch
+        ; move lower word of Dc to lower word of mm0
+        psrlq       mm0,    16
+        movzx       rcx,    word ptr arg(6) ;Dc
+        psllq       mm0,    16
+        movq        mm7,    rcx
+        por         mm0,    mm7
+
+        movsxd      rax,            dword ptr arg(4) ;pitch
+        movsxd      rdi,            dword ptr arg(5) ;stride
 
         psubw       mm0,            mm2             ; b1= 0-2
         paddw       mm2,            mm2             ;
@@ -270,11 +300,11 @@ sym(vp8_dequant_dc_idct_mmx):
         movq        mm5,            mm1
         paddw       mm2,            mm0             ; a1 =0+2
 
-        pmulhw      mm5,            [x_s1sqr2 GLOBAL];
+        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
         paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
 
         movq        mm7,            mm3             ;
-        pmulhw      mm7,            [x_c1sqr2less1 GLOBAL];
+        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
 
         paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
         psubw       mm7,            mm5             ; c1
@@ -282,10 +312,10 @@ sym(vp8_dequant_dc_idct_mmx):
         movq        mm5,            mm1
         movq        mm4,            mm3
 
-        pmulhw      mm5,            [x_c1sqr2less1 GLOBAL]
+        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
         paddw       mm5,            mm1
 
-        pmulhw      mm3,            [x_s1sqr2 GLOBAL]
+        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
         paddw       mm3,            mm4
 
         paddw       mm3,            mm5             ; d1
@@ -325,11 +355,11 @@ sym(vp8_dequant_dc_idct_mmx):
         movq        mm5,            mm1
         paddw       mm2,            mm0             ; a1 =0+2
 
-        pmulhw      mm5,            [x_s1sqr2 GLOBAL];
+        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
         paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
 
         movq        mm7,            mm3             ;
-        pmulhw      mm7,            [x_c1sqr2less1 GLOBAL];
+        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
 
         paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
         psubw       mm7,            mm5             ; c1
@@ -337,16 +367,16 @@ sym(vp8_dequant_dc_idct_mmx):
         movq        mm5,            mm1
         movq        mm4,            mm3
 
-        pmulhw      mm5,            [x_c1sqr2less1 GLOBAL]
+        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
         paddw       mm5,            mm1
 
-        pmulhw      mm3,            [x_s1sqr2 GLOBAL]
+        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
         paddw       mm3,            mm4
 
         paddw       mm3,            mm5             ; d1
-        paddw       mm0,            [fours GLOBAL]
+        paddw       mm0,            [GLOBAL(fours)]
 
-        paddw       mm2,            [fours GLOBAL]
+        paddw       mm2,            [GLOBAL(fours)]
         movq        mm6,            mm2             ; a1
 
         movq        mm4,            mm0             ; b1
@@ -381,13 +411,34 @@ sym(vp8_dequant_dc_idct_mmx):
         punpckldq   mm2,            mm4             ; 32 22 12 02
         punpckhdq   mm5,            mm4             ; 33 23 13 03
 
-        movq        [rdx],          mm0
+        pxor        mm7,            mm7
 
-        movq        [rdx+rax],      mm1
-        movq        [rdx+rax*2],    mm2
+        movd        mm4,            [rsi]
+        punpcklbw   mm4,            mm7
+        paddsw      mm0,            mm4
+        packuswb    mm0,            mm7
+        movd        [rdx],          mm0
 
-        add         rdx,            rax
-        movq        [rdx+rax*2],    mm5
+        movd        mm4,            [rsi+rax]
+        punpcklbw   mm4,            mm7
+        paddsw      mm1,            mm4
+        packuswb    mm1,            mm7
+        movd        [rdx+rdi],      mm1
+
+        movd        mm4,            [rsi+2*rax]
+        punpcklbw   mm4,            mm7
+        paddsw      mm2,            mm4
+        packuswb    mm2,            mm7
+        movd        [rdx+rdi*2],    mm2
+
+        add         rdx,            rdi
+        add         rsi,            rax
+
+        movd        mm4,            [rsi+2*rax]
+        punpcklbw   mm4,            mm7
+        paddsw      mm5,            mm4
+        packuswb    mm5,            mm7
+        movd        [rdx+rdi*2],    mm5
 
     ; begin epilog
     pop rdi

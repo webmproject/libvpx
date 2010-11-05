@@ -1,0 +1,88 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example", "example.vcproj", "{BA5FE66F-38DD-E034-F542-B1578C5FB950}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74} = {DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2} = {E1360C65-D375-4335-8057-7ED99CC3F9B2}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "obj_int_extract", "obj_int_extract.vcproj", "{E1360C65-D375-4335-8057-7ED99CC3F9B2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vpx", "vpx.vcproj", "{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2} = {E1360C65-D375-4335-8057-7ED99CC3F9B2}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xma", "xma.vcproj", "{A955FC4A-73F1-44F7-135E-30D84D32F022}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2} = {E1360C65-D375-4335-8057-7ED99CC3F9B2}
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74} = {DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|Pocket PC 2003 (ARMV4) = Debug|Pocket PC 2003 (ARMV4)
+		Debug|Win32 = Debug|Win32
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|Pocket PC 2003 (ARMV4) = Release|Pocket PC 2003 (ARMV4)
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Debug|Mixed Platforms.ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Debug|Mixed Platforms.Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Debug|Mixed Platforms.Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Debug|Pocket PC 2003 (ARMV4).Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Debug|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Debug|Win32.ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Release|Mixed Platforms.ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Release|Mixed Platforms.Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Release|Mixed Platforms.Deploy.0 = Release|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
+		{BA5FE66F-38DD-E034-F542-B1578C5FB950}.Release|Win32.ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Debug|Mixed Platforms.ActiveCfg = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Debug|Mixed Platforms.Build.0 = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Debug|Win32.ActiveCfg = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Debug|Win32.Build.0 = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Release|Win32.ActiveCfg = Release|Win32
+		{E1360C65-D375-4335-8057-7ED99CC3F9B2}.Release|Win32.Build.0 = Release|Win32
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Debug|Mixed Platforms.ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Debug|Mixed Platforms.Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Debug|Mixed Platforms.Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Debug|Pocket PC 2003 (ARMV4).Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Debug|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Debug|Win32.ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Release|Mixed Platforms.ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Release|Mixed Platforms.Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Release|Mixed Platforms.Deploy.0 = Release|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
+		{DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74}.Release|Win32.ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Debug|Mixed Platforms.ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Debug|Mixed Platforms.Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Debug|Mixed Platforms.Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Debug|Pocket PC 2003 (ARMV4).ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Debug|Pocket PC 2003 (ARMV4).Build.0 = Debug|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Debug|Pocket PC 2003 (ARMV4).Deploy.0 = Debug|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Debug|Win32.ActiveCfg = Debug|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Release|Mixed Platforms.ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Release|Mixed Platforms.Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Release|Mixed Platforms.Deploy.0 = Release|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Release|Pocket PC 2003 (ARMV4).ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Release|Pocket PC 2003 (ARMV4).Build.0 = Release|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Release|Pocket PC 2003 (ARMV4).Deploy.0 = Release|Pocket PC 2003 (ARMV4)
+		{A955FC4A-73F1-44F7-135E-30D84D32F022}.Release|Win32.ActiveCfg = Release|Pocket PC 2003 (ARMV4)
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

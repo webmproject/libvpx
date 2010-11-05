@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -27,7 +28,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
     int ithread = ((ENCODETHREAD_DATA *)p_data)->ithread;
     VP8_COMP *cpi   = (VP8_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr1);
     MB_ROW_COMP *mbri = (MB_ROW_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr2);
-    ENTROPY_CONTEXT mb_row_left_context[4][4];
+    ENTROPY_CONTEXT_PLANES mb_row_left_context;
 
     //printf("Started thread %d\n", ithread);
 
@@ -55,8 +56,10 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     int i;
                     int recon_yoffset, recon_uvoffset;
                     int mb_col;
-                    int recon_y_stride = cm->last_frame.y_stride;
-                    int recon_uv_stride = cm->last_frame.uv_stride;
+                    int ref_fb_idx = cm->lst_fb_idx;
+                    int dst_fb_idx = cm->new_fb_idx;
+                    int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
+                    int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
                     volatile int *last_row_current_mb_col;
 
                     if (ithread > 0)
@@ -65,11 +68,8 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         last_row_current_mb_col = &cpi->current_mb_col_main;
 
                     // reset above block coeffs
-                    xd->above_context[Y1CONTEXT] = cm->above_context[Y1CONTEXT];
-                    xd->above_context[UCONTEXT ] = cm->above_context[UCONTEXT ];
-                    xd->above_context[VCONTEXT ] = cm->above_context[VCONTEXT ];
-                    xd->above_context[Y2CONTEXT] = cm->above_context[Y2CONTEXT];
-                    xd->left_context = mb_row_left_context;
+                    xd->above_context = cm->above_context;
+                    xd->left_context = &mb_row_left_context;
 
                     vp8_zero(mb_row_left_context);
 
@@ -106,9 +106,9 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
                         x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
 
-                        xd->dst.y_buffer = cm->new_frame.y_buffer + recon_yoffset;
-                        xd->dst.u_buffer = cm->new_frame.u_buffer + recon_uvoffset;
-                        xd->dst.v_buffer = cm->new_frame.v_buffer + recon_uvoffset;
+                        xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+                        xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+                        xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
                         xd->left_available = (mb_col != 0);
 
                         // Is segmentation enabled
@@ -117,14 +117,14 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         {
                             // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
                             if (cpi->segmentation_map[seg_map_index+mb_col] <= 3)
-                                xd->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
+                                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
                             else
-                                xd->mbmi.segment_id = 0;
+                                xd->mode_info_context->mbmi.segment_id = 0;
 
                             vp8cx_mb_init_quantizer(cpi, x);
                         }
                         else
-                            xd->mbmi.segment_id = 0;         // Set to Segment 0 by default
+                            xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
 
 
                         if (cm->frame_type == KEY_FRAME)
@@ -147,24 +147,21 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                                 for (b = 0; b < xd->mbmi.partition_count; b++)
                                 {
-                                    inter_b_modes[xd->mbmi.partition_bmi[b].mode] ++;
+                                    inter_b_modes[x->partition->bmi[b].mode] ++;
                                 }
                             }
 
 #endif
 
                             // Count of last ref frame 0,0 useage
-                            if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
+                            if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                                 cpi->inter_zz_count ++;
 
                         }
 
                         cpi->tplist[mb_row].stop = *tp;
 
-                        xd->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
-
-                        // store macroblock mode info into context array
-                        vpx_memcpy(&xd->mode_info_context->mbmi, &xd->mbmi, sizeof(xd->mbmi));
+                        x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
 
                         for (i = 0; i < 16; i++)
                             vpx_memcpy(&xd->mode_info_context->bmi[i], &xd->block[i].bmi, sizeof(xd->block[i].bmi));
@@ -178,15 +175,13 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         recon_uvoffset += 8;
 
                         // Keep track of segment useage
-                        segment_counts[xd->mbmi.segment_id] ++;
+                        segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
 
                         // skip to next mb
                         xd->mode_info_context++;
+                        x->partition_info++;
 
-                        xd->above_context[Y1CONTEXT] += 4;
-                        xd->above_context[UCONTEXT ] += 2;
-                        xd->above_context[VCONTEXT ] += 2;
-                        xd->above_context[Y2CONTEXT] ++;
+                        xd->above_context++;
 
                         cpi->mb_row_ei[ithread].current_mb_col = mb_col;
 
@@ -194,19 +189,21 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                     //extend the recon for intra prediction
                     vp8_extend_mb_row(
-                        &cm->new_frame,
+                        &cm->yv12_fb[dst_fb_idx],
                         xd->dst.y_buffer + 16,
                         xd->dst.u_buffer + 8,
                         xd->dst.v_buffer + 8);
 
                     // this is to account for the border
                     xd->mode_info_context++;
+                    x->partition_info++;
 
                     x->src.y_buffer += 16 * x->src.y_stride * (cpi->encoding_thread_count + 1) - 16 * cm->mb_cols;
                     x->src.u_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
                     x->src.v_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
 
                     xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
+                    x->partition_info += xd->mode_info_stride * cpi->encoding_thread_count;
 
                     if (ithread == (cpi->encoding_thread_count - 1) || mb_row == cm->mb_rows - 1)
                     {
@@ -256,13 +253,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
 
     z->vp8_short_fdct4x4     = x->vp8_short_fdct4x4;
     z->vp8_short_fdct8x4     = x->vp8_short_fdct8x4;
-    z->short_fdct4x4rd   = x->short_fdct4x4rd;
-    z->short_fdct8x4rd   = x->short_fdct8x4rd;
-    z->short_fdct8x4rd   = x->short_fdct8x4rd;
-    z->vp8_short_fdct4x4_ptr = x->vp8_short_fdct4x4_ptr;
     z->short_walsh4x4    = x->short_walsh4x4;
     z->quantize_b        = x->quantize_b;
-    z->quantize_brd      = x->quantize_brd;
 
     /*
     z->mvc              = x->mvc;
@@ -290,6 +282,7 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
     for (i = 0; i < 25; i++)
     {
         z->block[i].quant           = x->block[i].quant;
+        z->block[i].quant_shift     = x->block[i].quant_shift;
         z->block[i].zbin            = x->block[i].zbin;
         z->block[i].zrun_zbin_boost   = x->block[i].zrun_zbin_boost;
         z->block[i].round           = x->block[i].round;
@@ -334,11 +327,6 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
         vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
 
-        /*
-        memcpy(zd->above_context,        xd->above_context, sizeof(xd->above_context));
-        memcpy(zd->mb_segment_tree_probs,  xd->mb_segment_tree_probs, sizeof(xd->mb_segment_tree_probs));
-        memcpy(zd->segment_feature_data,  xd->segment_feature_data, sizeof(xd->segment_feature_data));
-        */
         for (i = 0; i < 25; i++)
         {
             zd->block[i].dequant = xd->block[i].dequant;
@@ -372,14 +360,15 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 #if CONFIG_RUNTIME_CPU_DETECT
         mbd->rtcd                   = xd->rtcd;
 #endif
-        mbd->gf_active_ptr            = xd->gf_active_ptr;
+        mb->gf_active_ptr            = x->gf_active_ptr;
 
         mb->vector_range             = 32;
 
         vpx_memset(mbr_ei[i].segment_counts, 0, sizeof(mbr_ei[i].segment_counts));
         mbr_ei[i].totalrate = 0;
 
-        mbd->mode_info        = cm->mi - 1;
+        mb->partition_info = x->pi + x->e_mbd.mode_info_stride * (i + 1);
+
         mbd->mode_info_context = cm->mi   + x->e_mbd.mode_info_stride * (i + 1);
         mbd->mode_info_stride  = cm->mode_info_stride;
 
@@ -389,8 +378,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mbd->frames_till_alt_ref_frame = cm->frames_till_alt_ref_frame;
 
         mb->src = * cpi->Source;
-        mbd->pre = cm->last_frame;
-        mbd->dst = cm->new_frame;
+        mbd->pre = cm->yv12_fb[cm->lst_fb_idx];
+        mbd->dst = cm->yv12_fb[cm->new_fb_idx];
 
         mb->src.y_buffer += 16 * x->src.y_stride * (i + 1);
         mb->src.u_buffer +=  8 * x->src.uv_stride * (i + 1);
@@ -406,10 +395,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mb->rddiv = cpi->RDDIV;
         mb->rdmult = cpi->RDMULT;
 
-        mbd->mbmi.mode = DC_PRED;
-        mbd->mbmi.uv_mode = DC_PRED;
-
-        mbd->left_context = cm->left_context;
+        mbd->left_context = &cm->left_context;
         mb->mvc = cm->fc.mvc;
 
         setup_mbby_copy(&mbr_ei[i].mb, x);

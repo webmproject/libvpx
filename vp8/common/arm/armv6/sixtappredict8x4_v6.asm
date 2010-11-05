@@ -1,10 +1,11 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
@@ -24,10 +25,10 @@
 ;and the result is stored in transpose.
 |vp8_sixtap_predict8x4_armv6| PROC
     stmdb       sp!, {r4 - r11, lr}
-    sub         sp, sp, #184                ;reserve space on stack for temporary storage: 20x(8+1) +4
+    str         r3, [sp, #-184]!            ;reserve space on stack for temporary storage, store yoffset
 
     cmp         r2, #0                      ;skip first_pass filter if xoffset=0
-    str         r3, [sp], #4                ;store yoffset
+    add         lr, sp, #4                  ;point to temporary buffer
     beq         skip_firstpass_filter
 
 ;first-pass filter
@@ -44,7 +45,6 @@
     mov         r2, #0x90000                ; height=9 is top part of counter
 
     sub         r1, r1, #8
-    mov         lr, #20
 
 |first_pass_hloop_v6|
     ldrb        r6, [r0, #-5]               ; load source data
@@ -82,10 +82,10 @@
     tst         r2, #0xff                   ; test loop counter
     usat        r11, #8, r11, asr #7
     add         r12, r12, #0x40
-    strh        r11, [sp], lr               ; result is transposed and stored, which
+    strh        r11, [lr], #20              ; result is transposed and stored, which
     usat        r12, #8, r12, asr #7
 
-    strh        r12, [sp], lr
+    strh        r12, [lr], #20
 
     movne       r11, r6
     movne       r12, r7
@@ -106,8 +106,7 @@
 
     subs        r2, r2, #0x10000
 
-    mov         r6, #158
-    sub         sp, sp, r6
+    sub         lr, lr, #158
 
     add         r0, r0, r1                  ; move to next input line
 
@@ -115,10 +114,7 @@
 
 ;second pass filter
 secondpass_filter
-    mov         r1, #18
-    sub         sp, sp, r1                  ; 18+4
-
-    ldr         r3, [sp, #-4]               ; load back yoffset
+    ldr         r3, [sp], #4                ; load back yoffset
     ldr         r0, [sp, #216]              ; load dst address from stack 180+36
     ldr         r1, [sp, #220]              ; load dst stride from stack 180+40
 
@@ -191,30 +187,28 @@ skip_firstpass_filter
     sub         r0, r0, r1, lsl #1
     sub         r1, r1, #8
     mov         r2, #9
-    mov         r3, #20
 
 skip_firstpass_hloop
     ldrb        r4, [r0], #1                ; load data
     subs        r2, r2, #1
     ldrb        r5, [r0], #1
-    strh        r4, [sp], r3                ; store it to immediate buffer
+    strh        r4, [lr], #20               ; store it to immediate buffer
     ldrb        r6, [r0], #1                ; load data
-    strh        r5, [sp], r3
+    strh        r5, [lr], #20
     ldrb        r7, [r0], #1
-    strh        r6, [sp], r3
+    strh        r6, [lr], #20
     ldrb        r8, [r0], #1
-    strh        r7, [sp], r3
+    strh        r7, [lr], #20
     ldrb        r9, [r0], #1
-    strh        r8, [sp], r3
+    strh        r8, [lr], #20
     ldrb        r10, [r0], #1
-    strh        r9, [sp], r3
+    strh        r9, [lr], #20
     ldrb        r11, [r0], #1
-    strh        r10, [sp], r3
+    strh        r10, [lr], #20
     add         r0, r0, r1                  ; move to next input line
-    strh        r11, [sp], r3
+    strh        r11, [lr], #20
 
-    mov         r4, #158
-    sub         sp, sp, r4                  ; move over to next column
+    sub         lr, lr, #158                ; move over to next column
     bne         skip_firstpass_hloop
 
     b           secondpass_filter

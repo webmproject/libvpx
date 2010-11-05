@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -14,6 +15,7 @@
 
 
 void vp8_arch_x86_encoder_init(VP8_COMP *cpi);
+void vp8_arch_arm_encoder_init(VP8_COMP *cpi);
 
 
 void (*vp8_fast_quantize_b)(BLOCK *b, BLOCKD *d);
@@ -38,6 +40,12 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.variance.sad8x8x3              = vp8_sad8x8x3_c;
     cpi->rtcd.variance.sad4x4x3              = vp8_sad4x4x3_c;
 
+    cpi->rtcd.variance.sad16x16x8            = vp8_sad16x16x8_c;
+    cpi->rtcd.variance.sad16x8x8             = vp8_sad16x8x8_c;
+    cpi->rtcd.variance.sad8x16x8             = vp8_sad8x16x8_c;
+    cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_c;
+    cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_c;
+
     cpi->rtcd.variance.sad16x16x4d           = vp8_sad16x16x4d_c;
     cpi->rtcd.variance.sad16x8x4d            = vp8_sad16x8x4d_c;
     cpi->rtcd.variance.sad8x16x4d            = vp8_sad8x16x4d_c;
@@ -55,6 +63,9 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_c;
     cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;
     cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_c;
+    cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_c;
+    cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_c;
+    cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_c;
     cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_c;
 
     cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;
@@ -67,8 +78,8 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 
     cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
     cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
-    cpi->rtcd.fdct.fast4x4                   = vp8_fast_fdct4x4_c;
-    cpi->rtcd.fdct.fast8x4                   = vp8_fast_fdct8x4_c;
+    cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
+    cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
     cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
 
     cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
@@ -91,6 +102,10 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 
 #if ARCH_X86 || ARCH_X86_64
     vp8_arch_x86_encoder_init(cpi);
+#endif
+
+#if ARCH_ARM
+    vp8_arch_arm_encoder_init(cpi);
 #endif
 
 }

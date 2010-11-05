@@ -1,20 +1,21 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
 %include "vpx_ports/x86_abi_support.asm"
 
 ;void vp8_subtract_b_mmx_impl(unsigned char *z,  int src_stride,
-;                            unsigned short *diff, unsigned char *Predictor,
+;                            short *diff, unsigned char *Predictor,
 ;                            int pitch);
 global sym(vp8_subtract_b_mmx_impl)
-sym(vp8_subtract_b_mmx_impl)
+sym(vp8_subtract_b_mmx_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
@@ -150,7 +151,7 @@ submby_loop:
 
 ;void vp8_subtract_mbuv_mmx(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride)
 global sym(vp8_subtract_mbuv_mmx)
-sym(vp8_subtract_mbuv_mmx)
+sym(vp8_subtract_mbuv_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5

@@ -1,10 +1,11 @@
 ##
-##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+##  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
@@ -38,13 +39,8 @@ dist:
 	@if [ -d "$(DIST_DIR)/src" ]; then \
             mkdir -p "$(DIST_DIR)/build"; \
             cd "$(DIST_DIR)/build"; \
-            if [ "$(TGT_CC)" = "rvct" ] ; then \
-				echo "../src/configure --target=$(TOOLCHAIN) --libc=$(ALT_LIBC)"; \
-				../src/configure --target=$(TOOLCHAIN) --libc=$(ALT_LIBC); \
-			else \
-				echo "../src/configure --target=$(TOOLCHAIN)"; \
-				../src/configure --target=$(TOOLCHAIN); \
-			fi; \
+            echo "Rerunning configure $(CONFIGURE_ARGS)"; \
+            ../src/configure $(CONFIGURE_ARGS); \
             $(if $(filter vs%,$(TGT_CC)),make NO_LAUNCH_DEVENV=1;) \
         fi
 	@if [ -d "$(DIST_DIR)" ]; then \
@@ -56,7 +52,6 @@ dist:
         fi
 
 
-svnstat: ALL_TARGETS:=$(firstword $(ALL_TARGETS))
 endif
 
 ifneq ($(target),)
@@ -70,7 +65,7 @@ endif
 BUILD_ROOT?=.
 VPATH=$(SRC_PATH_BARE)
 CFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT) -I$(SRC_PATH)
-ASFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT) -I$(SRC_PATH)
+ASFLAGS+=-I$(BUILD_PFX)$(BUILD_ROOT)/ -I$(SRC_PATH)/
 DIST_DIR?=dist
 HOSTCC?=gcc
 TGT_ISA:=$(word 1, $(subst -, ,$(TOOLCHAIN)))
@@ -219,6 +214,20 @@ $(1):
 	$(qexec)$$(AR) $$(ARFLAGS) $$@ $$?
 endef
 
+define so_template
+# Not using a pattern rule here because we don't want to generate empty
+# archives when they are listed as a dependency in files not responsible
+# for creating them.
+#
+# This needs further abstraction for dealing with non-GNU linkers.
+$(1):
+	$(if $(quiet),@echo "    [LD] $$@")
+	$(qexec)$$(LD) -shared $$(LDFLAGS) \
+            -Wl,--no-undefined -Wl,-soname,$$(SONAME) \
+            -Wl,--version-script,$$(SO_VERSION_SCRIPT) -o $$@ \
+            $$(filter %.o,$$?) $$(extralibs)
+endef
+
 define lipo_lib_template
 $(1): $(addsuffix /$(1),$(FAT_ARCHS))
 	$(if $(quiet),@echo "    [LIPO] $$@")
@@ -282,6 +291,7 @@ LIBS=$(call enabled,LIBS)
 .libs: $(LIBS)
 	@touch $@
 $(foreach lib,$(filter %_g.a,$(LIBS)),$(eval $(call archive_template,$(lib))))
+$(foreach lib,$(filter %so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH),$(LIBS)),$(eval $(call so_template,$(lib))))
 
 INSTALL-LIBS=$(call cond_enabled,CONFIG_INSTALL_LIBS,INSTALL-LIBS)
 ifeq ($(MAKECMDGOALS),dist)
@@ -319,6 +329,7 @@ ifneq ($(call enabled,DIST-SRCS),)
     DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_def.sh
     DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_proj.sh
     DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_sln.sh
+    DIST-SRCS-$(CONFIG_MSVS)  += build/x86-msvs/yasm.rules
     DIST-SRCS-$(CONFIG_RVCT) += build/make/armlink_adapter.sh
     #
     # This isn't really ARCH_ARM dependent, it's dependant on whether we're
@@ -347,12 +358,3 @@ INSTALL_TARGETS += .install-docs .install-srcs .install-libs .install-bins
 all-$(target): $(BUILD_TARGETS)
 install:: $(INSTALL_TARGETS)
 dist: $(INSTALL_TARGETS)
-
-#
-# Development helper targets
-#
-ifneq ($(SRC_PATH_BARE),)
-.PHONY: svnstat
-svnstat:
-	svn stat $(SRC_PATH_BARE)
-endif

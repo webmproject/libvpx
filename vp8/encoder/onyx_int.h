@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -28,7 +29,6 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
 
-#define INTRARDOPT
 //#define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4
 #define DEFAULT_GF_INTERVAL         7
@@ -229,20 +229,33 @@ typedef struct VP8_ENCODER_RTCD
     vp8_search_rtcd_vtable_t    search;
 } VP8_ENCODER_RTCD;
 
+enum
+{
+    BLOCK_16X8,
+    BLOCK_8X16,
+    BLOCK_8X8,
+    BLOCK_4X4,
+    BLOCK_16X16,
+    BLOCK_MAX_SEGMENTS
+};
+
 typedef struct
 {
 
-    DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y1zbin[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y1round[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1quant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1zbin[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1round[QINDEX_RANGE][16]);
 
-    DECLARE_ALIGNED(16, short, Y2quant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y2zbin[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y2round[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, Y2quant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2quant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2zbin[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2round[QINDEX_RANGE][16]);
 
-    DECLARE_ALIGNED(16, short, UVquant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, UVzbin[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, UVround[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, UVquant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVquant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVzbin[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVround[QINDEX_RANGE][16]);
 
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2[QINDEX_RANGE][16]);
@@ -270,6 +283,7 @@ typedef struct
 
     int last_alt_ref_sei;
     int is_src_frame_alt_ref;
+    int is_next_src_alt_ref;
 
     int gold_is_last; // golden frame same as last frame ( short circuit gold searches)
     int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
@@ -306,15 +320,12 @@ typedef struct
     int subseqblockweight;
     int errthresh;
 
-#ifdef INTRARDOPT
     int RDMULT;
     int RDDIV ;
 
     TOKENEXTRA *rdtok;
-    int intra_rd_opt;
     vp8_writer rdbc;
     int intra_mode_costs[10];
-#endif
 
 
     CODING_CONTEXT coding_context;
@@ -355,9 +366,14 @@ typedef struct
     int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
     int mid_gf_extra_bits;             // A few extra bits for the frame half way between two gfs.
 
-    int kf_group_bits;                // Projected total bits available for a key frame group of frames
-    int kf_group_error_left;           // Error score of frames still to be coded in kf group
-    int kf_bits;                     // Bits for the key frame in a key frame group - 2 pass only
+    // Projected total bits available for a key frame group of frames
+    long long kf_group_bits;
+
+    // Error score of frames still to be coded in kf group
+    long long kf_group_error_left;
+
+    // Bits for the key frame in a key frame group - 2 pass only
+    int kf_bits;
 
     int non_gf_bitrate_adjustment;     // Used in the few frames following a GF to recover the extra bits spent in that GF
     int initial_gf_use;               // percentage use of gf 2 frames after gf
@@ -369,6 +385,7 @@ typedef struct
     int max_gf_interval;
     int baseline_gf_interval;
     int gf_decay_rate;
+    int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
 
     INT64 key_frame_count;
     INT64 tot_key_frame_bits;
@@ -454,14 +471,14 @@ typedef struct
 
     int target_bandwidth;
     long long bits_left;
-    FIRSTPASS_STATS total_stats;
-    FIRSTPASS_STATS this_frame_stats;
+    FIRSTPASS_STATS *total_stats;
+    FIRSTPASS_STATS *this_frame_stats;
     FIRSTPASS_STATS *stats_in, *stats_in_end;
     struct vpx_codec_pkt_list  *output_pkt_list;
     int                          first_pass_done;
     unsigned char *fp_motion_map;
-    FILE *fp_motion_mapfile;
-    int fpmm_pos;
+
+    unsigned char *fp_motion_map_stats, *fp_motion_map_stats_save;
 
 #if 0
     // Experimental code for lagged and one pass
@@ -522,8 +539,8 @@ typedef struct
     int motion_lvl;
     int motion_speed;
     int motion_var;
-    int next_iiratio;
-    int this_iiratio;
+    unsigned int next_iiratio;
+    unsigned int this_iiratio;
     int this_frame_modified_error;
 
     double norm_intra_err_per_mb;
@@ -584,7 +601,7 @@ typedef struct
     fractional_mv_step_fp *find_fractional_mv_step;
     vp8_full_search_fn_t full_search_sad;
     vp8_diamond_search_fn_t diamond_search_sad;
-    vp8_variance_fn_ptr_t fn_ptr;
+    vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SEGMENTS];
     unsigned int time_receive_data;
     unsigned int time_compress_data;
     unsigned int time_pick_lpf;
@@ -607,9 +624,11 @@ typedef struct
 #endif
 #if VP8_TEMPORAL_ALT_REF
     SOURCE_SAMPLE alt_ref_buffer;
-    unsigned char *frames[MAX_LAG_BUFFERS];
-    int fixed_divide[255];
+    YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
+    int fixed_divide[512];
 #endif
+    // Flag to indicate temporal filter method
+    int use_weighted_temporal_filter;
 
 #if CONFIG_PSNR
     int    count;
@@ -637,6 +656,12 @@ typedef struct
     int b_calculate_ssimg;
 #endif
     int b_calculate_psnr;
+
+
+    unsigned char *gf_active_flags;   // Record of which MBs still refer to last golden frame either directly or through 0,0
+    int gf_active_count;
+
+
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);

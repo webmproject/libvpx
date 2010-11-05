@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -13,9 +14,9 @@
 #include "reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 
-// For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *x) and
-// vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
-
+/* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *x) and
+ * vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
+ */
 void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 {
     int i;
@@ -41,8 +42,8 @@ void vp8_build_intra_predictors_mby(MACROBLOCKD *x)
         yleft_col[i] = x->dst.y_buffer [i* x->dst.y_stride -1];
     }
 
-    // for Y
-    switch (x->mbmi.mode)
+    /* for Y */
+    switch (x->mode_info_context->mbmi.mode)
     {
     case DC_PRED:
     {
@@ -155,15 +156,15 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
     int r, c, i;
 
     int y_stride = x->dst.y_stride;
-    ypred_ptr = x->dst.y_buffer; //x->predictor;
+    ypred_ptr = x->dst.y_buffer; /*x->predictor;*/
 
     for (i = 0; i < 16; i++)
     {
         yleft_col[i] = x->dst.y_buffer [i* x->dst.y_stride -1];
     }
 
-    // for Y
-    switch (x->mbmi.mode)
+    /* for Y */
+    switch (x->mode_info_context->mbmi.mode)
     {
     case DC_PRED:
     {
@@ -203,11 +204,11 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
             expected_dc = 128;
         }
 
-        //vpx_memset(ypred_ptr, expected_dc, 256);
+        /*vpx_memset(ypred_ptr, expected_dc, 256);*/
         for (r = 0; r < 16; r++)
         {
             vpx_memset(ypred_ptr, expected_dc, 16);
-            ypred_ptr += y_stride; //16;
+            ypred_ptr += y_stride; /*16;*/
         }
     }
     break;
@@ -221,7 +222,7 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
             ((int *)ypred_ptr)[1] = ((int *)yabove_row)[1];
             ((int *)ypred_ptr)[2] = ((int *)yabove_row)[2];
             ((int *)ypred_ptr)[3] = ((int *)yabove_row)[3];
-            ypred_ptr += y_stride; //16;
+            ypred_ptr += y_stride; /*16;*/
         }
     }
     break;
@@ -232,7 +233,7 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
         {
 
             vpx_memset(ypred_ptr, yleft_col[r], 16);
-            ypred_ptr += y_stride;  //16;
+            ypred_ptr += y_stride;  /*16;*/
         }
 
     }
@@ -255,7 +256,7 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
                 ypred_ptr[c] = pred;
             }
 
-            ypred_ptr += y_stride;  //16;
+            ypred_ptr += y_stride;  /*16;*/
         }
 
     }
@@ -289,7 +290,7 @@ void vp8_build_intra_predictors_mbuv(MACROBLOCKD *x)
         vleft_col[i] = x->dst.v_buffer [i* x->dst.uv_stride -1];
     }
 
-    switch (x->mbmi.uv_mode)
+    switch (x->mode_info_context->mbmi.uv_mode)
     {
     case DC_PRED:
     {
@@ -417,8 +418,8 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
     unsigned char *vabove_row = x->dst.v_buffer - x->dst.uv_stride;
     unsigned char vleft_col[20];
     unsigned char vtop_left = vabove_row[-1];
-    unsigned char *upred_ptr = x->dst.u_buffer; //&x->predictor[256];
-    unsigned char *vpred_ptr = x->dst.v_buffer; //&x->predictor[320];
+    unsigned char *upred_ptr = x->dst.u_buffer; /*&x->predictor[256];*/
+    unsigned char *vpred_ptr = x->dst.v_buffer; /*&x->predictor[320];*/
     int uv_stride = x->dst.uv_stride;
 
     int i, j;
@@ -429,7 +430,7 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
         vleft_col[i] = x->dst.v_buffer [i* x->dst.uv_stride -1];
     }
 
-    switch (x->mbmi.uv_mode)
+    switch (x->mode_info_context->mbmi.uv_mode)
     {
     case DC_PRED:
     {
@@ -471,14 +472,14 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
         }
 
 
-        //vpx_memset(upred_ptr,expected_udc,64);
-        //vpx_memset(vpred_ptr,expected_vdc,64);
+        /*vpx_memset(upred_ptr,expected_udc,64);*/
+        /*vpx_memset(vpred_ptr,expected_vdc,64);*/
         for (i = 0; i < 8; i++)
         {
             vpx_memset(upred_ptr, expected_udc, 8);
             vpx_memset(vpred_ptr, expected_vdc, 8);
-            upred_ptr += uv_stride; //8;
-            vpred_ptr += uv_stride; //8;
+            upred_ptr += uv_stride; /*8;*/
+            vpred_ptr += uv_stride; /*8;*/
         }
     }
     break;
@@ -490,8 +491,8 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
         {
             vpx_memcpy(upred_ptr, uabove_row, 8);
             vpx_memcpy(vpred_ptr, vabove_row, 8);
-            upred_ptr += uv_stride; //8;
-            vpred_ptr += uv_stride; //8;
+            upred_ptr += uv_stride; /*8;*/
+            vpred_ptr += uv_stride; /*8;*/
         }
 
     }
@@ -504,8 +505,8 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
         {
             vpx_memset(upred_ptr, uleft_col[i], 8);
             vpx_memset(vpred_ptr, vleft_col[i], 8);
-            upred_ptr += uv_stride; //8;
-            vpred_ptr += uv_stride; //8;
+            upred_ptr += uv_stride; /*8;*/
+            vpred_ptr += uv_stride; /*8;*/
         }
     }
 
@@ -537,8 +538,8 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
                 vpred_ptr[j] = predv;
             }
 
-            upred_ptr += uv_stride; //8;
-            vpred_ptr += uv_stride; //8;
+            upred_ptr += uv_stride; /*8;*/
+            vpred_ptr += uv_stride; /*8;*/
         }
 
     }

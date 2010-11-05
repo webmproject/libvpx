@@ -1,10 +1,11 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
@@ -35,6 +36,43 @@
 %define rsp esp
 %define rbp ebp
 %define movsxd mov
+%macro movq 2
+  %ifidn %1,eax
+    movd %1,%2
+  %elifidn %2,eax
+    movd %1,%2
+  %elifidn %1,ebx
+    movd %1,%2
+  %elifidn %2,ebx
+    movd %1,%2
+  %elifidn %1,ecx
+    movd %1,%2
+  %elifidn %2,ecx
+    movd %1,%2
+  %elifidn %1,edx
+    movd %1,%2
+  %elifidn %2,edx
+    movd %1,%2
+  %elifidn %1,esi
+    movd %1,%2
+  %elifidn %2,esi
+    movd %1,%2
+  %elifidn %1,edi
+    movd %1,%2
+  %elifidn %2,edi
+    movd %1,%2
+  %elifidn %1,esp
+    movd %1,%2
+  %elifidn %2,esp
+    movd %1,%2
+  %elifidn %1,ebp
+    movd %1,%2
+  %elifidn %2,ebp
+    movd %1,%2
+  %else
+    movq %1,%2
+  %endif
+%endmacro
 %endif
 
 
@@ -89,7 +127,7 @@
 %macro ALIGN_STACK 2
     mov         %2, rsp
     and         rsp, -%1
-    sub         rsp, %1 - REG_SZ_BYTES
+    lea         rsp, [rsp - (%1 - REG_SZ_BYTES)]
     push        %2
 %endmacro
 
@@ -104,7 +142,6 @@
 %idefine XMMWORD
 %idefine MMWORD
 
-
 ; PIC macros
 ;
 %if ABI_IS_32BIT
@@ -115,11 +152,15 @@
       extern _GLOBAL_OFFSET_TABLE_
       push %1
       call %%get_got
+      %%sub_offset:
+      jmp %%exitGG
       %%get_got:
-      pop %1
-      add %1, _GLOBAL_OFFSET_TABLE_ + $$ - %%get_got wrt ..gotpc
+      mov %1, [esp]
+      add %1, _GLOBAL_OFFSET_TABLE_ + $$ - %%sub_offset wrt ..gotpc
+      ret
+      %%exitGG:
       %undef GLOBAL
-      %define GLOBAL + %1 wrt ..gotoff
+      %define GLOBAL(x) x + %1 wrt ..gotoff
       %undef RESTORE_GOT
       %define RESTORE_GOT pop %1
     %endmacro
@@ -127,28 +168,36 @@
     %macro GET_GOT 1
       push %1
       call %%get_got
+      %%sub_offset:
+      jmp  %%exitGG
       %%get_got:
-      pop %1
-      add %1, fake_got - %%get_got
+      mov  %1, [esp]
+      add %1, fake_got - %%sub_offset
+      ret
+      %%exitGG:
       %undef GLOBAL
-      %define GLOBAL + %1 - fake_got
+      %define GLOBAL(x) x + %1 - fake_got
       %undef RESTORE_GOT
       %define RESTORE_GOT pop %1
     %endmacro
   %endif
   %endif
+  %define HIDDEN_DATA(x) x
 %else
   %macro GET_GOT 1
   %endmacro
-  %define GLOBAL wrt rip
+  %define GLOBAL(x) rel x
   %ifidn __OUTPUT_FORMAT__,elf64
     %define WRT_PLT wrt ..plt
+    %define HIDDEN_DATA(x) x:data hidden
+  %else
+    %define HIDDEN_DATA(x) x
   %endif
 %endif
 %ifnmacro GET_GOT
     %macro GET_GOT 1
     %endmacro
-    %define GLOBAL
+    %define GLOBAL(x) x
 %endif
 %ifndef RESTORE_GOT
 %define RESTORE_GOT
@@ -198,22 +247,38 @@
         push r9
     %endif
     %if %1 > 6
-        mov rax,[rbp+16]
+      %assign i %1-6
+      %assign off 16
+      %rep i
+        mov rax,[rbp+off]
         push rax
-    %endif
-    %if %1 > 7
-        mov rax,[rbp+24]
-        push rax
-    %endif
-    %if %1 > 8
-        mov rax,[rbp+32]
-        push rax
+        %assign off off+8
+      %endrep
     %endif
   %endm
 %endif
   %define UNSHADOW_ARGS mov rsp, rbp
 %endif
 
+; must keep XMM6:XMM15 (libvpx uses XMM6 and XMM7) on Win64 ABI
+; rsp register has to be aligned
+%ifidn __OUTPUT_FORMAT__,x64
+%macro SAVE_XMM 0
+  sub rsp, 32
+  movdqa XMMWORD PTR [rsp], xmm6
+  movdqa XMMWORD PTR [rsp+16], xmm7
+%endmacro
+%macro RESTORE_XMM 0
+  movdqa xmm6, XMMWORD PTR [rsp]
+  movdqa xmm7, XMMWORD PTR [rsp+16]
+  add rsp, 32
+%endmacro
+%else
+%macro SAVE_XMM 0
+%endmacro
+%macro RESTORE_XMM 0
+%endmacro
+%endif
 
 ; Name of the rodata section
 ;

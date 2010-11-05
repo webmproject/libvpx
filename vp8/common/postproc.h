@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -22,6 +23,18 @@
     void sym (unsigned char *s, char *noise, char blackclamp[16],\
               char whiteclamp[16], char bothclamp[16],\
               unsigned int w, unsigned int h, int pitch)
+
+#define prototype_postproc_blend_mb_inner(sym)\
+    void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
+              int y1, int u1, int v1, int alpha, int stride)
+
+#define prototype_postproc_blend_mb_outer(sym)\
+    void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
+              int y1, int u1, int v1, int alpha, int stride)
+
+#define prototype_postproc_blend_b(sym)\
+    void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
+              int y1, int u1, int v1, int alpha, int stride)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/postproc_x86.h"
@@ -47,16 +60,36 @@ extern prototype_postproc(vp8_postproc_downacross);
 #endif
 extern prototype_postproc_addnoise(vp8_postproc_addnoise);
 
+#ifndef vp8_postproc_blend_mb_inner
+#define vp8_postproc_blend_mb_inner vp8_blend_mb_inner_c
+#endif
+extern prototype_postproc_blend_mb_inner(vp8_postproc_blend_mb_inner);
+
+#ifndef vp8_postproc_blend_mb_outer
+#define vp8_postproc_blend_mb_outer vp8_blend_mb_outer_c
+#endif
+extern prototype_postproc_blend_mb_outer(vp8_postproc_blend_mb_outer);
+
+#ifndef vp8_postproc_blend_b
+#define vp8_postproc_blend_b vp8_blend_b_c
+#endif
+extern prototype_postproc_blend_b(vp8_postproc_blend_b);
 
 typedef prototype_postproc((*vp8_postproc_fn_t));
 typedef prototype_postproc_inplace((*vp8_postproc_inplace_fn_t));
 typedef prototype_postproc_addnoise((*vp8_postproc_addnoise_fn_t));
+typedef prototype_postproc_blend_mb_inner((*vp8_postproc_blend_mb_inner_fn_t));
+typedef prototype_postproc_blend_mb_outer((*vp8_postproc_blend_mb_outer_fn_t));
+typedef prototype_postproc_blend_b((*vp8_postproc_blend_b_fn_t));
 typedef struct
 {
-    vp8_postproc_inplace_fn_t   down;
-    vp8_postproc_inplace_fn_t   across;
-    vp8_postproc_fn_t           downacross;
-    vp8_postproc_addnoise_fn_t  addnoise;
+    vp8_postproc_inplace_fn_t           down;
+    vp8_postproc_inplace_fn_t           across;
+    vp8_postproc_fn_t                   downacross;
+    vp8_postproc_addnoise_fn_t          addnoise;
+    vp8_postproc_blend_mb_inner_fn_t    blend_mb_inner;
+    vp8_postproc_blend_mb_outer_fn_t    blend_mb_outer;
+    vp8_postproc_blend_b_fn_t           blend_b;
 } vp8_postproc_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

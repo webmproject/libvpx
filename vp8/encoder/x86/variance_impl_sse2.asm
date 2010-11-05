@@ -1,10 +1,11 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
@@ -57,7 +58,7 @@ NEXTROW:
         movdqa      xmm3,xmm4
         psrldq      xmm4,4
         paddd       xmm4,xmm3
-        movd        rax,xmm4
+        movq        rax,xmm4
 
 
     ; begin epilog
@@ -470,7 +471,7 @@ sym(vp8_get8x8var_sse2):
         mov         rax,            arg(5) ;[Sum]
         mov         rdi,            arg(4) ;[SSE]
 
-        movd        rdx,            xmm7
+        movq        rdx,            xmm7
         movsx       rcx,            dx
 
         mov  dword ptr [rax],       ecx
@@ -531,7 +532,7 @@ sym(vp8_filter_block2d_bil_var_sse2):
         pmullw          xmm3,           [rax+16]             ;
         paddw           xmm1,           xmm3                 ;
 
-        paddw           xmm1,           [xmm_bi_rd GLOBAL]   ;
+        paddw           xmm1,           [GLOBAL(xmm_bi_rd)]  ;
         psraw           xmm1,           xmm_filter_shift    ;
 
         movdqa          xmm5,           xmm1
@@ -553,7 +554,7 @@ filter_block2d_bil_var_sse2_loop:
         pmullw          xmm3,           [rax+16]             ;
 
         paddw           xmm1,           xmm3                 ;
-        paddw           xmm1,           [xmm_bi_rd GLOBAL]   ;
+        paddw           xmm1,           [GLOBAL(xmm_bi_rd)]  ;
 
         psraw           xmm1,           xmm_filter_shift    ;
         movdqa          xmm3,           xmm5                 ;
@@ -564,7 +565,7 @@ filter_block2d_bil_var_sse2_loop:
         pmullw          xmm1,           [rdx+16]             ;
         paddw           xmm1,           xmm3                 ;
 
-        paddw           xmm1,           [xmm_bi_rd GLOBAL]   ;
+        paddw           xmm1,           [GLOBAL(xmm_bi_rd)]  ;
         psraw           xmm1,           xmm_filter_shift    ;
 
         movq            xmm3,           QWORD PTR [rdi]               ;

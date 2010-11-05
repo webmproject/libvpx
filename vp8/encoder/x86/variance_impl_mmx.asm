@@ -1,10 +1,11 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
@@ -497,7 +498,7 @@ sym(vp8_get4x4sse_cs_mmx):
         psrlq       mm7,    32
 
         paddd       mm0,    mm7
-        movd        rax,    mm0
+        movq        rax,    mm0
 
 
     ; begin epilog
@@ -555,7 +556,7 @@ sym(vp8_filter_block2d_bil4x4_var_mmx):
         pmullw          mm3,            [rax+8]             ;
 
         paddw           mm1,            mm3                 ;
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
         movq            mm5,            mm1
@@ -579,7 +580,7 @@ filter_block2d_bil4x4_var_mmx_loop:
         pmullw          mm3,            [rax+8]             ;
 
         paddw           mm1,            mm3                 ;
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
         movq            mm3,            mm5                 ;
@@ -591,7 +592,7 @@ filter_block2d_bil4x4_var_mmx_loop:
         paddw           mm1,            mm3                 ;
 
 
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
         psraw           mm1,            mmx_filter_shift    ;
 
         movd            mm3,            [rdi]               ;
@@ -709,10 +710,10 @@ sym(vp8_filter_block2d_bil_var_mmx):
         paddw           mm1,            mm3                 ;
 
         paddw           mm2,            mm4                 ;
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
-        paddw           mm2,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm2,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm2,            mmx_filter_shift    ;
         movq            mm5,            mm1
@@ -748,10 +749,10 @@ filter_block2d_bil_var_mmx_loop:
         paddw           mm1,            mm3                 ;
         paddw           mm2,            mm4                 ;
 
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
         psraw           mm1,            mmx_filter_shift    ;
 
-        paddw           mm2,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm2,            [GLOBAL(mmx_bi_rd)] ;
         psraw           mm2,            mmx_filter_shift    ;
 
         movq            mm3,            mm5                 ;
@@ -772,8 +773,8 @@ filter_block2d_bil_var_mmx_loop:
         paddw           mm1,            mm3                 ;
         paddw           mm2,            mm4                 ;
 
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
-        paddw           mm2,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
+        paddw           mm2,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
         psraw           mm2,            mmx_filter_shift    ;
