@@ -10,6 +10,7 @@
 
 
 #include "vpx_ports/config.h"
+#include "vpx_ports/arm.h"
 #include "vpx_scale/vpxscale.h"
 
 
@@ -47,6 +48,9 @@ extern void vp8_yv12_copy_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CO
  ****************************************************************************/
 void vp8_scale_machine_specific_config()
 {
+#if HAVE_ARMV7 && CONFIG_RUNTIME_CPU_DETECT
+    int flags;
+#endif
     /*
     vp8_horizontal_line_1_2_scale        = horizontal_line_1_2_scale_armv4;
     vp8_vertical_band_1_2_scale          = vertical_band_1_2_scale_armv4;
@@ -73,14 +77,20 @@ void vp8_scale_machine_specific_config()
     vp8_horizontal_line_5_4_scale         = vp8cx_horizontal_line_5_4_scale_c;
     */
 
-#if HAVE_ARMV7
-    vp8_yv12_extend_frame_borders_ptr      = vp8_yv12_extend_frame_borders_neon;
-    vp8_yv12_copy_frame_yonly_ptr          = vp8_yv12_copy_frame_yonly_neon;
-    vp8_yv12_copy_frame_ptr               = vp8_yv12_copy_frame_neon;
-#else
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
     vp8_yv12_extend_frame_borders_ptr      = vp8_yv12_extend_frame_borders;
     vp8_yv12_copy_frame_yonly_ptr          = vp8_yv12_copy_frame_yonly;
     vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame;
 #endif
-
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+    flags = arm_cpu_caps();
+    if (flags & HAS_NEON)
+#endif
+    {
+        vp8_yv12_extend_frame_borders_ptr = vp8_yv12_extend_frame_borders_neon;
+        vp8_yv12_copy_frame_yonly_ptr     = vp8_yv12_copy_frame_yonly_neon;
+        vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame_neon;
+    }
+#endif
 }

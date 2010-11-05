@@ -12,7 +12,7 @@
 #ifndef __INC_TREECODER_H
 #define __INC_TREECODER_H
 
-typedef unsigned char vp8bc_index_t; // probability index
+typedef unsigned char vp8bc_index_t; /* probability index */
 
 
 typedef unsigned char vp8_prob;

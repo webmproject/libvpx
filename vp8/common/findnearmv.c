@@ -168,7 +168,7 @@ void vp8_find_near_mvs
 
     vp8_clamp_mv(nearest, xd);
     vp8_clamp_mv(nearby, xd);
-    vp8_clamp_mv(best_mv, xd); //TODO: move this up before the copy
+    vp8_clamp_mv(best_mv, xd); /*TODO: move this up before the copy*/
 }
 
 vp8_prob *vp8_mv_ref_probs(
@@ -179,7 +179,7 @@ vp8_prob *vp8_mv_ref_probs(
     p[1] = vp8_mode_contexts [near_mv_ref_ct[1]] [1];
     p[2] = vp8_mode_contexts [near_mv_ref_ct[2]] [2];
     p[3] = vp8_mode_contexts [near_mv_ref_ct[3]] [3];
-    //p[3] = vp8_mode_contexts [near_mv_ref_ct[1] + near_mv_ref_ct[2] + near_mv_ref_ct[3]] [3];
+    /*p[3] = vp8_mode_contexts [near_mv_ref_ct[1] + near_mv_ref_ct[2] + near_mv_ref_ct[3]] [3];*/
     return p;
 }
 

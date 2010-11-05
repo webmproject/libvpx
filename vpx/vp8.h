@@ -53,7 +53,7 @@ enum vp8_postproc_level
     VP8_NOFILTERING    = 0,
     VP8_DEBLOCK        = 1,
     VP8_DEMACROBLOCK   = 2,
-    VP8_ADDNOISE       = 4,
+    VP8_ADDNOISE       = 4
 };
 
 /*!\brief post process flags

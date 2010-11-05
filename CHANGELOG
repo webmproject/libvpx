@@ -1,3 +1,111 @@
+2010-10-28 v0.9.5 "Aylesbury"
+  Our first named release, focused on a faster decoder, and a better encoder.
+
+  - Upgrading:
+    This release incorporates backwards-incompatible changes to the
+    ivfenc and ivfdec tools. These tools are now called vpxenc and vpxdec.
+
+    vpxdec
+      * the -q (quiet) option has been removed, and replaced with
+        -v (verbose). the output is quiet by default. Use -v to see
+        the version number of the binary.
+
+      * The default behavior is now to write output to a single file
+        instead of individual frames. The -y option has been removed.
+        Y4M output is the default.
+
+      * For raw I420/YV12 output instead of Y4M, the --i420 or --yv12
+        options must be specified.
+
+          $ ivfdec -o OUTPUT INPUT
+          $ vpxdec --i420 -o OUTPUT INPUT
+
+      * If an output file is not specified, the default is to write
+        Y4M to stdout. This makes piping more natural.
+
+          $ ivfdec -y -o - INPUT | ...
+          $ vpxdec INPUT | ...
+
+      * The output file has additional flexibility for formatting the
+        filename. It supports escape characters for constructing a
+        filename from the width, height, and sequence number. This
+        replaces the -p option. To get the equivalent:
+
+          $ ivfdec -p frame INPUT
+          $ vpxdec --i420 -o frame-%wx%h-%4.i420 INPUT
+
+    vpxenc
+      * The output file must be specified with -o, rather than as the
+        last argument.
+
+          $ ivfenc <options> INPUT OUTPUT
+          $ vpxenc <options> -o OUTPUT INPUT
+
+      * The output defaults to webm. To get IVF output, use the --ivf
+        option.
+
+          $ ivfenc <options> INPUT OUTPUT.ivf
+          $ vpxenc <options> -o OUTPUT.ivf --ivf INPUT
+
+
+  - Enhancements:
+      ivfenc and ivfdec have been renamed to vpxenc, vpxdec.
+      vpxdec supports .webm input
+      vpxdec writes .y4m by default
+      vpxenc writes .webm output by default
+      vpxenc --psnr now shows the average/overall PSNR at the end
+      ARM platforms now support runtime cpu detection
+      vpxdec visualizations added for motion vectors, block modes, references
+      vpxdec now silent by default
+      vpxdec --progress shows frame-by-frame timing information
+      vpxenc supports the distinction between --fps and --timebase
+      NASM is now a supported assembler
+      configure: enable PIC for shared libs by default
+      configure: add --enable-small
+      configure: support for ppc32-linux-gcc
+      configure: support for sparc-solaris-gcc
+
+  - Bugs:
+      Improve handling of invalid frames
+      Fix valgrind errors in the NEON loop filters.
+      Fix loopfilter delta zero transitions
+      Fix valgrind errors in vp8_sixtap_predict8x4_armv6().
+      Build fixes for darwin-icc
+
+  - Speed:
+      20-40% (average 28%) improvement in libvpx decoder speed,
+      including:
+        Rewrite vp8_short_walsh4x4_sse2()
+        Optimizations on the loopfilters.
+        Miscellaneous improvements for Atom
+        Add 4-tap version of 2nd-pass ARMv6 MC filter.
+        Improved multithread utilization
+        Better instruction choices on x86
+        reorder data to use wider instructions
+        Update NEON wide idcts
+        Make block access to frame buffer sequential
+        Improved subset block search
+        Bilinear subpixel optimizations for ssse3.
+        Decrease memory footprint
+
+      Encoder speed improvements (percentage gain not measured):
+        Skip unnecessary search of identical frames
+        Add SSE2 subtract functions
+        Improve bounds checking in vp8_diamond_search_sadx4()
+        Added vp8_fast_quantize_b_sse2
+
+  - Quality:
+      Over 7% overall PSNR improvement (6.3% SSIM) in "best" quality
+      encoding mode, and up to 60% improvement on very noisy, still
+      or slow moving source video
+
+        Motion compensated temporal filter for Alt-Ref Noise Reduction
+        Improved use of trellis quantization on 2nd order Y blocks
+        Tune effect of motion on KF/GF boost in two pass
+        Allow coefficient optimization for good quality speed 0.
+        Improved control of active min quantizer for two pass.
+        Enable ARFs for non-lagged compress
+
 2010-09-02 v0.9.2
   - Enhancements:
       Disable frame dropping by default

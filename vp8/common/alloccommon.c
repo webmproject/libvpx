@@ -56,7 +56,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
 
     vp8_de_alloc_frame_buffers(oci);
 
-    // our internal buffers are always multiples of 16
+    /* our internal buffers are always multiples of 16 */
     if ((width & 0xf) != 0)
         width += 16 - (width & 0xf);
 
@@ -179,10 +179,10 @@ void vp8_create_common(VP8_COMMON *oci)
     oci->clr_type = REG_YUV;
     oci->clamp_type = RECON_CLAMP_REQUIRED;
 
-    // Initialise reference frame sign bias structure to defaults
+    /* Initialise reference frame sign bias structure to defaults */
     vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
 
-    // Default disable buffer to buffer copying
+    /* Default disable buffer to buffer copying */
     oci->copy_buffer_to_gf = 0;
     oci->copy_buffer_to_arf = 0;
 }

@@ -249,7 +249,7 @@ sym(vp8_fast_quantize_b_impl_mmx):
         paddd           mm0,        mm5
 
         ; eob adjustment begins here
-        movd            rcx,        mm0
+        movq            rcx,        mm0
         and             rcx,        0xffff
 
         xor             rdx,        rdx
@@ -262,7 +262,7 @@ sym(vp8_fast_quantize_b_impl_mmx):
         and             rax,        rdx
         ; Substitute the sse assembly for the old mmx mixed assembly/C. The
         ; following is kept as reference
-        ;    movd            rcx,        mm0
+        ;    movq            rcx,        mm0
         ;    bsr             rax,        rcx
         ;
         ;    mov             eob,        rax
@@ -277,159 +277,6 @@ sym(vp8_fast_quantize_b_impl_mmx):
         ;    eob=15;
         ;}
         ;d->eob = eob+1;
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-
-;int vp8_fast_quantize_b_impl_sse(short *coeff_ptr, short *zbin_ptr,
-;                           short *qcoeff_ptr,short *dequant_ptr,
-;                           short *scan_mask, short *round_ptr,
-;                           short *quant_ptr, short *dqcoeff_ptr);
-global sym(vp8_fast_quantize_b_impl_sse)
-sym(vp8_fast_quantize_b_impl_sse):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 8
-    push rsi
-    push rdi
-    ; end prolog
-
-
-        mov             rsi,        arg(0) ;coeff_ptr
-        movdqa          xmm0,       [rsi]
-
-        mov             rax,        arg(1) ;zbin_ptr
-        movdqa          xmm1,       [rax]
-
-        movdqa          xmm3,       xmm0
-        psraw           xmm0,       15
-
-        pxor            xmm3,       xmm0
-        psubw           xmm3,       xmm0            ; abs
-
-        movdqa          xmm2,       xmm3
-        pcmpgtw         xmm1,       xmm2
-
-        pandn           xmm1,       xmm2
-        movdqa          xmm3,       xmm1
-
-        mov             rdx,        arg(6) ; quant_ptr
-        movdqa          xmm1,       [rdx]
-
-        mov             rcx,        arg(5) ; round_ptr
-        movdqa          xmm2,       [rcx]
-
-        paddw           xmm3,       xmm2
-        pmulhuw         xmm3,       xmm1
-
-        pxor            xmm3,       xmm0
-        psubw           xmm3,       xmm0        ;gain the sign back
-
-        mov             rdi,        arg(2) ;qcoeff_ptr
-        movdqa          xmm0,       xmm3
-
-        movdqa          [rdi],      xmm3
-
-        mov             rax,        arg(3) ;dequant_ptr
-        movdqa          xmm2,       [rax]
-
-        pmullw          xmm3,       xmm2
-        mov             rax,        arg(7) ;dqcoeff_ptr
-
-        movdqa          [rax],      xmm3
-
-        ; next 8
-        movdqa          xmm4,       [rsi+16]
-
-        mov             rax,        arg(1) ;zbin_ptr
-        movdqa          xmm5,       [rax+16]
-
-        movdqa          xmm7,       xmm4
-        psraw           xmm4,       15
-
-        pxor            xmm7,       xmm4
-        psubw           xmm7,       xmm4            ; abs
-
-        movdqa          xmm6,       xmm7
-        pcmpgtw         xmm5,       xmm6
-
-        pandn           xmm5,       xmm6
-        movdqa          xmm7,       xmm5
-
-        movdqa          xmm5,       [rdx+16]
-        movdqa          xmm6,       [rcx+16]
-
-
-        paddw           xmm7,       xmm6
-        pmulhuw         xmm7,       xmm5
-
-        pxor            xmm7,       xmm4
-        psubw           xmm7,       xmm4;gain the sign back
-
-        mov             rdi,        arg(2) ;qcoeff_ptr
-
-        movdqa          xmm1,       xmm7
-        movdqa          [rdi+16],   xmm7
-
-        mov             rax,        arg(3) ;dequant_ptr
-        movdqa          xmm6,       [rax+16]
-
-        pmullw          xmm7,       xmm6
-        mov             rax,        arg(7) ;dqcoeff_ptr
-
-        movdqa          [rax+16],   xmm7
-        mov             rdi,        arg(4) ;scan_mask
-
-        pxor            xmm7,       xmm7
-        movdqa          xmm2,       [rdi]
-
-        movdqa          xmm3,       [rdi+16];
-        pcmpeqw         xmm0,       xmm7
-
-        pcmpeqw         xmm1,       xmm7
-        pcmpeqw         xmm6,       xmm6
-
-        pxor            xmm0,       xmm6
-        pxor            xmm1,       xmm6
-
-        psrlw           xmm0,       15
-        psrlw           xmm1,       15
-
-        pmaddwd         xmm0,       xmm2
-        pmaddwd         xmm1,       xmm3
-
-        movq            xmm2,       xmm0
-        movq            xmm3,       xmm1
-
-        psrldq          xmm0,       8
-        psrldq          xmm1,       8
-
-        paddd           xmm0,       xmm1
-        paddd           xmm2,       xmm3
-
-        paddd           xmm0,       xmm2
-        movq            xmm1,       xmm0
-
-        psrldq          xmm0,       4
-        paddd           xmm1,       xmm0
-
-        movd            rcx,        xmm1
-        and             rcx,        0xffff
-
-        xor             rdx,        rdx
-        sub             rdx,        rcx
-
-        bsr             rax,        rcx
-        inc             rax
-
-        sar             rdx,        31
-        and             rax,        rdx
-
 
     ; begin epilog
     pop rdi

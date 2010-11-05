@@ -52,14 +52,14 @@ sym(vp8_short_fdct4x4_sse2):
     psllw       xmm0, 3                         ;b1 <<= 3 a1 <<= 3
     psllw       xmm3, 3                         ;c1 <<= 3 d1 <<= 3
     movdqa      xmm1, xmm0
-    pmaddwd     xmm0, XMMWORD PTR[_mult_add GLOBAL]     ;a1 + b1
-    pmaddwd     xmm1, XMMWORD PTR[_mult_sub GLOBAL]     ;a1 - b1
+    pmaddwd     xmm0, XMMWORD PTR[GLOBAL(_mult_add)]    ;a1 + b1
+    pmaddwd     xmm1, XMMWORD PTR[GLOBAL(_mult_sub)]    ;a1 - b1
     movdqa      xmm4, xmm3
-    pmaddwd     xmm3, XMMWORD PTR[_5352_2217 GLOBAL]    ;c1*2217 + d1*5352
-    pmaddwd     xmm4, XMMWORD PTR[_2217_neg5352 GLOBAL] ;d1*2217 - c1*5352
+    pmaddwd     xmm3, XMMWORD PTR[GLOBAL(_5352_2217)]   ;c1*2217 + d1*5352
+    pmaddwd     xmm4, XMMWORD PTR[GLOBAL(_2217_neg5352)];d1*2217 - c1*5352
 
-    paddd       xmm3, XMMWORD PTR[_14500 GLOBAL]
-    paddd       xmm4, XMMWORD PTR[_7500 GLOBAL]
+    paddd       xmm3, XMMWORD PTR[GLOBAL(_14500)]
+    paddd       xmm4, XMMWORD PTR[GLOBAL(_7500)]
     psrad       xmm3, 12            ;(c1 * 2217 + d1 * 5352 +  14500)>>12
     psrad       xmm4, 12            ;(d1 * 2217 - c1 * 5352 +   7500)>>12
 
@@ -80,7 +80,7 @@ sym(vp8_short_fdct4x4_sse2):
     punpcklwd   xmm0, xmm3                      ;13 12 11 10 03 02 01 00
     punpckhwd   xmm2, xmm3                      ;33 32 31 30 23 22 21 20
 
-    movdqa      xmm5, XMMWORD PTR[_7 GLOBAL]
+    movdqa      xmm5, XMMWORD PTR[GLOBAL(_7)]
     pshufd      xmm2, xmm2, 04eh
     movdqa      xmm3, xmm0
     paddw       xmm0, xmm2                      ;b1 b1 b1 b1 a1 a1 a1 a1
@@ -94,8 +94,8 @@ sym(vp8_short_fdct4x4_sse2):
     pshufhw     xmm0, xmm0, 0d8h                ;b1 a1 b1 a1 b1 a1 b1 a1
     pshufhw     xmm3, xmm3, 0d8h                ;c1 d1 c1 d1 c1 d1 c1 d1
     movdqa      xmm1, xmm0
-    pmaddwd     xmm0, XMMWORD PTR[_mult_add GLOBAL] ;a1 + b1
-    pmaddwd     xmm1, XMMWORD PTR[_mult_sub GLOBAL] ;a1 - b1
+    pmaddwd     xmm0, XMMWORD PTR[GLOBAL(_mult_add)] ;a1 + b1
+    pmaddwd     xmm1, XMMWORD PTR[GLOBAL(_mult_sub)] ;a1 - b1
 
     pxor        xmm4, xmm4                      ;zero out for compare
     paddd       xmm0, xmm5
@@ -103,14 +103,14 @@ sym(vp8_short_fdct4x4_sse2):
     pcmpeqw     xmm2, xmm4
     psrad       xmm0, 4                         ;(a1 + b1 + 7)>>4
     psrad       xmm1, 4                         ;(a1 - b1 + 7)>>4
-    pandn       xmm2, XMMWORD PTR[_cmp_mask GLOBAL] ;clear upper,
-                                                    ;and keep bit 0 of lower
+    pandn       xmm2, XMMWORD PTR[GLOBAL(_cmp_mask)] ;clear upper,
+                                                     ;and keep bit 0 of lower
 
     movdqa      xmm4, xmm3
-    pmaddwd     xmm3, XMMWORD PTR[_5352_2217 GLOBAL]    ;c1*2217 + d1*5352
-    pmaddwd     xmm4, XMMWORD PTR[_2217_neg5352 GLOBAL] ;d1*2217 - c1*5352
-    paddd       xmm3, XMMWORD PTR[_12000 GLOBAL]
-    paddd       xmm4, XMMWORD PTR[_51000 GLOBAL]
+    pmaddwd     xmm3, XMMWORD PTR[GLOBAL(_5352_2217)]    ;c1*2217 + d1*5352
+    pmaddwd     xmm4, XMMWORD PTR[GLOBAL(_2217_neg5352)] ;d1*2217 - c1*5352
+    paddd       xmm3, XMMWORD PTR[GLOBAL(_12000)]
+    paddd       xmm4, XMMWORD PTR[GLOBAL(_51000)]
     packssdw    xmm0, xmm1                      ;op[8] op[0]
     psrad       xmm3, 16                ;(c1 * 2217 + d1 * 5352 +  12000)>>16
     psrad       xmm4, 16                ;(d1 * 2217 - c1 * 5352 +  51000)>>16

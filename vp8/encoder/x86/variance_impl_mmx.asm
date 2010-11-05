@@ -498,7 +498,7 @@ sym(vp8_get4x4sse_cs_mmx):
         psrlq       mm7,    32
 
         paddd       mm0,    mm7
-        movd        rax,    mm0
+        movq        rax,    mm0
 
 
     ; begin epilog
@@ -556,7 +556,7 @@ sym(vp8_filter_block2d_bil4x4_var_mmx):
         pmullw          mm3,            [rax+8]             ;
 
         paddw           mm1,            mm3                 ;
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
         movq            mm5,            mm1
@@ -580,7 +580,7 @@ filter_block2d_bil4x4_var_mmx_loop:
         pmullw          mm3,            [rax+8]             ;
 
         paddw           mm1,            mm3                 ;
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
         movq            mm3,            mm5                 ;
@@ -592,7 +592,7 @@ filter_block2d_bil4x4_var_mmx_loop:
         paddw           mm1,            mm3                 ;
 
 
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
         psraw           mm1,            mmx_filter_shift    ;
 
         movd            mm3,            [rdi]               ;
@@ -710,10 +710,10 @@ sym(vp8_filter_block2d_bil_var_mmx):
         paddw           mm1,            mm3                 ;
 
         paddw           mm2,            mm4                 ;
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
-        paddw           mm2,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm2,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm2,            mmx_filter_shift    ;
         movq            mm5,            mm1
@@ -749,10 +749,10 @@ filter_block2d_bil_var_mmx_loop:
         paddw           mm1,            mm3                 ;
         paddw           mm2,            mm4                 ;
 
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
         psraw           mm1,            mmx_filter_shift    ;
 
-        paddw           mm2,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm2,            [GLOBAL(mmx_bi_rd)] ;
         psraw           mm2,            mmx_filter_shift    ;
 
         movq            mm3,            mm5                 ;
@@ -773,8 +773,8 @@ filter_block2d_bil_var_mmx_loop:
         paddw           mm1,            mm3                 ;
         paddw           mm2,            mm4                 ;
 
-        paddw           mm1,            [mmx_bi_rd GLOBAL]  ;
-        paddw           mm2,            [mmx_bi_rd GLOBAL]  ;
+        paddw           mm1,            [GLOBAL(mmx_bi_rd)] ;
+        paddw           mm2,            [GLOBAL(mmx_bi_rd)] ;
 
         psraw           mm1,            mmx_filter_shift    ;
         psraw           mm2,            mmx_filter_shift    ;

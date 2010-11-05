@@ -11,8 +11,6 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-%idefine QWORD
-
 ;unsigned int vp8_sad16x16_wmt(
 ;    unsigned char *src_ptr,
 ;    int  src_stride,
@@ -75,7 +73,7 @@ x16x16sad_wmt_loop:
         psrldq          xmm7,       8
 
         paddw           xmm0,       xmm7
-        movd            rax,        xmm0
+        movq            rax,        xmm0
 
     ; begin epilog
     pop rdi
@@ -113,7 +111,7 @@ sym(vp8_sad8x16_wmt):
 
 x8x16sad_wmt_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              x8x16sad_wmt_early_exit
 
@@ -135,7 +133,7 @@ x8x16sad_wmt_loop:
         cmp             rsi,        rcx
         jne             x8x16sad_wmt_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 
 x8x16sad_wmt_early_exit:
 
@@ -174,7 +172,7 @@ sym(vp8_sad8x8_wmt):
 
 x8x8sad_wmt_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              x8x8sad_wmt_early_exit
 
@@ -190,7 +188,7 @@ x8x8sad_wmt_loop:
         cmp             rsi,        rcx
         jne             x8x8sad_wmt_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 x8x8sad_wmt_early_exit:
 
     ; begin epilog
@@ -221,11 +219,11 @@ sym(vp8_sad4x4_wmt):
         movsxd          rax,        dword ptr arg(1) ;src_stride
         movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        movd            mm0,       QWORD PTR [rsi]
-        movd            mm1,       QWORD PTR [rdi]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm1,        DWORD PTR [rdi]
 
-        movd            mm2,       QWORD PTR [rsi+rax]
-        movd            mm3,       QWORD PTR [rdi+rdx]
+        movd            mm2,        DWORD PTR [rsi+rax]
+        movd            mm3,        DWORD PTR [rdi+rdx]
 
         punpcklbw       mm0,        mm2
         punpcklbw       mm1,        mm3
@@ -234,19 +232,19 @@ sym(vp8_sad4x4_wmt):
         lea             rsi,        [rsi+rax*2]
 
         lea             rdi,        [rdi+rdx*2]
-        movd            mm4,       QWORD PTR [rsi]
+        movd            mm4,        DWORD PTR [rsi]
 
-        movd            mm5,       QWORD PTR [rdi]
-        movd            mm6,       QWORD PTR [rsi+rax]
+        movd            mm5,        DWORD PTR [rdi]
+        movd            mm6,        DWORD PTR [rsi+rax]
 
-        movd            mm7,       QWORD PTR [rdi+rdx]
+        movd            mm7,        DWORD PTR [rdi+rdx]
         punpcklbw       mm4,        mm6
 
         punpcklbw       mm5,        mm7
         psadbw          mm4,        mm5
 
         paddw           mm0,        mm4
-        movd            rax,        mm0
+        movq            rax,        mm0
 
     ; begin epilog
     pop rdi
@@ -283,7 +281,7 @@ sym(vp8_sad16x8_wmt):
 
 x16x8sad_wmt_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              x16x8sad_wmt_early_exit
 
@@ -317,7 +315,7 @@ x16x8sad_wmt_loop:
         cmp             rsi,        rcx
         jne             x16x8sad_wmt_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 
 x16x8sad_wmt_early_exit:
 

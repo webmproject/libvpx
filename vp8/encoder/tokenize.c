@@ -198,6 +198,28 @@ static void tokenize1st_order_b
 
 }
 
+
+static int mb_is_skippable(MACROBLOCKD *x)
+{
+    int has_y2_block;
+    int skip = 1;
+    int i = 0;
+
+    has_y2_block = (x->mode_info_context->mbmi.mode != B_PRED
+                    && x->mode_info_context->mbmi.mode != SPLITMV);
+    if (has_y2_block)
+    {
+        for (i = 0; i < 16; i++)
+            skip &= (x->block[i].eob < 2);
+    }
+
+    for (; i < 24 + has_y2_block; i++)
+        skip &= (!x->block[i].eob);
+
+    return skip;
+}
+
+
 void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 {
     ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
@@ -223,6 +245,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
 #if 1
 
+    x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(x);
     if (x->mode_info_context->mbmi.mb_skip_coeff)
     {
 
@@ -247,35 +270,6 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     cpi->skip_false_count++;
 #endif
 #if 0
-
-    if (x->mbmi.mode == B_PRED || x->mbmi.mode == SPLITMV)
-    {
-        int i, skip = 1;
-
-        for (i = 0; i < 24; i++)
-            skip &= (!x->block[i].eob);
-
-        if (skip != x->mbmi.mb_skip_coeff)
-            skip += 0;
-
-        x->mbmi.mb_skip_coeff = skip;
-    }
-    else
-    {
-        int i, skip = 1;
-
-        for (i = 0; i < 16; i++)
-            skip &= (x->block[i].eob < 2);
-
-        for (i = 16; i < 25; i++)
-            skip &= (!x->block[i].eob);
-
-        if (skip != x->mbmi.mb_skip_coeff)
-            skip += 0;
-
-        x->mbmi.mb_skip_coeff = skip;
-    }
-
     vpx_memcpy(cpi->coef_counts_backup, cpi->coef_counts, sizeof(cpi->coef_counts));
 #endif
 

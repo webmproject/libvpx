@@ -82,6 +82,8 @@ VP8_CX_SRCS-yes += encoder/treewriter.c
 VP8_CX_SRCS-yes += encoder/variance_c.c
 VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.c
+VP8_CX_SRCS-yes += encoder/temporal_filter.c
+VP8_CX_SRCS-yes += encoder/temporal_filter.h
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
@@ -104,8 +106,11 @@ VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/variance_impl_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/sad_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/fwalsh_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/quantize_sse2.asm
+VP8_CX_SRCS-$(HAVE_SSE2) += encoder/x86/subtract_sse2.asm
 VP8_CX_SRCS-$(HAVE_SSE3) += encoder/x86/sad_sse3.asm
 VP8_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/sad_ssse3.asm
+VP8_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/quantize_ssse3.asm
+VP8_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/sad_sse4.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_mmx.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodeopt.asm
 

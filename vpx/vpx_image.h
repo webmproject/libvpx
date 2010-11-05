@@ -55,7 +55,7 @@ extern "C" {
         VPX_IMG_FMT_YV12    = VPX_IMG_FMT_PLANAR | VPX_IMG_FMT_UV_FLIP | 1, /**< planar YVU */
         VPX_IMG_FMT_I420    = VPX_IMG_FMT_PLANAR | 2,
         VPX_IMG_FMT_VPXYV12 = VPX_IMG_FMT_PLANAR | VPX_IMG_FMT_UV_FLIP | 3, /** < planar 4:2:0 format with vpx color space */
-        VPX_IMG_FMT_VPXI420 = VPX_IMG_FMT_PLANAR | 4,  /** < planar 4:2:0 format with vpx color space */
+        VPX_IMG_FMT_VPXI420 = VPX_IMG_FMT_PLANAR | 4   /** < planar 4:2:0 format with vpx color space */
     }
     vpx_img_fmt_t; /**< alias for enum vpx_img_fmt */
 

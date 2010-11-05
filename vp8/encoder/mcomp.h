@@ -42,14 +42,15 @@ extern int vp8_hex_search
     int search_param,
     int error_per_bit,
     int *num00,
-    vp8_variance_fn_t vf,
-    vp8_sad_fn_t sf,
+    const vp8_variance_fn_ptr_t *vf,
     int *mvsadcost[2],
     int *mvcost[2]
 
 );
 
-typedef int (fractional_mv_step_fp)(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, vp8_subpixvariance_fn_t svf, vp8_variance_fn_t vf, int *mvcost[2]);
+typedef int (fractional_mv_step_fp)
+    (MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv,
+     int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2]);
 extern fractional_mv_step_fp vp8_find_best_sub_pixel_step_iteratively;
 extern fractional_mv_step_fp vp8_find_best_sub_pixel_step;
 extern fractional_mv_step_fp vp8_find_best_half_pixel_step;
@@ -92,6 +93,7 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
 typedef prototype_full_search_sad(*vp8_full_search_fn_t);
 extern prototype_full_search_sad(vp8_full_search_sad);
 extern prototype_full_search_sad(vp8_full_search_sadx3);
+extern prototype_full_search_sad(vp8_full_search_sadx8);
 
 typedef prototype_diamond_search_sad(*vp8_diamond_search_fn_t);
 extern prototype_diamond_search_sad(vp8_diamond_search_sad);

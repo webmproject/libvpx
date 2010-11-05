@@ -74,7 +74,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
 #if CONFIG_POSTPROC
         rtcd->postproc.down        = vp8_mbpost_proc_down_mmx;
-        //rtcd->postproc.across      = vp8_mbpost_proc_across_ip_c;
+        /*rtcd->postproc.across      = vp8_mbpost_proc_across_ip_c;*/
         rtcd->postproc.downacross  = vp8_post_proc_down_and_across_mmx;
         rtcd->postproc.addnoise    = vp8_plane_add_noise_mmx;
 #endif

@@ -30,6 +30,7 @@ extern prototype_submbuv(vp8_subtract_mbuv_neon);
 //#undef  vp8_encodemb_mbuverr
 //#define vp8_encodemb_mbuverr vp8_mbuverror_c
 
+#if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_encodemb_subb
 #define vp8_encodemb_subb vp8_subtract_b_neon
 
@@ -38,6 +39,7 @@ extern prototype_submbuv(vp8_subtract_mbuv_neon);
 
 #undef  vp8_encodemb_submbuv
 #define vp8_encodemb_submbuv vp8_subtract_mbuv_neon
+#endif
 
 #endif
 

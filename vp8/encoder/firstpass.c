@@ -30,7 +30,6 @@
 #include "encodemv.h"
 
 //#define OUTPUT_FPF 1
-//#define FIRSTPASS_MM 1
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -108,15 +107,6 @@ static void reset_fpf_position(VP8_COMP *cpi, FIRSTPASS_STATS *Position)
 
 static int lookup_next_frame_stats(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
 {
-    /*FIRSTPASS_STATS * start_pos;
-    int ret_val;
-
-    start_pos = cpi->stats_in;
-    ret_val = vp8_input_stats(cpi, next_frame);
-    reset_fpf_position(cpi, start_pos);
-
-    return ret_val;*/
-
     if (cpi->stats_in >= cpi->stats_in_end)
         return EOF;
 
@@ -127,7 +117,7 @@ static int lookup_next_frame_stats(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
 // Calculate a modified Error used in distributing bits between easier and harder frames
 static double calculate_modified_err(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 {
-    double av_err = cpi->total_stats.ssim_weighted_pred_err;
+    double av_err = cpi->total_stats->ssim_weighted_pred_err;
     double this_err = this_frame->ssim_weighted_pred_err;
     double modified_err;
 
@@ -238,7 +228,7 @@ int frame_max_bits(VP8_COMP *cpi)
     else
     {
         // For VBR base this on the bits and frames left plus the two_pass_vbrmax_section rate passed in by the user
-        max_bits = (int)(((double)cpi->bits_left / (cpi->total_stats.count - (double)cpi->common.current_video_frame)) * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
+        max_bits = (int)(((double)cpi->bits_left / (cpi->total_stats->count - (double)cpi->common.current_video_frame)) * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
     }
 
     // Trap case where we are out of bits
@@ -248,17 +238,35 @@ int frame_max_bits(VP8_COMP *cpi)
     return max_bits;
 }
 
-void vp8_output_stats(struct vpx_codec_pkt_list *pktlist,
+
+extern size_t vp8_firstpass_stats_sz(unsigned int mb_count)
+{
+    /* Calculate the size of a stats packet, which is dependent on the frame
+     * resolution. The FIRSTPASS_STATS struct has a single element array,
+     * motion_map, which is virtually expanded to have one element per
+     * macroblock.
+     */
+    size_t stats_sz;
+    FIRSTPASS_STATS stats;
+
+    stats_sz = sizeof(FIRSTPASS_STATS) + mb_count;
+    stats_sz = (stats_sz + 7) & ~7;
+    return stats_sz;
+}
+
+
+void vp8_output_stats(const VP8_COMP            *cpi,
+                      struct vpx_codec_pkt_list *pktlist,
                       FIRSTPASS_STATS            *stats)
 {
     struct vpx_codec_cx_pkt pkt;
     pkt.kind = VPX_CODEC_STATS_PKT;
     pkt.data.twopass_stats.buf = stats;
-    pkt.data.twopass_stats.sz = sizeof(*stats);
+    pkt.data.twopass_stats.sz = vp8_firstpass_stats_sz(cpi->common.MBs);
     vpx_codec_pkt_list_add(pktlist, &pkt);
 
 // TEMP debug code
-#ifdef OUTPUT_FPF
+#if OUTPUT_FPF
     {
         FILE *fpfile;
         fpfile = fopen("firstpass.stt", "a");
@@ -280,16 +288,24 @@ void vp8_output_stats(struct vpx_codec_pkt_list *pktlist,
                 stats->mv_in_out_count,
                 stats->count);
         fclose(fpfile);
+
+
+        fpfile = fopen("fpmotionmap.stt", "a");
+        if(fwrite(cpi->fp_motion_map, 1, cpi->common.MBs, fpfile));
+        fclose(fpfile);
     }
 #endif
 }
 
 int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps)
 {
+    size_t stats_sz = vp8_firstpass_stats_sz(cpi->common.MBs);
+
     if (cpi->stats_in >= cpi->stats_in_end)
         return EOF;
 
-    *fps = *cpi->stats_in++;
+    *fps = *cpi->stats_in;
+    cpi->stats_in = (void*)((char *)cpi->stats_in + stats_sz);
     return 1;
 }
 
@@ -352,82 +368,55 @@ void vp8_avg_stats(FIRSTPASS_STATS *section)
     section->duration   /= section->count;
 }
 
-int vp8_fpmm_get_pos(VP8_COMP *cpi)
+unsigned char *vp8_fpmm_get_pos(VP8_COMP *cpi)
 {
-    return ftell(cpi->fp_motion_mapfile);
+    return cpi->fp_motion_map_stats;
 }
-void vp8_fpmm_reset_pos(VP8_COMP *cpi, int target_pos)
+void vp8_fpmm_reset_pos(VP8_COMP *cpi, unsigned char *target_pos)
 {
     int Offset;
 
-    if (cpi->fp_motion_mapfile)
-    {
-        Offset = ftell(cpi->fp_motion_mapfile) - target_pos;
-        fseek(cpi->fp_motion_mapfile, (int) - Offset, SEEK_CUR);
-    }
+    cpi->fp_motion_map_stats = target_pos;
 }
 
 void vp8_advance_fpmm(VP8_COMP *cpi, int count)
 {
-#ifdef FIRSTPASS_MM
-    fseek(cpi->fp_motion_mapfile, (int)(count * cpi->common.MBs), SEEK_CUR);
-#endif
+    cpi->fp_motion_map_stats = (void*)((char*)cpi->fp_motion_map_stats +
+        count * vp8_firstpass_stats_sz(cpi->common.MBs));
 }
 
-void vp8_input_fpmm(VP8_COMP *cpi, int count)
+void vp8_input_fpmm(VP8_COMP *cpi)
 {
-#ifdef FIRSTPASS_MM
+    unsigned char *fpmm = cpi->fp_motion_map;
+    int MBs = cpi->common.MBs;
+    int max_frames = cpi->active_arnr_frames;
+    int i;
 
-    unsigned char *tmp_motion_map;
-    int i, j;
-
-    if (!cpi->fp_motion_mapfile)
-        return;                 // Error
-
-    // Create the first pass motion map structure and set to 0
-    CHECK_MEM_ERROR(tmp_motion_map, vpx_calloc(cpi->common.MBs, 1));
-
-    // Reset the state of the global map
-    vpx_memset(cpi->fp_motion_map, 0, cpi->common.MBs);
-
-    // Read the specified number of frame maps and set the global map to the highest value seen for each mb.
-    for (i = 0; i < count; i++)
+    for (i=0; i<max_frames; i++)
     {
-        if (fread(tmp_motion_map, 1, cpi->common.MBs, cpi->fp_motion_mapfile) == cpi->common.MBs)
-        {
-            for (j = 0; j < cpi->common.MBs; j++)
-            {
-                if (tmp_motion_map[j] > 1)
-                    cpi->fp_motion_map[j] += 5;   // Intra is flagged
-                else
-                    cpi->fp_motion_map[j] += tmp_motion_map[j];
-            }
-        }
-        else
-            break;  // Read error
+        char *motion_map = (char*)cpi->fp_motion_map_stats
+                           + sizeof(FIRSTPASS_STATS);
 
+        memcpy(fpmm, motion_map, MBs);
+        fpmm += MBs;
+        vp8_advance_fpmm(cpi, 1);
     }
 
-    if (tmp_motion_map != 0)
-        vpx_free(tmp_motion_map);
-
-#endif
-
+    // Flag the use of weights in the temporal filter
+    cpi->use_weighted_temporal_filter = 1;
 }
 
 void vp8_init_first_pass(VP8_COMP *cpi)
 {
-    vp8_zero_stats(&cpi->total_stats);
-
-#ifdef FIRSTPASS_MM
-    cpi->fp_motion_mapfile = fopen("fpmotionmap.stt", "wb");
-#endif
+    vp8_zero_stats(cpi->total_stats);
 
 // TEMP debug code
 #ifdef OUTPUT_FPF
     {
         FILE *fpfile;
         fpfile = fopen("firstpass.stt", "w");
+        fclose(fpfile);
+        fpfile = fopen("fpmotionmap.stt", "wb");
         fclose(fpfile);
     }
 #endif
@@ -436,16 +425,10 @@ void vp8_init_first_pass(VP8_COMP *cpi)
 
 void vp8_end_first_pass(VP8_COMP *cpi)
 {
-    vp8_output_stats(cpi->output_pkt_list, &cpi->total_stats);
-
-#ifdef FIRSTPASS_MM
-
-    if (cpi->fp_motion_mapfile)
-        fclose(cpi->fp_motion_mapfile);
-
-#endif
-
+    vp8_output_stats(cpi, cpi->output_pkt_list, cpi->total_stats);
 }
+
+
 void vp8_zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG * recon_buffer, int * best_motion_err, int recon_yoffset )
 {
     MACROBLOCKD * const xd = & x->e_mbd;
@@ -479,12 +462,11 @@ void vp8_first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *
     int step_param = 3;                                       //3;          // Dont search over full range for first pass
     int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param; //3;
     int n;
-    vp8_variance_fn_ptr_t v_fn_ptr;
+    vp8_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
     int new_mv_mode_penalty = 256;
 
+    // override the default variance function to use MSE
     v_fn_ptr.vf    = VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16);
-    v_fn_ptr.sdf   = cpi->fn_ptr.sdf;
-    v_fn_ptr.sdx4df = cpi->fn_ptr.sdx4df;
 
     // Set up pointers for this macro block recon buffer
     xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
@@ -603,6 +585,8 @@ void vp8_first_pass(VP8_COMP *cpi)
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int this_error;
+            int zero_error;
+            int zz_to_best_ratio;
             int gf_motion_error = INT_MAX;
             int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
@@ -624,7 +608,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             intra_error += this_error;
 
             // Indicate default assumption of intra in the motion map
-            *fp_motion_map_ptr = 2;
+            *fp_motion_map_ptr = 0;
 
             // Set up limit values for motion vectors to prevent them extending outside the UMV borders
             x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
@@ -645,6 +629,9 @@ void vp8_first_pass(VP8_COMP *cpi)
                 vp8_zz_motion_search( cpi, x, lst_yv12, &motion_error, recon_yoffset );
                 d->bmi.mv.as_mv.row = 0;
                 d->bmi.mv.as_mv.col = 0;
+
+                // Save (0,0) error for later use
+                zero_error = motion_error;
 
                 // Test last reference frame using the previous best mv as the
                 // starting point (best reference) for the search
@@ -719,8 +706,6 @@ void vp8_first_pass(VP8_COMP *cpi)
                     {
                         mvcount++;
 
-                        *fp_motion_map_ptr = 1;
-
                         // Does the Row vector point inwards or outwards
                         if (mb_row < cm->mb_rows / 2)
                         {
@@ -752,12 +737,30 @@ void vp8_first_pass(VP8_COMP *cpi)
                             else if (d->bmi.mv.as_mv.col < 0)
                                 sum_in_vectors--;
                         }
+
+                        // Compute how close (0,0) predictor is to best
+                        // predictor in terms of their prediction error
+                        zz_to_best_ratio = (10*zero_error + this_error/2)
+                                            / (this_error+!this_error);
+
+                        if ((zero_error < 50000) &&
+                            (zz_to_best_ratio <= 11) )
+                            *fp_motion_map_ptr = 1;
+                        else
+                            *fp_motion_map_ptr = 0;
                     }
                     else
-                        *fp_motion_map_ptr = 0;    // 0,0 mv was best
+                    {
+                        // 0,0 mv was best
+                        if( zero_error<50000 )
+                            *fp_motion_map_ptr = 2;
+                        else
+                            *fp_motion_map_ptr = 1;
+                    }
                 }
                 else
                 {
+                    // Intra was best
                     best_ref_mv.row = 0;
                     best_ref_mv.col = 0;
                 }
@@ -835,19 +838,20 @@ void vp8_first_pass(VP8_COMP *cpi)
         fps.duration = cpi->source_end_time_stamp - cpi->source_time_stamp;
 
         // don't want to do outputstats with a stack variable!
-        cpi->this_frame_stats = fps;
-        vp8_output_stats(cpi->output_pkt_list, &cpi->this_frame_stats);
-        vp8_accumulate_stats(&cpi->total_stats, &fps);
-
-#ifdef FIRSTPASS_MM
-        fwrite(cpi->fp_motion_map, 1, cpi->common.MBs, cpi->fp_motion_mapfile);
-#endif
+        memcpy(cpi->this_frame_stats,
+               &fps,
+               sizeof(FIRSTPASS_STATS));
+        memcpy((char*)cpi->this_frame_stats + sizeof(FIRSTPASS_STATS),
+               cpi->fp_motion_map,
+               sizeof(cpi->fp_motion_map[0]) * cpi->common.MBs);
+        vp8_output_stats(cpi, cpi->output_pkt_list, cpi->this_frame_stats);
+        vp8_accumulate_stats(cpi->total_stats, &fps);
     }
 
     // Copy the previous Last Frame into the GF buffer if specific conditions for doing so are met
     if ((cm->current_video_frame > 0) &&
-        (cpi->this_frame_stats.pcnt_inter > 0.20) &&
-        ((cpi->this_frame_stats.intra_error / cpi->this_frame_stats.coded_error) > 2.0))
+        (cpi->this_frame_stats->pcnt_inter > 0.20) &&
+        ((cpi->this_frame_stats->intra_error / cpi->this_frame_stats->coded_error) > 2.0))
     {
         vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
     }
@@ -875,7 +879,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         else
             recon_file = fopen(filename, "ab");
 
-        fwrite(lst_yv12->buffer_alloc, lst_yv12->frame_size, 1, recon_file);
+        if(fwrite(lst_yv12->buffer_alloc, lst_yv12->frame_size, 1, recon_file));
         fclose(recon_file);
     }
 
@@ -1116,33 +1120,33 @@ void vp8_init_second_pass(VP8_COMP *cpi)
 
     double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
 
-    vp8_zero_stats(&cpi->total_stats);
+    vp8_zero_stats(cpi->total_stats);
 
     if (!cpi->stats_in_end)
         return;
 
-    cpi->total_stats = *cpi->stats_in_end;
+    *cpi->total_stats = *cpi->stats_in_end;
 
-    cpi->total_error_left = cpi->total_stats.ssim_weighted_pred_err;
-    cpi->total_intra_error_left = cpi->total_stats.intra_error;
-    cpi->total_coded_error_left = cpi->total_stats.coded_error;
+    cpi->total_error_left = cpi->total_stats->ssim_weighted_pred_err;
+    cpi->total_intra_error_left = cpi->total_stats->intra_error;
+    cpi->total_coded_error_left = cpi->total_stats->coded_error;
     cpi->start_tot_err_left = cpi->total_error_left;
 
-    //cpi->bits_left = (long long)(cpi->total_stats.count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
-    //cpi->bits_left -= (long long)(cpi->total_stats.count * two_pass_min_rate / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+    //cpi->bits_left = (long long)(cpi->total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+    //cpi->bits_left -= (long long)(cpi->total_stats->count * two_pass_min_rate / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
 
     // each frame can have a different duration, as the frame rate in the source
     // isn't guaranteed to be constant.   The frame rate prior to the first frame
     // encoded in the second pass is a guess.  However the sum duration is not.
     // Its calculated based on the actual durations of all frames from the first
     // pass.
-    vp8_new_frame_rate(cpi, 10000000.0 * cpi->total_stats.count / cpi->total_stats.duration);
+    vp8_new_frame_rate(cpi, 10000000.0 * cpi->total_stats->count / cpi->total_stats->duration);
 
     cpi->output_frame_rate = cpi->oxcf.frame_rate;
-    cpi->bits_left = (long long)(cpi->total_stats.duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
-    cpi->bits_left -= (long long)(cpi->total_stats.duration * two_pass_min_rate / 10000000.0);
+    cpi->bits_left = (long long)(cpi->total_stats->duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
+    cpi->bits_left -= (long long)(cpi->total_stats->duration * two_pass_min_rate / 10000000.0);
 
-    vp8_avg_stats(&cpi->total_stats);
+    vp8_avg_stats(cpi->total_stats);
 
     // Scan the first pass file and calculate an average Intra / Inter error score ratio for the sequence
     {
@@ -1158,7 +1162,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
             sum_iiratio += IIRatio;
         }
 
-        cpi->avg_iiratio = sum_iiratio / DOUBLE_DIVIDE_CHECK((double)cpi->total_stats.count);
+        cpi->avg_iiratio = sum_iiratio / DOUBLE_DIVIDE_CHECK((double)cpi->total_stats->count);
 
         // Reset file position
         reset_fpf_position(cpi, start_pos);
@@ -1180,21 +1184,11 @@ void vp8_init_second_pass(VP8_COMP *cpi)
 
     }
 
-#ifdef FIRSTPASS_MM
-    cpi->fp_motion_mapfile = 0;
-    cpi->fp_motion_mapfile = fopen("fpmotionmap.stt", "rb");
-#endif
-
+    cpi->fp_motion_map_stats = (unsigned char *)cpi->stats_in;
 }
 
 void vp8_end_second_pass(VP8_COMP *cpi)
 {
-#ifdef FIRSTPASS_MM
-
-    if (cpi->fp_motion_mapfile)
-        fclose(cpi->fp_motion_mapfile);
-
-#endif
 }
 
 // Analyse and define a gf/arf group .
@@ -1214,10 +1208,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     double mv_accumulator_rabs  = 0.0;
     double mv_accumulator_cabs  = 0.0;
-    double this_mv_rabs;
-    double this_mv_cabs;
     double mv_ratio_accumulator = 0.0;
-    double distance_factor = 0.0;
     double decay_accumulator = 1.0;
 
     double boost_factor = IIFACTOR;
@@ -1230,18 +1221,14 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     int max_bits = frame_max_bits(cpi);    // Max for a single frame
 
-#ifdef FIRSTPASS_MM
-    int fpmm_pos;
-#endif
+    unsigned char *fpmm_pos;
 
     cpi->gf_group_bits = 0;
     cpi->gf_decay_rate = 0;
 
     vp8_clear_system_state();  //__asm emms;
 
-#ifdef FIRSTPASS_MM
     fpmm_pos = vp8_fpmm_get_pos(cpi);
-#endif
 
     start_pos = cpi->stats_in;
 
@@ -1266,9 +1253,10 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     while (((i < cpi->max_gf_interval) || ((cpi->frames_to_key - i) < MIN_GF_INTERVAL)) && (i < cpi->frames_to_key))
     {
         double r;
-        double motion_factor;
         double this_frame_mvr_ratio;
         double this_frame_mvc_ratio;
+        double motion_decay;
+        double motion_pct = next_frame.pcnt_motion;
 
         i++;                                                    // Increment the loop counter
 
@@ -1283,12 +1271,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             break;
 
         // Accumulate motion stats.
-        motion_factor = next_frame.pcnt_motion;
-        this_mv_rabs = fabs(next_frame.mvr_abs * motion_factor);
-        this_mv_cabs = fabs(next_frame.mvc_abs * motion_factor);
-
-        mv_accumulator_rabs += fabs(next_frame.mvr_abs * motion_factor);
-        mv_accumulator_cabs += fabs(next_frame.mvc_abs * motion_factor);
+        mv_accumulator_rabs += fabs(next_frame.mvr_abs * motion_pct);
+        mv_accumulator_cabs += fabs(next_frame.mvc_abs * motion_pct);
 
         //Accumulate Motion In/Out of frame stats
         this_frame_mv_in_out = next_frame.mv_in_out_count * next_frame.pcnt_motion;
@@ -1296,13 +1280,23 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         abs_mv_in_out_accumulator += fabs(next_frame.mv_in_out_count * next_frame.pcnt_motion);
 
         // If there is a significant amount of motion
-        if (motion_factor > 0.05)
+        if (motion_pct > 0.05)
         {
-            this_frame_mvr_ratio = fabs(next_frame.mvr_abs) / DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVr));
-            this_frame_mvc_ratio = fabs(next_frame.mvc_abs) / DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVc));
+            this_frame_mvr_ratio = fabs(next_frame.mvr_abs) /
+                                   DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVr));
 
-            mv_ratio_accumulator += (this_frame_mvr_ratio < next_frame.mvr_abs) ? (this_frame_mvr_ratio * motion_factor) : next_frame.mvr_abs * motion_factor;
-            mv_ratio_accumulator += (this_frame_mvc_ratio < next_frame.mvc_abs) ? (this_frame_mvc_ratio * motion_factor) : next_frame.mvc_abs * motion_factor;
+            this_frame_mvc_ratio = fabs(next_frame.mvc_abs) /
+                                   DOUBLE_DIVIDE_CHECK(fabs(next_frame.MVc));
+
+            mv_ratio_accumulator +=
+                (this_frame_mvr_ratio < next_frame.mvr_abs)
+                    ? (this_frame_mvr_ratio * motion_pct)
+                    : next_frame.mvr_abs * motion_pct;
+
+            mv_ratio_accumulator +=
+                (this_frame_mvc_ratio < next_frame.mvc_abs)
+                    ? (this_frame_mvc_ratio * motion_pct)
+                    : next_frame.mvc_abs * motion_pct;
         }
         else
         {
@@ -1330,14 +1324,26 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         loop_decay_rate = next_frame.pcnt_inter;
 
         // High % motion -> somewhat higher decay rate
-        if ((1.0 - (next_frame.pcnt_motion / 10.0)) < loop_decay_rate)
-            loop_decay_rate = (1.0 - (next_frame.pcnt_motion / 10.0));
+        motion_decay = (1.0 - (motion_pct / 20.0));
+        if (motion_decay < loop_decay_rate)
+            loop_decay_rate = motion_decay;
 
-        distance_factor = sqrt((this_mv_rabs * this_mv_rabs) + (this_mv_cabs * this_mv_cabs)) / 300.0;
-        distance_factor = ((distance_factor > 1.0) ? 0.0 : (1.0 - distance_factor));
+        // Adjustment to decay rate based on speed of motion
+        {
+            double this_mv_rabs;
+            double this_mv_cabs;
+            double distance_factor;
 
-        if (distance_factor < loop_decay_rate)
-            loop_decay_rate = distance_factor;
+            this_mv_rabs = fabs(next_frame.mvr_abs * motion_pct);
+            this_mv_cabs = fabs(next_frame.mvc_abs * motion_pct);
+
+            distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
+                                   (this_mv_cabs * this_mv_cabs)) / 250.0;
+            distance_factor = ((distance_factor > 1.0)
+                                    ? 0.0 : (1.0 - distance_factor));
+            if (distance_factor < loop_decay_rate)
+                loop_decay_rate = distance_factor;
+        }
 
         // Cumulative effect of decay
         decay_accumulator = decay_accumulator * loop_decay_rate;
@@ -1452,6 +1458,11 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // Only use an arf if it is likely we will be able to code it at a lower Q than the surrounding frames.
         if (tmp_q < cpi->worst_quality)
         {
+            int half_gf_int;
+            int frames_after_arf;
+            int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
+            int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
+
             cpi->source_alt_ref_pending = TRUE;
 
             // For alt ref frames the error score for the end frame of the group (the alt ref frame) should not contribute to the group total and hence
@@ -1462,22 +1473,63 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             // The future frame itself is part of the next group
             cpi->baseline_gf_interval = i - 1;
 
-#ifdef FIRSTPASS_MM
-            // Read through the motion map to load up the entry for the ARF
+            // Define the arnr filter width for this group of frames:
+            // We only filter frames that lie within a distance of half
+            // the GF interval from the ARF frame. We also have to trap
+            // cases where the filter extends beyond the end of clip.
+            // Note: this_frame->frame has been updated in the loop
+            // so it now points at the ARF frame.
+            half_gf_int = cpi->baseline_gf_interval >> 1;
+            frames_after_arf = cpi->total_stats->count - this_frame->frame - 1;
+
+            switch (cpi->oxcf.arnr_type)
             {
-                int j;
+            case 1: // Backward filter
+                frames_fwd = 0;
+                if (frames_bwd > half_gf_int)
+                    frames_bwd = half_gf_int;
+                break;
 
-                // Advance to the region of interest
-                // Current default 2 frames before to 2 frames after the ARF frame itsef
-                vp8_fpmm_reset_pos(cpi, cpi->fpmm_pos);
+            case 2: // Forward filter
+                if (frames_fwd > half_gf_int)
+                    frames_fwd = half_gf_int;
+                if (frames_fwd > frames_after_arf)
+                    frames_fwd = frames_after_arf;
+                frames_bwd = 0;
+                break;
 
-                for (j = 0; j < cpi->baseline_gf_interval - 2; j++)
-                    vp8_advance_fpmm(cpi, 1);
+            case 3: // Centered filter
+            default:
+                frames_fwd >>= 1;
+                if (frames_fwd > frames_after_arf)
+                    frames_fwd = frames_after_arf;
+                if (frames_fwd > half_gf_int)
+                    frames_fwd = half_gf_int;
+
+                frames_bwd = frames_fwd;
+
+                // For even length filter there is one more frame backward
+                // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
+                if (frames_bwd < half_gf_int)
+                    frames_bwd += (cpi->oxcf.arnr_max_frames+1) & 0x1;
+                break;
+            }
+
+            cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
+
+            {
+                // Advance to & read in the motion map for those frames
+                // to be considered for filtering based on the position
+                // of the ARF
+                vp8_fpmm_reset_pos(cpi, cpi->fp_motion_map_stats_save);
+
+                // Position at the 'earliest' frame to be filtered
+                vp8_advance_fpmm(cpi,
+                    cpi->baseline_gf_interval - frames_bwd);
 
                 // Read / create a motion map for the region of interest
-                vp8_input_fpmm(cpi, 5);
+                vp8_input_fpmm(cpi);
             }
-#endif
         }
         else
         {
@@ -1513,7 +1565,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     // Now decide how many bits should be allocated to the GF group as  a proportion of those remaining in the kf group.
     // The final key frame group in the clip is treated as a special case where cpi->kf_group_bits is tied to cpi->bits_left.
     // This is also important for short clips where there may only be one key frame.
-    if (cpi->frames_to_key >= (int)(cpi->total_stats.count - cpi->common.current_video_frame))
+    if (cpi->frames_to_key >= (int)(cpi->total_stats->count - cpi->common.current_video_frame))
     {
         cpi->kf_group_bits = (cpi->bits_left > 0) ? cpi->bits_left : 0;
     }
@@ -1713,10 +1765,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         reset_fpf_position(cpi, start_pos);
     }
 
-#ifdef FIRSTPASS_MM
     // Reset the First pass motion map file position
     vp8_fpmm_reset_pos(cpi, fpmm_pos);
-#endif
 }
 
 // Allocate bits to a normal frame that is neither a gf an arf or a key frame.
@@ -1730,7 +1780,7 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     int max_bits = frame_max_bits(cpi);    // Max for a single frame
 
     // The final few frames have special treatment
-    if (cpi->frames_till_gf_update_due >= (int)(cpi->total_stats.count - cpi->common.current_video_frame))
+    if (cpi->frames_till_gf_update_due >= (int)(cpi->total_stats->count - cpi->common.current_video_frame))
     {
         cpi->gf_group_bits = (cpi->bits_left > 0) ? cpi->bits_left : 0;;
     }
@@ -1775,7 +1825,7 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 void vp8_second_pass(VP8_COMP *cpi)
 {
     int tmp_q;
-    int frames_left = (int)(cpi->total_stats.count - cpi->common.current_video_frame);
+    int frames_left = (int)(cpi->total_stats->count - cpi->common.current_video_frame);
 
     FIRSTPASS_STATS this_frame;
     FIRSTPASS_STATS this_frame_copy;
@@ -1798,11 +1848,12 @@ void vp8_second_pass(VP8_COMP *cpi)
     if (EOF == vp8_input_stats(cpi, &this_frame))
         return;
 
-#ifdef FIRSTPASS_MM
-    vpx_memset(cpi->fp_motion_map, 0, cpi->common.MBs);
-    cpi->fpmm_pos = vp8_fpmm_get_pos(cpi);
-    vp8_advance_fpmm(cpi, 1);         // Read this frame's first pass motion map
-#endif
+    vpx_memset(cpi->fp_motion_map, 0,
+                cpi->oxcf.arnr_max_frames*cpi->common.MBs);
+    cpi->fp_motion_map_stats_save = vp8_fpmm_get_pos(cpi);
+
+    // Step over this frame's first pass motion map
+    vp8_advance_fpmm(cpi, 1);
 
     this_frame_error = this_frame.ssim_weighted_pred_err;
     this_frame_intra_error = this_frame.intra_error;
@@ -2226,6 +2277,8 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     for (i = 0 ; i < cpi->frames_to_key ; i++)
     {
         double r;
+        double motion_decay;
+        double motion_pct = next_frame.pcnt_motion;
 
         if (EOF == vp8_input_stats(cpi, &next_frame))
             break;
@@ -2239,10 +2292,30 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         //if ( next_frame.pcnt_inter < loop_decay_rate )
         loop_decay_rate = next_frame.pcnt_inter;
 
-        if ((1.0 - (next_frame.pcnt_motion / 10.0)) < loop_decay_rate)
-            loop_decay_rate = (1.0 - (next_frame.pcnt_motion / 10.0));
+        // High % motion -> somewhat higher decay rate
+        motion_decay = (1.0 - (motion_pct / 20.0));
+        if (motion_decay < loop_decay_rate)
+            loop_decay_rate = motion_decay;
+
+        // Adjustment to decay rate based on speed of motion
+        {
+            double this_mv_rabs;
+            double this_mv_cabs;
+            double distance_factor;
+
+            this_mv_rabs = fabs(next_frame.mvr_abs * motion_pct);
+            this_mv_cabs = fabs(next_frame.mvc_abs * motion_pct);
+
+            distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
+                                   (this_mv_cabs * this_mv_cabs)) / 250.0;
+            distance_factor = ((distance_factor > 1.0)
+                                    ? 0.0 : (1.0 - distance_factor));
+            if (distance_factor < loop_decay_rate)
+                loop_decay_rate = distance_factor;
+        }
 
         decay_accumulator = decay_accumulator * loop_decay_rate;
+        decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
 
         boost_score += (decay_accumulator * r);
 
@@ -2469,7 +2542,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         cpi->common.vert_scale = NORMAL;
 
         // Calculate Average bits per frame.
-        //av_bits_per_frame = cpi->bits_left/(double)(cpi->total_stats.count - cpi->common.current_video_frame);
+        //av_bits_per_frame = cpi->bits_left/(double)(cpi->total_stats->count - cpi->common.current_video_frame);
         av_bits_per_frame = cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate);
         //if ( av_bits_per_frame < 0.0 )
         //  av_bits_per_frame = 0.0
@@ -2513,7 +2586,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (0)
         {
             FILE *f = fopen("Subsamle.stt", "a");
-            fprintf(f, " %8d %8d %8d %8d %12.0f %8d %8d %8d\n",  cpi->common.current_video_frame, kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, cpi->kf_group_bits / cpi->frames_to_key, new_height, new_width);
+            fprintf(f, " %8d %8d %8d %8d %12.0f %8d %8d %8d\n",  cpi->common.current_video_frame, kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, (int)(cpi->kf_group_bits / cpi->frames_to_key), new_height, new_width);
             fclose(f);
         }
 
@@ -2532,7 +2605,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
         else
         {
-            long long clip_bits = (long long)(cpi->total_stats.count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+            long long clip_bits = (long long)(cpi->total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
             long long over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;
             long long over_spend2 = cpi->oxcf.starting_buffer_level - projected_buffer_level;
 
@@ -2571,7 +2644,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 if (0)
                 {
                     FILE *f = fopen("Subsamle.stt", "a");
-                    fprintf(f, "******** %8d %8d %8d %12.0f %8d %8d %8d\n",  kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, cpi->kf_group_bits / cpi->frames_to_key, new_height, new_width);
+                    fprintf(f, "******** %8d %8d %8d %12.0f %8d %8d %8d\n",  kf_q, cpi->common.horiz_scale, cpi->common.vert_scale,  kf_group_err / cpi->frames_to_key, (int)(cpi->kf_group_bits / cpi->frames_to_key), new_height, new_width);
                     fclose(f);
                 }
             }

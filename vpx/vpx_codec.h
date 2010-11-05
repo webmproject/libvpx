@@ -62,7 +62,7 @@ extern "C" {
     /*!\brief Decorator indicating a function is potentially unused */
 #ifdef UNUSED
 #elif __GNUC__
-#define UNUSED __attribute__ ((unused));
+#define UNUSED __attribute__ ((unused))
 #else
 #define UNUSED
 #endif
@@ -128,7 +128,7 @@ extern "C" {
         /*!\brief An iterator reached the end of list.
          *
          */
-        VPX_CODEC_LIST_END,
+        VPX_CODEC_LIST_END
 
     }
     vpx_codec_err_t;

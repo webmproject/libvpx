@@ -14,6 +14,7 @@
 #include "vpx_version.h"
 #include "onyx_int.h"
 #include "vpx/vp8e.h"
+#include "vp8/encoder/firstpass.h"
 #include "onyx.h"
 #include <stdlib.h>
 #include <string.h>
@@ -63,9 +64,9 @@ static const struct extraconfig_map extracfg_map[] =
             0,                          /* Sharpness */
             0,                          /* static_thresh */
             VP8_ONE_TOKENPARTITION,     /* token_partitions */
-            0, /* arnr_max_frames */
-            0, /* arnr_strength */
-            0, /* arnr_type*/
+            0,                          /* arnr_max_frames */
+            3,                          /* arnr_strength */
+            3,                          /* arnr_type*/
             0,                          /* experimental mode */
         }
     }
@@ -184,28 +185,31 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
     RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
-    RANGE_CHECK_HI(vp8_cfg, arnr_max_frames, 15);
+    RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
     RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
-    RANGE_CHECK_HI(vp8_cfg, arnr_type,       0xffffffff);
+    RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
 
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
-        int n_doubles = cfg->rc_twopass_stats_in.sz / sizeof(double);
-        int n_packets = cfg->rc_twopass_stats_in.sz / sizeof(FIRSTPASS_STATS);
-        double frames;
+        int              mb_r = (cfg->g_h + 15) / 16;
+        int              mb_c = (cfg->g_w + 15) / 16;
+        size_t           packet_sz = vp8_firstpass_stats_sz(mb_r * mb_c);
+        int              n_packets = cfg->rc_twopass_stats_in.sz / packet_sz;
+        FIRSTPASS_STATS *stats;
 
         if (!cfg->rc_twopass_stats_in.buf)
             ERROR("rc_twopass_stats_in.buf not set.");
 
-        if (cfg->rc_twopass_stats_in.sz % sizeof(FIRSTPASS_STATS))
+        if (cfg->rc_twopass_stats_in.sz % packet_sz)
             ERROR("rc_twopass_stats_in.sz indicates truncated packet.");
 
-        if (cfg->rc_twopass_stats_in.sz < 2 * sizeof(FIRSTPASS_STATS))
+        if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
             ERROR("rc_twopass_stats_in requires at least two packets.");
 
-        frames = ((double *)cfg->rc_twopass_stats_in.buf)[n_doubles - 1];
+        stats = (void*)((char *)cfg->rc_twopass_stats_in.buf
+                + (n_packets - 1) * packet_sz);
 
-        if ((int)(frames + 0.5) != n_packets - 1)
+        if ((int)(stats->count + 0.5) != n_packets - 1)
             ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
 
@@ -780,12 +784,13 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                 {
                     pkt.data.frame.flags |= VPX_FRAME_IS_INVISIBLE;
 
-                    // TODO: ideally this timestamp should be as close as
-                    // possible to the prior PTS so that if a decoder uses
-                    // pts to schedule when to do this, we start right after
-                    // last frame was decoded.  Maybe should be set to
-                    // last time stamp. Invisible frames have no duration..
-                    pkt.data.frame.pts --;
+                    // This timestamp should be as close as possible to the
+                    // prior PTS so that if a decoder uses pts to schedule when
+                    // to do this, we start right after last frame was decoded.
+                    // Invisible frames have no duration.
+                    pkt.data.frame.pts = ((cpi->last_time_stamp_seen
+                        * ctx->cfg.g_timebase.den + round)
+                        / ctx->cfg.g_timebase.num / 10000000) + 1;
                     pkt.data.frame.duration = 0;
                 }
 

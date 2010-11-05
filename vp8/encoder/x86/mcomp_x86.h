@@ -24,5 +24,14 @@
 #endif
 #endif
 
+#if HAVE_SSE4_1
+#if !CONFIG_RUNTIME_CPU_DETECT
+
+#undef  vp8_search_full_search
+#define vp8_search_full_search vp8_full_search_sadx8
+
+#endif
+#endif
+
 #endif
 

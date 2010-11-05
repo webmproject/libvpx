@@ -53,8 +53,6 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BLOCK
 
     x->quantize_b(be, b);
 
-    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!b->eob);
-
     vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
 
     RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
@@ -69,8 +67,6 @@ void vp8_encode_intra4x4block_rd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BL
     x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
 
     x->quantize_b(be, b);
-
-    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff &= (!b->eob);
 
     IDCT_INVOKE(&rtcd->common->idct, idct16)(b->dqcoeff, b->diff, 32);
 
@@ -109,7 +105,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
 #if !(CONFIG_REALTIME_ONLY)
 #if 1
-    if (x->optimize && x->rddiv > 1)
+    if (x->optimize==2 ||(x->optimize && x->rddiv > 1))
         vp8_optimize_mby(x, rtcd);
 
 #endif
@@ -117,7 +113,8 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mby(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mby)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
     // make sure block modes are set the way we want them for context updates
     for (b = 0; b < 16; b++)
@@ -157,13 +154,12 @@ void vp8_encode_intra16x16mbyrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_transform_intra_mby(x);
 
-    x->e_mbd.mode_info_context->mbmi.mb_skip_coeff = 1;
-
     vp8_quantize_mby(x);
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mby(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mby)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
     // make sure block modes are set the way we want them for context updates
     for (b = 0; b < 16; b++)
@@ -206,7 +202,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 #if !(CONFIG_REALTIME_ONLY)
 #if 1
 
-    if (x->optimize && x->rddiv > 1)
+    if (x->optimize==2 ||(x->optimize && x->rddiv > 1))
         vp8_optimize_mbuv(x, rtcd);
 
 #endif

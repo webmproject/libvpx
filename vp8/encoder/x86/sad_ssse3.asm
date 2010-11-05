@@ -11,23 +11,21 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-%idefine QWORD
-
 %macro PROCESS_16X2X3 1
 %if %1
-        movdqa          xmm0,       [rsi]
-        lddqu           xmm5,       [rdi]
-        lddqu           xmm6,       [rdi+1]
-        lddqu           xmm7,       [rdi+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm5,       XMMWORD PTR [rdi]
+        lddqu           xmm6,       XMMWORD PTR [rdi+1]
+        lddqu           xmm7,       XMMWORD PTR [rdi+2]
 
         psadbw          xmm5,       xmm0
         psadbw          xmm6,       xmm0
         psadbw          xmm7,       xmm0
 %else
-        movdqa          xmm0,       [rsi]
-        lddqu           xmm1,       [rdi]
-        lddqu           xmm2,       [rdi+1]
-        lddqu           xmm3,       [rdi+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm1,       XMMWORD PTR [rdi]
+        lddqu           xmm2,       XMMWORD PTR [rdi+1]
+        lddqu           xmm3,       XMMWORD PTR [rdi+2]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
@@ -37,10 +35,10 @@
         paddw           xmm6,       xmm2
         paddw           xmm7,       xmm3
 %endif
-        movdqa          xmm0,       QWORD PTR [rsi+rax]
-        lddqu           xmm1,       QWORD PTR [rdi+rdx]
-        lddqu           xmm2,       QWORD PTR [rdi+rdx+1]
-        lddqu           xmm3,       QWORD PTR [rdi+rdx+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi+rax]
+        lddqu           xmm1,       XMMWORD PTR [rdi+rdx]
+        lddqu           xmm2,       XMMWORD PTR [rdi+rdx+1]
+        lddqu           xmm3,       XMMWORD PTR [rdi+rdx+2]
 
         lea             rsi,        [rsi+rax*2]
         lea             rdi,        [rdi+rdx*2]
@@ -56,9 +54,9 @@
 
 %macro PROCESS_16X2X3_OFFSET 2
 %if %1
-        movdqa          xmm0,       [rsi]
-        movdqa          xmm4,       [rdi]
-        movdqa          xmm7,       [rdi+16]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        movdqa          xmm4,       XMMWORD PTR [rdi]
+        movdqa          xmm7,       XMMWORD PTR [rdi+16]
 
         movdqa          xmm5,       xmm7
         palignr         xmm5,       xmm4,       %2
@@ -72,9 +70,9 @@
         psadbw          xmm6,       xmm0
         psadbw          xmm7,       xmm0
 %else
-        movdqa          xmm0,       [rsi]
-        movdqa          xmm4,       [rdi]
-        movdqa          xmm3,       [rdi+16]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        movdqa          xmm4,       XMMWORD PTR [rdi]
+        movdqa          xmm3,       XMMWORD PTR [rdi+16]
 
         movdqa          xmm1,       xmm3
         palignr         xmm1,       xmm4,       %2
@@ -92,9 +90,9 @@
         paddw           xmm6,       xmm2
         paddw           xmm7,       xmm3
 %endif
-        movdqa          xmm0,       QWORD PTR [rsi+rax]
-        movdqa          xmm4,       QWORD PTR [rdi+rdx]
-        movdqa          xmm3,       QWORD PTR [rdi+rdx+16]
+        movdqa          xmm0,       XMMWORD PTR [rsi+rax]
+        movdqa          xmm4,       XMMWORD PTR [rdi+rdx]
+        movdqa          xmm3,       XMMWORD PTR [rdi+rdx+16]
 
         movdqa          xmm1,       xmm3
         palignr         xmm1,       xmm4,       %2

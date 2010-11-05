@@ -15,6 +15,7 @@
 
 
 void vp8_arch_x86_encoder_init(VP8_COMP *cpi);
+void vp8_arch_arm_encoder_init(VP8_COMP *cpi);
 
 
 void (*vp8_fast_quantize_b)(BLOCK *b, BLOCKD *d);
@@ -39,6 +40,12 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.variance.sad8x8x3              = vp8_sad8x8x3_c;
     cpi->rtcd.variance.sad4x4x3              = vp8_sad4x4x3_c;
 
+    cpi->rtcd.variance.sad16x16x8            = vp8_sad16x16x8_c;
+    cpi->rtcd.variance.sad16x8x8             = vp8_sad16x8x8_c;
+    cpi->rtcd.variance.sad8x16x8             = vp8_sad8x16x8_c;
+    cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_c;
+    cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_c;
+
     cpi->rtcd.variance.sad16x16x4d           = vp8_sad16x16x4d_c;
     cpi->rtcd.variance.sad16x8x4d            = vp8_sad16x8x4d_c;
     cpi->rtcd.variance.sad8x16x4d            = vp8_sad8x16x4d_c;
@@ -56,6 +63,9 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_c;
     cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;
     cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_c;
+    cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_c;
+    cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_c;
+    cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_c;
     cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_c;
 
     cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;
@@ -92,6 +102,10 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 
 #if ARCH_X86 || ARCH_X86_64
     vp8_arch_x86_encoder_init(cpi);
+#endif
+
+#if ARCH_ARM
+    vp8_arch_arm_encoder_init(cpi);
 #endif
 
 }

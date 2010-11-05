@@ -171,7 +171,7 @@ extern "C" {
     {
         VPX_RC_ONE_PASS,   /**< Single pass mode */
         VPX_RC_FIRST_PASS, /**< First pass of multi-pass mode */
-        VPX_RC_LAST_PASS,  /**< Final pass of multi-pass mode */
+        VPX_RC_LAST_PASS   /**< Final pass of multi-pass mode */
     };
 
 

@@ -11,23 +11,21 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-%idefine QWORD
-
 %macro PROCESS_16X2X3 1
 %if %1
-        movdqa          xmm0,       [rsi]
-        lddqu           xmm5,       [rdi]
-        lddqu           xmm6,       [rdi+1]
-        lddqu           xmm7,       [rdi+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm5,       XMMWORD PTR [rdi]
+        lddqu           xmm6,       XMMWORD PTR [rdi+1]
+        lddqu           xmm7,       XMMWORD PTR [rdi+2]
 
         psadbw          xmm5,       xmm0
         psadbw          xmm6,       xmm0
         psadbw          xmm7,       xmm0
 %else
-        movdqa          xmm0,       [rsi]
-        lddqu           xmm1,       [rdi]
-        lddqu           xmm2,       [rdi+1]
-        lddqu           xmm3,       [rdi+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm1,       XMMWORD PTR [rdi]
+        lddqu           xmm2,       XMMWORD PTR [rdi+1]
+        lddqu           xmm3,       XMMWORD PTR [rdi+2]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
@@ -37,10 +35,10 @@
         paddw           xmm6,       xmm2
         paddw           xmm7,       xmm3
 %endif
-        movdqa          xmm0,       QWORD PTR [rsi+rax]
-        lddqu           xmm1,       QWORD PTR [rdi+rdx]
-        lddqu           xmm2,       QWORD PTR [rdi+rdx+1]
-        lddqu           xmm3,       QWORD PTR [rdi+rdx+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi+rax]
+        lddqu           xmm1,       XMMWORD PTR [rdi+rdx]
+        lddqu           xmm2,       XMMWORD PTR [rdi+rdx+1]
+        lddqu           xmm3,       XMMWORD PTR [rdi+rdx+2]
 
         lea             rsi,        [rsi+rax*2]
         lea             rdi,        [rdi+rdx*2]
@@ -56,19 +54,19 @@
 
 %macro PROCESS_8X2X3 1
 %if %1
-        movq            mm0,       [rsi]
-        movq            mm5,       [rdi]
-        movq            mm6,       [rdi+1]
-        movq            mm7,       [rdi+2]
+        movq            mm0,       QWORD PTR [rsi]
+        movq            mm5,       QWORD PTR [rdi]
+        movq            mm6,       QWORD PTR [rdi+1]
+        movq            mm7,       QWORD PTR [rdi+2]
 
         psadbw          mm5,       mm0
         psadbw          mm6,       mm0
         psadbw          mm7,       mm0
 %else
-        movq            mm0,       [rsi]
-        movq            mm1,       [rdi]
-        movq            mm2,       [rdi+1]
-        movq            mm3,       [rdi+2]
+        movq            mm0,       QWORD PTR [rsi]
+        movq            mm1,       QWORD PTR [rdi]
+        movq            mm2,       QWORD PTR [rdi+1]
+        movq            mm3,       QWORD PTR [rdi+2]
 
         psadbw          mm1,       mm0
         psadbw          mm2,       mm0
@@ -105,45 +103,45 @@
 
 %macro PROCESS_16X2X4 1
 %if %1
-        movdqa          xmm0,       [rsi]
-        lddqu           xmm4,       [rcx]
-        lddqu           xmm5,       [rdx]
-        lddqu           xmm6,       [rbx]
-        lddqu           xmm7,       [rdi]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm4,       XMMWORD PTR [rcx]
+        lddqu           xmm5,       XMMWORD PTR [rdx]
+        lddqu           xmm6,       XMMWORD PTR [rbx]
+        lddqu           xmm7,       XMMWORD PTR [rdi]
 
         psadbw          xmm4,       xmm0
         psadbw          xmm5,       xmm0
         psadbw          xmm6,       xmm0
         psadbw          xmm7,       xmm0
 %else
-        movdqa          xmm0,       [rsi]
-        lddqu           xmm1,       [rcx]
-        lddqu           xmm2,       [rdx]
-        lddqu           xmm3,       [rbx]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm1,       XMMWORD PTR [rcx]
+        lddqu           xmm2,       XMMWORD PTR [rdx]
+        lddqu           xmm3,       XMMWORD PTR [rbx]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
         psadbw          xmm3,       xmm0
 
         paddw           xmm4,       xmm1
-        lddqu           xmm1,       [rdi]
+        lddqu           xmm1,       XMMWORD PTR [rdi]
         paddw           xmm5,       xmm2
         paddw           xmm6,       xmm3
 
         psadbw          xmm1,       xmm0
         paddw           xmm7,       xmm1
 %endif
-        movdqa          xmm0,       QWORD PTR [rsi+rax]
-        lddqu           xmm1,       QWORD PTR [rcx+rbp]
-        lddqu           xmm2,       QWORD PTR [rdx+rbp]
-        lddqu           xmm3,       QWORD PTR [rbx+rbp]
+        movdqa          xmm0,       XMMWORD PTR [rsi+rax]
+        lddqu           xmm1,       XMMWORD PTR [rcx+rbp]
+        lddqu           xmm2,       XMMWORD PTR [rdx+rbp]
+        lddqu           xmm3,       XMMWORD PTR [rbx+rbp]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
         psadbw          xmm3,       xmm0
 
         paddw           xmm4,       xmm1
-        lddqu           xmm1,       QWORD PTR [rdi+rbp]
+        lddqu           xmm1,       XMMWORD PTR [rdi+rbp]
         paddw           xmm5,       xmm2
         paddw           xmm6,       xmm3
 
@@ -162,28 +160,28 @@
 
 %macro PROCESS_8X2X4 1
 %if %1
-        movq            mm0,        [rsi]
-        movq            mm4,        [rcx]
-        movq            mm5,        [rdx]
-        movq            mm6,        [rbx]
-        movq            mm7,        [rdi]
+        movq            mm0,        QWORD PTR [rsi]
+        movq            mm4,        QWORD PTR [rcx]
+        movq            mm5,        QWORD PTR [rdx]
+        movq            mm6,        QWORD PTR [rbx]
+        movq            mm7,        QWORD PTR [rdi]
 
         psadbw          mm4,        mm0
         psadbw          mm5,        mm0
         psadbw          mm6,        mm0
         psadbw          mm7,        mm0
 %else
-        movq            mm0,        [rsi]
-        movq            mm1,        [rcx]
-        movq            mm2,        [rdx]
-        movq            mm3,        [rbx]
+        movq            mm0,        QWORD PTR [rsi]
+        movq            mm1,        QWORD PTR [rcx]
+        movq            mm2,        QWORD PTR [rdx]
+        movq            mm3,        QWORD PTR [rbx]
 
         psadbw          mm1,        mm0
         psadbw          mm2,        mm0
         psadbw          mm3,        mm0
 
         paddw           mm4,        mm1
-        movq            mm1,        [rdi]
+        movq            mm1,        QWORD PTR [rdi]
         paddw           mm5,        mm2
         paddw           mm6,        mm3
 
@@ -430,20 +428,20 @@ sym(vp8_sad4x4x3_sse3):
         movsxd          rax,        dword ptr arg(1) ;src_stride
         movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        movd            mm0,        QWORD PTR [rsi]
-        movd            mm1,        QWORD PTR [rdi]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm1,        DWORD PTR [rdi]
 
-        movd            mm2,        QWORD PTR [rsi+rax]
-        movd            mm3,        QWORD PTR [rdi+rdx]
+        movd            mm2,        DWORD PTR [rsi+rax]
+        movd            mm3,        DWORD PTR [rdi+rdx]
 
         punpcklbw       mm0,        mm2
         punpcklbw       mm1,        mm3
 
-        movd            mm4,        QWORD PTR [rdi+1]
-        movd            mm5,        QWORD PTR [rdi+2]
+        movd            mm4,        DWORD PTR [rdi+1]
+        movd            mm5,        DWORD PTR [rdi+2]
 
-        movd            mm2,        QWORD PTR [rdi+rdx+1]
-        movd            mm3,        QWORD PTR [rdi+rdx+2]
+        movd            mm2,        DWORD PTR [rdi+rdx+1]
+        movd            mm3,        DWORD PTR [rdi+rdx+2]
 
         psadbw          mm1,        mm0
 
@@ -458,24 +456,24 @@ sym(vp8_sad4x4x3_sse3):
         lea             rsi,        [rsi+rax*2]
         lea             rdi,        [rdi+rdx*2]
 
-        movd            mm0,        QWORD PTR [rsi]
-        movd            mm2,        QWORD PTR [rdi]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm2,        DWORD PTR [rdi]
 
-        movd            mm3,        QWORD PTR [rsi+rax]
-        movd            mm6,        QWORD PTR [rdi+rdx]
+        movd            mm3,        DWORD PTR [rsi+rax]
+        movd            mm6,        DWORD PTR [rdi+rdx]
 
         punpcklbw       mm0,        mm3
         punpcklbw       mm2,        mm6
 
-        movd            mm3,        QWORD PTR [rdi+1]
-        movd            mm7,        QWORD PTR [rdi+2]
+        movd            mm3,        DWORD PTR [rdi+1]
+        movd            mm7,        DWORD PTR [rdi+2]
 
         psadbw          mm2,        mm0
 
         paddw           mm1,        mm2
 
-        movd            mm2,        QWORD PTR [rdi+rdx+1]
-        movd            mm6,        QWORD PTR [rdi+rdx+2]
+        movd            mm2,        DWORD PTR [rdi+rdx+1]
+        movd            mm6,        DWORD PTR [rdi+rdx+2]
 
         punpcklbw       mm3,        mm2
         punpcklbw       mm7,        mm6
@@ -530,7 +528,7 @@ sym(vp8_sad16x16_sse3):
 
 vp8_sad16x16_sse3_loop:
 
-        movd            rax,        mm7
+        movq            rax,        mm7
         cmp             rax,        arg(4)
         jg              vp8_sad16x16_early_exit
 
@@ -564,7 +562,7 @@ vp8_sad16x16_sse3_loop:
         cmp             rsi,        rcx
         jne             vp8_sad16x16_sse3_loop
 
-        movd            rax,        mm7
+        movq            rax,        mm7
 
 vp8_sad16x16_early_exit:
 
@@ -846,23 +844,23 @@ sym(vp8_sad4x4x4d_sse3):
 
         xchg            rbx,        rax
 
-        movd            mm0,        QWORD PTR [rsi]
-        movd            mm1,        QWORD PTR [rcx]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm1,        DWORD PTR [rcx]
 
-        movd            mm2,        QWORD PTR [rsi+rax]
-        movd            mm3,        QWORD PTR [rcx+rbp]
+        movd            mm2,        DWORD PTR [rsi+rax]
+        movd            mm3,        DWORD PTR [rcx+rbp]
 
         punpcklbw       mm0,        mm2
         punpcklbw       mm1,        mm3
 
-        movd            mm4,        QWORD PTR [rdx]
-        movd            mm5,        QWORD PTR [rbx]
+        movd            mm4,        DWORD PTR [rdx]
+        movd            mm5,        DWORD PTR [rbx]
 
-        movd            mm6,        QWORD PTR [rdi]
-        movd            mm2,        QWORD PTR [rdx+rbp]
+        movd            mm6,        DWORD PTR [rdi]
+        movd            mm2,        DWORD PTR [rdx+rbp]
 
-        movd            mm3,        QWORD PTR [rbx+rbp]
-        movd            mm7,        QWORD PTR [rdi+rbp]
+        movd            mm3,        DWORD PTR [rbx+rbp]
+        movd            mm7,        DWORD PTR [rdi+rbp]
 
         psadbw          mm1,        mm0
 
@@ -885,17 +883,17 @@ sym(vp8_sad4x4x4d_sse3):
 
         lea             rdi,        [rdi+rbp*2]
 
-        movd            mm0,        QWORD PTR [rsi]
-        movd            mm2,        QWORD PTR [rcx]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm2,        DWORD PTR [rcx]
 
-        movd            mm3,        QWORD PTR [rsi+rax]
-        movd            mm7,        QWORD PTR [rcx+rbp]
+        movd            mm3,        DWORD PTR [rsi+rax]
+        movd            mm7,        DWORD PTR [rcx+rbp]
 
         punpcklbw       mm0,        mm3
         punpcklbw       mm2,        mm7
 
-        movd            mm3,        QWORD PTR [rdx]
-        movd            mm7,        QWORD PTR [rbx]
+        movd            mm3,        DWORD PTR [rdx]
+        movd            mm7,        DWORD PTR [rbx]
 
         psadbw          mm2,        mm0
         mov             rax,        rbp
@@ -906,8 +904,8 @@ sym(vp8_sad4x4x4d_sse3):
         paddw           mm1,        mm2
         movd            [rsi],      mm1
 
-        movd            mm2,        QWORD PTR [rdx+rax]
-        movd            mm1,        QWORD PTR [rbx+rax]
+        movd            mm2,        DWORD PTR [rdx+rax]
+        movd            mm1,        DWORD PTR [rbx+rax]
 
         punpcklbw       mm3,        mm2
         punpcklbw       mm7,        mm1
@@ -915,8 +913,8 @@ sym(vp8_sad4x4x4d_sse3):
         psadbw          mm3,        mm0
         psadbw          mm7,        mm0
 
-        movd            mm2,        QWORD PTR [rdi]
-        movd            mm1,        QWORD PTR [rdi+rax]
+        movd            mm2,        DWORD PTR [rdi]
+        movd            mm1,        DWORD PTR [rdi+rax]
 
         paddw           mm3,        mm4
         paddw           mm7,        mm5

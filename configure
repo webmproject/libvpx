@@ -23,6 +23,7 @@ Advanced options:
   ${toggle_libs}                  don't build libraries
   ${toggle_examples}              don't build examples
   --libc=PATH                     path to alternate libc
+  --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   ${toggle_fast_unaligned}        don't use unaligned accesses, even when
                                   supported by hardware [auto]
   ${toggle_codec_srcs}            in/exclude codec library source code
@@ -100,6 +101,7 @@ all_platforms="${all_platforms} ppc32-linux-gcc"
 all_platforms="${all_platforms} ppc64-darwin8-gcc"
 all_platforms="${all_platforms} ppc64-darwin9-gcc"
 all_platforms="${all_platforms} ppc64-linux-gcc"
+all_platforms="${all_platforms} sparc-solaris-gcc"
 all_platforms="${all_platforms} x86-darwin8-gcc"
 all_platforms="${all_platforms} x86-darwin8-icc"
 all_platforms="${all_platforms} x86-darwin9-gcc"
@@ -197,6 +199,7 @@ ARCH_EXT_LIST="
     sse2
     sse3
     ssse3
+    sse4_1
 
     altivec
 "
@@ -271,6 +274,7 @@ CMDLINE_SELECT="
     libs
     examples
     libc
+    as
     fast_unaligned
     codec_srcs
     debug_libs

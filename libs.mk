@@ -91,7 +91,9 @@ ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emms.asm
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_cpuid.c
 endif
+CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm_cpudetect.c
 CODEC_SRCS-$(ARCH_ARM) += $(BUILD_PFX)vpx_config.asm
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc

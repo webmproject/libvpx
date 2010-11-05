@@ -12,6 +12,14 @@
 #include "idct.h"
 #include "dequantize.h"
 
+void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
+                               unsigned char *dest, int pitch, int stride,
+                               int Dc);
+void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
+                            unsigned char *dest, int pitch, int stride);
+void vp8_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
+                            unsigned char *dst_ptr, int pitch, int stride);
+
 void vp8_dequant_dc_idct_add_y_block_c
             (short *q, short *dq, unsigned char *pre,
              unsigned char *dst, int stride, char *eobs, short *dc)
