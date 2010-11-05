@@ -253,8 +253,11 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
                                    unsigned int           data_sz,
                                    vpx_codec_stream_info_t *si)
 {
-
     vpx_codec_err_t res = VPX_CODEC_OK;
+
+    if(data + data_sz <= data)
+        res = VPX_CODEC_INVALID_PARAM;
+    else
     {
         /* Parse uncompresssed part of key frame header.
          * 3 bytes:- including version, frame type and an offset
@@ -331,7 +334,10 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 
     ctx->img_avail = 0;
 
-    /* Determine the stream parameters */
+    /* Determine the stream parameters. Note that we rely on peek_si to
+     * validate that we have a buffer that does not wrap around the top
+     * of the heap.
+     */
     if (!ctx->si.h)
         res = ctx->base.iface->dec.peek_si(data, data_sz, &ctx->si);
 
