@@ -3494,8 +3494,18 @@ static void encode_frame_to_data_rate
     cpi->zbin_over_quant = 0;
     cpi->zbin_mode_boost = 0;
 
-    // Enable mode based tweaking of the zbin
+    // Enable or disable mode based tweaking of the zbin
+    // For 2 Pass Only used where GF/ARF prediction quality
+    // is above a threshold
+    cpi->zbin_mode_boost = 0;
     cpi->zbin_mode_boost_enabled = TRUE;
+    if (cpi->pass == 2)
+    {
+        if ( cpi->gfu_boost <= 400 )
+        {
+            cpi->zbin_mode_boost_enabled = FALSE;
+        }
+    }
 
     // Current default encoder behaviour for the altref sign bias
     if (cpi->source_alt_ref_active)

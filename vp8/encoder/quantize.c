@@ -16,7 +16,7 @@
 #include "entropy.h"
 #include "predictdc.h"
 
-//#define EXACT_QUANT
+#define EXACT_QUANT
 #ifdef EXACT_QUANT
 void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 {

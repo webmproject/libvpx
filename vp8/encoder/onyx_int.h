@@ -46,6 +46,8 @@
 #define MAX_THRESHMULT  512
 
 #define GF_ZEROMV_ZBIN_BOOST 24
+#define LF_ZEROMV_ZBIN_BOOST 12
+#define MV_ZBIN_BOOST        4
 #define ZBIN_OQ_MAX 192
 
 #define VP8_TEMPORAL_ALT_REF 1
