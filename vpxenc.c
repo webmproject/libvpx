@@ -1188,7 +1188,7 @@ int main(int argc, const char **argv_)
     /* Change the default timebase to a high enough value so that the encoder
      * will always create strictly increasing timestamps.
      */
-    cfg.g_timebase.den = 100000;
+    cfg.g_timebase.den = 1000;
 
     /* Never use the library's default resolution, require it be parsed
      * from the file or set on the command line.
@@ -1544,7 +1544,7 @@ int main(int argc, const char **argv_)
             vpx_codec_iter_t iter = NULL;
             const vpx_codec_cx_pkt_t *pkt;
             struct vpx_usec_timer timer;
-            int64_t frame_start;
+            int64_t frame_start, next_frame_start;
 
             if (!arg_limit || frames_in < arg_limit)
             {
@@ -1565,9 +1565,11 @@ int main(int argc, const char **argv_)
 
             frame_start = (cfg.g_timebase.den * (int64_t)(frames_in - 1)
                           * arg_framerate.den) / cfg.g_timebase.num / arg_framerate.num;
+            next_frame_start = (cfg.g_timebase.den * (int64_t)(frames_in)
+                                * arg_framerate.den)
+                                / cfg.g_timebase.num / arg_framerate.num;
             vpx_codec_encode(&encoder, frame_avail ? &raw : NULL, frame_start,
-                             cfg.g_timebase.den * arg_framerate.den
-                             / cfg.g_timebase.num / arg_framerate.num,
+                             next_frame_start - frame_start,
                              0, arg_deadline);
             vpx_usec_timer_mark(&timer);
             cx_time += vpx_usec_timer_elapsed(&timer);

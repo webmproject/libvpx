@@ -399,6 +399,7 @@ typedef struct
     int inter_frame_target;
     double output_frame_rate;
     long long last_time_stamp_seen;
+    long long last_end_time_stamp_seen;
     long long first_time_stamp_ever;
 
     int ni_av_qi;
