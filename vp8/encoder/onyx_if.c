@@ -4972,17 +4972,16 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     *frame_flags = cpi->source_frame_flags;
 
-#if CONFIG_PSNR
-
     if (cpi->source_time_stamp < cpi->first_time_stamp_ever)
+    {
         cpi->first_time_stamp_ever = cpi->source_time_stamp;
-
-#endif
+        cpi->last_end_time_stamp_seen = cpi->source_time_stamp;
+    }
 
     // adjust frame rates based on timestamps given
     if (!cm->refresh_alt_ref_frame)
     {
-        if (cpi->last_time_stamp_seen == 0)
+        if (cpi->source_time_stamp == cpi->first_time_stamp_ever)
         {
             double this_fps = 10000000.000 / (cpi->source_end_time_stamp - cpi->source_time_stamp);
 
@@ -4990,7 +4989,8 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         }
         else
         {
-            long long nanosecs = cpi->source_time_stamp - cpi->last_time_stamp_seen;
+            long long nanosecs = cpi->source_end_time_stamp
+                - cpi->last_end_time_stamp_seen;
             double this_fps = 10000000.000 / nanosecs;
 
             vp8_new_frame_rate(cpi, (7 * cpi->oxcf.frame_rate + this_fps) / 8);
@@ -4998,6 +4998,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         }
 
         cpi->last_time_stamp_seen = cpi->source_time_stamp;
+        cpi->last_end_time_stamp_seen = cpi->source_end_time_stamp;
     }
 
     if (cpi->compressor_speed == 2)
