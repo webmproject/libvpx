@@ -538,8 +538,9 @@ process_toolchain() {
     # Other toolchain specific defaults
     case $toolchain in x86*|ppc*|universal*) soft_enable postproc;; esac
 
-    enabled postproc_visualizer && {enabled postproc \
-        || die "postproc_visualizer requires postproc to be enabled"}
+    if enabled postproc_visualizer; then
+        enabled postproc || die "postproc_visualizer requires postproc to be enabled"
+    fi
 }
 
 
