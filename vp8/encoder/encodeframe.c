@@ -146,16 +146,25 @@ static const int qzbin_factors_y2[129] =
 
 #define EXACT_QUANT
 #ifdef EXACT_QUANT
-static void vp8cx_invert_quant(short *quant, short *shift, short d)
+static void vp8cx_invert_quant(int improved_quant, short *quant,
+                               short *shift, short d)
 {
-    unsigned t;
-    int l;
-    t = d;
-    for(l = 0; t > 1; l++)
-        t>>=1;
-    t = 1 + (1<<(16+l))/d;
-    *quant = (short)(t - (1<<16));
-    *shift = l;
+    if(improved_quant)
+    {
+        unsigned t;
+        int l;
+        t = d;
+        for(l = 0; t > 1; l++)
+            t>>=1;
+        t = 1 + (1<<(16+l))/d;
+        *quant = (short)(t - (1<<16));
+        *shift = l;
+    }
+    else
+    {
+        *quant = (1 << 16) / d;
+        *shift = 0;
+    }
 }
 
 void vp8cx_init_quantizer(VP8_COMP *cpi)
@@ -170,7 +179,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
     {
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
-        vp8cx_invert_quant(cpi->Y1quant[Q] + 0,
+        vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y1quant[Q] + 0,
                            cpi->Y1quant_shift[Q] + 0, quant_val);
         cpi->Y1zbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
         cpi->Y1round[Q][0] = (qrounding_factors[Q] * quant_val) >> 7;
@@ -178,7 +187,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
         cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
         quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
-        vp8cx_invert_quant(cpi->Y2quant[Q] + 0,
+        vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y2quant[Q] + 0,
                            cpi->Y2quant_shift[Q] + 0, quant_val);
         cpi->Y2zbin[Q][0] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
         cpi->Y2round[Q][0] = (qrounding_factors_y2[Q] * quant_val) >> 7;
@@ -186,7 +195,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
         cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
         quant_val = vp8_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
-        vp8cx_invert_quant(cpi->UVquant[Q] + 0,
+        vp8cx_invert_quant(cpi->sf.improved_quant, cpi->UVquant[Q] + 0,
                            cpi->UVquant_shift[Q] + 0, quant_val);
         cpi->UVzbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;;
         cpi->UVround[Q][0] = (qrounding_factors[Q] * quant_val) >> 7;
@@ -199,7 +208,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
             int rc = vp8_default_zig_zag1d[i];
 
             quant_val = vp8_ac_yquant(Q);
-            vp8cx_invert_quant(cpi->Y1quant[Q] + rc,
+            vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y1quant[Q] + rc,
                                cpi->Y1quant_shift[Q] + rc, quant_val);
             cpi->Y1zbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
             cpi->Y1round[Q][rc] = (qrounding_factors[Q] * quant_val) >> 7;
@@ -207,7 +216,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
             cpi->zrun_zbin_boost_y1[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 
             quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
-            vp8cx_invert_quant(cpi->Y2quant[Q] + rc,
+            vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y2quant[Q] + rc,
                                cpi->Y2quant_shift[Q] + rc, quant_val);
             cpi->Y2zbin[Q][rc] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
             cpi->Y2round[Q][rc] = (qrounding_factors_y2[Q] * quant_val) >> 7;
@@ -215,7 +224,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
             cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 
             quant_val = vp8_ac_uv_quant(Q, cpi->common.uvac_delta_q);
-            vp8cx_invert_quant(cpi->UVquant[Q] + rc,
+            vp8cx_invert_quant(cpi->sf.improved_quant, cpi->UVquant[Q] + rc,
                                cpi->UVquant_shift[Q] + rc, quant_val);
             cpi->UVzbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
             cpi->UVround[Q][rc] = (qrounding_factors[Q] * quant_val) >> 7;
@@ -405,14 +414,14 @@ void encode_mb_row(VP8_COMP *cpi,
     // Set up limit values for vertical motion vector components
     // to prevent them extending beyond the UMV borders
     x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
-    x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) 
+    x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
                         + (VP8BORDERINPIXELS - 16);
 
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {
-        // Distance of Mb to the left & right edges, specified in 
-        // 1/8th pel units as they are always compared to values 
+        // Distance of Mb to the left & right edges, specified in
+        // 1/8th pel units as they are always compared to values
         // that are in 1/8th pel units
         xd->mb_to_left_edge = -((mb_col * 16) << 3);
         xd->mb_to_right_edge = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
@@ -420,7 +429,7 @@ void encode_mb_row(VP8_COMP *cpi,
         // Set up limit values for horizontal motion vector components
         // to prevent them extending beyond the UMV borders
         x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) 
+        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16)
                             + (VP8BORDERINPIXELS - 16);
 
         xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;

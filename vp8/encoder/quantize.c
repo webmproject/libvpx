@@ -17,7 +17,8 @@
 #include "predictdc.h"
 
 #define EXACT_QUANT
-#ifdef EXACT_QUANT
+
+#ifdef EXACT_FASTQUANT
 void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 {
     int i, rc, eob;
@@ -64,6 +65,45 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     d->eob = eob + 1;
 }
 
+#else
+
+void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
+{
+    int i, rc, eob;
+    int zbin;
+    int x, y, z, sz;
+    short *coeff_ptr   = b->coeff;
+    short *round_ptr   = b->round;
+    short *quant_ptr   = b->quant;
+    short *qcoeff_ptr  = d->qcoeff;
+    short *dqcoeff_ptr = d->dqcoeff;
+    short *dequant_ptr = d->dequant;
+
+    eob = -1;
+    for (i = 0; i < 16; i++)
+    {
+        rc   = vp8_default_zig_zag1d[i];
+        z    = coeff_ptr[rc];
+
+        sz = (z >> 31);                                 // sign of z
+        x  = (z ^ sz) - sz;                             // x = abs(z)
+
+        y  = ((x + round_ptr[rc]) * quant_ptr[rc]) >> 16; // quantize (x)
+        x  = (y ^ sz) - sz;                         // get the sign back
+        qcoeff_ptr[rc] = x;                          // write to destination
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
+
+        if (y)
+        {
+            eob = i;                                // last nonzero coeffs
+        }
+    }
+    d->eob = eob + 1;
+}
+
+#endif
+
+#ifdef EXACT_QUANT
 void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
 {
     int i, rc, eob;
@@ -178,39 +218,6 @@ void vp8_strict_quantize_b(BLOCK *b, BLOCKD *d)
 }
 
 #else
-void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
-{
-    int i, rc, eob;
-    int zbin;
-    int x, y, z, sz;
-    short *coeff_ptr   = b->coeff;
-    short *round_ptr   = b->round;
-    short *quant_ptr   = b->quant;
-    short *qcoeff_ptr  = d->qcoeff;
-    short *dqcoeff_ptr = d->dqcoeff;
-    short *dequant_ptr = d->dequant;
-
-    eob = -1;
-    for (i = 0; i < 16; i++)
-    {
-        rc   = vp8_default_zig_zag1d[i];
-        z    = coeff_ptr[rc];
-
-        sz = (z >> 31);                                 // sign of z
-        x  = (z ^ sz) - sz;                             // x = abs(z)
-
-        y  = ((x + round_ptr[rc]) * quant_ptr[rc]) >> 16; // quantize (x)
-        x  = (y ^ sz) - sz;                         // get the sign back
-        qcoeff_ptr[rc] = x;                          // write to destination
-        dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
-
-        if (y)
-        {
-            eob = i;                                // last nonzero coeffs
-        }
-    }
-    d->eob = eob + 1;
-}
 
 void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
 {
