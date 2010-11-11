@@ -3494,8 +3494,18 @@ static void encode_frame_to_data_rate
     cpi->zbin_over_quant = 0;
     cpi->zbin_mode_boost = 0;
 
-    // Enable mode based tweaking of the zbin
+    // Enable or disable mode based tweaking of the zbin
+    // For 2 Pass Only used where GF/ARF prediction quality
+    // is above a threshold
+    cpi->zbin_mode_boost = 0;
     cpi->zbin_mode_boost_enabled = TRUE;
+    if (cpi->pass == 2)
+    {
+        if ( cpi->gfu_boost <= 400 )
+        {
+            cpi->zbin_mode_boost_enabled = FALSE;
+        }
+    }
 
     // Current default encoder behaviour for the altref sign bias
     if (cpi->source_alt_ref_active)
@@ -5214,7 +5224,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     return 0;
 }
 
-int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, int deblock_level, int noise_level, int flags)
+int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags)
 {
     VP8_COMP *cpi = (VP8_COMP *) comp;
 
@@ -5224,7 +5234,7 @@ int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, int debloc
     {
         int ret;
 #if CONFIG_POSTPROC
-        ret = vp8_post_proc_frame(&cpi->common, dest, deblock_level, noise_level, flags);
+        ret = vp8_post_proc_frame(&cpi->common, dest, flags);
 #else
 
         if (cpi->common.frame_to_show)

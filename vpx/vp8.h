@@ -38,9 +38,13 @@
  */
 enum vp8_dec_control_id
 {
-    VP8_SET_REFERENCE       = 1,    /**< pass in an external frame into decoder to be used as reference frame */
-    VP8_COPY_REFERENCE      = 2,    /**< get a copy of reference frame from the decoder */
-    VP8_SET_POSTPROC        = 3,    /**< set decoder's the post processing settings  */
+    VP8_SET_REFERENCE           = 1,    /**< pass in an external frame into decoder to be used as reference frame */
+    VP8_COPY_REFERENCE          = 2,    /**< get a copy of reference frame from the decoder */
+    VP8_SET_POSTPROC            = 3,    /**< set the decoder's post processing settings  */
+    VP8_SET_DBG_COLOR_REF_FRAME = 4,    /**< set the reference frames to color for each macroblock */
+    VP8_SET_DBG_COLOR_MB_MODES  = 5,    /**< set which macro block modes to color */
+    VP8_SET_DBG_COLOR_B_MODES   = 6,    /**< set which blocks modes to color */
+    VP8_SET_DBG_DISPLAY_MV      = 7,    /**< set which motion vector modes to draw */
     VP8_COMMON_CTRL_ID_MAX
 };
 
@@ -50,10 +54,14 @@ enum vp8_dec_control_id
  */
 enum vp8_postproc_level
 {
-    VP8_NOFILTERING    = 0,
-    VP8_DEBLOCK        = 1,
-    VP8_DEMACROBLOCK   = 2,
-    VP8_ADDNOISE       = 4
+    VP8_NOFILTERING             = 0,
+    VP8_DEBLOCK                 = 1<<0,
+    VP8_DEMACROBLOCK            = 1<<1,
+    VP8_ADDNOISE                = 1<<2,
+    VP8_DEBUG_TXT_FRAME_INFO    = 1<<3, /**< print frame information */
+    VP8_DEBUG_TXT_MBLK_MODES    = 1<<4, /**< print macro block modes over each macro block */
+    VP8_DEBUG_TXT_DC_DIFF       = 1<<5, /**< print dc diff for each macro block */
+    VP8_DEBUG_TXT_RATE_INFO     = 1<<6, /**< print video rate info (encoder only) */
 };
 
 /*!\brief post process flags
@@ -65,9 +73,9 @@ enum vp8_postproc_level
 
 typedef struct vp8_postproc_cfg
 {
-    int post_proc_flag;           /**< the types of post processing to be done, should be combination of "vp8_postproc_level" */
-    int deblocking_level;        /**< the strength of deblocking, valid range [0, 16] */
-    int noise_level;             /**< the strength of additive noise, valid range [0, 16] */
+    int post_proc_flag;         /**< the types of post processing to be done, should be combination of "vp8_postproc_level" */
+    int deblocking_level;       /**< the strength of deblocking, valid range [0, 16] */
+    int noise_level;            /**< the strength of additive noise, valid range [0, 16] */
 } vp8_postproc_cfg_t;
 
 /*!\brief reference frame type
@@ -95,12 +103,16 @@ typedef struct vpx_ref_frame
 
 /*!\brief vp8 decoder control funciton parameter type
  *
- * defines the data type for each of VP8 decoder control funciton requires
+ * defines the data type for each of VP8 decoder control function requires
  */
 
 VPX_CTRL_USE_TYPE(VP8_SET_REFERENCE,           vpx_ref_frame_t *)
 VPX_CTRL_USE_TYPE(VP8_COPY_REFERENCE,          vpx_ref_frame_t *)
 VPX_CTRL_USE_TYPE(VP8_SET_POSTPROC,            vp8_postproc_cfg_t *)
+VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_REF_FRAME, int)
+VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_MB_MODES,  int)
+VPX_CTRL_USE_TYPE(VP8_SET_DBG_COLOR_B_MODES,   int)
+VPX_CTRL_USE_TYPE(VP8_SET_DBG_DISPLAY_MV,      int)
 
 
 /*! @} - end defgroup vp8 */

@@ -41,6 +41,7 @@ Advanced options:
   ${toggle_shared}                shared library support
   ${toggle_small}                 favor smaller size over speed
   ${toggle_arm_asm_detok}         assembly version of the detokenizer (ARM platforms only)
+  ${toggle_postproc_visualizer}   macro block / block level visualizers
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -252,6 +253,7 @@ CONFIG_LIST="
     shared
     small
     arm_asm_detok
+    postproc_visualizer
 
     experimental
     ${EXPERIMENT_LIST}
@@ -294,6 +296,8 @@ CMDLINE_SELECT="
     shared
     small
     arm_asm_detok
+    postproc_visualizer
+
     experimental
 "
 
@@ -343,8 +347,6 @@ post_process_cmdline() {
     for c in ${CODECS}; do
         enabled ${c} && enable ${c##*_}s
     done
-
-
 }
 
 
@@ -554,6 +556,10 @@ process_toolchain() {
 
     # Other toolchain specific defaults
     case $toolchain in x86*|ppc*|universal*) soft_enable postproc;; esac
+
+    if enabled postproc_visualizer; then
+        enabled postproc || die "postproc_visualizer requires postproc to be enabled"
+    fi
 }
 
 

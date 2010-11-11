@@ -506,7 +506,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     pbi->common.error.setjmp = 0;
     return retcode;
 }
-int vp8dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp, INT64 *time_end_stamp, int deblock_level,  int noise_level, int flags)
+int vp8dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp, INT64 *time_end_stamp, vp8_ppflags_t *flags)
 {
     int ret = -1;
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
@@ -524,7 +524,7 @@ int vp8dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp,
 
     sd->clrtype = pbi->common.clr_type;
 #if CONFIG_POSTPROC
-    ret = vp8_post_proc_frame(&pbi->common, sd, deblock_level, noise_level, flags);
+    ret = vp8_post_proc_frame(&pbi->common, sd, flags);
 #else
 
     if (pbi->common.frame_to_show)
