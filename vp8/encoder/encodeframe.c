@@ -62,7 +62,6 @@ unsigned int b_modes[14]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 static const int qrounding_factors[129] =
 {
-    56, 56, 56, 56, 48, 48, 56, 56,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
@@ -78,12 +77,18 @@ static const int qrounding_factors[129] =
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
-    48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48
 };
 
 static const int qzbin_factors[129] =
 {
-    72, 72, 72, 72, 80, 80, 72, 72,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
@@ -94,17 +99,11 @@ static const int qzbin_factors[129] =
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80,
+    80
 };
 
 static const int qrounding_factors_y2[129] =
 {
-    56, 56, 56, 56, 48, 48, 56, 56,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
@@ -120,12 +119,18 @@ static const int qrounding_factors_y2[129] =
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
-    48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48
 };
 
 static const int qzbin_factors_y2[129] =
 {
-    72, 72, 72, 72, 80, 80, 72, 72,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
@@ -136,15 +141,10 @@ static const int qzbin_factors_y2[129] =
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80,
+    80
 };
 
-//#define EXACT_QUANT
+#define EXACT_QUANT
 #ifdef EXACT_QUANT
 static void vp8cx_invert_quant(short *quant, short *shift, short d)
 {
@@ -351,6 +351,9 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
 
 void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
 {
+    // Clear Zbin mode boost for default case
+    cpi->zbin_mode_boost = 0;
+
     // vp8cx_init_quantizer() is first called in vp8_create_compressor(). A check is added here so that vp8cx_init_quantizer() is only called
     // when these values are not all zero.
     if (cpi->common.y1dc_delta_q | cpi->common.y2dc_delta_q | cpi->common.uvdc_delta_q | cpi->common.y2ac_delta_q | cpi->common.uvac_delta_q)
@@ -1214,11 +1217,25 @@ int vp8cx_encode_inter_macroblock
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)
         {
-            if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME))
-                cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
+            if ( xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME )
+                 cpi->zbin_mode_boost = 0;
             else
-                cpi->zbin_mode_boost = 0;
+            {
+                if (xd->mode_info_context->mbmi.mode == ZEROMV)
+                {
+                    if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME)
+                        cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
+                    else
+                        cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
+                }
+                else if (xd->mode_info_context->mbmi.mode == SPLITMV)
+                    cpi->zbin_mode_boost = 0;
+                else
+                    cpi->zbin_mode_boost = MV_ZBIN_BOOST;
+            }
         }
+        else
+            cpi->zbin_mode_boost = 0;
 
         vp8cx_mb_init_quantizer(cpi,  x);
     }

@@ -51,7 +51,7 @@ extern "C"
     int vp8dx_get_setting(VP8D_PTR comp, VP8D_SETTING oxst);
 
     int vp8dx_receive_compressed_data(VP8D_PTR comp, unsigned long size, const unsigned char *dest, INT64 time_stamp);
-    int vp8dx_get_raw_frame(VP8D_PTR comp, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp, INT64 *time_end_stamp, int deblock_level,  int noise_level, int flags);
+    int vp8dx_get_raw_frame(VP8D_PTR comp, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp, INT64 *time_end_stamp, vp8_ppflags_t *flags);
 
     int vp8dx_get_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
     int vp8dx_set_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);

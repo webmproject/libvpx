@@ -1626,10 +1626,22 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)
         {
-            if ((vp8_mode_order[mode_index] == ZEROMV) && (vp8_ref_frame_order[mode_index] != LAST_FRAME))
-                cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
-            else
+            if ( vp8_ref_frame_order[mode_index] == INTRA_FRAME )
                 cpi->zbin_mode_boost = 0;
+            else
+            {
+                if (vp8_mode_order[mode_index] == ZEROMV)
+                {
+                    if (vp8_ref_frame_order[mode_index] != LAST_FRAME)
+                        cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
+                    else
+                        cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
+                }
+                else if (vp8_ref_frame_order[mode_index] == SPLITMV)
+                    cpi->zbin_mode_boost = 0;
+                else
+                    cpi->zbin_mode_boost = MV_ZBIN_BOOST;
+            }
 
             vp8cx_mb_init_quantizer(cpi, x);
         }

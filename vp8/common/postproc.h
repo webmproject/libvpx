@@ -111,7 +111,7 @@ struct postproc_state
 #include "onyxc_int.h"
 #include "ppflags.h"
 int vp8_post_proc_frame(struct VP8Common *oci, YV12_BUFFER_CONFIG *dest,
-                        int deblock_level, int noise_level, int flags);
+                        vp8_ppflags_t *flags);
 
 
 void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
