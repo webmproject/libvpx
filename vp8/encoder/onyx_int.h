@@ -614,9 +614,6 @@ typedef struct
     unsigned int tempdata2;
 
     int base_skip_false_prob[128];
-    unsigned int section_is_low_motion;
-    unsigned int section_benefits_from_aggresive_q;
-    unsigned int section_is_fast_motion;
     unsigned int section_intra_rating;
 
     double section_max_qfactor;

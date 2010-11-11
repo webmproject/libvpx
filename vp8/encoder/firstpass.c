@@ -1439,7 +1439,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         // Boost for arf frame
         Boost = (cpi->gfu_boost * 3 * GFQ_ADJUSTMENT) / (2 * 100);
-        Boost += (cpi->baseline_gf_interval * 50);
+        Boost += (i * 50);
         allocation_chunks = (i * 100) + Boost;
 
         // Normalize Altboost and allocations chunck down to prevent overflow
@@ -1738,16 +1738,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         vp8_avg_stats(&sectionstats);
 
-        if (sectionstats.pcnt_motion < .17)
-            cpi->section_is_low_motion = 1;
-        else
-            cpi->section_is_low_motion = 0;
-
-        if (sectionstats.mvc_abs + sectionstats.mvr_abs > 45)
-            cpi->section_is_fast_motion = 1;
-        else
-            cpi->section_is_fast_motion = 0;
-
         cpi->section_intra_rating = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
 
         Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
@@ -1980,7 +1970,14 @@ void vp8_second_pass(VP8_COMP *cpi)
             cpi->ni_av_qi                     = cpi->worst_quality;
         }
     }
-    else
+    // The last few frames of a clip almost always have to few or too many
+    // bits and for the sake of over exact rate control we dont want to make
+    // radical adjustments to the allowed quantizer range just to use up a
+    // few surplus bits or get beneath the target rate.
+    else if ( (cpi->common.current_video_frame <
+                  (((unsigned int)cpi->total_stats->count * 255)>>8)) &&
+              ((cpi->common.current_video_frame + cpi->baseline_gf_interval) <
+                  (unsigned int)cpi->total_stats->count) )
     {
         if (frames_left < 1)
             frames_left = 1;
@@ -2344,17 +2341,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         vp8_avg_stats(&sectionstats);
 
-        if (sectionstats.pcnt_motion < .17)
-            cpi->section_is_low_motion = 1;
-        else
-            cpi->section_is_low_motion = 0;
-
-        if (sectionstats.mvc_abs + sectionstats.mvr_abs > 45)
-            cpi->section_is_fast_motion = 1;
-        else
-            cpi->section_is_fast_motion = 0;
-
-        cpi->section_intra_rating = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
+         cpi->section_intra_rating = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
 
         Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
         // if( (Ratio > 11) ) //&& (sectionstats.pcnt_second_ref < .20) )
