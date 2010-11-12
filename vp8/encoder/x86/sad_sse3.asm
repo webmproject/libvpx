@@ -8,171 +8,24 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
+
 %include "vpx_ports/x86_abi_support.asm"
 
-%macro STACK_FRAME_CREATE_X3 0
-%if ABI_IS_32BIT
-  %define     src_ptr       rsi
-  %define     src_stride    rax
-  %define     ref_ptr       rdi
-  %define     ref_stride    rdx
-  %define     end_ptr       rcx
-  %define     ret_var       rbx
-  %define     result_ptr    arg(4)
-  %define     max_err       arg(4)
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 5
-    push        rsi
-    push        rdi
-
-    mov         rsi,        arg(0)              ; src_ptr
-    mov         rdi,        arg(2)              ; ref_ptr
-
-    movsxd      rax,        dword ptr arg(1)    ; src_stride
-    movsxd      rdx,        dword ptr arg(3)    ; ref_stride
-%else
-  %ifidn __OUTPUT_FORMAT__,x64
-    %define     src_ptr     rcx
-    %define     src_stride  rdx
-    %define     ref_ptr     r8
-    %define     ref_stride  r9
-    %define     end_ptr     r10
-    %define     ret_var     r11
-    %define     result_ptr  [rsp+8+4*8]
-    %define     max_err     [rsp+8+4*8]
-  %else
-    %define     src_ptr     rdi
-    %define     src_stride  rsi
-    %define     ref_ptr     rdx
-    %define     ref_stride  rcx
-    %define     end_ptr     r9
-    %define     ret_var     r10
-    %define     result_ptr  r8
-    %define     max_err     r8
-  %endif
-%endif
-
-%endmacro
-
-%macro STACK_FRAME_DESTROY_X3 0
-  %define     src_ptr
-  %define     src_stride
-  %define     ref_ptr
-  %define     ref_stride
-  %define     end_ptr
-  %define     ret_var
-  %define     result_ptr
-  %define     max_err
-
-%if ABI_IS_32BIT
-    pop         rdi
-    pop         rsi
-    UNSHADOW_ARGS
-    pop         rbp
-%else
-  %ifidn __OUTPUT_FORMAT__,x64
-  %endif
-%endif
-    ret
-%endmacro
-
-%macro STACK_FRAME_CREATE_X4 0
-%if ABI_IS_32BIT
-  %define     src_ptr       rsi
-  %define     src_stride    rax
-  %define     r0_ptr        rcx
-  %define     r1_ptr        rdx
-  %define     r2_ptr        rbx
-  %define     r3_ptr        rdi
-  %define     ref_stride    rbp
-  %define     result_ptr    arg(4)
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 5
-    push        rsi
-    push        rdi
-    push        rbx
-
-    push        rbp
-    mov         rdi,        arg(2)              ; ref_ptr_base
-
-    LOAD_X4_ADDRESSES rdi, rcx, rdx, rax, rdi
-
-    mov         rsi,        arg(0)              ; src_ptr
-
-    movsxd      rbx,        dword ptr arg(1)    ; src_stride
-    movsxd      rbp,        dword ptr arg(3)    ; ref_stride
-
-    xchg        rbx,        rax
-%else
-  %ifidn __OUTPUT_FORMAT__,x64
-    %define     src_ptr     rcx
-    %define     src_stride  rdx
-    %define     r0_ptr      rsi
-    %define     r1_ptr      r10
-    %define     r2_ptr      r11
-    %define     r3_ptr      r8
-    %define     ref_stride  r9
-    %define     result_ptr  [rsp+16+4*8]
-    push        rsi
-
-    LOAD_X4_ADDRESSES r8, r0_ptr, r1_ptr, r2_ptr, r3_ptr
-  %else
-    %define     src_ptr     rdi
-    %define     src_stride  rsi
-    %define     r0_ptr      r9
-    %define     r1_ptr      r10
-    %define     r2_ptr      r11
-    %define     r3_ptr      rdx
-    %define     ref_stride  rcx
-    %define     result_ptr  r8
-
-    LOAD_X4_ADDRESSES rdx, r0_ptr, r1_ptr, r2_ptr, r3_ptr
-
-  %endif
-%endif
-%endmacro
-
-%macro STACK_FRAME_DESTROY_X4 0
-  %define     src_ptr
-  %define     src_stride
-  %define     r0_ptr
-  %define     r1_ptr
-  %define     r2_ptr
-  %define     r3_ptr
-  %define     ref_stride
-  %define     result_ptr
-
-%if ABI_IS_32BIT
-    pop         rbx
-    pop         rdi
-    pop         rsi
-    UNSHADOW_ARGS
-    pop         rbp
-%else
-  %ifidn __OUTPUT_FORMAT__,x64
-    pop         rsi
-  %endif
-%endif
-    ret
-%endmacro
-
-%macro PROCESS_16X2X3 5
-%if %1==0
-        movdqa          xmm0,       XMMWORD PTR [%2]
-        lddqu           xmm5,       XMMWORD PTR [%3]
-        lddqu           xmm6,       XMMWORD PTR [%3+1]
-        lddqu           xmm7,       XMMWORD PTR [%3+2]
+%macro PROCESS_16X2X3 1
+%if %1
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm5,       XMMWORD PTR [rdi]
+        lddqu           xmm6,       XMMWORD PTR [rdi+1]
+        lddqu           xmm7,       XMMWORD PTR [rdi+2]
 
         psadbw          xmm5,       xmm0
         psadbw          xmm6,       xmm0
         psadbw          xmm7,       xmm0
 %else
-        movdqa          xmm0,       XMMWORD PTR [%2]
-        lddqu           xmm1,       XMMWORD PTR [%3]
-        lddqu           xmm2,       XMMWORD PTR [%3+1]
-        lddqu           xmm3,       XMMWORD PTR [%3+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm1,       XMMWORD PTR [rdi]
+        lddqu           xmm2,       XMMWORD PTR [rdi+1]
+        lddqu           xmm3,       XMMWORD PTR [rdi+2]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
@@ -182,15 +35,13 @@
         paddw           xmm6,       xmm2
         paddw           xmm7,       xmm3
 %endif
-        movdqa          xmm0,       XMMWORD PTR [%2+%4]
-        lddqu           xmm1,       XMMWORD PTR [%3+%5]
-        lddqu           xmm2,       XMMWORD PTR [%3+%5+1]
-        lddqu           xmm3,       XMMWORD PTR [%3+%5+2]
+        movdqa          xmm0,       XMMWORD PTR [rsi+rax]
+        lddqu           xmm1,       XMMWORD PTR [rdi+rdx]
+        lddqu           xmm2,       XMMWORD PTR [rdi+rdx+1]
+        lddqu           xmm3,       XMMWORD PTR [rdi+rdx+2]
 
-%if %1==0 || %1==1
-        lea             %2,         [%2+%4*2]
-        lea             %3,         [%3+%5*2]
-%endif
+        lea             rsi,        [rsi+rax*2]
+        lea             rdi,        [rdi+rdx*2]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
@@ -201,21 +52,21 @@
         paddw           xmm7,       xmm3
 %endmacro
 
-%macro PROCESS_8X2X3 5
-%if %1==0
-        movq            mm0,       QWORD PTR [%2]
-        movq            mm5,       QWORD PTR [%3]
-        movq            mm6,       QWORD PTR [%3+1]
-        movq            mm7,       QWORD PTR [%3+2]
+%macro PROCESS_8X2X3 1
+%if %1
+        movq            mm0,       QWORD PTR [rsi]
+        movq            mm5,       QWORD PTR [rdi]
+        movq            mm6,       QWORD PTR [rdi+1]
+        movq            mm7,       QWORD PTR [rdi+2]
 
         psadbw          mm5,       mm0
         psadbw          mm6,       mm0
         psadbw          mm7,       mm0
 %else
-        movq            mm0,       QWORD PTR [%2]
-        movq            mm1,       QWORD PTR [%3]
-        movq            mm2,       QWORD PTR [%3+1]
-        movq            mm3,       QWORD PTR [%3+2]
+        movq            mm0,       QWORD PTR [rsi]
+        movq            mm1,       QWORD PTR [rdi]
+        movq            mm2,       QWORD PTR [rdi+1]
+        movq            mm3,       QWORD PTR [rdi+2]
 
         psadbw          mm1,       mm0
         psadbw          mm2,       mm0
@@ -225,15 +76,13 @@
         paddw           mm6,       mm2
         paddw           mm7,       mm3
 %endif
-        movq            mm0,       QWORD PTR [%2+%4]
-        movq            mm1,       QWORD PTR [%3+%5]
-        movq            mm2,       QWORD PTR [%3+%5+1]
-        movq            mm3,       QWORD PTR [%3+%5+2]
+        movq            mm0,       QWORD PTR [rsi+rax]
+        movq            mm1,       QWORD PTR [rdi+rdx]
+        movq            mm2,       QWORD PTR [rdi+rdx+1]
+        movq            mm3,       QWORD PTR [rdi+rdx+2]
 
-%if %1==0 || %1==1
-        lea             %2,        [%2+%4*2]
-        lea             %3,        [%3+%5*2]
-%endif
+        lea             rsi,       [rsi+rax*2]
+        lea             rdi,       [rdi+rdx*2]
 
         psadbw          mm1,       mm0
         psadbw          mm2,       mm0
@@ -252,117 +101,115 @@
         mov             %5,         [%1+REG_SZ_BYTES*3]
 %endmacro
 
-%macro PROCESS_16X2X4 8
-%if %1==0
-        movdqa          xmm0,       XMMWORD PTR [%2]
-        lddqu           xmm4,       XMMWORD PTR [%3]
-        lddqu           xmm5,       XMMWORD PTR [%4]
-        lddqu           xmm6,       XMMWORD PTR [%5]
-        lddqu           xmm7,       XMMWORD PTR [%6]
+%macro PROCESS_16X2X4 1
+%if %1
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm4,       XMMWORD PTR [rcx]
+        lddqu           xmm5,       XMMWORD PTR [rdx]
+        lddqu           xmm6,       XMMWORD PTR [rbx]
+        lddqu           xmm7,       XMMWORD PTR [rdi]
 
         psadbw          xmm4,       xmm0
         psadbw          xmm5,       xmm0
         psadbw          xmm6,       xmm0
         psadbw          xmm7,       xmm0
 %else
-        movdqa          xmm0,       XMMWORD PTR [%2]
-        lddqu           xmm1,       XMMWORD PTR [%3]
-        lddqu           xmm2,       XMMWORD PTR [%4]
-        lddqu           xmm3,       XMMWORD PTR [%5]
+        movdqa          xmm0,       XMMWORD PTR [rsi]
+        lddqu           xmm1,       XMMWORD PTR [rcx]
+        lddqu           xmm2,       XMMWORD PTR [rdx]
+        lddqu           xmm3,       XMMWORD PTR [rbx]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
         psadbw          xmm3,       xmm0
 
         paddw           xmm4,       xmm1
-        lddqu           xmm1,       XMMWORD PTR [%6]
+        lddqu           xmm1,       XMMWORD PTR [rdi]
         paddw           xmm5,       xmm2
         paddw           xmm6,       xmm3
 
         psadbw          xmm1,       xmm0
         paddw           xmm7,       xmm1
 %endif
-        movdqa          xmm0,       XMMWORD PTR [%2+%7]
-        lddqu           xmm1,       XMMWORD PTR [%3+%8]
-        lddqu           xmm2,       XMMWORD PTR [%4+%8]
-        lddqu           xmm3,       XMMWORD PTR [%5+%8]
+        movdqa          xmm0,       XMMWORD PTR [rsi+rax]
+        lddqu           xmm1,       XMMWORD PTR [rcx+rbp]
+        lddqu           xmm2,       XMMWORD PTR [rdx+rbp]
+        lddqu           xmm3,       XMMWORD PTR [rbx+rbp]
 
         psadbw          xmm1,       xmm0
         psadbw          xmm2,       xmm0
         psadbw          xmm3,       xmm0
 
         paddw           xmm4,       xmm1
-        lddqu           xmm1,       XMMWORD PTR [%6+%8]
+        lddqu           xmm1,       XMMWORD PTR [rdi+rbp]
         paddw           xmm5,       xmm2
         paddw           xmm6,       xmm3
 
-%if %1==0 || %1==1
-        lea             %2,         [%2+%7*2]
-        lea             %3,         [%3+%8*2]
+        lea             rsi,        [rsi+rax*2]
+        lea             rcx,        [rcx+rbp*2]
 
-        lea             %4,         [%4+%8*2]
-        lea             %5,         [%5+%8*2]
+        lea             rdx,        [rdx+rbp*2]
+        lea             rbx,        [rbx+rbp*2]
 
-        lea             %6,         [%6+%8*2]
-%endif
+        lea             rdi,        [rdi+rbp*2]
+
         psadbw          xmm1,       xmm0
         paddw           xmm7,       xmm1
 
 %endmacro
 
-%macro PROCESS_8X2X4 8
-%if %1==0
-        movq            mm0,        QWORD PTR [%2]
-        movq            mm4,        QWORD PTR [%3]
-        movq            mm5,        QWORD PTR [%4]
-        movq            mm6,        QWORD PTR [%5]
-        movq            mm7,        QWORD PTR [%6]
+%macro PROCESS_8X2X4 1
+%if %1
+        movq            mm0,        QWORD PTR [rsi]
+        movq            mm4,        QWORD PTR [rcx]
+        movq            mm5,        QWORD PTR [rdx]
+        movq            mm6,        QWORD PTR [rbx]
+        movq            mm7,        QWORD PTR [rdi]
 
         psadbw          mm4,        mm0
         psadbw          mm5,        mm0
         psadbw          mm6,        mm0
         psadbw          mm7,        mm0
 %else
-        movq            mm0,        QWORD PTR [%2]
-        movq            mm1,        QWORD PTR [%3]
-        movq            mm2,        QWORD PTR [%4]
-        movq            mm3,        QWORD PTR [%5]
+        movq            mm0,        QWORD PTR [rsi]
+        movq            mm1,        QWORD PTR [rcx]
+        movq            mm2,        QWORD PTR [rdx]
+        movq            mm3,        QWORD PTR [rbx]
 
         psadbw          mm1,        mm0
         psadbw          mm2,        mm0
         psadbw          mm3,        mm0
 
         paddw           mm4,        mm1
-        movq            mm1,        QWORD PTR [%6]
+        movq            mm1,        QWORD PTR [rdi]
         paddw           mm5,        mm2
         paddw           mm6,        mm3
 
         psadbw          mm1,        mm0
         paddw           mm7,        mm1
 %endif
-        movq            mm0,        QWORD PTR [%2+%7]
-        movq            mm1,        QWORD PTR [%3+%8]
-        movq            mm2,        QWORD PTR [%4+%8]
-        movq            mm3,        QWORD PTR [%5+%8]
+        movq            mm0,        QWORD PTR [rsi+rax]
+        movq            mm1,        QWORD PTR [rcx+rbp]
+        movq            mm2,        QWORD PTR [rdx+rbp]
+        movq            mm3,        QWORD PTR [rbx+rbp]
 
         psadbw          mm1,        mm0
         psadbw          mm2,        mm0
         psadbw          mm3,        mm0
 
         paddw           mm4,        mm1
-        movq            mm1,        QWORD PTR [%6+%8]
+        movq            mm1,        QWORD PTR [rdi+rbp]
         paddw           mm5,        mm2
         paddw           mm6,        mm3
 
-%if %1==0 || %1==1
-        lea             %2,         [%2+%7*2]
-        lea             %3,         [%3+%8*2]
+        lea             rsi,        [rsi+rax*2]
+        lea             rcx,        [rcx+rbp*2]
 
-        lea             %4,         [%4+%8*2]
-        lea             %5,         [%5+%8*2]
+        lea             rdx,        [rdx+rbp*2]
+        lea             rbx,        [rbx+rbp*2]
 
-        lea             %6,         [%6+%8*2]
-%endif
+        lea             rdi,        [rdi+rbp*2]
+
         psadbw          mm1,        mm0
         paddw           mm7,        mm1
 
@@ -376,39 +223,54 @@
 ;    int  *results)
 global sym(vp8_sad16x16x3_sse3)
 sym(vp8_sad16x16x3_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    ; end prolog
 
-    STACK_FRAME_CREATE_X3
+        mov             rsi,        arg(0) ;src_ptr
+        mov             rdi,        arg(2) ;ref_ptr
 
-        PROCESS_16X2X3 0, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 2, src_ptr, ref_ptr, src_stride, ref_stride
+        movsxd          rax,        dword ptr arg(1) ;src_stride
+        movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        mov             rcx,        result_ptr
+        PROCESS_16X2X3 1
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+
+        mov             rdi,        arg(4) ;Results
 
         movq            xmm0,       xmm5
         psrldq          xmm5,       8
 
         paddw           xmm0,       xmm5
-        movd            [rcx],      xmm0
+        movd            [rdi],      xmm0
 ;-
         movq            xmm0,       xmm6
         psrldq          xmm6,       8
 
         paddw           xmm0,       xmm6
-        movd            [rcx+4],    xmm0
+        movd            [rdi+4],    xmm0
 ;-
         movq            xmm0,       xmm7
         psrldq          xmm7,       8
 
         paddw           xmm0,       xmm7
-        movd            [rcx+8],    xmm0
+        movd            [rdi+8],    xmm0
 
-    STACK_FRAME_DESTROY_X3
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void int vp8_sad16x8x3_sse3(
 ;    unsigned char *src_ptr,
@@ -418,35 +280,50 @@ sym(vp8_sad16x16x3_sse3):
 ;    int  *results)
 global sym(vp8_sad16x8x3_sse3)
 sym(vp8_sad16x8x3_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    ; end prolog
 
-    STACK_FRAME_CREATE_X3
+        mov             rsi,        arg(0) ;src_ptr
+        mov             rdi,        arg(2) ;ref_ptr
 
-        PROCESS_16X2X3 0, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_16X2X3 2, src_ptr, ref_ptr, src_stride, ref_stride
+        movsxd          rax,        dword ptr arg(1) ;src_stride
+        movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        mov             rcx,        result_ptr
+        PROCESS_16X2X3 1
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+        PROCESS_16X2X3 0
+
+        mov             rdi,        arg(4) ;Results
 
         movq            xmm0,       xmm5
         psrldq          xmm5,       8
 
         paddw           xmm0,       xmm5
-        movd            [rcx],      xmm0
+        movd            [rdi],      xmm0
 ;-
         movq            xmm0,       xmm6
         psrldq          xmm6,       8
 
         paddw           xmm0,       xmm6
-        movd            [rcx+4],    xmm0
+        movd            [rdi+4],    xmm0
 ;-
         movq            xmm0,       xmm7
         psrldq          xmm7,       8
 
         paddw           xmm0,       xmm7
-        movd            [rcx+8],    xmm0
+        movd            [rdi+8],    xmm0
 
-    STACK_FRAME_DESTROY_X3
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void int vp8_sad8x16x3_sse3(
 ;    unsigned char *src_ptr,
@@ -456,26 +333,40 @@ sym(vp8_sad16x8x3_sse3):
 ;    int  *results)
 global sym(vp8_sad8x16x3_sse3)
 sym(vp8_sad8x16x3_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    ; end prolog
 
-    STACK_FRAME_CREATE_X3
+        mov             rsi,        arg(0) ;src_ptr
+        mov             rdi,        arg(2) ;ref_ptr
 
-        PROCESS_8X2X3 0, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 2, src_ptr, ref_ptr, src_stride, ref_stride
+        movsxd          rax,        dword ptr arg(1) ;src_stride
+        movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        mov             rcx,        result_ptr
+        PROCESS_8X2X3 1
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
 
-        punpckldq       mm5,        mm6
+        mov             rdi,        arg(4) ;Results
 
-        movq            [rcx],      mm5
-        movd            [rcx+8],    mm7
+        movd            [rdi],      mm5
+        movd            [rdi+4],    mm6
+        movd            [rdi+8],    mm7
 
-    STACK_FRAME_DESTROY_X3
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void int vp8_sad8x8x3_sse3(
 ;    unsigned char *src_ptr,
@@ -485,22 +376,36 @@ sym(vp8_sad8x16x3_sse3):
 ;    int  *results)
 global sym(vp8_sad8x8x3_sse3)
 sym(vp8_sad8x8x3_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    ; end prolog
 
-    STACK_FRAME_CREATE_X3
+        mov             rsi,        arg(0) ;src_ptr
+        mov             rdi,        arg(2) ;ref_ptr
 
-        PROCESS_8X2X3 0, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 1, src_ptr, ref_ptr, src_stride, ref_stride
-        PROCESS_8X2X3 2, src_ptr, ref_ptr, src_stride, ref_stride
+        movsxd          rax,        dword ptr arg(1) ;src_stride
+        movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        mov             rcx,        result_ptr
+        PROCESS_8X2X3 1
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
+        PROCESS_8X2X3 0
 
-        punpckldq       mm5,        mm6
+        mov             rdi,        arg(4) ;Results
 
-        movq            [rcx],      mm5
-        movd            [rcx+8],    mm7
+        movd            [rdi],      mm5
+        movd            [rdi+4],    mm6
+        movd            [rdi+8],    mm7
 
-    STACK_FRAME_DESTROY_X3
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void int vp8_sad4x4x3_sse3(
 ;    unsigned char *src_ptr,
@@ -510,23 +415,33 @@ sym(vp8_sad8x8x3_sse3):
 ;    int  *results)
 global sym(vp8_sad4x4x3_sse3)
 sym(vp8_sad4x4x3_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    ; end prolog
 
-    STACK_FRAME_CREATE_X3
+        mov             rsi,        arg(0) ;src_ptr
+        mov             rdi,        arg(2) ;ref_ptr
 
-        movd            mm0,        DWORD PTR [src_ptr]
-        movd            mm1,        DWORD PTR [ref_ptr]
+        movsxd          rax,        dword ptr arg(1) ;src_stride
+        movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        movd            mm2,        DWORD PTR [src_ptr+src_stride]
-        movd            mm3,        DWORD PTR [ref_ptr+ref_stride]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm1,        DWORD PTR [rdi]
+
+        movd            mm2,        DWORD PTR [rsi+rax]
+        movd            mm3,        DWORD PTR [rdi+rdx]
 
         punpcklbw       mm0,        mm2
         punpcklbw       mm1,        mm3
 
-        movd            mm4,        DWORD PTR [ref_ptr+1]
-        movd            mm5,        DWORD PTR [ref_ptr+2]
+        movd            mm4,        DWORD PTR [rdi+1]
+        movd            mm5,        DWORD PTR [rdi+2]
 
-        movd            mm2,        DWORD PTR [ref_ptr+ref_stride+1]
-        movd            mm3,        DWORD PTR [ref_ptr+ref_stride+2]
+        movd            mm2,        DWORD PTR [rdi+rdx+1]
+        movd            mm3,        DWORD PTR [rdi+rdx+2]
 
         psadbw          mm1,        mm0
 
@@ -536,27 +451,29 @@ sym(vp8_sad4x4x3_sse3):
         psadbw          mm4,        mm0
         psadbw          mm5,        mm0
 
-        lea             src_ptr,    [src_ptr+src_stride*2]
-        lea             ref_ptr,    [ref_ptr+ref_stride*2]
 
-        movd            mm0,        DWORD PTR [src_ptr]
-        movd            mm2,        DWORD PTR [ref_ptr]
 
-        movd            mm3,        DWORD PTR [src_ptr+src_stride]
-        movd            mm6,        DWORD PTR [ref_ptr+ref_stride]
+        lea             rsi,        [rsi+rax*2]
+        lea             rdi,        [rdi+rdx*2]
+
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm2,        DWORD PTR [rdi]
+
+        movd            mm3,        DWORD PTR [rsi+rax]
+        movd            mm6,        DWORD PTR [rdi+rdx]
 
         punpcklbw       mm0,        mm3
         punpcklbw       mm2,        mm6
 
-        movd            mm3,        DWORD PTR [ref_ptr+1]
-        movd            mm7,        DWORD PTR [ref_ptr+2]
+        movd            mm3,        DWORD PTR [rdi+1]
+        movd            mm7,        DWORD PTR [rdi+2]
 
         psadbw          mm2,        mm0
 
         paddw           mm1,        mm2
 
-        movd            mm2,        DWORD PTR [ref_ptr+ref_stride+1]
-        movd            mm6,        DWORD PTR [ref_ptr+ref_stride+2]
+        movd            mm2,        DWORD PTR [rdi+rdx+1]
+        movd            mm6,        DWORD PTR [rdi+rdx+2]
 
         punpcklbw       mm3,        mm2
         punpcklbw       mm7,        mm6
@@ -567,14 +484,19 @@ sym(vp8_sad4x4x3_sse3):
         paddw           mm3,        mm4
         paddw           mm7,        mm5
 
-        mov             rcx,        result_ptr
+        mov             rdi,        arg(4) ;Results
+        movd            [rdi],      mm1
 
-        punpckldq       mm1,        mm3
+        movd            [rdi+4],    mm3
+        movd            [rdi+8],    mm7
 
-        movq            [rcx],      mm1
-        movd            [rcx+8],    mm7
 
-    STACK_FRAME_DESTROY_X3
+    ; begin epilog
+    pop rdi
+    pop rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;unsigned int vp8_sad16x16_sse3(
 ;    unsigned char *src_ptr,
@@ -585,40 +507,51 @@ sym(vp8_sad4x4x3_sse3):
 ;%define lddqu movdqu
 global sym(vp8_sad16x16_sse3)
 sym(vp8_sad16x16_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rbx
+    push        rsi
+    push        rdi
+    ; end prolog
 
-    STACK_FRAME_CREATE_X3
+        mov             rsi,        arg(0) ;src_ptr
+        mov             rdi,        arg(2) ;ref_ptr
 
-        lea             end_ptr,    [src_ptr+src_stride*8]
+        movsxd          rbx,        dword ptr arg(1) ;src_stride
+        movsxd          rdx,        dword ptr arg(3) ;ref_stride
 
-        lea             end_ptr,    [end_ptr+src_stride*8]
+        lea             rcx,        [rsi+rbx*8]
+
+        lea             rcx,        [rcx+rbx*8]
         pxor            mm7,        mm7
 
-.vp8_sad16x16_sse3_loop:
+vp8_sad16x16_sse3_loop:
 
-        movq            ret_var,    mm7
-        cmp             ret_var,    max_err
-        jg              .vp8_sad16x16_early_exit
+        movq            rax,        mm7
+        cmp             rax,        arg(4)
+        jg              vp8_sad16x16_early_exit
 
-        movq            mm0,        QWORD PTR [src_ptr]
-        movq            mm2,        QWORD PTR [src_ptr+8]
+        movq            mm0,        QWORD PTR [rsi]
+        movq            mm2,        QWORD PTR [rsi+8]
 
-        movq            mm1,        QWORD PTR [ref_ptr]
-        movq            mm3,        QWORD PTR [ref_ptr+8]
+        movq            mm1,        QWORD PTR [rdi]
+        movq            mm3,        QWORD PTR [rdi+8]
 
-        movq            mm4,        QWORD PTR [src_ptr+src_stride]
-        movq            mm5,        QWORD PTR [ref_ptr+ref_stride]
+        movq            mm4,        QWORD PTR [rsi+rbx]
+        movq            mm5,        QWORD PTR [rdi+rdx]
 
         psadbw          mm0,        mm1
         psadbw          mm2,        mm3
 
-        movq            mm1,        QWORD PTR [src_ptr+src_stride+8]
-        movq            mm3,        QWORD PTR [ref_ptr+ref_stride+8]
+        movq            mm1,        QWORD PTR [rsi+rbx+8]
+        movq            mm3,        QWORD PTR [rdi+rdx+8]
 
         psadbw          mm4,        mm5
         psadbw          mm1,        mm3
 
-        lea             src_ptr,    [src_ptr+src_stride*2]
-        lea             ref_ptr,    [ref_ptr+ref_stride*2]
+        lea             rsi,        [rsi+rbx*2]
+        lea             rdi,        [rdi+rdx*2]
 
         paddw           mm0,        mm2
         paddw           mm4,        mm1
@@ -626,16 +559,20 @@ sym(vp8_sad16x16_sse3):
         paddw           mm7,        mm0
         paddw           mm7,        mm4
 
-        cmp             src_ptr,    end_ptr
-        jne             .vp8_sad16x16_sse3_loop
+        cmp             rsi,        rcx
+        jne             vp8_sad16x16_sse3_loop
 
-        movq            ret_var,    mm7
+        movq            rax,        mm7
 
-.vp8_sad16x16_early_exit:
+vp8_sad16x16_early_exit:
 
-        mov             rax,        ret_var
-
-    STACK_FRAME_DESTROY_X3
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    pop         rbx
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void vp8_sad16x16x4d_sse3(
 ;    unsigned char *src_ptr,
@@ -645,48 +582,69 @@ sym(vp8_sad16x16_sse3):
 ;    int  *results)
 global sym(vp8_sad16x16x4d_sse3)
 sym(vp8_sad16x16x4d_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    push        rbx
+    ; end prolog
 
-    STACK_FRAME_CREATE_X4
+        push            rbp
+        mov             rdi,        arg(2) ; ref_ptr_base
 
-        PROCESS_16X2X4 0, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 2, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        LOAD_X4_ADDRESSES rdi, rcx, rdx, rax, rdi
 
-%if ABI_IS_32BIT
+        mov             rsi,        arg(0) ;src_ptr
+
+        movsxd          rbx,        dword ptr arg(1) ;src_stride
+        movsxd          rbp,        dword ptr arg(3) ;ref_stride
+
+        xchg            rbx,        rax
+
+        PROCESS_16X2X4 1
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+
         pop             rbp
-%endif
-        mov             rcx,        result_ptr
+        mov             rdi,        arg(4) ;Results
 
         movq            xmm0,       xmm4
         psrldq          xmm4,       8
 
         paddw           xmm0,       xmm4
-        movd            [rcx],      xmm0
+        movd            [rdi],      xmm0
 ;-
         movq            xmm0,       xmm5
         psrldq          xmm5,       8
 
         paddw           xmm0,       xmm5
-        movd            [rcx+4],    xmm0
+        movd            [rdi+4],    xmm0
 ;-
         movq            xmm0,       xmm6
         psrldq          xmm6,       8
 
         paddw           xmm0,       xmm6
-        movd            [rcx+8],    xmm0
+        movd            [rdi+8],    xmm0
 ;-
         movq            xmm0,       xmm7
         psrldq          xmm7,       8
 
         paddw           xmm0,       xmm7
-        movd            [rcx+12],   xmm0
+        movd            [rdi+12],   xmm0
 
-    STACK_FRAME_DESTROY_X4
+    ; begin epilog
+    pop         rbx
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void vp8_sad16x8x4d_sse3(
 ;    unsigned char *src_ptr,
@@ -696,44 +654,65 @@ sym(vp8_sad16x16x4d_sse3):
 ;    int  *results)
 global sym(vp8_sad16x8x4d_sse3)
 sym(vp8_sad16x8x4d_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    push        rbx
+    ; end prolog
 
-    STACK_FRAME_CREATE_X4
+        push            rbp
+        mov             rdi,        arg(2) ; ref_ptr_base
 
-        PROCESS_16X2X4 0, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_16X2X4 2, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        LOAD_X4_ADDRESSES rdi, rcx, rdx, rax, rdi
 
-%if ABI_IS_32BIT
+        mov             rsi,        arg(0) ;src_ptr
+
+        movsxd          rbx,        dword ptr arg(1) ;src_stride
+        movsxd          rbp,        dword ptr arg(3) ;ref_stride
+
+        xchg            rbx,        rax
+
+        PROCESS_16X2X4 1
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+        PROCESS_16X2X4 0
+
         pop             rbp
-%endif
-        mov             rcx,        result_ptr
+        mov             rdi,        arg(4) ;Results
 
         movq            xmm0,       xmm4
         psrldq          xmm4,       8
 
         paddw           xmm0,       xmm4
-        movd            [rcx],      xmm0
+        movd            [rdi],      xmm0
 ;-
         movq            xmm0,       xmm5
         psrldq          xmm5,       8
 
         paddw           xmm0,       xmm5
-        movd            [rcx+4],    xmm0
+        movd            [rdi+4],    xmm0
 ;-
         movq            xmm0,       xmm6
         psrldq          xmm6,       8
 
         paddw           xmm0,       xmm6
-        movd            [rcx+8],    xmm0
+        movd            [rdi+8],    xmm0
 ;-
         movq            xmm0,       xmm7
         psrldq          xmm7,       8
 
         paddw           xmm0,       xmm7
-        movd            [rcx+12],   xmm0
+        movd            [rdi+12],   xmm0
 
-    STACK_FRAME_DESTROY_X4
+    ; begin epilog
+    pop         rbx
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void int vp8_sad8x16x4d_sse3(
 ;    unsigned char *src_ptr,
@@ -743,30 +722,50 @@ sym(vp8_sad16x8x4d_sse3):
 ;    int  *results)
 global sym(vp8_sad8x16x4d_sse3)
 sym(vp8_sad8x16x4d_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    push        rbx
+    ; end prolog
 
-    STACK_FRAME_CREATE_X4
+        push            rbp
+        mov             rdi,        arg(2) ; ref_ptr_base
 
-        PROCESS_8X2X4 0, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 2, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        LOAD_X4_ADDRESSES rdi, rcx, rdx, rax, rdi
 
-%if ABI_IS_32BIT
+        mov             rsi,        arg(0) ;src_ptr
+
+        movsxd          rbx,        dword ptr arg(1) ;src_stride
+        movsxd          rbp,        dword ptr arg(3) ;ref_stride
+
+        xchg            rbx,        rax
+
+        PROCESS_8X2X4 1
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+
         pop             rbp
-%endif
-        mov             rcx,        result_ptr
+        mov             rdi,        arg(4) ;Results
 
-        punpckldq       mm4,        mm5
-        punpckldq       mm6,        mm7
+        movd            [rdi],      mm4
+        movd            [rdi+4],    mm5
+        movd            [rdi+8],    mm6
+        movd            [rdi+12],   mm7
 
-        movq            [rcx],      mm4
-        movq            [rcx+8],    mm6
-
-    STACK_FRAME_DESTROY_X4
+    ; begin epilog
+    pop         rbx
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void int vp8_sad8x8x4d_sse3(
 ;    unsigned char *src_ptr,
@@ -776,26 +775,46 @@ sym(vp8_sad8x16x4d_sse3):
 ;    int  *results)
 global sym(vp8_sad8x8x4d_sse3)
 sym(vp8_sad8x8x4d_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    push        rbx
+    ; end prolog
 
-    STACK_FRAME_CREATE_X4
+        push            rbp
+        mov             rdi,        arg(2) ; ref_ptr_base
 
-        PROCESS_8X2X4 0, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 1, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
-        PROCESS_8X2X4 2, src_ptr, r0_ptr, r1_ptr, r2_ptr, r3_ptr, src_stride, ref_stride
+        LOAD_X4_ADDRESSES rdi, rcx, rdx, rax, rdi
 
-%if ABI_IS_32BIT
+        mov             rsi,        arg(0) ;src_ptr
+
+        movsxd          rbx,        dword ptr arg(1) ;src_stride
+        movsxd          rbp,        dword ptr arg(3) ;ref_stride
+
+        xchg            rbx,        rax
+
+        PROCESS_8X2X4 1
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+        PROCESS_8X2X4 0
+
         pop             rbp
-%endif
-        mov             rcx,        result_ptr
+        mov             rdi,        arg(4) ;Results
 
-        punpckldq       mm4,        mm5
-        punpckldq       mm6,        mm7
+        movd            [rdi],      mm4
+        movd            [rdi+4],    mm5
+        movd            [rdi+8],    mm6
+        movd            [rdi+12],   mm7
 
-        movq            [rcx],      mm4
-        movq            [rcx+8],    mm6
-
-    STACK_FRAME_DESTROY_X4
+    ; begin epilog
+    pop         rbx
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
 
 ;void int vp8_sad4x4x4d_sse3(
 ;    unsigned char *src_ptr,
@@ -805,26 +824,43 @@ sym(vp8_sad8x8x4d_sse3):
 ;    int  *results)
 global sym(vp8_sad4x4x4d_sse3)
 sym(vp8_sad4x4x4d_sse3):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 5
+    push        rsi
+    push        rdi
+    push        rbx
+    ; end prolog
 
-    STACK_FRAME_CREATE_X4
+        push            rbp
+        mov             rdi,        arg(2) ; ref_ptr_base
 
-        movd            mm0,        DWORD PTR [src_ptr]
-        movd            mm1,        DWORD PTR [r0_ptr]
+        LOAD_X4_ADDRESSES rdi, rcx, rdx, rax, rdi
 
-        movd            mm2,        DWORD PTR [src_ptr+src_stride]
-        movd            mm3,        DWORD PTR [r0_ptr+ref_stride]
+        mov             rsi,        arg(0) ;src_ptr
+
+        movsxd          rbx,        dword ptr arg(1) ;src_stride
+        movsxd          rbp,        dword ptr arg(3) ;ref_stride
+
+        xchg            rbx,        rax
+
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm1,        DWORD PTR [rcx]
+
+        movd            mm2,        DWORD PTR [rsi+rax]
+        movd            mm3,        DWORD PTR [rcx+rbp]
 
         punpcklbw       mm0,        mm2
         punpcklbw       mm1,        mm3
 
-        movd            mm4,        DWORD PTR [r1_ptr]
-        movd            mm5,        DWORD PTR [r2_ptr]
+        movd            mm4,        DWORD PTR [rdx]
+        movd            mm5,        DWORD PTR [rbx]
 
-        movd            mm6,        DWORD PTR [r3_ptr]
-        movd            mm2,        DWORD PTR [r1_ptr+ref_stride]
+        movd            mm6,        DWORD PTR [rdi]
+        movd            mm2,        DWORD PTR [rdx+rbp]
 
-        movd            mm3,        DWORD PTR [r2_ptr+ref_stride]
-        movd            mm7,        DWORD PTR [r3_ptr+ref_stride]
+        movd            mm3,        DWORD PTR [rbx+rbp]
+        movd            mm7,        DWORD PTR [rdi+rbp]
 
         psadbw          mm1,        mm0
 
@@ -839,40 +875,37 @@ sym(vp8_sad4x4x4d_sse3):
 
 
 
-        lea             src_ptr,    [src_ptr+src_stride*2]
-        lea             r0_ptr,     [r0_ptr+ref_stride*2]
+        lea             rsi,        [rsi+rax*2]
+        lea             rcx,        [rcx+rbp*2]
 
-        lea             r1_ptr,     [r1_ptr+ref_stride*2]
-        lea             r2_ptr,     [r2_ptr+ref_stride*2]
+        lea             rdx,        [rdx+rbp*2]
+        lea             rbx,        [rbx+rbp*2]
 
-        lea             r3_ptr,     [r3_ptr+ref_stride*2]
+        lea             rdi,        [rdi+rbp*2]
 
-        movd            mm0,        DWORD PTR [src_ptr]
-        movd            mm2,        DWORD PTR [r0_ptr]
+        movd            mm0,        DWORD PTR [rsi]
+        movd            mm2,        DWORD PTR [rcx]
 
-        movd            mm3,        DWORD PTR [src_ptr+src_stride]
-        movd            mm7,        DWORD PTR [r0_ptr+ref_stride]
+        movd            mm3,        DWORD PTR [rsi+rax]
+        movd            mm7,        DWORD PTR [rcx+rbp]
 
         punpcklbw       mm0,        mm3
         punpcklbw       mm2,        mm7
 
-        movd            mm3,        DWORD PTR [r1_ptr]
-        movd            mm7,        DWORD PTR [r2_ptr]
+        movd            mm3,        DWORD PTR [rdx]
+        movd            mm7,        DWORD PTR [rbx]
 
         psadbw          mm2,        mm0
-%if ABI_IS_32BIT
         mov             rax,        rbp
 
         pop             rbp
-%define     ref_stride    rax
-%endif
-        mov             rsi,        result_ptr
+        mov             rsi,        arg(4) ;Results
 
         paddw           mm1,        mm2
         movd            [rsi],      mm1
 
-        movd            mm2,        DWORD PTR [r1_ptr+ref_stride]
-        movd            mm1,        DWORD PTR [r2_ptr+ref_stride]
+        movd            mm2,        DWORD PTR [rdx+rax]
+        movd            mm1,        DWORD PTR [rbx+rax]
 
         punpcklbw       mm3,        mm2
         punpcklbw       mm7,        mm1
@@ -880,8 +913,8 @@ sym(vp8_sad4x4x4d_sse3):
         psadbw          mm3,        mm0
         psadbw          mm7,        mm0
 
-        movd            mm2,        DWORD PTR [r3_ptr]
-        movd            mm1,        DWORD PTR [r3_ptr+ref_stride]
+        movd            mm2,        DWORD PTR [rdi]
+        movd            mm1,        DWORD PTR [rdi+rax]
 
         paddw           mm3,        mm4
         paddw           mm7,        mm5
@@ -896,4 +929,10 @@ sym(vp8_sad4x4x4d_sse3):
         movd            [rsi+12],   mm2
 
 
-    STACK_FRAME_DESTROY_X4
+    ; begin epilog
+    pop         rbx
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
