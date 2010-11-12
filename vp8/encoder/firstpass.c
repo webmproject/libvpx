@@ -1145,6 +1145,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     cpi->output_frame_rate = cpi->oxcf.frame_rate;
     cpi->bits_left = (long long)(cpi->total_stats->duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
     cpi->bits_left -= (long long)(cpi->total_stats->duration * two_pass_min_rate / 10000000.0);
+    cpi->clip_bits_total = cpi->bits_left;
 
     vp8_avg_stats(cpi->total_stats);
 
@@ -1173,16 +1174,24 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     {
         start_pos = cpi->stats_in;               // Note starting "file" position
 
-        cpi->modified_total_error_left = 0.0;
+        cpi->modified_error_total = 0.0;
+        cpi->modified_error_used = 0.0;
 
         while (vp8_input_stats(cpi, &this_frame) != EOF)
         {
-            cpi->modified_total_error_left += calculate_modified_err(cpi, &this_frame);
+            cpi->modified_error_total += calculate_modified_err(cpi, &this_frame);
         }
+        cpi->modified_error_left = cpi->modified_error_total;
 
         reset_fpf_position(cpi, start_pos);            // Reset file position
 
     }
+
+    // Calculate the clip target modified bits per error
+    // The observed bpe starts as the same number.
+    cpi->clip_bpe =  cpi->bits_left /
+                     DOUBLE_DIVIDE_CHECK(cpi->modified_error_total);
+    cpi->observed_bpe = cpi->clip_bpe;
 
     cpi->fp_motion_map_stats = (unsigned char *)cpi->stats_in;
 }
@@ -1585,6 +1594,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     // Reset the file position
     reset_fpf_position(cpi, start_pos);
 
+    // Update the record of error used so far (only done once per gf group)
+    cpi->modified_error_used += gf_group_err;
+
     // Assign  bits to the arf or gf.
     {
         int Boost;
@@ -1882,6 +1894,16 @@ void vp8_second_pass(VP8_COMP *cpi)
     // Is this a GF / ARF (Note that a KF is always also a GF)
     if (cpi->frames_till_gf_update_due == 0)
     {
+        // Update monitor of the bits per error observed so far.
+        // Done once per gf group based on what has gone before
+        // so do nothing if this is the first frame.
+        if (cpi->common.current_video_frame > 0)
+        {
+            cpi->observed_bpe =
+                (double)(cpi->clip_bits_total - cpi->bits_left) /
+                cpi->modified_error_used;
+        }
+
         // Define next gf group and assign bits to it
         vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
         define_gf_group(cpi, &this_frame_copy);
@@ -2196,7 +2218,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     }
 
     // Calculate the number of bits that should be assigned to the kf group.
-    if ((cpi->bits_left > 0) && ((int)cpi->modified_total_error_left > 0))
+    if ((cpi->bits_left > 0) && ((int)cpi->modified_error_left > 0))
     {
         // Max for a single normal frame (not key frame)
         int max_bits = frame_max_bits(cpi);
@@ -2208,7 +2230,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // complexity of the section
         cpi->kf_group_bits = (long long)( cpi->bits_left *
                                           ( kf_group_err /
-                                            cpi->modified_total_error_left ));
+                                            cpi->modified_error_left ));
 
         // Clip based on maximum per frame rate defined by the user.
         max_grp_bits = (long long)max_bits * (long long)cpi->frames_to_key;
@@ -2461,7 +2483,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             double  alt_kf_grp_bits =
                         ((double)cpi->bits_left *
                          (kf_mod_err * (double)cpi->frames_to_key) /
-                         DOUBLE_DIVIDE_CHECK(cpi->modified_total_error_left));
+                         DOUBLE_DIVIDE_CHECK(cpi->modified_error_left));
 
             alt_kf_bits = (int)((double)kf_boost *
                                 (alt_kf_grp_bits / (double)allocation_chunks));
@@ -2479,7 +2501,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             alt_kf_bits =
                 (int)((double)cpi->bits_left *
                       (kf_mod_err /
-                       DOUBLE_DIVIDE_CHECK(cpi->modified_total_error_left)));
+                       DOUBLE_DIVIDE_CHECK(cpi->modified_error_left)));
 
             if (alt_kf_bits > cpi->kf_bits)
             {
@@ -2499,7 +2521,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     // Adjust the count of total modified error left.
     // The count of bits left is adjusted elsewhere based on real coded frame sizes
-    cpi->modified_total_error_left -= kf_group_err;
+    cpi->modified_error_left -= kf_group_err;
 
     if (cpi->oxcf.allow_spatial_resampling)
     {
