@@ -563,6 +563,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     int Speed = cpi->Speed;
     int i;
     VP8_COMMON *cm = &cpi->common;
+    int last_improved_quant = sf->improved_quant;
 
     // Initialise default mode frequency sampling variables
     for (i = 0; i < MAX_MODES; i ++)
@@ -1262,6 +1263,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     {
         cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
     }
+    if (cpi->sf.improved_quant != last_improved_quant)
+        vp8cx_init_quantizer(cpi);
 
 #if CONFIG_RUNTIME_CPU_DETECT
     cpi->mb.e_mbd.rtcd = &cpi->common.rtcd;
