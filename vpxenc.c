@@ -438,7 +438,7 @@ struct EbmlGlobal
     int debug;
 
     FILE    *stream;
-    uint64_t last_pts_ms;
+    int64_t last_pts_ms;
     vpx_rational_t  framerate;
 
     /* These pointers are to the start of an element */
@@ -651,7 +651,7 @@ write_webm_block(EbmlGlobal                *glob,
     unsigned char  track_number;
     unsigned short block_timecode = 0;
     unsigned char  flags;
-    uint64_t       pts_ms;
+    int64_t        pts_ms;
     int            start_cluster = 0, is_keyframe;
 
     /* Calculate the PTS of this frame in milliseconds */
@@ -1077,6 +1077,7 @@ int main(int argc, const char **argv_)
     int                      psnr_count = 0;
 
     exec_name = argv_[0];
+    ebml.last_pts_ms = -1;
 
     if (argc < 3)
         usage_exit();
