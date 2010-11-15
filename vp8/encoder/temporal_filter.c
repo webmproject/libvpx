@@ -292,7 +292,7 @@ static int find_matching_mb
         bestsme = cpi->find_fractional_mv_step(x, b, d,
                     &d->bmi.mv.as_mv, &best_ref_mv1,
                     x->errorperbit, &cpi->fn_ptr[BLOCK_16X16],
-                    cpi->mb.mvcost);
+                    mvcost);
     }
 #endif
 
