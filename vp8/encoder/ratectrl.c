@@ -1037,9 +1037,7 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
             gf_frame_useage = pct_gf_active;
 
         // Is a fixed manual GF frequency being used
-        if (!cpi->auto_gold)
-            cpi->common.refresh_golden_frame = TRUE;
-        else
+        if (cpi->auto_gold)
         {
             // For one pass throw a GF if recent frame intra useage is low or the GF useage is high
             if ((cpi->pass == 0) && (cpi->this_frame_percent_intra < 15 || gf_frame_useage >= 5))
