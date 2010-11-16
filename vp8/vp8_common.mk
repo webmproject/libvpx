@@ -112,6 +112,11 @@ VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
+ifeq ($(CONFIG_CSM),yes)
+VP8_COMMON_SRCS-yes += common/maskingmv.c
+VP8_COMMON_SRCS-$(HAVE_SSE3) += common/x86/mask_sse3.asm
+endif
+
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 
 # common (c)

@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+#include "vpx_config.h"
 #include "vpx_version.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
