@@ -214,6 +214,7 @@ HAVE_LIST="
 "
 EXPERIMENT_LIST="
     segmentation
+    csm
 "
 CONFIG_LIST="
     external_build
