@@ -309,8 +309,10 @@ void vp8_optimize_b(MACROBLOCK *mb, int ib, int type,
     eob = d->eob;
 
     /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-    /* TODO: These should vary with the block type, since the quantizer does. */
     rdmult = (mb->rdmult << 2)*err_mult;
+    if(mb->e_mbd.mode_info_context->mbmi.ref_frame==INTRA_FRAME)
+        rdmult = (rdmult * 9)>>4;
+
     rddiv = mb->rddiv;
     best_mask[0] = best_mask[1] = 0;
     /* Initialize the sentinel node of the trellis. */
