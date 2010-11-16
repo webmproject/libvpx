@@ -1,15 +1,17 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
     EXPORT  |vp8_filter_block2d_first_pass_armv6|
     EXPORT  |vp8_filter_block2d_second_pass_armv6|
+    EXPORT  |vp8_filter4_block2d_second_pass_armv6|
     EXPORT  |vp8_filter_block2d_first_pass_only_armv6|
     EXPORT  |vp8_filter_block2d_second_pass_only_armv6|
 
@@ -187,6 +189,64 @@
     bne     height_loop_2nd
 
     add     sp, sp, #4
+    ldmia   sp!, {r4 - r11, pc}
+
+    ENDP
+
+;---------------------------------
+; r0    short         *src_ptr,
+; r1    unsigned char *output_ptr,
+; r2    unsigned int output_pitch,
+; r3    unsigned int cnt,
+; stack const short *vp8_filter
+;---------------------------------
+|vp8_filter4_block2d_second_pass_armv6| PROC
+    stmdb   sp!, {r4 - r11, lr}
+
+    ldr     r11, [sp, #36]                  ; vp8_filter address
+    mov     r7, r3, lsl #16                 ; height is top part of counter
+
+    ldr     r4, [r11]                       ; load up packed filter coefficients
+    add     lr, r1, r3                      ; save final destination pointer
+    ldr     r5, [r11, #4]
+    ldr     r6, [r11, #8]
+
+    pkhbt   r12, r5, r4                     ; pack the filter differently
+    pkhbt   r11, r6, r5
+    mov     r4, #0x40                       ; rounding factor (for smlad{x})
+
+|height_loop_2nd_4|
+    ldrd    r8, [r0, #-4]                   ; load the data
+    orr     r7, r7, r3, lsr #1              ; loop counter
+
+|width_loop_2nd_4|
+    ldr     r10, [r0, #4]!
+    smladx  r6, r9, r12, r4                 ; apply filter
+    pkhbt   r8, r9, r8
+    smlad   r5, r8, r12, r4
+    pkhbt   r8, r10, r9
+    smladx  r6, r10, r11, r6
+    sub     r7, r7, #1
+    smlad   r5, r8, r11, r5
+
+    mov     r8, r9                          ; shift the data for the next loop
+    mov     r9, r10
+
+    usat    r6, #8, r6, asr #7              ; shift and clamp
+    usat    r5, #8, r5, asr #7
+
+    strb    r5, [r1], r2                    ; the result is transposed back and stored
+    tst     r7, #0xff
+    strb    r6, [r1], r2
+
+    bne     width_loop_2nd_4
+
+    subs    r7, r7, #0x10000
+    add     r0, r0, #16                     ; update src for next loop
+    sub     r1, lr, r7, lsr #16             ; update dst for next loop
+
+    bne     height_loop_2nd_4
+
     ldmia   sp!, {r4 - r11, pc}
 
     ENDP

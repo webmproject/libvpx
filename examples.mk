@@ -1,28 +1,51 @@
 ##
-##  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+##  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ##
-##  Use of this source code is governed by a BSD-style license and patent
-##  grant that can be found in the LICENSE file in the root of the source
-##  tree. All contributing project authors may be found in the AUTHORS
-##  file in the root of the source tree.
+##  Use of this source code is governed by a BSD-style license
+##  that can be found in the LICENSE file in the root of the source
+##  tree. An additional intellectual property rights grant can be found
+##  in the file PATENTS.  All contributing project authors may
+##  be found in the AUTHORS file in the root of the source tree.
 ##
 
 
 # List of examples to build. UTILS are files that are taken from the source
 # tree directly, and GEN_EXAMPLES are files that are created from the
 # examples folder.
-UTILS-$(CONFIG_DECODERS)    += ivfdec.c
-ivfdec.SRCS                 += md5_utils.c md5_utils.h
-ivfdec.SRCS                 += vpx_ports/vpx_timer.h
-ivfdec.SRCS                 += vpx/vpx_integer.h
-ivfdec.SRCS                 += args.c args.h vpx_ports/config.h
-ivfdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
-ivfdec.DESCRIPTION           = Full featured decoder
-UTILS-$(CONFIG_ENCODERS)    += ivfenc.c
-ivfenc.SRCS                 += args.c args.h vpx_ports/config.h
-ivfenc.SRCS                 += vpx_ports/mem_ops.h vpx_ports/mem_ops_aligned.h
-ivfenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
-ivfenc.DESCRIPTION           = Full featured encoder
+UTILS-$(CONFIG_DECODERS)    += vpxdec.c
+vpxdec.SRCS                 += md5_utils.c md5_utils.h
+vpxdec.SRCS                 += vpx_ports/vpx_timer.h
+vpxdec.SRCS                 += vpx/vpx_integer.h
+vpxdec.SRCS                 += args.c args.h vpx_ports/config.h
+vpxdec.SRCS                 += tools_common.c tools_common.h
+vpxdec.SRCS                 += nestegg/halloc/halloc.h
+vpxdec.SRCS                 += nestegg/halloc/src/align.h
+vpxdec.SRCS                 += nestegg/halloc/src/halloc.c
+vpxdec.SRCS                 += nestegg/halloc/src/hlist.h
+vpxdec.SRCS                 += nestegg/halloc/src/macros.h
+vpxdec.SRCS                 += nestegg/include/nestegg/nestegg.h
+vpxdec.SRCS                 += nestegg/src/nestegg.c
+vpxdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
+vpxdec.DESCRIPTION           = Full featured decoder
+UTILS-$(CONFIG_ENCODERS)    += vpxenc.c
+vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h
+vpxenc.SRCS                 += tools_common.c tools_common.h
+vpxenc.SRCS                 += vpx_ports/config.h vpx_ports/mem_ops.h
+vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
+vpxenc.SRCS                 += libmkv/EbmlIDs.h
+vpxenc.SRCS                 += libmkv/EbmlWriter.c
+vpxenc.SRCS                 += libmkv/EbmlWriter.h
+vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
+vpxenc.DESCRIPTION           = Full featured encoder
+
+# Clean up old ivfenc, ivfdec binaries.
+ifeq ($(CONFIG_MSVS),yes)
+CLEAN-OBJS += $(foreach p,$(VS_PLATFORMS),$(p)/Release/ivfenc.exe)
+CLEAN-OBJS += $(foreach p,$(VS_PLATFORMS),$(p)/Release/ivfdec.exe)
+else
+CLEAN-OBJS += ivfenc{.c.o,.c.d,.dox,.exe,}
+CLEAN-OBJS += ivfdec{.c.o,.c.d,.dox,.exe,}
+endif
 
 # XMA example disabled for now, not used in VP8
 #UTILS-$(CONFIG_DECODERS)    += example_xma.c

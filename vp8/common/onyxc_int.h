@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -20,9 +21,9 @@
 #include "recon.h"
 #include "postproc.h"
 
-//#ifdef PACKET_TESTING
+/*#ifdef PACKET_TESTING*/
 #include "header.h"
-//#endif
+/*#endif*/
 
 /* Create/destroy static data structures. */
 
@@ -32,6 +33,7 @@ void vp8_initialize_common(void);
 #define MAXQ 127
 #define QINDEX_RANGE (MAXQ + 1)
 
+#define NUM_YV12_BUFFERS 4
 
 typedef struct frame_contexts
 {
@@ -41,7 +43,7 @@ typedef struct frame_contexts
     vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1];
     MV_CONTEXT mvc[2];
-    MV_CONTEXT pre_mvc[2];  //not to caculate the mvcost for the frame if mvc doesn't change.
+    MV_CONTEXT pre_mvc[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
 } FRAME_CONTEXT;
 
 typedef enum
@@ -72,6 +74,7 @@ typedef struct VP8_COMMON_RTCD
     vp8_subpix_rtcd_vtable_t      subpix;
     vp8_loopfilter_rtcd_vtable_t  loopfilter;
     vp8_postproc_rtcd_vtable_t    postproc;
+    int                           flags;
 #else
     int unused;
 #endif
@@ -81,9 +84,9 @@ typedef struct VP8Common
 {
     struct vpx_internal_error_info  error;
 
-    DECLARE_ALIGNED(16, short, Y1dequant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, Y2dequant[QINDEX_RANGE][4][4]);
-    DECLARE_ALIGNED(16, short, UVdequant[QINDEX_RANGE][4][4]);
+    DECLARE_ALIGNED(16, short, Y1dequant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2dequant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVdequant[QINDEX_RANGE][16]);
 
     int Width;
     int Height;
@@ -93,15 +96,16 @@ typedef struct VP8Common
     YUV_TYPE clr_type;
     CLAMP_TYPE  clamp_type;
 
-    YV12_BUFFER_CONFIG last_frame;
-    YV12_BUFFER_CONFIG golden_frame;
-    YV12_BUFFER_CONFIG alt_ref_frame;
-    YV12_BUFFER_CONFIG new_frame;
     YV12_BUFFER_CONFIG *frame_to_show;
+
+    YV12_BUFFER_CONFIG yv12_fb[NUM_YV12_BUFFERS];
+    int fb_idx_ref_cnt[NUM_YV12_BUFFERS];
+    int new_fb_idx, lst_fb_idx, gld_fb_idx, alt_fb_idx;
+
     YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG temp_scale_frame;
 
-    FRAME_TYPE last_frame_type;  //Add to check if vp8_frame_init_loop_filter() can be skiped.
+    FRAME_TYPE last_frame_type;  /* Add to check if vp8_frame_init_loop_filter() can be skipped. */
     FRAME_TYPE frame_type;
 
     int show_frame;
@@ -112,7 +116,7 @@ typedef struct VP8Common
     int mb_cols;
     int mode_info_stride;
 
-    // prfile settings
+    /* profile settings */
     int experimental;
     int mb_no_coeff_skip;
     int no_lpf;
@@ -121,7 +125,7 @@ typedef struct VP8Common
     int full_pixel;
 
     int base_qindex;
-    int last_kf_gf_q;  // Q used on the last GF or KF
+    int last_kf_gf_q;  /* Q used on the last GF or KF */
 
     int y1dc_delta_q;
     int y2dc_delta_q;
@@ -131,8 +135,6 @@ typedef struct VP8Common
 
     unsigned int frames_since_golden;
     unsigned int frames_till_alt_ref_frame;
-    unsigned char *gf_active_flags;   // Record of which MBs still refer to last golden frame either directly or through 0,0
-    int gf_active_count;
 
     /* We allocate a MODE_INFO struct for each macroblock, together with
        an extra row on top and column on the left to simplify prediction. */
@@ -153,31 +155,31 @@ typedef struct VP8Common
     int last_sharpness_level;
     int sharpness_level;
 
-    int refresh_last_frame;       // Two state 0 = NO, 1 = YES
-    int refresh_golden_frame;     // Two state 0 = NO, 1 = YES
-    int refresh_alt_ref_frame;     // Two state 0 = NO, 1 = YES
+    int refresh_last_frame;       /* Two state 0 = NO, 1 = YES */
+    int refresh_golden_frame;     /* Two state 0 = NO, 1 = YES */
+    int refresh_alt_ref_frame;     /* Two state 0 = NO, 1 = YES */
 
-    int copy_buffer_to_gf;         // 0 none, 1 Last to GF, 2 ARF to GF
-    int copy_buffer_to_arf;        // 0 none, 1 Last to ARF, 2 GF to ARF
+    int copy_buffer_to_gf;         /* 0 none, 1 Last to GF, 2 ARF to GF */
+    int copy_buffer_to_arf;        /* 0 none, 1 Last to ARF, 2 GF to ARF */
 
-    int refresh_entropy_probs;    // Two state 0 = NO, 1 = YES
+    int refresh_entropy_probs;    /* Two state 0 = NO, 1 = YES */
 
-    int ref_frame_sign_bias[MAX_REF_FRAMES];    // Two state 0, 1
+    int ref_frame_sign_bias[MAX_REF_FRAMES];    /* Two state 0, 1 */
 
-    // Y,U,V,Y2
-    ENTROPY_CONTEXT *above_context[4];   // row of context for each plane
-    ENTROPY_CONTEXT left_context[4][4];  // (up to) 4 contexts ""
+    /* Y,U,V,Y2 */
+    ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
+    ENTROPY_CONTEXT_PLANES left_context;  /* (up to) 4 contexts "" */
 
 
-    // keyframe block modes are predicted by their above, left neighbors
+    /* keyframe block modes are predicted by their above, left neighbors */
 
     vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
     vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
     vp8_prob kf_uv_mode_prob [VP8_UV_MODES-1];
 
 
-    FRAME_CONTEXT lfc; // last frame entropy
-    FRAME_CONTEXT fc;  // this frame entropy
+    FRAME_CONTEXT lfc; /* last frame entropy */
+    FRAME_CONTEXT fc;  /* this frame entropy */
 
     unsigned int current_video_frame;
 
@@ -201,6 +203,7 @@ typedef struct VP8Common
 
 void vp8_adjust_mb_lf_value(MACROBLOCKD *mbd, int *filter_level);
 void vp8_init_loop_filter(VP8_COMMON *cm);
+void vp8_frame_init_loop_filter(loop_filter_info *lfi, int frame_type);
 extern void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val);
 
 #endif

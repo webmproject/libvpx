@@ -1,10 +1,11 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
@@ -83,7 +84,7 @@ nextrow:
         pmullw      mm5,    [rdx]            ; mm5 *= kernel 5 modifiers
         paddsw      mm3,    mm5              ; mm3 += mm5
 
-        paddsw      mm3,    [rd GLOBAL]               ; mm3 += round value
+        paddsw      mm3,    [GLOBAL(rd)]              ; mm3 += round value
         psraw       mm3,    VP8_FILTER_SHIFT     ; mm3 /= 128
         packuswb    mm3,    mm0              ; pack and unpack to saturate
         punpcklbw   mm3,    mm0              ;
@@ -135,7 +136,7 @@ sym(vp8_filter_block1d_v6_mmx):
     push        rdi
     ; end prolog
 
-        movq      mm5, [rd GLOBAL]
+        movq      mm5, [GLOBAL(rd)]
         push        rbx
         mov         rbx, arg(6) ;vp8_filter
         movq      mm1, [rbx + 16]             ; do both the negative taps first!!!
@@ -224,7 +225,7 @@ sym(vp8_filter_block1dc_v6_mmx):
     push        rdi
     ; end prolog
 
-        movq      mm5, [rd GLOBAL]
+        movq      mm5, [GLOBAL(rd)]
         push        rbx
         mov         rbx, arg(7) ;vp8_filter
         movq      mm1, [rbx + 16]             ; do both the negative taps first!!!
@@ -319,7 +320,7 @@ sym(vp8_bilinear_predict8x8_mmx):
         mov         rdi,        arg(4) ;dst_ptr           ;
 
         shl         rax,        5 ; offset * 32
-        lea         rcx,        [sym(vp8_bilinear_filters_mmx) GLOBAL]
+        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
 
         add         rax,        rcx ; HFilter
         mov         rsi,        arg(0) ;src_ptr              ;
@@ -362,10 +363,10 @@ sym(vp8_bilinear_predict8x8_mmx):
         paddw       mm3,        mm5                 ;
         paddw       mm4,        mm6                 ;
 
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
-        paddw       mm4,        [rd GLOBAL]                  ;
+        paddw       mm4,        [GLOBAL(rd)]                 ;
         psraw       mm4,        VP8_FILTER_SHIFT        ;
 
         movq        mm7,        mm3                 ;
@@ -403,10 +404,10 @@ next_row_8x8:
         pmullw      mm5,        [rax]               ;
         pmullw      mm6,        [rax]               ;
 
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
-        paddw       mm4,        [rd GLOBAL]                  ;
+        paddw       mm4,        [GLOBAL(rd)]                 ;
         psraw       mm4,        VP8_FILTER_SHIFT        ;
 
         movq        mm7,        mm3                 ;
@@ -420,10 +421,10 @@ next_row_8x8:
         paddw       mm4,        mm6                 ;
 
 
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
-        paddw       mm4,        [rd GLOBAL]                  ;
+        paddw       mm4,        [GLOBAL(rd)]                 ;
         psraw       mm4,        VP8_FILTER_SHIFT        ;
 
         packuswb    mm3,        mm4
@@ -475,7 +476,7 @@ sym(vp8_bilinear_predict8x4_mmx):
         movsxd      rax,        dword ptr arg(2) ;xoffset
         mov         rdi,        arg(4) ;dst_ptr           ;
 
-        lea         rcx,        [sym(vp8_bilinear_filters_mmx) GLOBAL]
+        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
         shl         rax,        5
 
         mov         rsi,        arg(0) ;src_ptr              ;
@@ -517,10 +518,10 @@ sym(vp8_bilinear_predict8x4_mmx):
         paddw       mm3,        mm5                 ;
         paddw       mm4,        mm6                 ;
 
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
-        paddw       mm4,        [rd GLOBAL]                  ;
+        paddw       mm4,        [GLOBAL(rd)]                 ;
         psraw       mm4,        VP8_FILTER_SHIFT        ;
 
         movq        mm7,        mm3                 ;
@@ -558,10 +559,10 @@ next_row_8x4:
         pmullw      mm5,        [rax]               ;
         pmullw      mm6,        [rax]               ;
 
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
-        paddw       mm4,        [rd GLOBAL]                  ;
+        paddw       mm4,        [GLOBAL(rd)]                 ;
         psraw       mm4,        VP8_FILTER_SHIFT        ;
 
         movq        mm7,        mm3                 ;
@@ -575,10 +576,10 @@ next_row_8x4:
         paddw       mm4,        mm6                 ;
 
 
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
-        paddw       mm4,        [rd GLOBAL]                  ;
+        paddw       mm4,        [GLOBAL(rd)]                 ;
         psraw       mm4,        VP8_FILTER_SHIFT        ;
 
         packuswb    mm3,        mm4
@@ -630,7 +631,7 @@ sym(vp8_bilinear_predict4x4_mmx):
         movsxd      rax,        dword ptr arg(2) ;xoffset
         mov         rdi,        arg(4) ;dst_ptr           ;
 
-        lea         rcx,        [sym(vp8_bilinear_filters_mmx) GLOBAL]
+        lea         rcx,        [GLOBAL(sym(vp8_bilinear_filters_mmx))]
         shl         rax,        5
 
         add         rax,        rcx ; HFilter
@@ -661,7 +662,7 @@ sym(vp8_bilinear_predict4x4_mmx):
         pmullw      mm5,        mm2                 ;
 
         paddw       mm3,        mm5                 ;
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
 
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
@@ -685,7 +686,7 @@ next_row_4x4:
         punpcklbw   mm5,        mm0                 ;
 
         pmullw      mm5,        [rax]               ;
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
 
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
         movq        mm7,        mm3                 ;
@@ -696,7 +697,7 @@ next_row_4x4:
         paddw       mm3,        mm5                 ;
 
 
-        paddw       mm3,        [rd GLOBAL]                  ; xmm3 += round value
+        paddw       mm3,        [GLOBAL(rd)]                 ; xmm3 += round value
         psraw       mm3,        VP8_FILTER_SHIFT        ; xmm3 /= 128
 
         packuswb    mm3,        mm0
@@ -730,7 +731,7 @@ rd:
     times 4 dw 0x40
 
 align 16
-global sym(vp8_six_tap_mmx)
+global HIDDEN_DATA(sym(vp8_six_tap_mmx))
 sym(vp8_six_tap_mmx):
     times 8 dw 0
     times 8 dw 0
@@ -790,7 +791,7 @@ sym(vp8_six_tap_mmx):
 
 
 align 16
-global sym(vp8_bilinear_filters_mmx)
+global HIDDEN_DATA(sym(vp8_bilinear_filters_mmx))
 sym(vp8_bilinear_filters_mmx):
     times 8 dw 128
     times 8 dw 0

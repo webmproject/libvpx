@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -13,6 +14,7 @@
 #include "vpx_version.h"
 #include "onyx_int.h"
 #include "vpx/vp8e.h"
+#include "vp8/encoder/firstpass.h"
 #include "onyx.h"
 #include <stdlib.h>
 #include <string.h>
@@ -52,19 +54,19 @@ static const struct extraconfig_map extracfg_map[] =
             NULL,
 #if !(CONFIG_REALTIME_ONLY)
             VP8_BEST_QUALITY_ENCODING,  /* Encoding Mode */
-            -4,                         /* cpu_used      */
+            0,                          /* cpu_used      */
 #else
             VP8_REAL_TIME_ENCODING,     /* Encoding Mode */
-            -8,                         /* cpu_used      */
+            4,                          /* cpu_used      */
 #endif
             0,                          /* enable_auto_alt_ref */
             0,                          /* noise_sensitivity */
             0,                          /* Sharpness */
-            800,                        /* static_thresh */
+            0,                          /* static_thresh */
             VP8_ONE_TOKENPARTITION,     /* token_partitions */
-            0, /* arnr_max_frames */
-            0, /* arnr_strength */
-            0, /* arnr_type*/
+            0,                          /* arnr_max_frames */
+            3,                          /* arnr_strength */
+            3,                          /* arnr_type*/
             0,                          /* experimental mode */
         }
     }
@@ -109,8 +111,13 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
     } while(0)
 
 #define RANGE_CHECK(p,memb,lo,hi) do {\
-        if(!((p)->memb >= (lo) && (p)->memb <= hi)) \
+        if(!(((p)->memb == lo || (p)->memb > (lo)) && (p)->memb <= hi)) \
             ERROR(#memb " out of range ["#lo".."#hi"]");\
+    } while(0)
+
+#define RANGE_CHECK_HI(p,memb,hi) do {\
+        if(!((p)->memb <= (hi))) \
+            ERROR(#memb " out of range [.."#hi"]");\
     } while(0)
 
 #define RANGE_CHECK_LO(p,memb,lo) do {\
@@ -130,24 +137,24 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(cfg, g_h,                   2, 16384);
     RANGE_CHECK(cfg, g_timebase.den,        1, 1000000000);
     RANGE_CHECK(cfg, g_timebase.num,        1, cfg->g_timebase.den);
-    RANGE_CHECK(cfg, g_profile,             0, 3);
-    RANGE_CHECK(cfg, rc_min_quantizer,      0, 63);
-    RANGE_CHECK(cfg, rc_max_quantizer,      0, 63);
-    RANGE_CHECK(cfg, g_threads,             0, 64);
+    RANGE_CHECK_HI(cfg, g_profile,          3);
+    RANGE_CHECK_HI(cfg, rc_min_quantizer,   63);
+    RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
+    RANGE_CHECK_HI(cfg, g_threads,          64);
 #if !(CONFIG_REALTIME_ONLY)
-    RANGE_CHECK(cfg, g_lag_in_frames,       0, 25);
+    RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
 #else
-    RANGE_CHECK(cfg, g_lag_in_frames,       0, 0);
+    RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
 #endif
     RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CBR);
-    RANGE_CHECK(cfg, rc_undershoot_pct,     0, 100);
-    RANGE_CHECK(cfg, rc_2pass_vbr_bias_pct, 0, 100);
+    RANGE_CHECK_HI(cfg, rc_undershoot_pct,  100);
+    RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
     RANGE_CHECK(cfg, kf_mode,               VPX_KF_DISABLED, VPX_KF_AUTO);
     //RANGE_CHECK_BOOL(cfg,                 g_delete_firstpassfile);
     RANGE_CHECK_BOOL(cfg,                   rc_resize_allowed);
-    RANGE_CHECK(cfg, rc_dropframe_thresh,   0, 100);
-    RANGE_CHECK(cfg, rc_resize_up_thresh,   0, 100);
-    RANGE_CHECK(cfg, rc_resize_down_thresh, 0, 100);
+    RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   100);
+    RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
+    RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
 #if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
 #else
@@ -166,7 +173,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 #if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_BEST_QUALITY_ENCODING, VP8_REAL_TIME_ENCODING);
     RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
-    RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 6);
+    RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
 #else
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_REAL_TIME_ENCODING, VP8_REAL_TIME_ENCODING);
 
@@ -177,29 +184,32 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 #endif
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
-    RANGE_CHECK(vp8_cfg, Sharpness,         0, 7);
-    RANGE_CHECK(vp8_cfg, arnr_max_frames,    0, 25);
-    RANGE_CHECK(vp8_cfg, arnr_strength,     0, 6);
-    RANGE_CHECK(vp8_cfg, arnr_type,         0, 0xffffffff);
+    RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
+    RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
+    RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
+    RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
 
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
-        int n_doubles = cfg->rc_twopass_stats_in.sz / sizeof(double);
-        int n_packets = cfg->rc_twopass_stats_in.sz / sizeof(FIRSTPASS_STATS);
-        double frames;
+        int              mb_r = (cfg->g_h + 15) / 16;
+        int              mb_c = (cfg->g_w + 15) / 16;
+        size_t           packet_sz = vp8_firstpass_stats_sz(mb_r * mb_c);
+        int              n_packets = cfg->rc_twopass_stats_in.sz / packet_sz;
+        FIRSTPASS_STATS *stats;
 
         if (!cfg->rc_twopass_stats_in.buf)
             ERROR("rc_twopass_stats_in.buf not set.");
 
-        if (cfg->rc_twopass_stats_in.sz % sizeof(FIRSTPASS_STATS))
+        if (cfg->rc_twopass_stats_in.sz % packet_sz)
             ERROR("rc_twopass_stats_in.sz indicates truncated packet.");
 
-        if (cfg->rc_twopass_stats_in.sz < 2 * sizeof(FIRSTPASS_STATS))
+        if (cfg->rc_twopass_stats_in.sz < 2 * packet_sz)
             ERROR("rc_twopass_stats_in requires at least two packets.");
 
-        frames = ((double *)cfg->rc_twopass_stats_in.buf)[n_doubles - 1];
+        stats = (void*)((char *)cfg->rc_twopass_stats_in.buf
+                + (n_packets - 1) * packet_sz);
 
-        if ((int)(frames + 0.5) != n_packets - 1)
+        if ((int)(stats->count + 0.5) != n_packets - 1)
             ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
 
@@ -297,9 +307,9 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->under_shoot_pct         = cfg.rc_undershoot_pct;
     //oxcf->over_shoot_pct        = cfg.rc_overshoot_pct;
 
-    oxcf->maximum_buffer_size     = cfg.rc_buf_sz / 1000;
-    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz / 1000;
-    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz / 1000;
+    oxcf->maximum_buffer_size     = cfg.rc_buf_sz;
+    oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz;
+    oxcf->optimal_buffer_level    = cfg.rc_buf_optimal_sz;
 
     oxcf->two_pass_vbrbias        = cfg.rc_2pass_vbr_bias_pct;
     oxcf->two_pass_vbrmin_section  = cfg.rc_2pass_vbr_minsection_pct;
@@ -774,12 +784,13 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                 {
                     pkt.data.frame.flags |= VPX_FRAME_IS_INVISIBLE;
 
-                    // TODO: ideally this timestamp should be as close as
-                    // possible to the prior PTS so that if a decoder uses
-                    // pts to schedule when to do this, we start right after
-                    // last frame was decoded.  Maybe should be set to
-                    // last time stamp. Invisible frames have no duration..
-                    pkt.data.frame.pts --;
+                    // This timestamp should be as close as possible to the
+                    // prior PTS so that if a decoder uses pts to schedule when
+                    // to do this, we start right after last frame was decoded.
+                    // Invisible frames have no duration.
+                    pkt.data.frame.pts = ((cpi->last_time_stamp_seen
+                        * ctx->cfg.g_timebase.den + round)
+                        / ctx->cfg.g_timebase.num / 10000000) + 1;
                     pkt.data.frame.duration = 0;
                 }
 
@@ -846,7 +857,9 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
         int ctr_id,
         va_list args)
 {
+#if CONFIG_POSTPROC
     vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
+    (void)ctr_id;
 
     if (data)
     {
@@ -855,6 +868,12 @@ static vpx_codec_err_t vp8e_set_previewpp(vpx_codec_alg_priv_t *ctx,
     }
     else
         return VPX_CODEC_INVALID_PARAM;
+#else
+    (void)ctx;
+    (void)ctr_id;
+    (void)args;
+    return VPX_CODEC_INCAPABLE;
+#endif
 }
 
 
@@ -862,8 +881,16 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx)
 {
 
     YV12_BUFFER_CONFIG sd;
+    vp8_ppflags_t flags = {0};
 
-    if (0 == vp8_get_preview_raw_frame(ctx->cpi, &sd, ctx->preview_ppcfg.deblocking_level, ctx->preview_ppcfg.noise_level, ctx->preview_ppcfg.post_proc_flag))
+    if (ctx->preview_ppcfg.post_proc_flag)
+    {
+        flags.post_proc_flag        = ctx->preview_ppcfg.post_proc_flag;
+        flags.deblocking_level      = ctx->preview_ppcfg.deblocking_level;
+        flags.noise_level           = ctx->preview_ppcfg.noise_level;
+    }
+
+    if (0 == vp8_get_preview_raw_frame(ctx->cpi, &sd, &flags))
     {
 
         /*
@@ -1044,7 +1071,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 
         0,                  /* g_lag_in_frames */
 
-        70,                 /* rc_dropframe_thresh */
+        0,                  /* rc_dropframe_thresh */
         0,                  /* rc_resize_allowed */
         60,                 /* rc_resize_down_thresold */
         30,                 /* rc_resize_up_thresold */
@@ -1086,9 +1113,9 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 #ifndef VERSION_STRING
 #define VERSION_STRING
 #endif
-vpx_codec_iface_t vpx_codec_vp8_cx_algo =
+CODEC_INTERFACE(vpx_codec_vp8_cx) =
 {
-    "vpx Technologies VP8 Encoder" VERSION_STRING,
+    "WebM Project VP8 Encoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,
     /* vpx_codec_caps_t          caps; */
@@ -1207,7 +1234,7 @@ static vpx_codec_err_t api1_encode(vpx_codec_alg_priv_t  *ctx,
 
 vpx_codec_iface_t vpx_enc_vp8_algo =
 {
-    "vpx Technologies VP8 Encoder (Deprecated API)" VERSION_STRING,
+    "WebM Project VP8 Encoder (Deprecated API)" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_ENCODER,
     /* vpx_codec_caps_t          caps; */

@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -28,7 +29,7 @@ void vp8_build_intra_predictors_mby_neon(MACROBLOCKD *x)
     unsigned char *y_buffer = x->dst.y_buffer;
     unsigned char *ypred_ptr = x->predictor;
     int y_stride = x->dst.y_stride;
-    int mode = x->mbmi.mode;
+    int mode = x->mode_info_context->mbmi.mode;
     int Up = x->up_available;
     int Left = x->left_available;
 
@@ -51,7 +52,7 @@ void vp8_build_intra_predictors_mby_s_neon(MACROBLOCKD *x)
     unsigned char *y_buffer = x->dst.y_buffer;
     unsigned char *ypred_ptr = x->predictor;
     int y_stride = x->dst.y_stride;
-    int mode = x->mbmi.mode;
+    int mode = x->mode_info_context->mbmi.mode;
     int Up = x->up_available;
     int Left = x->left_available;
 

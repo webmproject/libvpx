@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -40,7 +41,7 @@ typedef enum
     VP8_SEG_ALG_PRIV     = 256,
     VP8_SEG_MAX
 } mem_seg_id_t;
-#define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
+#define NELEMENTS(x) ((int)(sizeof(x)/sizeof(x[0])))
 
 static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t);
 
@@ -64,12 +65,19 @@ struct vpx_codec_alg_priv
     vpx_codec_priv_t        base;
     vpx_codec_mmap_t        mmaps[NELEMENTS(vp8_mem_req_segs)-1];
     vpx_codec_dec_cfg_t     cfg;
-    vp8_stream_info_t   si;
+    vp8_stream_info_t       si;
     int                     defer_alloc;
     int                     decoder_init;
     VP8D_PTR                pbi;
     int                     postproc_cfg_set;
     vp8_postproc_cfg_t      postproc_cfg;
+#if CONFIG_POSTPROC_VISUALIZER
+    unsigned int            dbg_postproc_flag;
+    int                     dbg_color_ref_frame_flag;
+    int                     dbg_color_mb_modes_flag;
+    int                     dbg_color_b_modes_flag;
+    int                     dbg_display_mv_flag;
+#endif
     vpx_image_t             img;
     int                     img_setup;
     int                     img_avail;
@@ -169,7 +177,7 @@ static void vp8_init_ctx(vpx_codec_ctx_t *ctx, const vpx_codec_mmap_t *mmap)
     }
 }
 
-static void *mmap_lkup(vpx_codec_alg_priv_t *ctx, int id)
+static void *mmap_lkup(vpx_codec_alg_priv_t *ctx, unsigned int id)
 {
     int i;
 
@@ -195,9 +203,6 @@ static void vp8_finalize_mmaps(vpx_codec_alg_priv_t *ctx)
     ctx->pbi->fb_storage_ptr[0] = mmap_lkup(ctx, VP6_SEG_IMG0_STRG);
     ctx->pbi->fb_storage_ptr[1] = mmap_lkup(ctx, VP6_SEG_IMG1_STRG);
     ctx->pbi->fb_storage_ptr[2] = mmap_lkup(ctx, VP6_SEG_IMG2_STRG);
-    #if CONFIG_NEW_TOKENS
-    ctx->pbi->token_graph = mmap_lkup(ctx, VP6_SEG_TOKEN_GRAPH);
-    #endif
     #if CONFIG_POSTPROC
     ctx->pbi->postproc.deblock.fragment_variances = mmap_lkup(ctx, VP6_SEG_DEBLOCKER);
     ctx->pbi->fb_storage_ptr[3] = mmap_lkup(ctx, VP6_SEG_PP_IMG_STRG);
@@ -225,11 +230,12 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx)
         res = vp8_mmap_alloc(&mmap);
 
         if (!res)
+        {
             vp8_init_ctx(ctx, &mmap);
 
-        ctx->priv->alg_priv->defer_alloc = 1;
-        /*post processing level initialized to do nothing */
-
+            ctx->priv->alg_priv->defer_alloc = 1;
+            /*post processing level initialized to do nothing */
+        }
     }
 
     return res;
@@ -254,15 +260,18 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
                                    unsigned int           data_sz,
                                    vpx_codec_stream_info_t *si)
 {
-
     vpx_codec_err_t res = VPX_CODEC_OK;
-    {
-        /*Parse from VP8 compressed data, the implies knowledge of the
-         *VP8 bitsteam.
-         * First 3 byte header including version, frame type and an offset
-         * Next 3 bytes are image sizewith 12 bit each for width and height
-         */
 
+    if(data + data_sz <= data)
+        res = VPX_CODEC_INVALID_PARAM;
+    else
+    {
+        /* Parse uncompresssed part of key frame header.
+         * 3 bytes:- including version, frame type and an offset
+         * 3 bytes:- sync code (0x9d, 0x01, 0x2a)
+         * 4 bytes:- including image width and height in the lowest 14 bits
+         *           of each 2-byte value.
+         */
         si->is_kf = 0;
 
         if (data_sz >= 10 && !(data[0] & 0x01))  /* I-Frame */
@@ -270,14 +279,14 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
             const uint8_t *c = data + 3;
             si->is_kf = 1;
 
-            // vet via sync code
+            /* vet via sync code */
             if (c[0] != 0x9d || c[1] != 0x01 || c[2] != 0x2a)
                 res = VPX_CODEC_UNSUP_BITSTREAM;
 
             si->w = swap2(*(const unsigned short *)(c + 3)) & 0x3fff;
             si->h = swap2(*(const unsigned short *)(c + 5)) & 0x3fff;
 
-            //printf("w=%d, h=%d\n", si->w, si->h);
+            /*printf("w=%d, h=%d\n", si->w, si->h);*/
             if (!(si->h | si->w))
                 res = VPX_CODEC_UNSUP_BITSTREAM;
         }
@@ -332,7 +341,10 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
 
     ctx->img_avail = 0;
 
-    /* Determine the stream parameters */
+    /* Determine the stream parameters. Note that we rely on peek_si to
+     * validate that we have a buffer that does not wrap around the top
+     * of the heap.
+     */
     if (!ctx->si.h)
         res = ctx->base.iface->dec.peek_si(data, data_sz, &ctx->si);
 
@@ -411,15 +423,27 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     {
         YV12_BUFFER_CONFIG sd;
         INT64 time_stamp = 0, time_end_stamp = 0;
-        int ppflag       = 0;
-        int ppdeblocking = 0;
-        int ppnoise      = 0;
+        vp8_ppflags_t flags = {0};
 
         if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)
         {
-            ppflag      = ctx->postproc_cfg.post_proc_flag;
-            ppdeblocking = ctx->postproc_cfg.deblocking_level;
-            ppnoise     = ctx->postproc_cfg.noise_level;
+            flags.post_proc_flag= ctx->postproc_cfg.post_proc_flag
+#if CONFIG_POSTPROC_VISUALIZER
+
+                                | ((ctx->dbg_color_ref_frame_flag != 0) ? VP8D_DEBUG_CLR_FRM_REF_BLKS : 0)
+                                | ((ctx->dbg_color_mb_modes_flag != 0) ? VP8D_DEBUG_CLR_BLK_MODES : 0)
+                                | ((ctx->dbg_color_b_modes_flag != 0) ? VP8D_DEBUG_CLR_BLK_MODES : 0)
+                                | ((ctx->dbg_display_mv_flag != 0) ? VP8D_DEBUG_DRAW_MV : 0)
+#endif
+                                ;
+            flags.deblocking_level      = ctx->postproc_cfg.deblocking_level;
+            flags.noise_level           = ctx->postproc_cfg.noise_level;
+#if CONFIG_POSTPROC_VISUALIZER
+            flags.display_ref_frame_flag= ctx->dbg_color_ref_frame_flag;
+            flags.display_mb_modes_flag = ctx->dbg_color_mb_modes_flag;
+            flags.display_b_modes_flag  = ctx->dbg_color_b_modes_flag;
+            flags.display_mv_flag       = ctx->dbg_display_mv_flag;
+#endif
         }
 
         if (vp8dx_receive_compressed_data(ctx->pbi, data_sz, data, deadline))
@@ -428,7 +452,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             res = update_error_state(ctx, &pbi->common.error);
         }
 
-        if (!res && 0 == vp8dx_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, ppdeblocking, ppnoise, ppflag))
+        if (!res && 0 == vp8dx_get_raw_frame(ctx->pbi, &sd, &time_stamp, &time_end_stamp, &flags))
         {
             /* Align width/height */
             unsigned int a_w = (sd.y_width + 15) & ~15;
@@ -529,7 +553,7 @@ static vpx_codec_err_t vp8_xma_set_mmap(vpx_codec_ctx_t         *ctx,
 
     done = 1;
 
-    if (ctx->priv->alg_priv)
+    if (!res && ctx->priv->alg_priv)
     {
         for (i = 0; i < NELEMENTS(vp8_mem_req_segs); i++)
         {
@@ -641,12 +665,38 @@ static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
 #endif
 }
 
+static vpx_codec_err_t vp8_set_dbg_options(vpx_codec_alg_priv_t *ctx,
+                                        int ctrl_id,
+                                        va_list args)
+{
+#if CONFIG_POSTPROC_VISUALIZER && CONFIG_POSTPROC
+    int data = va_arg(args, int);
+
+#define MAP(id, var) case id: var = data; break;
+
+    switch (ctrl_id)
+    {
+        MAP (VP8_SET_DBG_COLOR_REF_FRAME,   ctx->dbg_color_ref_frame_flag);
+        MAP (VP8_SET_DBG_COLOR_MB_MODES,    ctx->dbg_color_mb_modes_flag);
+        MAP (VP8_SET_DBG_COLOR_B_MODES,     ctx->dbg_color_b_modes_flag);
+        MAP (VP8_SET_DBG_DISPLAY_MV,        ctx->dbg_display_mv_flag);
+    }
+
+    return VPX_CODEC_OK;
+#else
+    return VPX_CODEC_INCAPABLE;
+#endif
+}
 
 vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
 {
-    {VP8_SET_REFERENCE,  vp8_set_reference},
-    {VP8_COPY_REFERENCE, vp8_get_reference},
-    {VP8_SET_POSTPROC,   vp8_set_postproc},
+    {VP8_SET_REFERENCE,             vp8_set_reference},
+    {VP8_COPY_REFERENCE,            vp8_get_reference},
+    {VP8_SET_POSTPROC,              vp8_set_postproc},
+    {VP8_SET_DBG_COLOR_REF_FRAME,   vp8_set_dbg_options},
+    {VP8_SET_DBG_COLOR_MB_MODES,    vp8_set_dbg_options},
+    {VP8_SET_DBG_COLOR_B_MODES,     vp8_set_dbg_options},
+    {VP8_SET_DBG_DISPLAY_MV,        vp8_set_dbg_options},
     { -1, NULL},
 };
 
@@ -654,9 +704,9 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
 #ifndef VERSION_STRING
 #define VERSION_STRING
 #endif
-vpx_codec_iface_t vpx_codec_vp8_dx_algo =
+CODEC_INTERFACE(vpx_codec_vp8_dx) =
 {
-    "vpx Technologies VP8 Decoder" VERSION_STRING,
+    "WebM Project VP8 Decoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC,
     /* vpx_codec_caps_t          caps; */
@@ -671,7 +721,14 @@ vpx_codec_iface_t vpx_codec_vp8_dx_algo =
         vp8_decode,       /* vpx_codec_decode_fn_t     decode; */
         vp8_get_frame,    /* vpx_codec_frame_get_fn_t  frame_get; */
     },
-    {NOT_IMPLEMENTED} /* encoder functions */
+    { /* encoder functions */
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED
+    }
 };
 
 /*
@@ -679,7 +736,7 @@ vpx_codec_iface_t vpx_codec_vp8_dx_algo =
  */
 vpx_codec_iface_t vpx_codec_vp8_algo =
 {
-    "vpx Technologies VP8 Decoder (Deprecated API)" VERSION_STRING,
+    "WebM Project VP8 Decoder (Deprecated API)" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
     VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC,
     /* vpx_codec_caps_t          caps; */
@@ -694,5 +751,12 @@ vpx_codec_iface_t vpx_codec_vp8_algo =
         vp8_decode,       /* vpx_codec_decode_fn_t     decode; */
         vp8_get_frame,    /* vpx_codec_frame_get_fn_t  frame_get; */
     },
-    {NOT_IMPLEMENTED} /* encoder functions */
+    { /* encoder functions */
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED,
+        NOT_IMPLEMENTED
+    }
 };

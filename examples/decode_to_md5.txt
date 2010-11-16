@@ -26,21 +26,21 @@ is processed, then U, then V. It is important to honor the image's `stride`
 values.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PROCESS_DX
 unsigned char  md5_sum[16];
-md5_ctx_t      md5;
+MD5Context     md5;
 int            i;
 
-md5_init(&md5);
+MD5Init(&md5);
 
 for(plane=0; plane < 3; plane++) {
     unsigned char *buf =img->planes[plane];
 
     for(y=0; y<img->d_h >> (plane?1:0); y++) {
-        md5_update(&md5, buf, img->d_w >> (plane?1:0));
+        MD5Update(&md5, buf, img->d_w >> (plane?1:0));
         buf += img->stride[plane];
     }
 }
 
-md5_finalize(&md5, md5_sum);
+MD5Final(md5_sum, &md5);
 for(i=0; i<16; i++)
     fprintf(outfile, "%02x",md5_sum[i]);
 fprintf(outfile, "  img-%dx%d-%04d.i420\n", img->d_w, img->d_h,

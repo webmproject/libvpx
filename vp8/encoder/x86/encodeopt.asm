@@ -1,15 +1,15 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
 %include "vpx_ports/x86_abi_support.asm"
-
 
 ;int vp8_block_error_xmm(short *coeff_ptr,  short *dcoef_ptr)
 global sym(vp8_block_error_xmm)
@@ -19,11 +19,9 @@ sym(vp8_block_error_xmm):
     SHADOW_ARGS_TO_STACK 2
     push rsi
     push rdi
-    ; end prolog
-
+    ; end prologue
 
         mov         rsi,        arg(0) ;coeff_ptr
-        pxor        xmm7,       xmm7
 
         mov         rdi,        arg(1) ;dcoef_ptr
         movdqa      xmm3,       [rsi]
@@ -32,33 +30,27 @@ sym(vp8_block_error_xmm):
         movdqa      xmm5,       [rsi+16]
 
         movdqa      xmm6,       [rdi+16]
-        pxor        xmm1,       xmm1    ; from movd xmm1, dc; dc=0
-
-        movdqa      xmm2,       xmm7
-        psubw       xmm5,       xmm6
-
-        por         xmm1,       xmm2
-        pmaddwd     xmm5,       xmm5
-
-        pcmpeqw     xmm1,       xmm7
         psubw       xmm3,       xmm4
 
-        pand        xmm1,       xmm3
-        pmaddwd     xmm1,       xmm1
+        psubw       xmm5,       xmm6
+        pmaddwd     xmm3,       xmm3
+        pmaddwd     xmm5,       xmm5
 
-        paddd       xmm1,       xmm5
-        movdqa      xmm0,       xmm1
+        paddd       xmm3,       xmm5
+
+        pxor        xmm7,       xmm7
+        movdqa      xmm0,       xmm3
 
         punpckldq   xmm0,       xmm7
-        punpckhdq   xmm1,       xmm7
+        punpckhdq   xmm3,       xmm7
 
-        paddd       xmm0,       xmm1
-        movdqa      xmm1,       xmm0
+        paddd       xmm0,       xmm3
+        movdqa      xmm3,       xmm0
 
         psrldq      xmm0,       8
-        paddd       xmm0,       xmm1
+        paddd       xmm0,       xmm3
 
-        movd        rax,        xmm0
+        movq        rax,        xmm0
 
     pop rdi
     pop rsi
@@ -66,7 +58,6 @@ sym(vp8_block_error_xmm):
     UNSHADOW_ARGS
     pop         rbp
     ret
-
 
 ;int vp8_block_error_mmx(short *coeff_ptr,  short *dcoef_ptr)
 global sym(vp8_block_error_mmx)
@@ -124,7 +115,7 @@ sym(vp8_block_error_mmx):
         psrlq       mm1,        32
         paddd       mm0,        mm1
 
-        movd        rax,        mm0
+        movq        rax,        mm0
 
     pop rdi
     pop rsi
@@ -201,7 +192,7 @@ mberror_loop_mmx:
         psrlq       mm2,        32
 
         paddd       mm0,        mm2
-        movd        rax,        mm0
+        movq        rax,        mm0
 
     pop rdi
     pop rsi
@@ -269,7 +260,7 @@ mberror_loop:
         psrldq      xmm0,       8
 
         paddd       xmm0,       xmm1
-        movd        rax,        xmm0
+        movq        rax,        xmm0
 
     pop rdi
     pop rsi
@@ -326,7 +317,7 @@ mbuverror_loop_mmx:
         psrlq           mm7,        32
 
         paddd           mm0,        mm7
-        movd            rax,        mm0
+        movq            rax,        mm0
 
     pop rdi
     pop rsi
@@ -383,7 +374,7 @@ mbuverror_loop:
         psrldq      xmm1,           8
         paddd       xmm1,           xmm2
 
-        movd            rax,            xmm1
+        movq            rax,            xmm1
 
     pop rdi
     pop rsi

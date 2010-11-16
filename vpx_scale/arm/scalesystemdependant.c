@@ -1,14 +1,16 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
 #include "vpx_ports/config.h"
+#include "vpx_ports/arm.h"
 #include "vpx_scale/vpxscale.h"
 
 
@@ -46,6 +48,9 @@ extern void vp8_yv12_copy_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CO
  ****************************************************************************/
 void vp8_scale_machine_specific_config()
 {
+#if HAVE_ARMV7 && CONFIG_RUNTIME_CPU_DETECT
+    int flags;
+#endif
     /*
     vp8_horizontal_line_1_2_scale        = horizontal_line_1_2_scale_armv4;
     vp8_vertical_band_1_2_scale          = vertical_band_1_2_scale_armv4;
@@ -72,14 +77,20 @@ void vp8_scale_machine_specific_config()
     vp8_horizontal_line_5_4_scale         = vp8cx_horizontal_line_5_4_scale_c;
     */
 
-#if HAVE_ARMV7
-    vp8_yv12_extend_frame_borders_ptr      = vp8_yv12_extend_frame_borders_neon;
-    vp8_yv12_copy_frame_yonly_ptr          = vp8_yv12_copy_frame_yonly_neon;
-    vp8_yv12_copy_frame_ptr               = vp8_yv12_copy_frame_neon;
-#else
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
     vp8_yv12_extend_frame_borders_ptr      = vp8_yv12_extend_frame_borders;
     vp8_yv12_copy_frame_yonly_ptr          = vp8_yv12_copy_frame_yonly;
     vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame;
 #endif
-
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+    flags = arm_cpu_caps();
+    if (flags & HAS_NEON)
+#endif
+    {
+        vp8_yv12_extend_frame_borders_ptr = vp8_yv12_extend_frame_borders_neon;
+        vp8_yv12_copy_frame_yonly_ptr     = vp8_yv12_copy_frame_yonly_neon;
+        vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame_neon;
+    }
+#endif
 }

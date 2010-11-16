@@ -1,10 +1,11 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
@@ -16,6 +17,7 @@ sym(vp8_short_inv_walsh4x4_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 2
+    SAVE_XMM
     push        rsi
     push        rdi
     ; end prolog
@@ -100,6 +102,7 @@ sym(vp8_short_inv_walsh4x4_sse2):
     ; begin epilog
     pop rdi
     pop rsi
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret

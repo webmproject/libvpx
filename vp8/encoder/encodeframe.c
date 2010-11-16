@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -16,7 +17,7 @@
 #include "extend.h"
 #include "entropymode.h"
 #include "quant_common.h"
-#include "segmentation_common.h"
+#include "segmentation.h"
 #include "setupintrarecon.h"
 #include "encodeintra.h"
 #include "reconinter.h"
@@ -67,10 +68,8 @@ unsigned int uv_modes[4]  = {0, 0, 0, 0};
 unsigned int b_modes[14]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
-// The first four entries are dummy values
 static const int qrounding_factors[129] =
 {
-    56, 56, 56, 56, 56, 56, 56, 56,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
@@ -86,12 +85,18 @@ static const int qrounding_factors[129] =
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
     48, 48, 48, 48, 48, 48, 48, 48,
-    48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48
 };
 
 static const int qzbin_factors[129] =
 {
-    64, 64, 64, 64, 80, 80, 80, 80,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
@@ -102,17 +107,76 @@ static const int qzbin_factors[129] =
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
     80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80, 80, 80, 80, 80, 80, 80, 80,
-    80,
+    80
 };
+
+static const int qrounding_factors_y2[129] =
+{
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48, 48, 48, 48, 48, 48, 48, 48,
+    48
+};
+
+static const int qzbin_factors_y2[129] =
+{
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    84, 84, 84, 84, 84, 84, 84, 84,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80, 80, 80, 80, 80, 80, 80, 80,
+    80
+};
+
+#define EXACT_QUANT
+#ifdef EXACT_QUANT
+static void vp8cx_invert_quant(int improved_quant, short *quant,
+                               short *shift, short d)
+{
+    if(improved_quant)
+    {
+        unsigned t;
+        int l;
+        t = d;
+        for(l = 0; t > 1; l++)
+            t>>=1;
+        t = 1 + (1<<(16+l))/d;
+        *quant = (short)(t - (1<<16));
+        *shift = l;
+    }
+    else
+    {
+        *quant = (1 << 16) / d;
+        *shift = 0;
+    }
+}
 
 void vp8cx_init_quantizer(VP8_COMP *cpi)
 {
-    int r, c;
     int i;
     int quant_val;
     int Q;
@@ -123,63 +187,127 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
     {
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
-        cpi->Y1quant[Q][0][0] = (1 << 16) / quant_val;
-        cpi->Y1zbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-        cpi->Y1round[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
-        cpi->common.Y1dequant[Q][0][0] = quant_val;
+        vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y1quant[Q] + 0,
+                           cpi->Y1quant_shift[Q] + 0, quant_val);
+        cpi->Y1zbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+        cpi->Y1round[Q][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->common.Y1dequant[Q][0] = quant_val;
         cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
         quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
-        cpi->Y2quant[Q][0][0] = (1 << 16) / quant_val;
-        cpi->Y2zbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-        cpi->Y2round[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
-        cpi->common.Y2dequant[Q][0][0] = quant_val;
+        vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y2quant[Q] + 0,
+                           cpi->Y2quant_shift[Q] + 0, quant_val);
+        cpi->Y2zbin[Q][0] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+        cpi->Y2round[Q][0] = (qrounding_factors_y2[Q] * quant_val) >> 7;
+        cpi->common.Y2dequant[Q][0] = quant_val;
         cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
         quant_val = vp8_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
-        cpi->UVquant[Q][0][0] = (1 << 16) / quant_val;
-        cpi->UVzbin[Q][0][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;;
-        cpi->UVround[Q][0][0] = (qrounding_factors[Q] * quant_val) >> 7;
-        cpi->common.UVdequant[Q][0][0] = quant_val;
+        vp8cx_invert_quant(cpi->sf.improved_quant, cpi->UVquant[Q] + 0,
+                           cpi->UVquant_shift[Q] + 0, quant_val);
+        cpi->UVzbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;;
+        cpi->UVround[Q][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->common.UVdequant[Q][0] = quant_val;
         cpi->zrun_zbin_boost_uv[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
         // all the ac values = ;
         for (i = 1; i < 16; i++)
         {
             int rc = vp8_default_zig_zag1d[i];
-            r = (rc >> 2);
-            c = (rc & 3);
 
             quant_val = vp8_ac_yquant(Q);
-            cpi->Y1quant[Q][r][c] = (1 << 16) / quant_val;
-            cpi->Y1zbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-            cpi->Y1round[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
-            cpi->common.Y1dequant[Q][r][c] = quant_val;
+            vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y1quant[Q] + rc,
+                               cpi->Y1quant_shift[Q] + rc, quant_val);
+            cpi->Y1zbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+            cpi->Y1round[Q][rc] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->common.Y1dequant[Q][rc] = quant_val;
             cpi->zrun_zbin_boost_y1[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 
             quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
-            cpi->Y2quant[Q][r][c] = (1 << 16) / quant_val;
-            cpi->Y2zbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-            cpi->Y2round[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
-            cpi->common.Y2dequant[Q][r][c] = quant_val;
+            vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y2quant[Q] + rc,
+                               cpi->Y2quant_shift[Q] + rc, quant_val);
+            cpi->Y2zbin[Q][rc] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+            cpi->Y2round[Q][rc] = (qrounding_factors_y2[Q] * quant_val) >> 7;
+            cpi->common.Y2dequant[Q][rc] = quant_val;
             cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 
             quant_val = vp8_ac_uv_quant(Q, cpi->common.uvac_delta_q);
-            cpi->UVquant[Q][r][c] = (1 << 16) / quant_val;
-            cpi->UVzbin[Q][r][c] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
-            cpi->UVround[Q][r][c] = (qrounding_factors[Q] * quant_val) >> 7;
-            cpi->common.UVdequant[Q][r][c] = quant_val;
+            vp8cx_invert_quant(cpi->sf.improved_quant, cpi->UVquant[Q] + rc,
+                               cpi->UVquant_shift[Q] + rc, quant_val);
+            cpi->UVzbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+            cpi->UVround[Q][rc] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->common.UVdequant[Q][rc] = quant_val;
             cpi->zrun_zbin_boost_uv[Q][i] = (quant_val * zbin_boost[i]) >> 7;
         }
     }
 }
+#else
+void vp8cx_init_quantizer(VP8_COMP *cpi)
+{
+    int i;
+    int quant_val;
+    int Q;
 
+    int zbin_boost[16] = {0, 0, 8, 10, 12, 14, 16, 20, 24, 28, 32, 36, 40, 44, 44, 44};
+
+    for (Q = 0; Q < QINDEX_RANGE; Q++)
+    {
+        // dc values
+        quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
+        cpi->Y1quant[Q][0] = (1 << 16) / quant_val;
+        cpi->Y1zbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+        cpi->Y1round[Q][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->common.Y1dequant[Q][0] = quant_val;
+        cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+
+        quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
+        cpi->Y2quant[Q][0] = (1 << 16) / quant_val;
+        cpi->Y2zbin[Q][0] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+        cpi->Y2round[Q][0] = (qrounding_factors_y2[Q] * quant_val) >> 7;
+        cpi->common.Y2dequant[Q][0] = quant_val;
+        cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+
+        quant_val = vp8_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
+        cpi->UVquant[Q][0] = (1 << 16) / quant_val;
+        cpi->UVzbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;;
+        cpi->UVround[Q][0] = (qrounding_factors[Q] * quant_val) >> 7;
+        cpi->common.UVdequant[Q][0] = quant_val;
+        cpi->zrun_zbin_boost_uv[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+
+        // all the ac values = ;
+        for (i = 1; i < 16; i++)
+        {
+            int rc = vp8_default_zig_zag1d[i];
+
+            quant_val = vp8_ac_yquant(Q);
+            cpi->Y1quant[Q][rc] = (1 << 16) / quant_val;
+            cpi->Y1zbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+            cpi->Y1round[Q][rc] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->common.Y1dequant[Q][rc] = quant_val;
+            cpi->zrun_zbin_boost_y1[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+
+            quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
+            cpi->Y2quant[Q][rc] = (1 << 16) / quant_val;
+            cpi->Y2zbin[Q][rc] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
+            cpi->Y2round[Q][rc] = (qrounding_factors_y2[Q] * quant_val) >> 7;
+            cpi->common.Y2dequant[Q][rc] = quant_val;
+            cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+
+            quant_val = vp8_ac_uv_quant(Q, cpi->common.uvac_delta_q);
+            cpi->UVquant[Q][rc] = (1 << 16) / quant_val;
+            cpi->UVzbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
+            cpi->UVround[Q][rc] = (qrounding_factors[Q] * quant_val) >> 7;
+            cpi->common.UVdequant[Q][rc] = quant_val;
+            cpi->zrun_zbin_boost_uv[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+        }
+    }
+}
+#endif
 void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
 {
     int i;
     int QIndex;
     MACROBLOCKD *xd = &x->e_mbd;
-    MB_MODE_INFO *mbmi = &xd->mbmi;
     int zbin_extra;
 
     // Select the baseline MB Q index.
@@ -187,12 +315,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     {
         // Abs Value
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
-            QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
 
+            QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
         // Delta Value
         else
         {
-            QIndex = cpi->common.base_qindex + xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
+            QIndex = cpi->common.base_qindex + xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    // Clamp to valid range
         }
     }
@@ -200,11 +328,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         QIndex = cpi->common.base_qindex;
 
     // Y
-    zbin_extra = (cpi->common.Y1dequant[QIndex][0][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = (cpi->common.Y1dequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
 
     for (i = 0; i < 16; i++)
     {
         x->block[i].quant = cpi->Y1quant[QIndex];
+        x->block[i].quant_shift = cpi->Y1quant_shift[QIndex];
         x->block[i].zbin = cpi->Y1zbin[QIndex];
         x->block[i].round = cpi->Y1round[QIndex];
         x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
@@ -213,11 +342,12 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     }
 
     // UV
-    zbin_extra = (cpi->common.UVdequant[QIndex][0][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = (cpi->common.UVdequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
 
     for (i = 16; i < 24; i++)
     {
         x->block[i].quant = cpi->UVquant[QIndex];
+        x->block[i].quant_shift = cpi->UVquant_shift[QIndex];
         x->block[i].zbin = cpi->UVzbin[QIndex];
         x->block[i].round = cpi->UVround[QIndex];
         x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
@@ -226,8 +356,9 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     }
 
     // Y2
-    zbin_extra = (cpi->common.Y2dequant[QIndex][0][1] * ((cpi->zbin_over_quant / 2) + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = (cpi->common.Y2dequant[QIndex][1] * ((cpi->zbin_over_quant / 2) + cpi->zbin_mode_boost)) >> 7;
     x->block[24].quant = cpi->Y2quant[QIndex];
+    x->block[24].quant_shift = cpi->Y2quant_shift[QIndex];
     x->block[24].zbin = cpi->Y2zbin[QIndex];
     x->block[24].round = cpi->Y2round[QIndex];
     x->e_mbd.block[24].dequant = cpi->common.Y2dequant[QIndex];
@@ -237,6 +368,9 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
 
 void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
 {
+    // Clear Zbin mode boost for default case
+    cpi->zbin_mode_boost = 0;
+
     // vp8cx_init_quantizer() is first called in vp8_create_compressor(). A check is added here so that vp8cx_init_quantizer() is only called
     // when these values are not all zero.
     if (cpi->common.y1dc_delta_q | cpi->common.y2dc_delta_q | cpi->common.uvdc_delta_q | cpi->common.y2ac_delta_q | cpi->common.uvac_delta_q)
@@ -263,18 +397,17 @@ void encode_mb_row(VP8_COMP *cpi,
     int i;
     int recon_yoffset, recon_uvoffset;
     int mb_col;
-    int recon_y_stride = cm->last_frame.y_stride;
-    int recon_uv_stride = cm->last_frame.uv_stride;
+    int ref_fb_idx = cm->lst_fb_idx;
+    int dst_fb_idx = cm->new_fb_idx;
+    int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
+    int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int seg_map_index = (mb_row * cpi->common.mb_cols);
 #if CONFIG_SEGMENTATION
     int left_id, above_id;
     int sum;
 #endif
     // reset above block coeffs
-    xd->above_context[Y1CONTEXT] = cm->above_context[Y1CONTEXT];
-    xd->above_context[UCONTEXT ] = cm->above_context[UCONTEXT ];
-    xd->above_context[VCONTEXT ] = cm->above_context[VCONTEXT ];
-    xd->above_context[Y2CONTEXT] = cm->above_context[Y2CONTEXT];
+    xd->above_context = cm->above_context;
 
     xd->up_available = (mb_row != 0);
     recon_yoffset = (mb_row * recon_y_stride * 16);
@@ -283,25 +416,35 @@ void encode_mb_row(VP8_COMP *cpi,
     cpi->tplist[mb_row].start = *tp;
     //printf("Main mb_row = %d\n", mb_row);
 
+    // Distance of Mb to the top & bottom edges, specified in 1/8th pel
+    // units as they are always compared to values that are in 1/8th pel units
+    xd->mb_to_top_edge = -((mb_row * 16) << 3);
+    xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
+
+    // Set up limit values for vertical motion vector components
+    // to prevent them extending beyond the UMV borders
+    x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
+    x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
+                        + (VP8BORDERINPIXELS - 16);
+
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {
-        // Distance of Mb to the various image edges.
-        // These specified to 8th pel as they are always compared to values that are in 1/8th pel units
+        // Distance of Mb to the left & right edges, specified in
+        // 1/8th pel units as they are always compared to values
+        // that are in 1/8th pel units
         xd->mb_to_left_edge = -((mb_col * 16) << 3);
         xd->mb_to_right_edge = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
-        xd->mb_to_top_edge = -((mb_row * 16) << 3);
-        xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
 
-        // Set up limit values for motion vectors used to prevent them extending outside the UMV borders
+        // Set up limit values for horizontal motion vector components
+        // to prevent them extending beyond the UMV borders
         x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + (VP8BORDERINPIXELS - 16);
-        x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
+        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16)
+                            + (VP8BORDERINPIXELS - 16);
 
-        xd->dst.y_buffer = cm->new_frame.y_buffer + recon_yoffset;
-        xd->dst.u_buffer = cm->new_frame.u_buffer + recon_uvoffset;
-        xd->dst.v_buffer = cm->new_frame.v_buffer + recon_uvoffset;
+        xd->dst.y_buffer = cm->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+        xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+        xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
         xd->left_available = (mb_col != 0);
 
         // Is segmentation enabled
@@ -310,15 +453,15 @@ void encode_mb_row(VP8_COMP *cpi,
         {
             // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
             if (cpi->segmentation_map[seg_map_index+mb_col] <= 3)
-                xd->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
+                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
             else
-                xd->mbmi.segment_id = 0;
+                xd->mode_info_context->mbmi.segment_id = 0;
 
             vp8cx_mb_init_quantizer(cpi, x);
 
         }
         else
-            xd->mbmi.segment_id = 0;         // Set to Segment 0 by default
+            xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
 
         x->active_ptr = cpi->active_map + seg_map_index + mb_col;
 
@@ -342,14 +485,14 @@ void encode_mb_row(VP8_COMP *cpi,
 
                 for (b = 0; b < xd->mbmi.partition_count; b++)
                 {
-                    inter_b_modes[xd->mbmi.partition_bmi[b].mode] ++;
+                    inter_b_modes[x->partition->bmi[b].mode] ++;
                 }
             }
 
 #endif
 
             // Count of last ref frame 0,0 useage
-            if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
+            if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 cpi->inter_zz_count ++;
 
             // Special case code for cyclic refresh
@@ -357,14 +500,14 @@ void encode_mb_row(VP8_COMP *cpi,
             // during vp8cx_encode_inter_macroblock()) back into the global sgmentation map
             if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
             {
-                cpi->segmentation_map[seg_map_index+mb_col] = xd->mbmi.segment_id;
+                cpi->segmentation_map[seg_map_index+mb_col] = xd->mode_info_context->mbmi.segment_id;
 
                 // If the block has been refreshed mark it as clean (the magnitude of the -ve influences how long it will be before we consider another refresh):
                 // Else if it was coded (last frame 0,0) and has not already been refreshed then mark it as a candidate for cleanup next time (marked 0)
                 // else mark it as dirty (1).
-                if (xd->mbmi.segment_id)
+                if (xd->mode_info_context->mbmi.segment_id)
                     cpi->cyclic_refresh_map[seg_map_index+mb_col] = -1;
-                else if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
+                else if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 {
                     if (cpi->cyclic_refresh_map[seg_map_index+mb_col] == 1)
                         cpi->cyclic_refresh_map[seg_map_index+mb_col] = 0;
@@ -377,15 +520,12 @@ void encode_mb_row(VP8_COMP *cpi,
 
         cpi->tplist[mb_row].stop = *tp;
 
-        xd->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
+        x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
 
-        if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame == LAST_FRAME))
-            xd->mbmi.segment_id = 0;
+        if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
+            xd->mode_info_context->mbmi.segment_id = 0;
         else
-            xd->mbmi.segment_id = 1;
-
-        // store macroblock mode info into context array
-        vpx_memcpy(&xd->mode_info_context->mbmi, &xd->mbmi, sizeof(xd->mbmi));
+            xd->mode_info_context->mbmi.segment_id = 1;
 
         for (i = 0; i < 16; i++)
             vpx_memcpy(&xd->mode_info_context->bmi[i], &xd->block[i].bmi, sizeof(xd->block[i].bmi));
@@ -412,7 +552,7 @@ void encode_mb_row(VP8_COMP *cpi,
             if (mb_row != 0)
                 sum += (xd->mode_info_context-cm->mb_cols)->mbmi.segment_flag;
 
-            if (xd->mbmi.segment_id == cpi->segmentation_map[(mb_row*cm->mb_cols) + mb_col])
+            if (xd->mode_info_context->mbmi.segment_id == cpi->segmentation_map[(mb_row*cm->mb_cols) + mb_col])
                 xd->mode_info_context->mbmi.segment_flag = 0;
             else
                 xd->mode_info_context->mbmi.segment_flag = 1;
@@ -430,29 +570,28 @@ void encode_mb_row(VP8_COMP *cpi,
                 segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
             }
         }
-        segment_counts[SEEK_SEGID + xd->mbmi.segment_id] ++;
+        segment_counts[SEEK_SEGID + xd->mode_info_context->mbmi.segment_id] ++;
 #else
         segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
 #endif
         // skip to next mb
         xd->mode_info_context++;
+        x->partition_info++;
 
-        xd->above_context[Y1CONTEXT] += 4;
-        xd->above_context[UCONTEXT ] += 2;
-        xd->above_context[VCONTEXT ] += 2;
-        xd->above_context[Y2CONTEXT] ++;
+        xd->above_context++;
         cpi->current_mb_col_main = mb_col;
     }
 
     //extend the recon for intra prediction
     vp8_extend_mb_row(
-        &cm->new_frame,
+        &cm->yv12_fb[dst_fb_idx],
         xd->dst.y_buffer + 16,
         xd->dst.u_buffer + 8,
         xd->dst.v_buffer + 8);
 
     // this is to account for the border
     xd->mode_info_context++;
+    x->partition_info++;
 }
 
 void vp8_encode_frame(VP8_COMP *cpi)
@@ -473,32 +612,31 @@ void vp8_encode_frame(VP8_COMP *cpi)
 #endif
     int totalrate;
 
-    if (cm->frame_type != KEY_FRAME)
+    // Functions setup for all frame types so we can use MC in AltRef
+    if (cm->mcomp_filter_type == SIXTAP)
     {
-        if (cm->mcomp_filter_type == SIXTAP)
-        {
-            xd->subpixel_predict     = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap4x4);
-            xd->subpixel_predict8x4      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap8x4);
-            xd->subpixel_predict8x8      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap8x8);
-            xd->subpixel_predict16x16    = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, sixtap16x16);
-        }
-        else
-        {
-            xd->subpixel_predict     = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear4x4);
-            xd->subpixel_predict8x4      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear8x4);
-            xd->subpixel_predict8x8      = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear8x8);
-            xd->subpixel_predict16x16    = SUBPIX_INVOKE(&cpi->common.rtcd.subpix, bilinear16x16);
-        }
+        xd->subpixel_predict        = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap4x4);
+        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap8x4);
+        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap8x8);
+        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap16x16);
+    }
+    else
+    {
+        xd->subpixel_predict        = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, bilinear4x4);
+        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, bilinear8x4);
+        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, bilinear8x8);
+        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
+                                      &cpi->common.rtcd.subpix, bilinear16x16);
     }
 
-    //else  // Key Frame
-    //{
-    // For key frames make sure the intra ref frame probability value
-    // is set to "all intra"
-    //cpi->prob_intra_coded = 255;
-    //}
-
-    xd->gf_active_ptr = (signed char *)cm->gf_active_flags;     // Point to base of GF active flags data structure
+    x->gf_active_ptr = (signed char *)cpi->gf_active_flags;     // Point to base of GF active flags data structure
 
     x->vector_range = 32;
 
@@ -523,7 +661,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     totalrate = 0;
 
-    xd->mode_info = cm->mi - 1;
+    x->partition_info = x->pi;
 
     xd->mode_info_context = cm->mi;
     xd->mode_info_stride = cm->mode_info_stride;
@@ -559,12 +697,12 @@ void vp8_encode_frame(VP8_COMP *cpi)
     // Copy data over into macro block data sturctures.
 
     x->src = * cpi->Source;
-    xd->pre = cm->last_frame;
-    xd->dst = cm->new_frame;
+    xd->pre = cm->yv12_fb[cm->lst_fb_idx];
+    xd->dst = cm->yv12_fb[cm->new_fb_idx];
 
     // set up frame new frame for intra coded blocks
 
-    vp8_setup_intra_recon(&cm->new_frame);
+    vp8_setup_intra_recon(&cm->yv12_fb[cm->new_fb_idx]);
 
     vp8_build_block_offsets(x);
 
@@ -589,10 +727,10 @@ void vp8_encode_frame(VP8_COMP *cpi)
     //x->rdmult = (int)(cpi->RDMULT * pow( (cpi->rate_correction_factor * 2.0), 0.75 ));
 #endif
 
-    xd->mbmi.mode = DC_PRED;
-    xd->mbmi.uv_mode = DC_PRED;
+    xd->mode_info_context->mbmi.mode = DC_PRED;
+    xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 
-    xd->left_context = cm->left_context;
+    xd->left_context = &cm->left_context;
 
     vp8_zero(cpi->count_mb_ref_frame_usage)
     vp8_zero(cpi->ymode_count)
@@ -600,17 +738,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     x->mvc = cm->fc.mvc;
 
-    // vp8_zero( entropy_stats)
-    {
-        ENTROPY_CONTEXT **p = cm->above_context;
-        const size_t L = cm->mb_cols;
-
-        vp8_zero_array(p [Y1CONTEXT], L * 4)
-        vp8_zero_array(p [ UCONTEXT], L * 2)
-        vp8_zero_array(p [ VCONTEXT], L * 2)
-        vp8_zero_array(p [Y2CONTEXT], L)
-    }
-
+    vpx_memset(cm->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
     {
         struct vpx_usec_timer  emr_timer;
@@ -669,6 +797,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 x->src.v_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
 
                 xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
+                x->partition_info  += xd->mode_info_stride * cpi->encoding_thread_count;
 
                 if (mb_row < cm->mb_rows - 1)
                     //WaitForSingleObject(cpi->h_event_main, INFINITE);
@@ -1029,8 +1158,8 @@ void vp8_build_block_offsets(MACROBLOCK *x)
 static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 {
     const MACROBLOCKD *xd = & x->e_mbd;
-    const MB_PREDICTION_MODE m = xd->mbmi.mode;
-    const MB_PREDICTION_MODE uvm = xd->mbmi.uv_mode;
+    const MB_PREDICTION_MODE m = xd->mode_info_context->mbmi.mode;
+    const MB_PREDICTION_MODE uvm = xd->mode_info_context->mbmi.uv_mode;
 
 #ifdef MODE_STATS
     const int is_key = cpi->common.frame_type == KEY_FRAME;
@@ -1068,7 +1197,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
     int rateuv_tokenonly = 0;
     int i;
 
-    x->e_mbd.mbmi.ref_frame = INTRA_FRAME;
+    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
 #if !(CONFIG_REALTIME_ONLY)
 
@@ -1084,15 +1213,13 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
         error_uv = vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
 
-        x->e_mbd.mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
-
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
         rate += rateuv;
 
         if (Error4x4 < Error16x16)
         {
             rate += rate4x4;
-            x->e_mbd.mbmi.mode = B_PRED;
+            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
 
             // get back the intra block modes
             for (i = 0; i < 16; i++)
@@ -1132,7 +1259,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
         for (mode = DC_PRED; mode <= TM_PRED; mode ++)
         {
-            x->e_mbd.mbmi.mode = mode;
+            x->e_mbd.mode_info_context->mbmi.mode = mode;
             vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
             distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
             rate2  = x->mbmode_cost[x->e_mbd.frame_type][mode];
@@ -1152,17 +1279,15 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         else
             Error4x4 = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
 
-        x->e_mbd.mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
-
         if (Error4x4 < Error16x16)
         {
-            x->e_mbd.mbmi.mode = B_PRED;
+            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
             cpi->prediction_error += Error4x4;
         }
         else
         {
-            x->e_mbd.mbmi.mode = best_mode;
+            x->e_mbd.mode_info_context->mbmi.mode = best_mode;
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
             cpi->prediction_error += Error16x16;
         }
@@ -1179,7 +1304,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 extern int cnt_pm;
 #endif
 
-extern void vp8_fix_contexts(VP8_COMP *cpi, MACROBLOCKD *x);
+extern void vp8_fix_contexts(MACROBLOCKD *x);
 
 int vp8cx_encode_inter_macroblock
 (
@@ -1196,7 +1321,7 @@ int vp8cx_encode_inter_macroblock
     x->skip = 0;
 
     if (xd->segmentation_enabled)
-        x->encode_breakout = cpi->segment_encode_breakout[xd->mbmi.segment_id];
+        x->encode_breakout = cpi->segment_encode_breakout[xd->mode_info_context->mbmi.segment_id];
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
@@ -1227,34 +1352,46 @@ int vp8cx_encode_inter_macroblock
         if (cpi->cyclic_refresh_mode_enabled)
         {
             // Clear segment_id back to 0 if not coded (last frame 0,0)
-            if ((xd->mbmi.segment_id == 1) &&
-                ((xd->mbmi.ref_frame != LAST_FRAME) || (xd->mbmi.mode != ZEROMV)))
+            if ((xd->mode_info_context->mbmi.segment_id == 1) &&
+                ((xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) || (xd->mode_info_context->mbmi.mode != ZEROMV)))
             {
-                xd->mbmi.segment_id = 0;
+                xd->mode_info_context->mbmi.segment_id = 0;
             }
         }
 
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)
         {
-            if ((xd->mbmi.mode == ZEROMV) && (xd->mbmi.ref_frame != LAST_FRAME))
-                cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
+            if ( xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME )
+                 cpi->zbin_mode_boost = 0;
             else
-                cpi->zbin_mode_boost = 0;
+            {
+                if (xd->mode_info_context->mbmi.mode == ZEROMV)
+                {
+                    if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME)
+                        cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
+                    else
+                        cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
+                }
+                else if (xd->mode_info_context->mbmi.mode == SPLITMV)
+                    cpi->zbin_mode_boost = 0;
+                else
+                    cpi->zbin_mode_boost = MV_ZBIN_BOOST;
+            }
         }
+        else
+            cpi->zbin_mode_boost = 0;
 
         vp8cx_mb_init_quantizer(cpi,  x);
     }
 
-    cpi->count_mb_ref_frame_usage[xd->mbmi.ref_frame] ++;
+    cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
 
-    if (xd->mbmi.ref_frame == INTRA_FRAME)
+    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        x->e_mbd.mbmi.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
-
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
 
-        if (xd->mbmi.mode == B_PRED)
+        if (xd->mode_info_context->mbmi.mode == B_PRED)
         {
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
         }
@@ -1270,36 +1407,25 @@ int vp8cx_encode_inter_macroblock
         MV best_ref_mv;
         MV nearest, nearby;
         int mdcounts[4];
+        int ref_fb_idx;
 
         vp8_find_near_mvs(xd, xd->mode_info_context,
-                          &nearest, &nearby, &best_ref_mv, mdcounts, xd->mbmi.ref_frame, cpi->common.ref_frame_sign_bias);
+                          &nearest, &nearby, &best_ref_mv, mdcounts, xd->mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias);
 
         vp8_build_uvmvs(xd, cpi->common.full_pixel);
 
-        // store motion vectors in our motion vector list
-        if (xd->mbmi.ref_frame == LAST_FRAME)
-        {
-            // Set up pointers for this macro block into the previous frame recon buffer
-            xd->pre.y_buffer = cpi->common.last_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = cpi->common.last_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = cpi->common.last_frame.v_buffer + recon_uvoffset;
-        }
-        else if (xd->mbmi.ref_frame == GOLDEN_FRAME)
-        {
-            // Set up pointers for this macro block into the golden frame recon buffer
-            xd->pre.y_buffer = cpi->common.golden_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = cpi->common.golden_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = cpi->common.golden_frame.v_buffer + recon_uvoffset;
-        }
+        if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
+            ref_fb_idx = cpi->common.lst_fb_idx;
+        else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
+            ref_fb_idx = cpi->common.gld_fb_idx;
         else
-        {
-            // Set up pointers for this macro block into the alternate reference frame recon buffer
-            xd->pre.y_buffer = cpi->common.alt_ref_frame.y_buffer + recon_yoffset;
-            xd->pre.u_buffer = cpi->common.alt_ref_frame.u_buffer + recon_uvoffset;
-            xd->pre.v_buffer = cpi->common.alt_ref_frame.v_buffer + recon_uvoffset;
-        }
+            ref_fb_idx = cpi->common.alt_fb_idx;
 
-        if (xd->mbmi.mode == SPLITMV)
+        xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
+        xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
+        xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
+
+        if (xd->mode_info_context->mbmi.mode == SPLITMV)
         {
             int i;
 
@@ -1312,19 +1438,19 @@ int vp8cx_encode_inter_macroblock
                 }
             }
         }
-        else if (xd->mbmi.mode == NEWMV)
+        else if (xd->mode_info_context->mbmi.mode == NEWMV)
         {
             cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv.row) >> 1)]++;
             cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv.col) >> 1)]++;
         }
 
-        if (!x->skip && !x->e_mbd.mbmi.force_no_skip)
+        if (!x->skip && !x->e_mbd.mode_info_context->mbmi.force_no_skip)
         {
             vp8_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
 
             // Clear mb_skip_coeff if mb_no_coeff_skip is not set
             if (!cpi->common.mb_no_coeff_skip)
-                xd->mbmi.mb_skip_coeff = 0;
+                xd->mode_info_context->mbmi.mb_skip_coeff = 0;
 
         }
         else
@@ -1337,19 +1463,19 @@ int vp8cx_encode_inter_macroblock
     {
         if (cpi->common.mb_no_coeff_skip)
         {
-            if (xd->mbmi.mode != B_PRED && xd->mbmi.mode != SPLITMV)
-                xd->mbmi.dc_diff = 0;
+            if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
+                xd->mode_info_context->mbmi.dc_diff = 0;
             else
-                xd->mbmi.dc_diff = 1;
+                xd->mode_info_context->mbmi.dc_diff = 1;
 
-            xd->mbmi.mb_skip_coeff = 1;
+            xd->mode_info_context->mbmi.mb_skip_coeff = 1;
             cpi->skip_true_count ++;
-            vp8_fix_contexts(cpi, xd);
+            vp8_fix_contexts(xd);
         }
         else
         {
             vp8_stuff_mb(cpi, xd, t);
-            xd->mbmi.mb_skip_coeff = 0;
+            xd->mode_info_context->mbmi.mb_skip_coeff = 0;
             cpi->skip_false_count ++;
         }
     }

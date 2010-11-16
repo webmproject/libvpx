@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -61,7 +62,7 @@ extern "C" {
     /*!\brief Decorator indicating a function is potentially unused */
 #ifdef UNUSED
 #elif __GNUC__
-#define UNUSED __attribute__ ((unused));
+#define UNUSED __attribute__ ((unused))
 #else
 #define UNUSED
 #endif
@@ -127,7 +128,7 @@ extern "C" {
         /*!\brief An iterator reached the end of list.
          *
          */
-        VPX_CODEC_LIST_END,
+        VPX_CODEC_LIST_END
 
     }
     vpx_codec_err_t;

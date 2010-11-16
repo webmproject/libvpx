@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -793,7 +794,8 @@ static void write_mv_ref
 
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
 
-    vp8_write_token(w, vp8_mv_ref_tree, p, VP8_MVREFENCODINGS + m);
+    vp8_write_token(w, vp8_mv_ref_tree, p,
+                    vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
 
 static void write_sub_mv_ref
@@ -803,7 +805,8 @@ static void write_sub_mv_ref
 {
     assert(LEFT4X4 <= m  &&  m <= NEW4X4);
 
-    vp8_write_token(w, vp8_sub_mv_ref_tree, p, VP8_SUBMVREFENCODINGS + m);
+    vp8_write_token(w, vp8_sub_mv_ref_tree, p,
+                    vp8_sub_mv_ref_encoding_array - LEFT4X4 + m);
 }
 
 static void write_mv
@@ -881,6 +884,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int prob_gf_coded;
     int prob_skip_false = 0;
     ms = pc->mi - 1;
+
+    cpi->mb.partition_info = cpi->mb.pi;
 
     // Calculate the probabilities to be used to code the reference frame based on actual useage this frame
     if (!(cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter)))
@@ -1065,7 +1070,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                     do
                     {
-                        const B_MODE_INFO *const b = mi->partition_bmi + j;
+                        const B_MODE_INFO *const b = cpi->mb.partition_info->bmi + j;
                         const int *const  L = vp8_mbsplits [mi->partitioning];
                         int k = -1;  /* first block in subset j */
                         int mv_contz;
@@ -1087,7 +1092,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                             write_mv(w, &b->mv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
                         }
                     }
-                    while (++j < mi->partition_count);
+                    while (++j < cpi->mb.partition_info->count);
                 }
                 break;
                 default:
@@ -1096,9 +1101,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             }
 
             ++m;
+            cpi->mb.partition_info++;
         }
 
         ++m;  /* skip L prediction border */
+        cpi->mb.partition_info++;
     }
 }
 
@@ -1553,9 +1560,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     if (xd->mode_ref_lf_delta_enabled)
     {
         // Do the deltas need to be updated
-        vp8_write_bit(bc, (xd->mode_ref_lf_delta_update) ? 1 : 0);
+        int send_update = xd->mode_ref_lf_delta_update
+                          || cpi->oxcf.error_resilient_mode;
 
-        if (xd->mode_ref_lf_delta_update)
+        vp8_write_bit(bc, send_update);
+        if (send_update)
         {
             int Data;
 
@@ -1565,8 +1574,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 Data = xd->ref_lf_deltas[i];
 
                 // Frame level data
-                if (Data)
+                if (xd->ref_lf_deltas[i] != xd->last_ref_lf_deltas[i]
+                    || cpi->oxcf.error_resilient_mode)
                 {
+                    xd->last_ref_lf_deltas[i] = xd->ref_lf_deltas[i];
                     vp8_write_bit(bc, 1);
 
                     if (Data > 0)
@@ -1590,8 +1601,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
             {
                 Data = xd->mode_lf_deltas[i];
 
-                if (Data)
+                if (xd->mode_lf_deltas[i] != xd->last_mode_lf_deltas[i]
+                    || cpi->oxcf.error_resilient_mode)
                 {
+                    xd->last_mode_lf_deltas[i] = xd->mode_lf_deltas[i];
                     vp8_write_bit(bc, 1);
 
                     if (Data > 0)

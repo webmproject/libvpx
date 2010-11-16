@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -407,7 +408,7 @@ static void calc_gf_params(VP8_COMP *cpi)
                   cpi->recent_ref_frame_usage[GOLDEN_FRAME] +
                   cpi->recent_ref_frame_usage[ALTREF_FRAME];
 
-    int pct_gf_active = (100 * cpi->common.gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
+    int pct_gf_active = (100 * cpi->gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
 
     // Reset the last boost indicator
     //cpi->last_boost = 100;
@@ -1021,7 +1022,7 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                       cpi->recent_ref_frame_usage[GOLDEN_FRAME] +
                       cpi->recent_ref_frame_usage[ALTREF_FRAME];
 
-        int pct_gf_active = (100 * cpi->common.gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
+        int pct_gf_active = (100 * cpi->gf_active_count) / (cpi->common.mb_rows * cpi->common.mb_cols);
 
         // Reset the last boost indicator
         //cpi->last_boost = 100;
@@ -1119,10 +1120,12 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
 
             }
             // If there is an active ARF at this location use the minimum
-            // bits on this frame unless it was a contructed arf.
-            else if (cpi->oxcf.arnr_max_frames == 0)
+            // bits on this frame even if it is a contructed arf.
+            // The active maximum quantizer insures that an appropriate
+            // number of bits will be spent if needed for contstructed ARFs.
+            else
             {
-                cpi->this_frame_target = 0;           // Minimial spend on gf that is replacing an arf
+                cpi->this_frame_target = 0;
             }
 
             cpi->current_gf_interval = cpi->frames_till_gf_update_due;
@@ -1363,8 +1366,7 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
                 if (cpi->zbin_over_quant > zbin_oqmax)
                     cpi->zbin_over_quant = zbin_oqmax;
 
-                // Each over-run step is assumed to equate to approximately
-                // 3% reduction in bitrate
+                // Adjust bits_per_mb_at_this_q estimate
                 bits_per_mb_at_this_q = (int)(Factor * bits_per_mb_at_this_q);
                 Factor += factor_adjustment;
 
@@ -1442,6 +1444,9 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
     }
     else
     {
+        int last_kf_interval =
+                (cpi->frames_since_key > 0) ? cpi->frames_since_key : 1;
+
         // reset keyframe context and calculate weighted average of last KEY_FRAME_CONTEXT keyframes
         for (i = 0; i < KEY_FRAME_CONTEXT; i++)
         {
@@ -1452,8 +1457,8 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
             }
             else
             {
-                cpi->prior_key_frame_size[KEY_FRAME_CONTEXT - 1]     = cpi->projected_frame_size;
-                cpi->prior_key_frame_distance[KEY_FRAME_CONTEXT - 1] = cpi->frames_since_key;
+                cpi->prior_key_frame_size[i]     = cpi->projected_frame_size;
+                cpi->prior_key_frame_distance[i] = last_kf_interval;
             }
 
             av_key_frame_bits      += prior_key_frame_weight[i] * cpi->prior_key_frame_size[i];
@@ -1476,6 +1481,8 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
         // allocated than those following other gfs.
         cpi->kf_overspend_bits += (cpi->projected_frame_size - cpi->per_frame_bandwidth) * 7 / 8;
         cpi->gf_overspend_bits += (cpi->projected_frame_size - cpi->per_frame_bandwidth) * 1 / 8;
+        if(!av_key_frame_frequency)
+            av_key_frame_frequency = 60;
 
         // Work out how much to try and recover per frame.
         // For one pass we estimate the number of frames to spread it over based upon past history.

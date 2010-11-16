@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -60,8 +61,8 @@ int main(int argc, char **argv) {
         die("Failed to open %s for writing", argv[2]);
 
     /* Read file header */
-    fread(file_hdr, 1, IVF_FILE_HDR_SZ, infile);
-    if(!(file_hdr[0]=='D' && file_hdr[1]=='K' && file_hdr[2]=='I'
+    if(!(fread(file_hdr, 1, IVF_FILE_HDR_SZ, infile) == IVF_FILE_HDR_SZ
+         && file_hdr[0]=='D' && file_hdr[1]=='K' && file_hdr[2]=='I'
          && file_hdr[3]=='F'))
         die("%s is not an IVF file.", argv[1]);
 

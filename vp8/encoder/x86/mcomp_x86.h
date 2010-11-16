@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -19,6 +20,15 @@
 
 #undef  vp8_search_diamond_search
 #define vp8_search_diamond_search vp8_diamond_search_sadx4
+
+#endif
+#endif
+
+#if HAVE_SSE4_1
+#if !CONFIG_RUNTIME_CPU_DETECT
+
+#undef  vp8_search_full_search
+#define vp8_search_full_search vp8_full_search_sadx8
 
 #endif
 #endif

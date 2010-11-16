@@ -11,13 +11,10 @@
  * to be useless. However, its been left (for now)
  * for reference.
  */
-/*
+#if 0
 #if HAVE_ARMV6
 #undef vp8_dbool_start
 #define vp8_dbool_start vp8dx_start_decode_v6
-
-#undef vp8_dbool_stop
-#define vp8_dbool_stop vp8dx_stop_decode_v6
 
 #undef vp8_dbool_fill
 #define vp8_dbool_fill vp8_bool_decoder_fill_v6
@@ -27,14 +24,11 @@
 
 #undef vp8_dbool_devalue
 #define vp8_dbool_devalue vp8_decode_value_v6
-#endif // HAVE_ARMV6
+#endif /* HAVE_ARMV6 */
 
 #if HAVE_ARMV7
 #undef vp8_dbool_start
 #define vp8_dbool_start vp8dx_start_decode_neon
-
-#undef vp8_dbool_stop
-#define vp8_dbool_stop vp8dx_stop_decode_neon
 
 #undef vp8_dbool_fill
 #define vp8_dbool_fill vp8_bool_decoder_fill_neon
@@ -44,6 +38,6 @@
 
 #undef vp8_dbool_devalue
 #define vp8_dbool_devalue vp8_decode_value_neon
-#endif // HAVE_ARMV7
-*/
-#endif // DBOOLHUFF_ARM_H
+#endif /* HAVE_ARMV7 */
+#endif
+#endif /* DBOOLHUFF_ARM_H */

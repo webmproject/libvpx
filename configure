@@ -23,22 +23,25 @@ Advanced options:
   ${toggle_libs}                  don't build libraries
   ${toggle_examples}              don't build examples
   --libc=PATH                     path to alternate libc
+  --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   ${toggle_fast_unaligned}        don't use unaligned accesses, even when
                                   supported by hardware [auto]
   ${toggle_codec_srcs}            in/exclude codec library source code
   ${toggle_debug_libs}            in/exclude debug version of libraries
-  ${toggle_eval_limit}            enable limited evaluation build
   ${toggle_md5}                   support for output of checksum data
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
   ${toggle_vp8}                   VP8 codec support
   ${toggle_psnr}                  output of PSNR data, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
-  ${toggle_eval_limit}            decoder limitted to 500 frames
   ${toggle_postproc}              postprocessing
   ${toggle_multithread}           multithreaded encoding and decoding.
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_runtime_cpu_detect}    runtime cpu detection
+  ${toggle_shared}                shared library support
+  ${toggle_small}                 favor smaller size over speed
+  ${toggle_arm_asm_detok}         assembly version of the detokenizer (ARM platforms only)
+  ${toggle_postproc_visualizer}   macro block / block level visualizers
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -95,9 +98,11 @@ all_platforms="${all_platforms} armv7-linux-gcc"     #neon Cortex-A8
 all_platforms="${all_platforms} mips32-linux-gcc"
 all_platforms="${all_platforms} ppc32-darwin8-gcc"
 all_platforms="${all_platforms} ppc32-darwin9-gcc"
+all_platforms="${all_platforms} ppc32-linux-gcc"
 all_platforms="${all_platforms} ppc64-darwin8-gcc"
 all_platforms="${all_platforms} ppc64-darwin9-gcc"
 all_platforms="${all_platforms} ppc64-linux-gcc"
+all_platforms="${all_platforms} sparc-solaris-gcc"
 all_platforms="${all_platforms} x86-darwin8-gcc"
 all_platforms="${all_platforms} x86-darwin8-icc"
 all_platforms="${all_platforms} x86-darwin9-gcc"
@@ -108,10 +113,13 @@ all_platforms="${all_platforms} x86-solaris-gcc"
 all_platforms="${all_platforms} x86-win32-gcc"
 all_platforms="${all_platforms} x86-win32-vs7"
 all_platforms="${all_platforms} x86-win32-vs8"
+all_platforms="${all_platforms} x86-win32-vs9"
 all_platforms="${all_platforms} x86_64-darwin9-gcc"
 all_platforms="${all_platforms} x86_64-linux-gcc"
+all_platforms="${all_platforms} x86_64-linux-icc"
 all_platforms="${all_platforms} x86_64-solaris-gcc"
 all_platforms="${all_platforms} x86_64-win64-vs8"
+all_platforms="${all_platforms} x86_64-win64-vs9"
 all_platforms="${all_platforms} universal-darwin8-gcc"
 all_platforms="${all_platforms} universal-darwin9-gcc"
 all_platforms="${all_platforms} generic-gnu"
@@ -192,6 +200,7 @@ ARCH_EXT_LIST="
     sse2
     sse3
     ssse3
+    sse4_1
 
     altivec
 "
@@ -231,11 +240,8 @@ CONFIG_LIST="
 
     dequant_tokens
     dc_recon
-    new_tokens
-    eval_limit
     runtime_cpu_detect
     postproc
-    postproc_generic
     multithread
     psnr
     ${CODECS}
@@ -245,6 +251,10 @@ CONFIG_LIST="
     static_msvcrt
     spatial_resampling
     realtime_only
+    shared
+    small
+    arm_asm_detok
+    postproc_visualizer
 
     experimental
     ${EXPERIMENT_LIST}
@@ -267,6 +277,7 @@ CMDLINE_SELECT="
     libs
     examples
     libc
+    as
     fast_unaligned
     codec_srcs
     debug_libs
@@ -274,10 +285,7 @@ CMDLINE_SELECT="
 
     dequant_tokens
     dc_recon
-    new_tokens
-    eval_limit
     postproc
-    postproc_generic
     multithread
     psnr
     ${CODECS}
@@ -286,6 +294,11 @@ CMDLINE_SELECT="
     mem_tracker
     spatial_resampling
     realtime_only
+    shared
+    small
+    arm_asm_detok
+    postproc_visualizer
+
     experimental
 "
 
@@ -335,8 +348,6 @@ post_process_cmdline() {
     for c in ${CODECS}; do
         enabled ${c} && enable ${c##*_}s
     done
-
-
 }
 
 
@@ -377,7 +388,6 @@ process_targets() {
     enabled codec_srcs && DIST_DIR="${DIST_DIR}-src"
     ! enabled postproc && DIST_DIR="${DIST_DIR}-nopost"
     ! enabled multithread && DIST_DIR="${DIST_DIR}-nomt"
-    enabled eval_limit && DIST_DIR="${DIST_DIR}-eval"
     ! enabled install_docs && DIST_DIR="${DIST_DIR}-nodocs"
     DIST_DIR="${DIST_DIR}-${tgt_isa}-${tgt_os}"
     case "${tgt_os}" in
@@ -388,6 +398,12 @@ process_targets() {
     if [ -f "${source_path}/build/make/version.sh" ]; then
         local ver=`"$source_path/build/make/version.sh" --bare $source_path`
         DIST_DIR="${DIST_DIR}-${ver}"
+        ver=${ver%%-*}
+        VERSION_PATCH=${ver##*.}
+        ver=${ver%.*}
+        VERSION_MINOR=${ver##*.}
+        ver=${ver#v}
+        VERSION_MAJOR=${ver%.*}
     fi
     enabled child || cat <<EOF >> config.mk
 ifeq (\$(MAKECMDGOALS),dist)
@@ -396,6 +412,12 @@ else
 DIST_DIR?=\$(DESTDIR)${prefix}
 endif
 LIBSUBDIR=${libdir##${prefix}/}
+
+VERSION_MAJOR=${VERSION_MAJOR}
+VERSION_MINOR=${VERSION_MINOR}
+VERSION_PATCH=${VERSION_PATCH}
+
+CONFIGURE_ARGS=${CONFIGURE_ARGS}
 EOF
     enabled child || echo "CONFIGURE_ARGS?=${CONFIGURE_ARGS}" >> config.mk
 
@@ -415,6 +437,12 @@ EOF
 }
 
 process_detect() {
+    if enabled shared; then
+        # Can only build shared libs on a subset of platforms. Doing this check
+        # here rather than at option parse time because the target auto-detect
+        # magic happens after the command line has been parsed.
+        enabled linux || die "--enable-shared only supported on ELF for now"
+    fi
     if [ -z "$CC" ]; then
         echo "Bypassing toolchain for environment detection."
         enable external_build
@@ -515,7 +543,7 @@ process_toolchain() {
     enabled gcc || soft_disable ccache
     if enabled mips; then
         enable dequant_tokens
-	enable dc_recon
+        enable dc_recon
     fi
 
     # Enable the postbuild target if building for visual studio.
@@ -524,13 +552,15 @@ process_toolchain() {
              enable solution
              vs_version=${tgt_cc##vs}
              all_targets="${all_targets} solution"
-             INLINE=__inline
-             FORCEINLINE=__forceinline
         ;;
     esac
 
     # Other toolchain specific defaults
     case $toolchain in x86*|ppc*|universal*) soft_enable postproc;; esac
+
+    if enabled postproc_visualizer; then
+        enabled postproc || die "postproc_visualizer requires postproc to be enabled"
+    fi
 }
 
 

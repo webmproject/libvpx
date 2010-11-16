@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -39,7 +40,7 @@ vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf)
     plane_height = ybf->y_height;
     plane_width = ybf->y_width;
 
-    // copy the left and right most columns out
+    /* copy the left and right most columns out */
     src_ptr1 = ybf->y_buffer;
     src_ptr2 = src_ptr1 + plane_width - 1;
     dest_ptr1 = src_ptr1 - Border;
@@ -55,7 +56,7 @@ vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf)
         dest_ptr2 += plane_stride;
     }
 
-    // Now copy the top and bottom source lines into each line of the respective borders
+    /* Now copy the top and bottom source lines into each line of the respective borders */
     src_ptr1 = ybf->y_buffer - Border;
     src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
     dest_ptr1 = src_ptr1 - (Border * plane_stride);
@@ -78,7 +79,7 @@ vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf)
     plane_width = ybf->uv_width;
     Border /= 2;
 
-    // copy the left and right most columns out
+    /* copy the left and right most columns out */
     src_ptr1 = ybf->u_buffer;
     src_ptr2 = src_ptr1 + plane_width - 1;
     dest_ptr1 = src_ptr1 - Border;
@@ -94,7 +95,7 @@ vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf)
         dest_ptr2 += plane_stride;
     }
 
-    // Now copy the top and bottom source lines into each line of the respective borders
+    /* Now copy the top and bottom source lines into each line of the respective borders */
     src_ptr1 = ybf->u_buffer - Border;
     src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
     dest_ptr1 = src_ptr1 - (Border * plane_stride);
@@ -112,7 +113,7 @@ vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf)
     /* V Plane */
     /***********/
 
-    // copy the left and right most columns out
+    /* copy the left and right most columns out */
     src_ptr1 = ybf->v_buffer;
     src_ptr2 = src_ptr1 + plane_width - 1;
     dest_ptr1 = src_ptr1 - Border;
@@ -128,7 +129,7 @@ vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf)
         dest_ptr2 += plane_stride;
     }
 
-    // Now copy the top and bottom source lines into each line of the respective borders
+    /* Now copy the top and bottom source lines into each line of the respective borders */
     src_ptr1 = ybf->v_buffer - Border;
     src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
     dest_ptr1 = src_ptr1 - (Border * plane_stride);
@@ -164,7 +165,7 @@ vp8_yv12_extend_frame_borders_yonly(YV12_BUFFER_CONFIG *ybf)
     plane_height = ybf->y_height;
     plane_width = ybf->y_width;
 
-    // copy the left and right most columns out
+    /* copy the left and right most columns out */
     src_ptr1 = ybf->y_buffer;
     src_ptr2 = src_ptr1 + plane_width - 1;
     dest_ptr1 = src_ptr1 - Border;
@@ -180,7 +181,7 @@ vp8_yv12_extend_frame_borders_yonly(YV12_BUFFER_CONFIG *ybf)
         dest_ptr2 += plane_stride;
     }
 
-    // Now copy the top and bottom source lines into each line of the respective borders
+    /* Now copy the top and bottom source lines into each line of the respective borders */
     src_ptr1 = ybf->y_buffer - Border;
     src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride;
     dest_ptr1 = src_ptr1 - (Border * plane_stride);

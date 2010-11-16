@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -52,8 +53,6 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BLOCK
 
     x->quantize_b(be, b);
 
-    x->e_mbd.mbmi.mb_skip_coeff &= (!b->eob);
-
     vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
 
     RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
@@ -65,11 +64,9 @@ void vp8_encode_intra4x4block_rd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BL
 
     ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
-    x->short_fdct4x4rd(be->src_diff, be->coeff, 32);
+    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
 
-    x->quantize_brd(be, b);
-
-    x->e_mbd.mbmi.mb_skip_coeff &= (!b->eob);
+    x->quantize_b(be, b);
 
     IDCT_INVOKE(&rtcd->common->idct, idct16)(b->dqcoeff, b->diff, 32);
 
@@ -108,8 +105,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
 #if !(CONFIG_REALTIME_ONLY)
 #if 1
-
-    if (x->optimize && x->rddiv > 1)
+    if (x->optimize==2 ||(x->optimize && x->rddiv > 1))
         vp8_optimize_mby(x, rtcd);
 
 #endif
@@ -117,14 +113,15 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mby(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mby)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
     // make sure block modes are set the way we want them for context updates
     for (b = 0; b < 16; b++)
     {
         BLOCKD *d = &x->e_mbd.block[b];
 
-        switch (x->e_mbd.mbmi.mode)
+        switch (x->e_mbd.mode_info_context->mbmi.mode)
         {
 
         case DC_PRED:
@@ -155,23 +152,21 @@ void vp8_encode_intra16x16mbyrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
 
-    vp8_transform_intra_mbyrd(x);
+    vp8_transform_intra_mby(x);
 
-    x->e_mbd.mbmi.mb_skip_coeff = 1;
-
-    vp8_quantize_mbyrd(x);
-
+    vp8_quantize_mby(x);
 
     vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-    vp8_recon16x16mby(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, recon_mby)
+        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
     // make sure block modes are set the way we want them for context updates
     for (b = 0; b < 16; b++)
     {
         BLOCKD *d = &x->e_mbd.block[b];
 
-        switch (x->e_mbd.mbmi.mode)
+        switch (x->e_mbd.mode_info_context->mbmi.mode)
         {
 
         case DC_PRED:
@@ -207,7 +202,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 #if !(CONFIG_REALTIME_ONLY)
 #if 1
 
-    if (x->optimize && x->rddiv > 1)
+    if (x->optimize==2 ||(x->optimize && x->rddiv > 1))
         vp8_optimize_mbuv(x, rtcd);
 
 #endif
@@ -224,11 +219,9 @@ void vp8_encode_intra16x16mbuvrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 
-    vp8_transform_mbuvrd(x);
+    vp8_transform_mbuv(x);
 
-    vp8_quantize_mbuvrd(x);
-
-
+    vp8_quantize_mbuv(x);
 
     vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 

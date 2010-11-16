@@ -1,16 +1,17 @@
 ;
-;  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
 ;
-;  Use of this source code is governed by a BSD-style license and patent
-;  grant that can be found in the LICENSE file in the root of the source
-;  tree. All contributing project authors may be found in the AUTHORS
-;  file in the root of the source tree.
+;  Use of this source code is governed by a BSD-style license
+;  that can be found in the LICENSE file in the root of the source
+;  tree. An additional intellectual property rights grant can be found
+;  in the file PATENTS.  All contributing project authors may
+;  be found in the AUTHORS file in the root of the source tree.
 ;
 
 
-    EXPORT  |vp8_sub_pixel_variance16x16s_4_0_neon|
-    EXPORT  |vp8_sub_pixel_variance16x16s_0_4_neon|
-    EXPORT  |vp8_sub_pixel_variance16x16s_4_4_neon|
+    EXPORT  |vp8_variance_halfpixvar16x16_h_neon|
+    EXPORT  |vp8_variance_halfpixvar16x16_v_neon|
+    EXPORT  |vp8_variance_halfpixvar16x16_hv_neon|
     EXPORT  |vp8_sub_pixel_variance16x16s_neon|
     ARM
     REQUIRE8
@@ -19,7 +20,7 @@
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
 ;================================================
-;unsigned int vp8_sub_pixel_variance16x16s_4_0_neon
+;unsigned int vp8_variance_halfpixvar16x16_h_neon
 ;(
 ;    unsigned char  *src_ptr, r0
 ;    int  src_pixels_per_line,  r1
@@ -28,7 +29,7 @@
 ;    unsigned int *sse
 ;);
 ;================================================
-|vp8_sub_pixel_variance16x16s_4_0_neon| PROC
+|vp8_variance_halfpixvar16x16_h_neon| PROC
     push            {lr}
 
     mov             r12, #4                  ;loop counter
@@ -119,7 +120,7 @@ vp8_filt_fpo16x16s_4_0_loop_neon
     ENDP
 
 ;================================================
-;unsigned int vp8_sub_pixel_variance16x16s_0_4_neon
+;unsigned int vp8_variance_halfpixvar16x16_v_neon
 ;(
 ;    unsigned char  *src_ptr, r0
 ;    int  src_pixels_per_line,  r1
@@ -128,7 +129,7 @@ vp8_filt_fpo16x16s_4_0_loop_neon
 ;    unsigned int *sse
 ;);
 ;================================================
-|vp8_sub_pixel_variance16x16s_0_4_neon| PROC
+|vp8_variance_halfpixvar16x16_v_neon| PROC
     push            {lr}
 
     mov             r12, #4                     ;loop counter
@@ -215,7 +216,7 @@ vp8_filt_spo16x16s_0_4_loop_neon
     ENDP
 
 ;================================================
-;unsigned int vp8_sub_pixel_variance16x16s_4_4_neon
+;unsigned int vp8_variance_halfpixvar16x16_hv_neon
 ;(
 ;    unsigned char  *src_ptr, r0
 ;    int  src_pixels_per_line,  r1
@@ -224,7 +225,7 @@ vp8_filt_spo16x16s_0_4_loop_neon
 ;    unsigned int *sse
 ;);
 ;================================================
-|vp8_sub_pixel_variance16x16s_4_4_neon| PROC
+|vp8_variance_halfpixvar16x16_hv_neon| PROC
     push            {lr}
 
     vld1.u8         {d0, d1, d2, d3}, [r0], r1      ;load src data

@@ -1,10 +1,11 @@
 /*
- *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
  */
 
 
@@ -48,7 +49,7 @@ extern void vp8_filter_block2d_bil_second_pass_armv6
     const short *vp8_filter
 );
 
-/*
+#if 0
 void vp8_filter_block2d_bil_first_pass_6
 (
     unsigned char *src_ptr,
@@ -65,14 +66,14 @@ void vp8_filter_block2d_bil_first_pass_6
     {
         for ( j=0; j<output_width; j++ )
         {
-            // Apply bilinear filter
+            /* Apply bilinear filter */
             output_ptr[j] = ( ( (int)src_ptr[0]          * vp8_filter[0]) +
                                ((int)src_ptr[1] * vp8_filter[1]) +
                                 (VP8_FILTER_WEIGHT/2) ) >> VP8_FILTER_SHIFT;
             src_ptr++;
         }
 
-        // Next row...
+        /* Next row... */
         src_ptr    += src_pixels_per_line - output_width;
         output_ptr += output_width;
     }
@@ -95,7 +96,7 @@ void vp8_filter_block2d_bil_second_pass_6
     {
         for ( j=0; j<output_width; j++ )
         {
-            // Apply filter
+            /* Apply filter */
             Temp =  ((int)src_ptr[0]         * vp8_filter[0]) +
                     ((int)src_ptr[output_width] * vp8_filter[1]) +
                     (VP8_FILTER_WEIGHT/2);
@@ -103,12 +104,12 @@ void vp8_filter_block2d_bil_second_pass_6
             src_ptr++;
         }
 
-        // Next row...
-        //src_ptr    += src_pixels_per_line - output_width;
+        /* Next row... */
+        /*src_ptr    += src_pixels_per_line - output_width;*/
         output_ptr += output_pitch;
     }
 }
-*/
+#endif
 
 void vp8_filter_block2d_bil_armv6
 (
@@ -123,13 +124,13 @@ void vp8_filter_block2d_bil_armv6
 )
 {
 
-    unsigned short FData[36*16]; // Temp data bufffer used in filtering
+    unsigned short FData[36*16]; /* Temp data bufffer used in filtering */
 
-    // First filter 1-D horizontally...
-    // pixel_step = 1;
+    /* First filter 1-D horizontally... */
+    /* pixel_step = 1; */
     vp8_filter_block2d_bil_first_pass_armv6(src_ptr, FData, src_pixels_per_line, Height + 1, Width, HFilter);
 
-    // then 1-D vertically...
+    /* then 1-D vertically... */
     vp8_filter_block2d_bil_second_pass_armv6(FData, output_ptr, dst_pitch, Height, Width, VFilter);
 }
 
