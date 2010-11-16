@@ -24,10 +24,10 @@
 #define FOUR_TOKEN              4       /* 4         Extra Bits 0+1 */
 #define DCT_VAL_CATEGORY1       5       /* 5-6       Extra Bits 1+1 */
 #define DCT_VAL_CATEGORY2       6       /* 7-10      Extra Bits 2+1 */
-#define DCT_VAL_CATEGORY3       7       /* 11-26     Extra Bits 4+1 */
-#define DCT_VAL_CATEGORY4       8       /* 11-26     Extra Bits 5+1 */
-#define DCT_VAL_CATEGORY5       9       /* 27-58     Extra Bits 5+1 */
-#define DCT_VAL_CATEGORY6       10      /* 59+       Extra Bits 11+1 */
+#define DCT_VAL_CATEGORY3       7       /* 11-18     Extra Bits 3+1 */
+#define DCT_VAL_CATEGORY4       8       /* 19-34     Extra Bits 4+1 */
+#define DCT_VAL_CATEGORY5       9       /* 35-66     Extra Bits 5+1 */
+#define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 11+1 */
 #define DCT_EOB_TOKEN           11      /* EOB       Extra Bits 0+0 */
 
 #define vp8_coef_tokens 12
