@@ -282,14 +282,14 @@ typedef struct
     unsigned int source_frame_flags;
     YV12_BUFFER_CONFIG scaled_source;
 
-    int source_buffer_count;
-    int source_encode_index;
-    int source_alt_ref_pending;
-    int source_alt_ref_active;
+    int source_buffer_count;    // number of src_buffers in use for lagged encoding
+    int source_encode_index;    // index of buffer in src_buffer to encode
+    int source_alt_ref_pending; // frame in src_buffers has been identified to be encoded as an alt ref
+    int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
 
-    int last_alt_ref_sei;
-    int is_src_frame_alt_ref;
-    int is_next_src_alt_ref;
+    int last_alt_ref_sei;       // index into src_buffers of frame used as alt reference
+    int is_src_frame_alt_ref;   // source of frame to encode is an exact copy of an alt ref frame
+    int is_next_src_alt_ref;    // source of next frame to encode is an exact copy of an alt ref frame
 
     int gold_is_last; // golden frame same as last frame ( short circuit gold searches)
     int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)

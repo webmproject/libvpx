@@ -547,6 +547,10 @@ process_common_toolchain() {
                 tgt_isa=universal
                 tgt_os=darwin9
                 ;;
+            *darwin10*)
+                tgt_isa=x86_64
+                tgt_os=darwin10
+                ;;
             *mingw32*|*cygwin*)
                 [ -z "$tgt_isa" ] && tgt_isa=x86
                 tgt_os=win32
@@ -605,6 +609,12 @@ process_common_toolchain() {
             add_cflags  "-mmacosx-version-min=10.5"
             add_ldflags "-isysroot /Developer/SDKs/MacOSX10.5.sdk"
             add_ldflags "-mmacosx-version-min=10.5"
+            ;;
+        *-darwin10-*)
+            add_cflags  "-isysroot /Developer/SDKs/MacOSX10.6.sdk"
+            add_cflags  "-mmacosx-version-min=10.6"
+            add_ldflags "-isysroot /Developer/SDKs/MacOSX10.6.sdk"
+            add_ldflags "-mmacosx-version-min=10.6"
             ;;
     esac
 
