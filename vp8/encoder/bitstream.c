@@ -831,29 +831,39 @@ static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACRO
         case 0:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[1]);
+#if CONFIG_SEGMENTATION
             segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[1]);
+#endif
             break;
         case 1:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 1, x->mb_segment_tree_probs[1]);
+#if CONFIG_SEGMENTATION
             segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_one(x->mb_segment_tree_probs[1]);
+#endif
             break;
         case 2:
             vp8_write(w, 1, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[2]);
+#if CONFIG_SEGMENTATION
             segment_cost += vp8_cost_one(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[2]);
+#endif
             break;
         case 3:
             vp8_write(w, 1, x->mb_segment_tree_probs[0]);
             vp8_write(w, 1, x->mb_segment_tree_probs[2]);
+#if CONFIG_SEGMENTATION
             segment_cost += vp8_cost_one(x->mb_segment_tree_probs[0]) + vp8_cost_one(x->mb_segment_tree_probs[2]);
+#endif
             break;
 
             // TRAP.. This should not happen
         default:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[1]);
+#if CONFIG_SEGMENTATION
             segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[1]);
+#endif
             break;
         }
     }
