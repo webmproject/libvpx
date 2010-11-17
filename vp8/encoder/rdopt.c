@@ -477,67 +477,6 @@ int vp8_mbuverror_c(MACROBLOCK *mb)
     return error;
 }
 
-#if !(CONFIG_REALTIME_ONLY)
-static int macro_block_max_error(MACROBLOCK *mb)
-{
-    int error = 0;
-    int dc = 0;
-    BLOCK  *be;
-    int i, j;
-    int berror;
-
-    dc = !(mb->e_mbd.mode_info_context->mbmi.mode == B_PRED || mb->e_mbd.mode_info_context->mbmi.mode == SPLITMV);
-
-    for (i = 0; i < 16; i++)
-    {
-        be = &mb->block[i];
-
-        berror = 0;
-
-        for (j = dc; j < 16; j++)
-        {
-            int this_diff = be->coeff[j];
-            berror += this_diff * this_diff;
-        }
-
-        error += berror;
-    }
-
-    for (i = 16; i < 24; i++)
-    {
-        be = &mb->block[i];
-        berror = 0;
-
-        for (j = 0; j < 16; j++)
-        {
-            int this_diff = be->coeff[j];
-            berror += this_diff * this_diff;
-        }
-
-        error += berror;
-    }
-
-    error <<= 2;
-
-    if (dc)
-    {
-        be = &mb->block[24];
-        berror = 0;
-
-        for (j = 0; j < 16; j++)
-        {
-            int this_diff = be->coeff[j];
-            berror += this_diff * this_diff;
-        }
-
-        error += berror;
-    }
-
-    error >>= 4;
-    return error;
-}
-#endif
-
 int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
 {
     unsigned char *uptr, *vptr;
@@ -610,11 +549,10 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, 
     return cost;
 }
 
-int vp8_rdcost_mby(MACROBLOCK *mb)
+static int vp8_rdcost_mby(MACROBLOCK *mb)
 {
     int cost = 0;
     int b;
-    int type = 0;
     MACROBLOCKD *x = &mb->e_mbd;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
@@ -626,16 +564,12 @@ int vp8_rdcost_mby(MACROBLOCK *mb)
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-    if (x->mode_info_context->mbmi.mode == SPLITMV)
-        type = 3;
-
     for (b = 0; b < 16; b++)
-        cost += cost_coeffs(mb, x->block + b, type,
+        cost += cost_coeffs(mb, x->block + b, 0,
                     ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
-    if (x->mode_info_context->mbmi.mode != SPLITMV)
-        cost += cost_coeffs(mb, x->block + 24, 1,
-                    ta + vp8_block2above[24], tl + vp8_block2left[24]);
+    cost += cost_coeffs(mb, x->block + 24, 1,
+                ta + vp8_block2above[24], tl + vp8_block2left[24]);
 
     return cost;
 }
@@ -1062,10 +996,7 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp
     }
 
     // 2nd order fdct
-    if (x->mode_info_context->mbmi.mode != SPLITMV)
-    {
-        mb->short_walsh4x4(mb_y2->src_diff, mb_y2->coeff, 8);
-    }
+    mb->short_walsh4x4(mb_y2->src_diff, mb_y2->coeff, 8);
 
     // Quantization
     for (b = 0; b < 16; b++)
@@ -1074,22 +1005,11 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp
     }
 
     // DC predication and Quantization of 2nd Order block
-    if (x->mode_info_context->mbmi.mode != SPLITMV)
-    {
-
-        {
-            mb->quantize_b(mb_y2, x_y2);
-        }
-    }
+    mb->quantize_b(mb_y2, x_y2);
 
     // Distortion
-    if (x->mode_info_context->mbmi.mode == SPLITMV)
-        d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 0) << 2;
-    else
-    {
-        d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
-        d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
-    }
+    d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
+    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
 
     *Distortion = (d >> 4);
 
@@ -2015,40 +1935,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
 #endif
                 }
-
-#if             0
-                else
-                {
-                    int rateuseskip;
-                    int ratenotuseskip;
-                    int maxdistortion;
-                    int minrate;
-                    int skip_rd;
-
-                    // distortion when no coeff is encoded
-                    maxdistortion = macro_block_max_error(x);
-
-                    ratenotuseskip = rate_y + rate_uv + vp8_cost_bit(cpi->prob_skip_false, 0);
-                    rateuseskip    = vp8_cost_bit(cpi->prob_skip_false, 1);
-
-                    minrate         = rateuseskip - ratenotuseskip;
-
-                    skip_rd = RDFUNC(x->rdmult, x->rddiv, minrate, maxdistortion - distortion2, cpi->target_bits_per_mb);
-
-                    if (skip_rd + 50 < 0 && x->e_mbd.mbmi.ref_frame != INTRA_FRAME && rate_y + rate_uv < 4000)
-                    {
-                        force_no_skip = 1;
-                        rate2       = rate2 + rateuseskip - ratenotuseskip;
-                        distortion2 =  maxdistortion;
-                    }
-                    else
-                    {
-                        force_no_skip = 0;
-                    }
-
-                }
-
-#endif
 
             }
 
