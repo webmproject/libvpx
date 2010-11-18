@@ -804,7 +804,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
 
-            // Only do recode loop on key frames and golden frames
+            // Only do recode loop on key frames, golden frames and
+            // alt ref frames
             sf->recode_loop = 2;
 
             sf->full_freq[0] = 31;
@@ -3435,6 +3436,37 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 #endif
 // return of 0 means drop frame
 
+// Function to test for conditions that indeicate we should loop
+// back and recode a frame.
+static BOOL recode_loop_test( VP8_COMP *cpi,
+                              int high_limit, int low_limit,
+                              int q, int maxq, int minq )
+{
+    BOOL    force_recode = FALSE;
+    VP8_COMMON *cm = &cpi->common;
+
+    // Is frame recode allowed at all
+    // Yes if either recode mode 1 is selected or mode two is selcted
+    // and the frame is a key frame. golden frame or alt_ref_frame
+    if ( (cpi->sf.recode_loop == 1) ||
+         ( (cpi->sf.recode_loop == 2) &&
+           ( (cm->frame_type == KEY_FRAME) ||
+             cm->refresh_golden_frame ||
+             cm->refresh_alt_ref_frame ) ) )
+    {
+        // General over and under shoot tests
+        if ( ((cpi->projected_frame_size > high_limit) && (q < maxq)) ||
+             ((cpi->projected_frame_size < low_limit) && (q > minq)) )
+        {
+            force_recode = TRUE;
+        }
+        // Specific rate control mode related tests
+        // TBD
+    }
+
+    return force_recode;
+}
+
 static void encode_frame_to_data_rate
 (
     VP8_COMP *cpi,
@@ -4029,19 +4061,18 @@ static void encode_frame_to_data_rate
 #if !(CONFIG_REALTIME_ONLY)
 
         // Is the projected frame size out of range and are we allowed to attempt to recode.
-        if (((cpi->sf.recode_loop == 1) ||
-             ((cpi->sf.recode_loop == 2) && (cm->refresh_golden_frame || (cm->frame_type == KEY_FRAME)))) &&
-            (((cpi->projected_frame_size > frame_over_shoot_limit) && (Q < top_index)) ||
-             //((cpi->projected_frame_size > frame_over_shoot_limit ) && (Q == top_index) && (cpi->zbin_over_quant < ZBIN_OQ_MAX)) ||
-             ((cpi->projected_frame_size < frame_under_shoot_limit) && (Q > bottom_index)))
-           )
+        if ( recode_loop_test( cpi,
+                               frame_over_shoot_limit, frame_under_shoot_limit,
+                               Q, top_index, bottom_index ) )
         {
             int last_q = Q;
             int Retries = 0;
 
             // Frame size out of permitted range:
             // Update correction factor & compute new Q to try...
-            if (cpi->projected_frame_size > frame_over_shoot_limit)
+
+            // Frame is too large
+            if (cpi->projected_frame_size > cpi->this_frame_target)
             {
                 //if ( cpi->zbin_over_quant == 0 )
                 q_low = (Q < q_high) ? (Q + 1) : q_high; // Raise Qlow as to at least the current value
@@ -4085,6 +4116,7 @@ static void encode_frame_to_data_rate
 
                 overshoot_seen = TRUE;
             }
+            // Frame is too small
             else
             {
                 if (cpi->zbin_over_quant == 0)
