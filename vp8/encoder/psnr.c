@@ -13,7 +13,7 @@
 #include "math.h"
 #include "systemdependent.h" /* for vp8_clear_system_state() */
 
-#define MAX_PSNR 60
+#define MAX_PSNR 100
 
 double vp8_mse2psnr(double Samples, double Peak, double Mse)
 {
