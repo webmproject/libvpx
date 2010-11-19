@@ -41,9 +41,9 @@ typedef struct
 
 typedef struct
 {
-    INT16         min_val;
-    INT16         Length;
-    UINT8 Probs[12];
+    INT16        min_val;
+    INT16        Length;
+    UINT8 Probs[14];
 } TOKENEXTRABITS;
 
 typedef struct

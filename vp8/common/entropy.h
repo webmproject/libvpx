@@ -27,7 +27,7 @@
 #define DCT_VAL_CATEGORY3       7       /* 11-18     Extra Bits 3+1 */
 #define DCT_VAL_CATEGORY4       8       /* 19-34     Extra Bits 4+1 */
 #define DCT_VAL_CATEGORY5       9       /* 35-66     Extra Bits 5+1 */
-#define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 11+1 */
+#define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 13+1 */
 #define DCT_EOB_TOKEN           11      /* EOB       Extra Bits 0+0 */
 
 #define vp8_coef_tokens 12
@@ -52,7 +52,7 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 #define PROB_UPDATE_BASELINE_COST   7
 
 #define MAX_PROB                255
-#define DCT_MAX_VALUE           2048
+#define DCT_MAX_VALUE           8192
 
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
