@@ -469,11 +469,17 @@ typedef struct
     double start_tot_err_left;
     double min_error;
 
-    double modified_total_error_left;
+    double modified_error_total;
+    double modified_error_used;
+    double modified_error_left;
+    double clip_bpe;
+    double observed_bpe;
+
     double avg_iiratio;
 
     int target_bandwidth;
     long long bits_left;
+    long long clip_bits_total;
     FIRSTPASS_STATS *total_stats;
     FIRSTPASS_STATS *this_frame_stats;
     FIRSTPASS_STATS *stats_in, *stats_in_end;
