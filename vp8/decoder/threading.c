@@ -275,6 +275,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
 
                     for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
                     {
+/*
                         if ((mb_col & (nsync-1)) == 0)
                         {
                             while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != pc->mb_cols - 1)
@@ -283,6 +284,8 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                                 thread_sleep(0);
                             }
                         }
+*/
+                        sem_wait(&pbi->h_mb_counter[ithread]);
 
                         if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
                         {
@@ -383,6 +386,9 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
 
                         /*pbi->mb_row_di[ithread].current_mb_col = mb_col;*/
                         pbi->mt_current_mb_col[mb_row] = mb_col;
+
+                        if (mb_row != pbi->common.mb_rows-1)
+                            sem_post(&pbi->h_mb_counter[ithread+1]);
                     }
 
                     /* adjust to the next row of mbs */
@@ -438,6 +444,7 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi)
 
         CHECK_MEM_ERROR(pbi->h_decoding_thread, vpx_malloc(sizeof(pthread_t) * pbi->decoding_thread_count));
         CHECK_MEM_ERROR(pbi->h_event_start_decoding, vpx_malloc(sizeof(sem_t) * pbi->decoding_thread_count));
+        CHECK_MEM_ERROR(pbi->h_mb_counter, vpx_malloc(sizeof(sem_t) * (pbi->decoding_thread_count + 1)));
         CHECK_MEM_ERROR(pbi->mb_row_di, vpx_memalign(32, sizeof(MB_ROW_DEC) * pbi->decoding_thread_count));
         vpx_memset(pbi->mb_row_di, 0, sizeof(MB_ROW_DEC) * pbi->decoding_thread_count);
         CHECK_MEM_ERROR(pbi->de_thread_data, vpx_malloc(sizeof(DECODETHREAD_DATA) * pbi->decoding_thread_count));
@@ -452,6 +459,9 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi)
 
             pthread_create(&pbi->h_decoding_thread[ithread], 0, vp8_thread_decoding_proc, (&pbi->de_thread_data[ithread]));
         }
+
+        for (ithread = 0; ithread < pbi->decoding_thread_count + 1; ithread++)
+            sem_init(&pbi->h_mb_counter[ithread], 0, 0);
 
         sem_init(&pbi->h_event_end_decoding, 0, 0);
 
@@ -615,6 +625,9 @@ void vp8_decoder_remove_threads(VP8D_COMP *pbi)
             sem_destroy(&pbi->h_event_start_decoding[i]);
         }
 
+        for (i = 0; i < pbi->decoding_thread_count + 1; i++)
+            sem_destroy(&pbi->h_mb_counter[i]);
+
         sem_destroy(&pbi->h_event_end_decoding);
 
             vpx_free(pbi->h_decoding_thread);
@@ -623,6 +636,11 @@ void vp8_decoder_remove_threads(VP8D_COMP *pbi)
             vpx_free(pbi->h_event_start_decoding);
             pbi->h_event_start_decoding = NULL;
 
+        if (pbi->h_mb_counter)
+        {
+            vpx_free(pbi->h_mb_counter);
+            pbi->h_mb_counter = NULL;
+        }
             vpx_free(pbi->mb_row_di);
             pbi->mb_row_di = NULL ;
 
@@ -720,8 +738,11 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
     vp8_setup_decoding_thread_data(pbi, xd, pbi->mb_row_di, pbi->decoding_thread_count);
 
+
+
     for (i = 0; i < pbi->decoding_thread_count; i++)
         sem_post(&pbi->h_event_start_decoding[i]);
+
 
     for (mb_row = 0; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
     {
@@ -755,6 +776,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
             for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
             {
+/*
                 if ( mb_row > 0 && (mb_col & (nsync-1)) == 0){
                     while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != pc->mb_cols - 1)
                     {
@@ -762,6 +784,9 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                         thread_sleep(0);
                     }
                 }
+*/
+                if(mb_row > 0)
+                    sem_wait(&pbi->h_mb_counter[pbi->decoding_thread_count]);
 
                 if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
                 {
@@ -870,6 +895,10 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                 xd->above_context++;
 
                 pbi->mt_current_mb_col[mb_row] = mb_col;
+
+                /* macroblock counter */
+                if (mb_row != pbi->common.mb_rows-1)
+                    sem_post(&pbi->h_mb_counter[0]);
             }
 
             /* adjust to the next row of mbs */
