@@ -78,8 +78,8 @@ if(frame_cnt + 1 == 22) {
 } else if(frame_cnt + 1 == 44) {
     vpx_active_map_t  active;
 
-    active.rows = 240/16;
-    active.cols = 320/16;
+    active.rows = cfg.g_h/16;
+    active.cols = cfg.g_w/16;
 
     /* pass in null map to disable active_map*/
     active.active_map = NULL;

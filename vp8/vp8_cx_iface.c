@@ -105,6 +105,7 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
 }
 
 
+#undef ERROR
 #define ERROR(str) do {\
         ctx->base.err_detail = str;\
         return VPX_CODEC_INVALID_PARAM;\
