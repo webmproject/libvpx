@@ -596,7 +596,7 @@ void vp8mt_de_alloc_temp_buffers(VP8D_COMP *pbi, int mb_rows)
 }
 
 
-int vp8mt_alloc_temp_buffers(VP8D_COMP *pbi, int width, int prev_mb_rows)
+void vp8mt_alloc_temp_buffers(VP8D_COMP *pbi, int width, int prev_mb_rows)
 {
 #if CONFIG_MULTITHREAD
     VP8_COMMON *const pc = & pbi->common;
@@ -647,7 +647,6 @@ int vp8mt_alloc_temp_buffers(VP8D_COMP *pbi, int width, int prev_mb_rows)
         for (i=0; i< pc->mb_rows; i++)
             CHECK_MEM_ERROR(pbi->mt_vleft_col[i], vpx_calloc(sizeof(unsigned char) * 8, 1));
     }
-    return 0;
 #else
     (void) pbi;
     (void) width;

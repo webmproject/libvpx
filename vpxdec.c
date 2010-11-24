@@ -442,6 +442,8 @@ unsigned int file_is_raw(FILE *infile,
     int is_raw = 0;
     vpx_codec_stream_info_t si;
 
+    si.sz = sizeof(si);
+
     if (fread(buf, 1, 32, infile) == 32)
     {
         int i;
