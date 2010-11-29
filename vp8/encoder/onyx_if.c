@@ -73,6 +73,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 
+extern void vp8cx_temp_filter_c(VP8_COMP *cpi);
 
 static void set_default_lf_deltas(VP8_COMP *cpi);
 

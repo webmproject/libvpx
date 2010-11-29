@@ -94,6 +94,8 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 
     cpi->rtcd.search.full_search             = vp8_full_search_sad;
     cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
+
+    cpi->rtcd.temporal.filter                = vp8_apply_temporal_filter_c;
 #endif
 
     // Pure C:
