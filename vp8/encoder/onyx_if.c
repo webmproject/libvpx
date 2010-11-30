@@ -73,7 +73,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 
-extern void vp8cx_temp_filter_c(VP8_COMP *cpi);
+extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi);
 
 static void set_default_lf_deltas(VP8_COMP *cpi);
 
@@ -4971,7 +4971,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 {
                     int thiserr;
                     cpi->oxcf.arnr_strength = i;
-                    vp8cx_temp_filter_c(cpi);
+                    vp8_temporal_filter_prepare_c(cpi);
 
                     thiserr = vp8_calc_low_ss_err(&cpi->alt_ref_buffer.source_buffer,
                                                   &cpi->src_buffer[start_frame].source_buffer, IF_RTCD(&cpi->rtcd.variance));
@@ -4986,7 +4986,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 if (besti != -1)
                 {
                     cpi->oxcf.arnr_strength = besti;
-                    vp8cx_temp_filter_c(cpi);
+                    vp8_temporal_filter_prepare_c(cpi);
                     s = &cpi->alt_ref_buffer;
 
                     // FWG not sure if I need to copy this data for the Alt Ref frame
@@ -4998,7 +4998,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                     s = &cpi->src_buffer[cpi->last_alt_ref_sei];
 
 #else
-                vp8cx_temp_filter_c(cpi);
+                vp8_temporal_filter_prepare_c(cpi);
                 s = &cpi->alt_ref_buffer;
 
                 // FWG not sure if I need to copy this data for the Alt Ref frame
