@@ -251,7 +251,8 @@ enum video_file_type
 
 struct detect_buffer {
     char buf[4];
-    int  valid;
+    size_t buf_read;
+    size_t position;
 };
 
 
@@ -305,14 +306,21 @@ static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
 
             for (r = 0; r < h; r++)
             {
-                if (detect->valid)
+                size_t needed = w;
+                size_t buf_position = 0;
+                const size_t left = detect->buf_read - detect->position;
+                if (left > 0)
                 {
-                    memcpy(ptr, detect->buf, 4);
-                    shortread |= fread(ptr+4, 1, w-4, f) < w-4;
-                    detect->valid = 0;
+                    const size_t more = (left < needed) ? left : needed;
+                    memcpy(ptr, detect->buf + detect->position, more);
+                    buf_position = more;
+                    needed -= more;
+                    detect->position += more;
                 }
-                else
-                    shortread |= fread(ptr, 1, w, f) < w;
+                if (needed > 0)
+                {
+                    shortread |= (fread(ptr + buf_position, 1, needed, f) < needed);
+                }
 
                 ptr += img->stride[plane];
             }
@@ -1338,7 +1346,6 @@ int main(int argc, const char **argv_)
     {
         int frames_in = 0, frames_out = 0;
         unsigned long nbytes = 0;
-        size_t detect_bytes;
         struct detect_buffer detect;
 
         /* Parse certain options from the input file, if possible */
@@ -1353,13 +1360,11 @@ int main(int argc, const char **argv_)
 
         /* For RAW input sources, these bytes will applied on the first frame
          *  in read_frame().
-         * We can always read 4 bytes because the minimum supported frame size
-         *  is 2x2.
          */
-        detect_bytes = fread(detect.buf, 1, 4, infile);
-        detect.valid = 0;
+        detect.buf_read = fread(detect.buf, 1, 4, infile);
+        detect.position = 0;
 
-        if (detect_bytes == 4 && file_is_y4m(infile, &y4m, detect.buf))
+        if (detect.buf_read == 4 && file_is_y4m(infile, &y4m, detect.buf))
         {
             if (y4m_input_open(&y4m, infile, detect.buf, 4) >= 0)
             {
@@ -1384,7 +1389,7 @@ int main(int argc, const char **argv_)
                 return EXIT_FAILURE;
             }
         }
-        else if (detect_bytes == 4 &&
+        else if (detect.buf_read == 4 &&
                  file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, detect.buf))
         {
             file_type = FILE_TYPE_IVF;
@@ -1404,7 +1409,6 @@ int main(int argc, const char **argv_)
         else
         {
             file_type = FILE_TYPE_RAW;
-            detect.valid = 1;
         }
 
         if(!cfg.g_w || !cfg.g_h)
