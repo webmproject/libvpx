@@ -214,6 +214,7 @@ HAVE_LIST="
     sys_mman_h
 "
 EXPERIMENT_LIST="
+    extend_qrange
 "
 CONFIG_LIST="
     external_build

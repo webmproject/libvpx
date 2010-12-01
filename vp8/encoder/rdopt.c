@@ -158,6 +158,48 @@ static int rd_iifactor [ 32 ] =  {    4,   4,   3,   2,   1,   0,   0,   0,
                                       0,   0,   0,   0,   0,   0,   0,   0,
                                  };
 
+// 3* dc_qlookup[Q]*dc_qlookup[Q];
+#if !CONFIG_EXTEND_QRANGE
+static int rdmult_lut[QINDEX_RANGE]=
+{
+    48,75,108,147,192,243,300,300,
+    363,432,507,588,675,768,867,867,
+    972,1083,1200,1200,1323,1323,1452,1452,
+    1587,1587,1728,1875,1875,2028,2187,2352,
+    2523,2700,2883,3072,3267,3468,3675,3888,
+    4107,4107,4332,4563,4800,5043,5292,5547,
+    5808,6075,6348,6348,6627,6912,7203,7500,
+    7803,8112,8427,8748,9075,9408,9747,10092,
+    10443,10800,11163,11532,11907,12288,12675,13068,
+    13467,13872,14283,14700,15123,15552,15987,16428,
+    16875,17328,17328,17787,18252,18723,19200,19683,
+    20172,20667,21168,21675,22188,22707,23232,23763,
+    24843,25947,27075,27648,28812,30000,30603,31212,
+    32448,33708,34992,36300,37632,38988,40368,41772,
+    44652,46128,47628,49152,50700,52272,53868,55488,
+    57132,58800,61347,63075,65712,68403,71148,73947,
+};
+#else
+static int rdmult_lut[QINDEX_RANGE]=
+{
+    3,5,7,9,12,15,19,23,
+    27,32,37,42,48,54,61,68,
+    75,83,91,99,108,117,127,137,
+    147,169,192,217,243,271,300,331,
+    363,397,450,507,567,631,698,768,
+    842,919,999,1083,1170,1261,1355,1452,
+    1587,1728,1875,2028,2187,2352,2523,2700,
+    2883,3072,3267,3468,3675,3888,4107,4332,
+    4563,4800,5043,5292,5547,5808,6075,6348,
+    6627,6912,7203,7500,7880,8269,8667,9075,
+    9492,9919,10355,10800,11255,11719,12192,12675,
+    13167,13669,14180,14700,15230,15769,16317,16875,
+    18019,19200,20419,21675,22969,24300,25669,27075,
+    28519,30000,31519,33075,34669,36300,37969,39675,
+    41772,43923,46128,48387,50700,53067,55488,57963,
+    61347,64827,69312,73947,78732,83667,89787,97200,
+};
+#endif
 
 /* values are now correlated to quantizer */
 static int sad_per_bit16lut[QINDEX_RANGE] =
@@ -205,12 +247,16 @@ void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex)
     cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex];
 }
 
-void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
+
+
+
+
+void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 {
     int q;
     int i;
-    double capped_q = (Qvalue < 160) ? (double)Qvalue : 160.0;
-    double rdconst = 3.00;
+    int *thresh;
+    int threshmult;
 
     vp8_clear_system_state();  //__asm emms;
 
@@ -218,7 +264,8 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
     // for key frames, golden frames and arf frames.
     // if (cpi->common.refresh_golden_frame ||
     //     cpi->common.refresh_alt_ref_frame)
-    cpi->RDMULT = (int)(rdconst * (capped_q * capped_q));
+    QIndex=(QIndex<0)? 0 : ((QIndex>127)?127 : QIndex);
+    cpi->RDMULT = rdmult_lut[QIndex];
 
     // Extend rate multiplier along side quantizer zbin increases
     if (cpi->zbin_over_quant  > 0)
@@ -229,8 +276,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
         // Experimental code using the same basic equation as used for Q above
         // The units of cpi->zbin_over_quant are 1/128 of Q bin size
         oq_factor = 1.0 + ((double)0.0015625 * cpi->zbin_over_quant);
-        modq = (int)((double)capped_q * oq_factor);
-        cpi->RDMULT = (int)(rdconst * (modq * modq));
+        cpi->RDMULT = (int)((double)cpi->RDMULT * oq_factor * oq_factor);
     }
 
     if (cpi->pass == 2 && (cpi->common.frame_type != KEY_FRAME))
@@ -241,19 +287,34 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
             cpi->RDMULT += (cpi->RDMULT * rd_iifactor[cpi->next_iiratio]) >> 4;
     }
 
+#if !CONFIG_EXTEND_QRANGE
     if (cpi->RDMULT < 125)
         cpi->RDMULT = 125;
+#else
+    if (cpi->RDMULT < 7)
+        cpi->RDMULT = 7;
+#endif
 
     cpi->mb.errorperbit = (cpi->RDMULT / 100);
+#if CONFIG_EXTEND_QRANGE
+    if(cpi->mb.errorperbit<1)
+        cpi->mb.errorperbit=1;
+#endif
     vp8_set_speed_features(cpi);
 
     if (cpi->common.simpler_lpf)
         cpi->common.filter_type = SIMPLE_LOOPFILTER;
 
-    q = (int)pow(Qvalue, 1.25);
+    q = (int)pow(vp8_dc_quant(QIndex,0), 1.25);
 
     if (q < 8)
         q = 8;
+
+
+
+#if CONFIG_EXTEND_QRANGE
+    cpi->RDMULT *= 16;
+#endif
 
     if (cpi->RDMULT > 1000)
     {
@@ -972,7 +1033,11 @@ static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp
 
     // Distortion
     d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
+#if CONFIG_EXTEND_QRANGE
+    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
+#else
     d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
+#endif
 
     *Distortion = (d >> 4);
 

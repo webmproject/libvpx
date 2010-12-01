@@ -245,7 +245,11 @@ struct vp8_token_state{
 // TODO: experiments to find optimal multiple numbers
 #define Y1_RD_MULT 4
 #define UV_RD_MULT 2
+#if !CONFIG_EXTEND_QRANGE
 #define Y2_RD_MULT 16
+#else
+#define Y2_RD_MULT 4
+#endif
 
 static const int plane_rd_mult[4]=
 {

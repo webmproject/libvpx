@@ -39,7 +39,16 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     vp8_arch_x86_decode_init(pbi);
 #endif
 
+
 #if ARCH_ARM
     vp8_arch_arm_decode_init(pbi);
+#endif
+
+#if CONFIG_EXTEND_QRANGE
+    pbi->dequant.idct_add            = vp8_dequant_idct_add_c;
+    pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_c;
+    pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_c;
+    pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_c;
+    pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_c;
 #endif
 }

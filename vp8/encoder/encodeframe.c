@@ -709,7 +709,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
             vp8_auto_select_speed(cpi);
     }
 
-    vp8_initialize_rd_consts(cpi, vp8_dc_quant(cm->base_qindex, cm->y1dc_delta_q));
+    vp8_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
     vp8cx_initialize_me_consts(cpi, cm->base_qindex);
 
     // Copy data over into macro block data sturctures.
