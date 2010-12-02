@@ -4582,7 +4582,7 @@ static void encode_frame_to_data_rate
     }
     else
     {
-        if (cpi->oxcf.play_alternate && cpi->common.refresh_alt_ref_frame)
+        if (cpi->oxcf.play_alternate && cpi->common.refresh_alt_ref_frame && (cpi->common.frame_type != KEY_FRAME))
             // Update the alternate reference frame and stats as appropriate.
             update_alt_ref_frame_and_stats(cpi);
         else

@@ -326,6 +326,7 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
         cpi->frames_till_gf_update_due = cpi->goldfreq;
 
     cpi->common.refresh_golden_frame = TRUE;
+    cpi->common.refresh_alt_ref_frame = TRUE;
 }
 
 void vp8_calc_auto_iframe_target_size(VP8_COMP *cpi)
