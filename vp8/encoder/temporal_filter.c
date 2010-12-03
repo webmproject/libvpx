@@ -246,7 +246,7 @@ static int find_matching_mb
             step_param,
             sadpb / 2/*x->errorperbit*/,
             &num00, &cpi->fn_ptr[BLOCK_16X16],
-            mvsadcost, mvcost); //sadpb < 9
+            mvsadcost, mvcost, &best_ref_mv1); //sadpb < 9
 
         // Further step/diamond searches as necessary
         n = 0;
@@ -268,7 +268,7 @@ static int find_matching_mb
                     step_param + n,
                     sadpb / 4/*x->errorperbit*/,
                     &num00, &cpi->fn_ptr[BLOCK_16X16],
-                    mvsadcost, mvcost); //sadpb = 9
+                    mvsadcost, mvcost, &best_ref_mv1); //sadpb = 9
 
                 if (thissme < bestsme)
                 {
