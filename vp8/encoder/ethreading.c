@@ -61,6 +61,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
                     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
                     volatile int *last_row_current_mb_col;
+                    INT64 activity_sum = 0;
 
                     if (ithread > 0)
                         last_row_current_mb_col = &cpi->mb_row_ei[ithread-1].current_mb_col;
@@ -110,6 +111,11 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         xd->dst.u_buffer = cm->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
                         xd->dst.v_buffer = cm->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
                         xd->left_available = (mb_col != 0);
+
+                        x->rddiv = cpi->RDDIV;
+                        x->rdmult = cpi->RDMULT;
+
+                        activity_sum += vp8_activity_masking(cpi, x);
 
                         // Is segmentation enabled
                         // MB level adjutment to quantizer
@@ -197,6 +203,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     // this is to account for the border
                     xd->mode_info_context++;
                     x->partition_info++;
+                    x->activity_sum += activity_sum;
 
                     x->src.y_buffer += 16 * x->src.y_stride * (cpi->encoding_thread_count + 1) - 16 * cm->mb_cols;
                     x->src.u_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
@@ -240,8 +247,6 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
     z->sadperbit16      = x->sadperbit16;
     z->sadperbit4       = x->sadperbit4;
     z->errthresh        = x->errthresh;
-    z->rddiv            = x->rddiv;
-    z->rdmult           = x->rdmult;
 
     /*
     z->mv_col_min    = x->mv_col_min;
@@ -392,8 +397,7 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 
         vp8_setup_block_ptrs(mb);
 
-        mb->rddiv = cpi->RDDIV;
-        mb->rdmult = cpi->RDMULT;
+        mb->activity_sum = 0;
 
         mbd->left_context = &cm->left_context;
         mb->mvc = cm->fc.mvc;
