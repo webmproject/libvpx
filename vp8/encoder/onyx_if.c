@@ -2205,6 +2205,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     init_context_counters();
 #endif
 
+    /*Initialize the feed-forward activity masking.*/
+    cpi->activity_avg = 90<<12;
 
     cpi->frames_since_key = 8;        // Give a sensible default for the first frame.
     cpi->key_frame_frequency = cpi->oxcf.key_freq;

@@ -321,6 +321,7 @@ typedef struct
     int mvcostmultiplier;
     int subseqblockweight;
     int errthresh;
+    unsigned int activity_avg;
 
     int RDMULT;
     int RDDIV ;
@@ -675,6 +676,8 @@ void control_data_rate(VP8_COMP *cpi);
 void vp8_encode_frame(VP8_COMP *cpi);
 
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size);
+
+unsigned int vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
 
 int rd_cost_intra_mb(MACROBLOCKD *x);
 
