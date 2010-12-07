@@ -1023,285 +1023,324 @@ unsigned char vp8_mbsplit_offset2[4][16] = {
     { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
     { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
 };
-static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *best_ref_mv, int best_rd, int *mdcounts, int *returntotrate, int *returnyrate, int *returndistortion, int compressor_speed, int *mvcost[2], int mvthresh, int fullpixel)
+
+
+static const unsigned int segmentation_to_sseshift[4] = {3, 3, 2, 0};
+
+
+typedef struct
 {
-    int i, segmentation;
-    B_PREDICTION_MODE this_mode;
-    MACROBLOCKD *xc = &x->e_mbd;
-    BLOCK *c;
-    BLOCKD *e;
+  MV *ref_mv;
+
+  int segment_rd;
+  int segment_num;
+  int r;
+  int d;
+  int segment_yrate;
+  B_PREDICTION_MODE modes[16];
+  MV mvs[16];
+  unsigned char eobs[16];
+
+  int mvthresh;
+  int *mdcounts;
+
+} BEST_SEG_INFO;
+
+
+void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
+                         unsigned int segmentation)
+{
+    int i;
     int const *labels;
-    int best_segment_rd = INT_MAX;
-    int best_seg = 0;
     int br = 0;
     int bd = 0;
-    int bsr = 0;
-    int bsd = 0;
-    int bestsegmentyrate = 0;
-
-    static const int segmentation_to_sseshift[4] = {3, 3, 2, 0};
-
-    // FIX TO Rd error outrange bug PGW 9 june 2004
-    B_PREDICTION_MODE bmodes[16] = {ZERO4X4, ZERO4X4, ZERO4X4, ZERO4X4,
-                                    ZERO4X4, ZERO4X4, ZERO4X4, ZERO4X4,
-                                    ZERO4X4, ZERO4X4, ZERO4X4, ZERO4X4,
-                                    ZERO4X4, ZERO4X4, ZERO4X4, ZERO4X4
-                                   };
-
-    MV bmvs[16];
-    int beobs[16];
-
-    vpx_memset(beobs, 0, sizeof(beobs));
+    B_PREDICTION_MODE this_mode;
 
 
-    for (segmentation = 0; segmentation < VP8_NUMMBSPLITS; segmentation++)
+    int label_count;
+    int this_segment_rd = 0;
+    int label_mv_thresh;
+    int rate = 0;
+    int sbr = 0;
+    int sbd = 0;
+    int segmentyrate = 0;
+
+    vp8_variance_fn_ptr_t *v_fn_ptr;
+
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+    ENTROPY_CONTEXT_PLANES t_above_b, t_left_b;
+    ENTROPY_CONTEXT *ta_b;
+    ENTROPY_CONTEXT *tl_b;
+
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+    ta_b = (ENTROPY_CONTEXT *)&t_above_b;
+    tl_b = (ENTROPY_CONTEXT *)&t_left_b;
+
+    br = 0;
+    bd = 0;
+
+    v_fn_ptr = &cpi->fn_ptr[segmentation];
+    labels = vp8_mbsplits[segmentation];
+    label_count = vp8_mbsplit_count[segmentation];
+
+    // 64 makes this threshold really big effectively
+    // making it so that we very rarely check mvs on
+    // segments.   setting this to 1 would make mv thresh
+    // roughly equal to what it is for macroblocks
+    label_mv_thresh = 1 * bsi->mvthresh / label_count ;
+
+    // Segmentation method overheads
+    rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + segmentation);
+    rate += vp8_cost_mv_ref(SPLITMV, bsi->mdcounts);
+    this_segment_rd += RDFUNC(x->rdmult, x->rddiv, rate, 0, cpi->target_bits_per_mb);
+    br += rate;
+
+    for (i = 0; i < label_count; i++)
     {
-        int label_count;
-        int this_segment_rd = 0;
-        int label_mv_thresh;
-        int rate = 0;
-        int sbr = 0;
-        int sbd = 0;
-        int sseshift;
-        int segmentyrate = 0;
+        MV mode_mv[B_MODE_COUNT];
+        int best_label_rd = INT_MAX;
+        B_PREDICTION_MODE mode_selected = ZERO4X4;
+        int bestlabelyrate = 0;
 
-        vp8_variance_fn_ptr_t *v_fn_ptr;
-
-        ENTROPY_CONTEXT_PLANES t_above, t_left;
-        ENTROPY_CONTEXT *ta;
-        ENTROPY_CONTEXT *tl;
-        ENTROPY_CONTEXT_PLANES t_above_b, t_left_b;
-        ENTROPY_CONTEXT *ta_b;
-        ENTROPY_CONTEXT *tl_b;
-
-        vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-        vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-        ta = (ENTROPY_CONTEXT *)&t_above;
-        tl = (ENTROPY_CONTEXT *)&t_left;
-        ta_b = (ENTROPY_CONTEXT *)&t_above_b;
-        tl_b = (ENTROPY_CONTEXT *)&t_left_b;
-
-        br = 0;
-        bd = 0;
-
-        v_fn_ptr = &cpi->fn_ptr[segmentation];
-        sseshift = segmentation_to_sseshift[segmentation];
-        labels = vp8_mbsplits[segmentation];
-        label_count = vp8_mbsplit_count[segmentation];
-
-        // 64 makes this threshold really big effectively
-        // making it so that we very rarely check mvs on
-        // segments.   setting this to 1 would make mv thresh
-        // roughly equal to what it is for macroblocks
-        label_mv_thresh = 1 * mvthresh / label_count ;
-
-        // Segmentation method overheads
-        rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + segmentation);
-
-        rate += vp8_cost_mv_ref(SPLITMV, mdcounts);
-
-        this_segment_rd += RDFUNC(x->rdmult, x->rddiv, rate, 0, cpi->target_bits_per_mb);
-        br += rate;
-
-        for (i = 0; i < label_count; i++)
+        // search for the best motion vector on this segment
+        for (this_mode = LEFT4X4; this_mode <= NEW4X4 ; this_mode ++)
         {
-            MV mode_mv[B_MODE_COUNT];
-            int best_label_rd = INT_MAX;
-            B_PREDICTION_MODE mode_selected = ZERO4X4;
-            int j;
-            int bestlabelyrate = 0;
+            int this_rd;
+            int distortion;
+            int labelyrate;
+            ENTROPY_CONTEXT_PLANES t_above_s, t_left_s;
+            ENTROPY_CONTEXT *ta_s;
+            ENTROPY_CONTEXT *tl_s;
 
+            vpx_memcpy(&t_above_s, &t_above, sizeof(ENTROPY_CONTEXT_PLANES));
+            vpx_memcpy(&t_left_s, &t_left, sizeof(ENTROPY_CONTEXT_PLANES));
 
-            // find first label
-            j = vp8_mbsplit_offset2[segmentation][i];
+            ta_s = (ENTROPY_CONTEXT *)&t_above_s;
+            tl_s = (ENTROPY_CONTEXT *)&t_left_s;
 
-            c = &x->block[j];
-            e = &x->e_mbd.block[j];
-
-            // search for the best motion vector on this segment
-            for (this_mode = LEFT4X4; this_mode <= NEW4X4 ; this_mode ++)
+            if (this_mode == NEW4X4)
             {
-                int distortion;
-                int this_rd;
+                int sseshift;
                 int num00;
-                int labelyrate;
-                ENTROPY_CONTEXT_PLANES t_above_s, t_left_s;
-                ENTROPY_CONTEXT *ta_s;
-                ENTROPY_CONTEXT *tl_s;
+                int step_param = 0;
+                int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
+                int n;
+                int thissme;
+                int bestsme = INT_MAX;
+                MV  temp_mv;
+                BLOCK *c;
+                BLOCKD *e;
 
-                vpx_memcpy(&t_above_s, &t_above, sizeof(ENTROPY_CONTEXT_PLANES));
-                vpx_memcpy(&t_left_s, &t_left, sizeof(ENTROPY_CONTEXT_PLANES));
+                // Is the best so far sufficiently good that we cant justify doing and new motion search.
+                if (best_label_rd < label_mv_thresh)
+                    break;
 
-                ta_s = (ENTROPY_CONTEXT *)&t_above_s;
-                tl_s = (ENTROPY_CONTEXT *)&t_left_s;
-
-                if (this_mode == NEW4X4)
                 {
-                    int step_param = 0;
-                    int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
-                    int n;
-                    int thissme;
-                    int bestsme = INT_MAX;
-                    MV  temp_mv;
+                    int sadpb = x->sadperbit4;
 
-                    // Is the best so far sufficiently good that we cant justify doing and new motion search.
-                    if (best_label_rd < label_mv_thresh)
-                        break;
+                    // find first label
+                    n = vp8_mbsplit_offset2[segmentation][i];
 
+                    c = &x->block[n];
+                    e = &x->e_mbd.block[n];
+
+                    if (cpi->sf.search_method == HEX)
+                        bestsme = vp8_hex_search(x, c, e, bsi->ref_mv,
+                                                 &mode_mv[NEW4X4], step_param, sadpb, &num00, v_fn_ptr, x->mvsadcost, x->mvcost);
+
+                    else
                     {
-                        int sadpb = x->sadperbit4;
+                        bestsme = cpi->diamond_search_sad(x, c, e, bsi->ref_mv,
+                                                          &mode_mv[NEW4X4], step_param,
+                                                          sadpb / 2, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
 
-                        if (cpi->sf.search_method == HEX)
-                            bestsme = vp8_hex_search(x, c, e, best_ref_mv, &mode_mv[NEW4X4], step_param, sadpb/*x->errorperbit*/, &num00, v_fn_ptr, x->mvsadcost, mvcost);
-                        else
+                        n = num00;
+                        num00 = 0;
+
+                        while (n < further_steps)
                         {
-                            bestsme = cpi->diamond_search_sad(x, c, e, best_ref_mv, &mode_mv[NEW4X4], step_param, sadpb / 2/*x->errorperbit*/, &num00, v_fn_ptr, x->mvsadcost, mvcost, best_ref_mv);
+                            n++;
 
-                            n = num00;
-                            num00 = 0;
-
-                            while (n < further_steps)
+                            if (num00)
+                                num00--;
+                            else
                             {
-                                n++;
+                                thissme = cpi->diamond_search_sad(x, c, e, bsi->ref_mv,
+                                                                  &temp_mv, step_param + n,
+                                                                  sadpb / 2, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
 
-                                if (num00)
-                                    num00--;
-                                else
+                                if (thissme < bestsme)
                                 {
-                                    thissme = cpi->diamond_search_sad(x, c, e, best_ref_mv, &temp_mv, step_param + n, sadpb / 2/*x->errorperbit*/, &num00, v_fn_ptr, x->mvsadcost, mvcost, best_ref_mv);
-
-                                    if (thissme < bestsme)
-                                    {
-                                        bestsme = thissme;
-                                        mode_mv[NEW4X4].row = temp_mv.row;
-                                        mode_mv[NEW4X4].col = temp_mv.col;
-                                    }
+                                    bestsme = thissme;
+                                    mode_mv[NEW4X4].row = temp_mv.row;
+                                    mode_mv[NEW4X4].col = temp_mv.col;
                                 }
                             }
                         }
+                    }
 
-                        // Should we do a full search (best quality only)
-                        if ((compressor_speed == 0) && (bestsme >> sseshift) > 4000)
+                    sseshift = segmentation_to_sseshift[segmentation];
+
+                    // Should we do a full search (best quality only)
+                    if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000)
+                    {
+                        thissme = cpi->full_search_sad(x, c, e, bsi->ref_mv,
+                                                       sadpb / 4, 16, v_fn_ptr, x->mvcost, x->mvsadcost,bsi->ref_mv);
+
+                        if (thissme < bestsme)
                         {
-                            thissme = cpi->full_search_sad(x, c, e, best_ref_mv, sadpb / 4, 16, v_fn_ptr, x->mvcost, x->mvsadcost, best_ref_mv);
-
-                            if (thissme < bestsme)
-                            {
-                                bestsme = thissme;
-                                mode_mv[NEW4X4] = e->bmi.mv.as_mv;
-                            }
-                            else
-                            {
-                                // The full search result is actually worse so re-instate the previous best vector
-                                e->bmi.mv.as_mv = mode_mv[NEW4X4];
-                            }
+                            bestsme = thissme;
+                            mode_mv[NEW4X4] = e->bmi.mv.as_mv;
+                        }
+                        else
+                        {
+                            // The full search result is actually worse so re-instate the previous best vector
+                            e->bmi.mv.as_mv = mode_mv[NEW4X4];
                         }
                     }
-
-                    if (bestsme < INT_MAX)
-                    {
-                        if (!fullpixel)
-                            cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4], best_ref_mv, x->errorperbit / 2, v_fn_ptr, mvcost);
-                        else
-                            vp8_skip_fractional_mv_step(x, c, e, &mode_mv[NEW4X4], best_ref_mv, x->errorperbit, v_fn_ptr, mvcost);
-                    }
                 }
 
-                rate = labels2mode(x, labels, i, this_mode, &mode_mv[this_mode], best_ref_mv, mvcost);
-
-                // Trap vectors that reach beyond the UMV borders
-                if (((mode_mv[this_mode].row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].row >> 3) > x->mv_row_max) ||
-                    ((mode_mv[this_mode].col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].col >> 3) > x->mv_col_max))
+                if (bestsme < INT_MAX)
                 {
-                    continue;
+                    if (!cpi->common.full_pixel)
+                        cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
+                                                     bsi->ref_mv, x->errorperbit / 2, v_fn_ptr, x->mvcost);
+                    else
+                        vp8_skip_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
+                                                    bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost);
                 }
+            } /* NEW4X4 */
 
-                distortion = vp8_encode_inter_mb_segment(x, labels, i, IF_RTCD(&cpi->rtcd.encodemb)) / 4;
+            rate = labels2mode(x, labels, i, this_mode, &mode_mv[this_mode],
+                               bsi->ref_mv, x->mvcost);
 
-                labelyrate = rdcost_mbsegment_y(x, labels, i, ta_s, tl_s);
-                rate += labelyrate;
-
-                this_rd = RDFUNC(x->rdmult, x->rddiv, rate, distortion, cpi->target_bits_per_mb);
-
-                if (this_rd < best_label_rd)
-                {
-                    sbr = rate;
-                    sbd = distortion;
-                    bestlabelyrate = labelyrate;
-                    mode_selected = this_mode;
-                    best_label_rd = this_rd;
-
-                    vpx_memcpy(ta_b, ta_s, sizeof(ENTROPY_CONTEXT_PLANES));
-                    vpx_memcpy(tl_b, tl_s, sizeof(ENTROPY_CONTEXT_PLANES));
-
-                }
-            }
-
-            vpx_memcpy(ta, ta_b, sizeof(ENTROPY_CONTEXT_PLANES));
-            vpx_memcpy(tl, tl_b, sizeof(ENTROPY_CONTEXT_PLANES));
-
-            labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected], best_ref_mv, mvcost);
-
-            br += sbr;
-            bd += sbd;
-            segmentyrate += bestlabelyrate;
-            this_segment_rd += best_label_rd;
-
-            if ((this_segment_rd > best_rd) || (this_segment_rd > best_segment_rd))
-                break;
-        }
-
-        if ((this_segment_rd <= best_rd) && (this_segment_rd < best_segment_rd))
-        {
-            bsr = br;
-            bsd = bd;
-            bestsegmentyrate = segmentyrate;
-            best_segment_rd = this_segment_rd;
-            best_seg = segmentation;
-
-            // store everything needed to come back to this!!
-            for (i = 0; i < 16; i++)
+            // Trap vectors that reach beyond the UMV borders
+            if (((mode_mv[this_mode].row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].row >> 3) > x->mv_row_max) ||
+                ((mode_mv[this_mode].col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].col >> 3) > x->mv_col_max))
             {
-                BLOCKD *bd = &x->e_mbd.block[i];
-
-                bmvs[i] = bd->bmi.mv.as_mv;
-                bmodes[i] = bd->bmi.mode;
-                beobs[i] = bd->eob;
+                continue;
             }
+
+            distortion = vp8_encode_inter_mb_segment(x, labels, i, IF_RTCD(&cpi->rtcd.encodemb)) / 4;
+
+            labelyrate = rdcost_mbsegment_y(x, labels, i, ta_s, tl_s);
+            rate += labelyrate;
+
+            this_rd = RDFUNC(x->rdmult, x->rddiv, rate, distortion, cpi->target_bits_per_mb);
+
+            if (this_rd < best_label_rd)
+            {
+                sbr = rate;
+                sbd = distortion;
+                bestlabelyrate = labelyrate;
+                mode_selected = this_mode;
+                best_label_rd = this_rd;
+
+                vpx_memcpy(ta_b, ta_s, sizeof(ENTROPY_CONTEXT_PLANES));
+                vpx_memcpy(tl_b, tl_s, sizeof(ENTROPY_CONTEXT_PLANES));
+
+            }
+        } /*for each 4x4 mode*/
+
+        vpx_memcpy(ta, ta_b, sizeof(ENTROPY_CONTEXT_PLANES));
+        vpx_memcpy(tl, tl_b, sizeof(ENTROPY_CONTEXT_PLANES));
+
+        labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected],
+                    bsi->ref_mv, x->mvcost);
+
+        br += sbr;
+        bd += sbd;
+        segmentyrate += bestlabelyrate;
+        this_segment_rd += best_label_rd;
+
+        if (this_segment_rd > bsi->segment_rd)
+            break;
+    } /* for each label */
+
+    if (this_segment_rd < bsi->segment_rd)
+    {
+        bsi->r = br;
+        bsi->d = bd;
+        bsi->segment_yrate = segmentyrate;
+        bsi->segment_rd = this_segment_rd;
+        bsi->segment_num = segmentation;
+
+        // store everything needed to come back to this!!
+        for (i = 0; i < 16; i++)
+        {
+            BLOCKD *bd = &x->e_mbd.block[i];
+
+            bsi->mvs[i] = bd->bmi.mv.as_mv;
+            bsi->modes[i] = bd->bmi.mode;
+            bsi->eobs[i] = bd->eob;
         }
     }
+}
+static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
+                                           MV *best_ref_mv, int best_rd,
+                                           int *mdcounts, int *returntotrate,
+                                           int *returnyrate, int *returndistortion,
+                                           int mvthresh)
+{
+    int i;
+    BEST_SEG_INFO bsi;
+    BEST_SEG_INFO bsi_8x8;
+    int check_8x16 = 0;
+    int check_16x8 = 0;
 
-    // set it to the best
+    vpx_memset(&bsi, 0, sizeof(bsi));
+
+    bsi.segment_rd = best_rd;
+    bsi.ref_mv = best_ref_mv;
+    bsi.mvthresh = mvthresh;
+    bsi.mdcounts = mdcounts;
+
+    for(i = 0; i < 16; i++)
+    {
+        bsi.modes[i] = ZERO4X4;
+    }
+
+    /* original */
+    vp8_rd_check_segment(cpi, x, &bsi, 0);
+    vp8_rd_check_segment(cpi, x, &bsi, 1);
+    vp8_rd_check_segment(cpi, x, &bsi, 2);
+    vp8_rd_check_segment(cpi, x, &bsi, 3);
+
+    /* set it to the best */
     for (i = 0; i < 16; i++)
     {
         BLOCKD *bd = &x->e_mbd.block[i];
 
-        bd->bmi.mv.as_mv = bmvs[i];
-        bd->bmi.mode = bmodes[i];
-        bd->eob = beobs[i];
+        bd->bmi.mv.as_mv = bsi.mvs[i];
+        bd->bmi.mode = bsi.modes[i];
+        bd->eob = bsi.eobs[i];
     }
 
-    *returntotrate = bsr;
-    *returndistortion = bsd;
-    *returnyrate = bestsegmentyrate;
+    *returntotrate = bsi.r;
+    *returndistortion = bsi.d;
+    *returnyrate = bsi.segment_yrate;
 
-    // save partitions
-    labels = vp8_mbsplits[best_seg];
-    x->e_mbd.mode_info_context->mbmi.partitioning = best_seg;
-    x->partition_info->count = vp8_mbsplit_count[best_seg];
+    /* save partitions */
+    x->e_mbd.mode_info_context->mbmi.partitioning = bsi.segment_num;
+    x->partition_info->count = vp8_mbsplit_count[bsi.segment_num];
 
     for (i = 0; i < x->partition_info->count; i++)
     {
         int j;
 
-        j = vp8_mbsplit_offset2[best_seg][i];
+        j = vp8_mbsplit_offset2[bsi.segment_num][i];
 
         x->partition_info->bmi[i].mode = x->e_mbd.block[j].bmi.mode;
         x->partition_info->bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
     }
 
-    return best_segment_rd;
+    return bsi.segment_rd;
 }
 
 
@@ -1853,14 +1892,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         frame_cost = ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
         rate2 += frame_cost;
 
-        if (this_mode <= B_PRED)
-        {
-            for (i = 0; i < 16; i++)
-            {
-                vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
-            }
-        }
-
         // Check to see if the testing frequency for this mode is at its max
         // If so then prevent it from being tested and increase the threshold for its testing
         if (cpi->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
@@ -1909,6 +1940,10 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         {
         case B_PRED:
 
+            for (i = 0; i < 16; i++)
+            {
+                vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
+            }
             // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
             vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion);
             rate2 += rate;
@@ -1928,13 +1963,14 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             // (best_rd - frame_cost_rd) is thus a conservative breakout number.
             int breakout_rd = best_rd - frame_cost_rd;
             int tmp_rd;
+            int this_rd_thresh;
 
-            if (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME)
-                tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv, breakout_rd, mdcounts, &rate, &rate_y, &distortion, cpi->compressor_speed, x->mvcost, cpi->rd_threshes[THR_NEWMV], cpi->common.full_pixel) ;
-            else if (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-                tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv, breakout_rd, mdcounts, &rate, &rate_y, &distortion, cpi->compressor_speed, x->mvcost, cpi->rd_threshes[THR_NEWG], cpi->common.full_pixel) ;
-            else
-                tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv, breakout_rd, mdcounts, &rate, &rate_y, &distortion, cpi->compressor_speed, x->mvcost, cpi->rd_threshes[THR_NEWA], cpi->common.full_pixel) ;
+            this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ? cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
+            this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ? cpi->rd_threshes[THR_NEWG]: this_rd_thresh;
+
+            tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
+                                                     breakout_rd, mdcounts,
+                                                     &rate, &rate_y, &distortion, this_rd_thresh) ;
 
             rate2 += rate;
             distortion2 += distortion;
@@ -2007,6 +2043,10 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         case V_PRED:
         case H_PRED:
         case TM_PRED:
+            for (i = 0; i < 16; i++)
+            {
+                vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
+            }
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
             vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
             {
