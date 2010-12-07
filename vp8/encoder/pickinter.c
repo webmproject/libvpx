@@ -685,7 +685,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
 #if 0
 
             // Initial step Search
-            bestsme = vp8_diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, x->errorperbit, &num00, &cpi->fn_ptr, cpi->mb.mvsadcost, cpi->mb.mvcost);
+            bestsme = vp8_diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, x->errorperbit, &num00, &cpi->fn_ptr, cpi->mb.mvsadcost, cpi->mb.mvcost, &best_ref_mv1);
             mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
             mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
 
@@ -698,7 +698,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
                     num00--;
                 else
                 {
-                    thissme = vp8_diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param + n, x->errorperbit, &num00, &cpi->fn_ptr, cpi->mb.mvsadcost, x->mvcost);
+                    thissme = vp8_diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param + n, x->errorperbit, &num00, &cpi->fn_ptr, cpi->mb.mvsadcost, x->mvcost, &best_ref_mv1);
 
                     if (thissme < bestsme)
                     {
@@ -724,7 +724,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
             }
             else
             {
-                bestsme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost); //sadpb < 9
+                bestsme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv1); //sadpb < 9
                 mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
                 mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
 
@@ -743,7 +743,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
                         num00--;
                     else
                     {
-                        thissme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost); //sadpb = 9
+                        thissme = cpi->diamond_search_sad(x, b, d, &best_ref_mv1, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv1); //sadpb = 9
 
                         if (thissme < bestsme)
                         {

@@ -261,6 +261,21 @@ static void setup_features(VP8_COMP *cpi)
 
 void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 {
+    // Delete last frame MV storage buffers
+    if (cpi->lfmv != 0)
+        vpx_free(cpi->lfmv);
+
+    cpi->lfmv = 0;
+
+    if (cpi->lf_ref_frame_sign_bias != 0)
+        vpx_free(cpi->lf_ref_frame_sign_bias);
+
+    cpi->lf_ref_frame_sign_bias = 0;
+
+    if (cpi->lf_ref_frame != 0)
+        vpx_free(cpi->lf_ref_frame);
+
+    cpi->lf_ref_frame = 0;
 
     // Delete sementation map
     if (cpi->segmentation_map != 0)
@@ -309,8 +324,15 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 
     cpi->mb.pip = 0;
 
-    vpx_free(cpi->total_stats);
-    vpx_free(cpi->this_frame_stats);
+    if(cpi->total_stats)
+        vpx_free(cpi->total_stats);
+
+    cpi->total_stats = 0;
+
+    if(cpi->this_frame_stats)
+        vpx_free(cpi->this_frame_stats);
+
+    cpi->this_frame_stats = 0;
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -1311,6 +1333,9 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 
 static int vp8_alloc_partition_data(VP8_COMP *cpi)
 {
+    if(cpi->mb.pip)
+        vpx_free(cpi->mb.pip);
+
     cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
                                 (cpi->common.mb_rows + 1),
                                 sizeof(PARTITION_INFO));
@@ -1378,8 +1403,16 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
+    if(cpi->total_stats)
+        vpx_free(cpi->total_stats);
+
     cpi->total_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+
+    if(cpi->this_frame_stats)
+        vpx_free(cpi->this_frame_stats);
+
     cpi->this_frame_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+
     if(!cpi->total_stats || !cpi->this_frame_stats)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");
@@ -2127,7 +2160,10 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->alt_is_last  = 0 ;
     cpi->gold_is_alt  = 0 ;
 
-
+    // allocate memory for storing last frame's MVs for MV prediction.
+    CHECK_MEM_ERROR(cpi->lfmv, vpx_calloc((cpi->common.mb_rows+1) * (cpi->common.mb_cols+1), sizeof(int_mv)));
+    CHECK_MEM_ERROR(cpi->lf_ref_frame_sign_bias, vpx_calloc((cpi->common.mb_rows+1) * (cpi->common.mb_cols+1), sizeof(int)));
+    CHECK_MEM_ERROR(cpi->lf_ref_frame, vpx_calloc((cpi->common.mb_rows+1) * (cpi->common.mb_cols+1), sizeof(int)));
 
     // Create the encoder segmentation map and set all entries to 0
     CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
@@ -4189,6 +4225,60 @@ static void encode_frame_to_data_rate
         cpi->one_pass_frame_stats[cpi->one_pass_frame_index].frame_pcnt_inter = (double)(100 - cpi->this_frame_percent_intra) / 100.0;
     }
 #endif
+
+    // Update the GF useage maps.
+    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
+    vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
+////////////////////////////////
+////////////////////////////////
+    // This frame's MVs are saved and will be used in next frame's MV prediction.
+    if(cm->show_frame)   //do not save for altref frame
+    {
+      int mb_row;
+      int mb_col;
+      MODE_INFO *tmp = cm->mip; //point to beginning of allocated MODE_INFO arrays.
+      //static int last_video_frame = 0;
+
+      /*
+      if (cm->current_video_frame == 0)   //first frame: set to 0
+      {
+        for (mb_row = 0; mb_row < cm->mb_rows+1; mb_row ++)
+        {
+            for (mb_col = 0; mb_col < cm->mb_cols+1; mb_col ++)
+            {
+                cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride)].as_int = 0;
+                cpi->lf_ref_frame_sign_bias[mb_col + mb_row*(cm->mode_info_stride)] = 0;
+                cpi->lf_ref_frame[mb_col + mb_row*(cm->mode_info_stride)] = 0;
+            }
+        }
+      }else
+      */
+
+      if(cm->frame_type != KEY_FRAME)
+      {
+        for (mb_row = 0; mb_row < cm->mb_rows+1; mb_row ++)
+        {
+          for (mb_col = 0; mb_col < cm->mb_cols+1; mb_col ++)
+          {
+              if(tmp->mbmi.ref_frame != INTRA_FRAME)
+                cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride)].as_int = tmp->mbmi.mv.as_int;
+
+              cpi->lf_ref_frame_sign_bias[mb_col + mb_row*(cm->mode_info_stride)] = cm->ref_frame_sign_bias[tmp->mbmi.ref_frame];
+              cpi->lf_ref_frame[mb_col + mb_row*(cm->mode_info_stride)] = tmp->mbmi.ref_frame;
+              //printf("[%d, %d]  ", cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride-1)].as_mv.row, cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride-1)].as_mv.col);
+              tmp++;
+          }
+        }
+
+      //last_video_frame = cm->current_video_frame;
+      }
+    }
+
+//printf("after: %d   %d \n", cm->current_video_frame, cm->show_frame );
+
+
+
+
 
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter

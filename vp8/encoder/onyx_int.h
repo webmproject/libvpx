@@ -241,6 +241,12 @@ enum
     BLOCK_MAX_SEGMENTS
 };
 
+typedef union
+{
+    unsigned int as_int;
+    MV           as_mv;
+} int_mv;        /* facilitates rapid equality tests */
+
 typedef struct
 {
 
@@ -668,6 +674,10 @@ typedef struct
     unsigned char *gf_active_flags;   // Record of which MBs still refer to last golden frame either directly or through 0,0
     int gf_active_count;
 
+    //Store last frame's MV info for next frame MV prediction
+    int_mv *lfmv;
+    int *lf_ref_frame_sign_bias;
+    int *lf_ref_frame;
 
 } VP8_COMP;
 
