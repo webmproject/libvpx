@@ -67,7 +67,8 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
      int distance, \
      vp8_variance_fn_ptr_t *fn_ptr, \
      int *mvcost[2], \
-     int *mvsadcost[2] \
+     int *mvsadcost[2], \
+     MV *center_mv \
     )
 
 #define prototype_diamond_search_sad(sym)\
@@ -83,7 +84,8 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
      int *num00, \
      vp8_variance_fn_ptr_t *fn_ptr, \
      int *mvsadcost[2], \
-     int *mvcost[2] \
+     int *mvcost[2], \
+     MV *center_mv \
     )
 
 #if ARCH_X86 || ARCH_X86_64

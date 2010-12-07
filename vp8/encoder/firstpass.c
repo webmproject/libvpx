@@ -472,7 +472,7 @@ void vp8_first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *
     xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
 
     // Initial step/diamond search centred on best mv
-    tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param, x->errorperbit, &num00, &v_fn_ptr, x->mvsadcost, x->mvcost);
+    tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param, x->errorperbit, &num00, &v_fn_ptr, x->mvsadcost, x->mvcost, ref_mv);
     if ( tmp_err < INT_MAX-new_mv_mode_penalty )
         tmp_err += new_mv_mode_penalty;
 
@@ -495,7 +495,7 @@ void vp8_first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *
             num00--;
         else
         {
-            tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param + n, x->errorperbit, &num00, &v_fn_ptr, x->mvsadcost, x->mvcost);
+            tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param + n, x->errorperbit, &num00, &v_fn_ptr, x->mvsadcost, x->mvcost, ref_mv);
             if ( tmp_err < INT_MAX-new_mv_mode_penalty )
                 tmp_err += new_mv_mode_penalty;
 
