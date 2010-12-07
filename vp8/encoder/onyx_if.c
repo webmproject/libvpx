@@ -324,8 +324,15 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 
     cpi->mb.pip = 0;
 
-    vpx_free(cpi->total_stats);
-    vpx_free(cpi->this_frame_stats);
+    if(cpi->total_stats)
+        vpx_free(cpi->total_stats);
+
+    cpi->total_stats = 0;
+
+    if(cpi->this_frame_stats)
+        vpx_free(cpi->this_frame_stats);
+
+    cpi->this_frame_stats = 0;
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -1326,6 +1333,9 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 
 static int vp8_alloc_partition_data(VP8_COMP *cpi)
 {
+    if(cpi->mb.pip)
+        vpx_free(cpi->mb.pip);
+
     cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
                                 (cpi->common.mb_rows + 1),
                                 sizeof(PARTITION_INFO));
@@ -1393,8 +1403,16 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
+    if(cpi->total_stats)
+        vpx_free(cpi->total_stats);
+
     cpi->total_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+
+    if(cpi->this_frame_stats)
+        vpx_free(cpi->this_frame_stats);
+
     cpi->this_frame_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+
     if(!cpi->total_stats || !cpi->this_frame_stats)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");

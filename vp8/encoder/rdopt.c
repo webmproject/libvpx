@@ -2200,8 +2200,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             vp8_build_inter_predictors_mby(&x->e_mbd);
             VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, (unsigned int *)(&sse), &sum);
 
-            if (cpi->active_map_enabled && x->active_ptr[0] == 0)
-            {
+            if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
                 x->skip = 1;
             }
             else if (sse < x->encode_breakout)
@@ -2209,21 +2208,23 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                 // Check u and v to make sure skip is ok
                 int sse2 = 0;
 
-                sse2 = VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
-
-                if (sse2 * 2 < x->encode_breakout)
+                // add dc check
+                if (abs(sum) < (cpi->common.Y2dequant[0][0] << 2))
                 {
-                    x->skip = 1;
-                    distortion2 = sse;
-                    rate2 = 500;
+                    sse2 = VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
 
-                    disable_skip = 1;    // We have no real rate data so trying to adjust for rate_y and rate_uv below will cause problems.
-                    this_rd = RDFUNC(x->rdmult, x->rddiv, rate2, distortion2, cpi->target_bits_per_mb);
+                    if (sse2 * 2 < x->encode_breakout)
+                    {
+                        x->skip = 1;
+                        distortion2 = sse;
+                        rate2 = 500;
+                        disable_skip = 1;
+                        this_rd = RDFUNC(x->rdmult, x->rddiv, rate2,
+                          distortion2, cpi->target_bits_per_mb);
 
-                    break;              // (PGW) Move break here from below - for now at least
+                        break;
+                    }
                 }
-                else
-                    x->skip = 0;
             }
 
             //intermodecost[mode_index] = vp8_cost_mv_ref(this_mode, mdcounts);   // Experimental debug code
