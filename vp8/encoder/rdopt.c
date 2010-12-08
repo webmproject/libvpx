@@ -2238,7 +2238,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
             vp8_build_inter_predictors_mby(&x->e_mbd);
-            VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, (unsigned int *)(&sse), &sum);
+            if(x->encode_breakout)
+                VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, (unsigned int *)(&sse), &sum);
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0)
             {
