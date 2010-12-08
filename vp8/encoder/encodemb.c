@@ -243,9 +243,9 @@ struct vp8_token_state{
 };
 
 // TODO: experiments to find optimal multiple numbers
-#define Y1_RD_MULT 1
-#define UV_RD_MULT 1
-#define Y2_RD_MULT 4
+#define Y1_RD_MULT 4
+#define UV_RD_MULT 2
+#define Y2_RD_MULT 16
 
 static const int plane_rd_mult[4]=
 {
@@ -309,7 +309,7 @@ void vp8_optimize_b(MACROBLOCK *mb, int ib, int type,
     eob = d->eob;
 
     /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-    rdmult = (mb->rdmult << 2)*err_mult;
+    rdmult = mb->rdmult * err_mult;
     if(mb->e_mbd.mode_info_context->mbmi.ref_frame==INTRA_FRAME)
         rdmult = (rdmult * 9)>>4;
 
