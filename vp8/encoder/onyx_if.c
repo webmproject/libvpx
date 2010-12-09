@@ -3837,16 +3837,15 @@ static void encode_frame_to_data_rate
 
     vp8_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
 
-    // Limit Q range for the adaptive loop (Values not clipped to range 20-60 as in VP8).
+    // Limit Q range for the adaptive loop.
     bottom_index = cpi->active_best_quality;
     top_index    = cpi->active_worst_quality;
+    q_low  = cpi->active_best_quality;
+    q_high = cpi->active_worst_quality;
 
     vp8_save_coding_context(cpi);
 
     loop_count = 0;
-
-    q_low  = cpi->best_quality;
-    q_high = cpi->worst_quality;
 
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
@@ -4029,15 +4028,13 @@ static void encode_frame_to_data_rate
 
                 Q = vp8_regulate_q(cpi, cpi->this_frame_target);
 
-                q_low  = cpi->best_quality;
-                q_high = cpi->worst_quality;
-
                 vp8_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
 
-                // Limit Q range for the adaptive loop (Values not clipped to range 20-60 as in VP8).
+                // Limit Q range for the adaptive loop.
                 bottom_index = cpi->active_best_quality;
                 top_index    = cpi->active_worst_quality;
-
+                q_low  = cpi->active_best_quality;
+                q_high = cpi->active_worst_quality;
 
                 loop_count++;
                 Loop = TRUE;
