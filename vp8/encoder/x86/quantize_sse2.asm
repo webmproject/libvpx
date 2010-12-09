@@ -253,10 +253,9 @@ rq_zigzag_1c:
     pop         rbp
     ret
 
-
 ;int vp8_fast_quantize_b_impl_sse2(short *coeff_ptr,
 ;                           short *qcoeff_ptr,short *dequant_ptr,
-;                           short *scan_mask, short *round_ptr,
+;                           short *inv_scan_order, short *round_ptr,
 ;                           short *quant_ptr, short *dqcoeff_ptr);
 global sym(vp8_fast_quantize_b_impl_sse2)
 sym(vp8_fast_quantize_b_impl_sse2):
@@ -265,32 +264,18 @@ sym(vp8_fast_quantize_b_impl_sse2):
     SHADOW_ARGS_TO_STACK 7
     push        rsi
     push        rdi
-    push        rbx
     ; end prolog
-
-    ALIGN_STACK 16, rax
-
-    %define save_xmm6  0
-    %define save_xmm7 16
-
-    %define vp8_fastquantizeb_stack_size save_xmm7 + 16
-
-    sub         rsp, vp8_fastquantizeb_stack_size
-
-    movdqa      XMMWORD PTR[rsp + save_xmm6], xmm6
-    movdqa      XMMWORD PTR[rsp + save_xmm7], xmm7
 
     mov         rdx, arg(0)                 ;coeff_ptr
     mov         rcx, arg(2)                 ;dequant_ptr
-    mov         rax, arg(3)                 ;scan_mask
     mov         rdi, arg(4)                 ;round_ptr
     mov         rsi, arg(5)                 ;quant_ptr
 
     movdqa      xmm0, XMMWORD PTR[rdx]
     movdqa      xmm4, XMMWORD PTR[rdx + 16]
 
-    movdqa      xmm6, XMMWORD PTR[rdi]      ;round lo
-    movdqa      xmm7, XMMWORD PTR[rdi + 16] ;round hi
+    movdqa      xmm2, XMMWORD PTR[rdi]      ;round lo
+    movdqa      xmm3, XMMWORD PTR[rdi + 16] ;round hi
 
     movdqa      xmm1, xmm0
     movdqa      xmm5, xmm4
@@ -303,8 +288,8 @@ sym(vp8_fast_quantize_b_impl_sse2):
     psubw       xmm1, xmm0                  ;x = abs(z)
     psubw       xmm5, xmm4                  ;x = abs(z)
 
-    paddw       xmm1, xmm6
-    paddw       xmm5, xmm7
+    paddw       xmm1, xmm2
+    paddw       xmm5, xmm3
 
     pmulhw      xmm1, XMMWORD PTR[rsi]
     pmulhw      xmm5, XMMWORD PTR[rsi + 16]
@@ -312,8 +297,8 @@ sym(vp8_fast_quantize_b_impl_sse2):
     mov         rdi, arg(1)                 ;qcoeff_ptr
     mov         rsi, arg(6)                 ;dqcoeff_ptr
 
-    movdqa      xmm6, XMMWORD PTR[rcx]
-    movdqa      xmm7, XMMWORD PTR[rcx + 16]
+    movdqa      xmm2, XMMWORD PTR[rcx]
+    movdqa      xmm3, XMMWORD PTR[rcx + 16]
 
     pxor        xmm1, xmm0
     pxor        xmm5, xmm4
@@ -323,64 +308,47 @@ sym(vp8_fast_quantize_b_impl_sse2):
     movdqa      XMMWORD PTR[rdi], xmm1
     movdqa      XMMWORD PTR[rdi + 16], xmm5
 
-    pmullw      xmm6, xmm1
-    pmullw      xmm7, xmm5
+    pmullw      xmm2, xmm1
+    pmullw      xmm3, xmm5
 
-    movdqa      xmm2, XMMWORD PTR[rax]
-    movdqa      xmm3, XMMWORD PTR[rax+16];
+    mov         rdi, arg(3)                 ;inv_scan_order
 
-    pxor        xmm4, xmm4            ;clear all bits
+    ; Start with 16
+    pxor        xmm4, xmm4                  ;clear all bits
     pcmpeqw     xmm1, xmm4
     pcmpeqw     xmm5, xmm4
 
-    pcmpeqw     xmm4, xmm4            ;set all bits
+    pcmpeqw     xmm4, xmm4                  ;set all bits
     pxor        xmm1, xmm4
     pxor        xmm5, xmm4
 
-    psrlw       xmm1, 15
-    psrlw       xmm5, 15
+    pand        xmm1, XMMWORD PTR[rdi]
+    pand        xmm5, XMMWORD PTR[rdi+16]
 
-    pmaddwd     xmm1, xmm2
-    pmaddwd     xmm5, xmm3
+    pmaxsw      xmm1, xmm5
 
-    movq        xmm2, xmm1
-    movq        xmm3, xmm5
+    ; now down to 8
+    pshufd      xmm5, xmm1, 00001110b
 
-    psrldq      xmm1, 8
-    psrldq      xmm5, 8
+    pmaxsw      xmm1, xmm5
 
-    paddd       xmm1, xmm5
-    paddd       xmm2, xmm3
+    ; only 4 left
+    pshuflw     xmm5, xmm1, 00001110b
 
-    paddd       xmm1, xmm2
-    movq        xmm5, xmm1
+    pmaxsw      xmm1, xmm5
 
-    psrldq      xmm1, 4
-    paddd       xmm5, xmm1
+    ; okay, just 2!
+    pshuflw     xmm5, xmm1, 00000001b
 
-    movq        rcx,  xmm5
-    and         rcx,  0xffff
+    pmaxsw      xmm1, xmm5
 
-    xor         rdx,  rdx
-    sub         rdx,  rcx
+    movd        rax, xmm1
+    and         rax, 0xff
 
-    bsr         rax,  rcx
-    inc         rax
-
-    sar         rdx,  31
-    and         rax,  rdx
-
-    movdqa      XMMWORD PTR[rsi], xmm6        ;store dqcoeff
-    movdqa      XMMWORD PTR[rsi + 16], xmm7   ;store dqcoeff
-
-    movdqa      xmm6, XMMWORD PTR[rsp + save_xmm6]
-    movdqa      xmm7, XMMWORD PTR[rsp + save_xmm7]
-
-    add         rsp, vp8_fastquantizeb_stack_size
-    pop         rsp
+    movdqa      XMMWORD PTR[rsi], xmm2        ;store dqcoeff
+    movdqa      XMMWORD PTR[rsi + 16], xmm3   ;store dqcoeff
 
     ; begin epilog
-    pop         rbx
     pop         rdi
     pop         rsi
     UNSHADOW_ARGS
