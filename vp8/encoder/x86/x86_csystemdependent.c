@@ -83,7 +83,7 @@ void vp8_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch)
 #if HAVE_SSE2
 int vp8_fast_quantize_b_impl_sse2(short *coeff_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
-                                 short *scan_mask, short *round_ptr,
+                                 const short *inv_scan_order, short *round_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
 void vp8_fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
 {
@@ -99,8 +99,7 @@ void vp8_fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
                  coeff_ptr,
                  qcoeff_ptr,
                  dequant_ptr,
-                 scan_mask,
-
+                 vp8_default_inv_zig_zag,
                  round_ptr,
                  quant_ptr,
                  dqcoeff_ptr

@@ -36,6 +36,14 @@ DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]) =
     7, 11, 14, 15,
 };
 
+DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) = 
+{
+    1,  2,  6,  7,
+    3,  5,  8, 13,
+    4,  9, 12, 14,
+   10, 11, 15, 16
+};
+
 DECLARE_ALIGNED(16, short, vp8_default_zig_zag_mask[16]);
 
 const int vp8_mb_feature_data_bits[MB_LVL_MAX] = {7, 6};
