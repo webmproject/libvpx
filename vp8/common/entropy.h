@@ -95,6 +95,7 @@ struct VP8Common;
 void vp8_default_coef_probs(struct VP8Common *);
 
 extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]);
+extern DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]);
 extern short vp8_default_zig_zag_mask[16];
 extern const int vp8_mb_feature_data_bits[MB_LVL_MAX];
 
