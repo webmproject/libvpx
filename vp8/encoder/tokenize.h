@@ -25,11 +25,10 @@ typedef struct
 
 typedef struct
 {
-    int Token;
-    int Extra;
     const vp8_prob *context_tree;
-    int skip_eob_node;
-    int section;
+    char            skip_eob_node;
+    char            Token;
+    short           Extra;
 } TOKENEXTRA;
 
 int rd_cost_mby(MACROBLOCKD *);
