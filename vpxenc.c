@@ -347,12 +347,12 @@ unsigned int file_is_ivf(FILE *infile,
                          unsigned int *fourcc,
                          unsigned int *width,
                          unsigned int *height,
-                         char          detect[4])
+                         struct detect_buffer *detect)
 {
     char raw_hdr[IVF_FILE_HDR_SZ];
     int is_ivf = 0;
 
-    if(memcmp(detect, "DKIF", 4) != 0)
+    if(memcmp(detect->buf, "DKIF", 4) != 0)
         return 0;
 
     /* See write_ivf_file_header() for more documentation on the file header
@@ -376,6 +376,7 @@ unsigned int file_is_ivf(FILE *infile,
     {
         *width = mem_get_le16(raw_hdr + 12);
         *height = mem_get_le16(raw_hdr + 14);
+        detect->position = 4;
     }
 
     return is_ivf;
@@ -1390,7 +1391,7 @@ int main(int argc, const char **argv_)
             }
         }
         else if (detect.buf_read == 4 &&
-                 file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, detect.buf))
+                 file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, &detect))
         {
             file_type = FILE_TYPE_IVF;
             switch (fourcc)
