@@ -17,7 +17,6 @@ VP8_COMMON_SRCS-yes += common/type_aliases.h
 VP8_COMMON_SRCS-yes += common/pragmas.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
-VP8_COMMON_SRCS-yes += common/preproc.h
 VP8_COMMON_SRCS-yes += common/vpxerrors.h
 
 CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
