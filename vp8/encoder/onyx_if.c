@@ -4221,8 +4221,7 @@ static void encode_frame_to_data_rate
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
     vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
-////////////////////////////////
-////////////////////////////////
+
     // This frame's MVs are saved and will be used in next frame's MV prediction.
     if(cm->show_frame)   //do not save for altref frame
     {
@@ -4230,21 +4229,6 @@ static void encode_frame_to_data_rate
       int mb_col;
       MODE_INFO *tmp = cm->mip; //point to beginning of allocated MODE_INFO arrays.
       //static int last_video_frame = 0;
-
-      /*
-      if (cm->current_video_frame == 0)   //first frame: set to 0
-      {
-        for (mb_row = 0; mb_row < cm->mb_rows+1; mb_row ++)
-        {
-            for (mb_col = 0; mb_col < cm->mb_cols+1; mb_col ++)
-            {
-                cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride)].as_int = 0;
-                cpi->lf_ref_frame_sign_bias[mb_col + mb_row*(cm->mode_info_stride)] = 0;
-                cpi->lf_ref_frame[mb_col + mb_row*(cm->mode_info_stride)] = 0;
-            }
-        }
-      }else
-      */
 
       if(cm->frame_type != KEY_FRAME)
       {
@@ -4257,19 +4241,11 @@ static void encode_frame_to_data_rate
 
               cpi->lf_ref_frame_sign_bias[mb_col + mb_row*(cm->mode_info_stride)] = cm->ref_frame_sign_bias[tmp->mbmi.ref_frame];
               cpi->lf_ref_frame[mb_col + mb_row*(cm->mode_info_stride)] = tmp->mbmi.ref_frame;
-              //printf("[%d, %d]  ", cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride-1)].as_mv.row, cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride-1)].as_mv.col);
               tmp++;
           }
         }
-
-      //last_video_frame = cm->current_video_frame;
       }
     }
-
-//printf("after: %d   %d \n", cm->current_video_frame, cm->show_frame );
-
-
-
 
 
     // Update the GF useage maps.
