@@ -3882,7 +3882,6 @@ static void encode_frame_to_data_rate
         if (cm->frame_type == KEY_FRAME)
         {
             vp8_de_noise(cpi->Source, cpi->Source, l , 1,  0, RTCD(postproc));
-            cpi->ppi.frame = 0;
         }
         else
         {
@@ -3894,10 +3893,6 @@ static void encode_frame_to_data_rate
             {
                 src += cpi->Source->y_stride * (cpi->Source->y_height - 1);
             }
-
-            //temp_filter(&cpi->ppi,src,src,
-            //  cm->last_frame.y_width * cm->last_frame.y_height,
-            //  cpi->oxcf.noise_sensitivity);
         }
     }
 

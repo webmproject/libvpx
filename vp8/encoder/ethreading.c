@@ -132,6 +132,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         else
                             xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
 
+                        x->active_ptr = cpi->active_map + seg_map_index + mb_col;
 
                         if (cm->frame_type == KEY_FRAME)
                         {
@@ -163,8 +164,28 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                             if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                                 cpi->inter_zz_count ++;
 
-                        }
+                            // Special case code for cyclic refresh
+                            // If cyclic update enabled then copy xd->mbmi.segment_id; (which may have been updated based on mode
+                            // during vp8cx_encode_inter_macroblock()) back into the global sgmentation map
+                            if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
+                            {
+                                cpi->segmentation_map[seg_map_index+mb_col] = xd->mode_info_context->mbmi.segment_id;
 
+                                // If the block has been refreshed mark it as clean (the magnitude of the -ve influences how long it will be before we consider another refresh):
+                                // Else if it was coded (last frame 0,0) and has not already been refreshed then mark it as a candidate for cleanup next time (marked 0)
+                                // else mark it as dirty (1).
+                                if (xd->mode_info_context->mbmi.segment_id)
+                                    cpi->cyclic_refresh_map[seg_map_index+mb_col] = -1;
+                                else if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
+                                {
+                                    if (cpi->cyclic_refresh_map[seg_map_index+mb_col] == 1)
+                                        cpi->cyclic_refresh_map[seg_map_index+mb_col] = 0;
+                                }
+                                else
+                                    cpi->cyclic_refresh_map[seg_map_index+mb_col] = 1;
+
+                            }
+                        }
                         cpi->tplist[mb_row].stop = *tp;
 
                         x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb

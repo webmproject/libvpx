@@ -18,7 +18,6 @@
 #include "treewriter.h"
 #include "tokenize.h"
 #include "onyxc_int.h"
-#include "preproc.h"
 #include "variance.h"
 #include "dct.h"
 #include "encodemb.h"
@@ -463,8 +462,6 @@ typedef struct
 
     unsigned char *output_partition2;
     size_t output_partition2size;
-
-    pre_proc_instance ppi;
 
     int frames_to_key;
     int gfu_boost;
