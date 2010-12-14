@@ -42,7 +42,6 @@ typedef struct
 {
     vp8_tree_p tree;
     const vp8_prob *prob;
-    vp8bc_index_t *prob_bc;
     int Len;
     int base_val;
 } vp8_extra_bit_struct;

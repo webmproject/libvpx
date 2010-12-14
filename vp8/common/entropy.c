@@ -36,7 +36,7 @@ DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]) =
     7, 11, 14, 15,
 };
 
-DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) = 
+DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) =
 {
     1,  2,  6,  7,
     3,  5,  8, 13,
@@ -114,23 +114,20 @@ static void init_bit_trees()
     init_bit_tree(cat6, 11);
 }
 
-
-static vp8bc_index_t bcc1[1], bcc2[2], bcc3[3], bcc4[4], bcc5[5], bcc6[11];
-
 vp8_extra_bit_struct vp8_extra_bits[12] =
 {
-    { 0, 0, 0, 0, 0},
-    { 0, 0, 0, 0, 1},
-    { 0, 0, 0, 0, 2},
-    { 0, 0, 0, 0, 3},
-    { 0, 0, 0, 0, 4},
-    { cat1, Pcat1, bcc1, 1, 5},
-    { cat2, Pcat2, bcc2, 2, 7},
-    { cat3, Pcat3, bcc3, 3, 11},
-    { cat4, Pcat4, bcc4, 4, 19},
-    { cat5, Pcat5, bcc5, 5, 35},
-    { cat6, Pcat6, bcc6, 11, 67},
-    { 0, 0, 0, 0, 0}
+    { 0, 0, 0, 0},
+    { 0, 0, 0, 1},
+    { 0, 0, 0, 2},
+    { 0, 0, 0, 3},
+    { 0, 0, 0, 4},
+    { cat1, Pcat1, 1, 5},
+    { cat2, Pcat2, 2, 7},
+    { cat3, Pcat3, 3, 11},
+    { cat4, Pcat4, 4, 19},
+    { cat5, Pcat5, 5, 35},
+    { cat6, Pcat6, 11, 67},
+    { 0, 0, 0, 0}
 };
 #include "defaultcoefcounts.h"
 

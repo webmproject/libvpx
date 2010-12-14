@@ -51,7 +51,6 @@ DEFINE(vp8_token_len,                           offsetof(vp8_token, Len));
 
 DEFINE(vp8_extra_bit_struct_tree,                 offsetof(vp8_extra_bit_struct, tree));
 DEFINE(vp8_extra_bit_struct_prob,                 offsetof(vp8_extra_bit_struct, prob));
-DEFINE(vp8_extra_bit_struct_prob_bc,               offsetof(vp8_extra_bit_struct, prob_bc));
 DEFINE(vp8_extra_bit_struct_len,                  offsetof(vp8_extra_bit_struct, Len));
 DEFINE(vp8_extra_bit_struct_base_val,              offsetof(vp8_extra_bit_struct, base_val));
 
@@ -67,8 +66,8 @@ DEFINE(vp8_common_mb_rows,                       offsetof(VP8_COMMON, mb_rows));
 
 // These two sizes are used in vp7cx_pack_tokens.  They are hard coded
 //  so if the size changes this will have to be adjusted.
-ct_assert(TOKENEXTRA_SZ, sizeof(TOKENEXTRA) == 20)
-ct_assert(vp8_extra_bit_struct_sz, sizeof(vp8_extra_bit_struct) == 20)
+ct_assert(TOKENEXTRA_SZ, sizeof(TOKENEXTRA) == 8)
+ct_assert(vp8_extra_bit_struct_sz, sizeof(vp8_extra_bit_struct) == 16)
 
 //add asserts for any offset that is not supported by assembly code
 //add asserts for any size that is not supported by assembly code

@@ -132,8 +132,6 @@ static void tokenize2nd_order_b
         t->Token = x;
         t->context_tree = cpi->common.fc.coef_probs [type] [band] [pt];
 
-        t->section = frametype * BLOCK_TYPES * 2 + 2 * type + (c == 0);
-
         t->skip_eob_node = pt == 0 && ((band > 0 && type > 0) || (band > 1 && type == 0));
 
         ++cpi->coef_counts       [type] [band] [pt] [x];
@@ -185,7 +183,6 @@ static void tokenize1st_order_b
         t->Token = x;
         t->context_tree = cpi->common.fc.coef_probs [type] [band] [pt];
 
-        t->section = frametype * BLOCK_TYPES * 2 + 2 * type + (c == 0);
         t->skip_eob_node = pt == 0 && ((band > 0 && type > 0) || (band > 1 && type == 0));
 
         ++cpi->coef_counts       [type] [band] [pt] [x];
@@ -434,7 +431,6 @@ static __inline void stuff2nd_order_b
 
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [1] [0] [pt];
-    t->section = 11;
     t->skip_eob_node = 0;
     ++cpi->coef_counts       [1] [0] [pt] [DCT_EOB_TOKEN];
     ++t;
@@ -465,7 +461,6 @@ static __inline void stuff1st_order_b
 
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [0] [1] [pt];
-    t->section = 8;
     t->skip_eob_node = 0;
     ++cpi->coef_counts       [0] [1] [pt] [DCT_EOB_TOKEN];
     ++t;
@@ -495,7 +490,6 @@ void stuff1st_order_buv
 
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [2] [0] [pt];
-    t->section = 13;
     t->skip_eob_node = 0;
     ++cpi->coef_counts[2] [0] [pt] [DCT_EOB_TOKEN];
     ++t;
