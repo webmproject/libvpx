@@ -131,6 +131,7 @@ static void tokenize2nd_order_b
 
         t->Token = x;
         t->context_tree = cpi->common.fc.coef_probs [type] [band] [pt];
+
         t->skip_eob_node = pt == 0 && ((band > 0 && type > 0) || (band > 1 && type == 0));
 
         ++cpi->coef_counts       [type] [band] [pt] [x];
@@ -181,6 +182,7 @@ static void tokenize1st_order_b
 
         t->Token = x;
         t->context_tree = cpi->common.fc.coef_probs [type] [band] [pt];
+
         t->skip_eob_node = pt == 0 && ((band > 0 && type > 0) || (band > 1 && type == 0));
 
         ++cpi->coef_counts       [type] [band] [pt] [x];

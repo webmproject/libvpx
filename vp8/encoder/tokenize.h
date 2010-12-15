@@ -26,9 +26,9 @@ typedef struct
 typedef struct
 {
     const vp8_prob *context_tree;
-    char            skip_eob_node;
-    char            Token;
     short           Extra;
+    unsigned char   Token;
+    unsigned char   skip_eob_node;
 } TOKENEXTRA;
 
 int rd_cost_mby(MACROBLOCKD *);
