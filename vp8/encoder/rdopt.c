@@ -1344,8 +1344,6 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 }
 
 
-
-/////////////////////////
 static void mv_bias(const MODE_INFO *x, int refframe, int_mv *mvp, const int *ref_frame_sign_bias)
 {
     MV xmv;
@@ -1884,6 +1882,16 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
             vp8_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
                         x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
+
+            /* adjust mvp to make sure it is within MV range */
+            if(mvp.row > best_ref_mv.row + MAX_POSSIBLE_MV)
+                mvp.row = best_ref_mv.row + MAX_POSSIBLE_MV;
+            if(mvp.row < best_ref_mv.row - MAX_POSSIBLE_MV)
+                mvp.row = best_ref_mv.row - MAX_POSSIBLE_MV;
+            if(mvp.col > best_ref_mv.col + MAX_POSSIBLE_MV)
+                mvp.col = best_ref_mv.col + MAX_POSSIBLE_MV;
+            if(mvp.col < best_ref_mv.col - MAX_POSSIBLE_MV)
+                mvp.col = best_ref_mv.col - MAX_POSSIBLE_MV;
         }
 
         // Estimate the reference frame signaling cost and add it to the rolling cost variable.
@@ -2163,13 +2171,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                     {
                         int sadpb = x->sadperbit16 >> 2;
                         thissme = cpi->full_search_sad(x, b, d, &full_mvp, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, x->mvsadcost,&best_ref_mv);
-                        /*
-                        MV dia_ref_mv;
-                        dia_ref_mv.row = d->bmi.mv.as_mv.row << 3;
-                        dia_ref_mv.col = d->bmi.mv.as_mv.col << 3;
-                        thissme = cpi->full_search_sad(x, b, d, &dia_ref_mv, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, x->mvsadcost,&best_ref_mv);
-                        */
-
                     }
 
                     // Barrier threshold to initiating full search

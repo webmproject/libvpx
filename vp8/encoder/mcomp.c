@@ -941,6 +941,18 @@ int vp8_diamond_search_sad
     unsigned char *check_here;
     int thissad;
 
+    int search_range = 128>>search_param;
+
+    *num00 = 0;
+
+    // Trap uncodable vectors
+    if (((abs(ref_mv->col - center_mv->col) + (search_range<<4)) > MAX_POSSIBLE_MV) || ((abs(ref_mv->row - center_mv->row) + (search_range<<4)) > MAX_POSSIBLE_MV))
+    {
+        best_mv->row = ref_row;
+        best_mv->col = ref_col;
+        return INT_MAX;
+    }
+
     // Work out the start point for the search
     in_what = (unsigned char *)(*(d->base_pre) + d->pre + (ref_row * (d->pre_stride)) + ref_col);
     best_address = in_what;
@@ -961,8 +973,6 @@ int vp8_diamond_search_sad
     i = 1;
     best_mv->row = ref_row;
     best_mv->col = ref_col;
-
-    *num00 = 0;
 
     for (step = 0; step < tot_steps ; step++)
     {
@@ -1057,6 +1067,18 @@ int vp8_diamond_search_sadx4
     unsigned char *check_here;
     unsigned int thissad;
 
+    int search_range = 128>>search_param;
+
+    *num00 = 0;
+
+    // Trap uncodable vectors
+    if (((abs(ref_mv->col - center_mv->col) + (search_range<<4)) > MAX_POSSIBLE_MV) || ((abs(ref_mv->row - center_mv->row) + (search_range<<4)) > MAX_POSSIBLE_MV))
+    {
+        best_mv->row = ref_row;
+        best_mv->col = ref_col;
+        return INT_MAX;
+    }
+
     // Work out the start point for the search
     in_what = (unsigned char *)(*(d->base_pre) + d->pre + (ref_row * (d->pre_stride)) + ref_col);
     best_address = in_what;
@@ -1077,8 +1099,6 @@ int vp8_diamond_search_sadx4
     i = 1;
     best_mv->row = ref_row;
     best_mv->col = ref_col;
-
-    *num00 = 0;
 
     for (step = 0; step < tot_steps ; step++)
     {
@@ -1194,10 +1214,24 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int erro
     int ref_row = ref_mv->row >> 3;
     int ref_col = ref_mv->col >> 3;
 
-    int row_min = ref_row - distance;
-    int row_max = ref_row + distance;
-    int col_min = ref_col - distance;
-    int col_max = ref_col + distance;
+    int row_min, row_max, col_min, col_max;
+
+    int drow = abs(ref_mv->row - center_mv->row);
+    int dcol = abs(ref_mv->col - center_mv->col);
+
+    // reduce search distance and make sure MV obtained is in range.
+    if (((dcol + (distance<<3)) > MAX_POSSIBLE_MV) || (( drow + (distance<<3)) > MAX_POSSIBLE_MV))
+    {
+        if(dcol > drow)
+            distance = (MAX_POSSIBLE_MV - dcol)>>3;
+        else
+            distance = (MAX_POSSIBLE_MV - drow)>>3;
+    }
+
+    row_min = ref_row - distance;
+    row_max = ref_row + distance;
+    col_min = ref_col - distance;
+    col_max = ref_col + distance;
 
     // Work out the mid point for the search
     in_what = *(d->base_pre) + d->pre;
@@ -1284,12 +1318,24 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     int ref_row = ref_mv->row >> 3;
     int ref_col = ref_mv->col >> 3;
 
-    int row_min = ref_row - distance;
-    int row_max = ref_row + distance;
-    int col_min = ref_col - distance;
-    int col_max = ref_col + distance;
-
+    int row_min, row_max, col_min, col_max;
     unsigned int sad_array[3];
+    int drow = abs(ref_mv->row - center_mv->row);
+    int dcol = abs(ref_mv->col - center_mv->col);
+
+    // reduce search distance and make sure MV obtained is in range.
+    if (((dcol + (distance<<3)) > MAX_POSSIBLE_MV) || (( drow + (distance<<3)) > MAX_POSSIBLE_MV))
+    {
+        if(dcol > drow)
+            distance = (MAX_POSSIBLE_MV - dcol)>>3;
+        else
+            distance = (MAX_POSSIBLE_MV - drow)>>3;
+    }
+
+    row_min = ref_row - distance;
+    row_max = ref_row + distance;
+    col_min = ref_col - distance;
+    col_max = ref_col + distance;
 
     // Work out the mid point for the search
     in_what = *(d->base_pre) + d->pre;
@@ -1409,13 +1455,25 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     int ref_row = ref_mv->row >> 3;
     int ref_col = ref_mv->col >> 3;
 
-    int row_min = ref_row - distance;
-    int row_max = ref_row + distance;
-    int col_min = ref_col - distance;
-    int col_max = ref_col + distance;
-
+    int row_min, row_max, col_min, col_max;
     unsigned short sad_array8[8];
     unsigned int sad_array[3];
+    int drow = abs(ref_mv->row - center_mv->row);
+    int dcol = abs(ref_mv->col - center_mv->col);
+
+    // reduce search distance and make sure MV obtained is in range.
+    if (((dcol + (distance<<3)) > MAX_POSSIBLE_MV) || (( drow + (distance<<3)) > MAX_POSSIBLE_MV))
+    {
+        if(dcol > drow)
+            distance = (MAX_POSSIBLE_MV - dcol)>>3;
+        else
+            distance = (MAX_POSSIBLE_MV - drow)>>3;
+    }
+
+    row_min = ref_row - distance;
+    row_max = ref_row + distance;
+    col_min = ref_col - distance;
+    col_max = ref_col + distance;
 
     // Work out the mid point for the search
     in_what = *(d->base_pre) + d->pre;
