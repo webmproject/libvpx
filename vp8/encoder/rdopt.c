@@ -1886,11 +1886,11 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             /* adjust mvp to make sure it is within MV range */
             if(mvp.row > best_ref_mv.row + MAX_POSSIBLE_MV)
                 mvp.row = best_ref_mv.row + MAX_POSSIBLE_MV;
-            if(mvp.row < best_ref_mv.row - MAX_POSSIBLE_MV)
+            else if(mvp.row < best_ref_mv.row - MAX_POSSIBLE_MV)
                 mvp.row = best_ref_mv.row - MAX_POSSIBLE_MV;
             if(mvp.col > best_ref_mv.col + MAX_POSSIBLE_MV)
                 mvp.col = best_ref_mv.col + MAX_POSSIBLE_MV;
-            if(mvp.col < best_ref_mv.col - MAX_POSSIBLE_MV)
+            else if(mvp.col < best_ref_mv.col - MAX_POSSIBLE_MV)
                 mvp.col = best_ref_mv.col - MAX_POSSIBLE_MV;
         }
 
@@ -2081,6 +2081,26 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                 int further_steps;
                 int n;
 
+                int col_min = (best_ref_mv.col - MAX_POSSIBLE_MV) >>3;
+                int col_max = (best_ref_mv.col + MAX_POSSIBLE_MV) >>3;
+                int row_min = (best_ref_mv.row - MAX_POSSIBLE_MV) >>3;
+                int row_max = (best_ref_mv.row + MAX_POSSIBLE_MV) >>3;
+
+                int tmp_col_min = x->mv_col_min;
+                int tmp_col_max = x->mv_col_max;
+                int tmp_row_min = x->mv_row_min;
+                int tmp_row_max = x->mv_row_max;
+
+                // Get intersection of UMV window and valid MV window to reduce # of checks in diamond search.
+                if (x->mv_col_min < col_min )
+                    x->mv_col_min = col_min;
+                if (x->mv_col_max > col_max )
+                    x->mv_col_max = col_max;
+                if (x->mv_row_min < row_min )
+                    x->mv_row_min = row_min;
+                if (x->mv_row_max > row_max )
+                    x->mv_row_max = row_max;
+
                 //adjust search range according to sr from mv prediction
                 if(sr > step_param)
                     step_param = sr;
@@ -2192,6 +2212,11 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                         d->bmi.mv.as_mv.col = mode_mv[NEWMV].col;
                     }
                 }
+
+                x->mv_col_min = tmp_col_min;
+                x->mv_col_max = tmp_col_max;
+                x->mv_row_min = tmp_row_min;
+                x->mv_row_max = tmp_row_max;
 
                 if (bestsme < INT_MAX)
                     // cpi->find_fractional_mv_step(x,b,d,&d->bmi.mv.as_mv,&best_ref_mv,x->errorperbit/2,cpi->fn_ptr.svf,cpi->fn_ptr.vf,x->mvcost);  // normal mvc=11
