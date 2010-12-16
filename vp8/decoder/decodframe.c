@@ -381,6 +381,12 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
         xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
+        if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME)
+        {
+            /* propagate errors from reference frames */
+            xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
+        }
+
         vp8_build_uvmvs(xd, pc->full_pixel);
 
         /*
@@ -391,6 +397,8 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         */
         vp8_decode_macroblock(pbi, xd);
 
+        /* check if the boolean decoder has suffered an error */
+        xd->corrupted |= vp8dx_bool_error(xd->current_bc);
 
         recon_yoffset += 16;
         recon_uvoffset += 8;
@@ -556,6 +564,7 @@ static void init_frame(VP8D_COMP *pbi)
     xd->frame_type = pc->frame_type;
     xd->mode_info_context->mbmi.mode = DC_PRED;
     xd->mode_info_stride = pc->mode_info_stride;
+    xd->corrupted = 0; /* init without corruption */
 }
 
 int vp8_decode_frame(VP8D_COMP *pbi)
@@ -570,6 +579,10 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     int mb_row;
     int i, j, k, l;
     const int *const mb_feature_data_bits = vp8_mb_feature_data_bits;
+
+    /* start with no corruption of current frame */
+    xd->corrupted = 0;
+    pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
 
     if (data_end - data < 3)
         vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
@@ -891,6 +904,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
 
     stop_token_decoder(pbi);
+
+    /* Collect information about decoder corruption. */
+    /* 1. Check first boolean decoder for errors. */
+    pc->yv12_fb[pc->new_fb_idx].corrupted =
+        vp8dx_bool_error(bc);
+    /* 2. Check the macroblock information */
+    pc->yv12_fb[pc->new_fb_idx].corrupted |=
+        xd->corrupted;
 
     /* vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes  \n",bc->pos+pbi->bc2.pos); */
 

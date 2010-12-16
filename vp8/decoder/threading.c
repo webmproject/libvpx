@@ -893,8 +893,17 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                 xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
                 xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
+                if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME)
+                {
+                    /* propagate errors from reference frames */
+                    xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
+                }
+
                 vp8_build_uvmvs(xd, pc->full_pixel);
                 vp8mt_decode_macroblock(pbi, xd, mb_row, mb_col);
+
+                /* check if the boolean decoder has suffered an error */
+                xd->corrupted |= vp8dx_bool_error(xd->current_bc);
 
                 if (pbi->common.filter_level)
                 {

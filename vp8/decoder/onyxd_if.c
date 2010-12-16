@@ -334,6 +334,23 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->common.error.error_code = VPX_CODEC_OK;
 
+    if (size == 0)
+    {
+       /* This is used to signal that we are missing frames.
+        * We do not know if the missing frame(s) was supposed to update
+        * any of the reference buffers, but we act conservative and
+        * mark only the last buffer as corrupted.
+        */
+        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+
+        /* Signal that we have no frame to show. */
+        cm->show_frame = 0;
+
+        /* Nothing more to do. */
+        return 0;
+    }
+
+
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
     if (cm->rtcd.flags & HAS_NEON)
@@ -356,6 +373,13 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         }
 #endif
         pbi->common.error.setjmp = 0;
+
+       /* We do not know if the missing frame(s) was supposed to update
+        * any of the reference buffers, but we act conservative and
+        * mark only the last buffer as corrupted.
+        */
+        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+
         if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
           cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
         return -1;
