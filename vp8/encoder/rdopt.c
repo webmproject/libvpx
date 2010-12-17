@@ -1633,6 +1633,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
+    int distortion_uv;
+    int best_yrd = INT_MAX;
 
     //int all_rds[MAX_MODES];        // Experimental debug code.
     //int all_rates[MAX_MODES];
@@ -1641,7 +1643,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
     MB_PREDICTION_MODE uv_intra_mode;
     int uvintra_eob = 0;
-    int tteob = 0;
     int force_no_skip = 0;
 
     MV mvp;
@@ -1719,10 +1720,10 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
-        int frame_cost;
         int this_rd = INT_MAX;
         int lf_or_gf = 0;           // Lat Frame (01) or gf/arf (1)
         int disable_skip = 0;
+        int other_cost = 0;
 
         force_no_skip = 0;
 
@@ -1742,14 +1743,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         // These variables hold are rolling total cost and distortion for this mode
         rate2 = 0;
         distortion2 = 0;
-
-        // Where skip is allowable add in the default per mb cost for the no skip case.
-        // where we then decide to skip we have to delete this and replace it with the
-        // cost of signallying a skip
-        if (cpi->common.mb_no_coeff_skip)
-        {
-            rate2 += vp8_cost_bit(cpi->prob_skip_false, 0);
-        }
 
         this_mode = vp8_mode_order[mode_index];
 
@@ -1894,10 +1887,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                 mvp.col = best_ref_mv.col - MAX_POSSIBLE_MV;
         }
 
-        // Estimate the reference frame signaling cost and add it to the rolling cost variable.
-        frame_cost = ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
-        rate2 += frame_cost;
-
         // Check to see if the testing frequency for this mode is at its max
         // If so then prevent it from being tested and increase the threshold for its testing
         if (cpi->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
@@ -1953,21 +1942,16 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
             vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion);
             rate2 += rate;
-            //rate_y = rate;
+
             distortion2 += distortion;
             rate2 += uv_intra_rate;
             rate_uv = uv_intra_rate_tokenonly;
             distortion2 += uv_intra_distortion;
+            distortion_uv = uv_intra_distortion;
             break;
 
         case SPLITMV:
         {
-            int frame_cost_rd = RDFUNC(x->rdmult, x->rddiv, frame_cost, 0, cpi->target_bits_per_mb);
-            int saved_rate = rate2;
-
-            // vp8_rd_pick_best_mbsegmentation looks only at Y and does not account for frame_cost.
-            // (best_rd - frame_cost_rd) is thus a conservative breakout number.
-            int breakout_rd = best_rd - frame_cost_rd;
             int tmp_rd;
             int this_rd_thresh;
 
@@ -1975,74 +1959,25 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ? cpi->rd_threshes[THR_NEWG]: this_rd_thresh;
 
             tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
-                                                     breakout_rd, mdcounts,
+                                                     best_yrd, mdcounts,
                                                      &rate, &rate_y, &distortion, this_rd_thresh) ;
 
             rate2 += rate;
             distortion2 += distortion;
 
             // If even the 'Y' rd value of split is higher than best so far then dont bother looking at UV
-            if (tmp_rd < breakout_rd)
+            if (tmp_rd < best_yrd)
             {
                 // Now work out UV cost and add it in
-                vp8_rd_inter_uv(cpi, x, &rate, &distortion, cpi->common.full_pixel);
-                rate2 += rate;
-                rate_uv = rate;
-                distortion2 += distortion;
-
+                vp8_rd_inter_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+                rate2 += rate_uv;
+                distortion2 += distortion_uv;
             }
             else
             {
                 this_rd = INT_MAX;
                 disable_skip = 1;
             }
-
-            // Trap cases where the best split mode has all vectors coded 0,0 (or all the same)
-            if (0)
-            {
-                int allsame = 1;
-
-                for (i = 1; i < 16; i++)
-                {
-                    BLOCKD *bd = &x->e_mbd.block[i];
-
-                    if (bd->bmi.mv.as_int != x->e_mbd.block[0].bmi.mv.as_int)   //(bmvs[i].col != bmvs[i-1].col) || (bmvs[i].row != bmvs[i-1].row ) )
-                    {
-                        allsame = 0;
-                        break;
-                    }
-                }
-
-                if (allsame)
-                {
-                    // reset mode and mv and jump to newmv
-                    this_mode = NEWMV;
-                    distortion2 = 0;
-                    rate2 = saved_rate;
-                    mode_mv[NEWMV].row = x->e_mbd.block[0].bmi.mv.as_mv.row;
-                    mode_mv[NEWMV].col = x->e_mbd.block[0].bmi.mv.as_mv.col;
-                    rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, x->mvcost, 96);
-                    goto mv_selected;
-                }
-            }
-
-            // trap cases where the 8x8s can be promoted to 8x16s or 16x8s
-            if (0)//x->partition_info->count == 4)
-            {
-
-                if (x->partition_info->bmi[0].mv.as_int == x->partition_info->bmi[1].mv.as_int
-                    && x->partition_info->bmi[2].mv.as_int == x->partition_info->bmi[3].mv.as_int)
-                {
-                    const int *labels = vp8_mbsplits[2];
-                    x->e_mbd.mode_info_context->mbmi.partitioning = 0;
-                    rate -= vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + 2);
-                    rate += vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings);
-                    //rate -=  x->inter_bmode_costs[  x->partition_info->bmi[1]];
-                    //rate -=  x->inter_bmode_costs[  x->partition_info->bmi[3]];
-                    x->partition_info->bmi[1] = x->partition_info->bmi[2];
-                }
-            }
-
         }
         break;
         case DC_PRED:
@@ -2056,14 +1991,14 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
             vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
             {
-                macro_block_yrd(x, &rate, &distortion, IF_RTCD(&cpi->rtcd.encodemb)) ;
-                rate2 += rate;
-                rate_y = rate;
+                macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb)) ;
+                rate2 += rate_y;
                 distortion2 += distortion;
                 rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
                 rate2 += uv_intra_rate;
                 rate_uv = uv_intra_rate_tokenonly;
                 distortion2 += uv_intra_distortion;
+                distortion_uv = uv_intra_distortion;
             }
             break;
 
@@ -2287,11 +2222,16 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                         if (sse2 * 2 < x->encode_breakout)
                         {
                             x->skip = 1;
-                            distortion2 = sse;
+                            distortion2 = sse + sse2;
                             rate2 = 500;
+
+                            /* for best_yrd calculation */
+                            rate_uv = 0;
+                            distortion_uv = sse2;
+
                             disable_skip = 1;
                             this_rd = RDFUNC(x->rdmult, x->rddiv, rate2,
-                              distortion2, cpi->target_bits_per_mb);
+                                             distortion2, cpi->target_bits_per_mb);
 
                             break;
                         }
@@ -2306,27 +2246,39 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
 
             // Y cost and distortion
-            macro_block_yrd(x, &rate, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
-            rate2 += rate;
-            rate_y = rate;
+            macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
+            rate2 += rate_y;
             distortion2 += distortion;
 
             // UV cost and distortion
-            vp8_rd_inter_uv(cpi, x, &rate, &distortion, cpi->common.full_pixel);
-            rate2 += rate;
-            rate_uv = rate;
-            distortion2 += distortion;
+            vp8_rd_inter_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+            rate2 += rate_uv;
+            distortion2 += distortion_uv;
             break;
 
         default:
             break;
         }
 
+        // Where skip is allowable add in the default per mb cost for the no skip case.
+        // where we then decide to skip we have to delete this and replace it with the
+        // cost of signallying a skip
+        if (cpi->common.mb_no_coeff_skip)
+        {
+            other_cost += vp8_cost_bit(cpi->prob_skip_false, 0);
+            rate2 += other_cost;
+        }
+
+        // Estimate the reference frame signaling cost and add it to the rolling cost variable.
+        rate2 += ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+
         if (!disable_skip)
         {
             // Test for the condition where skip block will be activated because there are no non zero coefficients and make any necessary adjustment for rate
             if (cpi->common.mb_no_coeff_skip)
             {
+                int tteob;
+
                 tteob = 0;
 
                 for (i = 0; i <= 24; i++)
@@ -2336,41 +2288,22 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
                 if (tteob == 0)
                 {
-#if 1
                     rate2 -= (rate_y + rate_uv);
+                    //for best_yrd calculation
+                    rate_uv = 0;
 
                     // Back out no skip flag costing and add in skip flag costing
                     if (cpi->prob_skip_false)
                     {
-                        rate2 += vp8_cost_bit(cpi->prob_skip_false, 1);
-                        rate2 -= vp8_cost_bit(cpi->prob_skip_false, 0);
+                        int prob_skip_cost;
+
+                        prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 1);
+                        prob_skip_cost -= vp8_cost_bit(cpi->prob_skip_false, 0);
+                        rate2 += prob_skip_cost;
+                        other_cost += prob_skip_cost;
                     }
-
-#else
-                    int rateuseskip;
-                    int ratenotuseskip;
-
-
-
-                    ratenotuseskip = rate_y + rate_uv + vp8_cost_bit(cpi->prob_skip_false, 0);
-                    rateuseskip    = vp8_cost_bit(cpi->prob_skip_false, 1);
-
-                    if (1) // rateuseskip<ratenotuseskip)
-                    {
-                        rate2 -= ratenotuseskip;
-                        rate2 += rateuseskip;
-                        force_no_skip = 0;
-                    }
-                    else
-                    {
-                        force_no_skip = 1;
-                    }
-
-#endif
                 }
-
             }
-
             // Calculate the final RD estimate for this mode
             this_rd = RDFUNC(x->rdmult, x->rddiv, rate2, distortion2, cpi->target_bits_per_mb);
         }
@@ -2396,6 +2329,12 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             {
                 x->e_mbd.mode_info_context->mbmi.uv_mode = uv_intra_mode;
             }
+
+            other_cost += ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+
+            /* Calculate the final y RD estimate for this mode */
+            best_yrd = RDFUNC(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
+                              (distortion2-distortion_uv), cpi->target_bits_per_mb);
 
             *returnrate = rate2;
             *returndistortion = distortion2;
