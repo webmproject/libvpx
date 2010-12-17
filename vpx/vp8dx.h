@@ -36,6 +36,30 @@ extern vpx_codec_iface_t* vpx_codec_vp8_dx(void);
 #include "vp8.h"
 
 
+/*!\brief VP8 decoder control functions
+ *
+ * The set of macros define the control functions of VP8 decoder interface
+ */
+enum vp8d_dec_control_id
+{
+    VP8_DECODER_CTRL_ID_START   = 256,
+    VP8D_GET_LAST_REF_UPDATES,              /**< control function to get info on which reference frames were updated
+                                            by the last decode */
+    VP8_DECODER_CTRL_ID_MAX
+} ;
+
+
+/*!\brief VP8 encoder control function parameter type
+ *
+ * Defines the data types that VP8E control functions take. Note that
+ * additional common controls are defined in vp8.h
+ *
+ */
+
+
+VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_UPDATES,   int *)
+
+
 /*! @} - end defgroup vp8_decoder */
 
 
