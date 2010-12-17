@@ -466,6 +466,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             vpx_img_set_rect(&ctx->img,
                              VP8BORDERINPIXELS, VP8BORDERINPIXELS,
                              sd.y_width, sd.y_height);
+            ctx->img.user_priv = user_priv;
             ctx->img_avail = 1;
 
         }
