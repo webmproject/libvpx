@@ -683,6 +683,32 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_NEARG    ] = 1000;
         sf->thresh_mult[THR_NEARA    ] = 1000;
 
+#if 1
+        sf->thresh_mult[THR_ZEROMV   ] = 0;
+        sf->thresh_mult[THR_ZEROG    ] = 0;
+        sf->thresh_mult[THR_ZEROA    ] = 0;
+        sf->thresh_mult[THR_NEARESTMV] = 0;
+        sf->thresh_mult[THR_NEARESTG ] = 0;
+        sf->thresh_mult[THR_NEARESTA ] = 0;
+        sf->thresh_mult[THR_NEARMV   ] = 0;
+        sf->thresh_mult[THR_NEARG    ] = 0;
+        sf->thresh_mult[THR_NEARA    ] = 0;
+
+//        sf->thresh_mult[THR_DC       ] = 0;
+
+//        sf->thresh_mult[THR_V_PRED   ] = 1000;
+//        sf->thresh_mult[THR_H_PRED   ] = 1000;
+//        sf->thresh_mult[THR_B_PRED   ] = 2000;
+//        sf->thresh_mult[THR_TM       ] = 1000;
+
+        sf->thresh_mult[THR_NEWMV    ] = 1000;
+        sf->thresh_mult[THR_NEWG     ] = 1000;
+        sf->thresh_mult[THR_NEWA     ] = 1000;
+
+        sf->thresh_mult[THR_SPLITMV  ] = 1700;
+        sf->thresh_mult[THR_SPLITG   ] = 4500;
+        sf->thresh_mult[THR_SPLITA   ] = 4500;
+#else
         sf->thresh_mult[THR_NEWMV    ] = 1500;
         sf->thresh_mult[THR_NEWG     ] = 1500;
         sf->thresh_mult[THR_NEWA     ] = 1500;
@@ -690,7 +716,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITMV  ] = 5000;
         sf->thresh_mult[THR_SPLITG   ] = 10000;
         sf->thresh_mult[THR_SPLITA   ] = 10000;
-
+#endif
         sf->full_freq[0] = 15;
         sf->full_freq[1] = 31;
 
@@ -731,7 +757,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             cpi->mode_check_freq[THR_SPLITG] = 4;
             cpi->mode_check_freq[THR_SPLITA] = 4;
-            cpi->mode_check_freq[THR_SPLITMV] = 2;
+            cpi->mode_check_freq[THR_SPLITMV] = 0;
 
             sf->thresh_mult[THR_TM       ] = 1500;
             sf->thresh_mult[THR_V_PRED   ] = 1500;

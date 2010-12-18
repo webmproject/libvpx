@@ -1038,7 +1038,7 @@ typedef struct
   int d;
   int segment_yrate;
   B_PREDICTION_MODE modes[16];
-  MV mvs[16];
+  int_mv mvs[16];
   unsigned char eobs[16];
 
   int mvthresh;
@@ -1276,7 +1276,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
         {
             BLOCKD *bd = &x->e_mbd.block[i];
 
-            bsi->mvs[i] = bd->bmi.mv.as_mv;
+            bsi->mvs[i].as_mv = bd->bmi.mv.as_mv;
             bsi->modes[i] = bd->bmi.mode;
             bsi->eobs[i] = bd->eob;
         }
@@ -1305,19 +1305,32 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     {
         bsi.modes[i] = ZERO4X4;
     }
-
-    /* original */
-    vp8_rd_check_segment(cpi, x, &bsi, 0);
-    vp8_rd_check_segment(cpi, x, &bsi, 1);
-    vp8_rd_check_segment(cpi, x, &bsi, 2);
-    vp8_rd_check_segment(cpi, x, &bsi, 3);
+    if(cpi->compressor_speed == 0)
+    {
+        /* for now, we will keep the original segmentation order
+           when in best quality mode */
+        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
+        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
+        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
+        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
+    }
+    else
+    {
+        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
+        if (bsi.segment_rd < best_rd)
+        {
+          vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
+          vp8_rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
+          vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
+        }
+    }
 
     /* set it to the best */
     for (i = 0; i < 16; i++)
     {
         BLOCKD *bd = &x->e_mbd.block[i];
 
-        bd->bmi.mv.as_mv = bsi.mvs[i];
+        bd->bmi.mv.as_mv = bsi.mvs[i].as_mv;
         bd->bmi.mode = bsi.modes[i];
         bd->eob = bsi.eobs[i];
     }
