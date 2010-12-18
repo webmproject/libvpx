@@ -466,6 +466,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             vpx_img_set_rect(&ctx->img,
                              VP8BORDERINPIXELS, VP8BORDERINPIXELS,
                              sd.y_width, sd.y_height);
+            ctx->img.user_priv = user_priv;
             ctx->img_avail = 1;
 
         }
@@ -688,6 +689,26 @@ static vpx_codec_err_t vp8_set_dbg_options(vpx_codec_alg_priv_t *ctx,
 #endif
 }
 
+static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
+                                                int ctrl_id,
+                                                va_list args)
+{
+    int *update_info = va_arg(args, int *);
+    VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
+
+    if (update_info)
+    {
+        *update_info = pbi->common.refresh_alt_ref_frame * (int) VP8_ALTR_FRAME
+            + pbi->common.refresh_golden_frame * (int) VP8_GOLD_FRAME
+            + pbi->common.refresh_last_frame * (int) VP8_LAST_FRAME;
+
+        return VPX_CODEC_OK;
+    }
+    else
+        return VPX_CODEC_INVALID_PARAM;
+}
+
+
 vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
 {
     {VP8_SET_REFERENCE,             vp8_set_reference},
@@ -697,6 +718,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
     {VP8_SET_DBG_COLOR_MB_MODES,    vp8_set_dbg_options},
     {VP8_SET_DBG_COLOR_B_MODES,     vp8_set_dbg_options},
     {VP8_SET_DBG_DISPLAY_MV,        vp8_set_dbg_options},
+    {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
     { -1, NULL},
 };
 
