@@ -135,6 +135,17 @@ void arg_show_usage(FILE *fp, const struct arg_def *const *defs)
                      def->long_name, long_val);
 
         fprintf(fp, "  %-37s\t%s\n", option_text, def->desc);
+
+        if(def->enums)
+        {
+            const struct arg_enum_list *listptr;
+
+            fprintf(fp, "  %-37s\t  ", "");
+
+            for(listptr = def->enums; listptr->name; listptr++)
+                fprintf(fp, "%s%s", listptr->name,
+                        listptr[1].name ? ", " : "\n");
+        }
     }
 }
 
@@ -217,4 +228,38 @@ struct vpx_rational arg_parse_rational(const struct arg *arg)
     else die("Option %s: Invalid character '%c'\n", arg->name, *endptr);
 
     return rat;
+}
+
+
+int arg_parse_enum(const struct arg *arg)
+{
+    const struct arg_enum_list *listptr;
+    long int                    rawval;
+    char                       *endptr;
+
+    /* First see if the value can be parsed as a raw value */
+    rawval = strtol(arg->val, &endptr, 10);
+    if (arg->val[0] != '\0' && endptr[0] == '\0')
+    {
+        /* Got a raw value, make sure it's valid */
+        for(listptr = arg->def->enums; listptr->name; listptr++)
+            if(listptr->val == rawval)
+                return rawval;
+    }
+
+    /* Next see if it can be parsed as a string */
+    for(listptr = arg->def->enums; listptr->name; listptr++)
+        if(!strcmp(arg->val, listptr->name))
+            return listptr->val;
+
+    die("Option %s: Invalid value '%s'\n", arg->name, arg->val);
+    return 0;
+}
+
+
+int arg_parse_enum_or_int(const struct arg *arg)
+{
+    if(arg->def->enums)
+        return arg_parse_enum(arg);
+    return arg_parse_int(arg);
 }
