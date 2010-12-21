@@ -997,18 +997,27 @@ static const arg_def_t arnr_strength = ARG_DEF(NULL, "arnr-strength", 1,
                                        "AltRef Strength");
 static const arg_def_t arnr_type = ARG_DEF(NULL, "arnr-type", 1,
                                    "AltRef Type");
+static const struct arg_enum_list tuning_enum[] = {
+    {"psnr", VP8_TUNE_PSNR},
+    {"ssim", VP8_TUNE_SSIM},
+    {NULL, 0}
+};
+static const arg_def_t tune_ssim = ARG_DEF_ENUM(NULL, "tune", 1,
+                                   "Material to favor", tuning_enum);
 
 static const arg_def_t *vp8_args[] =
 {
     &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
-    &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type, NULL
+    &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
+    &tune_ssim, NULL
 };
 static const int vp8_arg_ctrl_map[] =
 {
     VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
     VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
     VP8E_SET_TOKEN_PARTITIONS,
-    VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH , VP8E_SET_ARNR_TYPE, 0
+    VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH , VP8E_SET_ARNR_TYPE,
+    VP8E_SET_TUNING, 0
 };
 #endif
 
@@ -1325,7 +1334,7 @@ int main(int argc, const char **argv_)
                 if (arg_ctrl_cnt < ARG_CTRL_CNT_MAX)
                 {
                     arg_ctrls[arg_ctrl_cnt][0] = ctrl_args_map[i];
-                    arg_ctrls[arg_ctrl_cnt][1] = arg_parse_int(&arg);
+                    arg_ctrls[arg_ctrl_cnt][1] = arg_parse_enum_or_int(&arg);
                     arg_ctrl_cnt++;
                 }
             }

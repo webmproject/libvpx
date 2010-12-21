@@ -115,7 +115,8 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         x->rddiv = cpi->RDDIV;
                         x->rdmult = cpi->RDMULT;
 
-                        activity_sum += vp8_activity_masking(cpi, x);
+                        if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
+                            activity_sum += vp8_activity_masking(cpi, x);
 
                         // Is segmentation enabled
                         // MB level adjutment to quantizer

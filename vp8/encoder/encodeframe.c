@@ -507,7 +507,8 @@ void encode_mb_row(VP8_COMP *cpi,
         x->rddiv = cpi->RDDIV;
         x->rdmult = cpi->RDMULT;
 
-        activity_sum += vp8_activity_masking(cpi, x);
+        if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
+            activity_sum += vp8_activity_masking(cpi, x);
 
         // Is segmentation enabled
         // MB level adjutment to quantizer

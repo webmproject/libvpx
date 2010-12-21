@@ -38,6 +38,8 @@ struct vp8_extracfg
     unsigned int                arnr_strength;    /* alt_ref Noise Reduction Strength */
     unsigned int                arnr_type;        /* alt_ref filter type */
     unsigned int                experimental;
+    vp8e_tuning                 tuning;
+
 };
 
 struct extraconfig_map
@@ -68,6 +70,7 @@ static const struct extraconfig_map extracfg_map[] =
             3,                          /* arnr_strength */
             3,                          /* arnr_type*/
             0,                          /* experimental mode */
+            0,                          /* tuning*/
         }
     }
 };
@@ -338,6 +341,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->arnr_strength =  vp8_cfg.arnr_strength;
     oxcf->arnr_type =      vp8_cfg.arnr_type;
 
+    oxcf->tuning = vp8_cfg.tuning;
 
     /*
         printf("Current VP8 Settings: \n");
@@ -451,6 +455,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
         MAP(VP8E_SET_ARNR_MAXFRAMES,        xcfg.arnr_max_frames);
         MAP(VP8E_SET_ARNR_STRENGTH ,        xcfg.arnr_strength);
         MAP(VP8E_SET_ARNR_TYPE     ,        xcfg.arnr_type);
+        MAP(VP8E_SET_TUNING,                xcfg.tuning);
 
     }
 
@@ -1050,6 +1055,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
     {VP8E_SET_ARNR_MAXFRAMES,           set_param},
     {VP8E_SET_ARNR_STRENGTH ,           set_param},
     {VP8E_SET_ARNR_TYPE     ,           set_param},
+    {VP8E_SET_TUNING,                   set_param},
     { -1, NULL},
 };
 

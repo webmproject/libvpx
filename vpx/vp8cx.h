@@ -150,7 +150,8 @@ enum vp8e_enc_control_id
     VP8E_SET_ARNR_MAXFRAMES,         /**< control function to set the max number of frames blurred creating arf*/
     VP8E_SET_ARNR_STRENGTH ,         /**< control function to set the filter strength for the arf */
     VP8E_SET_ARNR_TYPE     ,         /**< control function to set the type of filter to use for the arf*/
-} ;
+    VP8E_SET_TUNING,                 /**< control function to set visual tuning */
+};
 
 /*!\brief vpx 1-D scaling mode
  *
@@ -234,6 +235,18 @@ typedef enum
 } vp8e_token_partitions;
 
 
+/*!\brief VP8 model tuning parameters
+ *
+ * Changes the encoder to tune for certain types of input material.
+ *
+ */
+typedef enum
+{
+    VP8_TUNE_PSNR,
+    VP8_TUNE_SSIM
+} vp8e_tuning;
+
+
 /*!\brief VP8 encoder control function parameter type
  *
  * Defines the data types that VP8E control functions take. Note that
@@ -263,7 +276,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_TOKEN_PARTITIONS,   vp8e_token_partitions)
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_MAXFRAMES,     unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_STRENGTH ,     unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_TYPE     ,     unsigned int)
-
+VPX_CTRL_USE_TYPE(VP8E_SET_TUNING,             vp8e_tuning)
 
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
