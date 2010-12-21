@@ -18,6 +18,7 @@ extern "C"
 #endif
 
 #include "vpx/internal/vpx_codec_internal.h"
+#include "vpx/vp8cx.h"
 #include "vpx_scale/yv12config.h"
 #include "type_aliases.h"
 #include "ppflags.h"
@@ -189,6 +190,8 @@ extern "C"
 
         struct vpx_fixed_buf         two_pass_stats_in;
         struct vpx_codec_pkt_list  *output_pkt_list;
+
+        vp8e_tuning tuning;
     } VP8_CONFIG;
 
 
