@@ -36,27 +36,34 @@
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
+#define USE_FILTER_LUT 0         // use lookup table to improve filter
 
-#define USE_FILTER_LUT 1
 #if VP8_TEMPORAL_ALT_REF
 
 #if USE_FILTER_LUT
+// for (strength = 0; strength <= 6; strength++) {
+//   for (delta = 0; delta <= 18; delta++) {
+//     float coeff = (3.0 * delta * delta) / pow(2, strength);
+//     printf("%3d", (int)roundf(coeff > 16 ? 0 : 16-coeff));
+//   }
+//   printf("\n");
+// }
 static int modifier_lut[7][19] =
 {
     // Strength=0
-    {16, 13, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {16, 13,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
     // Strength=1
-    {16, 15, 10, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {16, 15, 10,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
     // Strength=2
-    {16, 15, 13, 9, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {16, 15, 13,  9,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
     // Strength=3
-    {16, 16, 15, 13, 10, 7, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {16, 16, 15, 13, 10,  7,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
     // Strength=4
-    {16, 16, 15, 14, 13, 11, 9, 7, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    {16, 16, 15, 14, 13, 11,  9,  7,  4,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
     // Strength=5
-    {16, 16, 16, 15, 15, 14, 13, 11, 10, 8, 7, 5, 3, 0, 0, 0, 0, 0, 0},
+    {16, 16, 16, 15, 15, 14, 13, 11, 10,  8,  7,  5,  3,  0,  0,  0,  0,  0,  0},
     // Strength=6
-    {16, 16, 16, 16, 15, 15, 14, 14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 2, 1}
+    {16, 16, 16, 16, 15, 15, 14, 14, 13, 12, 11, 10,  9,  8,  7,  5,  4,  2,  1}
 };
 #endif
 static void vp8_temporal_filter_predictors_mb_c
@@ -140,16 +147,14 @@ void vp8_temporal_filter_apply_c
             int pixel_value = *frame2++;
 
 #if USE_FILTER_LUT
-            // LUT implementation --
-            // improves precision of filter
             modifier = abs(src_byte-pixel_value);
             modifier = modifier>18 ? 0 : lut[modifier];
 #else
-            modifier   = src_byte;
-            modifier  -= pixel_value;
+            modifier   = src_byte - pixel_value;
             modifier  *= modifier;
-            modifier >>= strength;
             modifier  *= 3;
+            modifier  += 1 << (strength - 1);
+            modifier >>= strength;
 
             if (modifier > 16)
                 modifier = 16;
