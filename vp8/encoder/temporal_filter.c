@@ -36,36 +36,9 @@
 
 #define ALT_REF_MC_ENABLED 1    // dis/enable MC in AltRef filtering
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
-#define USE_FILTER_LUT 0         // use lookup table to improve filter
 
 #if VP8_TEMPORAL_ALT_REF
 
-#if USE_FILTER_LUT
-// for (strength = 0; strength <= 6; strength++) {
-//   for (delta = 0; delta <= 18; delta++) {
-//     float coeff = (3.0 * delta * delta) / pow(2, strength);
-//     printf("%3d", (int)roundf(coeff > 16 ? 0 : 16-coeff));
-//   }
-//   printf("\n");
-// }
-static int modifier_lut[7][19] =
-{
-    // Strength=0
-    {16, 13,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-    // Strength=1
-    {16, 15, 10,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-    // Strength=2
-    {16, 15, 13,  9,  4,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-    // Strength=3
-    {16, 16, 15, 13, 10,  7,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-    // Strength=4
-    {16, 16, 15, 14, 13, 11,  9,  7,  4,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0},
-    // Strength=5
-    {16, 16, 16, 15, 15, 14, 13, 11, 10,  8,  7,  5,  3,  0,  0,  0,  0,  0,  0},
-    // Strength=6
-    {16, 16, 16, 16, 15, 15, 14, 14, 13, 12, 11, 10,  9,  8,  7,  5,  4,  2,  1}
-};
-#endif
 static void vp8_temporal_filter_predictors_mb_c
 (
     MACROBLOCKD *x,
@@ -86,14 +59,11 @@ static void vp8_temporal_filter_predictors_mb_c
 
     if ((mv_row | mv_col) & 7)
     {
-//        vp8_sixtap_predict16x16_c(yptr, stride,
-//                                    mv_col & 7, mv_row & 7, &pred[0], 16);
         x->subpixel_predict16x16(yptr, stride,
                                     mv_col & 7, mv_row & 7, &pred[0], 16);
     }
     else
     {
-        //vp8_copy_mem16x16_c (yptr, stride, &pred[0], 16);
         RECON_INVOKE(&x->rtcd->recon, copy16x16)(yptr, stride, &pred[0], 16);
     }
 
@@ -127,16 +97,12 @@ void vp8_temporal_filter_apply_c
     int strength,
     int filter_weight,
     unsigned int *accumulator,
-    unsigned int *count
+    unsigned short *count
 )
 {
     int i, j, k;
     int modifier;
     int byte = 0;
-
-#if USE_FILTER_LUT
-    int *lut = modifier_lut[strength];
-#endif
 
     for (i = 0,k = 0; i < block_size; i++)
     {
@@ -146,11 +112,10 @@ void vp8_temporal_filter_apply_c
             int src_byte = frame1[byte];
             int pixel_value = *frame2++;
 
-#if USE_FILTER_LUT
-            modifier = abs(src_byte-pixel_value);
-            modifier = modifier>18 ? 0 : lut[modifier];
-#else
             modifier   = src_byte - pixel_value;
+            // This is an integer approximation of:
+            // float coeff = (3.0 * modifer * modifier) / pow(2, strength);
+            // modifier =  (int)roundf(coeff > 16 ? 0 : 16-coeff);
             modifier  *= modifier;
             modifier  *= 3;
             modifier  += 1 << (strength - 1);
@@ -160,7 +125,6 @@ void vp8_temporal_filter_apply_c
                 modifier = 16;
 
             modifier = 16 - modifier;
-#endif
             modifier *= filter_weight;
 
             count[k] += modifier;
@@ -331,12 +295,12 @@ static void vp8_temporal_filter_iterate_c
     int MBs  = cpi->common.MBs;
     int mb_y_offset = 0;
     int mb_uv_offset = 0;
-    unsigned int accumulator[384];
-    unsigned int count[384];
+    DECLARE_ALIGNED_ARRAY(16, unsigned int, accumulator, 16*16 + 8*8 + 8*8);
+    DECLARE_ALIGNED_ARRAY(16, unsigned short, count, 16*16 + 8*8 + 8*8);
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
     YV12_BUFFER_CONFIG *f = cpi->frames[alt_ref_index];
     unsigned char *dst1, *dst2;
-    DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
+    DECLARE_ALIGNED_ARRAY(16, unsigned char,  predictor, 16*16 + 8*8 + 8*8);
 
     // Save input state
     unsigned char *y_buffer = mbd->pre.y_buffer;
@@ -366,7 +330,7 @@ static void vp8_temporal_filter_iterate_c
             int stride;
 
             vpx_memset(accumulator, 0, 384*sizeof(unsigned int));
-            vpx_memset(count, 0, 384*sizeof(unsigned int));
+            vpx_memset(count, 0, 384*sizeof(unsigned short));
 
 #if ALT_REF_MC_ENABLED
             // Reduced search extent by 3 for 6-tap filter & smaller UMV border
