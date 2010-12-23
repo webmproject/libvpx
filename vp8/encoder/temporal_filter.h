@@ -12,7 +12,7 @@
 #ifndef __INC_VP8_TEMPORAL_FILTER_H
 #define __INC_VP8_TEMPORAL_FILTER_H
 
-#define prototype_filter(sym)\
+#define prototype_apply(sym)\
     void (sym) \
     ( \
      unsigned char *frame1, \
@@ -25,20 +25,20 @@
      unsigned int *count \
     )
 
-#ifndef vp8_temporal_filter
-#define vp8_temporal_filter vp8_apply_temporal_filter_c
+#ifndef vp8_temporal_filter_apply
+#define vp8_temporal_filter_apply vp8_temporal_filter_apply_c
 #endif
-extern prototype_filter(vp8_temporal_filter);
+extern prototype_apply(vp8_temporal_filter_apply);
 
 typedef struct
 {
-    prototype_filter(*filter);
+    prototype_apply(*apply);
 } vp8_temporal_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define TEMPORAL_INVOKE(ctx,fn) (ctx)->fn
 #else
-#define TEMPORAL_INVOKE(ctx,fn) vp8_temporal_##fn
+#define TEMPORAL_INVOKE(ctx,fn) vp8_temporal_filter_##fn
 #endif
 
 #endif // __INC_VP8_TEMPORAL_FILTER_H

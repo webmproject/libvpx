@@ -59,7 +59,7 @@ static int modifier_lut[7][19] =
     {16, 16, 16, 16, 15, 15, 14, 14, 13, 12, 11, 10, 9, 8, 7, 5, 4, 2, 1}
 };
 #endif
-static void build_predictors_mb
+static void vp8_temporal_filter_predictors_mb_c
 (
     MACROBLOCKD *x,
     unsigned char *y_mb_ptr,
@@ -111,7 +111,7 @@ static void build_predictors_mb
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, stride, &pred[320], 8);
     }
 }
-void vp8_apply_temporal_filter_c
+void vp8_temporal_filter_apply_c
 (
     unsigned char *frame1,
     unsigned int stride,
@@ -171,7 +171,7 @@ void vp8_apply_temporal_filter_c
 #if ALT_REF_MC_ENABLED
 static int dummy_cost[2*mv_max+1];
 
-static int find_matching_mb
+static int vp8_temporal_filter_find_matching_mb_c
 (
     VP8_COMP *cpi,
     YV12_BUFFER_CONFIG *arf_frame,
@@ -308,7 +308,7 @@ static int find_matching_mb
 }
 #endif
 
-static void vp8cx_temp_blur1_c
+static void vp8_temporal_filter_iterate_c
 (
     VP8_COMP *cpi,
     int frame_count,
@@ -412,11 +412,12 @@ static void vp8cx_temp_blur1_c
 #define THRESH_HIGH  20000
 
                     // Correlation has been lost try MC
-                    err = find_matching_mb ( cpi,
-                                             cpi->frames[alt_ref_index],
-                                             cpi->frames[frame],
-                                             mb_y_offset,
-                                             THRESH_LOW );
+                    err = vp8_temporal_filter_find_matching_mb_c
+                        (cpi,
+                         cpi->frames[alt_ref_index],
+                         cpi->frames[frame],
+                         mb_y_offset,
+                         THRESH_LOW);
 
                     if (filter_weight[frame] < 2)
                     {
@@ -429,18 +430,18 @@ static void vp8cx_temp_blur1_c
                 if (filter_weight[frame] != 0)
                 {
                     // Construct the predictors
-                    build_predictors_mb (
-                              mbd,
-                              cpi->frames[frame]->y_buffer + mb_y_offset,
-                              cpi->frames[frame]->u_buffer + mb_uv_offset,
-                              cpi->frames[frame]->v_buffer + mb_uv_offset,
-                              cpi->frames[frame]->y_stride,
-                              mbd->block[0].bmi.mv.as_mv.row,
-                              mbd->block[0].bmi.mv.as_mv.col,
-                              predictor );
+                    vp8_temporal_filter_predictors_mb_c
+                        (mbd,
+                         cpi->frames[frame]->y_buffer + mb_y_offset,
+                         cpi->frames[frame]->u_buffer + mb_uv_offset,
+                         cpi->frames[frame]->v_buffer + mb_uv_offset,
+                         cpi->frames[frame]->y_stride,
+                         mbd->block[0].bmi.mv.as_mv.row,
+                         mbd->block[0].bmi.mv.as_mv.col,
+                         predictor);
 
                     // Apply the filter (YUV)
-                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, filter)
+                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, apply)
                         (f->y_buffer + mb_y_offset,
                          f->y_stride,
                          predictor,
@@ -450,7 +451,7 @@ static void vp8cx_temp_blur1_c
                          accumulator,
                          count);
 
-                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, filter)
+                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, apply)
                         (f->u_buffer + mb_uv_offset,
                          f->uv_stride,
                          predictor + 256,
@@ -460,7 +461,7 @@ static void vp8cx_temp_blur1_c
                          accumulator + 256,
                          count + 256);
 
-                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, filter)
+                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, apply)
                         (f->v_buffer + mb_uv_offset,
                          f->uv_stride,
                          predictor + 320,
@@ -537,7 +538,7 @@ static void vp8cx_temp_blur1_c
     mbd->pre.v_buffer = v_buffer;
 }
 
-void vp8cx_temp_filter_c
+void vp8_temporal_filter_prepare_c
 (
     VP8_COMP *cpi
 )
@@ -645,7 +646,7 @@ void vp8cx_temp_filter_c
                 = &cpi->src_buffer[which_buffer].source_buffer;
     }
 
-    vp8cx_temp_blur1_c (
+    vp8_temporal_filter_iterate_c (
         cpi,
         frames_to_blur,
         frames_to_blur_backward,
