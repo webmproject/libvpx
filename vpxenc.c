@@ -186,11 +186,11 @@ int stats_open_mem(stats_io_t *stats, int pass)
 }
 
 
-void stats_close(stats_io_t *stats)
+void stats_close(stats_io_t *stats, int last_pass)
 {
     if (stats->file)
     {
-        if (stats->pass == 1)
+        if (stats->pass == last_pass)
         {
 #if 0
 #elif USE_POSIX_MMAP
@@ -205,7 +205,7 @@ void stats_close(stats_io_t *stats)
     }
     else
     {
-        if (stats->pass == 1)
+        if (stats->pass == last_pass)
             free(stats->buf.buf);
     }
 }
@@ -1692,7 +1692,7 @@ int main(int argc, const char **argv_)
         }
 
         fclose(outfile);
-        stats_close(&stats);
+        stats_close(&stats, arg_passes-1);
         fprintf(stderr, "\n");
 
         if (one_pass_only)
