@@ -1031,6 +1031,7 @@ static const unsigned int segmentation_to_sseshift[4] = {3, 3, 2, 0};
 typedef struct
 {
   MV *ref_mv;
+  MV *mvp;
 
   int segment_rd;
   int segment_num;
@@ -1043,6 +1044,9 @@ typedef struct
 
   int mvthresh;
   int *mdcounts;
+
+  MV sv_mvp[4];     // save 4 mvp from 8x8
+  int sv_istep[2];  // save 2 initial step_param for 16x8/8x16
 
 } BEST_SEG_INFO;
 
@@ -1129,7 +1133,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
                 int sseshift;
                 int num00;
                 int step_param = 0;
-                int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
+                int further_steps;
                 int n;
                 int thissme;
                 int bestsme = INT_MAX;
@@ -1140,6 +1144,27 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
                 // Is the best so far sufficiently good that we cant justify doing and new motion search.
                 if (best_label_rd < label_mv_thresh)
                     break;
+
+                if(cpi->compressor_speed)
+                {
+                    if (segmentation == BLOCK_8X16 || segmentation == BLOCK_16X8)
+                    {
+                        bsi->mvp = &bsi->sv_mvp[i];
+                        if (i==1 && segmentation == BLOCK_16X8) bsi->mvp = &bsi->sv_mvp[2];
+
+                        step_param = bsi->sv_istep[i];
+                    }
+
+                    // use previous block's result as next block's MV predictor.
+                    if (segmentation == BLOCK_4X4 && i>0)
+                    {
+                        bsi->mvp = &(x->e_mbd.block[i-1].bmi.mv.as_mv);
+                        if (i==4 || i==8 || i==12) bsi->mvp = &(x->e_mbd.block[i-4].bmi.mv.as_mv);
+                        step_param = 2;
+                    }
+                }
+
+                further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
 
                 {
                     int sadpb = x->sadperbit4;
@@ -1156,7 +1181,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
 
                     else
                     {
-                        bestsme = cpi->diamond_search_sad(x, c, e, bsi->ref_mv,
+                        bestsme = cpi->diamond_search_sad(x, c, e, bsi->mvp,
                                                           &mode_mv[NEW4X4], step_param,
                                                           sadpb / 2, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
 
@@ -1171,7 +1196,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
                                 num00--;
                             else
                             {
-                                thissme = cpi->diamond_search_sad(x, c, e, bsi->ref_mv,
+                                thissme = cpi->diamond_search_sad(x, c, e, bsi->mvp,
                                                                   &temp_mv, step_param + n,
                                                                   sadpb / 2, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
 
@@ -1190,7 +1215,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
                     // Should we do a full search (best quality only)
                     if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000)
                     {
-                        thissme = cpi->full_search_sad(x, c, e, bsi->ref_mv,
+                        thissme = cpi->full_search_sad(x, c, e, bsi->mvp,
                                                        sadpb / 4, 16, v_fn_ptr, x->mvcost, x->mvsadcost,bsi->ref_mv);
 
                         if (thissme < bestsme)
@@ -1259,8 +1284,9 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
         segmentyrate += bestlabelyrate;
         this_segment_rd += best_label_rd;
 
-        if (this_segment_rd > bsi->segment_rd)
+        if (this_segment_rd >= bsi->segment_rd)
             break;
+
     } /* for each label */
 
     if (this_segment_rd < bsi->segment_rd)
@@ -1282,6 +1308,21 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
         }
     }
 }
+
+static __inline
+void vp8_cal_step_param(int sr, int *sp)
+{
+    int step = 0;
+
+    if (sr > MAX_FIRST_STEP) sr = MAX_FIRST_STEP;
+    else if (sr < 1) sr = 1;
+
+    while (sr>>=1)
+        step++;
+
+    *sp = MAX_MVSEARCH_STEPS - 1 - step;
+}
+
 static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                                            MV *best_ref_mv, int best_rd,
                                            int *mdcounts, int *returntotrate,
@@ -1290,14 +1331,12 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 {
     int i;
     BEST_SEG_INFO bsi;
-    BEST_SEG_INFO bsi_8x8;
-    int check_8x16 = 0;
-    int check_16x8 = 0;
 
     vpx_memset(&bsi, 0, sizeof(bsi));
 
     bsi.segment_rd = best_rd;
     bsi.ref_mv = best_ref_mv;
+    bsi.mvp = best_ref_mv;
     bsi.mvthresh = mvthresh;
     bsi.mdcounts = mdcounts;
 
@@ -1305,6 +1344,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     {
         bsi.modes[i] = ZERO4X4;
     }
+
     if(cpi->compressor_speed == 0)
     {
         /* for now, we will keep the original segmentation order
@@ -1316,12 +1356,46 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     }
     else
     {
+        int sr;
+
         vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
+
         if (bsi.segment_rd < best_rd)
         {
-          vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
-          vp8_rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
-          vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
+            bsi.sv_mvp[0] = bsi.mvs[0].as_mv;
+            bsi.sv_mvp[1] = bsi.mvs[2].as_mv;
+            bsi.sv_mvp[2] = bsi.mvs[8].as_mv;
+            bsi.sv_mvp[3] = bsi.mvs[10].as_mv;
+
+            // Use 8x8 result as 16x8/8x16's predictor MV. Adjust search range according to the closeness of 2 MV.
+            //block 8X16
+            {
+                sr = MAXF((abs(bsi.sv_mvp[0].row - bsi.sv_mvp[2].row))>>3, (abs(bsi.sv_mvp[0].col - bsi.sv_mvp[2].col))>>3);
+                vp8_cal_step_param(sr, &bsi.sv_istep[0]);
+
+                sr = MAXF((abs(bsi.sv_mvp[1].row - bsi.sv_mvp[3].row))>>3, (abs(bsi.sv_mvp[1].col - bsi.sv_mvp[3].col))>>3);
+                vp8_cal_step_param(sr, &bsi.sv_istep[1]);
+
+                vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
+            }
+
+            //block 16X8
+            {
+                sr = MAXF((abs(bsi.sv_mvp[0].row - bsi.sv_mvp[1].row))>>3, (abs(bsi.sv_mvp[0].col - bsi.sv_mvp[1].col))>>3);
+                vp8_cal_step_param(sr, &bsi.sv_istep[0]);
+
+                sr = MAXF((abs(bsi.sv_mvp[2].row - bsi.sv_mvp[3].row))>>3, (abs(bsi.sv_mvp[2].col - bsi.sv_mvp[3].col))>>3);
+                vp8_cal_step_param(sr, &bsi.sv_istep[1]);
+
+                vp8_rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
+            }
+
+            // If 8x8 is better than 16x8/8x16, then do 4x4 search
+            if (bsi.segment_num == BLOCK_8X8)  // || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5)
+            {
+                bsi.mvp = &bsi.sv_mvp[0];
+                vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
+            }
         }
     }
 
