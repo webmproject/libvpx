@@ -111,7 +111,7 @@ static void build_predictors_mb
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, stride, &pred[320], 8);
     }
 }
-static void apply_temporal_filter
+void vp8_apply_temporal_filter_c
 (
     unsigned char *frame1,
     unsigned int stride,
@@ -440,32 +440,35 @@ static void vp8cx_temp_blur1_c
                               predictor );
 
                     // Apply the filter (YUV)
-                    apply_temporal_filter ( f->y_buffer + mb_y_offset,
-                                            f->y_stride,
-                                            predictor,
-                                            16,
-                                            strength,
-                                            filter_weight[frame],
-                                            accumulator,
-                                            count );
+                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, filter)
+                        (f->y_buffer + mb_y_offset,
+                         f->y_stride,
+                         predictor,
+                         16,
+                         strength,
+                         filter_weight[frame],
+                         accumulator,
+                         count);
 
-                    apply_temporal_filter ( f->u_buffer + mb_uv_offset,
-                                            f->uv_stride,
-                                            predictor + 256,
-                                            8,
-                                            strength,
-                                            filter_weight[frame],
-                                            accumulator + 256,
-                                            count + 256 );
+                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, filter)
+                        (f->u_buffer + mb_uv_offset,
+                         f->uv_stride,
+                         predictor + 256,
+                         8,
+                         strength,
+                         filter_weight[frame],
+                         accumulator + 256,
+                         count + 256);
 
-                    apply_temporal_filter ( f->v_buffer + mb_uv_offset,
-                                            f->uv_stride,
-                                            predictor + 320,
-                                            8,
-                                            strength,
-                                            filter_weight[frame],
-                                            accumulator + 320,
-                                            count + 320 );
+                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, filter)
+                        (f->v_buffer + mb_uv_offset,
+                         f->uv_stride,
+                         predictor + 320,
+                         8,
+                         strength,
+                         filter_weight[frame],
+                         accumulator + 320,
+                         count + 320);
                 }
             }
 
