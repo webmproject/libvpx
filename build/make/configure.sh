@@ -890,7 +890,7 @@ process_common_toolchain() {
         case  ${tgt_os} in
             win*)
                 add_asflags -f win${bits}
-                enabled debug && add_asflags -g dwarf2
+                enabled debug && add_asflags -g cv8
             ;;
             linux*|solaris*)
                 add_asflags -f elf${bits}
