@@ -1357,13 +1357,34 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
         if (bsi.segment_rd < best_rd)
         {
+            int col_min = (best_ref_mv->col - MAX_POSSIBLE_MV) >>3;
+            int col_max = (best_ref_mv->col + MAX_POSSIBLE_MV) >>3;
+            int row_min = (best_ref_mv->row - MAX_POSSIBLE_MV) >>3;
+            int row_max = (best_ref_mv->row + MAX_POSSIBLE_MV) >>3;
+
+            int tmp_col_min = x->mv_col_min;
+            int tmp_col_max = x->mv_col_max;
+            int tmp_row_min = x->mv_row_min;
+            int tmp_row_max = x->mv_row_max;
+
+            /* Get intersection of UMV window and valid MV window to reduce # of checks in diamond search. */
+            if (x->mv_col_min < col_min )
+                x->mv_col_min = col_min;
+            if (x->mv_col_max > col_max )
+                x->mv_col_max = col_max;
+            if (x->mv_row_min < row_min )
+                x->mv_row_min = row_min;
+            if (x->mv_row_max > row_max )
+                x->mv_row_max = row_max;
+
+            /* Get 8x8 result */
             bsi.sv_mvp[0] = bsi.mvs[0].as_mv;
             bsi.sv_mvp[1] = bsi.mvs[2].as_mv;
             bsi.sv_mvp[2] = bsi.mvs[8].as_mv;
             bsi.sv_mvp[3] = bsi.mvs[10].as_mv;
 
-            // Use 8x8 result as 16x8/8x16's predictor MV. Adjust search range according to the closeness of 2 MV.
-            //block 8X16
+            /* Use 8x8 result as 16x8/8x16's predictor MV. Adjust search range according to the closeness of 2 MV. */
+            /* block 8X16 */
             {
                 sr = MAXF((abs(bsi.sv_mvp[0].row - bsi.sv_mvp[2].row))>>3, (abs(bsi.sv_mvp[0].col - bsi.sv_mvp[2].col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[0]);
@@ -1374,7 +1395,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                 vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
             }
 
-            //block 16X8
+            /* block 16X8 */
             {
                 sr = MAXF((abs(bsi.sv_mvp[0].row - bsi.sv_mvp[1].row))>>3, (abs(bsi.sv_mvp[0].col - bsi.sv_mvp[1].col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[0]);
@@ -1385,12 +1406,18 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                 vp8_rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
             }
 
-            // If 8x8 is better than 16x8/8x16, then do 4x4 search
-            if (bsi.segment_num == BLOCK_8X8)  // || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5)
+            /* If 8x8 is better than 16x8/8x16, then do 4x4 search */
+            if (bsi.segment_num == BLOCK_8X8)  /* || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5) */
             {
                 bsi.mvp = &bsi.sv_mvp[0];
                 vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
             }
+
+            /* restore UMV window */
+            x->mv_col_min = tmp_col_min;
+            x->mv_col_max = tmp_col_max;
+            x->mv_row_min = tmp_row_min;
+            x->mv_row_max = tmp_row_max;
         }
     }
 
