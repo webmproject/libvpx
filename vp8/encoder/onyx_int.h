@@ -182,6 +182,8 @@ typedef struct
     int first_step;
     int optimize_coefficients;
 
+    int use_fastquant_for_pick;
+
 } SPEED_FEATURES;
 
 typedef struct
@@ -269,6 +271,9 @@ typedef struct
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1quant_fast[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y2quant_fast[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, UVquant_fast[QINDEX_RANGE][16]);
 
 
     MACROBLOCK mb;
