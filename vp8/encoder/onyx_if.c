@@ -588,6 +588,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->max_fs_radius = 32;
     sf->iterative_sub_pixel = 1;
     sf->optimize_coefficients = 1;
+    sf->use_fastquant_for_pick = 0;
 
     sf->first_step = 0;
     sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -755,7 +756,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             cpi->mode_check_freq[THR_SPLITG] = 4;
             cpi->mode_check_freq[THR_SPLITA] = 4;
-            cpi->mode_check_freq[THR_SPLITMV] = 0;
+            cpi->mode_check_freq[THR_SPLITMV] = 2;
 
             sf->thresh_mult[THR_TM       ] = 1500;
             sf->thresh_mult[THR_V_PRED   ] = 1500;
@@ -786,8 +787,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 20000;
             }
 
-            sf->improved_quant = 0;
-            sf->improved_dct = 0;
+            sf->use_fastquant_for_pick = 1;
 
             sf->first_step = 1;
             sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -795,6 +795,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         if (Speed > 1)
         {
+            sf->use_fastquant_for_pick = 0;
+
             cpi->mode_check_freq[THR_SPLITG] = 15;
             cpi->mode_check_freq[THR_SPLITA] = 15;
             cpi->mode_check_freq[THR_SPLITMV] = 7;
@@ -827,6 +829,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWA     ] = 2500;
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
+
+            sf->first_step = 1;
+
+            sf->improved_quant = 0;
+            sf->improved_dct = 0;
 
             // Only do recode loop on key frames, golden frames and
             // alt ref frames

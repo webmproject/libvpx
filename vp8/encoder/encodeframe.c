@@ -187,6 +187,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
     {
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
+        cpi->Y1quant_fast[Q][0] = (1 << 16) / quant_val;
         vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y1quant[Q] + 0,
                            cpi->Y1quant_shift[Q] + 0, quant_val);
         cpi->Y1zbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
@@ -195,6 +196,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
         cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
         quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
+        cpi->Y2quant_fast[Q][0] = (1 << 16) / quant_val;
         vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y2quant[Q] + 0,
                            cpi->Y2quant_shift[Q] + 0, quant_val);
         cpi->Y2zbin[Q][0] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
@@ -203,6 +205,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
         cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
 
         quant_val = vp8_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
+        cpi->UVquant_fast[Q][0] = (1 << 16) / quant_val;
         vp8cx_invert_quant(cpi->sf.improved_quant, cpi->UVquant[Q] + 0,
                            cpi->UVquant_shift[Q] + 0, quant_val);
         cpi->UVzbin[Q][0] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;;
@@ -216,6 +219,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
             int rc = vp8_default_zig_zag1d[i];
 
             quant_val = vp8_ac_yquant(Q);
+            cpi->Y1quant_fast[Q][rc] = (1 << 16) / quant_val;
             vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y1quant[Q] + rc,
                                cpi->Y1quant_shift[Q] + rc, quant_val);
             cpi->Y1zbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
@@ -224,6 +228,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
             cpi->zrun_zbin_boost_y1[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 
             quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
+            cpi->Y2quant_fast[Q][rc] = (1 << 16) / quant_val;
             vp8cx_invert_quant(cpi->sf.improved_quant, cpi->Y2quant[Q] + rc,
                                cpi->Y2quant_shift[Q] + rc, quant_val);
             cpi->Y2zbin[Q][rc] = ((qzbin_factors_y2[Q] * quant_val) + 64) >> 7;
@@ -232,6 +237,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
             cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
 
             quant_val = vp8_ac_uv_quant(Q, cpi->common.uvac_delta_q);
+            cpi->UVquant_fast[Q][rc] = (1 << 16) / quant_val;
             vp8cx_invert_quant(cpi->sf.improved_quant, cpi->UVquant[Q] + rc,
                                cpi->UVquant_shift[Q] + rc, quant_val);
             cpi->UVzbin[Q][rc] = ((qzbin_factors[Q] * quant_val) + 64) >> 7;
@@ -333,6 +339,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     for (i = 0; i < 16; i++)
     {
         x->block[i].quant = cpi->Y1quant[QIndex];
+        x->block[i].quant_fast = cpi->Y1quant_fast[QIndex];
         x->block[i].quant_shift = cpi->Y1quant_shift[QIndex];
         x->block[i].zbin = cpi->Y1zbin[QIndex];
         x->block[i].round = cpi->Y1round[QIndex];
@@ -347,6 +354,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     for (i = 16; i < 24; i++)
     {
         x->block[i].quant = cpi->UVquant[QIndex];
+        x->block[i].quant_fast = cpi->UVquant_fast[QIndex];
         x->block[i].quant_shift = cpi->UVquant_shift[QIndex];
         x->block[i].zbin = cpi->UVzbin[QIndex];
         x->block[i].round = cpi->UVround[QIndex];
@@ -357,6 +365,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
 
     // Y2
     zbin_extra = (cpi->common.Y2dequant[QIndex][1] * ((cpi->zbin_over_quant / 2) + cpi->zbin_mode_boost)) >> 7;
+    x->block[24].quant_fast = cpi->Y2quant_fast[QIndex];
     x->block[24].quant = cpi->Y2quant[QIndex];
     x->block[24].quant_shift = cpi->Y2quant_shift[QIndex];
     x->block[24].zbin = cpi->Y2zbin[QIndex];
@@ -1406,7 +1415,18 @@ int vp8cx_encode_inter_macroblock
 
     if (cpi->sf.RD)
     {
+        /* Are we using the fast quantizer for the mode selection? */
+        if(cpi->sf.use_fastquant_for_pick)
+            cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
+
         inter_error = vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
+
+        /* switch back to the regular quantizer for the encode */
+        if (cpi->sf.improved_quant)
+        {
+            cpi->mb.quantize_b    = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb);
+        }
+
     }
     else
 #endif
