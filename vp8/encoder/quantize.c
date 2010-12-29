@@ -27,7 +27,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     short *coeff_ptr       = b->coeff;
     short *zbin_ptr        = b->zbin;
     short *round_ptr       = b->round;
-    short *quant_ptr       = b->quant;
+    short *quant_ptr       = b->quant_fast;
     short *quant_shift_ptr = b->quant_shift;
     short *qcoeff_ptr      = d->qcoeff;
     short *dqcoeff_ptr     = d->dqcoeff;
@@ -74,7 +74,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     int x, y, z, sz;
     short *coeff_ptr   = b->coeff;
     short *round_ptr   = b->round;
-    short *quant_ptr   = b->quant;
+    short *quant_ptr   = b->quant_fast;
     short *qcoeff_ptr  = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = d->dequant;

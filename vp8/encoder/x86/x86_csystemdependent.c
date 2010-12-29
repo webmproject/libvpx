@@ -32,7 +32,7 @@ void vp8_fast_quantize_b_mmx(BLOCK *b, BLOCKD *d)
     short *coeff_ptr   = b->coeff;
     short *zbin_ptr    = b->zbin;
     short *round_ptr   = b->round;
-    short *quant_ptr   = b->quant;
+    short *quant_ptr   = b->quant_fast;
     short *qcoeff_ptr  = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = d->dequant;
@@ -90,7 +90,7 @@ void vp8_fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
     short *scan_mask   = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
     short *coeff_ptr   = b->coeff;
     short *round_ptr   = b->round;
-    short *quant_ptr   = b->quant;
+    short *quant_ptr   = b->quant_fast;
     short *qcoeff_ptr  = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = d->dequant;
@@ -183,7 +183,7 @@ void vp8_fast_quantize_b_ssse3(BLOCK *b, BLOCKD *d)
                     d->qcoeff,
                     d->dequant,
                     b->round,
-                    b->quant,
+                    b->quant_fast,
                     d->dqcoeff
                );
 }
