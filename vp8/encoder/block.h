@@ -112,6 +112,7 @@ typedef struct
 
     unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens];
     int optimize;
+    int q_index;
 
     void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
     void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
