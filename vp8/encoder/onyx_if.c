@@ -4340,10 +4340,11 @@ static void encode_frame_to_data_rate
             {
                 vp8cx_set_alt_lf_level(cpi, cm->filter_level);
                 vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
-                cm->last_frame_type = cm->frame_type;
                 cm->last_filter_type = cm->filter_type;
                 cm->last_sharpness_level = cm->sharpness_level;
             }
+            /* Move storing frame_type out of the above loop since it is also needed in motion search besides loopfilter */
+            cm->last_frame_type = cm->frame_type;
 
             vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
 
