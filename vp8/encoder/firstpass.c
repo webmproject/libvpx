@@ -53,9 +53,11 @@ extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
 #define IIFACTOR   1.4
 #define IIKFACTOR1 1.40
 #define IIKFACTOR2 1.5
-#define RMAX    14.0
-#define GF_RMAX 48.0        // 128.0
+#define RMAX       14.0
+#define GF_RMAX    48.0
 
+#define KF_MB_INTRA_MIN 300
+#define GF_MB_INTRA_MIN 200
 #define DOUBLE_DIVIDE_CHECK(X) ((X)<0?(X)-.000001:(X)+.000001)
 
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
@@ -1147,6 +1149,13 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     cpi->bits_left -= (long long)(cpi->total_stats->duration * two_pass_min_rate / 10000000.0);
     cpi->clip_bits_total = cpi->bits_left;
 
+    // Calculate a minimum intra value to be used in determining the IIratio
+    // scores used in the second pass. We have this minimum to make sure
+    // that clips that are static but "low complexity" in the intra domain
+    // are still boosted appropriately for KF/GF/ARF
+    cpi->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
+    cpi->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
+
     vp8_avg_stats(cpi->total_stats);
 
     // Scan the first pass file and calculate an average Intra / Inter error score ratio for the sequence
@@ -1316,6 +1325,13 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         // Underlying boost factor is based on inter intra error ratio
         r = (boost_factor * (next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error)));
+
+        if (next_frame.intra_error > cpi->gf_intra_err_min)
+            r = (IIKFACTOR2 * next_frame.intra_error /
+                     DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
+        else
+            r = (IIKFACTOR2 * cpi->gf_intra_err_min /
+                     DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
 
         // Increase boost for frames where new data coming into frame (eg zoom out)
         // Slightly reduce boost if there is a net balance of motion out of the frame (zoom in)
@@ -2302,7 +2318,12 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (EOF == vp8_input_stats(cpi, &next_frame))
             break;
 
-        r = (IIKFACTOR2 * next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error)) ;
+        if (next_frame.intra_error > cpi->kf_intra_err_min)
+            r = (IIKFACTOR2 * next_frame.intra_error /
+                     DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
+        else
+            r = (IIKFACTOR2 * cpi->kf_intra_err_min /
+                     DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
 
         if (r > RMAX)
             r = RMAX;
@@ -2443,7 +2464,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         kf_boost = (int)((double)kf_boost * 100.0) >> 4;                          // Scale 16 to 100
 
         // Adjustment to boost based on recent average q
-        kf_boost = kf_boost * vp8_kf_boost_qadjustment[cpi->ni_av_qi] / 100;
+        //kf_boost = kf_boost * vp8_kf_boost_qadjustment[cpi->ni_av_qi] / 100;
 
         if (kf_boost < 250)                                                      // Min KF boost
             kf_boost = 250;
