@@ -483,6 +483,8 @@ typedef struct
     double total_coded_error_left;
     double start_tot_err_left;
     double min_error;
+    double kf_intra_err_min;
+    double gf_intra_err_min;
 
     double modified_error_total;
     double modified_error_used;
