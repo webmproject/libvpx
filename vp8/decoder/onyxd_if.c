@@ -254,12 +254,7 @@ static void ref_cnt_fb (int *buf, int *idx, int new_idx)
 /* If any buffer copy / swapping is signalled it should be done here. */
 static int swap_frame_buffers (VP8_COMMON *cm)
 {
-    int fb_to_update_with, err = 0;
-
-    if (cm->refresh_last_frame)
-        fb_to_update_with = cm->lst_fb_idx;
-    else
-        fb_to_update_with = cm->new_fb_idx;
+    int err = 0;
 
     /* The alternate reference frame or golden frame can be updated
      *  using the new, last, or golden/alt ref frame.  If it
@@ -271,7 +266,7 @@ static int swap_frame_buffers (VP8_COMMON *cm)
         int new_fb = 0;
 
         if (cm->copy_buffer_to_arf == 1)
-            new_fb = fb_to_update_with;
+            new_fb = cm->lst_fb_idx;
         else if (cm->copy_buffer_to_arf == 2)
             new_fb = cm->gld_fb_idx;
         else
@@ -285,7 +280,7 @@ static int swap_frame_buffers (VP8_COMMON *cm)
         int new_fb = 0;
 
         if (cm->copy_buffer_to_gf == 1)
-            new_fb = fb_to_update_with;
+            new_fb = cm->lst_fb_idx;
         else if (cm->copy_buffer_to_gf == 2)
             new_fb = cm->alt_fb_idx;
         else
