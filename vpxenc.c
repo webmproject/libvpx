@@ -39,6 +39,7 @@
 #include "y4minput.h"
 #include "libmkv/EbmlWriter.h"
 #include "libmkv/EbmlIDs.h"
+#include "experimental.h"
 
 /* Need special handling of these functions on Windows */
 #if defined(_MSC_VER)
@@ -1039,6 +1040,7 @@ static void usage_exit()
 #if CONFIG_VP8_ENCODER
     fprintf(stderr, "\nVP8 Specific Options:\n");
     arg_show_usage(stdout, vp8_args);
+    xxx_show_usage(stdout);
 #endif
     fprintf(stderr, "\n"
            "Included encoders:\n"
@@ -1173,6 +1175,7 @@ int main(int argc, const char **argv_)
             out_fn = arg.val;
         else if (arg_match(&arg, &debugmode, argi))
             ebml.debug = 1;
+        else if (xxx_parse_arg(argi));
         else
             argj++;
     }

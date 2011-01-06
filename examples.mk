@@ -35,6 +35,7 @@ vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
 vpxenc.SRCS                 += libmkv/EbmlIDs.h
 vpxenc.SRCS                 += libmkv/EbmlWriter.c
 vpxenc.SRCS                 += libmkv/EbmlWriter.h
+vpxenc.SRCS                 += experimental.c
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
 
