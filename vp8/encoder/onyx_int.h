@@ -365,7 +365,6 @@ typedef struct
     int this_frame_target;
     int projected_frame_size;
     int last_q[2];                   // Separate values for Intra/Inter
-    int target_bits_per_mb;
 
     double rate_correction_factor;
     double key_frame_rate_correction_factor;

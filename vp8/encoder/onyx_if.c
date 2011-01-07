@@ -3081,9 +3081,6 @@ static int pick_frame_size(VP8_COMP *cpi)
         }
     }
 
-    // Note target_size in bits * 256 per MB
-    cpi->target_bits_per_mb = (cpi->this_frame_target * 256) / cpi->common.MBs;
-
     return 1;
 }
 static void set_quantizer(VP8_COMP *cpi, int Q)
