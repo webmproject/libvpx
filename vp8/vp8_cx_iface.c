@@ -38,6 +38,7 @@ struct vp8_extracfg
     unsigned int                arnr_strength;    /* alt_ref Noise Reduction Strength */
     unsigned int                arnr_type;        /* alt_ref filter type */
     vp8e_tuning                 tuning;
+    unsigned int                cq_level;         /* constrained quality level */
 
 };
 
@@ -69,6 +70,7 @@ static const struct extraconfig_map extracfg_map[] =
             3,                          /* arnr_strength */
             3,                          /* arnr_type*/
             0,                          /* tuning*/
+            10,                         /* cq_level */
         }
     }
 };
@@ -148,7 +150,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 #else
     RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
 #endif
-    RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CBR);
+    RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
     RANGE_CHECK_HI(cfg, rc_undershoot_pct,  100);
     RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
     RANGE_CHECK(cfg, kf_mode,               VPX_KF_DISABLED, VPX_KF_AUTO);
@@ -190,6 +192,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
     RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
+    RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
 
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
@@ -298,6 +301,10 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     {
         oxcf->end_usage          = USAGE_STREAM_FROM_SERVER;
     }
+    else if (cfg.rc_end_usage == VPX_CQ)
+    {
+        oxcf->end_usage          = USAGE_CONSTRAINED_QUALITY;
+    }
 
     oxcf->target_bandwidth       = cfg.rc_target_bitrate;
 
@@ -339,6 +346,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->arnr_type =      vp8_cfg.arnr_type;
 
     oxcf->tuning = vp8_cfg.tuning;
+    oxcf->cq_level = vp8_cfg.cq_level;
 
     /*
         printf("Current VP8 Settings: \n");
@@ -453,6 +461,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
         MAP(VP8E_SET_ARNR_STRENGTH ,        xcfg.arnr_strength);
         MAP(VP8E_SET_ARNR_TYPE     ,        xcfg.arnr_type);
         MAP(VP8E_SET_TUNING,                xcfg.tuning);
+        MAP(VP8E_SET_CQ_LEVEL,              xcfg.cq_level);
 
     }
 
@@ -1034,6 +1043,7 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
     {VP8E_SET_ARNR_STRENGTH ,           set_param},
     {VP8E_SET_ARNR_TYPE     ,           set_param},
     {VP8E_SET_TUNING,                   set_param},
+    {VP8E_SET_CQ_LEVEL,                 set_param},
     { -1, NULL},
 };
 
@@ -1069,7 +1079,6 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
 
         4,                  /* rc_min_quantizer */
         63,                 /* rc_max_quantizer */
-
         95,                 /* rc_undershoot_pct */
         200,                /* rc_overshoot_pct */
 

@@ -141,6 +141,7 @@ enum vp8e_enc_control_id
     VP8E_SET_ARNR_STRENGTH ,         /**< control function to set the filter strength for the arf */
     VP8E_SET_ARNR_TYPE     ,         /**< control function to set the type of filter to use for the arf*/
     VP8E_SET_TUNING,                 /**< control function to set visual tuning */
+    VP8E_SET_CQ_LEVEL,               /**< control function to set constrained quality level */
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -267,6 +268,7 @@ VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_MAXFRAMES,     unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_STRENGTH ,     unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_ARNR_TYPE     ,     unsigned int)
 VPX_CTRL_USE_TYPE(VP8E_SET_TUNING,             vp8e_tuning)
+VPX_CTRL_USE_TYPE(VP8E_SET_CQ_LEVEL     ,      unsigned int)
 
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)

@@ -46,7 +46,8 @@ extern "C"
     typedef enum
     {
         USAGE_STREAM_FROM_SERVER    = 0x0,
-        USAGE_LOCAL_FILE_PLAYBACK   = 0x1
+        USAGE_LOCAL_FILE_PLAYBACK   = 0x1,
+        USAGE_CONSTRAINED_QUALITY   = 0x2
     } END_USAGE;
 
 
@@ -150,6 +151,7 @@ extern "C"
         int fixed_q;
         int worst_allowed_q;
         int best_allowed_q;
+        int cq_level;
 
         // allow internal resizing ( currently disabled in the build !!!!!)
         int allow_spatial_resampling;
@@ -186,7 +188,6 @@ extern "C"
         int arnr_max_frames;
         int arnr_strength ;
         int arnr_type     ;
-
 
         struct vpx_fixed_buf         two_pass_stats_in;
         struct vpx_codec_pkt_list  *output_pkt_list;
