@@ -446,6 +446,7 @@ typedef struct
     int best_quality;
     int active_best_quality;
 
+    int cq_target_quality;
     int maxq_max_limit;
     int maxq_min_limit;
 

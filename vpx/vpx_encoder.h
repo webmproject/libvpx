@@ -179,7 +179,8 @@ extern "C" {
     enum vpx_rc_mode
     {
         VPX_VBR, /**< Variable Bit Rate (VBR) mode */
-        VPX_CBR  /**< Constant Bit Rate (CBR) mode */
+        VPX_CBR,  /**< Constant Bit Rate (CBR) mode */
+        VPX_CQ   /**< Constant Quality  (CQ)  mode */
     };
 
 

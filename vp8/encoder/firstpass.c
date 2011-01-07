@@ -58,6 +58,7 @@ extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
 
 #define KF_MB_INTRA_MIN 300
 #define GF_MB_INTRA_MIN 200
+
 #define DOUBLE_DIVIDE_CHECK(X) ((X)<0?(X)-.000001:(X)+.000001)
 
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
@@ -65,6 +66,19 @@ extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
 
 static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
 static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
+
+
+const int cq_level[QINDEX_RANGE] =
+{
+    0,0,1,1,2,3,3,4,4,5,6,6,7,8,8,9,
+    9,10,11,11,12,13,13,14,15,15,16,17,17,18,19,20,
+    20,21,22,22,23,24,24,25,26,27,27,28,29,30,30,31,
+    32,33,33,34,35,36,36,37,38,39,39,40,41,42,42,43,
+    44,45,46,46,47,48,49,50,50,51,52,53,54,55,55,56,
+    57,58,59,60,60,61,62,63,64,65,66,67,67,68,69,70,
+    71,72,73,74,75,75,76,77,78,79,80,81,82,83,84,85,
+    86,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100
+};
 
 void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
 int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps);
@@ -889,7 +903,7 @@ void vp8_first_pass(VP8_COMP *cpi)
 }
 extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
-#define BASE_ERRPERMB   150
+#define BASE_ERRPERMB   100
 static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width)
 {
     int Q;
@@ -945,7 +959,7 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     corr_high = (corr_high < 0.05)
                     ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
 
-    // Try and pick a Q that should be high enough to encode the
+    // Try and pick a max Q that will be high enough to encode the
     // content at the given rate.
     for (Q = cpi->maxq_min_limit; Q < cpi->maxq_max_limit; Q++)
     {
@@ -964,6 +978,15 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
+    }
+
+    // Restriction on active max q for constrained quality mode.
+    if ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+         (Q < cpi->cq_target_quality) )
+         //(Q < cpi->oxcf.cq_target_quality) )
+    {
+        Q = cpi->cq_target_quality;
+        //Q = cpi->oxcf.cq_target_quality;
     }
 
     return Q;
@@ -1114,6 +1137,79 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
 
     return Q;
 }
+
+// For cq mode estimate a cq level that matches the observed
+// complexity and data rate.
+static int estimate_cq(VP8_COMP *cpi, double section_err,
+                       int section_target_bandwitdh, int Height, int Width)
+{
+    int Q;
+    int num_mbs = ((Height * Width) / (16 * 16));
+    int target_norm_bits_per_mb;
+
+    double err_per_mb = section_err / num_mbs;
+    double correction_factor;
+    double corr_high;
+    double speed_correction = 1.0;
+    double pow_highq = 0.90;
+    double pow_lowq = 0.40;
+    double clip_iiratio;
+    double clip_iifactor;
+
+    target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20))
+                              ? (512 * section_target_bandwitdh) / num_mbs
+                              : 512 * (section_target_bandwitdh / num_mbs);
+
+    // Corrections for higher compression speed settings
+    // (reduced compression expected)
+    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    {
+        if (cpi->oxcf.cpu_used <= 5)
+            speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
+        else
+            speed_correction = 1.25;
+    }
+    // II ratio correction factor for clip as a whole
+    clip_iiratio = cpi->total_stats->intra_error /
+                   DOUBLE_DIVIDE_CHECK(cpi->total_stats->coded_error);
+    clip_iifactor = 1.0 - ((clip_iiratio - 10.0) * 0.025);
+    if (clip_iifactor < 0.80)
+        clip_iifactor = 0.80;
+
+    // Correction factor used for Q values >= 20
+    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
+    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
+
+    // Try and pick a Q that can encode the content at the given rate.
+    for (Q = 0; Q < MAXQ; Q++)
+    {
+        int bits_per_mb_at_this_q;
+
+        if (Q < 50)
+        {
+            correction_factor =
+                pow( err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
+
+            correction_factor = (correction_factor < 0.05) ? 0.05
+                                    : (correction_factor > 5.0) ? 5.0
+                                        : correction_factor;
+        }
+        else
+            correction_factor = corr_high;
+
+        bits_per_mb_at_this_q =
+            (int)( .5 + correction_factor *
+                        speed_correction *
+                        clip_iifactor *
+                        (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+
+        if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
+            break;
+    }
+
+    return cq_level[Q];
+}
+
 extern void vp8_new_frame_rate(VP8_COMP *cpi, double framerate);
 
 void vp8_init_second_pass(VP8_COMP *cpi)
@@ -1767,7 +1863,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         vp8_avg_stats(&sectionstats);
 
-        cpi->section_intra_rating = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
+        cpi->section_intra_rating =
+            sectionstats.intra_error /
+            DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
 
         Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
         //if( (Ratio > 11) ) //&& (sectionstats.pcnt_second_ref < .20) )
@@ -1994,9 +2092,26 @@ void vp8_second_pass(VP8_COMP *cpi)
 
     if (cpi->common.current_video_frame == 0)
     {
-        // guess at 2nd pass max q
         cpi->est_max_qcorrection_factor = 1.0;
 
+        // Experimental code to try and set a cq_level in constrained
+        // quality mode.
+        if ( cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY )
+        {
+            int est_cq;
+
+            est_cq =
+                estimate_cq( cpi,
+                             (cpi->total_coded_error_left / frames_left),
+                             (int)(cpi->bits_left / frames_left),
+                             cpi->common.Height, cpi->common.Width);
+
+            cpi->cq_target_quality = cpi->oxcf.cq_level;
+            if ( est_cq > cpi->cq_target_quality )
+                cpi->cq_target_quality = est_cq;
+        }
+
+        // guess at maxq needed in 2nd pass
         cpi->maxq_max_limit = cpi->worst_quality;
         cpi->maxq_min_limit = cpi->best_quality;
         tmp_q = estimate_max_q( cpi,
@@ -2005,7 +2120,7 @@ void vp8_second_pass(VP8_COMP *cpi)
                                 cpi->common.Height,
                                 cpi->common.Width);
 
-        // Limit the maxq value retuned subsequently.
+        // Limit the maxq value returned subsequently.
         // This increases the risk of overspend if the initial
         // estimate for the clip is bad, but helps prevent excessive
         // variation in Q, especially near the end of a clip
@@ -2018,6 +2133,7 @@ void vp8_second_pass(VP8_COMP *cpi)
         cpi->active_worst_quality         = tmp_q;
         cpi->ni_av_qi                     = tmp_q;
     }
+
     // The last few frames of a clip almost always have to few or too many
     // bits and for the sake of over exact rate control we dont want to make
     // radical adjustments to the allowed quantizer range just to use up a
