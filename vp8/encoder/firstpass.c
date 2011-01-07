@@ -66,7 +66,6 @@ extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
 static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
 static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
 
-
 void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
 int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps);
 
@@ -907,7 +906,7 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     double pow_lowq = 0.40;
 
     if (section_target_bandwitdh <= 0)
-        return MAXQ;
+        return cpi->maxq_max_limit;          // Highest value allowed
 
     target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
 
@@ -943,10 +942,12 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
 
     // Correction factor used for Q values >= 20
     corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
-    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
+    corr_high = (corr_high < 0.05)
+                    ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
 
-    // Try and pick a Q that should be high enough to encode the content at the given rate.
-    for (Q = 0; Q < MAXQ; Q++)
+    // Try and pick a Q that should be high enough to encode the
+    // content at the given rate.
+    for (Q = cpi->maxq_min_limit; Q < cpi->maxq_max_limit; Q++)
     {
         int bits_per_mb_at_this_q;
 
@@ -1993,20 +1994,29 @@ void vp8_second_pass(VP8_COMP *cpi)
 
     if (cpi->common.current_video_frame == 0)
     {
-        // guess at 2nd pass q
+        // guess at 2nd pass max q
         cpi->est_max_qcorrection_factor = 1.0;
-        tmp_q = estimate_max_q(cpi, (cpi->total_coded_error_left / frames_left), (int)(cpi->bits_left / frames_left), cpi->common.Height, cpi->common.Width);
 
-        if (tmp_q < cpi->worst_quality)
-        {
-            cpi->active_worst_quality         = tmp_q;
-            cpi->ni_av_qi                     = tmp_q;
-        }
-        else
-        {
-            cpi->active_worst_quality         = cpi->worst_quality;
-            cpi->ni_av_qi                     = cpi->worst_quality;
-        }
+        cpi->maxq_max_limit = cpi->worst_quality;
+        cpi->maxq_min_limit = cpi->best_quality;
+        tmp_q = estimate_max_q( cpi,
+                                (cpi->total_coded_error_left / frames_left),
+                                (int)(cpi->bits_left / frames_left),
+                                cpi->common.Height,
+                                cpi->common.Width);
+
+        // Limit the maxq value retuned subsequently.
+        // This increases the risk of overspend if the initial
+        // estimate for the clip is bad, but helps prevent excessive
+        // variation in Q, especially near the end of a clip
+        // where for example a small overspend may cause Q to crash
+        cpi->maxq_max_limit = ((tmp_q + 32) < cpi->worst_quality)
+                                  ? (tmp_q + 32) : cpi->worst_quality;
+        cpi->maxq_min_limit = ((tmp_q - 32) > cpi->best_quality)
+                                  ? (tmp_q - 32) : cpi->best_quality;
+
+        cpi->active_worst_quality         = tmp_q;
+        cpi->ni_av_qi                     = tmp_q;
     }
     // The last few frames of a clip almost always have to few or too many
     // bits and for the sake of over exact rate control we dont want to make
@@ -2029,13 +2039,6 @@ void vp8_second_pass(VP8_COMP *cpi)
             cpi->active_worst_quality --;
 
         cpi->active_worst_quality = ((cpi->active_worst_quality * 3) + tmp_q + 2) / 4;
-
-        // Clamp to user set limits
-        if (cpi->active_worst_quality > cpi->worst_quality)
-            cpi->active_worst_quality = cpi->worst_quality;
-        else if (cpi->active_worst_quality < cpi->best_quality)
-            cpi->active_worst_quality = cpi->best_quality;
-
     }
 
     cpi->frames_to_key --;

@@ -446,6 +446,9 @@ typedef struct
     int best_quality;
     int active_best_quality;
 
+    int maxq_max_limit;
+    int maxq_min_limit;
+
     int drop_frames_allowed;          // Are we permitted to drop frames?
     int drop_frame;                  // Drop this frame?
     int drop_count;                  // How many frames have we dropped?
