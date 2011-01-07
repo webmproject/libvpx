@@ -309,6 +309,8 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 
         /*cpi->rtcd.quantize.quantb            = vp8_regular_quantize_b_sse2;*/
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
+
+        cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
     }
 #endif
 
