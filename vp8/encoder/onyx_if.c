@@ -576,7 +576,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     cpi->mbs_tested_so_far = 0;
 
-    // best quality
+    // best quality defaults
     sf->RD = 1;
     sf->search_method = NSTEP;
     sf->improved_quant = 1;
@@ -1267,6 +1267,15 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         vpx_memset(cpi->error_bins, 0, sizeof(cpi->error_bins));
 
     };
+
+    // Slow quant, dct and trellis not worthwhile for first pass
+    // so make sure they are always turned off.
+    if ( cpi->pass == 1 )
+    {
+        sf->improved_quant = 0;
+        sf->optimize_coefficients = 0;
+        sf->improved_dct = 0;
+    }
 
     if (cpi->sf.search_method == NSTEP)
     {
