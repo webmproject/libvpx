@@ -22,8 +22,12 @@
      int strength, \
      int filter_weight, \
      unsigned int *accumulator, \
-     unsigned int *count \
+     unsigned short *count \
     )
+
+#if ARCH_X86 || ARCH_X86_64
+#include "x86/temporal_filter_x86.h"
+#endif
 
 #ifndef vp8_temporal_filter_apply
 #define vp8_temporal_filter_apply vp8_temporal_filter_apply_c
