@@ -917,7 +917,7 @@ static const arg_def_t resize_up_thresh   = ARG_DEF(NULL, "resize-up", 1,
 static const arg_def_t resize_down_thresh = ARG_DEF(NULL, "resize-down", 1,
         "Downscale threshold (buf %)");
 static const arg_def_t end_usage          = ARG_DEF(NULL, "end-usage", 1,
-        "VBR=0 | CBR=1");
+        "VBR=0 | CBR=1 | CQ=2");
 static const arg_def_t target_bitrate     = ARG_DEF(NULL, "target-bitrate", 1,
         "Bitrate (kbps)");
 static const arg_def_t min_quantizer      = ARG_DEF(NULL, "min-q", 1,
@@ -1000,12 +1000,14 @@ static const struct arg_enum_list tuning_enum[] = {
 };
 static const arg_def_t tune_ssim = ARG_DEF_ENUM(NULL, "tune", 1,
                                    "Material to favor", tuning_enum);
+static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
+                                   "Constrained Quality Level");
 
 static const arg_def_t *vp8_args[] =
 {
     &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
     &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-    &tune_ssim, NULL
+    &tune_ssim, &cq_level, NULL
 };
 static const int vp8_arg_ctrl_map[] =
 {
@@ -1013,7 +1015,7 @@ static const int vp8_arg_ctrl_map[] =
     VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
     VP8E_SET_TOKEN_PARTITIONS,
     VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH , VP8E_SET_ARNR_TYPE,
-    VP8E_SET_TUNING, 0
+    VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, 0
 };
 #endif
 
