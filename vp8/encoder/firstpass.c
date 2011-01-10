@@ -989,6 +989,19 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
         //Q = cpi->oxcf.cq_target_quality;
     }
 
+    // Adjust maxq_min_limit and maxq_max_limit limits based on
+    // averaga q observed in clip for non kf/gf.arf frames
+    // Give average a chance to settle though.
+    if ( (cpi->ni_frames >
+                  ((unsigned int)cpi->total_stats->count >> 8)) &&
+         (cpi->ni_frames > 150) )
+    {
+        cpi->maxq_max_limit = ((cpi->ni_av_qi + 32) < cpi->worst_quality)
+                                  ? (cpi->ni_av_qi + 32) : cpi->worst_quality;
+        cpi->maxq_min_limit = ((cpi->ni_av_qi - 32) > cpi->best_quality)
+                                  ? (cpi->ni_av_qi - 32) : cpi->best_quality;
+    }
+
     return Q;
 }
 static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width)
@@ -2121,7 +2134,7 @@ void vp8_second_pass(VP8_COMP *cpi)
                                 cpi->common.Width);
 
         // Limit the maxq value returned subsequently.
-        // This increases the risk of overspend if the initial
+        // This increases the risk of overspend or underspend if the initial
         // estimate for the clip is bad, but helps prevent excessive
         // variation in Q, especially near the end of a clip
         // where for example a small overspend may cause Q to crash
