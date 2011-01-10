@@ -314,7 +314,7 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->tok);
     cpi->tok = 0;
 
-    // Structure used to minitor GF useage
+    // Structure used to monitor GF usage
     if (cpi->gf_active_flags != 0)
         vpx_free(cpi->gf_active_flags);
 
@@ -325,6 +325,7 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 
     cpi->mb.pip = 0;
 
+#if !(CONFIG_REALTIME_ONLY)
     if(cpi->total_stats)
         vpx_free(cpi->total_stats);
 
@@ -334,6 +335,7 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
         vpx_free(cpi->this_frame_stats);
 
     cpi->this_frame_stats = 0;
+#endif
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -1448,6 +1450,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
+#if !(CONFIG_REALTIME_ONLY)
     if(cpi->total_stats)
         vpx_free(cpi->total_stats);
 
@@ -1461,6 +1464,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     if(!cpi->total_stats || !cpi->this_frame_stats)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");
+#endif
 }
 
 
@@ -3150,8 +3154,8 @@ static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
     // Update data structure that monitors level of reference to last GF
     vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
-    // this frame refreshes means next frames don't unless specified by user
 
+    // this frame refreshes means next frames don't unless specified by user
     cpi->common.frames_since_golden = 0;
 
     // Clear the alternate reference update pending flag.
@@ -4361,10 +4365,6 @@ static void encode_frame_to_data_rate
                                            &cm->yv12_fb[cm->new_fb_idx],
                                            IF_RTCD(&cpi->rtcd.variance));
     }
-
-    // Update the GF useage maps.
-    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
-    vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
 
     // This frame's MVs are saved and will be used in next frame's MV prediction.
     if(cm->show_frame)   //do not save for altref frame
