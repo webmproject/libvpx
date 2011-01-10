@@ -1375,7 +1375,8 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
             }
 
             /* If 8x8 is better than 16x8/8x16, then do 4x4 search */
-            if (bsi.segment_num == BLOCK_8X8)  /* || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5) */
+            /* Not skip 4x4 if speed=0 (good quality) */
+            if (cpi->sf.no_skip_block4x4_search || bsi.segment_num == BLOCK_8X8)  /* || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5) */
             {
                 bsi.mvp = &bsi.sv_mvp[0];
                 vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);

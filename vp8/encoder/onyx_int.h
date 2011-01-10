@@ -183,6 +183,7 @@ typedef struct
     int optimize_coefficients;
 
     int use_fastquant_for_pick;
+    int no_skip_block4x4_search;
 
 } SPEED_FEATURES;
 
