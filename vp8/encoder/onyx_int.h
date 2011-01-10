@@ -369,7 +369,6 @@ typedef struct
     int this_frame_target;
     int projected_frame_size;
     int last_q[2];                   // Separate values for Intra/Inter
-    int target_bits_per_mb;
 
     double rate_correction_factor;
     double key_frame_rate_correction_factor;
@@ -450,6 +449,10 @@ typedef struct
     int active_worst_quality;
     int best_quality;
     int active_best_quality;
+
+    int cq_target_quality;
+    int maxq_max_limit;
+    int maxq_min_limit;
 
     int drop_frames_allowed;          // Are we permitted to drop frames?
     int drop_frame;                  // Drop this frame?

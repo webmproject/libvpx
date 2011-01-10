@@ -785,20 +785,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     x->activity_sum = 0;
 
-#if 0
-    // Experimental rd code
-    // 2 Pass - Possibly set Rdmult based on last frame distortion + this frame target bits or other metrics
-    // such as cpi->rate_correction_factor that indicate relative complexity.
-    /*if ( cpi->pass == 2 && (cpi->last_frame_distortion > 0) && (cpi->target_bits_per_mb > 0) )
-    {
-        //x->rdmult = ((cpi->last_frame_distortion * 256)/cpi->common.MBs)/ cpi->target_bits_per_mb;
-        x->rdmult = (int)(cpi->RDMULT * cpi->rate_correction_factor);
-    }
-    else
-        x->rdmult = cpi->RDMULT; */
-    //x->rdmult = (int)(cpi->RDMULT * pow( (cpi->rate_correction_factor * 2.0), 0.75 ));
-#endif
-
     xd->mode_info_context->mbmi.mode = DC_PRED;
     xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 

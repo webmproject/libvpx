@@ -36,7 +36,6 @@
 #include "dct.h"
 #include "systemdependent.h"
 
-#define DIAMONDSEARCH 1
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x)  (x)
 #else
@@ -45,19 +44,6 @@
 
 
 void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
-
-
-#define RDFUNC(RM,DM,R,D,target_rd) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
-/*int  RDFUNC( int RM,int DM, int R, int D, int target_r )
-{
-    int rd_value;
-
-    rd_value =  ( ((128+(R)*(RM)) >> 8) + (DM)*(D) );
-
-    return rd_value;
-}*/
-
-#define UVRDFUNC(RM,DM,R,D,target_r)  RDFUNC(RM,DM,R,D,target_r)
 
 #define RDCOST(RM,DM,R,D) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
 
@@ -223,8 +209,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
 {
     int q;
     int i;
-    int *thresh;
-    int threshmult;
     double capped_q = (Qvalue < 160) ? (double)Qvalue : 160.0;
     double rdconst = 3.00;
 
@@ -270,22 +254,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
 
     if (q < 8)
         q = 8;
-
-    if (cpi->ref_frame_flags == VP8_ALT_FLAG)
-    {
-        thresh      = &cpi->rd_threshes[THR_NEWA];
-        threshmult  = cpi->sf.thresh_mult[THR_NEWA];
-    }
-    else if (cpi->ref_frame_flags == VP8_GOLD_FLAG)
-    {
-        thresh      = &cpi->rd_threshes[THR_NEWG];
-        threshmult  = cpi->sf.thresh_mult[THR_NEWG];
-    }
-    else
-    {
-        thresh      = &cpi->rd_threshes[THR_NEWMV];
-        threshmult  = cpi->sf.thresh_mult[THR_NEWMV];
-    }
 
     if (cpi->RDMULT > 1000)
     {
@@ -775,7 +743,7 @@ static int vp8_rd_inter_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *distort
     *rate       = rd_cost_mbuv(x);
     *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
 
-    return UVRDFUNC(x->rdmult, x->rddiv, *rate, *distortion, cpi->target_bits_per_mb);
+    return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
 int vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *rate_tokenonly, int *distortion)
@@ -800,7 +768,7 @@ int vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *ra
 
         distortion = vp8_get_mbuvrecon_error(IF_RTCD(&cpi->rtcd.variance), x);
 
-        this_rd = UVRDFUNC(x->rdmult, x->rddiv, rate, distortion, cpi->target_bits_per_mb);
+        this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
         if (this_rd < best_rd)
         {
@@ -1097,7 +1065,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
     // Segmentation method overheads
     rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + segmentation);
     rate += vp8_cost_mv_ref(SPLITMV, bsi->mdcounts);
-    this_segment_rd += RDFUNC(x->rdmult, x->rddiv, rate, 0, cpi->target_bits_per_mb);
+    this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
     br += rate;
 
     for (i = 0; i < label_count; i++)
@@ -1252,7 +1220,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
             labelyrate = rdcost_mbsegment_y(x, labels, i, ta_s, tl_s);
             rate += labelyrate;
 
-            this_rd = RDFUNC(x->rdmult, x->rddiv, rate, distortion, cpi->target_bits_per_mb);
+            this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
             if (this_rd < best_label_rd)
             {
@@ -1751,7 +1719,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     //int intermodecost[MAX_MODES];
 
     MB_PREDICTION_MODE uv_intra_mode;
-    int uvintra_eob = 0;
+
     int force_no_skip = 0;
 
     MV mvp;
@@ -1769,27 +1737,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     x->skip = 0;
 
     ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
-
-    // Experimental code
-    // Adjust the RD multiplier based on the best case distortion we saw in the most recently coded mb
-    //if ( (cpi->last_mb_distortion) > 0 && (cpi->target_bits_per_mb > 0) )
-    /*{
-        int tmprdmult;
-
-        //tmprdmult = (cpi->last_mb_distortion * 256) / ((cpi->av_per_frame_bandwidth*256)/cpi->common.MBs);
-        tmprdmult = (cpi->last_mb_distortion * 256) / cpi->target_bits_per_mb;
-        //tmprdmult = tmprdmult;
-
-        //if ( tmprdmult > cpi->RDMULT * 2 )
-        //  tmprdmult = cpi->RDMULT * 2;
-        //else if ( tmprdmult < cpi->RDMULT / 2 )
-        //  tmprdmult = cpi->RDMULT / 2;
-
-        //tmprdmult = (tmprdmult < 25) ? 25 : tmprdmult;
-
-        //x->rdmult = tmprdmult;
-
-    }*/
 
     // Special case treatment when GF and ARF are not sensible options for reference
     if (cpi->ref_frame_flags == VP8_LAST_FLAG)
@@ -1820,12 +1767,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
     vp8_rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
     uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
-    {
-        uvintra_eob = 0;
-
-        for (i = 16; i < 24; i++)
-            uvintra_eob += x->e_mbd.block[i].eob;
-    }
 
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
@@ -2339,8 +2280,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                             distortion_uv = sse2;
 
                             disable_skip = 1;
-                            this_rd = RDFUNC(x->rdmult, x->rddiv, rate2,
-                                             distortion2, cpi->target_bits_per_mb);
+                            this_rd = RDCOST(x->rdmult, x->rddiv, rate2,
+                                             distortion2);
 
                             break;
                         }
@@ -2414,7 +2355,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                 }
             }
             // Calculate the final RD estimate for this mode
-            this_rd = RDFUNC(x->rdmult, x->rddiv, rate2, distortion2, cpi->target_bits_per_mb);
+            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
         }
 
         // Experimental debug code.
@@ -2442,8 +2383,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             other_cost += ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
 
             /* Calculate the final y RD estimate for this mode */
-            best_yrd = RDFUNC(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
-                              (distortion2-distortion_uv), cpi->target_bits_per_mb);
+            best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
+                              (distortion2-distortion_uv));
 
             *returnrate = rate2;
             *returndistortion = distortion2;

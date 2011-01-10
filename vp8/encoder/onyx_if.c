@@ -155,25 +155,25 @@ extern const int vp8cx_base_skip_false_prob[128];
 // Tables relating active max Q to active min Q
 static const int kf_low_motion_minq[QINDEX_RANGE] =
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4,
-    5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 10,10,
-    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
-    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
-    27,27,28,28,29,29,30,30,31,32,33,34,35,36,37,38,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,
+    3,3,3,3,3,3,4,4,4,5,5,5,5,5,6,6,
+    6,6,7,7,8,8,8,8,9,9,10,10,10,10,11,11,
+    11,11,12,12,13,13,13,13,14,14,15,15,15,15,16,16,
+    16,16,17,17,18,18,18,18,19,20,20,21,21,22,23,23
 };
 static const int kf_high_motion_minq[QINDEX_RANGE] =
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-    2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
-    6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10,10,
-    11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,18,
-    19,19,20,20,21,21,22,22,23,23,24,24,25,25,26,26,
-    27,27,28,28,29,29,30,30,31,31,32,32,33,33,34,34,
-    35,35,36,36,37,38,39,40,41,42,43,44,45,46,47,48,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+    1,1,1,1,1,1,1,1,2,2,2,2,3,3,3,3,
+    3,3,3,3,4,4,4,4,5,5,5,5,5,5,6,6,
+    6,6,7,7,8,8,8,8,9,9,10,10,10,10,11,11,
+    11,11,12,12,13,13,13,13,14,14,15,15,15,15,16,16,
+    16,16,17,17,18,18,18,18,19,19,20,20,20,20,21,21,
+    21,21,22,22,23,23,24,25,25,26,26,27,28,28,29,30
 };
 static const int gf_low_motion_minq[QINDEX_RANGE] =
 {
@@ -195,7 +195,7 @@ static const int gf_mid_motion_minq[QINDEX_RANGE] =
     22,22,23,23,24,24,25,25,26,26,27,27,28,28,29,29,
     30,30,31,31,32,32,33,33,34,34,35,35,36,36,37,37,
     38,39,39,40,40,41,41,42,42,43,43,44,45,46,47,48,
-    49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,
+    49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64
 };
 static const int gf_high_motion_minq[QINDEX_RANGE] =
 {
@@ -206,7 +206,7 @@ static const int gf_high_motion_minq[QINDEX_RANGE] =
     25,25,26,26,27,27,28,28,29,29,30,30,31,31,32,32,
     33,33,34,34,35,35,36,36,37,37,38,38,39,39,40,40,
     41,41,42,42,43,44,45,46,47,48,49,50,51,52,53,54,
-    55,56,57,58,59,60,62,64,66,68,70,72,74,76,78,80,
+    55,56,57,58,59,60,62,64,66,68,70,72,74,76,78,80
 };
 static const int inter_minq[QINDEX_RANGE] =
 {
@@ -573,7 +573,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     cpi->mbs_tested_so_far = 0;
 
-    // best quality
+    // best quality defaults
     sf->RD = 1;
     sf->search_method = NSTEP;
     sf->improved_quant = 1;
@@ -1264,6 +1264,15 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         vpx_memset(cpi->error_bins, 0, sizeof(cpi->error_bins));
 
     };
+
+    // Slow quant, dct and trellis not worthwhile for first pass
+    // so make sure they are always turned off.
+    if ( cpi->pass == 1 )
+    {
+        sf->improved_quant = 0;
+        sf->optimize_coefficients = 0;
+        sf->improved_dct = 0;
+    }
 
     if (cpi->sf.search_method == NSTEP)
     {
@@ -2013,6 +2022,9 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->best_quality                = cpi->oxcf.best_allowed_q;
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
+
+    // Experimental cq target value
+    cpi->cq_target_quality = oxcf->cq_level;
 
     cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
     cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
@@ -3077,9 +3089,6 @@ static int pick_frame_size(VP8_COMP *cpi)
         }
     }
 
-    // Note target_size in bits * 256 per MB
-    cpi->target_bits_per_mb = (cpi->this_frame_target * 256) / cpi->common.MBs;
-
     return 1;
 }
 static void set_quantizer(VP8_COMP *cpi, int Q)
@@ -3502,12 +3511,14 @@ static BOOL recode_loop_test( VP8_COMP *cpi,
     {
         // General over and under shoot tests
         if ( ((cpi->projected_frame_size > high_limit) && (q < maxq)) ||
-             ((cpi->projected_frame_size < low_limit) && (q > minq)) )
+             ((cpi->projected_frame_size < low_limit) && (q > minq)) ||
+             ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+              (q > cpi->cq_target_quality) &&
+              (cpi->projected_frame_size <
+                  ((cpi->this_frame_target * 7) >> 3))) )
         {
             force_recode = TRUE;
         }
-        // Specific rate control mode related tests
-        // TBD
     }
 
     return force_recode;
@@ -3802,15 +3813,7 @@ static void encode_frame_to_data_rate
                     cpi->active_best_quality = gf_high_motion_minq[Q];
                 else
                     cpi->active_best_quality = gf_mid_motion_minq[Q];
-
-                /*cpi->active_best_quality = gf_arf_minq[Q];
-                tmp = (cpi->gfu_boost > 1000) ? 600 : cpi->gfu_boost - 400;
-                //tmp = (cpi->gfu_boost > 1000) ? 600 :
-                          //(cpi->gfu_boost < 400) ? 0 : cpi->gfu_boost - 400;
-                tmp = 128 - (tmp >> 4);
-                cpi->active_best_quality = (cpi->active_best_quality * tmp)>>7;*/
-
-           }
+          }
            // KEY FRAMES
            else
            {
@@ -3823,6 +3826,14 @@ static void encode_frame_to_data_rate
         else
         {
             cpi->active_best_quality = inter_minq[Q];
+
+            // For the constant/constrained quality mode we dont want
+            // the quality to rise above the cq level.
+            if ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+                (cpi->active_best_quality < cpi->cq_target_quality) )
+            {
+                cpi->active_best_quality = cpi->cq_target_quality;
+            }
         }
 
         // If CBR and the buffer is as full then it is reasonable to allow higher quality on the frames
@@ -4556,7 +4567,8 @@ static void encode_frame_to_data_rate
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
                        (int)cpi->total_actual_bits, cm->base_qindex,
                        cpi->active_best_quality, cpi->active_worst_quality,
-                       cpi->avg_frame_qindex, cpi->zbin_over_quant,
+                       cpi->cq_target_quality, cpi->zbin_over_quant,
+                       //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
                        cpi->est_max_qcorrection_factor, (int)cpi->bits_left,
@@ -4574,7 +4586,8 @@ static void encode_frame_to_data_rate
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
                        (int)cpi->total_actual_bits, cm->base_qindex,
                        cpi->active_best_quality, cpi->active_worst_quality,
-                       cpi->avg_frame_qindex, cpi->zbin_over_quant,
+                       cpi->cq_target_quality, cpi->zbin_over_quant,
+                       //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
                        cpi->est_max_qcorrection_factor, (int)cpi->bits_left,

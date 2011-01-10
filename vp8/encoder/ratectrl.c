@@ -1550,12 +1550,21 @@ void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, 
                         *frame_under_shoot_limit = cpi->this_frame_target * 5 / 8;
                     }
                 }
-                // VBR
+                // VBR and CQ mode
                 // Note that tighter restrictions here can help quality but hurt encode speed
                 else
                 {
-                    *frame_over_shoot_limit  = cpi->this_frame_target * 11 / 8;
-                    *frame_under_shoot_limit = cpi->this_frame_target * 5 / 8;
+                    // Stron overshoot limit for constrained quality
+                    if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
+                    {
+                        *frame_over_shoot_limit  = cpi->this_frame_target * 11 / 8;
+                        *frame_under_shoot_limit = cpi->this_frame_target * 2 / 8;
+                    }
+                    else
+                    {
+                        *frame_over_shoot_limit  = cpi->this_frame_target * 11 / 8;
+                        *frame_under_shoot_limit = cpi->this_frame_target * 5 / 8;
+                    }
                 }
             }
         }
