@@ -903,7 +903,7 @@ void vp8_first_pass(VP8_COMP *cpi)
 }
 extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
-#define BASE_ERRPERMB   100
+#define BASE_ERRPERMB   150
 static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width)
 {
     int Q;
