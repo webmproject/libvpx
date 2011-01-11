@@ -592,6 +592,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->iterative_sub_pixel = 1;
     sf->optimize_coefficients = 1;
     sf->use_fastquant_for_pick = 0;
+    sf->no_skip_block4x4_search = 1;
 
     sf->first_step = 0;
     sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -794,6 +795,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             sf->first_step = 1;
             sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
+            sf->no_skip_block4x4_search = 0;
         }
 
         if (Speed > 1)
