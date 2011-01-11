@@ -4441,30 +4441,38 @@ static void encode_frame_to_data_rate
     {
         cpi->ni_frames++;
 
-        // Calculate the average Q for normal inter frames (not key or GFU frames)
-        // This is used as a basis for setting active worst quality.
-        if (cpi->ni_frames > 150)
+        // Calculate the average Q for normal inter frames (not key or GFU
+        // frames).
+        if ( cpi->pass == 2 )
         {
             cpi->ni_tot_qi += Q;
             cpi->ni_av_qi = (cpi->ni_tot_qi / cpi->ni_frames);
         }
-        // Early in the clip ... average the current frame Q value with the default
-        // entered by the user as a dampening measure
         else
         {
-            cpi->ni_tot_qi += Q;
-            cpi->ni_av_qi = ((cpi->ni_tot_qi / cpi->ni_frames) + cpi->worst_quality + 1) / 2;
+            // Damp value for first few frames
+            if (cpi->ni_frames > 150 )
+            {
+                cpi->ni_tot_qi += Q;
+                cpi->ni_av_qi = (cpi->ni_tot_qi / cpi->ni_frames);
+            }
+            // For one pass, early in the clip ... average the current frame Q
+            // value with the worstq entered by the user as a dampening measure
+            else
+            {
+                cpi->ni_tot_qi += Q;
+                cpi->ni_av_qi = ((cpi->ni_tot_qi / cpi->ni_frames) + cpi->worst_quality + 1) / 2;
+            }
+
+            // If the average Q is higher than what was used in the last frame
+            // (after going through the recode loop to keep the frame size within range)
+            // then use the last frame value - 1.
+            // The -1 is designed to stop Q and hence the data rate, from progressively
+            // falling away during difficult sections, but at the same time reduce the number of
+            // itterations around the recode loop.
+            if (Q > cpi->ni_av_qi)
+                cpi->ni_av_qi = Q - 1;
         }
-
-        // If the average Q is higher than what was used in the last frame
-        // (after going through the recode loop to keep the frame size within range)
-        // then use the last frame value - 1.
-        // The -1 is designed to stop Q and hence the data rate, from progressively
-        // falling away during difficult sections, but at the same time reduce the number of
-        // itterations around the recode loop.
-        if (Q > cpi->ni_av_qi)
-            cpi->ni_av_qi = Q - 1;
-
     }
 
 #if 0
@@ -4558,7 +4566,7 @@ static void encode_frame_to_data_rate
 
         if (cpi->total_coded_error_left != 0.0)
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
-                       "%6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
+                       "%6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
                        "%10.3f %8ld\n",
                        cpi->common.current_video_frame, cpi->this_frame_target,
                        cpi->projected_frame_size,
@@ -4567,7 +4575,7 @@ static void encode_frame_to_data_rate
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
                        (int)cpi->total_actual_bits, cm->base_qindex,
                        cpi->active_best_quality, cpi->active_worst_quality,
-                       cpi->cq_target_quality, cpi->zbin_over_quant,
+                       cpi->ni_av_qi, cpi->cq_target_quality, cpi->zbin_over_quant,
                        //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
@@ -4577,7 +4585,7 @@ static void encode_frame_to_data_rate
                        cpi->tot_recode_hits);
         else
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
-                       "%6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
+                       "%6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
                        "%8ld\n",
                        cpi->common.current_video_frame,
                        cpi->this_frame_target, cpi->projected_frame_size,
@@ -4586,7 +4594,7 @@ static void encode_frame_to_data_rate
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
                        (int)cpi->total_actual_bits, cm->base_qindex,
                        cpi->active_best_quality, cpi->active_worst_quality,
-                       cpi->cq_target_quality, cpi->zbin_over_quant,
+                       cpi->ni_av_qi, cpi->cq_target_quality, cpi->zbin_over_quant,
                        //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
