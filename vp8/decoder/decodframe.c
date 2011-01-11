@@ -485,7 +485,6 @@ static void setup_token_decoder(VP8D_COMP *pbi,
 
 static void stop_token_decoder(VP8D_COMP *pbi)
 {
-    int i;
     VP8_COMMON *pc = &pbi->common;
 
     if (pc->multi_token_partition != ONE_PARTITION)

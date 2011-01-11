@@ -262,7 +262,6 @@ extern size_t vp8_firstpass_stats_sz(unsigned int mb_count)
      * macroblock.
      */
     size_t stats_sz;
-    FIRSTPASS_STATS stats;
 
     stats_sz = sizeof(FIRSTPASS_STATS) + mb_count;
     stats_sz = (stats_sz + 7) & ~7;
@@ -389,8 +388,6 @@ unsigned char *vp8_fpmm_get_pos(VP8_COMP *cpi)
 }
 void vp8_fpmm_reset_pos(VP8_COMP *cpi, unsigned char *target_pos)
 {
-    int Offset;
-
     cpi->fp_motion_map_stats = target_pos;
 }
 

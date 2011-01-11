@@ -680,7 +680,6 @@ static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int hei
 
 int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags)
 {
-    char message[512];
     int q = oci->filter_level * 10 / 6;
     int flags = ppflags->post_proc_flag;
     int deblock_level = ppflags->deblocking_level;
@@ -744,6 +743,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 #if CONFIG_POSTPROC_VISUALIZER
     if (flags & VP8D_DEBUG_TXT_FRAME_INFO)
     {
+        char message[512];
         sprintf(message, "F%1dG%1dQ%3dF%3dP%d_s%dx%d",
                 (oci->frame_type == KEY_FRAME),
                 oci->refresh_golden_frame,
@@ -823,6 +823,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
     if (flags & VP8D_DEBUG_TXT_RATE_INFO)
     {
+        char message[512];
         sprintf(message, "Bitrate: %10.2f frame_rate: %10.2f ", oci->bitrate, oci->framerate);
         vp8_blit_text(message, oci->post_proc_buffer.y_buffer, oci->post_proc_buffer.y_stride);
     }
