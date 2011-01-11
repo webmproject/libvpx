@@ -308,8 +308,6 @@ typedef struct
 
     YV12_BUFFER_CONFIG last_frame_uf;
 
-    char *Dest;
-
     TOKENEXTRA *tok;
     unsigned int tok_count;
 
@@ -337,11 +335,6 @@ typedef struct
 
     int RDMULT;
     int RDDIV ;
-
-    TOKENEXTRA *rdtok;
-    vp8_writer rdbc;
-    int intra_mode_costs[10];
-
 
     CODING_CONTEXT coding_context;
 
@@ -550,8 +543,6 @@ typedef struct
     int last_kffilt_lvl;
 
     int ref_frame_flags;
-
-    int exp[512];
 
     SPEED_FEATURES sf;
     int error_bins[1024];
