@@ -2272,6 +2272,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->frames_since_key = 8;        // Give a sensible default for the first frame.
     cpi->key_frame_frequency = cpi->oxcf.key_freq;
+    cpi->this_key_frame_forced = FALSE;
+    cpi->next_key_frame_forced = FALSE;
 
     cpi->source_alt_ref_pending = FALSE;
     cpi->source_alt_ref_active = FALSE;
@@ -3817,10 +3819,22 @@ static void encode_frame_to_data_rate
            // KEY FRAMES
            else
            {
-               if (cpi->gfu_boost > 600)
-                   cpi->active_best_quality = kf_low_motion_minq[Q];
-               else
-                   cpi->active_best_quality = kf_high_motion_minq[Q];
+                // Special case for key frames forced because we have reached
+                // the maximum key frame interval. Here force the Q to a range
+                // close to but just below the ambient Q to reduce the risk
+                // of popping
+                if ( cpi->this_key_frame_forced )
+                {
+                    cpi->active_worst_quality = cpi->avg_frame_qindex * 7/8;
+                    cpi->active_best_quality = cpi->avg_frame_qindex * 2/3;
+                }
+                else
+                {
+                   if (cpi->gfu_boost > 600)
+                       cpi->active_best_quality = kf_low_motion_minq[Q];
+                   else
+                       cpi->active_best_quality = kf_high_motion_minq[Q];
+                }
            }
         }
         else
