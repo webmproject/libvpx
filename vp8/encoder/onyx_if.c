@@ -592,6 +592,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->iterative_sub_pixel = 1;
     sf->optimize_coefficients = 1;
     sf->use_fastquant_for_pick = 0;
+    sf->no_skip_block4x4_search = 1;
 
     sf->first_step = 0;
     sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -794,6 +795,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             sf->first_step = 1;
             sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
+            sf->no_skip_block4x4_search = 0;
         }
 
         if (Speed > 1)
@@ -3792,8 +3794,6 @@ static void encode_frame_to_data_rate
     if (cpi->pass == 2 || (cm->current_video_frame > 150))
     {
         int Q;
-        int i;
-        int bpm_target;
         //int tmp;
 
         vp8_clear_system_state();
@@ -4828,7 +4828,9 @@ extern void vp8_pop_neon(INT64 *store);
 #endif
 int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, INT64 time_stamp, INT64 end_time)
 {
+#if HAVE_ARMV7
     INT64 store_reg[8];
+#endif
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  timer;
@@ -4931,7 +4933,9 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
 }
 int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, INT64 *time_stamp, INT64 *time_end, int flush)
 {
+#if HAVE_ARMV7
     INT64 store_reg[8];
+#endif
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  tsctimer;

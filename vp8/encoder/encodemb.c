@@ -273,7 +273,6 @@ void vp8_optimize_b(MACROBLOCK *mb, int ib, int type,
     int x;
     int sz;
     int next;
-    int path;
     int rdmult;
     int rddiv;
     int final_eob;

@@ -84,7 +84,7 @@ temporal_filter_apply_load_8:
         jmp         temporal_filter_apply_load_finished
 
 temporal_filter_apply_load_16:
-        movdqa      xmm0,           [rsi]  ; src (frame1)
+        movdqu      xmm0,           [rsi]  ; src (frame1)
         lea         rsi,            [rsi + rbp] ; += stride
         movdqa      xmm1,           xmm0
         punpcklbw   xmm0,           xmm7   ; src[ 0- 7]
