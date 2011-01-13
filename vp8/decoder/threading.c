@@ -451,7 +451,6 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi)
 #if CONFIG_MULTITHREAD
     int core_count = 0;
     int ithread;
-    int i;
 
     pbi->b_multithreaded_rd = 0;
     pbi->allocated_decoding_thread_count = 0;
@@ -721,7 +720,6 @@ void vp8mt_lpf_init( VP8D_COMP *pbi, int default_filt_lvl)
     /*int mb_row;
     int mb_col;
     int baseline_filter_level[MAX_MB_SEGMENTS];*/
-    int filter_level;
     int alt_flt_enabled = mbd->segmentation_enabled;
 
     int i;
@@ -769,7 +767,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
     int ibc = 0;
     int num_part = 1 << pbi->common.multi_token_partition;
-    int i, j;
+    int i;
     volatile int *last_row_current_mb_col = NULL;
     int nsync = pbi->sync_range;
 
@@ -809,7 +807,6 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
     for (mb_row = 0; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
     {
-        int i;
 
         xd->current_bc = &pbi->mbc[mb_row%num_part];
 

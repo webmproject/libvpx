@@ -416,7 +416,6 @@ unsigned int vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
     int sum;
     unsigned int a;
     unsigned int b;
-    unsigned int d;
     /* TODO: This could also be done over smaller areas (8x8), but that would
      *  require extensive changes elsewhere, as lambda is assumed to be fixed
      *  over an entire MB in most of the code.
@@ -674,7 +673,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     VP8_COMMON *const cm = & cpi->common;
     MACROBLOCKD *const xd = & x->e_mbd;
 
-    int i;
     TOKENEXTRA *tp = cpi->tok;
 #if CONFIG_SEGMENTATION
     int segment_counts[MAX_MB_SEGMENTS + SEEK_SEGID];

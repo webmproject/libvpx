@@ -70,7 +70,6 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 {
     int i, rc, eob;
-    int zbin;
     int x, y, z, sz;
     short *coeff_ptr   = b->coeff;
     short *round_ptr   = b->round;

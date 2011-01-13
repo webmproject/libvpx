@@ -589,6 +589,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->iterative_sub_pixel = 1;
     sf->optimize_coefficients = 1;
     sf->use_fastquant_for_pick = 0;
+    sf->no_skip_block4x4_search = 1;
 
     sf->first_step = 0;
     sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -791,6 +792,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             sf->first_step = 1;
             sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
+            sf->no_skip_block4x4_search = 0;
         }
 
         if (Speed > 1)
@@ -2266,6 +2268,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->frames_since_key = 8;        // Give a sensible default for the first frame.
     cpi->key_frame_frequency = cpi->oxcf.key_freq;
+    cpi->this_key_frame_forced = FALSE;
+    cpi->next_key_frame_forced = FALSE;
 
     cpi->source_alt_ref_pending = FALSE;
     cpi->source_alt_ref_active = FALSE;
@@ -3792,8 +3796,6 @@ static void encode_frame_to_data_rate
     if (cpi->pass == 2 || (cm->current_video_frame > 150))
     {
         int Q;
-        int i;
-        int bpm_target;
         //int tmp;
 
         vp8_clear_system_state();
@@ -3817,10 +3819,22 @@ static void encode_frame_to_data_rate
            // KEY FRAMES
            else
            {
-               if (cpi->gfu_boost > 600)
-                   cpi->active_best_quality = kf_low_motion_minq[Q];
-               else
-                   cpi->active_best_quality = kf_high_motion_minq[Q];
+                // Special case for key frames forced because we have reached
+                // the maximum key frame interval. Here force the Q to a range
+                // close to but just below the ambient Q to reduce the risk
+                // of popping
+                if ( cpi->this_key_frame_forced )
+                {
+                    cpi->active_worst_quality = cpi->avg_frame_qindex * 7/8;
+                    cpi->active_best_quality = cpi->avg_frame_qindex * 2/3;
+                }
+                else
+                {
+                   if (cpi->gfu_boost > 600)
+                       cpi->active_best_quality = kf_low_motion_minq[Q];
+                   else
+                       cpi->active_best_quality = kf_high_motion_minq[Q];
+                }
            }
         }
         else
@@ -4827,7 +4841,9 @@ extern void vp8_pop_neon(INT64 *store);
 #endif
 int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, INT64 time_stamp, INT64 end_time)
 {
+#if HAVE_ARMV7
     INT64 store_reg[8];
+#endif
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  timer;
@@ -4930,7 +4946,9 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
 }
 int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, INT64 *time_stamp, INT64 *time_end, int flush)
 {
+#if HAVE_ARMV7
     INT64 store_reg[8];
+#endif
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
     struct vpx_usec_timer  tsctimer;
