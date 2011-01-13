@@ -980,10 +980,10 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     // Restriction on active max q for constrained quality mode.
     if ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
          (Q < cpi->cq_target_quality) )
-         //(Q < cpi->oxcf.cq_target_quality) )
+         //(Q < cpi->oxcf.cq_level;) )
     {
         Q = cpi->cq_target_quality;
-        //Q = cpi->oxcf.cq_target_quality;
+        //Q = cpi->oxcf.cq_level;
     }
 
     // Adjust maxq_min_limit and maxq_max_limit limits based on
@@ -2286,6 +2286,9 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     cpi->common.frame_type = KEY_FRAME;
 
+    // is this a forced key frame by interval
+    cpi->this_key_frame_forced = cpi->next_key_frame_forced;
+
     // Clear the alt ref active flag as this can never be active on a key frame
     cpi->source_alt_ref_active = FALSE;
 
@@ -2348,7 +2351,11 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         kf_group_err /= 2.0;
         kf_group_intra_err /= 2.0;
         kf_group_coded_err /= 2.0;
+
+        cpi->next_key_frame_forced = TRUE;
     }
+    else
+        cpi->next_key_frame_forced = FALSE;
 
     // Special case for the last frame of the file
     if (cpi->stats_in >= cpi->stats_in_end)

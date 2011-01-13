@@ -317,7 +317,8 @@ typedef struct
 
     unsigned int frames_since_key;
     unsigned int key_frame_frequency;
-    unsigned int next_key;
+    unsigned int this_key_frame_forced;
+    unsigned int next_key_frame_forced;
 
     unsigned int mode_check_freq[MAX_MODES];
     unsigned int mode_test_hit_counts[MAX_MODES];
