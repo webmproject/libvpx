@@ -3793,49 +3793,56 @@ static void encode_frame_to_data_rate
     }
 
     // Set an active best quality and if necessary active worst quality
-    if (cpi->pass == 2 || (cm->current_video_frame > 150))
+    // There is some odd behaviour for one pass here that needs attention.
+    if ( (cpi->pass == 2) || (cpi->ni_frames > 150))
     {
-        int Q;
-        //int tmp;
-
         vp8_clear_system_state();
 
         Q = cpi->active_worst_quality;
 
-        if ((cm->frame_type == KEY_FRAME) || cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
+        if ( cm->frame_type == KEY_FRAME )
         {
-            if (cm->frame_type != KEY_FRAME)
+            // Special case for key frames forced because we have reached
+            // the maximum key frame interval. Here force the Q to a range
+            // close to but just below the ambient Q to minimize the risk
+            // of popping
+            if ( cpi->this_key_frame_forced )
             {
-                if (cpi->avg_frame_qindex < cpi->active_worst_quality)
-                    Q = cpi->avg_frame_qindex;
+                cpi->active_worst_quality = cpi->avg_frame_qindex * 7/8;
+                cpi->active_best_quality = cpi->avg_frame_qindex * 2/3;
+            }
+            else
+            {
+               if ( cpi->pass == 2 )
+               {
+                   if (cpi->gfu_boost > 600)
+                       cpi->active_best_quality = kf_low_motion_minq[Q];
+                   else
+                       cpi->active_best_quality = kf_high_motion_minq[Q];
+               }
+               // One pass more conservative
+               else
+                   cpi->active_best_quality = kf_high_motion_minq[Q];
+            }
+        }
 
-               if ( cpi->gfu_boost > 1000 )
+        else if (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
+        {
+            if (cpi->avg_frame_qindex < cpi->active_worst_quality)
+                Q = cpi->avg_frame_qindex;
+
+            if ( cpi->pass == 2 )
+            {
+                if ( cpi->gfu_boost > 1000 )
                     cpi->active_best_quality = gf_low_motion_minq[Q];
                 else if ( cpi->gfu_boost < 400 )
                     cpi->active_best_quality = gf_high_motion_minq[Q];
                 else
                     cpi->active_best_quality = gf_mid_motion_minq[Q];
-          }
-           // KEY FRAMES
-           else
-           {
-                // Special case for key frames forced because we have reached
-                // the maximum key frame interval. Here force the Q to a range
-                // close to but just below the ambient Q to reduce the risk
-                // of popping
-                if ( cpi->this_key_frame_forced )
-                {
-                    cpi->active_worst_quality = cpi->avg_frame_qindex * 7/8;
-                    cpi->active_best_quality = cpi->avg_frame_qindex * 2/3;
-                }
-                else
-                {
-                   if (cpi->gfu_boost > 600)
-                       cpi->active_best_quality = kf_low_motion_minq[Q];
-                   else
-                       cpi->active_best_quality = kf_high_motion_minq[Q];
-                }
-           }
+            }
+            // One pass more conservative
+            else
+                cpi->active_best_quality = gf_high_motion_minq[Q];
         }
         else
         {
@@ -3865,7 +3872,6 @@ static void encode_frame_to_data_rate
 
                 cpi->active_best_quality -= min_qadjustment;
             }
-
         }
     }
 
