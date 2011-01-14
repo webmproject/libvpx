@@ -1729,10 +1729,60 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     int saddone=0;
     int sr=0;    //search range got from mv_pred(). It uses step_param levels. (0-7)
 
+    MV frame_nearest_mv[4];
+    MV frame_near_mv[4];
+    MV frame_best_ref_mv[4];
+    int frame_mdcounts[4][4];
+    int frame_lf_or_gf[4];
+    unsigned char *y_buffer[4];
+    unsigned char *u_buffer[4];
+    unsigned char *v_buffer[4];
+
+    vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
+
+    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
+    {
+        YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
+
+        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &frame_nearest_mv[LAST_FRAME], &frame_near_mv[LAST_FRAME],
+                          &frame_best_ref_mv[LAST_FRAME], frame_mdcounts[LAST_FRAME], LAST_FRAME, cpi->common.ref_frame_sign_bias);
+
+        y_buffer[LAST_FRAME] = lst_yv12->y_buffer + recon_yoffset;
+        u_buffer[LAST_FRAME] = lst_yv12->u_buffer + recon_uvoffset;
+        v_buffer[LAST_FRAME] = lst_yv12->v_buffer + recon_uvoffset;
+
+        frame_lf_or_gf[LAST_FRAME] = 0;
+    }
+
+    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
+    {
+        YV12_BUFFER_CONFIG *gld_yv12 = &cpi->common.yv12_fb[cpi->common.gld_fb_idx];
+
+        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &frame_nearest_mv[GOLDEN_FRAME], &frame_near_mv[GOLDEN_FRAME],
+                          &frame_best_ref_mv[GOLDEN_FRAME], frame_mdcounts[GOLDEN_FRAME], GOLDEN_FRAME, cpi->common.ref_frame_sign_bias);
+
+        y_buffer[GOLDEN_FRAME] = gld_yv12->y_buffer + recon_yoffset;
+        u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
+        v_buffer[GOLDEN_FRAME] = gld_yv12->v_buffer + recon_uvoffset;
+
+        frame_lf_or_gf[GOLDEN_FRAME] = 1;
+    }
+
+    if (cpi->ref_frame_flags & VP8_ALT_FLAG)
+    {
+        YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
+
+        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &frame_nearest_mv[ALTREF_FRAME], &frame_near_mv[ALTREF_FRAME],
+                          &frame_best_ref_mv[ALTREF_FRAME], frame_mdcounts[ALTREF_FRAME], ALTREF_FRAME, cpi->common.ref_frame_sign_bias);
+
+        y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
+        u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;
+        v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
+
+        frame_lf_or_gf[ALTREF_FRAME] = 1;
+    }
+
     *returnintra = INT_MAX;
-
-    vpx_memset(&best_mbmode, 0, sizeof(best_mbmode)); // clean
-
     cpi->mbs_tested_so_far++;          // Count of the number of MBs tested so far this frame
 
     x->skip = 0;
@@ -1789,8 +1839,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         if (best_rd <= cpi->rd_threshes[mode_index])
             continue;
 
-
-
         // These variables hold are rolling total cost and distortion for this mode
         rate2 = 0;
         distortion2 = 0;
@@ -1808,58 +1856,19 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                 continue;
         }
 
-        if (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME)
+        /* everything but intra */
+        if (x->e_mbd.mode_info_context->mbmi.ref_frame)
         {
-            YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
-
-            if (!(cpi->ref_frame_flags & VP8_LAST_FLAG))
-                continue;
-
-            lf_or_gf = 0;  // Local last frame vs Golden frame flag
-
-            // Set up pointers for this macro block into the previous frame recon buffer
-            x->e_mbd.pre.y_buffer = lst_yv12->y_buffer + recon_yoffset;
-            x->e_mbd.pre.u_buffer = lst_yv12->u_buffer + recon_uvoffset;
-            x->e_mbd.pre.v_buffer = lst_yv12->v_buffer + recon_uvoffset;
-        }
-        else if (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-        {
-            YV12_BUFFER_CONFIG *gld_yv12 = &cpi->common.yv12_fb[cpi->common.gld_fb_idx];
-
-            // not supposed to reference gold frame
-            if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
-                continue;
-
-            lf_or_gf = 1;  // Local last frame vs Golden frame flag
-
-            // Set up pointers for this macro block into the previous frame recon buffer
-            x->e_mbd.pre.y_buffer = gld_yv12->y_buffer + recon_yoffset;
-            x->e_mbd.pre.u_buffer = gld_yv12->u_buffer + recon_uvoffset;
-            x->e_mbd.pre.v_buffer = gld_yv12->v_buffer + recon_uvoffset;
-        }
-        else if (x->e_mbd.mode_info_context->mbmi.ref_frame == ALTREF_FRAME)
-        {
-            YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
-
-            // not supposed to reference alt ref frame
-            if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
-                continue;
-
-            //if ( !cpi->source_alt_ref_active )
-            //  continue;
-
-            lf_or_gf = 1;  // Local last frame vs Golden frame flag
-
-            // Set up pointers for this macro block into the previous frame recon buffer
-            x->e_mbd.pre.y_buffer = alt_yv12->y_buffer + recon_yoffset;
-            x->e_mbd.pre.u_buffer = alt_yv12->u_buffer + recon_uvoffset;
-            x->e_mbd.pre.v_buffer = alt_yv12->v_buffer + recon_uvoffset;
+            x->e_mbd.pre.y_buffer = y_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            x->e_mbd.pre.u_buffer = u_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            x->e_mbd.pre.v_buffer = v_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            mode_mv[NEARESTMV] = frame_nearest_mv[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            mode_mv[NEARMV] = frame_near_mv[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            best_ref_mv = frame_best_ref_mv[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            vpx_memcpy(mdcounts, frame_mdcounts[x->e_mbd.mode_info_context->mbmi.ref_frame], sizeof(mdcounts));
+            lf_or_gf = frame_lf_or_gf[x->e_mbd.mode_info_context->mbmi.ref_frame];
         }
 
-        vp8_find_near_mvs(&x->e_mbd,
-                          x->e_mbd.mode_info_context,
-                          &mode_mv[NEARESTMV], &mode_mv[NEARMV], &best_ref_mv,
-                          mdcounts, x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias);
 
         if(x->e_mbd.mode_info_context->mbmi.mode == NEWMV)
         {
