@@ -1849,7 +1849,10 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
 
-        //Only consider ZEROMV/ALTREF_FRAME for alt ref frame.
+        // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
+        // unless ARNR filtering is enabled in which case we want
+        // an unfiltered alternative
+        //if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames > 0))
         if (cpi->is_src_frame_alt_ref)
         {
             if (this_mode != ZEROMV || x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
