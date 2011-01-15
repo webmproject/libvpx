@@ -2026,7 +2026,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
     // Experimental cq target value
-    cpi->cq_target_quality = oxcf->cq_level;
+    cpi->cq_target_quality = cpi->oxcf.cq_level;
 
     cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
     cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
@@ -3515,13 +3515,28 @@ static BOOL recode_loop_test( VP8_COMP *cpi,
     {
         // General over and under shoot tests
         if ( ((cpi->projected_frame_size > high_limit) && (q < maxq)) ||
-             ((cpi->projected_frame_size < low_limit) && (q > minq)) ||
-             ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
-              (q > cpi->cq_target_quality) &&
-              (cpi->projected_frame_size <
-                  ((cpi->this_frame_target * 7) >> 3))) )
+             ((cpi->projected_frame_size < low_limit) && (q > minq)) )
         {
             force_recode = TRUE;
+        }
+        // Special Constrained quality tests
+        else if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
+        {
+            // Undershoot and below auto cq level
+            if ( (q > cpi->cq_target_quality) &&
+                 (cpi->projected_frame_size <
+                     ((cpi->this_frame_target * 7) >> 3)))
+            {
+                force_recode = TRUE;
+            }
+            // Severe undershoot and between auto and user cq level
+            else if ( (q > cpi->oxcf.cq_level) &&
+                      (cpi->projected_frame_size < cpi->min_frame_bandwidth) &&
+                      (cpi->active_best_quality > cpi->oxcf.cq_level))
+            {
+                force_recode = TRUE;
+                cpi->active_best_quality = cpi->oxcf.cq_level;
+            }
         }
     }
 
@@ -3853,7 +3868,13 @@ static void encode_frame_to_data_rate
             if ((cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
                 (cpi->active_best_quality < cpi->cq_target_quality) )
             {
-                cpi->active_best_quality = cpi->cq_target_quality;
+                // If we are strongly undershooting the target rate in the last
+                // frames then use the user passed in cq value not the auto
+                // cq value.
+                if ( cpi->rolling_actual_bits < cpi->min_frame_bandwidth )
+                    cpi->active_best_quality = cpi->oxcf.cq_level;
+                else
+                    cpi->active_best_quality = cpi->cq_target_quality;
             }
         }
 
@@ -4217,6 +4238,16 @@ static void encode_frame_to_data_rate
                         vp8_update_rate_correction_factors(cpi, 0);
 
                     Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+
+                    // Special case reset for qlow for constrained quality.
+                    // This should only trigger where there is very substantial
+                    // undershoot on a frame and the auto cq level is above
+                    // the user passsed in value.
+                    if ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+                         (Q < q_low) )
+                    {
+                        q_low = Q;
+                    }
 
                     while (((Q > q_high) || (cpi->zbin_over_quant > zbin_oq_high)) && (Retries < 10))
                     {
