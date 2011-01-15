@@ -290,8 +290,8 @@ static void vp8_temporal_filter_iterate_c
     int mb_col, mb_row;
     unsigned int filter_weight[MAX_LAG_BUFFERS];
     unsigned char *mm_ptr = cpi->fp_motion_map;
-    int cols = cpi->common.mb_cols;
-    int rows = cpi->common.mb_rows;
+    int mb_cols = cpi->common.mb_cols;
+    int mb_rows = cpi->common.mb_rows;
     int MBs  = cpi->common.MBs;
     int mb_y_offset = 0;
     int mb_uv_offset = 0;
@@ -314,7 +314,7 @@ static void vp8_temporal_filter_iterate_c
             filter_weight[frame] = 1;
     }
 
-    for (mb_row = 0; mb_row < rows; mb_row++)
+    for (mb_row = 0; mb_row < mb_rows; mb_row++)
     {
 #if ALT_REF_MC_ENABLED
         // Reduced search extent by 3 for 6-tap filter & smaller UMV border
@@ -323,7 +323,7 @@ static void vp8_temporal_filter_iterate_c
                                 + (VP8BORDERINPIXELS - 19);
 #endif
 
-        for (mb_col = 0; mb_col < cols; mb_col++)
+        for (mb_col = 0; mb_col < mb_cols; mb_col++)
         {
             int i, j, k, w;
             int weight_cap;
@@ -497,8 +497,8 @@ static void vp8_temporal_filter_iterate_c
             mb_uv_offset += 8;
         }
 
-        mb_y_offset += 16*f->y_stride-f->y_width;
-        mb_uv_offset += 8*f->uv_stride-f->uv_width;
+        mb_y_offset += 16*(f->y_stride-mb_cols);
+        mb_uv_offset += 8*(f->uv_stride-mb_cols);
     }
 
     // Restore input state
