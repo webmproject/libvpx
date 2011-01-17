@@ -310,6 +310,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
 
     oxcf->best_allowed_q          = cfg.rc_min_quantizer;
     oxcf->worst_allowed_q         = cfg.rc_max_quantizer;
+    oxcf->cq_level                = vp8_cfg.cq_level;
     oxcf->fixed_q = -1;
 
     oxcf->under_shoot_pct         = cfg.rc_undershoot_pct;
@@ -346,7 +347,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->arnr_type =      vp8_cfg.arnr_type;
 
     oxcf->tuning = vp8_cfg.tuning;
-    oxcf->cq_level = vp8_cfg.cq_level;
 
     /*
         printf("Current VP8 Settings: \n");
