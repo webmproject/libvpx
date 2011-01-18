@@ -1501,21 +1501,25 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
-    cpi->max_gf_interval = (int)(cpi->output_frame_rate / 2) + 2;
 
-    //cpi->max_gf_interval = (int)(cpi->output_frame_rate * 2 / 3) + 1;
-    //cpi->max_gf_interval = 24;
+    // Set Maximum gf/arf interval
+    cpi->max_gf_interval = max(((int)(cpi->output_frame_rate / 2.0) + 2), 12);
 
-    if (cpi->max_gf_interval < 12)
-        cpi->max_gf_interval = 12;
+    // Extended interval for genuinely static scenes
+    cpi->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
 
-
-    // Special conditions when altr ref frame enabled in lagged compress mode
+     // Special conditions when altr ref frame enabled in lagged compress mode
     if (cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames)
     {
         if (cpi->max_gf_interval > cpi->oxcf.lag_in_frames - 1)
             cpi->max_gf_interval = cpi->oxcf.lag_in_frames - 1;
+
+        if (cpi->static_scene_max_gf_interval > cpi->oxcf.lag_in_frames - 1)
+            cpi->static_scene_max_gf_interval = cpi->oxcf.lag_in_frames - 1;
     }
+
+    if ( cpi->max_gf_interval > cpi->static_scene_max_gf_interval )
+        cpi->max_gf_interval = cpi->static_scene_max_gf_interval;
 }
 
 
@@ -3850,8 +3854,20 @@ static void encode_frame_to_data_rate
 
         else if (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
         {
-            if (cpi->avg_frame_qindex < cpi->active_worst_quality)
+            // Use the lower of cpi->active_worst_quality and recent
+            // average Q as basis for GF/ARF Q limit unless last frame was
+            // a key frame.
+            if ( (cpi->frames_since_key > 1) &&
+                 (cpi->avg_frame_qindex < cpi->active_worst_quality) )
+            {
                 Q = cpi->avg_frame_qindex;
+
+                if ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+                     (Q < cpi->oxcf.cq_level) )
+                {
+                    Q = cpi->oxcf.cq_level;
+                }
+            }
 
             if ( cpi->pass == 2 )
             {
@@ -4528,9 +4544,7 @@ static void encode_frame_to_data_rate
     }
 
     // Keep a record of ambient average Q.
-    if (cm->frame_type == KEY_FRAME)
-        cpi->avg_frame_qindex = cm->base_qindex;
-    else
+    if (cm->frame_type != KEY_FRAME)
         cpi->avg_frame_qindex = (2 + 3 * cpi->avg_frame_qindex + cm->base_qindex) >> 2;
 
     // Keep a record from which we can calculate the average Q excluding GF updates and key frames

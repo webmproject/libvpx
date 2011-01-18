@@ -1375,7 +1375,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     // what level of boost is appropriate for the GF or ARF that will be coded with the group
     i = 0;
 
-    while (((i < cpi->max_gf_interval) || ((cpi->frames_to_key - i) < MIN_GF_INTERVAL)) && (i < cpi->frames_to_key))
+    while (((i < cpi->static_scene_max_gf_interval) || ((cpi->frames_to_key - i) < MIN_GF_INTERVAL)) && (i < cpi->frames_to_key))
     {
         double r;
         double this_frame_mvr_ratio;
@@ -1485,18 +1485,20 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         boost_score += (decay_accumulator * r);
 
         // Break out conditions.
-        if (   /* i>4 || */
+        if  (   /* i>4 || */
+            // Break at cpi->max_gf_interval unless almost totally static
+            (i >= cpi->max_gf_interval && (loop_decay_rate < 0.99)) ||
             (
-                (i > MIN_GF_INTERVAL) &&                            // Dont break out with a very short interval
-                ((cpi->frames_to_key - i) >= MIN_GF_INTERVAL) &&      // Dont break out very close to a key frame
+                // Dont break out with a very short interval
+                (i > MIN_GF_INTERVAL) &&
+                // Dont break out very close to a key frame
+                ((cpi->frames_to_key - i) >= MIN_GF_INTERVAL) &&
                 ((boost_score > 20.0) || (next_frame.pcnt_inter < 0.75)) &&
                 ((mv_ratio_accumulator > 100.0) ||
                  (abs_mv_in_out_accumulator > 3.0) ||
                  (mv_in_out_accumulator < -2.0) ||
-                 ((boost_score - old_boost_score) < 2.0)
-                )
-            )
-        )
+                 ((boost_score - old_boost_score) < 2.0))
+            ) )
         {
             boost_score = old_boost_score;
             break;
