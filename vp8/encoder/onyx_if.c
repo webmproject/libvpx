@@ -1548,6 +1548,7 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->auto_worst_q              = 0;
         cpi->oxcf.best_allowed_q            = MINQ;
         cpi->oxcf.worst_allowed_q           = MAXQ;
+        cpi->oxcf.cq_level = MINQ;
 
         cpi->oxcf.end_usage                = USAGE_STREAM_FROM_SERVER;
         cpi->oxcf.starting_buffer_level     =   4000;
@@ -1648,6 +1649,7 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
     cpi->oxcf.best_allowed_q  = q_trans[oxcf->best_allowed_q];
+    cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
 
     if (oxcf->fixed_q >= 0)
     {
@@ -1737,6 +1739,8 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
     cpi->best_quality                = cpi->oxcf.best_allowed_q;
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
+    cpi->cq_target_quality = cpi->oxcf.cq_level;
+
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
     cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
@@ -1933,6 +1937,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
     cpi->oxcf.best_allowed_q = q_trans[oxcf->best_allowed_q];
+    cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
 
     if (oxcf->fixed_q >= 0)
     {
@@ -2025,7 +2030,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
-    // Experimental cq target value
     cpi->cq_target_quality = cpi->oxcf.cq_level;
 
     cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
@@ -3817,29 +3821,28 @@ static void encode_frame_to_data_rate
 
         if ( cm->frame_type == KEY_FRAME )
         {
-            // Special case for key frames forced because we have reached
-            // the maximum key frame interval. Here force the Q to a range
-            // close to but just below the ambient Q to minimize the risk
-            // of popping
-            if ( cpi->this_key_frame_forced )
+            if ( cpi->pass == 2 )
             {
-                cpi->active_worst_quality = cpi->avg_frame_qindex * 7/8;
-                cpi->active_best_quality = cpi->avg_frame_qindex * 2/3;
-            }
-            else
-            {
-               if ( cpi->pass == 2 )
-               {
-                   if (cpi->gfu_boost > 600)
-                       cpi->active_best_quality = kf_low_motion_minq[Q];
-                   else
-                       cpi->active_best_quality = kf_high_motion_minq[Q];
-               }
-               // One pass more conservative
-               else
+                if (cpi->gfu_boost > 600)
+                   cpi->active_best_quality = kf_low_motion_minq[Q];
+                else
                    cpi->active_best_quality = kf_high_motion_minq[Q];
+
+                // Special case for key frames forced because we have reached
+                // the maximum key frame interval. Here force the Q to a range
+                // based on the ambient Q to reduce the risk of popping
+                if ( cpi->this_key_frame_forced )
+                {
+                    if ( cpi->active_best_quality > cpi->avg_frame_qindex * 7/8)
+                        cpi->active_best_quality = cpi->avg_frame_qindex * 7/8;
+                    else if ( cpi->active_best_quality < cpi->avg_frame_qindex >> 2 )
+                        cpi->active_best_quality = cpi->avg_frame_qindex >> 2;
+                }
             }
-        }
+            // One pass more conservative
+            else
+               cpi->active_best_quality = kf_high_motion_minq[Q];
+         }
 
         else if (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
         {
@@ -4152,9 +4155,44 @@ static void encode_frame_to_data_rate
             active_worst_qchanged = FALSE;
 
 #if !(CONFIG_REALTIME_ONLY)
+        // Special case handling for forced key frames
+        if ( (cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced )
+        {
+            int last_q = Q;
+            int kf_err = vp8_calc_ss_err(cpi->Source,
+                                         &cm->yv12_fb[cm->new_fb_idx],
+                                         IF_RTCD(&cpi->rtcd.variance));
+
+            // The key frame is not good enough
+            if ( kf_err > ((cpi->ambient_err * 3) >> 2) )
+            {
+                // Lower q_high
+                q_high = (Q > q_low) ? (Q - 1) : q_low;
+
+                // Adjust Q
+                Q = (q_high + q_low) >> 1;
+            }
+            // The key frame is much better than the previous frame
+            else if ( kf_err < (cpi->ambient_err >> 1) )
+            {
+                // Raise q_low
+                q_low = (Q < q_high) ? (Q + 1) : q_high;
+
+                // Adjust Q
+                Q = (q_high + q_low + 1) >> 1;
+            }
+
+            // Clamp Q to upper and lower limits:
+            if (Q > q_high)
+                Q = q_high;
+            else if (Q < q_low)
+                Q = q_low;
+
+            Loop = ((Q != last_q)) ? TRUE : FALSE;
+        }
 
         // Is the projected frame size out of range and are we allowed to attempt to recode.
-        if ( recode_loop_test( cpi,
+        else if ( recode_loop_test( cpi,
                                frame_over_shoot_limit, frame_under_shoot_limit,
                                Q, top_index, bottom_index ) )
         {
@@ -4170,7 +4208,7 @@ static void encode_frame_to_data_rate
                 //if ( cpi->zbin_over_quant == 0 )
                 q_low = (Q < q_high) ? (Q + 1) : q_high; // Raise Qlow as to at least the current value
 
-                if (cpi->zbin_over_quant > 0)           // If we are using over quant do the same for zbin_oq_low
+                if (cpi->zbin_over_quant > 0)            // If we are using over quant do the same for zbin_oq_low
                     zbin_oq_low = (cpi->zbin_over_quant < zbin_oq_high) ? (cpi->zbin_over_quant + 1) : zbin_oq_high;
 
                 //if ( undershoot_seen || (Q == MAXQ) )
@@ -4313,6 +4351,16 @@ static void encode_frame_to_data_rate
     }
 #endif
 
+    // Special case code to reduce pulsing when key frames are forced at a
+    // fixed interval. Note the reconstruction error if it is the frame before
+    // the force key frame
+    if ( cpi->next_key_frame_forced && (cpi->frames_to_key == 0) )
+    {
+        cpi->ambient_err = vp8_calc_ss_err(cpi->Source,
+                                           &cm->yv12_fb[cm->new_fb_idx],
+                                           IF_RTCD(&cpi->rtcd.variance));
+    }
+
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
     vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
@@ -4341,7 +4389,6 @@ static void encode_frame_to_data_rate
         }
       }
     }
-
 
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
@@ -4372,8 +4419,6 @@ static void encode_frame_to_data_rate
     }
     else
         cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
-
-
 
     //#pragma omp parallel sections
     {

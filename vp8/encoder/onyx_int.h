@@ -324,6 +324,9 @@ typedef struct
     unsigned int this_key_frame_forced;
     unsigned int next_key_frame_forced;
 
+    // Ambient reconstruction err target for force key frames
+    int ambient_err;
+
     unsigned int mode_check_freq[MAX_MODES];
     unsigned int mode_test_hit_counts[MAX_MODES];
     unsigned int mode_chosen_counts[MAX_MODES];
