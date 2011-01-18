@@ -402,6 +402,7 @@ typedef struct
     int kf_overspend_bits;            // Extra bits spent on key frames that need to be recovered on inter frames
     int kf_bitrate_adjustment;        // Current number of bit s to try and recover on each inter frame.
     int max_gf_interval;
+    int static_scene_max_gf_interval;
     int baseline_gf_interval;
     int gf_decay_rate;
     int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
