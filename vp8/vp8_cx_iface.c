@@ -196,6 +196,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
     RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
 
+#if !(CONFIG_REALTIME_ONLY)
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
         int              mb_r = (cfg->g_h + 15) / 16;
@@ -219,6 +220,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
         if ((int)(stats->count + 0.5) != n_packets - 1)
             ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
+#endif
 
     return VPX_CODEC_OK;
 }

@@ -314,7 +314,7 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->tok);
     cpi->tok = 0;
 
-    // Structure used to minitor GF useage
+    // Structure used to monitor GF usage
     if (cpi->gf_active_flags != 0)
         vpx_free(cpi->gf_active_flags);
 
@@ -325,6 +325,7 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 
     cpi->mb.pip = 0;
 
+#if !(CONFIG_REALTIME_ONLY)
     if(cpi->total_stats)
         vpx_free(cpi->total_stats);
 
@@ -334,6 +335,7 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
         vpx_free(cpi->this_frame_stats);
 
     cpi->this_frame_stats = 0;
+#endif
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -1448,6 +1450,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
+#if !(CONFIG_REALTIME_ONLY)
     if(cpi->total_stats)
         vpx_free(cpi->total_stats);
 
@@ -1461,6 +1464,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     if(!cpi->total_stats || !cpi->this_frame_stats)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");
+#endif
 }
 
 
@@ -1497,21 +1501,28 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
-    cpi->max_gf_interval = (int)(cpi->output_frame_rate / 2) + 2;
 
-    //cpi->max_gf_interval = (int)(cpi->output_frame_rate * 2 / 3) + 1;
-    //cpi->max_gf_interval = 24;
+    // Set Maximum gf/arf interval
+    cpi->max_gf_interval = ((int)(cpi->output_frame_rate / 2.0) + 2);
 
-    if (cpi->max_gf_interval < 12)
+    if(cpi->max_gf_interval < 12)
         cpi->max_gf_interval = 12;
 
+    // Extended interval for genuinely static scenes
+    cpi->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
 
-    // Special conditions when altr ref frame enabled in lagged compress mode
+     // Special conditions when altr ref frame enabled in lagged compress mode
     if (cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames)
     {
         if (cpi->max_gf_interval > cpi->oxcf.lag_in_frames - 1)
             cpi->max_gf_interval = cpi->oxcf.lag_in_frames - 1;
+
+        if (cpi->static_scene_max_gf_interval > cpi->oxcf.lag_in_frames - 1)
+            cpi->static_scene_max_gf_interval = cpi->oxcf.lag_in_frames - 1;
     }
+
+    if ( cpi->max_gf_interval > cpi->static_scene_max_gf_interval )
+        cpi->max_gf_interval = cpi->static_scene_max_gf_interval;
 }
 
 
@@ -3150,8 +3161,8 @@ static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
     // Update data structure that monitors level of reference to last GF
     vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
-    // this frame refreshes means next frames don't unless specified by user
 
+    // this frame refreshes means next frames don't unless specified by user
     cpi->common.frames_since_golden = 0;
 
     // Clear the alternate reference update pending flag.
@@ -3846,8 +3857,20 @@ static void encode_frame_to_data_rate
 
         else if (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
         {
-            if (cpi->avg_frame_qindex < cpi->active_worst_quality)
+            // Use the lower of cpi->active_worst_quality and recent
+            // average Q as basis for GF/ARF Q limit unless last frame was
+            // a key frame.
+            if ( (cpi->frames_since_key > 1) &&
+                 (cpi->avg_frame_qindex < cpi->active_worst_quality) )
+            {
                 Q = cpi->avg_frame_qindex;
+
+                if ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+                     (Q < cpi->oxcf.cq_level) )
+                {
+                    Q = cpi->oxcf.cq_level;
+                }
+            }
 
             if ( cpi->pass == 2 )
             {
@@ -4362,10 +4385,6 @@ static void encode_frame_to_data_rate
                                            IF_RTCD(&cpi->rtcd.variance));
     }
 
-    // Update the GF useage maps.
-    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
-    vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
-
     // This frame's MVs are saved and will be used in next frame's MV prediction.
     if(cm->show_frame)   //do not save for altref frame
     {
@@ -4528,9 +4547,7 @@ static void encode_frame_to_data_rate
     }
 
     // Keep a record of ambient average Q.
-    if (cm->frame_type == KEY_FRAME)
-        cpi->avg_frame_qindex = cm->base_qindex;
-    else
+    if (cm->frame_type != KEY_FRAME)
         cpi->avg_frame_qindex = (2 + 3 * cpi->avg_frame_qindex + cm->base_qindex) >> 2;
 
     // Keep a record from which we can calculate the average Q excluding GF updates and key frames
