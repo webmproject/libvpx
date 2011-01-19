@@ -408,6 +408,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         diag = vfp->svf_halfpix_hv(y - 1, d->pre_stride, z, b->src_stride, &sse);
         break;
     case 3:
+    default:
         this_mv.col += 4;
         this_mv.row += 4;
         diag = vfp->svf_halfpix_hv(y, d->pre_stride, z, b->src_stride, &sse);
@@ -1387,8 +1388,6 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     else
         return INT_MAX;
 }
-#endif
-
 
 int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int error_per_bit, int distance, vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2], int *mvsadcost[2], MV *center_mv)
 {
@@ -1541,6 +1540,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     else
         return INT_MAX;
 }
+#endif /* !(CONFIG_REALTIME_ONLY) */
 
 #ifdef ENTROPY_STATS
 void print_mode_context(void)
