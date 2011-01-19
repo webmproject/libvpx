@@ -45,6 +45,7 @@ enum vp8d_dec_control_id
     VP8_DECODER_CTRL_ID_START   = 256,
     VP8D_GET_LAST_REF_UPDATES,              /**< control function to get info on which reference frames were updated
                                             by the last decode */
+    VP8D_GET_FRAME_CORRUPTED,               /**< check if the indicated frame is corrupted */
     VP8_DECODER_CTRL_ID_MAX
 } ;
 
@@ -58,6 +59,7 @@ enum vp8d_dec_control_id
 
 
 VPX_CTRL_USE_TYPE(VP8D_GET_LAST_REF_UPDATES,   int *)
+VPX_CTRL_USE_TYPE(VP8D_GET_FRAME_CORRUPTED,    int *)
 
 
 /*! @} - end defgroup vp8_decoder */
