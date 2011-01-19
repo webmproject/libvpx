@@ -1487,7 +1487,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // Break out conditions.
         if  (   /* i>4 || */
             // Break at cpi->max_gf_interval unless almost totally static
-            (i >= cpi->max_gf_interval && (loop_decay_rate < 0.99)) ||
+            (i >= cpi->max_gf_interval && (decay_accumulator < 0.99)) ||
             (
                 // Dont break out with a very short interval
                 (i > MIN_GF_INTERVAL) &&
