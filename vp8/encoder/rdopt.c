@@ -2267,22 +2267,28 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
             else if (x->encode_breakout)
             {
                 int sum, sse;
+                int threshold = (xd->block[0].dequant[1]
+                            * xd->block[0].dequant[1] >>4);
+
+                if(threshold < x->encode_breakout)
+                    threshold = x->encode_breakout;
 
                 VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)
                     (x->src.y_buffer, x->src.y_stride,
                      x->e_mbd.predictor, 16, (unsigned int *)(&sse), &sum);
 
-                if (sse < x->encode_breakout)
+                if (sse < threshold)
                 {
                     // Check u and v to make sure skip is ok
                     int sse2 = 0;
-
-                    // add dc check
-                    if (abs(sum) < (cpi->common.Y2dequant[0][0] << 2))
+                    /* If theres is no codeable 2nd order dc
+                       or a very small uniform pixel change change */
+                    if (abs(sum) < (xd->block[24].dequant[0]<<2)||
+                        ((sum * sum>>8) > sse && abs(sum) <128))
                     {
                         sse2 = VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
 
-                        if (sse2 * 2 < x->encode_breakout)
+                        if (sse2 * 2 < threshold)
                         {
                             x->skip = 1;
                             distortion2 = sse + sse2;
@@ -2428,6 +2434,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
         if (x->skip)
             break;
+
     }
 
     // Reduce the activation RD thresholds for the best choice mode
