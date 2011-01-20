@@ -1381,7 +1381,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         double this_frame_mvr_ratio;
         double this_frame_mvc_ratio;
         double motion_decay;
-        double motion_pct = next_frame.pcnt_motion;
+        double motion_pct;
 
         i++;                                                    // Increment the loop counter
 
@@ -1396,13 +1396,14 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             break;
 
         // Accumulate motion stats.
+        motion_pct = next_frame.pcnt_motion;
         mv_accumulator_rabs += fabs(next_frame.mvr_abs * motion_pct);
         mv_accumulator_cabs += fabs(next_frame.mvc_abs * motion_pct);
 
         //Accumulate Motion In/Out of frame stats
-        this_frame_mv_in_out = next_frame.mv_in_out_count * next_frame.pcnt_motion;
-        mv_in_out_accumulator += next_frame.mv_in_out_count * next_frame.pcnt_motion;
-        abs_mv_in_out_accumulator += fabs(next_frame.mv_in_out_count * next_frame.pcnt_motion);
+        this_frame_mv_in_out = next_frame.mv_in_out_count * motion_pct;
+        mv_in_out_accumulator += next_frame.mv_in_out_count * motion_pct;
+        abs_mv_in_out_accumulator += fabs(next_frame.mv_in_out_count * motion_pct);
 
         // If there is a significant amount of motion
         if (motion_pct > 0.05)
@@ -2451,7 +2452,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     {
         double r;
         double motion_decay;
-        double motion_pct = next_frame.pcnt_motion;
+        double motion_pct;
 
         if (EOF == vp8_input_stats(cpi, &next_frame))
             break;
@@ -2471,6 +2472,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         loop_decay_rate = next_frame.pcnt_inter;
 
         // High % motion -> somewhat higher decay rate
+        motion_pct = next_frame.pcnt_motion;
         motion_decay = (1.0 - (motion_pct / 20.0));
         if (motion_decay < loop_decay_rate)
             loop_decay_rate = motion_decay;
