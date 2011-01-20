@@ -300,7 +300,7 @@ process_cmdline() {
         optval="${opt#*=}"
         case "$opt" in
         --disable-codecs) for c in ${CODECS}; do disable $c; done ;;
-        *) process_common_cmdline $opt
+        *) process_common_cmdline "$opt"
         ;;
         esac
     done
