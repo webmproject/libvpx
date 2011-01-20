@@ -44,9 +44,11 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
 
     vpx_free(oci->above_context);
     vpx_free(oci->mip);
+    vpx_free(oci->prev_mip);
 
     oci->above_context = 0;
     oci->mip = 0;
+    oci->prev_mip = 0;
 
 }
 
@@ -110,6 +112,17 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     }
 
     oci->mi = oci->mip + oci->mode_info_stride + 1;
+
+    /* allocate memory for last frame MODE_INFO array */
+    oci->prev_mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
+
+    if (!oci->prev_mip)
+    {
+        vp8_de_alloc_frame_buffers(oci);
+        return ALLOC_FAILURE;
+    }
+
+    oci->prev_mi = oci->prev_mip + oci->mode_info_stride + 1;
 
 
     oci->above_context = vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * oci->mb_cols, 1);

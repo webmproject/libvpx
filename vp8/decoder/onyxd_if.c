@@ -407,6 +407,16 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         return retcode;
     }
 
+    /* copy mode info to storage for future error concealment */
+    if (pbi->common.prev_mip)
+    {
+        /* size allocated in vp8_alloc_frame_buffers() */
+        int size_of_mip = (pbi->common.mb_cols + 1) * (pbi->common.mb_rows + 1)
+            * sizeof(MODE_INFO);
+
+        memcpy(pbi->common.prev_mip, pbi->common.mip, size_of_mip);
+    }
+
     if (pbi->b_multithreaded_rd && cm->multi_token_partition != ONE_PARTITION)
     {
         if (swap_frame_buffers (cm))
