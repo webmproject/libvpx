@@ -1337,16 +1337,19 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     double decay_accumulator = 1.0;
 
     double boost_factor = IIFACTOR;
-    double loop_decay_rate = 1.00;        // Starting decay rate
+    double loop_decay_rate = 1.00;          // Starting decay rate
 
     double this_frame_mv_in_out = 0.0;
     double mv_in_out_accumulator = 0.0;
     double abs_mv_in_out_accumulator = 0.0;
     double mod_err_per_mb_accumulator = 0.0;
 
-    int max_bits = frame_max_bits(cpi);    // Max for a single frame
+    int max_bits = frame_max_bits(cpi);     // Max for a single frame
 
     unsigned char *fpmm_pos;
+
+    unsigned int allow_alt_ref =
+                    cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames;
 
     cpi->gf_group_bits = 0;
     cpi->gf_decay_rate = 0;
@@ -1362,35 +1365,41 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     // Preload the stats for the next frame.
     mod_frame_err = calculate_modified_err(cpi, this_frame);
 
-    // Note the error of the frame at the start of the group (this will be the GF frame error if we code a normal gf
+    // Note the error of the frame at the start of the group (this will be
+    // the GF frame error if we code a normal gf
     gf_first_frame_err = mod_frame_err;
 
-    // Special treatment if the current frame is a key frame (which is also a gf).
-    // If it is then its error score (and hence bit allocation) need to be subtracted out
-    // from the calculation for the GF group
+    // Special treatment if the current frame is a key frame (which is also
+    // a gf). If it is then its error score (and hence bit allocation) need
+    // to be subtracted out from the calculation for the GF group
     if (cpi->common.frame_type == KEY_FRAME)
         gf_group_err -= gf_first_frame_err;
 
-    // Scan forward to try and work out how many frames the next gf group should contain and
-    // what level of boost is appropriate for the GF or ARF that will be coded with the group
+    // Scan forward to try and work out how many frames the next gf group
+    // should contain and what level of boost is appropriate for the GF
+    // or ARF that will be coded with the group
     i = 0;
 
-    while (((i < cpi->static_scene_max_gf_interval) || ((cpi->frames_to_key - i) < MIN_GF_INTERVAL)) && (i < cpi->frames_to_key))
+    while (((i < cpi->static_scene_max_gf_interval) ||
+            ((cpi->frames_to_key - i) < MIN_GF_INTERVAL)) &&
+           (i < cpi->frames_to_key))
     {
         double r;
         double this_frame_mvr_ratio;
         double this_frame_mvc_ratio;
         double motion_decay;
+        //double motion_pct = next_frame.pcnt_motion;
         double motion_pct;
 
-        i++;                                                    // Increment the loop counter
+        i++;    // Increment the loop counter
 
         // Accumulate error score of frames in this gf group
         mod_frame_err = calculate_modified_err(cpi, this_frame);
 
         gf_group_err += mod_frame_err;
 
-        mod_err_per_mb_accumulator += mod_frame_err / DOUBLE_DIVIDE_CHECK((double)cpi->common.MBs);
+        mod_err_per_mb_accumulator +=
+            mod_frame_err / DOUBLE_DIVIDE_CHECK((double)cpi->common.MBs);
 
         if (EOF == vp8_input_stats(cpi, &next_frame))
             break;
@@ -1401,9 +1410,12 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         mv_accumulator_cabs += fabs(next_frame.mvc_abs * motion_pct);
 
         //Accumulate Motion In/Out of frame stats
-        this_frame_mv_in_out = next_frame.mv_in_out_count * motion_pct;
-        mv_in_out_accumulator += next_frame.mv_in_out_count * motion_pct;
-        abs_mv_in_out_accumulator += fabs(next_frame.mv_in_out_count * motion_pct);
+        this_frame_mv_in_out =
+            next_frame.mv_in_out_count * motion_pct;
+        mv_in_out_accumulator +=
+            next_frame.mv_in_out_count * motion_pct;
+        abs_mv_in_out_accumulator +=
+            fabs(next_frame.mv_in_out_count * motion_pct);
 
         // If there is a significant amount of motion
         if (motion_pct > 0.05)
@@ -1432,7 +1444,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
 
         // Underlying boost factor is based on inter intra error ratio
-        r = (boost_factor * (next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error)));
+        r = ( boost_factor *
+              ( next_frame.intra_error /
+                DOUBLE_DIVIDE_CHECK(next_frame.coded_error)));
 
         if (next_frame.intra_error > cpi->gf_intra_err_min)
             r = (IIKFACTOR2 * next_frame.intra_error /
@@ -1441,13 +1455,15 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             r = (IIKFACTOR2 * cpi->gf_intra_err_min /
                      DOUBLE_DIVIDE_CHECK(next_frame.coded_error));
 
-        // Increase boost for frames where new data coming into frame (eg zoom out)
-        // Slightly reduce boost if there is a net balance of motion out of the frame (zoom in)
+        // Increase boost for frames where new data coming into frame
+        // (eg zoom out). Slightly reduce boost if there is a net balance
+        // of motion out of the frame (zoom in).
         // The range for this_frame_mv_in_out is -1.0 to +1.0
         if (this_frame_mv_in_out > 0.0)
             r += r * (this_frame_mv_in_out * 2.0);
+        // In extreme case boost is halved
         else
-            r += r * (this_frame_mv_in_out / 2.0);  // In extreme case boost is halved
+            r += r * (this_frame_mv_in_out / 2.0);
 
         if (r > GF_RMAX)
             r = GF_RMAX;
@@ -1485,10 +1501,24 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         boost_score += (decay_accumulator * r);
 
+        // Break clause to detect very still sections after motion
+        // For example a staic image after a fade or other transition
+        // instead of a clean key frame.
+        if ( (i > MIN_GF_INTERVAL) &&
+             (loop_decay_rate >= 0.999) &&
+             (decay_accumulator < 0.9) )
+        {
+             // Force GF not alt ref
+             allow_alt_ref = FALSE;
+
+             boost_score = old_boost_score;
+             break;
+        }
+
         // Break out conditions.
         if  (   /* i>4 || */
             // Break at cpi->max_gf_interval unless almost totally static
-            (i >= cpi->max_gf_interval && (decay_accumulator < 0.99)) ||
+            (i >= cpi->max_gf_interval && (decay_accumulator < 0.995)) ||
             (
                 // Dont break out with a very short interval
                 (i > MIN_GF_INTERVAL) &&
@@ -1510,7 +1540,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         old_boost_score = boost_score;
     }
 
-    cpi->gf_decay_rate = (i > 0) ? (int)(100.0 * (1.0 - decay_accumulator)) / i : 0;
+    cpi->gf_decay_rate =
+        (i > 0) ? (int)(100.0 * (1.0 - decay_accumulator)) / i : 0;
 
     // When using CBR apply additional buffer related upper limits
     if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
@@ -1520,7 +1551,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // For cbr apply buffer related limits
         if (cpi->drop_frames_allowed)
         {
-            int df_buffer_level = cpi->oxcf.drop_frames_water_mark * (cpi->oxcf.optimal_buffer_level / 100);
+            int df_buffer_level = cpi->oxcf.drop_frames_water_mark *
+                                  (cpi->oxcf.optimal_buffer_level / 100);
 
             if (cpi->buffer_level > df_buffer_level)
                 max_boost = ((double)((cpi->buffer_level - df_buffer_level) * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
@@ -1543,10 +1575,10 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     cpi->gfu_boost = (int)(boost_score * 100.0) >> 4;
 
     // Should we use the alternate refernce frame
-    if (cpi->oxcf.play_alternate &&
-        cpi->oxcf.lag_in_frames &&
+    if (allow_alt_ref &&
         (i >= MIN_GF_INTERVAL) &&
-        (i <= (cpi->frames_to_key - MIN_GF_INTERVAL)) &&          // dont use ARF very near next kf
+        // dont use ARF very near next kf
+        (i <= (cpi->frames_to_key - MIN_GF_INTERVAL)) &&
         (((next_frame.pcnt_inter > 0.75) &&
           ((mv_in_out_accumulator / (double)i > -0.2) || (mv_in_out_accumulator > -2.0)) &&
           //(cpi->gfu_boost>150) &&
