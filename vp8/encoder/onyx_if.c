@@ -3928,7 +3928,7 @@ static void encode_frame_to_data_rate
             // One pass more conservative
             else
                cpi->active_best_quality = kf_high_motion_minq[Q];
-         }
+        }
 
         else if (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
         {
@@ -4274,7 +4274,7 @@ static void encode_frame_to_data_rate
                                          IF_RTCD(&cpi->rtcd.variance));
 
             // The key frame is not good enough
-            if ( kf_err > ((cpi->ambient_err * 3) >> 2) )
+            if ( kf_err > ((cpi->ambient_err * 7) >> 3) )
             {
                 // Lower q_high
                 q_high = (Q > q_low) ? (Q - 1) : q_low;

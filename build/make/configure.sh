@@ -78,6 +78,7 @@ Build options:
   --log=yes|no|FILE           file configure log is written to [config.err]
   --target=TARGET             target platform tuple [generic-gnu]
   --cpu=CPU                   optimize for a specific cpu rather than a family
+  --extra-cflags=ECFLAGS      add ECFLAGS to CFLAGS [$CFLAGS]
   ${toggle_extra_warnings}    emit harmless warnings (always non-fatal)
   ${toggle_werror}            treat warnings as errors, if possible
                               (not available with all compilers)
@@ -442,6 +443,9 @@ process_common_cmdline() {
         ;;
         --cpu=*) tune_cpu="$optval"
         ;;
+        --extra-cflags=*)
+        extra_cflags="${optval}"
+        ;;
         --enable-?*|--disable-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
         echo "${CMDLINE_SELECT} ${ARCH_EXT_LIST}" | grep "^ *$option\$" >/dev/null || die_unknown $opt
@@ -665,7 +669,7 @@ process_common_toolchain() {
                 check_add_cflags -march=${tgt_isa}
                 check_add_asflags -march=${tgt_isa}
             fi
-
+            enabled debug && add_asflags -g
             asm_conversion_cmd="${source_path}/build/make/ads2gas.pl"
             ;;
         rvct)
@@ -690,6 +694,7 @@ process_common_toolchain() {
             arch_int=${tgt_isa##armv}
             arch_int=${arch_int%%te}
             check_add_asflags --pd "\"ARCHITECTURE SETA ${arch_int}\""
+            enabled debug && add_asflags -g
         ;;
         esac
 
@@ -972,6 +977,10 @@ EOF
         add_cflags -D_LARGEFILE_SOURCE
         add_cflags -D_FILE_OFFSET_BITS=64
     fi
+
+    # append any user defined extra cflags
+    check_add_cflags ${extra_cflags} || \
+    die "Requested extra CFLAGS '${extra_cflags}' not supported by compiler"
 }
 
 process_toolchain() {
