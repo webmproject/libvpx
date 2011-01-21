@@ -76,8 +76,8 @@ void vp8_filter_block2d_bil_var_sse2
     const unsigned char *src_ptr,
     int src_pixels_per_line,
     unsigned int Height,
-    const short *HFilter,
-    const short *VFilter,
+    int  xoffset,
+    int  yoffset,
     int *sum,
     unsigned int *sumsquared
 );
@@ -222,21 +222,6 @@ unsigned int vp8_variance8x16_wmt
 
 }
 
-///////////////////////////////////////////////////////////////////////////
-// the mmx function that does the bilinear filtering and var calculation //
-// int one pass                                                          //
-///////////////////////////////////////////////////////////////////////////
-DECLARE_ALIGNED(16, const short, vp8_bilinear_filters_xmm[8][16]) =
-{
-    { 128, 128, 128, 128, 128, 128, 128, 128,  0,  0,  0,  0,  0,  0,  0,  0 },
-    { 112, 112, 112, 112, 112, 112, 112, 112, 16, 16, 16, 16, 16, 16, 16, 16 },
-    {  96, 96, 96, 96, 96, 96, 96, 96, 32, 32, 32, 32, 32, 32, 32, 32 },
-    {  80, 80, 80, 80, 80, 80, 80, 80, 48, 48, 48, 48, 48, 48, 48, 48 },
-    {  64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64 },
-    {  48, 48, 48, 48, 48, 48, 48, 48, 80, 80, 80, 80, 80, 80, 80, 80 },
-    {  32, 32, 32, 32, 32, 32, 32, 32, 96, 96, 96, 96, 96, 96, 96, 96 },
-    {  16, 16, 16, 16, 16, 16, 16, 16, 112, 112, 112, 112, 112, 112, 112, 112 }
-};
 unsigned int vp8_sub_pixel_variance4x4_wmt
 (
     const unsigned char  *src_ptr,
@@ -272,15 +257,38 @@ unsigned int vp8_sub_pixel_variance8x8_wmt
     unsigned int *sse
 )
 {
-
     int xsum;
     unsigned int xxsum;
-    vp8_filter_block2d_bil_var_sse2(
-        src_ptr, src_pixels_per_line,
-        dst_ptr, dst_pixels_per_line, 8,
-        vp8_bilinear_filters_xmm[xoffset], vp8_bilinear_filters_xmm[yoffset],
-        &xsum, &xxsum
-    );
+
+    if (xoffset == 4 && yoffset == 0)
+    {
+        vp8_half_horiz_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            &xsum, &xxsum);
+    }
+    else if (xoffset == 0 && yoffset == 4)
+    {
+        vp8_half_vert_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            &xsum, &xxsum);
+    }
+    else if (xoffset == 4 && yoffset == 4)
+    {
+        vp8_half_horiz_vert_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            &xsum, &xxsum);
+    }
+    else
+    {
+        vp8_filter_block2d_bil_var_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            xoffset, yoffset,
+            &xsum, &xxsum);
+    }
 
     *sse = xxsum;
     return (xxsum - ((xsum * xsum) >> 6));
@@ -344,7 +352,7 @@ unsigned int vp8_sub_pixel_variance16x16_wmt
         vp8_filter_block2d_bil_var_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
-            vp8_bilinear_filters_xmm[xoffset], vp8_bilinear_filters_xmm[yoffset],
+            xoffset, yoffset,
             &xsum0, &xxsum0
         );
 
@@ -352,7 +360,7 @@ unsigned int vp8_sub_pixel_variance16x16_wmt
         vp8_filter_block2d_bil_var_sse2(
             src_ptr + 8, src_pixels_per_line,
             dst_ptr + 8, dst_pixels_per_line, 16,
-            vp8_bilinear_filters_xmm[xoffset], vp8_bilinear_filters_xmm[yoffset],
+            xoffset, yoffset,
             &xsum1, &xxsum1
         );
     }
@@ -392,21 +400,56 @@ unsigned int vp8_sub_pixel_variance16x8_wmt
     int xsum0, xsum1;
     unsigned int xxsum0, xxsum1;
 
+    if (xoffset == 4 && yoffset == 0)
+    {
+        vp8_half_horiz_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            &xsum0, &xxsum0);
 
-    vp8_filter_block2d_bil_var_sse2(
-        src_ptr, src_pixels_per_line,
-        dst_ptr, dst_pixels_per_line, 8,
-        vp8_bilinear_filters_xmm[xoffset], vp8_bilinear_filters_xmm[yoffset],
-        &xsum0, &xxsum0
-    );
+        vp8_half_horiz_variance16x_h_sse2(
+            src_ptr + 8, src_pixels_per_line,
+            dst_ptr + 8, dst_pixels_per_line, 8,
+            &xsum1, &xxsum1);
+    }
+    else if (xoffset == 0 && yoffset == 4)
+    {
+        vp8_half_vert_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            &xsum0, &xxsum0);
 
+        vp8_half_vert_variance16x_h_sse2(
+            src_ptr + 8, src_pixels_per_line,
+            dst_ptr + 8, dst_pixels_per_line, 8,
+            &xsum1, &xxsum1);
+    }
+    else if (xoffset == 4 && yoffset == 4)
+    {
+        vp8_half_horiz_vert_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            &xsum0, &xxsum0);
 
-    vp8_filter_block2d_bil_var_sse2(
-        src_ptr + 8, src_pixels_per_line,
-        dst_ptr + 8, dst_pixels_per_line, 8,
-        vp8_bilinear_filters_xmm[xoffset], vp8_bilinear_filters_xmm[yoffset],
-        &xsum1, &xxsum1
-    );
+        vp8_half_horiz_vert_variance16x_h_sse2(
+            src_ptr + 8, src_pixels_per_line,
+            dst_ptr + 8, dst_pixels_per_line, 8,
+            &xsum1, &xxsum1);
+    }
+    else
+    {
+        vp8_filter_block2d_bil_var_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 8,
+            xoffset, yoffset,
+            &xsum0, &xxsum0);
+
+        vp8_filter_block2d_bil_var_sse2(
+            src_ptr + 8, src_pixels_per_line,
+            dst_ptr + 8, dst_pixels_per_line, 8,
+            xoffset, yoffset,
+            &xsum1, &xxsum1);
+    }
 
     xsum0 += xsum1;
     xxsum0 += xxsum1;
@@ -428,12 +471,36 @@ unsigned int vp8_sub_pixel_variance8x16_wmt
 {
     int xsum;
     unsigned int xxsum;
-    vp8_filter_block2d_bil_var_sse2(
-        src_ptr, src_pixels_per_line,
-        dst_ptr, dst_pixels_per_line, 16,
-        vp8_bilinear_filters_xmm[xoffset], vp8_bilinear_filters_xmm[yoffset],
-        &xsum, &xxsum
-    );
+
+    if (xoffset == 4 && yoffset == 0)
+    {
+        vp8_half_horiz_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 16,
+            &xsum, &xxsum);
+    }
+    else if (xoffset == 0 && yoffset == 4)
+    {
+        vp8_half_vert_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 16,
+            &xsum, &xxsum);
+    }
+    else if (xoffset == 4 && yoffset == 4)
+    {
+        vp8_half_horiz_vert_variance16x_h_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 16,
+            &xsum, &xxsum);
+    }
+    else
+    {
+        vp8_filter_block2d_bil_var_sse2(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 16,
+            xoffset, yoffset,
+            &xsum, &xxsum);
+    }
 
     *sse = xxsum;
     return (xxsum - ((xsum * xsum) >> 7));
