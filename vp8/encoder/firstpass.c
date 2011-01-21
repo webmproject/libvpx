@@ -578,7 +578,7 @@ void vp8_first_pass(VP8_COMP *cpi)
     //if ( 0 )
     {
         int flag[2] = {1, 1};
-        vp8_initialize_rd_consts(cpi, vp8_dc_quant(cm->base_qindex, cm->y1dc_delta_q));
+        vp8_initialize_rd_consts(cpi, cm->base_qindex+cm->y1dc_delta_q);
         vpx_memcpy(cm->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
         vp8_build_component_cost_table(cpi->mb.mvcost, cpi->mb.mvsadcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
     }
@@ -1487,7 +1487,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // Break out conditions.
         if  (   /* i>4 || */
             // Break at cpi->max_gf_interval unless almost totally static
-            (i >= cpi->max_gf_interval && (loop_decay_rate < 0.99)) ||
+            (i >= cpi->max_gf_interval && (decay_accumulator < 0.99)) ||
             (
                 // Dont break out with a very short interval
                 (i > MIN_GF_INTERVAL) &&

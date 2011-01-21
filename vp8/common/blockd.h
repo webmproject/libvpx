@@ -287,6 +287,8 @@ typedef struct
 
     void *current_bc;
 
+    int corrupted;
+
 #if CONFIG_RUNTIME_CPU_DETECT
     struct VP8_COMMON_RTCD  *rtcd;
 #endif

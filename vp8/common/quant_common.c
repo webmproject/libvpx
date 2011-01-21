@@ -11,6 +11,8 @@
 
 #include "quant_common.h"
 
+
+#if !CONFIG_EXTEND_QRANGE
 static const int dc_qlookup[QINDEX_RANGE] =
 {
     4,    5,    6,    7,    8,    9,   10,   10,   11,   12,   13,   14,   15,   16,   17,   17,
@@ -34,7 +36,32 @@ static const int ac_qlookup[QINDEX_RANGE] =
     155,  158,  161,  164,  167,  170,  173,  177,  181,  185,  189,  193,  197,  201,  205,  209,
     213,  217,  221,  225,  229,  234,  239,  245,  249,  254,  259,  264,  269,  274,  279,  284,
 };
+#else
 
+static const int dc_qlookup[QINDEX_RANGE] =
+{
+    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
+    20,   21,   22,   23,   24,   25,   26,   27,   28,   30,   32,   34,   36,   38,   40,   42,
+    44,   46,   49,   52,   55,   58,   61,   64,   67,   70,   73,   76,   79,   82,   85,   88,
+    92,    96,  100,  104,  108,  112,  116,  120,  124,  128,  132,  136,  140,  144,  148,  152,
+    156,  160,  164,  168,  172,  176,  180,  184,  188,  192,  196,  200,  205,  210,  215,  220,
+    225,  230,  235,  240,  245,  250,  255,  260,  265,  270,  275,  280,  285,  290,  295,  300,
+    310,  320,  330,  340,  350,  360,  370,  380,  390,  400,  410,  420,  430,  440,  450,  460,
+    472,  484,  496,  508,  520,  532,  544,  556,  572,  588,  608,  628,  648,  668,  692,  720,
+};
+
+static const int ac_qlookup[QINDEX_RANGE] =
+{
+    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
+    20,   22,   24,   26,   28,   30,   32,   34,   36,   38,   40,   42,   44,   46,   48,   51,
+    54,   57,   60,   63,   66,   69,   72,   76,   80,   84,   88,   92,   96,   100,  105,  110,
+    115,  120,  125,  130,  135,  140,  146,  152,  158,  164,  170,  176,  182,  188,  194,  200,
+    206,  212,  218,  224,  232,  240,  248,  256,  264,  272,  280,  288,  296,  304,  312,  320,
+    330,  340,  350,  360,  370,  380,  392,  404,  416,  428,  440,  454,  468,  482,  496,  510,
+    524,  540,  556,  572,  588,  604,  622,  640,  658,  676,  696,  716,  736,  756,  776,  796,
+    820,  844,  868,  892,  916,  944,  972,  1000, 1032, 1064, 1096, 1128, 1168, 1208, 1252, 1300
+};
+#endif
 
 int vp8_dc_quant(int QIndex, int Delta)
 {
@@ -62,7 +89,11 @@ int vp8_dc2quant(int QIndex, int Delta)
     else if (QIndex < 0)
         QIndex = 0;
 
+#if !CONFIG_EXTEND_QRANGE
     retval = dc_qlookup[ QIndex ] * 2;
+#else
+    retval = dc_qlookup[ QIndex ];
+#endif
     return retval;
 
 }
@@ -72,15 +103,12 @@ int vp8_dc_uv_quant(int QIndex, int Delta)
 
     QIndex = QIndex + Delta;
 
-    if (QIndex > 127)
-        QIndex = 127;
+    if (QIndex > 117)
+        QIndex = 117;
     else if (QIndex < 0)
         QIndex = 0;
 
     retval = dc_qlookup[ QIndex ];
-
-    if (retval > 132)
-        retval = 132;
 
     return retval;
 }
@@ -108,12 +136,13 @@ int vp8_ac2quant(int QIndex, int Delta)
         QIndex = 127;
     else if (QIndex < 0)
         QIndex = 0;
-
+#if !CONFIG_EXTEND_QRANGE
     retval = (ac_qlookup[ QIndex ] * 155) / 100;
-
     if (retval < 8)
         retval = 8;
-
+#else
+    retval = ac_qlookup[ QIndex ];
+#endif
     return retval;
 }
 int vp8_ac_uv_quant(int QIndex, int Delta)

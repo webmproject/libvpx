@@ -206,4 +206,29 @@ static int vp8_decode_value(BOOL_DECODER *br, int bits)
 
     return z;
 }
+
+static int vp8dx_bool_error(BOOL_DECODER *br)
+{
+  /* Check if we have reached the end of the buffer.
+   *
+   * Variable 'count' stores the number of bits in the 'value' buffer,
+   * minus 8. So if count == 8, there are 16 bits available to be read.
+   * Normally, count is filled with 8 and one byte is filled into the
+   * value buffer. When we reach the end of the buffer, count is instead
+   * filled with VP8_LOTS_OF_BITS, 8 of which represent the last 8 real
+   * bits from the bitstream. So the last bit in the bitstream will be
+   * represented by count == VP8_LOTS_OF_BITS - 16.
+   */
+    if ((br->count > VP8_BD_VALUE_SIZE)
+        && (br->count <= VP8_LOTS_OF_BITS - 16))
+    {
+       /* We have tried to decode bits after the end of
+        * stream was encountered.
+        */
+        return 1;
+    }
+
+    /* No error. */
+    return 0;
+}
 #endif

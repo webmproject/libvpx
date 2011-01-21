@@ -151,7 +151,7 @@ extern const int qrounding_factors[129];
 extern const int qzbin_factors[129];
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
 extern const int vp8cx_base_skip_false_prob[128];
-
+#if !CONFIG_EXTEND_QRANGE
 // Tables relating active max Q to active min Q
 static const int kf_low_motion_minq[QINDEX_RANGE] =
 {
@@ -219,7 +219,76 @@ static const int inter_minq[QINDEX_RANGE] =
     71,72,73,74,75,75,76,77,78,79,80,81,82,83,84,85,
     86,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100
 };
+#else
+static const int kf_low_motion_minq[QINDEX_RANGE] =
+{
+     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+     1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+     4, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8,
+    9, 9, 9, 10,10,11,11,12,12,13,13,14,14,15,15,16,
+    16,17,17,18,18,19,19,20,20,21,21,22,23,23,24,24,
+    25,25,26,27,28,29,30,30,31,32,33,34,35,35,36,36,
+    38,38,39,40,40,41,42,42,43,44,44,45,46,46,47,48,
+    49,49,50,50,51,52,52,53,54,55,56,57,58,59,60,61,
+};
+static const int kf_high_motion_minq[QINDEX_RANGE] =
+{
+     0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2,
+     2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6,
+     6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9,10,10,
+    11,11,12,13,14,15,16,17,18,19,20,21,22,23,24,24,
+    25,26,27,28,28,29,29,30,30,31,31,32,33,33,34,34,
+    35,36,37,38,39,39,40,41,41,42,43,44,45,45,46,46,
+    47,47,48,48,49,49,50,50,51,51,52,52,53,53,54,54,
+    55,55,56,56,57,58,59,60,61,62,63,64,65,67,69,70,
+};
 
+static const int gf_low_motion_minq[QINDEX_RANGE] =
+{
+     0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4,
+     4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9,
+    10,10,10,11,11,12,12,13,13,14,14,15,15,16,16,17,
+    17,18,18,19,19,20,21,22,23,24,25,26,27,29,29,30,
+    31,32,33,34,35,36,37,38,39,40,41,41,42,42,43,43,
+    44,44,45,45,46,46,47,47,48,48,49,49,50,50,51,51,
+    52,52,53,53,54,54,55,55,56,56,57,57,58,59,60,61,
+    62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,
+};
+static const int gf_mid_motion_minq[QINDEX_RANGE] =
+{
+     0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4,
+     4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9,10,
+    10,11,11,12,12,13,13,14,14,15,15,16,16,17,17,18,
+    18,19,19,20,20,21,22,23,24,25,26,27,28,29,30,31,
+    32,33,34,35,35,36,36,37,37,38,38,39,39,40,40,41,
+    41,42,42,43,43,44,44,45,45,46,46,47,48,49,50,51,
+    52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,
+    68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,
+};
+static const int gf_high_motion_minq[QINDEX_RANGE] =
+{
+     0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4,
+     4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 8, 8, 9, 9,10,10,
+    11,11,12,12,13,14,15,16,17,18,18,19,19,20,20,21,
+    22,23,24,25,26,26,27,28,29,30,31,32,33,34,35,36,
+    37,38,39,39,40,40,40,41,41,41,42,42,43,43,44,44,
+    44,45,45,45,46,46,47,47,47,48,48,48,49,49,49,50,
+    50,50,51,51,52,53,54,54,55,56,57,57,58,59,60,61,
+    62,63,64,66,68,69,72,74,77,80,82,85,87,89,91,93,
+};
+
+static const int inter_minq[QINDEX_RANGE] =
+{
+     0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7,
+     8, 9,10,11,12,13,14,15,16,17,18,18,19,19,20,21,
+    21,22,23,23,24,25,26,26,27,28,29,30,31,32,32,33,
+    34,35,36,36,37,38,39,40,40,41,41,42,43,44,44,45,
+    46,46,47,47,48,49,49,50,50,51,52,52,53,54,54,55,
+    55,56,57,57,58,59,60,60,61,62,63,63,64,65,66,67,
+    68,68,69,70,71,72,72,73,74,75,76,77,78,79,80,81,
+    81,82,83,84,85,86,87,88,89,90,90,91,92,93,94,95,
+};
+#endif
 void vp8_initialize()
 {
     static int init_done = 0;
@@ -3462,6 +3531,12 @@ static int decide_key_frame(VP8_COMP *cpi)
     return code_key_frame;
 
 }
+#if !CONFIG_EXTEND_QRANGE
+#define FIRSTPASS_QINDEX 26
+#else
+#define FIRSTPASS_QINDEX 49
+#endif
+
 
 #if !(CONFIG_REALTIME_ONLY)
 static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags)
@@ -4105,6 +4180,17 @@ static void encode_frame_to_data_rate
         cpi->projected_frame_size = (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;
 
         vp8_clear_system_state();  //__asm emms;
+
+#if 0
+        if (cpi->pass != 1)
+        {
+            FILE *f = fopen("q_used.stt", "a");
+            fprintf(f, "%4d, %4d, %8d\n", cpi->common.current_video_frame,
+                cpi->common.base_qindex, cpi->projected_frame_size);
+            fclose(f);
+        }
+#endif
+
 
         // Test to see if the stats generated for this frame indicate that we should have coded a key frame
         // (assuming that we didn't)!
@@ -4842,10 +4928,15 @@ static void encode_frame_to_data_rate
         fclose(recon_file);
     }
 #endif
-
+#if 0
     // DEBUG
-    //vp8_write_yuv_frame("encoder_recon.yuv", cm->frame_to_show);
-
+    if(cm->current_video_frame>173 && cm->current_video_frame<178)
+    {
+        char filename[512];
+        sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
+        vp8_write_yuv_frame(filename, cm->frame_to_show);
+    }
+#endif
 
 }
 
@@ -5415,7 +5506,15 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                     cpi->totalp_v += v2;
                     cpi->totalp  += frame_psnr2;
                     cpi->total_sq_error2 += sq_error;
-
+#if 0
+                    {
+                        FILE *f = fopen("q_used.stt", "a");
+                        fprintf(f, "%5d : Y%f7.3:U%f7.3:V%f7.3:F%f7.3:S%7.3f\n",
+                            cpi->common.current_video_frame,y2, u2, v2,
+                            frame_psnr2, frame_ssim2);
+                        fclose(f);
+                    }
+#endif
                 }
             }
 
