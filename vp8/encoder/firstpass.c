@@ -1316,6 +1316,43 @@ void vp8_end_second_pass(VP8_COMP *cpi)
 {
 }
 
+// This function gives and estimate of how badly we believe
+// the predicition quality is decaying from frame to frame.
+double gf_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
+{
+    double prediction_decay_rate;
+    double motion_decay;
+    double motion_pct = next_frame->pcnt_motion;
+
+
+    // Initial basis is the % mbs inter coded
+    prediction_decay_rate = next_frame->pcnt_inter;
+
+    // High % motion -> somewhat higher decay rate
+    motion_decay = (1.0 - (motion_pct / 20.0));
+    if (motion_decay < prediction_decay_rate)
+        prediction_decay_rate = motion_decay;
+
+    // Adjustment to decay rate based on speed of motion
+    {
+        double this_mv_rabs;
+        double this_mv_cabs;
+        double distance_factor;
+
+        this_mv_rabs = fabs(next_frame->mvr_abs * motion_pct);
+        this_mv_cabs = fabs(next_frame->mvc_abs * motion_pct);
+
+        distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
+                               (this_mv_cabs * this_mv_cabs)) / 250.0;
+        distance_factor = ((distance_factor > 1.0)
+                                ? 0.0 : (1.0 - distance_factor));
+        if (distance_factor < prediction_decay_rate)
+            prediction_decay_rate = distance_factor;
+    }
+
+    return prediction_decay_rate;
+}
+
 // Analyse and define a gf/arf group .
 static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 {
@@ -1468,36 +1505,11 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (r > GF_RMAX)
             r = GF_RMAX;
 
-        // Adjust loop decay rate
-        //if ( next_frame.pcnt_inter < loop_decay_rate )
-        loop_decay_rate = next_frame.pcnt_inter;
-
-        // High % motion -> somewhat higher decay rate
-        motion_decay = (1.0 - (motion_pct / 20.0));
-        if (motion_decay < loop_decay_rate)
-            loop_decay_rate = motion_decay;
-
-        // Adjustment to decay rate based on speed of motion
-        {
-            double this_mv_rabs;
-            double this_mv_cabs;
-            double distance_factor;
-
-            this_mv_rabs = fabs(next_frame.mvr_abs * motion_pct);
-            this_mv_cabs = fabs(next_frame.mvc_abs * motion_pct);
-
-            distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
-                                   (this_mv_cabs * this_mv_cabs)) / 250.0;
-            distance_factor = ((distance_factor > 1.0)
-                                    ? 0.0 : (1.0 - distance_factor));
-            if (distance_factor < loop_decay_rate)
-                loop_decay_rate = distance_factor;
-        }
+        loop_decay_rate = gf_prediction_decay_rate(cpi, &next_frame);
 
         // Cumulative effect of decay
         decay_accumulator = decay_accumulator * loop_decay_rate;
         decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
-        //decay_accumulator = ( loop_decay_rate < decay_accumulator ) ? loop_decay_rate : decay_accumulator;
 
         boost_score += (decay_accumulator * r);
 
@@ -1508,11 +1520,42 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
              (loop_decay_rate >= 0.999) &&
              (decay_accumulator < 0.9) )
         {
-             // Force GF not alt ref
-             allow_alt_ref = FALSE;
+            int j;
+            FIRSTPASS_STATS * position = cpi->stats_in;
+            FIRSTPASS_STATS tmp_next_frame;
+            double decay_rate;
 
-             boost_score = old_boost_score;
-             break;
+            // Look ahead a few frames to see if static condition
+            // persists...
+            for ( j = 0; j < 4; j++ )
+            {
+                if (EOF == vp8_input_stats(cpi, &tmp_next_frame))
+                    break;
+
+                decay_rate = gf_prediction_decay_rate(cpi, &tmp_next_frame);
+                if ( decay_rate < 0.999 )
+                    break;
+            }
+            reset_fpf_position(cpi, position);            // Reset file position
+
+            // Force GF not alt ref
+            if ( j == 4 )
+            {
+                if (0)
+                {
+                    FILE *f = fopen("fadegf.stt", "a");
+                    fprintf(f, " %8d %8d %10.4f %10.4f %10.4f\n",
+                         cpi->common.current_video_frame+i, i,
+                         loop_decay_rate, decay_accumulator,
+                         boost_score );
+                    fclose(f);
+                }
+
+                allow_alt_ref = FALSE;
+
+                boost_score = old_boost_score;
+                break;
+            }
         }
 
         // Break out conditions.
