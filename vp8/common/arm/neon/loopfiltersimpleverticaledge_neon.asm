@@ -145,10 +145,7 @@
     ENDP        ; |vp8_loop_filter_simple_vertical_edge_neon|
 
 ;-----------------
-    AREA    vloopfiltery_dat, DATA, READWRITE           ;read/write by default
-;Data section with name data_area is specified. DCD reserves space in memory for 16 data.
-;One word each is reserved. Label filter_coeff can be used to access the data.
-;Data address: filter_coeff, filter_coeff+4, filter_coeff+8 ...
+
 _vlfy_coeff_
     DCD     vlfy_coeff
 vlfy_coeff
