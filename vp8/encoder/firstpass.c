@@ -2423,12 +2423,35 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     if (cpi->oxcf.auto_key
         && cpi->frames_to_key > (int)cpi->key_frame_frequency )
     {
+        int current_pos = cpi->stats_in;
+        FIRSTPASS_STATS tmp_frame;
+
         cpi->frames_to_key /= 2;
 
-        // Estimate corrected kf group error
-        kf_group_err /= 2.0;
-        kf_group_intra_err /= 2.0;
-        kf_group_coded_err /= 2.0;
+        // Copy first frame details
+        vpx_memcpy(&tmp_frame, &first_frame, sizeof(first_frame));
+
+        // Reset to the start of the group
+        reset_fpf_position(cpi, start_position);
+
+        kf_group_err = 0;
+        kf_group_intra_err = 0;
+        kf_group_coded_err = 0;
+
+        // Rescan to get the correct error data for the forced kf group
+        for( i = 0; i < cpi->frames_to_key; i++ )
+        {
+            // Accumulate kf group errors
+            kf_group_err += calculate_modified_err(cpi, &tmp_frame);
+            kf_group_intra_err += tmp_frame.intra_error;
+            kf_group_coded_err += tmp_frame.coded_error;
+
+            // Load a the next frame's stats
+            vp8_input_stats(cpi, &tmp_frame);
+        }
+
+        // Reset to the start of the group
+        reset_fpf_position(cpi, current_pos);
 
         cpi->next_key_frame_forced = TRUE;
     }
