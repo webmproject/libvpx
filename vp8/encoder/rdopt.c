@@ -43,7 +43,9 @@
 #endif
 
 
-void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
+extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
+extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
+
 
 #define RDCOST(RM,DM,R,D) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
 
@@ -2055,7 +2057,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                     cpi->zbin_mode_boost = MV_ZBIN_BOOST;
             }
 
-            vp8cx_mb_init_quantizer(cpi, x);
+            vp8_update_zbin_extra(cpi, x);
         }
 
         switch (this_mode)

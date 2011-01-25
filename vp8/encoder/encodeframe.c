@@ -373,6 +373,33 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     x->e_mbd.block[24].dequant = cpi->common.Y2dequant[QIndex];
     x->block[24].zrun_zbin_boost = cpi->zrun_zbin_boost_y2[QIndex];
     x->block[24].zbin_extra = (short)zbin_extra;
+
+    /* save this macroblock QIndex for vp8_update_zbin_extra() */
+    x->q_index = QIndex;
+}
+void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x)
+{
+    int i;
+    int QIndex = x->q_index;
+    int zbin_extra;
+
+    // Y
+    zbin_extra = (cpi->common.Y1dequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    for (i = 0; i < 16; i++)
+    {
+        x->block[i].zbin_extra = (short)zbin_extra;
+    }
+
+    // UV
+    zbin_extra = (cpi->common.UVdequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    for (i = 16; i < 24; i++)
+    {
+        x->block[i].zbin_extra = (short)zbin_extra;
+    }
+
+    // Y2
+    zbin_extra = (cpi->common.Y2dequant[QIndex][1] * ((cpi->zbin_over_quant / 2) + cpi->zbin_mode_boost)) >> 7;
+    x->block[24].zbin_extra = (short)zbin_extra;
 }
 
 void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
@@ -1397,10 +1424,17 @@ int vp8cx_encode_inter_macroblock
 
     if (cpi->sf.RD)
     {
+        int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
+
         /* Are we using the fast quantizer for the mode selection? */
         if(cpi->sf.use_fastquant_for_pick)
+        {
             cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
 
+            /* the fast quantizer does not use zbin_extra, so
+             * do not recalculate */
+            cpi->zbin_mode_boost_enabled = 0;
+        }
         inter_error = vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
 
         /* switch back to the regular quantizer for the encode */
@@ -1408,6 +1442,9 @@ int vp8cx_encode_inter_macroblock
         {
             cpi->mb.quantize_b    = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb);
         }
+
+        /* restore cpi->zbin_mode_boost_enabled */
+        cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
 
     }
     else
@@ -1425,7 +1462,7 @@ int vp8cx_encode_inter_macroblock
 #endif
 
     // MB level adjutment to quantizer setup
-    if (xd->segmentation_enabled || cpi->zbin_mode_boost_enabled)
+    if (xd->segmentation_enabled)
     {
         // If cyclic update enabled
         if (cpi->cyclic_refresh_mode_enabled)
@@ -1435,9 +1472,14 @@ int vp8cx_encode_inter_macroblock
                 ((xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) || (xd->mode_info_context->mbmi.mode != ZEROMV)))
             {
                 xd->mode_info_context->mbmi.segment_id = 0;
+
+                /* segment_id changed, so update */
+                vp8cx_mb_init_quantizer(cpi, x);
             }
         }
+    }
 
+    {
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)
         {
@@ -1461,7 +1503,7 @@ int vp8cx_encode_inter_macroblock
         else
             cpi->zbin_mode_boost = 0;
 
-        vp8cx_mb_init_quantizer(cpi,  x);
+        vp8_update_zbin_extra(cpi, x);
     }
 
     cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;

@@ -979,8 +979,10 @@ EOF
     fi
 
     # append any user defined extra cflags
-    check_add_cflags ${extra_cflags} || \
-    die "Requested extra CFLAGS '${extra_cflags}' not supported by compiler"
+    if [ -n "${extra_cflags}" ] ; then
+        check_add_cflags ${extra_cflags} || \
+        die "Requested extra CFLAGS '${extra_cflags}' not supported by compiler"
+    fi
 }
 
 process_toolchain() {
