@@ -18,6 +18,37 @@ extern void (*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12
 extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
 extern void vpxyv12_copy_partial_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
 
+extern unsigned int vp8_sub_pixel_variance16x16_neon_func
+(
+    const unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    const unsigned char *dst_ptr,
+    int dst_pixels_per_line,
+    unsigned int *sse
+);
+unsigned int vp8_sub_pixel_variance16x16_neon
+(
+    const unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    const unsigned char *dst_ptr,
+    int dst_pixels_per_line,
+    unsigned int *sse
+)
+{
+  if (xoffset == 4 && yoffset == 0)
+      return vp8_variance_halfpixvar16x16_h_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
+  else if (xoffset == 0 && yoffset == 4)
+      return vp8_variance_halfpixvar16x16_v_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
+  else if (xoffset == 4 && yoffset == 4)
+      return vp8_variance_halfpixvar16x16_hv_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
+  else
+      return vp8_sub_pixel_variance16x16_neon_func(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);
+}
+
 void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
