@@ -129,9 +129,6 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
         rc   = vp8_default_zig_zag1d[i];
         z    = coeff_ptr[rc];
 
-        //if ( i == 0 )
-        //    zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value/2;
-        //else
         zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
 
         zbin_boost_ptr ++;
@@ -144,13 +141,13 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
             y  = (((x * quant_ptr[rc]) >> 16) + x)
                  >> quant_shift_ptr[rc];                // quantize (x)
             x  = (y ^ sz) - sz;                         // get the sign back
-            qcoeff_ptr[rc]  = x;                         // write to destination
-            dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
+            qcoeff_ptr[rc]  = x;                        // write to destination
+            dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
 
             if (y)
             {
                 eob = i;                                // last nonzero coeffs
-                zbin_boost_ptr = &b->zrun_zbin_boost[0];    // reset zero runlength
+                zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
             }
         }
     }

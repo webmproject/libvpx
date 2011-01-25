@@ -27,11 +27,11 @@ extern prototype_quantize_block(vp8_regular_quantize_b_sse2);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 
-/* The sse2 quantizer has not been updated to match the new exact
- * quantizer introduced in commit e04e2935
- *#undef vp8_quantize_quantb
- *#define vp8_quantize_quantb vp8_regular_quantize_b_sse2
- */
+// Currently, this function realizes a gain on x86 and a loss on x86_64
+#if ARCH_X86
+#undef vp8_quantize_quantb
+#define vp8_quantize_quantb vp8_regular_quantize_b_sse2
+#endif
 
 #endif
 
