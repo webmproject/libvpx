@@ -243,10 +243,9 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
             cpi->RDMULT += (cpi->RDMULT * rd_iifactor[cpi->next_iiratio]) >> 4;
     }
 
-    if (cpi->RDMULT < 125)
-        cpi->RDMULT = 125;
-
     cpi->mb.errorperbit = (cpi->RDMULT / 100);
+    cpi->mb.errorperbit += (cpi->mb.errorperbit==0);
+
     vp8_set_speed_features(cpi);
 
     if (cpi->common.simpler_lpf)
