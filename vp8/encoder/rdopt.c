@@ -538,6 +538,51 @@ static int vp8_rdcost_mby(MACROBLOCK *mb)
     return cost;
 }
 
+static void macro_block_yrd( MACROBLOCK *mb,
+                             int *Rate,
+                             int *Distortion,
+                             const vp8_encodemb_rtcd_vtable_t *rtcd)
+{
+    int b;
+    MACROBLOCKD *const x = &mb->e_mbd;
+    BLOCK   *const mb_y2 = mb->block + 24;
+    BLOCKD *const x_y2  = x->block + 24;
+    short *Y2DCPtr = mb_y2->src_diff;
+    BLOCK *beptr;
+    int d;
+
+    ENCODEMB_INVOKE(rtcd, submby)( mb->src_diff, mb->src.y_buffer,
+                                   mb->e_mbd.predictor, mb->src.y_stride );
+
+    // Fdct and building the 2nd order block
+    for (beptr = mb->block; beptr < mb->block + 16; beptr += 2)
+    {
+        mb->vp8_short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
+        *Y2DCPtr++ = beptr->coeff[0];
+        *Y2DCPtr++ = beptr->coeff[16];
+    }
+
+    // 2nd order fdct
+    mb->short_walsh4x4(mb_y2->src_diff, mb_y2->coeff, 8);
+
+    // Quantization
+    for (b = 0; b < 16; b++)
+    {
+        mb->quantize_b(&mb->block[b], &mb->e_mbd.block[b]);
+    }
+
+    // DC predication and Quantization of 2nd Order block
+    mb->quantize_b(mb_y2, x_y2);
+
+    // Distortion
+    d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
+    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
+
+    *Distortion = (d >> 4);
+
+    // rate
+    *Rate = vp8_rdcost_mby(mb);
+}
 
 static void rd_pick_intra4x4block(
     VP8_COMP *cpi,
@@ -654,33 +699,35 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate, int 
     return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
 }
 
-int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi, MACROBLOCK *x, int *Rate, int *rate_y, int *Distortion)
+int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
+                                   MACROBLOCK *x,
+                                   int *Rate,
+                                   int *rate_y,
+                                   int *Distortion)
 {
-
     MB_PREDICTION_MODE mode;
     MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
     int rate, ratey;
     unsigned int distortion;
     int best_rd = INT_MAX;
+    int this_rd;
+    int i;
 
     //Y Search for 16x16 intra prediction mode
     for (mode = DC_PRED; mode <= TM_PRED; mode++)
     {
-        int this_rd;
-        int dummy;
-        rate = 0;
+        for (i = 0; i < 16; i++)
+        {
+            vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
+        }
 
         x->e_mbd.mode_info_context->mbmi.mode = mode;
 
-        rate += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
+        vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
 
-        vp8_encode_intra16x16mbyrd(IF_RTCD(&cpi->rtcd), x);
-
-        ratey = vp8_rdcost_mby(x);
-
-        rate += ratey;
-
-        VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)(x->src.y_buffer, x->src.y_stride, x->e_mbd.dst.y_buffer, x->e_mbd.dst.y_stride, &distortion, &dummy);
+        macro_block_yrd(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
+        rate = ratey + x->mbmode_cost[x->e_mbd.frame_type]
+                                     [x->e_mbd.mode_info_context->mbmi.mode];
 
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
@@ -697,7 +744,6 @@ int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi, MACROBLOCK *x, int *Rate, int 
     x->e_mbd.mode_info_context->mbmi.mode = mode_selected;
     return best_rd;
 }
-
 
 static int rd_cost_mbuv(MACROBLOCK *mb)
 {
@@ -937,48 +983,6 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
     }
 
     return distortion;
-}
-
-static void macro_block_yrd(MACROBLOCK *mb, int *Rate, int *Distortion, const vp8_encodemb_rtcd_vtable_t *rtcd)
-{
-    int b;
-    MACROBLOCKD *const x = &mb->e_mbd;
-    BLOCK   *const mb_y2 = mb->block + 24;
-    BLOCKD *const x_y2  = x->block + 24;
-    short *Y2DCPtr = mb_y2->src_diff;
-    BLOCK *beptr;
-    int d;
-
-    ENCODEMB_INVOKE(rtcd, submby)(mb->src_diff, mb->src.y_buffer, mb->e_mbd.predictor, mb->src.y_stride);
-
-    // Fdct and building the 2nd order block
-    for (beptr = mb->block; beptr < mb->block + 16; beptr += 2)
-    {
-        mb->vp8_short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
-        *Y2DCPtr++ = beptr->coeff[0];
-        *Y2DCPtr++ = beptr->coeff[16];
-    }
-
-    // 2nd order fdct
-    mb->short_walsh4x4(mb_y2->src_diff, mb_y2->coeff, 8);
-
-    // Quantization
-    for (b = 0; b < 16; b++)
-    {
-        mb->quantize_b(&mb->block[b], &mb->e_mbd.block[b]);
-    }
-
-    // DC predication and Quantization of 2nd Order block
-    mb->quantize_b(mb_y2, x_y2);
-
-    // Distortion
-    d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
-    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
-
-    *Distortion = (d >> 4);
-
-    // rate
-    *Rate = vp8_rdcost_mby(mb);
 }
 
 unsigned char vp8_mbsplit_offset2[4][16] = {
