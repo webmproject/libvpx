@@ -30,6 +30,7 @@ extern prototype_subpixvariance(vp8_sub_pixel_variance8x8_neon);
 //extern prototype_subpixvariance(vp8_sub_pixel_variance8x16_c);
 //extern prototype_subpixvariance(vp8_sub_pixel_variance16x8_c);
 extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon);
+extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon_func);
 extern prototype_variance(vp8_variance_halfpixvar16x16_h_neon);
 extern prototype_variance(vp8_variance_halfpixvar16x16_v_neon);
 extern prototype_variance(vp8_variance_halfpixvar16x16_hv_neon);

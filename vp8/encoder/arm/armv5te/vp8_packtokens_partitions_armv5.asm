@@ -65,6 +65,8 @@
 numparts_loop
     ldr     r10, [sp, #40]              ; ptr
     ldr     r5,  [sp, #36]              ; move mb_rows to the counting section
+    sub     r5, r5, r11                 ; move start point with each partition
+                                        ; mb_rows starts at i
     str     r5,  [sp, #12]
 
     ; Reset all of the VP8 Writer data for each partition that
