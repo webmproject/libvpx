@@ -4618,7 +4618,8 @@ static void encode_frame_to_data_rate
     }
 
     // Update the buffer level variable.
-    if (cpi->common.refresh_alt_ref_frame)
+    // Non-viewable frames are a special case and are treated as pure overhead.
+    if ( !cm->show_frame )
         cpi->bits_off_target -= cpi->projected_frame_size;
     else
         cpi->bits_off_target += cpi->av_per_frame_bandwidth - cpi->projected_frame_size;
