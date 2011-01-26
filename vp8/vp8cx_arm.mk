@@ -60,7 +60,7 @@ ifeq ($(ARCH_ARM),yes)
 vpx_vp8_enc_asm_offsets.asm: obj_int_extract
 vpx_vp8_enc_asm_offsets.asm: $(VP8_PREFIX)encoder/arm/vpx_vp8_enc_asm_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
-OBJS-yes += $(VP8_PREFIX)encoder/arm/vpx_vp7_enc_asm_offsets.c.o
+OBJS-yes += $(VP8_PREFIX)encoder/arm/vpx_vp8_enc_asm_offsets.c.o
 CLEAN-OBJS += vpx_vp8_enc_asm_offsets.asm
 $(filter %$(ASM).o,$(OBJS-yes)): vpx_vp8_enc_asm_offsets.asm
 endif
