@@ -16,6 +16,7 @@
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/arm_csystemdependent.c
 
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/encodemb_arm.c
+VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/variance_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/quantize_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/picklpf_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV5TE) += encoder/arm/boolhuff_arm.c
