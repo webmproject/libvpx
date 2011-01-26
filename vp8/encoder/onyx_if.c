@@ -3127,6 +3127,10 @@ static void set_quantizer(VP8_COMP *cpi, int Q)
     cm->uvdc_delta_q = 0;
     cm->uvac_delta_q = 0;
 
+    if(Q<4)
+    {
+        cm->y2dc_delta_q = 4-Q;
+    }
     // Set Segment specific quatizers
     mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
     mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
