@@ -1465,6 +1465,17 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");
 #endif
+
+#if CONFIG_MULTITHREAD
+    if (width < 640)
+        cpi->mt_sync_range = 1;
+    else if (width <= 1280)
+        cpi->mt_sync_range = 4;
+    else if (width <= 2560)
+        cpi->mt_sync_range = 8;
+    else
+        cpi->mt_sync_range = 16;
+#endif
 }
 
 

@@ -487,6 +487,16 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int seg_map_index = (mb_row * cpi->common.mb_cols);
 
+#if CONFIG_MULTITHREAD
+    const int nsync = cpi->mt_sync_range;
+    const int rightmost_col = cm->mb_cols - 1;
+    volatile const int *last_row_current_mb_col;
+
+    if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
+        last_row_current_mb_col = &cpi->mt_current_mb_col[mb_row - 1];
+    else
+        last_row_current_mb_col = &rightmost_col;
+#endif
 
     // reset above block coeffs
     xd->above_context = cm->above_context;
@@ -531,6 +541,21 @@ void encode_mb_row(VP8_COMP *cpi,
 
         x->rddiv = cpi->RDDIV;
         x->rdmult = cpi->RDMULT;
+
+#if CONFIG_MULTITHREAD
+        if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
+        {
+            if ((mb_col & (nsync - 1)) == 0)
+            {
+                while (mb_col > (*last_row_current_mb_col - nsync)
+                        && (*last_row_current_mb_col) != (cm->mb_cols - 1))
+                {
+                    x86_pause_hint();
+                    thread_sleep(0);
+                }
+            }
+        }
+#endif
 
         if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
             activity_sum += vp8_activity_masking(cpi, x);
@@ -628,7 +653,12 @@ void encode_mb_row(VP8_COMP *cpi,
         x->partition_info++;
 
         xd->above_context++;
-        cpi->current_mb_col_main = mb_col;
+#if CONFIG_MULTITHREAD
+        if (cpi->b_multi_threaded != 0)
+        {
+            cpi->mt_current_mb_col[mb_row] = mb_col;
+        }
+#endif
     }
 
     //extend the recon for intra prediction
@@ -642,11 +672,14 @@ void encode_mb_row(VP8_COMP *cpi,
     xd->mode_info_context++;
     x->partition_info++;
     x->activity_sum += activity_sum;
+
+#if CONFIG_MULTITHREAD
+    if ((cpi->b_multi_threaded != 0) && (mb_row == cm->mb_rows - 1))
+    {
+        sem_post(&cpi->h_event_end_encoding); /* signal frame encoding end */
+    }
+#endif
 }
-
-
-
-
 
 void vp8_encode_frame(VP8_COMP *cpi)
 {
@@ -800,22 +833,16 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
             vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei, 1,  cpi->encoding_thread_count);
 
+            for (i = 0; i < cm->mb_rows; i++)
+                cpi->mt_current_mb_col[i] = 0;
+
+            for (i = 0; i < cpi->encoding_thread_count; i++)
+            {
+                sem_post(&cpi->h_event_start_encoding[i]);
+            }
+
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row += (cpi->encoding_thread_count + 1))
             {
-                cpi->current_mb_col_main = -1;
-
-                for (i = 0; i < cpi->encoding_thread_count; i++)
-                {
-                    if ((mb_row + i + 1) >= cm->mb_rows)
-                        break;
-
-                    cpi->mb_row_ei[i].mb_row = mb_row + i + 1;
-                    cpi->mb_row_ei[i].tp  = cpi->tok + (mb_row + i + 1) * (cm->mb_cols * 16 * 24);
-                    cpi->mb_row_ei[i].current_mb_col = -1;
-                    //SetEvent(cpi->h_event_mbrencoding[i]);
-                    sem_post(&cpi->h_event_mbrencoding[i]);
-                }
-
                 vp8_zero(cm->left_context)
 
                 tp = cpi->tok + mb_row * (cm->mb_cols * 16 * 24);
@@ -830,26 +857,10 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
                 x->partition_info  += xd->mode_info_stride * cpi->encoding_thread_count;
 
-                if (mb_row < cm->mb_rows - 1)
-                    //WaitForSingleObject(cpi->h_event_main, INFINITE);
-                    sem_wait(&cpi->h_event_main);
             }
 
-            /*
-            for( ;mb_row<cm->mb_rows; mb_row ++)
-            {
-            vp8_zero( cm->left_context)
+            sem_wait(&cpi->h_event_end_encoding); /* wait for other threads to finish */
 
-            tp = cpi->tok + mb_row * (cm->mb_cols * 16 * 24);
-
-            encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
-            // adjust to the next row of mbs
-            x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
-            x->src.u_buffer +=  8 * x->src.uv_stride - 8 * cm->mb_cols;
-            x->src.v_buffer +=  8 * x->src.uv_stride - 8 * cm->mb_cols;
-
-            }
-            */
             cpi->tok_count = 0;
 
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row ++)
@@ -859,7 +870,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
             if (xd->segmentation_enabled)
             {
-
                 int i, j;
 
                 if (xd->segmentation_enabled)
@@ -871,7 +881,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
                             segment_counts[j] += cpi->mb_row_ei[i].segment_counts[j];
                     }
                 }
-
             }
 
             for (i = 0; i < cpi->encoding_thread_count; i++)
