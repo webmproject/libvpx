@@ -28,6 +28,7 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
 #include "temporal_filter.h"
+#include "findnearmv.h"
 
 //#define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4
@@ -244,12 +245,6 @@ enum
     BLOCK_16X16,
     BLOCK_MAX_SEGMENTS
 };
-
-typedef union
-{
-    unsigned int as_int;
-    MV           as_mv;
-} int_mv;        /* facilitates rapid equality tests */
 
 typedef struct
 {

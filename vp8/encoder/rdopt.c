@@ -1426,48 +1426,6 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     return bsi.segment_rd;
 }
 
-
-static void mv_bias(const MODE_INFO *x, int refframe, int_mv *mvp, const int *ref_frame_sign_bias)
-{
-    MV xmv;
-    xmv = x->mbmi.mv.as_mv;
-
-    if (ref_frame_sign_bias[x->mbmi.ref_frame] != ref_frame_sign_bias[refframe])
-    {
-        xmv.row *= -1;
-        xmv.col *= -1;
-    }
-
-    mvp->as_mv = xmv;
-}
-
-static void lf_mv_bias(const int lf_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias)
-{
-    MV xmv;
-    xmv = mvp->as_mv;
-
-    if (lf_ref_frame_sign_bias != ref_frame_sign_bias[refframe])
-    {
-        xmv.row *= -1;
-        xmv.col *= -1;
-    }
-
-    mvp->as_mv = xmv;
-}
-
-static void vp8_clamp_mv(MV *mv, const MACROBLOCKD *xd)
-{
-    if (mv->col < (xd->mb_to_left_edge - LEFT_TOP_MARGIN))
-        mv->col = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-    else if (mv->col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN)
-        mv->col = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
-
-    if (mv->row < (xd->mb_to_top_edge - LEFT_TOP_MARGIN))
-        mv->row = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-    else if (mv->row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN)
-        mv->row = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
-}
-
 static void swap(int *x,int *y)
 {
    int tmp;
@@ -1551,7 +1509,7 @@ static void quicksortsad(int arr[],int idx[], int left, int right)
 }
 
 //The improved MV prediction
-static void vp8_mv_pred
+void vp8_mv_pred
 (
     VP8_COMP *cpi,
     MACROBLOCKD *xd,
@@ -1588,21 +1546,21 @@ static void vp8_mv_pred
         if (above->mbmi.ref_frame != INTRA_FRAME)
         {
             near_mvs[vcnt].as_int = above->mbmi.mv.as_int;
-            mv_bias(above, refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
             near_ref[vcnt] =  above->mbmi.ref_frame;
         }
         vcnt++;
         if (left->mbmi.ref_frame != INTRA_FRAME)
         {
             near_mvs[vcnt].as_int = left->mbmi.mv.as_int;
-            mv_bias(left, refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
             near_ref[vcnt] =  left->mbmi.ref_frame;
         }
         vcnt++;
         if (aboveleft->mbmi.ref_frame != INTRA_FRAME)
         {
             near_mvs[vcnt].as_int = aboveleft->mbmi.mv.as_int;
-            mv_bias(aboveleft, refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
             near_ref[vcnt] =  aboveleft->mbmi.ref_frame;
         }
         vcnt++;
@@ -1616,7 +1574,7 @@ static void vp8_mv_pred
             if (cpi->lf_ref_frame[mb_offset] != INTRA_FRAME)
             {
                 near_mvs[vcnt].as_int = cpi->lfmv[mb_offset].as_int;
-                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
                 near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset];
             }
             vcnt++;
@@ -1625,7 +1583,7 @@ static void vp8_mv_pred
             if (cpi->lf_ref_frame[mb_offset - xd->mode_info_stride-1] != INTRA_FRAME)
             {
                 near_mvs[vcnt].as_int = cpi->lfmv[mb_offset - xd->mode_info_stride-1].as_int;
-                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset - xd->mode_info_stride-1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset - xd->mode_info_stride-1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
                 near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset - xd->mode_info_stride-1];
             }
             vcnt++;
@@ -1634,7 +1592,7 @@ static void vp8_mv_pred
             if (cpi->lf_ref_frame[mb_offset-1] != INTRA_FRAME)
             {
                 near_mvs[vcnt].as_int = cpi->lfmv[mb_offset -1].as_int;
-                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset -1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset -1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
                 near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset - 1];
             }
             vcnt++;
@@ -1643,7 +1601,7 @@ static void vp8_mv_pred
             if (cpi->lf_ref_frame[mb_offset +1] != INTRA_FRAME)
             {
                 near_mvs[vcnt].as_int = cpi->lfmv[mb_offset +1].as_int;
-                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset +1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset +1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
                 near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset +1];
             }
             vcnt++;
@@ -1652,7 +1610,7 @@ static void vp8_mv_pred
             if (cpi->lf_ref_frame[mb_offset + xd->mode_info_stride +1] != INTRA_FRAME)
             {
                 near_mvs[vcnt].as_int = cpi->lfmv[mb_offset + xd->mode_info_stride +1].as_int;
-                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset + xd->mode_info_stride +1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset + xd->mode_info_stride +1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
                 near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset + xd->mode_info_stride +1];
             }
             vcnt++;
