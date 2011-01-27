@@ -2187,7 +2187,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->common.error.setjmp = 1;
 
-    CHECK_MEM_ERROR(cpi->rdtok, vpx_calloc(256 * 3 / 2, sizeof(TOKENEXTRA)));
     CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
     vp8_create_common(&cpi->common);
@@ -2697,7 +2696,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
     vp8_dealloc_compressor_data(cpi);
     vpx_free(cpi->mb.ss);
     vpx_free(cpi->tok);
-    vpx_free(cpi->rdtok);
     vpx_free(cpi->cyclic_refresh_map);
 
     vp8_remove_common(&cpi->common);
