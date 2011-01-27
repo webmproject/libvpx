@@ -1566,23 +1566,23 @@ static void vp8_mv_pred
     const MODE_INFO *above = here - xd->mode_info_stride;
     const MODE_INFO *left = here - 1;
     const MODE_INFO *aboveleft = above - 1;
-    int_mv           near_mvs[7];
-    int              near_ref[7];
+    int_mv           near_mvs[8];
+    int              near_ref[8];
     int_mv           mv;
     int              vcnt=0;
     int              find=0;
     int              mb_offset;
 
-    int              mvx[7];
-    int              mvy[7];
+    int              mvx[8];
+    int              mvy[8];
     int              i;
 
     mv.as_int = 0;
 
     if(here->mbmi.ref_frame != INTRA_FRAME)
     {
-        near_mvs[0].as_int = near_mvs[1].as_int = near_mvs[2].as_int = near_mvs[3].as_int = near_mvs[4].as_int = near_mvs[5].as_int = near_mvs[6].as_int = 0;
-        near_ref[0] = near_ref[1] = near_ref[2] = near_ref[3] = near_ref[4] = near_ref[5] = near_ref[6] = 0;
+        near_mvs[0].as_int = near_mvs[1].as_int = near_mvs[2].as_int = near_mvs[3].as_int = near_mvs[4].as_int = near_mvs[5].as_int = near_mvs[6].as_int = near_mvs[7].as_int = 0;
+        near_ref[0] = near_ref[1] = near_ref[2] = near_ref[3] = near_ref[4] = near_ref[5] = near_ref[6] = near_ref[7] = 0;
 
         // read in 3 nearby block's MVs from current frame as prediction candidates.
         if (above->mbmi.ref_frame != INTRA_FRAME)
@@ -1607,10 +1607,10 @@ static void vp8_mv_pred
         }
         vcnt++;
 
-        // read in 4 nearby block's MVs from last frame.
+        // read in 5 nearby block's MVs from last frame.
         if(cpi->common.last_frame_type != KEY_FRAME)
         {
-            mb_offset = (-xd->mb_to_top_edge/128 + 1) * (xd->mode_info_stride) + (-xd->mb_to_left_edge/128 +1) ;
+            mb_offset = (-xd->mb_to_top_edge/128 + 1) * (xd->mode_info_stride +1) + (-xd->mb_to_left_edge/128 +1) ;
 
             // current in last frame
             if (cpi->lf_ref_frame[mb_offset] != INTRA_FRAME)
@@ -1622,11 +1622,11 @@ static void vp8_mv_pred
             vcnt++;
 
             // above in last frame
-            if (cpi->lf_ref_frame[mb_offset - xd->mode_info_stride] != INTRA_FRAME)
+            if (cpi->lf_ref_frame[mb_offset - xd->mode_info_stride-1] != INTRA_FRAME)
             {
-                near_mvs[vcnt].as_int = cpi->lfmv[mb_offset - xd->mode_info_stride].as_int;
-                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset - xd->mode_info_stride], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-                near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset - xd->mode_info_stride];
+                near_mvs[vcnt].as_int = cpi->lfmv[mb_offset - xd->mode_info_stride-1].as_int;
+                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset - xd->mode_info_stride-1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset - xd->mode_info_stride-1];
             }
             vcnt++;
 
@@ -1639,12 +1639,21 @@ static void vp8_mv_pred
             }
             vcnt++;
 
-            // aboveleft in last frame
-            if (cpi->lf_ref_frame[mb_offset - xd->mode_info_stride -1] != INTRA_FRAME)
+            // right in last frame
+            if (cpi->lf_ref_frame[mb_offset +1] != INTRA_FRAME)
             {
-                near_mvs[vcnt].as_int = cpi->lfmv[mb_offset - xd->mode_info_stride -1].as_int;
-                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset - xd->mode_info_stride -1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
-                near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset - xd->mode_info_stride -1];
+                near_mvs[vcnt].as_int = cpi->lfmv[mb_offset +1].as_int;
+                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset +1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset +1];
+            }
+            vcnt++;
+
+            // below in last frame
+            if (cpi->lf_ref_frame[mb_offset + xd->mode_info_stride +1] != INTRA_FRAME)
+            {
+                near_mvs[vcnt].as_int = cpi->lfmv[mb_offset + xd->mode_info_stride +1].as_int;
+                lf_mv_bias(cpi->lf_ref_frame_sign_bias[mb_offset + xd->mode_info_stride +1], refframe, &near_mvs[vcnt], ref_frame_sign_bias);
+                near_ref[vcnt] =  cpi->lf_ref_frame[mb_offset + xd->mode_info_stride +1];
             }
             vcnt++;
         }
@@ -1657,9 +1666,7 @@ static void vp8_mv_pred
                 {
                     mv.as_int = near_mvs[near_sadidx[i]].as_int;
                     find = 1;
-                    if(vcnt<2)
-                        *sr = 4;
-                    else if (vcnt<4)
+                    if (i < 3)
                         *sr = 3;
                     else
                         *sr = 2;
@@ -1729,8 +1736,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     int force_no_skip = 0;
 
     MV mvp;
-    int near_sad[7]; // 0-cf above, 1-cf left, 2-cf aboveleft, 3-lf current, 4-lf above, 5-lf left, 6-lf aboveleft
-    int near_sadidx[7] = {0, 1, 2, 3, 4, 5, 6};
+    int near_sad[8] = {0}; // 0-cf above, 1-cf left, 2-cf aboveleft, 3-lf current, 4-lf above, 5-lf left, 6-lf right, 7-lf below
+    int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
     int saddone=0;
     int sr=0;    //search range got from mv_pred(). It uses step_param levels. (0-7)
 
@@ -1902,36 +1909,29 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
                 if(cpi->common.last_frame_type != KEY_FRAME)
                 {
-                    //calculate sad for last frame 4 nearby MBs.
+                    //calculate sad for last frame 5 nearby MBs.
                     unsigned char *pre_y_buffer = cpi->common.yv12_fb[cpi->common.lst_fb_idx].y_buffer + recon_yoffset;
                     int pre_y_stride = cpi->common.yv12_fb[cpi->common.lst_fb_idx].y_stride;
 
-                    if( xd->mb_to_top_edge==0 && xd->mb_to_left_edge ==0)
-                    {
-                        near_sad[4] = near_sad[5] = near_sad[6] = INT_MAX;
-                        near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer, pre_y_stride, 0x7fffffff);
-                    }else if(xd->mb_to_top_edge==0)
-                    {   //only has left MB for sad calculation.
-                        near_sad[4] = near_sad[6] = INT_MAX;
-                        near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer, pre_y_stride, 0x7fffffff);
-                        near_sad[5] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer - 16, pre_y_stride, 0x7fffffff);
-                    }else if(xd->mb_to_left_edge ==0)
-                    {   //only has left MB for sad calculation.
-                        near_sad[5] = near_sad[6] = INT_MAX;
-                        near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer, pre_y_stride, 0x7fffffff);
+                    if(xd->mb_to_top_edge==0) near_sad[4] = INT_MAX;
+                    if(xd->mb_to_left_edge ==0) near_sad[5] = INT_MAX;
+                    if(xd->mb_to_right_edge ==0) near_sad[6] = INT_MAX;
+                    if(xd->mb_to_bottom_edge==0) near_sad[7] = INT_MAX;
+
+                    if(near_sad[4] != INT_MAX)
                         near_sad[4] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer - pre_y_stride *16, pre_y_stride, 0x7fffffff);
-                    }else
-                    {
-                        near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer, pre_y_stride, 0x7fffffff);
-                        near_sad[4] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer - pre_y_stride *16, pre_y_stride, 0x7fffffff);
+                    if(near_sad[5] != INT_MAX)
                         near_sad[5] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer - 16, pre_y_stride, 0x7fffffff);
-                        near_sad[6] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer - pre_y_stride *16 -16, pre_y_stride, 0x7fffffff);
-                    }
+                    near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer, pre_y_stride, 0x7fffffff);
+                    if(near_sad[6] != INT_MAX)
+                        near_sad[6] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer + 16, pre_y_stride, 0x7fffffff);
+                    if(near_sad[7] != INT_MAX)
+                        near_sad[7] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer + pre_y_stride *16, pre_y_stride, 0x7fffffff);
                 }
 
                 if(cpi->common.last_frame_type != KEY_FRAME)
                 {
-                    quicksortsad(near_sad, near_sadidx, 0, 6);
+                    quicksortsad(near_sad, near_sadidx, 0, 7);
                 }else
                 {
                     quicksortsad(near_sad, near_sadidx, 0, 2);
