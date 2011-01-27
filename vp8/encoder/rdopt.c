@@ -708,7 +708,7 @@ int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
     MB_PREDICTION_MODE mode;
     MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
     int rate, ratey;
-    unsigned int distortion;
+    int distortion;
     int best_rd = INT_MAX;
     int this_rd;
     int i;
@@ -737,7 +737,7 @@ int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
             best_rd = this_rd;
             *Rate = rate;
             *rate_y = ratey;
-            *Distortion = (int)distortion;
+            *Distortion = distortion;
         }
     }
 
@@ -2474,4 +2474,3 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     return best_rd;
 }
 #endif
-
