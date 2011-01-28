@@ -813,7 +813,7 @@ int vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *ra
         rate_to = rd_cost_mbuv(x);
         rate = rate_to + x->intra_uv_mode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.uv_mode];
 
-        distortion = vp8_get_mbuvrecon_error(IF_RTCD(&cpi->rtcd.variance), x);
+        distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
 
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
