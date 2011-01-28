@@ -664,7 +664,7 @@ process_common_toolchain() {
             elif enabled armv7
             then
                 check_add_cflags -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp  #-ftree-vectorize
-        check_add_asflags -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp  #-march=armv7-a
+                check_add_asflags -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp  #-march=armv7-a
             else
                 check_add_cflags -march=${tgt_isa}
                 check_add_asflags -march=${tgt_isa}
@@ -695,10 +695,17 @@ process_common_toolchain() {
             arch_int=${arch_int%%te}
             check_add_asflags --pd "\"ARCHITECTURE SETA ${arch_int}\""
             enabled debug && add_asflags -g
+            add_cflags --gnu
+            add_cflags --enum_is_int
+            add_cflags --wchar32
         ;;
         esac
 
         case ${tgt_os} in
+        none*)
+            disable multithread
+            disable os_support
+            ;;
         darwin*)
             SDK_PATH=/Developer/Platforms/iPhoneOS.platform/Developer
             TOOLCHAIN_PATH=${SDK_PATH}/usr/bin
@@ -747,13 +754,9 @@ process_common_toolchain() {
                     || die "Must supply --libc when targetting *-linux-rvct"
 
                 # Set up compiler
-                add_cflags --gnu
-                add_cflags --enum_is_int
                 add_cflags --library_interface=aeabi_glibc
                 add_cflags --no_hide_all
-                add_cflags --wchar32
                 add_cflags --dwarf2
-                add_cflags --gnu
 
                 # Set up linker
                 add_ldflags --sysv --no_startup --no_ref_cpp_init

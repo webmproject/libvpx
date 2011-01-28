@@ -9,7 +9,7 @@
  */
 
 
-#ifndef WIN32
+#if !defined(WIN32) && CONFIG_OS_SUPPORT == 1
 # include <unistd.h>
 #endif
 #ifdef __APPLE__

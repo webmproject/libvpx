@@ -176,10 +176,7 @@ skip_secondpass_filter
     ENDP
 
 ;-----------------
-    AREA    bifilters8_dat, DATA, READWRITE         ;read/write by default
-;Data section with name data_area is specified. DCD reserves space in memory for 48 data.
-;One word each is reserved. Label filter_coeff can be used to access the data.
-;Data address: filter_coeff, filter_coeff+4, filter_coeff+8 ...
+
 _bifilter8_coeff_
     DCD     bifilter8_coeff
 bifilter8_coeff
