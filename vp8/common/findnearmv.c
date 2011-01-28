@@ -11,8 +11,6 @@
 
 #include "findnearmv.h"
 
-#define FINDNEAR_SEARCH_SITES   3
-
 /* Predict motion vectors using those from already-decoded nearby blocks.
    Note that we only consider one 4x4 subblock from each candidate 16x16
    macroblock.   */
