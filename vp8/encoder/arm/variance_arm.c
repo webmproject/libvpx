@@ -9,6 +9,7 @@
  */
 
 #include "vpx_config.h"
+#include "variance.h"
 
 #if HAVE_ARMV7
 

@@ -2423,7 +2423,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     if (cpi->oxcf.auto_key
         && cpi->frames_to_key > (int)cpi->key_frame_frequency )
     {
-        int current_pos = cpi->stats_in;
+        FIRSTPASS_STATS *current_pos = cpi->stats_in;
         FIRSTPASS_STATS tmp_frame;
 
         cpi->frames_to_key /= 2;

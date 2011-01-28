@@ -28,6 +28,7 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
 #include "temporal_filter.h"
+#include "findnearmv.h"
 
 //#define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4
@@ -245,12 +246,6 @@ enum
     BLOCK_MAX_SEGMENTS
 };
 
-typedef union
-{
-    unsigned int as_int;
-    MV           as_mv;
-} int_mv;        /* facilitates rapid equality tests */
-
 typedef struct
 {
 
@@ -309,8 +304,6 @@ typedef struct
 
     YV12_BUFFER_CONFIG last_frame_uf;
 
-    char *Dest;
-
     TOKENEXTRA *tok;
     unsigned int tok_count;
 
@@ -342,11 +335,6 @@ typedef struct
 
     int RDMULT;
     int RDDIV ;
-
-    TOKENEXTRA *rdtok;
-    vp8_writer rdbc;
-    int intra_mode_costs[10];
-
 
     CODING_CONTEXT coding_context;
 
@@ -559,8 +547,6 @@ typedef struct
     int last_kffilt_lvl;
 
     int ref_frame_flags;
-
-    int exp[512];
 
     SPEED_FEATURES sf;
     int error_bins[1024];
