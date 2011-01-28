@@ -2253,7 +2253,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->common.error.setjmp = 1;
 
-    CHECK_MEM_ERROR(cpi->rdtok, vpx_calloc(256 * 3 / 2, sizeof(TOKENEXTRA)));
     CHECK_MEM_ERROR(cpi->mb.ss, vpx_calloc(sizeof(search_site), (MAX_MVSEARCH_STEPS * 8) + 1));
 
     vp8_create_common(&cpi->common);
@@ -2290,9 +2289,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->gold_is_alt  = 0 ;
 
     // allocate memory for storing last frame's MVs for MV prediction.
-    CHECK_MEM_ERROR(cpi->lfmv, vpx_calloc((cpi->common.mb_rows+1) * (cpi->common.mb_cols+1), sizeof(int_mv)));
-    CHECK_MEM_ERROR(cpi->lf_ref_frame_sign_bias, vpx_calloc((cpi->common.mb_rows+1) * (cpi->common.mb_cols+1), sizeof(int)));
-    CHECK_MEM_ERROR(cpi->lf_ref_frame, vpx_calloc((cpi->common.mb_rows+1) * (cpi->common.mb_cols+1), sizeof(int)));
+    CHECK_MEM_ERROR(cpi->lfmv, vpx_calloc((cpi->common.mb_rows+2) * (cpi->common.mb_cols+2), sizeof(int_mv)));
+    CHECK_MEM_ERROR(cpi->lf_ref_frame_sign_bias, vpx_calloc((cpi->common.mb_rows+2) * (cpi->common.mb_cols+2), sizeof(int)));
+    CHECK_MEM_ERROR(cpi->lf_ref_frame, vpx_calloc((cpi->common.mb_rows+2) * (cpi->common.mb_cols+2), sizeof(int)));
 
     // Create the encoder segmentation map and set all entries to 0
     CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
@@ -2762,7 +2761,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
     vp8_dealloc_compressor_data(cpi);
     vpx_free(cpi->mb.ss);
     vpx_free(cpi->tok);
-    vpx_free(cpi->rdtok);
     vpx_free(cpi->cyclic_refresh_map);
 
     vp8_remove_common(&cpi->common);
@@ -3192,6 +3190,10 @@ static void set_quantizer(VP8_COMP *cpi, int Q)
     cm->uvdc_delta_q = 0;
     cm->uvac_delta_q = 0;
 
+    if(Q<4)
+    {
+        cm->y2dc_delta_q = 4-Q;
+    }
     // Set Segment specific quatizers
     mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
     mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
@@ -4471,30 +4473,31 @@ static void encode_frame_to_data_rate
     }
 
     // This frame's MVs are saved and will be used in next frame's MV prediction.
+    // Last frame has one more line(add to bottom) and one more column(add to right) than cm->mip. The edge elements are initialized to 0.
     if(cm->show_frame)   //do not save for altref frame
     {
-      int mb_row;
-      int mb_col;
-      MODE_INFO *tmp = cm->mip; //point to beginning of allocated MODE_INFO arrays.
-      //static int last_video_frame = 0;
+        int mb_row;
+        int mb_col;
+        MODE_INFO *tmp = cm->mip; //point to beginning of allocated MODE_INFO arrays.
 
-      if(cm->frame_type != KEY_FRAME)
-      {
-        for (mb_row = 0; mb_row < cm->mb_rows+1; mb_row ++)
+        if(cm->frame_type != KEY_FRAME)
         {
-          for (mb_col = 0; mb_col < cm->mb_cols+1; mb_col ++)
-          {
-              if(tmp->mbmi.ref_frame != INTRA_FRAME)
-                cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride)].as_int = tmp->mbmi.mv.as_int;
+            for (mb_row = 0; mb_row < cm->mb_rows+1; mb_row ++)
+            {
+                for (mb_col = 0; mb_col < cm->mb_cols+1; mb_col ++)
+                {
+                    if(tmp->mbmi.ref_frame != INTRA_FRAME)
+                        cpi->lfmv[mb_col + mb_row*(cm->mode_info_stride+1)].as_int = tmp->mbmi.mv.as_int;
 
-              cpi->lf_ref_frame_sign_bias[mb_col + mb_row*(cm->mode_info_stride)] = cm->ref_frame_sign_bias[tmp->mbmi.ref_frame];
-              cpi->lf_ref_frame[mb_col + mb_row*(cm->mode_info_stride)] = tmp->mbmi.ref_frame;
-              tmp++;
-          }
+                    cpi->lf_ref_frame_sign_bias[mb_col + mb_row*(cm->mode_info_stride+1)] = cm->ref_frame_sign_bias[tmp->mbmi.ref_frame];
+                    cpi->lf_ref_frame[mb_col + mb_row*(cm->mode_info_stride+1)] = tmp->mbmi.ref_frame;
+                    tmp++;
+                }
+            }
         }
-      }
     }
 
+    // Update the GF useage maps.
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
     vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
@@ -4699,7 +4702,8 @@ static void encode_frame_to_data_rate
     }
 
     // Update the buffer level variable.
-    if (cpi->common.refresh_alt_ref_frame)
+    // Non-viewable frames are a special case and are treated as pure overhead.
+    if ( !cm->show_frame )
         cpi->bits_off_target -= cpi->projected_frame_size;
     else
         cpi->bits_off_target += cpi->av_per_frame_bandwidth - cpi->projected_frame_size;

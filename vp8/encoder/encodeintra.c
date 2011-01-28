@@ -144,51 +144,6 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     }
 }
 
-void vp8_encode_intra16x16mbyrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
-{
-    int b;
-
-    vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
-
-    ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
-
-    vp8_transform_intra_mby(x);
-
-    vp8_quantize_mby(x);
-
-    vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-
-    RECON_INVOKE(&rtcd->common->recon, recon_mby)
-        (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
-
-    // make sure block modes are set the way we want them for context updates
-    for (b = 0; b < 16; b++)
-    {
-        BLOCKD *d = &x->e_mbd.block[b];
-
-        switch (x->e_mbd.mode_info_context->mbmi.mode)
-        {
-
-        case DC_PRED:
-            d->bmi.mode = B_DC_PRED;
-            break;
-        case V_PRED:
-            d->bmi.mode = B_VE_PRED;
-            break;
-        case H_PRED:
-            d->bmi.mode = B_HE_PRED;
-            break;
-        case TM_PRED:
-            d->bmi.mode = B_TM_PRED;
-            break;
-        default:
-            d->bmi.mode = B_DC_PRED;
-            break;
-
-        }
-    }
-}
-
 void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
     vp8_build_intra_predictors_mbuv(&x->e_mbd);
