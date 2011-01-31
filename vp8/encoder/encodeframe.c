@@ -1211,13 +1211,15 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 #endif
     {
 
-        int rate2, distortion2;
+        int rate2, best_distortion;
         MB_PREDICTION_MODE mode, best_mode = DC_PRED;
         int this_rd;
         Error16x16 = INT_MAX;
 
         for (mode = DC_PRED; mode <= TM_PRED; mode ++)
         {
+            int distortion2;
+
             x->e_mbd.mode_info_context->mbmi.mode = mode;
             vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
             distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
@@ -1228,15 +1230,16 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
             {
                 Error16x16 = this_rd;
                 best_mode = mode;
+                best_distortion = distortion2;
             }
         }
 
-        vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate2, &distortion2);
+        vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate2, &best_distortion);
 
-        if (distortion2 == INT_MAX)
+        if (best_distortion == INT_MAX)
             Error4x4 = INT_MAX;
         else
-            Error4x4 = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
+            Error4x4 = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, best_distortion);
 
         if (Error4x4 < Error16x16)
         {
