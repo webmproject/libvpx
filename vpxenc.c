@@ -12,7 +12,7 @@
 /* This is a simple program that encodes YV12 files and generates ivf
  * files using the new interface.
  */
-#if defined(_WIN32)
+#if defined(_WIN32) || !CONFIG_OS_SUPPORT
 #define USE_POSIX_MMAP 0
 #else
 #define USE_POSIX_MMAP 1
@@ -57,6 +57,14 @@ typedef __int64 off_t;
 #define LITERALU64(n) n
 #else
 #define LITERALU64(n) n##LLU
+#endif
+
+/* We should use 32-bit file operations in WebM file format
+ * when building ARM executable file (.axf) with RVCT */
+#if !CONFIG_OS_SUPPORT
+typedef long off_t;
+#define fseeko fseek
+#define ftello ftell
 #endif
 
 static const char *exec_name;

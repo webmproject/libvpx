@@ -93,8 +93,16 @@ vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
 
 # Handle extra library flags depending on codec configuration
-CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
 
+# We should not link to math library (libm) on RVCT
+# when building for bare-metal targets
+ifeq ($(CONFIG_OS_SUPPORT), yes)
+CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
+else
+    ifeq ($(CONFIG_GCC), yes)
+    CODEC_EXTRA_LIBS-$(CONFIG_VP8)         += m
+    endif
+endif
 #
 # End of specified files. The rest of the build rules should happen
 # automagically from here.

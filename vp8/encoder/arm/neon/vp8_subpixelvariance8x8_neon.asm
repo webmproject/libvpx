@@ -215,10 +215,7 @@ sub_pixel_variance8x8_neon_loop
     ENDP
 
 ;-----------------
-    AREA    bilinear_taps_dat, DATA, READWRITE           ;read/write by default
-;Data section with name data_area is specified. DCD reserves space in memory for 48 data.
-;One word each is reserved. Label filter_coeff can be used to access the data.
-;Data address: filter_coeff, filter_coeff+4, filter_coeff+8 ...
+
 _BilinearTaps_coeff_
     DCD     bilinear_taps_coeff
 bilinear_taps_coeff

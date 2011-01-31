@@ -17,14 +17,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <limits.h>
-#if defined(_WIN32)
-#include <io.h>
-#define snprintf _snprintf
-#define isatty   _isatty
-#define fileno   _fileno
-#else
-#include <unistd.h>
-#endif
+
 #define VPX_CODEC_DISABLE_COMPAT 1
 #include "vpx_config.h"
 #include "vpx/vpx_decoder.h"
@@ -37,6 +30,17 @@
 #endif
 #include "tools_common.h"
 #include "nestegg/include/nestegg/nestegg.h"
+
+#if CONFIG_OS_SUPPORT
+#if defined(_WIN32)
+#include <io.h>
+#define snprintf _snprintf
+#define isatty   _isatty
+#define fileno   _fileno
+#else
+#include <unistd.h>
+#endif
+#endif
 
 #ifndef PATH_MAX
 #define PATH_MAX 256
@@ -866,7 +870,7 @@ int main(int argc, const char **argv_)
                 strcmp(fn, "-") ? fn : "stdin");
         return EXIT_FAILURE;
     }
-
+#if CONFIG_OS_SUPPORT
     /* Make sure we don't dump to the terminal, unless forced to with -o - */
     if(!outfile_pattern && isatty(fileno(stdout)) && !do_md5 && !noblit)
     {
@@ -875,7 +879,7 @@ int main(int argc, const char **argv_)
                 "override.\n");
         return EXIT_FAILURE;
     }
-
+#endif
     input.infile = infile;
     if(file_is_ivf(infile, &fourcc, &width, &height, &fps_den,
                    &fps_num))
