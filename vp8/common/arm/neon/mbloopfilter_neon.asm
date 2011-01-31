@@ -505,7 +505,8 @@
     bx          lr
     ENDP        ; |vp8_mbloop_filter_neon|
 
-    AREA    mbloopfilter_dat, DATA, READONLY
+;-----------------
+
 _mblf_coeff_
     DCD     mblf_coeff
 mblf_coeff

@@ -397,7 +397,8 @@
     bx          lr
     ENDP        ; |vp8_loop_filter_horizontal_edge_y_neon|
 
-    AREA    loopfilter_dat, DATA, READONLY
+;-----------------
+
 _lf_coeff_
     DCD     lf_coeff
 lf_coeff

@@ -20,8 +20,6 @@
  * Still in the public domain.
  */
 
-#include <sys/types.h>    /* for stupid systems */
-
 #include <string.h>   /* for memcpy() */
 
 #include "md5_utils.h"

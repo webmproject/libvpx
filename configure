@@ -79,11 +79,13 @@ EOF
 # alphabetically by architecture, generic-gnu last.
 all_platforms="${all_platforms} armv5te-linux-rvct"
 all_platforms="${all_platforms} armv5te-linux-gcc"
+all_platforms="${all_platforms} armv5te-none-rvct"
 all_platforms="${all_platforms} armv5te-symbian-gcc"
 all_platforms="${all_platforms} armv5te-wince-vs8"
 all_platforms="${all_platforms} armv6-darwin-gcc"
 all_platforms="${all_platforms} armv6-linux-rvct"
 all_platforms="${all_platforms} armv6-linux-gcc"
+all_platforms="${all_platforms} armv6-none-rvct"
 all_platforms="${all_platforms} armv6-symbian-gcc"
 all_platforms="${all_platforms} armv6-wince-vs8"
 all_platforms="${all_platforms} iwmmxt-linux-rvct"
@@ -95,6 +97,7 @@ all_platforms="${all_platforms} iwmmxt2-wince-vs8"
 all_platforms="${all_platforms} armv7-darwin-gcc"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-rvct"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-gcc"     #neon Cortex-A8
+all_platforms="${all_platforms} armv7-none-rvct"     #neon Cortex-A8
 all_platforms="${all_platforms} mips32-linux-gcc"
 all_platforms="${all_platforms} ppc32-darwin8-gcc"
 all_platforms="${all_platforms} ppc32-darwin9-gcc"
@@ -159,6 +162,7 @@ enable fast_unaligned #allow unaligned accesses, if supported by hw
 enable md5
 enable spatial_resampling
 enable multithread
+enable os_support
 
 [ -d ${source_path}/../include ] && enable alt_tree_layout
 for d in vp8; do
@@ -256,6 +260,7 @@ CONFIG_LIST="
     small
     arm_asm_detok
     postproc_visualizer
+    os_support
 
     experimental
     ${EXPERIMENT_LIST}
