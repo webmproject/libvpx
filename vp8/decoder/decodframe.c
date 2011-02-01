@@ -27,6 +27,7 @@
 
 #include "decodemv.h"
 #include "extend.h"
+#include "error_concealment.h"
 #include "vpx_mem/vpx_mem.h"
 #include "idct.h"
 #include "dequantize.h"
@@ -176,7 +177,7 @@ void clamp_mvs(MACROBLOCKD *xd)
 
 }
 
-void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
+void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, unsigned int mb_idx)
 {
     int eobtotal = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
@@ -223,6 +224,14 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
     else
     {
         vp8_build_inter_predictors_mb(xd);
+    }
+
+    /* TODO(holmer): change when we have MB level error tracking */
+    if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
+        (xd->corrupted || mb_idx >= pbi->mvs_corrupt_from_mb))
+    {
+        vp8_conceal_corrupt_block(xd);
+        return;
     }
 
     /* dequantization and idct */
@@ -395,7 +404,7 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         else
         pbi->debugoutput =0;
         */
-        vp8_decode_macroblock(pbi, xd);
+        vp8_decode_macroblock(pbi, xd, mb_row * pc->mb_cols + mb_col);
 
         /* check if the boolean decoder has suffered an error */
         xd->corrupted |= vp8dx_bool_error(xd->current_bc);
@@ -469,8 +478,8 @@ static void setup_token_decoder(VP8D_COMP *pbi,
             partition_size = user_data_end - partition;
         }
 
-        if (partition + partition_size > user_data_end
-            || partition + partition_size < partition)
+        if (!pbi->ec_enabled && (partition + partition_size > user_data_end
+            || partition + partition_size < partition))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet or corrupt partition "
                                "%d length", i + 1);
@@ -584,63 +593,82 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
 
     if (data_end - data < 3)
-        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Truncated packet");
-    pc->frame_type = (FRAME_TYPE)(data[0] & 1);
-    pc->version = (data[0] >> 1) & 7;
-    pc->show_frame = (data[0] >> 4) & 1;
-    first_partition_length_in_bytes =
-        (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
-    data += 3;
-
-    if (data + first_partition_length_in_bytes > data_end
-        || data + first_partition_length_in_bytes < data)
-        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Truncated packet or corrupt partition 0 length");
-    vp8_setup_version(pc);
-
-    if (pc->frame_type == KEY_FRAME)
     {
-        const int Width = pc->Width;
-        const int Height = pc->Height;
-
-        /* vet via sync code */
-        if (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a)
-            vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
-                               "Invalid frame sync code");
-
-        pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
-        pc->horiz_scale = data[4] >> 6;
-        pc->Height = (data[5] | (data[6] << 8)) & 0x3fff;
-        pc->vert_scale = data[6] >> 6;
-        data += 7;
-
-        if (Width != pc->Width  ||  Height != pc->Height)
+        if (pbi->ec_enabled)
         {
-            int prev_mb_rows = pc->mb_rows;
+            /* Declare the missing frame as an inter frame since it will
+               be handled as an inter frame when we have estimated its
+               motion vectors. */
+            pc->frame_type = INTER_FRAME;
+            pc->version = 0;
+            pc->show_frame = 1;
+            first_partition_length_in_bytes = 0;
+        }
+        else
+        {
+            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                               "Truncated packet");
+        }
+    }
+    else
+    {
+        pc->frame_type = (FRAME_TYPE)(data[0] & 1);
+        pc->version = (data[0] >> 1) & 7;
+        pc->show_frame = (data[0] >> 4) & 1;
+        first_partition_length_in_bytes =
+            (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
+        data += 3;
 
-            if (pc->Width <= 0)
+        if (!pbi->ec_enabled && (data + first_partition_length_in_bytes > data_end
+            || data + first_partition_length_in_bytes < data))
+            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                               "Truncated packet or corrupt partition 0 length");
+        vp8_setup_version(pc);
+
+        if (pc->frame_type == KEY_FRAME)
+        {
+            const int Width = pc->Width;
+            const int Height = pc->Height;
+
+            /* vet via sync code */
+            if (!pbi->ec_enabled &&
+                (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a))
+                vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
+                                   "Invalid frame sync code");
+
+            pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
+            pc->horiz_scale = data[4] >> 6;
+            pc->Height = (data[5] | (data[6] << 8)) & 0x3fff;
+            pc->vert_scale = data[6] >> 6;
+            data += 7;
+
+            if (Width != pc->Width  ||  Height != pc->Height)
             {
-                pc->Width = Width;
-                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                   "Invalid frame width");
-            }
+                int prev_mb_rows = pc->mb_rows;
 
-            if (pc->Height <= 0)
-            {
-                pc->Height = Height;
-                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                   "Invalid frame height");
-            }
+                if (pc->Width <= 0)
+                {
+                    pc->Width = Width;
+                    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                       "Invalid frame width");
+                }
 
-            if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
-                vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                                   "Failed to allocate frame buffers");
+                if (pc->Height <= 0)
+                {
+                    pc->Height = Height;
+                    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                       "Invalid frame height");
+                }
+
+                if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
+                    vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
+                                       "Failed to allocate frame buffers");
 
 #if CONFIG_MULTITHREAD
-            if (pbi->b_multithreaded_rd)
-                vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
+                if (pbi->b_multithreaded_rd)
+                    vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
 #endif
+            }
         }
     }
 
@@ -861,6 +889,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
 
     vp8_decode_mode_mvs(pbi);
+
+    if (pbi->ec_enabled && pbi->mvs_corrupt_from_mb < (unsigned int)pc->mb_cols * pc->mb_rows)
+    {
+        vp8_estimate_missing_mvs(pbi);
+    }
 
     vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 

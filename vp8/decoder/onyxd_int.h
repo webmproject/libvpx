@@ -134,6 +134,9 @@ typedef struct VP8Decompressor
     vp8_prob prob_gf;
     vp8_prob prob_skip_false;
 
+    unsigned int mvs_corrupt_from_mb;
+    int ec_enabled;
+
 } VP8D_COMP;
 
 int vp8_decode_frame(VP8D_COMP *cpi);

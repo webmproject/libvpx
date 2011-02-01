@@ -251,6 +251,7 @@ void vp8_mb_mode_mv_init(VP8D_COMP *pbi)
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
 
+    pbi->mvs_corrupt_from_mb = -1;
     pbi->prob_skip_false = 0;
     if (pbi->common.mb_no_coeff_skip)
         pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
@@ -543,11 +544,17 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
         while (++mb_col < pbi->common.mb_cols)
         {
+            int mb_num = mb_row * pbi->common.mb_cols + mb_col;
             /*vp8_read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
             if(pbi->common.frame_type == KEY_FRAME)
                 vp8_kfread_modes(pbi, mi, mb_row, mb_col);
             else
                 vp8_read_mb_modes_mv(pbi, mi, &mi->mbmi, mb_row, mb_col);
+
+            /* look for corruption */
+            if (vp8dx_bool_error(&pbi->bc) && mb_num < pbi->mvs_corrupt_from_mb)
+                pbi->mvs_corrupt_from_mb = mb_num;
+
 
             mi++;       /* next macroblock */
         }

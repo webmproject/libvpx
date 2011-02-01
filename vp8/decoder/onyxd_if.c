@@ -318,6 +318,8 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     VP8_COMMON *cm = &pbi->common;
     int retcode = 0;
     struct vpx_usec_timer timer;
+    
+    pbi->ec_enabled = 1;
 
     /*if(pbi->ready_for_new_data == 0)
         return -1;*/
@@ -338,11 +340,14 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         */
         cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
 
-        /* Signal that we have no frame to show. */
-        cm->show_frame = 0;
+        if (!pbi->ec_enabled)
+        {
+            /* Signal that we have no frame to show. */
+            cm->show_frame = 0;
 
-        /* Nothing more to do. */
-        return 0;
+            /* Nothing more to do. */
+            return 0;
+        }
     }
 
 
