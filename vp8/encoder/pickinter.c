@@ -168,8 +168,6 @@ static int pick_intra4x4block(
     B_PREDICTION_MODE *best_mode,
     B_PREDICTION_MODE above,
     B_PREDICTION_MODE left,
-    ENTROPY_CONTEXT *a,
-    ENTROPY_CONTEXT *l,
 
     int *bestrate,
     int *bestdistortion)
@@ -179,8 +177,6 @@ static int pick_intra4x4block(
     int rate;
     int distortion;
     unsigned int *mode_costs;
-    (void) l;
-    (void) a;
 
     if (x->e_mbd.frame_type == KEY_FRAME)
     {
@@ -211,6 +207,7 @@ static int pick_intra4x4block(
 
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
     vp8_encode_intra4x4block(rtcd, x, be, b, b->bmi.mode);
+
     return best_rd;
 }
 
@@ -220,17 +217,8 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
     MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
-    int error = RD_ESTIMATE(mb->rdmult, mb->rddiv, cost, 0); // Rd estimate for the cost of the block prediction mode
+    int error;
     int distortion = 0;
-    ENTROPY_CONTEXT_PLANES t_above, t_left;
-    ENTROPY_CONTEXT *ta;
-    ENTROPY_CONTEXT *tl;
-
-    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
-
-    ta = (ENTROPY_CONTEXT *)&t_above;
-    tl = (ENTROPY_CONTEXT *)&t_left;
 
     vp8_intra_prediction_down_copy(xd);
 
@@ -243,10 +231,8 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
         B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
         int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(d);
 
-        error += pick_intra4x4block(rtcd,
-                                    mb, mb->block + i, xd->block + i, &best_mode, A, L,
-                                    ta + vp8_block2above[i],
-                                    tl + vp8_block2left[i], &r, &d);
+        pick_intra4x4block(rtcd, mb, mb->block + i, xd->block + i,
+                               &best_mode, A, L, &r, &d);
 
         cost += r;
         distortion += d;
@@ -264,10 +250,15 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
     *Rate = cost;
 
     if (i == 16)
+    {
         *best_dist = distortion;
+        error = RD_ESTIMATE(mb->rdmult, mb->rddiv, cost, distortion);
+    }
     else
+    {
         *best_dist = INT_MAX;
-
+        error = INT_MAX;
+    }
 
     return error;
 }

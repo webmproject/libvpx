@@ -1197,12 +1197,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         }
         x->e_mbd.mode_info_context->mbmi.mode = best_mode;
 
-        vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate2, &best_distortion);
-
-        if (best_distortion == INT_MAX)
-            Error4x4 = INT_MAX;
-        else
-            Error4x4 = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, best_distortion);
+        Error4x4 = vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate2, &best_distortion);
     }
 
     if (Error4x4 < Error16x16)
