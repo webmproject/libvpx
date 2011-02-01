@@ -1185,22 +1185,11 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
                 x->e_mbd.block[i].bmi.mode = intra_bmodes[i];
 
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
-            cpi->prediction_error += Error4x4 ;
-#if 0
-            // Experimental RD code
-            cpi->frame_distortion += dist4x4;
-#endif
         }
         else
         {
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
             rate += rate16x16;
-
-#if 0
-            // Experimental RD code
-            cpi->prediction_error += Error16x16;
-            cpi->frame_distortion += dist16x16;
-#endif
         }
 
         sum_intra_stats(cpi, x);
@@ -1245,13 +1234,11 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         {
             x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
-            cpi->prediction_error += Error4x4;
         }
         else
         {
             x->e_mbd.mode_info_context->mbmi.mode = best_mode;
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
-            cpi->prediction_error += Error16x16;
         }
 
         vp8_pick_intra_mbuv_mode(x);
