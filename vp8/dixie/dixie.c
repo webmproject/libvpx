@@ -406,17 +406,12 @@ decode_frame(struct vp8_decoder_ctx *ctx,
         ctx->saved_entropy_valid = 0;
     }
 
-    /* TODO: This logic can be condensed for readability. */
+    /* Handle reference frame updates */
     if (ctx->reference_hdr.copy_arf == 1)
     {
         vp8_dixie_release_ref_frame(ctx->ref_frames[ALTREF_FRAME]);
-
-        if (ctx->reference_hdr.refresh_last)
-            ctx->ref_frames[ALTREF_FRAME] =
-                vp8_dixie_ref_frame(ctx->ref_frames[LAST_FRAME]);
-        else
-            ctx->ref_frames[ALTREF_FRAME] =
-                vp8_dixie_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+        ctx->ref_frames[ALTREF_FRAME] =
+            vp8_dixie_ref_frame(ctx->ref_frames[LAST_FRAME]);
     }
     else if (ctx->reference_hdr.copy_arf == 2)
     {
@@ -428,13 +423,8 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     if (ctx->reference_hdr.copy_gf == 1)
     {
         vp8_dixie_release_ref_frame(ctx->ref_frames[GOLDEN_FRAME]);
-
-        if (ctx->reference_hdr.refresh_last)
-            ctx->ref_frames[GOLDEN_FRAME] =
-                vp8_dixie_ref_frame(ctx->ref_frames[LAST_FRAME]);
-        else
-            ctx->ref_frames[GOLDEN_FRAME] =
-                vp8_dixie_ref_frame(ctx->ref_frames[CURRENT_FRAME]);
+        ctx->ref_frames[GOLDEN_FRAME] =
+            vp8_dixie_ref_frame(ctx->ref_frames[LAST_FRAME]);
     }
     else if (ctx->reference_hdr.copy_gf == 2)
     {
