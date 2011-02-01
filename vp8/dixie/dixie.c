@@ -108,8 +108,8 @@ decode_quantizer_header(struct vp8_decoder_ctx    *ctx,
     update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
     update |= (hdr->y2_dc_delta_q = bool_maybe_get_int(bool, 4));
     update |= (hdr->y2_ac_delta_q = bool_maybe_get_int(bool, 4));
-    update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
-    update |= (hdr->y1_dc_delta_q = bool_maybe_get_int(bool, 4));
+    update |= (hdr->uv_dc_delta_q = bool_maybe_get_int(bool, 4));
+    update |= (hdr->uv_ac_delta_q = bool_maybe_get_int(bool, 4));
     hdr->delta_update = update;
 }
 
