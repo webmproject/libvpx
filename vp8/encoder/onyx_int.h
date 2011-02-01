@@ -343,7 +343,6 @@ typedef struct
     long long last_prediction_error;
     long long intra_error;
     long long last_intra_error;
-    long long last_auto_filter_prediction_error;
 
 #if 0
     // Experimental RD code
