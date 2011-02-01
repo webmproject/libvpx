@@ -1160,7 +1160,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
 #if !(CONFIG_REALTIME_ONLY)
 
-    if (cpi->sf.RD || cpi->compressor_speed != 2)
+    if (cpi->sf.RD && cpi->compressor_speed != 2)
     {
         Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4);
 

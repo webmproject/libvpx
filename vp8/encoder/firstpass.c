@@ -8,7 +8,6 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #include "math.h"
 #include "limits.h"
 #include "block.h"
@@ -178,39 +177,67 @@ static double calculate_modified_err(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     return modified_err;
 }
 
+static const double weight_table[256] = {
+0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
+0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
+0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
+0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000, 0.020000,
+0.020000, 0.031250, 0.062500, 0.093750, 0.125000, 0.156250, 0.187500, 0.218750,
+0.250000, 0.281250, 0.312500, 0.343750, 0.375000, 0.406250, 0.437500, 0.468750,
+0.500000, 0.531250, 0.562500, 0.593750, 0.625000, 0.656250, 0.687500, 0.718750,
+0.750000, 0.781250, 0.812500, 0.843750, 0.875000, 0.906250, 0.937500, 0.968750,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000,
+1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000
+};
+
 double vp8_simple_weight(YV12_BUFFER_CONFIG *source)
 {
     int i, j;
 
     unsigned char *src = source->y_buffer;
-    unsigned char value;
     double sum_weights = 0.0;
-    double Weight;
 
     // Loop throught the Y plane raw examining levels and creating a weight for the image
-    for (i = 0; i < source->y_height; i++)
+    i = source->y_height;
+    do
     {
-        for (j = 0; j < source->y_width; j++)
+        j = source->y_width;
+        do
         {
-            value = src[j];
-
-            if (value >= 64)
-                Weight = 1.0;
-            else if (value > 32)
-                Weight = (value - 32.0f) / 32.0f;
-            else
-                Weight = 0.02;
-
-            sum_weights += Weight;
-        }
-
+            sum_weights += weight_table[ *src];
+            src++;
+        }while(--j);
+        src -= source->y_width;
         src += source->y_stride;
-    }
+    }while(--i);
 
     sum_weights /= (source->y_height * source->y_width);
 
     return sum_weights;
 }
+
 
 // This function returns the current per frame maximum bitrate target
 int frame_max_bits(VP8_COMP *cpi)
@@ -440,7 +467,6 @@ void vp8_end_first_pass(VP8_COMP *cpi)
     vp8_output_stats(cpi, cpi->output_pkt_list, cpi->total_stats);
 }
 
-
 void vp8_zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG * recon_buffer, int * best_motion_err, int recon_yoffset )
 {
     MACROBLOCKD * const xd = & x->e_mbd;
@@ -459,7 +485,6 @@ void vp8_zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG * r
 
     VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16) ( src_ptr, src_stride, ref_ptr, ref_stride, (unsigned int *)(best_motion_err));
 }
-
 
 void vp8_first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *best_mv, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset )
 {
@@ -548,7 +573,6 @@ void vp8_first_pass(VP8_COMP *cpi)
 
     int sum_in_vectors = 0;
 
-    MV best_ref_mv = {0, 0};
     MV zero_ref_mv = {0, 0};
 
     unsigned char *fp_motion_map_ptr = cpi->fp_motion_map;
@@ -586,12 +610,19 @@ void vp8_first_pass(VP8_COMP *cpi)
     // for each macroblock row in image
     for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
     {
-        MV best_ref_mv = {0, 0};
+        int_mv best_ref_mv;
+
+        best_ref_mv.as_int = 0;
 
         // reset above block coeffs
         xd->up_available = (mb_row != 0);
         recon_yoffset = (mb_row * recon_y_stride * 16);
         recon_uvoffset = (mb_row * recon_uv_stride * 8);
+
+        // Set up limit values for motion vectors to prevent them extending outside the UMV borders
+        x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
+        x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
+
 
         // for each macroblock col in image
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
@@ -625,8 +656,6 @@ void vp8_first_pass(VP8_COMP *cpi)
             // Set up limit values for motion vectors to prevent them extending outside the UMV borders
             x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
             x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + (VP8BORDERINPIXELS - 16);
-            x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
-            x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16) + (VP8BORDERINPIXELS - 16);
 
             // Other than for the first frame do a motion search
             if (cm->current_video_frame > 0)
@@ -647,12 +676,12 @@ void vp8_first_pass(VP8_COMP *cpi)
 
                 // Test last reference frame using the previous best mv as the
                 // starting point (best reference) for the search
-                vp8_first_pass_motion_search(cpi, x, &best_ref_mv,
+                vp8_first_pass_motion_search(cpi, x, &best_ref_mv.as_mv,
                                         &d->bmi.mv.as_mv, lst_yv12,
                                         &motion_error, recon_yoffset);
 
                 // If the current best reference mv is not centred on 0,0 then do a 0,0 based search as well
-                if ((best_ref_mv.col != 0) || (best_ref_mv.row != 0))
+                if (best_ref_mv.as_int)
                 {
                    tmp_err = INT_MAX;
                    vp8_first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv,
@@ -664,7 +693,6 @@ void vp8_first_pass(VP8_COMP *cpi)
                         d->bmi.mv.as_mv.row = tmp_mv.row;
                         d->bmi.mv.as_mv.col = tmp_mv.col;
                    }
-
                 }
 
                 // Experimental search in a second reference frame ((0,0) based only)
@@ -693,6 +721,9 @@ void vp8_first_pass(VP8_COMP *cpi)
                     xd->pre.v_buffer = lst_yv12->v_buffer + recon_uvoffset;
                 }
 
+                /* Intra assumed best */
+                best_ref_mv.as_int = 0;
+
                 if (motion_error <= this_error)
                 {
                     d->bmi.mv.as_mv.row <<= 3;
@@ -708,13 +739,10 @@ void vp8_first_pass(VP8_COMP *cpi)
                     sum_mvcs += d->bmi.mv.as_mv.col * d->bmi.mv.as_mv.col;
                     intercount++;
 
-                    best_ref_mv.row = d->bmi.mv.as_mv.row;
-                    best_ref_mv.col = d->bmi.mv.as_mv.col;
-                    //best_ref_mv.row = 0;
-                    //best_ref_mv.col = 0;
+                    best_ref_mv.as_int = d->bmi.mv.as_int;
 
                     // Was the vector non-zero
-                    if (d->bmi.mv.as_mv.row || d->bmi.mv.as_mv.col)
+                    if (d->bmi.mv.as_int)
                     {
                         mvcount++;
 
@@ -770,12 +798,6 @@ void vp8_first_pass(VP8_COMP *cpi)
                             *fp_motion_map_ptr = 1;
                     }
                 }
-                else
-                {
-                    // Intra was best
-                    best_ref_mv.row = 0;
-                    best_ref_mv.col = 0;
-                }
             }
 
             coded_error += this_error;
@@ -812,6 +834,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         fps.intra_error = intra_error >> 8;
         fps.coded_error = coded_error >> 8;
         weight = vp8_simple_weight(cpi->Source);
+
 
         if (weight < 0.1)
             weight = 0.1;
