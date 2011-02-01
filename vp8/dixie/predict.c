@@ -1633,6 +1633,7 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
 
             vpx_img_free(&ctx->frame_strg[i].img);
             ctx->frame_strg[i].ref_cnt = 0;
+            ctx->ref_frames[i] = NULL;
 
             if (!vpx_img_alloc(&ctx->frame_strg[i].img,
                                IMG_FMT_I420, w, h, 16))
