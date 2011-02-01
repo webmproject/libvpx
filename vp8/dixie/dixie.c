@@ -494,7 +494,7 @@ vp8_parse_frame_header(const unsigned char   *data,
     hdr->is_shown        = BITS_GET(raw, 4, 1);
     hdr->part0_sz        = BITS_GET(raw, 5, 19);
 
-    if (sz <= hdr->part0_sz + 10)
+    if (sz <= hdr->part0_sz + (hdr->is_keyframe ? 10 : 3))
         return VPX_CODEC_CORRUPT_FRAME;
 
     hdr->frame_size_updated = 0;
