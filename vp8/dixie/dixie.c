@@ -263,11 +263,12 @@ ac_q(int q)
 
 
 static void
-dequant_init(struct dequant_factors        dqf[MAX_MB_SEGMENTS],
+dequant_init(struct dequant_factors        factors[MAX_MB_SEGMENTS],
              const struct vp8_segment_hdr *seg,
              const struct vp8_quant_hdr   *quant_hdr)
 {
     int i, q;
+    struct dequant_factors *dqf = factors;
 
     for (i = 0; i < (seg->enabled ? MAX_MB_SEGMENTS : 1); i++)
     {
@@ -295,6 +296,8 @@ dequant_init(struct dequant_factors        dqf[MAX_MB_SEGMENTS],
 
             dqf->quant_idx = q;
         }
+
+        dqf++;
     }
 }
 
