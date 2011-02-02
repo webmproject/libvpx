@@ -772,16 +772,10 @@ int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
     int distortion;
     int best_rd = INT_MAX;
     int this_rd;
-    int i;
 
     //Y Search for 16x16 intra prediction mode
     for (mode = DC_PRED; mode <= TM_PRED; mode++)
     {
-        for (i = 0; i < 16; i++)
-        {
-            vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
-        }
-
         x->e_mbd.mode_info_context->mbmi.mode = mode;
 
         vp8_build_intra_predictors_mby_ptr(&x->e_mbd);

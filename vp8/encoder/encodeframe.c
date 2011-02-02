@@ -1147,77 +1147,41 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
     int Error4x4, Error16x16, error_uv;
-    B_PREDICTION_MODE intra_bmodes[16];
     int rate4x4, rate16x16, rateuv;
     int dist4x4, dist16x16, distuv;
     int rate = 0;
     int rate4x4_tokenonly = 0;
     int rate16x16_tokenonly = 0;
     int rateuv_tokenonly = 0;
-    int i;
 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
 #if !(CONFIG_REALTIME_ONLY)
-
     if (cpi->sf.RD && cpi->compressor_speed != 2)
     {
-        Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4);
-
-        //save the b modes for possible later use
-        for (i = 0; i < 16; i++)
-            intra_bmodes[i] = x->e_mbd.block[i].bmi.mode;
+        error_uv = vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
+        rate += rateuv;
 
         Error16x16 = vp8_rd_pick_intra16x16mby_mode(cpi, x, &rate16x16, &rate16x16_tokenonly, &dist16x16);
 
-        error_uv = vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
+        Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4);
 
-        vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-        rate += rateuv;
-
-        if (Error4x4 < Error16x16)
-        {
-            rate += rate4x4;
-            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
-
-            // get back the intra block modes
-            for (i = 0; i < 16; i++)
-                x->e_mbd.block[i].bmi.mode = intra_bmodes[i];
-
-            vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
-            cpi->prediction_error += Error4x4 ;
-#if 0
-            // Experimental RD code
-            cpi->frame_distortion += dist4x4;
-#endif
-        }
-        else
-        {
-            vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
-            rate += rate16x16;
-
-#if 0
-            // Experimental RD code
-            cpi->prediction_error += Error16x16;
-            cpi->frame_distortion += dist16x16;
-#endif
-        }
-
-        sum_intra_stats(cpi, x);
-
-        vp8_tokenize_mb(cpi, &x->e_mbd, t);
+        rate += (Error4x4 < Error16x16) ? rate4x4 : rate16x16;
     }
     else
 #endif
     {
-
-        int rate2, distortion2;
+        int rate2, best_distortion;
         MB_PREDICTION_MODE mode, best_mode = DC_PRED;
         int this_rd;
         Error16x16 = INT_MAX;
 
+        vp8_pick_intra_mbuv_mode(x);
+
         for (mode = DC_PRED; mode <= TM_PRED; mode ++)
         {
+            int distortion2;
+
             x->e_mbd.mode_info_context->mbmi.mode = mode;
             vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
             distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
@@ -1228,34 +1192,27 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
             {
                 Error16x16 = this_rd;
                 best_mode = mode;
+                best_distortion = distortion2;
             }
         }
+        x->e_mbd.mode_info_context->mbmi.mode = best_mode;
 
-        vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate2, &distortion2);
-
-        if (distortion2 == INT_MAX)
-            Error4x4 = INT_MAX;
-        else
-            Error4x4 = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
-
-        if (Error4x4 < Error16x16)
-        {
-            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
-            vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
-            cpi->prediction_error += Error4x4;
-        }
-        else
-        {
-            x->e_mbd.mode_info_context->mbmi.mode = best_mode;
-            vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
-            cpi->prediction_error += Error16x16;
-        }
-
-        vp8_pick_intra_mbuv_mode(x);
-        vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-        sum_intra_stats(cpi, x);
-        vp8_tokenize_mb(cpi, &x->e_mbd, t);
+        Error4x4 = vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate2, &best_distortion);
     }
+
+    if (Error4x4 < Error16x16)
+    {
+        x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+        vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
+    }
+    else
+    {
+        vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+    }
+
+    vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+    sum_intra_stats(cpi, x);
+    vp8_tokenize_mb(cpi, &x->e_mbd, t);
 
     return rate;
 }
