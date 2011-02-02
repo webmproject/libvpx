@@ -320,10 +320,6 @@ decode_frame(struct vp8_decoder_ctx *ctx,
         vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
                            "Experimental bitstreams not supported.");
 
-    if (ctx->frame_hdr.version != 0)
-        vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
-                           "Unsupported version %d", ctx->frame_hdr.version);
-
     data += FRAME_HEADER_SZ;
     sz -= FRAME_HEADER_SZ;
 

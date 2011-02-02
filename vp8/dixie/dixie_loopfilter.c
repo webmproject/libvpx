@@ -56,6 +56,16 @@ high_edge_variance(unsigned char *pixels,
     return ABS(p1 - p0) > hev_threshold || ABS(q1 - q0) > hev_threshold;
 }
 
+
+static int
+simple_threshold(unsigned char *pixels,
+                 int            stride,
+                 int            filter_limit)
+{
+    return (ABS(p0 - q0) * 2 + (ABS(p1 - q1) >> 1)) <= filter_limit;
+}
+
+
 static int
 normal_threshold(unsigned char *pixels,
                  int            stride,
@@ -66,7 +76,7 @@ normal_threshold(unsigned char *pixels,
     int I = interior_limit;
 
     /* Note: Deviates from spec */
-    return (ABS(p0 - q0) * 2 + (ABS(p1 - q1) >> 1)) <= 2 * E + I
+    return simple_threshold(pixels, stride, 2 * E + I)
            && ABS(p3 - p2) <= I && ABS(p2 - p1) <= I && ABS(p1 - p0) <= I
            && ABS(q3 - q2) <= I && ABS(q2 - q1) <= I && ABS(q1 - q0) <= I;
 }
@@ -224,6 +234,38 @@ filter_subblock_h_edge(unsigned char *src,
 
 
 static void
+filter_v_edge_simple(unsigned char *src,
+                     int            stride,
+                     int            filter_limit)
+{
+    int i;
+
+    for (i = 0; i < 16; i++)
+    {
+        if (simple_threshold(src, 1, filter_limit))
+            filter_common(src, 1, 1);
+        src += stride;
+    }
+}
+
+
+static void
+filter_h_edge_simple(unsigned char *src,
+                     int            stride,
+                     int            filter_limit)
+{
+    int i;
+
+    for (i = 0; i < 16; i++)
+    {
+        if (simple_threshold(src, stride, filter_limit))
+            filter_common(src, stride, 1);
+        src += 1;
+    }
+}
+
+
+static void
 calculate_filter_parameters(struct vp8_decoder_ctx *ctx,
                             struct mb_info         *mbi,
                             int                    *edge_limit_,
@@ -292,12 +334,12 @@ calculate_filter_parameters(struct vp8_decoder_ctx *ctx,
     *hev_threshold_ = hev_threshold;
 }
 
-#include <assert.h>
-void
-vp8_dixie_loopfilter_process_row(struct vp8_decoder_ctx *ctx,
-                                 unsigned int            row,
-                                 unsigned int            start_col,
-                                 unsigned int            num_cols)
+
+static void
+filter_row_normal(struct vp8_decoder_ctx *ctx,
+                  unsigned int            row,
+                  unsigned int            start_col,
+                  unsigned int            num_cols)
 {
     unsigned char  *y, *u, *v;
     int             stride, uv_stride;
@@ -389,4 +431,85 @@ vp8_dixie_loopfilter_process_row(struct vp8_decoder_ctx *ctx,
         v += 8;
         mbi++;
     }
+}
+
+
+static void
+filter_row_simple(struct vp8_decoder_ctx *ctx,
+                  unsigned int            row,
+                  unsigned int            start_col,
+                  unsigned int            num_cols)
+{
+    unsigned char  *y;
+    int             stride;
+    struct mb_info *mbi;
+    unsigned int    col;
+    int             i;
+
+    /* Adjust pointers based on row, start_col */
+    stride    = ctx->ref_frames[CURRENT_FRAME]->img.stride[PLANE_Y];
+    y = ctx->ref_frames[CURRENT_FRAME]->img.planes[PLANE_Y];
+    y += (stride * row + start_col) * 16;
+    mbi = ctx->mb_info_rows[row] + start_col;
+
+    for (col = start_col; col < start_col + num_cols; col++)
+    {
+        int edge_limit, interior_limit, hev_threshold;
+
+        /* TODO: only need to recalculate every MB if segmentation is
+         * enabled.
+         */
+        calculate_filter_parameters(ctx, mbi, &edge_limit, &interior_limit,
+                                    &hev_threshold);
+
+        if (edge_limit)
+        {
+
+            /* NOTE: This conditional is actually dependent on the number
+             * of coefficients decoded, not the skip flag as coded in the
+             * bitstream. The tokens task is expected to set 31 if there
+             * is *any* non-zero data.
+             */
+            int filter_subblocks = (mbi->base.eob_mask
+                || mbi->base.y_mode == SPLITMV || mbi->base.y_mode == B_PRED);
+            int mb_limit = (edge_limit + 2) * 2 + interior_limit;
+            int b_limit = edge_limit * 2 + interior_limit;
+
+            if (col)
+                filter_v_edge_simple(y, stride, mb_limit);
+
+            if (filter_subblocks)
+            {
+                filter_v_edge_simple(y + 4, stride, b_limit);
+                filter_v_edge_simple(y + 8, stride, b_limit);
+                filter_v_edge_simple(y + 12, stride, b_limit);
+            }
+
+            if (row)
+                filter_h_edge_simple(y, stride, mb_limit);
+
+            if (filter_subblocks)
+            {
+                filter_h_edge_simple(y + 4 * stride, stride, b_limit);
+                filter_h_edge_simple(y + 8 * stride, stride, b_limit);
+                filter_h_edge_simple(y + 12 * stride, stride, b_limit);
+            }
+        }
+
+        y += 16;
+        mbi++;
+    }
+}
+
+
+void
+vp8_dixie_loopfilter_process_row(struct vp8_decoder_ctx *ctx,
+                                 unsigned int            row,
+                                 unsigned int            start_col,
+                                 unsigned int            num_cols)
+{
+    if(ctx->loopfilter_hdr.use_simple)
+        filter_row_simple(ctx, row, start_col, num_cols);
+    else
+        filter_row_normal(ctx, row, start_col, num_cols);
 }

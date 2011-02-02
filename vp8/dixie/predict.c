@@ -33,6 +33,20 @@ static const short sixtap_filters[8][6] =
 };
 
 
+static const short bilinear_filters[8][6] =
+{
+
+    { 0,  0,  128,    0,   0,  0 },
+    { 0,  0,  112,   16,   0,  0 },
+    { 0,  0,   96,   32,   0,  0 },
+    { 0,  0,   80,   48,   0,  0 },
+    { 0,  0,   64,   64,   0,  0 },
+    { 0,  0,   48,   80,   0,  0 },
+    { 0,  0,   32,   96,   0,  0 },
+    { 0,  0,   16,  112,   0,  0 }
+};
+
+
 static void
 predict_h_nxn(unsigned char *predict,
               int            stride,
@@ -790,6 +804,72 @@ fourtap_vert(unsigned char       *output,
 }
 
 
+static void
+twotap_horiz(unsigned char       *output,
+             int                  output_stride,
+             const unsigned char *reference,
+             int                  reference_stride,
+             int                  cols,
+             int                  rows,
+             int                  mx,
+             int                  my
+            )
+{
+    const short *filter_x = &bilinear_filters[mx][2];
+    const short *filter_y = &bilinear_filters[my][2];
+    int r, c, temp;
+
+    for (r = 0; r < rows; r++)
+    {
+        for (c = 0; c < cols; c++)
+        {
+            temp = (reference[ 0] * filter_x[0]) +
+                   (reference[ 1] * filter_x[1]) +
+                   64;
+            temp >>= 7;
+            output[c] = CLAMP_255(temp);
+            reference++;
+        }
+
+        reference += reference_stride - cols;
+        output += output_stride;
+    }
+}
+
+
+static void
+twotap_vert(unsigned char       *output,
+            int                  output_stride,
+            const unsigned char *reference,
+            int                  reference_stride,
+            int                  cols,
+            int                  rows,
+            int                  mx,
+            int                  my
+           )
+{
+    const short *filter_x = &bilinear_filters[mx][2];
+    const short *filter_y = &bilinear_filters[my][2];
+    int r, c, temp;
+
+    for (r = 0; r < rows; r++)
+    {
+        for (c = 0; c < cols; c++)
+        {
+            temp = (reference[ 0*reference_stride] * filter_y[0]) +
+                   (reference[ 1*reference_stride] * filter_y[1]) +
+                   64;
+            temp >>= 7;
+            output[c] = CLAMP_255(temp);
+            reference++;
+        }
+
+        reference += reference_stride - cols;
+        output += output_stride;
+    }
+}
+
+
 #if 1
 #define DEFINE_FILTER(kind, w, h)\
     static void kind##_h_##w##x##h##_c(const unsigned char *reference,\
@@ -885,12 +965,16 @@ fourtap_vert(unsigned char       *output,
 
 DEFINE_FILTER(sixtap, 16, 16)
 DEFINE_FILTER(fourtap, 16, 16)
+DEFINE_FILTER(twotap, 16, 16)
 DEFINE_FILTER(sixtap, 8, 8)
 DEFINE_FILTER(fourtap, 8, 8)
+DEFINE_FILTER(twotap, 8, 8)
 DEFINE_FILTER(sixtap, 8, 4)
 DEFINE_FILTER(fourtap, 8, 4)
+DEFINE_FILTER(twotap, 8, 4)
 DEFINE_FILTER(sixtap, 4, 4)
 DEFINE_FILTER(fourtap, 4, 4)
+DEFINE_FILTER(twotap, 4, 4)
 
 #define DEFINE_SPLIT_FILTER(w, h)\
     static void filter_6h4v_##w##x##h##_c(const unsigned char *reference,\
@@ -1278,6 +1362,7 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
     int            w, h, x, y, b;
     union mv       chroma_mv[4];
     unsigned char *u = img->u, *v = img->v;
+    int            full_pixel = ctx->frame_hdr.version == 3;
 
 
     x = mb_col * 16;
@@ -1301,6 +1386,12 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
         uvmv = mbi->base.mv;
         uvmv.d.x = (uvmv.d.x + 1 + (uvmv.d.x >> 31) * 2) / 2;
         uvmv.d.y = (uvmv.d.y + 1 + (uvmv.d.y >> 31) * 2) / 2;
+        if (full_pixel)
+        {
+            uvmv.d.x &= ~7;
+            uvmv.d.y &= ~7;
+        }
+	
         chroma_mv[0] = uvmv;
         chroma_mv[1] = uvmv;
         chroma_mv[2] = uvmv;
@@ -1308,8 +1399,6 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
     }
     else
     {
-        int full_pixel = ctx->frame_hdr.version == 3;
-
         chroma_mv[0] = calculate_chroma_splitmv(mbi,  0, full_pixel);
         chroma_mv[1] = calculate_chroma_splitmv(mbi,  2, full_pixel);
         chroma_mv[2] = calculate_chroma_splitmv(mbi,  8, full_pixel);
@@ -1648,41 +1737,82 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
         }
 
         /* TODO: Move the rest of this out of this function */
-        ctx->mc_functions[MC_16X16][MC_4H0V] = fourtap_h_16x16_c;
-        ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
-        ctx->mc_functions[MC_16X16][MC_0H4V] = fourtap_v_16x16_c;
-        ctx->mc_functions[MC_16X16][MC_4H4V] = fourtap_hv_16x16_c;
-        ctx->mc_functions[MC_16X16][MC_6H4V] = filter_6h4v_16x16_c;
-        ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
-        ctx->mc_functions[MC_16X16][MC_4H6V] = filter_4h6v_16x16_c;
-        ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
+	if(ctx->frame_hdr.version)
+	{
+            ctx->mc_functions[MC_16X16][MC_4H0V] = twotap_h_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_6H0V] = twotap_h_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_0H4V] = twotap_v_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_4H4V] = twotap_hv_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_6H4V] = twotap_hv_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_0H6V] = twotap_v_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_4H6V] = twotap_hv_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_6H6V] = twotap_hv_16x16_c;
 
-        ctx->mc_functions[MC_8X8][MC_4H0V]   = fourtap_h_8x8_c;
-        ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
-        ctx->mc_functions[MC_8X8][MC_0H4V]   = fourtap_v_8x8_c;
-        ctx->mc_functions[MC_8X8][MC_4H4V]   = fourtap_hv_8x8_c;
-        ctx->mc_functions[MC_8X8][MC_6H4V]   = filter_6h4v_8x8_c;
-        ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
-        ctx->mc_functions[MC_8X8][MC_4H6V]   = filter_4h6v_8x8_c;
-        ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_4H0V]   = twotap_h_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_6H0V]   = twotap_h_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_0H4V]   = twotap_v_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_4H4V]   = twotap_hv_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_6H4V]   = twotap_hv_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_0H6V]   = twotap_v_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_4H6V]   = twotap_hv_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_6H6V]   = twotap_hv_8x8_c;
 
-        ctx->mc_functions[MC_8X4][MC_4H0V]   = fourtap_h_8x4_c;
-        ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
-        ctx->mc_functions[MC_8X4][MC_0H4V]   = fourtap_v_8x4_c;
-        ctx->mc_functions[MC_8X4][MC_4H4V]   = fourtap_hv_8x4_c;
-        ctx->mc_functions[MC_8X4][MC_6H4V]   = filter_6h4v_8x4_c;
-        ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
-        ctx->mc_functions[MC_8X4][MC_4H6V]   = filter_4h6v_8x4_c;
-        ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_4H0V]   = twotap_h_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_6H0V]   = twotap_h_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_0H4V]   = twotap_v_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_4H4V]   = twotap_hv_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_6H4V]   = twotap_hv_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_0H6V]   = twotap_v_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_4H6V]   = twotap_hv_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_6H6V]   = twotap_hv_8x4_c;
 
-        ctx->mc_functions[MC_4X4][MC_4H0V]   = fourtap_h_4x4_c;
-        ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
-        ctx->mc_functions[MC_4X4][MC_0H4V]   = fourtap_v_4x4_c;
-        ctx->mc_functions[MC_4X4][MC_4H4V]   = fourtap_hv_4x4_c;
-        ctx->mc_functions[MC_4X4][MC_6H4V]   = filter_6h4v_4x4_c;
-        ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
-        ctx->mc_functions[MC_4X4][MC_4H6V]   = filter_4h6v_4x4_c;
-        ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_4H0V]   = twotap_h_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_6H0V]   = twotap_h_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_0H4V]   = twotap_v_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_4H4V]   = twotap_hv_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_6H4V]   = twotap_hv_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_0H6V]   = twotap_v_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_4H6V]   = twotap_hv_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_6H6V]   = twotap_hv_4x4_c;
+	}
+	else
+	{
+            ctx->mc_functions[MC_16X16][MC_4H0V] = fourtap_h_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_0H4V] = fourtap_v_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_4H4V] = fourtap_hv_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_6H4V] = filter_6h4v_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_4H6V] = filter_4h6v_16x16_c;
+            ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
+
+            ctx->mc_functions[MC_8X8][MC_4H0V]   = fourtap_h_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_0H4V]   = fourtap_v_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_4H4V]   = fourtap_hv_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_6H4V]   = filter_6h4v_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_4H6V]   = filter_4h6v_8x8_c;
+            ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
+
+            ctx->mc_functions[MC_8X4][MC_4H0V]   = fourtap_h_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_0H4V]   = fourtap_v_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_4H4V]   = fourtap_hv_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_6H4V]   = filter_6h4v_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_4H6V]   = filter_4h6v_8x4_c;
+            ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
+
+            ctx->mc_functions[MC_4X4][MC_4H0V]   = fourtap_h_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_0H4V]   = fourtap_v_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_4H4V]   = fourtap_hv_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_6H4V]   = filter_6h4v_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_4H6V]   = filter_4h6v_4x4_c;
+            ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
+	}
     }
 
     /* Find a free framebuffer to predict into */
