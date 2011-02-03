@@ -15,6 +15,10 @@ vp8_dixie_modemv_init(struct vp8_decoder_ctx *ctx);
 
 
 void
+vp8_dixie_modemv_destroy(struct vp8_decoder_ctx *ctx);
+
+
+void
 vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
                              struct bool_decoder    *bool,
                              int                     row,

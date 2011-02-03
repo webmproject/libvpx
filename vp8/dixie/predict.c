@@ -1837,6 +1837,20 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
 
 
 void
+vp8_dixie_predict_destroy(struct vp8_decoder_ctx *ctx)
+{
+    int i;
+
+    for (i = 0; i < NUM_REF_FRAMES; i++)
+    {
+        vpx_img_free(&ctx->frame_strg[i].img);
+        ctx->frame_strg[i].ref_cnt = 0;
+        ctx->ref_frames[i] = NULL;
+    }
+}
+
+
+void
 vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
                               unsigned int            row,
                               unsigned int            start_col,

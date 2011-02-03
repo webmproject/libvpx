@@ -15,6 +15,10 @@ vp8_dixie_tokens_init(struct vp8_decoder_ctx *ctx);
 
 
 void
+vp8_dixie_tokens_destroy(struct vp8_decoder_ctx *ctx);
+
+
+void
 vp8_dixie_tokens_process_row(struct vp8_decoder_ctx *ctx,
                              unsigned int            partition,
                              unsigned int            row,

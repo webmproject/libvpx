@@ -82,6 +82,7 @@ static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx)
 
 static vpx_codec_err_t vp8_destroy(vpx_codec_alg_priv_t *ctx)
 {
+    vp8_dixie_decode_destroy(&ctx->decoder_ctx);
     vpx_free(ctx->base.alg_priv);
     return VPX_CODEC_OK;
 }

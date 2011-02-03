@@ -15,6 +15,10 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx);
 
 
 void
+vp8_dixie_predict_destroy(struct vp8_decoder_ctx *ctx);
+
+
+void
 vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
                               unsigned int            row,
                               unsigned int            start_col,

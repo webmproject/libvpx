@@ -525,3 +525,12 @@ vp8_dixie_decode_frame(struct vp8_decoder_ctx *ctx,
 
     return ctx_->error.error_code;
 }
+
+
+void
+vp8_dixie_decode_destroy(struct vp8_decoder_ctx *ctx)
+{
+    vp8_dixie_predict_destroy(ctx);
+    vp8_dixie_tokens_destroy(ctx);
+    vp8_dixie_modemv_destroy(ctx);
+}

@@ -479,3 +479,15 @@ vp8_dixie_tokens_init(struct vp8_decoder_ctx *ctx)
             vpx_internal_error(&ctx->error, VPX_CODEC_MEM_ERROR, NULL);
     }
 }
+
+
+void
+vp8_dixie_tokens_destroy(struct vp8_decoder_ctx *ctx)
+{
+    int i;
+
+    for (i = 0; i < MAX_PARTITIONS; i++)
+        free(ctx->tokens[i].coeffs);
+
+    free(ctx->above_token_entropy_ctx);
+}

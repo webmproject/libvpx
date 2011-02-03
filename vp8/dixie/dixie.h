@@ -315,6 +315,10 @@ void
 vp8_dixie_decode_init(struct vp8_decoder_ctx *ctx);
 
 
+void
+vp8_dixie_decode_destroy(struct vp8_decoder_ctx *ctx);
+
+
 vpx_codec_err_t
 vp8_parse_frame_header(const unsigned char   *data,
                        unsigned int           sz,

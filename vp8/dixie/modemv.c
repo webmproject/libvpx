@@ -666,3 +666,13 @@ vp8_dixie_modemv_init(struct vp8_decoder_ctx *ctx)
 
     ctx->mb_info_rows = ctx->mb_info_rows_storage + 1;
 }
+
+
+void
+vp8_dixie_modemv_destroy(struct vp8_decoder_ctx *ctx)
+{
+    free(ctx->mb_info_storage);
+    ctx->mb_info_storage = NULL;
+    free(ctx->mb_info_rows_storage);
+    ctx->mb_info_rows_storage = NULL;
+}
