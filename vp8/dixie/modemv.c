@@ -639,8 +639,14 @@ vp8_dixie_modemv_init(struct vp8_decoder_ctx *ctx)
     mbi_w = ctx->mb_cols + 1; /* For left border col */
     mbi_h = ctx->mb_rows + 1; /* For above border row */
 
-    /* TODO: Handle buffer size changes */
-
+    if (ctx->frame_hdr.frame_size_updated)
+    {
+        free(ctx->mb_info_storage);
+	ctx->mb_info_storage = NULL;
+	free(ctx->mb_info_rows_storage);
+	ctx->mb_info_rows_storage = NULL;
+    }
+    
     if (!ctx->mb_info_storage)
         ctx->mb_info_storage = calloc(mbi_w * mbi_h,
                                       sizeof(*ctx->mb_info_storage));

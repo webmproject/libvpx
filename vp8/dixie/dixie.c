@@ -325,10 +325,6 @@ decode_frame(struct vp8_decoder_ctx *ctx,
 
     if (ctx->frame_hdr.is_keyframe)
     {
-        if (ctx->frame_hdr.kf.scale_w || ctx->frame_hdr.kf.scale_h)
-            vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
-                               "Spatial resampling not supported.");
-
         data += KEYFRAME_HEADER_SZ;
         sz -= KEYFRAME_HEADER_SZ;
         ctx->mb_cols = (ctx->frame_hdr.kf.w + 15) / 16;
