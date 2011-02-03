@@ -86,74 +86,23 @@ static const unsigned int zigzag[16] =
     0,  1,  4,  8,  5,  2,  3,  6,  9, 12, 13, 10,  7, 11, 14, 15
 };
 
-#define FILL \
-    if(count < 0) \
-        VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
-
-#define NORMALIZE \
-    /*if(range < 0x80)*/                            \
-    { \
-        shift = vp8dx_bitreader_norm[range]; \
-        range <<= shift; \
-        value <<= shift; \
-        count -= shift; \
-    }
-
 #define DECODE_AND_APPLYSIGN(value_to_sign) \
-    split = (range + 1) >> 1; \
-    bigsplit = (vp8_bool_value_t)split << (VP8_BD_VALUE_SIZE - 8); \
-    FILL \
-    if ( value < bigsplit ) \
-    { \
-        range = split; \
-        v= value_to_sign; \
-    } \
-    else \
-    { \
-        range = range-split; \
-        value = value-bigsplit; \
-        v = -value_to_sign; \
-    } \
-    v *= dqf[!!c]; \
-    range +=range;                   \
-    value +=value;                   \
-    count--;
+    v = (bool_get_bit(bool) ? -value_to_sign : value_to_sign) * dqf[!!c];
 
 #define DECODE_AND_BRANCH_IF_ZERO(probability,branch) \
-    { \
-        split = 1 +  ((( probability*(range-1) ) )>> 8); \
-        bigsplit = (vp8_bool_value_t)split << (VP8_BD_VALUE_SIZE - 8); \
-        FILL \
-        if ( value < bigsplit ) \
-        { \
-            range = split; \
-            NORMALIZE \
-            goto branch; \
-        } \
-        value -= bigsplit; \
-        range = range - split; \
-        NORMALIZE \
-    }
+    if (!bool_get(bool, probability)) goto branch;
 
 #define DECODE_AND_LOOP_IF_ZERO(probability,branch) \
+    if (!bool_get(bool, probability)) \
     { \
-        split = 1 + ((( probability*(range-1) ) ) >> 8); \
-        bigsplit = (vp8_bool_value_t)split << (VP8_BD_VALUE_SIZE - 8); \
-        FILL \
-        if ( value < bigsplit ) \
-        { \
-            range = split; \
-            NORMALIZE \
-            prob = type_probs; \
-            if(c<15) {\
-                ++c; \
-                prob += bands_x[c]; \
-                goto branch; \
-            } goto BLOCK_FINISHED; /*for malformed input */\
-        } \
-        value -= bigsplit; \
-        range = range - split; \
-        NORMALIZE \
+        prob = type_probs; \
+        if(c<15) {\
+            ++c; \
+            prob += bands_x[c]; \
+            goto branch; \
+        }\
+        else \
+            goto BLOCK_FINISHED; /*for malformed input */\
     }
 
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val) \
@@ -168,20 +117,7 @@ static const unsigned int zigzag[16] =
 
 
 #define DECODE_EXTRABIT_AND_ADJUST_VAL(t,bits_count)\
-    split = 1 +  (((range-1) * extrabits[t].probs[bits_count]) >> 8); \
-    bigsplit = (vp8_bool_value_t)split << (VP8_BD_VALUE_SIZE - 8); \
-    FILL \
-    if(value >= bigsplit)\
-    {\
-        range = range-split;\
-        value = value-bigsplit;\
-        val += 1<<bits_count;\
-    }\
-    else\
-    {\
-        range = split;\
-    }\
-    NORMALIZE
+    val += bool_get(bool, extrabits[t].probs[bits_count]) << bits_count;
 
 
 static int
@@ -201,16 +137,6 @@ decode_mb_tokens(struct bool_decoder  *bool,
     unsigned char *type_probs; /* probabilities for this block type */
     unsigned char *prob;
     short         *dqf;
-
-    /* Unpack bool decoder to local variables */
-    const unsigned char *bufend = bool->user_buffer_end;
-    const unsigned char *bufptr = bool->user_buffer;
-    vp8_bool_value_t     value = bool->value;
-    int                  count = bool->count;
-    unsigned int         range = bool->range;
-    unsigned int         split;
-    vp8_bool_value_t     bigsplit;
-    unsigned int shift;
 
     eob_mask = 0;
 
@@ -360,11 +286,6 @@ BLOCK_FINISHED:
         goto BLOCK_LOOP;
     }
 
-    FILL
-    bool->user_buffer = bufptr;
-    bool->value = value;
-    bool->count = count;
-    bool->range = range;
     return eob_mask;
 }
 

@@ -151,7 +151,7 @@ decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
 
     for (i = 0; i < ctx->token_hdr.partitions; i++)
     {
-        vp8dx_bool_init(&ctx->tokens[i].bool, data,
+        init_bool_decoder(&ctx->tokens[i].bool, data,
                         ctx->token_hdr.partition_sz[i]);
         data += ctx->token_hdr.partition_sz[i];
     }
@@ -332,7 +332,7 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     }
 
     /* Start the bitreader for the header/entropy partition */
-    vp8dx_bool_init(&bool, data, ctx->frame_hdr.part0_sz);
+    init_bool_decoder(&bool, data, ctx->frame_hdr.part0_sz);
 
     /* Skip the colorspace and clamping bits */
     if (ctx->frame_hdr.is_keyframe)

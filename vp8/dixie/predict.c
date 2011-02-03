@@ -10,6 +10,7 @@
 #include "dixie.h"
 #include "predict.h"
 #include "idct_add.h"
+#include "vpx_ports/mem.h"
 #include <assert.h>
 #include <string.h>
 
