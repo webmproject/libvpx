@@ -1953,15 +1953,9 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         switch (this_mode)
         {
         case B_PRED:
-
-            for (i = 0; i < 16; i++)
-            {
-                vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
-            }
             // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
             vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion);
             rate2 += rate;
-
             distortion2 += distortion;
             rate2 += uv_intra_rate;
             rate_uv = uv_intra_rate_tokenonly;
@@ -2003,22 +1997,16 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         case V_PRED:
         case H_PRED:
         case TM_PRED:
-            for (i = 0; i < 16; i++)
-            {
-                vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
-            }
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
             vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
-            {
-                macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb)) ;
-                rate2 += rate_y;
-                distortion2 += distortion;
-                rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
-                rate2 += uv_intra_rate;
-                rate_uv = uv_intra_rate_tokenonly;
-                distortion2 += uv_intra_distortion;
-                distortion_uv = uv_intra_distortion;
-            }
+            macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb)) ;
+            rate2 += rate_y;
+            distortion2 += distortion;
+            rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
+            rate2 += uv_intra_rate;
+            rate_uv = uv_intra_rate_tokenonly;
+            distortion2 += uv_intra_distortion;
+            distortion_uv = uv_intra_distortion;
             break;
 
         case NEWMV:
@@ -2460,6 +2448,15 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         return best_rd;
     }
 
+
+    if(best_mbmode.mode <= B_PRED)
+    {
+        int i;
+        for (i = 0; i < 16; i++)
+        {
+            best_bmodes[i].mv.as_int = 0;
+        }
+    }
 
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
