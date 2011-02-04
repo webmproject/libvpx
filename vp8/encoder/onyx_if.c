@@ -3123,11 +3123,14 @@ static int pick_frame_size(VP8_COMP *cpi)
 
     return 1;
 }
+
 static void set_quantizer(VP8_COMP *cpi, int Q)
 {
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
+    int update = 0;
 
+    update |= cm->base_qindex != Q;
     cm->base_qindex = Q;
 
     cm->y1dc_delta_q = 0;
@@ -3138,13 +3141,19 @@ static void set_quantizer(VP8_COMP *cpi, int Q)
 
     if(Q<4)
     {
+        update |= cm->y2dc_delta_q != 4-Q;
         cm->y2dc_delta_q = 4-Q;
     }
+
     // Set Segment specific quatizers
     mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
     mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
     mbd->segment_feature_data[MB_LVL_ALT_Q][2] = cpi->segment_feature_data[MB_LVL_ALT_Q][2];
     mbd->segment_feature_data[MB_LVL_ALT_Q][3] = cpi->segment_feature_data[MB_LVL_ALT_Q][3];
+
+    if(update)
+        vp8cx_init_quantizer(cpi);
+
 }
 
 static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)

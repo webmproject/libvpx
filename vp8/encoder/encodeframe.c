@@ -399,13 +399,6 @@ void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
     // Clear Zbin mode boost for default case
     cpi->zbin_mode_boost = 0;
 
-    // vp8cx_init_quantizer() is first called in vp8_create_compressor(). A check is added here so that vp8cx_init_quantizer() is only called
-    // when these values are not all zero.
-    if (cpi->common.y1dc_delta_q | cpi->common.y2dc_delta_q | cpi->common.uvdc_delta_q | cpi->common.y2ac_delta_q | cpi->common.uvac_delta_q)
-    {
-        vp8cx_init_quantizer(cpi);
-    }
-
     // MB level quantizer setup
     vp8cx_mb_init_quantizer(cpi, &cpi->mb);
 }
