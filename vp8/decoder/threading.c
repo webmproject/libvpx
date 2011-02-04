@@ -320,7 +320,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                              * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
                              * Apply any context driven MB level adjustment
                              */
-                            vp8_adjust_mb_lf_value(xd, &filter_level);
+                            filter_level = vp8_adjust_mb_lf_value(xd, filter_level);
                         }
 
                         /* Distance of Mb to the various image edges.
@@ -863,7 +863,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                      * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
                      * Apply any context driven MB level adjustment
                      */
-                    vp8_adjust_mb_lf_value(xd, &filter_level);
+                    filter_level = vp8_adjust_mb_lf_value(xd, filter_level);
                 }
 
                 /* Distance of Mb to the various image edges.

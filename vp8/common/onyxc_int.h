@@ -201,7 +201,7 @@ typedef struct VP8Common
 } VP8_COMMON;
 
 
-void vp8_adjust_mb_lf_value(MACROBLOCKD *mbd, int *filter_level);
+int vp8_adjust_mb_lf_value(MACROBLOCKD *mbd, int filter_level);
 void vp8_init_loop_filter(VP8_COMMON *cm);
 void vp8_frame_init_loop_filter(loop_filter_info *lfi, int frame_type);
 extern void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val);

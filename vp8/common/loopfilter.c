@@ -263,43 +263,44 @@ void vp8_frame_init_loop_filter(loop_filter_info *lfi, int frame_type)
 }
 
 
-void vp8_adjust_mb_lf_value(MACROBLOCKD *mbd, int *filter_level)
+int vp8_adjust_mb_lf_value(MACROBLOCKD *mbd, int filter_level)
 {
     MB_MODE_INFO *mbmi = &mbd->mode_info_context->mbmi;
 
     if (mbd->mode_ref_lf_delta_enabled)
     {
         /* Apply delta for reference frame */
-        *filter_level += mbd->ref_lf_deltas[mbmi->ref_frame];
+        filter_level += mbd->ref_lf_deltas[mbmi->ref_frame];
 
         /* Apply delta for mode */
         if (mbmi->ref_frame == INTRA_FRAME)
         {
             /* Only the split mode BPRED has a further special case */
             if (mbmi->mode == B_PRED)
-                *filter_level +=  mbd->mode_lf_deltas[0];
+                filter_level +=  mbd->mode_lf_deltas[0];
         }
         else
         {
             /* Zero motion mode */
             if (mbmi->mode == ZEROMV)
-                *filter_level +=  mbd->mode_lf_deltas[1];
+                filter_level +=  mbd->mode_lf_deltas[1];
 
             /* Split MB motion mode */
             else if (mbmi->mode == SPLITMV)
-                *filter_level +=  mbd->mode_lf_deltas[3];
+                filter_level +=  mbd->mode_lf_deltas[3];
 
             /* All other inter motion modes (Nearest, Near, New) */
             else
-                *filter_level +=  mbd->mode_lf_deltas[2];
+                filter_level +=  mbd->mode_lf_deltas[2];
         }
 
         /* Range check */
-        if (*filter_level > MAX_LOOP_FILTER)
-            *filter_level = MAX_LOOP_FILTER;
-        else if (*filter_level < 0)
-            *filter_level = 0;
+        if (filter_level > MAX_LOOP_FILTER)
+            filter_level = MAX_LOOP_FILTER;
+        else if (filter_level < 0)
+            filter_level = 0;
     }
+    return filter_level;
 }
 
 
@@ -373,7 +374,7 @@ void vp8_loop_filter_frame
              * These specified to 8th pel as they are always compared to values that are in 1/8th pel units
              * Apply any context driven MB level adjustment
              */
-            vp8_adjust_mb_lf_value(mbd, &filter_level);
+            filter_level = vp8_adjust_mb_lf_value(mbd, filter_level);
 
             if (filter_level)
             {
@@ -473,7 +474,7 @@ void vp8_loop_filter_frame_yonly
             filter_level = baseline_filter_level[Segment];
 
             /* Apply any context driven MB level adjustment */
-            vp8_adjust_mb_lf_value(mbd, &filter_level);
+            filter_level = vp8_adjust_mb_lf_value(mbd, filter_level);
 
             if (filter_level)
             {
