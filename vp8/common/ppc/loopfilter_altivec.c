@@ -56,10 +56,10 @@ void loop_filter_mbh_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned ch
                          int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
     (void)simpler_lpf;
-    mbloop_filter_horizontal_edge_y_ppc(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->mbthr);
+    mbloop_filter_horizontal_edge_y_ppc(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr);
 
     if (u_ptr)
-        mbloop_filter_horizontal_edge_uv_ppc(u_ptr, v_ptr, uv_stride, lfi->uvmbflim, lfi->uvlim, lfi->uvmbthr);
+        mbloop_filter_horizontal_edge_uv_ppc(u_ptr, v_ptr, uv_stride, lfi->mbflim, lfi->lim, lfi->thr);
 }
 
 void loop_filter_mbhs_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
@@ -77,10 +77,10 @@ void loop_filter_mbv_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned ch
                          int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
 {
     (void)simpler_lpf;
-    mbloop_filter_vertical_edge_y_ppc(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->mbthr);
+    mbloop_filter_vertical_edge_y_ppc(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr);
 
     if (u_ptr)
-        mbloop_filter_vertical_edge_uv_ppc(u_ptr, v_ptr, uv_stride, lfi->uvmbflim, lfi->uvlim, lfi->uvmbthr);
+        mbloop_filter_vertical_edge_uv_ppc(u_ptr, v_ptr, uv_stride, lfi->mbflim, lfi->lim, lfi->thr);
 }
 
 void loop_filter_mbvs_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
@@ -104,7 +104,7 @@ void loop_filter_bh_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned cha
     loop_filter_horizontal_edge_y_ppc(y_ptr + 12 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr);
 
     if (u_ptr)
-        loop_filter_horizontal_edge_uv_ppc(u_ptr + 4 * uv_stride, v_ptr + 4 * uv_stride, uv_stride, lfi->uvflim, lfi->uvlim, lfi->uvthr);
+        loop_filter_horizontal_edge_uv_ppc(u_ptr + 4 * uv_stride, v_ptr + 4 * uv_stride, uv_stride, lfi->flim, lfi->lim, lfi->thr);
 }
 
 void loop_filter_bhs_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
@@ -127,7 +127,7 @@ void loop_filter_bv_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned cha
     loop_filter_vertical_edge_y_ppc(y_ptr, y_stride, lfi->flim, lfi->lim, lfi->thr);
 
     if (u_ptr)
-        loop_filter_vertical_edge_uv_ppc(u_ptr + 4, v_ptr + 4, uv_stride, lfi->uvflim, lfi->uvlim, lfi->uvthr);
+        loop_filter_vertical_edge_uv_ppc(u_ptr + 4, v_ptr + 4, uv_stride, lfi->flim, lfi->lim, lfi->thr);
 }
 
 void loop_filter_bvs_ppc(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
