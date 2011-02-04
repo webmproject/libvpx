@@ -590,7 +590,7 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
     //log_msg("COFF: Symbol table at offset %u\n", symtab_ptr);
     //log_msg("COFF: raw data pointer ofset for section .data is %u\n", sectionrawdata_ptr);
 
-    fp = fopen("vpx_asm_offsets.asm", "w");
+    fp = fopen("assembly_offsets.asm", "w");
 
     if (fp == NULL)
     {

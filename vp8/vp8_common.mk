@@ -85,6 +85,9 @@ VP8_COMMON_SRCS-yes += common/swapyv12buffer.c
 VP8_COMMON_SRCS-yes += common/textblit.c
 VP8_COMMON_SRCS-yes += common/treecoder.c
 
+# upcoming work to move this to CONFIG_OPTIMIZATIONS
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/assembly_offsets.c
+
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/subpixel_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/recon_x86.h
@@ -118,7 +121,6 @@ VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/filter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/reconintra_arm.c
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/vpx_asm_offsets.c
 
 # common (armv6)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/bilinearfilter_v6$(ASM)
@@ -166,11 +168,12 @@ VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon_neon.c
 #
 # Rule to extract assembly constants from C sources
 #
+# upcoming work to move this to CONFIG_OPTIMIZATIONS
 ifeq ($(ARCH_ARM),yes)
-vpx_asm_offsets.asm: obj_int_extract
-vpx_asm_offsets.asm: $(VP8_PREFIX)common/arm/vpx_asm_offsets.c.o
+assembly_offsets.asm: obj_int_extract
+assembly_offsets.asm: $(VP8_PREFIX)common/assembly_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
-OBJS-yes += $(VP8_PREFIX)common/arm/vpx_asm_offsets.c.o
-CLEAN-OBJS += vpx_asm_offsets.asm
-$(filter %$(ASM).o,$(OBJS-yes)): vpx_asm_offsets.asm
+OBJS-yes += $(VP8_PREFIX)common/assembly_offsets.c.o
+CLEAN-OBJS += assembly_offsets.asm
+$(filter %$(ASM).o,$(OBJS-yes)): assembly_offsets.asm
 endif

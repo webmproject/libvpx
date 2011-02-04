@@ -230,7 +230,6 @@ endif
 #
 # Add assembler dependencies for configuration and offsets
 #
-#$(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm $(BUILD_PFX)vpx_asm_offsets.asm
 $(filter %.s.o,$(OBJS-yes)):   $(BUILD_PFX)vpx_config.asm
 $(filter %.asm.o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 
