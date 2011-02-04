@@ -13,7 +13,7 @@
 
     AREA    |.text|, CODE, READONLY  ; name this block of code
 
-    INCLUDE assembly_offsets.asm
+    INCLUDE asm_dec_offsets.asm
 
 l_qcoeff    EQU     0
 l_i         EQU     4

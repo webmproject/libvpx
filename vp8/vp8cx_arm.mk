@@ -14,6 +14,7 @@
 #File list for arm
 # encoder
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/arm_csystemdependent.c
+VP8_CX_SRCS-$(ARCH_ARM)  += encoder/asm_enc_offsets.c
 
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/encodemb_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/variance_arm.c
@@ -50,17 +51,3 @@ VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/vp8_subpixelvariance16x16_neon$(A
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/vp8_subpixelvariance16x16s_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/vp8_memcpy_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/vp8_shortwalsh4x4_neon$(ASM)
-
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/vpx_vp8_enc_asm_offsets.c
-
-#
-# Rule to extract assembly constants from C sources
-#
-ifeq ($(ARCH_ARM),yes)
-vpx_vp8_enc_asm_offsets.asm: obj_int_extract
-vpx_vp8_enc_asm_offsets.asm: $(VP8_PREFIX)encoder/arm/vpx_vp8_enc_asm_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
-OBJS-yes += $(VP8_PREFIX)encoder/arm/vpx_vp8_enc_asm_offsets.c.o
-CLEAN-OBJS += vpx_vp8_enc_asm_offsets.asm
-$(filter %$(ASM).o,$(OBJS-yes)): vpx_vp8_enc_asm_offsets.asm
-endif

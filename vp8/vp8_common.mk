@@ -85,9 +85,6 @@ VP8_COMMON_SRCS-yes += common/swapyv12buffer.c
 VP8_COMMON_SRCS-yes += common/textblit.c
 VP8_COMMON_SRCS-yes += common/treecoder.c
 
-# upcoming work to move this to CONFIG_OPTIMIZATIONS
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/assembly_offsets.c
-
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/subpixel_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/recon_x86.h
@@ -114,6 +111,7 @@ VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/asm_com_offsets.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 
 # common (c)
@@ -163,17 +161,3 @@ VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon16x16mb_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/buildintrapredictorsmby_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/save_neon_reg$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon_neon.c
-
-
-#
-# Rule to extract assembly constants from C sources
-#
-# upcoming work to move this to CONFIG_OPTIMIZATIONS
-ifeq ($(ARCH_ARM),yes)
-assembly_offsets.asm: obj_int_extract
-assembly_offsets.asm: $(VP8_PREFIX)common/assembly_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
-OBJS-yes += $(VP8_PREFIX)common/assembly_offsets.c.o
-CLEAN-OBJS += assembly_offsets.asm
-$(filter %$(ASM).o,$(OBJS-yes)): assembly_offsets.asm
-endif

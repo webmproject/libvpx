@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2011 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -12,13 +12,7 @@
 #include "vpx_ports/config.h"
 #include <stddef.h>
 
-#if CONFIG_VP8_ENCODER
-#include "vpx_scale/yv12config.h"
-#endif
-
-#if CONFIG_VP8_DECODER
 #include "onyxd_int.h"
-#endif
 
 #define DEFINE(sym, val) int sym = val;
 
@@ -31,20 +25,6 @@
  * {
  */
 
-#if CONFIG_VP8_DECODER || CONFIG_VP8_ENCODER
-DEFINE(yv12_buffer_config_y_width,              offsetof(YV12_BUFFER_CONFIG, y_width));
-DEFINE(yv12_buffer_config_y_height,             offsetof(YV12_BUFFER_CONFIG, y_height));
-DEFINE(yv12_buffer_config_y_stride,             offsetof(YV12_BUFFER_CONFIG, y_stride));
-DEFINE(yv12_buffer_config_uv_width,             offsetof(YV12_BUFFER_CONFIG, uv_width));
-DEFINE(yv12_buffer_config_uv_height,            offsetof(YV12_BUFFER_CONFIG, uv_height));
-DEFINE(yv12_buffer_config_uv_stride,            offsetof(YV12_BUFFER_CONFIG, uv_stride));
-DEFINE(yv12_buffer_config_y_buffer,             offsetof(YV12_BUFFER_CONFIG, y_buffer));
-DEFINE(yv12_buffer_config_u_buffer,             offsetof(YV12_BUFFER_CONFIG, u_buffer));
-DEFINE(yv12_buffer_config_v_buffer,             offsetof(YV12_BUFFER_CONFIG, v_buffer));
-DEFINE(yv12_buffer_config_border,               offsetof(YV12_BUFFER_CONFIG, border));
-#endif
-
-#if CONFIG_VP8_DECODER
 DEFINE(detok_scan,                              offsetof(DETOK, scan));
 DEFINE(detok_ptr_block2leftabove,               offsetof(DETOK, ptr_block2leftabove));
 DEFINE(detok_coef_tree_ptr,                     offsetof(DETOK, vp8_coef_tree_ptr));
@@ -68,7 +48,6 @@ DEFINE(bool_decoder_range,                      offsetof(BOOL_DECODER, range));
 
 DEFINE(tokenextrabits_min_val,                  offsetof(TOKENEXTRABITS, min_val));
 DEFINE(tokenextrabits_length,                   offsetof(TOKENEXTRABITS, Length));
-#endif
 
 //add asserts for any offset that is not supported by assembly code
 //add asserts for any size that is not supported by assembly code
