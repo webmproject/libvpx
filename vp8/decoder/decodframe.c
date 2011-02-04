@@ -475,8 +475,7 @@ static void setup_token_decoder(VP8D_COMP *pbi,
                                "Truncated packet or corrupt partition "
                                "%d length", i + 1);
 
-        if (vp8dx_start_decode(bool_decoder, IF_RTCD(&pbi->dboolhuff),
-                               partition, partition_size))
+        if (vp8dx_start_decode(bool_decoder, partition, partition_size))
             vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate bool decoder %d", i + 1);
 
@@ -651,8 +650,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     init_frame(pbi);
 
-    if (vp8dx_start_decode(bc, IF_RTCD(&pbi->dboolhuff),
-                           data, data_end - data))
+    if (vp8dx_start_decode(bc, data, data_end - data))
         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate bool decoder 0");
     if (pc->frame_type == KEY_FRAME) {
