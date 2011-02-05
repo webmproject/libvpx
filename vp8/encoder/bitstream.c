@@ -1654,10 +1654,12 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     {
         vp8_start_encode(&cpi->bc2, cx_data + bc->pos);
 
-        if (!cpi->b_multi_threaded)
-            pack_tokens(&cpi->bc2, cpi->tok, cpi->tok_count);
-        else
+#if CONFIG_MULTITHREAD
+        if (cpi->b_multi_threaded)
             pack_mb_row_tokens(cpi, &cpi->bc2);
+        else
+#endif
+            pack_tokens(&cpi->bc2, cpi->tok, cpi->tok_count);
 
         vp8_stop_encode(&cpi->bc2);
         oh.first_partition_length_in_bytes = cpi->bc.pos ;

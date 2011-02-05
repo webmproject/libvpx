@@ -14,7 +14,7 @@
 
 #define VPXINFINITE 10000       /* 10second. */
 
-#if CONFIG_OS_SUPPORT
+#if CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD
 
 /* Thread management macros */
 #ifdef _WIN32
@@ -90,8 +90,6 @@
 #define x86_pause_hint()
 #endif
 
-#else /* CONFIG_OS_SUPPORT = 0 */
-#define THREAD_FUNCTION void *
-#endif /* CONFIG_OS_SUPPORT */
+#endif /* CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD */
 
 #endif
