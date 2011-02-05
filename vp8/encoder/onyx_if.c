@@ -3192,11 +3192,14 @@ static int pick_frame_size(VP8_COMP *cpi)
 
     return 1;
 }
+
 static void set_quantizer(VP8_COMP *cpi, int Q)
 {
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
+    int update = 0;
 
+    update |= cm->base_qindex != Q;
     cm->base_qindex = Q;
 
     cm->y1dc_delta_q = 0;
@@ -3207,13 +3210,19 @@ static void set_quantizer(VP8_COMP *cpi, int Q)
 
     if(Q<4)
     {
+        update |= cm->y2dc_delta_q != 4-Q;
         cm->y2dc_delta_q = 4-Q;
     }
+
     // Set Segment specific quatizers
     mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
     mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
     mbd->segment_feature_data[MB_LVL_ALT_Q][2] = cpi->segment_feature_data[MB_LVL_ALT_Q][2];
     mbd->segment_feature_data[MB_LVL_ALT_Q][3] = cpi->segment_feature_data[MB_LVL_ALT_Q][3];
+
+    if(update)
+        vp8cx_init_quantizer(cpi);
+
 }
 
 static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
@@ -3688,6 +3697,17 @@ static void encode_frame_to_data_rate
 
     // Test code for segmentation of gf/arf (0,0)
     //segmentation_test_function((VP8_PTR) cpi);
+
+#if CONFIG_REALTIME_ONLY
+    if(cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
+    {
+        if(cpi->force_next_frame_intra)
+        {
+            cm->frame_type = KEY_FRAME;  /* delayed intra frame */
+        }
+    }
+    cpi->force_next_frame_intra = 0;
+#endif
 
     // For an alt ref frame in 2 pass we skip the call to the second pass function that sets the target bandwidth
 #if !(CONFIG_REALTIME_ONLY)
@@ -4210,6 +4230,14 @@ static void encode_frame_to_data_rate
         // (assuming that we didn't)!
         if (cpi->pass != 2 && cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
         {
+
+#if CONFIG_REALTIME_ONLY
+            {
+                /* we don't do re-encoding in realtime mode
+                 * if key frame is decided than we force it on next frame */
+                cpi->force_next_frame_intra = decide_key_frame(cpi);
+            }
+#else
             if (decide_key_frame(cpi))
             {
                 vp8_calc_auto_iframe_target_size(cpi);
@@ -4248,6 +4276,7 @@ static void encode_frame_to_data_rate
                 resize_key_frame(cpi);
                 continue;
             }
+#endif
         }
 
         vp8_clear_system_state();

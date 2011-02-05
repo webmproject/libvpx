@@ -677,6 +677,9 @@ typedef struct
     int *lf_ref_frame_sign_bias;
     int *lf_ref_frame;
 
+#if CONFIG_REALTIME_ONLY
+    int force_next_frame_intra; /* force next frame to intra when kf_auto says so */
+#endif
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);
