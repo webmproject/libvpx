@@ -25,10 +25,6 @@ typedef size_t VP8_BD_VALUE;
   Even relatively modest values like 100 would work fine.*/
 # define VP8_LOTS_OF_BITS (0x40000000)
 
-
-
-struct vp8_dboolhuff_rtcd_vtable;
-
 typedef struct
 {
     const unsigned char *user_buffer_end;
@@ -36,82 +32,15 @@ typedef struct
     VP8_BD_VALUE         value;
     int                  count;
     unsigned int         range;
-#if CONFIG_RUNTIME_CPU_DETECT
-    struct vp8_dboolhuff_rtcd_vtable *rtcd;
-#endif
 } BOOL_DECODER;
-
-#define prototype_dbool_start(sym) int sym(BOOL_DECODER *br, \
-    const unsigned char *source, unsigned int source_sz)
-#define prototype_dbool_fill(sym) void sym(BOOL_DECODER *br)
-#define prototype_dbool_debool(sym) int sym(BOOL_DECODER *br, int probability)
-#define prototype_dbool_devalue(sym) int sym(BOOL_DECODER *br, int bits)
-
-#if ARCH_ARM
-#include "arm/dboolhuff_arm.h"
-#endif
-
-#ifndef vp8_dbool_start
-#define vp8_dbool_start vp8dx_start_decode_c
-#endif
-
-#ifndef vp8_dbool_fill
-#define vp8_dbool_fill vp8dx_bool_decoder_fill_c
-#endif
-
-#ifndef vp8_dbool_debool
-#define vp8_dbool_debool vp8dx_decode_bool_c
-#endif
-
-#ifndef vp8_dbool_devalue
-#define vp8_dbool_devalue vp8dx_decode_value_c
-#endif
-
-extern prototype_dbool_start(vp8_dbool_start);
-extern prototype_dbool_fill(vp8_dbool_fill);
-extern prototype_dbool_debool(vp8_dbool_debool);
-extern prototype_dbool_devalue(vp8_dbool_devalue);
-
-typedef prototype_dbool_start((*vp8_dbool_start_fn_t));
-typedef prototype_dbool_fill((*vp8_dbool_fill_fn_t));
-typedef prototype_dbool_debool((*vp8_dbool_debool_fn_t));
-typedef prototype_dbool_devalue((*vp8_dbool_devalue_fn_t));
-
-typedef struct vp8_dboolhuff_rtcd_vtable {
-    vp8_dbool_start_fn_t   start;
-    vp8_dbool_fill_fn_t    fill;
-    vp8_dbool_debool_fn_t  debool;
-    vp8_dbool_devalue_fn_t devalue;
-} vp8_dboolhuff_rtcd_vtable_t;
-
-/* There are no processor-specific versions of these
- * functions right now. Disable RTCD to avoid using
- * function pointers which gives a speed boost
- */
-/*#ifdef ENABLE_RUNTIME_CPU_DETECT
-#define DBOOLHUFF_INVOKE(ctx,fn) (ctx)->fn
-#define IF_RTCD(x) (x)
-#else*/
-#define DBOOLHUFF_INVOKE(ctx,fn) vp8_dbool_##fn
-#define IF_RTCD(x) NULL
-/*#endif*/
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8dx_bitreader_norm[256]);
 
-/* wrapper functions to hide RTCD. static means inline means hopefully no
- * penalty
- */
-static int vp8dx_start_decode(BOOL_DECODER *br,
-        struct vp8_dboolhuff_rtcd_vtable *rtcd,
-        const unsigned char *source, unsigned int source_sz) {
-#if CONFIG_RUNTIME_CPU_DETECT
-    br->rtcd = rtcd;
-#endif
-    return DBOOLHUFF_INVOKE(rtcd, start)(br, source, source_sz);
-}
-static void vp8dx_bool_decoder_fill(BOOL_DECODER *br) {
-    DBOOLHUFF_INVOKE(br->rtcd, fill)(br);
-}
+int vp8dx_start_decode(BOOL_DECODER *br,
+                       const unsigned char *source,
+                       unsigned int source_sz);
+
+void vp8dx_bool_decoder_fill(BOOL_DECODER *br);
 
 /*The refill loop is used in several places, so define it in a macro to make
    sure they're all consistent.
@@ -138,12 +67,6 @@ static void vp8dx_bool_decoder_fill(BOOL_DECODER *br) {
 
 
 static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
-  /*
-   * Until optimized versions of this function are available, we
-   * keep the implementation in the header to allow inlining.
-   *
-   *return DBOOLHUFF_INVOKE(br->rtcd, debool)(br, probability);
-   */
     unsigned int bit = 0;
     VP8_BD_VALUE value;
     unsigned int split;
@@ -167,13 +90,6 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
         bit = 1;
     }
 
-    /*if(range>=0x80)
-    {
-        br->value = value;
-        br->range = range;
-        return bit
-    }*/
-
     {
         register unsigned int shift = vp8dx_bitreader_norm[range];
         range <<= shift;
@@ -190,12 +106,6 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
 
 static int vp8_decode_value(BOOL_DECODER *br, int bits)
 {
-  /*
-   * Until optimized versions of this function are available, we
-   * keep the implementation in the header to allow inlining.
-   *
-   *return DBOOLHUFF_INVOKE(br->rtcd, devalue)(br, bits);
-   */
     int z = 0;
     int bit;
 

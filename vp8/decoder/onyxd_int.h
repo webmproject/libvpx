@@ -124,7 +124,6 @@ typedef struct VP8Decompressor
 
 #if CONFIG_RUNTIME_CPU_DETECT
     vp8_dequant_rtcd_vtable_t        dequant;
-    struct vp8_dboolhuff_rtcd_vtable dboolhuff;
 #endif
 
 

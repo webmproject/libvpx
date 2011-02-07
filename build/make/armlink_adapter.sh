@@ -17,15 +17,17 @@ for i; do
         on_of=1
     elif [ "$i" == "-v" ]; then
         verbose=1
+    elif [ "$i" == "-g" ]; then
+        args="${args} --debug"
     elif [ "$on_of" == "1" ]; then
         outfile=$i
-    on_of=0
+        on_of=0
     elif [ -f "$i" ]; then
         infiles="$infiles $i"
     elif [ "${i:0:2}" == "-l" ]; then
         libs="$libs ${i#-l}"
     elif [ "${i:0:2}" == "-L" ]; then
-    libpaths="${libpaths} ${i#-L}"
+        libpaths="${libpaths} ${i#-L}"
     else
         args="${args} ${i}"
     fi
