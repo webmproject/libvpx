@@ -831,7 +831,6 @@ twotap_vert(unsigned char       *output,
 }
 
 
-#if 1
 #define DEFINE_FILTER(kind, w, h)\
     static void kind##_h_##w##x##h##_c(const unsigned char *reference,\
                                        int                  reference_stride,\
@@ -871,58 +870,6 @@ twotap_vert(unsigned char       *output,
                     temp + 2 * 16, 16,\
                     w, h, mx, my);\
     }
-#else
-/* DEBUG -- always do 2d filter */
-#define DEFINE_FILTER(kind, w, h)\
-    static void kind##_h_##w##x##h##_c(const unsigned char *reference,\
-                                       int                  reference_stride,\
-                                       int                  mx,\
-                                       int                  my,\
-                                       unsigned char       *output,\
-                                       int                  output_stride)\
-    {\
-        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
-        \
-        kind##_horiz(temp, 16,\
-                     reference - 2 * reference_stride, reference_stride,\
-                     w, h + 5, mx, my);\
-        kind##_vert(output, output_stride,\
-                    temp + 2 * 16, 16,\
-                    w, h, mx, my);\
-    }\
-    static void kind##_v_##w##x##h##_c(const unsigned char *reference,\
-                                       int                  reference_stride,\
-                                       int                  mx,\
-                                       int                  my,\
-                                       unsigned char       *output,\
-                                       int                  output_stride)\
-    {\
-        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
-        \
-        kind##_horiz(temp, 16,\
-                     reference - 2 * reference_stride, reference_stride,\
-                     w, h + 5, mx, my);\
-        kind##_vert(output, output_stride,\
-                    temp + 2 * 16, 16,\
-                    w, h, mx, my);\
-    }\
-    static void kind##_hv_##w##x##h##_c(const unsigned char *reference,\
-                                        int                  reference_stride,\
-                                        int                  mx,\
-                                        int                  my,\
-                                        unsigned char       *output,\
-                                        int                  output_stride)\
-    {\
-        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
-        \
-        kind##_horiz(temp, 16,\
-                     reference - 2 * reference_stride, reference_stride,\
-                     w, h + 5, mx, my);\
-        kind##_vert(output, output_stride,\
-                    temp + 2 * 16, 16,\
-                    w, h, mx, my);\
-    }
-#endif
 
 DEFINE_FILTER(sixtap, 16, 16)
 DEFINE_FILTER(fourtap, 16, 16)
@@ -1016,84 +963,6 @@ filter_block(unsigned char        *output,
 
 
 static void
-recon_16_blocks(unsigned char        *output,
-                const unsigned char  *reference,
-                int                   stride,
-                const union mv       *mv,
-                mc_fn_t              *mc,
-                short                *coeffs,
-                struct mb_info       *mbi
-               )
-{
-    const unsigned char *predict;
-    int b;
-
-    predict = filter_block(output, reference, stride, mv, mc);
-
-    for (b = 0; b < 16; b++)
-    {
-        vp8_dixie_idct_add(output, predict, stride, coeffs);
-        output += 4;
-        predict += 4;
-        coeffs += 16;
-
-        if ((b & 3) == 3)
-        {
-            output += 4 * stride - 16;
-            predict += 4 * stride - 16;
-        }
-    }
-}
-
-
-static void
-recon_4_blocks(unsigned char        *output,
-               const unsigned char  *reference,
-               int                   stride,
-               const union mv       *mv,
-               mc_fn_t              *mc,
-               short                *coeffs,
-               struct mb_info       *mbi,
-               int                   start_b
-              )
-{
-    const unsigned char *predict;
-    int                  b = start_b;
-
-    predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
-    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
-
-    output += stride * 4;
-    predict += stride * 4;
-    b += (start_b < 16) ? 4 : 2;
-
-    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
-    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
-}
-
-
-static void
-recon_2_blocks(unsigned char        *output,
-               const unsigned char  *reference,
-               int                   stride,
-               const union mv       *mv,
-               mc_fn_t              *mc,
-               short                *coeffs,
-               struct mb_info       *mbi,
-               int                   start_b
-              )
-{
-    const unsigned char *predict;
-    int                  b = start_b;
-
-    predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
-    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
-}
-
-
-static void
 recon_1_block(unsigned char        *output,
               const unsigned char  *reference,
               int                   stride,
@@ -1169,12 +1038,11 @@ build_mc_border(unsigned char       *dst,
                 int                  h
                )
 {
-    const unsigned char *plane, *ref_row;
+    const unsigned char *ref_row;
 
 
     /* Get a pointer to the start of the real data for this row */
-    plane = src - x - y * stride;
-    ref_row = plane;
+    ref_row = src - x - y * stride;
 
     if (y >= h)
         ref_row += (h - 1) * stride;
@@ -1214,54 +1082,6 @@ build_mc_border(unsigned char       *dst,
             ref_row += stride;
     }
     while (--b_h);
-}
-
-
-static void
-recon_4_edge_blocks(unsigned char        *output,
-                    unsigned char        *emul_block,
-                    const unsigned char  *reference,
-                    int                   stride,
-                    const union mv       *mv,
-                    mc_fn_t              *mc,
-                    short                *coeffs,
-                    struct mb_info       *mbi,
-                    int                   x,
-                    int                   y,
-                    int                   w,
-                    int                   h,
-                    int                   start_b
-                   )
-{
-    const unsigned char *predict;
-    int                  b = start_b;
-    const int            b_w = 8;
-    const int            b_h = 8;
-
-    x += mv->d.x >> 3;
-    y += mv->d.y >> 3;
-
-    /* Need two pixels left/above, 3 right/below for 6-tap */
-    if (x < 2 || x + b_w - 1 + 3 >= w || y < 2 || y + b_h - 1 + 3 >= h)
-    {
-        reference += (mv->d.x >> 3) + (mv->d.y >> 3) * stride;
-        build_mc_border(emul_block,
-                        reference - 2 - 2 * stride, stride,
-                        x - 2, y - 2, b_w + 5, b_h + 5, w, h);
-        reference = emul_block + 2 * stride + 2;
-        reference -= (mv->d.x >> 3) + (mv->d.y >> 3) * stride;
-    }
-
-    predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
-    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
-
-    output += stride * 4;
-    predict += stride * 4;
-    b += (start_b < 16) ? 4 : 2;
-
-    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
-    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
 }
 
 
@@ -1338,12 +1158,6 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
     {
         union mv uvmv;
 
-        mbi->split.mvs[0] = mbi->base.mv;
-        mbi->split.mvs[2] = mbi->base.mv;
-        mbi->split.mvs[8] = mbi->base.mv;
-        mbi->split.mvs[10] = mbi->base.mv;
-        mbi->base.partitioning = SPLITMV_8X8;
-
         uvmv = mbi->base.mv;
         uvmv.d.x = (uvmv.d.x + 1 + (uvmv.d.x >> 31) * 2) / 2;
         uvmv.d.y = (uvmv.d.y + 1 + (uvmv.d.y >> 31) * 2) / 2;
@@ -1368,47 +1182,34 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
 
 
     /* Luma */
-    if (mbi->base.partitioning < SPLITMV_4X4)
+    for (b = 0; b < 16; b++)
     {
-        recon_4_edge_blocks(output, emul_block, reference, img->stride,
-                            &mbi->split.mvs[0], ctx->mc_functions[MC_8X8],
-                            coeffs, mbi, x, y, w, h, 0);
-        recon_4_edge_blocks(output + 8, emul_block, reference + 8, img->stride,
-                            &mbi->split.mvs[2], ctx->mc_functions[MC_8X8],
-                            coeffs, mbi, x + 8, y, w, h, 2);
-        output += 8 * img->stride;
-        reference += 8 * img->stride;
-        recon_4_edge_blocks(output, emul_block, reference, img->stride,
-                            &mbi->split.mvs[8], ctx->mc_functions[MC_8X8],
-                            coeffs, mbi, x, y + 8, w, h, 8);
-        recon_4_edge_blocks(output + 8, emul_block, reference + 8, img->stride,
-                            &mbi->split.mvs[10], ctx->mc_functions[MC_8X8],
-                            coeffs, mbi, x + 8, y + 8, w, h, 10);
-    }
-    else
-    {
-        for (b = 0; b < 16; b++)
+        union mv *ymv;
+
+        if(mbi->base.y_mode != SPLITMV)
+            ymv = &mbi->base.mv;
+        else
+            ymv = mbi->split.mvs + b;
+
+        recon_1_edge_block(output, emul_block, reference, img->stride,
+                           ymv, ctx->mc_functions[MC_4X4],
+                           coeffs, mbi, x, y, w, h, b);
+
+        x += 4;
+        output += 4;
+        reference += 4;
+
+        if ((b & 3) == 3)
         {
-            recon_1_edge_block(output, emul_block, reference, img->stride,
-                               &mbi->split.mvs[b], ctx->mc_functions[MC_4X4],
-                               coeffs, mbi, x, y, w, h, b);
-
-            x += 4;
-            output += 4;
-            reference += 4;
-
-            if ((b & 3) == 3)
-            {
-                x -= 16;
-                y += 4;
-                output += 4 * img->stride - 16;
-                reference += 4 * img->stride - 16;
-            }
+            x -= 16;
+            y += 4;
+            output += 4 * img->stride - 16;
+            reference += 4 * img->stride - 16;
         }
-
-        x = mb_col * 16;
-        y = mb_row * 16;
     }
+
+    x = mb_col * 16;
+    y = mb_row * 16;
 
     /* Chroma */
     x >>= 1;
@@ -1447,109 +1248,75 @@ predict_inter(struct vp8_decoder_ctx  *ctx,
               short                   *coeffs,
               struct mb_info          *mbi)
 {
-    ptrdiff_t            reference_offset;
-    union mv             uvmv;
-
-
-    reference_offset = ctx->ref_frame_offsets[mbi->base.ref_frame];
+    unsigned char *y = img->y;
+    unsigned char *u = img->u;
+    unsigned char *v = img->v;
+    ptrdiff_t      reference_offset;
+    union mv       chroma_mv[4];
+    int            full_pixel = ctx->frame_hdr.version == 3;
+    int b;
 
     if (mbi->base.y_mode != SPLITMV)
     {
-        recon_16_blocks(img->y, img->y + reference_offset, img->stride,
-                        &mbi->base.mv, ctx->mc_functions[MC_16X16],
-                        coeffs, mbi);
+        union mv             uvmv;
+
         uvmv = mbi->base.mv;
         uvmv.d.x = (uvmv.d.x + 1 + (uvmv.d.x >> 31) * 2) / 2;
         uvmv.d.y = (uvmv.d.y + 1 + (uvmv.d.y >> 31) * 2) / 2;
 
-        if (ctx->frame_hdr.version == 3)
+        if (full_pixel)
         {
             uvmv.d.x &= ~7;
             uvmv.d.y &= ~7;
         }
 
-        recon_4_blocks(img->u, img->u + reference_offset, img->uv_stride,
-                       &uvmv, ctx->mc_functions[MC_8X8],
-                       coeffs, mbi, 16);
-        recon_4_blocks(img->v, img->v + reference_offset, img->uv_stride,
-                       &uvmv, ctx->mc_functions[MC_8X8],
-                       coeffs, mbi, 20);
+        chroma_mv[0] =
+        chroma_mv[1] =
+        chroma_mv[2] =
+        chroma_mv[3] = uvmv;
     }
     else
     {
-        unsigned char *y = img->y;
-        unsigned char *u = img->u;
-        unsigned char *v = img->v;
-        union mv       chroma_mv[4];
-        int            full_pixel = ctx->frame_hdr.version == 3;
-        int            b;
-
-        if (mbi->base.partitioning < 3)
-        {
-            recon_4_blocks(y, y + reference_offset,
-                           img->stride, &mbi->split.mvs[0],
-                           ctx->mc_functions[MC_8X8], coeffs, mbi, 0);
-            recon_4_blocks(y + 8, y + reference_offset + 8,
-                           img->stride, &mbi->split.mvs[2],
-                           ctx->mc_functions[MC_8X8], coeffs, mbi, 2);
-            y += 8 * img->stride;
-            recon_4_blocks(y, y + reference_offset,
-                           img->stride, &mbi->split.mvs[8],
-                           ctx->mc_functions[MC_8X8], coeffs, mbi, 8);
-            recon_4_blocks(y + 8, y + reference_offset + 8,
-                           img->stride, &mbi->split.mvs[10],
-                           ctx->mc_functions[MC_8X8], coeffs, mbi, 10);
-        }
-        else
-        {
-
-            for (b = 0; b < 16; b += 2)
-            {
-                if (mbi->split.mvs[b].raw == mbi->split.mvs[b+1].raw)
-                {
-                    recon_2_blocks(y, y + reference_offset,
-                                   img->stride, &mbi->split.mvs[b],
-                                   ctx->mc_functions[MC_8X4], coeffs, mbi, b);
-                }
-                else
-                {
-                    recon_1_block(y, y + reference_offset,
-                                  img->stride, &mbi->split.mvs[b],
-                                  ctx->mc_functions[MC_4X4], coeffs, mbi, b);
-                    recon_1_block(y + 4, y + reference_offset + 4,
-                                  img->stride, &mbi->split.mvs[b+1],
-                                  ctx->mc_functions[MC_4X4], coeffs, mbi, b + 1);
-                }
-
-                y += 8;
-
-                if ((b & 3) == 2)
-                    y += 4 * img->stride - 16;
-            }
-        }
-
         chroma_mv[0] = calculate_chroma_splitmv(mbi,  0, full_pixel);
         chroma_mv[1] = calculate_chroma_splitmv(mbi,  2, full_pixel);
         chroma_mv[2] = calculate_chroma_splitmv(mbi,  8, full_pixel);
         chroma_mv[3] = calculate_chroma_splitmv(mbi, 10, full_pixel);
+    }
 
-        for (b = 0; b < 4; b++)
+    reference_offset = ctx->ref_frame_offsets[mbi->base.ref_frame];
+
+    for (b=0; b < 16; b++)
+    {
+        union mv *ymv;
+
+        if(mbi->base.y_mode != SPLITMV)
+            ymv = &mbi->base.mv;
+        else
+            ymv = mbi->split.mvs + b;
+
+
+        recon_1_block(y, y + reference_offset, img->stride,
+                      ymv, ctx->mc_functions[MC_4X4], coeffs, mbi, b);
+        y += 4;
+        if ((b & 3) == 3)
+            y += 4 * img->stride - 16;
+    }
+
+    for (b = 0; b < 4; b++)
+    {
+        recon_1_block(u, u + reference_offset,
+                      img->uv_stride, &chroma_mv[b],
+                      ctx->mc_functions[MC_4X4], coeffs, mbi, b + 16);
+        recon_1_block(v, v + reference_offset,
+                      img->uv_stride, &chroma_mv[b],
+                      ctx->mc_functions[MC_4X4], coeffs, mbi, b + 20);
+        u += 4;
+        v += 4;
+
+        if (b & 1)
         {
-            /* TODO: Could do 2/1 like we do for Y here */
-            recon_1_block(u, u + reference_offset,
-                          img->uv_stride, &chroma_mv[b],
-                          ctx->mc_functions[MC_4X4], coeffs, mbi, b + 16);
-            recon_1_block(v, v + reference_offset,
-                          img->uv_stride, &chroma_mv[b],
-                          ctx->mc_functions[MC_4X4], coeffs, mbi, b + 20);
-            u += 4;
-            v += 4;
-
-            if (b & 1)
-            {
-                u += 4 * img->uv_stride - 8;
-                v += 4 * img->uv_stride - 8;
-            }
+            u += 4 * img->uv_stride - 8;
+            v += 4 * img->uv_stride - 8;
         }
     }
 }
