@@ -1531,6 +1531,17 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");
 #endif
+
+#if CONFIG_MULTITHREAD
+    if (width < 640)
+        cpi->mt_sync_range = 1;
+    else if (width <= 1280)
+        cpi->mt_sync_range = 4;
+    else if (width <= 2560)
+        cpi->mt_sync_range = 8;
+    else
+        cpi->mt_sync_range = 16;
+#endif
 }
 
 
@@ -3177,11 +3188,14 @@ static int pick_frame_size(VP8_COMP *cpi)
 
     return 1;
 }
+
 static void set_quantizer(VP8_COMP *cpi, int Q)
 {
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
+    int update = 0;
 
+    update |= cm->base_qindex != Q;
     cm->base_qindex = Q;
 
     cm->y1dc_delta_q = 0;
@@ -3192,13 +3206,19 @@ static void set_quantizer(VP8_COMP *cpi, int Q)
 
     if(Q<4)
     {
+        update |= cm->y2dc_delta_q != 4-Q;
         cm->y2dc_delta_q = 4-Q;
     }
+
     // Set Segment specific quatizers
     mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
     mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
     mbd->segment_feature_data[MB_LVL_ALT_Q][2] = cpi->segment_feature_data[MB_LVL_ALT_Q][2];
     mbd->segment_feature_data[MB_LVL_ALT_Q][3] = cpi->segment_feature_data[MB_LVL_ALT_Q][3];
+
+    if(update)
+        vp8cx_init_quantizer(cpi);
+
 }
 
 static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
@@ -3676,6 +3696,17 @@ static void encode_frame_to_data_rate
 #if CONFIG_SEGMENTATION
     cpi->mb.e_mbd.segmentation_enabled = 1;
     cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+#endif
+
+#if CONFIG_REALTIME_ONLY
+    if(cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
+    {
+        if(cpi->force_next_frame_intra)
+        {
+            cm->frame_type = KEY_FRAME;  /* delayed intra frame */
+        }
+    }
+    cpi->force_next_frame_intra = 0;
 #endif
 
     // For an alt ref frame in 2 pass we skip the call to the second pass function that sets the target bandwidth
@@ -4198,6 +4229,14 @@ static void encode_frame_to_data_rate
         // (assuming that we didn't)!
         if (cpi->pass != 2 && cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
         {
+
+#if CONFIG_REALTIME_ONLY
+            {
+                /* we don't do re-encoding in realtime mode
+                 * if key frame is decided than we force it on next frame */
+                cpi->force_next_frame_intra = decide_key_frame(cpi);
+            }
+#else
             if (decide_key_frame(cpi))
             {
                 vp8_calc_auto_iframe_target_size(cpi);
@@ -4236,6 +4275,7 @@ static void encode_frame_to_data_rate
                 resize_key_frame(cpi);
                 continue;
             }
+#endif
         }
 
         vp8_clear_system_state();
@@ -4498,7 +4538,7 @@ static void encode_frame_to_data_rate
     }
 
     // Update the GF useage maps.
-    // Update the GF useage maps.
+    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
     // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
     vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
 

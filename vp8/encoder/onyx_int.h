@@ -191,15 +191,12 @@ typedef struct
 typedef struct
 {
     MACROBLOCK  mb;
-    int mb_row;
-    TOKENEXTRA *tp;
 #if CONFIG_SEGMENTATION
     int segment_counts[MAX_MB_SEGMENTS + 8];
 #else
     int segment_counts[MAX_MB_SEGMENTS];
 #endif
     int totalrate;
-    int current_mb_col;
 } MB_ROW_COMP;
 
 typedef struct
@@ -597,7 +594,8 @@ typedef struct
     signed char *cyclic_refresh_map;
 
     // multithread data
-    int current_mb_col_main;
+    int * mt_current_mb_col;
+    int mt_sync_range;
     int processor_core_count;
     int b_multi_threaded;
     int encoding_thread_count;
@@ -610,8 +608,8 @@ typedef struct
 
 #if CONFIG_MULTITHREAD
     //events
-    sem_t *h_event_mbrencoding;
-    sem_t h_event_main;
+    sem_t *h_event_start_encoding;
+    sem_t h_event_end_encoding;
 #endif
 
     TOKENLIST *tplist;
@@ -683,6 +681,9 @@ typedef struct
     int *lf_ref_frame_sign_bias;
     int *lf_ref_frame;
 
+#if CONFIG_REALTIME_ONLY
+    int force_next_frame_intra; /* force next frame to intra when kf_auto says so */
+#endif
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);
