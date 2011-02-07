@@ -45,15 +45,6 @@ DEFINE(yv12_buffer_config_border,               offsetof(YV12_BUFFER_CONFIG, bor
 #endif
 
 #if CONFIG_VP8_DECODER
-DEFINE(mb_diff,                                 offsetof(MACROBLOCKD, diff));
-DEFINE(mb_predictor,                            offsetof(MACROBLOCKD, predictor));
-DEFINE(mb_dst_y_stride,                         offsetof(MACROBLOCKD, dst.y_stride));
-DEFINE(mb_dst_y_buffer,                         offsetof(MACROBLOCKD, dst.y_buffer));
-DEFINE(mb_dst_u_buffer,                         offsetof(MACROBLOCKD, dst.u_buffer));
-DEFINE(mb_dst_v_buffer,                         offsetof(MACROBLOCKD, dst.v_buffer));
-DEFINE(mb_up_available,                         offsetof(MACROBLOCKD, up_available));
-DEFINE(mb_left_available,                       offsetof(MACROBLOCKD, left_available));
-
 DEFINE(detok_scan,                              offsetof(DETOK, scan));
 DEFINE(detok_ptr_block2leftabove,               offsetof(DETOK, ptr_block2leftabove));
 DEFINE(detok_coef_tree_ptr,                     offsetof(DETOK, vp8_coef_tree_ptr));
