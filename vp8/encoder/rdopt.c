@@ -1419,6 +1419,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
     return bsi.segment_rd;
 }
+#endif
 
 static void swap(int *x,int *y)
 {
@@ -1706,6 +1707,7 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
+#if !(CONFIG_REALTIME_ONLY)
 int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
