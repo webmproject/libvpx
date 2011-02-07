@@ -54,14 +54,11 @@ predict_h_nxn(unsigned char *predict,
               int            n)
 {
     unsigned char *left = predict - 1;
-    int            i;
+    int            i, j;
 
     for (i = 0; i < n; i++)
-    {
-        predict[n-1] = *left;
-        predict += stride;
-        left += stride;
-    }
+        for (j = 0; j < n; j++)
+            predict[i * stride + j] = left[i * stride];
 }
 
 
@@ -71,12 +68,11 @@ predict_v_nxn(unsigned char *predict,
               int            n)
 {
     unsigned char *above = predict - stride;
-    int            i;
-
-    predict += (n - 1) * stride;
+    int            i, j;
 
     for (i = 0; i < n; i++)
-        predict[i] = above[i];
+        for (j = 0; j < n; j++)
+            predict[i * stride + j] = above[j];
 }
 
 
@@ -103,65 +99,30 @@ predict_tm_nxn(unsigned char *predict,
     }
 }
 
-
 static void
-predict_dc_16x16(unsigned char *predict,
-                 int            stride)
+predict_dc_nxn(unsigned char *predict,
+               int            stride,
+               int            n)
 {
     unsigned char *left = predict - 1;
     unsigned char *above = predict - stride;
-    int            i, dc = 0;
+    int            i, j, dc = 0;
 
-    for (i = 0; i < 16; i++)
+    for (i = 0; i < n; i++)
     {
         dc += *left + above[i];
         left += stride;
     }
 
-    dc = (dc + 16) >> 5;
-    predict[15] = dc;
-    predict[15+4*stride] = dc;
-    predict[15+8*stride] = dc;
-    predict[15+12*stride] = dc;
-}
-
-
-static void
-predict_dc_8x8(unsigned char *predict,
-               int            stride)
-{
-    unsigned char *left = predict - 1;
-    unsigned char *above = predict - stride;
-    int            i, dc = 0;
-
-    for (i = 0; i < 8; i++)
+    switch(n)
     {
-        dc += *left + above[i];
-        left += stride;
+    case 16: dc = (dc + 16) >> 5; break;
+    case  8: dc = (dc + 8) >> 4; break;
+    case  4: dc = (dc + 4) >> 3; break;
     }
-
-    dc = (dc + 8) >> 4;
-    predict[7] = dc;
-    predict[7+4*stride] = dc;
-}
-
-
-static void
-predict_dc_4x4(unsigned char *predict,
-               int            stride)
-{
-    unsigned char *left = predict - 1;
-    unsigned char *above = predict - stride;
-    int            i, dc = 0;
-
-    for (i = 0; i < 4; i++)
-    {
-        dc += *left + above[i];
-        left += stride;
-    }
-
-    dc = (dc + 4) >> 3;
-    predict[3] = dc;
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            predict[i * stride + j] = dc;
 }
 
 
@@ -170,12 +131,16 @@ predict_ve_4x4(unsigned char *predict,
                int            stride)
 {
     unsigned char *above = predict - stride;
+    int            i, j;
 
-    predict += 3 * stride;
     predict[0] = (above[-1] + 2 * above[0] + above[1] + 2) >> 2;
     predict[1] = (above[ 0] + 2 * above[1] + above[2] + 2) >> 2;
     predict[2] = (above[ 1] + 2 * above[2] + above[3] + 2) >> 2;
     predict[3] = (above[ 2] + 2 * above[3] + above[4] + 2) >> 2;
+
+    for(i = 1; i < 4; i++)
+        for(j = 0; j < 4; j++)
+            predict[i * stride + j] = predict[j];
 }
 
 
@@ -183,14 +148,33 @@ static void
 predict_he_4x4(unsigned char *predict,
                int            stride)
 {
-    predict = predict - 1;
-    predict[4] = (predict[-stride] + 2 * predict[0] + predict[stride] + 2) >> 2;
+    unsigned char *left = predict - 1;
+
+    predict[0] =
+    predict[1] =
+    predict[2] =
+    predict[3] = (left[-stride] + 2 * left[0] + left[stride] + 2) >> 2;
     predict += stride;
-    predict[4] = (predict[-stride] + 2 * predict[0] + predict[stride] + 2) >> 2;
+    left += stride;
+
+    predict[0] =
+    predict[1] =
+    predict[2] =
+    predict[3] = (left[-stride] + 2 * left[0] + left[stride] + 2) >> 2;
     predict += stride;
-    predict[4] = (predict[-stride] + 2 * predict[0] + predict[stride] + 2) >> 2;
+    left += stride;
+
+    predict[0] =
+    predict[1] =
+    predict[2] =
+    predict[3] = (left[-stride] + 2 * left[0] + left[stride] + 2) >> 2;
     predict += stride;
-    predict[4] = (predict[-stride] + 2 * predict[0] + predict[0] + 2) >> 2;
+    left += stride;
+
+    predict[0] =
+    predict[1] =
+    predict[2] =
+    predict[3] = (left[-stride] + 2 * left[0] + left[0] + 2) >> 2;
 }
 
 
@@ -435,20 +419,6 @@ predict_tm_8x8(unsigned char *predict, int stride)
 
 
 static void
-predict_h_4x4(unsigned char *predict, int stride)
-{
-    predict_h_nxn(predict, stride, 4);
-}
-
-
-static void
-predict_v_4x4(unsigned char *predict, int stride)
-{
-    predict_v_nxn(predict, stride, 4);
-}
-
-
-static void
 predict_tm_4x4(unsigned char *predict, int stride)
 {
     predict_tm_nxn(predict, stride, 4);
@@ -492,7 +462,7 @@ b_pred(unsigned char  *predict,
         switch (mbi->split.modes[i])
         {
         case B_DC_PRED:
-            predict_dc_4x4(b_predict, stride);
+            predict_dc_nxn(b_predict, stride, 4);
             break;
         case B_TM_PRED:
             predict_tm_4x4(b_predict, stride);
@@ -525,7 +495,7 @@ b_pred(unsigned char  *predict,
             assert(0);
         }
 
-        vp8_dixie_idct_add(b_predict, stride, coeffs, mbi, i);
+        vp8_dixie_idct_add(b_predict, b_predict, stride, coeffs);
         coeffs += 16;
 
         if ((i & 3) == 3)
@@ -543,20 +513,10 @@ fixup_dc_coeffs(struct mb_info *mbi,
     short y2[16];
     int   i;
 
-    if (mbi->base.eob_mask & (1 << 24))
-    {
-        vp8_dixie_walsh(coeffs + 24 * 16, y2);
+    vp8_dixie_walsh(coeffs + 24 * 16, y2);
 
-        for (i = 0; i < 16; i++)
-            coeffs[i*16] = y2[i];
-    }
-    else
-    {
-        int dc = ((coeffs[24*16] + 3) >> 3);
-
-        for (i = 0; i < 16; i++)
-            coeffs[i*16] = dc;
-    }
+    for (i = 0; i < 16; i++)
+        coeffs[i*16] = y2[i];
 }
 
 
@@ -575,7 +535,7 @@ predict_intra_luma(unsigned char   *predict,
         switch (mbi->base.y_mode)
         {
         case DC_PRED:
-            predict_dc_16x16(predict, stride);
+            predict_dc_nxn(predict, stride, 16);
             break;
         case V_PRED:
             predict_v_16x16(predict, stride);
@@ -594,7 +554,7 @@ predict_intra_luma(unsigned char   *predict,
 
         for (i = 0; i < 16; i++)
         {
-            vp8_dixie_idct_add(predict, stride, coeffs, mbi, i);
+            vp8_dixie_idct_add(predict, predict, stride, coeffs);
             coeffs += 16;
             predict += 4;
 
@@ -618,8 +578,8 @@ predict_intra_chroma(unsigned char   *predict_u,
     switch (mbi->base.uv_mode)
     {
     case DC_PRED:
-        predict_dc_8x8(predict_u, stride);
-        predict_dc_8x8(predict_v, stride);
+        predict_dc_nxn(predict_u, stride, 8);
+        predict_dc_nxn(predict_v, stride, 8);
         break;
     case V_PRED:
         predict_v_8x8(predict_u, stride);
@@ -641,7 +601,7 @@ predict_intra_chroma(unsigned char   *predict_u,
 
     for (i = 16; i < 20; i++)
     {
-        vp8_dixie_idct_add(predict_u, stride, coeffs, mbi, i);
+        vp8_dixie_idct_add(predict_u, predict_u, stride, coeffs);
         coeffs += 16;
         predict_u += 4;
 
@@ -651,7 +611,7 @@ predict_intra_chroma(unsigned char   *predict_u,
 
     for (i = 20; i < 24; i++)
     {
-        vp8_dixie_idct_add(predict_v, stride, coeffs, mbi, i);
+        vp8_dixie_idct_add(predict_v, predict_v, stride, coeffs);
         coeffs += 16;
         predict_v += 4;
 
@@ -1072,10 +1032,10 @@ recon_16_blocks(unsigned char        *output,
 
     for (b = 0; b < 16; b++)
     {
-        vp8_dixie_idct_add_inter(output, predict, stride,
-                                 coeffs, mbi, b);
+        vp8_dixie_idct_add(output, predict, stride, coeffs);
         output += 4;
         predict += 4;
+        coeffs += 16;
 
         if ((b & 3) == 3)
         {
@@ -1101,15 +1061,15 @@ recon_4_blocks(unsigned char        *output,
     int                  b = start_b;
 
     predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
-    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
+    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
 
     output += stride * 4;
     predict += stride * 4;
     b += (start_b < 16) ? 4 : 2;
 
-    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
-    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
+    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
 }
 
 
@@ -1128,8 +1088,8 @@ recon_2_blocks(unsigned char        *output,
     int                  b = start_b;
 
     predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
-    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
+    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
 }
 
 
@@ -1147,7 +1107,7 @@ recon_1_block(unsigned char        *output,
     const unsigned char *predict;
 
     predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
 }
 
 
@@ -1293,15 +1253,15 @@ recon_4_edge_blocks(unsigned char        *output,
     }
 
     predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
-    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
+    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
 
     output += stride * 4;
     predict += stride * 4;
     b += (start_b < 16) ? 4 : 2;
 
-    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
-    vp8_dixie_idct_add_inter(output + 4, predict + 4, stride, coeffs, mbi, b + 1);
+    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
+    vp8_dixie_idct_add(output + 4, predict + 4, stride, coeffs + 16 * (b + 1));
 }
 
 
@@ -1341,7 +1301,7 @@ recon_1_edge_block(unsigned char        *output,
     }
 
     predict = filter_block(output, reference, stride, mv, mc);
-    vp8_dixie_idct_add_inter(output, predict, stride, coeffs, mbi, b);
+    vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
 }
 
 

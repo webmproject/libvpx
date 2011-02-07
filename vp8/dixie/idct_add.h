@@ -15,20 +15,10 @@ vp8_dixie_idct_add_init(struct vp8_decoder_ctx *ctx);
 
 
 void
-vp8_dixie_idct_add(unsigned char        *predict,
+vp8_dixie_idct_add(unsigned char        *recon,
+                   const unsigned char  *predict,
                    int                   stride,
-                   const short          *coeffs,
-                   struct mb_info       *mbi,
-                   int                   block);
-
-
-void
-vp8_dixie_idct_add_inter(unsigned char        *recon,
-                         const unsigned char  *predict,
-                         int                   stride,
-                         const short          *coeffs,
-                         struct mb_info       *mbi,
-                         int                   block);
+                   const short          *coeffs);
 
 
 void
