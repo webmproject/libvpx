@@ -1139,7 +1139,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
 
                     if (cpi->sf.search_method == HEX)
                         bestsme = vp8_hex_search(x, c, e, bsi->ref_mv,
-                                                 &mode_mv[NEW4X4], step_param, sadpb, &num00, v_fn_ptr, x->mvsadcost, x->mvcost);
+                                                 &mode_mv[NEW4X4], step_param, sadpb, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
 
                     else
                     {
@@ -2068,7 +2068,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
                     if (cpi->sf.search_method == HEX)
                     {
-                        bestsme = vp8_hex_search(x, b, d, &best_ref_mv, &d->bmi.mv.as_mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost);
+                        bestsme = vp8_hex_search(x, b, d, &best_ref_mv, &d->bmi.mv.as_mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv);
                         mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
                         mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
                     }

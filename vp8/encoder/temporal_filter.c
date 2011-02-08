@@ -204,7 +204,7 @@ static int vp8_temporal_filter_find_matching_mb_c
             step_param,
             sadpb/*x->errorperbit*/,
             &num00, &cpi->fn_ptr[BLOCK_16X16],
-            mvsadcost, mvcost);
+            mvsadcost, mvcost, &best_ref_mv1);
     }
     else
     {
