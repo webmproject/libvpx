@@ -345,7 +345,6 @@ filter_row_normal(struct vp8_decoder_ctx *ctx,
     int             stride, uv_stride;
     struct mb_info *mbi;
     unsigned int    col;
-    int             i;
 
     /* Adjust pointers based on row, start_col */
     stride    = ctx->ref_frames[CURRENT_FRAME]->img.stride[PLANE_Y];
@@ -444,7 +443,6 @@ filter_row_simple(struct vp8_decoder_ctx *ctx,
     int             stride;
     struct mb_info *mbi;
     unsigned int    col;
-    int             i;
 
     /* Adjust pointers based on row, start_col */
     stride    = ctx->ref_frames[CURRENT_FRAME]->img.stride[PLANE_Y];

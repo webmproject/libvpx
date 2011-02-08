@@ -488,7 +488,7 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
     int               mv_cnts[4];
     unsigned char     probs[4];
     enum {BEST, NEAREST, NEAR};
-    int ref_frame, x, y, w, h, b;
+    int x, y, w, h, b;
 
     this->base.ref_frame = bool_get(bool, hdr->prob_last)
                            ? 2 + bool_get(bool, hdr->prob_gf)
