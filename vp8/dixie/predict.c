@@ -20,7 +20,7 @@ enum
 };
 
 
-static const short sixtap_filters[8][6] =
+static const filter_t sixtap_filters[8] =
 {
 
     { 0,  0,  128,    0,   0,  0 },         // note that 1/8 pel positions are just as per alpha -0.5 bicubic
@@ -34,7 +34,7 @@ static const short sixtap_filters[8][6] =
 };
 
 
-static const short bilinear_filters[8][6] =
+static const filter_t bilinear_filters[8] =
 {
 
     { 0,  0,  128,    0,   0,  0 },
@@ -629,24 +629,21 @@ sixtap_horiz(unsigned char       *output,
              int                  reference_stride,
              int                  cols,
              int                  rows,
-             int                  mx,
-             int                  my
+             const filter_t       filter
             )
 {
-    const short *filter_x = sixtap_filters[mx];
-    const short *filter_y = sixtap_filters[my];
     int r, c, temp;
 
     for (r = 0; r < rows; r++)
     {
         for (c = 0; c < cols; c++)
         {
-            temp = (reference[-2] * filter_x[0]) +
-                   (reference[-1] * filter_x[1]) +
-                   (reference[ 0] * filter_x[2]) +
-                   (reference[ 1] * filter_x[3]) +
-                   (reference[ 2] * filter_x[4]) +
-                   (reference[ 3] * filter_x[5]) +
+            temp = (reference[-2] * filter[0]) +
+                   (reference[-1] * filter[1]) +
+                   (reference[ 0] * filter[2]) +
+                   (reference[ 1] * filter[3]) +
+                   (reference[ 2] * filter[4]) +
+                   (reference[ 3] * filter[5]) +
                    64;
             temp >>= 7;
             output[c] = CLAMP_255(temp);
@@ -666,58 +663,21 @@ sixtap_vert(unsigned char       *output,
             int                  reference_stride,
             int                  cols,
             int                  rows,
-            int                  mx,
-            int                  my
+            const filter_t       filter
            )
 {
-    const short *filter_x = sixtap_filters[mx];
-    const short *filter_y = sixtap_filters[my];
     int r, c, temp;
 
     for (r = 0; r < rows; r++)
     {
         for (c = 0; c < cols; c++)
         {
-            temp = (reference[-2*reference_stride] * filter_y[0]) +
-                   (reference[-1*reference_stride] * filter_y[1]) +
-                   (reference[ 0*reference_stride] * filter_y[2]) +
-                   (reference[ 1*reference_stride] * filter_y[3]) +
-                   (reference[ 2*reference_stride] * filter_y[4]) +
-                   (reference[ 3*reference_stride] * filter_y[5]) +
-                   64;
-            temp >>= 7;
-            output[c] = CLAMP_255(temp);
-            reference++;
-        }
-
-        reference += reference_stride - cols;
-        output += output_stride;
-    }
-}
-
-static void
-fourtap_horiz(unsigned char       *output,
-              int                  output_stride,
-              const unsigned char *reference,
-              int                  reference_stride,
-              int                  cols,
-              int                  rows,
-              int                  mx,
-              int                  my
-             )
-{
-    const short *filter_x = &sixtap_filters[mx][1];
-    const short *filter_y = &sixtap_filters[my][1];
-    int r, c, temp;
-
-    for (r = 0; r < rows; r++)
-    {
-        for (c = 0; c < cols; c++)
-        {
-            temp = (reference[-1] * filter_x[0]) +
-                   (reference[ 0] * filter_x[1]) +
-                   (reference[ 1] * filter_x[2]) +
-                   (reference[ 2] * filter_x[3]) +
+            temp = (reference[-2*reference_stride] * filter[0]) +
+                   (reference[-1*reference_stride] * filter[1]) +
+                   (reference[ 0*reference_stride] * filter[2]) +
+                   (reference[ 1*reference_stride] * filter[3]) +
+                   (reference[ 2*reference_stride] * filter[4]) +
+                   (reference[ 3*reference_stride] * filter[5]) +
                    64;
             temp >>= 7;
             output[c] = CLAMP_255(temp);
@@ -731,197 +691,27 @@ fourtap_horiz(unsigned char       *output,
 
 
 static void
-fourtap_vert(unsigned char       *output,
-             int                  output_stride,
-             const unsigned char *reference,
-             int                  reference_stride,
-             int                  cols,
-             int                  rows,
-             int                  mx,
-             int                  my
-            )
+sixtap_2d(unsigned char       *output,
+          int                  output_stride,
+          const unsigned char *reference,
+          int                  reference_stride,
+          int                  cols,
+          int                  rows,
+          int                  mx,
+          int                  my,
+          const filter_t       filters[8]
+          )
 {
-    const short *filter_x = &sixtap_filters[mx][1];
-    const short *filter_y = &sixtap_filters[my][1];
-    int r, c, temp;
+    DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);
 
-    for (r = 0; r < rows; r++)
-    {
-        for (c = 0; c < cols; c++)
-        {
-            temp = (reference[-1*reference_stride] * filter_y[0]) +
-                   (reference[ 0*reference_stride] * filter_y[1]) +
-                   (reference[ 1*reference_stride] * filter_y[2]) +
-                   (reference[ 2*reference_stride] * filter_y[3]) +
-                   64;
-            temp >>= 7;
-            output[c] = CLAMP_255(temp);
-            reference++;
-        }
-
-        reference += reference_stride - cols;
-        output += output_stride;
-    }
+    sixtap_horiz(temp, 16,
+                 reference - 2 * reference_stride, reference_stride,
+                 cols, rows + 5, filters[mx]);
+    sixtap_vert(output, output_stride,
+                temp + 2 * 16, 16,
+                cols, rows, filters[my]);
 }
 
-
-static void
-twotap_horiz(unsigned char       *output,
-             int                  output_stride,
-             const unsigned char *reference,
-             int                  reference_stride,
-             int                  cols,
-             int                  rows,
-             int                  mx,
-             int                  my
-            )
-{
-    const short *filter_x = &bilinear_filters[mx][2];
-    const short *filter_y = &bilinear_filters[my][2];
-    int r, c, temp;
-
-    for (r = 0; r < rows; r++)
-    {
-        for (c = 0; c < cols; c++)
-        {
-            temp = (reference[ 0] * filter_x[0]) +
-                   (reference[ 1] * filter_x[1]) +
-                   64;
-            temp >>= 7;
-            output[c] = CLAMP_255(temp);
-            reference++;
-        }
-
-        reference += reference_stride - cols;
-        output += output_stride;
-    }
-}
-
-
-static void
-twotap_vert(unsigned char       *output,
-            int                  output_stride,
-            const unsigned char *reference,
-            int                  reference_stride,
-            int                  cols,
-            int                  rows,
-            int                  mx,
-            int                  my
-           )
-{
-    const short *filter_x = &bilinear_filters[mx][2];
-    const short *filter_y = &bilinear_filters[my][2];
-    int r, c, temp;
-
-    for (r = 0; r < rows; r++)
-    {
-        for (c = 0; c < cols; c++)
-        {
-            temp = (reference[ 0*reference_stride] * filter_y[0]) +
-                   (reference[ 1*reference_stride] * filter_y[1]) +
-                   64;
-            temp >>= 7;
-            output[c] = CLAMP_255(temp);
-            reference++;
-        }
-
-        reference += reference_stride - cols;
-        output += output_stride;
-    }
-}
-
-
-#define DEFINE_FILTER(kind, w, h)\
-    static void kind##_h_##w##x##h##_c(const unsigned char *reference,\
-                                       int                  reference_stride,\
-                                       int                  mx,\
-                                       int                  my,\
-                                       unsigned char       *output,\
-                                       int                  output_stride)\
-    {\
-        kind##_horiz(output, output_stride,\
-                     reference, reference_stride,\
-                     w, h, mx, my);\
-    }\
-    static void kind##_v_##w##x##h##_c(const unsigned char *reference,\
-                                       int                  reference_stride,\
-                                       int                  mx,\
-                                       int                  my,\
-                                       unsigned char       *output,\
-                                       int                  output_stride)\
-    {\
-        kind##_vert(output, output_stride,\
-                    reference, reference_stride,\
-                    w, h, mx, my);\
-    }\
-    static void kind##_hv_##w##x##h##_c(const unsigned char *reference,\
-                                        int                  reference_stride,\
-                                        int                  mx,\
-                                        int                  my,\
-                                        unsigned char       *output,\
-                                        int                  output_stride)\
-    {\
-        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
-        \
-        kind##_horiz(temp, 16,\
-                     reference - 2 * reference_stride, reference_stride,\
-                     w, h + 5, mx, my);\
-        kind##_vert(output, output_stride,\
-                    temp + 2 * 16, 16,\
-                    w, h, mx, my);\
-    }
-
-DEFINE_FILTER(sixtap, 16, 16)
-DEFINE_FILTER(fourtap, 16, 16)
-DEFINE_FILTER(twotap, 16, 16)
-DEFINE_FILTER(sixtap, 8, 8)
-DEFINE_FILTER(fourtap, 8, 8)
-DEFINE_FILTER(twotap, 8, 8)
-DEFINE_FILTER(sixtap, 8, 4)
-DEFINE_FILTER(fourtap, 8, 4)
-DEFINE_FILTER(twotap, 8, 4)
-DEFINE_FILTER(sixtap, 4, 4)
-DEFINE_FILTER(fourtap, 4, 4)
-DEFINE_FILTER(twotap, 4, 4)
-
-#define DEFINE_SPLIT_FILTER(w, h)\
-    static void filter_6h4v_##w##x##h##_c(const unsigned char *reference,\
-                                          int                  ref_stride,\
-                                          int                  mx,\
-                                          int                  my,\
-                                          unsigned char       *output,\
-                                          int                  output_stride)\
-    {\
-        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
-        \
-        sixtap_horiz(temp, 16,\
-                     reference - 1 * ref_stride, ref_stride,\
-                     w, h + 3, mx, my);\
-        fourtap_vert(output, output_stride,\
-                     temp + 1 * 16, 16,\
-                     w, h, mx, my);\
-    }\
-    static void filter_4h6v_##w##x##h##_c(const unsigned char *reference,\
-                                          int                  ref_stride,\
-                                          int                  mx,\
-                                          int                  my,\
-                                          unsigned char       *output,\
-                                          int                  output_stride)\
-    {\
-        DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);\
-        \
-        fourtap_horiz(temp, 16,\
-                      reference - 2 * ref_stride, ref_stride,\
-                      w, h + 5, mx, my);\
-        sixtap_vert(output, output_stride,\
-                    temp + 2 * 16, 16,\
-                    w, h, mx, my);\
-    }
-
-DEFINE_SPLIT_FILTER(16, 16)
-DEFINE_SPLIT_FILTER(8, 8)
-DEFINE_SPLIT_FILTER(8, 4)
-DEFINE_SPLIT_FILTER(4, 4)
 
 struct img_index
 {
@@ -935,7 +725,7 @@ filter_block(unsigned char        *output,
              const unsigned char  *reference,
              int                   stride,
              const union mv       *mv,
-             mc_fn_t              *mc)
+             const filter_t        filters[8])
 {
     int mx, my;
 
@@ -949,12 +739,7 @@ filter_block(unsigned char        *output,
 
     if (mx | my)
     {
-        /* Index is composed of whether to use 4-tap and whether the component
-         * is non-zero. 0/4-tap/6-tap
-         */
-        int idx_x = !!mx + (mx & 1);
-        int idx_y = !!my + (my & 1);
-        mc[idx_y * 4 + idx_x](reference, stride, mx, my, output, stride);
+        sixtap_2d(output, stride, reference, stride, 4, 4, mx, my, filters);
         reference = output;
     }
 
@@ -967,7 +752,7 @@ recon_1_block(unsigned char        *output,
               const unsigned char  *reference,
               int                   stride,
               const union mv       *mv,
-              mc_fn_t              *mc,
+              const filter_t        filters[8],
               short                *coeffs,
               struct mb_info       *mbi,
               int                   b
@@ -975,7 +760,7 @@ recon_1_block(unsigned char        *output,
 {
     const unsigned char *predict;
 
-    predict = filter_block(output, reference, stride, mv, mc);
+    predict = filter_block(output, reference, stride, mv, filters);
     vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
 }
 
@@ -1091,7 +876,7 @@ recon_1_edge_block(unsigned char        *output,
                    const unsigned char  *reference,
                    int                   stride,
                    const union mv       *mv,
-                   mc_fn_t              *mc,
+                   const filter_t        filters[8],
                    short                *coeffs,
                    struct mb_info       *mbi,
                    int                   x,
@@ -1120,7 +905,7 @@ recon_1_edge_block(unsigned char        *output,
         reference -= (mv->d.x >> 3) + (mv->d.y >> 3) * stride;
     }
 
-    predict = filter_block(output, reference, stride, mv, mc);
+    predict = filter_block(output, reference, stride, mv, filters);
     vp8_dixie_idct_add(output, predict, stride, coeffs + 16 * b);
 }
 
@@ -1192,7 +977,7 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
             ymv = mbi->split.mvs + b;
 
         recon_1_edge_block(output, emul_block, reference, img->stride,
-                           ymv, ctx->mc_functions[MC_4X4],
+                           ymv, ctx->subpixel_filters,
                            coeffs, mbi, x, y, w, h, b);
 
         x += 4;
@@ -1221,11 +1006,11 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
     {
         recon_1_edge_block(u, emul_block, u + reference_offset,
                            img->uv_stride,
-                           &chroma_mv[b], ctx->mc_functions[MC_4X4],
+                           &chroma_mv[b], ctx->subpixel_filters,
                            coeffs, mbi, x, y, w, h, b + 16);
         recon_1_edge_block(v, emul_block, v + reference_offset,
                            img->uv_stride,
-                           &chroma_mv[b], ctx->mc_functions[MC_4X4],
+                           &chroma_mv[b], ctx->subpixel_filters,
                            coeffs, mbi, x, y, w, h, b + 20);
         u += 4;
         v += 4;
@@ -1296,7 +1081,7 @@ predict_inter(struct vp8_decoder_ctx  *ctx,
 
 
         recon_1_block(y, y + reference_offset, img->stride,
-                      ymv, ctx->mc_functions[MC_4X4], coeffs, mbi, b);
+                      ymv, ctx->subpixel_filters, coeffs, mbi, b);
         y += 4;
         if ((b & 3) == 3)
             y += 4 * img->stride - 16;
@@ -1306,10 +1091,10 @@ predict_inter(struct vp8_decoder_ctx  *ctx,
     {
         recon_1_block(u, u + reference_offset,
                       img->uv_stride, &chroma_mv[b],
-                      ctx->mc_functions[MC_4X4], coeffs, mbi, b + 16);
+                      ctx->subpixel_filters, coeffs, mbi, b + 16);
         recon_1_block(v, v + reference_offset,
                       img->uv_stride, &chroma_mv[b],
-                      ctx->mc_functions[MC_4X4], coeffs, mbi, b + 20);
+                      ctx->subpixel_filters, coeffs, mbi, b + 20);
         u += 4;
         v += 4;
 
@@ -1464,83 +1249,10 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
 
         }
 
-        /* TODO: Move the rest of this out of this function */
-	if(ctx->frame_hdr.version)
-	{
-            ctx->mc_functions[MC_16X16][MC_4H0V] = twotap_h_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_6H0V] = twotap_h_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_0H4V] = twotap_v_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_4H4V] = twotap_hv_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_6H4V] = twotap_hv_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_0H6V] = twotap_v_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_4H6V] = twotap_hv_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_6H6V] = twotap_hv_16x16_c;
-
-            ctx->mc_functions[MC_8X8][MC_4H0V]   = twotap_h_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_6H0V]   = twotap_h_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_0H4V]   = twotap_v_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_4H4V]   = twotap_hv_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_6H4V]   = twotap_hv_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_0H6V]   = twotap_v_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_4H6V]   = twotap_hv_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_6H6V]   = twotap_hv_8x8_c;
-
-            ctx->mc_functions[MC_8X4][MC_4H0V]   = twotap_h_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_6H0V]   = twotap_h_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_0H4V]   = twotap_v_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_4H4V]   = twotap_hv_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_6H4V]   = twotap_hv_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_0H6V]   = twotap_v_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_4H6V]   = twotap_hv_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_6H6V]   = twotap_hv_8x4_c;
-
-            ctx->mc_functions[MC_4X4][MC_4H0V]   = twotap_h_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_6H0V]   = twotap_h_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_0H4V]   = twotap_v_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_4H4V]   = twotap_hv_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_6H4V]   = twotap_hv_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_0H6V]   = twotap_v_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_4H6V]   = twotap_hv_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_6H6V]   = twotap_hv_4x4_c;
-	}
-	else
-	{
-            ctx->mc_functions[MC_16X16][MC_4H0V] = fourtap_h_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_6H0V] = sixtap_h_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_0H4V] = fourtap_v_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_4H4V] = fourtap_hv_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_6H4V] = filter_6h4v_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_0H6V] = sixtap_v_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_4H6V] = filter_4h6v_16x16_c;
-            ctx->mc_functions[MC_16X16][MC_6H6V] = sixtap_hv_16x16_c;
-
-            ctx->mc_functions[MC_8X8][MC_4H0V]   = fourtap_h_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_6H0V]   = sixtap_h_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_0H4V]   = fourtap_v_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_4H4V]   = fourtap_hv_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_6H4V]   = filter_6h4v_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_0H6V]   = sixtap_v_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_4H6V]   = filter_4h6v_8x8_c;
-            ctx->mc_functions[MC_8X8][MC_6H6V]   = sixtap_hv_8x8_c;
-
-            ctx->mc_functions[MC_8X4][MC_4H0V]   = fourtap_h_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_6H0V]   = sixtap_h_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_0H4V]   = fourtap_v_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_4H4V]   = fourtap_hv_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_6H4V]   = filter_6h4v_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_0H6V]   = sixtap_v_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_4H6V]   = filter_4h6v_8x4_c;
-            ctx->mc_functions[MC_8X4][MC_6H6V]   = sixtap_hv_8x4_c;
-
-            ctx->mc_functions[MC_4X4][MC_4H0V]   = fourtap_h_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_6H0V]   = sixtap_h_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_0H4V]   = fourtap_v_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_4H4V]   = fourtap_hv_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_6H4V]   = filter_6h4v_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_0H6V]   = sixtap_v_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_4H6V]   = filter_4h6v_4x4_c;
-            ctx->mc_functions[MC_4X4][MC_6H6V]   = sixtap_hv_4x4_c;
-	}
+	    if(ctx->frame_hdr.version)
+            ctx->subpixel_filters = bilinear_filters;
+	    else
+            ctx->subpixel_filters = sixtap_filters;
     }
 
     /* Find a free framebuffer to predict into */
