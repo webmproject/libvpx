@@ -711,7 +711,7 @@ process_common_toolchain() {
             TOOLCHAIN_PATH=${SDK_PATH}/usr/bin
             CC=${TOOLCHAIN_PATH}/gcc
             AR=${TOOLCHAIN_PATH}/ar
-            LD=${TOOLCHAIN_PATH}/arm-apple-darwin9-gcc-4.2.1
+            LD=${TOOLCHAIN_PATH}/arm-apple-darwin10-gcc-4.2.1
             AS=${TOOLCHAIN_PATH}/as
             STRIP=${TOOLCHAIN_PATH}/strip
             NM=${TOOLCHAIN_PATH}/nm
@@ -725,14 +725,14 @@ process_common_toolchain() {
             add_cflags -arch ${tgt_isa}
             add_ldflags -arch_only ${tgt_isa}
 
-            add_cflags  "-isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS3.1.sdk"
+            add_cflags  "-isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk"
 
             # This should be overridable
-            alt_libc=${SDK_PATH}/SDKs/iPhoneOS3.1.sdk
+            alt_libc=${SDK_PATH}/SDKs/iPhoneOS4.2.sdk
 
             # Add the paths for the alternate libc
 #            for d in usr/include usr/include/gcc/darwin/4.0/; do
-            for d in usr/include usr/include/gcc/darwin/4.0/ usr/lib/gcc/arm-apple-darwin9/4.0.1/include/; do
+            for d in usr/include usr/include/gcc/darwin/4.0/ usr/lib/gcc/arm-apple-darwin10/4.2.1/include/; do
                 try_dir="${alt_libc}/${d}"
                 [ -d "${try_dir}" ] && add_cflags -I"${try_dir}"
             done

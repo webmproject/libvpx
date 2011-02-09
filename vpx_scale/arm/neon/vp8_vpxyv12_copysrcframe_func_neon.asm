@@ -14,7 +14,7 @@
     REQUIRE8
     PRESERVE8
 
-    INCLUDE vpx_asm_offsets.asm
+    INCLUDE asm_com_offsets.asm
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 ;Note: This function is used to copy source data in src_buffer[i] at beginning of

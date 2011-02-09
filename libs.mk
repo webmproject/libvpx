@@ -230,9 +230,38 @@ endif
 #
 # Add assembler dependencies for configuration and offsets
 #
-#$(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm $(BUILD_PFX)vpx_asm_offsets.asm
 $(filter %.s.o,$(OBJS-yes)):   $(BUILD_PFX)vpx_config.asm
 $(filter %.asm.o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
+
+#
+# Calculate platform- and compiler-specific offsets for hand coded assembly
+#
+ifeq ($(ARCH_ARM), yes)
+  asm_com_offsets.asm: obj_int_extract
+  asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
+	./obj_int_extract rvds $< $(ADS2GAS) > $@
+  OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
+  CLEAN-OBJS += asm_com_offsets.asm
+  $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
+
+  ifeq ($(CONFIG_VP8_ENCODER), yes)
+    asm_enc_offsets.asm: obj_int_extract
+    asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
+	./obj_int_extract rvds $< $(ADS2GAS) > $@
+    OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
+    CLEAN-OBJS += asm_enc_offsets.asm
+    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
+  endif
+
+  ifeq ($(CONFIG_VP8_DECODER), yes)
+    asm_dec_offsets.asm: obj_int_extract
+    asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
+	./obj_int_extract rvds $< $(ADS2GAS) > $@
+    OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
+    CLEAN-OBJS += asm_dec_offsets.asm
+    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
+  endif
+endif
 
 $(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
 CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
