@@ -1,0 +1,415 @@
+@TEMPLATE decoder_tmpl.c
+Decode With Drops Example
+=========================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ INTRODUCTION
+This is an example utility which drops a series of frames, as specified
+on the command line. This is useful for observing the error recovery
+features of the codec.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ INTRODUCTION
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA_INCLUDES
+#include <math.h>
+#include <time.h>
+#include "vpx_scale/yv12config.h"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA_INCLUDES
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HELPERS
+extern double vp8_calc_ssim
+(
+    YV12_BUFFER_CONFIG *source,
+    YV12_BUFFER_CONFIG *dest,
+    int lumamask,
+    double *weight
+);
+
+extern double vp8_ssim
+(
+    const unsigned char *img1,
+    const unsigned char *img2,
+    int stride_img1,
+    int stride_img2,
+    int width,
+    int height
+);
+
+struct detect_buffer {
+    char buf[4];
+    size_t buf_read;
+    size_t position;
+};
+
+struct parsed_header
+{
+    char key_frame;
+    int version;
+    char show_frame;
+    int first_part_size;
+};
+
+int next_packet(struct parsed_header* hdr, int pos, int length, int mtu)
+{
+    int size = 0;
+    int remaining = length - pos;
+    /* Uncompressed part is 3 bytes for P frames and 10 bytes for I frames */
+    int uncomp_part_size = (hdr->key_frame ? 10 : 3);
+    /* number of bytes yet to send from header and the first partition */
+    int remainFirst = uncomp_part_size + hdr->first_part_size - pos;
+    if (remainFirst > 0)
+    {
+        if (remainFirst <= mtu)
+        {
+            size = remainFirst;
+        }
+        else
+        {
+            size = mtu;
+        }
+
+        return size;
+    }
+
+    /* second partition; just slot it up according to MTU */
+    if (remaining <= mtu)
+    {
+        size = remaining;
+        return size;
+    }
+    return mtu;
+}
+
+void throw_packets(unsigned char* frame, int* size, int loss_rate, int* thrown, int* kept)
+{
+    unsigned char loss_frame[256*1024];
+    int pkg_size = 1;
+    int count = 0;
+    int pos = 0;
+    int loss_pos = 0;
+    struct parsed_header hdr;
+    unsigned int tmp;
+    int mtu = 100;
+
+    if (*size < 3)
+    {
+        return;
+    }
+    putc('|', stdout);
+    /* parse uncompressed 3 bytes */
+    tmp = (frame[2] << 16) | (frame[1] << 8) | frame[0];
+    hdr.key_frame = !(tmp & 0x1); /* inverse logic */
+    hdr.version = (tmp >> 1) & 0x7;
+    hdr.show_frame = (tmp >> 4) & 0x1;
+    hdr.first_part_size = (tmp >> 5) & 0x7FFFF;
+
+    /* don't drop key frames */
+    if (hdr.key_frame)
+    {
+        int i;
+        *kept = *size/mtu + ((*size % mtu > 0) ? 1 : 0); /* approximate */
+        for (i=0; i < *kept; i++)
+            putc('.', stdout);
+        return;
+    }
+
+    while ((pkg_size = next_packet(&hdr, pos, *size, mtu)) > 0)
+    {
+        int loss_event = ((rand() + 1.0)/(RAND_MAX + 1.0) < loss_rate/100.0);
+        if (*thrown == 0 && !loss_event)
+        {
+            memcpy(loss_frame + loss_pos, frame + pos, pkg_size);
+            loss_pos += pkg_size;
+            (*kept)++;
+            putc('.', stdout);
+        }
+        else
+        {
+            (*thrown)++;
+            putc('X', stdout);
+        }
+        pos += pkg_size;
+    }
+    memcpy(frame, loss_frame, loss_pos);
+    memset(frame + loss_pos, 0, *size - loss_pos);
+    *size = loss_pos;
+}
+
+double ssim_yuv(unsigned char *ptr_ref, 
+                unsigned char *ptr_deg,
+                int w,
+                int h,
+                double *weight) 
+{
+    /* insert ref and deg into YV12_BUFFER_CONFIG structs
+     * and calculate SSIM for this frame
+     */
+    
+    YV12_BUFFER_CONFIG ref, deg;
+    
+    ref.y_width = w;
+    ref.y_height = h;
+    ref.y_stride = w;
+    ref.uv_width = w/2;
+    ref.uv_height = h/2;
+    ref.uv_stride = w/2;
+    ref.y_buffer = ptr_ref;
+    ref.u_buffer = ptr_ref + w*h;
+    ref.v_buffer = ptr_ref + w*h + (w*h)/4;
+    /* do not need the rest of the struct parameters; leave them as is */
+    
+    deg.y_width = w;
+    deg.y_height = h;
+    deg.y_stride = w;
+    deg.uv_width = w/2;
+    deg.uv_height = h/2;
+    deg.uv_stride = w/2;
+    deg.y_buffer = ptr_deg;
+    deg.u_buffer = ptr_deg + w*h;
+    deg.v_buffer = ptr_deg + w*h + (w*h)/4;
+    
+    return vp8_calc_ssim(&ref, &deg, 1, weight);
+}
+
+void write_and_eval_frame(unsigned char *img_buf,
+                         int w,
+                         int h,
+                         FILE *outfile,
+                         FILE *reffile,
+                         double *sum_ssim,
+                         double *sum_weight)
+{
+    /* write frame in img to output file and calculate SSIM */
+    int img_sz = (w*h*3)/2;
+    unsigned char *ref_buf = NULL;
+    double temp_ssim;
+    double weight = 0.0;
+    
+    if(!img_buf || !outfile || !reffile) 
+        die("Failure in write_and_eval_frame");
+    
+    if(fwrite(img_buf, 1, img_sz, outfile) != img_sz)
+        die("Could not write to file");
+    
+    /* Read next frame from reference file */
+    ref_buf = (unsigned char *) malloc(img_sz);
+    if(!ref_buf)
+        die("Error allocating memory");
+
+    if(fread(ref_buf, 1, img_sz, reffile) != img_sz)
+        die("Failed to read complete reference frame");
+
+    /* Calculate SSIM */
+    
+    temp_ssim = ssim_yuv(ref_buf, img_buf, 
+                         w, h, &weight);
+    *sum_ssim += temp_ssim * weight;
+    *sum_weight += weight;
+    
+    free(ref_buf);    
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HELPERS
+
+Usage
+-----
+This example adds a single argument to the `simple_decoder` example,
+which specifies the range or pattern of frames to drop. The parameter is
+parsed as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ USAGE
+if(argc!=5 && argc != 6)
+    die("Usage: %s <infile> <outfile> <reffile> <N-M|N/M|L,S>\n", 
+        argv[0]);
+{
+    char *nptr;
+    n = strtol(argv[4], &nptr, 0);
+    mode = (*nptr == '\0' || *nptr == ',') ? 2 : (*nptr == '-') ? 1 : 0;
+
+    m = strtol(nptr+1, NULL, 0);
+    if((!n && !m) || (*nptr != '-' && *nptr != '/' &&
+        *nptr != '\0' && *nptr != ','))
+        die("Couldn't parse pattern %s\n", argv[4]);
+}
+seed = (m > 0) ? m : (unsigned int)time(NULL);
+srand(seed);thrown_frame = 0;
+printf("Seed: %u\n", seed);
+
+if(!(reffile = fopen(argv[3], "rb")))
+    die("Failed to open %s for reading", argv[3]);
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ USAGE
+
+
+Dropping A Range Of Frames
+--------------------------
+To drop a range of frames, specify the starting frame and the ending
+frame to drop, separated by a dash. The following command will drop
+frames 5 through 10 (base 1).
+
+  $ ./decode_with_drops in.ivf out.i420 5-10
+
+
+Dropping A Pattern Of Frames
+----------------------------
+To drop a pattern of frames, specify the number of frames to drop and
+the number of frames after which to repeat the pattern, separated by
+a forward-slash. The following command will drop 3 of 7 frames.
+Specifically, it will decode 4 frames, then drop 3 frames, and then
+repeat.
+
+  $ ./decode_with_drops in.ivf out.i420 3/7
+
+
+Extra Variables
+---------------
+This example maintains the pattern passed on the command line in the
+`n`, `m`, and `is_range` variables:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA_VARS
+int              n, m, mode;                                        //
+unsigned int     seed;
+int              thrown=0, kept=0;
+int              thrown_frame=0, kept_frame=0;
+unsigned char   *last_yuv_buf = NULL;
+int              last_sz = 0;
+int              last_alloc_sz = 0;
+unsigned char   *temp_last = NULL;
+int              expected_decode = 1;
+FILE            *reffile, *sttfile;
+unsigned char   *ref_yuv_buf = NULL;
+int              ref_sz = 0;
+int              ref_alloc_sz = 0;
+double           sum_ssim = 0.0, sum_weight = 0.0;
+double           total_ssim;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA_VARS
+
+
+Making The Drop Decision
+------------------------
+The example decides whether to drop the frame based on the current
+frame number, immediately before decoding the frame.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PRE_DECODE
+/* Decide whether to throw parts of the frame or the whole frame
+   depending on the drop mode */
+thrown_frame = 0;
+kept_frame = 0;
+switch (mode)
+{
+case 0:
+    if (m - (frame_cnt-1)%m <= n)
+    {
+        frame_sz = 0;
+    }
+    break;
+case 1:
+    if (frame_cnt >= n && frame_cnt <= m)
+    {
+        frame_sz = 0;
+    }
+    break;
+case 2:
+    throw_packets(frame, &frame_sz, n, &thrown_frame, &kept_frame);
+    break;
+default: break;
+}
+if (mode < 2)
+{
+    if (frame_sz == 0)
+    {
+        putc('X', stdout);
+        thrown_frame++;
+    }
+    else
+    {
+        putc('.', stdout);
+        kept_frame++;
+    }
+}
+thrown += thrown_frame;
+kept += kept_frame;
+fflush(stdout);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PRE_DECODE
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DECODE
+/* Decode the frame, use frame_cnt as user-specific data */
+if(vpx_codec_decode(&codec, frame, frame_sz, NULL /*(void *) frame_cnt*/, 0))
+    die_codec(&codec, "Failed to decode frame");
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DECODE
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GET_FRAME
+while((img = vpx_codec_get_frame(&codec, &iter))) {
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ GET_FRAME
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PROCESS_DX
+/* Check if we are missing frames */
+while(/*((int) img->user_priv)*/ frame_cnt > expected_decode) {
+    write_and_eval_frame(last_yuv_buf,
+                         img->d_w,
+                         img->d_h,
+                         outfile,
+                         reffile,
+                         &sum_ssim,
+                         &sum_weight);
+                         
+    expected_decode++;
+    }
+
+expected_decode++; 
+
+/* Check size of last_yuv_buf */
+if(last_alloc_sz < (img->d_w * img->d_h * 3) / 2) {
+    /* Re-allocate */
+    if(last_yuv_buf) {
+        free(last_yuv_buf);
+        last_yuv_buf = NULL;
+    }
+    last_alloc_sz = (img->d_w * img->d_h * 3) / 2;
+    last_yuv_buf = (unsigned char *) malloc(last_alloc_sz);
+    last_sz = 0;
+}
+
+/* First, write new frame to last_yuv_buf */
+temp_last = last_yuv_buf;
+last_sz = 0;
+for(plane=0; plane < 3; plane++) {
+    unsigned char *buf =img->planes[plane];
+
+    for(y=0; y<img->d_h >> (plane?1:0); y++) {
+        memcpy(temp_last, buf, img->d_w >> (plane?1:0));
+        temp_last += img->d_w >> (plane?1:0);
+        last_sz += img->d_w >> (plane?1:0);
+        buf += img->stride[plane];
+    }
+}
+
+/* Then, write it to file and calculate SSIM*/
+write_and_eval_frame(last_yuv_buf,
+                     img->d_w,
+                     img->d_h,
+                     outfile,
+                     reffile,
+                     &sum_ssim,
+                     &sum_weight);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ PROCESS_DX
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DESTROY
+
+total_ssim = sum_ssim / sum_weight;
+printf("SSIM = %f\n", total_ssim);
+
+if(!(sttfile = fopen("loss.stt", "at")))
+    die("Failed to open loss.stt for writing");
+fprintf(sttfile, "lossparam \tSSIM\n");
+fprintf(sttfile, "%s\t%f\n", argv[4], total_ssim);
+fclose(sttfile);
+
+if(last_yuv_buf)
+    free(last_yuv_buf);
+
+if(vpx_codec_destroy(&codec))
+    die_codec(&codec, "Failed to destroy codec");
+    
+fclose(reffile);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DESTROY
