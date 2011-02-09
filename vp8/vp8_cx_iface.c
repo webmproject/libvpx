@@ -912,8 +912,8 @@ static vpx_image_t *vp8e_get_preview(vpx_codec_alg_priv_t *ctx)
         ctx->preview_img.x_chroma_shift = 1;
         ctx->preview_img.y_chroma_shift = 1;
 
-        ctx->preview_img.d_w = ctx->cfg.g_w;
-        ctx->preview_img.d_h = ctx->cfg.g_h;
+        ctx->preview_img.d_w = sd.y_width;
+        ctx->preview_img.d_h = sd.y_height;
         ctx->preview_img.stride[VPX_PLANE_Y] = sd.y_stride;
         ctx->preview_img.stride[VPX_PLANE_U] = sd.uv_stride;
         ctx->preview_img.stride[VPX_PLANE_V] = sd.uv_stride;
