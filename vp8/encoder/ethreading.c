@@ -13,6 +13,8 @@
 #include "common.h"
 #include "extend.h"
 
+#if CONFIG_MULTITHREAD
+
 extern int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
                                          TOKENEXTRA **t, int recon_yoffset,
                                          int recon_uvoffset);
@@ -25,7 +27,6 @@ extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 static
 THREAD_FUNCTION thread_encoding_proc(void *p_data)
 {
-#if CONFIG_MULTITHREAD
     int ithread = ((ENCODETHREAD_DATA *)p_data)->ithread;
     VP8_COMP *cpi = (VP8_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr1);
     MB_ROW_COMP *mbri = (MB_ROW_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr2);
@@ -247,10 +248,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
         }
     }
 
-#else
-    (void) p_data;
-#endif
-
     //printf("exit thread %d\n", ithread);
     return 0;
 }
@@ -436,10 +433,6 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
 
     cpi->processor_core_count = 32; //vp8_get_proc_core_count();
 
-    CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
-
-#if CONFIG_MULTITHREAD
-
     if (cpi->processor_core_count > 1 && cpi->oxcf.multi_threaded > 1)
     {
         int ithread;
@@ -488,13 +481,10 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
 
     }
 
-#endif
 }
 
 void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
 {
-#if CONFIG_MULTITHREAD
-
     if (cpi->b_multi_threaded)
     {
         //shutdown other threads
@@ -521,7 +511,5 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
         vpx_free(cpi->en_thread_data);
         vpx_free(cpi->mt_current_mb_col);
     }
-
-#endif
-    vpx_free(cpi->tplist);
 }
+#endif

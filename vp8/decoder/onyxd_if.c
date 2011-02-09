@@ -114,8 +114,10 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     pbi->ready_for_new_data = 1;
 
     pbi->CPUFreq = 0; /*vp8_get_processor_freq();*/
+#if CONFIG_MULTITHREAD
     pbi->max_threads = oxcf->max_threads;
     vp8_decoder_create_threads(pbi);
+#endif
 
     /* vp8cx_init_de_quantizer() is first called here. Add check in frame_init_dequantizer() to avoid
      *  unnecessary calling of vp8cx_init_de_quantizer() for every frame.
@@ -149,8 +151,8 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
 #if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd)
         vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
-#endif
     vp8_decoder_remove_threads(pbi);
+#endif
     vp8_remove_common(&pbi->common);
     vpx_free(pbi);
 }
@@ -407,6 +409,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         return retcode;
     }
 
+#if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd && cm->multi_token_partition != ONE_PARTITION)
     {
         if (swap_frame_buffers (cm))
@@ -424,6 +427,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
             return -1;
         }
     } else
+#endif
     {
         if (swap_frame_buffers (cm))
         {

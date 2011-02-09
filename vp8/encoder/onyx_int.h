@@ -589,6 +589,7 @@ typedef struct
     int cyclic_refresh_q;
     signed char *cyclic_refresh_map;
 
+#if CONFIG_MULTITHREAD
     // multithread data
     int * mt_current_mb_col;
     int mt_sync_range;
@@ -596,13 +597,10 @@ typedef struct
     int b_multi_threaded;
     int encoding_thread_count;
 
-#if CONFIG_MULTITHREAD
     pthread_t *h_encoding_thread;
-#endif
     MB_ROW_COMP *mb_row_ei;
     ENCODETHREAD_DATA *en_thread_data;
 
-#if CONFIG_MULTITHREAD
     //events
     sem_t *h_event_start_encoding;
     sem_t h_event_end_encoding;
