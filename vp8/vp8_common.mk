@@ -116,6 +116,7 @@ VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 
 # common (c)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.c
+VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.h
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/filter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/reconintra_arm.c

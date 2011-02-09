@@ -12,26 +12,7 @@
 #include <math.h>
 #include "filter.h"
 #include "subpixel.h"
-
-extern void vp8_filter_block2d_bil_first_pass_armv6
-(
-    unsigned char  *src_ptr,
-    unsigned short *dst_ptr,
-    unsigned int    src_pitch,
-    unsigned int    height,
-    unsigned int    width,
-    const short    *vp8_filter
-);
-
-extern void vp8_filter_block2d_bil_second_pass_armv6
-(
-    unsigned short *src_ptr,
-    unsigned char  *dst_ptr,
-    int             dst_pitch,
-    unsigned int    height,
-    unsigned int    width,
-    const short    *vp8_filter
-);
+#include "arm/bilinearfilter_arm.h"
 
 void vp8_filter_block2d_bil_armv6
 (
