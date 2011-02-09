@@ -11,7 +11,7 @@
 
     EXPORT |vp8cx_pack_tokens_into_partitions_armv5|
 
-    INCLUDE vpx_vp8_enc_asm_offsets.asm
+    INCLUDE asm_enc_offsets.asm
 
     ARM
     REQUIRE8

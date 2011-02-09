@@ -16,7 +16,7 @@
     REQUIRE8
     PRESERVE8
 
-    INCLUDE vpx_asm_offsets.asm
+    INCLUDE asm_com_offsets.asm
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 ;void vpxyv12_copy_frame_yonly(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);

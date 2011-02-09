@@ -14,7 +14,7 @@
     EXPORT |vp8_stop_encode|
     EXPORT |vp8_encode_value|
 
-    INCLUDE vpx_vp8_enc_asm_offsets.asm
+    INCLUDE asm_enc_offsets.asm
 
     ARM
     REQUIRE8

@@ -12,6 +12,7 @@
 #VP8_DX_SRCS list is modified according to different platforms.
 
 VP8_DX_SRCS-$(ARCH_ARM)  += decoder/arm/arm_dsystemdependent.c
+VP8_CX_SRCS-$(ARCH_ARM)  += decoder/asm_dec_offsets.c
 
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/dequantize_arm.c
 VP8_DX_SRCS-$(CONFIG_ARM_ASM_DETOK)  += decoder/arm/detokenize$(ASM)
