@@ -331,11 +331,8 @@ ifneq ($(call enabled,DIST-SRCS),)
     DIST-SRCS-$(CONFIG_MSVS)  += build/make/gen_msvs_sln.sh
     DIST-SRCS-$(CONFIG_MSVS)  += build/x86-msvs/yasm.rules
     DIST-SRCS-$(CONFIG_RVCT) += build/make/armlink_adapter.sh
-    #
-    # This isn't really ARCH_ARM dependent, it's dependent on whether we're
-    # using assembly code or not (CONFIG_OPTIMIZATIONS maybe). Just use
-    # this for now.
-    DIST-SRCS-$(ARCH_ARM)    += build/make/obj_int_extract.c
+    # Include obj_int_extract if we use offsets from asm_*_offsets
+    DIST-SRCS-$(ARCH_ARM)$(ARCH_X86)$(ARCH_X86_64)    += build/make/obj_int_extract.c
     DIST-SRCS-$(ARCH_ARM)    += build/make/ads2gas.pl
     DIST-SRCS-yes            += $(target:-$(TOOLCHAIN)=).mk
 endif
