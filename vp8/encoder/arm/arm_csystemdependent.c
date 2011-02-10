@@ -29,8 +29,8 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 #if HAVE_ARMV6
     if (has_media)
     {
-        /*cpi->rtcd.variance.sad16x16              = vp8_sad16x16_c;
-        cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;
+        cpi->rtcd.variance.sad16x16              = vp8_sad16x16_armv6;
+        /*cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;
         cpi->rtcd.variance.sad8x16               = vp8_sad8x16_c;
         cpi->rtcd.variance.sad8x8                = vp8_sad8x8_c;
         cpi->rtcd.variance.sad4x4                = vp8_sad4x4_c;*/
