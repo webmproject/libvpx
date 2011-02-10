@@ -12,7 +12,7 @@
 #ifndef tokenize_h
 #define tokenize_h
 
-#include "entropy.h"
+#include "vp8/common/entropy.h"
 #include "block.h"
 
 void vp8_tokenize_initialize();

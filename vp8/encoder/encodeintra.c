@@ -10,15 +10,15 @@
 
 
 #include "vpx_ports/config.h"
-#include "idct.h"
+#include "vp8/common/idct.h"
 #include "quantize.h"
-#include "reconintra.h"
-#include "reconintra4x4.h"
+#include "vp8/common/reconintra.h"
+#include "vp8/common/reconintra4x4.h"
 #include "encodemb.h"
-#include "invtrans.h"
-#include "recon.h"
+#include "vp8/common/invtrans.h"
+#include "vp8/common/recon.h"
 #include "dct.h"
-#include "g_common.h"
+#include "vp8/common/g_common.h"
 #include "encodeintra.h"
 
 #define intra4x4ibias_rate    128

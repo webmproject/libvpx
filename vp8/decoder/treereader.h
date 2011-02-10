@@ -12,7 +12,7 @@
 #ifndef tree_reader_h
 #define tree_reader_h 1
 
-#include "treecoder.h"
+#include "vp8/common/treecoder.h"
 
 #include "dboolhuff.h"
 

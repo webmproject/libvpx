@@ -13,28 +13,28 @@
 #include <math.h>
 #include <limits.h>
 #include <assert.h>
-#include "pragmas.h"
+#include "vp8/common/pragmas.h"
 
 #include "tokenize.h"
 #include "treewriter.h"
 #include "onyx_int.h"
 #include "modecosts.h"
 #include "encodeintra.h"
-#include "entropymode.h"
-#include "reconinter.h"
-#include "reconintra.h"
-#include "reconintra4x4.h"
-#include "findnearmv.h"
+#include "vp8/common/entropymode.h"
+#include "vp8/common/reconinter.h"
+#include "vp8/common/reconintra.h"
+#include "vp8/common/reconintra4x4.h"
+#include "vp8/common/findnearmv.h"
 #include "encodemb.h"
 #include "quantize.h"
-#include "idct.h"
-#include "g_common.h"
+#include "vp8/common/idct.h"
+#include "vp8/common/g_common.h"
 #include "variance.h"
 #include "mcomp.h"
 
 #include "vpx_mem/vpx_mem.h"
 #include "dct.h"
-#include "systemdependent.h"
+#include "vp8/common/systemdependent.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x)  (x)

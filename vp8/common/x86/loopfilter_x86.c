@@ -10,7 +10,7 @@
 
 
 #include "vpx_ports/config.h"
-#include "loopfilter.h"
+#include "vp8/common/loopfilter.h"
 
 prototype_loopfilter(vp8_loop_filter_horizontal_edge_c);
 prototype_loopfilter(vp8_loop_filter_vertical_edge_c);

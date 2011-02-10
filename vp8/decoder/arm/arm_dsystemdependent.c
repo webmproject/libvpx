@@ -11,11 +11,11 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_ports/arm.h"
-#include "blockd.h"
-#include "pragmas.h"
-#include "postproc.h"
-#include "dequantize.h"
-#include "onyxd_int.h"
+#include "vp8/common/blockd.h"
+#include "vp8/common/pragmas.h"
+#include "vp8/common/postproc.h"
+#include "vp8/decoder/dequantize.h"
+#include "vp8/decoder/onyxd_int.h"
 
 void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
 {

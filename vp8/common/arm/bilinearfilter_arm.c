@@ -10,9 +10,9 @@
 
 
 #include <math.h>
-#include "filter.h"
-#include "subpixel.h"
-#include "arm/bilinearfilter_arm.h"
+#include "vp8/common/filter.h"
+#include "vp8/common/subpixel.h"
+#include "bilinearfilter_arm.h"
 
 void vp8_filter_block2d_bil_armv6
 (

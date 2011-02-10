@@ -9,8 +9,8 @@
  */
 
 
-#include "boolhuff.h"
-#include "blockd.h"
+#include "vp8/encoder/boolhuff.h"
+#include "vp8/common/blockd.h"
 
 const unsigned int vp8_prob_cost[256] =
 {

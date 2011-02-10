@@ -9,8 +9,8 @@
  */
 
 
-#include "variance.h"
-#include "pragmas.h"
+#include "vp8/encoder/variance.h"
+#include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
 
 extern void filter_block1d_h6_mmx

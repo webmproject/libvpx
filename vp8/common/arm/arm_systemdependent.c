@@ -11,13 +11,13 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_ports/arm.h"
-#include "g_common.h"
-#include "pragmas.h"
-#include "subpixel.h"
-#include "loopfilter.h"
-#include "recon.h"
-#include "idct.h"
-#include "onyxc_int.h"
+#include "vp8/common/g_common.h"
+#include "vp8/common/pragmas.h"
+#include "vp8/common/subpixel.h"
+#include "vp8/common/loopfilter.h"
+#include "vp8/common/recon.h"
+#include "vp8/common/idct.h"
+#include "vp8/common/onyxc_int.h"
 
 extern void (*vp8_build_intra_predictors_mby_ptr)(MACROBLOCKD *x);
 extern void vp8_build_intra_predictors_mby(MACROBLOCKD *x);

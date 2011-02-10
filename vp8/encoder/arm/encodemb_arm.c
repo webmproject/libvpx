@@ -9,13 +9,13 @@
  */
 
 
-#include "encodemb.h"
-#include "reconinter.h"
-#include "quantize.h"
-#include "invtrans.h"
-#include "recon.h"
-#include "reconintra.h"
-#include "dct.h"
+#include "vp8/encoder/encodemb.h"
+#include "vp8/common/reconinter.h"
+#include "vp8/encoder/quantize.h"
+#include "vp8/common/invtrans.h"
+#include "vp8/common/recon.h"
+#include "vp8/common/reconintra.h"
+#include "vp8/encoder/dct.h"
 #include "vpx_mem/vpx_mem.h"
 
 extern void vp8_subtract_b_neon_func(short *diff, unsigned char *src, unsigned char *pred, int stride, int pitch);

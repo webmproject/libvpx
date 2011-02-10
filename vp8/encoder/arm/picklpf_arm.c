@@ -9,13 +9,13 @@
  */
 
 
-#include "onyxc_int.h"
-#include "onyx_int.h"
-#include "quantize.h"
+#include "vp8/common/onyxc_int.h"
+#include "vp8/encoder/onyx_int.h"
+#include "vp8/encoder/quantize.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
-#include "alloccommon.h"
+#include "vp8/common/alloccommon.h"
 
 extern void vp8_memcpy_neon(unsigned char *dst_ptr, unsigned char *src_ptr, int sz);
 

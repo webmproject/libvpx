@@ -14,21 +14,21 @@
 
 #include <stdio.h>
 #include "vpx_ports/config.h"
-#include "onyx.h"
+#include "vp8/common/onyx.h"
 #include "treewriter.h"
 #include "tokenize.h"
-#include "onyxc_int.h"
+#include "vp8/common/onyxc_int.h"
 #include "variance.h"
 #include "dct.h"
 #include "encodemb.h"
 #include "quantize.h"
-#include "entropy.h"
-#include "threading.h"
+#include "vp8/common/entropy.h"
+#include "vp8/common/threading.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
 #include "temporal_filter.h"
-#include "findnearmv.h"
+#include "vp8/common/findnearmv.h"
 
 //#define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4

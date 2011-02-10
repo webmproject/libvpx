@@ -17,13 +17,13 @@
 #endif
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
-#include "threading.h"
+#include "vp8/common/threading.h"
 
-#include "loopfilter.h"
-#include "extend.h"
+#include "vp8/common/loopfilter.h"
+#include "vp8/common/extend.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"
-#include "reconinter.h"
+#include "vp8/common/reconinter.h"
 #include "reconintra_mt.h"
 
 extern void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);

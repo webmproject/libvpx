@@ -9,13 +9,13 @@
  */
 
 
-#include "onyxc_int.h"
+#include "vp8/common/onyxc_int.h"
 #include "onyx_int.h"
 #include "quantize.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
-#include "alloccommon.h"
+#include "vp8/common/alloccommon.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif

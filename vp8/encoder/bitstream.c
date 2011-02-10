@@ -9,15 +9,15 @@
  */
 
 
-#include "header.h"
+#include "vp8/common/header.h"
 #include "encodemv.h"
-#include "entropymode.h"
-#include "findnearmv.h"
+#include "vp8/common/entropymode.h"
+#include "vp8/common/findnearmv.h"
 #include "mcomp.h"
-#include "systemdependent.h"
+#include "vp8/common/systemdependent.h"
 #include <assert.h>
 #include <stdio.h>
-#include "pragmas.h"
+#include "vp8/common/pragmas.h"
 #include "vpx_mem/vpx_mem.h"
 #include "bitstream.h"
 
