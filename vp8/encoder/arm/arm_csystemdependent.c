@@ -38,14 +38,14 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         /*cpi->rtcd.variance.var4x4                = vp8_variance4x4_c;
         cpi->rtcd.variance.var8x8                = vp8_variance8x8_c;
         cpi->rtcd.variance.var8x16               = vp8_variance8x16_c;
-        cpi->rtcd.variance.var16x8               = vp8_variance16x8_c;
-        cpi->rtcd.variance.var16x16              = vp8_variance16x16_c;*/
+        cpi->rtcd.variance.var16x8               = vp8_variance16x8_c;*/
+        cpi->rtcd.variance.var16x16              = vp8_variance16x16_armv6;
 
         /*cpi->rtcd.variance.subpixvar4x4          = vp8_sub_pixel_variance4x4_c;
         cpi->rtcd.variance.subpixvar8x8          = vp8_sub_pixel_variance8x8_c;
         cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_c;
-        cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;
-        cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_c;*/
+        cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;*/
+        cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_armv6;
 
         /*cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;
         cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;*/

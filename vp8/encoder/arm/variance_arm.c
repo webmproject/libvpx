@@ -10,6 +10,40 @@
 
 #include "vpx_config.h"
 #include "variance.h"
+#include "filter.h"
+#include "arm/bilinearfilter_arm.h"
+
+#if HAVE_ARMV6
+
+unsigned int vp8_sub_pixel_variance16x16_armv6
+(
+    const unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    const unsigned char *dst_ptr,
+    int dst_pixels_per_line,
+    unsigned int *sse
+)
+{
+    unsigned short first_pass[36*16];
+    unsigned char  second_pass[20*16];
+    const short *HFilter, *VFilter;
+
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
+
+    vp8_filter_block2d_bil_first_pass_armv6(src_ptr, first_pass,
+                                            src_pixels_per_line,
+                                            17, 16, HFilter);
+    vp8_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
+                                             16, 16, 16, VFilter);
+
+    return vp8_variance16x16_armv6(second_pass, 16, dst_ptr,
+                                   dst_pixels_per_line, sse);
+}
+
+#endif
 
 #if HAVE_ARMV7
 
