@@ -484,9 +484,11 @@ static void setup_token_decoder(VP8D_COMP *pbi,
         bool_decoder++;
     }
 
+#if CONFIG_MULTITHREAD
     /* Clamp number of decoder threads */
     if (pbi->decoding_thread_count > num_part - 1)
         pbi->decoding_thread_count = num_part - 1;
+#endif
 }
 
 
@@ -849,7 +851,9 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #endif
 
     /* set up frame new frame for intra coded blocks */
+#if CONFIG_MULTITHREAD
     if (!(pbi->b_multithreaded_rd) || pc->multi_token_partition == ONE_PARTITION || !(pc->filter_level))
+#endif
         vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
 
     vp8_setup_block_dptrs(xd);
@@ -869,6 +873,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     vpx_memcpy(&xd->block[0].bmi, &xd->mode_info_context->bmi[0], sizeof(B_MODE_INFO));
 
+#if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {
         vp8mt_decode_mb_rows(pbi, xd);
@@ -883,6 +888,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         vp8_yv12_extend_frame_borders_ptr(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
     }
     else
+#endif
     {
         int ibc = 0;
         int num_part = 1 << pc->multi_token_partition;

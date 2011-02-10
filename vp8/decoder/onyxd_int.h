@@ -87,13 +87,14 @@ typedef struct VP8Decompressor
     unsigned int time_decoding;
     unsigned int time_loop_filtering;
 
+#if CONFIG_MULTITHREAD
+    /* variable for threading */
+
     volatile int b_multithreaded_rd;
     int max_threads;
     int current_mb_col_main;
     int decoding_thread_count;
     int allocated_decoding_thread_count;
-    /* variable for threading */
-#if CONFIG_MULTITHREAD
     int mt_baseline_filter_level[MAX_MB_SEGMENTS];
     int sync_range;
     int *mt_current_mb_col;                  /* Each row remembers its already decoded column. */

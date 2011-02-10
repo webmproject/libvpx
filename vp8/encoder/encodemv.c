@@ -128,7 +128,7 @@ static unsigned int cost_mvcomponent(const int v, const struct mv_context *mvc)
 
         while (--i > 3);
 
-        if (x & 240)
+        if (x & 0xFFF0)
             cost += vp8_cost_bit(p [MVPbits + 3], (x >> 3) & 1);
     }
 

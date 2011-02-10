@@ -853,28 +853,9 @@ void vp8_encode_frame(VP8_COMP *cpi)
         struct vpx_usec_timer  emr_timer;
         vpx_usec_timer_start(&emr_timer);
 
-        if (!cpi->b_multi_threaded)
-        {
-            // for each macroblock row in image
-            for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
-            {
-
-                vp8_zero(cm->left_context)
-
-                encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
-
-                // adjust to the next row of mbs
-                x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
-                x->src.u_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
-                x->src.v_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
-            }
-
-            cpi->tok_count = tp - cpi->tok;
-
-        }
-        else
-        {
 #if CONFIG_MULTITHREAD
+        if (cpi->b_multi_threaded)
+        {
             int i;
 
             vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei, 1,  cpi->encoding_thread_count);
@@ -939,7 +920,25 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 x->activity_sum += cpi->mb_row_ei[i].mb.activity_sum;
             }
 
+        }
+        else
 #endif
+        {
+            // for each macroblock row in image
+            for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+            {
+
+                vp8_zero(cm->left_context)
+
+                encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
+
+                // adjust to the next row of mbs
+                x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
+                x->src.u_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
+                x->src.v_buffer += 8 * x->src.uv_stride - 8 * cm->mb_cols;
+            }
+
+            cpi->tok_count = tp - cpi->tok;
 
         }
 
@@ -1304,7 +1303,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
         Error16x16 = vp8_rd_pick_intra16x16mby_mode(cpi, x, &rate16x16, &rate16x16_tokenonly, &dist16x16);
 
-        Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4);
+        Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4, Error16x16);
 
         rate += (Error4x4 < Error16x16) ? rate4x4 : rate16x16;
     }
