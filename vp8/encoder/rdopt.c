@@ -645,7 +645,7 @@ static void macro_block_yrd( MACROBLOCK *mb,
     *Rate = vp8_rdcost_mby(mb);
 }
 
-static void rd_pick_intra4x4block(
+static int rd_pick_intra4x4block(
     VP8_COMP *cpi,
     MACROBLOCK *x,
     BLOCK *be,
@@ -711,16 +711,20 @@ static void rd_pick_intra4x4block(
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
     vp8_encode_intra4x4block_rd(IF_RTCD(&cpi->rtcd), x, be, b, b->bmi.mode);
 
+    return best_rd;
+
 }
 
 
-int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate, int *rate_y, int *Distortion)
+int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
+                                  int *rate_y, int *Distortion, int best_rd)
 {
     MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int distortion = 0;
     int tot_rate_y = 0;
+    int total_rd = 0;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
@@ -742,7 +746,7 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate, int 
         B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
         int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
 
-        rd_pick_intra4x4block(
+        total_rd += rd_pick_intra4x4block(
             cpi, mb, mb->block + i, xd->block + i, &best_mode, A, L,
             ta + vp8_block2above[i],
             tl + vp8_block2left[i], &r, &ry, &d);
@@ -751,7 +755,13 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate, int 
         distortion += d;
         tot_rate_y += ry;
         mic->bmi[i].mode = xd->block[i].bmi.mode = best_mode;
+
+        if(total_rd >= best_rd)
+          break;
     }
+
+    if(total_rd >= best_rd)
+      return INT_MAX;
 
     *Rate = cost;
     *rate_y += tot_rate_y;
@@ -2025,15 +2035,28 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         switch (this_mode)
         {
         case B_PRED:
+        {
+            int tmp_rd;
+
             // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
-            vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion);
+            tmp_rd = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd);
             rate2 += rate;
             distortion2 += distortion;
-            rate2 += uv_intra_rate;
-            rate_uv = uv_intra_rate_tokenonly;
-            distortion2 += uv_intra_distortion;
-            distortion_uv = uv_intra_distortion;
-            break;
+
+            if(tmp_rd < best_yrd)
+            {
+                rate2 += uv_intra_rate;
+                rate_uv = uv_intra_rate_tokenonly;
+                distortion2 += uv_intra_distortion;
+                distortion_uv = uv_intra_distortion;
+            }
+            else
+            {
+                this_rd = INT_MAX;
+                disable_skip = 1;
+            }
+        }
+        break;
 
         case SPLITMV:
         {

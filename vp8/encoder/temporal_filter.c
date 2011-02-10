@@ -70,7 +70,7 @@ static void vp8_temporal_filter_predictors_mb_c
     // U & V
     mv_row >>= 1;
     mv_col >>= 1;
-    stride >>= 1;
+    stride = (stride + 1) >> 1;
     offset = (mv_row >> 3) * stride + (mv_col >> 3);
     uptr = u_mb_ptr + offset;
     vptr = v_mb_ptr + offset;

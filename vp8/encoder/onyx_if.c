@@ -331,6 +331,9 @@ static void setup_features(VP8_COMP *cpi)
 
 void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 {
+    vpx_free(cpi->tplist);
+    cpi->tplist = NULL;
+
     // Delete last frame MV storage buffers
     if (cpi->lfmv != 0)
         vpx_free(cpi->lfmv);
@@ -1545,6 +1548,8 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     else
         cpi->mt_sync_range = 16;
 #endif
+
+    CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
 }
 
 
@@ -2496,7 +2501,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     init_mv_ref_counts();
 #endif
 
+#if CONFIG_MULTITHREAD
     vp8cx_create_encoder_threads(cpi);
+#endif
 
     cpi->fn_ptr[BLOCK_16X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
     cpi->fn_ptr[BLOCK_16X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16);
@@ -2771,7 +2778,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
     }
 
+#if CONFIG_MULTITHREAD
     vp8cx_remove_encoder_threads(cpi);
+#endif
 
     vp8_dealloc_compressor_data(cpi);
     vpx_free(cpi->mb.ss);
