@@ -43,8 +43,8 @@ extern int vp8_hex_search
     int *num00,
     const vp8_variance_fn_ptr_t *vf,
     int *mvsadcost[2],
-    int *mvcost[2]
-
+    int *mvcost[2],
+    MV *center_mv
 );
 
 typedef int (fractional_mv_step_fp)
