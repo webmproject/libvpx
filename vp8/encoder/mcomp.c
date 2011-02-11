@@ -779,15 +779,17 @@ int vp8_hex_search
     int *num00,
     const vp8_variance_fn_ptr_t *vfp,
     int *mvsadcost[2],
-    int *mvcost[2]
+    int *mvcost[2],
+    MV *center_mv
 )
 {
     MV hex[6] = { { -1, -2}, {1, -2}, {2, 0}, {1, 2}, { -1, 2}, { -2, 0} } ;
-    MV neighbors[8] = { { -1, -1}, { -1, 0}, { -1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}, {1, 1} } ;
+    MV neighbors[8] = { { -1, -1}, {0, -1}, {1, -1}, { -1, 0}, {1, 0}, { -1, 1}, {0, 1}, {1, 1} } ;
     int i, j;
     unsigned char *src = (*(b->base_src) + b->src);
     int src_stride = b->src_stride;
-    int rr = ref_mv->row, rc = ref_mv->col, br = rr >> 3, bc = rc >> 3, tr, tc;
+    int rr = center_mv->row, rc = center_mv->col;
+    int br = ref_mv->row >> 3, bc = ref_mv->col >> 3, tr, tc;
     unsigned int besterr, thiserr = 0x7fffffff;
     int k = -1, tk;
 
@@ -892,7 +894,7 @@ cal_neighbors:
     best_mv->row = br;
     best_mv->col = bc;
 
-    return vfp->vf(src, src_stride, PRE(br, bc), d->pre_stride, &thiserr) + MVC(br, bc) ;
+    return vfp->vf(src, src_stride, PRE(br, bc), d->pre_stride, &thiserr) + vp8_mv_err_cost(best_mv, center_mv, mvcost, error_per_bit) ;
 }
 #undef MVC
 #undef PRE
