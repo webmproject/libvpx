@@ -1187,6 +1187,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 #else
             sf->search_method = DIAMOND;
 #endif
+            sf->iterative_sub_pixel = 0;
 
             cpi->mode_check_freq[THR_V_PRED] = 4;
             cpi->mode_check_freq[THR_H_PRED] = 4;
@@ -1238,7 +1239,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             int total_skip;
 
             int min = 2000;
-            sf->iterative_sub_pixel = 0;
 
             if (cpi->oxcf.encode_breakout > 2000)
                 min = cpi->oxcf.encode_breakout;
