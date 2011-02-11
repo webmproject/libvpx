@@ -185,6 +185,7 @@ typedef struct
 
     int use_fastquant_for_pick;
     int no_skip_block4x4_search;
+    int improved_mv_pred;
 
 } SPEED_FEATURES;
 
