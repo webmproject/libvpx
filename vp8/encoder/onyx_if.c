@@ -601,6 +601,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     sf->first_step = 0;
     sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
+    sf->improved_mv_pred = 1;
 
     cpi->do_full[0] = 0;
     cpi->do_full[1] = 0;
@@ -1228,6 +1229,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_V_PRED] = INT_MAX;
             sf->thresh_mult[THR_H_PRED] = INT_MAX;
 
+            sf->improved_mv_pred = 0;
         }
 
         if (Speed > 8)
