@@ -643,34 +643,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         sf->first_step = 0;
         sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
-
-        if (!(cpi->ref_frame_flags & VP8_LAST_FLAG))
-        {
-            sf->thresh_mult[THR_NEWMV    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
-            sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
-            sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
-        }
-
-        if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
-        {
-            sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
-            sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARG    ] = INT_MAX;
-            sf->thresh_mult[THR_NEWG     ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
-        }
-
-        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
-        {
-            sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
-            sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARA    ] = INT_MAX;
-            sf->thresh_mult[THR_NEWA     ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
-        }
-
         break;
     case 1:
     case 3:
@@ -728,41 +700,22 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->full_freq[0] = 15;
         sf->full_freq[1] = 31;
 
-        sf->first_step = 0;
-        sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
-
-        if (!(cpi->ref_frame_flags & VP8_LAST_FLAG))
-        {
-            sf->thresh_mult[THR_NEWMV    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
-            sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
-            sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
-        }
-
-        if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
-        {
-            sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
-            sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARG    ] = INT_MAX;
-            sf->thresh_mult[THR_NEWG     ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
-        }
-
-        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
-        {
-            sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
-            sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARA    ] = INT_MAX;
-            sf->thresh_mult[THR_NEWA     ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
-        }
-
         if (Speed > 0)
         {
-            // Disable coefficient optimization above speed 0
+            /* Disable coefficient optimization above speed 0 */
             sf->optimize_coefficients = 0;
+            sf->use_fastquant_for_pick = 1;
+            sf->no_skip_block4x4_search = 0;
 
+            sf->first_step = 1;
+
+            cpi->mode_check_freq[THR_SPLITG] = 2;
+            cpi->mode_check_freq[THR_SPLITA] = 2;
+            cpi->mode_check_freq[THR_SPLITMV] = 0;
+        }
+
+        if (Speed > 1)
+        {
             cpi->mode_check_freq[THR_SPLITG] = 4;
             cpi->mode_check_freq[THR_SPLITA] = 4;
             cpi->mode_check_freq[THR_SPLITMV] = 2;
@@ -795,18 +748,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWA     ] = 2000;
                 sf->thresh_mult[THR_SPLITA   ] = 20000;
             }
-
-            sf->use_fastquant_for_pick = 1;
-
-            sf->first_step = 1;
-            sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
-            sf->no_skip_block4x4_search = 0;
         }
 
-        if (Speed > 1)
+        if (Speed > 2)
         {
-            sf->use_fastquant_for_pick = 0;
-
             cpi->mode_check_freq[THR_SPLITG] = 15;
             cpi->mode_check_freq[THR_SPLITA] = 15;
             cpi->mode_check_freq[THR_SPLITMV] = 7;
@@ -840,8 +785,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
 
-            sf->first_step = 1;
-
             sf->improved_quant = 0;
             sf->improved_dct = 0;
 
@@ -851,38 +794,14 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             sf->full_freq[0] = 31;
             sf->full_freq[1] = 63;
-
-        }
-
-        if (Speed > 2)
-        {
-            sf->auto_filter = 0;                     // Faster selection of loop filter
-            cpi->mode_check_freq[THR_V_PRED] = 2;
-            cpi->mode_check_freq[THR_H_PRED] = 2;
-            cpi->mode_check_freq[THR_B_PRED] = 2;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARG] = 2;
-                cpi->mode_check_freq[THR_NEWG] = 4;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARA] = 2;
-                cpi->mode_check_freq[THR_NEWA] = 4;
-            }
-
-            sf->thresh_mult[THR_SPLITA  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITG  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
-
-            sf->full_freq[0] = 63;
-            sf->full_freq[1] = 127;
         }
 
         if (Speed > 3)
         {
+            sf->thresh_mult[THR_SPLITA  ] = INT_MAX;
+            sf->thresh_mult[THR_SPLITG  ] = INT_MAX;
+            sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
+
             cpi->mode_check_freq[THR_V_PRED] = 0;
             cpi->mode_check_freq[THR_H_PRED] = 0;
             cpi->mode_check_freq[THR_B_PRED] = 0;
@@ -894,13 +813,16 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->auto_filter = 1;
             sf->recode_loop = 0; // recode loop off
             sf->RD = 0;         // Turn rd off
-            sf->full_freq[0] = INT_MAX;
-            sf->full_freq[1] = INT_MAX;
+
+            sf->full_freq[0] = 63;
+            sf->full_freq[1] = 127;
         }
 
         if (Speed > 4)
         {
             sf->auto_filter = 0;                     // Faster selection of loop filter
+            sf->full_freq[0] = INT_MAX;
+            sf->full_freq[1] = INT_MAX;
 
             cpi->mode_check_freq[THR_V_PRED] = 2;
             cpi->mode_check_freq[THR_H_PRED] = 2;
@@ -965,33 +887,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->full_freq[0] = 15;
         sf->full_freq[1] = 31;
         sf->search_method = NSTEP;
-
-        if (!(cpi->ref_frame_flags & VP8_LAST_FLAG))
-        {
-            sf->thresh_mult[THR_NEWMV    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
-            sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
-            sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
-        }
-
-        if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
-        {
-            sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
-            sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARG    ] = INT_MAX;
-            sf->thresh_mult[THR_NEWG     ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
-        }
-
-        if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
-        {
-            sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
-            sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
-            sf->thresh_mult[THR_NEARA    ] = INT_MAX;
-            sf->thresh_mult[THR_NEWA     ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
-        }
 
         if (Speed > 0)
         {
@@ -1273,7 +1168,36 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         vpx_memset(cpi->error_bins, 0, sizeof(cpi->error_bins));
 
-    };
+    }; /* switch */
+
+    /* disable frame modes if flags not set */
+    if (!(cpi->ref_frame_flags & VP8_LAST_FLAG))
+    {
+        sf->thresh_mult[THR_NEWMV    ] = INT_MAX;
+        sf->thresh_mult[THR_NEARESTMV] = INT_MAX;
+        sf->thresh_mult[THR_ZEROMV   ] = INT_MAX;
+        sf->thresh_mult[THR_NEARMV   ] = INT_MAX;
+        sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
+    }
+
+    if (!(cpi->ref_frame_flags & VP8_GOLD_FLAG))
+    {
+        sf->thresh_mult[THR_NEARESTG ] = INT_MAX;
+        sf->thresh_mult[THR_ZEROG    ] = INT_MAX;
+        sf->thresh_mult[THR_NEARG    ] = INT_MAX;
+        sf->thresh_mult[THR_NEWG     ] = INT_MAX;
+        sf->thresh_mult[THR_SPLITG   ] = INT_MAX;
+    }
+
+    if (!(cpi->ref_frame_flags & VP8_ALT_FLAG))
+    {
+        sf->thresh_mult[THR_NEARESTA ] = INT_MAX;
+        sf->thresh_mult[THR_ZEROA    ] = INT_MAX;
+        sf->thresh_mult[THR_NEARA    ] = INT_MAX;
+        sf->thresh_mult[THR_NEWA     ] = INT_MAX;
+        sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
+    }
+
 
     // Slow quant, dct and trellis not worthwhile for first pass
     // so make sure they are always turned off.
