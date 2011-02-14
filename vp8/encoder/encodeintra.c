@@ -58,21 +58,6 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BLOCK
     RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
 
-void vp8_encode_intra4x4block_rd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BLOCK *be, BLOCKD *b, int best_mode)
-{
-    vp8_predict_intra4x4(b, best_mode, b->predictor);
-
-    ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
-
-    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
-
-    x->quantize_b(be, b);
-
-    IDCT_INVOKE(&rtcd->common->idct, idct16)(b->dqcoeff, b->diff, 32);
-
-    RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
-}
-
 void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb)
 {
     int i;

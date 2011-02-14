@@ -584,14 +584,41 @@ static void macro_block_yrd( MACROBLOCK *mb,
     *Rate = vp8_rdcost_mby(mb);
 }
 
+static void save_predictor(unsigned char *predictor, unsigned char *dst)
+{
+    int r, c;
+    for (r = 0; r < 4; r++)
+    {
+        for (c = 0; c < 4; c++)
+        {
+            *dst = predictor[c];
+            dst++;
+        }
+
+        predictor += 16;
+    }
+}
+static void restore_predictor(unsigned char *predictor, unsigned char *dst)
+{
+    int r, c;
+    for (r = 0; r < 4; r++)
+    {
+        for (c = 0; c < 4; c++)
+        {
+            predictor[c] = *dst;
+            dst++;
+        }
+
+        predictor += 16;
+    }
+}
 static int rd_pick_intra4x4block(
     VP8_COMP *cpi,
     MACROBLOCK *x,
     BLOCK *be,
     BLOCKD *b,
     B_PREDICTION_MODE *best_mode,
-    B_PREDICTION_MODE above,
-    B_PREDICTION_MODE left,
+    unsigned int *bmode_costs,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
 
@@ -600,31 +627,27 @@ static int rd_pick_intra4x4block(
     int *bestdistortion)
 {
     B_PREDICTION_MODE mode;
-    int best_rd = INT_MAX;       // 1<<30
+    int best_rd = INT_MAX;
     int rate = 0;
     int distortion;
-    unsigned int *mode_costs;
 
     ENTROPY_CONTEXT ta = *a, tempa = *a;
     ENTROPY_CONTEXT tl = *l, templ = *l;
 
-
-    if (x->e_mbd.frame_type == KEY_FRAME)
-    {
-        mode_costs  = x->bmode_costs[above][left];
-    }
-    else
-    {
-        mode_costs = x->inter_bmode_costs;
-    }
+    DECLARE_ALIGNED_ARRAY(16, unsigned char,  predictor, 16);
+    DECLARE_ALIGNED_ARRAY(16, short, dqcoeff, 16);
 
     for (mode = B_DC_PRED; mode <= B_HU_PRED; mode++)
     {
         int this_rd;
         int ratey;
 
-        rate = mode_costs[mode];
-        vp8_encode_intra4x4block_rd(IF_RTCD(&cpi->rtcd), x, be, b, mode);
+        rate = bmode_costs[mode];
+
+        vp8_predict_intra4x4(b, mode, b->predictor);
+        ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
+        x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+        x->quantize_b(be, b);
 
         tempa = ta;
         templ = tl;
@@ -644,16 +667,22 @@ static int rd_pick_intra4x4block(
             *best_mode = mode;
             *a = tempa;
             *l = templ;
+            save_predictor(b->predictor, predictor);
+            vpx_memcpy(dqcoeff, b->dqcoeff, 32);
         }
     }
 
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
-    vp8_encode_intra4x4block_rd(IF_RTCD(&cpi->rtcd), x, be, b, b->bmi.mode);
+
+    restore_predictor(b->predictor, predictor);
+    vpx_memcpy(b->dqcoeff, dqcoeff, 32);
+
+    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(b->dqcoeff, b->diff, 32);
+    RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
     return best_rd;
 
 }
-
 
 int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
                                   int *rate_y, int *Distortion, int best_rd)
@@ -667,6 +696,7 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
+    unsigned int *bmode_costs;
 
     vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
     vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -676,17 +706,25 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
 
     vp8_intra_prediction_down_copy(xd);
 
+    bmode_costs = mb->inter_bmode_costs;
+
     for (i = 0; i < 16; i++)
     {
         MODE_INFO *const mic = xd->mode_info_context;
         const int mis = xd->mode_info_stride;
-        const B_PREDICTION_MODE A = vp8_above_bmi(mic, i, mis)->mode;
-        const B_PREDICTION_MODE L = vp8_left_bmi(mic, i)->mode;
         B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
         int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
 
+        if (mb->e_mbd.frame_type == KEY_FRAME)
+        {
+            const B_PREDICTION_MODE A = vp8_above_bmi(mic, i, mis)->mode;
+            const B_PREDICTION_MODE L = vp8_left_bmi(mic, i)->mode;
+
+            bmode_costs  = mb->bmode_costs[A][L];
+        }
+
         total_rd += rd_pick_intra4x4block(
-            cpi, mb, mb->block + i, xd->block + i, &best_mode, A, L,
+            cpi, mb, mb->block + i, xd->block + i, &best_mode, bmode_costs,
             ta + vp8_block2above[i],
             tl + vp8_block2left[i], &r, &ry, &d);
 
@@ -708,7 +746,6 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
 
     return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
 }
-
 int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
                                    MACROBLOCK *x,
                                    int *Rate,
