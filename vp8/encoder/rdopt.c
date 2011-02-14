@@ -813,15 +813,6 @@ static int rd_cost_mbuv(MACROBLOCK *mb)
 }
 
 
-unsigned int vp8_get_mbuvrecon_error(const vp8_variance_rtcd_vtable_t *rtcd, const MACROBLOCK *x) // sum of squares
-{
-    unsigned int sse0, sse1;
-    int sum0, sum1;
-    VARIANCE_INVOKE(rtcd, get8x8var)(x->src.u_buffer, x->src.uv_stride, x->e_mbd.dst.u_buffer, x->e_mbd.dst.uv_stride, &sse0, &sum0);
-    VARIANCE_INVOKE(rtcd, get8x8var)(x->src.v_buffer, x->src.uv_stride, x->e_mbd.dst.v_buffer, x->e_mbd.dst.uv_stride, &sse1, &sum1);
-    return (sse0 + sse1);
-}
-
 static int vp8_rd_inter_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *distortion, int fullpixel)
 {
     vp8_build_uvmvs(&x->e_mbd, fullpixel);
@@ -849,7 +840,12 @@ int vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *ra
         int this_rd;
 
         x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-        vp8_encode_intra16x16mbuvrd(IF_RTCD(&cpi->rtcd), x);
+        vp8_build_intra_predictors_mbuv(&x->e_mbd);
+        ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
+                      x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor,
+                      x->src.uv_stride);
+        vp8_transform_mbuv(x);
+        vp8_quantize_mbuv(x);
 
         rate_to = rd_cost_mbuv(x);
         rate = rate_to + x->intra_uv_mode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.uv_mode];
