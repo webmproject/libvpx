@@ -586,52 +586,45 @@ sym(vp8_sad16x16_sse3):
 
     STACK_FRAME_CREATE_X3
 
-        lea             end_ptr,    [src_ptr+src_stride*8]
-
-        lea             end_ptr,    [end_ptr+src_stride*8]
-        pxor            mm7,        mm7
+        mov             end_ptr,    4
+        pxor            xmm7,        xmm7
 
 .vp8_sad16x16_sse3_loop:
-
-        movq            ret_var,    mm7
-        cmp             ret_var,    max_err
-        jg              .vp8_sad16x16_early_exit
-
-        movq            mm0,        QWORD PTR [src_ptr]
-        movq            mm2,        QWORD PTR [src_ptr+8]
-
-        movq            mm1,        QWORD PTR [ref_ptr]
-        movq            mm3,        QWORD PTR [ref_ptr+8]
-
-        movq            mm4,        QWORD PTR [src_ptr+src_stride]
-        movq            mm5,        QWORD PTR [ref_ptr+ref_stride]
-
-        psadbw          mm0,        mm1
-        psadbw          mm2,        mm3
-
-        movq            mm1,        QWORD PTR [src_ptr+src_stride+8]
-        movq            mm3,        QWORD PTR [ref_ptr+ref_stride+8]
-
-        psadbw          mm4,        mm5
-        psadbw          mm1,        mm3
+        movdqa          xmm0,       XMMWORD PTR [src_ptr]
+        movdqu          xmm1,       XMMWORD PTR [ref_ptr]
+        movdqa          xmm2,       XMMWORD PTR [src_ptr+src_stride]
+        movdqu          xmm3,       XMMWORD PTR [ref_ptr+ref_stride]
 
         lea             src_ptr,    [src_ptr+src_stride*2]
         lea             ref_ptr,    [ref_ptr+ref_stride*2]
 
-        paddw           mm0,        mm2
-        paddw           mm4,        mm1
+        movdqa          xmm4,       XMMWORD PTR [src_ptr]
+        movdqu          xmm5,       XMMWORD PTR [ref_ptr]
+        movdqa          xmm6,       XMMWORD PTR [src_ptr+src_stride]
 
-        paddw           mm7,        mm0
-        paddw           mm7,        mm4
+        psadbw          xmm0,       xmm1
 
-        cmp             src_ptr,    end_ptr
+        movdqu          xmm1,       XMMWORD PTR [ref_ptr+ref_stride]
+
+        psadbw          xmm2,       xmm3
+        psadbw          xmm4,       xmm5
+        psadbw          xmm6,       xmm1
+
+        lea             src_ptr,    [src_ptr+src_stride*2]
+        lea             ref_ptr,    [ref_ptr+ref_stride*2]
+
+        paddw           xmm7,        xmm0
+        paddw           xmm7,        xmm2
+        paddw           xmm7,        xmm4
+        paddw           xmm7,        xmm6
+
+        sub             end_ptr,     1
         jne             .vp8_sad16x16_sse3_loop
 
-        movq            ret_var,    mm7
-
-.vp8_sad16x16_early_exit:
-
-        mov             rax,        ret_var
+        movq            xmm0,       xmm7
+        psrldq          xmm7,       8
+        paddw           xmm0,       xmm7
+        movq            rax,        xmm0
 
     STACK_FRAME_DESTROY_X3
 
