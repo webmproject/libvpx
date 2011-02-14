@@ -46,6 +46,8 @@
 #define RTCD(x) NULL
 #endif
 
+#define OUTPUT_YUV_REC
+
 extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
 extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
@@ -105,10 +107,13 @@ extern double vp8_calc_ssimg
 #ifdef OUTPUT_YUV_SRC
 FILE *yuv_file;
 #endif
+#ifdef OUTPUT_YUV_REC
+FILE *yuv_rec_file;
+#endif
 
 #if 0
 FILE *framepsnr;
-FILE *kf_list;
+FILE ikf_list;
 FILE *keyfile;
 #endif
 
@@ -130,15 +135,20 @@ unsigned int tot_ef = 0;
 unsigned int cnt_ef = 0;
 #endif
 
+#if defined(SECTIONBITS_OUTPUT)
+extern unsigned __int64 Sectionbits[500];
+#endif
 #ifdef MODE_STATS
-extern unsigned __int64 Sectionbits[50];
 extern int y_modes[5]  ;
 extern int uv_modes[4] ;
 extern int b_modes[10]  ;
-
 extern int inter_y_modes[10] ;
 extern int inter_uv_modes[4] ;
 extern unsigned int inter_b_modes[15];
+#if CONFIG_SEGMENTATION
+extern int segment_modes_intra[MAX_MB_SEGMENTS];
+extern int segment_modes_inter[MAX_MB_SEGMENTS];
+#endif
 #endif
 
 extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
@@ -309,7 +319,11 @@ extern FILE *vpxlogc;
 static void setup_features(VP8_COMP *cpi)
 {
     // Set up default state for MB feature flags
+#if CONFIG_SEGMENTATION
+    cpi->mb.e_mbd.segmentation_enabled = 1;
+#else
     cpi->mb.e_mbd.segmentation_enabled = 0;
+#endif
     cpi->mb.e_mbd.update_mb_segmentation_map = 0;
     cpi->mb.e_mbd.update_mb_segmentation_data = 0;
     vpx_memset(cpi->mb.e_mbd.mb_segment_tree_probs, 255, sizeof(cpi->mb.e_mbd.mb_segment_tree_probs));
@@ -1231,16 +1245,25 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     if (cpi->sf.improved_dct)
     {
+#if CONFIG_T8X8
+        cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
+#endif
         cpi->mb.vp8_short_fdct8x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
         cpi->mb.vp8_short_fdct4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
     }
     else
     {
+#if CONFIG_T8X8
+        cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
+#endif
         cpi->mb.vp8_short_fdct8x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
         cpi->mb.vp8_short_fdct4x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
     }
 
     cpi->mb.short_walsh4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, walsh_short4x4);
+#if CONFIG_T8X8
+    cpi->mb.short_fhaar2x2 = FDCT_INVOKE(&cpi->rtcd.fdct, haar_short2x2);
+#endif
 
     if (cpi->sf.improved_quant)
     {
@@ -1248,6 +1271,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                                                   quantb);
         cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
                                                   quantb_pair);
+#if CONFIG_T8X8
+        cpi->mb.quantize_b_8x8  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb_8x8);
+        cpi->mb.quantize_b_2x2  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb_2x2);
+#endif
     }
     else
     {
@@ -1255,6 +1282,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                                                   fastquantb);
         cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
                                                   fastquantb_pair);
+#if CONFIG_T8X8
+        cpi->mb.quantize_b_8x8  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb_8x8);
+        cpi->mb.quantize_b_2x2  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb_2x2);
+#endif
     }
     if (cpi->sf.improved_quant != last_improved_quant)
         vp8cx_init_quantizer(cpi);
@@ -2037,6 +2068,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 #ifdef OUTPUT_YUV_SRC
     yuv_file = fopen("bd.yuv", "ab");
 #endif
+#ifdef OUTPUT_YUV_REC
+    yuv_rec_file = fopen("rec.yuv", "wb");
+#endif
 
 #if 0
     framepsnr = fopen("framepsnr.stt", "a");
@@ -2250,8 +2284,8 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 #ifdef MODE_STATS
         {
             extern int count_mb_seg[4];
-            FILE *f = fopen("modes.stt", "a");
-            double dr = (double)cpi->oxcf.frame_rate * (double)bytes * (double)8 / (double)count / (double)1000 ;
+            FILE *f = fopen("modes.stt", "w");
+            double dr = (double)cpi->oxcf.frame_rate * (double)cpi->bytes * (double)8 / (double)cpi->count / (double)1000 ;
             fprintf(f, "intra_mode in Intra Frames:\n");
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4]);
             fprintf(f, "UV:%8d, %8d, %8d, %8d\n", uv_modes[0], uv_modes[1], uv_modes[2], uv_modes[3]);
@@ -2265,6 +2299,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                 fprintf(f, "\n");
 
             }
+#if CONFIG_SEGMENTATION
+            fprintf(f, "Segments:%8d, %8d, %8d, %8d\n", segment_modes_intra[0], segment_modes_intra[1], segment_modes_intra[2], segment_modes_intra[3]);
+#endif
 
             fprintf(f, "Modes in Inter Frames:\n");
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d\n",
@@ -2284,8 +2321,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             fprintf(f, "P:%8d, %8d, %8d, %8d\n", count_mb_seg[0], count_mb_seg[1], count_mb_seg[2], count_mb_seg[3]);
             fprintf(f, "PB:%8d, %8d, %8d, %8d\n", inter_b_modes[LEFT4X4], inter_b_modes[ABOVE4X4], inter_b_modes[ZERO4X4], inter_b_modes[NEW4X4]);
 
-
-
+#if CONFIG_SEGMENTATION
+            fprintf(f, "Segments:%8d, %8d, %8d, %8d\n", segment_modes_inter[0], segment_modes_inter[1], segment_modes_inter[2], segment_modes_inter[3]);
+#endif
             fclose(f);
         }
 #endif
@@ -2372,6 +2410,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
 #ifdef OUTPUT_YUV_SRC
     fclose(yuv_file);
+#endif
+#ifdef OUTPUT_YUV_REC
+    fclose(yuv_rec_file);
 #endif
 
 #if 0
@@ -2583,10 +2624,9 @@ int vp8_update_entropy(VP8_PTR comp, int update)
 }
 
 
-#if OUTPUT_YUV_SRC
-void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
+#ifdef OUTPUT_YUV_SRC
+void vp8_write_yuv_frame(YV12_BUFFER_CONFIG *s)
 {
-    FILE *yuv_file = fopen(name, "ab");
     unsigned char *src = s->y_buffer;
     int h = s->y_height;
 
@@ -2616,8 +2656,42 @@ void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s)
         src += s->uv_stride;
     }
     while (--h);
+}
+#endif
 
-    fclose(yuv_file);
+#ifdef OUTPUT_YUV_REC
+void vp8_write_yuv_rec_frame(VP8_COMMON *cm)
+{
+    YV12_BUFFER_CONFIG *s = cm->frame_to_show;
+    unsigned char *src = s->y_buffer;
+    int h = cm->Height;
+
+    do
+    {
+        fwrite(src, s->y_width, 1,  yuv_rec_file);
+        src += s->y_stride;
+    }
+    while (--h);
+
+    src = s->u_buffer;
+    h = (cm->Height+1)/2;
+
+    do
+    {
+        fwrite(src, s->uv_width, 1,  yuv_rec_file);
+        src += s->uv_stride;
+    }
+    while (--h);
+
+    src = s->v_buffer;
+    h = (cm->Height+1)/2;
+
+    do
+    {
+        fwrite(src, s->uv_width, 1, yuv_rec_file);
+        src += s->uv_stride;
+    }
+    while (--h);
 }
 #endif
 
@@ -4643,14 +4717,8 @@ static void encode_frame_to_data_rate
         fclose(recon_file);
     }
 #endif
-#if 0
-    // DEBUG
-    if(cm->current_video_frame>173 && cm->current_video_frame<178)
-    {
-        char filename[512];
-        sprintf(filename, "enc%04d.yuv", (int) cm->current_video_frame);
-        vp8_write_yuv_frame(filename, cm->frame_to_show);
-    }
+#ifdef OUTPUT_YUV_REC
+    vp8_write_yuv_rec_frame(cm);
 #endif
 
 }
@@ -5005,7 +5073,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     }
     else
 #endif
-        encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+    encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 
     if (cpi->compressor_speed == 2)
     {

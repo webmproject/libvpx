@@ -24,13 +24,24 @@ static void recon_dcblock(MACROBLOCKD *x)
     }
 
 }
+#if CONFIG_T8X8
+static void recon_dcblock_8x8(MACROBLOCKD *x)
+{
+    BLOCKD *b = &x->block[24]; //for coeff 0, 2, 8, 10
+    x->block[0].dqcoeff[0] = b->diff[0];
+    x->block[4].dqcoeff[0] = b->diff[1];
+    x->block[8].dqcoeff[0] = b->diff[4];
+    x->block[12].dqcoeff[0] = b->diff[8];
+
+}
+#endif
 
 void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch)
 {
-    if (b->eob > 1)
-        IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->diff, pitch);
-    else
+    if (b->eob <= 1)
         IDCT_INVOKE(rtcd, idct1)(b->dqcoeff, b->diff, pitch);
+    else
+        IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->diff, pitch);
 }
 
 
@@ -86,3 +97,77 @@ void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x
     }
 
 }
+
+#if CONFIG_T8X8
+void vp8_inverse_transform_b_8x8(const vp8_idct_rtcd_vtable_t *rtcd, short *input_dqcoeff, short *output_coeff, int pitch)//pay attention to use when 8x8
+{
+    // int b,i;
+    //if (b->eob > 1)
+        IDCT_INVOKE(rtcd, idct8)(input_dqcoeff, output_coeff, pitch);
+    //else
+        //IDCT_INVOKE(rtcd, idct8_1)(b->dqcoeff, b->diff, pitch);//pitch
+
+}
+
+
+void vp8_inverse_transform_mby_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
+{
+    int i;
+
+    // do 2nd order transform on the dc block
+    IDCT_INVOKE(rtcd, ihaar2)(x->block[24].dqcoeff, x->block[24].diff, 8);
+
+    recon_dcblock_8x8(x); //need to change for 8x8
+    for (i = 0; i < 9; i += 8)
+    {
+        vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 32);
+    }
+    for (i = 2; i < 11; i += 8)
+    {
+        vp8_inverse_transform_b_8x8(rtcd, &x->block[i+2].dqcoeff[0], &x->block[i].diff[0], 32);
+    }
+
+}
+void vp8_inverse_transform_mbuv_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
+{
+    int i;
+
+    for (i = 16; i < 24; i += 4)
+    {
+        vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+    }
+
+}
+
+
+void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
+{
+    int i;
+
+    if (x->mode_info_context->mbmi.mode != B_PRED &&
+        x->mode_info_context->mbmi.mode != SPLITMV)
+    {
+        // do 2nd order transform on the dc block
+
+        IDCT_INVOKE(rtcd, ihaar2)(&x->block[24].dqcoeff[0], x->block[24].diff, 8);//dqcoeff[0]
+        recon_dcblock_8x8(x); //need to change for 8x8
+
+    }
+
+    for (i = 0; i < 9; i += 8)
+    {
+        vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 32);
+    }
+    for (i = 2; i < 11; i += 8)
+    {
+        vp8_inverse_transform_b_8x8(rtcd, &x->block[i+2].dqcoeff[0], &x->block[i].diff[0], 32);
+    }
+
+
+    for (i = 16; i < 24; i += 4)
+    {
+        vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+    }
+
+}
+#endif

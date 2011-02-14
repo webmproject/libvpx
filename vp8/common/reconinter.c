@@ -464,7 +464,3 @@ void vp8_build_uvmvs(MACROBLOCKD *x, int fullpixel)
         }
     }
 }
-
-
-
-

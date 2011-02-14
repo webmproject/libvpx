@@ -251,8 +251,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 {
     int q;
     int i;
-    int *thresh;
-    int threshmult;
 
     vp8_clear_system_state();  //__asm emms;
 
@@ -267,7 +265,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
     if (cpi->zbin_over_quant  > 0)
     {
         double oq_factor;
-        double modq;
 
         // Experimental code using the same basic equation as used for Q above
         // The units of cpi->zbin_over_quant are 1/128 of Q bin size

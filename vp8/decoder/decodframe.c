@@ -40,6 +40,10 @@
 #include <assert.h>
 #include <stdio.h>
 
+#ifdef DEC_DEBUG
+int dec_debug = 0;
+#endif
+
 void vp8cx_init_de_quantizer(VP8D_COMP *pbi)
 {
     int i;
@@ -125,6 +129,16 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
         vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
                                            xd->dst.u_buffer, xd->dst.v_buffer,
                                            xd->dst.y_stride, xd->dst.uv_stride);
+#ifdef DEC_DEBUG
+        if (dec_debug) {
+          int i, j;
+          printf("Generating predictors\n");
+          for (i=0;i<16;i++) {
+            for (j=0;j<16;j++) printf("%3d ", xd->dst.y_buffer[i*xd->dst.y_stride+j]);
+            printf("\n");
+          }
+        }
+#endif
     }
 }
 
@@ -192,7 +206,28 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
     else
     {
-        eobtotal = vp8_decode_mb_tokens(pbi, xd);
+
+#if CONFIG_T8X8
+        for(i = 0; i < 25; i++)
+        {
+            xd->block[i].eob = 0;
+            xd->eobs[i] = 0;
+        }
+        if (xd->mode_info_context->mbmi.segment_id >= 2)
+            eobtotal = vp8_decode_mb_tokens_8x8(pbi, xd);
+        else
+#endif
+            eobtotal = vp8_decode_mb_tokens(pbi, xd);
+#ifdef DEC_DEBUG
+        if (dec_debug) {
+            printf("\nTokens (%d)\n", eobtotal);
+            for (i =0; i<400; i++) {
+                printf("%3d ", xd->qcoeff[i]);
+                if (i%16 == 15) printf("\n");
+            }
+            printf("\n");
+        }
+#endif
     }
 
     /* Perform temporary clamping of the MV to be used for prediction */
@@ -206,14 +241,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV)
     {
         /* Special case:  Force the loopfilter to skip when eobtotal and
-         * mb_skip_coeff are zero.
-         * */
+        * mb_skip_coeff are zero.
+        * */
         xd->mode_info_context->mbmi.mb_skip_coeff = 1;
 
         skip_recon_mb(pbi, xd);
         return;
     }
-
     if (xd->segmentation_enabled)
         mb_init_dequantizer(pbi, xd);
 
@@ -225,7 +259,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         if (mode != B_PRED)
         {
             RECON_INVOKE(&pbi->common.rtcd.recon,
-                         build_intra_predictors_mby)(xd);
+                build_intra_predictors_mby)(xd);
         } else {
             vp8_intra_prediction_down_copy(xd);
         }
@@ -241,8 +275,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         vp8dx_bool_error(xd->current_bc)))
     {
         /* MB with corrupt residuals or corrupt mode/motion vectors.
-         * Better to use the predictor as reconstruction.
-         */
+        * Better to use the predictor as reconstruction.
+        */
         vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
         vp8_conceal_corrupt_mb(xd);
         return;
@@ -256,7 +290,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         {
             BLOCKD *b = &xd->block[i];
             RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
-                          (b, b->bmi.as_mode, b->predictor);
+                (b, b->bmi.as_mode, b->predictor);
 
             if (xd->eobs[i] > 1)
             {
@@ -272,14 +306,25 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 ((int *)b->qcoeff)[0] = 0;
             }
         }
-
     }
     else if (mode == SPLITMV)
     {
-        DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
-                        (xd->qcoeff, xd->block[0].dequant,
-                         xd->predictor, xd->dst.y_buffer,
-                         xd->dst.y_stride, xd->eobs);
+#if CONFIG_T8X8
+        if(xd->mode_info_context->mbmi.segment_id >= 2)
+        {
+            DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block_8x8)
+                (xd->qcoeff, xd->block[0].dequant,
+                xd->predictor, xd->dst.y_buffer,
+                xd->dst.y_stride, xd->eobs, xd);
+        }
+        else
+#endif
+        {
+            DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
+                (xd->qcoeff, xd->block[0].dequant,
+                xd->predictor, xd->dst.y_buffer,
+                xd->dst.y_stride, xd->eobs);
+        }
     }
     else
     {
@@ -288,10 +333,23 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         DEQUANT_INVOKE(&pbi->dequant, block)(b);
 
         /* do 2nd order transform on the dc block */
-        if (xd->eobs[24] > 1)
+#if CONFIG_T8X8
+        if(xd->mode_info_context->mbmi.segment_id >= 2)
         {
-            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
-            ((int *)b->qcoeff)[0] = 0;
+            DEQUANT_INVOKE(&pbi->dequant, block_8x8)(b);
+#ifdef DEC_DEBUG
+            if (dec_debug)
+            {
+                int j;
+                printf("DQcoeff Haar\n");
+                for (j=0;j<16;j++) {
+                    printf("%d ", b->dqcoeff[j]);
+                }
+                printf("\n");
+            }
+#endif
+            IDCT_INVOKE(RTCD_VTABLE(idct), ihaar2)(&b->dqcoeff[0], b->diff, 8);
+            ((int *)b->qcoeff)[0] = 0;//2nd order block are set to 0 after inverse transform
             ((int *)b->qcoeff)[1] = 0;
             ((int *)b->qcoeff)[2] = 0;
             ((int *)b->qcoeff)[3] = 0;
@@ -299,24 +357,61 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             ((int *)b->qcoeff)[5] = 0;
             ((int *)b->qcoeff)[6] = 0;
             ((int *)b->qcoeff)[7] = 0;
-        }
-        else
-        {
-            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh1)(&b->dqcoeff[0], b->diff);
-            ((int *)b->qcoeff)[0] = 0;
+            DEQUANT_INVOKE (&pbi->dequant, dc_idct_add_y_block_8x8)
+                (xd->qcoeff, xd->block[0].dequant,
+                xd->predictor, xd->dst.y_buffer,
+                xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
+
         }
 
-        DEQUANT_INVOKE (&pbi->dequant, dc_idct_add_y_block)
-                        (xd->qcoeff, xd->block[0].dequant,
-                         xd->predictor, xd->dst.y_buffer,
-                         xd->dst.y_stride, xd->eobs, xd->block[24].diff);
+        else
+#endif
+        {
+            DEQUANT_INVOKE(&pbi->dequant, block)(b);
+            if (xd->eobs[24] > 1)
+            {
+                IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
+                ((int *)b->qcoeff)[0] = 0;
+                ((int *)b->qcoeff)[1] = 0;
+                ((int *)b->qcoeff)[2] = 0;
+                ((int *)b->qcoeff)[3] = 0;
+                ((int *)b->qcoeff)[4] = 0;
+                ((int *)b->qcoeff)[5] = 0;
+                ((int *)b->qcoeff)[6] = 0;
+                ((int *)b->qcoeff)[7] = 0;
+            }
+            else
+            {
+                IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh1)(&b->dqcoeff[0], b->diff);
+                ((int *)b->qcoeff)[0] = 0;
+            }
+
+            DEQUANT_INVOKE (&pbi->dequant, dc_idct_add_y_block)
+                (xd->qcoeff, xd->block[0].dequant,
+                xd->predictor, xd->dst.y_buffer,
+                xd->dst.y_stride, xd->eobs, xd->block[24].diff);
+        }
+    }
+#if CONFIG_T8X8
+    if(xd->mode_info_context->mbmi.segment_id >= 2)
+    {
+        DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block_8x8)//
+            (xd->qcoeff+16*16, xd->block[16].dequant,
+            xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
+            xd->dst.uv_stride, xd->eobs+16, xd);//
+
+    }
+    else
+#endif
+    {
+
+        DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
+            (xd->qcoeff+16*16, xd->block[16].dequant,
+            xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
+            xd->dst.uv_stride, xd->eobs+16);
     }
 
-    DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
-                    (xd->qcoeff+16*16, xd->block[16].dequant,
-                     xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
-                     xd->dst.uv_stride, xd->eobs+16);
-}
+    }
 
 
 static int get_delta_q(vp8_reader *bc, int prev, int *q_update)
@@ -423,6 +518,9 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
 
         vp8_build_uvmvs(xd, pc->full_pixel);
 
+#ifdef DEC_DEBUG
+        dec_debug = (pc->current_video_frame==5 && mb_row==2 && mb_col==3);
+#endif
         /*
         if(pc->current_video_frame==0 &&mb_col==1 && mb_row==0)
         pbi->debugoutput =1;
@@ -433,7 +531,6 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
 
         /* check if the boolean decoder has suffered an error */
         xd->corrupted |= vp8dx_bool_error(xd->current_bc);
-
         recon_yoffset += 16;
         recon_uvoffset += 8;
 
@@ -992,13 +1089,34 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                         }
                     }
     }
+#if CONFIG_T8X8
+    {
+        // read coef probability tree
+
+        for (i = 0; i < BLOCK_TYPES; i++)
+            for (j = 0; j < COEF_BANDS; j++)
+                for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                    for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++)
+                    {
+
+                        vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
+
+                        if (vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]))
+                        {
+                            *p = (vp8_prob)vp8_read_literal(bc, 8);
+
+                        }
+                    }
+    }
+#endif
 
     vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
 #if CONFIG_SEGMENTATION
      // Create the encoder segmentation map and set all entries to 0
-     CHECK_MEM_ERROR(pbi->segmentation_map, vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
+     if (!pbi->segmentation_map)
+       CHECK_MEM_ERROR(pbi->segmentation_map, vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
 #endif
 
     /* set up frame new frame for intra coded blocks */
@@ -1102,6 +1220,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         fclose(f);
     }
 #endif
+    //printf("Frame %d Done\n", frame_count++);
 
     return 0;
 }

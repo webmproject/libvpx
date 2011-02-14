@@ -26,6 +26,11 @@
 #else
 #define IF_RTCD(x) NULL
 #endif
+
+#ifdef ENC_DEBUG
+extern int enc_debug;
+#endif
+
 void vp8_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch)
 {
     unsigned char *src_ptr = (*(be->base_src) + be->src);
@@ -117,6 +122,19 @@ static void build_dcblock(MACROBLOCK *x)
         src_diff_ptr[i] = x->coeff[i * 16];
     }
 }
+void vp8_build_dcblock_8x8(MACROBLOCK *x)
+{
+    short *src_diff_ptr = &x->src_diff[384];
+    int i;
+    for (i = 0; i < 16; i++)
+    {
+        src_diff_ptr[i] = 0;
+    }
+    src_diff_ptr[0] = x->coeff[0 * 16];
+    src_diff_ptr[1] = x->coeff[4 * 16];
+    src_diff_ptr[4] = x->coeff[8 * 16];
+    src_diff_ptr[8] = x->coeff[12 * 16];
+}
 
 void vp8_transform_mbuv(MACROBLOCK *x)
 {
@@ -197,10 +215,104 @@ static void transform_mby(MACROBLOCK *x)
     }
 }
 
+#if CONFIG_T8X8
 
+void vp8_transform_mbuv_8x8(MACROBLOCK *x)
+{
+    int i;
+
+    for (i = 16; i < 24; i += 4)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 16);
+    }
+}
+
+
+void vp8_transform_intra_mby_8x8(MACROBLOCK *x)//changed
+{
+    int i;
+
+    for (i = 0; i < 9; i += 8)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
+    }
+    for (i = 2; i < 11; i += 8)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i+2].coeff[0], 32);
+    }
+    // build dc block from 16 y dc values
+    vp8_build_dcblock_8x8(x);
+    //vp8_build_dcblock(x);
+
+    // do 2nd order transform on the dc block
+    x->short_fhaar2x2(&x->block[24].src_diff[0],
+        &x->block[24].coeff[0], 8);
+
+}
+
+
+void vp8_transform_mb_8x8(MACROBLOCK *x)
+{
+    int i;
+
+    for (i = 0; i < 9; i += 8)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
+    }
+    for (i = 2; i < 11; i += 8)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i+2].coeff[0], 32);
+    }
+    // build dc block from 16 y dc values
+    if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED &&x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+        vp8_build_dcblock_8x8(x);
+      //vp8_build_dcblock(x);
+
+    for (i = 16; i < 24; i += 4)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 16);
+    }
+
+    // do 2nd order transform on the dc block
+    if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED &&x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+        x->short_fhaar2x2(&x->block[24].src_diff[0],
+        &x->block[24].coeff[0], 8);
+}
+
+void vp8_transform_mby_8x8(MACROBLOCK *x)
+{
+    int i;
+
+    for (i = 0; i < 9; i += 8)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i].coeff[0], 32);
+    }
+    for (i = 2; i < 11; i += 8)
+    {
+        x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+            &x->block[i+2].coeff[0], 32);
+    }
+    // build dc block from 16 y dc values
+    if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+    {
+        //vp8_build_dcblock(x);
+        vp8_build_dcblock_8x8(x);
+        x->short_fhaar2x2(&x->block[24].src_diff[0],
+            &x->block[24].coeff[0], 8);
+    }
+}
+
+#endif
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
-
+#define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 typedef struct vp8_token_state vp8_token_state;
 
 struct vp8_token_state{
@@ -581,27 +693,554 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     }
 }
 
+#if CONFIG_T8X8
+void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
+                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                    ENTROPY_CONTEXT *a1, ENTROPY_CONTEXT *l1,
+                    const VP8_ENCODER_RTCD *rtcd)
+{
+    BLOCK *b;
+    BLOCKD *d;
+    vp8_token_state tokens[65][2];
+    unsigned best_mask[2];
+    const short *dequant_ptr;
+    const short *coeff_ptr;
+    short *qcoeff_ptr;
+    short *dqcoeff_ptr;
+    int eob;
+    int i0;
+    int rc;
+    int x;
+    int sz = 0;
+    int next;
+    int rdmult;
+    int rddiv;
+    int final_eob;
+    int rd_cost0;
+    int rd_cost1;
+    int rate0;
+    int rate1;
+    int error0;
+    int error1;
+    int t0;
+    int t1;
+    int best;
+    int band;
+    int pt;
+
+    b = &mb->block[i];
+    d = &mb->e_mbd.block[i];
+
+    /* Enable this to test the effect of RDO as a replacement for the dynamic
+     *  zero bin instead of an augmentation of it.
+     */
+#if 0
+    vp8_strict_quantize_b(b, d);
+#endif
+
+    dequant_ptr = d->dequant;
+    coeff_ptr = b->coeff;
+    qcoeff_ptr = d->qcoeff;
+    dqcoeff_ptr = d->dqcoeff;
+    i0 = !type;
+    eob = d->eob;
+
+    /* Now set up a Viterbi trellis to evaluate alternative roundings. */
+    /* TODO: These should vary with the block type, since the quantizer does. */
+    rdmult = mb->rdmult << 2;
+    rddiv = mb->rddiv;
+    best_mask[0] = best_mask[1] = 0;
+    /* Initialize the sentinel node of the trellis. */
+    tokens[eob][0].rate = 0;
+    tokens[eob][0].error = 0;
+    tokens[eob][0].next = 64;
+    tokens[eob][0].token = DCT_EOB_TOKEN;
+    tokens[eob][0].qc = 0;
+    *(tokens[eob] + 1) = *(tokens[eob] + 0);
+    next = eob;
+    for (i = eob; i-- > i0;)
+    {
+        int base_bits;
+        int d2;
+        int dx;
+
+        rc = vp8_default_zig_zag1d_8x8[i];
+        x = qcoeff_ptr[rc];
+        /* Only add a trellis state for non-zero coefficients. */
+        if (x)
+        {
+            int shortcut=0;
+            error0 = tokens[next][0].error;
+            error1 = tokens[next][1].error;
+            /* Evaluate the first possibility for this state. */
+            rate0 = tokens[next][0].rate;
+            rate1 = tokens[next][1].rate;
+            t0 = (vp8_dct_value_tokens_ptr + x)->Token;
+            /* Consider both possible successor states. */
+            if (next < 64)
+            {
+                band = vp8_coef_bands_8x8[i + 1];
+                pt = vp8_prev_token_class[t0];
+                rate0 +=
+                    mb->token_costs[type][band][pt][tokens[next][0].token];
+                rate1 +=
+                    mb->token_costs[type][band][pt][tokens[next][1].token];
+            }
+            rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
+            rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
+            if (rd_cost0 == rd_cost1)
+            {
+                rd_cost0 = RDTRUNC_8x8(rdmult, rddiv, rate0, error0);
+                rd_cost1 = RDTRUNC_8x8(rdmult, rddiv, rate1, error1);
+            }
+            /* And pick the best. */
+            best = rd_cost1 < rd_cost0;
+            base_bits = *(vp8_dct_value_cost_ptr + x);
+            dx = dqcoeff_ptr[rc] - coeff_ptr[rc];
+            d2 = dx*dx;
+            tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
+            tokens[i][0].error = d2 + (best ? error1 : error0);
+            tokens[i][0].next = next;
+            tokens[i][0].token = t0;
+            tokens[i][0].qc = x;
+            best_mask[0] |= best << i;
+            /* Evaluate the second possibility for this state. */
+            rate0 = tokens[next][0].rate;
+            rate1 = tokens[next][1].rate;
+
+            if((abs(x)*dequant_ptr[rc!=0]>abs(coeff_ptr[rc])) &&
+               (abs(x)*dequant_ptr[rc!=0]<abs(coeff_ptr[rc])+dequant_ptr[rc!=0]))
+                shortcut = 1;
+            else
+                shortcut = 0;
+
+            if(shortcut)
+            {
+                sz = -(x < 0);
+                x -= 2*sz + 1;
+            }
+
+            /* Consider both possible successor states. */
+            if (!x)
+            {
+                /* If we reduced this coefficient to zero, check to see if
+                 *  we need to move the EOB back here.
+                 */
+                t0 = tokens[next][0].token == DCT_EOB_TOKEN ?
+                    DCT_EOB_TOKEN : ZERO_TOKEN;
+                t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
+                    DCT_EOB_TOKEN : ZERO_TOKEN;
+            }
+            else
+            {
+                t0=t1 = (vp8_dct_value_tokens_ptr + x)->Token;
+            }
+            if (next < 64)
+            {
+                band = vp8_coef_bands_8x8[i + 1];
+                if(t0!=DCT_EOB_TOKEN)
+                {
+                    pt = vp8_prev_token_class[t0];
+                    rate0 += mb->token_costs[type][band][pt][
+                        tokens[next][0].token];
+                }
+                if(t1!=DCT_EOB_TOKEN)
+                {
+                    pt = vp8_prev_token_class[t1];
+                    rate1 += mb->token_costs[type][band][pt][
+                        tokens[next][1].token];
+                }
+            }
+
+            rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
+            rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
+            if (rd_cost0 == rd_cost1)
+            {
+                rd_cost0 = RDTRUNC_8x8(rdmult, rddiv, rate0, error0);
+                rd_cost1 = RDTRUNC_8x8(rdmult, rddiv, rate1, error1);
+            }
+            /* And pick the best. */
+            best = rd_cost1 < rd_cost0;
+            base_bits = *(vp8_dct_value_cost_ptr + x);
+
+            if(shortcut)
+            {
+                dx -= (dequant_ptr[rc!=0] + sz) ^ sz;
+                d2 = dx*dx;
+            }
+            tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
+            tokens[i][1].error = d2 + (best ? error1 : error0);
+            tokens[i][1].next = next;
+            tokens[i][1].token =best?t1:t0;
+            tokens[i][1].qc = x;
+            best_mask[1] |= best << i;
+            /* Finally, make this the new head of the trellis. */
+            next = i;
+        }
+        /* There's no choice to make for a zero coefficient, so we don't
+         *  add a new trellis node, but we do need to update the costs.
+         */
+        else
+        {
+            band = vp8_coef_bands_8x8[i + 1];
+            t0 = tokens[next][0].token;
+            t1 = tokens[next][1].token;
+            /* Update the cost of each path if we're past the EOB token. */
+            if (t0 != DCT_EOB_TOKEN)
+            {
+                tokens[next][0].rate += mb->token_costs[type][band][0][t0];
+                tokens[next][0].token = ZERO_TOKEN;
+            }
+            if (t1 != DCT_EOB_TOKEN)
+            {
+                tokens[next][1].rate += mb->token_costs[type][band][0][t1];
+                tokens[next][1].token = ZERO_TOKEN;
+            }
+            /* Don't update next, because we didn't add a new node. */
+        }
+    }
+
+    /* Now pick the best path through the whole trellis. */
+    band = vp8_coef_bands_8x8[i + 1];
+    VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
+    rate0 = tokens[next][0].rate;
+    rate1 = tokens[next][1].rate;
+    error0 = tokens[next][0].error;
+    error1 = tokens[next][1].error;
+    t0 = tokens[next][0].token;
+    t1 = tokens[next][1].token;
+    rate0 += mb->token_costs[type][band][pt][t0];
+    rate1 += mb->token_costs[type][band][pt][t1];
+    rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
+    rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
+    if (rd_cost0 == rd_cost1)
+    {
+        rd_cost0 = RDTRUNC_8x8(rdmult, rddiv, rate0, error0);
+        rd_cost1 = RDTRUNC_8x8(rdmult, rddiv, rate1, error1);
+    }
+    best = rd_cost1 < rd_cost0;
+    final_eob = i0 - 1;
+    for (i = next; i < eob; i = next)
+    {
+        x = tokens[i][best].qc;
+        if (x)
+            final_eob = i;
+        rc = vp8_default_zig_zag1d_8x8[i];
+        qcoeff_ptr[rc] = x;
+        dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];
+        next = tokens[i][best].next;
+        best = (best_mask[best] >> i) & 1;
+    }
+    final_eob++;
+
+    d->eob = final_eob;
+    *a = *l = (d->eob != !type);
+
+}
+
+void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
+{
+    int b;
+    int type;
+    int has_2nd_order;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
+    has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+    type = has_2nd_order ? 0 : 3;
+
+    for (b = 0; b < 16; b+=4)
+    {
+        optimize_b_8x8(x, b, type,
+            ta + vp8_block2above[b], tl + vp8_block2left[b],
+            ta + vp8_block2above[b+1], tl + vp8_block2left[b+4],
+            rtcd);
+
+        if(b==0)
+        {
+          *(ta + vp8_block2above[1]) = *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[5]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[1]) = *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[5]) = *(tl + vp8_block2left[b]);
+        }
+        else if(b==4)
+        {
+          *(ta + vp8_block2above[2]) = *(ta + vp8_block2above[3]) = *(ta + vp8_block2above[6]) = *(ta + vp8_block2above[7]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[2]) = *(tl + vp8_block2left[3]) = *(tl + vp8_block2left[6]) = *(tl + vp8_block2left[7]) = *(tl + vp8_block2left[b]);
+          *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[1]);
+          *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[1]);
+        }
+        else if(b==8)
+        {
+          *(ta + vp8_block2above[9]) = *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[13]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[9]) = *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[13]) = *(tl + vp8_block2left[b]);
+
+        }
+        else if(b==12)
+        {
+          *(ta + vp8_block2above[10]) = *(ta + vp8_block2above[11]) = *(ta + vp8_block2above[14]) = *(ta + vp8_block2above[15]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[10]) = *(tl + vp8_block2left[11]) = *(tl + vp8_block2left[14]) = *(tl + vp8_block2left[15]) = *(tl + vp8_block2left[b]);
+          *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[8]);
+          *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[8]);
+
+        }
+
+
+
+    }
+
+    for (b = 16; b < 20; b+=4)
+    {
+        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
+            ta + vp8_block2above[b], tl + vp8_block2left[b],
+            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
+            rtcd);
+        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
+            *(ta + vp8_block2above[b]);
+        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
+            *(tl + vp8_block2left[b]);
+
+    }
+
+    for (b = 20; b < 24; b+=4)
+    {
+        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
+            ta + vp8_block2above[b], tl + vp8_block2left[b],
+            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
+            rtcd);
+        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
+            *(ta + vp8_block2above[b]);
+        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
+            *(tl + vp8_block2left[b]);
+
+    }
+
+
+    /*
+    if (has_2nd_order)
+    {
+        vp8_setup_temp_context(&t, x->e_mbd.above_context[Y2CONTEXT],
+            x->e_mbd.left_context[Y2CONTEXT], 1);
+        optimize_b(x, 24, 1, t.a, t.l, rtcd);
+    }
+    */
+}
+
+void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
+{
+    int b;
+    int type;
+    int has_2nd_order;
+
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    if (!x->e_mbd.above_context)
+        return;
+
+    if (!x->e_mbd.left_context)
+        return;
+
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
+    has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+    type = has_2nd_order ? 0 : 3;
+
+    for (b = 0; b < 16; b+=4)
+    {
+        optimize_b_8x8(x, b, type,
+        ta + vp8_block2above[b], tl + vp8_block2left[b],
+        ta + vp8_block2above[b+1], tl + vp8_block2left[b+4],
+        rtcd);
+        if(b==0)
+        {
+          *(ta + vp8_block2above[1]) = *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[5]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[1]) = *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[5]) = *(tl + vp8_block2left[b]);
+        }
+        else if(b==4)
+        {
+          *(ta + vp8_block2above[2]) = *(ta + vp8_block2above[3]) = *(ta + vp8_block2above[6]) = *(ta + vp8_block2above[7]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[2]) = *(tl + vp8_block2left[3]) = *(tl + vp8_block2left[6]) = *(tl + vp8_block2left[7]) = *(tl + vp8_block2left[b]);
+          *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[1]);
+          *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[1]);
+        }
+        else if(b==8)
+        {
+          *(ta + vp8_block2above[9]) = *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[13]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[9]) = *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[13]) = *(tl + vp8_block2left[b]);
+
+        }
+        else if(b==12)
+        {
+          *(ta + vp8_block2above[10]) = *(ta + vp8_block2above[11]) = *(ta + vp8_block2above[14]) = *(ta + vp8_block2above[15]) = *(ta + vp8_block2above[b]);
+          *(tl + vp8_block2left[10]) = *(tl + vp8_block2left[11]) = *(tl + vp8_block2left[14]) = *(tl + vp8_block2left[15]) = *(tl + vp8_block2left[b]);
+          *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[8]);
+          *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[8]);
+
+        }
+
+
+    }
+
+    /*
+    if (has_2nd_order)
+    {
+        vp8_setup_temp_context(&t, x->e_mbd.above_context[Y2CONTEXT],
+            x->e_mbd.left_context[Y2CONTEXT], 1);
+        optimize_b(x, 24, 1, t.a, t.l, rtcd);
+    }
+    */
+}
+
+void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
+{
+    int b;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    if (!x->e_mbd.above_context)
+        return;
+
+    if (!x->e_mbd.left_context)
+        return;
+
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
+    for (b = 16; b < 20; b+=4)
+    {
+        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
+            ta + vp8_block2above[b], tl + vp8_block2left[b],
+            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
+            rtcd);
+        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
+            *(ta + vp8_block2above[b]);
+        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
+            *(tl + vp8_block2left[b]);
+
+    }
+
+    for (b = 20; b < 24; b+=4)
+    {
+        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
+            ta + vp8_block2above[b], tl + vp8_block2left[b],
+            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
+            rtcd);
+        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
+            *(ta + vp8_block2above[b]);
+        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
+            *(tl + vp8_block2left[b]);
+
+    }
+
+}
+#endif
+
 void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
     vp8_build_inter_predictors_mb(&x->e_mbd);
 
     vp8_subtract_mb(rtcd, x);
 
-    transform_mb(x);
+#if  CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+         vp8_transform_mb_8x8(x);
+    else
+#endif
+         transform_mb(x);
 
-    vp8_quantize_mb(x);
+#if  CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        vp8_quantize_mb_8x8(x);
+    else
+#endif
+        vp8_quantize_mb(x);
 
     if (x->optimize)
+    {
+#if CONFIG_T8X8
+      if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        optimize_mb_8x8(x, rtcd);
+      else
+#endif
         optimize_mb(x, rtcd);
+    }
 
-    vp8_inverse_transform_mb(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    else
+#endif
+        vp8_inverse_transform_mb(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2) {
+#ifdef ENC_DEBUG
+        if (enc_debug)
+        {
+          int i;
+          printf("qcoeff:\n");
+          printf("%d %d:\n", x->e_mbd.mb_to_left_edge, x->e_mbd.mb_to_top_edge);
+          for (i =0; i<400; i++) {
+            printf("%3d ", x->e_mbd.qcoeff[i]);
+            if (i%16 == 15) printf("\n");
+          }
+          printf("dqcoeff:\n");
+          for (i =0; i<400; i++) {
+            printf("%3d ", x->e_mbd.dqcoeff[i]);
+            if (i%16 == 15) printf("\n");
+          }
+          printf("diff:\n");
+          for (i =0; i<400; i++) {
+            printf("%3d ", x->e_mbd.diff[i]);
+            if (i%16 == 15) printf("\n");
+          }
+          printf("predictor:\n");
+          for (i =0; i<400; i++) {
+            printf("%3d ", x->e_mbd.predictor[i]);
+            if (i%16 == 15) printf("\n");
+          }
+          printf("\n");
+        }
+#endif
+    }
 
     RECON_INVOKE(&rtcd->common->recon, recon_mb)
         (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
+#ifdef ENC_DEBUG
+    if (enc_debug) {
+      int i, j, k;
+      printf("Final Reconstruction\n");
+      for (i =0; i<16; i+=4) {
+        BLOCKD *b = &x->e_mbd.block[i];
+        unsigned char *d = *(b->base_dst) + b->dst;
+        for (k=0; k<4; k++) {
+          for (j=0; j<16; j++)
+            printf("%3d ", d[j]);
+          printf("\n");
+          d+=b->dst_stride;
+        }
+      }
+    }
+#endif
 }
 
 
-/* this funciton is used by first pass only */
+/* this function is used by first pass only */
 void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
     BLOCK *b = &x->block[0];
@@ -610,22 +1249,34 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
 
-    transform_mby(x);
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+          vp8_transform_mby_8x8(x);
+    else
+#endif
+          transform_mby(x);
 
     vp8_quantize_mby(x);
-
-    vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+          vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    else
+#endif
+          vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
     RECON_INVOKE(&rtcd->common->recon, recon_mby)
         (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
 
-
 void vp8_encode_inter16x16uvrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
     vp8_build_inter_predictors_mbuv(&x->e_mbd);
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
-
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+       vp8_transform_mbuv_8x8(x);
+    else
+#endif
     vp8_transform_mbuv(x);
 
     vp8_quantize_mbuv(x);

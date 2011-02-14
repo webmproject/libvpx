@@ -20,4 +20,11 @@ extern void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd, MACROBL
 extern void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x);
 extern void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x);
 
+#if CONFIG_T8X8
+extern void vp8_inverse_transform_b_8x8(const vp8_idct_rtcd_vtable_t *rtcd, short *input_dqcoeff, short *output_coeff, int pitch);
+extern void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x);
+extern void vp8_inverse_transform_mby_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x);
+extern void vp8_inverse_transform_mbuv_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x);
+#endif
+
 #endif

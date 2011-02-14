@@ -32,12 +32,15 @@
 #include "lookahead.h"
 
 //#define SPEEDSTATS 1
+#define MODE_STATS 1
+//#define ENC_DEBUG
+
 #define MIN_GF_INTERVAL             4
 #define DEFAULT_GF_INTERVAL         7
 
 #define KEY_FRAME_CONTEXT 5
 
-#define MAX_LAG_BUFFERS (CONFIG_REALTIME_ONLY? 1 : 25)
+#define MAX_LAG_BUFFERS (CONFIG_REALTIME_ONLY? 1 : 25)//1:25
 
 #define AF_THRESH   25
 #define AF_THRESH2  100
@@ -411,6 +414,11 @@ typedef struct VP8_COMP
     //save vp8_tree_probs_from_distribution result for each frame to avoid repeat calculation
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+#if CONFIG_T8X8
+    unsigned int coef_counts_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
+    vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    unsigned int frame_branch_ct_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+#endif
 
     int gfu_boost;
     int kf_boost;
@@ -469,6 +477,8 @@ typedef struct VP8_COMP
     int gf_update_recommended;
     int skip_true_count;
     int skip_false_count;
+    int t4x4_count;
+    int t8x8_count;
 
     unsigned char *segmentation_map;
     signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            // Segment data (can be deltas or absolute values)
@@ -636,7 +646,7 @@ int rd_cost_intra_mb(MACROBLOCKD *x);
 void vp8_tokenize_mb(VP8_COMP *, MACROBLOCKD *, TOKENEXTRA **);
 
 void vp8_set_speed_features(VP8_COMP *cpi);
-
+extern void vp8_write_yuv_frame(const char *name, YV12_BUFFER_CONFIG *s);
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(lval,expr) do {\
         lval = (expr); \

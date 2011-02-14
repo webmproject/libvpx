@@ -21,6 +21,17 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     /* Pure C: */
 #if CONFIG_RUNTIME_CPU_DETECT
     pbi->mb.rtcd                     = &pbi->common.rtcd;
+
+#if CONFIG_T8X8
+
+    pbi->dequant.block_8x8           = vp8_dequantize_b_8x8_c;
+    pbi->dequant.idct_add_8x8        = vp8_dequant_idct_add_8x8_c;
+    pbi->dequant.dc_idct_add_8x8     = vp8_dequant_dc_idct_add_8x8_c;
+    pbi->dequant.dc_idct_add_y_block_8x8 = vp8_dequant_dc_idct_add_y_block_8x8_c;
+    pbi->dequant.idct_add_y_block_8x8 = vp8_dequant_idct_add_y_block_8x8_c;
+    pbi->dequant.idct_add_uv_block_8x8 = vp8_dequant_idct_add_uv_block_8x8_c;
+
+#endif
     pbi->dequant.block               = vp8_dequantize_b_c;
     pbi->dequant.idct_add            = vp8_dequant_idct_add_c;
     pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_c;

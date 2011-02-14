@@ -20,6 +20,7 @@ void vpx_log(const char *format, ...);
 #include "treecoder.h"
 #include "subpixel.h"
 #include "vpx_ports/mem.h"
+#include "common.h"
 
 #define TRUE    1
 #define FALSE   0
@@ -65,6 +66,10 @@ extern const unsigned char vp8_block2above[25];
 #define VP8_COMBINEENTROPYCONTEXTS( Dest, A, B) \
     Dest = ((A)!=0) + ((B)!=0);
 
+#if CONFIG_T8X8
+#define VP8_COMBINEENTROPYCONTEXTS_8x8( Dest, A1, B1, A2, B2) \
+    Dest = ((A1)!=0 || (A2)!=0) + ((B1)!=0 || (B2)!=0);
+#endif
 
 typedef enum
 {
@@ -89,14 +94,14 @@ typedef enum
     MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
-/* Macroblock level features */
+// Macroblock level features
 typedef enum
 {
-    MB_LVL_ALT_Q = 0,               /* Use alternate Quantizer .... */
-    MB_LVL_ALT_LF = 1,              /* Use alternate loop filter value... */
-    MB_LVL_MAX = 2                  /* Number of MB level features supported */
-
+    MB_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
+    MB_LVL_ALT_LF = 1,              // Use alternate loop filter value...
+    MB_LVL_MAX = 2,                 // Number of MB level features supported
 } MB_LVL_FEATURES;
+
 
 /* Segment Feature Masks */
 #define SEGMENT_ALTQ    0x01
@@ -269,6 +274,7 @@ typedef struct
     vp8_subpix_fn_t  subpixel_predict16x16;
 
     void *current_bc;
+
 
     int corrupted;
 

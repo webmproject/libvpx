@@ -21,6 +21,8 @@
 #include "ec_types.h"
 #endif
 
+//#define DEC_DEBUG
+
 typedef struct
 {
     int ithread;
@@ -52,11 +54,17 @@ typedef struct
 typedef struct
 {
     int const *scan;
+#if CONFIG_T8X8
+    int const *scan_8x8;
+#endif
     UINT8 const *ptr_block2leftabove;
     vp8_tree_index const *vp8_coef_tree_ptr;
     TOKENEXTRABITS const *teb_base_ptr;
     unsigned char *norm_ptr;
     UINT8 *ptr_coef_bands_x;
+#if CONFIG_T8X8
+    UINT8 *ptr_coef_bands_x_8x8;
+#endif
 
     ENTROPY_CONTEXT_PLANES *A;
     ENTROPY_CONTEXT_PLANES *L;
@@ -65,6 +73,9 @@ typedef struct
     BOOL_DECODER *current_bc;
 
     vp8_prob const *coef_probs[4];
+#if CONFIG_T8X8
+    vp8_prob const *coef_probs_8x8[4];
+#endif
 
     UINT8 eob[25];
 

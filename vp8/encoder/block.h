@@ -46,7 +46,7 @@ typedef struct
     int src;
     int src_stride;
 
-//  MV  enc_mv;
+    //  MV  enc_mv;
     int force_empty;
 
 } BLOCK;
@@ -126,6 +126,12 @@ typedef struct
     void (*short_walsh4x4)(short *input, short *output, int pitch);
     void (*quantize_b)(BLOCK *b, BLOCKD *d);
     void (*quantize_b_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
+ #if CONFIG_T8X8
+    void (*vp8_short_fdct8x8)(short *input, short *output, int pitch);
+    void (*short_fhaar2x2)(short *input, short *output, int pitch);
+    void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
+    void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);
+#endif
 
 } MACROBLOCK;
 

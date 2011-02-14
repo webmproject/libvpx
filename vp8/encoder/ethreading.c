@@ -24,6 +24,14 @@ extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 
+#ifdef MODE_STATS
+extern unsigned int inter_y_modes[10];
+extern unsigned int inter_uv_modes[4];
+extern unsigned int inter_b_modes[15];
+extern unsigned int y_modes[5];
+extern unsigned int uv_modes[4];
+extern unsigned int b_modes[14];
+#endif
 extern void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
 
 static THREAD_FUNCTION loopfilter_thread(void *p_data)
@@ -175,7 +183,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     {
                         *totalrate += vp8cx_encode_intra_macro_block(cpi, x, &tp);
 #ifdef MODE_STATS
-                        y_modes[xd->mbmi.mode] ++;
+                        y_modes[xd->mode_info_context->mbmi.mode] ++;
 #endif
                     }
                     else
@@ -183,15 +191,15 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         *totalrate += vp8cx_encode_inter_macroblock(cpi, x, &tp, recon_yoffset, recon_uvoffset);
 
 #ifdef MODE_STATS
-                        inter_y_modes[xd->mbmi.mode] ++;
+                        inter_y_modes[xd->mode_info_context->mbmi.mode] ++;
 
-                        if (xd->mbmi.mode == SPLITMV)
+                        if (xd->mode_info_context->mbmi.mode == SPLITMV)
                         {
                             int b;
 
-                            for (b = 0; b < xd->mbmi.partition_count; b++)
+                            for (b = 0; b < x->partition_info->count; b++)
                             {
-                                inter_b_modes[x->partition->bmi[b].mode] ++;
+                                inter_b_modes[x->partition_info->bmi[b].mode] ++;
                             }
                         }
 

@@ -43,6 +43,43 @@ extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 static int get_free_fb (VP8_COMMON *cm);
 static void ref_cnt_fb (int *buf, int *idx, int new_idx);
 
+#if CONFIG_DEBUG
+void vp8_recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s)
+{
+    FILE *yuv_file = fopen((char *)name, "ab");
+    unsigned char *src = s->y_buffer;
+    int h = s->y_height;
+
+    do
+    {
+        fwrite(src, s->y_width, 1,  yuv_file);
+        src += s->y_stride;
+    }
+    while (--h);
+
+    src = s->u_buffer;
+    h = s->uv_height;
+
+    do
+    {
+        fwrite(src, s->uv_width, 1,  yuv_file);
+        src += s->uv_stride;
+    }
+    while (--h);
+
+    src = s->v_buffer;
+    h = s->uv_height;
+
+    do
+    {
+        fwrite(src, s->uv_width, 1, yuv_file);
+        src += s->uv_stride;
+    }
+    while (--h);
+
+    fclose(yuv_file);
+}
+#endif
 
 void vp8dx_initialize()
 {
@@ -120,7 +157,7 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
     if (!pbi)
         return;
 #if CONFIG_SEGMENTATION
-     // Delete sementation map
+    // Delete sementation map
     if (pbi->segmentation_map != 0)
         vpx_free(pbi->segmentation_map);
 #endif
@@ -298,6 +335,22 @@ static int swap_frame_buffers (VP8_COMMON *cm)
     return err;
 }
 
+/*
+static void vp8_print_yuv_rec_mb(VP8_COMMON *cm, int mb_row, int mb_col)
+{
+  YV12_BUFFER_CONFIG *s = cm->frame_to_show;
+  unsigned char *src = s->y_buffer;
+  int i, j;
+
+  printf("After loop filter\n");
+  for (i=0;i<16;i++) {
+    for (j=0;j<16;j++)
+      printf("%3d ", src[(mb_row*16+i)*s->y_stride + mb_col*16+j]);
+    printf("\n");
+  }
+}
+*/
+
 int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, INT64 time_stamp)
 {
 #if HAVE_ARMV7
@@ -461,6 +514,8 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         {
             /* Apply the loop filter if appropriate. */
             vp8_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
+            //vp8_print_yuv_rec_mb(cm, 9, 10);
+
 
             cm->last_frame_type = cm->frame_type;
             cm->last_filter_type = cm->filter_type;
@@ -469,7 +524,9 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
     }
 
+#if CONFIG_DEBUG
     vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
+#endif
 
 
     vp8_clear_system_state();
@@ -498,6 +555,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     /*vp8_print_modes_and_motion_vectors( cm->mi, cm->mb_rows,cm->mb_cols, cm->current_video_frame);*/
 
+    //printf("Decoded frame (%d) %d\n", cm->show_frame, cm->current_video_frame);
     if (cm->show_frame)
         cm->current_video_frame++;
 

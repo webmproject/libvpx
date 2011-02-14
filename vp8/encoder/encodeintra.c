@@ -22,6 +22,10 @@
 #include "encodeintra.h"
 
 
+#ifdef ENC_DEBUG
+extern int enc_debug;
+#endif
+
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
 #else
@@ -96,15 +100,67 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mby)(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
-
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        vp8_transform_intra_mby_8x8(x);
+    else
+#endif
     vp8_transform_intra_mby(x);
 
-    vp8_quantize_mby(x);
+#if  CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+      vp8_quantize_mby_8x8(x);
+    else
+#endif
+      vp8_quantize_mby(x);
 
     if (x->optimize)
+    {
+#if CONFIG_T8X8
+      if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        vp8_optimize_mby_8x8(x, rtcd);
+      else
+#endif
         vp8_optimize_mby(x, rtcd);
+    }
 
-    vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+      vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    else
+#endif
+      vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+
+#ifdef ENC_DEBUG
+    if (enc_debug) {
+      int i;
+      printf("Intra qcoeff:\n");
+      printf("%d %d:\n", x->e_mbd.mb_to_left_edge, x->e_mbd.mb_to_top_edge);
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.qcoeff[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("Intra dqcoeff:\n");
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.dqcoeff[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("Intra diff:\n");
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.diff[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("Intra predictor:\n");
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.predictor[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("eobs:\n");
+      for (i=0;i<25;i++)
+        printf("%d ", x->e_mbd.block[i].eob);
+      printf("\n");
+    }
+#endif
 
     RECON_INVOKE(&rtcd->common->recon, recon_mby)
         (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
@@ -116,14 +172,66 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mbuv)(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        vp8_transform_mbuv_8x8(x);
+    else
+#endif
+        vp8_transform_mbuv(x);
 
-    vp8_transform_mbuv(x);
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        vp8_quantize_mbuv_8x8(x);
+    else
+#endif
+        vp8_quantize_mbuv(x);
 
-    vp8_quantize_mbuv(x);
-
+#ifdef ENC_DEBUG
+    if (enc_debug) {
+      int i;
+      printf("vp8_encode_intra16x16mbuv\n");
+      printf("%d %d:\n", x->e_mbd.mb_to_left_edge, x->e_mbd.mb_to_top_edge);
+      printf("qcoeff:\n");
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.qcoeff[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("dqcoeff:\n");
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.dqcoeff[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("diff:\n");
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.diff[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("predictor:\n");
+      for (i =0; i<400; i++) {
+        printf("%3d ", x->e_mbd.predictor[i]);
+        if (i%16 == 15) printf("\n");
+      }
+      printf("eobs:\n");
+      for (i=0;i<25;i++)
+        printf("%d ", x->e_mbd.block[i].eob);
+      printf("\n");
+    }
+#endif
     if (x->optimize)
+    {
+#if CONFIG_T8X8
+      if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+        vp8_optimize_mbuv_8x8(x, rtcd);
+      else
+#endif
         vp8_optimize_mbuv(x, rtcd);
+    }
 
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+      vp8_inverse_transform_mbuv_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+    else
+#endif
     vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
     vp8_recon_intra_mbuv(IF_RTCD(&rtcd->common->recon), &x->e_mbd);

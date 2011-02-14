@@ -13,6 +13,7 @@
 #define __INC_RDOPT_H
 
 #define RDCOST(RM,DM,R,D) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
+#define RDCOST_8x8(RM,DM,R,D) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
 
 extern void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue);
 extern void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra);

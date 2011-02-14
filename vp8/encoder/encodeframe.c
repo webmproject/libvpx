@@ -26,6 +26,7 @@
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/reconintra.h"
 #include <stdio.h>
+#include <math.h>
 #include <limits.h>
 #include "vp8/common/subpixel.h"
 #include "vpx_ports/vpx_timer.h"
@@ -45,6 +46,11 @@
 #define SEEK_DIFFID 7
 #endif
 
+#ifdef ENC_DEBUG
+int enc_debug=0;
+int mb_row_debug, mb_col_debug;
+#endif
+
 extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 
 extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
@@ -59,6 +65,8 @@ void vp8_setup_block_ptrs(MACROBLOCK *x);
 int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t, int recon_yoffset, int recon_uvoffset);
 int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t);
 static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x );
+
+
 
 #ifdef MODE_STATS
 unsigned int inter_y_modes[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -87,6 +95,186 @@ static const unsigned char VP8_VAR_OFFS[16]=
     128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128
 };
 
+
+
+#if CONFIG_T8X8
+
+//INTRA mode transform size
+//When all three criteria are off the default is 4x4
+//#define INTRA_VARIANCE_ENTROPY_CRITERIA
+#define INTRA_WTD_SSE_ENTROPY_CRITERIA
+//#define INTRA_TEST_8X8_ONLY
+//
+//INTER mode transform size
+//When all three criteria are off the default is 4x4
+//#define INTER_VARIANCE_ENTROPY_CRITERIA
+#define INTER_WTD_SSE_ENTROPY_CRITERIA
+//#define INTER_TEST_8X8_ONLY
+
+double variance_Block(short *b1, int pitch, int dimension)
+{
+    short ip[8][8]={{0}};
+    short *b = b1;
+    int i, j = 0;
+    double mean = 0.0, variance = 0.0;
+    for (i = 0; i < dimension; i++)
+    {
+        for (j = 0; j < dimension; j++)
+        {
+            ip[i][j] = b[j];
+            mean += ip[i][j];
+        }
+        b += pitch;
+    }
+    mean /= (dimension*dimension);
+
+    for (i = 0; i < dimension; i++)
+    {
+        for (j = 0; j < dimension; j++)
+        {
+            variance += (ip[i][j]-mean)*(ip[i][j]-mean);
+        }
+    }
+    variance /= (dimension*dimension);
+    return variance;
+}
+
+double mean_Block(short *b, int pitch, int dimension)
+{
+    short ip[8][8]={{0}};
+    int i, j = 0;
+    double mean = 0;
+    for (i = 0; i < dimension; i++)
+    {
+        for (j = 0; j < dimension; j++)
+        {
+            ip[i][j] = b[j];
+            mean += ip[i][j];
+        }
+        b += pitch;
+    }
+    mean /= (dimension*dimension);
+
+    return mean;
+}
+
+int SSE_Block(short *b, int pitch, int dimension)
+{
+    int i, j, sse_block = 0;
+    for (i = 0; i < dimension; i++)
+    {
+        for (j = 0; j < dimension; j++)
+        {
+            sse_block += b[j]*b[j];
+        }
+        b += pitch;
+    }
+   return sse_block;
+}
+
+double Compute_Variance_Entropy(MACROBLOCK *x)
+{
+    double variance_8[4] = {0.0, 0.0, 0.0, 0.0}, sum_var = 0.0, all_entropy = 0.0;
+    variance_8[0] = variance_Block(x->block[0].src_diff, 16, 8);
+    variance_8[1] = variance_Block(x->block[2].src_diff, 16, 8);
+    variance_8[2] = variance_Block(x->block[8].src_diff, 16, 8);
+    variance_8[3] = variance_Block(x->block[10].src_diff, 16, 8);
+    sum_var = variance_8[0] + variance_8[1] + variance_8[2] + variance_8[3];
+    if(sum_var)
+    {
+      int i;
+      for(i = 0; i <4; i++)
+      {
+        if(variance_8[i])
+        {
+          variance_8[i] /= sum_var;
+          all_entropy -= variance_8[i]*log(variance_8[i]);
+        }
+      }
+    }
+    return (all_entropy /log(2));
+}
+
+double Compute_Wtd_SSE_SubEntropy(MACROBLOCK *x)
+{
+    double variance_8[4] = {0.0, 0.0, 0.0, 0.0};
+    double entropy_8[4] = {0.0, 0.0, 0.0, 0.0};
+    double sse_1, sse_2, sse_3, sse_4, sse_0;
+    int i;
+    for (i=0;i<3;i+=2)
+    {
+      sse_0 = SSE_Block(x->block[i].src_diff, 16, 8);
+      if(sse_0)
+      {
+        sse_1 = SSE_Block(x->block[i].src_diff, 16, 4)/sse_0;
+        sse_2 = SSE_Block(x->block[i+1].src_diff, 16, 4)/sse_0;
+        sse_3 = SSE_Block(x->block[i+4].src_diff, 16, 4)/sse_0;
+        sse_4 = SSE_Block(x->block[i+5].src_diff, 16, 4)/sse_0;
+        variance_8[i]= variance_Block(x->block[i].src_diff, 16, 8);
+        if(sse_1 && sse_2 && sse_3 && sse_4)
+        entropy_8[i]= (-sse_1*log(sse_1)
+                       -sse_2*log(sse_2)
+                       -sse_3*log(sse_3)
+                       -sse_4*log(sse_4))/log(2);
+      }
+    }
+    for (i=8;i<11;i+=2)
+    {
+      if(sse_0)
+      {
+        sse_0 = SSE_Block(x->block[i].src_diff, 16, 8);
+        sse_1 = SSE_Block(x->block[i].src_diff, 16, 4)/sse_0;
+        sse_2 = SSE_Block(x->block[i+1].src_diff, 16, 4)/sse_0;
+        sse_3 = SSE_Block(x->block[i+4].src_diff, 16, 4)/sse_0;
+        sse_4 = SSE_Block(x->block[i+5].src_diff, 16, 4)/sse_0;
+        variance_8[i-7]= variance_Block(x->block[i].src_diff, 16, 8);
+        if(sse_1 && sse_2 && sse_3 && sse_4)
+        entropy_8[i-7]= (-sse_1*log(sse_1)
+                         -sse_2*log(sse_2)
+                         -sse_3*log(sse_3)
+                         -sse_4*log(sse_4))/log(2);
+      }
+    }
+    if(variance_8[0]+variance_8[1]+variance_8[2]+variance_8[3])
+      return (entropy_8[0]*variance_8[0]+
+              entropy_8[1]*variance_8[1]+
+              entropy_8[2]*variance_8[2]+
+              entropy_8[3]*variance_8[3])/
+             (variance_8[0]+
+              variance_8[1]+
+              variance_8[2]+
+              variance_8[3]);
+    else
+      return 0;
+}
+
+int vp8_8x8_selection_intra(MACROBLOCK *x)
+{
+#ifdef INTRA_VARIANCE_ENTROPY_CRITERIA
+    return (Compute_Variance_Entropy(x) > 1.2);
+#elif defined(INTRA_WTD_SSE_ENTROPY_CRITERIA)
+    return (Compute_Wtd_SSE_SubEntropy(x) > 1.2);
+#elif defined(INTRA_TEST_8X8_ONLY)
+    return 1;
+#else
+    return 0; //when all criteria are off use the default 4x4 only
+#endif
+}
+
+int vp8_8x8_selection_inter(MACROBLOCK *x)
+{
+#ifdef INTER_VARIANCE_ENTROPY_CRITERIA
+    return (Compute_Variance_Entropy(x) > 1.5);
+#elif defined(INTER_WTD_SSE_ENTROPY_CRITERIA)
+    return (Compute_Wtd_SSE_SubEntropy(x) > 1.5);
+#elif defined(INTER_TEST_8X8_ONLY)
+    return 1;
+#else
+    return 0; //when all criteria are off use the default 4x4 only
+#endif
+}
+
+#endif
 
 // Original activity measure from Tim T's code.
 static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
@@ -385,7 +573,6 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int map_index = (mb_row * cpi->common.mb_cols);
 #if CONFIG_SEGMENTATION
-    int left_id, above_id;
     int sum;
 #endif
 #if CONFIG_MULTITHREAD
@@ -425,6 +612,12 @@ void encode_mb_row(VP8_COMP *cpi,
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {
+#ifdef ENC_DEBUG
+        //enc_debug = (cpi->count==29 && mb_row==5 && mb_col==0);
+        enc_debug = (cpi->count==4 && mb_row==17 && mb_col==13);
+        mb_col_debug=mb_col;
+        mb_row_debug=mb_row;
+#endif
         // Distance of Mb to the left & right edges, specified in
         // 1/8th pel units as they are always compared to values
         // that are in 1/8th pel units
@@ -471,8 +664,9 @@ void encode_mb_row(VP8_COMP *cpi,
         if (xd->segmentation_enabled)
         {
             // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
+            // Reset segment_id to 0 or 1 so that the default transform mode is 4x4
             if (cpi->segmentation_map[map_index+mb_col] <= 3)
-                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index+mb_col];
+                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index+mb_col]&1;
             else
                 xd->mode_info_context->mbmi.segment_id = 0;
 
@@ -487,24 +681,27 @@ void encode_mb_row(VP8_COMP *cpi,
         if (cm->frame_type == KEY_FRAME)
         {
             *totalrate += vp8cx_encode_intra_macro_block(cpi, x, tp);
+            //Note the encoder may have changed the segment_id
+
 #ifdef MODE_STATS
-            y_modes[xd->mbmi.mode] ++;
+            y_modes[xd->mode_info_context->mbmi.mode] ++;
 #endif
         }
         else
         {
             *totalrate += vp8cx_encode_inter_macroblock(cpi, x, tp, recon_yoffset, recon_uvoffset);
+            //Note the encoder may have changed the segment_id
 
 #ifdef MODE_STATS
-            inter_y_modes[xd->mbmi.mode] ++;
+            inter_y_modes[xd->mode_info_context->mbmi.mode] ++;
 
-            if (xd->mbmi.mode == SPLITMV)
+            if (xd->mode_info_context->mbmi.mode == SPLITMV)
             {
                 int b;
 
-                for (b = 0; b < xd->mbmi.partition_count; b++)
+                for (b = 0; b < x->partition_info->count; b++)
                 {
-                    inter_b_modes[x->partition->bmi[b].mode] ++;
+                    inter_b_modes[x->partition_info->bmi[b].mode] ++;
                 }
             }
 
@@ -545,10 +742,12 @@ void encode_mb_row(VP8_COMP *cpi,
         // Increment the activity mask pointers.
         x->mb_activity_ptr++;
 
+        /* Test code
         if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
             xd->mode_info_context->mbmi.segment_id = 0;
         else
             xd->mode_info_context->mbmi.segment_id = 1;
+            */
 
         /* save the block info */
         for (i = 0; i < 16; i++)
@@ -566,7 +765,7 @@ void encode_mb_row(VP8_COMP *cpi,
        //cpi->segmentation_map[mb_row * cm->mb_cols + mb_col] =  xd->mbmi.segment_id;
         if (cm->frame_type == KEY_FRAME)
         {
-            segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
+            segment_counts[xd->mode_info_context->mbmi.segment_id]++;
         }
         else
         {
@@ -724,7 +923,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     TOKENEXTRA *tp = cpi->tok;
 #if CONFIG_SEGMENTATION
     int segment_counts[MAX_MB_SEGMENTS + SEEK_SEGID];
-    int prob[3];
+    int prob[3] = {255, 255, 255};
     int new_cost, original_cost;
 #else
     int segment_counts[MAX_MB_SEGMENTS];
@@ -901,7 +1100,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     if (xd->segmentation_enabled)
     {
         int tot_count;
-        int i,j;
+        int i;
         int count1,count2,count3,count4;
 
         // Set to defaults
@@ -1218,7 +1417,7 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 
         do
         {
-            ++ bct[xd->block[b].bmi.mode];
+            ++ bct[xd->block[b].bmi.as_mode];
         }
         while (++b < 16);
     }
@@ -1256,6 +1455,10 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
     int rate;
 
+#if CONFIG_T8X8
+    if (x->e_mbd.segmentation_enabled)
+        x->e_mbd.update_mb_segmentation_map = 1;
+#endif
     if (cpi->sf.RD && cpi->compressor_speed != 2)
         vp8_rd_pick_intra_mode(cpi, x, &rate);
     else
@@ -1270,14 +1473,26 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
     if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
         vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
     else
+    {
+#if CONFIG_T8X8
+        if (x->e_mbd.segmentation_enabled)
+            x->e_mbd.mode_info_context->mbmi.segment_id |= (vp8_8x8_selection_intra(x) << 1);
+#endif
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
 
-    vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-    sum_intra_stats(cpi, x);
-    vp8_tokenize_mb(cpi, &x->e_mbd, t);
-
+        vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+        sum_intra_stats(cpi, x);
+        vp8_tokenize_mb(cpi, &x->e_mbd, t);
+#if CONFIG_T8X8
+        if( x->e_mbd.mode_info_context->mbmi.segment_id >=2)
+            cpi->t8x8_count++;
+        else
+            cpi->t4x4_count++;
+#endif
+    }
     return rate;
 }
+
 #ifdef SPEEDSTATS
 extern int cnt_pm;
 #endif
@@ -1353,7 +1568,7 @@ int vp8cx_encode_inter_macroblock
     cpi->last_mb_distortion = distortion;
 #endif
 
-    // MB level adjutment to quantizer setup
+    // MB level adjustment to quantizer setup
     if (xd->segmentation_enabled)
     {
         // If cyclic update enabled
@@ -1397,16 +1612,25 @@ int vp8cx_encode_inter_macroblock
 
     cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
 
+#if CONFIG_T8X8
+    if (xd->segmentation_enabled)
+        x->e_mbd.update_mb_segmentation_map = 1;
+#endif
+
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-
         if (xd->mode_info_context->mbmi.mode == B_PRED)
         {
+            vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
         }
         else
         {
+#if CONFIG_T8X8
+            if (xd->segmentation_enabled)
+              xd->mode_info_context->mbmi.segment_id |= (vp8_8x8_selection_intra(x) << 1);
+#endif
+            vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
         }
 
@@ -1415,6 +1639,10 @@ int vp8cx_encode_inter_macroblock
     else
     {
         int ref_fb_idx;
+#if CONFIG_T8X8
+        if (xd->segmentation_enabled)
+          xd->mode_info_context->mbmi.segment_id |= (vp8_8x8_selection_inter(x) << 1);
+#endif
 
         vp8_build_uvmvs(xd, cpi->common.full_pixel);
 
@@ -1444,9 +1672,40 @@ int vp8cx_encode_inter_macroblock
                                            xd->dst.y_stride, xd->dst.uv_stride);
 
     }
+#if CONFIG_T8X8
+    if (x->e_mbd.mode_info_context->mbmi.segment_id >=2)
+        cpi->t8x8_count++;
+    else
+        cpi->t4x4_count++;
+#endif
 
     if (!x->skip)
+    {
+#ifdef ENC_DEBUG
+        if (enc_debug)
+        {
+          int i;
+            printf("Segment=%d [%d, %d]: %d %d:\n", x->e_mbd.mode_info_context->mbmi.segment_id, mb_col_debug, mb_row_debug, xd->mb_to_left_edge, xd->mb_to_top_edge);
+            for (i =0; i<400; i++) {
+              printf("%3d ", xd->qcoeff[i]);
+              if (i%16 == 15) printf("\n");
+            }
+            printf("\n");
+            printf("eobs = ");
+            for (i=0;i<25;i++)
+              printf("%d:%d ", i, xd->block[i].eob);
+            printf("\n");
+            fflush(stdout);
+        }
+#endif
         vp8_tokenize_mb(cpi, xd, t);
+#ifdef ENC_DEBUG
+        if (enc_debug) {
+          printf("Tokenized\n");
+          fflush(stdout);
+        }
+#endif
+    }
     else
     {
         if (cpi->common.mb_no_coeff_skip)

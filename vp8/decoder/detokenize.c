@@ -26,6 +26,18 @@ DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
     6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
     6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X
 };
+#if CONFIG_T8X8
+DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) = {
+  0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X,
+  5 * OCB_X, 3 * OCB_X, 6 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 6 * OCB_X, 6 * OCB_X,
+  6 * OCB_X, 5 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
+  6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
+  6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
+  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
+  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
+  7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
+};
+#endif
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
 #define ONE_CONTEXT_NODE            2
@@ -149,7 +161,48 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         range = range - split; \
         NORMALIZE \
     }
-
+#if CONFIG_T8X8
+#define DECODE_AND_LOOP_IF_ZERO_8x8_2(probability,branch) \
+    { \
+        split = 1 + ((( probability*(range-1) ) ) >> 8); \
+        bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
+        FILL \
+        if ( value < bigsplit ) \
+        { \
+            range = split; \
+            NORMALIZE \
+            Prob = coef_probs; \
+            if(c<3) {\
+            ++c; \
+            Prob += coef_bands_x[c]; \
+            goto branch; \
+            } goto BLOCK_FINISHED_8x8; /*for malformed input */\
+        } \
+        value -= bigsplit; \
+        range = range - split; \
+        NORMALIZE \
+    }
+#define DECODE_AND_LOOP_IF_ZERO_8X8(probability,branch) \
+    { \
+        split = 1 + ((( probability*(range-1) ) ) >> 8); \
+        bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
+        FILL \
+        if ( value < bigsplit ) \
+        { \
+            range = split; \
+            NORMALIZE \
+            Prob = coef_probs; \
+            if(c<63) {\
+            ++c; \
+            Prob += coef_bands_x_8x8[c]; \
+            goto branch; \
+            } goto BLOCK_FINISHED_8x8; /*for malformed input */\
+        } \
+        value -= bigsplit; \
+        range = range - split; \
+        NORMALIZE \
+    }
+#endif
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val) \
     DECODE_AND_APPLYSIGN(val) \
     Prob = coef_probs + (ENTROPY_NODES*2); \
@@ -160,6 +213,26 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     qcoeff_ptr [ scan[15] ] = (INT16) v; \
     goto BLOCK_FINISHED;
 
+#if CONFIG_T8X8
+#define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val) \
+    DECODE_AND_APPLYSIGN(val) \
+    Prob = coef_probs + (ENTROPY_NODES*2); \
+    if(c < 3){\
+        qcoeff_ptr [ scan[c] ] = (INT16) v; \
+        ++c; \
+        goto DO_WHILE_8x8; }\
+    qcoeff_ptr [ scan[3] ] = (INT16) v; \
+    goto BLOCK_FINISHED_8x8;
+#define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val) \
+    DECODE_AND_APPLYSIGN(val) \
+    Prob = coef_probs + (ENTROPY_NODES*2); \
+    if(c < 63){\
+        qcoeff_ptr [ scan[c] ] = (INT16) v; \
+        ++c; \
+        goto DO_WHILE_8x8; }\
+    qcoeff_ptr [ scan[63] ] = (INT16) v; \
+    goto BLOCK_FINISHED_8x8;
+#endif
 
 #define DECODE_EXTRABIT_AND_ADJUST_VAL(t,bits_count)\
     split = 1 +  (((range-1) * vp8d_token_extra_bits2[t].Probs[bits_count]) >> 8); \
@@ -177,6 +250,354 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     }\
     NORMALIZE
 
+#if CONFIG_T8X8
+int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
+{
+    ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
+    ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
+    const VP8_COMMON *const oc = & dx->common;
+
+    BOOL_DECODER *bc = x->current_bc;
+
+    char *eobs = x->eobs;
+
+    ENTROPY_CONTEXT *a, *a1;
+    ENTROPY_CONTEXT *l, *l1;
+    int i;
+
+    int eobtotal = 0;
+
+    register int count;
+
+    const BOOL_DATA *bufptr;
+    const BOOL_DATA *bufend;
+    register unsigned int range;
+    VP8_BD_VALUE value;
+    const int *scan;//
+    register unsigned int shift;
+    UINT32 split;
+    VP8_BD_VALUE bigsplit;
+    INT16 *qcoeff_ptr;
+
+    const vp8_prob *coef_probs;//
+    int type;
+    int stop;
+    INT16 val, bits_count;
+    INT16 c;
+    INT16 v;
+    const vp8_prob *Prob;//
+
+    type = 3;
+    i = 0;
+    stop = 16;
+
+    scan = vp8_default_zig_zag1d_8x8;
+    qcoeff_ptr = &x->qcoeff[0];
+
+    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
+    {
+        i = 24;
+        stop = 24;
+        type = 1;
+        qcoeff_ptr += 24*16;
+        eobtotal -= 4;
+        scan = vp8_default_zig_zag1d;
+    }
+
+    bufend  = bc->user_buffer_end;
+    bufptr  = bc->user_buffer;
+    value   = bc->value;
+    count   = bc->count;
+    range   = bc->range;
+
+    coef_probs = oc->fc.coef_probs_8x8 [type] [ 0 ] [0];
+
+BLOCK_LOOP_8x8:
+    a = A + vp8_block2above[i];
+    l = L + vp8_block2left[i];
+
+    if(i < 16)
+    {
+       a1 = A + vp8_block2above[i+1];
+       l1 = L + vp8_block2left[i+4];
+    }
+    else if(i<24)
+    {
+      a1 = A + vp8_block2above[i+1];
+      l1 = L + vp8_block2left[i+2];
+
+    }
+    c = (INT16)(!type);
+
+//    Dest = ((A)!=0) + ((B)!=0);
+    if(i==24)
+    {
+      VP8_COMBINEENTROPYCONTEXTS(v, *a, *l);
+    }
+    else
+    {
+      VP8_COMBINEENTROPYCONTEXTS_8x8(v, *a, *l, *a1, *l1);
+    }
+
+    Prob = coef_probs;
+    Prob += v * ENTROPY_NODES;
+
+DO_WHILE_8x8:
+    if(i==24)
+      Prob += coef_bands_x[c];
+    else
+      Prob += coef_bands_x_8x8[c];
+    DECODE_AND_BRANCH_IF_ZERO(Prob[EOB_CONTEXT_NODE], BLOCK_FINISHED_8x8);
+
+CHECK_0_8x8_:
+    if (i==24)
+    {
+      DECODE_AND_LOOP_IF_ZERO_8x8_2(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
+    }
+    else
+    {
+      DECODE_AND_LOOP_IF_ZERO_8X8(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
+    }
+    DECODE_AND_BRANCH_IF_ZERO(Prob[ONE_CONTEXT_NODE], ONE_CONTEXT_NODE_0_8x8_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[LOW_VAL_CONTEXT_NODE], LOW_VAL_CONTEXT_NODE_0_8x8_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[HIGH_LOW_CONTEXT_NODE], HIGH_LOW_CONTEXT_NODE_0_8x8_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREEFOUR_CONTEXT_NODE], CAT_THREEFOUR_CONTEXT_NODE_0_8x8_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_FIVE_CONTEXT_NODE], CAT_FIVE_CONTEXT_NODE_0_8x8_);
+    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY6].min_val;
+    bits_count = vp8d_token_extra_bits2[DCT_VAL_CATEGORY6].Length;
+
+    do
+    {
+        DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY6, bits_count);
+        bits_count -- ;
+    }
+    while (bits_count >= 0);
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
+    }
+
+CAT_FIVE_CONTEXT_NODE_0_8x8_:
+    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY5].min_val;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 4);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 3);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 2);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 0);
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
+    }
+
+CAT_THREEFOUR_CONTEXT_NODE_0_8x8_:
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREE_CONTEXT_NODE], CAT_THREE_CONTEXT_NODE_0_8x8_);
+    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY4].min_val;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 3);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 2);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 0);
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
+    }
+
+CAT_THREE_CONTEXT_NODE_0_8x8_:
+    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY3].min_val;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY3, 2);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY3, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY3, 0);
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
+    }
+
+HIGH_LOW_CONTEXT_NODE_0_8x8_:
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_ONE_CONTEXT_NODE], CAT_ONE_CONTEXT_NODE_0_8x8_);
+
+    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY2].min_val;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY2, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY2, 0);
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
+    }
+
+CAT_ONE_CONTEXT_NODE_0_8x8_:
+    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY1].min_val;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY1, 0);
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
+    }
+
+LOW_VAL_CONTEXT_NODE_0_8x8_:
+    DECODE_AND_BRANCH_IF_ZERO(Prob[TWO_CONTEXT_NODE], TWO_CONTEXT_NODE_0_8x8_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[THREE_CONTEXT_NODE], THREE_CONTEXT_NODE_0_8x8_);
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(4);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(4);
+    }
+
+
+THREE_CONTEXT_NODE_0_8x8_:
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(3);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(3);
+    }
+
+
+TWO_CONTEXT_NODE_0_8x8_:
+    if(i==24)
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(2);
+    }
+    else
+    {
+        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(2);
+    }
+
+
+ONE_CONTEXT_NODE_0_8x8_:
+    DECODE_AND_APPLYSIGN(1);
+    Prob = coef_probs + ENTROPY_NODES;
+
+    if (i==24)
+    {
+      if (c < 3)//15
+      {
+        qcoeff_ptr [ scan[c] ] = (INT16) v;
+        ++c;
+        goto DO_WHILE_8x8;
+      }
+    }
+    else
+    {
+      if (c < 63)
+      {
+        qcoeff_ptr [ scan[c] ] = (INT16) v;
+        ++c;
+        goto DO_WHILE_8x8;
+      }
+    }
+
+   if(i==24)
+       qcoeff_ptr [ scan[3] ] = (INT16) v;//15
+   else
+       qcoeff_ptr [ scan[63] ] = (INT16) v;
+
+
+BLOCK_FINISHED_8x8:
+    *a = *l = ((eobs[i] = c) != !type);   // any nonzero data?
+    /*if (i!=24) {
+      *(A + vp8_block2above[i+1]) = *(A + vp8_block2above[i+2]) = *(A + vp8_block2above[i+3]) = *a;
+      *(L + vp8_block2left[i+1]) = *(L + vp8_block2left[i+2]) = *(L + vp8_block2left[i+3]) = *l;
+    }*/
+
+    if (i!=24)
+    {
+      if(i==0)
+      {
+        *(A + vp8_block2above[1]) = *(A + vp8_block2above[4]) = *(A + vp8_block2above[5]) = *a;
+        *(L + vp8_block2left[1]) = *(L + vp8_block2left[4]) = *(L + vp8_block2left[5]) = *l;
+      }
+      else if(i==4)
+      {
+        *(A + vp8_block2above[2]) = *(A + vp8_block2above[3]) = *(A + vp8_block2above[6]) = *(A + vp8_block2above[7]) = *a;
+        *(L + vp8_block2left[2]) = *(L + vp8_block2left[3]) = *(L + vp8_block2left[6]) = *(L + vp8_block2left[7]) = *l;
+        *(A + vp8_block2above[4]) = *(A + vp8_block2above[1]);
+        *(L + vp8_block2left[4]) = *(L + vp8_block2left[1]);
+      }
+      else if(i==8)
+      {
+        *(A + vp8_block2above[9]) = *(A + vp8_block2above[12]) = *(A + vp8_block2above[13]) = *a;
+        *(L + vp8_block2left[9]) = *(L + vp8_block2left[12]) = *(L + vp8_block2left[13]) = *l;
+
+      }
+      else if(i==12)
+      {
+        *(A + vp8_block2above[10]) = *(A + vp8_block2above[11]) = *(A + vp8_block2above[14]) = *(A + vp8_block2above[15]) = *a;
+        *(L + vp8_block2left[10]) = *(L + vp8_block2left[11]) = *(L + vp8_block2left[14]) = *(L + vp8_block2left[15]) = *l;
+        *(A + vp8_block2above[12]) = *(A + vp8_block2above[8]);
+        *(L + vp8_block2left[12]) = *(L + vp8_block2left[8]);
+
+      }
+      else
+      {
+        *(A + vp8_block2above[i+1]) = *(A + vp8_block2above[i+2]) = *(A + vp8_block2above[i+3]) = *a;
+        *(L + vp8_block2left[i+1]) = *(L + vp8_block2left[i+2]) = *(L + vp8_block2left[i+3]) = *l;
+
+      }
+    }
+
+    eobtotal += c;
+    qcoeff_ptr += (i==24 ? 16 : 64);
+
+    i+=4;
+
+    if (i < stop)
+        goto BLOCK_LOOP_8x8;
+
+    if (i > 24)
+    {
+        type = 0;
+        i = 0;
+        stop = 16;
+        coef_probs = oc->fc.coef_probs_8x8 [type] [ 0 ] [0];
+        qcoeff_ptr -= (24*16 + 16);
+        scan = vp8_default_zig_zag1d_8x8;
+        goto BLOCK_LOOP_8x8;
+    }
+
+    if (i == 16)
+    {
+        type = 2;
+        coef_probs = oc->fc.coef_probs_8x8 [type] [ 0 ] [0];
+        stop = 24;
+        goto BLOCK_LOOP_8x8;
+    }
+
+    FILL
+    bc->user_buffer = bufptr;
+    bc->value = value;
+    bc->count = count;
+    bc->range = range;
+
+    return eobtotal;
+
+}
+#endif
 int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 {
     ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
@@ -366,6 +787,7 @@ BLOCK_FINISHED:
     bc->value = value;
     bc->count = count;
     bc->range = range;
+
     return eobtotal;
 
 }
