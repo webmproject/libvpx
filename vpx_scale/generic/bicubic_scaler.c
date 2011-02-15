@@ -271,17 +271,17 @@ void bicubic_coefficient_destroy()
 {
     if (!g_first_time)
     {
-        if (g_b_scaler.l_w) vpx_free(g_b_scaler.l_w);
+        vpx_free(g_b_scaler.l_w);
 
-        if (g_b_scaler.l_h) vpx_free(g_b_scaler.l_h);
+        vpx_free(g_b_scaler.l_h);
 
-        if (g_b_scaler.l_h_uv) vpx_free(g_b_scaler.l_h_uv);
+        vpx_free(g_b_scaler.l_h_uv);
 
-        if (g_b_scaler.c_w) vpx_free(g_b_scaler.c_w);
+        vpx_free(g_b_scaler.c_w);
 
-        if (g_b_scaler.c_h) vpx_free(g_b_scaler.c_h);
+        vpx_free(g_b_scaler.c_h);
 
-        if (g_b_scaler.c_h_uv) vpx_free(g_b_scaler.c_h_uv);
+        vpx_free(g_b_scaler.c_h_uv);
 
         vpx_memset(&g_b_scaler, 0, sizeof(BICUBIC_SCALER_STRUCT));
     }
@@ -342,21 +342,21 @@ int bicubic_coefficient_setup(int in_width, int in_height, int out_width, int ou
     d_h_uv = (in_height / 2) / gcd_h_uv;
 
     // allocate memory for the coefficents
-    if (g_b_scaler.l_w) vpx_free(g_b_scaler.l_w);
+    vpx_free(g_b_scaler.l_w);
 
-    if (g_b_scaler.l_h) vpx_free(g_b_scaler.l_h);
+    vpx_free(g_b_scaler.l_h);
 
-    if (g_b_scaler.l_h_uv) vpx_free(g_b_scaler.l_h_uv);
+    vpx_free(g_b_scaler.l_h_uv);
 
     g_b_scaler.l_w = (short *)vpx_memalign(32, out_width * 2);
     g_b_scaler.l_h = (short *)vpx_memalign(32, out_height * 2);
     g_b_scaler.l_h_uv = (short *)vpx_memalign(32, out_height * 2);
 
-    if (g_b_scaler.c_w) vpx_free(g_b_scaler.c_w);
+    vpx_free(g_b_scaler.c_w);
 
-    if (g_b_scaler.c_h) vpx_free(g_b_scaler.c_h);
+    vpx_free(g_b_scaler.c_h);
 
-    if (g_b_scaler.c_h_uv) vpx_free(g_b_scaler.c_h_uv);
+    vpx_free(g_b_scaler.c_h_uv);
 
     g_b_scaler.c_w = (short *)vpx_memalign(32, g_b_scaler.nw * 4 * 2);
     g_b_scaler.c_h = (short *)vpx_memalign(32, g_b_scaler.nh * 4 * 2);
