@@ -589,12 +589,8 @@ static void save_predictor(unsigned char *predictor, unsigned char *dst)
     int r, c;
     for (r = 0; r < 4; r++)
     {
-        for (c = 0; c < 4; c++)
-        {
-            *dst = predictor[c];
-            dst++;
-        }
-
+        memcpy(dst, predictor, 4);
+        dst += 4;
         predictor += 16;
     }
 }
@@ -603,12 +599,8 @@ static void restore_predictor(unsigned char *predictor, unsigned char *dst)
     int r, c;
     for (r = 0; r < 4; r++)
     {
-        for (c = 0; c < 4; c++)
-        {
-            predictor[c] = *dst;
-            dst++;
-        }
-
+        memcpy(predictor, dst, 4);
+        dst += 4;
         predictor += 16;
     }
 }
