@@ -40,7 +40,6 @@ Advanced options:
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
   ${toggle_small}                 favor smaller size over speed
-  ${toggle_arm_asm_detok}         assembly version of the detokenizer (ARM platforms only)
   ${toggle_postproc_visualizer}   macro block / block level visualizers
 
 Codecs:
@@ -260,7 +259,6 @@ CONFIG_LIST="
     realtime_only
     shared
     small
-    arm_asm_detok
     postproc_visualizer
     os_support
 
@@ -304,7 +302,6 @@ CMDLINE_SELECT="
     realtime_only
     shared
     small
-    arm_asm_detok
     postproc_visualizer
 
     experimental

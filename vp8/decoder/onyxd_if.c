@@ -132,9 +132,6 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
         cm->last_sharpness_level = cm->sharpness_level;
     }
 
-#if CONFIG_ARM_ASM_DETOK
-    vp8_init_detokenizer(pbi);
-#endif
     pbi->common.error.setjmp = 0;
     return (VP8D_PTR) pbi;
 }

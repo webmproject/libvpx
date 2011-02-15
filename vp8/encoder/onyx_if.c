@@ -331,7 +331,8 @@ static void setup_features(VP8_COMP *cpi)
 
 void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 {
-    vpx_free(cpi->tplist);
+    if(cpi->tplist!=0)
+        vpx_free(cpi->tplist);
     cpi->tplist = NULL;
 
     // Delete last frame MV storage buffers
@@ -1471,6 +1472,9 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     else
         cpi->mt_sync_range = 16;
 #endif
+
+    if(cpi->tplist);
+        vpx_free(cpi->tplist);
 
     CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
 }
