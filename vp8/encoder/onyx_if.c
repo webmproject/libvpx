@@ -331,39 +331,32 @@ static void setup_features(VP8_COMP *cpi)
 
 void vp8_dealloc_compressor_data(VP8_COMP *cpi)
 {
-    if(cpi->tplist!=0)
         vpx_free(cpi->tplist);
     cpi->tplist = NULL;
 
     // Delete last frame MV storage buffers
-    if (cpi->lfmv != 0)
         vpx_free(cpi->lfmv);
 
     cpi->lfmv = 0;
 
-    if (cpi->lf_ref_frame_sign_bias != 0)
         vpx_free(cpi->lf_ref_frame_sign_bias);
 
     cpi->lf_ref_frame_sign_bias = 0;
 
-    if (cpi->lf_ref_frame != 0)
         vpx_free(cpi->lf_ref_frame);
 
     cpi->lf_ref_frame = 0;
 
     // Delete sementation map
-    if (cpi->segmentation_map != 0)
         vpx_free(cpi->segmentation_map);
 
     cpi->segmentation_map = 0;
 
-    if (cpi->active_map != 0)
         vpx_free(cpi->active_map);
 
     cpi->active_map = 0;
 
     // Delete first pass motion map
-    if (cpi->fp_motion_map != 0)
         vpx_free(cpi->fp_motion_map);
 
     cpi->fp_motion_map = 0;
@@ -388,23 +381,19 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
     cpi->tok = 0;
 
     // Structure used to monitor GF usage
-    if (cpi->gf_active_flags != 0)
         vpx_free(cpi->gf_active_flags);
 
     cpi->gf_active_flags = 0;
 
-    if(cpi->mb.pip)
         vpx_free(cpi->mb.pip);
 
     cpi->mb.pip = 0;
 
 #if !(CONFIG_REALTIME_ONLY)
-    if(cpi->total_stats)
         vpx_free(cpi->total_stats);
 
     cpi->total_stats = 0;
 
-    if(cpi->this_frame_stats)
         vpx_free(cpi->this_frame_stats);
 
     cpi->this_frame_stats = 0;
@@ -508,7 +497,6 @@ static void segmentation_test_function(VP8_PTR ptr)
     set_segment_data(ptr, &feature_data[0][0], SEGMENT_DELTADATA);
 
     // Delete sementation map
-    if (seg_map != 0)
         vpx_free(seg_map);
 
     seg_map = 0;
@@ -602,7 +590,6 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
     // Delete sementation map
-    if (seg_map != 0)
         vpx_free(seg_map);
 
     seg_map = 0;
@@ -1376,7 +1363,6 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 
 static int vp8_alloc_partition_data(VP8_COMP *cpi)
 {
-    if(cpi->mb.pip)
         vpx_free(cpi->mb.pip);
 
     cpi->mb.pip = vpx_calloc((cpi->common.mb_cols + 1) *
@@ -1423,7 +1409,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
                            "Failed to allocate scaled source buffer");
 
 
-    if (cpi->tok != 0)
         vpx_free(cpi->tok);
 
     {
@@ -1439,7 +1424,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
 
     // Structures used to minitor GF usage
-    if (cpi->gf_active_flags != 0)
         vpx_free(cpi->gf_active_flags);
 
     CHECK_MEM_ERROR(cpi->gf_active_flags, vpx_calloc(1, cm->mb_rows * cm->mb_cols));
@@ -1447,12 +1431,10 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
 
 #if !(CONFIG_REALTIME_ONLY)
-    if(cpi->total_stats)
         vpx_free(cpi->total_stats);
 
     cpi->total_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
 
-    if(cpi->this_frame_stats)
         vpx_free(cpi->this_frame_stats);
 
     cpi->this_frame_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
@@ -1473,7 +1455,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         cpi->mt_sync_range = 16;
 #endif
 
-    if(cpi->tplist);
         vpx_free(cpi->tplist);
 
     CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));

@@ -39,10 +39,7 @@ vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf)
 {
     if (ybf)
     {
-        if (ybf->buffer_alloc)
-        {
             duck_free(ybf->buffer_alloc);
-        }
 
         ybf->buffer_alloc = 0;
     }
