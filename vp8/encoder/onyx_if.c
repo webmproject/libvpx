@@ -4410,22 +4410,25 @@ static void encode_frame_to_data_rate
 
         //#pragma omp section
         {
-
-            struct vpx_usec_timer timer;
-
-            vpx_usec_timer_start(&timer);
-
-            if (cpi->sf.auto_filter == 0)
-                vp8cx_pick_filter_level_fast(cpi->Source, cpi);
-            else
-                vp8cx_pick_filter_level(cpi->Source, cpi);
-
-            vpx_usec_timer_mark(&timer);
-
-            cpi->time_pick_lpf +=  vpx_usec_timer_elapsed(&timer);
-
             if (cm->no_lpf)
+            {
                 cm->filter_level = 0;
+            }
+            else
+            {
+                struct vpx_usec_timer timer;
+
+                vpx_usec_timer_start(&timer);
+
+                if (cpi->sf.auto_filter == 0)
+                    vp8cx_pick_filter_level_fast(cpi->Source, cpi);
+                else
+                    vp8cx_pick_filter_level(cpi->Source, cpi);
+
+                vpx_usec_timer_mark(&timer);
+
+                cpi->time_pick_lpf +=  vpx_usec_timer_elapsed(&timer);
+            }
 
             if (cm->filter_level > 0)
             {
@@ -4434,7 +4437,9 @@ static void encode_frame_to_data_rate
                 cm->last_filter_type = cm->filter_type;
                 cm->last_sharpness_level = cm->sharpness_level;
             }
-            /* Move storing frame_type out of the above loop since it is also needed in motion search besides loopfilter */
+
+            /* Move storing frame_type out of the above loop since it is also
+             * needed in motion search besides loopfilter */
             cm->last_frame_type = cm->frame_type;
 
             vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
