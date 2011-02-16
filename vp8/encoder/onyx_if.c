@@ -1267,6 +1267,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 {
     int i, buffers;
+    /* allocate source_buffer to be multiples of 16 */
+    int width = (cpi->oxcf.Width + 15) & ~15;
 
     buffers = cpi->oxcf.lag_in_frames;
 
@@ -1278,7 +1280,7 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 
     for (i = 0; i < buffers; i++)
         if (vp8_yv12_alloc_frame_buffer(&cpi->src_buffer[i].source_buffer,
-                                        cpi->oxcf.Width, cpi->oxcf.Height,
+                                        width, cpi->oxcf.Height,
                                         16))
             vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                                "Failed to allocate lag buffer");
@@ -1286,7 +1288,7 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 #if VP8_TEMPORAL_ALT_REF
 
     if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer.source_buffer,
-                                    cpi->oxcf.Width, cpi->oxcf.Height, 16))
+                                    width, cpi->oxcf.Height, 16))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate altref buffer");
 
