@@ -9,7 +9,7 @@
  */
 
 
-/*!\file vpx_encoder.c
+/*!\file
  * \brief Provides the high level interface to wrap encoder algorithms.
  *
  */
