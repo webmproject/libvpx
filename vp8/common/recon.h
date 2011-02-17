@@ -94,6 +94,5 @@ typedef struct vp8_recon_rtcd_vtable
 #define RECON_INVOKE(ctx,fn) vp8_recon_##fn
 #endif
 
-void vp8_recon_intra4x4mb(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x);
 void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x);
 #endif
