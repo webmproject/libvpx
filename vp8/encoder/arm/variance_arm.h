@@ -14,10 +14,14 @@
 
 #if HAVE_ARMV6
 
+extern prototype_sad(vp8_sad16x16_armv6);
 extern prototype_variance(vp8_variance16x16_armv6);
 extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_armv6);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
+
+#undef  vp8_variance_sad16x16
+#define vp8_variance_sad16x16 vp8_sad16x16_armv6
 
 #undef  vp8_variance_subpixvar16x16
 #define vp8_variance_subpixvar16x16 vp8_sub_pixel_variance16x16_armv6
