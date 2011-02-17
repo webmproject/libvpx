@@ -16,7 +16,6 @@
 #include "findnearmv.h"
 #include "entropymode.h"
 #include "systemdependent.h"
-#include "vpxerrors.h"
 
 
 extern  void vp8_init_scan_order_mask();
@@ -71,7 +70,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
       if (vp8_yv12_alloc_frame_buffer(&oci->yv12_fb[i],  width, height, VP8BORDERINPIXELS) < 0)
         {
             vp8_de_alloc_frame_buffers(oci);
-            return ALLOC_FAILURE;
+            return 1;
         }
     }
 
@@ -88,13 +87,13 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     if (vp8_yv12_alloc_frame_buffer(&oci->temp_scale_frame,   width, 16, VP8BORDERINPIXELS) < 0)
     {
         vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
+        return 1;
     }
 
     if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height, VP8BORDERINPIXELS) < 0)
     {
         vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
+        return 1;
     }
 
     oci->mb_rows = height >> 4;
@@ -106,7 +105,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     if (!oci->mip)
     {
         vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
+        return 1;
     }
 
     oci->mi = oci->mip + oci->mode_info_stride + 1;
@@ -117,7 +116,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     if (!oci->above_context)
     {
         vp8_de_alloc_frame_buffers(oci);
-        return ALLOC_FAILURE;
+        return 1;
     }
 
     vp8_update_mode_info_border(oci->mi, oci->mb_rows, oci->mb_cols);

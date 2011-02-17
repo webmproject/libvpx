@@ -29,7 +29,6 @@
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
-#include "vp8/common/vpxerrors.h"
 
 #include <math.h>
 #include <limits.h>
