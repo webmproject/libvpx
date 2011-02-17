@@ -10,9 +10,9 @@
 
 
 #include "vpx_ports/config.h"
-#include "dequantize.h"
-#include "predictdc.h"
-#include "idct.h"
+#include "vp8/decoder/dequantize.h"
+#include "vp8/common/predictdc.h"
+#include "vp8/common/idct.h"
 #include "vpx_mem/vpx_mem.h"
 
 #if HAVE_ARMV7

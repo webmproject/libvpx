@@ -16,7 +16,7 @@
 #include <fstream>
 extern "C"
 {
-    #include "onyx.h"
+    #include "vp8/common/onyx.h"
 }
 
 

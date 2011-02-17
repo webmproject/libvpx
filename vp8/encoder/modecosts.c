@@ -9,10 +9,10 @@
  */
 
 
-#include "blockd.h"
+#include "vp8/common/blockd.h"
 #include "onyx_int.h"
 #include "treewriter.h"
-#include "entropymode.h"
+#include "vp8/common/entropymode.h"
 
 
 void vp8_init_mode_costs(VP8_COMP *c)

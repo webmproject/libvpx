@@ -15,7 +15,7 @@
 /* Trees map alphabets into huffman-like codes suitable for an arithmetic
    bit coder.  Timothy S Murphy  11 October 2004 */
 
-#include "treecoder.h"
+#include "vp8/common/treecoder.h"
 
 #include "boolhuff.h"       /* for now */
 

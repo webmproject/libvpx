@@ -21,19 +21,19 @@
 *  Header Files
 ****************************************************************************/
 #include <math.h>   // For Abs()
-#include "pragmas.h"
+#include "vp8/common/pragmas.h"
 
 #include "vpxdxv.h"
 #include "vpxdxv_plugin.h"
 
-#include "onyxd_int.h"
-#include "onyx.h"
-#include "codec_common_interface.h"
+#include "vp8/decoder/onyxd_int.h"
+#include "vp8/common/onyx.h"
+#include "vp8/common/codec_common_interface.h"
 #include "vpx_scale/vpxscale.h"
 #include "vpx_mem/vpx_mem.h"
-#include "postproc.h"
-#include "vpxblit.h"
-#include "g_common.h"
+#include "vp8/common/postproc.h"
+#include "vp8/common/vpxblit.h"
+#include "vp8/common/g_common.h"
 #include "vpx_scale/yv12extend.h"
 
 #include <limits.h>

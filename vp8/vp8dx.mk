@@ -24,9 +24,6 @@ endif
 
 VP8_DX_SRCS-yes += vp8_dx_iface.c
 
-CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)decoder
-
-
 # common
 #define ARM
 #define DISABLE_THREAD

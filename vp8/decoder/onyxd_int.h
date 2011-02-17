@@ -12,10 +12,10 @@
 #ifndef __INC_VP8D_INT_H
 #define __INC_VP8D_INT_H
 #include "vpx_ports/config.h"
-#include "onyxd.h"
+#include "vp8/common/onyxd.h"
 #include "treereader.h"
-#include "onyxc_int.h"
-#include "threading.h"
+#include "vp8/common/onyxc_int.h"
+#include "vp8/common/threading.h"
 #include "dequantize.h"
 
 typedef struct

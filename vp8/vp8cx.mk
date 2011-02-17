@@ -33,8 +33,6 @@ VP8_CX_SRCS-yes += vp8_cx_iface.c
 #INCLUDES += common
 #INCLUDES += encoder
 
-CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)encoder
-
 VP8_CX_SRCS-yes += encoder/bitstream.c
 VP8_CX_SRCS-yes += encoder/boolhuff.c
 VP8_CX_SRCS-yes += encoder/dct.c

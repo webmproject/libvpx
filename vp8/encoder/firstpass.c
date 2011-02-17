@@ -14,18 +14,18 @@
 #include "onyx_int.h"
 #include "variance.h"
 #include "encodeintra.h"
-#include "setupintrarecon.h"
+#include "vp8/common/setupintrarecon.h"
 #include "mcomp.h"
 #include "vpx_scale/vpxscale.h"
 #include "encodemb.h"
-#include "extend.h"
-#include "systemdependent.h"
+#include "vp8/common/extend.h"
+#include "vp8/common/systemdependent.h"
 #include "vpx_scale/yv12extend.h"
 #include "vpx_mem/vpx_mem.h"
-#include "swapyv12buffer.h"
+#include "vp8/common/swapyv12buffer.h"
 #include <stdio.h>
 #include "rdopt.h"
-#include "quant_common.h"
+#include "vp8/common/quant_common.h"
 #include "encodemv.h"
 
 //#define OUTPUT_FPF 1

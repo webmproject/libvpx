@@ -11,8 +11,8 @@
 
 #include "vpx_ports/config.h"
 #include <math.h>
-#include "loopfilter.h"
-#include "onyxc_int.h"
+#include "vp8/common/loopfilter.h"
+#include "vp8/common/onyxc_int.h"
 
 extern prototype_loopfilter(vp8_loop_filter_horizontal_edge_armv6);
 extern prototype_loopfilter(vp8_loop_filter_vertical_edge_armv6);

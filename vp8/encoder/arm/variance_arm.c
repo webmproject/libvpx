@@ -9,9 +9,9 @@
  */
 
 #include "vpx_config.h"
-#include "variance.h"
-#include "filter.h"
-#include "arm/bilinearfilter_arm.h"
+#include "vp8/encoder/variance.h"
+#include "vp8/common/filter.h"
+#include "vp8/common/arm/bilinearfilter_arm.h"
 
 #if HAVE_ARMV6
 
