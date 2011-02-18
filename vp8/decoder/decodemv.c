@@ -10,10 +10,10 @@
 
 
 #include "treereader.h"
-#include "entropymv.h"
-#include "entropymode.h"
+#include "vp8/common/entropymv.h"
+#include "vp8/common/entropymode.h"
 #include "onyxd_int.h"
-#include "findnearmv.h"
+#include "vp8/common/findnearmv.h"
 
 #if CONFIG_DEBUG
 #include <assert.h>

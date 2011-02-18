@@ -15,24 +15,11 @@
 #include "vpx/vp8dx.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
-#include "onyxd.h"
-#include "onyxd_int.h"
+#include "common/onyxd.h"
+#include "decoder/onyxd_int.h"
 
 #define VP8_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
 
-#if CONFIG_BIG_ENDIAN
-# define swap4(d)\
-    ((d&0x000000ff)<<24) |  \
-    ((d&0x0000ff00)<<8)  |  \
-    ((d&0x00ff0000)>>8)  |  \
-    ((d&0xff000000)>>24)
-# define swap2(d)\
-    ((d&0x000000ff)<<8) |  \
-    ((d&0x0000ff00)>>8)
-#else
-# define swap4(d) d
-# define swap2(d) d
-#endif
 typedef vpx_codec_stream_info_t  vp8_stream_info_t;
 
 /* Structures for handling memory allocations */
@@ -283,8 +270,8 @@ static vpx_codec_err_t vp8_peek_si(const uint8_t         *data,
             if (c[0] != 0x9d || c[1] != 0x01 || c[2] != 0x2a)
                 res = VPX_CODEC_UNSUP_BITSTREAM;
 
-            si->w = swap2(*(const unsigned short *)(c + 3)) & 0x3fff;
-            si->h = swap2(*(const unsigned short *)(c + 5)) & 0x3fff;
+            si->w = (c[3] | (c[4] << 8)) & 0x3fff;
+            si->h = (c[5] | (c[6] << 8)) & 0x3fff;
 
             /*printf("w=%d, h=%d\n", si->w, si->h);*/
             if (!(si->h | si->w))

@@ -11,7 +11,7 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_ports/x86.h"
-#include "onyxd_int.h"
+#include "vp8/decoder/onyxd_int.h"
 
 
 #if HAVE_MMX

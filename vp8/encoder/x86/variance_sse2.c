@@ -9,8 +9,8 @@
  */
 
 
-#include "variance.h"
-#include "pragmas.h"
+#include "vp8/encoder/variance.h"
+#include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
 
 extern void filter_block1d_h6_mmx(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);

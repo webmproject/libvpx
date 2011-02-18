@@ -9,10 +9,10 @@
  */
 
 
-#include "common.h"
+#include "vp8/common/common.h"
 #include "encodemv.h"
-#include "entropymode.h"
-#include "systemdependent.h"
+#include "vp8/common/entropymode.h"
+#include "vp8/common/systemdependent.h"
 
 #include <math.h>
 

@@ -9,8 +9,8 @@
  */
 
 
-#include "variance.h"
-#include "onyx_int.h"
+#include "vp8/encoder/variance.h"
+#include "vp8/encoder/onyx_int.h"
 
 SADFunction *vp8_sad16x16;
 SADFunction *vp8_sad16x8;

@@ -12,9 +12,9 @@
 #include <math.h>
 #include "vpx_mem/vpx_mem.h"
 
-#include "quantize.h"
-#include "entropy.h"
-#include "predictdc.h"
+#include "vp8/encoder/quantize.h"
+#include "vp8/common/entropy.h"
+#include "vp8/common/predictdc.h"
 
 DECLARE_ALIGNED(16, const short, vp8_rvsplus1_default_zig_zag1d[16]) =
 {

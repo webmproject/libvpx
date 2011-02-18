@@ -10,7 +10,7 @@
 
 
 #include "boolhuff.h"
-#include "blockd.h"
+#include "vp8/common/blockd.h"
 
 
 

@@ -9,15 +9,15 @@
  */
 
 
-#include "header.h"
+#include "vp8/common/header.h"
 #include "encodemv.h"
-#include "entropymode.h"
-#include "findnearmv.h"
+#include "vp8/common/entropymode.h"
+#include "vp8/common/findnearmv.h"
 #include "mcomp.h"
-#include "systemdependent.h"
+#include "vp8/common/systemdependent.h"
 #include <assert.h>
 #include <stdio.h>
-#include "pragmas.h"
+#include "vp8/common/pragmas.h"
 #include "vpx_mem/vpx_mem.h"
 #include "bitstream.h"
 
@@ -58,16 +58,6 @@ extern unsigned int active_section;
 int count_mb_seg[4] = { 0, 0, 0, 0 };
 #endif
 
-#if CONFIG_BIG_ENDIAN
-# define make_endian_16(a)  \
-    (((unsigned int)(a & 0xff)) << 8) | (((unsigned int)(a & 0xff00)) >> 8)
-# define make_endian_32(a)                              \
-    (((unsigned int)(a & 0xff)) << 24)    | (((unsigned int)(a & 0xff00)) << 8) |   \
-    (((unsigned int)(a & 0xff0000)) >> 8) | (((unsigned int)(a & 0xff000000)) >> 24)
-#else
-# define make_endian_16(a)  a
-# define make_endian_32(a)  a
-#endif
 
 static void update_mode(
     vp8_writer *const w,
@@ -1392,13 +1382,20 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     // every keyframe send startcode, width, height, scale factor, clamp and color type
     if (oh.type == KEY_FRAME)
     {
+        int v;
+
         // Start / synch code
         cx_data[0] = 0x9D;
         cx_data[1] = 0x01;
         cx_data[2] = 0x2a;
 
-        *((unsigned short *)(cx_data + 3)) = make_endian_16((pc->horiz_scale << 14) | pc->Width);
-        *((unsigned short *)(cx_data + 5)) = make_endian_16((pc->vert_scale << 14) | pc->Height);
+        v = (pc->horiz_scale << 14) | pc->Width;
+        cx_data[3] = v;
+        cx_data[4] = v >> 8;
+
+        v = (pc->vert_scale << 14) | pc->Height;
+        cx_data[5] = v;
+        cx_data[6] = v >> 8;
 
         extra_bytes_packed = 7;
         cx_data += extra_bytes_packed ;
@@ -1666,19 +1663,16 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         *size = cpi->bc2.pos + cpi->bc.pos + VP8_HEADER_SIZE + extra_bytes_packed;
     }
 
-#if CONFIG_BIG_ENDIAN
     {
         int v = (oh.first_partition_length_in_bytes << 5) |
                 (oh.show_frame << 4) |
                 (oh.version << 1) |
                 oh.type;
 
-        v = make_endian_32(v);
-        vpx_memcpy(dest, &v, 3);
+        dest[0] = v;
+        dest[1] = v >> 8;
+        dest[2] = v >> 16;
     }
-#else
-    vpx_memcpy(dest, &oh, 3);
-#endif
 }
 
 #ifdef ENTROPY_STATS
