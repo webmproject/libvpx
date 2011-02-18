@@ -29,7 +29,6 @@
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
-#include "vp8/common/vpxerrors.h"
 #include "temporal_filter.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -1305,7 +1304,7 @@ static int vp8_alloc_partition_data(VP8_COMP *cpi)
                                 (cpi->common.mb_rows + 1),
                                 sizeof(PARTITION_INFO));
     if(!cpi->mb.pip)
-        return ALLOC_FAILURE;
+        return 1;
 
     cpi->mb.pi = cpi->mb.pip + cpi->common.mode_info_stride + 1;
 
