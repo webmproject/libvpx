@@ -4412,57 +4412,47 @@ static void encode_frame_to_data_rate
     else
         cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
-    //#pragma omp parallel sections
+    if (cm->no_lpf)
     {
-
-        //#pragma omp section
-        {
-            if (cm->no_lpf)
-            {
-                cm->filter_level = 0;
-            }
-            else
-            {
-                struct vpx_usec_timer timer;
-
-                vpx_usec_timer_start(&timer);
-
-                if (cpi->sf.auto_filter == 0)
-                    vp8cx_pick_filter_level_fast(cpi->Source, cpi);
-                else
-                    vp8cx_pick_filter_level(cpi->Source, cpi);
-
-                vpx_usec_timer_mark(&timer);
-
-                cpi->time_pick_lpf +=  vpx_usec_timer_elapsed(&timer);
-            }
-
-            if (cm->filter_level > 0)
-            {
-                vp8cx_set_alt_lf_level(cpi, cm->filter_level);
-                vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
-                cm->last_filter_type = cm->filter_type;
-                cm->last_sharpness_level = cm->sharpness_level;
-            }
-
-            /* Move storing frame_type out of the above loop since it is also
-             * needed in motion search besides loopfilter */
-            cm->last_frame_type = cm->frame_type;
-
-            vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
-
-            if (cpi->oxcf.error_resilient_mode == 1)
-            {
-                cm->refresh_entropy_probs = 0;
-            }
-
-        }
-//#pragma omp section
-        {
-            // build the bitstream
-            vp8_pack_bitstream(cpi, dest, size);
-        }
+        cm->filter_level = 0;
     }
+    else
+    {
+        struct vpx_usec_timer timer;
+
+        vpx_usec_timer_start(&timer);
+
+        if (cpi->sf.auto_filter == 0)
+            vp8cx_pick_filter_level_fast(cpi->Source, cpi);
+        else
+            vp8cx_pick_filter_level(cpi->Source, cpi);
+
+        vpx_usec_timer_mark(&timer);
+
+        cpi->time_pick_lpf +=  vpx_usec_timer_elapsed(&timer);
+    }
+
+    if (cm->filter_level > 0)
+    {
+        vp8cx_set_alt_lf_level(cpi, cm->filter_level);
+        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
+        cm->last_filter_type = cm->filter_type;
+        cm->last_sharpness_level = cm->sharpness_level;
+    }
+
+    /* Move storing frame_type out of the above loop since it is also
+     * needed in motion search besides loopfilter */
+    cm->last_frame_type = cm->frame_type;
+
+    vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
+
+    if (cpi->oxcf.error_resilient_mode == 1)
+    {
+        cm->refresh_entropy_probs = 0;
+    }
+
+    // build the bitstream
+    vp8_pack_bitstream(cpi, dest, size);
 
     {
         YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
