@@ -12,10 +12,10 @@
 #ifndef __INC_BLOCK_H
 #define __INC_BLOCK_H
 
-#include "onyx.h"
-#include "blockd.h"
-#include "entropymv.h"
-#include "entropy.h"
+#include "vp8/common/onyx.h"
+#include "vp8/common/blockd.h"
+#include "vp8/common/entropymv.h"
+#include "vp8/common/entropy.h"
 #include "vpx_ports/mem.h"
 
 // motion search site

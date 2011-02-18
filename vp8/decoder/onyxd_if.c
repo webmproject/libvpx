@@ -9,25 +9,25 @@
  */
 
 
-#include "onyxc_int.h"
+#include "vp8/common/onyxc_int.h"
 #if CONFIG_POSTPROC
-#include "postproc.h"
+#include "vp8/common/postproc.h"
 #endif
-#include "onyxd.h"
+#include "vp8/common/onyxd.h"
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
-#include "alloccommon.h"
+#include "vp8/common/alloccommon.h"
 #include "vpx_scale/yv12extend.h"
-#include "loopfilter.h"
-#include "swapyv12buffer.h"
-#include "g_common.h"
-#include "threading.h"
+#include "vp8/common/loopfilter.h"
+#include "vp8/common/swapyv12buffer.h"
+#include "vp8/common/g_common.h"
+#include "vp8/common/threading.h"
 #include "decoderthreading.h"
 #include <stdio.h>
 
-#include "quant_common.h"
+#include "vp8/common/quant_common.h"
 #include "vpx_scale/vpxscale.h"
-#include "systemdependent.h"
+#include "vp8/common/systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"
 #if ARCH_ARM

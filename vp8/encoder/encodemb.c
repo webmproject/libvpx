@@ -11,12 +11,12 @@
 
 #include "vpx_ports/config.h"
 #include "encodemb.h"
-#include "reconinter.h"
+#include "vp8/common/reconinter.h"
 #include "quantize.h"
 #include "tokenize.h"
-#include "invtrans.h"
-#include "recon.h"
-#include "reconintra.h"
+#include "vp8/common/invtrans.h"
+#include "vp8/common/recon.h"
+#include "vp8/common/reconintra.h"
 #include "dct.h"
 #include "vpx_mem/vpx_mem.h"
 

@@ -8,24 +8,13 @@
 ##  be found in the AUTHORS file in the root of the source tree.
 ##
 
-
-#add this file to the installed sources list
 VP8_COMMON_SRCS-yes += vp8_common.mk
-
-CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
 VP8_COMMON_SRCS-yes += common/type_aliases.h
 VP8_COMMON_SRCS-yes += common/pragmas.h
-
-CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
 VP8_COMMON_SRCS-yes += common/vpxerrors.h
-
-CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
 VP8_COMMON_SRCS-yes += common/ppflags.h
 VP8_COMMON_SRCS-yes += common/onyx.h
 VP8_COMMON_SRCS-yes += common/onyxd.h
-
-CFLAGS+=-I$(SRC_PATH_BARE)/$(VP8_PREFIX)common
-
 VP8_COMMON_SRCS-yes += common/alloccommon.c
 VP8_COMMON_SRCS-yes += common/blockd.c
 VP8_COMMON_SRCS-yes += common/coefupdateprobs.h

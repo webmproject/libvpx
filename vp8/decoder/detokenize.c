@@ -9,8 +9,8 @@
  */
 
 
-#include "type_aliases.h"
-#include "blockd.h"
+#include "vp8/common/type_aliases.h"
+#include "vp8/common/blockd.h"
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/mem.h"

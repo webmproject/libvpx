@@ -10,8 +10,8 @@
 
 
 #include "vpx_ports/config.h"
-#include "dequantize.h"
-#include "onyxd_int.h"
+#include "vp8/decoder/dequantize.h"
+#include "vp8/decoder/onyxd_int.h"
 
 extern void vp8_arch_x86_decode_init(VP8D_COMP *pbi);
 extern void vp8_arch_arm_decode_init(VP8D_COMP *pbi);

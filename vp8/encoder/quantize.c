@@ -13,8 +13,8 @@
 #include "vpx_mem/vpx_mem.h"
 
 #include "quantize.h"
-#include "entropy.h"
-#include "predictdc.h"
+#include "vp8/common/entropy.h"
+#include "vp8/common/predictdc.h"
 
 #define EXACT_QUANT
 

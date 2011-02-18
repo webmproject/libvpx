@@ -11,8 +11,8 @@
 
 #include "vpx_ports/config.h"
 #include <math.h>
-#include "filter.h"
-#include "subpixel.h"
+#include "vp8/common/filter.h"
+#include "vp8/common/subpixel.h"
 #include "vpx_ports/mem.h"
 
 extern void vp8_filter_block2d_first_pass_armv6

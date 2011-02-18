@@ -11,8 +11,8 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_ports/arm.h"
-#include "variance.h"
-#include "onyx_int.h"
+#include "vp8/encoder/variance.h"
+#include "vp8/encoder/onyx_int.h"
 
 extern void (*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
 extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);

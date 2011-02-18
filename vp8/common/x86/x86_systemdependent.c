@@ -11,13 +11,13 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_ports/x86.h"
-#include "g_common.h"
-#include "subpixel.h"
-#include "loopfilter.h"
-#include "recon.h"
-#include "idct.h"
-#include "pragmas.h"
-#include "onyxc_int.h"
+#include "vp8/common/g_common.h"
+#include "vp8/common/subpixel.h"
+#include "vp8/common/loopfilter.h"
+#include "vp8/common/recon.h"
+#include "vp8/common/idct.h"
+#include "vp8/common/pragmas.h"
+#include "vp8/common/onyxc_int.h"
 
 void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 {

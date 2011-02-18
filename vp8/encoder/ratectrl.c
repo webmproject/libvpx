@@ -16,11 +16,11 @@
 #include <assert.h>
 
 #include "math.h"
-#include "common.h"
+#include "vp8/common/common.h"
 #include "ratectrl.h"
-#include "entropymode.h"
+#include "vp8/common/entropymode.h"
 #include "vpx_mem/vpx_mem.h"
-#include "systemdependent.h"
+#include "vp8/common/systemdependent.h"
 #include "encodemv.h"
 
 

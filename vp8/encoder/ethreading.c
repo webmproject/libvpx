@@ -9,9 +9,9 @@
  */
 
 #include "onyx_int.h"
-#include "threading.h"
-#include "common.h"
-#include "extend.h"
+#include "vp8/common/threading.h"
+#include "vp8/common/common.h"
+#include "vp8/common/extend.h"
 
 #if CONFIG_MULTITHREAD
 

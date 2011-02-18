@@ -11,8 +11,8 @@
 
 #include "vpx_ports/config.h"
 #include "vpx_ports/x86.h"
-#include "variance.h"
-#include "onyx_int.h"
+#include "vp8/encoder/variance.h"
+#include "vp8/encoder/onyx_int.h"
 
 
 #if HAVE_MMX
