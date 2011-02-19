@@ -14,7 +14,6 @@
 
 #include "quantize.h"
 #include "vp8/common/entropy.h"
-#include "vp8/common/predictdc.h"
 
 #define EXACT_QUANT
 
