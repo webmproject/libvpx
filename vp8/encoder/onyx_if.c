@@ -29,7 +29,6 @@
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
-#include "vp8/common/vpxerrors.h"
 #include "temporal_filter.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -1374,7 +1373,7 @@ static int vp8_alloc_partition_data(VP8_COMP *cpi)
                                 (cpi->common.mb_rows + 1),
                                 sizeof(PARTITION_INFO));
     if(!cpi->mb.pip)
-        return ALLOC_FAILURE;
+        return 1;
 
     cpi->mb.pi = cpi->mb.pip + cpi->common.mode_info_stride + 1;
 
@@ -3120,21 +3119,27 @@ static void set_quantizer(VP8_COMP *cpi, int Q)
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
     int update = 0;
-
-    update |= cm->base_qindex != Q;
+    int new_delta_q;
     cm->base_qindex = Q;
 
+    /* if any of the delta_q values are changing update flag has to be set */
+    /* currently only y2dc_delta_q may change */
+
     cm->y1dc_delta_q = 0;
-    cm->y2dc_delta_q = 0;
     cm->y2ac_delta_q = 0;
     cm->uvdc_delta_q = 0;
     cm->uvac_delta_q = 0;
 
-    if(Q<4)
+    if (Q < 4)
     {
-        update |= cm->y2dc_delta_q != 4-Q;
-        cm->y2dc_delta_q = 4-Q;
+        new_delta_q = 4-Q;
     }
+    else
+        new_delta_q = 0;
+
+    update |= cm->y2dc_delta_q != new_delta_q;
+    cm->y2dc_delta_q = new_delta_q;
+
 
     // Set Segment specific quatizers
     mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
@@ -3142,6 +3147,7 @@ static void set_quantizer(VP8_COMP *cpi, int Q)
     mbd->segment_feature_data[MB_LVL_ALT_Q][2] = cpi->segment_feature_data[MB_LVL_ALT_Q][2];
     mbd->segment_feature_data[MB_LVL_ALT_Q][3] = cpi->segment_feature_data[MB_LVL_ALT_Q][3];
 
+    /* quantizer has to be reinitialized for any delta_q changes */
     if(update)
         vp8cx_init_quantizer(cpi);
 
@@ -4491,52 +4497,47 @@ static void encode_frame_to_data_rate
     else
         cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
-    //#pragma omp parallel sections
+    if (cm->no_lpf)
     {
-
-        //#pragma omp section
-        {
-
-            struct vpx_usec_timer timer;
-
-            vpx_usec_timer_start(&timer);
-
-            if (cpi->sf.auto_filter == 0)
-                vp8cx_pick_filter_level_fast(cpi->Source, cpi);
-            else
-                vp8cx_pick_filter_level(cpi->Source, cpi);
-
-            vpx_usec_timer_mark(&timer);
-
-            cpi->time_pick_lpf +=  vpx_usec_timer_elapsed(&timer);
-
-            if (cm->no_lpf)
-                cm->filter_level = 0;
-
-            if (cm->filter_level > 0)
-            {
-                vp8cx_set_alt_lf_level(cpi, cm->filter_level);
-                vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
-                cm->last_filter_type = cm->filter_type;
-                cm->last_sharpness_level = cm->sharpness_level;
-            }
-            /* Move storing frame_type out of the above loop since it is also needed in motion search besides loopfilter */
-            cm->last_frame_type = cm->frame_type;
-
-            vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
-
-            if (cpi->oxcf.error_resilient_mode == 1)
-            {
-                cm->refresh_entropy_probs = 0;
-            }
-
-        }
-//#pragma omp section
-        {
-            // build the bitstream
-            vp8_pack_bitstream(cpi, dest, size);
-        }
+        cm->filter_level = 0;
     }
+    else
+    {
+        struct vpx_usec_timer timer;
+
+        vpx_usec_timer_start(&timer);
+
+        if (cpi->sf.auto_filter == 0)
+            vp8cx_pick_filter_level_fast(cpi->Source, cpi);
+        else
+            vp8cx_pick_filter_level(cpi->Source, cpi);
+
+        vpx_usec_timer_mark(&timer);
+
+        cpi->time_pick_lpf +=  vpx_usec_timer_elapsed(&timer);
+    }
+
+    if (cm->filter_level > 0)
+    {
+        vp8cx_set_alt_lf_level(cpi, cm->filter_level);
+        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
+        cm->last_filter_type = cm->filter_type;
+        cm->last_sharpness_level = cm->sharpness_level;
+    }
+
+    /* Move storing frame_type out of the above loop since it is also
+     * needed in motion search besides loopfilter */
+    cm->last_frame_type = cm->frame_type;
+
+    vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
+
+    if (cpi->oxcf.error_resilient_mode == 1)
+    {
+        cm->refresh_entropy_probs = 0;
+    }
+
+    // build the bitstream
+    vp8_pack_bitstream(cpi, dest, size);
 
     {
         YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
