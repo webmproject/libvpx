@@ -126,29 +126,6 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
-ifeq ($(ARCH_ARM),yes)
-ifeq ($(HAVE_ARMV5TE),yes)
-ARM_ARCH=v5
-endif
-ifeq ($(HAVE_ARMV6),yes)
-ARM_ARCH=v6
-endif
-obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
-	@cp $(SRC_PATH_BARE)/build/arm-wince-vs8/obj_int_extract.bat .
-	@echo "    [CREATE] $@"
-	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
-			--exe\
-			--target=$(TOOLCHAIN)\
-            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
-            --name=obj_int_extract\
-            --proj-guid=E1360C65-D375-4335-8057-7ED99CC3F9B2\
-            --out=$@ $^\
-            -I".&quot;;&quot;$(SRC_PATH_BARE)"
-
-PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
-PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
-endif
-
 vpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
 	$(SRC_PATH_BARE)/build/make/gen_msvs_def.sh\
