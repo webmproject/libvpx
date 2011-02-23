@@ -529,10 +529,10 @@ static int vp8_rdcost_mby(MACROBLOCK *mb)
     tl = (ENTROPY_CONTEXT *)&t_left;
 
     for (b = 0; b < 16; b++)
-        cost += cost_coeffs(mb, x->block + b, 0,
+        cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
                     ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
-    cost += cost_coeffs(mb, x->block + 24, 1,
+    cost += cost_coeffs(mb, x->block + 24, PLANE_TYPE_Y2,
                 ta + vp8_block2above[24], tl + vp8_block2left[24]);
 
     return cost;
@@ -637,7 +637,7 @@ static int rd_pick_intra4x4block(
         tempa = ta;
         templ = tl;
 
-        ratey = cost_coeffs(x, b, 3, &tempa, &templ);
+        ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ);
         rate += ratey;
         distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(be->coeff, b->dqcoeff) >> 2;
 
@@ -782,12 +782,8 @@ static int rd_cost_mbuv(MACROBLOCK *mb)
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-    for (b = 16; b < 20; b++)
-        cost += cost_coeffs(mb, x->block + b, vp8_block2type[b],
-                    ta + vp8_block2above[b], tl + vp8_block2left[b]);
-
-    for (b = 20; b < 24; b++)
-        cost += cost_coeffs(mb, x->block + b, vp8_block2type[b],
+    for (b = 16; b < 24; b++)
+        cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_UV,
                     ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
     return cost;
@@ -968,7 +964,7 @@ static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
 
     for (b = 0; b < 16; b++)
         if (labels[ b] == which_label)
-            cost += cost_coeffs(mb, x->block + b, 3,
+            cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_WITH_DC,
                                 ta + vp8_block2above[b],
                                 tl + vp8_block2left[b]);
 
