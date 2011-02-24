@@ -14,7 +14,7 @@
  * VP8 is vpx's newest video compression algorithm that uses motion
  * compensated prediction, Discrete Cosine Transform (DCT) coding of the
  * prediction error signal and context dependent entropy coding techniques
- * based on arithmatic principles. It features:
+ * based on arithmetic principles. It features:
  *  - YUV 4:2:0 image format
  *  - Macro-block based coding (16x16 luma plus two 8x8 chroma)
  *  - 1/4 (1/8) pixel accuracy motion compensated prediction
@@ -25,7 +25,7 @@
  *
  * @{
  */
-/*!\file vp8.h
+/*!\file
  * \brief Provides controls common to both the VP8 encoder and decoder.
  */
 #ifndef VP8_H
@@ -67,7 +67,7 @@ enum vp8_postproc_level
 /*!\brief post process flags
  *
  * This define a structure that describe the post processing settings. For
- * the best objective measure (using thet PSNR metric) set post_proc_flag
+ * the best objective measure (using the PSNR metric) set post_proc_flag
  * to VP8_DEBLOCK and deblocking_level to 1.
  */
 
@@ -101,7 +101,7 @@ typedef struct vpx_ref_frame
 } vpx_ref_frame_t;
 
 
-/*!\brief vp8 decoder control funciton parameter type
+/*!\brief vp8 decoder control function parameter type
  *
  * defines the data type for each of VP8 decoder control function requires
  */

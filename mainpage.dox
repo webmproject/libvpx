@@ -31,7 +31,7 @@
   The WebM project is an open source project supported by its community. For
   questions about this SDK, please mail the apps-devel@webmproject.org list.
   To contribute, see http://www.webmproject.org/code/contribute and mail
-  vpx-devel@webmproject.org.
+  codec-devel@webmproject.org.
 */
 
 /*!\page changelog CHANGELOG

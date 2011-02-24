@@ -16,7 +16,7 @@
  */
 #include "vp8.h"
 
-/*!\file vp8cx.h
+/*!\file
  * \brief Provides definitions for using the VP8 encoder algorithm within the
  *        vpx Codec Interface.
  */

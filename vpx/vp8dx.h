@@ -16,7 +16,7 @@
  *
  * @{
  */
-/*!\file vp8dx.h
+/*!\file
  * \brief Provides definitions for using the VP8 algorithm within the vpx Decoder
  *        interface.
  */
