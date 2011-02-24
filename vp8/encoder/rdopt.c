@@ -584,33 +584,14 @@ static void macro_block_yrd( MACROBLOCK *mb,
     *Rate = vp8_rdcost_mby(mb);
 }
 
-static void save_predictor(unsigned char *predictor, unsigned char *dst)
+static void copy_predictor(unsigned char *dst, const unsigned char *predictor)
 {
-    int r, c;
-    for (r = 0; r < 4; r++)
-    {
-        for (c = 0; c < 4; c++)
-        {
-            *dst = predictor[c];
-            dst++;
-        }
-
-        predictor += 16;
-    }
-}
-static void restore_predictor(unsigned char *predictor, unsigned char *dst)
-{
-    int r, c;
-    for (r = 0; r < 4; r++)
-    {
-        for (c = 0; c < 4; c++)
-        {
-            predictor[c] = *dst;
-            dst++;
-        }
-
-        predictor += 16;
-    }
+    const unsigned int *p = (const unsigned int *)predictor;
+    unsigned int *d = (unsigned int *)dst;
+    d[0] = p[0];
+    d[4] = p[4];
+    d[8] = p[8];
+    d[12] = p[12];
 }
 static int rd_pick_intra4x4block(
     VP8_COMP *cpi,
@@ -633,9 +614,13 @@ static int rd_pick_intra4x4block(
 
     ENTROPY_CONTEXT ta = *a, tempa = *a;
     ENTROPY_CONTEXT tl = *l, templ = *l;
-
-    DECLARE_ALIGNED_ARRAY(16, unsigned char,  predictor, 16);
-    DECLARE_ALIGNED_ARRAY(16, short, dqcoeff, 16);
+    /*
+     * The predictor buffer is a 2d buffer with a stride of 16.  Create
+     * a temp buffer that meets the stride requirements, but we are only
+     * interested in the left 4x4 block
+     * */
+    DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16*4);
+    DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16);
 
     for (mode = B_DC_PRED; mode <= B_HU_PRED; mode++)
     {
@@ -667,21 +652,17 @@ static int rd_pick_intra4x4block(
             *best_mode = mode;
             *a = tempa;
             *l = templ;
-            save_predictor(b->predictor, predictor);
-            vpx_memcpy(dqcoeff, b->dqcoeff, 32);
+            copy_predictor(best_predictor, b->predictor);
+            vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
         }
     }
 
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
 
-    restore_predictor(b->predictor, predictor);
-    vpx_memcpy(b->dqcoeff, dqcoeff, 32);
-
-    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(b->dqcoeff, b->diff, 32);
-    RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff, b->diff, 32);
+    RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
     return best_rd;
-
 }
 
 int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
@@ -692,7 +673,7 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int distortion = 0;
     int tot_rate_y = 0;
-    int total_rd = 0;
+    long long total_rd = 0;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
@@ -733,12 +714,12 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
         tot_rate_y += ry;
         mic->bmi[i].mode = xd->block[i].bmi.mode = best_mode;
 
-        if(total_rd >= best_rd)
-          break;
+        if(total_rd >= (long long)best_rd)
+            break;
     }
 
-    if(total_rd >= best_rd)
-      return INT_MAX;
+    if(total_rd >= (long long)best_rd)
+        return INT_MAX;
 
     *Rate = cost;
     *rate_y += tot_rate_y;
