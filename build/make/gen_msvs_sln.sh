@@ -139,9 +139,6 @@ process_global() {
             echo "${indent}${proj_guid}.${config}.ActiveCfg = ${config}"
             echo "${indent}${proj_guid}.${config}.Build.0 = ${config}"
 
-            if [ "$target" == "armv6-wince-vs8" ] || [ "$target" == "armv5te-wince-vs8" ] || [ "$target" == "iwmmxt-wince-vs8" ] || [ "$target" == "iwmmxt2-wince-vs8" ];then
-                echo "${indent}${proj_guid}.${config}.Deploy.0 = ${config}"
-            fi
         done
         IFS=${IFS_bak}
     done

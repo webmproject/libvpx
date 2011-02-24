@@ -45,18 +45,14 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     armv5te-linux-rvct
     armv5te-linux-gcc
     armv5te-symbian-gcc
-    armv5te-wince-vs8
     armv6-darwin-gcc
     armv6-linux-rvct
     armv6-linux-gcc
     armv6-symbian-gcc
-    armv6-wince-vs8
     iwmmxt-linux-rvct
     iwmmxt-linux-gcc
-    iwmmxt-wince-vs8
     iwmmxt2-linux-rvct
     iwmmxt2-linux-gcc
-    iwmmxt2-wince-vs8
     armv7-linux-rvct
     armv7-linux-gcc
     mips32-linux-gcc
