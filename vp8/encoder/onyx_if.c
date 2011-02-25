@@ -5221,23 +5221,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     if (cpi->compressor_speed == 2)
     {
         vp8_check_gf_quality(cpi);
-    }
-
-    if (!cpi)
-    {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->rtcd.flags & HAS_NEON)
-#endif
-        {
-            vp8_pop_neon(store_reg);
-        }
-#endif
-        return 0;
-    }
-
-    if (cpi->compressor_speed == 2)
-    {
         vpx_usec_timer_start(&tsctimer);
         vpx_usec_timer_start(&ticktimer);
     }
