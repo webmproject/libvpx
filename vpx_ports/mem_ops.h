@@ -9,10 +9,10 @@
  */
 
 
-/* \file mem_ops.h
- * \brief Provides portable memory access primatives
+/* \file
+ * \brief Provides portable memory access primitives
  *
- * This function provides portable primatives for getting and setting of
+ * This function provides portable primitives for getting and setting of
  * signed and unsigned integers in 16, 24, and 32 bit sizes. The operations
  * can be performed on unaligned data regardless of hardware support for
  * unaligned accesses.

@@ -9,12 +9,12 @@
  */
 
 
-/* \file mem_ops_aligned.h
- * \brief Provides portable memory access primatives for operating on aligned
+/* \file
+ * \brief Provides portable memory access primitives for operating on aligned
  *        data
  *
- * This file is split from mem_ops.h for easier maintainence. See mem_ops.h
- * for a more detailed description of these primatives.
+ * This file is split from mem_ops.h for easier maintenance. See mem_ops.h
+ * for a more detailed description of these primitives.
  */
 #ifndef INCLUDED_BY_MEM_OPS_H
 #error Include mem_ops.h, not mem_ops_aligned.h directly.

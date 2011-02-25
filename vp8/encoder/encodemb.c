@@ -522,7 +522,7 @@ void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
-    type = has_2nd_order ? 0 : 3;
+    type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
     for (b = 0; b < 16; b++)
     {
@@ -530,23 +530,16 @@ void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
-    for (b = 16; b < 20; b++)
+    for (b = 16; b < 24; b++)
     {
-        vp8_optimize_b(x, b, vp8_block2type[b],
+        vp8_optimize_b(x, b, PLANE_TYPE_UV,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
-
-    for (b = 20; b < 24; b++)
-    {
-        vp8_optimize_b(x, b, vp8_block2type[b],
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
-    }
-
 
     if (has_2nd_order)
     {
         b=24;
-        vp8_optimize_b(x, b, vp8_block2type[b],
+        vp8_optimize_b(x, b, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 }
@@ -576,7 +569,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
-    type = has_2nd_order ? 0 : 3;
+    type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
     for (b = 0; b < 16; b++)
     {
@@ -588,7 +581,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     if (has_2nd_order)
     {
         b=24;
-        vp8_optimize_b(x, b, vp8_block2type[b],
+        vp8_optimize_b(x, b, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 }
@@ -612,18 +605,11 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-    for (b = 16; b < 20; b++)
+    for (b = 16; b < 24; b++)
     {
-        vp8_optimize_b(x, b, vp8_block2type[b],
+        vp8_optimize_b(x, b, PLANE_TYPE_UV,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
-
-    for (b = 20; b < 24; b++)
-    {
-        vp8_optimize_b(x, b, vp8_block2type[b],
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
-    }
-
 }
 #endif
 
