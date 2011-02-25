@@ -603,12 +603,17 @@ typedef struct
     int encoding_thread_count;
 
     pthread_t *h_encoding_thread;
+    pthread_t h_filter_thread;
+
     MB_ROW_COMP *mb_row_ei;
     ENCODETHREAD_DATA *en_thread_data;
+    LPFTHREAD_DATA lpf_thread_data;
 
     //events
     sem_t *h_event_start_encoding;
     sem_t h_event_end_encoding;
+    sem_t h_event_start_lpf;
+    sem_t h_event_end_lpf;
 #endif
 
     TOKENLIST *tplist;
