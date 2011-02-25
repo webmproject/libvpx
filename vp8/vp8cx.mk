@@ -85,6 +85,7 @@ VP8_CX_SRCS-yes += encoder/temporal_filter.h
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
+VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.c
 endif
 
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodemb_x86.h
@@ -113,5 +114,10 @@ VP8_CX_SRCS-$(HAVE_SSSE3) += encoder/x86/quantize_ssse3.asm
 VP8_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/sad_sse4.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_mmx.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodeopt.asm
+
+ifeq ($(CONFIG_REALTIME_ONLY),yes)
+VP8_CX_SRCS_REMOVE-$(HAVE_SSE2) += encoder/x86/temporal_filter_apply_sse2.asm
+endif
+
 
 VP8_CX_SRCS-yes := $(filter-out $(VP8_CX_SRCS_REMOVE-yes),$(VP8_CX_SRCS-yes))
