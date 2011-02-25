@@ -492,57 +492,67 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
     {
         priv = calloc(1, sizeof(struct vpx_codec_alg_priv));
 
-        if (priv)
+        if (!priv)
         {
-            ctx->priv = &priv->base;
-            ctx->priv->sz = sizeof(*ctx->priv);
-            ctx->priv->iface = ctx->iface;
-            ctx->priv->alg_priv = priv;
-            ctx->priv->init_flags = ctx->init_flags;
+            return VPX_CODEC_MEM_ERROR;
+        }
 
-            if (ctx->config.enc)
-            {
-                /* Update the reference to the config structure to an
-                 * internal copy.
-                 */
-                ctx->priv->alg_priv->cfg = *ctx->config.enc;
-                ctx->config.enc = &ctx->priv->alg_priv->cfg;
-            }
+        ctx->priv = &priv->base;
+        ctx->priv->sz = sizeof(*ctx->priv);
+        ctx->priv->iface = ctx->iface;
+        ctx->priv->alg_priv = priv;
+        ctx->priv->init_flags = ctx->init_flags;
 
-            cfg =  &ctx->priv->alg_priv->cfg;
-
-            /* Select the extra vp6 configuration table based on the current
-             * usage value. If the current usage value isn't found, use the
-             * values for usage case 0.
+        if (ctx->config.enc)
+        {
+            /* Update the reference to the config structure to an
+             * internal copy.
              */
-            for (i = 0;
-                 extracfg_map[i].usage && extracfg_map[i].usage != cfg->g_usage;
-                 i++);
+            ctx->priv->alg_priv->cfg = *ctx->config.enc;
+            ctx->config.enc = &ctx->priv->alg_priv->cfg;
+        }
 
-            priv->vp8_cfg = extracfg_map[i].cfg;
-            priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
+        cfg =  &ctx->priv->alg_priv->cfg;
 
-            priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
+        /* Select the extra vp6 configuration table based on the current
+         * usage value. If the current usage value isn't found, use the
+         * values for usage case 0.
+         */
+        for (i = 0;
+             extracfg_map[i].usage && extracfg_map[i].usage != cfg->g_usage;
+             i++);
 
-            if (priv->cx_data_sz < 4096) priv->cx_data_sz = 4096;
+        priv->vp8_cfg = extracfg_map[i].cfg;
+        priv->vp8_cfg.pkt_list = &priv->pkt_list.head;
 
-            priv->cx_data = malloc(priv->cx_data_sz);
-            priv->deprecated_mode = NO_MODE_SET;
+        priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
 
-            vp8_initialize();
+        if (priv->cx_data_sz < 4096) priv->cx_data_sz = 4096;
 
-            res = validate_config(priv, &priv->cfg, &priv->vp8_cfg);
+        priv->cx_data = malloc(priv->cx_data_sz);
 
-            if (!res)
-            {
-                set_vp8e_config(&ctx->priv->alg_priv->oxcf, ctx->priv->alg_priv->cfg, ctx->priv->alg_priv->vp8_cfg);
-                optr = vp8_create_compressor(&ctx->priv->alg_priv->oxcf);
+        if (!priv->cx_data)
+        {
+            return VPX_CODEC_MEM_ERROR;
+        }
 
-                if (!optr)
-                    res = VPX_CODEC_MEM_ERROR;
-                else
-                    ctx->priv->alg_priv->cpi = optr;
-            }
+        priv->deprecated_mode = NO_MODE_SET;
+
+        vp8_initialize();
+
+        res = validate_config(priv, &priv->cfg, &priv->vp8_cfg);
+
+        if (!res)
+        {
+            set_vp8e_config(&ctx->priv->alg_priv->oxcf,
+                             ctx->priv->alg_priv->cfg,
+                             ctx->priv->alg_priv->vp8_cfg);
+            optr = vp8_create_compressor(&ctx->priv->alg_priv->oxcf);
+
+            if (!optr)
+                res = VPX_CODEC_MEM_ERROR;
+            else
+                ctx->priv->alg_priv->cpi = optr;
         }
     }
 
