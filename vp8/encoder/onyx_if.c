@@ -3124,8 +3124,11 @@ static void update_golden_frame_and_stats(VP8_COMP *cpi)
     // Update the Golden frame reconstruction buffer if signalled and the GF usage counts.
     if (cm->refresh_golden_frame)
     {
-        // Update the golden frame buffer
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
+        if (cm->frame_type != KEY_FRAME)
+        {
+            // Update the golden frame buffer
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
+        }
 
         // Select an interval before next GF
         if (!cpi->auto_gold)
@@ -4742,16 +4745,19 @@ static void encode_frame_to_data_rate
 
     if (cpi->oxcf.error_resilient_mode)
     {
-        // Is this an alternate reference update
-        if (cpi->common.refresh_alt_ref_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
+        if (cm->frame_type != KEY_FRAME)
+        {
+            // Is this an alternate reference update
+            if (cm->refresh_alt_ref_frame)
+                vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
 
-        if (cpi->common.refresh_golden_frame)
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
+            if (cm->refresh_golden_frame)
+                vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
+        }
     }
     else
     {
-        if (cpi->oxcf.play_alternate && cpi->common.refresh_alt_ref_frame && (cpi->common.frame_type != KEY_FRAME))
+        if (cpi->oxcf.play_alternate && cm->refresh_alt_ref_frame && (cm->frame_type != KEY_FRAME))
             // Update the alternate reference frame and stats as appropriate.
             update_alt_ref_frame_and_stats(cpi);
         else
