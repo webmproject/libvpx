@@ -33,6 +33,7 @@ Options:
     --proj-guid=GUID            GUID to use for the project
     --module-def=filename       File containing export definitions (for DLLs)
     --ver=version               Version (7,8,9) of visual studio to generate for
+    --src-path-bare=dir         Path to root of source tree
     -Ipath/to/include           Additional include directories
     -DFLAG[=value]              Preprocessor macros to define
     -Lpath/to/lib               Additional library search paths
@@ -191,6 +192,8 @@ for opt in "$@"; do
         ;;
         --lib) proj_kind="lib"
         ;;
+        --src-path-bare=*) src_path_bare="$optval"
+        ;;
         --static-crt) use_static_runtime=true
         ;;
         --ver=*)
@@ -335,6 +338,35 @@ generate_vcproj() {
         case "$target" in
             x86*)
                 case "$name" in
+                    obj_int_extract)
+                        tag Tool \
+                            Name="VCCLCompilerTool" \
+                            Optimization="0" \
+                            AdditionalIncludeDirectories="$incs" \
+                            PreprocessorDefinitions="WIN32;DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE" \
+                            RuntimeLibrary="$debug_runtime" \
+                            WarningLevel="3" \
+                            Detect64BitPortabilityProblems="true" \
+                            DebugInformationFormat="1" \
+                    ;;
+                    vpx)
+                        tag Tool \
+                            Name="VCPreBuildEventTool" \
+                            CommandLine="call obj_int_extract.bat $src_path_bare" \
+
+                        tag Tool \
+                            Name="VCCLCompilerTool" \
+                            Optimization="0" \
+                            AdditionalIncludeDirectories="$incs" \
+                            PreprocessorDefinitions="WIN32;_DEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
+                            RuntimeLibrary="$debug_runtime" \
+                            UsePrecompiledHeader="0" \
+                            WarningLevel="3" \
+                            DebugInformationFormat="1" \
+                            Detect64BitPortabilityProblems="true" \
+
+                        $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="1"
+                    ;;
                     *)
                         tag Tool \
                             Name="VCCLCompilerTool" \
@@ -358,6 +390,12 @@ generate_vcproj() {
                 case "$target" in
                     x86*)
                         case "$name" in
+                            obj_int_extract)
+                                tag Tool \
+                                    Name="VCLinkerTool" \
+                                    OutputFile="${name}.exe" \
+                                    GenerateDebugInformation="true" \
+                            ;;
                             *)
                                 tag Tool \
                                     Name="VCLinkerTool" \
@@ -406,6 +444,34 @@ generate_vcproj() {
         case "$target" in
             x86*)
                 case "$name" in
+                    obj_int_extract)
+                        tag Tool \
+                            Name="VCCLCompilerTool" \
+                            AdditionalIncludeDirectories="$incs" \
+                            PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE" \
+                            RuntimeLibrary="$release_runtime" \
+                            UsePrecompiledHeader="0" \
+                            WarningLevel="3" \
+                            Detect64BitPortabilityProblems="true" \
+                            DebugInformationFormat="0" \
+                    ;;
+                    vpx)
+                        tag Tool \
+                            Name="VCPreBuildEventTool" \
+                            CommandLine="call obj_int_extract.bat $src_path_bare" \
+
+                        tag Tool \
+                            Name="VCCLCompilerTool" \
+                            AdditionalIncludeDirectories="$incs" \
+                            PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
+                            RuntimeLibrary="$release_runtime" \
+                            UsePrecompiledHeader="0" \
+                            WarningLevel="3" \
+                            DebugInformationFormat="0" \
+                            Detect64BitPortabilityProblems="true" \
+
+                        $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs"
+                    ;;
                     *)
                         tag Tool \
                             Name="VCCLCompilerTool" \
@@ -428,6 +494,12 @@ generate_vcproj() {
                 case "$target" in
                     x86*)
                         case "$name" in
+                            obj_int_extract)
+                                tag Tool \
+                                    Name="VCLinkerTool" \
+                                    OutputFile="${name}.exe" \
+                                    GenerateDebugInformation="true" \
+                            ;;
                             *)
                                 tag Tool \
                                     Name="VCLinkerTool" \

@@ -9,7 +9,13 @@
 ##
 
 
-ASM:=$(if $(filter yes,$(CONFIG_GCC)),.asm.s,.asm)
+# ARM assembly files are written in RVCT-style. We use some make magic to
+# filter those files to allow GCC compilation
+ifeq ($(ARCH_ARM),yes)
+  ASM:=$(if $(filter yes,$(CONFIG_GCC)),.asm.s,.asm)
+else
+  ASM:=.asm
+endif
 
 CODEC_SRCS-yes += libs.mk
 
@@ -126,6 +132,23 @@ INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
+obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
+	@cp $(SRC_PATH_BARE)/build/x86-msvs/obj_int_extract.bat .
+	@echo "    [CREATE] $@"
+	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+    --exe \
+    --target=$(TOOLCHAIN) \
+    --name=obj_int_extract \
+    --ver=$(CONFIG_VS_VERSION) \
+    --proj-guid=E1360C65-D375-4335-8057-7ED99CC3F9B2 \
+    $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+    --out=$@ $^ \
+    -I. \
+    -I"$(SRC_PATH_BARE)" \
+
+PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.vcproj
+PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
+
 vpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
 	$(SRC_PATH_BARE)/build/make/gen_msvs_def.sh\
@@ -135,15 +158,16 @@ CLEAN-OBJS += vpx.def
 
 vpx.vcproj: $(CODEC_SRCS) vpx.def
 	@echo "    [CREATE] $@"
-	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
-			--lib\
-			--target=$(TOOLCHAIN)\
+	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+			--lib \
+			--target=$(TOOLCHAIN) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
-            --name=vpx\
-            --proj-guid=DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74\
-            --module-def=vpx.def\
-            --ver=$(CONFIG_VS_VERSION)\
-            --out=$@ $(CFLAGS) $^\
+            --name=vpx \
+            --proj-guid=DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74 \
+            --module-def=vpx.def \
+            --ver=$(CONFIG_VS_VERSION) \
+            --out=$@ $(CFLAGS) $^ \
+            --src-path-bare="$(SRC_PATH_BARE)" \
 
 PROJECTS-$(BUILD_LIBVPX) += vpx.vcproj
 
@@ -207,36 +231,38 @@ endif
 #
 # Add assembler dependencies for configuration and offsets
 #
-$(filter %.s.o,$(OBJS-yes)):   $(BUILD_PFX)vpx_config.asm
-$(filter %.asm.o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
+$(filter %.s.o,$(OBJS-yes)):     $(BUILD_PFX)vpx_config.asm
+$(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 
 #
 # Calculate platform- and compiler-specific offsets for hand coded assembly
 #
-ifeq ($(ARCH_ARM), yes)
-  asm_com_offsets.asm: obj_int_extract
-  asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
+ifeq ($(CONFIG_EXTERNAL_BUILD),) # Visual Studio uses obj_int_extract.bat
+  ifeq ($(ARCH_ARM), yes)
+    asm_com_offsets.asm: obj_int_extract
+    asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
-  OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
-  CLEAN-OBJS += asm_com_offsets.asm
-  $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
+    OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
+    CLEAN-OBJS += asm_com_offsets.asm
+    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
 
-  ifeq ($(CONFIG_VP8_ENCODER), yes)
-    asm_enc_offsets.asm: obj_int_extract
-    asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
+    ifeq ($(CONFIG_VP8_ENCODER), yes)
+      asm_enc_offsets.asm: obj_int_extract
+      asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
-    OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-    CLEAN-OBJS += asm_enc_offsets.asm
-    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
-  endif
+      OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
+      CLEAN-OBJS += asm_enc_offsets.asm
+      $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
+    endif
 
-  ifeq ($(CONFIG_VP8_DECODER), yes)
-    asm_dec_offsets.asm: obj_int_extract
-    asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
+    ifeq ($(CONFIG_VP8_DECODER), yes)
+      asm_dec_offsets.asm: obj_int_extract
+      asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
-    OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-    CLEAN-OBJS += asm_dec_offsets.asm
-    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
+      OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
+      CLEAN-OBJS += asm_dec_offsets.asm
+      $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
+    endif
   endif
 endif
 
