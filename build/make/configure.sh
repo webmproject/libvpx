@@ -624,6 +624,10 @@ process_common_toolchain() {
 
     # Handle Solaris variants. Solaris 10 needs -lposix4
     case ${toolchain} in
+        sparc-solaris-*)
+            add_extralibs -lposix4
+            add_cflags "-DMUST_BE_ALIGNED"
+            ;;
         *-solaris-*)
             add_extralibs -lposix4
             ;;

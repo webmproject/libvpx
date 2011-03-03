@@ -17,6 +17,9 @@
 extern prototype_sad(vp8_sad16x16_armv6);
 extern prototype_variance(vp8_variance16x16_armv6);
 extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_armv6);
+extern prototype_variance(vp8_variance_halfpixvar16x16_h_armv6);
+extern prototype_variance(vp8_variance_halfpixvar16x16_v_armv6);
+extern prototype_variance(vp8_variance_halfpixvar16x16_hv_armv6);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 
@@ -29,9 +32,19 @@ extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_armv6);
 #undef  vp8_variance_var16x16
 #define vp8_variance_var16x16 vp8_variance16x16_armv6
 
+#undef  vp8_variance_halfpixvar16x16_h
+#define vp8_variance_halfpixvar16x16_h vp8_variance_halfpixvar16x16_h_armv6
+
+#undef  vp8_variance_halfpixvar16x16_v
+#define vp8_variance_halfpixvar16x16_v vp8_variance_halfpixvar16x16_v_armv6
+
+#undef  vp8_variance_halfpixvar16x16_hv
+#define vp8_variance_halfpixvar16x16_hv vp8_variance_halfpixvar16x16_hv_armv6
+
 #endif /* !CONFIG_RUNTIME_CPU_DETECT */
 
 #endif /* HAVE_ARMV6 */
+
 
 #if HAVE_ARMV7
 extern prototype_sad(vp8_sad4x4_neon);

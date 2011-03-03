@@ -46,6 +46,9 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_c;
         cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;*/
         cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_armv6;
+        cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_armv6;
+        cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_armv6;
+        cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_armv6;
 
         /*cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;
         cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;*/
