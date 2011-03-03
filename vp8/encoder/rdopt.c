@@ -590,10 +590,10 @@ static int vp8_rdcost_mby(MACROBLOCK *mb)
     tl = (ENTROPY_CONTEXT *)&t_left;
 
     for (b = 0; b < 16; b++)
-        cost += cost_coeffs(mb, x->block + b, 0,
+        cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
                     ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
-    cost += cost_coeffs(mb, x->block + 24, 1,
+    cost += cost_coeffs(mb, x->block + 24, PLANE_TYPE_Y2,
                 ta + vp8_block2above[24], tl + vp8_block2left[24]);
 
     return cost;
@@ -645,33 +645,14 @@ static void macro_block_yrd( MACROBLOCK *mb,
     *Rate = vp8_rdcost_mby(mb);
 }
 
-static void save_predictor(unsigned char *predictor, unsigned char *dst)
+static void copy_predictor(unsigned char *dst, const unsigned char *predictor)
 {
-    int r, c;
-    for (r = 0; r < 4; r++)
-    {
-        for (c = 0; c < 4; c++)
-        {
-            *dst = predictor[c];
-            dst++;
-        }
-
-        predictor += 16;
-    }
-}
-static void restore_predictor(unsigned char *predictor, unsigned char *dst)
-{
-    int r, c;
-    for (r = 0; r < 4; r++)
-    {
-        for (c = 0; c < 4; c++)
-        {
-            predictor[c] = *dst;
-            dst++;
-        }
-
-        predictor += 16;
-    }
+    const unsigned int *p = (const unsigned int *)predictor;
+    unsigned int *d = (unsigned int *)dst;
+    d[0] = p[0];
+    d[4] = p[4];
+    d[8] = p[8];
+    d[12] = p[12];
 }
 static int rd_pick_intra4x4block(
     VP8_COMP *cpi,
@@ -694,9 +675,13 @@ static int rd_pick_intra4x4block(
 
     ENTROPY_CONTEXT ta = *a, tempa = *a;
     ENTROPY_CONTEXT tl = *l, templ = *l;
-
-    DECLARE_ALIGNED_ARRAY(16, unsigned char,  predictor, 16);
-    DECLARE_ALIGNED_ARRAY(16, short, dqcoeff, 16);
+    /*
+     * The predictor buffer is a 2d buffer with a stride of 16.  Create
+     * a temp buffer that meets the stride requirements, but we are only
+     * interested in the left 4x4 block
+     * */
+    DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16*4);
+    DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16);
 
     for (mode = B_DC_PRED; mode <= B_HU_PRED; mode++)
     {
@@ -713,7 +698,7 @@ static int rd_pick_intra4x4block(
         tempa = ta;
         templ = tl;
 
-        ratey = cost_coeffs(x, b, 3, &tempa, &templ);
+        ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ);
         rate += ratey;
         distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(be->coeff, b->dqcoeff) >> 2;
 
@@ -728,21 +713,17 @@ static int rd_pick_intra4x4block(
             *best_mode = mode;
             *a = tempa;
             *l = templ;
-            save_predictor(b->predictor, predictor);
-            vpx_memcpy(dqcoeff, b->dqcoeff, 32);
+            copy_predictor(best_predictor, b->predictor);
+            vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
         }
     }
 
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
 
-    restore_predictor(b->predictor, predictor);
-    vpx_memcpy(b->dqcoeff, dqcoeff, 32);
-
-    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(b->dqcoeff, b->diff, 32);
-    RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff, b->diff, 32);
+    RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 
     return best_rd;
-
 }
 
 int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
@@ -753,7 +734,7 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int distortion = 0;
     int tot_rate_y = 0;
-    int total_rd = 0;
+    long long total_rd = 0;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
@@ -794,12 +775,12 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
         tot_rate_y += ry;
         mic->bmi[i].mode = xd->block[i].bmi.mode = best_mode;
 
-        if(total_rd >= best_rd)
-          break;
+        if(total_rd >= (long long)best_rd)
+            break;
     }
 
-    if(total_rd >= best_rd)
-      return INT_MAX;
+    if(total_rd >= (long long)best_rd)
+        return INT_MAX;
 
     *Rate = cost;
     *rate_y += tot_rate_y;
@@ -862,12 +843,8 @@ static int rd_cost_mbuv(MACROBLOCK *mb)
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-    for (b = 16; b < 20; b++)
-        cost += cost_coeffs(mb, x->block + b, vp8_block2type[b],
-                    ta + vp8_block2above[b], tl + vp8_block2left[b]);
-
-    for (b = 20; b < 24; b++)
-        cost += cost_coeffs(mb, x->block + b, vp8_block2type[b],
+    for (b = 16; b < 24; b++)
+        cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_UV,
                     ta + vp8_block2above[b], tl + vp8_block2left[b]);
 
     return cost;
@@ -1048,7 +1025,7 @@ static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
 
     for (b = 0; b < 16; b++)
         if (labels[ b] == which_label)
-            cost += cost_coeffs(mb, x->block + b, 3,
+            cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_WITH_DC,
                                 ta + vp8_block2above[b],
                                 tl + vp8_block2left[b]);
 

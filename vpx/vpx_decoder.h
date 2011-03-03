@@ -17,7 +17,7 @@
  * @{
  */
 
-/*!\file vpx_decoder.h
+/*!\file
  * \brief Describes the decoder algorithm interface to applications.
  *
  * This file describes the interface between an application and a
@@ -48,7 +48,7 @@ extern "C" {
      *  ::vpx_codec_iface_t interface structure. Capabilities are extra interfaces
      *  or functionality, and are not required to be supported by a decoder.
      *
-     *  The available flags are specifiedby VPX_CODEC_CAP_* defines.
+     *  The available flags are specified by VPX_CODEC_CAP_* defines.
      */
 #define VPX_CODEC_CAP_PUT_SLICE  0x10000 /**< Will issue put_slice callbacks */
 #define VPX_CODEC_CAP_PUT_FRAME  0x20000 /**< Will issue put_frame callbacks */
@@ -109,7 +109,7 @@ extern "C" {
      * kept readable and stable until all memory maps have been set.
      *
      * \param[in]    ctx     Pointer to this instance's context.
-     * \param[in]    iface   Pointer to the alogrithm interface to use.
+     * \param[in]    iface   Pointer to the algorithm interface to use.
      * \param[in]    cfg     Configuration to use, if known. May be NULL.
      * \param[in]    flags   Bitfield of VPX_CODEC_USE_* flags
      * \param[in]    ver     ABI version number. Must be set to
@@ -139,7 +139,7 @@ extern "C" {
      * context is not necessary. Can be used to determine if the bitstream is
      * of the proper format, and to extract information from the stream.
      *
-     * \param[in]      iface   Pointer to the alogrithm interface
+     * \param[in]      iface   Pointer to the algorithm interface
      * \param[in]      data    Pointer to a block of data to parse
      * \param[in]      data_sz Size of the data buffer
      * \param[in,out]  si      Pointer to stream info to update. The size member

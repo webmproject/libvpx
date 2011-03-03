@@ -28,10 +28,6 @@ void vpx_log(const char *format, ...);
 #define DCPREDSIMTHRESH 0
 #define DCPREDCNTTHRESH 3
 
-#define Y1CONTEXT 0
-#define UCONTEXT 1
-#define VCONTEXT 2
-#define Y2CONTEXT 3
 #define MB_FEATURE_TREE_PROBS   3
 
 #define MAX_MB_SEGMENTS         4
@@ -48,6 +44,11 @@ typedef struct
     int r, c;
 } POS;
 
+#define PLANE_TYPE_Y_NO_DC    0
+#define PLANE_TYPE_Y2         1
+#define PLANE_TYPE_UV         2
+#define PLANE_TYPE_Y_WITH_DC  3
+
 
 typedef char ENTROPY_CONTEXT;
 typedef struct
@@ -57,8 +58,6 @@ typedef struct
     ENTROPY_CONTEXT v[2];
     ENTROPY_CONTEXT y2;
 } ENTROPY_CONTEXT_PLANES;
-
-extern const int vp8_block2type[25];
 
 extern const unsigned char vp8_block2left[25];
 extern const unsigned char vp8_block2above[25];

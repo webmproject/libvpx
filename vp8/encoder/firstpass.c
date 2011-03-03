@@ -560,8 +560,8 @@ void vp8_first_pass(VP8_COMP *cpi)
     YV12_BUFFER_CONFIG *gld_yv12 = &cm->yv12_fb[cm->gld_fb_idx];
     int recon_y_stride = lst_yv12->y_stride;
     int recon_uv_stride = lst_yv12->uv_stride;
-    int intra_error = 0;
-    int coded_error = 0;
+    long long intra_error = 0;
+    long long coded_error = 0;
 
     int sum_mvr = 0, sum_mvc = 0;
     int sum_mvr_abs = 0, sum_mvc_abs = 0;
@@ -648,7 +648,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             this_error += intrapenalty;
 
             // Cumulative intra error total
-            intra_error += this_error;
+            intra_error += (long long)this_error;
 
             // Indicate default assumption of intra in the motion map
             *fp_motion_map_ptr = 0;
@@ -800,7 +800,7 @@ void vp8_first_pass(VP8_COMP *cpi)
                 }
             }
 
-            coded_error += this_error;
+            coded_error += (long long)this_error;
 
             // adjust to the next column of macroblocks
             x->src.y_buffer += 16;

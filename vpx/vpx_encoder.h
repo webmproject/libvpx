@@ -17,7 +17,7 @@
  * @{
  */
 
-/*!\file vpx_encoder.h
+/*!\file
  * \brief Describes the encoder algorithm interface to applications.
  *
  * This file describes the interface between an application and a
@@ -51,7 +51,7 @@ extern "C" {
      *  interfaces or functionality, and are not required to be supported
      *  by an encoder.
      *
-     *  The available flags are specifiedby VPX_CODEC_CAP_* defines.
+     *  The available flags are specified by VPX_CODEC_CAP_* defines.
      */
 #define VPX_CODEC_CAP_PSNR  0x10000 /**< Can issue PSNR packets */
 
@@ -147,7 +147,7 @@ extern "C" {
 
             /* This packet size is fixed to allow codecs to extend this
              * interface without having to manage storage for raw packets,
-             * ie if it's smaller than 128 bytes, you can store in the
+             * i.e., if it's smaller than 128 bytes, you can store in the
              * packet list directly.
              */
             char pad[128 - sizeof(enum vpx_codec_cx_pkt_kind)]; /**< fixed sz */

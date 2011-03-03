@@ -9,7 +9,7 @@
  */
 
 
-/*!\file decoder_impl.h
+/*!\file
  * \brief Describes the decoder algorithm interface for algorithm
  *        implementations.
  *
@@ -214,7 +214,7 @@ typedef vpx_image_t*(*vpx_codec_get_frame_fn_t)(vpx_codec_alg_priv_t *ctx,
         vpx_codec_iter_t     *iter);
 
 
-/*\brief e_xternal Memory Allocation memory map get iterator
+/*\brief eXternal Memory Allocation memory map get iterator
  *
  * Iterates over a list of the memory maps requested by the decoder. The
  * iterator storage should be initialized to NULL to start the iteration.
@@ -230,7 +230,7 @@ typedef vpx_codec_err_t (*vpx_codec_get_mmap_fn_t)(const vpx_codec_ctx_t      *c
         vpx_codec_iter_t           *iter);
 
 
-/*\brief e_xternal Memory Allocation memory map set iterator
+/*\brief eXternal Memory Allocation memory map set iterator
  *
  * Sets a memory descriptor inside the decoder instance.
  *
@@ -405,7 +405,7 @@ vpx_codec_iface_t  id##_algo
 
 /* Internal Utility Functions
  *
- * The following functions are indended to be used inside algorithms as
+ * The following functions are intended to be used inside algorithms as
  * utilities for manipulating vpx_codec_* data structures.
  */
 struct vpx_codec_pkt_list
