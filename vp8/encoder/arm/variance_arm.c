@@ -43,7 +43,41 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
                                    dst_pixels_per_line, sse);
 }
 
-#endif
+unsigned int vp8_variance_halfpixvar16x16_h_armv6(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_armv6(src_ptr, source_stride, 4, 0,
+                                         ref_ptr, recon_stride, sse);
+}
+
+unsigned int vp8_variance_halfpixvar16x16_v_armv6(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_armv6(src_ptr, source_stride, 0, 4,
+                                         ref_ptr, recon_stride, sse);
+}
+
+unsigned int vp8_variance_halfpixvar16x16_hv_armv6(
+    const unsigned char *src_ptr,
+    int  source_stride,
+    const unsigned char *ref_ptr,
+    int  recon_stride,
+    unsigned int *sse)
+{
+    return vp8_sub_pixel_variance16x16_armv6(src_ptr, source_stride, 4, 4,
+                                         ref_ptr, recon_stride, sse);
+}
+
+#endif /* HAVE_ARMV6 */
+
 
 #if HAVE_ARMV7
 

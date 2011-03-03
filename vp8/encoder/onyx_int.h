@@ -51,7 +51,9 @@
 #define MV_ZBIN_BOOST        4
 #define ZBIN_OQ_MAX 192
 
+#if !(CONFIG_REALTIME_ONLY)
 #define VP8_TEMPORAL_ALT_REF 1
+#endif
 
 typedef struct
 {
@@ -496,9 +498,11 @@ typedef struct
     FIRSTPASS_STATS *stats_in, *stats_in_end;
     struct vpx_codec_pkt_list  *output_pkt_list;
     int                          first_pass_done;
-    unsigned char *fp_motion_map;
 
+#if !(CONFIG_REALTIME_ONLY)
+    unsigned char *fp_motion_map;
     unsigned char *fp_motion_map_stats, *fp_motion_map_stats_save;
+#endif
 
 #if 0
     // Experimental code for lagged and one pass

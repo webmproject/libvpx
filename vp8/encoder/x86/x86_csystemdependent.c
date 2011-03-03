@@ -301,7 +301,9 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #endif
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
 
+#if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
+#endif
     }
 #endif
 

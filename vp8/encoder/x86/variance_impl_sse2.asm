@@ -85,10 +85,9 @@ sym(vp8_get16x16var_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    GET_GOT     rbx
+    push rbx
     push rsi
     push rdi
-    sub         rsp, 16
     ; end prolog
 
         mov         rsi,            arg(0) ;[src_ptr]
@@ -96,6 +95,29 @@ sym(vp8_get16x16var_sse2):
 
         movsxd      rax,            DWORD PTR arg(1) ;[source_stride]
         movsxd      rdx,            DWORD PTR arg(3) ;[recon_stride]
+
+        ; Prefetch data
+        lea             rcx,    [rax+rax*2]
+        prefetcht0      [rsi]
+        prefetcht0      [rsi+rax]
+        prefetcht0      [rsi+rax*2]
+        prefetcht0      [rsi+rcx]
+        lea             rbx,    [rsi+rax*4]
+        prefetcht0      [rbx]
+        prefetcht0      [rbx+rax]
+        prefetcht0      [rbx+rax*2]
+        prefetcht0      [rbx+rcx]
+
+        lea             rcx,    [rdx+rdx*2]
+        prefetcht0      [rdi]
+        prefetcht0      [rdi+rdx]
+        prefetcht0      [rdi+rdx*2]
+        prefetcht0      [rdi+rcx]
+        lea             rbx,    [rdi+rdx*4]
+        prefetcht0      [rbx]
+        prefetcht0      [rbx+rdx]
+        prefetcht0      [rbx+rdx*2]
+        prefetcht0      [rbx+rcx]
 
         pxor        xmm0,           xmm0                        ; clear xmm0 for unpack
         pxor        xmm7,           xmm7                        ; clear xmm7 for accumulating diffs
@@ -106,6 +128,9 @@ sym(vp8_get16x16var_sse2):
 var16loop:
         movdqu      xmm1,           XMMWORD PTR [rsi]
         movdqu      xmm2,           XMMWORD PTR [rdi]
+
+        prefetcht0      [rsi+rax*8]
+        prefetcht0      [rdi+rdx*8]
 
         movdqa      xmm3,           xmm1
         movdqa      xmm4,           xmm2
@@ -178,10 +203,9 @@ var16loop:
 
 
     ; begin epilog
-    add rsp, 16
     pop rdi
     pop rsi
-    RESTORE_GOT
+    pop rbx
     UNSHADOW_ARGS
     pop         rbp
     ret
