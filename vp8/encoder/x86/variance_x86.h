@@ -286,6 +286,7 @@ extern prototype_sad_multi_dif_address(vp8_sad4x4x4d_sse3);
 #if HAVE_SSSE3
 extern prototype_sad_multi_same_address(vp8_sad16x16x3_ssse3);
 extern prototype_sad_multi_same_address(vp8_sad16x8x3_ssse3);
+extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_ssse3);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_variance_sad16x16x3
@@ -293,6 +294,9 @@ extern prototype_sad_multi_same_address(vp8_sad16x8x3_ssse3);
 
 #undef  vp8_variance_sad16x8x3
 #define vp8_variance_sad16x8x3 vp8_sad16x8x3_ssse3
+
+#undef  vp8_variance_subpixvar16x16
+#define vp8_variance_subpixvar16x16 vp8_sub_pixel_variance16x16_ssse3
 
 #endif
 #endif
