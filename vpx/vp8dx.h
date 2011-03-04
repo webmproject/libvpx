@@ -45,19 +45,23 @@ extern vpx_codec_iface_t* vpx_codec_vp8_dx(void);
  *
  * \sa #vpx_codec_control
  */
-enum vp8d_dec_control_id
+enum vp8_dec_control_id
 {
-    VP8_DECODER_CTRL_ID_START   = 256,
-    VP8D_GET_LAST_REF_UPDATES,              /**< control function to get info on which reference frames were updated
-                                            by the last decode */
-    VP8D_GET_FRAME_CORRUPTED,               /**< check if the indicated frame is corrupted */
+    /** control function to get info on which reference frames were updated
+     *  by the last decode
+     */
+    VP8D_GET_LAST_REF_UPDATES = VP8_DECODER_CTRL_ID_START,
+
+    /** check if the indicated frame is corrupted */
+    VP8D_GET_FRAME_CORRUPTED,
+
     VP8_DECODER_CTRL_ID_MAX
 } ;
 
 
-/*!\brief VP8 encoder control function parameter type
+/*!\brief VP8 decoder control function parameter type
  *
- * Defines the data types that VP8E control functions take. Note that
+ * Defines the data types that VP8D control functions take. Note that
  * additional common controls are defined in vp8.h
  *
  */

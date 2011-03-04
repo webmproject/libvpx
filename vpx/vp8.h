@@ -36,7 +36,7 @@
  *
  * The set of macros define the control functions of VP8 interface
  */
-enum vp8_dec_control_id
+enum vp8_com_control_id
 {
     VP8_SET_REFERENCE           = 1,    /**< pass in an external frame into decoder to be used as reference frame */
     VP8_COPY_REFERENCE          = 2,    /**< get a copy of reference frame from the decoder */
@@ -45,7 +45,8 @@ enum vp8_dec_control_id
     VP8_SET_DBG_COLOR_MB_MODES  = 5,    /**< set which macro block modes to color */
     VP8_SET_DBG_COLOR_B_MODES   = 6,    /**< set which blocks modes to color */
     VP8_SET_DBG_DISPLAY_MV      = 7,    /**< set which motion vector modes to draw */
-    VP8_COMMON_CTRL_ID_MAX
+    VP8_COMMON_CTRL_ID_MAX,
+    VP8_DECODER_CTRL_ID_START   = 256,
 };
 
 /*!\brief post process flags
