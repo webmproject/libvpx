@@ -24,13 +24,15 @@
 #define VP8DX_H
 #include "vpx/vpx_codec_impl_top.h"
 
-/*!\brief Algorithm interface for VP8
+/*!\name Algorithm interface for VP8
  *
  * This interface provides the capability to decode raw VP8 streams, as would
  * be found in AVI files and other non-Flash uses.
+ * @{
  */
 extern vpx_codec_iface_t  vpx_codec_vp8_dx_algo;
 extern vpx_codec_iface_t* vpx_codec_vp8_dx(void);
+/*!@} - end algorithm interface member group*/
 
 /* Include controls common to both the encoder and decoder */
 #include "vp8.h"
@@ -38,7 +40,10 @@ extern vpx_codec_iface_t* vpx_codec_vp8_dx(void);
 
 /*!\brief VP8 decoder control functions
  *
- * The set of macros define the control functions of VP8 decoder interface
+ * This set of macros define the control functions available for the VP8
+ * decoder interface.
+ *
+ * \sa #vpx_codec_control
  */
 enum vp8d_dec_control_id
 {
