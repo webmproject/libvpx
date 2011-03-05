@@ -2494,7 +2494,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     }
 
     // Calculate the number of bits that should be assigned to the kf group.
-    if ((cpi->bits_left > 0) && ((int)cpi->modified_error_left > 0))
+    if ((cpi->bits_left > 0) && (cpi->modified_error_left > 0.0))
     {
         // Max for a single normal frame (not key frame)
         int max_bits = frame_max_bits(cpi);

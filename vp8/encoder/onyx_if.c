@@ -5305,9 +5305,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         {
             long long nanosecs = cpi->source_end_time_stamp
                 - cpi->last_end_time_stamp_seen;
-            double this_fps = 10000000.000 / nanosecs;
 
-            vp8_new_frame_rate(cpi, (7 * cpi->oxcf.frame_rate + this_fps) / 8);
+            if (nanosecs > 0)
+            {
+              double this_fps = 10000000.000 / nanosecs;
+              vp8_new_frame_rate(cpi, (7 * cpi->oxcf.frame_rate + this_fps) / 8);
+            }
 
         }
 

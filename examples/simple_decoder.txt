@@ -33,7 +33,7 @@ Initializing The Codec
 ----------------------
 The decoder is initialized by the following code. This is an example for
 the VP8 decoder, but the code is analogous for all algorithms. Replace
-`&vpx_codec_vp8_dx_algo` with a pointer to the interface exposed by the
+`vpx_codec_vp8_dx()` with a pointer to the interface exposed by the
 algorithm you want to use. The `cfg` argument is left as NULL in this
 example, because we want the algorithm to determine the stream
 configuration (width/height) and allocate memory automatically. This

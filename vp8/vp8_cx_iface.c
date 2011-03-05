@@ -738,7 +738,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         if (++ctx->fixed_kf_cntr > ctx->cfg.kf_min_dist)
         {
             flags |= VPX_EFLAG_FORCE_KF;
-            ctx->fixed_kf_cntr = 0;
+            ctx->fixed_kf_cntr = 1;
         }
     }
 
