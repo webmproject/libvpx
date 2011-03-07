@@ -163,8 +163,8 @@ int stats_open_file(stats_io_t *stats, const char *fpf, int pass)
 
         if (!stats->buf.buf)
         {
-            fprintf(stderr, "Failed to allocate first-pass stats buffer (%d bytes)\n",
-                    stats->buf_alloc_sz);
+            fprintf(stderr, "Failed to allocate first-pass stats buffer (%lu bytes)\n",
+                    (unsigned long)stats->buf_alloc_sz);
             exit(EXIT_FAILURE);
         }
 
