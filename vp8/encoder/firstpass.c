@@ -312,7 +312,9 @@ void vp8_output_stats(const VP8_COMP            *cpi,
         FILE *fpfile;
         fpfile = fopen("firstpass.stt", "a");
 
-        fprintf(fpfile, "%12.0f %12.0f %12.0f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.0f\n",
+        fprintf(fpfile, "%12.0f %12.0f %12.0f %12.4f %12.4f %12.4f %12.4f
+                %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.0f
+                %12.4f\n",
                 stats->frame,
                 stats->intra_error,
                 stats->coded_error,
@@ -320,6 +322,7 @@ void vp8_output_stats(const VP8_COMP            *cpi,
                 stats->pcnt_inter,
                 stats->pcnt_motion,
                 stats->pcnt_second_ref,
+                stats->pcnt_neutral,
                 stats->MVr,
                 stats->mvr_abs,
                 stats->MVc,
@@ -327,7 +330,8 @@ void vp8_output_stats(const VP8_COMP            *cpi,
                 stats->MVrv,
                 stats->MVcv,
                 stats->mv_in_out_count,
-                stats->count);
+                stats->count,
+                stats->duration);
         fclose(fpfile);
 
 
@@ -359,6 +363,7 @@ void vp8_zero_stats(FIRSTPASS_STATS *section)
     section->pcnt_inter  = 0.0;
     section->pcnt_motion  = 0.0;
     section->pcnt_second_ref = 0.0;
+    section->pcnt_neutral = 0.0;
     section->MVr        = 0.0;
     section->mvr_abs     = 0.0;
     section->MVc        = 0.0;
@@ -378,6 +383,7 @@ void vp8_accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
     section->pcnt_inter  += frame->pcnt_inter;
     section->pcnt_motion += frame->pcnt_motion;
     section->pcnt_second_ref += frame->pcnt_second_ref;
+    section->pcnt_neutral += frame->pcnt_neutral;
     section->MVr        += frame->MVr;
     section->mvr_abs     += frame->mvr_abs;
     section->MVc        += frame->MVc;
@@ -398,6 +404,7 @@ void vp8_avg_stats(FIRSTPASS_STATS *section)
     section->ssim_weighted_pred_err /= section->count;
     section->pcnt_inter  /= section->count;
     section->pcnt_second_ref /= section->count;
+    section->pcnt_neutral /= section->count;
     section->pcnt_motion /= section->count;
     section->MVr        /= section->count;
     section->mvr_abs     /= section->count;
@@ -570,6 +577,7 @@ void vp8_first_pass(VP8_COMP *cpi)
     int intercount = 0;
     int second_ref_count = 0;
     int intrapenalty = 256;
+    int neutral_count = 0;
 
     int sum_in_vectors = 0;
 
@@ -726,6 +734,17 @@ void vp8_first_pass(VP8_COMP *cpi)
 
                 if (motion_error <= this_error)
                 {
+                    // Keep a count of cases where the inter and intra were
+                    // very close and very low. This helps with scene cut
+                    // detection for example in cropped clips with black bars
+                    // at the sides or top and bottom.
+                    if( (((this_error-intrapenalty) * 9) <=
+                         (motion_error*10)) &&
+                        (this_error < (2*intrapenalty)) )
+                    {
+                        neutral_count++;
+                    }
+
                     d->bmi.mv.as_mv.row <<= 3;
                     d->bmi.mv.as_mv.col <<= 3;
                     this_error = motion_error;
@@ -854,6 +873,7 @@ void vp8_first_pass(VP8_COMP *cpi)
 
         fps.pcnt_inter   = 1.0 * (double)intercount / cm->MBs;
         fps.pcnt_second_ref = 1.0 * (double)second_ref_count / cm->MBs;
+        fps.pcnt_neutral = 1.0 * (double)neutral_count / cm->MBs;
 
         if (mvcount > 0)
         {
@@ -1375,6 +1395,7 @@ double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
 
     return prediction_decay_rate;
 }
+
 // Funtion to test for a condition where a complex transition is followe
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
@@ -2295,7 +2316,7 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
         (next_frame->pcnt_second_ref < 0.10) &&
         ((this_frame->pcnt_inter < 0.05) ||
          (
-             (this_frame->pcnt_inter < .25) &&
+             ((this_frame->pcnt_inter - this_frame->pcnt_neutral) < .25) &&
              ((this_frame->intra_error / DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) < 2.5) &&
              ((fabs(last_frame->coded_error - this_frame->coded_error) / DOUBLE_DIVIDE_CHECK(this_frame->coded_error) > .40) ||
               (fabs(last_frame->intra_error - this_frame->intra_error) / DOUBLE_DIVIDE_CHECK(this_frame->intra_error) > .40) ||
@@ -2342,7 +2363,9 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
             // Test various breakout clauses
             if ((local_next_frame.pcnt_inter < 0.05) ||
                 (next_iiratio < 1.5) ||
-                ((local_next_frame.pcnt_inter < 0.20) && (next_iiratio < 3.0)) ||
+                (((local_next_frame.pcnt_inter -
+                   local_next_frame.pcnt_neutral) < 0.20) &&
+                 (next_iiratio < 3.0)) ||
                 ((boost_score - old_boost_score) < 0.5) ||
                 (local_next_frame.intra_error < 200)
                )
