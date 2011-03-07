@@ -1341,7 +1341,7 @@ void vp8_end_second_pass(VP8_COMP *cpi)
 
 // This function gives and estimate of how badly we believe
 // the predicition quality is decaying from frame to frame.
-double gf_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
+double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
 {
     double prediction_decay_rate;
     double motion_decay;
@@ -1374,6 +1374,51 @@ double gf_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
     }
 
     return prediction_decay_rate;
+}
+// Funtion to test for a condition where a complex transition is followe
+// by a static section. For example in slide shows where there is a fade
+// between slides. This is to help with more optimal kf and gf positioning.
+BOOL detect_transition_to_still(
+    VP8_COMP *cpi,
+    int frame_interval,
+    int still_interval,
+    double loop_decay_rate,
+    double decay_accumulator )
+{
+    BOOL trans_to_still = FALSE;
+
+    // Break clause to detect very still sections after motion
+    // For example a staic image after a fade or other transition
+    // instead of a clean scene cut.
+    if ( (frame_interval > MIN_GF_INTERVAL) &&
+         (loop_decay_rate >= 0.999) &&
+         (decay_accumulator < 0.9) )
+    {
+        int j;
+        FIRSTPASS_STATS * position = cpi->stats_in;
+        FIRSTPASS_STATS tmp_next_frame;
+        double decay_rate;
+
+        // Look ahead a few frames to see if static condition
+        // persists...
+        for ( j = 0; j < still_interval; j++ )
+        {
+            if (EOF == vp8_input_stats(cpi, &tmp_next_frame))
+                break;
+
+            decay_rate = get_prediction_decay_rate(cpi, &tmp_next_frame);
+            if ( decay_rate < 0.999 )
+                break;
+        }
+        // Reset file position
+        reset_fpf_position(cpi, position);
+
+        // Only if it does do we signal a transition to still
+        if ( j == still_interval )
+            trans_to_still = TRUE;
+    }
+
+    return trans_to_still;
 }
 
 // Analyse and define a gf/arf group .
@@ -1528,7 +1573,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (r > GF_RMAX)
             r = GF_RMAX;
 
-        loop_decay_rate = gf_prediction_decay_rate(cpi, &next_frame);
+        loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
 
         // Cumulative effect of decay
         decay_accumulator = decay_accumulator * loop_decay_rate;
@@ -1537,48 +1582,13 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         boost_score += (decay_accumulator * r);
 
         // Break clause to detect very still sections after motion
-        // For example a staic image after a fade or other transition
-        // instead of a clean key frame.
-        if ( (i > MIN_GF_INTERVAL) &&
-             (loop_decay_rate >= 0.999) &&
-             (decay_accumulator < 0.9) )
+        // For example a staic image after a fade or other transition.
+        if ( detect_transition_to_still( cpi, i, 5,
+                                         loop_decay_rate, decay_accumulator ) )
         {
-            int j;
-            FIRSTPASS_STATS * position = cpi->stats_in;
-            FIRSTPASS_STATS tmp_next_frame;
-            double decay_rate;
-
-            // Look ahead a few frames to see if static condition
-            // persists...
-            for ( j = 0; j < 4; j++ )
-            {
-                if (EOF == vp8_input_stats(cpi, &tmp_next_frame))
-                    break;
-
-                decay_rate = gf_prediction_decay_rate(cpi, &tmp_next_frame);
-                if ( decay_rate < 0.999 )
-                    break;
-            }
-            reset_fpf_position(cpi, position);            // Reset file position
-
-            // Force GF not alt ref
-            if ( j == 4 )
-            {
-                if (0)
-                {
-                    FILE *f = fopen("fadegf.stt", "a");
-                    fprintf(f, " %8d %8d %10.4f %10.4f %10.4f\n",
-                         cpi->common.current_video_frame+i, i,
-                         loop_decay_rate, decay_accumulator,
-                         boost_score );
-                    fclose(f);
-                }
-
-                allow_alt_ref = FALSE;
-
-                boost_score = old_boost_score;
-                break;
-            }
+            allow_alt_ref = FALSE;
+            boost_score = old_boost_score;
+            break;
         }
 
         // Break out conditions.
@@ -2363,13 +2373,13 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
 }
 void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 {
-    int i;
+    int i,j;
     FIRSTPASS_STATS last_frame;
     FIRSTPASS_STATS first_frame;
     FIRSTPASS_STATS next_frame;
     FIRSTPASS_STATS *start_position;
 
-    double decay_accumulator = 0;
+    double decay_accumulator = 1.0;
     double boost_score = 0;
     double old_boost_score = 0.0;
     double loop_decay_rate;
@@ -2379,6 +2389,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     double kf_group_intra_err = 0.0;
     double kf_group_coded_err = 0.0;
     double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
+    double recent_loop_decay[8] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 
     vpx_memset(&next_frame, 0, sizeof(next_frame)); // assure clean
 
@@ -2407,6 +2418,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     kf_mod_err = calculate_modified_err(cpi, this_frame);
 
     // find the next keyframe
+    i = 0;
     while (cpi->stats_in < cpi->stats_in_end)
     {
         // Accumulate kf group error
@@ -2425,8 +2437,33 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (cpi->oxcf.auto_key
             && lookup_next_frame_stats(cpi, &next_frame) != EOF)
         {
+            // Normal scene cut check
             if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
                 break;
+
+            // How fast is prediction quality decaying
+            loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
+
+            // We want to know something about the recent past... rather than
+            // as used elsewhere where we are concened with decay in prediction
+            // quality since the last GF or KF.
+            recent_loop_decay[i%8] = loop_decay_rate;
+            decay_accumulator = 1.0;
+            for (j = 0; j < 8; j++)
+            {
+                decay_accumulator = decay_accumulator * recent_loop_decay[j];
+            }
+
+            // Special check for transition or high motion followed by a
+            // to a static scene.
+            if ( detect_transition_to_still( cpi, i,
+                                             (cpi->key_frame_frequency-i),
+                                             loop_decay_rate,
+                                             decay_accumulator ) )
+            {
+                break;
+            }
+
 
             // Step on to the next frame
             cpi->frames_to_key ++;
@@ -2437,6 +2474,8 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 break;
         } else
             cpi->frames_to_key ++;
+
+        i++;
     }
 
     // If there is a max kf interval set by the user we must obey it.
@@ -2588,32 +2627,8 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (r > RMAX)
             r = RMAX;
 
-        // Adjust loop decay rate
-        //if ( next_frame.pcnt_inter < loop_decay_rate )
-        loop_decay_rate = next_frame.pcnt_inter;
-
-        // High % motion -> somewhat higher decay rate
-        motion_pct = next_frame.pcnt_motion;
-        motion_decay = (1.0 - (motion_pct / 20.0));
-        if (motion_decay < loop_decay_rate)
-            loop_decay_rate = motion_decay;
-
-        // Adjustment to decay rate based on speed of motion
-        {
-            double this_mv_rabs;
-            double this_mv_cabs;
-            double distance_factor;
-
-            this_mv_rabs = fabs(next_frame.mvr_abs * motion_pct);
-            this_mv_cabs = fabs(next_frame.mvc_abs * motion_pct);
-
-            distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
-                                   (this_mv_cabs * this_mv_cabs)) / 250.0;
-            distance_factor = ((distance_factor > 1.0)
-                                    ? 0.0 : (1.0 - distance_factor));
-            if (distance_factor < loop_decay_rate)
-                loop_decay_rate = distance_factor;
-        }
+        // How fast is prediction quality decaying
+        loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
 
         decay_accumulator = decay_accumulator * loop_decay_rate;
         decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
