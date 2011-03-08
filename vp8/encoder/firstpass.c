@@ -1396,7 +1396,7 @@ double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
     return prediction_decay_rate;
 }
 
-// Funtion to test for a condition where a complex transition is followe
+// Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
 BOOL detect_transition_to_still(
@@ -1409,7 +1409,7 @@ BOOL detect_transition_to_still(
     BOOL trans_to_still = FALSE;
 
     // Break clause to detect very still sections after motion
-    // For example a staic image after a fade or other transition
+    // For example a static image after a fade or other transition
     // instead of a clean scene cut.
     if ( (frame_interval > MIN_GF_INTERVAL) &&
          (loop_decay_rate >= 0.999) &&
