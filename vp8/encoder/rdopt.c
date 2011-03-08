@@ -1968,7 +1968,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                     else
                         cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
                 }
-                else if (vp8_ref_frame_order[mode_index] == SPLITMV)
+                else if (vp8_mode_order[mode_index] == SPLITMV)
                     cpi->zbin_mode_boost = 0;
                 else
                     cpi->zbin_mode_boost = MV_ZBIN_BOOST;
