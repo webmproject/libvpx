@@ -312,9 +312,9 @@ void vp8_output_stats(const VP8_COMP            *cpi,
         FILE *fpfile;
         fpfile = fopen("firstpass.stt", "a");
 
-        fprintf(fpfile, "%12.0f %12.0f %12.0f %12.4f %12.4f %12.4f %12.4f
-                %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.0f
-                %12.4f\n",
+        fprintf(fpfile, "%12.0f %12.0f %12.0f %12.4f %12.4f %12.4f %12.4f"
+                " %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.0f"
+                " %12.4f\n",
                 stats->frame,
                 stats->intra_error,
                 stats->coded_error,
