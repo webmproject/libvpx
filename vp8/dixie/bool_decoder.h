@@ -1,10 +1,10 @@
 /*
  *  Copyright (c) 2010 The VP8 project authors. All Rights Reserved.
  *
- *  Use of this source code is governed by a BSD-style license and patent
- *  grant that can be found in the LICENSE file in the root of the source
- *  tree. All contributing project authors may be found in the AUTHORS
- *  file in the root of the source tree.
+ *  Use of this source code is governed by a BSD-style license and
+ *  patent grant that can be found in the LICENSE file in the root of
+ *  the source tree. All contributing project authors may be found in
+ *  the AUTHORS file in the root of the source tree.
  */
 
 
@@ -14,11 +14,13 @@
 
 struct bool_decoder
 {
-  const unsigned char *input;      /* pointer to next compressed data byte */
-  size_t               input_len;  /* length of the input buffer */
-  unsigned int         range;      /* always identical to encoder's range */
-  unsigned int         value;      /* contains at least 8 significant bits */
-  int                  bit_count;  /* # of bits shifted out of value, max 7 */
+    const unsigned char *input;      /* next compressed data byte */
+    size_t               input_len;  /* length of the input buffer */
+    unsigned int         range;      /* identical to encoder's range */
+    unsigned int         value;      /* contains at least 8 significant
+                                      * bits */
+    int                  bit_count;  /* # of bits shifted out of value,
+                                      * max 7 */
 };
 
 
@@ -27,11 +29,11 @@ init_bool_decoder(struct bool_decoder *d,
                   const unsigned char *start_partition,
                   size_t               sz)
 {
-    if(sz >= 2)
+    if (sz >= 2)
     {
         d->value = (start_partition[0] << 8) /* first 2 input bytes */
                    | start_partition[1];
-        d->input = start_partition + 2;      /* ptr to next byte to be read */
+        d->input = start_partition + 2;      /* ptr to next byte */
         d->input_len = sz - 2;
     }
     else
@@ -40,42 +42,51 @@ init_bool_decoder(struct bool_decoder *d,
         d->input = NULL;
         d->input_len = 0;
     }
-    d->range = 255;                      /* initial range is full */
-    d->bit_count = 0;                    /* have not yet shifted out any bits */
+
+    d->range = 255;    /* initial range is full */
+    d->bit_count = 0;  /* have not yet shifted out any bits */
 }
 
 
 static int bool_get(struct bool_decoder *d, int probability)
 {
-  /* range and split are identical to the corresponding values
-     used by the encoder when this bool was written */
+    /* range and split are identical to the corresponding values
+       used by the encoder when this bool was written */
 
-  unsigned int  split = 1 + ( ((d->range - 1) * probability) >> 8);
-  unsigned int  SPLIT = split << 8;
-  int           retval;           /* will be 0 or 1 */
+    unsigned int  split = 1 + (((d->range - 1) * probability) >> 8);
+    unsigned int  SPLIT = split << 8;
+    int           retval;           /* will be 0 or 1 */
 
-  if( d->value >= SPLIT) {  /* encoded a one */
-    retval = 1;
-    d->range -= split;  /* reduce range */
-    d->value -= SPLIT;  /* subtract off left endpoint of interval */
-  } else {              /* encoded a zero */
-    retval = 0;
-    d->range = split;  /* reduce range, no change in left endpoint */
-  }
-
-  while( d->range < 128) {  /* shift out irrelevant value bits */
-    d->value <<= 1;
-    d->range <<= 1;
-    if( ++d->bit_count == 8) {  /* shift in new bits 8 at a time */
-      d->bit_count = 0;
-      if(d->input_len)
-      {
-          d->value |= *d->input++;
-          d->input_len--;
-      }
+    if (d->value >= SPLIT)    /* encoded a one */
+    {
+        retval = 1;
+        d->range -= split;  /* reduce range */
+        d->value -= SPLIT;  /* subtract off left endpoint of interval */
     }
-  }
-  return retval;
+    else                  /* encoded a zero */
+    {
+        retval = 0;
+        d->range = split; /* reduce range, no change in left endpoint */
+    }
+
+    while (d->range < 128)    /* shift out irrelevant value bits */
+    {
+        d->value <<= 1;
+        d->range <<= 1;
+
+        if (++d->bit_count == 8)    /* shift in new bits 8 at a time */
+        {
+            d->bit_count = 0;
+
+            if (d->input_len)
+            {
+                d->value |= *d->input++;
+                d->input_len--;
+            }
+        }
+    }
+
+    return retval;
 }
 
 

@@ -24,10 +24,14 @@ static union mv
 {
     union mv newmv;
 
-    newmv.d.x = (raw.d.x < bounds->to_left) ? bounds->to_left : raw.d.x;
-    newmv.d.x = (raw.d.x > bounds->to_right) ? bounds->to_right : newmv.d.x;
-    newmv.d.y = (raw.d.y < bounds->to_top) ? bounds->to_top : raw.d.y;
-    newmv.d.y = (raw.d.y > bounds->to_bottom) ? bounds->to_bottom : newmv.d.y;
+    newmv.d.x = (raw.d.x < bounds->to_left)
+                ? bounds->to_left : raw.d.x;
+    newmv.d.x = (raw.d.x > bounds->to_right)
+                ? bounds->to_right : newmv.d.x;
+    newmv.d.y = (raw.d.y < bounds->to_top)
+                ? bounds->to_top : raw.d.y;
+    newmv.d.y = (raw.d.y > bounds->to_bottom)
+                ? bounds->to_bottom : newmv.d.y;
     return newmv;
 }
 
@@ -117,7 +121,8 @@ decode_kf_mb_mode(struct mb_info      *this,
             enum prediction_mode l = left_block_mode(this, left, i);
             enum prediction_mode b;
 
-            b = bool_read_tree(bool, b_mode_tree, kf_b_mode_probs[a][l]);
+            b = bool_read_tree(bool, b_mode_tree,
+                               kf_b_mode_probs[a][l]);
             this->split.modes[i] = b;
         }
     }
@@ -353,7 +358,8 @@ find_near_mvs(const struct mb_info   *this,
             union mv this_mv;
 
             this_mv.raw = aboveleft->base.mv.raw;
-            mv_bias(aboveleft, sign_bias, this->base.ref_frame, &this_mv);
+            mv_bias(aboveleft, sign_bias, this->base.ref_frame,
+                    &this_mv);
 
             if (this_mv.raw != mv->raw)
             {
@@ -391,8 +397,8 @@ find_near_mvs(const struct mb_info   *this,
         near_mvs[CNT_NEAR].raw = tmp;
     }
 
-    /* Use near_mvs[CNT_BEST] to store the "best" MV. Note that this storage
-     * shares the same address as near_mvs[CNT_ZEROZERO].
+    /* Use near_mvs[CNT_BEST] to store the "best" MV. Note that this
+     * storage shares the same address as near_mvs[CNT_ZEROZERO].
      */
     if (cnt[CNT_NEAREST] >= cnt[CNT_BEST])
         near_mvs[CNT_BEST] = near_mvs[CNT_NEAREST];
@@ -537,8 +543,10 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
 
         for (b = 0; b < 16; b++)
         {
-            chroma_mv[(b>>1&1) + (b>>2&2)].d.x += this->split.mvs[b].d.x;
-            chroma_mv[(b>>1&1) + (b>>2&2)].d.y += this->split.mvs[b].d.y;
+            chroma_mv[(b>>1&1) + (b>>2&2)].d.x +=
+                this->split.mvs[b].d.x;
+            chroma_mv[(b>>1&1) + (b>>2&2)].d.y +=
+                this->split.mvs[b].d.y;
 
             if (need_mc_border(this->split.mvs[b],
             x + (b & 3) * 4, y + (b & ~3), 4, w, h))
@@ -577,10 +585,10 @@ decode_mvs(struct vp8_decoder_ctx       *ctx,
 
 void
 vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
-                             struct bool_decoder    *bool,
-                             int                     row,
-                             int                     start_col,
-                             int                     num_cols)
+struct bool_decoder    *bool,
+int                     row,
+int                     start_col,
+int                     num_cols)
 {
     struct mb_info       *above, *this;
     unsigned int          col;
@@ -599,11 +607,11 @@ vp8_dixie_modemv_process_row(struct vp8_decoder_ctx *ctx,
     {
         if (ctx->segment_hdr.update_map)
             this->base.segment_id = read_segment_id(bool,
-                                                    &ctx->segment_hdr);
+            &ctx->segment_hdr);
 
         if (ctx->entropy_hdr.coeff_skip_enabled)
             this->base.skip_coeff = bool_get(bool,
-                                             ctx->entropy_hdr.coeff_skip_prob);
+            ctx->entropy_hdr.coeff_skip_prob);
 
         if (ctx->frame_hdr.is_keyframe)
         {
@@ -642,18 +650,18 @@ vp8_dixie_modemv_init(struct vp8_decoder_ctx *ctx)
     if (ctx->frame_hdr.frame_size_updated)
     {
         free(ctx->mb_info_storage);
-	ctx->mb_info_storage = NULL;
-	free(ctx->mb_info_rows_storage);
-	ctx->mb_info_rows_storage = NULL;
+        ctx->mb_info_storage = NULL;
+        free(ctx->mb_info_rows_storage);
+        ctx->mb_info_rows_storage = NULL;
     }
-    
+
     if (!ctx->mb_info_storage)
         ctx->mb_info_storage = calloc(mbi_w * mbi_h,
-                                      sizeof(*ctx->mb_info_storage));
+        sizeof(*ctx->mb_info_storage));
 
     if (!ctx->mb_info_rows_storage)
         ctx->mb_info_rows_storage = calloc(mbi_h,
-                                           sizeof(*ctx->mb_info_rows_storage));
+        sizeof(*ctx->mb_info_rows_storage));
 
     /* Set up row pointers */
     mbi = ctx->mb_info_storage + 1;

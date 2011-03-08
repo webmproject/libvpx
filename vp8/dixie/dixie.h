@@ -28,7 +28,9 @@ struct vp8_frame_hdr
         unsigned int scale_h;  /* Scaling factor, Height */
     } kf;
 
-    unsigned int frame_size_updated; /* Flag to indicate a resolution update */
+    unsigned int frame_size_updated; /* Flag to indicate a resolution
+                                      * update.
+                                      */
 };
 
 
@@ -158,8 +160,8 @@ enum prediction_mode
     MB_MODE_COUNT,
 
     /* 4x4 intra modes */
-    B_DC_PRED = 0, B_TM_PRED, B_VE_PRED, B_HE_PRED, B_LD_PRED, B_RD_PRED,
-    B_VR_PRED, B_VL_PRED, B_HD_PRED, B_HU_PRED,
+    B_DC_PRED = 0, B_TM_PRED, B_VE_PRED, B_HE_PRED, B_LD_PRED,
+    B_RD_PRED, B_VR_PRED, B_VL_PRED, B_HD_PRED, B_HU_PRED,
 
     /* 4x4 inter modes */
     LEFT4X4, ABOVE4X4, ZERO4X4, NEW4X4,

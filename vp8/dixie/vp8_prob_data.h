@@ -383,7 +383,7 @@ unsigned char k_default_mv_probs[2][MV_PROB_CNT] =
     {                                                    /* row */
         162,                                             /* is short */
         128,                                             /* sign */
-        225, 146, 172, 147, 214,  39, 156,               /* short tree */
+        225, 146, 172, 147, 214,  39, 156,              /* short tree */
         128, 129, 132,  75, 145, 178, 206, 239, 254, 254 /* long bits */
     },
     {

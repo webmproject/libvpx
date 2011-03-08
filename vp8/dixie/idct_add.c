@@ -81,10 +81,12 @@ idct_columns(const short *input, short *output)
         b1 = ip[0] - ip[8];
 
         temp1 = (ip[4] * sinpi8sqrt2 + rounding) >> 16;
-        temp2 = ip[12] + ((ip[12] * cospi8sqrt2minus1 + rounding) >> 16);
+        temp2 = ip[12] +
+            ((ip[12] * cospi8sqrt2minus1 + rounding) >> 16);
         c1 = temp1 - temp2;
 
-        temp1 = ip[4] + ((ip[4] * cospi8sqrt2minus1 + rounding) >> 16);
+        temp1 = ip[4] +
+            ((ip[4] * cospi8sqrt2minus1 + rounding) >> 16);
         temp2 = (ip[12] * sinpi8sqrt2 + rounding) >> 16;
         d1 = temp1 + temp2;
 
@@ -119,10 +121,12 @@ vp8_dixie_idct_add(unsigned char        *recon,
         b1 = coeffs[0] - coeffs[2];
 
         temp1 = (coeffs[1] * sinpi8sqrt2 + rounding) >> 16;
-        temp2 = coeffs[3] + ((coeffs[3] * cospi8sqrt2minus1 + rounding) >> 16);
+        temp2 = coeffs[3] +
+            ((coeffs[3] * cospi8sqrt2minus1 + rounding) >> 16);
         c1 = temp1 - temp2;
 
-        temp1 = coeffs[1] + ((coeffs[1] * cospi8sqrt2minus1 + rounding) >> 16);
+        temp1 = coeffs[1] +
+            ((coeffs[1] * cospi8sqrt2minus1 + rounding) >> 16);
         temp2 = (coeffs[3] * sinpi8sqrt2 + rounding) >> 16;
         d1 = temp1 + temp2;
 

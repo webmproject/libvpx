@@ -23,13 +23,13 @@ enum
 static const filter_t sixtap_filters[8] =
 {
 
-    { 0,  0,  128,    0,   0,  0 },         // note that 1/8 pel positions are just as per alpha -0.5 bicubic
+    { 0,  0,  128,    0,   0,  0 },
     { 0, -6,  123,   12,  -1,  0 },
-    { 2, -11, 108,   36,  -8,  1 },         // New 1/4 pel 6 tap filter
+    { 2, -11, 108,   36,  -8,  1 },
     { 0, -9,   93,   50,  -6,  0 },
-    { 3, -16,  77,   77, -16,  3 },         // New 1/2 pel 6 tap filter
+    { 3, -16,  77,   77, -16,  3 },
     { 0, -6,   50,   93,  -9,  0 },
-    { 1, -8,   36,  108, -11,  2 },         // New 1/4 pel 6 tap filter
+    { 1, -8,   36,  108, -11,  2 },
     { 0, -1,   12,  123,  -6,  0 },
 };
 
@@ -58,7 +58,7 @@ predict_h_nxn(unsigned char *predict,
 
     for (i = 0; i < n; i++)
         for (j = 0; j < n; j++)
-            predict[i * stride + j] = left[i * stride];
+            predict[i *stride + j] = left[i * stride];
 }
 
 
@@ -72,7 +72,7 @@ predict_v_nxn(unsigned char *predict,
 
     for (i = 0; i < n; i++)
         for (j = 0; j < n; j++)
-            predict[i * stride + j] = above[j];
+            predict[i *stride + j] = above[j];
 }
 
 
@@ -114,15 +114,22 @@ predict_dc_nxn(unsigned char *predict,
         left += stride;
     }
 
-    switch(n)
+    switch (n)
     {
-    case 16: dc = (dc + 16) >> 5; break;
-    case  8: dc = (dc + 8) >> 4; break;
-    case  4: dc = (dc + 4) >> 3; break;
+    case 16:
+        dc = (dc + 16) >> 5;
+        break;
+    case  8:
+        dc = (dc + 8) >> 4;
+        break;
+    case  4:
+        dc = (dc + 4) >> 3;
+        break;
     }
+
     for (i = 0; i < n; i++)
         for (j = 0; j < n; j++)
-            predict[i * stride + j] = dc;
+            predict[i *stride + j] = dc;
 }
 
 
@@ -138,9 +145,9 @@ predict_ve_4x4(unsigned char *predict,
     predict[2] = (above[ 1] + 2 * above[2] + above[3] + 2) >> 2;
     predict[3] = (above[ 2] + 2 * above[3] + above[4] + 2) >> 2;
 
-    for(i = 1; i < 4; i++)
-        for(j = 0; j < 4; j++)
-            predict[i * stride + j] = predict[j];
+    for (i = 1; i < 4; i++)
+        for (j = 0; j < 4; j++)
+            predict[i *stride + j] = predict[j];
 }
 
 
@@ -218,25 +225,32 @@ predict_rd_4x4(unsigned char *predict,
     unsigned char *above = predict - stride;
     int            pred0, pred1, pred2, pred3, pred4, pred5, pred6;
 
-    predict[0] = pred0 = (left[ 0] + 2 * above[-1] + above[0] + 2) >> 2;
-    predict[1] = pred1 = (above[-1] + 2 * above[ 0] + above[1] + 2) >> 2;
-    predict[2] = pred2 = (above[ 0] + 2 * above[ 1] + above[2] + 2) >> 2;
-    predict[3] = pred3 = (above[ 1] + 2 * above[ 2] + above[3] + 2) >> 2;
+    predict[0] = pred0 =
+        (left[ 0] + 2 * above[-1] + above[0] + 2) >> 2;
+    predict[1] = pred1 =
+        (above[-1] + 2 * above[ 0] + above[1] + 2) >> 2;
+    predict[2] = pred2 =
+        (above[ 0] + 2 * above[ 1] + above[2] + 2) >> 2;
+    predict[3] = pred3 =
+        (above[ 1] + 2 * above[ 2] + above[3] + 2) >> 2;
     predict += stride;
 
-    predict[0] = pred4 = (left[stride] + 2 * left[0] + above[-1] + 2) >> 2;
+    predict[0] = pred4 =
+        (left[stride] + 2 * left[0] + above[-1] + 2) >> 2;
     predict[1] = pred0;
     predict[2] = pred1;
     predict[3] = pred2;
     predict += stride;
 
-    predict[0] = pred5 = (left[stride*2] + 2 * left[stride] + left[0] + 2) >> 2;
+    predict[0] = pred5 =
+        (left[stride*2] + 2 * left[stride] + left[0] + 2) >> 2;
     predict[1] = pred4;
     predict[2] = pred0;
     predict[3] = pred1;
     predict += stride;
 
-    predict[0] = pred6 = (left[stride*3] + 2 * left[stride*2] + left[stride] + 2) >> 2;
+    predict[0] = pred6 =
+        (left[stride*3] + 2 * left[stride*2] + left[stride] + 2) >> 2;
     predict[1] = pred5;
     predict[2] = pred4;
     predict[3] = pred0;
@@ -249,8 +263,8 @@ predict_vr_4x4(unsigned char *predict,
 {
     unsigned char *left = predict - 1;
     unsigned char *above = predict - stride;
-    int            pred0, pred1, pred2, pred3, pred4, pred5, pred6, pred7,
-      pred8, pred9;
+    int            pred0, pred1, pred2, pred3, pred4, pred5, pred6,
+                   pred7, pred8, pred9;
 
     predict[0] = pred0 = (above[-1] + above[0] + 1) >> 1;
     predict[1] = pred1 = (above[ 0] + above[1] + 1) >> 1;
@@ -258,19 +272,25 @@ predict_vr_4x4(unsigned char *predict,
     predict[3] = pred3 = (above[ 2] + above[3] + 1) >> 1;
     predict += stride;
 
-    predict[0] = pred4 = (left[ 0] + 2 * above[-1] + above[0] + 2) >> 2;
-    predict[1] = pred5 = (above[-1] + 2 * above[ 0] + above[1] + 2) >> 2;
-    predict[2] = pred6 = (above[ 0] + 2 * above[ 1] + above[2] + 2) >> 2;
-    predict[3] = pred7 = (above[ 1] + 2 * above[ 2] + above[3] + 2) >> 2;
+    predict[0] = pred4 =
+        (left[ 0] + 2 * above[-1] + above[0] + 2) >> 2;
+    predict[1] = pred5 =
+        (above[-1] + 2 * above[ 0] + above[1] + 2) >> 2;
+    predict[2] = pred6 =
+        (above[ 0] + 2 * above[ 1] + above[2] + 2) >> 2;
+    predict[3] = pred7 =
+        (above[ 1] + 2 * above[ 2] + above[3] + 2) >> 2;
     predict += stride;
 
-    predict[0] = pred8 = (left[stride] + 2 * left[0] + above[-1] + 2) >> 2;
+    predict[0] = pred8 =
+        (left[stride] + 2 * left[0] + above[-1] + 2) >> 2;
     predict[1] = pred0;
     predict[2] = pred1;
     predict[3] = pred2;
     predict += stride;
 
-    predict[0] = pred9 = (left[stride*2] + 2 * left[stride] + left[0] + 2) >> 2;
+    predict[0] = pred9 =
+        (left[stride*2] + 2 * left[stride] + left[0] + 2) >> 2;
     predict[1] = pred4;
     predict[2] = pred5;
     predict[3] = pred6;
@@ -282,8 +302,8 @@ predict_vl_4x4(unsigned char *predict,
                int            stride)
 {
     unsigned char *above = predict - stride;
-    int            pred0, pred1, pred2, pred3, pred4, pred5, pred6, pred7,
-      pred8, pred9;
+    int            pred0, pred1, pred2, pred3, pred4, pred5, pred6,
+                   pred7, pred8, pred9;
 
     predict[0] = pred0 = (above[0] + above[1] + 1) >> 1;
     predict[1] = pred1 = (above[1] + above[2] + 1) >> 1;
@@ -291,10 +311,14 @@ predict_vl_4x4(unsigned char *predict,
     predict[3] = pred3 = (above[3] + above[4] + 1) >> 1;
     predict += stride;
 
-    predict[0] = pred4 = (above[0] + 2 * above[1] + above[2] + 2) >> 2;
-    predict[1] = pred5 = (above[1] + 2 * above[2] + above[3] + 2) >> 2;
-    predict[2] = pred6 = (above[2] + 2 * above[3] + above[4] + 2) >> 2;
-    predict[3] = pred7 = (above[3] + 2 * above[4] + above[5] + 2) >> 2;
+    predict[0] = pred4 =
+        (above[0] + 2 * above[1] + above[2] + 2) >> 2;
+    predict[1] = pred5 =
+        (above[1] + 2 * above[2] + above[3] + 2) >> 2;
+    predict[2] = pred6 =
+        (above[2] + 2 * above[3] + above[4] + 2) >> 2;
+    predict[3] = pred7 =
+        (above[3] + 2 * above[4] + above[5] + 2) >> 2;
     predict += stride;
 
     predict[0] = pred1;
@@ -316,29 +340,39 @@ predict_hd_4x4(unsigned char *predict,
 {
     unsigned char *left = predict - 1;
     unsigned char *above = predict - stride;
-    int            pred0, pred1, pred2, pred3, pred4, pred5, pred6, pred7,
-      pred8, pred9;
+    int            pred0, pred1, pred2, pred3, pred4, pred5, pred6,
+                   pred7, pred8, pred9;
 
-    predict[0] = pred0 = (left[ 0] + above[-1] + 1) >> 1;
-    predict[1] = pred1 = (left[ 0] + 2 * above[-1] + above[0] + 2) >> 2;
-    predict[2] = pred2 = (above[-1] + 2 * above[ 0] + above[1] + 2) >> 2;
-    predict[3] = pred3 = (above[ 0] + 2 * above[ 1] + above[2] + 2) >> 2;
+    predict[0] = pred0 =
+        (left[ 0] + above[-1] + 1) >> 1;
+    predict[1] = pred1 =
+        (left[ 0] + 2 * above[-1] + above[0] + 2) >> 2;
+    predict[2] = pred2 =
+        (above[-1] + 2 * above[ 0] + above[1] + 2) >> 2;
+    predict[3] = pred3 =
+        (above[ 0] + 2 * above[ 1] + above[2] + 2) >> 2;
     predict += stride;
 
-    predict[0] = pred4 = (left[stride] + left[0] + 1) >> 1;
-    predict[1] = pred5 = (left[stride] + 2 * left[0] + above[-1] + 2) >> 2;
+    predict[0] = pred4 =
+        (left[stride] + left[0] + 1) >> 1;
+    predict[1] = pred5 =
+        (left[stride] + 2 * left[0] + above[-1] + 2) >> 2;
     predict[2] = pred0;
     predict[3] = pred1;
     predict += stride;
 
-    predict[0] = pred6 = (left[stride*2] +   left[stride] + 1) >> 1;
-    predict[1] = pred7 = (left[stride*2] + 2 * left[stride] + left[0] + 2) >> 2;
+    predict[0] = pred6 =
+        (left[stride*2] +   left[stride] + 1) >> 1;
+    predict[1] = pred7 =
+        (left[stride*2] + 2 * left[stride] + left[0] + 2) >> 2;
     predict[2] = pred4;
     predict[3] = pred5;
     predict += stride;
 
-    predict[0] = pred8 = (left[stride*3] +   left[stride*2] + 1) >> 1;
-    predict[1] = pred9 = (left[stride*3] + 2 * left[stride*2] + left[stride] + 2) >> 2;
+    predict[0] = pred8 =
+        (left[stride*3] +   left[stride*2] + 1) >> 1;
+    predict[1] = pred9 =
+        (left[stride*3] + 2 * left[stride*2] + left[stride] + 2) >> 2;
     predict[2] = pred6;
     predict[3] = pred7;
 }
@@ -351,16 +385,22 @@ predict_hu_4x4(unsigned char *predict,
     unsigned char *left = predict - 1;
     int            pred0, pred1, pred2, pred3, pred4, pred5, pred6;
 
-    predict[0] = pred0 = (left[stride*0] +   left[stride*1] + 1) >> 1;
-    predict[1] = pred1 = (left[stride*0] + 2 * left[stride*1] + left[stride*2] + 2) >> 2;
-    predict[2] = pred2 = (left[stride*1] +   left[stride*2] + 1) >> 1;
-    predict[3] = pred3 = (left[stride*1] + 2 * left[stride*2] + left[stride*3] + 2) >> 2;
+    predict[0] = pred0 =
+        (left[stride*0] +   left[stride*1] + 1) >> 1;
+    predict[1] = pred1 =
+        (left[stride*0] + 2 * left[stride*1] + left[stride*2] + 2) >> 2;
+    predict[2] = pred2 =
+        (left[stride*1] +   left[stride*2] + 1) >> 1;
+    predict[3] = pred3 =
+        (left[stride*1] + 2 * left[stride*2] + left[stride*3] + 2) >> 2;
     predict += stride;
 
     predict[0] = pred2;
     predict[1] = pred3;
-    predict[2] = pred4 = (left[stride*2] + left[stride*3] + 1) >> 1;
-    predict[3] = pred5 = (left[stride*2] + 2 * left[stride*3] + left[stride*3] + 2) >> 2;
+    predict[2] = pred4 =
+        (left[stride*2] + left[stride*3] + 1) >> 1;
+    predict[3] = pred5 =
+        (left[stride*2] + 2 * left[stride*3] + left[stride*3] + 2) >> 2;
     predict += stride;
 
     predict[0] = pred4;
@@ -700,7 +740,7 @@ sixtap_2d(unsigned char       *output,
           int                  mx,
           int                  my,
           const filter_t       filters[8]
-          )
+         )
 {
     DECLARE_ALIGNED(16, unsigned char, temp[16*(16+5)]);
 
@@ -729,7 +769,9 @@ filter_block(unsigned char        *output,
 {
     int mx, my;
 
-    /* Handle 0,0 as a special case. TODO: does this make it any faster? */
+    /* Handle 0,0 as a special case. TODO: does this make it any
+     * faster?
+     */
     if (!mv->raw)
         return reference;
 
@@ -739,7 +781,8 @@ filter_block(unsigned char        *output,
 
     if (mx | my)
     {
-        sixtap_2d(output, stride, reference, stride, 4, 4, mx, my, filters);
+        sixtap_2d(output, stride, reference, stride, 4, 4, mx, my,
+                  filters);
         reference = output;
     }
 
@@ -807,9 +850,9 @@ calculate_chroma_splitmv(struct mb_info *mbi,
 }
 
 
-/* Note: We rely on the reconstructed border having the same stride as the
- * reference buffer because the filter_block can't adjust the stride with
- * its return value, only the reference pointer.
+/* Note: We rely on the reconstructed border having the same stride as
+ * the reference buffer because the filter_block can't adjust the
+ * stride with its return value, only the reference pointer.
  */
 static void
 build_mc_border(unsigned char       *dst,
@@ -946,12 +989,13 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
         uvmv = mbi->base.mv;
         uvmv.d.x = (uvmv.d.x + 1 + (uvmv.d.x >> 31) * 2) / 2;
         uvmv.d.y = (uvmv.d.y + 1 + (uvmv.d.y >> 31) * 2) / 2;
+
         if (full_pixel)
         {
             uvmv.d.x &= ~7;
             uvmv.d.y &= ~7;
         }
-	
+
         chroma_mv[0] = uvmv;
         chroma_mv[1] = uvmv;
         chroma_mv[2] = uvmv;
@@ -971,7 +1015,7 @@ predict_inter_emulated_edge(struct vp8_decoder_ctx  *ctx,
     {
         union mv *ymv;
 
-        if(mbi->base.y_mode != SPLITMV)
+        if (mbi->base.y_mode != SPLITMV)
             ymv = &mbi->base.mv;
         else
             ymv = mbi->split.mvs + b;
@@ -1056,9 +1100,9 @@ predict_inter(struct vp8_decoder_ctx  *ctx,
         }
 
         chroma_mv[0] =
-        chroma_mv[1] =
-        chroma_mv[2] =
-        chroma_mv[3] = uvmv;
+            chroma_mv[1] =
+                chroma_mv[2] =
+                    chroma_mv[3] = uvmv;
     }
     else
     {
@@ -1070,11 +1114,11 @@ predict_inter(struct vp8_decoder_ctx  *ctx,
 
     reference_offset = ctx->ref_frame_offsets[mbi->base.ref_frame];
 
-    for (b=0; b < 16; b++)
+    for (b = 0; b < 16; b++)
     {
         union mv *ymv;
 
-        if(mbi->base.y_mode != SPLITMV)
+        if (mbi->base.y_mode != SPLITMV)
             ymv = &mbi->base.mv;
         else
             ymv = mbi->split.mvs + b;
@@ -1083,6 +1127,7 @@ predict_inter(struct vp8_decoder_ctx  *ctx,
         recon_1_block(y, y + reference_offset, img->stride,
                       ymv, ctx->subpixel_filters, coeffs, mbi, b);
         y += 4;
+
         if ((b & 3) == 3)
             y += 4 * img->stride - 16;
     }
@@ -1240,7 +1285,8 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
             if (!vpx_img_alloc(&ctx->frame_strg[i].img,
                                IMG_FMT_I420, w, h, 16))
                 vpx_internal_error(&ctx->error, VPX_CODEC_MEM_ERROR,
-                                   "Failed to allocate %dx%d framebuffer",
+                                   "Failed to allocate %dx%d"
+                                   " framebuffer",
                                    w, h);
 
             vpx_img_set_rect(&ctx->frame_strg[i].img,
@@ -1249,9 +1295,9 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
 
         }
 
-	    if(ctx->frame_hdr.version)
+        if (ctx->frame_hdr.version)
             ctx->subpixel_filters = bilinear_filters;
-	    else
+        else
             ctx->subpixel_filters = sixtap_filters;
     }
 
@@ -1268,8 +1314,8 @@ vp8_dixie_predict_init(struct vp8_decoder_ctx *ctx)
     {
         struct ref_cnt_img  *ref = ctx->ref_frames[i];
 
-        ctx->ref_frame_offsets[i] = ref ? ref->img.img_data - this_frame_base
-                                    : 0;
+        ctx->ref_frame_offsets[i] =
+            ref ? ref->img.img_data - this_frame_base : 0;
     }
 
     /* TODO: No need to do this on every frame... */
@@ -1330,14 +1376,17 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
         if (row == 0)
         {
             fixup_above(img.y, 16, img.stride, col, mbi->base.y_mode);
-            fixup_above(img.u, 8, img.uv_stride, col, mbi->base.uv_mode);
-            fixup_above(img.v, 8, img.uv_stride, col, mbi->base.uv_mode);
+            fixup_above(img.u, 8, img.uv_stride, col,
+                        mbi->base.uv_mode);
+            fixup_above(img.v, 8, img.uv_stride, col,
+                        mbi->base.uv_mode);
         }
 
         if (mbi->base.y_mode <= B_PRED)
         {
             predict_intra_luma(img.y, img.stride, mbi, coeffs);
-            predict_intra_chroma(img.u, img.v, img.uv_stride, mbi, coeffs);
+            predict_intra_chroma(img.u, img.v, img.uv_stride, mbi,
+                                 coeffs);
         }
         else
         {
@@ -1345,7 +1394,8 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
                 fixup_dc_coeffs(mbi, coeffs);
 
             if (mbi->base.need_mc_border)
-                predict_inter_emulated_edge(ctx, &img, coeffs, mbi, col, row);
+                predict_inter_emulated_edge(ctx, &img, coeffs, mbi, col,
+                                            row);
             else
                 predict_inter(ctx, &img, coeffs, mbi);
         }
@@ -1360,8 +1410,8 @@ vp8_dixie_predict_process_row(struct vp8_decoder_ctx *ctx,
 
     if (col == ctx->mb_cols)
     {
-        /* Extend the last row by four pixels for intra prediction. This will
-         * be propagated later by copy_down.
+        /* Extend the last row by four pixels for intra prediction.
+         * This will be propagated later by copy_down.
          */
         uint32_t *extend = (uint32_t *)(img.y + 15 * img.stride);
         uint32_t  val = 0x01010101 * img.y[-1 + 15 * img.stride];

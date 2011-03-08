@@ -53,11 +53,13 @@ struct extrabits
 };
 static const unsigned int left_context_index[25] =
 {
-    0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8
+    0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+    4, 4, 5, 5, 6, 6, 7, 7, 8
 };
 static const unsigned int above_context_index[25] =
 {
-    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 4, 5, 4, 5, 6, 7, 6, 7, 8
+    0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
+    4, 5, 4, 5, 6, 7, 6, 7, 8
 };
 #define X(n) ((n) * PREV_COEF_CONTEXTS * ENTROPY_NODES)
 static const unsigned int bands_x[16] =
@@ -68,18 +70,30 @@ static const unsigned int bands_x[16] =
 #undef X
 static const struct extrabits extrabits[MAX_ENTROPY_TOKENS] =
 {
-    {  0, -1, {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //ZERO_TOKEN
-    {  1, 0,  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //ONE_TOKEN
-    {  2, 0,  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //TWO_TOKEN
-    {  3, 0,  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //THREE_TOKEN
-    {  4, 0,  {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //FOUR_TOKEN
-    {  5, 0,  { 159,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //DCT_VAL_CATEGORY1
-    {  7, 1,  { 145, 165,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //DCT_VAL_CATEGORY2
-    { 11, 2,  { 140, 148, 173,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, //DCT_VAL_CATEGORY3
-    { 19, 3,  { 135, 140, 155, 176,   0,   0,   0,   0,   0,   0,   0,  0   } }, //DCT_VAL_CATEGORY4
-    { 35, 4,  { 130, 134, 141, 157, 180,   0,   0,   0,   0,   0,   0,  0   } }, //DCT_VAL_CATEGORY5
-    { 67, 10, { 129, 130, 133, 140, 153, 177, 196, 230, 243, 254, 254,  0   } }, //DCT_VAL_CATEGORY6
-    {  0, -1, {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,  0   } }, // EOB TOKEN
+    {  0, -1, {   0,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //ZERO_TOKEN
+    {  1, 0,  {   0,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //ONE_TOKEN
+    {  2, 0,  {   0,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //TWO_TOKEN
+    {  3, 0,  {   0,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //THREE_TOKEN
+    {  4, 0,  {   0,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //FOUR_TOKEN
+    {  5, 0,  { 159,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //DCT_VAL_CATEGORY1
+    {  7, 1,  { 145, 165,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //DCT_VAL_CATEGORY2
+    { 11, 2,  { 140, 148, 173,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //DCT_VAL_CATEGORY3
+    { 19, 3,  { 135, 140, 155, 176,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, //DCT_VAL_CATEGORY4
+    { 35, 4,  { 130, 134, 141, 157, 180,   0,
+                  0,   0,   0,   0,   0,   0   } }, //DCT_VAL_CATEGORY5
+    { 67, 10, { 129, 130, 133, 140, 153, 177,
+                196, 230, 243, 254, 254,   0   } }, //DCT_VAL_CATEGORY6
+    {  0, -1, {   0,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0   } }, // EOB TOKEN
 };
 static const unsigned int zigzag[16] =
 {
@@ -87,7 +101,8 @@ static const unsigned int zigzag[16] =
 };
 
 #define DECODE_AND_APPLYSIGN(value_to_sign) \
-    v = (bool_get_bit(bool) ? -value_to_sign : value_to_sign) * dqf[!!c];
+    v = (bool_get_bit(bool) ? -value_to_sign \
+                            : value_to_sign) * dqf[!!c];
 
 #define DECODE_AND_BRANCH_IF_ZERO(probability,branch) \
     if (!bool_get(bool, probability)) goto branch;
@@ -157,14 +172,15 @@ decode_mb_tokens(struct bool_decoder  *bool,
         dqf = factor[TOKEN_BLOCK_Y1];
     }
 
-    /* Save a pointer to the coefficient probs for the current type. Need
-     * to repeat this whenever type changes.
+    /* Save a pointer to the coefficient probs for the current type.
+     * Need to repeat this whenever type changes.
      */
     type_probs = probs[type][0][0];
 
 BLOCK_LOOP:
     t = left[left_context_index[i]] + above[above_context_index[i]];
-    c = !type; /* all blocks start at 0 except type 0, which starts at 1. */
+    c = !type; /* all blocks start at 0 except type 0, which starts
+                * at 1. */
 
     prob = type_probs;
     prob += t * ENTROPY_NODES;
@@ -175,11 +191,16 @@ DO_WHILE:
 
 CHECK_0_:
     DECODE_AND_LOOP_IF_ZERO(prob[ZERO_CONTEXT_NODE], CHECK_0_);
-    DECODE_AND_BRANCH_IF_ZERO(prob[ONE_CONTEXT_NODE], ONE_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(prob[LOW_VAL_CONTEXT_NODE], LOW_VAL_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(prob[HIGH_LOW_CONTEXT_NODE], HIGH_LOW_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_THREEFOUR_CONTEXT_NODE], CAT_THREEFOUR_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_FIVE_CONTEXT_NODE], CAT_FIVE_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[ONE_CONTEXT_NODE],
+                              ONE_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[LOW_VAL_CONTEXT_NODE],
+                              LOW_VAL_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[HIGH_LOW_CONTEXT_NODE],
+                              HIGH_LOW_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_THREEFOUR_CONTEXT_NODE],
+                              CAT_THREEFOUR_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_FIVE_CONTEXT_NODE],
+                              CAT_FIVE_CONTEXT_NODE_0_);
     val = extrabits[DCT_VAL_CATEGORY6].min_val;
     bits_count = extrabits[DCT_VAL_CATEGORY6].length;
 
@@ -202,7 +223,8 @@ CAT_FIVE_CONTEXT_NODE_0_:
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 CAT_THREEFOUR_CONTEXT_NODE_0_:
-    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_THREE_CONTEXT_NODE], CAT_THREE_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_THREE_CONTEXT_NODE],
+                              CAT_THREE_CONTEXT_NODE_0_);
     val = extrabits[DCT_VAL_CATEGORY4].min_val;
     DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 3);
     DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 2);
@@ -218,7 +240,8 @@ CAT_THREE_CONTEXT_NODE_0_:
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 HIGH_LOW_CONTEXT_NODE_0_:
-    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_ONE_CONTEXT_NODE], CAT_ONE_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[CAT_ONE_CONTEXT_NODE],
+                              CAT_ONE_CONTEXT_NODE_0_);
 
     val = extrabits[DCT_VAL_CATEGORY2].min_val;
     DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY2, 1);
@@ -231,8 +254,10 @@ CAT_ONE_CONTEXT_NODE_0_:
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 LOW_VAL_CONTEXT_NODE_0_:
-    DECODE_AND_BRANCH_IF_ZERO(prob[TWO_CONTEXT_NODE], TWO_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(prob[THREE_CONTEXT_NODE], THREE_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[TWO_CONTEXT_NODE],
+                              TWO_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(prob[THREE_CONTEXT_NODE],
+                              THREE_CONTEXT_NODE_0_);
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(4);
 
 THREE_CONTEXT_NODE_0_:
@@ -309,9 +334,9 @@ reset_mb_context(token_entropy_ctx_t  *left,
                  token_entropy_ctx_t  *above,
                  enum prediction_mode  mode)
 {
-    /* Reset the macroblock context on the left and right. We have to preserve
-     * the context of the second order block if this mode would not have
-     * updated it.
+    /* Reset the macroblock context on the left and right. We have to
+     * preserve the context of the second order block if this mode
+     * would not have updated it.
      */
     memset(left, 0, sizeof((*left)[0]) * 8);
     memset(above, 0, sizeof((*above)[0]) * 8);
@@ -334,7 +359,8 @@ vp8_dixie_tokens_process_row(struct vp8_decoder_ctx *ctx,
     struct token_decoder *tokens = &ctx->tokens[partition];
     short                *coeffs = tokens->coeffs + 25 * 16 * start_col;
     unsigned int          col;
-    token_entropy_ctx_t  *above = ctx->above_token_entropy_ctx + start_col;
+    token_entropy_ctx_t  *above = ctx->above_token_entropy_ctx
+                                  + start_col;
     token_entropy_ctx_t  *left = &tokens->left_token_entropy_ctx;
     struct mb_info       *mbi = ctx->mb_info_rows[row] + start_col;
 
@@ -358,12 +384,13 @@ vp8_dixie_tokens_process_row(struct vp8_decoder_ctx *ctx,
             struct dequant_factors *dqf;
 
             dqf = ctx->dequant_factors  + mbi->base.segment_id;
-            mbi->base.eob_mask = decode_mb_tokens(&tokens->bool,
-                                                  *left, *above,
-                                                  coeffs,
-                                                  mbi->base.y_mode,
-                                                  ctx->entropy_hdr.coeff_probs,
-                                                  dqf->factor);
+            mbi->base.eob_mask =
+                decode_mb_tokens(&tokens->bool,
+                                 *left, *above,
+                                 coeffs,
+                                 mbi->base.y_mode,
+                                 ctx->entropy_hdr.coeff_probs,
+                                 dqf->factor);
         }
 
         above++;
@@ -381,7 +408,8 @@ vp8_dixie_tokens_init(struct vp8_decoder_ctx *ctx)
     if (ctx->frame_hdr.frame_size_updated)
     {
         unsigned int i;
-        unsigned int coeff_row_sz = ctx->mb_cols * 25 * 16 * sizeof(short);
+        unsigned int coeff_row_sz =
+            ctx->mb_cols * 25 * 16 * sizeof(short);
 
         for (i = 0; i < partitions; i++)
         {
@@ -389,7 +417,8 @@ vp8_dixie_tokens_init(struct vp8_decoder_ctx *ctx)
             ctx->tokens[i].coeffs = memalign(16, coeff_row_sz);
 
             if (!ctx->tokens[i].coeffs)
-                vpx_internal_error(&ctx->error, VPX_CODEC_MEM_ERROR, NULL);
+                vpx_internal_error(&ctx->error, VPX_CODEC_MEM_ERROR,
+                                   NULL);
         }
 
         free(ctx->above_token_entropy_ctx);

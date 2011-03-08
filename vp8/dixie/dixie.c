@@ -26,7 +26,8 @@ enum
 };
 
 
-#define ARRAY_COPY(a,b) {assert(sizeof(a)==sizeof(b));memcpy(a,b,sizeof(a));}
+#define ARRAY_COPY(a,b) {\
+    assert(sizeof(a)==sizeof(b));memcpy(a,b,sizeof(a));}
 static void
 decode_entropy_header(struct vp8_decoder_ctx    *ctx,
                       struct bool_decoder       *bool,
@@ -40,8 +41,10 @@ decode_entropy_header(struct vp8_decoder_ctx    *ctx,
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
                 for (l = 0; l < ENTROPY_NODES; l++)
                     if (bool_get(bool,
-                                 k_coeff_entropy_update_probs[i][j][k][l]))
-                        hdr->coeff_probs[i][j][k][l] = bool_get_uint(bool, 8);
+                                 k_coeff_entropy_update_probs
+                                     [i][j][k][l]))
+                        hdr->coeff_probs[i][j][k][l] =
+                            bool_get_uint(bool, 8);
 
     /* Read coefficient skip mode probability */
     hdr->coeff_skip_enabled = bool_get_bit(bool);
@@ -127,7 +130,8 @@ decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
 
     if (sz < 3 *(hdr->partitions - 1))
         vpx_internal_error(&ctx->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Truncated packet found parsing partition lengths.");
+                           "Truncated packet found parsing partition"
+                           " lengths.");
 
     sz -= 3 * (hdr->partitions - 1);
 
@@ -135,7 +139,8 @@ decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
     {
         if (i < hdr->partitions - 1)
         {
-            hdr->partition_sz[i] = (data[2] << 16) | (data[1] << 8) | data[0];
+            hdr->partition_sz[i] = (data[2] << 16)
+                                   | (data[1] << 8) | data[0];
             data += 3;
         }
         else
@@ -152,7 +157,7 @@ decode_and_init_token_partitions(struct vp8_decoder_ctx    *ctx,
     for (i = 0; i < ctx->token_hdr.partitions; i++)
     {
         init_bool_decoder(&ctx->tokens[i].bool, data,
-                        ctx->token_hdr.partition_sz[i]);
+                          ctx->token_hdr.partition_sz[i]);
         data += ctx->token_hdr.partition_sz[i];
     }
 }
@@ -279,14 +284,18 @@ dequant_init(struct dequant_factors        factors[MAX_MB_SEGMENTS],
 
         if (dqf->quant_idx != q || quant_hdr->delta_update)
         {
-            dqf->factor[TOKEN_BLOCK_Y1][0] = dc_q(q + quant_hdr->y1_dc_delta_q);
-            dqf->factor[TOKEN_BLOCK_Y1][1] = ac_q(q);
-            dqf->factor[TOKEN_BLOCK_UV][0] = dc_q(q + quant_hdr->uv_dc_delta_q);
-            dqf->factor[TOKEN_BLOCK_UV][1] = ac_q(q + quant_hdr->uv_ac_delta_q);
-            dqf->factor[TOKEN_BLOCK_Y2][0] = dc_q(q + quant_hdr->y2_dc_delta_q)
-                                             * 2;
-            dqf->factor[TOKEN_BLOCK_Y2][1] = ac_q(q + quant_hdr->y2_ac_delta_q)
-                                             * 155 / 100;
+            dqf->factor[TOKEN_BLOCK_Y1][0] =
+                dc_q(q + quant_hdr->y1_dc_delta_q);
+            dqf->factor[TOKEN_BLOCK_Y1][1] =
+                ac_q(q);
+            dqf->factor[TOKEN_BLOCK_UV][0] =
+                dc_q(q + quant_hdr->uv_dc_delta_q);
+            dqf->factor[TOKEN_BLOCK_UV][1] =
+                ac_q(q + quant_hdr->uv_ac_delta_q);
+            dqf->factor[TOKEN_BLOCK_Y2][0] =
+                dc_q(q + quant_hdr->y2_dc_delta_q) * 2;
+            dqf->factor[TOKEN_BLOCK_Y2][1] =
+                ac_q(q + quant_hdr->y2_ac_delta_q) * 155 / 100;
 
             if (dqf->factor[TOKEN_BLOCK_Y2][1] < 8)
                 dqf->factor[TOKEN_BLOCK_Y2][1] = 8;
@@ -314,7 +323,8 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     ctx->saved_entropy_valid = 0;
 
     if ((res = vp8_parse_frame_header(data, sz, &ctx->frame_hdr)))
-        vpx_internal_error(&ctx->error, res, "Failed to parse frame header");
+        vpx_internal_error(&ctx->error, res,
+                           "Failed to parse frame header");
 
     if (ctx->frame_hdr.is_experimental)
         vpx_internal_error(&ctx->error, VPX_CODEC_UNSUP_BITSTREAM,
@@ -355,10 +365,14 @@ decode_frame(struct vp8_decoder_ctx *ctx,
      */
     if (ctx->frame_hdr.is_keyframe)
     {
-        ARRAY_COPY(ctx->entropy_hdr.coeff_probs, k_default_coeff_probs);
-        ARRAY_COPY(ctx->entropy_hdr.mv_probs, k_default_mv_probs);
-        ARRAY_COPY(ctx->entropy_hdr.y_mode_probs, k_default_y_mode_probs);
-        ARRAY_COPY(ctx->entropy_hdr.uv_mode_probs, k_default_uv_mode_probs);
+        ARRAY_COPY(ctx->entropy_hdr.coeff_probs,
+                   k_default_coeff_probs);
+        ARRAY_COPY(ctx->entropy_hdr.mv_probs,
+                   k_default_mv_probs);
+        ARRAY_COPY(ctx->entropy_hdr.y_mode_probs,
+                   k_default_y_mode_probs);
+        ARRAY_COPY(ctx->entropy_hdr.uv_mode_probs,
+                   k_default_uv_mode_probs);
     }
 
     if (!ctx->reference_hdr.refresh_entropy)
@@ -372,16 +386,19 @@ decode_frame(struct vp8_decoder_ctx *ctx,
     vp8_dixie_modemv_init(ctx);
     vp8_dixie_tokens_init(ctx);
     vp8_dixie_predict_init(ctx);
-    dequant_init(ctx->dequant_factors, &ctx->segment_hdr, &ctx->quant_hdr);
+    dequant_init(ctx->dequant_factors, &ctx->segment_hdr,
+                 &ctx->quant_hdr);
 
     for (row = 0, partition = 0; row < ctx->mb_rows; row++)
     {
         vp8_dixie_modemv_process_row(ctx, &bool, row, 0, ctx->mb_cols);
-        vp8_dixie_tokens_process_row(ctx, partition, row, 0, ctx->mb_cols);
+        vp8_dixie_tokens_process_row(ctx, partition, row, 0,
+                                     ctx->mb_cols);
         vp8_dixie_predict_process_row(ctx, row, 0, ctx->mb_cols);
 
         if (ctx->loopfilter_hdr.level && row)
-            vp8_dixie_loopfilter_process_row(ctx, row - 1, 0, ctx->mb_cols);
+            vp8_dixie_loopfilter_process_row(ctx, row - 1, 0,
+                                             ctx->mb_cols);
 
         if (++partition == ctx->token_hdr.partitions)
             partition = 0;
@@ -471,7 +488,9 @@ vp8_parse_frame_header(const unsigned char   *data,
     if (sz < 10)
         return VPX_CODEC_CORRUPT_FRAME;
 
-    /* The frame header is defined as a three byte little endian value */
+    /* The frame header is defined as a three byte little endian
+     * value
+     */
     raw = data[0] | (data[1] << 8) | (data[2] << 16);
     hdr->is_keyframe     = !BITS_GET(raw, 0, 1);
     hdr->version         = BITS_GET(raw, 1, 2);
@@ -488,17 +507,22 @@ vp8_parse_frame_header(const unsigned char   *data,
     {
         unsigned int update = 0;
 
-        /* Keyframe header consists of a three byte sync code followed by the
-         * width and height and associated scaling factors.
+        /* Keyframe header consists of a three byte sync code followed
+         * by the width and height and associated scaling factors.
          */
         if (data[3] != 0x9d || data[4] != 0x01 || data[5] != 0x2a)
             return VPX_CODEC_UNSUP_BITSTREAM;
 
-        raw = data[6] | (data[7] << 8) | (data[8] << 16) | (data[9] << 24);
-        CHECK_FOR_UPDATE(hdr->kf.w,       BITS_GET(raw,  0, 14), update);
-        CHECK_FOR_UPDATE(hdr->kf.scale_w, BITS_GET(raw, 14,  2), update);
-        CHECK_FOR_UPDATE(hdr->kf.h,       BITS_GET(raw, 16, 14), update);
-        CHECK_FOR_UPDATE(hdr->kf.scale_h, BITS_GET(raw, 30,  2), update);
+        raw = data[6] | (data[7] << 8)
+              | (data[8] << 16) | (data[9] << 24);
+        CHECK_FOR_UPDATE(hdr->kf.w,       BITS_GET(raw,  0, 14),
+                         update);
+        CHECK_FOR_UPDATE(hdr->kf.scale_w, BITS_GET(raw, 14,  2),
+                         update);
+        CHECK_FOR_UPDATE(hdr->kf.h,       BITS_GET(raw, 16, 14),
+                         update);
+        CHECK_FOR_UPDATE(hdr->kf.scale_h, BITS_GET(raw, 30,  2),
+                         update);
 
         hdr->frame_size_updated = update;
 

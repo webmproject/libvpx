@@ -75,10 +75,10 @@ normal_threshold(unsigned char *pixels,
     int E = edge_limit;
     int I = interior_limit;
 
-    /* Note: Deviates from spec */
     return simple_threshold(pixels, stride, 2 * E + I)
-           && ABS(p3 - p2) <= I && ABS(p2 - p1) <= I && ABS(p1 - p0) <= I
-           && ABS(q3 - q2) <= I && ABS(q2 - q1) <= I && ABS(q1 - q0) <= I;
+           && ABS(p3 - p2) <= I && ABS(p2 - p1) <= I
+           && ABS(p1 - p0) <= I && ABS(q3 - q2) <= I
+           && ABS(q2 - q1) <= I && ABS(q1 - q0) <= I;
 }
 
 
@@ -88,11 +88,6 @@ filter_common(unsigned char *pixels,
               int            use_outer_taps)
 {
     int a, f1, f2;
-
-    /* This logic cribbed from ffvp8, which incorporates a number of
-     * deviations from the bitstream guide to match what the libvpx
-     * reference code does.
-     */
 
     a = 3 * (q0 - p0);
 
@@ -109,8 +104,8 @@ filter_common(unsigned char *pixels,
 
     if (!use_outer_taps)
     {
-        /* This handles the case of subblock_filter() (from the bitstream
-         * guide.
+        /* This handles the case of subblock_filter()
+         * (from the bitstream guide.
          */
         a = (f1 + 1) >> 1;
         p1 = saturate_uint8(p1 + a);
@@ -180,7 +175,8 @@ filter_subblock_v_edge(unsigned char *src,
     for (i = 0; i < 8 * size; i++)
     {
         if (normal_threshold(src, 1, edge_limit, interior_limit))
-            filter_common(src, 1, high_edge_variance(src, 1, hev_threshold));
+            filter_common(src, 1,
+                          high_edge_variance(src, 1, hev_threshold));
 
         src += stride;
     }
@@ -226,7 +222,8 @@ filter_subblock_h_edge(unsigned char *src,
     {
         if (normal_threshold(src, stride, edge_limit, interior_limit))
             filter_common(src, stride,
-                          high_edge_variance(src, stride, hev_threshold));
+                          high_edge_variance(src, stride,
+                                             hev_threshold));
 
         src += 1;
     }
@@ -244,6 +241,7 @@ filter_v_edge_simple(unsigned char *src,
     {
         if (simple_threshold(src, 1, filter_limit))
             filter_common(src, 1, 1);
+
         src += stride;
     }
 }
@@ -260,6 +258,7 @@ filter_h_edge_simple(unsigned char *src,
     {
         if (simple_threshold(src, stride, filter_limit))
             filter_common(src, stride, 1);
+
         src += 1;
     }
 }
@@ -274,21 +273,26 @@ calculate_filter_parameters(struct vp8_decoder_ctx *ctx,
 {
     int filter_level, interior_limit, hev_threshold;
 
-    /* Reference code/spec seems to conflate filter_level and edge_limit */
+    /* Reference code/spec seems to conflate filter_level and
+     * edge_limit
+     */
 
     filter_level = ctx->loopfilter_hdr.level;
 
     if (ctx->segment_hdr.enabled)
     {
         if (!ctx->segment_hdr.abs)
-            filter_level += ctx->segment_hdr.lf_level[mbi->base.segment_id];
+            filter_level +=
+                ctx->segment_hdr.lf_level[mbi->base.segment_id];
         else
-            filter_level = ctx->segment_hdr.lf_level[mbi->base.segment_id];
+            filter_level =
+                ctx->segment_hdr.lf_level[mbi->base.segment_id];
     }
 
     if (ctx->loopfilter_hdr.delta_enabled)
     {
-        filter_level += ctx->loopfilter_hdr.ref_delta[mbi->base.ref_frame];
+        filter_level +=
+            ctx->loopfilter_hdr.ref_delta[mbi->base.ref_frame];
 
         if (mbi->base.ref_frame == CURRENT_FRAME)
         {
@@ -364,64 +368,76 @@ filter_row_normal(struct vp8_decoder_ctx *ctx,
         /* TODO: only need to recalculate every MB if segmentation is
          * enabled.
          */
-        calculate_filter_parameters(ctx, mbi, &edge_limit, &interior_limit,
-                                    &hev_threshold);
+        calculate_filter_parameters(ctx, mbi, &edge_limit,
+                                    &interior_limit, &hev_threshold);
 
         if (edge_limit)
         {
             if (col)
             {
-                filter_mb_v_edge(y, stride, edge_limit + 2, interior_limit,
-                                 hev_threshold, 2);
-                filter_mb_v_edge(u, uv_stride, edge_limit + 2, interior_limit,
-                                 hev_threshold, 1);
-                filter_mb_v_edge(v, uv_stride, edge_limit + 2, interior_limit,
-                                 hev_threshold, 1);
+                filter_mb_v_edge(y, stride, edge_limit + 2,
+                                 interior_limit, hev_threshold, 2);
+                filter_mb_v_edge(u, uv_stride, edge_limit + 2,
+                                 interior_limit, hev_threshold, 1);
+                filter_mb_v_edge(v, uv_stride, edge_limit + 2,
+                                 interior_limit, hev_threshold, 1);
             }
 
-            /* NOTE: This conditional is actually dependent on the number
-             * of coefficients decoded, not the skip flag as coded in the
-             * bitstream. The tokens task is expected to set 31 if there
-             * is *any* non-zero data.
+            /* NOTE: This conditional is actually dependent on the
+             * number of coefficients decoded, not the skip flag as
+             * coded in the bitstream. The tokens task is expected to
+             * set 31 if there is *any* non-zero data.
              */
             if (mbi->base.eob_mask
-                || mbi->base.y_mode == SPLITMV || mbi->base.y_mode == B_PRED)
+                || mbi->base.y_mode == SPLITMV
+                || mbi->base.y_mode == B_PRED)
             {
                 filter_subblock_v_edge(y + 4, stride, edge_limit,
-                                       interior_limit, hev_threshold, 2);
+                                       interior_limit, hev_threshold,
+                                       2);
                 filter_subblock_v_edge(y + 8, stride, edge_limit,
-                                       interior_limit, hev_threshold, 2);
+                                       interior_limit, hev_threshold,
+                                       2);
                 filter_subblock_v_edge(y + 12, stride, edge_limit,
-                                       interior_limit, hev_threshold, 2);
+                                       interior_limit, hev_threshold,
+                                       2);
                 filter_subblock_v_edge(u + 4, uv_stride, edge_limit,
-                                       interior_limit, hev_threshold, 1);
+                                       interior_limit, hev_threshold,
+                                       1);
                 filter_subblock_v_edge(v + 4, uv_stride, edge_limit,
-                                       interior_limit, hev_threshold, 1);
+                                       interior_limit, hev_threshold,
+                                       1);
             }
 
             if (row)
             {
-                filter_mb_h_edge(y, stride, edge_limit + 2, interior_limit,
-                                 hev_threshold, 2);
-                filter_mb_h_edge(u, uv_stride, edge_limit + 2, interior_limit,
-                                 hev_threshold, 1);
-                filter_mb_h_edge(v, uv_stride, edge_limit + 2, interior_limit,
-                                 hev_threshold, 1);
+                filter_mb_h_edge(y, stride, edge_limit + 2,
+                                 interior_limit, hev_threshold, 2);
+                filter_mb_h_edge(u, uv_stride, edge_limit + 2,
+                                 interior_limit, hev_threshold, 1);
+                filter_mb_h_edge(v, uv_stride, edge_limit + 2,
+                                 interior_limit, hev_threshold, 1);
             }
 
             if (mbi->base.eob_mask
-                || mbi->base.y_mode == SPLITMV || mbi->base.y_mode == B_PRED)
+                || mbi->base.y_mode == SPLITMV
+                || mbi->base.y_mode == B_PRED)
             {
-                filter_subblock_h_edge(y + 4 * stride, stride, edge_limit,
-                                       interior_limit, hev_threshold, 2);
-                filter_subblock_h_edge(y + 8 * stride, stride, edge_limit,
-                                       interior_limit, hev_threshold, 2);
-                filter_subblock_h_edge(y + 12 * stride, stride, edge_limit,
-                                       interior_limit, hev_threshold, 2);
-                filter_subblock_h_edge(u + 4 * uv_stride, uv_stride, edge_limit,
-                                       interior_limit, hev_threshold, 1);
-                filter_subblock_h_edge(v + 4 * uv_stride, uv_stride, edge_limit,
-                                       interior_limit, hev_threshold, 1);
+                filter_subblock_h_edge(y + 4 * stride, stride,
+                                       edge_limit, interior_limit,
+                                       hev_threshold, 2);
+                filter_subblock_h_edge(y + 8 * stride, stride,
+                                       edge_limit, interior_limit,
+                                       hev_threshold, 2);
+                filter_subblock_h_edge(y + 12 * stride, stride,
+                                       edge_limit, interior_limit,
+                                       hev_threshold, 2);
+                filter_subblock_h_edge(u + 4 * uv_stride, uv_stride,
+                                       edge_limit, interior_limit,
+                                       hev_threshold, 1);
+                filter_subblock_h_edge(v + 4 * uv_stride, uv_stride,
+                                       edge_limit, interior_limit,
+                                       hev_threshold, 1);
             }
         }
 
@@ -457,19 +473,20 @@ filter_row_simple(struct vp8_decoder_ctx *ctx,
         /* TODO: only need to recalculate every MB if segmentation is
          * enabled.
          */
-        calculate_filter_parameters(ctx, mbi, &edge_limit, &interior_limit,
-                                    &hev_threshold);
+        calculate_filter_parameters(ctx, mbi, &edge_limit,
+                                    &interior_limit, &hev_threshold);
 
         if (edge_limit)
         {
 
-            /* NOTE: This conditional is actually dependent on the number
-             * of coefficients decoded, not the skip flag as coded in the
-             * bitstream. The tokens task is expected to set 31 if there
-             * is *any* non-zero data.
+            /* NOTE: This conditional is actually dependent on the
+             * number of coefficients decoded, not the skip flag as
+             * coded in the bitstream. The tokens task is expected to
+             * set 31 if there is *any* non-zero data.
              */
             int filter_subblocks = (mbi->base.eob_mask
-                || mbi->base.y_mode == SPLITMV || mbi->base.y_mode == B_PRED);
+                                    || mbi->base.y_mode == SPLITMV
+                                    || mbi->base.y_mode == B_PRED);
             int mb_limit = (edge_limit + 2) * 2 + interior_limit;
             int b_limit = edge_limit * 2 + interior_limit;
 
@@ -506,7 +523,7 @@ vp8_dixie_loopfilter_process_row(struct vp8_decoder_ctx *ctx,
                                  unsigned int            start_col,
                                  unsigned int            num_cols)
 {
-    if(ctx->loopfilter_hdr.use_simple)
+    if (ctx->loopfilter_hdr.use_simple)
         filter_row_simple(ctx, row, start_col, num_cols);
     else
         filter_row_normal(ctx, row, start_col, num_cols);
