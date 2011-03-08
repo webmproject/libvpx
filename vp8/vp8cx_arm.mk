@@ -36,6 +36,7 @@ VP8_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/vp8_packtokens_partitions_ar
 # encoder
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_sad16x16_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_variance16x16_armv6$(ASM)
+VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_mse16x16_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/walsh_v6$(ASM)
 
 #File list for neon
