@@ -627,6 +627,10 @@ filter_block2d_bil_var_sse2_loop:
 
 filter_block2d_bil_var_sse2_sp_only:
         movsxd          rdx,            dword ptr arg(6)     ; yoffset
+
+        cmp             rdx,            0                    ; skip all if both xoffset=0 and yoffset=0
+        je              filter_block2d_bil_var_sse2_full_pixel
+
         shl             rdx,            5
         lea             rdx,            [rdx + rcx]          ; VFilter
 
@@ -668,6 +672,35 @@ filter_block2d_bil_sp_only_loop:
 
         sub             rcx,            1                   ;
         jnz             filter_block2d_bil_sp_only_loop       ;
+
+        jmp             filter_block2d_bil_variance
+
+filter_block2d_bil_var_sse2_full_pixel:
+        mov             rsi,            arg(0)               ;ref_ptr
+        mov             rdi,            arg(2)               ;src_ptr
+        movsxd          rcx,            dword ptr arg(4)     ;Height
+        movsxd          rax,            dword ptr arg(1)     ;ref_pixels_per_line
+        movsxd          rbx,            dword ptr arg(3)     ;src_pixels_per_line
+        pxor            xmm0,           xmm0                 ;
+
+filter_block2d_bil_full_pixel_loop:
+        movq            xmm1,           QWORD PTR [rsi]               ;
+        punpcklbw       xmm1,           xmm0                 ;
+
+        movq            xmm2,           QWORD PTR [rdi]               ;
+        punpcklbw       xmm2,           xmm0                 ;
+
+        psubw           xmm1,           xmm2                 ;
+        paddw           xmm6,           xmm1                 ;
+
+        pmaddwd         xmm1,           xmm1                 ;
+        paddd           xmm7,           xmm1                 ;
+
+        lea             rsi,            [rsi + rax]          ;ref_pixels_per_line
+        lea             rdi,            [rdi + rbx]          ;src_pixels_per_line
+
+        sub             rcx,            1                   ;
+        jnz             filter_block2d_bil_full_pixel_loop       ;
 
         jmp             filter_block2d_bil_variance
 
