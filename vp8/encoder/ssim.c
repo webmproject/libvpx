@@ -387,7 +387,7 @@ double vp8_calc_ssim
 {
     double a, b, c;
     double ssimv;
-//IF_RTCD(&cpi->rtcd.variance)
+
     a = vp8_ssim2(source->y_buffer, dest->y_buffer,
                  source->y_stride, dest->y_stride, source->y_width,
                  source->y_height, rtcd);
