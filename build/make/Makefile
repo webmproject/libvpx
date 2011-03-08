@@ -153,7 +153,7 @@ endif
 #
 obj_int_extract: build/make/obj_int_extract.c
 	$(if $(quiet),echo "    [HOSTCC] $@")
-	$(qexec)$(HOSTCC) -I. -o $@ $<
+	$(qexec)$(HOSTCC) -I. -I$(SRC_PATH_BARE) -o $@ $<
 CLEAN-OBJS += obj_int_extract
 
 #
