@@ -86,8 +86,10 @@ extern double vp8_calc_ssim
     YV12_BUFFER_CONFIG *source,
     YV12_BUFFER_CONFIG *dest,
     int lumamask,
-    double *weight
+    double *weight,
+    const vp8_variance_rtcd_vtable_t *rtcd
 );
+
 
 extern double vp8_calc_ssimg
 (
@@ -5133,8 +5135,12 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
                     vp8_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0, IF_RTCD(&cm->rtcd.postproc));
                     vp8_clear_system_state();
-                    frame_psnr2 = vp8_calc_psnr(cpi->Source, &cm->post_proc_buffer, &y2, &u2, &v2, &sq_error);
-                    frame_ssim2 = vp8_calc_ssim(cpi->Source, &cm->post_proc_buffer, 1, &weight);
+                    frame_psnr2 = vp8_calc_psnr(cpi->Source,
+                      &cm->post_proc_buffer, &y2, &u2, &v2, &sq_error);
+
+                    frame_ssim2 = vp8_calc_ssim(cpi->Source,
+                      &cm->post_proc_buffer, 1, &weight,
+                      IF_RTCD(&cpi->rtcd.variance));
 
                     cpi->summed_quality += frame_ssim2 * weight;
                     cpi->summed_weights += weight;
