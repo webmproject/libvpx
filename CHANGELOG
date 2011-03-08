@@ -1,3 +1,80 @@
+2011-03-07 v0.9.6 "Bali"
+  Our second named release, focused on a faster, higher quality, encoder.
+
+  - Upgrading:
+    This release is backwards compatible with Aylesbury (v0.9.5). Users
+    of older releases should refer to the Upgrading notes in this
+    document for that release.
+
+  - Enhancements:
+      vpxenc --psnr shows a summary when encode completes
+      --tune=ssim option to enable activity masking
+      improved postproc visualizations for development
+      updated support for Apple iOS to SDK 4.2
+      query decoder to determine which reference frames were updated
+      implemented error tracking in the decoder
+      fix pipe support on windows
+
+  - Speed:
+      Primary focus was on good quality mode, speed 0. Average improvement
+      on x86 about 40%, up to 100% on user-generated content at that speed.
+      Best quality mode speed improved 35%, and realtime speed 10-20%. This
+      release also saw significant improvement in realtime encoding speed
+      on ARM platforms.
+
+        Improved encoder threading
+        Dont pick encoder filter level when loopfilter is disabled.
+        Avoid double copying of key frames into alt and golden buffer
+        FDCT optimizations.
+        x86 sse2 temporal filter
+        SSSE3 version of fast quantizer
+        vp8_rd_pick_best_mbsegmentation code restructure
+        Adjusted breakout RD for SPLITMV
+        Changed segmentation check order
+        Improved rd_pick_intra4x4block
+        Adds armv6 optimized variance calculation
+        ARMv6 optimized sad16x16
+        ARMv6 optimized half pixel variance calculations
+        Full search SAD function optimization in SSE4.1
+        Improve MV prediction accuracy to achieve performance gain
+        Improve MV prediction in vp8_pick_inter_mode() for speed>3
+
+  - Quality:
+      Best quality mode improved PSNR 6.3%, and SSIM 6.1%. This release
+      also includes support for "activity masking," which greatly improves
+      SSIM at the expense of PSNR. For now, this feature is available with
+      the --tune=ssim option. Further experimentation in this area
+      is ongoing. This release also introduces a new rate control mode
+      called "CQ," which changes the allocation of bits within a clip to
+      the sections where they will have the most visual impact.
+
+        Tuning for the more exact quantizer.
+        Relax rate control for last few frames
+        CQ Mode
+        Limit key frame quantizer for forced key frames.
+        KF/GF Pulsing
+        Add simple version of activity masking.
+        make rdmult adaptive for intra in quantizer RDO
+        cap the best quantizer for 2nd order DC
+        change the threshold of DC check for encode breakout
+
+  - Bug Fixes:
+      Fix crash on Sparc Solaris.
+      Fix counter of fixed keyframe distance
+      ARNR filter pointer update bug fix
+      Fixed use of motion percentage in KF/GF group calc
+      Changed condition for using RD in Intra Mode
+      Fix encoder real-time only configuration.
+      Fix ARM encoder crash with multiple token partitions
+      Fixed bug first cluster timecode of webm file is wrong.
+      Fixed various encoder bugs with odd-sized images
+      vp8e_get_preview fixed when spatial resampling enabled
+      quantizer: fix assertion in fast quantizer path
+      Allocate source buffers to be multiples of 16
+      Fix for manual Golden frame frequency
+      Fix drastic undershoot in long form content
+
+
 2010-10-28 v0.9.5 "Aylesbury"
   Our first named release, focused on a faster decoder, and a better encoder.
 
