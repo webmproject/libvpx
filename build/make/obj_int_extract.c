@@ -59,20 +59,47 @@ int parse_macho(uint8_t *base_buf, size_t sz)
     struct mach_header header;
     uint8_t *buf = base_buf;
     int base_data_section = 0;
+    int bits = 0;
 
+    /* We can read in mach_header for 32 and 64 bit architectures
+     * because it's identical to mach_header_64 except for the last
+     * element (uint32_t reserved), which we don't use. Then, when
+     * we know which architecture we're looking at, increment buf
+     * appropriately.
+     */
     memcpy(&header, buf, sizeof(struct mach_header));
-    buf += sizeof(struct mach_header);
 
-    if (header.magic != MH_MAGIC)
+    if (header.magic == MH_MAGIC)
     {
-        log_msg("Bad magic number for object file. 0x%x expected, 0x%x found.\n",
-                header.magic, MH_MAGIC);
-        goto bail;
+        if (header.cputype == CPU_TYPE_ARM
+            || header.cputype == CPU_TYPE_X86)
+        {
+            bits = 32;
+            buf += sizeof(struct mach_header);
+        }
+        else
+        {
+            log_msg("Bad cputype for object file. Currently only tested for CPU_TYPE_[ARM|X86].\n");
+            goto bail;
+        }
     }
-
-    if (header.cputype != CPU_TYPE_ARM)
+    else if (header.magic == MH_MAGIC_64)
     {
-        log_msg("Bad cputype for object file. Currently only tested for CPU_TYPE_ARM.\n");
+        if (header.cputype == CPU_TYPE_X86_64)
+        {
+            bits = 64;
+            buf += sizeof(struct mach_header_64);
+        }
+        else
+        {
+            log_msg("Bad cputype for object file. Currently only tested for CPU_TYPE_X86_64.\n");
+            goto bail;
+        }
+    }
+    else
+    {
+        log_msg("Bad magic number for object file. 0x%x or 0x%x expected, 0x%x found.\n",
+                MH_MAGIC, MH_MAGIC_64, header.magic);
         goto bail;
     }
 
@@ -85,8 +112,6 @@ int parse_macho(uint8_t *base_buf, size_t sz)
     for (i = 0; i < header.ncmds; i++)
     {
         struct load_command lc;
-        struct symtab_command sc;
-        struct segment_command seg_c;
 
         memcpy(&lc, buf, sizeof(struct load_command));
 
@@ -94,50 +119,99 @@ int parse_macho(uint8_t *base_buf, size_t sz)
         {
             uint8_t *seg_buf = buf;
             struct section s;
+            struct segment_command seg_c;
 
-            memcpy(&seg_c, buf, sizeof(struct segment_command));
-
+            memcpy(&seg_c, seg_buf, sizeof(struct segment_command));
             seg_buf += sizeof(struct segment_command);
 
-            for (j = 0; j < seg_c.nsects; j++)
+            /* Although each section is given it's own offset, nlist.n_value
+             * references the offset of the first section. This isn't
+             * apparent without debug information because the offset of the
+             * data section is the same as the first section. However, with
+             * debug sections mixed in, the offset of the debug section
+             * increases but n_value still references the first section.
+             */
+            if (seg_c.nsects < 1)
             {
-                memcpy(&s, seg_buf + (j * sizeof(struct section)), sizeof(struct section));
-
-                // Need to get this offset which is the start of the symbol table
-                // before matching the strings up with symbols.
-                base_data_section = s.offset;
+                log_msg("Not enough sections\n");
+                goto bail;
             }
+
+            memcpy(&s, seg_buf, sizeof(struct section));
+            base_data_section = s.offset;
+        }
+        else if (lc.cmd == LC_SEGMENT_64)
+        {
+            uint8_t *seg_buf = buf;
+            struct section_64 s;
+            struct segment_command_64 seg_c;
+
+            memcpy(&seg_c, seg_buf, sizeof(struct segment_command_64));
+            seg_buf += sizeof(struct segment_command_64);
+
+            /* Explanation in LG_SEGMENT */
+            if (seg_c.nsects < 1)
+            {
+                log_msg("Not enough sections\n");
+                goto bail;
+            }
+
+            memcpy(&s, seg_buf, sizeof(struct section_64));
+            base_data_section = s.offset;
         }
         else if (lc.cmd == LC_SYMTAB)
         {
-            uint8_t *sym_buf = base_buf;
-            uint8_t *str_buf = base_buf;
-
             if (base_data_section != 0)
             {
+                struct symtab_command sc;
+                uint8_t *sym_buf = base_buf;
+                uint8_t *str_buf = base_buf;
+
                 memcpy(&sc, buf, sizeof(struct symtab_command));
 
                 if (sc.cmdsize != sizeof(struct symtab_command))
+                {
                     log_msg("Can't find symbol table!\n");
+                    goto bail;
+                }
 
                 sym_buf += sc.symoff;
                 str_buf += sc.stroff;
 
                 for (j = 0; j < sc.nsyms; j++)
                 {
-                    struct nlist nl;
-                    int val;
+                    /* Location of string is cacluated each time from the
+                     * start of the string buffer.  On darwin the symbols
+                     * are prefixed by "_", so we bump the pointer by 1.
+                     * The target value is defined as an int in asm_*_offsets.c,
+                     * which is 4 bytes on all targets we currently use.
+                     */
+                    if (bits == 32)
+                    {
+                        struct nlist nl;
+                        int val;
 
-                    memcpy(&nl, sym_buf + (j * sizeof(struct nlist)), sizeof(struct nlist));
+                        memcpy(&nl, sym_buf, sizeof(struct nlist));
+                        sym_buf += sizeof(struct nlist);
 
-                    val = *((int *)(base_buf + base_data_section + nl.n_value));
+                        memcpy(&val, base_buf + base_data_section + nl.n_value,
+                               sizeof(val));
+                        printf("%-40s EQU %5d\n",
+                               str_buf + nl.n_un.n_strx + 1, val);
+                    }
+                    else /* if (bits == 64) */
+                    {
+                        struct nlist_64 nl;
+                        int val;
 
-                    // Location of string is cacluated each time from the
-                    // start of the string buffer.  On darwin the symbols
-                    // are prefixed by "_".  On other platforms it is not
-                    // so it needs to be removed.  That is the reason for
-                    // the +1.
-                    printf("%-40s EQU %5d\n", str_buf + nl.n_un.n_strx + 1, val);
+                        memcpy(&nl, sym_buf, sizeof(struct nlist_64));
+                        sym_buf += sizeof(struct nlist_64);
+
+                        memcpy(&val, base_buf + base_data_section + nl.n_value,
+                               sizeof(val));
+                        printf("%-40s EQU %5d\n",
+                               str_buf + nl.n_un.n_strx + 1, val);
+                    }
                 }
             }
         }
