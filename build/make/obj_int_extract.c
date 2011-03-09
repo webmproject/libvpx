@@ -14,7 +14,7 @@
 
 #include "vpx_config.h"
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #include <io.h>
 #include <share.h>
 #include "vpx/vpx_integer.h"
@@ -816,7 +816,7 @@ bail:
 #endif
 
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 /*  See "Microsoft Portable Executable and Common Object File Format Specification"
     for reference.
 */
@@ -830,7 +830,6 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
     unsigned int i;
     unsigned __int8 *ptr;
     unsigned __int32 symoffset;
-    FILE *fp;
 
     char **sectionlist;  //this array holds all section names in their correct order.
     //it is used to check if the symbol is in .bss or .data section.
@@ -871,14 +870,6 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
     //log_msg("COFF: Symbol table at offset %u\n", symtab_ptr);
     //log_msg("COFF: raw data pointer ofset for section .data is %u\n", sectionrawdata_ptr);
 
-    fp = fopen("assembly_offsets.asm", "w");
-
-    if (fp == NULL)
-    {
-        perror("open file");
-        goto bail;
-    }
-
     /*  The compiler puts the data with non-zero offset in .data section, but puts the data with
         zero offset in .bss section. So, if the data in in .bss section, set offset=0.
         Note from Wiki: In an object module compiled from C, the bss section contains
@@ -912,13 +903,13 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
                 char name[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
                 strncpy(name, ptr, 8);
                 //log_msg("COFF: Parsing symbol %s\n",name);
-                fprintf(fp, "%-40s EQU ", name);
+                printf("%-40s EQU ", name + 1);
             }
             else
             {
                 //log_msg("COFF: Parsing symbol %s\n",
                 //        buf + strtab_ptr + get_le32(ptr+4));
-                fprintf(fp, "%-40s EQU ", buf + strtab_ptr + get_le32(ptr + 4));
+                printf("%-40s EQU ", buf + strtab_ptr + get_le32(ptr + 4) + 1);
             }
 
             if (!(strcmp(sectionlist[section-1], ".bss")))
@@ -935,14 +926,13 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
             //log_msg("      Address: %u\n",get_le32(ptr+8));
             //log_msg("      Offset: %u\n", symoffset);
 
-            fprintf(fp, "%5d\n", symoffset);
+            printf("%5d\n", symoffset);
         }
 
         ptr += 18;
     }
 
-    fprintf(fp, "    END\n");
-    fclose(fp);
+    printf("    END\n");
 
     for (i = 0; i < nsections; i++)
     {
@@ -992,11 +982,7 @@ int main(int argc, char **argv)
     else
         f = argv[1];
 
-    if (_sopen_s(&fd, f, _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE))
-    {
-        perror("Unable to open file");
-        goto bail;
-    }
+    fd = _sopen(f, _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
 
     if (_fstat(fd, &stat_buf))
     {
