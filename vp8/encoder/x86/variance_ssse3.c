@@ -87,14 +87,6 @@ unsigned int vp8_sub_pixel_variance16x16_ssse3
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
             &xsum0, &xxsum0);
-
-        vp8_half_horiz_variance16x_h_sse2(
-            src_ptr + 8, src_pixels_per_line,
-            dst_ptr + 8, dst_pixels_per_line, 16,
-            &xsum1, &xxsum1);
-
-        xsum0 += xsum1;
-        xxsum0 += xxsum1;
     }
     else if (xoffset == 0 && yoffset == 4)
     {
@@ -102,14 +94,6 @@ unsigned int vp8_sub_pixel_variance16x16_ssse3
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
             &xsum0, &xxsum0);
-
-        vp8_half_vert_variance16x_h_sse2(
-            src_ptr + 8, src_pixels_per_line,
-            dst_ptr + 8, dst_pixels_per_line, 16,
-            &xsum1, &xxsum1);
-
-        xsum0 += xsum1;
-        xxsum0 += xxsum1;
     }
     else if (xoffset == 4 && yoffset == 4)
     {
@@ -117,22 +101,14 @@ unsigned int vp8_sub_pixel_variance16x16_ssse3
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
             &xsum0, &xxsum0);
-
-        vp8_half_horiz_vert_variance16x_h_sse2(
-            src_ptr + 8, src_pixels_per_line,
-            dst_ptr + 8, dst_pixels_per_line, 16,
-            &xsum1, &xxsum1);
-
-        xsum0 += xsum1;
-        xxsum0 += xxsum1;
     }
     else
     {
-      vp8_filter_block2d_bil_var_ssse3(
-          src_ptr, src_pixels_per_line,
-          dst_ptr, dst_pixels_per_line, 16,
-          xoffset, yoffset,
-          &xsum0, &xxsum0);
+        vp8_filter_block2d_bil_var_ssse3(
+            src_ptr, src_pixels_per_line,
+            dst_ptr, dst_pixels_per_line, 16,
+            xoffset, yoffset,
+            &xsum0, &xxsum0);
     }
 
     *sse = xxsum0;
