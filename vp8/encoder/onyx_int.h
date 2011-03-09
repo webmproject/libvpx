@@ -99,6 +99,7 @@ typedef struct
     double pcnt_inter;
     double pcnt_motion;
     double pcnt_second_ref;
+    double pcnt_neutral;
     double MVr;
     double mvr_abs;
     double MVc;
