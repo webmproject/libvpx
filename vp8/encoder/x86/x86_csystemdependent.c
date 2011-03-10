@@ -334,6 +334,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_ssse3;
         cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_ssse3;
 
+        cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_ssse3;
         cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_ssse3;
 
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;

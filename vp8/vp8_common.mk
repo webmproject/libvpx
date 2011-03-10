@@ -24,6 +24,7 @@ VP8_COMMON_SRCS-yes += common/entropymode.c
 VP8_COMMON_SRCS-yes += common/entropymv.c
 VP8_COMMON_SRCS-yes += common/extend.c
 VP8_COMMON_SRCS-yes += common/filter.c
+VP8_COMMON_SRCS-yes += common/filter.h
 VP8_COMMON_SRCS-yes += common/findnearmv.c
 VP8_COMMON_SRCS-yes += common/generic/systemdependent.c
 VP8_COMMON_SRCS-yes += common/idctllm.c
