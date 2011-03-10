@@ -944,10 +944,10 @@ void vp8_first_pass(VP8_COMP *cpi)
 extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
 #define BASE_ERRPERMB   150
-static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width)
+static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
 {
     int Q;
-    int num_mbs = ((Height * Width) / (16 * 16));
+    int num_mbs = cpi->common.MBs;
     int target_norm_bits_per_mb;
 
     double err_per_mb = section_err / num_mbs;
@@ -1044,10 +1044,10 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
 
     return Q;
 }
-static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width)
+static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
 {
     int Q;
-    int num_mbs = ((Height * Width) / (16 * 16));
+    int num_mbs = cpi->common.MBs;
     int target_norm_bits_per_mb;
 
     double err_per_mb = section_err / num_mbs;
@@ -1095,10 +1095,10 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
 }
 
 // Estimate a worst case Q for a KF group
-static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, int Height, int Width, double group_iiratio)
+static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh, double group_iiratio)
 {
     int Q;
-    int num_mbs = ((Height * Width) / (16 * 16));
+    int num_mbs = cpi->common.MBs;
     int target_norm_bits_per_mb = (512 * section_target_bandwitdh) / num_mbs;
     int bits_per_mb_at_this_q;
 
@@ -1193,11 +1193,10 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
 
 // For cq mode estimate a cq level that matches the observed
 // complexity and data rate.
-static int estimate_cq(VP8_COMP *cpi, double section_err,
-                       int section_target_bandwitdh, int Height, int Width)
+static int estimate_cq(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
 {
     int Q;
-    int num_mbs = ((Height * Width) / (16 * 16));
+    int num_mbs = cpi->common.MBs;
     int target_norm_bits_per_mb;
 
     double err_per_mb = section_err / num_mbs;
@@ -1717,7 +1716,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         arf_frame_bits = (int)((double)Boost * (group_bits / (double)allocation_chunks));
 
         // Estimate if there are enough bits available to make worthwhile use of an arf.
-        tmp_q = estimate_q(cpi, mod_frame_err, (int)arf_frame_bits, cpi->common.Height, cpi->common.Width);
+        tmp_q = estimate_q(cpi, mod_frame_err, (int)arf_frame_bits);
 
         // Only use an arf if it is likely we will be able to code it at a lower Q than the surrounding frames.
         if (tmp_q < cpi->worst_quality)
@@ -2245,8 +2244,7 @@ void vp8_second_pass(VP8_COMP *cpi)
             est_cq =
                 estimate_cq( cpi,
                              (cpi->total_coded_error_left / frames_left),
-                             (int)(cpi->bits_left / frames_left),
-                             cpi->common.Height, cpi->common.Width);
+                             (int)(cpi->bits_left / frames_left));
 
             cpi->cq_target_quality = cpi->oxcf.cq_level;
             if ( est_cq > cpi->cq_target_quality )
@@ -2258,9 +2256,7 @@ void vp8_second_pass(VP8_COMP *cpi)
         cpi->maxq_min_limit = cpi->best_quality;
         tmp_q = estimate_max_q( cpi,
                                 (cpi->total_coded_error_left / frames_left),
-                                (int)(cpi->bits_left / frames_left),
-                                cpi->common.Height,
-                                cpi->common.Width);
+                                (int)(cpi->bits_left / frames_left));
 
         // Limit the maxq value returned subsequently.
         // This increases the risk of overspend or underspend if the initial
@@ -2288,7 +2284,7 @@ void vp8_second_pass(VP8_COMP *cpi)
         if (frames_left < 1)
             frames_left = 1;
 
-        tmp_q = estimate_max_q(cpi, (cpi->total_coded_error_left / frames_left), (int)(cpi->bits_left / frames_left), cpi->common.Height, cpi->common.Width);
+        tmp_q = estimate_max_q(cpi, (cpi->total_coded_error_left / frames_left), (int)(cpi->bits_left / frames_left));
 
         // Move active_worst_quality but in a damped way
         if (tmp_q > cpi->active_worst_quality)
@@ -2897,7 +2893,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             bits_per_frame = (cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
 
         // Work out if spatial resampling is necessary
-        kf_q = estimate_kf_group_q(cpi, err_per_frame, bits_per_frame, new_height, new_width, group_iiratio);
+        kf_q = estimate_kf_group_q(cpi, err_per_frame, bits_per_frame, group_iiratio);
 
         // If we project a required Q higher than the maximum allowed Q then make a guess at the actual size of frames in this section
         projected_bits_perframe = bits_per_frame;
@@ -2968,7 +2964,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 effective_size_ratio = (1.0 + (3.0 * effective_size_ratio)) / 4.0;
 
                 // Now try again and see what Q we get with the smaller image size
-                kf_q = estimate_kf_group_q(cpi, err_per_frame * effective_size_ratio, bits_per_frame, new_height, new_width, group_iiratio);
+                kf_q = estimate_kf_group_q(cpi, err_per_frame * effective_size_ratio, bits_per_frame, group_iiratio);
 
                 if (0)
                 {
