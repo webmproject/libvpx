@@ -199,7 +199,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     {
         int              mb_r = (cfg->g_h + 15) / 16;
         int              mb_c = (cfg->g_w + 15) / 16;
-        size_t           packet_sz = vp8_firstpass_stats_sz(mb_r * mb_c);
+        size_t           packet_sz = sizeof(FIRSTPASS_STATS);
         int              n_packets = cfg->rc_twopass_stats_in.sz / packet_sz;
         FIRSTPASS_STATS *stats;
 
