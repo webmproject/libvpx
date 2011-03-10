@@ -1516,19 +1516,21 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     else
         cpi->oxcf = *oxcf;
 
+    // change includes all joint functionality
+    vp8_change_config(ptr, oxcf);
 
-    // Convert target bandwidth from Kbit/s to Bit/s
-    cpi->oxcf.target_bandwidth       *= 1000;
+    // Initialize active best and worst q and average q values.
+    cpi->active_worst_quality         = cpi->oxcf.worst_allowed_q;
+    cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
+    cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
+
+    // Initialise the starting buffer levels
     cpi->oxcf.starting_buffer_level =
         rescale(cpi->oxcf.starting_buffer_level,
                 cpi->oxcf.target_bandwidth, 1000);
 
     cpi->buffer_level                 = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
-
-    cpi->active_worst_quality         = cpi->oxcf.worst_allowed_q;
-    cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
-    cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
 
     cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
     cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
@@ -1537,9 +1539,6 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual       = 0;
-
-    // change includes all joint functionality
-   vp8_change_config(ptr, oxcf);
 
 #if VP8_TEMPORAL_ALT_REF
 
@@ -1668,7 +1667,8 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     }
 
-    cpi->baseline_gf_interval = cpi->oxcf.alt_freq ? cpi->oxcf.alt_freq : DEFAULT_GF_INTERVAL;
+    cpi->baseline_gf_interval =
+        cpi->oxcf.alt_freq ? cpi->oxcf.alt_freq : DEFAULT_GF_INTERVAL;
 
     cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
 
@@ -1679,7 +1679,8 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cm->refresh_entropy_probs = 1;
 
     if (cpi->oxcf.token_partitions >= 0 && cpi->oxcf.token_partitions <= 3)
-        cm->multi_token_partition = (TOKEN_PARTITION) cpi->oxcf.token_partitions;
+        cm->multi_token_partition =
+            (TOKEN_PARTITION) cpi->oxcf.token_partitions;
 
     setup_features(cpi);
 
@@ -1700,12 +1701,12 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->oxcf.starting_buffer_level   = 60000;
         cpi->oxcf.optimal_buffer_level    = 60000;
         cpi->oxcf.maximum_buffer_size     = 240000;
-
     }
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
 
+    // Set or reset optimal and maximum buffer levels.
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
@@ -1720,7 +1721,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
             rescale(cpi->oxcf.maximum_buffer_size,
                     cpi->oxcf.target_bandwidth, 1000);
 
+    // Set up frame rate and related parameters rate control values.
     vp8_new_frame_rate(cpi, cpi->oxcf.frame_rate);
+
+    // Set absolute upper and lower quality limits
     cpi->worst_quality               = cpi->oxcf.worst_allowed_q;
     cpi->best_quality                = cpi->oxcf.best_allowed_q;
 
@@ -1749,9 +1753,9 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->cq_target_quality = cpi->oxcf.cq_level;
 
     // Only allow dropped frames in buffered mode
-    cpi->drop_frames_allowed         = cpi->oxcf.allow_df && cpi->buffered_mode;
+    cpi->drop_frames_allowed = cpi->oxcf.allow_df && cpi->buffered_mode;
 
-    cm->filter_type                  = (LOOPFILTERTYPE) cpi->filter_type;
+    cm->filter_type          = (LOOPFILTERTYPE) cpi->filter_type;
 
     if (!cm->use_bilinear_mc_filter)
         cm->mcomp_filter_type = SIXTAP;
@@ -1766,7 +1770,8 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cm->horiz_scale  = cpi->horiz_scale;
     cm->vert_scale   = cpi->vert_scale ;
 
-    cpi->intra_frame_target           = (4 * (cm->Width + cm->Height) / 15) * 1000; // As per VP8
+    // As per VP8
+    cpi->intra_frame_target = (4 * (cm->Width + cm->Height) / 15) * 1000;
 
     // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
     if (cpi->oxcf.Sharpness > 7)
@@ -1787,8 +1792,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
 
-    if (((cm->Width + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_width ||
-        ((cm->Height + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_height ||
+    if (((cm->Width + 15) & 0xfffffff0) !=
+          cm->yv12_fb[cm->lst_fb_idx].y_width ||
+        ((cm->Height + 15) & 0xfffffff0) !=
+          cm->yv12_fb[cm->lst_fb_idx].y_height ||
         cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
         alloc_raw_frame_buffers(cpi);
@@ -3637,11 +3644,12 @@ static void encode_frame_to_data_rate
             }
         }
 
-        // If CBR and the buffer is as full then it is reasonable to allow higher quality on the frames
-        // to prevent bits just going to waste.
+        // If CBR and the buffer is as full then it is reasonable to allow
+        // higher quality on the frames to prevent bits just going to waste.
         if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
         {
-            // Note that the use of >= here elliminates the risk of a devide by 0 error in the else if clause
+            // Note that the use of >= here elliminates the risk of a devide
+            // by 0 error in the else if clause
             if (cpi->buffer_level >= cpi->oxcf.maximum_buffer_size)
                 cpi->active_best_quality = cpi->best_quality;
 
@@ -3652,6 +3660,20 @@ static void encode_frame_to_data_rate
 
                 cpi->active_best_quality -= min_qadjustment;
             }
+        }
+    }
+    // Make sure constrained quality mode limits are adhered to for the first
+    // few frames of one pass encodes
+    else if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
+    {
+        if ( (cm->frame_type == KEY_FRAME) ||
+             cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame )
+        {
+             cpi->active_best_quality = cpi->best_quality;
+        }
+        else if (cpi->active_best_quality < cpi->cq_target_quality)
+        {
+            cpi->active_best_quality = cpi->cq_target_quality;
         }
     }
 

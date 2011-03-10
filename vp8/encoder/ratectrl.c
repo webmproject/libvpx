@@ -842,7 +842,8 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
         {
             int one_percent_bits = 1 + cpi->oxcf.optimal_buffer_level / 100;
 
-            if ((cpi->buffer_level < cpi->oxcf.optimal_buffer_level) || (cpi->bits_off_target < cpi->oxcf.optimal_buffer_level))
+            if ((cpi->buffer_level < cpi->oxcf.optimal_buffer_level) ||
+                (cpi->bits_off_target < cpi->oxcf.optimal_buffer_level))
             {
                 int percent_low = 0;
 
@@ -851,9 +852,12 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                 // If we are are below the optimal buffer fullness level and adherence
                 // to buffering contraints is important to the end useage then adjust
                 // the per frame target.
-                if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) && (cpi->buffer_level < cpi->oxcf.optimal_buffer_level))
+                if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
+                    (cpi->buffer_level < cpi->oxcf.optimal_buffer_level))
                 {
-                    percent_low = (cpi->oxcf.optimal_buffer_level - cpi->buffer_level) / one_percent_bits;
+                    percent_low =
+                        (cpi->oxcf.optimal_buffer_level - cpi->buffer_level) /
+                        one_percent_bits;
 
                     if (percent_low > 100)
                         percent_low = 100;
@@ -864,7 +868,8 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                 else if (cpi->bits_off_target < 0)
                 {
                     // Adjust per frame data target downwards to compensate.
-                    percent_low = (int)(100 * -cpi->bits_off_target / (cpi->total_byte_count * 8));
+                    percent_low = (int)(100 * -cpi->bits_off_target /
+                                       (cpi->total_byte_count * 8));
 
                     if (percent_low > 100)
                         percent_low = 100;
@@ -873,39 +878,60 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                 }
 
                 // lower the target bandwidth for this frame.
-                cpi->this_frame_target = (cpi->this_frame_target * (100 - (percent_low / 2))) / 100;
+                cpi->this_frame_target =
+                    (cpi->this_frame_target * (100 - (percent_low / 2))) / 100;
 
-                // Are we using allowing control of active_worst_allowed_q according to buffer level.
+                // Are we using allowing control of active_worst_allowed_q
+                // according to buffer level.
                 if (cpi->auto_worst_q)
                 {
                     int critical_buffer_level;
 
-                    // For streaming applications the most important factor is cpi->buffer_level as this takes
-                    // into account the specified short term buffering constraints. However, hitting the long
-                    // term clip data rate target is also important.
+                    // For streaming applications the most important factor is
+                    // cpi->buffer_level as this takes into account the
+                    // specified short term buffering constraints. However,
+                    // hitting the long term clip data rate target is also
+                    // important.
                     if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
                     {
-                        // Take the smaller of cpi->buffer_level and cpi->bits_off_target
-                        critical_buffer_level = (cpi->buffer_level < cpi->bits_off_target) ? cpi->buffer_level : cpi->bits_off_target;
+                        // Take the smaller of cpi->buffer_level and
+                        // cpi->bits_off_target
+                        critical_buffer_level =
+                            (cpi->buffer_level < cpi->bits_off_target)
+                            ? cpi->buffer_level : cpi->bits_off_target;
                     }
-                    // For local file playback short term buffering contraints are less of an issue
+                    // For local file playback short term buffering contraints
+                    // are less of an issue
                     else
                     {
-                        // Consider only how we are doing for the clip as a whole
+                        // Consider only how we are doing for the clip as a
+                        // whole
                         critical_buffer_level = cpi->bits_off_target;
                     }
 
-                    // Set the active worst quality based upon the selected buffer fullness number.
+                    // Set the active worst quality based upon the selected
+                    // buffer fullness number.
                     if (critical_buffer_level < cpi->oxcf.optimal_buffer_level)
                     {
-                        if (critical_buffer_level > (cpi->oxcf.optimal_buffer_level / 4))
+                        if ( critical_buffer_level >
+                             (cpi->oxcf.optimal_buffer_level >> 2) )
                         {
-                            int qadjustment_range = cpi->worst_quality - cpi->ni_av_qi;
-                            int above_base = (critical_buffer_level - (cpi->oxcf.optimal_buffer_level / 4));
+                            INT64 qadjustment_range =
+                                      cpi->worst_quality - cpi->ni_av_qi;
+                            INT64 above_base =
+                                      (critical_buffer_level -
+                                       (cpi->oxcf.optimal_buffer_level >> 2));
 
-                            // Step active worst quality down from cpi->ni_av_qi when (critical_buffer_level == cpi->optimal_buffer_level)
-                            // to cpi->oxcf.worst_allowed_q when (critical_buffer_level == cpi->optimal_buffer_level/4)
-                            cpi->active_worst_quality = cpi->worst_quality - ((qadjustment_range * above_base) / (cpi->oxcf.optimal_buffer_level * 3 / 4));
+                            // Step active worst quality down from
+                            // cpi->ni_av_qi when (critical_buffer_level ==
+                            // cpi->optimal_buffer_level) to
+                            // cpi->worst_quality when
+                            // (critical_buffer_level ==
+                            //     cpi->optimal_buffer_level >> 2)
+                            cpi->active_worst_quality =
+                                cpi->worst_quality -
+                                ((qadjustment_range * above_base) /
+                                 (cpi->oxcf.optimal_buffer_level*3>>2));
                         }
                         else
                         {
@@ -964,6 +990,15 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
         {
             // Set the active worst quality
             cpi->active_worst_quality = cpi->worst_quality;
+        }
+
+        // Special trap for constrained quality mode
+        // "active_worst_quality" may never drop below cq level
+        // for any frame type.
+        if ( cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY &&
+             cpi->active_worst_quality < cpi->cq_target_quality)
+        {
+            cpi->active_worst_quality = cpi->cq_target_quality;
         }
     }
 
