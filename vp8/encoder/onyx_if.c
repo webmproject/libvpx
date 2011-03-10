@@ -1586,252 +1586,29 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->oxcf = *oxcf;
 
 
-    switch (cpi->oxcf.Mode)
-    {
-
-    case MODE_REALTIME:
-        cpi->pass = 0;
-        cpi->compressor_speed = 2;
-
-        if (cpi->oxcf.cpu_used < -16)
-        {
-            cpi->oxcf.cpu_used = -16;
-        }
-
-        if (cpi->oxcf.cpu_used > 16)
-            cpi->oxcf.cpu_used = 16;
-
-        break;
-
-#if !(CONFIG_REALTIME_ONLY)
-    case MODE_GOODQUALITY:
-        cpi->pass = 0;
-        cpi->compressor_speed = 1;
-
-        if (cpi->oxcf.cpu_used < -5)
-        {
-            cpi->oxcf.cpu_used = -5;
-        }
-
-        if (cpi->oxcf.cpu_used > 5)
-            cpi->oxcf.cpu_used = 5;
-
-        break;
-
-    case MODE_BESTQUALITY:
-        cpi->pass = 0;
-        cpi->compressor_speed = 0;
-        break;
-
-    case MODE_FIRSTPASS:
-        cpi->pass = 1;
-        cpi->compressor_speed = 1;
-        break;
-    case MODE_SECONDPASS:
-        cpi->pass = 2;
-        cpi->compressor_speed = 1;
-
-        if (cpi->oxcf.cpu_used < -5)
-        {
-            cpi->oxcf.cpu_used = -5;
-        }
-
-        if (cpi->oxcf.cpu_used > 5)
-            cpi->oxcf.cpu_used = 5;
-
-        break;
-    case MODE_SECONDPASS_BEST:
-        cpi->pass = 2;
-        cpi->compressor_speed = 0;
-        break;
-#endif
-    }
-
-    if (cpi->pass == 0)
-        cpi->auto_worst_q = 1;
-
-    cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
-    cpi->oxcf.best_allowed_q  = q_trans[oxcf->best_allowed_q];
-    cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
-
-    if (oxcf->fixed_q >= 0)
-    {
-        if (oxcf->worst_allowed_q < 0)
-            cpi->oxcf.fixed_q = q_trans[0];
-        else
-            cpi->oxcf.fixed_q = q_trans[oxcf->worst_allowed_q];
-
-        if (oxcf->alt_q < 0)
-            cpi->oxcf.alt_q = q_trans[0];
-        else
-            cpi->oxcf.alt_q = q_trans[oxcf->alt_q];
-
-        if (oxcf->key_q < 0)
-            cpi->oxcf.key_q = q_trans[0];
-        else
-            cpi->oxcf.key_q = q_trans[oxcf->key_q];
-
-        if (oxcf->gold_q < 0)
-            cpi->oxcf.gold_q = q_trans[0];
-        else
-            cpi->oxcf.gold_q = q_trans[oxcf->gold_q];
-
-    }
-
-    cpi->baseline_gf_interval = cpi->oxcf.alt_freq ? cpi->oxcf.alt_freq : DEFAULT_GF_INTERVAL;
-    cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
-
-    //cpi->use_golden_frame_only = 0;
-    //cpi->use_last_frame_only = 0;
-    cm->refresh_golden_frame = 0;
-    cm->refresh_last_frame = 1;
-    cm->refresh_entropy_probs = 1;
-
-    if (cpi->oxcf.token_partitions >= 0 && cpi->oxcf.token_partitions <= 3)
-        cm->multi_token_partition = (TOKEN_PARTITION) cpi->oxcf.token_partitions;
-
-    setup_features(cpi);
-
-    {
-        int i;
-
-        for (i = 0; i < MAX_MB_SEGMENTS; i++)
-            cpi->segment_encode_breakout[i] = cpi->oxcf.encode_breakout;
-    }
-
-    // At the moment the first order values may not be > MAXQ
-    if (cpi->oxcf.fixed_q > MAXQ)
-        cpi->oxcf.fixed_q = MAXQ;
-
-    // local file playback mode == really big buffer
-    if (cpi->oxcf.end_usage == USAGE_LOCAL_FILE_PLAYBACK)
-    {
-        cpi->oxcf.starting_buffer_level   = 60000;
-        cpi->oxcf.optimal_buffer_level    = 60000;
-        cpi->oxcf.maximum_buffer_size     = 240000;
-
-    }
-
-
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
     cpi->oxcf.starting_buffer_level =
         rescale(cpi->oxcf.starting_buffer_level,
                 cpi->oxcf.target_bandwidth, 1000);
 
-    if (cpi->oxcf.optimal_buffer_level == 0)
-        cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
-    else
-        cpi->oxcf.optimal_buffer_level =
-            rescale(cpi->oxcf.optimal_buffer_level,
-                    cpi->oxcf.target_bandwidth, 1000);
-
-    if (cpi->oxcf.maximum_buffer_size == 0)
-        cpi->oxcf.maximum_buffer_size = cpi->oxcf.target_bandwidth / 8;
-    else
-        cpi->oxcf.maximum_buffer_size =
-            rescale(cpi->oxcf.maximum_buffer_size,
-                    cpi->oxcf.target_bandwidth, 1000);
-
-    cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
+    cpi->buffer_level                 = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
 
-    vp8_new_frame_rate(cpi, cpi->oxcf.frame_rate);
-    cpi->worst_quality               = cpi->oxcf.worst_allowed_q;
     cpi->active_worst_quality         = cpi->oxcf.worst_allowed_q;
-    cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
-    cpi->best_quality                = cpi->oxcf.best_allowed_q;
     cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
-    cpi->cq_target_quality = cpi->oxcf.cq_level;
-
-    cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
+    cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
 
     cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
     cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
-    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
-    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_target_bits     = cpi->av_per_frame_bandwidth;
+    cpi->long_rolling_actual_bits     = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
-    cpi->total_target_vs_actual        = 0;
+    cpi->total_target_vs_actual       = 0;
 
-    // Only allow dropped frames in buffered mode
-    cpi->drop_frames_allowed          = cpi->oxcf.allow_df && cpi->buffered_mode;
-
-    cm->filter_type      = (LOOPFILTERTYPE) cpi->filter_type;
-
-    if (!cm->use_bilinear_mc_filter)
-        cm->mcomp_filter_type = SIXTAP;
-    else
-        cm->mcomp_filter_type = BILINEAR;
-
-    cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
-
-    cm->Width       = cpi->oxcf.Width     ;
-    cm->Height      = cpi->oxcf.Height    ;
-
-    cpi->intra_frame_target = (4 * (cm->Width + cm->Height) / 15) * 1000; // As per VP8
-
-    cm->horiz_scale  = cpi->horiz_scale;
-    cm->vert_scale   = cpi->vert_scale ;
-
-    // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
-    if (cpi->oxcf.Sharpness > 7)
-        cpi->oxcf.Sharpness = 7;
-
-    cm->sharpness_level = cpi->oxcf.Sharpness;
-
-    if (cm->horiz_scale != NORMAL || cm->vert_scale != NORMAL)
-    {
-        int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-        int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
-
-        Scale2Ratio(cm->horiz_scale, &hr, &hs);
-        Scale2Ratio(cm->vert_scale, &vr, &vs);
-
-        // always go to the next whole number
-        cm->Width = (hs - 1 + cpi->oxcf.Width * hr) / hs;
-        cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
-    }
-
-    if (((cm->Width + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_width ||
-        ((cm->Height + 15) & 0xfffffff0) != cm->yv12_fb[cm->lst_fb_idx].y_height ||
-        cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
-    {
-        alloc_raw_frame_buffers(cpi);
-        vp8_alloc_compressor_data(cpi);
-    }
-
-    // Clamp KF frame size to quarter of data rate
-    if (cpi->intra_frame_target > cpi->target_bandwidth >> 2)
-        cpi->intra_frame_target = cpi->target_bandwidth >> 2;
-
-    if (cpi->oxcf.fixed_q >= 0)
-    {
-        cpi->last_q[0] = cpi->oxcf.fixed_q;
-        cpi->last_q[1] = cpi->oxcf.fixed_q;
-    }
-
-    cpi->Speed = cpi->oxcf.cpu_used;
-
-    // force to allowlag to 0 if lag_in_frames is 0;
-    if (cpi->oxcf.lag_in_frames == 0)
-    {
-        cpi->oxcf.allow_lag = 0;
-    }
-    // Limit on lag buffers as these are not currently dynamically allocated
-    else if (cpi->oxcf.lag_in_frames > MAX_LAG_BUFFERS)
-        cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
-
-    // YX Temp
-    cpi->last_alt_ref_sei    = -1;
-    cpi->is_src_frame_alt_ref = 0;
-    cpi->is_next_src_alt_ref = 0;
-
-#if 0
-    // Experimental RD Code
-    cpi->frame_distortion = 0;
-    cpi->last_frame_distortion = 0;
-#endif
+    // change includes all joint functionality
+   vp8_change_config(ptr, oxcf);
 
 #if VP8_TEMPORAL_ALT_REF
 
@@ -1848,12 +1625,6 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 #endif
 }
 
-/*
- * This function needs more clean up, i.e. be more tuned torwards
- * change_config rather than init_config  !!!!!!!!!!!!!!!!
- * YX - 5/28/2009
- *
- */
 
 void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 {
@@ -2004,10 +1775,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
 
-    cpi->oxcf.starting_buffer_level =
-        rescale(cpi->oxcf.starting_buffer_level,
-                cpi->oxcf.target_bandwidth, 1000);
-
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
     else
@@ -2022,29 +1789,36 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
             rescale(cpi->oxcf.maximum_buffer_size,
                     cpi->oxcf.target_bandwidth, 1000);
 
-    cpi->buffer_level                = cpi->oxcf.starting_buffer_level;
-    cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
-
     vp8_new_frame_rate(cpi, cpi->oxcf.frame_rate);
     cpi->worst_quality               = cpi->oxcf.worst_allowed_q;
-    cpi->active_worst_quality         = cpi->oxcf.worst_allowed_q;
-    cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
     cpi->best_quality                = cpi->oxcf.best_allowed_q;
-    cpi->active_best_quality          = cpi->oxcf.best_allowed_q;
+
+    // active values should only be modified if out of new range
+    if (cpi->active_worst_quality > cpi->oxcf.worst_allowed_q)
+    {
+      cpi->active_worst_quality = cpi->oxcf.worst_allowed_q;
+    }
+    // less likely
+    else if (cpi->active_worst_quality < cpi->oxcf.best_allowed_q)
+    {
+      cpi->active_worst_quality = cpi->oxcf.best_allowed_q;
+    }
+    if (cpi->active_best_quality < cpi->oxcf.best_allowed_q)
+    {
+      cpi->active_best_quality = cpi->oxcf.best_allowed_q;
+    }
+    // less likely
+    else if (cpi->active_best_quality > cpi->oxcf.worst_allowed_q)
+    {
+      cpi->active_best_quality = cpi->oxcf.worst_allowed_q;
+    }
+
     cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
 
     cpi->cq_target_quality = cpi->oxcf.cq_level;
 
-    cpi->rolling_target_bits          = cpi->av_per_frame_bandwidth;
-    cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
-    cpi->long_rolling_target_bits      = cpi->av_per_frame_bandwidth;
-    cpi->long_rolling_actual_bits      = cpi->av_per_frame_bandwidth;
-
-    cpi->total_actual_bits            = 0;
-    cpi->total_target_vs_actual        = 0;
-
     // Only allow dropped frames in buffered mode
-    cpi->drop_frames_allowed          = cpi->oxcf.allow_df && cpi->buffered_mode;
+    cpi->drop_frames_allowed         = cpi->oxcf.allow_df && cpi->buffered_mode;
 
     cm->filter_type                  = (LOOPFILTERTYPE) cpi->filter_type;
 
@@ -3616,6 +3390,7 @@ static void encode_frame_to_data_rate
     int drop_mark75 = drop_mark * 2 / 3;
     int drop_mark50 = drop_mark / 4;
     int drop_mark25 = drop_mark / 8;
+
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
