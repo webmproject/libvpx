@@ -350,12 +350,6 @@ void vp8_dealloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->active_map);
     cpi->active_map = 0;
 
-#if !(CONFIG_REALTIME_ONLY)
-    // Delete first pass motion map
-    vpx_free(cpi->fp_motion_map);
-    cpi->fp_motion_map = 0;
-#endif
-
     vp8_de_alloc_frame_buffers(&cpi->common);
 
     vp8_yv12_de_alloc_frame_buffer(&cpi->last_frame_uf);
@@ -1429,11 +1423,11 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 #if !(CONFIG_REALTIME_ONLY)
         vpx_free(cpi->total_stats);
 
-    cpi->total_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+    cpi->total_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
 
         vpx_free(cpi->this_frame_stats);
 
-    cpi->this_frame_stats = vpx_calloc(1, vp8_firstpass_stats_sz(cpi->common.MBs));
+    cpi->this_frame_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
 
     if(!cpi->total_stats || !cpi->this_frame_stats)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
@@ -1611,8 +1605,6 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
    vp8_change_config(ptr, oxcf);
 
 #if VP8_TEMPORAL_ALT_REF
-
-    cpi->use_weighted_temporal_filter = 0;
 
     {
         int i;
@@ -1996,12 +1988,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     vpx_memset(cpi->active_map , 1, (cpi->common.mb_rows * cpi->common.mb_cols));
     cpi->active_map_enabled = 0;
 
-#if !(CONFIG_REALTIME_ONLY)
-    // Create the first pass motion map structure and set to 0
-    // Allocate space for maximum of 15 buffers
-    CHECK_MEM_ERROR(cpi->fp_motion_map, vpx_calloc(15*cpi->common.MBs, 1));
-#endif
-
 #if 0
     // Experimental code for lagged and one pass
     // Initialise one_pass GF frames stats
@@ -2151,7 +2137,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     }
     else if (cpi->pass == 2)
     {
-        size_t packet_sz = vp8_firstpass_stats_sz(cpi->common.MBs);
+        size_t packet_sz = sizeof(FIRSTPASS_STATS);
         int packets = oxcf->two_pass_stats_in.sz / packet_sz;
 
         cpi->stats_in = oxcf->two_pass_stats_in.buf;

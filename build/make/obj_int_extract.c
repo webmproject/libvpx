@@ -840,9 +840,18 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
     strtab_ptr = symtab_ptr + symtab_sz * 18;
 
     if (nsections > 96)
-        goto bail;
+    {
+        log_msg("Too many sections\n");
+        return 1;
+    }
 
-    sectionlist = malloc(nsections * sizeof * sectionlist);
+    sectionlist = malloc(nsections * sizeof(sectionlist));
+
+    if (sectionlist == NULL)
+    {
+        log_msg("Allocating first level of section list failed\n");
+        return 1;
+    }
 
     //log_msg("COFF: Found %u symbols in %u sections.\n", symtab_sz, nsections);
 
@@ -860,6 +869,12 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
         //log_msg("COFF: Parsing section %s\n",sectionname);
 
         sectionlist[i] = malloc(strlen(sectionname) + 1);
+
+        if (sectionlist[i] == NULL)
+        {
+            log_msg("Allocating storage for %s failed\n", sectionname);
+            goto bail;
+        }
         strcpy(sectionlist[i], sectionname);
 
         if (!strcmp(sectionname, ".data")) sectionrawdata_ptr = get_le32(ptr + 20);
@@ -903,12 +918,14 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
                 char name[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
                 strncpy(name, ptr, 8);
                 //log_msg("COFF: Parsing symbol %s\n",name);
+                /* +1 to avoid printing leading underscore */
                 printf("%-40s EQU ", name + 1);
             }
             else
             {
                 //log_msg("COFF: Parsing symbol %s\n",
                 //        buf + strtab_ptr + get_le32(ptr+4));
+                /* +1 to avoid printing leading underscore */
                 printf("%-40s EQU ", buf + strtab_ptr + get_le32(ptr + 4) + 1);
             }
 

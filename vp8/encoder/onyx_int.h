@@ -496,11 +496,6 @@ typedef struct
     struct vpx_codec_pkt_list  *output_pkt_list;
     int                          first_pass_done;
 
-#if !(CONFIG_REALTIME_ONLY)
-    unsigned char *fp_motion_map;
-    unsigned char *fp_motion_map_stats, *fp_motion_map_stats_save;
-#endif
-
 #if 0
     // Experimental code for lagged and one pass
     ONEPASS_FRAMESTATS one_pass_frame_stats[MAX_LAG_BUFFERS];
@@ -642,8 +637,6 @@ typedef struct
     YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
     int fixed_divide[512];
 #endif
-    // Flag to indicate temporal filter method
-    int use_weighted_temporal_filter;
 
 #if CONFIG_PSNR
     int    count;
