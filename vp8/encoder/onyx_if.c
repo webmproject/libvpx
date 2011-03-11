@@ -1458,8 +1458,7 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
 
-    if (!cpi)
-        return;
+    cpi->oxcf = *oxcf;
 
     cpi->auto_gold = 1;
     cpi->auto_adjust_gold_quantizer = 1;
@@ -1470,47 +1469,6 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cm->version = oxcf->Version;
     vp8_setup_version(cm);
-
-    if (oxcf == 0)
-    {
-        cpi->pass                     = 0;
-
-        cpi->auto_worst_q              = 0;
-        cpi->oxcf.best_allowed_q            = MINQ;
-        cpi->oxcf.worst_allowed_q           = MAXQ;
-        cpi->oxcf.cq_level = MINQ;
-
-        cpi->oxcf.end_usage                = USAGE_STREAM_FROM_SERVER;
-        cpi->oxcf.starting_buffer_level     =   4000;
-        cpi->oxcf.optimal_buffer_level      =   5000;
-        cpi->oxcf.maximum_buffer_size       =   6000;
-        cpi->oxcf.under_shoot_pct           =  90;
-        cpi->oxcf.allow_df                 =   0;
-        cpi->oxcf.drop_frames_water_mark     =  20;
-
-        cpi->oxcf.allow_spatial_resampling  = 0;
-        cpi->oxcf.resample_down_water_mark   = 40;
-        cpi->oxcf.resample_up_water_mark     = 60;
-
-        cpi->oxcf.fixed_q = cpi->interquantizer;
-
-        cpi->filter_type = NORMAL_LOOPFILTER;
-
-        if (cm->simpler_lpf)
-            cpi->filter_type = SIMPLE_LOOPFILTER;
-
-        cpi->compressor_speed = 1;
-        cpi->horiz_scale = 0;
-        cpi->vert_scale = 0;
-        cpi->oxcf.two_pass_vbrbias = 50;
-        cpi->oxcf.two_pass_vbrmax_section = 400;
-        cpi->oxcf.two_pass_vbrmin_section = 0;
-
-        cpi->oxcf.Sharpness = 0;
-        cpi->oxcf.noise_sensitivity = 0;
-    }
-    else
-        cpi->oxcf = *oxcf;
 
     // change includes all joint functionality
     vp8_change_config(ptr, oxcf);
@@ -1537,7 +1495,6 @@ void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->total_target_vs_actual       = 0;
 
 #if VP8_TEMPORAL_ALT_REF
-
     {
         int i;
 
