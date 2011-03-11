@@ -80,7 +80,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
     int b;
 
-    vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mby)(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
 
