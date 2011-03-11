@@ -5143,12 +5143,35 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             if (cpi->b_calculate_psnr)
             {
                 double y, u, v;
-                double sq_error;
-                double frame_psnr = vp8_calc_psnr(cpi->Source, cm->frame_to_show, &y, &u, &v, &sq_error);
+                double ye,ue,ve;
+                double frame_psnr;
+                YV12_BUFFER_CONFIG      *orig = cpi->Source;
+                YV12_BUFFER_CONFIG      *recon = cpi->common.frame_to_show;
+                YV12_BUFFER_CONFIG      *pp = &cm->post_proc_buffer;
+                int y_samples = orig->y_height * orig->y_width ;
+                int uv_samples = orig->uv_height * orig->uv_width ;
+                int t_samples = y_samples + 2 * uv_samples;
+                long long sq_error;
 
-                cpi->total_y += y;
-                cpi->total_u += u;
-                cpi->total_v += v;
+                ye = calc_plane_error(orig->y_buffer, orig->y_stride,
+                  recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height,
+                  IF_RTCD(&cpi->rtcd.variance));
+
+                ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
+                  recon->u_buffer, recon->uv_stride, orig->uv_width, orig->uv_height,
+                  IF_RTCD(&cpi->rtcd.variance));
+
+                ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
+                  recon->v_buffer, recon->uv_stride, orig->uv_width, orig->uv_height,
+                  IF_RTCD(&cpi->rtcd.variance));
+
+                sq_error = ye + ue + ve;
+
+                frame_psnr = vp8_mse2psnr(t_samples, 255.0, sq_error);
+
+                cpi->total_y += vp8_mse2psnr(y_samples, 255.0, ye);
+                cpi->total_u += vp8_mse2psnr(uv_samples, 255.0, ue);
+                cpi->total_v += vp8_mse2psnr(uv_samples, 255.0, ve);
                 cpi->total_sq_error += sq_error;
                 cpi->total  += frame_psnr;
                 {
@@ -5157,8 +5180,28 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
                     vp8_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0, IF_RTCD(&cm->rtcd.postproc));
                     vp8_clear_system_state();
-                    frame_psnr2 = vp8_calc_psnr(cpi->Source,
-                      &cm->post_proc_buffer, &y2, &u2, &v2, &sq_error);
+
+                    ye = calc_plane_error(orig->y_buffer, orig->y_stride,
+                      pp->y_buffer, pp->y_stride, orig->y_width, orig->y_height,
+                      IF_RTCD(&cpi->rtcd.variance));
+
+                    ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
+                      pp->u_buffer, pp->uv_stride, orig->uv_width, orig->uv_height,
+                      IF_RTCD(&cpi->rtcd.variance));
+
+                    ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
+                      pp->v_buffer, pp->uv_stride, orig->uv_width, orig->uv_height,
+                      IF_RTCD(&cpi->rtcd.variance));
+
+                    sq_error = ye + ue + ve;
+
+                    frame_psnr2 = vp8_mse2psnr(t_samples, 255.0, sq_error);
+
+                    cpi->totalp_y += vp8_mse2psnr(y_samples, 255.0, ye);
+                    cpi->totalp_u += vp8_mse2psnr(uv_samples, 255.0, ue);
+                    cpi->totalp_v += vp8_mse2psnr(uv_samples, 255.0, ve);
+                    cpi->total_sq_error2 += sq_error;
+                    cpi->totalp  += frame_psnr2;
 
                     frame_ssim2 = vp8_calc_ssim(cpi->Source,
                       &cm->post_proc_buffer, 1, &weight,
@@ -5166,12 +5209,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
                     cpi->summed_quality += frame_ssim2 * weight;
                     cpi->summed_weights += weight;
-
-                    cpi->totalp_y += y2;
-                    cpi->totalp_u += u2;
-                    cpi->totalp_v += v2;
-                    cpi->totalp  += frame_psnr2;
-                    cpi->total_sq_error2 += sq_error;
 
                 }
             }
