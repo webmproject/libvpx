@@ -186,7 +186,7 @@ sym(vp8_sad16x16x8_sse4):
         PROCESS_16X2X8 0
 
         mov             rdi,        arg(4)           ;Results
-        movdqu          XMMWORD PTR [rdi],    xmm1
+        movdqa          XMMWORD PTR [rdi],    xmm1
 
     ; begin epilog
     pop         rdi
@@ -224,7 +224,7 @@ sym(vp8_sad16x8x8_sse4):
         PROCESS_16X2X8 0
 
         mov             rdi,        arg(4)           ;Results
-        movdqu          XMMWORD PTR [rdi],    xmm1
+        movdqa          XMMWORD PTR [rdi],    xmm1
 
     ; begin epilog
     pop         rdi
@@ -262,7 +262,7 @@ sym(vp8_sad8x8x8_sse4):
         PROCESS_8X2X8 0
 
         mov             rdi,        arg(4)           ;Results
-        movdqu          XMMWORD PTR [rdi],    xmm1
+        movdqa          XMMWORD PTR [rdi],    xmm1
 
     ; begin epilog
     pop         rdi
@@ -303,7 +303,7 @@ sym(vp8_sad8x16x8_sse4):
         PROCESS_8X2X8 0
         PROCESS_8X2X8 0
         mov             rdi,        arg(4)           ;Results
-        movdqu          XMMWORD PTR [rdi],    xmm1
+        movdqa          XMMWORD PTR [rdi],    xmm1
 
     ; begin epilog
     pop         rdi
@@ -339,7 +339,7 @@ sym(vp8_sad4x4x8_sse4):
         PROCESS_4X2X8 0
 
         mov             rdi,        arg(4)           ;Results
-        movdqu          XMMWORD PTR [rdi],    xmm1
+        movdqa          XMMWORD PTR [rdi],    xmm1
 
     ; begin epilog
     pop         rdi
