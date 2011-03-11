@@ -287,8 +287,7 @@ static void vp8_temporal_filter_iterate_c
     int byte;
     int frame;
     int mb_col, mb_row;
-    unsigned int filter_weight[MAX_LAG_BUFFERS];
-    unsigned char *mm_ptr = cpi->fp_motion_map;
+    unsigned int filter_weight;
     int mb_cols = cpi->common.mb_cols;
     int mb_rows = cpi->common.mb_rows;
     int MBs  = cpi->common.MBs;
@@ -305,13 +304,6 @@ static void vp8_temporal_filter_iterate_c
     unsigned char *y_buffer = mbd->pre.y_buffer;
     unsigned char *u_buffer = mbd->pre.u_buffer;
     unsigned char *v_buffer = mbd->pre.v_buffer;
-
-    if (!cpi->use_weighted_temporal_filter)
-    {
-        // Temporal filtering is unweighted
-        for (frame = 0; frame < frame_count; frame++)
-            filter_weight[frame] = 1;
-    }
 
     for (mb_row = 0; mb_row < mb_rows; mb_row++)
     {
@@ -338,34 +330,9 @@ static void vp8_temporal_filter_iterate_c
                                     + (VP8BORDERINPIXELS - 19);
 #endif
 
-            // Read & process macroblock weights from motion map
-            if (cpi->use_weighted_temporal_filter)
-            {
-                weight_cap = 2;
-
-                for (frame = alt_ref_index-1; frame >= 0; frame--)
-                {
-                    w = *(mm_ptr + (frame+1)*MBs);
-                    filter_weight[frame] = w < weight_cap ? w : weight_cap;
-                    weight_cap = w;
-                }
-
-                filter_weight[alt_ref_index] = 2;
-
-                weight_cap = 2;
-
-                for (frame = alt_ref_index+1; frame < frame_count; frame++)
-                {
-                    w = *(mm_ptr + frame*MBs);
-                    filter_weight[frame] = w < weight_cap ? w : weight_cap;
-                    weight_cap = w;
-                }
-
-            }
-
             for (frame = 0; frame < frame_count; frame++)
             {
-                int err;
+                int err = 0;
 
                 if (cpi->frames[frame] == NULL)
                     continue;
@@ -374,28 +341,25 @@ static void vp8_temporal_filter_iterate_c
                 mbd->block[0].bmi.mv.as_mv.col = 0;
 
 #if ALT_REF_MC_ENABLED
-                //if (filter_weight[frame] == 0)
-                {
 #define THRESH_LOW   10000
 #define THRESH_HIGH  20000
 
-                    // Correlation has been lost try MC
-                    err = vp8_temporal_filter_find_matching_mb_c
-                        (cpi,
-                         cpi->frames[alt_ref_index],
-                         cpi->frames[frame],
-                         mb_y_offset,
-                         THRESH_LOW);
+                // Find best match in this frame by MC
+                err = vp8_temporal_filter_find_matching_mb_c
+                      (cpi,
+                       cpi->frames[alt_ref_index],
+                       cpi->frames[frame],
+                       mb_y_offset,
+                       THRESH_LOW);
 
-                    if (filter_weight[frame] < 2)
-                    {
-                        // Set weight depending on error
-                        filter_weight[frame] = err<THRESH_LOW
-                                                ? 2 : err<THRESH_HIGH ? 1 : 0;
-                    }
-                }
 #endif
-                if (filter_weight[frame] != 0)
+                // Assign higher weight to matching MB if it's error
+                // score is lower. If not applying MC default behavior
+                // is to weight all MBs equal.
+                filter_weight = err<THRESH_LOW
+                                  ? 2 : err<THRESH_HIGH ? 1 : 0;
+
+                if (filter_weight != 0)
                 {
                     // Construct the predictors
                     vp8_temporal_filter_predictors_mb_c
@@ -415,7 +379,7 @@ static void vp8_temporal_filter_iterate_c
                          predictor,
                          16,
                          strength,
-                         filter_weight[frame],
+                         filter_weight,
                          accumulator,
                          count);
 
@@ -425,7 +389,7 @@ static void vp8_temporal_filter_iterate_c
                          predictor + 256,
                          8,
                          strength,
-                         filter_weight[frame],
+                         filter_weight,
                          accumulator + 256,
                          count + 256);
 
@@ -435,7 +399,7 @@ static void vp8_temporal_filter_iterate_c
                          predictor + 320,
                          8,
                          strength,
-                         filter_weight[frame],
+                         filter_weight,
                          accumulator + 320,
                          count + 320);
                 }
@@ -491,7 +455,6 @@ static void vp8_temporal_filter_iterate_c
                 byte += stride - 8;
             }
 
-            mm_ptr++;
             mb_y_offset += 16;
             mb_uv_offset += 8;
         }
