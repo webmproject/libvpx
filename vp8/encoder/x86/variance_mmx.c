@@ -53,13 +53,6 @@ extern unsigned int vp8_get4x4var_mmx
     unsigned int *SSE,
     int *Sum
 );
-extern unsigned int vp8_get4x4sse_cs_mmx
-(
-    const unsigned char *src_ptr,
-    int  source_stride,
-    const unsigned char *ref_ptr,
-    int  recon_stride
-);
 extern void vp8_filter_block2d_bil4x4_var_mmx
 (
     const unsigned char *ref_ptr,
