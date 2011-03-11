@@ -3269,6 +3269,89 @@ static BOOL recode_loop_test( VP8_COMP *cpi,
     return force_recode;
 }
 
+void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
+{
+    if (cm->no_lpf)
+    {
+        cm->filter_level = 0;
+    }
+    else
+    {
+        struct vpx_usec_timer timer;
+
+        vp8_clear_system_state();
+
+        vpx_usec_timer_start(&timer);
+        if (cpi->sf.auto_filter == 0)
+            vp8cx_pick_filter_level_fast(cpi->Source, cpi);
+
+        else
+            vp8cx_pick_filter_level(cpi->Source, cpi);
+
+        vpx_usec_timer_mark(&timer);
+        cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
+    }
+
+#if CONFIG_MULTITHREAD
+    sem_post(&cpi->h_event_end_lpf); /* signal that we have set filter_level */
+#endif
+
+    if (cm->filter_level > 0)
+    {
+        vp8cx_set_alt_lf_level(cpi, cm->filter_level);
+        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
+        cm->last_filter_type = cm->filter_type;
+        cm->last_sharpness_level = cm->sharpness_level;
+    }
+
+    vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
+
+    {
+        YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
+        YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
+        YV12_BUFFER_CONFIG *gld_yv12 = &cm->yv12_fb[cm->gld_fb_idx];
+        YV12_BUFFER_CONFIG *alt_yv12 = &cm->yv12_fb[cm->alt_fb_idx];
+        // At this point the new frame has been encoded.
+        // If any buffer copy / swapping is signaled it should be done here.
+        if (cm->frame_type == KEY_FRAME)
+        {
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, gld_yv12);
+            vp8_yv12_copy_frame_ptr(cm->frame_to_show, alt_yv12);
+        }
+        else    // For non key frames
+        {
+            // Code to copy between reference buffers
+            if (cm->copy_buffer_to_arf)
+            {
+                if (cm->copy_buffer_to_arf == 1)
+                {
+                    if (cm->refresh_last_frame)
+                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
+                        vp8_yv12_copy_frame_ptr(new_yv12, alt_yv12);
+                    else
+                        vp8_yv12_copy_frame_ptr(lst_yv12, alt_yv12);
+                }
+                else if (cm->copy_buffer_to_arf == 2)
+                    vp8_yv12_copy_frame_ptr(gld_yv12, alt_yv12);
+            }
+
+            if (cm->copy_buffer_to_gf)
+            {
+                if (cm->copy_buffer_to_gf == 1)
+                {
+                    if (cm->refresh_last_frame)
+                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
+                        vp8_yv12_copy_frame_ptr(new_yv12, gld_yv12);
+                    else
+                        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
+                }
+                else if (cm->copy_buffer_to_gf == 2)
+                    vp8_yv12_copy_frame_ptr(alt_yv12, gld_yv12);
+            }
+        }
+    }
+}
+
 static void encode_frame_to_data_rate
 (
     VP8_COMP *cpi,
@@ -3819,8 +3902,8 @@ static void encode_frame_to_data_rate
             vp8_setup_key_frame(cpi);
 
         // transform / motion compensation build reconstruction frame
-
         vp8_encode_frame(cpi);
+
         cpi->projected_frame_size -= vp8_estimate_entropy_savings(cpi);
         cpi->projected_frame_size = (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;
 
@@ -4169,92 +4252,43 @@ static void encode_frame_to_data_rate
     else
         cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
-    if (cm->no_lpf)
+
+#if CONFIG_MULTITHREAD
+    if (cpi->b_multi_threaded)
     {
-        cm->filter_level = 0;
+        sem_post(&cpi->h_event_start_lpf); /* start loopfilter in separate thread */
     }
     else
+#endif
     {
-        struct vpx_usec_timer timer;
-
-        vpx_usec_timer_start(&timer);
-
-        if (cpi->sf.auto_filter == 0)
-            vp8cx_pick_filter_level_fast(cpi->Source, cpi);
-        else
-            vp8cx_pick_filter_level(cpi->Source, cpi);
-
-        vpx_usec_timer_mark(&timer);
-
-        cpi->time_pick_lpf +=  vpx_usec_timer_elapsed(&timer);
+        loopfilter_frame(cpi, cm);
     }
-
-    if (cm->filter_level > 0)
-    {
-        vp8cx_set_alt_lf_level(cpi, cm->filter_level);
-        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
-        cm->last_filter_type = cm->filter_type;
-        cm->last_sharpness_level = cm->sharpness_level;
-    }
-
-    /* Move storing frame_type out of the above loop since it is also
-     * needed in motion search besides loopfilter */
-    cm->last_frame_type = cm->frame_type;
-
-    vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
 
     if (cpi->oxcf.error_resilient_mode == 1)
     {
         cm->refresh_entropy_probs = 0;
     }
 
+#if CONFIG_MULTITHREAD
+    /* wait that filter_level is picked so that we can continue with stream packing */
+    if (cpi->b_multi_threaded)
+        sem_wait(&cpi->h_event_end_lpf);
+#endif
+
     // build the bitstream
     vp8_pack_bitstream(cpi, dest, size);
 
+#if CONFIG_MULTITHREAD
+    /* wait for loopfilter thread done */
+    if (cpi->b_multi_threaded)
     {
-        YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
-        YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
-        YV12_BUFFER_CONFIG *gld_yv12 = &cm->yv12_fb[cm->gld_fb_idx];
-        YV12_BUFFER_CONFIG *alt_yv12 = &cm->yv12_fb[cm->alt_fb_idx];
-        // At this point the new frame has been encoded coded.
-        // If any buffer copy / swaping is signalled it should be done here.
-        if (cm->frame_type == KEY_FRAME)
-        {
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, gld_yv12);
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, alt_yv12);
-        }
-        else    // For non key frames
-        {
-            // Code to copy between reference buffers
-            if (cm->copy_buffer_to_arf)
-            {
-                if (cm->copy_buffer_to_arf == 1)
-                {
-                    if (cm->refresh_last_frame)
-                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                        vp8_yv12_copy_frame_ptr(new_yv12, alt_yv12);
-                    else
-                        vp8_yv12_copy_frame_ptr(lst_yv12, alt_yv12);
-                }
-                else if (cm->copy_buffer_to_arf == 2)
-                    vp8_yv12_copy_frame_ptr(gld_yv12, alt_yv12);
-            }
-
-            if (cm->copy_buffer_to_gf)
-            {
-                if (cm->copy_buffer_to_gf == 1)
-                {
-                    if (cm->refresh_last_frame)
-                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                        vp8_yv12_copy_frame_ptr(new_yv12, gld_yv12);
-                    else
-                        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
-                }
-                else if (cm->copy_buffer_to_gf == 2)
-                    vp8_yv12_copy_frame_ptr(alt_yv12, gld_yv12);
-            }
-        }
+        sem_wait(&cpi->h_event_end_lpf);
     }
+#endif
+
+    /* Move storing frame_type out of the above loop since it is also
+     * needed in motion search besides loopfilter */
+      cm->last_frame_type = cm->frame_type;
 
     // Update rate control heuristics
     cpi->total_byte_count += (*size);
@@ -5089,7 +5123,9 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
 
     if (cpi->b_calculate_psnr && cpi->pass != 1 && cm->show_frame)
+    {
         generate_psnr_packet(cpi);
+    }
 
 #if CONFIG_PSNR
 
