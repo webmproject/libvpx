@@ -65,6 +65,17 @@ DEFINE(TOKENLIST_SZ,                            sizeof(TOKENLIST));
 
 DEFINE(vp8_common_mb_rows,                      offsetof(VP8_COMMON, mb_rows));
 
+// offsets from BLOCK structure
+DEFINE(vp8_block_coeff,                         offsetof(BLOCK, coeff));
+DEFINE(vp8_block_quant_fast,                    offsetof(BLOCK, quant_fast));
+DEFINE(vp8_block_round,                         offsetof(BLOCK, round));
+
+// offsets from BLOCKD structure
+DEFINE(vp8_blockd_qcoeff,                       offsetof(BLOCKD, qcoeff));
+DEFINE(vp8_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
+DEFINE(vp8_blockd_dequant,                      offsetof(BLOCKD, dequant));
+DEFINE(vp8_blockd_eob,                          offsetof(BLOCKD, eob));
+
 // These two sizes are used in vp8cx_pack_tokens.  They are hard coded
 // so if the size changes this will have to be adjusted.
 #if HAVE_ARMV5TE
