@@ -296,18 +296,6 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                             }
                         }
 
-                        if(pbi->common.filter_level)
-                        {
-                            /*update loopfilter info*/
-                            Segment = (alt_flt_enabled) ? xd->mode_info_context->mbmi.segment_id : 0;
-                            filter_level = pbi->mt_baseline_filter_level[Segment];
-                            /* Distance of Mb to the various image edges.
-                             * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
-                             * Apply any context driven MB level adjustment
-                             */
-                            filter_level = vp8_adjust_mb_lf_value(xd, filter_level);
-                        }
-
                         /* Distance of Mb to the various image edges.
                          * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
                          */
@@ -362,7 +350,16 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                                 }
                             }
 
-                          /* loopfilter on this macroblock. */
+                            /* update loopfilter info */
+                            Segment = (alt_flt_enabled) ? xd->mode_info_context->mbmi.segment_id : 0;
+                            filter_level = pbi->mt_baseline_filter_level[Segment];
+                            /* Distance of Mb to the various image edges.
+                             * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
+                             * Apply any context driven MB level adjustment
+                             */
+                            filter_level = vp8_adjust_mb_lf_value(xd, filter_level);
+
+                            /* loopfilter on this macroblock. */
                             if (filter_level)
                             {
                                 if (mb_col > 0)
@@ -778,18 +775,6 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                     }
                 }
 
-                if(pbi->common.filter_level)
-                {
-                    /* update loopfilter info */
-                    Segment = (alt_flt_enabled) ? xd->mode_info_context->mbmi.segment_id : 0;
-                    filter_level = pbi->mt_baseline_filter_level[Segment];
-                    /* Distance of Mb to the various image edges.
-                     * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
-                     * Apply any context driven MB level adjustment
-                     */
-                    filter_level = vp8_adjust_mb_lf_value(xd, filter_level);
-                }
-
                 /* Distance of Mb to the various image edges.
                  * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
                  */
@@ -852,6 +837,15 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                             }
                         }
                     }
+
+                    /* update loopfilter info */
+                    Segment = (alt_flt_enabled) ? xd->mode_info_context->mbmi.segment_id : 0;
+                    filter_level = pbi->mt_baseline_filter_level[Segment];
+                    /* Distance of Mb to the various image edges.
+                     * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
+                     * Apply any context driven MB level adjustment
+                     */
+                    filter_level = vp8_adjust_mb_lf_value(xd, filter_level);
 
                     /* loopfilter on this macroblock. */
                     if (filter_level)
