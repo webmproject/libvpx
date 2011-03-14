@@ -918,15 +918,23 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
                 char name[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
                 strncpy(name, ptr, 8);
                 //log_msg("COFF: Parsing symbol %s\n",name);
-                /* +1 to avoid printing leading underscore */
-                printf("%-40s EQU ", name + 1);
+                /* The 64bit Windows compiler doesn't prefix with an _.
+                 * Check what's there, and bump if necessary
+                 */
+                if (name[0] == '_')
+                    printf("%-40s EQU ", name + 1);
+                else
+                    printf("%-40s EQU ", name);
             }
             else
             {
                 //log_msg("COFF: Parsing symbol %s\n",
                 //        buf + strtab_ptr + get_le32(ptr+4));
-                /* +1 to avoid printing leading underscore */
-                printf("%-40s EQU ", buf + strtab_ptr + get_le32(ptr + 4) + 1);
+                if ((buf + strtab_ptr + get_le32(ptr + 4))[0] == '_')
+                    printf("%-40s EQU ",
+                           buf + strtab_ptr + get_le32(ptr + 4) + 1);
+                else
+                    printf("%-40s EQU ", buf + strtab_ptr + get_le32(ptr + 4));
             }
 
             if (!(strcmp(sectionlist[section-1], ".bss")))
