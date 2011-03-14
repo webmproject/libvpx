@@ -24,6 +24,35 @@ extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 
+#if CONFIG_MULTITHREAD
+
+extern void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
+
+static THREAD_FUNCTION loopfilter_thread(void *p_data)
+{
+    VP8_COMP *cpi = (VP8_COMP *)(((LPFTHREAD_DATA *)p_data)->ptr1);
+    VP8_COMMON *cm = &cpi->common;
+
+    while (1)
+    {
+        if (cpi->b_multi_threaded == 0)
+            break;
+
+        if (sem_wait(&cpi->h_event_start_lpf) == 0)
+        {
+            if (cpi->b_multi_threaded == FALSE) // we're shutting down
+                break;
+
+            loopfilter_frame(cpi, cm);
+
+            sem_post(&cpi->h_event_end_lpf);
+        }
+    }
+
+    return 0;
+}
+#endif
+
 static
 THREAD_FUNCTION thread_encoding_proc(void *p_data)
 {
@@ -479,6 +508,15 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
             pthread_create(&cpi->h_encoding_thread[ithread], 0, thread_encoding_proc, ethd);
         }
 
+        {
+            LPFTHREAD_DATA * lpfthd = &cpi->lpf_thread_data;
+
+            sem_init(&cpi->h_event_start_lpf, 0, 0);
+            sem_init(&cpi->h_event_end_lpf, 0, 0);
+
+            lpfthd->ptr1 = (void *)cpi;
+            pthread_create(&cpi->h_filter_thread, 0, loopfilter_thread, lpfthd);
+        }
     }
 
 }
@@ -500,9 +538,14 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
 
                 sem_destroy(&cpi->h_event_start_encoding[i]);
             }
+
+            sem_post(&cpi->h_event_start_lpf);
+            pthread_join(cpi->h_filter_thread, 0);
         }
 
         sem_destroy(&cpi->h_event_end_encoding);
+        sem_destroy(&cpi->h_event_end_lpf);
+        sem_destroy(&cpi->h_event_start_lpf);
 
         //free thread related resources
         vpx_free(cpi->h_event_start_encoding);

@@ -71,8 +71,8 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_c;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_c;*/
 
-        /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_c;*/
+        /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;*/
+        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_armv6;
     }
 #endif
 
