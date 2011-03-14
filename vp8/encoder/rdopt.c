@@ -806,7 +806,8 @@ int vp8_rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
     {
         x->e_mbd.mode_info_context->mbmi.mode = mode;
 
-        vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
+        RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+            (&x->e_mbd);
 
         macro_block_yrd(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
         rate = ratey + x->mbmode_cost[x->e_mbd.frame_type]
@@ -2103,7 +2104,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         case H_PRED:
         case TM_PRED:
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-            vp8_build_intra_predictors_mby_ptr(&x->e_mbd);
+            RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+                (&x->e_mbd);
             macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb)) ;
             rate2 += rate_y;
             distortion2 += distortion;

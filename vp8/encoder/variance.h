@@ -85,6 +85,19 @@
       unsigned int *sse \
     );
 
+#define prototype_ssimpf(sym) \
+    void (sym) \
+      ( \
+        unsigned char *s, \
+        int sp, \
+        unsigned char *r, \
+        int rp, \
+        unsigned long *sum_s, \
+        unsigned long *sum_r, \
+        unsigned long *sum_sq_s, \
+        unsigned long *sum_sq_r, \
+        unsigned long *sum_sxr \
+      );
 
 #define prototype_getmbss(sym) unsigned int (sym)(const short *)
 
@@ -306,6 +319,15 @@ extern prototype_variance2(vp8_variance_get16x16var);
 #endif
 extern prototype_sad(vp8_variance_get4x4sse_cs);
 
+#ifndef vp8_ssimpf
+#define vp8_ssimpf ssim_parms_c
+#endif
+extern prototype_ssimpf(vp8_ssimpf)
+
+#ifndef vp8_ssimpf_8x8
+#define vp8_ssimpf_8x8 ssim_parms_8x8_c
+#endif
+extern prototype_ssimpf(vp8_ssimpf_8x8)
 
 typedef prototype_sad(*vp8_sad_fn_t);
 typedef prototype_sad_multi_same_address(*vp8_sad_multi_fn_t);
@@ -315,6 +337,10 @@ typedef prototype_variance(*vp8_variance_fn_t);
 typedef prototype_variance2(*vp8_variance2_fn_t);
 typedef prototype_subpixvariance(*vp8_subpixvariance_fn_t);
 typedef prototype_getmbss(*vp8_getmbss_fn_t);
+
+typedef prototype_ssimpf(*vp8_ssimpf_fn_t)
+
+
 typedef struct
 {
     vp8_sad_fn_t             sad4x4;
@@ -365,6 +391,11 @@ typedef struct
     vp8_sad_multi_d_fn_t     sad8x8x4d;
     vp8_sad_multi_d_fn_t     sad4x4x4d;
 
+#if CONFIG_PSNR
+    vp8_ssimpf_fn_t          ssimpf_8x8;
+    vp8_ssimpf_fn_t          ssimpf;
+#endif
+
 } vp8_variance_rtcd_vtable_t;
 
 typedef struct
@@ -378,6 +409,7 @@ typedef struct
     vp8_sad_multi_fn_t      sdx3f;
     vp8_sad_multi1_fn_t     sdx8f;
     vp8_sad_multi_d_fn_t    sdx4df;
+
 } vp8_variance_fn_ptr_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

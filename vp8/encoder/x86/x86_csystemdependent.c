@@ -176,6 +176,25 @@ void vp8_fast_quantize_b_ssse3(BLOCK *b, BLOCKD *d)
                     d->dqcoeff
                );
 }
+#if CONFIG_PSNR
+#if ARCH_X86_64
+typedef void ssimpf
+(
+    unsigned char *s,
+    int sp,
+    unsigned char *r,
+    int rp,
+    unsigned long *sum_s,
+    unsigned long *sum_r,
+    unsigned long *sum_sq_s,
+    unsigned long *sum_sq_r,
+    unsigned long *sum_sxr
+);
+
+extern ssimpf vp8_ssim_parms_16x16_sse3;
+extern ssimpf vp8_ssim_parms_8x8_sse3;
+#endif
+#endif
 #endif
 
 
@@ -280,6 +299,8 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.get16x16prederror     = vp8_get16x16pred_error_sse2;
         cpi->rtcd.variance.get8x8var             = vp8_get8x8var_sse2;
         cpi->rtcd.variance.get16x16var           = vp8_get16x16var_sse2;
+
+
         /* cpi->rtcd.variance.get4x4sse_cs  not implemented for wmt */;
 
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_sse2;
@@ -339,8 +360,17 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
 
+#if CONFIG_PSNR
+#if ARCH_X86_64
+        cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_sse3;
+        cpi->rtcd.variance.ssimpf                = vp8_ssim_parms_16x16_sse3;
+#endif
+#endif
+
     }
 #endif
+
+
 
 #if HAVE_SSE4_1
     if (SSE4_1Enabled)

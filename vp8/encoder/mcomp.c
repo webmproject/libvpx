@@ -1415,7 +1415,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     int col_min = ref_col - distance;
     int col_max = ref_col + distance;
 
-    unsigned short sad_array8[8];
+    DECLARE_ALIGNED_ARRAY(16, unsigned short, sad_array8, 8);
     unsigned int sad_array[3];
 
     // Work out the mid point for the search

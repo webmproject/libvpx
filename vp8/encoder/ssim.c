@@ -11,298 +11,13 @@
 
 #include "vpx_scale/yv12config.h"
 #include "math.h"
+#include "onyx_int.h"
 
-#define C1 (float)(64 * 64 * 0.01*255*0.01*255)
-#define C2 (float)(64 * 64 * 0.03*255*0.03*255)
-
-static int width_y;
-static int height_y;
-static int height_uv;
-static int width_uv;
-static int stride_uv;
-static int stride;
-static int lumimask;
-static int luminance;
-static double plane_summed_weights = 0;
-
-static short img12_sum_block[8*4096*4096*2] ;
-
-static short img1_sum[8*4096*2];
-static short img2_sum[8*4096*2];
-static int   img1_sq_sum[8*4096*2];
-static int   img2_sq_sum[8*4096*2];
-static int   img12_mul_sum[8*4096*2];
-
-
-double vp8_similarity
-(
-    int mu_x,
-    int mu_y,
-    int pre_mu_x2,
-    int pre_mu_y2,
-    int pre_mu_xy2
-)
-{
-    int mu_x2, mu_y2, mu_xy, theta_x2, theta_y2, theta_xy;
-
-    mu_x2 = mu_x * mu_x;
-    mu_y2 = mu_y * mu_y;
-    mu_xy = mu_x * mu_y;
-
-    theta_x2 = 64 * pre_mu_x2 - mu_x2;
-    theta_y2 = 64 * pre_mu_y2 - mu_y2;
-    theta_xy = 64 * pre_mu_xy2 - mu_xy;
-
-    return (2 * mu_xy + C1) * (2 * theta_xy + C2) / ((mu_x2 + mu_y2 + C1) * (theta_x2 + theta_y2 + C2));
-}
-
-double vp8_ssim
-(
-    const unsigned char *img1,
-    const unsigned char *img2,
-    int stride_img1,
-    int stride_img2,
-    int width,
-    int height
-)
-{
-    int x, y, x2, y2, img1_block, img2_block, img1_sq_block, img2_sq_block, img12_mul_block, temp;
-
-    double plane_quality, weight, mean;
-
-    short *img1_sum_ptr1, *img1_sum_ptr2;
-    short *img2_sum_ptr1, *img2_sum_ptr2;
-    int *img1_sq_sum_ptr1, *img1_sq_sum_ptr2;
-    int *img2_sq_sum_ptr1, *img2_sq_sum_ptr2;
-    int *img12_mul_sum_ptr1, *img12_mul_sum_ptr2;
-
-    plane_quality = 0;
-
-    if (lumimask)
-        plane_summed_weights = 0.0f;
-    else
-        plane_summed_weights = (height - 7) * (width - 7);
-
-    //some prologue for the main loop
-    temp = 8 * width;
-
-    img1_sum_ptr1      = img1_sum + temp;
-    img2_sum_ptr1      = img2_sum + temp;
-    img1_sq_sum_ptr1   = img1_sq_sum + temp;
-    img2_sq_sum_ptr1   = img2_sq_sum + temp;
-    img12_mul_sum_ptr1 = img12_mul_sum + temp;
-
-    for (x = 0; x < width; x++)
-    {
-        img1_sum[x]      = img1[x];
-        img2_sum[x]      = img2[x];
-        img1_sq_sum[x]   = img1[x] * img1[x];
-        img2_sq_sum[x]   = img2[x] * img2[x];
-        img12_mul_sum[x] = img1[x] * img2[x];
-
-        img1_sum_ptr1[x]      = 0;
-        img2_sum_ptr1[x]      = 0;
-        img1_sq_sum_ptr1[x]   = 0;
-        img2_sq_sum_ptr1[x]   = 0;
-        img12_mul_sum_ptr1[x] = 0;
-    }
-
-    //the main loop
-    for (y = 1; y < height; y++)
-    {
-        img1 += stride_img1;
-        img2 += stride_img2;
-
-        temp = (y - 1) % 9 * width;
-
-        img1_sum_ptr1      = img1_sum + temp;
-        img2_sum_ptr1      = img2_sum + temp;
-        img1_sq_sum_ptr1   = img1_sq_sum + temp;
-        img2_sq_sum_ptr1   = img2_sq_sum + temp;
-        img12_mul_sum_ptr1 = img12_mul_sum + temp;
-
-        temp = y % 9 * width;
-
-        img1_sum_ptr2      = img1_sum + temp;
-        img2_sum_ptr2      = img2_sum + temp;
-        img1_sq_sum_ptr2   = img1_sq_sum + temp;
-        img2_sq_sum_ptr2   = img2_sq_sum + temp;
-        img12_mul_sum_ptr2 = img12_mul_sum + temp;
-
-        for (x = 0; x < width; x++)
-        {
-            img1_sum_ptr2[x]      = img1_sum_ptr1[x] + img1[x];
-            img2_sum_ptr2[x]      = img2_sum_ptr1[x] + img2[x];
-            img1_sq_sum_ptr2[x]   = img1_sq_sum_ptr1[x] + img1[x] * img1[x];
-            img2_sq_sum_ptr2[x]   = img2_sq_sum_ptr1[x] + img2[x] * img2[x];
-            img12_mul_sum_ptr2[x] = img12_mul_sum_ptr1[x] + img1[x] * img2[x];
-        }
-
-        if (y > 6)
-        {
-            //calculate the sum of the last 8 lines by subtracting the total sum of 8 lines back from the present sum
-            temp = (y + 1) % 9 * width;
-
-            img1_sum_ptr1      = img1_sum + temp;
-            img2_sum_ptr1      = img2_sum + temp;
-            img1_sq_sum_ptr1   = img1_sq_sum + temp;
-            img2_sq_sum_ptr1   = img2_sq_sum + temp;
-            img12_mul_sum_ptr1 = img12_mul_sum + temp;
-
-            for (x = 0; x < width; x++)
-            {
-                img1_sum_ptr1[x]      = img1_sum_ptr2[x] - img1_sum_ptr1[x];
-                img2_sum_ptr1[x]      = img2_sum_ptr2[x] - img2_sum_ptr1[x];
-                img1_sq_sum_ptr1[x]   = img1_sq_sum_ptr2[x] - img1_sq_sum_ptr1[x];
-                img2_sq_sum_ptr1[x]   = img2_sq_sum_ptr2[x] - img2_sq_sum_ptr1[x];
-                img12_mul_sum_ptr1[x] = img12_mul_sum_ptr2[x] - img12_mul_sum_ptr1[x];
-            }
-
-            //here we calculate the sum over the 8x8 block of pixels
-            //this is done by sliding a window across the column sums for the last 8 lines
-            //each time adding the new column sum, and subtracting the one which fell out of the window
-            img1_block      = 0;
-            img2_block      = 0;
-            img1_sq_block   = 0;
-            img2_sq_block   = 0;
-            img12_mul_block = 0;
-
-            //prologue, and calculation of simularity measure from the first 8 column sums
-            for (x = 0; x < 8; x++)
-            {
-                img1_block      += img1_sum_ptr1[x];
-                img2_block      += img2_sum_ptr1[x];
-                img1_sq_block   += img1_sq_sum_ptr1[x];
-                img2_sq_block   += img2_sq_sum_ptr1[x];
-                img12_mul_block += img12_mul_sum_ptr1[x];
-            }
-
-            if (lumimask)
-            {
-                y2 = y - 7;
-                x2 = 0;
-
-                if (luminance)
-                {
-                    mean = (img2_block + img1_block) / 128.0f;
-
-                    if (!(y2 % 2 || x2 % 2))
-                        *(img12_sum_block + y2 / 2 * width_uv + x2 / 2) = img2_block + img1_block;
-                }
-                else
-                {
-                    mean = *(img12_sum_block + y2 * width_uv + x2);
-                    mean += *(img12_sum_block + y2 * width_uv + x2 + 4);
-                    mean += *(img12_sum_block + (y2 + 4) * width_uv + x2);
-                    mean += *(img12_sum_block + (y2 + 4) * width_uv + x2 + 4);
-
-                    mean /= 512.0f;
-                }
-
-                weight = mean < 40 ? 0.0f :
-                         (mean < 50 ? (mean - 40.0f) / 10.0f : 1.0f);
-                plane_summed_weights += weight;
-
-                plane_quality += weight * vp8_similarity(img1_block, img2_block, img1_sq_block, img2_sq_block, img12_mul_block);
-            }
-            else
-                plane_quality += vp8_similarity(img1_block, img2_block, img1_sq_block, img2_sq_block, img12_mul_block);
-
-            //and for the rest
-            for (x = 8; x < width; x++)
-            {
-                img1_block      = img1_block + img1_sum_ptr1[x] - img1_sum_ptr1[x - 8];
-                img2_block      = img2_block + img2_sum_ptr1[x] - img2_sum_ptr1[x - 8];
-                img1_sq_block   = img1_sq_block + img1_sq_sum_ptr1[x] - img1_sq_sum_ptr1[x - 8];
-                img2_sq_block   = img2_sq_block + img2_sq_sum_ptr1[x] - img2_sq_sum_ptr1[x - 8];
-                img12_mul_block = img12_mul_block + img12_mul_sum_ptr1[x] - img12_mul_sum_ptr1[x - 8];
-
-                if (lumimask)
-                {
-                    y2 = y - 7;
-                    x2 = x - 7;
-
-                    if (luminance)
-                    {
-                        mean = (img2_block + img1_block) / 128.0f;
-
-                        if (!(y2 % 2 || x2 % 2))
-                            *(img12_sum_block + y2 / 2 * width_uv + x2 / 2) = img2_block + img1_block;
-                    }
-                    else
-                    {
-                        mean = *(img12_sum_block + y2 * width_uv + x2);
-                        mean += *(img12_sum_block + y2 * width_uv + x2 + 4);
-                        mean += *(img12_sum_block + (y2 + 4) * width_uv + x2);
-                        mean += *(img12_sum_block + (y2 + 4) * width_uv + x2 + 4);
-
-                        mean /= 512.0f;
-                    }
-
-                    weight = mean < 40 ? 0.0f :
-                             (mean < 50 ? (mean - 40.0f) / 10.0f : 1.0f);
-                    plane_summed_weights += weight;
-
-                    plane_quality += weight * vp8_similarity(img1_block, img2_block, img1_sq_block, img2_sq_block, img12_mul_block);
-                }
-                else
-                    plane_quality += vp8_similarity(img1_block, img2_block, img1_sq_block, img2_sq_block, img12_mul_block);
-            }
-        }
-    }
-
-    if (plane_summed_weights == 0)
-        return 1.0f;
-    else
-        return plane_quality / plane_summed_weights;
-}
-
-double vp8_calc_ssim
-(
-    YV12_BUFFER_CONFIG *source,
-    YV12_BUFFER_CONFIG *dest,
-    int lumamask,
-    double *weight
-)
-{
-    double a, b, c;
-    double frame_weight;
-    double ssimv;
-
-    width_y = source->y_width;
-    height_y = source->y_height;
-    height_uv = source->uv_height;
-    width_uv = source->uv_width;
-    stride_uv = dest->uv_stride;
-    stride = dest->y_stride;
-
-    lumimask = lumamask;
-
-    luminance = 1;
-    a = vp8_ssim(source->y_buffer, dest->y_buffer,
-                 source->y_stride, dest->y_stride, source->y_width, source->y_height);
-    luminance = 0;
-
-    frame_weight = plane_summed_weights / ((width_y - 7) * (height_y - 7));
-
-    if (frame_weight == 0)
-        a = b = c = 1.0f;
-    else
-    {
-        b = vp8_ssim(source->u_buffer, dest->u_buffer,
-                     source->uv_stride, dest->uv_stride, source->uv_width, source->uv_height);
-
-        c = vp8_ssim(source->v_buffer, dest->v_buffer,
-                     source->uv_stride, dest->uv_stride, source->uv_width, source->uv_height);
-    }
-
-    ssimv = a * .8 + .1 * (b + c);
-
-    *weight = frame_weight;
-
-    return ssimv;
-}
-
+#if CONFIG_RUNTIME_CPU_DETECT
+#define IF_RTCD(x)  (x)
+#else
+#define IF_RTCD(x)  NULL
+#endif
 // Google version of SSIM
 // SSIM
 #define KERNEL 3
@@ -519,4 +234,175 @@ double vp8_calc_ssimg
     *ssim_u /= uvsize;
     *ssim_v /= uvsize;
     return ssim_all;
+}
+
+
+void ssim_parms_c
+(
+    unsigned char *s,
+    int sp,
+    unsigned char *r,
+    int rp,
+    unsigned long *sum_s,
+    unsigned long *sum_r,
+    unsigned long *sum_sq_s,
+    unsigned long *sum_sq_r,
+    unsigned long *sum_sxr
+)
+{
+    int i,j;
+    for(i=0;i<16;i++,s+=sp,r+=rp)
+     {
+         for(j=0;j<16;j++)
+         {
+             *sum_s += s[j];
+             *sum_r += r[j];
+             *sum_sq_s += s[j] * s[j];
+             *sum_sq_r += r[j] * r[j];
+             *sum_sxr += s[j] * r[j];
+         }
+     }
+}
+void ssim_parms_8x8_c
+(
+    unsigned char *s,
+    int sp,
+    unsigned char *r,
+    int rp,
+    unsigned long *sum_s,
+    unsigned long *sum_r,
+    unsigned long *sum_sq_s,
+    unsigned long *sum_sq_r,
+    unsigned long *sum_sxr
+)
+{
+    int i,j;
+    for(i=0;i<8;i++,s+=sp,r+=rp)
+     {
+         for(j=0;j<8;j++)
+         {
+             *sum_s += s[j];
+             *sum_r += r[j];
+             *sum_sq_s += s[j] * s[j];
+             *sum_sq_r += r[j] * r[j];
+             *sum_sxr += s[j] * r[j];
+         }
+     }
+}
+
+const static long long c1 =  426148; // (256^2*(.01*255)^2
+const static long long c2 = 3835331; //(256^2*(.03*255)^2
+
+static double similarity
+(
+    unsigned long sum_s,
+    unsigned long sum_r,
+    unsigned long sum_sq_s,
+    unsigned long sum_sq_r,
+    unsigned long sum_sxr,
+    int count
+)
+{
+    long long ssim_n = (2*sum_s*sum_r+ c1)*(2*count*sum_sxr-2*sum_s*sum_r+c2);
+
+    long long ssim_d = (sum_s*sum_s +sum_r*sum_r+c1)*
+            (count*sum_sq_s-sum_s*sum_s + count*sum_sq_r-sum_r*sum_r +c2) ;
+
+    return ssim_n * 1.0 / ssim_d;
+}
+
+static double ssim_16x16(unsigned char *s,int sp, unsigned char *r,int rp,
+            const vp8_variance_rtcd_vtable_t *rtcd)
+{
+    unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
+    rtcd->ssimpf(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 256);
+}
+static double ssim_8x8(unsigned char *s,int sp, unsigned char *r,int rp,
+                const vp8_variance_rtcd_vtable_t *rtcd)
+{
+    unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
+    rtcd->ssimpf_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64);
+}
+
+// TODO: (jbb) tried to scale this function such that we may be able to use it
+// for distortion metric in mode selection code ( provided we do a reconstruction)
+long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
+           const vp8_variance_rtcd_vtable_t *rtcd)
+{
+    unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
+    double ssim3;
+    long long ssim_n;
+    long long ssim_d;
+
+    rtcd->ssimpf(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    ssim_n = (2*sum_s*sum_r+ c1)*(2*256*sum_sxr-2*sum_s*sum_r+c2);
+
+    ssim_d = (sum_s*sum_s +sum_r*sum_r+c1)*
+            (256*sum_sq_s-sum_s*sum_s + 256*sum_sq_r-sum_r*sum_r +c2) ;
+
+    ssim3 = 256 * (ssim_d-ssim_n) / ssim_d;
+    return (long)( 256*ssim3 * ssim3 );
+}
+// TODO: (jbb) this 8x8 window might be too big + we may want to pick pixels
+// such that the window regions overlap block boundaries to penalize blocking
+// artifacts.
+
+double vp8_ssim2
+(
+    unsigned char *img1,
+    unsigned char *img2,
+    int stride_img1,
+    int stride_img2,
+    int width,
+    int height,
+    const vp8_variance_rtcd_vtable_t *rtcd
+)
+{
+    int i,j;
+
+    double ssim_total=0;
+
+    // we can sample points as frequently as we like start with 1 per 8x8
+    for(i=0; i < height; i+=8, img1 += stride_img1*8, img2 += stride_img2*8)
+    {
+        for(j=0; j < width; j+=8 )
+        {
+            ssim_total += ssim_8x8(img1, stride_img1, img2, stride_img2, rtcd);
+        }
+    }
+    ssim_total /= (width/8 * height /8);
+    return ssim_total;
+
+}
+double vp8_calc_ssim
+(
+    YV12_BUFFER_CONFIG *source,
+    YV12_BUFFER_CONFIG *dest,
+    int lumamask,
+    double *weight,
+    const vp8_variance_rtcd_vtable_t *rtcd
+)
+{
+    double a, b, c;
+    double ssimv;
+
+    a = vp8_ssim2(source->y_buffer, dest->y_buffer,
+                 source->y_stride, dest->y_stride, source->y_width,
+                 source->y_height, rtcd);
+
+    b = vp8_ssim2(source->u_buffer, dest->u_buffer,
+                 source->uv_stride, dest->uv_stride, source->uv_width,
+                 source->uv_height, rtcd);
+
+    c = vp8_ssim2(source->v_buffer, dest->v_buffer,
+                 source->uv_stride, dest->uv_stride, source->uv_width,
+                 source->uv_height, rtcd);
+
+    ssimv = a * .8 + .1 * (b + c);
+
+    *weight = 1;
+
+    return ssimv;
 }
