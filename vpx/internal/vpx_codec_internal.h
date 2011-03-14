@@ -332,7 +332,7 @@ typedef struct vpx_codec_priv_cb_pair
  * extended in one of two ways. First, a second, algorithm specific structure
  * can be allocated and the priv member pointed to it. Alternatively, this
  * structure can be made the first member of the algorithm specific structure,
- * and the pointer casted to the proper type.
+ * and the pointer cast to the proper type.
  */
 struct vpx_codec_priv
 {
