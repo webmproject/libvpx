@@ -255,7 +255,7 @@ ifeq ($(filter clean,$(MAKECMDGOALS)),)
 endif
 
 #
-# Configuration dependant rules
+# Configuration dependent rules
 #
 $(call pairmap,install_map_templates,$(INSTALL_MAPS))
 
@@ -332,7 +332,7 @@ ifneq ($(call enabled,DIST-SRCS),)
     DIST-SRCS-$(CONFIG_MSVS)  += build/x86-msvs/yasm.rules
     DIST-SRCS-$(CONFIG_RVCT) += build/make/armlink_adapter.sh
     #
-    # This isn't really ARCH_ARM dependent, it's dependant on whether we're
+    # This isn't really ARCH_ARM dependent, it's dependent on whether we're
     # using assembly code or not (CONFIG_OPTIMIZATIONS maybe). Just use
     # this for now.
     DIST-SRCS-$(ARCH_ARM)    += build/make/obj_int_extract.c
