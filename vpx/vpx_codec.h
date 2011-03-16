@@ -498,7 +498,7 @@ extern "C" {
      * Iterates over a list of the segments to allocate. The iterator storage
      * should be initialized to NULL to start the iteration. Iteration is complete
      * when this function returns VPX_CODEC_LIST_END. The amount of memory needed to
-     * allocate is dependant upon the size of the encoded stream. In cases where the
+     * allocate is dependent upon the size of the encoded stream. In cases where the
      * stream is not available at allocation time, a fixed size must be requested.
      * The codec will not be able to operate on streams larger than the size used at
      * allocation time.

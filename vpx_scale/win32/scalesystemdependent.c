@@ -11,9 +11,9 @@
 
 /****************************************************************************
 *
-*   Module Title :     system_dependant.c
+*   Module Title :     system_dependent.c
 *
-*   Description  :     Miscellaneous system dependant functions
+*   Description  :     Miscellaneous system dependent functions
 *
 ****************************************************************************/
 

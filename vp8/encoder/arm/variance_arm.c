@@ -15,6 +15,34 @@
 
 #if HAVE_ARMV6
 
+unsigned int vp8_sub_pixel_variance8x8_armv6
+(
+    const unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    const unsigned char *dst_ptr,
+    int dst_pixels_per_line,
+    unsigned int *sse
+)
+{
+    unsigned short first_pass[10*8];
+    unsigned char  second_pass[8*8];
+    const short *HFilter, *VFilter;
+
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
+
+    vp8_filter_block2d_bil_first_pass_armv6(src_ptr, first_pass,
+                                            src_pixels_per_line,
+                                            9, 8, HFilter);
+    vp8_filter_block2d_bil_second_pass_armv6(first_pass, second_pass,
+                                             8, 8, 8, VFilter);
+
+    return vp8_variance8x8_armv6(second_pass, 8, dst_ptr,
+                                   dst_pixels_per_line, sse);
+}
+
 unsigned int vp8_sub_pixel_variance16x16_armv6
 (
     const unsigned char  *src_ptr,
