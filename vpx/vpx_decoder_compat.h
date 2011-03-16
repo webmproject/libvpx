@@ -527,7 +527,7 @@ extern "C" {
      * Iterates over a list of the segments to allocate. The iterator storage
      * should be initialized to NULL to start the iteration. Iteration is complete
      * when this function returns VPX_DEC_LIST_END. The amount of memory needed to
-     * allocate is dependant upon the size of the encoded stream. This means that
+     * allocate is dependent upon the size of the encoded stream. This means that
      * the stream info structure must be known at allocation time. It can be
      * populated with the vpx_dec_peek_stream_info() function. In cases where the
      * stream to be decoded is not available at allocation time, a fixed size must
