@@ -12,9 +12,6 @@
 #if !defined(WIN32) && CONFIG_OS_SUPPORT == 1
 # include <unistd.h>
 #endif
-#ifdef __APPLE__
-#include <mach/mach_init.h>
-#endif
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/threading.h"

@@ -152,7 +152,7 @@ endif
 # Rule to extract assembly constants from C sources
 #
 obj_int_extract: build/make/obj_int_extract.c
-	$(if $(quiet),echo "    [HOSTCC] $@")
+	$(if $(quiet),@echo "    [HOSTCC] $@")
 	$(qexec)$(HOSTCC) -I. -I$(SRC_PATH_BARE) -o $@ $<
 CLEAN-OBJS += obj_int_extract
 

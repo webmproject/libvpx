@@ -38,6 +38,7 @@
 #define pthread_self() GetCurrentThreadId()
 #else
 #ifdef __APPLE__
+#include <mach/mach_init.h>
 #include <mach/semaphore.h>
 #include <mach/task.h>
 #include <time.h>
