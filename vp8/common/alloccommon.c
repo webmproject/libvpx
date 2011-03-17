@@ -20,7 +20,7 @@
 
 extern  void vp8_init_scan_order_mask();
 
-void vp8_update_mode_info_border(MODE_INFO *mi, int rows, int cols)
+static void update_mode_info_border(MODE_INFO *mi, int rows, int cols)
 {
     int i;
     vpx_memset(mi - cols - 2, 0, sizeof(MODE_INFO) * (cols + 1));
@@ -119,7 +119,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
         return 1;
     }
 
-    vp8_update_mode_info_border(oci->mi, oci->mb_rows, oci->mb_cols);
+    update_mode_info_border(oci->mi, oci->mb_rows, oci->mb_cols);
 
     return 0;
 }

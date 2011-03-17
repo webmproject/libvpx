@@ -36,7 +36,7 @@ extern void vp8_build_uvmvs(MACROBLOCKD *x, int fullpixel);
 #define RTCD_VTABLE(x) NULL
 #endif
 
-void vp8_setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC *mbrd, int count)
+static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC *mbrd, int count)
 {
     VP8_COMMON *const pc = & pbi->common;
     int i, j;
@@ -90,7 +90,7 @@ void vp8_setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC 
 }
 
 
-void vp8mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col)
+static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col)
 {
     int eobtotal = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
@@ -217,7 +217,7 @@ void vp8mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb
 }
 
 
-THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
+static THREAD_FUNCTION thread_decoding_proc(void *p_data)
 {
     int ithread = ((DECODETHREAD_DATA *)p_data)->ithread;
     VP8D_COMP *pbi = (VP8D_COMP *)(((DECODETHREAD_DATA *)p_data)->ptr1);
@@ -321,7 +321,7 @@ THREAD_FUNCTION vp8_thread_decoding_proc(void *p_data)
                         xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
                         vp8_build_uvmvs(xd, pc->full_pixel);
-                        vp8mt_decode_macroblock(pbi, xd, mb_row, mb_col);
+                        decode_macroblock(pbi, xd, mb_row, mb_col);
 
                         if (pbi->common.filter_level)
                         {
@@ -453,7 +453,7 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi)
             pbi->de_thread_data[ithread].ptr1     = (void *)pbi;
             pbi->de_thread_data[ithread].ptr2     = (void *) &pbi->mb_row_di[ithread];
 
-            pthread_create(&pbi->h_decoding_thread[ithread], 0, vp8_thread_decoding_proc, (&pbi->de_thread_data[ithread]));
+            pthread_create(&pbi->h_decoding_thread[ithread], 0, thread_decoding_proc, (&pbi->de_thread_data[ithread]));
         }
 
         sem_init(&pbi->h_event_end_decoding, 0, 0);
@@ -635,7 +635,7 @@ void vp8_decoder_remove_threads(VP8D_COMP *pbi)
 }
 
 
-void vp8mt_lpf_init( VP8D_COMP *pbi, int default_filt_lvl)
+static void lpf_init( VP8D_COMP *pbi, int default_filt_lvl)
 {
     VP8_COMMON *cm  = &pbi->common;
     MACROBLOCKD *mbd = &pbi->mb;
@@ -718,10 +718,10 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
             vpx_memset(pbi->mt_uleft_col[i], (unsigned char)129, 8);
             vpx_memset(pbi->mt_vleft_col[i], (unsigned char)129, 8);
         }
-        vp8mt_lpf_init(pbi, pc->filter_level);
+        lpf_init(pbi, pc->filter_level);
     }
 
-    vp8_setup_decoding_thread_data(pbi, xd, pbi->mb_row_di, pbi->decoding_thread_count);
+    setup_decoding_thread_data(pbi, xd, pbi->mb_row_di, pbi->decoding_thread_count);
 
     for (i = 0; i < pbi->decoding_thread_count; i++)
         sem_post(&pbi->h_event_start_decoding[i]);
@@ -806,7 +806,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                 }
 
                 vp8_build_uvmvs(xd, pc->full_pixel);
-                vp8mt_decode_macroblock(pbi, xd, mb_row, mb_col);
+                decode_macroblock(pbi, xd, mb_row, mb_col);
 
                 /* check if the boolean decoder has suffered an error */
                 xd->corrupted |= vp8dx_bool_error(xd->current_bc);

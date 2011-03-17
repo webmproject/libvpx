@@ -211,7 +211,7 @@ void vp8_post_proc_down_and_across_c
     }
 }
 
-int vp8_q2mbl(int x)
+static int q2mbl(int x)
 {
     if (x < 20) x = 20;
 
@@ -314,8 +314,8 @@ static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
     (void) flag;
 
     POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,  ppl);
-    POSTPROC_INVOKE(rtcd, across)(post->y_buffer, post->y_stride, post->y_height, post->y_width, vp8_q2mbl(q));
-    POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride, post->y_height, post->y_width, vp8_q2mbl(q));
+    POSTPROC_INVOKE(rtcd, across)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
+    POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
 
     POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
     POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
