@@ -168,7 +168,7 @@ static void *mmap_lkup(vpx_codec_alg_priv_t *ctx, unsigned int id)
 {
     int i;
 
-    for (i = 0; i < NELEMENTS(vp8_mem_req_segs); i++)
+    for (i = 0; i < NELEMENTS(ctx->mmaps); i++)
         if (ctx->mmaps[i].id == id)
             return ctx->mmaps[i].base;
 
@@ -525,7 +525,7 @@ static vpx_codec_err_t vp8_xma_set_mmap(vpx_codec_ctx_t         *ctx,
 
     if (!res && ctx->priv->alg_priv)
     {
-        for (i = 0; i < NELEMENTS(vp8_mem_req_segs); i++)
+        for (i = 0; i < NELEMENTS(ctx->priv->alg_priv->mmaps); i++)
         {
             if (ctx->priv->alg_priv->mmaps[i].id == mmap->id)
                 if (!ctx->priv->alg_priv->mmaps[i].base)
