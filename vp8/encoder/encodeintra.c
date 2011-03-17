@@ -25,19 +25,6 @@
 #define intra4x4pbias_rate    256
 
 
-void vp8_update_mode_context(int *abmode, int *lbmode, int i, int best_mode)
-{
-    if (i < 12)
-    {
-        abmode[i+4] = best_mode;
-    }
-
-    if ((i & 3) != 3)
-    {
-        lbmode[i+1] = best_mode;
-    }
-
-}
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
 #else

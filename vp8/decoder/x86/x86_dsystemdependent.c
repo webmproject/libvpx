@@ -17,7 +17,7 @@
 #if HAVE_MMX
 void vp8_dequantize_b_impl_mmx(short *sq, short *dq, short *q);
 
-void vp8_dequantize_b_mmx(BLOCKD *d)
+static void dequantize_b_mmx(BLOCKD *d)
 {
     short *sq = (short *) d->qcoeff;
     short *dq = (short *) d->dqcoeff;
@@ -41,7 +41,7 @@ void vp8_arch_x86_decode_init(VP8D_COMP *pbi)
 #if HAVE_MMX
     if (flags & HAS_MMX)
     {
-        pbi->dequant.block               = vp8_dequantize_b_mmx;
+        pbi->dequant.block               = dequantize_b_mmx;
         pbi->dequant.idct_add            = vp8_dequant_idct_add_mmx;
         pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_mmx;
         pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_mmx;
