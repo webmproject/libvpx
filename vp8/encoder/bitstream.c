@@ -1441,6 +1441,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     oh.show_frame = (int) pc->show_frame;
     oh.type = (int)pc->frame_type;
     oh.version = pc->version;
+    oh.first_partition_length_in_bytes = 0;
 
     mb_feature_data_bits = vp8_mb_feature_data_bits;
     cx_data += 3;
@@ -1716,6 +1717,21 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 #endif
     vp8_stop_encode(bc);
 
+    oh.first_partition_length_in_bytes = cpi->bc.pos;
+
+    /* update frame tag */
+    {
+        int v = (oh.first_partition_length_in_bytes << 5) |
+                (oh.show_frame << 4) |
+                (oh.version << 1) |
+                oh.type;
+
+        dest[0] = v;
+        dest[1] = v >> 8;
+        dest[2] = v >> 16;
+    }
+
+    *size = VP8_HEADER_SIZE + extra_bytes_packed + cpi->bc.pos;
 
     if (pc->multi_token_partition != ONE_PARTITION)
     {
@@ -1725,9 +1741,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
         pack_tokens_into_partitions(cpi, cx_data + bc->pos, num_part, &asize);
 
-        oh.first_partition_length_in_bytes = cpi->bc.pos;
-
-        *size = cpi->bc.pos + VP8_HEADER_SIZE + asize + extra_bytes_packed;
+        *size += asize;
     }
     else
     {
@@ -1741,19 +1755,8 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
             pack_tokens(&cpi->bc2, cpi->tok, cpi->tok_count);
 
         vp8_stop_encode(&cpi->bc2);
-        oh.first_partition_length_in_bytes = cpi->bc.pos ;
-        *size = cpi->bc2.pos + cpi->bc.pos + VP8_HEADER_SIZE + extra_bytes_packed;
-    }
 
-    {
-        int v = (oh.first_partition_length_in_bytes << 5) |
-                (oh.show_frame << 4) |
-                (oh.version << 1) |
-                oh.type;
-
-        dest[0] = v;
-        dest[1] = v >> 8;
-        dest[2] = v >> 16;
+        *size += cpi->bc2.pos;
     }
 }
 
