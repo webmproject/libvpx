@@ -168,7 +168,7 @@ static void *mmap_lkup(vpx_codec_alg_priv_t *ctx, unsigned int id)
 {
     int i;
 
-    for (i = 0; i < NELEMENTS(vp8_mem_req_segs); i++)
+    for (i = 0; i < NELEMENTS(ctx->mmaps); i++)
         if (ctx->mmaps[i].id == id)
             return ctx->mmaps[i].base;
 
@@ -176,25 +176,7 @@ static void *mmap_lkup(vpx_codec_alg_priv_t *ctx, unsigned int id)
 }
 static void vp8_finalize_mmaps(vpx_codec_alg_priv_t *ctx)
 {
-    /*
-    ctx->pbi = mmap_lkup(ctx, VP6_SEG_PB_INSTANCE);
-    ctx->pbi->mbi.block_dx_info[0].idct_output_ptr = mmap_lkup(ctx, VP6_SEG_IDCT_BUFFER);
-    ctx->pbi->loop_filtered_block = mmap_lkup(ctx, VP6_SEG_LF_BLOCK);
-    ctx->pbi->huff = mmap_lkup(ctx, VP6_SEG_HUFF);
-    ctx->pbi->mbi.coeffs_base_ptr = mmap_lkup(ctx, VP6_SEG_COEFFS);
-    ctx->pbi->fc.above_y = mmap_lkup(ctx, VP6_SEG_ABOVEY);
-    ctx->pbi->fc.above_u = mmap_lkup(ctx, VP6_SEG_ABOVEU);
-    ctx->pbi->fc.above_v = mmap_lkup(ctx, VP6_SEG_ABOVEV);
-    ctx->pbi->prediction_mode = mmap_lkup(ctx, VP6_SEG_PRED_MODES);
-    ctx->pbi->mbmotion_vector = mmap_lkup(ctx, VP6_SEG_MV_FIELD);
-    ctx->pbi->fb_storage_ptr[0] = mmap_lkup(ctx, VP6_SEG_IMG0_STRG);
-    ctx->pbi->fb_storage_ptr[1] = mmap_lkup(ctx, VP6_SEG_IMG1_STRG);
-    ctx->pbi->fb_storage_ptr[2] = mmap_lkup(ctx, VP6_SEG_IMG2_STRG);
-    #if CONFIG_POSTPROC
-    ctx->pbi->postproc.deblock.fragment_variances = mmap_lkup(ctx, VP6_SEG_DEBLOCKER);
-    ctx->pbi->fb_storage_ptr[3] = mmap_lkup(ctx, VP6_SEG_PP_IMG_STRG);
-    #endif
-    */
+    /* nothing to clean up */
 }
 
 static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx)
@@ -543,7 +525,7 @@ static vpx_codec_err_t vp8_xma_set_mmap(vpx_codec_ctx_t         *ctx,
 
     if (!res && ctx->priv->alg_priv)
     {
-        for (i = 0; i < NELEMENTS(vp8_mem_req_segs); i++)
+        for (i = 0; i < NELEMENTS(ctx->priv->alg_priv->mmaps); i++)
         {
             if (ctx->priv->alg_priv->mmaps[i].id == mmap->id)
                 if (!ctx->priv->alg_priv->mmaps[i].base)
