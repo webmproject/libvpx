@@ -924,8 +924,14 @@ static const arg_def_t resize_up_thresh   = ARG_DEF(NULL, "resize-up", 1,
         "Upscale threshold (buf %)");
 static const arg_def_t resize_down_thresh = ARG_DEF(NULL, "resize-down", 1,
         "Downscale threshold (buf %)");
-static const arg_def_t end_usage          = ARG_DEF(NULL, "end-usage", 1,
-        "VBR=0 | CBR=1 | CQ=2");
+static const struct arg_enum_list end_usage_enum[] = {
+    {"vbr", VPX_VBR},
+    {"cbr", VPX_CBR},
+    {"cq",  VPX_CQ},
+    {NULL, 0}
+};
+static const arg_def_t end_usage          = ARG_DEF_ENUM(NULL, "end-usage", 1,
+        "Rate control mode", end_usage_enum);
 static const arg_def_t target_bitrate     = ARG_DEF(NULL, "target-bitrate", 1,
         "Bitrate (kbps)");
 static const arg_def_t min_quantizer      = ARG_DEF(NULL, "min-q", 1,
@@ -1256,7 +1262,7 @@ int main(int argc, const char **argv_)
         else if (arg_match(&arg, &resize_down_thresh, argi))
             cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
         else if (arg_match(&arg, &end_usage, argi))
-            cfg.rc_end_usage = arg_parse_uint(&arg);
+            cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &target_bitrate, argi))
             cfg.rc_target_bitrate = arg_parse_uint(&arg);
         else if (arg_match(&arg, &min_quantizer, argi))
