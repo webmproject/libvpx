@@ -69,7 +69,7 @@ VP8_COMMON_SRCS-yes += common/reconintra.c
 VP8_COMMON_SRCS-yes += common/reconintra4x4.c
 VP8_COMMON_SRCS-yes += common/setupintrarecon.c
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.c
-VP8_COMMON_SRCS-yes += common/textblit.c
+VP8_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
 VP8_COMMON_SRCS-yes += common/treecoder.c
 
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
