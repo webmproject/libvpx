@@ -24,8 +24,6 @@ extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 
-#if CONFIG_MULTITHREAD
-
 extern void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
 
 static THREAD_FUNCTION loopfilter_thread(void *p_data)
@@ -51,7 +49,6 @@ static THREAD_FUNCTION loopfilter_thread(void *p_data)
 
     return 0;
 }
-#endif
 
 static
 THREAD_FUNCTION thread_encoding_proc(void *p_data)
@@ -458,52 +455,57 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 
 void vp8cx_create_encoder_threads(VP8_COMP *cpi)
 {
-    cpi->b_multi_threaded = 0;
+    const VP8_COMMON * cm = &cpi->common;
 
+    cpi->b_multi_threaded = 0;
+    cpi->encoding_thread_count = 0;
     cpi->processor_core_count = 32; //vp8_get_proc_core_count();
 
     if (cpi->processor_core_count > 1 && cpi->oxcf.multi_threaded > 1)
     {
         int ithread;
+        int th_count = cpi->oxcf.multi_threaded - 1;
 
         if (cpi->oxcf.multi_threaded > cpi->processor_core_count)
-            cpi->encoding_thread_count = cpi->processor_core_count - 1;
-        else
-            cpi->encoding_thread_count = cpi->oxcf.multi_threaded - 1;
+            th_count = cpi->processor_core_count - 1;
 
-        CHECK_MEM_ERROR(cpi->h_encoding_thread, vpx_malloc(sizeof(pthread_t) * cpi->encoding_thread_count));
-        CHECK_MEM_ERROR(cpi->h_event_start_encoding, vpx_malloc(sizeof(sem_t) * cpi->encoding_thread_count));
-        CHECK_MEM_ERROR(cpi->mb_row_ei, vpx_memalign(32, sizeof(MB_ROW_COMP) * cpi->encoding_thread_count));
-        vpx_memset(cpi->mb_row_ei, 0, sizeof(MB_ROW_COMP) * cpi->encoding_thread_count);
-        CHECK_MEM_ERROR(cpi->en_thread_data, vpx_malloc(sizeof(ENCODETHREAD_DATA) * cpi->encoding_thread_count));
-        CHECK_MEM_ERROR(cpi->mt_current_mb_col, vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cpi->common.mb_rows));
+        /* we have th_count + 1 (main) threads processing one row each */
+        /* no point to have more threads than the sync range allows */
+        if(th_count > ((cm->mb_cols / cpi->mt_sync_range) - 1))
+        {
+            th_count = (cm->mb_cols / cpi->mt_sync_range) - 1;
+        }
 
-        //cpi->h_event_main = CreateEvent(NULL, FALSE, FALSE, NULL);
+        if(th_count == 0)
+            return;
+
+        CHECK_MEM_ERROR(cpi->h_encoding_thread, vpx_malloc(sizeof(pthread_t) * th_count));
+        CHECK_MEM_ERROR(cpi->h_event_start_encoding, vpx_malloc(sizeof(sem_t) * th_count));
+        CHECK_MEM_ERROR(cpi->mb_row_ei, vpx_memalign(32, sizeof(MB_ROW_COMP) * th_count));
+        vpx_memset(cpi->mb_row_ei, 0, sizeof(MB_ROW_COMP) * th_count);
+        CHECK_MEM_ERROR(cpi->en_thread_data,
+                        vpx_malloc(sizeof(ENCODETHREAD_DATA) * th_count));
+        CHECK_MEM_ERROR(cpi->mt_current_mb_col,
+                        vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
+
         sem_init(&cpi->h_event_end_encoding, 0, 0);
 
         cpi->b_multi_threaded = 1;
+        cpi->encoding_thread_count = th_count;
 
-        //printf("[VP8:] multi_threaded encoding is enabled with %d threads\n\n", (cpi->encoding_thread_count +1));
+        /*
+        printf("[VP8:] multi_threaded encoding is enabled with %d threads\n\n",
+               (cpi->encoding_thread_count +1));
+        */
 
-        for (ithread = 0; ithread < cpi->encoding_thread_count; ithread++)
+        for (ithread = 0; ithread < th_count; ithread++)
         {
             ENCODETHREAD_DATA * ethd = &cpi->en_thread_data[ithread];
 
-            //cpi->h_event_mbrencoding[ithread] = CreateEvent(NULL, FALSE, FALSE, NULL);
             sem_init(&cpi->h_event_start_encoding[ithread], 0, 0);
             ethd->ithread = ithread;
             ethd->ptr1 = (void *)cpi;
             ethd->ptr2 = (void *)&cpi->mb_row_ei[ithread];
-
-            //printf(" call begin thread %d \n", ithread);
-
-            //cpi->h_encoding_thread[ithread] =   (HANDLE)_beginthreadex(
-            //  NULL,           // security
-            //  0,              // stksize
-            //  thread_encoding_proc,
-            //  (&cpi->en_thread_data[ithread]),          // Thread data
-            //  0,
-            //  NULL);
 
             pthread_create(&cpi->h_encoding_thread[ithread], 0, thread_encoding_proc, ethd);
         }
