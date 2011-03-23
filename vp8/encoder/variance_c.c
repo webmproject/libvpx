@@ -10,33 +10,8 @@
 
 
 #include "variance.h"
+#include "vp8/common/filter.h"
 
-const int vp8_six_tap[8][6] =
-{
-    { 0,  0,  128,    0,   0,  0 },         // note that 1/8 pel positions are just as per alpha -0.5 bicubic
-    { 0, -6,  123,   12,  -1,  0 },
-    { 2, -11, 108,   36,  -8,  1 },         // New 1/4 pel 6 tap filter
-    { 0, -9,   93,   50,  -6,  0 },
-    { 3, -16,  77,   77, -16,  3 },         // New 1/2 pel 6 tap filter
-    { 0, -6,   50,   93,  -9,  0 },
-    { 1, -8,   36,  108, -11,  2 },         // New 1/4 pel 6 tap filter
-    { 0, -1,   12,  123,  -6,  0 }
-};
-
-
-const int VP8_FILTER_WEIGHT = 128;
-const int VP8_FILTER_SHIFT  =   7;
-const int vp8_bilinear_taps[8][2] =
-{
-    { 128,   0 },
-    { 112,  16 },
-    {  96,  32 },
-    {  80,  48 },
-    {  64,  64 },
-    {  48,  80 },
-    {  32,  96 },
-    {  16, 112 }
-};
 
 unsigned int vp8_get_mb_ss_c
 (
@@ -56,7 +31,7 @@ unsigned int vp8_get_mb_ss_c
 }
 
 
-void  vp8_variance(
+static void variance(
     const unsigned char *src_ptr,
     int  source_stride,
     const unsigned char *ref_ptr,
@@ -98,7 +73,7 @@ vp8_get8x8var_c
 )
 {
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 8, SSE, Sum);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 8, SSE, Sum);
     return (*SSE - (((*Sum) * (*Sum)) >> 6));
 }
 
@@ -114,7 +89,7 @@ vp8_get16x16var_c
 )
 {
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, SSE, Sum);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, SSE, Sum);
     return (*SSE - (((*Sum) * (*Sum)) >> 8));
 
 }
@@ -132,7 +107,7 @@ unsigned int vp8_variance16x16_c(
     int avg;
 
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, &var, &avg);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, &var, &avg);
     *sse = var;
     return (var - ((avg * avg) >> 8));
 }
@@ -148,7 +123,7 @@ unsigned int vp8_variance8x16_c(
     int avg;
 
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 16, &var, &avg);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 16, &var, &avg);
     *sse = var;
     return (var - ((avg * avg) >> 7));
 }
@@ -164,7 +139,7 @@ unsigned int vp8_variance16x8_c(
     int avg;
 
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 8, &var, &avg);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 8, &var, &avg);
     *sse = var;
     return (var - ((avg * avg) >> 7));
 }
@@ -181,7 +156,7 @@ unsigned int vp8_variance8x8_c(
     int avg;
 
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 8, &var, &avg);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 8, &var, &avg);
     *sse = var;
     return (var - ((avg * avg) >> 6));
 }
@@ -197,7 +172,7 @@ unsigned int vp8_variance4x4_c(
     int avg;
 
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 4, 4, &var, &avg);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 4, 4, &var, &avg);
     *sse = var;
     return (var - ((avg * avg) >> 4));
 }
@@ -213,7 +188,7 @@ unsigned int vp8_mse16x16_c(
     unsigned int var;
     int avg;
 
-    vp8_variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, &var, &avg);
+    variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, &var, &avg);
     *sse = var;
     return var;
 }
@@ -247,7 +222,7 @@ unsigned int vp8_mse16x16_c(
  *                  to the next.
  *
  ****************************************************************************/
-void vp8e_filter_block2d_bil_first_pass
+static void var_filter_block2d_bil_first_pass
 (
     const unsigned char *src_ptr,
     unsigned short *output_ptr,
@@ -255,7 +230,7 @@ void vp8e_filter_block2d_bil_first_pass
     int pixel_step,
     unsigned int output_height,
     unsigned int output_width,
-    const int *vp8_filter
+    const short *vp8_filter
 )
 {
     unsigned int i, j;
@@ -305,7 +280,7 @@ void vp8e_filter_block2d_bil_first_pass
  *                  to the next.
  *
  ****************************************************************************/
-void vp8e_filter_block2d_bil_second_pass
+static void var_filter_block2d_bil_second_pass
 (
     const unsigned short *src_ptr,
     unsigned char  *output_ptr,
@@ -313,7 +288,7 @@ void vp8e_filter_block2d_bil_second_pass
     unsigned int  pixel_step,
     unsigned int  output_height,
     unsigned int  output_width,
-    const int *vp8_filter
+    const short *vp8_filter
 )
 {
     unsigned int  i, j;
@@ -338,52 +313,6 @@ void vp8e_filter_block2d_bil_second_pass
 }
 
 
-/****************************************************************************
- *
- *  ROUTINE       : filter_block2d_bil
- *
- *  INPUTS        : UINT8  *src_ptr          : Pointer to source block.
- *                  UINT32 src_pixels_per_line : Stride of input block.
- *                  INT32  *HFilter         : Array of 2 horizontal filter taps.
- *                  INT32  *VFilter         : Array of 2 vertical filter taps.
- *
- *  OUTPUTS       : UINT16 *output_ptr       : Pointer to filtered block.
- *
- *  RETURNS       : void
- *
- *  FUNCTION      : 2-D filters an 8x8 input block by applying a 2-tap
- *                  bi-linear filter horizontally followed by a 2-tap
- *                  bi-linear filter vertically on the result.
- *
- *  SPECIAL NOTES : The intermediate horizontally filtered block must produce
- *                  1 more point than the input block in each column. This
- *                  is to ensure that the 2-tap filter has one extra data-point
- *                  at the top of each column so filter taps do not extend
- *                  beyond data. Thus the output of the first stage filter
- *                  is an 8x9 (hx_v) block.
- *
- ****************************************************************************/
-void vp8e_filter_block2d_bil
-(
-    const unsigned char  *src_ptr,
-    unsigned char *output_ptr,
-    unsigned int src_pixels_per_line,
-    int  *HFilter,
-    int  *VFilter
-)
-{
-
-    unsigned short FData[20*16];    // Temp data bufffer used in filtering
-
-    // First filter 1-D horizontally...
-    vp8e_filter_block2d_bil_first_pass(src_ptr, FData, src_pixels_per_line, 1, 9, 8, HFilter);
-
-    // then 1-D vertically...
-    vp8e_filter_block2d_bil_second_pass(FData, output_ptr, 8, 8, 8, 8, VFilter);
-}
-
-
-
 unsigned int vp8_sub_pixel_variance4x4_c
 (
     const unsigned char  *src_ptr,
@@ -396,17 +325,17 @@ unsigned int vp8_sub_pixel_variance4x4_c
 )
 {
     unsigned char  temp2[20*16];
-    const int *HFilter, *VFilter;
+    const short *HFilter, *VFilter;
     unsigned short FData3[5*4]; // Temp data bufffer used in filtering
 
-    HFilter = vp8_bilinear_taps[xoffset];
-    VFilter = vp8_bilinear_taps[yoffset];
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
 
     // First filter 1d Horizontal
-    vp8e_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 5, 4, HFilter);
+    var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 5, 4, HFilter);
 
     // Now filter Verticaly
-    vp8e_filter_block2d_bil_second_pass(FData3, temp2, 4,  4,  4,  4, VFilter);
+    var_filter_block2d_bil_second_pass(FData3, temp2, 4,  4,  4,  4, VFilter);
 
     return vp8_variance4x4_c(temp2, 4, dst_ptr, dst_pixels_per_line, sse);
 }
@@ -425,13 +354,13 @@ unsigned int vp8_sub_pixel_variance8x8_c
 {
     unsigned short FData3[9*8]; // Temp data bufffer used in filtering
     unsigned char  temp2[20*16];
-    const int *HFilter, *VFilter;
+    const short *HFilter, *VFilter;
 
-    HFilter = vp8_bilinear_taps[xoffset];
-    VFilter = vp8_bilinear_taps[yoffset];
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
 
-    vp8e_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 9, 8, HFilter);
-    vp8e_filter_block2d_bil_second_pass(FData3, temp2, 8, 8, 8, 8, VFilter);
+    var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 9, 8, HFilter);
+    var_filter_block2d_bil_second_pass(FData3, temp2, 8, 8, 8, 8, VFilter);
 
     return vp8_variance8x8_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
 }
@@ -449,13 +378,13 @@ unsigned int vp8_sub_pixel_variance16x16_c
 {
     unsigned short FData3[17*16];   // Temp data bufffer used in filtering
     unsigned char  temp2[20*16];
-    const int *HFilter, *VFilter;
+    const short *HFilter, *VFilter;
 
-    HFilter = vp8_bilinear_taps[xoffset];
-    VFilter = vp8_bilinear_taps[yoffset];
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
 
-    vp8e_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 17, 16, HFilter);
-    vp8e_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 16, 16, VFilter);
+    var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 17, 16, HFilter);
+    var_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 16, 16, VFilter);
 
     return vp8_variance16x16_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
@@ -525,13 +454,13 @@ unsigned int vp8_sub_pixel_variance16x8_c
 {
     unsigned short FData3[16*9];    // Temp data bufffer used in filtering
     unsigned char  temp2[20*16];
-    const int *HFilter, *VFilter;
+    const short *HFilter, *VFilter;
 
-    HFilter = vp8_bilinear_taps[xoffset];
-    VFilter = vp8_bilinear_taps[yoffset];
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
 
-    vp8e_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 9, 16, HFilter);
-    vp8e_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 8, 16, VFilter);
+    var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 9, 16, HFilter);
+    var_filter_block2d_bil_second_pass(FData3, temp2, 16, 16, 8, 16, VFilter);
 
     return vp8_variance16x8_c(temp2, 16, dst_ptr, dst_pixels_per_line, sse);
 }
@@ -549,15 +478,15 @@ unsigned int vp8_sub_pixel_variance8x16_c
 {
     unsigned short FData3[9*16];    // Temp data bufffer used in filtering
     unsigned char  temp2[20*16];
-    const int *HFilter, *VFilter;
+    const short *HFilter, *VFilter;
 
 
-    HFilter = vp8_bilinear_taps[xoffset];
-    VFilter = vp8_bilinear_taps[yoffset];
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
 
 
-    vp8e_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 17, 8, HFilter);
-    vp8e_filter_block2d_bil_second_pass(FData3, temp2, 8, 8, 16, 8, VFilter);
+    var_filter_block2d_bil_first_pass(src_ptr, FData3, src_pixels_per_line, 1, 17, 8, HFilter);
+    var_filter_block2d_bil_second_pass(FData3, temp2, 8, 8, 16, 8, VFilter);
 
     return vp8_variance8x16_c(temp2, 8, dst_ptr, dst_pixels_per_line, sse);
 }

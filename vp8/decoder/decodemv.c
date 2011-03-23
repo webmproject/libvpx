@@ -228,15 +228,8 @@ unsigned int vp8_mv_cont_count[5][4] =
 };
 #endif
 
-unsigned char vp8_mbsplit_offset[4][16] = {
-    { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
-};
-
-unsigned char vp8_mbsplit_fill_count[4] = {8, 8, 4, 1};
-unsigned char vp8_mbsplit_fill_offset[4][16] = {
+static const unsigned char mbsplit_fill_count[4] = {8, 8, 4, 1};
+static const unsigned char mbsplit_fill_offset[4][16] = {
     { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15},
     { 0,  1,  4,  5,  8,  9, 12, 13,  2,  3,   6,  7, 10, 11, 14, 15},
     { 0,  1,  4,  5,  2,  3,  6,  7,  8,  9,  12, 13, 10, 11, 14, 15},
@@ -245,7 +238,7 @@ unsigned char vp8_mbsplit_fill_offset[4][16] = {
 
 
 
-void vp8_mb_mode_mv_init(VP8D_COMP *pbi)
+static void mb_mode_mv_init(VP8D_COMP *pbi)
 {
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
@@ -292,7 +285,7 @@ void vp8_mb_mode_mv_init(VP8D_COMP *pbi)
     }
 }
 
-void vp8_read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
+static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                             int mb_row, int mb_col)
 {
     const MV Zero = { 0, 0};
@@ -447,10 +440,10 @@ void vp8_read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     /* Fill (uniform) modes, mvs of jth subset.
                      Must do it here because ensuing subsets can
                      refer back to us via "left" or "above". */
-                    unsigned char *fill_offset;
-                    unsigned int fill_count = vp8_mbsplit_fill_count[s];
+                    const unsigned char *fill_offset;
+                    unsigned int fill_count = mbsplit_fill_count[s];
 
-                    fill_offset = &vp8_mbsplit_fill_offset[s][(unsigned char)j * vp8_mbsplit_fill_count[s]];
+                    fill_offset = &mbsplit_fill_offset[s][(unsigned char)j * mbsplit_fill_count[s]];
 
                     do {
                         mi->bmi[ *fill_offset] = bmi;
@@ -567,7 +560,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
     MODE_INFO *mi = pbi->common.mi;
     int mb_row = -1;
 
-    vp8_mb_mode_mv_init(pbi);
+    mb_mode_mv_init(pbi);
 
     while (++mb_row < pbi->common.mb_rows)
     {
@@ -585,11 +578,11 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
         while (++mb_col < pbi->common.mb_cols)
         {
-            /*vp8_read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
+            /*read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
             if(pbi->common.frame_type == KEY_FRAME)
                 vp8_kfread_modes(pbi, mi, mb_row, mb_col);
             else
-                vp8_read_mb_modes_mv(pbi, mi, &mi->mbmi, mb_row, mb_col);
+                read_mb_modes_mv(pbi, mi, &mi->mbmi, mb_row, mb_col);
 
             mi++;       /* next macroblock */
         }

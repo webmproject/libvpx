@@ -37,43 +37,6 @@
 extern void vp8_init_loop_filter(VP8_COMMON *cm);
 extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 
-#if CONFIG_DEBUG
-void vp8_recon_write_yuv_frame(unsigned char *name, YV12_BUFFER_CONFIG *s)
-{
-    FILE *yuv_file = fopen((char *)name, "ab");
-    unsigned char *src = s->y_buffer;
-    int h = s->y_height;
-
-    do
-    {
-        fwrite(src, s->y_width, 1,  yuv_file);
-        src += s->y_stride;
-    }
-    while (--h);
-
-    src = s->u_buffer;
-    h = s->uv_height;
-
-    do
-    {
-        fwrite(src, s->uv_width, 1,  yuv_file);
-        src += s->uv_stride;
-    }
-    while (--h);
-
-    src = s->v_buffer;
-    h = s->uv_height;
-
-    do
-    {
-        fwrite(src, s->uv_width, 1, yuv_file);
-        src += s->uv_stride;
-    }
-    while (--h);
-
-    fclose(yuv_file);
-}
-#endif
 
 void vp8dx_initialize()
 {
@@ -158,35 +121,6 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
 }
 
 
-void vp8dx_set_setting(VP8D_PTR comp, VP8D_SETTING oxst, int x)
-{
-    VP8D_COMP *pbi = (VP8D_COMP *) comp;
-
-    (void) pbi;
-    (void) x;
-
-    switch (oxst)
-    {
-    case VP8D_OK:
-        break;
-    }
-}
-
-int vp8dx_get_setting(VP8D_PTR comp, VP8D_SETTING oxst)
-{
-    VP8D_COMP *pbi = (VP8D_COMP *) comp;
-
-    (void) pbi;
-
-    switch (oxst)
-    {
-    case VP8D_OK:
-        break;
-    }
-
-    return -1;
-}
-
 int vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
@@ -206,6 +140,8 @@ int vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
 
     return 0;
 }
+
+
 int vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
@@ -462,14 +398,8 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
     }
 
-#if 0
-    /* DEBUG code */
-    /*vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);*/
     vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
 
-    if (cm->current_video_frame <= 5)
-        write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
-#endif
 
     vp8_clear_system_state();
 

@@ -168,7 +168,7 @@ void vp8_build_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf)
     }
 }
 
-void vp8_build_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch)
+static void build_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch)
 {
     unsigned char *ptr_base;
     unsigned char *ptr;
@@ -187,7 +187,7 @@ void vp8_build_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch)
     }
 }
 
-void vp8_build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch)
+static void build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch)
 {
     unsigned char *ptr_base;
     unsigned char *ptr;
@@ -246,7 +246,7 @@ void vp8_build_inter_predictors_mbuv(MACROBLOCKD *x)
             BLOCKD *d1 = &x->block[i+1];
 
             if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
-                vp8_build_inter_predictors2b(x, d0, 8);
+                build_inter_predictors2b(x, d0, 8);
             else
             {
                 vp8_build_inter_predictors_b(d0, 8, x->subpixel_predict);
@@ -291,7 +291,7 @@ void vp8_build_inter_predictors_mby(MACROBLOCKD *x)
             for (i = 0; i < 4; i++)
             {
                 BLOCKD *d = &x->block[bbb[i]];
-                vp8_build_inter_predictors4b(x, d, 16);
+                build_inter_predictors4b(x, d, 16);
             }
 
         }
@@ -303,7 +303,7 @@ void vp8_build_inter_predictors_mby(MACROBLOCKD *x)
                 BLOCKD *d1 = &x->block[i+1];
 
                 if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
-                    vp8_build_inter_predictors2b(x, d0, 16);
+                    build_inter_predictors2b(x, d0, 16);
                 else
                 {
                     vp8_build_inter_predictors_b(d0, 16, x->subpixel_predict);
@@ -372,7 +372,7 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
             for (i = 0; i < 4; i++)
             {
                 BLOCKD *d = &x->block[bbb[i]];
-                vp8_build_inter_predictors4b(x, d, 16);
+                build_inter_predictors4b(x, d, 16);
             }
         }
         else
@@ -383,7 +383,7 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
                 BLOCKD *d1 = &x->block[i+1];
 
                 if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
-                    vp8_build_inter_predictors2b(x, d0, 16);
+                    build_inter_predictors2b(x, d0, 16);
                 else
                 {
                     vp8_build_inter_predictors_b(d0, 16, x->subpixel_predict);
@@ -400,7 +400,7 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
             BLOCKD *d1 = &x->block[i+1];
 
             if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
-                vp8_build_inter_predictors2b(x, d0, 8);
+                build_inter_predictors2b(x, d0, 8);
             else
             {
                 vp8_build_inter_predictors_b(d0, 8, x->subpixel_predict);
@@ -600,7 +600,7 @@ void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
             for (i = 0; i < 4; i++)
             {
                 BLOCKD *d = &x->block[bbb[i]];
-                /*vp8_build_inter_predictors4b(x, d, 16);*/
+                /*build_inter_predictors4b(x, d, 16);*/
 
                 {
                     unsigned char *ptr_base;
@@ -630,7 +630,7 @@ void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
 
                 if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
                 {
-                    /*vp8_build_inter_predictors2b(x, d0, 16);*/
+                    /*build_inter_predictors2b(x, d0, 16);*/
                     unsigned char *ptr_base;
                     unsigned char *ptr;
                     unsigned char *pred_ptr = d0->predictor;
@@ -662,7 +662,7 @@ void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
 
             if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
             {
-                /*vp8_build_inter_predictors2b(x, d0, 8);*/
+                /*build_inter_predictors2b(x, d0, 8);*/
                 unsigned char *ptr_base;
                 unsigned char *ptr;
                 unsigned char *pred_ptr = d0->predictor;

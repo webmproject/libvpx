@@ -175,7 +175,7 @@ void clamp_mvs(MACROBLOCKD *xd)
 
 }
 
-void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
+static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     int eobtotal = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
@@ -320,10 +320,8 @@ FILE *vpxlog = 0;
 
 
 
-void vp8_decode_mb_row(VP8D_COMP *pbi,
-                       VP8_COMMON *pc,
-                       int mb_row,
-                       MACROBLOCKD *xd)
+static void
+decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
 {
 
     int i;
@@ -395,7 +393,7 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         else
         pbi->debugoutput =0;
         */
-        vp8_decode_macroblock(pbi, xd);
+        decode_macroblock(pbi, xd);
 
         /* check if the boolean decoder has suffered an error */
         xd->corrupted |= vp8dx_bool_error(xd->current_bc);
@@ -906,7 +904,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     ibc = 0;
             }
 
-            vp8_decode_mb_row(pbi, pc, mb_row, xd);
+            decode_mb_row(pbi, pc, mb_row, xd);
         }
     }
 

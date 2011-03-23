@@ -861,7 +861,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
             vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei, 1,  cpi->encoding_thread_count);
 
             for (i = 0; i < cm->mb_rows; i++)
-                cpi->mt_current_mb_col[i] = 0;
+                cpi->mt_current_mb_col[i] = -1;
 
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {

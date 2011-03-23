@@ -26,9 +26,9 @@ _int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 void vp8_fix_contexts(MACROBLOCKD *x);
 
-TOKENVALUE vp8_dct_value_tokens[DCT_MAX_VALUE*2];
+static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE*2];
 const TOKENVALUE *vp8_dct_value_tokens_ptr;
-int vp8_dct_value_cost[DCT_MAX_VALUE*2];
+static int dct_value_cost[DCT_MAX_VALUE*2];
 const int *vp8_dct_value_cost_ptr;
 #if 0
 int skip_true_count = 0;
@@ -37,7 +37,7 @@ int skip_false_count = 0;
 static void fill_value_tokens()
 {
 
-    TOKENVALUE *const t = vp8_dct_value_tokens + DCT_MAX_VALUE;
+    TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
     vp8_extra_bit_struct *const e = vp8_extra_bits;
 
     int i = -DCT_MAX_VALUE;
@@ -81,7 +81,7 @@ static void fill_value_tokens()
                     cost += vp8_treed_cost(p->tree, p->prob, extra >> 1, Length);
 
                 cost += vp8_cost_bit(vp8_prob_half, extra & 1); /* sign */
-                vp8_dct_value_cost[i + DCT_MAX_VALUE] = cost;
+                dct_value_cost[i + DCT_MAX_VALUE] = cost;
             }
 
         }
@@ -89,8 +89,8 @@ static void fill_value_tokens()
     }
     while (++i < DCT_MAX_VALUE);
 
-    vp8_dct_value_tokens_ptr = vp8_dct_value_tokens + DCT_MAX_VALUE;
-    vp8_dct_value_cost_ptr   = vp8_dct_value_cost + DCT_MAX_VALUE;
+    vp8_dct_value_tokens_ptr = dct_value_tokens + DCT_MAX_VALUE;
+    vp8_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
 static void tokenize2nd_order_b

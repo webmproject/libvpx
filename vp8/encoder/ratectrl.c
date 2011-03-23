@@ -135,7 +135,7 @@ const int vp8_bits_per_mb[2][QINDEX_RANGE] =
   };
   #endif
 
-const int vp8_kf_boost_qadjustment[QINDEX_RANGE] =
+static const int kf_boost_qadjustment[QINDEX_RANGE] =
   {
       128, 129, 130, 131, 132, 133, 134, 135,
     136, 137, 138, 139, 140, 141, 142, 143,
@@ -199,7 +199,7 @@ const int vp8_gf_boost_qadjustment[QINDEX_RANGE] =
 };
 */
 
-const int vp8_kf_gf_boost_qlimits[QINDEX_RANGE] =
+static const int kf_gf_boost_qlimits[QINDEX_RANGE] =
 {
     150, 155, 160, 165, 170, 175, 180, 185,
     190, 195, 200, 205, 210, 215, 220, 225,
@@ -220,14 +220,14 @@ const int vp8_kf_gf_boost_qlimits[QINDEX_RANGE] =
 };
 
 // % adjustment to target kf size based on seperation from previous frame
-const int vp8_kf_boost_seperationt_adjustment[16] =
+static const int kf_boost_seperation_adjustment[16] =
 {
     30,   40,   50,   55,   60,   65,   70,   75,
     80,   85,   90,   95,  100,  100,  100,  100,
 };
 
 
-const int vp8_gf_adjust_table[101] =
+static const int gf_adjust_table[101] =
 {
     100,
     115, 130, 145, 160, 175, 190, 200, 210, 220, 230,
@@ -242,13 +242,13 @@ const int vp8_gf_adjust_table[101] =
     400, 400, 400, 400, 400, 400, 400, 400, 400, 400,
 };
 
-const int vp8_gf_intra_useage_adjustment[20] =
+static const int gf_intra_usage_adjustment[20] =
 {
     125, 120, 115, 110, 105, 100,  95,  85,  80,  75,
     70,  65,  60,  55,  50,  50,  50,  50,  50,  50,
 };
 
-const int vp8_gf_interval_table[101] =
+static const int gf_interval_table[101] =
 {
     7,
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
@@ -398,7 +398,7 @@ void vp8_calc_auto_iframe_target_size(VP8_COMP *cpi)
         kf_boost = (int)(2 * cpi->output_frame_rate - 16);
 
         // adjustment up based on q
-        kf_boost = kf_boost * vp8_kf_boost_qadjustment[cpi->ni_av_qi] / 100;
+        kf_boost = kf_boost * kf_boost_qadjustment[cpi->ni_av_qi] / 100;
 
         // frame separation adjustment ( down)
         if (cpi->frames_since_key  < cpi->output_frame_rate / 2)
@@ -533,10 +533,10 @@ static void calc_gf_params(VP8_COMP *cpi)
             Boost = GFQ_ADJUSTMENT;
 
             // Adjust based upon most recently measure intra useage
-            Boost = Boost * vp8_gf_intra_useage_adjustment[(cpi->this_frame_percent_intra < 15) ? cpi->this_frame_percent_intra : 14] / 100;
+            Boost = Boost * gf_intra_usage_adjustment[(cpi->this_frame_percent_intra < 15) ? cpi->this_frame_percent_intra : 14] / 100;
 
             // Adjust gf boost based upon GF usage since last GF
-            Boost = Boost * vp8_gf_adjust_table[gf_frame_useage] / 100;
+            Boost = Boost * gf_adjust_table[gf_frame_useage] / 100;
 #endif
         }
 
@@ -548,8 +548,8 @@ static void calc_gf_params(VP8_COMP *cpi)
         }
 
         // Apply an upper limit based on Q for 1 pass encodes
-        if (Boost > vp8_kf_gf_boost_qlimits[Q] && (cpi->pass == 0))
-            Boost = vp8_kf_gf_boost_qlimits[Q];
+        if (Boost > kf_gf_boost_qlimits[Q] && (cpi->pass == 0))
+            Boost = kf_gf_boost_qlimits[Q];
 
         // Apply lower limits to boost.
         else if (Boost < 110)
@@ -584,8 +584,8 @@ static void calc_gf_params(VP8_COMP *cpi)
             if (cpi->last_boost >= 1500)
                 cpi->frames_till_gf_update_due ++;
 
-            if (vp8_gf_interval_table[gf_frame_useage] > cpi->frames_till_gf_update_due)
-                cpi->frames_till_gf_update_due = vp8_gf_interval_table[gf_frame_useage];
+            if (gf_interval_table[gf_frame_useage] > cpi->frames_till_gf_update_due)
+                cpi->frames_till_gf_update_due = gf_interval_table[gf_frame_useage];
 
             if (cpi->frames_till_gf_update_due > cpi->max_gf_interval)
                 cpi->frames_till_gf_update_due = cpi->max_gf_interval;
@@ -639,17 +639,17 @@ void vp8_calc_iframe_target_size(VP8_COMP *cpi)
         // between key frames.
 
         // Adjust boost based upon ambient Q
-        Boost = vp8_kf_boost_qadjustment[Q];
+        Boost = kf_boost_qadjustment[Q];
 
         // Make the Key frame boost less if the seperation from the previous key frame is small
         if (cpi->frames_since_key < 16)
-            Boost = Boost * vp8_kf_boost_seperationt_adjustment[cpi->frames_since_key] / 100;
+            Boost = Boost * kf_boost_seperation_adjustment[cpi->frames_since_key] / 100;
         else
-            Boost = Boost * vp8_kf_boost_seperationt_adjustment[15] / 100;
+            Boost = Boost * kf_boost_seperation_adjustment[15] / 100;
 
         // Apply limits on boost
-        if (Boost > vp8_kf_gf_boost_qlimits[Q])
-            Boost = vp8_kf_gf_boost_qlimits[Q];
+        if (Boost > kf_gf_boost_qlimits[Q])
+            Boost = kf_gf_boost_qlimits[Q];
         else if (Boost < 120)
             Boost = 120;
     }

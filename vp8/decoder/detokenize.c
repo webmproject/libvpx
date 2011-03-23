@@ -19,7 +19,13 @@
 #define BOOL_DATA UINT8
 
 #define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
-DECLARE_ALIGNED(16, UINT8, vp8_coef_bands_x[16]) = { 0, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X};
+DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
+{
+    0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X,
+    6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X,
+    6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
+    6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X
+};
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
 #define ONE_CONTEXT_NODE            2
@@ -135,7 +141,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8dx_bitreader_norm[256]);
             Prob = coef_probs; \
             if(c<15) {\
             ++c; \
-            Prob += vp8_coef_bands_x[c]; \
+            Prob += coef_bands_x[c]; \
             goto branch; \
             } goto BLOCK_FINISHED; /*for malformed input */\
         } \
@@ -244,7 +250,7 @@ BLOCK_LOOP:
     Prob += v * ENTROPY_NODES;
 
 DO_WHILE:
-    Prob += vp8_coef_bands_x[c];
+    Prob += coef_bands_x[c];
     DECODE_AND_BRANCH_IF_ZERO(Prob[EOB_CONTEXT_NODE], BLOCK_FINISHED);
 
 CHECK_0_:
