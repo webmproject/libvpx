@@ -67,7 +67,7 @@ static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
 static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
 
 
-const int cq_level[QINDEX_RANGE] =
+static const int cq_level[QINDEX_RANGE] =
 {
     0,0,1,1,2,3,3,4,4,5,6,6,7,8,8,9,
     9,10,11,11,12,13,13,14,15,15,16,17,17,18,19,20,
@@ -79,10 +79,9 @@ const int cq_level[QINDEX_RANGE] =
     86,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100
 };
 
-void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
-int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps);
+static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
 
-int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
+static int encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
 {
 
     int i;
@@ -146,7 +145,7 @@ static double calculate_modified_err(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     /*start_pos = cpi->stats_in;
     sum_iiratio = 0.0;
     i = 0;
-    while ( (i < 1) && vp8_input_stats(cpi,&next_frame) != EOF )
+    while ( (i < 1) && input_stats(cpi,&next_frame) != EOF )
     {
 
         next_iiratio = next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error);
@@ -212,7 +211,7 @@ static const double weight_table[256] = {
 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000, 1.000000
 };
 
-double vp8_simple_weight(YV12_BUFFER_CONFIG *source)
+static double simple_weight(YV12_BUFFER_CONFIG *source)
 {
     int i, j;
 
@@ -240,7 +239,7 @@ double vp8_simple_weight(YV12_BUFFER_CONFIG *source)
 
 
 // This function returns the current per frame maximum bitrate target
-int frame_max_bits(VP8_COMP *cpi)
+static int frame_max_bits(VP8_COMP *cpi)
 {
     // Max allocation for a single frame based on the max section guidelines passed in and how many bits are left
     int max_bits;
@@ -281,9 +280,9 @@ int frame_max_bits(VP8_COMP *cpi)
 }
 
 
-void vp8_output_stats(const VP8_COMP            *cpi,
-                      struct vpx_codec_pkt_list *pktlist,
-                      FIRSTPASS_STATS            *stats)
+static void output_stats(const VP8_COMP            *cpi,
+                         struct vpx_codec_pkt_list *pktlist,
+                         FIRSTPASS_STATS            *stats)
 {
     struct vpx_codec_cx_pkt pkt;
     pkt.kind = VPX_CODEC_STATS_PKT;
@@ -323,7 +322,7 @@ void vp8_output_stats(const VP8_COMP            *cpi,
 #endif
 }
 
-int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps)
+static int input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps)
 {
     if (cpi->stats_in >= cpi->stats_in_end)
         return EOF;
@@ -333,7 +332,7 @@ int vp8_input_stats(VP8_COMP *cpi, FIRSTPASS_STATS *fps)
     return 1;
 }
 
-void vp8_zero_stats(FIRSTPASS_STATS *section)
+static void zero_stats(FIRSTPASS_STATS *section)
 {
     section->frame      = 0.0;
     section->intra_error = 0.0;
@@ -353,7 +352,7 @@ void vp8_zero_stats(FIRSTPASS_STATS *section)
     section->count      = 0.0;
     section->duration   = 1.0;
 }
-void vp8_accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
+static void accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
 {
     section->frame += frame->frame;
     section->intra_error += frame->intra_error;
@@ -373,7 +372,7 @@ void vp8_accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
     section->count      += frame->count;
     section->duration   += frame->duration;
 }
-void vp8_avg_stats(FIRSTPASS_STATS *section)
+static void avg_stats(FIRSTPASS_STATS *section)
 {
     if (section->count < 1.0)
         return;
@@ -397,15 +396,15 @@ void vp8_avg_stats(FIRSTPASS_STATS *section)
 
 void vp8_init_first_pass(VP8_COMP *cpi)
 {
-    vp8_zero_stats(cpi->total_stats);
+    zero_stats(cpi->total_stats);
 }
 
 void vp8_end_first_pass(VP8_COMP *cpi)
 {
-    vp8_output_stats(cpi, cpi->output_pkt_list, cpi->total_stats);
+    output_stats(cpi, cpi->output_pkt_list, cpi->total_stats);
 }
 
-void vp8_zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG * recon_buffer, int * best_motion_err, int recon_yoffset )
+static void zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG * recon_buffer, int * best_motion_err, int recon_yoffset )
 {
     MACROBLOCKD * const xd = & x->e_mbd;
     BLOCK *b = &x->block[0];
@@ -424,7 +423,7 @@ void vp8_zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG * r
     VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16) ( src_ptr, src_stride, ref_ptr, ref_stride, (unsigned int *)(best_motion_err));
 }
 
-void vp8_first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *best_mv, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset )
+static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *best_mv, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset )
 {
     MACROBLOCKD *const xd = & x->e_mbd;
     BLOCK *b = &x->block[0];
@@ -575,7 +574,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             xd->left_available = (mb_col != 0);
 
             // do intra 16x16 prediction
-            this_error = vp8_encode_intra(cpi, x, use_dc_pred);
+            this_error = encode_intra(cpi, x, use_dc_pred);
 
             // "intrapenalty" below deals with situations where the intra and inter error scores are very low (eg a plain black frame)
             // We do not have special cases in first pass for 0,0 and nearest etc so all inter modes carry an overhead cost estimate fot the mv.
@@ -600,13 +599,13 @@ void vp8_first_pass(VP8_COMP *cpi)
                 int motion_error = INT_MAX;
 
                 // Simple 0,0 motion with no mv overhead
-                vp8_zz_motion_search( cpi, x, lst_yv12, &motion_error, recon_yoffset );
+                zz_motion_search( cpi, x, lst_yv12, &motion_error, recon_yoffset );
                 d->bmi.mv.as_mv.row = 0;
                 d->bmi.mv.as_mv.col = 0;
 
                 // Test last reference frame using the previous best mv as the
                 // starting point (best reference) for the search
-                vp8_first_pass_motion_search(cpi, x, &best_ref_mv.as_mv,
+                first_pass_motion_search(cpi, x, &best_ref_mv.as_mv,
                                         &d->bmi.mv.as_mv, lst_yv12,
                                         &motion_error, recon_yoffset);
 
@@ -614,7 +613,7 @@ void vp8_first_pass(VP8_COMP *cpi)
                 if (best_ref_mv.as_int)
                 {
                    tmp_err = INT_MAX;
-                   vp8_first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv,
+                   first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv,
                                      lst_yv12, &tmp_err, recon_yoffset);
 
                    if ( tmp_err < motion_error )
@@ -628,7 +627,7 @@ void vp8_first_pass(VP8_COMP *cpi)
                 // Experimental search in a second reference frame ((0,0) based only)
                 if (cm->current_video_frame > 1)
                 {
-                    vp8_first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv, gld_yv12, &gf_motion_error, recon_yoffset);
+                    first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv, gld_yv12, &gf_motion_error, recon_yoffset);
 
                     if ((gf_motion_error < motion_error) && (gf_motion_error < this_error))
                     {
@@ -752,7 +751,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         fps.frame      = cm->current_video_frame ;
         fps.intra_error = intra_error >> 8;
         fps.coded_error = coded_error >> 8;
-        weight = vp8_simple_weight(cpi->Source);
+        weight = simple_weight(cpi->Source);
 
 
         if (weight < 0.1)
@@ -796,8 +795,8 @@ void vp8_first_pass(VP8_COMP *cpi)
         memcpy(cpi->this_frame_stats,
                &fps,
                sizeof(FIRSTPASS_STATS));
-        vp8_output_stats(cpi, cpi->output_pkt_list, cpi->this_frame_stats);
-        vp8_accumulate_stats(cpi->total_stats, &fps);
+        output_stats(cpi, cpi->output_pkt_list, cpi->this_frame_stats);
+        accumulate_stats(cpi->total_stats, &fps);
     }
 
     // Copy the previous Last Frame into the GF buffer if specific conditions for doing so are met
@@ -1168,7 +1167,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
 
     double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
 
-    vp8_zero_stats(cpi->total_stats);
+    zero_stats(cpi->total_stats);
 
     if (!cpi->stats_in_end)
         return;
@@ -1202,7 +1201,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     cpi->kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
     cpi->gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
 
-    vp8_avg_stats(cpi->total_stats);
+    avg_stats(cpi->total_stats);
 
     // Scan the first pass file and calculate an average Intra / Inter error score ratio for the sequence
     {
@@ -1211,7 +1210,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
 
         start_pos = cpi->stats_in;               // Note starting "file" position
 
-        while (vp8_input_stats(cpi, &this_frame) != EOF)
+        while (input_stats(cpi, &this_frame) != EOF)
         {
             IIRatio = this_frame.intra_error / DOUBLE_DIVIDE_CHECK(this_frame.coded_error);
             IIRatio = (IIRatio < 1.0) ? 1.0 : (IIRatio > 20.0) ? 20.0 : IIRatio;
@@ -1232,7 +1231,7 @@ void vp8_init_second_pass(VP8_COMP *cpi)
         cpi->modified_error_total = 0.0;
         cpi->modified_error_used = 0.0;
 
-        while (vp8_input_stats(cpi, &this_frame) != EOF)
+        while (input_stats(cpi, &this_frame) != EOF)
         {
             cpi->modified_error_total += calculate_modified_err(cpi, &this_frame);
         }
@@ -1255,7 +1254,7 @@ void vp8_end_second_pass(VP8_COMP *cpi)
 
 // This function gives and estimate of how badly we believe
 // the prediction quality is decaying from frame to frame.
-double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
+static double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
 {
     double prediction_decay_rate;
     double motion_decay;
@@ -1293,7 +1292,7 @@ double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
 // Function to test for a condition where a complex transition is followed
 // by a static section. For example in slide shows where there is a fade
 // between slides. This is to help with more optimal kf and gf positioning.
-BOOL detect_transition_to_still(
+static int detect_transition_to_still(
     VP8_COMP *cpi,
     int frame_interval,
     int still_interval,
@@ -1318,7 +1317,7 @@ BOOL detect_transition_to_still(
         // persists...
         for ( j = 0; j < still_interval; j++ )
         {
-            if (EOF == vp8_input_stats(cpi, &tmp_next_frame))
+            if (EOF == input_stats(cpi, &tmp_next_frame))
                 break;
 
             decay_rate = get_prediction_decay_rate(cpi, &tmp_next_frame);
@@ -1417,7 +1416,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         mod_err_per_mb_accumulator +=
             mod_frame_err / DOUBLE_DIVIDE_CHECK((double)cpi->common.MBs);
 
-        if (EOF == vp8_input_stats(cpi, &next_frame))
+        if (EOF == input_stats(cpi, &next_frame))
             break;
 
         // Accumulate motion stats.
@@ -1691,7 +1690,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         {
             while (cpi->baseline_gf_interval < cpi->frames_to_key)
             {
-                if (EOF == vp8_input_stats(cpi, this_frame))
+                if (EOF == input_stats(cpi, this_frame))
                     break;
 
                 cpi->baseline_gf_interval++;
@@ -1870,16 +1869,16 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         FIRSTPASS_STATS sectionstats;
         double Ratio;
 
-        vp8_zero_stats(&sectionstats);
+        zero_stats(&sectionstats);
         reset_fpf_position(cpi, start_pos);
 
         for (i = 0 ; i < cpi->baseline_gf_interval ; i++)
         {
-            vp8_input_stats(cpi, &next_frame);
-            vp8_accumulate_stats(&sectionstats, &next_frame);
+            input_stats(cpi, &next_frame);
+            accumulate_stats(&sectionstats, &next_frame);
         }
 
-        vp8_avg_stats(&sectionstats);
+        avg_stats(&sectionstats);
 
         cpi->section_intra_rating =
             sectionstats.intra_error /
@@ -1977,7 +1976,7 @@ void vp8_second_pass(VP8_COMP *cpi)
 
     vp8_clear_system_state();
 
-    if (EOF == vp8_input_stats(cpi, &this_frame))
+    if (EOF == input_stats(cpi, &this_frame))
         return;
 
     this_frame_error = this_frame.ssim_weighted_pred_err;
@@ -1998,7 +1997,7 @@ void vp8_second_pass(VP8_COMP *cpi)
     {
         // Define next KF group and assign bits to it
         vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
-        vp8_find_next_key_frame(cpi, &this_frame_copy);
+        find_next_key_frame(cpi, &this_frame_copy);
 
         // Special case: Error error_resilient_mode mode does not make much sense for two pass but with its current meaning but this code is designed to stop
         // outlandish behaviour if someone does set it when using two pass. It effectively disables GF groups.
@@ -2239,7 +2238,7 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
             old_boost_score = boost_score;
 
             // Get the next frame details
-            if (EOF == vp8_input_stats(cpi, &local_next_frame))
+            if (EOF == input_stats(cpi, &local_next_frame))
                 break;
         }
 
@@ -2257,7 +2256,7 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
 
     return is_viable_kf;
 }
-void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
+static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 {
     int i,j;
     FIRSTPASS_STATS last_frame;
@@ -2317,7 +2316,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         // load a the next frame's stats
         vpx_memcpy(&last_frame, this_frame, sizeof(*this_frame));
-        vp8_input_stats(cpi, this_frame);
+        input_stats(cpi, this_frame);
 
         // Provided that we are not at the end of the file...
         if (cpi->oxcf.auto_key
@@ -2395,7 +2394,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             kf_group_coded_err += tmp_frame.coded_error;
 
             // Load a the next frame's stats
-            vp8_input_stats(cpi, &tmp_frame);
+            input_stats(cpi, &tmp_frame);
         }
 
         // Reset to the start of the group
@@ -2500,7 +2499,7 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         double motion_decay;
         double motion_pct;
 
-        if (EOF == vp8_input_stats(cpi, &next_frame))
+        if (EOF == input_stats(cpi, &next_frame))
             break;
 
         if (next_frame.intra_error > cpi->kf_intra_err_min)
@@ -2535,16 +2534,16 @@ void vp8_find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         FIRSTPASS_STATS sectionstats;
         double Ratio;
 
-        vp8_zero_stats(&sectionstats);
+        zero_stats(&sectionstats);
         reset_fpf_position(cpi, start_position);
 
         for (i = 0 ; i < cpi->frames_to_key ; i++)
         {
-            vp8_input_stats(cpi, &next_frame);
-            vp8_accumulate_stats(&sectionstats, &next_frame);
+            input_stats(cpi, &next_frame);
+            accumulate_stats(&sectionstats, &next_frame);
         }
 
-        vp8_avg_stats(&sectionstats);
+        avg_stats(&sectionstats);
 
          cpi->section_intra_rating = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
 

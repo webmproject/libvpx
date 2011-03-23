@@ -70,4 +70,6 @@ const B_MODE_INFO *vp8_left_bmi(const MODE_INFO *cur_mb, int b);
 
 const B_MODE_INFO *vp8_above_bmi(const MODE_INFO *cur_mb, int b, int mi_stride);
 
+extern const unsigned char vp8_mbsplit_offset[4][16];
+
 #endif

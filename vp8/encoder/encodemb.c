@@ -104,7 +104,7 @@ static void vp8_subtract_mb(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 }
 
-void vp8_build_dcblock(MACROBLOCK *x)
+static void build_dcblock(MACROBLOCK *x)
 {
     short *src_diff_ptr = &x->src_diff[384];
     int i;
@@ -138,7 +138,7 @@ void vp8_transform_intra_mby(MACROBLOCK *x)
     }
 
     // build dc block from 16 y dc values
-    vp8_build_dcblock(x);
+    build_dcblock(x);
 
     // do 2nd order transform on the dc block
     x->short_walsh4x4(&x->block[24].src_diff[0],
@@ -147,7 +147,7 @@ void vp8_transform_intra_mby(MACROBLOCK *x)
 }
 
 
-void vp8_transform_mb(MACROBLOCK *x)
+static void transform_mb(MACROBLOCK *x)
 {
     int i;
 
@@ -159,7 +159,7 @@ void vp8_transform_mb(MACROBLOCK *x)
 
     // build dc block from 16 y dc values
     if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
-        vp8_build_dcblock(x);
+        build_dcblock(x);
 
     for (i = 16; i < 24; i += 2)
     {
@@ -174,7 +174,8 @@ void vp8_transform_mb(MACROBLOCK *x)
 
 }
 
-void vp8_transform_mby(MACROBLOCK *x)
+
+static void transform_mby(MACROBLOCK *x)
 {
     int i;
 
@@ -187,7 +188,7 @@ void vp8_transform_mby(MACROBLOCK *x)
     // build dc block from 16 y dc values
     if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
     {
-        vp8_build_dcblock(x);
+        build_dcblock(x);
         x->short_walsh4x4(&x->block[24].src_diff[0],
             &x->block[24].coeff[0], 8);
     }
@@ -259,9 +260,9 @@ static const int plane_rd_mult[4]=
     Y1_RD_MULT
 };
 
-void vp8_optimize_b(MACROBLOCK *mb, int ib, int type,
-                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                    const VP8_ENCODER_RTCD *rtcd)
+static void optimize_b(MACROBLOCK *mb, int ib, int type,
+                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                       const VP8_ENCODER_RTCD *rtcd)
 {
     BLOCK *b;
     BLOCKD *d;
@@ -505,7 +506,7 @@ void vp8_optimize_b(MACROBLOCK *mb, int ib, int type,
     *a = *l = (d->eob != !type);
 }
 
-void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
+static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
     int type;
@@ -526,20 +527,20 @@ void vp8_optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
     for (b = 0; b < 16; b++)
     {
-        vp8_optimize_b(x, b, type,
+        optimize_b(x, b, type,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
     for (b = 16; b < 24; b++)
     {
-        vp8_optimize_b(x, b, PLANE_TYPE_UV,
+        optimize_b(x, b, PLANE_TYPE_UV,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
     if (has_2nd_order)
     {
         b=24;
-        vp8_optimize_b(x, b, PLANE_TYPE_Y2,
+        optimize_b(x, b, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 }
@@ -573,7 +574,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
     for (b = 0; b < 16; b++)
     {
-        vp8_optimize_b(x, b, type,
+        optimize_b(x, b, type,
         ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
@@ -581,7 +582,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     if (has_2nd_order)
     {
         b=24;
-        vp8_optimize_b(x, b, PLANE_TYPE_Y2,
+        optimize_b(x, b, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 }
@@ -607,7 +608,7 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
     for (b = 16; b < 24; b++)
     {
-        vp8_optimize_b(x, b, PLANE_TYPE_UV,
+        optimize_b(x, b, PLANE_TYPE_UV,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 }
@@ -619,13 +620,13 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_subtract_mb(rtcd, x);
 
-    vp8_transform_mb(x);
+    transform_mb(x);
 
     vp8_quantize_mb(x);
 
 #if !(CONFIG_REALTIME_ONLY)
     if (x->optimize)
-        vp8_optimize_mb(x, rtcd);
+        optimize_mb(x, rtcd);
 #endif
 
     vp8_inverse_transform_mb(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
@@ -642,7 +643,7 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
 
-    vp8_transform_mby(x);
+    transform_mby(x);
 
     vp8_quantize_mby(x);
 
@@ -650,22 +651,6 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     RECON_INVOKE(&rtcd->common->recon, recon_mby)
         (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
-}
-
-
-void vp8_encode_inter16x16uv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
-{
-    vp8_build_inter_predictors_mbuv(&x->e_mbd);
-
-    ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
-
-    vp8_transform_mbuv(x);
-
-    vp8_quantize_mbuv(x);
-
-    vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-
-    vp8_recon_intra_mbuv(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
 
 

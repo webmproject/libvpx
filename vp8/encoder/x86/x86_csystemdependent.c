@@ -16,7 +16,7 @@
 
 
 #if HAVE_MMX
-void vp8_short_fdct8x4_mmx(short *input, short *output, int pitch)
+static void short_fdct8x4_mmx(short *input, short *output, int pitch)
 {
     vp8_short_fdct4x4_mmx(input,   output,    pitch);
     vp8_short_fdct4x4_mmx(input + 4, output + 16, pitch);
@@ -26,7 +26,7 @@ int vp8_fast_quantize_b_impl_mmx(short *coeff_ptr, short *zbin_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
                                  short *scan_mask, short *round_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
-void vp8_fast_quantize_b_mmx(BLOCK *b, BLOCKD *d)
+static void fast_quantize_b_mmx(BLOCK *b, BLOCKD *d)
 {
     short *scan_mask   = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
     short *coeff_ptr   = b->coeff;
@@ -51,7 +51,7 @@ void vp8_fast_quantize_b_mmx(BLOCK *b, BLOCKD *d)
 }
 
 int vp8_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-int vp8_mbblock_error_mmx(MACROBLOCK *mb, int dc)
+static int mbblock_error_mmx(MACROBLOCK *mb, int dc)
 {
     short *coeff_ptr =  mb->block[0].coeff;
     short *dcoef_ptr =  mb->e_mbd.block[0].dqcoeff;
@@ -59,7 +59,7 @@ int vp8_mbblock_error_mmx(MACROBLOCK *mb, int dc)
 }
 
 int vp8_mbuverror_mmx_impl(short *s_ptr, short *d_ptr);
-int vp8_mbuverror_mmx(MACROBLOCK *mb)
+static int mbuverror_mmx(MACROBLOCK *mb)
 {
     short *s_ptr = &mb->coeff[256];
     short *d_ptr = &mb->e_mbd.dqcoeff[256];
@@ -69,7 +69,7 @@ int vp8_mbuverror_mmx(MACROBLOCK *mb)
 void vp8_subtract_b_mmx_impl(unsigned char *z,  int src_stride,
                              short *diff, unsigned char *predictor,
                              int pitch);
-void vp8_subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch)
+static void subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch)
 {
     unsigned char *z = *(be->base_src) + be->src;
     unsigned int  src_stride = be->src_stride;
@@ -85,7 +85,7 @@ int vp8_fast_quantize_b_impl_sse2(short *coeff_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
                                  const short *inv_scan_order, short *round_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
-void vp8_fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
+static void fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
 {
     short *scan_mask   = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
     short *coeff_ptr   = b->coeff;
@@ -115,7 +115,7 @@ int vp8_regular_quantize_b_impl_sse2(short *coeff_ptr, short *zbin_ptr,
                                      short *zbin_boost_ptr,
                                      short *quant_shift_ptr);
 
-void vp8_regular_quantize_b_sse2(BLOCK *b,BLOCKD *d)
+static void regular_quantize_b_sse2(BLOCK *b,BLOCKD *d)
 {
     d->eob = vp8_regular_quantize_b_impl_sse2(b->coeff,
                                               b->zbin,
@@ -131,7 +131,7 @@ void vp8_regular_quantize_b_sse2(BLOCK *b,BLOCKD *d)
 }
 
 int vp8_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
-int vp8_mbblock_error_xmm(MACROBLOCK *mb, int dc)
+static int mbblock_error_xmm(MACROBLOCK *mb, int dc)
 {
     short *coeff_ptr =  mb->block[0].coeff;
     short *dcoef_ptr =  mb->e_mbd.block[0].dqcoeff;
@@ -139,7 +139,7 @@ int vp8_mbblock_error_xmm(MACROBLOCK *mb, int dc)
 }
 
 int vp8_mbuverror_xmm_impl(short *s_ptr, short *d_ptr);
-int vp8_mbuverror_xmm(MACROBLOCK *mb)
+static int mbuverror_xmm(MACROBLOCK *mb)
 {
     short *s_ptr = &mb->coeff[256];
     short *d_ptr = &mb->e_mbd.dqcoeff[256];
@@ -149,7 +149,7 @@ int vp8_mbuverror_xmm(MACROBLOCK *mb)
 void vp8_subtract_b_sse2_impl(unsigned char *z,  int src_stride,
                              short *diff, unsigned char *predictor,
                              int pitch);
-void vp8_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
+static void subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
 {
     unsigned char *z = *(be->base_src) + be->src;
     unsigned int  src_stride = be->src_stride;
@@ -165,7 +165,7 @@ int vp8_fast_quantize_b_impl_ssse3(short *coeff_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
                                  short *round_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
-void vp8_fast_quantize_b_ssse3(BLOCK *b, BLOCKD *d)
+static void fast_quantize_b_ssse3(BLOCK *b, BLOCKD *d)
 {
     d->eob = vp8_fast_quantize_b_impl_ssse3(
                     b->coeff,
@@ -251,20 +251,20 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_mmx;
 
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_mmx;
-        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_mmx;
+        cpi->rtcd.fdct.short8x4                  = short_fdct8x4_mmx;
         cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_mmx;
-        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_mmx;
+        cpi->rtcd.fdct.fast8x4                   = short_fdct8x4_mmx;
 
         cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
 
         cpi->rtcd.encodemb.berr                  = vp8_block_error_mmx;
-        cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_mmx;
-        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_mmx;
-        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_mmx;
+        cpi->rtcd.encodemb.mberr                 = mbblock_error_mmx;
+        cpi->rtcd.encodemb.mbuverr               = mbuverror_mmx;
+        cpi->rtcd.encodemb.subb                  = subtract_b_mmx;
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_mmx;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_mmx;
 
-        /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_mmx;*/
+        /*cpi->rtcd.quantize.fastquantb            = fast_quantize_b_mmx;*/
     }
 #endif
 
@@ -311,16 +311,16 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_sse2 ;
 
         cpi->rtcd.encodemb.berr                  = vp8_block_error_xmm;
-        cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_xmm;
-        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_xmm;
-        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_sse2;
+        cpi->rtcd.encodemb.mberr                 = mbblock_error_xmm;
+        cpi->rtcd.encodemb.mbuverr               = mbuverror_xmm;
+        cpi->rtcd.encodemb.subb                  = subtract_b_sse2;
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_sse2;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
 
 #if ARCH_X86
-        cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse2;
+        cpi->rtcd.quantize.quantb                = regular_quantize_b_sse2;
 #endif
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
+        cpi->rtcd.quantize.fastquantb            = fast_quantize_b_sse2;
 
 #if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
@@ -358,7 +358,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_ssse3;
         cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_ssse3;
 
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
+        cpi->rtcd.quantize.fastquantb            = fast_quantize_b_ssse3;
 
 #if CONFIG_PSNR
 #if ARCH_X86_64

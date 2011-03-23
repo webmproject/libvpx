@@ -38,7 +38,7 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters[8][6]) =
     { 0, -1,   12,  123,  -6,  0 },
 };
 
-void vp8_filter_block2d_first_pass
+static void filter_block2d_first_pass
 (
     unsigned char *src_ptr,
     int *output_ptr,
@@ -82,7 +82,7 @@ void vp8_filter_block2d_first_pass
     }
 }
 
-void vp8_filter_block2d_second_pass
+static void filter_block2d_second_pass
 (
     int *src_ptr,
     unsigned char *output_ptr,
@@ -129,7 +129,7 @@ void vp8_filter_block2d_second_pass
 }
 
 
-void vp8_filter_block2d
+static void filter_block2d
 (
     unsigned char  *src_ptr,
     unsigned char  *output_ptr,
@@ -142,37 +142,11 @@ void vp8_filter_block2d
     int FData[9*4]; /* Temp data buffer used in filtering */
 
     /* First filter 1-D horizontally... */
-    vp8_filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 9, 4, HFilter);
+    filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 9, 4, HFilter);
 
     /* then filter verticaly... */
-    vp8_filter_block2d_second_pass(FData + 8, output_ptr, output_pitch, 4, 4, 4, 4, VFilter);
+    filter_block2d_second_pass(FData + 8, output_ptr, output_pitch, 4, 4, 4, 4, VFilter);
 }
-
-
-void vp8_block_variation_c
-(
-    unsigned char  *src_ptr,
-    int   src_pixels_per_line,
-    int *HVar,
-    int *VVar
-)
-{
-    int i, j;
-    unsigned char *Ptr = src_ptr;
-
-    for (i = 0; i < 4; i++)
-    {
-        for (j = 0; j < 4; j++)
-        {
-            *HVar += abs((int)Ptr[j] - (int)Ptr[j+1]);
-            *VVar += abs((int)Ptr[j] - (int)Ptr[j+src_pixels_per_line]);
-        }
-
-        Ptr += src_pixels_per_line;
-    }
-}
-
-
 
 
 void vp8_sixtap_predict_c
@@ -191,7 +165,7 @@ void vp8_sixtap_predict_c
     HFilter = vp8_sub_pel_filters[xoffset];   /* 6 tap */
     VFilter = vp8_sub_pel_filters[yoffset];   /* 6 tap */
 
-    vp8_filter_block2d(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter);
+    filter_block2d(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter);
 }
 void vp8_sixtap_predict8x8_c
 (
@@ -211,11 +185,11 @@ void vp8_sixtap_predict8x8_c
     VFilter = vp8_sub_pel_filters[yoffset];   /* 6 tap */
 
     /* First filter 1-D horizontally... */
-    vp8_filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 13, 8, HFilter);
+    filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 13, 8, HFilter);
 
 
     /* then filter verticaly... */
-    vp8_filter_block2d_second_pass(FData + 16, dst_ptr, dst_pitch, 8, 8, 8, 8, VFilter);
+    filter_block2d_second_pass(FData + 16, dst_ptr, dst_pitch, 8, 8, 8, 8, VFilter);
 
 }
 
@@ -237,11 +211,11 @@ void vp8_sixtap_predict8x4_c
     VFilter = vp8_sub_pel_filters[yoffset];   /* 6 tap */
 
     /* First filter 1-D horizontally... */
-    vp8_filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 9, 8, HFilter);
+    filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 9, 8, HFilter);
 
 
     /* then filter verticaly... */
-    vp8_filter_block2d_second_pass(FData + 16, dst_ptr, dst_pitch, 8, 8, 4, 8, VFilter);
+    filter_block2d_second_pass(FData + 16, dst_ptr, dst_pitch, 8, 8, 4, 8, VFilter);
 
 }
 
@@ -264,10 +238,10 @@ void vp8_sixtap_predict16x16_c
     VFilter = vp8_sub_pel_filters[yoffset];   /* 6 tap */
 
     /* First filter 1-D horizontally... */
-    vp8_filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 21, 16, HFilter);
+    filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 21, 16, HFilter);
 
     /* then filter verticaly... */
-    vp8_filter_block2d_second_pass(FData + 32, dst_ptr, dst_pitch, 16, 16, 16, 16, VFilter);
+    filter_block2d_second_pass(FData + 32, dst_ptr, dst_pitch, 16, 16, 16, 16, VFilter);
 
 }
 
@@ -294,7 +268,7 @@ void vp8_sixtap_predict16x16_c
  *                  Two filter taps should sum to VP8_FILTER_WEIGHT.
  *
  ****************************************************************************/
-void vp8_filter_block2d_bil_first_pass
+static void filter_block2d_bil_first_pass
 (
     unsigned char  *src_ptr,
     unsigned short *dst_ptr,
@@ -345,7 +319,7 @@ void vp8_filter_block2d_bil_first_pass
  *                  Two filter taps should sum to VP8_FILTER_WEIGHT.
  *
  ****************************************************************************/
-void vp8_filter_block2d_bil_second_pass
+static void filter_block2d_bil_second_pass
 (
     unsigned short *src_ptr,
     unsigned char  *dst_ptr,
@@ -399,7 +373,7 @@ void vp8_filter_block2d_bil_second_pass
  *  SPECIAL NOTES : The largest block size can be handled here is 16x16
  *
  ****************************************************************************/
-void vp8_filter_block2d_bil
+static void filter_block2d_bil
 (
     unsigned char *src_ptr,
     unsigned char *dst_ptr,
@@ -415,10 +389,10 @@ void vp8_filter_block2d_bil
     unsigned short FData[17*16];    /* Temp data buffer used in filtering */
 
     /* First filter 1-D horizontally... */
-    vp8_filter_block2d_bil_first_pass(src_ptr, FData, src_pitch, Height + 1, Width, HFilter);
+    filter_block2d_bil_first_pass(src_ptr, FData, src_pitch, Height + 1, Width, HFilter);
 
     /* then 1-D vertically... */
-    vp8_filter_block2d_bil_second_pass(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
+    filter_block2d_bil_second_pass(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
 }
 
 
@@ -444,19 +418,19 @@ void vp8_bilinear_predict4x4_c
         unsigned char temp2[16];
 
         bilinear_predict4x4_mmx(src_ptr, src_pixels_per_line, xoffset, yoffset, temp1, 4);
-        vp8_filter_block2d_bil(src_ptr, temp2, src_pixels_per_line, 4, HFilter, VFilter, 4, 4);
+        filter_block2d_bil(src_ptr, temp2, src_pixels_per_line, 4, HFilter, VFilter, 4, 4);
 
         for (i = 0; i < 16; i++)
         {
             if (temp1[i] != temp2[i])
             {
                 bilinear_predict4x4_mmx(src_ptr, src_pixels_per_line, xoffset, yoffset, temp1, 4);
-                vp8_filter_block2d_bil(src_ptr, temp2, src_pixels_per_line, 4, HFilter, VFilter, 4, 4);
+                filter_block2d_bil(src_ptr, temp2, src_pixels_per_line, 4, HFilter, VFilter, 4, 4);
             }
         }
     }
 #endif
-    vp8_filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 4, 4);
+    filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 4, 4);
 
 }
 
@@ -476,7 +450,7 @@ void vp8_bilinear_predict8x8_c
     HFilter = vp8_bilinear_filters[xoffset];
     VFilter = vp8_bilinear_filters[yoffset];
 
-    vp8_filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 8);
+    filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 8);
 
 }
 
@@ -496,7 +470,7 @@ void vp8_bilinear_predict8x4_c
     HFilter = vp8_bilinear_filters[xoffset];
     VFilter = vp8_bilinear_filters[yoffset];
 
-    vp8_filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 4);
+    filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 8, 4);
 
 }
 
@@ -516,5 +490,5 @@ void vp8_bilinear_predict16x16_c
     HFilter = vp8_bilinear_filters[xoffset];
     VFilter = vp8_bilinear_filters[yoffset];
 
-    vp8_filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 16, 16);
+    filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 16, 16);
 }

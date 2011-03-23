@@ -70,7 +70,6 @@ extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_
 
 int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
-int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 
 extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi);
 
@@ -330,7 +329,7 @@ static void setup_features(VP8_COMP *cpi)
 }
 
 
-void vp8_dealloc_compressor_data(VP8_COMP *cpi)
+static void dealloc_compressor_data(VP8_COMP *cpi)
 {
     vpx_free(cpi->tplist);
     cpi->tplist = NULL;
@@ -1522,7 +1521,7 @@ rescale(int val, int num, int denom)
 }
 
 
-void vp8_init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
+static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
@@ -1913,7 +1912,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     vp8_create_common(&cpi->common);
     vp8_cmachine_specific_config(cpi);
 
-    vp8_init_config((VP8_PTR)cpi, oxcf);
+    init_config((VP8_PTR)cpi, oxcf);
 
     memcpy(cpi->base_skip_false_prob, vp8cx_base_skip_false_prob, sizeof(vp8cx_base_skip_false_prob));
     cpi->common.current_video_frame   = 0;
@@ -2414,7 +2413,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
     vp8cx_remove_encoder_threads(cpi);
 #endif
 
-    vp8_dealloc_compressor_data(cpi);
+    dealloc_compressor_data(cpi);
     vpx_free(cpi->mb.ss);
     vpx_free(cpi->tok);
     vpx_free(cpi->cyclic_refresh_map);
@@ -4684,18 +4683,8 @@ static void encode_frame_to_data_rate
 
 }
 
-int vp8_is_gf_update_needed(VP8_PTR ptr)
-{
-    VP8_COMP *cpi = (VP8_COMP *) ptr;
-    int ret_val;
 
-    ret_val = cpi->gf_update_recommended;
-    cpi->gf_update_recommended = 0;
-
-    return ret_val;
-}
-
-void vp8_check_gf_quality(VP8_COMP *cpi)
+static void check_gf_quality(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
     int gf_active_pct = (100 * cpi->gf_active_count) / (cm->mb_rows * cm->mb_cols);
@@ -4944,7 +4933,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 if (start_frame < 0)
                     start_frame += cpi->oxcf.lag_in_frames;
 
-                besterr = vp8_calc_low_ss_err(&cpi->src_buffer[cpi->last_alt_ref_sei].source_buffer,
+                besterr = calc_low_ss_err(&cpi->src_buffer[cpi->last_alt_ref_sei].source_buffer,
                                               &cpi->src_buffer[start_frame].source_buffer, IF_RTCD(&cpi->rtcd.variance));
 
                 for (i = 0; i < 7; i++)
@@ -4953,7 +4942,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                     cpi->oxcf.arnr_strength = i;
                     vp8_temporal_filter_prepare_c(cpi);
 
-                    thiserr = vp8_calc_low_ss_err(&cpi->alt_ref_buffer.source_buffer,
+                    thiserr = calc_low_ss_err(&cpi->alt_ref_buffer.source_buffer,
                                                   &cpi->src_buffer[start_frame].source_buffer, IF_RTCD(&cpi->rtcd.variance));
 
                     if (10 * thiserr < besterr * 8)
@@ -5096,7 +5085,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     if (cpi->compressor_speed == 2)
     {
-        vp8_check_gf_quality(cpi);
+        check_gf_quality(cpi);
         vpx_usec_timer_start(&tsctimer);
         vpx_usec_timer_start(&ticktimer);
     }
@@ -5483,7 +5472,9 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const 
 
     return Total;
 }
-int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd)
+
+
+static int calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd)
 {
     int i, j;
     int Total = 0;
@@ -5511,11 +5502,7 @@ int vp8_calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, co
     return Total;
 }
 
-int vp8_get_speed(VP8_PTR c)
-{
-    VP8_COMP   *cpi = (VP8_COMP *) c;
-    return cpi->Speed;
-}
+
 int vp8_get_quantizer(VP8_PTR c)
 {
     VP8_COMP   *cpi = (VP8_COMP *) c;

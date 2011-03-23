@@ -88,24 +88,3 @@ vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height, int 
 
     return 0;
 }
-
-/****************************************************************************
- *
- ****************************************************************************/
-int
-vp8_yv12_black_frame_buffer(YV12_BUFFER_CONFIG *ybf)
-{
-    if (ybf)
-    {
-        if (ybf->buffer_alloc)
-        {
-            duck_memset(ybf->y_buffer, 0x0, ybf->y_stride * ybf->y_height);
-            duck_memset(ybf->u_buffer, 0x80, ybf->uv_stride * ybf->uv_height);
-            duck_memset(ybf->v_buffer, 0x80, ybf->uv_stride * ybf->uv_height);
-        }
-
-        return 0;
-    }
-
-    return -1;
-}

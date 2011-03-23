@@ -11,6 +11,13 @@
 
 #include "findnearmv.h"
 
+const unsigned char vp8_mbsplit_offset[4][16] = {
+    { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+    { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+    { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+    { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
+};
+
 /* Predict motion vectors using those from already-decoded nearby blocks.
    Note that we only consider one 4x4 subblock from each candidate 16x16
    macroblock.   */

@@ -53,7 +53,7 @@ extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
 
 
-const int vp8_auto_speed_thresh[17] =
+static const int auto_speed_thresh[17] =
 {
     1000,
     200,
@@ -414,7 +414,7 @@ void vp8_auto_select_speed(VP8_COMP *cpi)
                 }
             }
 
-            if (milliseconds_for_compress * 100 > cpi->avg_encode_time * vp8_auto_speed_thresh[cpi->Speed])
+            if (milliseconds_for_compress * 100 > cpi->avg_encode_time * auto_speed_thresh[cpi->Speed])
             {
                 cpi->Speed          -= 1;
                 cpi->avg_pick_mode_time = 0;
@@ -1065,13 +1065,6 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
     d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
 #else
 #endif
-unsigned char vp8_mbsplit_offset2[4][16] = {
-    { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
-};
-
 
 static const unsigned int segmentation_to_sseshift[4] = {3, 3, 2, 0};
 
@@ -1099,8 +1092,8 @@ typedef struct
 } BEST_SEG_INFO;
 
 
-void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
-                         unsigned int segmentation)
+static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
+                             BEST_SEG_INFO *bsi, unsigned int segmentation)
 {
     int i;
     int const *labels;
@@ -1218,7 +1211,7 @@ void vp8_rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x, BEST_SEG_INFO *bsi,
                     int sadpb = x->sadperbit4;
 
                     // find first label
-                    n = vp8_mbsplit_offset2[segmentation][i];
+                    n = vp8_mbsplit_offset[segmentation][i];
 
                     c = &x->block[n];
                     e = &x->e_mbd.block[n];
@@ -1397,16 +1390,16 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     {
         /* for now, we will keep the original segmentation order
            when in best quality mode */
-        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
-        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
-        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
-        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
+        rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
+        rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
+        rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
+        rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
     }
     else
     {
         int sr;
 
-        vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
+        rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
 
         if (bsi.segment_rd < best_rd)
         {
@@ -1445,7 +1438,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                 sr = MAXF((abs(bsi.sv_mvp[1].row - bsi.sv_mvp[3].row))>>3, (abs(bsi.sv_mvp[1].col - bsi.sv_mvp[3].col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[1]);
 
-                vp8_rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
+                rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
             }
 
             /* block 16X8 */
@@ -1456,7 +1449,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                 sr = MAXF((abs(bsi.sv_mvp[2].row - bsi.sv_mvp[3].row))>>3, (abs(bsi.sv_mvp[2].col - bsi.sv_mvp[3].col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[1]);
 
-                vp8_rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
+                rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
             }
 
             /* If 8x8 is better than 16x8/8x16, then do 4x4 search */
@@ -1464,7 +1457,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
             if (cpi->sf.no_skip_block4x4_search || bsi.segment_num == BLOCK_8X8)  /* || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5) */
             {
                 bsi.mvp = &bsi.sv_mvp[0];
-                vp8_rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
+                rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
             }
 
             /* restore UMV window */
@@ -1497,7 +1490,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     {
         int j;
 
-        j = vp8_mbsplit_offset2[bsi.segment_num][i];
+        j = vp8_mbsplit_offset[bsi.segment_num][i];
 
         x->partition_info->bmi[i].mode = x->e_mbd.block[j].bmi.mode;
         x->partition_info->bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
