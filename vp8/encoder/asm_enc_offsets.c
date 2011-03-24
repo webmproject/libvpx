@@ -12,9 +12,11 @@
 #include "vpx_ports/config.h"
 #include <stddef.h>
 
+#include "block.h"
+#include "vp8/common/blockd.h"
+#include "onyx_int.h"
 #include "treewriter.h"
 #include "tokenize.h"
-#include "onyx_int.h"
 
 #define ct_assert(name,cond) \
     static void assert_##name(void) UNUSED;\
@@ -30,6 +32,21 @@
  * int main(void)
  * {
  */
+
+//regular quantize
+DEFINE(vp8_block_coeff,                         offsetof(BLOCK, coeff));
+DEFINE(vp8_block_zbin,                          offsetof(BLOCK, zbin));
+DEFINE(vp8_block_round,                         offsetof(BLOCK, round));
+DEFINE(vp8_block_quant,                         offsetof(BLOCK, quant));
+DEFINE(vp8_block_quant_fast,                    offsetof(BLOCK, quant_fast));
+DEFINE(vp8_block_zbin_extra,                    offsetof(BLOCK, zbin_extra));
+DEFINE(vp8_block_zrun_zbin_boost,               offsetof(BLOCK, zrun_zbin_boost));
+DEFINE(vp8_block_quant_shift,                   offsetof(BLOCK, quant_shift));
+
+DEFINE(vp8_blockd_qcoeff,                       offsetof(BLOCKD, qcoeff));
+DEFINE(vp8_blockd_dequant,                      offsetof(BLOCKD, dequant));
+DEFINE(vp8_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
+DEFINE(vp8_blockd_eob,                          offsetof(BLOCKD, eob));
 
 //pack tokens
 DEFINE(vp8_writer_lowvalue,                     offsetof(vp8_writer, lowvalue));
@@ -64,17 +81,6 @@ DEFINE(tokenlist_stop,                          offsetof(TOKENLIST, stop));
 DEFINE(TOKENLIST_SZ,                            sizeof(TOKENLIST));
 
 DEFINE(vp8_common_mb_rows,                      offsetof(VP8_COMMON, mb_rows));
-
-// offsets from BLOCK structure
-DEFINE(vp8_block_coeff,                         offsetof(BLOCK, coeff));
-DEFINE(vp8_block_quant_fast,                    offsetof(BLOCK, quant_fast));
-DEFINE(vp8_block_round,                         offsetof(BLOCK, round));
-
-// offsets from BLOCKD structure
-DEFINE(vp8_blockd_qcoeff,                       offsetof(BLOCKD, qcoeff));
-DEFINE(vp8_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
-DEFINE(vp8_blockd_dequant,                      offsetof(BLOCKD, dequant));
-DEFINE(vp8_blockd_eob,                          offsetof(BLOCKD, eob));
 
 // These two sizes are used in vp8cx_pack_tokens.  They are hard coded
 // so if the size changes this will have to be adjusted.

@@ -245,7 +245,9 @@ ifeq ($(CONFIG_EXTERNAL_BUILD),) # Visual Studio uses obj_int_extract.bat
     OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
     CLEAN-OBJS += asm_com_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
+  endif
 
+  ifeq ($(ARCH_ARM)$(ARCH_X86)$(ARCH_X86_64), yes)
     ifeq ($(CONFIG_VP8_ENCODER), yes)
       asm_enc_offsets.asm: obj_int_extract
       asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
@@ -254,7 +256,9 @@ ifeq ($(CONFIG_EXTERNAL_BUILD),) # Visual Studio uses obj_int_extract.bat
       CLEAN-OBJS += asm_enc_offsets.asm
       $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
     endif
+  endif
 
+  ifeq ($(ARCH_ARM), yes)
     ifeq ($(CONFIG_VP8_DECODER), yes)
       asm_dec_offsets.asm: obj_int_extract
       asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
