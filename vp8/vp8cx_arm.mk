@@ -19,6 +19,7 @@ VP8_CX_SRCS-$(ARCH_ARM)  += encoder/asm_enc_offsets.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/encodemb_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/quantize_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/picklpf_arm.c
+VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/dct_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/variance_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/variance_arm.h
 VP8_CX_SRCS-$(HAVE_ARMV5TE) += encoder/arm/boolhuff_arm.c
@@ -34,6 +35,7 @@ VP8_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/vp8_packtokens_partitions_ar
 
 #File list for armv6
 # encoder
+VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_fast_fdct4x4_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_fast_quantize_b_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_sad16x16_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_variance16x16_armv6$(ASM)
