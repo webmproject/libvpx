@@ -386,6 +386,8 @@ process_targets() {
         VERSION_MAJOR=${ver%.*}
     fi
     enabled child || cat <<EOF >> config.mk
+
+PREFIX=${prefix}
 ifeq (\$(MAKECMDGOALS),dist)
 DIST_DIR?=${DIST_DIR}
 else
