@@ -377,6 +377,7 @@ process_targets() {
     if [ -f "${source_path}/build/make/version.sh" ]; then
         local ver=`"$source_path/build/make/version.sh" --bare $source_path`
         DIST_DIR="${DIST_DIR}-${ver}"
+        VERSION_STRING=${ver}
         ver=${ver%%-*}
         VERSION_PATCH=${ver##*.}
         ver=${ver%.*}
@@ -391,6 +392,8 @@ else
 DIST_DIR?=\$(DESTDIR)${prefix}
 endif
 LIBSUBDIR=${libdir##${prefix}/}
+
+VERSION_STRING=${VERSION_STRING}
 
 VERSION_MAJOR=${VERSION_MAJOR}
 VERSION_MINOR=${VERSION_MINOR}
