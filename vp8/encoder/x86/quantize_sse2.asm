@@ -130,7 +130,7 @@ sym(vp8_regular_quantize_b_sse2):
     mov         [rsp + zrun_zbin_boost], rsi
 
 %macro ZIGZAG_LOOP 1
-    movsx       edx, WORD PTR[GLOBAL(zig_zag) + (%1 * 2)] ; rc
+    movsx       edx, WORD PTR[GLOBAL(zig_zag + (%1 * 2))] ; rc
 
     ; x
     movsx       ecx, WORD PTR[rsp + abs_minus_zbin + rdx *2]
@@ -209,7 +209,7 @@ ZIGZAG_LOOP 15
     pxor        xmm3, xmm6
     ; mask inv_zig_zag
     pand        xmm2, [GLOBAL(inv_zig_zag)]
-    pand        xmm3, [GLOBAL(inv_zig_zag) + 16]
+    pand        xmm3, [GLOBAL(inv_zig_zag + 16)]
     ; select the max value
     pmaxsw      xmm2, xmm3
     pshufd      xmm3, xmm2, 00001110b
