@@ -486,7 +486,7 @@ process_toolchain() {
         check_add_cflags -Wpointer-arith
         check_add_cflags -Wtype-limits
         check_add_cflags -Wcast-qual
-        enabled extra_warnings || check_add_cflags -Wno-unused
+        enabled extra_warnings || check_add_cflags -Wno-unused-function
     fi
 
     if enabled icc; then
