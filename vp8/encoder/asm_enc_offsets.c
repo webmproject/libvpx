@@ -48,6 +48,14 @@ DEFINE(vp8_blockd_dequant,                      offsetof(BLOCKD, dequant));
 DEFINE(vp8_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
 DEFINE(vp8_blockd_eob,                          offsetof(BLOCKD, eob));
 
+// subtract
+DEFINE(vp8_block_base_src,                      offsetof(BLOCK, base_src));
+DEFINE(vp8_block_src,                           offsetof(BLOCK, src));
+DEFINE(vp8_block_src_diff,                      offsetof(BLOCK, src_diff));
+DEFINE(vp8_block_src_stride,                    offsetof(BLOCK, src_stride));
+
+DEFINE(vp8_blockd_predictor,                    offsetof(BLOCKD, predictor));
+
 //pack tokens
 DEFINE(vp8_writer_lowvalue,                     offsetof(vp8_writer, lowvalue));
 DEFINE(vp8_writer_range,                        offsetof(vp8_writer, range));

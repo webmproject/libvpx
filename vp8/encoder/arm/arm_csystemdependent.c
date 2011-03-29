@@ -66,10 +66,10 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 
         /*cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
         cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_c;
-        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;
-        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_c;
-        cpi->rtcd.encodemb.submby                = vp8_subtract_mby_c;
-        cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_c;*/
+        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;*/
+        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_armv6;
+        cpi->rtcd.encodemb.submby                = vp8_subtract_mby_armv6;
+        cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_armv6;
 
         /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;*/
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_armv6;
