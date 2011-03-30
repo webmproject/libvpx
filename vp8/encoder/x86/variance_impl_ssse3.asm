@@ -38,7 +38,6 @@ sym(vp8_filter_block2d_bil_var_ssse3):
     GET_GOT     rbx
     push rsi
     push rdi
-    push rbx
     ; end prolog
 
         pxor            xmm6,           xmm6
@@ -81,10 +80,12 @@ sym(vp8_filter_block2d_bil_var_ssse3):
 
         packuswb        xmm0,           xmm2
 
-        movsxd          rbx,            dword ptr arg(1) ;ref_pixels_per_line
-        lea             rsi,            [rsi + rbx]
-%if ABI_IS_32BIT=0
+%if ABI_IS_32BIT
+        add             rsi,            dword ptr arg(1) ;ref_pixels_per_line
+%else
+        movsxd          r8,             dword ptr arg(1) ;ref_pixels_per_line
         movsxd          r9,             dword ptr arg(3) ;src_pixels_per_line
+        lea             rsi,            [rsi + r8]
 %endif
 
 filter_block2d_bil_var_ssse3_loop:
@@ -132,10 +133,11 @@ filter_block2d_bil_var_ssse3_loop:
         paddd           xmm7,           xmm2
         paddd           xmm7,           xmm3
 
-        lea             rsi,            [rsi + rbx]          ;ref_pixels_per_line
 %if ABI_IS_32BIT
+        add             rsi,            dword ptr arg(1)     ;ref_pixels_per_line
         add             rdi,            dword ptr arg(3)     ;src_pixels_per_line
 %else
+        lea             rsi,            [rsi + r8]
         lea             rdi,            [rdi + r9]
 %endif
 
@@ -161,7 +163,10 @@ filter_block2d_bil_var_ssse3_sp_only:
         movdqu          xmm1,           XMMWORD PTR [rsi]
         movdqa          xmm0,           xmm1
 
-        movsxd          rbx,            dword ptr arg(3)     ;src_pixels_per_line
+%if ABI_IS_32BIT=0
+        movsxd          r9,             dword ptr arg(3) ;src_pixels_per_line
+%endif
+
         lea             rsi,            [rsi + rax]
 
 filter_block2d_bil_sp_only_loop:
@@ -196,7 +201,12 @@ filter_block2d_bil_sp_only_loop:
 
         movdqa          xmm1,           xmm0
         lea             rsi,            [rsi + rax]          ;ref_pixels_per_line
-        lea             rdi,            [rdi + rbx]          ;src_pixels_per_line
+
+%if ABI_IS_32BIT
+        add             rdi,            dword ptr arg(3)     ;src_pixels_per_line
+%else
+        lea             rdi,            [rdi + r9]
+%endif
 
         sub             rcx,            1
         jnz             filter_block2d_bil_sp_only_loop
@@ -208,7 +218,7 @@ filter_block2d_bil_var_ssse3_full_pixel:
         mov             rdi,            arg(2)               ;src_ptr
         movsxd          rcx,            dword ptr arg(4)     ;Height
         movsxd          rax,            dword ptr arg(1)     ;ref_pixels_per_line
-        movsxd          rbx,            dword ptr arg(3)     ;src_pixels_per_line
+        movsxd          rdx,            dword ptr arg(3)     ;src_pixels_per_line
         pxor            xmm0,           xmm0
 
 filter_block2d_bil_full_pixel_loop:
@@ -232,7 +242,7 @@ filter_block2d_bil_full_pixel_loop:
         paddd           xmm7,           xmm2
 
         lea             rsi,            [rsi + rax]          ;ref_pixels_per_line
-        lea             rdi,            [rdi + rbx]          ;src_pixels_per_line
+        lea             rdi,            [rdi + rdx]          ;src_pixels_per_line
         sub             rcx,            1
         jnz             filter_block2d_bil_full_pixel_loop
 
@@ -245,7 +255,10 @@ filter_block2d_bil_var_ssse3_fp_only:
         movsxd          rdx,            dword ptr arg(1)     ;ref_pixels_per_line
 
         pxor            xmm0,           xmm0
-        movsxd          rbx,            dword ptr arg(3)     ;src_pixels_per_line
+
+%if ABI_IS_32BIT=0
+        movsxd          r9,             dword ptr arg(3) ;src_pixels_per_line
+%endif
 
 filter_block2d_bil_fp_only_loop:
         movdqu          xmm1,           XMMWORD PTR [rsi]
@@ -278,7 +291,11 @@ filter_block2d_bil_fp_only_loop:
         paddd           xmm7,           xmm3
 
         lea             rsi,            [rsi + rdx]
-        lea             rdi,            [rdi + rbx]          ;src_pixels_per_line
+%if ABI_IS_32BIT
+        add             rdi,            dword ptr arg(3)     ;src_pixels_per_line
+%else
+        lea             rdi,            [rdi + r9]
+%endif
 
         sub             rcx,            1
         jnz             filter_block2d_bil_fp_only_loop
@@ -322,7 +339,6 @@ filter_block2d_bil_variance:
         movd        [rdi],       xmm6
 
     ; begin epilog
-    pop rbx
     pop rdi
     pop rsi
     RESTORE_GOT
