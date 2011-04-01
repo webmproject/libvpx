@@ -18,6 +18,25 @@
 #include "threading.h"
 #include "dequantize.h"
 
+#define MAX_OVERLAPS 16
+
+typedef struct overlap_node
+{
+    int overlap;
+    B_MODE_INFO *bmi;
+    MV_REFERENCE_FRAME ref_frame;
+} OVERLAP_NODE;
+
+typedef struct
+{
+    OVERLAP_NODE overlaps[MAX_OVERLAPS];
+} B_OVERLAP;
+
+typedef struct
+{
+    B_OVERLAP overlaps[16];
+} MB_OVERLAP;
+
 typedef struct
 {
     int ithread;
@@ -134,6 +153,7 @@ typedef struct VP8Decompressor
     vp8_prob prob_gf;
     vp8_prob prob_skip_false;
 
+    MB_OVERLAP *overlaps;
     unsigned int mvs_corrupt_from_mb;
     int ec_enabled;
 

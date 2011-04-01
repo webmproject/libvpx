@@ -12,6 +12,7 @@
 #include "vpx_ports/config.h"
 #include "blockd.h"
 #include "vpx_mem/vpx_mem.h"
+#include "error_concealment.h"
 #include "onyxc_int.h"
 #include "findnearmv.h"
 #include "entropymode.h"
@@ -28,6 +29,9 @@ void vp8_update_mode_info_border(MODE_INFO *mi, int rows, int cols)
 
     for (i = 0; i < rows; i++)
     {
+        /* TODO(holmer): Bug? This updates the last element of each row
+         * rather than the border element!
+         */
         vpx_memset(&mi[i*cols-1], 0, sizeof(MODE_INFO));
     }
 }
@@ -123,7 +127,6 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     }
 
     oci->prev_mi = oci->prev_mip + oci->mode_info_stride + 1;
-
 
     oci->above_context = vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * oci->mb_cols, 1);
 

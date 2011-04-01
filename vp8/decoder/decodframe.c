@@ -227,8 +227,8 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, unsigned int mb_idx)
     }
 
     /* TODO(holmer): change when we have MB level error tracking */
-    if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
-        (xd->corrupted || mb_idx >= pbi->mvs_corrupt_from_mb))
+    if (pbi->ec_enabled && xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME
+        && (xd->corrupted || mb_idx >= pbi->mvs_corrupt_from_mb))
     {
         vp8_conceal_corrupt_block(xd);
         return;
@@ -664,6 +664,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                        "Failed to allocate frame buffers");
 
+                if (vp8_alloc_overlap_lists(pbi))
+                    vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
+                                       "Failed to allocate overlap lists for "
+                                       "error concealment");
+
 #if CONFIG_MULTITHREAD
                 if (pbi->b_multithreaded_rd)
                     vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
@@ -890,7 +895,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     vp8_decode_mode_mvs(pbi);
 
-    if (pbi->ec_enabled && pbi->mvs_corrupt_from_mb < (unsigned int)pc->mb_cols * pc->mb_rows)
+    if (pbi->ec_enabled &&
+            pbi->mvs_corrupt_from_mb < (unsigned int)pc->mb_cols * pc->mb_rows)
     {
         vp8_estimate_missing_mvs(pbi);
     }

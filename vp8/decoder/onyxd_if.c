@@ -150,6 +150,7 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
     if (pbi->b_multithreaded_rd)
         vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
 #endif
+    vp8_de_alloc_overlap_lists(pbi);
     vp8_decoder_remove_threads(pbi);
     vp8_remove_common(&pbi->common);
     vpx_free(pbi);
@@ -318,7 +319,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     VP8_COMMON *cm = &pbi->common;
     int retcode = 0;
     struct vpx_usec_timer timer;
-    
+
     pbi->ec_enabled = 1;
 
     /*if(pbi->ready_for_new_data == 0)

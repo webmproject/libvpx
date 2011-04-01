@@ -413,7 +413,7 @@ void vp8_read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
                     do {
                         mi->bmi[ *fill_offset] = bmi;
-                      fill_offset++;
+                        fill_offset++;
 
                     }while (--fill_count);
                 }
