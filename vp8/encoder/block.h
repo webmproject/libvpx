@@ -86,7 +86,7 @@ typedef struct
 
     int mvcosts[2][MVvals+1];
     int *mvcost[2];
-    int mvsadcosts[2][MVvals+1];
+    int mvsadcosts[2][MVfpvals+1];
     int *mvsadcost[2];
     int mbmode_cost[2][MB_MODE_COUNT];
     int intra_uv_mode_cost[2][MB_MODE_COUNT];
