@@ -204,6 +204,26 @@ $(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)):
 
 INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
 INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
+
+LIBS-$(BUILD_LIBVPX) += vpx.pc
+vpx.pc: config.mk libs.mk
+	@echo "    [CREATE] $@"
+	$(qexec)echo '# pkg-config file from libvpx $(VERSION_STRING)' > $@
+	$(qexec)echo 'prefix=$(PREFIX)' >> $@
+	$(qexec)echo 'exec_prefix=$${prefix}' >> $@
+	$(qexec)echo 'libdir=$${prefix}/lib' >> $@
+	$(qexec)echo 'includedir=$${prefix}/include' >> $@
+	$(qexec)echo '' >> $@
+	$(qexec)echo 'Name: vpx' >> $@
+	$(qexec)echo 'Description: WebM Project VPx codec implementation' >> $@
+	$(qexec)echo 'Version: $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)' >> $@
+	$(qexec)echo 'Requires:' >> $@
+	$(qexec)echo 'Conflicts:' >> $@
+	$(qexec)echo 'Libs: -L$${libdir} -lvpx' >> $@
+	$(qexec)echo 'Cflags: -I$${includedir}' >> $@
+INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
+INSTALL_MAPS += $(LIBSUBDIR)/pkgconfig/%.pc %.pc
+CLEAN-OBJS += vpx.pc
 endif
 
 LIBS-$(LIPO_LIBVPX) += libvpx.a

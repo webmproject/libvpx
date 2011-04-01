@@ -3333,7 +3333,8 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
     }
 
 #if CONFIG_MULTITHREAD
-    sem_post(&cpi->h_event_end_lpf); /* signal that we have set filter_level */
+    if (cpi->b_multi_threaded)
+        sem_post(&cpi->h_event_end_lpf); /* signal that we have set filter_level */
 #endif
 
     if (cm->filter_level > 0)
