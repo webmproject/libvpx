@@ -240,7 +240,13 @@ void stats_write(stats_io_t *stats, const void *pkt, size_t len)
                 stats->buf_ptr = new_ptr + (stats->buf_ptr - (char *)stats->buf.buf);
                 stats->buf.buf = new_ptr;
                 stats->buf_alloc_sz = new_sz;
-            } /* else ... */
+            }
+            else
+            {
+                fprintf(stderr,
+                        "\nFailed to realloc firstpass stats buffer.\n");
+                exit(EXIT_FAILURE);
+            }
         }
 
         memcpy(stats->buf_ptr, pkt, len);
@@ -702,10 +708,18 @@ write_webm_block(EbmlGlobal                *glob,
         /* Save a cue point if this is a keyframe. */
         if(is_keyframe)
         {
-            struct cue_entry *cue;
+            struct cue_entry *cue, *new_cue_list;
 
-            glob->cue_list = realloc(glob->cue_list,
-                                     (glob->cues+1) * sizeof(struct cue_entry));
+            new_cue_list = realloc(glob->cue_list,
+                                   (glob->cues+1) * sizeof(struct cue_entry));
+            if(new_cue_list)
+                glob->cue_list = new_cue_list;
+            else
+            {
+                fprintf(stderr, "\nFailed to realloc cue list.\n");
+                exit(EXIT_FAILURE);
+            }
+
             cue = &glob->cue_list[glob->cues];
             cue->time = glob->cluster_timecode;
             cue->loc = glob->cluster_pos;
