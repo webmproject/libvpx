@@ -490,7 +490,6 @@ void vp8_first_pass(VP8_COMP *cpi)
     VP8_COMMON *const cm = & cpi->common;
     MACROBLOCKD *const xd = & x->e_mbd;
 
-    int col_blocks = 4 * cm->mb_cols;
     int recon_yoffset, recon_uvoffset;
     YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
     YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
@@ -564,7 +563,6 @@ void vp8_first_pass(VP8_COMP *cpi)
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int this_error;
-            int zz_to_best_ratio;
             int gf_motion_error = INT_MAX;
             int use_dc_pred = (mb_col || mb_row) && (!mb_col || !mb_row);
 
@@ -592,7 +590,6 @@ void vp8_first_pass(VP8_COMP *cpi)
             // Other than for the first frame do a motion search
             if (cm->current_video_frame > 0)
             {
-                BLOCK *b = &x->block[0];
                 BLOCKD *d = &x->e_mbd.block[0];
                 MV tmp_mv = {0, 0};
                 int tmp_err;
@@ -863,9 +860,6 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     // Calculate a corrective factor based on a rolling ratio of bits spent vs target bits
     if ((cpi->rolling_target_bits > 0.0) && (cpi->active_worst_quality < cpi->worst_quality))
     {
-        //double adjustment_rate = 0.985 + (0.00005 * cpi->active_worst_quality);
-        double adjustment_rate = 0.99;
-
         rolling_ratio = (double)cpi->rolling_actual_bits / (double)cpi->rolling_target_bits;
 
         //if ( cpi->est_max_qcorrection_factor > rolling_ratio )
@@ -1341,9 +1335,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     FIRSTPASS_STATS next_frame;
     FIRSTPASS_STATS *start_pos;
     int i;
-    int y_width  = cpi->common.yv12_fb[cpi->common.lst_fb_idx].y_width;
-    int y_height = cpi->common.yv12_fb[cpi->common.lst_fb_idx].y_height;
-    int image_size = y_width  * y_height;
     double boost_score = 0.0;
     double old_boost_score = 0.0;
     double gf_group_err = 0.0;
@@ -1402,7 +1393,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         double r;
         double this_frame_mvr_ratio;
         double this_frame_mvc_ratio;
-        double motion_decay;
         //double motion_pct = next_frame.pcnt_motion;
         double motion_pct;
 
@@ -1961,8 +1951,6 @@ void vp8_second_pass(VP8_COMP *cpi)
     FIRSTPASS_STATS this_frame;
     FIRSTPASS_STATS this_frame_copy;
 
-    VP8_COMMON *cm = &cpi->common;
-
     double this_frame_error;
     double this_frame_intra_error;
     double this_frame_coded_error;
@@ -2273,7 +2261,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     double kf_group_err = 0.0;
     double kf_group_intra_err = 0.0;
     double kf_group_coded_err = 0.0;
-    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
     double recent_loop_decay[8] = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
 
     vpx_memset(&next_frame, 0, sizeof(next_frame)); // assure clean
@@ -2496,8 +2483,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     for (i = 0 ; i < cpi->frames_to_key ; i++)
     {
         double r;
-        double motion_decay;
-        double motion_pct;
 
         if (EOF == input_stats(cpi, &next_frame))
             break;
@@ -2798,7 +2783,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         {
             long long clip_bits = (long long)(cpi->total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
             long long over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;
-            long long over_spend2 = cpi->oxcf.starting_buffer_level - projected_buffer_level;
 
             if ((last_kf_resampled && (kf_q > cpi->worst_quality)) ||                                               // If triggered last time the threshold for triggering again is reduced
                 ((kf_q > cpi->worst_quality) &&                                                                  // Projected Q higher than allowed and ...
