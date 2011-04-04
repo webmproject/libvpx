@@ -979,7 +979,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
         }
 
         if (flag[0] || flag[1])
-            vp8_build_component_cost_table(cpi->mb.mvcost, cpi->mb.mvsadcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
+            vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
     }
 #endif
 
