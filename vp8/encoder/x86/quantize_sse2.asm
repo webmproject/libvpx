@@ -22,35 +22,36 @@ sym(vp8_regular_quantize_b_sse2):
     mov         rbp, rsp
     SAVE_XMM
     GET_GOT     rbx
-    push        rsi
 
 %if ABI_IS_32BIT
     push        rdi
+    push        rsi
 %else
   %ifidn __OUTPUT_FORMAT__,x64
     push        rdi
+    push        rsi
   %endif
 %endif
 
     ALIGN_STACK 16, rax
-    %define BLOCKD_d          0  ;  8
-    %define zrun_zbin_boost   8  ;  8
-    %define abs_minus_zbin    16 ; 32
-    %define temp_qcoeff       48 ; 32
-    %define qcoeff            80 ; 32
-    %define stack_size        112
+    %define zrun_zbin_boost   0  ;  8
+    %define abs_minus_zbin    8  ; 32
+    %define temp_qcoeff       40 ; 32
+    %define qcoeff            72 ; 32
+    %define stack_size        104
     sub         rsp, stack_size
     ; end prolog
 
 %if ABI_IS_32BIT
-    mov         rdi, arg(0)
+    mov         rdi, arg(0)                 ; BLOCK *b
+    mov         rsi, arg(1)                 ; BLOCKD *d
 %else
   %ifidn __OUTPUT_FORMAT__,x64
     mov         rdi, rcx                    ; BLOCK *b
-    mov         [rsp + BLOCKD_d], rdx
+    mov         rsi, rdx                    ; BLOCKD *d
   %else
     ;mov         rdi, rdi                    ; BLOCK *b
-    mov         [rsp + BLOCKD_d], rsi
+    ;mov         rsi, rsi                    ; BLOCKD *d
   %endif
 %endif
 
@@ -125,59 +126,52 @@ sym(vp8_regular_quantize_b_sse2):
     movdqa      [rsp + qcoeff], xmm6
     movdqa      [rsp + qcoeff + 16], xmm6
 
-    mov         rsi, [rdi + vp8_block_zrun_zbin_boost] ; zbin_boost_ptr
+    mov         rdx, [rdi + vp8_block_zrun_zbin_boost] ; zbin_boost_ptr
     mov         rax, [rdi + vp8_block_quant_shift] ; quant_shift_ptr
-    mov         [rsp + zrun_zbin_boost], rsi
+    mov         [rsp + zrun_zbin_boost], rdx
 
 %macro ZIGZAG_LOOP 1
-    movsx       edx, WORD PTR[GLOBAL(zig_zag + (%1 * 2))] ; rc
-
     ; x
-    movsx       ecx, WORD PTR[rsp + abs_minus_zbin + rdx *2]
+    movsx       ecx, WORD PTR[rsp + abs_minus_zbin + %1 * 2]
 
     ; if (x >= zbin)
-    sub         cx, WORD PTR[rsi]           ; x - zbin
-    lea         rsi, [rsi + 2]              ; zbin_boost_ptr++
+    sub         cx, WORD PTR[rdx]           ; x - zbin
+    lea         rdx, [rdx + 2]              ; zbin_boost_ptr++
     jl          rq_zigzag_loop_%1           ; x < zbin
 
-    movsx       edi, WORD PTR[rsp + temp_qcoeff + rdx *2]
+    movsx       edi, WORD PTR[rsp + temp_qcoeff + %1 * 2]
 
-    ; downshift by quant_shift[rdx]
-    movsx       ecx, WORD PTR[rax + rdx*2]  ; quant_shift_ptr[rc]
+    ; downshift by quant_shift[rc]
+    movsx       ecx, WORD PTR[rax + %1 * 2] ; quant_shift_ptr[rc]
     sar         edi, cl                     ; also sets Z bit
     je          rq_zigzag_loop_%1           ; !y
-    mov         WORD PTR[rsp + qcoeff + rdx*2], di ;qcoeff_ptr[rc] = temp_qcoeff[rc]
-    mov         rsi, [rsp + zrun_zbin_boost] ; reset to b->zrun_zbin_boost
+    mov         WORD PTR[rsp + qcoeff + %1 * 2], di ;qcoeff_ptr[rc] = temp_qcoeff[rc]
+    mov         rdx, [rsp + zrun_zbin_boost] ; reset to b->zrun_zbin_boost
 rq_zigzag_loop_%1:
 %endmacro
-ZIGZAG_LOOP 0
-ZIGZAG_LOOP 1
-ZIGZAG_LOOP 2
-ZIGZAG_LOOP 3
-ZIGZAG_LOOP 4
-ZIGZAG_LOOP 5
-ZIGZAG_LOOP 6
-ZIGZAG_LOOP 7
-ZIGZAG_LOOP 8
-ZIGZAG_LOOP 9
-ZIGZAG_LOOP 10
-ZIGZAG_LOOP 11
+; in vp8_default_zig_zag1d order: see vp8/common/entropy.c
+ZIGZAG_LOOP  0
+ZIGZAG_LOOP  1
+ZIGZAG_LOOP  4
+ZIGZAG_LOOP  8
+ZIGZAG_LOOP  5
+ZIGZAG_LOOP  2
+ZIGZAG_LOOP  3
+ZIGZAG_LOOP  6
+ZIGZAG_LOOP  9
 ZIGZAG_LOOP 12
 ZIGZAG_LOOP 13
+ZIGZAG_LOOP 10
+ZIGZAG_LOOP  7
+ZIGZAG_LOOP 11
 ZIGZAG_LOOP 14
 ZIGZAG_LOOP 15
 
     movdqa      xmm2, [rsp + qcoeff]
     movdqa      xmm3, [rsp + qcoeff + 16]
 
-%if ABI_IS_32BIT
-    mov         rdi, arg(1)
-%else
-    mov         rdi, [rsp + BLOCKD_d]
-%endif
-
-    mov         rcx, [rdi + vp8_blockd_dequant] ; dequant_ptr
-    mov         rsi, [rdi + vp8_blockd_dqcoeff] ; dqcoeff_ptr
+    mov         rcx, [rsi + vp8_blockd_dequant] ; dequant_ptr
+    mov         rdi, [rsi + vp8_blockd_dqcoeff] ; dqcoeff_ptr
 
     ; y ^ sz
     pxor        xmm2, xmm0
@@ -190,15 +184,15 @@ ZIGZAG_LOOP 15
     movdqa      xmm0, [rcx]
     movdqa      xmm1, [rcx + 16]
 
-    mov         rcx, [rdi + vp8_blockd_qcoeff] ; qcoeff_ptr
+    mov         rcx, [rsi + vp8_blockd_qcoeff] ; qcoeff_ptr
 
     pmullw      xmm0, xmm2
     pmullw      xmm1, xmm3
 
     movdqa      [rcx], xmm2        ; store qcoeff
     movdqa      [rcx + 16], xmm3
-    movdqa      [rsi], xmm0        ; store dqcoeff
-    movdqa      [rsi + 16], xmm1
+    movdqa      [rdi], xmm0        ; store dqcoeff
+    movdqa      [rdi + 16], xmm1
 
     ; select the last value (in zig_zag order) for EOB
     pcmpeqw     xmm2, xmm6
@@ -220,19 +214,20 @@ ZIGZAG_LOOP 15
     pmaxsw      xmm2, xmm3
     movd        eax, xmm2
     and         eax, 0xff
-    mov         [rdi + vp8_blockd_eob], eax
+    mov         [rsi + vp8_blockd_eob], eax
 
     ; begin epilog
     add         rsp, stack_size
     pop         rsp
 %if ABI_IS_32BIT
+    pop         rsi
     pop         rdi
 %else
   %ifidn __OUTPUT_FORMAT__,x64
+    pop         rsi
     pop         rdi
   %endif
 %endif
-    pop         rsi
     RESTORE_GOT
     RESTORE_XMM
     pop         rbp
@@ -347,11 +342,6 @@ sym(vp8_fast_quantize_b_impl_sse2):
 
 SECTION_RODATA
 align 16
-zig_zag:
-  dw 0x0000, 0x0001, 0x0004, 0x0008
-  dw 0x0005, 0x0002, 0x0003, 0x0006
-  dw 0x0009, 0x000c, 0x000d, 0x000a
-  dw 0x0007, 0x000b, 0x000e, 0x000f
 inv_zig_zag:
   dw 0x0001, 0x0002, 0x0006, 0x0007
   dw 0x0003, 0x0005, 0x0008, 0x000d

@@ -195,63 +195,14 @@ static int vp8_temporal_filter_find_matching_mb_c
         further_steps = 0;
     }
 
-    if (1/*cpi->sf.search_method == HEX*/)
-    {
-        // TODO Check that the 16x16 vf & sdf are selected here
-        bestsme = vp8_hex_search(x, b, d,
-            &best_ref_mv1, &d->bmi.mv.as_mv,
-            step_param,
-            sadpb/*x->errorperbit*/,
-            &num00, &cpi->fn_ptr[BLOCK_16X16],
-            mvsadcost, mvcost, &best_ref_mv1);
-    }
-    else
-    {
-        int mv_x, mv_y;
-
-        bestsme = cpi->diamond_search_sad(x, b, d,
-            &best_ref_mv1, &d->bmi.mv.as_mv,
-            step_param,
-            sadpb / 2/*x->errorperbit*/,
-            &num00, &cpi->fn_ptr[BLOCK_16X16],
-            mvsadcost, mvcost, &best_ref_mv1); //sadpb < 9
-
-        // Further step/diamond searches as necessary
-        n = 0;
-        //further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
-
-        n = num00;
-        num00 = 0;
-
-        while (n < further_steps)
-        {
-            n++;
-
-            if (num00)
-                num00--;
-            else
-            {
-                thissme = cpi->diamond_search_sad(x, b, d,
-                    &best_ref_mv1, &d->bmi.mv.as_mv,
-                    step_param + n,
-                    sadpb / 4/*x->errorperbit*/,
-                    &num00, &cpi->fn_ptr[BLOCK_16X16],
-                    mvsadcost, mvcost, &best_ref_mv1); //sadpb = 9
-
-                if (thissme < bestsme)
-                {
-                    bestsme = thissme;
-                    mv_y = d->bmi.mv.as_mv.row;
-                    mv_x = d->bmi.mv.as_mv.col;
-                }
-                else
-                {
-                    d->bmi.mv.as_mv.row = mv_y;
-                    d->bmi.mv.as_mv.col = mv_x;
-                }
-            }
-        }
-    }
+    /*cpi->sf.search_method == HEX*/
+    // TODO Check that the 16x16 vf & sdf are selected here
+    bestsme = vp8_hex_search(x, b, d,
+        &best_ref_mv1, &d->bmi.mv.as_mv,
+        step_param,
+        sadpb/*x->errorperbit*/,
+        &num00, &cpi->fn_ptr[BLOCK_16X16],
+        mvsadcost, mvcost, &best_ref_mv1);
 
 #if ALT_REF_SUBPEL_ENABLED
     // Try sub-pixel MC?

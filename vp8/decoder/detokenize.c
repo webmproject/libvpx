@@ -181,7 +181,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 {
     ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
     ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
-    const VP8_COMMON *const oc = & dx->common;
+    const FRAME_CONTEXT * const fc = &dx->common.fc;
 
     BOOL_DECODER *bc = x->current_bc;
 
@@ -236,7 +236,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
     range   = bc->range;
 
 
-    coef_probs = oc->fc.coef_probs [type] [ 0 ] [0];
+    coef_probs = fc->coef_probs [type] [ 0 ] [0];
 
 BLOCK_LOOP:
     a = A + vp8_block2above[i];
@@ -348,7 +348,7 @@ BLOCK_FINISHED:
         type = 0;
         i = 0;
         stop = 16;
-        coef_probs = oc->fc.coef_probs [type] [ 0 ] [0];
+        coef_probs = fc->coef_probs [type] [ 0 ] [0];
         qcoeff_ptr -= (24*16 + 16);
         goto BLOCK_LOOP;
     }
@@ -356,7 +356,7 @@ BLOCK_FINISHED:
     if (i == 16)
     {
         type = 2;
-        coef_probs = oc->fc.coef_probs [type] [ 0 ] [0];
+        coef_probs = fc->coef_probs [type] [ 0 ] [0];
         stop = 24;
         goto BLOCK_LOOP;
     }

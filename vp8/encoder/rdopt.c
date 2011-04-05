@@ -1224,7 +1224,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     {
                         bestsme = cpi->diamond_search_sad(x, c, e, bsi->mvp,
                                                           &mode_mv[NEW4X4], step_param,
-                                                          sadpb / 2, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
+                                                          sadpb / 2, &num00, v_fn_ptr, x->mvcost, bsi->ref_mv);
 
                         n = num00;
                         num00 = 0;
@@ -1239,7 +1239,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                             {
                                 thissme = cpi->diamond_search_sad(x, c, e, bsi->mvp,
                                                                   &temp_mv, step_param + n,
-                                                                  sadpb / 2, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
+                                                                  sadpb / 2, &num00, v_fn_ptr, x->mvcost, bsi->ref_mv);
 
                                 if (thissme < bestsme)
                                 {
@@ -1257,7 +1257,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000)
                     {
                         thissme = cpi->full_search_sad(x, c, e, bsi->mvp,
-                                                       sadpb / 4, 16, v_fn_ptr, x->mvcost, x->mvsadcost,bsi->ref_mv);
+                                                       sadpb / 4, 16, v_fn_ptr, x->mvcost, bsi->ref_mv);
 
                         if (thissme < bestsme)
                         {
@@ -2167,7 +2167,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                     }
                     else
                     {
-                        bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv); //sadpb < 9
+                        bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb < 9
                         mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
                         mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
 
@@ -2186,7 +2186,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                                 num00--;
                             else
                             {
-                                thissme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv); //sadpb = 9
+                                thissme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb = 9
 
                                 if (thissme < bestsme)
                                 {
@@ -2232,7 +2232,7 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
                     {
                         int sadpb = x->sadperbit16 >> 2;
-                        thissme = cpi->full_search_sad(x, b, d, &full_mvp, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, x->mvsadcost,&best_ref_mv);
+                        thissme = cpi->full_search_sad(x, b, d, &full_mvp, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
                     }
 
                     // Barrier threshold to initiating full search

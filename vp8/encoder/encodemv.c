@@ -134,31 +134,14 @@ static unsigned int cost_mvcomponent(const int v, const struct mv_context *mvc)
 
     return cost;   // + vp8_cost_bit( p [MVPsign], v < 0);
 }
-//#define M_LOG2_E 0.693147180559945309417
-//#define log2f(x) (log (x) / (float) M_LOG2_E)
 
-void vp8_build_component_cost_table(int *mvcost[2], int *mvsadcost[2], const MV_CONTEXT *mvc, int mvc_flag[2])
+void vp8_build_component_cost_table(int *mvcost[2], const MV_CONTEXT *mvc, int mvc_flag[2])
 {
     int i = 1;   //-mv_max;
     unsigned int cost0 = 0;
     unsigned int cost1 = 0;
 
     vp8_clear_system_state();
-#if 0
-    mvsadcost [0] [0] = 300;
-    mvsadcost [1] [0] = 300;
-
-    do
-    {
-        double z = 256 * (2 * (log2f(2 * i) + .6));
-        mvsadcost [0][i] = (int) z;
-        mvsadcost [1][i] = (int) z;
-        mvsadcost [0][-i] = (int) z;
-        mvsadcost [1][-i] = (int) z;
-    }
-    while (++i <= mv_max);
-
-#endif
 
     i = 1;
 
@@ -193,16 +176,6 @@ void vp8_build_component_cost_table(int *mvcost[2], int *mvsadcost[2], const MV_
         }
         while (++i <= mv_max);
     }
-
-    /*
-        i=-mv_max;
-        do
-        {
-            mvcost [0] [i] = cost_mvcomponent( i, mvc[0]);
-            mvcost [1] [i] = cost_mvcomponent( i, mvc[1]);
-        }
-        while( ++i <= mv_max);
-    */
 }
 
 
@@ -436,7 +409,7 @@ void vp8_write_mvprobs(VP8_COMP *cpi)
     );
 
     if (flags[0] || flags[1])
-        vp8_build_component_cost_table(cpi->mb.mvcost, cpi->mb.mvsadcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flags);
+        vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flags);
 
 #ifdef ENTROPY_STATS
     active_section = 5;

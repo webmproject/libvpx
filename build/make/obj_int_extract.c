@@ -9,25 +9,13 @@
  */
 
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "vpx_config.h"
-
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#include <io.h>
-#include <share.h>
 #include "vpx/vpx_integer.h"
-#else
-#include <stdint.h>
-#include <unistd.h>
-#endif
-
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdarg.h>
 
 typedef enum
 {
@@ -47,7 +35,6 @@ int log_msg(const char *fmt, ...)
 }
 
 #if defined(__GNUC__) && __GNUC__
-
 #if defined(__MACH__)
 
 #include <mach-o/loader.h>
@@ -223,73 +210,6 @@ int parse_macho(uint8_t *base_buf, size_t sz)
 bail:
     return 1;
 
-}
-
-int main(int argc, char **argv)
-{
-    int fd;
-    char *f;
-    struct stat stat_buf;
-    uint8_t *file_buf;
-    int res;
-
-    if (argc < 2 || argc > 3)
-    {
-        fprintf(stderr, "Usage: %s [output format] <obj file>\n\n", argv[0]);
-        fprintf(stderr, "  <obj file>\tMachO format object file to parse\n");
-        fprintf(stderr, "Output Formats:\n");
-        fprintf(stderr, "  gas  - compatible with GNU assembler\n");
-        fprintf(stderr, "  rvds - compatible with armasm\n");
-        goto bail;
-    }
-
-    f = argv[2];
-
-    if (!((!strcmp(argv[1], "rvds")) || (!strcmp(argv[1], "gas"))))
-        f = argv[1];
-
-    fd = open(f, O_RDONLY);
-
-    if (fd < 0)
-    {
-        perror("Unable to open file");
-        goto bail;
-    }
-
-    if (fstat(fd, &stat_buf))
-    {
-        perror("stat");
-        goto bail;
-    }
-
-    file_buf = malloc(stat_buf.st_size);
-
-    if (!file_buf)
-    {
-        perror("malloc");
-        goto bail;
-    }
-
-    if (read(fd, file_buf, stat_buf.st_size) != stat_buf.st_size)
-    {
-        perror("read");
-        goto bail;
-    }
-
-    if (close(fd))
-    {
-        perror("close");
-        goto bail;
-    }
-
-    res = parse_macho(file_buf, stat_buf.st_size);
-    free(file_buf);
-
-    if (!res)
-        return EXIT_SUCCESS;
-
-bail:
-    return EXIT_FAILURE;
 }
 
 #elif defined(__ELF__)
@@ -740,96 +660,24 @@ bail:
     return 1;
 }
 
-int main(int argc, char **argv)
-{
-    int fd;
-    output_fmt_t mode;
-    char *f;
-    struct stat stat_buf;
-    uint8_t *file_buf;
-    int res;
-
-    if (argc < 2 || argc > 3)
-    {
-        fprintf(stderr, "Usage: %s [output format] <obj file>\n\n", argv[0]);
-        fprintf(stderr, "  <obj file>\tELF format object file to parse\n");
-        fprintf(stderr, "Output Formats:\n");
-        fprintf(stderr, "  gas  - compatible with GNU assembler\n");
-        fprintf(stderr, "  rvds - compatible with armasm\n");
-        goto bail;
-    }
-
-    f = argv[2];
-
-    if (!strcmp(argv[1], "rvds"))
-        mode = OUTPUT_FMT_RVDS;
-    else if (!strcmp(argv[1], "gas"))
-        mode = OUTPUT_FMT_GAS;
-    else
-        f = argv[1];
-
-
-    fd = open(f, O_RDONLY);
-
-    if (fd < 0)
-    {
-        perror("Unable to open file");
-        goto bail;
-    }
-
-    if (fstat(fd, &stat_buf))
-    {
-        perror("stat");
-        goto bail;
-    }
-
-    file_buf = malloc(stat_buf.st_size);
-
-    if (!file_buf)
-    {
-        perror("malloc");
-        goto bail;
-    }
-
-    if (read(fd, file_buf, stat_buf.st_size) != stat_buf.st_size)
-    {
-        perror("read");
-        goto bail;
-    }
-
-    if (close(fd))
-    {
-        perror("close");
-        goto bail;
-    }
-
-    res = parse_elf(file_buf, stat_buf.st_size, mode);
-    free(file_buf);
-
-    if (!res)
-        return EXIT_SUCCESS;
-
-bail:
-    return EXIT_FAILURE;
-}
 #endif
-#endif
+#endif /* defined(__GNUC__) && __GNUC__ */
 
 
-#if defined(_MSC_VER) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__)
 /*  See "Microsoft Portable Executable and Common Object File Format Specification"
     for reference.
 */
 #define get_le32(x) ((*(x)) | (*(x+1)) << 8 |(*(x+2)) << 16 | (*(x+3)) << 24 )
 #define get_le16(x) ((*(x)) | (*(x+1)) << 8)
 
-int parse_coff(unsigned __int8 *buf, size_t sz)
+int parse_coff(uint8_t *buf, size_t sz)
 {
     unsigned int nsections, symtab_ptr, symtab_sz, strtab_ptr;
     unsigned int sectionrawdata_ptr;
     unsigned int i;
-    unsigned __int8 *ptr;
-    unsigned __int32 symoffset;
+    uint8_t *ptr;
+    uint32_t symoffset;
 
     char **sectionlist;  //this array holds all section names in their correct order.
     //it is used to check if the symbol is in .bss or .data section.
@@ -907,7 +755,7 @@ int parse_coff(unsigned __int8 *buf, size_t sz)
 
     for (i = 0; i < symtab_sz; i++)
     {
-        __int16 section = get_le16(ptr + 12); //section number
+        int16_t section = get_le16(ptr + 12); //section number
 
         if (section > 0 && ptr[16] == 2)
         {
@@ -978,20 +826,21 @@ bail:
 
     return 1;
 }
+#endif /* defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__) */
 
 int main(int argc, char **argv)
 {
-    int fd;
-    output_fmt_t mode;
+    output_fmt_t mode = OUTPUT_FMT_PLAIN;
     const char *f;
-    struct _stat stat_buf;
-    unsigned __int8 *file_buf;
+    uint8_t *file_buf;
     int res;
+    FILE *fp;
+    long int file_size;
 
     if (argc < 2 || argc > 3)
     {
         fprintf(stderr, "Usage: %s [output format] <obj file>\n\n", argv[0]);
-        fprintf(stderr, "  <obj file>\tELF format object file to parse\n");
+        fprintf(stderr, "  <obj file>\tobject file to parse\n");
         fprintf(stderr, "Output Formats:\n");
         fprintf(stderr, "  gas  - compatible with GNU assembler\n");
         fprintf(stderr, "  rvds - compatible with armasm\n");
@@ -1007,15 +856,22 @@ int main(int argc, char **argv)
     else
         f = argv[1];
 
-    fd = _sopen(f, _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
+    fp = fopen(f, "rb");
 
-    if (_fstat(fd, &stat_buf))
+    if (!fp)
+    {
+        perror("Unable to open file");
+        goto bail;
+    }
+
+    if (fseek(fp, 0, SEEK_END))
     {
         perror("stat");
         goto bail;
     }
 
-    file_buf = malloc(stat_buf.st_size);
+    file_size = ftell(fp);
+    file_buf = malloc(file_size);
 
     if (!file_buf)
     {
@@ -1023,19 +879,30 @@ int main(int argc, char **argv)
         goto bail;
     }
 
-    if (_read(fd, file_buf, stat_buf.st_size) != stat_buf.st_size)
+    rewind(fp);
+
+    if (fread(file_buf, sizeof(char), file_size, fp) != file_size)
     {
         perror("read");
         goto bail;
     }
 
-    if (_close(fd))
+    if (fclose(fp))
     {
         perror("close");
         goto bail;
     }
 
-    res = parse_coff(file_buf, stat_buf.st_size);
+#if defined(__GNUC__) && __GNUC__
+#if defined(__MACH__)
+    res = parse_macho(file_buf, file_size);
+#elif defined(__ELF__)
+    res = parse_elf(file_buf, file_size, mode);
+#endif
+#endif
+#if defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__)
+    res = parse_coff(file_buf, file_size);
+#endif
 
     free(file_buf);
 
@@ -1045,4 +912,3 @@ int main(int argc, char **argv)
 bail:
     return EXIT_FAILURE;
 }
-#endif
