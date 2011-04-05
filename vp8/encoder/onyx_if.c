@@ -1863,13 +1863,13 @@ static void cal_mvsadcosts(int *mvsadcost[2])
 
     do
     {
-        double z = 256 * (2 * (log2f(2 * i) + .6));
+        double z = 256 * (2 * (log2f(8 * i) + .6));
         mvsadcost [0][i] = (int) z;
         mvsadcost [1][i] = (int) z;
         mvsadcost [0][-i] = (int) z;
         mvsadcost [1][-i] = (int) z;
     }
-    while (++i <= mv_max);
+    while (++i <= mvfp_max);
 }
 
 VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
@@ -2065,8 +2065,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->mb.mvcost[0] = &cpi->mb.mvcosts[0][mv_max+1];
     cpi->mb.mvcost[1] = &cpi->mb.mvcosts[1][mv_max+1];
-    cpi->mb.mvsadcost[0] = &cpi->mb.mvsadcosts[0][mv_max+1];
-    cpi->mb.mvsadcost[1] = &cpi->mb.mvsadcosts[1][mv_max+1];
+    cpi->mb.mvsadcost[0] = &cpi->mb.mvsadcosts[0][mvfp_max+1];
+    cpi->mb.mvsadcost[1] = &cpi->mb.mvsadcosts[1][mvfp_max+1];
 
     cal_mvsadcosts(cpi->mb.mvsadcost);
 

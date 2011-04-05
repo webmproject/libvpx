@@ -355,7 +355,7 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     vpx_memcpy(cpi->common.fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
     {
         int flag[2] = {1, 1};
-        vp8_build_component_cost_table(cpi->mb.mvcost, cpi->mb.mvsadcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flag);
+        vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flag);
     }
 
     vpx_memset(cpi->common.fc.pre_mvc, 0, sizeof(cpi->common.fc.pre_mvc));  //initialize pre_mvc to all zero.

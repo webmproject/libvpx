@@ -319,8 +319,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
     vpx_memcpy(z->mvcosts,          x->mvcosts,         sizeof(x->mvcosts));
     z->mvcost[0] = &z->mvcosts[0][mv_max+1];
     z->mvcost[1] = &z->mvcosts[1][mv_max+1];
-    z->mvsadcost[0] = &z->mvsadcosts[0][mv_max+1];
-    z->mvsadcost[1] = &z->mvsadcosts[1][mv_max+1];
+    z->mvsadcost[0] = &z->mvsadcosts[0][mvfp_max+1];
+    z->mvsadcost[1] = &z->mvsadcosts[1][mvfp_max+1];
 
 
     vpx_memcpy(z->token_costs,       x->token_costs,      sizeof(x->token_costs));
