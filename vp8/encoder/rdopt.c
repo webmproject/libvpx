@@ -2145,10 +2145,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
                 {
                     int thissme;
                     int full_flag_thresh = 0;
-                    MV full_mvp;
-
-                    full_mvp.row = d->bmi.mv.as_mv.row <<3;    // use diamond search result as full search staring point
-                    full_mvp.col = d->bmi.mv.as_mv.col <<3;
 
                     // Update x->vector_range based on best vector found in step search
                     search_range = MAXF(abs((mvp.row>>3) - d->bmi.mv.as_mv.row), abs((mvp.col>>3) - d->bmi.mv.as_mv.col));
@@ -2167,7 +2163,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
 
                     {
                         int sadpb = x->sadperbit16 >> 2;
-                        thissme = cpi->full_search_sad(x, b, d, &full_mvp, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
+                        /* use diamond search result as full search staring point */
+                        thissme = cpi->full_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
                     }
 
                     // Barrier threshold to initiating full search
