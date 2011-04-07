@@ -81,31 +81,6 @@ static void subtract_b_mmx(BLOCK *be, BLOCKD *bd, int pitch)
 #endif
 
 #if HAVE_SSE2
-int vp8_fast_quantize_b_impl_sse2(short *coeff_ptr,
-                                 short *qcoeff_ptr, short *dequant_ptr,
-                                 const short *inv_scan_order, short *round_ptr,
-                                 short *quant_ptr, short *dqcoeff_ptr);
-static void fast_quantize_b_sse2(BLOCK *b, BLOCKD *d)
-{
-    short *scan_mask   = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
-    short *coeff_ptr   = b->coeff;
-    short *round_ptr   = b->round;
-    short *quant_ptr   = b->quant_fast;
-    short *qcoeff_ptr  = d->qcoeff;
-    short *dqcoeff_ptr = d->dqcoeff;
-    short *dequant_ptr = d->dequant;
-
-    d->eob = vp8_fast_quantize_b_impl_sse2(
-                 coeff_ptr,
-                 qcoeff_ptr,
-                 dequant_ptr,
-                 vp8_default_inv_zig_zag,
-                 round_ptr,
-                 quant_ptr,
-                 dqcoeff_ptr
-             );
-}
-
 int vp8_mbblock_error_xmm_impl(short *coeff_ptr, short *dcoef_ptr, int dc);
 static int mbblock_error_xmm(MACROBLOCK *mb, int dc)
 {
@@ -294,7 +269,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
 
         cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse2;
-        cpi->rtcd.quantize.fastquantb            = fast_quantize_b_sse2;
+        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
 
 #if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
