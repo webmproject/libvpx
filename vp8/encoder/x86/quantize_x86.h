@@ -19,7 +19,7 @@
  */
 #if HAVE_MMX
 
-#endif
+#endif /* HAVE_MMX */
 
 
 #if HAVE_SSE2
@@ -34,9 +34,21 @@ extern prototype_quantize_block(vp8_fast_quantize_b_sse2);
 #undef vp8_quantize_fastquantb
 #define vp8_quantize_fastquantb vp8_fast_quantize_b_sse2
 
-#endif
+#endif /* !CONFIG_RUNTIME_CPU_DETECT */
 
-#endif
+#endif /* HAVE_SSE2 */
 
 
-#endif
+#if HAVE_SSSE3
+extern prototype_quantize_block(vp8_fast_quantize_b_ssse3);
+
+#if !CONFIG_RUNTIME_CPU_DETECT
+
+#undef vp8_quantize_fastquantb
+#define vp8_quantize_fastquantb vp8_fast_quantize_b_ssse3
+
+#endif /* !CONFIG_RUNTIME_CPU_DETECT */
+
+#endif /* HAVE_SSSE3 */
+
+#endif /* QUANTIZE_X86_H */
