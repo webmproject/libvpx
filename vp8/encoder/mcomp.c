@@ -1208,8 +1208,8 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int erro
     unsigned char *check_here;
     int thissad;
 
-    int ref_row = ref_mv->row >> 3;
-    int ref_col = ref_mv->col >> 3;
+    int ref_row = ref_mv->row;
+    int ref_col = ref_mv->col;
 
     int row_min = ref_row - distance;
     int row_max = ref_row + distance;
@@ -1303,8 +1303,8 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     unsigned char *check_here;
     unsigned int thissad;
 
-    int ref_row = ref_mv->row >> 3;
-    int ref_col = ref_mv->col >> 3;
+    int ref_row = ref_mv->row;
+    int ref_col = ref_mv->col;
 
     int row_min = ref_row - distance;
     int row_max = ref_row + distance;
@@ -1431,8 +1431,8 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
     unsigned char *check_here;
     unsigned int thissad;
 
-    int ref_row = ref_mv->row >> 3;
-    int ref_col = ref_mv->col >> 3;
+    int ref_row = ref_mv->row;
+    int ref_col = ref_mv->col;
 
     int row_min = ref_row - distance;
     int row_max = ref_row + distance;

@@ -233,72 +233,97 @@ ZIGZAG_LOOP 15
     pop         rbp
     ret
 
-; int vp8_fast_quantize_b_impl_sse2 | arg
-;  (short *coeff_ptr,               |  0
-;   short *qcoeff_ptr,              |  1
-;   short *dequant_ptr,             |  2
-;   short *inv_scan_order,          |  3
-;   short *round_ptr,               |  4
-;   short *quant_ptr,               |  5
-;   short *dqcoeff_ptr)             |  6
+; void vp8_fast_quantize_b_sse2 | arg
+;  (BLOCK  *b,                  |  0
+;   BLOCKD *d)                  |  1
 
-global sym(vp8_fast_quantize_b_impl_sse2)
-sym(vp8_fast_quantize_b_impl_sse2):
+global sym(vp8_fast_quantize_b_sse2)
+sym(vp8_fast_quantize_b_sse2):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 7
-    push        rsi
+    GET_GOT     rbx
+
+%if ABI_IS_32BIT
     push        rdi
+    push        rsi
+%else
+  %ifidn __OUTPUT_FORMAT__,x64
+    push        rdi
+    push        rsi
+  %else
+    ; these registers are used for passing arguments
+  %endif
+%endif
+
     ; end prolog
 
-    mov         rdx, arg(0)                 ;coeff_ptr
-    mov         rcx, arg(2)                 ;dequant_ptr
-    mov         rdi, arg(4)                 ;round_ptr
-    mov         rsi, arg(5)                 ;quant_ptr
+%if ABI_IS_32BIT
+    mov         rdi, arg(0)                 ; BLOCK *b
+    mov         rsi, arg(1)                 ; BLOCKD *d
+%else
+  %ifidn __OUTPUT_FORMAT__,x64
+    mov         rdi, rcx                    ; BLOCK *b
+    mov         rsi, rdx                    ; BLOCKD *d
+  %else
+    ;mov         rdi, rdi                    ; BLOCK *b
+    ;mov         rsi, rsi                    ; BLOCKD *d
+  %endif
+%endif
 
-    movdqa      xmm0, XMMWORD PTR[rdx]
-    movdqa      xmm4, XMMWORD PTR[rdx + 16]
+    mov         rax, [rdi + vp8_block_coeff]
+    mov         rcx, [rdi + vp8_block_round]
+    mov         rdx, [rdi + vp8_block_quant_fast]
 
-    movdqa      xmm2, XMMWORD PTR[rdi]      ;round lo
-    movdqa      xmm3, XMMWORD PTR[rdi + 16] ;round hi
+    ; z = coeff
+    movdqa      xmm0, [rax]
+    movdqa      xmm4, [rax + 16]
 
+    ; dup z so we can save sz
     movdqa      xmm1, xmm0
     movdqa      xmm5, xmm4
 
-    psraw       xmm0, 15                    ;sign of z (aka sz)
-    psraw       xmm4, 15                    ;sign of z (aka sz)
+    ; sz = z >> 15
+    psraw       xmm0, 15
+    psraw       xmm4, 15
 
-    pxor        xmm1, xmm0
-    pxor        xmm5, xmm4
-    psubw       xmm1, xmm0                  ;x = abs(z)
-    psubw       xmm5, xmm4                  ;x = abs(z)
-
-    paddw       xmm1, xmm2
-    paddw       xmm5, xmm3
-
-    pmulhw      xmm1, XMMWORD PTR[rsi]
-    pmulhw      xmm5, XMMWORD PTR[rsi + 16]
-
-    mov         rdi, arg(1)                 ;qcoeff_ptr
-    mov         rsi, arg(6)                 ;dqcoeff_ptr
-
-    movdqa      xmm2, XMMWORD PTR[rcx]
-    movdqa      xmm3, XMMWORD PTR[rcx + 16]
-
+    ; x = abs(z) = (z ^ sz) - sz
     pxor        xmm1, xmm0
     pxor        xmm5, xmm4
     psubw       xmm1, xmm0
     psubw       xmm5, xmm4
 
-    movdqa      XMMWORD PTR[rdi], xmm1
-    movdqa      XMMWORD PTR[rdi + 16], xmm5
+    ; x += round
+    paddw       xmm1, [rcx]
+    paddw       xmm5, [rcx + 16]
 
-    pmullw      xmm2, xmm1
-    pmullw      xmm3, xmm5
+    mov         rax, [rsi + vp8_blockd_qcoeff]
+    mov         rcx, [rsi + vp8_blockd_dequant]
+    mov         rdi, [rsi + vp8_blockd_dqcoeff]
 
-    mov         rdi, arg(3)                 ;inv_scan_order
+    ; y = x * quant >> 16
+    pmulhw      xmm1, [rdx]
+    pmulhw      xmm5, [rdx + 16]
 
-    ; Start with 16
+    ; x = (y ^ sz) - sz
+    pxor        xmm1, xmm0
+    pxor        xmm5, xmm4
+    psubw       xmm1, xmm0
+    psubw       xmm5, xmm4
+
+    ; qcoeff = x
+    movdqa      [rax], xmm1
+    movdqa      [rax + 16], xmm5
+
+    ; x * dequant
+    movdqa      xmm2, xmm1
+    movdqa      xmm3, xmm5
+    pmullw      xmm2, [rcx]
+    pmullw      xmm3, [rcx + 16]
+
+    ; dqcoeff = x * dequant
+    movdqa      [rdi], xmm2
+    movdqa      [rdi + 16], xmm3
+
     pxor        xmm4, xmm4                  ;clear all bits
     pcmpeqw     xmm1, xmm4
     pcmpeqw     xmm5, xmm4
@@ -307,8 +332,8 @@ sym(vp8_fast_quantize_b_impl_sse2):
     pxor        xmm1, xmm4
     pxor        xmm5, xmm4
 
-    pand        xmm1, XMMWORD PTR[rdi]
-    pand        xmm5, XMMWORD PTR[rdi+16]
+    pand        xmm1, [GLOBAL(inv_zig_zag)]
+    pand        xmm5, [GLOBAL(inv_zig_zag + 16)]
 
     pmaxsw      xmm1, xmm5
 
@@ -327,16 +352,22 @@ sym(vp8_fast_quantize_b_impl_sse2):
 
     pmaxsw      xmm1, xmm5
 
-    movd        rax, xmm1
-    and         rax, 0xff
-
-    movdqa      XMMWORD PTR[rsi], xmm2        ;store dqcoeff
-    movdqa      XMMWORD PTR[rsi + 16], xmm3   ;store dqcoeff
+    movd        eax, xmm1
+    and         eax, 0xff
+    mov         [rsi + vp8_blockd_eob], eax
 
     ; begin epilog
-    pop         rdi
+%if ABI_IS_32BIT
     pop         rsi
-    UNSHADOW_ARGS
+    pop         rdi
+%else
+  %ifidn __OUTPUT_FORMAT__,x64
+    pop         rsi
+    pop         rdi
+  %endif
+%endif
+
+    RESTORE_GOT
     pop         rbp
     ret
 
