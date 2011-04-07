@@ -31,7 +31,7 @@
 #include "vp8/common/g_common.h"
 #include "variance.h"
 #include "mcomp.h"
-
+#include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
 #include "dct.h"
 #include "vp8/common/systemdependent.h"
@@ -46,12 +46,7 @@
 extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
-
-#define RDCOST(RM,DM,R,D) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
-
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
-
-
 
 static const int auto_speed_thresh[17] =
 {
