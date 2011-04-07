@@ -260,12 +260,12 @@
 %ifidn __OUTPUT_FORMAT__,x64
 %macro SAVE_XMM 0
   sub rsp, 32
-  movdqa XMMWORD PTR [rsp], xmm6
-  movdqa XMMWORD PTR [rsp+16], xmm7
+  movdqu XMMWORD PTR [rsp], xmm6
+  movdqu XMMWORD PTR [rsp+16], xmm7
 %endmacro
 %macro RESTORE_XMM 0
-  movdqa xmm6, XMMWORD PTR [rsp]
-  movdqa xmm7, XMMWORD PTR [rsp+16]
+  movdqu xmm6, XMMWORD PTR [rsp]
+  movdqu xmm7, XMMWORD PTR [rsp+16]
   add rsp, 32
 %endmacro
 %else
