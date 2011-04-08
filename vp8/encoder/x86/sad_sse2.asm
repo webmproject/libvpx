@@ -112,7 +112,7 @@ sym(vp8_sad8x16_wmt):
 x8x16sad_wmt_loop:
 
         movq            rax,        mm7
-        cmp             rax,        arg(4)
+        cmp             eax,        arg(4)
         jg              x8x16sad_wmt_early_exit
 
         movq            mm0,        QWORD PTR [rsi]
@@ -173,7 +173,7 @@ sym(vp8_sad8x8_wmt):
 x8x8sad_wmt_loop:
 
         movq            rax,        mm7
-        cmp             rax,        arg(4)
+        cmp             eax,        arg(4)
         jg              x8x8sad_wmt_early_exit
 
         movq            mm0,        QWORD PTR [rsi]
@@ -282,7 +282,7 @@ sym(vp8_sad16x8_wmt):
 x16x8sad_wmt_loop:
 
         movq            rax,        mm7
-        cmp             rax,        arg(4)
+        cmp             eax,        arg(4)
         jg              x16x8sad_wmt_early_exit
 
         movq            mm0,        QWORD PTR [rsi]
