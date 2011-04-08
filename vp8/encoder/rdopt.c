@@ -1190,7 +1190,12 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     // Should we do a full search (best quality only)
                     if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000)
                     {
-                        thissme = cpi->full_search_sad(x, c, e, bsi->mvp,
+                        MV full_mvp;
+
+                        full_mvp.row = bsi->mvp->row >>3;
+                        full_mvp.col = bsi->mvp->col >>3;
+
+                        thissme = cpi->full_search_sad(x, c, e, &full_mvp,
                                                        sadpb / 4, 16, v_fn_ptr, x->mvcost, bsi->ref_mv);
 
                         if (thissme < bestsme)
