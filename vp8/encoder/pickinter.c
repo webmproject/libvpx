@@ -263,7 +263,7 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
     return error;
 }
 
-int vp8_pick_intra_mbuv_mode(MACROBLOCK *mb)
+void vp8_pick_intra_mbuv_mode(MACROBLOCK *mb)
 {
 
     MACROBLOCKD *x = &mb->e_mbd;
@@ -408,11 +408,10 @@ int vp8_pick_intra_mbuv_mode(MACROBLOCK *mb)
 
 
     mb->e_mbd.mode_info_context->mbmi.uv_mode = best_mode;
-    return best_error;
 
 }
 
-int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
+void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
@@ -504,7 +503,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
 
     cpi->mbs_tested_so_far++;          // Count of the number of MBs tested so far this frame
 
-    *returnintra = best_intra_rd;
+    *returnintra = INT_MAX;
     x->skip = 0;
 
     ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
@@ -649,7 +648,7 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
                 if (this_rd < best_intra_rd)
                 {
                     best_intra_rd = this_rd;
-                    *returnintra = best_intra_rd ;
+                    *returnintra = distortion2;
                 }
             }
 
@@ -673,9 +672,8 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
             if (this_rd < best_intra_rd)
             {
                 best_intra_rd = this_rd;
-                *returnintra = best_intra_rd ;
+                *returnintra = distortion2;
             }
-
             break;
 
         case NEWMV:
@@ -934,8 +932,6 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
         }
 
         x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
-
-        return best_rd;
     }
 
 
@@ -955,6 +951,4 @@ int vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int rec
     }
 
     x->e_mbd.mode_info_context->mbmi.mv.as_mv = x->e_mbd.block[15].bmi.mv.as_mv;
-
-    return best_rd;
 }
