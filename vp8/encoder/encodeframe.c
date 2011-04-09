@@ -1285,7 +1285,7 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 }
 int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
-    int Error4x4, Error16x16, error_uv;
+    int Error4x4, Error16x16;
     int rate4x4, rate16x16, rateuv;
     int dist4x4, dist16x16, distuv;
     int rate = 0;
@@ -1298,7 +1298,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 #if !(CONFIG_REALTIME_ONLY)
     if (cpi->sf.RD && cpi->compressor_speed != 2)
     {
-        error_uv = vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
+        vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
         rate += rateuv;
 
         Error16x16 = vp8_rd_pick_intra16x16mby_mode(cpi, x, &rate16x16, &rate16x16_tokenonly, &dist16x16);
@@ -1369,7 +1369,6 @@ int vp8cx_encode_inter_macroblock
 )
 {
     MACROBLOCKD *const xd = &x->e_mbd;
-    int inter_error;
     int intra_error = 0;
     int rate;
     int distortion;
@@ -1396,7 +1395,7 @@ int vp8cx_encode_inter_macroblock
              * do not recalculate */
             cpi->zbin_mode_boost_enabled = 0;
         }
-        inter_error = vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
+        vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
 
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)
@@ -1410,10 +1409,9 @@ int vp8cx_encode_inter_macroblock
     }
     else
 #endif
-        inter_error = vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
+        vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
 
-
-    cpi->prediction_error += inter_error;
+    cpi->prediction_error += distortion;
     cpi->intra_error += intra_error;
 
 #if 0

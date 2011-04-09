@@ -864,7 +864,7 @@ static int vp8_rd_inter_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *distort
     return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
 
-int vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *rate_tokenonly, int *distortion)
+void vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *rate_tokenonly, int *distortion)
 {
     MB_PREDICTION_MODE mode;
     MB_PREDICTION_MODE UNINITIALIZED_IS_SAFE(mode_selected);
@@ -907,7 +907,6 @@ int vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *ra
     *distortion = d;
 
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode_selected;
-    return best_rd;
 }
 #endif
 
@@ -1256,7 +1255,12 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     // Should we do a full search (best quality only)
                     if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000)
                     {
-                        thissme = cpi->full_search_sad(x, c, e, bsi->mvp,
+                        MV full_mvp;
+
+                        full_mvp.row = bsi->mvp->row >>3;
+                        full_mvp.col = bsi->mvp->col >>3;
+
+                        thissme = cpi->full_search_sad(x, c, e, &full_mvp,
                                                        sadpb / 4, 16, v_fn_ptr, x->mvcost, bsi->ref_mv);
 
                         if (thissme < bestsme)
@@ -1787,7 +1791,7 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
 }
 
 #if !(CONFIG_REALTIME_ONLY)
-int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
+void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
@@ -1806,7 +1810,8 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     int mdcounts[4];
     int rate;
     int distortion;
-    int best_rd = INT_MAX; // 1 << 30;
+    int best_rd = INT_MAX;
+    int best_intra_rd = INT_MAX;
     int ref_frame_cost[MAX_REF_FRAMES];
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
@@ -2423,9 +2428,12 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         //all_rates[mode_index] = rate2;
         //all_dist[mode_index] = distortion2;
 
-        if ((x->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)  && (this_rd < *returnintra))
+        // Keep record of best intra distortion
+        if ((x->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME) &&
+            (this_rd < best_intra_rd) )
         {
-            *returnintra = this_rd ;
+            best_intra_rd = this_rd;
+            *returnintra = distortion2 ;
         }
 
         // Did this mode help.. i.i is it the new best mode
@@ -2541,8 +2549,6 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
         }
 
         x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
-
-        return best_rd;
     }
 
 
@@ -2565,7 +2571,5 @@ int vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int 
     }
 
     x->e_mbd.mode_info_context->mbmi.mv.as_mv = x->e_mbd.block[15].bmi.mv.as_mv;
-
-    return best_rd;
 }
 #endif

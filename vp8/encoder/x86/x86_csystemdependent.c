@@ -112,21 +112,6 @@ static void subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
 #endif
 
 #if HAVE_SSSE3
-int vp8_fast_quantize_b_impl_ssse3(short *coeff_ptr,
-                                 short *qcoeff_ptr, short *dequant_ptr,
-                                 short *round_ptr,
-                                 short *quant_ptr, short *dqcoeff_ptr);
-static void fast_quantize_b_ssse3(BLOCK *b, BLOCKD *d)
-{
-    d->eob = vp8_fast_quantize_b_impl_ssse3(
-                    b->coeff,
-                    d->qcoeff,
-                    d->dequant,
-                    b->round,
-                    b->quant_fast,
-                    d->dqcoeff
-               );
-}
 #if CONFIG_PSNR
 #if ARCH_X86_64
 typedef void ssimpf
@@ -307,7 +292,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_ssse3;
         cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_ssse3;
 
-        cpi->rtcd.quantize.fastquantb            = fast_quantize_b_ssse3;
+        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
 
 #if CONFIG_PSNR
 #if ARCH_X86_64
