@@ -317,7 +317,6 @@ process_cmdline() {
             process_common_cmdline "$opt"
         fi
         ;;
-        ;;
         esac
     done
 }
