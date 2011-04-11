@@ -174,16 +174,13 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
               "or kf_max_dist instead.");
 
     RANGE_CHECK_BOOL(vp8_cfg,               enable_auto_alt_ref);
+    RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
+
 #if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_BEST_QUALITY_ENCODING, VP8_REAL_TIME_ENCODING);
-    RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
     RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
 #else
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_REAL_TIME_ENCODING, VP8_REAL_TIME_ENCODING);
-
-    if (!((vp8_cfg->cpu_used >= -16 && vp8_cfg->cpu_used <= -4) || (vp8_cfg->cpu_used >= 4 && vp8_cfg->cpu_used <= 16)))
-        ERROR("cpu_used out of range [-16..-4] or [4..16]");
-
     RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 0);
 #endif
 

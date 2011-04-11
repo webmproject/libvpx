@@ -1542,7 +1542,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
         break;
 
-#if !(CONFIG_REALTIME_ONLY)
     case MODE_GOODQUALITY:
         cpi->pass = 0;
         cpi->compressor_speed = 1;
@@ -1583,7 +1582,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->pass = 2;
         cpi->compressor_speed = 0;
         break;
-#endif
     }
 
     if (cpi->pass == 0)
@@ -2117,9 +2115,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->fn_ptr[BLOCK_4X4].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x8);
     cpi->fn_ptr[BLOCK_4X4].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x4d);
 
-#if !(CONFIG_REALTIME_ONLY)
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
-#endif
     cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
 
     cpi->ready_for_new_frame = 1;

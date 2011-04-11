@@ -230,7 +230,6 @@ void vp8_stuff_inter16x16(MACROBLOCK *x)
     */
 }
 
-#if !(CONFIG_REALTIME_ONLY)
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 
 typedef struct vp8_token_state vp8_token_state;
@@ -608,7 +607,6 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 }
-#endif
 
 void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
@@ -620,10 +618,8 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_quantize_mb(x);
 
-#if !(CONFIG_REALTIME_ONLY)
     if (x->optimize)
         optimize_mb(x, rtcd);
-#endif
 
     vp8_inverse_transform_mb(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 

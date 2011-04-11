@@ -1157,7 +1157,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
-#if !(CONFIG_REALTIME_ONLY)
     if (cpi->sf.RD && cpi->compressor_speed != 2)
     {
         vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
@@ -1170,7 +1169,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         rate += (Error4x4 < Error16x16) ? rate4x4 : rate16x16;
     }
     else
-#endif
     {
         int rate2, best_distortion;
         MB_PREDICTION_MODE mode, best_mode = DC_PRED;
@@ -1242,8 +1240,6 @@ int vp8cx_encode_inter_macroblock
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
-#if !(CONFIG_REALTIME_ONLY)
-
     if (cpi->sf.RD)
     {
         int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
@@ -1270,7 +1266,6 @@ int vp8cx_encode_inter_macroblock
 
     }
     else
-#endif
         vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
 
     cpi->prediction_error += distortion;
