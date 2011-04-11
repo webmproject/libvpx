@@ -932,6 +932,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
         }
 
         x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
+        return;
     }
 
 
