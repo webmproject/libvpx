@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+;  Copyright (c) 2011 The WebM project authors. All Rights Reserved.
 ;
 ;  Use of this source code is governed by a BSD-style license
 ;  that can be found in the LICENSE file in the root of the source
@@ -9,110 +9,122 @@
 ;
 
 
-    EXPORT  |vp8_fast_quantize_b_neon_func|
+    EXPORT  |vp8_fast_quantize_b_neon|
+
+    INCLUDE asm_enc_offsets.asm
 
     ARM
     REQUIRE8
     PRESERVE8
 
-    AREA ||.text||, CODE, READONLY, ALIGN=2
+    AREA ||.text||, CODE, READONLY, ALIGN=4
 
-; r0        short *coeff_ptr
-; r1        short *zbin_ptr
-; r2        short *qcoeff_ptr
-; r3        short *dqcoeff_ptr
-; stack     short *dequant_ptr
-; stack     short *scan_mask
-; stack     short *round_ptr
-; stack     short *quant_ptr
 
-; return    int * eob
-|vp8_fast_quantize_b_neon_func| PROC
-    vld1.16         {q0, q1}, [r0]              ;load z
-    vld1.16         {q10, q11}, [r1]            ;load zbin
+;void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
+|vp8_fast_quantize_b_neon| PROC
 
-    vabs.s16        q4, q0                      ;calculate x = abs(z)
-    vabs.s16        q5, q1
+    stmfd           sp!, {r4-r7}
 
-    vcge.s16        q10, q4, q10                ;x>=zbin
-    vcge.s16        q11, q5, q11
+    ldr             r3, [r0, #vp8_block_coeff]
+    ldr             r4, [r0, #vp8_block_quant_fast]
+    ldr             r5, [r0, #vp8_block_round]
 
-    ;if x<zbin (q10 & q11 are all 0), go to zero_output
-    vorr.s16        q6, q10, q11
-    vorr.s16        d12, d12, d13
-    vmov            r0, r1, d12
-    orr             r0, r0, r1
-    cmp             r0, #0
-    beq             zero_output
+    vld1.16         {q0, q1}, [r3@128]  ; load z
+    vorr.s16        q14, q0, q1         ; check if all zero (step 1)
+    ldr             r6, [r1, #vp8_blockd_qcoeff]
+    ldr             r7, [r1, #vp8_blockd_dqcoeff]
+    vorr.s16        d28, d28, d29       ; check if all zero (step 2)
 
-    ldr             r0, [sp, #8]                ;load round_ptr
-    ldr             r12, [sp, #12]              ;load quant_ptr
+    vabs.s16        q12, q0             ; calculate x = abs(z)
+    vabs.s16        q13, q1
 
     ;right shift 15 to get sign, all 0 if it is positive, all 1 if it is negative
-    vshr.s16        q2, q0, #15                 ; sz
+    vshr.s16        q2, q0, #15         ; sz
+    vmov            r2, r3, d28         ; check if all zero (step 3)
     vshr.s16        q3, q1, #15
 
-    vld1.s16        {q6, q7}, [r0]              ;load round_ptr [0-15]
-    vld1.s16        {q8, q9}, [r12]             ;load quant_ptr [0-15]
+    vld1.s16        {q14, q15}, [r5@128]; load round_ptr [0-15]
+    vld1.s16        {q8, q9}, [r4@128]  ; load quant_ptr [0-15]
 
-    vadd.s16        q4, q6                      ;x + Round
-    vadd.s16        q5, q7
+    vadd.s16        q12, q14            ; x + Round
+    vadd.s16        q13, q15
 
-    ldr             r0, [sp, #4]                ;load rvsplus1_scan_order ptr
+    ldr             r0, _inv_zig_zag_   ; load ptr of inverse zigzag table
 
-    vqdmulh.s16     q4, q8                      ;y = ((Round + abs(z)) * Quant) >> 16
-    vqdmulh.s16     q5, q9
+    vqdmulh.s16     q12, q8             ; y = ((Round+abs(z)) * Quant) >> 16
+    vqdmulh.s16     q13, q9
 
-    vld1.16         {q0, q1}, [r0]              ;load rvsplus1_scan_order
-    vceq.s16        q8, q8                      ;set q8 to all 1
+    vld1.16         {q10, q11}, [r0@128]; load inverse scan order
 
-    vshr.s16        q4, #1                      ;right shift 1 after vqdmulh
-    vshr.s16        q5, #1
+    vceq.s16        q8, q8              ; set q8 to all 1
+
+    ldr             r4, [r1, #vp8_blockd_dequant]
+
+    vshr.s16        q12, #1             ; right shift 1 after vqdmulh
+    vshr.s16        q13, #1
+
+    orr             r2, r2, r3          ; check if all zero (step 4)
+    cmp             r2, #0              ; check if all zero (step 5)
+    beq             zero_output         ; check if all zero (step 6)
 
     ;modify data to have its original sign
-    veor.s16        q4, q2                      ; y^sz
-    veor.s16        q5, q3
+    veor.s16        q12, q2             ; y^sz
+    veor.s16        q13, q3
 
-    ldr             r12, [sp]                   ;load dequant_ptr
+    vsub.s16        q12, q2             ; x1=(y^sz)-sz = (y^sz)-(-1) (2's complement)
+    vsub.s16        q13, q3
 
-    vsub.s16        q4, q2                      ; x1 = (y^sz) - sz = (y^sz) - (-1) (two's complement)
-    vsub.s16        q5, q3
+    vld1.s16        {q2, q3}, [r4@128]  ; load dequant_ptr[i]
 
-    vand.s16        q4, q10                     ;mask off x1 elements
-    vand.s16        q5, q11
+    vtst.16         q14, q12, q8        ; now find eob
+    vtst.16         q15, q13, q8        ; non-zero element is set to all 1
 
-    vld1.s16        {q6, q7}, [r12]             ;load dequant_ptr[i]
+    vst1.s16        {q12, q13}, [r6@128]; store: qcoeff = x1
 
-    vtst.16         q14, q4, q8                 ;now find eob
-    vtst.16         q15, q5, q8                 ;non-zero element is set to all 1 in q4, q5
+    vand            q10, q10, q14       ; get all valid numbers from scan array
+    vand            q11, q11, q15
 
-    vst1.s16        {q4, q5}, [r2]              ;store: qcoeff = x1
 
-    vand            q0, q0, q14                 ;get all valid number from rvsplus1_scan_order array
-    vand            q1, q1, q15
-
-    vmax.u16        q0, q0, q1                  ;find maximum value in q0, q1
+    vmax.u16        q0, q10, q11        ; find maximum value in q0, q1
     vmax.u16        d0, d0, d1
     vmovl.u16       q0, d0
 
-    vmul.s16        q6, q4                      ;x * Dequant
-    vmul.s16        q7, q5
+    vmul.s16        q2, q12             ; x * Dequant
+    vmul.s16        q3, q13
 
     vmax.u32        d0, d0, d1
     vpmax.u32       d0, d0, d0
 
-    vst1.s16        {q6, q7}, [r3]              ;store dqcoeff = x * Dequant
+    vst1.s16        {q2, q3}, [r7@128]  ; store dqcoeff = x * Dequant
 
-    vmov.32         r0, d0[0]
+    vmov.32         r0, d0[0]           ; this instruction takes 1+13 cycles
+                                        ; if we have vfp, we could use
+                                        ; vstr      s0, [r1, #vp8_blockd_eob]
+    str             r0, [r1, #vp8_blockd_eob]
+
+    ldmfd           sp!, {r4-r7}
     bx              lr
 
 zero_output
-    vst1.s16        {q10, q11}, [r2]        ; qcoeff = 0
-    vst1.s16        {q10, q11}, [r3]        ; dqcoeff = 0
-    mov             r0, #0
+    str             r2, [r1, #vp8_blockd_eob]
+    vst1.s16        {q0, q1}, [r6@128]  ; qcoeff = 0
+    vst1.s16        {q0, q1}, [r7@128]  ; dqcoeff = 0
 
+    ldmfd           sp!, {r4-r7}
     bx              lr
 
     ENDP
 
+; default inverse zigzag table is defined in vp8/common/entropy.c
+_inv_zig_zag_
+    DCD inv_zig_zag
+
+    ALIGN 16    ; enable use of @128 bit aligned loads
+inv_zig_zag
+    DCW 0x0001, 0x0002, 0x0006, 0x0007
+    DCW 0x0003, 0x0005, 0x0008, 0x000d
+    DCW 0x0004, 0x0009, 0x000c, 0x000e
+    DCW 0x000a, 0x000b, 0x000f, 0x0010
+
     END
+

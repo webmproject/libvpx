@@ -17,6 +17,7 @@
 #define prototype_quantize_block(sym) \
     void (sym)(BLOCK *b,BLOCKD *d)
 
+
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/quantize_x86.h"
 #endif
@@ -40,6 +41,7 @@ typedef struct
     prototype_quantize_block(*quantb);
     prototype_quantize_block(*fastquantb);
 } vp8_quantize_rtcd_vtable_t;
+
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define QUANTIZE_INVOKE(ctx,fn) (ctx)->fn
