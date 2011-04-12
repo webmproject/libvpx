@@ -137,8 +137,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
                                        const vpx_codec_enc_cfg_t *cfg,
                                        const struct vp8_extracfg *vp8_cfg)
 {
-    RANGE_CHECK(cfg, g_w,                   1, 16384);
-    RANGE_CHECK(cfg, g_h,                   1, 16384);
+    RANGE_CHECK(cfg, g_w,                   1, 16383); /* 14 bits available */
+    RANGE_CHECK(cfg, g_h,                   1, 16383); /* 14 bits available */
     RANGE_CHECK(cfg, g_timebase.den,        1, 1000000000);
     RANGE_CHECK(cfg, g_timebase.num,        1, cfg->g_timebase.den);
     RANGE_CHECK_HI(cfg, g_profile,          3);
@@ -194,8 +194,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 #if !(CONFIG_REALTIME_ONLY)
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
-        int              mb_r = (cfg->g_h + 15) / 16;
-        int              mb_c = (cfg->g_w + 15) / 16;
         size_t           packet_sz = sizeof(FIRSTPASS_STATS);
         int              n_packets = cfg->rc_twopass_stats_in.sz / packet_sz;
         FIRSTPASS_STATS *stats;
