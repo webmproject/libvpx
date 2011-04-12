@@ -194,7 +194,7 @@ static int pick_intra4x4block(
         rate = mode_costs[mode];
         vp8_predict_intra4x4(b, mode, b->predictor);
         distortion = get_prediction_error(be, b, &rtcd->variance);
-        this_rd = RD_ESTIMATE(x->rdmult, x->rddiv, rate, distortion);
+        this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
         if (this_rd < best_rd)
         {
@@ -252,7 +252,7 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
     if (i == 16)
     {
         *best_dist = distortion;
-        error = RD_ESTIMATE(mb->rdmult, mb->rddiv, cost, distortion);
+        error = RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
     }
     else
     {
@@ -643,7 +643,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
             }
             else
             {
-                this_rd = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
+                this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
                 if (this_rd < best_intra_rd)
                 {
@@ -667,7 +667,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
                 (&x->e_mbd);
             distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
             rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
-            this_rd = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
+            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
             if (this_rd < best_intra_rd)
             {
@@ -813,7 +813,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
 
             distortion2 = get_inter_mbpred_error(x, &cpi->fn_ptr[BLOCK_16X16], (unsigned int *)(&sse));
 
-            this_rd = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
+            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0)
             {

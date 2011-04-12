@@ -1326,7 +1326,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
                 (&x->e_mbd);
             distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
             rate2  = x->mbmode_cost[x->e_mbd.frame_type][mode];
-            this_rd = RD_ESTIMATE(x->rdmult, x->rddiv, rate2, distortion2);
+            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
             if (Error16x16 > this_rd)
             {
