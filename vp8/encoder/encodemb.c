@@ -19,6 +19,7 @@
 #include "vp8/common/reconintra.h"
 #include "dct.h"
 #include "vpx_mem/vpx_mem.h"
+#include "rdopt.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -230,7 +231,6 @@ void vp8_stuff_inter16x16(MACROBLOCK *x)
 }
 
 #if !(CONFIG_REALTIME_ONLY)
-#define RDCOST(RM,DM,R,D) ( ((128+(R)*(RM)) >> 8) + (DM)*(D) )
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 
 typedef struct vp8_token_state vp8_token_state;
