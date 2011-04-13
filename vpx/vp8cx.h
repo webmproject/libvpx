@@ -148,7 +148,7 @@ enum vp8e_enc_control_id
      * onyx_if.c:vp8_set_speed_features().
      * \todo List highlights of the changes at various levels.
      *
-     * \note Valid range: -16..16 or {-16..-4, 4..16} w/CONFIG_REALTIME_ONLY
+     * \note Valid range: -16..16
      */
     VP8E_SET_CPUUSED           = 13,
     VP8E_SET_ENABLEAUTOALTREF,       /**< control function to enable vp8 to automatic set and use altref frame */
