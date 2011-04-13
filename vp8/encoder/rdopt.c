@@ -536,7 +536,6 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
 
 }
 
-#if !(CONFIG_REALTIME_ONLY)
 static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
 {
     int c = !type;              /* start at coef 0, unless Y with Y2 */
@@ -903,7 +902,6 @@ void vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *r
 
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode_selected;
 }
-#endif
 
 int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4])
 {
@@ -931,7 +929,6 @@ void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, MV *mv)
     }
 }
 
-#if !(CONFIG_REALTIME_ONLY)
 static int labels2mode(
     MACROBLOCK *x,
     int const *labelings, int which_label,
@@ -1497,7 +1494,6 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
     return bsi.segment_rd;
 }
-#endif
 
 static void swap(int *x,int *y)
 {
@@ -1785,7 +1781,6 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
-#if !(CONFIG_REALTIME_ONLY)
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
@@ -2290,8 +2285,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         case ZEROMV:
 
-        mv_selected:
-
             // Trap vectors that reach beyond the UMV borders
             // Note that ALL New MV, Nearest MV Near MV and Zero MV code drops through to this point
             // because of the lack of break statements in the previous two cases.
@@ -2544,6 +2537,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         }
 
         x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
+        return;
     }
 
 
@@ -2567,4 +2561,3 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     x->e_mbd.mode_info_context->mbmi.mv.as_mv = x->e_mbd.block[15].bmi.mv.as_mv;
 }
-#endif
