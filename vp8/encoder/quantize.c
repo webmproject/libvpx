@@ -27,7 +27,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     short *zbin_ptr        = b->zbin;
     short *round_ptr       = b->round;
     short *quant_ptr       = b->quant_fast;
-    short *quant_shift_ptr = b->quant_shift;
+    unsigned char *quant_shift_ptr = b->quant_shift;
     short *qcoeff_ptr      = d->qcoeff;
     short *dqcoeff_ptr     = d->dqcoeff;
     short *dequant_ptr     = d->dequant;
@@ -112,7 +112,7 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
     short *zbin_ptr        = b->zbin;
     short *round_ptr       = b->round;
     short *quant_ptr       = b->quant;
-    short *quant_shift_ptr = b->quant_shift;
+    unsigned char *quant_shift_ptr = b->quant_shift;
     short *qcoeff_ptr      = d->qcoeff;
     short *dqcoeff_ptr     = d->dqcoeff;
     short *dequant_ptr     = d->dequant;
@@ -166,7 +166,7 @@ void vp8_strict_quantize_b(BLOCK *b, BLOCKD *d)
     int sz;
     short *coeff_ptr;
     short *quant_ptr;
-    short *quant_shift_ptr;
+    unsigned char *quant_shift_ptr;
     short *qcoeff_ptr;
     short *dqcoeff_ptr;
     short *dequant_ptr;
