@@ -2182,7 +2182,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                 double total_ssim = 100 * pow(cpi->summed_quality / cpi->summed_weights, 8.0);
 
                 fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\tVPXSSIM\t  Time(us)\n");
-                fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f %8.0f\n",
+                fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
                         dr, cpi->total / cpi->count, total_psnr, cpi->totalp / cpi->count, total_psnr2, total_ssim,
                         total_encode_time);
             }
