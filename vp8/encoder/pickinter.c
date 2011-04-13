@@ -212,7 +212,13 @@ static int pick_intra4x4block(
 }
 
 
-int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int *Rate, int *best_dist)
+int vp8_pick_intra4x4mby_modes
+(
+    const VP8_ENCODER_RTCD *rtcd,
+    MACROBLOCK *mb,
+    int *Rate,
+    int *best_dist
+)
 {
     MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
@@ -239,13 +245,11 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
 
         mic->bmi[i].mode = xd->block[i].bmi.mode = best_mode;
 
-        // Break out case where we have already exceeded best so far value that was bassed in
+        // Break out case where we have already exceeded best so far value
+        // that was passed in
         if (distortion > *best_dist)
             break;
     }
-
-    for (i = 0; i < 16; i++)
-        xd->block[i].bmi.mv.as_int = 0;
 
     *Rate = cost;
 
@@ -259,6 +263,9 @@ int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb, int
         *best_dist = INT_MAX;
         error = INT_MAX;
     }
+
+    for (i = 0; i < 16; i++)
+        xd->block[i].bmi.mv.as_int = 0;
 
     return error;
 }
