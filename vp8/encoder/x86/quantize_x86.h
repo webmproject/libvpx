@@ -51,4 +51,17 @@ extern prototype_quantize_block(vp8_fast_quantize_b_ssse3);
 
 #endif /* HAVE_SSSE3 */
 
+
+#if HAVE_SSE4_1
+extern prototype_quantize_block(vp8_regular_quantize_b_sse4);
+
+#if !CONFIG_RUNTIME_CPU_DETECT
+
+#undef vp8_quantize_quantb
+#define vp8_quantize_quantb vp8_regular_quantize_b_sse4
+
+#endif /* !CONFIG_RUNTIME_CPU_DETECT */
+
+#endif /* HAVE_SSE4_1 */
+
 #endif /* QUANTIZE_X86_H */
