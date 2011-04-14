@@ -729,19 +729,18 @@ process_common_toolchain() {
             add_cflags -arch ${tgt_isa}
             add_ldflags -arch_only ${tgt_isa}
 
-            add_cflags  "-isysroot /Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS4.2.sdk"
+            add_cflags  "-isysroot ${SDK_PATH}/SDKs/iPhoneOS4.3.sdk"
 
             # This should be overridable
-            alt_libc=${SDK_PATH}/SDKs/iPhoneOS4.2.sdk
+            alt_libc=${SDK_PATH}/SDKs/iPhoneOS4.3.sdk
 
             # Add the paths for the alternate libc
-#            for d in usr/include usr/include/gcc/darwin/4.0/; do
-            for d in usr/include usr/include/gcc/darwin/4.0/ usr/lib/gcc/arm-apple-darwin10/4.2.1/include/; do
+            for d in usr/include usr/include/gcc/darwin/4.2/ usr/lib/gcc/arm-apple-darwin10/4.2.1/include/; do
                 try_dir="${alt_libc}/${d}"
                 [ -d "${try_dir}" ] && add_cflags -I"${try_dir}"
             done
 
-            for d in lib usr/lib; do
+            for d in lib usr/lib usr/lib/system; do
                 try_dir="${alt_libc}/${d}"
                 [ -d "${try_dir}" ] && add_ldflags -L"${try_dir}"
             done
