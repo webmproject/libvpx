@@ -71,7 +71,7 @@ extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_
 int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 
-extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi);
+extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance);
 
 static void set_default_lf_deltas(VP8_COMP *cpi);
 
@@ -287,16 +287,9 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     vp8_yv12_de_alloc_frame_buffer(&cpi->last_frame_uf);
     vp8_yv12_de_alloc_frame_buffer(&cpi->scaled_source);
 #if VP8_TEMPORAL_ALT_REF
-    vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer.source_buffer);
+    vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
 #endif
-    {
-        int i;
-
-        for (i = 0; i < MAX_LAG_BUFFERS; i++)
-            vp8_yv12_de_alloc_frame_buffer(&cpi->src_buffer[i].source_buffer);
-
-        cpi->source_buffer_count = 0;
-    }
+    vp8_lookahead_destroy(cpi->lookahead);
 
     vpx_free(cpi->tok);
     cpi->tok = 0;
@@ -1252,35 +1245,23 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 }
 static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 {
-    int i, buffers;
-    /* allocate source_buffer to be multiples of 16 */
     int width = (cpi->oxcf.Width + 15) & ~15;
+    int height = (cpi->oxcf.Height + 15) & ~15;
 
-    buffers = cpi->oxcf.lag_in_frames;
-
-    if (buffers > MAX_LAG_BUFFERS)
-        buffers = MAX_LAG_BUFFERS;
-
-    if (buffers < 1)
-        buffers = 1;
-
-    for (i = 0; i < buffers; i++)
-        if (vp8_yv12_alloc_frame_buffer(&cpi->src_buffer[i].source_buffer,
-                                        width, cpi->oxcf.Height,
-                                        16))
-            vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
-                               "Failed to allocate lag buffer");
+    cpi->lookahead = vp8_lookahead_init(cpi->oxcf.Width, cpi->oxcf.Height,
+                                        cpi->oxcf.lag_in_frames);
+    if(!cpi->lookahead)
+        vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate lag buffers");
 
 #if VP8_TEMPORAL_ALT_REF
 
-    if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer.source_buffer,
-                                    width, cpi->oxcf.Height, 16))
+    if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer,
+                                    width, height, 16))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate altref buffer");
 
 #endif
-
-    cpi->source_buffer_count = 0;
 }
 
 static int vp8_alloc_partition_data(VP8_COMP *cpi)
@@ -1772,7 +1753,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->oxcf.lag_in_frames = MAX_LAG_BUFFERS;
 
     // YX Temp
-    cpi->last_alt_ref_sei    = -1;
+    cpi->alt_ref_source = NULL;
     cpi->is_src_frame_alt_ref = 0;
     cpi->is_next_src_alt_ref = 0;
 
@@ -2120,8 +2101,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->ready_for_new_frame = 1;
 
-    cpi->source_encode_index = 0;
-
     // make sure frame 1 is okay
     cpi->error_bins[0] = cpi->common.MBs;
 
@@ -2169,7 +2148,8 @@ void vp8_remove_compressor(VP8_PTR *ptr)
         if (cpi->pass != 1)
         {
             FILE *f = fopen("opsnr.stt", "a");
-            double time_encoded = (cpi->source_end_time_stamp - cpi->first_time_stamp_ever) / 10000000.000;
+            double time_encoded = (cpi->last_end_time_stamp_seen
+                                   - cpi->first_time_stamp_ever) / 10000000.000;
             double total_encode_time = (cpi->time_receive_data + cpi->time_compress_data)   / 1000.000;
             double dr = (double)cpi->bytes * (double) 8 / (double)1000  / time_encoded;
 
@@ -2624,37 +2604,13 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         vp8_scale_frame(sd, &cpi->scaled_source, cm->temp_scale_frame.y_buffer,
                         tmp_height, hs, hr, vs, vr, 0);
 
+        vp8_yv12_extend_frame_borders(&cpi->scaled_source);
         cpi->Source = &cpi->scaled_source;
 #endif
     }
-    // we may need to copy to a buffer so we can extend the image...
-    else if (cm->Width != cm->yv12_fb[cm->lst_fb_idx].y_width ||
-             cm->Height != cm->yv12_fb[cm->lst_fb_idx].y_height)
-    {
-        //vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->rtcd.flags & HAS_NEON)
-#endif
-        {
-            vp8_yv12_copy_src_frame_func_neon(sd, &cpi->scaled_source);
-        }
-#if CONFIG_RUNTIME_CPU_DETECT
-        else
-#endif
-#endif
-#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-        {
-            vp8_yv12_copy_frame_ptr(sd, &cpi->scaled_source);
-        }
-#endif
-
-        cpi->Source = &cpi->scaled_source;
-    }
-
-    vp8_extend_to_multiple_of16(cpi->Source, cm->Width, cm->Height);
-
 }
+
+
 static void resize_key_frame(VP8_COMP *cpi)
 {
 #if CONFIG_SPATIAL_RESAMPLING
@@ -3567,7 +3523,6 @@ static void encode_frame_to_data_rate
         if (Adjustment)
         {
             int buff_lvl_step;
-            int tmp_lvl = cpi->buffer_level;
 
             if (cpi->buffer_level < cpi->oxcf.maximum_buffer_size)
             {
@@ -4668,17 +4623,17 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 extern void vp8_push_neon(INT64 *store);
 extern void vp8_pop_neon(INT64 *store);
 #endif
+
+
 int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, INT64 time_stamp, INT64 end_time)
 {
 #if HAVE_ARMV7
     INT64 store_reg[8];
 #endif
-    VP8_COMP *cpi = (VP8_COMP *) ptr;
-    VP8_COMMON *cm = &cpi->common;
+    VP8_COMP              *cpi = (VP8_COMP *) ptr;
+    VP8_COMMON            *cm = &cpi->common;
     struct vpx_usec_timer  timer;
-
-    if (!cpi)
-        return -1;
+    int                    res = 0;
 
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -4690,75 +4645,10 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
 #endif
 
     vpx_usec_timer_start(&timer);
-
-    // no more room for frames;
-    if (cpi->source_buffer_count != 0 && cpi->source_buffer_count >= cpi->oxcf.lag_in_frames)
-    {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->rtcd.flags & HAS_NEON)
-#endif
-        {
-            vp8_pop_neon(store_reg);
-        }
-#endif
-        return -1;
-    }
-
-    //printf("in-cpi->source_buffer_count: %d\n", cpi->source_buffer_count);
-
+    if(vp8_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
+                          frame_flags))
+        res = -1;
     cm->clr_type = sd->clrtype;
-
-    // make a copy of the frame for use later...
-#if !(CONFIG_REALTIME_ONLY)
-
-    if (cpi->oxcf.allow_lag)
-    {
-        int which_buffer =  cpi->source_encode_index - 1;
-        SOURCE_SAMPLE *s;
-
-        if (which_buffer == -1)
-            which_buffer = cpi->oxcf.lag_in_frames - 1;
-
-        if (cpi->source_buffer_count < cpi->oxcf.lag_in_frames - 1)
-            which_buffer = cpi->source_buffer_count;
-
-        s = &cpi->src_buffer[which_buffer];
-
-        s->source_time_stamp = time_stamp;
-        s->source_end_time_stamp = end_time;
-        s->source_frame_flags = frame_flags;
-        vp8_yv12_copy_frame_ptr(sd, &s->source_buffer);
-
-        cpi->source_buffer_count ++;
-    }
-    else
-#endif
-    {
-        SOURCE_SAMPLE *s;
-        s = &cpi->src_buffer[0];
-        s->source_end_time_stamp = end_time;
-        s->source_time_stamp = time_stamp;
-        s->source_frame_flags = frame_flags;
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->rtcd.flags & HAS_NEON)
-#endif
-        {
-            vp8_yv12_copy_src_frame_func_neon(sd, &s->source_buffer);
-        }
-#if CONFIG_RUNTIME_CPU_DETECT
-        else
-#endif
-#endif
-#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-        {
-            vp8_yv12_copy_frame_ptr(sd, &s->source_buffer);
-        }
-#endif
-        cpi->source_buffer_count = 1;
-    }
-
     vpx_usec_timer_mark(&timer);
     cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 
@@ -4771,8 +4661,10 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
     }
 #endif
 
-    return 0;
+    return res;
 }
+
+
 int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, INT64 *time_stamp, INT64 *time_end, int flush)
 {
 #if HAVE_ARMV7
@@ -4783,6 +4675,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     struct vpx_usec_timer  tsctimer;
     struct vpx_usec_timer  ticktimer;
     struct vpx_usec_timer  cmptimer;
+    YV12_BUFFER_CONFIG    *force_src_buffer = NULL;
 
     if (!cpi)
         return -1;
@@ -4798,95 +4691,24 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     vpx_usec_timer_start(&cmptimer);
 
-
-    // flush variable tells us that even though we have less than 10 frames
-    // in our buffer we need to start producing compressed frames.
-    // Probably because we are at the end of a file....
-    if ((cpi->source_buffer_count == cpi->oxcf.lag_in_frames && cpi->oxcf.lag_in_frames > 0)
-        || (!cpi->oxcf.allow_lag && cpi->source_buffer_count > 0)
-        || (flush && cpi->source_buffer_count > 0))
-    {
-
-        SOURCE_SAMPLE *s;
-
-        s = &cpi->src_buffer[cpi->source_encode_index];
-        cpi->source_time_stamp = s->source_time_stamp;
-        cpi->source_end_time_stamp = s->source_end_time_stamp;
+    cpi->source = NULL;
 
 #if !(CONFIG_REALTIME_ONLY)
-
-        // Should we code an alternate reference frame
-        if (cpi->oxcf.error_resilient_mode == 0 &&
-            cpi->oxcf.play_alternate &&
-            cpi->source_alt_ref_pending  &&
-            (cpi->frames_till_gf_update_due < cpi->source_buffer_count) &&
-            cpi->oxcf.lag_in_frames != 0)
+    // Should we code an alternate reference frame
+    if (cpi->oxcf.error_resilient_mode == 0 &&
+        cpi->oxcf.play_alternate &&
+        cpi->source_alt_ref_pending)
+    {
+        if ((cpi->source = vp8_lookahead_peek(cpi->lookahead,
+                                              cpi->frames_till_gf_update_due)))
         {
-            cpi->last_alt_ref_sei = (cpi->source_encode_index + cpi->frames_till_gf_update_due) % cpi->oxcf.lag_in_frames;
-
-#if VP8_TEMPORAL_ALT_REF
-
+            cpi->alt_ref_source = cpi->source;
             if (cpi->oxcf.arnr_max_frames > 0)
             {
-#if 0
-                // my attempt at a loop that tests the results of strength filter.
-                int start_frame = cpi->last_alt_ref_sei - 3;
-
-                int i, besti = -1, pastin = cpi->oxcf.arnr_strength;
-
-                int besterr;
-
-                if (start_frame < 0)
-                    start_frame += cpi->oxcf.lag_in_frames;
-
-                besterr = calc_low_ss_err(&cpi->src_buffer[cpi->last_alt_ref_sei].source_buffer,
-                                              &cpi->src_buffer[start_frame].source_buffer, IF_RTCD(&cpi->rtcd.variance));
-
-                for (i = 0; i < 7; i++)
-                {
-                    int thiserr;
-                    cpi->oxcf.arnr_strength = i;
-                    vp8_temporal_filter_prepare_c(cpi);
-
-                    thiserr = calc_low_ss_err(&cpi->alt_ref_buffer.source_buffer,
-                                                  &cpi->src_buffer[start_frame].source_buffer, IF_RTCD(&cpi->rtcd.variance));
-
-                    if (10 * thiserr < besterr * 8)
-                    {
-                        besterr = thiserr;
-                        besti = i;
-                    }
-                }
-
-                if (besti != -1)
-                {
-                    cpi->oxcf.arnr_strength = besti;
-                    vp8_temporal_filter_prepare_c(cpi);
-                    s = &cpi->alt_ref_buffer;
-
-                    // FWG not sure if I need to copy this data for the Alt Ref frame
-                    s->source_time_stamp = cpi->src_buffer[cpi->last_alt_ref_sei].source_time_stamp;
-                    s->source_end_time_stamp = cpi->src_buffer[cpi->last_alt_ref_sei].source_end_time_stamp;
-                    s->source_frame_flags = cpi->src_buffer[cpi->last_alt_ref_sei].source_frame_flags;
-                }
-                else
-                    s = &cpi->src_buffer[cpi->last_alt_ref_sei];
-
-#else
-                vp8_temporal_filter_prepare_c(cpi);
-                s = &cpi->alt_ref_buffer;
-
-                // FWG not sure if I need to copy this data for the Alt Ref frame
-                s->source_time_stamp = cpi->src_buffer[cpi->last_alt_ref_sei].source_time_stamp;
-                s->source_end_time_stamp = cpi->src_buffer[cpi->last_alt_ref_sei].source_end_time_stamp;
-                s->source_frame_flags = cpi->src_buffer[cpi->last_alt_ref_sei].source_frame_flags;
-
-#endif
+                vp8_temporal_filter_prepare_c(cpi,
+                                              cpi->frames_till_gf_update_due);
+                force_src_buffer = &cpi->alt_ref_buffer;
             }
-            else
-#endif
-                s = &cpi->src_buffer[cpi->last_alt_ref_sei];
-
             cm->frames_till_alt_ref_frame = cpi->frames_till_gf_update_due;
             cm->refresh_alt_ref_frame = 1;
             cm->refresh_golden_frame = 0;
@@ -4896,40 +4718,33 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             cpi->is_src_frame_alt_ref = 0;
             cpi->is_next_src_alt_ref = 0;
         }
-        else
+    }
 #endif
+
+    if (!cpi->source)
+    {
+        if ((cpi->source = vp8_lookahead_pop(cpi->lookahead, flush)))
         {
             cm->show_frame = 1;
-#if !(CONFIG_REALTIME_ONLY)
 
-            if (cpi->oxcf.allow_lag)
-            {
-                if (cpi->source_encode_index ==  cpi->last_alt_ref_sei)
-                {
-                    cpi->is_src_frame_alt_ref = 1;
-                    cpi->last_alt_ref_sei    = -1;
-                }
-                else
-                    cpi->is_src_frame_alt_ref = 0;
+            cpi->is_src_frame_alt_ref = cpi->alt_ref_source
+                                        && (cpi->source == cpi->alt_ref_source);
 
-                cpi->source_encode_index = (cpi->source_encode_index + 1) % cpi->oxcf.lag_in_frames;
-
-                if(cpi->source_encode_index == cpi->last_alt_ref_sei)
-                    cpi->is_next_src_alt_ref = 1;
-                else
-                    cpi->is_next_src_alt_ref = 0;
-            }
-
-#endif
-            cpi->source_buffer_count--;
+            cpi->is_next_src_alt_ref = cpi->alt_ref_source
+                                        && (vp8_lookahead_peek(cpi->lookahead, 0)
+                                            == cpi->alt_ref_source);
+            if(cpi->is_src_frame_alt_ref)
+                cpi->alt_ref_source = NULL;
         }
+    }
 
-        cpi->un_scaled_source = &s->source_buffer;
-        cpi->Source = &s->source_buffer;
-        cpi->source_frame_flags = s->source_frame_flags;
-
-        *time_stamp = cpi->source_time_stamp;
-        *time_end = cpi->source_end_time_stamp;
+    if (cpi->source)
+    {
+        cpi->un_scaled_source =
+        cpi->Source = force_src_buffer ? force_src_buffer : &cpi->source->img;
+        *time_stamp = cpi->source->ts_start;
+        *time_end = cpi->source->ts_end;
+        *frame_flags = cpi->source->flags;
     }
     else
     {
@@ -4955,26 +4770,24 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         return -1;
     }
 
-    *frame_flags = cpi->source_frame_flags;
-
-    if (cpi->source_time_stamp < cpi->first_time_stamp_ever)
+    if (cpi->source->ts_start < cpi->first_time_stamp_ever)
     {
-        cpi->first_time_stamp_ever = cpi->source_time_stamp;
-        cpi->last_end_time_stamp_seen = cpi->source_time_stamp;
+        cpi->first_time_stamp_ever = cpi->source->ts_start;
+        cpi->last_end_time_stamp_seen = cpi->source->ts_start;
     }
 
     // adjust frame rates based on timestamps given
     if (!cm->refresh_alt_ref_frame)
     {
-        if (cpi->source_time_stamp == cpi->first_time_stamp_ever)
+        if (cpi->source->ts_start == cpi->first_time_stamp_ever)
         {
-            double this_fps = 10000000.000 / (cpi->source_end_time_stamp - cpi->source_time_stamp);
+            double this_fps = 10000000.000 / (cpi->source->ts_end - cpi->source->ts_start);
 
             vp8_new_frame_rate(cpi, this_fps);
         }
         else
         {
-            long long nanosecs = cpi->source_end_time_stamp
+            long long nanosecs = cpi->source->ts_end
                 - cpi->last_end_time_stamp_seen;
 
             if (nanosecs > 0)
@@ -4985,8 +4798,8 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
         }
 
-        cpi->last_time_stamp_seen = cpi->source_time_stamp;
-        cpi->last_end_time_stamp_seen = cpi->source_end_time_stamp;
+        cpi->last_time_stamp_seen = cpi->source->ts_start;
+        cpi->last_end_time_stamp_seen = cpi->source->ts_end;
     }
 
     if (cpi->compressor_speed == 2)
@@ -5107,7 +4920,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
             if (cpi->b_calculate_psnr)
             {
-                double y, u, v;
                 double ye,ue,ve;
                 double frame_psnr;
                 YV12_BUFFER_CONFIG      *orig = cpi->Source;
@@ -5140,7 +4952,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 cpi->total_sq_error += sq_error;
                 cpi->total  += frame_psnr;
                 {
-                    double y2, u2, v2, frame_psnr2, frame_ssim2 = 0;
+                    double frame_psnr2, frame_ssim2 = 0;
                     double weight = 0;
 
                     vp8_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0, IF_RTCD(&cm->rtcd.postproc));
