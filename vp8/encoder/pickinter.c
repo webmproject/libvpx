@@ -639,10 +639,10 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
         switch (this_mode)
         {
         case B_PRED:
-            distortion2 = *returndistortion;                    // Best so far passed in as breakout value to vp8_pick_intra4x4mby_modes
-            vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate, &distortion2);
-            rate2 += rate;
-            distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
+            // Pass best so far to vp8_pick_intra4x4mby_modes to use as breakout
+            distortion2 = *returndistortion;
+            vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x,
+                                         &rate, &distortion2);
 
             if (distortion2 == INT_MAX)
             {
@@ -650,6 +650,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
             }
             else
             {
+                rate2 += rate;
+                distortion2 = VARIANCE_INVOKE
+                                (&cpi->rtcd.variance, get16x16prederror)(
+                                    x->src.y_buffer, x->src.y_stride,
+                                    x->e_mbd.predictor, 16, 0x7fffffff);
                 this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
                 if (this_rd < best_intra_rd)
