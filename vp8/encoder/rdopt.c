@@ -1205,12 +1205,14 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
                 if (bestsme < INT_MAX)
                 {
+                    int distortion;
+
                     if (!cpi->common.full_pixel)
                         cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                                                     bsi->ref_mv, x->errorperbit / 2, v_fn_ptr, x->mvcost);
+                                                     bsi->ref_mv, x->errorperbit / 2, v_fn_ptr, x->mvcost, &distortion);
                     else
                         vp8_skip_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                                                    bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost);
+                                                    bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost, &distortion);
                 }
             } /* NEW4X4 */
 
@@ -2188,8 +2190,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 x->mv_row_max = tmp_row_max;
 
                 if (bestsme < INT_MAX)
-                    // cpi->find_fractional_mv_step(x,b,d,&d->bmi.mv.as_mv,&best_ref_mv,x->errorperbit/2,cpi->fn_ptr.svf,cpi->fn_ptr.vf,x->mvcost);  // normal mvc=11
-                    cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost);
+                    {
+                        int dis; /* TODO: use dis in distortion calculation later. */
+                        cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis);
+                }
 
                 mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
                 mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
