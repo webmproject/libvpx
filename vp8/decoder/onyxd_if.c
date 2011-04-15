@@ -76,7 +76,6 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     pbi->common.current_video_frame = 0;
     pbi->ready_for_new_data = 1;
 
-    pbi->CPUFreq = 0; /*vp8_get_processor_freq();*/
 #if CONFIG_MULTITHREAD
     pbi->max_threads = oxcf->max_threads;
     vp8_decoder_create_threads(pbi);
@@ -252,7 +251,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
     int retcode = 0;
-    struct vpx_usec_timer timer;
 
     /*if(pbi->ready_for_new_data == 0)
         return -1;*/
@@ -317,8 +315,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->common.error.setjmp = 1;
 
-    vpx_usec_timer_start(&timer);
-
     /*cm->current_video_frame++;*/
     pbi->Source = source;
     pbi->source_sz = size;
@@ -379,14 +375,8 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
         if(pbi->common.filter_level)
         {
-            struct vpx_usec_timer lpftimer;
-            vpx_usec_timer_start(&lpftimer);
             /* Apply the loop filter if appropriate. */
-
             vp8_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
-
-            vpx_usec_timer_mark(&lpftimer);
-            pbi->time_loop_filtering += vpx_usec_timer_elapsed(&lpftimer);
 
             cm->last_frame_type = cm->frame_type;
             cm->last_filter_type = cm->filter_type;
@@ -397,11 +387,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
 
     vp8_clear_system_state();
-
-    vpx_usec_timer_mark(&timer);
-    pbi->decode_microseconds = vpx_usec_timer_elapsed(&timer);
-
-    pbi->time_decoding += pbi->decode_microseconds;
 
     /*vp8_print_modes_and_motion_vectors( cm->mi, cm->mb_rows,cm->mb_cols, cm->current_video_frame);*/
 
