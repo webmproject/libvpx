@@ -157,7 +157,7 @@ sym(vp8_sad16x16x3_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
-    SAVE_XMM
+    SAVE_XMM 7
     push        rsi
     push        rdi
     push        rcx
@@ -270,7 +270,7 @@ sym(vp8_sad16x8x3_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 5
-    SAVE_XMM
+    SAVE_XMM 7
     push        rsi
     push        rdi
     push        rcx

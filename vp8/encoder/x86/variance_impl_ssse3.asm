@@ -34,7 +34,7 @@ sym(vp8_filter_block2d_bil_var_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi

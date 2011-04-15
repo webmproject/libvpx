@@ -66,7 +66,7 @@ sym(vp8_ssim_parms_16x16_sse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
-    SAVE_XMM
+    SAVE_XMM 15
     push        rsi
     push        rdi
     ; end prolog
@@ -156,7 +156,7 @@ sym(vp8_ssim_parms_8x8_sse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
-    SAVE_XMM
+    SAVE_XMM 15
     push        rsi
     push        rdi
     ; end prolog

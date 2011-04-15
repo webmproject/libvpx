@@ -85,7 +85,7 @@ sym(vp8_get16x16var_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     push rbx
     push rsi
     push rdi
@@ -225,7 +225,7 @@ sym(vp8_get16x16pred_error_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -345,7 +345,7 @@ sym(vp8_get8x8var_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -534,7 +534,7 @@ sym(vp8_filter_block2d_bil_var_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -811,7 +811,7 @@ sym(vp8_half_horiz_vert_variance8x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -933,7 +933,7 @@ sym(vp8_half_horiz_vert_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -1049,7 +1049,7 @@ sym(vp8_half_vert_variance8x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -1156,7 +1156,7 @@ sym(vp8_half_vert_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -1264,7 +1264,7 @@ sym(vp8_half_horiz_variance8x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi
@@ -1369,7 +1369,7 @@ sym(vp8_half_horiz_variance16x_h_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi

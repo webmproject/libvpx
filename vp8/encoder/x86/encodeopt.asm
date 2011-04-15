@@ -208,7 +208,7 @@ sym(vp8_mbblock_error_xmm_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
-    SAVE_XMM ; 6
+    SAVE_XMM 6
     push rsi
     push rdi
     ; end prolog

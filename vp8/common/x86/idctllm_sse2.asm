@@ -102,7 +102,7 @@ sym(idct_dequant_full_2x_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -443,7 +443,7 @@ sym(idct_dequant_dc_full_2x_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi

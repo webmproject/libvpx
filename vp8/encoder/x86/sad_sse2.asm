@@ -21,7 +21,7 @@ sym(vp8_sad16x16_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
-    SAVE_XMM ; 6
+    SAVE_XMM 6
     push        rsi
     push        rdi
     ; end prolog
