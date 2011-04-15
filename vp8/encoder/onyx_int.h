@@ -29,6 +29,7 @@
 #include "mcomp.h"
 #include "temporal_filter.h"
 #include "vp8/common/findnearmv.h"
+#include "lookahead.h"
 
 //#define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4
@@ -221,14 +222,6 @@ typedef struct
     void *ptr1;
 } LPFTHREAD_DATA;
 
-typedef struct
-{
-    INT64  source_time_stamp;
-    INT64  source_end_time_stamp;
-
-    DECLARE_ALIGNED(16, YV12_BUFFER_CONFIG, source_buffer);
-    unsigned int source_frame_flags;
-} SOURCE_SAMPLE;
 
 typedef struct VP8_ENCODER_RTCD
 {
@@ -284,19 +277,17 @@ typedef struct
 
     VP8_CONFIG oxcf;
 
+    struct lookahead_ctx    *lookahead;
+    struct lookahead_entry  *source;
+    struct lookahead_entry  *alt_ref_source;
+
     YV12_BUFFER_CONFIG *Source;
     YV12_BUFFER_CONFIG *un_scaled_source;
-    INT64 source_time_stamp;
-    INT64 source_end_time_stamp;
-    unsigned int source_frame_flags;
     YV12_BUFFER_CONFIG scaled_source;
 
-    int source_buffer_count;    // number of src_buffers in use for lagged encoding
-    int source_encode_index;    // index of buffer in src_buffer to encode
     int source_alt_ref_pending; // frame in src_buffers has been identified to be encoded as an alt ref
     int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
 
-    int last_alt_ref_sei;       // index into src_buffers of frame used as alt reference
     int is_src_frame_alt_ref;   // source of frame to encode is an exact copy of an alt ref frame
     int is_next_src_alt_ref;    // source of next frame to encode is an exact copy of an alt ref frame
 
@@ -305,8 +296,6 @@ typedef struct
     int gold_is_alt;  // don't do both alt and gold search ( just do gold).
 
     //int refresh_alt_ref_frame;
-    SOURCE_SAMPLE src_buffer[MAX_LAG_BUFFERS];
-
     YV12_BUFFER_CONFIG last_frame_uf;
 
     TOKENEXTRA *tok;
@@ -642,7 +631,7 @@ typedef struct
     VP8_ENCODER_RTCD            rtcd;
 #endif
 #if VP8_TEMPORAL_ALT_REF
-    SOURCE_SAMPLE alt_ref_buffer;
+    YV12_BUFFER_CONFIG alt_ref_buffer;
     YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];
     int fixed_divide[512];
 #endif

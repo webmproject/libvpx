@@ -786,7 +786,8 @@ void vp8_first_pass(VP8_COMP *cpi)
 
         // TODO:  handle the case when duration is set to 0, or something less
         // than the full time between subsequent cpi->source_time_stamp s  .
-        fps.duration = cpi->source_end_time_stamp - cpi->source_time_stamp;
+        fps.duration = cpi->source->ts_end
+                       - cpi->source->ts_start;
 
         // don't want to do output stats with a stack variable!
         memcpy(cpi->this_frame_stats,
