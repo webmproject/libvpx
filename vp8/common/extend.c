@@ -38,7 +38,7 @@ static void copy_and_extend_plane
     dest_ptr1 = d - el;
     dest_ptr2 = d + w;
 
-    for (i = 0; i < h - 0 + 1; i++)
+    for (i = 0; i < h; i++)
     {
         vpx_memset(dest_ptr1, src_ptr1[0], el);
         vpx_memcpy(dest_ptr1 + el, src_ptr1, w);
