@@ -12,8 +12,6 @@
 #ifndef _PTHREAD_EMULATION
 #define _PTHREAD_EMULATION
 
-#define VPXINFINITE 10000       /* 10second. */
-
 #if CONFIG_OS_SUPPORT && CONFIG_MULTITHREAD
 
 /* Thread management macros */
@@ -28,7 +26,7 @@
 #define pthread_t HANDLE
 #define pthread_attr_t DWORD
 #define pthread_create(thhandle,attr,thfunc,tharg) (int)((*thhandle=(HANDLE)_beginthreadex(NULL,0,(unsigned int (__stdcall *)(void *))thfunc,tharg,0,NULL))==NULL)
-#define pthread_join(thread, result) ((WaitForSingleObject((thread),VPXINFINITE)!=WAIT_OBJECT_0) || !CloseHandle(thread))
+#define pthread_join(thread, result) ((WaitForSingleObject((thread),INFINITE)!=WAIT_OBJECT_0) || !CloseHandle(thread))
 #define pthread_detach(thread) if(thread!=NULL)CloseHandle(thread)
 #define thread_sleep(nms) Sleep(nms)
 #define pthread_cancel(thread) terminate_thread(thread,0)
@@ -62,7 +60,7 @@
 #define sem_t HANDLE
 #define pause(voidpara) __asm PAUSE
 #define sem_init(sem, sem_attr1, sem_init_value) (int)((*sem = CreateEvent(NULL,FALSE,FALSE,NULL))==NULL)
-#define sem_wait(sem) (int)(WAIT_OBJECT_0 != WaitForSingleObject(*sem,VPXINFINITE))
+#define sem_wait(sem) (int)(WAIT_OBJECT_0 != WaitForSingleObject(*sem,INFINITE))
 #define sem_post(sem) SetEvent(*sem)
 #define sem_destroy(sem) if(*sem)((int)(CloseHandle(*sem))==TRUE)
 #define thread_sleep(nms) Sleep(nms)
