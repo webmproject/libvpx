@@ -357,8 +357,8 @@ static void vp8_temporal_filter_iterate_c
             }
 
             // Normalize filter output to produce AltRef frame
-            dst1 = cpi->alt_ref_buffer.source_buffer.y_buffer;
-            stride = cpi->alt_ref_buffer.source_buffer.y_stride;
+            dst1 = cpi->alt_ref_buffer.y_buffer;
+            stride = cpi->alt_ref_buffer.y_stride;
             byte = mb_y_offset;
             for (i = 0,k = 0; i < 16; i++)
             {
@@ -377,9 +377,9 @@ static void vp8_temporal_filter_iterate_c
                 byte += stride - 16;
             }
 
-            dst1 = cpi->alt_ref_buffer.source_buffer.u_buffer;
-            dst2 = cpi->alt_ref_buffer.source_buffer.v_buffer;
-            stride = cpi->alt_ref_buffer.source_buffer.uv_stride;
+            dst1 = cpi->alt_ref_buffer.u_buffer;
+            dst2 = cpi->alt_ref_buffer.v_buffer;
+            stride = cpi->alt_ref_buffer.uv_stride;
             byte = mb_uv_offset;
             for (i = 0,k = 256; i < 8; i++)
             {
@@ -422,7 +422,8 @@ static void vp8_temporal_filter_iterate_c
 
 void vp8_temporal_filter_prepare_c
 (
-    VP8_COMP *cpi
+    VP8_COMP *cpi,
+    int distance
 )
 {
     int frame = 0;
@@ -441,12 +442,9 @@ void vp8_temporal_filter_prepare_c
 
     int max_frames = cpi->active_arnr_frames;
 
-    num_frames_backward = cpi->last_alt_ref_sei - cpi->source_encode_index;
-
-    if (num_frames_backward < 0)
-        num_frames_backward += cpi->oxcf.lag_in_frames;
-
-    num_frames_forward = cpi->oxcf.lag_in_frames - (num_frames_backward + 1);
+    num_frames_backward = distance;
+    num_frames_forward = vp8_lookahead_depth(cpi->lookahead)
+                         - (num_frames_backward + 1);
 
     switch (blur_type)
     {
@@ -498,8 +496,7 @@ void vp8_temporal_filter_prepare_c
         break;
     }
 
-    start_frame = (cpi->last_alt_ref_sei
-                    + frames_to_blur_forward) % cpi->oxcf.lag_in_frames;
+    start_frame = distance + frames_to_blur_forward;
 
 #ifdef DEBUGFWG
     // DEBUG FWG
@@ -520,12 +517,9 @@ void vp8_temporal_filter_prepare_c
     for (frame = 0; frame < frames_to_blur; frame++)
     {
         int which_buffer =  start_frame - frame;
-
-        if (which_buffer < 0)
-            which_buffer += cpi->oxcf.lag_in_frames;
-
-        cpi->frames[frames_to_blur-1-frame]
-                = &cpi->src_buffer[which_buffer].source_buffer;
+        struct lookahead_entry* buf = vp8_lookahead_peek(cpi->lookahead,
+                                                         which_buffer);
+        cpi->frames[frames_to_blur-1-frame] = &buf->img;
     }
 
     vp8_temporal_filter_iterate_c (
