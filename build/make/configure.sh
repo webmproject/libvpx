@@ -957,6 +957,38 @@ process_common_toolchain() {
         enabled rvct && check_add_cflags -Otime
         enabled small && check_add_cflags -O2 || check_add_cflags -O3
     fi
+    
+    if enabled opencl; then
+        disable multithread
+        echo "  disabling multithread"
+        soft_enable opencl #Provide output to make user comfortable
+        enable runtime_cpu_detect
+	
+        #Use dlopen() to load OpenCL when possible.
+        case ${toolchain} in
+            *darwin10*)
+                check_add_cflags -D__APPLE__
+                add_extralibs -framework OpenCL
+                ;;
+            *-win32-gcc)
+                if check_header dlfcn.h; then
+                    add_extralibs -ldl 
+                    enable dlopen
+                else
+                    #This shouldn't be a hard-coded path in the long term
+                    add_extralibs -L/cygdrive/c/Windows/System32 -lOpenCL
+                fi
+                ;;
+            *)
+                if check_header dlfcn.h; then
+                    add_extralibs -ldl 
+                    enable dlopen
+                else
+                    add_extralibs -lOpenCL
+                fi
+                ;;
+        esac
+    fi
 
     # Position Independent Code (PIC) support, for building relocatable
     # shared objects

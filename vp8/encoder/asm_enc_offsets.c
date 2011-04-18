@@ -43,9 +43,11 @@ DEFINE(vp8_block_zbin_extra,                    offsetof(BLOCK, zbin_extra));
 DEFINE(vp8_block_zrun_zbin_boost,               offsetof(BLOCK, zrun_zbin_boost));
 DEFINE(vp8_block_quant_shift,                   offsetof(BLOCK, quant_shift));
 
-DEFINE(vp8_blockd_qcoeff,                       offsetof(BLOCKD, qcoeff));
+DEFINE(vp8_blockd_qcoeff_base,                  offsetof(BLOCKD, qcoeff_base));
+DEFINE(vp8_blockd_qcoeff_offset,                offsetof(BLOCKD, qcoeff_offset));
 DEFINE(vp8_blockd_dequant,                      offsetof(BLOCKD, dequant));
-DEFINE(vp8_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
+DEFINE(vp8_blockd_dqcoeff_base,                 offsetof(BLOCKD, dqcoeff_base));
+DEFINE(vp8_blockd_dqcoeff_offset,               offsetof(BLOCKD, dqcoeff_offset));
 DEFINE(vp8_blockd_eob,                          offsetof(BLOCKD, eob));
 
 // subtract
@@ -54,7 +56,8 @@ DEFINE(vp8_block_src,                           offsetof(BLOCK, src));
 DEFINE(vp8_block_src_diff,                      offsetof(BLOCK, src_diff));
 DEFINE(vp8_block_src_stride,                    offsetof(BLOCK, src_stride));
 
-DEFINE(vp8_blockd_predictor,                    offsetof(BLOCKD, predictor));
+DEFINE(vp8_blockd_predictor_base,               offsetof(BLOCKD, predictor_base));
+DEFINE(vp8_blockd_predictor_offset,             offsetof(BLOCKD, predictor_offset));
 
 //pack tokens
 DEFINE(vp8_writer_lowvalue,                     offsetof(vp8_writer, lowvalue));

@@ -40,6 +40,7 @@ Advanced options:
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
   ${toggle_small}                 favor smaller size over speed
+  ${toggle_opencl}                support for OpenCL-assisted VP8 decoding (experimental)
   ${toggle_postproc_visualizer}   macro block / block level visualizers
 
 Codecs:
@@ -105,6 +106,7 @@ all_platforms="${all_platforms} x86-darwin8-gcc"
 all_platforms="${all_platforms} x86-darwin8-icc"
 all_platforms="${all_platforms} x86-darwin9-gcc"
 all_platforms="${all_platforms} x86-darwin9-icc"
+all_platforms="${all_platforms} x86-darwin10-gcc"
 all_platforms="${all_platforms} x86-linux-gcc"
 all_platforms="${all_platforms} x86-linux-icc"
 all_platforms="${all_platforms} x86-solaris-gcc"
@@ -211,6 +213,7 @@ HAVE_LIST="
     alt_tree_layout
     pthread_h
     sys_mman_h
+    dlopen
 "
 CONFIG_LIST="
     external_build
@@ -250,6 +253,7 @@ CONFIG_LIST="
     realtime_only
     shared
     small
+    opencl
     postproc_visualizer
     os_support
 "
@@ -290,6 +294,7 @@ CMDLINE_SELECT="
     realtime_only
     shared
     small
+    opencl
     postproc_visualizer
 "
 
@@ -556,4 +561,6 @@ process "$@"
 cat <<EOF > ${BUILD_PFX}vpx_config.c
 static const char* const cfg = "$CONFIGURE_ARGS";
 const char *vpx_codec_build_config(void) {return cfg;}
+static const char* const libdir = "$libdir";
+const char *vpx_codec_lib_dir(void) {return libdir;}
 EOF

@@ -11,10 +11,16 @@
 
 #include "swapyv12buffer.h"
 
+
+
 void vp8_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame, YV12_BUFFER_CONFIG *last_frame)
 {
     unsigned char *temp;
-
+#if CONFIG_OPENCL
+    cl_mem temp_mem;
+#endif
+    int temp_size;
+    
     temp = last_frame->buffer_alloc;
     last_frame->buffer_alloc = new_frame->buffer_alloc;
     new_frame->buffer_alloc = temp;
@@ -30,5 +36,15 @@ void vp8_swap_yv12_buffer(YV12_BUFFER_CONFIG *new_frame, YV12_BUFFER_CONFIG *las
     temp = last_frame->v_buffer;
     last_frame->v_buffer = new_frame->v_buffer;
     new_frame->v_buffer = temp;
+
+    temp_size = last_frame->buffer_size;
+    last_frame->buffer_size = new_frame->buffer_size;
+    new_frame->buffer_size = temp_size;
+
+#if CONFIG_OPENCL
+    temp_mem = last_frame->buffer_mem;
+    last_frame->buffer_mem = new_frame->buffer_mem;
+    new_frame->buffer_mem = temp_mem;
+#endif
 
 }

@@ -14,7 +14,7 @@
 #include "vp8/common/reconinter.h"
 #include "quantize.h"
 #include "tokenize.h"
-#include "vp8/common/invtrans.h"
+#include "invtrans.h"
 #include "vp8/common/recon.h"
 #include "vp8/common/reconintra.h"
 #include "dct.h"
@@ -30,7 +30,7 @@ void vp8_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch)
 {
     unsigned char *src_ptr = (*(be->base_src) + be->src);
     short *diff_ptr = be->src_diff;
-    unsigned char *pred_ptr = bd->predictor;
+    unsigned char *pred_ptr = bd->predictor_base + bd->predictor_offset;
     int src_stride = be->src_stride;
 
     int r, c;
@@ -203,7 +203,7 @@ void vp8_stuff_inter16x16(MACROBLOCK *x)
         // recon = copy from predictors to destination
         {
             BLOCKD *b = &x->e_mbd.block[0];
-            unsigned char *pred_ptr = b->predictor;
+            unsigned char *pred_ptr = b->predictor_base + b->predictor_offset;
             unsigned char *dst_ptr = *(b->base_dst) + b->dst;
             int stride = b->dst_stride;
 
@@ -212,7 +212,7 @@ void vp8_stuff_inter16x16(MACROBLOCK *x)
                 vpx_memcpy(dst_ptr+i*stride,pred_ptr+16*i,16);
 
             b = &x->e_mbd.block[16];
-            pred_ptr = b->predictor;
+            pred_ptr = b->predictor_base + b->predictor_offset;
             dst_ptr = *(b->base_dst) + b->dst;
             stride = b->dst_stride;
 
@@ -220,7 +220,7 @@ void vp8_stuff_inter16x16(MACROBLOCK *x)
                 vpx_memcpy(dst_ptr+i*stride,pred_ptr+8*i,8);
 
             b = &x->e_mbd.block[20];
-            pred_ptr = b->predictor;
+            pred_ptr = b->predictor_base + b->predictor_offset;
             dst_ptr = *(b->base_dst) + b->dst;
             stride = b->dst_stride;
 
@@ -302,8 +302,8 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
 
     dequant_ptr = d->dequant;
     coeff_ptr = b->coeff;
-    qcoeff_ptr = d->qcoeff;
-    dqcoeff_ptr = d->dqcoeff;
+    qcoeff_ptr = d->qcoeff_base + d->qcoeff_offset;
+    dqcoeff_ptr = d->dqcoeff_base + d->qcoeff_offset;
     i0 = !type;
     eob = d->eob;
 

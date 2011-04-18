@@ -31,6 +31,10 @@
 #include "arm/idct_arm.h"
 #endif
 
+#if CONFIG_OPENCL
+#include "opencl/idct_cl.h"
+#endif
+
 #ifndef vp8_idct_idct1
 #define vp8_idct_idct1 vp8_short_idct4x4llm_1_c
 #endif

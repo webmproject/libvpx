@@ -28,7 +28,7 @@ extern int vp8_fast_quantize_b_neon_func(short *coeff_ptr, short *zbin_ptr, shor
 
 void vp8_fast_quantize_b_neon(BLOCK *b, BLOCKD *d)
 {
-    d->eob = vp8_fast_quantize_b_neon_func(b->coeff, b->zbin, d->qcoeff, d->dqcoeff, d->dequant, vp8_rvsplus1_default_zig_zag1d, b->round, b->quant_fast);
+    d->eob = vp8_fast_quantize_b_neon_func(b->coeff, b->zbin, d->qcoeff_base + d->qcoeff_offset, d->dqcoeff_base + d->dqcoeff_offset, d->dequant, vp8_rvsplus1_default_zig_zag1d, b->round, b->quant_fast);
 }
 
 /*
@@ -42,8 +42,8 @@ void vp8_fast_quantize_b_neon(BLOCK *b,BLOCKD *d)
     short *zbin_ptr   = &b->Zbin[0][0];
     short *round_ptr  = &b->Round[0][0];
     short *quant_ptr  = &b->Quant[0][0];
-    short *qcoeff_ptr = d->qcoeff;
-    short *dqcoeff_ptr= d->dqcoeff;
+    short *qcoeff_ptr = d->qcoeff_base + d->qcoeff_offset;
+    short *dqcoeff_ptr= d->dqcoeff_base + d->dqcoeff_offset;
     short *dequant_ptr= &d->Dequant[0][0];
 
     eob = 0;

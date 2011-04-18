@@ -19,8 +19,8 @@ void vp8_dequantize_b_impl_mmx(short *sq, short *dq, short *q);
 
 static void dequantize_b_mmx(BLOCKD *d)
 {
-    short *sq = (short *) d->qcoeff;
-    short *dq = (short *) d->dqcoeff;
+    short *sq = (short *) d->qcoeff_base + d->qcoeff_offset;
+    short *dq = (short *) d->dqcoeff_base + d->dqcoeff_offset;
     short *q = (short *) d->dequant;
     vp8_dequantize_b_impl_mmx(sq, dq, q);
 }

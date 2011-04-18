@@ -13,6 +13,10 @@
 #include "loopfilter.h"
 #include "onyxc_int.h"
 
+#if CONFIG_OPENCL
+#include "opencl/loopfilter_cl.h"
+#endif
+
 typedef unsigned char uc;
 
 
@@ -312,6 +316,13 @@ void vp8_loop_filter_frame
     int i;
     unsigned char *y_ptr, *u_ptr, *v_ptr;
 
+#if CONFIG_OPENCL && ENABLE_CL_LOOPFILTER
+    if ( cl_initialized == CL_SUCCESS ){
+        vp8_loop_filter_frame_cl(cm,mbd,default_filt_lvl);
+        return;
+    }
+#endif
+
     mbd->mode_info_context = cm->mi;          /* Point at base of Mb MODE_INFO list */
 
     /* Note the baseline filter values for each segment */
@@ -394,6 +405,7 @@ void vp8_loop_filter_frame
 }
 
 
+/* Encoder only... */
 void vp8_loop_filter_frame_yonly
 (
     VP8_COMMON *cm,
@@ -489,7 +501,7 @@ void vp8_loop_filter_frame_yonly
 
 }
 
-
+/* Encoder only... */
 void vp8_loop_filter_partial_frame
 (
     VP8_COMMON *cm,

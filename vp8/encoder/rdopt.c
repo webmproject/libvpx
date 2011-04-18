@@ -300,7 +300,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
 
 void vp8_auto_select_speed(VP8_COMP *cpi)
 {
-    int used = cpi->oxcf.cpu_used;
+    //int used = cpi->oxcf.cpu_used;
 
     int milliseconds_for_compress = (int)(1000000 / cpi->oxcf.frame_rate);
 
@@ -405,7 +405,8 @@ int vp8_mbblock_error_c(MACROBLOCK *mb, int dc)
 
         for (j = dc; j < 16; j++)
         {
-            int this_diff = be->coeff[j] - bd->dqcoeff[j];
+            short *dqcoeff = bd->dqcoeff_base + bd->dqcoeff_offset;
+            int this_diff = be->coeff[j] - dqcoeff[j];
             berror += this_diff * this_diff;
         }
 
@@ -427,10 +428,13 @@ int vp8_mbuverror_c(MACROBLOCK *mb)
 
     for (i = 16; i < 24; i++)
     {
+        short *dqcoeff;
+
         be = &mb->block[i];
         bd = &mb->e_mbd.block[i];
 
-        error += vp8_block_error_c(be->coeff, bd->dqcoeff);
+        dqcoeff = bd->dqcoeff_base + bd->dqcoeff_offset;
+        error += vp8_block_error_c(be->coeff, dqcoeff);
     }
 
     return error;
@@ -481,7 +485,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, 
     int eob = b->eob;
     int pt ;    /* surrounding block/prev coef predictor */
     int cost = 0;
-    short *qcoeff_ptr = b->qcoeff;
+    short *qcoeff_ptr = b->qcoeff_base + b->qcoeff_offset;;
 
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
@@ -570,7 +574,7 @@ static void macro_block_yrd( MACROBLOCK *mb,
 
     // Distortion
     d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
-    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
+    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff_base + x_y2->dqcoeff_offset);
 
     *Distortion = (d >> 4);
 
@@ -623,7 +627,7 @@ static int rd_pick_intra4x4block(
 
         rate = bmode_costs[mode];
 
-        vp8_predict_intra4x4(b, mode, b->predictor);
+        vp8_predict_intra4x4(b, mode, b->predictor_base + b->predictor_offset);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
         x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b(be, b);
@@ -633,7 +637,7 @@ static int rd_pick_intra4x4block(
 
         ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ);
         rate += ratey;
-        distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(be->coeff, b->dqcoeff) >> 2;
+        distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(be->coeff, b->dqcoeff_base + b->dqcoeff_offset) >> 2;
 
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
@@ -646,15 +650,15 @@ static int rd_pick_intra4x4block(
             *best_mode = mode;
             *a = tempa;
             *l = templ;
-            copy_predictor(best_predictor, b->predictor);
-            vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
+            copy_predictor(best_predictor, b->predictor_base + b->predictor_offset);
+            vpx_memcpy(best_dqcoeff, b->dqcoeff_base + b->dqcoeff_offset, 32);
         }
     }
 
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
 
-    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff, b->diff, 32);
-    RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff, b->diff_base + b->diff_offset, 32);
+    RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(best_predictor, b->diff_base + b->diff_offset, *(b->base_dst) + b->dst, b->dst_stride);
 
     return best_rd;
 }
@@ -984,7 +988,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
             //be->coeff[0] = 0;
             x->quantize_b(be, bd);
 
-            distortion += ENCODEMB_INVOKE(rtcd, berr)(be->coeff, bd->dqcoeff);
+            distortion += ENCODEMB_INVOKE(rtcd, berr)(be->coeff, bd->dqcoeff_base + bd->dqcoeff_offset);
         }
     }
 

@@ -11,7 +11,7 @@
 
 #ifndef VPX_PORTS_MEM_H
 #define VPX_PORTS_MEM_H
-#include "vpx_config.h"
+#include "../vpx_config.h"
 #include "vpx/vpx_integer.h"
 
 #if defined(__GNUC__) && __GNUC__

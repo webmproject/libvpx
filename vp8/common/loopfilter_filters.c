@@ -49,7 +49,6 @@ static __inline signed char vp8_hevmask(signed char thresh, uc p1, uc p0, uc q0,
 }
 
 static __inline void vp8_filter(signed char mask, signed char hev, uc *op1, uc *op0, uc *oq0, uc *oq1)
-
 {
     signed char ps0, qs0;
     signed char ps1, qs1;
@@ -94,6 +93,7 @@ static __inline void vp8_filter(signed char mask, signed char hev, uc *op1, uc *
     *op1 = u ^ 0x80;
 
 }
+
 void vp8_loop_filter_horizontal_edge_c
 (
     unsigned char *s,

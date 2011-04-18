@@ -14,12 +14,17 @@
 
 void vpx_log(const char *format, ...);
 
-#include "vpx_ports/config.h"
-#include "vpx_scale/yv12config.h"
+#include "../../vpx_ports/config.h"
+#include "../../vpx_scale/yv12config.h"
 #include "mv.h"
 #include "treecoder.h"
 #include "subpixel.h"
-#include "vpx_ports/mem.h"
+#include "../../vpx_ports/mem.h"
+
+#include "../../vpx_config.h"
+#if CONFIG_OPENCL
+#include "opencl/vp8_opencl.h"
+#endif
 
 #define TRUE    1
 #define FALSE   0
@@ -73,19 +78,19 @@ typedef enum
 
 typedef enum
 {
-    DC_PRED,            /* average of above and left pixels */
-    V_PRED,             /* vertical prediction */
-    H_PRED,             /* horizontal prediction */
-    TM_PRED,            /* Truemotion prediction */
-    B_PRED,             /* block based prediction, each block has its own prediction mode */
+    DC_PRED = 0,            /* average of above and left pixels */
+    V_PRED = 1,             /* vertical prediction */
+    H_PRED = 2,             /* horizontal prediction */
+    TM_PRED = 3,            /* Truemotion prediction */
+    B_PRED = 4,             /* block based prediction, each block has its own prediction mode */
 
-    NEARESTMV,
-    NEARMV,
-    ZEROMV,
-    NEWMV,
-    SPLITMV,
+    NEARESTMV = 5,
+    NEARMV = 6,
+    ZEROMV = 7,
+    NEWMV = 8,
+    SPLITMV = 9,
 
-    MB_MODE_COUNT
+    MB_MODE_COUNT = 10
 } MB_PREDICTION_MODE;
 
 /* Macroblock level features */
@@ -187,24 +192,47 @@ typedef struct
 
 typedef struct
 {
-    short *qcoeff;
-    short *dqcoeff;
-    unsigned char  *predictor;
-    short *diff;
-    short *reference;
+    short *qcoeff_base;
+    int qcoeff_offset;
+
+    short *dqcoeff_base;
+    int dqcoeff_offset;
+
+    unsigned char *predictor_base;
+    int predictor_offset;
+
+    short *diff_base;
+    int diff_offset;
 
     short *dequant;
 
+#if CONFIG_OPENCL
+    cl_command_queue cl_commands; //pointer to macroblock CL command queue
+
+    cl_mem cl_diff_mem;
+    cl_mem cl_predictor_mem;
+    cl_mem cl_qcoeff_mem;
+    cl_mem cl_dqcoeff_mem;
+    cl_mem cl_eobs_mem;
+
+    cl_mem cl_dequant_mem; //Block-specific, not shared
+
+    cl_bool sixtap_filter; //Subpixel Prediction type (true=sixtap, false=bilinear)
+
+#endif
+
     /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
-    unsigned char **base_pre;
+    unsigned char **base_pre; //previous frame, same Macroblock, base pointer
     int pre;
     int pre_stride;
 
-    unsigned char **base_dst;
+    unsigned char **base_dst; //destination base pointer
     int dst;
     int dst_stride;
 
-    int eob;
+    int eob; //only used in encoder? Decoder uses MBD.eobs
+
+    char *eobs_base; //beginning of MB.eobs
 
     B_MODE_INFO bmi;
 
@@ -214,16 +242,26 @@ typedef struct
 {
     DECLARE_ALIGNED(16, short, diff[400]);      /* from idct diff */
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
-/* not used    DECLARE_ALIGNED(16, short, reference[384]); */
     DECLARE_ALIGNED(16, short, qcoeff[400]);
     DECLARE_ALIGNED(16, short, dqcoeff[400]);
     DECLARE_ALIGNED(16, char,  eobs[25]);
+
+#if CONFIG_OPENCL
+    cl_command_queue cl_commands; //Each macroblock gets its own command queue.
+    cl_mem cl_diff_mem;
+    cl_mem cl_predictor_mem;
+    cl_mem cl_qcoeff_mem;
+    cl_mem cl_dqcoeff_mem;
+    cl_mem cl_eobs_mem;
+
+    cl_bool sixtap_filter;
+#endif
 
     /* 16 Y blocks, 4 U, 4 V, 1 DC 2nd order block, each with 16 entries. */
     BLOCKD block[25];
 
     YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
-    YV12_BUFFER_CONFIG dst;
+    YV12_BUFFER_CONFIG dst; /* Destination buffer for current frame */
 
     MODE_INFO *mode_info_context;
     int mode_info_stride;
@@ -273,6 +311,7 @@ typedef struct
 
     unsigned int frames_since_golden;
     unsigned int frames_till_alt_ref_frame;
+
     vp8_subpix_fn_t  subpixel_predict;
     vp8_subpix_fn_t  subpixel_predict8x4;
     vp8_subpix_fn_t  subpixel_predict8x8;

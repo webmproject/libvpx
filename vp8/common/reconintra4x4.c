@@ -124,6 +124,18 @@ void vp8_predict_intra4x4(BLOCKD *x,
     case B_LD_PRED:
     {
         unsigned char *ptr = Above;
+
+#if 0
+        //More readable version of the unrolled loop
+        int stride = 16, r=0, c=0;
+        for (r=0; r < 4; r++){
+            for (c=0; c < 4; c++){
+                int off = r+c;
+                int off2 = off > 5 ? 5: off; //Clamp so [3,3] has max off2 of 7
+                predictor[r*stride+c] = (ptr[off] + ptr[off+1]*2 + ptr[off2+2] + 2)>>2;
+            }
+        }
+#else
         predictor[0 * 16 + 0] = (ptr[0] + ptr[1] * 2 + ptr[2] + 2) >> 2;
         predictor[0 * 16 + 1] =
             predictor[1 * 16 + 0] = (ptr[1] + ptr[2] * 2 + ptr[3] + 2) >> 2;
@@ -140,7 +152,8 @@ void vp8_predict_intra4x4(BLOCKD *x,
         predictor[2 * 16 + 3] =
             predictor[3 * 16 + 2] = (ptr[5] + ptr[6] * 2 + ptr[7] + 2) >> 2;
         predictor[3 * 16 + 3] = (ptr[6] + ptr[7] * 2 + ptr[7] + 2) >> 2;
-
+#endif
+        
     }
     break;
     case B_RD_PRED:
@@ -311,5 +324,3 @@ void vp8_intra_prediction_down_copy(MACROBLOCKD *x)
     *dst_ptr1 = *src_ptr;
     *dst_ptr2 = *src_ptr;
 }
-
-

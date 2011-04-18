@@ -19,6 +19,12 @@ extern "C"
 #define VP7BORDERINPIXELS       48
 #define VP8BORDERINPIXELS       32
 
+#include "../vpx_config.h"
+    
+#if CONFIG_OPENCL
+#include "../vp8/common/opencl/vp8_opencl.h"
+#endif
+
     /*************************************
      For INT_YUV:
 
@@ -54,6 +60,11 @@ extern "C"
         unsigned char *v_buffer;
 
         unsigned char *buffer_alloc;
+        int buffer_size;
+#if CONFIG_OPENCL
+        cl_mem buffer_mem;
+#endif
+       
         int border;
         int frame_size;
         YUV_TYPE clrtype;

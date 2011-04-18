@@ -27,8 +27,8 @@ extern void vp8_dequantize_b_loop_v6(short *Q, short *DQC, short *DQ);
 void vp8_dequantize_b_neon(BLOCKD *d)
 {
     int i;
-    short *DQ  = d->dqcoeff;
-    short *Q   = d->qcoeff;
+    short *DQ  = d->dqcoeff_base + d->dqcoeff_offset;
+    short *Q   = d->qcoeff_base + d->qcoeff_offset;
     short *DQC = d->dequant;
 
     vp8_dequantize_b_loop_neon(Q, DQC, DQ);
@@ -39,8 +39,8 @@ void vp8_dequantize_b_neon(BLOCKD *d)
 void vp8_dequantize_b_v6(BLOCKD *d)
 {
     int i;
-    short *DQ  = d->dqcoeff;
-    short *Q   = d->qcoeff;
+    short *DQ  = d->dqcoeff_base + d->dqcoeff_offset;
+    short *Q   = d->qcoeff_base + d->qcoeff_offset;
     short *DQC = d->dequant;
 
     vp8_dequantize_b_loop_v6(Q, DQC, DQ);

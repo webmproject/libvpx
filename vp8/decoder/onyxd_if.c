@@ -34,9 +34,22 @@
 #include "vpx_ports/arm.h"
 #endif
 
+#include "vpx_config.h"
+#if CONFIG_OPENCL
+#include "vp8/common/opencl/blockd_cl.h"
+#include "vp8/common/opencl/vp8_opencl.h"
+#endif
+
 extern void vp8_init_loop_filter(VP8_COMMON *cm);
 extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 
+#define PROFILE_OUTPUT 0
+#if PROFILE_OUTPUT
+struct vpx_usec_timer frame_timer;
+struct vpx_usec_timer loop_filter_timer;
+unsigned int total_mb = 0;
+unsigned int total_loop_filter = 0;
+#endif
 
 void vp8dx_initialize()
 {
@@ -113,6 +126,7 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
     vp8_decoder_remove_threads(pbi);
 #endif
     vp8_remove_common(&pbi->common);
+
     vpx_free(pbi);
 }
 
@@ -319,7 +333,82 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     pbi->Source = source;
     pbi->source_sz = size;
 
+#if CONFIG_OPENCL
+    pbi->mb.cl_commands = NULL;
+    if (cl_initialized == CL_SUCCESS){
+        int err;
+        //Create command queue for macroblock.
+        pbi->mb.cl_commands = clCreateCommandQueue(cl_data.context, cl_data.device_id, 0, &err);
+        if (!pbi->mb.cl_commands || err != CL_SUCCESS) {
+            printf("Error: Failed to create a command queue!\n");
+            cl_destroy(NULL, VP8_CL_TRIED_BUT_FAILED);
+        }
+
+        pbi->mb.cl_diff_mem = NULL;
+        pbi->mb.cl_predictor_mem = NULL;
+        pbi->mb.cl_qcoeff_mem = NULL;
+        pbi->mb.cl_dqcoeff_mem = NULL;
+        pbi->mb.cl_eobs_mem = NULL;
+
+#define SET_ON_ALLOC 0
+#if SET_ON_ALLOC
+        
+#if ENABLE_CL_SUBPIXEL || ENABLE_CL_IDCT_DEQUANT
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_predictor_mem, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR,
+                    sizeof(cl_uchar)*384, pbi->mb.predictor, goto BUF_DONE, -1);
+#endif
+
+#if ENABLE_CL_IDCT_DEQUANT
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_diff_mem, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR,
+                    sizeof(cl_short)*400, pbi->mb.diff, goto BUF_DONE, -1);
+
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_qcoeff_mem, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR,
+                    sizeof(cl_short)*400, pbi->mb.qcoeff, goto BUF_DONE,-1);
+
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_dqcoeff_mem, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR,
+                    sizeof(cl_short)*400, pbi->mb.dqcoeff, goto BUF_DONE,-1);
+
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_eobs_mem, CL_MEM_READ_WRITE|CL_MEM_COPY_HOST_PTR,
+                    sizeof(cl_char)*25, pbi->mb.eobs, goto BUF_DONE,-1);
+#endif
+#else
+#if ENABLE_CL_IDCT_DEQUANT || ENABLE_CL_SUBPIXEL
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_predictor_mem, CL_MEM_READ_WRITE,
+                    sizeof(cl_uchar)*384, NULL, goto BUF_DONE,-1);
+#endif
+
+#if ENABLE_CL_IDCT_DEQUANT
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_diff_mem, CL_MEM_READ_WRITE,
+                    sizeof(cl_short)*400, NULL, goto BUF_DONE,-1);
+
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_qcoeff_mem, CL_MEM_READ_WRITE,
+                    sizeof(cl_short)*400, NULL, goto BUF_DONE,-1);
+
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_dqcoeff_mem, CL_MEM_READ_WRITE,
+                    sizeof(cl_short)*400, NULL, goto BUF_DONE,-1);
+
+            VP8_CL_CREATE_BUF(pbi->mb.cl_commands, pbi->mb.cl_eobs_mem, CL_MEM_READ_WRITE,
+                    sizeof(cl_char) * 25, NULL, goto BUF_DONE,-1);
+#endif
+#endif
+    }
+#if ENABLE_CL_IDCT_DEQUANT || ENABLE_CL_SUBPIXEL
+    BUF_DONE:
+#endif
+#endif
+
+#if PROFILE_OUTPUT
+    printf("Frame size = %d * %d\n", cm->Height, cm->Width);
+    printf("Macroblocks = %d * %d\n", cm->mb_rows, cm->mb_cols);
+
+    vpx_usec_timer_start(&frame_timer);
+#endif
     retcode = vp8_decode_frame(pbi);
+
+#if PROFILE_OUTPUT
+    vpx_usec_timer_mark(&frame_timer);
+    total_mb += vpx_usec_timer_elapsed(&frame_timer);
+#endif
 
     if (retcode < 0)
     {
@@ -375,16 +464,53 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
         if(pbi->common.filter_level)
         {
+
+#if PROFILE_OUTPUT
+            struct vpx_usec_timer lpftimer;
+            vpx_usec_timer_start(&lpftimer);
+#endif
+           
             /* Apply the loop filter if appropriate. */
             vp8_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
+
+#if PROFILE_OUTPUT
+            vpx_usec_timer_mark(&lpftimer);
+            pbi->time_loop_filtering += vpx_usec_timer_elapsed(&lpftimer);
+
+            printf("Loop Filter\n");
+            total_loop_filter += vpx_usec_timer_elapsed(&lpftimer);
+#if 0
+            if (pbi->common.filter_type == NORMAL_LOOPFILTER){
+                printf("Normal LF Time (us): %d\n", vpx_usec_timer_elapsed(&lpftimer));
+            } else {
+                printf("Simple LF Time (us): %d\n", vpx_usec_timer_elapsed(&lpftimer));
+            }
+#endif
+#endif
 
             cm->last_frame_type = cm->frame_type;
             cm->last_filter_type = cm->filter_type;
             cm->last_sharpness_level = cm->sharpness_level;
         }
+#if PROFILE_OUTPUT
+        else {
+            printf("No Loop Filter\n");
+        }
+#endif
         vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
     }
 
+#if CONFIG_OPENCL
+    if (cl_initialized == CL_SUCCESS){
+        //Copy buffer_alloc to buffer_mem so YV12_BUFFER_CONFIG can be used as
+        //a reference frame (e.g. YV12..buffer_mem contains same as buffer_alloc).
+        vp8_cl_mb_prep(&pbi->mb, DST_BUF);
+
+        if (pbi->mb.cl_commands != NULL)
+            clReleaseCommandQueue(pbi->mb.cl_commands);
+        pbi->mb.cl_commands = NULL;
+    }
+#endif
 
     vp8_clear_system_state();
 
@@ -439,8 +565,18 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     }
 #endif
     pbi->common.error.setjmp = 0;
+
+
+#if PROFILE_OUTPUT
+    //Dump the total MB/Loop Filter processing times.
+    //This is cumulative between frames, so only use the last output value.
+    printf("MB Time (us): %d, LF Time (us): %d\n", total_mb, total_loop_filter);
+#endif
+
+
     return retcode;
 }
+
 int vp8dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp, INT64 *time_end_stamp, vp8_ppflags_t *flags)
 {
     int ret = -1;

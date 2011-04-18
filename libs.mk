@@ -123,6 +123,18 @@ endif
 else
 INSTALL-LIBS-yes += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
+
+#Install the OpenCL kernels if CL enabled.
+ifeq ($(CONFIG_OPENCL),yes)
+INSTALL-LIBS-yes += $(LIBSUBDIR)/vp8/common/opencl/filter_cl.cl
+INSTALL-LIBS-yes += $(LIBSUBDIR)/vp8/common/opencl/idctllm_cl.cl
+INSTALL-LIBS-yes += $(LIBSUBDIR)/vp8/common/opencl/loopfilter.cl
+#only install decoder CL files if VP8 decoder enabled
+ifeq ($(CONFIG_VP8_DECODER),yes)
+INSTALL-LIBS-yes += $(LIBSUBDIR)/vp8/decoder/opencl/dequantize_cl.cl
+endif
+endif #CONFIG_OPENCL=yes
+
 endif
 
 CODEC_SRCS=$(call enabled,CODEC_SRCS)

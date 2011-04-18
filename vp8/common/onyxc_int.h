@@ -120,7 +120,6 @@ typedef struct VP8Common
     int mb_no_coeff_skip;
     int no_lpf;
     int simpler_lpf;
-    int use_bilinear_mc_filter;
     int full_pixel;
 
     int base_qindex;

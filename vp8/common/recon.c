@@ -110,19 +110,19 @@ void vp8_recon_mby_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 {
 #if ARCH_ARM
     BLOCKD *b = &x->block[0];
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
 
     /*b = &x->block[4];*/
     b += 4;
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
 
     /*b = &x->block[8];*/
     b += 4;
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
 
     /*b = &x->block[12];*/
     b += 4;
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
 #else
     int i;
 
@@ -130,7 +130,7 @@ void vp8_recon_mby_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
     {
         BLOCKD *b = &x->block[i];
 
-        RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+        RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     }
 #endif
 }
@@ -140,27 +140,27 @@ void vp8_recon_mb_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 #if ARCH_ARM
     BLOCKD *b = &x->block[0];
 
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     b += 4;
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     b += 4;
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     b += 4;
-    RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     b += 4;
 
     /*b = &x->block[16];*/
 
-    RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon2)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     b++;
     b++;
-    RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon2)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     b++;
     b++;
-    RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon2)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     b++;
     b++;
-    RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    RECON_INVOKE(rtcd, recon2)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
 #else
     int i;
 
@@ -168,14 +168,14 @@ void vp8_recon_mb_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
     {
         BLOCKD *b = &x->block[i];
 
-        RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+        RECON_INVOKE(rtcd, recon4)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     }
 
     for (i = 16; i < 24; i += 2)
     {
         BLOCKD *b = &x->block[i];
 
-        RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+        RECON_INVOKE(rtcd, recon2)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     }
 #endif
 }

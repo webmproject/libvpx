@@ -24,7 +24,7 @@ void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
     for (i = 16; i < 24; i += 2)
     {
         BLOCKD *b = &x->block[i];
-        RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+        RECON_INVOKE(rtcd, recon2)(b->predictor_base + b->predictor_offset, &b->diff_base[b->diff_offset], *(b->base_dst) + b->dst, b->dst_stride);
     }
 }
 

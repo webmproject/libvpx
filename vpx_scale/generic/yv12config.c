@@ -26,7 +26,22 @@ vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf)
     {
             duck_free(ybf->buffer_alloc);
 
-        ybf->buffer_alloc = 0;
+        ybf->buffer_alloc = NULL;
+        ybf->buffer_size = -1;
+
+        ybf->y_buffer = NULL;
+        ybf->u_buffer = NULL;
+        ybf->v_buffer = NULL;
+
+#if CONFIG_OPENCL
+        if (cl_initialized == CL_SUCCESS){
+            if (ybf->buffer_mem){
+                clReleaseMemObject(ybf->buffer_mem);
+                ybf->buffer_mem = NULL;
+            }
+        }
+#endif
+
     }
     else
     {
@@ -66,10 +81,23 @@ vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height, int 
          * when we have a large motion vector in V on the last v block.
          * Note : We never use these pixels anyway so this doesn't hurt.
          */
+
         ybf->buffer_alloc = (unsigned char *) duck_memalign(32,  ybf->frame_size + (ybf->y_stride * 2) + 32, 0);
 
         if (ybf->buffer_alloc == NULL)
             return -1;
+
+        ybf->buffer_size = ybf->frame_size + (ybf->y_stride * 2) + 32;
+
+#if CONFIG_OPENCL
+        ybf->buffer_mem = NULL;
+        if (cl_initialized == CL_SUCCESS){
+            ybf->buffer_mem = clCreateBuffer(cl_data.context, CL_MEM_READ_WRITE, ybf->buffer_size, NULL, NULL);
+            if (ybf->buffer_mem == NULL){
+                cl_destroy(NULL, VP8_CL_TRIED_BUT_FAILED);
+            }
+        }
+#endif
 
         ybf->y_buffer = ybf->buffer_alloc + (border * ybf->y_stride) + border;
 
@@ -77,7 +105,7 @@ vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height, int 
             yplane_size += 16 - (yplane_size & 0xf);
 
         ybf->u_buffer = ybf->buffer_alloc + yplane_size + (border / 2  * ybf->uv_stride) + border / 2;
-        ybf->v_buffer = ybf->buffer_alloc + yplane_size + uvplane_size + (border / 2  * ybf->uv_stride) + border / 2;
+        ybf->v_buffer = ybf->buffer_alloc + yplane_size + (border / 2  * ybf->uv_stride) + border / 2 + uvplane_size;
 
         ybf->corrupted = 0; /* assume not currupted by errors */
     }

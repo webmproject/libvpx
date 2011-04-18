@@ -40,7 +40,6 @@ VP8_COMMON_SRCS-yes += common/findnearmv.h
 VP8_COMMON_SRCS-yes += common/g_common.h
 VP8_COMMON_SRCS-yes += common/header.h
 VP8_COMMON_SRCS-yes += common/idct.h
-VP8_COMMON_SRCS-yes += common/invtrans.h
 VP8_COMMON_SRCS-yes += common/loopfilter.h
 VP8_COMMON_SRCS-yes += common/modecont.h
 VP8_COMMON_SRCS-yes += common/mv.h
@@ -56,7 +55,6 @@ VP8_COMMON_SRCS-yes += common/swapyv12buffer.h
 VP8_COMMON_SRCS-yes += common/systemdependent.h
 VP8_COMMON_SRCS-yes += common/threading.h
 VP8_COMMON_SRCS-yes += common/treecoder.h
-VP8_COMMON_SRCS-yes += common/invtrans.c
 VP8_COMMON_SRCS-yes += common/loopfilter.c
 VP8_COMMON_SRCS-yes += common/loopfilter_filters.c
 VP8_COMMON_SRCS-yes += common/mbpitch.c
@@ -149,3 +147,33 @@ VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon16x16mb_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/buildintrapredictorsmby_neon$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/save_neon_reg$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV7)  += common/arm/neon/recon_neon.c
+
+#Append OpenCL source files to source listing if needed
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/vp8_opencl.c
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/vp8_opencl.h
+
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/blockd_cl.h
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/blockd_cl.c
+
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/filter_cl.h
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/filter_cl.c
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/filter_cl.cl
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/subpixel_cl.h
+
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/reconinter_cl.h
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/reconinter_cl.c
+
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/idctllm_cl.h
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/idctllm_cl.c
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/idctllm_cl.cl
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/idct_cl.h
+
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/loopfilter_cl.h
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/loopfilter_cl.c
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/loopfilter_cl.cl
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/loopfilter_filters_cl.c
+
+
+VP8_COMMON_SRCS-$(CONFIG_OPENCL) += common/opencl/opencl_systemdependent.c
+VP8_COMMON_SRCS-$(HAVE_DLOPEN) += common/opencl/dynamic_cl.c
+VP8_COMMON_SRCS-$(HAVE_DLOPEN) += common/opencl/dynamic_cl.h

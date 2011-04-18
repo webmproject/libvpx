@@ -1686,11 +1686,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cm->filter_type          = (LOOPFILTERTYPE) cpi->filter_type;
 
-    if (!cm->use_bilinear_mc_filter)
-        cm->mcomp_filter_type = SIXTAP;
-    else
-        cm->mcomp_filter_type = BILINEAR;
-
     cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
     cm->Width       = cpi->oxcf.Width     ;
