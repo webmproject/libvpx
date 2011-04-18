@@ -147,7 +147,7 @@ static const int qzbin_factors_y2[129] =
 #define EXACT_QUANT
 #ifdef EXACT_QUANT
 static void vp8cx_invert_quant(int improved_quant, short *quant,
-                               short *shift, short d)
+                               unsigned char *shift, short d)
 {
     if(improved_quant)
     {
