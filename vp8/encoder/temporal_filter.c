@@ -209,10 +209,11 @@ static int vp8_temporal_filter_find_matching_mb_c
     //if (bestsme > error_thresh && bestsme < INT_MAX)
     {
         int distortion;
+        unsigned int sse;
         bestsme = cpi->find_fractional_mv_step(x, b, d,
                     &d->bmi.mv.as_mv, &best_ref_mv1,
                     x->errorperbit, &cpi->fn_ptr[BLOCK_16X16],
-                    mvcost, &distortion);
+                    mvcost, &distortion, &sse);
     }
 #endif
 
