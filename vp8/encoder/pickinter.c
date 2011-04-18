@@ -50,7 +50,7 @@ extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, MV *mv);
 
 
-int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion)
+int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion, unsigned int *sse)
 {
     (void) b;
     (void) d;
@@ -59,6 +59,7 @@ int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv,
     (void) vfp;
     (void) mvcost;
     (void) distortion;
+    (void) sse;
     bestmv->row <<= 3;
     bestmv->col <<= 3;
     return 0;
@@ -443,7 +444,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
     int bestsme;
     //int all_rds[MAX_MODES];         // Experimental debug code.
     int best_mode_index = 0;
-    int sse = INT_MAX;
+    unsigned int sse = INT_MAX;
 
     MV mvp;
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
@@ -796,7 +797,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
             }
 
             if (bestsme < INT_MAX)
-                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit, &cpi->fn_ptr[BLOCK_16X16], cpi->mb.mvcost, &distortion2);
+                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit, &cpi->fn_ptr[BLOCK_16X16], cpi->mb.mvcost, &distortion2, &sse);
 
             mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
             mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
@@ -827,7 +828,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
             x->e_mbd.block[0].bmi.mv.as_int = x->e_mbd.mode_info_context->mbmi.mv.as_int;
 
             if((this_mode != NEWMV) || !(have_subp_search))
-                distortion2 = get_inter_mbpred_error(x, &cpi->fn_ptr[BLOCK_16X16], (unsigned int *)(&sse));
+                distortion2 = get_inter_mbpred_error(x, &cpi->fn_ptr[BLOCK_16X16], &sse);
 
             this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 

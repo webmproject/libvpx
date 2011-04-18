@@ -194,13 +194,13 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride)
 #define DIST(r,c) vfp->svf( PRE(r,c), d->pre_stride, SP(c),SP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
 #define IFMVCV(r,c,s,e) if ( c >= minc && c <= maxc && r >= minr && r <= maxr) s else e;
 #define ERR(r,c) (MVC(r,c)+DIST(r,c)) // returns distortion + motion vector cost
-#define CHECK_BETTER(v,r,c) IFMVCV(r,c,{thismse = DIST(r,c); if((v = (MVC(r,c)+thismse)) < besterr) { besterr = v; br=r; bc=c; *distortion = thismse;}}, v=INT_MAX;)// checks if (r,c) has better score than previous best
+#define CHECK_BETTER(v,r,c) IFMVCV(r,c,{thismse = DIST(r,c); if((v = (MVC(r,c)+thismse)) < besterr) { besterr = v; br=r; bc=c; *distortion = thismse; *sse1 = sse; }}, v=INT_MAX;)// checks if (r,c) has better score than previous best
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
 
 //#define CHECK_BETTER(v,r,c) if((v = ERR(r,c)) < besterr) { besterr = v; br=r; bc=c; }
 
-int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion)
+int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion, unsigned int *sse1)
 {
     unsigned char *y = *(d->base_pre) + d->pre + (bestmv->row) * d->pre_stride + bestmv->col;
     unsigned char *z = (*(b->base_src) + b->src);
@@ -226,7 +226,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     bestmv->col <<= 3;
 
     // calculate central point error
-    besterr = vfp->vf(y, d->pre_stride, z, b->src_stride, &sse);
+    besterr = vfp->vf(y, d->pre_stride, z, b->src_stride, sse1);
     *distortion = besterr;
     besterr += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit);
 
@@ -316,7 +316,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #undef CHECK_BETTER
 #undef MIN
 #undef MAX
-int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion)
+int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion, unsigned int *sse1)
 {
     int bestmse = INT_MAX;
     MV startmv;
@@ -345,7 +345,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
     startmv = *bestmv;
 
     // calculate central point error
-    bestmse = vfp->vf(y, d->pre_stride, z, b->src_stride, &sse);
+    bestmse = vfp->vf(y, d->pre_stride, z, b->src_stride, sse1);
     *distortion = bestmse;
     bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit);
 
@@ -360,6 +360,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = left;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.col += 8;
@@ -371,6 +372,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = right;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     // go up then down and check error
@@ -384,6 +386,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = up;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.row += 8;
@@ -395,6 +398,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = down;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
 
@@ -436,6 +440,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = diag;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
 //  }
@@ -473,6 +478,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = left;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.col += 4;
@@ -484,6 +490,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = right;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     // go up then down and check error
@@ -507,6 +514,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = up;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.row += 4;
@@ -518,6 +526,7 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = down;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
 
@@ -608,12 +617,13 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv,
         *bestmv = this_mv;
         bestmse = diag;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     return bestmse;
 }
 
-int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion)
+int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv, int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion, unsigned int *sse1)
 {
     int bestmse = INT_MAX;
     MV startmv;
@@ -640,7 +650,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
     startmv = *bestmv;
 
     // calculate central point error
-    bestmse = vfp->vf(y, d->pre_stride, z, b->src_stride, &sse);
+    bestmse = vfp->vf(y, d->pre_stride, z, b->src_stride, sse1);
     *distortion = bestmse;
     bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit);
 
@@ -655,6 +665,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = left;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.col += 8;
@@ -666,6 +677,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = right;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     // go up then down and check error
@@ -679,6 +691,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = up;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.row += 8;
@@ -690,6 +703,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = down;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     // somewhat strangely not doing all the diagonals for half pel is slower than doing them.
@@ -741,6 +755,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = diag;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.col += 8;
@@ -752,6 +767,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = diag;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.col = (this_mv.col - 8) | 4;
@@ -764,6 +780,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = diag;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
     this_mv.col += 8;
@@ -775,6 +792,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d, MV *bestm
         *bestmv = this_mv;
         bestmse = diag;
         *distortion = thismse;
+        *sse1 = sse;
     }
 
 #endif
