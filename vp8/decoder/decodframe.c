@@ -427,9 +427,6 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         */
         vp8_decode_macroblock(pbi, xd);
 
-        /* check if the boolean decoder has suffered an error */
-        xd->corrupted |= vp8dx_bool_error(xd->current_bc);
-
         recon_yoffset += 16;
         recon_uvoffset += 8;
 
