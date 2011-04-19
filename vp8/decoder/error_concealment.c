@@ -384,7 +384,7 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
                                 mi->bmi,
                                 mi->mbmi.ref_frame,
                                 &mi->mbmi.mv.as_mv);
-            mi->mbmi.uv_mode = SPLITMV;
+            mi->mbmi.uv_mode = DC_PRED;
 
             mi->mbmi.mb_skip_coeff = 1;
             /* TODO(holmer): should this be enabled, when? */
@@ -569,7 +569,7 @@ void vp8_interpolate_mv(MODE_INFO *mi,
     vp8_interpolate_mvs(mi, neighbors, dom_ref_frame);
 
     mi->mbmi.ref_frame = dom_ref_frame;
-    mi->mbmi.uv_mode = SPLITMV;
+    mi->mbmi.uv_mode = DC_PRED;
     mi->mbmi.mb_skip_coeff = 1;
     /* TODO(holmer): should this be enabled, when? */
     mi->mbmi.need_to_clamp_mvs = 1;
