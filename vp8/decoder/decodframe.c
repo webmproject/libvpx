@@ -342,6 +342,7 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
     int dst_fb_idx = pc->new_fb_idx;
     int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
     int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
+    int corrupt_partition = 0;
 
     vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
     recon_yoffset = mb_row * recon_y_stride * 16;
@@ -356,6 +357,18 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
 
     for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
     {
+        if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
+            corrupt_partition)
+        {
+            /* We have an intra block with corrupt coefficients,
+             * better to conceal with an inter block. Interpolate MVs
+             * from neighboring MBs.
+             */
+            vp8_interpolate_mv(xd->mode_info_context,
+                               mb_row, mb_col,
+                               pc->mb_rows, pc->mb_cols,
+                               pc->mode_info_stride);
+        }
 
         if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
         {
@@ -407,7 +420,8 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
         vp8_decode_macroblock(pbi, xd, mb_row * pc->mb_cols + mb_col);
 
         /* check if the boolean decoder has suffered an error */
-        xd->corrupted |= vp8dx_bool_error(xd->current_bc);
+        corrupt_partition = vp8dx_bool_error(xd->current_bc);
+        xd->corrupted |= corrupt_partition;
 
         recon_yoffset += 16;
         recon_uvoffset += 8;

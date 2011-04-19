@@ -19,6 +19,29 @@
 
 #define FLOOR(x,q) ((x) & -(1 << (q)))
 
+#define NUM_NEIGHBORS 20
+
+typedef struct ec_position
+{
+    int row;
+    int col;
+} EC_POS;
+
+/*
+ * Regenerate the table in Matlab with:
+ * x = meshgrid((1:4), (1:4));
+ * y = meshgrid((1:4), (1:4))';
+ * W = round((1./(sqrt(x.^2 + y.^2))*2^7));
+ * W(1,1) = 0;
+ */
+static const int weights_q7[5][5] = {
+       {  0,   128,    64,    43,    32 },
+       {128,    91,    57,    40,    31 },
+       { 64,    57,    45,    36,    29 },
+       { 43,    40,    36,    30,    26 },
+       { 32,    31,    29,    26,    23 }
+};
+
 int vp8_alloc_overlap_lists(VP8D_COMP *pbi)
 {
     if (pbi->overlaps != NULL)
@@ -184,11 +207,6 @@ void vp8_calculate_overlaps_submb(MB_OVERLAP *overlap_ul,
     /* Check if the new block col starts at the last block col of the MB */
     if (abs(new_col - ((16*overlap_mb_col) << 3)) < ((3*4) << 3))
         end_col = 1;
-    /* Check if our MV is even (only overlapping one block) */
-//    if (abs(bmi->mv.as_mv.row) % (4 << 3) == 0)
-//        end_row = 1;
-//    if (abs(bmi->mv.as_mv.col) % (4 << 3) == 0)
-//        end_col = 1;
 
     /* find the MB(s) this block is overlapping */
     for (rel_row = 0; rel_row < end_row; ++rel_row)
@@ -376,6 +394,226 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
         mb_col = 0;
         ++mi;
     }
+}
+
+void vp8_find_neighboring_blocks(MODE_INFO *mi,
+                                 EC_BLOCK *neighbors,
+                                 int mb_row, int mb_col,
+                                 int mb_rows, int mb_cols,
+                                 int mi_stride)
+{
+    /* TODO(holmer): Refactor this code */
+    MODE_INFO *neighbor;
+    int i = 0;
+    int j;
+    if (mb_row > 0)
+    {
+        if (mb_col > 0)
+        {
+            /* upper left */
+            neighbor = mi - mi_stride - 1;
+            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i].mv = neighbor->bmi[15].mv.as_mv;
+        }
+        ++i;
+        /* above */
+        neighbor = mi - mi_stride;
+        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+        for (j = 12; j < 16; ++j)
+        {
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
+        }
+    }
+    else
+        i += 5;
+    if (mb_col < mb_cols - 1)
+    {
+        if (mb_row > 0)
+        {
+            /* upper right */
+            neighbor = mi - mi_stride + 1;
+            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i].mv = neighbor->bmi[12].mv.as_mv;
+        }
+        ++i;
+        /* right */
+        neighbor = mi + 1;
+        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+        neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+        for (j = 0; j <= 12; j += 4)
+        {
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
+        }
+    }
+    else
+        i += 5;
+    if (mb_row < mb_rows - 1)
+    {
+        if (mb_col < mb_cols - 1)
+        {
+            /* lower right */
+            neighbor = mi + mi_stride + 1;
+            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i].mv = neighbor->bmi[0].mv.as_mv;
+        }
+        ++i;
+        /* below */
+        neighbor = mi + mi_stride;
+        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+        neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+        for (j = 0; j < 4; ++j)
+        {
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
+        }
+    }
+    else
+        i += 5;
+    if (mb_col > 0)
+    {
+        if (mb_row < mb_rows - 1)
+        {
+            /* lower left */
+            neighbor = mi + mi_stride - 1;
+            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i].mv = neighbor->bmi[4].mv.as_mv;
+        }
+        ++i;
+        /* left */
+        neighbor = mi - 1;
+        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
+        neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+        for (j = 3; j < 16; j += 4)
+        {
+            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
+            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
+        }
+    }
+    else
+        i += 5;
+    assert(i == 20);
+}
+
+MV_REFERENCE_FRAME vp8_dominant_ref_frame(EC_BLOCK *neighbors)
+{
+    /* default to referring to "skip" */
+    MV_REFERENCE_FRAME dom_ref_frame = LAST_FRAME;
+    int max_ref_frame_cnt = 0;
+    int ref_frame_cnt[MAX_REF_FRAMES] = {0};
+    int i;
+    /* count neighboring reference frames */
+    for (i = 0; i < NUM_NEIGHBORS; ++i)
+    {
+        if (neighbors[i].ref_frame < MAX_REF_FRAMES)
+            ++ref_frame_cnt[neighbors[i].ref_frame];
+    }
+    /* find maximum */
+    for (i = 0; i < MAX_REF_FRAMES; ++i)
+    {
+        if (ref_frame_cnt[i] > max_ref_frame_cnt)
+        {
+            dom_ref_frame = i;
+            max_ref_frame_cnt = ref_frame_cnt[i];
+        }
+    }
+    return dom_ref_frame;
+}
+
+void vp8_interpolate_mvs(MODE_INFO *mi,
+                         EC_BLOCK *neighbors,
+                         MV_REFERENCE_FRAME dom_ref_frame)
+{
+    int row, col, i;
+    /* Table with the position of the neighboring blocks relative the position
+     * of the upper left block of the current MB. Starting with the upper left
+     * neighbor and going to the right.
+     */
+    const EC_POS neigh_pos[NUM_NEIGHBORS] = {
+                                        {-1,-1}, {-1,0}, {-1,1}, {-1,2}, {-1,3},
+                                        {-1,4}, {0,4}, {1,4}, {2,4}, {3,4},
+                                        {4,4}, {4,3}, {4,2}, {4,1}, {4,0},
+                                        {4,-1}, {3,-1}, {2,-1}, {1,-1}, {0,-1}
+                                      };
+    for (row = 0; row < 4; ++row)
+    {
+        for (col = 0; col < 4; ++col)
+        {
+            int w_sum = 0;
+            int mv_row_sum = 0;
+            int mv_col_sum = 0;
+            for (i = 0; i < NUM_NEIGHBORS; ++i)
+            {
+                /* Calculate the weighted sum of neighboring MVs referring
+                 * to the dominant frame type.
+                 */
+                const int w = weights_q7[abs(row - neigh_pos[i].row)]
+                                        [abs(col - neigh_pos[i].col)];
+                if (neighbors[i].ref_frame != dom_ref_frame)
+                    continue;
+                w_sum += w;
+                /* Q7 * Q3 = Q10 */
+                mv_row_sum += w*neighbors[i].mv.row;
+                mv_col_sum += w*neighbors[i].mv.col;
+            }
+            if (w_sum > 0)
+            {
+                /* Avoid division by zero.
+                 * Normalize with the sum of the coefficients
+                 * Q3 = Q10 / Q7
+                 */
+                mi->bmi[row*4 + col].mv.as_mv.row = mv_row_sum / w_sum;
+                mi->bmi[row*4 + col].mv.as_mv.col = mv_col_sum / w_sum;
+                /* TODO(holmer): Get the mode from the most overlapping block?
+                 * Or is the mode only used when decoding the MVs?
+                 */
+                mi->bmi[row*4 + col].mode = NEW4X4;
+            }
+        }
+    }
+}
+
+void vp8_interpolate_mv(MODE_INFO *mi,
+                        int mb_row, int mb_col,
+                        int mb_rows, int mb_cols,
+                        int mi_stride)
+{
+    /* Find relevant neighboring blocks */
+    EC_BLOCK neighbors[NUM_NEIGHBORS];
+    MV_REFERENCE_FRAME dom_ref_frame;
+    int i;
+    /* Initialize the array. MAX_REF_FRAMES is interpreted as "doesn't exist" */
+    for (i = 0; i < NUM_NEIGHBORS; ++i)
+    {
+        neighbors[i].ref_frame = MAX_REF_FRAMES;
+        neighbors[i].mv.row = neighbors[i].mv.col = 0;
+    }
+    vp8_find_neighboring_blocks(mi,
+                                neighbors,
+                                mb_row, mb_col,
+                                mb_rows, mb_cols,
+                                mi_stride);
+    /* Determine the dominant block type */
+    dom_ref_frame = vp8_dominant_ref_frame(neighbors);
+    /* Interpolate MVs for the missing blocks
+     * from the dominating MVs */
+    vp8_interpolate_mvs(mi, neighbors, dom_ref_frame);
+
+    mi->mbmi.ref_frame = dom_ref_frame;
+    mi->mbmi.uv_mode = SPLITMV;
+    mi->mbmi.mb_skip_coeff = 1;
+    /* TODO(holmer): should this be enabled, when? */
+    mi->mbmi.need_to_clamp_mvs = 1;
+
+    /* Improved algorithm:
+     * Use the same block type as neighboring blocks
+     * Interpolate from blocks with same type
+     */
 }
 
 void vp8_conceal_corrupt_block(MACROBLOCKD *xd)
