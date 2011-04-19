@@ -396,103 +396,67 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
     }
 }
 
+void assign_neighbor(EC_BLOCK *neighbor, MODE_INFO *mi, int block_idx)
+{
+    assert(mi->mbmi.ref_frame < MAX_REF_FRAMES);
+    neighbor->ref_frame = mi->mbmi.ref_frame;
+    neighbor->mv = mi->bmi[block_idx].mv.as_mv;
+}
+
 void vp8_find_neighboring_blocks(MODE_INFO *mi,
                                  EC_BLOCK *neighbors,
                                  int mb_row, int mb_col,
                                  int mb_rows, int mb_cols,
                                  int mi_stride)
 {
-    /* TODO(holmer): Refactor this code */
-    MODE_INFO *neighbor;
     int i = 0;
     int j;
     if (mb_row > 0)
     {
+        /* upper left */
         if (mb_col > 0)
-        {
-            /* upper left */
-            neighbor = mi - mi_stride - 1;
-            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i].mv = neighbor->bmi[15].mv.as_mv;
-        }
+            assign_neighbor(&neighbors[i], mi - mi_stride - 1, 15);
         ++i;
         /* above */
-        neighbor = mi - mi_stride;
-        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-        for (j = 12; j < 16; ++j)
-        {
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
-        }
+        for (j = 12; j < 16; ++j, ++i)
+            assign_neighbor(&neighbors[i], mi - mi_stride, j);
     }
     else
         i += 5;
     if (mb_col < mb_cols - 1)
     {
+        /* upper right */
         if (mb_row > 0)
-        {
-            /* upper right */
-            neighbor = mi - mi_stride + 1;
-            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i].mv = neighbor->bmi[12].mv.as_mv;
-        }
+            assign_neighbor(&neighbors[i], mi - mi_stride + 1, 12);
         ++i;
         /* right */
-        neighbor = mi + 1;
-        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-        neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-        for (j = 0; j <= 12; j += 4)
-        {
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
-        }
+        for (j = 0; j <= 12; j += 4, ++i)
+            assign_neighbor(&neighbors[i], mi + 1, j);
     }
     else
         i += 5;
     if (mb_row < mb_rows - 1)
     {
+        /* lower right */
         if (mb_col < mb_cols - 1)
-        {
-            /* lower right */
-            neighbor = mi + mi_stride + 1;
-            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i].mv = neighbor->bmi[0].mv.as_mv;
-        }
+            assign_neighbor(&neighbors[i], mi + mi_stride + 1, 0);
         ++i;
         /* below */
-        neighbor = mi + mi_stride;
-        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-        neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-        for (j = 0; j < 4; ++j)
-        {
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
-        }
+        for (j = 0; j < 4; ++j, ++i)
+            assign_neighbor(&neighbors[i], mi + mi_stride, j);
     }
     else
         i += 5;
     if (mb_col > 0)
     {
+        /* lower left */
         if (mb_row < mb_rows - 1)
-        {
-            /* lower left */
-            neighbor = mi + mi_stride - 1;
-            assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i].mv = neighbor->bmi[4].mv.as_mv;
-        }
+            assign_neighbor(&neighbors[i], mi + mi_stride - 1, 4);
         ++i;
         /* left */
-        neighbor = mi - 1;
-        assert(neighbor->mbmi.ref_frame < MAX_REF_FRAMES);
-        neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-        for (j = 3; j < 16; j += 4)
+        for (j = 3; j < 16; j += 4, ++i)
         {
-            neighbors[i].ref_frame = neighbor->mbmi.ref_frame;
-            neighbors[i++].mv = neighbor->bmi[j].mv.as_mv;
+            assign_neighbor(&neighbors[i], mi - 1, j);
         }
     }
     else
@@ -609,11 +573,6 @@ void vp8_interpolate_mv(MODE_INFO *mi,
     mi->mbmi.mb_skip_coeff = 1;
     /* TODO(holmer): should this be enabled, when? */
     mi->mbmi.need_to_clamp_mvs = 1;
-
-    /* Improved algorithm:
-     * Use the same block type as neighboring blocks
-     * Interpolate from blocks with same type
-     */
 }
 
 void vp8_conceal_corrupt_block(MACROBLOCKD *xd)
