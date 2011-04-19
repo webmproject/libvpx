@@ -1452,92 +1452,90 @@ static int estimate_min_frame_size(VP8_COMP *cpi)
     return (bits_per_mb_at_max_q * cpi->common.MBs) >> BPER_MB_NORMBITS;
 }
 
-void vp8_adjust_key_frame_context(VP8_COMP *cpi)
+
+static int estimate_keyframe_frequency(VP8_COMP *cpi)
 {
     int i;
-    int av_key_frames_per_second;
 
-    // Average key frame frequency and size
-    unsigned int total_weight = 0;
-    unsigned int av_key_frame_frequency = 0;
-    unsigned int av_key_frame_bits = 0;
+    // Average key frame frequency
+    int av_key_frame_frequency = 0;
 
-    unsigned int output_frame_rate = (unsigned int)(100 * cpi->output_frame_rate);
-    unsigned int target_bandwidth = (unsigned int)(100 * cpi->target_bandwidth);
-
-    // Clear down mmx registers to allow floating point in what follows
-    vp8_clear_system_state();  //__asm emms;
-
-    // Update the count of total key frame bits
-    cpi->tot_key_frame_bits += cpi->projected_frame_size;
-
-    // First key frame at start of sequence is a special case. We have no frequency data.
+    /* First key frame at start of sequence is a special case. We have no
+     * frequency data.
+     */
     if (cpi->key_frame_count == 1)
     {
-        av_key_frame_frequency = (int)cpi->output_frame_rate * 2;            // Assume a default of 1 kf every 2 seconds
-        av_key_frame_bits = cpi->projected_frame_size;
-        av_key_frames_per_second  = output_frame_rate / av_key_frame_frequency;  // Note output_frame_rate not cpi->output_frame_rate
+        /* Assume a default of 1 kf every 2 seconds, or the max kf interval,
+         * whichever is smaller.
+         */
+        av_key_frame_frequency = (int)cpi->output_frame_rate * 2;
+        if (av_key_frame_frequency > cpi->oxcf.key_freq)
+            av_key_frame_frequency = cpi->oxcf.key_freq;
+
+        cpi->prior_key_frame_distance[KEY_FRAME_CONTEXT - 1]
+            = av_key_frame_frequency;
     }
     else
     {
+        unsigned int total_weight = 0;
         int last_kf_interval =
                 (cpi->frames_since_key > 0) ? cpi->frames_since_key : 1;
 
-        // reset keyframe context and calculate weighted average of last KEY_FRAME_CONTEXT keyframes
+        /* reset keyframe context and calculate weighted average of last
+         * KEY_FRAME_CONTEXT keyframes
+         */
         for (i = 0; i < KEY_FRAME_CONTEXT; i++)
         {
             if (i < KEY_FRAME_CONTEXT - 1)
-            {
-                cpi->prior_key_frame_size[i]     = cpi->prior_key_frame_size[i+1];
-                cpi->prior_key_frame_distance[i] = cpi->prior_key_frame_distance[i+1];
-            }
+                cpi->prior_key_frame_distance[i]
+                    = cpi->prior_key_frame_distance[i+1];
             else
-            {
-                cpi->prior_key_frame_size[i]     = cpi->projected_frame_size;
                 cpi->prior_key_frame_distance[i] = last_kf_interval;
-            }
 
-            av_key_frame_bits      += prior_key_frame_weight[i] * cpi->prior_key_frame_size[i];
-            av_key_frame_frequency += prior_key_frame_weight[i] * cpi->prior_key_frame_distance[i];
-            total_weight         += prior_key_frame_weight[i];
+            av_key_frame_frequency += prior_key_frame_weight[i]
+                                      * cpi->prior_key_frame_distance[i];
+            total_weight += prior_key_frame_weight[i];
         }
 
-        av_key_frame_bits       /= total_weight;
         av_key_frame_frequency  /= total_weight;
-        av_key_frames_per_second  = output_frame_rate / av_key_frame_frequency;
 
     }
+    return av_key_frame_frequency;
+}
+
+
+void vp8_adjust_key_frame_context(VP8_COMP *cpi)
+{
+    // Clear down mmx registers to allow floating point in what follows
+    vp8_clear_system_state();
 
     // Do we have any key frame overspend to recover?
-    if ((cpi->pass != 2) && (cpi->projected_frame_size > cpi->per_frame_bandwidth))
+    // Two-pass overspend handled elsewhere.
+    if ((cpi->pass != 2)
+         && (cpi->projected_frame_size > cpi->per_frame_bandwidth))
     {
-        // Update the count of key frame overspend to be recovered in subsequent frames
-        // A portion of the KF overspend is treated as gf overspend (and hence recovered more quickly)
-        // as the kf is also a gf. Otherwise the few frames following each kf tend to get more bits
-        // allocated than those following other gfs.
-        cpi->kf_overspend_bits += (cpi->projected_frame_size - cpi->per_frame_bandwidth) * 7 / 8;
-        cpi->gf_overspend_bits += (cpi->projected_frame_size - cpi->per_frame_bandwidth) * 1 / 8;
-        if(!av_key_frame_frequency)
-            av_key_frame_frequency = 60;
+        int overspend;
 
-        // Work out how much to try and recover per frame.
-        // For one pass we estimate the number of frames to spread it over based upon past history.
-        // For two pass we know how many frames there will be till the next kf.
-        if (cpi->pass == 2)
-        {
-            if (cpi->frames_to_key > 16)
-                cpi->kf_bitrate_adjustment = cpi->kf_overspend_bits / (int)cpi->frames_to_key;
-            else
-                cpi->kf_bitrate_adjustment = cpi->kf_overspend_bits / 16;
-        }
-        else
-            cpi->kf_bitrate_adjustment = cpi->kf_overspend_bits / (int)av_key_frame_frequency;
+        /* Update the count of key frame overspend to be recovered in
+         * subsequent frames. A portion of the KF overspend is treated as gf
+         * overspend (and hence recovered more quickly) as the kf is also a
+         * gf. Otherwise the few frames following each kf tend to get more
+         * bits allocated than those following other gfs.
+         */
+        overspend = (cpi->projected_frame_size - cpi->per_frame_bandwidth);
+        cpi->kf_overspend_bits += overspend * 7 / 8;
+        cpi->gf_overspend_bits += overspend * 1 / 8;
+
+        /* Work out how much to try and recover per frame. */
+        cpi->kf_bitrate_adjustment = cpi->kf_overspend_bits
+                                     / estimate_keyframe_frequency(cpi);
     }
 
     cpi->frames_since_key = 0;
     cpi->last_key_frame_size = cpi->projected_frame_size;
     cpi->key_frame_count++;
 }
+
 
 void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit)
 {
