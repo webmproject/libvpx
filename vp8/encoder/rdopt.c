@@ -2234,7 +2234,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 continue;
 
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
-            vp8_build_inter_predictors_mby(&x->e_mbd);
+            vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
                 x->skip = 1;
