@@ -34,7 +34,7 @@ typedef struct
     // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
     short *quant;
     short *quant_fast;
-    short *quant_shift;
+    unsigned char *quant_shift;
     short *zbin;
     short *zrun_zbin_boost;
     short *round;

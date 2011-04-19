@@ -1271,13 +1271,14 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                 if (bestsme < INT_MAX)
                 {
                     int distortion;
+                    unsigned int sse;
 
                     if (!cpi->common.full_pixel)
                         cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                                                     bsi->ref_mv, x->errorperbit / 2, v_fn_ptr, x->mvcost, &distortion);
+                                                     bsi->ref_mv, x->errorperbit / 2, v_fn_ptr, x->mvcost, &distortion, &sse);
                     else
                         vp8_skip_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                                                    bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost, &distortion);
+                                                    bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost, &distortion, &sse);
                 }
             } /* NEW4X4 */
 
@@ -2255,9 +2256,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 x->mv_row_max = tmp_row_max;
 
                 if (bestsme < INT_MAX)
-                    {
-                        int dis; /* TODO: use dis in distortion calculation later. */
-                        cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis);
+                {
+                    int dis; /* TODO: use dis in distortion calculation later. */
+                    unsigned int sse;
+                    cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis, &sse);
                 }
 
                 mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
@@ -2304,7 +2306,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
             else if (x->encode_breakout)
             {
-                int sum, sse;
+                int sum;
+                unsigned int sse;
                 int threshold = (xd->block[0].dequant[1]
                             * xd->block[0].dequant[1] >>4);
 
@@ -2313,7 +2316,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
                 VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)
                     (x->src.y_buffer, x->src.y_stride,
-                     x->e_mbd.predictor, 16, (unsigned int *)(&sse), &sum);
+                     x->e_mbd.predictor, 16, &sse, &sum);
 
                 if (sse < threshold)
                 {
@@ -2337,8 +2340,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                             distortion_uv = sse2;
 
                             disable_skip = 1;
-                            this_rd = RDCOST(x->rdmult, x->rddiv, rate2,
-                                             distortion2);
+                            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
                             break;
                         }

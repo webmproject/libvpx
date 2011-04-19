@@ -290,8 +290,8 @@ void ssim_parms_8x8_c
      }
 }
 
-const static long long c1 =  426148; // (256^2*(.01*255)^2
-const static long long c2 = 3835331; //(256^2*(.03*255)^2
+const static long long cc1 =  26634; // (64^2*(.01*255)^2
+const static long long cc2 = 239708; // (64^2*(.03*255)^2
 
 static double similarity
 (
@@ -303,10 +303,19 @@ static double similarity
     int count
 )
 {
-    long long ssim_n = (2*sum_s*sum_r+ c1)*(2*count*sum_sxr-2*sum_s*sum_r+c2);
+    long long ssim_n, ssim_d;
+    long long c1, c2;
 
-    long long ssim_d = (sum_s*sum_s +sum_r*sum_r+c1)*
-            (count*sum_sq_s-sum_s*sum_s + count*sum_sq_r-sum_r*sum_r +c2) ;
+    //scale the constants by number of pixels
+    c1 = (cc1*count*count)>>12;
+    c2 = (cc2*count*count)>>12;
+
+    ssim_n = (2*sum_s*sum_r+ c1)*((long long) 2*count*sum_sxr-
+          (long long) 2*sum_s*sum_r+c2);
+
+    ssim_d = (sum_s*sum_s +sum_r*sum_r+c1)*
+        ((long long)count*sum_sq_s-(long long)sum_s*sum_s +
+        (long long)count*sum_sq_r-(long long) sum_r*sum_r +c2) ;
 
     return ssim_n * 1.0 / ssim_d;
 }
@@ -332,18 +341,33 @@ long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
            const vp8_variance_rtcd_vtable_t *rtcd)
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
-    double ssim3;
-    long long ssim_n;
-    long long ssim_d;
+    long long ssim3;
+    long long ssim_n,ssim_n1,ssim_n2;
+    long long ssim_d,ssim_d1,ssim_d2;
+    long long ssim_t1,ssim_t2;
+    long long c1, c2;
+
+    // normalize by 256/64
+    c1 = cc1*16;
+    c2 = cc2*16;
 
     rtcd->ssimpf(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
-    ssim_n = (2*sum_s*sum_r+ c1)*(2*256*sum_sxr-2*sum_s*sum_r+c2);
+    ssim_n1 = (2*sum_s*sum_r+ c1);
 
-    ssim_d = (sum_s*sum_s +sum_r*sum_r+c1)*
-            (256*sum_sq_s-sum_s*sum_s + 256*sum_sq_r-sum_r*sum_r +c2) ;
+    ssim_n2 =((long long) 2*256*sum_sxr-(long long) 2*sum_s*sum_r+c2);
 
-    ssim3 = 256 * (ssim_d-ssim_n) / ssim_d;
-    return (long)( 256*ssim3 * ssim3 );
+    ssim_d1 =((long long)sum_s*sum_s +(long long)sum_r*sum_r+c1);
+
+    ssim_d2 = (256 * (long long) sum_sq_s-(long long) sum_s*sum_s +
+                    (long long) 256*sum_sq_r-(long long) sum_r*sum_r +c2) ;
+
+    ssim_t1 = 256 - 256 * ssim_n1 / ssim_d1;
+    ssim_t2 = 256 - 256 * ssim_n2 / ssim_d2;
+
+    ssim3 = 256 *ssim_t1 * ssim_t2;
+    if(ssim3 <0 )
+        ssim3=0;
+    return (long)( ssim3  );
 }
 // TODO: (jbb) this 8x8 window might be too big + we may want to pick pixels
 // such that the window regions overlap block boundaries to penalize blocking
@@ -361,18 +385,20 @@ double vp8_ssim2
 )
 {
     int i,j;
-
+    int samples =0;
     double ssim_total=0;
 
-    // we can sample points as frequently as we like start with 1 per 8x8
-    for(i=0; i < height; i+=8, img1 += stride_img1*8, img2 += stride_img2*8)
+    // we can sample points as frequently as we like start with 1 per 4x4
+    for(i=0; i < height-8; i+=4, img1 += stride_img1*4, img2 += stride_img2*4)
     {
-        for(j=0; j < width; j+=8 )
+        for(j=0; j < width-8; j+=4 )
         {
-            ssim_total += ssim_8x8(img1, stride_img1, img2, stride_img2, rtcd);
+            double v = ssim_8x8(img1+j, stride_img1, img2+j, stride_img2, rtcd);
+            ssim_total += v;
+            samples++;
         }
     }
-    ssim_total /= (width/8 * height /8);
+    ssim_total /= samples;
     return ssim_total;
 
 }
