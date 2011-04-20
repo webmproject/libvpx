@@ -1381,7 +1381,7 @@ int vp8cx_encode_inter_macroblock
             cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv.col) >> 1)]++;
         }
 
-        if (!x->skip && !x->e_mbd.mode_info_context->mbmi.force_no_skip)
+        if (!x->skip)
         {
             vp8_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
 
