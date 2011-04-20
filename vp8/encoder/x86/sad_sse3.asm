@@ -39,8 +39,9 @@
     %define     ref_stride  r9
     %define     end_ptr     r10
     %define     ret_var     r11
-    %define     result_ptr  [rsp+8+4*8]
-    %define     max_err     [rsp+8+4*8]
+    %define     result_ptr  [rsp+40+4*8]
+    %define     max_err     [rsp+40+4*8]
+    SAVE_XMM
   %else
     %define     src_ptr     rdi
     %define     src_stride  rsi
@@ -72,6 +73,7 @@
     pop         rbp
 %else
   %ifidn __OUTPUT_FORMAT__,x64
+    RESTORE_XMM
   %endif
 %endif
     ret
@@ -113,7 +115,8 @@
     %define     r2_ptr      r11
     %define     r3_ptr      r8
     %define     ref_stride  r9
-    %define     result_ptr  [rsp+16+4*8]
+    %define     result_ptr  [rsp+48+4*8]
+    SAVE_XMM
     push        rsi
 
     LOAD_X4_ADDRESSES r8, r0_ptr, r1_ptr, r2_ptr, r3_ptr
@@ -151,6 +154,7 @@
 %else
   %ifidn __OUTPUT_FORMAT__,x64
     pop         rsi
+    RESTORE_XMM
   %endif
 %endif
     ret
