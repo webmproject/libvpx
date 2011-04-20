@@ -182,6 +182,19 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, unsigned int mb_idx)
     int eobtotal = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
 
+#ifndef EC_COPY_PREDICTOR
+    /* TODO(holmer): change when we have MB level error tracking
+     * The residuals may not match the predicted signal when a macroblock is
+     * corrupted due to previous losses. Should we try to add the residual
+     * anyway, or just throw it away? Should test this on a couple of files.
+     */
+    if (pbi->ec_enabled && xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME
+        && (xd->corrupted || mb_idx >= pbi->mvs_corrupt_from_mb))
+    {
+        xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+    }
+#endif
+
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
         vp8_reset_mb_tokens_context(xd);
@@ -226,13 +239,19 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, unsigned int mb_idx)
         vp8_build_inter_predictors_mb(xd);
     }
 
-    /* TODO(holmer): change when we have MB level error tracking */
+#ifndef EC_COPY_PREDICTOR
+    /* TODO(holmer): change when we have MB level error tracking
+     * The residuals may not match the predicted signal when a macroblock is
+     * corrupted due to previous losses. Should we try to add the residual
+     * anyway, or just throw it away? Should test this on a couple of files.
+     */
     if (pbi->ec_enabled && xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME
         && (xd->corrupted || mb_idx >= pbi->mvs_corrupt_from_mb))
     {
         vp8_conceal_corrupt_block(xd);
         return;
     }
+#endif
 
     /* dequantization and idct */
     if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
@@ -357,6 +376,12 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
 
     for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
     {
+        /* Distance of Mb to the various image edges.
+         * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
+         */
+        xd->mb_to_left_edge = -((mb_col * 16) << 3);
+        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+
         if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
             corrupt_partition)
         {
@@ -368,7 +393,7 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
              * coefficients if it's the first block with missing coefficients,
              * since the bool dec error detection is done after reconstruction.
              */
-            vp8_interpolate_mv(xd->mode_info_context,
+            vp8_interpolate_mv(xd,
                                mb_row, mb_col,
                                pc->mb_rows, pc->mb_cols,
                                pc->mode_info_stride);
@@ -382,12 +407,6 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
                 vpx_memcpy(&d->bmi, &xd->mode_info_context->bmi[i], sizeof(B_MODE_INFO));
             }
         }
-
-        /* Distance of Mb to the various image edges.
-         * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
-         */
-        xd->mb_to_left_edge = -((mb_col * 16) << 3);
-        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
         xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
         xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;

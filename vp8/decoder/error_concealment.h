@@ -37,9 +37,11 @@ MV_REFERENCE_FRAME vp8_largest_overlap_type(const B_OVERLAP *block_overlaps);
 void vp8_estimate_mv(const OVERLAP_NODE *overlaps, B_MODE_INFO *bmi,
                      MV_REFERENCE_FRAME type);
 void vp8_estimate_mb_mvs(const B_OVERLAP *block_overlaps,
-                         B_MODE_INFO *bmi,
-                         MV_REFERENCE_FRAME type,
-                         MV* filtered_mv);
+                         MODE_INFO *mi,
+                         int mb_to_left_edge,
+                         int mb_to_right_edge,
+                         int mb_to_top_edge,
+                         int mb_to_bottom_edge);
 void vp8_estimate_missing_mvs(VP8D_COMP *pbi);
 void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
                                  MODE_INFO *mi, MODE_INFO *prev_mi,
@@ -53,10 +55,10 @@ void vp8_find_neighboring_blocks(MODE_INFO *mi,
                                  int mb_rows, int mb_cols,
                                  int mi_stride);
 MV_REFERENCE_FRAME vp8_dominant_ref_frame(EC_BLOCK *neighbors);
-void vp8_interpolate_mvs(MODE_INFO *mi,
+void vp8_interpolate_mvs(MACROBLOCKD *mb,
                          EC_BLOCK *neighbors,
                          MV_REFERENCE_FRAME dom_ref_frame);
-void vp8_interpolate_mv(MODE_INFO *mi,
+void vp8_interpolate_mv(MACROBLOCKD *mb,
                         int mb_row, int mb_col,
                         int mb_rows, int mb_cols,
                         int mi_stride);

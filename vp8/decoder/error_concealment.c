@@ -42,6 +42,18 @@ static const int weights_q7[5][5] = {
        { 32,    31,    29,    26,    23 }
 };
 
+int vp8_need_to_clamp_mv(MV *mv,
+                         int mb_to_left_edge,
+                         int mb_to_right_edge,
+                         int mb_to_top_edge,
+                         int mb_to_bottom_edge)
+{
+    return (mv->col < mb_to_left_edge) ||
+           (mv->col > mb_to_right_edge) ||
+           (mv->row < mb_to_top_edge) ||
+           (mv->row > mb_to_bottom_edge);
+}
+
 int vp8_alloc_overlap_lists(VP8D_COMP *pbi)
 {
     if (pbi->overlaps != NULL)
@@ -102,9 +114,15 @@ void vp8_calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
                                int first_ol_mb_row, int first_ol_mb_col,
                                int first_ol_blk_row, int first_ol_blk_col)
 {
-    /* find the blocks it's overlapping */
+    /* Find the blocks within this MB which are overlapped by bmi and
+     * calculate and assign overlap for each of those blocks. */
+
+    /* Block coordinates relative the upper-left block */
     const int rel_ol_blk_row = first_ol_blk_row - first_ol_mb_row * 4;
     const int rel_ol_blk_col = first_ol_blk_col - first_ol_mb_col * 4;
+    /* If the block partly overlaps any previous MB, these coordinates
+     * can be < 0. We don't want to access blocks in previous MBs.
+     */
     const int blk_idx = MAX(rel_ol_blk_row,0) * 4 + MAX(rel_ol_blk_col,0);
     /* Upper left overlapping block */
     B_OVERLAP *b_ol_ul = &(b_overlaps[blk_idx]);
@@ -280,9 +298,6 @@ void vp8_estimate_mv(const OVERLAP_NODE *overlaps, B_MODE_INFO *bmi,
         /* Q9 / Q6 = Q3 */
         bmi->mv.as_mv.col = col_acc / overlap_sum;
         bmi->mv.as_mv.row = row_acc / overlap_sum;
-        /* TODO(holmer): Get the mode from the most overlapping block?
-         * Or is the mode only used when decoding the MVs?
-         */
         bmi->mode = NEW4X4;
     }
     else
@@ -294,24 +309,31 @@ void vp8_estimate_mv(const OVERLAP_NODE *overlaps, B_MODE_INFO *bmi,
 }
 
 void vp8_estimate_mb_mvs(const B_OVERLAP *block_overlaps,
-                         B_MODE_INFO *bmi,
-                         MV_REFERENCE_FRAME type,
-                         MV* filtered_mv)
+                         MODE_INFO *mi,
+                         int mb_to_left_edge,
+                         int mb_to_right_edge,
+                         int mb_to_top_edge,
+                         int mb_to_bottom_edge)
 {
     int i;
     int non_zero_count = 0;
+    MV * const filtered_mv = &(mi->mbmi.mv.as_mv);
+    B_MODE_INFO * const bmi = mi->bmi;
     filtered_mv->col = 0;
     filtered_mv->row = 0;
     for (i = 0; i < 16; ++i)
     {
-        /* TODO(holmer): How can we be certain that all blocks refer
-         * to the same frame buffer? We can't
-         */
         /* Estimate vectors for all blocks which are overlapped by this
          * type
          */
         /* Interpolate/extrapolate the rest of the block's MVs */
-        vp8_estimate_mv(block_overlaps[i].overlaps, bmi + i, type);
+        vp8_estimate_mv(block_overlaps[i].overlaps, bmi + i,
+                mi->mbmi.ref_frame);
+        mi->mbmi.need_to_clamp_mvs = vp8_need_to_clamp_mv(&(bmi[i].mv.as_mv),
+                                                          mb_to_left_edge,
+                                                          mb_to_right_edge,
+                                                          mb_to_top_edge,
+                                                          mb_to_bottom_edge);
         if (bmi[i].mv.as_int != 0)
         {
             ++non_zero_count;
@@ -371,8 +393,12 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
     mi += mb_row*(mb_cols + 1) + mb_col;
     for (; mb_row < mb_rows; ++mb_row)
     {
+        int mb_to_top_edge = -((mb_row * 16)) << 3;
+        int mb_to_bottom_edge = ((mb_rows - 1 - mb_row) * 16) << 3;
         for (; mb_col < mb_cols; ++mb_col)
         {
+            int mb_to_left_edge = -((mb_col * 16) << 3);
+            int mb_to_right_edge = ((mb_cols - 1 - mb_col) * 16) << 3;
             int i;
             MV_REFERENCE_FRAME type = LAST_FRAME;
             int largest_overlap = 0;
@@ -381,14 +407,14 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
             /* Find largest overlap and its type */
             mi->mbmi.ref_frame = vp8_largest_overlap_type(block_overlaps);
             vp8_estimate_mb_mvs(block_overlaps,
-                                mi->bmi,
-                                mi->mbmi.ref_frame,
-                                &mi->mbmi.mv.as_mv);
+                                mi,
+                                mb_to_left_edge,
+                                mb_to_right_edge,
+                                mb_to_top_edge,
+                                mb_to_bottom_edge);
             mi->mbmi.uv_mode = DC_PRED;
 
-            mi->mbmi.mb_skip_coeff = 1;
-            /* TODO(holmer): should this be enabled, when? */
-            mi->mbmi.need_to_clamp_mvs = 1;
+            mi->mbmi.mb_skip_coeff = 0;
             ++mi;
         }
         mb_col = 0;
@@ -489,11 +515,12 @@ MV_REFERENCE_FRAME vp8_dominant_ref_frame(EC_BLOCK *neighbors)
     return dom_ref_frame;
 }
 
-void vp8_interpolate_mvs(MODE_INFO *mi,
+void vp8_interpolate_mvs(MACROBLOCKD *mb,
                          EC_BLOCK *neighbors,
                          MV_REFERENCE_FRAME dom_ref_frame)
 {
     int row, col, i;
+    MODE_INFO * const mi = mb->mode_info_context;
     /* Table with the position of the neighboring blocks relative the position
      * of the upper left block of the current MB. Starting with the upper left
      * neighbor and going to the right.
@@ -511,6 +538,7 @@ void vp8_interpolate_mvs(MODE_INFO *mi,
             int w_sum = 0;
             int mv_row_sum = 0;
             int mv_col_sum = 0;
+            MV * const mv = &(mi->bmi[row*4 + col].mv.as_mv);
             for (i = 0; i < NUM_NEIGHBORS; ++i)
             {
                 /* Calculate the weighted sum of neighboring MVs referring
@@ -531,18 +559,20 @@ void vp8_interpolate_mvs(MODE_INFO *mi,
                  * Normalize with the sum of the coefficients
                  * Q3 = Q10 / Q7
                  */
-                mi->bmi[row*4 + col].mv.as_mv.row = mv_row_sum / w_sum;
-                mi->bmi[row*4 + col].mv.as_mv.col = mv_col_sum / w_sum;
-                /* TODO(holmer): Get the mode from the most overlapping block?
-                 * Or is the mode only used when decoding the MVs?
-                 */
+                mv->row = mv_row_sum / w_sum;
+                mv->col = mv_col_sum / w_sum;
                 mi->bmi[row*4 + col].mode = NEW4X4;
+                mi->mbmi.need_to_clamp_mvs = vp8_need_to_clamp_mv(mv,
+                                                       mb->mb_to_left_edge,
+                                                       mb->mb_to_right_edge,
+                                                       mb->mb_to_top_edge,
+                                                       mb->mb_to_bottom_edge);
             }
         }
     }
 }
 
-void vp8_interpolate_mv(MODE_INFO *mi,
+void vp8_interpolate_mv(MACROBLOCKD *mb,
                         int mb_row, int mb_col,
                         int mb_rows, int mb_cols,
                         int mi_stride)
@@ -557,22 +587,20 @@ void vp8_interpolate_mv(MODE_INFO *mi,
         neighbors[i].ref_frame = MAX_REF_FRAMES;
         neighbors[i].mv.row = neighbors[i].mv.col = 0;
     }
-    vp8_find_neighboring_blocks(mi,
+    vp8_find_neighboring_blocks(mb->mode_info_context,
                                 neighbors,
                                 mb_row, mb_col,
                                 mb_rows, mb_cols,
-                                mi_stride);
+                                mb->mode_info_stride);
     /* Determine the dominant block type */
     dom_ref_frame = vp8_dominant_ref_frame(neighbors);
     /* Interpolate MVs for the missing blocks
      * from the dominating MVs */
-    vp8_interpolate_mvs(mi, neighbors, dom_ref_frame);
+    vp8_interpolate_mvs(mb, neighbors, dom_ref_frame);
 
-    mi->mbmi.ref_frame = dom_ref_frame;
-    mi->mbmi.uv_mode = DC_PRED;
-    mi->mbmi.mb_skip_coeff = 1;
-    /* TODO(holmer): should this be enabled, when? */
-    mi->mbmi.need_to_clamp_mvs = 1;
+    mb->mode_info_context->mbmi.ref_frame = dom_ref_frame;
+    mb->mode_info_context->mbmi.uv_mode = DC_PRED;
+    mb->mode_info_context->mbmi.mb_skip_coeff = 0;
 }
 
 void vp8_conceal_corrupt_block(MACROBLOCKD *xd)
