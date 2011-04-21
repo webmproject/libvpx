@@ -385,14 +385,11 @@ typedef struct
     int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
 
     INT64 key_frame_count;
-    INT64 tot_key_frame_bits;
-    int prior_key_frame_size[KEY_FRAME_CONTEXT];
     int prior_key_frame_distance[KEY_FRAME_CONTEXT];
     int per_frame_bandwidth;          // Current section per frame bandwidth target
     int av_per_frame_bandwidth;        // Average frame size target for clip
     int min_frame_bandwidth;          // Minimum allocation that should be used for any frame
     int last_key_frame_size;
-    int intra_frame_target;
     int inter_frame_target;
     double output_frame_rate;
     long long last_time_stamp_seen;

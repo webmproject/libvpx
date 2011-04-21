@@ -1699,9 +1699,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cm->horiz_scale  = cpi->horiz_scale;
     cm->vert_scale   = cpi->vert_scale ;
 
-    // As per VP8
-    cpi->intra_frame_target = (4 * (cm->Width + cm->Height) / 15) * 1000;
-
     // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
     if (cpi->oxcf.Sharpness > 7)
         cpi->oxcf.Sharpness = 7;
@@ -1730,10 +1727,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         alloc_raw_frame_buffers(cpi);
         vp8_alloc_compressor_data(cpi);
     }
-
-    // Clamp KF frame size to quarter of data rate
-    if (cpi->intra_frame_target > cpi->target_bandwidth >> 2)
-        cpi->intra_frame_target = cpi->target_bandwidth >> 2;
 
     if (cpi->oxcf.fixed_q >= 0)
     {
@@ -1960,7 +1953,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->frames_till_gf_update_due      = 0;
     cpi->key_frame_count              = 1;
-    cpi->tot_key_frame_bits            = 0;
 
     cpi->ni_av_qi                     = cpi->oxcf.worst_allowed_q;
     cpi->ni_tot_qi                    = 0;
@@ -1986,7 +1978,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     for (i = 0; i < KEY_FRAME_CONTEXT; i++)
     {
-        cpi->prior_key_frame_size[i]     = cpi->intra_frame_target;
         cpi->prior_key_frame_distance[i] = (int)cpi->output_frame_rate;
     }
 
