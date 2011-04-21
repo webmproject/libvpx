@@ -20,7 +20,7 @@ global sym(vp8_regular_quantize_b_sse2)
 sym(vp8_regular_quantize_b_sse2):
     push        rbp
     mov         rbp, rsp
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
 
 %if ABI_IS_32BIT

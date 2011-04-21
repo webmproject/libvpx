@@ -67,7 +67,7 @@ sym(vp8_recon4b_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
-    SAVE_XMM
+    SAVE_XMM 7
     push        rsi
     push        rdi
     ; end prolog

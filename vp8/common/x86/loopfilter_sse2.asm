@@ -288,7 +288,7 @@ sym(vp8_loop_filter_horizontal_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -338,7 +338,7 @@ sym(vp8_loop_filter_horizontal_edge_uv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -584,7 +584,7 @@ sym(vp8_mbloop_filter_horizontal_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -634,7 +634,7 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -1024,7 +1024,7 @@ sym(vp8_loop_filter_vertical_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -1091,7 +1091,7 @@ sym(vp8_loop_filter_vertical_edge_uv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -1249,7 +1249,7 @@ sym(vp8_mbloop_filter_vertical_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -1318,7 +1318,7 @@ sym(vp8_mbloop_filter_vertical_edge_uv_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -1386,7 +1386,7 @@ sym(vp8_loop_filter_simple_horizontal_edge_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -1503,7 +1503,7 @@ sym(vp8_loop_filter_simple_vertical_edge_sse2):
     push        rbp         ; save old base pointer value.
     mov         rbp, rsp    ; set new base pointer value.
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx         ; save callee-saved reg
     push        rsi
     push        rdi

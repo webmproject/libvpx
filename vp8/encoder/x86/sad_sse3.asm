@@ -33,15 +33,15 @@
     movsxd      rdx,        dword ptr arg(3)    ; ref_stride
 %else
   %ifidn __OUTPUT_FORMAT__,x64
+    SAVE_XMM 7, u
     %define     src_ptr     rcx
     %define     src_stride  rdx
     %define     ref_ptr     r8
     %define     ref_stride  r9
     %define     end_ptr     r10
     %define     ret_var     r11
-    %define     result_ptr  [rsp+40+4*8]
-    %define     max_err     [rsp+40+4*8]
-    SAVE_XMM
+    %define     result_ptr  [rsp+xmm_stack_space+8+4*8]
+    %define     max_err     [rsp+xmm_stack_space+8+4*8]
   %else
     %define     src_ptr     rdi
     %define     src_stride  rsi
@@ -108,6 +108,7 @@
     xchg        rbx,        rax
 %else
   %ifidn __OUTPUT_FORMAT__,x64
+    SAVE_XMM 7, u
     %define     src_ptr     rcx
     %define     src_stride  rdx
     %define     r0_ptr      rsi
@@ -115,8 +116,7 @@
     %define     r2_ptr      r11
     %define     r3_ptr      r8
     %define     ref_stride  r9
-    %define     result_ptr  [rsp+48+4*8]
-    SAVE_XMM
+    %define     result_ptr  [rsp+xmm_stack_space+16+4*8]
     push        rsi
 
     LOAD_X4_ADDRESSES r8, r0_ptr, r1_ptr, r2_ptr, r3_ptr
