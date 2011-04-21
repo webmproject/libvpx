@@ -804,11 +804,14 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             for (j = 0; j < mb_cols; j++)
             {
                 char zz[4];
+                int dc_diff = !(mi[mb_index].mbmi.mode != B_PRED &&
+                              mi[mb_index].mbmi.mode != SPLITMV &&
+                              mi[mb_index].mbmi.mb_skip_coeff));
 
                 if (oci->frame_type == KEY_FRAME)
                     sprintf(zz, "a");
                 else
-                    sprintf(zz, "%c", mi[mb_index].mbmi.dc_diff + '0');
+                    sprintf(zz, "%c", dc_diff + '0');
 
                 vp8_blit_text(zz, y_ptr, post->y_stride);
                 mb_index ++;
