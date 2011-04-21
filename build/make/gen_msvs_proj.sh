@@ -447,6 +447,8 @@ generate_vcproj() {
                     obj_int_extract)
                         tag Tool \
                             Name="VCCLCompilerTool" \
+                            Optimization="2" \
+                            FavorSizeorSpeed="1" \
                             AdditionalIncludeDirectories="$incs" \
                             PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE" \
                             RuntimeLibrary="$release_runtime" \
@@ -462,6 +464,8 @@ generate_vcproj() {
 
                         tag Tool \
                             Name="VCCLCompilerTool" \
+                            Optimization="2" \
+                            FavorSizeorSpeed="1" \
                             AdditionalIncludeDirectories="$incs" \
                             PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
                             RuntimeLibrary="$release_runtime" \
@@ -476,6 +480,8 @@ generate_vcproj() {
                         tag Tool \
                             Name="VCCLCompilerTool" \
                             AdditionalIncludeDirectories="$incs" \
+                            Optimization="2" \
+                            FavorSizeorSpeed="1" \
                             PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
                             RuntimeLibrary="$release_runtime" \
                             UsePrecompiledHeader="0" \
