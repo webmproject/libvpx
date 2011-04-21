@@ -4370,9 +4370,9 @@ static void encode_frame_to_data_rate
         vp8_clear_system_state();  //__asm emms;
 
         if (cpi->total_coded_error_left != 0.0)
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
-                       "%6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
-                       "%10.3f %8ld\n",
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6d %6d"
+                       "%6d %6d %6d %5d %5d %5d %8d %8.2f %10d %10.3f"
+                       "%10.3f %8d\n",
                        cpi->common.current_video_frame, cpi->this_frame_target,
                        cpi->projected_frame_size,
                        (cpi->projected_frame_size - cpi->this_frame_target),
@@ -4389,9 +4389,9 @@ static void encode_frame_to_data_rate
                        (double)cpi->bits_left / cpi->total_coded_error_left,
                        cpi->tot_recode_hits);
         else
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6ld %6ld"
-                       "%6ld %6ld %6ld %5ld %5ld %5ld %8ld %8.2f %10d %10.3f"
-                       "%8ld\n",
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6d %6d"
+                       "%6d %6d %6d %5d %5d %5d %8d %8.2f %10d %10.3f"
+                       "%8d\n",
                        cpi->common.current_video_frame,
                        cpi->this_frame_target, cpi->projected_frame_size,
                        (cpi->projected_frame_size - cpi->this_frame_target),
