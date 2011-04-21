@@ -256,6 +256,16 @@ vpx_fixed_buf_t stats_get(stats_io_t *stats)
     return stats->buf;
 }
 
+/* Stereo 3D packed frame format */
+typedef enum stereo_format
+{
+    STEREO_FORMAT_MONO       = 0,
+    STEREO_FORMAT_LEFT_RIGHT = 1,
+    STEREO_FORMAT_BOTTOM_TOP = 2,
+    STEREO_FORMAT_TOP_BOTTOM = 3,
+    STEREO_FORMAT_RIGHT_LEFT = 11
+} stereo_format_t;
+
 enum video_file_type
 {
     FILE_TYPE_RAW,
@@ -606,7 +616,8 @@ write_webm_seek_info(EbmlGlobal *ebml)
 static void
 write_webm_file_header(EbmlGlobal                *glob,
                        const vpx_codec_enc_cfg_t *cfg,
-                       const struct vpx_rational *fps)
+                       const struct vpx_rational *fps,
+                       stereo_format_t            stereo_fmt)
 {
     {
         EbmlLoc start;
@@ -650,6 +661,7 @@ write_webm_file_header(EbmlGlobal                *glob,
                     Ebml_StartSubElement(glob, &videoStart, Video);
                     Ebml_SerializeUnsigned(glob, PixelWidth, pixelWidth);
                     Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
+                    Ebml_SerializeUnsigned(glob, StereoMode, stereo_fmt);
                     Ebml_SerializeFloat(glob, FrameRate, frameRate);
                     Ebml_EndSubElement(glob, &videoStart); //Video
                 }
@@ -916,6 +928,16 @@ static const arg_def_t width            = ARG_DEF("w", "width", 1,
         "Frame width");
 static const arg_def_t height           = ARG_DEF("h", "height", 1,
         "Frame height");
+static const struct arg_enum_list stereo_mode_enum[] = {
+    {"mono"      , STEREO_FORMAT_MONO},
+    {"left-right", STEREO_FORMAT_LEFT_RIGHT},
+    {"bottom-top", STEREO_FORMAT_BOTTOM_TOP},
+    {"top-bottom", STEREO_FORMAT_TOP_BOTTOM},
+    {"right-left", STEREO_FORMAT_RIGHT_LEFT},
+    {NULL, 0}
+};
+static const arg_def_t stereo_mode      = ARG_DEF_ENUM(NULL, "stereo-mode", 1,
+        "Stereo 3D video format", stereo_mode_enum);
 static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
         "Stream timebase (frame duration)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
@@ -926,7 +948,7 @@ static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
 static const arg_def_t *global_args[] =
 {
     &use_yv12, &use_i420, &usage, &threads, &profile,
-    &width, &height, &timebase, &framerate, &error_resilient,
+    &width, &height, &stereo_mode, &timebase, &framerate, &error_resilient,
     &lag_in_frames, NULL
 };
 
@@ -1084,7 +1106,6 @@ static void usage_exit()
 
 #define ARG_CTRL_CNT_MAX 10
 
-
 int main(int argc, const char **argv_)
 {
     vpx_codec_ctx_t        encoder;
@@ -1120,6 +1141,7 @@ int main(int argc, const char **argv_)
     uint64_t                 psnr_samples_total = 0;
     double                   psnr_totals[4] = {0, 0, 0, 0};
     int                      psnr_count = 0;
+    stereo_format_t          stereo_fmt = STEREO_FORMAT_MONO;
 
     exec_name = argv_[0];
     ebml.last_pts_ms = -1;
@@ -1259,6 +1281,8 @@ int main(int argc, const char **argv_)
             cfg.g_w = arg_parse_uint(&arg);
         else if (arg_match(&arg, &height, argi))
             cfg.g_h = arg_parse_uint(&arg);
+        else if (arg_match(&arg, &stereo_mode, argi))
+            stereo_fmt = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &timebase, argi))
             cfg.g_timebase = arg_parse_rational(&arg);
         else if (arg_match(&arg, &error_resilient, argi))
@@ -1557,7 +1581,7 @@ int main(int argc, const char **argv_)
         if(write_webm)
         {
             ebml.stream = outfile;
-            write_webm_file_header(&ebml, &cfg, &arg_framerate);
+            write_webm_file_header(&ebml, &cfg, &arg_framerate, stereo_fmt);
         }
         else
             write_ivf_file_header(outfile, &cfg, codec->fourcc, 0);
