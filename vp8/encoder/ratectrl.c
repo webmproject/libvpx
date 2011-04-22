@@ -1468,8 +1468,10 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi)
         /* Assume a default of 1 kf every 2 seconds, or the max kf interval,
          * whichever is smaller.
          */
+        int key_freq = cpi->oxcf.key_freq>0 ? cpi->oxcf.key_freq : 1;
         av_key_frame_frequency = (int)cpi->output_frame_rate * 2;
-        if (av_key_frame_frequency > cpi->oxcf.key_freq)
+
+        if (cpi->oxcf.auto_key && av_key_frame_frequency > key_freq)
             av_key_frame_frequency = cpi->oxcf.key_freq;
 
         cpi->prior_key_frame_distance[KEY_FRAME_CONTEXT - 1]
