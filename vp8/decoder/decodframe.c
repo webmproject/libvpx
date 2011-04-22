@@ -120,7 +120,7 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
     }
     else
     {
-        vp8_build_inter_predictors_mb_s(xd);
+        vp8_build_inter16x16_predictors_mb_s(xd);
     }
 }
 

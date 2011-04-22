@@ -1818,9 +1818,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     //int intermodecost[MAX_MODES];
 
     MB_PREDICTION_MODE uv_intra_mode;
-
-    int force_no_skip = 0;
-
     MV mvp;
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
     int saddone=0;
@@ -1922,8 +1919,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         int lf_or_gf = 0;           // Lat Frame (01) or gf/arf (1)
         int disable_skip = 0;
         int other_cost = 0;
-
-        force_no_skip = 0;
 
         // Experimental debug code.
         // Record of rd values recorded for this MB. -1 indicates not measured
@@ -2299,7 +2294,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 continue;
 
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
-            vp8_build_inter_predictors_mby(&x->e_mbd);
+            vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
                 x->skip = 1;
@@ -2435,7 +2430,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         {
             // Note index of best mode so far
             best_mode_index = mode_index;
-            x->e_mbd.mode_info_context->mbmi.force_no_skip = force_no_skip;
 
             if (this_mode <= B_PRED)
             {

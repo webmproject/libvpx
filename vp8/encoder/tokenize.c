@@ -229,16 +229,6 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
     x->mode_info_context->mbmi.dc_diff = 1;
 
-#if 0
-
-    if (x->mbmi.force_no_skip)
-    {
-        x->mbmi.mb_skip_coeff = 1;
-        //reset for next_mb.
-        x->mbmi.force_no_skip = 0;
-    }
-
-#endif
 
 #if 1
 
