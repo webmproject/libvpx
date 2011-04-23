@@ -164,10 +164,10 @@ temporal_filter_apply_load_finished:
         movdqa      xmm6,           [rdi+32]
         movdqa      xmm7,           [rdi+48]
         ; += modifier
-        paddw       xmm4,           xmm0
-        paddw       xmm5,           xmm2
-        paddw       xmm6,           xmm1
-        paddw       xmm7,           xmm3
+        paddd       xmm4,           xmm0
+        paddd       xmm5,           xmm2
+        paddd       xmm6,           xmm1
+        paddd       xmm7,           xmm3
         ; write back
         movdqa      [rdi],          xmm4
         movdqa      [rdi+16],       xmm5
