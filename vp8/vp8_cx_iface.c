@@ -304,6 +304,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     }
 
     oxcf->target_bandwidth       = cfg.rc_target_bitrate;
+    oxcf->rc_max_intra_bitrate_pct = cfg.rc_max_intra_bitrate_pct;
 
     oxcf->best_allowed_q          = cfg.rc_min_quantizer;
     oxcf->worst_allowed_q         = cfg.rc_max_quantizer;
@@ -1083,7 +1084,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         {0},                /* rc_twopass_stats_in */
 #endif
         256,                /* rc_target_bandwidth */
-
+        0,                  /* rc_max_intra_bitrate_pct */
         4,                  /* rc_min_quantizer */
         63,                 /* rc_max_quantizer */
         95,                 /* rc_undershoot_pct */

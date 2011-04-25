@@ -962,11 +962,14 @@ static const arg_def_t buf_initial_sz     = ARG_DEF(NULL, "buf-initial-sz", 1,
         "Client initial buffer size (ms)");
 static const arg_def_t buf_optimal_sz     = ARG_DEF(NULL, "buf-optimal-sz", 1,
         "Client optimal buffer size (ms)");
+static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
+        "Max I-frame bitrate (pct)");
 static const arg_def_t *rc_args[] =
 {
     &dropframe_thresh, &resize_allowed, &resize_up_thresh, &resize_down_thresh,
     &end_usage, &target_bitrate, &min_quantizer, &max_quantizer,
     &undershoot_pct, &overshoot_pct, &buf_sz, &buf_initial_sz, &buf_optimal_sz,
+    &max_intra_rate_pct,
     NULL
 };
 
@@ -1279,6 +1282,8 @@ int main(int argc, const char **argv_)
             cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &target_bitrate, argi))
             cfg.rc_target_bitrate = arg_parse_uint(&arg);
+        else if (arg_match(&arg, &max_intra_rate_pct, argi))
+            cfg.rc_max_intra_bitrate_pct = arg_parse_uint(&arg);
         else if (arg_match(&arg, &min_quantizer, argi))
             cfg.rc_min_quantizer = arg_parse_uint(&arg);
         else if (arg_match(&arg, &max_quantizer, argi))
