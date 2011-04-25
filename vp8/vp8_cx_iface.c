@@ -151,7 +151,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
 #endif
     RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
-    RANGE_CHECK_HI(cfg, rc_undershoot_pct,  100);
+    RANGE_CHECK_HI(cfg, rc_undershoot_pct,  1000);
+    RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
     RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
     RANGE_CHECK(cfg, kf_mode,               VPX_KF_DISABLED, VPX_KF_AUTO);
     //RANGE_CHECK_BOOL(cfg,                 g_delete_firstpassfile);
@@ -312,7 +313,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->fixed_q = -1;
 
     oxcf->under_shoot_pct         = cfg.rc_undershoot_pct;
-    //oxcf->over_shoot_pct        = cfg.rc_overshoot_pct;
+    oxcf->over_shoot_pct          = cfg.rc_overshoot_pct;
 
     oxcf->maximum_buffer_size     = cfg.rc_buf_sz;
     oxcf->starting_buffer_level   = cfg.rc_buf_initial_sz;
@@ -358,6 +359,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         printf("key_freq: %d\n", oxcf->key_freq);
         printf("end_usage: %d\n", oxcf->end_usage);
         printf("under_shoot_pct: %d\n", oxcf->under_shoot_pct);
+        printf("over_shoot_pct: %d\n", oxcf->over_shoot_pct);
         printf("starting_buffer_level: %d\n", oxcf->starting_buffer_level);
         printf("optimal_buffer_level: %d\n",  oxcf->optimal_buffer_level);
         printf("maximum_buffer_size: %d\n", oxcf->maximum_buffer_size);
@@ -1087,8 +1089,8 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         0,                  /* rc_max_intra_bitrate_pct */
         4,                  /* rc_min_quantizer */
         63,                 /* rc_max_quantizer */
-        95,                 /* rc_undershoot_pct */
-        200,                /* rc_overshoot_pct */
+        100,                /* rc_undershoot_pct */
+        100,                /* rc_overshoot_pct */
 
         6000,               /* rc_max_buffer_size */
         4000,               /* rc_buffer_initial_size; */

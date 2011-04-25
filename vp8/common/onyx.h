@@ -140,8 +140,9 @@ extern "C"
 
         int end_usage; // vbr or cbr
 
-        // shoot to keep buffer full at all times by undershooting a bit 95 recommended
+        // buffer targeting aggressiveness
         int under_shoot_pct;
+        int over_shoot_pct;
 
         // buffering parameters
         int starting_buffer_level;  // in seconds

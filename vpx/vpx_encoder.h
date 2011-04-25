@@ -445,20 +445,28 @@ extern "C" {
          */
 
 
-        /*!\brief Rate control undershoot tolerance
+        /*!\brief Rate control adaptation undershoot control
          *
-         * This value, expressed as a percentage of the target bitrate, describes
-         * the target bitrate for easier frames, allowing bits to be saved for
-         * harder frames. Set to zero to use the codec default.
+         * This value, expressed as a percentage of the target bitrate,
+         * controls the maximum allowed adaptation speed of the codec.
+         * This factor controls the maximum amount of bits that can
+         * be subtracted from the target bitrate in order to compensate
+         * for prior overshoot.
+         *
+         * Valid values in the range 0-1000.
          */
         unsigned int           rc_undershoot_pct;
 
 
-        /*!\brief Rate control overshoot tolerance
+        /*!\brief Rate control adaptation overshoot control
          *
-         * This value, expressed as a percentage of the target bitrate, describes
-         * the maximum allowed bitrate for a given frame.  Set to zero to use the
-         * codec default.
+         * This value, expressed as a percentage of the target bitrate,
+         * controls the maximum allowed adaptation speed of the codec.
+         * This factor controls the maximum amount of bits that can
+         * be added to the target bitrate in order to compensate for
+         * prior undershoot.
+         *
+         * Valid values in the range 0-1000.
          */
         unsigned int           rc_overshoot_pct;
 

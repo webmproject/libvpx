@@ -817,11 +817,6 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
         }
     }
 
-    // Set a reduced data rate target for our initial Q calculation.
-    // This should help to save bits during earier sections.
-    if ((cpi->oxcf.under_shoot_pct > 0) && (cpi->oxcf.under_shoot_pct <= 100))
-        cpi->this_frame_target = (cpi->this_frame_target * cpi->oxcf.under_shoot_pct) / 100;
-
     // Sanity check that the total sum of adjustments is not above the maximum allowed
     // That is that having allowed for KF and GF penalties we have not pushed the
     // current interframe target to low. If the adjustment we apply here is not capable of recovering
@@ -858,11 +853,6 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                     percent_low =
                         (cpi->oxcf.optimal_buffer_level - cpi->buffer_level) /
                         one_percent_bits;
-
-                    if (percent_low > 100)
-                        percent_low = 100;
-                    else if (percent_low < 0)
-                        percent_low = 0;
                 }
                 // Are we overshooting the long term clip data rate...
                 else if (cpi->bits_off_target < 0)
@@ -870,16 +860,16 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                     // Adjust per frame data target downwards to compensate.
                     percent_low = (int)(100 * -cpi->bits_off_target /
                                        (cpi->total_byte_count * 8));
-
-                    if (percent_low > 100)
-                        percent_low = 100;
-                    else if (percent_low < 0)
-                        percent_low = 0;
                 }
 
+                if (percent_low > cpi->oxcf.under_shoot_pct)
+                    percent_low = cpi->oxcf.under_shoot_pct;
+                else if (percent_low < 0)
+                    percent_low = 0;
+
                 // lower the target bandwidth for this frame.
-                cpi->this_frame_target =
-                    (cpi->this_frame_target * (100 - (percent_low / 2))) / 100;
+                cpi->this_frame_target -= (cpi->this_frame_target * percent_low)
+                                          / 200;
 
                 // Are we using allowing control of active_worst_allowed_q
                 // according to buffer level.
@@ -950,20 +940,29 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
             }
             else
             {
-                int percent_high;
+                int percent_high = 0;
 
-                if (cpi->bits_off_target > cpi->oxcf.optimal_buffer_level)
+                if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+                     && (cpi->buffer_level > cpi->oxcf.optimal_buffer_level))
                 {
-                    percent_high = (int)(100 * (cpi->bits_off_target - cpi->oxcf.optimal_buffer_level) / (cpi->total_byte_count * 8));
-
-                    if (percent_high > 100)
-                        percent_high = 100;
-                    else if (percent_high < 0)
-                        percent_high = 0;
-
-                    cpi->this_frame_target = (cpi->this_frame_target * (100 + (percent_high / 2))) / 100;
-
+                    percent_high = (cpi->buffer_level
+                                    - cpi->oxcf.optimal_buffer_level)
+                                   / one_percent_bits;
                 }
+                else if (cpi->bits_off_target > cpi->oxcf.optimal_buffer_level)
+                {
+                    percent_high = (int)((100 * cpi->bits_off_target)
+                                         / (cpi->total_byte_count * 8));
+                }
+
+                if (percent_high > cpi->oxcf.over_shoot_pct)
+                    percent_high = cpi->oxcf.over_shoot_pct;
+                else if (percent_high < 0)
+                    percent_high = 0;
+
+                cpi->this_frame_target += (cpi->this_frame_target *
+                                           percent_high) / 200;
+
 
                 // Are we allowing control of active_worst_allowed_q according to bufferl level.
                 if (cpi->auto_worst_q)
@@ -1538,7 +1537,7 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
     cpi->key_frame_count++;
 }
 
-
+void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit)
 void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, int *frame_over_shoot_limit)
 {
     // Set-up bounds on acceptable frame size:
