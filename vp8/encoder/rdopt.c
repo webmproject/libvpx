@@ -243,9 +243,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
 
     vp8_set_speed_features(cpi);
 
-    if (cpi->common.simpler_lpf)
-        cpi->common.filter_type = SIMPLE_LOOPFILTER;
-
     q = (int)pow(Qvalue, 1.25);
 
     if (q < 8)
