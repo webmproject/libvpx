@@ -329,7 +329,11 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     cpi->common.refresh_alt_ref_frame = TRUE;
 }
 
-void vp8_calc_auto_iframe_target_size(VP8_COMP *cpi)
+
+static void calc_iframe_target_size(VP8_COMP *cpi);
+
+
+static void calc_auto_iframe_target_size(VP8_COMP *cpi)
 {
     // boost defaults to half second
     int kf_boost;
@@ -339,7 +343,7 @@ void vp8_calc_auto_iframe_target_size(VP8_COMP *cpi)
 
     if (cpi->oxcf.fixed_q >= 0)
     {
-        vp8_calc_iframe_target_size(cpi);
+        calc_iframe_target_size(cpi);
         return;
     }
 
@@ -579,7 +583,8 @@ static int baseline_bits_at_q(int frame_kind, int Q, int MBs)
         return (Bpm * MBs) >> BPER_MB_NORMBITS;
 }
 
-void vp8_calc_iframe_target_size(VP8_COMP *cpi)
+
+static void calc_iframe_target_size(VP8_COMP *cpi)
 {
     int Q;
     int Boost = 100;
@@ -656,8 +661,7 @@ void vp8_calc_iframe_target_size(VP8_COMP *cpi)
 }
 
 
-
-void vp8_calc_pframe_target_size(VP8_COMP *cpi)
+static void calc_pframe_target_size(VP8_COMP *cpi)
 {
     int min_frame_target;
     int Adjustment;
@@ -1568,4 +1572,76 @@ void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, 
             }
         }
     }
+}
+
+
+// return of 0 means drop frame
+int vp8_pick_frame_size(VP8_COMP *cpi)
+{
+    VP8_COMMON *cm = &cpi->common;
+
+    // First Frame is a special case
+    if (cm->current_video_frame == 0)
+    {
+#if !(CONFIG_REALTIME_ONLY)
+
+        if (cpi->pass == 2)
+            calc_auto_iframe_target_size(cpi);
+
+        else
+#endif
+        {
+            /* 1 Pass there is no information on which to base size so use
+             * bandwidth per second * fraction of the initial buffer
+             * level
+             */
+            cpi->this_frame_target = cpi->oxcf.starting_buffer_level / 2;
+
+            if(cpi->this_frame_target > cpi->oxcf.target_bandwidth * 3 / 2)
+                cpi->this_frame_target = cpi->oxcf.target_bandwidth * 3 / 2;
+        }
+
+        // Key frame from VFW/auto-keyframe/first frame
+        cm->frame_type = KEY_FRAME;
+
+    }
+    // Special case for forced key frames
+    // The frame sizing here is still far from ideal for 2 pass.
+    else if (cm->frame_flags & FRAMEFLAGS_KEY)
+    {
+        calc_iframe_target_size(cpi);
+    }
+    else if (cm->frame_type == KEY_FRAME)
+    {
+        calc_auto_iframe_target_size(cpi);
+    }
+    else
+    {
+        // INTER frame: compute target frame size
+        cm->frame_type = INTER_FRAME;
+        calc_pframe_target_size(cpi);
+
+        // Check if we're dropping the frame:
+        if (cpi->drop_frame)
+        {
+            cpi->drop_frame = FALSE;
+            cpi->drop_count++;
+            return 0;
+        }
+    }
+
+    /* Apply limits on keyframe target.
+     *
+     * TODO: move this after consolidating
+     * calc_iframe_target_size() and calc_auto_iframe_target_size()
+     */
+    if (cm->frame_type == KEY_FRAME && cpi->oxcf.rc_max_intra_bitrate_pct)
+    {
+        unsigned int max_rate = cpi->av_per_frame_bandwidth
+                                * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
+
+        if (cpi->this_frame_target > max_rate)
+            cpi->this_frame_target = max_rate;
+    }
+    return 1;
 }
