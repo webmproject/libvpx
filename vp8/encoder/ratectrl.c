@@ -662,8 +662,6 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
     int min_frame_target;
     int Adjustment;
 
-    // Set the min frame bandwidth.
-    //min_frame_target = estimate_min_frame_size( cpi );
     min_frame_target = 0;
 
     if (cpi->pass == 2)
@@ -1416,39 +1414,6 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
     }
 
     return Q;
-}
-
-static int estimate_min_frame_size(VP8_COMP *cpi)
-{
-    double correction_factor;
-    int bits_per_mb_at_max_q;
-
-    // This funtion returns a default value for the first few frames untill the correction factor has had time to adapt.
-    if (cpi->common.current_video_frame < 10)
-    {
-        if (cpi->pass == 2)
-            return (cpi->min_frame_bandwidth);
-        else
-            return cpi->per_frame_bandwidth / 3;
-    }
-
-    /*  // Select the appropriate correction factor based upon type of frame.
-        if ( cpi->common.frame_type == KEY_FRAME )
-            correction_factor = cpi->key_frame_rate_correction_factor;
-        else
-        {
-            if ( cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame )
-                correction_factor = cpi->gf_rate_correction_factor;
-            else
-                correction_factor = cpi->rate_correction_factor;
-        }*/
-
-    // We estimate at half the value we get from vp8_bits_per_mb
-    correction_factor = cpi->rate_correction_factor / 2.0;
-
-    bits_per_mb_at_max_q = (int)(.5 + correction_factor * vp8_bits_per_mb[cpi->common.frame_type][MAXQ]);
-
-    return (bits_per_mb_at_max_q * cpi->common.MBs) >> BPER_MB_NORMBITS;
 }
 
 

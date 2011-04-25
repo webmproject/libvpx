@@ -5189,35 +5189,6 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const 
 }
 
 
-static int calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd)
-{
-    int i, j;
-    int Total = 0;
-
-    unsigned char *src = source->y_buffer;
-    unsigned char *dst = dest->y_buffer;
-    (void)rtcd;
-
-    // Loop through the Y plane raw and reconstruction data summing (square differences)
-    for (i = 0; i < source->y_height; i += 16)
-    {
-        for (j = 0; j < source->y_width; j += 16)
-        {
-            unsigned int sse;
-            VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
-
-            if (sse < 8096)
-                Total += sse;
-        }
-
-        src += 16 * source->y_stride;
-        dst += 16 * dest->y_stride;
-    }
-
-    return Total;
-}
-
-
 int vp8_get_quantizer(VP8_PTR c)
 {
     VP8_COMP   *cpi = (VP8_COMP *) c;
