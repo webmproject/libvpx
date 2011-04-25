@@ -1459,10 +1459,6 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
 
     // Initialise the starting buffer levels
-    cpi->oxcf.starting_buffer_level =
-        rescale(cpi->oxcf.starting_buffer_level,
-                cpi->oxcf.target_bandwidth, 1000);
-
     cpi->buffer_level                 = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
 
@@ -1634,6 +1630,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
+
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
 
     // Set or reset optimal and maximum buffer levels.
     if (cpi->oxcf.optimal_buffer_level == 0)
@@ -2661,16 +2661,17 @@ static int pick_frame_size(VP8_COMP *cpi)
         if (cpi->pass == 2)
             vp8_calc_auto_iframe_target_size(cpi);
 
-        // 1 Pass there is no information on which to base size so use bandwidth per second * fixed fraction
         else
 #endif
-            cpi->this_frame_target = cpi->oxcf.target_bandwidth / 2;
-
-        // in error resilient mode the first frame is bigger since it likely contains
-        // all the static background
-        if (cpi->oxcf.error_resilient_mode == 1 || (cpi->compressor_speed == 2))
         {
-            cpi->this_frame_target *= 3;      // 5;
+            /* 1 Pass there is no information on which to base size so use
+             * bandwidth per second * fraction of the initial buffer
+             * level
+             */
+            cpi->this_frame_target = cpi->oxcf.starting_buffer_level / 2;
+
+            if(cpi->this_frame_target > cpi->oxcf.target_bandwidth * 3 / 2)
+                cpi->this_frame_target = cpi->oxcf.target_bandwidth * 3 / 2;
         }
 
         // Key frame from VFW/auto-keyframe/first frame
