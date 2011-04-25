@@ -38,9 +38,8 @@ extern loop_filter_uvfunction vp8_mbloop_filter_vertical_edge_uv_neon;
 /*ARMV6 loopfilter functions*/
 /* Horizontal MB filtering */
 void vp8_loop_filter_mbh_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                               int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_mbloop_filter_horizontal_edge_armv6(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 
     if (u_ptr)
@@ -51,20 +50,18 @@ void vp8_loop_filter_mbh_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsig
 }
 
 void vp8_loop_filter_mbhs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                                int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                                int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_horizontal_edge_armv6(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 }
 
 /* Vertical MB Filtering */
 void vp8_loop_filter_mbv_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                               int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_mbloop_filter_vertical_edge_armv6(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 
     if (u_ptr)
@@ -75,20 +72,18 @@ void vp8_loop_filter_mbv_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsig
 }
 
 void vp8_loop_filter_mbvs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                                int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                                int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_vertical_edge_armv6(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 }
 
 /* Horizontal B Filtering */
 void vp8_loop_filter_bh_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                              int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_loop_filter_horizontal_edge_armv6(y_ptr + 4 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_horizontal_edge_armv6(y_ptr + 8 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_horizontal_edge_armv6(y_ptr + 12 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
@@ -101,12 +96,11 @@ void vp8_loop_filter_bh_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsign
 }
 
 void vp8_loop_filter_bhs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                               int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_horizontal_edge_armv6(y_ptr + 4 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_horizontal_edge_armv6(y_ptr + 8 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_horizontal_edge_armv6(y_ptr + 12 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
@@ -114,9 +108,8 @@ void vp8_loop_filter_bhs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsig
 
 /* Vertical B Filtering */
 void vp8_loop_filter_bv_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                              int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_loop_filter_vertical_edge_armv6(y_ptr + 4, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_vertical_edge_armv6(y_ptr + 8, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_vertical_edge_armv6(y_ptr + 12, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
@@ -129,12 +122,11 @@ void vp8_loop_filter_bv_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsign
 }
 
 void vp8_loop_filter_bvs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                               int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_vertical_edge_armv6(y_ptr + 4, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_vertical_edge_armv6(y_ptr + 8, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_vertical_edge_armv6(y_ptr + 12, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
@@ -145,9 +137,8 @@ void vp8_loop_filter_bvs_armv6(unsigned char *y_ptr, unsigned char *u_ptr, unsig
 /* NEON loopfilter functions */
 /* Horizontal MB filtering */
 void vp8_loop_filter_mbh_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                              int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_mbloop_filter_horizontal_edge_y_neon(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 
     if (u_ptr)
@@ -155,20 +146,18 @@ void vp8_loop_filter_mbh_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsign
 }
 
 void vp8_loop_filter_mbhs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                               int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_horizontal_edge_neon(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 }
 
 /* Vertical MB Filtering */
 void vp8_loop_filter_mbv_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                              int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_mbloop_filter_vertical_edge_y_neon(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 
     if (u_ptr)
@@ -176,20 +165,18 @@ void vp8_loop_filter_mbv_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsign
 }
 
 void vp8_loop_filter_mbvs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                               int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                               int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_vertical_edge_neon(y_ptr, y_stride, lfi->mbflim, lfi->lim, lfi->thr, 2);
 }
 
 /* Horizontal B Filtering */
 void vp8_loop_filter_bh_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                             int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                             int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_loop_filter_horizontal_edge_y_neon(y_ptr + 4 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_horizontal_edge_y_neon(y_ptr + 8 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_horizontal_edge_y_neon(y_ptr + 12 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
@@ -199,12 +186,11 @@ void vp8_loop_filter_bh_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigne
 }
 
 void vp8_loop_filter_bhs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                              int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_horizontal_edge_neon(y_ptr + 4 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_horizontal_edge_neon(y_ptr + 8 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_horizontal_edge_neon(y_ptr + 12 * y_stride, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
@@ -212,9 +198,8 @@ void vp8_loop_filter_bhs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsign
 
 /* Vertical B Filtering */
 void vp8_loop_filter_bv_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                             int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                             int y_stride, int uv_stride, loop_filter_info *lfi)
 {
-    (void) simpler_lpf;
     vp8_loop_filter_vertical_edge_y_neon(y_ptr + 4, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_vertical_edge_y_neon(y_ptr + 8, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_vertical_edge_y_neon(y_ptr + 12, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
@@ -224,12 +209,11 @@ void vp8_loop_filter_bv_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigne
 }
 
 void vp8_loop_filter_bvs_neon(unsigned char *y_ptr, unsigned char *u_ptr, unsigned char *v_ptr,
-                              int y_stride, int uv_stride, loop_filter_info *lfi, int simpler_lpf)
+                              int y_stride, int uv_stride, loop_filter_info *lfi)
 {
     (void) u_ptr;
     (void) v_ptr;
     (void) uv_stride;
-    (void) simpler_lpf;
     vp8_loop_filter_simple_vertical_edge_neon(y_ptr + 4, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_vertical_edge_neon(y_ptr + 8, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);
     vp8_loop_filter_simple_vertical_edge_neon(y_ptr + 12, y_stride, lfi->flim, lfi->lim, lfi->thr, 2);

@@ -129,32 +129,32 @@ void vp8_setup_version(VP8_COMMON *cm)
     {
     case 0:
         cm->no_lpf = 0;
-        cm->simpler_lpf = 0;
+        cm->filter_type = NORMAL_LOOPFILTER;
         cm->use_bilinear_mc_filter = 0;
         cm->full_pixel = 0;
         break;
     case 1:
         cm->no_lpf = 0;
-        cm->simpler_lpf = 1;
+        cm->filter_type = SIMPLE_LOOPFILTER;
         cm->use_bilinear_mc_filter = 1;
         cm->full_pixel = 0;
         break;
     case 2:
         cm->no_lpf = 1;
-        cm->simpler_lpf = 0;
+        cm->filter_type = NORMAL_LOOPFILTER;
         cm->use_bilinear_mc_filter = 1;
         cm->full_pixel = 0;
         break;
     case 3:
         cm->no_lpf = 1;
-        cm->simpler_lpf = 1;
+        cm->filter_type = SIMPLE_LOOPFILTER;
         cm->use_bilinear_mc_filter = 1;
         cm->full_pixel = 1;
         break;
     default:
         /*4,5,6,7 are reserved for future use*/
         cm->no_lpf = 0;
-        cm->simpler_lpf = 0;
+        cm->filter_type = NORMAL_LOOPFILTER;
         cm->use_bilinear_mc_filter = 0;
         cm->full_pixel = 0;
         break;
@@ -169,7 +169,7 @@ void vp8_create_common(VP8_COMMON *oci)
 
     oci->mb_no_coeff_skip = 1;
     oci->no_lpf = 0;
-    oci->simpler_lpf = 0;
+    oci->filter_type = NORMAL_LOOPFILTER;
     oci->use_bilinear_mc_filter = 0;
     oci->full_pixel = 0;
     oci->multi_token_partition = ONE_PARTITION;

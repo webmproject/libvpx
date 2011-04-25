@@ -506,7 +506,6 @@ typedef struct
     int auto_adjust_key_quantizer;
     int keyquantizer;
     int auto_worst_q;
-    int filter_type;
     int cpu_used;
     int chroma_boost;
     int horiz_scale;

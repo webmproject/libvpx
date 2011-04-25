@@ -41,7 +41,7 @@ typedef struct
 
 #define prototype_loopfilter_block(sym) \
     void sym(unsigned char *y, unsigned char *u, unsigned char *v,\
-             int ystride, int uv_stride, loop_filter_info *lfi, int simpler)
+             int ystride, int uv_stride, loop_filter_info *lfi)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/loopfilter_x86.h"
