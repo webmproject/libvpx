@@ -196,39 +196,6 @@ static void transform_mby(MACROBLOCK *x)
 }
 
 
-void vp8_stuff_inter16x16(MACROBLOCK *x)
-{
-    vp8_build_inter_predictors_mb_s(&x->e_mbd);
-    /*
-        // recon = copy from predictors to destination
-        {
-            BLOCKD *b = &x->e_mbd.block[0];
-            unsigned char *pred_ptr = b->predictor;
-            unsigned char *dst_ptr = *(b->base_dst) + b->dst;
-            int stride = b->dst_stride;
-
-            int i;
-            for(i=0;i<16;i++)
-                vpx_memcpy(dst_ptr+i*stride,pred_ptr+16*i,16);
-
-            b = &x->e_mbd.block[16];
-            pred_ptr = b->predictor;
-            dst_ptr = *(b->base_dst) + b->dst;
-            stride = b->dst_stride;
-
-            for(i=0;i<8;i++)
-                vpx_memcpy(dst_ptr+i*stride,pred_ptr+8*i,8);
-
-            b = &x->e_mbd.block[20];
-            pred_ptr = b->predictor;
-            dst_ptr = *(b->base_dst) + b->dst;
-            stride = b->dst_stride;
-
-            for(i=0;i<8;i++)
-                vpx_memcpy(dst_ptr+i*stride,pred_ptr+8*i,8);
-        }
-    */
-}
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 
@@ -635,7 +602,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 /* this funciton is used by first pass only */
 void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
-    vp8_build_inter_predictors_mby(&x->e_mbd);
+    vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
 

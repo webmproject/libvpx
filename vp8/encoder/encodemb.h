@@ -95,8 +95,6 @@ typedef struct
 struct VP8_ENCODER_RTCD;
 void vp8_encode_inter16x16(const struct VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
 
-extern void vp8_stuff_inter16x16(MACROBLOCK *x);
-
 void vp8_build_dcblock(MACROBLOCK *b);
 void vp8_transform_mb(MACROBLOCK *mb);
 void vp8_transform_mbuv(MACROBLOCK *x);

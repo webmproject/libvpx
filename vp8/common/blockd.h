@@ -175,8 +175,6 @@ typedef struct
     unsigned char need_to_clamp_mvs;
 
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
-
-    unsigned char force_no_skip; /* encoder only */
 } MB_MODE_INFO;
 
 

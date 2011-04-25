@@ -82,11 +82,6 @@ typedef struct VP8Decompressor
     unsigned int   source_sz;
 
     unsigned char *segmentation_map;
-    unsigned int CPUFreq;
-    unsigned int decode_microseconds;
-    unsigned int time_decoding;
-    unsigned int time_loop_filtering;
-
 #if CONFIG_MULTITHREAD
     /* variable for threading */
 

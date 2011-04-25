@@ -49,7 +49,7 @@ extern int vp8_hex_search
 
 typedef int (fractional_mv_step_fp)
     (MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *bestmv, MV *ref_mv,
-     int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion);
+     int error_per_bit, const vp8_variance_fn_ptr_t *vfp, int *mvcost[2], int *distortion, unsigned int *sse);
 extern fractional_mv_step_fp vp8_find_best_sub_pixel_step_iteratively;
 extern fractional_mv_step_fp vp8_find_best_sub_pixel_step;
 extern fractional_mv_step_fp vp8_find_best_half_pixel_step;

@@ -151,8 +151,8 @@ x86_readtsc(void)
     __asm__ __volatile__ ("pause \n\t")
 #else
 #if ARCH_X86_64
-/* No pause intrinsic for windows x64 */
-#define x86_pause_hint()
+#define x86_pause_hint()\
+    _mm_pause();
 #else
 #define x86_pause_hint()\
     __asm pause

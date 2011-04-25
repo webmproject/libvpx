@@ -22,33 +22,33 @@ sym(vp8_block_error_xmm):
     ; end prologue
 
         mov         rsi,        arg(0) ;coeff_ptr
-
         mov         rdi,        arg(1) ;dcoef_ptr
-        movdqa      xmm3,       [rsi]
 
-        movdqa      xmm4,       [rdi]
-        movdqa      xmm5,       [rsi+16]
+        movdqa      xmm0,       [rsi]
+        movdqa      xmm1,       [rdi]
 
-        movdqa      xmm6,       [rdi+16]
-        psubw       xmm3,       xmm4
+        movdqa      xmm2,       [rsi+16]
+        movdqa      xmm3,       [rdi+16]
 
-        psubw       xmm5,       xmm6
-        pmaddwd     xmm3,       xmm3
-        pmaddwd     xmm5,       xmm5
+        psubw       xmm0,       xmm1
+        psubw       xmm2,       xmm3
 
-        paddd       xmm3,       xmm5
+        pmaddwd     xmm0,       xmm0
+        pmaddwd     xmm2,       xmm2
 
-        pxor        xmm7,       xmm7
-        movdqa      xmm0,       xmm3
+        paddd       xmm0,       xmm2
 
-        punpckldq   xmm0,       xmm7
-        punpckhdq   xmm3,       xmm7
+        pxor        xmm5,       xmm5
+        movdqa      xmm1,       xmm0
 
-        paddd       xmm0,       xmm3
-        movdqa      xmm3,       xmm0
+        punpckldq   xmm0,       xmm5
+        punpckhdq   xmm1,       xmm5
+
+        paddd       xmm0,       xmm1
+        movdqa      xmm1,       xmm0
 
         psrldq      xmm0,       8
-        paddd       xmm0,       xmm3
+        paddd       xmm0,       xmm1
 
         movq        rax,        xmm0
 
@@ -208,53 +208,54 @@ sym(vp8_mbblock_error_xmm_impl):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 3
+    SAVE_XMM 6
     push rsi
     push rdi
     ; end prolog
 
 
         mov         rsi,        arg(0) ;coeff_ptr
-        pxor        xmm7,       xmm7
+        pxor        xmm6,       xmm6
 
         mov         rdi,        arg(1) ;dcoef_ptr
-        pxor        xmm2,       xmm2
+        pxor        xmm4,       xmm4
 
-        movd        xmm1,       dword ptr arg(2) ;dc
-        por         xmm1,       xmm2
+        movd        xmm5,       dword ptr arg(2) ;dc
+        por         xmm5,       xmm4
 
-        pcmpeqw     xmm1,       xmm7
+        pcmpeqw     xmm5,       xmm6
         mov         rcx,        16
 
 mberror_loop:
-        movdqa      xmm3,       [rsi]
-        movdqa      xmm4,       [rdi]
+        movdqa      xmm0,       [rsi]
+        movdqa      xmm1,       [rdi]
 
-        movdqa      xmm5,       [rsi+16]
-        movdqa      xmm6,       [rdi+16]
+        movdqa      xmm2,       [rsi+16]
+        movdqa      xmm3,       [rdi+16]
 
 
-        psubw       xmm5,       xmm6
-        pmaddwd     xmm5,       xmm5
+        psubw       xmm2,       xmm3
+        pmaddwd     xmm2,       xmm2
 
-        psubw       xmm3,       xmm4
-        pand        xmm3,       xmm1
+        psubw       xmm0,       xmm1
+        pand        xmm0,       xmm5
 
-        pmaddwd     xmm3,       xmm3
+        pmaddwd     xmm0,       xmm0
         add         rsi,        32
 
         add         rdi,        32
 
         sub         rcx,        1
-        paddd       xmm2,       xmm5
+        paddd       xmm4,       xmm2
 
-        paddd       xmm2,       xmm3
+        paddd       xmm4,       xmm0
         jnz         mberror_loop
 
-        movdqa      xmm0,       xmm2
-        punpckldq   xmm0,       xmm7
+        movdqa      xmm0,       xmm4
+        punpckldq   xmm0,       xmm6
 
-        punpckhdq   xmm2,       xmm7
-        paddd       xmm0,       xmm2
+        punpckhdq   xmm4,       xmm6
+        paddd       xmm0,       xmm4
 
         movdqa      xmm1,       xmm0
         psrldq      xmm0,       8
@@ -265,6 +266,7 @@ mberror_loop:
     pop rdi
     pop rsi
     ; begin epilog
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -342,7 +344,7 @@ sym(vp8_mbuverror_xmm_impl):
         mov             rdi,        arg(1) ;d_ptr
 
         mov             rcx,        16
-        pxor            xmm7,       xmm7
+        pxor            xmm3,       xmm3
 
 mbuverror_loop:
 
@@ -352,7 +354,7 @@ mbuverror_loop:
         psubw           xmm1,       xmm2
         pmaddwd         xmm1,       xmm1
 
-        paddd           xmm7,       xmm1
+        paddd           xmm3,       xmm1
 
         add             rsi,        16
         add             rdi,        16
@@ -361,7 +363,7 @@ mbuverror_loop:
         jnz             mbuverror_loop
 
         pxor        xmm0,           xmm0
-        movdqa      xmm1,           xmm7
+        movdqa      xmm1,           xmm3
 
         movdqa      xmm2,           xmm1
         punpckldq   xmm1,           xmm0

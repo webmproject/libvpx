@@ -39,6 +39,7 @@ sym(vp8_filter_block1d8_h6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -107,6 +108,7 @@ filter_block1d8_h6_rowloop_ssse3:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -162,6 +164,7 @@ filter_block1d8_h4_rowloop_ssse3:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -179,7 +182,7 @@ sym(vp8_filter_block1d16_h6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -286,6 +289,7 @@ sym(vp8_filter_block1d4_h6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -393,6 +397,7 @@ filter_block1d4_h4_rowloop_ssse3:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -413,6 +418,7 @@ sym(vp8_filter_block1d16_v6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -508,6 +514,7 @@ vp8_filter_block1d16_v6_ssse3_loop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -580,6 +587,7 @@ vp8_filter_block1d16_v4_ssse3_loop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -598,6 +606,7 @@ sym(vp8_filter_block1d8_v6_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -670,6 +679,7 @@ vp8_filter_block1d8_v6_ssse3_loop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -718,6 +728,7 @@ vp8_filter_block1d8_v4_ssse3_loop:
     pop rdi
     pop rsi
     RESTORE_GOT
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -874,7 +885,7 @@ sym(vp8_bilinear_predict16x16_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi
@@ -1137,7 +1148,7 @@ sym(vp8_bilinear_predict8x8_ssse3):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push        rsi
     push        rdi

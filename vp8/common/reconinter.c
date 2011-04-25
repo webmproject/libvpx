@@ -207,12 +207,12 @@ static void build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch)
 }
 
 
+/*encoder only*/
 void vp8_build_inter_predictors_mbuv(MACROBLOCKD *x)
 {
     int i;
 
-    if (x->mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
-        x->mode_info_context->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != SPLITMV)
     {
         unsigned char *uptr, *vptr;
         unsigned char *upred_ptr = &x->predictor[256];
@@ -257,69 +257,32 @@ void vp8_build_inter_predictors_mbuv(MACROBLOCKD *x)
 }
 
 /*encoder only*/
-void vp8_build_inter_predictors_mby(MACROBLOCKD *x)
+void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *x)
 {
+    unsigned char *ptr_base;
+    unsigned char *ptr;
+    unsigned char *pred_ptr = x->predictor;
+    int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
+    int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
+    int pre_stride = x->block[0].pre_stride;
 
-  if (x->mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
-      x->mode_info_context->mbmi.mode != SPLITMV)
+    ptr_base = x->pre.y_buffer;
+    ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
+
+    if ((mv_row | mv_col) & 7)
     {
-        unsigned char *ptr_base;
-        unsigned char *ptr;
-        unsigned char *pred_ptr = x->predictor;
-        int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
-        int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
-        int pre_stride = x->block[0].pre_stride;
-
-        ptr_base = x->pre.y_buffer;
-        ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
-
-        if ((mv_row | mv_col) & 7)
-        {
-            x->subpixel_predict16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, pred_ptr, 16);
-        }
-        else
-        {
-            RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, pred_ptr, 16);
-        }
+        x->subpixel_predict16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, pred_ptr, 16);
     }
     else
     {
-        int i;
-
-        if (x->mode_info_context->mbmi.partitioning < 3)
-        {
-            for (i = 0; i < 4; i++)
-            {
-                BLOCKD *d = &x->block[bbb[i]];
-                build_inter_predictors4b(x, d, 16);
-            }
-
-        }
-        else
-        {
-            for (i = 0; i < 16; i += 2)
-            {
-                BLOCKD *d0 = &x->block[i];
-                BLOCKD *d1 = &x->block[i+1];
-
-                if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
-                    build_inter_predictors2b(x, d0, 16);
-                else
-                {
-                    vp8_build_inter_predictors_b(d0, 16, x->subpixel_predict);
-                    vp8_build_inter_predictors_b(d1, 16, x->subpixel_predict);
-                }
-
-            }
-        }
+        RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, pred_ptr, 16);
     }
 }
 
 void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
 {
 
-    if (x->mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
-        x->mode_info_context->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != SPLITMV)
     {
         int offset;
         unsigned char *ptr_base;
@@ -535,58 +498,58 @@ static void vp8_build_inter_predictors_b_s(BLOCKD *d, unsigned char *dst_ptr, vp
 
 
 
+void vp8_build_inter16x16_predictors_mb_s(MACROBLOCKD *x)
+{
+    unsigned char *dst_ptr = x->dst.y_buffer;
+
+    int offset;
+    unsigned char *ptr_base;
+    unsigned char *ptr;
+    unsigned char *uptr, *vptr;
+    unsigned char *udst_ptr = x->dst.u_buffer;
+    unsigned char *vdst_ptr = x->dst.v_buffer;
+
+    int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
+    int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
+    int pre_stride = x->dst.y_stride; /*x->block[0].pre_stride;*/
+
+    ptr_base = x->pre.y_buffer;
+    ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
+
+    if ((mv_row | mv_col) & 7)
+    {
+        x->subpixel_predict16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
+    }
+    else
+    {
+        RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
+    }
+
+    mv_row = x->block[16].bmi.mv.as_mv.row;
+    mv_col = x->block[16].bmi.mv.as_mv.col;
+    pre_stride >>= 1;
+    offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
+    uptr = x->pre.u_buffer + offset;
+    vptr = x->pre.v_buffer + offset;
+
+    if ((mv_row | mv_col) & 7)
+    {
+        x->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, udst_ptr, x->dst.uv_stride);
+        x->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, vdst_ptr, x->dst.uv_stride);
+    }
+    else
+    {
+        RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, udst_ptr, x->dst.uv_stride);
+        RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, vdst_ptr, x->dst.uv_stride);
+    }
+}
 void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
 {
-    /*unsigned char *pred_ptr = x->block[0].predictor;
-    unsigned char *dst_ptr = *(x->block[0].base_dst) + x->block[0].dst;*/
-    unsigned char *pred_ptr = x->predictor;
     unsigned char *dst_ptr = x->dst.y_buffer;
 
     if (x->mode_info_context->mbmi.mode != SPLITMV)
     {
-        int offset;
-        unsigned char *ptr_base;
-        unsigned char *ptr;
-        unsigned char *uptr, *vptr;
-        /*unsigned char *pred_ptr = x->predictor;
-        unsigned char *upred_ptr = &x->predictor[256];
-        unsigned char *vpred_ptr = &x->predictor[320];*/
-        unsigned char *udst_ptr = x->dst.u_buffer;
-        unsigned char *vdst_ptr = x->dst.v_buffer;
-
-        int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
-        int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
-        int pre_stride = x->dst.y_stride; /*x->block[0].pre_stride;*/
-
-        ptr_base = x->pre.y_buffer;
-        ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
-
-        if ((mv_row | mv_col) & 7)
-        {
-            x->subpixel_predict16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
-        }
-        else
-        {
-            RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
-        }
-
-        mv_row = x->block[16].bmi.mv.as_mv.row;
-        mv_col = x->block[16].bmi.mv.as_mv.col;
-        pre_stride >>= 1;
-        offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
-        uptr = x->pre.u_buffer + offset;
-        vptr = x->pre.v_buffer + offset;
-
-        if ((mv_row | mv_col) & 7)
-        {
-            x->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, udst_ptr, x->dst.uv_stride);
-            x->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, vdst_ptr, x->dst.uv_stride);
-        }
-        else
-        {
-            RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, udst_ptr, x->dst.uv_stride);
-            RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, vdst_ptr, x->dst.uv_stride);
-        }
+        vp8_build_inter16x16_predictors_mb_s(x);
     }
     else
     {
@@ -599,25 +562,20 @@ void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
         {
             for (i = 0; i < 4; i++)
             {
+                unsigned char *ptr_base;
+                unsigned char *ptr;
                 BLOCKD *d = &x->block[bbb[i]];
-                /*build_inter_predictors4b(x, d, 16);*/
 
+                ptr_base = *(d->base_pre);
+                ptr = ptr_base + d->pre + (d->bmi.mv.as_mv.row >> 3) * d->pre_stride + (d->bmi.mv.as_mv.col >> 3);
+
+                if (d->bmi.mv.as_mv.row & 7 || d->bmi.mv.as_mv.col & 7)
                 {
-                    unsigned char *ptr_base;
-                    unsigned char *ptr;
-                    unsigned char *pred_ptr = d->predictor;
-
-                    ptr_base = *(d->base_pre);
-                    ptr = ptr_base + d->pre + (d->bmi.mv.as_mv.row >> 3) * d->pre_stride + (d->bmi.mv.as_mv.col >> 3);
-
-                    if (d->bmi.mv.as_mv.row & 7 || d->bmi.mv.as_mv.col & 7)
-                    {
-                        x->subpixel_predict8x8(ptr, d->pre_stride, d->bmi.mv.as_mv.col & 7, d->bmi.mv.as_mv.row & 7, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
-                    }
-                    else
-                    {
-                        RECON_INVOKE(&x->rtcd->recon, copy8x8)(ptr, d->pre_stride, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
-                    }
+                    x->subpixel_predict8x8(ptr, d->pre_stride, d->bmi.mv.as_mv.col & 7, d->bmi.mv.as_mv.row & 7, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
+                }
+                else
+                {
+                    RECON_INVOKE(&x->rtcd->recon, copy8x8)(ptr, d->pre_stride, dst_ptr, x->dst.y_stride); /*x->block[0].dst_stride);*/
                 }
             }
         }
@@ -633,7 +591,6 @@ void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
                     /*build_inter_predictors2b(x, d0, 16);*/
                     unsigned char *ptr_base;
                     unsigned char *ptr;
-                    unsigned char *pred_ptr = d0->predictor;
 
                     ptr_base = *(d0->base_pre);
                     ptr = ptr_base + d0->pre + (d0->bmi.mv.as_mv.row >> 3) * d0->pre_stride + (d0->bmi.mv.as_mv.col >> 3);
@@ -665,7 +622,6 @@ void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x)
                 /*build_inter_predictors2b(x, d0, 8);*/
                 unsigned char *ptr_base;
                 unsigned char *ptr;
-                unsigned char *pred_ptr = d0->predictor;
 
                 ptr_base = *(d0->base_pre);
                 ptr = ptr_base + d0->pre + (d0->bmi.mv.as_mv.row >> 3) * d0->pre_stride + (d0->bmi.mv.as_mv.col >> 3);

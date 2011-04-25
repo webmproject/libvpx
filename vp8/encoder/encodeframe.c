@@ -155,7 +155,7 @@ static const int qzbin_factors_y2[129] =
 #define EXACT_QUANT
 #ifdef EXACT_QUANT
 static void vp8cx_invert_quant(int improved_quant, short *quant,
-                               short *shift, short d)
+                               unsigned char *shift, short d)
 {
     if(improved_quant)
     {
@@ -1519,7 +1519,7 @@ int vp8cx_encode_inter_macroblock
             cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv.col) >> 1)]++;
         }
 
-        if (!x->skip && !x->e_mbd.mode_info_context->mbmi.force_no_skip)
+        if (!x->skip)
         {
             vp8_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
 
@@ -1529,7 +1529,7 @@ int vp8cx_encode_inter_macroblock
 
         }
         else
-            vp8_stuff_inter16x16(x);
+            vp8_build_inter_predictors_mb_s(xd);
     }
 
     if (!x->skip)

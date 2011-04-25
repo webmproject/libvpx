@@ -77,7 +77,7 @@ sym(vp8_subtract_mby_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
     push rsi
     push rdi

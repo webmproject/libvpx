@@ -21,6 +21,7 @@ sym(vp8_sad16x16_wmt):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
+    SAVE_XMM 6
     push        rsi
     push        rdi
     ; end prolog
@@ -34,7 +35,7 @@ sym(vp8_sad16x16_wmt):
         lea             rcx,        [rsi+rax*8]
 
         lea             rcx,        [rcx+rax*8]
-        pxor            xmm7,       xmm7
+        pxor            xmm6,       xmm6
 
 x16x16sad_wmt_loop:
 
@@ -52,32 +53,33 @@ x16x16sad_wmt_loop:
         punpcklbw       xmm1,       xmm3
 
         psadbw          xmm0,       xmm1
-        movq            xmm6,       QWORD PTR [rsi+rax+8]
+        movq            xmm2,       QWORD PTR [rsi+rax+8]
 
         movq            xmm3,       QWORD PTR [rdi+rdx+8]
         lea             rsi,        [rsi+rax*2]
 
         lea             rdi,        [rdi+rdx*2]
-        punpcklbw       xmm4,       xmm6
+        punpcklbw       xmm4,       xmm2
 
         punpcklbw       xmm5,       xmm3
         psadbw          xmm4,       xmm5
 
-        paddw           xmm7,       xmm0
-        paddw           xmm7,       xmm4
+        paddw           xmm6,       xmm0
+        paddw           xmm6,       xmm4
 
         cmp             rsi,        rcx
         jne             x16x16sad_wmt_loop
 
-        movq            xmm0,       xmm7
-        psrldq          xmm7,       8
+        movq            xmm0,       xmm6
+        psrldq          xmm6,       8
 
-        paddw           xmm0,       xmm7
+        paddw           xmm0,       xmm6
         movq            rax,        xmm0
 
     ; begin epilog
     pop rdi
     pop rsi
+    RESTORE_XMM
     UNSHADOW_ARGS
     pop         rbp
     ret

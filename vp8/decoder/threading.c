@@ -122,7 +122,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
         }
         else
         {
-            vp8_build_inter_predictors_mb_s(xd);
+            vp8_build_inter16x16_predictors_mb_s(xd);
         }
         return;
     }

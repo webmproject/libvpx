@@ -20,7 +20,7 @@ global sym(vp8_regular_quantize_b_sse2)
 sym(vp8_regular_quantize_b_sse2):
     push        rbp
     mov         rbp, rsp
-    SAVE_XMM
+    SAVE_XMM 7
     GET_GOT     rbx
 
 %if ABI_IS_32BIT
@@ -142,7 +142,7 @@ sym(vp8_regular_quantize_b_sse2):
     movsx       edi, WORD PTR[rsp + temp_qcoeff + %1 * 2]
 
     ; downshift by quant_shift[rc]
-    movsx       ecx, WORD PTR[rax + %1 * 2] ; quant_shift_ptr[rc]
+    movsx       cx, BYTE PTR[rax + %1]      ; quant_shift_ptr[rc]
     sar         edi, cl                     ; also sets Z bit
     je          rq_zigzag_loop_%1           ; !y
     mov         WORD PTR[rsp + qcoeff + %1 * 2], di ;qcoeff_ptr[rc] = temp_qcoeff[rc]

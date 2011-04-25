@@ -248,17 +248,17 @@ typedef struct
 {
 
     DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, Y1quant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, unsigned char, Y1quant_shift[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, Y1zbin[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, Y1round[QINDEX_RANGE][16]);
 
     DECLARE_ALIGNED(16, short, Y2quant[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, Y2quant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, unsigned char, Y2quant_shift[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, Y2zbin[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, Y2round[QINDEX_RANGE][16]);
 
     DECLARE_ALIGNED(16, short, UVquant[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, UVquant_shift[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, unsigned char, UVquant_shift[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, UVzbin[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, UVround[QINDEX_RANGE][16]);
 
@@ -389,14 +389,11 @@ typedef struct
     int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
 
     INT64 key_frame_count;
-    INT64 tot_key_frame_bits;
-    int prior_key_frame_size[KEY_FRAME_CONTEXT];
     int prior_key_frame_distance[KEY_FRAME_CONTEXT];
     int per_frame_bandwidth;          // Current section per frame bandwidth target
     int av_per_frame_bandwidth;        // Average frame size target for clip
     int min_frame_bandwidth;          // Minimum allocation that should be used for any frame
     int last_key_frame_size;
-    int intra_frame_target;
     int inter_frame_target;
     double output_frame_rate;
     long long last_time_stamp_seen;
