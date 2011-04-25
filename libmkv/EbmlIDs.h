@@ -120,7 +120,7 @@ enum mkv
     //video
     Video = 0xE0,
     FlagInterlaced = 0x9A,
-//  StereoMode = 0x53B8,
+    StereoMode = 0x53B8,
     PixelWidth = 0xB0,
     PixelHeight = 0xBA,
     PixelCropBottom = 0x54AA,
