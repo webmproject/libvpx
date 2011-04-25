@@ -2704,6 +2704,19 @@ static int pick_frame_size(VP8_COMP *cpi)
         }
     }
 
+    /* Apply limits on keyframe target.
+     *
+     * TODO: move this after consolidating
+     * vp8_calc_iframe_target_size() and vp8_calc_auto_iframe_target_size()
+     */
+    if (cm->frame_type == KEY_FRAME && cpi->oxcf.rc_max_intra_bitrate_pct)
+    {
+        unsigned int max_rate = cpi->av_per_frame_bandwidth
+                                * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
+
+        if (cpi->this_frame_target > max_rate)
+            cpi->this_frame_target = max_rate;
+    }
     return 1;
 }
 

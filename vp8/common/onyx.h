@@ -109,6 +109,7 @@ extern "C"
         int noise_sensitivity;   // parameter used for applying pre processing blur: recommendation 0
         int Sharpness;          // parameter used for sharpening output: recommendation 0:
         int cpu_used;
+        unsigned int rc_max_intra_bitrate_pct;
 
         // mode ->
         //(0)=Realtime/Live Encoding. This mode is optimized for realtim encoding (for example, capturing

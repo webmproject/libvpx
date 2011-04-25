@@ -398,6 +398,21 @@ extern "C" {
         unsigned int           rc_target_bitrate;
 
 
+        /*!\brief Max data rate for Intra frames
+         *
+         * This value controls additional clamping on the maximum size of a
+         * keyframe. It is expressed as a percentage of the average
+         * per-frame bitrate, with the special (and default) value 0 meaning
+         * unlimited, or no additional clamping beyond the codec's built-in
+         * algorithm.
+         *
+         * For example, to allocate no more than 4.5 frames worth of bitrate
+         * to a keyframe, set this to 450.
+         *
+         */
+        unsigned int           rc_max_intra_bitrate_pct;
+
+
         /*
          * quantizer settings
          */
