@@ -224,18 +224,9 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int plane_type;
     int b;
 
-    TOKENEXTRA *start = *t;
-    TOKENEXTRA *tp = *t;
-
-    x->mode_info_context->mbmi.dc_diff = 1;
-
-
-#if 1
-
     x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(x);
     if (x->mode_info_context->mbmi.mb_skip_coeff)
     {
-
         cpi->skip_true_count++;
 
         if (!cpi->common.mb_no_coeff_skip)
@@ -245,17 +236,11 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
             vp8_fix_contexts(x);
         }
 
-        if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
-            x->mode_info_context->mbmi.dc_diff = 0;
-        else
-            x->mode_info_context->mbmi.dc_diff = 1;
-
-
         return;
     }
 
     cpi->skip_false_count++;
-#endif
+
 #if 0
     vpx_memcpy(cpi->coef_counts_backup, cpi->coef_counts, sizeof(cpi->coef_counts));
 #endif
@@ -282,42 +267,6 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
                             A + vp8_block2above[b],
                             L + vp8_block2left[b], cpi);
 
-#if 0
-
-    if (cpi->common.mb_no_coeff_skip)
-    {
-        int skip = 1;
-
-        while ((tp != *t) && skip)
-        {
-            skip = (skip && (tp->Token == DCT_EOB_TOKEN));
-            tp ++;
-        }
-
-        if (skip != x->mbmi.mb_skip_coeff)
-            skip += 0;
-
-        x->mbmi.mb_skip_coeff = skip;
-
-        if (x->mbmi.mb_skip_coeff == 1)
-        {
-            x->mbmi.dc_diff = 0;
-            //redo the coutnts
-            vpx_memcpy(cpi->coef_counts, cpi->coef_counts_backup, sizeof(cpi->coef_counts));
-
-            *t = start;
-            cpi->skip_true_count++;
-            //skip_true_count++;
-        }
-        else
-        {
-
-            cpi->skip_false_count++;
-            //skip_false_count++;
-        }
-    }
-
-#endif
 }
 
 
@@ -499,13 +448,6 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     stuff2nd_order_b(x->block + 24, t, 1, x->frame_type,
                      A + vp8_block2above[24], L + vp8_block2left[24], cpi);
     plane_type = 0;
-
-
-    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
-        x->mode_info_context->mbmi.dc_diff = 0;
-    else
-        x->mode_info_context->mbmi.dc_diff = 1;
-
 
     for (b = 0; b < 16; b++)
         stuff1st_order_b(x->block + b, t, plane_type, x->frame_type,

@@ -1400,11 +1400,6 @@ int vp8cx_encode_inter_macroblock
     {
         if (cpi->common.mb_no_coeff_skip)
         {
-            if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
-                xd->mode_info_context->mbmi.dc_diff = 0;
-            else
-                xd->mode_info_context->mbmi.dc_diff = 1;
-
             xd->mode_info_context->mbmi.mb_skip_coeff = 1;
             cpi->skip_true_count ++;
             vp8_fix_contexts(xd);
