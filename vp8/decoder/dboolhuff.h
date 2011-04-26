@@ -51,19 +51,26 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br);
 #define VP8DX_BOOL_DECODER_FILL(_count,_value,_bufptr,_bufend) \
     do \
     { \
-        int shift; \
-        for(shift = VP8_BD_VALUE_SIZE - 8 - ((_count) + 8); shift >= 0; ) \
+        int shift = VP8_BD_VALUE_SIZE - 8 - ((_count) + 8); \
+        int loop_end, x; \
+        size_t bits_left = ((_bufend)-(_bufptr))*CHAR_BIT; \
+        \
+        x = shift + CHAR_BIT - bits_left; \
+        loop_end = 0; \
+        if(x >= 0) \
         { \
-            if((_bufptr) >= (_bufend)) { \
-                (_count) += VP8_LOTS_OF_BITS; \
-                break; \
-            } \
-            (_count) += 8; \
+            (_count) += VP8_LOTS_OF_BITS; \
+            loop_end = x; \
+            if(!bits_left) break; \
+        } \
+        while(shift >= loop_end) \
+        { \
+            (_count) += CHAR_BIT; \
             (_value) |= (VP8_BD_VALUE)*(_bufptr)++ << shift; \
-            shift -= 8; \
+            shift -= CHAR_BIT; \
         } \
     } \
-    while(0)
+    while(0) \
 
 
 static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
