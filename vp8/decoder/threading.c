@@ -112,6 +112,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
                   xd->mode_info_context->mbmi.mode == SPLITMV);
     if (!eobtotal)
     {
+        /* Special case:  Force the loopfilter to skip when eobtotal and
+         * mb_skip_coeff are zero.
+         * */
+        xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+
         /*mt_skip_recon_mb(pbi, xd, mb_row, mb_col);*/
         if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
         {
