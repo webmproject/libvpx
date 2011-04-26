@@ -398,6 +398,21 @@ extern "C" {
         unsigned int           rc_target_bitrate;
 
 
+        /*!\brief Max data rate for Intra frames
+         *
+         * This value controls additional clamping on the maximum size of a
+         * keyframe. It is expressed as a percentage of the average
+         * per-frame bitrate, with the special (and default) value 0 meaning
+         * unlimited, or no additional clamping beyond the codec's built-in
+         * algorithm.
+         *
+         * For example, to allocate no more than 4.5 frames worth of bitrate
+         * to a keyframe, set this to 450.
+         *
+         */
+        unsigned int           rc_max_intra_bitrate_pct;
+
+
         /*
          * quantizer settings
          */
@@ -430,20 +445,28 @@ extern "C" {
          */
 
 
-        /*!\brief Rate control undershoot tolerance
+        /*!\brief Rate control adaptation undershoot control
          *
-         * This value, expressed as a percentage of the target bitrate, describes
-         * the target bitrate for easier frames, allowing bits to be saved for
-         * harder frames. Set to zero to use the codec default.
+         * This value, expressed as a percentage of the target bitrate,
+         * controls the maximum allowed adaptation speed of the codec.
+         * This factor controls the maximum amount of bits that can
+         * be subtracted from the target bitrate in order to compensate
+         * for prior overshoot.
+         *
+         * Valid values in the range 0-1000.
          */
         unsigned int           rc_undershoot_pct;
 
 
-        /*!\brief Rate control overshoot tolerance
+        /*!\brief Rate control adaptation overshoot control
          *
-         * This value, expressed as a percentage of the target bitrate, describes
-         * the maximum allowed bitrate for a given frame.  Set to zero to use the
-         * codec default.
+         * This value, expressed as a percentage of the target bitrate,
+         * controls the maximum allowed adaptation speed of the codec.
+         * This factor controls the maximum amount of bits that can
+         * be added to the target bitrate in order to compensate for
+         * prior undershoot.
+         *
+         * Valid values in the range 0-1000.
          */
         unsigned int           rc_overshoot_pct;
 

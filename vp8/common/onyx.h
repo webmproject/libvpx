@@ -109,6 +109,7 @@ extern "C"
         int noise_sensitivity;   // parameter used for applying pre processing blur: recommendation 0
         int Sharpness;          // parameter used for sharpening output: recommendation 0:
         int cpu_used;
+        unsigned int rc_max_intra_bitrate_pct;
 
         // mode ->
         //(0)=Realtime/Live Encoding. This mode is optimized for realtim encoding (for example, capturing
@@ -139,8 +140,9 @@ extern "C"
 
         int end_usage; // vbr or cbr
 
-        // shoot to keep buffer full at all times by undershooting a bit 95 recommended
+        // buffer targeting aggressiveness
         int under_shoot_pct;
+        int over_shoot_pct;
 
         // buffering parameters
         int starting_buffer_level;  // in seconds

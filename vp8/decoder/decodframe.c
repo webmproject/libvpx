@@ -111,9 +111,8 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
  */
 static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
-    if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-
         vp8_build_intra_predictors_mbuv_s(xd);
         RECON_INVOKE(&pbi->common.rtcd.recon,
                      build_intra_predictors_mby_s)(xd);
@@ -195,11 +194,10 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
         clamp_mvs(xd);
     }
 
-    xd->mode_info_context->mbmi.dc_diff = 1;
-
-    if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV && eobtotal == 0)
+    eobtotal |= (xd->mode_info_context->mbmi.mode == B_PRED ||
+                  xd->mode_info_context->mbmi.mode == SPLITMV);
+    if (!eobtotal)
     {
-        xd->mode_info_context->mbmi.dc_diff = 0;
         skip_recon_mb(pbi, xd);
         return;
     }
@@ -208,7 +206,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
         mb_init_dequantizer(pbi, xd);
 
     /* do prediction */
-    if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
         vp8_build_intra_predictors_mbuv(xd);
 
@@ -255,7 +253,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
                          xd->predictor, xd->dst.y_buffer,
                          xd->dst.y_stride, xd->eobs, xd->block[24].diff);
     }
-    else if ((xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) && xd->mode_info_context->mbmi.mode == B_PRED)
+    else if (xd->mode_info_context->mbmi.mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
         {
