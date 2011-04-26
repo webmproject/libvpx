@@ -1441,10 +1441,7 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->auto_gold = 1;
     cpi->auto_adjust_gold_quantizer = 1;
-    cpi->goldquantizer = 1;
     cpi->goldfreq = 7;
-    cpi->auto_adjust_key_quantizer = 1;
-    cpi->keyquantizer = 1;
 
     cm->version = oxcf->Version;
     vp8_setup_version(cm);

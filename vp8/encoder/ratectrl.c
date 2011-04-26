@@ -330,65 +330,95 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
 }
 
 
-static void calc_iframe_target_size(VP8_COMP *cpi);
+static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
+                              double correction_factor)
+{
+    int Bpm = (int)(.5 + correction_factor * vp8_bits_per_mb[frame_kind][Q]);
+
+    /* Attempt to retain reasonable accuracy without overflow. The cutoff is
+     * chosen such that the maximum product of Bpm and MBs fits 31 bits. The
+     * largest Bpm takes 20 bits.
+     */
+    if (MBs > (1 << 11))
+        return (Bpm >> BPER_MB_NORMBITS) * MBs;
+    else
+        return (Bpm * MBs) >> BPER_MB_NORMBITS;
+}
 
 
-static void calc_auto_iframe_target_size(VP8_COMP *cpi)
+static void calc_iframe_target_size(VP8_COMP *cpi)
 {
     // boost defaults to half second
     int kf_boost;
+    int target;
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();  //__asm emms;
 
     if (cpi->oxcf.fixed_q >= 0)
     {
-        calc_iframe_target_size(cpi);
-        return;
-    }
+        int Q = cpi->oxcf.key_q;
 
-    if (cpi->pass == 2)
+        target = estimate_bits_at_q(INTRA_FRAME, Q, cpi->common.MBs,
+                                    cpi->key_frame_rate_correction_factor);
+    }
+    else if (cpi->pass == 2)
     {
-        cpi->this_frame_target = cpi->per_frame_bandwidth;      // New Two pass RC
+        // New Two pass RC
+        target = cpi->per_frame_bandwidth;
+    }
+    // First Frame is a special case
+    else if (cpi->common.current_video_frame == 0)
+    {
+        /* 1 Pass there is no information on which to base size so use
+         * bandwidth per second * fraction of the initial buffer
+         * level
+         */
+        target = cpi->oxcf.starting_buffer_level / 2;
+
+        if(target > cpi->oxcf.target_bandwidth * 3 / 2)
+            target = cpi->oxcf.target_bandwidth * 3 / 2;
     }
     else
     {
+        // if this keyframe was forced, use a more recent Q estimate
+        int Q = (cpi->common.frame_flags & FRAMEFLAGS_KEY)
+                ? cpi->avg_frame_qindex : cpi->ni_av_qi;
+
         // Boost depends somewhat on frame rate
         kf_boost = (int)(2 * cpi->output_frame_rate - 16);
 
         // adjustment up based on q
-        kf_boost = kf_boost * kf_boost_qadjustment[cpi->ni_av_qi] / 100;
+        kf_boost = kf_boost * kf_boost_qadjustment[Q] / 100;
 
         // frame separation adjustment ( down)
         if (cpi->frames_since_key  < cpi->output_frame_rate / 2)
-            kf_boost = (int)(kf_boost * cpi->frames_since_key / (cpi->output_frame_rate / 2));
+            kf_boost = (int)(kf_boost
+                       * cpi->frames_since_key / (cpi->output_frame_rate / 2));
 
         if (kf_boost < 16)
             kf_boost = 16;
 
-        // Reset the active worst quality to the baseline value for key frames.
-        cpi->active_worst_quality = cpi->worst_quality;
-
-        cpi->this_frame_target = ((16 + kf_boost)  * cpi->per_frame_bandwidth) >> 4;
+        target = ((16 + kf_boost) * cpi->per_frame_bandwidth) >> 4;
     }
 
 
-    // Should the next frame be an altref frame
-    if (cpi->pass != 2)
+    if (cpi->oxcf.rc_max_intra_bitrate_pct)
     {
-        // For now Alt ref is not allowed except in 2 pass modes.
-        cpi->source_alt_ref_pending = FALSE;
+        unsigned int max_rate = cpi->per_frame_bandwidth
+                                * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
 
-        /*if ( cpi->oxcf.fixed_q == -1)
-        {
-            if ( cpi->oxcf.play_alternate && ( (cpi->last_boost/2) > (100+(AF_THRESH*cpi->frames_till_gf_update_due)) ) )
-                cpi->source_alt_ref_pending = TRUE;
-            else
-                cpi->source_alt_ref_pending = FALSE;
-        }*/
+        if (target > max_rate)
+            target = max_rate;
     }
 
-    if (0)
+    cpi->this_frame_target = target;
+
+    // TODO: if we separate rate targeting from Q targetting, move this.
+    // Reset the active worst quality to the baseline value for key frames.
+    cpi->active_worst_quality = cpi->worst_quality;
+
+#if 0
     {
         FILE *f;
 
@@ -401,7 +431,9 @@ static void calc_auto_iframe_target_size(VP8_COMP *cpi)
 
         fclose(f);
     }
+#endif
 }
+
 
 //  Do the best we can to define the parameteres for the next GF based on what information we have available.
 static void calc_gf_params(VP8_COMP *cpi)
@@ -566,97 +598,6 @@ static void calc_gf_params(VP8_COMP *cpi)
             else
                 cpi->source_alt_ref_pending = FALSE;
         }*/
-    }
-}
-/* This is equvialent to estimate_bits_at_q without the rate_correction_factor. */
-static int baseline_bits_at_q(int frame_kind, int Q, int MBs)
-{
-    int Bpm = vp8_bits_per_mb[frame_kind][Q];
-
-    /* Attempt to retain reasonable accuracy without overflow. The cutoff is
-     * chosen such that the maximum product of Bpm and MBs fits 31 bits. The
-     * largest Bpm takes 20 bits.
-     */
-    if (MBs > (1 << 11))
-        return (Bpm >> BPER_MB_NORMBITS) * MBs;
-    else
-        return (Bpm * MBs) >> BPER_MB_NORMBITS;
-}
-
-
-static void calc_iframe_target_size(VP8_COMP *cpi)
-{
-    int Q;
-    int Boost = 100;
-
-    Q = (cpi->oxcf.fixed_q >= 0) ? cpi->oxcf.fixed_q : cpi->avg_frame_qindex;
-
-    if (cpi->auto_adjust_key_quantizer == 1)
-    {
-        // If (auto_adjust_key_quantizer==1) then a lower Q is selected for key-frames.
-        // The enhanced Q is calculated so as to boost the key frame size by a factor
-        // specified in kf_boost_qadjustment. Also, can adjust based on distance
-        // between key frames.
-
-        // Adjust boost based upon ambient Q
-        Boost = kf_boost_qadjustment[Q];
-
-        // Make the Key frame boost less if the seperation from the previous key frame is small
-        if (cpi->frames_since_key < 16)
-            Boost = Boost * kf_boost_seperation_adjustment[cpi->frames_since_key] / 100;
-        else
-            Boost = Boost * kf_boost_seperation_adjustment[15] / 100;
-
-        // Apply limits on boost
-        if (Boost > kf_gf_boost_qlimits[Q])
-            Boost = kf_gf_boost_qlimits[Q];
-        else if (Boost < 120)
-            Boost = 120;
-    }
-
-    // Keep a record of the boost that was used
-    cpi->last_boost = Boost;
-
-    // Should the next frame be an altref frame
-    if (cpi->pass != 2)
-    {
-        // For now Alt ref is not allowed except in 2 pass modes.
-        cpi->source_alt_ref_pending = FALSE;
-
-        /*if ( cpi->oxcf.fixed_q == -1)
-        {
-            if ( cpi->oxcf.play_alternate && ( (cpi->last_boost/2) > (100+(AF_THRESH*cpi->frames_till_gf_update_due)) ) )
-                cpi->source_alt_ref_pending = TRUE;
-            else
-                cpi->source_alt_ref_pending = FALSE;
-        }*/
-    }
-
-    if (cpi->oxcf.fixed_q >= 0)
-    {
-        cpi->this_frame_target = (baseline_bits_at_q(0, Q, cpi->common.MBs) * Boost) / 100;
-    }
-    else
-    {
-
-        int bits_per_mb_at_this_q ;
-
-        if (cpi->oxcf.error_resilient_mode == 1)
-        {
-            cpi->this_frame_target = 2 * cpi->av_per_frame_bandwidth;
-            return;
-        }
-
-        // Rate targetted scenario:
-        // Be careful of 32-bit OVERFLOW if restructuring the caluclation of cpi->this_frame_target
-        bits_per_mb_at_this_q = (int)(.5 +
-                                      cpi->key_frame_rate_correction_factor * vp8_bits_per_mb[0][Q]);
-
-        cpi->this_frame_target = (((bits_per_mb_at_this_q * cpi->common.MBs) >> BPER_MB_NORMBITS) * Boost) / 100;
-
-        // Reset the active worst quality to the baseline value for key frames.
-        if (cpi->pass < 2)
-            cpi->active_worst_quality = cpi->worst_quality;
     }
 }
 
@@ -1153,7 +1094,9 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
                     }
                 }
                 else
-                    cpi->this_frame_target = (baseline_bits_at_q(1, Q, cpi->common.MBs) * cpi->last_boost) / 100;
+                    cpi->this_frame_target =
+                        (estimate_bits_at_q(1, Q, cpi->common.MBs, 1.0)
+                         * cpi->last_boost) / 100;
 
             }
             // If there is an active ARF at this location use the minimum
@@ -1273,21 +1216,6 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var)
         else
             cpi->rate_correction_factor = rate_correction_factor;
     }
-}
-
-static int estimate_bits_at_q(VP8_COMP *cpi, int Q)
-{
-    int Bpm = (int)(.5 + cpi->rate_correction_factor * vp8_bits_per_mb[INTER_FRAME][Q]);
-
-    /* Attempt to retain reasonable accuracy without overflow. The cutoff is
-     * chosen such that the maximum product of Bpm and MBs fits 31 bits. The
-     * largest Bpm takes 20 bits.
-     */
-    if (cpi->common.MBs > (1 << 11))
-        return (Bpm >> BPER_MB_NORMBITS) * cpi->common.MBs;
-    else
-        return (Bpm * cpi->common.MBs) >> BPER_MB_NORMBITS;
-
 }
 
 
@@ -1580,45 +1508,10 @@ int vp8_pick_frame_size(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
 
-    // First Frame is a special case
-    if (cm->current_video_frame == 0)
-    {
-#if !(CONFIG_REALTIME_ONLY)
-
-        if (cpi->pass == 2)
-            calc_auto_iframe_target_size(cpi);
-
-        else
-#endif
-        {
-            /* 1 Pass there is no information on which to base size so use
-             * bandwidth per second * fraction of the initial buffer
-             * level
-             */
-            cpi->this_frame_target = cpi->oxcf.starting_buffer_level / 2;
-
-            if(cpi->this_frame_target > cpi->oxcf.target_bandwidth * 3 / 2)
-                cpi->this_frame_target = cpi->oxcf.target_bandwidth * 3 / 2;
-        }
-
-        // Key frame from VFW/auto-keyframe/first frame
-        cm->frame_type = KEY_FRAME;
-
-    }
-    // Special case for forced key frames
-    // The frame sizing here is still far from ideal for 2 pass.
-    else if (cm->frame_flags & FRAMEFLAGS_KEY)
-    {
+    if (cm->frame_type == KEY_FRAME)
         calc_iframe_target_size(cpi);
-    }
-    else if (cm->frame_type == KEY_FRAME)
-    {
-        calc_auto_iframe_target_size(cpi);
-    }
     else
     {
-        // INTER frame: compute target frame size
-        cm->frame_type = INTER_FRAME;
         calc_pframe_target_size(cpi);
 
         // Check if we're dropping the frame:
@@ -1628,20 +1521,6 @@ int vp8_pick_frame_size(VP8_COMP *cpi)
             cpi->drop_count++;
             return 0;
         }
-    }
-
-    /* Apply limits on keyframe target.
-     *
-     * TODO: move this after consolidating
-     * calc_iframe_target_size() and calc_auto_iframe_target_size()
-     */
-    if (cm->frame_type == KEY_FRAME && cpi->oxcf.rc_max_intra_bitrate_pct)
-    {
-        unsigned int max_rate = cpi->av_per_frame_bandwidth
-                                * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
-
-        if (cpi->this_frame_target > max_rate)
-            cpi->this_frame_target = max_rate;
     }
     return 1;
 }
