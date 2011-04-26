@@ -108,12 +108,10 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
         clamp_mvs(xd);
     }
 
-    xd->mode_info_context->mbmi.dc_diff = 1;
-
-    if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV && eobtotal == 0)
+    eobtotal |= (xd->mode_info_context->mbmi.mode == B_PRED ||
+                  xd->mode_info_context->mbmi.mode == SPLITMV);
+    if (!eobtotal)
     {
-        xd->mode_info_context->mbmi.dc_diff = 0;
-
         /*mt_skip_recon_mb(pbi, xd, mb_row, mb_col);*/
         if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
         {
@@ -322,6 +320,7 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
 
                         if (pbi->common.filter_level)
                         {
+                            int skip_lf;
                             if( mb_row != pc->mb_rows-1 )
                             {
                                 /* Save decoded MB last row data for next-row decoding */
@@ -349,6 +348,10 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
 
                             /* update loopfilter info */
                             Segment = (alt_flt_enabled) ? xd->mode_info_context->mbmi.segment_id : 0;
+                            skip_lf = (xd->mode_info_context->mbmi.mode != B_PRED &&
+                                            xd->mode_info_context->mbmi.mode != SPLITMV &&
+                                            xd->mode_info_context->mbmi.mb_skip_coeff);
+
                             filter_level = pbi->mt_baseline_filter_level[Segment];
                             /* Distance of Mb to the various image edges.
                              * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
@@ -360,17 +363,17 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
                             if (filter_level)
                             {
                                 if (mb_col > 0)
-                                    pc->lf_mbv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                                    pc->lf_mbv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
 
-                                if (xd->mode_info_context->mbmi.dc_diff > 0)
-                                    pc->lf_bv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                                if (!skip_lf)
+                                    pc->lf_bv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
 
                                 /* don't apply across umv border */
                                 if (mb_row > 0)
-                                    pc->lf_mbh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                                    pc->lf_mbh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
 
-                                if (xd->mode_info_context->mbmi.dc_diff > 0)
-                                    pc->lf_bh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                                if (!skip_lf)
+                                    pc->lf_bh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
                             }
                         }
 
@@ -810,6 +813,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
                 if (pbi->common.filter_level)
                 {
+                    int skip_lf;
                     /* Save decoded MB last row data for next-row decoding */
                     if(mb_row != pc->mb_rows-1)
                     {
@@ -837,6 +841,9 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
                     /* update loopfilter info */
                     Segment = (alt_flt_enabled) ? xd->mode_info_context->mbmi.segment_id : 0;
+                    skip_lf = (xd->mode_info_context->mbmi.mode != B_PRED &&
+                                    xd->mode_info_context->mbmi.mode != SPLITMV &&
+                                    xd->mode_info_context->mbmi.mb_skip_coeff);
                     filter_level = pbi->mt_baseline_filter_level[Segment];
                     /* Distance of Mb to the various image edges.
                      * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
@@ -848,17 +855,17 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                     if (filter_level)
                     {
                         if (mb_col > 0)
-                            pc->lf_mbv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                            pc->lf_mbv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
 
-                        if (xd->mode_info_context->mbmi.dc_diff > 0)
-                            pc->lf_bv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                        if (!skip_lf)
+                            pc->lf_bv(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
 
                         /* don't apply across umv border */
                         if (mb_row > 0)
-                            pc->lf_mbh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                            pc->lf_mbh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
 
-                        if (xd->mode_info_context->mbmi.dc_diff > 0)
-                            pc->lf_bh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level], pc->simpler_lpf);
+                        if (!skip_lf)
+                            pc->lf_bh(xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi[filter_level]);
                     }
                 }
 

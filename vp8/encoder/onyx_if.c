@@ -1525,10 +1525,6 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
 
     // Initialise the starting buffer levels
-    cpi->oxcf.starting_buffer_level =
-        rescale(cpi->oxcf.starting_buffer_level,
-                cpi->oxcf.target_bandwidth, 1000);
-
     cpi->buffer_level                 = cpi->oxcf.starting_buffer_level;
     cpi->bits_off_target              = cpi->oxcf.starting_buffer_level;
 
@@ -1701,6 +1697,10 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // Convert target bandwidth from Kbit/s to Bit/s
     cpi->oxcf.target_bandwidth       *= 1000;
 
+    cpi->oxcf.starting_buffer_level =
+        rescale(cpi->oxcf.starting_buffer_level,
+                cpi->oxcf.target_bandwidth, 1000);
+
     // Set or reset optimal and maximum buffer levels.
     if (cpi->oxcf.optimal_buffer_level == 0)
         cpi->oxcf.optimal_buffer_level = cpi->oxcf.target_bandwidth / 8;
@@ -1749,8 +1749,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     // Only allow dropped frames in buffered mode
     cpi->drop_frames_allowed = cpi->oxcf.allow_df && cpi->buffered_mode;
-
-    cm->filter_type          = (LOOPFILTERTYPE) cpi->filter_type;
 
     if (!cm->use_bilinear_mc_filter)
         cm->mcomp_filter_type = SIXTAP;
@@ -2726,16 +2724,17 @@ static int pick_frame_size(VP8_COMP *cpi)
         if (cpi->pass == 2)
             vp8_calc_auto_iframe_target_size(cpi);
 
-        // 1 Pass there is no information on which to base size so use bandwidth per second * fixed fraction
         else
 #endif
-            cpi->this_frame_target = cpi->oxcf.target_bandwidth / 2;
-
-        // in error resilient mode the first frame is bigger since it likely contains
-        // all the static background
-        if (cpi->oxcf.error_resilient_mode == 1 || (cpi->compressor_speed == 2))
         {
-            cpi->this_frame_target *= 3;      // 5;
+            /* 1 Pass there is no information on which to base size so use
+             * bandwidth per second * fraction of the initial buffer
+             * level
+             */
+            cpi->this_frame_target = cpi->oxcf.starting_buffer_level / 2;
+
+            if(cpi->this_frame_target > cpi->oxcf.target_bandwidth * 3 / 2)
+                cpi->this_frame_target = cpi->oxcf.target_bandwidth * 3 / 2;
         }
 
         // Key frame from VFW/auto-keyframe/first frame
@@ -2769,6 +2768,19 @@ static int pick_frame_size(VP8_COMP *cpi)
         }
     }
 
+    /* Apply limits on keyframe target.
+     *
+     * TODO: move this after consolidating
+     * vp8_calc_iframe_target_size() and vp8_calc_auto_iframe_target_size()
+     */
+    if (cm->frame_type == KEY_FRAME && cpi->oxcf.rc_max_intra_bitrate_pct)
+    {
+        unsigned int max_rate = cpi->av_per_frame_bandwidth
+                                * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
+
+        if (cpi->this_frame_target > max_rate)
+            cpi->this_frame_target = max_rate;
+    }
     return 1;
 }
 
@@ -5264,35 +5276,6 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const 
         {
             unsigned int sse;
             Total += VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
-        }
-
-        src += 16 * source->y_stride;
-        dst += 16 * dest->y_stride;
-    }
-
-    return Total;
-}
-
-
-static int calc_low_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd)
-{
-    int i, j;
-    int Total = 0;
-
-    unsigned char *src = source->y_buffer;
-    unsigned char *dst = dest->y_buffer;
-    (void)rtcd;
-
-    // Loop through the Y plane raw and reconstruction data summing (square differences)
-    for (i = 0; i < source->y_height; i += 16)
-    {
-        for (j = 0; j < source->y_width; j += 16)
-        {
-            unsigned int sse;
-            VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
-
-            if (sse < 8096)
-                Total += sse;
         }
 
         src += 16 * source->y_stride;

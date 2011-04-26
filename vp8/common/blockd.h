@@ -171,9 +171,7 @@ typedef struct
 
     unsigned char partitioning;
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
-    unsigned char dc_diff;
     unsigned char need_to_clamp_mvs;
-
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
 } MB_MODE_INFO;
 

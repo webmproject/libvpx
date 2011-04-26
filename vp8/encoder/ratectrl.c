@@ -707,8 +707,6 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
     int min_frame_target;
     int Adjustment;
 
-    // Set the min frame bandwidth.
-    //min_frame_target = estimate_min_frame_size( cpi );
     min_frame_target = 0;
 
     if (cpi->pass == 2)
@@ -862,11 +860,6 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
         }
     }
 
-    // Set a reduced data rate target for our initial Q calculation.
-    // This should help to save bits during earier sections.
-    if ((cpi->oxcf.under_shoot_pct > 0) && (cpi->oxcf.under_shoot_pct <= 100))
-        cpi->this_frame_target = (cpi->this_frame_target * cpi->oxcf.under_shoot_pct) / 100;
-
     // Sanity check that the total sum of adjustments is not above the maximum allowed
     // That is that having allowed for KF and GF penalties we have not pushed the
     // current interframe target to low. If the adjustment we apply here is not capable of recovering
@@ -903,11 +896,6 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                     percent_low =
                         (cpi->oxcf.optimal_buffer_level - cpi->buffer_level) /
                         one_percent_bits;
-
-                    if (percent_low > 100)
-                        percent_low = 100;
-                    else if (percent_low < 0)
-                        percent_low = 0;
                 }
                 // Are we overshooting the long term clip data rate...
                 else if (cpi->bits_off_target < 0)
@@ -915,16 +903,16 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
                     // Adjust per frame data target downwards to compensate.
                     percent_low = (int)(100 * -cpi->bits_off_target /
                                        (cpi->total_byte_count * 8));
-
-                    if (percent_low > 100)
-                        percent_low = 100;
-                    else if (percent_low < 0)
-                        percent_low = 0;
                 }
 
+                if (percent_low > cpi->oxcf.under_shoot_pct)
+                    percent_low = cpi->oxcf.under_shoot_pct;
+                else if (percent_low < 0)
+                    percent_low = 0;
+
                 // lower the target bandwidth for this frame.
-                cpi->this_frame_target =
-                    (cpi->this_frame_target * (100 - (percent_low / 2))) / 100;
+                cpi->this_frame_target -= (cpi->this_frame_target * percent_low)
+                                          / 200;
 
                 // Are we using allowing control of active_worst_allowed_q
                 // according to buffer level.
@@ -995,20 +983,29 @@ void vp8_calc_pframe_target_size(VP8_COMP *cpi)
             }
             else
             {
-                int percent_high;
+                int percent_high = 0;
 
-                if (cpi->bits_off_target > cpi->oxcf.optimal_buffer_level)
+                if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+                     && (cpi->buffer_level > cpi->oxcf.optimal_buffer_level))
                 {
-                    percent_high = (int)(100 * (cpi->bits_off_target - cpi->oxcf.optimal_buffer_level) / (cpi->total_byte_count * 8));
-
-                    if (percent_high > 100)
-                        percent_high = 100;
-                    else if (percent_high < 0)
-                        percent_high = 0;
-
-                    cpi->this_frame_target = (cpi->this_frame_target * (100 + (percent_high / 2))) / 100;
-
+                    percent_high = (cpi->buffer_level
+                                    - cpi->oxcf.optimal_buffer_level)
+                                   / one_percent_bits;
                 }
+                else if (cpi->bits_off_target > cpi->oxcf.optimal_buffer_level)
+                {
+                    percent_high = (int)((100 * cpi->bits_off_target)
+                                         / (cpi->total_byte_count * 8));
+                }
+
+                if (percent_high > cpi->oxcf.over_shoot_pct)
+                    percent_high = cpi->oxcf.over_shoot_pct;
+                else if (percent_high < 0)
+                    percent_high = 0;
+
+                cpi->this_frame_target += (cpi->this_frame_target *
+                                           percent_high) / 200;
+
 
                 // Are we allowing control of active_worst_allowed_q according to bufferl level.
                 if (cpi->auto_worst_q)
@@ -1464,39 +1461,6 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
     return Q;
 }
 
-static int estimate_min_frame_size(VP8_COMP *cpi)
-{
-    double correction_factor;
-    int bits_per_mb_at_max_q;
-
-    // This funtion returns a default value for the first few frames untill the correction factor has had time to adapt.
-    if (cpi->common.current_video_frame < 10)
-    {
-        if (cpi->pass == 2)
-            return (cpi->min_frame_bandwidth);
-        else
-            return cpi->per_frame_bandwidth / 3;
-    }
-
-    /*  // Select the appropriate correction factor based upon type of frame.
-        if ( cpi->common.frame_type == KEY_FRAME )
-            correction_factor = cpi->key_frame_rate_correction_factor;
-        else
-        {
-            if ( cpi->common.refresh_alt_ref_frame || cpi->common.refresh_golden_frame )
-                correction_factor = cpi->gf_rate_correction_factor;
-            else
-                correction_factor = cpi->rate_correction_factor;
-        }*/
-
-    // We estimate at half the value we get from vp8_bits_per_mb
-    correction_factor = cpi->rate_correction_factor / 2.0;
-
-    bits_per_mb_at_max_q = (int)(.5 + correction_factor * vp8_bits_per_mb[cpi->common.frame_type][MAXQ]);
-
-    return (bits_per_mb_at_max_q * cpi->common.MBs) >> BPER_MB_NORMBITS;
-}
-
 
 static int estimate_keyframe_frequency(VP8_COMP *cpi)
 {
@@ -1513,8 +1477,10 @@ static int estimate_keyframe_frequency(VP8_COMP *cpi)
         /* Assume a default of 1 kf every 2 seconds, or the max kf interval,
          * whichever is smaller.
          */
+        int key_freq = cpi->oxcf.key_freq>0 ? cpi->oxcf.key_freq : 1;
         av_key_frame_frequency = (int)cpi->output_frame_rate * 2;
-        if (av_key_frame_frequency > cpi->oxcf.key_freq)
+
+        if (cpi->oxcf.auto_key && av_key_frame_frequency > key_freq)
             av_key_frame_frequency = cpi->oxcf.key_freq;
 
         cpi->prior_key_frame_distance[KEY_FRAME_CONTEXT - 1]

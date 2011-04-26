@@ -298,9 +298,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 #endif
     vp8_set_speed_features(cpi);
 
-    if (cpi->common.simpler_lpf)
-        cpi->common.filter_type = SIMPLE_LOOPFILTER;
-
     q = (int)pow(vp8_dc_quant(QIndex,0), 1.25);
 
     if (q < 8)
@@ -2526,7 +2523,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         best_mbmode.uv_mode = 0;
         best_mbmode.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
         best_mbmode.partitioning = 0;
-        best_mbmode.dc_diff = 0;
 
         vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
         vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));

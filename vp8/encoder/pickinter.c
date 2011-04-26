@@ -938,7 +938,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
         best_mbmode.uv_mode = 0;
         best_mbmode.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
         best_mbmode.partitioning = 0;
-        best_mbmode.dc_diff = 0;
 
         vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
         vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
