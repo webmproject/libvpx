@@ -1391,7 +1391,7 @@ int vp8cx_encode_inter_macroblock
 
         }
         else
-            vp8_build_inter_predictors_mb_s(xd);
+            vp8_build_inter16x16_predictors_mb_s(xd);
     }
 
     if (!x->skip)
