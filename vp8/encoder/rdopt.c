@@ -1430,86 +1430,55 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     return bsi.segment_rd;
 }
 
-static void swap(int *x,int *y)
+static void insertsortmv(int arr[], int len)
 {
-   int tmp;
+    int i, j, k;
 
-   tmp = *x;
-   *x = *y;
-   *y = tmp;
+    for ( i = 1 ; i <= len-1 ; i++ )
+    {
+        for ( j = 0 ; j < i ; j++ )
+        {
+            if ( arr[j] > arr[i] )
+            {
+                int temp;
+
+                temp = arr[i];
+
+                for ( k = i; k >j; k--)
+                    arr[k] = arr[k - 1] ;
+
+                arr[j] = temp ;
+            }
+        }
+    }
 }
 
-static void quicksortmv(int arr[],int left, int right)
+static void insertsortsad(int arr[],int idx[], int len)
 {
-   int lidx,ridx,pivot;
+    int i, j, k;
 
-   lidx = left;
-   ridx = right;
+    for ( i = 1 ; i <= len-1 ; i++ )
+    {
+        for ( j = 0 ; j < i ; j++ )
+        {
+            if ( arr[j] > arr[i] )
+            {
+                int temp, tempi;
 
-   if( left < right)
-   {
-      pivot = (left + right)/2;
+                temp = arr[i];
+                tempi = idx[i];
 
-      while(lidx <=pivot && ridx >=pivot)
-      {
-          while(arr[lidx] < arr[pivot] && lidx <= pivot)
-              lidx++;
-          while(arr[ridx] > arr[pivot] && ridx >= pivot)
-              ridx--;
-          swap(&arr[lidx], &arr[ridx]);
-          lidx++;
-          ridx--;
-          if(lidx-1 == pivot)
-          {
-              ridx++;
-              pivot = ridx;
-          }
-          else if(ridx+1 == pivot)
-          {
-              lidx--;
-              pivot = lidx;
-          }
-      }
-      quicksortmv(arr, left, pivot - 1);
-      quicksortmv(arr, pivot + 1, right);
-   }
-}
+                for ( k = i; k >j; k--)
+                {
+                    arr[k] = arr[k - 1] ;
+                    idx[k] = idx[k - 1];
+                }
 
-static void quicksortsad(int arr[],int idx[], int left, int right)
-{
-   int lidx,ridx,pivot;
-
-   lidx = left;
-   ridx = right;
-
-   if( left < right)
-   {
-      pivot = (left + right)/2;
-
-      while(lidx <=pivot && ridx >=pivot)
-      {
-          while(arr[lidx] < arr[pivot] && lidx <= pivot)
-              lidx++;
-          while(arr[ridx] > arr[pivot] && ridx >= pivot)
-              ridx--;
-          swap(&arr[lidx], &arr[ridx]);
-          swap(&idx[lidx], &idx[ridx]);
-          lidx++;
-          ridx--;
-          if(lidx-1 == pivot)
-          {
-              ridx++;
-              pivot = ridx;
-          }
-          else if(ridx+1 == pivot)
-          {
-              lidx--;
-              pivot = lidx;
-          }
-      }
-      quicksortsad(arr, idx, left, pivot - 1);
-      quicksortsad(arr, idx, pivot + 1, right);
-   }
+                arr[j] = temp ;
+                idx[j] = tempi;
+            }
+        }
+    }
 }
 
 //The improved MV prediction
@@ -1645,8 +1614,8 @@ void vp8_mv_pred
                 mvy[i] = near_mvs[i].as_mv.col;
             }
 
-            quicksortmv (mvx, 0, vcnt-1);
-            quicksortmv (mvy, 0, vcnt-1);
+            insertsortmv(mvx, vcnt);
+            insertsortmv(mvy, vcnt);
             mv.as_mv.row = mvx[vcnt/2];
             mv.as_mv.col = mvy[vcnt/2];
 
@@ -1709,10 +1678,10 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
 
     if(cpi->common.last_frame_type != KEY_FRAME)
     {
-        quicksortsad(near_sad, near_sadidx, 0, 7);
+        insertsortsad(near_sad, near_sadidx, 8);
     }else
     {
-        quicksortsad(near_sad, near_sadidx, 0, 2);
+        insertsortsad(near_sad, near_sadidx, 3);
     }
 }
 
