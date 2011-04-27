@@ -55,7 +55,7 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br);
         for(shift = VP8_BD_VALUE_SIZE - 8 - ((_count) + 8); shift >= 0; ) \
         { \
             if((_bufptr) >= (_bufend)) { \
-                (_count) = VP8_LOTS_OF_BITS; \
+                (_count) += VP8_LOTS_OF_BITS; \
                 break; \
             } \
             (_count) += 8; \
@@ -119,18 +119,19 @@ static int vp8_decode_value(BOOL_DECODER *br, int bits)
 
 static int vp8dx_bool_error(BOOL_DECODER *br)
 {
-  /* Check if we have reached the end of the buffer.
-   *
-   * Variable 'count' stores the number of bits in the 'value' buffer,
-   * minus 8. So if count == 8, there are 16 bits available to be read.
-   * Normally, count is filled with 8 and one byte is filled into the
-   * value buffer. When we reach the end of the buffer, count is instead
-   * filled with VP8_LOTS_OF_BITS, 8 of which represent the last 8 real
-   * bits from the bitstream. So the last bit in the bitstream will be
-   * represented by count == VP8_LOTS_OF_BITS - 16.
-   */
-    if ((br->count > VP8_BD_VALUE_SIZE)
-        && (br->count <= VP8_LOTS_OF_BITS - 16))
+    /* Check if we have reached the end of the buffer.
+     *
+     * Variable 'count' stores the number of bits in the 'value' buffer, minus
+     * 8. The top byte is part of the algorithm, and the remainder is buffered
+     * to be shifted into it. So if count == 8, the top 16 bits of 'value' are
+     * occupied, 8 for the algorithm and 8 in the buffer.
+     *
+     * When reading a byte from the user's buffer, count is filled with 8 and
+     * one byte is filled into the value buffer. When we reach the end of the
+     * data, count is additionally filled with VP8_LOTS_OF_BITS. So when
+     * count == VP8_LOTS_OF_BITS - 1, the user's data has been exhausted.
+     */
+    if ((br->count > VP8_BD_VALUE_SIZE) && (br->count < VP8_LOTS_OF_BITS))
     {
        /* We have tried to decode bits after the end of
         * stream was encountered.
