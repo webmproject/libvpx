@@ -14,7 +14,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "reconintra.h"
 
-void vp8_predict_intra4x4(BLOCKD *x,
+void vp8_intra4x4_predict(BLOCKD *x,
                           int b_mode,
                           unsigned char *predictor)
 {
