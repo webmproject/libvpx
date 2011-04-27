@@ -194,7 +194,8 @@ static int pick_intra4x4block(
         int this_rd;
 
         rate = mode_costs[mode];
-        vp8_predict_intra4x4(b, mode, b->predictor);
+        RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
+                     (b, mode, b->predictor);
         distortion = get_prediction_error(be, b, &rtcd->variance);
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
