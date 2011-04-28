@@ -118,14 +118,16 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
         xd->mode_info_context->mbmi.mb_skip_coeff = 1;
 
         /*mt_skip_recon_mb(pbi, xd, mb_row, mb_col);*/
-        if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+        if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
         {
             vp8mt_build_intra_predictors_mbuv_s(pbi, xd, mb_row, mb_col);
             vp8mt_build_intra_predictors_mby_s(pbi, xd, mb_row, mb_col);
         }
         else
         {
-            vp8_build_inter16x16_predictors_mb_s(xd);
+            vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
+                                               xd->dst.u_buffer, xd->dst.v_buffer,
+                                               xd->dst.y_stride, xd->dst.uv_stride);
         }
         return;
     }
