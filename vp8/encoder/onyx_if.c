@@ -56,7 +56,6 @@ extern void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt
 extern void vp8_loop_filter_frame_yonly(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val, int sharpness_lvl);
 extern void vp8_dmachine_specific_config(VP8_COMP *cpi);
 extern void vp8_cmachine_specific_config(VP8_COMP *cpi);
-extern void vp8_calc_auto_iframe_target_size(VP8_COMP *cpi);
 extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *post, int filt_lvl, int low_var_thresh, int flag);
 extern void print_parms(VP8_CONFIG *ocf, char *filenam);
 extern unsigned int vp8_get_processor_freq();
@@ -1511,10 +1510,7 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->auto_gold = 1;
     cpi->auto_adjust_gold_quantizer = 1;
-    cpi->goldquantizer = 1;
     cpi->goldfreq = 7;
-    cpi->auto_adjust_key_quantizer = 1;
-    cpi->keyquantizer = 1;
 
     cm->version = oxcf->Version;
     vp8_setup_version(cm);
@@ -2715,78 +2711,7 @@ static void resize_key_frame(VP8_COMP *cpi)
 
 #endif
 }
-// return of 0 means drop frame
-static int pick_frame_size(VP8_COMP *cpi)
-{
-    VP8_COMMON *cm = &cpi->common;
 
-    // First Frame is a special case
-    if (cm->current_video_frame == 0)
-    {
-#if !(CONFIG_REALTIME_ONLY)
-
-        if (cpi->pass == 2)
-            vp8_calc_auto_iframe_target_size(cpi);
-
-        else
-#endif
-        {
-            /* 1 Pass there is no information on which to base size so use
-             * bandwidth per second * fraction of the initial buffer
-             * level
-             */
-            cpi->this_frame_target = cpi->oxcf.starting_buffer_level / 2;
-
-            if(cpi->this_frame_target > cpi->oxcf.target_bandwidth * 3 / 2)
-                cpi->this_frame_target = cpi->oxcf.target_bandwidth * 3 / 2;
-        }
-
-        // Key frame from VFW/auto-keyframe/first frame
-        cm->frame_type = KEY_FRAME;
-
-    }
-    // Special case for forced key frames
-    // The frame sizing here is still far from ideal for 2 pass.
-    else if (cm->frame_flags & FRAMEFLAGS_KEY)
-    {
-        cm->frame_type = KEY_FRAME;
-        resize_key_frame(cpi);
-        vp8_calc_iframe_target_size(cpi);
-    }
-    else if (cm->frame_type == KEY_FRAME)
-    {
-        vp8_calc_auto_iframe_target_size(cpi);
-    }
-    else
-    {
-        // INTER frame: compute target frame size
-        cm->frame_type = INTER_FRAME;
-        vp8_calc_pframe_target_size(cpi);
-
-        // Check if we're dropping the frame:
-        if (cpi->drop_frame)
-        {
-            cpi->drop_frame = FALSE;
-            cpi->drop_count++;
-            return 0;
-        }
-    }
-
-    /* Apply limits on keyframe target.
-     *
-     * TODO: move this after consolidating
-     * vp8_calc_iframe_target_size() and vp8_calc_auto_iframe_target_size()
-     */
-    if (cm->frame_type == KEY_FRAME && cpi->oxcf.rc_max_intra_bitrate_pct)
-    {
-        unsigned int max_rate = cpi->av_per_frame_bandwidth
-                                * cpi->oxcf.rc_max_intra_bitrate_pct / 100;
-
-        if (cpi->this_frame_target > max_rate)
-            cpi->this_frame_target = max_rate;
-    }
-    return 1;
-}
 
 static void set_quantizer(VP8_COMP *cpi, int Q)
 {
@@ -3581,7 +3506,7 @@ static void encode_frame_to_data_rate
     }
 
     // Decide how big to make the frame
-    if (!pick_frame_size(cpi))
+    if (!vp8_pick_frame_size(cpi))
     {
         cm->current_video_frame++;
         cpi->frames_since_key++;
@@ -3909,7 +3834,10 @@ static void encode_frame_to_data_rate
         }
 
         if (cm->frame_type == KEY_FRAME)
+        {
+            resize_key_frame(cpi);
             vp8_setup_key_frame(cpi);
+        }
 
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);
@@ -3944,10 +3872,10 @@ static void encode_frame_to_data_rate
 #else
             if (decide_key_frame(cpi))
             {
-                vp8_calc_auto_iframe_target_size(cpi);
-
                 // Reset all our sizing numbers and recode
                 cm->frame_type = KEY_FRAME;
+
+                vp8_pick_frame_size(cpi);
 
                 // Clear the Alt reference frame active flag when we have a key frame
                 cpi->source_alt_ref_active = FALSE;
@@ -3977,7 +3905,6 @@ static void encode_frame_to_data_rate
                 loop_count++;
                 Loop = TRUE;
 
-                resize_key_frame(cpi);
                 continue;
             }
 #endif

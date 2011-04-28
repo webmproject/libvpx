@@ -88,6 +88,10 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->recon.recon2      = vp8_recon2b_sse2;
         rtcd->recon.recon4      = vp8_recon4b_sse2;
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_sse2;
+        rtcd->recon.build_intra_predictors_mbuv =
+            vp8_build_intra_predictors_mbuv_sse2;
+        rtcd->recon.build_intra_predictors_mbuv_s =
+            vp8_build_intra_predictors_mbuv_s_sse2;
 
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_sse2;
 
@@ -126,6 +130,11 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->subpix.sixtap4x4     = vp8_sixtap_predict4x4_ssse3;
         rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_ssse3;
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_ssse3;
+
+        rtcd->recon.build_intra_predictors_mbuv =
+            vp8_build_intra_predictors_mbuv_ssse3;
+        rtcd->recon.build_intra_predictors_mbuv_s =
+            vp8_build_intra_predictors_mbuv_s_ssse3;
     }
 #endif
 

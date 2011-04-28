@@ -32,7 +32,8 @@
 #endif
 void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BLOCK *be, BLOCKD *b, int best_mode)
 {
-    vp8_predict_intra4x4(b, best_mode, b->predictor);
+    RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
+                 (b, best_mode, b->predictor);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
@@ -113,7 +114,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
 void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
-    vp8_build_intra_predictors_mbuv(&x->e_mbd);
+    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mbuv)(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 

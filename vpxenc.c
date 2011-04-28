@@ -914,7 +914,7 @@ static const arg_def_t *main_args[] =
     &debugmode,
     &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline,
     &best_dl, &good_dl, &rt_dl,
-    &verbosearg, &psnrarg, &use_ivf, &framerate,
+    &verbosearg, &psnrarg, &use_ivf,
     NULL
 };
 

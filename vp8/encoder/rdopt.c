@@ -681,7 +681,8 @@ static int rd_pick_intra4x4block(
 
         rate = bmode_costs[mode];
 
-        vp8_predict_intra4x4(b, mode, b->predictor);
+        RECON_INVOKE(&cpi->rtcd.common->recon, intra4x4_predict)
+                     (b, mode, b->predictor);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
         x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b(be, b);
@@ -870,7 +871,8 @@ void vp8_rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *r
         int this_rd;
 
         x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-        vp8_build_intra_predictors_mbuv(&x->e_mbd);
+        RECON_INVOKE(&cpi->rtcd.common->recon, build_intra_predictors_mbuv)
+                     (&x->e_mbd);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
                       x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor,
                       x->src.uv_stride);

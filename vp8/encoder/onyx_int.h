@@ -501,10 +501,7 @@ typedef struct
     int interquantizer;
     int auto_gold;
     int auto_adjust_gold_quantizer;
-    int goldquantizer;
     int goldfreq;
-    int auto_adjust_key_quantizer;
-    int keyquantizer;
     int auto_worst_q;
     int cpu_used;
     int chroma_boost;
