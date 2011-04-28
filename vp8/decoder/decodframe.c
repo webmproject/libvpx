@@ -182,18 +182,20 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, unsigned int mb_idx)
     int eobtotal = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
 
-#ifndef EC_COPY_PREDICTOR
     /* TODO(holmer): change when we have MB level error tracking
      * The residuals may not match the predicted signal when a macroblock is
      * corrupted due to previous losses. Should we try to add the residual
      * anyway, or just throw it away? Should test this on a couple of files.
      */
-    if (pbi->ec_enabled && xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME
-        && (xd->corrupted || mb_idx >= pbi->mvs_corrupt_from_mb))
+    if (pbi->ec_enabled)
     {
-        xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+        if ((xd->corrupted &&
+             xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME) ||
+            vp8dx_bool_error(xd->current_bc))
+        {
+            xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+        }
     }
-#endif
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
@@ -238,20 +240,6 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, unsigned int mb_idx)
     {
         vp8_build_inter_predictors_mb(xd);
     }
-
-#ifndef EC_COPY_PREDICTOR
-    /* TODO(holmer): change when we have MB level error tracking
-     * The residuals may not match the predicted signal when a macroblock is
-     * corrupted due to previous losses. Should we try to add the residual
-     * anyway, or just throw it away? Should test this on a couple of files.
-     */
-    if (pbi->ec_enabled && xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME
-        && (xd->corrupted || mb_idx >= pbi->mvs_corrupt_from_mb))
-    {
-        vp8_conceal_corrupt_block(xd);
-        return;
-    }
-#endif
 
     /* dequantization and idct */
     if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
@@ -393,10 +381,10 @@ void vp8_decode_mb_row(VP8D_COMP *pbi,
              * coefficients if it's the first block with missing coefficients,
              * since the bool dec error detection is done after reconstruction.
              */
-            vp8_interpolate_mv(xd,
-                               mb_row, mb_col,
-                               pc->mb_rows, pc->mb_cols,
-                               pc->mode_info_stride);
+            vp8_interpolate_motion(xd,
+                                   mb_row, mb_col,
+                                   pc->mb_rows, pc->mb_cols,
+                                   pc->mode_info_stride);
         }
 
         if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)

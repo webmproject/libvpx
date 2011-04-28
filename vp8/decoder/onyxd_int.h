@@ -17,25 +17,7 @@
 #include "onyxc_int.h"
 #include "threading.h"
 #include "dequantize.h"
-
-#define MAX_OVERLAPS 16
-
-typedef struct overlap_node
-{
-    int overlap;
-    B_MODE_INFO *bmi;
-    MV_REFERENCE_FRAME ref_frame;
-} OVERLAP_NODE;
-
-typedef struct
-{
-    OVERLAP_NODE overlaps[MAX_OVERLAPS];
-} B_OVERLAP;
-
-typedef struct
-{
-    B_OVERLAP overlaps[16];
-} MB_OVERLAP;
+#include "ec_types.h"
 
 typedef struct
 {

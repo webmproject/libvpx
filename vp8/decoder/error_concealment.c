@@ -42,7 +42,7 @@ static const int weights_q7[5][5] = {
        { 32,    31,    29,    26,    23 }
 };
 
-int vp8_need_to_clamp_mv(MV *mv,
+static int vp8_need_to_clamp_mv(MV *mv,
                          int mb_to_left_edge,
                          int mb_to_right_edge,
                          int mb_to_top_edge,
@@ -111,15 +111,15 @@ int vp8_block_overlap(int b1_row, int b1_col, int b2_row, int b2_col)
 void vp8_calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
                                MV_REFERENCE_FRAME ref_frame,
                                int new_row, int new_col,
-                               int first_ol_mb_row, int first_ol_mb_col,
-                               int first_ol_blk_row, int first_ol_blk_col)
+                               int mb_row, int mb_col,
+                               int first_blk_row, int first_blk_col)
 {
     /* Find the blocks within this MB which are overlapped by bmi and
      * calculate and assign overlap for each of those blocks. */
 
     /* Block coordinates relative the upper-left block */
-    const int rel_ol_blk_row = first_ol_blk_row - first_ol_mb_row * 4;
-    const int rel_ol_blk_col = first_ol_blk_col - first_ol_mb_col * 4;
+    const int rel_ol_blk_row = first_blk_row - mb_row * 4;
+    const int rel_ol_blk_col = first_blk_col - mb_col * 4;
     /* If the block partly overlaps any previous MB, these coordinates
      * can be < 0. We don't want to access blocks in previous MBs.
      */
@@ -130,9 +130,10 @@ void vp8_calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
     /* Calculate and assign overlaps for all blocks in this MB
      * which the motion compensated block overlaps
      */
+    /* Avoid calculating overlaps for blocks in later MBs */
+    int end_row = MIN(4 + mb_row * 4 - first_blk_row, 2);
+    int end_col = MIN(4 + mb_col * 4 - first_blk_col, 2);
     int row, col;
-    int end_row = MIN(4 + first_ol_mb_row * 4 - first_ol_blk_row, 2);
-    int end_col = MIN(4 + first_ol_mb_col * 4 - first_ol_blk_col, 2);
 
     /* Check if new_row and new_col are evenly divisible by 4 (Q3),
      * and if so we shouldn't check neighboring blocks
@@ -142,10 +143,12 @@ void vp8_calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
     if (new_col >= 0 && (new_col & 0x1F) == 0)
         end_col = 1;
 
-    /* Avoid calculating overlap for blocks in the previous MB */
-    if (new_row < (first_ol_mb_row*16)<<3)
+    /* Check if the overlapping block partly overlaps a previous MB
+     * and if so, we're overlapping fewer blocks in this MB.
+     */
+    if (new_row < (mb_row*16)<<3)
         end_row = 1;
-    if (new_col < (first_ol_mb_col*16)<<3)
+    if (new_col < (mb_col*16)<<3)
         end_col = 1;
 
     for (row = 0; row < end_row; ++row)
@@ -154,9 +157,9 @@ void vp8_calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
         {
             /* input in Q3, result in Q6 */
             const int overlap = vp8_block_overlap(new_row, new_col,
-                                                  (((first_ol_blk_row + row) *
+                                                  (((first_blk_row + row) *
                                                       4) << 3),
-                                                  (((first_ol_blk_col + col) *
+                                                  (((first_blk_col + col) *
                                                       4) << 3));
             vp8_assign_overlap(b_ol_ul[row * 4 + col].overlaps,
                                bmi,
@@ -166,11 +169,11 @@ void vp8_calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
     }
 }
 
-void vp8_calculate_overlaps_submb(MB_OVERLAP *overlap_ul,
-                                  int mb_rows, int mb_cols,
-                                  B_MODE_INFO *bmi,
-                                  MV_REFERENCE_FRAME ref_frame,
-                                  int b_row, int b_col)
+void vp8_calculate_overlaps(MB_OVERLAP *overlap_ul,
+                            int mb_rows, int mb_cols,
+                            B_MODE_INFO *bmi,
+                            MV_REFERENCE_FRAME ref_frame,
+                            int b_row, int b_col)
 {
     MB_OVERLAP *mb_overlap;
     int row, col, rel_row, rel_col;
@@ -365,6 +368,7 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
     const unsigned int num_mbs = mb_rows * mb_cols;
     int mb_row, mb_col;
     vpx_memset(overlaps, 0, sizeof(MB_OVERLAP) * mb_rows * mb_cols);
+    /* First calculate the overlaps for all blocks */
     for (mb_row = 0; mb_row < mb_rows; ++mb_row)
     {
         for (mb_col = 0; mb_col < mb_cols; ++mb_col)
@@ -375,7 +379,7 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
             {
                 for (sub_col = 0; sub_col < 4; ++sub_col)
                 {
-                    vp8_calculate_overlaps_submb(
+                    vp8_calculate_overlaps(
                                         overlaps, mb_rows, mb_cols,
                                         &(prev_mi->bmi[sub_row * 4 + sub_col]),
                                         prev_mi->mbmi.ref_frame,
@@ -391,6 +395,9 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
     mb_row = first_corrupt / mb_cols;
     mb_col = first_corrupt - mb_row * mb_cols;
     mi += mb_row*(mb_cols + 1) + mb_col;
+    /* Go through all macroblocks in the current image with missing MVs
+     * and calculate new MVs using the overlaps.
+     */
     for (; mb_row < mb_rows; ++mb_row)
     {
         int mb_to_top_edge = -((mb_row * 16)) << 3;
@@ -412,9 +419,8 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
                                 mb_to_right_edge,
                                 mb_to_top_edge,
                                 mb_to_bottom_edge);
+            mi->mbmi.mode = SPLITMV;
             mi->mbmi.uv_mode = DC_PRED;
-
-            mi->mbmi.mb_skip_coeff = 0;
             ++mi;
         }
         mb_col = 0;
@@ -422,7 +428,7 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
     }
 }
 
-void assign_neighbor(EC_BLOCK *neighbor, MODE_INFO *mi, int block_idx)
+static void assign_neighbor(EC_BLOCK *neighbor, MODE_INFO *mi, int block_idx)
 {
     assert(mi->mbmi.ref_frame < MAX_REF_FRAMES);
     neighbor->ref_frame = mi->mbmi.ref_frame;
@@ -492,18 +498,18 @@ void vp8_find_neighboring_blocks(MODE_INFO *mi,
 
 MV_REFERENCE_FRAME vp8_dominant_ref_frame(EC_BLOCK *neighbors)
 {
-    /* default to referring to "skip" */
+    /* Default to referring to "skip" */
     MV_REFERENCE_FRAME dom_ref_frame = LAST_FRAME;
     int max_ref_frame_cnt = 0;
     int ref_frame_cnt[MAX_REF_FRAMES] = {0};
     int i;
-    /* count neighboring reference frames */
+    /* Count neighboring reference frames */
     for (i = 0; i < NUM_NEIGHBORS; ++i)
     {
         if (neighbors[i].ref_frame < MAX_REF_FRAMES)
             ++ref_frame_cnt[neighbors[i].ref_frame];
     }
-    /* find maximum */
+    /* Find maximum */
     for (i = 0; i < MAX_REF_FRAMES; ++i)
     {
         if (ref_frame_cnt[i] > max_ref_frame_cnt)
@@ -572,7 +578,7 @@ void vp8_interpolate_mvs(MACROBLOCKD *mb,
     }
 }
 
-void vp8_interpolate_mv(MACROBLOCKD *mb,
+void vp8_interpolate_motion(MACROBLOCKD *mb,
                         int mb_row, int mb_col,
                         int mb_rows, int mb_cols,
                         int mi_stride)
@@ -599,22 +605,7 @@ void vp8_interpolate_mv(MACROBLOCKD *mb,
     vp8_interpolate_mvs(mb, neighbors, dom_ref_frame);
 
     mb->mode_info_context->mbmi.ref_frame = dom_ref_frame;
+    mb->mode_info_context->mbmi.mode = SPLITMV;
     mb->mode_info_context->mbmi.uv_mode = DC_PRED;
-    mb->mode_info_context->mbmi.mb_skip_coeff = 0;
 }
 
-void vp8_conceal_corrupt_block(MACROBLOCKD *xd)
-{
-    /* this macroblock has corrupt residual, use the motion compensated
-     image for concealment */
-    int i;
-    for (i = 0; i < 16; i++)
-        vpx_memcpy(xd->dst.y_buffer + i * xd->dst.y_stride,
-                   xd->predictor + i * 16, 16);
-    for (i = 0; i < 8; i++)
-        vpx_memcpy(xd->dst.u_buffer + i * xd->dst.uv_stride,
-                   xd->predictor + 256 + i * 8, 8);
-    for (i = 0; i < 8; i++)
-        vpx_memcpy(xd->dst.v_buffer + i * xd->dst.uv_stride,
-                   xd->predictor + 320 + i * 8, 8);
-}
