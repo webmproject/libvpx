@@ -13,7 +13,6 @@
 #define __INC_RECONINTER_H
 
 extern void vp8_build_inter_predictors_mb(MACROBLOCKD *x);
-extern void vp8_build_inter_predictors_mb_s(MACROBLOCKD *x);
 extern void vp8_build_inter16x16_predictors_mb_s(MACROBLOCKD *x);
 
 extern void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *x);

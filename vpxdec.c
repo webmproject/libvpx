@@ -725,6 +725,7 @@ int main(int argc, const char **argv_)
     int                     vp8_dbg_display_mv = 0;
 #endif
     struct input_ctx        input = {0};
+    int                     frames_corrupted = 0;
 
     /* Parse command line */
     exec_name = argv_[0];
@@ -1018,6 +1019,7 @@ int main(int argc, const char **argv_)
         vpx_codec_iter_t  iter = NULL;
         vpx_image_t    *img;
         struct vpx_usec_timer timer;
+        int                   corrupted;
 
         vpx_usec_timer_start(&timer);
 
@@ -1036,6 +1038,14 @@ int main(int argc, const char **argv_)
         dx_time += vpx_usec_timer_elapsed(&timer);
 
         ++frame_in;
+
+        if (vpx_codec_control(&decoder, VP8D_GET_FRAME_CORRUPTED, &corrupted))
+        {
+            fprintf(stderr, "Failed VP8_GET_FRAME_CORRUPTED: %s\n",
+                    vpx_codec_error(&decoder));
+            goto fail;
+        }
+        frames_corrupted += corrupted;
 
         if ((img = vpx_codec_get_frame(&decoder, &iter)))
             ++frame_out;
@@ -1102,6 +1112,9 @@ int main(int argc, const char **argv_)
         fprintf(stderr, "\n");
     }
 
+    if (frames_corrupted)
+        fprintf(stderr, "WARNING: %d frames corrupted.\n",frames_corrupted);
+
 fail:
 
     if (vpx_codec_destroy(&decoder))
@@ -1120,5 +1133,5 @@ fail:
     fclose(infile);
     free(argv);
 
-    return EXIT_SUCCESS;
+    return frames_corrupted ? EXIT_FAILURE : EXIT_SUCCESS;
 }

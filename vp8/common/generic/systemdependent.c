@@ -43,6 +43,12 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
         vp8_build_intra_predictors_mby;
     rtcd->recon.build_intra_predictors_mby_s =
         vp8_build_intra_predictors_mby_s;
+    rtcd->recon.build_intra_predictors_mbuv =
+        vp8_build_intra_predictors_mbuv;
+    rtcd->recon.build_intra_predictors_mbuv_s =
+        vp8_build_intra_predictors_mbuv_s;
+    rtcd->recon.intra4x4_predict =
+        vp8_intra4x4_predict;
 
     rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_c;
     rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_c;

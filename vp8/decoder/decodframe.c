@@ -113,7 +113,7 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        vp8_build_intra_predictors_mbuv_s(xd);
+        RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv_s)(xd);
         RECON_INVOKE(&pbi->common.rtcd.recon,
                      build_intra_predictors_mby_s)(xd);
     }
@@ -213,7 +213,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
     /* do prediction */
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        vp8_build_intra_predictors_mbuv(xd);
+        RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv)(xd);
 
         if (xd->mode_info_context->mbmi.mode != B_PRED)
         {
@@ -264,7 +264,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
         {
 
             BLOCKD *b = &xd->block[i];
-            vp8_predict_intra4x4(b, b->bmi.mode, b->predictor);
+            RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
+                         (b, b->bmi.mode, b->predictor);
 
             if (xd->eobs[i] > 1)
             {
