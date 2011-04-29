@@ -27,11 +27,11 @@ extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_ve_mmx);
 extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_tm_sse2);
 extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_tm_ssse3);
 
-static inline void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *x,
-                                                       unsigned char *dst_u,
-                                                       unsigned char *dst_v,
-                                                       int dst_stride,
-                                                       build_intra_predictors_mbuv_fn_t tm_func)
+static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *x,
+                                                unsigned char *dst_u,
+                                                unsigned char *dst_v,
+                                                int dst_stride,
+                                                build_intra_predictors_mbuv_fn_t tm_func)
 {
     int mode = x->mode_info_context->mbmi.uv_mode;
     build_intra_predictors_mbuv_fn_t fn;
