@@ -112,7 +112,7 @@ static void subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
 #endif
 
 #if HAVE_SSSE3
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 #if ARCH_X86_64
 typedef void ssimpf
 (
@@ -292,7 +292,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 #if ARCH_X86_64
         cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_sse3;
         cpi->rtcd.variance.ssimpf                = vp8_ssim_parms_16x16_sse3;

@@ -99,7 +99,7 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     // Pure C:
     vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame;
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
     cpi->rtcd.variance.ssimpf_8x8            = ssim_parms_8x8_c;
     cpi->rtcd.variance.ssimpf                = ssim_parms_c;
 #endif

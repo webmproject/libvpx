@@ -77,12 +77,12 @@ VP8_CX_SRCS-yes += encoder/rdopt.c
 VP8_CX_SRCS-yes += encoder/sad_c.c
 VP8_CX_SRCS-yes += encoder/segmentation.c
 VP8_CX_SRCS-yes += encoder/segmentation.h
-VP8_CX_SRCS-$(CONFIG_PSNR) += encoder/ssim.c
+VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/ssim.c
 VP8_CX_SRCS-yes += encoder/tokenize.c
 VP8_CX_SRCS-yes += encoder/treewriter.c
 VP8_CX_SRCS-yes += encoder/variance_c.c
-VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.h
-VP8_CX_SRCS-$(CONFIG_PSNR) += common/postproc.c
+VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
+VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.h
 
