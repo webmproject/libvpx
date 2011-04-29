@@ -251,15 +251,8 @@ sym(vp8_intra_pred_uv_dc_mmx2):
     movsxd      rax,        dword ptr arg(3) ;src_stride;
     sub         rsi,        rax
     pxor        mm0,        mm0
-    movd        mm1,        [rsi]
-    movd        mm2,        [rsi+4]
-    punpcklbw   mm1,        mm0
-    punpcklbw   mm2,        mm0
-    paddw       mm1,        mm2
-    pshufw      mm2,        mm1, 0x0e
-    paddw       mm1,        mm2
-    pshufw      mm2,        mm1, 0x01
-    paddw       mm1,        mm2
+    movq        mm1,        [rsi]
+    psadbw      mm1,        mm0
 
     ; from left
     dec         rsi
@@ -331,15 +324,8 @@ sym(vp8_intra_pred_uv_dctop_mmx2):
     movsxd      rax,        dword ptr arg(3) ;src_stride;
     sub         rsi,        rax
     pxor        mm0,        mm0
-    movd        mm1,        [rsi]
-    movd        mm2,        [rsi+4]
-    punpcklbw   mm1,        mm0
-    punpcklbw   mm2,        mm0
-    paddw       mm1,        mm2
-    pshufw      mm2,        mm1, 0x0e
-    paddw       mm1,        mm2
-    pshufw      mm2,        mm1, 0x01
-    paddw       mm1,        mm2
+    movq        mm1,        [rsi]
+    psadbw      mm1,        mm0
 
     ; add up
     paddw       mm1,        [GLOBAL(dc_4)]
