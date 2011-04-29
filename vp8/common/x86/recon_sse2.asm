@@ -578,23 +578,35 @@ sym(vp8_intra_pred_uv_ve_mmx):
 ;    unsigned char *src,
 ;    int src_stride,
 ;    )
-global sym(vp8_intra_pred_uv_ho_mmx2)
-sym(vp8_intra_pred_uv_ho_mmx2):
+%macro vp8_intra_pred_uv_ho 1
+global sym(vp8_intra_pred_uv_ho_%1)
+sym(vp8_intra_pred_uv_ho_%1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
     push        rsi
     push        rdi
+%ifidn %1, ssse3
+    push        rbx
+%endif
     ; end prolog
 
     ; read from left and write out
+%ifidn %1, mmx2
     mov         edx,        4
+%endif
     mov         rsi,        arg(2) ;src;
     movsxd      rax,        dword ptr arg(3) ;src_stride;
     mov         rdi,        arg(0) ;dst;
     movsxd      rcx,        dword ptr arg(1) ;dst_stride
+%ifidn %1, ssse3
+    lea         rbx,        [rax*3]
+    lea         rdx,        [rcx*3]
+    movdqa      xmm2,       [GLOBAL(dc_00001111)]
+%endif
     dec         rsi
-vp8_intra_pred_uv_ho_mmx2_loop:
+%ifidn %1, mmx2
+vp8_intra_pred_uv_ho_%1_loop:
     movd        mm0,        [rsi]
     movd        mm1,        [rsi+rax]
     punpcklbw   mm0,        mm0
@@ -606,14 +618,49 @@ vp8_intra_pred_uv_ho_mmx2_loop:
     lea         rsi,        [rsi+rax*2]
     lea         rdi,        [rdi+rcx*2]
     dec         edx
-    jnz vp8_intra_pred_uv_ho_mmx2_loop
+    jnz vp8_intra_pred_uv_ho_%1_loop
+%else
+    movd        xmm0,       [rsi]
+    movd        xmm3,       [rsi+rax]
+    movd        xmm1,       [rsi+rax*2]
+    movd        xmm4,       [rsi+rbx]
+    punpcklbw   xmm0,       xmm3
+    punpcklbw   xmm1,       xmm4
+    pshufb      xmm0,       xmm2
+    pshufb      xmm1,       xmm2
+    movq   [rdi    ],       xmm0
+    movhps [rdi+rcx],       xmm0
+    movq [rdi+rcx*2],       xmm1
+    movhps [rdi+rdx],       xmm1
+    lea         rsi,        [rsi+rax*4]
+    lea         rdi,        [rdi+rcx*4]
+    movd        xmm0,       [rsi]
+    movd        xmm3,       [rsi+rax]
+    movd        xmm1,       [rsi+rax*2]
+    movd        xmm4,       [rsi+rbx]
+    punpcklbw   xmm0,       xmm3
+    punpcklbw   xmm1,       xmm4
+    pshufb      xmm0,       xmm2
+    pshufb      xmm1,       xmm2
+    movq   [rdi    ],       xmm0
+    movhps [rdi+rcx],       xmm0
+    movq [rdi+rcx*2],       xmm1
+    movhps [rdi+rdx],       xmm1
+%endif
 
     ; begin epilog
+%ifidn %1, ssse3
+    pop         rbx
+%endif
     pop         rdi
     pop         rsi
     UNSHADOW_ARGS
     pop         rbp
     ret
+%endmacro
+
+vp8_intra_pred_uv_ho mmx2
+vp8_intra_pred_uv_ho ssse3
 
 SECTION_RODATA
 dc_128:
@@ -623,3 +670,7 @@ dc_4:
 align 16
 dc_1024:
     times 8 dw 0x400
+align 16
+dc_00001111:
+    times 8 db 0
+    times 8 db 1
