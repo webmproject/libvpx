@@ -135,6 +135,13 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     vp8_init_detokenizer(pbi);
 #endif
     pbi->common.error.setjmp = 0;
+
+#if CONFIG_ERROR_CONCEALMENT
+    pbi->ec_enabled = 1;
+#else
+    pbi->ec_enabled = 0;
+#endif
+
     return (VP8D_PTR) pbi;
 }
 
@@ -319,8 +326,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     VP8_COMMON *cm = &pbi->common;
     int retcode = 0;
     struct vpx_usec_timer timer;
-
-    pbi->ec_enabled = 1;
 
     /*if(pbi->ready_for_new_data == 0)
         return -1;*/
