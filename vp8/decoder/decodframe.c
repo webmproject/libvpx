@@ -187,14 +187,9 @@ void vp8_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, unsigned int mb_idx)
      * corrupted due to previous losses. Should we try to add the residual
      * anyway, or just throw it away? Should test this on a couple of files.
      */
-    if (pbi->ec_enabled)
+    if (pbi->ec_enabled && mb_idx >= pbi->mvs_corrupt_from_mb)
     {
-        if ((xd->corrupted &&
-             xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME) ||
-            vp8dx_bool_error(xd->current_bc))
-        {
-            xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-        }
+        xd->mode_info_context->mbmi.mb_skip_coeff = 1;
     }
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)

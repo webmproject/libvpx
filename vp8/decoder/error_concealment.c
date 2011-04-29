@@ -421,6 +421,7 @@ void vp8_estimate_missing_mvs_ex(MB_OVERLAP *overlaps,
                                 mb_to_bottom_edge);
             mi->mbmi.mode = SPLITMV;
             mi->mbmi.uv_mode = DC_PRED;
+            mi->mbmi.partitioning = 3;
             ++mi;
         }
         mb_col = 0;
@@ -607,5 +608,5 @@ void vp8_interpolate_motion(MACROBLOCKD *mb,
     mb->mode_info_context->mbmi.ref_frame = dom_ref_frame;
     mb->mode_info_context->mbmi.mode = SPLITMV;
     mb->mode_info_context->mbmi.uv_mode = DC_PRED;
+    mb->mode_info_context->mbmi.partitioning = 3;
 }
-
