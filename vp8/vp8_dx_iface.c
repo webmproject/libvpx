@@ -19,6 +19,8 @@
 #include "decoder/onyxd_int.h"
 
 #define VP8_CAP_POSTPROC (CONFIG_POSTPROC ? VPX_CODEC_CAP_POSTPROC : 0)
+#define VP8_CAP_ERROR_CONCEALMENT (CONFIG_ERROR_CONCEALMENT ? \
+                                    VPX_CODEC_CAP_ERROR_CONCEALMENT : 0)
 
 typedef vpx_codec_stream_info_t  vp8_stream_info_t;
 
@@ -364,6 +366,8 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             oxcf.Version = 9;
             oxcf.postprocess = 0;
             oxcf.max_threads = ctx->cfg.threads;
+            oxcf.error_concealment =
+                    (ctx->base.init_flags & VPX_CODEC_USE_ERROR_CONCEALMENT);
 
             optr = vp8dx_create_decompressor(&oxcf);
 
@@ -719,7 +723,7 @@ CODEC_INTERFACE(vpx_codec_vp8_dx) =
 {
     "WebM Project VP8 Decoder" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
-    VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC,
+    VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC | VP8_CAP_ERROR_CONCEALMENT,
     /* vpx_codec_caps_t          caps; */
     vp8_init,         /* vpx_codec_init_fn_t       init; */
     vp8_destroy,      /* vpx_codec_destroy_fn_t    destroy; */
@@ -749,7 +753,7 @@ vpx_codec_iface_t vpx_codec_vp8_algo =
 {
     "WebM Project VP8 Decoder (Deprecated API)" VERSION_STRING,
     VPX_CODEC_INTERNAL_ABI_VERSION,
-    VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC,
+    VPX_CODEC_CAP_DECODER | VP8_CAP_POSTPROC | VP8_CAP_ERROR_CONCEALMENT,
     /* vpx_codec_caps_t          caps; */
     vp8_init,         /* vpx_codec_init_fn_t       init; */
     vp8_destroy,      /* vpx_codec_destroy_fn_t    destroy; */

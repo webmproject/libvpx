@@ -139,6 +139,8 @@ typedef struct VP8Common
 
     MODE_INFO *mip; /* Base of allocated array */
     MODE_INFO *mi;  /* Corresponds to upper left visible macroblock */
+    MODE_INFO *prev_mip; /* MODE_INFO array 'mip' from last decoded frame */
+    MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 
 
     INTERPOLATIONFILTERTYPE mcomp_filter_type;

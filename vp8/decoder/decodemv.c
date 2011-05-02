@@ -244,6 +244,12 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
 
+#if CONFIG_ERROR_CONCEALMENT
+    /* Default is that no macroblock is corrupt, therefore we initialize
+     * mvs_corrupt_from_mb to something very big, which we can be sure is
+     * outside the frame. */
+    pbi->mvs_corrupt_from_mb = UINT_MAX;
+#endif
     pbi->prob_skip_false = 0;
     if (pbi->common.mb_no_coeff_skip)
         pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
@@ -279,6 +285,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
         read_mvcontexts(bc, mvc);
     }
 }
+
 
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                             int mb_row, int mb_col)
@@ -403,7 +410,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
                     do {
                         mi->bmi[ *fill_offset] = bmi;
-                      fill_offset++;
+                        fill_offset++;
 
                     }while (--fill_count);
                 }
@@ -524,11 +531,25 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
         while (++mb_col < pbi->common.mb_cols)
         {
+            int mb_num = mb_row * pbi->common.mb_cols + mb_col;
             /*read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
             if(pbi->common.frame_type == KEY_FRAME)
                 vp8_kfread_modes(pbi, mi, mb_row, mb_col);
             else
                 read_mb_modes_mv(pbi, mi, &mi->mbmi, mb_row, mb_col);
+
+#if CONFIG_ERROR_CONCEALMENT
+            /* look for corruption. set mvs_corrupt_from_mb to the current
+             * mb_num if the frame is corrupt from this macroblock. */
+            if (vp8dx_bool_error(&pbi->bc) && mb_num < pbi->mvs_corrupt_from_mb)
+            {
+                pbi->mvs_corrupt_from_mb = mb_num;
+                /* no need to continue since the partition is corrupt from
+                 * here on.
+                 */
+                return;
+            }
+#endif
 
             mi++;       /* next macroblock */
         }
