@@ -122,8 +122,8 @@ else
     LIB_PATH := $(call enabled,LIB_PATH)
     INC_PATH := $(call enabled,INC_PATH)
 endif
-CFLAGS += $(addprefix -I,$(INC_PATH))
-LDFLAGS += $(addprefix -L,$(LIB_PATH))
+INTERNAL_CFLAGS = $(addprefix -I,$(INC_PATH))
+INTERNAL_LDFLAGS += $(addprefix -L,$(LIB_PATH))
 
 
 # Expand list of selected examples to build (as specified above)
@@ -214,7 +214,8 @@ $(1): $($(1:.vcproj=).SRCS)
             --ver=$$(CONFIG_VS_VERSION)\
             --proj-guid=$$($$(@:.vcproj=).GUID)\
             $$(if $$(CONFIG_STATIC_MSVCRT),--static-crt) \
-            --out=$$@ $$(CFLAGS) $$(LDFLAGS) -l$$(CODEC_LIB) -lwinmm $$^
+            --out=$$@ $$(INTERNAL_CFLAGS) $$(CFLAGS) \
+            $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -l$$(CODEC_LIB) -lwinmm $$^
 endef
 PROJECTS-$(CONFIG_MSVS) += $(ALL_EXAMPLES:.c=.vcproj)
 INSTALL-BINS-$(CONFIG_MSVS) += $(foreach p,$(VS_PLATFORMS),\
