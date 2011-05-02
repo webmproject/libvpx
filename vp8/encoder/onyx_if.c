@@ -96,7 +96,8 @@ extern double vp8_calc_ssimg
     YV12_BUFFER_CONFIG *dest,
     double *ssim_y,
     double *ssim_u,
-    double *ssim_v
+    double *ssim_v,
+    const vp8_variance_rtcd_vtable_t *rtcd
 );
 
 
@@ -4984,7 +4985,8 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             if (cpi->b_calculate_ssimg)
             {
                 double y, u, v, frame_all;
-                frame_all =  vp8_calc_ssimg(cpi->Source, cm->frame_to_show, &y, &u, &v);
+                frame_all =  vp8_calc_ssimg(cpi->Source, cm->frame_to_show,
+                    &y, &u, &v, IF_RTCD(&cpi->rtcd.variance));
                 cpi->total_ssimg_y += y;
                 cpi->total_ssimg_u += u;
                 cpi->total_ssimg_v += v;
