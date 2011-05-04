@@ -831,7 +831,9 @@ int vp8_hex_search
 )
 {
     MV hex[6] = { { -1, -2}, {1, -2}, {2, 0}, {1, 2}, { -1, 2}, { -2, 0} } ;
-    MV neighbors[8] = { { -1, -1}, {0, -1}, {1, -1}, { -1, 0}, {1, 0}, { -1, 1}, {0, 1}, {1, 1} } ;
+    //MV neighbors[8] = { { -1, -1}, {0, -1}, {1, -1}, { -1, 0}, {1, 0}, { -1, 1}, {0, 1}, {1, 1} } ;
+    MV neighbors[4] = {{0, -1}, { -1, 0}, {1, 0}, {0, 1}} ;
+
     int i, j;
     unsigned char *src = (*(b->base_src) + b->src);
     int src_stride = b->src_stride;
@@ -918,24 +920,31 @@ int vp8_hex_search
             break;
     }
 
-    // check 8 1 away neighbors
+    // check 4 1-away neighbors
 cal_neighbors:
-    tr = br;
-    tc = bc;
 
-    for (i = 0; i < 8; i++)
+    for (j = 0; j < 32; j++)
     {
-        int nr = tr + neighbors[i].row, nc = tc + neighbors[i].col;
+        tr = br;
+        tc = bc;
 
-        if (nc < x->mv_col_min) continue;
+        for (i = 0; i < 4; i++)
+        {
+            int nr = tr + neighbors[i].row, nc = tc + neighbors[i].col;
 
-        if (nc > x->mv_col_max) continue;
+            if (nc < x->mv_col_min) continue;
 
-        if (nr < x->mv_row_min) continue;
+            if (nc > x->mv_col_max) continue;
 
-        if (nr > x->mv_row_max) continue;
+            if (nr < x->mv_row_min) continue;
 
-        CHECK_BETTER(thiserr, nr, nc);
+            if (nr > x->mv_row_max) continue;
+
+            CHECK_BETTER(thiserr, nr, nc);
+        }
+
+        if (tr == br && tc == bc)
+            break;
     }
 
     best_mv->row = br;
