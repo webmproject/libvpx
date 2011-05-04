@@ -308,7 +308,6 @@
 ; q9    q2
 ; q10   q3
 |vp8_loop_filter_neon| PROC
-    ldr         r12, _lf_coeff_
 
     ; vp8_filter_mask
     vabd.u8     q11, q3, q4                 ; abs(p3 - p2)
@@ -339,7 +338,7 @@
     vqadd.u8    q9, q9, q2                  ; a = b + a
     vcge.u8     q9, q0, q9                  ; (a > flimit * 2 + limit) * -1
 
-    vld1.u8     {q0}, [r12]!
+    vmov.u8     q0, #0x80                   ; 0x80
 
     ; vp8_filter() function
     ; convert to signed
@@ -348,7 +347,7 @@
     veor        q5, q5, q0                  ; ps1
     veor        q8, q8, q0                  ; qs1
 
-    vld1.u8     {q10}, [r12]!
+    vmov.u8     q10, #3                     ; #3
 
     vsubl.s8    q2, d14, d12                ; ( qs0 - ps0)
     vsubl.s8    q11, d15, d13
@@ -367,7 +366,7 @@
     vaddw.s8    q2, q2, d2
     vaddw.s8    q11, q11, d3
 
-    vld1.u8     {q9}, [r12]!
+    vmov.u8     q9, #4                      ; #4
 
     ; vp8_filter = clamp(vp8_filter + 3 * ( qs0 - ps0))
     vqmovn.s16  d2, q2
@@ -398,13 +397,5 @@
     ENDP        ; |vp8_loop_filter_horizontal_edge_y_neon|
 
 ;-----------------
-
-_lf_coeff_
-    DCD     lf_coeff
-lf_coeff
-    DCD     0x80808080, 0x80808080, 0x80808080, 0x80808080
-    DCD     0x03030303, 0x03030303, 0x03030303, 0x03030303
-    DCD     0x04040404, 0x04040404, 0x04040404, 0x04040404
-    DCD     0x01010101, 0x01010101, 0x01010101, 0x01010101
 
     END
