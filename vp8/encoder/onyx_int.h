@@ -576,7 +576,6 @@ typedef struct
     // multithread data
     int * mt_current_mb_col;
     int mt_sync_range;
-    int processor_core_count;
     int b_multi_threaded;
     int encoding_thread_count;
 

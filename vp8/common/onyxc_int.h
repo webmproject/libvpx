@@ -195,6 +195,9 @@ typedef struct VP8Common
 #if CONFIG_RUNTIME_CPU_DETECT
     VP8_COMMON_RTCD rtcd;
 #endif
+#if CONFIG_MULTITHREAD
+    int processor_core_count;
+#endif
     struct postproc_state  postproc_state;
 } VP8_COMMON;
 
