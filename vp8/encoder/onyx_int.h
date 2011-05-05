@@ -590,6 +590,7 @@ typedef struct
     sem_t *h_event_start_encoding;
     sem_t h_event_end_encoding;
     sem_t h_event_start_lpf;
+    sem_t h_event_end_picklpf;
     sem_t h_event_end_lpf;
 #endif
 
