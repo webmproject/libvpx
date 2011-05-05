@@ -22,7 +22,7 @@
 ; r1    int p, //pitch
 ; r2    const signed char *flimit,
 ; r3    const signed char *limit,
-; stack(r4) const signed char *thresh,
+; stack(r4) const signed char *thresh (unused)
 ; //stack(r5)   int count --unused
 
 |vp8_loop_filter_simple_vertical_edge_neon| PROC
@@ -32,7 +32,6 @@
     vld1.s8     {d2[], d3[]}, [r2]          ; flimit
     vld1.s8     {d26[], d27[]}, [r3]        ; limit -> q13
     vld4.8      {d6[1], d7[1], d8[1], d9[1]}, [r0], r1
-    ldr         r12, _vlfy_coeff_
     vld4.8      {d6[2], d7[2], d8[2], d9[2]}, [r0], r1
     vld4.8      {d6[3], d7[3], d8[3], d9[3]}, [r0], r1
     vld4.8      {d6[4], d7[4], d8[4], d9[4]}, [r0], r1
@@ -41,11 +40,11 @@
     vld4.8      {d6[7], d7[7], d8[7], d9[7]}, [r0], r1
 
     vld4.8      {d10[0], d11[0], d12[0], d13[0]}, [r0], r1
-    vld1.u8     {q0}, [r12]!                ; 0x80
+    vmov.u8     q0, #0x80                ; 0x80
     vld4.8      {d10[1], d11[1], d12[1], d13[1]}, [r0], r1
-    vld1.u8     {q11}, [r12]!               ; 0x03
+    vmov.u8     q11, #0x03              ; 0x03
     vld4.8      {d10[2], d11[2], d12[2], d13[2]}, [r0], r1
-    vld1.u8     {q12}, [r12]!               ; 0x04
+    vmov.u8     q12, #0x04               ; 0x04
     vld4.8      {d10[3], d11[3], d12[3], d13[3]}, [r0], r1
     vld4.8      {d10[4], d11[4], d12[4], d13[4]}, [r0], r1
     vld4.8      {d10[5], d11[5], d12[5], d13[5]}, [r0], r1
@@ -145,12 +144,5 @@
     ENDP        ; |vp8_loop_filter_simple_vertical_edge_neon|
 
 ;-----------------
-
-_vlfy_coeff_
-    DCD     vlfy_coeff
-vlfy_coeff
-    DCD     0x80808080, 0x80808080, 0x80808080, 0x80808080
-    DCD     0x03030303, 0x03030303, 0x03030303, 0x03030303
-    DCD     0x04040404, 0x04040404, 0x04040404, 0x04040404
 
     END
