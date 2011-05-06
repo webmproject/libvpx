@@ -264,6 +264,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                 xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
                 x->partition_info += xd->mode_info_stride * cpi->encoding_thread_count;
+                x->gf_active_ptr   += cm->mb_cols * cpi->encoding_thread_count;
 
                 if (mb_row == cm->mb_rows - 1)
                 {

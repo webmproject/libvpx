@@ -830,6 +830,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
                 xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
                 x->partition_info  += xd->mode_info_stride * cpi->encoding_thread_count;
+                x->gf_active_ptr   += cm->mb_cols * cpi->encoding_thread_count;
 
             }
 
