@@ -514,7 +514,6 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
             LPFTHREAD_DATA * lpfthd = &cpi->lpf_thread_data;
 
             sem_init(&cpi->h_event_start_lpf, 0, 0);
-            sem_init(&cpi->h_event_end_picklpf, 0, 0);
             sem_init(&cpi->h_event_end_lpf, 0, 0);
 
             lpfthd->ptr1 = (void *)cpi;
@@ -548,7 +547,6 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
 
         sem_destroy(&cpi->h_event_end_encoding);
         sem_destroy(&cpi->h_event_end_lpf);
-        sem_destroy(&cpi->h_event_end_picklpf);
         sem_destroy(&cpi->h_event_start_lpf);
 
         //free thread related resources
