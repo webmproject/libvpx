@@ -410,6 +410,8 @@ generate_vcproj() {
                         tag Tool \
                             Name="VCCLCompilerTool" \
                             AdditionalIncludeDirectories="$incs" \
+                            Optimization="2" \
+                            FavorSizeorSpeed="1" \
                             PreprocessorDefinitions="WIN32;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;$defines" \
                             RuntimeLibrary="$release_runtime" \
                             UsePrecompiledHeader="0" \
