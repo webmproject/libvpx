@@ -211,6 +211,7 @@ HAVE_LIST="
     alt_tree_layout
     pthread_h
     sys_mman_h
+    unistd_h
 "
 EXPERIMENT_LIST="
     extend_qrange

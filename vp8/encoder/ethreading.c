@@ -459,15 +459,15 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
 
     cpi->b_multi_threaded = 0;
     cpi->encoding_thread_count = 0;
-    cpi->processor_core_count = 32; //vp8_get_proc_core_count();
 
-    if (cpi->processor_core_count > 1 && cpi->oxcf.multi_threaded > 1)
+    if (cm->processor_core_count > 1 && cpi->oxcf.multi_threaded > 1)
     {
         int ithread;
         int th_count = cpi->oxcf.multi_threaded - 1;
 
-        if (cpi->oxcf.multi_threaded > cpi->processor_core_count)
-            th_count = cpi->processor_core_count - 1;
+        /* don't allocate more threads than cores available */
+        if (cpi->oxcf.multi_threaded > cm->processor_core_count)
+            th_count = cm->processor_core_count - 1;
 
         /* we have th_count + 1 (main) threads processing one row each */
         /* no point to have more threads than the sync range allows */
@@ -514,6 +514,7 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
             LPFTHREAD_DATA * lpfthd = &cpi->lpf_thread_data;
 
             sem_init(&cpi->h_event_start_lpf, 0, 0);
+            sem_init(&cpi->h_event_end_picklpf, 0, 0);
             sem_init(&cpi->h_event_end_lpf, 0, 0);
 
             lpfthd->ptr1 = (void *)cpi;
@@ -547,6 +548,7 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
 
         sem_destroy(&cpi->h_event_end_encoding);
         sem_destroy(&cpi->h_event_end_lpf);
+        sem_destroy(&cpi->h_event_end_picklpf);
         sem_destroy(&cpi->h_event_start_lpf);
 
         //free thread related resources

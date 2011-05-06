@@ -439,12 +439,18 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi)
 
     pbi->b_multithreaded_rd = 0;
     pbi->allocated_decoding_thread_count = 0;
-    core_count = (pbi->max_threads > 16) ? 16 : pbi->max_threads;
+
+    /* limit decoding threads to the max number of token partitions */
+    core_count = (pbi->max_threads > 8) ? 8 : pbi->max_threads;
+
+    /* limit decoding threads to the available cores */
+    if (core_count > pbi->common.processor_core_count)
+        core_count = pbi->common.processor_core_count;
 
     if (core_count > 1)
     {
         pbi->b_multithreaded_rd = 1;
-        pbi->decoding_thread_count = core_count -1;
+        pbi->decoding_thread_count = core_count - 1;
 
         CHECK_MEM_ERROR(pbi->h_decoding_thread, vpx_malloc(sizeof(pthread_t) * pbi->decoding_thread_count));
         CHECK_MEM_ERROR(pbi->h_event_start_decoding, vpx_malloc(sizeof(sem_t) * pbi->decoding_thread_count));

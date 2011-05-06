@@ -372,7 +372,6 @@
 ; q10   q3
 
 |vp8_mbloop_filter_neon| PROC
-    ldr         r12, _mblf_coeff_
 
     ; vp8_filter_mask
     vabd.u8     q11, q3, q4                 ; abs(p3 - p2)
@@ -396,7 +395,7 @@
 
     vld1.s8     {d4[], d5[]}, [r2]          ; flimit
 
-    vld1.u8     {q0}, [r12]!
+    vmov.u8     q0, #0x80                   ; 0x80
 
     vadd.u8     q2, q2, q2                  ; flimit * 2
     vadd.u8     q2, q2, q1                  ; flimit * 2 +  limit
@@ -431,12 +430,12 @@
     vadd.s16    q2, q2, q10
     vadd.s16    q13, q13, q11
 
-    vld1.u8     {q12}, [r12]!               ; #3
+    vmov.u8     q12, #3                     ; #3
 
     vaddw.s8    q2, q2, d2                  ; vp8_filter + 3 * ( qs0 - ps0)
     vaddw.s8    q13, q13, d3
 
-    vld1.u8     {q11}, [r12]!               ; #4
+    vmov.u8     q11, #4                     ; #4
 
     ; vp8_filter = clamp(vp8_filter + 3 * ( qs0 - ps0))
     vqmovn.s16  d2, q2
@@ -444,16 +443,16 @@
 
     vand        q1, q1, q15                 ; vp8_filter &= mask
 
-    vld1.u8     {q15}, [r12]!               ; #63
-    ;
+    vmov.u16    q15, #63                    ; #63
+
     vand        q13, q1, q14                ; Filter2 &= hev
 
-    vld1.u8     {d7}, [r12]!                ; #9
+    vmov.u8     d7, #9                      ; #9
 
     vqadd.s8    q2, q13, q11                ; Filter1 = clamp(Filter2+4)
     vqadd.s8    q13, q13, q12               ; Filter2 = clamp(Filter2+3)
 
-    vld1.u8     {d6}, [r12]!                ; #18
+    vmov.u8     d6, #18                     ; #18
 
     vshr.s8     q2, q2, #3                  ; Filter1 >>= 3
     vshr.s8     q13, q13, #3                ; Filter2 >>= 3
@@ -463,7 +462,7 @@
 
     vqsub.s8    q7, q7, q2                  ; qs0 = clamp(qs0 - Filter1)
 
-    vld1.u8     {d5}, [r12]!                ; #27
+    vmov.u8     d5, #27                     ; #27
 
     vqadd.s8    q6, q6, q13                 ; ps0 = clamp(ps0 + Filter2)
 
@@ -506,15 +505,5 @@
     ENDP        ; |vp8_mbloop_filter_neon|
 
 ;-----------------
-
-_mblf_coeff_
-    DCD     mblf_coeff
-mblf_coeff
-    DCD     0x80808080, 0x80808080, 0x80808080, 0x80808080
-    DCD     0x03030303, 0x03030303, 0x03030303, 0x03030303
-    DCD     0x04040404, 0x04040404, 0x04040404, 0x04040404
-    DCD     0x003f003f, 0x003f003f, 0x003f003f, 0x003f003f
-    DCD     0x09090909, 0x09090909, 0x12121212, 0x12121212
-    DCD     0x1b1b1b1b, 0x1b1b1b1b
 
     END
