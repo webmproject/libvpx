@@ -980,6 +980,9 @@ EOF
         esac
     fi
 
+    # for sysconf(3) and friends.
+    check_header unistd.h
+
     # glibc needs these
     if enabled linux; then
         add_cflags -D_LARGEFILE_SOURCE

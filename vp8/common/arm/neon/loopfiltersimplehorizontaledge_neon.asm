@@ -22,20 +22,19 @@
 ; r1    int p, //pitch
 ; r2    const signed char *flimit,
 ; r3    const signed char *limit,
-; stack(r4) const signed char *thresh,
+; stack(r4) const signed char *thresh (unused)
 ; //stack(r5)   int count --unused
 
 |vp8_loop_filter_simple_horizontal_edge_neon| PROC
     sub         r0, r0, r1, lsl #1          ; move src pointer down by 2 lines
 
-    ldr         r12, _lfhy_coeff_
     vld1.u8     {q5}, [r0], r1              ; p1
     vld1.s8     {d2[], d3[]}, [r2]          ; flimit
     vld1.s8     {d26[], d27[]}, [r3]        ; limit -> q13
     vld1.u8     {q6}, [r0], r1              ; p0
-    vld1.u8     {q0}, [r12]!                ; 0x80
+    vmov.u8     q0, #0x80                   ; 0x80
     vld1.u8     {q7}, [r0], r1              ; q0
-    vld1.u8     {q10}, [r12]!               ; 0x03
+    vmov.u8     q10, #0x03                  ; 0x03
     vld1.u8     {q8}, [r0]                  ; q1
 
     ;vp8_filter_mask() function
@@ -66,7 +65,7 @@
     vadd.s16    q11, q2, q2                 ;  3 * ( qs0 - ps0)
     vadd.s16    q12, q3, q3
 
-    vld1.u8     {q9}, [r12]!                ; 0x04
+    vmov.u8     q9, #0x04                   ; 0x04
 
     vadd.s16    q2, q2, q11
     vadd.s16    q3, q3, q12
@@ -104,12 +103,5 @@
     ENDP        ; |vp8_loop_filter_simple_horizontal_edge_neon|
 
 ;-----------------
-
-_lfhy_coeff_
-    DCD     lfhy_coeff
-lfhy_coeff
-    DCD     0x80808080, 0x80808080, 0x80808080, 0x80808080
-    DCD     0x03030303, 0x03030303, 0x03030303, 0x03030303
-    DCD     0x04040404, 0x04040404, 0x04040404, 0x04040404
 
     END

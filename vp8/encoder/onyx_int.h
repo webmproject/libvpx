@@ -576,7 +576,6 @@ typedef struct
     // multithread data
     int * mt_current_mb_col;
     int mt_sync_range;
-    int processor_core_count;
     int b_multi_threaded;
     int encoding_thread_count;
 
@@ -591,6 +590,7 @@ typedef struct
     sem_t *h_event_start_encoding;
     sem_t h_event_end_encoding;
     sem_t h_event_start_lpf;
+    sem_t h_event_end_picklpf;
     sem_t h_event_end_lpf;
 #endif
 
