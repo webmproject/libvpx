@@ -311,9 +311,6 @@ typedef struct
     unsigned int mode_chosen_counts[MAX_MODES];
     unsigned int mbs_tested_so_far;
 
-    unsigned int check_freq[2];
-    unsigned int do_full[2];
-
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
     int rd_threshes[MAX_MODES];
@@ -599,6 +596,7 @@ typedef struct
 
     fractional_mv_step_fp *find_fractional_mv_step;
     vp8_full_search_fn_t full_search_sad;
+    vp8_refining_search_fn_t refining_search_sad;
     vp8_diamond_search_fn_t diamond_search_sad;
     vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SEGMENTS];
     unsigned int time_receive_data;

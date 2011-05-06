@@ -570,9 +570,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
     sf->improved_mv_pred = 1;
 
-    cpi->do_full[0] = 0;
-    cpi->do_full[1] = 0;
-
     // default thresholds to 0
     for (i = 0; i < MAX_MODES; i++)
         sf->thresh_mult[i] = 0;
@@ -1976,9 +1973,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         cpi->prior_key_frame_distance[i] = (int)cpi->output_frame_rate;
     }
 
-    cpi->check_freq[0] = 15;
-    cpi->check_freq[1] = 15;
-
 #ifdef OUTPUT_YUV_SRC
     yuv_file = fopen("bd.yuv", "ab");
 #endif
@@ -2084,6 +2078,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
     cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
+    cpi->refining_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, refining_search);
 
     cpi->ready_for_new_frame = 1;
 
