@@ -41,6 +41,9 @@ sub trim($)
 
 while (<STDIN>)
 {
+    # Load and store alignment
+    s/@/,:/g;
+
     # Comment character
     s/;/@/g;
 
@@ -137,8 +140,8 @@ while (<STDIN>)
     # put the colon at the end of the line in the macro
     s/^([a-zA-Z_0-9\$]+)/$1:/ if !/EQU/;
 
-    # Strip ALIGN
-    s/\sALIGN/@ ALIGN/g;
+    # ALIGN directive
+    s/ALIGN/.balign/g;
 
     # Strip ARM
     s/\sARM/@ ARM/g;

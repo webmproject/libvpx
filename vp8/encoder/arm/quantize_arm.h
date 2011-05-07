@@ -23,14 +23,13 @@ extern prototype_quantize_block(vp8_fast_quantize_b_armv6);
 
 
 #if HAVE_ARMV7
+
 extern prototype_quantize_block(vp8_fast_quantize_b_neon);
 
-/* The neon quantizer has not been updated to match the new exact
- * quantizer introduced in commit e04e2935
- */
-//#undef  vp8_quantize_fastquantb
-//#define vp8_quantize_fastquantb vp8_fast_quantize_b_neon
+#undef  vp8_quantize_fastquantb
+#define vp8_quantize_fastquantb vp8_fast_quantize_b_neon
+
+#endif /* HAVE_ARMV7 */
 
 #endif
 
-#endif
