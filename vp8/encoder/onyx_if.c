@@ -3211,7 +3211,7 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
 #if CONFIG_MULTITHREAD
     if (cpi->b_multi_threaded)
-        sem_post(&cpi->h_event_end_picklpf); /* signal that we have set filter_level */
+        sem_post(&cpi->h_event_end_lpf); /* signal that we have set filter_level */
 #endif
 
     if (cm->filter_level > 0)
@@ -4221,7 +4221,7 @@ static void encode_frame_to_data_rate
 #if CONFIG_MULTITHREAD
     /* wait that filter_level is picked so that we can continue with stream packing */
     if (cpi->b_multi_threaded)
-        sem_wait(&cpi->h_event_end_picklpf);
+        sem_wait(&cpi->h_event_end_lpf);
 #endif
 
     // build the bitstream

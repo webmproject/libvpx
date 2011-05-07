@@ -121,12 +121,8 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_neon;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_neon;
 
-        /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_c;*/
-        /* The neon quantizer has not been updated to match the new exact
-         * quantizer introduced in commit e04e2935
-         */
-        /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;*/
+        /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;*/
+        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;
     }
 #endif
 
