@@ -1142,8 +1142,10 @@ int vp8cx_encode_inter_macroblock
         /* Are we using the fast quantizer for the mode selection? */
         if(cpi->sf.use_fastquant_for_pick)
         {
-            cpi->mb.quantize_b = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                 fastquantb);
+            cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
+                                                      fastquantb);
+            cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
+                                                      fastquantb_pair);
 
             /* the fast quantizer does not use zbin_extra, so
              * do not recalculate */
@@ -1155,7 +1157,10 @@ int vp8cx_encode_inter_macroblock
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)
         {
-            cpi->mb.quantize_b    = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb);
+            cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
+                                                      quantb);
+            cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
+                                                      quantb_pair);
         }
 
         /* restore cpi->zbin_mode_boost_enabled */
