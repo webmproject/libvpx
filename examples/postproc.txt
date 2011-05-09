@@ -21,7 +21,7 @@ res = vpx_codec_dec_init(&codec, interface, NULL,
 if(res == VPX_CODEC_INCAPABLE) {
     printf("NOTICE: Postproc not supported by %s\n",
            vpx_codec_iface_name(interface));
-    res = vpx_codec_dec_init(&codec, interface, NULL, 0);
+    res = vpx_codec_dec_init(&codec, interface, NULL, flags);
 }
 if(res)
     die_codec(&codec, "Failed to initialize decoder");

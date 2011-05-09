@@ -238,7 +238,7 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     int i0;
     int rc;
     int x;
-    int sz;
+    int sz = 0;
     int next;
     int rdmult;
     int rddiv;

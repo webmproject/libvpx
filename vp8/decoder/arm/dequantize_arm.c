@@ -26,7 +26,6 @@ extern void vp8_dequantize_b_loop_v6(short *Q, short *DQC, short *DQ);
 
 void vp8_dequantize_b_neon(BLOCKD *d)
 {
-    int i;
     short *DQ  = d->dqcoeff;
     short *Q   = d->qcoeff;
     short *DQC = d->dequant;
@@ -38,7 +37,6 @@ void vp8_dequantize_b_neon(BLOCKD *d)
 #if HAVE_ARMV6
 void vp8_dequantize_b_v6(BLOCKD *d)
 {
-    int i;
     short *DQ  = d->dqcoeff;
     short *Q   = d->qcoeff;
     short *DQC = d->dequant;

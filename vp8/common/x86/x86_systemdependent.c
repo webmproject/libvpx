@@ -24,10 +24,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 #if CONFIG_RUNTIME_CPU_DETECT
     VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
     int flags = x86_simd_caps();
-    int mmx_enabled = flags & HAS_MMX;
-    int xmm_enabled = flags & HAS_SSE;
-    int wmt_enabled = flags & HAS_SSE2;
-    int SSSE3Enabled = flags & HAS_SSSE3;
 
     /* Note:
      *
@@ -39,7 +35,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
     /* Override default functions with fastest ones for this CPU. */
 #if HAVE_MMX
 
-    if (mmx_enabled)
+    if (flags & HAS_MMX)
     {
         rtcd->idct.idct1        = vp8_short_idct4x4llm_1_mmx;
         rtcd->idct.idct16       = vp8_short_idct4x4llm_mmx;
@@ -83,7 +79,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 #endif
 #if HAVE_SSE2
 
-    if (wmt_enabled)
+    if (flags & HAS_SSE2)
     {
         rtcd->recon.recon2      = vp8_recon2b_sse2;
         rtcd->recon.recon4      = vp8_recon4b_sse2;
@@ -122,7 +118,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
 #if HAVE_SSSE3
 
-    if (SSSE3Enabled)
+    if (flags & HAS_SSSE3)
     {
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_ssse3;
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_ssse3;

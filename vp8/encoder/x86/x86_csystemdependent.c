@@ -138,12 +138,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
     int flags = x86_simd_caps();
-    int mmx_enabled = flags & HAS_MMX;
-    int xmm_enabled = flags & HAS_SSE;
-    int wmt_enabled = flags & HAS_SSE2;
-    int SSE3Enabled = flags & HAS_SSE3;
-    int SSSE3Enabled = flags & HAS_SSSE3;
-    int SSE4_1Enabled = flags & HAS_SSE4_1;
 
     /* Note:
      *
@@ -154,7 +148,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 
     /* Override default functions with fastest ones for this CPU. */
 #if HAVE_MMX
-    if (mmx_enabled)
+    if (flags & HAS_MMX)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_mmx;
         cpi->rtcd.variance.sad16x8               = vp8_sad16x8_mmx;
@@ -205,7 +199,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #endif
 
 #if HAVE_SSE2
-    if (wmt_enabled)
+    if (flags & HAS_SSE2)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_wmt;
         cpi->rtcd.variance.sad16x8               = vp8_sad16x8_wmt;
@@ -263,7 +257,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #endif
 
 #if HAVE_SSE3
-    if (SSE3Enabled)
+    if (flags & HAS_SSE3)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_sse3;
         cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_sse3;
@@ -282,7 +276,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #endif
 
 #if HAVE_SSSE3
-    if (SSSE3Enabled)
+    if (flags & HAS_SSSE3)
     {
         cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_ssse3;
         cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_ssse3;
@@ -305,7 +299,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 
 
 #if HAVE_SSE4_1
-    if (SSE4_1Enabled)
+    if (flags & HAS_SSE4_1)
     {
         cpi->rtcd.variance.sad16x16x8            = vp8_sad16x16x8_sse4;
         cpi->rtcd.variance.sad16x8x8             = vp8_sad16x8x8_sse4;

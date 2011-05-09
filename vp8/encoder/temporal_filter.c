@@ -149,10 +149,8 @@ static int vp8_temporal_filter_find_matching_mb_c
 )
 {
     MACROBLOCK *x = &cpi->mb;
-    int thissme;
     int step_param;
     int further_steps;
-    int n = 0;
     int sadpb = x->sadperbit16;
     int bestsme = INT_MAX;
     int num00 = 0;
@@ -243,7 +241,6 @@ static void vp8_temporal_filter_iterate_c
     unsigned int filter_weight;
     int mb_cols = cpi->common.mb_cols;
     int mb_rows = cpi->common.mb_rows;
-    int MBs  = cpi->common.MBs;
     int mb_y_offset = 0;
     int mb_uv_offset = 0;
     DECLARE_ALIGNED_ARRAY(16, unsigned int, accumulator, 16*16 + 8*8 + 8*8);
@@ -269,8 +266,7 @@ static void vp8_temporal_filter_iterate_c
 
         for (mb_col = 0; mb_col < mb_cols; mb_col++)
         {
-            int i, j, k, w;
-            int weight_cap;
+            int i, j, k;
             int stride;
 
             vpx_memset(accumulator, 0, 384*sizeof(unsigned int));
@@ -436,7 +432,6 @@ void vp8_temporal_filter_prepare_c
     int frames_to_blur_forward = 0;
     int frames_to_blur = 0;
     int start_frame = 0;
-    unsigned int filtered = 0;
 
     int strength = cpi->oxcf.arnr_strength;
 
