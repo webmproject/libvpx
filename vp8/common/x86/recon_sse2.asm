@@ -315,6 +315,7 @@ sym(vp8_intra_pred_uv_dctop_mmx2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
+    GET_GOT     rbx
     push        rsi
     push        rdi
     ; end prolog
@@ -351,6 +352,7 @@ sym(vp8_intra_pred_uv_dctop_mmx2):
     ; begin epilog
     pop         rdi
     pop         rsi
+    RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -431,6 +433,7 @@ sym(vp8_intra_pred_uv_dc128_mmx):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
+    GET_GOT     rbx
     ; end prolog
 
     ; write out
@@ -450,6 +453,7 @@ sym(vp8_intra_pred_uv_dc128_mmx):
     movq [rax+rcx  ],       mm1
 
     ; begin epilog
+    RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp
     ret
@@ -466,6 +470,7 @@ sym(vp8_intra_pred_uv_tm_%1):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 4
+    GET_GOT     rbx
     push        rsi
     push        rdi
     ; end prolog
@@ -525,6 +530,7 @@ vp8_intra_pred_uv_tm_%1_loop:
     ; begin epilog
     pop         rdi
     pop         rsi
+    RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp
     ret
