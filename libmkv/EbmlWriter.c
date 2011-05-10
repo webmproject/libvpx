@@ -143,7 +143,6 @@ void Ebml_SerializeUTF8(EbmlGlobal *glob, unsigned long class_id, wchar_t *s)
 
 void Ebml_SerializeData(EbmlGlobal *glob, unsigned long class_id, unsigned char *data, unsigned long data_length)
 {
-    unsigned char size = 4;
     Ebml_WriteID(glob, class_id);
     Ebml_WriteLen(glob, data_length);
     Ebml_Write(glob,  data, data_length);

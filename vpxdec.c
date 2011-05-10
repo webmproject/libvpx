@@ -573,12 +573,10 @@ file_is_webm(struct input_ctx *input,
 {
     unsigned int i, n;
     int          track_type = -1;
-    uint64_t     tstamp=0;
 
     nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb,
                      input->infile};
     nestegg_video_params params;
-    nestegg_packet * pkt;
 
     if(nestegg_init(&input->nestegg_ctx, io, NULL))
         goto fail;

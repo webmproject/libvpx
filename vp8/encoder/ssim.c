@@ -125,8 +125,8 @@ long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
     long long ssim3;
-    long long ssim_n,ssim_n1,ssim_n2;
-    long long ssim_d,ssim_d1,ssim_d2;
+    long long ssim_n1,ssim_n2;
+    long long ssim_d1,ssim_d2;
     long long ssim_t1,ssim_t2;
     long long c1, c2;
 
