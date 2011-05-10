@@ -2004,167 +2004,137 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             break;
 
         case NEWMV:
+        {
+            int thissme;
+            int bestsme = INT_MAX;
+            int step_param = cpi->sf.first_step;
+            int further_steps;
+            int n;
+            int do_refine=1;   /* If last step (1-away) of n-step search doesn't pick the center point as the best match,
+                                  we will do a final 1-away diamond refining search  */
 
-            // Decrement full search counter
-            if (cpi->check_freq[lf_or_gf] > 0)
-                cpi->check_freq[lf_or_gf] --;
+            int sadpb = x->sadperbit16;
 
+            int col_min = (best_ref_mv.col - MAX_FULL_PEL_VAL) >>3;
+            int col_max = (best_ref_mv.col + MAX_FULL_PEL_VAL) >>3;
+            int row_min = (best_ref_mv.row - MAX_FULL_PEL_VAL) >>3;
+            int row_max = (best_ref_mv.row + MAX_FULL_PEL_VAL) >>3;
+
+            int tmp_col_min = x->mv_col_min;
+            int tmp_col_max = x->mv_col_max;
+            int tmp_row_min = x->mv_row_min;
+            int tmp_row_max = x->mv_row_max;
+
+            // Get intersection of UMV window and valid MV window to reduce # of checks in diamond search.
+            if (x->mv_col_min < col_min )
+                x->mv_col_min = col_min;
+            if (x->mv_col_max > col_max )
+                x->mv_col_max = col_max;
+            if (x->mv_row_min < row_min )
+                x->mv_row_min = row_min;
+            if (x->mv_row_max > row_max )
+                x->mv_row_max = row_max;
+
+            //adjust search range according to sr from mv prediction
+            if(sr > step_param)
+                step_param = sr;
+
+            // Initial step/diamond search
+            if (cpi->sf.search_method == HEX)
             {
-                int thissme;
-                int bestsme = INT_MAX;
-                int step_param = cpi->sf.first_step;
-                int search_range;
-                int further_steps;
-                int n;
-
-                int col_min = (best_ref_mv.col - MAX_FULL_PEL_VAL) >>3;
-                int col_max = (best_ref_mv.col + MAX_FULL_PEL_VAL) >>3;
-                int row_min = (best_ref_mv.row - MAX_FULL_PEL_VAL) >>3;
-                int row_max = (best_ref_mv.row + MAX_FULL_PEL_VAL) >>3;
-
-                int tmp_col_min = x->mv_col_min;
-                int tmp_col_max = x->mv_col_max;
-                int tmp_row_min = x->mv_row_min;
-                int tmp_row_max = x->mv_row_max;
-
-                // Get intersection of UMV window and valid MV window to reduce # of checks in diamond search.
-                if (x->mv_col_min < col_min )
-                    x->mv_col_min = col_min;
-                if (x->mv_col_max > col_max )
-                    x->mv_col_max = col_max;
-                if (x->mv_row_min < row_min )
-                    x->mv_row_min = row_min;
-                if (x->mv_row_max > row_max )
-                    x->mv_row_max = row_max;
-
-                //adjust search range according to sr from mv prediction
-                if(sr > step_param)
-                    step_param = sr;
-
-                // Work out how long a search we should do
-                search_range = MAXF(abs(best_ref_mv.col), abs(best_ref_mv.row)) >> 3;
-
-                if (search_range >= x->vector_range)
-                    x->vector_range = search_range;
-                else if (x->vector_range > cpi->sf.min_fs_radius)
-                    x->vector_range--;
-
-                // Initial step/diamond search
-                {
-                    int sadpb = x->sadperbit16;
-
-                    if (cpi->sf.search_method == HEX)
-                    {
-                        bestsme = vp8_hex_search(x, b, d, &best_ref_mv, &d->bmi.mv.as_mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv);
-                        mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-                        mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
-                    }
-                    else
-                    {
-                        bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb < 9
-                        mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-                        mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
-
-                        // Further step/diamond searches as necessary
-                        n = 0;
-                        further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
-
-                        n = num00;
-                        num00 = 0;
-
-                        while (n < further_steps)
-                        {
-                            n++;
-
-                            if (num00)
-                                num00--;
-                            else
-                            {
-                                thissme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb = 9
-
-                                if (thissme < bestsme)
-                                {
-                                    bestsme = thissme;
-                                    mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-                                    mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
-                                }
-                                else
-                                {
-                                    d->bmi.mv.as_mv.row = mode_mv[NEWMV].row;
-                                    d->bmi.mv.as_mv.col = mode_mv[NEWMV].col;
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-                // Should we do a full search
-                if (!cpi->check_freq[lf_or_gf] || cpi->do_full[lf_or_gf])
-                {
-                    int thissme;
-                    int full_flag_thresh = 0;
-
-                    // Update x->vector_range based on best vector found in step search
-                    search_range = MAXF(abs((mvp.row>>3) - d->bmi.mv.as_mv.row), abs((mvp.col>>3) - d->bmi.mv.as_mv.col));
-                    //search_range *= 1.4;  //didn't improve PSNR
-
-                    if (search_range > x->vector_range)
-                        x->vector_range = search_range;
-                    else
-                        search_range = x->vector_range;
-
-                    // Apply limits
-                    search_range = (search_range > cpi->sf.max_fs_radius) ? cpi->sf.max_fs_radius : search_range;
-
-                    //add this to reduce full search range.
-                    if(sr<=3 && search_range > 8) search_range = 8;
-
-                    {
-                        int sadpb = x->sadperbit16 >> 2;
-                        /* use diamond search result as full search staring point */
-                        thissme = cpi->full_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
-                    }
-
-                    // Barrier threshold to initiating full search
-                    // full_flag_thresh = 10 + (thissme >> 7);
-                    if ((thissme + full_flag_thresh) < bestsme)
-                    {
-                        cpi->do_full[lf_or_gf] ++;
-                        bestsme = thissme;
-                    }
-                    else if (thissme < bestsme)
-                        bestsme = thissme;
-                    else
-                    {
-                        cpi->do_full[lf_or_gf] = cpi->do_full[lf_or_gf] >> 1;
-                        cpi->check_freq[lf_or_gf] = cpi->sf.full_freq[lf_or_gf];
-
-                        // The full search result is actually worse so re-instate the previous best vector
-                        d->bmi.mv.as_mv.row = mode_mv[NEWMV].row;
-                        d->bmi.mv.as_mv.col = mode_mv[NEWMV].col;
-                    }
-                }
-
-                x->mv_col_min = tmp_col_min;
-                x->mv_col_max = tmp_col_max;
-                x->mv_row_min = tmp_row_min;
-                x->mv_row_max = tmp_row_max;
-
-                if (bestsme < INT_MAX)
-                {
-                    int dis; /* TODO: use dis in distortion calculation later. */
-                    unsigned int sse;
-                    cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis, &sse);
-                }
-
+                bestsme = vp8_hex_search(x, b, d, &best_ref_mv, &d->bmi.mv.as_mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv);
+                mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
+                mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+            }
+            else
+            {
+                bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb < 9
                 mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
                 mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
 
-                // Add the new motion vector cost to our rolling cost variable
-                rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, x->mvcost, 96);
+                // Further step/diamond searches as necessary
+                n = 0;
+                further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
+                n = num00;
+                num00 = 0;
+
+                /* If there won't be more n-step search, check to see if refining search is needed. */
+                if (n > further_steps)
+                    do_refine = 0;
+
+                while (n < further_steps)
+                {
+                    n++;
+
+                    if (num00)
+                        num00--;
+                    else
+                    {
+                        thissme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb = 9
+
+                        /* check to see if refining search is needed. */
+                        if (num00 > (further_steps-n))
+                            do_refine = 0;
+
+                        if (thissme < bestsme)
+                        {
+                            bestsme = thissme;
+                            mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
+                            mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+                        }
+                        else
+                        {
+                            d->bmi.mv.as_mv.row = mode_mv[NEWMV].row;
+                            d->bmi.mv.as_mv.col = mode_mv[NEWMV].col;
+                        }
+                    }
+                }
             }
+
+            /* final 1-away diamond refining search */
+            if (do_refine == 1)
+            {
+                int search_range;
+
+                //It seems not a good way to set search_range. Need further investigation.
+                //search_range = MAXF(abs((mvp.row>>3) - d->bmi.mv.as_mv.row), abs((mvp.col>>3) - d->bmi.mv.as_mv.col));
+                search_range = 8;
+
+                //thissme = cpi->full_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
+                thissme = cpi->refining_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb/4, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
+
+                if (thissme < bestsme)
+                {
+                    bestsme = thissme;
+                    mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
+                    mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+                }
+                else
+                {
+                    d->bmi.mv.as_mv.row = mode_mv[NEWMV].row;
+                    d->bmi.mv.as_mv.col = mode_mv[NEWMV].col;
+                }
+            }
+
+            x->mv_col_min = tmp_col_min;
+            x->mv_col_max = tmp_col_max;
+            x->mv_row_min = tmp_row_min;
+            x->mv_row_max = tmp_row_max;
+
+            if (bestsme < INT_MAX)
+            {
+                int dis; /* TODO: use dis in distortion calculation later. */
+                unsigned int sse;
+                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis, &sse);
+            }
+
+            mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
+            mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+
+            // Add the new motion vector cost to our rolling cost variable
+            rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, x->mvcost, 96);
+        }
 
         case NEARESTMV:
         case NEARMV:
@@ -2399,17 +2369,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             cpi->rd_threshes[THR_NEWA] = (cpi->rd_baseline_thresh[THR_NEWA] >> 7) * cpi->rd_thresh_mult[THR_NEWA];
         }*/
 
-    }
-
-    // If we have chosen new mv or split then decay the full search check count more quickly.
-    if ((vp8_mode_order[best_mode_index] == NEWMV) || (vp8_mode_order[best_mode_index] == SPLITMV))
-    {
-        int lf_or_gf = (vp8_ref_frame_order[best_mode_index] == LAST_FRAME) ? 0 : 1;
-
-        if (cpi->check_freq[lf_or_gf] && !cpi->do_full[lf_or_gf])
-        {
-            cpi->check_freq[lf_or_gf] --;
-        }
     }
 
     // Keep a record of best mode index that we chose

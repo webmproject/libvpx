@@ -90,6 +90,7 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;
     cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_c;
     cpi->rtcd.search.full_search             = vp8_full_search_sad;
+    cpi->rtcd.search.refining_search         = vp8_refining_search_sad;
     cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
 #if !(CONFIG_REALTIME_ONLY)
     cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;

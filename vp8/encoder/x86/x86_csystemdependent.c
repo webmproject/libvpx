@@ -272,6 +272,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.sad8x8x4d             = vp8_sad8x8x4d_sse3;
         cpi->rtcd.variance.sad4x4x4d             = vp8_sad4x4x4d_sse3;
         cpi->rtcd.search.diamond_search          = vp8_diamond_search_sadx4;
+        cpi->rtcd.search.refining_search         = vp8_refining_search_sadx4;
     }
 #endif
 
