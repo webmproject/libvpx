@@ -285,7 +285,6 @@ typedef struct
     int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
 
     int is_src_frame_alt_ref;   // source of frame to encode is an exact copy of an alt ref frame
-    int is_next_src_alt_ref;    // source of next frame to encode is an exact copy of an alt ref frame
 
     int gold_is_last; // golden frame same as last frame ( short circuit gold searches)
     int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
