@@ -69,6 +69,20 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
      MV *center_mv \
     )
 
+#define prototype_refining_search_sad(sym)\
+    int (sym)\
+    (\
+     MACROBLOCK *x, \
+     BLOCK *b, \
+     BLOCKD *d, \
+     MV *ref_mv, \
+     int error_per_bit, \
+     int distance, \
+     vp8_variance_fn_ptr_t *fn_ptr, \
+     int *mvcost[2], \
+     MV *center_mv \
+    )
+
 #define prototype_diamond_search_sad(sym)\
     int (sym)\
     (\
@@ -94,6 +108,10 @@ extern prototype_full_search_sad(vp8_full_search_sad);
 extern prototype_full_search_sad(vp8_full_search_sadx3);
 extern prototype_full_search_sad(vp8_full_search_sadx8);
 
+typedef prototype_refining_search_sad(*vp8_refining_search_fn_t);
+extern prototype_refining_search_sad(vp8_refining_search_sad);
+extern prototype_refining_search_sad(vp8_refining_search_sadx4);
+
 typedef prototype_diamond_search_sad(*vp8_diamond_search_fn_t);
 extern prototype_diamond_search_sad(vp8_diamond_search_sad);
 extern prototype_diamond_search_sad(vp8_diamond_search_sadx4);
@@ -103,6 +121,11 @@ extern prototype_diamond_search_sad(vp8_diamond_search_sadx4);
 #endif
 extern prototype_full_search_sad(vp8_search_full_search);
 
+#ifndef vp8_search_refining_search
+#define vp8_search_refining_search vp8_refining_search_sad
+#endif
+extern prototype_refining_search_sad(vp8_search_refining_search);
+
 #ifndef vp8_search_diamond_search
 #define vp8_search_diamond_search vp8_diamond_search_sad
 #endif
@@ -111,6 +134,7 @@ extern prototype_diamond_search_sad(vp8_search_diamond_search);
 typedef struct
 {
     prototype_full_search_sad(*full_search);
+    prototype_refining_search_sad(*refining_search);
     prototype_diamond_search_sad(*diamond_search);
 } vp8_search_rtcd_vtable_t;
 

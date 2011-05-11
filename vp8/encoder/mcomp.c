@@ -1621,6 +1621,187 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
         return INT_MAX;
 }
 
+int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int error_per_bit, int search_range, vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2], MV *center_mv)
+{
+    MV neighbors[4] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
+    MV tempmv;
+    int i, j;
+    short this_row_offset, this_col_offset;
+
+    int what_stride = b->src_stride;
+    int in_what_stride = d->pre_stride;
+    unsigned char *what = (*(b->base_src) + b->src);
+    unsigned char *best_address = (unsigned char *)(*(d->base_pre) + d->pre + (ref_mv->row * (d->pre_stride)) + ref_mv->col);
+    unsigned char *check_here;
+    unsigned int thissad;
+    MV this_mv;
+    unsigned int bestsad = INT_MAX;
+
+    int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    MV fcenter_mv;
+
+    fcenter_mv.row = center_mv->row >> 3;
+    fcenter_mv.col = center_mv->col >> 3;
+
+    bestsad = fn_ptr->sdf(what, what_stride, best_address, in_what_stride, 0x7fffffff) + mvsad_err_cost(ref_mv, &fcenter_mv, mvsadcost, error_per_bit);
+
+    for (i=0; i<search_range; i++)
+    {
+        tempmv.row = ref_mv->row;
+        tempmv.col = ref_mv->col;
+
+        for (j = 0 ; j < 4 ; j++)
+        {
+            this_row_offset = ref_mv->row + neighbors[j].row;
+            this_col_offset = ref_mv->col + neighbors[j].col;
+
+            if ((this_col_offset > x->mv_col_min) && (this_col_offset < x->mv_col_max) &&
+            (this_row_offset > x->mv_row_min) && (this_row_offset < x->mv_row_max))
+            {
+                check_here = (neighbors[j].row)*in_what_stride + neighbors[j].col + best_address;
+                thissad = fn_ptr->sdf(what, what_stride, check_here , in_what_stride, bestsad);
+
+                if (thissad < bestsad)
+                {
+                    this_mv.row = this_row_offset;
+                    this_mv.col = this_col_offset;
+                    thissad += mvsad_err_cost(&this_mv, &fcenter_mv, mvsadcost, error_per_bit);
+
+                    if (thissad < bestsad)
+                    {
+                        bestsad = thissad;
+                        ref_mv->row = this_row_offset;
+                        ref_mv->col = this_col_offset;
+                        best_address = check_here;
+                    }
+                }
+            }
+        }
+
+        if (tempmv.row == ref_mv->row && tempmv.col == ref_mv->col )
+            break;
+    }
+
+    this_mv.row = ref_mv->row << 3;
+    this_mv.col = ref_mv->col << 3;
+
+    if (bestsad < INT_MAX)
+        return fn_ptr->vf(what, what_stride, best_address, in_what_stride, (unsigned int *)(&thissad))
++ mv_err_cost(&this_mv, center_mv, mvcost, error_per_bit);
+    else
+        return INT_MAX;
+}
+
+int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int error_per_bit, int search_range, vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2], MV *center_mv)
+{
+    MV neighbors[4] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
+    MV tempmv;
+    int i, j;
+    short this_row_offset, this_col_offset;
+
+    int what_stride = b->src_stride;
+    int in_what_stride = d->pre_stride;
+    unsigned char *what = (*(b->base_src) + b->src);
+    unsigned char *best_address = (unsigned char *)(*(d->base_pre) + d->pre + (ref_mv->row * (d->pre_stride)) + ref_mv->col);
+    unsigned char *check_here;
+    unsigned int thissad;
+    MV this_mv;
+    unsigned int bestsad = INT_MAX;
+
+    int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    MV fcenter_mv;
+
+    fcenter_mv.row = center_mv->row >> 3;
+    fcenter_mv.col = center_mv->col >> 3;
+
+    bestsad = fn_ptr->sdf(what, what_stride, best_address, in_what_stride, 0x7fffffff) + mvsad_err_cost(ref_mv, &fcenter_mv, mvsadcost, error_per_bit);
+
+    for (i=0; i<search_range; i++)
+    {
+        int all_in = 1;
+
+        tempmv.row = ref_mv->row;
+        tempmv.col = ref_mv->col;
+
+        all_in &= ((ref_mv->row - 1) > x->mv_row_min);
+        all_in &= ((ref_mv->row + 1) < x->mv_row_max);
+        all_in &= ((ref_mv->col - 1) > x->mv_col_min);
+        all_in &= ((ref_mv->col + 1) < x->mv_col_max);
+
+        if(all_in)
+        {
+            unsigned int sad_array[4];
+            unsigned char *block_offset[4];
+            block_offset[0] = best_address - in_what_stride;
+            block_offset[1] = best_address - 1;
+            block_offset[2] = best_address + 1;
+            block_offset[3] = best_address + in_what_stride;
+
+            fn_ptr->sdx4df(what, what_stride, block_offset, in_what_stride, sad_array);
+
+            for (j = 0; j < 4; j++)
+            {
+                if (sad_array[j] < bestsad)
+                {
+                    this_mv.row = ref_mv->row + neighbors[j].row;
+                    this_mv.col = ref_mv->col + neighbors[j].col;
+                    sad_array[j] += mvsad_err_cost(&this_mv, &fcenter_mv, mvsadcost, error_per_bit);
+
+                    if (sad_array[j] < bestsad)
+                    {
+                        bestsad = sad_array[j];
+                        ref_mv->row = this_mv.row;
+                        ref_mv->col = this_mv.col;
+                        best_address = block_offset[j];
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (j = 0 ; j < 4 ; j++)
+            {
+                this_row_offset = ref_mv->row + neighbors[j].row;
+                this_col_offset = ref_mv->col + neighbors[j].col;
+
+                if ((this_col_offset > x->mv_col_min) && (this_col_offset < x->mv_col_max) &&
+                (this_row_offset > x->mv_row_min) && (this_row_offset < x->mv_row_max))
+                {
+                    check_here = (neighbors[j].row)*in_what_stride + neighbors[j].col + best_address;
+                    thissad = fn_ptr->sdf(what, what_stride, check_here , in_what_stride, bestsad);
+
+                    if (thissad < bestsad)
+                    {
+                        this_mv.row = this_row_offset;
+                        this_mv.col = this_col_offset;
+                        thissad += mvsad_err_cost(&this_mv, &fcenter_mv, mvsadcost, error_per_bit);
+
+                        if (thissad < bestsad)
+                        {
+                            bestsad = thissad;
+                            ref_mv->row = this_row_offset;
+                            ref_mv->col = this_col_offset;
+                            best_address = check_here;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (tempmv.row == ref_mv->row && tempmv.col == ref_mv->col )
+              break;
+    }
+
+    this_mv.row = ref_mv->row << 3;
+    this_mv.col = ref_mv->col << 3;
+
+    if (bestsad < INT_MAX)
+        return fn_ptr->vf(what, what_stride, best_address, in_what_stride, (unsigned int *)(&thissad))
++ mv_err_cost(&this_mv, center_mv, mvcost, error_per_bit);
+    else
+        return INT_MAX;
+}
+
 #ifdef ENTROPY_STATS
 void print_mode_context(void)
 {

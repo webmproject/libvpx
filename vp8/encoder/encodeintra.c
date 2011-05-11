@@ -122,7 +122,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_quantize_mbuv(x);
 
-    if (x->optimize==2 ||(x->optimize && x->rddiv > 1))
+    if (x->optimize)
         vp8_optimize_mbuv(x, rtcd);
 
     vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
