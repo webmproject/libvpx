@@ -639,9 +639,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
     sf->improved_mv_pred = 1;
 
-    cpi->do_full[0] = 0;
-    cpi->do_full[1] = 0;
-
     // default thresholds to 0
     for (i = 0; i < MAX_MODES; i++)
         sf->thresh_mult[i] = 0;
@@ -1301,7 +1298,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     }
 
     if (cpi->sf.optimize_coefficients == 1)
-        cpi->mb.optimize = 1 + cpi->is_next_src_alt_ref;
+        cpi->mb.optimize = 1;
     else
         cpi->mb.optimize = 0;
 
@@ -1812,7 +1809,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     // YX Temp
     cpi->alt_ref_source = NULL;
     cpi->is_src_frame_alt_ref = 0;
-    cpi->is_next_src_alt_ref = 0;
+
 
 #if 0
     // Experimental RD Code
@@ -2045,9 +2042,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         cpi->prior_key_frame_distance[i] = (int)cpi->output_frame_rate;
     }
 
-    cpi->check_freq[0] = 15;
-    cpi->check_freq[1] = 15;
-
 #ifdef OUTPUT_YUV_SRC
     yuv_file = fopen("bd.yuv", "ab");
 #endif
@@ -2153,6 +2147,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
     cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
+    cpi->refining_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, refining_search);
 
     cpi->ready_for_new_frame = 1;
 
@@ -4738,7 +4733,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             cm->show_frame = 0;
             cpi->source_alt_ref_pending = FALSE;   // Clear Pending altf Ref flag.
             cpi->is_src_frame_alt_ref = 0;
-            cpi->is_next_src_alt_ref = 0;
         }
     }
 #endif
@@ -4752,9 +4746,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             cpi->is_src_frame_alt_ref = cpi->alt_ref_source
                                         && (cpi->source == cpi->alt_ref_source);
 
-            cpi->is_next_src_alt_ref = cpi->alt_ref_source
-                                        && (vp8_lookahead_peek(cpi->lookahead, 0)
-                                            == cpi->alt_ref_source);
             if(cpi->is_src_frame_alt_ref)
                 cpi->alt_ref_source = NULL;
         }

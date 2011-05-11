@@ -285,7 +285,6 @@ typedef struct
     int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
 
     int is_src_frame_alt_ref;   // source of frame to encode is an exact copy of an alt ref frame
-    int is_next_src_alt_ref;    // source of next frame to encode is an exact copy of an alt ref frame
 
     int gold_is_last; // golden frame same as last frame ( short circuit gold searches)
     int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
@@ -310,9 +309,6 @@ typedef struct
     unsigned int mode_test_hit_counts[MAX_MODES];
     unsigned int mode_chosen_counts[MAX_MODES];
     unsigned int mbs_tested_so_far;
-
-    unsigned int check_freq[2];
-    unsigned int do_full[2];
 
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
@@ -599,6 +595,7 @@ typedef struct
 
     fractional_mv_step_fp *find_fractional_mv_step;
     vp8_full_search_fn_t full_search_sad;
+    vp8_refining_search_fn_t refining_search_sad;
     vp8_diamond_search_fn_t diamond_search_sad;
     vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SEGMENTS];
     unsigned int time_receive_data;
