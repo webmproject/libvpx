@@ -111,8 +111,6 @@ int main(int argc, char **argv) {
     vpx_codec_ctx_t      codec;
     vpx_codec_enc_cfg_t  cfg;
     int                  frame_cnt = 0;
-    unsigned char        file_hdr[IVF_FILE_HDR_SZ];
-    unsigned char        frame_hdr[IVF_FRAME_HDR_SZ];
     vpx_image_t          raw;
     vpx_codec_err_t      res;
     long                 width;

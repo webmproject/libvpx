@@ -618,8 +618,8 @@ static vpx_codec_err_t vp8_set_postproc(vpx_codec_alg_priv_t *ctx,
                                         int ctr_id,
                                         va_list args)
 {
-    vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
 #if CONFIG_POSTPROC
+    vp8_postproc_cfg_t *data = va_arg(args, vp8_postproc_cfg_t *);
 
     if (data)
     {

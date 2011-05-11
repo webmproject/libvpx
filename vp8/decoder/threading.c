@@ -91,7 +91,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
 {
     int eobtotal = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
-    VP8_COMMON *pc = &pbi->common;
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
@@ -478,7 +477,6 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi)
 
 void vp8mt_de_alloc_temp_buffers(VP8D_COMP *pbi, int mb_rows)
 {
-    VP8_COMMON *const pc = & pbi->common;
     int i;
 
     if (pbi->b_multithreaded_rd)
@@ -699,7 +697,6 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
     int mb_row;
     VP8_COMMON *pc = &pbi->common;
 
-    int ibc = 0;
     int num_part = 1 << pbi->common.multi_token_partition;
     int i;
     volatile int *last_row_current_mb_col = NULL;

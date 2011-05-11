@@ -358,8 +358,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 
 void vp8_auto_select_speed(VP8_COMP *cpi)
 {
-    int used = cpi->oxcf.cpu_used;
-
     int milliseconds_for_compress = (int)(1000000 / cpi->oxcf.frame_rate);
 
     milliseconds_for_compress = milliseconds_for_compress * (16 - cpi->oxcf.cpu_used) / 16;
@@ -380,10 +378,10 @@ void vp8_auto_select_speed(VP8_COMP *cpi)
 
     /*
     // this is done during parameter valid check
-    if( used > 16)
-        used = 16;
-    if( used < -16)
-        used = -16;
+    if( cpi->oxcf.cpu_used > 16)
+        cpi->oxcf.cpu_used = 16;
+    if( cpi->oxcf.cpu_used < -16)
+        cpi->oxcf.cpu_used = -16;
     */
 
     if (cpi->avg_pick_mode_time < milliseconds_for_compress && (cpi->avg_encode_time - cpi->avg_pick_mode_time) < milliseconds_for_compress)
