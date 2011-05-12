@@ -799,12 +799,12 @@ static void write_sub_mv_ref
 
 static void write_mv
 (
-    vp8_writer *w, const MV *mv, const MV *ref, const MV_CONTEXT *mvc
+    vp8_writer *w, const MV *mv, const int_mv *ref, const MV_CONTEXT *mvc
 )
 {
     MV e;
-    e.row = mv->row - ref->row;
-    e.col = mv->col - ref->col;
+    e.row = mv->row - ref->as_mv.row;
+    e.col = mv->col - ref->as_mv.col;
 
     vp8_encode_motion_vector(w, &e, mvc);
 }
@@ -957,7 +957,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             }
             else    /* inter coded */
             {
-                MV best_mv;
+                int_mv best_mv;
                 vp8_prob mv_ref_p [VP8_MVREFS-1];
 
                 vp8_write(w, 1, cpi->prob_intra_coded);
@@ -971,7 +971,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 }
 
                 {
-                    MV n1, n2;
+                    int_mv n1, n2;
                     int ct[4];
 
                     vp8_find_near_mvs(xd, m, &n1, &n2, &best_mv, ct, rf, cpi->common.ref_frame_sign_bias);

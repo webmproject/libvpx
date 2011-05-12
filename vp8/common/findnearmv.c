@@ -25,9 +25,9 @@ void vp8_find_near_mvs
 (
     MACROBLOCKD *xd,
     const MODE_INFO *here,
-    MV *nearest,
-    MV *nearby,
-    MV *best_mv,
+    int_mv *nearest,
+    int_mv *nearby,
+    int_mv *best_mv,
     int cnt[4],
     int refframe,
     int *ref_frame_sign_bias
@@ -131,13 +131,14 @@ void vp8_find_near_mvs
         near_mvs[CNT_INTRA] = near_mvs[CNT_NEAREST];
 
     /* Set up return values */
-    *best_mv = near_mvs[0].as_mv;
-    *nearest = near_mvs[CNT_NEAREST].as_mv;
-    *nearby = near_mvs[CNT_NEAR].as_mv;
+    best_mv->as_int = near_mvs[0].as_int;
+    nearest->as_int = near_mvs[CNT_NEAREST].as_int;
+    nearby->as_int = near_mvs[CNT_NEAR].as_int;
 
-    vp8_clamp_mv(nearest, xd);
-    vp8_clamp_mv(nearby, xd);
-    vp8_clamp_mv(best_mv, xd); /*TODO: move this up before the copy*/
+    //TODO: move clamp outside findnearmv
+    vp8_clamp_mv2(nearest, xd);
+    vp8_clamp_mv2(nearby, xd);
+    vp8_clamp_mv2(best_mv, xd);
 }
 
 vp8_prob *vp8_mv_ref_probs(

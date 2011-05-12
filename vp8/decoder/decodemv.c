@@ -283,12 +283,11 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                             int mb_row, int mb_col)
 {
-    const MV Zero = { 0, 0};
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
     const int mis = pbi->common.mode_info_stride;
 
-    MV *const mv = & mbmi->mv.as_mv;
+    int_mv *const mv = & mbmi->mv;
     int mb_to_left_edge;
     int mb_to_right_edge;
     int mb_to_top_edge;
@@ -325,7 +324,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     {
         int rct[4];
         vp8_prob mv_ref_p [VP8_MVREFS-1];
-        MV nearest, nearby, best_mv;
+        int_mv nearest, nearby, best_mv;
 
         if (vp8_read(bc, pbi->prob_last))
         {
@@ -349,8 +348,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             do  /* for each subset j */
             {
                 B_MODE_INFO bmi;
-                MV *const mv = & bmi.mv.as_mv;
-
                 int k;  /* first block in subset j */
                 int mv_contz;
                 k = vp8_mbsplit_offset[s][j];
@@ -360,27 +357,27 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 switch (bmi.mode = (B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
                 {
                 case NEW4X4:
-                    read_mv(bc, mv, (const MV_CONTEXT *) mvc);
-                    mv->row += best_mv.row;
-                    mv->col += best_mv.col;
+                    read_mv(bc, &bmi.mv.as_mv, (const MV_CONTEXT *) mvc);
+                    bmi.mv.as_mv.row += best_mv.as_mv.row;
+                    bmi.mv.as_mv.col += best_mv.as_mv.col;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][3]++;
   #endif
                     break;
                 case LEFT4X4:
-                    *mv = vp8_left_bmi(mi, k)->mv.as_mv;
+                    bmi.mv.as_int = vp8_left_bmi(mi, k)->mv.as_int;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][0]++;
   #endif
                     break;
                 case ABOVE4X4:
-                    *mv = vp8_above_bmi(mi, k, mis)->mv.as_mv;
+                    bmi.mv.as_int = vp8_above_bmi(mi, k, mis)->mv.as_int;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][1]++;
   #endif
                     break;
                 case ZERO4X4:
-                    *mv = Zero;
+                    bmi.mv.as_int = 0;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][2]++;
   #endif
@@ -389,10 +386,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     break;
                 }
 
-                mbmi->need_to_clamp_mvs |= (mv->col < mb_to_left_edge) ? 1 : 0;
-                mbmi->need_to_clamp_mvs |= (mv->col > mb_to_right_edge) ? 1 : 0;
-                mbmi->need_to_clamp_mvs |= (mv->row < mb_to_top_edge) ? 1 : 0;
-                mbmi->need_to_clamp_mvs |= (mv->row > mb_to_bottom_edge) ? 1 : 0;
+                mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(&bmi.mv,
+                                                          mb_to_left_edge,
+                                                          mb_to_right_edge,
+                                                          mb_to_top_edge,
+                                                          mb_to_bottom_edge);
 
                 {
                     /* Fill (uniform) modes, mvs of jth subset.
@@ -414,72 +412,62 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             while (++j < num_p);
         }
 
-        *mv = mi->bmi[15].mv.as_mv;
+        mv->as_int = mi->bmi[15].mv.as_int;
 
         break;  /* done with SPLITMV */
 
         case NEARMV:
-            *mv = nearby;
+            mv->as_int = nearby.as_int;
             /* Clip "next_nearest" so that it does not extend to far out of image */
-            mv->col = (mv->col < mb_to_left_edge) ? mb_to_left_edge : mv->col;
-            mv->col = (mv->col > mb_to_right_edge) ? mb_to_right_edge : mv->col;
-            mv->row = (mv->row < mb_to_top_edge) ? mb_to_top_edge : mv->row;
-            mv->row = (mv->row > mb_to_bottom_edge) ? mb_to_bottom_edge : mv->row;
+            vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
+                         mb_to_top_edge, mb_to_bottom_edge);
             goto propagate_mv;
 
         case NEARESTMV:
-            *mv = nearest;
+            mv->as_int = nearest.as_int;
             /* Clip "next_nearest" so that it does not extend to far out of image */
-            mv->col = (mv->col < mb_to_left_edge) ? mb_to_left_edge : mv->col;
-            mv->col = (mv->col > mb_to_right_edge) ? mb_to_right_edge : mv->col;
-            mv->row = (mv->row < mb_to_top_edge) ? mb_to_top_edge : mv->row;
-            mv->row = (mv->row > mb_to_bottom_edge) ? mb_to_bottom_edge : mv->row;
+            vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
+                         mb_to_top_edge, mb_to_bottom_edge);
             goto propagate_mv;
 
         case ZEROMV:
-            *mv = Zero;
+            mv->as_int = 0;
             goto propagate_mv;
 
         case NEWMV:
-            read_mv(bc, mv, (const MV_CONTEXT *) mvc);
-            mv->row += best_mv.row;
-            mv->col += best_mv.col;
+            read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
+            mv->as_mv.row += best_mv.as_mv.row;
+            mv->as_mv.col += best_mv.as_mv.col;
 
             /* Don't need to check this on NEARMV and NEARESTMV modes
              * since those modes clamp the MV. The NEWMV mode does not,
              * so signal to the prediction stage whether special
              * handling may be required.
              */
-            mbmi->need_to_clamp_mvs = (mv->col < mb_to_left_edge) ? 1 : 0;
-            mbmi->need_to_clamp_mvs |= (mv->col > mb_to_right_edge) ? 1 : 0;
-            mbmi->need_to_clamp_mvs |= (mv->row < mb_to_top_edge) ? 1 : 0;
-            mbmi->need_to_clamp_mvs |= (mv->row > mb_to_bottom_edge) ? 1 : 0;
+            mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(mv,
+                                                      mb_to_left_edge,
+                                                      mb_to_right_edge,
+                                                      mb_to_top_edge,
+                                                      mb_to_bottom_edge);
 
         propagate_mv:  /* same MV throughout */
             {
-                /*int i=0;
-                do
-                {
-                  mi->bmi[i].mv.as_mv = *mv;
-                }
-                while( ++i < 16);*/
-
-                mi->bmi[0].mv.as_mv = *mv;
-                mi->bmi[1].mv.as_mv = *mv;
-                mi->bmi[2].mv.as_mv = *mv;
-                mi->bmi[3].mv.as_mv = *mv;
-                mi->bmi[4].mv.as_mv = *mv;
-                mi->bmi[5].mv.as_mv = *mv;
-                mi->bmi[6].mv.as_mv = *mv;
-                mi->bmi[7].mv.as_mv = *mv;
-                mi->bmi[8].mv.as_mv = *mv;
-                mi->bmi[9].mv.as_mv = *mv;
-                mi->bmi[10].mv.as_mv = *mv;
-                mi->bmi[11].mv.as_mv = *mv;
-                mi->bmi[12].mv.as_mv = *mv;
-                mi->bmi[13].mv.as_mv = *mv;
-                mi->bmi[14].mv.as_mv = *mv;
-                mi->bmi[15].mv.as_mv = *mv;
+                mi->bmi[ 0].mv.as_int =
+                mi->bmi[ 1].mv.as_int =
+                mi->bmi[ 2].mv.as_int =
+                mi->bmi[ 3].mv.as_int =
+                mi->bmi[ 4].mv.as_int =
+                mi->bmi[ 5].mv.as_int =
+                mi->bmi[ 6].mv.as_int =
+                mi->bmi[ 7].mv.as_int =
+                mi->bmi[ 8].mv.as_int =
+                mi->bmi[ 9].mv.as_int =
+                mi->bmi[10].mv.as_int =
+                mi->bmi[11].mv.as_int =
+                mi->bmi[12].mv.as_int =
+                mi->bmi[13].mv.as_int =
+                mi->bmi[14].mv.as_int =
+                mi->bmi[15].mv.as_int = mv->as_int;
             }
             break;
         default:;
@@ -494,7 +482,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         int j = 0;
         do
         {
-            mi->bmi[j].mv.as_mv = Zero;
+            mi->bmi[j].mv.as_int = 0;
         }
         while (++j < 16);
 
