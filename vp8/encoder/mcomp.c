@@ -1624,7 +1624,6 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int er
 int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int error_per_bit, int search_range, vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2], MV *center_mv)
 {
     MV neighbors[4] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
-    MV tempmv;
     int i, j;
     short this_row_offset, this_col_offset;
 
@@ -1647,8 +1646,7 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int 
 
     for (i=0; i<search_range; i++)
     {
-        tempmv.row = ref_mv->row;
-        tempmv.col = ref_mv->col;
+        int best_site = -1;
 
         for (j = 0 ; j < 4 ; j++)
         {
@@ -1670,16 +1668,20 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int 
                     if (thissad < bestsad)
                     {
                         bestsad = thissad;
-                        ref_mv->row = this_row_offset;
-                        ref_mv->col = this_col_offset;
-                        best_address = check_here;
+                        best_site = j;
                     }
                 }
             }
         }
 
-        if (tempmv.row == ref_mv->row && tempmv.col == ref_mv->col )
+        if (best_site == -1)
             break;
+        else
+        {
+            ref_mv->row += neighbors[best_site].row;
+            ref_mv->col += neighbors[best_site].col;
+            best_address += (neighbors[best_site].row)*in_what_stride + neighbors[best_site].col;
+        }
     }
 
     this_mv.row = ref_mv->row << 3;
@@ -1695,7 +1697,6 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int 
 int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, int error_per_bit, int search_range, vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2], MV *center_mv)
 {
     MV neighbors[4] = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
-    MV tempmv;
     int i, j;
     short this_row_offset, this_col_offset;
 
@@ -1718,10 +1719,8 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, in
 
     for (i=0; i<search_range; i++)
     {
+        int best_site = -1;
         int all_in = 1;
-
-        tempmv.row = ref_mv->row;
-        tempmv.col = ref_mv->col;
 
         all_in &= ((ref_mv->row - 1) > x->mv_row_min);
         all_in &= ((ref_mv->row + 1) < x->mv_row_max);
@@ -1750,9 +1749,7 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, in
                     if (sad_array[j] < bestsad)
                     {
                         bestsad = sad_array[j];
-                        ref_mv->row = this_mv.row;
-                        ref_mv->col = this_mv.col;
-                        best_address = block_offset[j];
+                        best_site = j;
                     }
                 }
             }
@@ -1779,17 +1776,21 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d, MV *ref_mv, in
                         if (thissad < bestsad)
                         {
                             bestsad = thissad;
-                            ref_mv->row = this_row_offset;
-                            ref_mv->col = this_col_offset;
-                            best_address = check_here;
+                            best_site = j;
                         }
                     }
                 }
             }
         }
 
-        if (tempmv.row == ref_mv->row && tempmv.col == ref_mv->col )
-              break;
+        if (best_site == -1)
+            break;
+        else
+        {
+            ref_mv->row += neighbors[best_site].row;
+            ref_mv->col += neighbors[best_site].col;
+            best_address += (neighbors[best_site].row)*in_what_stride + neighbors[best_site].col;
+        }
     }
 
     this_mv.row = ref_mv->row << 3;
