@@ -21,19 +21,6 @@ static int mv_ref_ct [31] [4] [2];
 static int mv_mode_cts [4] [2];
 #endif
 
-static int mv_bits_sadcost[256];
-
-void vp8cx_init_mv_bits_sadcost()
-{
-    int i;
-
-    for (i = 0; i < 256; i++)
-    {
-        mv_bits_sadcost[i] = (int)sqrt(i * 16);
-    }
-}
-
-
 int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight)
 {
     // MV costing is based on the distribution of vectors in the previous frame and as such will tend to
@@ -1320,9 +1307,7 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
             thissad = fn_ptr->sdf(what, what_stride, check_here , in_what_stride, bestsad);
 
             this_mv.as_mv.col = c;
-            //thissad += (int)sqrt(mv_err_cost(&this_mv,ref_mv, mvcost,error_per_bit*14));
-            //thissad  += error_per_bit * mv_bits_sadcost[mv_bits(&this_mv, ref_mv, mvcost)];
-            thissad  += mvsad_err_cost(&this_mv, &fcenter_mv, mvsadcost, error_per_bit); //mv_bits(error_per_bit, &this_mv, ref_mv, mvsadcost);
+            thissad  += mvsad_err_cost(&this_mv, &fcenter_mv, mvsadcost, error_per_bit);
 
             if (thissad < bestsad)
             {

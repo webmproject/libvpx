@@ -46,7 +46,6 @@
 #define RTCD(x) NULL
 #endif
 
-extern void vp8cx_init_mv_bits_sadcost();
 extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
 extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
@@ -231,7 +230,6 @@ void vp8_initialize()
         //vp8_dmachine_specific_config();
         vp8_tokenize_initialize();
 
-        vp8cx_init_mv_bits_sadcost();
         init_done = 1;
     }
 }
