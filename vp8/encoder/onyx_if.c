@@ -4699,23 +4699,48 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     // adjust frame rates based on timestamps given
     if (!cm->refresh_alt_ref_frame)
     {
+        long long this_duration;
+        int step = 0;
+
         if (cpi->source->ts_start == cpi->first_time_stamp_ever)
         {
-            double this_fps = 10000000.000 / (cpi->source->ts_end - cpi->source->ts_start);
-
-            vp8_new_frame_rate(cpi, this_fps);
+            this_duration = cpi->source->ts_end - cpi->source->ts_start;
+            step = 1;
         }
         else
         {
-            long long nanosecs = cpi->source->ts_end
-                - cpi->last_end_time_stamp_seen;
+            long long last_duration;
 
-            if (nanosecs > 0)
+            this_duration = cpi->source->ts_end - cpi->last_end_time_stamp_seen;
+            last_duration = cpi->last_end_time_stamp_seen
+                            - cpi->last_time_stamp_seen;
+            // do a step update if the duration changes by 10%
+            if (last_duration)
+                step = ((this_duration - last_duration) * 10 / last_duration);
+        }
+
+        if (this_duration)
+        {
+            if (step)
+                vp8_new_frame_rate(cpi, 10000000.0 / this_duration);
+            else
             {
-              double this_fps = 10000000.000 / nanosecs;
-              vp8_new_frame_rate(cpi, (7 * cpi->oxcf.frame_rate + this_fps) / 8);
-            }
+                double avg_duration, interval;
 
+                /* Average this frame's rate into the last second's average
+                 * frame rate. If we haven't seen 1 second yet, then average
+                 * over the whole interval seen.
+                 */
+                interval = cpi->source->ts_end - cpi->first_time_stamp_ever;
+                if(interval > 10000000.0)
+                    interval = 10000000;
+
+                avg_duration = 10000000.0 / cpi->oxcf.frame_rate;
+                avg_duration *= (interval - avg_duration + this_duration);
+                avg_duration /= interval;
+
+                vp8_new_frame_rate(cpi, 10000000.0 / avg_duration);
+            }
         }
 
         cpi->last_time_stamp_seen = cpi->source->ts_start;
