@@ -140,11 +140,7 @@ typedef enum
 typedef struct
 {
     B_PREDICTION_MODE mode;
-    union
-    {
-        int as_int;
-        MV  as_mv;
-    } mv;
+    int_mv mv;
 } B_MODE_INFO;
 
 
@@ -161,11 +157,7 @@ typedef struct
 {
     MB_PREDICTION_MODE mode, uv_mode;
     MV_REFERENCE_FRAME ref_frame;
-    union
-    {
-        int as_int;
-        MV  as_mv;
-    } mv;
+    int_mv mv;
 
     unsigned char partitioning;
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */

@@ -1342,8 +1342,8 @@ int vp8cx_encode_inter_macroblock
     }
     else
     {
-        MV best_ref_mv;
-        MV nearest, nearby;
+        int_mv best_ref_mv;
+        int_mv nearest, nearby;
         int mdcounts[4];
         int ref_fb_idx;
 
@@ -1371,15 +1371,15 @@ int vp8cx_encode_inter_macroblock
             {
                 if (xd->block[i].bmi.mode == NEW4X4)
                 {
-                    cpi->MVcount[0][mv_max+((xd->block[i].bmi.mv.as_mv.row - best_ref_mv.row) >> 1)]++;
-                    cpi->MVcount[1][mv_max+((xd->block[i].bmi.mv.as_mv.col - best_ref_mv.col) >> 1)]++;
+                    cpi->MVcount[0][mv_max+((xd->block[i].bmi.mv.as_mv.row - best_ref_mv.as_mv.row) >> 1)]++;
+                    cpi->MVcount[1][mv_max+((xd->block[i].bmi.mv.as_mv.col - best_ref_mv.as_mv.col) >> 1)]++;
                 }
             }
         }
         else if (xd->mode_info_context->mbmi.mode == NEWMV)
         {
-            cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv.row) >> 1)]++;
-            cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv.col) >> 1)]++;
+            cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv.as_mv.row) >> 1)]++;
+            cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv.as_mv.col) >> 1)]++;
         }
 
         if (!x->skip)

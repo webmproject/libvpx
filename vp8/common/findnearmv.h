@@ -17,11 +17,6 @@
 #include "modecont.h"
 #include "treecoder.h"
 
-typedef union
-{
-    unsigned int as_int;
-    MV           as_mv;
-} int_mv;        /* facilitates rapid equality tests */
 
 static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias)
 {
@@ -39,24 +34,48 @@ static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, co
 
 #define LEFT_TOP_MARGIN (16 << 3)
 #define RIGHT_BOTTOM_MARGIN (16 << 3)
-static void vp8_clamp_mv(MV *mv, const MACROBLOCKD *xd)
+static void vp8_clamp_mv2(int_mv *mv, const MACROBLOCKD *xd)
 {
-    if (mv->col < (xd->mb_to_left_edge - LEFT_TOP_MARGIN))
-        mv->col = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-    else if (mv->col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN)
-        mv->col = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
+    if (mv->as_mv.col < (xd->mb_to_left_edge - LEFT_TOP_MARGIN))
+        mv->as_mv.col = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
+    else if (mv->as_mv.col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN)
+        mv->as_mv.col = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
 
-    if (mv->row < (xd->mb_to_top_edge - LEFT_TOP_MARGIN))
-        mv->row = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-    else if (mv->row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN)
-        mv->row = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+    if (mv->as_mv.row < (xd->mb_to_top_edge - LEFT_TOP_MARGIN))
+        mv->as_mv.row = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
+    else if (mv->as_mv.row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN)
+        mv->as_mv.row = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+}
+
+static void vp8_clamp_mv(int_mv *mv, int mb_to_left_edge, int mb_to_right_edge,
+                         int mb_to_top_edge, int mb_to_bottom_edge)
+{
+    mv->as_mv.col = (mv->as_mv.col < mb_to_left_edge) ?
+        mb_to_left_edge : mv->as_mv.col;
+    mv->as_mv.col = (mv->as_mv.col > mb_to_right_edge) ?
+        mb_to_right_edge : mv->as_mv.col;
+    mv->as_mv.row = (mv->as_mv.row < mb_to_top_edge) ?
+        mb_to_top_edge : mv->as_mv.row;
+    mv->as_mv.row = (mv->as_mv.row > mb_to_bottom_edge) ?
+        mb_to_bottom_edge : mv->as_mv.row;
+}
+static unsigned int vp8_check_mv_bounds(int_mv *mv, int mb_to_left_edge,
+                                int mb_to_right_edge, int mb_to_top_edge,
+                                int mb_to_bottom_edge)
+{
+    unsigned int need_to_clamp;
+    need_to_clamp = (mv->as_mv.col < mb_to_left_edge) ? 1 : 0;
+    need_to_clamp |= (mv->as_mv.col > mb_to_right_edge) ? 1 : 0;
+    need_to_clamp |= (mv->as_mv.row < mb_to_top_edge) ? 1 : 0;
+    need_to_clamp |= (mv->as_mv.row > mb_to_bottom_edge) ? 1 : 0;
+    return need_to_clamp;
 }
 
 void vp8_find_near_mvs
 (
     MACROBLOCKD *xd,
     const MODE_INFO *here,
-    MV *nearest, MV *nearby, MV *best,
+    int_mv *nearest, int_mv *nearby, int_mv *best,
     int near_mv_ref_cts[4],
     int refframe,
     int *ref_frame_sign_bias

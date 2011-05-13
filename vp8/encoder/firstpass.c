@@ -39,7 +39,7 @@
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
-extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, MV *mv);
+extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 
 //#define GFQ_ADJUSTMENT (40 + ((15*Q)/10))
@@ -423,14 +423,17 @@ static void zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG 
     VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16) ( src_ptr, src_stride, ref_ptr, ref_stride, (unsigned int *)(best_motion_err));
 }
 
-static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, MV *best_mv, YV12_BUFFER_CONFIG *recon_buffer, int *best_motion_err, int recon_yoffset )
+static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
+                                     int_mv *ref_mv, MV *best_mv,
+                                     YV12_BUFFER_CONFIG *recon_buffer,
+                                     int *best_motion_err, int recon_yoffset )
 {
     MACROBLOCKD *const xd = & x->e_mbd;
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     int num00;
 
-    MV tmp_mv = {0, 0};
+    int_mv tmp_mv;
 
     int tmp_err;
     int step_param = 3;                                       //3;          // Dont search over full range for first pass
@@ -446,6 +449,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, M
     xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;
 
     // Initial step/diamond search centred on best mv
+    tmp_mv.as_int = 0;
     tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param, x->errorperbit, &num00, &v_fn_ptr, x->mvcost, ref_mv);
     if ( tmp_err < INT_MAX-new_mv_mode_penalty )
         tmp_err += new_mv_mode_penalty;
@@ -453,8 +457,8 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, M
     if (tmp_err < *best_motion_err)
     {
         *best_motion_err = tmp_err;
-        best_mv->row = tmp_mv.row;
-        best_mv->col = tmp_mv.col;
+        best_mv->row = tmp_mv.as_mv.row;
+        best_mv->col = tmp_mv.as_mv.col;
     }
 
     // Further step/diamond searches as necessary
@@ -476,8 +480,8 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x, MV *ref_mv, M
             if (tmp_err < *best_motion_err)
             {
                 *best_motion_err = tmp_err;
-                best_mv->row = tmp_mv.row;
-                best_mv->col = tmp_mv.col;
+                best_mv->row = tmp_mv.as_mv.row;
+                best_mv->col = tmp_mv.as_mv.col;
             }
         }
     }
@@ -510,7 +514,9 @@ void vp8_first_pass(VP8_COMP *cpi)
 
     int sum_in_vectors = 0;
 
-    MV zero_ref_mv = {0, 0};
+    int_mv zero_ref_mv;
+
+    zero_ref_mv.as_int = 0;
 
     vp8_clear_system_state();  //__asm emms;
 
@@ -602,7 +608,7 @@ void vp8_first_pass(VP8_COMP *cpi)
 
                 // Test last reference frame using the previous best mv as the
                 // starting point (best reference) for the search
-                first_pass_motion_search(cpi, x, &best_ref_mv.as_mv,
+                first_pass_motion_search(cpi, x, &best_ref_mv,
                                         &d->bmi.mv.as_mv, lst_yv12,
                                         &motion_error, recon_yoffset);
 
@@ -666,7 +672,7 @@ void vp8_first_pass(VP8_COMP *cpi)
                     d->bmi.mv.as_mv.row <<= 3;
                     d->bmi.mv.as_mv.col <<= 3;
                     this_error = motion_error;
-                    vp8_set_mbmode_and_mvs(x, NEWMV, &d->bmi.mv.as_mv);
+                    vp8_set_mbmode_and_mvs(x, NEWMV, &d->bmi.mv);
                     vp8_encode_inter16x16y(IF_RTCD(&cpi->rtcd), x);
                     sum_mvr += d->bmi.mv.as_mv.row;
                     sum_mvr_abs += abs(d->bmi.mv.as_mv.row);

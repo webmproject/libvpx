@@ -25,7 +25,7 @@ extern void vp8_mv_pred
     VP8_COMP *cpi,
     MACROBLOCKD *xd,
     const MODE_INFO *here,
-    MV *mvp,
+    int_mv *mvp,
     int refframe,
     int *ref_frame_sign_bias,
     int *sr,

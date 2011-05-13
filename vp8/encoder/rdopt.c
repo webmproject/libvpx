@@ -909,20 +909,18 @@ int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4])
                           vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
 
-void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, MV *mv)
+void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv)
 {
     int i;
 
     x->e_mbd.mode_info_context->mbmi.mode = mb;
-    x->e_mbd.mode_info_context->mbmi.mv.as_mv.row = mv->row;
-    x->e_mbd.mode_info_context->mbmi.mv.as_mv.col = mv->col;
+    x->e_mbd.mode_info_context->mbmi.mv.as_int = mv->as_int;
 
     for (i = 0; i < 16; i++)
     {
         B_MODE_INFO *bmi = &x->e_mbd.block[i].bmi;
         bmi->mode = (B_PREDICTION_MODE) mb;
-        bmi->mv.as_mv.row = mv->row;
-        bmi->mv.as_mv.col = mv->col;
+        bmi->mv.as_int = mv->as_int;
     }
 }
 
@@ -930,7 +928,7 @@ static int labels2mode(
     MACROBLOCK *x,
     int const *labelings, int which_label,
     B_PREDICTION_MODE this_mode,
-    MV *this_mv, MV *best_ref_mv,
+    int_mv *this_mv, int_mv *best_ref_mv,
     int *mvcost[2]
 )
 {
@@ -971,13 +969,13 @@ static int labels2mode(
                 thismvcost  = vp8_mv_bit_cost(this_mv, best_ref_mv, mvcost, 102);
                 break;
             case LEFT4X4:
-                *this_mv = col ? d[-1].bmi.mv.as_mv : vp8_left_bmi(mic, i)->mv.as_mv;
+                this_mv->as_int = col ? d[-1].bmi.mv.as_int : vp8_left_bmi(mic, i)->mv.as_int;
                 break;
             case ABOVE4X4:
-                *this_mv = row ? d[-4].bmi.mv.as_mv : vp8_above_bmi(mic, i, mis)->mv.as_mv;
+                this_mv->as_int = row ? d[-4].bmi.mv.as_int : vp8_above_bmi(mic, i, mis)->mv.as_int;
                 break;
             case ZERO4X4:
-                this_mv->row = this_mv->col = 0;
+                this_mv->as_int = 0;
                 break;
             default:
                 break;
@@ -985,9 +983,11 @@ static int labels2mode(
 
             if (m == ABOVE4X4)  // replace above with left if same
             {
-                const MV mv = col ? d[-1].bmi.mv.as_mv : vp8_left_bmi(mic, i)->mv.as_mv;
+                int_mv left_mv;
+                left_mv.as_int = col ? d[-1].bmi.mv.as_int :
+                                        vp8_left_bmi(mic, i)->mv.as_int;
 
-                if (mv.row == this_mv->row  &&  mv.col == this_mv->col)
+                if (left_mv.as_int == this_mv->as_int)
                     m = LEFT4X4;
             }
 
@@ -995,7 +995,7 @@ static int labels2mode(
         }
 
         d->bmi.mode = m;
-        d->bmi.mv.as_mv = *this_mv;
+        d->bmi.mv.as_int = this_mv->as_int;
 
     }
     while (++i < 16);
@@ -1059,8 +1059,8 @@ static const unsigned int segmentation_to_sseshift[4] = {3, 3, 2, 0};
 
 typedef struct
 {
-  MV *ref_mv;
-  MV *mvp;
+  int_mv *ref_mv;
+  int_mv mvp;
 
   int segment_rd;
   int segment_num;
@@ -1074,7 +1074,7 @@ typedef struct
   int mvthresh;
   int *mdcounts;
 
-  MV sv_mvp[4];     // save 4 mvp from 8x8
+  int_mv sv_mvp[4];     // save 4 mvp from 8x8
   int sv_istep[2];  // save 2 initial step_param for 16x8/8x16
 
 } BEST_SEG_INFO;
@@ -1136,7 +1136,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
     for (i = 0; i < label_count; i++)
     {
-        MV mode_mv[B_MODE_COUNT];
+        int_mv mode_mv[B_MODE_COUNT];
         int best_label_rd = INT_MAX;
         B_PREDICTION_MODE mode_selected = ZERO4X4;
         int bestlabelyrate = 0;
@@ -1166,7 +1166,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                 int n;
                 int thissme;
                 int bestsme = INT_MAX;
-                MV  temp_mv;
+                int_mv  temp_mv;
                 BLOCK *c;
                 BLOCKD *e;
 
@@ -1178,8 +1178,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                 {
                     if (segmentation == BLOCK_8X16 || segmentation == BLOCK_16X8)
                     {
-                        bsi->mvp = &bsi->sv_mvp[i];
-                        if (i==1 && segmentation == BLOCK_16X8) bsi->mvp = &bsi->sv_mvp[2];
+                        bsi->mvp.as_int = bsi->sv_mvp[i].as_int;
+                        if (i==1 && segmentation == BLOCK_16X8)
+                          bsi->mvp.as_int = bsi->sv_mvp[2].as_int;
 
                         step_param = bsi->sv_istep[i];
                     }
@@ -1187,8 +1188,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     // use previous block's result as next block's MV predictor.
                     if (segmentation == BLOCK_4X4 && i>0)
                     {
-                        bsi->mvp = &(x->e_mbd.block[i-1].bmi.mv.as_mv);
-                        if (i==4 || i==8 || i==12) bsi->mvp = &(x->e_mbd.block[i-4].bmi.mv.as_mv);
+                        bsi->mvp.as_int = x->e_mbd.block[i-1].bmi.mv.as_int;
+                        if (i==4 || i==8 || i==12)
+                            bsi->mvp.as_int = x->e_mbd.block[i-4].bmi.mv.as_int;
                         step_param = 2;
                     }
                 }
@@ -1210,7 +1212,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
                     else
                     {
-                        bestsme = cpi->diamond_search_sad(x, c, e, bsi->mvp,
+                        bestsme = cpi->diamond_search_sad(x, c, e, &bsi->mvp,
                                                           &mode_mv[NEW4X4], step_param,
                                                           sadpb / 2, &num00, v_fn_ptr, x->mvcost, bsi->ref_mv);
 
@@ -1225,15 +1227,14 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                                 num00--;
                             else
                             {
-                                thissme = cpi->diamond_search_sad(x, c, e, bsi->mvp,
+                                thissme = cpi->diamond_search_sad(x, c, e, &bsi->mvp,
                                                                   &temp_mv, step_param + n,
                                                                   sadpb / 2, &num00, v_fn_ptr, x->mvcost, bsi->ref_mv);
 
                                 if (thissme < bestsme)
                                 {
                                     bestsme = thissme;
-                                    mode_mv[NEW4X4].row = temp_mv.row;
-                                    mode_mv[NEW4X4].col = temp_mv.col;
+                                    mode_mv[NEW4X4].as_int = temp_mv.as_int;
                                 }
                             }
                         }
@@ -1244,10 +1245,10 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     // Should we do a full search (best quality only)
                     if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000)
                     {
-                        MV full_mvp;
+                        int_mv full_mvp;
 
-                        full_mvp.row = bsi->mvp->row >>3;
-                        full_mvp.col = bsi->mvp->col >>3;
+                        full_mvp.as_mv.row = bsi->mvp.as_mv.row >>3;
+                        full_mvp.as_mv.col = bsi->mvp.as_mv.col >>3;
 
                         thissme = cpi->full_search_sad(x, c, e, &full_mvp,
                                                        sadpb / 4, 16, v_fn_ptr, x->mvcost, bsi->ref_mv);
@@ -1255,12 +1256,12 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                         if (thissme < bestsme)
                         {
                             bestsme = thissme;
-                            mode_mv[NEW4X4] = e->bmi.mv.as_mv;
+                            mode_mv[NEW4X4].as_int = e->bmi.mv.as_int;
                         }
                         else
                         {
                             // The full search result is actually worse so re-instate the previous best vector
-                            e->bmi.mv.as_mv = mode_mv[NEW4X4];
+                            e->bmi.mv.as_int = mode_mv[NEW4X4].as_int;
                         }
                     }
                 }
@@ -1283,8 +1284,8 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                                bsi->ref_mv, x->mvcost);
 
             // Trap vectors that reach beyond the UMV borders
-            if (((mode_mv[this_mode].row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].row >> 3) > x->mv_row_max) ||
-                ((mode_mv[this_mode].col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].col >> 3) > x->mv_col_max))
+            if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
+                ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max))
             {
                 continue;
             }
@@ -1361,7 +1362,7 @@ void vp8_cal_step_param(int sr, int *sp)
 }
 
 static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
-                                           MV *best_ref_mv, int best_rd,
+                                           int_mv *best_ref_mv, int best_rd,
                                            int *mdcounts, int *returntotrate,
                                            int *returnyrate, int *returndistortion,
                                            int mvthresh)
@@ -1373,7 +1374,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
     bsi.segment_rd = best_rd;
     bsi.ref_mv = best_ref_mv;
-    bsi.mvp = best_ref_mv;
+    bsi.mvp.as_int = best_ref_mv->as_int;
     bsi.mvthresh = mvthresh;
     bsi.mdcounts = mdcounts;
 
@@ -1399,10 +1400,10 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
         if (bsi.segment_rd < best_rd)
         {
-            int col_min = (best_ref_mv->col - MAX_FULL_PEL_VAL) >>3;
-            int col_max = (best_ref_mv->col + MAX_FULL_PEL_VAL) >>3;
-            int row_min = (best_ref_mv->row - MAX_FULL_PEL_VAL) >>3;
-            int row_max = (best_ref_mv->row + MAX_FULL_PEL_VAL) >>3;
+            int col_min = (best_ref_mv->as_mv.col - MAX_FULL_PEL_VAL) >>3;
+            int col_max = (best_ref_mv->as_mv.col + MAX_FULL_PEL_VAL) >>3;
+            int row_min = (best_ref_mv->as_mv.row - MAX_FULL_PEL_VAL) >>3;
+            int row_max = (best_ref_mv->as_mv.row + MAX_FULL_PEL_VAL) >>3;
 
             int tmp_col_min = x->mv_col_min;
             int tmp_col_max = x->mv_col_max;
@@ -1420,18 +1421,18 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                 x->mv_row_max = row_max;
 
             /* Get 8x8 result */
-            bsi.sv_mvp[0] = bsi.mvs[0].as_mv;
-            bsi.sv_mvp[1] = bsi.mvs[2].as_mv;
-            bsi.sv_mvp[2] = bsi.mvs[8].as_mv;
-            bsi.sv_mvp[3] = bsi.mvs[10].as_mv;
+            bsi.sv_mvp[0].as_int = bsi.mvs[0].as_int;
+            bsi.sv_mvp[1].as_int = bsi.mvs[2].as_int;
+            bsi.sv_mvp[2].as_int = bsi.mvs[8].as_int;
+            bsi.sv_mvp[3].as_int = bsi.mvs[10].as_int;
 
             /* Use 8x8 result as 16x8/8x16's predictor MV. Adjust search range according to the closeness of 2 MV. */
             /* block 8X16 */
             {
-                sr = MAXF((abs(bsi.sv_mvp[0].row - bsi.sv_mvp[2].row))>>3, (abs(bsi.sv_mvp[0].col - bsi.sv_mvp[2].col))>>3);
+                sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[2].as_mv.row))>>3, (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[2].as_mv.col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[0]);
 
-                sr = MAXF((abs(bsi.sv_mvp[1].row - bsi.sv_mvp[3].row))>>3, (abs(bsi.sv_mvp[1].col - bsi.sv_mvp[3].col))>>3);
+                sr = MAXF((abs(bsi.sv_mvp[1].as_mv.row - bsi.sv_mvp[3].as_mv.row))>>3, (abs(bsi.sv_mvp[1].as_mv.col - bsi.sv_mvp[3].as_mv.col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[1]);
 
                 rd_check_segment(cpi, x, &bsi, BLOCK_8X16);
@@ -1439,10 +1440,10 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
             /* block 16X8 */
             {
-                sr = MAXF((abs(bsi.sv_mvp[0].row - bsi.sv_mvp[1].row))>>3, (abs(bsi.sv_mvp[0].col - bsi.sv_mvp[1].col))>>3);
+                sr = MAXF((abs(bsi.sv_mvp[0].as_mv.row - bsi.sv_mvp[1].as_mv.row))>>3, (abs(bsi.sv_mvp[0].as_mv.col - bsi.sv_mvp[1].as_mv.col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[0]);
 
-                sr = MAXF((abs(bsi.sv_mvp[2].row - bsi.sv_mvp[3].row))>>3, (abs(bsi.sv_mvp[2].col - bsi.sv_mvp[3].col))>>3);
+                sr = MAXF((abs(bsi.sv_mvp[2].as_mv.row - bsi.sv_mvp[3].as_mv.row))>>3, (abs(bsi.sv_mvp[2].as_mv.col - bsi.sv_mvp[3].as_mv.col))>>3);
                 vp8_cal_step_param(sr, &bsi.sv_istep[1]);
 
                 rd_check_segment(cpi, x, &bsi, BLOCK_16X8);
@@ -1452,7 +1453,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
             /* Not skip 4x4 if speed=0 (good quality) */
             if (cpi->sf.no_skip_block4x4_search || bsi.segment_num == BLOCK_8X8)  /* || (sv_segment_rd8x8-bsi.segment_rd) < sv_segment_rd8x8>>5) */
             {
-                bsi.mvp = &bsi.sv_mvp[0];
+                bsi.mvp.as_int = bsi.sv_mvp[0].as_int;
                 rd_check_segment(cpi, x, &bsi, BLOCK_4X4);
             }
 
@@ -1552,7 +1553,7 @@ void vp8_mv_pred
     VP8_COMP *cpi,
     MACROBLOCKD *xd,
     const MODE_INFO *here,
-    MV *mvp,
+    int_mv *mvp,
     int refframe,
     int *ref_frame_sign_bias,
     int *sr,
@@ -1691,8 +1692,8 @@ void vp8_mv_pred
     }
 
     /* Set up return values */
-    *mvp = mv.as_mv;
-    vp8_clamp_mv(mvp, xd);
+    mvp->as_int = mv.as_int;
+    vp8_clamp_mv2(mvp, xd);
 }
 
 void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffset, int near_sadidx[])
@@ -1758,8 +1759,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     B_MODE_INFO best_bmodes[16];
     MB_MODE_INFO best_mbmode;
     PARTITION_INFO best_partition;
-    MV best_ref_mv;
-    MV mode_mv[MB_MODE_COUNT];
+    int_mv best_ref_mv;
+    int_mv mode_mv[MB_MODE_COUNT];
     MB_PREDICTION_MODE this_mode;
     int num00;
     int best_mode_index = 0;
@@ -1784,14 +1785,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     //int intermodecost[MAX_MODES];
 
     MB_PREDICTION_MODE uv_intra_mode;
-    MV mvp;
+    int_mv mvp;
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
     int saddone=0;
     int sr=0;    //search range got from mv_pred(). It uses step_param levels. (0-7)
 
-    MV frame_nearest_mv[4];
-    MV frame_near_mv[4];
-    MV frame_best_ref_mv[4];
+    int_mv frame_nearest_mv[4];
+    int_mv frame_near_mv[4];
+    int_mv frame_best_ref_mv[4];
     int frame_mdcounts[4][4];
     int frame_lf_or_gf[4];
     unsigned char *y_buffer[4];
@@ -1941,14 +1942,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                         x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
 
             /* adjust mvp to make sure it is within MV range */
-            if(mvp.row > best_ref_mv.row + MAX_FULL_PEL_VAL)
-                mvp.row = best_ref_mv.row + MAX_FULL_PEL_VAL;
-            else if(mvp.row < best_ref_mv.row - MAX_FULL_PEL_VAL)
-                mvp.row = best_ref_mv.row - MAX_FULL_PEL_VAL;
-            if(mvp.col > best_ref_mv.col + MAX_FULL_PEL_VAL)
-                mvp.col = best_ref_mv.col + MAX_FULL_PEL_VAL;
-            else if(mvp.col < best_ref_mv.col - MAX_FULL_PEL_VAL)
-                mvp.col = best_ref_mv.col - MAX_FULL_PEL_VAL;
+            vp8_clamp_mv(&mvp,
+                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
+                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL,
+                         best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL,
+                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL);
         }
 
         // Check to see if the testing frequency for this mode is at its max
@@ -2080,10 +2078,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             int sadpb = x->sadperbit16;
 
-            int col_min = (best_ref_mv.col - MAX_FULL_PEL_VAL) >>3;
-            int col_max = (best_ref_mv.col + MAX_FULL_PEL_VAL) >>3;
-            int row_min = (best_ref_mv.row - MAX_FULL_PEL_VAL) >>3;
-            int row_max = (best_ref_mv.row + MAX_FULL_PEL_VAL) >>3;
+            int col_min = (best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL) >>3;
+            int col_max = (best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL) >>3;
+            int row_min = (best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL) >>3;
+            int row_max = (best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL) >>3;
 
             int tmp_col_min = x->mv_col_min;
             int tmp_col_max = x->mv_col_max;
@@ -2107,15 +2105,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             // Initial step/diamond search
             if (cpi->sf.search_method == HEX)
             {
-                bestsme = vp8_hex_search(x, b, d, &best_ref_mv, &d->bmi.mv.as_mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv);
-                mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-                mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+                bestsme = vp8_hex_search(x, b, d, &best_ref_mv, &d->bmi.mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv);
+                mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
             }
             else
             {
-                bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb < 9
-                mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-                mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+                bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb < 9
+                mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
                 // Further step/diamond searches as necessary
                 n = 0;
@@ -2136,7 +2132,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                         num00--;
                     else
                     {
-                        thissme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv.as_mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb = 9
+                        thissme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv, step_param + n, sadpb / 4/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb = 9
 
                         /* check to see if refining search is needed. */
                         if (num00 > (further_steps-n))
@@ -2145,13 +2141,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                         if (thissme < bestsme)
                         {
                             bestsme = thissme;
-                            mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-                            mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+                            mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
                         }
                         else
                         {
-                            d->bmi.mv.as_mv.row = mode_mv[NEWMV].row;
-                            d->bmi.mv.as_mv.col = mode_mv[NEWMV].col;
+                            d->bmi.mv.as_int = mode_mv[NEWMV].as_int;
                         }
                     }
                 }
@@ -2167,18 +2161,16 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 search_range = 8;
 
                 //thissme = cpi->full_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
-                thissme = cpi->refining_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb/4, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
+                thissme = cpi->refining_search_sad(x, b, d, &d->bmi.mv, sadpb/4, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
 
                 if (thissme < bestsme)
                 {
                     bestsme = thissme;
-                    mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-                    mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+                    mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
                 }
                 else
                 {
-                    d->bmi.mv.as_mv.row = mode_mv[NEWMV].row;
-                    d->bmi.mv.as_mv.col = mode_mv[NEWMV].col;
+                    d->bmi.mv.as_int = mode_mv[NEWMV].as_int;
                 }
             }
 
@@ -2191,11 +2183,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             {
                 int dis; /* TODO: use dis in distortion calculation later. */
                 unsigned int sse;
-                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv.as_mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis, &sse);
+                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis, &sse);
             }
 
-            mode_mv[NEWMV].row = d->bmi.mv.as_mv.row;
-            mode_mv[NEWMV].col = d->bmi.mv.as_mv.col;
+            mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
             // Add the new motion vector cost to our rolling cost variable
             rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, x->mvcost, 96);
@@ -2203,21 +2194,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         case NEARESTMV:
         case NEARMV:
-
             // Clip "next_nearest" so that it does not extend to far out of image
-            if (mode_mv[this_mode].col < (xd->mb_to_left_edge - LEFT_TOP_MARGIN))
-                mode_mv[this_mode].col = xd->mb_to_left_edge - LEFT_TOP_MARGIN;
-            else if (mode_mv[this_mode].col > xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN)
-                mode_mv[this_mode].col = xd->mb_to_right_edge + RIGHT_BOTTOM_MARGIN;
-
-            if (mode_mv[this_mode].row < (xd->mb_to_top_edge - LEFT_TOP_MARGIN))
-                mode_mv[this_mode].row = xd->mb_to_top_edge - LEFT_TOP_MARGIN;
-            else if (mode_mv[this_mode].row > xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN)
-                mode_mv[this_mode].row = xd->mb_to_bottom_edge + RIGHT_BOTTOM_MARGIN;
+            vp8_clamp_mv2(&mode_mv[this_mode], xd);
 
             // Do not bother proceeding if the vector (from newmv,nearest or near) is 0,0 as this should then be coded using the zeromv mode.
-            if (((this_mode == NEARMV) || (this_mode == NEARESTMV)) &&
-                ((mode_mv[this_mode].row == 0) && (mode_mv[this_mode].col == 0)))
+            if (((this_mode == NEARMV) || (this_mode == NEARESTMV)) && (mode_mv[this_mode].as_int == 0))
                 continue;
 
         case ZEROMV:
@@ -2225,8 +2206,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             // Trap vectors that reach beyond the UMV borders
             // Note that ALL New MV, Nearest MV Near MV and Zero MV code drops through to this point
             // because of the lack of break statements in the previous two cases.
-            if (((mode_mv[this_mode].row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].row >> 3) > x->mv_row_max) ||
-                ((mode_mv[this_mode].col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].col >> 3) > x->mv_col_max))
+            if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
+                ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max))
                 continue;
 
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
