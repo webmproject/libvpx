@@ -1686,6 +1686,28 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
+static void vp8_rd_update_mvcount(VP8_COMP *cpi, MACROBLOCKD *xd, int_mv *best_ref_mv)
+{
+    int i;
+
+    if (xd->mode_info_context->mbmi.mode == SPLITMV)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            if (xd->block[i].bmi.mode == NEW4X4)
+            {
+                cpi->MVcount[0][mv_max+((xd->block[i].bmi.mv.as_mv.row - best_ref_mv->as_mv.row) >> 1)]++;
+                cpi->MVcount[1][mv_max+((xd->block[i].bmi.mv.as_mv.col - best_ref_mv->as_mv.col) >> 1)]++;
+            }
+        }
+    }
+    else if (xd->mode_info_context->mbmi.mode == NEWMV)
+    {
+        cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv->as_mv.row) >> 1)]++;
+        cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv->as_mv.col) >> 1)]++;
+    }
+}
+
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
@@ -2400,4 +2422,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     }
 
     x->e_mbd.mode_info_context->mbmi.mv.as_mv = x->e_mbd.block[15].bmi.mv.as_mv;
+
+    vp8_rd_update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 }
