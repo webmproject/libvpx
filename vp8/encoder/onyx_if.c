@@ -296,6 +296,12 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->gf_active_flags);
     cpi->gf_active_flags = 0;
 
+    // Activity mask based per mb zbin adjustments
+    vpx_free(cpi->mb_activity_map);
+    cpi->mb_activity_map = 0;
+    vpx_free(cpi->mb_norm_activity_map);
+    cpi->mb_norm_activity_map = 0;
+
     vpx_free(cpi->mb.pip);
     cpi->mb.pip = 0;
 
@@ -1322,11 +1328,20 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 
 
     // Structures used to minitor GF usage
-        vpx_free(cpi->gf_active_flags);
-
-    CHECK_MEM_ERROR(cpi->gf_active_flags, vpx_calloc(1, cm->mb_rows * cm->mb_cols));
-
+    vpx_free(cpi->gf_active_flags);
+    CHECK_MEM_ERROR(cpi->gf_active_flags,
+                    vpx_calloc(1, cm->mb_rows * cm->mb_cols));
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
+
+    vpx_free(cpi->mb_activity_map);
+    CHECK_MEM_ERROR(cpi->mb_activity_map,
+                    vpx_calloc(sizeof(unsigned int),
+                    cm->mb_rows * cm->mb_cols));
+
+    vpx_free(cpi->mb_norm_activity_map);
+    CHECK_MEM_ERROR(cpi->mb_norm_activity_map,
+                    vpx_calloc(sizeof(unsigned int),
+                    cm->mb_rows * cm->mb_cols));
 
 #if !(CONFIG_REALTIME_ONLY)
         vpx_free(cpi->total_stats);
