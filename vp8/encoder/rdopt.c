@@ -207,7 +207,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
     int q;
     int i;
     double capped_q = (Qvalue < 160) ? (double)Qvalue : 160.0;
-    double rdconst = 3.00;
+    double rdconst = 2.70;
 
     vp8_clear_system_state();  //__asm emms;
 
