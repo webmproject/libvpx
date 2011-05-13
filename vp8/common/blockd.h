@@ -141,11 +141,7 @@ typedef enum
 typedef struct
 {
     B_PREDICTION_MODE mode;
-    union
-    {
-        int as_int;
-        MV  as_mv;
-    } mv;
+    int_mv mv;
 } B_MODE_INFO;
 
 
@@ -162,11 +158,7 @@ typedef struct
 {
     MB_PREDICTION_MODE mode, uv_mode;
     MV_REFERENCE_FRAME ref_frame;
-    union
-    {
-        int as_int;
-        MV  as_mv;
-    } mv;
+    int_mv mv;
     unsigned char segment_flag;
 
     unsigned char partitioning;
