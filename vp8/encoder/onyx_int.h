@@ -317,7 +317,6 @@ typedef struct
     int mvcostmultiplier;
     int subseqblockweight;
     int errthresh;
-    unsigned int activity_avg;
 
     int RDMULT;
     int RDDIV ;
@@ -648,8 +647,14 @@ typedef struct
 #endif
     int b_calculate_psnr;
 
+    // Per MB activity measurement
+    unsigned int activity_avg;
+    unsigned int * mb_activity_map;
+    int * mb_norm_activity_map;
 
-    unsigned char *gf_active_flags;   // Record of which MBs still refer to last golden frame either directly or through 0,0
+    // Record of which MBs still refer to last golden frame either
+    // directly or through 0,0
+    unsigned char *gf_active_flags;
     int gf_active_count;
 
     //Store last frame's MV info for next frame MV prediction
@@ -668,7 +673,7 @@ void vp8_encode_frame(VP8_COMP *cpi);
 
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size);
 
-unsigned int vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
+void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
 
 int rd_cost_intra_mb(MACROBLOCKD *x);
 

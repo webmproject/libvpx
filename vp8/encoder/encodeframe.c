@@ -326,7 +326,10 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         QIndex = cpi->common.base_qindex;
 
     // Y
-    zbin_extra = (cpi->common.Y1dequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = ( cpi->common.Y1dequant[QIndex][1] *
+                   ( cpi->zbin_over_quant +
+                     cpi->zbin_mode_boost +
+                     x->act_zbin_adj ) ) >> 7;
 
     for (i = 0; i < 16; i++)
     {
@@ -341,7 +344,10 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     }
 
     // UV
-    zbin_extra = (cpi->common.UVdequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = ( cpi->common.UVdequant[QIndex][1] *
+                   ( cpi->zbin_over_quant +
+                     cpi->zbin_mode_boost +
+                     x->act_zbin_adj ) ) >> 7;
 
     for (i = 16; i < 24; i++)
     {
@@ -356,7 +362,11 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     }
 
     // Y2
-    zbin_extra = (cpi->common.Y2dequant[QIndex][1] * ((cpi->zbin_over_quant / 2) + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = ( cpi->common.Y2dequant[QIndex][1] *
+                   ( (cpi->zbin_over_quant / 2) +
+                     cpi->zbin_mode_boost +
+                     x->act_zbin_adj ) ) >> 7;
+
     x->block[24].quant_fast = cpi->Y2quant_fast[QIndex];
     x->block[24].quant = cpi->Y2quant[QIndex];
     x->block[24].quant_shift = cpi->Y2quant_shift[QIndex];
@@ -376,21 +386,32 @@ void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x)
     int zbin_extra;
 
     // Y
-    zbin_extra = (cpi->common.Y1dequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = ( cpi->common.Y1dequant[QIndex][1] *
+                   ( cpi->zbin_over_quant +
+                     cpi->zbin_mode_boost +
+                     x->act_zbin_adj ) ) >> 7;
     for (i = 0; i < 16; i++)
     {
         x->block[i].zbin_extra = (short)zbin_extra;
     }
 
     // UV
-    zbin_extra = (cpi->common.UVdequant[QIndex][1] * (cpi->zbin_over_quant + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = ( cpi->common.UVdequant[QIndex][1] *
+                   ( cpi->zbin_over_quant +
+                     cpi->zbin_mode_boost +
+                     x->act_zbin_adj ) ) >> 7;
+
     for (i = 16; i < 24; i++)
     {
         x->block[i].zbin_extra = (short)zbin_extra;
     }
 
     // Y2
-    zbin_extra = (cpi->common.Y2dequant[QIndex][1] * ((cpi->zbin_over_quant / 2) + cpi->zbin_mode_boost)) >> 7;
+    zbin_extra = ( cpi->common.Y2dequant[QIndex][1] *
+                   ( (cpi->zbin_over_quant / 2) +
+                     cpi->zbin_mode_boost +
+                     x->act_zbin_adj ) ) >> 7;
+
     x->block[24].zbin_extra = (short)zbin_extra;
 }
 
@@ -421,13 +442,14 @@ static const unsigned char VP8_VAR_OFFS[16]=
     128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128
 };
 
-unsigned int vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
+
+// Original activity measure from Tim T's code.
+unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 {
     unsigned int act;
     unsigned int sse;
     int sum;
-    unsigned int a;
-    unsigned int b;
+
     /* TODO: This could also be done over smaller areas (8x8), but that would
      *  require extensive changes elsewhere, as lambda is assumed to be fixed
      *  over an entire MB in most of the code.
@@ -436,29 +458,213 @@ unsigned int vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
      *  smallest, etc.).
      */
     VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)(x->src.y_buffer,
-     x->src.y_stride, VP8_VAR_OFFS, 0, &sse, &sum);
+                    x->src.y_stride, VP8_VAR_OFFS, 0, &sse, &sum);
+
     /* This requires a full 32 bits of precision. */
     act = (sse<<8) - sum*sum;
+
     /* Drop 4 to give us some headroom to work with. */
     act = (act + 8) >> 4;
+
     /* If the region is flat, lower the activity some more. */
     if (act < 8<<12)
         act = act < 5<<12 ? act : 5<<12;
-    /* TODO: For non-flat regions, edge regions should receive less masking
-     *  than textured regions, but identifying edge regions quickly and
-     *  reliably enough is still a subject of experimentation.
-     * This will be most noticable near edges with a complex shape (e.g.,
-     *  text), but the 4x4 transform size should make this less of a problem
-     *  than it would be for an 8x8 transform.
-     */
-    /* Apply the masking to the RD multiplier. */
-    a = act + 4*cpi->activity_avg;
-    b = 4*act + cpi->activity_avg;
-    x->rdmult = (unsigned int)(((INT64)x->rdmult*b + (a>>1))/a);
+
     return act;
 }
 
+// Stub for alternative experimental activity measures.
+unsigned int alt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
+{
+    unsigned int mb_activity = VP8_ACTIVITY_AVG_MIN;
 
+    x->e_mbd.mode_info_context->mbmi.mode = DC_PRED;
+    x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+
+    vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+
+    mb_activity = VARIANCE_INVOKE(&cpi->rtcd.variance, getmbss)(x->src_diff);
+
+    return mb_activity;
+}
+
+
+// Measure the activity of the current macroblock
+// What we measure here is TBD so abstracted to this function
+unsigned int mb_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
+{
+    unsigned int mb_activity;
+
+    if  ( 1 )
+    {
+        // Original activity measure from Tim T's code.
+        mb_activity = tt_activity_measure( cpi, x );
+    }
+    else
+    {
+        // Or use and alternative.
+        mb_activity = alt_activity_measure( cpi, x );
+    }
+
+    return mb_activity;
+}
+
+// Calculate an "average" mb activity value for the frame
+void calc_av_activity( VP8_COMP *cpi, INT64 activity_sum )
+{
+    // Simple mean for now
+    cpi->activity_avg = (unsigned int)(activity_sum/cpi->common.MBs);
+    if (cpi->activity_avg < VP8_ACTIVITY_AVG_MIN)
+        cpi->activity_avg = VP8_ACTIVITY_AVG_MIN;
+}
+
+#define OUTPUT_NORM_ACT_STATS   0
+// Calculate a normalized activity value for each mb
+void calc_norm_activity( VP8_COMP *cpi, MACROBLOCK *x )
+{
+    VP8_COMMON *const cm = & cpi->common;
+    int mb_row, mb_col;
+
+    unsigned int act;
+    unsigned int a;
+    unsigned int b;
+
+#if OUTPUT_NORM_ACT_STATS
+    FILE *f = fopen("norm_act.stt", "a");
+    fprintf(f, "\n");
+#endif
+
+    // Reset pointers to start of activity map
+    x->mb_activity_ptr = cpi->mb_activity_map;
+    x->mb_norm_activity_ptr = cpi->mb_norm_activity_map;
+
+    // Calculate normalized mb activity number.
+    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+    {
+        // for each macroblock col in image
+        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+        {
+            // Read activity from the map
+            act = *(x->mb_activity_ptr);
+
+            // Calculate a normalized activity number
+            a = act + 2*cpi->activity_avg;
+            b = 2*act + cpi->activity_avg;
+
+            if ( b >= a )
+                *(x->mb_norm_activity_ptr) = (int)((b + (a>>1))/a);
+            else
+                *(x->mb_norm_activity_ptr) = -(int)((a + (b>>1))/b);
+
+            if ( *(x->mb_norm_activity_ptr) == 0 )
+            {
+                *(x->mb_norm_activity_ptr) = 1;
+            }
+
+#if OUTPUT_NORM_ACT_STATS
+            fprintf(f, " %6d", *(x->mb_norm_activity_ptr));
+#endif
+            // Increment activity map pointers
+            x->mb_activity_ptr++;
+            x->mb_norm_activity_ptr++;
+        }
+
+#if OUTPUT_NORM_ACT_STATS
+        fprintf(f, "\n");
+#endif
+
+    }
+
+#if OUTPUT_NORM_ACT_STATS
+    fclose(f);
+#endif
+
+}
+
+
+// Loop through all MBs. Note activity of each, average activity and
+// calculate a normalized activity for each
+void build_activity_map( VP8_COMP *cpi )
+{
+    MACROBLOCK *const x = & cpi->mb;
+    VP8_COMMON *const cm = & cpi->common;
+
+    int mb_row, mb_col;
+    unsigned int mb_activity;
+    INT64 activity_sum = 0;
+
+    // Initialise source buffer pointer
+    x->src = *cpi->Source;
+
+    // Set pointer to start of activity map
+    x->mb_activity_ptr = cpi->mb_activity_map;
+
+    // for each macroblock row in image
+    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+    {
+        // for each macroblock col in image
+        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+        {
+            // measure activity
+            mb_activity = mb_activity_measure( cpi, x );
+
+            // Keep frame sum
+            activity_sum += mb_activity;
+
+            // Store MB level activity details.
+            *x->mb_activity_ptr = mb_activity;
+
+            // Increment activity map pointer
+            x->mb_activity_ptr++;
+
+            // adjust to the next column of source macroblocks
+            x->src.y_buffer += 16;
+        }
+
+        // adjust to the next row of mbs
+        x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
+    }
+
+    // Calculate an "average" MB activity
+    calc_av_activity(cpi, activity_sum);
+
+    // Calculate a normalized activity number of each mb
+    calc_norm_activity( cpi, x );
+}
+
+// Activity masking based on Tim T's original code
+void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
+{
+    unsigned int a;
+    unsigned int b;
+    unsigned int act = *(x->mb_activity_ptr);
+
+    // Apply the masking to the RD multiplier.
+    a = act + 2*cpi->activity_avg;
+    b = 2*act + cpi->activity_avg;
+
+    //tmp = (unsigned int)(((INT64)tmp*b + (a>>1))/a);
+    x->rdmult = (unsigned int)(((INT64)x->rdmult*b + (a>>1))/a);
+
+    // For now now zbin adjustment on mode choice
+    x->act_zbin_adj = 0;
+}
+
+// Stub function to use a normalized activity measure stored at mb level.
+void vp8_norm_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
+{
+    int norm_act;
+
+    norm_act = *(x->mb_norm_activity_ptr);
+    if (norm_act > 0)
+        x->rdmult = norm_act * (x->rdmult);
+    else
+        x->rdmult = -(x->rdmult / norm_act);
+
+    // For now now zbin adjustment on mode choice
+    x->act_zbin_adj = 0;
+}
 
 static
 void encode_mb_row(VP8_COMP *cpi,
@@ -470,7 +676,6 @@ void encode_mb_row(VP8_COMP *cpi,
                    int *segment_counts,
                    int *totalrate)
 {
-    INT64 activity_sum = 0;
     int i;
     int recon_yoffset, recon_uvoffset;
     int mb_col;
@@ -478,7 +683,7 @@ void encode_mb_row(VP8_COMP *cpi,
     int dst_fb_idx = cm->new_fb_idx;
     int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
-    int seg_map_index = (mb_row * cpi->common.mb_cols);
+    int map_index = (mb_row * cpi->common.mb_cols);
 
 #if CONFIG_MULTITHREAD
     const int nsync = cpi->mt_sync_range;
@@ -511,6 +716,10 @@ void encode_mb_row(VP8_COMP *cpi,
     x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
     x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
                         + (VP8BORDERINPIXELS - 16);
+
+    // Set the mb activity pointer to the start of the row.
+    x->mb_activity_ptr = &cpi->mb_activity_map[map_index];
+    x->mb_norm_activity_ptr = &cpi->mb_norm_activity_map[map_index];
 
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
@@ -551,15 +760,15 @@ void encode_mb_row(VP8_COMP *cpi,
 #endif
 
         if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
-            activity_sum += vp8_activity_masking(cpi, x);
+            vp8_activity_masking(cpi, x);
 
         // Is segmentation enabled
         // MB level adjutment to quantizer
         if (xd->segmentation_enabled)
         {
             // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
-            if (cpi->segmentation_map[seg_map_index+mb_col] <= 3)
-                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[seg_map_index+mb_col];
+            if (cpi->segmentation_map[map_index+mb_col] <= 3)
+                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index+mb_col];
             else
                 xd->mode_info_context->mbmi.segment_id = 0;
 
@@ -568,7 +777,7 @@ void encode_mb_row(VP8_COMP *cpi,
         else
             xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
 
-        x->active_ptr = cpi->active_map + seg_map_index + mb_col;
+        x->active_ptr = cpi->active_map + map_index + mb_col;
 
         if (cm->frame_type == KEY_FRAME)
         {
@@ -605,27 +814,32 @@ void encode_mb_row(VP8_COMP *cpi,
             // during vp8cx_encode_inter_macroblock()) back into the global sgmentation map
             if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
             {
-                cpi->segmentation_map[seg_map_index+mb_col] = xd->mode_info_context->mbmi.segment_id;
+                cpi->segmentation_map[map_index+mb_col] = xd->mode_info_context->mbmi.segment_id;
 
                 // If the block has been refreshed mark it as clean (the magnitude of the -ve influences how long it will be before we consider another refresh):
                 // Else if it was coded (last frame 0,0) and has not already been refreshed then mark it as a candidate for cleanup next time (marked 0)
                 // else mark it as dirty (1).
                 if (xd->mode_info_context->mbmi.segment_id)
-                    cpi->cyclic_refresh_map[seg_map_index+mb_col] = -1;
+                    cpi->cyclic_refresh_map[map_index+mb_col] = -1;
                 else if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 {
-                    if (cpi->cyclic_refresh_map[seg_map_index+mb_col] == 1)
-                        cpi->cyclic_refresh_map[seg_map_index+mb_col] = 0;
+                    if (cpi->cyclic_refresh_map[map_index+mb_col] == 1)
+                        cpi->cyclic_refresh_map[map_index+mb_col] = 0;
                 }
                 else
-                    cpi->cyclic_refresh_map[seg_map_index+mb_col] = 1;
+                    cpi->cyclic_refresh_map[map_index+mb_col] = 1;
 
             }
         }
 
         cpi->tplist[mb_row].stop = *tp;
 
-        x->gf_active_ptr++;      // Increment pointer into gf useage flags structure for next mb
+        // Increment pointer into gf useage flags structure.
+        x->gf_active_ptr++;
+
+        // Increment the activity mask pointers.
+        x->mb_activity_ptr++;
+        x->mb_norm_activity_ptr++;
 
         for (i = 0; i < 16; i++)
             vpx_memcpy(&xd->mode_info_context->bmi[i], &xd->block[i].bmi, sizeof(xd->block[i].bmi));
@@ -664,7 +878,6 @@ void encode_mb_row(VP8_COMP *cpi,
     // this is to account for the border
     xd->mode_info_context++;
     x->partition_info++;
-    x->activity_sum += activity_sum;
 
 #if CONFIG_MULTITHREAD
     if ((cpi->b_multi_threaded != 0) && (mb_row == cm->mb_rows - 1))
@@ -726,6 +939,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
     cpi->skip_true_count = 0;
     cpi->skip_false_count = 0;
 
+    x->act_zbin_adj = 0;
+
 #if 0
     // Experimental code
     cpi->frame_distortion = 0;
@@ -766,7 +981,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     vp8cx_initialize_me_consts(cpi, cm->base_qindex);
 
     // Copy data over into macro block data sturctures.
-
     x->src = * cpi->Source;
     xd->pre = cm->yv12_fb[cm->lst_fb_idx];
     xd->dst = cm->yv12_fb[cm->new_fb_idx];
@@ -781,8 +995,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     vp8_setup_block_ptrs(x);
 
-    x->activity_sum = 0;
-
     xd->mode_info_context->mbmi.mode = DC_PRED;
     xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 
@@ -795,6 +1007,20 @@ void vp8_encode_frame(VP8_COMP *cpi)
     x->mvc = cm->fc.mvc;
 
     vpx_memset(cm->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
+
+    if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
+    {
+        if(1)
+        {
+            // Build a frame level activity map
+            build_activity_map(cpi);
+        }
+
+        // Reset various MB pointers.
+        x->src = *cpi->Source;
+        x->mb_activity_ptr = cpi->mb_activity_map;
+        x->mb_norm_activity_ptr = cpi->mb_norm_activity_map;
+    }
 
     {
         struct vpx_usec_timer  emr_timer;
@@ -861,11 +1087,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
                 totalrate += cpi->mb_row_ei[i].totalrate;
-            }
-
-            for (i = 0; i < cpi->encoding_thread_count; i++)
-            {
-                x->activity_sum += cpi->mb_row_ei[i].mb.activity_sum;
             }
 
         }
@@ -1021,14 +1242,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     cpi->last_frame_distortion = cpi->frame_distortion;
 #endif
 
-    /* Update the average activity for the next frame.
-     * This is feed-forward for now; it could also be saved in two-pass, or
-     *  done during lookahead when that is eventually added.
-     */
-    cpi->activity_avg = (unsigned int )(x->activity_sum/cpi->common.MBs);
-    if (cpi->activity_avg < VP8_ACTIVITY_AVG_MIN)
-        cpi->activity_avg = VP8_ACTIVITY_AVG_MIN;
-
 }
 void vp8_setup_block_ptrs(MACROBLOCK *x)
 {
@@ -1146,6 +1359,32 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
     ++cpi->uv_mode_count[uvm];
 
 }
+
+// Experimental stub function to create a per MB zbin adjustment based on
+// some previously calculated measure of MB activity.
+void adjust_act_zbin( VP8_COMP *cpi, int rate, MACROBLOCK *x )
+{
+    INT64 act;
+    INT64 a;
+    INT64 b;
+
+    // Read activity from the map
+    act = (INT64)(*(x->mb_activity_ptr));
+
+    // Calculate a zbin adjustment for this mb
+    a = act + 4*cpi->activity_avg;
+    b = 4*act + cpi->activity_avg;
+    if ( b > a )
+        //x->act_zbin_adj = (char)((b * 8) / a) - 8;
+        x->act_zbin_adj = 8;
+    else
+        x->act_zbin_adj = 0;
+
+    // Tmp force to 0 to disable.
+    x->act_zbin_adj = 0;
+
+}
+
 int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
     int Error4x4, Error16x16;
@@ -1168,6 +1407,12 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4, Error16x16);
 
         rate += (Error4x4 < Error16x16) ? rate4x4 : rate16x16;
+
+        if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
+        {
+            adjust_act_zbin( cpi, rate, x );
+            vp8_update_zbin_extra(cpi, x);
+        }
     }
     else
     {
@@ -1248,13 +1493,15 @@ int vp8cx_encode_inter_macroblock
         /* Are we using the fast quantizer for the mode selection? */
         if(cpi->sf.use_fastquant_for_pick)
         {
-            cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb);
+            cpi->mb.quantize_b = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
+                                                 fastquantb);
 
             /* the fast quantizer does not use zbin_extra, so
              * do not recalculate */
             cpi->zbin_mode_boost_enabled = 0;
         }
-        vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
+        vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
+                               &distortion, &intra_error);
 
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)
@@ -1267,10 +1514,17 @@ int vp8cx_encode_inter_macroblock
 
     }
     else
-        vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate, &distortion, &intra_error);
+        vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
+                            &distortion, &intra_error);
 
     cpi->prediction_error += distortion;
     cpi->intra_error += intra_error;
+
+    if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
+    {
+        // Adjust the zbin based on this MB rate.
+        adjust_act_zbin( cpi, rate, x );
+    }
 
 #if 0
     // Experimental RD code
@@ -1297,7 +1551,8 @@ int vp8cx_encode_inter_macroblock
     }
 
     {
-        // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
+        // Experimental code. Special case for gf and arf zeromv modes.
+        // Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)
         {
             if ( xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME )
