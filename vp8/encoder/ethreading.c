@@ -91,8 +91,8 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                 int dst_fb_idx = cm->new_fb_idx;
                 int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
                 int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
+                int map_index = (mb_row * cm->mb_cols);
                 volatile int *last_row_current_mb_col;
-                INT64 activity_sum = 0;
 
                 tp = cpi->tok + (mb_row * (cm->mb_cols * 16 * 24));
 
@@ -111,6 +111,11 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                 cpi->tplist[mb_row].start = tp;
 
                 //printf("Thread mb_row = %d\n", mb_row);
+
+                // Set the mb activity pointer to the start of the row.
+                x->mb_activity_ptr = &cpi->mb_activity_map[map_index];
+                x->mb_norm_activity_ptr =
+                    &cpi->mb_norm_activity_map[map_index];
 
                 // for each macroblock col in image
                 for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
@@ -148,15 +153,15 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     x->rdmult = cpi->RDMULT;
 
                     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
-                        activity_sum += vp8_activity_masking(cpi, x);
+                        vp8_activity_masking(cpi, x);
 
                     // Is segmentation enabled
                     // MB level adjutment to quantizer
                     if (xd->segmentation_enabled)
                     {
                         // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
-                        if (cpi->segmentation_map[seg_map_index + mb_col] <= 3)
-                            xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[seg_map_index + mb_col];
+                        if (cpi->segmentation_map[map_index + mb_col] <= 3)
+                            xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index + mb_col];
                         else
                             xd->mode_info_context->mbmi.segment_id = 0;
 
@@ -165,7 +170,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     else
                         xd->mode_info_context->mbmi.segment_id = 0; // Set to Segment 0 by default
 
-                    x->active_ptr = cpi->active_map + seg_map_index + mb_col;
+                    x->active_ptr = cpi->active_map + map_index + mb_col;
 
                     if (cm->frame_type == KEY_FRAME)
                     {
@@ -203,26 +208,31 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
                         {
                             const MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
-                            cpi->segmentation_map[seg_map_index + mb_col] = mbmi->segment_id;
+                            cpi->segmentation_map[map_index + mb_col] = mbmi->segment_id;
 
                             // If the block has been refreshed mark it as clean (the magnitude of the -ve influences how long it will be before we consider another refresh):
                             // Else if it was coded (last frame 0,0) and has not already been refreshed then mark it as a candidate for cleanup next time (marked 0)
                             // else mark it as dirty (1).
                             if (mbmi->segment_id)
-                                cpi->cyclic_refresh_map[seg_map_index + mb_col] = -1;
+                                cpi->cyclic_refresh_map[map_index + mb_col] = -1;
                             else if ((mbmi->mode == ZEROMV) && (mbmi->ref_frame == LAST_FRAME))
                             {
-                                if (cpi->cyclic_refresh_map[seg_map_index + mb_col] == 1)
-                                    cpi->cyclic_refresh_map[seg_map_index + mb_col] = 0;
+                                if (cpi->cyclic_refresh_map[map_index + mb_col] == 1)
+                                    cpi->cyclic_refresh_map[map_index + mb_col] = 0;
                             }
                             else
-                                cpi->cyclic_refresh_map[seg_map_index + mb_col] = 1;
+                                cpi->cyclic_refresh_map[map_index + mb_col] = 1;
 
                         }
                     }
                     cpi->tplist[mb_row].stop = tp;
 
-                    x->gf_active_ptr++; // Increment pointer into gf useage flags structure for next mb
+                    // Increment pointer into gf useage flags structure.
+                    x->gf_active_ptr++;
+
+                    // Increment the activity mask pointers.
+                    x->mb_activity_ptr++;
+                    x->mb_norm_activity_ptr++;
 
                     for (i = 0; i < 16; i++)
                         vpx_memcpy(&xd->mode_info_context->bmi[i], &xd->block[i].bmi, sizeof(xd->block[i].bmi));
@@ -256,7 +266,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                 // this is to account for the border
                 xd->mode_info_context++;
                 x->partition_info++;
-                x->activity_sum += activity_sum;
 
                 x->src.y_buffer += 16 * x->src.y_stride * (cpi->encoding_thread_count + 1) - 16 * cm->mb_cols;
                 x->src.u_buffer += 8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
@@ -443,8 +452,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         vp8_setup_block_dptrs(mbd);
 
         vp8_setup_block_ptrs(mb);
-
-        mb->activity_sum = 0;
 
         mbd->left_context = &cm->left_context;
         mb->mvc = cm->fc.mvc;

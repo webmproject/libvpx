@@ -82,7 +82,9 @@ typedef struct
     int errthresh;
     int rddiv;
     int rdmult;
-    INT64 activity_sum;
+    unsigned int * mb_activity_ptr;
+    int * mb_norm_activity_ptr;
+    signed int act_zbin_adj;
 
     int mvcosts[2][MVvals+1];
     int *mvcost[2];
