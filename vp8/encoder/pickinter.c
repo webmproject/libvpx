@@ -637,10 +637,10 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
 
             /* adjust mvp to make sure it is within MV range */
             vp8_clamp_mv(&mvp,
-                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL,
                          best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL);
+                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL,
+                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
+                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL);
         }
 
         switch (this_mode)
