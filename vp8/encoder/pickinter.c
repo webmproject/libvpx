@@ -426,6 +426,16 @@ void vp8_pick_intra_mbuv_mode(MACROBLOCK *mb)
 
 }
 
+static void vp8_update_mvcount(VP8_COMP *cpi, MACROBLOCKD *xd, int_mv *best_ref_mv)
+{
+    /* Split MV modes currently not supported when RD is nopt enabled, therefore, only need to modify MVcount in NEWMV mode. */
+    if (xd->mode_info_context->mbmi.mode == NEWMV)
+    {
+        cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv->as_mv.row) >> 1)]++;
+        cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv->as_mv.col) >> 1)]++;
+    }
+}
+
 void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
@@ -637,10 +647,10 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
 
             /* adjust mvp to make sure it is within MV range */
             vp8_clamp_mv(&mvp,
-                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL,
                          best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL);
+                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL,
+                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
+                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL);
         }
 
         switch (this_mode)
@@ -970,4 +980,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
     }
 
     x->e_mbd.mode_info_context->mbmi.mv.as_mv = x->e_mbd.block[15].bmi.mv.as_mv;
+
+    vp8_update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 }
