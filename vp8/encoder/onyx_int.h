@@ -620,7 +620,7 @@ typedef struct VP8_COMP
     int fixed_divide[512];
 #endif
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
     int    count;
     double total_y;
     double total_u;

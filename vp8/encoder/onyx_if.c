@@ -75,7 +75,7 @@ static void set_default_lf_deltas(VP8_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 #include "math.h"
 
 extern double vp8_calc_ssim
@@ -1917,8 +1917,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->source_alt_ref_active = FALSE;
     cpi->common.refresh_alt_ref_frame = 0;
 
-    cpi->b_calculate_psnr = CONFIG_PSNR;
-#if CONFIG_PSNR
+    cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
+#if CONFIG_INTERNAL_STATS
     cpi->b_calculate_ssimg = 0;
 
     cpi->count = 0;
@@ -2137,7 +2137,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
         print_mode_context();
 #endif
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 
         if (cpi->pass != 1)
         {
@@ -3388,7 +3388,7 @@ static void encode_frame_to_data_rate
             cm->current_video_frame++;
             cpi->frames_since_key++;
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
             cpi->count ++;
 #endif
 
@@ -3989,7 +3989,7 @@ static void encode_frame_to_data_rate
         {
             vp8_restore_coding_context(cpi);
             loop_count++;
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
             cpi->tot_recode_hits++;
 #endif
         }
@@ -4263,7 +4263,7 @@ static void encode_frame_to_data_rate
         }
     }
 
-#if 0 && CONFIG_PSNR
+#if 0 && CONFIG_INTERNAL_STATS
     {
         FILE *f = fopen("tmp.stt", "a");
 
@@ -4828,7 +4828,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         generate_psnr_packet(cpi);
     }
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 
     if (cpi->pass != 1)
     {

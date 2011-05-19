@@ -31,7 +31,7 @@ Advanced options:
   ${toggle_md5}                   support for output of checksum data
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
   ${toggle_vp8}                   VP8 codec support
-  ${toggle_psnr}                  output of PSNR data, if supported (encoders)
+  ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
   ${toggle_multithread}           multithreaded encoding and decoding.
@@ -242,7 +242,7 @@ CONFIG_LIST="
     runtime_cpu_detect
     postproc
     multithread
-    psnr
+    internal_stats
     ${CODECS}
     ${CODEC_FAMILIES}
     encoders
@@ -284,7 +284,7 @@ CMDLINE_SELECT="
     dc_recon
     postproc
     multithread
-    psnr
+    internal_stats
     ${CODECS}
     ${CODEC_FAMILIES}
     static_msvcrt
