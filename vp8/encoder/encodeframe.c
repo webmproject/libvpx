@@ -1597,13 +1597,7 @@ int vp8cx_encode_inter_macroblock
     }
     else
     {
-        int_mv best_ref_mv;
-        int_mv nearest, nearby;
-        int mdcounts[4];
         int ref_fb_idx;
-
-        vp8_find_near_mvs(xd, xd->mode_info_context,
-                          &nearest, &nearby, &best_ref_mv, mdcounts, xd->mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias);
 
         vp8_build_uvmvs(xd, cpi->common.full_pixel);
 
@@ -1617,25 +1611,6 @@ int vp8cx_encode_inter_macroblock
         xd->pre.y_buffer = cpi->common.yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
         xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
         xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
-
-        if (xd->mode_info_context->mbmi.mode == SPLITMV)
-        {
-            int i;
-
-            for (i = 0; i < 16; i++)
-            {
-                if (xd->block[i].bmi.mode == NEW4X4)
-                {
-                    cpi->MVcount[0][mv_max+((xd->block[i].bmi.mv.as_mv.row - best_ref_mv.as_mv.row) >> 1)]++;
-                    cpi->MVcount[1][mv_max+((xd->block[i].bmi.mv.as_mv.col - best_ref_mv.as_mv.col) >> 1)]++;
-                }
-            }
-        }
-        else if (xd->mode_info_context->mbmi.mode == NEWMV)
-        {
-            cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv.as_mv.row) >> 1)]++;
-            cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv.as_mv.col) >> 1)]++;
-        }
 
         if (!x->skip)
         {
