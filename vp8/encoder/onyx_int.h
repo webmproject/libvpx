@@ -332,37 +332,18 @@ typedef struct VP8_COMP
     double rate_correction_factor;
     double key_frame_rate_correction_factor;
     double gf_rate_correction_factor;
-    double est_max_qcorrection_factor;
 
     int frames_till_gf_update_due;      // Count down till next GF
     int current_gf_interval;          // GF interval chosen when we coded the last GF
 
     int gf_overspend_bits;            // Total bits overspent becasue of GF boost (cumulative)
 
-    int gf_group_bits;                // Projected Bits available for a group of frames including 1 GF or ARF
-    int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
-    int mid_gf_extra_bits;             // A few extra bits for the frame half way between two gfs.
-
-    // Projected total bits available for a key frame group of frames
-    long long kf_group_bits;
-
-    // Error score of frames still to be coded in kf group
-    long long kf_group_error_left;
-
-    // Bits for the key frame in a key frame group - 2 pass only
-    int kf_bits;
-
     int non_gf_bitrate_adjustment;     // Used in the few frames following a GF to recover the extra bits spent in that GF
-    int initial_gf_use;               // percentage use of gf 2 frames after gf
-
-    int gf_group_error_left;           // Remaining error from uncoded frames in a gf group. Two pass use only
 
     int kf_overspend_bits;            // Extra bits spent on key frames that need to be recovered on inter frames
     int kf_bitrate_adjustment;        // Current number of bit s to try and recover on each inter frame.
     int max_gf_interval;
-    int static_scene_max_gf_interval;
     int baseline_gf_interval;
-    int gf_decay_rate;
     int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
 
     INT64 key_frame_count;
@@ -407,8 +388,6 @@ typedef struct VP8_COMP
     int active_best_quality;
 
     int cq_target_quality;
-    int maxq_max_limit;
-    int maxq_min_limit;
 
     int drop_frames_allowed;          // Are we permitted to drop frames?
     int drop_frame;                  // Drop this frame?
@@ -428,31 +407,12 @@ typedef struct VP8_COMP
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1];
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1][2];
 
-    int frames_to_key;
     int gfu_boost;
     int kf_boost;
     int last_boost;
-    double total_error_left;
-    double total_intra_error_left;
-    double total_coded_error_left;
-    double start_tot_err_left;
-    double kf_intra_err_min;
-    double gf_intra_err_min;
-
-    double modified_error_total;
-    double modified_error_used;
-    double modified_error_left;
-
-    double avg_iiratio;
 
     int target_bandwidth;
-    long long bits_left;
-    long long clip_bits_total;
-    FIRSTPASS_STATS *total_stats;
-    FIRSTPASS_STATS *this_frame_stats;
-    FIRSTPASS_STATS *stats_in, *stats_in_end;
     struct vpx_codec_pkt_list  *output_pkt_list;
-    int                          first_pass_done;
 
 #if 0
     // Experimental code for lagged and one pass
@@ -497,9 +457,6 @@ typedef struct VP8_COMP
 
     SPEED_FEATURES sf;
     int error_bins[1024];
-
-    unsigned int next_iiratio;
-    unsigned int this_iiratio;
 
     // Data used for real time conferencing mode to help determine if it would be good to update the gf
     int inter_zz_count;
@@ -558,10 +515,48 @@ typedef struct VP8_COMP
     unsigned int time_encode_mb_row;
 
     int base_skip_false_prob[128];
-    unsigned int section_intra_rating;
 
-    double section_max_qfactor;
+    struct twopass_rc
+    {
+        unsigned int section_intra_rating;
+        double section_max_qfactor;
+        unsigned int next_iiratio;
+        unsigned int this_iiratio;
+        FIRSTPASS_STATS *total_stats;
+        FIRSTPASS_STATS *this_frame_stats;
+        FIRSTPASS_STATS *stats_in, *stats_in_end;
+        int first_pass_done;
+        long long bits_left;
+        long long clip_bits_total;
+        double avg_iiratio;
+        double modified_error_total;
+        double modified_error_used;
+        double modified_error_left;
+        double total_error_left;
+        double total_intra_error_left;
+        double total_coded_error_left;
+        double start_tot_err_left;
+        double kf_intra_err_min;
+        double gf_intra_err_min;
+        int frames_to_key;
+        int maxq_max_limit;
+        int maxq_min_limit;
+        int gf_decay_rate;
+        int static_scene_max_gf_interval;
+        int kf_bits;
+        int gf_group_error_left;           // Remaining error from uncoded frames in a gf group. Two pass use only
 
+        // Projected total bits available for a key frame group of frames
+        long long kf_group_bits;
+
+        // Error score of frames still to be coded in kf group
+        long long kf_group_error_left;
+
+        int gf_group_bits;                // Projected Bits available for a group of frames including 1 GF or ARF
+        int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
+        int mid_gf_extra_bits;             // A few extra bits for the frame half way between two gfs.
+        double est_max_qcorrection_factor;
+    } twopass;
 
 #if CONFIG_RUNTIME_CPU_DETECT
     VP8_ENCODER_RTCD            rtcd;
