@@ -3427,15 +3427,15 @@ static void encode_frame_to_data_rate
                 buff_lvl_step = (cpi->oxcf.maximum_buffer_size - cpi->oxcf.optimal_buffer_level) / Adjustment;
 
                 if (buff_lvl_step)
-                {
                     Adjustment = (cpi->buffer_level - cpi->oxcf.optimal_buffer_level) / buff_lvl_step;
-                    cpi->active_worst_quality -= Adjustment;
-                }
+                else
+                    Adjustment = 0;
             }
-            else
-            {
-                cpi->active_worst_quality -= Adjustment;
-            }
+
+            cpi->active_worst_quality -= Adjustment;
+
+            if(cpi->active_worst_quality < cpi->active_best_quality)
+                cpi->active_worst_quality = cpi->active_best_quality;
         }
     }
 
