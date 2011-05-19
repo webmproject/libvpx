@@ -426,24 +426,29 @@ void vp8_pick_intra_mbuv_mode(MACROBLOCK *mb)
 
 }
 
-static void vp8_update_mvcount(VP8_COMP *cpi, MACROBLOCKD *xd, int_mv *best_ref_mv)
+static void update_mvcount(VP8_COMP *cpi, MACROBLOCKD *xd, int_mv *best_ref_mv)
 {
-    /* Split MV modes currently not supported when RD is nopt enabled, therefore, only need to modify MVcount in NEWMV mode. */
+    /* Split MV modes currently not supported when RD is nopt enabled,
+     * therefore, only need to modify MVcount in NEWMV mode. */
     if (xd->mode_info_context->mbmi.mode == NEWMV)
     {
-        cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv->as_mv.row) >> 1)]++;
-        cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv->as_mv.col) >> 1)]++;
+        cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row -
+                                      best_ref_mv->as_mv.row) >> 1)]++;
+        cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col -
+                                      best_ref_mv->as_mv.col) >> 1)]++;
     }
 }
 
-void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
+void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
+                         int recon_uvoffset, int *returnrate,
+                         int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
     B_MODE_INFO best_bmodes[16];
     MB_MODE_INFO best_mbmode;
-    PARTITION_INFO best_partition;
+
     int_mv best_ref_mv;
     int_mv mode_mv[MB_MODE_COUNT];
     MB_PREDICTION_MODE this_mode;
@@ -878,9 +883,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
             *returndistortion = distortion2;
             best_rd = this_rd;
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
-            vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
 
-            if (this_mode == B_PRED || this_mode == SPLITMV)
+            if (this_mode == B_PRED)
                 for (i = 0; i < 16; i++)
                 {
                     vpx_memcpy(&best_bmodes[i], &x->e_mbd.block[i].bmi, sizeof(B_MODE_INFO));
@@ -952,7 +956,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
         best_mbmode.partitioning = 0;
 
         vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
-        vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
         for (i = 0; i < 16; i++)
         {
@@ -963,12 +966,10 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
         return;
     }
 
-
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
-    vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
-    if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED || x->e_mbd.mode_info_context->mbmi.mode == SPLITMV)
+    if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
         for (i = 0; i < 16; i++)
         {
             vpx_memcpy(&x->e_mbd.block[i].bmi, &best_bmodes[i], sizeof(B_MODE_INFO));
@@ -979,7 +980,5 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int re
         vp8_set_mbmode_and_mvs(x, x->e_mbd.mode_info_context->mbmi.mode, &best_bmodes[0].mv);
     }
 
-    x->e_mbd.mode_info_context->mbmi.mv.as_mv = x->e_mbd.block[15].bmi.mv.as_mv;
-
-    vp8_update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
+    update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 }
