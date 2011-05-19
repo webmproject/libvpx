@@ -21,9 +21,6 @@
 #include "vp8/common/g_common.h"
 #include "encodeintra.h"
 
-#define intra4x4ibias_rate    128
-#define intra4x4pbias_rate    256
-
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)

@@ -1232,7 +1232,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         cpi->find_fractional_mv_step = vp8_skip_fractional_mv_step;
     }
 
-    if (cpi->sf.optimize_coefficients == 1)
+    if (cpi->sf.optimize_coefficients == 1 && cpi->pass!=1)
         cpi->mb.optimize = 1;
     else
         cpi->mb.optimize = 0;
