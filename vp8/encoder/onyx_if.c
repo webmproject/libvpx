@@ -2653,45 +2653,6 @@ static void resize_key_frame(VP8_COMP *cpi)
 }
 
 
-static void set_quantizer(VP8_COMP *cpi, int Q)
-{
-    VP8_COMMON *cm = &cpi->common;
-    MACROBLOCKD *mbd = &cpi->mb.e_mbd;
-    int update = 0;
-    int new_delta_q;
-    cm->base_qindex = Q;
-
-    /* if any of the delta_q values are changing update flag has to be set */
-    /* currently only y2dc_delta_q may change */
-
-    cm->y1dc_delta_q = 0;
-    cm->y2ac_delta_q = 0;
-    cm->uvdc_delta_q = 0;
-    cm->uvac_delta_q = 0;
-
-    if (Q < 4)
-    {
-        new_delta_q = 4-Q;
-    }
-    else
-        new_delta_q = 0;
-
-    update |= cm->y2dc_delta_q != new_delta_q;
-    cm->y2dc_delta_q = new_delta_q;
-
-
-    // Set Segment specific quatizers
-    mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][2] = cpi->segment_feature_data[MB_LVL_ALT_Q][2];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][3] = cpi->segment_feature_data[MB_LVL_ALT_Q][3];
-
-    /* quantizer has to be reinitialized for any delta_q changes */
-    if(update)
-        vp8cx_init_quantizer(cpi);
-
-}
-
 static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
@@ -3034,7 +2995,7 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     (void) size;
     (void) dest;
     (void) frame_flags;
-    set_quantizer(cpi, 26);
+    vp8_set_quantizer(cpi, 26);
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);
@@ -3694,7 +3655,7 @@ static void encode_frame_to_data_rate
             Q = 127;
             */
 
-        set_quantizer(cpi, Q);
+        vp8_set_quantizer(cpi, Q);
         this_q = Q;
 
         // setup skip prob for costing in mode/mv decision

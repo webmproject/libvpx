@@ -240,7 +240,7 @@ enum
     BLOCK_MAX_SEGMENTS
 };
 
-typedef struct
+typedef struct VP8_COMP
 {
 
     DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][16]);
