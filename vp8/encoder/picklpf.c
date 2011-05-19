@@ -474,8 +474,4 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     }
 
     cm->filter_level = filt_best;
-    cpi->last_auto_filt_val = filt_best;
-    cpi->last_auto_filt_q  = cm->base_qindex;
-
-    cpi->frames_since_auto_filter = 0;
 }

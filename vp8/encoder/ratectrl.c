@@ -1431,7 +1431,6 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
     }
 
     cpi->frames_since_key = 0;
-    cpi->last_key_frame_size = cpi->projected_frame_size;
     cpi->key_frame_count++;
 }
 

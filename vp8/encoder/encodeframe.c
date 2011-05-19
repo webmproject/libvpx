@@ -562,9 +562,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     x->vector_range = 32;
 
-    // Count of MBs using the alternate Q if any
-    cpi->alt_qcount = 0;
-
     // Reset frame count of inter 0,0 motion vector useage.
     cpi->inter_zz_count = 0;
 
