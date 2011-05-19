@@ -27,6 +27,9 @@
 
 #include "decodemv.h"
 #include "vp8/common/extend.h"
+#if CONFIG_ERROR_CONCEALMENT
+#include "error_concealment.h"
+#endif
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/idct.h"
 #include "dequantize.h"
@@ -176,7 +179,8 @@ void clamp_mvs(MACROBLOCKD *xd)
 
 }
 
-static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
+static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                              unsigned int mb_idx)
 {
     int eobtotal = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
@@ -232,6 +236,19 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd)
     {
         vp8_build_inter_predictors_mb(xd);
     }
+
+#if CONFIG_ERROR_CONCEALMENT
+    if (pbi->ec_enabled &&
+        (mb_idx > pbi->mvs_corrupt_from_mb ||
+        vp8dx_bool_error(xd->current_bc)))
+    {
+        /* MB with corrupt residuals or corrupt mode/motion vectors.
+         * Better to use the predictor as reconstruction.
+         */
+        vp8_conceal_corrupt_mb(xd);
+        return;
+    }
+#endif
 
     /* dequantization and idct */
     if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
@@ -355,6 +372,32 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
 
     for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
     {
+        /* Distance of Mb to the various image edges.
+         * These are specified to 8th pel as they are always compared to values
+         * that are in 1/8th pel units
+         */
+        xd->mb_to_left_edge = -((mb_col * 16) << 3);
+        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+
+#if CONFIG_ERROR_CONCEALMENT
+        if (pbi->ec_enabled &&
+            xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
+            vp8dx_bool_error(xd->current_bc))
+        {
+            /* We have an intra block with corrupt coefficients, better to
+             * conceal with an inter block. Interpolate MVs from neighboring MBs
+             *
+             * Note that for the first mb with corrupt residual in a frame,
+             * we might not discover that before decoding the residual. That
+             * happens after this check, and therefore no inter concealment will
+             * be done.
+             */
+            vp8_interpolate_motion(xd,
+                                   mb_row, mb_col,
+                                   pc->mb_rows, pc->mb_cols,
+                                   pc->mode_info_stride);
+        }
+#endif
 
         if (xd->mode_info_context->mbmi.mode == SPLITMV || xd->mode_info_context->mbmi.mode == B_PRED)
         {
@@ -364,12 +407,6 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
                 vpx_memcpy(&d->bmi, &xd->mode_info_context->bmi[i], sizeof(B_MODE_INFO));
             }
         }
-
-        /* Distance of Mb to the various image edges.
-         * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
-         */
-        xd->mb_to_left_edge = -((mb_col * 16) << 3);
-        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
         xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
         xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
@@ -403,7 +440,7 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
         else
         pbi->debugoutput =0;
         */
-        decode_macroblock(pbi, xd);
+        decode_macroblock(pbi, xd, mb_row * pc->mb_cols  + mb_col);
 
         /* check if the boolean decoder has suffered an error */
         xd->corrupted |= vp8dx_bool_error(xd->current_bc);
@@ -477,8 +514,8 @@ static void setup_token_decoder(VP8D_COMP *pbi,
             partition_size = user_data_end - partition;
         }
 
-        if (partition + partition_size > user_data_end
-            || partition + partition_size < partition)
+        if (!pbi->ec_enabled && (partition + partition_size > user_data_end
+            || partition + partition_size < partition))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet or corrupt partition "
                                "%d length", i + 1);
@@ -593,63 +630,105 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
 
     if (data_end - data < 3)
-        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Truncated packet");
-    pc->frame_type = (FRAME_TYPE)(data[0] & 1);
-    pc->version = (data[0] >> 1) & 7;
-    pc->show_frame = (data[0] >> 4) & 1;
-    first_partition_length_in_bytes =
-        (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
-    data += 3;
-
-    if (data + first_partition_length_in_bytes > data_end
-        || data + first_partition_length_in_bytes < data)
-        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                           "Truncated packet or corrupt partition 0 length");
-    vp8_setup_version(pc);
-
-    if (pc->frame_type == KEY_FRAME)
     {
-        const int Width = pc->Width;
-        const int Height = pc->Height;
-
-        /* vet via sync code */
-        if (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a)
-            vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
-                               "Invalid frame sync code");
-
-        pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
-        pc->horiz_scale = data[4] >> 6;
-        pc->Height = (data[5] | (data[6] << 8)) & 0x3fff;
-        pc->vert_scale = data[6] >> 6;
-        data += 7;
-
-        if (Width != pc->Width  ||  Height != pc->Height)
+        if (pbi->ec_enabled)
         {
-            int prev_mb_rows = pc->mb_rows;
+            /* Declare the missing frame as an inter frame since it will
+               be handled as an inter frame when we have estimated its
+               motion vectors. */
+            pc->frame_type = INTER_FRAME;
+            pc->version = 0;
+            pc->show_frame = 1;
+            first_partition_length_in_bytes = 0;
+        }
+        else
+        {
+            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                               "Truncated packet");
+        }
+    }
+    else
+    {
+        pc->frame_type = (FRAME_TYPE)(data[0] & 1);
+        pc->version = (data[0] >> 1) & 7;
+        pc->show_frame = (data[0] >> 4) & 1;
+        first_partition_length_in_bytes =
+            (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
+        data += 3;
 
-            if (pc->Width <= 0)
+        if (!pbi->ec_enabled && (data + first_partition_length_in_bytes > data_end
+            || data + first_partition_length_in_bytes < data))
+            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                               "Truncated packet or corrupt partition 0 length");
+        vp8_setup_version(pc);
+
+        if (pc->frame_type == KEY_FRAME)
+        {
+            const int Width = pc->Width;
+            const int Height = pc->Height;
+
+            /* vet via sync code */
+            /* When error concealment is enabled we should only check the sync
+             * code if we have enough bits available
+             */
+            if (!pbi->ec_enabled || data + 3 < data_end)
             {
-                pc->Width = Width;
-                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                   "Invalid frame width");
+                if (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a)
+                    vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
+                                   "Invalid frame sync code");
             }
 
-            if (pc->Height <= 0)
+            /* If error concealment is enabled we should only parse the new size
+             * if we have enough data. Otherwise we will end up with the wrong
+             * size.
+             */
+            if (!pbi->ec_enabled || data + 6 < data_end)
             {
-                pc->Height = Height;
-                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                   "Invalid frame height");
+                pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
+                pc->horiz_scale = data[4] >> 6;
+                pc->Height = (data[5] | (data[6] << 8)) & 0x3fff;
+                pc->vert_scale = data[6] >> 6;
             }
+            data += 7;
 
-            if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
-                vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                                   "Failed to allocate frame buffers");
+            if (Width != pc->Width  ||  Height != pc->Height)
+            {
+                int prev_mb_rows = pc->mb_rows;
+
+                if (pc->Width <= 0)
+                {
+                    pc->Width = Width;
+                    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                       "Invalid frame width");
+                }
+
+                if (pc->Height <= 0)
+                {
+                    pc->Height = Height;
+                    vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                       "Invalid frame height");
+                }
+
+                if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
+                    vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
+                                       "Failed to allocate frame buffers");
+
+#if CONFIG_ERROR_CONCEALMENT
+                pbi->overlaps = NULL;
+                if (pbi->ec_enabled)
+                {
+                    if (vp8_alloc_overlap_lists(pbi))
+                        vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
+                                           "Failed to allocate overlap lists "
+                                           "for error concealment");
+                }
+#endif
 
 #if CONFIG_MULTITHREAD
-            if (pbi->b_multithreaded_rd)
-                vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
+                if (pbi->b_multithreaded_rd)
+                    vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
 #endif
+            }
         }
     }
 
@@ -792,7 +871,20 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         /* Should the GF or ARF be updated from the current frame */
         pc->refresh_golden_frame = vp8_read_bit(bc);
+#if CONFIG_ERROR_CONCEALMENT
+        /* Assume we shouldn't refresh golden if the bit is missing */
+        xd->corrupted |= vp8dx_bool_error(bc);
+        if (pbi->ec_enabled && xd->corrupted)
+            pc->refresh_golden_frame = 0;
+#endif
+
         pc->refresh_alt_ref_frame = vp8_read_bit(bc);
+#if CONFIG_ERROR_CONCEALMENT
+        /* Assume we shouldn't refresh altref if the bit is missing */
+        xd->corrupted |= vp8dx_bool_error(bc);
+        if (pbi->ec_enabled && xd->corrupted)
+            pc->refresh_alt_ref_frame = 0;
+#endif
 
         /* Buffer to buffer copy flags. */
         pc->copy_buffer_to_gf = 0;
@@ -816,6 +908,13 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
     pc->refresh_last_frame = pc->frame_type == KEY_FRAME  ||  vp8_read_bit(bc);
+
+#if CONFIG_ERROR_CONCEALMENT
+    /* Assume we should refresh the last frame if the bit is missing */
+    xd->corrupted |= vp8dx_bool_error(bc);
+    if (pbi->ec_enabled && xd->corrupted)
+        pc->refresh_last_frame = 1;
+#endif
 
     if (0)
     {
@@ -871,6 +970,16 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
 
     vp8_decode_mode_mvs(pbi);
+
+#if CONFIG_ERROR_CONCEALMENT
+    if (pbi->ec_enabled &&
+            pbi->mvs_corrupt_from_mb < (unsigned int)pc->mb_cols * pc->mb_rows)
+    {
+        /* Motion vectors are missing in this frame. We will try to estimate
+         * them and then continue decoding the frame as usual */
+        vp8_estimate_missing_mvs(pbi);
+    }
+#endif
 
     vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 

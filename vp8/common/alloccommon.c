@@ -27,6 +27,9 @@ static void update_mode_info_border(MODE_INFO *mi, int rows, int cols)
 
     for (i = 0; i < rows; i++)
     {
+        /* TODO(holmer): Bug? This updates the last element of each row
+         * rather than the border element!
+         */
         vpx_memset(&mi[i*cols-1], 0, sizeof(MODE_INFO));
     }
 }
@@ -43,9 +46,11 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
 
     vpx_free(oci->above_context);
     vpx_free(oci->mip);
+    vpx_free(oci->prev_mip);
 
     oci->above_context = 0;
     oci->mip = 0;
+    oci->prev_mip = 0;
 
 }
 
@@ -110,6 +115,21 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
 
     oci->mi = oci->mip + oci->mode_info_stride + 1;
 
+    /* allocate memory for last frame MODE_INFO array */
+#if CONFIG_ERROR_CONCEALMENT
+    oci->prev_mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
+
+    if (!oci->prev_mip)
+    {
+        vp8_de_alloc_frame_buffers(oci);
+        return 1;
+    }
+
+    oci->prev_mi = oci->prev_mip + oci->mode_info_stride + 1;
+#else
+    oci->prev_mip = NULL;
+    oci->prev_mi = NULL;
+#endif
 
     oci->above_context = vpx_calloc(sizeof(ENTROPY_CONTEXT_PLANES) * oci->mb_cols, 1);
 
@@ -120,6 +140,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     }
 
     update_mode_info_border(oci->mi, oci->mb_rows, oci->mb_cols);
+    update_mode_info_border(oci->prev_mi, oci->mb_rows, oci->mb_cols);
 
     return 0;
 }
