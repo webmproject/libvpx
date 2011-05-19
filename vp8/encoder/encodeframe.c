@@ -80,7 +80,7 @@ static const unsigned char VP8_VAR_OFFS[16]=
 
 
 // Original activity measure from Tim T's code.
-unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
+static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 {
     unsigned int act;
     unsigned int sse;
@@ -110,7 +110,7 @@ unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 }
 
 // Stub for alternative experimental activity measures.
-unsigned int alt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
+static unsigned int alt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 {
     unsigned int mb_activity = VP8_ACTIVITY_AVG_MIN;
 
@@ -128,7 +128,7 @@ unsigned int alt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 
 // Measure the activity of the current macroblock
 // What we measure here is TBD so abstracted to this function
-unsigned int mb_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
+static unsigned int mb_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 {
     unsigned int mb_activity;
 
@@ -147,7 +147,7 @@ unsigned int mb_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 }
 
 // Calculate an "average" mb activity value for the frame
-void calc_av_activity( VP8_COMP *cpi, INT64 activity_sum )
+static void calc_av_activity( VP8_COMP *cpi, INT64 activity_sum )
 {
     // Simple mean for now
     cpi->activity_avg = (unsigned int)(activity_sum/cpi->common.MBs);
@@ -157,7 +157,7 @@ void calc_av_activity( VP8_COMP *cpi, INT64 activity_sum )
 
 #define OUTPUT_NORM_ACT_STATS   0
 // Calculate a normalized activity value for each mb
-void calc_norm_activity( VP8_COMP *cpi, MACROBLOCK *x )
+static void calc_norm_activity( VP8_COMP *cpi, MACROBLOCK *x )
 {
     VP8_COMMON *const cm = & cpi->common;
     int mb_row, mb_col;
@@ -221,7 +221,7 @@ void calc_norm_activity( VP8_COMP *cpi, MACROBLOCK *x )
 
 // Loop through all MBs. Note activity of each, average activity and
 // calculate a normalized activity for each
-void build_activity_map( VP8_COMP *cpi )
+static void build_activity_map( VP8_COMP *cpi )
 {
     MACROBLOCK *const x = & cpi->mb;
     VP8_COMMON *const cm = & cpi->common;
