@@ -2383,9 +2383,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     }
 
-    // Keep a record of best mode index that we chose
-    cpi->last_best_mode_index = best_mode_index;
-
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[best_mode_index] ++;
 

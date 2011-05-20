@@ -313,10 +313,6 @@ typedef struct VP8_COMP
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
     int rd_threshes[MAX_MODES];
-    int mvcostbase;
-    int mvcostmultiplier;
-    int subseqblockweight;
-    int errthresh;
 
     int RDMULT;
     int RDDIV ;
@@ -328,16 +324,6 @@ typedef struct VP8_COMP
     long long last_prediction_error;
     long long intra_error;
     long long last_intra_error;
-
-#if 0
-    // Experimental RD code
-    long long frame_distortion;
-    long long last_frame_distortion;
-#endif
-
-    int last_mb_distortion;
-
-    int frames_since_auto_filter;
 
     int this_frame_target;
     int projected_frame_size;
@@ -384,7 +370,6 @@ typedef struct VP8_COMP
     int per_frame_bandwidth;          // Current section per frame bandwidth target
     int av_per_frame_bandwidth;        // Average frame size target for clip
     int min_frame_bandwidth;          // Minimum allocation that should be used for any frame
-    int last_key_frame_size;
     int inter_frame_target;
     double output_frame_rate;
     long long last_time_stamp_seen;
@@ -443,11 +428,6 @@ typedef struct VP8_COMP
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1];
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1][2];
 
-    /* Second compressed data partition contains coefficient data. */
-
-    unsigned char *output_partition2;
-    size_t output_partition2size;
-
     int frames_to_key;
     int gfu_boost;
     int kf_boost;
@@ -456,15 +436,12 @@ typedef struct VP8_COMP
     double total_intra_error_left;
     double total_coded_error_left;
     double start_tot_err_left;
-    double min_error;
     double kf_intra_err_min;
     double gf_intra_err_min;
 
     double modified_error_total;
     double modified_error_used;
     double modified_error_left;
-    double clip_bpe;
-    double observed_bpe;
 
     double avg_iiratio;
 
@@ -499,7 +476,6 @@ typedef struct VP8_COMP
     int goldfreq;
     int auto_worst_q;
     int cpu_used;
-    int chroma_boost;
     int horiz_scale;
     int vert_scale;
     int pass;
@@ -517,30 +493,13 @@ typedef struct VP8_COMP
     int this_frame_percent_intra;
     int last_frame_percent_intra;
 
-    int last_key_frame_q;
-    int last_kffilt_lvl;
-
     int ref_frame_flags;
 
     SPEED_FEATURES sf;
     int error_bins[1024];
 
-    int inter_lvl;
-    int intra_lvl;
-    int motion_lvl;
-    int motion_speed;
-    int motion_var;
     unsigned int next_iiratio;
     unsigned int this_iiratio;
-    int this_frame_modified_error;
-
-    double norm_intra_err_per_mb;
-    double norm_inter_err_per_mb;
-    double norm_iidiff_per_mb;
-
-    int last_best_mode_index;          // Record of mode index chosen for previous macro block.
-    int last_auto_filt_val;
-    int last_auto_filt_q;
 
     // Data used for real time conferencing mode to help determine if it would be good to update the gf
     int inter_zz_count;
@@ -548,10 +507,6 @@ typedef struct VP8_COMP
     int gf_update_recommended;
     int skip_true_count;
     int skip_false_count;
-
-    int alt_qcount;
-
-    int ready_for_new_frame;
 
     unsigned char *segmentation_map;
     signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            // Segment data (can be deltas or absolute values)
@@ -601,9 +556,6 @@ typedef struct VP8_COMP
     unsigned int time_compress_data;
     unsigned int time_pick_lpf;
     unsigned int time_encode_mb_row;
-
-    unsigned int tempdata1;
-    unsigned int tempdata2;
 
     int base_skip_false_prob[128];
     unsigned int section_intra_rating;

@@ -923,9 +923,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         cpi->rd_threshes[best_mode_index] = (cpi->rd_baseline_thresh[best_mode_index] >> 7) * cpi->rd_thresh_mult[best_mode_index];
     }
 
-    // Keep a record of best mode index for use in next loop
-    cpi->last_best_mode_index = best_mode_index;
-
     if (best_mbmode.mode <= B_PRED)
     {
         x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;

@@ -1241,12 +1241,6 @@ void vp8_init_second_pass(VP8_COMP *cpi)
         reset_fpf_position(cpi, start_pos);            // Reset file position
 
     }
-
-    // Calculate the clip target modified bits per error
-    // The observed bpe starts as the same number.
-    cpi->clip_bpe =  cpi->bits_left /
-                     DOUBLE_DIVIDE_CHECK(cpi->modified_error_total);
-    cpi->observed_bpe = cpi->clip_bpe;
 }
 
 void vp8_end_second_pass(VP8_COMP *cpi)
@@ -1978,13 +1972,6 @@ void vp8_second_pass(VP8_COMP *cpi)
     this_frame_intra_error = this_frame.intra_error;
     this_frame_coded_error = this_frame.coded_error;
 
-    // Store information regarding level of motion etc for use mode decisions.
-    cpi->motion_speed = (int)(fabs(this_frame.MVr) + fabs(this_frame.MVc));
-    cpi->motion_var = (int)(fabs(this_frame.MVrv) + fabs(this_frame.MVcv));
-    cpi->inter_lvl = (int)(this_frame.pcnt_inter * 100);
-    cpi->intra_lvl = (int)((1.0 - this_frame.pcnt_inter) * 100);
-    cpi->motion_lvl = (int)(this_frame.pcnt_motion * 100);
-
     start_pos = cpi->stats_in;
 
     // keyframe and section processing !
@@ -2011,16 +1998,6 @@ void vp8_second_pass(VP8_COMP *cpi)
     // Is this a GF / ARF (Note that a KF is always also a GF)
     if (cpi->frames_till_gf_update_due == 0)
     {
-        // Update monitor of the bits per error observed so far.
-        // Done once per gf group based on what has gone before
-        // so do nothing if this is the first frame.
-        if (cpi->common.current_video_frame > 0)
-        {
-            cpi->observed_bpe =
-                (double)(cpi->clip_bits_total - cpi->bits_left) /
-                cpi->modified_error_used;
-        }
-
         // Define next gf group and assign bits to it
         vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
         define_gf_group(cpi, &this_frame_copy);

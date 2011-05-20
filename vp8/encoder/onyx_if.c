@@ -2093,8 +2093,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
     cpi->refining_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, refining_search);
 
-    cpi->ready_for_new_frame = 1;
-
     // make sure frame 1 is okay
     cpi->error_bins[0] = cpi->common.MBs;
 
@@ -4817,8 +4815,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         cm->frame_type = INTER_FRAME;
 
     }
-
-    cpi->ready_for_new_frame = 1;
 
     vpx_usec_timer_mark(&cmptimer);
     cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
