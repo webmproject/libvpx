@@ -27,10 +27,16 @@
 #else
 #define IF_RTCD(x) NULL
 #endif
-void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x, BLOCK *be, BLOCKD *b, int best_mode)
+
+
+void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
+                              MACROBLOCK *x, int ib)
 {
+    BLOCKD *b = &x->e_mbd.block[ib];
+    BLOCK *be = &x->block[ib];
+
     RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
-                 (b, best_mode, b->predictor);
+                (b, b->bmi.mode, b->predictor);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
@@ -51,13 +57,7 @@ void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb)
     vp8_intra_prediction_down_copy(x);
 
     for (i = 0; i < 16; i++)
-    {
-        BLOCK *be = &mb->block[i];
-        BLOCKD *b = &x->block[i];
-
-        vp8_encode_intra4x4block(rtcd, mb, be, b, b->bmi.mode);
-    }
-
+        vp8_encode_intra4x4block(rtcd, mb, i);
     return;
 }
 

@@ -100,10 +100,8 @@ static int encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
     {
         for (i = 0; i < 16; i++)
         {
-            BLOCKD *b = &x->e_mbd.block[i];
-            BLOCK  *be = &x->block[i];
-
-            vp8_encode_intra4x4block(IF_RTCD(&cpi->rtcd), x, be, b, B_DC_PRED);
+            x->e_mbd.block[i].bmi.mode = B_DC_PRED;
+            vp8_encode_intra4x4block(IF_RTCD(&cpi->rtcd), x, i);
         }
     }
 
