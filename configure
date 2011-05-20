@@ -31,12 +31,13 @@ Advanced options:
   ${toggle_md5}                   support for output of checksum data
   ${toggle_static_msvcrt}         use static MSVCRT (VS builds only)
   ${toggle_vp8}                   VP8 codec support
-  ${toggle_psnr}                  output of PSNR data, if supported (encoders)
+  ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
   ${toggle_multithread}           multithreaded encoding and decoding.
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
+  ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
   ${toggle_small}                 favor smaller size over speed
@@ -244,7 +245,7 @@ CONFIG_LIST="
     runtime_cpu_detect
     postproc
     multithread
-    psnr
+    internal_stats
     ${CODECS}
     ${CODEC_FAMILIES}
     encoders
@@ -252,6 +253,7 @@ CONFIG_LIST="
     static_msvcrt
     spatial_resampling
     realtime_only
+    error_concealment
     shared
     small
     postproc_visualizer
@@ -288,17 +290,19 @@ CMDLINE_SELECT="
     dc_recon
     postproc
     multithread
-    psnr
+    internal_stats
     ${CODECS}
     ${CODEC_FAMILIES}
     static_msvcrt
     mem_tracker
     spatial_resampling
     realtime_only
-    experimental
+    error_concealment
     shared
     small
     postproc_visualizer
+
+    experimental
 "
 
 process_cmdline() {

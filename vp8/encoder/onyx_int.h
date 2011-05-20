@@ -240,7 +240,7 @@ enum
     BLOCK_MAX_SEGMENTS
 };
 
-typedef struct
+typedef struct VP8_COMP
 {
 
     DECLARE_ALIGNED(16, short, Y1quant[QINDEX_RANGE][16]);
@@ -620,7 +620,7 @@ typedef struct
     int fixed_divide[512];
 #endif
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
     int    count;
     double total_y;
     double total_u;

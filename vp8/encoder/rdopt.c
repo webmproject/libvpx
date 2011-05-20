@@ -994,8 +994,10 @@ static int labels2mode(
             cost = x->inter_bmode_costs[ m];
         }
 
-        d->bmi.mode = m;
         d->bmi.mv.as_int = this_mv->as_int;
+
+        x->partition_info->bmi[i].mode = m;
+        x->partition_info->bmi[i].mv.as_int = this_mv->as_int;
 
     }
     while (++i < 16);
@@ -1340,8 +1342,8 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
         {
             BLOCKD *bd = &x->e_mbd.block[i];
 
-            bsi->mvs[i].as_mv = bd->bmi.mv.as_mv;
-            bsi->modes[i] = bd->bmi.mode;
+            bsi->mvs[i].as_mv = x->partition_info->bmi[i].mv.as_mv;
+            bsi->modes[i] = x->partition_info->bmi[i].mode;
             bsi->eobs[i] = bd->eob;
         }
     }
@@ -1471,7 +1473,6 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
         BLOCKD *bd = &x->e_mbd.block[i];
 
         bd->bmi.mv.as_mv = bsi.mvs[i].as_mv;
-        bd->bmi.mode = bsi.modes[i];
         bd->eob = bsi.eobs[i];
     }
 
@@ -1489,9 +1490,13 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
         j = vp8_mbsplit_offset[bsi.segment_num][i];
 
-        x->partition_info->bmi[i].mode = x->e_mbd.block[j].bmi.mode;
-        x->partition_info->bmi[i].mv.as_mv = x->e_mbd.block[j].bmi.mv.as_mv;
+        x->partition_info->bmi[i].mode = bsi.modes[j];
+        x->partition_info->bmi[i].mv.as_mv = bsi.mvs[j].as_mv;
     }
+    /*
+     * used to set x->e_mbd.mode_info_context->mbmi.mv.as_int
+     */
+    x->partition_info->bmi[15].mv.as_int = bsi.mvs[15].as_int;
 
     return bsi.segment_rd;
 }
@@ -1751,25 +1756,29 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
-static void vp8_rd_update_mvcount(VP8_COMP *cpi, MACROBLOCKD *xd, int_mv *best_ref_mv)
+static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
 {
-    int i;
-
-    if (xd->mode_info_context->mbmi.mode == SPLITMV)
+    if (x->e_mbd.mode_info_context->mbmi.mode == SPLITMV)
     {
-        for (i = 0; i < 16; i++)
+        int i;
+
+        for (i = 0; i < x->partition_info->count; i++)
         {
-            if (xd->block[i].bmi.mode == NEW4X4)
+            if (x->partition_info->bmi[i].mode == NEW4X4)
             {
-                cpi->MVcount[0][mv_max+((xd->block[i].bmi.mv.as_mv.row - best_ref_mv->as_mv.row) >> 1)]++;
-                cpi->MVcount[1][mv_max+((xd->block[i].bmi.mv.as_mv.col - best_ref_mv->as_mv.col) >> 1)]++;
+                cpi->MVcount[0][mv_max+((x->partition_info->bmi[i].mv.as_mv.row
+                                          - best_ref_mv->as_mv.row) >> 1)]++;
+                cpi->MVcount[1][mv_max+((x->partition_info->bmi[i].mv.as_mv.col
+                                          - best_ref_mv->as_mv.col) >> 1)]++;
             }
         }
     }
-    else if (xd->mode_info_context->mbmi.mode == NEWMV)
+    else if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV)
     {
-        cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row - best_ref_mv->as_mv.row) >> 1)]++;
-        cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col - best_ref_mv->as_mv.col) >> 1)]++;
+        cpi->MVcount[0][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
+                                          - best_ref_mv->as_mv.row) >> 1)]++;
+        cpi->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
+                                          - best_ref_mv->as_mv.col) >> 1)]++;
     }
 }
 
@@ -2479,14 +2488,19 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
-    vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
     for (i = 0; i < 16; i++)
     {
         vpx_memcpy(&x->e_mbd.block[i].bmi, &best_bmodes[i], sizeof(B_MODE_INFO));
     }
 
-    x->e_mbd.mode_info_context->mbmi.mv.as_mv = x->e_mbd.block[15].bmi.mv.as_mv;
+    if (best_mbmode.mode == SPLITMV)
+    {
+        vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
+        x->e_mbd.mode_info_context->mbmi.mv.as_int =
+                                      x->partition_info->bmi[15].mv.as_int;
+    }
 
-    vp8_rd_update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
+    rd_update_mvcount(cpi, x, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
+
 }
