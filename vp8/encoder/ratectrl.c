@@ -626,7 +626,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
     {
         if (cpi->pass == 2)
         {
-            cpi->per_frame_bandwidth = cpi->gf_bits;                       // Per frame bit target for the alt ref frame
+            cpi->per_frame_bandwidth = cpi->twopass.gf_bits;                       // Per frame bit target for the alt ref frame
             cpi->this_frame_target = cpi->per_frame_bandwidth;
         }
 
@@ -1055,7 +1055,6 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             }
 
 #endif
-            cpi->initial_gf_use = 0;
 
             if (cpi->auto_adjust_gold_quantizer)
             {

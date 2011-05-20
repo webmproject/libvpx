@@ -142,7 +142,7 @@ static int get_max_filter_level(VP8_COMP *cpi, int base_qindex)
     // with lots of intra coming in.
     int max_filter_level = MAX_LOOP_FILTER ;//* 3 / 4;
 
-    if (cpi->section_intra_rating > 8)
+    if (cpi->twopass.section_intra_rating > 8)
         max_filter_level = MAX_LOOP_FILTER * 3 / 4;
 
     (void) cpi;
@@ -377,8 +377,8 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         Bias = (best_err >> (15 - (filt_mid / 8))) * filter_step; //PGW change 12/12/06 for small images
 
         // jbb chg: 20100118 - in sections with lots of new material coming in don't bias as much to a low filter value
-        if (cpi->section_intra_rating < 20)
-            Bias = Bias * cpi->section_intra_rating / 20;
+        if (cpi->twopass.section_intra_rating < 20)
+            Bias = Bias * cpi->twopass.section_intra_rating / 20;
 
         filt_high = ((filt_mid + filter_step) > max_filter_level) ? max_filter_level : (filt_mid + filter_step);
         filt_low = ((filt_mid - filter_step) < min_filter_level) ? min_filter_level : (filt_mid - filter_step);
