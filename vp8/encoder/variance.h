@@ -391,7 +391,7 @@ typedef struct
     vp8_sad_multi_d_fn_t     sad8x8x4d;
     vp8_sad_multi_d_fn_t     sad4x4x4d;
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
     vp8_ssimpf_fn_t          ssimpf_8x8;
     vp8_ssimpf_fn_t          ssimpf;
 #endif

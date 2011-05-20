@@ -17,6 +17,9 @@
 #include "vp8/common/onyxc_int.h"
 #include "vp8/common/threading.h"
 #include "dequantize.h"
+#if CONFIG_ERROR_CONCEALMENT
+#include "ec_types.h"
+#endif
 
 typedef struct
 {
@@ -127,6 +130,13 @@ typedef struct VP8Decompressor
     vp8_prob prob_last;
     vp8_prob prob_gf;
     vp8_prob prob_skip_false;
+
+#if CONFIG_ERROR_CONCEALMENT
+    MB_OVERLAP *overlaps;
+    /* the mb num from which modes and mvs (first partition) are corrupt */
+    unsigned int mvs_corrupt_from_mb;
+#endif
+    int ec_enabled;
 
 } VP8D_COMP;
 

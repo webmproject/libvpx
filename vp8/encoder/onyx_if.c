@@ -75,7 +75,7 @@ static void set_default_lf_deltas(VP8_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 #include "math.h"
 
 extern double vp8_calc_ssim
@@ -1298,7 +1298,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         cpi->find_fractional_mv_step = vp8_skip_fractional_mv_step;
     }
 
-    if (cpi->sf.optimize_coefficients == 1)
+    if (cpi->sf.optimize_coefficients == 1 && cpi->pass!=1)
         cpi->mb.optimize = 1;
     else
         cpi->mb.optimize = 0;
@@ -1982,8 +1982,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->source_alt_ref_active = FALSE;
     cpi->common.refresh_alt_ref_frame = 0;
 
-    cpi->b_calculate_psnr = CONFIG_PSNR;
-#if CONFIG_PSNR
+    cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
+#if CONFIG_INTERNAL_STATS
     cpi->b_calculate_ssimg = 0;
 
     cpi->count = 0;
@@ -2202,7 +2202,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
         print_mode_context();
 #endif
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 
         if (cpi->pass != 1)
         {
@@ -2718,45 +2718,6 @@ static void resize_key_frame(VP8_COMP *cpi)
 }
 
 
-static void set_quantizer(VP8_COMP *cpi, int Q)
-{
-    VP8_COMMON *cm = &cpi->common;
-    MACROBLOCKD *mbd = &cpi->mb.e_mbd;
-    int update = 0;
-    int new_delta_q;
-    cm->base_qindex = Q;
-
-    /* if any of the delta_q values are changing update flag has to be set */
-    /* currently only y2dc_delta_q may change */
-
-    cm->y1dc_delta_q = 0;
-    cm->y2ac_delta_q = 0;
-    cm->uvdc_delta_q = 0;
-    cm->uvac_delta_q = 0;
-
-    if (Q < 4)
-    {
-        new_delta_q = 4-Q;
-    }
-    else
-        new_delta_q = 0;
-
-    update |= cm->y2dc_delta_q != new_delta_q;
-    cm->y2dc_delta_q = new_delta_q;
-
-
-    // Set Segment specific quatizers
-    mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][2] = cpi->segment_feature_data[MB_LVL_ALT_Q][2];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][3] = cpi->segment_feature_data[MB_LVL_ALT_Q][3];
-
-    /* quantizer has to be reinitialized for any delta_q changes */
-    if(update)
-        vp8cx_init_quantizer(cpi);
-
-}
-
 static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
@@ -3105,7 +3066,7 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     (void) size;
     (void) dest;
     (void) frame_flags;
-    set_quantizer(cpi, 26);
+    vp8_set_quantizer(cpi, 26);
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);
@@ -3502,7 +3463,7 @@ static void encode_frame_to_data_rate
             cm->current_video_frame++;
             cpi->frames_since_key++;
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
             cpi->count ++;
 #endif
 
@@ -3769,7 +3730,7 @@ static void encode_frame_to_data_rate
             Q = 127;
             */
 
-        set_quantizer(cpi, Q);
+        vp8_set_quantizer(cpi, Q);
         this_q = Q;
 
         // setup skip prob for costing in mode/mv decision
@@ -4114,7 +4075,7 @@ static void encode_frame_to_data_rate
         {
             vp8_restore_coding_context(cpi);
             loop_count++;
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
             cpi->tot_recode_hits++;
 #endif
         }
@@ -4388,7 +4349,7 @@ static void encode_frame_to_data_rate
         }
     }
 
-#if 0 && CONFIG_PSNR
+#if 0 && CONFIG_INTERNAL_STATS
     {
         FILE *f = fopen("tmp.stt", "a");
 
@@ -4958,7 +4919,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         generate_psnr_packet(cpi);
     }
 
-#if CONFIG_PSNR
+#if CONFIG_INTERNAL_STATS
 
     if (cpi->pass != 1)
     {

@@ -30,6 +30,9 @@
 #include "vp8/common/systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"
+#if CONFIG_ERROR_CONCEALMENT
+#include "error_concealment.h"
+#endif
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
@@ -95,6 +98,13 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     }
 
     pbi->common.error.setjmp = 0;
+
+#if CONFIG_ERROR_CONCEALMENT
+    pbi->ec_enabled = oxcf->error_concealment;
+#else
+    pbi->ec_enabled = 0;
+#endif
+
     return (VP8D_PTR) pbi;
 }
 
@@ -114,6 +124,9 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
     if (pbi->b_multithreaded_rd)
         vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
     vp8_decoder_remove_threads(pbi);
+#endif
+#if CONFIG_ERROR_CONCEALMENT
+    vp8_de_alloc_overlap_lists(pbi);
 #endif
     vp8_remove_common(&pbi->common);
     vpx_free(pbi);
@@ -274,11 +287,17 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         */
         cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
 
-        /* Signal that we have no frame to show. */
-        cm->show_frame = 0;
+        /* If error concealment is disabled we won't signal missing frames to
+         * the decoder.
+         */
+        if (!pbi->ec_enabled)
+        {
+            /* Signal that we have no frame to show. */
+            cm->show_frame = 0;
 
-        /* Nothing more to do. */
-        return 0;
+            /* Nothing more to do. */
+            return 0;
+        }
     }
 
 
@@ -392,6 +411,28 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
 
     vp8_clear_system_state();
+
+#if CONFIG_ERROR_CONCEALMENT
+    /* swap the mode infos to storage for future error concealment */
+    if (pbi->ec_enabled && pbi->common.prev_mi)
+    {
+        const MODE_INFO* tmp = pbi->common.prev_mi;
+        int row, col;
+        pbi->common.prev_mi = pbi->common.mi;
+        pbi->common.mi = tmp;
+
+        /* Propagate the segment_ids to the next frame */
+        for (row = 0; row < pbi->common.mb_rows; ++row)
+        {
+            for (col = 0; col < pbi->common.mb_cols; ++col)
+            {
+                const int i = row*pbi->common.mode_info_stride + col;
+                pbi->common.mi[i].mbmi.segment_id =
+                        pbi->common.prev_mi[i].mbmi.segment_id;
+            }
+        }
+    }
+#endif
 
     /*vp8_print_modes_and_motion_vectors( cm->mi, cm->mb_rows,cm->mb_cols, cm->current_video_frame);*/
 
