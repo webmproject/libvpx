@@ -79,7 +79,6 @@ typedef struct
     int errorperbit;
     int sadperbit16;
     int sadperbit4;
-    int errthresh;
     int rddiv;
     int rdmult;
     unsigned int * mb_activity_ptr;

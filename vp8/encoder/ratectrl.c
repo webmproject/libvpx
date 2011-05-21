@@ -671,7 +671,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
     {
         if (cpi->pass == 2)
         {
-            cpi->per_frame_bandwidth = cpi->gf_bits;                       // Per frame bit target for the alt ref frame
+            cpi->per_frame_bandwidth = cpi->twopass.gf_bits;                       // Per frame bit target for the alt ref frame
             cpi->this_frame_target = cpi->per_frame_bandwidth;
         }
 
@@ -1100,7 +1100,6 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             }
 
 #endif
-            cpi->initial_gf_use = 0;
 
             if (cpi->auto_adjust_gold_quantizer)
             {
@@ -1476,7 +1475,6 @@ void vp8_adjust_key_frame_context(VP8_COMP *cpi)
     }
 
     cpi->frames_since_key = 0;
-    cpi->last_key_frame_size = cpi->projected_frame_size;
     cpi->key_frame_count++;
 }
 

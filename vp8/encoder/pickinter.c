@@ -170,8 +170,7 @@ static int get_prediction_error(BLOCK *be, BLOCKD *b, const vp8_variance_rtcd_vt
 static int pick_intra4x4block(
     const VP8_ENCODER_RTCD *rtcd,
     MACROBLOCK *x,
-    BLOCK *be,
-    BLOCKD *b,
+    int ib,
     B_PREDICTION_MODE *best_mode,
     B_PREDICTION_MODE above,
     B_PREDICTION_MODE left,
@@ -179,6 +178,9 @@ static int pick_intra4x4block(
     int *bestrate,
     int *bestdistortion)
 {
+
+    BLOCKD *b = &x->e_mbd.block[ib];
+    BLOCK *be = &x->block[ib];
     B_PREDICTION_MODE mode;
     int best_rd = INT_MAX;       // 1<<30
     int rate;
@@ -214,8 +216,7 @@ static int pick_intra4x4block(
     }
 
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
-    vp8_encode_intra4x4block(rtcd, x, be, b, b->bmi.mode);
-
+    vp8_encode_intra4x4block(rtcd, x, ib);
     return best_rd;
 }
 
@@ -245,8 +246,7 @@ int vp8_pick_intra4x4mby_modes
         B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
         int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(d);
 
-        pick_intra4x4block(rtcd, mb, mb->block + i, xd->block + i,
-                               &best_mode, A, L, &r, &d);
+        pick_intra4x4block(rtcd, mb, i, &best_mode, A, L, &r, &d);
 
         cost += r;
         distortion += d;
@@ -922,9 +922,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         cpi->rd_thresh_mult[best_mode_index] = (cpi->rd_thresh_mult[best_mode_index] >= (MIN_THRESHMULT + best_adjustment)) ? cpi->rd_thresh_mult[best_mode_index] - best_adjustment : MIN_THRESHMULT;
         cpi->rd_threshes[best_mode_index] = (cpi->rd_baseline_thresh[best_mode_index] >> 7) * cpi->rd_thresh_mult[best_mode_index];
     }
-
-    // Keep a record of best mode index for use in next loop
-    cpi->last_best_mode_index = best_mode_index;
 
     if (best_mbmode.mode <= B_PRED)
     {
