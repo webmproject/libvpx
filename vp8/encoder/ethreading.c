@@ -302,7 +302,6 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
 
     z->sadperbit16      = x->sadperbit16;
     z->sadperbit4       = x->sadperbit4;
-    z->errthresh        = x->errthresh;
 
     /*
     z->mv_col_min    = x->mv_col_min;

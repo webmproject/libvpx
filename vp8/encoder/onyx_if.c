@@ -375,11 +375,11 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     cpi->mb.pip = 0;
 
 #if !(CONFIG_REALTIME_ONLY)
-    vpx_free(cpi->total_stats);
-    cpi->total_stats = 0;
+    vpx_free(cpi->twopass.total_stats);
+    cpi->twopass.total_stats = 0;
 
-    vpx_free(cpi->this_frame_stats);
-    cpi->this_frame_stats = 0;
+    vpx_free(cpi->twopass.this_frame_stats);
+    cpi->twopass.this_frame_stats = 0;
 #endif
 }
 
@@ -1410,15 +1410,15 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
                     cm->mb_rows * cm->mb_cols));
 
 #if !(CONFIG_REALTIME_ONLY)
-        vpx_free(cpi->total_stats);
+        vpx_free(cpi->twopass.total_stats);
 
-    cpi->total_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
+    cpi->twopass.total_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
 
-        vpx_free(cpi->this_frame_stats);
+        vpx_free(cpi->twopass.this_frame_stats);
 
-    cpi->this_frame_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
+    cpi->twopass.this_frame_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
 
-    if(!cpi->total_stats || !cpi->this_frame_stats)
+    if(!cpi->twopass.total_stats || !cpi->twopass.this_frame_stats)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");
 #endif
@@ -1481,7 +1481,7 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
         cpi->max_gf_interval = 12;
 
     // Extended interval for genuinely static scenes
-    cpi->static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
+    cpi->twopass.static_scene_max_gf_interval = cpi->key_frame_frequency >> 1;
 
      // Special conditions when altr ref frame enabled in lagged compress mode
     if (cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames)
@@ -1489,12 +1489,12 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
         if (cpi->max_gf_interval > cpi->oxcf.lag_in_frames - 1)
             cpi->max_gf_interval = cpi->oxcf.lag_in_frames - 1;
 
-        if (cpi->static_scene_max_gf_interval > cpi->oxcf.lag_in_frames - 1)
-            cpi->static_scene_max_gf_interval = cpi->oxcf.lag_in_frames - 1;
+        if (cpi->twopass.static_scene_max_gf_interval > cpi->oxcf.lag_in_frames - 1)
+            cpi->twopass.static_scene_max_gf_interval = cpi->oxcf.lag_in_frames - 1;
     }
 
-    if ( cpi->max_gf_interval > cpi->static_scene_max_gf_interval )
-        cpi->max_gf_interval = cpi->static_scene_max_gf_interval;
+    if ( cpi->max_gf_interval > cpi->twopass.static_scene_max_gf_interval )
+        cpi->max_gf_interval = cpi->twopass.static_scene_max_gf_interval;
 }
 
 
@@ -1909,7 +1909,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     // Set reference frame sign bias for ALTREF frame to 1 (for now)
     cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 1;
 
-    cpi->gf_decay_rate = 0;
+    cpi->twopass.gf_decay_rate = 0;
     cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
     cpi->gold_is_last = 0 ;
@@ -2037,7 +2037,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->rate_correction_factor         = 1.0;
     cpi->key_frame_rate_correction_factor = 1.0;
     cpi->gf_rate_correction_factor  = 1.0;
-    cpi->est_max_qcorrection_factor  = 1.0;
+    cpi->twopass.est_max_qcorrection_factor  = 1.0;
 
     cpi->mb.mvcost[0] = &cpi->mb.mvcosts[0][mv_max+1];
     cpi->mb.mvcost[1] = &cpi->mb.mvcosts[1][mv_max+1];
@@ -2073,8 +2073,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         size_t packet_sz = sizeof(FIRSTPASS_STATS);
         int packets = oxcf->two_pass_stats_in.sz / packet_sz;
 
-        cpi->stats_in = oxcf->two_pass_stats_in.buf;
-        cpi->stats_in_end = (void*)((char *)cpi->stats_in
+        cpi->twopass.stats_in = oxcf->two_pass_stats_in.buf;
+        cpi->twopass.stats_in_end = (void*)((char *)cpi->twopass.stats_in
                             + (packets - 1) * packet_sz);
         vp8_init_second_pass(cpi);
     }
@@ -2157,8 +2157,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
     cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
     cpi->refining_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, refining_search);
-
-    cpi->ready_for_new_frame = 1;
 
     // make sure frame 1 is okay
     cpi->error_bins[0] = cpi->common.MBs;
@@ -3301,8 +3299,8 @@ static void encode_frame_to_data_rate
     {
         if (cpi->common.refresh_alt_ref_frame)
         {
-            cpi->per_frame_bandwidth = cpi->gf_bits;                           // Per frame bit target for the alt ref frame
-            cpi->target_bandwidth = cpi->gf_bits * cpi->output_frame_rate;      // per second target bitrate
+            cpi->per_frame_bandwidth = cpi->twopass.gf_bits;                           // Per frame bit target for the alt ref frame
+            cpi->target_bandwidth = cpi->twopass.gf_bits * cpi->output_frame_rate;      // per second target bitrate
         }
     }
     else
@@ -3502,15 +3500,15 @@ static void encode_frame_to_data_rate
                 buff_lvl_step = (cpi->oxcf.maximum_buffer_size - cpi->oxcf.optimal_buffer_level) / Adjustment;
 
                 if (buff_lvl_step)
-                {
                     Adjustment = (cpi->buffer_level - cpi->oxcf.optimal_buffer_level) / buff_lvl_step;
-                    cpi->active_worst_quality -= Adjustment;
-                }
+                else
+                    Adjustment = 0;
             }
-            else
-            {
-                cpi->active_worst_quality -= Adjustment;
-            }
+
+            cpi->active_worst_quality -= Adjustment;
+
+            if(cpi->active_worst_quality < cpi->active_best_quality)
+                cpi->active_worst_quality = cpi->active_best_quality;
         }
     }
 
@@ -4107,7 +4105,7 @@ static void encode_frame_to_data_rate
     // Special case code to reduce pulsing when key frames are forced at a
     // fixed interval. Note the reconstruction error if it is the frame before
     // the force key frame
-    if ( cpi->next_key_frame_forced && (cpi->frames_to_key == 0) )
+    if ( cpi->next_key_frame_forced && (cpi->twopass.frames_to_key == 0) )
     {
         cpi->ambient_err = vp8_calc_ss_err(cpi->Source,
                                            &cm->yv12_fb[cm->new_fb_idx],
@@ -4313,17 +4311,17 @@ static void encode_frame_to_data_rate
     // Update bits left to the kf and gf groups to account for overshoot or undershoot on these frames
     if (cm->frame_type == KEY_FRAME)
     {
-        cpi->kf_group_bits += cpi->this_frame_target - cpi->projected_frame_size;
+        cpi->twopass.kf_group_bits += cpi->this_frame_target - cpi->projected_frame_size;
 
-        if (cpi->kf_group_bits < 0)
-            cpi->kf_group_bits = 0 ;
+        if (cpi->twopass.kf_group_bits < 0)
+            cpi->twopass.kf_group_bits = 0 ;
     }
     else if (cm->refresh_golden_frame || cm->refresh_alt_ref_frame)
     {
-        cpi->gf_group_bits += cpi->this_frame_target - cpi->projected_frame_size;
+        cpi->twopass.gf_group_bits += cpi->this_frame_target - cpi->projected_frame_size;
 
-        if (cpi->gf_group_bits < 0)
-            cpi->gf_group_bits = 0 ;
+        if (cpi->twopass.gf_group_bits < 0)
+            cpi->twopass.gf_group_bits = 0 ;
     }
 
     if (cm->frame_type != KEY_FRAME)
@@ -4370,7 +4368,7 @@ static void encode_frame_to_data_rate
                        //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
-                       cpi->est_max_qcorrection_factor, (int)cpi->bits_left,
+                       cpi->twopass.est_max_qcorrection_factor, (int)cpi->bits_left,
                        cpi->total_coded_error_left,
                        (double)cpi->bits_left / cpi->total_coded_error_left,
                        cpi->tot_recode_hits);
@@ -4389,7 +4387,7 @@ static void encode_frame_to_data_rate
                        //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
-                       cpi->est_max_qcorrection_factor, (int)cpi->bits_left,
+                       cpi->twopass.est_max_qcorrection_factor, (int)cpi->bits_left,
                        cpi->total_coded_error_left, cpi->tot_recode_hits);
 
         fclose(f);
@@ -4598,13 +4596,13 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
         vp8_second_pass(cpi);
 
     encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-    cpi->bits_left -= 8 * *size;
+    cpi->twopass.bits_left -= 8 * *size;
 
     if (!cpi->common.refresh_alt_ref_frame)
     {
         double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
             *cpi->oxcf.two_pass_vbrmin_section / 100);
-        cpi->bits_left += (long long)(two_pass_min_rate / cpi->oxcf.frame_rate);
+        cpi->twopass.bits_left += (long long)(two_pass_min_rate / cpi->oxcf.frame_rate);
     }
 }
 #endif
@@ -4738,10 +4736,10 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         *size = 0;
 #if !(CONFIG_REALTIME_ONLY)
 
-        if (flush && cpi->pass == 1 && !cpi->first_pass_done)
+        if (flush && cpi->pass == 1 && !cpi->twopass.first_pass_done)
         {
             vp8_end_first_pass(cpi);    /* get last stats packet */
-            cpi->first_pass_done = 1;
+            cpi->twopass.first_pass_done = 1;
         }
 
 #endif
@@ -4908,8 +4906,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         cm->frame_type = INTER_FRAME;
 
     }
-
-    cpi->ready_for_new_frame = 1;
 
     vpx_usec_timer_mark(&cmptimer);
     cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
