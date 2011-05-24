@@ -94,10 +94,10 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
 
                 do
                 {
-                    const B_PREDICTION_MODE A = vp8_above_bmi(m, i, mis)->mode;
-                    const B_PREDICTION_MODE L = vp8_left_bmi(m, i)->mode;
+                    const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
+                    const B_PREDICTION_MODE L = left_block_mode(m, i);
 
-                    m->bmi[i].mode = (B_PREDICTION_MODE) vp8_read_bmode(bc, pbi->common.kf_bmode_prob [A] [L]);
+                    m->bmi[i].as_mode = (B_PREDICTION_MODE) vp8_read_bmode(bc, pbi->common.kf_bmode_prob [A] [L]);
                 }
                 while (++i < 16);
             }
@@ -127,7 +127,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
 
                 do
                 {
-                    m->bmi[i].mode = (B_PREDICTION_MODE)BMode;
+                    m->bmi[i].as_mode = (B_PREDICTION_MODE)BMode;
                 }
                 while (++i < 16);
             }
@@ -354,12 +354,15 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
             do  /* for each subset j */
             {
+                int_mv leftmv, abovemv;
                 B_MODE_INFO bmi;
                 int k;  /* first block in subset j */
                 int mv_contz;
                 k = vp8_mbsplit_offset[s][j];
 
-                mv_contz = vp8_mv_cont(&(vp8_left_bmi(mi, k)->mv.as_mv), &(vp8_above_bmi(mi, k, mis)->mv.as_mv));
+                leftmv.as_int = left_block_mv(mi, k);
+                abovemv.as_int = above_block_mv(mi, k, mis);
+                mv_contz = vp8_mv_cont(&(leftmv.as_mv), &(abovemv.as_mv));
 
                 switch (bmi.mode = (B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
                 {
@@ -372,13 +375,13 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   #endif
                     break;
                 case LEFT4X4:
-                    bmi.mv.as_int = vp8_left_bmi(mi, k)->mv.as_int;
+                    bmi.mv.as_int = leftmv.as_int;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][0]++;
   #endif
                     break;
                 case ABOVE4X4:
-                    bmi.mv.as_int = vp8_above_bmi(mi, k, mis)->mv.as_int;
+                    bmi.mv.as_int = abovemv.as_int;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][1]++;
   #endif
@@ -409,9 +412,8 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     fill_offset = &mbsplit_fill_offset[s][(unsigned char)j * mbsplit_fill_count[s]];
 
                     do {
-                        mi->bmi[ *fill_offset] = bmi;
+                        mi->bmi[ *fill_offset].mv.as_int = bmi.mv.as_int;
                         fill_offset++;
-
                     }while (--fill_count);
                 }
 
@@ -485,20 +487,16 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
     else
     {
-        /* MB is intra coded */
-        int j = 0;
-        do
-        {
-            mi->bmi[j].mv.as_int = 0;
-        }
-        while (++j < 16);
+        /* required for left and above block mv */
+        mbmi->mv.as_int = 0;
 
+        /* MB is intra coded */
         if ((mbmi->mode = (MB_PREDICTION_MODE) vp8_read_ymode(bc, pbi->common.fc.ymode_prob)) == B_PRED)
         {
-            j = 0;
+            int j = 0;
             do
             {
-                mi->bmi[j].mode = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
+                mi->bmi[j].as_mode = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
             }
             while (++j < 16);
         }

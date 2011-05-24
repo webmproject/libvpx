@@ -214,7 +214,6 @@ static int pick_intra4x4block(
             *best_mode = mode;
         }
     }
-
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
     vp8_encode_intra4x4block(rtcd, x, ib);
     return best_rd;
@@ -241,8 +240,9 @@ int vp8_pick_intra4x4mby_modes
     {
         MODE_INFO *const mic = xd->mode_info_context;
         const int mis = xd->mode_info_stride;
-        const B_PREDICTION_MODE A = vp8_above_bmi(mic, i, mis)->mode;
-        const B_PREDICTION_MODE L = vp8_left_bmi(mic, i)->mode;
+        const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
+        const B_PREDICTION_MODE L = left_block_mode(mic, i);
+
         B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
         int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(d);
 
@@ -250,8 +250,7 @@ int vp8_pick_intra4x4mby_modes
 
         cost += r;
         distortion += d;
-
-        mic->bmi[i].mode = xd->block[i].bmi.mode = best_mode;
+        mic->bmi[i].as_mode = xd->block[i].bmi.mode = best_mode;
 
         // Break out case where we have already exceeded best so far value
         // that was passed in
@@ -271,9 +270,6 @@ int vp8_pick_intra4x4mby_modes
         *best_dist = INT_MAX;
         error = INT_MAX;
     }
-
-    for (i = 0; i < 16; i++)
-        xd->block[i].bmi.mv.as_int = 0;
 
     return error;
 }
@@ -432,9 +428,9 @@ static void update_mvcount(VP8_COMP *cpi, MACROBLOCKD *xd, int_mv *best_ref_mv)
      * therefore, only need to modify MVcount in NEWMV mode. */
     if (xd->mode_info_context->mbmi.mode == NEWMV)
     {
-        cpi->MVcount[0][mv_max+((xd->block[0].bmi.mv.as_mv.row -
+        cpi->MVcount[0][mv_max+((xd->mode_info_context->mbmi.mv.as_mv.row -
                                       best_ref_mv->as_mv.row) >> 1)]++;
-        cpi->MVcount[1][mv_max+((xd->block[0].bmi.mv.as_mv.col -
+        cpi->MVcount[1][mv_max+((xd->mode_info_context->mbmi.mv.as_mv.col -
                                       best_ref_mv->as_mv.col) >> 1)]++;
     }
 }
@@ -966,11 +962,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
 
-    if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
+
+    if (x->e_mbd.mode_info_context->mbmi.mode <= B_PRED)
         for (i = 0; i < 16; i++)
         {
-            vpx_memcpy(&x->e_mbd.block[i].bmi, &best_bmodes[i], sizeof(B_MODE_INFO));
-
+            x->e_mbd.block[i].bmi.mode = best_bmodes[i].mode;
         }
     else
     {
