@@ -840,7 +840,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             x->e_mbd.block[0].bmi.mode = this_mode;
             x->e_mbd.block[0].bmi.mv.as_int = x->e_mbd.mode_info_context->mbmi.mv.as_int;
 
-            if((this_mode != NEWMV) || !(have_subp_search))
+            if((this_mode != NEWMV) || !(have_subp_search) || cpi->common.full_pixel==1)
                 distortion2 = get_inter_mbpred_error(x, &cpi->fn_ptr[BLOCK_16X16], &sse);
 
             this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
