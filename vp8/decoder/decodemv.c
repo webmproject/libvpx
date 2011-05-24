@@ -529,7 +529,9 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
         while (++mb_col < pbi->common.mb_cols)
         {
+#if CONFIG_ERROR_CONCEALMENT
             int mb_num = mb_row * pbi->common.mb_cols + mb_col;
+#endif
             /*read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
             if(pbi->common.frame_type == KEY_FRAME)
                 vp8_kfread_modes(pbi, mi, mb_row, mb_col);

@@ -350,8 +350,6 @@ FILE *vpxlog = 0;
 static void
 decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
 {
-
-    int i;
     int recon_yoffset, recon_uvoffset;
     int mb_col;
     int ref_fb_idx = pc->lst_fb_idx;

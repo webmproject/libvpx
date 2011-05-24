@@ -120,8 +120,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                 // for each macroblock col in image
                 for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
                 {
-                    int seg_map_index = (mb_row * cm->mb_cols);
-
                     if ((mb_col & (nsync - 1)) == 0)
                     {
                         while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != cm->mb_cols - 1)
