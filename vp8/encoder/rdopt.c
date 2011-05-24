@@ -517,17 +517,21 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
 
     if ((mv_row | mv_col) & 7)
     {
-        VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride, mv_col & 7, mv_row & 7, upred_ptr, uv_stride, &sse2);
-        VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride, mv_col & 7, mv_row & 7, vpred_ptr, uv_stride, &sse1);
+        VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride,
+            mv_col & 7, mv_row & 7, upred_ptr, uv_stride, &sse2);
+        VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride,
+            mv_col & 7, mv_row & 7, vpred_ptr, uv_stride, &sse1);
         sse2 += sse1;
     }
     else
     {
-        VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride, mv_col & 7, mv_row & 7, upred_ptr, uv_stride, &sse2);
-        VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride, mv_col & 7, mv_row & 7, vpred_ptr, uv_stride, &sse1);
+        int sum2, sum1;
+        VARIANCE_INVOKE(rtcd, get8x8var)(uptr, pre_stride,
+            upred_ptr, uv_stride, &sse2, &sum2);
+        VARIANCE_INVOKE(rtcd, get8x8var)(vptr, pre_stride,
+            vpred_ptr, uv_stride, &sse1, &sum1);
         sse2 += sse1;
     }
-
     return sse2;
 
 }
