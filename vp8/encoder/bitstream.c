@@ -1023,7 +1023,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                                 assert(0);
                         leftmv.as_int = left_block_mv(m, k);
                         abovemv.as_int = above_block_mv(m, k, mis);
-                        mv_contz = vp8_mv_cont(&(leftmv.as_mv), &(abovemv.as_mv));
+                        mv_contz = vp8_mv_cont(&leftmv, &abovemv);
 
                         write_sub_mv_ref(w, b->mode, vp8_sub_mv_ref_prob2 [mv_contz]); //pc->fc.sub_mv_ref_prob);
 
