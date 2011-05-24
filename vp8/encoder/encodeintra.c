@@ -88,7 +88,6 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
         switch (x->e_mbd.mode_info_context->mbmi.mode)
         {
-
         case DC_PRED:
             d->bmi.mode = B_DC_PRED;
             break;
@@ -104,7 +103,6 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
         default:
             d->bmi.mode = B_DC_PRED;
             break;
-
         }
     }
 }

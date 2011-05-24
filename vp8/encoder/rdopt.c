@@ -651,7 +651,6 @@ static int rd_pick_intra4x4block(
             vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
         }
     }
-
     b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
 
     IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff, b->diff, 32);
@@ -693,8 +692,8 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
 
         if (mb->e_mbd.frame_type == KEY_FRAME)
         {
-            const B_PREDICTION_MODE A = vp8_above_bmi(mic, i, mis)->mode;
-            const B_PREDICTION_MODE L = vp8_left_bmi(mic, i)->mode;
+            const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
+            const B_PREDICTION_MODE L = left_block_mode(mic, i);
 
             bmode_costs  = mb->bmode_costs[A][L];
         }
@@ -707,7 +706,8 @@ int vp8_rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
         cost += r;
         distortion += d;
         tot_rate_y += ry;
-        mic->bmi[i].mode = xd->block[i].bmi.mode = best_mode;
+
+        mic->bmi[i].as_mode = best_mode;
 
         if(total_rd >= (long long)best_rd)
             break;
@@ -855,17 +855,8 @@ int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4])
 
 void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv)
 {
-    int i;
-
     x->e_mbd.mode_info_context->mbmi.mode = mb;
     x->e_mbd.mode_info_context->mbmi.mv.as_int = mv->as_int;
-
-    for (i = 0; i < 16; i++)
-    {
-        B_MODE_INFO *bmi = &x->e_mbd.block[i].bmi;
-        bmi->mode = (B_PREDICTION_MODE) mb;
-        bmi->mv.as_int = mv->as_int;
-    }
 }
 
 static int labels2mode(
@@ -913,10 +904,10 @@ static int labels2mode(
                 thismvcost  = vp8_mv_bit_cost(this_mv, best_ref_mv, mvcost, 102);
                 break;
             case LEFT4X4:
-                this_mv->as_int = col ? d[-1].bmi.mv.as_int : vp8_left_bmi(mic, i)->mv.as_int;
+                this_mv->as_int = col ? d[-1].bmi.mv.as_int : left_block_mv(mic, i);
                 break;
             case ABOVE4X4:
-                this_mv->as_int = row ? d[-4].bmi.mv.as_int : vp8_above_bmi(mic, i, mis)->mv.as_int;
+                this_mv->as_int = row ? d[-4].bmi.mv.as_int : above_block_mv(mic, i, mis);
                 break;
             case ZERO4X4:
                 this_mv->as_int = 0;
@@ -928,8 +919,9 @@ static int labels2mode(
             if (m == ABOVE4X4)  // replace above with left if same
             {
                 int_mv left_mv;
+
                 left_mv.as_int = col ? d[-1].bmi.mv.as_int :
-                                        vp8_left_bmi(mic, i)->mv.as_int;
+                                        left_block_mv(mic, i);
 
                 if (left_mv.as_int == this_mv->as_int)
                     m = LEFT4X4;
@@ -1413,6 +1405,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
         BLOCKD *bd = &x->e_mbd.block[i];
 
         bd->bmi.mv.as_mv = bsi.mvs[i].as_mv;
+        bd->bmi.mode = bsi.modes[i];
         bd->eob = bsi.eobs[i];
     }
 
@@ -2322,6 +2315,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             if (this_mode <= B_PRED)
             {
                 x->e_mbd.mode_info_context->mbmi.uv_mode = uv_intra_mode;
+                /* required for left and above block mv */
+                x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
             }
 
             other_cost += ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
@@ -2413,27 +2408,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         return;
     }
 
-
-    if(best_mbmode.mode <= B_PRED)
-    {
-        int i;
-        for (i = 0; i < 16; i++)
-        {
-            best_bmodes[i].mv.as_int = 0;
-        }
-    }
-
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
 
-    for (i = 0; i < 16; i++)
+    if (best_mbmode.mode == B_PRED)
     {
-        vpx_memcpy(&x->e_mbd.block[i].bmi, &best_bmodes[i], sizeof(B_MODE_INFO));
+        for (i = 0; i < 16; i++)
+          x->e_mbd.block[i].bmi.mode = best_bmodes[i].mode;
     }
 
     if (best_mbmode.mode == SPLITMV)
     {
+        for (i = 0; i < 16; i++)
+            x->e_mbd.block[i].bmi.mv.as_int = best_bmodes[i].mv.as_int;
+
         vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
+
         x->e_mbd.mode_info_context->mbmi.mv.as_int =
                                       x->partition_info->bmi[15].mv.as_int;
     }

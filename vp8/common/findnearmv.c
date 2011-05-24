@@ -153,26 +153,3 @@ vp8_prob *vp8_mv_ref_probs(
     return p;
 }
 
-const B_MODE_INFO *vp8_left_bmi(const MODE_INFO *cur_mb, int b)
-{
-    if (!(b & 3))
-    {
-        /* On L edge, get from MB to left of us */
-        --cur_mb;
-        b += 4;
-    }
-
-    return cur_mb->bmi + b - 1;
-}
-
-const B_MODE_INFO *vp8_above_bmi(const MODE_INFO *cur_mb, int b, int mi_stride)
-{
-    if (!(b >> 2))
-    {
-        /* On top edge, get from MB above us */
-        cur_mb -= mi_stride;
-        b += 16;
-    }
-
-    return cur_mb->bmi + b - 4;
-}
