@@ -63,7 +63,7 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
      BLOCK *b, \
      BLOCKD *d, \
      int_mv *ref_mv, \
-     int error_per_bit, \
+     int sad_per_bit, \
      int distance, \
      vp8_variance_fn_ptr_t *fn_ptr, \
      int *mvcost[2], \
@@ -77,7 +77,7 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
      BLOCK *b, \
      BLOCKD *d, \
      int_mv *ref_mv, \
-     int error_per_bit, \
+     int sad_per_bit, \
      int distance, \
      vp8_variance_fn_ptr_t *fn_ptr, \
      int *mvcost[2], \
@@ -93,7 +93,7 @@ extern fractional_mv_step_fp vp8_skip_fractional_mv_step;
      int_mv *ref_mv, \
      int_mv *best_mv, \
      int search_param, \
-     int error_per_bit, \
+     int sad_per_bit, \
      int *num00, \
      vp8_variance_fn_ptr_t *fn_ptr, \
      int *mvcost[2], \
