@@ -40,9 +40,6 @@ const int vp8cx_base_skip_false_prob[128] =
     53,  50,  47,  44,  41,  38,  35, 32,
     30,  28,  26,  24,  22,  20,  18, 16,
 };
-#ifdef VP8REF
-#define __int64 long long
-#endif
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
