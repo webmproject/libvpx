@@ -948,8 +948,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     int j = 0;
 
                     do
-                        write_bmode(w, m->bmi[j].mode, pc->fc.bmode_prob);
-
+                        write_bmode(w, m->bmi[j].as_mode, pc->fc.bmode_prob);
                     while (++j < 16);
                 }
 
@@ -1016,14 +1015,16 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         const int *const  L = vp8_mbsplits [mi->partitioning];
                         int k = -1;  /* first block in subset j */
                         int mv_contz;
+                        int_mv leftmv, abovemv;
+
 
                         while (j != L[++k])
                             if (k >= 16)
                                 assert(0);
+                        leftmv.as_int = left_block_mv(m, k);
+                        abovemv.as_int = above_block_mv(m, k, mis);
+                        mv_contz = vp8_mv_cont(&(leftmv.as_mv), &(abovemv.as_mv));
 
-                        mv_contz = vp8_mv_cont
-                                   (&(vp8_left_bmi(m, k)->mv.as_mv),
-                                    &(vp8_above_bmi(m, k, mis)->mv.as_mv));
                         write_sub_mv_ref(w, b->mode, vp8_sub_mv_ref_prob2 [mv_contz]); //pc->fc.sub_mv_ref_prob);
 
                         if (b->mode == NEW4X4)
@@ -1099,9 +1100,9 @@ static void write_kfmodes(VP8_COMP *cpi)
 
                 do
                 {
-                    const B_PREDICTION_MODE A = vp8_above_bmi(m, i, mis)->mode;
-                    const B_PREDICTION_MODE L = vp8_left_bmi(m, i)->mode;
-                    const int bm = m->bmi[i].mode;
+                    const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
+                    const B_PREDICTION_MODE L = left_block_mode(m, i);
+                    const int bm = m->bmi[i].as_mode;
 
 #ifdef ENTROPY_STATS
                     ++intra_mode_stats [A] [L] [bm];
