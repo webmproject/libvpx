@@ -101,8 +101,7 @@ unsigned int vp8_get16x16pred_error_c
     const unsigned char *src_ptr,
     int src_stride,
     const unsigned char *ref_ptr,
-    int ref_stride,
-    int max_sad
+    int ref_stride
 )
 {
     unsigned pred_error = 0;
@@ -134,8 +133,7 @@ unsigned int vp8_get4x4sse_cs_c
     const unsigned char *src_ptr,
     int  source_stride,
     const unsigned char *ref_ptr,
-    int  recon_stride,
-    int max_sad
+    int  recon_stride
 )
 {
     int distortion = 0;
@@ -163,7 +161,7 @@ static int get_prediction_error(BLOCK *be, BLOCKD *b, const vp8_variance_rtcd_vt
     sptr = (*(be->base_src) + be->src);
     dptr = b->predictor;
 
-    return VARIANCE_INVOKE(rtcd, get4x4sse_cs)(sptr, be->src_stride, dptr, 16, 0x7fffffff);
+    return VARIANCE_INVOKE(rtcd, get4x4sse_cs)(sptr, be->src_stride, dptr, 16);
 
 }
 
@@ -672,7 +670,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 distortion2 = VARIANCE_INVOKE
                                 (&cpi->rtcd.variance, get16x16prederror)(
                                     x->src.y_buffer, x->src.y_stride,
-                                    x->e_mbd.predictor, 16, 0x7fffffff);
+                                    x->e_mbd.predictor, 16);
                 this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
                 if (this_rd < best_intra_rd)
@@ -695,7 +693,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         case TM_PRED:
             RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
                 (&x->e_mbd);
-            distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16, 0x7fffffff);
+            distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16);
             rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
             this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
