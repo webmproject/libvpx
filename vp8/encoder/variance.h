@@ -101,6 +101,15 @@
 
 #define prototype_getmbss(sym) unsigned int (sym)(const short *)
 
+#define prototype_get16x16prederror(sym)\
+    unsigned int (sym)\
+    (\
+     const unsigned char *src_ptr, \
+     int source_stride, \
+     const unsigned char *ref_ptr, \
+     int  ref_stride \
+    )
+
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/variance_x86.h"
 #endif
@@ -302,7 +311,7 @@ extern prototype_variance(vp8_variance_mse16x16);
 #ifndef vp8_variance_get16x16prederror
 #define vp8_variance_get16x16prederror vp8_get16x16pred_error_c
 #endif
-extern prototype_sad(vp8_variance_get16x16prederror);
+extern prototype_get16x16prederror(vp8_variance_get16x16prederror);
 
 #ifndef vp8_variance_get8x8var
 #define vp8_variance_get8x8var vp8_get8x8var_c
@@ -317,7 +326,7 @@ extern prototype_variance2(vp8_variance_get16x16var);
 #ifndef vp8_variance_get4x4sse_cs
 #define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_c
 #endif
-extern prototype_sad(vp8_variance_get4x4sse_cs);
+extern prototype_get16x16prederror(vp8_variance_get4x4sse_cs);
 
 #ifndef vp8_ssimpf
 #define vp8_ssimpf ssim_parms_c
@@ -337,9 +346,8 @@ typedef prototype_variance(*vp8_variance_fn_t);
 typedef prototype_variance2(*vp8_variance2_fn_t);
 typedef prototype_subpixvariance(*vp8_subpixvariance_fn_t);
 typedef prototype_getmbss(*vp8_getmbss_fn_t);
-
-typedef prototype_ssimpf(*vp8_ssimpf_fn_t)
-
+typedef prototype_ssimpf(*vp8_ssimpf_fn_t);
+typedef prototype_get16x16prederror(*vp8_get16x16prederror_fn_t);
 
 typedef struct
 {
@@ -368,10 +376,10 @@ typedef struct
     vp8_getmbss_fn_t         getmbss;
     vp8_variance_fn_t        mse16x16;
 
-    vp8_sad_fn_t             get16x16prederror;
+    vp8_get16x16prederror_fn_t get16x16prederror;
     vp8_variance2_fn_t       get8x8var;
     vp8_variance2_fn_t       get16x16var;
-    vp8_sad_fn_t             get4x4sse_cs;
+    vp8_get16x16prederror_fn_t get4x4sse_cs;
 
     vp8_sad_multi_fn_t       sad16x16x3;
     vp8_sad_multi_fn_t       sad16x8x3;
