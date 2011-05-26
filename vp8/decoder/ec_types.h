@@ -13,13 +13,15 @@
 
 #define MAX_OVERLAPS 16
 
+
+
 /* The area (pixel area in Q6) the block pointed to by bmi overlaps
  * another block with.
  */
 typedef struct
 {
     int overlap;
-    B_MODE_INFO *bmi;
+    union b_mode_info *bmi;
 } OVERLAP_NODE;
 
 /* Structure to keep track of overlapping blocks on a block level. */
