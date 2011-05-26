@@ -362,7 +362,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
                 leftmv.as_int = left_block_mv(mi, k);
                 abovemv.as_int = above_block_mv(mi, k, mis);
-                mv_contz = vp8_mv_cont(&(leftmv.as_mv), &(abovemv.as_mv));
+                mv_contz = vp8_mv_cont(&leftmv, &abovemv);
 
                 switch (bmi.mode = (B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
                 {
