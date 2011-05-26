@@ -2651,12 +2651,9 @@ static void resize_key_frame(VP8_COMP *cpi)
 }
 
 
-static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
+static void update_alt_ref_frame_stats(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
-
-    // Update the golden frame buffer
-    vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
 
     // Select an interval before next GF or altref
     if (!cpi->auto_gold)
@@ -2690,19 +2687,13 @@ static void update_alt_ref_frame_and_stats(VP8_COMP *cpi)
 
 
 }
-static void update_golden_frame_and_stats(VP8_COMP *cpi)
+static void update_golden_frame_stats(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
 
-    // Update the Golden frame reconstruction buffer if signalled and the GF usage counts.
+    // Update the Golden frame usage counts.
     if (cm->refresh_golden_frame)
     {
-        if (cm->frame_type != KEY_FRAME)
-        {
-            // Update the golden frame buffer
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
-        }
-
         // Select an interval before next GF
         if (!cpi->auto_gold)
             cpi->frames_till_gf_update_due = cpi->goldfreq;
@@ -3082,6 +3073,85 @@ static BOOL recode_loop_test( VP8_COMP *cpi,
     return force_recode;
 }
 
+void update_reference_frames(VP8_COMMON *cm)
+{
+    YV12_BUFFER_CONFIG *yv12_fb = cm->yv12_fb;
+
+    // At this point the new frame has been encoded.
+    // If any buffer copy / swapping is signaled it should be done here.
+
+    if (cm->frame_type == KEY_FRAME)
+    {
+        yv12_fb[cm->new_fb_idx].flags |= VP8_GOLD_FLAG | VP8_ALT_FLAG ;
+
+        yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+        yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+
+        cm->alt_fb_idx = cm->gld_fb_idx = cm->new_fb_idx;
+    }
+    else    /* For non key frames */
+    {
+        if (cm->refresh_alt_ref_frame)
+        {
+            assert(!cm->copy_buffer_to_arf);
+
+            cm->yv12_fb[cm->new_fb_idx].flags |= VP8_ALT_FLAG;
+            cm->yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+            cm->alt_fb_idx = cm->new_fb_idx;
+        }
+        else if (cm->copy_buffer_to_arf)
+        {
+            assert(!(cm->copy_buffer_to_arf & ~0x3));
+
+            if (cm->copy_buffer_to_arf == 1)
+            {
+                yv12_fb[cm->lst_fb_idx].flags |= VP8_ALT_FLAG;
+                yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                cm->alt_fb_idx = cm->lst_fb_idx;
+            }
+            else /* if (cm->copy_buffer_to_arf == 2) */
+            {
+                yv12_fb[cm->gld_fb_idx].flags |= VP8_ALT_FLAG;
+                yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                cm->alt_fb_idx = cm->gld_fb_idx;
+            }
+        }
+
+        if (cm->refresh_golden_frame)
+        {
+            assert(!cm->copy_buffer_to_gf);
+
+            cm->yv12_fb[cm->new_fb_idx].flags |= VP8_GOLD_FLAG;
+            cm->yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+            cm->gld_fb_idx = cm->new_fb_idx;
+        }
+        else if (cm->copy_buffer_to_gf)
+        {
+            assert(!(cm->copy_buffer_to_arf & ~0x3));
+
+            if (cm->copy_buffer_to_gf == 1)
+            {
+                yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FLAG;
+                yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                cm->gld_fb_idx = cm->lst_fb_idx;
+            }
+            else /* if (cm->copy_buffer_to_gf == 2) */
+            {
+                yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FLAG;
+                yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                cm->gld_fb_idx = cm->alt_fb_idx;
+            }
+        }
+    }
+
+    if (cm->refresh_last_frame)
+    {
+        cm->yv12_fb[cm->new_fb_idx].flags |= VP8_LAST_FLAG;
+        cm->yv12_fb[cm->lst_fb_idx].flags &= ~VP8_LAST_FLAG;
+        cm->lst_fb_idx = cm->new_fb_idx;
+    }
+}
+
 void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 {
     if (cm->no_lpf)
@@ -3120,50 +3190,6 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
     vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
 
-    {
-        YV12_BUFFER_CONFIG *lst_yv12 = &cm->yv12_fb[cm->lst_fb_idx];
-        YV12_BUFFER_CONFIG *new_yv12 = &cm->yv12_fb[cm->new_fb_idx];
-        YV12_BUFFER_CONFIG *gld_yv12 = &cm->yv12_fb[cm->gld_fb_idx];
-        YV12_BUFFER_CONFIG *alt_yv12 = &cm->yv12_fb[cm->alt_fb_idx];
-        // At this point the new frame has been encoded.
-        // If any buffer copy / swapping is signaled it should be done here.
-        if (cm->frame_type == KEY_FRAME)
-        {
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, gld_yv12);
-            vp8_yv12_copy_frame_ptr(cm->frame_to_show, alt_yv12);
-        }
-        else    // For non key frames
-        {
-            // Code to copy between reference buffers
-            if (cm->copy_buffer_to_arf)
-            {
-                if (cm->copy_buffer_to_arf == 1)
-                {
-                    if (cm->refresh_last_frame)
-                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                        vp8_yv12_copy_frame_ptr(new_yv12, alt_yv12);
-                    else
-                        vp8_yv12_copy_frame_ptr(lst_yv12, alt_yv12);
-                }
-                else if (cm->copy_buffer_to_arf == 2)
-                    vp8_yv12_copy_frame_ptr(gld_yv12, alt_yv12);
-            }
-
-            if (cm->copy_buffer_to_gf)
-            {
-                if (cm->copy_buffer_to_gf == 1)
-                {
-                    if (cm->refresh_last_frame)
-                        // We copy new_frame here because last and new buffers will already have been swapped if cm->refresh_last_frame is set.
-                        vp8_yv12_copy_frame_ptr(new_yv12, gld_yv12);
-                    else
-                        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
-                }
-                else if (cm->copy_buffer_to_gf == 2)
-                    vp8_yv12_copy_frame_ptr(alt_yv12, gld_yv12);
-            }
-        }
-    }
 }
 
 static void encode_frame_to_data_rate
@@ -4067,21 +4093,15 @@ static void encode_frame_to_data_rate
     }
 #endif
 
-    // For inter frames the current default behaviour is that when cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
-    // This is purely an encoder descision at present.
+    // For inter frames the current default behavior is that when
+    // cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
+    // This is purely an encoder decision at present.
     if (!cpi->oxcf.error_resilient_mode && cm->refresh_golden_frame)
         cm->copy_buffer_to_arf  = 2;
     else
         cm->copy_buffer_to_arf  = 0;
 
-    if (cm->refresh_last_frame)
-    {
-        vp8_swap_yv12_buffer(&cm->yv12_fb[cm->lst_fb_idx], &cm->yv12_fb[cm->new_fb_idx]);
-        cm->frame_to_show = &cm->yv12_fb[cm->lst_fb_idx];
-    }
-    else
-        cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
-
+    cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
 #if CONFIG_MULTITHREAD
     if (cpi->b_multi_threaded)
@@ -4093,6 +4113,8 @@ static void encode_frame_to_data_rate
     {
         loopfilter_frame(cpi, cm);
     }
+
+    update_reference_frames(cm);
 
     if (cpi->oxcf.error_resilient_mode == 1)
     {
@@ -4118,7 +4140,7 @@ static void encode_frame_to_data_rate
 
     /* Move storing frame_type out of the above loop since it is also
      * needed in motion search besides loopfilter */
-      cm->last_frame_type = cm->frame_type;
+    cm->last_frame_type = cm->frame_type;
 
     // Update rate control heuristics
     cpi->total_byte_count += (*size);
@@ -4368,26 +4390,14 @@ static void encode_frame_to_data_rate
         cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
 
 
-    if (cpi->oxcf.error_resilient_mode)
-    {
-        if (cm->frame_type != KEY_FRAME)
-        {
-            // Is this an alternate reference update
-            if (cm->refresh_alt_ref_frame)
-                vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->alt_fb_idx]);
-
-            if (cm->refresh_golden_frame)
-                vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cm->yv12_fb[cm->gld_fb_idx]);
-        }
-    }
-    else
+    if (!cpi->oxcf.error_resilient_mode)
     {
         if (cpi->oxcf.play_alternate && cm->refresh_alt_ref_frame && (cm->frame_type != KEY_FRAME))
-            // Update the alternate reference frame and stats as appropriate.
-            update_alt_ref_frame_and_stats(cpi);
+            // Update the alternate reference frame stats as appropriate.
+            update_alt_ref_frame_stats(cpi);
         else
-            // Update the Golden frame and golden frame and stats as appropriate.
-            update_golden_frame_and_stats(cpi);
+            // Update the Golden frame stats as appropriate.
+            update_golden_frame_stats(cpi);
     }
 
     if (cm->frame_type == KEY_FRAME)
@@ -4752,7 +4762,20 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     }
 
 #endif
+    /* find a free buffer for the new frame */
+    {
+        int i = 0;
+        for(; i < NUM_YV12_BUFFERS; i++)
+        {
+            if(!cm->yv12_fb[i].flags)
+            {
+                cm->new_fb_idx = i;
+                break;
+            }
+        }
 
+        assert(i < NUM_YV12_BUFFERS );
+    }
 #if !(CONFIG_REALTIME_ONLY)
 
     if (cpi->pass == 1)
