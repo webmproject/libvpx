@@ -39,6 +39,8 @@
 
 extern void vp8_init_loop_filter(VP8_COMMON *cm);
 extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
+static int get_free_fb (VP8_COMMON *cm);
+static void ref_cnt_fb (int *buf, int *idx, int new_idx);
 
 
 void vp8dx_initialize()
@@ -158,18 +160,24 @@ int vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
-    int ref_fb_idx;
+    int *ref_fb_ptr = NULL;
+    int free_fb;
 
     if (ref_frame_flag == VP8_LAST_FLAG)
-        ref_fb_idx = cm->lst_fb_idx;
+        *ref_fb_ptr = cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        ref_fb_idx = cm->gld_fb_idx;
+        *ref_fb_ptr = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        ref_fb_idx = cm->alt_fb_idx;
+        *ref_fb_ptr = cm->alt_fb_idx;
     else
         return -1;
 
-    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[ref_fb_idx]);
+    /* Find an empty frame buffer. */
+    free_fb = get_free_fb(cm);
+
+    /* Manage the reference counters and copy image. */
+    ref_cnt_fb (cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
+    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[*ref_fb_ptr]);
 
     return 0;
 }

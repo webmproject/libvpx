@@ -167,13 +167,15 @@ typedef struct
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
 } MB_MODE_INFO;
 
-
 typedef struct
 {
     MB_MODE_INFO mbmi;
-    B_MODE_INFO bmi[16];
+    union
+    {
+        B_PREDICTION_MODE as_mode;
+        int_mv mv;
+    } bmi[16];
 } MODE_INFO;
-
 
 typedef struct
 {
@@ -197,7 +199,6 @@ typedef struct
     int eob;
 
     B_MODE_INFO bmi;
-
 } BLOCKD;
 
 typedef struct
@@ -284,5 +285,25 @@ typedef struct
 
 extern void vp8_build_block_doffsets(MACROBLOCKD *x);
 extern void vp8_setup_block_dptrs(MACROBLOCKD *x);
+
+static void update_blockd_bmi(MACROBLOCKD *xd)
+{
+    int i;
+    if (xd->mode_info_context->mbmi.mode == SPLITMV)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            BLOCKD *d = &xd->block[i];
+            d->bmi.mv.as_int = xd->mode_info_context->bmi[i].mv.as_int;
+        }
+    }else if (xd->mode_info_context->mbmi.mode == B_PRED)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            BLOCKD *d = &xd->block[i];
+            d->bmi.mode = xd->mode_info_context->bmi[i].as_mode;
+        }
+    }
+}
 
 #endif  /* __INC_BLOCKD_H */

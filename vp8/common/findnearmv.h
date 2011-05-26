@@ -85,10 +85,60 @@ vp8_prob *vp8_mv_ref_probs(
     vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
 );
 
-const B_MODE_INFO *vp8_left_bmi(const MODE_INFO *cur_mb, int b);
-
-const B_MODE_INFO *vp8_above_bmi(const MODE_INFO *cur_mb, int b, int mi_stride);
-
 extern const unsigned char vp8_mbsplit_offset[4][16];
+
+
+static int left_block_mv(const MODE_INFO *cur_mb, int b)
+{
+    if (!(b & 3))
+    {
+        /* On L edge, get from MB to left of us */
+        --cur_mb;
+
+        if(cur_mb->mbmi.mode != SPLITMV)
+            return cur_mb->mbmi.mv.as_int;
+        b += 4;
+    }
+
+    return (cur_mb->bmi + b - 1)->mv.as_int;
+}
+
+static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride)
+{
+    if (!(b >> 2))
+    {
+        /* On top edge, get from MB above us */
+        cur_mb -= mi_stride;
+
+        if(cur_mb->mbmi.mode != SPLITMV)
+            return cur_mb->mbmi.mv.as_int;
+        b += 16;
+    }
+
+    return (cur_mb->bmi + b - 4)->mv.as_int;
+}
+static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
+{
+    if (!(b & 3))
+    {
+        /* On L edge, get from MB to left of us */
+        --cur_mb;
+        b += 4;
+    }
+
+    return (cur_mb->bmi + b - 1)->as_mode;
+}
+
+static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi_stride)
+{
+    if (!(b >> 2))
+    {
+        /* On top edge, get from MB above us */
+        cur_mb -= mi_stride;
+        b += 16;
+    }
+
+    return (cur_mb->bmi + b - 4)->as_mode;
+}
 
 #endif
