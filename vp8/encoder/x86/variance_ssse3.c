@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include "vpx_config.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"

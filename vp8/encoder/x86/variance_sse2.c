@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include "vpx_config.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
@@ -148,30 +148,31 @@ unsigned int vp8_variance4x4_wmt(
     const unsigned char *src_ptr,
     int  source_stride,
     const unsigned char *ref_ptr,
-    int  recon_stride)
+    int  recon_stride,
+    unsigned int *sse)
 {
     unsigned int var;
     int avg;
 
     vp8_get4x4var_mmx(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg) ;
+    *sse = var;
     return (var - ((avg * avg) >> 4));
 
 }
-
-
 
 unsigned int vp8_variance8x8_wmt
 (
     const unsigned char *src_ptr,
     int  source_stride,
     const unsigned char *ref_ptr,
-    int  recon_stride)
+    int  recon_stride,
+    unsigned int *sse)
 {
     unsigned int var;
     int avg;
 
     vp8_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg) ;
-
+    *sse = var;
     return (var - ((avg * avg) >> 6));
 
 }

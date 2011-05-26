@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include "vpx_config.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
@@ -34,7 +34,7 @@ extern void filter_block1d_v6_mmx
     short *vp7_filter
 );
 
-extern unsigned int vp8_get_mb_ss_mmx(short *src_ptr);
+extern unsigned int vp8_get_mb_ss_mmx(const short *src_ptr);
 extern unsigned int vp8_get8x8var_mmx
 (
     const unsigned char *src_ptr,
@@ -78,20 +78,19 @@ extern void vp8_filter_block2d_bil_var_mmx
 );
 extern unsigned int vp8_get16x16pred_error_mmx
 (
-    unsigned char *src_ptr,
+    const unsigned char *src_ptr,
     int src_stride,
-    unsigned char *ref_ptr,
+    const unsigned char *ref_ptr,
     int ref_stride
 );
-
 
 unsigned int vp8_get16x16var_mmx(
     const unsigned char *src_ptr,
     int  source_stride,
     const unsigned char *ref_ptr,
     int  recon_stride,
-    unsigned *SSE,
-    unsigned *SUM
+    unsigned int *SSE,
+    int *SUM
 )
 {
     unsigned int sse0, sse1, sse2, sse3, var;
@@ -176,7 +175,7 @@ unsigned int vp8_variance16x16_mmx(
     int  source_stride,
     const unsigned char *ref_ptr,
     int  recon_stride,
-    int *sse)
+    unsigned int *sse)
 {
     unsigned int sse0, sse1, sse2, sse3, var;
     int sum0, sum1, sum2, sum3, avg;
@@ -401,7 +400,7 @@ unsigned int vp8_sub_pixel_variance8x16_mmx
     int  yoffset,
     const unsigned char *dst_ptr,
     int dst_pixels_per_line,
-    int *sse
+    unsigned int *sse
 )
 {
     int xsum;
