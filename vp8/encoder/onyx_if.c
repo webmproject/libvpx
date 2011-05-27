@@ -3105,15 +3105,21 @@ void update_reference_frames(VP8_COMMON *cm)
 
             if (cm->copy_buffer_to_arf == 1)
             {
-                yv12_fb[cm->lst_fb_idx].flags |= VP8_ALT_FLAG;
-                yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
-                cm->alt_fb_idx = cm->lst_fb_idx;
+                if(cm->alt_fb_idx != cm->lst_fb_idx)
+                {
+                    yv12_fb[cm->lst_fb_idx].flags |= VP8_ALT_FLAG;
+                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                    cm->alt_fb_idx = cm->lst_fb_idx;
+                }
             }
             else /* if (cm->copy_buffer_to_arf == 2) */
             {
-                yv12_fb[cm->gld_fb_idx].flags |= VP8_ALT_FLAG;
-                yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
-                cm->alt_fb_idx = cm->gld_fb_idx;
+                if(cm->alt_fb_idx != cm->gld_fb_idx)
+                {
+                    yv12_fb[cm->gld_fb_idx].flags |= VP8_ALT_FLAG;
+                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                    cm->alt_fb_idx = cm->gld_fb_idx;
+                }
             }
         }
 
@@ -3131,15 +3137,21 @@ void update_reference_frames(VP8_COMMON *cm)
 
             if (cm->copy_buffer_to_gf == 1)
             {
-                yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FLAG;
-                yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
-                cm->gld_fb_idx = cm->lst_fb_idx;
+                if(cm->gld_fb_idx != cm->lst_fb_idx)
+                {
+                    yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FLAG;
+                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                    cm->gld_fb_idx = cm->lst_fb_idx;
+                }
             }
             else /* if (cm->copy_buffer_to_gf == 2) */
             {
-                yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FLAG;
-                yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
-                cm->gld_fb_idx = cm->alt_fb_idx;
+                if(cm->alt_fb_idx != cm->gld_fb_idx)
+                {
+                    yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FLAG;
+                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                    cm->gld_fb_idx = cm->alt_fb_idx;
+                }
             }
         }
     }
