@@ -1139,11 +1139,6 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     c = &x->block[n];
                     e = &x->e_mbd.block[n];
 
-                    if (cpi->sf.search_method == HEX)
-                        bestsme = vp8_hex_search(x, c, e, bsi->ref_mv,
-                                                 &mode_mv[NEW4X4], step_param, sadpb, &num00, v_fn_ptr, x->mvsadcost, x->mvcost, bsi->ref_mv);
-
-                    else
                     {
                         bestsme = cpi->diamond_search_sad(x, c, e, &bsi->mvp,
                                                           &mode_mv[NEW4X4], step_param,
@@ -2066,12 +2061,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 step_param = sr;
 
             // Initial step/diamond search
-            if (cpi->sf.search_method == HEX)
-            {
-                bestsme = vp8_hex_search(x, b, d, &best_ref_mv, &d->bmi.mv, step_param, sadpb/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvsadcost, x->mvcost, &best_ref_mv);
-                mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
-            }
-            else
             {
                 bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv, step_param, sadpb / 2/*x->errorperbit*/, &num00, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv); //sadpb < 9
                 mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
