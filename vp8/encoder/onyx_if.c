@@ -1049,11 +1049,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         {
             sf->auto_filter = 0;                     // Faster selection of loop filter
 
-#if CONFIG_REALTIME_ONLY
             sf->search_method = HEX;
-#else
-            sf->search_method = DIAMOND;
-#endif
+            //sf->search_method = DIAMOND;
+
             sf->iterative_sub_pixel = 0;
 
             cpi->mode_check_freq[THR_V_PRED] = 4;
@@ -3180,15 +3178,21 @@ void update_reference_frames(VP8_COMMON *cm)
 
             if (cm->copy_buffer_to_arf == 1)
             {
-                yv12_fb[cm->lst_fb_idx].flags |= VP8_ALT_FLAG;
-                yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
-                cm->alt_fb_idx = cm->lst_fb_idx;
+                if(cm->alt_fb_idx != cm->lst_fb_idx)
+                {
+                    yv12_fb[cm->lst_fb_idx].flags |= VP8_ALT_FLAG;
+                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                    cm->alt_fb_idx = cm->lst_fb_idx;
+                }
             }
             else /* if (cm->copy_buffer_to_arf == 2) */
             {
-                yv12_fb[cm->gld_fb_idx].flags |= VP8_ALT_FLAG;
-                yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
-                cm->alt_fb_idx = cm->gld_fb_idx;
+                if(cm->alt_fb_idx != cm->gld_fb_idx)
+                {
+                    yv12_fb[cm->gld_fb_idx].flags |= VP8_ALT_FLAG;
+                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                    cm->alt_fb_idx = cm->gld_fb_idx;
+                }
             }
         }
 
@@ -3206,15 +3210,21 @@ void update_reference_frames(VP8_COMMON *cm)
 
             if (cm->copy_buffer_to_gf == 1)
             {
-                yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FLAG;
-                yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
-                cm->gld_fb_idx = cm->lst_fb_idx;
+                if(cm->gld_fb_idx != cm->lst_fb_idx)
+                {
+                    yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FLAG;
+                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                    cm->gld_fb_idx = cm->lst_fb_idx;
+                }
             }
             else /* if (cm->copy_buffer_to_gf == 2) */
             {
-                yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FLAG;
-                yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
-                cm->gld_fb_idx = cm->alt_fb_idx;
+                if(cm->alt_fb_idx != cm->gld_fb_idx)
+                {
+                    yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FLAG;
+                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                    cm->gld_fb_idx = cm->alt_fb_idx;
+                }
             }
         }
     }
