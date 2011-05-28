@@ -144,6 +144,11 @@ typedef struct
     int_mv mv;
 } B_MODE_INFO;
 
+union b_mode_info
+{
+    B_PREDICTION_MODE as_mode;
+    int_mv mv;
+};
 
 typedef enum
 {
@@ -170,11 +175,7 @@ typedef struct
 typedef struct
 {
     MB_MODE_INFO mbmi;
-    union
-    {
-        B_PREDICTION_MODE as_mode;
-        int_mv mv;
-    } bmi[16];
+    union b_mode_info bmi[16];
 } MODE_INFO;
 
 typedef struct

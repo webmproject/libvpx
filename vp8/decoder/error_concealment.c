@@ -69,7 +69,7 @@ void vp8_de_alloc_overlap_lists(VP8D_COMP *pbi)
 
 /* Inserts a new overlap area value to the list of overlaps of a block */
 static void assign_overlap(OVERLAP_NODE* overlaps,
-                           B_MODE_INFO *bmi,
+                           union b_mode_info *bmi,
                            int overlap)
 {
     int i;
@@ -111,7 +111,7 @@ static int block_overlap(int b1_row, int b1_col, int b2_row, int b2_col)
  * first block being overlapped in the macroblock has position (first_blk_row,
  * first_blk_col) in blocks relative the upper-left corner of the image.
  */
-static void calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
+static void calculate_overlaps_mb(B_OVERLAP *b_overlaps, union b_mode_info *bmi,
                                   int new_row, int new_col,
                                   int mb_row, int mb_col,
                                   int first_blk_row, int first_blk_col)
@@ -171,7 +171,7 @@ static void calculate_overlaps_mb(B_OVERLAP *b_overlaps, B_MODE_INFO *bmi,
 
 void vp8_calculate_overlaps(MB_OVERLAP *overlap_ul,
                             int mb_rows, int mb_cols,
-                            B_MODE_INFO *bmi,
+                            union b_mode_info *bmi,
                             int b_row, int b_col)
 {
     MB_OVERLAP *mb_overlap;
@@ -246,7 +246,7 @@ void vp8_calculate_overlaps(MB_OVERLAP *overlap_ul,
  * Filters out all overlapping blocks which do not refer to the correct
  * reference frame type.
  */
-static void estimate_mv(const OVERLAP_NODE *overlaps, B_MODE_INFO *bmi)
+static void estimate_mv(const OVERLAP_NODE *overlaps, union b_mode_info *bmi)
 {
     int i;
     int overlap_sum = 0;
@@ -267,13 +267,11 @@ static void estimate_mv(const OVERLAP_NODE *overlaps, B_MODE_INFO *bmi)
         /* Q9 / Q6 = Q3 */
         bmi->mv.as_mv.col = col_acc / overlap_sum;
         bmi->mv.as_mv.row = row_acc / overlap_sum;
-        bmi->mode = NEW4X4;
     }
     else
     {
         bmi->mv.as_mv.col = 0;
         bmi->mv.as_mv.row = 0;
-        bmi->mode = NEW4X4;
     }
 }
 
@@ -290,7 +288,7 @@ static void estimate_mb_mvs(const B_OVERLAP *block_overlaps,
     int i;
     int non_zero_count = 0;
     MV * const filtered_mv = &(mi->mbmi.mv.as_mv);
-    B_MODE_INFO * const bmi = mi->bmi;
+    union b_mode_info * const bmi = mi->bmi;
     filtered_mv->col = 0;
     filtered_mv->row = 0;
     for (i = 0; i < 16; ++i)
@@ -558,7 +556,7 @@ static void interpolate_mvs(MACROBLOCKD *mb,
                  */
                 mv->as_mv.row = mv_row_sum / w_sum;
                 mv->as_mv.col = mv_col_sum / w_sum;
-                mi->bmi[row*4 + col].mode = NEW4X4;
+
                 mi->mbmi.need_to_clamp_mvs = vp8_check_mv_bounds(mv,
                                                        mb->mb_to_left_edge,
                                                        mb->mb_to_right_edge,
