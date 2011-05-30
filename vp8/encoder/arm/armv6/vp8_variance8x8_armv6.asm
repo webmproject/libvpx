@@ -23,6 +23,10 @@
 |vp8_variance8x8_armv6| PROC
 
     push    {r4-r10, lr}
+
+    pld     [r0, r1, lsl #0]
+    pld     [r2, r3, lsl #0]
+
     mov     r12, #8             ; set loop counter to 8 (=block height)
     mov     r4, #0              ; initialize sum = 0
     mov     r5, #0              ; initialize sse = 0
@@ -35,8 +39,10 @@ loop
     mov     lr, #0              ; constant zero
 
     usub8   r8, r6, r7          ; calculate difference
+    pld     [r0, r1, lsl #1]
     sel     r10, r8, lr         ; select bytes with positive difference
     usub8   r9, r7, r6          ; calculate difference with reversed operands
+    pld     [r2, r3, lsl #1]
     sel     r8, r9, lr          ; select bytes with negative difference
 
     ; calculate partial sums
