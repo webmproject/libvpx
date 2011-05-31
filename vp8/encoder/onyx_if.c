@@ -1947,12 +1947,12 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         cpi->total_ssimg_all = 0;
     }
 
+#endif
+
 #ifndef LLONG_MAX
 #define LLONG_MAX  9223372036854775807LL
 #endif
     cpi->first_time_stamp_ever = LLONG_MAX;
-
-#endif
 
     cpi->frames_till_gf_update_due      = 0;
     cpi->key_frame_count              = 1;
