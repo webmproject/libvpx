@@ -2375,26 +2375,20 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     cpi->mode_chosen_counts[best_mode_index] ++;
 
 
-    if (cpi->is_src_frame_alt_ref && (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME))
+    if (cpi->is_src_frame_alt_ref &&
+        (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME))
     {
-        best_mbmode.mode = ZEROMV;
-        best_mbmode.ref_frame = ALTREF_FRAME;
-        best_mbmode.mv.as_int = 0;
-        best_mbmode.uv_mode = 0;
-        best_mbmode.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
-        best_mbmode.partitioning = 0;
-
-        vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
-        vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
-
-        for (i = 0; i < 16; i++)
-        {
-            vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
-        }
-
+        x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
+        x->e_mbd.mode_info_context->mbmi.ref_frame = ALTREF_FRAME;
         x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
+        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff =
+                                        (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+        x->e_mbd.mode_info_context->mbmi.partitioning = 0;
+
         return;
     }
+
 
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
