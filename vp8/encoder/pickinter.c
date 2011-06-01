@@ -71,7 +71,10 @@ int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
 }
 
 
-static int get_inter_mbpred_error(MACROBLOCK *mb, const vp8_variance_fn_ptr_t *vfp, unsigned int *sse)
+static int get_inter_mbpred_error(MACROBLOCK *mb,
+                                  const vp8_variance_fn_ptr_t *vfp,
+                                  unsigned int *sse,
+                                  int_mv this_mv)
 {
 
     BLOCK *b = &mb->block[0];
@@ -80,10 +83,10 @@ static int get_inter_mbpred_error(MACROBLOCK *mb, const vp8_variance_fn_ptr_t *v
     int what_stride = b->src_stride;
     unsigned char *in_what = *(d->base_pre) + d->pre ;
     int in_what_stride = d->pre_stride;
-    int xoffset = d->bmi.mv.as_mv.col & 7;
-    int yoffset = d->bmi.mv.as_mv.row & 7;
+    int xoffset = this_mv.as_mv.col & 7;
+    int yoffset = this_mv.as_mv.row & 7;
 
-    in_what += (d->bmi.mv.as_mv.row >> 3) * d->pre_stride + (d->bmi.mv.as_mv.col >> 3);
+    in_what += (this_mv.as_mv.row >> 3) * d->pre_stride + (this_mv.as_mv.col >> 3);
 
     if (xoffset | yoffset)
     {
@@ -833,13 +836,14 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 continue;
 
             rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
-            x->e_mbd.mode_info_context->mbmi.mode = this_mode;
-            x->e_mbd.mode_info_context->mbmi.mv.as_mv = mode_mv[this_mode].as_mv;
-            x->e_mbd.block[0].bmi.mode = this_mode;
-            x->e_mbd.block[0].bmi.mv.as_int = x->e_mbd.mode_info_context->mbmi.mv.as_int;
+            x->e_mbd.mode_info_context->mbmi.mv.as_int =
+                                                    mode_mv[this_mode].as_int;
 
-            if((this_mode != NEWMV) || !(have_subp_search) || cpi->common.full_pixel==1)
-                distortion2 = get_inter_mbpred_error(x, &cpi->fn_ptr[BLOCK_16X16], &sse);
+            if((this_mode != NEWMV) ||
+                !(have_subp_search) || cpi->common.full_pixel==1)
+                distortion2 = get_inter_mbpred_error(x,
+                                                     &cpi->fn_ptr[BLOCK_16X16],
+                                                     &sse, mode_mv[this_mode]);
 
             this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
@@ -883,10 +887,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 {
                     vpx_memcpy(&best_bmodes[i], &x->e_mbd.block[i].bmi, sizeof(B_MODE_INFO));
                 }
-            else
-            {
-                best_bmodes[0].mv = x->e_mbd.block[0].bmi.mv;
-            }
 
             // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
             cpi->rd_thresh_mult[mode_index] = (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ? cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
@@ -917,13 +917,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         cpi->rd_threshes[best_mode_index] = (cpi->rd_baseline_thresh[best_mode_index] >> 7) * cpi->rd_thresh_mult[best_mode_index];
     }
 
-    if (best_mbmode.mode <= B_PRED)
-    {
-        x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-        vp8_pick_intra_mbuv_mode(x);
-        best_mbmode.uv_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
-    }
-
 
     {
         int this_rdbin = (*returndistortion >> 7);
@@ -936,40 +929,34 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         cpi->error_bins[this_rdbin] ++;
     }
 
-
-    if (cpi->is_src_frame_alt_ref && (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME))
+    if (cpi->is_src_frame_alt_ref &&
+        (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME))
     {
-        best_mbmode.mode = ZEROMV;
-        best_mbmode.ref_frame = ALTREF_FRAME;
-        best_mbmode.mv.as_int = 0;
-        best_mbmode.uv_mode = 0;
-        best_mbmode.mb_skip_coeff = (cpi->common.mb_no_coeff_skip) ? 1 : 0;
-        best_mbmode.partitioning = 0;
-
-        vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
-
-        for (i = 0; i < 16; i++)
-        {
-            vpx_memset(&x->e_mbd.block[i].bmi, 0, sizeof(B_MODE_INFO));
-        }
-
+        x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
+        x->e_mbd.mode_info_context->mbmi.ref_frame = ALTREF_FRAME;
         x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
+        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+        x->e_mbd.mode_info_context->mbmi.mb_skip_coeff =
+                                        (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+        x->e_mbd.mode_info_context->mbmi.partitioning = 0;
+
         return;
     }
 
-    // macroblock modes
+    /* set to the best mb mode */
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
 
+    if (best_mbmode.mode <= B_PRED)
+    {
+        /* set mode_info_context->mbmi.uv_mode */
+        vp8_pick_intra_mbuv_mode(x);
+    }
 
-    if (x->e_mbd.mode_info_context->mbmi.mode <= B_PRED)
+    if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
         for (i = 0; i < 16; i++)
         {
             x->e_mbd.block[i].bmi.mode = best_bmodes[i].mode;
         }
-    else
-    {
-        vp8_set_mbmode_and_mvs(x, x->e_mbd.mode_info_context->mbmi.mode, &best_bmodes[0].mv);
-    }
 
     update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 }
