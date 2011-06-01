@@ -200,7 +200,7 @@ static int vp8_temporal_filter_find_matching_mb_c
     bestsme = vp8_hex_search(x, b, d,
         &best_ref_mv1, &d->bmi.mv,
         step_param,
-        sadpb/*x->errorperbit*/,
+        sadpb,
         &num00, &cpi->fn_ptr[BLOCK_16X16],
         mvsadcost, mvcost, &best_ref_mv1);
 
