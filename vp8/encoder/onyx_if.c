@@ -4385,7 +4385,7 @@ static void encode_frame_to_data_rate
 
         vp8_clear_system_state();  //__asm emms;
 
-        if (cpi->total_coded_error_left != 0.0)
+        if (cpi->twopass.total_coded_error_left != 0.0)
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6d %6d"
                        "%6d %6d %6d %5d %5d %5d %8d %8.2f %10d %10.3f"
                        "%10.3f %8d\n",
@@ -4400,9 +4400,9 @@ static void encode_frame_to_data_rate
                        //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
-                       cpi->twopass.est_max_qcorrection_factor, (int)cpi->bits_left,
-                       cpi->total_coded_error_left,
-                       (double)cpi->bits_left / cpi->total_coded_error_left,
+                       cpi->twopass.est_max_qcorrection_factor, (int)cpi->twopass.bits_left,
+                       cpi->twopass.total_coded_error_left,
+                       (double)cpi->twopass.bits_left / cpi->twopass.total_coded_error_left,
                        cpi->tot_recode_hits);
         else
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6d %6d"
@@ -4419,8 +4419,8 @@ static void encode_frame_to_data_rate
                        //cpi->avg_frame_qindex, cpi->zbin_over_quant,
                        cm->refresh_golden_frame, cm->refresh_alt_ref_frame,
                        cm->frame_type, cpi->gfu_boost,
-                       cpi->twopass.est_max_qcorrection_factor, (int)cpi->bits_left,
-                       cpi->total_coded_error_left, cpi->tot_recode_hits);
+                       cpi->twopass.est_max_qcorrection_factor, (int)cpi->twopass.bits_left,
+                       cpi->twopass.total_coded_error_left, cpi->tot_recode_hits);
 
         fclose(f);
 
