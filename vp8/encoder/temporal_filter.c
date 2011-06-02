@@ -153,7 +153,6 @@ static int vp8_temporal_filter_find_matching_mb_c
     int further_steps;
     int sadpb = x->sadperbit16;
     int bestsme = INT_MAX;
-    int num00 = 0;
 
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
@@ -201,7 +200,7 @@ static int vp8_temporal_filter_find_matching_mb_c
         &best_ref_mv1, &d->bmi.mv,
         step_param,
         sadpb,
-        &num00, &cpi->fn_ptr[BLOCK_16X16],
+        &cpi->fn_ptr[BLOCK_16X16],
         mvsadcost, mvcost, &best_ref_mv1);
 
 #if ALT_REF_SUBPEL_ENABLED

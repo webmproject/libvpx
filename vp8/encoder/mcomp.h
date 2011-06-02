@@ -40,7 +40,6 @@ extern int vp8_hex_search
     int_mv *best_mv,
     int search_param,
     int error_per_bit,
-    int *num00,
     const vp8_variance_fn_ptr_t *vf,
     int *mvsadcost[2],
     int *mvcost[2],
