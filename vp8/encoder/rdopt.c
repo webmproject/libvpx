@@ -650,7 +650,7 @@ static int rd_pick_intra4x4block(
             vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
         }
     }
-    b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
+    b->bmi.as_mode = (B_PREDICTION_MODE)(*best_mode);
 
     IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff, b->diff, 32);
     RECON_INVOKE(IF_RTCD(&cpi->rtcd.common->recon), recon)(best_predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
@@ -1398,8 +1398,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     {
         BLOCKD *bd = &x->e_mbd.block[i];
 
-        bd->bmi.mv.as_mv = bsi.mvs[i].as_mv;
-        bd->bmi.mode = bsi.modes[i];
+        bd->bmi.mv.as_int = bsi.mvs[i].as_int;
         bd->eob = bsi.eobs[i];
     }
 
@@ -1714,7 +1713,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
-    B_MODE_INFO best_bmodes[16];
+    union b_mode_info best_bmodes[16];
     MB_MODE_INFO best_mbmode;
     PARTITION_INFO best_partition;
     int_mv best_ref_mv;
@@ -1758,6 +1757,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     unsigned char *v_buffer[4];
 
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
+    vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
 
     if (cpi->ref_frame_flags & VP8_LAST_FLAG)
     {
@@ -2319,10 +2319,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
             vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
 
-            for (i = 0; i < 16; i++)
-            {
-                vpx_memcpy(&best_bmodes[i], &x->e_mbd.block[i].bmi, sizeof(B_MODE_INFO));
-            }
+            if ((this_mode == B_PRED) || (this_mode == SPLITMV))
+                for (i = 0; i < 16; i++)
+                {
+                    best_bmodes[i] = x->e_mbd.block[i].bmi;
+                }
+
 
             // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
             cpi->rd_thresh_mult[mode_index] = (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ? cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
@@ -2396,7 +2398,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     if (best_mbmode.mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
-          x->e_mbd.block[i].bmi.mode = best_bmodes[i].mode;
+          x->e_mbd.block[i].bmi.as_mode = best_bmodes[i].as_mode;
     }
 
     if (best_mbmode.mode == SPLITMV)

@@ -1008,28 +1008,32 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                     do
                     {
-                        const B_MODE_INFO *const b = cpi->mb.partition_info->bmi + j;
+                        B_PREDICTION_MODE blockmode;
+                        int_mv blockmv;
                         const int *const  L = vp8_mbsplits [mi->partitioning];
                         int k = -1;  /* first block in subset j */
                         int mv_contz;
                         int_mv leftmv, abovemv;
 
+                        blockmode =  cpi->mb.partition_info->bmi[j].mode;
+                        blockmv =  cpi->mb.partition_info->bmi[j].mv;
 
                         while (j != L[++k])
                             if (k >= 16)
                                 assert(0);
+
                         leftmv.as_int = left_block_mv(m, k);
                         abovemv.as_int = above_block_mv(m, k, mis);
                         mv_contz = vp8_mv_cont(&leftmv, &abovemv);
 
-                        write_sub_mv_ref(w, b->mode, vp8_sub_mv_ref_prob2 [mv_contz]); //pc->fc.sub_mv_ref_prob);
+                        write_sub_mv_ref(w, blockmode, vp8_sub_mv_ref_prob2 [mv_contz]);
 
-                        if (b->mode == NEW4X4)
+                        if (blockmode == NEW4X4)
                         {
 #ifdef ENTROPY_STATS
                             active_section = 11;
 #endif
-                            write_mv(w, &b->mv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
+                            write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
                         }
                     }
                     while (++j < cpi->mb.partition_info->count);
