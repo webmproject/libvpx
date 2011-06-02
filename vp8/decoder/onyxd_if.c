@@ -24,6 +24,7 @@
 #include "vp8/common/threading.h"
 #include "decoderthreading.h"
 #include <stdio.h>
+#include <assert.h>
 
 #include "vp8/common/quant_common.h"
 #include "vpx_scale/vpxscale.h"
@@ -161,16 +162,19 @@ int vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
     int free_fb;
 
     if (ref_frame_flag == VP8_LAST_FLAG)
-        *ref_fb_ptr = cm->lst_fb_idx;
+        ref_fb_ptr = &cm->lst_fb_idx;
     else if (ref_frame_flag == VP8_GOLD_FLAG)
-        *ref_fb_ptr = cm->gld_fb_idx;
+        ref_fb_ptr = &cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
-        *ref_fb_ptr = cm->alt_fb_idx;
+        ref_fb_ptr = &cm->alt_fb_idx;
     else
         return -1;
 
     /* Find an empty frame buffer. */
     free_fb = get_free_fb(cm);
+    /* Decrease fb_idx_ref_cnt since it will be increased again in
+     * ref_cnt_fb() below. */
+    cm->fb_idx_ref_cnt[free_fb]--;
 
     /* Manage the reference counters and copy image. */
     ref_cnt_fb (cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
@@ -192,6 +196,7 @@ static int get_free_fb (VP8_COMMON *cm)
         if (cm->fb_idx_ref_cnt[i] == 0)
             break;
 
+    assert(i < NUM_YV12_BUFFERS);
     cm->fb_idx_ref_cnt[i] = 1;
     return i;
 }
