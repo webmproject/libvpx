@@ -713,7 +713,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             int step_param;
             int further_steps;
             int n = 0;
-            int sadpb = x->sadperbit16/2;
+            int sadpb = x->sadperbit16;
 
             int col_min;
             int col_max;
@@ -817,7 +817,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             }
 
             if (bestsme < INT_MAX)
-                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv, &best_ref_mv, x->errorperbit, &cpi->fn_ptr[BLOCK_16X16], cpi->mb.mvcost, &distortion2, &sse);
+                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv, &best_ref_mv,
+                                             x->errorperbit,
+                                             &cpi->fn_ptr[BLOCK_16X16],
+                                             cpi->mb.mvcost,
+                                             &distortion2,&sse);
 
             mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
