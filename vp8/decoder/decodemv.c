@@ -355,7 +355,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             do  /* for each subset j */
             {
                 int_mv leftmv, abovemv;
-                B_MODE_INFO bmi;
+                int_mv blockmv;
                 int k;  /* first block in subset j */
                 int mv_contz;
                 k = vp8_mbsplit_offset[s][j];
@@ -364,30 +364,30 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 abovemv.as_int = above_block_mv(mi, k, mis);
                 mv_contz = vp8_mv_cont(&leftmv, &abovemv);
 
-                switch (bmi.mode = (B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
+                switch ((B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
                 {
                 case NEW4X4:
-                    read_mv(bc, &bmi.mv.as_mv, (const MV_CONTEXT *) mvc);
-                    bmi.mv.as_mv.row += best_mv.as_mv.row;
-                    bmi.mv.as_mv.col += best_mv.as_mv.col;
+                    read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
+                    blockmv.as_mv.row += best_mv.as_mv.row;
+                    blockmv.as_mv.col += best_mv.as_mv.col;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][3]++;
   #endif
                     break;
                 case LEFT4X4:
-                    bmi.mv.as_int = leftmv.as_int;
+                    blockmv.as_int = leftmv.as_int;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][0]++;
   #endif
                     break;
                 case ABOVE4X4:
-                    bmi.mv.as_int = abovemv.as_int;
+                    blockmv.as_int = abovemv.as_int;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][1]++;
   #endif
                     break;
                 case ZERO4X4:
-                    bmi.mv.as_int = 0;
+                    blockmv.as_int = 0;
   #ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][2]++;
   #endif
@@ -396,7 +396,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     break;
                 }
 
-                mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(&bmi.mv,
+                mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(&blockmv,
                                                           mb_to_left_edge,
                                                           mb_to_right_edge,
                                                           mb_to_top_edge,
@@ -412,7 +412,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     fill_offset = &mbsplit_fill_offset[s][(unsigned char)j * mbsplit_fill_count[s]];
 
                     do {
-                        mi->bmi[ *fill_offset].mv.as_int = bmi.mv.as_int;
+                        mi->bmi[ *fill_offset].mv.as_int = blockmv.as_int;
                         fill_offset++;
                     }while (--fill_count);
                 }

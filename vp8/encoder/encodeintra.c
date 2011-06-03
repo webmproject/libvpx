@@ -36,7 +36,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
     BLOCK *be = &x->block[ib];
 
     RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
-                (b, b->bmi.mode, b->predictor);
+                (b, b->bmi.as_mode, b->predictor);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
@@ -89,19 +89,19 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
         switch (x->e_mbd.mode_info_context->mbmi.mode)
         {
         case DC_PRED:
-            d->bmi.mode = B_DC_PRED;
+            d->bmi.as_mode = B_DC_PRED;
             break;
         case V_PRED:
-            d->bmi.mode = B_VE_PRED;
+            d->bmi.as_mode = B_VE_PRED;
             break;
         case H_PRED:
-            d->bmi.mode = B_HE_PRED;
+            d->bmi.as_mode = B_HE_PRED;
             break;
         case TM_PRED:
-            d->bmi.mode = B_TM_PRED;
+            d->bmi.as_mode = B_TM_PRED;
             break;
         default:
-            d->bmi.mode = B_DC_PRED;
+            d->bmi.as_mode = B_DC_PRED;
             break;
         }
     }

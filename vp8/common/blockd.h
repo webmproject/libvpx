@@ -137,12 +137,6 @@ typedef enum
    modes for the Y blocks to the left and above us; for interframes, there
    is a single probability table. */
 
-typedef struct
-{
-    B_PREDICTION_MODE mode;
-    int_mv mv;
-} B_MODE_INFO;
-
 union b_mode_info
 {
     B_PREDICTION_MODE as_mode;
@@ -182,8 +176,6 @@ typedef struct
     short *dqcoeff;
     unsigned char  *predictor;
     short *diff;
-    short *reference;
-
     short *dequant;
 
     /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
@@ -197,14 +189,13 @@ typedef struct
 
     int eob;
 
-    B_MODE_INFO bmi;
+    union b_mode_info bmi;
 } BLOCKD;
 
 typedef struct
 {
     DECLARE_ALIGNED(16, short, diff[400]);      /* from idct diff */
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
-/* not used    DECLARE_ALIGNED(16, short, reference[384]); */
     DECLARE_ALIGNED(16, short, qcoeff[400]);
     DECLARE_ALIGNED(16, short, dqcoeff[400]);
     DECLARE_ALIGNED(16, char,  eobs[25]);
@@ -284,19 +275,15 @@ extern void vp8_setup_block_dptrs(MACROBLOCKD *x);
 static void update_blockd_bmi(MACROBLOCKD *xd)
 {
     int i;
-    if (xd->mode_info_context->mbmi.mode == SPLITMV)
+    int is_4x4;
+    is_4x4 = (xd->mode_info_context->mbmi.mode == SPLITMV) ||
+              (xd->mode_info_context->mbmi.mode == B_PRED);
+
+    if (is_4x4)
     {
         for (i = 0; i < 16; i++)
         {
-            BLOCKD *d = &xd->block[i];
-            d->bmi.mv.as_int = xd->mode_info_context->bmi[i].mv.as_int;
-        }
-    }else if (xd->mode_info_context->mbmi.mode == B_PRED)
-    {
-        for (i = 0; i < 16; i++)
-        {
-            BLOCKD *d = &xd->block[i];
-            d->bmi.mode = xd->mode_info_context->bmi[i].as_mode;
+            xd->block[i].bmi = xd->mode_info_context->bmi[i];
         }
     }
 }

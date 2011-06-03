@@ -47,7 +47,6 @@ extern unsigned int (*vp8_get16x16pred_error)(unsigned char *src_ptr, int src_st
 extern unsigned int (*vp8_get4x4sse_cs)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
 extern int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *best_ref_mv, int best_rd, int *, int *, int *, int, int *mvcost[2], int, int fullpixel);
 extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
-extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 
 
 int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
@@ -215,7 +214,8 @@ static int pick_intra4x4block(
             *best_mode = mode;
         }
     }
-    b->bmi.mode = (B_PREDICTION_MODE)(*best_mode);
+
+    b->bmi.as_mode = (B_PREDICTION_MODE)(*best_mode);
     vp8_encode_intra4x4block(rtcd, x, ib);
     return best_rd;
 }
@@ -251,7 +251,7 @@ int vp8_pick_intra4x4mby_modes
 
         cost += r;
         distortion += d;
-        mic->bmi[i].as_mode = xd->block[i].bmi.mode = best_mode;
+        mic->bmi[i].as_mode = best_mode;
 
         // Break out case where we have already exceeded best so far value
         // that was passed in
@@ -443,7 +443,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
-    B_MODE_INFO best_bmodes[16];
+    union b_mode_info best_bmodes[16];
     MB_MODE_INFO best_mbmode;
 
     int_mv best_ref_mv;
@@ -485,6 +485,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     vpx_memset(nearest_mv, 0, sizeof(nearest_mv));
     vpx_memset(near_mv, 0, sizeof(near_mv));
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
+    vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
 
 
     // set up all the refframe dependent pointers.
@@ -891,7 +892,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             if (this_mode == B_PRED)
                 for (i = 0; i < 16; i++)
                 {
-                    vpx_memcpy(&best_bmodes[i], &x->e_mbd.block[i].bmi, sizeof(B_MODE_INFO));
+                     best_bmodes[i].as_mode = x->e_mbd.block[i].bmi.as_mode;
                 }
 
             // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
@@ -959,10 +960,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     }
 
     if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
+    {
         for (i = 0; i < 16; i++)
         {
-            x->e_mbd.block[i].bmi.mode = best_bmodes[i].mode;
+            x->e_mbd.block[i].bmi.as_mode = best_bmodes[i].as_mode;
         }
-
+    }
     update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 }
