@@ -1000,7 +1000,8 @@ cal_neighbors:
     this_mv.as_mv.col = bc<<3;
 
     this_offset = (unsigned char *)(*(d->base_pre) + d->pre + (br * (in_what_stride)) + bc);
-    return vfp->vf(what, what_stride, this_offset, in_what_stride, &bestsad) + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit) ;
+    return vfp->vf(what, what_stride, this_offset, in_what_stride, &bestsad)
+        + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit) ;
 }
 #undef CHECK_BOUNDS
 #undef CHECK_POINT

@@ -240,8 +240,8 @@ static int sad_per_bit4lut[QINDEX_RANGE] =
 
 void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex)
 {
-    cpi->mb.sadperbit16 =  sad_per_bit16lut[QIndex];
-    cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex];
+    cpi->mb.sadperbit16 =  sad_per_bit16lut[QIndex]/2;
+    cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex]/2;
 }
 
 
@@ -1196,7 +1196,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                 further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
 
                 {
-                    int sadpb = x->sadperbit4/2;
+                    int sadpb = x->sadperbit4;
 
                     // find first label
                     n = vp8_mbsplit_offset[segmentation][i];
@@ -1267,13 +1267,10 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                 {
                     int distortion;
                     unsigned int sse;
+                    cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
+                        bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost,
+                        &distortion, &sse);
 
-                    if (!cpi->common.full_pixel)
-                        cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                                                     bsi->ref_mv, x->errorperbit / 2, v_fn_ptr, x->mvcost, &distortion, &sse);
-                    else
-                        vp8_skip_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                                                    bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost, &distortion, &sse);
                 }
             } /* NEW4X4 */
 
@@ -2103,7 +2100,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             int do_refine=1;   /* If last step (1-away) of n-step search doesn't pick the center point as the best match,
                                   we will do a final 1-away diamond refining search  */
 
-            int sadpb = x->sadperbit16/2;
+            int sadpb = x->sadperbit16;
 
             int col_min = (best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL) >>3;
             int col_max = (best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL) >>3;
@@ -2212,7 +2209,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             {
                 int dis; /* TODO: use dis in distortion calculation later. */
                 unsigned int sse;
-                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv, &best_ref_mv, x->errorperbit / 4, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &dis, &sse);
+                cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv, &best_ref_mv,
+                                             x->errorperbit,
+                                             &cpi->fn_ptr[BLOCK_16X16],
+                                             x->mvcost, &dis, &sse);
             }
 
             mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
