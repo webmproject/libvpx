@@ -54,7 +54,11 @@ typedef struct
 typedef struct
 {
     int count;
-    B_MODE_INFO bmi[16];
+    struct
+    {
+        B_PREDICTION_MODE mode;
+        int_mv mv;
+    } bmi[16];
 } PARTITION_INFO;
 
 typedef struct

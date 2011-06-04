@@ -232,23 +232,9 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     x->mb_activity_ptr++;
                     x->mb_norm_activity_ptr++;
 
-                    if(cm->frame_type != INTRA_FRAME)
-                    {
-                        if (xd->mode_info_context->mbmi.mode != B_PRED)
-                        {
-                            for (i = 0; i < 16; i++)
-                                xd->mode_info_context->bmi[i].mv.as_int = xd->block[i].bmi.mv.as_int;
-                        }else
-                        {
-                            for (i = 0; i < 16; i++)
-                                xd->mode_info_context->bmi[i].as_mode = xd->block[i].bmi.mode;
-                        }
-                    }
-                    else {
-                        if(xd->mode_info_context->mbmi.mode != B_PRED)
-                            for (i = 0; i < 16; i++)
-                                xd->mode_info_context->bmi[i].as_mode = xd->block[i].bmi.mode;
-                    }
+                    /* save the block info */
+                    for (i = 0; i < 16; i++)
+                        xd->mode_info_context->bmi[i] = xd->block[i].bmi;
 
                     // adjust to the next column of macroblocks
                     x->src.y_buffer += 16;
