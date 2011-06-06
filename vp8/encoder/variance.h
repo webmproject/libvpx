@@ -313,16 +313,6 @@ extern prototype_variance(vp8_variance_mse16x16);
 #endif
 extern prototype_get16x16prederror(vp8_variance_get16x16prederror);
 
-#ifndef vp8_variance_get8x8var
-#define vp8_variance_get8x8var vp8_get8x8var_c
-#endif
-extern prototype_variance2(vp8_variance_get8x8var);
-
-#ifndef vp8_variance_get16x16var
-#define vp8_variance_get16x16var vp8_get16x16var_c
-#endif
-extern prototype_variance2(vp8_variance_get16x16var);
-
 #ifndef vp8_variance_get4x4sse_cs
 #define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_c
 #endif
@@ -377,8 +367,6 @@ typedef struct
     vp8_variance_fn_t        mse16x16;
 
     vp8_get16x16prederror_fn_t get16x16prederror;
-    vp8_variance2_fn_t       get8x8var;
-    vp8_variance2_fn_t       get16x16var;
     vp8_get16x16prederror_fn_t get4x4sse_cs;
 
     vp8_sad_multi_fn_t       sad16x16x3;

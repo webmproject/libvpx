@@ -43,7 +43,6 @@ extern prototype_getmbss(vp8_get_mb_ss_mmx);
 extern prototype_variance(vp8_mse16x16_mmx);
 extern prototype_get16x16prederror(vp8_get16x16pred_error_mmx);
 extern prototype_variance2(vp8_get8x8var_mmx);
-extern prototype_variance2(vp8_get16x16var_mmx);
 extern prototype_get16x16prederror(vp8_get4x4sse_cs_mmx);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
@@ -112,12 +111,6 @@ extern prototype_get16x16prederror(vp8_get4x4sse_cs_mmx);
 
 #undef  vp8_variance_get16x16prederror
 #define vp8_variance_get16x16prederror vp8_get16x16pred_error_mmx
-
-#undef  vp8_variance_get8x8var
-#define vp8_variance_get8x8var vp8_get8x8var_mmx
-
-#undef  vp8_variance_get16x16var
-#define vp8_variance_get16x16var vp8_get16x16var_mmx
 
 #undef  vp8_variance_get4x4sse_cs
 #define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_mmx
@@ -218,12 +211,6 @@ extern prototype_variance2(vp8_get16x16var_sse2);
 
 #undef  vp8_variance_get16x16prederror
 #define vp8_variance_get16x16prederror vp8_get16x16pred_error_sse2
-
-#undef  vp8_variance_get8x8var
-#define vp8_variance_get8x8var vp8_get8x8var_sse2
-
-#undef  vp8_variance_get16x16var
-#define vp8_variance_get16x16var vp8_get16x16var_sse2
 
 #endif
 #endif

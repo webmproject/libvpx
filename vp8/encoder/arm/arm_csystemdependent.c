@@ -54,8 +54,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         /*cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;*/
 
         /*cpi->rtcd.variance.get16x16prederror     = vp8_get16x16pred_error_c;
-        cpi->rtcd.variance.get8x8var             = vp8_get8x8var_c;
-        cpi->rtcd.variance.get16x16var           = vp8_get16x16var_c;;
         cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_c;*/
 
         /*cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
@@ -104,8 +102,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         /*cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;*/
 
         cpi->rtcd.variance.get16x16prederror     = vp8_get16x16pred_error_neon;
-        /*cpi->rtcd.variance.get8x8var             = vp8_get8x8var_c;
-        cpi->rtcd.variance.get16x16var           = vp8_get16x16var_c;*/
         cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_neon;
 
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_neon;
