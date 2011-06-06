@@ -1558,6 +1558,24 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     cpi->gfu_boost = (int)(boost_score * 100.0) >> 4;
 
+    // Dont allow conventional gf too near the next kf
+    if ((cpi->twopass.frames_to_key - i) < MIN_GF_INTERVAL)
+    {
+        while (i < cpi->twopass.frames_to_key)
+        {
+            i++;
+
+            if (EOF == input_stats(cpi, this_frame))
+                break;
+
+            if (i < cpi->twopass.frames_to_key)
+            {
+                mod_frame_err = calculate_modified_err(cpi, this_frame);
+                gf_group_err += mod_frame_err;
+            }
+        }
+    }
+
     // Should we use the alternate refernce frame
     if (allow_alt_ref &&
         (i >= MIN_GF_INTERVAL) &&
@@ -1678,25 +1696,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     {
         cpi->source_alt_ref_pending = FALSE;
         cpi->baseline_gf_interval = i;
-    }
-
-    // Conventional GF
-    if (!cpi->source_alt_ref_pending)
-    {
-        // Dont allow conventional gf too near the next kf
-        if ((cpi->twopass.frames_to_key - cpi->baseline_gf_interval) < MIN_GF_INTERVAL)
-        {
-            while (cpi->baseline_gf_interval < cpi->twopass.frames_to_key)
-            {
-                if (EOF == input_stats(cpi, this_frame))
-                    break;
-
-                cpi->baseline_gf_interval++;
-
-                if (cpi->baseline_gf_interval < cpi->twopass.frames_to_key)
-                    gf_group_err += calculate_modified_err(cpi, this_frame);
-            }
-        }
     }
 
     // Now decide how many bits should be allocated to the GF group as  a proportion of those remaining in the kf group.
