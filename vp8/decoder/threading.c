@@ -186,7 +186,9 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
         for (i = 0; i < 16; i++)
         {
             BLOCKD *b = &xd->block[i];
-            vp8mt_predict_intra4x4(pbi, xd, b->bmi.mode, b->predictor, mb_row, mb_col, i);
+
+            vp8mt_predict_intra4x4(pbi, xd, b->bmi.as_mode, b->predictor, mb_row, mb_col, i);
+
             if (xd->eobs[i] > 1)
             {
                 DEQUANT_INVOKE(&pbi->dequant, idct_add)
