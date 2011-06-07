@@ -762,7 +762,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             if (cpi->sf.search_method == HEX)
             {
                 bestsme = vp8_hex_search(x, b, d, &mvp, &d->bmi.mv, step_param,
-                                      sadpb, &num00, &cpi->fn_ptr[BLOCK_16X16],
+                                      sadpb, &cpi->fn_ptr[BLOCK_16X16],
                                       x->mvsadcost, x->mvcost, &best_ref_mv);
                 mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
             }

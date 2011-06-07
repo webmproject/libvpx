@@ -27,8 +27,11 @@
 |vp8_mse16x16_armv6| PROC
 
     push    {r4-r9, lr}
-    mov     r12, #16            ; set loop counter to 16 (=block height)
 
+    pld     [r0, r1, lsl #0]
+    pld     [r2, r3, lsl #0]
+
+    mov     r12, #16            ; set loop counter to 16 (=block height)
     mov     r4, #0              ; initialize sse = 0
 
 loop
@@ -39,8 +42,10 @@ loop
     mov     lr, #0              ; constant zero
 
     usub8   r8, r5, r6          ; calculate difference
+    pld     [r0, r1, lsl #1]
     sel     r7, r8, lr          ; select bytes with positive difference
     usub8   r9, r6, r5          ; calculate difference with reversed operands
+    pld     [r2, r3, lsl #1]
     sel     r8, r9, lr          ; select bytes with negative difference
 
     ; calculate partial sums
