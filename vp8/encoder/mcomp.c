@@ -842,7 +842,6 @@ int vp8_hex_search
     int_mv *best_mv,
     int search_param,
     int sad_per_bit,
-    int *num00,
     const vp8_variance_fn_ptr_t *vfp,
     int *mvsadcost[2],
     int *mvcost[2],
@@ -996,12 +995,8 @@ cal_neighbors:
 
     best_mv->as_mv.row = br;
     best_mv->as_mv.col = bc;
-    this_mv.as_mv.row = br<<3;
-    this_mv.as_mv.col = bc<<3;
 
-    this_offset = (unsigned char *)(*(d->base_pre) + d->pre + (br * (in_what_stride)) + bc);
-    return vfp->vf(what, what_stride, this_offset, in_what_stride, &bestsad)
-        + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit) ;
+    return bestsad;
 }
 #undef CHECK_BOUNDS
 #undef CHECK_POINT

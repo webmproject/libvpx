@@ -25,6 +25,10 @@
 |vp8_variance16x16_armv6| PROC
 
     stmfd   sp!, {r4-r12, lr}
+
+    pld     [r0, r1, lsl #0]
+    pld     [r2, r3, lsl #0]
+
     mov     r8, #0              ; initialize sum = 0
     mov     r11, #0             ; initialize sse = 0
     mov     r12, #16            ; set loop counter to 16 (=block height)
@@ -37,8 +41,10 @@ loop
     mov     lr, #0              ; constant zero
 
     usub8   r6, r4, r5          ; calculate difference
+    pld     [r0, r1, lsl #1]
     sel     r7, r6, lr          ; select bytes with positive difference
     usub8   r9, r5, r4          ; calculate difference with reversed operands
+    pld     [r2, r3, lsl #1]
     sel     r6, r9, lr          ; select bytes with negative difference
 
     ; calculate partial sums

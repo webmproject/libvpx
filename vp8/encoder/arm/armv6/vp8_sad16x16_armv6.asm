@@ -24,6 +24,12 @@
 ; stack max_sad (not used)
 |vp8_sad16x16_armv6| PROC
     stmfd   sp!, {r4-r12, lr}
+
+    pld     [r0, r1, lsl #0]
+    pld     [r2, r3, lsl #0]
+    pld     [r0, r1, lsl #1]
+    pld     [r2, r3, lsl #1]
+
     mov     r4, #0              ; sad = 0;
     mov     r5, #8              ; loop count
 
@@ -44,6 +50,9 @@ loop
 
     add     r0, r0, r1          ; set src pointer to next row
     add     r2, r2, r3          ; set dst pointer to next row
+
+    pld     [r0, r1, lsl #1]
+    pld     [r2, r3, lsl #1]
 
     usada8  r4, r10, r12, r4    ; calculate sad for 4 pixels
     usada8  r8, r11, lr, r8     ; calculate sad for 4 pixels
@@ -69,6 +78,9 @@ loop
 
     usada8  r4, r10, r12, r4    ; calculate sad for 4 pixels
     usada8  r8, r11, lr, r8     ; calculate sad for 4 pixels
+
+    pld     [r0, r1, lsl #1]
+    pld     [r2, r3, lsl #1]
 
     subs    r5, r5, #1          ; decrement loop counter
     add     r4, r4, r8          ; add partial sad values
