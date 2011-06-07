@@ -776,9 +776,9 @@ static void write_mv_ref
     vp8_writer *w, MB_PREDICTION_MODE m, const vp8_prob *p
 )
 {
-
+#if CONFIG_DEBUG
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
-
+#endif
     vp8_write_token(w, vp8_mv_ref_tree, p,
                     vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
@@ -788,8 +788,9 @@ static void write_sub_mv_ref
     vp8_writer *w, B_PREDICTION_MODE m, const vp8_prob *p
 )
 {
+#if CONFIG_DEBUG
     assert(LEFT4X4 <= m  &&  m <= NEW4X4);
-
+#endif
     vp8_write_token(w, vp8_sub_mv_ref_tree, p,
                     vp8_sub_mv_ref_encoding_array - LEFT4X4 + m);
 }
@@ -1017,11 +1018,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                         blockmode =  cpi->mb.partition_info->bmi[j].mode;
                         blockmv =  cpi->mb.partition_info->bmi[j].mv;
-
+#if CONFIG_DEBUG
                         while (j != L[++k])
                             if (k >= 16)
                                 assert(0);
-
+#else
+                        while (j != L[++k]);
+#endif
                         leftmv.as_int = left_block_mv(m, k);
                         abovemv.as_int = above_block_mv(m, k, mis);
                         mv_contz = vp8_mv_cont(&leftmv, &abovemv);

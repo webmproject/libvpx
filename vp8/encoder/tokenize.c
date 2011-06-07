@@ -120,9 +120,9 @@ static void tokenize2nd_order_b
         {
             int rc = vp8_default_zig_zag1d[c];
             const int v = qcoeff_ptr[rc];
-
+#if CONFIG_DEBUG
             assert(-DCT_MAX_VALUE <= v  &&  v < (DCT_MAX_VALUE));
-
+#endif
             t->Extra = vp8_dct_value_tokens_ptr[v].Extra;
             x        = vp8_dct_value_tokens_ptr[v].Token;
         }
@@ -173,9 +173,9 @@ static void tokenize1st_order_b
         {
             int rc = vp8_default_zig_zag1d[c];
             const int v = qcoeff_ptr[rc];
-
+#if CONFIG_DEBUG
             assert(-DCT_MAX_VALUE <= v  &&  v < (DCT_MAX_VALUE));
-
+#endif
             t->Extra = vp8_dct_value_tokens_ptr[v].Extra;
             x        = vp8_dct_value_tokens_ptr[v].Token;
         }
