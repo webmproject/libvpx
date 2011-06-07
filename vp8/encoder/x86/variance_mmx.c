@@ -84,36 +84,6 @@ extern unsigned int vp8_get16x16pred_error_mmx
     int ref_stride
 );
 
-unsigned int vp8_get16x16var_mmx(
-    const unsigned char *src_ptr,
-    int  source_stride,
-    const unsigned char *ref_ptr,
-    int  recon_stride,
-    unsigned int *SSE,
-    int *SUM
-)
-{
-    unsigned int sse0, sse1, sse2, sse3, var;
-    int sum0, sum1, sum2, sum3, avg;
-
-
-    vp8_get8x8var_mmx(src_ptr, source_stride, ref_ptr, recon_stride, &sse0, &sum0) ;
-    vp8_get8x8var_mmx(src_ptr + 8, source_stride, ref_ptr + 8, recon_stride, &sse1, &sum1);
-    vp8_get8x8var_mmx(src_ptr + 8 * source_stride, source_stride, ref_ptr + 8 * recon_stride, recon_stride, &sse2, &sum2) ;
-    vp8_get8x8var_mmx(src_ptr + 8 * source_stride + 8, source_stride, ref_ptr + 8 * recon_stride + 8, recon_stride, &sse3, &sum3);
-
-    var = sse0 + sse1 + sse2 + sse3;
-    avg = sum0 + sum1 + sum2 + sum3;
-
-    *SSE = var;
-    *SUM = avg;
-    return (var - ((avg * avg) >> 8));
-
-}
-
-
-
-
 
 unsigned int vp8_variance4x4_mmx(
     const unsigned char *src_ptr,

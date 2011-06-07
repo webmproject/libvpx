@@ -84,8 +84,6 @@ static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 {
     unsigned int act;
     unsigned int sse;
-    int sum;
-
     /* TODO: This could also be done over smaller areas (8x8), but that would
      *  require extensive changes elsewhere, as lambda is assumed to be fixed
      *  over an entire MB in most of the code.
@@ -93,14 +91,9 @@ static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
      *  lambda using a non-linear combination (e.g., the smallest, or second
      *  smallest, etc.).
      */
-    VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)(x->src.y_buffer,
-                    x->src.y_stride, VP8_VAR_OFFS, 0, &sse, &sum);
-
-    /* This requires a full 32 bits of precision. */
-    act = (sse<<8) - sum*sum;
-
-    /* Drop 4 to give us some headroom to work with. */
-    act = (act + 8) >> 4;
+    act =     VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)(x->src.y_buffer,
+                    x->src.y_stride, VP8_VAR_OFFS, 0, &sse);
+    act = act<<4;
 
     /* If the region is flat, lower the activity some more. */
     if (act < 8<<12)

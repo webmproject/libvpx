@@ -49,8 +49,6 @@ void (*vp8_subtract_mbuv)(short *diff, unsigned char *usrc, unsigned char *vsrc,
 void (*vp8_fast_quantize_b)(BLOCK *b, BLOCKD *d);
 
 unsigned int (*vp8_get16x16pred_error)(unsigned char *src_ptr, int src_stride, unsigned char *ref_ptr, int ref_stride);
-unsigned int (*vp8_get8x8var)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride, unsigned int *SSE, int *Sum);
-unsigned int (*vp8_get16x16var)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride, unsigned int *SSE, int *Sum);
 unsigned int (*vp8_get4x4sse_cs)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
 
 // c imports
@@ -89,8 +87,6 @@ extern sub_pixel_variance_function sub_pixel_variance16x16_c;
 
 extern unsigned int vp8_get_mb_ss_c(short *);
 extern unsigned int vp8_get16x16pred_error_c(unsigned char *src_ptr, int src_stride, unsigned char *ref_ptr, int ref_stride);
-extern unsigned int vp8_get8x8var_c(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride, unsigned int *SSE, int *Sum);
-extern unsigned int vp8_get16x16var_c(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride, unsigned int *SSE, int *Sum);
 extern unsigned int vp8_get4x4sse_cs_c(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
 
 // ppc
@@ -150,8 +146,6 @@ void vp8_cmachine_specific_config(void)
 
     vp8_get_mb_ss                 = vp8_get_mb_ss_c;
     vp8_get16x16pred_error       = vp8_get16x16pred_error_c;
-    vp8_get8x8var               = vp8_get8x8var_ppc;
-    vp8_get16x16var             = vp8_get16x16var_ppc;
     vp8_get4x4sse_cs            = vp8_get4x4sse_cs_c;
 
     vp8_sad16x16                = vp8_sad16x16_ppc;

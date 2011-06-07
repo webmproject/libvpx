@@ -2181,29 +2181,28 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
             else if (x->encode_breakout)
             {
-                int sum;
                 unsigned int sse;
+                unsigned int var;
                 int threshold = (xd->block[0].dequant[1]
                             * xd->block[0].dequant[1] >>4);
 
                 if(threshold < x->encode_breakout)
                     threshold = x->encode_breakout;
 
-                VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16var)
-                    (x->src.y_buffer, x->src.y_stride,
-                     x->e_mbd.predictor, 16, &sse, &sum);
+                var = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
+                        (x->src.y_buffer, x->src.y_stride,
+                        x->e_mbd.predictor, 16, &sse);
 
                 if (sse < threshold)
                 {
-                    // Check u and v to make sure skip is ok
-                    int sse2 = 0;
+                     unsigned int q2dc = xd->block[24].dequant[0];
                     /* If theres is no codeable 2nd order dc
                        or a very small uniform pixel change change */
-                    if (abs(sum) < (xd->block[24].dequant[0]<<2)||
-                        ((sum * sum>>8) > sse && abs(sum) <128))
+                    if ((sse - var < q2dc * q2dc >>4) ||
+                        (sse /2 > var && sse-var < 64))
                     {
-                        sse2 = VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
-
+                        // Check u and v to make sure skip is ok
+                        int sse2=  VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
                         if (sse2 * 2 < threshold)
                         {
                             x->skip = 1;
