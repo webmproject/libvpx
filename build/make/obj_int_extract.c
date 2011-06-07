@@ -347,6 +347,46 @@ bail:
     return 1;
 }
 
+int parse_elf_program(elf_obj_t *elf, int idx, Elf32_Phdr *phdr32, Elf64_Phdr *phdr64)
+{
+    if (phdr32)
+    {
+        if (idx >= elf->hdr32.e_phnum)
+            goto bail;
+
+        COPY_STRUCT(phdr32, elf->buf, elf->hdr32.e_phoff + idx * elf->hdr32.e_phentsize,
+                    elf->sz);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_type);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_offset);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_vaddr);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_paddr);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_filesz);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_memsz);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_flags);
+        ENDIAN_ASSIGN_IN_PLACE(phdr32->p_align);
+    }
+    else /* if (phdr64) */
+    {
+        if (idx >= elf->hdr64.e_phnum)
+            goto bail;
+
+        COPY_STRUCT(phdr64, elf->buf, elf->hdr64.e_phoff + idx * elf->hdr64.e_phentsize,
+                    elf->sz);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_type);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_offset);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_vaddr);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_paddr);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_filesz);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_memsz);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_flags);
+        ENDIAN_ASSIGN_IN_PLACE(phdr64->p_align);
+    }
+
+    return 0;
+bail:
+    return 1;
+}
+
 char *parse_elf_string_table(elf_obj_t *elf, int s_idx, int idx)
 {
     if (elf->bits == 32)
@@ -411,15 +451,19 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode)
     int          i;
     Elf32_Off    strtab_off32;
     Elf64_Off    strtab_off64; /* save String Table offset for later use */
+    Elf32_Word   load_alignment32;
+    Elf64_Xword  load_alignment64;
 
     memset(&elf, 0, sizeof(elf));
     elf.buf = buf;
     elf.sz = sz;
 
-    /* Parse Header */
     if (parse_elf_header(&elf))
       goto bail;
 
+    /* Parse Section and Program headers for string table offset and data
+     * aligment, respectively.
+     */
     if (elf.bits == 32)
     {
         Elf32_Shdr shdr;
@@ -439,6 +483,15 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode)
                     strtab_off32 = shdr.sh_offset;
                     break;
                 }
+            }
+        }
+        Elf32_Phdr phdr;
+        for (i = 0; i< elf.hdr32.e_phnum; i++)
+        {
+            parse_elf_program(&elf, i, &phdr, NULL);
+            if (phdr.p_type == PT_LOAD)
+            {
+                load_alignment32 = phdr.p_align;
             }
         }
     }
@@ -463,6 +516,15 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode)
                 }
             }
         }
+        Elf64_Phdr phdr;
+        for (i = 0; i< elf.hdr64.e_phnum; i++)
+        {
+            parse_elf_program(&elf, i, NULL, &phdr);
+            if (phdr.p_type == PT_LOAD)
+            {
+                load_alignment64 = phdr.p_align;
+            }
+        }
     }
 
     /* Parse all Symbol Tables */
@@ -473,7 +535,7 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode)
         {
             parse_elf_section(&elf, i, &shdr, NULL);
 
-            if (shdr.sh_type == SHT_SYMTAB)
+            if (shdr.sh_type == SHT_DYNSYM)
             {
                 for (ofst = shdr.sh_offset;
                      ofst < shdr.sh_offset + shdr.sh_size;
@@ -520,7 +582,7 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode)
                             }
 
                             memcpy(&val,
-                                   elf.buf + dhdr.sh_offset + sym.st_value,
+                                   elf.buf + (sym.st_value - load_alignment32),
                                    sym.st_size);
                         }
 
@@ -565,7 +627,7 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode)
         {
             parse_elf_section(&elf, i, NULL, &shdr);
 
-            if (shdr.sh_type == SHT_SYMTAB)
+            if (shdr.sh_type == SHT_DYNSYM)
             {
                 for (ofst = shdr.sh_offset;
                      ofst < shdr.sh_offset + shdr.sh_size;
@@ -612,7 +674,7 @@ int parse_elf(uint8_t *buf, size_t sz, output_fmt_t mode)
                             }
 
                             memcpy(&val,
-                                   elf.buf + dhdr.sh_offset + sym.st_value,
+                                   elf.buf + (sym.st_value - load_alignment64),
                                    sym.st_size);
                         }
 
