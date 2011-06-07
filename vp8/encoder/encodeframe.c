@@ -336,6 +336,7 @@ void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
 {
 #if USE_ACT_INDEX
     x->rdmult += *(x->mb_activity_ptr) * (x->rdmult >> 2);
+    x->errorperbit = x->rdmult/x->rddiv;
 #else
     INT64 a;
     INT64 b;
@@ -346,6 +347,8 @@ void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
     b = (2*act) + cpi->activity_avg;
 
     x->rdmult = (unsigned int)(((INT64)x->rdmult*b + (a>>1))/a);
+    x->errorperbit = x->rdmult/x->rddiv;
+
 #endif
 
     // Activity based Zbin adjustment
