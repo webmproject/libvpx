@@ -443,7 +443,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
-    union b_mode_info best_bmodes[16];
     MB_MODE_INFO best_mbmode;
 
     int_mv best_ref_mv;
@@ -485,7 +484,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     vpx_memset(nearest_mv, 0, sizeof(nearest_mv));
     vpx_memset(near_mv, 0, sizeof(near_mv));
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
-    vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
 
 
     // set up all the refframe dependent pointers.
@@ -888,12 +886,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             best_rd = this_rd;
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
 
-            if (this_mode == B_PRED)
-                for (i = 0; i < 16; i++)
-                {
-                     best_bmodes[i].as_mode = x->e_mbd.block[i].bmi.as_mode;
-                }
-
             // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
             cpi->rd_thresh_mult[mode_index] = (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ? cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
             cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
@@ -958,13 +950,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         pick_intra_mbuv_mode(x);
     }
 
-    if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
-    {
-        for (i = 0; i < 16; i++)
-        {
-            x->e_mbd.block[i].bmi.as_mode = best_bmodes[i].as_mode;
-        }
-    }
     update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 }
 
