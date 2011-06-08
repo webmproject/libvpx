@@ -972,7 +972,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {
     int error4x4, error16x16 = INT_MAX;
-    int rate, distortion, best_distortion;
+    int rate, best_rate = 0, distortion, best_distortion;
     MB_PREDICTION_MODE mode, best_mode = DC_PRED;
     int this_rd;
 
@@ -995,6 +995,7 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
             error16x16 = this_rd;
             best_mode = mode;
             best_distortion = distortion;
+            best_rate = rate;
         }
     }
     x->e_mbd.mode_info_context->mbmi.mode = best_mode;
@@ -1002,7 +1003,10 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     error4x4 = pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate,
                                       &best_distortion);
     if (error4x4 < error16x16)
+    {
         x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+        best_rate = rate;
+    }
 
-    *rate_ = rate;
+    *rate_ = best_rate;
 }
