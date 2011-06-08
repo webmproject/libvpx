@@ -9,21 +9,10 @@
  */
 
 
-#include "vpx_ports/config.h"
-#include <stddef.h>
-
+#include "vpx_ports/asm_offsets.h"
 #include "onyxd_int.h"
 
-#define DEFINE(sym, val) int sym = val;
-
-/*
-#define BLANK() asm volatile("\n->" : : )
-*/
-
-/*
- * int main(void)
- * {
- */
+BEGIN
 
 DEFINE(detok_scan,                              offsetof(DETOK, scan));
 DEFINE(detok_ptr_block2leftabove,               offsetof(DETOK, ptr_block2leftabove));
@@ -49,9 +38,7 @@ DEFINE(bool_decoder_range,                      offsetof(BOOL_DECODER, range));
 DEFINE(tokenextrabits_min_val,                  offsetof(TOKENEXTRABITS, min_val));
 DEFINE(tokenextrabits_length,                   offsetof(TOKENEXTRABITS, Length));
 
-//add asserts for any offset that is not supported by assembly code
-//add asserts for any size that is not supported by assembly code
-/*
- * return 0;
- * }
- */
+END
+
+/* add asserts for any offset that is not supported by assembly code */
+/* add asserts for any size that is not supported by assembly code */
