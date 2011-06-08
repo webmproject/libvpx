@@ -1034,7 +1034,15 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 
         Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4, Error16x16);
 
-        rate += (Error4x4 < Error16x16) ? rate4x4 : rate16x16;
+        if (Error4x4 < Error16x16)
+        {
+            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+            rate += rate4x4;
+        }
+        else
+        {
+            rate += rate16x16;
+        }
 
         if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
         {
@@ -1043,46 +1051,12 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         }
     }
     else
-    {
-        int rate2, best_distortion;
-        MB_PREDICTION_MODE mode, best_mode = DC_PRED;
-        int this_rd;
-        Error16x16 = INT_MAX;
+        vp8_pick_intra_mode(cpi, x, &rate);
 
-        vp8_pick_intra_mbuv_mode(x);
-
-        for (mode = DC_PRED; mode <= TM_PRED; mode ++)
-        {
-            int distortion2;
-
-            x->e_mbd.mode_info_context->mbmi.mode = mode;
-            RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
-                (&x->e_mbd);
-            distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)(x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16);
-            rate2  = x->mbmode_cost[x->e_mbd.frame_type][mode];
-            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-
-            if (Error16x16 > this_rd)
-            {
-                Error16x16 = this_rd;
-                best_mode = mode;
-                best_distortion = distortion2;
-            }
-        }
-        x->e_mbd.mode_info_context->mbmi.mode = best_mode;
-
-        Error4x4 = vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate2, &best_distortion);
-    }
-
-    if (Error4x4 < Error16x16)
-    {
-        x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+    if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
         vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
-    }
     else
-    {
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
-    }
 
     vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
     sum_intra_stats(cpi, x);

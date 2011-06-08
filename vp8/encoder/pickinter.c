@@ -221,7 +221,7 @@ static int pick_intra4x4block(
 }
 
 
-int vp8_pick_intra4x4mby_modes
+static int pick_intra4x4mby_modes
 (
     const VP8_ENCODER_RTCD *rtcd,
     MACROBLOCK *mb,
@@ -275,7 +275,7 @@ int vp8_pick_intra4x4mby_modes
     return error;
 }
 
-void vp8_pick_intra_mbuv_mode(MACROBLOCK *mb)
+static void pick_intra_mbuv_mode(MACROBLOCK *mb)
 {
 
     MACROBLOCKD *x = &mb->e_mbd;
@@ -659,10 +659,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         switch (this_mode)
         {
         case B_PRED:
-            // Pass best so far to vp8_pick_intra4x4mby_modes to use as breakout
+            // Pass best so far to pick_intra4x4mby_modes to use as breakout
             distortion2 = *returndistortion;
-            vp8_pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x,
-                                         &rate, &distortion2);
+            pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate, &distortion2);
 
             if (distortion2 == INT_MAX)
             {
@@ -956,7 +955,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     if (best_mbmode.mode <= B_PRED)
     {
         /* set mode_info_context->mbmi.uv_mode */
-        vp8_pick_intra_mbuv_mode(x);
+        pick_intra_mbuv_mode(x);
     }
 
     if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
@@ -967,4 +966,41 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         }
     }
     update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
+}
+
+
+void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
+{
+    int error4x4, error16x16 = INT_MAX;
+    int rate, distortion, best_distortion;
+    MB_PREDICTION_MODE mode, best_mode = DC_PRED;
+    int this_rd;
+
+    pick_intra_mbuv_mode(x);
+
+    for (mode = DC_PRED; mode <= TM_PRED; mode ++)
+    {
+        x->e_mbd.mode_info_context->mbmi.mode = mode;
+        RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+            (&x->e_mbd);
+        distortion = VARIANCE_INVOKE(&cpi->rtcd.variance, get16x16prederror)
+            (x->src.y_buffer, x->src.y_stride, x->e_mbd.predictor, 16);
+        rate = x->mbmode_cost[x->e_mbd.frame_type][mode];
+        this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+
+        if (error16x16 > this_rd)
+        {
+            error16x16 = this_rd;
+            best_mode = mode;
+            best_distortion = distortion;
+        }
+    }
+    x->e_mbd.mode_info_context->mbmi.mode = best_mode;
+
+    error4x4 = pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate,
+                                      &best_distortion);
+    if (error4x4 < error16x16)
+        x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+
+    *rate_ = rate;
 }
