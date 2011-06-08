@@ -98,7 +98,6 @@ static void tokenize2nd_order_b
     const BLOCKD *const b,
     TOKENEXTRA **tp,
     const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-    const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
     VP8_COMP *cpi
@@ -149,7 +148,6 @@ static void tokenize1st_order_b
     const BLOCKD *const b,
     TOKENEXTRA **tp,
     const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-    const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
     VP8_COMP *cpi
@@ -196,14 +194,11 @@ static void tokenize1st_order_b
 }
 
 
-static int mb_is_skippable(MACROBLOCKD *x)
+static int mb_is_skippable(MACROBLOCKD *x, int has_y2_block)
 {
-    int has_y2_block;
     int skip = 1;
     int i = 0;
 
-    has_y2_block = (x->mode_info_context->mbmi.mode != B_PRED
-                    && x->mode_info_context->mbmi.mode != SPLITMV);
     if (has_y2_block)
     {
         for (i = 0; i < 16; i++)
@@ -223,8 +218,12 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
     int plane_type;
     int b;
+    int has_y2_block;
 
-    x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(x);
+    has_y2_block = (x->mode_info_context->mbmi.mode != B_PRED
+                    && x->mode_info_context->mbmi.mode != SPLITMV);
+
+    x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(x, has_y2_block);
     if (x->mode_info_context->mbmi.mb_skip_coeff)
     {
         cpi->skip_true_count++;
@@ -241,29 +240,24 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
     cpi->skip_false_count++;
 
-#if 0
-    vpx_memcpy(cpi->coef_counts_backup, cpi->coef_counts, sizeof(cpi->coef_counts));
-#endif
 
-    if (x->mode_info_context->mbmi.mode == B_PRED || x->mode_info_context->mbmi.mode == SPLITMV)
+
+    plane_type = 3;
+    if(has_y2_block)
     {
-        plane_type = 3;
-    }
-    else
-    {
-        tokenize2nd_order_b(x->block + 24, t, 1, x->frame_type,
+        tokenize2nd_order_b(x->block + 24, t, 1,
                    A + vp8_block2above[24], L + vp8_block2left[24], cpi);
         plane_type = 0;
 
     }
 
     for (b = 0; b < 16; b++)
-        tokenize1st_order_b(x->block + b, t, plane_type, x->frame_type,
+        tokenize1st_order_b(x->block + b, t, plane_type,
                             A + vp8_block2above[b],
                             L + vp8_block2left[b], cpi);
 
     for (b = 16; b < 24; b++)
-        tokenize1st_order_b(x->block + b, t, 2, x->frame_type,
+        tokenize1st_order_b(x->block + b, t, 2,
                             A + vp8_block2above[b],
                             L + vp8_block2left[b], cpi);
 
@@ -352,10 +346,7 @@ void vp8_tokenize_initialize()
 
 static __inline void stuff2nd_order_b
 (
-    const BLOCKD *const b,
     TOKENEXTRA **tp,
-    const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-    const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
     VP8_COMP *cpi
@@ -364,9 +355,6 @@ static __inline void stuff2nd_order_b
     int pt; /* near block/prev token context index */
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-    (void) frametype;
-    (void) type;
-    (void) b;
 
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [1] [0] [pt];
@@ -382,10 +370,7 @@ static __inline void stuff2nd_order_b
 
 static __inline void stuff1st_order_b
 (
-    const BLOCKD *const b,
     TOKENEXTRA **tp,
-    const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-    const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
     VP8_COMP *cpi
@@ -394,9 +379,6 @@ static __inline void stuff1st_order_b
     int pt; /* near block/prev token context index */
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-    (void) frametype;
-    (void) type;
-    (void) b;
 
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [0] [1] [pt];
@@ -411,10 +393,7 @@ static __inline void stuff1st_order_b
 static __inline
 void stuff1st_order_buv
 (
-    const BLOCKD *const b,
     TOKENEXTRA **tp,
-    const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
-    const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
     VP8_COMP *cpi
@@ -423,9 +402,6 @@ void stuff1st_order_buv
     int pt; /* near block/prev token context index */
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-    (void) frametype;
-    (void) type;
-    (void) b;
 
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [2] [0] [pt];
@@ -445,17 +421,17 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int plane_type;
     int b;
 
-    stuff2nd_order_b(x->block + 24, t, 1, x->frame_type,
+    stuff2nd_order_b(t,
                      A + vp8_block2above[24], L + vp8_block2left[24], cpi);
     plane_type = 0;
 
     for (b = 0; b < 16; b++)
-        stuff1st_order_b(x->block + b, t, plane_type, x->frame_type,
+        stuff1st_order_b(t,
                          A + vp8_block2above[b],
                          L + vp8_block2left[b], cpi);
 
     for (b = 16; b < 24; b++)
-        stuff1st_order_buv(x->block + b, t, 2, x->frame_type,
+        stuff1st_order_buv(t,
                            A + vp8_block2above[b],
                            L + vp8_block2left[b], cpi);
 
