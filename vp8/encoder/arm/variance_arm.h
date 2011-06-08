@@ -83,7 +83,6 @@ extern prototype_variance(vp8_variance_halfpixvar16x16_hv_neon);
 
 //extern prototype_getmbss(vp8_get_mb_ss_c);
 extern prototype_variance(vp8_mse16x16_neon);
-extern prototype_get16x16prederror(vp8_get16x16pred_error_neon);
 extern prototype_get16x16prederror(vp8_get4x4sse_cs_neon);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
@@ -146,9 +145,6 @@ extern prototype_get16x16prederror(vp8_get4x4sse_cs_neon);
 
 #undef  vp8_variance_mse16x16
 #define vp8_variance_mse16x16 vp8_mse16x16_neon
-
-#undef  vp8_variance_get16x16prederror
-#define vp8_variance_get16x16prederror vp8_get16x16pred_error_neon
 
 #undef  vp8_variance_get4x4sse_cs
 #define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_neon

@@ -76,13 +76,6 @@ extern void vp8_filter_block2d_bil_var_mmx
     int *sum,
     unsigned int *sumsquared
 );
-extern unsigned int vp8_get16x16pred_error_mmx
-(
-    const unsigned char *src_ptr,
-    int src_stride,
-    const unsigned char *ref_ptr,
-    int ref_stride
-);
 
 
 unsigned int vp8_variance4x4_mmx(
