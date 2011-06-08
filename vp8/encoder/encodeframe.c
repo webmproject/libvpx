@@ -1080,34 +1080,11 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x )
 
 int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
-    int Error4x4, Error16x16;
-    int rate4x4, rate16x16, rateuv;
-    int dist4x4, dist16x16, distuv;
-    int rate = 0;
-    int rate4x4_tokenonly = 0;
-    int rate16x16_tokenonly = 0;
-    int rateuv_tokenonly = 0;
-
-    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+    int rate;
 
     if (cpi->sf.RD && cpi->compressor_speed != 2)
     {
-        vp8_rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
-        rate += rateuv;
-
-        Error16x16 = vp8_rd_pick_intra16x16mby_mode(cpi, x, &rate16x16, &rate16x16_tokenonly, &dist16x16);
-
-        Error4x4 = vp8_rd_pick_intra4x4mby_modes(cpi, x, &rate4x4, &rate4x4_tokenonly, &dist4x4, Error16x16);
-
-        if (Error4x4 < Error16x16)
-        {
-            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
-            rate += rate4x4;
-        }
-        else
-        {
-            rate += rate16x16;
-        }
+        vp8_rd_pick_intra_mode(cpi, x, &rate);
 
         if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
         {
