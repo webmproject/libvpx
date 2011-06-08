@@ -81,7 +81,7 @@ static const int cq_level[QINDEX_RANGE] =
 
 static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
 
-static int encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
+int encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
 {
 
     int i;
