@@ -114,8 +114,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                 // Set the mb activity pointer to the start of the row.
                 x->mb_activity_ptr = &cpi->mb_activity_map[map_index];
-                x->mb_norm_activity_ptr =
-                    &cpi->mb_norm_activity_map[map_index];
 
                 // for each macroblock col in image
                 for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
@@ -230,7 +228,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                     // Increment the activity mask pointers.
                     x->mb_activity_ptr++;
-                    x->mb_norm_activity_ptr++;
 
                     /* save the block info */
                     for (i = 0; i < 16; i++)
