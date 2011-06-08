@@ -1083,17 +1083,15 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
     int rate;
 
     if (cpi->sf.RD && cpi->compressor_speed != 2)
-    {
         vp8_rd_pick_intra_mode(cpi, x, &rate);
-
-        if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
-        {
-            adjust_act_zbin( cpi, x );
-            vp8_update_zbin_extra(cpi, x);
-        }
-    }
     else
         vp8_pick_intra_mode(cpi, x, &rate);
+
+    if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
+    {
+        adjust_act_zbin( cpi, x );
+        vp8_update_zbin_extra(cpi, x);
+    }
 
     if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
         vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
