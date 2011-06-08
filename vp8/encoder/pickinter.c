@@ -976,6 +976,8 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     MB_PREDICTION_MODE mode, best_mode = DC_PRED;
     int this_rd;
 
+    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+
     pick_intra_mbuv_mode(x);
 
     for (mode = DC_PRED; mode <= TM_PRED; mode ++)
