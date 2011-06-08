@@ -220,14 +220,11 @@ define so_template
 # for creating them.
 #
 # This needs further abstraction for dealing with non-GNU linkers.
-comma := ,
 $(1):
 	$(if $(quiet),@echo "    [LD] $$@")
 	$(qexec)$$(LD) -shared $$(LDFLAGS) \
-            -Wl,--no-undefined \
-            $$(if $$(SONAME), -Wl$$(comma)-soname$$(comma)$$(SONAME)) \
-            $$(if $$(SO_VERSION_SCRIPT), -Wl$$(comma)--version-script$$(comma)$$(SO_VERSION_SCRIPT)) \
-            -o $$@ \
+            -Wl,--no-undefined -Wl,-soname,$$(SONAME) \
+            -Wl,--version-script,$$(SO_VERSION_SCRIPT) -o $$@ \
             $$(filter %.o,$$?) $$(extralibs)
 endef
 
@@ -294,7 +291,7 @@ LIBS=$(call enabled,LIBS)
 .libs: $(LIBS)
 	@touch $@
 $(foreach lib,$(filter %_g.a,$(LIBS)),$(eval $(call archive_template,$(lib))))
-$(foreach lib,$(filter %.so %so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH),$(LIBS)),$(eval $(call so_template,$(lib))))
+$(foreach lib,$(filter %so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH),$(LIBS)),$(eval $(call so_template,$(lib))))
 
 INSTALL-LIBS=$(call cond_enabled,CONFIG_INSTALL_LIBS,INSTALL-LIBS)
 ifeq ($(MAKECMDGOALS),dist)

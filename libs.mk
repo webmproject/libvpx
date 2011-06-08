@@ -257,27 +257,12 @@ $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 #
 # Calculate platform- and compiler-specific offsets for hand coded assembly
 #
-
-#
-# Parse shared object files for elf, object files for mach-o and coff
-#
-ifeq ($(TGT_OS), linux)
-OIE_LIB:=yes
-OIE_EXT:=.so
-else
-OIE_EXT:=.o
-endif
-
 ifeq ($(CONFIG_EXTERNAL_BUILD),) # Visual Studio uses obj_int_extract.bat
   ifeq ($(ARCH_ARM), yes)
     asm_com_offsets.asm: obj_int_extract
-    asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c$(OIE_EXT)
+    asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
-    ifeq ($(OIE_LIB), yes)
-      $(VP8_PREFIX)common/asm_com_offsets.c.so: $(VP8_PREFIX)common/asm_com_offsets.c.o
-      LIBS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.so
-    endif
     CLEAN-OBJS += asm_com_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
   endif
@@ -285,13 +270,9 @@ ifeq ($(CONFIG_EXTERNAL_BUILD),) # Visual Studio uses obj_int_extract.bat
   ifeq ($(ARCH_ARM)$(ARCH_X86)$(ARCH_X86_64), yes)
     ifeq ($(CONFIG_VP8_ENCODER), yes)
       asm_enc_offsets.asm: obj_int_extract
-      asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c$(OIE_EXT)
+      asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
       OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-      ifeq ($(OIE_LIB), yes)
-        $(VP8_PREFIX)encoder/asm_enc_offsets.c.so: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-        LIBS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.so
-      endif
       CLEAN-OBJS += asm_enc_offsets.asm
       $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
     endif
@@ -300,13 +281,9 @@ ifeq ($(CONFIG_EXTERNAL_BUILD),) # Visual Studio uses obj_int_extract.bat
   ifeq ($(ARCH_ARM), yes)
     ifeq ($(CONFIG_VP8_DECODER), yes)
       asm_dec_offsets.asm: obj_int_extract
-      asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c$(OIE_EXT)
+      asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
       OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-      ifeq ($(OIE_LIB), yes)
-        $(VP8_PREFIX)decoder/asm_dec_offsets.c.so: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-        LIBS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.so
-      endif
       CLEAN-OBJS += asm_dec_offsets.asm
       $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
     endif
