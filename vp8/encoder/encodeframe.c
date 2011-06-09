@@ -696,6 +696,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
     cpi->last_mb_distortion = 0;
 #endif
 
+    xd->mode_info_context = cm->mi;
+
     vp8_zero(cpi->MVcount);
     vp8_zero(cpi->coef_counts);
 
