@@ -39,6 +39,9 @@ vpx_codec_err_t vpx_codec_dec_init_ver(vpx_codec_ctx_t      *ctx,
     else if ((flags & VPX_CODEC_USE_ERROR_CONCEALMENT) &&
             !(iface->caps & VPX_CODEC_CAP_ERROR_CONCEALMENT))
         res = VPX_CODEC_INCAPABLE;
+    else if ((flags & VPX_CODEC_USE_INPUT_PARTITION) &&
+            !(iface->caps & VPX_CODEC_CAP_INPUT_PARTITION))
+        res = VPX_CODEC_INCAPABLE;
     else if (!(iface->caps & VPX_CODEC_CAP_DECODER))
         res = VPX_CODEC_INCAPABLE;
     else

@@ -55,6 +55,13 @@ extern "C" {
      */
 #define VPX_CODEC_CAP_PSNR  0x10000 /**< Can issue PSNR packets */
 
+    /*! Can output one partition at a time. Each partition is returned in its
+     *  own VPX_CODEC_CX_FRAME_PKT, with the FRAME_IS_FRAGMENT flag set for
+     *  every partition but the last. In this mode all frames are always
+     *  returned partition by partition.
+     */
+#define VPX_CODEC_CAP_OUTPUT_PARTITION  0x20000
+
 
     /*! \brief Initialization-time Feature Enabling
      *
@@ -64,6 +71,8 @@ extern "C" {
      *  The available flags are specified by VPX_CODEC_USE_* defines.
      */
 #define VPX_CODEC_USE_PSNR  0x10000 /**< Calculate PSNR on each frame */
+#define VPX_CODEC_USE_OUTPUT_PARTITION  0x20000 /**< Make the encoder output one
+                                                     partition at a time. */
 
 
     /*!\brief Generic fixed size buffer structure
@@ -99,6 +108,8 @@ extern "C" {
                 this one) */
 #define VPX_FRAME_IS_INVISIBLE 0x4 /**< frame should be decoded but will not
     be shown */
+#define VPX_FRAME_IS_FRAGMENT  0x8 /**< this is a fragment of the encoded
+    frame */
 
     /*!\brief Error Resilient flags
      *
