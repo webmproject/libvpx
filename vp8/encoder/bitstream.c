@@ -17,9 +17,12 @@
 #include "vp8/common/systemdependent.h"
 #include <assert.h>
 #include <stdio.h>
+#include <limits.h>
 #include "vp8/common/pragmas.h"
+#include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
 #include "bitstream.h"
+#include "vp8/common/defaultcoefcounts.h"
 
 const int vp8cx_base_skip_false_prob[128] =
 {
@@ -1123,9 +1126,201 @@ static void write_kfmodes(VP8_COMP *cpi)
         m++;    // skip L prediction border
     }
 }
+
+/* This function is used for debugging probability trees. */
+static void print_prob_tree(vp8_prob
+     coef_probs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][vp8_coef_tokens-1])
+{
+    /* print coef probability tree */
+    int i,j,k,l;
+    FILE* f = fopen("enc_tree_probs.txt", "a");
+    fprintf(f, "{\n");
+    for (i = 0; i < BLOCK_TYPES; i++)
+    {
+        fprintf(f, "  {\n");
+        for (j = 0; j < COEF_BANDS; j++)
+        {
+            fprintf(f, "    {\n");
+            for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+            {
+                fprintf(f, "      {");
+                for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++)
+                {
+                    fprintf(f, "%3u, ",
+                            (unsigned int)(coef_probs [i][j][k][l]));
+                }
+                fprintf(f, " }\n");
+            }
+            fprintf(f, "    }\n");
+        }
+        fprintf(f, "  }\n");
+    }
+    fprintf(f, "}\n");
+    fclose(f);
+}
+
+static void sum_probs_over_prev_coef_context(
+        const unsigned int probs[PREV_COEF_CONTEXTS][vp8_coef_tokens],
+        unsigned int* out)
+{
+    int i, j;
+    for (i=0; i < vp8_coef_tokens; ++i)
+    {
+        for (j=0; j < PREV_COEF_CONTEXTS; ++j)
+        {
+            const int tmp = out[i];
+            out[i] += probs[j][i];
+            /* check for wrap */
+            if (out[i] < tmp)
+                out[i] = UINT_MAX;
+        }
+    }
+}
+
+static int prob_update_savings(const unsigned int *ct,
+                                   const vp8_prob oldp, const vp8_prob newp,
+                                   const vp8_prob upd)
+{
+    const int old_b = vp8_cost_branch(ct, oldp);
+    const int new_b = vp8_cost_branch(ct, newp);
+    const int update_b = 8 +
+                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+
+    return old_b - new_b - update_b;
+}
+
+static int independent_coef_context_savings(VP8_COMP *cpi)
+{
+    int savings = 0;
+    int i = 0;
+    do
+    {
+        int j = 0;
+        do
+        {
+            int k = 0;
+            unsigned int prev_coef_count_sum[vp8_coef_tokens] = {0};
+            int prev_coef_savings[vp8_coef_tokens] = {0};
+            /* Calculate new probabilities given the constraint that
+             * they must be equal over the prev coef contexts
+             */
+            if (cpi->common.frame_type == KEY_FRAME)
+            {
+                /* Reset to default probabilities at key frames */
+                sum_probs_over_prev_coef_context(vp8_default_coef_counts[i][j],
+                                                 prev_coef_count_sum);
+            }
+            else
+            {
+                sum_probs_over_prev_coef_context(cpi->coef_counts[i][j],
+                                                 prev_coef_count_sum);
+            }
+            do
+            {
+                /* at every context */
+
+                /* calc probs and branch cts for this frame only */
+                //vp8_prob new_p           [vp8_coef_tokens-1];
+                //unsigned int branch_ct   [vp8_coef_tokens-1] [2];
+
+                int t = 0;      /* token/prob index */
+
+                vp8_tree_probs_from_distribution(
+                    vp8_coef_tokens, vp8_coef_encodings, vp8_coef_tree,
+                    cpi->frame_coef_probs[i][j][k],
+                    cpi->frame_branch_ct [i][j][k],
+                    prev_coef_count_sum,
+                    256, 1);
+
+                do
+                {
+                    const unsigned int *ct  = cpi->frame_branch_ct [i][j][k][t];
+                    const vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
+                    const vp8_prob oldp = cpi->common.fc.coef_probs [i][j][k][t];
+                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                    const int s = prob_update_savings(ct, oldp, newp, upd);
+
+                    if (cpi->common.frame_type != KEY_FRAME ||
+                        (cpi->common.frame_type == KEY_FRAME && newp != oldp))
+                        prev_coef_savings[t] += s;
+                }
+                while (++t < vp8_coef_tokens - 1);
+            }
+            while (++k < PREV_COEF_CONTEXTS);
+            k = 0;
+            do
+            {
+                /* We only update probabilities if we can save bits, except
+                 * for key frames where we have to update all probabilities
+                 * to get the equal probabilities across the prev coef
+                 * contexts.
+                 */
+                if (prev_coef_savings[k] > 0 ||
+                    cpi->common.frame_type == KEY_FRAME)
+                    savings += prev_coef_savings[k];
+            }
+            while (++k < vp8_coef_tokens - 1);
+        }
+        while (++j < COEF_BANDS);
+    }
+    while (++i < BLOCK_TYPES);
+    return savings;
+}
+
+static int default_coef_context_savings(VP8_COMP *cpi)
+{
+    int savings = 0;
+    int i = 0;
+    do
+    {
+        int j = 0;
+        do
+        {
+            int k = 0;
+            do
+            {
+                /* at every context */
+
+                /* calc probs and branch cts for this frame only */
+                //vp8_prob new_p           [vp8_coef_tokens-1];
+                //unsigned int branch_ct   [vp8_coef_tokens-1] [2];
+
+                int t = 0;      /* token/prob index */
+
+
+                vp8_tree_probs_from_distribution(
+                    vp8_coef_tokens, vp8_coef_encodings, vp8_coef_tree,
+                    cpi->frame_coef_probs [i][j][k],
+                    cpi->frame_branch_ct [i][j][k],
+                    cpi->coef_counts [i][j][k],
+                    256, 1
+                );
+
+                do
+                {
+                    const unsigned int *ct  = cpi->frame_branch_ct [i][j][k][t];
+                    const vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
+                    const vp8_prob oldp = cpi->common.fc.coef_probs [i][j][k][t];
+                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                    const int s = prob_update_savings(ct, oldp, newp, upd);
+
+                    if (s > 0)
+                    {
+                        savings += s;
+                    }
+                }
+                while (++t < vp8_coef_tokens - 1);
+            }
+            while (++k < PREV_COEF_CONTEXTS);
+        }
+        while (++j < COEF_BANDS);
+    }
+    while (++i < BLOCK_TYPES);
+    return savings;
+}
+
 int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
-    int i = 0;
     int savings = 0;
 
     const int *const rfct = cpi->count_mb_ref_frame_usage;
@@ -1185,60 +1380,11 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
     }
 
 
-    do
-    {
-        int j = 0;
+    if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
+        savings += independent_coef_context_savings(cpi);
+    else
+        savings += default_coef_context_savings(cpi);
 
-        do
-        {
-            int k = 0;
-
-            do
-            {
-                /* at every context */
-
-                /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [vp8_coef_tokens-1];
-                //unsigned int branch_ct   [vp8_coef_tokens-1] [2];
-
-                int t = 0;      /* token/prob index */
-
-                vp8_tree_probs_from_distribution(
-                    vp8_coef_tokens, vp8_coef_encodings, vp8_coef_tree,
-                    cpi->frame_coef_probs [i][j][k], cpi->frame_branch_ct [i][j][k], cpi->coef_counts [i][j][k],
-                    256, 1
-                );
-
-                do
-                {
-                    const unsigned int *ct  = cpi->frame_branch_ct [i][j][k][t];
-                    const vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
-
-                    const vp8_prob old = cpi->common.fc.coef_probs [i][j][k][t];
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
-
-                    const int old_b = vp8_cost_branch(ct, old);
-                    const int new_b = vp8_cost_branch(ct, newp);
-
-                    const int update_b = 8 +
-                                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
-
-                    const int s = old_b - new_b - update_b;
-
-                    if (s > 0)
-                        savings += s;
-
-
-                }
-                while (++t < vp8_coef_tokens - 1);
-
-
-            }
-            while (++k < PREV_COEF_CONTEXTS);
-        }
-        while (++j < COEF_BANDS);
-    }
-    while (++i < BLOCK_TYPES);
 
     return savings;
 }
@@ -1251,7 +1397,6 @@ static void update_coef_probs(VP8_COMP *cpi)
 
     vp8_clear_system_state(); //__asm emms;
 
-
     do
     {
         int j = 0;
@@ -1259,7 +1404,27 @@ static void update_coef_probs(VP8_COMP *cpi)
         do
         {
             int k = 0;
+            int prev_coef_savings[vp8_coef_tokens - 1] = {0};
+            if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
+            {
+                for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
+                {
+                    int t;      /* token/prob index */
+                    for (t = 0; t < vp8_coef_tokens - 1; ++t)
+                    {
+                        const unsigned int *ct = cpi->frame_branch_ct [i][j]
+                                                                      [k][t];
+                        const vp8_prob newp = cpi->frame_coef_probs[i][j][k][t];
+                        const vp8_prob oldp = cpi->common.fc.coef_probs[i][j]
+                                                                       [k][t];
+                        const vp8_prob upd = vp8_coef_update_probs[i][j][k][t];
 
+                        prev_coef_savings[t] +=
+                                prob_update_savings(ct, oldp, newp, upd);
+                    }
+                }
+                k = 0;
+            }
             do
             {
                 //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
@@ -1279,21 +1444,33 @@ static void update_coef_probs(VP8_COMP *cpi)
 
                 do
                 {
-                    const unsigned int *ct  = cpi->frame_branch_ct [i][j][k][t];
                     const vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
 
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-                    const vp8_prob old = *Pold;
                     const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
 
-                    const int old_b = vp8_cost_branch(ct, old);
-                    const int new_b = vp8_cost_branch(ct, newp);
+                    int s = prev_coef_savings[t];
+                    int u = 0;
 
-                    const int update_b = 8 +
-                                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+                    if (!(cpi->oxcf.error_resilient_mode &
+                            VPX_ERROR_RESILIENT_PARTITIONS))
+                    {
+                        s = prob_update_savings(
+                                cpi->frame_branch_ct [i][j][k][t],
+                                *Pold, newp, upd);
+                    }
 
-                    const int s = old_b - new_b - update_b;
-                    const int u = s > 0 ? 1 : 0;
+                    if (s > 0)
+                        u = 1;
+
+                    /* Force updates on key frames if the new is different,
+                     * so that we can be sure we end up with equal probabilities
+                     * over the prev coef contexts.
+                     */
+                    if ((cpi->oxcf.error_resilient_mode &
+                            VPX_ERROR_RESILIENT_PARTITIONS) &&
+                        cpi->common.frame_type == KEY_FRAME && newp != *Pold)
+                        u = 1;
 
                     vp8_write(w, u, upd);
 
@@ -1588,6 +1765,14 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         // Indicate reference frame sign bias for Golden and ARF frames (always 0 for last frame buffer)
         vp8_write_bit(bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
         vp8_write_bit(bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);
+    }
+
+    if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
+    {
+        if (pc->frame_type == KEY_FRAME)
+            pc->refresh_entropy_probs = 1;
+        else
+            pc->refresh_entropy_probs = 0;
     }
 
     vp8_write_bit(bc, pc->refresh_entropy_probs);

@@ -100,6 +100,23 @@ extern "C" {
 #define VPX_FRAME_IS_INVISIBLE 0x4 /**< frame should be decoded but will not
     be shown */
 
+    /*!\brief Error Resilient flags
+     *
+     * These flags define which error resilient features to enable in the
+     * encoder. The flags are specified through the
+     * vpx_codec_enc_cfg::g_error_resilient variable.
+     */
+    typedef uint32_t vpx_codec_er_flags_t;
+#define VPX_ERROR_RESILIENT_DEFAULT     0x1 /**< Improve resiliency against
+                                                 losses of whole frames */
+#define VPX_ERROR_RESILIENT_PARTITIONS  0x2 /**< The frame partitions are
+                                                 independently decodable by the
+                                                 bool decoder, meaning that
+                                                 partitions can be decoded even
+                                                 though earlier partitions have
+                                                 been lost. Note that intra
+                                                 predicition is still done over
+                                                 the partition boundary. */
 
     /*!\brief Encoder output packet variants
      *
@@ -289,13 +306,13 @@ extern "C" {
         struct vpx_rational    g_timebase;
 
 
-        /*!\brief Enable error resilient mode.
+        /*!\brief Enable error resilient modes.
          *
-         * Error resilient mode indicates to the encoder that it should take
-         * measures appropriate for streaming over lossy or noisy links, if
-         * possible. Set to 1 to enable this feature, 0 to disable it.
+         * The error resilient bitfield indicates to the encoder which features
+         * it should enable to take measures for streaming over lossy or noisy
+         * links.
          */
-        unsigned int           g_error_resilient;
+        vpx_codec_er_flags_t   g_error_resilient;
 
 
         /*!\brief Multi-pass Encoding Mode

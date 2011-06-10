@@ -4132,7 +4132,7 @@ static void encode_frame_to_data_rate
 
     update_reference_frames(cm);
 
-    if (cpi->oxcf.error_resilient_mode == 1)
+    if (cpi->oxcf.error_resilient_mode)
     {
         cm->refresh_entropy_probs = 0;
     }
