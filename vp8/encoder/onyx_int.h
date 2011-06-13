@@ -501,6 +501,7 @@ typedef struct VP8_COMP
 #endif
 
     TOKENLIST *tplist;
+    unsigned int partition_sz[MAX_PARTITIONS];
     // end of multithread data
 
 
@@ -603,6 +604,8 @@ typedef struct VP8_COMP
     // directly or through 0,0
     unsigned char *gf_active_flags;
     int gf_active_count;
+
+    int output_partition;
 
     //Store last frame's MV info for next frame MV prediction
     int_mv *lfmv;

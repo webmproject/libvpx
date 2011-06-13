@@ -163,6 +163,13 @@ extern "C" {
                 unsigned long            duration; /**< duration to show frame
                                                     (in timebase units) */
                 vpx_codec_frame_flags_t  flags;    /**< flags for this frame */
+                int                      partition_id; /**< the partition id
+                                              defines the decoding order
+                                              of the partitions. Only
+                                              applicable when "output partition"
+                                              mode is enabled. First partition
+                                              has id 0.*/
+
             } frame;  /**< data for compressed frame packet */
             struct vpx_fixed_buf twopass_stats;  /**< data for two-pass packet */
             struct vpx_psnr_pkt

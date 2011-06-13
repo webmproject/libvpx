@@ -377,6 +377,7 @@ static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
     unsigned int shift;
     vp8_writer *w = &cpi->bc2;
     *size = 3 * (num_part - 1);
+    cpi->partition_sz[0] += *size;
     ptr = cx_data + (*size);
 
     for (i = 0; i < num_part; i++)
@@ -572,6 +573,9 @@ static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
 
         vp8_stop_encode(w);
         *size +=   w->pos;
+
+        /* The first partition size is set earlier */
+        cpi->partition_sz[i + 1] = w->pos;
 
         if (i < (num_part - 1))
         {
@@ -1840,6 +1844,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     }
 
     *size = VP8_HEADER_SIZE + extra_bytes_packed + cpi->bc.pos;
+    cpi->partition_sz[0] = *size;
 
     if (pc->multi_token_partition != ONE_PARTITION)
     {
@@ -1865,6 +1870,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         vp8_stop_encode(&cpi->bc2);
 
         *size += cpi->bc2.pos;
+        cpi->partition_sz[1] = cpi->bc2.pos;
     }
 }
 

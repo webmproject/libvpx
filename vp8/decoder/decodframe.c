@@ -463,6 +463,40 @@ static unsigned int read_partition_size(const unsigned char *cx_size)
     return size;
 }
 
+static void setup_token_decoder_partition_input(VP8D_COMP *pbi)
+{
+    vp8_reader *bool_decoder = &pbi->bc2;
+    int part_idx = 1;
+
+    TOKEN_PARTITION multi_token_partition =
+            (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
+    assert(vp8dx_bool_error(&pbi->bc) ||
+           multi_token_partition == pbi->common.multi_token_partition);
+    if (pbi->num_partitions > 2)
+    {
+        CHECK_MEM_ERROR(pbi->mbc, vpx_malloc((pbi->num_partitions - 1) *
+                                             sizeof(vp8_reader)));
+        bool_decoder = pbi->mbc;
+    }
+
+    for (; part_idx < pbi->num_partitions; ++part_idx)
+    {
+        if (vp8dx_start_decode(bool_decoder,
+                               pbi->partitions[part_idx],
+                               pbi->partition_sizes[part_idx]))
+            vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,
+                               "Failed to allocate bool decoder %d",
+                               part_idx);
+
+        bool_decoder++;
+    }
+
+#if CONFIG_MULTITHREAD
+    /* Clamp number of decoder threads */
+    if (pbi->decoding_thread_count > pbi->num_partitions - 1)
+        pbi->decoding_thread_count = pbi->num_partitions - 1;
+#endif
+}
 
 static void setup_token_decoder(VP8D_COMP *pbi,
                                 const unsigned char *cx_data)
@@ -619,12 +653,18 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     VP8_COMMON *const pc = & pbi->common;
     MACROBLOCKD *const xd  = & pbi->mb;
     const unsigned char *data = (const unsigned char *)pbi->Source;
-    const unsigned char *const data_end = data + pbi->source_sz;
+    const unsigned char *data_end = data + pbi->source_sz;
     ptrdiff_t first_partition_length_in_bytes;
 
     int mb_row;
     int i, j, k, l;
     const int *const mb_feature_data_bits = vp8_mb_feature_data_bits;
+
+    if (pbi->input_partition)
+    {
+        data = pbi->partitions[0];
+        data_end =  data + pbi->partition_sizes[0];
+    }
 
     /* start with no corruption of current frame */
     xd->corrupted = 0;
@@ -841,7 +881,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         }
     }
 
-    setup_token_decoder(pbi, data + first_partition_length_in_bytes);
+    if (pbi->input_partition)
+    {
+        setup_token_decoder_partition_input(pbi);
+    }
+    else
+    {
+        setup_token_decoder(pbi, data + first_partition_length_in_bytes);
+    }
     xd->current_bc = &pbi->bc2;
 
     /* Read the default quantizers. */
@@ -930,10 +977,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         fclose(z);
     }
 
-
     {
         /* read coef probability tree */
-
         for (i = 0; i < BLOCK_TYPES; i++)
             for (j = 0; j < COEF_BANDS; j++)
                 for (k = 0; k < PREV_COEF_CONTEXTS; k++)
@@ -1020,7 +1065,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             decode_mb_row(pbi, pc, mb_row, xd);
         }
     }
-
 
     stop_token_decoder(pbi);
 
