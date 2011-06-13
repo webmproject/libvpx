@@ -416,7 +416,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int_mv mode_mv[MB_MODE_COUNT];
     MB_PREDICTION_MODE this_mode;
     int num00;
-
     int mdcounts[4];
     int best_rd = INT_MAX; // 1 << 30;
     int best_intra_rd = INT_MAX;
@@ -427,7 +426,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int bestsme;
     //int all_rds[MAX_MODES];         // Experimental debug code.
     int best_mode_index = 0;
-    unsigned int sse = INT_MAX;
+    unsigned int sse = INT_MAX, best_sse = INT_MAX;
 
     int_mv mvp;
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
@@ -599,7 +598,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         {
         case B_PRED:
             // Pass best so far to pick_intra4x4mby_modes to use as breakout
-            distortion2 = *returndistortion;
+            distortion2 = best_sse;
             pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate, &distortion2);
 
             if (distortion2 == INT_MAX)
@@ -826,6 +825,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             *returnrate = rate2;
             *returndistortion = distortion2;
+            best_sse = sse;
             best_rd = this_rd;
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
 
@@ -900,7 +900,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {
     int error4x4, error16x16 = INT_MAX;
-    int rate, best_rate = 0, distortion, best_distortion;
+    int rate, best_rate = 0, distortion, best_sse;
     MB_PREDICTION_MODE mode, best_mode = DC_PRED;
     int this_rd;
     unsigned int sse;
@@ -923,14 +923,14 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
         {
             error16x16 = this_rd;
             best_mode = mode;
-            best_distortion = distortion;
+            best_sse = sse;
             best_rate = rate;
         }
     }
     x->e_mbd.mode_info_context->mbmi.mode = best_mode;
 
     error4x4 = pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate,
-                                      &best_distortion);
+                                      &best_sse);
     if (error4x4 < error16x16)
     {
         x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
