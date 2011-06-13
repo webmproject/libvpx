@@ -140,8 +140,7 @@ static int pick_intra4x4block(
     MACROBLOCK *x,
     int ib,
     B_PREDICTION_MODE *best_mode,
-    B_PREDICTION_MODE above,
-    B_PREDICTION_MODE left,
+    unsigned int *mode_costs,
 
     int *bestrate,
     int *bestdistortion)
@@ -153,16 +152,6 @@ static int pick_intra4x4block(
     int best_rd = INT_MAX;       // 1<<30
     int rate;
     int distortion;
-    unsigned int *mode_costs;
-
-    if (x->e_mbd.frame_type == KEY_FRAME)
-    {
-        mode_costs = x->bmode_costs[above][left];
-    }
-    else
-    {
-        mode_costs = x->inter_bmode_costs;
-    }
 
     for (mode = B_DC_PRED; mode <= B_HE_PRED /*B_HU_PRED*/; mode++)
     {
@@ -202,20 +191,30 @@ static int pick_intra4x4mby_modes
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int error;
     int distortion = 0;
+    unsigned int *bmode_costs;
 
     vp8_intra_prediction_down_copy(xd);
+
+    bmode_costs = mb->inter_bmode_costs;
 
     for (i = 0; i < 16; i++)
     {
         MODE_INFO *const mic = xd->mode_info_context;
         const int mis = xd->mode_info_stride;
-        const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
-        const B_PREDICTION_MODE L = left_block_mode(mic, i);
 
         B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
         int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(d);
 
-        pick_intra4x4block(rtcd, mb, i, &best_mode, A, L, &r, &d);
+        if (mb->e_mbd.frame_type == KEY_FRAME)
+        {
+            const B_PREDICTION_MODE A = above_block_mode(mic, i, mis);
+            const B_PREDICTION_MODE L = left_block_mode(mic, i);
+
+            bmode_costs  = mb->bmode_costs[A][L];
+        }
+
+
+        pick_intra4x4block(rtcd, mb, i, &best_mode, bmode_costs, &r, &d);
 
         cost += r;
         distortion += d;

@@ -123,7 +123,21 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
     {
         /* On L edge, get from MB to left of us */
         --cur_mb;
-        b += 4;
+        switch (cur_mb->mbmi.mode)
+        {
+            case B_PRED:
+              return (cur_mb->bmi + b + 3)->as_mode;
+            case DC_PRED:
+                return B_DC_PRED;
+            case V_PRED:
+                return B_VE_PRED;
+            case H_PRED:
+                return B_HE_PRED;
+            case TM_PRED:
+                return B_TM_PRED;
+            default:
+                return B_DC_PRED;
+        }
     }
 
     return (cur_mb->bmi + b - 1)->as_mode;
@@ -135,7 +149,22 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi
     {
         /* On top edge, get from MB above us */
         cur_mb -= mi_stride;
-        b += 16;
+
+        switch (cur_mb->mbmi.mode)
+        {
+            case B_PRED:
+              return (cur_mb->bmi + b + 12)->as_mode;
+            case DC_PRED:
+                return B_DC_PRED;
+            case V_PRED:
+                return B_VE_PRED;
+            case H_PRED:
+                return B_HE_PRED;
+            case TM_PRED:
+                return B_TM_PRED;
+            default:
+                return B_DC_PRED;
+        }
     }
 
     return (cur_mb->bmi + b - 4)->as_mode;
