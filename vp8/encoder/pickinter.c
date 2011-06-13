@@ -417,12 +417,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int_mv mode_mv[MB_MODE_COUNT];
     MB_PREDICTION_MODE this_mode;
     int num00;
-    int i;
+
     int mdcounts[4];
     int best_rd = INT_MAX; // 1 << 30;
     int best_intra_rd = INT_MAX;
     int mode_index;
-    int ref_frame_cost[MAX_REF_FRAMES];
     int rate;
     int rate2;
     int distortion2;
@@ -502,32 +501,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     *returnintra = INT_MAX;
     x->skip = 0;
 
-    ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
-
-    // Special case treatment when GF and ARF are not sensible options for reference
-    if (cpi->ref_frame_flags == VP8_LAST_FLAG)
-    {
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(255);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(255)
-                                        + vp8_cost_zero(128);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(255)
-                                        + vp8_cost_one(128);
-    }
-    else
-    {
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(cpi->prob_last_coded);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_zero(cpi->prob_gf_coded);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_one(cpi->prob_gf_coded);
-    }
-
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
     // if we encode a new mv this is important
@@ -579,7 +552,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
 
         // Work out the cost assosciated with selecting the reference frame
-        frame_cost = ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+        frame_cost =
+            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
         rate2 += frame_cost;
 
         // everything but intra

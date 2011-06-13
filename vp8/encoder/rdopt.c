@@ -1731,7 +1731,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int distortion;
     int best_rd = INT_MAX;
     int best_intra_rd = INT_MAX;
-    int ref_frame_cost[MAX_REF_FRAMES];
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
@@ -1807,32 +1806,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     cpi->mbs_tested_so_far++;          // Count of the number of MBs tested so far this frame
 
     x->skip = 0;
-
-    ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
-
-    // Special case treatment when GF and ARF are not sensible options for reference
-    if (cpi->ref_frame_flags == VP8_LAST_FLAG)
-    {
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(255);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(255)
-                                        + vp8_cost_zero(128);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(255)
-                                        + vp8_cost_one(128);
-    }
-    else
-    {
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(cpi->prob_last_coded);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_zero(cpi->prob_gf_coded);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_one(cpi->prob_gf_coded);
-    }
 
     vpx_memset(mode_mv, 0, sizeof(mode_mv));
 
@@ -2254,8 +2227,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             rate2 += other_cost;
         }
 
-        // Estimate the reference frame signaling cost and add it to the rolling cost variable.
-        rate2 += ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+        /* Estimate the reference frame signaling cost and add it
+         * to the rolling cost variable.
+         */
+        rate2 +=
+            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
 
         if (!disable_skip)
         {
@@ -2319,7 +2295,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
             }
 
-            other_cost += ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            other_cost +=
+            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
 
             /* Calculate the final y RD estimate for this mode */
             best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),

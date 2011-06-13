@@ -632,6 +632,33 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
 
     vpx_memset(cm->above_context, 0,
                sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
+
+    xd->ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
+
+    // Special case treatment when GF and ARF are not sensible options for reference
+    if (cpi->ref_frame_flags == VP8_LAST_FLAG)
+    {
+        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
+                                        + vp8_cost_zero(255);
+        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
+                                        + vp8_cost_one(255)
+                                        + vp8_cost_zero(128);
+        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
+                                        + vp8_cost_one(255)
+                                        + vp8_cost_one(128);
+    }
+    else
+    {
+        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
+                                        + vp8_cost_zero(cpi->prob_last_coded);
+        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
+                                        + vp8_cost_one(cpi->prob_last_coded)
+                                        + vp8_cost_zero(cpi->prob_gf_coded);
+        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
+                                        + vp8_cost_one(cpi->prob_last_coded)
+                                        + vp8_cost_one(cpi->prob_gf_coded);
+    }
+
 }
 
 void vp8_encode_frame(VP8_COMP *cpi)
