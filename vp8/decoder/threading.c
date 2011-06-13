@@ -135,7 +135,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
         mb_init_dequantizer(pbi, xd);
 
     /* do prediction */
-    if (xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+    if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
         vp8mt_build_intra_predictors_mbuv(pbi, xd, mb_row, mb_col);
 
@@ -181,7 +181,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
                          xd->predictor, xd->dst.y_buffer,
                          xd->dst.y_stride, xd->eobs, xd->block[24].diff);
     }
-    else if ((xd->frame_type == KEY_FRAME  ||  xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) && xd->mode_info_context->mbmi.mode == B_PRED)
+    else if (xd->mode_info_context->mbmi.mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
         {
@@ -334,7 +334,7 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
                             {
                                 MODE_INFO *next = xd->mode_info_context +1;
 
-                                if (xd->frame_type == KEY_FRAME  ||  next->mbmi.ref_frame == INTRA_FRAME)
+                                if (next->mbmi.ref_frame == INTRA_FRAME)
                                 {
                                     for (i = 0; i < 16; i++)
                                         pbi->mt_yleft_col[mb_row][i] = xd->dst.y_buffer [i* recon_y_stride + 15];
@@ -824,7 +824,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                     {
                         MODE_INFO *next = xd->mode_info_context +1;
 
-                        if (xd->frame_type == KEY_FRAME  ||  next->mbmi.ref_frame == INTRA_FRAME)
+                        if (next->mbmi.ref_frame == INTRA_FRAME)
                         {
                             for (i = 0; i < 16; i++)
                                 pbi->mt_yleft_col[mb_row][i] = xd->dst.y_buffer [i* recon_y_stride + 15];
