@@ -31,6 +31,12 @@ extern prototype_fdct(vp8_short_fdct8x4_mmx);
 #undef  vp8_fdct_short8x4
 #define vp8_fdct_short8x4 vp8_short_fdct8x4_mmx
 
+#undef  vp8_fdct_fast4x4
+#define vp8_fdct_fast4x4 vp8_short_fdct4x4_mmx
+
+#undef  vp8_fdct_fast8x4
+#define vp8_fdct_fast8x4 vp8_short_fdct8x4_mmx
+
 #endif
 
 #endif
