@@ -104,11 +104,10 @@ static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 }
 
 // Stub for alternative experimental activity measures.
-extern int encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred);
 static unsigned int alt_activity_measure( VP8_COMP *cpi,
                                           MACROBLOCK *x, int use_dc_pred )
 {
-    return encode_intra(cpi,x, use_dc_pred);
+    return vp8_encode_intra(cpi,x, use_dc_pred);
 }
 
 

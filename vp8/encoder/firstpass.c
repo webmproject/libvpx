@@ -81,35 +81,6 @@ static const int cq_level[QINDEX_RANGE] =
 
 static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
 
-int encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
-{
-
-    int i;
-    int intra_pred_var = 0;
-    (void) cpi;
-
-    if (use_dc_pred)
-    {
-        x->e_mbd.mode_info_context->mbmi.mode = DC_PRED;
-        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
-        x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-
-        vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
-    }
-    else
-    {
-        for (i = 0; i < 16; i++)
-        {
-            x->e_mbd.block[i].bmi.as_mode = B_DC_PRED;
-            vp8_encode_intra4x4block(IF_RTCD(&cpi->rtcd), x, i);
-        }
-    }
-
-    intra_pred_var = VARIANCE_INVOKE(&cpi->rtcd.variance, getmbss)(x->src_diff);
-
-    return intra_pred_var;
-}
-
 // Resets the first pass file to the given position using a relative seek from the current position
 static void reset_fpf_position(VP8_COMP *cpi, FIRSTPASS_STATS *Position)
 {
@@ -607,7 +578,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             xd->left_available = (mb_col != 0);
 
             // do intra 16x16 prediction
-            this_error = encode_intra(cpi, x, use_dc_pred);
+            this_error = vp8_encode_intra(cpi, x, use_dc_pred);
 
             // "intrapenalty" below deals with situations where the intra and inter error scores are very low (eg a plain black frame)
             // We do not have special cases in first pass for 0,0 and nearest etc so all inter modes carry an overhead cost estimate fot the mv.
