@@ -689,7 +689,7 @@ process_common_toolchain() {
             if enabled armv7
                 then
                     check_add_cflags --cpu=Cortex-A8 --fpu=softvfp+vfpv3
-                    check_add_asflags --cpu=Cortex-A8 --fpu=none
+                    check_add_asflags --cpu=Cortex-A8 --fpu=softvfp+vfpv3
                 else
                     check_add_cflags --cpu=${tgt_isa##armv}
                     check_add_asflags --cpu=${tgt_isa##armv}
@@ -751,41 +751,24 @@ process_common_toolchain() {
         linux*)
             enable linux
             if enabled rvct; then
-                # Compiling with RVCT requires an alternate libc (glibc) when
-                # targetting linux.
-                disabled builtin_libc \
-                    || die "Must supply --libc when targetting *-linux-rvct"
+                # Check if we have CodeSourcery GCC in PATH. Needed for
+                # libraries
+                hash arm-none-linux-gnueabi-gcc 2>&- || \
+                  die "Couldn't find CodeSourcery GCC from PATH"
 
-                # Set up compiler
-                add_cflags --library_interface=aeabi_glibc
-                add_cflags --no_hide_all
-                add_cflags --dwarf2
+                # Use armcc as a linker to enable translation of
+                # some gcc specific options such as -lm and -lpthread.
+                LD="armcc --translate_gcc"
 
-                # Set up linker
-                add_ldflags --sysv --no_startup --no_ref_cpp_init
-                add_ldflags --entry=_start
-                add_ldflags --keep '"*(.init)"' --keep '"*(.fini)"'
-                add_ldflags --keep '"*(.init_array)"' --keep '"*(.fini_array)"'
-                add_ldflags --dynamiclinker=/lib/ld-linux.so.3
-                add_extralibs libc.so.6 -lc_nonshared crt1.o crti.o crtn.o
+                # create configuration file (uses path to CodeSourcery GCC)
+                armcc --arm_linux_configure --arm_linux_config_file=arm_linux.cfg
 
-                # Add the paths for the alternate libc
-                for d in usr/include; do
-                    try_dir="${alt_libc}/${d}"
-                    [ -d "${try_dir}" ] && add_cflags -J"${try_dir}"
-                done
-                add_cflags -J"${RVCT31INC}"
-                for d in lib usr/lib; do
-                    try_dir="${alt_libc}/${d}"
-                    [ -d "${try_dir}" ] && add_ldflags -L"${try_dir}"
-                done
-
-
-                # glibc has some struct members named __align, which is a
-                # storage modifier in RVCT. If we need to use this modifier,
-                # we'll have to #undef it in our code. Note that this must
-                # happen AFTER all libc inclues.
-                add_cflags -D__align=x_align_x
+                add_cflags --arm_linux_paths --arm_linux_config_file=arm_linux.cfg
+                add_asflags --no_hide_all --apcs=/interwork
+                add_ldflags --arm_linux_paths --arm_linux_config_file=arm_linux.cfg
+                enabled pic && add_cflags --apcs=/fpic
+                enabled pic && add_asflags --apcs=/fpic
+                enabled shared && add_cflags --shared
             fi
         ;;
 
@@ -953,9 +936,13 @@ process_common_toolchain() {
     enabled gcov &&
         check_add_cflags -fprofile-arcs -ftest-coverage &&
         check_add_ldflags -fprofile-arcs -ftest-coverage
+
     if enabled optimizations; then
-        enabled rvct && check_add_cflags -Otime
-        enabled small && check_add_cflags -O2 || check_add_cflags -O3
+        if enabled rvct; then
+            enabled small && check_add_cflags -Ospace || check_add_cflags -Otime
+        else
+            enabled small && check_add_cflags -O2 ||  check_add_cflags -O3
+        fi
     fi
 
     # Position Independent Code (PIC) support, for building relocatable
