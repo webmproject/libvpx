@@ -1722,14 +1722,15 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     cpi->twopass.modified_error_used += gf_group_err;
 
     // Assign  bits to the arf or gf.
-    {
+    for (i = 0; i <= (cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME); i++) {
         int Boost;
         int frames_in_section;
         int allocation_chunks;
         int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
+        int gf_bits;
 
         // For ARF frames
-        if (cpi->source_alt_ref_pending)
+        if (cpi->source_alt_ref_pending && i == 0)
         {
             Boost = (cpi->gfu_boost * 3 * GFQ_ADJUSTMENT) / (2 * 100);
             //Boost += (cpi->baseline_gf_interval * 25);
@@ -1768,7 +1769,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
 
         // Calculate the number of bits to be spent on the gf or arf based on the boost number
-        cpi->twopass.gf_bits = (int)((double)Boost * (cpi->twopass.gf_group_bits / (double)allocation_chunks));
+        gf_bits = (int)((double)Boost * (cpi->twopass.gf_group_bits / (double)allocation_chunks));
 
         // If the frame that is to be boosted is simpler than the average for
         // the gf/arf group then use an alternative calculation
@@ -1786,9 +1787,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             alt_gf_bits = (int)((double)Boost * (alt_gf_grp_bits /
                                                  (double)allocation_chunks));
 
-            if (cpi->twopass.gf_bits > alt_gf_bits)
+            if (gf_bits > alt_gf_bits)
             {
-                cpi->twopass.gf_bits = alt_gf_bits;
+                gf_bits = alt_gf_bits;
             }
         }
         // Else if it is harder than other frames in the group make sure it at
@@ -1801,16 +1802,29 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                       mod_frame_err /
                       DOUBLE_DIVIDE_CHECK((double)cpi->twopass.kf_group_error_left));
 
-            if (alt_gf_bits > cpi->twopass.gf_bits)
+            if (alt_gf_bits > gf_bits)
             {
-                cpi->twopass.gf_bits = alt_gf_bits;
+                gf_bits = alt_gf_bits;
             }
         }
 
         // Dont allow a negative value for gf_bits
-        if (cpi->twopass.gf_bits < 0)
-            cpi->twopass.gf_bits = 0;
+        if (gf_bits < 0)
+            gf_bits = 0;
 
+        gf_bits += cpi->min_frame_bandwidth;                     // Add in minimum for a frame
+
+        if (i == 0)
+        {
+            cpi->twopass.gf_bits = gf_bits;
+        }
+        if (i == 1 || (!cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME)))
+        {
+            cpi->per_frame_bandwidth = gf_bits;                 // Per frame bit target for this frame
+        }
+    }
+
+    {
         // Adjust KF group bits and error remainin
         cpi->twopass.kf_group_error_left -= gf_group_err;
         cpi->twopass.kf_group_bits -= cpi->twopass.gf_group_bits;
@@ -1825,7 +1839,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         else
             cpi->twopass.gf_group_error_left = gf_group_err;
 
-        cpi->twopass.gf_group_bits -= cpi->twopass.gf_bits;
+        cpi->twopass.gf_group_bits -= cpi->twopass.gf_bits - cpi->min_frame_bandwidth;
 
         if (cpi->twopass.gf_group_bits < 0)
             cpi->twopass.gf_group_bits = 0;
@@ -1841,13 +1855,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
         else
             cpi->twopass.mid_gf_extra_bits = 0;
-
-        cpi->twopass.gf_bits += cpi->min_frame_bandwidth;                                              // Add in minimum for a frame
-    }
-
-    if (!cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME))                  // Normal GF and not a KF
-    {
-        cpi->per_frame_bandwidth = cpi->twopass.gf_bits;                                               // Per frame bit target for this frame
     }
 
     // Adjustment to estimate_max_q based on a measure of complexity of the section
@@ -1998,22 +2005,10 @@ void vp8_second_pass(VP8_COMP *cpi)
         if (cpi->source_alt_ref_pending && (cpi->common.frame_type != KEY_FRAME))
         {
             // Assign a standard frames worth of bits from those allocated to the GF group
+            int bak = cpi->per_frame_bandwidth;
             vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
             assign_std_frame_bits(cpi, &this_frame_copy);
-
-            // If appropriate (we are switching into ARF active but it was not previously active) apply a boost for the gf at the start of the group.
-            //if ( !cpi->source_alt_ref_active && (cpi->gfu_boost > 150) )
-            if (FALSE)
-            {
-                int extra_bits;
-                int pct_extra = (cpi->gfu_boost - 100) / 50;
-
-                pct_extra = (pct_extra > 20) ? 20 : pct_extra;
-
-                extra_bits = (cpi->twopass.gf_group_bits * pct_extra) / 100;
-                cpi->twopass.gf_group_bits -= extra_bits;
-                cpi->per_frame_bandwidth += extra_bits;
-            }
+            cpi->per_frame_bandwidth = bak;
         }
     }
 
