@@ -239,12 +239,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
 #if CONFIG_ERROR_CONCEALMENT
     if (pbi->ec_enabled &&
-        (mb_idx > pbi->mvs_corrupt_from_mb ||
+        (mb_idx >= pbi->mvs_corrupt_from_mb ||
         vp8dx_bool_error(xd->current_bc)))
     {
         /* MB with corrupt residuals or corrupt mode/motion vectors.
          * Better to use the predictor as reconstruction.
          */
+        vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
         vp8_conceal_corrupt_mb(xd);
         return;
     }
@@ -474,7 +475,13 @@ static void setup_token_decoder(VP8D_COMP *pbi,
     const unsigned char *partition;
 
     /* Parse number of token partitions to use */
-    pc->multi_token_partition = (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
+    const TOKEN_PARTITION multi_token_partition =
+            (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
+    /* Only update the multi_token_partition field if we are sure the value
+     * is correct. */
+    if (!pbi->ec_enabled || !vp8dx_bool_error(&pbi->bc))
+        pc->multi_token_partition = multi_token_partition;
+
     num_part = 1 << pc->multi_token_partition;
 
     /* Set up pointers to the first partition */
