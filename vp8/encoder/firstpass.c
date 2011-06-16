@@ -1897,12 +1897,6 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     int max_bits = frame_max_bits(cpi);    // Max for a single frame
 
-    // The final few frames have special treatment
-    if (cpi->frames_till_gf_update_due >= (int)(cpi->twopass.total_stats->count - cpi->common.current_video_frame))
-    {
-        cpi->twopass.gf_group_bits = (cpi->twopass.bits_left > 0) ? cpi->twopass.bits_left : 0;;
-    }
-
     // Calculate modified prediction error used in bit allocation
     modified_err = calculate_modified_err(cpi, this_frame);
 
