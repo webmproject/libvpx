@@ -28,6 +28,34 @@
 #define IF_RTCD(x) NULL
 #endif
 
+int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
+{
+
+    int i;
+    int intra_pred_var = 0;
+    (void) cpi;
+
+    if (use_dc_pred)
+    {
+        x->e_mbd.mode_info_context->mbmi.mode = DC_PRED;
+        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+        x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+
+        vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+    }
+    else
+    {
+        for (i = 0; i < 16; i++)
+        {
+            x->e_mbd.block[i].bmi.as_mode = B_DC_PRED;
+            vp8_encode_intra4x4block(IF_RTCD(&cpi->rtcd), x, i);
+        }
+    }
+
+    intra_pred_var = VARIANCE_INVOKE(&cpi->rtcd.variance, getmbss)(x->src_diff);
+
+    return intra_pred_var;
+}
 
 void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
                               MACROBLOCK *x, int ib)
@@ -81,30 +109,6 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     RECON_INVOKE(&rtcd->common->recon, recon_mby)
         (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 
-    // make sure block modes are set the way we want them for context updates
-    for (b = 0; b < 16; b++)
-    {
-        BLOCKD *d = &x->e_mbd.block[b];
-
-        switch (x->e_mbd.mode_info_context->mbmi.mode)
-        {
-        case DC_PRED:
-            d->bmi.as_mode = B_DC_PRED;
-            break;
-        case V_PRED:
-            d->bmi.as_mode = B_VE_PRED;
-            break;
-        case H_PRED:
-            d->bmi.as_mode = B_HE_PRED;
-            break;
-        case TM_PRED:
-            d->bmi.as_mode = B_TM_PRED;
-            break;
-        default:
-            d->bmi.as_mode = B_DC_PRED;
-            break;
-        }
-    }
 }
 
 void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
@@ -124,4 +128,3 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_recon_intra_mbuv(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
-

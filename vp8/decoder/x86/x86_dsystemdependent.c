@@ -17,7 +17,7 @@
 #if HAVE_MMX
 void vp8_dequantize_b_impl_mmx(short *sq, short *dq, short *q);
 
-static void dequantize_b_mmx(BLOCKD *d)
+void vp8_dequantize_b_mmx(BLOCKD *d)
 {
     short *sq = (short *) d->qcoeff;
     short *dq = (short *) d->dqcoeff;
@@ -28,6 +28,7 @@ static void dequantize_b_mmx(BLOCKD *d)
 
 void vp8_arch_x86_decode_init(VP8D_COMP *pbi)
 {
+#if CONFIG_RUNTIME_CPU_DETECT
     int flags = x86_simd_caps();
 
     /* Note:
@@ -36,12 +37,11 @@ void vp8_arch_x86_decode_init(VP8D_COMP *pbi)
      * you modify any of the function mappings present in this file, be sure
      * to also update them in static mapings (<arch>/filename_<arch>.h)
      */
-#if CONFIG_RUNTIME_CPU_DETECT
     /* Override default functions with fastest ones for this CPU. */
 #if HAVE_MMX
     if (flags & HAS_MMX)
     {
-        pbi->dequant.block               = dequantize_b_mmx;
+        pbi->dequant.block               = vp8_dequantize_b_mmx;
         pbi->dequant.idct_add            = vp8_dequant_idct_add_mmx;
         pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_mmx;
         pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_mmx;

@@ -365,7 +365,7 @@ generate_vcproj() {
                             DebugInformationFormat="1" \
                             Detect64BitPortabilityProblems="true" \
 
-                        $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="1"
+                        $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="true"
                     ;;
                     *)
                         tag Tool \
@@ -379,7 +379,7 @@ generate_vcproj() {
                             DebugInformationFormat="1" \
                             Detect64BitPortabilityProblems="true" \
 
-                        $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="1"
+                        $uses_asm && tag Tool Name="YASM"  IncludePaths="$incs" Debug="true"
                     ;;
                 esac
             ;;

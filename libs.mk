@@ -184,7 +184,7 @@ BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
 LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
 LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)
 $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
-$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm -pthread
+$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
 $(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
 $(BUILD_PFX)$(LIBVPX_SO): SO_VERSION_SCRIPT = libvpx.ver
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
@@ -257,36 +257,44 @@ $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 #
 # Calculate platform- and compiler-specific offsets for hand coded assembly
 #
-ifeq ($(CONFIG_EXTERNAL_BUILD),) # Visual Studio uses obj_int_extract.bat
-  ifeq ($(ARCH_ARM), yes)
+
+ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
+    asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.S
+	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
+    $(VP8_PREFIX)common/asm_com_offsets.c.S: vp8/common/asm_com_offsets.c
+    CLEAN-OBJS += asm_com_offsets.asm $(VP8_PREFIX)common/asm_com_offsets.c.S
+
+    asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.S
+	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
+    $(VP8_PREFIX)encoder/asm_enc_offsets.c.S: vp8/encoder/asm_enc_offsets.c
+    CLEAN-OBJS += asm_enc_offsets.asm $(VP8_PREFIX)encoder/asm_enc_offsets.c.S
+
+    asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.S
+	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
+    $(VP8_PREFIX)decoder/asm_dec_offsets.c.S: vp8/decoder/asm_dec_offsets.c
+    CLEAN-OBJS += asm_dec_offsets.asm $(VP8_PREFIX)decoder/asm_dec_offsets.c.S
+else
+  ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
     asm_com_offsets.asm: obj_int_extract
     asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
     CLEAN-OBJS += asm_com_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
-  endif
 
-  ifeq ($(ARCH_ARM)$(ARCH_X86)$(ARCH_X86_64), yes)
-    ifeq ($(CONFIG_VP8_ENCODER), yes)
-      asm_enc_offsets.asm: obj_int_extract
-      asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
+    asm_enc_offsets.asm: obj_int_extract
+    asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
-      OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-      CLEAN-OBJS += asm_enc_offsets.asm
-      $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
-    endif
-  endif
+    OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
+    CLEAN-OBJS += asm_enc_offsets.asm
+    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
 
-  ifeq ($(ARCH_ARM), yes)
-    ifeq ($(CONFIG_VP8_DECODER), yes)
-      asm_dec_offsets.asm: obj_int_extract
-      asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
+    asm_dec_offsets.asm: obj_int_extract
+    asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
 	./obj_int_extract rvds $< $(ADS2GAS) > $@
-      OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-      CLEAN-OBJS += asm_dec_offsets.asm
-      $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
-    endif
+    OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
+    CLEAN-OBJS += asm_dec_offsets.asm
+    $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
   endif
 endif
 

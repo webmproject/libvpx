@@ -9,31 +9,17 @@
  */
 
 
-#include "vpx_ports/config.h"
-#include <stddef.h>
-
+#include "vpx_ports/asm_offsets.h"
+#include "vpx_config.h"
 #include "block.h"
 #include "vp8/common/blockd.h"
 #include "onyx_int.h"
 #include "treewriter.h"
 #include "tokenize.h"
 
-#define ct_assert(name,cond) \
-    static void assert_##name(void) UNUSED;\
-    static void assert_##name(void) {switch(0){case 0:case !!(cond):;}}
+BEGIN
 
-#define DEFINE(sym, val) int sym = val;
-
-/*
-#define BLANK() asm volatile("\n->" : : )
-*/
-
-/*
- * int main(void)
- * {
- */
-
-//regular quantize
+/* regular quantize */
 DEFINE(vp8_block_coeff,                         offsetof(BLOCK, coeff));
 DEFINE(vp8_block_zbin,                          offsetof(BLOCK, zbin));
 DEFINE(vp8_block_round,                         offsetof(BLOCK, round));
@@ -48,7 +34,7 @@ DEFINE(vp8_blockd_dequant,                      offsetof(BLOCKD, dequant));
 DEFINE(vp8_blockd_dqcoeff,                      offsetof(BLOCKD, dqcoeff));
 DEFINE(vp8_blockd_eob,                          offsetof(BLOCKD, eob));
 
-// subtract
+/* subtract */
 DEFINE(vp8_block_base_src,                      offsetof(BLOCK, base_src));
 DEFINE(vp8_block_src,                           offsetof(BLOCK, src));
 DEFINE(vp8_block_src_diff,                      offsetof(BLOCK, src_diff));
@@ -56,7 +42,7 @@ DEFINE(vp8_block_src_stride,                    offsetof(BLOCK, src_stride));
 
 DEFINE(vp8_blockd_predictor,                    offsetof(BLOCKD, predictor));
 
-//pack tokens
+/* pack tokens */
 DEFINE(vp8_writer_lowvalue,                     offsetof(vp8_writer, lowvalue));
 DEFINE(vp8_writer_range,                        offsetof(vp8_writer, range));
 DEFINE(vp8_writer_value,                        offsetof(vp8_writer, value));
@@ -90,16 +76,16 @@ DEFINE(TOKENLIST_SZ,                            sizeof(TOKENLIST));
 
 DEFINE(vp8_common_mb_rows,                      offsetof(VP8_COMMON, mb_rows));
 
-// These two sizes are used in vp8cx_pack_tokens.  They are hard coded
-// so if the size changes this will have to be adjusted.
+END
+
+/* add asserts for any offset that is not supported by assembly code
+ * add asserts for any size that is not supported by assembly code
+
+ * These are used in vp8cx_pack_tokens.  They are hard coded so if their sizes
+ * change they will have to be adjusted.
+ */
+
 #if HAVE_ARMV5TE
 ct_assert(TOKENEXTRA_SZ, sizeof(TOKENEXTRA) == 8)
 ct_assert(vp8_extra_bit_struct_sz, sizeof(vp8_extra_bit_struct) == 16)
 #endif
-
-//add asserts for any offset that is not supported by assembly code
-//add asserts for any size that is not supported by assembly code
-/*
- * return 0;
- * }
- */

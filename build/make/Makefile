@@ -124,6 +124,12 @@ $(BUILD_PFX)%.s.o: %.s
 	$(if $(quiet),@echo "    [AS] $@")
 	$(qexec)$(AS) $(ASFLAGS) -o $@ $<
 
+.PRECIOUS: %.c.S
+%.c.S: CFLAGS += -DINLINE_ASM
+$(BUILD_PFX)%.c.S: %.c
+	$(if $(quiet),@echo "    [GEN] $@")
+	$(qexec)$(CC) -S $(CFLAGS) -o $@ $<
+
 .PRECIOUS: %.asm.s
 $(BUILD_PFX)%.asm.s: %.asm
 	$(if $(quiet),@echo "    [ASM CONVERSION] $@")

@@ -14,7 +14,6 @@
 #include "vpx_ports/config.h"
 #include "vp8/common/onyxc_int.h"
 
-extern int vp8_pick_intra4x4mby_modes(const VP8_ENCODER_RTCD *, MACROBLOCK *mb, int *Rate, int *Distortion);
-extern void vp8_pick_intra_mbuv_mode(MACROBLOCK *mb);
 extern void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra);
+extern void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate);
 #endif
