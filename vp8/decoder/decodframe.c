@@ -533,7 +533,10 @@ static void stop_token_decoder(VP8D_COMP *pbi)
     VP8_COMMON *pc = &pbi->common;
 
     if (pc->multi_token_partition != ONE_PARTITION)
+    {
         vpx_free(pbi->mbc);
+        pbi->mbc = NULL;
+    }
 }
 
 static void init_frame(VP8D_COMP *pbi)

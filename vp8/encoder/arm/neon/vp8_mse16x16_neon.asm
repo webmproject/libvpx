@@ -10,7 +10,6 @@
 
 
     EXPORT  |vp8_mse16x16_neon|
-    EXPORT  |vp8_get16x16pred_error_neon|
     EXPORT  |vp8_get4x4sse_cs_neon|
 
     ARM
@@ -76,62 +75,6 @@ mse16x16_neon_loop
 
     ENDP
 
-;============================
-; r0    unsigned char *src_ptr
-; r1    int src_stride
-; r2    unsigned char *ref_ptr
-; r3    int ref_stride
-|vp8_get16x16pred_error_neon| PROC
-    vmov.i8         q8, #0                      ;q8 - sum
-    vmov.i8         q9, #0                      ;q9, q10 - pred_error
-    vmov.i8         q10, #0
-
-    mov             r12, #8
-
-get16x16pred_error_neon_loop
-    vld1.8          {q0}, [r0], r1              ;Load up source and reference
-    vld1.8          {q2}, [r2], r3
-    vld1.8          {q1}, [r0], r1
-    vld1.8          {q3}, [r2], r3
-
-    vsubl.u8        q11, d0, d4
-    vsubl.u8        q12, d1, d5
-    vsubl.u8        q13, d2, d6
-    vsubl.u8        q14, d3, d7
-
-    vpadal.s16      q8, q11
-    vmlal.s16       q9, d22, d22
-    vmlal.s16       q10, d23, d23
-
-    subs            r12, r12, #1
-
-    vpadal.s16      q8, q12
-    vmlal.s16       q9, d24, d24
-    vmlal.s16       q10, d25, d25
-    vpadal.s16      q8, q13
-    vmlal.s16       q9, d26, d26
-    vmlal.s16       q10, d27, d27
-    vpadal.s16      q8, q14
-    vmlal.s16       q9, d28, d28
-    vmlal.s16       q10, d29, d29
-
-    bne             get16x16pred_error_neon_loop
-
-    vadd.u32        q10, q9, q10
-    vpaddl.s32      q0, q8
-
-    vpaddl.u32      q1, q10
-    vadd.s64        d0, d0, d1
-    vadd.u64        d1, d2, d3
-
-    vmull.s32       q5, d0, d0
-    vshr.s32        d10, d10, #8
-    vsub.s32        d0, d1, d10
-
-    vmov.32         r0, d0[0]
-    bx              lr
-
-    ENDP
 
 ;=============================
 ; r0    unsigned char *src_ptr,

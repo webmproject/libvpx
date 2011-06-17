@@ -61,40 +61,6 @@ static void variance(
     }
 }
 
-unsigned int
-vp8_get8x8var_c
-(
-    const unsigned char *src_ptr,
-    int  source_stride,
-    const unsigned char *ref_ptr,
-    int  recon_stride,
-    unsigned int *SSE,
-    int *Sum
-)
-{
-
-    variance(src_ptr, source_stride, ref_ptr, recon_stride, 8, 8, SSE, Sum);
-    return (*SSE - (((*Sum) * (*Sum)) >> 6));
-}
-
-unsigned int
-vp8_get16x16var_c
-(
-    const unsigned char *src_ptr,
-    int  source_stride,
-    const unsigned char *ref_ptr,
-    int  recon_stride,
-    unsigned int *SSE,
-    int *Sum
-)
-{
-
-    variance(src_ptr, source_stride, ref_ptr, recon_stride, 16, 16, SSE, Sum);
-    return (*SSE - (((*Sum) * (*Sum)) >> 8));
-
-}
-
-
 
 unsigned int vp8_variance16x16_c(
     const unsigned char *src_ptr,

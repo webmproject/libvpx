@@ -101,36 +101,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
                 }
                 while (++i < 16);
             }
-            else
-            {
-                int BMode;
-                int i = 0;
-
-                switch (y_mode)
-                {
-                case DC_PRED:
-                    BMode = B_DC_PRED;
-                    break;
-                case V_PRED:
-                    BMode = B_VE_PRED;
-                    break;
-                case H_PRED:
-                    BMode = B_HE_PRED;
-                    break;
-                case TM_PRED:
-                    BMode = B_TM_PRED;
-                    break;
-                default:
-                    BMode = B_DC_PRED;
-                    break;
-                }
-
-                do
-                {
-                    m->bmi[i].as_mode = (B_PREDICTION_MODE)BMode;
-                }
-                while (++i < 16);
-            }
 
             m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc, pbi->common.kf_uv_mode_prob);
         }

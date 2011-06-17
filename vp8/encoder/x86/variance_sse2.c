@@ -53,13 +53,6 @@ unsigned int vp8_get16x16var_sse2
     unsigned int *SSE,
     int *Sum
 );
-unsigned int vp8_get16x16pred_error_sse2
-(
-    const unsigned char *src_ptr,
-    int src_stride,
-    const unsigned char *ref_ptr,
-    int ref_stride
-);
 unsigned int vp8_get8x8var_sse2
 (
     const unsigned char *src_ptr,
