@@ -238,7 +238,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
                 (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
     }
 
-    cpi->mb.errorperbit = (cpi->RDMULT / 100);
+    cpi->mb.errorperbit = (cpi->RDMULT / 110);
     cpi->mb.errorperbit += (cpi->mb.errorperbit==0);
 
     vp8_set_speed_features(cpi);
