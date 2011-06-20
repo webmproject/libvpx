@@ -81,11 +81,14 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
     int count;
     unsigned int range;
 
+    split = 1 + (((br->range - 1) * probability) >> 8);
+
+    if(br->count < 0)
+        vp8dx_bool_decoder_fill(br);
+
     value = br->value;
     count = br->count;
-    range = br->range;
 
-    split = 1 + (((range - 1) * probability) >> 8);
     bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8);
 
     range = split;
@@ -106,8 +109,7 @@ static int vp8dx_decode_bool(BOOL_DECODER *br, int probability) {
     br->value = value;
     br->count = count;
     br->range = range;
-    if(count < 0)
-        vp8dx_bool_decoder_fill(br);
+
     return bit;
 }
 
