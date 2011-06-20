@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vpx_ports/x86.h"
 #include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
@@ -63,9 +63,9 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_mmx;
         rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_mmx;
         rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_mmx;
-        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_mbvs_mmx;
+        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_simple_vertical_edge_mmx;
         rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_mmx;
-        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_mbhs_mmx;
+        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_simple_horizontal_edge_mmx;
         rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_mmx;
 
 #if CONFIG_POSTPROC
@@ -101,9 +101,9 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_sse2;
         rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_sse2;
         rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_sse2;
-        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_mbvs_sse2;
+        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_simple_vertical_edge_sse2;
         rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_sse2;
-        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_mbhs_sse2;
+        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_simple_horizontal_edge_sse2;
         rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_sse2;
 
 #if CONFIG_POSTPROC
