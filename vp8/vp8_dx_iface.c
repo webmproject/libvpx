@@ -588,8 +588,7 @@ static vpx_codec_err_t vp8_set_reference(vpx_codec_alg_priv_t *ctx,
 
         image2yuvconfig(&frame->img, &sd);
 
-        vp8dx_set_reference(ctx->pbi, frame->frame_type, &sd);
-        return VPX_CODEC_OK;
+        return vp8dx_set_reference(ctx->pbi, frame->frame_type, &sd);
     }
     else
         return VPX_CODEC_INVALID_PARAM;
@@ -610,8 +609,7 @@ static vpx_codec_err_t vp8_get_reference(vpx_codec_alg_priv_t *ctx,
 
         image2yuvconfig(&frame->img, &sd);
 
-        vp8dx_get_reference(ctx->pbi, frame->frame_type, &sd);
-        return VPX_CODEC_OK;
+        return vp8dx_get_reference(ctx->pbi, frame->frame_type, &sd);
     }
     else
         return VPX_CODEC_INVALID_PARAM;

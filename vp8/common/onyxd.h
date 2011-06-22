@@ -22,6 +22,7 @@ extern "C"
 #include "vpx_scale/yv12config.h"
 #include "ppflags.h"
 #include "vpx_ports/mem.h"
+#include "vpx/vpx_codec.h"
 
     typedef void   *VP8D_PTR;
     typedef struct
@@ -54,8 +55,8 @@ extern "C"
     int vp8dx_receive_compressed_data(VP8D_PTR comp, unsigned long size, const unsigned char *dest, INT64 time_stamp);
     int vp8dx_get_raw_frame(VP8D_PTR comp, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp, INT64 *time_end_stamp, vp8_ppflags_t *flags);
 
-    int vp8dx_get_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
-    int vp8dx_set_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
+    vpx_codec_err_t vp8dx_get_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
+    vpx_codec_err_t vp8dx_set_reference(VP8D_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
 
     VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf);
 
