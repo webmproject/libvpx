@@ -198,7 +198,7 @@ libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	$(qexec)echo "local: *; };" >> $@
 CLEAN-OBJS += libvpx.ver
 
-$(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)):
+$(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)): $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)
 	@echo "    [LN]      $@"
 	$(qexec)ln -sf $(LIBVPX_SO) $@
 
