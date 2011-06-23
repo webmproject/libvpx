@@ -91,11 +91,11 @@ void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb)
 
 void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
-    int b;
+    BLOCK *b = &x->block[0];
 
     RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mby)(&x->e_mbd);
 
-    ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, x->src.y_buffer, x->e_mbd.predictor, x->src.y_stride);
+    ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
 
     vp8_transform_intra_mby(x);
 

@@ -148,6 +148,9 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     x->rddiv = cpi->RDDIV;
                     x->rdmult = cpi->RDMULT;
 
+                    //Copy current mb to a buffer
+                    RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+
                     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
                         vp8_activity_masking(cpi, x);
 

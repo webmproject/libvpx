@@ -65,7 +65,9 @@ typedef struct
 {
     DECLARE_ALIGNED(16, short, src_diff[400]);       // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
     DECLARE_ALIGNED(16, short, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
+    DECLARE_ALIGNED(16, unsigned char, thismb[256]);
 
+    unsigned char *thismb_ptr;
     // 16 Y blocks, 4 U blocks, 4 V blocks, 1 DC 2nd order block each with 16 entries
     BLOCK block[25];
 
