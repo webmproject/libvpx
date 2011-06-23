@@ -289,7 +289,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
     if (cpi->RDMULT < 7)
         cpi->RDMULT = 7;
 #endif
-    cpi->mb.errorperbit = (cpi->RDMULT / 100);
+    cpi->mb.errorperbit = (cpi->RDMULT / 110);
     cpi->mb.errorperbit += (cpi->mb.errorperbit==0);
 
 #if CONFIG_EXTEND_QRANGE

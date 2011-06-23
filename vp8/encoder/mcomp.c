@@ -317,17 +317,6 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     int whichdir ;
     int thismse;
 
-
-    // Trap uncodable vectors
-    if ((abs((bestmv->as_mv.col << 3) - ref_mv->as_mv.col) > MAX_FULL_PEL_VAL)
-        || (abs((bestmv->as_mv.row << 3) - ref_mv->as_mv.row) > MAX_FULL_PEL_VAL))
-    {
-        bestmv->as_mv.row <<= 3;
-        bestmv->as_mv.col <<= 3;
-        *distortion = INT_MAX;
-        return INT_MAX;
-    }
-
     // central mv
     bestmv->as_mv.row <<= 3;
     bestmv->as_mv.col <<= 3;
@@ -627,16 +616,6 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
     int left, right, up, down, diag;
     unsigned int sse;
     int thismse;
-
-    // Trap uncodable vectors
-    if ((abs((bestmv->as_mv.col << 3) - ref_mv->as_mv.col) > MAX_FULL_PEL_VAL)
-        || (abs((bestmv->as_mv.row << 3) - ref_mv->as_mv.row) > MAX_FULL_PEL_VAL))
-    {
-        bestmv->as_mv.row <<= 3;
-        bestmv->as_mv.col <<= 3;
-        *distortion = INT_MAX;
-        return INT_MAX;
-    }
 
     // central mv
     bestmv->as_mv.row <<= 3;
@@ -1055,15 +1034,10 @@ int vp8_diamond_search_sad
     in_what = (unsigned char *)(*(d->base_pre) + d->pre + (ref_row * (d->pre_stride)) + ref_col);
     best_address = in_what;
 
-    // We need to check that the starting point for the search (as indicated by ref_mv) is within the buffer limits
-    if ((ref_col > x->mv_col_min) && (ref_col < x->mv_col_max) &&
-    (ref_row > x->mv_row_min) && (ref_row < x->mv_row_max))
-    {
-        // Check the starting position
-        bestsad = fn_ptr->sdf(what, what_stride, in_what,
-                              in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
-    }
+    // Check the starting position
+    bestsad = fn_ptr->sdf(what, what_stride, in_what,
+                          in_what_stride, 0x7fffffff)
+              + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
 
     // search_param determines the length of the initial step and hence the number of iterations
     // 0 = initial step (MAX_FIRST_STEP) pel : 1 = (MAX_FIRST_STEP/2) pel, 2 = (MAX_FIRST_STEP/4) pel... etc.
@@ -1178,15 +1152,10 @@ int vp8_diamond_search_sadx4
     in_what = (unsigned char *)(*(d->base_pre) + d->pre + (ref_row * (d->pre_stride)) + ref_col);
     best_address = in_what;
 
-    // We need to check that the starting point for the search (as indicated by ref_mv) is within the buffer limits
-    if ((ref_col > x->mv_col_min) && (ref_col < x->mv_col_max) &&
-    (ref_row > x->mv_row_min) && (ref_row < x->mv_row_max))
-    {
-        // Check the starting position
-        bestsad = fn_ptr->sdf(what, what_stride,
-                              in_what, in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
-    }
+    // Check the starting position
+    bestsad = fn_ptr->sdf(what, what_stride,
+                          in_what, in_what_stride, 0x7fffffff)
+              + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
 
     // search_param determines the length of the initial step and hence the number of iterations
     // 0 = initial step (MAX_FIRST_STEP) pel : 1 = (MAX_FIRST_STEP/2) pel, 2 = (MAX_FIRST_STEP/4) pel... etc.
@@ -1329,17 +1298,10 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     best_mv->as_mv.row = ref_row;
     best_mv->as_mv.col = ref_col;
 
-    // We need to check that the starting point for the search (as indicated by ref_mv) is within the buffer limits
-    if ((ref_col > x->mv_col_min) && (ref_col < x->mv_col_max) &&
-    (ref_row > x->mv_row_min) && (ref_row < x->mv_row_max))
-    {
-        // Baseline value at the centre
-
-        //bestsad = fn_ptr->sf( what,what_stride,bestaddress,in_what_stride) + (int)sqrt(mv_err_cost(ref_mv,ref_mv, mvcost,error_per_bit*14));
-        bestsad = fn_ptr->sdf(what, what_stride, bestaddress,
-                              in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
-    }
+    // Baseline value at the centre
+    bestsad = fn_ptr->sdf(what, what_stride, bestaddress,
+                          in_what_stride, 0x7fffffff)
+              + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
 
     // Apply further limits to prevent us looking using vectors that stretch beyiond the UMV border
     if (col_min < x->mv_col_min)
@@ -1430,15 +1392,10 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     best_mv->as_mv.row = ref_row;
     best_mv->as_mv.col = ref_col;
 
-    // We need to check that the starting point for the search (as indicated by ref_mv) is within the buffer limits
-    if ((ref_col > x->mv_col_min) && (ref_col < x->mv_col_max) &&
-    (ref_row > x->mv_row_min) && (ref_row < x->mv_row_max))
-    {
-        // Baseline value at the centre
-        bestsad = fn_ptr->sdf(what, what_stride,
-                              bestaddress, in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
-    }
+    // Baseline value at the centre
+    bestsad = fn_ptr->sdf(what, what_stride,
+                          bestaddress, in_what_stride, 0x7fffffff)
+              + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
 
     // Apply further limits to prevent us looking using vectors that stretch beyiond the UMV border
     if (col_min < x->mv_col_min)
@@ -1566,15 +1523,10 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     best_mv->as_mv.row = ref_row;
     best_mv->as_mv.col = ref_col;
 
-    // We need to check that the starting point for the search (as indicated by ref_mv) is within the buffer limits
-    if ((ref_col > x->mv_col_min) && (ref_col < x->mv_col_max) &&
-    (ref_row > x->mv_row_min) && (ref_row < x->mv_row_max))
-    {
-        // Baseline value at the centre
-        bestsad = fn_ptr->sdf(what, what_stride,
-                              bestaddress, in_what_stride, 0x7fffffff)
-                + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
-    }
+    // Baseline value at the centre
+    bestsad = fn_ptr->sdf(what, what_stride,
+                          bestaddress, in_what_stride, 0x7fffffff)
+              + mvsad_err_cost(best_mv, &fcenter_mv, mvsadcost, sad_per_bit);
 
     // Apply further limits to prevent us looking using vectors that stretch beyiond the UMV border
     if (col_min < x->mv_col_min)
