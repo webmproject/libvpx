@@ -137,7 +137,7 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
 }
 
 
-int vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+vpx_codec_err_t vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
@@ -149,16 +149,27 @@ int vp8dx_get_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
         ref_fb_idx = cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
         ref_fb_idx = cm->alt_fb_idx;
+    else{
+        vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+            "Invalid reference frame");
+        return pbi->common.error.error_code;
+    }
+
+    if(cm->yv12_fb[ref_fb_idx].y_height != sd->y_height ||
+        cm->yv12_fb[ref_fb_idx].y_width != sd->y_width ||
+        cm->yv12_fb[ref_fb_idx].uv_height != sd->uv_height ||
+        cm->yv12_fb[ref_fb_idx].uv_width != sd->uv_width){
+        vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+            "Incorrect buffer dimensions");
+    }
     else
-        return -1;
+        vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
 
-    vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
-
-    return 0;
+    return pbi->common.error.error_code;
 }
 
 
-int vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+vpx_codec_err_t vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
@@ -171,20 +182,32 @@ int vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_C
         ref_fb_ptr = &cm->gld_fb_idx;
     else if (ref_frame_flag == VP8_ALT_FLAG)
         ref_fb_ptr = &cm->alt_fb_idx;
-    else
-        return -1;
+    else{
+        vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+            "Invalid reference frame");
+        return pbi->common.error.error_code;
+    }
 
-    /* Find an empty frame buffer. */
-    free_fb = get_free_fb(cm);
-    /* Decrease fb_idx_ref_cnt since it will be increased again in
-     * ref_cnt_fb() below. */
-    cm->fb_idx_ref_cnt[free_fb]--;
+    if(cm->yv12_fb[*ref_fb_ptr].y_height != sd->y_height ||
+        cm->yv12_fb[*ref_fb_ptr].y_width != sd->y_width ||
+        cm->yv12_fb[*ref_fb_ptr].uv_height != sd->uv_height ||
+        cm->yv12_fb[*ref_fb_ptr].uv_width != sd->uv_width){
+        vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
+            "Incorrect buffer dimensions");
+    }
+    else{
+        /* Find an empty frame buffer. */
+        free_fb = get_free_fb(cm);
+        /* Decrease fb_idx_ref_cnt since it will be increased again in
+         * ref_cnt_fb() below. */
+        cm->fb_idx_ref_cnt[free_fb]--;
 
-    /* Manage the reference counters and copy image. */
-    ref_cnt_fb (cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
-    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[*ref_fb_ptr]);
+        /* Manage the reference counters and copy image. */
+        ref_cnt_fb (cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
+        vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[*ref_fb_ptr]);
+    }
 
-    return 0;
+   return pbi->common.error.error_code;
 }
 
 /*For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.*/
