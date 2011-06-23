@@ -1477,7 +1477,6 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
     cpi->long_rolling_target_bits     = cpi->av_per_frame_bandwidth;
     cpi->long_rolling_actual_bits     = cpi->av_per_frame_bandwidth;
-    cpi->buffered_av_per_frame_bandwidth = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual       = 0;
@@ -1573,7 +1572,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         break;
     }
 
-    if (cpi->pass == 0 && cpi->oxcf.end_usage != USAGE_STREAM_FROM_SERVER)
+    if (cpi->pass == 0)
         cpi->auto_worst_q = 1;
 
     cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
@@ -3454,8 +3453,7 @@ static void encode_frame_to_data_rate
     // For CBR if the buffer reaches its maximum level then we can no longer
     // save up bits for later frames so we might as well use them up
     // on the current frame.
-    if (cpi->pass == 2
-        && (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
+    if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
         (cpi->buffer_level >= cpi->oxcf.optimal_buffer_level) && cpi->buffered_mode)
     {
         int Adjustment = cpi->active_worst_quality / 4;       // Max adjustment is 1/4
@@ -3546,9 +3544,6 @@ static void encode_frame_to_data_rate
         }
         else
         {
-            if(cpi->pass != 2)
-                Q = cpi->avg_frame_qindex;
-
             cpi->active_best_quality = inter_minq[Q];
 
             // For the constant/constrained quality mode we dont want
@@ -3850,16 +3845,15 @@ static void encode_frame_to_data_rate
             (cpi->active_worst_quality < cpi->worst_quality)      &&
             (cpi->projected_frame_size > frame_over_shoot_limit))
         {
-            /* step down active_worst_quality such that the corresponding
-             * active_best_quality will be equal to the current
-             * active_worst_quality + 1
-             */
-            int i;
+            int over_size_percent = ((cpi->projected_frame_size - frame_over_shoot_limit) * 100) / frame_over_shoot_limit;
 
-            for(i=cpi->active_worst_quality; i<cpi->worst_quality; i++)
-                if(inter_minq[i] >= cpi->active_worst_quality + 1)
-                    break;
-            cpi->active_worst_quality = i;
+            // If so is there any scope for relaxing it
+            while ((cpi->active_worst_quality < cpi->worst_quality) && (over_size_percent > 0))
+            {
+                cpi->active_worst_quality++;
+                top_index = cpi->active_worst_quality;
+                over_size_percent = (int)(over_size_percent * 0.96);        // Assume 1 qstep = about 4% on frame size.
+            }
 
             // If we have updated the active max Q do not call vp8_update_rate_correction_factors() this loop.
             active_worst_qchanged = TRUE;
@@ -4247,9 +4241,10 @@ static void encode_frame_to_data_rate
 
     // Update the buffer level variable.
     // Non-viewable frames are a special case and are treated as pure overhead.
-    if ( cm->show_frame )
-        cpi->bits_off_target += cpi->av_per_frame_bandwidth;
-    cpi->bits_off_target -= cpi->projected_frame_size;
+    if ( !cm->show_frame )
+        cpi->bits_off_target -= cpi->projected_frame_size;
+    else
+        cpi->bits_off_target += cpi->av_per_frame_bandwidth - cpi->projected_frame_size;
 
     // Rolling monitors of whether we are over or underspending used to help regulate min and Max Q in two pass.
     cpi->rolling_target_bits = ((cpi->rolling_target_bits * 3) + cpi->this_frame_target + 2) / 4;
@@ -4263,33 +4258,7 @@ static void encode_frame_to_data_rate
     // Debug stats
     cpi->total_target_vs_actual += (cpi->this_frame_target - cpi->projected_frame_size);
 
-    // Update the buffered average bitrate
-    {
-        long long numerator;
-
-        numerator = cpi->oxcf.maximum_buffer_size
-                    - cpi->buffered_av_per_frame_bandwidth
-                    + cpi->projected_frame_size;
-        numerator *= cpi->buffered_av_per_frame_bandwidth;
-        cpi->buffered_av_per_frame_bandwidth = numerator
-                                               / cpi->oxcf.maximum_buffer_size;
-    }
-
-    {
-        long long tmp = (long long)cpi->buffered_av_per_frame_bandwidth
-                        * cpi->oxcf.maximum_buffer_size
-                        / cpi->av_per_frame_bandwidth;
-        cpi->buffer_level = cpi->oxcf.maximum_buffer_size
-                            - tmp
-                            + cpi->oxcf.optimal_buffer_level;
-    }
-
-    // Accumulate overshoot error.
-    cpi->accumulated_overshoot +=
-        (cpi->projected_frame_size > cpi->av_per_frame_bandwidth)
-        ? cpi->projected_frame_size - cpi->av_per_frame_bandwidth
-        : 0;
-
+    cpi->buffer_level = cpi->bits_off_target;
 
     // Update bits left to the kf and gf groups to account for overshoot or undershoot on these frames
     if (cm->frame_type == KEY_FRAME)

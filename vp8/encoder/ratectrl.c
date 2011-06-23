@@ -605,10 +605,10 @@ static void calc_gf_params(VP8_COMP *cpi)
 
 static void calc_pframe_target_size(VP8_COMP *cpi)
 {
-    int min_frame_target, max_frame_target;
+    int min_frame_target;
     int Adjustment;
 
-    min_frame_target = 1;
+    min_frame_target = 0;
 
     if (cpi->pass == 2)
     {
@@ -616,19 +616,10 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
 
         if (min_frame_target < (cpi->av_per_frame_bandwidth >> 5))
             min_frame_target = cpi->av_per_frame_bandwidth >> 5;
-
-        max_frame_target = INT_MAX;
     }
-    else
-    {
-        if (min_frame_target < cpi->per_frame_bandwidth / 4)
-            min_frame_target = cpi->per_frame_bandwidth / 4;
+    else if (min_frame_target < cpi->per_frame_bandwidth / 4)
+        min_frame_target = cpi->per_frame_bandwidth / 4;
 
-        /* Don't allow the target to completely deplete the buffer. */
-        max_frame_target = cpi->buffer_level + cpi->av_per_frame_bandwidth;
-        if(max_frame_target < min_frame_target)
-            max_frame_target = min_frame_target;
-    }
 
     // Special alt reference frame case
     if (cpi->common.refresh_alt_ref_frame)
@@ -1121,32 +1112,6 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
 
         }
     }
-
-    if (cpi->pass==0 && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER){
-        /* determine the accumulated error to apply to this frame. Apply
-         * more of the error when we've been undershooting, less when
-         * we've been overshooting
-         */
-        long long adjust;
-        int bitrate_error;
-
-        bitrate_error = cpi->av_per_frame_bandwidth
-                        - cpi->buffered_av_per_frame_bandwidth;
-
-        adjust = cpi->accumulated_overshoot;
-        adjust *= cpi->av_per_frame_bandwidth + bitrate_error;
-        adjust /= cpi->oxcf.maximum_buffer_size;
-        if (adjust > (cpi->this_frame_target - min_frame_target))
-            adjust = (cpi->this_frame_target - min_frame_target);
-        else if (adjust < 0)
-            adjust = 0;
-
-        cpi->this_frame_target -= adjust;
-        cpi->accumulated_overshoot -= adjust;
-    }
-
-    if(cpi->this_frame_target > max_frame_target)
-        cpi->this_frame_target = max_frame_target;
 }
 
 
