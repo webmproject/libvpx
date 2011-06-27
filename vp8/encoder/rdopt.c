@@ -630,7 +630,12 @@ static void macro_block_yrd( MACROBLOCK *mb,
 
     // Distortion
     d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
+
+#if CONFIG_EXTEND_QRANGE
+    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
+#else
     d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
+#endif
 
     *Distortion = (d >> 4);
 
@@ -1049,10 +1054,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
     return distortion;
 }
 
-#if CONFIG_EXTEND_QRANGE
-    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
-#else
-#endif
+
 
 static const unsigned int segmentation_to_sseshift[4] = {3, 3, 2, 0};
 
