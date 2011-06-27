@@ -382,6 +382,7 @@ static void estimate_missing_mvs(MB_OVERLAP *overlaps,
             mi->mbmi.mode = SPLITMV;
             mi->mbmi.uv_mode = DC_PRED;
             mi->mbmi.partitioning = 3;
+            mi->mbmi.segment_id = 0;
             estimate_mb_mvs(block_overlaps,
                                 mi,
                                 mb_to_left_edge,
@@ -563,6 +564,12 @@ static void interpolate_mvs(MACROBLOCKD *mb,
                                                        mb->mb_to_top_edge,
                                                        mb->mb_to_bottom_edge);
             }
+            else
+            {
+                mv->as_int = 0;
+                mi->bmi[row*4 + col].as_mode = NEW4X4;
+                mi->mbmi.need_to_clamp_mvs = 0;
+            }
         }
     }
 }
@@ -597,6 +604,7 @@ void vp8_interpolate_motion(MACROBLOCKD *mb,
     mb->mode_info_context->mbmi.mode = SPLITMV;
     mb->mode_info_context->mbmi.uv_mode = DC_PRED;
     mb->mode_info_context->mbmi.partitioning = 3;
+    mb->mode_info_context->mbmi.segment_id = 0;
 }
 
 void vp8_conceal_corrupt_mb(MACROBLOCKD *xd)
