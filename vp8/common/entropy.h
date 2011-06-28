@@ -30,13 +30,12 @@
 #define DCT_VAL_CATEGORY6       10      /* 67+       Extra Bits 11+1 */
 #define DCT_EOB_TOKEN           11      /* EOB       Extra Bits 0+0 */
 
-#define vp8_coef_tokens 12
-#define MAX_ENTROPY_TOKENS vp8_coef_tokens
+#define MAX_ENTROPY_TOKENS 12
 #define ENTROPY_NODES 11
 
 extern const vp8_tree_index vp8_coef_tree[];
 
-extern struct vp8_token_struct vp8_coef_encodings[vp8_coef_tokens];
+extern struct vp8_token_struct vp8_coef_encodings[MAX_ENTROPY_TOKENS];
 
 typedef struct
 {
@@ -85,9 +84,9 @@ extern DECLARE_ALIGNED(16, const unsigned char, vp8_coef_bands[16]);
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
 #   define PREV_COEF_CONTEXTS       3
 
-extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[vp8_coef_tokens]);
+extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY_TOKENS]);
 
-extern const vp8_prob vp8_coef_update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1];
+extern const vp8_prob vp8_coef_update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 
 
 struct VP8Common;
