@@ -15,17 +15,16 @@
 # encoder
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/arm_csystemdependent.c
 
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/quantize_arm.c
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/picklpf_arm.c
-VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/dct_arm.c
-VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/variance_arm.c
-VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/variance_arm.h
-VP8_CX_SRCS-$(HAVE_ARMV5TE) += encoder/arm/boolhuff_arm.c
-
-VP8_CX_SRCS_REMOVE-$(HAVE_ARMV5TE)  += encoder/boolhuff.c
+VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.c
+VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/picklpf_arm.c
+VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.c
+VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/variance_arm.c
+VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/variance_arm.h
 
 #File list for armv5te
 # encoder
+VP8_CX_SRCS-$(HAVE_ARMV5TE) += encoder/arm/boolhuff_arm.c
+VP8_CX_SRCS_REMOVE-$(HAVE_ARMV5TE)  += encoder/boolhuff.c
 VP8_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/boolhuff_armv5te$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/vp8_packtokens_armv5$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/vp8_packtokens_mbrow_armv5$(ASM)
