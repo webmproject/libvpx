@@ -99,6 +99,7 @@ VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
+# common (c)
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/asm_com_offsets.c
 ifeq ($(CONFIG_CSM),yes)
 VP8_COMMON_SRCS-yes += common/maskingmv.c
@@ -107,12 +108,11 @@ endif
 
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 
-# common (c)
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.c
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.h
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/filter_arm.c
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/loopfilter_arm.c
-VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/reconintra_arm.c
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.c
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.h
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/filter_arm.c
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/loopfilter_arm.c
+VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/reconintra_arm.c
 
 # common (armv6)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/bilinearfilter_v6$(ASM)

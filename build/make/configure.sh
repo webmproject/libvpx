@@ -642,8 +642,8 @@ process_common_toolchain() {
     # on arm, isa versions are supersets
     enabled armv7a && soft_enable armv7 ### DEBUG
     enabled armv7 && soft_enable armv6
-    enabled armv6 && soft_enable armv5te
-    enabled armv6 && soft_enable fast_unaligned
+    enabled armv7 || enabled armv6 && soft_enable armv5te
+    enabled armv7 || enabled armv6 && soft_enable fast_unaligned
     enabled iwmmxt2 && soft_enable iwmmxt
     enabled iwmmxt && soft_enable armv5te
 
