@@ -2012,7 +2012,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         size_t packet_sz = sizeof(FIRSTPASS_STATS);
         int packets = oxcf->two_pass_stats_in.sz / packet_sz;
 
-        cpi->twopass.stats_in = oxcf->two_pass_stats_in.buf;
+        cpi->twopass.stats_in_start = oxcf->two_pass_stats_in.buf;
+        cpi->twopass.stats_in = cpi->twopass.stats_in_start;
         cpi->twopass.stats_in_end = (void*)((char *)cpi->twopass.stats_in
                             + (packets - 1) * packet_sz);
         vp8_init_second_pass(cpi);

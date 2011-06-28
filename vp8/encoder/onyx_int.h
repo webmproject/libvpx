@@ -525,7 +525,7 @@ typedef struct VP8_COMP
         unsigned int this_iiratio;
         FIRSTPASS_STATS *total_stats;
         FIRSTPASS_STATS *this_frame_stats;
-        FIRSTPASS_STATS *stats_in, *stats_in_end;
+        FIRSTPASS_STATS *stats_in, *stats_in_end, *stats_in_start;
         int first_pass_done;
         long long bits_left;
         long long clip_bits_total;
