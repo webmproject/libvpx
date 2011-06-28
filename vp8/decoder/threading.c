@@ -22,6 +22,9 @@
 #include "detokenize.h"
 #include "vp8/common/reconinter.h"
 #include "reconintra_mt.h"
+#if CONFIG_ERROR_CONCEALMENT
+#include "error_concealment.h"
+#endif
 
 extern void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
 extern void clamp_mvs(MACROBLOCKD *xd);
@@ -150,6 +153,20 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
     {
         vp8_build_inter_predictors_mb(xd);
     }
+
+#if CONFIG_ERROR_CONCEALMENT
+    if (pbi->ec_enabled &&
+        (mb_row * pbi->common.mb_cols + mb_col >= pbi->mvs_corrupt_from_mb ||
+        vp8dx_bool_error(xd->current_bc)))
+    {
+        /* MB with corrupt residuals or corrupt mode/motion vectors.
+         * Better to use the predictor as reconstruction.
+         */
+        vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
+        vp8_conceal_corrupt_mb(xd);
+        return;
+    }
+#endif
 
     /* dequantization and idct */
     if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
@@ -291,11 +308,36 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
 
                         update_blockd_bmi(xd);
 
-                        /* Distance of Mb to the various image edges.
-                         * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
+                        /* Distance of MB to the various image edges.
+                         * These are specified to 8th pel as they are always
+                         * compared to values that are in 1/8th pel units.
                          */
                         xd->mb_to_left_edge = -((mb_col * 16) << 3);
                         xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+
+#if CONFIG_ERROR_CONCEALMENT
+                        if (pbi->ec_enabled &&
+                            (xd->mode_info_context->mbmi.ref_frame ==
+                                                                 INTRA_FRAME) &&
+                            vp8dx_bool_error(xd->current_bc))
+                        {
+                            /* We have an intra block with corrupt coefficients,
+                             * better to conceal with an inter block.
+                             * Interpolate MVs from neighboring MBs
+                             *
+                             * Note that for the first mb with corrupt residual
+                             * in a frame, we might not discover that before
+                             * decoding the residual. That happens after this
+                             * check, and therefore no inter concealment will be
+                             * done.
+                             */
+                            vp8_interpolate_motion(xd,
+                                                   mb_row, mb_col,
+                                                   pc->mb_rows, pc->mb_cols,
+                                                   pc->mode_info_stride);
+                        }
+#endif
+
 
                         xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
                         xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
@@ -772,11 +814,34 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 
                 update_blockd_bmi(xd);
 
-                /* Distance of Mb to the various image edges.
-                 * These are specified to 8th pel as they are always compared to values that are in 1/8th pel units
+                /* Distance of MB to the various image edges.
+                 * These are specified to 8th pel as they are always compared to
+                 * values that are in 1/8th pel units.
                  */
                 xd->mb_to_left_edge = -((mb_col * 16) << 3);
                 xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+
+#if CONFIG_ERROR_CONCEALMENT
+                if (pbi->ec_enabled &&
+                    (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) &&
+                    vp8dx_bool_error(xd->current_bc))
+                {
+                    /* We have an intra block with corrupt coefficients, better
+                     * to conceal with an inter block. Interpolate MVs from
+                     * neighboring MBs
+                     *
+                     * Note that for the first mb with corrupt residual in a
+                     * frame, we might not discover that before decoding the
+                     * residual. That happens after this check, and therefore no
+                     * inter concealment will be done.
+                     */
+                    vp8_interpolate_motion(xd,
+                                           mb_row, mb_col,
+                                           pc->mb_rows, pc->mb_cols,
+                                           pc->mode_info_stride);
+                }
+#endif
+
 
                 xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
                 xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;

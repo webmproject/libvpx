@@ -303,7 +303,6 @@ CMDLINE_SELECT="
     shared
     small
     postproc_visualizer
-
     experimental
 "
 
@@ -321,8 +320,10 @@ process_cmdline() {
                 log_echo "Ignoring $opt -- not in experimental mode."
             fi
         else
-            process_common_cmdline "$opt"
+            process_common_cmdline $opt
         fi
+        ;;
+        *) process_common_cmdline $opt
         ;;
         esac
     done

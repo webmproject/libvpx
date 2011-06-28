@@ -110,7 +110,7 @@ void throw_packets(unsigned char* frame, int* size, int loss_rate,
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DEC_INIT
 /* Initialize codec */
 flags = VPX_CODEC_USE_ERROR_CONCEALMENT;
-res = vpx_codec_dec_init(&codec, interface, NULL, flags);
+res = vpx_codec_dec_init(&codec, interface, &dec_cfg, flags);
 if(res)
     die_codec(&codec, "Failed to initialize decoder");
 
@@ -123,11 +123,15 @@ which specifies the range or pattern of frames to drop. The parameter is
 parsed as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ USAGE
-if(argc!=4 && argc != 5)
-    die("Usage: %s <infile> <outfile> <N-M|N/M|L,S>\n", argv[0]);
+if(argc < 4 || argc > 6)
+    die("Usage: %s <infile> <outfile> [-t <num threads>] <N-M|N/M|L,S>\n",
+        argv[0]);
 {
     char *nptr;
-    n = strtol(argv[3], &nptr, 0);
+    int arg_num = 3;
+    if (argc == 6 && strncmp(argv[arg_num++], "-t", 2) == 0)
+        dec_cfg.threads = strtol(argv[arg_num++], NULL, 0);
+    n = strtol(argv[arg_num], &nptr, 0);
     mode = (*nptr == '\0' || *nptr == ',') ? 2 : (*nptr == '-') ? 1 : 0;
 
     m = strtol(nptr+1, NULL, 0);
@@ -138,6 +142,7 @@ if(argc!=4 && argc != 5)
 seed = (m > 0) ? m : (unsigned int)time(NULL);
 srand(seed);thrown_frame = 0;
 printf("Seed: %u\n", seed);
+printf("Threads: %d\n", dec_cfg.threads);
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ USAGE
 
 
@@ -181,6 +186,7 @@ int              n, m, mode;
 unsigned int     seed;
 int              thrown=0, kept=0;
 int              thrown_frame=0, kept_frame=0;
+vpx_codec_dec_cfg_t  dec_cfg = {0};
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ EXTRA_VARS
 
 
