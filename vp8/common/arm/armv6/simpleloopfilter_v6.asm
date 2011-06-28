@@ -154,22 +154,26 @@ pstep       RN  r1
 
     ; load soure data to r7, r8, r9, r10
     ldrh        r3, [src, #-2]
+    pld         [src, #23]                  ; preload for next block
     ldrh        r4, [src], pstep
     uadd8       r12, r12, r12               ; flimit * 2
 
     ldrh        r5, [src, #-2]
+    pld         [src, #23]
     ldrh        r6, [src], pstep
     uadd8       r12, r12, r7                ; flimit * 2 + limit
 
     pkhbt       r7, r3, r4, lsl #16
 
     ldrh        r3, [src, #-2]
+    pld         [src, #23]
     ldrh        r4, [src], pstep
     ldr         r11, [sp, #40]              ; count (r11) for 8-in-parallel
 
     pkhbt       r8, r5, r6, lsl #16
 
     ldrh        r5, [src, #-2]
+    pld         [src, #23]
     ldrh        r6, [src], pstep
     mov         r11, r11, lsl #1            ; 4-in-parallel
 
@@ -259,19 +263,23 @@ pstep       RN  r1
 
     ; load soure data to r7, r8, r9, r10
     ldrneh      r3, [src, #-2]
+    pld         [src, #23]                  ; preload for next block
     ldrneh      r4, [src], pstep
 
     ldrneh      r5, [src, #-2]
+    pld         [src, #23]
     ldrneh      r6, [src], pstep
 
     pkhbt       r7, r3, r4, lsl #16
 
     ldrneh      r3, [src, #-2]
+    pld         [src, #23]
     ldrneh      r4, [src], pstep
 
     pkhbt       r8, r5, r6, lsl #16
 
     ldrneh      r5, [src, #-2]
+    pld         [src, #23]
     ldrneh      r6, [src], pstep
 
     bne         simple_vnext8

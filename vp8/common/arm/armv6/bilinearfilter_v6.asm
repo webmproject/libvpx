@@ -30,11 +30,11 @@
     ldr     r4, [sp, #36]                   ; width
 
     mov     r12, r3                         ; outer-loop counter
-    sub     r2, r2, r4                      ; src increment for height loop
 
-    ;;IF ARCHITECTURE=6
-    pld     [r0]
-    ;;ENDIF
+    add     r7, r2, r4                      ; preload next row
+    pld     [r0, r7]
+
+    sub     r2, r2, r4                      ; src increment for height loop
 
     ldr     r5, [r11]                       ; load up filter coefficients
 
@@ -96,9 +96,8 @@
     add     r0, r0, r2                      ; move to next input row
     subs    r12, r12, #1
 
-    ;;IF ARCHITECTURE=6
-    pld     [r0]
-    ;;ENDIF
+    add     r9, r2, r4, lsl #1              ; adding back block width
+    pld     [r0, r9]                        ; preload next row
 
     add     r11, r11, #2                    ; move over to next column
     mov     r1, r11
