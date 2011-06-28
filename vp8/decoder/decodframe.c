@@ -183,7 +183,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                               unsigned int mb_idx)
 {
     int eobtotal = 0;
-    int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
+    MB_PREDICTION_MODE mode;
+    int i;
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
@@ -195,14 +196,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
 
     /* Perform temporary clamping of the MV to be used for prediction */
-    if (do_clamp)
+    if (xd->mode_info_context->mbmi.need_to_clamp_mvs)
     {
         clamp_mvs(xd);
     }
 
-    eobtotal |= (xd->mode_info_context->mbmi.mode == B_PRED ||
-                  xd->mode_info_context->mbmi.mode == SPLITMV);
-    if (!eobtotal)
+    mode = xd->mode_info_context->mbmi.mode;
+
+    if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV)
     {
         /* Special case:  Force the loopfilter to skip when eobtotal and
          * mb_skip_coeff are zero.
@@ -221,15 +222,12 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     {
         RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv)(xd);
 
-        if (xd->mode_info_context->mbmi.mode != B_PRED)
+        if (mode != B_PRED)
         {
             RECON_INVOKE(&pbi->common.rtcd.recon,
                          build_intra_predictors_mby)(xd);
         } else {
             vp8_intra_prediction_down_copy(xd);
-
-
-
         }
     }
     else
@@ -252,7 +250,38 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #endif
 
     /* dequantization and idct */
-    if (xd->mode_info_context->mbmi.mode != B_PRED && xd->mode_info_context->mbmi.mode != SPLITMV)
+    if (mode == B_PRED)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            BLOCKD *b = &xd->block[i];
+            RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
+                          (b, b->bmi.as_mode, b->predictor);
+
+            if (xd->eobs[i] > 1)
+            {
+                DEQUANT_INVOKE(&pbi->dequant, idct_add)
+                    (b->qcoeff, b->dequant,  b->predictor,
+                    *(b->base_dst) + b->dst, 16, b->dst_stride);
+            }
+            else
+            {
+                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
+                    (b->qcoeff[0] * b->dequant[0], b->predictor,
+                    *(b->base_dst) + b->dst, 16, b->dst_stride);
+                ((int *)b->qcoeff)[0] = 0;
+            }
+        }
+
+    }
+    else if (mode == SPLITMV)
+    {
+        DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
+                        (xd->qcoeff, xd->block[0].dequant,
+                         xd->predictor, xd->dst.y_buffer,
+                         xd->dst.y_stride, xd->eobs);
+    }
+    else
     {
         BLOCKD *b = &xd->block[24];
 
@@ -281,38 +310,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                         (xd->qcoeff, xd->block[0].dequant,
                          xd->predictor, xd->dst.y_buffer,
                          xd->dst.y_stride, xd->eobs, xd->block[24].diff);
-    }
-    else if (xd->mode_info_context->mbmi.mode == B_PRED)
-    {
-        for (i = 0; i < 16; i++)
-        {
-
-            BLOCKD *b = &xd->block[i];
-            RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
-                          (b, b->bmi.as_mode, b->predictor);
-
-            if (xd->eobs[i] > 1)
-            {
-                DEQUANT_INVOKE(&pbi->dequant, idct_add)
-                    (b->qcoeff, b->dequant,  b->predictor,
-                    *(b->base_dst) + b->dst, 16, b->dst_stride);
-            }
-            else
-            {
-                IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
-                    (b->qcoeff[0] * b->dequant[0], b->predictor,
-                    *(b->base_dst) + b->dst, 16, b->dst_stride);
-                ((int *)b->qcoeff)[0] = 0;
-            }
-        }
-
-    }
-    else
-    {
-        DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
-                        (xd->qcoeff, xd->block[0].dequant,
-                         xd->predictor, xd->dst.y_buffer,
-                         xd->dst.y_stride, xd->eobs);
     }
 
     DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
