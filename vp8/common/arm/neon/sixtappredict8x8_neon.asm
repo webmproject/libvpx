@@ -15,6 +15,17 @@
     PRESERVE8
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
+
+filter8_coeff
+    DCD     0,  0,  128,    0,   0,  0,   0,  0
+    DCD     0, -6,  123,   12,  -1,  0,   0,  0
+    DCD     2, -11, 108,   36,  -8,  1,   0,  0
+    DCD     0, -9,   93,   50,  -6,  0,   0,  0
+    DCD     3, -16,  77,   77, -16,  3,   0,  0
+    DCD     0, -6,   50,   93,  -9,  0,   0,  0
+    DCD     1, -8,   36,  108, -11,  2,   0,  0
+    DCD     0, -1,   12,  123,  -6,   0,  0,  0
+
 ; r0    unsigned char  *src_ptr,
 ; r1    int  src_pixels_per_line,
 ; r2    int  xoffset,
@@ -25,7 +36,7 @@
 |vp8_sixtap_predict8x8_neon| PROC
     push            {r4-r5, lr}
 
-    ldr             r12, _filter8_coeff_
+    adr             r12, filter8_coeff
 
     ldr             r4, [sp, #12]           ;load parameters from stack
     ldr             r5, [sp, #16]           ;load parameters from stack
@@ -509,17 +520,5 @@ filt_blk2d_spo8x8_loop_neon
     ENDP
 
 ;-----------------
-
-_filter8_coeff_
-    DCD     filter8_coeff
-filter8_coeff
-    DCD     0,  0,  128,    0,   0,  0,   0,  0
-    DCD     0, -6,  123,   12,  -1,  0,   0,  0
-    DCD     2, -11, 108,   36,  -8,  1,   0,  0
-    DCD     0, -9,   93,   50,  -6,  0,   0,  0
-    DCD     3, -16,  77,   77, -16,  3,   0,  0
-    DCD     0, -6,   50,   93,  -9,  0,   0,  0
-    DCD     1, -8,   36,  108, -11,  2,   0,  0
-    DCD     0, -1,   12,  123,  -6,   0,  0,  0
 
     END
