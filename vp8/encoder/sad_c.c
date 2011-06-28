@@ -10,6 +10,8 @@
 
 
 #include <stdlib.h>
+#include "vpx_ports/config.h"
+#include "vpx/vpx_integer.h"
 
 unsigned int vp8_sad16x16_c(
     const unsigned char *src_ptr,
@@ -336,4 +338,65 @@ void vp8_sad4x4x4d_c(
     sad_array[1] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[1], ref_stride, 0x7fffffff);
     sad_array[2] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[2], ref_stride, 0x7fffffff);
     sad_array[3] = vp8_sad4x4_c(src_ptr, src_stride, ref_ptr[3], ref_stride, 0x7fffffff);
+}
+
+/* Copy 2 macroblocks to a buffer */
+void vp8_copy32xn_c(
+    unsigned char *src_ptr,
+    int  src_stride,
+    unsigned char *dst_ptr,
+    int  dst_stride,
+    int height)
+{
+    int r;
+
+    for (r = 0; r < height; r++)
+    {
+#if !(CONFIG_FAST_UNALIGNED)
+        dst_ptr[0] = src_ptr[0];
+        dst_ptr[1] = src_ptr[1];
+        dst_ptr[2] = src_ptr[2];
+        dst_ptr[3] = src_ptr[3];
+        dst_ptr[4] = src_ptr[4];
+        dst_ptr[5] = src_ptr[5];
+        dst_ptr[6] = src_ptr[6];
+        dst_ptr[7] = src_ptr[7];
+        dst_ptr[8] = src_ptr[8];
+        dst_ptr[9] = src_ptr[9];
+        dst_ptr[10] = src_ptr[10];
+        dst_ptr[11] = src_ptr[11];
+        dst_ptr[12] = src_ptr[12];
+        dst_ptr[13] = src_ptr[13];
+        dst_ptr[14] = src_ptr[14];
+        dst_ptr[15] = src_ptr[15];
+        dst_ptr[16] = src_ptr[16];
+        dst_ptr[17] = src_ptr[17];
+        dst_ptr[18] = src_ptr[18];
+        dst_ptr[19] = src_ptr[19];
+        dst_ptr[20] = src_ptr[20];
+        dst_ptr[21] = src_ptr[21];
+        dst_ptr[22] = src_ptr[22];
+        dst_ptr[23] = src_ptr[23];
+        dst_ptr[24] = src_ptr[24];
+        dst_ptr[25] = src_ptr[25];
+        dst_ptr[26] = src_ptr[26];
+        dst_ptr[27] = src_ptr[27];
+        dst_ptr[28] = src_ptr[28];
+        dst_ptr[29] = src_ptr[29];
+        dst_ptr[30] = src_ptr[30];
+        dst_ptr[31] = src_ptr[31];
+#else
+        ((uint32_t *)dst_ptr)[0] = ((uint32_t *)src_ptr)[0] ;
+        ((uint32_t *)dst_ptr)[1] = ((uint32_t *)src_ptr)[1] ;
+        ((uint32_t *)dst_ptr)[2] = ((uint32_t *)src_ptr)[2] ;
+        ((uint32_t *)dst_ptr)[3] = ((uint32_t *)src_ptr)[3] ;
+        ((uint32_t *)dst_ptr)[4] = ((uint32_t *)src_ptr)[4] ;
+        ((uint32_t *)dst_ptr)[5] = ((uint32_t *)src_ptr)[5] ;
+        ((uint32_t *)dst_ptr)[6] = ((uint32_t *)src_ptr)[6] ;
+        ((uint32_t *)dst_ptr)[7] = ((uint32_t *)src_ptr)[7] ;
+#endif
+        src_ptr += src_stride;
+        dst_ptr += dst_stride;
+
+    }
 }
