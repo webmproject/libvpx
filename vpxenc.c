@@ -1347,6 +1347,8 @@ static void update_rate_histogram(struct rate_hist          *hist,
     if(now < cfg->rc_buf_initial_sz)
         return;
 
+    then = now;
+
     /* Sum the size over the past rc_buf_sz ms */
     for(i = hist->frames; i > 0 && hist->frames - i < hist->samples; i--)
     {
@@ -1357,6 +1359,9 @@ static void update_rate_histogram(struct rate_hist          *hist,
             break;
         sum_sz += hist->sz[i_idx];
     }
+
+    if (now == then)
+        return;
 
     avg_bitrate = sum_sz * 8 * 1000 / (now - then);
     idx = avg_bitrate * (RATE_BINS/2) / (cfg->rc_target_bitrate * 1000);
