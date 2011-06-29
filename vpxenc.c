@@ -2040,10 +2040,14 @@ int main(int argc, const char **argv_)
         vpx_codec_destroy(&encoder);
 
         fclose(infile);
+        if (file_type == FILE_TYPE_Y4M)
+            y4m_input_close(&y4m);
 
         if(write_webm)
         {
             write_webm_file_footer(&ebml, hash);
+            free(ebml.cue_list);
+            ebml.cue_list = NULL;
         }
         else
         {

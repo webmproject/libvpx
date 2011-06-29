@@ -148,7 +148,9 @@ void vp8_default_coef_probs(VP8_COMMON *pc)
                 unsigned int branch_ct [vp8_coef_tokens-1] [2];
                 vp8_tree_probs_from_distribution(
                     vp8_coef_tokens, vp8_coef_encodings, vp8_coef_tree,
-                    pc->fc.coef_probs [h][i][k], branch_ct, default_coef_counts [h][i][k],
+                    pc->fc.coef_probs[h][i][k],
+                    branch_ct,
+                    vp8_default_coef_counts[h][i][k],
                     256, 1);
 
             }

@@ -83,6 +83,9 @@ typedef struct VP8Decompressor
 
     const unsigned char *Source;
     unsigned int   source_sz;
+    const unsigned char *partitions[MAX_PARTITIONS];
+    unsigned int   partition_sizes[MAX_PARTITIONS];
+    unsigned int   num_partitions;
 
 #if CONFIG_MULTITHREAD
     /* variable for threading */
@@ -137,6 +140,7 @@ typedef struct VP8Decompressor
     unsigned int mvs_corrupt_from_mb;
 #endif
     int ec_enabled;
+    int input_partition;
 
 } VP8D_COMP;
 

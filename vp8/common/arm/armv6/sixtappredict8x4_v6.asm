@@ -32,8 +32,11 @@
     beq         skip_firstpass_filter
 
 ;first-pass filter
-    ldr         r12, _filter8_coeff_
+    adr         r12, filter8_coeff
     sub         r0, r0, r1, lsl #1
+
+    add         r3, r1, #10                 ; preload next low
+    pld         [r0, r3]
 
     add         r2, r12, r2, lsl #4         ;calculate filter location
     add         r0, r0, #3                  ;adjust src only for loading convinience
@@ -110,6 +113,9 @@
 
     add         r0, r0, r1                  ; move to next input line
 
+    add         r11, r1, #18                ; preload next low. adding back block width(=8), which is subtracted earlier
+    pld         [r0, r11]
+
     bne         first_pass_hloop_v6
 
 ;second pass filter
@@ -121,7 +127,7 @@ secondpass_filter
     cmp         r3, #0
     beq         skip_secondpass_filter
 
-    ldr         r12, _filter8_coeff_
+    adr         r12, filter8_coeff
     add         lr, r12, r3, lsl #4         ;calculate filter location
 
     mov         r2, #0x00080000
@@ -245,8 +251,6 @@ skip_secondpass_hloop
 ;-----------------
 ;One word each is reserved. Label filter_coeff can be used to access the data.
 ;Data address: filter_coeff, filter_coeff+4, filter_coeff+8 ...
-_filter8_coeff_
-    DCD     filter8_coeff
 filter8_coeff
     DCD     0x00000000,     0x00000080,     0x00000000,     0x00000000
     DCD     0xfffa0000,     0x000c007b,     0x0000ffff,     0x00000000

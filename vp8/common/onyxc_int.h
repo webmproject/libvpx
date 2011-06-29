@@ -35,6 +35,8 @@ void vp8_initialize_common(void);
 
 #define NUM_YV12_BUFFERS 4
 
+#define MAX_PARTITIONS 9
+
 typedef struct frame_contexts
 {
     vp8_prob bmode_prob [VP8_BINTRAMODES-1];
