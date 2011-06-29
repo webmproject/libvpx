@@ -115,7 +115,7 @@ typedef struct
     unsigned char *active_ptr;
     MV_CONTEXT *mvc;
 
-    unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens];
+    unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
     int optimize;
     int q_index;
 

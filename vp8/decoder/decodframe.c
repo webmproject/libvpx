@@ -979,7 +979,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         for (i = 0; i < BLOCK_TYPES; i++)
             for (j = 0; j < COEF_BANDS; j++)
                 for (k = 0; k < PREV_COEF_CONTEXTS; k++)
-                    for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++)
+                    for (l = 0; l < ENTROPY_NODES; l++)
                     {
 
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;

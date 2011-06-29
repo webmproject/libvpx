@@ -16,6 +16,6 @@
 extern const unsigned int vp8_default_coef_counts[BLOCK_TYPES]
                                                  [COEF_BANDS]
                                                  [PREV_COEF_CONTEXTS]
-                                                 [vp8_coef_tokens];
+                                                 [MAX_ENTROPY_TOKENS];
 
 #endif //__DEFAULTCOEFCOUNTS_H

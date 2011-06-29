@@ -50,7 +50,7 @@ unsigned __int64 Sectionbits[500];
 
 #ifdef ENTROPY_STATS
 int intra_mode_stats[10][10][10];
-static unsigned int tree_update_hist [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1] [2];
+static unsigned int tree_update_hist [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] [2];
 extern unsigned int active_section;
 #endif
 
@@ -1133,7 +1133,7 @@ static void write_kfmodes(VP8_COMP *cpi)
 
 /* This function is used for debugging probability trees. */
 static void print_prob_tree(vp8_prob
-     coef_probs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][vp8_coef_tokens-1])
+     coef_probs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES])
 {
     /* print coef probability tree */
     int i,j,k,l;
@@ -1148,7 +1148,7 @@ static void print_prob_tree(vp8_prob
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
             {
                 fprintf(f, "      {");
-                for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++)
+                for (l = 0; l < ENTROPY_NODES; l++)
                 {
                     fprintf(f, "%3u, ",
                             (unsigned int)(coef_probs [i][j][k][l]));
@@ -1164,11 +1164,11 @@ static void print_prob_tree(vp8_prob
 }
 
 static void sum_probs_over_prev_coef_context(
-        const unsigned int probs[PREV_COEF_CONTEXTS][vp8_coef_tokens],
+        const unsigned int probs[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS],
         unsigned int* out)
 {
     int i, j;
-    for (i=0; i < vp8_coef_tokens; ++i)
+    for (i=0; i < MAX_ENTROPY_TOKENS; ++i)
     {
         for (j=0; j < PREV_COEF_CONTEXTS; ++j)
         {
@@ -1203,8 +1203,8 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
         do
         {
             int k = 0;
-            unsigned int prev_coef_count_sum[vp8_coef_tokens] = {0};
-            int prev_coef_savings[vp8_coef_tokens] = {0};
+            unsigned int prev_coef_count_sum[MAX_ENTROPY_TOKENS] = {0};
+            int prev_coef_savings[MAX_ENTROPY_TOKENS] = {0};
             /* Calculate new probabilities given the constraint that
              * they must be equal over the prev coef contexts
              */
@@ -1224,13 +1224,13 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
                 /* at every context */
 
                 /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [vp8_coef_tokens-1];
-                //unsigned int branch_ct   [vp8_coef_tokens-1] [2];
+                //vp8_prob new_p           [ENTROPY_NODES];
+                //unsigned int branch_ct   [ENTROPY_NODES] [2];
 
                 int t = 0;      /* token/prob index */
 
                 vp8_tree_probs_from_distribution(
-                    vp8_coef_tokens, vp8_coef_encodings, vp8_coef_tree,
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     cpi->frame_coef_probs[i][j][k],
                     cpi->frame_branch_ct [i][j][k],
                     prev_coef_count_sum,
@@ -1248,7 +1248,7 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
                         (cpi->common.frame_type == KEY_FRAME && newp != oldp))
                         prev_coef_savings[t] += s;
                 }
-                while (++t < vp8_coef_tokens - 1);
+                while (++t < ENTROPY_NODES);
             }
             while (++k < PREV_COEF_CONTEXTS);
             k = 0;
@@ -1263,7 +1263,7 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
                     cpi->common.frame_type == KEY_FRAME)
                     savings += prev_coef_savings[k];
             }
-            while (++k < vp8_coef_tokens - 1);
+            while (++k < ENTROPY_NODES);
         }
         while (++j < COEF_BANDS);
     }
@@ -1286,14 +1286,14 @@ static int default_coef_context_savings(VP8_COMP *cpi)
                 /* at every context */
 
                 /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [vp8_coef_tokens-1];
-                //unsigned int branch_ct   [vp8_coef_tokens-1] [2];
+                //vp8_prob new_p           [ENTROPY_NODES];
+                //unsigned int branch_ct   [ENTROPY_NODES] [2];
 
                 int t = 0;      /* token/prob index */
 
 
                 vp8_tree_probs_from_distribution(
-                    vp8_coef_tokens, vp8_coef_encodings, vp8_coef_tree,
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     cpi->frame_coef_probs [i][j][k],
                     cpi->frame_branch_ct [i][j][k],
                     cpi->coef_counts [i][j][k],
@@ -1313,7 +1313,7 @@ static int default_coef_context_savings(VP8_COMP *cpi)
                         savings += s;
                     }
                 }
-                while (++t < vp8_coef_tokens - 1);
+                while (++t < ENTROPY_NODES);
             }
             while (++k < PREV_COEF_CONTEXTS);
         }
@@ -1408,13 +1408,13 @@ static void update_coef_probs(VP8_COMP *cpi)
         do
         {
             int k = 0;
-            int prev_coef_savings[vp8_coef_tokens - 1] = {0};
+            int prev_coef_savings[ENTROPY_NODES] = {0};
             if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
             {
                 for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
                 {
                     int t;      /* token/prob index */
-                    for (t = 0; t < vp8_coef_tokens - 1; ++t)
+                    for (t = 0; t < ENTROPY_NODES; ++t)
                     {
                         const unsigned int *ct = cpi->frame_branch_ct [i][j]
                                                                       [k][t];
@@ -1435,13 +1435,13 @@ static void update_coef_probs(VP8_COMP *cpi)
                 /* at every context */
 
                 /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [vp8_coef_tokens-1];
-                //unsigned int branch_ct   [vp8_coef_tokens-1] [2];
+                //vp8_prob new_p           [ENTROPY_NODES];
+                //unsigned int branch_ct   [ENTROPY_NODES] [2];
 
                 int t = 0;      /* token/prob index */
 
                 //vp8_tree_probs_from_distribution(
-                //    vp8_coef_tokens, vp8_coef_encodings, vp8_coef_tree,
+                //    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                 //    new_p, branch_ct, (unsigned int *)cpi->coef_counts [i][j][k],
                 //    256, 1
                 //    );
@@ -1495,7 +1495,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                     }
 
                 }
-                while (++t < vp8_coef_tokens - 1);
+                while (++t < ENTROPY_NODES);
 
                 /* Accum token counts for generation of default statistics */
 #ifdef ENTROPY_STATS
@@ -1505,7 +1505,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                 {
                     context_counters [i][j][k][t] += cpi->coef_counts [i][j][k][t];
                 }
-                while (++t < vp8_coef_tokens);
+                while (++t < MAX_ENTROPY_TOKENS);
 
 #endif
 
@@ -1881,7 +1881,7 @@ void print_tree_update_probs()
     FILE *f = fopen("context.c", "a");
     int Sum;
     fprintf(f, "\n/* Update probabilities for token entropy tree. */\n\n");
-    fprintf(f, "const vp8_prob tree_update_probs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens-1] = {\n");
+    fprintf(f, "const vp8_prob tree_update_probs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {\n");
 
     for (i = 0; i < BLOCK_TYPES; i++)
     {
@@ -1895,7 +1895,7 @@ void print_tree_update_probs()
             {
                 fprintf(f, "      {");
 
-                for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++)
+                for (l = 0; l < ENTROPY_NODES; l++)
                 {
                     Sum = tree_update_hist[i][j][k][l][0] + tree_update_hist[i][j][k][l][1];
 
