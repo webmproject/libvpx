@@ -588,10 +588,10 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             /* adjust mvp to make sure it is within MV range */
             vp8_clamp_mv(&mvp,
-                         best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL);
+                         best_ref_mv.as_mv.col - (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.col + (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.row - (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.row + (MAX_FULL_PEL_VAL<<3));
         }
 
         switch (this_mode)
@@ -681,10 +681,14 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 mvp.as_int = best_ref_mv.as_int;
             }
 
-            col_min = (best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL) >>3;
-            col_max = (best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL) >>3;
-            row_min = (best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL) >>3;
-            row_max = (best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL) >>3;
+            col_min = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) - MAX_FULL_PEL_VAL)
+                                                 :((best_ref_mv.as_mv.col>>3) - MAX_FULL_PEL_VAL);
+            col_max = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) + MAX_FULL_PEL_VAL)
+                                                 :((best_ref_mv.as_mv.col>>3) + MAX_FULL_PEL_VAL);
+            row_min = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) - MAX_FULL_PEL_VAL)
+                                                 :((best_ref_mv.as_mv.row>>3) - MAX_FULL_PEL_VAL);
+            row_max = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) + MAX_FULL_PEL_VAL)
+                                                 :((best_ref_mv.as_mv.row>>3) + MAX_FULL_PEL_VAL);
 
             // Get intersection of UMV window and valid MV window to reduce # of checks in diamond search.
             if (x->mv_col_min < col_min )
