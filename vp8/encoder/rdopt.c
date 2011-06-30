@@ -1330,10 +1330,14 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
         if (bsi.segment_rd < best_rd)
         {
-            int col_min = (best_ref_mv->as_mv.col - MAX_FULL_PEL_VAL) >>3;
-            int col_max = (best_ref_mv->as_mv.col + MAX_FULL_PEL_VAL) >>3;
-            int row_min = (best_ref_mv->as_mv.row - MAX_FULL_PEL_VAL) >>3;
-            int row_max = (best_ref_mv->as_mv.row + MAX_FULL_PEL_VAL) >>3;
+            int col_min = (best_ref_mv->as_mv.col < 0)?(-((abs(best_ref_mv->as_mv.col))>>3) - MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.col>>3) - MAX_FULL_PEL_VAL);
+            int col_max = (best_ref_mv->as_mv.col < 0)?(-((abs(best_ref_mv->as_mv.col))>>3) + MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.col>>3) + MAX_FULL_PEL_VAL);
+            int row_min = (best_ref_mv->as_mv.row < 0)?(-((abs(best_ref_mv->as_mv.row))>>3) - MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.row>>3) - MAX_FULL_PEL_VAL);
+            int row_max = (best_ref_mv->as_mv.row < 0)?(-((abs(best_ref_mv->as_mv.row))>>3) + MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.row>>3) + MAX_FULL_PEL_VAL);
 
             int tmp_col_min = x->mv_col_min;
             int tmp_col_max = x->mv_col_max;
@@ -1876,10 +1880,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             /* adjust mvp to make sure it is within MV range */
             vp8_clamp_mv(&mvp,
-                         best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL);
+                         best_ref_mv.as_mv.col - (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.col + (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.row - (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.row + (MAX_FULL_PEL_VAL<<3));
         }
 
         // Check to see if the testing frequency for this mode is at its max
@@ -2011,10 +2015,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             int sadpb = x->sadperbit16;
 
-            int col_min = (best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL) >>3;
-            int col_max = (best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL) >>3;
-            int row_min = (best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL) >>3;
-            int row_max = (best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL) >>3;
+            int col_min = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) - MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.col>>3) - MAX_FULL_PEL_VAL);
+            int col_max = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) + MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.col>>3) + MAX_FULL_PEL_VAL);
+            int row_min = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) - MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.row>>3) - MAX_FULL_PEL_VAL);
+            int row_max = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) + MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.row>>3) + MAX_FULL_PEL_VAL);
 
             int tmp_col_min = x->mv_col_min;
             int tmp_col_max = x->mv_col_max;
