@@ -31,7 +31,7 @@
 ;result of the multiplication that is needed in IDCT.
 
 |vp8_short_idct4x4llm_neon| PROC
-    ldr             r12, _idct_coeff_
+    adr             r12, idct_coeff
     vld1.16         {q1, q2}, [r0]
     vld1.16         {d0}, [r12]
 
@@ -114,8 +114,6 @@
 
 ;-----------------
 
-_idct_coeff_
-    DCD     idct_coeff
 idct_coeff
     DCD     0x4e7b4e7b, 0x8a8c8a8c
 

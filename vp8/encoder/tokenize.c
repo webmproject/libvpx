@@ -21,7 +21,7 @@
    compressions, then generating context.c = initial stats. */
 
 #ifdef ENTROPY_STATS
-_int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens];
+_int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #endif
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 void vp8_fix_contexts(MACROBLOCKD *x);
@@ -282,9 +282,9 @@ void print_context_counters()
 
     fprintf(f, "\n/* *** GENERATED FILE: DO NOT EDIT *** */\n\n");
 
-    fprintf(f, "int Contexts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens];\n\n");
+    fprintf(f, "int Contexts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];\n\n");
 
-    fprintf(f, "const int default_contexts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [vp8_coef_tokens] = {");
+    fprintf(f, "const int default_contexts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
 
 # define Comma( X) (X? ",":"")
 
@@ -317,7 +317,7 @@ void print_context_counters()
                     fprintf(f, "%s %d", Comma(t), y);
 
                 }
-                while (++t < vp8_coef_tokens);
+                while (++t < MAX_ENTROPY_TOKENS);
 
                 fprintf(f, "}");
             }

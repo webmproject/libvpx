@@ -1306,11 +1306,16 @@ struct rate_hist
 
 
 static void init_rate_histogram(struct rate_hist          *hist,
-                                const vpx_codec_enc_cfg_t *cfg)
+                                const vpx_codec_enc_cfg_t *cfg,
+                                const vpx_rational_t      *fps)
 {
     int i;
 
-    hist->samples = cfg->rc_buf_sz * 60 / 1000; // max 60 fps
+    /* Determine the number of samples in the buffer. Use the file's framerate
+     * to determine the number of frames in rc_buf_sz milliseconds, with an
+     * adjustment (5/4) to account for alt-refs
+     */
+    hist->samples = cfg->rc_buf_sz * 5 / 4 * fps->num / fps->den / 1000;
     hist->pts = calloc(hist->samples, sizeof(*hist->pts));
     hist->sz = calloc(hist->samples, sizeof(*hist->sz));
     for(i=0; i<RATE_BINS; i++)
@@ -1346,8 +1351,10 @@ static void update_rate_histogram(struct rate_hist          *hist,
     if(now < cfg->rc_buf_initial_sz)
         return;
 
+    then = now;
+
     /* Sum the size over the past rc_buf_sz ms */
-    for(i = hist->frames; i > 0; i--)
+    for(i = hist->frames; i > 0 && hist->frames - i < hist->samples; i--)
     {
         int i_idx = (i-1) % hist->samples;
 
@@ -1356,6 +1363,9 @@ static void update_rate_histogram(struct rate_hist          *hist,
             break;
         sum_sz += hist->sz[i_idx];
     }
+
+    if (now == then)
+        return;
 
     avg_bitrate = sum_sz * 8 * 1000 / (now - then);
     idx = avg_bitrate * (RATE_BINS/2) / (cfg->rc_target_bitrate * 1000);
@@ -1707,8 +1717,6 @@ int main(int argc, const char **argv_)
 
     memset(&stats, 0, sizeof(stats));
 
-    init_rate_histogram(&rate_hist, &cfg);
-
     for (pass = one_pass_only ? one_pass_only - 1 : 0; pass < arg_passes; pass++)
     {
         int frames_in = 0, frames_out = 0;
@@ -1835,6 +1843,8 @@ int main(int argc, const char **argv_)
             else
                 vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
                               cfg.g_w, cfg.g_h, 1);
+
+            init_rate_histogram(&rate_hist, &cfg, &arg_framerate);
         }
 
         outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb")
@@ -2048,10 +2058,14 @@ int main(int argc, const char **argv_)
         vpx_codec_destroy(&encoder);
 
         fclose(infile);
+        if (file_type == FILE_TYPE_Y4M)
+            y4m_input_close(&y4m);
 
         if(write_webm)
         {
             write_webm_file_footer(&ebml, hash);
+            free(ebml.cue_list);
+            ebml.cue_list = NULL;
         }
         else
         {

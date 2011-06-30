@@ -108,6 +108,8 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     pbi->ec_enabled = 0;
 #endif
 
+    pbi->input_partition = oxcf->input_partition;
+
     return (VP8D_PTR) pbi;
 }
 
@@ -315,68 +317,91 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->common.error.error_code = VPX_CODEC_OK;
 
-    if (size == 0)
+    if (pbi->input_partition && !(source == NULL && size == 0))
     {
-       /* This is used to signal that we are missing frames.
-        * We do not know if the missing frame(s) was supposed to update
-        * any of the reference buffers, but we act conservative and
-        * mark only the last buffer as corrupted.
-        */
-        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
-
-        /* If error concealment is disabled we won't signal missing frames to
-         * the decoder.
+        /* Store a pointer to this partition and return. We haven't
+         * received the complete frame yet, so we will wait with decoding.
          */
-        if (!pbi->ec_enabled)
+        pbi->partitions[pbi->num_partitions] = source;
+        pbi->partition_sizes[pbi->num_partitions] = size;
+        pbi->source_sz += size;
+        pbi->num_partitions++;
+        if (pbi->num_partitions > (1<<pbi->common.multi_token_partition) + 1)
+            pbi->common.multi_token_partition++;
+        if (pbi->common.multi_token_partition > EIGHT_PARTITION)
         {
-            /* Signal that we have no frame to show. */
-            cm->show_frame = 0;
-
-            /* Nothing more to do. */
-            return 0;
+            pbi->common.error.error_code = VPX_CODEC_UNSUP_BITSTREAM;
+            pbi->common.error.setjmp = 0;
+            return -1;
         }
+        return 0;
     }
-
-
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
-#endif
+    else
     {
-        vp8_push_neon(dx_store_reg);
-    }
-#endif
+        if (!pbi->input_partition)
+        {
+            pbi->Source = source;
+            pbi->source_sz = size;
+        }
 
-    cm->new_fb_idx = get_free_fb (cm);
+        if (pbi->source_sz == 0)
+        {
+           /* This is used to signal that we are missing frames.
+            * We do not know if the missing frame(s) was supposed to update
+            * any of the reference buffers, but we act conservative and
+            * mark only the last buffer as corrupted.
+            */
+            cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
 
-    if (setjmp(pbi->common.error.jmp))
-    {
+            /* If error concealment is disabled we won't signal missing frames to
+             * the decoder.
+             */
+            if (!pbi->ec_enabled)
+            {
+                /* Signal that we have no frame to show. */
+                cm->show_frame = 0;
+
+                /* Nothing more to do. */
+                return 0;
+            }
+        }
+
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
         if (cm->rtcd.flags & HAS_NEON)
 #endif
         {
-            vp8_pop_neon(dx_store_reg);
+            vp8_push_neon(dx_store_reg);
         }
 #endif
-        pbi->common.error.setjmp = 0;
 
-       /* We do not know if the missing frame(s) was supposed to update
-        * any of the reference buffers, but we act conservative and
-        * mark only the last buffer as corrupted.
-        */
-        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+        cm->new_fb_idx = get_free_fb (cm);
 
-        if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
-          cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
-        return -1;
+        if (setjmp(pbi->common.error.jmp))
+        {
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+            if (cm->rtcd.flags & HAS_NEON)
+#endif
+            {
+                vp8_pop_neon(dx_store_reg);
+            }
+#endif
+            pbi->common.error.setjmp = 0;
+
+           /* We do not know if the missing frame(s) was supposed to update
+            * any of the reference buffers, but we act conservative and
+            * mark only the last buffer as corrupted.
+            */
+            cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+
+            if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
+              cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+            return -1;
+        }
+
+        pbi->common.error.setjmp = 1;
     }
-
-    pbi->common.error.setjmp = 1;
-
-    /*cm->current_video_frame++;*/
-    pbi->Source = source;
-    pbi->source_sz = size;
 
     retcode = vp8_decode_frame(pbi);
 
@@ -478,6 +503,10 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->ready_for_new_data = 0;
     pbi->last_time_stamp = time_stamp;
+    pbi->num_partitions = 0;
+    if (pbi->input_partition)
+        pbi->common.multi_token_partition = 0;
+    pbi->source_sz = 0;
 
 #if 0
     {

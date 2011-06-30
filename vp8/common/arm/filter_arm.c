@@ -25,6 +25,28 @@ extern void vp8_filter_block2d_first_pass_armv6
     const short *vp8_filter
 );
 
+// 8x8
+extern void vp8_filter_block2d_first_pass_8x8_armv6
+(
+    unsigned char *src_ptr,
+    short         *output_ptr,
+    unsigned int src_pixels_per_line,
+    unsigned int output_width,
+    unsigned int output_height,
+    const short *vp8_filter
+);
+
+// 16x16
+extern void vp8_filter_block2d_first_pass_16x16_armv6
+(
+    unsigned char *src_ptr,
+    short         *output_ptr,
+    unsigned int src_pixels_per_line,
+    unsigned int output_width,
+    unsigned int output_height,
+    const short *vp8_filter
+);
+
 extern void vp8_filter_block2d_second_pass_armv6
 (
     short         *src_ptr,
@@ -143,12 +165,12 @@ void vp8_sixtap_predict8x8_armv6
     {
         if (yoffset & 0x1)
         {
-            vp8_filter_block2d_first_pass_armv6(src_ptr - src_pixels_per_line, FData + 1, src_pixels_per_line, 8, 11, HFilter);
+            vp8_filter_block2d_first_pass_8x8_armv6(src_ptr - src_pixels_per_line, FData + 1, src_pixels_per_line, 8, 11, HFilter);
             vp8_filter4_block2d_second_pass_armv6(FData + 2, dst_ptr, dst_pitch, 8, VFilter);
         }
         else
         {
-            vp8_filter_block2d_first_pass_armv6(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 8, 13, HFilter);
+            vp8_filter_block2d_first_pass_8x8_armv6(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 8, 13, HFilter);
             vp8_filter_block2d_second_pass_armv6(FData + 2, dst_ptr, dst_pitch, 8, VFilter);
         }
     }
@@ -185,12 +207,12 @@ void vp8_sixtap_predict16x16_armv6
     {
         if (yoffset & 0x1)
         {
-            vp8_filter_block2d_first_pass_armv6(src_ptr - src_pixels_per_line, FData + 1, src_pixels_per_line, 16, 19, HFilter);
+            vp8_filter_block2d_first_pass_16x16_armv6(src_ptr - src_pixels_per_line, FData + 1, src_pixels_per_line, 16, 19, HFilter);
             vp8_filter4_block2d_second_pass_armv6(FData + 2, dst_ptr, dst_pitch, 16, VFilter);
         }
         else
         {
-            vp8_filter_block2d_first_pass_armv6(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 16, 21, HFilter);
+            vp8_filter_block2d_first_pass_16x16_armv6(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 16, 21, HFilter);
             vp8_filter_block2d_second_pass_armv6(FData + 2, dst_ptr, dst_pitch, 16, VFilter);
         }
     }

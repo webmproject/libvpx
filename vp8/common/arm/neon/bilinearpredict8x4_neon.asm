@@ -25,7 +25,7 @@
 |vp8_bilinear_predict8x4_neon| PROC
     push            {r4, lr}
 
-    ldr             r12, _bifilter8x4_coeff_
+    adr             r12, bifilter8x4_coeff
     ldr             r4, [sp, #8]            ;load parameters from stack
     ldr             lr, [sp, #12]           ;load parameters from stack
 
@@ -129,8 +129,6 @@ skip_secondpass_filter
 
 ;-----------------
 
-_bifilter8x4_coeff_
-    DCD     bifilter8x4_coeff
 bifilter8x4_coeff
     DCD     128, 0, 112, 16, 96, 32, 80, 48, 64, 64, 48, 80, 32, 96, 16, 112
 
