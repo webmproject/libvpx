@@ -292,6 +292,9 @@ static void build_activity_map( VP8_COMP *cpi )
             xd->left_available = (mb_col != 0);
             recon_yoffset += 16;
 #endif
+            //Copy current mb to a buffer
+            RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+
             // measure activity
             mb_activity = mb_activity_measure( cpi, x, mb_row, mb_col );
 
@@ -431,6 +434,9 @@ void encode_mb_row(VP8_COMP *cpi,
 
         x->rddiv = cpi->RDDIV;
         x->rdmult = cpi->RDMULT;
+
+        //Copy current mb to a buffer
+        RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
 #if CONFIG_MULTITHREAD
         if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
@@ -1015,14 +1021,18 @@ void vp8_build_block_offsets(MACROBLOCK *x)
     vp8_build_block_doffsets(&x->e_mbd);
 
     // y blocks
+    x->thismb_ptr = &x->thismb[0];
     for (br = 0; br < 4; br++)
     {
         for (bc = 0; bc < 4; bc++)
         {
             BLOCK *this_block = &x->block[block];
-            this_block->base_src = &x->src.y_buffer;
-            this_block->src_stride = x->src.y_stride;
-            this_block->src = 4 * br * this_block->src_stride + 4 * bc;
+            //this_block->base_src = &x->src.y_buffer;
+            //this_block->src_stride = x->src.y_stride;
+            //this_block->src = 4 * br * this_block->src_stride + 4 * bc;
+            this_block->base_src = &x->thismb_ptr;
+            this_block->src_stride = 16;
+            this_block->src = 4 * br * 16 + 4 * bc;
             ++block;
         }
     }
