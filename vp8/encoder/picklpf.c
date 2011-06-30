@@ -141,12 +141,10 @@ static int get_max_filter_level(VP8_COMP *cpi, int base_qindex)
     // jbb chg: 20100118 - not so any more with this overquant stuff allow high values
     // with lots of intra coming in.
     int max_filter_level = MAX_LOOP_FILTER ;//* 3 / 4;
+    (void)base_qindex;
 
     if (cpi->twopass.section_intra_rating > 8)
         max_filter_level = MAX_LOOP_FILTER * 3 / 4;
-
-    (void) cpi;
-    (void) base_qindex;
 
     return max_filter_level;
 }
@@ -157,8 +155,8 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     int best_err = 0;
     int filt_err = 0;
-    int min_filter_level = 0;
-    int max_filter_level = MAX_LOOP_FILTER * 3 / 4;   // PGW August 2006: Highest filter values almost always a bad idea
+    int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
+    int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
     int filt_val;
     int best_filt_val = cm->filter_level;
 
@@ -170,10 +168,6 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         cm->sharpness_level = 0;
     else
         cm->sharpness_level = cpi->oxcf.Sharpness;
-
-    // Enforce a minimum filter level based upon Q
-    min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
-    max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
 
     // Start the search at the previous frame filter level unless it is now out of range.
     if (cm->filter_level < min_filter_level)
@@ -294,8 +288,8 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     int best_err = 0;
     int filt_err = 0;
-    int min_filter_level;
-    int max_filter_level;
+    int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
+    int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
 
     int filter_step;
     int filt_high = 0;
@@ -328,10 +322,6 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         cm->sharpness_level = 0;
     else
         cm->sharpness_level = cpi->oxcf.Sharpness;
-
-    // Enforce a minimum filter level based upon Q
-    min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
-    max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
 
     // Start the search at the previous frame filter level unless it is now out of range.
     filt_mid = cm->filter_level;
