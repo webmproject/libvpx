@@ -286,8 +286,8 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     bestmv->as_mv.row = br << 1;
     bestmv->as_mv.col = bc << 1;
 
-    if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > MAX_FULL_PEL_VAL) ||
-        (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > MAX_FULL_PEL_VAL))
+    if ((abs(bestmv->as_mv.col - ref_mv->as_mv.col) > (MAX_FULL_PEL_VAL<<3)) ||
+        (abs(bestmv->as_mv.row - ref_mv->as_mv.row) > (MAX_FULL_PEL_VAL<<3)))
         return INT_MAX;
 
     return besterr;
