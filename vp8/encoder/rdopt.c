@@ -604,8 +604,8 @@ static void macro_block_yrd( MACROBLOCK *mb,
     BLOCK *beptr;
     int d;
 
-    ENCODEMB_INVOKE(rtcd, submby)( mb->src_diff, mb->src.y_buffer,
-                                   mb->e_mbd.predictor, mb->src.y_stride );
+    ENCODEMB_INVOKE(rtcd, submby)( mb->src_diff, *(mb->block[0].base_src),
+                                   mb->e_mbd.predictor, mb->block[0].src_stride );
 
     // Fdct and building the 2nd order block
     for (beptr = mb->block; beptr < mb->block + 16; beptr += 2)
@@ -1397,10 +1397,14 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
 
         if (bsi.segment_rd < best_rd)
         {
-            int col_min = (best_ref_mv->as_mv.col - MAX_FULL_PEL_VAL) >>3;
-            int col_max = (best_ref_mv->as_mv.col + MAX_FULL_PEL_VAL) >>3;
-            int row_min = (best_ref_mv->as_mv.row - MAX_FULL_PEL_VAL) >>3;
-            int row_max = (best_ref_mv->as_mv.row + MAX_FULL_PEL_VAL) >>3;
+            int col_min = (best_ref_mv->as_mv.col < 0)?(-((abs(best_ref_mv->as_mv.col))>>3) - MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.col>>3) - MAX_FULL_PEL_VAL);
+            int col_max = (best_ref_mv->as_mv.col < 0)?(-((abs(best_ref_mv->as_mv.col))>>3) + MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.col>>3) + MAX_FULL_PEL_VAL);
+            int row_min = (best_ref_mv->as_mv.row < 0)?(-((abs(best_ref_mv->as_mv.row))>>3) - MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.row>>3) - MAX_FULL_PEL_VAL);
+            int row_max = (best_ref_mv->as_mv.row < 0)?(-((abs(best_ref_mv->as_mv.row))>>3) + MAX_FULL_PEL_VAL)
+                                                      :((best_ref_mv->as_mv.row>>3) + MAX_FULL_PEL_VAL);
 
             int tmp_col_min = x->mv_col_min;
             int tmp_col_max = x->mv_col_max;
@@ -1700,6 +1704,8 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
 {
 
     int near_sad[8] = {0}; // 0-cf above, 1-cf left, 2-cf aboveleft, 3-lf current, 4-lf above, 5-lf left, 6-lf right, 7-lf below
+    BLOCK *b = &x->block[0];
+    unsigned char *src_y_ptr = *(b->base_src);
 
     //calculate sad for current frame 3 nearby MBs.
     if( xd->mb_to_top_edge==0 && xd->mb_to_left_edge ==0)
@@ -1708,16 +1714,16 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }else if(xd->mb_to_top_edge==0)
     {   //only has left MB for sad calculation.
         near_sad[0] = near_sad[2] = INT_MAX;
-        near_sad[1] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, xd->dst.y_buffer - 16,xd->dst.y_stride, 0x7fffffff);
+        near_sad[1] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, xd->dst.y_buffer - 16,xd->dst.y_stride, 0x7fffffff);
     }else if(xd->mb_to_left_edge ==0)
     {   //only has left MB for sad calculation.
         near_sad[1] = near_sad[2] = INT_MAX;
-        near_sad[0] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, xd->dst.y_buffer - xd->dst.y_stride *16,xd->dst.y_stride, 0x7fffffff);
+        near_sad[0] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, xd->dst.y_buffer - xd->dst.y_stride *16,xd->dst.y_stride, 0x7fffffff);
     }else
     {
-        near_sad[0] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, xd->dst.y_buffer - xd->dst.y_stride *16,xd->dst.y_stride, 0x7fffffff);
-        near_sad[1] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, xd->dst.y_buffer - 16,xd->dst.y_stride, 0x7fffffff);
-        near_sad[2] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, xd->dst.y_buffer - xd->dst.y_stride *16 -16,xd->dst.y_stride, 0x7fffffff);
+        near_sad[0] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, xd->dst.y_buffer - xd->dst.y_stride *16,xd->dst.y_stride, 0x7fffffff);
+        near_sad[1] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, xd->dst.y_buffer - 16,xd->dst.y_stride, 0x7fffffff);
+        near_sad[2] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, xd->dst.y_buffer - xd->dst.y_stride *16 -16,xd->dst.y_stride, 0x7fffffff);
     }
 
     if(cpi->common.last_frame_type != KEY_FRAME)
@@ -1732,14 +1738,14 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
         if(xd->mb_to_bottom_edge==0) near_sad[7] = INT_MAX;
 
         if(near_sad[4] != INT_MAX)
-            near_sad[4] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer - pre_y_stride *16, pre_y_stride, 0x7fffffff);
+            near_sad[4] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, pre_y_buffer - pre_y_stride *16, pre_y_stride, 0x7fffffff);
         if(near_sad[5] != INT_MAX)
-            near_sad[5] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer - 16, pre_y_stride, 0x7fffffff);
-        near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer, pre_y_stride, 0x7fffffff);
+            near_sad[5] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, pre_y_buffer - 16, pre_y_stride, 0x7fffffff);
+        near_sad[3] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, pre_y_buffer, pre_y_stride, 0x7fffffff);
         if(near_sad[6] != INT_MAX)
-            near_sad[6] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer + 16, pre_y_stride, 0x7fffffff);
+            near_sad[6] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, pre_y_buffer + 16, pre_y_stride, 0x7fffffff);
         if(near_sad[7] != INT_MAX)
-            near_sad[7] = cpi->fn_ptr[BLOCK_16X16].sdf(x->src.y_buffer, x->src.y_stride, pre_y_buffer + pre_y_stride *16, pre_y_stride, 0x7fffffff);
+            near_sad[7] = cpi->fn_ptr[BLOCK_16X16].sdf(src_y_ptr, b->src_stride, pre_y_buffer + pre_y_stride *16, pre_y_stride, 0x7fffffff);
     }
 
     if(cpi->common.last_frame_type != KEY_FRAME)
@@ -1943,10 +1949,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             /* adjust mvp to make sure it is within MV range */
             vp8_clamp_mv(&mvp,
-                         best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL,
-                         best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL);
+                         best_ref_mv.as_mv.col - (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.col + (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.row - (MAX_FULL_PEL_VAL<<3),
+                         best_ref_mv.as_mv.row + (MAX_FULL_PEL_VAL<<3));
         }
 
         // Check to see if the testing frequency for this mode is at its max
@@ -2078,10 +2084,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             int sadpb = x->sadperbit16;
 
-            int col_min = (best_ref_mv.as_mv.col - MAX_FULL_PEL_VAL) >>3;
-            int col_max = (best_ref_mv.as_mv.col + MAX_FULL_PEL_VAL) >>3;
-            int row_min = (best_ref_mv.as_mv.row - MAX_FULL_PEL_VAL) >>3;
-            int row_max = (best_ref_mv.as_mv.row + MAX_FULL_PEL_VAL) >>3;
+            int col_min = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) - MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.col>>3) - MAX_FULL_PEL_VAL);
+            int col_max = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) + MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.col>>3) + MAX_FULL_PEL_VAL);
+            int row_min = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) - MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.row>>3) - MAX_FULL_PEL_VAL);
+            int row_max = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) + MAX_FULL_PEL_VAL)
+                                                     :((best_ref_mv.as_mv.row>>3) + MAX_FULL_PEL_VAL);
 
             int tmp_col_min = x->mv_col_min;
             int tmp_col_max = x->mv_col_max;
@@ -2232,7 +2242,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                     threshold = x->encode_breakout;
 
                 var = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
-                        (x->src.y_buffer, x->src.y_stride,
+                        (*(b->base_src), b->src_stride,
                         x->e_mbd.predictor, 16, &sse);
 
                 if (sse < threshold)

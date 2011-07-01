@@ -22,7 +22,7 @@ extern void accum_mv_refs(MB_PREDICTION_MODE, const int near_mv_ref_cts[4]);
 
 
 #define MAX_MVSEARCH_STEPS 8                                    // The maximum number of steps in a step search given the largest allowed initial step
-#define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS+3)) - 8)    // Max full pel mv specified in 1/8 pel units
+#define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)      // Max full pel mv specified in 1 pel units
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))            // Maximum size of the first step in full pel units
 
 extern void print_mode_context(void);
