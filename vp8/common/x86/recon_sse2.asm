@@ -593,7 +593,10 @@ sym(vp8_intra_pred_uv_ho_%1):
     push        rsi
     push        rdi
 %ifidn %1, ssse3
+%ifndef GET_GOT_SAVE_ARG
     push        rbx
+%endif
+    GET_GOT     rbx
 %endif
     ; end prolog
 
@@ -606,9 +609,9 @@ sym(vp8_intra_pred_uv_ho_%1):
     mov         rdi,        arg(0) ;dst;
     movsxd      rcx,        dword ptr arg(1) ;dst_stride
 %ifidn %1, ssse3
-    lea         rbx,        [rax*3]
     lea         rdx,        [rcx*3]
     movdqa      xmm2,       [GLOBAL(dc_00001111)]
+    lea         rbx,        [rax*3]
 %endif
     dec         rsi
 %ifidn %1, mmx2
@@ -656,7 +659,10 @@ vp8_intra_pred_uv_ho_%1_loop:
 
     ; begin epilog
 %ifidn %1, ssse3
+    RESTORE_GOT
+%ifndef GET_GOT_SAVE_ARG
     pop         rbx
+%endif
 %endif
     pop         rdi
     pop         rsi
