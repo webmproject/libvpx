@@ -834,7 +834,7 @@ int vp8_hex_search
     unsigned char *what = (*(b->base_src) + b->src);
     int what_stride = b->src_stride;
     int in_what_stride = d->pre_stride;
-    int br = ref_mv->as_mv.row >> 3, bc = ref_mv->as_mv.col >> 3;
+    int br = ref_mv->as_mv.row, bc = ref_mv->as_mv.col;
     int_mv this_mv;
     unsigned int bestsad = 0x7fffffff;
     unsigned int thissad;
@@ -1011,8 +1011,8 @@ int vp8_diamond_search_sad
     int best_site = 0;
     int last_site = 0;
 
-    int ref_row = ref_mv->as_mv.row >> 3;
-    int ref_col = ref_mv->as_mv.col >> 3;
+    int ref_row = ref_mv->as_mv.row;
+    int ref_col = ref_mv->as_mv.col;
     int this_row_offset;
     int this_col_offset;
     search_site *ss;
@@ -1130,8 +1130,8 @@ int vp8_diamond_search_sadx4
     int best_site = 0;
     int last_site = 0;
 
-    int ref_row = ref_mv->as_mv.row >> 3;
-    int ref_col = ref_mv->as_mv.col >> 3;
+    int ref_row = ref_mv->as_mv.row;
+    int ref_col = ref_mv->as_mv.col;
     int this_row_offset;
     int this_col_offset;
     search_site *ss;

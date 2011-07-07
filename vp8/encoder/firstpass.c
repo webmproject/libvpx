@@ -431,6 +431,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
     int num00;
 
     int_mv tmp_mv;
+    int_mv ref_mv_full;
 
     int tmp_err;
     int step_param = 3;                                       //3;          // Dont search over full range for first pass
@@ -447,7 +448,9 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
 
     // Initial step/diamond search centred on best mv
     tmp_mv.as_int = 0;
-    tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv, step_param,
+    ref_mv_full.as_mv.col = ref_mv->as_mv.col>>3;
+    ref_mv_full.as_mv.row = ref_mv->as_mv.row>>3;
+    tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv, step_param,
                                       x->sadperbit16, &num00, &v_fn_ptr,
                                       x->mvcost, ref_mv);
     if ( tmp_err < INT_MAX-new_mv_mode_penalty )
@@ -472,7 +475,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
             num00--;
         else
         {
-            tmp_err = cpi->diamond_search_sad(x, b, d, ref_mv, &tmp_mv,
+            tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv,
                                               step_param + n, x->sadperbit16,
                                               &num00, &v_fn_ptr, x->mvcost,
                                               ref_mv);
