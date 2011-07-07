@@ -4590,6 +4590,20 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
 }
 
 
+static int frame_is_reference(const VP8_COMP *cpi)
+{
+    const VP8_COMMON *cm = &cpi->common;
+    const MACROBLOCKD *xd = &cpi->mb.e_mbd;
+
+    return cm->frame_type == KEY_FRAME || cm->refresh_last_frame
+           || cm->refresh_golden_frame || cm->refresh_alt_ref_frame
+           || cm->copy_buffer_to_gf || cm->copy_buffer_to_arf
+           || cm->refresh_entropy_probs
+           || xd->mode_ref_lf_delta_update
+           || xd->update_mb_segmentation_map || xd->update_mb_segmentation_data;
+}
+
+
 int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, INT64 *time_stamp, INT64 *time_end, int flush)
 {
 #if HAVE_ARMV7
@@ -4846,6 +4860,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     // if its a dropped frame honor the requests on subsequent frames
     if (*size > 0)
     {
+        cpi->droppable = !frame_is_reference(cpi);
 
         // return to normal state
         cm->refresh_entropy_probs = 1;

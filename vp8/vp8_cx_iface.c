@@ -798,6 +798,9 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                     pkt.data.frame.duration = 0;
                 }
 
+                if (cpi->droppable)
+                    pkt.data.frame.flags |= VPX_FRAME_IS_DROPPABLE;
+
                 if (cpi->output_partition)
                 {
                     int i;
