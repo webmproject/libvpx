@@ -615,6 +615,7 @@ typedef struct VP8_COMP
 #if CONFIG_REALTIME_ONLY
     int force_next_frame_intra; /* force next frame to intra when kf_auto says so */
 #endif
+    int droppable;
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);
