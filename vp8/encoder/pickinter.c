@@ -585,13 +585,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             vp8_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
                         x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
-
-            /* adjust mvp to make sure it is within MV range */
-            vp8_clamp_mv(&mvp,
-                         best_ref_mv.as_mv.col - (MAX_FULL_PEL_VAL<<3),
-                         best_ref_mv.as_mv.col + (MAX_FULL_PEL_VAL<<3),
-                         best_ref_mv.as_mv.row - (MAX_FULL_PEL_VAL<<3),
-                         best_ref_mv.as_mv.row + (MAX_FULL_PEL_VAL<<3));
         }
 
         switch (this_mode)
@@ -654,11 +647,12 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             int further_steps;
             int n = 0;
             int sadpb = x->sadperbit16;
+            int_mv mvp_full;
 
-            int col_min;
-            int col_max;
-            int row_min;
-            int row_max;
+            int col_min = (best_ref_mv.as_mv.col>>3) - MAX_FULL_PEL_VAL + ((best_ref_mv.as_mv.col & 7)?1:0);
+            int row_min = (best_ref_mv.as_mv.row>>3) - MAX_FULL_PEL_VAL + ((best_ref_mv.as_mv.row & 7)?1:0);
+            int col_max = (best_ref_mv.as_mv.col>>3) + MAX_FULL_PEL_VAL;
+            int row_max = (best_ref_mv.as_mv.row>>3) + MAX_FULL_PEL_VAL;
 
             int tmp_col_min = x->mv_col_min;
             int tmp_col_max = x->mv_col_max;
@@ -676,19 +670,18 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 //adjust search range according to sr from mv prediction
                 if(sr > step_param)
                     step_param = sr;
+
+                mvp_full.as_mv.col = mvp.as_mv.col>>3;
+                mvp_full.as_mv.row = mvp.as_mv.row>>3;
+
+                /* adjust mvp to make sure it is within MV range */
+                vp8_clamp_mv(&mvp_full, col_min, col_max, row_min, row_max);
             }else
             {
                 mvp.as_int = best_ref_mv.as_int;
+                mvp_full.as_mv.col = best_ref_mv.as_mv.col>>3;
+                mvp_full.as_mv.row = best_ref_mv.as_mv.row>>3;
             }
-
-            col_min = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) - MAX_FULL_PEL_VAL)
-                                                 :((best_ref_mv.as_mv.col>>3) - MAX_FULL_PEL_VAL);
-            col_max = (best_ref_mv.as_mv.col < 0)?(-((abs(best_ref_mv.as_mv.col))>>3) + MAX_FULL_PEL_VAL)
-                                                 :((best_ref_mv.as_mv.col>>3) + MAX_FULL_PEL_VAL);
-            row_min = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) - MAX_FULL_PEL_VAL)
-                                                 :((best_ref_mv.as_mv.row>>3) - MAX_FULL_PEL_VAL);
-            row_max = (best_ref_mv.as_mv.row < 0)?(-((abs(best_ref_mv.as_mv.row))>>3) + MAX_FULL_PEL_VAL)
-                                                 :((best_ref_mv.as_mv.row>>3) + MAX_FULL_PEL_VAL);
 
             // Get intersection of UMV window and valid MV window to reduce # of checks in diamond search.
             if (x->mv_col_min < col_min )
@@ -704,14 +697,14 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             if (cpi->sf.search_method == HEX)
             {
-                bestsme = vp8_hex_search(x, b, d, &mvp, &d->bmi.mv, step_param,
+                bestsme = vp8_hex_search(x, b, d, &mvp_full, &d->bmi.mv, step_param,
                                       sadpb, &cpi->fn_ptr[BLOCK_16X16],
                                       x->mvsadcost, x->mvcost, &best_ref_mv);
                 mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
             }
             else
             {
-                bestsme = cpi->diamond_search_sad(x, b, d, &mvp, &d->bmi.mv,
+                bestsme = cpi->diamond_search_sad(x, b, d, &mvp_full, &d->bmi.mv,
                                       step_param, sadpb, &num00,
                                       &cpi->fn_ptr[BLOCK_16X16],
                                       x->mvcost, &best_ref_mv);
@@ -733,7 +726,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                     else
                     {
                         thissme =
-                        cpi->diamond_search_sad(x, b, d, &mvp,
+                        cpi->diamond_search_sad(x, b, d, &mvp_full,
                                                 &d->bmi.mv,
                                                 step_param + n,
                                                 sadpb, &num00,
