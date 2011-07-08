@@ -42,9 +42,7 @@ extern unsigned int cnt_pm;
 extern const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES];
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 
-
 extern unsigned int (*vp8_get4x4sse_cs)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
-extern int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x, MV *best_ref_mv, int best_rd, int *, int *, int *, int, int *mvcost[2], int, int fullpixel);
 extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
 
 
@@ -575,18 +573,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 continue;
         }
 
-        if(cpi->sf.improved_mv_pred && x->e_mbd.mode_info_context->mbmi.mode == NEWMV)
-        {
-            if(!saddone)
-            {
-                vp8_cal_sad(cpi,xd,x, recon_yoffset ,&near_sadidx[0] );
-                saddone = 1;
-            }
-
-            vp8_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
-                        x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
-        }
-
         switch (this_mode)
         {
         case B_PRED:
@@ -666,6 +652,15 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             if(cpi->sf.improved_mv_pred)
             {
+                if(!saddone)
+                {
+                    vp8_cal_sad(cpi,xd,x, recon_yoffset ,&near_sadidx[0] );
+                    saddone = 1;
+                }
+
+                vp8_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
+                            x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
+
                 sr += speed_adjust;
                 //adjust search range according to sr from mv prediction
                 if(sr > step_param)
