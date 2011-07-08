@@ -22,12 +22,15 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
     int flags = cpi->common.rtcd.flags;
-    int has_edsp = flags & HAS_EDSP;
-    int has_media = flags & HAS_MEDIA;
-    int has_neon = flags & HAS_NEON;
+
+#if HAVE_ARMV5TE
+    if (flags & HAS_EDSP)
+    {
+    }
+#endif
 
 #if HAVE_ARMV6
-    if (has_media)
+    if (flags & HAS_MEDIA)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_armv6;
         /*cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;
@@ -74,7 +77,7 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 #endif
 
 #if HAVE_ARMV7
-    if (has_neon)
+    if (flags & HAS_NEON)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_neon;
         cpi->rtcd.variance.sad16x8               = vp8_sad16x8_neon;
@@ -124,7 +127,7 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
-    if (has_neon)
+    if (flags & HAS_NEON)
 #endif
     {
         vp8_yv12_copy_partial_frame_ptr = vpxyv12_copy_partial_frame_neon;
