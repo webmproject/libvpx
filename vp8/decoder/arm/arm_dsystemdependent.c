@@ -21,12 +21,15 @@ void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
     int flags = pbi->common.rtcd.flags;
-    int has_edsp = flags & HAS_EDSP;
-    int has_media = flags & HAS_MEDIA;
-    int has_neon = flags & HAS_NEON;
+
+#if HAVE_ARMV5TE
+    if (flags & HAS_EDSP)
+    {
+    }
+#endif
 
 #if HAVE_ARMV6
-    if (has_media)
+    if (flags & HAS_MEDIA)
     {
         pbi->dequant.block               = vp8_dequantize_b_v6;
         pbi->dequant.idct_add            = vp8_dequant_idct_add_v6;
@@ -38,7 +41,7 @@ void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
 #endif
 
 #if HAVE_ARMV7
-    if (has_neon)
+    if (flags & HAS_NEON)
     {
         pbi->dequant.block               = vp8_dequantize_b_neon;
         pbi->dequant.idct_add            = vp8_dequant_idct_add_neon;
