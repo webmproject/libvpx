@@ -180,11 +180,11 @@ static MB_PREDICTION_MODE read_mv_ref(vp8_reader *bc, const vp8_prob *p)
     return (MB_PREDICTION_MODE)i;
 }
 
-static MB_PREDICTION_MODE sub_mv_ref(vp8_reader *bc, const vp8_prob *p)
+static B_PREDICTION_MODE sub_mv_ref(vp8_reader *bc, const vp8_prob *p)
 {
     const int i = vp8_treed_read(bc, vp8_sub_mv_ref_tree, p);
 
-    return (MB_PREDICTION_MODE)i;
+    return (B_PREDICTION_MODE)i;
 }
 
 #ifdef VPX_MODE_COUNT
@@ -334,7 +334,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 abovemv.as_int = above_block_mv(mi, k, mis);
                 mv_contz = vp8_mv_cont(&leftmv, &abovemv);
 
-                switch ((B_PREDICTION_MODE) sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
+                switch (sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
                 {
                 case NEW4X4:
                     read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
