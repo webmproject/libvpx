@@ -35,11 +35,11 @@ void writeSimpleBlock(EbmlGlobal *glob, unsigned char trackNumber, short timeCod
     Ebml_WriteID(glob, SimpleBlock);
     unsigned long blockLength = 4 + dataLength;
     blockLength |= 0x10000000; //TODO check length < 0x0FFFFFFFF
-    Ebml_Serialize(glob, &blockLength, 4);
+    Ebml_Serialize(glob, &blockLength, sizeof(blockLength), 4);
     trackNumber |= 0x80;  //TODO check track nubmer < 128
     Ebml_Write(glob, &trackNumber, 1);
     //Ebml_WriteSigned16(glob, timeCode,2); //this is 3 bytes
-    Ebml_Serialize(glob, &timeCode, 2);
+    Ebml_Serialize(glob, &timeCode, sizeof(timeCode), 2);
     unsigned char flags = 0x00 | (isKeyframe ? 0x80 : 0x00) | (lacingFlag << 1) | discardable;
     Ebml_Write(glob, &flags, 1);
     Ebml_Write(glob, data, dataLength);

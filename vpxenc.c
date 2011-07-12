@@ -501,15 +501,42 @@ void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
     if(fwrite(buffer_in, 1, len, glob->stream));
 }
 
-
-void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
-{
-    const unsigned char *q = (const unsigned char *)buffer_in + len - 1;
-
-    for(; len; len--)
-        Ebml_Write(glob, q--, 1);
+#define WRITE_BUFFER(s) \
+for(i = len-1; i>=0; i--)\
+{ \
+    x = *(const s *)buffer_in >> (i * CHAR_BIT); \
+    Ebml_Write(glob, &x, 1); \
 }
+void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, int buffer_size, unsigned long len)
+{
+    char x;
+    int i;
 
+    /* buffer_size:
+     * 1 - int8_t;
+     * 2 - int16_t;
+     * 3 - int32_t;
+     * 4 - int64_t;
+     */
+    switch (buffer_size)
+    {
+        case 1:
+            WRITE_BUFFER(int8_t)
+            break;
+        case 2:
+            WRITE_BUFFER(int16_t)
+            break;
+        case 4:
+            WRITE_BUFFER(int32_t)
+            break;
+        case 8:
+            WRITE_BUFFER(int64_t)
+            break;
+        default:
+            break;
+    }
+}
+#undef WRITE_BUFFER
 
 /* Need a fixed size serializer for the track ID. libmkv provdes a 64 bit
  * one, but not a 32 bit one.
@@ -518,8 +545,8 @@ static void Ebml_SerializeUnsigned32(EbmlGlobal *glob, unsigned long class_id, u
 {
     unsigned char sizeSerialized = 4 | 0x80;
     Ebml_WriteID(glob, class_id);
-    Ebml_Serialize(glob, &sizeSerialized, 1);
-    Ebml_Serialize(glob, &ui, 4);
+    Ebml_Serialize(glob, &sizeSerialized, sizeof(sizeSerialized), 1);
+    Ebml_Serialize(glob, &ui, sizeof(ui), 4);
 }
 
 
@@ -533,7 +560,7 @@ Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
 
     Ebml_WriteID(glob, class_id);
     *ebmlLoc = ftello(glob->stream);
-    Ebml_Serialize(glob, &unknownLen, 8);
+    Ebml_Serialize(glob, &unknownLen, sizeof(unknownLen), 8);
 }
 
 static void
@@ -551,7 +578,7 @@ Ebml_EndSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc)
 
     /* Seek back to the beginning of the element and write the new size */
     fseeko(glob->stream, *ebmlLoc, SEEK_SET);
-    Ebml_Serialize(glob, &size, 8);
+    Ebml_Serialize(glob, &size, sizeof(size), 8);
 
     /* Reset the stream pointer */
     fseeko(glob->stream, pos, SEEK_SET);
@@ -741,13 +768,13 @@ write_webm_block(EbmlGlobal                *glob,
 
     block_length = pkt->data.frame.sz + 4;
     block_length |= 0x10000000;
-    Ebml_Serialize(glob, &block_length, 4);
+    Ebml_Serialize(glob, &block_length, sizeof(block_length), 4);
 
     track_number = 1;
     track_number |= 0x80;
     Ebml_Write(glob, &track_number, 1);
 
-    Ebml_Serialize(glob, &block_timecode, 2);
+    Ebml_Serialize(glob, &block_timecode, sizeof(block_timecode), 2);
 
     flags = 0;
     if(is_keyframe)
