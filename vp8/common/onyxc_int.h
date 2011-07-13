@@ -83,6 +83,7 @@ typedef struct VP8_COMMON_RTCD
 } VP8_COMMON_RTCD;
 
 typedef struct VP8Common
+
 {
     struct vpx_internal_error_info  error;
 
@@ -107,7 +108,8 @@ typedef struct VP8Common
     YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG temp_scale_frame;
 
-    FRAME_TYPE last_frame_type;  /* Save last frame's frame type for loopfilter init checking and motion search. */
+
+    FRAME_TYPE last_frame_type;  /* Save last frame's frame type for motion search. */
     FRAME_TYPE frame_type;
 
     int show_frame;
@@ -148,11 +150,9 @@ typedef struct VP8Common
     INTERPOLATIONFILTERTYPE mcomp_filter_type;
     LOOPFILTERTYPE last_filter_type;
     LOOPFILTERTYPE filter_type;
-    loop_filter_info lf_info[MAX_LOOP_FILTER+1];
-    prototype_loopfilter_block((*lf_mbv));
-    prototype_loopfilter_block((*lf_mbh));
-    prototype_loopfilter_block((*lf_bv));
-    prototype_loopfilter_block((*lf_bh));
+
+    loop_filter_info_n lf_info;
+
     int filter_level;
     int last_sharpness_level;
     int sharpness_level;
@@ -205,10 +205,9 @@ typedef struct VP8Common
     struct postproc_state  postproc_state;
 } VP8_COMMON;
 
-
-int vp8_adjust_mb_lf_value(MACROBLOCKD *mbd, int filter_level);
-void vp8_init_loop_filter(VP8_COMMON *cm);
-void vp8_frame_init_loop_filter(loop_filter_info *lfi, int frame_type);
-extern void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val);
+void vp8_loop_filter_init(VP8_COMMON *cm);
+void vp8_loop_filter_frame_init(VP8_COMMON *cm, MACROBLOCKD *mbd,
+                                int default_filt_lvl, int sharpness_lvl);
+void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val);
 
 #endif

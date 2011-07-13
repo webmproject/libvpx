@@ -2105,7 +2105,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     //when needed. This will avoid unnecessary calls of vp8cx_init_quantizer() for every frame.
     vp8cx_init_quantizer(cpi);
     {
-        vp8_init_loop_filter(cm);
+        vp8_loop_filter_init(cm);
         cm->last_frame_type = KEY_FRAME;
         cm->last_filter_type = cm->filter_type;
         cm->last_sharpness_level = cm->sharpness_level;
