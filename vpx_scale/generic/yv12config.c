@@ -24,9 +24,12 @@ vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf)
 {
     if (ybf)
     {
-            duck_free(ybf->buffer_alloc);
+        vpx_free(ybf->buffer_alloc);
 
-        ybf->buffer_alloc = 0;
+        /* buffer_alloc isn't accessed by most functions.  Rather y_buffer,
+          u_buffer and v_buffer point to buffer_alloc and are used.  Clear out
+          all of this so that a freed pointer isn't inadvertently used */
+        vpx_memset (ybf, 0, sizeof (YV12_BUFFER_CONFIG));
     }
     else
     {
@@ -44,38 +47,37 @@ vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height, int 
 {
 /*NOTE:*/
 
-    int yplane_size = (height + 2 * border) * (width + 2 * border);
-    int uvplane_size = ((1 + height) / 2 + border) * ((1 + width) / 2 + border);
-
     if (ybf)
     {
+        int uv_width = width >> 1;
+        int uv_height = height >> 1;
+        int yplane_size = (height + 2 * border) * (width + 2 * border);
+        int uvplane_size = (uv_height + border) * (uv_width + border);
+
         vp8_yv12_de_alloc_frame_buffer(ybf);
+
+        /* only support allocating buffers that have
+          a height and width that are multiples of 16 */
+        if ((width & 0xf) | (height & 0xf))
+            return -3;
 
         ybf->y_width  = width;
         ybf->y_height = height;
         ybf->y_stride = width + 2 * border;
 
-        ybf->uv_width = (1 + width) / 2;
-        ybf->uv_height = (1 + height) / 2;
-        ybf->uv_stride = ybf->uv_width + border;
+        ybf->uv_width = uv_width;
+        ybf->uv_height = uv_height;
+        ybf->uv_stride = uv_width + border;
 
         ybf->border = border;
         ybf->frame_size = yplane_size + 2 * uvplane_size;
 
-        /* Added 2 extra lines to framebuffer so that copy12x12 doesn't fail
-         * when we have a large motion vector in V on the last v block.
-         * Note : We never use these pixels anyway so this doesn't hurt.
-         */
-        ybf->buffer_alloc = (unsigned char *) duck_memalign(32,  ybf->frame_size + (ybf->y_stride * 2) + 32, 0);
+        ybf->buffer_alloc = (unsigned char *) vpx_memalign(32, ybf->frame_size);
 
         if (ybf->buffer_alloc == NULL)
             return -1;
 
         ybf->y_buffer = ybf->buffer_alloc + (border * ybf->y_stride) + border;
-
-        if (yplane_size & 0xf)
-            yplane_size += 16 - (yplane_size & 0xf);
-
         ybf->u_buffer = ybf->buffer_alloc + yplane_size + (border / 2  * ybf->uv_stride) + border / 2;
         ybf->v_buffer = ybf->buffer_alloc + yplane_size + uvplane_size + (border / 2  * ybf->uv_stride) + border / 2;
 
