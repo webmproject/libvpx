@@ -1932,18 +1932,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             lf_or_gf = frame_lf_or_gf[x->e_mbd.mode_info_context->mbmi.ref_frame];
         }
 
-        if(x->e_mbd.mode_info_context->mbmi.mode == NEWMV)
-        {
-            if(!saddone)
-            {
-                vp8_cal_sad(cpi,xd,x, recon_yoffset ,&near_sadidx[0] );
-                saddone = 1;
-            }
-
-            vp8_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
-                        x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
-        }
-
         // Check to see if the testing frequency for this mode is at its max
         // If so then prevent it from being tested and increase the threshold for its testing
         if (cpi->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
@@ -2083,6 +2071,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             int tmp_col_max = x->mv_col_max;
             int tmp_row_min = x->mv_row_min;
             int tmp_row_max = x->mv_row_max;
+
+            if(!saddone)
+            {
+                vp8_cal_sad(cpi,xd,x, recon_yoffset ,&near_sadidx[0] );
+                saddone = 1;
+            }
+
+            vp8_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
+                        x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
 
             mvp_full.as_mv.col = mvp.as_mv.col>>3;
             mvp_full.as_mv.row = mvp.as_mv.row>>3;
