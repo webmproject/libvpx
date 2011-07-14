@@ -561,10 +561,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->recode_loop = 1;
     sf->quarter_pixel_search = 1;
     sf->half_pixel_search = 1;
-    sf->full_freq[0] = 7;
-    sf->full_freq[1] = 7;
-    sf->min_fs_radius = 8;
-    sf->max_fs_radius = 32;
     sf->iterative_sub_pixel = 1;
     sf->optimize_coefficients = 1;
     sf->use_fastquant_for_pick = 0;
@@ -607,8 +603,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITG   ] = 5000;
         sf->thresh_mult[THR_SPLITA   ] = 5000;
 
-        sf->full_freq[0] = 7;
-        sf->full_freq[1] = 15;
 
         sf->first_step = 0;
         sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -666,8 +660,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITG   ] = 10000;
         sf->thresh_mult[THR_SPLITA   ] = 10000;
 #endif
-        sf->full_freq[0] = 15;
-        sf->full_freq[1] = 31;
 
         if (Speed > 0)
         {
@@ -761,8 +753,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             // alt ref frames
             sf->recode_loop = 2;
 
-            sf->full_freq[0] = 31;
-            sf->full_freq[1] = 63;
         }
 
         if (Speed > 3)
@@ -783,15 +773,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->recode_loop = 0; // recode loop off
             sf->RD = 0;         // Turn rd off
 
-            sf->full_freq[0] = 63;
-            sf->full_freq[1] = 127;
         }
 
         if (Speed > 4)
         {
             sf->auto_filter = 0;                     // Faster selection of loop filter
-            sf->full_freq[0] = INT_MAX;
-            sf->full_freq[1] = INT_MAX;
 
             cpi->mode_check_freq[THR_V_PRED] = 2;
             cpi->mode_check_freq[THR_H_PRED] = 2;
@@ -853,8 +839,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITMV  ] = 5000;
         sf->thresh_mult[THR_SPLITG   ] = 10000;
         sf->thresh_mult[THR_SPLITA   ] = 10000;
-        sf->full_freq[0] = 15;
-        sf->full_freq[1] = 31;
         sf->search_method = NSTEP;
 
         if (Speed > 0)
@@ -935,8 +919,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
 
-            sf->full_freq[0] = 31;
-            sf->full_freq[1] = 63;
         }
 
         if (Speed > 2)
@@ -963,15 +945,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_SPLITG  ] = INT_MAX;
             sf->thresh_mult[THR_SPLITA  ] = INT_MAX;
 
-            sf->full_freq[0] = 63;
-            sf->full_freq[1] = 127;
         }
 
         if (Speed > 3)
         {
             sf->RD = 0;
-            sf->full_freq[0] = INT_MAX;
-            sf->full_freq[1] = INT_MAX;
 
             sf->auto_filter = 1;
         }

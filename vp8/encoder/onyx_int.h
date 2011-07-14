@@ -180,9 +180,6 @@ typedef struct
     int half_pixel_search;
     int quarter_pixel_search;
     int thresh_mult[MAX_MODES];
-    int full_freq[2];
-    int min_fs_radius;
-    int max_fs_radius;
     int max_step_search_steps;
     int first_step;
     int optimize_coefficients;
