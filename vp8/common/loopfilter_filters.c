@@ -24,8 +24,9 @@ static __inline signed char vp8_signed_char_clamp(int t)
 
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline signed char vp8_filter_mask(signed char limit, signed char flimit,
-                                     uc p3, uc p2, uc p1, uc p0, uc q0, uc q1, uc q2, uc q3)
+static __inline signed char vp8_filter_mask(uc limit, uc blimit,
+                                     uc p3, uc p2, uc p1, uc p0,
+                                     uc q0, uc q1, uc q2, uc q3)
 {
     signed char mask = 0;
     mask |= (abs(p3 - p2) > limit) * -1;
@@ -34,13 +35,13 @@ static __inline signed char vp8_filter_mask(signed char limit, signed char flimi
     mask |= (abs(q1 - q0) > limit) * -1;
     mask |= (abs(q2 - q1) > limit) * -1;
     mask |= (abs(q3 - q2) > limit) * -1;
-    mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > flimit * 2 + limit) * -1;
+    mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > blimit) * -1;
     mask = ~mask;
     return mask;
 }
 
 /* is there high variance internal edge ( 11111111 yes, 00000000 no) */
-static __inline signed char vp8_hevmask(signed char thresh, uc p1, uc p0, uc q0, uc q1)
+static __inline signed char vp8_hevmask(uc thresh, uc p1, uc p0, uc q0, uc q1)
 {
     signed char hev = 0;
     hev  |= (abs(p1 - p0) > thresh) * -1;
@@ -48,7 +49,8 @@ static __inline signed char vp8_hevmask(signed char thresh, uc p1, uc p0, uc q0,
     return hev;
 }
 
-static __inline void vp8_filter(signed char mask, signed char hev, uc *op1, uc *op0, uc *oq0, uc *oq1)
+static __inline void vp8_filter(signed char mask, uc hev, uc *op1,
+        uc *op0, uc *oq0, uc *oq1)
 
 {
     signed char ps0, qs0;
@@ -98,9 +100,9 @@ void vp8_loop_filter_horizontal_edge_c
 (
     unsigned char *s,
     int p, /* pitch */
-    const signed char *flimit,
-    const signed char *limit,
-    const signed char *thresh,
+    const unsigned char *blimit,
+    const unsigned char *limit,
+    const unsigned char *thresh,
     int count
 )
 {
@@ -113,11 +115,11 @@ void vp8_loop_filter_horizontal_edge_c
      */
     do
     {
-        mask = vp8_filter_mask(limit[i], flimit[i],
+        mask = vp8_filter_mask(limit[0], blimit[0],
                                s[-4*p], s[-3*p], s[-2*p], s[-1*p],
                                s[0*p], s[1*p], s[2*p], s[3*p]);
 
-        hev = vp8_hevmask(thresh[i], s[-2*p], s[-1*p], s[0*p], s[1*p]);
+        hev = vp8_hevmask(thresh[0], s[-2*p], s[-1*p], s[0*p], s[1*p]);
 
         vp8_filter(mask, hev, s - 2 * p, s - 1 * p, s, s + 1 * p);
 
@@ -130,9 +132,9 @@ void vp8_loop_filter_vertical_edge_c
 (
     unsigned char *s,
     int p,
-    const signed char *flimit,
-    const signed char *limit,
-    const signed char *thresh,
+    const unsigned char *blimit,
+    const unsigned char *limit,
+    const unsigned char *thresh,
     int count
 )
 {
@@ -145,10 +147,10 @@ void vp8_loop_filter_vertical_edge_c
      */
     do
     {
-        mask = vp8_filter_mask(limit[i], flimit[i],
+        mask = vp8_filter_mask(limit[0], blimit[0],
                                s[-4], s[-3], s[-2], s[-1], s[0], s[1], s[2], s[3]);
 
-        hev = vp8_hevmask(thresh[i], s[-2], s[-1], s[0], s[1]);
+        hev = vp8_hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
 
         vp8_filter(mask, hev, s - 2, s - 1, s, s + 1);
 
@@ -157,7 +159,7 @@ void vp8_loop_filter_vertical_edge_c
     while (++i < count * 8);
 }
 
-static __inline void vp8_mbfilter(signed char mask, signed char hev,
+static __inline void vp8_mbfilter(signed char mask, uc hev,
                            uc *op2, uc *op1, uc *op0, uc *oq0, uc *oq1, uc *oq2)
 {
     signed char s, u;
@@ -216,9 +218,9 @@ void vp8_mbloop_filter_horizontal_edge_c
 (
     unsigned char *s,
     int p,
-    const signed char *flimit,
-    const signed char *limit,
-    const signed char *thresh,
+    const unsigned char *blimit,
+    const unsigned char *limit,
+    const unsigned char *thresh,
     int count
 )
 {
@@ -232,11 +234,11 @@ void vp8_mbloop_filter_horizontal_edge_c
     do
     {
 
-        mask = vp8_filter_mask(limit[i], flimit[i],
+        mask = vp8_filter_mask(limit[0], blimit[0],
                                s[-4*p], s[-3*p], s[-2*p], s[-1*p],
                                s[0*p], s[1*p], s[2*p], s[3*p]);
 
-        hev = vp8_hevmask(thresh[i], s[-2*p], s[-1*p], s[0*p], s[1*p]);
+        hev = vp8_hevmask(thresh[0], s[-2*p], s[-1*p], s[0*p], s[1*p]);
 
         vp8_mbfilter(mask, hev, s - 3 * p, s - 2 * p, s - 1 * p, s, s + 1 * p, s + 2 * p);
 
@@ -251,9 +253,9 @@ void vp8_mbloop_filter_vertical_edge_c
 (
     unsigned char *s,
     int p,
-    const signed char *flimit,
-    const signed char *limit,
-    const signed char *thresh,
+    const unsigned char *blimit,
+    const unsigned char *limit,
+    const unsigned char *thresh,
     int count
 )
 {
@@ -264,10 +266,10 @@ void vp8_mbloop_filter_vertical_edge_c
     do
     {
 
-        mask = vp8_filter_mask(limit[i], flimit[i],
+        mask = vp8_filter_mask(limit[0], blimit[0],
                                s[-4], s[-3], s[-2], s[-1], s[0], s[1], s[2], s[3]);
 
-        hev = vp8_hevmask(thresh[i], s[-2], s[-1], s[0], s[1]);
+        hev = vp8_hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
 
         vp8_mbfilter(mask, hev, s - 3, s - 2, s - 1, s, s + 1, s + 2);
 
@@ -278,13 +280,13 @@ void vp8_mbloop_filter_vertical_edge_c
 }
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline signed char vp8_simple_filter_mask(signed char limit, signed char flimit, uc p1, uc p0, uc q0, uc q1)
+static __inline signed char vp8_simple_filter_mask(uc blimit, uc p1, uc p0, uc q0, uc q1)
 {
 /* Why does this cause problems for win32?
  * error C2143: syntax error : missing ';' before 'type'
  *  (void) limit;
  */
-    signed char mask = (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  <= flimit * 2 + limit) * -1;
+    signed char mask = (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  <= blimit) * -1;
     return mask;
 }
 
@@ -317,47 +319,37 @@ void vp8_loop_filter_simple_horizontal_edge_c
 (
     unsigned char *s,
     int p,
-    const signed char *flimit,
-    const signed char *limit,
-    const signed char *thresh,
-    int count
+    const unsigned char *blimit
 )
 {
     signed char mask = 0;
     int i = 0;
-    (void) thresh;
 
     do
     {
-        /*mask = vp8_simple_filter_mask( limit[i], flimit[i],s[-1*p],s[0*p]);*/
-        mask = vp8_simple_filter_mask(limit[i], flimit[i], s[-2*p], s[-1*p], s[0*p], s[1*p]);
+        mask = vp8_simple_filter_mask(blimit[0], s[-2*p], s[-1*p], s[0*p], s[1*p]);
         vp8_simple_filter(mask, s - 2 * p, s - 1 * p, s, s + 1 * p);
         ++s;
     }
-    while (++i < count * 8);
+    while (++i < 16);
 }
 
 void vp8_loop_filter_simple_vertical_edge_c
 (
     unsigned char *s,
     int p,
-    const signed char *flimit,
-    const signed char *limit,
-    const signed char *thresh,
-    int count
+    const unsigned char *blimit
 )
 {
     signed char mask = 0;
     int i = 0;
-    (void) thresh;
 
     do
     {
-        /*mask = vp8_simple_filter_mask( limit[i], flimit[i],s[-1],s[0]);*/
-        mask = vp8_simple_filter_mask(limit[i], flimit[i], s[-2], s[-1], s[0], s[1]);
+        mask = vp8_simple_filter_mask(blimit[0], s[-2], s[-1], s[0], s[1]);
         vp8_simple_filter(mask, s - 2, s - 1, s, s + 1);
         s += p;
     }
-    while (++i < count * 8);
+    while (++i < 16);
 
 }

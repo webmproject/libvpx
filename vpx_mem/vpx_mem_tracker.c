@@ -36,9 +36,6 @@
 # include <winbase.h>
 #elif defined(VXWORKS)
 # include <sem_lib.h>
-#elif defined(NDS_NITRO)
-# include <nitro.h>
-# include <nitro/os.h>
 #endif
 
 #include <stdio.h>
@@ -112,8 +109,6 @@ struct memory_tracker
     HANDLE mutex;
 #elif defined(VXWORKS)
     SEM_ID mutex;
-#elif defined(NDS_NITRO)
-    OSMutex mutex;
 #elif defined(NO_MUTEX)
 #else
 #error "No mutex type defined for this platform!"
@@ -193,9 +188,6 @@ int vpx_memory_tracker_init(int padding_size, int pad_value)
             memtrack.mutex = sem_bcreate(SEM_Q_FIFO, /*SEM_Q_FIFO non-priority based mutex*/
                                          SEM_FULL);  /*SEM_FULL initial state is unlocked*/
             ret = !memtrack.mutex;
-#elif defined(NDS_NITRO)
-            os_init_mutex(&memtrack.mutex);
-            ret = 0;
 #elif defined(NO_MUTEX)
             ret = 0;
 #endif
@@ -251,9 +243,7 @@ void vpx_memory_tracker_destroy()
 
         if (!g_logging.type && g_logging.file && g_logging.file != stderr)
         {
-#if !defined(NDS_NITRO)
             fclose(g_logging.file);
-#endif
             g_logging.file = NULL;
         }
 
@@ -368,15 +358,12 @@ int vpx_memory_tracker_set_log_type(int type, char *option)
             g_logging.file = stderr;
             ret = 0;
         }
-
-#if !defined(NDS_NITRO)
         else
         {
             if ((g_logging.file = fopen((char *)option, "w")))
                 ret = 0;
         }
 
-#endif
         break;
 #if defined(WIN32) && !defined(_WIN32_WCE)
     case 1:
@@ -505,12 +492,6 @@ static void memory_tracker_dump()
             memtrack_log("memblocks[%d].addr= 0x%.8x, memblocks[%d].size= %d, file: %s, line: %d\n", i,
                          p->addr, i, p->size,
                          p->file, p->line);
-
-#ifdef NDS_NITRO
-
-        if (!(i % 20)) os_sleep(500);
-
-#endif
 
         p = p->next;
         ++i;
@@ -719,9 +700,6 @@ static int memory_tracker_lock_mutex()
         ret = WaitForSingleObject(memtrack.mutex, INFINITE);
 #elif defined(VXWORKS)
         ret = sem_take(memtrack.mutex, WAIT_FOREVER);
-#elif defined(NDS_NITRO)
-        os_lock_mutex(&memtrack.mutex);
-        ret = 0;
 #endif
 
         if (ret)
@@ -754,9 +732,6 @@ static int memory_tracker_unlock_mutex()
         ret = !ReleaseMutex(memtrack.mutex);
 #elif defined(VXWORKS)
         ret = sem_give(memtrack.mutex);
-#elif defined(NDS_NITRO)
-        os_unlock_mutex(&memtrack.mutex);
-        ret = 0;
 #endif
 
         if (ret)
