@@ -94,7 +94,7 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     {
         VP8_COMMON *cm = &pbi->common;
 
-        vp8_init_loop_filter(cm);
+        vp8_loop_filter_init(cm);
         cm->last_frame_type = KEY_FRAME;
         cm->last_filter_type = cm->filter_type;
         cm->last_sharpness_level = cm->sharpness_level;

@@ -54,9 +54,11 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_armv6;
         rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_armv6;
         rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_armv6;
-        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_mbvs_armv6;
+        rtcd->loopfilter.simple_mb_v =
+                vp8_loop_filter_simple_vertical_edge_armv6;
         rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_armv6;
-        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_mbhs_armv6;
+        rtcd->loopfilter.simple_mb_h =
+                vp8_loop_filter_simple_horizontal_edge_armv6;
         rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_armv6;
 
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_v6;
