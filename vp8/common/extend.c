@@ -85,10 +85,10 @@ void vp8_copy_and_extend_frame(YV12_BUFFER_CONFIG *src,
                           src->y_height, src->y_width,
                           et, el, eb, er);
 
-    et = (et + 1) >> 1;
-    el = (el + 1) >> 1;
-    eb = (eb + 1) >> 1;
-    er = (er + 1) >> 1;
+    et = dst->border >> 1;
+    el = dst->border >> 1;
+    eb = (dst->border >> 1) + dst->uv_height - src->uv_height;
+    er = (dst->border >> 1) + dst->uv_width - src->uv_width;
 
     copy_and_extend_plane(src->u_buffer, src->uv_stride,
                           dst->u_buffer, dst->uv_stride,
