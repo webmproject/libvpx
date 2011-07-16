@@ -15,7 +15,7 @@
 #include "vpx/vpx_integer.h"
 
 typedef struct EbmlGlobal EbmlGlobal;
-void  Ebml_Serialize(EbmlGlobal *glob, const void *, unsigned long);
+void  Ebml_Serialize(EbmlGlobal *glob, const void *, int, unsigned long);
 void  Ebml_Write(EbmlGlobal *glob, const void *, unsigned long);
 /////
 
