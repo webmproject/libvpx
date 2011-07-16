@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <string.h>
+#include <limits.h>
 #if defined(_MSC_VER)
 #define LITERALU64(n) n
 #else
@@ -33,7 +34,7 @@ void Ebml_WriteLen(EbmlGlobal *glob, long long val)
 
     val |= (LITERALU64(0x000000000000080) << ((size - 1) * 7));
 
-    Ebml_Serialize(glob, (void *) &val, size);
+    Ebml_Serialize(glob, (void *) &val, sizeof(val), size);
 }
 
 void Ebml_WriteString(EbmlGlobal *glob, const char *str)
@@ -60,21 +61,26 @@ void Ebml_WriteUTF8(EbmlGlobal *glob, const wchar_t *wstr)
 
 void Ebml_WriteID(EbmlGlobal *glob, unsigned long class_id)
 {
+    int len;
+
     if (class_id >= 0x01000000)
-        Ebml_Serialize(glob, (void *)&class_id, 4);
+        len = 4;
     else if (class_id >= 0x00010000)
-        Ebml_Serialize(glob, (void *)&class_id, 3);
+        len = 3;
     else if (class_id >= 0x00000100)
-        Ebml_Serialize(glob, (void *)&class_id, 2);
+        len = 2;
     else
-        Ebml_Serialize(glob, (void *)&class_id, 1);
+        len = 1;
+
+    Ebml_Serialize(glob, (void *)&class_id, sizeof(class_id), len);
 }
+
 void Ebml_SerializeUnsigned64(EbmlGlobal *glob, unsigned long class_id, uint64_t ui)
 {
     unsigned char sizeSerialized = 8 | 0x80;
     Ebml_WriteID(glob, class_id);
-    Ebml_Serialize(glob, &sizeSerialized, 1);
-    Ebml_Serialize(glob, &ui, 8);
+    Ebml_Serialize(glob, &sizeSerialized, sizeof(sizeSerialized), 1);
+    Ebml_Serialize(glob, &ui, sizeof(ui), 8);
 }
 
 void Ebml_SerializeUnsigned(EbmlGlobal *glob, unsigned long class_id, unsigned long ui)
@@ -97,8 +103,8 @@ void Ebml_SerializeUnsigned(EbmlGlobal *glob, unsigned long class_id, unsigned l
     }
 
     sizeSerialized = 0x80 | size;
-    Ebml_Serialize(glob, &sizeSerialized, 1);
-    Ebml_Serialize(glob, &ui, size);
+    Ebml_Serialize(glob, &sizeSerialized, sizeof(sizeSerialized), 1);
+    Ebml_Serialize(glob, &ui, sizeof(ui), size);
 }
 //TODO: perhaps this is a poor name for this id serializer helper function
 void Ebml_SerializeBinary(EbmlGlobal *glob, unsigned long class_id, unsigned long bin)
@@ -119,14 +125,14 @@ void Ebml_SerializeFloat(EbmlGlobal *glob, unsigned long class_id, double d)
     unsigned char len = 0x88;
 
     Ebml_WriteID(glob, class_id);
-    Ebml_Serialize(glob, &len, 1);
-    Ebml_Serialize(glob,  &d, 8);
+    Ebml_Serialize(glob, &len, sizeof(len), 1);
+    Ebml_Serialize(glob,  &d, sizeof(d), 8);
 }
 
 void Ebml_WriteSigned16(EbmlGlobal *glob, short val)
 {
     signed long out = ((val & 0x003FFFFF) | 0x00200000) << 8;
-    Ebml_Serialize(glob, &out, 3);
+    Ebml_Serialize(glob, &out, sizeof(out), 3);
 }
 
 void Ebml_SerializeString(EbmlGlobal *glob, unsigned long class_id, const char *s)
