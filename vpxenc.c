@@ -1339,6 +1339,11 @@ static void init_rate_histogram(struct rate_hist          *hist,
      * adjustment (5/4) to account for alt-refs
      */
     hist->samples = cfg->rc_buf_sz * 5 / 4 * fps->num / fps->den / 1000;
+
+    // prevent division by zero
+    if (hist->samples == 0)
+      hist->samples=1;
+
     hist->pts = calloc(hist->samples, sizeof(*hist->pts));
     hist->sz = calloc(hist->samples, sizeof(*hist->sz));
     for(i=0; i<RATE_BINS; i++)
