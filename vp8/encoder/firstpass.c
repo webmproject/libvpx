@@ -357,25 +357,11 @@ static int frame_max_bits(VP8_COMP *cpi)
     int max_bits;
 
     // For CBR we need to also consider buffer fullness.
-    // If we are running below the optimal level then we need to gradually tighten up on max_bits.
     if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
     {
-        double buffer_fullness_ratio = (double)cpi->buffer_level / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.optimal_buffer_level);
-
-        // For CBR base this on the target average bits per frame plus the maximum sedction rate passed in by the user
-        max_bits = (int)(cpi->av_per_frame_bandwidth * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
-
-        // If our buffer is below the optimum level
-        if (buffer_fullness_ratio < 1.0)
-        {
-            // The lower of max_bits / 4 or cpi->av_per_frame_bandwidth / 4.
-            int min_max_bits = ((cpi->av_per_frame_bandwidth >> 2) < (max_bits >> 2)) ? cpi->av_per_frame_bandwidth >> 2 : max_bits >> 2;
-
-            max_bits = (int)(max_bits * buffer_fullness_ratio);
-
-            if (max_bits < min_max_bits)
-                max_bits = min_max_bits;       // Lowest value we will set ... which should allow the buffer to refil.
-        }
+        max_bits = 2 * cpi->av_per_frame_bandwidth;
+        max_bits -= cpi->buffered_av_per_frame_bandwidth;
+        max_bits *= ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0);
     }
     // VBR
     else
@@ -383,6 +369,45 @@ static int frame_max_bits(VP8_COMP *cpi)
         // For VBR base this on the bits and frames left plus the two_pass_vbrmax_section rate passed in by the user
         max_bits = (int)(((double)cpi->twopass.bits_left / (cpi->twopass.total_stats->count - (double)cpi->common.current_video_frame)) * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
     }
+
+    // Trap case where we are out of bits
+    if (max_bits < 0)
+        max_bits = 0;
+
+    return max_bits;
+}
+
+
+static int gf_group_max_bits(VP8_COMP *cpi)
+{
+    // Max allocation for a golden frame group
+    int max_bits;
+
+    // For CBR we need to also consider buffer fullness.
+    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+    {
+        max_bits = cpi->av_per_frame_bandwidth * cpi->baseline_gf_interval;
+        if (max_bits > cpi->oxcf.optimal_buffer_level)
+        {
+            max_bits -= cpi->oxcf.optimal_buffer_level;
+            max_bits += cpi->buffer_level;
+        }
+        else
+        {
+            max_bits -= (cpi->buffered_av_per_frame_bandwidth
+                         - cpi->av_per_frame_bandwidth)
+                        * cpi->baseline_gf_interval;
+        }
+
+        max_bits *= ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0);
+    }
+    else
+    {
+        // For VBR base this on the bits and frames left plus the two_pass_vbrmax_section rate passed in by the user
+        max_bits = (int)(((double)cpi->twopass.bits_left / (cpi->twopass.total_stats->count - (double)cpi->common.current_video_frame)) * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
+        max_bits *=  cpi->baseline_gf_interval;
+    }
+
 
     // Trap case where we are out of bits
     if (max_bits < 0)
@@ -1601,7 +1626,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     double abs_mv_in_out_accumulator = 0.0;
     double mod_err_per_mb_accumulator = 0.0;
 
-    int max_bits = frame_max_bits(cpi);     // Max for a single frame
+    int max_group_bits;
 
     unsigned int allow_alt_ref =
                     cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames;
@@ -1963,8 +1988,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     // Clip cpi->twopass.gf_group_bits based on user supplied data rate
     // variability limit (cpi->oxcf.two_pass_vbrmax_section)
-    if (cpi->twopass.gf_group_bits > max_bits * cpi->baseline_gf_interval)
-        cpi->twopass.gf_group_bits = max_bits * cpi->baseline_gf_interval;
+    max_group_bits = gf_group_max_bits(cpi);
+    if (cpi->twopass.gf_group_bits > max_group_bits)
+        cpi->twopass.gf_group_bits = max_group_bits;
 
     // Reset the file position
     reset_fpf_position(cpi, start_pos);
@@ -2062,13 +2088,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             {
                 gf_bits = alt_gf_bits;
             }
-        }
-
-        // Apply an additional limit for CBR
-        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-        {
-            if (cpi->twopass.gf_bits > (cpi->buffer_level >> 1))
-                cpi->twopass.gf_bits = cpi->buffer_level >> 1;
         }
 
         // Dont allow a negative value for gf_bits
