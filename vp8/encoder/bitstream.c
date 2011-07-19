@@ -158,18 +158,6 @@ static void write_split(vp8_writer *bc, int x)
     );
 }
 
-static const unsigned int norm[256] =
-{
-    0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
 static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 {
     const TOKENEXTRA *const stop = p + xcount;
@@ -211,7 +199,7 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
                 range = split;
             }
 
-            shift = norm[range];
+            shift = vp8_norm[range];
             range <<= shift;
             count += shift;
 
@@ -271,7 +259,7 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
                         range = split;
                     }
 
-                    shift = norm[range];
+                    shift = vp8_norm[range];
                     range <<= shift;
                     count += shift;
 
@@ -427,7 +415,7 @@ static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
                             range = split;
                         }
 
-                        shift = norm[range];
+                        shift = vp8_norm[range];
                         range <<= shift;
                         count += shift;
 
@@ -487,7 +475,7 @@ static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
                                     range = split;
                                 }
 
-                                shift = norm[range];
+                                shift = vp8_norm[range];
                                 range <<= shift;
                                 count += shift;
 
@@ -634,7 +622,7 @@ static void pack_mb_row_tokens_c(VP8_COMP *cpi, vp8_writer *w)
                     range = split;
                 }
 
-                shift = norm[range];
+                shift = vp8_norm[range];
                 range <<= shift;
                 count += shift;
 
@@ -694,7 +682,7 @@ static void pack_mb_row_tokens_c(VP8_COMP *cpi, vp8_writer *w)
                             range = split;
                         }
 
-                        shift = norm[range];
+                        shift = vp8_norm[range];
                         range <<= shift;
                         count += shift;
 
