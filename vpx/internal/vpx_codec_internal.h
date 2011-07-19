@@ -45,6 +45,7 @@
 #define VPX_CODEC_INTERNAL_H
 #include "../vpx_decoder.h"
 #include "../vpx_encoder.h"
+#include "vpx_config.h"
 #include <stdarg.h>
 
 
@@ -435,6 +436,23 @@ vpx_codec_pkt_list_get(struct vpx_codec_pkt_list *list,
 
 #include <stdio.h>
 #include <setjmp.h>
+
+/* GLIBC started intercepting calls to longjmp in version 2.11, if the
+ * FORTIFY_SOURCE flag is defined (it's defined by default on Ubuntu).
+ * This can cause problems running under older versions of GLIBC (ie,
+ * for binary distributions), so work around it by linking to the
+ * underlying longjmp call directly.
+ */
+#if defined(__GNUC_PREREQ)
+#if __GNUC_PREREQ (2,11)
+#if ARCH_X86_64
+__asm__(".symver __longjmp_chk,longjmp@GLIBC_2.2.5");
+#else
+__asm__(".symver __longjmp_chk,longjmp@GLIBC_2.0");
+#endif
+#endif
+#endif
+
 struct vpx_internal_error_info
 {
     vpx_codec_err_t  error_code;
