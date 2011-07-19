@@ -154,3 +154,6 @@ while (<STDIN>)
     next if /^\s*END\s*$/;
     print;
 }
+
+# Mark that this object doesn't need an executable stack.
+printf ("\t.section\t.note.GNU-stack,\"\",\%\%progbits\n");
