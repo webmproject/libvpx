@@ -10,9 +10,6 @@
 
 
 #include "boolhuff.h"
-#include "vp8/common/blockd.h"
-
-
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
@@ -62,81 +59,6 @@ void vp8_stop_encode(BOOL_CODER *br)
         vp8_encode_bool(br, 0, 128);
 }
 
-DECLARE_ALIGNED(16, static const unsigned int, norm[256]) =
-{
-    0, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-void vp8_encode_bool(BOOL_CODER *br, int bit, int probability)
-{
-    unsigned int split;
-    int count = br->count;
-    unsigned int range = br->range;
-    unsigned int lowvalue = br->lowvalue;
-    register unsigned int shift;
-
-#ifdef ENTROPY_STATS
-#if defined(SECTIONBITS_OUTPUT)
-
-    if (bit)
-        Sectionbits[active_section] += vp8_prob_cost[255-probability];
-    else
-        Sectionbits[active_section] += vp8_prob_cost[probability];
-
-#endif
-#endif
-
-    split = 1 + (((range - 1) * probability) >> 8);
-
-    range = split;
-
-    if (bit)
-    {
-        lowvalue += split;
-        range = br->range - split;
-    }
-
-    shift = norm[range];
-
-    range <<= shift;
-    count += shift;
-
-    if (count >= 0)
-    {
-        int offset = shift - count;
-
-        if ((lowvalue << (offset - 1)) & 0x80000000)
-        {
-            int x = br->pos - 1;
-
-            while (x >= 0 && br->buffer[x] == 0xff)
-            {
-                br->buffer[x] = (unsigned char)0;
-                x--;
-            }
-
-            br->buffer[x] += 1;
-        }
-
-        br->buffer[br->pos++] = (lowvalue >> (24 - offset));
-        lowvalue <<= offset;
-        shift = count;
-        lowvalue &= 0xffffff;
-        count -= 8 ;
-    }
-
-    lowvalue <<= shift;
-    br->count = count;
-    br->lowvalue = lowvalue;
-    br->range = range;
-}
 
 void vp8_encode_value(BOOL_CODER *br, int data, int bits)
 {
