@@ -21,6 +21,9 @@ print "@ This file was created from a .asm file\n";
 print "@  using the ads2gas.pl script.\n";
 print "\t.equ DO1STROUNDING, 0\n";
 
+# Stack of procedure names.
+@proc_stack = ();
+
 while (<STDIN>)
 {
     # Load and store alignment
@@ -133,9 +136,23 @@ while (<STDIN>)
     # Strip PRESERVE8
     s/\sPRESERVE8/@ PRESERVE8/g;
 
-    # Strip PROC and ENDPROC
-    s/\sPROC/@/g;
-    s/\sENDP/@/g;
+    # Use PROC and ENDP to give the symbols a .size directive.
+    # This makes them show up properly in debugging tools like gdb and valgrind.
+    if (/\bPROC\b/)
+    {
+        my $proc;
+        /^_([\.0-9A-Z_a-z]\w+)\b/;
+        $proc = $1;
+        push(@proc_stack, $proc) if ($proc);
+        s/\bPROC\b/@ $&/;
+    }
+    if (/\bENDP\b/)
+    {
+        my $proc;
+        s/\bENDP\b/@ $&/;
+        $proc = pop(@proc_stack);
+        $_ = "\t.size $proc, .-$proc".$_ if ($proc);
+    }
 
     # EQU directive
     s/(.*)EQU(.*)/.equ $1, $2/;
