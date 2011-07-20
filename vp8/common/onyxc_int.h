@@ -148,7 +148,6 @@ typedef struct VP8Common
 
 
     INTERPOLATIONFILTERTYPE mcomp_filter_type;
-    LOOPFILTERTYPE last_filter_type;
     LOOPFILTERTYPE filter_type;
 
     loop_filter_info_n lf_info;
@@ -204,10 +203,5 @@ typedef struct VP8Common
 #endif
     struct postproc_state  postproc_state;
 } VP8_COMMON;
-
-void vp8_loop_filter_init(VP8_COMMON *cm);
-void vp8_loop_filter_frame_init(VP8_COMMON *cm, MACROBLOCKD *mbd,
-                                int default_filt_lvl, int sharpness_lvl);
-void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val);
 
 #endif
