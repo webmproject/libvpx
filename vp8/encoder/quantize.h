@@ -45,7 +45,7 @@ extern prototype_quantize_block_pair(vp8_quantize_quantb_pair);
 #define vp8_quantize_fastquantb vp8_fast_quantize_b_c
 #endif
 extern prototype_quantize_block(vp8_quantize_fastquantb);
-
+#if CONFIG_T8X8
 #ifndef vp8_quantize_quantb_8x8
 #define vp8_quantize_quantb_8x8 vp8_regular_quantize_b_8x8
 #endif
@@ -65,7 +65,7 @@ extern prototype_quantize_block(vp8_quantize_quantb_2x2);
 #define vp8_quantize_fastquantb_2x2 vp8_fast_quantize_b_2x2_c
 #endif
 extern prototype_quantize_block(vp8_quantize_fastquantb_2x2);
-
+#endif
 
 #ifndef vp8_quantize_fastquantb_pair
 #define vp8_quantize_fastquantb_pair vp8_fast_quantize_b_pair_c
@@ -77,10 +77,12 @@ typedef struct
     prototype_quantize_block(*quantb);
     prototype_quantize_block_pair(*quantb_pair);
     prototype_quantize_block(*fastquantb);
+#if CONFIG_T8X8
     prototype_quantize_block(*quantb_8x8);
     prototype_quantize_block(*fastquantb_8x8);
     prototype_quantize_block(*quantb_2x2);
     prototype_quantize_block(*fastquantb_2x2);
+#endif
     prototype_quantize_block_pair(*fastquantb_pair);
 } vp8_quantize_rtcd_vtable_t;
 
@@ -106,9 +108,10 @@ extern prototype_quantize_mb(vp8_quantize_mby);
 #endif
 
 extern void vp8_strict_quantize_b(BLOCK *b,BLOCKD *d);
+#if CONFIG_T8X8
 extern void vp8_strict_quantize_b_8x8(BLOCK *b,BLOCKD *d);
 extern void vp8_strict_quantize_b_2x2(BLOCK *b,BLOCKD *d);
-
+#endif
 struct VP8_COMP;
 extern void vp8_set_quantizer(struct VP8_COMP *cpi, int Q);
 extern void vp8cx_frame_init_quantizer(struct VP8_COMP *cpi);

@@ -183,8 +183,11 @@ const vp8_prob vp8_coef_update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTE
         },
     },
 };
-
-const vp8_prob vp8_coef_update_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] =
+#if CONFIG_T8X8
+const vp8_prob vp8_coef_update_probs_8x8 [BLOCK_TYPES]
+                                         [COEF_BANDS]
+                                         [PREV_COEF_CONTEXTS]
+                                         [ENTROPY_NODES] =
 {
     {
       {
@@ -356,3 +359,4 @@ const vp8_prob vp8_coef_update_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_C
     },
 
 };
+#endif

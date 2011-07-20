@@ -18,8 +18,6 @@
 #if CONFIG_DEBUG
 #include <assert.h>
 #endif
-extern int frame_count;
-
 static int vp8_read_bmode(vp8_reader *bc, const vp8_prob *p)
 {
     const int i = vp8_treed_read(bc, vp8_bmode_tree, p);
@@ -62,7 +60,6 @@ static void vp8_read_mb_features(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x
         else
             mi->segment_id = (unsigned char)(vp8_read(r, x->mb_segment_tree_probs[1]));
     }
-    //printf("vp8_read_mb_features Segment = %d of frame %d\n", mi->segment_id, frame_count);
 }
 
 static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_col)
@@ -80,7 +77,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
 
             if (pbi->mb.update_mb_segmentation_map)
                 vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
-            //printf("vp8_kfread_modes segment = %d\n", m->mbmi.segment_id);
 
             /* Read the macroblock coeff skip flag if this feature is in use, else default to 0 */
             if (pbi->common.mb_no_coeff_skip)
@@ -316,14 +312,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     {
                         mbmi->segment_id = pbi->segmentation_map[index];
                         mbmi->segment_flag = 0;
-                        //printf("vp8_read_mb_modes_mv Temporal Update if %d\n", mbmi->segment_id);
                     }
                     else
                     {
                         vp8_read_mb_features(bc, &mi->mbmi, &pbi->mb);
                         mbmi->segment_flag = 1;
                         pbi->segmentation_map[index] = mbmi->segment_id;
-                        //printf("vp8_read_mb_modes_mv Temporal Update else %d\n", mbmi->segment_id);
                     }
 
                 }
@@ -331,7 +325,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 {
                     vp8_read_mb_features(bc, &mi->mbmi, &pbi->mb);
                     pbi->segmentation_map[index] = mbmi->segment_id;
-                    //printf("vp8_read_mb_modes_mv Not Temporal Update %d\n", mbmi->segment_id);
                 }
                 index++;
 #else

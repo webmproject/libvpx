@@ -74,6 +74,7 @@ extern prototype_idct(vp8_idct_idct16);
 #endif
 extern prototype_idct_scalar_add(vp8_idct_idct1_scalar_add);
 
+
 #ifndef vp8_idct_iwalsh1
 #define vp8_idct_iwalsh1 vp8_short_inv_walsh4x4_1_c
 #endif

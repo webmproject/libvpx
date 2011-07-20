@@ -50,8 +50,11 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 #define PROB_UPDATE_BASELINE_COST   7
 
 #define MAX_PROB                255
+#if CONFIG_EXTEND_QRANGE
 #define DCT_MAX_VALUE           8192
-
+#else
+#define DCT_MAX_VALUE           2048
+#endif
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
@@ -104,6 +107,6 @@ extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
 extern short vp8_default_zig_zag_mask_8x8[64];//int64_t
 #endif
 extern const int vp8_mb_feature_data_bits[MB_LVL_MAX];
-void vp8_coef_tree_initialize(void);
 
+void vp8_coef_tree_initialize(void);
 #endif

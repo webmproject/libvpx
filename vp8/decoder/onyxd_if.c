@@ -157,7 +157,7 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
     if (!pbi)
         return;
 #if CONFIG_SEGMENTATION
-    // Delete sementation map
+     // Delete sementation map
     if (pbi->segmentation_map != 0)
         vpx_free(pbi->segmentation_map);
 #endif
@@ -514,8 +514,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         {
             /* Apply the loop filter if appropriate. */
             vp8_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
-            //vp8_print_yuv_rec_mb(cm, 9, 10);
-
 
             cm->last_frame_type = cm->frame_type;
             cm->last_filter_type = cm->filter_type;
@@ -554,7 +552,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     /*vp8_print_modes_and_motion_vectors( cm->mi, cm->mb_rows,cm->mb_cols, cm->current_video_frame);*/
 
-    //printf("Decoded frame (%d) %d\n", cm->show_frame, cm->current_video_frame);
     if (cm->show_frame)
         cm->current_video_frame++;
 

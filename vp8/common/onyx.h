@@ -126,7 +126,6 @@ extern "C"
         //(5)=Two Pass - Second Pass Best.  The encoder uses the statistics that were generated in the first
         //    encoding pass to create the compressed output using the highest possible quality, and taking a
         //    longer amount of time to encode.. ( speed setting ignored )
-
         int Mode;               //
 
         // Key Framing Operations

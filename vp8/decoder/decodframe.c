@@ -241,13 +241,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV)
     {
         /* Special case:  Force the loopfilter to skip when eobtotal and
-        * mb_skip_coeff are zero.
-        * */
+         * mb_skip_coeff are zero.
+         * */
         xd->mode_info_context->mbmi.mb_skip_coeff = 1;
 
         skip_recon_mb(pbi, xd);
         return;
     }
+
     if (xd->segmentation_enabled)
         mb_init_dequantizer(pbi, xd);
 
@@ -259,7 +260,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         if (mode != B_PRED)
         {
             RECON_INVOKE(&pbi->common.rtcd.recon,
-                build_intra_predictors_mby)(xd);
+                         build_intra_predictors_mby)(xd);
         } else {
             vp8_intra_prediction_down_copy(xd);
         }
@@ -275,8 +276,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         vp8dx_bool_error(xd->current_bc)))
     {
         /* MB with corrupt residuals or corrupt mode/motion vectors.
-        * Better to use the predictor as reconstruction.
-        */
+         * Better to use the predictor as reconstruction.
+         */
         vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
         vp8_conceal_corrupt_mb(xd);
         return;
@@ -290,7 +291,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         {
             BLOCKD *b = &xd->block[i];
             RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
-                (b, b->bmi.as_mode, b->predictor);
+                          (b, b->bmi.as_mode, b->predictor);
 
             if (xd->eobs[i] > 1)
             {
@@ -306,6 +307,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 ((int *)b->qcoeff)[0] = 0;
             }
         }
+
     }
     else if (mode == SPLITMV)
     {
@@ -366,8 +368,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
         else
 #endif
-        {
-            DEQUANT_INVOKE(&pbi->dequant, block)(b);
             if (xd->eobs[24] > 1)
             {
                 IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
@@ -390,7 +390,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 (xd->qcoeff, xd->block[0].dequant,
                 xd->predictor, xd->dst.y_buffer,
                 xd->dst.y_stride, xd->eobs, xd->block[24].diff);
-        }
     }
 #if CONFIG_T8X8
     if(xd->mode_info_context->mbmi.segment_id >= 2)
@@ -403,15 +402,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
     else
 #endif
-    {
 
-        DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
-            (xd->qcoeff+16*16, xd->block[16].dequant,
-            xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
-            xd->dst.uv_stride, xd->eobs+16);
-    }
+    DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
+                    (xd->qcoeff+16*16, xd->block[16].dequant,
+                     xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
+                     xd->dst.uv_stride, xd->eobs+16);
 
-    }
+}
 
 
 static int get_delta_q(vp8_reader *bc, int prev, int *q_update)
@@ -749,6 +746,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     const unsigned char *data = (const unsigned char *)pbi->Source;
     const unsigned char *data_end = data + pbi->source_sz;
     ptrdiff_t first_partition_length_in_bytes;
+
     int mb_row;
     int i, j, k, l;
     const int *const mb_feature_data_bits = vp8_mb_feature_data_bits;

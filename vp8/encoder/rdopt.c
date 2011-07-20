@@ -1051,7 +1051,6 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
 }
 
 
-
 static const unsigned int segmentation_to_sseshift[4] = {3, 3, 2, 0};
 
 

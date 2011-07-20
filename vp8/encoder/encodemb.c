@@ -122,6 +122,7 @@ static void build_dcblock(MACROBLOCK *x)
         src_diff_ptr[i] = x->coeff[i * 16];
     }
 }
+#if CONFIG_T8X8
 void vp8_build_dcblock_8x8(MACROBLOCK *x)
 {
     short *src_diff_ptr = &x->src_diff[384];
@@ -135,7 +136,7 @@ void vp8_build_dcblock_8x8(MACROBLOCK *x)
     src_diff_ptr[4] = x->coeff[8 * 16];
     src_diff_ptr[8] = x->coeff[12 * 16];
 }
-
+#endif
 void vp8_transform_mbuv(MACROBLOCK *x)
 {
     int i;

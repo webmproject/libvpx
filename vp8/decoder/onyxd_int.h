@@ -44,13 +44,21 @@ typedef struct
     int size;
 } DATARATE;
 
+#if CONFIG_EXTEND_QRANGE
 typedef struct
 {
     INT16        min_val;
     INT16        Length;
     UINT8 Probs[14];
 } TOKENEXTRABITS;
-
+#else
+typedef struct
+{
+    INT16        min_val;
+    INT16        Length;
+    UINT8 Probs[12];
+} TOKENEXTRABITS;
+#endif
 typedef struct
 {
     int const *scan;
