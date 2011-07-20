@@ -528,7 +528,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
 #endif
 
-
     vp8_clear_system_state();
 
 #if CONFIG_ERROR_CONCEALMENT

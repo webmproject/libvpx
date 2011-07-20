@@ -870,8 +870,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     VP8_COMMON *const pc = & cpi->common;
     vp8_writer *const w = & cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
-    MACROBLOCKD *xd = &cpi->mb.e_mbd;
 #if CONFIG_SEGMENTATION
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+    int left_id, above_id;
+    int i;
     int sum;
     int index = 0;
 #endif
@@ -952,8 +954,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
             xd->mb_to_top_edge = -((mb_row * 16)) << 3;
             xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+#if CONFIG_SEGMENTATION
             xd->up_available = (mb_row != 0);
             xd->left_available = (mb_col != 0);
+#endif
 #ifdef ENTROPY_STATS
             active_section = 9;
 #endif
@@ -1824,9 +1828,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     }
     else
         vp8_start_encode(bc, cx_data);
-
+#if CONFIG_SEGMENTATION
     xd->update_mb_segmentation_map = 1;
-
+#endif
     // Signal whether or not Segmentation is enabled
     vp8_write_bit(bc, (xd->segmentation_enabled) ? 1 : 0);
 

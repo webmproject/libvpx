@@ -742,13 +742,12 @@ void encode_mb_row(VP8_COMP *cpi,
         // Increment the activity mask pointers.
         x->mb_activity_ptr++;
 
-        /* Test code
+#if CONFIG_SEGMENTATION
         if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
             xd->mode_info_context->mbmi.segment_id = 0;
         else
             xd->mode_info_context->mbmi.segment_id = 1;
-            */
-
+#endif
         /* save the block info */
         for (i = 0; i < 16; i++)
             xd->mode_info_context->bmi[i] = xd->block[i].bmi;
@@ -988,6 +987,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     vp8cx_frame_init_quantizer(cpi);
 
+    vp8_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
     vp8cx_initialize_me_consts(cpi, cm->base_qindex);
 
     if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
