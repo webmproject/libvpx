@@ -80,7 +80,7 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
     }
 }
 
-DECLARE_ALIGNED(16, extern const unsigned char, vp8dx_bitreader_norm[256]);
+DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 #define FILL \
     if(count < 0) \
         VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
@@ -88,7 +88,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8dx_bitreader_norm[256]);
 #define NORMALIZE \
     /*if(range < 0x80)*/                            \
     { \
-        shift = vp8dx_bitreader_norm[range]; \
+        shift = vp8_norm[range]; \
         range <<= shift; \
         value <<= shift; \
         count -= shift; \
