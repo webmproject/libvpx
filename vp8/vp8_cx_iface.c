@@ -806,14 +806,17 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                     int i;
                     const int num_partitions =
                             (1 << cpi->common.multi_token_partition) + 1;
+
+                    pkt.data.frame.flags |= VPX_FRAME_IS_FRAGMENT;
+
                     for (i = 0; i < num_partitions; ++i)
                     {
                         pkt.data.frame.buf = cx_data;
                         pkt.data.frame.sz = cpi->partition_sz[i];
                         pkt.data.frame.partition_id = i;
                         /* don't set the fragment bit for the last partition */
-                        if (i < num_partitions - 1)
-                            pkt.data.frame.flags |= VPX_FRAME_IS_FRAGMENT;
+                        if (i == (num_partitions - 1))
+                            pkt.data.frame.flags &= ~VPX_FRAME_IS_FRAGMENT;
                         vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
                         cx_data += cpi->partition_sz[i];
                         cx_data_sz -= cpi->partition_sz[i];
