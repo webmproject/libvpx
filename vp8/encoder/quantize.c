@@ -81,10 +81,11 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     short *qcoeff_ptr  = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = d->dequant;
+#if CONFIG_T8X8
 
     vpx_memset(qcoeff_ptr, 0, 32);
     vpx_memset(dqcoeff_ptr, 0, 32);
-
+#endif
     eob = -1;
     for (i = 0; i < 16; i++)
     {
@@ -1325,3 +1326,4 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
         vp8cx_init_quantizer(cpi);
 
 }
+

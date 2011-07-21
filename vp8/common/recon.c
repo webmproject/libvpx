@@ -12,7 +12,7 @@
 #include "vpx_ports/config.h"
 #include "recon.h"
 #include "blockd.h"
-#include <stdio.h>
+
 void vp8_recon_b_c
 (
     unsigned char *pred_ptr,
@@ -133,7 +133,6 @@ void vp8_recon_mby_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
         RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
     }
 #endif
-
 }
 
 void vp8_recon_mb_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
@@ -172,7 +171,6 @@ void vp8_recon_mb_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
         RECON_INVOKE(rtcd, recon4)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
     }
 
-
     for (i = 16; i < 24; i += 2)
     {
         BLOCKD *b = &x->block[i];
@@ -180,5 +178,4 @@ void vp8_recon_mb_c(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
         RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
     }
 #endif
-
 }

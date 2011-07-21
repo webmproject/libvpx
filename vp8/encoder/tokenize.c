@@ -11,7 +11,6 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "onyx_int.h"
@@ -598,7 +597,6 @@ void print_context_counters()
 
 # define Comma( X) (X? ",":"")
 
-
     type = 0;
 
     do
@@ -933,7 +931,6 @@ static __inline void stuff1st_order_b
     *a = *l = pt;
 
 }
-
 static __inline
 void stuff1st_order_buv
 (

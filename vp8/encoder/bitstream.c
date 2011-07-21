@@ -192,10 +192,6 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
             n--;
             i = 2;
         }
-        if (n == 0) {
-          printf("Fatal Error: n=0\n");
-          fflush(stdout);
-        }
 
         do
         {
@@ -870,8 +866,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     VP8_COMMON *const pc = & cpi->common;
     vp8_writer *const w = & cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
-#if CONFIG_SEGMENTATION
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
+#if CONFIG_SEGMENTATION
     int left_id, above_id;
     int i;
     int sum;
@@ -1136,6 +1132,8 @@ static void write_kfmodes(VP8_COMP *cpi)
     /* const */
     MODE_INFO *m = c->mi;
 #if CONFIG_SEGMENTATION
+    int left_id, above_id;
+    int i;
     int index = 0;
 #endif
     int mb_row = -1;
@@ -2063,9 +2061,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         active_section = 1;
 #endif
     }
-#if CONFIG_SEGMENTATION
-    //printf("%d\n",segment_cost);
-#endif
+
     vp8_stop_encode(bc);
 
     oh.first_partition_length_in_bytes = cpi->bc.pos;

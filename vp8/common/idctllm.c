@@ -203,7 +203,6 @@ void vp8_short_inv_walsh4x4_c(short *input, short *output)
         ip += 4;
         op += 4;
     }
-    //printf("here2\n");
 }
 
 void vp8_short_inv_walsh4x4_1_c(short *input, short *output)
@@ -213,9 +212,9 @@ void vp8_short_inv_walsh4x4_1_c(short *input, short *output)
     short *op = output;
 
 #if !CONFIG_EXTEND_QRANGE
-    a1 = ((input[0] + 3) >> 3);
+    a1 = (input[0] + 3 )>> 3;
 #else
-    a1 = ((input[0] + 1) >> 2);
+    a1 = (input[0] + 1 )>> 2;
 #endif
 
     for (i = 0; i < 4; i++)

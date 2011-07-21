@@ -94,14 +94,14 @@ typedef enum
     MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
-// Macroblock level features
+/* Macroblock level features */
 typedef enum
 {
-    MB_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
-    MB_LVL_ALT_LF = 1,              // Use alternate loop filter value...
-    MB_LVL_MAX = 2,                 // Number of MB level features supported
-} MB_LVL_FEATURES;
+    MB_LVL_ALT_Q = 0,               /* Use alternate Quantizer .... */
+    MB_LVL_ALT_LF = 1,              /* Use alternate loop filter value... */
+    MB_LVL_MAX = 2                  /* Number of MB level features supported */
 
+} MB_LVL_FEATURES;
 
 /* Segment Feature Masks */
 #define SEGMENT_ALTQ    0x01
@@ -163,8 +163,9 @@ typedef struct
     MB_PREDICTION_MODE mode, uv_mode;
     MV_REFERENCE_FRAME ref_frame;
     int_mv mv;
+#if CONFIG_SEGMENTATION
     unsigned char segment_flag;
-
+#endif
     unsigned char partitioning;
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
     unsigned char need_to_clamp_mvs;
@@ -237,11 +238,11 @@ typedef struct
     /* 0 (do not update) 1 (update) the macroblock segmentation feature data. */
     unsigned char mb_segement_abs_delta;
 
-    unsigned char temporal_update;
     /* Per frame flags that define which MB level features (such as quantizer or loop filter level) */
     /* are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO */
 #if CONFIG_SEGMENTATION
     vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS + 3];         // Probability Tree used to code Segment number
+    unsigned char temporal_update;
 #else
     vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
 #endif
@@ -274,7 +275,6 @@ typedef struct
     vp8_subpix_fn_t  subpixel_predict16x16;
 
     void *current_bc;
-
 
     int corrupted;
 

@@ -16,7 +16,7 @@
 
 
 
-
+#if CONFIG_T8X8
 void vp8_short_fdct8x8_c(short *block, short *coefs, int pitch)
 {
   int j1, i, j, k;
@@ -126,6 +126,7 @@ void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) //pitch = 8
    op1[8]=ip1[0] - ip1[1] - ip1[4] + ip1[8];
 
 }
+#endif
 void vp8_short_fdct4x4_c(short *input, short *output, int pitch)
 {
     int i;
@@ -176,6 +177,11 @@ void vp8_short_fdct4x4_c(short *input, short *output, int pitch)
     }
 }
 
+void vp8_short_fdct8x4_c(short *input, short *output, int pitch)
+{
+    vp8_short_fdct4x4_c(input,   output,    pitch);
+    vp8_short_fdct4x4_c(input + 4, output + 16, pitch);
+}
 
 void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
 {
@@ -194,7 +200,7 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
         c1 = ((ip[1] - ip[3])<<2);
         b1 = ((ip[0] - ip[2])<<2);
 
-        op[0] = a1 + d1+ (a1!=0);
+        op[0] = a1 + d1 + (a1!=0);
 #else
         a1 = ((ip[0] + ip[2]));
         d1 = ((ip[1] + ip[3]));
@@ -245,10 +251,4 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
         ip++;
         op++;
     }
-}
-
-void vp8_short_fdct8x4_c(short *input, short *output, int pitch)
-{
-    vp8_short_fdct4x4_c(input,   output,    pitch);
-    vp8_short_fdct4x4_c(input + 4, output + 16, pitch);
 }

@@ -46,8 +46,6 @@
 #define RTCD(x) NULL
 #endif
 
-#define OUTPUT_YUV_REC
-
 extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
 extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
@@ -113,7 +111,7 @@ FILE *yuv_rec_file;
 
 #if 0
 FILE *framepsnr;
-FILE ikf_list;
+FILE *kf_list;
 FILE *keyfile;
 #endif
 
@@ -139,6 +137,7 @@ unsigned int cnt_ef = 0;
 extern unsigned __int64 Sectionbits[500];
 #endif
 #ifdef MODE_STATS
+extern unsigned __int64 Sectionbits[50];
 extern int y_modes[5]  ;
 extern int uv_modes[4] ;
 extern int b_modes[10]  ;

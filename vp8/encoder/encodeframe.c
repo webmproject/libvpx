@@ -573,6 +573,7 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int map_index = (mb_row * cpi->common.mb_cols);
 #if CONFIG_SEGMENTATION
+    int left_id, above_id;
     int sum;
 #endif
 #if CONFIG_MULTITHREAD
@@ -585,6 +586,7 @@ void encode_mb_row(VP8_COMP *cpi,
     else
         last_row_current_mb_col = &rightmost_col;
 #endif
+
     // reset above block coeffs
     xd->above_context = cm->above_context;
 
@@ -664,14 +666,18 @@ void encode_mb_row(VP8_COMP *cpi,
         if (xd->segmentation_enabled)
         {
             // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
+#if CONFIG_T8X8
             // Reset segment_id to 0 or 1 so that the default transform mode is 4x4
             if (cpi->segmentation_map[map_index+mb_col] <= 3)
                 xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index+mb_col]&1;
+#else
+            if (cpi->segmentation_map[map_index+mb_col] <= 3)
+                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index+mb_col];
+#endif
             else
                 xd->mode_info_context->mbmi.segment_id = 0;
 
             vp8cx_mb_init_quantizer(cpi, x);
-
         }
         else
             xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
@@ -819,6 +825,7 @@ void encode_mb_row(VP8_COMP *cpi,
     // this is to account for the border
     xd->mode_info_context++;
     x->partition_info++;
+
 #if CONFIG_MULTITHREAD
     if ((cpi->b_multi_threaded != 0) && (mb_row == cm->mb_rows - 1))
     {
@@ -826,6 +833,7 @@ void encode_mb_row(VP8_COMP *cpi,
     }
 #endif
 }
+
 void init_encode_frame_mb_context(VP8_COMP *cpi)
 {
     MACROBLOCK *const x = & cpi->mb;
@@ -922,7 +930,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     TOKENEXTRA *tp = cpi->tok;
 #if CONFIG_SEGMENTATION
     int segment_counts[MAX_MB_SEGMENTS + SEEK_SEGID];
-    int prob[3] = {255, 255, 255};
+    int prob[3];
     int new_cost, original_cost;
 #else
     int segment_counts[MAX_MB_SEGMENTS];
@@ -1479,20 +1487,18 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
             x->e_mbd.mode_info_context->mbmi.segment_id |= (vp8_8x8_selection_intra(x) << 1);
 #endif
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
-
-        vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
-        sum_intra_stats(cpi, x);
-        vp8_tokenize_mb(cpi, &x->e_mbd, t);
+    }
+    vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+    sum_intra_stats(cpi, x);
+    vp8_tokenize_mb(cpi, &x->e_mbd, t);
 #if CONFIG_T8X8
         if( x->e_mbd.mode_info_context->mbmi.segment_id >=2)
             cpi->t8x8_count++;
         else
             cpi->t4x4_count++;
 #endif
-    }
     return rate;
 }
-
 #ifdef SPEEDSTATS
 extern int cnt_pm;
 #endif
@@ -1568,7 +1574,7 @@ int vp8cx_encode_inter_macroblock
     cpi->last_mb_distortion = distortion;
 #endif
 
-    // MB level adjustment to quantizer setup
+    // MB level adjutment to quantizer setup
     if (xd->segmentation_enabled)
     {
         // If cyclic update enabled

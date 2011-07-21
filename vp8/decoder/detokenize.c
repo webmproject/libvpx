@@ -59,7 +59,7 @@ typedef struct
     UINT8 Probs[14];
 } TOKENEXTRABITS;
 */
-
+#if CONFIG_EXTEND_QRANGE
 DECLARE_ALIGNED(16, static const TOKENEXTRABITS, vp8d_token_extra_bits2[MAX_ENTROPY_TOKENS]) =
 {
     {  0, -1, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /* ZERO_TOKEN */
@@ -75,6 +75,23 @@ DECLARE_ALIGNED(16, static const TOKENEXTRABITS, vp8d_token_extra_bits2[MAX_ENTR
     { 67, 12, { 129, 130, 133, 140, 153, 177, 196, 230, 243, 249, 252, 254, 254,  0   } }, /* DCT_VAL_CATEGORY6 */
     {  0, -1, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /*  EOB TOKEN */
 };
+#else
+DECLARE_ALIGNED(16, static const TOKENEXTRABITS, vp8d_token_extra_bits2[MAX_ENTROPY_TOKENS]) =
+{
+    {  0, -1, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /* ZERO_TOKEN */
+    {  1, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* ONE_TOKEN */
+    {  2, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* TWO_TOKEN */
+    {  3, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* THREE_TOKEN */
+    {  4, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* FOUR_TOKEN */
+    {  5, 0, { 159, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /* DCT_VAL_CATEGORY1 */
+    {  7, 1, { 145, 165, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY2 */
+    { 11, 2, { 140, 148, 173, 0,  0,  0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY3 */
+    { 19, 3, { 135, 140, 155, 176, 0,  0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY4 */
+    { 35, 4, { 130, 134, 141, 157, 180, 0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY5 */
+    { 67, 10, { 129, 130, 133, 140, 153, 177, 196, 230, 243, 254, 254, 0   } }, /* DCT_VAL_CATEGORY6 */
+    {  0, -1, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /*  EOB TOKEN */
+};
+#endif
 
 
 void vp8_reset_mb_tokens_context(MACROBLOCKD *x)

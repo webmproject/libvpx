@@ -42,7 +42,7 @@
              unsigned char *pre, unsigned char *dst_u, \
              unsigned char *dst_v, int stride, char *eobs)
 
-#if 1//CONFIG_T8X8
+#if CONFIG_T8X8
 #define prototype_dequant_dc_idct_add_y_block_8x8(sym) \
     void sym(short *q, short *dq, \
              unsigned char *pre, unsigned char *dst, \
