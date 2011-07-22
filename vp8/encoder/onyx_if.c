@@ -2078,6 +2078,14 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->fn_ptr[BLOCK_4X4].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x8);
     cpi->fn_ptr[BLOCK_4X4].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x4d);
 
+#if ARCH_X86 || ARCH_X86_64
+    cpi->fn_ptr[BLOCK_16X16].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
+    cpi->fn_ptr[BLOCK_16X8].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
+    cpi->fn_ptr[BLOCK_8X16].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
+    cpi->fn_ptr[BLOCK_8X8].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
+    cpi->fn_ptr[BLOCK_4X4].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
+#endif
+
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
     cpi->diamond_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, diamond_search);
     cpi->refining_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, refining_search);

@@ -266,6 +266,14 @@ typedef struct
 
     int corrupted;
 
+#if ARCH_X86 || ARCH_X86_64
+    /* This is an intermediate buffer currently used in sub-pixel motion search
+     * to keep a copy of the reference area. This buffer can be used for other
+     * purpose.
+     */
+    DECLARE_ALIGNED(32, unsigned char, y_buf[22*32]);
+#endif
+
 #if CONFIG_RUNTIME_CPU_DETECT
     struct VP8_COMMON_RTCD  *rtcd;
 #endif

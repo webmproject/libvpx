@@ -47,7 +47,9 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.variance.sad8x16x4d            = vp8_sad8x16x4d_c;
     cpi->rtcd.variance.sad8x8x4d             = vp8_sad8x8x4d_c;
     cpi->rtcd.variance.sad4x4x4d             = vp8_sad4x4x4d_c;
-
+#if ARCH_X86 || ARCH_X86_64
+    cpi->rtcd.variance.copy32xn              = vp8_copy32xn_c;
+#endif
     cpi->rtcd.variance.var4x4                = vp8_variance4x4_c;
     cpi->rtcd.variance.var8x8                = vp8_variance8x8_c;
     cpi->rtcd.variance.var8x16               = vp8_variance8x16_c;
