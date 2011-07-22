@@ -92,14 +92,7 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
      */
     vp8cx_init_de_quantizer(pbi);
 
-    {
-        VP8_COMMON *cm = &pbi->common;
-
-        vp8_loop_filter_init(cm);
-        cm->last_frame_type = KEY_FRAME;
-        cm->last_filter_type = cm->filter_type;
-        cm->last_sharpness_level = cm->sharpness_level;
-    }
+    vp8_loop_filter_init(&pbi->common);
 
     pbi->common.error.setjmp = 0;
 
@@ -454,14 +447,10 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
             return -1;
         }
 
-        if(pbi->common.filter_level)
+        if(cm->filter_level)
         {
             /* Apply the loop filter if appropriate. */
-            vp8_loop_filter_frame(cm, &pbi->mb, cm->filter_level);
-
-            cm->last_frame_type = cm->frame_type;
-            cm->last_filter_type = cm->filter_type;
-            cm->last_sharpness_level = cm->sharpness_level;
+            vp8_loop_filter_frame(cm, &pbi->mb);
         }
         vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
     }

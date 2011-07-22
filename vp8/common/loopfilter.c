@@ -195,8 +195,7 @@ void vp8_loop_filter_init(VP8_COMMON *cm)
 
 void vp8_loop_filter_frame_init(VP8_COMMON *cm,
                                 MACROBLOCKD *mbd,
-                                int default_filt_lvl,
-                                int sharpness_lvl)
+                                int default_filt_lvl)
 {
     int seg,  /* segment number */
         ref,  /* index in ref_lf_deltas */
@@ -205,10 +204,10 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
     loop_filter_info_n *lfi = &cm->lf_info;
 
     /* update limits if sharpness has changed */
-    if(cm->last_sharpness_level != sharpness_lvl)
+    if(cm->last_sharpness_level != cm->sharpness_level)
     {
-        vp8_loop_filter_update_sharpness(lfi, sharpness_lvl);
-        cm->last_sharpness_level = sharpness_lvl;
+        vp8_loop_filter_update_sharpness(lfi, cm->sharpness_level);
+        cm->last_sharpness_level = cm->sharpness_level;
     }
 
     for(seg = 0; seg < MAX_MB_SEGMENTS; seg++)
@@ -283,8 +282,7 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
 void vp8_loop_filter_frame
 (
     VP8_COMMON *cm,
-    MACROBLOCKD *mbd,
-    int default_filt_lvl
+    MACROBLOCKD *mbd
 )
 {
     YV12_BUFFER_CONFIG *post = cm->frame_to_show;
@@ -304,7 +302,7 @@ void vp8_loop_filter_frame
     const MODE_INFO *mode_info_context = cm->mi;
 
     /* Initialize the loop filter for this frame. */
-    vp8_loop_filter_frame_init( cm, mbd, default_filt_lvl, cm->sharpness_level);
+    vp8_loop_filter_frame_init(cm, mbd, cm->filter_level);
 
     /* Set up the buffer pointers */
     y_ptr = post->y_buffer;
@@ -393,8 +391,7 @@ void vp8_loop_filter_frame_yonly
 (
     VP8_COMMON *cm,
     MACROBLOCKD *mbd,
-    int default_filt_lvl,
-    int sharpness_lvl
+    int default_filt_lvl
 )
 {
     YV12_BUFFER_CONFIG *post = cm->frame_to_show;
@@ -412,15 +409,13 @@ void vp8_loop_filter_frame_yonly
     /* Point at base of Mb MODE_INFO list */
     const MODE_INFO *mode_info_context = cm->mi;
 
-    sharpness_lvl = cm->sharpness_level;
-
 #if 0
     if(default_filt_lvl == 0) /* no filter applied */
         return;
 #endif
 
     /* Initialize the loop filter for this frame. */
-    vp8_loop_filter_frame_init( cm, mbd, default_filt_lvl, sharpness_lvl);
+    vp8_loop_filter_frame_init( cm, mbd, default_filt_lvl);
 
     /* Set up the buffer pointers */
     y_ptr = post->y_buffer;
@@ -503,9 +498,7 @@ void vp8_loop_filter_partial_frame
 (
     VP8_COMMON *cm,
     MACROBLOCKD *mbd,
-    int default_filt_lvl,
-    int sharpness_lvl,
-    int Fraction
+    int default_filt_lvl
 )
 {
     YV12_BUFFER_CONFIG *post = cm->frame_to_show;
@@ -528,16 +521,10 @@ void vp8_loop_filter_partial_frame
 
     int lvl_seg[MAX_MB_SEGMENTS];
 
-    sharpness_lvl = cm->sharpness_level;
-
-#if 0
-    if(default_filt_lvl == 0) /* no filter applied */
-        return;
-#endif
-
     mode_info_context = cm->mi + (post->y_height >> 5) * (mb_cols + 1);
 
-    linestocopy = (post->y_height >> (4 + Fraction));
+    /* 3 is a magic number. 4 is probably magic too */
+    linestocopy = (post->y_height >> (4 + 3));
 
     if (linestocopy < 1)
         linestocopy = 1;
@@ -545,6 +532,9 @@ void vp8_loop_filter_partial_frame
     linestocopy <<= 4;
 
     /* Note the baseline filter values for each segment */
+    /* See vp8_loop_filter_frame_init. Rather than call that for each change
+     * to default_filt_lvl, copy the relevant calculation here.
+     */
     if (alt_flt_enabled)
     {
         for (i = 0; i < MAX_MB_SEGMENTS; i++)
@@ -563,9 +553,6 @@ void vp8_loop_filter_partial_frame
             }
         }
     }
-    else
-        lvl_seg[0] = default_filt_lvl;
-
 
     /* Set up the buffer pointers */
     y_ptr = post->y_buffer + (post->y_height >> 5) * 16 * post->y_stride;
@@ -582,7 +569,7 @@ void vp8_loop_filter_partial_frame
             if (alt_flt_enabled)
                 filter_level = lvl_seg[mode_info_context->mbmi.segment_id];
             else
-                filter_level = lvl_seg[0];
+                filter_level = default_filt_lvl;
 
             if (filter_level)
             {

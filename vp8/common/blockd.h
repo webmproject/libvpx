@@ -192,7 +192,7 @@ typedef struct
     union b_mode_info bmi;
 } BLOCKD;
 
-typedef struct
+typedef struct MacroBlockD
 {
     DECLARE_ALIGNED(16, short, diff[400]);      /* from idct diff */
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);

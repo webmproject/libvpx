@@ -50,9 +50,6 @@ extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
 extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 
-extern void vp8_init_loop_filter(VP8_COMMON *cm);
-extern void vp8_loop_filter_frame(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val);
-extern void vp8_loop_filter_frame_yonly(VP8_COMMON *cm,    MACROBLOCKD *mbd,  int filt_val, int sharpness_lvl);
 extern void vp8_dmachine_specific_config(VP8_COMP *cpi);
 extern void vp8_cmachine_specific_config(VP8_COMP *cpi);
 extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *post, int filt_lvl, int low_var_thresh, int flag);
@@ -2096,12 +2093,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     //vp8cx_init_quantizer() is first called here. Add check in vp8cx_frame_init_quantizer() so that vp8cx_init_quantizer is only called later
     //when needed. This will avoid unnecessary calls of vp8cx_init_quantizer() for every frame.
     vp8cx_init_quantizer(cpi);
-    {
-        vp8_loop_filter_init(cm);
-        cm->last_frame_type = KEY_FRAME;
-        cm->last_filter_type = cm->filter_type;
-        cm->last_sharpness_level = cm->sharpness_level;
-    }
+
+    vp8_loop_filter_init(cm);
+
     cpi->common.error.setjmp = 0;
     return (VP8_PTR) cpi;
 
@@ -3192,9 +3186,7 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
     if (cm->filter_level > 0)
     {
         vp8cx_set_alt_lf_level(cpi, cm->filter_level);
-        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, cm->filter_level);
-        cm->last_filter_type = cm->filter_type;
-        cm->last_sharpness_level = cm->sharpness_level;
+        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd);
     }
 
     vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
