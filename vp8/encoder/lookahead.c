@@ -86,7 +86,8 @@ vp8_lookahead_init(unsigned int width,
         if(!ctx->buf)
             goto bail;
         for(i=0; i<depth; i++)
-            if (vp8_yv12_alloc_frame_buffer(&ctx->buf[i].img, width, height, 16))
+            if (vp8_yv12_alloc_frame_buffer(&ctx->buf[i].img,
+                                            width, height, VP8BORDERINPIXELS))
                 goto bail;
     }
     return ctx;
