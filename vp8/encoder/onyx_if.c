@@ -961,6 +961,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             sf->improved_quant = 0;
             sf->improved_dct = 0;
+
+            sf->use_fastquant_for_pick = 1;
+            sf->no_skip_block4x4_search = 0;
+            sf->first_step = 1;
         }
 
         if (Speed > 1)
@@ -1336,7 +1340,7 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 #if VP8_TEMPORAL_ALT_REF
 
     if (vp8_yv12_alloc_frame_buffer(&cpi->alt_ref_buffer,
-                                    width, height, 16))
+                                    width, height, VP8BORDERINPIXELS))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate altref buffer");
 
@@ -1386,7 +1390,8 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate last frame buffer");
 
-    if (vp8_yv12_alloc_frame_buffer(&cpi->scaled_source, width, height, 16))
+    if (vp8_yv12_alloc_frame_buffer(&cpi->scaled_source,
+                                    width, height, VP8BORDERINPIXELS))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate scaled source buffer");
 
