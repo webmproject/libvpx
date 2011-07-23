@@ -192,7 +192,7 @@ typedef struct
     union b_mode_info bmi;
 } BLOCKD;
 
-typedef struct
+typedef struct MacroBlockD
 {
     DECLARE_ALIGNED(16, short, diff[400]);      /* from idct diff */
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
@@ -265,6 +265,14 @@ typedef struct
     void *current_bc;
 
     int corrupted;
+
+#if ARCH_X86 || ARCH_X86_64
+    /* This is an intermediate buffer currently used in sub-pixel motion search
+     * to keep a copy of the reference area. This buffer can be used for other
+     * purpose.
+     */
+    DECLARE_ALIGNED(32, unsigned char, y_buf[22*32]);
+#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
     struct VP8_COMMON_RTCD  *rtcd;
