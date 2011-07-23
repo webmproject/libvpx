@@ -1152,14 +1152,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {
         vp8mt_decode_mb_rows(pbi, xd);
-        if(pbi->common.filter_level)
-        {
-            /*vp8_mt_loop_filter_frame(pbi);*/ /*cm, &pbi->mb, cm->filter_level);*/
-
-            pc->last_frame_type = pc->frame_type;
-            pc->last_filter_type = pc->filter_type;
-            pc->last_sharpness_level = pc->sharpness_level;
-        }
         vp8_yv12_extend_frame_borders_ptr(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
     }
     else

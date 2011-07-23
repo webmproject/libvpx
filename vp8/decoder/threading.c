@@ -746,7 +746,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
         }
 
         /* Initialize the loop filter for this frame. */
-        vp8_loop_filter_frame_init(pc, &pbi->mb, filter_level, pc->sharpness_level);
+        vp8_loop_filter_frame_init(pc, &pbi->mb, filter_level);
     }
 
     setup_decoding_thread_data(pbi, xd, pbi->mb_row_di, pbi->decoding_thread_count);

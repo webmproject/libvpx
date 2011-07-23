@@ -11,7 +11,7 @@
 
 #include "mcomp.h"
 #include "vpx_mem/vpx_mem.h"
-
+#include "vpx_ports/config.h"
 #include <stdio.h>
 #include <limits.h>
 #include <math.h>
@@ -165,18 +165,24 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride)
     x->searches_per_step = 8;
 }
 
-
+/*
+ * To avoid the penalty for crossing cache-line read, preload the reference
+ * area in a small buffer, which is aligned to make sure there won't be crossing
+ * cache-line read while reading from this buffer. This reduced the cpu
+ * cycles spent on reading ref data in sub-pixel filter functions.
+ * TODO: Currently, since sub-pixel search range here is -3 ~ 3, copy 22 rows x
+ * 32 cols area that is enough for 16x16 macroblock. Later, for SPLITMV, we
+ * could reduce the area.
+ */
 #define MVC(r,c) (((mvcost[0][(r)-rr] + mvcost[1][(c) - rc]) * error_per_bit + 128 )>>8 ) // estimated cost of a motion vector (r,c)
-#define PRE(r,c) (*(d->base_pre) + d->pre + ((r)>>2) * d->pre_stride + ((c)>>2)) // pointer to predictor base of a motionvector
+#define PRE(r,c) (y + (((r)>>2) * y_stride + ((c)>>2) -(offset))) // pointer to predictor base of a motionvector
 #define SP(x) (((x)&3)<<1) // convert motion vector component to offset for svf calc
-#define DIST(r,c) vfp->svf( PRE(r,c), d->pre_stride, SP(c),SP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
+#define DIST(r,c) vfp->svf( PRE(r,c), y_stride, SP(c),SP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
 #define IFMVCV(r,c,s,e) if ( c >= minc && c <= maxc && r >= minr && r <= maxr) s else e;
 #define ERR(r,c) (MVC(r,c)+DIST(r,c)) // returns distortion + motion vector cost
 #define CHECK_BETTER(v,r,c) IFMVCV(r,c,{thismse = DIST(r,c); if((v = (MVC(r,c)+thismse)) < besterr) { besterr = v; br=r; bc=c; *distortion = thismse; *sse1 = sse; }}, v=INT_MAX;)// checks if (r,c) has better score than previous best
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
-
-//#define CHECK_BETTER(v,r,c) if((v = ERR(r,c)) < besterr) { besterr = v; br=r; bc=c; }
 
 int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int_mv *bestmv, int_mv *ref_mv,
@@ -185,7 +191,6 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int *mvcost[2], int *distortion,
                                              unsigned int *sse1)
 {
-    unsigned char *y = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
     unsigned char *z = (*(b->base_src) + b->src);
 
     int rr = ref_mv->as_mv.row >> 1, rc = ref_mv->as_mv.col >> 1;
@@ -204,12 +209,38 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     int minr = MAX(x->mv_row_min << 2, (ref_mv->as_mv.row >> 1) - ((1 << mvlong_width) - 1));
     int maxr = MIN(x->mv_row_max << 2, (ref_mv->as_mv.row >> 1) + ((1 << mvlong_width) - 1));
 
+    int y_stride;
+    int offset;
+
+#if ARCH_X86 || ARCH_X86_64
+    MACROBLOCKD *xd = &x->e_mbd;
+    unsigned char *y0 = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
+    unsigned char *y;
+    int buf_r1, buf_r2, buf_c1, buf_c2;
+
+    // Clamping to avoid out-of-range data access
+    buf_r1 = ((bestmv->as_mv.row - 3) < x->mv_row_min)?(bestmv->as_mv.row - x->mv_row_min):3;
+    buf_r2 = ((bestmv->as_mv.row + 3) > x->mv_row_max)?(x->mv_row_max - bestmv->as_mv.row):3;
+    buf_c1 = ((bestmv->as_mv.col - 3) < x->mv_col_min)?(bestmv->as_mv.col - x->mv_col_min):3;
+    buf_c2 = ((bestmv->as_mv.col + 3) > x->mv_col_max)?(x->mv_col_max - bestmv->as_mv.col):3;
+    y_stride = 32;
+
+    /* Copy to intermediate buffer before searching. */
+    vfp->copymem(y0 - buf_c1 - d->pre_stride*buf_r1, d->pre_stride, xd->y_buf, y_stride, 16+buf_r1+buf_r2);
+    y = xd->y_buf + y_stride*buf_r1 +buf_c1;
+#else
+    unsigned char *y = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
+    y_stride = d->pre_stride;
+#endif
+
+    offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
+
     // central mv
     bestmv->as_mv.row <<= 3;
     bestmv->as_mv.col <<= 3;
 
     // calculate central point error
-    besterr = vfp->vf(y, d->pre_stride, z, b->src_stride, sse1);
+    besterr = vfp->vf(y, y_stride, z, b->src_stride, sse1);
     *distortion = besterr;
     besterr += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit);
 
@@ -296,6 +327,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #undef PRE
 #undef SP
 #undef DIST
+#undef IFMVCV
 #undef ERR
 #undef CHECK_BETTER
 #undef MIN
