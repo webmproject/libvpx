@@ -35,9 +35,6 @@ DEFINE(bool_decoder_value,                      offsetof(BOOL_DECODER, value));
 DEFINE(bool_decoder_count,                      offsetof(BOOL_DECODER, count));
 DEFINE(bool_decoder_range,                      offsetof(BOOL_DECODER, range));
 
-DEFINE(tokenextrabits_min_val,                  offsetof(TOKENEXTRABITS, min_val));
-DEFINE(tokenextrabits_length,                   offsetof(TOKENEXTRABITS, Length));
-
 END
 
 /* add asserts for any offset that is not supported by assembly code */
