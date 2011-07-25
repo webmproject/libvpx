@@ -629,7 +629,7 @@ process_common_toolchain() {
     case ${toolchain} in
         sparc-solaris-*)
             add_extralibs -lposix4
-            add_cflags "-DMUST_BE_ALIGNED"
+            disable fast_unaligned
             ;;
         *-solaris-*)
             add_extralibs -lposix4
