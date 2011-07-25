@@ -538,7 +538,7 @@ void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, int buffer_size, un
 }
 #undef WRITE_BUFFER
 
-/* Need a fixed size serializer for the track ID. libmkv provdes a 64 bit
+/* Need a fixed size serializer for the track ID. libmkv provides a 64 bit
  * one, but not a 32 bit one.
  */
 static void Ebml_SerializeUnsigned32(EbmlGlobal *glob, unsigned long class_id, uint64_t ui)
@@ -555,7 +555,7 @@ Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
                           unsigned long class_id)
 {
     //todo this is always taking 8 bytes, this may need later optimization
-    //this is a key that says lenght unknown
+    //this is a key that says length unknown
     uint64_t unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
 
     Ebml_WriteID(glob, class_id);
@@ -971,7 +971,7 @@ static const struct arg_enum_list stereo_mode_enum[] = {
 static const arg_def_t stereo_mode      = ARG_DEF_ENUM(NULL, "stereo-mode", 1,
         "Stereo 3D video format", stereo_mode_enum);
 static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
-        "Stream timebase (frame duration)");
+        "Stream timebase (see below)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
         "Enable error resiliency features");
 static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
@@ -1127,6 +1127,9 @@ static void usage_exit()
     fprintf(stderr, "\nVP8 Specific Options:\n");
     arg_show_usage(stdout, vp8_args);
 #endif
+    fprintf(stderr, "\nStream timebase (--timebase):\n"
+            "  This is the unit of time used to represent frame timestamps,\n"
+            "  in fractional seconds. Default is 1/1000.\n");
     fprintf(stderr, "\n"
            "Included encoders:\n"
            "\n");
@@ -1165,7 +1168,7 @@ static int merge_hist_buckets(struct hist_bucket *bucket,
             big_bucket = i;
     }
 
-    /* If we have too many buckets, merge the smallest with an ajacent
+    /* If we have too many buckets, merge the smallest with an adjacent
      * bucket.
      */
     while(buckets > max_buckets)
