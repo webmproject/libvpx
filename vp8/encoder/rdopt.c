@@ -665,7 +665,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int distortion = 0;
     int tot_rate_y = 0;
-    long long total_rd = 0;
+    int64_t total_rd = 0;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
@@ -707,11 +707,11 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
 
         mic->bmi[i].as_mode = best_mode;
 
-        if(total_rd >= (long long)best_rd)
+        if(total_rd >= (int64_t)best_rd)
             break;
     }
 
-    if(total_rd >= (long long)best_rd)
+    if(total_rd >= (int64_t)best_rd)
         return INT_MAX;
 
     *Rate = cost;

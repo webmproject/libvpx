@@ -852,9 +852,9 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
                         if ( critical_buffer_level >
                              (cpi->oxcf.optimal_buffer_level >> 2) )
                         {
-                            INT64 qadjustment_range =
+                            int64_t qadjustment_range =
                                       cpi->worst_quality - cpi->ni_av_qi;
-                            INT64 above_base =
+                            int64_t above_base =
                                       (critical_buffer_level -
                                        (cpi->oxcf.optimal_buffer_level >> 2));
 
@@ -1118,7 +1118,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
     if (cpi->pass==0
         && cpi->common.refresh_golden_frame
         && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-        long long adjust;
+        int64_t adjust;
 
         /*
         frames_in_buffer = cpi->oxcf.maximum_buffer_size

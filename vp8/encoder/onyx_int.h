@@ -317,10 +317,10 @@ typedef struct VP8_COMP
     CODING_CONTEXT coding_context;
 
     // Rate targetting variables
-    long long prediction_error;
-    long long last_prediction_error;
-    long long intra_error;
-    long long last_intra_error;
+    int64_t prediction_error;
+    int64_t last_prediction_error;
+    int64_t intra_error;
+    int64_t last_intra_error;
 
     int this_frame_target;
     int projected_frame_size;
@@ -343,7 +343,7 @@ typedef struct VP8_COMP
     int baseline_gf_interval;
     int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
 
-    INT64 key_frame_count;
+    int64_t key_frame_count;
     int prior_key_frame_distance[KEY_FRAME_CONTEXT];
     int per_frame_bandwidth;          // Current section per frame bandwidth target
     int av_per_frame_bandwidth;        // Average frame size target for clip
@@ -354,9 +354,9 @@ typedef struct VP8_COMP
 
     int inter_frame_target;
     double output_frame_rate;
-    long long last_time_stamp_seen;
-    long long last_end_time_stamp_seen;
-    long long first_time_stamp_ever;
+    int64_t last_time_stamp_seen;
+    int64_t last_end_time_stamp_seen;
+    int64_t first_time_stamp_ever;
 
     int ni_av_qi;
     int ni_tot_qi;
@@ -367,7 +367,7 @@ typedef struct VP8_COMP
     int zbin_mode_boost;
     int zbin_mode_boost_enabled;
 
-    INT64 total_byte_count;
+    int64_t total_byte_count;
 
     int buffered_mode;
 
@@ -380,7 +380,7 @@ typedef struct VP8_COMP
     int long_rolling_target_bits;
     int long_rolling_actual_bits;
 
-    long long total_actual_bits;
+    int64_t total_actual_bits;
     int total_target_vs_actual;        // debug stats
 
     int worst_quality;
@@ -528,8 +528,8 @@ typedef struct VP8_COMP
         FIRSTPASS_STATS *this_frame_stats;
         FIRSTPASS_STATS *stats_in, *stats_in_end, *stats_in_start;
         int first_pass_done;
-        long long bits_left;
-        long long clip_bits_total;
+        int64_t bits_left;
+        int64_t clip_bits_total;
         double avg_iiratio;
         double modified_error_total;
         double modified_error_used;
@@ -549,10 +549,10 @@ typedef struct VP8_COMP
         int gf_group_error_left;           // Remaining error from uncoded frames in a gf group. Two pass use only
 
         // Projected total bits available for a key frame group of frames
-        long long kf_group_bits;
+        int64_t kf_group_bits;
 
         // Error score of frames still to be coded in kf group
-        long long kf_group_error_left;
+        int64_t kf_group_error_left;
 
         int gf_group_bits;                // Projected Bits available for a group of frames including 1 GF or ARF
         int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
