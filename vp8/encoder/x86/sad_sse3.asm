@@ -43,7 +43,7 @@
     %define     ret_var     r11
     %define     result_ptr  [rsp+xmm_stack_space+8+4*8]
     %define     max_err     [rsp+xmm_stack_space+8+4*8]
-    %define     height      [rsp+xmm_stack_space+8+4*8]
+    %define     height      dword ptr [rsp+xmm_stack_space+8+4*8]
   %else
     %define     src_ptr     rdi
     %define     src_stride  rsi

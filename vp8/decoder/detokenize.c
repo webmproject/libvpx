@@ -38,37 +38,41 @@ DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
 #define CAT_THREE_CONTEXT_NODE      9
 #define CAT_FIVE_CONTEXT_NODE       10
 
-/*
-//the definition is put in "onyxd_int.h"
-typedef struct
-{
-    INT16         min_val;
-    INT16         Length;
-    UINT8 Probs[14];
-} TOKENEXTRABITS;
-*/
+#define CAT1_MIN_VAL    5
+#define CAT2_MIN_VAL    7
+#define CAT3_MIN_VAL   11
+#define CAT4_MIN_VAL   19
+#define CAT5_MIN_VAL   35
+#define CAT6_MIN_VAL   67
 
-DECLARE_ALIGNED(16, static const TOKENEXTRABITS, vp8d_token_extra_bits2[MAX_ENTROPY_TOKENS]) =
-{
-    {  0, -1, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /* ZERO_TOKEN */
-    {  1, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* ONE_TOKEN */
-    {  2, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* TWO_TOKEN */
-    {  3, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* THREE_TOKEN */
-    {  4, 0, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },   /* FOUR_TOKEN */
-    {  5, 0, { 159, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /* DCT_VAL_CATEGORY1 */
-    {  7, 1, { 145, 165, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY2 */
-    { 11, 2, { 140, 148, 173, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY3 */
-    { 19, 3, { 135, 140, 155, 176, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY4 */
-    { 35, 4, { 130, 134, 141, 157, 180, 0,  0,  0,  0,  0,  0,  0,  0,  0   } }, /* DCT_VAL_CATEGORY5 */
-    { 67, 12, { 129, 130, 133, 140, 153, 177, 196, 230, 243, 249, 252, 254, 254,  0   } }, /* DCT_VAL_CATEGORY6 */
-    {  0, -1, { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0   } },  /*  EOB TOKEN */
-};
+#define CAT1_PROB0    159
+#define CAT2_PROB0    145
+#define CAT2_PROB1    165
+
+#define CAT3_PROB0 140
+#define CAT3_PROB1 148
+#define CAT3_PROB2 173
+
+#define CAT4_PROB0 135
+#define CAT4_PROB1 140
+#define CAT4_PROB2 155
+#define CAT4_PROB3 176
+
+#define CAT5_PROB0 130
+#define CAT5_PROB1 134
+#define CAT5_PROB2 141
+#define CAT5_PROB3 157
+#define CAT5_PROB4 180
+
+static const unsigned char cat6_prob[14] =
+{ 129, 130, 133, 140, 153, 177, 196, 230, 243, 249, 252, 254, 254, 0 };
 
 
 void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
     /* Clear entropy contexts for Y2 blocks */
-    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != B_PRED &&
+        x->mode_info_context->mbmi.mode != SPLITMV)
     {
         vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
         vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -157,12 +161,12 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         qcoeff_ptr [ scan[c] ] = (INT16) v; \
         ++c; \
         goto DO_WHILE; }\
-    qcoeff_ptr [ scan[15] ] = (INT16) v; \
+    qcoeff_ptr [ 15 ] = (INT16) v; \
     goto BLOCK_FINISHED;
 
 
-#define DECODE_EXTRABIT_AND_ADJUST_VAL(t,bits_count)\
-    split = 1 +  (((range-1) * vp8d_token_extra_bits2[t].Probs[bits_count]) >> 8); \
+#define DECODE_EXTRABIT_AND_ADJUST_VAL(prob, bits_count)\
+    split = 1 +  (((range-1) * prob) >> 8); \
     bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
     FILL \
     if(value >= bigsplit)\
@@ -220,7 +224,8 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
     scan = vp8_default_zig_zag1d;
     qcoeff_ptr = &x->qcoeff[0];
 
-    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
+    if (x->mode_info_context->mbmi.mode != B_PRED &&
+        x->mode_info_context->mbmi.mode != SPLITMV)
     {
         i = 24;
         stop = 24;
@@ -256,16 +261,21 @@ DO_WHILE:
 CHECK_0_:
     DECODE_AND_LOOP_IF_ZERO(Prob[ZERO_CONTEXT_NODE], CHECK_0_);
     DECODE_AND_BRANCH_IF_ZERO(Prob[ONE_CONTEXT_NODE], ONE_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[LOW_VAL_CONTEXT_NODE], LOW_VAL_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[HIGH_LOW_CONTEXT_NODE], HIGH_LOW_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREEFOUR_CONTEXT_NODE], CAT_THREEFOUR_CONTEXT_NODE_0_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_FIVE_CONTEXT_NODE], CAT_FIVE_CONTEXT_NODE_0_);
-    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY6].min_val;
-    bits_count = vp8d_token_extra_bits2[DCT_VAL_CATEGORY6].Length;
+    DECODE_AND_BRANCH_IF_ZERO(Prob[LOW_VAL_CONTEXT_NODE],
+                              LOW_VAL_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[HIGH_LOW_CONTEXT_NODE],
+                              HIGH_LOW_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREEFOUR_CONTEXT_NODE],
+                              CAT_THREEFOUR_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_FIVE_CONTEXT_NODE],
+                              CAT_FIVE_CONTEXT_NODE_0_);
+
+    val = CAT6_MIN_VAL;
+    bits_count = 12;
 
     do
     {
-        DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY6, bits_count);
+        DECODE_EXTRABIT_AND_ADJUST_VAL(cat6_prob[bits_count], bits_count);
         bits_count -- ;
     }
     while (bits_count >= 0);
@@ -273,41 +283,43 @@ CHECK_0_:
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 CAT_FIVE_CONTEXT_NODE_0_:
-    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY5].min_val;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 4);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 3);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 2);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY5, 0);
+    val = CAT5_MIN_VAL;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB4, 4);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB3, 3);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB2, 2);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB1, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB0, 0);
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 CAT_THREEFOUR_CONTEXT_NODE_0_:
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREE_CONTEXT_NODE], CAT_THREE_CONTEXT_NODE_0_);
-    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY4].min_val;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 3);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 2);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY4, 0);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREE_CONTEXT_NODE],
+                              CAT_THREE_CONTEXT_NODE_0_);
+    val = CAT4_MIN_VAL;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB3, 3);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB2, 2);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB1, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB0, 0);
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 CAT_THREE_CONTEXT_NODE_0_:
-    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY3].min_val;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY3, 2);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY3, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY3, 0);
+    val = CAT3_MIN_VAL;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT3_PROB2, 2);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT3_PROB1, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT3_PROB0, 0);
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 HIGH_LOW_CONTEXT_NODE_0_:
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_ONE_CONTEXT_NODE], CAT_ONE_CONTEXT_NODE_0_);
+    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_ONE_CONTEXT_NODE],
+                              CAT_ONE_CONTEXT_NODE_0_);
 
-    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY2].min_val;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY2, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY2, 0);
+    val = CAT2_MIN_VAL;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT2_PROB1, 1);
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT2_PROB0, 0);
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 CAT_ONE_CONTEXT_NODE_0_:
-    val = vp8d_token_extra_bits2[DCT_VAL_CATEGORY1].min_val;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(DCT_VAL_CATEGORY1, 0);
+    val = CAT1_MIN_VAL;
+    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT1_PROB0, 0);
     DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val);
 
 LOW_VAL_CONTEXT_NODE_0_:
@@ -332,7 +344,7 @@ ONE_CONTEXT_NODE_0_:
         goto DO_WHILE;
     }
 
-    qcoeff_ptr [ scan[15] ] = (INT16) v;
+    qcoeff_ptr [ 15 ] = (INT16) v;
 BLOCK_FINISHED:
     *a = *l = ((eobs[i] = c) != !type);   /* any nonzero data? */
     eobtotal += c;

@@ -44,17 +44,9 @@ typedef struct
 
 typedef struct
 {
-    INT16        min_val;
-    INT16        Length;
-    UINT8 Probs[14];
-} TOKENEXTRABITS;
-
-typedef struct
-{
     int const *scan;
     UINT8 const *ptr_block2leftabove;
     vp8_tree_index const *vp8_coef_tree_ptr;
-    TOKENEXTRABITS const *teb_base_ptr;
     unsigned char *norm_ptr;
     UINT8 *ptr_coef_bands_x;
 
