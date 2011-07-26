@@ -556,7 +556,7 @@ Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
 {
     //todo this is always taking 8 bytes, this may need later optimization
     //this is a key that says lenght unknown
-    unsigned long long unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
+    uint64_t unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
 
     Ebml_WriteID(glob, class_id);
     *ebmlLoc = ftello(glob->stream);

@@ -3196,7 +3196,7 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
 static void update_buffer_level(VP8_COMP *cpi)
 {
-    long long tmp;
+    int64_t tmp;
 
     /* Update the buffered average bitrate.
      *
@@ -3266,7 +3266,7 @@ static void update_buffer_level(VP8_COMP *cpi)
          */
         if(cpi->total_actual_bits > cpi->oxcf.starting_buffer_level)
         {
-            tmp = (long long)cpi->buffered_av_per_frame_bandwidth
+            tmp = (int64_t)cpi->buffered_av_per_frame_bandwidth
                   * cpi->oxcf.maximum_buffer_size
                   / cpi->av_per_frame_bandwidth;
             cpi->buffer_level = cpi->oxcf.maximum_buffer_size
@@ -3284,7 +3284,7 @@ static void update_buffer_level(VP8_COMP *cpi)
          */
         if(cpi->total_actual_bits > cpi->oxcf.starting_buffer_level)
         {
-            long long decayed_overshoot;
+            int64_t decayed_overshoot;
 
             decayed_overshoot = cpi->accumulated_overshoot;
             decayed_overshoot *= (cpi->oxcf.maximum_buffer_size
@@ -4638,22 +4638,22 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     {
         double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
             *cpi->oxcf.two_pass_vbrmin_section / 100);
-        cpi->twopass.bits_left += (long long)(two_pass_min_rate / cpi->oxcf.frame_rate);
+        cpi->twopass.bits_left += (int64_t)(two_pass_min_rate / cpi->oxcf.frame_rate);
     }
 }
 #endif
 
 //For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.
 #if HAVE_ARMV7
-extern void vp8_push_neon(INT64 *store);
-extern void vp8_pop_neon(INT64 *store);
+extern void vp8_push_neon(int64_t *store);
+extern void vp8_pop_neon(int64_t *store);
 #endif
 
 
-int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, INT64 time_stamp, INT64 end_time)
+int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time)
 {
 #if HAVE_ARMV7
-    INT64 store_reg[8];
+    int64_t store_reg[8];
 #endif
     VP8_COMP              *cpi = (VP8_COMP *) ptr;
     VP8_COMMON            *cm = &cpi->common;
@@ -4704,10 +4704,10 @@ static int frame_is_reference(const VP8_COMP *cpi)
 }
 
 
-int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, INT64 *time_stamp, INT64 *time_end, int flush)
+int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, int64_t *time_stamp, int64_t *time_end, int flush)
 {
 #if HAVE_ARMV7
-    INT64 store_reg[8];
+    int64_t store_reg[8];
 #endif
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
@@ -4814,7 +4814,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     // adjust frame rates based on timestamps given
     if (!cm->refresh_alt_ref_frame)
     {
-        long long this_duration;
+        int64_t this_duration;
         int step = 0;
 
         if (cpi->source->ts_start == cpi->first_time_stamp_ever)
@@ -4824,7 +4824,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         }
         else
         {
-            long long last_duration;
+            int64_t last_duration;
 
             this_duration = cpi->source->ts_end - cpi->last_end_time_stamp_seen;
             last_duration = cpi->last_end_time_stamp_seen
@@ -5000,7 +5000,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 int y_samples = orig->y_height * orig->y_width ;
                 int uv_samples = orig->uv_height * orig->uv_width ;
                 int t_samples = y_samples + 2 * uv_samples;
-                long long sq_error;
+                int64_t sq_error;
 
                 ye = calc_plane_error(orig->y_buffer, orig->y_stride,
                   recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height,

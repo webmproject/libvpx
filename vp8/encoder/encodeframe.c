@@ -140,7 +140,7 @@ static unsigned int mb_activity_measure( VP8_COMP *cpi, MACROBLOCK *x,
 
 // Calculate an "average" mb activity value for the frame
 #define ACT_MEDIAN 0
-static void calc_av_activity( VP8_COMP *cpi, INT64 activity_sum )
+static void calc_av_activity( VP8_COMP *cpi, int64_t activity_sum )
 {
 #if ACT_MEDIAN
     // Find median: Simple n^2 algorithm for experimentation
@@ -208,9 +208,9 @@ static void calc_activity_index( VP8_COMP *cpi, MACROBLOCK *x )
     VP8_COMMON *const cm = & cpi->common;
     int mb_row, mb_col;
 
-    INT64 act;
-    INT64 a;
-    INT64 b;
+    int64_t act;
+    int64_t a;
+    int64_t b;
 
 #if OUTPUT_NORM_ACT_STATS
     FILE *f = fopen("norm_act.stt", "a");
@@ -274,7 +274,7 @@ static void build_activity_map( VP8_COMP *cpi )
 
     int mb_row, mb_col;
     unsigned int mb_activity;
-    INT64 activity_sum = 0;
+    int64_t activity_sum = 0;
 
     // for each macroblock row in image
     for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
@@ -341,15 +341,15 @@ void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x)
     x->errorperbit = x->rdmult * 100 /(110 * x->rddiv);
     x->errorperbit += (x->errorperbit==0);
 #else
-    INT64 a;
-    INT64 b;
-    INT64 act = *(x->mb_activity_ptr);
+    int64_t a;
+    int64_t b;
+    int64_t act = *(x->mb_activity_ptr);
 
     // Apply the masking to the RD multiplier.
     a = act + (2*cpi->activity_avg);
     b = (2*act) + cpi->activity_avg;
 
-    x->rdmult = (unsigned int)(((INT64)x->rdmult*b + (a>>1))/a);
+    x->rdmult = (unsigned int)(((int64_t)x->rdmult*b + (a>>1))/a);
     x->errorperbit = x->rdmult * 100 /(110 * x->rddiv);
     x->errorperbit += (x->errorperbit==0);
 #endif
@@ -1102,18 +1102,18 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x )
 #if USE_ACT_INDEX
     x->act_zbin_adj = *(x->mb_activity_ptr);
 #else
-    INT64 a;
-    INT64 b;
-    INT64 act = *(x->mb_activity_ptr);
+    int64_t a;
+    int64_t b;
+    int64_t act = *(x->mb_activity_ptr);
 
     // Apply the masking to the RD multiplier.
     a = act + 4*cpi->activity_avg;
     b = 4*act + cpi->activity_avg;
 
     if ( act > cpi->activity_avg )
-        x->act_zbin_adj = (int)(((INT64)b + (a>>1))/a) - 1;
+        x->act_zbin_adj = (int)(((int64_t)b + (a>>1))/a) - 1;
     else
-        x->act_zbin_adj = 1 - (int)(((INT64)a + (b>>1))/b);
+        x->act_zbin_adj = 1 - (int)(((int64_t)a + (b>>1))/b);
 #endif
 }
 

@@ -530,8 +530,8 @@ void vp8_first_pass(VP8_COMP *cpi)
     YV12_BUFFER_CONFIG *gld_yv12 = &cm->yv12_fb[cm->gld_fb_idx];
     int recon_y_stride = lst_yv12->y_stride;
     int recon_uv_stride = lst_yv12->uv_stride;
-    long long intra_error = 0;
-    long long coded_error = 0;
+    int64_t intra_error = 0;
+    int64_t coded_error = 0;
 
     int sum_mvr = 0, sum_mvc = 0;
     int sum_mvr_abs = 0, sum_mvc_abs = 0;
@@ -620,7 +620,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             this_error += intrapenalty;
 
             // Cumulative intra error total
-            intra_error += (long long)this_error;
+            intra_error += (int64_t)this_error;
 
             // Set up limit values for motion vectors to prevent them extending outside the UMV borders
             x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
@@ -757,7 +757,7 @@ void vp8_first_pass(VP8_COMP *cpi)
                 }
             }
 
-            coded_error += (long long)this_error;
+            coded_error += (int64_t)this_error;
 
             // adjust to the next column of macroblocks
             x->src.y_buffer += 16;
@@ -1219,8 +1219,8 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     cpi->twopass.total_coded_error_left = cpi->twopass.total_stats->coded_error;
     cpi->twopass.start_tot_err_left = cpi->twopass.total_error_left;
 
-    //cpi->twopass.bits_left = (long long)(cpi->twopass.total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
-    //cpi->twopass.bits_left -= (long long)(cpi->twopass.total_stats->count * two_pass_min_rate / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+    //cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+    //cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats->count * two_pass_min_rate / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
 
     // each frame can have a different duration, as the frame rate in the source
     // isn't guaranteed to be constant.   The frame rate prior to the first frame
@@ -1230,8 +1230,8 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     vp8_new_frame_rate(cpi, 10000000.0 * cpi->twopass.total_stats->count / cpi->twopass.total_stats->duration);
 
     cpi->output_frame_rate = cpi->oxcf.frame_rate;
-    cpi->twopass.bits_left = (long long)(cpi->twopass.total_stats->duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
-    cpi->twopass.bits_left -= (long long)(cpi->twopass.total_stats->duration * two_pass_min_rate / 10000000.0);
+    cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats->duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
+    cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats->duration * two_pass_min_rate / 10000000.0);
     cpi->twopass.clip_bits_total = cpi->twopass.bits_left;
 
     // Calculate a minimum intra value to be used in determining the IIratio
@@ -2671,16 +2671,16 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         int max_bits = frame_max_bits(cpi);
 
         // Maximum bits for the kf group
-        long long max_grp_bits;
+        int64_t max_grp_bits;
 
         // Default allocation based on bits left and relative
         // complexity of the section
-        cpi->twopass.kf_group_bits = (long long)( cpi->twopass.bits_left *
+        cpi->twopass.kf_group_bits = (int64_t)( cpi->twopass.bits_left *
                                           ( kf_group_err /
                                             cpi->twopass.modified_error_left ));
 
         // Clip based on maximum per frame rate defined by the user.
-        max_grp_bits = (long long)max_bits * (long long)cpi->twopass.frames_to_key;
+        max_grp_bits = (int64_t)max_bits * (int64_t)cpi->twopass.frames_to_key;
         if (cpi->twopass.kf_group_bits > max_grp_bits)
             cpi->twopass.kf_group_bits = max_grp_bits;
 
@@ -2697,19 +2697,19 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 int high_water_mark = (opt_buffer_lvl +
                                        cpi->oxcf.maximum_buffer_size) >> 1;
 
-                long long av_group_bits;
+                int64_t av_group_bits;
 
                 // Av bits per frame * number of frames
-                av_group_bits = (long long)cpi->av_per_frame_bandwidth *
-                                (long long)cpi->twopass.frames_to_key;
+                av_group_bits = (int64_t)cpi->av_per_frame_bandwidth *
+                                (int64_t)cpi->twopass.frames_to_key;
 
                 // We are at or above the maximum.
                 if (cpi->buffer_level >= high_water_mark)
                 {
-                    long long min_group_bits;
+                    int64_t min_group_bits;
 
                     min_group_bits = av_group_bits +
-                                     (long long)(buffer_lvl -
+                                     (int64_t)(buffer_lvl -
                                                  high_water_mark);
 
                     if (cpi->twopass.kf_group_bits < min_group_bits)
@@ -2718,11 +2718,11 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 // We are above optimal but below the maximum
                 else if (cpi->twopass.kf_group_bits < av_group_bits)
                 {
-                    long long bits_below_av = av_group_bits -
+                    int64_t bits_below_av = av_group_bits -
                                               cpi->twopass.kf_group_bits;
 
                     cpi->twopass.kf_group_bits +=
-                       (long long)((double)bits_below_av *
+                       (int64_t)((double)bits_below_av *
                                    (double)(buffer_lvl - opt_buffer_lvl) /
                                    (double)(high_water_mark - opt_buffer_lvl));
                 }
@@ -3043,8 +3043,8 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
         else
         {
-            long long clip_bits = (long long)(cpi->twopass.total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
-            long long over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;
+            int64_t clip_bits = (int64_t)(cpi->twopass.total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+            int64_t over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;
 
             if ((last_kf_resampled && (kf_q > cpi->worst_quality)) ||                                               // If triggered last time the threshold for triggering again is reduced
                 ((kf_q > cpi->worst_quality) &&                                                                  // Projected Q higher than allowed and ...

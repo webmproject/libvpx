@@ -723,7 +723,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
     {
         unsigned int lib_flags;
         YV12_BUFFER_CONFIG sd;
-        INT64 dst_time_stamp, dst_end_time_stamp;
+        int64_t dst_time_stamp, dst_end_time_stamp;
         unsigned long size, cx_data_sz;
         unsigned char *cx_data;
 
