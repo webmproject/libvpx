@@ -17,7 +17,6 @@ BEGIN
 DEFINE(detok_scan,                              offsetof(DETOK, scan));
 DEFINE(detok_ptr_block2leftabove,               offsetof(DETOK, ptr_block2leftabove));
 DEFINE(detok_coef_tree_ptr,                     offsetof(DETOK, vp8_coef_tree_ptr));
-DEFINE(detok_teb_base_ptr,                      offsetof(DETOK, teb_base_ptr));
 DEFINE(detok_norm_ptr,                          offsetof(DETOK, norm_ptr));
 DEFINE(detok_ptr_coef_bands_x,                  offsetof(DETOK, ptr_coef_bands_x));
 
