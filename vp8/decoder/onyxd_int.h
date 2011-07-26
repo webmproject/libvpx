@@ -44,21 +44,6 @@ typedef struct
     int size;
 } DATARATE;
 
-#if CONFIG_EXTEND_QRANGE
-typedef struct
-{
-    INT16        min_val;
-    INT16        Length;
-    UINT8 Probs[14];
-} TOKENEXTRABITS;
-#else
-typedef struct
-{
-    INT16        min_val;
-    INT16        Length;
-    UINT8 Probs[12];
-} TOKENEXTRABITS;
-#endif
 typedef struct
 {
     int const *scan;
@@ -67,7 +52,6 @@ typedef struct
 #endif
     UINT8 const *ptr_block2leftabove;
     vp8_tree_index const *vp8_coef_tree_ptr;
-    TOKENEXTRABITS const *teb_base_ptr;
     unsigned char *norm_ptr;
     UINT8 *ptr_coef_bands_x;
 #if CONFIG_T8X8
