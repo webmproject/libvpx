@@ -427,7 +427,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
     if (!res && ctx->pbi)
     {
         YV12_BUFFER_CONFIG sd;
-        INT64 time_stamp = 0, time_end_stamp = 0;
+        int64_t time_stamp = 0, time_end_stamp = 0;
         vp8_ppflags_t flags = {0};
 
         if (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC)

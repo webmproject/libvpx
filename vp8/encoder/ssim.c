@@ -73,8 +73,8 @@ void ssim_parms_8x8_c
      }
 }
 
-const static long long cc1 =  26634; // (64^2*(.01*255)^2
-const static long long cc2 = 239708; // (64^2*(.03*255)^2
+const static int64_t cc1 =  26634; // (64^2*(.01*255)^2
+const static int64_t cc2 = 239708; // (64^2*(.03*255)^2
 
 static double similarity
 (
@@ -86,19 +86,19 @@ static double similarity
     int count
 )
 {
-    long long ssim_n, ssim_d;
-    long long c1, c2;
+    int64_t ssim_n, ssim_d;
+    int64_t c1, c2;
 
     //scale the constants by number of pixels
     c1 = (cc1*count*count)>>12;
     c2 = (cc2*count*count)>>12;
 
-    ssim_n = (2*sum_s*sum_r+ c1)*((long long) 2*count*sum_sxr-
-          (long long) 2*sum_s*sum_r+c2);
+    ssim_n = (2*sum_s*sum_r+ c1)*((int64_t) 2*count*sum_sxr-
+          (int64_t) 2*sum_s*sum_r+c2);
 
     ssim_d = (sum_s*sum_s +sum_r*sum_r+c1)*
-        ((long long)count*sum_sq_s-(long long)sum_s*sum_s +
-        (long long)count*sum_sq_r-(long long) sum_r*sum_r +c2) ;
+        ((int64_t)count*sum_sq_s-(int64_t)sum_s*sum_s +
+        (int64_t)count*sum_sq_r-(int64_t) sum_r*sum_r +c2) ;
 
     return ssim_n * 1.0 / ssim_d;
 }
@@ -124,11 +124,11 @@ long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
            const vp8_variance_rtcd_vtable_t *rtcd)
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
-    long long ssim3;
-    long long ssim_n1,ssim_n2;
-    long long ssim_d1,ssim_d2;
-    long long ssim_t1,ssim_t2;
-    long long c1, c2;
+    int64_t ssim3;
+    int64_t ssim_n1,ssim_n2;
+    int64_t ssim_d1,ssim_d2;
+    int64_t ssim_t1,ssim_t2;
+    int64_t c1, c2;
 
     // normalize by 256/64
     c1 = cc1*16;
@@ -137,12 +137,12 @@ long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
     rtcd->ssimpf(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
     ssim_n1 = (2*sum_s*sum_r+ c1);
 
-    ssim_n2 =((long long) 2*256*sum_sxr-(long long) 2*sum_s*sum_r+c2);
+    ssim_n2 =((int64_t) 2*256*sum_sxr-(int64_t) 2*sum_s*sum_r+c2);
 
-    ssim_d1 =((long long)sum_s*sum_s +(long long)sum_r*sum_r+c1);
+    ssim_d1 =((int64_t)sum_s*sum_s +(int64_t)sum_r*sum_r+c1);
 
-    ssim_d2 = (256 * (long long) sum_sq_s-(long long) sum_s*sum_s +
-                    (long long) 256*sum_sq_r-(long long) sum_r*sum_r +c2) ;
+    ssim_d2 = (256 * (int64_t) sum_sq_s-(int64_t) sum_s*sum_s +
+                    (int64_t) 256*sum_sq_r-(int64_t) sum_r*sum_r +c2) ;
 
     ssim_t1 = 256 - 256 * ssim_n1 / ssim_d1;
     ssim_t2 = 256 - 256 * ssim_n2 / ssim_d2;

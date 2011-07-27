@@ -38,7 +38,7 @@ typedef struct
 
 typedef struct
 {
-    INT64 time_stamp;
+    int64_t time_stamp;
     int size;
 } DATARATE;
 
@@ -109,7 +109,7 @@ typedef struct VP8Decompressor
 #endif
 
     vp8_reader *mbc;
-    INT64 last_time_stamp;
+    int64_t last_time_stamp;
     int   ready_for_new_data;
 
     DATARATE dr[16];
