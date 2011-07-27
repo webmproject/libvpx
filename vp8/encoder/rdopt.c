@@ -2016,9 +2016,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             mvp_full.as_mv.col = mvp.as_mv.col>>3;
             mvp_full.as_mv.row = mvp.as_mv.row>>3;
 
-            /* adjust mvp to make sure it is within MV range */
-            vp8_clamp_mv(&mvp_full, col_min, col_max, row_min, row_max);
-
             // Get intersection of UMV window and valid MV window to reduce # of checks in diamond search.
             if (x->mv_col_min < col_min )
                 x->mv_col_min = col_min;
