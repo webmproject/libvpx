@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <math.h>
+#include "vp8/common/findnearmv.h"
 
 #ifdef ENTROPY_STATS
 static int mv_ref_ct [31] [4] [2];
@@ -866,7 +867,7 @@ int vp8_hex_search
     unsigned char *what = (*(b->base_src) + b->src);
     int what_stride = b->src_stride;
     int in_what_stride = d->pre_stride;
-    int br = ref_mv->as_mv.row, bc = ref_mv->as_mv.col;
+    int br, bc;
     int_mv this_mv;
     unsigned int bestsad = 0x7fffffff;
     unsigned int thissad;
@@ -879,6 +880,11 @@ int vp8_hex_search
     int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
+
+    // adjust ref_mv to make sure it is within MV range
+    vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+    br = ref_mv->as_mv.row;
+    bc = ref_mv->as_mv.col;
 
     // Work out the start point for the search
     base_offset = (unsigned char *)(*(d->base_pre) + d->pre);
@@ -1043,8 +1049,8 @@ int vp8_diamond_search_sad
     int best_site = 0;
     int last_site = 0;
 
-    int ref_row = ref_mv->as_mv.row;
-    int ref_col = ref_mv->as_mv.col;
+    int ref_row;
+    int ref_col;
     int this_row_offset;
     int this_col_offset;
     search_site *ss;
@@ -1057,8 +1063,10 @@ int vp8_diamond_search_sad
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
+    vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+    ref_row = ref_mv->as_mv.row;
+    ref_col = ref_mv->as_mv.col;
     *num00 = 0;
-
     best_mv->as_mv.row = ref_row;
     best_mv->as_mv.col = ref_col;
 
@@ -1162,8 +1170,8 @@ int vp8_diamond_search_sadx4
     int best_site = 0;
     int last_site = 0;
 
-    int ref_row = ref_mv->as_mv.row;
-    int ref_col = ref_mv->as_mv.col;
+    int ref_row;
+    int ref_col;
     int this_row_offset;
     int this_col_offset;
     search_site *ss;
@@ -1176,6 +1184,9 @@ int vp8_diamond_search_sadx4
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
+    vp8_clamp_mv(ref_mv, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+    ref_row = ref_mv->as_mv.row;
+    ref_col = ref_mv->as_mv.col;
     *num00 = 0;
     best_mv->as_mv.row = ref_row;
     best_mv->as_mv.col = ref_col;
