@@ -669,8 +669,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 mvp_full.as_mv.col = mvp.as_mv.col>>3;
                 mvp_full.as_mv.row = mvp.as_mv.row>>3;
 
-                /* adjust mvp to make sure it is within MV range */
-                vp8_clamp_mv(&mvp_full, col_min, col_max, row_min, row_max);
             }else
             {
                 mvp.as_int = best_ref_mv.as_int;
