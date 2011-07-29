@@ -121,7 +121,7 @@ INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/v
 INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/vpx.exp)
 endif
 else
-INSTALL-LIBS-yes += $(LIBSUBDIR)/libvpx.a
+INSTALL-LIBS-$(CONFIG_STATIC) += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
@@ -177,12 +177,13 @@ endif
 else
 LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
-LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
+LIBS-$(CONFIG_STATIC) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
 BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
 LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
-LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)
+LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
+                           $(notdir $(LIBVPX_SO_SYMLINKS))
 $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
 $(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
 $(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
@@ -198,9 +199,18 @@ libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	$(qexec)echo "local: *; };" >> $@
 CLEAN-OBJS += libvpx.ver
 
-$(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)): $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)
-	@echo "    [LN]      $@"
-	$(qexec)ln -sf $(LIBVPX_SO) $@
+define libvpx_symlink_template
+$(1): $(2)
+	@echo "    [LN]      $$@"
+	$(qexec)ln -sf $(LIBVPX_SO) $$@
+endef
+
+$(eval $(call libvpx_symlink_template,\
+    $(addprefix $(BUILD_PFX),$(notdir $(LIBVPX_SO_SYMLINKS))),\
+    $(BUILD_PFX)$(LIBVPX_SO)))
+$(eval $(call libvpx_symlink_template,\
+    $(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)),\
+    $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)))
 
 INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
 INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
