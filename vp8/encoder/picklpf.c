@@ -161,7 +161,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     if (cm->sharpness_level != cm->last_sharpness_level)
     {
         vp8_loop_filter_update_sharpness(&cm->lf_info, cm->sharpness_level);
-        cm->last_sharpness_level = cm->last_sharpness_level;
+        cm->last_sharpness_level = cm->sharpness_level;
     }
 
     // Start the search at the previous frame filter level unless it is now out of range.
