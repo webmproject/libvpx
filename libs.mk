@@ -89,6 +89,7 @@ $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
 
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx/vpx_integer.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/asm_offsets.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_timer.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
