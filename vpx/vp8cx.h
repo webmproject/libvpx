@@ -164,6 +164,20 @@ enum vp8e_enc_control_id
      * \note Valid range: 0..63
      */
     VP8E_SET_CQ_LEVEL,
+
+    /*!\brief Max data rate for Intra frames
+     *
+     * This value controls additional clamping on the maximum size of a
+     * keyframe. It is expressed as a percentage of the average
+     * per-frame bitrate, with the special (and default) value 0 meaning
+     * unlimited, or no additional clamping beyond the codec's built-in
+     * algorithm.
+     *
+     * For example, to allocate no more than 4.5 frames worth of bitrate
+     * to a keyframe, set this to 450.
+     *
+     */
+    VP8E_SET_MAX_INTRA_BITRATE_PCT,
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -294,6 +308,9 @@ VPX_CTRL_USE_TYPE(VP8E_SET_CQ_LEVEL     ,      unsigned int)
 
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER,     int *)
 VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
+
+VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
+
 
 /*! @} - end defgroup vp8_encoder */
 #include "vpx_codec_impl_bottom.h"
