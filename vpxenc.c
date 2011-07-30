@@ -1016,14 +1016,11 @@ static const arg_def_t buf_initial_sz     = ARG_DEF(NULL, "buf-initial-sz", 1,
         "Client initial buffer size (ms)");
 static const arg_def_t buf_optimal_sz     = ARG_DEF(NULL, "buf-optimal-sz", 1,
         "Client optimal buffer size (ms)");
-static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
-        "Max I-frame bitrate (pct)");
 static const arg_def_t *rc_args[] =
 {
     &dropframe_thresh, &resize_allowed, &resize_up_thresh, &resize_down_thresh,
     &end_usage, &target_bitrate, &min_quantizer, &max_quantizer,
     &undershoot_pct, &overshoot_pct, &buf_sz, &buf_initial_sz, &buf_optimal_sz,
-    &max_intra_rate_pct,
     NULL
 };
 
@@ -1087,12 +1084,14 @@ static const arg_def_t tune_ssim = ARG_DEF_ENUM(NULL, "tune", 1,
                                    "Material to favor", tuning_enum);
 static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
                                    "Constrained Quality Level");
+static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
+        "Max I-frame bitrate (pct)");
 
 static const arg_def_t *vp8_args[] =
 {
     &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
     &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-    &tune_ssim, &cq_level, NULL
+    &tune_ssim, &cq_level, &max_intra_rate_pct, NULL
 };
 static const int vp8_arg_ctrl_map[] =
 {
@@ -1100,7 +1099,7 @@ static const int vp8_arg_ctrl_map[] =
     VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
     VP8E_SET_TOKEN_PARTITIONS,
     VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH , VP8E_SET_ARNR_TYPE,
-    VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, 0
+    VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT, 0
 };
 #endif
 
@@ -1639,8 +1638,6 @@ int main(int argc, const char **argv_)
             cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &target_bitrate, argi))
             cfg.rc_target_bitrate = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &max_intra_rate_pct, argi))
-            cfg.rc_max_intra_bitrate_pct = arg_parse_uint(&arg);
         else if (arg_match(&arg, &min_quantizer, argi))
             cfg.rc_min_quantizer = arg_parse_uint(&arg);
         else if (arg_match(&arg, &max_quantizer, argi))
