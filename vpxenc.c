@@ -971,7 +971,7 @@ static const struct arg_enum_list stereo_mode_enum[] = {
 static const arg_def_t stereo_mode      = ARG_DEF_ENUM(NULL, "stereo-mode", 1,
         "Stereo 3D video format", stereo_mode_enum);
 static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
-        "Stream timebase (see below)");
+        "Output timestamp precision (fractional seconds)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
         "Enable error resiliency features");
 static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
@@ -1127,7 +1127,7 @@ static void usage_exit()
     arg_show_usage(stdout, vp8_args);
 #endif
     fprintf(stderr, "\nStream timebase (--timebase):\n"
-            "  This is the unit of time used to represent frame timestamps,\n"
+            "  The desired precision of timestamps in the output, expressed\n"
             "  in fractional seconds. Default is 1/1000.\n");
     fprintf(stderr, "\n"
            "Included encoders:\n"
