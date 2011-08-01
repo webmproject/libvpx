@@ -19,7 +19,9 @@
 #include "entropy.h"
 #include "idct.h"
 #include "recon.h"
+#if CONFIG_POSTPROC
 #include "postproc.h"
+#endif
 
 /*#ifdef PACKET_TESTING*/
 #include "header.h"
@@ -75,7 +77,9 @@ typedef struct VP8_COMMON_RTCD
     vp8_recon_rtcd_vtable_t       recon;
     vp8_subpix_rtcd_vtable_t      subpix;
     vp8_loopfilter_rtcd_vtable_t  loopfilter;
+#if CONFIG_POSTPROC
     vp8_postproc_rtcd_vtable_t    postproc;
+#endif
     int                           flags;
 #else
     int unused;
@@ -201,7 +205,9 @@ typedef struct VP8Common
 #if CONFIG_MULTITHREAD
     int processor_core_count;
 #endif
+#if CONFIG_POSTPROC
     struct postproc_state  postproc_state;
+#endif
 } VP8_COMMON;
 
 #endif
