@@ -13,8 +13,8 @@
 
 VP8_DX_SRCS-$(ARCH_ARM)  += decoder/arm/arm_dsystemdependent.c
 VP8_CX_SRCS-$(ARCH_ARM)  += decoder/asm_dec_offsets.c
-
 VP8_DX_SRCS-$(ARCH_ARM)  += decoder/arm/dequantize_arm.c
+VP8_DX_SRCS-$(ARCH_ARM)  += decoder/arm/dequantize_arm.h
 
 #File list for armv6
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequant_dc_idct_v6$(ASM)
