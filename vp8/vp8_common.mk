@@ -15,6 +15,7 @@ VP8_COMMON_SRCS-yes += common/ppflags.h
 VP8_COMMON_SRCS-yes += common/onyx.h
 VP8_COMMON_SRCS-yes += common/onyxd.h
 VP8_COMMON_SRCS-yes += common/alloccommon.c
+VP8_COMMON_SRCS-yes += common/asm_com_offsets.c
 VP8_COMMON_SRCS-yes += common/blockd.c
 VP8_COMMON_SRCS-yes += common/coefupdateprobs.h
 VP8_COMMON_SRCS-yes += common/debugmodes.c
@@ -101,7 +102,6 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
 # common (c)
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/asm_com_offsets.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.h
