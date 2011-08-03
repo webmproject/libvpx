@@ -180,7 +180,7 @@ endif
 else
 LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
-LIBS-$(CONFIG_STATIC) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
+LIBS-$(if $(BUILD_LIBVPX),$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
 BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
