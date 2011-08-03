@@ -2594,6 +2594,8 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         cpi->Source = &cpi->scaled_source;
 #endif
     }
+    else
+        cpi->Source = sd;
 }
 
 
