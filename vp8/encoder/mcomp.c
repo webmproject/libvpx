@@ -661,6 +661,7 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     unsigned char *z = (*(b->base_src) + b->src);
     int left, right, up, down, diag;
     unsigned int sse;
+    int whichdir ;
     int thismse;
     int y_stride;
 
@@ -740,8 +741,6 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         *sse1 = sse;
     }
 
-    // somewhat strangely not doing all the diagonals for half pel is slower than doing them.
-#if 0
     // now check 1 more diagonal -
     whichdir = (left < right ? 0 : 1) + (up < down ? 0 : 2);
     this_mv = startmv;
@@ -749,39 +748,28 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     switch (whichdir)
     {
     case 0:
-        this_mv.col = (this_mv.col - 8) | 4;
-        this_mv.row = (this_mv.row - 8) | 4;
-        diag = vfp->svf(y - 1 - y_stride, y_stride, 4, 4, z, b->src_stride, &sse);
+        this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
+        this_mv.as_mv.row = (this_mv.as_mv.row - 8) | 4;
+        thismse = vfp->svf_halfpix_hv(y - 1 - y_stride, y_stride, z, b->src_stride, &sse);
         break;
     case 1:
-        this_mv.col += 4;
-        this_mv.row = (this_mv.row - 8) | 4;
-        diag = vfp->svf(y - y_stride, y_stride, 4, 4, z, b->src_stride, &sse);
+        this_mv.as_mv.col += 4;
+        this_mv.as_mv.row = (this_mv.as_mv.row - 8) | 4;
+        thismse = vfp->svf_halfpix_hv(y - y_stride, y_stride, z, b->src_stride, &sse);
         break;
     case 2:
-        this_mv.col = (this_mv.col - 8) | 4;
-        this_mv.row += 4;
-        diag = vfp->svf(y - 1, y_stride, 4, 4, z, b->src_stride, &sse);
+        this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
+        this_mv.as_mv.row += 4;
+        thismse = vfp->svf_halfpix_hv(y - 1, y_stride, z, b->src_stride, &sse);
         break;
     case 3:
-        this_mv.col += 4;
-        this_mv.row += 4;
-        diag = vfp->svf(y, y_stride, 4, 4, z, b->src_stride, &sse);
+    default:
+        this_mv.as_mv.col += 4;
+        this_mv.as_mv.row += 4;
+        thismse = vfp->svf_halfpix_hv(y, y_stride, z, b->src_stride, &sse);
         break;
     }
 
-    diag += mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-
-    if (diag < bestmse)
-    {
-        *bestmv = this_mv;
-        bestmse = diag;
-    }
-
-#else
-    this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
-    this_mv.as_mv.row = (this_mv.as_mv.row - 8) | 4;
-    thismse = vfp->svf_halfpix_hv(y - 1 - y_stride, y_stride, z, b->src_stride, &sse);
     diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
 
     if (diag < bestmse)
@@ -792,44 +780,6 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         *sse1 = sse;
     }
 
-    this_mv.as_mv.col += 8;
-    thismse = vfp->svf_halfpix_hv(y - y_stride, y_stride, z, b->src_stride, &sse);
-    diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-
-    if (diag < bestmse)
-    {
-        *bestmv = this_mv;
-        bestmse = diag;
-        *distortion = thismse;
-        *sse1 = sse;
-    }
-
-    this_mv.as_mv.col = (this_mv.as_mv.col - 8) | 4;
-    this_mv.as_mv.row = startmv.as_mv.row + 4;
-    thismse = vfp->svf_halfpix_hv(y - 1, y_stride, z, b->src_stride, &sse);
-    diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-
-    if (diag < bestmse)
-    {
-        *bestmv = this_mv;
-        bestmse = diag;
-        *distortion = thismse;
-        *sse1 = sse;
-    }
-
-    this_mv.as_mv.col += 8;
-    thismse = vfp->svf_halfpix_hv(y, y_stride, z, b->src_stride, &sse);
-    diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-
-    if (diag < bestmse)
-    {
-        *bestmv = this_mv;
-        bestmse = diag;
-        *distortion = thismse;
-        *sse1 = sse;
-    }
-
-#endif
     return bestmse;
 }
 
