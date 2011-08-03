@@ -180,7 +180,7 @@ endif
 else
 LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
-LIBS-$(CONFIG_STATIC) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
+LIBS-$(if $(BUILD_LIBVPX),$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
 BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
@@ -272,20 +272,20 @@ $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 #
 
 ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
-    asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.S
+    $(BUILD_PFX)asm_com_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
 	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(VP8_PREFIX)common/asm_com_offsets.c.S: vp8/common/asm_com_offsets.c
-    CLEAN-OBJS += asm_com_offsets.asm $(VP8_PREFIX)common/asm_com_offsets.c.S
+    $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S: $(VP8_PREFIX)common/asm_com_offsets.c
+    CLEAN-OBJS += $(BUILD_PFX)asm_com_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
 
-    asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.S
+    $(BUILD_PFX)asm_enc_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
 	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(VP8_PREFIX)encoder/asm_enc_offsets.c.S: vp8/encoder/asm_enc_offsets.c
-    CLEAN-OBJS += asm_enc_offsets.asm $(VP8_PREFIX)encoder/asm_enc_offsets.c.S
+    $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S: $(VP8_PREFIX)encoder/asm_enc_offsets.c
+    CLEAN-OBJS += $(BUILD_PFX)asm_enc_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
 
-    asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.S
+    $(BUILD_PFX)asm_dec_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
 	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(VP8_PREFIX)decoder/asm_dec_offsets.c.S: vp8/decoder/asm_dec_offsets.c
-    CLEAN-OBJS += asm_dec_offsets.asm $(VP8_PREFIX)decoder/asm_dec_offsets.c.S
+    $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S: $(VP8_PREFIX)decoder/asm_dec_offsets.c
+    CLEAN-OBJS += $(BUILD_PFX)asm_dec_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
 else
   ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
     asm_com_offsets.asm: obj_int_extract
