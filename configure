@@ -224,6 +224,7 @@ EXPERIMENT_LIST="
     csm
     i8x8
     qimode
+    uvintra
 "
 CONFIG_LIST="
     external_build

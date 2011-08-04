@@ -155,7 +155,13 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
            }
             else
 #endif
-            m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc, pbi->common.kf_uv_mode_prob);
+#if CONFIG_UVINTRA
+            m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+                pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
+#else
+            m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+                pbi->common.kf_uv_mode_prob);
+#endif
         }
 }
 

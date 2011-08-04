@@ -34,11 +34,41 @@ static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 0
 static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 1607, 915, 812, 811, 5455};
 static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 5874};
 #endif
+
+#if CONFIG_UVINTRA
+static const unsigned int uv_mode_cts  [VP8_UV_MODES] ={ 162, 41, 41, 12};
+/*
+static const unsigned int uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
+    { 180, 35, 35,  6},
+    { 152, 76, 20,  8},
+    { 152, 20, 76,  8},
+    { 172, 36, 36, 12},
+    { 162, 41, 41, 12},
+    { 162, 41, 41, 12},
+};
+*/
+#else
 static const unsigned int uv_mode_cts  [VP8_UV_MODES] = { 59483, 13605, 16492, 4230};
+#endif
+
+
 #if CONFIG_I8X8
 static const unsigned int i8x8_mode_cts  [VP8_UV_MODES] = {93, 69, 81, 13};
 #endif
+
+
+#if CONFIG_UVINTRA
+static const unsigned int kf_uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
+    { 180, 34, 34,  8},
+    { 132, 74, 40, 10},
+    { 132, 40, 74, 10},
+    { 152, 46, 40, 18},
+    { 142, 51, 45, 18},
+    { 142, 51, 45, 18},
+};
+#else
 static const unsigned int kf_uv_mode_cts[VP8_UV_MODES] = { 5319, 1904, 1703, 674};
+#endif
 
 static const unsigned int bmode_cts[VP8_BINTRAMODES] =
 {
@@ -259,11 +289,22 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
         x->fc.uv_mode_prob, bct, uv_mode_cts,
         256, 1
     );
+#if CONFIG_UVINTRA
+    {
+        int i;
+        for (i=0;i<VP8_YMODES;i++)
+            vp8_tree_probs_from_distribution(
+                VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
+                x->kf_uv_mode_prob[i], bct, kf_uv_mode_cts[i],
+                256, 1);
+    }
+#else
     vp8_tree_probs_from_distribution(
         VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
         x->kf_uv_mode_prob, bct, kf_uv_mode_cts,
         256, 1
     );
+#endif
 #if CONFIG_I8X8
     vp8_tree_probs_from_distribution(
         VP8_UV_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,

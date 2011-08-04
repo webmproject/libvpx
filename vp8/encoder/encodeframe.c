@@ -75,8 +75,17 @@ unsigned int inter_y_modes[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 unsigned int inter_uv_modes[VP8_UV_MODES] = {0, 0, 0, 0};
 unsigned int inter_b_modes[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 unsigned int y_modes[VP8_YMODES] = {0, 0, 0, 0, 0};
-unsigned int i8x8_modes[VP8_I8X8_MODES]={0};
+unsigned int i8x8_modes[VP8_I8X8_MODES]={0  };
 unsigned int uv_modes[VP8_UV_MODES] = {0, 0, 0, 0};
+unsigned int uv_modes_y[VP8_YMODES][VP8_UV_MODES]=
+{
+{0, 0, 0, 0},
+{0, 0, 0, 0},
+{0, 0, 0, 0},
+{0, 0, 0, 0},
+{0, 0, 0, 0},
+{0, 0, 0, 0}
+};
 unsigned int b_modes[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
@@ -1462,6 +1471,7 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
     const int is_key = cpi->common.frame_type == KEY_FRAME;
 
     ++ (is_key ? uv_modes : inter_uv_modes)[uvm];
+    ++ uv_modes_y[m][uvm];
 
     if (m == B_PRED)
     {

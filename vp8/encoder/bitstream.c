@@ -1359,7 +1359,11 @@ static void write_kfmodes(VP8_COMP *cpi)
             }
             else
 #endif
+#if CONFIG_UVINTRA
+            write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
+#else
             write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob);
+#endif
         }
         //printf("\n");
         m++;    // skip L prediction border

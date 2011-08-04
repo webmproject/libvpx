@@ -190,7 +190,11 @@ typedef struct VP8Common
 #else
     vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
 #endif
+#if CONFIG_UVINTRA
+    vp8_prob kf_uv_mode_prob[VP8_YMODES] [VP8_UV_MODES-1];
+#else
     vp8_prob kf_uv_mode_prob [VP8_UV_MODES-1];
+#endif
 #if CONFIG_I8X8
     vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
 #endif

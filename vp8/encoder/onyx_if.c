@@ -147,6 +147,7 @@ extern INT64 Sectionbits[500];
 extern int y_modes[VP8_YMODES]  ;
 extern int i8x8_modes[VP8_I8X8_MODES];
 extern int uv_modes[VP8_UV_MODES] ;
+extern int uv_modes_y[VP8_YMODES][VP8_UV_MODES];
 extern int b_modes[10]  ;
 extern int inter_y_modes[10] ;
 extern int inter_uv_modes[4] ;
@@ -2476,6 +2477,15 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4]);
 #endif
             fprintf(f, "UV:%8d, %8d, %8d, %8d\n", uv_modes[0], uv_modes[1], uv_modes[2], uv_modes[3]);
+            fprintf(f, "Y-UV:\n");
+            {
+                int i;
+                for(i=0;i<VP8_YMODES;i++)
+                {
+                    fprintf(f, "%2d:%8d, %8d, %8d, %8d\n",i,uv_modes_y[i][0],
+                        uv_modes_y[i][1], uv_modes_y[i][2], uv_modes_y[i][3]);
+                }
+            }
             fprintf(f, "B: ");
             {
                 int i;
