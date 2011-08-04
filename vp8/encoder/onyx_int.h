@@ -81,7 +81,11 @@ typedef struct
     /* interframe intra mode probs */
     vp8_prob ymode_prob[VP8_YMODES-1], uv_mode_prob[VP8_UV_MODES-1];
     /* keyframe intra mode probs */
+#if CONFIG_QIMODE
+    vp8_prob kf_ymode_prob[8][VP8_YMODES-1], kf_uv_mode_prob[VP8_UV_MODES-1];
+#else
     vp8_prob kf_ymode_prob[VP8_YMODES-1], kf_uv_mode_prob[VP8_UV_MODES-1];
+#endif
     /* intra MB type cts this frame */
     int ymode_count[VP8_YMODES], uv_mode_count[VP8_UV_MODES];
 

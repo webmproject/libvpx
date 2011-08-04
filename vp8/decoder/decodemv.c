@@ -90,9 +90,12 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
                 m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
             else
                 m->mbmi.mb_skip_coeff = 0;
-
+#if CONFIG_QIMODE
+            y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc,
+                pbi->common.kf_ymode_prob[pbi->common.base_qindex>>4]);
+#else
             y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc, pbi->common.kf_ymode_prob);
-
+#endif
             m->mbmi.ref_frame = INTRA_FRAME;
 
             if ((m->mbmi.mode = y_mode) == B_PRED)
@@ -124,6 +127,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
                  }
                 //printf("%2d%2d%2d%2d\n", m->bmi[0].as_mode,m->bmi[2].as_mode,
                 //                       m->bmi[8].as_mode,m->bmi[10].as_mode);
+                                         */
            }
             else
 #endif

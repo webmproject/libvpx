@@ -222,6 +222,7 @@ EXPERIMENT_LIST="
     t8x8
     csm
     i8x8
+    qimode
 "
 CONFIG_LIST="
     external_build

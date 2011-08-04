@@ -183,7 +183,11 @@ typedef struct VP8Common
     /* keyframe block modes are predicted by their above, left neighbors */
 
     vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
+#if CONFIG_QIMODE
+    vp8_prob kf_ymode_prob[8][VP8_YMODES-1];  /* keyframe "" */
+#else
     vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
+#endif
     vp8_prob kf_uv_mode_prob [VP8_UV_MODES-1];
 #if CONFIG_I8X8
     vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];

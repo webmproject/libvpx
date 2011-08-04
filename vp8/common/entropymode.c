@@ -13,7 +13,22 @@
 #include "entropy.h"
 #include "vpx_mem/vpx_mem.h"
 #if CONFIG_I8X8
+
+#if CONFIG_QIMODE
+static const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
+{
+    {17,  6,  5,  2, 22, 203},
+    {27, 13, 13,  6, 27, 170},
+    {35, 17, 18,  9, 26, 152},
+    {45, 22, 24, 12, 27, 126},
+    {58, 26, 29, 13, 26, 104},
+    {73, 33, 36, 17, 20,  78},
+    {88, 38, 39, 19, 16,  57},
+    {99, 42, 43, 21, 12,  39},
+};
+#else
 static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 49, 22, 23, 11, 23, 128};
+#endif
 static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 0, 5874};
 #else
 static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 1607, 915, 812, 811, 5455};
@@ -222,11 +237,23 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
         x->fc.ymode_prob, bct, y_mode_cts,
         256, 1
     );
+#if CONFIG_QIMODE
+    {
+        int i;
+        for (i=0;i<8;i++)
+        vp8_tree_probs_from_distribution(
+            VP8_YMODES, vp8_kf_ymode_encodings, vp8_kf_ymode_tree,
+            x->kf_ymode_prob[i], bct, kf_y_mode_cts[i],
+            256, 1
+            );
+    }
+#else
     vp8_tree_probs_from_distribution(
         VP8_YMODES, vp8_kf_ymode_encodings, vp8_kf_ymode_tree,
         x->kf_ymode_prob, bct, kf_y_mode_cts,
         256, 1
     );
+#endif
     vp8_tree_probs_from_distribution(
         VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
         x->fc.uv_mode_prob, bct, uv_mode_cts,

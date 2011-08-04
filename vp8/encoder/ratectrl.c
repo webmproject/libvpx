@@ -321,7 +321,6 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
     vp8_copy(cpi->common.fc.mvc, cc->mvc);
 
     vp8_copy(cpi->mb.mvcosts, cc->mvcosts);
-
     vp8_copy(cpi->common.kf_ymode_prob,   cc->kf_ymode_prob);
     vp8_copy(cpi->common.fc.ymode_prob,   cc->ymode_prob);
     vp8_copy(cpi->common.kf_uv_mode_prob,  cc->kf_uv_mode_prob);

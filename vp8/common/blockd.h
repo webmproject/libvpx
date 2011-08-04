@@ -25,6 +25,8 @@ void vpx_log(const char *format, ...);
 #define TRUE    1
 #define FALSE   0
 
+#define MODE_STATS
+
 /*#define DCPRED 1*/
 #define DCPREDSIMTHRESH 0
 #define DCPREDCNTTHRESH 3

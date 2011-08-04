@@ -1192,8 +1192,11 @@ static void write_kfmodes(VP8_COMP *cpi)
 
             if (c->mb_no_coeff_skip)
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
-
+#if CONFIG_QIMODE
+            kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->base_qindex>>4]);
+#else
             kfwrite_ymode(bc, ym, c->kf_ymode_prob);
+#endif
             if (ym == B_PRED)
             {
                 const int mis = c->mode_info_stride;
