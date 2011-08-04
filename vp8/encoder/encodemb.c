@@ -53,6 +53,25 @@ void vp8_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch)
     }
 }
 
+void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch)
+{
+    unsigned char *src_ptr = (*(be->base_src) + be->src);
+    short *diff_ptr = be->src_diff;
+    unsigned char *pred_ptr = bd->predictor;
+    int src_stride = be->src_stride;
+    int r, c;
+    for (r = 0; r < 8; r++)
+    {
+        for (c = 0; c < 8; c++)
+        {
+            diff_ptr[c] = src_ptr[c] - pred_ptr[c];
+        }
+        diff_ptr += pitch;
+        pred_ptr += pitch;
+        src_ptr  += src_stride;
+    }
+}
+
 void vp8_subtract_mbuv_c(short *diff, unsigned char *usrc, unsigned char *vsrc, unsigned char *pred, int stride)
 {
     short *udiff = diff + 256;

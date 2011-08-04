@@ -236,3 +236,83 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_recon_intra_mbuv(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
+
+#if CONFIG_I8X8
+void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
+                              MACROBLOCK *x, int ib)
+{
+    BLOCKD *b = &x->e_mbd.block[ib];
+    BLOCK *be = &x->block[ib];
+    const int iblock[4]={0,1,4,5};
+    int i;
+
+    RECON_INVOKE(&rtcd->common->recon, intra8x8_predict)
+                (b, b->bmi.as_mode, b->predictor);
+
+    for(i=0;i<4;i++)
+    {
+        b = &x->e_mbd.block[ib + iblock[i]];
+        be = &x->block[ib + iblock[i]];
+        ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
+        x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+        x->quantize_b(be, b);
+        vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
+        RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor,
+            b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+    }
+
+}
+
+extern const int vp8_i8x8_block[4];
+void vp8_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
+{
+    int i, ib;
+
+    for(i=0;i<4;i++)
+    {
+        ib = vp8_i8x8_block[i];
+        vp8_encode_intra8x8(rtcd, x, ib);
+    }
+
+}
+
+void vp8_encode_intra_uv4x4(const VP8_ENCODER_RTCD *rtcd,
+                              MACROBLOCK *x, int ib,
+                              int mode)
+{
+    BLOCKD *b = &x->e_mbd.block[ib];
+    BLOCK *be = &x->block[ib];
+
+    RECON_INVOKE(&rtcd->common->recon, intra_uv4x4_predict)
+                (b, mode, b->predictor);
+
+    ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 8);
+
+    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 16);
+
+    x->quantize_b(be, b);
+
+    vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 16);
+
+    RECON_INVOKE(&rtcd->common->recon, recon_uv)(b->predictor,
+        b->diff, *(b->base_dst) + b->dst, b->dst_stride);
+}
+
+
+
+void vp8_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
+{
+    int i, ib, mode;
+    BLOCKD *b;
+    for(i=0;i<4;i++)
+    {
+        ib = vp8_i8x8_block[i];
+        b = &x->e_mbd.block[ib];
+        mode = b->bmi.as_mode;
+        /*u */
+        vp8_encode_intra_uv4x4(rtcd, x, i+16, mode);
+        /*v */
+        vp8_encode_intra_uv4x4(rtcd, x, i+20, mode);
+    }
+}
+#endif

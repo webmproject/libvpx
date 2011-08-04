@@ -101,6 +101,7 @@ extern double vp8_calc_ssimg
 
 #endif
 
+//#define OUTPUT_YUV_REC
 
 #ifdef OUTPUT_YUV_SRC
 FILE *yuv_file;
@@ -137,9 +138,10 @@ unsigned int cnt_ef = 0;
 extern unsigned __int64 Sectionbits[500];
 #endif
 #ifdef MODE_STATS
-extern unsigned __int64 Sectionbits[50];
-extern int y_modes[5]  ;
-extern int uv_modes[4] ;
+extern INT64 Sectionbits[500];
+extern int y_modes[VP8_YMODES]  ;
+extern int i8x8_modes[VP8_I8X8_MODES];
+extern int uv_modes[VP8_UV_MODES] ;
 extern int b_modes[10]  ;
 extern int inter_y_modes[10] ;
 extern int inter_uv_modes[4] ;
@@ -2305,10 +2307,18 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 #ifdef MODE_STATS
         {
             extern int count_mb_seg[4];
-            FILE *f = fopen("modes.stt", "w");
+            char modes_stats_file[250];
+            FILE *f; 
             double dr = (double)cpi->oxcf.frame_rate * (double)cpi->bytes * (double)8 / (double)cpi->count / (double)1000 ;
+            sprintf(modes_stats_file, "modes_q%03d.stt",cpi->common.base_qindex);
+            f = fopen(modes_stats_file, "w");
             fprintf(f, "intra_mode in Intra Frames:\n");
+#if CONFIG_I8X8
+            fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4], y_modes[5]);
+            fprintf(f, "I8:%8d, %8d, %8d, %8d\n", i8x8_modes[0], i8x8_modes[1], i8x8_modes[2], i8x8_modes[3]);
+#else
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4]);
+#endif
             fprintf(f, "UV:%8d, %8d, %8d, %8d\n", uv_modes[0], uv_modes[1], uv_modes[2], uv_modes[3]);
             fprintf(f, "B: ");
             {
@@ -4622,7 +4632,7 @@ static void encode_frame_to_data_rate
         fclose(recon_file);
     }
 #endif
-#ifdef OUTPUT_YUV_REC
+#if OUTPUT_YUV_REC
     vp8_write_yuv_rec_frame(cm);
 #endif
 

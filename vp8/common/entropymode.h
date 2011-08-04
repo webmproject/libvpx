@@ -38,7 +38,9 @@ extern const vp8_tree_index vp8_bmode_tree[];
 extern const vp8_tree_index  vp8_ymode_tree[];
 extern const vp8_tree_index  vp8_kf_ymode_tree[];
 extern const vp8_tree_index  vp8_uv_mode_tree[];
-
+#if CONFIG_I8X8
+extern const vp8_tree_index  vp8_i8x8_mode_tree[];
+#endif
 extern const vp8_tree_index  vp8_mbsplit_tree[];
 extern const vp8_tree_index  vp8_mv_ref_tree[];
 extern const vp8_tree_index  vp8_sub_mv_ref_tree[];
@@ -46,6 +48,9 @@ extern const vp8_tree_index  vp8_sub_mv_ref_tree[];
 extern struct vp8_token_struct vp8_bmode_encodings   [VP8_BINTRAMODES];
 extern struct vp8_token_struct vp8_ymode_encodings   [VP8_YMODES];
 extern struct vp8_token_struct vp8_kf_ymode_encodings [VP8_YMODES];
+#if CONFIG_I8X8
+extern struct vp8_token_struct vp8_i8x8_mode_encodings  [VP8_UV_MODES];
+#endif
 extern struct vp8_token_struct vp8_uv_mode_encodings  [VP8_UV_MODES];
 extern struct vp8_token_struct vp8_mbsplit_encodings  [VP8_NUMMBSPLITS];
 

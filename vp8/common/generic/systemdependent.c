@@ -86,6 +86,9 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->recon.copy8x8     = vp8_copy_mem8x8_c;
     rtcd->recon.copy8x4     = vp8_copy_mem8x4_c;
     rtcd->recon.recon       = vp8_recon_b_c;
+#if CONFIG_I8X8
+    rtcd->recon.recon_uv    = vp8_recon_uv_b_c;
+#endif
     rtcd->recon.recon2      = vp8_recon2b_c;
     rtcd->recon.recon4      = vp8_recon4b_c;
     rtcd->recon.recon_mb    = vp8_recon_mb_c;
@@ -100,6 +103,14 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
         vp8_build_intra_predictors_mbuv_s;
     rtcd->recon.intra4x4_predict =
         vp8_intra4x4_predict;
+
+#if CONFIG_I8X8
+    rtcd->recon.intra8x8_predict =
+        vp8_intra8x8_predict;
+    rtcd->recon.intra_uv4x4_predict =
+        vp8_intra_uv4x4_predict;
+#endif
+
 
     rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_c;
     rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_c;

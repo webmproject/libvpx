@@ -70,11 +70,7 @@ void vp8_build_intra_predictors_mby(MACROBLOCKD *x)
                 {
                     average += yleft_col[i];
                 }
-
             }
-
-
-
             shift = 3 + x->up_available + x->left_available;
             expected_dc = (average + (1 << (shift - 1))) >> shift;
         }
@@ -135,6 +131,9 @@ void vp8_build_intra_predictors_mby(MACROBLOCKD *x)
 
     }
     break;
+#if CONIFG_I8X8
+    case I8X8_PRED:
+#endif
     case B_PRED:
     case NEARESTMV:
     case NEARMV:
@@ -193,8 +192,6 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
                 }
 
             }
-
-
 
             shift = 3 + x->up_available + x->left_available;
             expected_dc = (average + (1 << (shift - 1))) >> shift;
@@ -554,3 +551,184 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
         break;
     }
 }
+#if CONFIG_I8X8
+void vp8_intra8x8_predict(BLOCKD *x,
+                          int mode,
+                          unsigned char *predictor)
+{
+
+    unsigned char *yabove_row = *(x->base_dst) + x->dst - x->dst_stride;
+    unsigned char yleft_col[8];
+    unsigned char ytop_left = yabove_row[-1];
+    int r, c, i;
+
+    for (i = 0; i < 8; i++)
+    {
+        yleft_col[i] = (*(x->base_dst))[x->dst - 1 + i * x->dst_stride];
+    }
+    switch (mode)
+    {
+    case DC_PRED:
+        {
+            int expected_dc = 0;
+
+            for (i = 0; i < 8; i++)
+            {
+                expected_dc += yabove_row[i];
+                expected_dc += yleft_col[i];
+            }
+            expected_dc = (expected_dc + 8) >> 4;
+
+            for (r = 0; r < 8; r++)
+            {
+                for (c = 0; c < 8; c++)
+                {
+                    predictor[c] = expected_dc;
+                }
+                predictor += 16;
+            }
+        }
+        break;
+    case V_PRED:
+        {
+            for (r = 0; r < 8; r++)
+            {
+                for (c = 0; c < 8; c++)
+                {
+
+                    predictor[c] = yabove_row[c];
+                }
+                predictor += 16;
+            }
+
+        }
+        break;
+    case H_PRED:
+        {
+
+            for (r = 0; r < 8; r++)
+            {
+                for (c = 0; c < 8; c++)
+                {
+                    predictor[c] = yleft_col[r];
+                }
+                predictor += 16;
+            }
+        }
+        break;
+    case TM_PRED:
+        {
+            /* prediction similar to true_motion prediction */
+            for (r = 0; r < 8; r++)
+            {
+                for (c = 0; c < 8; c++)
+                {
+                    int pred = yabove_row[c] - ytop_left + yleft_col[r];
+                    if (pred < 0)
+                        pred = 0;
+
+                    if (pred > 255)
+                        pred = 255;
+                    predictor[c] = pred;
+                }
+
+                predictor += 16;
+            }
+        }
+        break;
+    }
+}
+
+void vp8_intra_uv4x4_predict(BLOCKD *x,
+                             int mode,
+                             unsigned char *predictor)
+{
+
+    unsigned char *above_row = *(x->base_dst) + x->dst - x->dst_stride;
+    unsigned char left_col[4];
+    unsigned char top_left = above_row[-1];
+    int r, c, i;
+
+    for (i = 0; i < 4; i++)
+    {
+        left_col[i] = (*(x->base_dst))[x->dst - 1 + i * x->dst_stride];
+    }
+    switch (mode)
+    {
+    case DC_PRED:
+        {
+            int expected_dc = 0;
+
+            for (i = 0; i < 4; i++)
+            {
+                expected_dc += above_row[i];
+                expected_dc += left_col[i];
+            }
+            expected_dc = (expected_dc + 4) >> 3;
+
+            for (r = 0; r < 4; r++)
+            {
+                for (c = 0; c < 4; c++)
+                {
+                    predictor[c] = expected_dc;
+                }
+                predictor += 8;
+            }
+        }
+        break;
+    case V_PRED:
+        {
+            for (r = 0; r < 4; r++)
+            {
+                for (c = 0; c < 4; c++)
+                {
+
+                    predictor[c] = above_row[c];
+                }
+                predictor += 8;
+            }
+
+        }
+        break;
+    case H_PRED:
+        {
+
+            for (r = 0; r < 4; r++)
+            {
+                for (c = 0; c < 4; c++)
+                {
+                    predictor[c] = left_col[r];
+                }
+                predictor += 8;
+            }
+        }
+        break;
+    case TM_PRED:
+        {
+            /* prediction similar to true_motion prediction */
+            for (r = 0; r < 4; r++)
+            {
+                for (c = 0; c < 4; c++)
+                {
+                    int pred = above_row[c] - top_left + left_col[r];
+                    if (pred < 0)
+                        pred = 0;
+
+                    if (pred > 255)
+                        pred = 255;
+                    predictor[c] = pred;
+                }
+
+                predictor += 8;
+            }
+        }
+        break;
+    }
+}
+
+
+/* TODO: try different ways of use Y-UV mode correlation
+ Current code assumes that a uv 4x4 block use same mode
+ as corresponding Y 8x8 area
+ */
+#endif

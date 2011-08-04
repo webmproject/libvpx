@@ -200,9 +200,13 @@ vp8_extra_bit_struct vp8_extra_bits[12] =
 };
 
 #include "default_coef_probs.h"
+#include "defaultcoefcounts.h"
 
 void vp8_default_coef_probs(VP8_COMMON *pc)
 {
+#if CONFIG_T8X8
+    int h;
+#endif
     vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
                    sizeof(default_coef_probs));
 #if CONFIG_T8X8

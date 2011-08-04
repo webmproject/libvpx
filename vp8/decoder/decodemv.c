@@ -39,7 +39,14 @@ static int vp8_kfread_ymode(vp8_reader *bc, const vp8_prob *p)
 
     return i;
 }
+#if CONFIG_I8X8
+static int vp8_read_i8x8_mode(vp8_reader *bc, const vp8_prob *p)
+{
+    const int i = vp8_treed_read(bc, vp8_i8x8_mode_tree, p);
 
+    return i;
+}
+#endif
 
 
 static int vp8_read_uv_mode(vp8_reader *bc, const vp8_prob *p)
@@ -61,7 +68,7 @@ static void vp8_read_mb_features(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x
             mi->segment_id = (unsigned char)(vp8_read(r, x->mb_segment_tree_probs[1]));
     }
 }
-
+extern const int vp8_i8x8_block[4];
 static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_col)
 {
     vp8_reader *const bc = & pbi->bc;
@@ -91,7 +98,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
             if ((m->mbmi.mode = y_mode) == B_PRED)
             {
                 int i = 0;
-
                 do
                 {
                     const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
@@ -101,7 +107,26 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
                 }
                 while (++i < 16);
             }
-
+#if CONFIG_I8X8
+            if((m->mbmi.mode = y_mode) == I8X8_PRED)
+            {
+                int i;
+                int mode8x8;
+                //printf("F%3d:%d:%d:", pbi->common.current_video_frame, mb_row, mb_col);
+                for(i=0;i<4;i++)
+                 {
+                     int ib = vp8_i8x8_block[i];
+                     mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
+                     m->bmi[ib+0].as_mode= mode8x8;
+                     m->bmi[ib+1].as_mode= mode8x8;
+                     m->bmi[ib+4].as_mode= mode8x8;
+                     m->bmi[ib+5].as_mode= mode8x8;
+                 }
+                //printf("%2d%2d%2d%2d\n", m->bmi[0].as_mode,m->bmi[2].as_mode,
+                //                       m->bmi[8].as_mode,m->bmi[10].as_mode);
+           }
+            else
+#endif
             m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc, pbi->common.kf_uv_mode_prob);
         }
 }
@@ -553,6 +578,22 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             else
                 read_mb_modes_mv(pbi, mi, &mi->mbmi, mb_row, mb_col);
 
+            //printf("%3d", mi->mbmi.mode);
+
+            /*
+            if(pbi->common.current_video_frame==7)
+            {
+                FILE *fmode=fopen("kfmode.txt", "a");
+                fprintf(fmode, "%3d:%3d:%d\n",mb_row, mb_col, mi->mbmi.mode);
+                fclose(fmode);
+
+            }*/
+            /*
+            if(mi->mbmi.mode==I8X8_PRED)
+            {
+                printf("F%3d:%d:%d\n", pbi->common.current_video_frame, mb_row, mb_col);
+            }
+            */
 #if CONFIG_ERROR_CONCEALMENT
             /* look for corruption. set mvs_corrupt_from_mb to the current
              * mb_num if the frame is corrupt from this macroblock. */
@@ -568,7 +609,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
             mi++;       /* next macroblock */
         }
-
+       // printf("\n");
         mi++;           /* skip left predictor each row */
     }
 }

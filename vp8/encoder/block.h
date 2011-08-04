@@ -98,6 +98,9 @@ typedef struct
     int mbmode_cost[2][MB_MODE_COUNT];
     int intra_uv_mode_cost[2][MB_MODE_COUNT];
     unsigned int bmode_costs[10][10][10];
+#if CONFIG_I8X8
+    unsigned int i8x8_mode_costs[MB_MODE_COUNT];
+#endif
     unsigned int inter_bmode_costs[B_MODE_COUNT];
 
     // These define limits to motion vector components to prevent them from extending outside the UMV borders

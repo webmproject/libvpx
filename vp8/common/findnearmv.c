@@ -51,7 +51,8 @@ void vp8_find_near_mvs
         if (above->mbmi.mv.as_int)
         {
             (++mv)->as_int = above->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame], refframe, mv, ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame],
+                refframe, mv, ref_frame_sign_bias);
             ++cntx;
         }
 
@@ -66,7 +67,8 @@ void vp8_find_near_mvs
             int_mv this_mv;
 
             this_mv.as_int = left->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame], refframe, &this_mv, ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame],
+                refframe, &this_mv, ref_frame_sign_bias);
 
             if (this_mv.as_int != mv->as_int)
             {
@@ -88,7 +90,8 @@ void vp8_find_near_mvs
             int_mv this_mv;
 
             this_mv.as_int = aboveleft->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame], refframe, &this_mv, ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame],
+                refframe, &this_mv, ref_frame_sign_bias);
 
             if (this_mv.as_int != mv->as_int)
             {
@@ -149,7 +152,8 @@ vp8_prob *vp8_mv_ref_probs(
     p[1] = vp8_mode_contexts [near_mv_ref_ct[1]] [1];
     p[2] = vp8_mode_contexts [near_mv_ref_ct[2]] [2];
     p[3] = vp8_mode_contexts [near_mv_ref_ct[3]] [3];
-    /*p[3] = vp8_mode_contexts [near_mv_ref_ct[1] + near_mv_ref_ct[2] + near_mv_ref_ct[3]] [3];*/
+    /*p[3] = vp8_mode_contexts [near_mv_ref_ct[1]
+    + near_mv_ref_ct[2] + near_mv_ref_ct[3]] [3];*/
     return p;
 }
 

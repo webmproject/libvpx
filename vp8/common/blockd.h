@@ -83,6 +83,9 @@ typedef enum
     V_PRED,             /* vertical prediction */
     H_PRED,             /* horizontal prediction */
     TM_PRED,            /* Truemotion prediction */
+#if CONFIG_I8X8
+    I8X8_PRED,           /* 8x8 based prediction, each 8x8 has its own prediction mode */
+#endif
     B_PRED,             /* block based prediction, each block has its own prediction mode */
 
     NEARESTMV,
@@ -114,6 +117,7 @@ typedef enum
 
 #define VP8_YMODES  (B_PRED + 1)
 #define VP8_UV_MODES (TM_PRED + 1)
+#define VP8_I8X8_MODES (TM_PRED + 1)
 
 #define VP8_MVREFS (1 + SPLITMV - NEARESTMV)
 
@@ -306,4 +310,22 @@ typedef struct MacroBlockD
 extern void vp8_build_block_doffsets(MACROBLOCKD *x);
 extern void vp8_setup_block_dptrs(MACROBLOCKD *x);
 
+static void update_blockd_bmi(MACROBLOCKD *xd)
+{
+    int i;
+    int is_4x4;
+    is_4x4 = (xd->mode_info_context->mbmi.mode == SPLITMV) ||
+#if CONFIG_I8X8
+        (xd->mode_info_context->mbmi.mode==I8X8_PRED)||
+#endif
+        (xd->mode_info_context->mbmi.mode == B_PRED);
+
+    if (is_4x4)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            xd->block[i].bmi = xd->mode_info_context->bmi[i];
+        }
+    }
+}
 #endif  /* __INC_BLOCKD_H */

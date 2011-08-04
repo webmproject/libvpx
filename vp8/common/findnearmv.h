@@ -125,8 +125,6 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
         --cur_mb;
         switch (cur_mb->mbmi.mode)
         {
-            case B_PRED:
-              return (cur_mb->bmi + b + 3)->as_mode;
             case DC_PRED:
                 return B_DC_PRED;
             case V_PRED:
@@ -135,6 +133,11 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
                 return B_HE_PRED;
             case TM_PRED:
                 return B_TM_PRED;
+#if CONFIG_I8X8
+            case I8X8_PRED:
+#endif
+            case B_PRED:
+              return (cur_mb->bmi + b + 3)->as_mode;
             default:
                 return B_DC_PRED;
         }
@@ -143,7 +146,8 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
     return (cur_mb->bmi + b - 1)->as_mode;
 }
 
-static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi_stride)
+static B_PREDICTION_MODE above_block_mode(const MODE_INFO
+                                          *cur_mb, int b, int mi_stride)
 {
     if (!(b >> 2))
     {
@@ -152,8 +156,6 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi
 
         switch (cur_mb->mbmi.mode)
         {
-            case B_PRED:
-              return (cur_mb->bmi + b + 12)->as_mode;
             case DC_PRED:
                 return B_DC_PRED;
             case V_PRED:
@@ -162,6 +164,11 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi
                 return B_HE_PRED;
             case TM_PRED:
                 return B_TM_PRED;
+#if CONFIG_I8X8
+            case I8X8_PRED:
+#endif
+            case B_PRED:
+              return (cur_mb->bmi + b + 12)->as_mode;
             default:
                 return B_DC_PRED;
         }

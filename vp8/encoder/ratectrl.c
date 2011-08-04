@@ -33,12 +33,12 @@ extern const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES];
 
 
 #ifdef MODE_STATS
-extern int y_modes[5];
-extern int uv_modes[4];
+extern int y_modes[VP8_YMODES];
+extern int uv_modes[VP8_UV_MODES];
 extern int b_modes[10];
 
 extern int inter_y_modes[10];
-extern int inter_uv_modes[4];
+extern int inter_uv_modes[VP8_UV_MODES];
 extern int inter_b_modes[10];
 #endif
 

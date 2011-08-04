@@ -185,6 +185,9 @@ typedef struct VP8Common
     vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
     vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
     vp8_prob kf_uv_mode_prob [VP8_UV_MODES-1];
+#if CONFIG_I8X8
+    vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
+#endif
 
 
     FRAME_CONTEXT lfc; /* last frame entropy */

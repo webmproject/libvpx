@@ -70,18 +70,20 @@ typedef struct
 
 #ifdef MODE_STATS
     // Stats
-    int y_modes[5];
-    int uv_modes[4];
+    int y_modes[VP8_YMODES];
+    int uv_modes[VP8_UV_MODES];
+    int i8x8_modes[VP8_I8X8_MODES];
     int b_modes[10];
     int inter_y_modes[10];
-    int inter_uv_modes[4];
+    int inter_uv_modes[VP8_UV_MODES];
     int inter_b_modes[10];
 #endif
-
-    vp8_prob ymode_prob[4], uv_mode_prob[3];   /* interframe intra mode probs */
-    vp8_prob kf_ymode_prob[4], kf_uv_mode_prob[3];   /* keyframe "" */
-
-    int ymode_count[5], uv_mode_count[4];  /* intra MB type cts this frame */
+    /* interframe intra mode probs */
+    vp8_prob ymode_prob[VP8_YMODES-1], uv_mode_prob[VP8_UV_MODES-1];
+    /* keyframe intra mode probs */
+    vp8_prob kf_ymode_prob[VP8_YMODES-1], kf_uv_mode_prob[VP8_UV_MODES-1];
+    /* intra MB type cts this frame */
+    int ymode_count[VP8_YMODES], uv_mode_count[VP8_UV_MODES];
 
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
 

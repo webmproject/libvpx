@@ -221,6 +221,7 @@ EXPERIMENT_LIST="
     segmentation
     t8x8
     csm
+    i8x8
 "
 CONFIG_LIST="
     external_build

@@ -70,11 +70,12 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x );
 
 #ifdef MODE_STATS
 unsigned int inter_y_modes[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-unsigned int inter_uv_modes[4] = {0, 0, 0, 0};
-unsigned int inter_b_modes[15]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-unsigned int y_modes[5]   = {0, 0, 0, 0, 0};
-unsigned int uv_modes[4]  = {0, 0, 0, 0};
-unsigned int b_modes[14]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+unsigned int inter_uv_modes[VP8_UV_MODES] = {0, 0, 0, 0};
+unsigned int inter_b_modes[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+unsigned int y_modes[VP8_YMODES] = {0, 0, 0, 0, 0};
+unsigned int i8x8_modes[VP8_I8X8_MODES]={0};
+unsigned int uv_modes[VP8_UV_MODES] = {0, 0, 0, 0};
+unsigned int b_modes[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
 
@@ -1427,7 +1428,15 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
         }
         while (++b < 16);
     }
-
+#if CONFIG_I8X8
+    if(m==I8X8_PRED)
+    {
+        i8x8_modes[xd->block[0].bmi.as_mode]++;
+        i8x8_modes[xd->block[2].bmi.as_mode]++;
+        i8x8_modes[xd->block[8].bmi.as_mode]++;
+        i8x8_modes[xd->block[10].bmi.as_mode]++;
+    }
+#endif
 #endif
 
     ++cpi->ymode_count[m];
@@ -1476,6 +1485,14 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         vp8_update_zbin_extra(cpi, x);
     }
 
+#if CONFIG_I8X8
+    if(x->e_mbd.mode_info_context->mbmi.mode == I8X8_PRED)
+    {
+        vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
+        vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
+    }
+    else
+#endif
     if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
         vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
     else
@@ -1486,6 +1503,9 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 #endif
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
     }
+#if CONFIG_I8X8
+        if(x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED)
+#endif
     vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);

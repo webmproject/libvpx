@@ -59,6 +59,14 @@ extern prototype_copy_block(vp8_recon_copy8x4);
 #endif
 extern prototype_recon_block(vp8_recon_recon);
 
+#if CONFIG_I8X8
+#ifndef vp8_recon_recon_uv
+#define vp8_recon_recon_uv vp8_recon_uv_b_c
+#endif
+extern prototype_recon_block(vp8_recon_recon_uv);
+#endif
+
+extern prototype_recon_block(vp8_recon_recon);
 #ifndef vp8_recon_recon2
 #define vp8_recon_recon2 vp8_recon2b_c
 #endif
@@ -85,6 +93,14 @@ extern prototype_recon_macroblock(vp8_recon_recon_mby);
 extern prototype_build_intra_predictors\
     (vp8_recon_build_intra_predictors_mby);
 
+#if CONFIG_I8X8
+#ifndef vp8_recon_build_intra8x8_predictors_mby
+#define vp8_recon_build_intra8x8_predictors_mby vp8_build_intra8x8_predictors_mby
+#endif
+extern prototype_build_intra_predictors\
+    (vp8_recon_build_intra8x8_predictors_mby);
+#endif
+
 #ifndef vp8_recon_build_intra_predictors_mby_s
 #define vp8_recon_build_intra_predictors_mby_s vp8_build_intra_predictors_mby_s
 #endif
@@ -96,6 +112,14 @@ extern prototype_build_intra_predictors\
 #endif
 extern prototype_build_intra_predictors\
     (vp8_recon_build_intra_predictors_mbuv);
+
+#if CONFIG_I8X8
+#ifndef vp8_recon_build_intra8x8_predictors_mbuv
+#define vp8_recon_build_intra8x8_predictors_mbuv vp8_build_intra8x8_predictors_mbuv
+#endif
+extern prototype_build_intra_predictors\
+    (vp8_recon_build_intra8x8_predictors_mbuv);
+#endif
 
 #ifndef vp8_recon_build_intra_predictors_mbuv_s
 #define vp8_recon_build_intra_predictors_mbuv_s vp8_build_intra_predictors_mbuv_s
@@ -109,6 +133,20 @@ extern prototype_build_intra_predictors\
 extern prototype_intra4x4_predict\
     (vp8_recon_intra4x4_predict);
 
+#if CONFIG_I8X8
+#ifndef vp8_recon_intra8x8_predict
+#define vp8_recon_intra8x8_predict vp8_intra8x8_predict
+#endif
+extern prototype_intra4x4_predict\
+    (vp8_recon_intra8x8_predict);
+
+#ifndef vp8_recon_intra_uv4x4_predict
+#define vp8_recon_intra_uv4x4_predict vp8_intra_uv4x4_predict
+#endif
+extern prototype_intra4x4_predict\
+    (vp8_recon_intra_uv4x4_predict);
+
+#endif
 
 typedef prototype_copy_block((*vp8_copy_block_fn_t));
 typedef prototype_recon_block((*vp8_recon_fn_t));
@@ -121,6 +159,9 @@ typedef struct vp8_recon_rtcd_vtable
     vp8_copy_block_fn_t  copy8x8;
     vp8_copy_block_fn_t  copy8x4;
     vp8_recon_fn_t       recon;
+#if CONFIG_I8X8
+    vp8_recon_fn_t       recon_uv;
+#endif
     vp8_recon_fn_t       recon2;
     vp8_recon_fn_t       recon4;
     vp8_recon_mb_fn_t    recon_mb;
@@ -130,6 +171,10 @@ typedef struct vp8_recon_rtcd_vtable
     vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv_s;
     vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv;
     vp8_intra4x4_pred_fn_t intra4x4_predict;
+#if CONFIG_I8X8
+    vp8_intra4x4_pred_fn_t intra8x8_predict;
+    vp8_intra4x4_pred_fn_t intra_uv4x4_predict;
+#endif
 } vp8_recon_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

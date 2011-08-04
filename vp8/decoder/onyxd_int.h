@@ -103,7 +103,6 @@ typedef struct VP8Decompressor
     int mt_baseline_filter_level[MAX_MB_SEGMENTS];
     int sync_range;
     int *mt_current_mb_col;                  /* Each row remembers its already decoded column. */
-
     unsigned char **mt_yabove_row;           /* mb_rows x width */
     unsigned char **mt_uabove_row;
     unsigned char **mt_vabove_row;

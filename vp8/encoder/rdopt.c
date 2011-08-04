@@ -657,6 +657,29 @@ static void copy_predictor(unsigned char *dst, const unsigned char *predictor)
     d[8] = p[8];
     d[12] = p[12];
 }
+
+static void copy_predictor_8x8(unsigned char *dst, const unsigned char *predictor)
+{
+    const unsigned int *p = (const unsigned int *)predictor;
+    unsigned int *d = (unsigned int *)dst;
+    d[0] = p[0];
+    d[1] = p[1];
+    d[4] = p[4];
+    d[5] = p[5];
+    d[8] = p[8];
+    d[9] = p[9];
+    d[12] = p[12];
+    d[13] = p[13];
+    d[16] = p[16];
+    d[17] = p[17];
+    d[20] = p[20];
+    d[21] = p[21];
+    d[24] = p[24];
+    d[25] = p[25];
+    d[28] = p[28];
+    d[29] = p[29];
+}
+
 static int rd_pick_intra4x4block(
     VP8_COMP *cpi,
     MACROBLOCK *x,
@@ -834,6 +857,156 @@ static int rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
     x->e_mbd.mode_info_context->mbmi.mode = mode_selected;
     return best_rd;
 }
+#if CONFIG_I8X8
+static int rd_pick_intra8x8block(
+    VP8_COMP *cpi,
+    MACROBLOCK *x,
+    int ib,
+    B_PREDICTION_MODE *best_mode,
+    unsigned int *mode_costs,
+    ENTROPY_CONTEXT *a,
+    ENTROPY_CONTEXT *l,
+    int *bestrate,
+    int *bestratey,
+    int *bestdistortion)
+{
+    MB_PREDICTION_MODE mode;
+    MACROBLOCKD *xd = &x->e_mbd;
+    int best_rd = INT_MAX;
+    int rate = 0;
+    int distortion;
+    BLOCK  *be=x->block + ib;
+    BLOCKD *b=x->e_mbd.block + ib;
+    ENTROPY_CONTEXT ta0, ta1, besta0, besta1;
+    ENTROPY_CONTEXT tl0, tl1, bestl0, bestl1;
+
+
+    /*
+     * The predictor buffer is a 2d buffer with a stride of 16.  Create
+     * a temp buffer that meets the stride requirements, but we are only
+     * interested in the left 8x8 block
+     * */
+
+    DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16*8);
+    DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16*4);
+
+    for (mode = DC_PRED; mode <= TM_PRED; mode++)
+    {
+        int this_rd;
+        int rate_t;
+
+        rate = mode_costs[mode];
+
+        RECON_INVOKE(&cpi->rtcd.common->recon, intra8x8_predict)
+                     (b, mode, b->predictor);
+
+        vp8_subtract_4b_c(be, b, 16);
+
+        x->vp8_short_fdct8x4(be->src_diff, be->coeff, 32);
+        x->vp8_short_fdct8x4(be->src_diff + 64, be->coeff + 64, 32);
+
+        x->quantize_b_pair(x->block+ib, x->block+ib+1,
+                            xd->block+ib, xd->block+ib+1);
+        x->quantize_b_pair(x->block+ib+4, x->block+ib+5,
+                            xd->block+ib+4, xd->block+ib+5);
+
+        distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
+            ((x->block+ib)->coeff,(xd->block+ib)->dqcoeff)>>2;
+        distortion += ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
+            ((x->block+ib+1)->coeff,(xd->block+ib+1)->dqcoeff)>>2;
+        distortion += ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
+            ((x->block+ib+4)->coeff,(xd->block+ib+4)->dqcoeff)>>2;
+        distortion += ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)
+            ((x->block+ib+5)->coeff,(xd->block+ib+5)->dqcoeff)>>2;
+
+        ta0 = *(a + vp8_block2above[ib]);
+        ta1 = *(a + vp8_block2above[ib+1]);
+        tl0 = *(l + vp8_block2above[ib]);
+        tl1 = *(l + vp8_block2above[ib+4]);
+        rate_t = cost_coeffs(x, xd->block+ib, PLANE_TYPE_Y_WITH_DC,
+            &ta0, &tl0);
+        rate_t += cost_coeffs(x, xd->block+ib+1, PLANE_TYPE_Y_WITH_DC,
+            &ta1, &tl0);
+        rate_t += cost_coeffs(x, xd->block+ib+4, PLANE_TYPE_Y_WITH_DC,
+            &ta0, &tl1);
+        rate_t += cost_coeffs(x, xd->block+ib+5, PLANE_TYPE_Y_WITH_DC,
+            &ta1, &tl1);
+        rate += rate_t;
+        this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+        if (this_rd < best_rd)
+        {
+            *bestrate = rate;
+            *bestratey = rate_t;
+            *bestdistortion = distortion;
+            besta0 = ta0;
+            besta1 = ta1;
+            bestl0 = tl0;
+            bestl1 = tl1;
+            best_rd = this_rd;
+            *best_mode = mode;
+            copy_predictor_8x8(best_predictor, b->predictor);
+            vpx_memcpy(best_dqcoeff, b->dqcoeff, 64);
+            vpx_memcpy(best_dqcoeff+32, b->dqcoeff+64, 64);
+        }
+    }
+    b->bmi.as_mode = (*best_mode);
+    vp8_encode_intra8x8 (IF_RTCD(&cpi->rtcd), x, ib);
+    *(a + vp8_block2above[ib])   = besta0;
+    *(a + vp8_block2above[ib+1]) = besta1;
+    *(l + vp8_block2above[ib])   = bestl0;
+    *(l + vp8_block2above[ib+4]) = bestl1;
+    return best_rd;
+}
+
+const int vp8_i8x8_block[4]={0, 2, 8, 10};
+int rd_pick_intra8x8mby_modes(VP8_COMP *cpi,
+                                      MACROBLOCK *mb,
+                                      int *Rate,
+                                      int *rate_y,
+                                      int *Distortion,
+                                      int best_rd)
+{
+    MACROBLOCKD *const xd = &mb->e_mbd;
+    int i,ib;
+    int cost = mb->mbmode_cost [xd->frame_type] [I8X8_PRED];
+    int distortion = 0;
+    int tot_rate_y = 0;
+    long long total_rd = 0;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+    unsigned int *i8x8mode_costs;
+
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
+    i8x8mode_costs  = mb->i8x8_mode_costs;
+
+    for (i = 0; i < 4; i++)
+    {
+        MODE_INFO *const mic = xd->mode_info_context;
+        const int mis = xd->mode_info_stride;
+        B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
+        int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
+
+        ib = vp8_i8x8_block[i];
+        total_rd += rd_pick_intra8x8block(
+            cpi, mb, ib, &best_mode, i8x8mode_costs,
+            ta, tl, &r, &ry, &d);
+        cost += r;
+        distortion += d;
+        tot_rate_y += ry;
+        mic->bmi[ib].as_mode = best_mode;
+    }
+    *Rate = cost;
+    *rate_y += tot_rate_y;
+    *Distortion = distortion;
+    return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
+}
+#endif
 
 static int rd_cost_mbuv(MACROBLOCK *mb)
 {
@@ -2502,6 +2675,27 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
 }
 
+#if CONFIG_I8X8
+static void set_i8x8_block_modes(MACROBLOCK *x, int *modes)
+{
+    int i;
+    MACROBLOCKD *xd = &x->e_mbd;
+    for(i=0;i<4;i++)
+    {
+        int ib = vp8_i8x8_block[i];
+        x->e_mbd.mode_info_context->bmi[ib+0].as_mode= modes[i];
+        x->e_mbd.mode_info_context->bmi[ib+1].as_mode= modes[i];
+        x->e_mbd.mode_info_context->bmi[ib+4].as_mode= modes[i];
+        x->e_mbd.mode_info_context->bmi[ib+5].as_mode= modes[i];
+    }
+
+    for (i = 0; i < 16; i++)
+    {
+        xd->block[i].bmi = xd->mode_info_context->bmi[i];
+    }
+}
+#endif
+
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {
     int error4x4, error16x16;
@@ -2511,6 +2705,12 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     int rate4x4_tokenonly = 0;
     int rate16x16_tokenonly = 0;
     int rateuv_tokenonly = 0;
+#if CONFIG_I8X8
+    int error8x8, rate8x8_tokenonly=0;
+    int rate8x8, dist8x8;
+    int mode16x16;
+    int mode8x8[4];
+#endif
 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
@@ -2520,11 +2720,24 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     error16x16 = rd_pick_intra16x16mby_mode(cpi, x,
                                             &rate16x16, &rate16x16_tokenonly,
                                             &dist16x16);
-
+#if CONFIG_I8X8
+    mode16x16 = x->e_mbd.mode_info_context->mbmi.mode;
+    error8x8 = rd_pick_intra8x8mby_modes(cpi, x,
+                                         &rate8x8, &rate8x8_tokenonly,
+                                         &dist8x8, error16x16);
+    mode8x8[0]= x->e_mbd.mode_info_context->bmi[0].as_mode;
+    mode8x8[1]= x->e_mbd.mode_info_context->bmi[2].as_mode;
+    mode8x8[2]= x->e_mbd.mode_info_context->bmi[8].as_mode;
+    mode8x8[3]= x->e_mbd.mode_info_context->bmi[10].as_mode;
+#endif
     error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                          &rate4x4, &rate4x4_tokenonly,
                                          &dist4x4, error16x16);
 
+#if CONFIG_I8X8
+    if(error8x8> error16x16)
+    {
+#endif
     if (error4x4 < error16x16)
     {
         x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
@@ -2532,8 +2745,29 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     }
     else
     {
+#if CONFIG_I8X8
+        x->e_mbd.mode_info_context->mbmi.mode = mode16x16;
+#endif
         rate += rate16x16;
-    }
 
+    }
+#if CONFIG_I8X8
+    }
+    else
+    {
+        if (error4x4 < error8x8)
+        {
+            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+            rate += rate4x4;
+        }
+        else
+        {
+
+            x->e_mbd.mode_info_context->mbmi.mode = I8X8_PRED;
+            set_i8x8_block_modes(x, mode8x8);
+            rate += rate8x8;
+        }
+    }
+#endif
     *rate_ = rate;
 }

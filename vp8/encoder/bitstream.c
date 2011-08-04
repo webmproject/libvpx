@@ -151,6 +151,12 @@ static void kfwrite_ymode(vp8_writer *bc, int m, const vp8_prob *p)
     vp8_write_token(bc, vp8_kf_ymode_tree, p, vp8_kf_ymode_encodings + m);
 }
 
+#if CONFIG_I8X8
+static void write_i8x8_mode(vp8_writer *bc, int m, const vp8_prob *p)
+{
+    vp8_write_token(bc,vp8_i8x8_mode_tree, p, vp8_i8x8_mode_encodings + m);
+}
+#endif
 static void write_uv_mode(vp8_writer *bc, int m, const vp8_prob *p)
 {
     vp8_write_token(bc, vp8_uv_mode_tree, p, vp8_uv_mode_encodings + m);
@@ -1188,7 +1194,6 @@ static void write_kfmodes(VP8_COMP *cpi)
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
 
             kfwrite_ymode(bc, ym, c->kf_ymode_prob);
-
             if (ym == B_PRED)
             {
                 const int mis = c->mode_info_stride;
@@ -1208,10 +1213,20 @@ static void write_kfmodes(VP8_COMP *cpi)
                 }
                 while (++i < 16);
             }
-
+#if CONFIG_I8X8
+            if(ym == I8X8_PRED)
+            {
+                write_i8x8_mode(bc, m->bmi[0].as_mode, c->i8x8_mode_prob);
+                write_i8x8_mode(bc, m->bmi[2].as_mode, c->i8x8_mode_prob);
+                write_i8x8_mode(bc, m->bmi[8].as_mode, c->i8x8_mode_prob);
+                write_i8x8_mode(bc, m->bmi[10].as_mode, c->i8x8_mode_prob);
+                m++;
+            }
+            else
+#endif
             write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob);
         }
-
+        //printf("\n");
         m++;    // skip L prediction border
     }
 }
