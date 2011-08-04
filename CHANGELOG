@@ -1,3 +1,85 @@
+2011-08-02 v0.9.7 "Cayuga"
+  Our third named release, focused on a faster, higher quality, encoder.
+
+  - Upgrading:
+    This release is backwards compatible with Aylesbury (v0.9.5) and
+    Bali (v0.9.6). Users of older releases should refer to the Upgrading
+    notes in this document for that release.
+
+  - Enhancements:
+          Stereo 3D format support for vpxenc
+          Runtime detection of available processor cores.
+          Allow specifying --end-usage by enum name
+          vpxdec: test for frame corruption
+          vpxenc: add quantizer histogram display
+          vpxenc: add rate histogram display
+          Set VPX_FRAME_IS_DROPPABLE
+          update configure for ios sdk 4.3
+          Avoid text relocations in ARM vp8 decoder
+          Generate a vpx.pc file for pkg-config.
+          New ways of passing encoded data between encoder and decoder.
+
+  - Speed:
+      This release includes across-the-board speed improvements to the
+      encoder. On x86, these measure at approximately 11.5% in Best mode,
+      21.5% in Good mode (speed 0), and 22.5% in Realtime mode (speed 6).
+      On ARM Cortex A9 with Neon extensions, real-time encoding of video
+      telephony content is 35% faster than Bali on single core and 48%
+      faster on multi-core. On the NVidia Tegra2 platform, real time
+      encoding is 40% faster than Bali.
+
+      Decoder speed was not a priority for this release, but improved
+      approximately 8.4% on x86.
+
+          Reduce motion vector search on alt-ref frame.
+          Encoder loopfilter running in its own thread
+          Reworked loopfilter to precalculate more parameters
+          SSE2/SSSE3 optimizations for build_predictors_mbuv{,_s}().
+          Make hor UV predict ~2x faster (73 vs 132 cycles) using SSSE3.
+          Removed redundant checks
+          Reduced structure sizes
+          utilize preload in ARMv6 MC/LPF/Copy routines
+          ARM optimized quantization, dfct, variance, subtract
+          Increase chrow row alignment to 16 bytes.
+          disable trellis optimization for first pass
+          Write SSSE3 sub-pixel filter function
+          Improve SSE2 half-pixel filter funtions
+          Add vp8_sub_pixel_variance16x8_ssse3 function
+          Reduce unnecessary distortion computation
+          Use diamond search to replace full search
+          Preload reference area in sub-pixel motion search (real-time mode)
+
+  - Quality:
+      This release focused primarily on one-pass use cases, including
+      video conferencing. Low latency data rate control was significantly
+      improved, improving streamability over bandwidth constrained links.
+      Added support for error concealment, allowing frames to maintain
+      visual quality in the presence of substantial packet loss.
+
+          Add rc_max_intra_bitrate_pct control
+          Limit size of initial keyframe in one-pass.
+          Improve framerate adaptation
+          Improved 1-pass CBR rate control
+          Improved KF insertion after fades to still.
+          Improved key frame detection.
+          Improved activity masking (lower PSNR impact for same SSIM boost)
+          Improved interaction between GF and ARFs
+          Adding error-concealment to the decoder.
+          Adding support for independent partitions
+          Adjusted rate-distortion constants
+
+
+  - Bug Fixes:
+          Removed firstpass motion map
+          Fix parallel make install
+          Fix multithreaded encoding for 1 MB wide frame
+          Fixed iwalsh_neon build problems with RVDS4.1
+          Fix semaphore emulation, spin-wait intrinsics on Windows
+          Fix build with xcode4 and simplify GLOBAL.
+          Mark ARM asm objects as allowing a non-executable stack.
+          Fix vpxenc encoding incorrect webm file header on big endian
+
+
 2011-03-07 v0.9.6 "Bali"
   Our second named release, focused on a faster, higher quality, encoder.
 
