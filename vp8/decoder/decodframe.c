@@ -495,6 +495,15 @@ static void setup_token_decoder_partition_input(VP8D_COMP *pbi)
 #endif
 }
 
+
+static int read_is_valid(const unsigned char *start,
+                         size_t               len,
+                         const unsigned char *end)
+{
+    return (start + len > start && start + len <= end);
+}
+
+
 static void setup_token_decoder(VP8D_COMP *pbi,
                                 const unsigned char *cx_data)
 {
@@ -529,25 +538,41 @@ static void setup_token_decoder(VP8D_COMP *pbi,
     for (i = 0; i < num_part; i++)
     {
         const unsigned char *partition_size_ptr = cx_data + i * 3;
-        ptrdiff_t            partition_size;
+        ptrdiff_t            partition_size, bytes_left;
+
+        bytes_left = user_data_end - partition;
 
         /* Calculate the length of this partition. The last partition
-         * size is implicit.
+         * size is implicit. If the partition size can't be read, then
+         * either use the remaining data in the buffer (for EC mode)
+         * or throw an error.
          */
         if (i < num_part - 1)
         {
-            partition_size = read_partition_size(partition_size_ptr);
+            if (read_is_valid(partition_size_ptr, 3, user_data_end))
+                partition_size = read_partition_size(partition_size_ptr);
+            else if(pbi->ec_enabled)
+                partition_size = bytes_left;
+            else
+                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                   "Truncated partition size data");
         }
         else
-        {
-            partition_size = user_data_end - partition;
-        }
+            partition_size = bytes_left;
 
-        if (!pbi->ec_enabled && (partition + partition_size > user_data_end
-            || partition + partition_size < partition))
-            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                               "Truncated packet or corrupt partition "
-                               "%d length", i + 1);
+        /* Validate the calculated partition length. If the buffer
+         * described by the partition can't be fully read, then restrict
+         * it to the portion that can be (for EC mode) or throw an error.
+         */
+        if (!read_is_valid(partition, partition_size, user_data_end))
+        {
+            if(pbi->ec_enabled)
+                partition_size = bytes_left;
+            else
+                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                   "Truncated packet or corrupt partition "
+                                   "%d length", i + 1);
+        }
 
         if (vp8dx_start_decode(bool_decoder, partition, partition_size))
             vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
