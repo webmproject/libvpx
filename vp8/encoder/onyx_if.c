@@ -9,6 +9,7 @@
  */
 
 
+#include "vpx_config.h"
 #include "vp8/common/onyxc_int.h"
 #include "onyx_int.h"
 #include "vp8/common/systemdependent.h"
@@ -24,7 +25,9 @@
 #include "segmentation.h"
 #include "vp8/common/g_common.h"
 #include "vpx_scale/yv12extend.h"
+#if CONFIG_POSTPROC
 #include "vp8/common/postproc.h"
+#endif
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
@@ -2660,6 +2663,8 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         cpi->Source = &cpi->scaled_source;
 #endif
     }
+    else
+        cpi->Source = sd;
 }
 
 

@@ -48,6 +48,7 @@ VP8_DX_SRCS-yes += vp8_dx_iface.c
 #INCLUDES += common
 #INCLUDES += decoder
 
+VP8_DX_SRCS-yes += decoder/asm_dec_offsets.c
 VP8_DX_SRCS-yes += decoder/dboolhuff.c
 VP8_DX_SRCS-yes += decoder/decodemv.c
 VP8_DX_SRCS-yes += decoder/decodframe.c
