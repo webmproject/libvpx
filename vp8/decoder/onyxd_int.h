@@ -132,7 +132,11 @@ typedef struct VP8Decompressor
     unsigned int mvs_corrupt_from_mb;
 #endif
     int ec_enabled;
+    int ec_active;
     int input_partition;
+    int decoded_key_frame;
+    int independent_partitions;
+    int frame_corrupt_residual;
 
 } VP8D_COMP;
 
