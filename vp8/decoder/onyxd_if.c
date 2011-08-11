@@ -244,8 +244,8 @@ vpx_codec_err_t vp8dx_set_reference(VP8D_PTR ptr, VP8_REFFRAME ref_frame_flag, Y
 
 /*For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.*/
 #if HAVE_ARMV7
-extern void vp8_push_neon(INT64 *store);
-extern void vp8_pop_neon(INT64 *store);
+extern void vp8_push_neon(int64_t *store);
+extern void vp8_pop_neon(int64_t *store);
 #endif
 
 static int get_free_fb (VP8_COMMON *cm)
@@ -344,10 +344,10 @@ static void vp8_print_yuv_rec_mb(VP8_COMMON *cm, int mb_row, int mb_col)
 }
 */
 
-int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, INT64 time_stamp)
+int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, int64_t time_stamp)
 {
 #if HAVE_ARMV7
-    INT64 dx_store_reg[8];
+    int64_t dx_store_reg[8];
 #endif
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;
     VP8_COMMON *cm = &pbi->common;
@@ -554,9 +554,9 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #if 0
     {
         int i;
-        INT64 earliest_time = pbi->dr[0].time_stamp;
-        INT64 latest_time = pbi->dr[0].time_stamp;
-        INT64 time_diff = 0;
+        int64_t earliest_time = pbi->dr[0].time_stamp;
+        int64_t latest_time = pbi->dr[0].time_stamp;
+        int64_t time_diff = 0;
         int bytes = 0;
 
         pbi->dr[pbi->common.current_video_frame&0xf].size = pbi->bc.pos + pbi->bc2.pos + 4;;
@@ -596,7 +596,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     pbi->common.error.setjmp = 0;
     return retcode;
 }
-int vp8dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, INT64 *time_stamp, INT64 *time_end_stamp, vp8_ppflags_t *flags)
+int vp8dx_get_raw_frame(VP8D_PTR ptr, YV12_BUFFER_CONFIG *sd, int64_t *time_stamp, int64_t *time_end_stamp, vp8_ppflags_t *flags)
 {
     int ret = -1;
     VP8D_COMP *pbi = (VP8D_COMP *) ptr;

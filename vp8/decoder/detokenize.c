@@ -83,7 +83,6 @@ static const unsigned char cat6_prob[12] =
 { 129, 130, 133, 140, 153, 177, 196, 230, 243, 254, 254, 0 };
 #endif
 
-
 void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
     /* Clear entropy contexts for Y2 blocks */

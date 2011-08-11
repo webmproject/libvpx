@@ -542,7 +542,7 @@ void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, int buffer_size, un
 }
 #undef WRITE_BUFFER
 
-/* Need a fixed size serializer for the track ID. libmkv provdes a 64 bit
+/* Need a fixed size serializer for the track ID. libmkv provides a 64 bit
  * one, but not a 32 bit one.
  */
 static void Ebml_SerializeUnsigned32(EbmlGlobal *glob, unsigned long class_id, uint64_t ui)
@@ -559,8 +559,8 @@ Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
                           unsigned long class_id)
 {
     //todo this is always taking 8 bytes, this may need later optimization
-    //this is a key that says lenght unknown
-    unsigned long long unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
+    //this is a key that says length unknown
+    uint64_t unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
 
     Ebml_WriteID(glob, class_id);
     *ebmlLoc = ftello(glob->stream);
@@ -975,7 +975,7 @@ static const struct arg_enum_list stereo_mode_enum[] = {
 static const arg_def_t stereo_mode      = ARG_DEF_ENUM(NULL, "stereo-mode", 1,
         "Stereo 3D video format", stereo_mode_enum);
 static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
-        "Stream timebase (frame duration)");
+        "Output timestamp precision (fractional seconds)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
         "Enable error resiliency features");
 static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
@@ -1020,14 +1020,11 @@ static const arg_def_t buf_initial_sz     = ARG_DEF(NULL, "buf-initial-sz", 1,
         "Client initial buffer size (ms)");
 static const arg_def_t buf_optimal_sz     = ARG_DEF(NULL, "buf-optimal-sz", 1,
         "Client optimal buffer size (ms)");
-static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
-        "Max I-frame bitrate (pct)");
 static const arg_def_t *rc_args[] =
 {
     &dropframe_thresh, &resize_allowed, &resize_up_thresh, &resize_down_thresh,
     &end_usage, &target_bitrate, &min_quantizer, &max_quantizer,
     &undershoot_pct, &overshoot_pct, &buf_sz, &buf_initial_sz, &buf_optimal_sz,
-    &max_intra_rate_pct,
     NULL
 };
 
@@ -1091,12 +1088,14 @@ static const arg_def_t tune_ssim = ARG_DEF_ENUM(NULL, "tune", 1,
                                    "Material to favor", tuning_enum);
 static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
                                    "Constrained Quality Level");
+static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
+        "Max I-frame bitrate (pct)");
 
 static const arg_def_t *vp8_args[] =
 {
     &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
     &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-    &tune_ssim, &cq_level, NULL
+    &tune_ssim, &cq_level, &max_intra_rate_pct, NULL
 };
 static const int vp8_arg_ctrl_map[] =
 {
@@ -1104,7 +1103,7 @@ static const int vp8_arg_ctrl_map[] =
     VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
     VP8E_SET_TOKEN_PARTITIONS,
     VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH , VP8E_SET_ARNR_TYPE,
-    VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, 0
+    VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT, 0
 };
 #endif
 
@@ -1131,6 +1130,9 @@ static void usage_exit()
     fprintf(stderr, "\nVP8 Specific Options:\n");
     arg_show_usage(stdout, vp8_args);
 #endif
+    fprintf(stderr, "\nStream timebase (--timebase):\n"
+            "  The desired precision of timestamps in the output, expressed\n"
+            "  in fractional seconds. Default is 1/1000.\n");
     fprintf(stderr, "\n"
            "Included encoders:\n"
            "\n");
@@ -1169,7 +1171,7 @@ static int merge_hist_buckets(struct hist_bucket *bucket,
             big_bucket = i;
     }
 
-    /* If we have too many buckets, merge the smallest with an ajacent
+    /* If we have too many buckets, merge the smallest with an adjacent
      * bucket.
      */
     while(buckets > max_buckets)
@@ -1640,8 +1642,6 @@ int main(int argc, const char **argv_)
             cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &target_bitrate, argi))
             cfg.rc_target_bitrate = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &max_intra_rate_pct, argi))
-            cfg.rc_max_intra_bitrate_pct = arg_parse_uint(&arg);
         else if (arg_match(&arg, &min_quantizer, argi))
             cfg.rc_min_quantizer = arg_parse_uint(&arg);
         else if (arg_match(&arg, &max_quantizer, argi))

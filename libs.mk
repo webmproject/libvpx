@@ -35,6 +35,7 @@ ifeq ($(CONFIG_VP8_ENCODER),yes)
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
   CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk vpx/vp8.h vpx/vp8cx.h vpx/vp8e.h
+  CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp8cx_arm.mk
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8e.h include/vpx/vp8cx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
@@ -47,6 +48,7 @@ ifeq ($(CONFIG_VP8_DECODER),yes)
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
   CODEC_SRCS-yes += $(VP8_PREFIX)vp8dx.mk vpx/vp8.h vpx/vp8dx.h
+  CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp8dx_arm.mk
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
@@ -89,6 +91,7 @@ $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
 
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx/vpx_integer.h
+CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/asm_offsets.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_timer.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/mem.h
 CODEC_SRCS-$(BUILD_LIBVPX) += $(BUILD_PFX)vpx_config.c
@@ -100,7 +103,7 @@ CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_cpuid.c
 endif
 CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm_cpudetect.c
-CODEC_SRCS-$(ARCH_ARM) += $(BUILD_PFX)vpx_config.asm
+CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm.h
 CODEC_EXPORTS-$(BUILD_LIBVPX) += vpx/exports_com
 CODEC_EXPORTS-$(CONFIG_ENCODERS) += vpx/exports_enc
 CODEC_EXPORTS-$(CONFIG_DECODERS) += vpx/exports_dec
@@ -121,7 +124,7 @@ INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/v
 INSTALL-LIBS-$(CONFIG_SHARED) += $(foreach p,$(VS_PLATFORMS),$(LIBSUBDIR)/$(p)/vpx.exp)
 endif
 else
-INSTALL-LIBS-yes += $(LIBSUBDIR)/libvpx.a
+INSTALL-LIBS-$(CONFIG_STATIC) += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
@@ -177,12 +180,13 @@ endif
 else
 LIBVPX_OBJS=$(call objs,$(CODEC_SRCS))
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
-LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
+LIBS-$(if $(BUILD_LIBVPX),$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
 BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
 LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
-LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)
+LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
+                           $(notdir $(LIBVPX_SO_SYMLINKS))
 $(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
 $(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
 $(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
@@ -198,9 +202,18 @@ libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	$(qexec)echo "local: *; };" >> $@
 CLEAN-OBJS += libvpx.ver
 
-$(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)): $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)
-	@echo "    [LN]      $@"
-	$(qexec)ln -sf $(LIBVPX_SO) $@
+define libvpx_symlink_template
+$(1): $(2)
+	@echo "    [LN]      $$@"
+	$(qexec)ln -sf $(LIBVPX_SO) $$@
+endef
+
+$(eval $(call libvpx_symlink_template,\
+    $(addprefix $(BUILD_PFX),$(notdir $(LIBVPX_SO_SYMLINKS))),\
+    $(BUILD_PFX)$(LIBVPX_SO)))
+$(eval $(call libvpx_symlink_template,\
+    $(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)),\
+    $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)))
 
 INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
 INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
@@ -259,20 +272,20 @@ $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 #
 
 ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
-    asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.S
+    $(BUILD_PFX)asm_com_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
 	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(VP8_PREFIX)common/asm_com_offsets.c.S: vp8/common/asm_com_offsets.c
-    CLEAN-OBJS += asm_com_offsets.asm $(VP8_PREFIX)common/asm_com_offsets.c.S
+    $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S: $(VP8_PREFIX)common/asm_com_offsets.c
+    CLEAN-OBJS += $(BUILD_PFX)asm_com_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
 
-    asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.S
+    $(BUILD_PFX)asm_enc_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
 	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(VP8_PREFIX)encoder/asm_enc_offsets.c.S: vp8/encoder/asm_enc_offsets.c
-    CLEAN-OBJS += asm_enc_offsets.asm $(VP8_PREFIX)encoder/asm_enc_offsets.c.S
+    $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S: $(VP8_PREFIX)encoder/asm_enc_offsets.c
+    CLEAN-OBJS += $(BUILD_PFX)asm_enc_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
 
-    asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.S
+    $(BUILD_PFX)asm_dec_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
 	grep EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
-    $(VP8_PREFIX)decoder/asm_dec_offsets.c.S: vp8/decoder/asm_dec_offsets.c
-    CLEAN-OBJS += asm_dec_offsets.asm $(VP8_PREFIX)decoder/asm_dec_offsets.c.S
+    $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S: $(VP8_PREFIX)decoder/asm_dec_offsets.c
+    CLEAN-OBJS += $(BUILD_PFX)asm_dec_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
 else
   ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
     asm_com_offsets.asm: obj_int_extract

@@ -728,7 +728,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int distortion = 0;
     int tot_rate_y = 0;
-    long long total_rd = 0;
+    int64_t total_rd = 0;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
@@ -770,11 +770,11 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
 
         mic->bmi[i].as_mode = best_mode;
 
-        if(total_rd >= (long long)best_rd)
+        if(total_rd >= (int64_t)best_rd)
             break;
     }
 
-    if(total_rd >= (long long)best_rd)
+    if(total_rd >= (int64_t)best_rd)
         return INT_MAX;
 
     *Rate = cost;
@@ -1244,6 +1244,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     // Should we do a full search (best quality only)
                     if ((cpi->compressor_speed == 0) && (bestsme >> sseshift) > 4000)
                     {
+                        /* Check if mvp_full is within the range. */
+                        vp8_clamp_mv(&mvp_full, x->mv_col_min, x->mv_col_max, x->mv_row_min, x->mv_row_max);
+
                         thissme = cpi->full_search_sad(x, c, e, &mvp_full,
                                                        sadpb, 16, v_fn_ptr,
                                                        x->mvcost, bsi->ref_mv);
@@ -2078,9 +2081,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             mvp_full.as_mv.col = mvp.as_mv.col>>3;
             mvp_full.as_mv.row = mvp.as_mv.row>>3;
-
-            /* adjust mvp to make sure it is within MV range */
-            vp8_clamp_mv(&mvp_full, col_min, col_max, row_min, row_max);
 
             // Get intersection of UMV window and valid MV window to reduce # of checks in diamond search.
             if (x->mv_col_min < col_min )
