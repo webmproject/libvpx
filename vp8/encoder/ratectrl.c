@@ -608,7 +608,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
     int min_frame_target;
     int Adjustment;
 
-    min_frame_target = 1;
+    min_frame_target = 0;
 
     if (cpi->pass == 2)
     {
@@ -617,11 +617,9 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         if (min_frame_target < (cpi->av_per_frame_bandwidth >> 5))
             min_frame_target = cpi->av_per_frame_bandwidth >> 5;
     }
-    else
-    {
-        if (min_frame_target < cpi->per_frame_bandwidth / 4)
-            min_frame_target = cpi->per_frame_bandwidth / 4;
-    }
+    else if (min_frame_target < cpi->per_frame_bandwidth / 4)
+        min_frame_target = cpi->per_frame_bandwidth / 4;
+
 
     // Special alt reference frame case
     if (cpi->common.refresh_alt_ref_frame)
@@ -1113,33 +1111,6 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             cpi->current_gf_interval = cpi->frames_till_gf_update_due;
 
         }
-    }
-
-    if (cpi->pass==0
-        && cpi->common.refresh_golden_frame
-        && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
-        int64_t adjust;
-
-        /*
-        frames_in_buffer = cpi->oxcf.maximum_buffer_size
-                           / cpi->av_per_frame_bandwidth;
-        gf_in_buffer = frames_in_buffer /
-                       cpi->frames_till_gf_update_due;
-        overshoot_per_gf = cpi->accumulated_overshoot / gf_in_buffer;
-
-        */
-
-        adjust = cpi->accumulated_overshoot;
-        adjust *= cpi->frames_till_gf_update_due + 1;
-        adjust *= cpi->av_per_frame_bandwidth;
-        adjust /= cpi->oxcf.maximum_buffer_size;
-
-        if (adjust > (cpi->this_frame_target - min_frame_target))
-            adjust = (cpi->this_frame_target - min_frame_target);
-        else if (adjust < 0)
-            adjust = 0;
-
-        cpi->this_frame_target -= adjust;
     }
 }
 
