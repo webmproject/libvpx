@@ -400,18 +400,18 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             /* Clip "next_nearest" so that it does not extend to far out of image */
             vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
                          mb_to_top_edge, mb_to_bottom_edge);
-            break;
+            goto propagate_mv;
 
         case NEARESTMV:
             mv->as_int = nearest.as_int;
             /* Clip "next_nearest" so that it does not extend to far out of image */
             vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
                          mb_to_top_edge, mb_to_bottom_edge);
-            break;
+            goto propagate_mv;
 
         case ZEROMV:
             mv->as_int = 0;
-            break;
+            goto propagate_mv;
 
         case NEWMV:
             read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
@@ -428,8 +428,30 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                       mb_to_right_edge,
                                                       mb_to_top_edge,
                                                       mb_to_bottom_edge);
-            break;
 
+        propagate_mv:  /* same MV throughout */
+#if CONFIG_ERROR_CONCEALMENT
+            if(pbi->ec_enabled)
+            {
+                mi->bmi[ 0].mv.as_int =
+                mi->bmi[ 1].mv.as_int =
+                mi->bmi[ 2].mv.as_int =
+                mi->bmi[ 3].mv.as_int =
+                mi->bmi[ 4].mv.as_int =
+                mi->bmi[ 5].mv.as_int =
+                mi->bmi[ 6].mv.as_int =
+                mi->bmi[ 7].mv.as_int =
+                mi->bmi[ 8].mv.as_int =
+                mi->bmi[ 9].mv.as_int =
+                mi->bmi[10].mv.as_int =
+                mi->bmi[11].mv.as_int =
+                mi->bmi[12].mv.as_int =
+                mi->bmi[13].mv.as_int =
+                mi->bmi[14].mv.as_int =
+                mi->bmi[15].mv.as_int = mv->as_int;
+            }
+#endif
+            break;
         default:;
   #if CONFIG_DEBUG
             assert(0);
