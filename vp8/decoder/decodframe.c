@@ -197,6 +197,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                               unsigned int mb_idx)
 {
     int eobtotal = 0;
+    int throw_residual = 0;
     MB_PREDICTION_MODE mode;
     int i;
 
@@ -238,7 +239,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
     mode = xd->mode_info_context->mbmi.mode;
 
-    if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV)
+    if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV &&
+            !vp8dx_bool_error(xd->current_bc))
     {
         /* Special case:  Force the loopfilter to skip when eobtotal and
          * mb_skip_coeff are zero.
@@ -270,14 +272,21 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         vp8_build_inter_predictors_mb(xd);
     }
 
+    /* When we have independent partitions we can apply residual even
+     * though other partitions within the frame are corrupt.
+     */
+    throw_residual = (!pbi->independent_partitions &&
+                      pbi->frame_corrupt_residual);
+    throw_residual = (throw_residual || vp8dx_bool_error(xd->current_bc));
+
 #if CONFIG_ERROR_CONCEALMENT
-    if (pbi->ec_enabled &&
-        (mb_idx >= pbi->mvs_corrupt_from_mb ||
-        vp8dx_bool_error(xd->current_bc)))
+    if (pbi->ec_active &&
+        (mb_idx >= pbi->mvs_corrupt_from_mb || throw_residual))
     {
         /* MB with corrupt residuals or corrupt mode/motion vectors.
          * Better to use the predictor as reconstruction.
          */
+        pbi->frame_corrupt_residual = 1;
         vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
         vp8_conceal_corrupt_mb(xd);
         return;
@@ -468,22 +477,28 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
         xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
 #if CONFIG_ERROR_CONCEALMENT
-        if (pbi->ec_enabled &&
-            xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
-            vp8dx_bool_error(xd->current_bc))
         {
-            /* We have an intra block with corrupt coefficients, better to
-             * conceal with an inter block. Interpolate MVs from neighboring MBs
-             *
-             * Note that for the first mb with corrupt residual in a frame,
-             * we might not discover that before decoding the residual. That
-             * happens after this check, and therefore no inter concealment will
-             * be done.
-             */
-            vp8_interpolate_motion(xd,
-                                   mb_row, mb_col,
-                                   pc->mb_rows, pc->mb_cols,
-                                   pc->mode_info_stride);
+            int corrupt_residual = (!pbi->independent_partitions &&
+                                   pbi->frame_corrupt_residual) ||
+                                   vp8dx_bool_error(xd->current_bc);
+            if (pbi->ec_active &&
+                xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
+                corrupt_residual)
+            {
+                /* We have an intra block with corrupt coefficients, better to
+                 * conceal with an inter block. Interpolate MVs from neighboring
+                 * MBs.
+                 *
+                 * Note that for the first mb with corrupt residual in a frame,
+                 * we might not discover that before decoding the residual. That
+                 * happens after this check, and therefore no inter concealment
+                 * will be done.
+                 */
+                vp8_interpolate_motion(xd,
+                                       mb_row, mb_col,
+                                       pc->mb_rows, pc->mb_cols,
+                                       pc->mode_info_stride);
+            }
         }
 #endif
 
@@ -589,6 +604,15 @@ static void setup_token_decoder_partition_input(VP8D_COMP *pbi)
 #endif
 }
 
+
+static int read_is_valid(const unsigned char *start,
+                         size_t               len,
+                         const unsigned char *end)
+{
+    return (start + len > start && start + len <= end);
+}
+
+
 static void setup_token_decoder(VP8D_COMP *pbi,
                                 const unsigned char *cx_data)
 {
@@ -604,7 +628,7 @@ static void setup_token_decoder(VP8D_COMP *pbi,
             (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
     /* Only update the multi_token_partition field if we are sure the value
      * is correct. */
-    if (!pbi->ec_enabled || !vp8dx_bool_error(&pbi->bc))
+    if (!pbi->ec_active || !vp8dx_bool_error(&pbi->bc))
         pc->multi_token_partition = multi_token_partition;
 
     num_part = 1 << pc->multi_token_partition;
@@ -623,25 +647,41 @@ static void setup_token_decoder(VP8D_COMP *pbi,
     for (i = 0; i < num_part; i++)
     {
         const unsigned char *partition_size_ptr = cx_data + i * 3;
-        ptrdiff_t            partition_size;
+        ptrdiff_t            partition_size, bytes_left;
+
+        bytes_left = user_data_end - partition;
 
         /* Calculate the length of this partition. The last partition
-         * size is implicit.
+         * size is implicit. If the partition size can't be read, then
+         * either use the remaining data in the buffer (for EC mode)
+         * or throw an error.
          */
         if (i < num_part - 1)
         {
-            partition_size = read_partition_size(partition_size_ptr);
+            if (read_is_valid(partition_size_ptr, 3, user_data_end))
+                partition_size = read_partition_size(partition_size_ptr);
+            else if (pbi->ec_active)
+                partition_size = bytes_left;
+            else
+                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                   "Truncated partition size data");
         }
         else
-        {
-            partition_size = user_data_end - partition;
-        }
+            partition_size = bytes_left;
 
-        if (!pbi->ec_enabled && (partition + partition_size > user_data_end
-            || partition + partition_size < partition))
-            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                               "Truncated packet or corrupt partition "
-                               "%d length", i + 1);
+        /* Validate the calculated partition length. If the buffer
+         * described by the partition can't be fully read, then restrict
+         * it to the portion that can be (for EC mode) or throw an error.
+         */
+        if (!read_is_valid(partition, partition_size, user_data_end))
+        {
+            if (pbi->ec_active)
+                partition_size = bytes_left;
+            else
+                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                                   "Truncated packet or corrupt partition "
+                                   "%d length", i + 1);
+        }
 
         if (vp8dx_start_decode(bool_decoder, partition, partition_size))
             vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
@@ -728,6 +768,9 @@ static void init_frame(VP8D_COMP *pbi)
             xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x8);
             xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear16x16);
         }
+
+        if (pbi->decoded_key_frame && pbi->ec_enabled && !pbi->ec_active)
+            pbi->ec_active = 1;
     }
 
     xd->left_context = &pc->left_context;
@@ -750,6 +793,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     int mb_row;
     int i, j, k, l;
     const int *const mb_feature_data_bits = vp8_mb_feature_data_bits;
+    int corrupt_tokens = 0;
+    int prev_independent_partitions = pbi->independent_partitions;
 
     if (pbi->input_partition)
     {
@@ -763,7 +808,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     if (data_end - data < 3)
     {
-        if (pbi->ec_enabled)
+        if (pbi->ec_active)
         {
             /* Declare the missing frame as an inter frame since it will
                be handled as an inter frame when we have estimated its
@@ -788,7 +833,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
         data += 3;
 
-        if (!pbi->ec_enabled && (data + first_partition_length_in_bytes > data_end
+        if (!pbi->ec_active && (data + first_partition_length_in_bytes > data_end
             || data + first_partition_length_in_bytes < data))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet or corrupt partition 0 length");
@@ -803,7 +848,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             /* When error concealment is enabled we should only check the sync
              * code if we have enough bits available
              */
-            if (!pbi->ec_enabled || data + 3 < data_end)
+            if (!pbi->ec_active || data + 3 < data_end)
             {
                 if (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a)
                     vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
@@ -814,7 +859,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
              * if we have enough data. Otherwise we will end up with the wrong
              * size.
              */
-            if (!pbi->ec_enabled || data + 6 < data_end)
+            if (!pbi->ec_active || data + 6 < data_end)
             {
                 pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
                 pc->horiz_scale = data[4] >> 6;
@@ -1015,7 +1060,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #if CONFIG_ERROR_CONCEALMENT
         /* Assume we shouldn't refresh golden if the bit is missing */
         xd->corrupted |= vp8dx_bool_error(bc);
-        if (pbi->ec_enabled && xd->corrupted)
+        if (pbi->ec_active && xd->corrupted)
             pc->refresh_golden_frame = 0;
 #endif
 
@@ -1023,7 +1068,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #if CONFIG_ERROR_CONCEALMENT
         /* Assume we shouldn't refresh altref if the bit is missing */
         xd->corrupted |= vp8dx_bool_error(bc);
-        if (pbi->ec_enabled && xd->corrupted)
+        if (pbi->ec_active && xd->corrupted)
             pc->refresh_alt_ref_frame = 0;
 #endif
 
@@ -1053,7 +1098,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #if CONFIG_ERROR_CONCEALMENT
     /* Assume we should refresh the last frame if the bit is missing */
     xd->corrupted |= vp8dx_bool_error(bc);
-    if (pbi->ec_enabled && xd->corrupted)
+    if (pbi->ec_active && xd->corrupted)
         pc->refresh_last_frame = 1;
 #endif
 
@@ -1071,6 +1116,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
     {
+        pbi->independent_partitions = 1;
+
         /* read coef probability tree */
         for (i = 0; i < BLOCK_TYPES; i++)
             for (j = 0; j < COEF_BANDS; j++)
@@ -1085,6 +1132,9 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                             *p = (vp8_prob)vp8_read_literal(bc, 8);
 
                         }
+                        if (k > 0 && *p != pc->fc.coef_probs[i][j][k-1][l])
+                            pbi->independent_partitions = 0;
+
                     }
     }
 #if CONFIG_T8X8
@@ -1137,7 +1187,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vp8_decode_mode_mvs(pbi);
 
 #if CONFIG_ERROR_CONCEALMENT
-    if (pbi->ec_enabled &&
+    if (pbi->ec_active &&
             pbi->mvs_corrupt_from_mb < (unsigned int)pc->mb_cols * pc->mb_rows)
     {
         /* Motion vectors are missing in this frame. We will try to estimate
@@ -1151,14 +1201,19 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {
+        int i;
+        pbi->frame_corrupt_residual = 0;
         vp8mt_decode_mb_rows(pbi, xd);
         vp8_yv12_extend_frame_borders_ptr(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
+        for (i = 0; i < pbi->decoding_thread_count; ++i)
+            corrupt_tokens |= pbi->mb_row_di[i].mbd.corrupted;
     }
     else
 #endif
     {
         int ibc = 0;
         int num_part = 1 << pc->multi_token_partition;
+        pbi->frame_corrupt_residual = 0;
 
         /* Decode the individual macro block */
         for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
@@ -1175,17 +1230,26 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
             decode_mb_row(pbi, pc, mb_row, xd);
         }
+        corrupt_tokens |= xd->corrupted;
     }
 
     stop_token_decoder(pbi);
 
     /* Collect information about decoder corruption. */
     /* 1. Check first boolean decoder for errors. */
-    pc->yv12_fb[pc->new_fb_idx].corrupted =
-        vp8dx_bool_error(bc);
+    pc->yv12_fb[pc->new_fb_idx].corrupted = vp8dx_bool_error(bc);
     /* 2. Check the macroblock information */
-    pc->yv12_fb[pc->new_fb_idx].corrupted |=
-        xd->corrupted;
+    pc->yv12_fb[pc->new_fb_idx].corrupted |= corrupt_tokens;
+
+    if (!pbi->decoded_key_frame)
+    {
+        if (pc->frame_type == KEY_FRAME &&
+            !pc->yv12_fb[pc->new_fb_idx].corrupted)
+            pbi->decoded_key_frame = 1;
+        else
+            vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
+                               "A stream must start with a complete key frame");
+    }
 
     /* vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes  \n",bc->pos+pbi->bc2.pos); */
 
@@ -1199,6 +1263,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     if (pc->refresh_entropy_probs == 0)
     {
         vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
+        pbi->independent_partitions = prev_independent_partitions;
     }
 
 #ifdef PACKET_TESTING

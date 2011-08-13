@@ -93,6 +93,7 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col)
 {
     int eobtotal = 0;
+    int throw_residual = 0;
     int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
@@ -112,7 +113,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
 
     eobtotal |= (xd->mode_info_context->mbmi.mode == B_PRED ||
                   xd->mode_info_context->mbmi.mode == SPLITMV);
-    if (!eobtotal)
+    if (!eobtotal && !vp8dx_bool_error(xd->current_bc))
     {
         /* Special case:  Force the loopfilter to skip when eobtotal and
          * mb_skip_coeff are zero.
@@ -154,14 +155,22 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
         vp8_build_inter_predictors_mb(xd);
     }
 
+    /* When we have independent partitions we can apply residual even
+     * though other partitions within the frame are corrupt.
+     */
+    throw_residual = (!pbi->independent_partitions &&
+                      pbi->frame_corrupt_residual);
+    throw_residual = (throw_residual || vp8dx_bool_error(xd->current_bc));
+
 #if CONFIG_ERROR_CONCEALMENT
-    if (pbi->ec_enabled &&
+    if (pbi->ec_active &&
         (mb_row * pbi->common.mb_cols + mb_col >= pbi->mvs_corrupt_from_mb ||
-        vp8dx_bool_error(xd->current_bc)))
+        throw_residual))
     {
         /* MB with corrupt residuals or corrupt mode/motion vectors.
          * Better to use the predictor as reconstruction.
          */
+        pbi->frame_corrupt_residual = 1;
         vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
         vp8_conceal_corrupt_mb(xd);
         return;
@@ -314,25 +323,32 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
                         xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
 #if CONFIG_ERROR_CONCEALMENT
-                        if (pbi->ec_enabled &&
-                            (xd->mode_info_context->mbmi.ref_frame ==
-                                                                 INTRA_FRAME) &&
-                            vp8dx_bool_error(xd->current_bc))
                         {
-                            /* We have an intra block with corrupt coefficients,
-                             * better to conceal with an inter block.
-                             * Interpolate MVs from neighboring MBs
-                             *
-                             * Note that for the first mb with corrupt residual
-                             * in a frame, we might not discover that before
-                             * decoding the residual. That happens after this
-                             * check, and therefore no inter concealment will be
-                             * done.
-                             */
-                            vp8_interpolate_motion(xd,
-                                                   mb_row, mb_col,
-                                                   pc->mb_rows, pc->mb_cols,
-                                                   pc->mode_info_stride);
+                            int corrupt_residual =
+                                        (!pbi->independent_partitions &&
+                                        pbi->frame_corrupt_residual) ||
+                                        vp8dx_bool_error(xd->current_bc);
+                            if (pbi->ec_active &&
+                                (xd->mode_info_context->mbmi.ref_frame ==
+                                                                 INTRA_FRAME) &&
+                                corrupt_residual)
+                            {
+                                /* We have an intra block with corrupt
+                                 * coefficients, better to conceal with an inter
+                                 * block.
+                                 * Interpolate MVs from neighboring MBs
+                                 *
+                                 * Note that for the first mb with corrupt
+                                 * residual in a frame, we might not discover
+                                 * that before decoding the residual. That
+                                 * happens after this check, and therefore no
+                                 * inter concealment will be done.
+                                 */
+                                vp8_interpolate_motion(xd,
+                                                       mb_row, mb_col,
+                                                       pc->mb_rows, pc->mb_cols,
+                                                       pc->mode_info_stride);
+                            }
                         }
 #endif
 
@@ -355,8 +371,18 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
                         xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
                         xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
+                        if (xd->mode_info_context->mbmi.ref_frame !=
+                                INTRA_FRAME)
+                        {
+                            /* propagate errors from reference frames */
+                            xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
+                        }
+
                         vp8_build_uvmvs(xd, pc->full_pixel);
                         decode_macroblock(pbi, xd, mb_row, mb_col);
+
+                        /* check if the boolean decoder has suffered an error */
+                        xd->corrupted |= vp8dx_bool_error(xd->current_bc);
 
                         if (pbi->common.filter_level)
                         {
@@ -803,23 +829,28 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                 xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
 #if CONFIG_ERROR_CONCEALMENT
-                if (pbi->ec_enabled &&
-                    (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) &&
-                    vp8dx_bool_error(xd->current_bc))
                 {
-                    /* We have an intra block with corrupt coefficients, better
-                     * to conceal with an inter block. Interpolate MVs from
-                     * neighboring MBs
-                     *
-                     * Note that for the first mb with corrupt residual in a
-                     * frame, we might not discover that before decoding the
-                     * residual. That happens after this check, and therefore no
-                     * inter concealment will be done.
-                     */
-                    vp8_interpolate_motion(xd,
-                                           mb_row, mb_col,
-                                           pc->mb_rows, pc->mb_cols,
-                                           pc->mode_info_stride);
+                    int corrupt_residual = (!pbi->independent_partitions &&
+                                            pbi->frame_corrupt_residual) ||
+                                            vp8dx_bool_error(xd->current_bc);
+                    if (pbi->ec_active &&
+                        (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) &&
+                        corrupt_residual)
+                    {
+                        /* We have an intra block with corrupt coefficients,
+                         * better to conceal with an inter block. Interpolate
+                         * MVs from neighboring MBs
+                         *
+                         * Note that for the first mb with corrupt residual in a
+                         * frame, we might not discover that before decoding the
+                         * residual. That happens after this check, and
+                         * therefore no inter concealment will be done.
+                         */
+                        vp8_interpolate_motion(xd,
+                                               mb_row, mb_col,
+                                               pc->mb_rows, pc->mb_cols,
+                                               pc->mode_info_stride);
+                    }
                 }
 #endif
 

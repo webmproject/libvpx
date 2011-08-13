@@ -137,8 +137,20 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 #else
     pbi->ec_enabled = 0;
 #endif
+    /* Error concealment is activated after a key frame has been
+     * decoded without errors when error concealment is enabled.
+     */
+    pbi->ec_active = 0;
+
+    pbi->decoded_key_frame = 0;
 
     pbi->input_partition = oxcf->input_partition;
+
+    /* Independent partitions is activated when a frame updates the
+     * token probability table to have equal probabilities over the
+     * PREV_COEF context.
+     */
+    pbi->independent_partitions = 0;
 
     return (VP8D_PTR) pbi;
 }
@@ -402,10 +414,14 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
             /* If error concealment is disabled we won't signal missing frames to
              * the decoder.
              */
-            if (!pbi->ec_enabled)
+            if (!pbi->ec_active)
             {
                 /* Signal that we have no frame to show. */
                 cm->show_frame = 0;
+
+                pbi->num_partitions = 0;
+                if (pbi->input_partition)
+                    pbi->common.multi_token_partition = 0;
 
                 /* Nothing more to do. */
                 return 0;
@@ -434,6 +450,10 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
             }
 #endif
             pbi->common.error.setjmp = 0;
+
+            pbi->num_partitions = 0;
+            if (pbi->input_partition)
+                pbi->common.multi_token_partition = 0;
 
            /* We do not know if the missing frame(s) was supposed to update
             * any of the reference buffers, but we act conservative and
