@@ -1,3 +1,33 @@
+2011-08-15 v0.9.7-p1 "Cayuga" patch 1
+  This is an incremental bugfix release against Cayuga. All users of that
+  release are strongly encouraged to upgrade.
+
+    - Fix potential OOB reads (cdae03a)
+
+          An unbounded out of bounds read was discovered when the
+          decoder was requested to perform error concealment (new in
+          Cayuga) given a frame with corrupt partition sizes.
+
+          A bounded out of bounds read was discovered affecting all
+          versions of libvpx. Given an multipartition input frame that
+          is truncated between the mode/mv partition and the first
+          residiual paritition (in the block of partition offsets), up
+          to 3 extra bytes could have been read from the source buffer.
+          The code will not take any action regardless of the contents
+          of these undefined bytes, as the truncated buffer is detected
+          immediately following the read based on the calculated
+          starting position of the coefficient partition.
+
+    - Fix potential error concealment crash when the very first frame
+      is missing or corrupt (a609be5)
+
+    - Fix significant artifacts in error concealment (a4c2211, 99d870a)
+
+    - Revert 1-pass CBR rate control changes (e961317)
+      Further testing showed this change produced undesirable visual
+      artifacts, rolling back for now.
+
+
 2011-08-02 v0.9.7 "Cayuga"
   Our third named release, focused on a faster, higher quality, encoder.
 
