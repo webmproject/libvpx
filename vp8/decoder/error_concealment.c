@@ -567,7 +567,6 @@ static void interpolate_mvs(MACROBLOCKD *mb,
             else
             {
                 mv->as_int = 0;
-                mi->bmi[row*4 + col].as_mode = NEW4X4;
                 mi->mbmi.need_to_clamp_mvs = 0;
             }
         }

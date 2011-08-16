@@ -132,6 +132,14 @@ CODEC_SRCS=$(call enabled,CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 
+
+# Generate a list of all enabled sources, in particular for exporting to gyp
+# based build systems.
+libvpx_srcs.txt:
+	@echo "    [CREATE] $@"
+	@echo $(CODEC_SRCS) | xargs -n1 echo | sort -u > $@
+
+
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
 
