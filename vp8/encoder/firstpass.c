@@ -862,8 +862,6 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     double correction_factor;
     double corr_high;
     double speed_correction = 1.0;
-    double rolling_ratio;
-
     double pow_highq = 0.90;
     double pow_lowq = 0.40;
 
@@ -873,8 +871,10 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
 
     // Calculate a corrective factor based on a rolling ratio of bits spent vs target bits
-    if ((cpi->rolling_target_bits > 0.0) && (cpi->active_worst_quality < cpi->worst_quality))
+    if ((cpi->rolling_target_bits > 0) && (cpi->active_worst_quality < cpi->worst_quality))
     {
+        double rolling_ratio;
+
         rolling_ratio = (double)cpi->rolling_actual_bits / (double)cpi->rolling_target_bits;
 
         //if ( cpi->twopass.est_max_qcorrection_factor > rolling_ratio )
@@ -2107,6 +2107,10 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (cpi->twopass.gf_group_bits < 0)
             cpi->twopass.gf_group_bits = 0;
 
+        // This condition could fail if there are two kfs very close together
+        // despite (MIN_GF_INTERVAL) and would cause a devide by 0 in the
+        // calculation of cpi->twopass.alt_extra_bits.
+        if ( cpi->baseline_gf_interval >= 3 )
         {
 #if NEW_BOOST
             int boost = (cpi->source_alt_ref_pending)
@@ -2114,19 +2118,24 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 #else
             int boost = cpi->gfu_boost;
 #endif
-            // Set aside some bits for a mid gf sequence boost
-            if ((boost > 150) && (cpi->baseline_gf_interval > 5))
+            if ( boost >= 150 )
             {
-                int pct_extra = (boost - 100) / 50;
-                pct_extra = (pct_extra > 10) ? 10 : pct_extra;
+                int pct_extra;
 
-                cpi->twopass.mid_gf_extra_bits =
+                pct_extra = (boost - 100) / 50;
+                pct_extra = (pct_extra > 20) ? 20 : pct_extra;
+
+                cpi->twopass.alt_extra_bits =
                     (cpi->twopass.gf_group_bits * pct_extra) / 100;
-                cpi->twopass.gf_group_bits -= cpi->twopass.mid_gf_extra_bits;
+                cpi->twopass.gf_group_bits -= cpi->twopass.alt_extra_bits;
+                cpi->twopass.alt_extra_bits /=
+                    ((cpi->baseline_gf_interval-1)>>1);
             }
             else
-                cpi->twopass.mid_gf_extra_bits = 0;
+                cpi->twopass.alt_extra_bits = 0;
         }
+        else
+            cpi->twopass.alt_extra_bits = 0;
     }
 
     // Adjustment to estimate_max_q based on a measure of complexity of the section
@@ -2206,9 +2215,12 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     target_frame_size += cpi->min_frame_bandwidth;                                          // Add in the minimum number of bits that is set aside for every frame.
 
-    // Special case for the frame that lies half way between two gfs
-    if (cpi->common.frames_since_golden == cpi->baseline_gf_interval / 2)
-        target_frame_size += cpi->twopass.mid_gf_extra_bits;
+    // Every other frame gets a few extra bits
+    if ( (cpi->common.frames_since_golden & 0x01) &&
+         (cpi->frames_till_gf_update_due > 0) )
+    {
+        target_frame_size += cpi->twopass.alt_extra_bits;
+    }
 
     cpi->per_frame_bandwidth = target_frame_size;                                           // Per frame bit target for this frame
 }
@@ -2551,8 +2563,11 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             && lookup_next_frame_stats(cpi, &next_frame) != EOF)
         {
             // Normal scene cut check
-            if (test_candidate_kf(cpi, &last_frame, this_frame, &next_frame))
+            if ( ( i >= MIN_GF_INTERVAL ) &&
+                 test_candidate_kf(cpi, &last_frame, this_frame, &next_frame) )
+            {
                 break;
+            }
 
             // How fast is prediction quality decaying
             loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
