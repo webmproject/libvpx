@@ -391,6 +391,7 @@ LDFLAGS = ${LDFLAGS}
 ASFLAGS = ${ASFLAGS}
 extralibs = ${extralibs}
 AS_SFX    = ${AS_SFX:-.asm}
+RTCD_OPTIONS = ${RTCD_OPTIONS}
 EOF
 
     if enabled rvct; then cat >> $1 << EOF
@@ -454,8 +455,21 @@ process_common_cmdline() {
         ;;
         --enable-?*|--disable-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
-        echo "${CMDLINE_SELECT} ${ARCH_EXT_LIST}" | grep "^ *$option\$" >/dev/null || die_unknown $opt
+        if echo "${ARCH_EXT_LIST}" | grep "^ *$option\$" >/dev/null; then
+            [ $action = "disable" ] && RTCD_OPTIONS="${RTCD_OPTIONS}${opt} "
+        else
+            echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
+                die_unknown $opt
+        fi
         $action $option
+        ;;
+        --require-?*)
+        eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
+        if echo "${ARCH_EXT_LIST}" none | grep "^ *$option\$" >/dev/null; then
+            RTCD_OPTIONS="${RTCD_OPTIONS}${opt} "
+        else
+            die_unknown $opt
+        fi
         ;;
         --force-enable-?*|--force-disable-?*)
         eval `echo "$opt" | sed 's/--force-/action=/;s/-/ option=/;s/-/_/g'`

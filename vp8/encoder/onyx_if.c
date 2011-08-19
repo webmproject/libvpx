@@ -55,7 +55,6 @@ extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
 extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 
-extern void vp8_dmachine_specific_config(VP8_COMP *cpi);
 extern void vp8_cmachine_specific_config(VP8_COMP *cpi);
 extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *post, int filt_lvl, int low_var_thresh, int flag);
 extern void print_parms(VP8_CONFIG *ocf, char *filenam);
@@ -230,7 +229,6 @@ void vp8_initialize()
     {
         vp8_scale_machine_specific_config();
         vp8_initialize_common();
-        //vp8_dmachine_specific_config();
         vp8_tokenize_initialize();
 
         init_done = 1;

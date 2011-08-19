@@ -9,6 +9,8 @@
  */
 
 
+#include "vpx_config.h"
+#include "vpx_rtcd.h"
 #if !defined(WIN32) && CONFIG_OS_SUPPORT == 1
 # include <unistd.h>
 #endif
@@ -191,7 +193,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
             {
                 if (xd->eobs[i] > 1)
                 {
-                    DEQUANT_INVOKE(&pbi->common.rtcd.dequant, idct_add)
+                    vp8_dequant_idct_add
                         (b->qcoeff, DQC,
                         *(b->base_dst) + b->dst, b->dst_stride);
                 }
@@ -217,7 +219,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
             /* do 2nd order transform on the dc block */
             if (xd->eobs[24] > 1)
             {
-                DEQUANT_INVOKE(&pbi->common.rtcd.dequant, block)(b, xd->dequant_y2);
+                vp8_dequantize_b(b, xd->dequant_y2);
 
                 IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0],
                     xd->qcoeff);
@@ -241,13 +243,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
             DQC = xd->dequant_y1_dc;
         }
 
-        DEQUANT_INVOKE (&pbi->common.rtcd.dequant, idct_add_y_block)
+        vp8_dequant_idct_add_y_block
                         (xd->qcoeff, DQC,
                          xd->dst.y_buffer,
                          xd->dst.y_stride, xd->eobs);
     }
 
-    DEQUANT_INVOKE (&pbi->common.rtcd.dequant, idct_add_uv_block)
+    vp8_dequant_idct_add_uv_block
                     (xd->qcoeff+16*16, xd->dequant_uv,
                      xd->dst.u_buffer, xd->dst.v_buffer,
                      xd->dst.uv_stride, xd->eobs+16);

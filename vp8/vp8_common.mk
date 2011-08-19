@@ -20,7 +20,6 @@ VP8_COMMON_SRCS-yes += common/coefupdateprobs.h
 VP8_COMMON_SRCS-yes += common/debugmodes.c
 VP8_COMMON_SRCS-yes += common/default_coef_probs.h
 VP8_COMMON_SRCS-yes += common/dequantize.c
-VP8_COMMON_SRCS-yes += common/dequantize.h
 VP8_COMMON_SRCS-yes += common/entropy.c
 VP8_COMMON_SRCS-yes += common/entropymode.c
 VP8_COMMON_SRCS-yes += common/entropymv.c
@@ -51,6 +50,8 @@ VP8_COMMON_SRCS-yes += common/recon.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
 VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
+VP8_COMMON_SRCS-yes += common/rtcd.c
+VP8_COMMON_SRCS-yes += common/rtcd_defs.sh
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
 VP8_COMMON_SRCS-yes += common/subpixel.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h
@@ -74,7 +75,6 @@ VP8_COMMON_SRCS-yes += common/swapyv12buffer.c
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
 VP8_COMMON_SRCS-yes += common/treecoder.c
 
-VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/dequantize_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
@@ -120,7 +120,6 @@ VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/recon_arm.h
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/reconintra_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/subpixel_arm.h
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/dequantize_arm.c
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/dequantize_arm.h
 
 # common (media)
 VP8_COMMON_SRCS-$(HAVE_MEDIA)  += common/arm/bilinearfilter_arm.c

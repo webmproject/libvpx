@@ -17,7 +17,6 @@
 #include "vp8/common/onyxc_int.h"
 #include "vp8/common/threading.h"
 
-
 #if CONFIG_ERROR_CONCEALMENT
 #include "ec_types.h"
 #endif
@@ -114,8 +113,6 @@ typedef struct VP8D_COMP
 } VP8D_COMP;
 
 int vp8_decode_frame(VP8D_COMP *cpi);
-void vp8_dmachine_specific_config(VP8D_COMP *pbi);
-
 
 #if CONFIG_DEBUG
 #define CHECK_MEM_ERROR(lval,expr) do {\

@@ -18,10 +18,6 @@ VP8_DX_SRCS-no  += $(VP8_COMMON_SRCS-no)
 VP8_DX_SRCS_REMOVE-yes += $(VP8_COMMON_SRCS_REMOVE-yes)
 VP8_DX_SRCS_REMOVE-no  += $(VP8_COMMON_SRCS_REMOVE-no)
 
-ifeq ($(ARCH_ARM),yes)
-  include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8dx_arm.mk
-endif
-
 VP8_DX_SRCS-yes += vp8_dx_iface.c
 
 # common
@@ -56,7 +52,6 @@ VP8_DX_SRCS-yes += decoder/detokenize.c
 VP8_DX_SRCS-$(CONFIG_ERROR_CONCEALMENT) += decoder/ec_types.h
 VP8_DX_SRCS-$(CONFIG_ERROR_CONCEALMENT) += decoder/error_concealment.h
 VP8_DX_SRCS-$(CONFIG_ERROR_CONCEALMENT) += decoder/error_concealment.c
-VP8_DX_SRCS-yes += decoder/generic/dsystemdependent.c
 VP8_DX_SRCS-yes += decoder/dboolhuff.h
 VP8_DX_SRCS-yes += decoder/decodemv.h
 VP8_DX_SRCS-yes += decoder/decoderthreading.h
@@ -69,5 +64,3 @@ VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/reconintra_mt.h
 VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/reconintra_mt.c
 
 VP8_DX_SRCS-yes := $(filter-out $(VP8_DX_SRCS_REMOVE-yes),$(VP8_DX_SRCS-yes))
-
-VP8_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/x86_dsystemdependent.c

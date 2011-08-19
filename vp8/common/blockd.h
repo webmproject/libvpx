@@ -179,7 +179,7 @@ typedef struct
 } LOWER_RES_INFO;
 #endif
 
-typedef struct
+typedef struct blockd
 {
     short *qcoeff;
     short *dqcoeff;

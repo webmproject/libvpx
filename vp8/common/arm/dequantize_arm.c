@@ -10,8 +10,7 @@
 
 
 #include "vpx_config.h"
-#include "vp8/common/dequantize.h"
-#include "vp8/common/idct.h"
+#include "vp8/common/blockd.h"
 
 #if HAVE_NEON
 extern void vp8_dequantize_b_loop_neon(short *Q, short *DQC, short *DQ);

@@ -13,6 +13,7 @@
 #define __INC_INVTRANS_H
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "idct.h"
 #include "blockd.h"
 #include "onyxc_int.h"
@@ -55,7 +56,7 @@ static void vp8_inverse_transform_mby(MACROBLOCKD *xd,
 
         DQC = xd->dequant_y1_dc;
     }
-    DEQUANT_INVOKE (&rtcd->dequant, idct_add_y_block)
+    vp8_dequant_idct_add_y_block
                     (xd->qcoeff, DQC,
                      xd->dst.y_buffer,
                      xd->dst.y_stride, xd->eobs);

@@ -62,12 +62,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_v6;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_v6;
         rtcd->recon.intra4x4_predict = vp8_intra4x4_predict_armv6;
-
-        rtcd->dequant.block               = vp8_dequantize_b_v6;
-        rtcd->dequant.idct_add            = vp8_dequant_idct_add_v6;
-        rtcd->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_v6;
-        rtcd->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_v6;
-
     }
 #endif
 
@@ -102,12 +96,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
             vp8_build_intra_predictors_mby_neon;
         rtcd->recon.build_intra_predictors_mby_s =
             vp8_build_intra_predictors_mby_s_neon;
-
-        rtcd->dequant.block               = vp8_dequantize_b_neon;
-        rtcd->dequant.idct_add            = vp8_dequant_idct_add_neon;
-        rtcd->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_neon;
-        rtcd->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_neon;
-
     }
 #endif
 

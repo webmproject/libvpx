@@ -10,6 +10,7 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/recon.h"
@@ -68,13 +69,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
     VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
-
-
-    rtcd->dequant.block             = vp8_dequantize_b_c;
-    rtcd->dequant.idct_add          = vp8_dequant_idct_add_c;
-    rtcd->dequant.idct_add_y_block  = vp8_dequant_idct_add_y_block_c;
-    rtcd->dequant.idct_add_uv_block =
-        vp8_dequant_idct_add_uv_block_c;
 
 
     rtcd->idct.idct16       = vp8_short_idct4x4llm_c;
@@ -138,4 +132,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 #if CONFIG_MULTITHREAD
     ctx->processor_core_count = get_cpu_count();
 #endif /* CONFIG_MULTITHREAD */
+
+    vpx_rtcd();
 }
