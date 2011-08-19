@@ -9,8 +9,8 @@
  */
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vp8/common/idct.h"
-#include "vp8/decoder/dequantize.h"
 
 void vp8_dequant_idct_add_y_block_mmx
             (short *q, short *dq,

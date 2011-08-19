@@ -322,6 +322,15 @@ endif
 $(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
 CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
 
+#
+# Rule to generate runtime cpu detection files
+#
+$(OBJS-yes:.o=.d): vpx_rtcd.h
+vpx_rtcd.h: $(sort $(filter %rtcd_defs.sh,$(CODEC_SRCS)))
+	$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$(TGT_ISA) --sym=vpx_rtcd \
+      --rtcd=$(CONFIG_RUNTIME_CPU_DETECT) $^ > $@
+CLEAN-OBJS += $(BUILD_PFX)vpx_rtcd.h
+
 CODEC_DOC_SRCS += vpx/vpx_codec.h \
                   vpx/vpx_decoder.h \
                   vpx/vpx_encoder.h \

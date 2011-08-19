@@ -51,6 +51,7 @@ VP8_COMMON_SRCS-yes += common/recon.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
 VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
+VP8_COMMON_SRCS-yes += common/rtcd.c
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
 VP8_COMMON_SRCS-yes += common/subpixel.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h

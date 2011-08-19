@@ -61,7 +61,6 @@ VP8_DX_SRCS-yes += decoder/generic/dsystemdependent.c
 VP8_DX_SRCS-yes += decoder/dboolhuff.h
 VP8_DX_SRCS-yes += decoder/decodemv.h
 VP8_DX_SRCS-yes += decoder/decoderthreading.h
-VP8_DX_SRCS-yes += decoder/dequantize.h
 VP8_DX_SRCS-yes += decoder/detokenize.h
 VP8_DX_SRCS-yes += decoder/onyxd_int.h
 VP8_DX_SRCS-yes += decoder/treereader.h
@@ -70,10 +69,10 @@ VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/threading.c
 VP8_DX_SRCS-yes += decoder/idct_blk.c
 VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/reconintra_mt.h
 VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/reconintra_mt.c
+VP8_DX_SRCS-yes += decoder/rtcd_defs.sh
 
 VP8_DX_SRCS-yes := $(filter-out $(VP8_DX_SRCS_REMOVE-yes),$(VP8_DX_SRCS-yes))
 
-VP8_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/dequantize_x86.h
 VP8_DX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += decoder/x86/x86_dsystemdependent.c
 VP8_DX_SRCS-$(HAVE_MMX) += decoder/x86/dequantize_mmx.asm
 VP8_DX_SRCS-$(HAVE_MMX) += decoder/x86/idct_blk_mmx.c

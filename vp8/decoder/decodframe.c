@@ -9,13 +9,14 @@
  */
 
 
+#include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "onyxd_int.h"
 #include "vp8/common/header.h"
 #include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/recon.h"
 #include "vp8/common/reconinter.h"
-#include "dequantize.h"
 #include "detokenize.h"
 #include "vp8/common/invtrans.h"
 #include "vp8/common/alloccommon.h"
@@ -32,7 +33,6 @@
 #endif
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/idct.h"
-#include "dequantize.h"
 #include "vp8/common/threading.h"
 #include "decoderthreading.h"
 #include "dboolhuff.h"
@@ -218,7 +218,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             {
                 if (xd->eobs[i] > 1)
                 {
-                    DEQUANT_INVOKE(&pbi->dequant, idct_add)
+                    vp8_dequant_idct_add
                         (b->qcoeff, b->dequant,
                         *(b->base_dst) + b->dst, b->dst_stride);
                 }
@@ -247,7 +247,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             /* do 2nd order transform on the dc block */
             if (xd->eobs[24] > 1)
             {
-                DEQUANT_INVOKE(&pbi->dequant, block)(b);
+                vp8_dequantize_b(b);
 
                 IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0],
                     xd->qcoeff);
@@ -272,7 +272,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             DQC[0] = 1;
         }
 
-        DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
+        vp8_dequant_idct_add_y_block
                         (xd->qcoeff, xd->block[0].dequant,
                          xd->dst.y_buffer,
                          xd->dst.y_stride, xd->eobs);
@@ -281,7 +281,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         DQC[0] = dc_dequant_temp;
     }
 
-    DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
+    vp8_dequant_idct_add_uv_block
                     (xd->qcoeff+16*16, xd->block[16].dequant,
                      xd->dst.u_buffer, xd->dst.v_buffer,
                      xd->dst.uv_stride, xd->eobs+16);
