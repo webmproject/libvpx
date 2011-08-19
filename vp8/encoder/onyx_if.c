@@ -4559,7 +4559,7 @@ int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CON
 
     vpx_usec_timer_start(&timer);
     if(vp8_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
-                          frame_flags))
+                          frame_flags, cpi->active_map_enabled ? cpi->active_map : NULL))
         res = -1;
     cm->clr_type = sd->clrtype;
     vpx_usec_timer_mark(&timer);
