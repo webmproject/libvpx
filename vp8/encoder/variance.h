@@ -320,15 +320,15 @@ extern prototype_variance(vp8_variance_mse16x16);
 #endif
 extern prototype_get16x16prederror(vp8_variance_get4x4sse_cs);
 
-#ifndef vp8_ssimpf
-#define vp8_ssimpf ssim_parms_c
-#endif
-extern prototype_ssimpf(vp8_ssimpf)
-
 #ifndef vp8_ssimpf_8x8
-#define vp8_ssimpf_8x8 ssim_parms_8x8_c
+#define vp8_ssimpf_8x8 vp8_ssim_parms_8x8_c
 #endif
 extern prototype_ssimpf(vp8_ssimpf_8x8)
+
+#ifndef vp8_ssimpf_16x16
+#define vp8_ssimpf_16x16 vp8_ssim_parms_16x16_c
+#endif
+extern prototype_ssimpf(vp8_ssimpf_16x16)
 
 typedef prototype_sad(*vp8_sad_fn_t);
 typedef prototype_sad_multi_same_address(*vp8_sad_multi_fn_t);
@@ -394,7 +394,7 @@ typedef struct
 
 #if CONFIG_INTERNAL_STATS
     vp8_ssimpf_fn_t          ssimpf_8x8;
-    vp8_ssimpf_fn_t          ssimpf;
+    vp8_ssimpf_fn_t          ssimpf_16x16;
 #endif
 
 } vp8_variance_rtcd_vtable_t;
@@ -417,8 +417,10 @@ typedef struct
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define VARIANCE_INVOKE(ctx,fn) (ctx)->fn
+#define SSIMPF_INVOKE(ctx,fn) (ctx)->fn
 #else
 #define VARIANCE_INVOKE(ctx,fn) vp8_variance_##fn
+#define SSIMPF_INVOKE(ctx,fn) vp8_ssimpf_##fn
 #endif
 
 #endif
