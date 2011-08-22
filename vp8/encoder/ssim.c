@@ -9,18 +9,9 @@
  */
 
 
-#include "vpx_scale/yv12config.h"
-#include "math.h"
 #include "onyx_int.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x)  (x)
-#else
-#define IF_RTCD(x)  NULL
-#endif
-
-
-void ssim_parms_c
+void vp8_ssim_parms_16x16_c
 (
     unsigned char *s,
     int sp,
@@ -46,7 +37,7 @@ void ssim_parms_c
          }
      }
 }
-void ssim_parms_8x8_c
+void vp8_ssim_parms_8x8_c
 (
     unsigned char *s,
     int sp,
@@ -107,14 +98,14 @@ static double ssim_16x16(unsigned char *s,int sp, unsigned char *r,int rp,
             const vp8_variance_rtcd_vtable_t *rtcd)
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
-    rtcd->ssimpf(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    SSIMPF_INVOKE(rtcd,16x16)(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
     return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 256);
 }
 static double ssim_8x8(unsigned char *s,int sp, unsigned char *r,int rp,
                 const vp8_variance_rtcd_vtable_t *rtcd)
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
-    rtcd->ssimpf_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    SSIMPF_INVOKE(rtcd,8x8)(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
     return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64);
 }
 
@@ -134,7 +125,7 @@ long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
     c1 = cc1*16;
     c2 = cc2*16;
 
-    rtcd->ssimpf(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    SSIMPF_INVOKE(rtcd,16x16)(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
     ssim_n1 = (2*sum_s*sum_r+ c1);
 
     ssim_n2 =((int64_t) 2*256*sum_sxr-(int64_t) 2*sum_s*sum_r+c2);
