@@ -137,17 +137,17 @@ sym(vp8_regular_quantize_b_sse2):
     ; if (x >= zbin)
     sub         cx, WORD PTR[rdx]           ; x - zbin
     lea         rdx, [rdx + 2]              ; zbin_boost_ptr++
-    jl          rq_zigzag_loop_%1           ; x < zbin
+    jl          .rq_zigzag_loop_%1           ; x < zbin
 
     movsx       edi, WORD PTR[rsp + temp_qcoeff + %1 * 2]
 
     ; downshift by quant_shift[rc]
     movsx       cx, BYTE PTR[rax + %1]      ; quant_shift_ptr[rc]
     sar         edi, cl                     ; also sets Z bit
-    je          rq_zigzag_loop_%1           ; !y
+    je          .rq_zigzag_loop_%1           ; !y
     mov         WORD PTR[rsp + qcoeff + %1 * 2], di ;qcoeff_ptr[rc] = temp_qcoeff[rc]
     mov         rdx, [rsp + zrun_zbin_boost] ; reset to b->zrun_zbin_boost
-rq_zigzag_loop_%1:
+.rq_zigzag_loop_%1:
 %endmacro
 ; in vp8_default_zig_zag1d order: see vp8/common/entropy.c
 ZIGZAG_LOOP  0

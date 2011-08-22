@@ -647,7 +647,7 @@ sym(vp8_copy32xn_sse3):
 
     STACK_FRAME_CREATE_X3
 
-block_copy_sse3_loopx4:
+.block_copy_sse3_loopx4:
         lea             end_ptr,    [src_ptr+src_stride*2]
 
         movdqu          xmm0,       XMMWORD PTR [src_ptr]
@@ -676,13 +676,13 @@ block_copy_sse3_loopx4:
 
         sub             height,     4
         cmp             height,     4
-        jge             block_copy_sse3_loopx4
+        jge             .block_copy_sse3_loopx4
 
         ;Check to see if there is more rows need to be copied.
         cmp             height, 0
-        je              copy_is_done
+        je              .copy_is_done
 
-block_copy_sse3_loop:
+.block_copy_sse3_loop:
         movdqu          xmm0,       XMMWORD PTR [src_ptr]
         movdqu          xmm1,       XMMWORD PTR [src_ptr + 16]
         lea             src_ptr,    [src_ptr+src_stride]
@@ -692,9 +692,9 @@ block_copy_sse3_loop:
         lea             ref_ptr,    [ref_ptr+ref_stride]
 
         sub             height,     1
-        jne             block_copy_sse3_loop
+        jne             .block_copy_sse3_loop
 
-copy_is_done:
+.copy_is_done:
     STACK_FRAME_DESTROY_X3
 
 ;void vp8_sad16x16x4d_sse3(

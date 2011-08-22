@@ -27,7 +27,7 @@ sym(vp8_get_mb_ss_mmx):
         mov         rcx, 16
         pxor        mm4, mm4
 
-NEXTROW:
+.NEXTROW:
         movq        mm0, [rax]
         movq        mm1, [rax+8]
         movq        mm2, [rax+16]
@@ -44,7 +44,7 @@ NEXTROW:
 
         add         rax, 32
         dec         rcx
-        ja          NEXTROW
+        ja          .NEXTROW
         movq        QWORD PTR [rsp], mm4
 
         ;return sum[0]+sum[1];
@@ -568,7 +568,7 @@ sym(vp8_filter_block2d_bil4x4_var_mmx):
         add             rsi, r8
 %endif
 
-filter_block2d_bil4x4_var_mmx_loop:
+.filter_block2d_bil4x4_var_mmx_loop:
 
         movd            mm1,            [rsi]               ;
         movd            mm3,            [rsi+1]             ;
@@ -614,7 +614,7 @@ filter_block2d_bil4x4_var_mmx_loop:
         add             rdi,            r9
 %endif
         sub             rcx,            1                   ;
-        jnz             filter_block2d_bil4x4_var_mmx_loop       ;
+        jnz             .filter_block2d_bil4x4_var_mmx_loop       ;
 
 
         pxor            mm3,            mm3                 ;
@@ -726,7 +726,7 @@ sym(vp8_filter_block2d_bil_var_mmx):
         add             rsi,            r8
 %endif
 
-filter_block2d_bil_var_mmx_loop:
+.filter_block2d_bil_var_mmx_loop:
 
         movq            mm1,            [rsi]               ;
         movq            mm3,            [rsi+1]             ;
@@ -807,7 +807,7 @@ filter_block2d_bil_var_mmx_loop:
         add             rdi,            r9
 %endif
         sub             rcx,            1                   ;
-        jnz             filter_block2d_bil_var_mmx_loop       ;
+        jnz             .filter_block2d_bil_var_mmx_loop       ;
 
 
         pxor            mm3,            mm3                 ;

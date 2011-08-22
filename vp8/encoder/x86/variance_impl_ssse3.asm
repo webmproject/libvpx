@@ -47,7 +47,7 @@ sym(vp8_filter_block2d_bil_var_ssse3):
         movsxd          rax,            dword ptr arg(5)     ; xoffset
 
         cmp             rax,            0                    ; skip first_pass filter if xoffset=0
-        je              filter_block2d_bil_var_ssse3_sp_only
+        je              .filter_block2d_bil_var_ssse3_sp_only
 
         shl             rax,            4                    ; point to filter coeff with xoffset
         lea             rax,            [rax + rcx]          ; HFilter
@@ -55,7 +55,7 @@ sym(vp8_filter_block2d_bil_var_ssse3):
         movsxd          rdx,            dword ptr arg(6)     ; yoffset
 
         cmp             rdx,            0                    ; skip second_pass filter if yoffset=0
-        je              filter_block2d_bil_var_ssse3_fp_only
+        je              .filter_block2d_bil_var_ssse3_fp_only
 
         shl             rdx,            4
         lea             rdx,            [rdx + rcx]          ; VFilter
@@ -88,7 +88,7 @@ sym(vp8_filter_block2d_bil_var_ssse3):
         lea             rsi,            [rsi + r8]
 %endif
 
-filter_block2d_bil_var_ssse3_loop:
+.filter_block2d_bil_var_ssse3_loop:
         movdqu          xmm1,           XMMWORD PTR [rsi]
         movdqu          xmm2,           XMMWORD PTR [rsi+1]
         movdqa          xmm3,           xmm1
@@ -142,15 +142,15 @@ filter_block2d_bil_var_ssse3_loop:
 %endif
 
         sub             rcx,            1
-        jnz             filter_block2d_bil_var_ssse3_loop
+        jnz             .filter_block2d_bil_var_ssse3_loop
 
-        jmp             filter_block2d_bil_variance
+        jmp             .filter_block2d_bil_variance
 
-filter_block2d_bil_var_ssse3_sp_only:
+.filter_block2d_bil_var_ssse3_sp_only:
         movsxd          rdx,            dword ptr arg(6)     ; yoffset
 
         cmp             rdx,            0                    ; Both xoffset =0 and yoffset=0
-        je              filter_block2d_bil_var_ssse3_full_pixel
+        je              .filter_block2d_bil_var_ssse3_full_pixel
 
         shl             rdx,            4
         lea             rdx,            [rdx + rcx]          ; VFilter
@@ -169,7 +169,7 @@ filter_block2d_bil_var_ssse3_sp_only:
 
         lea             rsi,            [rsi + rax]
 
-filter_block2d_bil_sp_only_loop:
+.filter_block2d_bil_sp_only_loop:
         movdqu          xmm3,           XMMWORD PTR [rsi]
         movdqa          xmm2,           xmm1
         movdqa          xmm0,           xmm3
@@ -209,11 +209,11 @@ filter_block2d_bil_sp_only_loop:
 %endif
 
         sub             rcx,            1
-        jnz             filter_block2d_bil_sp_only_loop
+        jnz             .filter_block2d_bil_sp_only_loop
 
-        jmp             filter_block2d_bil_variance
+        jmp             .filter_block2d_bil_variance
 
-filter_block2d_bil_var_ssse3_full_pixel:
+.filter_block2d_bil_var_ssse3_full_pixel:
         mov             rsi,            arg(0)               ;ref_ptr
         mov             rdi,            arg(2)               ;src_ptr
         movsxd          rcx,            dword ptr arg(4)     ;Height
@@ -221,7 +221,7 @@ filter_block2d_bil_var_ssse3_full_pixel:
         movsxd          rdx,            dword ptr arg(3)     ;src_pixels_per_line
         pxor            xmm0,           xmm0
 
-filter_block2d_bil_full_pixel_loop:
+.filter_block2d_bil_full_pixel_loop:
         movq            xmm1,           QWORD PTR [rsi]
         punpcklbw       xmm1,           xmm0
         movq            xmm2,           QWORD PTR [rsi+8]
@@ -244,11 +244,11 @@ filter_block2d_bil_full_pixel_loop:
         lea             rsi,            [rsi + rax]          ;ref_pixels_per_line
         lea             rdi,            [rdi + rdx]          ;src_pixels_per_line
         sub             rcx,            1
-        jnz             filter_block2d_bil_full_pixel_loop
+        jnz             .filter_block2d_bil_full_pixel_loop
 
-        jmp             filter_block2d_bil_variance
+        jmp             .filter_block2d_bil_variance
 
-filter_block2d_bil_var_ssse3_fp_only:
+.filter_block2d_bil_var_ssse3_fp_only:
         mov             rsi,            arg(0)               ;ref_ptr
         mov             rdi,            arg(2)               ;src_ptr
         movsxd          rcx,            dword ptr arg(4)     ;Height
@@ -260,7 +260,7 @@ filter_block2d_bil_var_ssse3_fp_only:
         movsxd          r9,             dword ptr arg(3) ;src_pixels_per_line
 %endif
 
-filter_block2d_bil_fp_only_loop:
+.filter_block2d_bil_fp_only_loop:
         movdqu          xmm1,           XMMWORD PTR [rsi]
         movdqu          xmm2,           XMMWORD PTR [rsi+1]
         movdqa          xmm3,           xmm1
@@ -298,11 +298,11 @@ filter_block2d_bil_fp_only_loop:
 %endif
 
         sub             rcx,            1
-        jnz             filter_block2d_bil_fp_only_loop
+        jnz             .filter_block2d_bil_fp_only_loop
 
-        jmp             filter_block2d_bil_variance
+        jmp             .filter_block2d_bil_variance
 
-filter_block2d_bil_variance:
+.filter_block2d_bil_variance:
         pxor        xmm0,           xmm0
         pxor        xmm1,           xmm1
         pxor        xmm5,           xmm5

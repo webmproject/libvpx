@@ -84,7 +84,7 @@ sym(vp8_ssim_parms_16x16_sse2):
     pxor            xmm11,xmm11  ;sum_sxr
 
     mov             rdx, 16      ;row counter
-NextRow:
+.NextRow:
 
     ;grab source and reference pixels
     movdqu          xmm5, [rsi]
@@ -107,7 +107,7 @@ NextRow:
     add             rdi, rax   ; next r row
 
     dec             rdx        ; counter
-    jnz NextRow
+    jnz .NextRow
 
     SUM_ACROSS_W    xmm15
     SUM_ACROSS_W    xmm14
@@ -174,7 +174,7 @@ sym(vp8_ssim_parms_8x8_sse2):
     pxor            xmm11,xmm11  ;sum_sxr
 
     mov             rdx, 8      ;row counter
-NextRow2:
+.NextRow:
 
     ;grab source and reference pixels
     movq            xmm3, [rsi]
@@ -188,7 +188,7 @@ NextRow2:
     add             rdi, rax   ; next r row
 
     dec             rdx        ; counter
-    jnz NextRow2
+    jnz .NextRow
 
     SUM_ACROSS_W    xmm15
     SUM_ACROSS_W    xmm14
