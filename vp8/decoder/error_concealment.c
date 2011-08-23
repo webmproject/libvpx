@@ -285,27 +285,37 @@ static void estimate_mb_mvs(const B_OVERLAP *block_overlaps,
                             int mb_to_top_edge,
                             int mb_to_bottom_edge)
 {
-    int i;
+    int row, col;
     int non_zero_count = 0;
     MV * const filtered_mv = &(mi->mbmi.mv.as_mv);
     union b_mode_info * const bmi = mi->bmi;
     filtered_mv->col = 0;
     filtered_mv->row = 0;
-    for (i = 0; i < 16; ++i)
+    mi->mbmi.need_to_clamp_mvs = 0;
+    for (row = 0; row < 4; ++row)
     {
-        /* Estimate vectors for all blocks which are overlapped by this type */
-        /* Interpolate/extrapolate the rest of the block's MVs */
-        estimate_mv(block_overlaps[i].overlaps, &(bmi[i]));
-        mi->mbmi.need_to_clamp_mvs = vp8_check_mv_bounds(&bmi[i].mv,
-                                                         mb_to_left_edge,
-                                                         mb_to_right_edge,
-                                                         mb_to_top_edge,
-                                                         mb_to_bottom_edge);
-        if (bmi[i].mv.as_int != 0)
+        int this_b_to_top_edge = mb_to_top_edge + ((row*4)<<3);
+        int this_b_to_bottom_edge = mb_to_bottom_edge - ((row*4)<<3);
+        for (col = 0; col < 4; ++col)
         {
-            ++non_zero_count;
-            filtered_mv->col += bmi[i].mv.as_mv.col;
-            filtered_mv->row += bmi[i].mv.as_mv.row;
+            int i = row * 4 + col;
+            int this_b_to_left_edge = mb_to_left_edge + ((col*4)<<3);
+            int this_b_to_right_edge = mb_to_right_edge - ((col*4)<<3);
+            /* Estimate vectors for all blocks which are overlapped by this */
+            /* type. Interpolate/extrapolate the rest of the block's MVs */
+            estimate_mv(block_overlaps[i].overlaps, &(bmi[i]));
+            mi->mbmi.need_to_clamp_mvs |= vp8_check_mv_bounds(
+                                                         &bmi[i].mv,
+                                                         this_b_to_left_edge,
+                                                         this_b_to_right_edge,
+                                                         this_b_to_top_edge,
+                                                         this_b_to_bottom_edge);
+            if (bmi[i].mv.as_int != 0)
+            {
+                ++non_zero_count;
+                filtered_mv->col += bmi[i].mv.as_mv.col;
+                filtered_mv->row += bmi[i].mv.as_mv.row;
+            }
         }
     }
     if (non_zero_count > 0)
@@ -384,11 +394,11 @@ static void estimate_missing_mvs(MB_OVERLAP *overlaps,
             mi->mbmi.partitioning = 3;
             mi->mbmi.segment_id = 0;
             estimate_mb_mvs(block_overlaps,
-                                mi,
-                                mb_to_left_edge,
-                                mb_to_right_edge,
-                                mb_to_top_edge,
-                                mb_to_bottom_edge);
+                            mi,
+                            mb_to_left_edge,
+                            mb_to_right_edge,
+                            mb_to_top_edge,
+                            mb_to_bottom_edge);
             ++mi;
         }
         mb_col = 0;
@@ -527,14 +537,20 @@ static void interpolate_mvs(MACROBLOCKD *mb,
                                         {4,4}, {4,3}, {4,2}, {4,1}, {4,0},
                                         {4,-1}, {3,-1}, {2,-1}, {1,-1}, {0,-1}
                                       };
+    mi->mbmi.need_to_clamp_mvs = 0;
     for (row = 0; row < 4; ++row)
     {
+        int mb_to_top_edge = mb->mb_to_top_edge + ((row*4)<<3);
+        int mb_to_bottom_edge = mb->mb_to_bottom_edge - ((row*4)<<3);
         for (col = 0; col < 4; ++col)
         {
+            int mb_to_left_edge = mb->mb_to_left_edge + ((col*4)<<3);
+            int mb_to_right_edge = mb->mb_to_right_edge - ((col*4)<<3);
             int w_sum = 0;
             int mv_row_sum = 0;
             int mv_col_sum = 0;
             int_mv * const mv = &(mi->bmi[row*4 + col].mv);
+            mv->as_int = 0;
             for (i = 0; i < NUM_NEIGHBORS; ++i)
             {
                 /* Calculate the weighted sum of neighboring MVs referring
@@ -557,17 +573,12 @@ static void interpolate_mvs(MACROBLOCKD *mb,
                  */
                 mv->as_mv.row = mv_row_sum / w_sum;
                 mv->as_mv.col = mv_col_sum / w_sum;
-
-                mi->mbmi.need_to_clamp_mvs = vp8_check_mv_bounds(mv,
-                                                       mb->mb_to_left_edge,
-                                                       mb->mb_to_right_edge,
-                                                       mb->mb_to_top_edge,
-                                                       mb->mb_to_bottom_edge);
-            }
-            else
-            {
-                mv->as_int = 0;
-                mi->mbmi.need_to_clamp_mvs = 0;
+                mi->mbmi.need_to_clamp_mvs |= vp8_check_mv_bounds(
+                                                            mv,
+                                                            mb_to_left_edge,
+                                                            mb_to_right_edge,
+                                                            mb_to_top_edge,
+                                                            mb_to_bottom_edge);
             }
         }
     }
