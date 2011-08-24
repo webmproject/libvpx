@@ -368,7 +368,6 @@ void encode_mb_row(VP8_COMP *cpi,
                    int *segment_counts,
                    int *totalrate)
 {
-    int i;
     int recon_yoffset, recon_uvoffset;
     int mb_col;
     int ref_fb_idx = cm->lst_fb_idx;
@@ -534,10 +533,6 @@ void encode_mb_row(VP8_COMP *cpi,
         // Increment the activity mask pointers.
         x->mb_activity_ptr++;
 
-        /* save the block info */
-        for (i = 0; i < 16; i++)
-            xd->mode_info_context->bmi[i] = xd->block[i].bmi;
-
         // adjust to the next column of macroblocks
         x->src.y_buffer += 16;
         x->src.u_buffer += 8;
@@ -665,6 +660,9 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
                                         + vp8_cost_one(cpi->prob_gf_coded);
     }
 
+    xd->fullpixel_mask = 0xffffffff;
+    if(cm->full_pixel)
+        xd->fullpixel_mask = 0xfffffff8;
 }
 
 void vp8_encode_frame(VP8_COMP *cpi)
@@ -1280,8 +1278,6 @@ int vp8cx_encode_inter_macroblock
     else
     {
         int ref_fb_idx;
-
-        vp8_build_uvmvs(xd, cpi->common.full_pixel);
 
         if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
             ref_fb_idx = cpi->common.lst_fb_idx;
