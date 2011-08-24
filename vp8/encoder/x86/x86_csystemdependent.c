@@ -111,29 +111,6 @@ void vp8_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
 
 #endif
 
-#if HAVE_SSSE3
-#if CONFIG_INTERNAL_STATS
-#if ARCH_X86_64
-typedef void ssimpf
-(
-    unsigned char *s,
-    int sp,
-    unsigned char *r,
-    int rp,
-    unsigned long *sum_s,
-    unsigned long *sum_r,
-    unsigned long *sum_sq_s,
-    unsigned long *sum_sq_r,
-    unsigned long *sum_sxr
-);
-
-extern ssimpf vp8_ssim_parms_16x16_sse3;
-extern ssimpf vp8_ssim_parms_8x8_sse3;
-#endif
-#endif
-#endif
-
-
 void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -246,6 +223,13 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
 #endif
+
+#if CONFIG_INTERNAL_STATS
+#if ARCH_X86_64
+        cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_sse2;
+        cpi->rtcd.variance.ssimpf_16x16          = vp8_ssim_parms_16x16_sse2;
+#endif
+#endif
     }
 #endif
 
@@ -280,14 +264,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_ssse3;
 
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
-
-#if CONFIG_INTERNAL_STATS
-#if ARCH_X86_64
-        cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_sse3;
-        cpi->rtcd.variance.ssimpf                = vp8_ssim_parms_16x16_sse3;
-#endif
-#endif
-
     }
 #endif
 

@@ -140,6 +140,8 @@ extern prototype_getmbss(vp8_get_mb_ss_sse2);
 extern prototype_variance(vp8_mse16x16_wmt);
 extern prototype_variance2(vp8_get8x8var_sse2);
 extern prototype_variance2(vp8_get16x16var_sse2);
+extern prototype_ssimpf(vp8_ssim_parms_8x8_sse2)
+extern prototype_ssimpf(vp8_ssim_parms_16x16_sse2)
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_variance_sad4x4
@@ -207,6 +209,14 @@ extern prototype_variance2(vp8_get16x16var_sse2);
 
 #undef  vp8_variance_mse16x16
 #define vp8_variance_mse16x16 vp8_mse16x16_wmt
+
+#if ARCH_X86_64
+#undef  vp8_ssimpf_8x8
+#define vp8_ssimpf_8x8 vp8_ssim_parms_8x8_sse2
+
+#undef  vp8_ssimpf_16x16
+#define vp8_ssimpf_16x16 vp8_ssim_parms_16x16_sse2
+#endif
 
 #endif
 #endif

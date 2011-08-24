@@ -44,7 +44,7 @@
         paddd           %1, xmm1
         SUM_ACROSS_Q    %1
 %endmacro
-;void ssim_parms_sse3(
+;void ssim_parms_sse2(
 ;    unsigned char *s,
 ;    int sp,
 ;    unsigned char *r,
@@ -61,8 +61,8 @@
 ; or pavgb At this point this is just meant to be first pass for calculating
 ; all the parms needed for 16x16 ssim so we can play with dssim as distortion
 ; in mode selection code.
-global sym(vp8_ssim_parms_16x16_sse3)
-sym(vp8_ssim_parms_16x16_sse3):
+global sym(vp8_ssim_parms_16x16_sse2)
+sym(vp8_ssim_parms_16x16_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
@@ -84,7 +84,7 @@ sym(vp8_ssim_parms_16x16_sse3):
     pxor            xmm11,xmm11  ;sum_sxr
 
     mov             rdx, 16      ;row counter
-NextRow:
+.NextRow:
 
     ;grab source and reference pixels
     movdqu          xmm5, [rsi]
@@ -107,7 +107,7 @@ NextRow:
     add             rdi, rax   ; next r row
 
     dec             rdx        ; counter
-    jnz NextRow
+    jnz .NextRow
 
     SUM_ACROSS_W    xmm15
     SUM_ACROSS_W    xmm14
@@ -134,7 +134,7 @@ NextRow:
     pop         rbp
     ret
 
-;void ssim_parms_sse3(
+;void ssim_parms_sse2(
 ;    unsigned char *s,
 ;    int sp,
 ;    unsigned char *r,
@@ -151,8 +151,8 @@ NextRow:
 ; or pavgb At this point this is just meant to be first pass for calculating
 ; all the parms needed for 16x16 ssim so we can play with dssim as distortion
 ; in mode selection code.
-global sym(vp8_ssim_parms_8x8_sse3)
-sym(vp8_ssim_parms_8x8_sse3):
+global sym(vp8_ssim_parms_8x8_sse2)
+sym(vp8_ssim_parms_8x8_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 9
@@ -174,7 +174,7 @@ sym(vp8_ssim_parms_8x8_sse3):
     pxor            xmm11,xmm11  ;sum_sxr
 
     mov             rdx, 8      ;row counter
-NextRow2:
+.NextRow:
 
     ;grab source and reference pixels
     movq            xmm3, [rsi]
@@ -188,7 +188,7 @@ NextRow2:
     add             rdi, rax   ; next r row
 
     dec             rdx        ; counter
-    jnz NextRow2
+    jnz .NextRow
 
     SUM_ACROSS_W    xmm15
     SUM_ACROSS_W    xmm14
