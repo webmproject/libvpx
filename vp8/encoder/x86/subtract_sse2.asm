@@ -91,7 +91,7 @@ sym(vp8_subtract_mby_sse2):
 
             mov         rcx,            8      ; do two lines at one time
 
-submby_loop:
+.submby_loop:
             movdqa      xmm0,           XMMWORD PTR [rsi]   ; src
             movdqa      xmm1,           XMMWORD PTR [rax]   ; pred
 
@@ -133,7 +133,7 @@ submby_loop:
             lea         rsi,            [rsi+rdx*2]
 
             sub         rcx,            1
-            jnz         submby_loop
+            jnz         .submby_loop
 
     pop rdi
     pop rsi

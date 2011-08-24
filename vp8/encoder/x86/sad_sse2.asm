@@ -37,7 +37,7 @@ sym(vp8_sad16x16_wmt):
         lea             rcx,        [rcx+rax*8]
         pxor            xmm6,       xmm6
 
-x16x16sad_wmt_loop:
+.x16x16sad_wmt_loop:
 
         movq            xmm0,       QWORD PTR [rsi]
         movq            xmm2,       QWORD PTR [rsi+8]
@@ -68,7 +68,7 @@ x16x16sad_wmt_loop:
         paddw           xmm6,       xmm4
 
         cmp             rsi,        rcx
-        jne             x16x16sad_wmt_loop
+        jne             .x16x16sad_wmt_loop
 
         movq            xmm0,       xmm6
         psrldq          xmm6,       8
@@ -111,11 +111,11 @@ sym(vp8_sad8x16_wmt):
         lea             rcx,        [rcx+rbx*8]
         pxor            mm7,        mm7
 
-x8x16sad_wmt_loop:
+.x8x16sad_wmt_loop:
 
         movq            rax,        mm7
         cmp             eax,        arg(4)
-        jg              x8x16sad_wmt_early_exit
+        jg              .x8x16sad_wmt_early_exit
 
         movq            mm0,        QWORD PTR [rsi]
         movq            mm1,        QWORD PTR [rdi]
@@ -133,11 +133,11 @@ x8x16sad_wmt_loop:
         paddw           mm7,        mm2
 
         cmp             rsi,        rcx
-        jne             x8x16sad_wmt_loop
+        jne             .x8x16sad_wmt_loop
 
         movq            rax,        mm7
 
-x8x16sad_wmt_early_exit:
+.x8x16sad_wmt_early_exit:
 
     ; begin epilog
     pop         rdi
@@ -172,11 +172,11 @@ sym(vp8_sad8x8_wmt):
         lea             rcx,        [rsi+rbx*8]
         pxor            mm7,        mm7
 
-x8x8sad_wmt_loop:
+.x8x8sad_wmt_loop:
 
         movq            rax,        mm7
         cmp             eax,        arg(4)
-        jg              x8x8sad_wmt_early_exit
+        jg              .x8x8sad_wmt_early_exit
 
         movq            mm0,        QWORD PTR [rsi]
         movq            mm1,        QWORD PTR [rdi]
@@ -188,10 +188,10 @@ x8x8sad_wmt_loop:
         paddw           mm7,        mm0
 
         cmp             rsi,        rcx
-        jne             x8x8sad_wmt_loop
+        jne             .x8x8sad_wmt_loop
 
         movq            rax,        mm7
-x8x8sad_wmt_early_exit:
+.x8x8sad_wmt_early_exit:
 
     ; begin epilog
     pop         rdi
@@ -281,11 +281,11 @@ sym(vp8_sad16x8_wmt):
         lea             rcx,        [rsi+rbx*8]
         pxor            mm7,        mm7
 
-x16x8sad_wmt_loop:
+.x16x8sad_wmt_loop:
 
         movq            rax,        mm7
         cmp             eax,        arg(4)
-        jg              x16x8sad_wmt_early_exit
+        jg              .x16x8sad_wmt_early_exit
 
         movq            mm0,        QWORD PTR [rsi]
         movq            mm2,        QWORD PTR [rsi+8]
@@ -315,11 +315,11 @@ x16x8sad_wmt_loop:
         paddw           mm7,        mm4
 
         cmp             rsi,        rcx
-        jne             x16x8sad_wmt_loop
+        jne             .x16x8sad_wmt_loop
 
         movq            rax,        mm7
 
-x16x8sad_wmt_early_exit:
+.x16x8sad_wmt_early_exit:
 
     ; begin epilog
     pop         rdi
@@ -352,7 +352,7 @@ sym(vp8_copy32xn_sse2):
         movsxd          rdx,        dword ptr arg(3) ;dst_stride
         movsxd          rcx,        dword ptr arg(4) ;height
 
-block_copy_sse2_loopx4:
+.block_copy_sse2_loopx4:
         movdqu          xmm0,       XMMWORD PTR [rsi]
         movdqu          xmm1,       XMMWORD PTR [rsi + 16]
         movdqu          xmm2,       XMMWORD PTR [rsi + rax]
@@ -383,12 +383,12 @@ block_copy_sse2_loopx4:
 
         sub             rcx,     4
         cmp             rcx,     4
-        jge             block_copy_sse2_loopx4
+        jge             .block_copy_sse2_loopx4
 
         cmp             rcx, 0
-        je              copy_is_done
+        je              .copy_is_done
 
-block_copy_sse2_loop:
+.block_copy_sse2_loop:
         movdqu          xmm0,       XMMWORD PTR [rsi]
         movdqu          xmm1,       XMMWORD PTR [rsi + 16]
         lea             rsi,    [rsi+rax]
@@ -398,9 +398,9 @@ block_copy_sse2_loop:
         lea             rdi,    [rdi+rdx]
 
         sub             rcx,     1
-        jne             block_copy_sse2_loop
+        jne             .block_copy_sse2_loop
 
-copy_is_done:
+.copy_is_done:
     ; begin epilog
     pop rdi
     pop rsi

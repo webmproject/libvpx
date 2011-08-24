@@ -57,10 +57,10 @@ sym(vp8_post_proc_down_and_across_xmm):
         movsxd      rax,        DWORD PTR arg(2) ;src_pixels_per_line ; destination pitch?
         pxor        xmm0,       xmm0              ; mm0 = 00000000
 
-nextrow:
+.nextrow:
 
         xor         rdx,        rdx       ; clear out rdx for use as loop counter
-nextcol:
+.nextcol:
         movq        xmm3,       QWORD PTR [rsi]         ; mm4 = r0 p0..p7
         punpcklbw   xmm3,       xmm0                    ; mm3 = p0..p3
         movdqa      xmm1,       xmm3                    ; mm1 = p0..p3
@@ -133,7 +133,7 @@ nextcol:
         add         rdx,        8
         cmp         edx,        dword arg(5) ;cols
 
-        jl          nextcol
+        jl          .nextcol
 
         ; done with the all cols, start the across filtering in place
         sub         rsi,        rdx
@@ -142,7 +142,7 @@ nextcol:
         xor         rdx,        rdx
         movq        mm0,        QWORD PTR [rdi-8];
 
-acrossnextcol:
+.acrossnextcol:
         movq        xmm7,       QWORD PTR [rdi +rdx -2]
         movd        xmm4,       DWORD PTR [rdi +rdx +6]
 
@@ -219,7 +219,7 @@ acrossnextcol:
 
         add         rdx,        8
         cmp         edx,        dword arg(5) ;cols
-        jl          acrossnextcol;
+        jl          .acrossnextcol;
 
         ; last 8 pixels
         movq        QWORD PTR [rdi+rdx-8],  mm0
@@ -231,7 +231,7 @@ acrossnextcol:
         mov         eax, dword arg(2) ;src_pixels_per_line ; destination pitch?
 
         dec         rcx                   ; decrement count
-        jnz         nextrow               ; next row
+        jnz         .nextrow              ; next row
 
 %if ABI_IS_32BIT=1 && CONFIG_PIC=1
     add rsp,16
@@ -282,7 +282,7 @@ sym(vp8_mbpost_proc_down_xmm):
     add         dword arg(2), 8
 
     ;for(c=0; c<cols; c+=8)
-loop_col:
+.loop_col:
             mov         rsi,        arg(0) ; s
             pxor        xmm0,       xmm0        ;
 
@@ -301,7 +301,7 @@ loop_col:
 
             mov         rcx,        15          ;
 
-loop_initvar:
+.loop_initvar:
             movq        xmm1,       QWORD PTR [rdi];
             punpcklbw   xmm1,       xmm0        ;
 
@@ -318,10 +318,10 @@ loop_initvar:
             lea         rdi,        [rdi+rax]   ;
 
             dec         rcx
-            jne         loop_initvar
+            jne         .loop_initvar
             ;save the var and sum
             xor         rdx,        rdx
-loop_row:
+.loop_row:
             movq        xmm1,       QWORD PTR [rsi]     ; [s-pitch*8]
             movq        xmm2,       QWORD PTR [rdi]     ; [s+pitch*7]
 
@@ -428,12 +428,12 @@ loop_row:
             add         rdx,        1
 
             cmp         edx,        dword arg(2) ;rows
-            jl          loop_row
+            jl          .loop_row
 
         add         dword arg(0), 8 ; s += 8
         sub         dword arg(3), 8 ; cols -= 8
         cmp         dword arg(3), 0
-        jg          loop_col
+        jg          .loop_col
 
     add         rsp, 128+16
     pop         rsp
@@ -475,13 +475,13 @@ sym(vp8_mbpost_proc_across_ip_xmm):
 
 
     ;for(r=0;r<rows;r++)
-ip_row_loop:
+.ip_row_loop:
 
         xor         rdx,    rdx ;sumsq=0;
         xor         rcx,    rcx ;sum=0;
         mov         rsi,    arg(0); s
         mov         rdi,    -8
-ip_var_loop:
+.ip_var_loop:
         ;for(i=-8;i<=6;i++)
         ;{
         ;    sumsq += s[i]*s[i];
@@ -493,7 +493,7 @@ ip_var_loop:
         add         edx, eax
         add         rdi, 1
         cmp         rdi, 6
-        jle         ip_var_loop
+        jle         .ip_var_loop
 
 
             ;mov         rax,    sumsq
@@ -513,7 +513,7 @@ ip_var_loop:
             pxor        mm1,    mm1
 
             pxor        xmm0,   xmm0
-nextcol4:
+.nextcol4:
 
             movd        xmm1,   DWORD PTR [rsi+rcx-8]   ; -8 -7 -6 -5
             movd        xmm2,   DWORD PTR [rsi+rcx+7]   ; +7 +8 +9 +10
@@ -600,7 +600,7 @@ nextcol4:
             add         rcx,    4
 
             cmp         rcx,    rdx
-            jl          nextcol4
+            jl          .nextcol4
 
         ;s+=pitch;
         movsxd rax, dword arg(1)
@@ -608,7 +608,7 @@ nextcol4:
 
         sub dword arg(2), 1 ;rows-=1
         cmp dword arg(2), 0
-        jg ip_row_loop
+        jg .ip_row_loop
 
     add         rsp, 16
     pop         rsp
@@ -640,7 +640,7 @@ sym(vp8_plane_add_noise_wmt):
     push        rdi
     ; end prolog
 
-addnoise_loop:
+.addnoise_loop:
     call sym(rand) WRT_PLT
     mov     rcx, arg(1) ;noise
     and     rax, 0xff
@@ -657,7 +657,7 @@ addnoise_loop:
             mov     rsi, arg(0) ;Pos
             xor         rax,rax
 
-addnoise_nextset:
+.addnoise_nextset:
             movdqu      xmm1,[rsi+rax]         ; get the source
 
             psubusb     xmm1, [rdx]    ;blackclamp        ; clamp both sides so we don't outrange adding noise
@@ -671,12 +671,12 @@ addnoise_nextset:
             add         rax,16                 ; move to the next line
 
             cmp         rax, rcx
-            jl          addnoise_nextset
+            jl          .addnoise_nextset
 
     movsxd  rax, dword arg(7) ; Pitch
     add     arg(0), rax ; Start += Pitch
     sub     dword arg(6), 1   ; Height -= 1
-    jg      addnoise_loop
+    jg      .addnoise_loop
 
     ; begin epilog
     pop rdi

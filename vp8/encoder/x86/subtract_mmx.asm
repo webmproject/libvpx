@@ -93,7 +93,7 @@ sym(vp8_subtract_mby_mmx):
             mov         rcx,            16
             pxor        mm0,            mm0
 
-submby_loop:
+.submby_loop:
 
             movq        mm1,            [rsi]
             movq        mm3,            [rax]
@@ -139,7 +139,7 @@ submby_loop:
             lea         rsi,            [rsi+rdx]
 
             sub         rcx,            1
-            jnz         submby_loop
+            jnz         .submby_loop
 
     pop rdi
     pop rsi

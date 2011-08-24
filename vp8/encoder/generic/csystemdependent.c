@@ -94,15 +94,14 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 #if !(CONFIG_REALTIME_ONLY)
     cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
 #endif
+#if CONFIG_INTERNAL_STATS
+    cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_c;
+    cpi->rtcd.variance.ssimpf_16x16          = vp8_ssim_parms_16x16_c;
+#endif
 #endif
 
     // Pure C:
     vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame;
-
-#if CONFIG_INTERNAL_STATS
-    cpi->rtcd.variance.ssimpf_8x8            = ssim_parms_8x8_c;
-    cpi->rtcd.variance.ssimpf                = ssim_parms_c;
-#endif
 
 #if ARCH_X86 || ARCH_X86_64
     vp8_arch_x86_encoder_init(cpi);

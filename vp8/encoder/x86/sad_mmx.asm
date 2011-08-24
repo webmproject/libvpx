@@ -43,7 +43,7 @@ sym(vp8_sad16x16_mmx):
 
         pxor            mm6,        mm6
 
-x16x16sad_mmx_loop:
+.x16x16sad_mmx_loop:
 
         movq            mm0,        QWORD PTR [rsi]
         movq            mm2,        QWORD PTR [rsi+8]
@@ -83,7 +83,7 @@ x16x16sad_mmx_loop:
         paddw           mm7,        mm1
 
         cmp             rsi,        rcx
-        jne             x16x16sad_mmx_loop
+        jne             .x16x16sad_mmx_loop
 
 
         movq            mm0,        mm7
@@ -135,7 +135,7 @@ sym(vp8_sad8x16_mmx):
 
         pxor            mm6,        mm6
 
-x8x16sad_mmx_loop:
+.x8x16sad_mmx_loop:
 
         movq            mm0,        QWORD PTR [rsi]
         movq            mm1,        QWORD PTR [rdi]
@@ -158,7 +158,7 @@ x8x16sad_mmx_loop:
         paddw           mm7,        mm2
         cmp             rsi,        rcx
 
-        jne             x8x16sad_mmx_loop
+        jne             .x8x16sad_mmx_loop
 
         movq            mm0,        mm7
         punpcklwd       mm0,        mm6
@@ -205,7 +205,7 @@ sym(vp8_sad8x8_mmx):
 
         pxor            mm6,        mm6
 
-x8x8sad_mmx_loop:
+.x8x8sad_mmx_loop:
 
         movq            mm0,        QWORD PTR [rsi]
         movq            mm1,        QWORD PTR [rdi]
@@ -228,7 +228,7 @@ x8x8sad_mmx_loop:
         paddw           mm7,       mm0
         cmp             rsi,        rcx
 
-        jne             x8x8sad_mmx_loop
+        jne             .x8x8sad_mmx_loop
 
         movq            mm0,        mm7
         punpcklwd       mm0,        mm6
@@ -364,7 +364,7 @@ sym(vp8_sad16x8_mmx):
 
         pxor            mm6,        mm6
 
-x16x8sad_mmx_loop:
+.x16x8sad_mmx_loop:
 
         movq            mm0,       [rsi]
         movq            mm1,       [rdi]
@@ -404,7 +404,7 @@ x16x8sad_mmx_loop:
         paddw           mm7,        mm0
 
         cmp             rsi,        rcx
-        jne             x16x8sad_mmx_loop
+        jne             .x16x8sad_mmx_loop
 
         movq            mm0,        mm7
         punpcklwd       mm0,        mm6

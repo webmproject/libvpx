@@ -503,7 +503,7 @@ sym(vp8_intra_pred_uv_tm_%1):
     mov         rdi,        arg(0) ;dst;
     movsxd      rcx,        dword ptr arg(1) ;dst_stride
 
-vp8_intra_pred_uv_tm_%1_loop:
+.vp8_intra_pred_uv_tm_%1_loop:
     movd        xmm3,       [rsi]
     movd        xmm5,       [rsi+rax]
 %ifidn %1, sse2
@@ -525,7 +525,7 @@ vp8_intra_pred_uv_tm_%1_loop:
     lea         rsi,        [rsi+rax*2]
     lea         rdi,        [rdi+rcx*2]
     dec         edx
-    jnz vp8_intra_pred_uv_tm_%1_loop
+    jnz .vp8_intra_pred_uv_tm_%1_loop
 
     ; begin epilog
     pop         rdi
@@ -615,7 +615,7 @@ sym(vp8_intra_pred_uv_ho_%1):
 %endif
     dec         rsi
 %ifidn %1, mmx2
-vp8_intra_pred_uv_ho_%1_loop:
+.vp8_intra_pred_uv_ho_%1_loop:
     movd        mm0,        [rsi]
     movd        mm1,        [rsi+rax]
     punpcklbw   mm0,        mm0
@@ -627,7 +627,7 @@ vp8_intra_pred_uv_ho_%1_loop:
     lea         rsi,        [rsi+rax*2]
     lea         rdi,        [rdi+rcx*2]
     dec         edx
-    jnz vp8_intra_pred_uv_ho_%1_loop
+    jnz .vp8_intra_pred_uv_ho_%1_loop
 %else
     movd        xmm0,       [rsi]
     movd        xmm3,       [rsi+rax]

@@ -33,7 +33,7 @@ sym(vp8_get_mb_ss_sse2):
         mov         rcx, 8
         pxor        xmm4, xmm4
 
-NEXTROW:
+.NEXTROW:
         movdqa      xmm0, [rax]
         movdqa      xmm1, [rax+16]
         movdqa      xmm2, [rax+32]
@@ -50,7 +50,7 @@ NEXTROW:
 
         add         rax, 0x40
         dec         rcx
-        ja          NEXTROW
+        ja          .NEXTROW
 
         movdqa      xmm3,xmm4
         psrldq      xmm4,8
@@ -126,7 +126,7 @@ sym(vp8_get16x16var_sse2):
         pxor        xmm6,           xmm6                        ; clear xmm6 for accumulating sse
         mov         rcx,            16
 
-var16loop:
+.var16loop:
         movdqu      xmm1,           XMMWORD PTR [rsi]
         movdqu      xmm2,           XMMWORD PTR [rdi]
 
@@ -160,7 +160,7 @@ var16loop:
         add         rdi,            rdx
 
         sub         rcx,            1
-        jnz         var16loop
+        jnz         .var16loop
 
 
         movdqa      xmm1,           xmm6

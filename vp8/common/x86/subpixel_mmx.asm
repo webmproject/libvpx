@@ -50,7 +50,7 @@ sym(vp8_filter_block1d_h6_mmx):
         movsxd      rax,    dword ptr arg(5) ;output_width      ; destination pitch?
         pxor        mm0,    mm0              ; mm0 = 00000000
 
-nextrow:
+.nextrow:
         movq        mm3,    [rsi-2]          ; mm3 = p-2..p5
         movq        mm4,    mm3              ; mm4 = p-2..p5
         psrlq       mm3,    8                ; mm3 = p-1..p5
@@ -102,7 +102,7 @@ nextrow:
 %endif
 
         dec         rcx                      ; decrement count
-        jnz         nextrow                  ; next row
+        jnz         .nextrow                 ; next row
 
     ; begin epilog
     pop rdi
@@ -152,7 +152,7 @@ sym(vp8_filter_block1dc_v6_mmx):
         pxor        mm0, mm0              ; mm0 = 00000000
 
 
-nextrow_cv:
+.nextrow_cv:
         movq        mm3, [rsi+rdx]        ; mm3 = p0..p8  = row -1
         pmullw      mm3, mm1              ; mm3 *= kernel 1 modifiers.
 
@@ -190,7 +190,7 @@ nextrow_cv:
         ; avoidable!!!.
         lea         rdi,  [rdi+rax] ;
         dec         rcx                   ; decrement count
-        jnz         nextrow_cv             ; next row
+        jnz         .nextrow_cv           ; next row
 
         pop         rbx
 
@@ -282,7 +282,7 @@ sym(vp8_bilinear_predict8x8_mmx):
         packuswb    mm7,        mm4                 ;
 
         add         rsi,        rdx                 ; next line
-next_row_8x8:
+.next_row_8x8:
         movq        mm3,        [rsi]               ; xx 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
         movq        mm4,        mm3                 ; make a copy of current line
 
@@ -349,7 +349,7 @@ next_row_8x8:
         add         rdi,        r8                  ;dst_pitch
 %endif
         cmp         rdi,        rcx                 ;
-        jne         next_row_8x8
+        jne         .next_row_8x8
 
     ; begin epilog
     pop rdi
@@ -437,7 +437,7 @@ sym(vp8_bilinear_predict8x4_mmx):
         packuswb    mm7,        mm4                 ;
 
         add         rsi,        rdx                 ; next line
-next_row_8x4:
+.next_row_8x4:
         movq        mm3,        [rsi]               ; xx 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
         movq        mm4,        mm3                 ; make a copy of current line
 
@@ -504,7 +504,7 @@ next_row_8x4:
         add         rdi,        r8
 %endif
         cmp         rdi,        rcx                 ;
-        jne         next_row_8x4
+        jne         .next_row_8x4
 
     ; begin epilog
     pop rdi
@@ -579,7 +579,7 @@ sym(vp8_bilinear_predict4x4_mmx):
         packuswb    mm7,        mm0                 ;
 
         add         rsi,        rdx                 ; next line
-next_row_4x4:
+.next_row_4x4:
         movd        mm3,        [rsi]               ; xx 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14
         punpcklbw   mm3,        mm0                 ; xx 00 01 02 03 04 05 06
 
@@ -622,7 +622,7 @@ next_row_4x4:
 %endif
 
         cmp         rdi,        rcx                 ;
-        jne         next_row_4x4
+        jne         .next_row_4x4
 
     ; begin epilog
     pop rdi
