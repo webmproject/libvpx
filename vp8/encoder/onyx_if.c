@@ -3237,16 +3237,17 @@ static void encode_frame_to_data_rate
     // Test code for segmentation of gf/arf (0,0)
     //segmentation_test_function((VP8_PTR) cpi);
 
-#if CONFIG_REALTIME_ONLY
-    if(cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
+    if (cpi->compressor_speed == 2)
     {
-        if(cpi->force_next_frame_intra)
+        if(cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
         {
-            cm->frame_type = KEY_FRAME;  /* delayed intra frame */
+            if(cpi->force_next_frame_intra)
+            {
+                cm->frame_type = KEY_FRAME;  /* delayed intra frame */
+            }
         }
+        cpi->force_next_frame_intra = 0;
     }
-    cpi->force_next_frame_intra = 0;
-#endif
 
     // For an alt ref frame in 2 pass we skip the call to the second pass function that sets the target bandwidth
 #if !(CONFIG_REALTIME_ONLY)
@@ -3775,15 +3776,15 @@ static void encode_frame_to_data_rate
         // (assuming that we didn't)!
         if (cpi->pass != 2 && cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
         {
+            int key_frame_decision = decide_key_frame(cpi);
 
-#if CONFIG_REALTIME_ONLY
+            if (cpi->compressor_speed == 2)
             {
                 /* we don't do re-encoding in realtime mode
                  * if key frame is decided than we force it on next frame */
-                cpi->force_next_frame_intra = decide_key_frame(cpi);
+                cpi->force_next_frame_intra = key_frame_decision;
             }
-#else
-            if (decide_key_frame(cpi))
+            else if (key_frame_decision)
             {
                 // Reset all our sizing numbers and recode
                 cm->frame_type = KEY_FRAME;
@@ -3820,7 +3821,6 @@ static void encode_frame_to_data_rate
 
                 continue;
             }
-#endif
         }
 
         vp8_clear_system_state();
