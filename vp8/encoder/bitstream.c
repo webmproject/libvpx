@@ -22,7 +22,8 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
 #include "bitstream.h"
-#include "vp8/common/defaultcoefcounts.h"
+
+#include "defaultcoefcounts.h"
 
 const int vp8cx_base_skip_false_prob[128] =
 {
@@ -1199,7 +1200,7 @@ static int independent_coef_context_savings(VP8_COMP *cpi)
             if (cpi->common.frame_type == KEY_FRAME)
             {
                 /* Reset to default probabilities at key frames */
-                sum_probs_over_prev_coef_context(vp8_default_coef_counts[i][j],
+                sum_probs_over_prev_coef_context(default_coef_counts[i][j],
                                                  prev_coef_count_sum);
             }
             else

@@ -34,6 +34,7 @@ VP8_CX_SRCS-yes += vp8_cx_iface.c
 #INCLUDES += encoder
 
 VP8_CX_SRCS-yes += encoder/asm_enc_offsets.c
+VP8_CX_SRCS-yes += encoder/defaultcoefcounts.h
 VP8_CX_SRCS-yes += encoder/bitstream.c
 VP8_CX_SRCS-yes += encoder/boolhuff.c
 VP8_CX_SRCS-yes += encoder/dct.c
