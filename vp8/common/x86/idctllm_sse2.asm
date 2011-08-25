@@ -11,7 +11,7 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;void idct_dequant_0_2x_sse2
+;void vp8_idct_dequant_0_2x_sse2
 ; (
 ;   short *qcoeff       - 0
 ;   short *dequant      - 1
@@ -21,8 +21,8 @@
 ;   int blk_stride      - 5
 ; )
 
-global sym(idct_dequant_0_2x_sse2)
-sym(idct_dequant_0_2x_sse2):
+global sym(vp8_idct_dequant_0_2x_sse2)
+sym(vp8_idct_dequant_0_2x_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 6
@@ -97,8 +97,8 @@ sym(idct_dequant_0_2x_sse2):
     pop         rbp
     ret
 
-global sym(idct_dequant_full_2x_sse2)
-sym(idct_dequant_full_2x_sse2):
+global sym(vp8_idct_dequant_full_2x_sse2)
+sym(vp8_idct_dequant_full_2x_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -353,7 +353,7 @@ sym(idct_dequant_full_2x_sse2):
     pop         rbp
     ret
 
-;void idct_dequant_dc_0_2x_sse2
+;void vp8_idct_dequant_dc_0_2x_sse2
 ; (
 ;   short *qcoeff       - 0
 ;   short *dequant      - 1
@@ -362,8 +362,8 @@ sym(idct_dequant_full_2x_sse2):
 ;   int dst_stride      - 4
 ;   short *dc           - 5
 ; )
-global sym(idct_dequant_dc_0_2x_sse2)
-sym(idct_dequant_dc_0_2x_sse2):
+global sym(vp8_idct_dequant_dc_0_2x_sse2)
+sym(vp8_idct_dequant_dc_0_2x_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7
@@ -438,8 +438,8 @@ sym(idct_dequant_dc_0_2x_sse2):
     pop         rbp
     ret
 
-global sym(idct_dequant_dc_full_2x_sse2)
-sym(idct_dequant_dc_full_2x_sse2):
+global sym(vp8_idct_dequant_dc_full_2x_sse2)
+sym(vp8_idct_dequant_dc_full_2x_sse2):
     push        rbp
     mov         rbp, rsp
     SHADOW_ARGS_TO_STACK 7

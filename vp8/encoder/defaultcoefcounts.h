@@ -8,14 +8,12 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "defaultcoefcounts.h"
-
 /* Generated file, included by entropy.c */
 
-const unsigned int vp8_default_coef_counts[BLOCK_TYPES]
-                                          [COEF_BANDS]
-                                          [PREV_COEF_CONTEXTS]
-                                          [MAX_ENTROPY_TOKENS] =
+static const unsigned int default_coef_counts[BLOCK_TYPES]
+                                             [COEF_BANDS]
+                                             [PREV_COEF_CONTEXTS]
+                                             [MAX_ENTROPY_TOKENS] =
 {
 
     {
