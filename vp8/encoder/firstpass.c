@@ -1473,7 +1473,6 @@ static int calc_arf_boost(
 
     int i;
     double boost_score = 0.0;
-    double fwd_boost_score = 0.0;
     double mv_ratio_accumulator = 0.0;
     double decay_accumulator = 1.0;
     double this_frame_mv_in_out = 0.0;
