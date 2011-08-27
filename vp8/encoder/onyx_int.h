@@ -609,9 +609,8 @@ typedef struct VP8_COMP
     int *lf_ref_frame_sign_bias;
     int *lf_ref_frame;
 
-#if CONFIG_REALTIME_ONLY
     int force_next_frame_intra; /* force next frame to intra when kf_auto says so */
-#endif
+
     int droppable;
 } VP8_COMP;
 
