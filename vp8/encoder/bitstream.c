@@ -1160,6 +1160,13 @@ static void write_kfmodes(VP8_COMP *cpi)
         vp8_write_literal(bc, prob_skip_false, 8);
     }
 
+#if CONFIG_QIMODE
+    if(!c->kf_ymode_probs_update)
+    {
+        vp8_write_literal(bc, c->kf_ymode_probs_index, 3);
+    }
+#endif
+
     while (++mb_row < c->mb_rows)
     {
         int mb_col = -1;
@@ -1193,7 +1200,7 @@ static void write_kfmodes(VP8_COMP *cpi)
             if (c->mb_no_coeff_skip)
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
 #if CONFIG_QIMODE
-            kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->base_qindex>>4]);
+            kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->kf_ymode_probs_index]);
 #else
             kfwrite_ymode(bc, ym, c->kf_ymode_prob);
 #endif
@@ -1785,6 +1792,35 @@ static void put_delta_q(vp8_writer *bc, int delta_q)
     else
         vp8_write_bit(bc, 0);
 }
+#if CONFIG_QIMODE
+extern const unsigned int kf_y_mode_cts[8][VP8_YMODES];
+static void decide_kf_ymode_entropy(VP8_COMP *cpi)
+{
+
+    int mode_cost[MB_MODE_COUNT];
+    int cost;
+    int bestcost = INT_MAX;
+    int bestindex = 0;
+    int i, j;
+
+    for(i=0; i<8; i++)
+    {
+        vp8_cost_tokens(mode_cost, cpi->common.kf_ymode_prob[i], vp8_kf_ymode_tree);
+        cost = 0;
+        for(j=0;j<VP8_YMODES;j++)
+        {
+            cost += mode_cost[j] * cpi->ymode_count[j];
+        }
+        if(cost < bestcost)
+        {
+            bestindex = i;
+            bestcost = cost;
+        }
+    }
+    cpi->common.kf_ymode_probs_index = bestindex;
+
+}
+#endif
 
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 {
@@ -2083,6 +2119,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     if (pc->frame_type == KEY_FRAME)
     {
+#if CONFIG_QIMODE
+        decide_kf_ymode_entropy(cpi);
+#endif
         write_kfmodes(cpi);
 
 #ifdef ENTROPY_STATS

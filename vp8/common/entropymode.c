@@ -15,7 +15,7 @@
 #if CONFIG_I8X8
 
 #if CONFIG_QIMODE
-static const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
+const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
 {
     {17,  6,  5,  2, 22, 203},
     {27, 13, 13,  6, 27, 170},

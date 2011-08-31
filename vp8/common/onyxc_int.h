@@ -185,6 +185,8 @@ typedef struct VP8Common
     vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
 #if CONFIG_QIMODE
     vp8_prob kf_ymode_prob[8][VP8_YMODES-1];  /* keyframe "" */
+    int kf_ymode_probs_index;
+    int kf_ymode_probs_update;
 #else
     vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
 #endif

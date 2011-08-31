@@ -41,7 +41,8 @@ void vp8_init_mode_costs(VP8_COMP *c)
 
     vp8_cost_tokens(c->mb.mbmode_cost[1], x->fc.ymode_prob, vp8_ymode_tree);
 #if CONFIG_QIMODE
-    vp8_cost_tokens(c->mb.mbmode_cost[0], x->kf_ymode_prob[c->common.base_qindex>>4], vp8_kf_ymode_tree);
+    vp8_cost_tokens(c->mb.mbmode_cost[0],
+        x->kf_ymode_prob[c->common.kf_ymode_probs_index], vp8_kf_ymode_tree);
 #else
     vp8_cost_tokens(c->mb.mbmode_cost[0], x->kf_ymode_prob, vp8_kf_ymode_tree);
 #endif

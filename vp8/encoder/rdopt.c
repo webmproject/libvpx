@@ -349,6 +349,10 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
         (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs
     );
 
+#if CONFIG_QIMODE
+    //rough estimate for costing
+    cpi->common.kf_ymode_probs_index = cpi->common.base_qindex>>4;
+#endif
     vp8_init_mode_costs(cpi);
 
 }
