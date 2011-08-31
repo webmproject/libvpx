@@ -775,6 +775,15 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             x->e_mbd.mode_info_context->mbmi.mv.as_int =
                                                     mode_mv[this_mode].as_int;
 
+            /* Exit early and don't compute the distortion if this macroblock is marked inactive. */
+            if (cpi->active_map_enabled && x->active_ptr[0] == 0)
+            {
+                sse = 0;
+                distortion2 = 0;
+                x->skip = 1;
+                break;
+            }
+
             if((this_mode != NEWMV) ||
                 !(have_subp_search) || cpi->common.full_pixel==1)
                 distortion2 = get_inter_mbpred_error(x,
@@ -783,11 +792,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
 
-            if (cpi->active_map_enabled && x->active_ptr[0] == 0)
-            {
-                x->skip = 1;
-            }
-            else if (sse < x->encode_breakout)
+            if (sse < x->encode_breakout)
             {
                 // Check u and v to make sure skip is ok
                 int sse2 = 0;
