@@ -1255,7 +1255,11 @@ int vp8cx_encode_inter_macroblock
                     cpi->zbin_mode_boost = MV_ZBIN_BOOST;
             }
         }
-        vp8_update_zbin_extra(cpi, x);
+
+        /* The fast quantizer doesn't use zbin_extra, only do so with
+         * the regular quantizer. */
+        if (cpi->sf.improved_quant)
+            vp8_update_zbin_extra(cpi, x);
     }
 
     cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
