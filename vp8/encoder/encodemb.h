@@ -99,7 +99,7 @@ void vp8_build_dcblock(MACROBLOCK *b);
 void vp8_transform_mb(MACROBLOCK *mb);
 void vp8_transform_mbuv(MACROBLOCK *x);
 void vp8_transform_intra_mby(MACROBLOCK *x);
-void vp8_encode_inter16x16uvrd(const struct VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
+
 void vp8_optimize_mby(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 void vp8_optimize_mbuv(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 void vp8_encode_inter16x16y(const struct VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);

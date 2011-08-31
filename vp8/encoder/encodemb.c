@@ -615,15 +615,3 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     RECON_INVOKE(&rtcd->common->recon, recon_mby)
         (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
-
-
-void vp8_encode_inter16x16uvrd(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
-{
-    vp8_build_inter_predictors_mbuv(&x->e_mbd);
-    ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
-
-    vp8_transform_mbuv(x);
-
-    vp8_quantize_mbuv(x);
-
-}
