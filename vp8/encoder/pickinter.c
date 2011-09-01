@@ -440,6 +440,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     unsigned char *v_buffer[4];
 
     int skip_mode[4] = {0, 0, 0, 0};
+    int found_near_mvs[4] = {0, 0, 0, 0};
 
     int have_subp_search = cpi->sf.half_pixel_search;  /* In real-time mode, when Speed >= 15, no sub-pixel search. */
 
@@ -453,10 +454,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     if (cpi->ref_frame_flags & VP8_LAST_FLAG)
     {
         YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
-
-        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &nearest_mv[LAST_FRAME], &near_mv[LAST_FRAME],
-                          &frame_best_ref_mv[LAST_FRAME], MDCounts[LAST_FRAME], LAST_FRAME, cpi->common.ref_frame_sign_bias);
-
         y_buffer[LAST_FRAME] = lst_yv12->y_buffer + recon_yoffset;
         u_buffer[LAST_FRAME] = lst_yv12->u_buffer + recon_uvoffset;
         v_buffer[LAST_FRAME] = lst_yv12->v_buffer + recon_uvoffset;
@@ -467,10 +464,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
     {
         YV12_BUFFER_CONFIG *gld_yv12 = &cpi->common.yv12_fb[cpi->common.gld_fb_idx];
-
-        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &nearest_mv[GOLDEN_FRAME], &near_mv[GOLDEN_FRAME],
-                          &frame_best_ref_mv[GOLDEN_FRAME], MDCounts[GOLDEN_FRAME], GOLDEN_FRAME, cpi->common.ref_frame_sign_bias);
-
         y_buffer[GOLDEN_FRAME] = gld_yv12->y_buffer + recon_yoffset;
         u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
         v_buffer[GOLDEN_FRAME] = gld_yv12->v_buffer + recon_uvoffset;
@@ -481,10 +474,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     if (cpi->ref_frame_flags & VP8_ALT_FLAG && cpi->source_alt_ref_active)
     {
         YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
-
-        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &nearest_mv[ALTREF_FRAME], &near_mv[ALTREF_FRAME],
-                          &frame_best_ref_mv[ALTREF_FRAME], MDCounts[ALTREF_FRAME], ALTREF_FRAME, cpi->common.ref_frame_sign_bias);
-
         y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
         u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;
         v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
@@ -531,6 +520,21 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
                 continue;
             }
+        }
+
+        // If nearby MVs haven't been found for this reference frame then do it now.
+        if (x->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
+            !found_near_mvs[x->e_mbd.mode_info_context->mbmi.ref_frame])
+        {
+            int ref_frame = x->e_mbd.mode_info_context->mbmi.ref_frame;
+            vp8_find_near_mvs(&x->e_mbd,
+                              x->e_mbd.mode_info_context,
+                              &nearest_mv[ref_frame], &near_mv[ref_frame],
+                              &frame_best_ref_mv[ref_frame],
+                              MDCounts[ref_frame],
+                              ref_frame,
+                              cpi->common.ref_frame_sign_bias);
+            found_near_mvs[ref_frame] = 1;
         }
 
         // We have now reached the point where we are going to test the current mode so increment the counter for the number of times it has been tested
@@ -879,8 +883,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         return;
     }
 
-    /* set to the best mb mode */
-    vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+    /* set to the best mb mode, this copy can be skip if x->skip since it already has the right content */
+    if (!x->skip)
+        vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
 
     if (best_mbmode.mode <= B_PRED)
     {
