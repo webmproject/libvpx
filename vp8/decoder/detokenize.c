@@ -695,7 +695,7 @@ CHECK_0_:
                               CAT_FIVE_CONTEXT_NODE_0_);
 
     val = CAT6_MIN_VAL;
-    bits_count = CONFIG_EXTEND_QRANGE?14:12;
+    bits_count = CONFIG_EXTEND_QRANGE?12:10;
 
     do
     {
