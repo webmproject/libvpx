@@ -47,9 +47,11 @@ typedef __int64 off_t;
 #define fseeko _fseeki64
 #define ftello _ftelli64
 #elif defined(_WIN32)
-/* MinGW defines off_t, and uses f{seek,tell}o64 */
+/* MinGW defines off_t as long
+   and uses f{seek,tell}o64/off64_t for large files */
 #define fseeko fseeko64
 #define ftello ftello64
+#define off_t off64_t
 #endif
 
 #if defined(_MSC_VER)
