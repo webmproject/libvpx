@@ -261,7 +261,7 @@ void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val)
 
     mbd->segment_feature_data[0][SEG_LVL_ALT_LF] = cpi->segment_feature_data[0][SEG_LVL_ALT_LF];
     mbd->segment_feature_data[1][SEG_LVL_ALT_LF] = cpi->segment_feature_data[1][SEG_LVL_ALT_LF];
-    mbd->segment_feature_data[2][SEG_LVL_ALT_LF] = cpi->segment_feature_data[2[SEG_LVL_ALT_LF]];
+    mbd->segment_feature_data[2][SEG_LVL_ALT_LF] = cpi->segment_feature_data[2][SEG_LVL_ALT_LF];
     mbd->segment_feature_data[3][SEG_LVL_ALT_LF] = cpi->segment_feature_data[3][SEG_LVL_ALT_LF];
 }
 

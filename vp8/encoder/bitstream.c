@@ -1846,11 +1846,19 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
             vp8_write_bit(bc, (xd->mb_segement_abs_delta) ? 1 : 0);
 
-            // For each segmentation codable feature
+#if CONFIG_SEGFEATURES
+            // For each segments id...
+            for (j = 0; j < MAX_MB_SEGMENTS; j++)
+            {
+                // For each segmentation codable feature...
+                for (i = 0; i < SEG_LVL_MAX; i++)
+#else
+            // For each segmentation codable feature...
             for (i = 0; i < SEG_LVL_MAX; i++)
             {
-                // For each of the segments
+                // For each of the segments id...
                 for (j = 0; j < MAX_MB_SEGMENTS; j++)
+#endif
                 {
                     Data = xd->segment_feature_data[j][i];
 
@@ -1862,12 +1870,14 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                         if (Data < 0)
                         {
                             Data = - Data;
-                            vp8_write_literal(bc, Data, mb_feature_data_bits[i]);
+                            vp8_write_literal(bc, Data,
+                                              mb_feature_data_bits[i]);
                             vp8_write_bit(bc, 1);
                         }
                         else
                         {
-                            vp8_write_literal(bc, Data, mb_feature_data_bits[i]);
+                            vp8_write_literal(bc, Data,
+                                              mb_feature_data_bits[i]);
                             vp8_write_bit(bc, 0);
                         }
                     }

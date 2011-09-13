@@ -939,11 +939,22 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
             vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
 
-            /* For each segmentation feature (Quant and loop filter level) */
+#if CONFIG_SEGFEATURES
+            // For each segmentation...
+            for (j = 0; j < MAX_MB_SEGMENTS; j++)
+            {
+                // For each of the segments features...
+                for (i = 0; i < SEG_LVL_MAX; i++)
+                {
+
+#else
+            // For each segmentation feature...
             for (i = 0; i < SEG_LVL_MAX; i++)
             {
+                // For each segmentation...
                 for (j = 0; j < MAX_MB_SEGMENTS; j++)
                 {
+#endif
                     /* Frame level data */
                     if (vp8_read_bit(bc))
                     {
