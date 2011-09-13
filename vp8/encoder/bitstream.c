@@ -1852,7 +1852,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 // For each of the segments
                 for (j = 0; j < MAX_MB_SEGMENTS; j++)
                 {
-                    Data = xd->segment_feature_data[i][j];
+                    Data = xd->segment_feature_data[j][i];
 
                     // Frame level data
                     if (Data)

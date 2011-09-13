@@ -80,12 +80,13 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
     {
         /* Abs Value */
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
-            QIndex = xd->segment_feature_data[SEG_LVL_ALT_Q][mbmi->segment_id];
+            QIndex = xd->segment_feature_data[mbmi->segment_id][SEG_LVL_ALT_Q];
 
         /* Delta Value */
         else
         {
-            QIndex = pc->base_qindex + xd->segment_feature_data[SEG_LVL_ALT_Q][mbmi->segment_id];
+            QIndex = pc->base_qindex +
+                xd->segment_feature_data[mbmi->segment_id][SEG_LVL_ALT_Q];
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    /* Clamp to valid range */
         }
     }
@@ -946,13 +947,13 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     /* Frame level data */
                     if (vp8_read_bit(bc))
                     {
-                        xd->segment_feature_data[i][j] = (signed char)vp8_read_literal(bc, mb_feature_data_bits[i]);
+                        xd->segment_feature_data[j][i] = (signed char)vp8_read_literal(bc, mb_feature_data_bits[i]);
 
                         if (vp8_read_bit(bc))
-                            xd->segment_feature_data[i][j] = -xd->segment_feature_data[i][j];
+                            xd->segment_feature_data[j][i] = -xd->segment_feature_data[j][i];
                     }
                     else
-                        xd->segment_feature_data[i][j] = 0;
+                        xd->segment_feature_data[j][i] = 0;
                 }
             }
         }

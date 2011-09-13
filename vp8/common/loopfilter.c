@@ -221,11 +221,11 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
             /* Abs value */
             if (mbd->mb_segement_abs_delta == SEGMENT_ABSDATA)
             {
-                lvl_seg = mbd->segment_feature_data[SEG_LVL_ALT_LF][seg];
+                lvl_seg = mbd->segment_feature_data[seg][SEG_LVL_ALT_LF];
             }
             else  /* Delta Value */
             {
-                lvl_seg += mbd->segment_feature_data[SEG_LVL_ALT_LF][seg];
+                lvl_seg += mbd->segment_feature_data[seg][SEG_LVL_ALT_LF];
                 lvl_seg = (lvl_seg > 0) ? ((lvl_seg > 63) ? 63: lvl_seg) : 0;
             }
         }
@@ -541,13 +541,13 @@ void vp8_loop_filter_partial_frame
         {    /* Abs value */
             if (mbd->mb_segement_abs_delta == SEGMENT_ABSDATA)
             {
-                lvl_seg[i] = mbd->segment_feature_data[SEG_LVL_ALT_LF][i];
+                lvl_seg[i] = mbd->segment_feature_data[i][SEG_LVL_ALT_LF];
             }
             /* Delta Value */
             else
             {
                 lvl_seg[i] = default_filt_lvl
-                        + mbd->segment_feature_data[SEG_LVL_ALT_LF][i];
+                        + mbd->segment_feature_data[i][SEG_LVL_ALT_LF];
                 lvl_seg[i] = (lvl_seg[i] > 0) ?
                         ((lvl_seg[i] > 63) ? 63: lvl_seg[i]) : 0;
             }

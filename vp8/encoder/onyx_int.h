@@ -478,7 +478,7 @@ typedef struct VP8_COMP
     unsigned char *segmentation_map;
 
     // Segment data (can be deltas or absolute values)
-    signed char segment_feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
+    signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
 
     // segment threashold for encode breakout
     int  segment_encode_breakout[MAX_MB_SEGMENTS];

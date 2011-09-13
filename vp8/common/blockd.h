@@ -253,7 +253,7 @@ typedef struct MacroBlockD
 #endif
 
     // Segment features
-    signed char segment_feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
+    signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
 
     /* mode_based Loop filter adjustment */
     unsigned char mode_ref_lf_delta_enabled;
