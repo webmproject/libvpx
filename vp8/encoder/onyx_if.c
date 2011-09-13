@@ -428,8 +428,8 @@ static void set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_map)
 
 // The values given for each segment can be either deltas (from the default value chosen for the frame) or absolute values.
 //
-// Valid range for abs values is (0-127 for MB_LVL_ALT_Q) , (0-63 for SEGMENT_ALT_LF)
-// Valid range for delta values are (+/-127 for MB_LVL_ALT_Q) , (+/-63 for SEGMENT_ALT_LF)
+// Valid range for abs values is (0-127 for SEG_LVL_ALT_Q) , (0-63 for SEGMENT_ALT_LF)
+// Valid range for delta values are (+/-127 for SEG_LVL_ALT_Q) , (+/-63 for SEGMENT_ALT_LF)
 //
 // abs_delta = SEGMENT_DELTADATA (deltas) abs_delta = SEGMENT_ABSDATA (use the absolute values given).
 //
@@ -447,7 +447,7 @@ static void segmentation_test_function(VP8_PTR ptr)
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     unsigned char *seg_map;
-    signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
+    signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
     CHECK_MEM_ERROR(seg_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
     // Create a temporary map for segmentation data.
 
@@ -478,15 +478,15 @@ static void segmentation_test_function(VP8_PTR ptr)
     enable_segmentation(ptr);
 
     // Set up the quant segment data
-    feature_data[MB_LVL_ALT_Q][0] = 0;
-    feature_data[MB_LVL_ALT_Q][1] = 4;
-    feature_data[MB_LVL_ALT_Q][2] = 0;
-    feature_data[MB_LVL_ALT_Q][3] = 0;
+    feature_data[SEG_LVL_ALT_Q][0] = 0;
+    feature_data[SEG_LVL_ALT_Q][1] = 4;
+    feature_data[SEG_LVL_ALT_Q][2] = 0;
+    feature_data[SEG_LVL_ALT_Q][3] = 0;
     // Set up the loop segment data
-    feature_data[MB_LVL_ALT_LF][0] = 0;
-    feature_data[MB_LVL_ALT_LF][1] = 0;
-    feature_data[MB_LVL_ALT_LF][2] = 0;
-    feature_data[MB_LVL_ALT_LF][3] = 0;
+    feature_data[SEG_LVL_ALT_LF][0] = 0;
+    feature_data[SEG_LVL_ALT_LF][1] = 0;
+    feature_data[SEG_LVL_ALT_LF][2] = 0;
+    feature_data[SEG_LVL_ALT_LF][3] = 0;
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
@@ -503,7 +503,7 @@ static void segmentation_test_function(VP8_PTR ptr)
 static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 {
     unsigned char *seg_map;
-    signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
+    signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
     int i;
     int block_count = cpi->cyclic_refresh_mode_max_mbs_perframe;
     int mbs_in_frame = cpi->common.mb_rows * cpi->common.mb_cols;
@@ -570,16 +570,16 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     enable_segmentation((VP8_PTR)cpi);
 
     // Set up the quant segment data
-    feature_data[MB_LVL_ALT_Q][0] = 0;
-    feature_data[MB_LVL_ALT_Q][1] = (cpi->cyclic_refresh_q - Q);
-    feature_data[MB_LVL_ALT_Q][2] = 0;
-    feature_data[MB_LVL_ALT_Q][3] = 0;
+    feature_data[SEG_LVL_ALT_Q][0] = 0;
+    feature_data[SEG_LVL_ALT_Q][1] = (cpi->cyclic_refresh_q - Q);
+    feature_data[SEG_LVL_ALT_Q][2] = 0;
+    feature_data[SEG_LVL_ALT_Q][3] = 0;
 
     // Set up the loop segment data
-    feature_data[MB_LVL_ALT_LF][0] = 0;
-    feature_data[MB_LVL_ALT_LF][1] = lf_adjustment;
-    feature_data[MB_LVL_ALT_LF][2] = 0;
-    feature_data[MB_LVL_ALT_LF][3] = 0;
+    feature_data[SEG_LVL_ALT_LF][0] = 0;
+    feature_data[SEG_LVL_ALT_LF][1] = lf_adjustment;
+    feature_data[SEG_LVL_ALT_LF][2] = 0;
+    feature_data[SEG_LVL_ALT_LF][3] = 0;
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
@@ -5202,7 +5202,7 @@ int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflag
 int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4])
 {
     VP8_COMP *cpi = (VP8_COMP *) comp;
-    signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
+    signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
 
     if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
         return -1;
@@ -5220,16 +5220,16 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
     enable_segmentation((VP8_PTR)cpi);
 
     // Set up the quant segment data
-    feature_data[MB_LVL_ALT_Q][0] = delta_q[0];
-    feature_data[MB_LVL_ALT_Q][1] = delta_q[1];
-    feature_data[MB_LVL_ALT_Q][2] = delta_q[2];
-    feature_data[MB_LVL_ALT_Q][3] = delta_q[3];
+    feature_data[SEG_LVL_ALT_Q][0] = delta_q[0];
+    feature_data[SEG_LVL_ALT_Q][1] = delta_q[1];
+    feature_data[SEG_LVL_ALT_Q][2] = delta_q[2];
+    feature_data[SEG_LVL_ALT_Q][3] = delta_q[3];
 
     // Set up the loop segment data s
-    feature_data[MB_LVL_ALT_LF][0] = delta_lf[0];
-    feature_data[MB_LVL_ALT_LF][1] = delta_lf[1];
-    feature_data[MB_LVL_ALT_LF][2] = delta_lf[2];
-    feature_data[MB_LVL_ALT_LF][3] = delta_lf[3];
+    feature_data[SEG_LVL_ALT_LF][0] = delta_lf[0];
+    feature_data[SEG_LVL_ALT_LF][1] = delta_lf[1];
+    feature_data[SEG_LVL_ALT_LF][2] = delta_lf[2];
+    feature_data[SEG_LVL_ALT_LF][3] = delta_lf[3];
 
     cpi->segment_encode_breakout[0] = threshold[0];
     cpi->segment_encode_breakout[1] = threshold[1];

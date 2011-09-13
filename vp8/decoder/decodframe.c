@@ -80,12 +80,12 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
     {
         /* Abs Value */
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
-            QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
+            QIndex = xd->segment_feature_data[SEG_LVL_ALT_Q][mbmi->segment_id];
 
         /* Delta Value */
         else
         {
-            QIndex = pc->base_qindex + xd->segment_feature_data[MB_LVL_ALT_Q][mbmi->segment_id];
+            QIndex = pc->base_qindex + xd->segment_feature_data[SEG_LVL_ALT_Q][mbmi->segment_id];
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    /* Clamp to valid range */
         }
     }
@@ -939,7 +939,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
 
             /* For each segmentation feature (Quant and loop filter level) */
-            for (i = 0; i < MB_LVL_MAX; i++)
+            for (i = 0; i < SEG_LVL_MAX; i++)
             {
                 for (j = 0; j < MAX_MB_SEGMENTS; j++)
                 {

@@ -1846,8 +1846,8 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
             vp8_write_bit(bc, (xd->mb_segement_abs_delta) ? 1 : 0);
 
-            // For each segmentation feature (Quant and loop filter level)
-            for (i = 0; i < MB_LVL_MAX; i++)
+            // For each segmentation codable feature
+            for (i = 0; i < SEG_LVL_MAX; i++)
             {
                 // For each of the segments
                 for (j = 0; j < MAX_MB_SEGMENTS; j++)

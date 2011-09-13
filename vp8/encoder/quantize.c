@@ -1174,11 +1174,11 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         // Abs Value
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
 
-            QIndex = xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
+            QIndex = xd->segment_feature_data[SEG_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
         // Delta Value
         else
         {
-            QIndex = cpi->common.base_qindex + xd->segment_feature_data[MB_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
+            QIndex = cpi->common.base_qindex + xd->segment_feature_data[SEG_LVL_ALT_Q][xd->mode_info_context->mbmi.segment_id];
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    // Clamp to valid range
         }
     }
@@ -1316,10 +1316,10 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
 
 
     // Set Segment specific quatizers
-    mbd->segment_feature_data[MB_LVL_ALT_Q][0] = cpi->segment_feature_data[MB_LVL_ALT_Q][0];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][1] = cpi->segment_feature_data[MB_LVL_ALT_Q][1];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][2] = cpi->segment_feature_data[MB_LVL_ALT_Q][2];
-    mbd->segment_feature_data[MB_LVL_ALT_Q][3] = cpi->segment_feature_data[MB_LVL_ALT_Q][3];
+    mbd->segment_feature_data[SEG_LVL_ALT_Q][0] = cpi->segment_feature_data[SEG_LVL_ALT_Q][0];
+    mbd->segment_feature_data[SEG_LVL_ALT_Q][1] = cpi->segment_feature_data[SEG_LVL_ALT_Q][1];
+    mbd->segment_feature_data[SEG_LVL_ALT_Q][2] = cpi->segment_feature_data[SEG_LVL_ALT_Q][2];
+    mbd->segment_feature_data[SEG_LVL_ALT_Q][3] = cpi->segment_feature_data[SEG_LVL_ALT_Q][3];
 
     /* quantizer has to be reinitialized for any delta_q changes */
     if(update)

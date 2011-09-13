@@ -94,18 +94,23 @@ typedef enum
     MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
-/* Macroblock level features */
+// Segment level features.
 typedef enum
 {
-    MB_LVL_ALT_Q = 0,               /* Use alternate Quantizer .... */
-    MB_LVL_ALT_LF = 1,              /* Use alternate loop filter value... */
-    MB_LVL_MAX = 2                  /* Number of MB level features supported */
+    SEG_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
+    SEG_LVL_ALT_LF = 1,              // Use alternate loop filter value...
+#if CONFIG_SEGFEATURES
+    SEG_LVL_REF_FRAME = 2,           // Optional Segment reference frame
+    SEG_LVL_MODE = 3,                // Optional Segment mode
+    SEG_LVL_EOB = 4,                 // EOB end stop marker.
+    SEG_LVL_TRANSFORM = 6,           // Block transform size.
 
-} MB_LVL_FEATURES;
+    SEG_LVL_MAX = 6                  // Number of MB level features supported
+#else
+    SEG_LVL_MAX = 2                  // Number of MB level features supported
+#endif
 
-/* Segment Feature Masks */
-#define SEGMENT_ALTQ    0x01
-#define SEGMENT_ALT_LF  0x02
+} SEG_LVL_FEATURES;
 
 #define VP8_YMODES  (B_PRED + 1)
 #define VP8_UV_MODES (TM_PRED + 1)
@@ -246,7 +251,9 @@ typedef struct MacroBlockD
 #else
     vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
 #endif
-    signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            // Segment parameters
+
+    // Segment features
+    signed char segment_feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
 
     /* mode_based Loop filter adjustment */
     unsigned char mode_ref_lf_delta_enabled;
