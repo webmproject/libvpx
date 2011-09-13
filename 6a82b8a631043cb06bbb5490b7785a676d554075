@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFX///D0\u003d",
+        "filename": "vpx_io/vpxio_intrn.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-13T23:44:08Z",
+      "side": 1,
+      "message": "cf., http://code.google.com/p/webm/issues/detail?id\u003d364",
+      "revId": "6a82b8a631043cb06bbb5490b7785a676d554075",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
