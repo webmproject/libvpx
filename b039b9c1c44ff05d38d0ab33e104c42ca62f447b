@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFX//+yI\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3344,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2011-09-14T16:22:12Z",
+      "side": 1,
+      "message": "Obviously this will break other uses of segmentation.\nFor now it might be good to protect with #ifs",
+      "revId": "b039b9c1c44ff05d38d0ab33e104c42ca62f447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//+yQ\u003d",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1367,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2011-09-14T16:22:12Z",
+      "side": 1,
+      "message": "The average number of bits left per frame in the gf group seems a big number to use here. Also is there any mileage in taking into account the distribution of highq vs low q blocks.\n\nPerhaps we really want to pass a bits per MB target into the requlate_q function as this is what it gets turned into internally. Then we work out a bits per MB target for each block type such that the total for all blocks \u003d target_bits_per_frame.",
+      "revId": "b039b9c1c44ff05d38d0ab33e104c42ca62f447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//+yo\u003d",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1378,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2011-09-14T16:22:12Z",
+      "side": 1,
+      "message": "Should follow WebM brace standards",
+      "revId": "b039b9c1c44ff05d38d0ab33e104c42ca62f447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
