@@ -395,7 +395,16 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->subpixel_predict16x16    = xd->subpixel_predict16x16;
         zd->segmentation_enabled     = xd->segmentation_enabled;
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
-        vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
+
+        vpx_memcpy(zd->segment_feature_data,
+                   xd->segment_feature_data,
+                   sizeof(xd->segment_feature_data));
+
+#if CONFIG_SEGFEATURES
+        vpx_memcpy(zd->segment_feature_mask,
+                   xd->segment_feature_mask,
+                   sizeof(xd->segment_feature_mask));
+#endif
 
         for (i = 0; i < 25; i++)
         {

@@ -257,12 +257,19 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val)
 {
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
-    (void) filt_val;
+    int i;
 
-    mbd->segment_feature_data[0][SEG_LVL_ALT_LF] = cpi->segment_feature_data[0][SEG_LVL_ALT_LF];
-    mbd->segment_feature_data[1][SEG_LVL_ALT_LF] = cpi->segment_feature_data[1][SEG_LVL_ALT_LF];
-    mbd->segment_feature_data[2][SEG_LVL_ALT_LF] = cpi->segment_feature_data[2][SEG_LVL_ALT_LF];
-    mbd->segment_feature_data[3][SEG_LVL_ALT_LF] = cpi->segment_feature_data[3][SEG_LVL_ALT_LF];
+    for ( i = 0; i < MAX_MB_SEGMENTS;  i++ )
+    {
+        mbd->segment_feature_data[i][SEG_LVL_ALT_LF] =
+            cpi->segment_feature_data[i][SEG_LVL_ALT_LF];
+
+#if CONFIG_SEGFEATURES
+        mbd->segment_feature_mask[i] &= ~(1 << SEG_LVL_ALT_LF);
+        mbd->segment_feature_mask[i] |=
+            cpi->segment_feature_mask[i] & (1 << SEG_LVL_ALT_LF);
+#endif
+    }
 }
 
 void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)

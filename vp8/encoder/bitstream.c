@@ -1862,11 +1862,18 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 {
                     Data = xd->segment_feature_data[j][i];
 
-                    // Frame level data
+#if CONFIG_SEGFEATURES
+                    // If the feature is enabled...
+                    if ( xd->segment_feature_mask[j] & (0x01 << i))
+#else
+                    // If the feature is enabled...Indicated by non zero
+                    // value in VP8
                     if (Data)
+#endif
                     {
                         vp8_write_bit(bc, 1);
 
+                        // Encode the relevant feature data
                         if (Data < 0)
                         {
                             Data = - Data;

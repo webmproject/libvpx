@@ -66,7 +66,15 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         vp8_build_block_doffsets(mbd);
         mbd->segmentation_enabled    = xd->segmentation_enabled;
         mbd->mb_segement_abs_delta     = xd->mb_segement_abs_delta;
-        vpx_memcpy(mbd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
+
+        vpx_memcpy(mbd->segment_feature_data,
+                   xd->segment_feature_data,
+                   sizeof(xd->segment_feature_data));
+#if CONFIG_SEGFEATURES
+        vpx_memcpy(mbd->segment_feature_mask,
+                   xd->segment_feature_mask,
+                   sizeof(xd->segment_feature_mask));
+#endif
 
         /*signed char ref_lf_deltas[MAX_REF_LF_DELTAS];*/
         vpx_memcpy(mbd->ref_lf_deltas, xd->ref_lf_deltas, sizeof(xd->ref_lf_deltas));

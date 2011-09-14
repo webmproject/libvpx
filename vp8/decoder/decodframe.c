@@ -72,21 +72,27 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     int i;
     int QIndex;
-    MB_MODE_INFO *mbmi = &xd->mode_info_context->mbmi;
     VP8_COMMON *const pc = & pbi->common;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-    /* Decide whether to use the default or alternate baseline Q value. */
-    if (xd->segmentation_enabled)
+
+    // Set the Q baseline allowing for any segment level adjustment
+#if CONFIG_SEGFEATURES
+    if ( xd->segmentation_enabled &&
+         ( xd->segment_feature_mask[segment_id] & (1 << SEG_LVL_ALT_Q) ) )
+#else
+    if ( xd->segmentation_enabled )
+#endif
     {
         /* Abs Value */
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
-            QIndex = xd->segment_feature_data[mbmi->segment_id][SEG_LVL_ALT_Q];
+            QIndex = xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
 
         /* Delta Value */
         else
         {
             QIndex = pc->base_qindex +
-                xd->segment_feature_data[mbmi->segment_id][SEG_LVL_ALT_Q];
+                xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    /* Clamp to valid range */
         }
     }
@@ -727,8 +733,15 @@ static void init_frame(VP8D_COMP *pbi)
         vp8_default_coef_probs(pc);
         vp8_kf_default_bmode_probs(pc->kf_bmode_prob);
 
-        /* reset the segment feature data to 0 with delta coding (Default state). */
-        vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
+        // Reset the segment feature data to the default stats:
+        // Features disabled, 0, with delta coding (Default state).
+#if CONFIG_SEGFEATURES
+        vpx_memset(xd->segment_feature_mask, 0,
+                   sizeof(xd->segment_feature_mask));
+#endif
+        vpx_memset(xd->segment_feature_data, 0,
+                   sizeof(xd->segment_feature_data));
+
         xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
 
         /* reset the mode ref deltasa for loop filter */
@@ -937,9 +950,15 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         {
             xd->mb_segement_abs_delta = (unsigned char)vp8_read_bit(bc);
 
-            vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
+            // Clear down feature data structure
+            vpx_memset(xd->segment_feature_data, 0,
+                       sizeof(xd->segment_feature_data));
 
 #if CONFIG_SEGFEATURES
+            // Clear down feature enabled masks
+            vpx_memset(xd->segment_feature_mask, 0,
+                       sizeof(xd->segment_feature_mask));
+
             // For each segmentation...
             for (j = 0; j < MAX_MB_SEGMENTS; j++)
             {
@@ -955,16 +974,23 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 for (j = 0; j < MAX_MB_SEGMENTS; j++)
                 {
 #endif
-                    /* Frame level data */
+                    // Is the feature enabled
                     if (vp8_read_bit(bc))
                     {
+#if CONFIG_SEGFEATURES
+                        // Update the feature data and mask
+                        xd->segment_feature_mask[j] |= (1 << i);
+#endif
+
                         xd->segment_feature_data[j][i] = (signed char)vp8_read_literal(bc, mb_feature_data_bits[i]);
 
                         if (vp8_read_bit(bc))
                             xd->segment_feature_data[j][i] = -xd->segment_feature_data[j][i];
                     }
                     else
+                    {
                         xd->segment_feature_data[j][i] = 0;
+                    }
                 }
             }
         }

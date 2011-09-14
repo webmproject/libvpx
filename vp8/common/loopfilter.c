@@ -215,8 +215,14 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
         int lvl_seg = default_filt_lvl;
         int lvl_ref, lvl_mode;
 
-        /* Note the baseline filter values for each segment */
-        if (mbd->segmentation_enabled)
+
+        // Set the baseline filter values for each segment
+#if CONFIG_SEGFEATURES
+        if ( mbd->segmentation_enabled &&
+             ( mbd->segment_feature_mask[seg] & (1 << SEG_LVL_ALT_LF) ) )
+#else
+        if ( mbd->segmentation_enabled )
+#endif
         {
             /* Abs value */
             if (mbd->mb_segement_abs_delta == SEGMENT_ABSDATA)

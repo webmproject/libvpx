@@ -1167,19 +1167,28 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     int QIndex;
     MACROBLOCKD *xd = &x->e_mbd;
     int zbin_extra;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-    // Select the baseline MB Q index.
-    if (xd->segmentation_enabled)
+    // Select the baseline MB Q index allowing for any segment level change.
+#if CONFIG_SEGFEATURES
+    if ( xd->segmentation_enabled &&
+         ( xd->segment_feature_mask[segment_id] & (0x01 << SEG_LVL_ALT_Q) ) )
+#else
+    if ( xd->segmentation_enabled )
+#endif
     {
         // Abs Value
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+            QIndex = xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
 
-            QIndex = xd->segment_feature_data[xd->mode_info_context->mbmi.segment_id][SEG_LVL_ALT_Q];
         // Delta Value
         else
         {
-            QIndex = cpi->common.base_qindex + xd->segment_feature_data[xd->mode_info_context->mbmi.segment_id][SEG_LVL_ALT_Q];
-            QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    // Clamp to valid range
+            QIndex = cpi->common.base_qindex +
+                     xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
+
+            // Clamp to valid range
+            QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;
         }
     }
     else
@@ -1294,6 +1303,7 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
     MACROBLOCKD *mbd = &cpi->mb.e_mbd;
     int update = 0;
     int new_delta_q;
+    int i;
     cm->base_qindex = Q;
 
     /* if any of the delta_q values are changing update flag has to be set */
@@ -1315,11 +1325,18 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
     cm->y2dc_delta_q = new_delta_q;
 
 
-    // Set Segment specific quatizers
-    mbd->segment_feature_data[0][SEG_LVL_ALT_Q] = cpi->segment_feature_data[0][SEG_LVL_ALT_Q];
-    mbd->segment_feature_data[1][SEG_LVL_ALT_Q] = cpi->segment_feature_data[1][SEG_LVL_ALT_Q];
-    mbd->segment_feature_data[2][SEG_LVL_ALT_Q] = cpi->segment_feature_data[2][SEG_LVL_ALT_Q];
-    mbd->segment_feature_data[3][SEG_LVL_ALT_Q] = cpi->segment_feature_data[3][SEG_LVL_ALT_Q];
+    // Set Segment specific quatizers if enabled
+    for ( i = 0; i < MAX_MB_SEGMENTS;  i++ )
+    {
+        mbd->segment_feature_data[i][SEG_LVL_ALT_Q] =
+            cpi->segment_feature_data[i][SEG_LVL_ALT_Q];
+
+#if CONFIG_SEGFEATURES
+        mbd->segment_feature_mask[i] &= ~(1 << SEG_LVL_ALT_Q);
+        mbd->segment_feature_mask[i] |=
+            cpi->segment_feature_mask[i] & (1 << SEG_LVL_ALT_Q);
+#endif
+    }
 
     /* quantizer has to be reinitialized for any delta_q changes */
     if(update)

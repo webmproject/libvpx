@@ -317,23 +317,29 @@ extern FILE *vpxlogc;
 
 static void setup_features(VP8_COMP *cpi)
 {
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+
     // Set up default state for MB feature flags
 #if CONFIG_SEGMENTATION
-    cpi->mb.e_mbd.segmentation_enabled = 1;
+    xd->segmentation_enabled = 1;
 #else
-    cpi->mb.e_mbd.segmentation_enabled = 0;
+    xd->segmentation_enabled = 0;
 #endif
-    cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 0;
-    vpx_memset(cpi->mb.e_mbd.mb_segment_tree_probs, 255, sizeof(cpi->mb.e_mbd.mb_segment_tree_probs));
-    vpx_memset(cpi->mb.e_mbd.segment_feature_data, 0, sizeof(cpi->mb.e_mbd.segment_feature_data));
+    xd->update_mb_segmentation_map = 0;
+    xd->update_mb_segmentation_data = 0;
+    vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
+    vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
 
-    cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 0;
-    cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
-    vpx_memset(cpi->mb.e_mbd.ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-    vpx_memset(cpi->mb.e_mbd.mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
-    vpx_memset(cpi->mb.e_mbd.last_ref_lf_deltas, 0, sizeof(cpi->mb.e_mbd.ref_lf_deltas));
-    vpx_memset(cpi->mb.e_mbd.last_mode_lf_deltas, 0, sizeof(cpi->mb.e_mbd.mode_lf_deltas));
+#if CONFIG_SEGFEATURES
+    vpx_memset(xd->segment_feature_mask, 0, sizeof(xd->segment_feature_mask));
+#endif
+
+    xd->mode_ref_lf_delta_enabled = 0;
+    xd->mode_ref_lf_delta_update = 0;
+    vpx_memset(xd->ref_lf_deltas, 0, sizeof(xd->ref_lf_deltas));
+    vpx_memset(xd->mode_lf_deltas, 0, sizeof(xd->mode_lf_deltas));
+    vpx_memset(xd->last_ref_lf_deltas, 0, sizeof(xd->ref_lf_deltas));
+    vpx_memset(xd->last_mode_lf_deltas, 0, sizeof(xd->mode_lf_deltas));
 
     set_default_lf_deltas(cpi);
 
@@ -439,7 +445,14 @@ static void set_segment_data(VP8_PTR ptr, signed char *feature_data, unsigned ch
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
     cpi->mb.e_mbd.mb_segement_abs_delta = abs_delta;
-    vpx_memcpy(cpi->segment_feature_data, feature_data, sizeof(cpi->segment_feature_data));
+    vpx_memcpy(cpi->segment_feature_data, feature_data,
+               sizeof(cpi->segment_feature_data));
+
+#if CONFIG_SEGFEATURES
+    // TBD ?? Set the feature mask
+    // vpx_memset(xd->segment_feature_mask, 0, sizeof(xd->segment_feature_mask));
+#endif
+
 }
 
 
