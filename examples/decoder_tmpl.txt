@@ -47,8 +47,9 @@ while((img = vpx_codec_get_frame(&codec, &iter))) {
 for(plane=0; plane < 3; plane++) {
     unsigned char *buf =img->planes[plane];
 
-    for(y=0; y<img->d_h >> (plane?1:0); y++) {
-        if(fwrite(buf, 1, img->d_w >> (plane?1:0), outfile));
+    for(y=0; y < (plane ? (img->d_h + 1) >> 1 : img->d_h); y++) {
+        if(fwrite(buf, 1, (plane ? (img->d_w + 1) >> 1 : img->d_w),
+           outfile));
         buf += img->stride[plane];
     }
 }

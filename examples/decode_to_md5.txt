@@ -34,8 +34,8 @@ MD5Init(&md5);
 for(plane=0; plane < 3; plane++) {
     unsigned char *buf =img->planes[plane];
 
-    for(y=0; y<img->d_h >> (plane?1:0); y++) {
-        MD5Update(&md5, buf, img->d_w >> (plane?1:0));
+    for(y=0; y < (plane ? (img->d_h + 1) >> 1 : img->d_h); y++) {
+        MD5Update(&md5, buf, (plane ? (img->d_w + 1) >> 1 : img->d_w));
         buf += img->stride[plane];
     }
 }
