@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFX//97w\u003d",
+        "filename": "vp8/decoder/error_concealment.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-15T17:17:01Z",
+      "side": 1,
+      "message": "this logic doesn\u0027t look right.. I think this will have the sequence x,x+32,x+32+64,x+32+64+96. You want this to calculate the offset, not accumulate, ie\n\n  this_b_to_top_edge \u003d mb_to_top_edge + ((row*4)\u003c\u003c3);\n\nor, at the bottom of the loop:\n\n  mb_to_top_edge +\u003d ((row*4)\u003c\u003c3);\n\nI think this applies to all 4 offsets and the other function modified in this patch too.",
+      "revId": "cf55e4863fb6c36b7a6dbf2924732b5f74bd6042",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
