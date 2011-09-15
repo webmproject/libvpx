@@ -10,7 +10,7 @@
 
 
 #include <stdlib.h>
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vpx/vpx_integer.h"
 
 unsigned int vp8_sad16x16_c(

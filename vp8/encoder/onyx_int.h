@@ -13,7 +13,7 @@
 #define __INC_VP8_INT_H
 
 #include <stdio.h>
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vp8/common/onyx.h"
 #include "treewriter.h"
 #include "tokenize.h"

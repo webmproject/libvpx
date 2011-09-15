@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vpx_ports/arm.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/encoder/onyx_int.h"

@@ -12,7 +12,7 @@
 #ifndef __VPXTYPES_H__
 #define __VPXTYPES_H__
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 
 //#include <sys/types.h>
 #ifdef _MSC_VER
