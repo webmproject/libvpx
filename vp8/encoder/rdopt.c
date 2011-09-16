@@ -498,14 +498,23 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
 
     unsigned int sse1 = 0;
     unsigned int sse2 = 0;
-    int mv_row;
-    int mv_col;
+    int mv_row = x->e_mbd.mode_info_context->mbmi.mv.as_mv.row;
+    int mv_col = x->e_mbd.mode_info_context->mbmi.mv.as_mv.col;
     int offset;
     int pre_stride = x->e_mbd.block[16].pre_stride;
 
-    vp8_build_uvmvs(&x->e_mbd, 0);
-    mv_row = x->e_mbd.block[16].bmi.mv.as_mv.row;
-    mv_col = x->e_mbd.block[16].bmi.mv.as_mv.col;
+    if (mv_row < 0)
+        mv_row -= 1;
+    else
+        mv_row += 1;
+
+    if (mv_col < 0)
+        mv_col -= 1;
+    else
+        mv_col += 1;
+
+    mv_row /= 2;
+    mv_col /= 2;
 
     offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
     uptr = x->e_mbd.pre.u_buffer + offset;
@@ -849,11 +858,36 @@ static int rd_cost_mbuv(MACROBLOCK *mb)
 }
 
 
-static int vp8_rd_inter_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int *distortion, int fullpixel)
+static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+                            int *distortion, int fullpixel)
 {
-    vp8_build_uvmvs(&x->e_mbd, fullpixel);
-    vp8_encode_inter16x16uvrd(IF_RTCD(&cpi->rtcd), x);
+    vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
+    ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
+        x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 
+#if CONFIG_T8X8
+    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+       vp8_transform_mbuv_8x8(x);
+    else
+#endif
+    vp8_transform_mbuv(x);
+    vp8_quantize_mbuv(x);
+
+    *rate       = rd_cost_mbuv(x);
+    *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+
+    return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
+}
+
+static int rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+                          int *distortion, int fullpixel)
+{
+    vp8_build_inter4x4_predictors_mbuv(&x->e_mbd);
+    ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
+        x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
+
+    vp8_transform_mbuv(x);
+    vp8_quantize_mbuv(x);
 
     *rate       = rd_cost_mbuv(x);
     *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
@@ -2019,7 +2053,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             if (tmp_rd < best_yrd)
             {
                 // Now work out UV cost and add it in
-                vp8_rd_inter_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+                rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
                 rate2 += rate_uv;
                 distortion2 += distortion_uv;
             }
@@ -2270,7 +2304,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             distortion2 += distortion;
 
             // UV cost and distortion
-            vp8_rd_inter_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+            rd_inter16x16_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
             rate2 += rate_uv;
             distortion2 += distortion_uv;
             break;
@@ -2448,13 +2482,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     if (best_mbmode.mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
-          x->e_mbd.block[i].bmi.as_mode = best_bmodes[i].as_mode;
+            xd->mode_info_context->bmi[i].as_mode = best_bmodes[i].as_mode;
     }
 
     if (best_mbmode.mode == SPLITMV)
     {
         for (i = 0; i < 16; i++)
-            x->e_mbd.block[i].bmi.mv.as_int = best_bmodes[i].mv.as_int;
+            xd->mode_info_context->bmi[i].mv.as_int = best_bmodes[i].mv.as_int;
 
         vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
 
@@ -2463,6 +2497,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     }
 
     rd_update_mvcount(cpi, x, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
+
+
 
 }
 

@@ -19,10 +19,6 @@
 #include "onyxc_int.h"
 #endif
 
-static const int bbb[4] = {0, 2, 8, 10};
-
-
-
 void vp8_copy_mem16x16_c(
     unsigned char *src,
     int src_stride,
@@ -203,53 +199,108 @@ static void build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch)
 
 
 /*encoder only*/
-void vp8_build_inter_predictors_mbuv(MACROBLOCKD *x)
+void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x)
 {
-    int i;
+    unsigned char *uptr, *vptr;
+    unsigned char *upred_ptr = &x->predictor[256];
+    unsigned char *vpred_ptr = &x->predictor[320];
 
-    if (x->mode_info_context->mbmi.mode != SPLITMV)
+    int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
+    int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
+    int offset;
+    int pre_stride = x->block[16].pre_stride;
+
+    /* calc uv motion vectors */
+    if (mv_row < 0)
+        mv_row -= 1;
+    else
+        mv_row += 1;
+
+    if (mv_col < 0)
+        mv_col -= 1;
+    else
+        mv_col += 1;
+
+    mv_row /= 2;
+    mv_col /= 2;
+
+    mv_row &= x->fullpixel_mask;
+    mv_col &= x->fullpixel_mask;
+
+    offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
+    uptr = x->pre.u_buffer + offset;
+    vptr = x->pre.v_buffer + offset;
+
+    if ((mv_row | mv_col) & 7)
     {
-        unsigned char *uptr, *vptr;
-        unsigned char *upred_ptr = &x->predictor[256];
-        unsigned char *vpred_ptr = &x->predictor[320];
-
-        int mv_row = x->block[16].bmi.mv.as_mv.row;
-        int mv_col = x->block[16].bmi.mv.as_mv.col;
-        int offset;
-        int pre_stride = x->block[16].pre_stride;
-
-        offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
-        uptr = x->pre.u_buffer + offset;
-        vptr = x->pre.v_buffer + offset;
-
-        if ((mv_row | mv_col) & 7)
-        {
-            x->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, upred_ptr, 8);
-            x->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, vpred_ptr, 8);
-        }
-        else
-        {
-            RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, upred_ptr, 8);
-            RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, vpred_ptr, 8);
-        }
+        x->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, upred_ptr, 8);
+        x->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, vpred_ptr, 8);
     }
     else
     {
-        for (i = 16; i < 24; i += 2)
-        {
-            BLOCKD *d0 = &x->block[i];
-            BLOCKD *d1 = &x->block[i+1];
+        RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, upred_ptr, 8);
+        RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, vpred_ptr, 8);
+    }
+}
 
-            if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
-                build_inter_predictors2b(x, d0, 8);
-            else
-            {
-                vp8_build_inter_predictors_b(d0, 8, x->subpixel_predict);
-                vp8_build_inter_predictors_b(d1, 8, x->subpixel_predict);
-            }
+/*encoder only*/
+void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x)
+{
+    int i, j;
+
+    /* build uv mvs */
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 0; j < 2; j++)
+        {
+            int yoffset = i * 8 + j * 2;
+            int uoffset = 16 + i * 2 + j;
+            int voffset = 20 + i * 2 + j;
+
+            int temp;
+
+            temp = x->block[yoffset  ].bmi.mv.as_mv.row
+                   + x->block[yoffset+1].bmi.mv.as_mv.row
+                   + x->block[yoffset+4].bmi.mv.as_mv.row
+                   + x->block[yoffset+5].bmi.mv.as_mv.row;
+
+            if (temp < 0) temp -= 4;
+            else temp += 4;
+
+            x->block[uoffset].bmi.mv.as_mv.row = (temp / 8) & x->fullpixel_mask;
+
+            temp = x->block[yoffset  ].bmi.mv.as_mv.col
+                   + x->block[yoffset+1].bmi.mv.as_mv.col
+                   + x->block[yoffset+4].bmi.mv.as_mv.col
+                   + x->block[yoffset+5].bmi.mv.as_mv.col;
+
+            if (temp < 0) temp -= 4;
+            else temp += 4;
+
+            x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & x->fullpixel_mask;
+
+            x->block[voffset].bmi.mv.as_mv.row =
+                x->block[uoffset].bmi.mv.as_mv.row ;
+            x->block[voffset].bmi.mv.as_mv.col =
+                x->block[uoffset].bmi.mv.as_mv.col ;
+        }
+    }
+
+    for (i = 16; i < 24; i += 2)
+    {
+        BLOCKD *d0 = &x->block[i];
+        BLOCKD *d1 = &x->block[i+1];
+
+        if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
+            build_inter_predictors2b(x, d0, 8);
+        else
+        {
+            vp8_build_inter_predictors_b(d0, 8, x->subpixel_predict);
+            vp8_build_inter_predictors_b(d1, 8, x->subpixel_predict);
         }
     }
 }
+
 
 /*encoder only*/
 void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *x)
@@ -302,8 +353,23 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
         RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, dst_y, dst_ystride);
     }
 
-    mv_row = x->block[16].bmi.mv.as_mv.row;
-    mv_col = x->block[16].bmi.mv.as_mv.col;
+    /* calc uv motion vectors */
+    if (mv_row < 0)
+        mv_row -= 1;
+    else
+        mv_row += 1;
+
+    if (mv_col < 0)
+        mv_col -= 1;
+    else
+        mv_col += 1;
+
+    mv_row /= 2;
+    mv_col /= 2;
+
+    mv_row &= x->fullpixel_mask;
+    mv_col &= x->fullpixel_mask;
+
     pre_stride >>= 1;
     offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
     uptr = x->pre.u_buffer + offset;
@@ -322,17 +388,21 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
 
 }
 
-void vp8_build_inter4x4_predictors_mb(MACROBLOCKD *x)
+static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
 {
     int i;
 
     if (x->mode_info_context->mbmi.partitioning < 3)
     {
-        for (i = 0; i < 4; i++)
-        {
-            BLOCKD *d = &x->block[bbb[i]];
-            build_inter_predictors4b(x, d, 16);
-        }
+        x->block[ 0].bmi = x->mode_info_context->bmi[ 0];
+        x->block[ 2].bmi = x->mode_info_context->bmi[ 2];
+        x->block[ 8].bmi = x->mode_info_context->bmi[ 8];
+        x->block[10].bmi = x->mode_info_context->bmi[10];
+
+        build_inter_predictors4b(x, &x->block[ 0], 16);
+        build_inter_predictors4b(x, &x->block[ 2], 16);
+        build_inter_predictors4b(x, &x->block[ 8], 16);
+        build_inter_predictors4b(x, &x->block[10], 16);
     }
     else
     {
@@ -340,6 +410,9 @@ void vp8_build_inter4x4_predictors_mb(MACROBLOCKD *x)
         {
             BLOCKD *d0 = &x->block[i];
             BLOCKD *d1 = &x->block[i+1];
+
+            x->block[i+0].bmi = x->mode_info_context->bmi[i+0];
+            x->block[i+1].bmi = x->mode_info_context->bmi[i+1];
 
             if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
                 build_inter_predictors2b(x, d0, 16);
@@ -368,6 +441,49 @@ void vp8_build_inter4x4_predictors_mb(MACROBLOCKD *x)
     }
 }
 
+static
+void build_4x4uvmvs(MACROBLOCKD *x)
+{
+    int i, j;
+
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 0; j < 2; j++)
+        {
+            int yoffset = i * 8 + j * 2;
+            int uoffset = 16 + i * 2 + j;
+            int voffset = 20 + i * 2 + j;
+
+            int temp;
+
+            temp = x->mode_info_context->bmi[yoffset + 0].mv.as_mv.row
+                 + x->mode_info_context->bmi[yoffset + 1].mv.as_mv.row
+                 + x->mode_info_context->bmi[yoffset + 4].mv.as_mv.row
+                 + x->mode_info_context->bmi[yoffset + 5].mv.as_mv.row;
+
+            if (temp < 0) temp -= 4;
+            else temp += 4;
+
+            x->block[uoffset].bmi.mv.as_mv.row = (temp / 8) & x->fullpixel_mask;
+
+            temp = x->mode_info_context->bmi[yoffset + 0].mv.as_mv.col
+                 + x->mode_info_context->bmi[yoffset + 1].mv.as_mv.col
+                 + x->mode_info_context->bmi[yoffset + 4].mv.as_mv.col
+                 + x->mode_info_context->bmi[yoffset + 5].mv.as_mv.col;
+
+            if (temp < 0) temp -= 4;
+            else temp += 4;
+
+            x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & x->fullpixel_mask;
+
+            x->block[voffset].bmi.mv.as_mv.row =
+                x->block[uoffset].bmi.mv.as_mv.row ;
+            x->block[voffset].bmi.mv.as_mv.col =
+                x->block[uoffset].bmi.mv.as_mv.col ;
+        }
+    }
+}
+
 void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
 {
     if (x->mode_info_context->mbmi.mode != SPLITMV)
@@ -377,89 +493,8 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
     }
     else
     {
-        vp8_build_inter4x4_predictors_mb(x);
+        build_4x4uvmvs(x);
+        build_inter4x4_predictors_mb(x);
     }
 }
-
-void vp8_build_uvmvs(MACROBLOCKD *x, int fullpixel)
-{
-    int i, j;
-
-    if (x->mode_info_context->mbmi.mode == SPLITMV)
-    {
-        for (i = 0; i < 2; i++)
-        {
-            for (j = 0; j < 2; j++)
-            {
-                int yoffset = i * 8 + j * 2;
-                int uoffset = 16 + i * 2 + j;
-                int voffset = 20 + i * 2 + j;
-
-                int temp;
-
-                temp = x->block[yoffset  ].bmi.mv.as_mv.row
-                       + x->block[yoffset+1].bmi.mv.as_mv.row
-                       + x->block[yoffset+4].bmi.mv.as_mv.row
-                       + x->block[yoffset+5].bmi.mv.as_mv.row;
-
-                if (temp < 0) temp -= 4;
-                else temp += 4;
-
-                x->block[uoffset].bmi.mv.as_mv.row = temp / 8;
-
-                if (fullpixel)
-                    x->block[uoffset].bmi.mv.as_mv.row = (temp / 8) & 0xfffffff8;
-
-                temp = x->block[yoffset  ].bmi.mv.as_mv.col
-                       + x->block[yoffset+1].bmi.mv.as_mv.col
-                       + x->block[yoffset+4].bmi.mv.as_mv.col
-                       + x->block[yoffset+5].bmi.mv.as_mv.col;
-
-                if (temp < 0) temp -= 4;
-                else temp += 4;
-
-                x->block[uoffset].bmi.mv.as_mv.col = temp / 8;
-
-                if (fullpixel)
-                    x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & 0xfffffff8;
-
-                x->block[voffset].bmi.mv.as_mv.row = x->block[uoffset].bmi.mv.as_mv.row ;
-                x->block[voffset].bmi.mv.as_mv.col = x->block[uoffset].bmi.mv.as_mv.col ;
-            }
-        }
-    }
-    else
-    {
-        int mvrow = x->mode_info_context->mbmi.mv.as_mv.row;
-        int mvcol = x->mode_info_context->mbmi.mv.as_mv.col;
-
-        if (mvrow < 0)
-            mvrow -= 1;
-        else
-            mvrow += 1;
-
-        if (mvcol < 0)
-            mvcol -= 1;
-        else
-            mvcol += 1;
-
-        mvrow /= 2;
-        mvcol /= 2;
-
-        for (i = 0; i < 8; i++)
-        {
-            x->block[ 16 + i].bmi.mv.as_mv.row = mvrow;
-            x->block[ 16 + i].bmi.mv.as_mv.col = mvcol;
-
-            if (fullpixel)
-            {
-                x->block[ 16 + i].bmi.mv.as_mv.row = mvrow & 0xfffffff8;
-                x->block[ 16 + i].bmi.mv.as_mv.col = mvcol & 0xfffffff8;
-            }
-        }
-    }
-}
-
-
-
 
