@@ -16,6 +16,24 @@
       "revId": "b854bbd84494ba8a31704593654d4e4ff10ca65e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//8/o\u003d",
+        "filename": "vp8/decoder/error_concealment.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-09-16T14:58:53Z",
+      "side": 1,
+      "message": "But these are already local variables, so I think it should be fine? However, you could argue that they should have the same variable names.",
+      "parentUuid": "AAAAFX//8/4\u003d",
+      "revId": "b854bbd84494ba8a31704593654d4e4ff10ca65e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
