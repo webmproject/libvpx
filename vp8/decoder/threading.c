@@ -27,7 +27,6 @@
 #endif
 
 extern void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
-extern void clamp_mvs(MACROBLOCKD *xd);
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define RTCD_VTABLE(x) (&(pbi)->common.rtcd.x)
@@ -98,7 +97,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
 {
     int eobtotal = 0;
     int throw_residual = 0;
-    int i, do_clamp = xd->mode_info_context->mbmi.need_to_clamp_mvs;
+    int i;
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
@@ -107,12 +106,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
     else
     {
         eobtotal = vp8_decode_mb_tokens(pbi, xd);
-    }
-
-    /* Perform temporary clamping of the MV to be used for prediction */
-    if (do_clamp)
-    {
-        clamp_mvs(xd);
     }
 
     eobtotal |= (xd->mode_info_context->mbmi.mode == B_PRED ||
