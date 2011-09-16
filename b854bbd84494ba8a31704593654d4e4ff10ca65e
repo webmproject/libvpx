@@ -34,6 +34,24 @@
       "revId": "b854bbd84494ba8a31704593654d4e4ff10ca65e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//8/Y\u003d",
+        "filename": "vp8/decoder/error_concealment.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-16T15:04:43Z",
+      "side": 1,
+      "message": "you\u0027re right, I wasn\u0027t reading carefully enough.",
+      "parentUuid": "AAAAFX//8/o\u003d",
+      "revId": "b854bbd84494ba8a31704593654d4e4ff10ca65e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
