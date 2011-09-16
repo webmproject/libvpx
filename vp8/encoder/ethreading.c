@@ -24,9 +24,9 @@ extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 
-extern void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
+extern void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
 
-static THREAD_FUNCTION loopfilter_thread(void *p_data)
+static THREAD_FUNCTION thread_loopfilter(void *p_data)
 {
     VP8_COMP *cpi = (VP8_COMP *)(((LPFTHREAD_DATA *)p_data)->ptr1);
     VP8_COMMON *cm = &cpi->common;
@@ -41,7 +41,7 @@ static THREAD_FUNCTION loopfilter_thread(void *p_data)
             if (cpi->b_multi_threaded == 0) // we're shutting down
                 break;
 
-            loopfilter_frame(cpi, cm);
+            vp8_loopfilter_frame(cpi, cm);
 
             sem_post(&cpi->h_event_end_lpf);
         }
@@ -468,6 +468,7 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
 
     cpi->b_multi_threaded = 0;
     cpi->encoding_thread_count = 0;
+    cpi->b_lpf_running = 0;
 
     if (cm->processor_core_count > 1 && cpi->oxcf.multi_threaded > 1)
     {
@@ -526,7 +527,7 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
             sem_init(&cpi->h_event_end_lpf, 0, 0);
 
             lpfthd->ptr1 = (void *)cpi;
-            pthread_create(&cpi->h_filter_thread, 0, loopfilter_thread, lpfthd);
+            pthread_create(&cpi->h_filter_thread, 0, thread_loopfilter, lpfthd);
         }
     }
 
