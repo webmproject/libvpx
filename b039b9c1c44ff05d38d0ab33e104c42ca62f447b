@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn///i0\u003d",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1367,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2011-09-19T23:57:01Z",
+      "side": 1,
+      "message": "I implemented the \"bits_per_mb\" change you suggested, which makes sense (and actually gives a minor quality boost also). I chose the average number of bits per frame for the \"low prediction blocks\" so that they get coded as a regular non-key/golden/altref-frame, so that (at least for the non-temporal-scaled alt-ref case) the next golden frame still consists only of skips and is easier to code.\n\nPerhaps for the case where we use temporal scaling, I can go even lower here (or just force skips), since then that doesn\u0027t apply. I\u0027ve tested my patch mostly without temporal scaling enabled, so I can compare these two approaches with temporal scaling and see which is better, if you think that makes sense.",
+      "parentUuid": "AAAAFX//+yQ\u003d",
+      "revId": "b039b9c1c44ff05d38d0ab33e104c42ca62f447b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFX//+yo\u003d",
         "filename": "vp8/encoder/ratectrl.c",
         "patchSetId": 1
