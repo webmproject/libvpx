@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///7o\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1310,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-09-19T12:47:52Z",
+      "side": 1,
+      "message": "Do we need to guard these changes with CONFIG_REALTIME_ONLY flag? If the change is working also in non-rt mode, I would rather remove the compiler flags to make code less fragmented.",
+      "revId": "e51ae5dc0a8134577168a2095a775809ea6b01f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
