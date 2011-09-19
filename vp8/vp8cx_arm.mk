@@ -49,8 +49,6 @@ VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/walsh_v6$(ASM)
 
 #File list for neon
 # encoder
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/fastfdct4x4_neon$(ASM)
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/fastfdct8x4_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/fastquantizeb_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/sad8_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/sad16_neon$(ASM)
