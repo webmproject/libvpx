@@ -8,7 +8,7 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-    EXPORT |vp8_fast_fdct4x4_armv6|
+    EXPORT |vp8_short_fdct4x4_armv6|
 
     ARM
     REQUIRE8
@@ -16,7 +16,7 @@
 
     AREA    |.text|, CODE, READONLY
 ; void vp8_short_fdct4x4_c(short *input, short *output, int pitch)
-|vp8_fast_fdct4x4_armv6| PROC
+|vp8_short_fdct4x4_armv6| PROC
 
     stmfd       sp!, {r4 - r12, lr}
 
