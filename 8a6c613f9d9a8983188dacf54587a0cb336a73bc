@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///ZQ\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2074,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-09-20T07:41:30Z",
+      "side": 1,
+      "message": "newline \u0027\\n\u0027 could be added into beginning of the print. So, that it does not continue printing to same line in console as the stderr output above.",
+      "revId": "8a6c613f9d9a8983188dacf54587a0cb336a73bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///ZI\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2089,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-09-20T07:41:30Z",
+      "side": 1,
+      "message": "newline \u0027\\n\u0027 could be added also to beginning of the line. Otherwise this can continue printing to same line as last stderr message.",
+      "revId": "8a6c613f9d9a8983188dacf54587a0cb336a73bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
