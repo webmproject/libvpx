@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn///X0\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2072,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-20T14:21:25Z",
+      "side": 1,
+      "message": "Can we find a way to avoid duplicating this code block?",
+      "revId": "ee5775a23feaae57fb820b9a617dfe05b082b827",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn///Xs\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2088,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-20T14:21:25Z",
+      "side": 1,
+      "message": "stderr was intentional, since stdout can be used to pipe the encoded data to a different process, we want to avoid mixing them. You should be able to redirect stderr to your log.\n\nIf the concern is that you want to log without the per-frame progress spam, we could introduce a new --quiet option to suppress that (this would be useful anyway). Although --verbose --quiet would be both useful and confusing. Maybe an enum --progress\u003d[none|simple|full]\n\nA related idea I had that may or may not be useful in your context is to have a simpler per-frame progress (say a dot per frame, maybe with a K for keyframes or something) that would be used when the output stream is not a TTY. This would be useful in some of the continuous build/test stuff I\u0027ve been looking at.",
+      "revId": "ee5775a23feaae57fb820b9a617dfe05b082b827",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
