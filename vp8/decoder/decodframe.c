@@ -215,7 +215,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     {
         vp8_reset_mb_tokens_context(xd);
     }
-    else
+    else if (!vp8dx_bool_error(xd->current_bc))
     {
 
 #if CONFIG_T8X8
@@ -292,7 +292,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     {
         vp8_build_inter_predictors_mb(xd);
     }
-
     /* When we have independent partitions we can apply residual even
      * though other partitions within the frame are corrupt.
      */
@@ -641,9 +640,16 @@ static void setup_token_decoder_partition_input(VP8D_COMP *pbi)
 {
     vp8_reader *bool_decoder = &pbi->bc2;
     int part_idx = 1;
+    int num_token_partitions;
 
     TOKEN_PARTITION multi_token_partition =
             (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
+    if (!vp8dx_bool_error(&pbi->bc))
+        pbi->common.multi_token_partition = multi_token_partition;
+    num_token_partitions = 1 << pbi->common.multi_token_partition;
+    if (num_token_partitions + 1 > pbi->num_partitions)
+        vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
+                           "Partitions missing");
     assert(vp8dx_bool_error(&pbi->bc) ||
            multi_token_partition == pbi->common.multi_token_partition);
     if (pbi->num_partitions > 2)
@@ -911,12 +917,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         pc->show_frame = (data[0] >> 4) & 1;
         first_partition_length_in_bytes =
             (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
-        data += 3;
 
         if (!pbi->ec_active && (data + first_partition_length_in_bytes > data_end
             || data + first_partition_length_in_bytes < data))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet or corrupt partition 0 length");
+
+        data += 3;
+
         vp8_setup_version(pc);
 
         if (pc->frame_type == KEY_FRAME)
@@ -989,7 +997,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         }
     }
 
-    if (pc->Width == 0 || pc->Height == 0)
+    if ((!pbi->decoded_key_frame && pc->frame_type != KEY_FRAME) ||
+        pc->Width == 0 || pc->Height == 0)
     {
         return -1;
     }

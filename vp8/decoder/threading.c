@@ -112,7 +112,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
     {
         vp8_reset_mb_tokens_context(xd);
     }
-    else
+    else if (!vp8dx_bool_error(xd->current_bc))
     {
         eobtotal = vp8_decode_mb_tokens(pbi, xd);
     }
@@ -177,7 +177,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
 #if CONFIG_ERROR_CONCEALMENT
     if (pbi->ec_active &&
         (mb_row * pbi->common.mb_cols + mb_col >= pbi->mvs_corrupt_from_mb ||
-        throw_residual))
+         throw_residual))
     {
         /* MB with corrupt residuals or corrupt mode/motion vectors.
          * Better to use the predictor as reconstruction.
