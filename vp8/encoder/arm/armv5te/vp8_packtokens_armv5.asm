@@ -71,7 +71,7 @@ token_loop
     ; off of v, so set a flag here based on this.
     ; This value is refered to as "bb"
     lsls    r12, r12, #1                ; bb = v >> n
-    mul     r4, r4, r7                  ; ((range-1) * pp[i>>1]))
+    mul     r6, r4, r7                  ; ((range-1) * pp[i>>1]))
 
     ; bb can only be 0 or 1.  So only execute this statement
     ; if bb == 1, otherwise it will act like i + 0
@@ -79,7 +79,7 @@ token_loop
 
     mov     r7, #1
     ldrsb   lr, [r10, lr]               ; i = vp8_coef_tree[i+bb]
-    add     r4, r7, r4, lsr #8          ; 1 + (((range-1) * pp[i>>1]) >> 8)
+    add     r4, r7, r6, lsr #8          ; 1 + (((range-1) * pp[i>>1]) >> 8)
 
     addcs   r2, r2, r4                  ; if  (bb) lowvalue += split
     subcs   r4, r5, r4                  ; if  (bb) range = range-split
@@ -172,12 +172,12 @@ extra_bits_loop
     ldrb    r4, [r9, lr, asr #1]            ; pp[i>>1]
     sub     r7, r5, #1                  ; range-1
     lsls    r12, r12, #1                ; v >> n
-    mul     r4, r4, r7                  ; (range-1) * pp[i>>1]
+    mul     r6, r4, r7                  ; (range-1) * pp[i>>1]
     addcs   lr, lr, #1                  ; i + bb
 
     mov     r7, #1
     ldrsb   lr, [r10, lr]               ; i = b->tree[i+bb]
-    add     r4, r7, r4, lsr #8          ; split = 1 +  (((range-1) * pp[i>>1]) >> 8)
+    add     r4, r7, r6, lsr #8          ; split = 1 +  (((range-1) * pp[i>>1]) >> 8)
 
     addcs   r2, r2, r4                  ; if  (bb) lowvalue += split
     subcs   r4, r5, r4                  ; if  (bb) range = range-split

@@ -18,7 +18,6 @@ VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/arm_csystemdependent.c
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.c
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.h
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/encodemb_arm.h
-VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/picklpf_arm.c
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.c
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.h
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/variance_arm.c
@@ -36,7 +35,7 @@ VP8_CX_SRCS-$(HAVE_ARMV5TE)  += encoder/arm/armv5te/vp8_packtokens_partitions_ar
 #File list for armv6
 # encoder
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_subtract_armv6$(ASM)
-VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_fast_fdct4x4_armv6$(ASM)
+VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_short_fdct4x4_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_fast_quantize_b_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_sad16x16_armv6$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/vp8_variance16x16_armv6$(ASM)
@@ -49,9 +48,8 @@ VP8_CX_SRCS-$(HAVE_ARMV6)  += encoder/arm/armv6/walsh_v6$(ASM)
 
 #File list for neon
 # encoder
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/fastfdct4x4_neon$(ASM)
-VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/fastfdct8x4_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/fastquantizeb_neon$(ASM)
+VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/picklpf_arm.c
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/sad8_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/sad16_neon$(ASM)
 VP8_CX_SRCS-$(HAVE_ARMV7)  += encoder/arm/neon/shortfdct_neon$(ASM)
