@@ -32,7 +32,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
-#include "vpx_version.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
@@ -624,6 +623,18 @@ write_webm_seek_info(EbmlGlobal *ebml)
         //segment info
         EbmlLoc startInfo;
         uint64_t frame_time;
+        char version_string[64];
+
+        /* Assemble version string */
+        if(ebml->debug)
+            strcpy(version_string, "vpxenc");
+        else
+        {
+            strcpy(version_string, "vpxenc ");
+            strncat(version_string,
+                    vpx_codec_version_str(),
+                    sizeof(version_string) - 1 - strlen(version_string));
+        }
 
         frame_time = (uint64_t)1000 * ebml->framerate.den
                      / ebml->framerate.num;
@@ -632,10 +643,8 @@ write_webm_seek_info(EbmlGlobal *ebml)
         Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
         Ebml_SerializeFloat(ebml, Segment_Duration,
                             ebml->last_pts_ms + frame_time);
-        Ebml_SerializeString(ebml, 0x4D80,
-            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
-        Ebml_SerializeString(ebml, 0x5741,
-            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
+        Ebml_SerializeString(ebml, 0x4D80, version_string);
+        Ebml_SerializeString(ebml, 0x5741, version_string);
         Ebml_EndSubElement(ebml, &startInfo);
     }
 }
