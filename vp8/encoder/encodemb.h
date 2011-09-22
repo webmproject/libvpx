@@ -12,7 +12,7 @@
 #ifndef __INC_ENCODEMB_H
 #define __INC_ENCODEMB_H
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "block.h"
 
 #define prototype_mberr(sym) \
