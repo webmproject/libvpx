@@ -2,6 +2,193 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAFX//9mI\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "should be in the webm specific file (the nestegg_* stuff too)",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9l0\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "should be in the y4m specific file",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9lw\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 469,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "ivf specific",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9ls\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "raw specific",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9lk\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 534,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "webm specific",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9lY\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "raw img specific",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9lQ\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 670,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "ivf specifc",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9lM\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 699,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "webm specific",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9lI\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 728,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "raw img specific",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9lE\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "y4m specific",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9qk\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "shouldn\u0027t include a private interface from a public one.\n\nneed include guards, file header (applies to all new files)\n\nneed at least some documentation. Doesn\u0027t strictly have to be per-function, but at least group related ones to give some general overview. Real doxygen comments would be even better.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFX//9rI\u003d",
         "filename": "vpx_io/vpxio.h",
         "patchSetId": 6
@@ -19,6 +206,176 @@
     },
     {
       "key": {
+        "uuid": "AAAAFX//9qo\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "are these three still valid? I don\u0027t know what they do.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9p0\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "any function that takes only one context should just be named ctx. There are functions below where you have strange signatures that take a param input_ctx but talk about output files.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9qA\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "video_file_type_t is undefined. What\u0027s the use case for this? Does an application need to know this?",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9qQ\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "getting the vpx_img_fmt seems like a legitmate thing to get, \"use_i420\" seems like an implementation detail.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9p4\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "what is this? how is file_kind_t different than video_file_type_t? If these types are needed, they need to be defined as part of the public interface, not pulled in from vpxio_intrn.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9ps\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "is this function needed? file type can\u0027t be changed, it\u0027s determined at open time.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9po\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "not sure this makes sense to set -- fourcc is an implementation detail of the ivf container. allowing it to be set by the app allows it to be set wrong.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9pI\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "open_raw_src(), and take a vpx_img_fmt parameter.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9pA\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "open_raw_dst(), and take a vpx_img_fmt parameter.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9oo\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "take a vpx_rational instead of separate num/den params",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFX//9rg\u003d",
         "filename": "vpx_io/vpxio_intrn.h",
         "patchSetId": 6
@@ -30,6 +387,57 @@
       "writtenOn": "2011-09-15T19:43:11Z",
       "side": 1,
       "message": "still need to correct this as with:\nhttp://code.google.com/p/webm/issues/detail?id\u003d364",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9ks\u003d",
+        "filename": "vpx_io/vpxio_ivf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "this code should be made common with the raw format",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9kk\u003d",
+        "filename": "vpx_io/vpxio_ivf.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "should be made common with the raw img writing code.",
+      "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFX//9nI\u003d",
+        "filename": "vpx_io/vpxio_y4m.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-22T14:47:49Z",
+      "side": 1,
+      "message": "this code is common with the raw file writer, should put it into its own function so it can be shared.",
       "revId": "b37087a18dfb2f8fee7ebbaac37b95b199cd9798",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
