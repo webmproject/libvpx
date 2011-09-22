@@ -19,6 +19,7 @@ VP8_COMMON_SRCS-yes += common/asm_com_offsets.c
 VP8_COMMON_SRCS-yes += common/blockd.c
 VP8_COMMON_SRCS-yes += common/coefupdateprobs.h
 VP8_COMMON_SRCS-yes += common/debugmodes.c
+VP8_COMMON_SRCS-yes += common/default_coef_probs.h
 VP8_COMMON_SRCS-yes += common/entropy.c
 VP8_COMMON_SRCS-yes += common/entropymode.c
 VP8_COMMON_SRCS-yes += common/entropymv.c
