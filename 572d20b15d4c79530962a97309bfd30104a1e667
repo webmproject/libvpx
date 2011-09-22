@@ -1,0 +1,480 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//+hs\u003d",
+        "filename": "examples/decoder_tmpl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "Should return non-zero on error, EXIT_FAILURE might be a good choice.",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+ho\u003d",
+        "filename": "examples/decoder_tmpl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "long line",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+hc\u003d",
+        "filename": "examples/decoder_tmpl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "unnecessary casts",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+hM\u003d",
+        "filename": "examples/encoder_tmpl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "fourcc is unused now",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+hI\u003d",
+        "filename": "examples/encoder_tmpl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "Why is this so heavily indented?",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+hA\u003d",
+        "filename": "examples/encoder_tmpl.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "Overly indented",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+g4\u003d",
+        "filename": "examples/encoder_tmpl.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "can you add a comment about the use of 33?",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+gw\u003d",
+        "filename": "examples/twopass_encoder.txt",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "ditto on the use of 33",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+gs\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "sort these",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+gk\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "lose the excessive whitespace",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+gY\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "If possible sort the local includes alphabetically or at least a bit more logically",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+gU\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "duplicate",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+f0\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "const",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+f8\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "I think this was more readable in its original compact form in vpxdec.c",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+fo\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "add some whitespace between these functions",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+fs\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "unnecessary",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+fk\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "FILE *outfile \u003d isn\u0027t really needed",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+fM\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 323,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "unnecesary \u0027;\u0027",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+ic\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "keep the , with the other param and break at the function if need be.\n\n\nnestegg_track_codec_id(\n    input_ctx-\u003edecomp...\nor so.",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+ig\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 572,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "Either align this with the function ( or indent 4 spaces from the if (",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+fA\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 652,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "these type of comments belong in the header file",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+e4\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "align these",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+iY\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 982,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "align this with the ( or indent 4 spaces",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+ek\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "include guards\nand if this is meant to be a standalone lib, extern \"C\" {\n\nif this is user facing it shouldn\u0027t be including an \u0027internal\u0027 header file; maybe you want to name it _types? or not to include it at all?",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+ec\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "you should consistently use this enum. it also likely belongs in this file rather than the _intrn.h",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+eU\u003d",
+        "filename": "vpx_io/vpxio_i420.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "What is this?",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+eI\u003d",
+        "filename": "vpxdec.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "EXIT_FAILURE on error",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//+jE\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2011-09-22T01:41:04Z",
+      "side": 1,
+      "message": "Along with the other removed #define\u0027s are these necessary?",
+      "revId": "572d20b15d4c79530962a97309bfd30104a1e667",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
