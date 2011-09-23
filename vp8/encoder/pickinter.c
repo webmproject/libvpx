@@ -10,7 +10,7 @@
 
 
 #include <limits.h>
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "onyx_int.h"
 #include "modecosts.h"
 #include "encodeintra.h"

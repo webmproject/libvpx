@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"

@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "encodemb.h"
 #include "vp8/common/reconinter.h"
 #include "quantize.h"

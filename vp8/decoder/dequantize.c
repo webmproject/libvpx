@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "dequantize.h"
 #include "vp8/common/idct.h"
 #include "vpx_mem/vpx_mem.h"

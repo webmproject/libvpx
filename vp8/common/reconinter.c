@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vpx/vpx_integer.h"
 #include "recon.h"
 #include "subpixel.h"
@@ -325,6 +325,42 @@ void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *x)
     }
 }
 
+static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
+{
+    /* If the MV points so far into the UMV border that no visible pixels
+     * are used for reconstruction, the subpel part of the MV can be
+     * discarded and the MV limited to 16 pixels with equivalent results.
+     *
+     * This limit kicks in at 19 pixels for the top and left edges, for
+     * the 16 pixels plus 3 taps right of the central pixel when subpel
+     * filtering. The bottom and right edges use 16 pixels plus 2 pixels
+     * left of the central pixel when filtering.
+     */
+    if (mv->col < (xd->mb_to_left_edge - (19 << 3)))
+        mv->col = xd->mb_to_left_edge - (16 << 3);
+    else if (mv->col > xd->mb_to_right_edge + (18 << 3))
+        mv->col = xd->mb_to_right_edge + (16 << 3);
+
+    if (mv->row < (xd->mb_to_top_edge - (19 << 3)))
+        mv->row = xd->mb_to_top_edge - (16 << 3);
+    else if (mv->row > xd->mb_to_bottom_edge + (18 << 3))
+        mv->row = xd->mb_to_bottom_edge + (16 << 3);
+}
+
+/* A version of the above function for chroma block MVs.*/
+static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
+{
+    mv->col = (2*mv->col < (xd->mb_to_left_edge - (19 << 3))) ?
+        (xd->mb_to_left_edge - (16 << 3)) >> 1 : mv->col;
+    mv->col = (2*mv->col > xd->mb_to_right_edge + (18 << 3)) ?
+        (xd->mb_to_right_edge + (16 << 3)) >> 1 : mv->col;
+
+    mv->row = (2*mv->row < (xd->mb_to_top_edge - (19 << 3))) ?
+        (xd->mb_to_top_edge - (16 << 3)) >> 1 : mv->row;
+    mv->row = (2*mv->row > xd->mb_to_bottom_edge + (18 << 3)) ?
+        (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
+}
+
 void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
                                         unsigned char *dst_y,
                                         unsigned char *dst_u,
@@ -336,17 +372,23 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
     unsigned char *ptr;
     unsigned char *uptr, *vptr;
 
-    int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
-    int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
+    int_mv _16x16mv;
 
     unsigned char *ptr_base = x->pre.y_buffer;
     int pre_stride = x->block[0].pre_stride;
 
-    ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
+    _16x16mv.as_int = x->mode_info_context->mbmi.mv.as_int;
 
-    if ((mv_row | mv_col) & 7)
+    if (x->mode_info_context->mbmi.need_to_clamp_mvs)
     {
-        x->subpixel_predict16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, dst_y, dst_ystride);
+        clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
+    }
+
+    ptr = ptr_base + ( _16x16mv.as_mv.row >> 3) * pre_stride + (_16x16mv.as_mv.col >> 3);
+
+    if ( _16x16mv.as_int & 0x00070007)
+    {
+        x->subpixel_predict16x16(ptr, pre_stride, _16x16mv.as_mv.col & 7,  _16x16mv.as_mv.row & 7, dst_y, dst_ystride);
     }
     else
     {
@@ -354,38 +396,37 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
     }
 
     /* calc uv motion vectors */
-    if (mv_row < 0)
-        mv_row -= 1;
+    if ( _16x16mv.as_mv.row < 0)
+      _16x16mv.as_mv.row -= 1;
     else
-        mv_row += 1;
+      _16x16mv.as_mv.row += 1;
 
-    if (mv_col < 0)
-        mv_col -= 1;
+    if (_16x16mv.as_mv.col < 0)
+        _16x16mv.as_mv.col -= 1;
     else
-        mv_col += 1;
+        _16x16mv.as_mv.col += 1;
 
-    mv_row /= 2;
-    mv_col /= 2;
+    _16x16mv.as_mv.row /= 2;
+    _16x16mv.as_mv.col /= 2;
 
-    mv_row &= x->fullpixel_mask;
-    mv_col &= x->fullpixel_mask;
+    _16x16mv.as_mv.row &= x->fullpixel_mask;
+    _16x16mv.as_mv.col &= x->fullpixel_mask;
 
     pre_stride >>= 1;
-    offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
+    offset = ( _16x16mv.as_mv.row >> 3) * pre_stride + (_16x16mv.as_mv.col >> 3);
     uptr = x->pre.u_buffer + offset;
     vptr = x->pre.v_buffer + offset;
 
-    if ((mv_row | mv_col) & 7)
+    if ( _16x16mv.as_int & 0x00070007)
     {
-        x->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, dst_u, dst_uvstride);
-        x->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, dst_v, dst_uvstride);
+        x->subpixel_predict8x8(uptr, pre_stride, _16x16mv.as_mv.col & 7,  _16x16mv.as_mv.row & 7, dst_u, dst_uvstride);
+        x->subpixel_predict8x8(vptr, pre_stride, _16x16mv.as_mv.col & 7,  _16x16mv.as_mv.row & 7, dst_v, dst_uvstride);
     }
     else
     {
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, dst_u, dst_uvstride);
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, dst_v, dst_uvstride);
     }
-
 }
 
 static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
@@ -398,6 +439,13 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
         x->block[ 2].bmi = x->mode_info_context->bmi[ 2];
         x->block[ 8].bmi = x->mode_info_context->bmi[ 8];
         x->block[10].bmi = x->mode_info_context->bmi[10];
+        if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+        {
+            clamp_mv_to_umv_border(&x->block[ 0].bmi.mv.as_mv, x);
+            clamp_mv_to_umv_border(&x->block[ 2].bmi.mv.as_mv, x);
+            clamp_mv_to_umv_border(&x->block[ 8].bmi.mv.as_mv, x);
+            clamp_mv_to_umv_border(&x->block[10].bmi.mv.as_mv, x);
+        }
 
         build_inter_predictors4b(x, &x->block[ 0], 16);
         build_inter_predictors4b(x, &x->block[ 2], 16);
@@ -413,6 +461,11 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
 
             x->block[i+0].bmi = x->mode_info_context->bmi[i+0];
             x->block[i+1].bmi = x->mode_info_context->bmi[i+1];
+            if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+            {
+                clamp_mv_to_umv_border(&x->block[i+0].bmi.mv.as_mv, x);
+                clamp_mv_to_umv_border(&x->block[i+1].bmi.mv.as_mv, x);
+            }
 
             if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
                 build_inter_predictors2b(x, d0, 16);
@@ -430,6 +483,8 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
     {
         BLOCKD *d0 = &x->block[i];
         BLOCKD *d1 = &x->block[i+1];
+
+        /* Note: uv mvs already clamped in build_4x4uvmvs() */
 
         if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
             build_inter_predictors2b(x, d0, 8);
@@ -475,6 +530,9 @@ void build_4x4uvmvs(MACROBLOCKD *x)
             else temp += 4;
 
             x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & x->fullpixel_mask;
+
+            if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+                clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.mv.as_mv, x);
 
             x->block[voffset].bmi.mv.as_mv.row =
                 x->block[uoffset].bmi.mv.as_mv.row ;

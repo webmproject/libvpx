@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vp8/common/recon.h"
 #include "vp8/common/blockd.h"
 

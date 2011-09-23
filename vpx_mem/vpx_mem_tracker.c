@@ -22,7 +22,7 @@
    in the memory_tracker struct as well as calls to create/destroy/lock/unlock
    the mutex in vpx_memory_tracker_init/Destroy and memory_tracker_lock_mutex/unlock_mutex
 */
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 
 #if defined(__uClinux__)
 # include <lddk.h>

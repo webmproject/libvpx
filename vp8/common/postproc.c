@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 #include "vpx_scale/yv12config.h"
 #include "postproc.h"
 #include "vpx_scale/yv12extend.h"
