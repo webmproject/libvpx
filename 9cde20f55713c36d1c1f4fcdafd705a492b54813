@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//7k4\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3775,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-09-27T18:46:10Z",
+      "side": 1,
+      "message": "Could you use:\nif (cpi-\u003eb_multi_threaded \u0026\u0026 !cpi-\u003eb_calculate_psnr)\n\nthen cpi-\u003ewait_lpf is not needed?",
+      "revId": "9cde20f55713c36d1c1f4fcdafd705a492b54813",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
