@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//7DI\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-28T14:00:40Z",
+      "side": 1,
+      "message": "data",
+      "revId": "604d02c9660cdcd6b190457f1d443a909224383a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//7DE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-28T14:00:40Z",
+      "side": 1,
+      "message": "it\u0027s not clear what \"(actually {two,six})\" means here.",
+      "revId": "604d02c9660cdcd6b190457f1d443a909224383a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//7DQ\u003d",
+        "filename": "vp8/common/x86/loopfilter_x86.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-28T14:00:40Z",
+      "side": 1,
+      "message": "suffix to differentiate from 32-bit version.",
+      "revId": "604d02c9660cdcd6b190457f1d443a909224383a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//7DM\u003d",
+        "filename": "vp8/common/x86/loopfilter_x86.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-28T14:00:40Z",
+      "side": 1,
+      "message": "suffix to differentiate from 32-bit version.",
+      "revId": "604d02c9660cdcd6b190457f1d443a909224383a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//7DU\u003d",
+        "filename": "vp8/vp8_common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-28T14:00:40Z",
+      "side": 1,
+      "message": "can we give this file a suffix that makes it obvious it\u0027s x86_64 specific? _64 or _x64 maybe.. sse2 is implied, other extensions would need some additional differentiation.",
+      "revId": "604d02c9660cdcd6b190457f1d443a909224383a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
