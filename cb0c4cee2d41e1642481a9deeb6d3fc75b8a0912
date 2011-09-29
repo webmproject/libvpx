@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//6es\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2482,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-09-29T16:41:00Z",
+      "side": 1,
+      "message": "is this blank line extra here??",
+      "revId": "cb0c4cee2d41e1642481a9deeb6d3fc75b8a0912",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6ek\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2500,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-09-29T16:41:00Z",
+      "side": 1,
+      "message": "should these be absorbed into substract_stats()?",
+      "revId": "cb0c4cee2d41e1642481a9deeb6d3fc75b8a0912",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
