@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//6dM\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2011-09-29T17:35:10Z",
+      "side": 1,
+      "message": "add x-\u003ee_mbd.mode_info_context-\u003embmi.ref_frame \u0026\u0026 to this check to eliminate find_near_mvs for intra modes",
+      "revId": "fe8d0e286a4abfd409a6c3a1f78de8011a56d0c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6dE\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 529,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2011-09-29T17:35:10Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "fe8d0e286a4abfd409a6c3a1f78de8011a56d0c6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
