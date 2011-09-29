@@ -54,6 +54,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//6QQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000910
+      },
+      "writtenOn": "2011-09-29T23:00:28Z",
+      "side": 1,
+      "message": "Just curious if you\u0027ve got an equivalent C implementation.  I\u0027d love to try this method in the OpenCL WebM decoder I\u0027m working on.",
+      "revId": "604d02c9660cdcd6b190457f1d443a909224383a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//7DQ\u003d",
         "filename": "vp8/common/x86/loopfilter_x86.c",
         "patchSetId": 3
