@@ -29,15 +29,14 @@ static __inline signed char vp8_filter_mask(uc limit, uc blimit,
                                      uc q0, uc q1, uc q2, uc q3)
 {
     signed char mask = 0;
-    mask |= (abs(p3 - p2) > limit) * -1;
-    mask |= (abs(p2 - p1) > limit) * -1;
-    mask |= (abs(p1 - p0) > limit) * -1;
-    mask |= (abs(q1 - q0) > limit) * -1;
-    mask |= (abs(q2 - q1) > limit) * -1;
-    mask |= (abs(q3 - q2) > limit) * -1;
-    mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > blimit) * -1;
-    mask = ~mask;
-    return mask;
+    mask |= (abs(p3 - p2) > limit);
+    mask |= (abs(p2 - p1) > limit);
+    mask |= (abs(p1 - p0) > limit);
+    mask |= (abs(q1 - q0) > limit);
+    mask |= (abs(q2 - q1) > limit);
+    mask |= (abs(q3 - q2) > limit);
+    mask |= (abs(p0 - q0) * 2 + abs(p1 - q1) / 2  > blimit);
+    return mask - 1;
 }
 
 /* is there high variance internal edge ( 11111111 yes, 00000000 no) */
