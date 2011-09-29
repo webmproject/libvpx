@@ -82,8 +82,8 @@ qexec=$(if $(quiet),@)
 #
 # Common rules"
 #
-.PHONY: all-$(target)
-all-$(target):
+.PHONY: all
+all:
 
 .PHONY: clean
 clean::
@@ -359,6 +359,6 @@ ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 endif
 BUILD_TARGETS += .docs .libs .bins
 INSTALL_TARGETS += .install-docs .install-srcs .install-libs .install-bins
-all-$(target): $(BUILD_TARGETS)
+all: $(BUILD_TARGETS)
 install:: $(INSTALL_TARGETS)
 dist: $(INSTALL_TARGETS)
