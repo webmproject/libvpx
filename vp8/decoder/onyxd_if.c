@@ -108,7 +108,8 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 
     pbi->decoded_key_frame = 0;
 
-    pbi->input_partition = oxcf->input_partition;
+    pbi->input_fragments = oxcf->input_fragments;
+    pbi->num_fragments = 0;
 
     /* Independent partitions is activated when a frame updates the
      * token probability table to have equal probabilities over the
@@ -319,114 +320,106 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->common.error.error_code = VPX_CODEC_OK;
 
-    if (pbi->input_partition && !(source == NULL && size == 0))
+    if (pbi->num_fragments == 0)
     {
-        /* Store a pointer to this partition and return. We haven't
+        /* New frame, reset fragment pointers and sizes */
+        vpx_memset(pbi->fragments, 0, sizeof(pbi->fragments));
+        vpx_memset(pbi->fragment_sizes, 0, sizeof(pbi->fragment_sizes));
+    }
+    if (pbi->input_fragments && !(source == NULL && size == 0))
+    {
+        /* Store a pointer to this fragment and return. We haven't
          * received the complete frame yet, so we will wait with decoding.
          */
-        assert(pbi->num_partitions < MAX_PARTITIONS);
-        pbi->partitions[pbi->num_partitions] = source;
-        pbi->partition_sizes[pbi->num_partitions] = size;
-        pbi->source_sz += size;
-        pbi->num_partitions++;
-        if (pbi->num_partitions > (1 << EIGHT_PARTITION) + 1)
+        assert(pbi->num_fragments < MAX_PARTITIONS);
+        pbi->fragments[pbi->num_fragments] = source;
+        pbi->fragment_sizes[pbi->num_fragments] = size;
+        pbi->num_fragments++;
+        if (pbi->num_fragments > (1 << EIGHT_PARTITION) + 1)
         {
             pbi->common.error.error_code = VPX_CODEC_UNSUP_BITSTREAM;
             pbi->common.error.setjmp = 0;
-            pbi->num_partitions = 0;
+            pbi->num_fragments = 0;
             return -1;
         }
         return 0;
     }
-    else
+
+    if (!pbi->input_fragments)
     {
-        if (!pbi->input_partition)
+        pbi->fragments[0] = source;
+        pbi->fragment_sizes[0] = size;
+        pbi->num_fragments = 1;
+    }
+    assert(pbi->common.multi_token_partition <= EIGHT_PARTITION);
+    if (pbi->num_fragments == 0)
+    {
+        pbi->num_fragments = 1;
+        pbi->fragments[0] = NULL;
+        pbi->fragment_sizes[0] = 0;
+    }
+
+    if (pbi->num_fragments <= 1 && pbi->fragment_sizes[0] == 0)
+    {
+       /* This is used to signal that we are missing frames.
+        * We do not know if the missing frame(s) was supposed to update
+        * any of the reference buffers, but we act conservative and
+        * mark only the last buffer as corrupted.
+        */
+        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+
+        /* If error concealment is disabled we won't signal missing frames
+         * to the decoder.
+         */
+        if (!pbi->ec_active)
         {
-            pbi->Source = source;
-            pbi->source_sz = size;
+            /* Signal that we have no frame to show. */
+            cm->show_frame = 0;
+
+            pbi->num_fragments = 0;
+
+            /* Nothing more to do. */
+            return 0;
         }
-        else
-        {
-            assert(pbi->common.multi_token_partition <= EIGHT_PARTITION);
-            if (pbi->num_partitions == 0)
-            {
-                pbi->num_partitions = 1;
-                pbi->partitions[0] = NULL;
-                pbi->partition_sizes[0] = 0;
-            }
-            while (pbi->num_partitions < (1 << pbi->common.multi_token_partition) + 1)
-            {
-                // Reset all missing partitions
-                pbi->partitions[pbi->num_partitions] =
-                    pbi->partitions[pbi->num_partitions - 1] +
-                    pbi->partition_sizes[pbi->num_partitions - 1];
-                pbi->partition_sizes[pbi->num_partitions] = 0;
-                pbi->num_partitions++;
-            }
-        }
+    }
 
-        if (pbi->source_sz == 0)
-        {
-           /* This is used to signal that we are missing frames.
-            * We do not know if the missing frame(s) was supposed to update
-            * any of the reference buffers, but we act conservative and
-            * mark only the last buffer as corrupted.
-            */
-            cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_push_neon(dx_store_reg);
+    }
+#endif
 
-            /* If error concealment is disabled we won't signal missing frames to
-             * the decoder.
-             */
-            if (!pbi->ec_active)
-            {
-                /* Signal that we have no frame to show. */
-                cm->show_frame = 0;
+    cm->new_fb_idx = get_free_fb (cm);
 
-                pbi->num_partitions = 0;
-
-                /* Nothing more to do. */
-                return 0;
-            }
-        }
-
+    if (setjmp(pbi->common.error.jmp))
+    {
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
         if (cm->rtcd.flags & HAS_NEON)
 #endif
         {
-            vp8_push_neon(dx_store_reg);
+            vp8_pop_neon(dx_store_reg);
         }
 #endif
+        pbi->common.error.setjmp = 0;
 
-        cm->new_fb_idx = get_free_fb (cm);
+        pbi->num_fragments = 0;
 
-        if (setjmp(pbi->common.error.jmp))
-        {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
-#endif
-            {
-                vp8_pop_neon(dx_store_reg);
-            }
-#endif
-            pbi->common.error.setjmp = 0;
+       /* We do not know if the missing frame(s) was supposed to update
+        * any of the reference buffers, but we act conservative and
+        * mark only the last buffer as corrupted.
+        */
+        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
 
-            pbi->num_partitions = 0;
-
-           /* We do not know if the missing frame(s) was supposed to update
-            * any of the reference buffers, but we act conservative and
-            * mark only the last buffer as corrupted.
-            */
-            cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
-
-            if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
-              cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
-            return -1;
-        }
-
-        pbi->common.error.setjmp = 1;
+        if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
+          cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+        return -1;
     }
+
+    pbi->common.error.setjmp = 1;
 
     retcode = vp8_decode_frame(pbi);
 
@@ -442,7 +435,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #endif
         pbi->common.error.error_code = VPX_CODEC_ERROR;
         pbi->common.error.setjmp = 0;
-        pbi->num_partitions = 0;
+        pbi->num_fragments = 0;
         if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
           cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
         return retcode;
@@ -463,7 +456,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #endif
             pbi->common.error.error_code = VPX_CODEC_ERROR;
             pbi->common.error.setjmp = 0;
-            pbi->num_partitions = 0;
+            pbi->num_fragments = 0;
             return -1;
         }
     } else
@@ -481,7 +474,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #endif
             pbi->common.error.error_code = VPX_CODEC_ERROR;
             pbi->common.error.setjmp = 0;
-            pbi->num_partitions = 0;
+            pbi->num_fragments = 0;
             return -1;
         }
 
@@ -500,7 +493,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     /* swap the mode infos to storage for future error concealment */
     if (pbi->ec_enabled && pbi->common.prev_mi)
     {
-        const MODE_INFO* tmp = pbi->common.prev_mi;
+        MODE_INFO* tmp = pbi->common.prev_mi;
         int row, col;
         pbi->common.prev_mi = pbi->common.mi;
         pbi->common.mi = tmp;
@@ -525,8 +518,7 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->ready_for_new_data = 0;
     pbi->last_time_stamp = time_stamp;
-    pbi->num_partitions = 0;
-    pbi->source_sz = 0;
+    pbi->num_fragments = 0;
 
 #if 0
     {
