@@ -33,6 +33,40 @@
       "revId": "cb0c4cee2d41e1642481a9deeb6d3fc75b8a0912",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6eE\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1342,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-29T17:08:02Z",
+      "side": 1,
+      "message": "if there\u0027s only one element of this array, it\u0027d be simpler to make it a member of cpi-\u003etwopass directly rather than storing it on the heap.",
+      "revId": "cb0c4cee2d41e1642481a9deeb6d3fc75b8a0912",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6eU\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3610,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-29T17:08:02Z",
+      "side": 1,
+      "message": "I think you want to remove the \u0027else\u0027 part here, in favor of a standalone if.",
+      "revId": "cb0c4cee2d41e1642481a9deeb6d3fc75b8a0912",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
