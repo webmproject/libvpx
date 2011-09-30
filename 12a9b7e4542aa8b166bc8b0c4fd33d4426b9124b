@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//6K4\u003d",
+        "filename": "vp8/common/x86/loopfilter_x86.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-09-30T01:17:30Z",
+      "side": 1,
+      "message": "Use the same #if block that is used above.",
+      "revId": "12a9b7e4542aa8b166bc8b0c4fd33d4426b9124b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6K0\u003d",
+        "filename": "vp8/common/x86/loopfilter_x86.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-09-30T01:17:30Z",
+      "side": 1,
+      "message": "...as well",
+      "revId": "12a9b7e4542aa8b166bc8b0c4fd33d4426b9124b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
