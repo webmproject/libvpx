@@ -271,6 +271,7 @@
 
 %endmacro
 
+%if ABI_IS_32BIT
 
 ;void vp8_loop_filter_horizontal_edge_sse2
 ;(
@@ -321,6 +322,7 @@ sym(vp8_loop_filter_horizontal_edge_sse2):
     pop         rbp
     ret
 
+%endif
 
 ;void vp8_loop_filter_horizontal_edge_uv_sse2
 ;(
@@ -1005,6 +1007,7 @@ sym(vp8_mbloop_filter_horizontal_edge_uv_sse2):
         movd        [rdi+2*rcx+2],      %2
 %endmacro
 
+%if ABI_IS_32BIT
 
 ;void vp8_loop_filter_vertical_edge_sse2
 ;(
@@ -1072,6 +1075,7 @@ sym(vp8_loop_filter_vertical_edge_sse2):
     pop         rbp
     ret
 
+%endif
 
 ;void vp8_loop_filter_vertical_edge_uv_sse2
 ;(

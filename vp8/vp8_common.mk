@@ -99,6 +99,9 @@ ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
+ifeq ($(ARCH_X86_64),yes)
+VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_block_sse2.asm
+endif
 
 # common (c)
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
