@@ -219,6 +219,7 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     extend_qrange
     segmentation
+    segfeatures
     t8x8
     csm
     i8x8
