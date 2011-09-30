@@ -152,7 +152,7 @@ static void output_stats(const VP8_COMP            *cpi,
 
         fprintf(fpfile, "%12.0f %12.0f %12.0f %12.4f %12.4f %12.4f %12.4f"
                 " %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
-                " %12.0f %12.4f\n",
+                " %12.0f %12.0f %12.4f\n",
                 stats->frame,
                 stats->intra_error,
                 stats->coded_error,
@@ -168,6 +168,7 @@ static void output_stats(const VP8_COMP            *cpi,
                 stats->MVrv,
                 stats->MVcv,
                 stats->mv_in_out_count,
+                stats->new_mv_count,
                 stats->count,
                 stats->duration);
         fclose(fpfile);
@@ -192,6 +193,7 @@ static void zero_stats(FIRSTPASS_STATS *section)
     section->MVrv       = 0.0;
     section->MVcv       = 0.0;
     section->mv_in_out_count  = 0.0;
+    section->new_mv_count = 0.0;
     section->count      = 0.0;
     section->duration   = 1.0;
 }
@@ -213,8 +215,31 @@ static void accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
     section->MVrv       += frame->MVrv;
     section->MVcv       += frame->MVcv;
     section->mv_in_out_count  += frame->mv_in_out_count;
+    section->new_mv_count += frame->new_mv_count;
     section->count      += frame->count;
     section->duration   += frame->duration;
+}
+
+static void subtract_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
+{
+    section->frame -= frame->frame;
+    section->intra_error -= frame->intra_error;
+    section->coded_error -= frame->coded_error;
+    section->ssim_weighted_pred_err -= frame->ssim_weighted_pred_err;
+    section->pcnt_inter  -= frame->pcnt_inter;
+    section->pcnt_motion -= frame->pcnt_motion;
+    section->pcnt_second_ref -= frame->pcnt_second_ref;
+    section->pcnt_neutral -= frame->pcnt_neutral;
+    section->MVr        -= frame->MVr;
+    section->mvr_abs     -= frame->mvr_abs;
+    section->MVc        -= frame->MVc;
+    section->mvc_abs     -= frame->mvc_abs;
+    section->MVrv       -= frame->MVrv;
+    section->MVcv       -= frame->MVcv;
+    section->mv_in_out_count  -= frame->mv_in_out_count;
+    section->new_mv_count -= frame->new_mv_count;
+    section->count      -= frame->count;
+    section->duration   -= frame->duration;
 }
 
 static void avg_stats(FIRSTPASS_STATS *section)
@@ -242,48 +267,15 @@ static void avg_stats(FIRSTPASS_STATS *section)
 // Calculate a modified Error used in distributing bits between easier and harder frames
 static double calculate_modified_err(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 {
-    double av_err = cpi->twopass.total_stats->ssim_weighted_pred_err;
+    double av_err = ( cpi->twopass.total_stats->ssim_weighted_pred_err /
+                      cpi->twopass.total_stats->count );
     double this_err = this_frame->ssim_weighted_pred_err;
     double modified_err;
-
-    //double relative_next_iiratio;
-    //double next_iiratio;
-    //double sum_iiratio;
-    //int i;
-
-    //FIRSTPASS_STATS next_frame;
-    //FIRSTPASS_STATS *start_pos;
-
-    /*start_pos = cpi->twopass.stats_in;
-    sum_iiratio = 0.0;
-    i = 0;
-    while ( (i < 1) && input_stats(cpi,&next_frame) != EOF )
-    {
-
-        next_iiratio = next_frame.intra_error / DOUBLE_DIVIDE_CHECK(next_frame.coded_error);
-        next_iiratio = ( next_iiratio < 1.0 ) ? 1.0 : (next_iiratio > 20.0) ? 20.0 : next_iiratio;
-        sum_iiratio += next_iiratio;
-        i++;
-    }
-    if ( i > 0 )
-    {
-        relative_next_iiratio = sum_iiratio / DOUBLE_DIVIDE_CHECK(cpi->twopass.avg_iiratio * (double)i);
-    }
-    else
-    {
-        relative_next_iiratio = 1.0;
-    }
-    reset_fpf_position(cpi, start_pos);*/
 
     if (this_err > av_err)
         modified_err = av_err * pow((this_err / DOUBLE_DIVIDE_CHECK(av_err)), POW1);
     else
         modified_err = av_err * pow((this_err / DOUBLE_DIVIDE_CHECK(av_err)), POW2);
-
-    /*
-    relative_next_iiratio = pow(relative_next_iiratio,0.25);
-    modified_err = modified_err * relative_next_iiratio;
-    */
 
     return modified_err;
 }
@@ -516,8 +508,9 @@ void vp8_first_pass(VP8_COMP *cpi)
     int second_ref_count = 0;
     int intrapenalty = 256;
     int neutral_count = 0;
-
+    int new_mv_count = 0;
     int sum_in_vectors = 0;
+    uint32_t lastmv_as_int = 0;
 
     int_mv zero_ref_mv;
 
@@ -697,6 +690,11 @@ void vp8_first_pass(VP8_COMP *cpi)
                     {
                         mvcount++;
 
+                        // Was it different from the last non zero vector
+                        if ( d->bmi.mv.as_int != lastmv_as_int )
+                            new_mv_count++;
+                        lastmv_as_int = d->bmi.mv.as_int;
+
                         // Does the Row vector point inwards or outwards
                         if (mb_row < cm->mb_rows / 2)
                         {
@@ -794,6 +792,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             fps.MVrv = ((double)sum_mvrs - (fps.MVr * fps.MVr / (double)mvcount)) / (double)mvcount;
             fps.MVcv = ((double)sum_mvcs - (fps.MVc * fps.MVc / (double)mvcount)) / (double)mvcount;
             fps.mv_in_out_count = (double)sum_in_vectors / (double)(mvcount * 2);
+            fps.new_mv_count = new_mv_count;
 
             fps.pcnt_motion = 1.0 * (double)mvcount / cpi->common.MBs;
         }
@@ -851,41 +850,116 @@ void vp8_first_pass(VP8_COMP *cpi)
 }
 extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
-#define BASE_ERRPERMB   150
-static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
+// Estimate a cost per mb attributable to overheads such as the coding of
+// modes and motion vectors.
+// Currently simplistic in its assumptions for testing.
+//
+
+
+double bitcost( double prob )
+{
+    return -(log( prob ) / log( 2.0 ));
+}
+static long long estimate_modemvcost(VP8_COMP *cpi,
+                                     FIRSTPASS_STATS * fpstats)
+{
+    int mv_cost;
+    int mode_cost;
+
+    double av_pct_inter = fpstats->pcnt_inter / fpstats->count;
+    double av_pct_motion = fpstats->pcnt_motion / fpstats->count;
+    double av_intra = (1.0 - av_pct_inter);
+
+    double zz_cost;
+    double motion_cost;
+    double intra_cost;
+
+    zz_cost = bitcost(av_pct_inter - av_pct_motion);
+    motion_cost = bitcost(av_pct_motion);
+    intra_cost = bitcost(av_intra);
+
+    // Estimate of extra bits per mv overhead for mbs
+    // << 9 is the normalization to the (bits * 512) used in vp8_bits_per_mb
+    mv_cost = ((int)(fpstats->new_mv_count / fpstats->count) * 8) << 9;
+
+    // Crude estimate of overhead cost from modes
+    // << 9 is the normalization to (bits * 512) used in vp8_bits_per_mb
+    mode_cost =
+        (int)( ( ((av_pct_inter - av_pct_motion) * zz_cost) +
+                 (av_pct_motion * motion_cost) +
+                 (av_intra * intra_cost) ) * cpi->common.MBs ) << 9;
+
+    return mv_cost + mode_cost;
+}
+
+static double calc_correction_factor( double err_per_mb,
+                                      double err_devisor,
+                                      double pt_low,
+                                      double pt_high,
+                                      int Q )
+{
+    double power_term;
+    double error_term = err_per_mb / err_devisor;
+    double correction_factor;
+
+    // Adjustment based on Q to power term.
+    power_term = pt_low + (Q * 0.01);
+    power_term = (power_term > pt_high) ? pt_high : power_term;
+
+    // Adjustments to error term
+    // TBD
+
+    // Calculate correction factor
+    correction_factor = pow(error_term, power_term);
+
+    // Clip range
+    correction_factor =
+        (correction_factor < 0.05)
+            ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
+
+    return correction_factor;
+}
+
+static int estimate_max_q(VP8_COMP *cpi,
+                          FIRSTPASS_STATS * fpstats,
+                          int section_target_bandwitdh,
+                          int overhead_bits )
 {
     int Q;
     int num_mbs = cpi->common.MBs;
     int target_norm_bits_per_mb;
 
+    double section_err = (fpstats->coded_error / fpstats->count);
     double err_per_mb = section_err / num_mbs;
-    double correction_factor;
+    double err_correction_factor;
     double corr_high;
     double speed_correction = 1.0;
-    double pow_highq = 0.90;
-    double pow_lowq = 0.40;
+    double inter_pct = (fpstats->pcnt_inter / fpstats->count);
+    double intra_pct = 1.0 - inter_pct;
+    int overhead_bits_per_mb;
 
     if (section_target_bandwitdh <= 0)
         return cpi->twopass.maxq_max_limit;          // Highest value allowed
 
-    target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
+    target_norm_bits_per_mb =
+        (section_target_bandwitdh < (1 << 20))
+            ? (512 * section_target_bandwitdh) / num_mbs
+            : 512 * (section_target_bandwitdh / num_mbs);
 
-    // Calculate a corrective factor based on a rolling ratio of bits spent vs target bits
-    if ((cpi->rolling_target_bits > 0) && (cpi->active_worst_quality < cpi->worst_quality))
+    // Calculate a corrective factor based on a rolling ratio of bits spent
+    // vs target bits
+    if ((cpi->rolling_target_bits > 0) &&
+        (cpi->active_worst_quality < cpi->worst_quality))
     {
         double rolling_ratio;
 
-        rolling_ratio = (double)cpi->rolling_actual_bits / (double)cpi->rolling_target_bits;
+        rolling_ratio = (double)cpi->rolling_actual_bits /
+                        (double)cpi->rolling_target_bits;
 
-        //if ( cpi->twopass.est_max_qcorrection_factor > rolling_ratio )
         if (rolling_ratio < 0.95)
-            //cpi->twopass.est_max_qcorrection_factor *= adjustment_rate;
             cpi->twopass.est_max_qcorrection_factor -= 0.005;
-        //else if ( cpi->twopass.est_max_qcorrection_factor < rolling_ratio )
         else if (rolling_ratio > 1.05)
             cpi->twopass.est_max_qcorrection_factor += 0.005;
-
-        //cpi->twopass.est_max_qcorrection_factor /= adjustment_rate;
 
         cpi->twopass.est_max_qcorrection_factor =
             (cpi->twopass.est_max_qcorrection_factor < 0.1)
@@ -894,7 +968,8 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
                     ? 10.0 : cpi->twopass.est_max_qcorrection_factor;
     }
 
-    // Corrections for higher compression speed settings (reduced compression expected)
+    // Corrections for higher compression speed settings
+    // (reduced compression expected)
     if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
     {
         if (cpi->oxcf.cpu_used <= 5)
@@ -903,10 +978,10 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
             speed_correction = 1.25;
     }
 
-    // Correction factor used for Q values >= 20
-    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
-    corr_high = (corr_high < 0.05)
-                    ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
+    // Estimate of overhead bits per mb
+    // Correction to overhead bits for min allowed Q.
+    overhead_bits_per_mb = overhead_bits / num_mbs;
+    overhead_bits_per_mb *= pow( 0.98, (double)cpi->twopass.maxq_min_limit );
 
     // Try and pick a max Q that will be high enough to encode the
     // content at the given rate.
@@ -914,18 +989,22 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     {
         int bits_per_mb_at_this_q;
 
-        if (Q < 50)
-        {
-            correction_factor = pow(err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
-            correction_factor = (correction_factor < 0.05) ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
-        }
-        else
-            correction_factor = corr_high;
+        // Error per MB based correction factor
+        err_correction_factor =
+            calc_correction_factor(err_per_mb, 150.0, 0.40, 0.90, Q);
 
-        bits_per_mb_at_this_q = (int)(.5 + correction_factor
+        bits_per_mb_at_this_q =
+            vp8_bits_per_mb[INTER_FRAME][Q] + overhead_bits_per_mb;
+
+        bits_per_mb_at_this_q = (int)(.5 + err_correction_factor
             * speed_correction * cpi->twopass.est_max_qcorrection_factor
             * cpi->twopass.section_max_qfactor
-            * (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+            * (double)bits_per_mb_at_this_q);
+
+        // Mode and motion overhead
+        // As Q rises in real encode loop rd code will force overhead down
+        // We make a crude adjustment for this here as *.98 per Q step.
+        overhead_bits_per_mb = (int)((double)overhead_bits_per_mb * 0.98);
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
@@ -934,10 +1013,8 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
     // Restriction on active max q for constrained quality mode.
     if ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
          (Q < cpi->cq_target_quality) )
-         //(Q < cpi->oxcf.cq_level;) )
     {
         Q = cpi->cq_target_quality;
-        //Q = cpi->oxcf.cq_level;
     }
 
     // Adjust maxq_min_limit and maxq_max_limit limits based on
@@ -955,6 +1032,97 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
 
     return Q;
 }
+
+// For cq mode estimate a cq level that matches the observed
+// complexity and data rate.
+static int estimate_cq( VP8_COMP *cpi,
+                        FIRSTPASS_STATS * fpstats,
+                        int section_target_bandwitdh,
+                        int overhead_bits )
+{
+    int Q;
+    int num_mbs = cpi->common.MBs;
+    int target_norm_bits_per_mb;
+
+    double section_err = (fpstats->coded_error / fpstats->count);
+    double err_per_mb = section_err / num_mbs;
+    double err_correction_factor;
+    double corr_high;
+    double speed_correction = 1.0;
+    double clip_iiratio;
+    double clip_iifactor;
+    double inter_pct = (fpstats->pcnt_inter / fpstats->count);
+    double intra_pct = 1.0 - inter_pct;
+    int overhead_bits_per_mb;
+
+    if (0)
+    {
+        FILE *f = fopen("epmp.stt", "a");
+        fprintf(f, "%10.2f\n", err_per_mb );
+        fclose(f);
+    }
+
+    target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20))
+                              ? (512 * section_target_bandwitdh) / num_mbs
+                              : 512 * (section_target_bandwitdh / num_mbs);
+
+    // Estimate of overhead bits per mb
+    overhead_bits_per_mb = overhead_bits / num_mbs;
+
+    // Corrections for higher compression speed settings
+    // (reduced compression expected)
+    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    {
+        if (cpi->oxcf.cpu_used <= 5)
+            speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
+        else
+            speed_correction = 1.25;
+    }
+
+    // II ratio correction factor for clip as a whole
+    clip_iiratio = cpi->twopass.total_stats->intra_error /
+                   DOUBLE_DIVIDE_CHECK(cpi->twopass.total_stats->coded_error);
+    clip_iifactor = 1.0 - ((clip_iiratio - 10.0) * 0.025);
+    if (clip_iifactor < 0.80)
+        clip_iifactor = 0.80;
+
+    // Try and pick a Q that can encode the content at the given rate.
+    for (Q = 0; Q < MAXQ; Q++)
+    {
+        int bits_per_mb_at_this_q;
+
+        // Error per MB based correction factor
+        err_correction_factor =
+            calc_correction_factor(err_per_mb, 100.0, 0.40, 0.90, Q);
+
+        bits_per_mb_at_this_q =
+            vp8_bits_per_mb[INTER_FRAME][Q] + overhead_bits_per_mb;
+
+        bits_per_mb_at_this_q =
+            (int)( .5 + err_correction_factor *
+                        speed_correction *
+                        clip_iifactor *
+                        (double)bits_per_mb_at_this_q);
+
+        // Mode and motion overhead
+        // As Q rises in real encode loop rd code will force overhead down
+        // We make a crude adjustment for this here as *.98 per Q step.
+        overhead_bits_per_mb = (int)((double)overhead_bits_per_mb * 0.98);
+
+        if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
+            break;
+    }
+
+    // Clip value to range "best allowed to (worst allowed - 1)"
+    Q = cq_level[Q];
+    if ( Q >= cpi->worst_quality )
+        Q = cpi->worst_quality - 1;
+    if ( Q < cpi->best_quality )
+        Q = cpi->best_quality;
+
+    return Q;
+}
+
 static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
 {
     int Q;
@@ -962,11 +1130,9 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
     int target_norm_bits_per_mb;
 
     double err_per_mb = section_err / num_mbs;
-    double correction_factor;
+    double err_correction_factor;
     double corr_high;
     double speed_correction = 1.0;
-    double pow_highq = 0.90;
-    double pow_lowq = 0.40;
 
     target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
 
@@ -979,24 +1145,20 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
             speed_correction = 1.25;
     }
 
-    // Correction factor used for Q values >= 20
-    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
-    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
-
     // Try and pick a Q that can encode the content at the given rate.
     for (Q = 0; Q < MAXQ; Q++)
     {
         int bits_per_mb_at_this_q;
 
-        if (Q < 50)
-        {
-            correction_factor = pow(err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
-            correction_factor = (correction_factor < 0.05) ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
-        }
-        else
-            correction_factor = corr_high;
+        // Error per MB based correction factor
+        err_correction_factor =
+            calc_correction_factor(err_per_mb, 150.0, 0.40, 0.90, Q);
 
-        bits_per_mb_at_this_q = (int)(.5 + correction_factor * speed_correction * cpi->twopass.est_max_qcorrection_factor * (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+        bits_per_mb_at_this_q =
+            (int)( .5 + ( err_correction_factor *
+                          speed_correction *
+                          cpi->twopass.est_max_qcorrection_factor *
+                          (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0 ) );
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
@@ -1059,23 +1221,17 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
     // Combine the various factors calculated above
     combined_correction_factor = speed_correction * iiratio_correction_factor * current_spend_ratio;
 
-    // Correction factor used for Q values >= 20
-    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
-    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
-
     // Try and pick a Q that should be high enough to encode the content at the given rate.
     for (Q = 0; Q < MAXQ; Q++)
     {
-        // Q values < 20 treated as a special case
-        if (Q < 20)
-        {
-            err_correction_factor = pow(err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
-            err_correction_factor = (err_correction_factor < 0.05) ? 0.05 : (err_correction_factor > 5.0) ? 5.0 : err_correction_factor;
-        }
-        else
-            err_correction_factor = corr_high;
+        // Error per MB based correction factor
+        err_correction_factor =
+            calc_correction_factor(err_per_mb, 150.0, pow_lowq, pow_highq, Q);
 
-        bits_per_mb_at_this_q = (int)(.5 + err_correction_factor * combined_correction_factor * (double)vp8_bits_per_mb[INTER_FRAME][Q]);
+        bits_per_mb_at_this_q =
+            (int)(.5 + ( err_correction_factor *
+                         combined_correction_factor *
+                         (double)vp8_bits_per_mb[INTER_FRAME][Q]) );
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
@@ -1102,77 +1258,6 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
     return Q;
 }
 
-// For cq mode estimate a cq level that matches the observed
-// complexity and data rate.
-static int estimate_cq(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
-{
-    int Q;
-    int num_mbs = cpi->common.MBs;
-    int target_norm_bits_per_mb;
-
-    double err_per_mb = section_err / num_mbs;
-    double correction_factor;
-    double corr_high;
-    double speed_correction = 1.0;
-    double pow_highq = 0.90;
-    double pow_lowq = 0.40;
-    double clip_iiratio;
-    double clip_iifactor;
-
-    target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20))
-                              ? (512 * section_target_bandwitdh) / num_mbs
-                              : 512 * (section_target_bandwitdh / num_mbs);
-
-    // Corrections for higher compression speed settings
-    // (reduced compression expected)
-    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
-    {
-        if (cpi->oxcf.cpu_used <= 5)
-            speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
-        else
-            speed_correction = 1.25;
-    }
-    // II ratio correction factor for clip as a whole
-    clip_iiratio = cpi->twopass.total_stats->intra_error /
-                   DOUBLE_DIVIDE_CHECK(cpi->twopass.total_stats->coded_error);
-    clip_iifactor = 1.0 - ((clip_iiratio - 10.0) * 0.025);
-    if (clip_iifactor < 0.80)
-        clip_iifactor = 0.80;
-
-    // Correction factor used for Q values >= 20
-    corr_high = pow(err_per_mb / BASE_ERRPERMB, pow_highq);
-    corr_high = (corr_high < 0.05) ? 0.05 : (corr_high > 5.0) ? 5.0 : corr_high;
-
-    // Try and pick a Q that can encode the content at the given rate.
-    for (Q = 0; Q < MAXQ; Q++)
-    {
-        int bits_per_mb_at_this_q;
-
-        if (Q < 50)
-        {
-            correction_factor =
-                pow( err_per_mb / BASE_ERRPERMB, (pow_lowq + Q * 0.01));
-
-            correction_factor = (correction_factor < 0.05) ? 0.05
-                                    : (correction_factor > 5.0) ? 5.0
-                                        : correction_factor;
-        }
-        else
-            correction_factor = corr_high;
-
-        bits_per_mb_at_this_q =
-            (int)( .5 + correction_factor *
-                        speed_correction *
-                        clip_iifactor *
-                        (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
-
-        if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
-            break;
-    }
-
-    return cq_level[Q];
-}
-
 extern void vp8_new_frame_rate(VP8_COMP *cpi, double framerate);
 
 void vp8_init_second_pass(VP8_COMP *cpi)
@@ -1183,19 +1268,13 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
 
     zero_stats(cpi->twopass.total_stats);
+    zero_stats(cpi->twopass.total_left_stats);
 
     if (!cpi->twopass.stats_in_end)
         return;
 
     *cpi->twopass.total_stats = *cpi->twopass.stats_in_end;
-
-    cpi->twopass.total_error_left = cpi->twopass.total_stats->ssim_weighted_pred_err;
-    cpi->twopass.total_intra_error_left = cpi->twopass.total_stats->intra_error;
-    cpi->twopass.total_coded_error_left = cpi->twopass.total_stats->coded_error;
-    cpi->twopass.start_tot_err_left = cpi->twopass.total_error_left;
-
-    //cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
-    //cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats->count * two_pass_min_rate / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
+    *cpi->twopass.total_left_stats = *cpi->twopass.total_stats;
 
     // each frame can have a different duration, as the frame rate in the source
     // isn't guaranteed to be constant.   The frame rate prior to the first frame
@@ -1207,7 +1286,6 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     cpi->output_frame_rate = cpi->oxcf.frame_rate;
     cpi->twopass.bits_left = (int64_t)(cpi->twopass.total_stats->duration * cpi->oxcf.target_bandwidth / 10000000.0) ;
     cpi->twopass.bits_left -= (int64_t)(cpi->twopass.total_stats->duration * two_pass_min_rate / 10000000.0);
-    cpi->twopass.clip_bits_total = cpi->twopass.bits_left;
 
     // Calculate a minimum intra value to be used in determining the IIratio
     // scores used in the second pass. We have this minimum to make sure
@@ -1215,8 +1293,6 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     // are still boosted appropriately for KF/GF/ARF
     cpi->twopass.kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
     cpi->twopass.gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
-
-    avg_stats(cpi->twopass.total_stats);
 
     // Scan the first pass file and calculate an average Intra / Inter error score ratio for the sequence
     {
@@ -2137,7 +2213,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             cpi->twopass.alt_extra_bits = 0;
     }
 
-    // Adjustment to estimate_max_q based on a measure of complexity of the section
+    // Adjustments based on a measure of complexity of the section
     if (cpi->common.frame_type != KEY_FRAME)
     {
         FIRSTPASS_STATS sectionstats;
@@ -2238,6 +2314,8 @@ void vp8_second_pass(VP8_COMP *cpi)
 
     FIRSTPASS_STATS *start_pos;
 
+    int overhead_bits;
+
     if (!cpi->twopass.stats_in)
     {
         return ;
@@ -2337,20 +2415,26 @@ void vp8_second_pass(VP8_COMP *cpi)
     if (cpi->target_bandwidth < 0)
         cpi->target_bandwidth = 0;
 
+
+    // Account for mv, mode and other overheads.
+    overhead_bits = estimate_modemvcost(
+                        cpi, cpi->twopass.total_left_stats );
+
+    // Special case code for first frame.
     if (cpi->common.current_video_frame == 0)
     {
         cpi->twopass.est_max_qcorrection_factor = 1.0;
 
-        // Experimental code to try and set a cq_level in constrained
-        // quality mode.
+        // Set a cq_level in constrained quality mode.
         if ( cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY )
         {
             int est_cq;
 
             est_cq =
                 estimate_cq( cpi,
-                             (cpi->twopass.total_coded_error_left / frames_left),
-                             (int)(cpi->twopass.bits_left / frames_left));
+                             cpi->twopass.total_left_stats,
+                             (int)(cpi->twopass.bits_left / frames_left),
+                             overhead_bits );
 
             cpi->cq_target_quality = cpi->oxcf.cq_level;
             if ( est_cq > cpi->cq_target_quality )
@@ -2360,9 +2444,12 @@ void vp8_second_pass(VP8_COMP *cpi)
         // guess at maxq needed in 2nd pass
         cpi->twopass.maxq_max_limit = cpi->worst_quality;
         cpi->twopass.maxq_min_limit = cpi->best_quality;
-        tmp_q = estimate_max_q( cpi,
-                                (cpi->twopass.total_coded_error_left / frames_left),
-                                (int)(cpi->twopass.bits_left / frames_left));
+
+        tmp_q = estimate_max_q(
+                    cpi,
+                    cpi->twopass.total_left_stats,
+                    (int)(cpi->twopass.bits_left / frames_left),
+                    overhead_bits );
 
         // Limit the maxq value returned subsequently.
         // This increases the risk of overspend or underspend if the initial
@@ -2383,14 +2470,18 @@ void vp8_second_pass(VP8_COMP *cpi)
     // radical adjustments to the allowed quantizer range just to use up a
     // few surplus bits or get beneath the target rate.
     else if ( (cpi->common.current_video_frame <
-                  (((unsigned int)cpi->twopass.total_stats->count * 255)>>8)) &&
+                 (((unsigned int)cpi->twopass.total_stats->count * 255)>>8)) &&
               ((cpi->common.current_video_frame + cpi->baseline_gf_interval) <
-                  (unsigned int)cpi->twopass.total_stats->count) )
+                 (unsigned int)cpi->twopass.total_stats->count) )
     {
         if (frames_left < 1)
             frames_left = 1;
 
-        tmp_q = estimate_max_q(cpi, (cpi->twopass.total_coded_error_left / frames_left), (int)(cpi->twopass.bits_left / frames_left));
+        tmp_q = estimate_max_q(
+                    cpi,
+                    cpi->twopass.total_left_stats,
+                    (int)(cpi->twopass.bits_left / frames_left),
+                    overhead_bits );
 
         // Move active_worst_quality but in a damped way
         if (tmp_q > cpi->active_worst_quality)
@@ -2398,13 +2489,14 @@ void vp8_second_pass(VP8_COMP *cpi)
         else if (tmp_q < cpi->active_worst_quality)
             cpi->active_worst_quality --;
 
-        cpi->active_worst_quality = ((cpi->active_worst_quality * 3) + tmp_q + 2) / 4;
+        cpi->active_worst_quality =
+            ((cpi->active_worst_quality * 3) + tmp_q + 2) / 4;
     }
 
     cpi->twopass.frames_to_key --;
-    cpi->twopass.total_error_left      -= this_frame_error;
-    cpi->twopass.total_intra_error_left -= this_frame_intra_error;
-    cpi->twopass.total_coded_error_left -= this_frame_coded_error;
+
+    // Update the total stats remaining sturcture
+    subtract_stats(cpi->twopass.total_left_stats, &this_frame );
 }
 
 

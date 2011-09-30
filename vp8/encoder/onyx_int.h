@@ -108,6 +108,7 @@ typedef struct
     double MVrv;
     double MVcv;
     double mv_in_out_count;
+    double new_mv_count;
     double duration;
     double count;
 }
@@ -523,6 +524,7 @@ typedef struct VP8_COMP
         FIRSTPASS_STATS *total_stats;
         FIRSTPASS_STATS *this_frame_stats;
         FIRSTPASS_STATS *stats_in, *stats_in_end, *stats_in_start;
+        FIRSTPASS_STATS *total_left_stats;
         int first_pass_done;
         int64_t bits_left;
         int64_t clip_bits_total;
@@ -530,10 +532,6 @@ typedef struct VP8_COMP
         double modified_error_total;
         double modified_error_used;
         double modified_error_left;
-        double total_error_left;
-        double total_intra_error_left;
-        double total_coded_error_left;
-        double start_tot_err_left;
         double kf_intra_err_min;
         double gf_intra_err_min;
         int frames_to_key;
