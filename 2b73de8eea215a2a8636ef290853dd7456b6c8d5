@@ -1,0 +1,327 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//6CM\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "static",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5zI\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "these out_* functions need either to be static or have a vpxio_ prefix. out_put seems to be the only one used from another file at the moment.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5zU\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "this statement doesn\u0027t make much sense to me -- I already commented that these variants of MD5 maybe should be done in a later commit, but wanted to point out that this strikes me as weird.. other than NO_MD5 I\u0027d expect that all md5 modes would need an MD5 context.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5y4\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "this seems to be a helper function. Should be static without the vpxio prefix.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5y0\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "avoid declaring unnecessary scope, declare p at the top of the function.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5wg\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "make this a function pointer in ctx, so you can make this\n\n  return ctx-\u003ewrite_file_header(ctx);\n\nThat lets you avoid blocks like this where you have to case on the file type. This comment applies basically everywhere you reference a FILE_TYPE_* in this file, that code probably belongs in a different file (ask if you\u0027re unsure)",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5wc\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "per-filetype details could be handled inside their respective files, by making a function pointer ctx-\u003eclose(ctx).",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5wA\u003d",
+        "filename": "vpx_io/vpxio.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "why is this pattern hard coded? Shouldn\u0027t this md5 writing be handled in the out_* functions?",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5/U\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "need copyright headers",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5/g\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "remove the typedef, would like to get away from them on enum/struct/unions for internal libraries.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5/c\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "it seems like you\u0027re trying to add functionality that doesn\u0027t exist in the current version. I don\u0027t think these are necessary to implement the current semantics, if there are additional features we need here lets add them later as part of their own submit.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5/s\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "remove the typedef, would like to get away from them on enum/struct/unions for internal libraries.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5/o\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "remove typedef",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6AU\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "remove typedef. also, this type can be made internal if we remove vpxio_get_file_type()",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6AY\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "nobody is calling this function, let\u0027s remove until there\u0027s a clear need for it.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6AQ\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "this is an internal detail.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6AI\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "nobody is calling this function, let\u0027s remove until there\u0027s a clear need for it.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//6AE\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "it\u0027s not clear what the semantics are for vpxio_set_outfile_pattern() and vpxio_set_file_name() vs the file names set during the open calls. They\u0027re not called, suggest we remove them for now.",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//5/Y\u003d",
+        "filename": "vpx_io/vpxio.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-09-30T19:07:06Z",
+      "side": 1,
+      "message": "group these as either:\n\n  read_img\n  write_img\n  read_pkt\n  write_pkt\n\nor\n\n  read_img\n  read_pkt\n  write_img\n  write_pkt",
+      "revId": "2b73de8eea215a2a8636ef290853dd7456b6c8d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
