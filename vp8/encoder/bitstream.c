@@ -896,7 +896,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     cpi->mb.partition_info = cpi->mb.pi;
 
     // Calculate the probabilities to be used to code the reference frame based on actual useage this frame
-    if (!(cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter)))
+#if CONFIG_SEGFEATURES
+    cpi->prob_intra_coded = (rf_intra + rf_inter)
+                            ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
+#else
+    cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter);
+#endif
+    if (!cpi->prob_intra_coded)
         cpi->prob_intra_coded = 1;
 
     prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
@@ -1010,7 +1016,15 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
             if (rf == INTRA_FRAME)
             {
-                vp8_write(w, 0, cpi->prob_intra_coded);
+#if CONFIG_SEGFEATURES
+                // Is the segment coding of reference frame enabled
+                if ( !( xd->segment_feature_mask[mi->segment_id] &
+                        (0x01 << SEG_LVL_REF_FRAME) ) )
+#endif
+                {
+                    vp8_write(w, 0, cpi->prob_intra_coded);
+                }
+
 #ifdef ENTROPY_STATS
                 active_section = 6;
 #endif
@@ -1032,14 +1046,22 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 int_mv best_mv;
                 vp8_prob mv_ref_p [VP8_MVREFS-1];
 
-                vp8_write(w, 1, cpi->prob_intra_coded);
-
-                if (rf == LAST_FRAME)
-                    vp8_write(w, 0, prob_last_coded);
-                else
+#if CONFIG_SEGFEATURES
+                // Is the segment coding of reference frame enabled
+                if ( !( xd->segment_feature_mask[mi->segment_id] &
+                        (0x01 << SEG_LVL_REF_FRAME) ) )
+#endif
                 {
-                    vp8_write(w, 1, prob_last_coded);
-                    vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, prob_gf_coded);
+                    vp8_write(w, 1, cpi->prob_intra_coded);
+
+                    if (rf == LAST_FRAME)
+                        vp8_write(w, 0, prob_last_coded);
+                    else
+                    {
+                        vp8_write(w, 1, prob_last_coded);
+                        vp8_write(w, (rf == GOLDEN_FRAME)
+                                     ? 0 : 1, prob_gf_coded);
+                    }
                 }
 
                 {
@@ -1052,73 +1074,79 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #ifdef ENTROPY_STATS
                     accum_mv_refs(mode, ct);
 #endif
-
                 }
 
 #ifdef ENTROPY_STATS
                 active_section = 3;
 #endif
 
-                write_mv_ref(w, mode, mv_ref_p);
-
-                switch (mode)   /* new, split require MVs */
-                {
-                case NEWMV:
-
-#ifdef ENTROPY_STATS
-                    active_section = 5;
+#if CONFIG_SEGFEATURES
+                // Is the segment coding of reference frame enabled
+                if ( !( xd->segment_feature_mask[mi->segment_id] &
+                        (0x01 << SEG_LVL_MODE) ) )
 #endif
-
-                    write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
-                    break;
-
-                case SPLITMV:
                 {
-                    int j = 0;
+                    write_mv_ref(w, mode, mv_ref_p);
 
-#ifdef MODE_STATS
-                    ++count_mb_seg [mi->partitioning];
-#endif
-
-                    write_split(w, mi->partitioning);
-
-                    do
+                    switch (mode)   /* new, split require MVs */
                     {
-                        B_PREDICTION_MODE blockmode;
-                        int_mv blockmv;
-                        const int *const  L = vp8_mbsplits [mi->partitioning];
-                        int k = -1;  /* first block in subset j */
-                        int mv_contz;
-                        int_mv leftmv, abovemv;
+                    case NEWMV:
 
-                        blockmode =  cpi->mb.partition_info->bmi[j].mode;
-                        blockmv =  cpi->mb.partition_info->bmi[j].mv;
-#if CONFIG_DEBUG
-                        while (j != L[++k])
-                            if (k >= 16)
-                                assert(0);
-#else
-                        while (j != L[++k]);
-#endif
-                        leftmv.as_int = left_block_mv(m, k);
-                        abovemv.as_int = above_block_mv(m, k, mis);
-                        mv_contz = vp8_mv_cont(&leftmv, &abovemv);
+    #ifdef ENTROPY_STATS
+                        active_section = 5;
+    #endif
 
-                        write_sub_mv_ref(w, blockmode, vp8_sub_mv_ref_prob2 [mv_contz]);
+                        write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
+                        break;
 
-                        if (blockmode == NEW4X4)
+                    case SPLITMV:
+                    {
+                        int j = 0;
+
+    #ifdef MODE_STATS
+                        ++count_mb_seg [mi->partitioning];
+    #endif
+
+                        write_split(w, mi->partitioning);
+
+                        do
                         {
-#ifdef ENTROPY_STATS
-                            active_section = 11;
-#endif
-                            write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
+                            B_PREDICTION_MODE blockmode;
+                            int_mv blockmv;
+                            const int *const  L = vp8_mbsplits [mi->partitioning];
+                            int k = -1;  /* first block in subset j */
+                            int mv_contz;
+                            int_mv leftmv, abovemv;
+
+                            blockmode =  cpi->mb.partition_info->bmi[j].mode;
+                            blockmv =  cpi->mb.partition_info->bmi[j].mv;
+    #if CONFIG_DEBUG
+                            while (j != L[++k])
+                                if (k >= 16)
+                                    assert(0);
+    #else
+                            while (j != L[++k]);
+    #endif
+                            leftmv.as_int = left_block_mv(m, k);
+                            abovemv.as_int = above_block_mv(m, k, mis);
+                            mv_contz = vp8_mv_cont(&leftmv, &abovemv);
+
+                            write_sub_mv_ref(w, blockmode, vp8_sub_mv_ref_prob2 [mv_contz]);
+
+                            if (blockmode == NEW4X4)
+                            {
+    #ifdef ENTROPY_STATS
+                                active_section = 11;
+    #endif
+                                write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
+                            }
                         }
+                        while (++j < cpi->mb.partition_info->count);
                     }
-                    while (++j < cpi->mb.partition_info->count);
-                }
-                break;
-                default:
                     break;
+                    default:
+                        break;
+                    }
                 }
             }
 
@@ -1448,7 +1476,13 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
     if (cpi->common.frame_type != KEY_FRAME)
     {
-        if (!(new_intra = rf_intra * 255 / (rf_intra + rf_inter)))
+#if CONFIG_SEGFEATURES
+        new_intra = (rf_intra + rf_inter)
+                    ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
+#else
+        new_intra = rf_intra * 255 / (rf_intra + rf_inter);
+#endif
+        if (!new_intra)
             new_intra = 1;
 
         new_last = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;

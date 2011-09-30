@@ -717,27 +717,51 @@ void encode_mb_row(VP8_COMP *cpi,
             if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 cpi->inter_zz_count ++;
 
-            // Special case code for cyclic refresh
-            // If cyclic update enabled then copy xd->mbmi.segment_id; (which may have been updated based on mode
-            // during vp8cx_encode_inter_macroblock()) back into the global sgmentation map
-            if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
+            // Actions required if segmentation enabled
+            if ( xd->segmentation_enabled )
             {
-                cpi->segmentation_map[map_index+mb_col] = xd->mode_info_context->mbmi.segment_id;
-
-                // If the block has been refreshed mark it as clean (the magnitude of the -ve influences how long it will be before we consider another refresh):
-                // Else if it was coded (last frame 0,0) and has not already been refreshed then mark it as a candidate for cleanup next time (marked 0)
-                // else mark it as dirty (1).
-                if (xd->mode_info_context->mbmi.segment_id)
-                    cpi->cyclic_refresh_map[map_index+mb_col] = -1;
-                else if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
+                // Special case code for cyclic refresh
+                // If cyclic update enabled then copy xd->mbmi.segment_id;
+                // (which may have been updated based on mode during
+                // vp8cx_encode_inter_macroblock()) back into the global
+                // segmentation map
+                if (cpi->cyclic_refresh_mode_enabled)
                 {
-                    if (cpi->cyclic_refresh_map[map_index+mb_col] == 1)
-                        cpi->cyclic_refresh_map[map_index+mb_col] = 0;
-                }
-                else
-                    cpi->cyclic_refresh_map[map_index+mb_col] = 1;
+                    cpi->segmentation_map[map_index+mb_col] =
+                        xd->mode_info_context->mbmi.segment_id;
 
+                    // If the block has been refreshed mark it as clean (the
+                    // magnitude of the -ve influences how long it will be
+                    // before we consider another refresh):
+                    // Else if it was coded (last frame 0,0) and has not
+                    // already been refreshed then mark it as a candidate
+                    // for cleanup next time (marked 0)
+                    // else mark it as dirty (1).
+                    if (xd->mode_info_context->mbmi.segment_id)
+                        cpi->cyclic_refresh_map[map_index+mb_col] = -1;
+
+                    else if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
+                             (xd->mode_info_context->mbmi.ref_frame ==
+                              LAST_FRAME))
+                    {
+                        if (cpi->cyclic_refresh_map[map_index+mb_col] == 1)
+                            cpi->cyclic_refresh_map[map_index+mb_col] = 0;
+                    }
+                    else
+                        cpi->cyclic_refresh_map[map_index+mb_col] = 1;
+                }
+#if CONFIG_SEGFEATURES
+                else if ( cm->refresh_alt_ref_frame &&
+                         (cm->frame_type != KEY_FRAME) )
+                {
+                    // Update the global segmentation map to reflect
+                    // the segment choice made for this MB.
+                    cpi->segmentation_map[map_index+mb_col] =
+                        xd->mode_info_context->mbmi.segment_id;
+                }
+#endif
             }
+
         }
 
         cpi->tplist[mb_row].stop = *tp;
@@ -828,7 +852,44 @@ void encode_mb_row(VP8_COMP *cpi,
         sem_post(&cpi->h_event_end_encoding); /* signal frame encoding end */
     }
 #endif
+
+
+#if CONFIG_SEGFEATURES
+// debug output
+#if 0
+    {
+        FILE *statsfile;
+        statsfile = fopen("segmap2.stt", "a");
+        fprintf(statsfile, "\n" );
+        fclose(statsfile);
+    }
+#endif
+#endif
 }
+
+#if CONFIG_SEGFEATURES
+// Funtion to test out new segment features
+void segfeature_test_function(VP8_COMP *cpi, MACROBLOCKD * xd)
+{
+    VP8_COMMON *const cm = & cpi->common;
+
+    // Only update segment map for a frame that is an arf but not a kf.
+    if ( cm->refresh_alt_ref_frame && (cm->frame_type != KEY_FRAME) )
+    {
+        // Test code to code features at the segment level
+        if ( (xd->mode_info_context->mbmi.mode ==
+                 cpi->segment_feature_data[1][SEG_LVL_MODE]) &&
+             (xd->mode_info_context->mbmi.ref_frame ==
+                 cpi->segment_feature_data[1][SEG_LVL_REF_FRAME]) )
+        {
+            xd->mode_info_context->mbmi.segment_id = 1;
+        }
+        else
+            xd->mode_info_context->mbmi.segment_id = 0;
+    }
+}
+#endif
+
 
 void init_encode_frame_mb_context(VP8_COMP *cpi)
 {
@@ -927,6 +988,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     MACROBLOCKD *const xd = & x->e_mbd;
 
     TOKENEXTRA *tp = cpi->tok;
+
 #if CONFIG_SEGMENTATION
     int segment_counts[MAX_MB_SEGMENTS + SEEK_SEGID];
     int prob[3];
@@ -935,6 +997,19 @@ void vp8_encode_frame(VP8_COMP *cpi)
     int segment_counts[MAX_MB_SEGMENTS];
 #endif
     int totalrate;
+
+
+#if CONFIG_SEGFEATURES
+// debug output
+#if 0
+    {
+        FILE *statsfile;
+        statsfile = fopen("segmap2.stt", "a");
+        fprintf(statsfile, "\n" );
+        fclose(statsfile);
+    }
+#endif
+#endif
 
     vpx_memset(segment_counts, 0, sizeof(segment_counts));
     totalrate = 0;
@@ -1307,8 +1382,16 @@ void vp8_encode_frame(VP8_COMP *cpi)
                     cpi->prob_gf_coded = 1;
             }
         }
+#if CONFIG_SEGFEATURES
+        else
+        {
+            // Trap case where cpi->count_mb_ref_frame_usage[] blank.
+            cpi->prob_intra_coded = 63;
+            cpi->prob_last_coded  = 128;
+            cpi->prob_gf_coded    = 128;
+        }
+#endif
     }
-
 #if 0
     // Keep record of the total distortion this time around for future use
     cpi->last_frame_distortion = cpi->frame_distortion;
@@ -1599,8 +1682,9 @@ int vp8cx_encode_inter_macroblock
         if (cpi->cyclic_refresh_mode_enabled)
         {
             // Clear segment_id back to 0 if not coded (last frame 0,0)
-            if ((xd->mode_info_context->mbmi.segment_id == 1) &&
-                ((xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) || (xd->mode_info_context->mbmi.mode != ZEROMV)))
+            if ( (xd->mode_info_context->mbmi.segment_id == 1) &&
+                 ( (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) ||
+                   (xd->mode_info_context->mbmi.mode != ZEROMV) ) )
             {
                 xd->mode_info_context->mbmi.segment_id = 0;
 
@@ -1608,6 +1692,26 @@ int vp8cx_encode_inter_macroblock
                 vp8cx_mb_init_quantizer(cpi, x);
             }
         }
+#if CONFIG_SEGFEATURES
+        else
+        {
+            segfeature_test_function(cpi, xd);
+#if 0
+            // Debug output
+            {
+                FILE *statsfile;
+                statsfile = fopen("segmap2.stt", "a");
+
+                fprintf(statsfile, "%2d%2d%2d   ",
+                    xd->mode_info_context->mbmi.segment_id,
+                    xd->mode_info_context->mbmi.ref_frame,
+                    xd->mode_info_context->mbmi.mode );
+
+                fclose(statsfile);
+            }
+#endif
+        }
+#endif
     }
 
     {
@@ -1638,7 +1742,15 @@ int vp8cx_encode_inter_macroblock
             vp8_update_zbin_extra(cpi, x);
     }
 
+#if 0
+//#if CONFIG_SEGFEATURES
+    // Test code using segment 1 only.
+    // Dont increment count if ref frame coded at segment level
+    if ( (xd->mode_info_context->mbmi.segment_id != 1) )
+        cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame]++;
+#else
     cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
+#endif
 
 #if CONFIG_T8X8
     if (xd->segmentation_enabled)

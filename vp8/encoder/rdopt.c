@@ -1993,6 +1993,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
+    VP8_COMMON *cm = &cpi->common;
     union b_mode_info best_bmodes[16];
     MB_MODE_INFO best_mbmode;
     PARTITION_INFO best_partition;
@@ -2119,14 +2120,38 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
 
+#if CONFIG_SEGFEATURES
+        // Experimental use of Segment features.
+        if ( !cm->refresh_alt_ref_frame )
+        {
+            unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
+            int feature_mask = xd->segment_feature_mask[segment_id];
+
+            if ( (feature_mask & (0x01 << SEG_LVL_REF_FRAME)) &&
+                 ( x->e_mbd.mode_info_context->mbmi.ref_frame !=
+                   cpi->segment_feature_data[segment_id][SEG_LVL_REF_FRAME]))
+            {
+                continue;
+            }
+
+            if ( (feature_mask & (0x01 << SEG_LVL_MODE)) &&
+                 ( this_mode !=
+                   cpi->segment_feature_data[segment_id][SEG_LVL_MODE]))
+            {
+                continue;
+            }
+        }
+#else
         // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
         // unless ARNR filtering is enabled in which case we want
         // an unfiltered alternative
         if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0))
         {
-            if (this_mode != ZEROMV || x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
+            if (this_mode != ZEROMV ||
+                x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
                 continue;
         }
+#endif
 
         /* everything but intra */
         if (x->e_mbd.mode_info_context->mbmi.ref_frame)
@@ -2141,6 +2166,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             lf_or_gf = frame_lf_or_gf[x->e_mbd.mode_info_context->mbmi.ref_frame];
         }
 
+#if !CONFIG_SEGFEATURES
         // Check to see if the testing frequency for this mode is at its max
         // If so then prevent it from being tested and increase the threshold for its testing
         if (cpi->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
@@ -2161,6 +2187,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         // We have now reached the point where we are going to test the current mode so increment the counter for the number of times it has been tested
         cpi->mode_test_hit_counts[mode_index] ++;
+#endif
 
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)

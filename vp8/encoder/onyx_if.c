@@ -434,14 +434,6 @@ static void set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_map)
     cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
-// The values given for each segment can be either deltas (from the default value chosen for the frame) or absolute values.
-//
-// Valid range for abs values is (0-127 for SEG_LVL_ALT_Q) , (0-63 for SEGMENT_ALT_LF)
-// Valid range for delta values are (+/-127 for SEG_LVL_ALT_Q) , (+/-63 for SEGMENT_ALT_LF)
-//
-// abs_delta = SEGMENT_DELTADATA (deltas) abs_delta = SEGMENT_ABSDATA (use the absolute values given).
-//
-//
 static void set_segment_data(VP8_PTR ptr, signed char *feature_data, unsigned char abs_delta)
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
@@ -513,6 +505,99 @@ static void segmentation_test_function(VP8_PTR ptr)
     seg_map = 0;
 
 }
+
+#if CONFIG_SEGFEATURES
+static void init_seg_features(VP8_COMP *cpi)
+{
+    VP8_COMMON *cm = &cpi->common;
+    MACROBLOCKD *mbd = &cpi->mb.e_mbd;
+
+    // For now at least dont enable seg features alongside cyclic refresh.
+    if (cpi->cyclic_refresh_mode_enabled)
+        return;
+
+    // No updates for key frames
+    if ( cm->frame_type == KEY_FRAME )
+    {
+        cpi->mb.e_mbd.update_mb_segmentation_map = 0;
+        cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+    }
+    // Arf but not a key frame.
+    else if ( cm->refresh_alt_ref_frame )
+    {
+        // Clear down the global segmentation map
+        vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
+
+        // Activate segmentation.
+        enable_segmentation((VP8_PTR)cpi);
+
+        // For now set GF, (0,0) MV in segment 1
+        cpi->segment_feature_data[1][SEG_LVL_REF_FRAME] = LAST_FRAME;
+        cpi->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
+
+        mbd->segment_feature_data[1][SEG_LVL_REF_FRAME] = LAST_FRAME;
+        mbd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
+
+        // Enable target features is the segment feature mask
+        mbd->segment_feature_mask[1] |= (0x01 << SEG_LVL_REF_FRAME);
+        mbd->segment_feature_mask[1] |= (0x01 << SEG_LVL_MODE);
+    }
+    else
+    {
+        // Special case where we are coding over the top of a previous
+        // alt ref frame
+        if ( cpi->is_src_frame_alt_ref )
+        {
+            if ( cpi->source_alt_ref_pending )
+            {
+                cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+                cpi->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+                mbd->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+            }
+            else
+            {
+                vpx_memset( cpi->segmentation_map, 0,
+                            (cm->mb_rows * cm->mb_cols));
+                cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+                cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+            }
+        }
+        else
+        {
+            cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+        }
+    }
+}
+
+// DEBUG: Print out the segment id of each MB in the current frame.
+static void print_seg_map(VP8_COMP *cpi)
+{
+    VP8_COMMON *cm = & cpi->common;
+    int row,col;
+    int map_index = 0;
+    FILE *statsfile;
+
+    statsfile = fopen("segmap.stt", "a");
+
+    fprintf(statsfile, "%10d\n",
+            cm->current_video_frame );
+
+    for ( row = 0; row < cpi->common.mb_rows; row++ )
+    {
+        for ( col = 0; col < cpi->common.mb_cols; col++ )
+        {
+            fprintf(statsfile, "%10d",
+                    cpi->segmentation_map[map_index]);
+            map_index++;
+        }
+        fprintf(statsfile, "\n");
+    }
+    fprintf(statsfile, "\n");
+
+    fclose(statsfile);
+}
+
+#endif
 
 // A simple function to cyclically refresh the background at a lower Q
 static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
@@ -3401,13 +3486,6 @@ static void encode_frame_to_data_rate
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
 
-    // Test code for segmentation of gf/arf (0,0)
-    //segmentation_test_function((VP8_PTR) cpi);
-#if CONFIG_SEGMENTATION
-    cpi->mb.e_mbd.segmentation_enabled = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-#endif
-
     if (cpi->compressor_speed == 2)
     {
         if(cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
@@ -3472,9 +3550,23 @@ static void encode_frame_to_data_rate
         cm->frame_type = KEY_FRAME;
     }
 
-    // Set default state for segment and mode based loop filter update flags
-    cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+    // Test code for segmentation of gf/arf (0,0)
+    //segmentation_test_function((VP8_PTR) cpi);
+#if CONFIG_SEGMENTATION
+    cpi->mb.e_mbd.segmentation_enabled = 1;
+    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+#else
+    #if CONFIG_SEGFEATURES
+        // Test code for new segment features
+        init_seg_features( cpi );
+    #else
+        // Set default state for segment update flags
+        cpi->mb.e_mbd.update_mb_segmentation_map = 0;
+        cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+    #endif
+#endif
+
+    // Set default state for segment based loop filter update flags
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
 
     // Set various flags etc to special state if it is a key frame
@@ -4533,6 +4625,13 @@ static void encode_frame_to_data_rate
         }
     }
 
+#endif
+
+#if CONFIG_SEGFEATURES
+#if 0
+    // Debug stats for segment feature experiments.
+    print_seg_map(cpi);
+#endif
 #endif
 
     // If this was a kf or Gf note the Q
