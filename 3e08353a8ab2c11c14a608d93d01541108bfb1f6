@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//59g\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-09-30T16:19:04Z",
+      "side": 1,
+      "message": "t-\u003eskip_eob_node should be always false here.",
+      "revId": "3e08353a8ab2c11c14a608d93d01541108bfb1f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//5+s\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 1
@@ -36,6 +53,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//59Y\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-09-30T16:19:04Z",
+      "side": 1,
+      "message": "I think c\u003ebstart is always true here.",
+      "revId": "3e08353a8ab2c11c14a608d93d01541108bfb1f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//59c\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-09-30T16:19:04Z",
+      "side": 1,
+      "message": "t-\u003eskip_eob_node is always false here?",
+      "revId": "3e08353a8ab2c11c14a608d93d01541108bfb1f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//5+o\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 1
@@ -47,6 +98,23 @@
       "writtenOn": "2011-09-30T16:01:15Z",
       "side": 1,
       "message": "scoping unneccessary",
+      "revId": "3e08353a8ab2c11c14a608d93d01541108bfb1f6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//59U\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 348,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-09-30T16:19:04Z",
+      "side": 1,
+      "message": "t-\u003eskip_eob_node is always false here?",
       "revId": "3e08353a8ab2c11c14a608d93d01541108bfb1f6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
