@@ -348,6 +348,8 @@ typedef struct VP8_COMP
     int per_frame_bandwidth;          // Current section per frame bandwidth target
     int av_per_frame_bandwidth;        // Average frame size target for clip
     int min_frame_bandwidth;          // Minimum allocation that should be used for any frame
+    int estimated_display_frame_size; // Recent average bitrate
+
     int inter_frame_target;
     double output_frame_rate;
     int64_t last_time_stamp_seen;
@@ -369,6 +371,8 @@ typedef struct VP8_COMP
 
     int buffer_level;
     int bits_off_target;
+    int network_buffer_level;
+    int client_buffer_level;
 
     int rolling_target_bits;
     int rolling_actual_bits;

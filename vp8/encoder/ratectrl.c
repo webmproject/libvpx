@@ -608,7 +608,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
     int min_frame_target;
     int Adjustment;
 
-    min_frame_target = 0;
+    min_frame_target = 1;
 
     if (cpi->pass == 2)
     {
@@ -617,9 +617,11 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         if (min_frame_target < (cpi->av_per_frame_bandwidth >> 5))
             min_frame_target = cpi->av_per_frame_bandwidth >> 5;
     }
-    else if (min_frame_target < cpi->per_frame_bandwidth / 4)
-        min_frame_target = cpi->per_frame_bandwidth / 4;
-
+    else
+    {
+        if (min_frame_target < cpi->per_frame_bandwidth / 4)
+            min_frame_target = cpi->per_frame_bandwidth / 4;
+    }
 
     // Special alt reference frame case
     if (cpi->common.refresh_alt_ref_frame)
@@ -776,6 +778,52 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
     // One Pass specific code
     if (cpi->pass == 0)
     {
+#if 1
+        int one_pct_bits, bits_off_optimum, pct_off_optimum;
+        
+        one_pct_bits = 1 + cpi->oxcf.optimal_buffer_level / 100;
+        bits_off_optimum = cpi->buffer_level - cpi->oxcf.optimal_buffer_level;
+        pct_off_optimum = bits_off_optimum / one_pct_bits;
+        
+        /* Clamp error to limit response agressiveness */
+        if (pct_off_optimum > cpi->oxcf.over_shoot_pct)
+            pct_off_optimum = cpi->oxcf.over_shoot_pct;
+        else if (pct_off_optimum < -cpi->oxcf.under_shoot_pct)
+            pct_off_optimum = -cpi->oxcf.under_shoot_pct;
+
+printf("%d\t%d\t%d\t",cpi->client_buffer_level, cpi->network_buffer_level, cpi->buffer_level);
+printf("%d\t%d\t%d\t",cpi->oxcf.optimal_buffer_level, bits_off_optimum, pct_off_optimum);
+printf("%d\t",cpi->this_frame_target);
+
+        if (cpi->network_buffer_level > cpi->estimated_display_frame_size)
+        {
+            /* Network buffer is full, the client buffer will be filled at
+             * the maximum rate. To increase the buffer level, we must reduce
+             * the average frame size. To decrease the buffer level, we must
+             * increase the recent bitrate.
+             */
+            pct_off_optimum *= -1;
+        }
+        else
+        {
+            /* Network buffer is empty. To increase the buffer level,
+             * we must send data faster than the network. To decrease the
+             * buffer level, we must send less than the recent bitrate.
+             */
+            cpi->this_frame_target = cpi->estimated_display_frame_size;
+        }
+        
+        cpi->this_frame_target -= (cpi->this_frame_target * pct_off_optimum)
+                                  / 125;
+
+printf("%d\n",cpi->this_frame_target);
+
+
+                    cpi->active_worst_quality = cpi->worst_quality;
+            // Worst quality obviously must not be better than best quality
+            if (cpi->active_worst_quality <= cpi->active_best_quality)
+                cpi->active_worst_quality = cpi->active_best_quality + 1;
+#else
         // Adapt target frame size with respect to any buffering constraints:
         if (cpi->buffered_mode)
         {
@@ -943,6 +991,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         {
             cpi->active_worst_quality = cpi->cq_target_quality;
         }
+#endif
     }
 
     // Test to see if we have to drop a frame
@@ -1112,6 +1161,35 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
 
         }
     }
+
+#if 0
+    if (cpi->pass==0
+        && cpi->common.refresh_golden_frame
+        && cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) {
+        int64_t adjust;
+
+        /*
+        frames_in_buffer = cpi->oxcf.maximum_buffer_size
+                           / cpi->av_per_frame_bandwidth;
+        gf_in_buffer = frames_in_buffer /
+                       cpi->frames_till_gf_update_due;
+        overshoot_per_gf = cpi->accumulated_overshoot / gf_in_buffer;
+
+        */
+
+        adjust = cpi->accumulated_overshoot;
+        adjust *= cpi->frames_till_gf_update_due + 1;
+        adjust *= cpi->av_per_frame_bandwidth;
+        adjust /= cpi->oxcf.maximum_buffer_size;
+
+        if (adjust > (cpi->this_frame_target - min_frame_target))
+            adjust = (cpi->this_frame_target - min_frame_target);
+        else if (adjust < 0)
+            adjust = 0;
+
+        cpi->this_frame_target -= adjust;
+    }
+#endif
 }
 
 

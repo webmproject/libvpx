@@ -1460,6 +1460,7 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->rolling_actual_bits          = cpi->av_per_frame_bandwidth;
     cpi->long_rolling_target_bits     = cpi->av_per_frame_bandwidth;
     cpi->long_rolling_actual_bits     = cpi->av_per_frame_bandwidth;
+    cpi->estimated_display_frame_size = cpi->av_per_frame_bandwidth;
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual       = 0;
@@ -1555,7 +1556,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         break;
     }
 
-    if (cpi->pass == 0)
+    if (cpi->pass == 0 && cpi->oxcf.end_usage != USAGE_STREAM_FROM_SERVER)
         cpi->auto_worst_q = 1;
 
     cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
@@ -3197,6 +3198,68 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
 }
 
+
+#define MIN(x,y) (((x)<(y))?(x):(y))
+static void update_buffer_levels(VP8_COMP *cpi)
+{
+    int max_network_xfer, actual_network_xfter;
+    int64_t tmp;
+
+    /* Model the size of the displayed frame at t-n.
+     *
+     * The decoder lags the encoder by the starting_buffer_level, so we
+     * calculate an average per-frame bitrate over that window.
+     *
+     * It is calculated accordingly:
+     *
+     * A = Average Bits Per Frame In The Buffer
+     * P = New Frame Size
+     * N = Number of bits in the buffer
+     * W = Weight of this frame
+     *
+     * We recalculate the average as so:
+     *      (N-W)*A + W*P
+     * A' = -------------
+     *            N
+     */
+    tmp = (cpi->oxcf.starting_buffer_level - cpi->av_per_frame_bandwidth)
+          * cpi->estimated_display_frame_size;
+    tmp += cpi->av_per_frame_bandwidth * cpi->projected_frame_size;
+    cpi->estimated_display_frame_size = tmp / cpi->oxcf.starting_buffer_level;
+
+
+    /* Update the network buffer model (leaky bucket) */
+    max_network_xfer = cpi->av_per_frame_bandwidth;
+    actual_network_xfter = MIN(max_network_xfer, cpi->network_buffer_level);
+    cpi->network_buffer_level += cpi->projected_frame_size;
+    cpi->network_buffer_level -= actual_network_xfter;
+
+    if(cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
+    {
+        /* In CBR mode, the rate at which the buffer is refilled is
+         * constrained by the network bandwidth and the actual number of
+         * bits that have previously been transmitted. This is modeling
+         * the live streaming case.
+         */
+
+         /* Update the client buffer model (leaky bucket) */
+         cpi->client_buffer_level += actual_network_xfter;
+         if (cpi->total_byte_count > cpi->oxcf.starting_buffer_level / 8)
+             cpi->client_buffer_level -= cpi->estimated_display_frame_size;
+
+         /* The control variable is the buffer on the client's side */
+         cpi->buffer_level = cpi->client_buffer_level;
+    }
+    else
+    {
+        /* In VBR mode, the available bandwidth is essentially unlimited
+         * so the buffer level can grow and be consumed without bound.
+         */
+        cpi->buffer_level = cpi->bits_off_target;
+    }
+}
+
+
 static void encode_frame_to_data_rate
 (
     VP8_COMP *cpi,
@@ -3443,7 +3506,8 @@ static void encode_frame_to_data_rate
     // For CBR if the buffer reaches its maximum level then we can no longer
     // save up bits for later frames so we might as well use them up
     // on the current frame.
-    if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
+    if (cpi->pass == 2
+        && (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
         (cpi->buffer_level >= cpi->oxcf.optimal_buffer_level) && cpi->buffered_mode)
     {
         int Adjustment = cpi->active_worst_quality / 4;       // Max adjustment is 1/4
@@ -3534,6 +3598,10 @@ static void encode_frame_to_data_rate
         }
         else
         {
+            if(cpi->pass != 2)
+                Q = cpi->auto_worst_q?
+                    cpi->active_worst_quality:cpi->avg_frame_qindex;
+
             cpi->active_best_quality = inter_minq[Q];
 
             // For the constant/constrained quality mode we dont want
@@ -3834,15 +3902,17 @@ static void encode_frame_to_data_rate
             (cpi->active_worst_quality < cpi->worst_quality)      &&
             (cpi->projected_frame_size > frame_over_shoot_limit))
         {
-            int over_size_percent = ((cpi->projected_frame_size - frame_over_shoot_limit) * 100) / frame_over_shoot_limit;
+            /* step down active_worst_quality such that the corresponding
+             * active_best_quality will be equal to the current
+             * active_worst_quality + 1. Once the limit on active_best_quality
+             * is reached, active_worst_quality will equal worst_quality.
+             */
+            int i;
 
-            // If so is there any scope for relaxing it
-            while ((cpi->active_worst_quality < cpi->worst_quality) && (over_size_percent > 0))
-            {
-                cpi->active_worst_quality++;
-                top_index = cpi->active_worst_quality;
-                over_size_percent = (int)(over_size_percent * 0.96);        // Assume 1 qstep = about 4% on frame size.
-            }
+            for(i=cpi->active_worst_quality; i<cpi->worst_quality; i++)
+                if(inter_minq[i] >= cpi->active_worst_quality + 1)
+                    break;
+            cpi->active_worst_quality = i;
 
             // If we have updated the active max Q do not call vp8_update_rate_correction_factors() this loop.
             active_worst_qchanged = TRUE;
@@ -4230,10 +4300,9 @@ static void encode_frame_to_data_rate
 
     // Update the buffer level variable.
     // Non-viewable frames are a special case and are treated as pure overhead.
-    if ( !cm->show_frame )
-        cpi->bits_off_target -= cpi->projected_frame_size;
-    else
-        cpi->bits_off_target += cpi->av_per_frame_bandwidth - cpi->projected_frame_size;
+    if ( cm->show_frame )
+        cpi->bits_off_target += cpi->av_per_frame_bandwidth;
+    cpi->bits_off_target -= cpi->projected_frame_size;
 
     // Rolling monitors of whether we are over or underspending used to help regulate min and Max Q in two pass.
     cpi->rolling_target_bits = ((cpi->rolling_target_bits * 3) + cpi->this_frame_target + 2) / 4;
@@ -4247,7 +4316,7 @@ static void encode_frame_to_data_rate
     // Debug stats
     cpi->total_target_vs_actual += (cpi->this_frame_target - cpi->projected_frame_size);
 
-    cpi->buffer_level = cpi->bits_off_target;
+    update_buffer_levels(cpi);
 
     // Update bits left to the kf and gf groups to account for overshoot or undershoot on these frames
     if (cm->frame_type == KEY_FRAME)
