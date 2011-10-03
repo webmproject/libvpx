@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//5R4\u003d",
+        "filename": "vp8/common/loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-10-03T18:45:27Z",
+      "side": 1,
+      "message": "inter_zz_skip_count is currently not accumulated and changed in decoder, so if encoder accumulated counts lead to a change to filter_level, it would cause encoder/decoder mismatches.\n\nAnd implementing the same accumulation and changes in decoder could lead problems of decoder in decoding existing VP8 bitstream.",
+      "revId": "ebb7a6949f1b3a6c8120aacb55a793491ff54891",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
