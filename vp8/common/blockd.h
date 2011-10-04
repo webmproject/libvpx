@@ -62,7 +62,7 @@ extern const unsigned char vp8_block2left[25];
 extern const unsigned char vp8_block2above[25];
 
 #define VP8_COMBINEENTROPYCONTEXTS( Dest, A, B) \
-    Dest = ((A)!=0) + ((B)!=0);
+    Dest = (A)+(B);
 
 
 typedef enum
