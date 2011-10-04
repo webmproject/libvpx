@@ -777,6 +777,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         fps.MVrv       = 0.0;
         fps.MVcv       = 0.0;
         fps.mv_in_out_count  = 0.0;
+        fps.new_mv_count = 0.0;
         fps.count      = 1.0;
 
         fps.pcnt_inter   = 1.0 * (double)intercount / cm->MBs;
@@ -932,10 +933,7 @@ static int estimate_max_q(VP8_COMP *cpi,
     double section_err = (fpstats->coded_error / fpstats->count);
     double err_per_mb = section_err / num_mbs;
     double err_correction_factor;
-    double corr_high;
     double speed_correction = 1.0;
-    double inter_pct = (fpstats->pcnt_inter / fpstats->count);
-    double intra_pct = 1.0 - inter_pct;
     int overhead_bits_per_mb;
 
     if (section_target_bandwitdh <= 0)
@@ -1047,12 +1045,9 @@ static int estimate_cq( VP8_COMP *cpi,
     double section_err = (fpstats->coded_error / fpstats->count);
     double err_per_mb = section_err / num_mbs;
     double err_correction_factor;
-    double corr_high;
     double speed_correction = 1.0;
     double clip_iiratio;
     double clip_iifactor;
-    double inter_pct = (fpstats->pcnt_inter / fpstats->count);
-    double intra_pct = 1.0 - inter_pct;
     int overhead_bits_per_mb;
 
     if (0)
@@ -1131,7 +1126,6 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
 
     double err_per_mb = section_err / num_mbs;
     double err_correction_factor;
-    double corr_high;
     double speed_correction = 1.0;
 
     target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
@@ -1177,7 +1171,6 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
 
     double err_per_mb = section_err / num_mbs;
     double err_correction_factor;
-    double corr_high;
     double speed_correction = 1.0;
     double current_spend_ratio = 1.0;
 
@@ -2305,7 +2298,7 @@ void vp8_second_pass(VP8_COMP *cpi)
     int tmp_q;
     int frames_left = (int)(cpi->twopass.total_stats->count - cpi->common.current_video_frame);
 
-    FIRSTPASS_STATS this_frame;
+    FIRSTPASS_STATS this_frame = {0};
     FIRSTPASS_STATS this_frame_copy;
 
     double this_frame_error;
