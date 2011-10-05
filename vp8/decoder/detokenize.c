@@ -16,6 +16,10 @@
 #include "vpx_ports/mem.h"
 #include "detokenize.h"
 
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#endif
+
 #define BOOL_DATA UINT8
 
 #define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
@@ -611,15 +615,15 @@ BLOCK_FINISHED_8x8:
 
 }
 #endif
-int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
+int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
 {
-    ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
-    ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
+    ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
+    ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
     const FRAME_CONTEXT * const fc = &dx->common.fc;
 
-    BOOL_DECODER *bc = x->current_bc;
+    BOOL_DECODER *bc = xd->current_bc;
 
-    char *eobs = x->eobs;
+    char *eobs = xd->eobs;
 
     ENTROPY_CONTEXT *a;
     ENTROPY_CONTEXT *l;
@@ -647,17 +651,27 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
     INT16 v;
     const vp8_prob *Prob;
 
+#if CONFIG_SEGFEATURES
+    int seg_eob = 16;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
+
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+    }
+#endif
+
     type = 3;
     i = 0;
     stop = 16;
 
     scan = vp8_default_zig_zag1d;
-    qcoeff_ptr = &x->qcoeff[0];
-    if (x->mode_info_context->mbmi.mode != B_PRED &&
+    qcoeff_ptr = &xd->qcoeff[0];
+    if (xd->mode_info_context->mbmi.mode != B_PRED &&
 #if CONFIG_I8X8
-        x->mode_info_context->mbmi.mode != I8X8_PRED &&
+        xd->mode_info_context->mbmi.mode != I8X8_PRED &&
 #endif
-        x->mode_info_context->mbmi.mode != SPLITMV)
+        xd->mode_info_context->mbmi.mode != SPLITMV)
     {
         i = 24;
         stop = 24;
@@ -687,6 +701,11 @@ BLOCK_LOOP:
     Prob += v * ENTROPY_NODES;
 
 DO_WHILE:
+#if CONFIG_SEGFEATURES
+    if ( c == seg_eob )
+        goto BLOCK_FINISHED;
+#endif
+
     Prob += coef_bands_x[c];
     DECODE_AND_BRANCH_IF_ZERO(Prob[EOB_CONTEXT_NODE], BLOCK_FINISHED);
 

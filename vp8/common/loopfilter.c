@@ -14,6 +14,10 @@
 #include "onyxc_int.h"
 #include "vpx_mem/vpx_mem.h"
 
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#endif
+
 typedef unsigned char uc;
 
 prototype_loopfilter(vp8_loop_filter_horizontal_edge_c);
@@ -194,7 +198,7 @@ void vp8_loop_filter_init(VP8_COMMON *cm)
 }
 
 void vp8_loop_filter_frame_init(VP8_COMMON *cm,
-                                MACROBLOCKD *mbd,
+                                MACROBLOCKD *xd,
                                 int default_filt_lvl)
 {
     int seg,  /* segment number */
@@ -218,25 +222,24 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
 
         // Set the baseline filter values for each segment
 #if CONFIG_SEGFEATURES
-        if ( mbd->segmentation_enabled &&
-             ( mbd->segment_feature_mask[seg] & (1 << SEG_LVL_ALT_LF) ) )
+        if ( segfeature_active( xd, seg, SEG_LVL_ALT_LF ) )
 #else
-        if ( mbd->segmentation_enabled )
+        if ( xd->segmentation_enabled )
 #endif
         {
             /* Abs value */
-            if (mbd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+            if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
             {
-                lvl_seg = mbd->segment_feature_data[seg][SEG_LVL_ALT_LF];
+                lvl_seg = xd->segment_feature_data[seg][SEG_LVL_ALT_LF];
             }
             else  /* Delta Value */
             {
-                lvl_seg += mbd->segment_feature_data[seg][SEG_LVL_ALT_LF];
+                lvl_seg += xd->segment_feature_data[seg][SEG_LVL_ALT_LF];
                 lvl_seg = (lvl_seg > 0) ? ((lvl_seg > 63) ? 63: lvl_seg) : 0;
             }
         }
 
-        if (!mbd->mode_ref_lf_delta_enabled)
+        if (!xd->mode_ref_lf_delta_enabled)
         {
             /* we could get rid of this if we assume that deltas are set to
              * zero when not in use; encoder always uses deltas
@@ -251,12 +254,12 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
         ref = INTRA_FRAME;
 
         /* Apply delta for reference frame */
-        lvl_ref += mbd->ref_lf_deltas[ref];
+        lvl_ref += xd->ref_lf_deltas[ref];
 
         /* Apply delta for Intra modes */
         mode = 0; /* B_PRED */
         /* Only the split mode BPRED has a further special case */
-        lvl_mode = lvl_ref +  mbd->mode_lf_deltas[mode];
+        lvl_mode = lvl_ref +  xd->mode_lf_deltas[mode];
         lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
 
         lfi->lvl[seg][ref][mode] = lvl_mode;
@@ -271,12 +274,12 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
             int lvl_ref = lvl_seg;
 
             /* Apply delta for reference frame */
-            lvl_ref += mbd->ref_lf_deltas[ref];
+            lvl_ref += xd->ref_lf_deltas[ref];
 
             /* Apply delta for Inter modes */
             for (mode = 1; mode < 4; mode++)
             {
-                lvl_mode = lvl_ref + mbd->mode_lf_deltas[mode];
+                lvl_mode = lvl_ref + xd->mode_lf_deltas[mode];
                 lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
 
                 lfi->lvl[seg][ref][mode] = lvl_mode;

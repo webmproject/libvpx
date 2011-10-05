@@ -108,7 +108,7 @@ typedef enum
     SEG_LVL_REF_FRAME = 2,           // Optional Segment reference frame
     SEG_LVL_MODE = 3,                // Optional Segment mode
     SEG_LVL_EOB = 4,                 // EOB end stop marker.
-    SEG_LVL_TRANSFORM = 6,           // Block transform size.
+    SEG_LVL_TRANSFORM = 5,           // Block transform size.
 
     SEG_LVL_MAX = 6                  // Number of MB level features supported
 #else

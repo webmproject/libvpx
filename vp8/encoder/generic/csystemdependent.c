@@ -110,7 +110,7 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
 #endif
 #endif
 
-    // Pure C:
+    cpi->rtcd.variance.satd16x16             = vp8_satd16x16_c;
     vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame;
 
 #if ARCH_X86 || ARCH_X86_64

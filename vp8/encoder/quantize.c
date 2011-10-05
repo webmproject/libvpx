@@ -16,6 +16,10 @@
 #include "quantize.h"
 #include "vp8/common/quant_common.h"
 
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#endif
+
 #ifdef ENC_DEBUG
 extern int enc_debug;
 #endif
@@ -132,7 +136,11 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
 
     eob = -1;
 
+#if CONFIG_SEGFEATURES
+    for (i = 0; i < b->eob_max_offset; i++)
+#else
     for (i = 0; i < 16; i++)
+#endif
     {
         rc   = vp8_default_zig_zag1d[i];
         z    = coeff_ptr[rc];
@@ -1171,8 +1179,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
 
     // Select the baseline MB Q index allowing for any segment level change.
 #if CONFIG_SEGFEATURES
-    if ( xd->segmentation_enabled &&
-         ( xd->segment_feature_mask[segment_id] & (0x01 << SEG_LVL_ALT_Q) ) )
+    if ( segfeature_active( xd, segment_id, SEG_LVL_ALT_Q ) )
 #else
     if ( xd->segmentation_enabled )
 #endif
@@ -1210,6 +1217,16 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
         x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
         x->block[i].zbin_extra = (short)zbin_extra;
+#if CONFIG_SEGFEATURES
+    // Segment max eob offset feature.
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        x->block[i].eob_max_offset =
+            xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+    }
+    else
+        x->block[i].eob_max_offset = 16;
+#endif
     }
 
     // UV
@@ -1228,6 +1245,16 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
         x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[QIndex];
         x->block[i].zbin_extra = (short)zbin_extra;
+#if CONFIG_SEGFEATURES
+    // Segment max eob offset feature.
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        x->block[i].eob_max_offset =
+            xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+    }
+    else
+        x->block[i].eob_max_offset = 16;
+#endif
     }
 
     // Y2
@@ -1244,6 +1271,18 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     x->e_mbd.block[24].dequant = cpi->common.Y2dequant[QIndex];
     x->block[24].zrun_zbin_boost = cpi->zrun_zbin_boost_y2[QIndex];
     x->block[24].zbin_extra = (short)zbin_extra;
+
+#if CONFIG_SEGFEATURES
+    // TBD perhaps not use for Y2
+    // Segment max eob offset feature.
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        x->block[24].eob_max_offset =
+            xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+    }
+    else
+        x->block[24].eob_max_offset = 16;
+#endif
 
     /* save this macroblock QIndex for vp8_update_zbin_extra() */
     x->q_index = QIndex;
@@ -1324,23 +1363,8 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
     update |= cm->y2dc_delta_q != new_delta_q;
     cm->y2dc_delta_q = new_delta_q;
 
-
-    // Set Segment specific quatizers if enabled
-    for ( i = 0; i < MAX_MB_SEGMENTS;  i++ )
-    {
-        mbd->segment_feature_data[i][SEG_LVL_ALT_Q] =
-            cpi->segment_feature_data[i][SEG_LVL_ALT_Q];
-
-#if CONFIG_SEGFEATURES
-        mbd->segment_feature_mask[i] &= ~(1 << SEG_LVL_ALT_Q);
-        mbd->segment_feature_mask[i] |=
-            cpi->segment_feature_mask[i] & (1 << SEG_LVL_ALT_Q);
-#endif
-    }
-
     /* quantizer has to be reinitialized for any delta_q changes */
     if(update)
         vp8cx_init_quantizer(cpi);
-
 }
 

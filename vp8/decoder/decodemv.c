@@ -15,6 +15,14 @@
 #include "onyxd_int.h"
 #include "vp8/common/findnearmv.h"
 
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#endif
+
+#if CONFIG_SEGMENTATION
+#include "vp8/common/seg_common.h"
+#endif
+
 #if CONFIG_DEBUG
 #include <assert.h>
 #endif
@@ -85,11 +93,33 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
             if (pbi->mb.update_mb_segmentation_map)
                 vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
 
-            /* Read the macroblock coeff skip flag if this feature is in use, else default to 0 */
+#if CONFIG_SEGFEATURES
+            if ( pbi->common.mb_no_coeff_skip &&
+                 ( !segfeature_active( &pbi->mb,
+                                       m->mbmi.segment_id, SEG_LVL_EOB ) ||
+                   (pbi->mb.segment_feature_data[m->mbmi.segment_id]
+                                                [SEG_LVL_EOB] != 0) ) )
+#else
+            // Read the macroblock coeff skip flag if this feature is in use,
+            // else default to 0
             if (pbi->common.mb_no_coeff_skip)
+#endif
                 m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
             else
-                m->mbmi.mb_skip_coeff = 0;
+            {
+#if CONFIG_SEGFEATURES
+                if ( segfeature_active( &pbi->mb,
+                                        m->mbmi.segment_id, SEG_LVL_EOB ) &&
+                     (pbi->mb.segment_feature_data[m->mbmi.segment_id]
+                                                  [SEG_LVL_EOB] == 0) )
+                {
+                    m->mbmi.mb_skip_coeff = 1;
+                }
+                else
+#endif
+                    m->mbmi.mb_skip_coeff = 0;
+            }
+
 #if CONFIG_QIMODE
             y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc,
                 pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
@@ -210,7 +240,7 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
     MACROBLOCKD *const xd = &pbi->mb;
 
     // Is the segment level refernce frame feature enabled for this segment
-    if ( xd->segment_feature_mask[segment_id] & (0x01 << SEG_LVL_REF_FRAME) )
+    if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) )
     {
         ref_frame =
             xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME];
@@ -398,12 +428,34 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
             }
 
-
-    /* Read the macroblock coeff skip flag if this feature is in use, else default to 0 */
+#if CONFIG_SEGFEATURES
+    if ( pbi->common.mb_no_coeff_skip &&
+         ( !segfeature_active( xd,
+                               mbmi->segment_id, SEG_LVL_EOB ) ||
+           (xd->segment_feature_data[mbmi->segment_id]
+                                    [SEG_LVL_EOB] != 0) ) )
+#else
     if (pbi->common.mb_no_coeff_skip)
+#endif
+    {
+        // Read the macroblock coeff skip flag if this feature is in use,
+        // else default to 0
         mbmi->mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
+    }
     else
-        mbmi->mb_skip_coeff = 0;
+    {
+#if CONFIG_SEGFEATURES
+        if ( segfeature_active( xd,
+                                mbmi->segment_id, SEG_LVL_EOB ) &&
+             (xd->segment_feature_data[mbmi->segment_id]
+                                      [SEG_LVL_EOB] == 0) )
+        {
+            mbmi->mb_skip_coeff = 1;
+        }
+        else
+#endif
+            mbmi->mb_skip_coeff = 0;
+    }
 
     // Read the reference frame
     mbmi->ref_frame = read_ref_frame( pbi, mbmi->segment_id );
@@ -421,8 +473,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
 #if CONFIG_SEGFEATURES
         // Is the segment level mode feature enabled for this segment
-        if ( xd->segment_feature_mask[mbmi->segment_id] &
-            (0x01 << SEG_LVL_MODE) )
+        if ( segfeature_active( xd, mbmi->segment_id, SEG_LVL_MODE ) )
         {
             mbmi->mode =
                 xd->segment_feature_data[mbmi->segment_id][SEG_LVL_MODE];

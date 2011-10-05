@@ -37,6 +37,10 @@
 #include "decoderthreading.h"
 #include "dboolhuff.h"
 
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#endif
+
 #include <assert.h>
 #include <stdio.h>
 
@@ -78,8 +82,7 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
 
     // Set the Q baseline allowing for any segment level adjustment
 #if CONFIG_SEGFEATURES
-    if ( xd->segmentation_enabled &&
-         ( xd->segment_feature_mask[segment_id] & (1 << SEG_LVL_ALT_Q) ) )
+    if ( segfeature_active( xd, segment_id, SEG_LVL_ALT_Q ) )
 #else
     if ( xd->segmentation_enabled )
 #endif
@@ -1056,9 +1059,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     {
 #if CONFIG_SEGFEATURES
                         // Update the feature data and mask
-                        xd->segment_feature_mask[j] |= (1 << i);
+                        enable_segfeature(xd, j, i);
 #endif
-
                         xd->segment_feature_data[j][i] = (signed char)vp8_read_literal(bc, mb_feature_data_bits[i]);
 
                         if (vp8_read_bit(bc))

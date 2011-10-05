@@ -355,9 +355,10 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         /*
         z->block[i].src             = x->block[i].src;
         */
-        z->block[i].src_stride       = x->block[i].src_stride;
-        z->block[i].force_empty      = x->block[i].force_empty;
-
+        z->block[i].src_stride      = x->block[i].src_stride;
+#if CONFIG_SEGFEATURES
+        z->block[i].eob_max_offset  = x->block[i].eob_max_offset;
+#endif
     }
 
     {

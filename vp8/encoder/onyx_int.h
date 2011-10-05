@@ -133,6 +133,21 @@ typedef struct
 
 } ONEPASS_FRAMESTATS;
 
+typedef struct
+{
+    struct {
+        int err;
+        union {
+            int_mv mv;
+            MB_PREDICTION_MODE mode;
+        } m;
+    } ref[MAX_REF_FRAMES];
+} MBGRAPH_MB_STATS;
+
+typedef struct
+{
+    MBGRAPH_MB_STATS *mb_stats;
+} MBGRAPH_FRAME_STATS;
 
 typedef enum
 {
@@ -431,6 +446,13 @@ typedef struct VP8_COMP
     ONEPASS_FRAMESTATS one_pass_frame_stats[MAX_LAG_BUFFERS];
     int one_pass_frame_index;
 #endif
+    MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
+    int mbgraph_n_frames;             // number of frames filled in the above
+    int mbgraph_use_arf_segmentation; // set if part of an ARF is considered to be a
+                                      // poor predictor, and thus coeffs are skipped
+                                      // or coded at a higher Q using MB-segmentation
+                                      // this value is the number of MBs that are
+                                      // poor predictors (> 0 and < common.MBs)
 
     int decimation_factor;
     int decimation_count;
@@ -482,12 +504,6 @@ typedef struct VP8_COMP
 #endif
 
     unsigned char *segmentation_map;
-
-    // Segment data (can be deltas or absolute values)
-    signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
-#if CONFIG_SEGFEATURES
-unsigned int segment_feature_mask[MAX_MB_SEGMENTS];
-#endif
 
     // segment threashold for encode breakout
     int  segment_encode_breakout[MAX_MB_SEGMENTS];

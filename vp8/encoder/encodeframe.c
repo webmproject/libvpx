@@ -31,6 +31,9 @@
 #include "vp8/common/subpixel.h"
 #include "vpx_ports/vpx_timer.h"
 
+#if CONFIG_SEGFEATURES
+//#define DBG_PRNT_SEGMAP 1
+#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define RTCD(x)     &cpi->common.rtcd.x
@@ -750,18 +753,7 @@ void encode_mb_row(VP8_COMP *cpi,
                     else
                         cpi->cyclic_refresh_map[map_index+mb_col] = 1;
                 }
-#if CONFIG_SEGFEATURES
-                else if ( cm->refresh_alt_ref_frame &&
-                         (cm->frame_type != KEY_FRAME) )
-                {
-                    // Update the global segmentation map to reflect
-                    // the segment choice made for this MB.
-                    cpi->segmentation_map[map_index+mb_col] =
-                        xd->mode_info_context->mbmi.segment_id;
-                }
-#endif
             }
-
         }
 
         cpi->tplist[mb_row].stop = *tp;
@@ -856,7 +848,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
 #if CONFIG_SEGFEATURES
 // debug output
-#if 0
+#if DBG_PRNT_SEGMAP
     {
         FILE *statsfile;
         statsfile = fopen("segmap2.stt", "a");
@@ -866,30 +858,6 @@ void encode_mb_row(VP8_COMP *cpi,
 #endif
 #endif
 }
-
-#if CONFIG_SEGFEATURES
-// Funtion to test out new segment features
-void segfeature_test_function(VP8_COMP *cpi, MACROBLOCKD * xd)
-{
-    VP8_COMMON *const cm = & cpi->common;
-
-    // Only update segment map for a frame that is an arf but not a kf.
-    if ( cm->refresh_alt_ref_frame && (cm->frame_type != KEY_FRAME) )
-    {
-        // Test code to code features at the segment level
-        if ( (xd->mode_info_context->mbmi.mode ==
-                 cpi->segment_feature_data[1][SEG_LVL_MODE]) &&
-             (xd->mode_info_context->mbmi.ref_frame ==
-                 cpi->segment_feature_data[1][SEG_LVL_REF_FRAME]) )
-        {
-            xd->mode_info_context->mbmi.segment_id = 1;
-        }
-        else
-            xd->mode_info_context->mbmi.segment_id = 0;
-    }
-}
-#endif
-
 
 void init_encode_frame_mb_context(VP8_COMP *cpi)
 {
@@ -1695,8 +1663,8 @@ int vp8cx_encode_inter_macroblock
 #if CONFIG_SEGFEATURES
         else
         {
-            segfeature_test_function(cpi, xd);
-#if 0
+            //segfeature_test_function(cpi, xd);
+#if DBG_PRNT_SEGMAP
             // Debug output
             {
                 FILE *statsfile;

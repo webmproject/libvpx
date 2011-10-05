@@ -17,6 +17,10 @@
 #include "tokenize.h"
 #include "vpx_mem/vpx_mem.h"
 
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#endif
+
 /* Global event counters used for accumulating statistics across several
    compressions, then generating context.c = initial stats. */
 
@@ -167,7 +171,7 @@ static void tokenize2nd_order_b_8x8
 
 static void tokenize2nd_order_b
 (
-    MACROBLOCKD *x,
+    MACROBLOCKD *xd,
     TOKENEXTRA **tp,
     VP8_COMP *cpi
 )
@@ -181,10 +185,20 @@ static void tokenize2nd_order_b
     ENTROPY_CONTEXT * l;
     int band, rc, v, token;
 
-    b = x->block + 24;
+#if CONFIG_SEGFEATURES
+    int seg_eob = 16;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
+
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+    }
+#endif
+
+    b = xd->block + 24;
     qcoeff_ptr = b->qcoeff;
-    a = (ENTROPY_CONTEXT *)x->above_context + 8;
-    l = (ENTROPY_CONTEXT *)x->left_context + 8;
+    a = (ENTROPY_CONTEXT *)xd->above_context + 8;
+    l = (ENTROPY_CONTEXT *)xd->left_context + 8;
 
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
@@ -207,7 +221,12 @@ static void tokenize2nd_order_b
         pt = vp8_prev_token_class[token];
         t++;
     }
+
+#if CONFIG_SEGFEATURES
+    if (c < seg_eob)
+#else
     if (c < 16)
+#endif
     {
         band = vp8_coef_bands[c];
         t->Token = DCT_EOB_TOKEN;
@@ -288,7 +307,7 @@ static void tokenize1st_order_b_8x8
 
 static void tokenize1st_order_b
 (
-    MACROBLOCKD *x,
+    MACROBLOCKD *xd,
     TOKENEXTRA **tp,
     int type,           /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
     VP8_COMP *cpi
@@ -306,15 +325,25 @@ static void tokenize1st_order_b
     int band, rc, v;
     int tmp1, tmp2;
 
-    b = x->block;
+#if CONFIG_SEGFEATURES
+    int seg_eob = 16;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
+
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+    }
+#endif
+
+    b = xd->block;
     /* Luma */
     for (block = 0; block < 16; block++, b++)
     {
         tmp1 = vp8_block2above[block];
         tmp2 = vp8_block2left[block];
         qcoeff_ptr = b->qcoeff;
-        a = (ENTROPY_CONTEXT *)x->above_context + tmp1;
-        l = (ENTROPY_CONTEXT *)x->left_context + tmp2;
+        a = (ENTROPY_CONTEXT *)xd->above_context + tmp1;
+        l = (ENTROPY_CONTEXT *)xd->left_context + tmp2;
 
         VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
@@ -340,7 +369,12 @@ static void tokenize1st_order_b
             pt = vp8_prev_token_class[token];
             t++;
         }
+
+#if CONFIG_SEGFEATURES
+        if (c < seg_eob)
+#else
         if (c < 16)
+#endif
         {
             band = vp8_coef_bands[c];
             t->Token = DCT_EOB_TOKEN;
@@ -364,8 +398,8 @@ static void tokenize1st_order_b
         tmp1 = vp8_block2above[block];
         tmp2 = vp8_block2left[block];
         qcoeff_ptr = b->qcoeff;
-        a = (ENTROPY_CONTEXT *)x->above_context + tmp1;
-        l = (ENTROPY_CONTEXT *)x->left_context + tmp2;
+        a = (ENTROPY_CONTEXT *)xd->above_context + tmp1;
+        l = (ENTROPY_CONTEXT *)xd->left_context + tmp2;
 
         VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
@@ -388,7 +422,11 @@ static void tokenize1st_order_b
             pt = vp8_prev_token_class[token];
             t++;
         }
+#if CONFIG_SEGFEATURES
+        if (c < seg_eob)
+#else
         if (c < 16)
+#endif
         {
             band = vp8_coef_bands[c];
             t->Token = DCT_EOB_TOKEN;

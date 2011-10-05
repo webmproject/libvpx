@@ -37,8 +37,10 @@ void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
 
                 // If using golden then set GF active flag if not already set.
                 // If using last frame 0,0 mode then leave flag as it is
-                // else if using non 0,0 motion or intra modes then clear flag if it is currently set
-                if ((this_mb_mode_info->mbmi.ref_frame == GOLDEN_FRAME) || (this_mb_mode_info->mbmi.ref_frame == ALTREF_FRAME))
+                // else if using non 0,0 motion or intra modes then clear
+                // flag if it is currently set
+                if ((this_mb_mode_info->mbmi.ref_frame == GOLDEN_FRAME) ||
+                    (this_mb_mode_info->mbmi.ref_frame == ALTREF_FRAME))
                 {
                     if (*(x->gf_active_ptr) == 0)
                     {
@@ -46,7 +48,8 @@ void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
                         cpi->gf_active_count ++;
                     }
                 }
-                else if ((this_mb_mode_info->mbmi.mode != ZEROMV) && *(x->gf_active_ptr))
+                else if ((this_mb_mode_info->mbmi.mode != ZEROMV) &&
+                         *(x->gf_active_ptr))
                 {
                     *(x->gf_active_ptr) = 0;
                     cpi->gf_active_count--;
@@ -61,4 +64,55 @@ void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
             this_mb_mode_info++;
         }
     }
+}
+
+void vp8_enable_segmentation(VP8_PTR ptr)
+{
+    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+
+    // Set the appropriate feature bit
+    cpi->mb.e_mbd.segmentation_enabled = 1;
+    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+}
+
+void vp8_disable_segmentation(VP8_PTR ptr)
+{
+    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+
+    // Clear the appropriate feature bit
+    cpi->mb.e_mbd.segmentation_enabled = 0;
+}
+
+void vp8_set_segmentation_map(VP8_PTR ptr,
+                              unsigned char *segmentation_map)
+{
+    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+
+    // Copy in the new segmentation map
+    vpx_memcpy( cpi->segmentation_map, segmentation_map,
+                (cpi->common.mb_rows * cpi->common.mb_cols) );
+
+    // Signal that the map should be updated.
+    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+}
+
+void vp8_set_segment_data(VP8_PTR ptr,
+                          signed char *feature_data,
+                          unsigned char abs_delta)
+{
+    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+
+    cpi->mb.e_mbd.mb_segement_abs_delta = abs_delta;
+
+    vpx_memcpy(cpi->mb.e_mbd.segment_feature_data, feature_data,
+               sizeof(cpi->mb.e_mbd.segment_feature_data));
+
+#if CONFIG_SEGFEATURES
+    // TBD ?? Set the feature mask
+    // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
+    //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
+#endif
+
 }

@@ -33,6 +33,12 @@
 #include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
 #include "temporal_filter.h"
+
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#include "mbgraph.h"
+#endif
+
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
@@ -404,58 +410,15 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 #endif
 }
 
-static void enable_segmentation(VP8_PTR ptr)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
-    // Set the appropriate feature bit
-    cpi->mb.e_mbd.segmentation_enabled = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-}
-static void disable_segmentation(VP8_PTR ptr)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
-    // Clear the appropriate feature bit
-    cpi->mb.e_mbd.segmentation_enabled = 0;
-}
-
-// Valid values for a segment are 0 to 3
-// Segmentation map is arrange as [Rows][Columns]
-static void set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_map)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
-    // Copy in the new segmentation map
-    vpx_memcpy(cpi->segmentation_map, segmentation_map, (cpi->common.mb_rows * cpi->common.mb_cols));
-    // Signal that the map should be updated.
-    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-}
-
-static void set_segment_data(VP8_PTR ptr, signed char *feature_data, unsigned char abs_delta)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
-    cpi->mb.e_mbd.mb_segement_abs_delta = abs_delta;
-    vpx_memcpy(cpi->segment_feature_data, feature_data,
-               sizeof(cpi->segment_feature_data));
-
-#if CONFIG_SEGFEATURES
-    // TBD ?? Set the feature mask
-    // vpx_memset(xd->segment_feature_mask, 0, sizeof(xd->segment_feature_mask));
-#endif
-
-}
-
-
 static void segmentation_test_function(VP8_PTR ptr)
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
     unsigned char *seg_map;
     signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+
     CHECK_MEM_ERROR(seg_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
+
     // Create a temporary map for segmentation data.
 
     // MB loop to set local segmentation map
@@ -479,10 +442,10 @@ static void segmentation_test_function(VP8_PTR ptr)
     }*/
 
     // Set the segmentation Map
-    set_segmentation_map(ptr, seg_map);
+    vp8_set_segmentation_map(ptr, seg_map);
 
     // Activate segmentation.
-    enable_segmentation(ptr);
+    vp8_enable_segmentation(ptr);
 
     // Set up the quant segment data
     feature_data[SEG_LVL_ALT_Q][0] = 0;
@@ -495,12 +458,17 @@ static void segmentation_test_function(VP8_PTR ptr)
     feature_data[SEG_LVL_ALT_LF][2] = 0;
     feature_data[SEG_LVL_ALT_LF][3] = 0;
 
+#if CONFIG_SEGFEATURES
+    // Enable features as required
+    enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
+#endif
+
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-    set_segment_data(ptr, &feature_data[0][0], SEGMENT_DELTADATA);
+    vp8_set_segment_data(ptr, &feature_data[0][0], SEGMENT_DELTADATA);
 
     // Delete sementation map
-        vpx_free(seg_map);
+    vpx_free(seg_map);
 
     seg_map = 0;
 
@@ -510,39 +478,60 @@ static void segmentation_test_function(VP8_PTR ptr)
 static void init_seg_features(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
-    MACROBLOCKD *mbd = &cpi->mb.e_mbd;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     // For now at least dont enable seg features alongside cyclic refresh.
-    if (cpi->cyclic_refresh_mode_enabled)
-        return;
-
-    // No updates for key frames
-    if ( cm->frame_type == KEY_FRAME )
+    if ( cpi->cyclic_refresh_mode_enabled ||
+         (cpi->pass != 2) )
     {
-        cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-        cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+        vp8_disable_segmentation((VP8_PTR)cpi);
+        vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
+        return;
     }
-    // Arf but not a key frame.
-    else if ( cm->refresh_alt_ref_frame )
+
+    // Disable and clear down for KF,ARF and low Q
+    if ( cm->frame_type == KEY_FRAME || cm->refresh_alt_ref_frame )
     {
         // Clear down the global segmentation map
         vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
+        xd->update_mb_segmentation_map = 0;
+        xd->update_mb_segmentation_data = 0;
 
-        // Activate segmentation.
-        enable_segmentation((VP8_PTR)cpi);
-
-        // For now set GF, (0,0) MV in segment 1
-        cpi->segment_feature_data[1][SEG_LVL_REF_FRAME] = LAST_FRAME;
-        cpi->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
-
-        mbd->segment_feature_data[1][SEG_LVL_REF_FRAME] = LAST_FRAME;
-        mbd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
-
-        // Enable target features is the segment feature mask
-        mbd->segment_feature_mask[1] |= (0x01 << SEG_LVL_REF_FRAME);
-        mbd->segment_feature_mask[1] |= (0x01 << SEG_LVL_MODE);
+        // Disable segmentation
+        vp8_disable_segmentation((VP8_PTR)cpi);
     }
-    else
+
+    // First normal frame in a valid alt ref group and we dont have low Q
+    else if ( cpi->source_alt_ref_active &&
+              (cpi->common.frames_since_golden == 1) )
+    {
+        // Low Q test (only use segmentation at high q)
+        if ( ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+               (cpi->cq_target_quality > 56 ) ) ||
+             (cpi->ni_av_qi > 64) )
+        {
+            xd->segment_feature_data[1][SEG_LVL_REF_FRAME] = LAST_FRAME;
+            xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
+            xd->segment_feature_data[1][SEG_LVL_EOB] = 10;
+            xd->segment_feature_data[1][SEG_LVL_ALT_Q] = 10;
+            xd->segment_feature_data[1][SEG_LVL_ALT_LF] = -5;
+
+            // Enable target features is the segment feature mask
+            enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
+            enable_segfeature(xd, 1, SEG_LVL_MODE);
+            enable_segfeature(xd, 1, SEG_LVL_EOB);
+            enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
+            enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
+
+            // Where relevant assume segment data is delta data
+            xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
+
+            // Scan frames from current to arf frame and define segmentation
+            vp8_update_mbgraph_stats(cpi);
+        }
+    }
+    // Normal frames if segmentation got enabled.
+    else if ( xd->segmentation_enabled )
     {
         // Special case where we are coding over the top of a previous
         // alt ref frame
@@ -550,21 +539,20 @@ static void init_seg_features(VP8_COMP *cpi)
         {
             if ( cpi->source_alt_ref_pending )
             {
-                cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-                cpi->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
-                mbd->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+                xd->update_mb_segmentation_data = 1;
+                xd->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
             }
             else
             {
                 vpx_memset( cpi->segmentation_map, 0,
                             (cm->mb_rows * cm->mb_cols));
-                cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-                cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+                xd->update_mb_segmentation_map = 1;
+                xd->update_mb_segmentation_data = 1;
             }
         }
         else
         {
-            cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+            xd->update_mb_segmentation_data = 0;
         }
     }
 }
@@ -607,6 +595,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     int i;
     int block_count = cpi->cyclic_refresh_mode_max_mbs_perframe;
     int mbs_in_frame = cpi->common.mb_rows * cpi->common.mb_cols;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     // Create a temporary map for segmentation data.
     CHECK_MEM_ERROR(seg_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
@@ -664,10 +653,10 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     }
 
     // Set the segmentation Map
-    set_segmentation_map((VP8_PTR)cpi, seg_map);
+    vp8_set_segmentation_map((VP8_PTR)cpi, seg_map);
 
     // Activate segmentation.
-    enable_segmentation((VP8_PTR)cpi);
+    vp8_enable_segmentation((VP8_PTR)cpi);
 
     // Set up the quant segment data
     feature_data[SEG_LVL_ALT_Q][0] = 0;
@@ -681,9 +670,15 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     feature_data[SEG_LVL_ALT_LF][2] = 0;
     feature_data[SEG_LVL_ALT_LF][3] = 0;
 
+#if CONFIG_SEGFEATURES
+    // Enable the loop and quant changes in the feature mask
+    enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
+    enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
+#endif
+
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-    set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+    vp8_set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
     // Delete sementation map
         vpx_free(seg_map);
@@ -2067,6 +2062,17 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     }
 #endif
 
+#if CONFIG_SEGFEATURES
+    for (i = 0; i < ( sizeof(cpi->mbgraph_stats) /
+                      sizeof(cpi->mbgraph_stats[0]) ); i++)
+    {
+        CHECK_MEM_ERROR(cpi->mbgraph_stats[i].mb_stats,
+                        vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols *
+                                   sizeof(*cpi->mbgraph_stats[i].mb_stats),
+                                   1));
+    }
+#endif
+
     // Should we use the cyclic refresh method.
     // Currently this is tied to error resilliant mode
     cpi->cyclic_refresh_mode_enabled = cpi->oxcf.error_resilient_mode;
@@ -2305,6 +2311,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 void vp8_remove_compressor(VP8_PTR *ptr)
 {
     VP8_COMP *cpi = (VP8_COMP *)(*ptr);
+    int i;
 
     if (!cpi)
         return;
@@ -2519,6 +2526,13 @@ void vp8_remove_compressor(VP8_PTR *ptr)
     vpx_free(cpi->mb.ss);
     vpx_free(cpi->tok);
     vpx_free(cpi->cyclic_refresh_map);
+
+#if CONFIG_SEGFEATURES
+    for (i = 0; i < sizeof(cpi->mbgraph_stats) / sizeof(cpi->mbgraph_stats[0]); i++)
+    {
+        vpx_free(cpi->mbgraph_stats[i].mb_stats);
+    }
+#endif
 
     vp8_remove_common(&cpi->common);
     vpx_free(cpi);
@@ -3550,22 +3564,6 @@ static void encode_frame_to_data_rate
         cm->frame_type = KEY_FRAME;
     }
 
-    // Test code for segmentation of gf/arf (0,0)
-    //segmentation_test_function((VP8_PTR) cpi);
-#if CONFIG_SEGMENTATION
-    cpi->mb.e_mbd.segmentation_enabled = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-#else
-    #if CONFIG_SEGFEATURES
-        // Test code for new segment features
-        init_seg_features( cpi );
-    #else
-        // Set default state for segment update flags
-        cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-        cpi->mb.e_mbd.update_mb_segmentation_data = 0;
-    #endif
-#endif
-
     // Set default state for segment based loop filter update flags
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
 
@@ -3597,9 +3595,9 @@ static void encode_frame_to_data_rate
     // Test code for segmentation
     //if ( (cm->frame_type == KEY_FRAME) || ((cm->current_video_frame % 2) == 0))
     //if ( (cm->current_video_frame % 2) == 0 )
-    //  enable_segmentation((VP8_PTR)cpi);
+    //  vp8_enable_segmentation((VP8_PTR)cpi);
     //else
-    //  disable_segmentation((VP8_PTR)cpi);
+    //  vp8_disable_segmentation((VP8_PTR)cpi);
 
 #if 0
     // Experimental code for lagged compress and one pass
@@ -3622,6 +3620,22 @@ static void encode_frame_to_data_rate
 #endif
 
     update_rd_ref_frame_probs(cpi);
+
+    // Test code for segmentation of gf/arf (0,0)
+    //segmentation_test_function((VP8_PTR) cpi);
+#if CONFIG_SEGMENTATION
+    cpi->mb.e_mbd.segmentation_enabled = 1;
+    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+#else
+    #if CONFIG_SEGFEATURES
+        // Test code for new segment features
+        init_seg_features( cpi );
+    #else
+        // Set default state for segment update flags
+        cpi->mb.e_mbd.update_mb_segmentation_map = 0;
+        cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+    #endif
+#endif
 
     if (cpi->drop_frames_allowed)
     {
@@ -5325,21 +5339,23 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
 {
     VP8_COMP *cpi = (VP8_COMP *) comp;
     signed char feature_data[SEG_LVL_MAX][MAX_MB_SEGMENTS];
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+    int i;
 
     if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
         return -1;
 
     if (!map)
     {
-        disable_segmentation((VP8_PTR)cpi);
+        vp8_disable_segmentation((VP8_PTR)cpi);
         return 0;
     }
 
     // Set the segmentation Map
-    set_segmentation_map((VP8_PTR)cpi, map);
+    vp8_set_segmentation_map((VP8_PTR)cpi, map);
 
     // Activate segmentation.
-    enable_segmentation((VP8_PTR)cpi);
+    vp8_enable_segmentation((VP8_PTR)cpi);
 
     // Set up the quant segment data
     feature_data[SEG_LVL_ALT_Q][0] = delta_q[0];
@@ -5358,9 +5374,25 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
     cpi->segment_encode_breakout[2] = threshold[2];
     cpi->segment_encode_breakout[3] = threshold[3];
 
+#if CONFIG_SEGFEATURES
+    // Enable the loop and quant changes in the feature mask
+    for ( i = 0; i < 4; i++ )
+    {
+        if (delta_q[i])
+            enable_segfeature(xd, i, SEG_LVL_ALT_Q);
+        else
+            disable_segfeature(xd, i, SEG_LVL_ALT_Q);
+
+        if (delta_lf[i])
+            enable_segfeature(xd, i, SEG_LVL_ALT_LF);
+        else
+            disable_segfeature(xd, i, SEG_LVL_ALT_LF);
+    }
+#endif
+
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-    set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+    vp8_set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
     return 0;
 }

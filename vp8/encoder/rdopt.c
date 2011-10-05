@@ -36,6 +36,10 @@
 #include "dct.h"
 #include "vp8/common/systemdependent.h"
 
+#if CONFIG_SEGFEATURES
+#include "vp8/common/seg_common.h"
+#endif
+
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x)  (x)
 #else
@@ -2122,21 +2126,19 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
 #if CONFIG_SEGFEATURES
         // Experimental use of Segment features.
-        if ( !cm->refresh_alt_ref_frame )
+        if ( xd->segmentation_enabled && !cm->refresh_alt_ref_frame )
         {
             unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
-            int feature_mask = xd->segment_feature_mask[segment_id];
 
-            if ( (feature_mask & (0x01 << SEG_LVL_REF_FRAME)) &&
-                 ( x->e_mbd.mode_info_context->mbmi.ref_frame !=
-                   cpi->segment_feature_data[segment_id][SEG_LVL_REF_FRAME]))
+            if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME )  &&
+                 ( xd->mode_info_context->mbmi.ref_frame !=
+                   xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME]))
             {
                 continue;
             }
-
-            if ( (feature_mask & (0x01 << SEG_LVL_MODE)) &&
-                 ( this_mode !=
-                   cpi->segment_feature_data[segment_id][SEG_LVL_MODE]))
+            if ( segfeature_active( xd, segment_id, SEG_LVL_MODE )  &&
+                ( this_mode !=
+                  xd->segment_feature_data[segment_id][SEG_LVL_MODE]))
             {
                 continue;
             }

@@ -76,6 +76,7 @@ VP8_CX_SRCS-yes += encoder/quantize.c
 VP8_CX_SRCS-yes += encoder/ratectrl.c
 VP8_CX_SRCS-yes += encoder/rdopt.c
 VP8_CX_SRCS-yes += encoder/sad_c.c
+VP8_CX_SRCS-yes += encoder/satd_c.c
 VP8_CX_SRCS-yes += encoder/segmentation.c
 VP8_CX_SRCS-yes += encoder/segmentation.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/ssim.c
@@ -86,6 +87,8 @@ VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.h
+VP8_CX_SRCS-yes += encoder/mbgraph.c
+VP8_CX_SRCS-yes += encoder/mbgraph.h
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
