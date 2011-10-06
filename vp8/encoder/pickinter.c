@@ -471,7 +471,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     else
         skip_mode[GOLDEN_FRAME] = 1;
 
-    if (cpi->ref_frame_flags & VP8_ALT_FLAG && cpi->source_alt_ref_active)
+    if ((cpi->ref_frame_flags & VP8_ALT_FLAG) &&
+        (cpi->source_alt_ref_active || cpi->oxcf.number_of_layers > 1))
     {
         YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
         y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;

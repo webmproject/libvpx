@@ -237,6 +237,79 @@ void vp8_initialize()
 extern FILE *vpxlogc;
 #endif
 
+static void save_layer_context(VP8_COMP *cpi)
+{
+    LAYER_CONTEXT *lc = &cpi->layer_context[cpi->current_layer];
+
+    // Save layer dependent coding state
+    lc->target_bandwidth                 = cpi->target_bandwidth;
+    //lc->target_bandwidth                 = cpi->oxcf.target_bandwidth;
+    lc->starting_buffer_level            = cpi->oxcf.starting_buffer_level;
+    lc->optimal_buffer_level             = cpi->oxcf.optimal_buffer_level;
+    lc->maximum_buffer_size              = cpi->oxcf.maximum_buffer_size;
+    lc->buffer_level                     = cpi->buffer_level;
+    lc->bits_off_target                  = cpi->bits_off_target;
+    lc->total_actual_bits                = cpi->total_actual_bits;
+    lc->worst_quality                    = cpi->worst_quality;
+    lc->active_worst_quality             = cpi->active_worst_quality;
+    lc->best_quality                     = cpi->best_quality;
+    lc->active_best_quality              = cpi->active_best_quality;
+    lc->ni_av_qi                         = cpi->ni_av_qi;
+    lc->ni_tot_qi                        = cpi->ni_tot_qi;
+    lc->ni_frames                        = cpi->ni_frames;
+    lc->avg_frame_qindex                 = cpi->avg_frame_qindex;
+    lc->rate_correction_factor           = cpi->rate_correction_factor;
+    lc->key_frame_rate_correction_factor = cpi->key_frame_rate_correction_factor;
+    lc->gf_rate_correction_factor        = cpi->gf_rate_correction_factor;
+    lc->zbin_over_quant                  = cpi->zbin_over_quant;
+    lc->inter_frame_target               = cpi->inter_frame_target;
+    lc->total_byte_count                 = cpi->total_byte_count;
+    lc->filter_level                     = cpi->common.filter_level;
+
+    lc->last_frame_percent_intra         = cpi->last_frame_percent_intra;
+
+    memcpy (lc->count_mb_ref_frame_usage,
+            cpi->count_mb_ref_frame_usage,
+            sizeof(cpi->count_mb_ref_frame_usage));
+}
+
+static void restore_layer_context(VP8_COMP *cpi, const int layer)
+{
+    LAYER_CONTEXT *lc = &cpi->layer_context[layer];
+
+    // Restore layer dependent coding state
+    cpi->current_layer                    = layer;
+    cpi->target_bandwidth                 = lc->target_bandwidth;
+    cpi->oxcf.target_bandwidth            = lc->target_bandwidth;
+    cpi->oxcf.starting_buffer_level       = lc->starting_buffer_level;
+    cpi->oxcf.optimal_buffer_level        = lc->optimal_buffer_level;
+    cpi->oxcf.maximum_buffer_size         = lc->maximum_buffer_size;
+    cpi->buffer_level                     = lc->buffer_level;
+    cpi->bits_off_target                  = lc->bits_off_target;
+    cpi->total_actual_bits                = lc->total_actual_bits;
+    //cpi->worst_quality                    = lc->worst_quality;
+    cpi->active_worst_quality             = lc->active_worst_quality;
+    //cpi->best_quality                     = lc->best_quality;
+    cpi->active_best_quality              = lc->active_best_quality;
+    cpi->ni_av_qi                         = lc->ni_av_qi;
+    cpi->ni_tot_qi                        = lc->ni_tot_qi;
+    cpi->ni_frames                        = lc->ni_frames;
+    cpi->avg_frame_qindex                 = lc->avg_frame_qindex;
+    cpi->rate_correction_factor           = lc->rate_correction_factor;
+    cpi->key_frame_rate_correction_factor = lc->key_frame_rate_correction_factor;
+    cpi->gf_rate_correction_factor        = lc->gf_rate_correction_factor;
+    cpi->zbin_over_quant                  = lc->zbin_over_quant;
+    cpi->inter_frame_target               = lc->inter_frame_target;
+    cpi->total_byte_count                 = lc->total_byte_count;
+    cpi->common.filter_level              = lc->filter_level;
+
+    cpi->last_frame_percent_intra         = lc->last_frame_percent_intra;
+
+    memcpy (cpi->count_mb_ref_frame_usage,
+            lc->count_mb_ref_frame_usage,
+            sizeof(cpi->count_mb_ref_frame_usage));
+}
+
 static void setup_features(VP8_COMP *cpi)
 {
     // Set up default state for MB feature flags
@@ -510,7 +583,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
     // Delete sementation map
-        vpx_free(seg_map);
+    vpx_free(seg_map);
 
     seg_map = 0;
 
@@ -1397,11 +1470,13 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     if(framerate < .1)
         framerate = 30;
 
-    cpi->oxcf.frame_rate             = framerate;
-    cpi->output_frame_rate            = cpi->oxcf.frame_rate;
-    cpi->per_frame_bandwidth          = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
-    cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
-    cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
+    cpi->oxcf.frame_rate        = framerate;
+    cpi->output_frame_rate      = cpi->oxcf.frame_rate;
+    cpi->per_frame_bandwidth    = (int)(cpi->oxcf.target_bandwidth /
+                                  cpi->output_frame_rate);
+    cpi->av_per_frame_bandwidth = cpi->per_frame_bandwidth;
+    cpi->min_frame_bandwidth    = (int)(cpi->av_per_frame_bandwidth *
+                                  cpi->oxcf.two_pass_vbrmin_section / 100);
 
     // Set Maximum gf/arf interval
     cpi->max_gf_interval = ((int)(cpi->output_frame_rate / 2.0) + 2);
@@ -1471,6 +1546,65 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual       = 0;
+
+    // Temporal scalabilty
+    if (cpi->oxcf.number_of_layers > 1)
+    {
+        int i;
+        int prev_layer_frame_rate=0;
+
+        for (i=0; i<cpi->oxcf.number_of_layers; i++)
+        {
+            LAYER_CONTEXT *lc = &cpi->layer_context[i];
+
+            // Layer configuration
+            lc->frame_rate =
+                        cpi->output_frame_rate / cpi->oxcf.rate_decimator[i];
+            lc->target_bandwidth = cpi->oxcf.target_bitrate[i] * 1000;
+
+            lc->starting_buffer_level =
+              rescale(oxcf->starting_buffer_level,
+                          lc->target_bandwidth, 1000);
+
+            if (oxcf->optimal_buffer_level == 0)
+                lc->optimal_buffer_level = lc->target_bandwidth / 8;
+            else
+                lc->optimal_buffer_level =
+                  rescale(oxcf->optimal_buffer_level,
+                          lc->target_bandwidth, 1000);
+
+            if (oxcf->maximum_buffer_size == 0)
+                lc->maximum_buffer_size = lc->target_bandwidth / 8;
+            else
+                lc->maximum_buffer_size =
+                  rescale(oxcf->maximum_buffer_size,
+                          lc->target_bandwidth, 1000);
+
+            // Work out the average size of a frame within this layer
+            if (i > 0)
+                lc->avg_frame_size_for_layer = (cpi->oxcf.target_bitrate[i] -
+                    cpi->oxcf.target_bitrate[i-1]) * 1000 /
+                    (lc->frame_rate - prev_layer_frame_rate);
+
+            lc->active_worst_quality         = cpi->oxcf.worst_allowed_q;
+            lc->active_best_quality          = cpi->oxcf.best_allowed_q;
+            lc->avg_frame_qindex             = cpi->oxcf.worst_allowed_q;
+
+            lc->buffer_level                 = lc->starting_buffer_level;
+            lc->bits_off_target              = lc->starting_buffer_level;
+
+            lc->total_actual_bits                 = 0;
+            lc->ni_av_qi                          = 0;
+            lc->ni_tot_qi                         = 0;
+            lc->ni_frames                         = 0;
+            lc->rate_correction_factor            = 1.0;
+            lc->key_frame_rate_correction_factor  = 1.0;
+            lc->gf_rate_correction_factor         = 1.0;
+            lc->inter_frame_target                = 0.0;
+
+            prev_layer_frame_rate = lc->frame_rate;
+        }
+    }
 
 #if VP8_TEMPORAL_ALT_REF
     {
@@ -1693,11 +1827,11 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
-    cm->Width       = cpi->oxcf.Width     ;
-    cm->Height      = cpi->oxcf.Height    ;
+    cm->Width       = cpi->oxcf.Width;
+    cm->Height      = cpi->oxcf.Height;
 
     cm->horiz_scale  = cpi->horiz_scale;
-    cm->vert_scale   = cpi->vert_scale ;
+    cm->vert_scale   = cpi->vert_scale;
 
     // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
     if (cpi->oxcf.Sharpness > 7)
@@ -1828,7 +1962,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->prob_gf_coded                = 128;
     cpi->prob_intra_coded             = 63;
 
-    // Prime the recent reference frame useage counters.
+    // Prime the recent reference frame usage counters.
     // Hereafter they will be maintained as a sort of moving average
     cpi->recent_ref_frame_usage[INTRA_FRAME]  = 1;
     cpi->recent_ref_frame_usage[LAST_FRAME]   = 1;
@@ -2143,35 +2277,106 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             FILE *f = fopen("opsnr.stt", "a");
             double time_encoded = (cpi->last_end_time_stamp_seen
                                    - cpi->first_time_stamp_ever) / 10000000.000;
-            double total_encode_time = (cpi->time_receive_data + cpi->time_compress_data)   / 1000.000;
-            double dr = (double)cpi->bytes * (double) 8 / (double)1000  / time_encoded;
+            double total_encode_time = (cpi->time_receive_data +
+                                            cpi->time_compress_data) / 1000.000;
+            double dr = (double)cpi->bytes * 8.0 / 1000.0 / time_encoded;
 
             if (cpi->b_calculate_psnr)
             {
-                YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
-                double samples = 3.0 / 2 * cpi->count * lst_yv12->y_width * lst_yv12->y_height;
-                double total_psnr = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error);
-                double total_psnr2 = vp8_mse2psnr(samples, 255.0, cpi->total_sq_error2);
-                double total_ssim = 100 * pow(cpi->summed_quality / cpi->summed_weights, 8.0);
+                YV12_BUFFER_CONFIG *lst_yv12 =
+                              &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
 
-                fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\tGLPsnrP\tVPXSSIM\t  Time(us)\n");
-                fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
-                        dr, cpi->total / cpi->count, total_psnr, cpi->totalp / cpi->count, total_psnr2, total_ssim,
-                        total_encode_time);
+                if (cpi->oxcf.number_of_layers > 1)
+                {
+                    int i;
+
+                    fprintf(f, "Layer\tBitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
+                               "GLPsnrP\tVPXSSIM\t\n");
+                    for (i=0; i<cpi->oxcf.number_of_layers; i++)
+                    {
+                        double dr = (double)cpi->bytes_in_layer[i] *
+                                              8.0 / 1000.0  / time_encoded;
+                        double samples = 3.0 / 2 * cpi->frames_in_layer[i] *
+                                         lst_yv12->y_width * lst_yv12->y_height;
+                        double total_psnr = vp8_mse2psnr(samples, 255.0,
+                                                  cpi->total_error2[i]);
+                        double total_psnr2 = vp8_mse2psnr(samples, 255.0,
+                                                  cpi->total_error2_p[i]);
+                        double total_ssim = 100 * pow(cpi->sum_ssim[i] /
+                                                      cpi->sum_weights[i], 8.0);
+
+                        fprintf(f, "%5d\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
+                                   "%7.3f\t%7.3f\n",
+                                   i, dr,
+                                   cpi->sum_psnr[i] / cpi->frames_in_layer[i],
+                                   total_psnr,
+                                   cpi->sum_psnr_p[i] / cpi->frames_in_layer[i],
+                                   total_psnr2, total_ssim);
+                    }
+                }
+                else
+                {
+                    double samples = 3.0 / 2 * cpi->count *
+                                        lst_yv12->y_width * lst_yv12->y_height;
+                    double total_psnr = vp8_mse2psnr(samples, 255.0,
+                                                         cpi->total_sq_error);
+                    double total_psnr2 = vp8_mse2psnr(samples, 255.0,
+                                                         cpi->total_sq_error2);
+                    double total_ssim = 100 * pow(cpi->summed_quality /
+                                                      cpi->summed_weights, 8.0);
+
+                    fprintf(f, "Bitrate\tAVGPsnr\tGLBPsnr\tAVPsnrP\t"
+                               "GLPsnrP\tVPXSSIM\t  Time(us)\n");
+                    fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t"
+                               "%7.3f\t%8.0f\n",
+                               dr, cpi->total / cpi->count, total_psnr,
+                               cpi->totalp / cpi->count, total_psnr2,
+                               total_ssim, total_encode_time);
+                }
             }
 
             if (cpi->b_calculate_ssimg)
             {
-                fprintf(f, "BitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t  Time(us)\n");
-                fprintf(f, "%7.3f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%8.0f\n", dr,
-                        cpi->total_ssimg_y / cpi->count, cpi->total_ssimg_u / cpi->count,
-                        cpi->total_ssimg_v / cpi->count, cpi->total_ssimg_all / cpi->count, total_encode_time);
+                if (cpi->oxcf.number_of_layers > 1)
+                {
+                    int i;
+
+                    fprintf(f, "Layer\tBitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t"
+                               "Time(us)\n");
+                    for (i=0; i<cpi->oxcf.number_of_layers; i++)
+                    {
+                        double dr = (double)cpi->bytes_in_layer[i] *
+                                    8.0 / 1000.0  / time_encoded;
+                        fprintf(f, "%5d\t%7.3f\t%6.4f\t"
+                                "%6.4f\t%6.4f\t%6.4f\t%8.0f\n",
+                                i, dr,
+                                cpi->total_ssimg_y_in_layer[i] /
+                                     cpi->frames_in_layer[i],
+                                cpi->total_ssimg_u_in_layer[i] /
+                                     cpi->frames_in_layer[i],
+                                cpi->total_ssimg_v_in_layer[i] /
+                                     cpi->frames_in_layer[i],
+                                cpi->total_ssimg_all_in_layer[i] /
+                                     cpi->frames_in_layer[i],
+                                total_encode_time);
+                    }
+                }
+                else
+                {
+                    fprintf(f, "BitRate\tSSIM_Y\tSSIM_U\tSSIM_V\tSSIM_A\t"
+                               "Time(us)\n");
+                    fprintf(f, "%7.3f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%8.0f\n", dr,
+                            cpi->total_ssimg_y / cpi->count,
+                            cpi->total_ssimg_u / cpi->count,
+                            cpi->total_ssimg_v / cpi->count,
+                            cpi->total_ssimg_all / cpi->count, total_encode_time);
+                }
             }
 
             fclose(f);
 #if 0
             f = fopen("qskip.stt", "a");
-            fprintf(f, "minq:%d -maxq:%d skipture:skipfalse = %d:%d\n", cpi->oxcf.best_allowed_q, cpi->oxcf.worst_allowed_q, skiptruecount, skipfalsecount);
+            fprintf(f, "minq:%d -maxq:%d skiptrue:skipfalse = %d:%d\n", cpi->oxcf.best_allowed_q, cpi->oxcf.worst_allowed_q, skiptruecount, skipfalsecount);
             fclose(f);
 #endif
 
@@ -2841,10 +3046,41 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
     }
     else if (!(rf_intra + rf_inter))
     {
-        // This is a trap in case this function is called with cpi->recent_ref_frame_usage[] blank.
-        cpi->prob_intra_coded = 63;
-        cpi->prob_last_coded  = 128;
-        cpi->prob_gf_coded    = 128;
+        if (cpi->oxcf.number_of_layers > 1)
+        {
+            if (cpi->ref_frame_flags == VP8_LAST_FLAG)
+            {
+                cpi->prob_intra_coded = 63;
+                cpi->prob_last_coded  = 255;
+                cpi->prob_gf_coded    = 128;
+            }
+            else if (cpi->ref_frame_flags == VP8_GOLD_FLAG)
+            {
+                cpi->prob_intra_coded = 63;
+                cpi->prob_last_coded  = 1;
+                cpi->prob_gf_coded    = 255;
+            }
+            else if (cpi->ref_frame_flags == VP8_ALT_FLAG)
+            {
+                cpi->prob_intra_coded = 63;
+                cpi->prob_last_coded  = 1;
+                cpi->prob_gf_coded    = 1;
+            }
+            else
+            {
+                cpi->prob_intra_coded = 63;
+                cpi->prob_last_coded  = 128;
+                cpi->prob_gf_coded    = 128;
+            }
+        }
+        else
+        {
+            // This is a trap in case this function is called with
+            // cpi->recent_ref_frame_usage[] blank.
+            cpi->prob_intra_coded = 63;
+            cpi->prob_last_coded  = 128;
+            cpi->prob_gf_coded    = 128;
+        }
     }
     else
     {
@@ -2866,32 +3102,33 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
     }
 
     // update reference frame costs since we can do better than what we got last frame.
+    if (cpi->oxcf.number_of_layers == 1)
+    {
+        if (cpi->common.refresh_alt_ref_frame)
+        {
+            cpi->prob_intra_coded += 40;
+            cpi->prob_last_coded = 200;
+            cpi->prob_gf_coded = 1;
+        }
+        else if (cpi->common.frames_since_golden == 0)
+        {
+            cpi->prob_last_coded = 214;
+            cpi->prob_gf_coded = 1;
+        }
+        else if (cpi->common.frames_since_golden == 1)
+        {
+            cpi->prob_last_coded = 192;
+            cpi->prob_gf_coded = 220;
+        }
+        else if (cpi->source_alt_ref_active)
+        {
+            //int dist = cpi->common.frames_till_alt_ref_frame + cpi->common.frames_since_golden;
+            cpi->prob_gf_coded -= 20;
 
-    if (cpi->common.refresh_alt_ref_frame)
-    {
-        cpi->prob_intra_coded += 40;
-        cpi->prob_last_coded = 200;
-        cpi->prob_gf_coded = 1;
+            if (cpi->prob_gf_coded < 10)
+                cpi->prob_gf_coded = 10;
+        }
     }
-    else if (cpi->common.frames_since_golden == 0)
-    {
-        cpi->prob_last_coded = 214;
-        cpi->prob_gf_coded = 1;
-    }
-    else if (cpi->common.frames_since_golden == 1)
-    {
-        cpi->prob_last_coded = 192;
-        cpi->prob_gf_coded = 220;
-    }
-    else if (cpi->source_alt_ref_active)
-    {
-        //int dist = cpi->common.frames_till_alt_ref_frame + cpi->common.frames_since_golden;
-        cpi->prob_gf_coded -= 20;
-
-        if (cpi->prob_gf_coded < 10)
-            cpi->prob_gf_coded = 10;
-    }
-
 #endif
 }
 
@@ -3283,7 +3520,6 @@ static void encode_frame_to_data_rate
     // Enable or disable mode based tweaking of the zbin
     // For 2 Pass Only used where GF/ARF prediction quality
     // is above a threshold
-    cpi->zbin_mode_boost = 0;
     cpi->zbin_mode_boost_enabled = TRUE;
     if (cpi->pass == 2)
     {
@@ -3432,6 +3668,19 @@ static void encode_frame_to_data_rate
 
             cpi->buffer_level = cpi->bits_off_target;
 
+            if (cpi->oxcf.number_of_layers > 1)
+            {
+                int i;
+
+                // Propagate bits saved by dropping the frame to higher layers
+                for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
+                {
+                    cpi->layer_context[i].bits_off_target
+                                              += cpi->av_per_frame_bandwidth;
+                    cpi->layer_context[i].buffer_level = cpi->bits_off_target;
+                }
+            }
+
             return;
         }
         else
@@ -3478,7 +3727,7 @@ static void encode_frame_to_data_rate
     }
 
     // Set an active best quality and if necessary active worst quality
-    // There is some odd behaviour for one pass here that needs attention.
+    // There is some odd behavior for one pass here that needs attention.
     if ( (cpi->pass == 2) || (cpi->ni_frames > 150))
     {
         vp8_clear_system_state();
@@ -3510,13 +3759,14 @@ static void encode_frame_to_data_rate
                cpi->active_best_quality = kf_high_motion_minq[Q];
         }
 
-        else if (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
+        else if (cpi->oxcf.number_of_layers==1 &&
+                (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame))
         {
             // Use the lower of cpi->active_worst_quality and recent
             // average Q as basis for GF/ARF Q limit unless last frame was
             // a key frame.
             if ( (cpi->frames_since_key > 1) &&
-                 (cpi->avg_frame_qindex < cpi->active_worst_quality) )
+               (cpi->avg_frame_qindex < cpi->active_worst_quality) )
             {
                 Q = cpi->avg_frame_qindex;
             }
@@ -3617,13 +3867,17 @@ static void encode_frame_to_data_rate
     // Set highest allowed value for Zbin over quant
     if (cm->frame_type == KEY_FRAME)
         zbin_oq_high = 0; //ZBIN_OQ_MAX/16
-    else if (cm->refresh_alt_ref_frame || (cm->refresh_golden_frame && !cpi->source_alt_ref_active))
-        zbin_oq_high = 16;
+    else if ((cpi->oxcf.number_of_layers == 1) && ((cm->refresh_alt_ref_frame ||
+              (cm->refresh_golden_frame && !cpi->source_alt_ref_active))))
+    {
+          zbin_oq_high = 16;
+    }
     else
         zbin_oq_high = ZBIN_OQ_MAX;
 
-    // Setup background Q adjustment for error resilliant mode
-    if (cpi->cyclic_refresh_mode_enabled)
+    // Setup background Q adjustment for error resilient mode.
+    // For multi-layer encodes only enable this for the base layer.
+    if (cpi->cyclic_refresh_mode_enabled && (cpi->current_layer==0))
         cyclic_background_refresh(cpi, Q, 0);
 
     vp8_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
@@ -3756,10 +4010,8 @@ static void encode_frame_to_data_rate
                 if (cpi->prob_skip_false > 250)
                     cpi->prob_skip_false = 250;
 
-                if (cpi->is_src_frame_alt_ref)
+                if (cpi->oxcf.number_of_layers == 1 && cpi->is_src_frame_alt_ref)
                     cpi->prob_skip_false = 1;
-
-
             }
 
 #if 0
@@ -4111,9 +4363,10 @@ static void encode_frame_to_data_rate
     }
 
     // Update the GF useage maps.
-    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
-    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
-    vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
+    // This is done after completing the compression of a frame when all
+    // modes etc. are finalized but before loop filter
+    if (cpi->oxcf.number_of_layers == 1)
+        vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
 
     if (cm->frame_type == KEY_FRAME)
         cm->refresh_last_frame = 1;
@@ -4179,6 +4432,13 @@ static void encode_frame_to_data_rate
     cpi->total_byte_count += (*size);
     cpi->projected_frame_size = (*size) << 3;
 
+    if (cpi->oxcf.number_of_layers > 1)
+    {
+        int i;
+        for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
+          cpi->layer_context[i].total_byte_count += (*size);
+    }
+
     if (!active_worst_qchanged)
         vp8_update_rate_correction_factors(cpi, 2);
 
@@ -4194,7 +4454,8 @@ static void encode_frame_to_data_rate
         cpi->avg_frame_qindex = (2 + 3 * cpi->avg_frame_qindex + cm->base_qindex) >> 2;
 
     // Keep a record from which we can calculate the average Q excluding GF updates and key frames
-    if ((cm->frame_type != KEY_FRAME) && !cm->refresh_golden_frame && !cm->refresh_alt_ref_frame)
+    if ((cm->frame_type != KEY_FRAME) && ((cpi->oxcf.number_of_layers > 1) ||
+        (!cm->refresh_golden_frame && !cm->refresh_alt_ref_frame)))
     {
         cpi->ni_frames++;
 
@@ -4245,7 +4506,7 @@ static void encode_frame_to_data_rate
 
 #endif
 
-    // Set the count for maximum consequative dropped frames based upon the ratio of
+    // Set the count for maximum consecutive dropped frames based upon the ratio of
     // this frame size to the target average per frame bandwidth.
     // (cpi->av_per_frame_bandwidth > 0) is just a sanity check to prevent / 0.
     if (cpi->drop_frames_allowed && (cpi->av_per_frame_bandwidth > 0))
@@ -4270,12 +4531,31 @@ static void encode_frame_to_data_rate
     cpi->long_rolling_actual_bits = ((cpi->long_rolling_actual_bits * 31) + cpi->projected_frame_size + 16) / 32;
 
     // Actual bits spent
-    cpi->total_actual_bits    += cpi->projected_frame_size;
+    cpi->total_actual_bits += cpi->projected_frame_size;
 
     // Debug stats
     cpi->total_target_vs_actual += (cpi->this_frame_target - cpi->projected_frame_size);
 
     cpi->buffer_level = cpi->bits_off_target;
+
+    // Propagate values to higher temporal layers
+    if (cpi->oxcf.number_of_layers > 1)
+    {
+        int i;
+
+        for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
+        {
+            LAYER_CONTEXT *lc = &cpi->layer_context[i];
+            int bits_off_for_this_layer = lc->target_bandwidth / lc->frame_rate
+                                                - cpi->projected_frame_size;
+
+            lc->bits_off_target += bits_off_for_this_layer;
+
+            lc->total_actual_bits += cpi->projected_frame_size;
+            lc->total_target_vs_actual += bits_off_for_this_layer;
+            lc->buffer_level = lc->bits_off_target;
+        }
+    }
 
     // Update bits left to the kf and gf groups to account for overshoot or undershoot on these frames
     if (cm->frame_type == KEY_FRAME)
@@ -4322,7 +4602,7 @@ static void encode_frame_to_data_rate
 
         vp8_clear_system_state();  //__asm emms;
 
-        if (cpi->twopass.total_left_stats.coded_error != 0.0)
+        if (cpi->twopass.total_left_stats->coded_error != 0.0)
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6d %6d"
                        "%6d %6d %6d %5d %5d %5d %8d %8.2f %10d %10.3f"
                        "%10.3f %8d\n",
@@ -4340,9 +4620,9 @@ static void encode_frame_to_data_rate
                        cm->frame_type, cpi->gfu_boost,
                        cpi->twopass.est_max_qcorrection_factor,
                        (int)cpi->twopass.bits_left,
-                       cpi->twopass.total_left_stats.coded_error,
+                       cpi->twopass.total_left_stats->coded_error,
                        (double)cpi->twopass.bits_left /
-                           cpi->twopass.total_left_stats.coded_error,
+                           cpi->twopass.total_left_stats->coded_error,
                        cpi->tot_recode_hits);
         else
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d %6d %6d"
@@ -4362,7 +4642,7 @@ static void encode_frame_to_data_rate
                        cm->frame_type, cpi->gfu_boost,
                        cpi->twopass.est_max_qcorrection_factor,
                        (int)cpi->twopass.bits_left,
-                       cpi->twopass.total_left_stats.coded_error,
+                       cpi->twopass.total_left_stats->coded_error,
                        cpi->tot_recode_hits);
 
         fclose(f);
@@ -4675,7 +4955,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             cm->refresh_golden_frame = 0;
             cm->refresh_last_frame = 0;
             cm->show_frame = 0;
-            cpi->source_alt_ref_pending = FALSE;   // Clear Pending altf Ref flag.
+            cpi->source_alt_ref_pending = FALSE;  // Clear Pending alt Ref flag.
             cpi->is_src_frame_alt_ref = 0;
         }
     }
@@ -4727,6 +5007,13 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         return -1;
     }
 
+    // Restore layer specific context if necessary
+    if (cpi->oxcf.number_of_layers > 1)
+    {
+        restore_layer_context (cpi,
+           cpi->oxcf.layer_id[cm->current_video_frame % cpi->oxcf.periodicity]);
+    }
+
     if (cpi->source->ts_start < cpi->first_time_stamp_ever)
     {
         cpi->first_time_stamp_ever = cpi->source->ts_start;
@@ -4734,7 +5021,16 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     }
 
     // adjust frame rates based on timestamps given
-    if (!cm->refresh_alt_ref_frame)
+    if (cpi->oxcf.number_of_layers > 1 )
+    {
+        vp8_new_frame_rate (
+              cpi, cpi->layer_context[cpi->current_layer].frame_rate);
+
+        cpi->last_time_stamp_seen = cpi->source->ts_start;
+        cpi->last_end_time_stamp_seen = cpi->source->ts_end;
+
+    }
+    else if (!cm->refresh_alt_ref_frame)
     {
         int64_t this_duration;
         int step = 0;
@@ -4786,7 +5082,8 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     if (cpi->compressor_speed == 2)
     {
-        check_gf_quality(cpi);
+        if (cpi->oxcf.number_of_layers == 1)
+            check_gf_quality(cpi);
         vpx_usec_timer_start(&tsctimer);
         vpx_usec_timer_start(&ticktimer);
     }
@@ -4893,6 +5190,10 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     }
 
+    // Save layer specific state
+    if (cpi->oxcf.number_of_layers > 1)
+        save_layer_context (cpi);
+
     vpx_usec_timer_mark(&cmptimer);
     cpi->time_compress_data += vpx_usec_timer_elapsed(&cmptimer);
 
@@ -4922,7 +5223,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 int y_samples = orig->y_height * orig->y_width ;
                 int uv_samples = orig->uv_height * orig->uv_width ;
                 int t_samples = y_samples + 2 * uv_samples;
-                int64_t sq_error;
+                int64_t sq_error, sq_error2;
 
                 ye = calc_plane_error(orig->y_buffer, orig->y_stride,
                   recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height,
@@ -4964,14 +5265,14 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                       pp->v_buffer, pp->uv_stride, orig->uv_width, orig->uv_height,
                       IF_RTCD(&cpi->rtcd.variance));
 
-                    sq_error = ye + ue + ve;
+                    sq_error2 = ye + ue + ve;
 
-                    frame_psnr2 = vp8_mse2psnr(t_samples, 255.0, sq_error);
+                    frame_psnr2 = vp8_mse2psnr(t_samples, 255.0, sq_error2);
 
                     cpi->totalp_y += vp8_mse2psnr(y_samples, 255.0, ye);
                     cpi->totalp_u += vp8_mse2psnr(uv_samples, 255.0, ue);
                     cpi->totalp_v += vp8_mse2psnr(uv_samples, 255.0, ve);
-                    cpi->total_sq_error2 += sq_error;
+                    cpi->total_sq_error2 += sq_error2;
                     cpi->totalp  += frame_psnr2;
 
                     frame_ssim2 = vp8_calc_ssim(cpi->Source,
@@ -4981,6 +5282,24 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                     cpi->summed_quality += frame_ssim2 * weight;
                     cpi->summed_weights += weight;
 
+                    if (cpi->oxcf.number_of_layers > 1)
+                    {
+                         int i;
+
+                         for (i=cpi->current_layer;
+                                       i<cpi->oxcf.number_of_layers; i++)
+                         {
+                             cpi->frames_in_layer[i]++;
+
+                             cpi->bytes_in_layer[i] += *size;
+                             cpi->sum_psnr[i]       += frame_psnr;
+                             cpi->sum_psnr_p[i]     += frame_psnr2;
+                             cpi->total_error2[i]   += sq_error;
+                             cpi->total_error2_p[i] += sq_error2;
+                             cpi->sum_ssim[i]       += frame_ssim2 * weight;
+                             cpi->sum_weights[i]    += weight;
+                         }
+                    }
                 }
             }
 
@@ -4989,10 +5308,30 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 double y, u, v, frame_all;
                 frame_all =  vp8_calc_ssimg(cpi->Source, cm->frame_to_show,
                     &y, &u, &v, IF_RTCD(&cpi->rtcd.variance));
-                cpi->total_ssimg_y += y;
-                cpi->total_ssimg_u += u;
-                cpi->total_ssimg_v += v;
-                cpi->total_ssimg_all += frame_all;
+
+                if (cpi->oxcf.number_of_layers > 1)
+                {
+                    int i;
+
+                    for (i=cpi->current_layer;
+                         i<cpi->oxcf.number_of_layers; i++)
+                    {
+                        if (!cpi->b_calculate_psnr)
+                            cpi->frames_in_layer[i]++;
+
+                        cpi->total_ssimg_y_in_layer[i] += y;
+                        cpi->total_ssimg_u_in_layer[i] += u;
+                        cpi->total_ssimg_v_in_layer[i] += v;
+                        cpi->total_ssimg_all_in_layer[i] += frame_all;
+                    }
+                }
+                else
+                {
+                    cpi->total_ssimg_y += y;
+                    cpi->total_ssimg_u += u;
+                    cpi->total_ssimg_v += v;
+                    cpi->total_ssimg_all += frame_all;
+                }
             }
 
         }
