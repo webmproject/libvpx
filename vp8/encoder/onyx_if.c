@@ -489,8 +489,8 @@ static void init_seg_features(VP8_COMP *cpi)
         return;
     }
 
-    // Disable and clear down for KF,ARF and low Q
-    if ( cm->frame_type == KEY_FRAME || cm->refresh_alt_ref_frame )
+    // Disable and clear down for KF
+    if ( cm->frame_type == KEY_FRAME  )
     {
         // Clear down the global segmentation map
         vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
@@ -499,59 +499,117 @@ static void init_seg_features(VP8_COMP *cpi)
 
         // Disable segmentation
         vp8_disable_segmentation((VP8_PTR)cpi);
+
+        // Clear down the segment features.
+        clearall_segfeatures(xd);
     }
 
-    // First normal frame in a valid alt ref group and we dont have low Q
-    else if ( cpi->source_alt_ref_active &&
-              (cpi->common.frames_since_golden == 1) )
+    // If this is an alt ref frame
+    else if ( cm->refresh_alt_ref_frame )
     {
-        // Low Q test (only use segmentation at high q)
-        if ( ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
-               (cpi->cq_target_quality > 56 ) ) ||
-             (cpi->ni_av_qi > 64) )
-        {
-            xd->segment_feature_data[1][SEG_LVL_REF_FRAME] = LAST_FRAME;
-            xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
-            xd->segment_feature_data[1][SEG_LVL_EOB] = 10;
-            xd->segment_feature_data[1][SEG_LVL_ALT_Q] = 10;
-            xd->segment_feature_data[1][SEG_LVL_ALT_LF] = -5;
+        // Clear down the global segmentation map
+        vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
+        xd->update_mb_segmentation_map = 0;
+        xd->update_mb_segmentation_data = 0;
 
-            // Enable target features is the segment feature mask
-            enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
-            enable_segfeature(xd, 1, SEG_LVL_MODE);
-            enable_segfeature(xd, 1, SEG_LVL_EOB);
+        // Disable segmentation and individual segment features by default
+        vp8_disable_segmentation((VP8_PTR)cpi);
+        clearall_segfeatures(xd);
+
+        // Scan frames from current to arf frame.
+        // This function re-enables segmentation if appropriate.
+        vp8_update_mbgraph_stats(cpi);
+
+        // If segmentation was enabled set those features needed for the
+        // arf itself.
+        if ( xd->segmentation_enabled )
+        {
+            xd->update_mb_segmentation_map = 1;
+            xd->update_mb_segmentation_data = 1;
+
+            xd->segment_feature_data[1][SEG_LVL_ALT_Q] = -3;
+            xd->segment_feature_data[1][SEG_LVL_ALT_LF] = -2;
+
             enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
             enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
             // Where relevant assume segment data is delta data
             xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
-
-            // Scan frames from current to arf frame and define segmentation
-            vp8_update_mbgraph_stats(cpi);
         }
     }
-    // Normal frames if segmentation got enabled.
+
+    // All other frames if segmentation has been enabled
     else if ( xd->segmentation_enabled )
     {
-        // Special case where we are coding over the top of a previous
-        // alt ref frame
-        if ( cpi->is_src_frame_alt_ref )
+        // First normal frame in a valid gf or alt ref group
+        if ( cpi->common.frames_since_golden == 0 )
         {
-            if ( cpi->source_alt_ref_pending )
+            // Set up segment features for normal frames in an af group
+            if ( cpi->source_alt_ref_active )
             {
+                xd->update_mb_segmentation_map = 0;
                 xd->update_mb_segmentation_data = 1;
-                xd->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+                xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
+
+                xd->segment_feature_data[1][SEG_LVL_ALT_Q] = 5;
+                xd->segment_feature_data[1][SEG_LVL_ALT_LF] = -2;
+
+                enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
+                enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
+
+                if ( ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+                       (cpi->cq_target_quality > 56 ) ) ||
+                     (cpi->ni_av_qi > 64) )
+                {
+                    xd->segment_feature_data[1]
+                                            [SEG_LVL_REF_FRAME] = LAST_FRAME;
+                    xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
+                    xd->segment_feature_data[1][SEG_LVL_EOB] = 15;
+
+                    enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
+                    enable_segfeature(xd, 1, SEG_LVL_MODE);
+                    enable_segfeature(xd, 1, SEG_LVL_EOB);
+                }
             }
+
+            // Disable segmentation and clear down features if alt ref
+            // is not active for this group
             else
             {
+                vp8_disable_segmentation((VP8_PTR)cpi);
+
                 vpx_memset( cpi->segmentation_map, 0,
                             (cm->mb_rows * cm->mb_cols));
-                xd->update_mb_segmentation_map = 1;
-                xd->update_mb_segmentation_data = 1;
+
+                xd->update_mb_segmentation_map = 0;
+                xd->update_mb_segmentation_data = 0;
+
+                clearall_segfeatures(xd);
             }
         }
+
+        // Special case where we are coding over the top of a previous
+        // alt ref frame
+        else if ( cpi->is_src_frame_alt_ref )
+        {
+            // Enable mode and ref frame features for segment 0 as well
+            enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);
+            enable_segfeature(xd, 0, SEG_LVL_MODE);
+
+            // All mbs should use ALTREF_FRAME, ZEROMV
+            xd->segment_feature_data[0][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+            xd->segment_feature_data[0][SEG_LVL_MODE] = ZEROMV;
+            xd->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+            xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
+
+            // Enable data udpate
+            xd->update_mb_segmentation_data = 1;
+        }
+        // All other frames.
         else
         {
+            // No updeates.. leave things as they are.
+            xd->update_mb_segmentation_map = 0;
             xd->update_mb_segmentation_data = 0;
         }
     }

@@ -143,6 +143,47 @@ static int do_16x16_motion_search
     return err;
 }
 
+static int do_16x16_zerozero_search
+(
+    VP8_COMP *cpi,
+    int_mv *dst_mv,
+    YV12_BUFFER_CONFIG *buf,
+    int buf_mb_y_offset,
+    YV12_BUFFER_CONFIG *ref,
+    int mb_y_offset
+)
+{
+    MACROBLOCK  * const x  = &cpi->mb;
+    MACROBLOCKD * const xd = &x->e_mbd;
+    unsigned int err, tmp_err;
+    int_mv tmp_mv;
+    int n;
+
+    for (n = 0; n < 16; n++) {
+        BLOCKD *d = &xd->block[n];
+        BLOCK *b  = &x->block[n];
+
+        b->base_src   = &buf->y_buffer;
+        b->src_stride = buf->y_stride;
+        b->src        = buf->y_stride * (n & 12) + (n & 3) * 4 + buf_mb_y_offset;
+
+        d->base_pre   = &ref->y_buffer;
+        d->pre_stride = ref->y_stride;
+        d->pre        = ref->y_stride * (n & 12) + (n & 3) * 4 + mb_y_offset;
+    }
+
+    // Try zero MV first
+    // FIXME should really use something like near/nearest MV and/or MV prediction
+    xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
+    xd->pre.y_stride = ref->y_stride;
+    VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+                    (ref->y_buffer + mb_y_offset,
+                     ref->y_stride, xd->dst.y_buffer,
+                     xd->dst.y_stride, &err);
+    dst_mv->as_int = 0;
+
+    return err;
+}
 static int find_best_16x16_intra
 (
     VP8_COMP *cpi,
@@ -227,10 +268,17 @@ static void update_mbgraph_mb_stats
     // Alt-ref frame MV search, if it exists and is different than last/golden frame
     if (alt_ref)
     {
-        int a_motion_error = do_16x16_motion_search(cpi, prev_alt_ref_mv,
-                                                    &stats->ref[ALTREF_FRAME].m.mv,
-                                                    buf, mb_y_offset,
-                                                    alt_ref, arf_y_offset);
+        //int a_motion_error = do_16x16_motion_search(cpi, prev_alt_ref_mv,
+        //                                            &stats->ref[ALTREF_FRAME].m.mv,
+        //                                            buf, mb_y_offset,
+        //                                            alt_ref, arf_y_offset);
+
+        int a_motion_error =
+                do_16x16_zerozero_search( cpi,
+                                          &stats->ref[ALTREF_FRAME].m.mv,
+                                          buf, mb_y_offset,
+                                          alt_ref, arf_y_offset);
+
         stats->ref[ALTREF_FRAME].err = a_motion_error;
     }
     else
@@ -312,6 +360,15 @@ static void update_mbgraph_frame_stats
     }
 }
 
+// Test for small magnitude (<= 1 pel mvs)
+int small_mv( MV mv )
+{
+    if ( (abs( (int)mv.col ) > 2) || (abs( (int)mv.row ) > 2) )
+        return FALSE;
+    else
+        return TRUE;
+}
+
 //void separate_arf_mbs_byzz
 void separate_arf_mbs
 (
@@ -350,16 +407,15 @@ void separate_arf_mbs
                 int altref_err = mb_stats->ref[ALTREF_FRAME].err;
 
                 int intra_err  =
-                    ((mb_stats->ref[INTRA_FRAME ].err * 9) >> 3);
+                    mb_stats->ref[INTRA_FRAME ].err + 250;
 
                 int golden_err =
-                    250 + ((mb_stats->ref[GOLDEN_FRAME].err * 9) >> 3);
+                    mb_stats->ref[GOLDEN_FRAME].err + 250;
 
                 // Test for altref vs intra and gf and that its mv was 0,0.
-                if ( mb_stats->ref[ALTREF_FRAME].m.mv.as_int ||
-                     ( (altref_err > 500) &&
-                       ( (altref_err > (intra_err >> 2)) ||
-                         (altref_err > golden_err) ) ) )
+                if ( (altref_err > 1000) ||
+                     (altref_err > intra_err) ||
+                     (altref_err > golden_err) )
                 {
                     arf_not_zz[offset + mb_col]++;
                 }
@@ -389,7 +445,8 @@ void separate_arf_mbs
     }
 
     // Only bother with segmentation if over 10% of the MBs in static segment
-    if ( ncnt[1] && (ncnt[0] / ncnt[1] < 10) )
+    //if ( ncnt[1] && (ncnt[0] / ncnt[1] < 10) )
+    if ( 1 )
     {
         cpi->mbgraph_use_arf_segmentation = ncnt[1];
         vp8_enable_segmentation((VP8_PTR) cpi);

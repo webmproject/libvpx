@@ -1987,20 +1987,32 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                     {
                         vp8_write_bit(bc, 1);
 
-                        // Encode the relevant feature data
-                        if (Data < 0)
+#if CONFIG_SEGFEATURES
+                        // Is the segment data signed..
+                        if ( is_segfeature_signed(i) )
+#else
+                        if ( 1 )
+#endif
                         {
-                            Data = - Data;
-                            vp8_write_literal(bc, Data,
-                                              mb_feature_data_bits[i]);
-                            vp8_write_bit(bc, 1);
+                            // Encode the relevant feature data
+                            if (Data < 0)
+                            {
+                                Data = - Data;
+                                vp8_write_literal(bc, Data,
+                                                  mb_feature_data_bits[i]);
+                                vp8_write_bit(bc, 1);
+                            }
+                            else
+                            {
+                                vp8_write_literal(bc, Data,
+                                                  mb_feature_data_bits[i]);
+                                vp8_write_bit(bc, 0);
+                            }
                         }
+                        // Unsigned data element so no sign bit needed
                         else
-                        {
                             vp8_write_literal(bc, Data,
                                               mb_feature_data_bits[i]);
-                            vp8_write_bit(bc, 0);
-                        }
                     }
                     else
                         vp8_write_bit(bc, 0);

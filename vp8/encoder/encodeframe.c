@@ -969,7 +969,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
 #if CONFIG_SEGFEATURES
 // debug output
-#if 0
+#if DBG_PRNT_SEGMAP
     {
         FILE *statsfile;
         statsfile = fopen("segmap2.stt", "a");

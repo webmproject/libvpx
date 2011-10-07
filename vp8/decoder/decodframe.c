@@ -1030,14 +1030,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         {
             xd->mb_segement_abs_delta = (unsigned char)vp8_read_bit(bc);
 
-            // Clear down feature data structure
-            vpx_memset(xd->segment_feature_data, 0,
-                       sizeof(xd->segment_feature_data));
-
 #if CONFIG_SEGFEATURES
-            // Clear down feature enabled masks
-            vpx_memset(xd->segment_feature_mask, 0,
-                       sizeof(xd->segment_feature_mask));
+            clearall_segfeatures( xd );
 
             // For each segmentation...
             for (j = 0; j < MAX_MB_SEGMENTS; j++)
@@ -1045,8 +1039,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 // For each of the segments features...
                 for (i = 0; i < SEG_LVL_MAX; i++)
                 {
-
 #else
+            // Clear down feature data structure
+            vpx_memset(xd->segment_feature_data, 0,
+                       sizeof(xd->segment_feature_data));
+
             // For each segmentation feature...
             for (i = 0; i < SEG_LVL_MAX; i++)
             {
@@ -1061,10 +1058,23 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                         // Update the feature data and mask
                         enable_segfeature(xd, j, i);
 #endif
-                        xd->segment_feature_data[j][i] = (signed char)vp8_read_literal(bc, mb_feature_data_bits[i]);
+                        xd->segment_feature_data[j][i] =
+                            (signed char)vp8_read_literal(
+                                             bc, mb_feature_data_bits[i]);
 
-                        if (vp8_read_bit(bc))
-                            xd->segment_feature_data[j][i] = -xd->segment_feature_data[j][i];
+#if CONFIG_SEGFEATURES
+                        // Is the segment data signed..
+                        if ( is_segfeature_signed(i) )
+#else
+                        if ( 1 )
+#endif
+                        {
+                            if (vp8_read_bit(bc))
+                            {
+                                xd->segment_feature_data[j][i] =
+                                    -xd->segment_feature_data[j][i];
+                            }
+                        }
                     }
                     else
                     {

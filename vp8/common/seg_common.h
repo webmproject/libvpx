@@ -18,6 +18,8 @@ int segfeature_active( MACROBLOCKD *xd,
                        int segment_id,
                        SEG_LVL_FEATURES feature_id );
 
+void clearall_segfeatures( MACROBLOCKD *xd );
+
 void enable_segfeature( MACROBLOCKD *xd,
                         int segment_id,
                         SEG_LVL_FEATURES feature_id );
@@ -25,6 +27,8 @@ void enable_segfeature( MACROBLOCKD *xd,
 void disable_segfeature( MACROBLOCKD *xd,
                          int segment_id,
                          SEG_LVL_FEATURES feature_id );
+
+int is_segfeature_signed( SEG_LVL_FEATURES feature_id );
 
 #endif /* __INC_SEG_COMMON_H__ */
 
