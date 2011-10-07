@@ -368,7 +368,7 @@ typedef struct VP8_COMP
 
     int buffered_mode;
 
-    int buffer_level;
+    int64_t buffer_level;
     int bits_off_target;
 
     int rolling_target_bits;
