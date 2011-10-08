@@ -449,6 +449,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
         else
 #endif
+        {
             if (xd->eobs[24] > 1)
             {
                 IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
@@ -471,6 +472,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 (xd->qcoeff, xd->block[0].dequant,
                 xd->predictor, xd->dst.y_buffer,
                 xd->dst.y_stride, xd->eobs, xd->block[24].diff);
+        }
     }
 #if CONFIG_T8X8
     if(xd->mode_info_context->mbmi.segment_id >= 2)
@@ -604,7 +606,7 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
         }
 
 #ifdef DEC_DEBUG
-        dec_debug = (pc->current_video_frame==5 && mb_row==2 && mb_col==3);
+        dec_debug = (pc->current_video_frame==0 && mb_row==1 && mb_col==11);
 #endif
         decode_macroblock(pbi, xd, mb_row * pc->mb_cols  + mb_col);
 
