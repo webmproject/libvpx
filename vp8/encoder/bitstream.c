@@ -1784,9 +1784,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     vp8_clear_system_state();  //__asm emms;
 
-    //************************************************
-    // save a copy for later refresh
+    if (pc->refresh_entropy_probs == 0)
     {
+        // save a copy for later refresh
         vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
     }
 
