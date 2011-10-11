@@ -19,6 +19,7 @@ extern "C"
 
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
+#include "vpx/vpx_encoder.h"
 #include "vpx_scale/yv12config.h"
 #include "type_aliases.h"
 #include "ppflags.h"
@@ -198,6 +199,14 @@ extern "C"
         struct vpx_codec_pkt_list  *output_pkt_list;
 
         vp8e_tuning tuning;
+
+        // Temporal scaling parameters
+        unsigned int number_of_layers;
+        unsigned int target_bitrate[MAX_PERIODICITY];
+        unsigned int rate_decimator[MAX_PERIODICITY];
+        unsigned int periodicity;
+        unsigned int layer_id[MAX_PERIODICITY];
+
     } VP8_CONFIG;
 
 
