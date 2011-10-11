@@ -43,7 +43,7 @@ extern "C" {
      * types, removing or reassigning enums, adding/removing/rearranging
      * fields to structures
      */
-#define VPX_ENCODER_ABI_VERSION (2 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
+#define VPX_ENCODER_ABI_VERSION (3 + VPX_CODEC_ABI_VERSION) /**<\hideinitializer*/
 
 
     /*! \brief Encoder capabilities bitfield
