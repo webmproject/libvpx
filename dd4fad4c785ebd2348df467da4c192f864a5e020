@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//yj0\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T23:51:10Z",
+      "side": 1,
+      "message": "must bump this version number since you added parameters.",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yj8\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T23:51:10Z",
+      "side": 1,
+      "message": "can\u0027t have conditionals in this structure.",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yj4\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T23:51:10Z",
+      "side": 1,
+      "message": "it needs to be (mostly) obvious how to use this feature from reading only this file. Need doxygen-style comments describing each of these fields, like the others have.",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
