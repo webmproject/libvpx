@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//ynw\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 445,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T22:51:57Z",
+      "side": 1,
+      "message": "should be w-\u003ebuffer not cx_data",
+      "revId": "b09fa3a3255ab57060765893e81749ee61880d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yns\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T22:51:57Z",
+      "side": 1,
+      "message": "w-\u003ebuffer",
+      "revId": "b09fa3a3255ab57060765893e81749ee61880d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//ynk\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 512,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T22:51:57Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "b09fa3a3255ab57060765893e81749ee61880d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yno\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 559,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T22:51:57Z",
+      "side": 1,
+      "message": "w-\u003ebuffer",
+      "revId": "b09fa3a3255ab57060765893e81749ee61880d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//ynM\u003d",
+        "filename": "vp8/encoder/bitstream.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T22:51:57Z",
+      "side": 1,
+      "message": "should be a,b,unused,c,d until the asm gets updated.",
+      "revId": "b09fa3a3255ab57060765893e81749ee61880d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yoM\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 4925,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T22:51:57Z",
+      "side": 1,
+      "message": "should also clear the cpi-\u003ecommon.error.setjmp flag in this block",
+      "revId": "b09fa3a3255ab57060765893e81749ee61880d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yog\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 801,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T22:51:57Z",
+      "side": 1,
+      "message": "move this inside and to the top of the while loop, changing the \u0026\u0026 -1 from its condition to an if(...)break; that way you don\u0027t have to duplicate this code.",
+      "revId": "b09fa3a3255ab57060765893e81749ee61880d0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
