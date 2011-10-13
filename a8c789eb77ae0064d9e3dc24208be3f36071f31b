@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//yqg\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T21:32:50Z",
+      "side": 1,
+      "message": "this file should be private to the codec and not used in the public interface.",
+      "revId": "a8c789eb77ae0064d9e3dc24208be3f36071f31b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yqY\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-13T21:32:50Z",
+      "side": 1,
+      "message": "these types should be defined in this file as some opaque buffer type.. if the application doesn\u0027t need to manage the storage for these, you can just make them void *.",
+      "revId": "a8c789eb77ae0064d9e3dc24208be3f36071f31b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
