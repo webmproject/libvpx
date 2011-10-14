@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//yP0\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-14T16:30:27Z",
+      "side": 1,
+      "message": "Good point. Must\u0027ve been confused myself. Will change this.",
+      "parentUuid": "AAAAFn//yRA\u003d",
+      "revId": "02b99245c5b85c6bc11601db8abde51a0c8024f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//yQ4\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//yPo\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-14T16:30:27Z",
+      "side": 1,
+      "message": "I think this is unclear because I haven\u0027t clearly defined what a chunk is. If partitions[0] includes more than the first partition (i.e., the first chunk includes more than one partition), I want to cut out everything which isn\u0027t a part of the first partition and move that data to the right pointers.",
+      "parentUuid": "AAAAFn//yQ4\u003d",
+      "revId": "02b99245c5b85c6bc11601db8abde51a0c8024f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//yQo\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2011-10-14T16:01:46Z",
       "side": 1,
       "message": "it\u0027s not clear what the boundary conditions of this chunking are. If the chunking can be at arbitrary points in the compressed data, then I\u0027m not sure read_available_partition_size() is robust against that.. what happens if a chunk boundary falls in the middle of the partition sizes element or something?",
+      "revId": "02b99245c5b85c6bc11601db8abde51a0c8024f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yPk\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-14T16:30:27Z",
+      "side": 1,
+      "message": "Chunk n must contain at least all data belonging to partition n, and can also contain data from partitions \u003e n. So we can for example have:\n[0]: part0 + part1\n[1]: empty\n[2]: part2 + half of part3\n[3]: other half of part3\n[4]: part4\n\nTherefore there is no risk of having the partition sizes element split over two chunks.",
+      "parentUuid": "AAAAFn//yQo\u003d",
       "revId": "02b99245c5b85c6bc11601db8abde51a0c8024f9",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
