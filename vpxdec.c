@@ -303,7 +303,7 @@ static int read_frame(struct input_ctx      *input,
 
     *buf_sz = new_buf_sz;
 
-    if (*buf_sz)
+    if (!feof(infile))
     {
         if (fread(*buf, 1, *buf_sz, infile) != *buf_sz)
         {
