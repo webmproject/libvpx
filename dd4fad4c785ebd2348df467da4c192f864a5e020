@@ -2,6 +2,91 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAFn//yiQ\u003d",
+        "filename": "vp8_scalable_patterns.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T00:04:42Z",
+      "side": 1,
+      "message": "I\u0027m having a hard time following this example since it seems to test both temporal scalability and mv reuse. Need to factor these out better either into smaller functions or even their own files, and make it runtime selectable.",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yjE\u003d",
+        "filename": "vp8_scalable_patterns.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T00:04:42Z",
+      "side": 1,
+      "message": "use the (w + 15) \u0026 -15 idiom that\u0027s used elsewhere in the codec",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yjM\u003d",
+        "filename": "vp8_scalable_patterns.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T00:04:42Z",
+      "side": 1,
+      "message": "what is this magic constant?",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yjI\u003d",
+        "filename": "vp8_scalable_patterns.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T00:04:42Z",
+      "side": 1,
+      "message": "unnecessary free()",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yiM\u003d",
+        "filename": "vp8_scalable_patterns.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T00:04:42Z",
+      "side": 1,
+      "message": "stray //",
+      "revId": "dd4fad4c785ebd2348df467da4c192f864a5e020",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//yj0\u003d",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 3
