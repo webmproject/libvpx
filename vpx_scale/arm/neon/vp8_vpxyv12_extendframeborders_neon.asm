@@ -75,12 +75,13 @@ copy_left_right_y
     mul             r8, r4, lr              ; plane_height * plane_stride
 
     ; copy width is plane_stride
-    mov             r12, lr, lsr #7         ; plane_stride / 128
+    movs            r12, lr, lsr #7         ; plane_stride / 128
 
     sub             r1, r1, #32             ; src_ptr1 = y_buffer - Border
     add             r6, r1, r8              ; dest_ptr2 = src_ptr2 - plane_stride (src_ptr1 + (plane_height * plane_stride))
     sub             r2, r6, lr              ; src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride
     sub             r5, r1, lr, asl #5      ; dest_ptr1 = src_ptr1 - (Border * plane_stride)
+    ble             extra_y_copy_needed     ; plane stride < 128
 
 copy_top_bottom_y
     vld1.8          {q0, q1}, [r1]!
@@ -119,6 +120,7 @@ top_bottom_32
     subs            r12, r12, #1
     bne             copy_top_bottom_y
 
+extra_y_copy_needed
     mov             r7, lr, lsr #4          ; check to see if extra copy is needed
     ands            r7, r7, #0x7
     bne             extra_top_bottom_y
@@ -184,12 +186,13 @@ copy_left_right_uv
 ;Now copy the top and bottom source lines into each line of the respective borders
     mov             r1, r7
     mul             r8, r4, lr              ; plane_height * plane_stride
-    mov             r12, lr, lsr #6         ; plane_stride / 64
+    movs            r12, lr, lsr #6         ; plane_stride / 64
 
     sub             r1, r1, #16             ; src_ptr1 = u_buffer - Border
     add             r6, r1, r8              ; dest_ptr2 = src_ptr2 + plane_stride (src_ptr1 + (plane_height * plane_stride)
     sub             r2, r6, lr              ; src_ptr2 = src_ptr1 + (plane_height * plane_stride) - plane_stride
     sub             r5, r1, lr, asl #4      ; dest_ptr1 = src_ptr1 - (Border * plane_stride)
+    ble             extra_uv_copy_needed    ; plane_stride < 64
 
 copy_top_bottom_uv
     vld1.8          {q0, q1}, [r1]!
@@ -219,7 +222,7 @@ top_bottom_16
 
     subs            r12, r12, #1
     bne             copy_top_bottom_uv
-
+extra_uv_copy_needed
     mov             r7, lr, lsr #3          ; check to see if extra copy is needed
     ands            r7, r7, #0x7
     bne             extra_top_bottom_uv

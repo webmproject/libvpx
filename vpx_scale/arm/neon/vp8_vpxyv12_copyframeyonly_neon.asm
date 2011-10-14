@@ -42,7 +42,8 @@ cp_src_to_dst_height_loop
     mov             r9, r3
     add             r10, r2, r6
     add             r11, r3, r7
-    mov             r12, r5, lsr #7
+    movs            r12, r5, lsr #7
+    ble             extra_cp_needed   ; y_width < 128
 
 cp_src_to_dst_width_loop
     vld1.8          {q0, q1}, [r8]!
@@ -73,6 +74,7 @@ cp_src_to_dst_width_loop
 
     bne             cp_src_to_dst_height_loop
 
+extra_cp_needed
     ands            r10, r5, #0x7f                  ;check to see if extra copy is needed
     sub             r11, r5, r10
     ldr             r2, [r0, #yv12_buffer_config_y_buffer]       ;srcptr1
@@ -419,7 +421,8 @@ cp_src_to_dst_height_loop1
     mov             r9, r3
     add             r10, r2, r6
     add             r11, r3, r7
-    mov             r12, r5, lsr #7
+    movs            r12, r5, lsr #7
+    ble             extra_copy_needed   ; y_width < 128
 
 cp_src_to_dst_width_loop1
     vld1.8          {q0, q1}, [r8]!
@@ -450,6 +453,7 @@ cp_src_to_dst_width_loop1
 
     bne             cp_src_to_dst_height_loop1
 
+extra_copy_needed
     ands            r10, r5, #0x7f                  ;check to see if extra copy is needed
     sub             r11, r5, r10
     ldr             r2, [r0, #yv12_buffer_config_y_buffer]       ;srcptr1
