@@ -65,7 +65,7 @@
 numparts_loop
     ldr     r10, [sp, #40]              ; ptr
     ldr     r5,  [sp, #36]              ; move mb_rows to the counting section
-    sub     r5, r5, r11                 ; move start point with each partition
+    subs    r5, r5, r11                 ; move start point with each partition
                                         ; mb_rows starts at i
     str     r5,  [sp, #12]
 
@@ -79,6 +79,8 @@ numparts_loop
     str     r2,  [r0, #vp8_writer_value]
     str     r2,  [r0, #vp8_writer_pos]
     str     r10, [r0, #vp8_writer_buffer]
+
+    ble     end_partition               ; if (mb_rows <= 0) end partition
 
 mb_row_loop
 
@@ -344,6 +346,7 @@ check_p_lt_stop
     str     r6, [sp, #12]
     bgt     mb_row_loop
 
+end_partition
     mov     r12, #32
 
 stop_encode_loop
