@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//yEA\u003d",
+        "filename": "vpx_scale/arm/neon/vp8_vpxyv12_copyframeyonly_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-14T19:13:28Z",
+      "side": 1,
+      "message": "where is cpsr getting set?",
+      "revId": "8ffc58c3df04dd931059c8f5ace28ee66d3c345d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yD0\u003d",
+        "filename": "vpx_scale/arm/neon/vp8_vpxyv12_copyframeyonly_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-14T19:13:28Z",
+      "side": 1,
+      "message": "in x86 assembly, we can prepend a period and make the label local to the current function. would that work for arm? would clean up the naming",
+      "revId": "8ffc58c3df04dd931059c8f5ace28ee66d3c345d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
