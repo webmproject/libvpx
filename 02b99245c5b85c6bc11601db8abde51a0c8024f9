@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//yRA\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T16:01:46Z",
+      "side": 1,
+      "message": "I\u0027m confused by this (see below). the first partition size is in the bitstream.",
+      "revId": "02b99245c5b85c6bc11601db8abde51a0c8024f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yQ4\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T16:01:46Z",
+      "side": 1,
+      "message": "what\u0027s the difference between first_part_size and partition_sizes[0] here? can you add a comment to say what you\u0027re trying to catch here?",
+      "revId": "02b99245c5b85c6bc11601db8abde51a0c8024f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//yQo\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 518,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-14T16:01:46Z",
+      "side": 1,
+      "message": "it\u0027s not clear what the boundary conditions of this chunking are. If the chunking can be at arbitrary points in the compressed data, then I\u0027m not sure read_available_partition_size() is robust against that.. what happens if a chunk boundary falls in the middle of the partition sizes element or something?",
+      "revId": "02b99245c5b85c6bc11601db8abde51a0c8024f9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
