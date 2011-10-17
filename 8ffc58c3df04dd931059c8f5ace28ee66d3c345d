@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//xws\u003d",
+        "filename": "vpx_scale/arm/neon/vp8_vpxyv12_copyframeyonly_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-17T11:41:31Z",
+      "side": 1,
+      "message": "oops, it should have been in the preceding mov. i have to come up with tests for all the changed functions.\n\nvp8_yv12_copy_frame_yonly_neon does not seem to be used anywhere",
+      "parentUuid": "AAAAFn//yEA\u003d",
+      "revId": "8ffc58c3df04dd931059c8f5ace28ee66d3c345d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//yD0\u003d",
         "filename": "vpx_scale/arm/neon/vp8_vpxyv12_copyframeyonly_neon.asm",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2011-10-14T19:13:28Z",
       "side": 1,
       "message": "in x86 assembly, we can prepend a period and make the label local to the current function. would that work for arm? would clean up the naming",
+      "revId": "8ffc58c3df04dd931059c8f5ace28ee66d3c345d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xww\u003d",
+        "filename": "vpx_scale/arm/neon/vp8_vpxyv12_copyframeyonly_neon.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-17T11:41:31Z",
+      "side": 1,
+      "message": "prepend a number for arm, 0-99...but it is not allowed by gas.\nmaybe some perl guru could replace labels in ads2gas",
+      "parentUuid": "AAAAFn//yD0\u003d",
       "revId": "8ffc58c3df04dd931059c8f5ace28ee66d3c345d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
