@@ -6,16 +6,18 @@ SCALE_SRCS-yes += vpxscale.h
 SCALE_SRCS-yes += generic/vpxscale.c
 SCALE_SRCS-yes += generic/yv12config.c
 SCALE_SRCS-yes += generic/yv12extend.c
+SCALE_SRCS-yes += generic/yv12extend_generic.h
 SCALE_SRCS-yes += generic/scalesystemdependent.c
 SCALE_SRCS-$(CONFIG_SPATIAL_RESAMPLING) += generic/gen_scalers.c
 
 #arm
+SCALE_SRCS-$(HAVE_ARMV7)         += arm/yv12extend_arm.h
 SCALE_SRCS-$(HAVE_ARMV7)         += arm/scalesystemdependent.c
 SCALE_SRCS_REMOVE-$(HAVE_ARMV7)  += generic/scalesystemdependent.c
 
 #neon
 SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copyframe_func_neon$(ASM)
-SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copyframeyonly_neon$(ASM)
+SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copy_y_neon$(ASM)
 SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copysrcframe_func_neon$(ASM)
 SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_extendframeborders_neon$(ASM)
 SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/yv12extend_arm.c

@@ -12,23 +12,7 @@
 #include "vpx_config.h"
 #include "vpx_ports/arm.h"
 #include "vpx_scale/vpxscale.h"
-
-
-void (*vp8_yv12_extend_frame_borders_ptr)(YV12_BUFFER_CONFIG *ybf);
-extern void vp8_yv12_extend_frame_borders(YV12_BUFFER_CONFIG *ybf);
-extern void vp8_yv12_extend_frame_borders_neon(YV12_BUFFER_CONFIG *ybf);
-
-void (*vp8_yv12_copy_frame_yonly_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-extern void vp8_yv12_copy_frame_yonly(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-extern void vp8_yv12_copy_frame_yonly_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-
-void (*vp8_yv12_copy_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-extern void vp8_yv12_copy_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-extern void vp8_yv12_copy_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-
-/****************************************************************************
-*  Imports
-*****************************************************************************/
+#include "vpx_scale/yv12extend.h"
 
 /****************************************************************************
  *
@@ -78,9 +62,9 @@ void vp8_scale_machine_specific_config()
     */
 
 #if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-    vp8_yv12_extend_frame_borders_ptr      = vp8_yv12_extend_frame_borders;
-    vp8_yv12_copy_frame_yonly_ptr          = vp8_yv12_copy_frame_yonly;
-    vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame;
+    vp8_yv12_extend_frame_borders_ptr     = vp8_yv12_extend_frame_borders;
+    vp8_yv12_copy_y_ptr                   = vp8_yv12_copy_y_c;
+    vp8_yv12_copy_frame_ptr               = vp8_yv12_copy_frame;
 #endif
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -89,7 +73,7 @@ void vp8_scale_machine_specific_config()
 #endif
     {
         vp8_yv12_extend_frame_borders_ptr = vp8_yv12_extend_frame_borders_neon;
-        vp8_yv12_copy_frame_yonly_ptr     = vp8_yv12_copy_frame_yonly_neon;
+        vp8_yv12_copy_y_ptr               = vp8_yv12_copy_y_neon;
         vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame_neon;
     }
 #endif

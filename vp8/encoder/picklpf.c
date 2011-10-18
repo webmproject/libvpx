@@ -22,9 +22,6 @@
 #endif
 
 extern int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
-#if HAVE_ARMV7
-extern void vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -284,22 +281,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     int Bias = 0;                       // Bias against raising loop filter and in favour of lowering it
 
     //  Make a copy of the unfiltered / processed recon buffer
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
-#endif
-    {
-        vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(cm->frame_to_show, &cpi->last_frame_uf);
-    }
-#if CONFIG_RUNTIME_CPU_DETECT
-    else
-#endif
-#endif
-#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-    {
-        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf);
-    }
-#endif
+    vp8_yv12_copy_y_ptr(cm->frame_to_show, &cpi->last_frame_uf);
 
     if (cm->frame_type == KEY_FRAME)
         cm->sharpness_level = 0;
@@ -325,22 +307,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     filt_best = filt_mid;
 
     //  Re-instate the unfiltered frame
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
-#endif
-    {
-        vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
-    }
-#if CONFIG_RUNTIME_CPU_DETECT
-    else
-#endif
-#endif
-#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-    {
-        vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
-    }
-#endif
+    vp8_yv12_copy_y_ptr(&cpi->last_frame_uf, cm->frame_to_show);
 
     while (filter_step > 0)
     {
@@ -362,22 +329,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
             filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
 
             //  Re-instate the unfiltered frame
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
-#endif
-            {
-                vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
-            }
-#if CONFIG_RUNTIME_CPU_DETECT
-            else
-#endif
-#endif
-#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-            {
-                vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
-            }
-#endif
+            vp8_yv12_copy_y_ptr(&cpi->last_frame_uf, cm->frame_to_show);
 
             // If value is close to the best so far then bias towards a lower loop filter value.
             if ((filt_err - Bias) < best_err)
@@ -399,22 +351,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
             filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
 
             //  Re-instate the unfiltered frame
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
-#endif
-            {
-                vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
-            }
-#if CONFIG_RUNTIME_CPU_DETECT
-            else
-#endif
-#endif
-#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-            {
-                vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
-            }
-#endif
+            vp8_yv12_copy_y_ptr(&cpi->last_frame_uf, cm->frame_to_show);
 
             // Was it better than the previous best?
             if (filt_err < (best_err - Bias))
