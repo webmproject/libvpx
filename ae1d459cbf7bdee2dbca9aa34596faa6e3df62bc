@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//xM4\u003d",
+        "filename": "vp8/common/reconinter.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 599,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "Does this go away when the same changes are made in the encoder as the decoder?",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMw\u003d",
+        "filename": "vp8/common/x86/idctllm_sse2.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "I vote a comment on this ;)   its way out of place with the code around it.   Seems to have something to do with adjusting an adder.",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMs\u003d",
+        "filename": "vp8/common/x86/recon_mmx.asm",
+        "patchSetId": 8
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "If the whole file is just filled with block copy functions maybe it shouldn\u0027t be called recon_mmx anymore?",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMo\u003d",
+        "filename": "vp8/decoder/arm/armv6/idct_blk_v6.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "seems to me you don\u0027t need 2 ifs statements to do this - even a dumb switch avoids an if ( not sure if its faster )..   \nswitch (eobs[0])\n\nI won\u0027t repeat this comment for every where",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMk\u003d",
+        "filename": "vp8/decoder/arm/dequantize_arm.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "I think this change should be reverted.  This file didn\u0027t change!",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "I think doesn\u0027t require two ifs - not sure if a switch is faster ...  \nswitch (xd-\u003eeobs[i])  ....",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMQ\u003d",
+        "filename": "vp8/decoder/x86/idct_blk_mmx.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "switch again?  not sure if its better?",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMM\u003d",
+        "filename": "vp8/decoder/x86/idct_blk_sse2.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "comment  ?   0xfefe means both blocks have only one coefficient.. Goes for everytime you do it.",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//xMI\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 593,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-18T14:47:56Z",
+      "side": 1,
+      "message": "I hope we can use the decoders version soon -- 2 versions of this same function seems silly to me.",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
