@@ -29,12 +29,11 @@ extern int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest,
 #define IF_RTCD(x) NULL
 #endif
 
-extern void
-(*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
-                                   YV12_BUFFER_CONFIG *dst_ybc,
-                                   int Fraction);
-void
-vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction)
+extern void (*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
+                                               YV12_BUFFER_CONFIG *dst_ybc);
+
+void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
+                                 YV12_BUFFER_CONFIG *dst_ybc)
 {
     unsigned char *src_y, *dst_y;
     int yheight;
@@ -47,21 +46,26 @@ vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst
     yheight  = src_ybc->y_height;
     ystride  = src_ybc->y_stride;
 
-    linestocopy = (yheight >> (Fraction + 4));
+    /* number of MB rows to use in partial filtering */
+    linestocopy = (yheight >> 4) / PARTIAL_FRAME_FRACTION;
+    linestocopy = linestocopy ? linestocopy << 4 : 16;     /* 16 lines per MB */
 
-    if (linestocopy < 1)
-        linestocopy = 1;
-
-    linestocopy <<= 4;
-
-    yoffset  = ystride * ((yheight >> 5) * 16 - 8);
+    /* Copy extra 4 so that full filter context is available if filtering done
+     * on the copied partial frame and not original. Partial filter does mb
+     * filtering for top row also, which can modify3 pixels above.
+     */
+    linestocopy += 4;
+    /* partial image starts at ~middle of frame (macroblock border)*/
+    yoffset  = ystride * (((yheight >> 5) * 16) - 4);
     src_y = src_ybc->y_buffer + yoffset;
     dst_y = dst_ybc->y_buffer + yoffset;
 
-    vpx_memcpy(dst_y, src_y, ystride *(linestocopy + 16));
+    vpx_memcpy(dst_y, src_y, ystride * linestocopy);
 }
 
-static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, int Fraction, const vp8_variance_rtcd_vtable_t *rtcd)
+static int calc_partial_ssl_err(YV12_BUFFER_CONFIG *source,
+                                YV12_BUFFER_CONFIG *dest,
+                                const vp8_variance_rtcd_vtable_t *rtcd)
 {
     int i, j;
     int Total = 0;
@@ -69,17 +73,16 @@ static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONF
     unsigned char *src = source->y_buffer;
     unsigned char *dst = dest->y_buffer;
 
-    int linestocopy = (source->y_height >> (Fraction + 4));
-    (void)rtcd;
+    int linestocopy;
 
-    if (linestocopy < 1)
-        linestocopy = 1;
-
-    linestocopy <<= 4;
+    /* number of MB rows to use in partial filtering */
+    linestocopy = (source->y_height >> 4) / PARTIAL_FRAME_FRACTION;
+    linestocopy = linestocopy ? linestocopy << 4 : 16;     /* 16 lines per MB */
 
 
-    srcoffset = source->y_stride   * (dest->y_height >> 5) * 16;
-    dstoffset = dest->y_stride     * (dest->y_height >> 5) * 16;
+    /* partial image starts at ~middle of frame (macroblock border)*/
+    srcoffset = source->y_stride * ((dest->y_height >> 5) * 16);
+    dstoffset = dest->y_stride   * ((dest->y_height >> 5) * 16);
 
     src += srcoffset;
     dst += dstoffset;
@@ -90,7 +93,9 @@ static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONF
         for (j = 0; j < source->y_width; j += 16)
         {
             unsigned int sse;
-            Total += VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
+            Total += VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride,
+                                                     dst + j, dest->y_stride,
+                                                     &sse);
         }
 
         src += 16 * source->y_stride;
@@ -105,7 +110,8 @@ static int get_min_filter_level(VP8_COMP *cpi, int base_qindex)
 {
     int min_filter_level;
 
-    if (cpi->source_alt_ref_active && cpi->common.refresh_golden_frame && !cpi->common.refresh_alt_ref_frame)
+    if (cpi->source_alt_ref_active && cpi->common.refresh_golden_frame &&
+        !cpi->common.refresh_alt_ref_frame)
         min_filter_level = 0;
     else
     {
@@ -148,7 +154,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     int best_filt_val = cm->filter_level;
 
     //  Make a copy of the unfiltered / processed recon buffer
-    vp8_yv12_copy_partial_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf, 3);
+    vp8_yv12_copy_partial_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf);
 
     if (cm->frame_type == KEY_FRAME)
         cm->sharpness_level = 0;
@@ -173,10 +179,10 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     // Get the err using the previous frame's filter value.
     vp8_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
-    best_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3, IF_RTCD(&cpi->rtcd.variance));
+    best_err = calc_partial_ssl_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
 
     //  Re-instate the unfiltered frame
-    vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
+    vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show);
 
     filt_val -= (1 + ((filt_val > 10) ? 1 : 0));
 
@@ -187,11 +193,10 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         vp8_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
         // Get the err for filtered frame
-        filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3, IF_RTCD(&cpi->rtcd.variance));
+        filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
 
         //  Re-instate the unfiltered frame
-        vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
-
+        vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show);
 
         // Update the best case record or exit loop.
         if (filt_err < best_err)
@@ -220,10 +225,10 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
             vp8_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
             // Get the err for filtered frame
-            filt_err = vp8_calc_partial_ssl_err(sd, cm->frame_to_show, 3, IF_RTCD(&cpi->rtcd.variance));
+            filt_err = calc_partial_ssl_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
 
             //  Re-instate the unfiltered frame
-            vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show, 3);
+            vp8_yv12_copy_partial_frame_ptr(&cpi->last_frame_uf, cm->frame_to_show);
 
             // Update the best case record or exit loop.
             if (filt_err < best_err)

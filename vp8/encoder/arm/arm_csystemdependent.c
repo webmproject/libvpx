@@ -14,9 +14,9 @@
 #include "vp8/encoder/variance.h"
 #include "vp8/encoder/onyx_int.h"
 
-extern void (*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
-extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
-extern void vpxyv12_copy_partial_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction);
+extern void (*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
+extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
+extern void vp8_yv12_copy_partial_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 
 void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 {
@@ -123,15 +123,15 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;
         cpi->rtcd.quantize.fastquantb_pair       = vp8_fast_quantize_b_pair_neon;
     }
-#endif
+#endif /* HAVE_ARMV7 */
+#endif /* CONFIG_RUNTIME_CPU_DETECT */
 
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
     if (flags & HAS_NEON)
 #endif
     {
-        vp8_yv12_copy_partial_frame_ptr = vpxyv12_copy_partial_frame_neon;
+        vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame_neon;
     }
-#endif
 #endif
 }
