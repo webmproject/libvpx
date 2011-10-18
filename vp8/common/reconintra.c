@@ -17,16 +17,6 @@
 /* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *x) and
  * vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
  */
-void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
-{
-    int i;
-
-    for (i = 16; i < 24; i += 2)
-    {
-        BLOCKD *b = &x->block[i];
-        RECON_INVOKE(rtcd, recon2)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
-    }
-}
 
 void vp8_build_intra_predictors_mby(MACROBLOCKD *x)
 {

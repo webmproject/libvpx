@@ -37,7 +37,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
     if (flags & HAS_MMX)
     {
-        rtcd->idct.idct1        = vp8_short_idct4x4llm_1_mmx;
         rtcd->idct.idct16       = vp8_short_idct4x4llm_mmx;
         rtcd->idct.idct1_scalar_add = vp8_dc_only_idct_add_mmx;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_mmx;
@@ -45,7 +44,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
 
 
-        rtcd->recon.recon       = vp8_recon_b_mmx;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_mmx;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_mmx;
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_mmx;
@@ -81,8 +79,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
     if (flags & HAS_SSE2)
     {
-        rtcd->recon.recon2      = vp8_recon2b_sse2;
-        rtcd->recon.recon4      = vp8_recon4b_sse2;
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_sse2;
         rtcd->recon.build_intra_predictors_mbuv =
             vp8_build_intra_predictors_mbuv_sse2;

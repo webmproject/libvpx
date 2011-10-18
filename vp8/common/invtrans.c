@@ -12,6 +12,21 @@
 #include "invtrans.h"
 
 
+void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b,
+                             int pitch)
+{
+    if (b->eob > 1)
+    {
+        IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->predictor, pitch,
+              *(b->base_dst) + b->dst, b->dst_stride);
+    }
+    else
+    {
+        IDCT_INVOKE(rtcd, idct1_scalar_add)(b->dqcoeff[0], b->predictor, pitch,
+                         *(b->base_dst) + b->dst, b->dst_stride);
+    }
+
+}
 
 static void recon_dcblock(MACROBLOCKD *x)
 {
@@ -25,15 +40,6 @@ static void recon_dcblock(MACROBLOCKD *x)
 
 }
 
-void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch)
-{
-    if (b->eob > 1)
-        IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->diff, pitch);
-    else
-        IDCT_INVOKE(rtcd, idct1)(b->dqcoeff, b->diff, pitch);
-}
-
-
 void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 {
     int i;
@@ -45,7 +51,7 @@ void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *
 
     for (i = 0; i < 16; i++)
     {
-        vp8_inverse_transform_b(rtcd, &x->block[i], 32);
+        vp8_inverse_transform_b(rtcd, &x->block[i], 16);
     }
 
 }
@@ -55,34 +61,10 @@ void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD 
 
     for (i = 16; i < 24; i++)
     {
-        vp8_inverse_transform_b(rtcd, &x->block[i], 16);
+        vp8_inverse_transform_b(rtcd, &x->block[i], 8);
     }
 
 }
 
 
-void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
-{
-    int i;
 
-    if (x->mode_info_context->mbmi.mode != B_PRED &&
-        x->mode_info_context->mbmi.mode != SPLITMV)
-    {
-        /* do 2nd order transform on the dc block */
-
-        IDCT_INVOKE(rtcd, iwalsh16)(&x->block[24].dqcoeff[0], x->block[24].diff);
-        recon_dcblock(x);
-    }
-
-    for (i = 0; i < 16; i++)
-    {
-        vp8_inverse_transform_b(rtcd, &x->block[i], 32);
-    }
-
-
-    for (i = 16; i < 24; i++)
-    {
-        vp8_inverse_transform_b(rtcd, &x->block[i], 16);
-    }
-
-}

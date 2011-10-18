@@ -45,7 +45,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_armv6;
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_armv6;
 
-        rtcd->idct.idct1        = vp8_short_idct4x4llm_1_v6;
         rtcd->idct.idct16       = vp8_short_idct4x4llm_v6_dual;
         rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_v6;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_v6;
@@ -64,9 +63,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_v6;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_v6;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_v6;
-        rtcd->recon.recon       = vp8_recon_b_armv6;
-        rtcd->recon.recon2      = vp8_recon2b_armv6;
-        rtcd->recon.recon4      = vp8_recon4b_armv6;
     }
 #endif
 
@@ -82,7 +78,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_neon;
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_neon;
 
-        rtcd->idct.idct1        = vp8_short_idct4x4llm_1_neon;
         rtcd->idct.idct16       = vp8_short_idct4x4llm_neon;
         rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_neon;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_neon;
@@ -99,10 +94,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_neon;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_neon;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_neon;
-        rtcd->recon.recon       = vp8_recon_b_neon;
-        rtcd->recon.recon2      = vp8_recon2b_neon;
-        rtcd->recon.recon4      = vp8_recon4b_neon;
-        rtcd->recon.recon_mb    = vp8_recon_mb_neon;
         rtcd->recon.build_intra_predictors_mby =
             vp8_build_intra_predictors_mby_neon;
         rtcd->recon.build_intra_predictors_mby_s =

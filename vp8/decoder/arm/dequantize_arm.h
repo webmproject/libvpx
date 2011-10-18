@@ -49,6 +49,7 @@ extern prototype_dequant_dc_idct_add_y_block(vp8_dequant_dc_idct_add_y_block_neo
 extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block_neon);
 extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_neon);
 
+
 #if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_dequant_block
 #define vp8_dequant_block vp8_dequantize_b_neon
@@ -68,6 +69,7 @@ extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_neon);
 #undef vp8_dequant_idct_add_uv_block
 #define vp8_dequant_idct_add_uv_block vp8_dequant_idct_add_uv_block_neon
 #endif
+
 #endif
 
 #endif

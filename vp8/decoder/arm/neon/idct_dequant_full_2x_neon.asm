@@ -15,32 +15,30 @@
     PRESERVE8
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
-;void idct_dequant_full_2x_neon(short *q, short *dq, unsigned char *pre,
-;                               unsigned char *dst, int pitch, int stride);
+;void idct_dequant_full_2x_neon(short *q, short *dq,
+;                               unsigned char *dst, int stride);
 ; r0    *q,
 ; r1    *dq,
-; r2    *pre
-; r3    *dst
-; sp    pitch
-; sp+4  stride
+; r2    *dst
+; r3    stride
 |idct_dequant_full_2x_neon| PROC
     vld1.16         {q0, q1}, [r1]          ; dq (same l/r)
     vld1.16         {q2, q3}, [r0]          ; l q
-    ldr             r1, [sp]                ; pitch
     add             r0, r0, #32
     vld1.16         {q4, q5}, [r0]          ; r q
     add             r12, r2, #4
+
     ; interleave the predictors
-    vld1.32         {d28[0]}, [r2], r1      ; l pre
-    vld1.32         {d28[1]}, [r12], r1     ; r pre
-    vld1.32         {d29[0]}, [r2], r1
-    vld1.32         {d29[1]}, [r12], r1
-    vld1.32         {d30[0]}, [r2], r1
-    vld1.32         {d30[1]}, [r12], r1
-    vld1.32         {d31[0]}, [r2]
+    vld1.32         {d28[0]}, [r2],  r3     ; l pre
+    vld1.32         {d28[1]}, [r12], r3     ; r pre
+    vld1.32         {d29[0]}, [r2],  r3
+    vld1.32         {d29[1]}, [r12], r3
+    vld1.32         {d30[0]}, [r2],  r3
+    vld1.32         {d30[1]}, [r12], r3
+    vld1.32         {d31[0]}, [r2],  r3
     vld1.32         {d31[1]}, [r12]
 
-    adr             r2, cospi8sqrt2minus1   ; pointer to the first constant
+    adr             r1, cospi8sqrt2minus1   ; pointer to the first constant
 
     ; dequant: q[i] = q[i] * dq[i]
     vmul.i16        q2, q2, q0
@@ -48,7 +46,7 @@
     vmul.i16        q4, q4, q0
     vmul.i16        q5, q5, q1
 
-    vld1.16         {d0}, [r2]
+    vld1.16         {d0}, [r1]
 
     ; q2: l0r0  q3: l8r8
     ; q4: l4r4  q5: l12r12
@@ -168,22 +166,23 @@
     sub             r0, r0, #32
     vst1.16         {q14, q15}, [r0]        ; write over low input
 
+    sub             r2, r2, r3, lsl #2      ; dst - 4*stride
+    add             r1, r2, #4              ; hi
+
     ;saturate and narrow
     vqmovun.s16     d0, q4                  ; lo
     vqmovun.s16     d1, q5
     vqmovun.s16     d2, q6                  ; hi
     vqmovun.s16     d3, q7
 
-    ldr             r1, [sp, #4]            ; stride
-    add             r2, r3, #4              ; hi
-    vst1.32         {d0[0]}, [r3], r1       ; lo
-    vst1.32         {d0[1]}, [r2], r1       ; hi
-    vst1.32         {d1[0]}, [r3], r1
-    vst1.32         {d1[1]}, [r2], r1
-    vst1.32         {d2[0]}, [r3], r1
-    vst1.32         {d2[1]}, [r2], r1
-    vst1.32         {d3[0]}, [r3]
-    vst1.32         {d3[1]}, [r2]
+    vst1.32         {d0[0]}, [r2], r3       ; lo
+    vst1.32         {d0[1]}, [r1], r3       ; hi
+    vst1.32         {d1[0]}, [r2], r3
+    vst1.32         {d1[1]}, [r1], r3
+    vst1.32         {d2[0]}, [r2], r3
+    vst1.32         {d2[1]}, [r1], r3
+    vst1.32         {d3[0]}, [r2]
+    vst1.32         {d3[1]}, [r1]
 
     bx             lr
 

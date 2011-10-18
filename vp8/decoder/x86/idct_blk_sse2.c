@@ -13,102 +13,115 @@
 #include "vp8/decoder/dequantize.h"
 
 void vp8_idct_dequant_dc_0_2x_sse2
-            (short *q, short *dq, unsigned char *pre,
+            (short *q, short *dq,
              unsigned char *dst, int dst_stride, short *dc);
 void vp8_idct_dequant_dc_full_2x_sse2
-            (short *q, short *dq, unsigned char *pre,
+            (short *q, short *dq,
              unsigned char *dst, int dst_stride, short *dc);
 
 void vp8_idct_dequant_0_2x_sse2
-            (short *q, short *dq ,unsigned char *pre,
-             unsigned char *dst, int dst_stride, int blk_stride);
+            (short *q, short *dq ,
+             unsigned char *dst, int dst_stride);
 void vp8_idct_dequant_full_2x_sse2
-            (short *q, short *dq ,unsigned char *pre,
-             unsigned char *dst, int dst_stride, int blk_stride);
+            (short *q, short *dq ,
+             unsigned char *dst, int dst_stride);
 
 void vp8_dequant_dc_idct_add_y_block_sse2
-            (short *q, short *dq, unsigned char *pre,
+            (short *q, short *dq,
              unsigned char *dst, int stride, char *eobs, short *dc)
 {
     int i;
 
     for (i = 0; i < 4; i++)
     {
-        if (((short *)(eobs))[0] & 0xfefe)
-            vp8_idct_dequant_dc_full_2x_sse2 (q, dq, pre, dst, stride, dc);
-        else
-            vp8_idct_dequant_dc_0_2x_sse2 (q, dq, pre, dst, stride, dc);
+        if (((short *)(eobs))[0])
+        {
+            if (((short *)(eobs))[0] & 0xfefe)
+                vp8_idct_dequant_dc_full_2x_sse2 (q, dq, dst, stride, dc);
+            else
+                vp8_idct_dequant_dc_0_2x_sse2 (q, dq, dst, stride, dc);
+        }
 
-        if (((short *)(eobs))[1] & 0xfefe)
-            vp8_idct_dequant_dc_full_2x_sse2 (q+32, dq, pre+8, dst+8, stride, dc+2);
-        else
-            vp8_idct_dequant_dc_0_2x_sse2 (q+32, dq, pre+8, dst+8, stride, dc+2);
-
+        if (((short *)(eobs))[1])
+        {
+            if (((short *)(eobs))[1] & 0xfefe)
+                vp8_idct_dequant_dc_full_2x_sse2 (q+32, dq, dst+8, stride, dc+2);
+            else
+                vp8_idct_dequant_dc_0_2x_sse2 (q+32, dq, dst+8, stride, dc+2);
+        }
         q    += 64;
         dc   += 4;
-        pre  += 64;
         dst  += stride*4;
         eobs += 4;
     }
 }
 
 void vp8_dequant_idct_add_y_block_sse2
-            (short *q, short *dq, unsigned char *pre,
+            (short *q, short *dq,
              unsigned char *dst, int stride, char *eobs)
 {
     int i;
 
     for (i = 0; i < 4; i++)
     {
-        if (((short *)(eobs))[0] & 0xfefe)
-            vp8_idct_dequant_full_2x_sse2 (q, dq, pre, dst, stride, 16);
-        else
-            vp8_idct_dequant_0_2x_sse2 (q, dq, pre, dst, stride, 16);
-
-        if (((short *)(eobs))[1] & 0xfefe)
-            vp8_idct_dequant_full_2x_sse2 (q+32, dq, pre+8, dst+8, stride, 16);
-        else
-            vp8_idct_dequant_0_2x_sse2 (q+32, dq, pre+8, dst+8, stride, 16);
-
+        if (((short *)(eobs))[0])
+        {
+            if (((short *)(eobs))[0] & 0xfefe)
+                vp8_idct_dequant_full_2x_sse2 (q, dq, dst, stride);
+            else
+                vp8_idct_dequant_0_2x_sse2 (q, dq, dst, stride);
+        }
+        if (((short *)(eobs))[1])
+        {
+            if (((short *)(eobs))[1] & 0xfefe)
+                vp8_idct_dequant_full_2x_sse2 (q+32, dq, dst+8, stride);
+            else
+                vp8_idct_dequant_0_2x_sse2 (q+32, dq, dst+8, stride);
+        }
         q    += 64;
-        pre  += 64;
         dst  += stride*4;
         eobs += 4;
     }
 }
 
 void vp8_dequant_idct_add_uv_block_sse2
-            (short *q, short *dq, unsigned char *pre,
+            (short *q, short *dq,
              unsigned char *dstu, unsigned char *dstv, int stride, char *eobs)
 {
-    if (((short *)(eobs))[0] & 0xfefe)
-        vp8_idct_dequant_full_2x_sse2 (q, dq, pre, dstu, stride, 8);
-    else
-        vp8_idct_dequant_0_2x_sse2 (q, dq, pre, dstu, stride, 8);
-
+    if (((short *)(eobs))[0])
+    {
+        if (((short *)(eobs))[0] & 0xfefe)
+            vp8_idct_dequant_full_2x_sse2 (q, dq, dstu, stride);
+        else
+            vp8_idct_dequant_0_2x_sse2 (q, dq, dstu, stride);
+    }
     q    += 32;
-    pre  += 32;
     dstu += stride*4;
 
-    if (((short *)(eobs))[1] & 0xfefe)
-        vp8_idct_dequant_full_2x_sse2 (q, dq, pre, dstu, stride, 8);
-    else
-        vp8_idct_dequant_0_2x_sse2 (q, dq, pre, dstu, stride, 8);
-
+    if (((short *)(eobs))[1])
+    {
+        if (((short *)(eobs))[1] & 0xfefe)
+            vp8_idct_dequant_full_2x_sse2 (q, dq, dstu, stride);
+        else
+            vp8_idct_dequant_0_2x_sse2 (q, dq, dstu, stride);
+    }
     q    += 32;
-    pre  += 32;
 
-    if (((short *)(eobs))[2] & 0xfefe)
-        vp8_idct_dequant_full_2x_sse2 (q, dq, pre, dstv, stride, 8);
-    else
-        vp8_idct_dequant_0_2x_sse2 (q, dq, pre, dstv, stride, 8);
-
+    if (((short *)(eobs))[2])
+    {
+        if (((short *)(eobs))[2] & 0xfefe)
+            vp8_idct_dequant_full_2x_sse2 (q, dq, dstv, stride);
+        else
+            vp8_idct_dequant_0_2x_sse2 (q, dq, dstv, stride);
+    }
     q    += 32;
-    pre  += 32;
     dstv += stride*4;
 
-    if (((short *)(eobs))[3] & 0xfefe)
-        vp8_idct_dequant_full_2x_sse2 (q, dq, pre, dstv, stride, 8);
-    else
-        vp8_idct_dequant_0_2x_sse2 (q, dq, pre, dstv, stride, 8);
+    if (((short *)(eobs))[3])
+    {
+      if (((short *)(eobs))[3] & 0xfefe)
+          vp8_idct_dequant_full_2x_sse2 (q, dq, dstv, stride);
+      else
+          vp8_idct_dequant_0_2x_sse2 (q, dq, dstv, stride);
+    }
 }

@@ -50,14 +50,17 @@ sym(vp8_dequantize_b_impl_mmx):
     ret
 
 
-;void dequant_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride)
+;void dequant_idct_add_mmx(
+;short *input,            0
+;short *dq,               1
+;unsigned char *dest,     2
+;int stride)              3
 global sym(vp8_dequant_idct_add_mmx)
 sym(vp8_dequant_idct_add_mmx):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
+    SHADOW_ARGS_TO_STACK 4
     GET_GOT     rbx
-    push        rsi
     push        rdi
     ; end prolog
 
@@ -77,8 +80,8 @@ sym(vp8_dequant_idct_add_mmx):
         movq        mm3,    [rax+24]
         pmullw      mm3,    [rdx+24]
 
-        mov         rdx,    arg(3) ;dest
-        mov         rsi,    arg(2) ;pred
+        mov         rdx,    arg(2) ;dest
+
         pxor        mm7,    mm7
 
 
@@ -89,8 +92,7 @@ sym(vp8_dequant_idct_add_mmx):
         movq        [rax+24],mm7
 
 
-        movsxd      rax,            dword ptr arg(4) ;pitch
-        movsxd      rdi,            dword ptr arg(5) ;stride
+        movsxd      rdi,            dword ptr arg(3) ;stride
 
         psubw       mm0,            mm2             ; b1= 0-2
         paddw       mm2,            mm2             ;
@@ -211,28 +213,27 @@ sym(vp8_dequant_idct_add_mmx):
 
         pxor        mm7,            mm7
 
-        movd        mm4,            [rsi]
+        movd        mm4,            [rdx]
         punpcklbw   mm4,            mm7
         paddsw      mm0,            mm4
         packuswb    mm0,            mm7
         movd        [rdx],          mm0
 
-        movd        mm4,            [rsi+rax]
+        movd        mm4,            [rdx+rdi]
         punpcklbw   mm4,            mm7
         paddsw      mm1,            mm4
         packuswb    mm1,            mm7
         movd        [rdx+rdi],      mm1
 
-        movd        mm4,            [rsi+2*rax]
+        movd        mm4,            [rdx+2*rdi]
         punpcklbw   mm4,            mm7
         paddsw      mm2,            mm4
         packuswb    mm2,            mm7
         movd        [rdx+rdi*2],    mm2
 
         add         rdx,            rdi
-        add         rsi,            rax
 
-        movd        mm4,            [rsi+2*rax]
+        movd        mm4,            [rdx+2*rdi]
         punpcklbw   mm4,            mm7
         paddsw      mm5,            mm4
         packuswb    mm5,            mm7
@@ -240,22 +241,24 @@ sym(vp8_dequant_idct_add_mmx):
 
     ; begin epilog
     pop rdi
-    pop rsi
     RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp
     ret
 
 
-;void dequant_dc_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc)
+;void dequant_dc_idct_add_mmx(
+;short *input,          0
+;short *dq,             1
+;unsigned char *dest,   2
+;int stride,            3
+;int Dc)                4
 global sym(vp8_dequant_dc_idct_add_mmx)
 sym(vp8_dequant_dc_idct_add_mmx):
     push        rbp
     mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 7
+    SHADOW_ARGS_TO_STACK 5
     GET_GOT     rbx
-    push        rsi
-    push        rdi
     ; end prolog
 
         mov         rax,    arg(0) ;input
@@ -273,8 +276,7 @@ sym(vp8_dequant_dc_idct_add_mmx):
         movq        mm3,    [rax+24]
         pmullw      mm3,    [rdx+24]
 
-        mov         rdx,    arg(3) ;dest
-        mov         rsi,    arg(2) ;pred
+        mov         rdx,    arg(2) ;pred
         pxor        mm7,    mm7
 
 
@@ -286,13 +288,12 @@ sym(vp8_dequant_dc_idct_add_mmx):
 
         ; move lower word of Dc to lower word of mm0
         psrlq       mm0,    16
-        movzx       rcx,    word ptr arg(6) ;Dc
+        movzx       rcx,    word ptr arg(4) ;Dc
         psllq       mm0,    16
         movq        mm7,    rcx
         por         mm0,    mm7
 
-        movsxd      rax,            dword ptr arg(4) ;pitch
-        movsxd      rdi,            dword ptr arg(5) ;stride
+        movsxd      rax,            dword ptr arg(3) ;stride
 
         psubw       mm0,            mm2             ; b1= 0-2
         paddw       mm2,            mm2             ;
@@ -413,36 +414,33 @@ sym(vp8_dequant_dc_idct_add_mmx):
 
         pxor        mm7,            mm7
 
-        movd        mm4,            [rsi]
+        movd        mm4,            [rdx]
         punpcklbw   mm4,            mm7
         paddsw      mm0,            mm4
         packuswb    mm0,            mm7
         movd        [rdx],          mm0
 
-        movd        mm4,            [rsi+rax]
+        movd        mm4,            [rdx+rax]
         punpcklbw   mm4,            mm7
         paddsw      mm1,            mm4
         packuswb    mm1,            mm7
-        movd        [rdx+rdi],      mm1
+        movd        [rdx+rax],      mm1
 
-        movd        mm4,            [rsi+2*rax]
+        movd        mm4,            [rdx+2*rax]
         punpcklbw   mm4,            mm7
         paddsw      mm2,            mm4
         packuswb    mm2,            mm7
-        movd        [rdx+rdi*2],    mm2
+        movd        [rdx+rax*2],    mm2
 
-        add         rdx,            rdi
-        add         rsi,            rax
+        add         rdx,            rax
 
-        movd        mm4,            [rsi+2*rax]
+        movd        mm4,            [rdx+2*rax]
         punpcklbw   mm4,            mm7
         paddsw      mm5,            mm4
         packuswb    mm5,            mm7
-        movd        [rdx+rdi*2],    mm5
+        movd        [rdx+rax*2],    mm5
 
     ; begin epilog
-    pop rdi
-    pop rsi
     RESTORE_GOT
     UNSHADOW_ARGS
     pop         rbp

@@ -621,9 +621,8 @@ void vp8_conceal_corrupt_mb(MACROBLOCKD *xd)
 {
     /* This macroblock has corrupt residual, use the motion compensated
        image (predictor) for concealment */
-    vp8_recon_copy16x16(xd->predictor, 16, xd->dst.y_buffer, xd->dst.y_stride);
-    vp8_recon_copy8x8(xd->predictor + 256, 8,
-                      xd->dst.u_buffer, xd->dst.uv_stride);
-    vp8_recon_copy8x8(xd->predictor + 320, 8,
-                      xd->dst.v_buffer, xd->dst.uv_stride);
+
+    /* The build predictor functions now output directly into the dst buffer,
+     * so the copies are no longer necessary */
+
 }
