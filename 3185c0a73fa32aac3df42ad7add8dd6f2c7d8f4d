@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//wIw\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-19T22:06:31Z",
+      "side": 1,
+      "message": "isn\u0027t it only 2? only p1/p0 should be written out for the normal loopfilter\n\nhowever, i\u0027m contemplating a change where the loopfilter would be called on the copy instead of the original. initially, this will allow one less copy (don\u0027t need to copy the original back at the end), but hopefully there are some other benefits that could be realized as well.\n\nwhat this means is that the copy will need all the context: 4 lines above.\n\nbut ... the MB horizontal loopfilter doesn\u0027t get run for mb_row \u003c 0 .. oh wait, partial frame is different.",
+      "revId": "3185c0a73fa32aac3df42ad7add8dd6f2c7d8f4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
