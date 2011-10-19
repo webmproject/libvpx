@@ -1753,7 +1753,7 @@ int main(int argc, const char **argv_)
     for (pass = one_pass_only ? one_pass_only - 1 : 0; pass < arg_passes; pass++)
     {
         int frames_in = 0, frames_out = 0;
-        unsigned long nbytes = 0;
+        int64_t nbytes = 0;
         struct detect_buffer detect;
 
         /* Parse certain options from the input file, if possible */
@@ -1970,8 +1970,8 @@ int main(int argc, const char **argv_)
                     frames_in++;
 
                 fprintf(stderr,
-                        "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
-                        arg_passes, frames_in, frames_out, nbytes);
+                        "\rPass %d/%d frame %4d/%-4d %7"PRId64"B \033[K",
+                        pass + 1, arg_passes, frames_in, frames_out, nbytes);
             }
             else
                 frame_avail = 0;
@@ -2065,9 +2065,10 @@ int main(int argc, const char **argv_)
         }
 
         fprintf(stderr,
-               "\rPass %d/%d frame %4d/%-4d %7ldB %7ldb/f %7"PRId64"b/s"
+               "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
                " %7lu %s (%.2f fps)\033[K", pass + 1,
-               arg_passes, frames_in, frames_out, nbytes, nbytes * 8 / frames_in,
+               arg_passes, frames_in, frames_out, nbytes,
+               (unsigned long)(nbytes * 8 / frames_in),
                nbytes * 8 *(int64_t)arg_framerate.num / arg_framerate.den / frames_in,
                cx_time > 9999999 ? cx_time / 1000 : cx_time,
                cx_time > 9999999 ? "ms" : "us",
