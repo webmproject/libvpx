@@ -106,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//wmo\u003d",
+        "filename": "vp8/decoder/arm/armv6/idct_blk_v6.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-10-19T07:44:23Z",
+      "side": 1,
+      "message": "Idea was to compare eobs[0] against \u00271\u0027 so that the compiler could generate conditional branch and link instructions. Though, switch case would work as well.\n\nI think this function could be made more efficient by arranging function parameters to dequant_dc_idct_add and dc_only_idct add so that common parameters are at the same position. This way we could reduce unnecessary mov instructions. For example, in dc_only_idct_add call dc[0] could be the fifth parameter and then third, fourth and fifth parameters would be in the same position. (First four parameters are passed in the registers on ARM). However, I would do this as a separate commit so that its influence on performance can be more easily evaluated.",
+      "parentUuid": "AAAAFn//xMo\u003d",
+      "revId": "ae1d459cbf7bdee2dbca9aa34596faa6e3df62bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//xMk\u003d",
         "filename": "vp8/decoder/arm/dequantize_arm.h",
         "patchSetId": 8
