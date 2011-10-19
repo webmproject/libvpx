@@ -18,7 +18,8 @@
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
-;void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
+;void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc,
+;                                   YV12_BUFFER_CONFIG *dst_ybc);
 
 |vp8_yv12_copy_frame_func_neon| PROC
     push            {r4 - r11, lr}
@@ -52,7 +53,8 @@ cp_src_to_dst_height_loop
     mov             r9, r3
     add             r10, r2, r6
     add             r11, r3, r7
-    mov             r12, r5, lsr #7
+    movs            r12, r5, lsr #7
+    ble             extra_cp_needed   ; y_width < 128
 
 cp_src_to_dst_width_loop
     vld1.8          {q0, q1}, [r8]!
@@ -83,6 +85,7 @@ cp_src_to_dst_width_loop
 
     bne             cp_src_to_dst_height_loop
 
+extra_cp_needed
     ands            r10, r5, #0x7f                  ;check to see if extra copy is needed
     sub             r11, r5, r10
     ldr             r2, [r0, #yv12_buffer_config_y_buffer]       ;srcptr1
@@ -110,7 +113,8 @@ cp_src_to_dst_height_uv_loop
     mov             r9, r3
     add             r10, r2, r6
     add             r11, r3, r7
-    mov             r12, r5, lsr #6
+    movs            r12, r5, lsr #6
+    ble             extra_uv_cp_needed
 
 cp_src_to_dst_width_uv_loop
     vld1.8          {q0, q1}, [r8]!
@@ -133,6 +137,7 @@ cp_src_to_dst_width_uv_loop
 
     bne             cp_src_to_dst_height_uv_loop
 
+extra_uv_cp_needed
     ands            r10, r5, #0x3f                  ;check to see if extra copy is needed
     sub             r11, r5, r10
     ldr             r2, [sp]        ;srcptr1
