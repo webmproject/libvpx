@@ -10,15 +10,12 @@
     EXPORT |vp8_dequant_idct_add_v6|
 
     AREA |.text|, CODE, READONLY
-;void vp8_dequant_idct_v6(short *input, short *dq, unsigned char *pred,
-; unsigned char *dest, int pitch, int stride)
-; r0 = input
+;void vp8_dequant_idct_v6(short *input, short *dq,
+;                         unsigned char *dest, int stride)
+; r0 = q
 ; r1 = dq
-; r2 = pred
-; r3 = dest
-; sp + 36 = pitch  ; +4 = 40
-; sp + 40 = stride  ; +4 = 44
-
+; r2 = dst
+; r3 = stride
 
 |vp8_dequant_idct_add_v6| PROC
     stmdb   sp!, {r4-r11, lr}
@@ -127,7 +124,7 @@ vp8_dequant_idct_loop2_v6
     usub16  r1, r12, r8
     uadd16  r8, r11, r6
     ldr     r9, c0x00040004
-    ldr     r12, [sp, #40]
+    ldr     r12, [sp]               ; get stride from stack
     uadd16  r6, r10, r8
     usub16  r7, r10, r8
     uadd16  r7, r7, r9
@@ -136,7 +133,7 @@ vp8_dequant_idct_loop2_v6
     usub16  r1, r14, r1
     uadd16  r10, r10, r9
     uadd16  r1, r1, r9
-    ldr     r11, [r2], r12
+    ldr     r11, [r2]               ; load input from dst
     mov     r8, r7, asr #3
     pkhtb   r9, r8, r10, asr #19
     mov     r8, r1, asr #3
@@ -148,9 +145,7 @@ vp8_dequant_idct_loop2_v6
     usat16  r9, #8, r9
     usat16  r8, #8, r8
     orr     r9, r8, r9, lsl #8
-    ldr     r11, [r2], r12
-    ldr     lr, [sp]
-    ldr     r12, [sp, #44]
+    ldr     r11, [r2, r12]          ; load input from dst
     mov     r7, r7, lsl #16
     mov     r1, r1, lsl #16
     mov     r10, r10, lsl #16
@@ -166,9 +161,8 @@ vp8_dequant_idct_loop2_v6
     usat16  r7, #8, r7
     usat16  r1, #8, r1
     orr     r1, r1, r7, lsl #8
-    str     r9, [lr], r12
-    str     r1, [lr], r12
-    str     lr, [sp]
+    str     r9, [r2], r12           ; store output to dst
+    str     r1, [r2], r12           ; store output to dst
     bne     vp8_dequant_idct_loop2_v6
 
 ; vpx_memset

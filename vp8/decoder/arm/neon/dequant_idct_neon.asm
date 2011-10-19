@@ -15,25 +15,24 @@
     PRESERVE8
 
     AREA ||.text||, CODE, READONLY, ALIGN=2
-;void vp8_dequant_idct_neon(short *input, short *dq, unsigned char *pred,
-;                           unsigned char *dest, int pitch, int stride)
+;void vp8_dequant_idct_add_neon(short *input, short *dq,
+;                           unsigned char *dest, int stride)
 ; r0    short *input,
 ; r1    short *dq,
-; r2    unsigned char *pred
-; r3    unsigned char *dest
-; sp    int pitch
-; sp+4  int stride
+; r2    unsigned char *dest
+; r3    int stride
 
 |vp8_dequant_idct_add_neon| PROC
     vld1.16         {q3, q4}, [r0]
     vld1.16         {q5, q6}, [r1]
-    ldr             r1, [sp]                ; pitch
-    vld1.32         {d14[0]}, [r2], r1
-    vld1.32         {d14[1]}, [r2], r1
-    vld1.32         {d15[0]}, [r2], r1
-    vld1.32         {d15[1]}, [r2]
 
-    ldr             r1, [sp, #4]            ; stride
+    add             r1, r2, r3              ; r1 = dest + stride
+    lsl             r3, #1                  ; 2x stride
+
+    vld1.32         {d14[0]}, [r2], r3
+    vld1.32         {d14[1]}, [r1], r3
+    vld1.32         {d15[0]}, [r2]
+    vld1.32         {d15[1]}, [r1]
 
     adr             r12, cospi8sqrt2minus1  ; pointer to the first constant
 
@@ -110,13 +109,16 @@
     vaddw.u8        q1, q1, d14
     vaddw.u8        q2, q2, d15
 
+    sub             r2, r2, r3
+    sub             r1, r1, r3
+
     vqmovun.s16     d0, q1
     vqmovun.s16     d1, q2
 
-    vst1.32         {d0[0]}, [r3], r1
-    vst1.32         {d0[1]}, [r3], r1
-    vst1.32         {d1[0]}, [r3], r1
-    vst1.32         {d1[1]}, [r3]
+    vst1.32         {d0[0]}, [r2], r3
+    vst1.32         {d0[1]}, [r1], r3
+    vst1.32         {d1[0]}, [r2]
+    vst1.32         {d1[1]}, [r1]
 
     bx             lr
 

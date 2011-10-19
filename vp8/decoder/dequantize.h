@@ -18,28 +18,28 @@
 
 #define prototype_dequant_idct_add(sym) \
     void sym(short *input, short *dq, \
-             unsigned char *pred, unsigned char *output, \
-             int pitch, int stride)
+             unsigned char *output, \
+             int stride)
 
 #define prototype_dequant_dc_idct_add(sym) \
     void sym(short *input, short *dq, \
-             unsigned char *pred, unsigned char *output, \
-             int pitch, int stride, \
+             unsigned char *dst, \
+             int stride, \
              int dc)
 
 #define prototype_dequant_dc_idct_add_y_block(sym) \
     void sym(short *q, short *dq, \
-             unsigned char *pre, unsigned char *dst, \
+             unsigned char *dst, \
              int stride, char *eobs, short *dc)
 
 #define prototype_dequant_idct_add_y_block(sym) \
     void sym(short *q, short *dq, \
-             unsigned char *pre, unsigned char *dst, \
+             unsigned char *dst, \
              int stride, char *eobs)
 
 #define prototype_dequant_idct_add_uv_block(sym) \
     void sym(short *q, short *dq, \
-             unsigned char *pre, unsigned char *dst_u, \
+             unsigned char *dst_u, \
              unsigned char *dst_v, int stride, char *eobs)
 
 #if ARCH_X86 || ARCH_X86_64
