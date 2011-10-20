@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//vrw\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "static",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vr0\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 450,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "hanging indent should be 4 spaces.",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vrg\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "you seem to only use write_is_valid in this context:\n\n  if write_is_valid(...)\n      write\n  else\n      bail\n\nand reuse the same error code and message everywhere. This could be absorbed into a single function, say validate_buffer, that takes a pointer to the error context, so that this becomes a one liner everywhere you check the buffer.",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vrY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 1569,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "need to validate the buffer size before advancing this pointer.",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vq4\u003d",
+        "filename": "vp8/encoder/boolhuff.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "should be a pointer",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vrU\u003d",
+        "filename": "vp8/encoder/boolhuff.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "this should be a static inline function (move the definition to this file)",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vrA\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 4929,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "should only need one setjmp. Make these other places pointers to an error context so you can say:\n\n  cpi-\u003ebc.error \u003d\u0026cpi-\u003ecommon.error;",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vq8\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 812,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T15:14:30Z",
+      "side": 1,
+      "message": "indent",
+      "revId": "0c809c4dda3f6f51a8864b4da89d36fafa96e416",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
