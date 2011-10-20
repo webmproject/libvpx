@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//wAA\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 582,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-10-20T00:04:27Z",
+      "side": 1,
+      "message": "yeah",
+      "parentUuid": "AAAAFn//wAg\u003d",
+      "revId": "9df01067862ba56c7bcf0d8db96e1098047ba62a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//wAQ\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2011-10-20T00:00:12Z",
       "side": 1,
       "message": "I think this can be done with out setting all 384  to 0",
+      "revId": "9df01067862ba56c7bcf0d8db96e1098047ba62a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//v/4\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 605,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-10-20T00:04:27Z",
+      "side": 1,
+      "message": "the code only sets the 16 2nd order coefficients to 0, and yes, the code can be speed up by only set the few non-zero coefficients to zero based on eob position here.",
+      "parentUuid": "AAAAFn//wAQ\u003d",
       "revId": "9df01067862ba56c7bcf0d8db96e1098047ba62a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
