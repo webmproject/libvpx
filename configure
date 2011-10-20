@@ -562,7 +562,8 @@ process_toolchain() {
 ##
 CONFIGURE_ARGS="$@"
 process "$@"
-cat <<EOF > ${BUILD_PFX}vpx_config.c
+print_webm_license ${BUILD_PFX}vpx_config.c "/*" " */"
+cat <<EOF >> ${BUILD_PFX}vpx_config.c
 static const char* const cfg = "$CONFIGURE_ARGS";
 const char *vpx_codec_build_config(void) {return cfg;}
 EOF
