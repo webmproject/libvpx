@@ -42,25 +42,6 @@ typedef struct
     int size;
 } DATARATE;
 
-typedef struct
-{
-    int const *scan;
-    UINT8 const *ptr_block2leftabove;
-    vp8_tree_index const *vp8_coef_tree_ptr;
-    unsigned char *norm_ptr;
-    UINT8 *ptr_coef_bands_x;
-
-    ENTROPY_CONTEXT_PLANES *A;
-    ENTROPY_CONTEXT_PLANES *L;
-
-    INT16 *qcoeff_start_ptr;
-    BOOL_DECODER *current_bc;
-
-    vp8_prob const *coef_probs[4];
-
-    UINT8 eob[25];
-
-} DETOK;
 
 typedef struct VP8Decompressor
 {
@@ -113,8 +94,6 @@ typedef struct VP8Decompressor
     int   ready_for_new_data;
 
     DATARATE dr[16];
-
-    DETOK detoken;
 
 #if CONFIG_RUNTIME_CPU_DETECT
     vp8_dequant_rtcd_vtable_t        dequant;
