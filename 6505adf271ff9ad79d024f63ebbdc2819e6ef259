@@ -34,6 +34,24 @@
       "revId": "6505adf271ff9ad79d024f63ebbdc2819e6ef259",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vbk\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-20T18:35:23Z",
+      "side": 0,
+      "message": "if you do this, can you update vp8_loop_filter_partial_frame too please? i put this in:\n\n    /* 3 is a magic number. 4 is probably magic too */\n    linestocopy \u003d (post-\u003ey_height \u003e\u003e (4 + 3));\n\nsee a04ed0e8f3c2005aacfad83939ac8af70a9221ef",
+      "parentUuid": "AAAAFn//vxc\u003d",
+      "revId": "6505adf271ff9ad79d024f63ebbdc2819e6ef259",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
