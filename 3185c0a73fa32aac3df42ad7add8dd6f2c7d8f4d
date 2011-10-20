@@ -16,6 +16,24 @@
       "revId": "3185c0a73fa32aac3df42ad7add8dd6f2c7d8f4d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vz0\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-20T07:00:13Z",
+      "side": 1,
+      "message": "i think normal filter can change p2 also.\ncould copy 4 if needed, still less than 16 ;)\n\nwhile we are at optimizing the level picking...normal (slow) level pick will do a full Y filtering, why dont we keep this filtered result once we picked the right level? we save one full Y copy plus a filtering. We would need only a chroma filtering at the end.\nupdate filter functions to support chroma only filtering.\n\nA problem is that lvl picking does also lvl\u003d0 filtering and in that case we still need to restore the original. I haven\u0027t got an explanation why is this done in the pick process...",
+      "parentUuid": "AAAAFn//wIw\u003d",
+      "revId": "3185c0a73fa32aac3df42ad7add8dd6f2c7d8f4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
