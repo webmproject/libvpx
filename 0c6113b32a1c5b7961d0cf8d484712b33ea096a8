@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//vd4\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 13
+      },
+      "lineNbr": 441,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T18:08:52Z",
+      "side": 1,
+      "message": "don\u0027t need this if() if validate_buffer will always longjmp on error (applies everywhere in this file)",
+      "revId": "0c6113b32a1c5b7961d0cf8d484712b33ea096a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//veY\u003d",
+        "filename": "vp8/encoder/boolhuff.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T18:08:52Z",
+      "side": 1,
+      "message": "hanging indent should be 4, or lined up with the opening paren",
+      "revId": "0c6113b32a1c5b7961d0cf8d484712b33ea096a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//veM\u003d",
+        "filename": "vp8/encoder/boolhuff.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-10-20T18:08:52Z",
+      "side": 1,
+      "message": "don\u0027t need this if() if validate_buffer will always longjmp on error.",
+      "revId": "0c6113b32a1c5b7961d0cf8d484712b33ea096a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
