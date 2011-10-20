@@ -16,6 +16,24 @@
       "revId": "6505adf271ff9ad79d024f63ebbdc2819e6ef259",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vxc\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-20T08:54:02Z",
+      "side": 0,
+      "message": "I was thinking the same, just use a define",
+      "parentUuid": "AAAAFn//wK0\u003d",
+      "revId": "6505adf271ff9ad79d024f63ebbdc2819e6ef259",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
