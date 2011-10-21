@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//vBU\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-10-21T05:20:59Z",
+      "side": 1,
+      "message": "ok, will add.",
+      "parentUuid": "AAAAFn//vBs\u003d",
+      "revId": "6487eb0a3ec6dfbb6c7ea0e89e4b661dc029fd9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//vBo\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2011-10-21T04:35:01Z",
       "side": 1,
       "message": "Why do we only do this if skip?  Can\u0027t we have a situation in which the 2nd order produces non 0\u0027s but all 0\u0027s occur after transform even if the first order has non 0 coefficients?",
+      "revId": "6487eb0a3ec6dfbb6c7ea0e89e4b661dc029fd9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vBg\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-10-21T05:20:59Z",
+      "side": 1,
+      "message": "The min-quantizer for first order (ac)  is 4, any nonzero first order  coefficient after dequantization has a magnitude least 4 or larger, which almost always produces non-zero output given the our implementation of idct has (x+4)\u003e\u003e3 as the last scaling stage.",
+      "parentUuid": "AAAAFn//vBo\u003d",
       "revId": "6487eb0a3ec6dfbb6c7ea0e89e4b661dc029fd9d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
