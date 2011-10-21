@@ -34,6 +34,24 @@
       "revId": "c6fb97a376e2df5864105b0b0fe8daea89dc46d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vAs\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-10-21T06:37:18Z",
+      "side": 0,
+      "message": "Good point! I removed the DETOK structure. At least it reduces size of the VP8Decompressor structure.",
+      "parentUuid": "AAAAFn//vGI\u003d",
+      "revId": "c6fb97a376e2df5864105b0b0fe8daea89dc46d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
