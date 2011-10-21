@@ -761,6 +761,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         int64_t dst_time_stamp, dst_end_time_stamp;
         unsigned long size, cx_data_sz;
         unsigned char *cx_data;
+        unsigned char *cx_data_end;
+        int comp_data_state = 0;
 
         /* Set up internal flags */
         if (ctx->base.init_flags & VPX_CODEC_USE_PSNR)
@@ -793,11 +795,25 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 
         cx_data = ctx->cx_data;
         cx_data_sz = ctx->cx_data_sz;
+        cx_data_end = ctx->cx_data + cx_data_sz;
         lib_flags = 0;
 
-        while (cx_data_sz >= ctx->cx_data_sz / 2
-               && -1 != vp8_get_compressed_data(ctx->cpi, &lib_flags, &size, cx_data, &dst_time_stamp, &dst_end_time_stamp, !img))
+        while (cx_data_sz >= ctx->cx_data_sz / 2)
         {
+            comp_data_state = vp8_get_compressed_data(ctx->cpi,
+                                                  &lib_flags,
+                                                  &size,
+                                                  cx_data,
+                                                  cx_data_end,
+                                                  &dst_time_stamp,
+                                                  &dst_end_time_stamp,
+                                                  !img);
+
+            if(comp_data_state == VPX_CODEC_CORRUPT_FRAME)
+                return VPX_CODEC_CORRUPT_FRAME;
+            else if(comp_data_state == -1)
+                break;
+
             if (size)
             {
                 vpx_codec_pts_t    round, delta;

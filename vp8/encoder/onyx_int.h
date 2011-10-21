@@ -683,7 +683,7 @@ void control_data_rate(VP8_COMP *cpi);
 
 void vp8_encode_frame(VP8_COMP *cpi);
 
-void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size);
+void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char *dest_end, unsigned long *size);
 
 void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
 

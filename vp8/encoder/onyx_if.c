@@ -3447,6 +3447,7 @@ static void encode_frame_to_data_rate
     VP8_COMP *cpi,
     unsigned long *size,
     unsigned char *dest,
+    unsigned char* dest_end,
     unsigned int *frame_flags
 )
 {
@@ -4414,7 +4415,7 @@ static void encode_frame_to_data_rate
 #endif
 
     // build the bitstream
-    vp8_pack_bitstream(cpi, dest, size);
+    vp8_pack_bitstream(cpi, dest, dest_end, size);
 
 #if CONFIG_MULTITHREAD
     /* if PSNR packets are generated we have to wait for the lpf */
@@ -4827,13 +4828,13 @@ static void check_gf_quality(VP8_COMP *cpi)
 }
 
 #if !(CONFIG_REALTIME_ONLY)
-static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags)
+static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned char * dest_end, unsigned int *frame_flags)
 {
 
     if (!cpi->common.refresh_alt_ref_frame)
         vp8_second_pass(cpi);
 
-    encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+    encode_frame_to_data_rate(cpi, size, dest, dest_end, frame_flags);
     cpi->twopass.bits_left -= 8 * *size;
 
     if (!cpi->common.refresh_alt_ref_frame)
@@ -4906,7 +4907,7 @@ static int frame_is_reference(const VP8_COMP *cpi)
 }
 
 
-int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, int64_t *time_stamp, int64_t *time_end, int flush)
+int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, unsigned char *dest_end, int64_t *time_stamp, int64_t *time_end, int flush)
 {
 #if HAVE_ARMV7
     int64_t store_reg[8];
@@ -4920,6 +4921,14 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     if (!cpi)
         return -1;
+
+    if (setjmp(cpi->common.error.jmp)){
+        cpi->common.error.setjmp = 0;
+        return VPX_CODEC_CORRUPT_FRAME;
+    }
+
+    cpi->bc.error = &cpi->common.error;
+    cpi->common.error.setjmp = 1;
 
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -5134,11 +5143,11 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     }
     else if (cpi->pass == 2)
     {
-        Pass2Encode(cpi, size, dest, frame_flags);
+        Pass2Encode(cpi, size, dest, dest_end, frame_flags);
     }
     else
 #endif
-        encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+        encode_frame_to_data_rate(cpi, size, dest, dest_end, frame_flags);
 
     if (cpi->compressor_speed == 2)
     {
@@ -5370,6 +5379,8 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         vp8_pop_neon(store_reg);
     }
 #endif
+
+    cpi->common.error.setjmp = 0;
 
     return 0;
 }
