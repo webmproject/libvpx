@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//vBs\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-21T04:35:01Z",
+      "side": 1,
+      "message": "Please add a comment on why summing the absolute value of the coefficients and thresholding the results at 35 is the right thing to do.",
+      "revId": "6487eb0a3ec6dfbb6c7ea0e89e4b661dc029fd9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//vBo\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-10-21T04:35:01Z",
+      "side": 1,
+      "message": "Why do we only do this if skip?  Can\u0027t we have a situation in which the 2nd order produces non 0\u0027s but all 0\u0027s occur after transform even if the first order has non 0 coefficients?",
+      "revId": "6487eb0a3ec6dfbb6c7ea0e89e4b661dc029fd9d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
