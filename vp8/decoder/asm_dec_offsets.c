@@ -14,20 +14,6 @@
 
 BEGIN
 
-DEFINE(detok_scan,                              offsetof(DETOK, scan));
-DEFINE(detok_ptr_block2leftabove,               offsetof(DETOK, ptr_block2leftabove));
-DEFINE(detok_coef_tree_ptr,                     offsetof(DETOK, vp8_coef_tree_ptr));
-DEFINE(detok_norm_ptr,                          offsetof(DETOK, norm_ptr));
-DEFINE(detok_ptr_coef_bands_x,                  offsetof(DETOK, ptr_coef_bands_x));
-
-DEFINE(detok_A,                                 offsetof(DETOK, A));
-DEFINE(detok_L,                                 offsetof(DETOK, L));
-
-DEFINE(detok_qcoeff_start_ptr,                  offsetof(DETOK, qcoeff_start_ptr));
-DEFINE(detok_current_bc,                        offsetof(DETOK, current_bc));
-DEFINE(detok_coef_probs,                        offsetof(DETOK, coef_probs));
-DEFINE(detok_eob,                               offsetof(DETOK, eob));
-
 DEFINE(bool_decoder_user_buffer_end,            offsetof(BOOL_DECODER, user_buffer_end));
 DEFINE(bool_decoder_user_buffer,                offsetof(BOOL_DECODER, user_buffer));
 DEFINE(bool_decoder_value,                      offsetof(BOOL_DECODER, value));
