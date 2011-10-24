@@ -213,6 +213,74 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     }
 }
 
+static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
+                        MB_MODE_INFO *mbmi, int mis, int_mv best_mv,
+                        MV_CONTEXT *const mvc, int mb_to_left_edge,
+                        int mb_to_right_edge, int mb_to_top_edge,
+                        int mb_to_bottom_edge)
+{
+    const int s = mbmi->partitioning =
+              vp8_treed_read(bc, vp8_mbsplit_tree, vp8_mbsplit_probs);
+    const int num_p = vp8_mbsplit_count [s];
+    int j = 0;
+
+    do  /* for each subset j */
+    {
+        int_mv leftmv, abovemv;
+        int_mv blockmv;
+        int k;  /* first block in subset j */
+        int mv_contz;
+        k = vp8_mbsplit_offset[s][j];
+
+        leftmv.as_int = left_block_mv(mi, k);
+        abovemv.as_int = above_block_mv(mi, k, mis);
+        mv_contz = vp8_mv_cont(&leftmv, &abovemv);
+
+        switch (sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz]))
+        {
+        case NEW4X4:
+            read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
+            blockmv.as_mv.row += best_mv.as_mv.row;
+            blockmv.as_mv.col += best_mv.as_mv.col;
+            break;
+        case LEFT4X4:
+            blockmv.as_int = leftmv.as_int;
+            break;
+        case ABOVE4X4:
+            blockmv.as_int = abovemv.as_int;
+            break;
+        case ZERO4X4:
+            blockmv.as_int = 0;
+            break;
+        default:
+            break;
+        }
+
+        mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(&blockmv,
+                                                  mb_to_left_edge,
+                                                  mb_to_right_edge,
+                                                  mb_to_top_edge,
+                                                  mb_to_bottom_edge);
+
+        {
+            /* Fill (uniform) modes, mvs of jth subset.
+             Must do it here because ensuing subsets can
+             refer back to us via "left" or "above". */
+            const unsigned char *fill_offset;
+            unsigned int fill_count = mbsplit_fill_count[s];
+
+            fill_offset = &mbsplit_fill_offset[s]
+                             [(unsigned char)j * mbsplit_fill_count[s]];
+
+            do {
+                mi->bmi[ *fill_offset].mv.as_int = blockmv.as_int;
+                fill_offset++;
+            }while (--fill_count);
+        }
+
+    }
+    while (++j < num_p);
+}
 
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                             int mb_row, int mb_col)
@@ -268,70 +336,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         switch (mbmi->mode = read_mv_ref(bc, mv_ref_p))
         {
         case SPLITMV:
-        {
-            const int s = mbmi->partitioning =
-                      vp8_treed_read(bc, vp8_mbsplit_tree, vp8_mbsplit_probs);
-            const int num_p = vp8_mbsplit_count [s];
-            int j = 0;
-
-            do  /* for each subset j */
-            {
-                int_mv leftmv, abovemv;
-                int_mv blockmv;
-                int k;  /* first block in subset j */
-                int mv_contz;
-                k = vp8_mbsplit_offset[s][j];
-
-                leftmv.as_int = left_block_mv(mi, k);
-                abovemv.as_int = above_block_mv(mi, k, mis);
-                mv_contz = vp8_mv_cont(&leftmv, &abovemv);
-
-                switch (sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz]))
-                {
-                case NEW4X4:
-                    read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
-                    blockmv.as_mv.row += best_mv.as_mv.row;
-                    blockmv.as_mv.col += best_mv.as_mv.col;
-                    break;
-                case LEFT4X4:
-                    blockmv.as_int = leftmv.as_int;
-                    break;
-                case ABOVE4X4:
-                    blockmv.as_int = abovemv.as_int;
-                    break;
-                case ZERO4X4:
-                    blockmv.as_int = 0;
-                    break;
-                default:
-                    break;
-                }
-
-                mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(&blockmv,
-                                                          mb_to_left_edge,
-                                                          mb_to_right_edge,
-                                                          mb_to_top_edge,
-                                                          mb_to_bottom_edge);
-
-                {
-                    /* Fill (uniform) modes, mvs of jth subset.
-                     Must do it here because ensuing subsets can
-                     refer back to us via "left" or "above". */
-                    const unsigned char *fill_offset;
-                    unsigned int fill_count = mbsplit_fill_count[s];
-
-                    fill_offset = &mbsplit_fill_offset[s]
-                                     [(unsigned char)j * mbsplit_fill_count[s]];
-
-                    do {
-                        mi->bmi[ *fill_offset].mv.as_int = blockmv.as_int;
-                        fill_offset++;
-                    }while (--fill_count);
-                }
-
-            }
-            while (++j < num_p);
-        }
-
+          decode_split_mv(bc, mi, mbmi, mis, best_mv, mvc,
+                          mb_to_left_edge, mb_to_right_edge,
+                          mb_to_top_edge, mb_to_bottom_edge);
         mv->as_int = mi->bmi[15].mv.as_int;
 
         break;  /* done with SPLITMV */
