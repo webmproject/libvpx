@@ -14,61 +14,11 @@
 #include "vpx_scale/vpxscale.h"
 #include "vpx_scale/yv12extend.h"
 
-/****************************************************************************
- *
- *  ROUTINE       : vp8_scale_machine_specific_config
- *
- *  INPUTS        : UINT32 Version : Codec version number.
- *
- *  OUTPUTS       : None.
- *
- *  RETURNS       : void
- *
- *  FUNCTION      : Checks for machine specifc features such as MMX support
- *                  sets appropriate flags and function pointers.
- *
- *  SPECIAL NOTES : None.
- *
- ****************************************************************************/
-void vp8_scale_machine_specific_config()
+void vp8_arch_arm_vpx_scale_init()
 {
-#if HAVE_ARMV7 && CONFIG_RUNTIME_CPU_DETECT
-    int flags;
-#endif
-    /*
-    vp8_horizontal_line_1_2_scale        = horizontal_line_1_2_scale_armv4;
-    vp8_vertical_band_1_2_scale          = vertical_band_1_2_scale_armv4;
-    vp8_last_vertical_band_1_2_scale      = vp8cx_last_vertical_band_1_2_scale_c;
-    vp8_horizontal_line_3_5_scale        = horizontal_line_3_5_scale_armv4;
-    vp8_vertical_band_3_5_scale          = vertical_band_3_5_scale_armv4;
-    vp8_last_vertical_band_3_5_scale      = vp8cx_last_vertical_band_3_5_scale_c;
-    vp8_horizontal_line_3_4_scale        = horizontal_line_3_4_scale_armv4;
-    vp8_vertical_band_3_4_scale          = vertical_band_3_4_scale_armv4;
-    vp8_last_vertical_band_3_4_scale      = vp8cx_last_vertical_band_3_4_scale_c;
-    vp8_horizontal_line_2_3_scale        = horizontal_line_2_3_scale_armv4;
-    vp8_vertical_band_2_3_scale          = vertical_band_2_3_scale_armv4;
-    vp8_last_vertical_band_2_3_scale      = vp8cx_last_vertical_band_2_3_scale_c;
-    vp8_horizontal_line_4_5_scale        = horizontal_line_4_5_scale_armv4;
-    vp8_vertical_band_4_5_scale          = vertical_band_4_5_scale_armv4;
-    vp8_last_vertical_band_4_5_scale      = vp8cx_last_vertical_band_4_5_scale_c;
-
-    vp8_vertical_band_5_4_scale           = vp8cx_vertical_band_5_4_scale_c;
-    vp8_vertical_band_5_3_scale           = vp8cx_vertical_band_5_3_scale_c;
-    vp8_vertical_band_2_1_scale           = vp8cx_vertical_band_2_1_scale_c;
-    vp8_vertical_band_2_1_scale_i         = vp8cx_vertical_band_2_1_scale_i_c;
-    vp8_horizontal_line_2_1_scale         = vp8cx_horizontal_line_2_1_scale_c;
-    vp8_horizontal_line_5_3_scale         = vp8cx_horizontal_line_5_3_scale_c;
-    vp8_horizontal_line_5_4_scale         = vp8cx_horizontal_line_5_4_scale_c;
-    */
-
-#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
-    vp8_yv12_extend_frame_borders_ptr     = vp8_yv12_extend_frame_borders;
-    vp8_yv12_copy_y_ptr                   = vp8_yv12_copy_y_c;
-    vp8_yv12_copy_frame_ptr               = vp8_yv12_copy_frame;
-#endif
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
-    flags = arm_cpu_caps();
+    int flags = arm_cpu_caps();
     if (flags & HAS_NEON)
 #endif
     {

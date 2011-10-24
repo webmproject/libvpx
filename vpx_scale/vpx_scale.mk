@@ -11,9 +11,8 @@ SCALE_SRCS-yes += generic/scalesystemdependent.c
 SCALE_SRCS-$(CONFIG_SPATIAL_RESAMPLING) += generic/gen_scalers.c
 
 #arm
-SCALE_SRCS-$(HAVE_ARMV7)         += arm/yv12extend_arm.h
-SCALE_SRCS-$(HAVE_ARMV7)         += arm/scalesystemdependent.c
-SCALE_SRCS_REMOVE-$(HAVE_ARMV7)  += generic/scalesystemdependent.c
+SCALE_SRCS-$(ARCH_ARM)    += arm/yv12extend_arm.h
+SCALE_SRCS-$(ARCH_ARM)    += arm/scalesystemdependent.c
 
 #neon
 SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copyframe_func_neon$(ASM)
