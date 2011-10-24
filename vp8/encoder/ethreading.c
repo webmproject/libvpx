@@ -84,7 +84,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
             for (mb_row = ithread + 1; mb_row < cm->mb_rows; mb_row += (cpi->encoding_thread_count + 1))
             {
 
-                int i;
                 int recon_yoffset, recon_uvoffset;
                 int mb_col;
                 int ref_fb_idx = cm->lst_fb_idx;
