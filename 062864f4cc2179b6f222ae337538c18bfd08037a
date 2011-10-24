@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//t68\u003d",
+        "filename": "vpx_scale/generic/scalesystemdependent.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-24T23:35:34Z",
+      "side": 1,
+      "message": "nit, but this should have been wrapped in #if ARCH_ARM",
+      "revId": "062864f4cc2179b6f222ae337538c18bfd08037a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
