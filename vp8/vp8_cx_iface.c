@@ -560,7 +560,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
 
         priv->cx_data_sz = priv->cfg.g_w * priv->cfg.g_h * 3 / 2 * 2;
 
-        if (priv->cx_data_sz < 4096) priv->cx_data_sz = 4096;
+        if (priv->cx_data_sz < 32768) priv->cx_data_sz = 32768;
 
         priv->cx_data = malloc(priv->cx_data_sz);
 
