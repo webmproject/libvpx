@@ -16,6 +16,24 @@
       "revId": "bac6c229e5d14c1c972a65dfa5c4eef73651386d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//ttU\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-25T05:08:30Z",
+      "side": 1,
+      "message": "i am curious too...what settings you used to output more than twice the picture size?",
+      "parentUuid": "AAAAFn//uLc\u003d",
+      "revId": "bac6c229e5d14c1c972a65dfa5c4eef73651386d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
