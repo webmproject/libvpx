@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//tf0\u003d",
+        "filename": "vp8/encoder/arm/arm_csystemdependent.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-25T17:56:27Z",
+      "side": 1,
+      "message": "which if does this match? CONFIG_RUNTIME_CPU_DETECT?",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tew\u003d",
+        "filename": "vp8/encoder/arm/neon/picklpf_arm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-25T17:56:27Z",
+      "side": 1,
+      "message": "yheight instead of src_ybc-\u003ey_height",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tes\u003d",
+        "filename": "vp8/encoder/arm/neon/picklpf_arm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-25T17:56:27Z",
+      "side": 1,
+      "message": "Capitalize sentences and start this one on the previous line.\ns/dose/does/",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//teY\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-25T17:56:27Z",
+      "side": 1,
+      "message": "same changes as _neon",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//teM\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-25T17:56:27Z",
+      "side": 1,
+      "message": "Are the C and NEON versions identical except for this line? Would make sense to make this the _ptr function instead of vp8_yv12_copy_partial_frame_ptr and call it here? vpx_memcpy_partial_ptr \u003d vpx_memcpy or vp8_memcpy_partial_neon",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
