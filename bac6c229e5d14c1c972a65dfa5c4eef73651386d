@@ -34,6 +34,24 @@
       "revId": "bac6c229e5d14c1c972a65dfa5c4eef73651386d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//toU\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1000883
+      },
+      "writtenOn": "2011-10-25T17:29:02Z",
+      "side": 1,
+      "message": "The settings and file are extreme cases.  Before they would cause a crash now they will just exit with an error.\n\nSettings:\n--rt --verbose --usage\u003d0 --threads\u003d51 --profile\u003d1 --width\u003d352 --height\u003d288 --timebase\u003d1/30 --fps\u003d30/1 --error-resilient\u003d14 --lag-in-frames\u003d23 --drop-frame\u003d83 --resize-allowed\u003d0 --resize-up\u003d52 --resize-down\u003d61 --end-usage\u003d0 --target-bitrate\u003d1207 --min-q\u003d0 --max-q\u003d51 --undershoot-pct\u003d91 --overshoot-pct\u003d100 --buf-sz\u003d6000 --buf-initial-sz\u003d4000 --buf-optimal-sz\u003d5000 --bias-pct\u003d44 --minsection-pct\u003d400 --maxsection-pct\u003d0 --kf-min-dist\u003d0 --kf-max-dist\u003d15 --cpu-used\u003d-14 --auto-alt-ref\u003d0 --noise-sensitivity\u003d5 --sharpness\u003d4 --static-thresh\u003d53 --token-parts\u003d1 --arnr-maxframes\u003d10 --arnr-strength\u003d0 --arnr-type\u003d1 --cq-level\u003d21 --max-intra-rate\u003d1497\n\nFile:\n/home/jamesberry/test-clips/mobile_cif_352x288_9x224_raw.ivf",
+      "parentUuid": "AAAAFn//ttU\u003d",
+      "revId": "bac6c229e5d14c1c972a65dfa5c4eef73651386d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
