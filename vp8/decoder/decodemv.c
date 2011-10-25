@@ -138,14 +138,6 @@ static void read_mvcontexts(vp8_reader *bc, MV_CONTEXT *mvc)
     while (++i < 2);
 }
 
-
-static MB_PREDICTION_MODE read_mv_ref(vp8_reader *bc, const vp8_prob *p)
-{
-    const int i = vp8_treed_read(bc, vp8_mv_ref_tree, p);
-
-    return (MB_PREDICTION_MODE)i;
-}
-
 static B_PREDICTION_MODE sub_mv_ref(vp8_reader *bc, const vp8_prob *p)
 {
     const int i = vp8_treed_read(bc, vp8_sub_mv_ref_tree, p);
@@ -320,6 +312,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         int rct[4];
         vp8_prob mv_ref_p [VP8_MVREFS-1];
         int_mv nearest, nearby, best_mv;
+        int propogate_mv_for_ec = 0;
 
         if (vp8_read(bc, pbi->prob_last))
         {
@@ -332,74 +325,83 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
         vp8_mv_ref_probs(mv_ref_p, rct);
 
-        mbmi->uv_mode = DC_PRED;
-        switch (mbmi->mode = read_mv_ref(bc, mv_ref_p))
+        if( vp8_read(bc, mv_ref_p[0]) )
         {
-        case SPLITMV:
-          decode_split_mv(bc, mi, mbmi, mis, best_mv, mvc,
-                          mb_to_left_edge, mb_to_right_edge,
-                          mb_to_top_edge, mb_to_bottom_edge);
-        mv->as_int = mi->bmi[15].mv.as_int;
-
-        break;  /* done with SPLITMV */
-
-        case NEARMV:
-            mv->as_int = nearby.as_int;
-            goto propagate_mv;
-
-        case NEARESTMV:
-            mv->as_int = nearest.as_int;
-            goto propagate_mv;
-
-        case ZEROMV:
-            mv->as_int = 0;
-            goto propagate_mv;
-
-        case NEWMV:
-            read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
-            mv->as_mv.row += best_mv.as_mv.row;
-            mv->as_mv.col += best_mv.as_mv.col;
-
-            /* Don't need to check this on NEARMV and NEARESTMV modes
-             * since those modes clamp the MV. The NEWMV mode does not,
-             * so signal to the prediction stage whether special
-             * handling may be required.
-             */
-            mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(mv,
-                                                      mb_to_left_edge,
-                                                      mb_to_right_edge,
-                                                      mb_to_top_edge,
-                                                      mb_to_bottom_edge);
-
-        propagate_mv:  /* same MV throughout */
-#if CONFIG_ERROR_CONCEALMENT
-            if(pbi->ec_enabled)
+            if( vp8_read(bc, mv_ref_p[1]) )
             {
-                mi->bmi[ 0].mv.as_int =
-                mi->bmi[ 1].mv.as_int =
-                mi->bmi[ 2].mv.as_int =
-                mi->bmi[ 3].mv.as_int =
-                mi->bmi[ 4].mv.as_int =
-                mi->bmi[ 5].mv.as_int =
-                mi->bmi[ 6].mv.as_int =
-                mi->bmi[ 7].mv.as_int =
-                mi->bmi[ 8].mv.as_int =
-                mi->bmi[ 9].mv.as_int =
-                mi->bmi[10].mv.as_int =
-                mi->bmi[11].mv.as_int =
-                mi->bmi[12].mv.as_int =
-                mi->bmi[13].mv.as_int =
-                mi->bmi[14].mv.as_int =
-                mi->bmi[15].mv.as_int = mv->as_int;
+                if( vp8_read(bc, mv_ref_p[2]) )
+                {
+                    if( vp8_read(bc, mv_ref_p[3]) )
+                    {
+                        decode_split_mv(bc, mi, mbmi, mis, best_mv, mvc,
+                                        mb_to_left_edge, mb_to_right_edge,
+                                        mb_to_top_edge, mb_to_bottom_edge);
+                        mv->as_int = mi->bmi[15].mv.as_int;
+                        mbmi->mode =  SPLITMV;
+                    }
+                    else
+                    {
+                        read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
+                        mv->as_mv.row += best_mv.as_mv.row;
+                        mv->as_mv.col += best_mv.as_mv.col;
+
+                        /* Don't need to check this on NEARMV and NEARESTMV
+                         * modes since those modes clamp the MV. The NEWMV mode
+                         * does not, so signal to the prediction stage whether
+                         * special handling may be required.
+                         */
+                        mbmi->need_to_clamp_mvs =
+                            vp8_check_mv_bounds(mv, mb_to_left_edge,
+                                                mb_to_right_edge,
+                                                mb_to_top_edge,
+                                                mb_to_bottom_edge);
+                        mbmi->mode =  NEWMV;
+                        propogate_mv_for_ec = 1;
+                    }
+                }
+                else
+                {
+                    mbmi->mode =  NEARMV;
+                    mbmi->mv.as_int = nearby.as_int;
+                    propogate_mv_for_ec = 1;
+                }
             }
-#endif
-            break;
-        default:
-  #if CONFIG_DEBUG
-            assert(0);
-  #endif
-            break;
+            else
+            {
+                mbmi->mode =  NEARESTMV;
+                mbmi->mv.as_int = nearest.as_int;
+                propogate_mv_for_ec = 1;
+            }
         }
+        else {
+            mbmi->mode =  ZEROMV;
+            mbmi->mv.as_int = 0;
+            propogate_mv_for_ec = 1;
+        }
+
+        mbmi->uv_mode = DC_PRED;
+
+#if CONFIG_ERROR_CONCEALMENT
+        if(pbi->ec_enabled && propogate_mv_for_ec)
+        {
+            mi->bmi[ 0].mv.as_int =
+            mi->bmi[ 1].mv.as_int =
+            mi->bmi[ 2].mv.as_int =
+            mi->bmi[ 3].mv.as_int =
+            mi->bmi[ 4].mv.as_int =
+            mi->bmi[ 5].mv.as_int =
+            mi->bmi[ 6].mv.as_int =
+            mi->bmi[ 7].mv.as_int =
+            mi->bmi[ 8].mv.as_int =
+            mi->bmi[ 9].mv.as_int =
+            mi->bmi[10].mv.as_int =
+            mi->bmi[11].mv.as_int =
+            mi->bmi[12].mv.as_int =
+            mi->bmi[13].mv.as_int =
+            mi->bmi[14].mv.as_int =
+            mi->bmi[15].mv.as_int = mv->as_int;
+        }
+#endif
     }
     else
     {
