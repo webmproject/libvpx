@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAFn//tlM\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-10-25T16:36:01Z",
+      "side": 1,
+      "message": "haven\u0027t looked closely, but can you make eob/final_eob into char and avoid casting?",
+      "revId": "1d699bbce3afdd8a112318b8c51582ffdfe5bac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
