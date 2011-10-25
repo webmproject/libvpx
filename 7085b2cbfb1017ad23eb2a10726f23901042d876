@@ -70,6 +70,42 @@
       "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tqY\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-25T11:12:11Z",
+      "side": 1,
+      "message": "For a frame where the first packet contains all 9 partitions we would call the decoder twice. Once with the actual frame data and once to signal end-of-data.",
+      "parentUuid": "AAAAFn//trQ\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tqc\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-25T11:12:11Z",
+      "side": 1,
+      "message": "The RTP profile for VP8 specifies partition numbers and beginningOfPartition bits for all packets, which is enough to derive that information before decoding.\n\nHowever, we can\u0027t easily split a packet which contains several partitions without parsing the VP8 bitstream, that\u0027s why we need this API.",
+      "parentUuid": "AAAAFn//trg\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
