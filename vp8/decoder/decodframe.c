@@ -667,21 +667,19 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     if (data_end - data < 3)
     {
-        if (pbi->ec_active)
-        {
-            /* Declare the missing frame as an inter frame since it will
-               be handled as an inter frame when we have estimated its
-               motion vectors. */
-            pc->frame_type = INTER_FRAME;
-            pc->version = 0;
-            pc->show_frame = 1;
-            first_partition_length_in_bytes = 0;
-        }
-        else
+        if (!pbi->ec_active)
         {
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet");
         }
+
+        /* Declare the missing frame as an inter frame since it will
+           be handled as an inter frame when we have estimated its
+           motion vectors. */
+        pc->frame_type = INTER_FRAME;
+        pc->version = 0;
+        pc->show_frame = 1;
+        first_partition_length_in_bytes = 0;
     }
     else
     {
