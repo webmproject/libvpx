@@ -16,6 +16,24 @@
       "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tr8\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-25T07:04:43Z",
+      "side": 1,
+      "message": "As an example, fragment 4 must be empty if fragment 3 contains partition 3 and 4. A situation where fragment 3 contains both partition 3 and half of partition 4, and where the other half of partition 4 is in fragment 4 is not allowed.\n\nDoes that make things more clear?",
+      "parentUuid": "AAAAFn//tss\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
