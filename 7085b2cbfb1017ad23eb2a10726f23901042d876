@@ -34,6 +34,24 @@
       "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//trg\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-25T07:50:41Z",
+      "side": 1,
+      "message": "got it, but this for me implies that there are empty fragments in-between non-empty ones and they have to be passed to decoder...like fragment 0 contains part 0+1 frag 1 \u003d empty frag 2 \u003d part 2?\nam i missing a fragment id somewhere again?\n\nit seems that application has to call decode with size\u003d0 to signal an empty fragment...this assumes that application knows how many partitions are in the fragment and more exactly the partition id for each of them.. what happens if a fragment is lost in the middle of frame?\n\nwhole frame in one fragment \u003d\u003e call decode 8 more times to signal 8 empty fragments?",
+      "parentUuid": "AAAAFn//tr8\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
