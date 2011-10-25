@@ -15,7 +15,7 @@
 void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b,
                              int pitch)
 {
-    if (b->eob > 1)
+    if (*b->eob > 1)
     {
         IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->predictor, pitch,
               *(b->base_dst) + b->dst, b->dst_stride);
@@ -65,6 +65,3 @@ void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD 
     }
 
 }
-
-
-

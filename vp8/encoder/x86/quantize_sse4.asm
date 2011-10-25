@@ -208,6 +208,8 @@ ZIGZAG_LOOP 15, 7, xmm3, xmm7, xmm8
     movdqa      [rdi], xmm0
     movdqa      [rdi + 16], xmm1
 
+    mov         rcx, [rsi + vp8_blockd_eob]
+
     ; select the last value (in zig_zag order) for EOB
     pxor        xmm6, xmm6
     pcmpeqw     xmm4, xmm6
@@ -225,7 +227,7 @@ ZIGZAG_LOOP 15, 7, xmm3, xmm7, xmm8
     add         eax, 1
     and         eax, edi
 
-    mov         [rsi + vp8_blockd_eob], eax
+    mov         BYTE PTR [rcx], al          ; store eob
 
     ; begin epilog
 %if ABI_IS_32BIT

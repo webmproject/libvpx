@@ -108,15 +108,16 @@ static void tokenize2nd_order_b
     ENTROPY_CONTEXT * a;
     ENTROPY_CONTEXT * l;
     int band, rc, v, token;
+    int eob;
 
     b = x->block + 24;
     qcoeff_ptr = b->qcoeff;
     a = (ENTROPY_CONTEXT *)x->above_context + 8;
     l = (ENTROPY_CONTEXT *)x->left_context + 8;
-
+    eob = x->eobs[24];
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
-    if(!b->eob)
+    if(!eob)
     {
         /* c = band for this case */
         t->Token = DCT_EOB_TOKEN;
@@ -142,7 +143,7 @@ static void tokenize2nd_order_b
     t++;
     c = 1;
 
-    for (; c < b->eob; c++)
+    for (; c < eob; c++)
     {
         rc = vp8_default_zig_zag1d[c];
         band = vp8_coef_bands[c];
@@ -213,7 +214,7 @@ static void tokenize1st_order_b
 
         c = type ? 0 : 1;
 
-        if(c >= b->eob)
+        if(c >= *b->eob)
         {
             /* c = band for this case */
             t->Token = DCT_EOB_TOKEN;
@@ -240,7 +241,7 @@ static void tokenize1st_order_b
         t++;
         c++;
 
-        for (; c < b->eob; c++)
+        for (; c < *b->eob; c++)
         {
             rc = vp8_default_zig_zag1d[c];
             band = vp8_coef_bands[c];
@@ -284,7 +285,7 @@ static void tokenize1st_order_b
 
         VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
-        if(!b->eob)
+        if(!(*b->eob))
         {
             /* c = band for this case */
             t->Token = DCT_EOB_TOKEN;
@@ -311,7 +312,7 @@ static void tokenize1st_order_b
         t++;
         c = 1;
 
-        for (; c < b->eob; c++)
+        for (; c < *b->eob; c++)
         {
             rc = vp8_default_zig_zag1d[c];
             band = vp8_coef_bands[c];
@@ -356,11 +357,11 @@ static int mb_is_skippable(MACROBLOCKD *x, int has_y2_block)
     if (has_y2_block)
     {
         for (i = 0; i < 16; i++)
-            skip &= (x->block[i].eob < 2);
+            skip &= (x->eobs[i] < 2);
     }
 
     for (; i < 24 + has_y2_block; i++)
-        skip &= (!x->block[i].eob);
+        skip &= (!x->eobs[i]);
 
     return skip;
 }

@@ -485,7 +485,7 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
 static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
 {
     int c = !type;              /* start at coef 0, unless Y with Y2 */
-    int eob = b->eob;
+    int eob = (int)(*b->eob);
     int pt ;    /* surrounding block/prev coef predictor */
     int cost = 0;
     short *qcoeff_ptr = b->qcoeff;
@@ -1299,11 +1299,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
         // store everything needed to come back to this!!
         for (i = 0; i < 16; i++)
         {
-            BLOCKD *bd = &x->e_mbd.block[i];
-
             bsi->mvs[i].as_mv = x->partition_info->bmi[i].mv.as_mv;
             bsi->modes[i] = x->partition_info->bmi[i].mode;
-            bsi->eobs[i] = bd->eob;
+            bsi->eobs[i] = x->e_mbd.eobs[i];
         }
     }
 }
@@ -1432,7 +1430,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
         BLOCKD *bd = &x->e_mbd.block[i];
 
         bd->bmi.mv.as_int = bsi.mvs[i].as_int;
-        bd->eob = bsi.eobs[i];
+        *bd->eob = bsi.eobs[i];
     }
 
     *returntotrate = bsi.r;
@@ -2271,7 +2269,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
                 for (i = 0; i <= 24; i++)
                 {
-                    tteob += x->e_mbd.block[i].eob;
+                    tteob += x->e_mbd.eobs[i];
                 }
 
                 if (tteob == 0)

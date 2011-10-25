@@ -187,7 +187,7 @@ typedef struct
     int dst;
     int dst_stride;
 
-    int eob;
+    char *eob;
 
     union b_mode_info bmi;
 } BLOCKD;
