@@ -56,7 +56,7 @@ vpx_codec_err_t vpx_codec_dec_init_ver(vpx_codec_ctx_t      *ctx,
 
         if (!(flags & VPX_CODEC_USE_XMA))
         {
-            res = ctx->iface->init(ctx);
+            res = ctx->iface->init(ctx, NULL);
 
             if (res)
             {

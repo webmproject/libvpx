@@ -17,6 +17,7 @@ extern "C"
 {
 #endif
 
+#include "vpx_config.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx/vp8cx.h"
 #include "vpx/vpx_encoder.h"
@@ -207,6 +208,19 @@ extern "C"
         unsigned int periodicity;
         unsigned int layer_id[MAX_PERIODICITY];
 
+#if CONFIG_MULTI_RES_ENCODING
+        /* Number of total resolutions encoded */
+        unsigned int mr_total_resolutions;
+
+        /* Current encoder ID */
+        unsigned int mr_encoder_id;
+
+        /* Down-sampling factor */
+        vpx_rational_t mr_down_sampling_factor;
+
+        /* Memory location to store low-resolution encoder's mode info */
+        void* mr_low_res_mode_info;
+#endif
     } VP8_CONFIG;
 
 

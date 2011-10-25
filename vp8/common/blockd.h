@@ -170,6 +170,18 @@ typedef struct
     union b_mode_info bmi[16];
 } MODE_INFO;
 
+#if CONFIG_MULTI_RES_ENCODING
+/* The information needed to be stored for higher-resolution encoder */
+typedef struct
+{
+    MB_PREDICTION_MODE mode;
+    MV_REFERENCE_FRAME ref_frame;
+    int_mv mv;
+    //union b_mode_info bmi[16];
+    int dissim;    // dissimilarity level of the macroblock
+} LOWER_RES_INFO;
+#endif
+
 typedef struct
 {
     short *qcoeff;

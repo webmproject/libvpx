@@ -96,6 +96,16 @@ GEN_EXAMPLES-$(CONFIG_VP8_ENCODER) += vp8cx_set_ref.c
 vp8cx_set_ref.GUID                  = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
 vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
+# C file is provided, not generated automatically.
+GEN_EXAMPLES-$(CONFIG_MULTI_RES_ENCODING) += vp8_multi_resolution_encoder.c
+vp8_multi_resolution_encoder.SRCS  \
+                         += third_party/libyuv/include/libyuv/basic_types.h  \
+                            third_party/libyuv/include/libyuv/cpu_id.h  \
+                            third_party/libyuv/include/libyuv/scale.h  \
+                            third_party/libyuv/source/scale.c  \
+                            third_party/libyuv/source/cpu_id.c
+vp8_multi_resolution_encoder.GUID         = 04f8738e-63c8-423b-90fa-7c2703a374de
+vp8_multi_resolution_encoder.DESCRIPTION  = VP8 Multiple-resolution Encoding
 
 # Handle extra library flags depending on codec configuration
 

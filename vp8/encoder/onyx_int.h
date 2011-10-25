@@ -58,6 +58,9 @@
 
 #define MAX_PERIODICITY 16
 
+#define MAX(x,y) (((x)>(y))?(x):(y))
+#define MIN(x,y) (((x)<(y))?(x):(y))
+
 typedef struct
 {
     int kf_indicated;
@@ -678,6 +681,11 @@ typedef struct VP8_COMP
     double total_ssimg_u_in_layer[MAX_LAYERS];
     double total_ssimg_v_in_layer[MAX_LAYERS];
     double total_ssimg_all_in_layer[MAX_LAYERS];
+
+#if CONFIG_MULTI_RES_ENCODING
+    /* Number of MBs per row at lower-resolution level */
+    int    mr_low_res_mb_cols;
+#endif
 
 } VP8_COMP;
 

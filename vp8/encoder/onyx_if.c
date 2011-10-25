@@ -36,6 +36,9 @@
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
+#if CONFIG_MULTI_RES_ENCODING
+#include "mr_dissim.h"
+#endif
 
 #include <math.h>
 #include <stdio.h>
@@ -2234,6 +2237,13 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     vp8_loop_filter_init(cm);
 
     cpi->common.error.setjmp = 0;
+
+#if CONFIG_MULTI_RES_ENCODING
+    /* Calculate # of MBs in a row in lower-resolution level image. */
+    if (cpi->oxcf.mr_encoder_id > 0)
+        vp8_cal_low_res_mb_cols(cpi);
+#endif
+
     return (VP8_PTR) cpi;
 
 }
@@ -4338,13 +4348,20 @@ static void encode_frame_to_data_rate
                                            IF_RTCD(&cpi->rtcd.variance));
     }
 
-    // This frame's MVs are saved and will be used in next frame's MV prediction.
-    // Last frame has one more line(add to bottom) and one more column(add to right) than cm->mip. The edge elements are initialized to 0.
-    if(cm->show_frame)   //do not save for altref frame
+    /* This frame's MVs are saved and will be used in next frame's MV predictor.
+     * Last frame has one more line(add to bottom) and one more column(add to
+     * right) than cm->mip. The edge elements are initialized to 0.
+     */
+#if CONFIG_MULTI_RES_ENCODING
+    if(!cpi->oxcf.mr_encoder_id && cm->show_frame)
+#else
+    if(cm->show_frame)   /* do not save for altref frame */
+#endif
     {
         int mb_row;
         int mb_col;
-        MODE_INFO *tmp = cm->mip; //point to beginning of allocated MODE_INFO arrays.
+        /* Point to beginning of allocated MODE_INFO arrays. */
+        MODE_INFO *tmp = cm->mip;
 
         if(cm->frame_type != KEY_FRAME)
         {
@@ -4362,6 +4379,10 @@ static void encode_frame_to_data_rate
             }
         }
     }
+
+#if CONFIG_MULTI_RES_ENCODING
+    vp8_cal_dissimilarity(cpi);
+#endif
 
     // Update the GF useage maps.
     // This is done after completing the compression of a frame when all

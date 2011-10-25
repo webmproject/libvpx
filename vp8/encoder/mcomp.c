@@ -9,6 +9,7 @@
  */
 
 
+#include "onyx_int.h"
 #include "mcomp.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_config.h"
@@ -182,8 +183,6 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride)
 #define IFMVCV(r,c,s,e) if ( c >= minc && c <= maxc && r >= minr && r <= maxr) s else e;
 #define ERR(r,c) (MVC(r,c)+DIST(r,c)) // returns distortion + motion vector cost
 #define CHECK_BETTER(v,r,c) IFMVCV(r,c,{thismse = DIST(r,c); if((v = (MVC(r,c)+thismse)) < besterr) { besterr = v; br=r; bc=c; *distortion = thismse; *sse1 = sse; }}, v=INT_MAX;)// checks if (r,c) has better score than previous best
-#define MIN(x,y) (((x)<(y))?(x):(y))
-#define MAX(x,y) (((x)>(y))?(x):(y))
 
 int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                              int_mv *bestmv, int_mv *ref_mv,
@@ -331,8 +330,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #undef IFMVCV
 #undef ERR
 #undef CHECK_BETTER
-#undef MIN
-#undef MAX
+
 int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                  int_mv *bestmv, int_mv *ref_mv,
                                  int error_per_bit,
@@ -854,6 +852,8 @@ int vp8_hex_search
     int k = -1;
     int all_in;
     int best_site = -1;
+    int hex_range = 127;
+    int dia_range = 8;
 
     int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
@@ -872,6 +872,18 @@ int vp8_hex_search
     bestsad = vfp->sdf( what, what_stride, this_offset,
                         in_what_stride, 0x7fffffff)
             + mvsad_err_cost(&this_mv, &fcenter_mv, mvsadcost, sad_per_bit);
+
+#if CONFIG_MULTI_RES_ENCODING
+    /* Lower search range based on prediction info */
+    if (search_param >= 6) goto cal_neighbors;
+    else if (search_param >= 5) hex_range = 4;
+    else if (search_param >= 4) hex_range = 6;
+    else if (search_param >= 3) hex_range = 15;
+    else if (search_param >= 2) hex_range = 31;
+    else if (search_param >= 1) hex_range = 63;
+
+    dia_range = 8;
+#endif
 
     // hex search
     //j=0
@@ -909,7 +921,7 @@ int vp8_hex_search
         k = best_site;
     }
 
-    for (j = 1; j < 127; j++)
+    for (j = 1; j < hex_range; j++)
     {
         best_site = -1;
         CHECK_BOUNDS(2)
@@ -951,7 +963,7 @@ int vp8_hex_search
 
     // check 4 1-away neighbors
 cal_neighbors:
-    for (j = 0; j < 32; j++)
+    for (j = 0; j < dia_range; j++)
     {
         best_site = -1;
         CHECK_BOUNDS(1)

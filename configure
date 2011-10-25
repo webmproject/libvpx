@@ -35,7 +35,7 @@ Advanced options:
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
-  ${toggle_multithread}           multithreaded encoding and decoding.
+  ${toggle_multithread}           multithreaded encoding and decoding
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
@@ -44,6 +44,7 @@ Advanced options:
   ${toggle_static}                static library support
   ${toggle_small}                 favor smaller size over speed
   ${toggle_postproc_visualizer}   macro block / block level visualizers
+  ${toggle_multi_res_encoding}    enable multiple-resolution encoding
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -262,6 +263,7 @@ CONFIG_LIST="
     postproc_visualizer
     os_support
     unit_tests
+    multi_res_encoding
 "
 CMDLINE_SELECT="
     extra_warnings
@@ -304,6 +306,7 @@ CMDLINE_SELECT="
     small
     postproc_visualizer
     unit_tests
+    multi_res_encoding
 "
 
 process_cmdline() {

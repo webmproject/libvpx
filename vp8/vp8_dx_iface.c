@@ -181,9 +181,11 @@ static void vp8_finalize_mmaps(vpx_codec_alg_priv_t *ctx)
     /* nothing to clean up */
 }
 
-static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx)
+static vpx_codec_err_t vp8_init(vpx_codec_ctx_t *ctx,
+                                vpx_codec_priv_enc_mr_cfg_t *data)
 {
     vpx_codec_err_t        res = VPX_CODEC_OK;
+    (void) data;
 
     /* This function only allocates space for the vpx_codec_alg_priv_t
      * structure. More memory may be required at the time the stream
@@ -564,7 +566,7 @@ static vpx_codec_err_t vp8_xma_set_mmap(vpx_codec_ctx_t         *ctx,
     if (done && !res)
     {
         vp8_finalize_mmaps(ctx->priv->alg_priv);
-        res = ctx->iface->init(ctx);
+        res = ctx->iface->init(ctx, NULL);
     }
 
     return res;

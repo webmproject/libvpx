@@ -264,7 +264,8 @@ static vpx_codec_err_t validate_img(vpx_codec_alg_priv_t *ctx,
 
 static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
                                        vpx_codec_enc_cfg_t cfg,
-                                       struct vp8_extracfg vp8_cfg)
+                                       struct vp8_extracfg vp8_cfg,
+                                       vpx_codec_priv_enc_mr_cfg_t *mr_cfg)
 {
     oxcf->multi_threaded         = cfg.g_threads;
     oxcf->Version               = cfg.g_profile;
@@ -355,6 +356,17 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         memcpy (oxcf->layer_id, cfg.ts_layer_id, sizeof(cfg.ts_layer_id));
     }
 
+#if CONFIG_MULTI_RES_ENCODING
+    if(mr_cfg)
+    {
+        oxcf->mr_total_resolutions        = mr_cfg->mr_total_resolutions;
+        oxcf->mr_encoder_id               = mr_cfg->mr_encoder_id;
+        oxcf->mr_down_sampling_factor.num = mr_cfg->mr_down_sampling_factor.num;
+        oxcf->mr_down_sampling_factor.den = mr_cfg->mr_down_sampling_factor.den;
+        oxcf->mr_low_res_mode_info        = mr_cfg->mr_low_res_mode_info;
+    }
+#endif
+
     //oxcf->delete_first_pass_file = cfg.g_delete_firstpassfile;
     //strcpy(oxcf->first_pass_file, cfg.g_firstpass_file);
 
@@ -432,7 +444,7 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t       *ctx,
     if (!res)
     {
         ctx->cfg = *cfg;
-        set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
+        set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg, NULL);
         vp8_change_config(ctx->cpi, &ctx->oxcf);
     }
 
@@ -498,14 +510,38 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
     if (!res)
     {
         ctx->vp8_cfg = xcfg;
-        set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg);
+        set_vp8e_config(&ctx->oxcf, ctx->cfg, ctx->vp8_cfg, NULL);
         vp8_change_config(ctx->cpi, &ctx->oxcf);
     }
 
     return res;
 #undef MAP
 }
-static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
+
+static vpx_codec_err_t vp8e_mr_alloc_mem(const vpx_codec_enc_cfg_t *cfg,
+                                        void **mem_loc)
+{
+    vpx_codec_err_t res = 0;
+
+#if CONFIG_MULTI_RES_ENCODING
+    int mb_rows = ((cfg->g_w + 15) >>4);
+    int mb_cols = ((cfg->g_h + 15) >>4);
+
+    *mem_loc = calloc(mb_rows*mb_cols, sizeof(LOWER_RES_INFO));
+    if(!(*mem_loc))
+    {
+        free(*mem_loc);
+        res = VPX_CODEC_MEM_ERROR;
+    }
+    else
+        res = VPX_CODEC_OK;
+#endif
+
+    return res;
+}
+
+static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
+                                 vpx_codec_priv_enc_mr_cfg_t *mr_cfg)
 {
     vpx_codec_err_t        res = VPX_DEC_OK;
     struct vpx_codec_alg_priv *priv;
@@ -570,9 +606,16 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
 
         if (!res)
         {
+            if(mr_cfg)
+                ctx->priv->enc.total_encoders   = mr_cfg->mr_total_resolutions;
+            else
+                ctx->priv->enc.total_encoders   = 1;
+
             set_vp8e_config(&ctx->priv->alg_priv->oxcf,
                              ctx->priv->alg_priv->cfg,
-                             ctx->priv->alg_priv->vp8_cfg);
+                             ctx->priv->alg_priv->vp8_cfg,
+                             mr_cfg);
+
             optr = vp8_create_compressor(&ctx->priv->alg_priv->oxcf);
 
             if (!optr)
@@ -587,6 +630,11 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx)
 
 static vpx_codec_err_t vp8e_destroy(vpx_codec_alg_priv_t *ctx)
 {
+#if CONFIG_MULTI_RES_ENCODING
+    /* Free multi-encoder shared memory */
+    if (ctx->oxcf.mr_total_resolutions > 0 && (ctx->oxcf.mr_encoder_id == ctx->oxcf.mr_total_resolutions-1))
+        free(ctx->oxcf.mr_low_res_mode_info);
+#endif
 
     free(ctx->cx_data);
     vp8_remove_compressor(&ctx->cpi);
@@ -1223,6 +1271,7 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
         vp8e_set_config,
         NOT_IMPLEMENTED,
         vp8e_get_preview,
+        vp8e_mr_alloc_mem,
     } /* encoder functions */
 };
 
@@ -1307,5 +1356,6 @@ vpx_codec_iface_t vpx_enc_vp8_algo =
         vp8e_set_config,
         NOT_IMPLEMENTED,
         vp8e_get_preview,
+        vp8e_mr_alloc_mem,
     } /* encoder functions */
 };
