@@ -106,6 +106,24 @@
       "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tp0\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-25T11:39:44Z",
+      "side": 1,
+      "message": "i\u0027m not questioning the need of this API, i just play the first time user of this API...i\u0027m just concerned that the usage gets complicated...could extend the API to signal first partition # in fragment and let the decoder than figure out how many partitions present and how many missing?",
+      "parentUuid": "AAAAFn//tqc\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
