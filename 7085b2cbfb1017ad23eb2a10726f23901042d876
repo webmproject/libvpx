@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//tBU\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-26T11:54:20Z",
+      "side": 1,
+      "message": "Sure, the index variable could definitely be named partition_idx instead. However I think it\u0027s a good idea to reuse the pbi-\u003efragments[] and pbi-\u003efragment_sizes[] arrays. Or do you think I should add separate arrays for partitions?",
+      "parentUuid": "AAAAFn//tCI\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//tCM\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2011-10-26T11:27:11Z",
       "side": 1,
       "message": "this should be num_token_partitions - 1, as this is the number of extra decoding threads used, main is not counted in",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tBQ\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-26T11:54:20Z",
+      "side": 1,
+      "message": "Good point. Will fix that.",
+      "parentUuid": "AAAAFn//tCM\u003d",
       "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -191,6 +227,24 @@
       "side": 1,
       "message": "ok, just to summarize, vpx_codec_decode has to be called as many times as partitions there are!? with fragment data, with 0 length data for  empty fragments/missing fragments and null data for end of frame?",
       "parentUuid": "AAAAFn//tCs\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tBY\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-10-26T11:54:20Z",
+      "side": 1,
+      "message": "As many times as fragments there are, typically it would be used like this:\n\nfor (i\u003d0; i \u003c fragments.length; i++)\n  vpx_codec_decode(fragments[i], fragments[i].length)\nvpx_codec_decode(NULL, 0);\n\nIf all partitions are contained within one fragment, this boils down to two calls. The actual decoding is done in the last call.",
+      "parentUuid": "AAAAFn//tCg\u003d",
       "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
