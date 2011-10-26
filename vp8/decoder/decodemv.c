@@ -278,72 +278,180 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                             int mb_row, int mb_col)
 {
     vp8_reader *const bc = & pbi->bc;
-    MV_CONTEXT *const mvc = pbi->common.fc.mvc;
-    const int mis = pbi->common.mode_info_stride;
-
-    int_mv *const mv = & mbmi->mv;
-    int mb_to_left_edge;
-    int mb_to_right_edge;
-    int mb_to_top_edge;
-    int mb_to_bottom_edge;
-
-    mb_to_top_edge = pbi->mb.mb_to_top_edge;
-    mb_to_bottom_edge = pbi->mb.mb_to_bottom_edge;
-    mb_to_top_edge -= LEFT_TOP_MARGIN;
-    mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
-
-    mbmi->need_to_clamp_mvs = 0;
-    /* Distance of Mb to the various image edges.
-     * These specified to 8th pel as they are always compared to MV values
-     * that are in 1/8th pel units
-     */
-    pbi->mb.mb_to_left_edge =
-    mb_to_left_edge = -((mb_col * 16) << 3);
-    mb_to_left_edge -= LEFT_TOP_MARGIN;
-
-    pbi->mb.mb_to_right_edge =
-    mb_to_right_edge = ((pbi->common.mb_cols - 1 - mb_col) * 16) << 3;
-    mb_to_right_edge += RIGHT_BOTTOM_MARGIN;
-
-
-    if ((mbmi->ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra)))
+    mbmi->ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
+    if (mbmi->ref_frame)    /* inter MB */
     {
-        /* inter MB */
-        int rct[4];
+        enum {CNT_INTRA, CNT_NEAREST, CNT_NEAR, CNT_SPLITMV};
         vp8_prob mv_ref_p [VP8_MVREFS-1];
-        int_mv nearest, nearby, best_mv;
+        int cnt[4];
+        int *cntx = cnt;
+        int_mv near_mvs[4];
+        int_mv *nmv = near_mvs;
+        const int mis = pbi->mb.mode_info_stride;
+        const MODE_INFO *above = mi - mis;
+        const MODE_INFO *left = mi - 1;
+        const MODE_INFO *aboveleft = above - 1;
+        MV_CONTEXT *const mvc = pbi->common.fc.mvc;
+        int *ref_frame_sign_bias = pbi->common.ref_frame_sign_bias;
         int propogate_mv_for_ec = 0;
+
+        mbmi->need_to_clamp_mvs = 0;
 
         if (vp8_read(bc, pbi->prob_last))
         {
-            mbmi->ref_frame = (MV_REFERENCE_FRAME)((int)mbmi->ref_frame +
-                (int)(1 + vp8_read(bc, pbi->prob_gf)));
+            mbmi->ref_frame =
+                (MV_REFERENCE_FRAME)((int)(2 + vp8_read(bc, pbi->prob_gf)));
         }
 
-        vp8_find_near_mvs(&pbi->mb, mi, &nearest, &nearby, &best_mv, rct,
-                          mbmi->ref_frame, pbi->common.ref_frame_sign_bias);
+        /* Zero accumulators */
+        nmv[0].as_int = nmv[1].as_int = nmv[2].as_int = 0;
+        cnt[0] = cnt[1] = cnt[2] = cnt[3] = 0;
 
-        vp8_mv_ref_probs(mv_ref_p, rct);
+        /* Process above */
+        if (above->mbmi.ref_frame != INTRA_FRAME)
+        {
+            if (above->mbmi.mv.as_int)
+            {
+                (++nmv)->as_int = above->mbmi.mv.as_int;
+                mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame],
+                        mbmi->ref_frame, nmv, ref_frame_sign_bias);
+                ++cntx;
+            }
+
+            *cntx += 2;
+        }
+
+        /* Process left */
+        if (left->mbmi.ref_frame != INTRA_FRAME)
+        {
+            if (left->mbmi.mv.as_int)
+            {
+                int_mv this_mv;
+
+                this_mv.as_int = left->mbmi.mv.as_int;
+                mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame],
+                        mbmi->ref_frame, &this_mv, ref_frame_sign_bias);
+
+                if (this_mv.as_int != nmv->as_int)
+                {
+                    (++nmv)->as_int = this_mv.as_int;
+                    ++cntx;
+                }
+
+                *cntx += 2;
+            }
+            else
+                cnt[CNT_INTRA] += 2;
+        }
+
+        /* Process above left */
+        if (aboveleft->mbmi.ref_frame != INTRA_FRAME)
+        {
+            if (aboveleft->mbmi.mv.as_int)
+            {
+                int_mv this_mv;
+
+                this_mv.as_int = aboveleft->mbmi.mv.as_int;
+                mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame],
+                        mbmi->ref_frame, &this_mv, ref_frame_sign_bias);
+
+                if (this_mv.as_int != nmv->as_int)
+                {
+                    (++nmv)->as_int = this_mv.as_int;
+                    ++cntx;
+                }
+
+                *cntx += 1;
+            }
+            else
+                cnt[CNT_INTRA] += 1;
+        }
+
+        mv_ref_p[0] = vp8_mode_contexts [cnt[CNT_INTRA]] [0];
 
         if( vp8_read(bc, mv_ref_p[0]) )
         {
+            int mb_to_left_edge;
+            int mb_to_right_edge;
+
+            /* Distance of Mb to the various image edges.
+             * These specified to 8th pel as they are always compared to MV
+             * values that are in 1/8th pel units
+             */
+            pbi->mb.mb_to_left_edge =
+            mb_to_left_edge = -((mb_col * 16) << 3);
+            mb_to_left_edge -= LEFT_TOP_MARGIN;
+
+            pbi->mb.mb_to_right_edge =
+            mb_to_right_edge = ((pbi->common.mb_cols - 1 - mb_col) * 16) << 3;
+            mb_to_right_edge += RIGHT_BOTTOM_MARGIN;
+
+            /* If we have three distinct MV's ... */
+            if (cnt[CNT_SPLITMV])
+            {
+                /* See if above-left MV can be merged with NEAREST */
+                if (nmv->as_int == near_mvs[CNT_NEAREST].as_int)
+                    cnt[CNT_NEAREST] += 1;
+            }
+
+            cnt[CNT_SPLITMV] = ((above->mbmi.mode == SPLITMV)
+                                + (left->mbmi.mode == SPLITMV)) * 2
+                               + (aboveleft->mbmi.mode == SPLITMV);
+
+            /* Swap near and nearest if necessary */
+            if (cnt[CNT_NEAR] > cnt[CNT_NEAREST])
+            {
+                int tmp;
+                tmp = cnt[CNT_NEAREST];
+                cnt[CNT_NEAREST] = cnt[CNT_NEAR];
+                cnt[CNT_NEAR] = tmp;
+                tmp = near_mvs[CNT_NEAREST].as_int;
+                near_mvs[CNT_NEAREST].as_int = near_mvs[CNT_NEAR].as_int;
+                near_mvs[CNT_NEAR].as_int = tmp;
+            }
+
+            mv_ref_p[1] = vp8_mode_contexts [cnt[CNT_NEAREST]] [1];
+
             if( vp8_read(bc, mv_ref_p[1]) )
             {
+                mv_ref_p[2] = vp8_mode_contexts [cnt[CNT_NEAR]] [2];
+
                 if( vp8_read(bc, mv_ref_p[2]) )
                 {
+                    int mb_to_top_edge;
+                    int mb_to_bottom_edge;
+
+                    mb_to_top_edge = pbi->mb.mb_to_top_edge;
+                    mb_to_bottom_edge = pbi->mb.mb_to_bottom_edge;
+                    mb_to_top_edge -= LEFT_TOP_MARGIN;
+                    mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
+
+                    /* Use near_mvs[0] to store the "best" MV */
+                    if (cnt[CNT_NEAREST] >= cnt[CNT_INTRA])
+                        near_mvs[CNT_INTRA] = near_mvs[CNT_NEAREST];
+
+                    mv_ref_p[3] = vp8_mode_contexts [cnt[CNT_SPLITMV]] [3];
+
+                    vp8_clamp_mv2(&near_mvs[CNT_INTRA], &pbi->mb);
+
                     if( vp8_read(bc, mv_ref_p[3]) )
                     {
-                        decode_split_mv(bc, mi, mbmi, mis, best_mv, mvc,
-                                        mb_to_left_edge, mb_to_right_edge,
-                                        mb_to_top_edge, mb_to_bottom_edge);
-                        mv->as_int = mi->bmi[15].mv.as_int;
+                        decode_split_mv(bc, mi,
+                                                    mbmi, mis,
+                                                    near_mvs[CNT_INTRA],
+                                                    mvc, mb_to_left_edge,
+                                                    mb_to_right_edge,
+                                                    mb_to_top_edge,
+                                                    mb_to_bottom_edge);
+                        mbmi->mv.as_int = mi->bmi[15].mv.as_int;
                         mbmi->mode =  SPLITMV;
                     }
                     else
                     {
-                        read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
-                        mv->as_mv.row += best_mv.as_mv.row;
-                        mv->as_mv.col += best_mv.as_mv.col;
+                        int_mv *const mbmi_mv = & mbmi->mv;
+                        read_mv(bc, &mbmi_mv->as_mv, (const MV_CONTEXT *) mvc);
+                        mbmi_mv->as_mv.row += near_mvs[CNT_INTRA].as_mv.row;
+                        mbmi_mv->as_mv.col += near_mvs[CNT_INTRA].as_mv.col;
 
                         /* Don't need to check this on NEARMV and NEARESTMV
                          * modes since those modes clamp the MV. The NEWMV mode
@@ -351,7 +459,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                          * special handling may be required.
                          */
                         mbmi->need_to_clamp_mvs =
-                            vp8_check_mv_bounds(mv, mb_to_left_edge,
+                            vp8_check_mv_bounds(mbmi_mv, mb_to_left_edge,
                                                 mb_to_right_edge,
                                                 mb_to_top_edge,
                                                 mb_to_bottom_edge);
@@ -362,14 +470,16 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 else
                 {
                     mbmi->mode =  NEARMV;
-                    mbmi->mv.as_int = nearby.as_int;
+                    vp8_clamp_mv2(&near_mvs[CNT_NEAR], &pbi->mb);
+                    mbmi->mv.as_int = near_mvs[CNT_NEAR].as_int;
                     propogate_mv_for_ec = 1;
                 }
             }
             else
             {
                 mbmi->mode =  NEARESTMV;
-                mbmi->mv.as_int = nearest.as_int;
+                vp8_clamp_mv2(&near_mvs[CNT_NEAREST], &pbi->mb);
+                mbmi->mv.as_int = near_mvs[CNT_NEAREST].as_int;
                 propogate_mv_for_ec = 1;
             }
         }
@@ -399,7 +509,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             mi->bmi[12].mv.as_int =
             mi->bmi[13].mv.as_int =
             mi->bmi[14].mv.as_int =
-            mi->bmi[15].mv.as_int = mv->as_int;
+            mi->bmi[15].mv.as_int = mbmi->mv.as_int;
         }
 #endif
     }
