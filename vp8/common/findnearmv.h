@@ -18,18 +18,14 @@
 #include "treecoder.h"
 
 
-static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias)
+static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp,
+                    const int *ref_frame_sign_bias)
 {
-    MV xmv;
-    xmv = mvp->as_mv;
-
     if (refmb_ref_frame_sign_bias != ref_frame_sign_bias[refframe])
     {
-        xmv.row *= -1;
-        xmv.col *= -1;
+        mvp->as_mv.row *= -1;
+        mvp->as_mv.col *= -1;
     }
-
-    mvp->as_mv = xmv;
 }
 
 #define LEFT_TOP_MARGIN (16 << 3)
