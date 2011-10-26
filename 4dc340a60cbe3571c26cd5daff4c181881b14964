@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//tBs\u003d",
+        "filename": "vp8/encoder/arm/arm_csystemdependent.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:57:00Z",
+      "side": 1,
+      "message": "yes. previously it was not even using the copy_partial_frame_neon when rtcd was disabled",
+      "parentUuid": "AAAAFn//tf0\u003d",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//tew\u003d",
         "filename": "vp8/encoder/arm/neon/picklpf_arm.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2011-10-25T17:56:27Z",
       "side": 1,
       "message": "yheight instead of src_ybc-\u003ey_height",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tBg\u003d",
+        "filename": "vp8/encoder/arm/neon/picklpf_arm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:57:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAFn//tew\u003d",
       "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//tBc\u003d",
+        "filename": "vp8/encoder/arm/neon/picklpf_arm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:57:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAFn//tes\u003d",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//teY\u003d",
         "filename": "vp8/encoder/picklpf.c",
         "patchSetId": 4
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAFn//tBk\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:57:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAFn//teY\u003d",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//teM\u003d",
         "filename": "vp8/encoder/picklpf.c",
         "patchSetId": 4
@@ -81,6 +153,24 @@
       "writtenOn": "2011-10-25T17:56:27Z",
       "side": 1,
       "message": "Are the C and NEON versions identical except for this line? Would make sense to make this the _ptr function instead of vp8_yv12_copy_partial_frame_ptr and call it here? vpx_memcpy_partial_ptr \u003d vpx_memcpy or vp8_memcpy_partial_neon",
+      "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tBo\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:57:00Z",
+      "side": 1,
+      "message": "yes, but on the other hand current mode will allow having more specific implementations..like avoiding the border copy.",
+      "parentUuid": "AAAAFn//teM\u003d",
       "revId": "4dc340a60cbe3571c26cd5daff4c181881b14964",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
