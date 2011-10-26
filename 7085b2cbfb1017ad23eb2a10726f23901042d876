@@ -2,6 +2,40 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAFn//tCI\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 542,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:27:11Z",
+      "side": 1,
+      "message": "i would stick to \"partition\" naming when partitions are involved... fragment was introduced to name a bunch of partitions, 1 or more.",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tCM\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 556,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:27:11Z",
+      "side": 1,
+      "message": "this should be num_token_partitions - 1, as this is the number of extra decoding threads used, main is not counted in",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAFn//tss\u003d",
         "filename": "vpx/vpx_decoder.h",
         "patchSetId": 5
@@ -139,6 +173,24 @@
       "side": 1,
       "message": "That would be possible as well, and that\u0027s more or less what the current API does, but without explicitly having a parameter for \"first partition # in fragment\". \n\nThe downside is that we have to add another parameter to vpx_codec_decode(), which would also affect the default API when VPX_CODEC_USE_INPUT_FRAGMENTS is disabled, and in that situation such a parameter wouldn\u0027t make much sense.\n\nOr we\u0027d have to create a separate decode function for decoding fragments.\n\nI don\u0027t have a very strong opinion on how to signal this, but I like the current way since it doesn\u0027t change the default API and doesn\u0027t add additional decode functions.",
       "parentUuid": "AAAAFn//tp0\u003d",
+      "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tCg\u003d",
+        "filename": "vpx/vpx_decoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-10-26T11:27:11Z",
+      "side": 1,
+      "message": "ok, just to summarize, vpx_codec_decode has to be called as many times as partitions there are!? with fragment data, with 0 length data for  empty fragments/missing fragments and null data for end of frame?",
+      "parentUuid": "AAAAFn//tCs\u003d",
       "revId": "7085b2cbfb1017ad23eb2a10726f23901042d876",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
