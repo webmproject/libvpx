@@ -16,6 +16,24 @@
       "revId": "1d699bbce3afdd8a112318b8c51582ffdfe5bac7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAFn//tDI\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-10-26T07:06:06Z",
+      "side": 1,
+      "message": "I think the eob can be changed to char. Maybe better way would be to remove casting here because we read char type variable  into int variable and no lose of information is possible. I can change this after receiving rest of the comments.\n\nAt the end of the function we have an opposite situation. Int type variables are set to final_eob, so we can not change final_eob to char to avoid casting. So I think at the end of the function it is good to have explicit cast (*d-\u003eeob \u003d (char)final_eob;).",
+      "parentUuid": "AAAAFn//tlM\u003d",
+      "revId": "1d699bbce3afdd8a112318b8c51582ffdfe5bac7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
