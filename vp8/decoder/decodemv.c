@@ -138,11 +138,28 @@ static void read_mvcontexts(vp8_reader *bc, MV_CONTEXT *mvc)
     while (++i < 2);
 }
 
-static B_PREDICTION_MODE sub_mv_ref(vp8_reader *bc, const vp8_prob *p)
+static int_mv sub_mv_ref(vp8_reader *bc, const vp8_prob *p, int_mv abovemv,
+                         int_mv leftmv, int_mv best_mv, const MV_CONTEXT * mvc)
 {
-    const int i = vp8_treed_read(bc, vp8_sub_mv_ref_tree, p);
-
-    return (B_PREDICTION_MODE)i;
+    int_mv blockmv;
+    blockmv.as_int = 0;
+    if( vp8_read(bc, p[0]) )
+    {
+        if( vp8_read(bc, p[1]) )
+        {
+            if( vp8_read(bc, p[2]) )
+            {
+                read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
+                blockmv.as_mv.row += best_mv.as_mv.row;
+                blockmv.as_mv.col += best_mv.as_mv.col;
+            }
+            return blockmv;
+        }
+        else
+            return abovemv;
+    }
+    else
+        return leftmv;
 }
 
 static const unsigned char mbsplit_fill_count[4] = {8, 8, 4, 1};
@@ -205,48 +222,72 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     }
 }
 
+const vp8_prob vp8_sub_mv_ref_prob3 [8][VP8_SUBMVREFS-1] =
+{
+    { 147, 136, 18 },   /* SUBMVREF_NORMAL          */
+    { 223, 1  , 34 },   /* SUBMVREF_LEFT_ABOVE_SAME */
+    { 106, 145, 1  },   /* SUBMVREF_LEFT_ZED        */
+    { 208, 1  , 1  },   /* SUBMVREF_LEFT_ABOVE_ZED  */
+    { 179, 121, 1  },   /* SUBMVREF_ABOVE_ZED       */
+    { 223, 1  , 34 },   /* SUBMVREF_LEFT_ABOVE_SAME */
+    { 179, 121, 1  },   /* SUBMVREF_ABOVE_ZED       */
+    { 208, 1  , 1  }    /* SUBMVREF_LEFT_ABOVE_ZED  */
+};
+
+static
+const vp8_prob * get_sub_mv_ref_prob(const int_mv *l, const int_mv *a)
+{
+    int lez = (l->as_int == 0);
+    int aez = (a->as_int == 0);
+    int lea = (l->as_int == a->as_int);
+    const vp8_prob * prob;
+
+    prob = vp8_sub_mv_ref_prob3[(aez << 2) |
+                                (lez << 1) |
+                                (lea)];
+
+    return prob;
+}
+
 static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
                         MB_MODE_INFO *mbmi, int mis, int_mv best_mv,
                         MV_CONTEXT *const mvc, int mb_to_left_edge,
                         int mb_to_right_edge, int mb_to_top_edge,
                         int mb_to_bottom_edge)
 {
-    const int s = mbmi->partitioning =
-              vp8_treed_read(bc, vp8_mbsplit_tree, vp8_mbsplit_probs);
-    const int num_p = vp8_mbsplit_count [s];
+    int s;      /* split configuration (16x8, 8x16, 8x8, 4x4) */
+    int num_p;  /* number of partitions in the split configuration
+                  (see vp8_mbsplit_count) */
     int j = 0;
+
+    s = 3;
+    num_p = 16;
+    if( vp8_read(bc, 110) )
+    {
+        s = 2;
+        num_p = 4;
+        if( vp8_read(bc, 111) )
+        {
+            s = vp8_read(bc, 150);
+            num_p = 2;
+        }
+    }
 
     do  /* for each subset j */
     {
         int_mv leftmv, abovemv;
         int_mv blockmv;
         int k;  /* first block in subset j */
-        int mv_contz;
+
+        const vp8_prob *prob;
         k = vp8_mbsplit_offset[s][j];
 
         leftmv.as_int = left_block_mv(mi, k);
         abovemv.as_int = above_block_mv(mi, k, mis);
-        mv_contz = vp8_mv_cont(&leftmv, &abovemv);
 
-        switch (sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz]))
-        {
-        case NEW4X4:
-            read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
-            blockmv.as_mv.row += best_mv.as_mv.row;
-            blockmv.as_mv.col += best_mv.as_mv.col;
-            break;
-        case LEFT4X4:
-            blockmv.as_int = leftmv.as_int;
-            break;
-        case ABOVE4X4:
-            blockmv.as_int = abovemv.as_int;
-            break;
-        case ZERO4X4:
-            blockmv.as_int = 0;
-            break;
-        default:
-            break;
-        }
+        prob = get_sub_mv_ref_prob(&leftmv, &abovemv);
+
+        blockmv = sub_mv_ref(bc, prob, abovemv, leftmv, best_mv, mvc);
 
         mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(&blockmv,
                                                   mb_to_left_edge,
@@ -272,6 +313,8 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
 
     }
     while (++j < num_p);
+
+    mbmi->partitioning = s;
 }
 
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
