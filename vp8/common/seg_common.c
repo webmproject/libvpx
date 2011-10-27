@@ -10,6 +10,7 @@
 
 #include "vp8/common/seg_common.h"
 
+#if CONFIG_SEGFEATURES
 const int segfeaturedata_signed[SEG_LVL_MAX] = {1, 1, 0, 0, 0, 0};
 
 
@@ -53,3 +54,5 @@ int is_segfeature_signed( SEG_LVL_FEATURES feature_id )
 }
 
 // TBD? Functions to read and write segment data with range / validity checking
+
+#endif
