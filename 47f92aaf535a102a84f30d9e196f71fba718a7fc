@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGH///44\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1230,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "ws",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///6Q\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "Maybe a comment here as to how the range is dependent on the search_param.  It seems that search_param has a use within the other search modes and here it\u0027s being overridden for something else?",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///6c\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 877,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "ws",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///6k\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 965,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "So this was previously 32, no it\u0027s 8 for all.  Is that what you wanted?  Or did you mean to initialize dia_range to 32 and set it down to 8 in the #if ENABLE_MULTI_RESOLUTION_ENCODING block?",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///5k\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "comment on what this function does would be helpful.",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///5Y\u003d",
+        "filename": "vp8/encoder/pickinter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "hard to say if this one goes in here.  Not in pickinter.c, so should it have it\u0027s own header file.",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///5Q\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "isn\u0027t this declared in scale.h?",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///5I\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "Do you need this block?  This file will only be used for multi resolution encoding.",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///5A\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-10-27T19:16:15Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be defined on the configure line?",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
