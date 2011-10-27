@@ -49,6 +49,7 @@ DEFINE(vp8_writer_value,                        offsetof(vp8_writer, value));
 DEFINE(vp8_writer_count,                        offsetof(vp8_writer, count));
 DEFINE(vp8_writer_pos,                          offsetof(vp8_writer, pos));
 DEFINE(vp8_writer_buffer,                       offsetof(vp8_writer, buffer));
+DEFINE(vp8_writer_buffer_end,                   offsetof(vp8_writer, buffer_end));
 
 DEFINE(tokenextra_token,                        offsetof(TOKENEXTRA, Token));
 DEFINE(tokenextra_extra,                        offsetof(TOKENEXTRA, Extra));

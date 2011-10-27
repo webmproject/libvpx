@@ -24,8 +24,9 @@
 
 ; r0 BOOL_CODER *br
 ; r1 unsigned char *source
-
+; r2 unsigned char *source_end
 |vp8_start_encode| PROC
+    str     r2,  [r0, #vp8_writer_buffer_end]
     mov     r12, #0
     mov     r3,  #255
     mvn     r2,  #23
