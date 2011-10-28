@@ -716,7 +716,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
 #endif
 
-            // Count of last ref frame 0,0 useage
+            // Count of last ref frame 0,0 usage
             if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 cpi->inter_zz_count ++;
 
@@ -758,7 +758,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
         cpi->tplist[mb_row].stop = *tp;
 
-        // Increment pointer into gf useage flags structure.
+        // Increment pointer into gf usage flags structure.
         x->gf_active_ptr++;
 
         // Increment the activity mask pointers.
@@ -1014,7 +1014,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
                                       &cpi->common.rtcd.subpix, bilinear16x16);
     }
 
-    // Reset frame count of inter 0,0 motion vector useage.
+    // Reset frame count of inter 0,0 motion vector usage.
     cpi->inter_zz_count = 0;
 
     vpx_memset(segment_counts, 0, sizeof(segment_counts));
@@ -1320,7 +1320,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     }
 #endif
 
-    // Adjust the projected reference frame useage probability numbers to reflect
+    // Adjust the projected reference frame usage probability numbers to reflect
     // what we have just seen. This may be usefull when we make multiple itterations
     // of the recode loop rather than continuing to use values from the previous frame.
     if ((cm->frame_type != KEY_FRAME) && !cm->refresh_alt_ref_frame && !cm->refresh_golden_frame)
@@ -1710,11 +1710,10 @@ int vp8cx_encode_inter_macroblock
             vp8_update_zbin_extra(cpi, x);
     }
 
-#if 0
-//#if CONFIG_SEGFEATURES
-    // Test code using segment 1 only.
-    // Dont increment count if ref frame coded at segment level
-    if ( (xd->mode_info_context->mbmi.segment_id != 1) )
+#if CONFIG_SEGFEATURES
+    // Dont increment usage count if ref frame coded at segment level
+    if ( !segfeature_active( xd, xd->mode_info_context->mbmi.segment_id,
+                             SEG_LVL_REF_FRAME ) )
         cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame]++;
 #else
     cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;

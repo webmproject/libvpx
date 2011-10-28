@@ -929,12 +929,19 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     if (pc->mb_no_coeff_skip)
     {
-        prob_skip_false = cpi->skip_false_count * 256 / (cpi->skip_false_count + cpi->skip_true_count);
+        // Divide by 0 check. 0 case possible with segment features
+        if ( (cpi->skip_false_count + cpi->skip_true_count) )
+        {
+            prob_skip_false = cpi->skip_false_count * 256 /
+                              (cpi->skip_false_count + cpi->skip_true_count);
 
-        if (prob_skip_false <= 1)
-            prob_skip_false = 1;
+            if (prob_skip_false <= 1)
+                prob_skip_false = 1;
 
-        if (prob_skip_false > 255)
+            if (prob_skip_false > 255)
+                prob_skip_false = 255;
+        }
+        else
             prob_skip_false = 255;
 
         cpi->prob_skip_false = prob_skip_false;
@@ -1192,12 +1199,19 @@ static void write_kfmodes(VP8_COMP *cpi)
 
     if (c->mb_no_coeff_skip)
     {
-        prob_skip_false = cpi->skip_false_count * 256 / (cpi->skip_false_count + cpi->skip_true_count);
+        // Divide by 0 check. 0 case possible with segment features
+        if ( (cpi->skip_false_count + cpi->skip_true_count) )
+        {
+            prob_skip_false = cpi->skip_false_count * 256 /
+                              (cpi->skip_false_count + cpi->skip_true_count);
 
-        if (prob_skip_false <= 1)
-            prob_skip_false = 1;
+            if (prob_skip_false <= 1)
+                prob_skip_false = 1;
 
-        if (prob_skip_false >= 255)
+            if (prob_skip_false > 255)
+                prob_skip_false = 255;
+        }
+        else
             prob_skip_false = 255;
 
         cpi->prob_skip_false = prob_skip_false;

@@ -480,6 +480,10 @@ static void init_seg_features(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
+    int high_q = ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
+                   (cpi->cq_target_quality > 16 ) ) ||
+                 (cpi->ni_av_qi > 32);
+
     // For now at least dont enable seg features alongside cyclic refresh.
     if ( cpi->cyclic_refresh_mode_enabled ||
          (cpi->pass != 2) )
@@ -557,14 +561,12 @@ static void init_seg_features(VP8_COMP *cpi)
                 enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
                 enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
-                if ( ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
-                       (cpi->cq_target_quality > 56 ) ) ||
-                     (cpi->ni_av_qi > 64) )
+                if ( high_q )
                 {
                     xd->segment_feature_data[1]
-                                            [SEG_LVL_REF_FRAME] = LAST_FRAME;
+                                            [SEG_LVL_REF_FRAME] = ALTREF_FRAME;
                     xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
-                    xd->segment_feature_data[1][SEG_LVL_EOB] = 15;
+                    xd->segment_feature_data[1][SEG_LVL_EOB] = 0;
 
                     enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
                     enable_segfeature(xd, 1, SEG_LVL_MODE);
@@ -601,6 +603,15 @@ static void init_seg_features(VP8_COMP *cpi)
             xd->segment_feature_data[0][SEG_LVL_MODE] = ZEROMV;
             xd->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
             xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
+
+            // Skip all MBs if high Q
+            if ( high_q )
+            {
+                enable_segfeature(xd, 0, SEG_LVL_EOB);
+                enable_segfeature(xd, 1, SEG_LVL_EOB);
+                xd->segment_feature_data[0][SEG_LVL_EOB] = 0;
+                xd->segment_feature_data[1][SEG_LVL_EOB] = 0;
+            }
 
             // Enable data udpate
             xd->update_mb_segmentation_data = 1;
