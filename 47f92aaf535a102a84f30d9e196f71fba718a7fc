@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGH///X4\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 875,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-10-28T14:46:22Z",
+      "side": 1,
+      "message": "The dependence is based on the accuracy of motion prediction. The use of search_param is similar here with other places that is to decide the search range.",
+      "parentUuid": "AAAAGH///6Q\u003d",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGH///6c\u003d",
         "filename": "vp8/encoder/mcomp.c",
         "patchSetId": 7
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGH///YY\u003d",
+        "filename": "vp8/encoder/mcomp.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 965,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-10-28T14:46:22Z",
+      "side": 1,
+      "message": "I changed it to 8 from 32 based on some test. It should not cause much difference.",
+      "parentUuid": "AAAAGH///6k\u003d",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGH///5k\u003d",
         "filename": "vp8/encoder/mr_dissim.c",
         "patchSetId": 7
@@ -81,6 +117,24 @@
       "writtenOn": "2011-10-27T19:16:15Z",
       "side": 1,
       "message": "comment on what this function does would be helpful.",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///Xw\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-10-28T14:46:22Z",
+      "side": 1,
+      "message": "This function calculates the dissimilarity for each macroblock in lower-resolution level, which will be used in higher-resolution level motion estimation to help simplify the process.",
+      "parentUuid": "AAAAGH///5k\u003d",
       "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGH///Xo\u003d",
+        "filename": "vp8/encoder/pickinter.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-10-28T14:46:22Z",
+      "side": 1,
+      "message": "Yes. I will modify it.",
+      "parentUuid": "AAAAGH///5Y\u003d",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGH///5Q\u003d",
         "filename": "vp8_multi_resolution_encoder.c",
         "patchSetId": 7
@@ -115,6 +187,24 @@
       "writtenOn": "2011-10-27T19:16:15Z",
       "side": 1,
       "message": "isn\u0027t this declared in scale.h?",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///Xk\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-10-28T14:46:22Z",
+      "side": 1,
+      "message": "You are right. Done.",
+      "parentUuid": "AAAAGH///5Q\u003d",
       "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGH///Xg\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-10-28T14:46:22Z",
+      "side": 1,
+      "message": "Just want to be safe in case that ENABLE_MULTI_RESOLUTION_ENCODING is disabled in the libvpx. Will think about it.",
+      "parentUuid": "AAAAGH///5I\u003d",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGH///5A\u003d",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 7
@@ -149,6 +257,24 @@
       "writtenOn": "2011-10-27T19:16:15Z",
       "side": 1,
       "message": "Shouldn\u0027t this be defined on the configure line?",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH///XI\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-10-28T14:46:22Z",
+      "side": 1,
+      "message": "Will think about it.",
+      "parentUuid": "AAAAGH///5A\u003d",
       "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
