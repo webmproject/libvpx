@@ -32,14 +32,14 @@ extern int enc_debug;
 #define IF_RTCD(x) NULL
 #endif
 
-int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
+int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred)
 {
 
     int i;
     int intra_pred_var = 0;
     (void) cpi;
 
-    if (use_dc_pred)
+    if (use_16x16_pred)
     {
         x->e_mbd.mode_info_context->mbmi.mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
