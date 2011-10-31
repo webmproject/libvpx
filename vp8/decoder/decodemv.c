@@ -273,6 +273,7 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
         }
     }
 
+    mbmi->need_to_clamp_mvs = 0;
     do  /* for each subset j */
     {
         int_mv leftmv, abovemv;
@@ -289,7 +290,7 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
 
         blockmv = sub_mv_ref(bc, prob, abovemv, leftmv, best_mv, mvc);
 
-        mbmi->need_to_clamp_mvs = vp8_check_mv_bounds(&blockmv,
+        mbmi->need_to_clamp_mvs |= vp8_check_mv_bounds(&blockmv,
                                                   mb_to_left_edge,
                                                   mb_to_right_edge,
                                                   mb_to_top_edge,
