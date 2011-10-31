@@ -519,6 +519,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         if (skip_mode[x->e_mbd.mode_info_context->mbmi.ref_frame])
             continue;
 
+        this_mode = vp8_mode_order[mode_index];
+
 #if CONFIG_SEGFEATURES
         // Experimental use of Segment features.
         if ( xd->segmentation_enabled && !cm->refresh_alt_ref_frame )
@@ -574,8 +576,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         rate2 = 0;
         distortion2 = 0;
-
-        this_mode = vp8_mode_order[mode_index];
 
         // Experimental debug code.
         //all_rds[mode_index] = -1;
