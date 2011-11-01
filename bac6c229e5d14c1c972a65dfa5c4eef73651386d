@@ -70,6 +70,24 @@
       "revId": "bac6c229e5d14c1c972a65dfa5c4eef73651386d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH//92M\u003d",
+        "filename": "vp8/vp8_cx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-01T22:25:47Z",
+      "side": 1,
+      "message": "The change that adds bounds checking would be the one that fixes the crash with the command James posted. I believe there was another case with a small resolution file that exceeded the 4K floor. 4K was picked arbitrarily, 32K is equally arbitrary but safer. Safe enough? I did some testing with /dev/urandom and saw the 4K floor is close to the inflection point, using a larger fudge factor seems reasonable:\n\n  $ for i in $(seq 1 32); do for j in $(seq 1 32); do\n      ./vpxenc --i420 -w $i -h $j --limit\u003d1 /dev/urandom -o /dev/null 2\u003e\u00261\n      | tr -d bB/f \n      | awk \"{a\u003d\\$(NF-5);b\u003d$i*$j*3*8; print $i,$j,a,b,(a\u003eb)}\"; done; done",
+      "parentUuid": "AAAAFn//tUU\u003d",
+      "revId": "bac6c229e5d14c1c972a65dfa5c4eef73651386d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
