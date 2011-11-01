@@ -90,6 +90,7 @@ typedef struct
     unsigned int * mb_activity_ptr;
     int * mb_norm_activity_ptr;
     signed int act_zbin_adj;
+    signed int last_act_zbin_adj;
 
     int mvcosts[2][MVvals+1];
     int *mvcost[2];

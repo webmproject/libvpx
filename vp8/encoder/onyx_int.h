@@ -411,6 +411,8 @@ typedef struct VP8_COMP
     int zbin_over_quant;
     int zbin_mode_boost;
     int zbin_mode_boost_enabled;
+    int last_zbin_over_quant;
+    int last_zbin_mode_boost;
 
     int64_t total_byte_count;
 

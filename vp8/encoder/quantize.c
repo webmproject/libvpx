@@ -565,6 +565,23 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
 }
 #endif
 
+#define ZBIN_EXTRA_Y \
+    (( cpi->common.Y1dequant[QIndex][1] *  \
+    ( cpi->zbin_over_quant +  \
+      cpi->zbin_mode_boost +  \
+      x->act_zbin_adj ) ) >> 7)
+
+#define ZBIN_EXTRA_UV \
+    (( cpi->common.UVdequant[QIndex][1] *  \
+    ( cpi->zbin_over_quant +  \
+      cpi->zbin_mode_boost +  \
+      x->act_zbin_adj ) ) >> 7)
+
+#define ZBIN_EXTRA_Y2 \
+    (( cpi->common.Y2dequant[QIndex][1] *  \
+    ( (cpi->zbin_over_quant / 2) +  \
+       cpi->zbin_mode_boost +  \
+       x->act_zbin_adj ) ) >> 7)
 
 void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
 {
@@ -590,61 +607,82 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     else
         QIndex = cpi->common.base_qindex;
 
-    // Y
-    zbin_extra = ( cpi->common.Y1dequant[QIndex][1] *
-                   ( cpi->zbin_over_quant +
-                     cpi->zbin_mode_boost +
-                     x->act_zbin_adj ) ) >> 7;
-
-    for (i = 0; i < 16; i++)
+    if (QIndex != x->q_index)
     {
-        x->block[i].quant = cpi->Y1quant[QIndex];
-        x->block[i].quant_fast = cpi->Y1quant_fast[QIndex];
-        x->block[i].quant_shift = cpi->Y1quant_shift[QIndex];
-        x->block[i].zbin = cpi->Y1zbin[QIndex];
-        x->block[i].round = cpi->Y1round[QIndex];
-        x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
-        x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
-        x->block[i].zbin_extra = (short)zbin_extra;
+        // Y
+        zbin_extra = ZBIN_EXTRA_Y;
+
+        for (i = 0; i < 16; i++)
+        {
+            x->block[i].quant = cpi->Y1quant[QIndex];
+            x->block[i].quant_fast = cpi->Y1quant_fast[QIndex];
+            x->block[i].quant_shift = cpi->Y1quant_shift[QIndex];
+            x->block[i].zbin = cpi->Y1zbin[QIndex];
+            x->block[i].round = cpi->Y1round[QIndex];
+            x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
+            x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
+            x->block[i].zbin_extra = (short)zbin_extra;
+        }
+
+        // UV
+        zbin_extra = ZBIN_EXTRA_UV;
+
+        for (i = 16; i < 24; i++)
+        {
+            x->block[i].quant = cpi->UVquant[QIndex];
+            x->block[i].quant_fast = cpi->UVquant_fast[QIndex];
+            x->block[i].quant_shift = cpi->UVquant_shift[QIndex];
+            x->block[i].zbin = cpi->UVzbin[QIndex];
+            x->block[i].round = cpi->UVround[QIndex];
+            x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
+            x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[QIndex];
+            x->block[i].zbin_extra = (short)zbin_extra;
+        }
+
+        // Y2
+        zbin_extra = ZBIN_EXTRA_Y2;
+
+        x->block[24].quant_fast = cpi->Y2quant_fast[QIndex];
+        x->block[24].quant = cpi->Y2quant[QIndex];
+        x->block[24].quant_shift = cpi->Y2quant_shift[QIndex];
+        x->block[24].zbin = cpi->Y2zbin[QIndex];
+        x->block[24].round = cpi->Y2round[QIndex];
+        x->e_mbd.block[24].dequant = cpi->common.Y2dequant[QIndex];
+        x->block[24].zrun_zbin_boost = cpi->zrun_zbin_boost_y2[QIndex];
+        x->block[24].zbin_extra = (short)zbin_extra;
+
+        /* save this macroblock QIndex for vp8_update_zbin_extra() */
+        x->q_index = QIndex;
+
+        cpi->last_zbin_over_quant = cpi->zbin_over_quant;
+        cpi->last_zbin_mode_boost = cpi->zbin_mode_boost;
+        x->last_act_zbin_adj = x->act_zbin_adj;
     }
-
-    // UV
-    zbin_extra = ( cpi->common.UVdequant[QIndex][1] *
-                   ( cpi->zbin_over_quant +
-                     cpi->zbin_mode_boost +
-                     x->act_zbin_adj ) ) >> 7;
-
-    for (i = 16; i < 24; i++)
+    else if(cpi->last_zbin_over_quant != cpi->zbin_over_quant
+            || cpi->last_zbin_mode_boost != cpi->zbin_mode_boost
+            || x->last_act_zbin_adj != x->act_zbin_adj)
     {
-        x->block[i].quant = cpi->UVquant[QIndex];
-        x->block[i].quant_fast = cpi->UVquant_fast[QIndex];
-        x->block[i].quant_shift = cpi->UVquant_shift[QIndex];
-        x->block[i].zbin = cpi->UVzbin[QIndex];
-        x->block[i].round = cpi->UVround[QIndex];
-        x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
-        x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[QIndex];
-        x->block[i].zbin_extra = (short)zbin_extra;
+        // Y
+        zbin_extra = ZBIN_EXTRA_Y;
+
+        for (i = 0; i < 16; i++)
+            x->block[i].zbin_extra = (short)zbin_extra;
+
+        // UV
+        zbin_extra = ZBIN_EXTRA_UV;
+
+        for (i = 16; i < 24; i++)
+            x->block[i].zbin_extra = (short)zbin_extra;
+
+        // Y2
+        zbin_extra = ZBIN_EXTRA_Y2;
+        x->block[24].zbin_extra = (short)zbin_extra;
+
+        cpi->last_zbin_over_quant = cpi->zbin_over_quant;
+        cpi->last_zbin_mode_boost = cpi->zbin_mode_boost;
+        x->last_act_zbin_adj = x->act_zbin_adj;
     }
-
-    // Y2
-    zbin_extra = ( cpi->common.Y2dequant[QIndex][1] *
-                   ( (cpi->zbin_over_quant / 2) +
-                     cpi->zbin_mode_boost +
-                     x->act_zbin_adj ) ) >> 7;
-
-    x->block[24].quant_fast = cpi->Y2quant_fast[QIndex];
-    x->block[24].quant = cpi->Y2quant[QIndex];
-    x->block[24].quant_shift = cpi->Y2quant_shift[QIndex];
-    x->block[24].zbin = cpi->Y2zbin[QIndex];
-    x->block[24].round = cpi->Y2round[QIndex];
-    x->e_mbd.block[24].dequant = cpi->common.Y2dequant[QIndex];
-    x->block[24].zrun_zbin_boost = cpi->zrun_zbin_boost_y2[QIndex];
-    x->block[24].zbin_extra = (short)zbin_extra;
-
-    /* save this macroblock QIndex for vp8_update_zbin_extra() */
-    x->q_index = QIndex;
 }
-
 
 void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x)
 {
@@ -653,35 +691,24 @@ void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x)
     int zbin_extra;
 
     // Y
-    zbin_extra = ( cpi->common.Y1dequant[QIndex][1] *
-                   ( cpi->zbin_over_quant +
-                     cpi->zbin_mode_boost +
-                     x->act_zbin_adj ) ) >> 7;
+    zbin_extra = ZBIN_EXTRA_Y;
+
     for (i = 0; i < 16; i++)
-    {
         x->block[i].zbin_extra = (short)zbin_extra;
-    }
 
     // UV
-    zbin_extra = ( cpi->common.UVdequant[QIndex][1] *
-                   ( cpi->zbin_over_quant +
-                     cpi->zbin_mode_boost +
-                     x->act_zbin_adj ) ) >> 7;
+    zbin_extra = ZBIN_EXTRA_UV;
 
     for (i = 16; i < 24; i++)
-    {
         x->block[i].zbin_extra = (short)zbin_extra;
-    }
 
     // Y2
-    zbin_extra = ( cpi->common.Y2dequant[QIndex][1] *
-                   ( (cpi->zbin_over_quant / 2) +
-                     cpi->zbin_mode_boost +
-                     x->act_zbin_adj ) ) >> 7;
-
+    zbin_extra = ZBIN_EXTRA_Y2;
     x->block[24].zbin_extra = (short)zbin_extra;
 }
-
+#undef ZBIN_EXTRA_Y
+#undef ZBIN_EXTRA_UV
+#undef ZBIN_EXTRA_Y2
 
 void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
 {
