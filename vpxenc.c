@@ -2068,11 +2068,11 @@ int main(int argc, const char **argv_)
                "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
                " %7lu %s (%.2f fps)\033[K", pass + 1,
                arg_passes, frames_in, frames_out, nbytes,
-               (unsigned long)(nbytes * 8 / frames_in),
-               nbytes * 8 *(int64_t)arg_framerate.num / arg_framerate.den / frames_in,
+               frames_in ? (unsigned long)(nbytes * 8 / frames_in) : 0,
+               frames_in ? nbytes * 8 *(int64_t)arg_framerate.num / arg_framerate.den / frames_in : 0,
                cx_time > 9999999 ? cx_time / 1000 : cx_time,
                cx_time > 9999999 ? "ms" : "us",
-               (float)frames_in * 1000000.0 / (float)cx_time);
+               cx_time > 0 ? (float)frames_in * 1000000.0 / (float)cx_time : 0);
 
         if ( (show_psnr) && (psnr_count>0) )
         {
