@@ -469,12 +469,50 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     d->eob = final_eob;
     *a = *l = (d->eob != !type);
 }
+static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
+                                   ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
+{
+    int sum=0;
+    int i;
+    BLOCKD *bd = &x->block[24];
+
+    if(bd->dequant[0]>=35 && bd->dequant[1]>=35)
+        return;
+
+    for(i=0;i<bd->eob;i++)
+    {
+        int coef = bd->dqcoeff[vp8_default_zig_zag1d[i]];
+        sum+= (coef>=0)?coef:-coef;
+        if(sum>=35)
+            return;
+    }
+    /**************************************************************************
+    our inverse hadamard transform effectively is weighted sum of all 16 inputs
+    with weight either 1 or -1. It has a last stage scaling of (sum+3)>>3. And
+    dc only idct is (dc+4)>>3. So if all the sums are between -35 and 29, the
+    output after inverse wht and idct will be all zero. A sum of absolute value
+    smaller than 35 guarantees all 16 different (+1/-1) weighted sums in wht
+    fall between -35 and +35.
+    **************************************************************************/
+    if(sum < 35)
+    {
+        for(i=0;i<bd->eob;i++)
+        {
+            int rc = vp8_default_zig_zag1d[i];
+            bd->qcoeff[rc]=0;
+            bd->dqcoeff[rc]=0;
+        }
+        bd->eob = 0;
+        *a = *l = (bd->eob != !type);
+    }
+}
 
 static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
     int type;
     int has_2nd_order;
+
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
@@ -506,6 +544,8 @@ static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
         b=24;
         optimize_b(x, b, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+        check_reset_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 }
 
@@ -539,7 +579,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     for (b = 0; b < 16; b++)
     {
         optimize_b(x, b, type,
-        ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
     }
 
 
@@ -548,6 +588,8 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
         b=24;
         optimize_b(x, b, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+        check_reset_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 }
 
