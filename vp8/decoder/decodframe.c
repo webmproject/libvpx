@@ -883,7 +883,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     int mb_row;
     int i, j, k, l;
-    const int *const mb_feature_data_bits = vp8_mb_feature_data_bits;
+    const int *const mb_feature_data_bits = vp8_seg_feature_data_bits;
     int corrupt_tokens = 0;
     int prev_independent_partitions = pbi->independent_partitions;
 

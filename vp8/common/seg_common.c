@@ -53,6 +53,55 @@ int is_segfeature_signed( SEG_LVL_FEATURES feature_id )
     return ( segfeaturedata_signed[feature_id] );
 }
 
+void clear_segdata( MACROBLOCKD *xd,
+                    int segment_id,
+                    SEG_LVL_FEATURES feature_id)
+{
+    xd->segment_feature_data[segment_id][feature_id] = 0;
+}
+
+void set_segdata( MACROBLOCKD *xd,
+                  int segment_id,
+                  SEG_LVL_FEATURES feature_id,
+                  int seg_data )
+{
+    xd->segment_feature_data[segment_id][feature_id] = seg_data;
+}
+
+int get_segdata( MACROBLOCKD *xd,
+                 int segment_id,
+                 SEG_LVL_FEATURES feature_id )
+{
+    return xd->segment_feature_data[segment_id][feature_id];
+}
+
+void clear_segref( MACROBLOCKD *xd, int segment_id )
+{
+    xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] = 0;
+}
+
+void set_segref( MACROBLOCKD *xd,
+                 int segment_id,
+                 MV_REFERENCE_FRAME ref_frame )
+{
+    xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] |=
+        (1 << ref_frame);
+}
+
+int check_segref( MACROBLOCKD *xd,
+                  int segment_id,
+                  MV_REFERENCE_FRAME ref_frame )
+{
+    return ( xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] &
+             (1 << ref_frame) ) ? 1 : 0;
+}
+
+int check_segref_inter(MACROBLOCKD *xd, int segment_id)
+{
+    return ( xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME] &
+             ~(1 << INTRA_FRAME) ) ? 1 : 0;
+}
+
 // TBD? Functions to read and write segment data with range / validity checking
 
 #endif

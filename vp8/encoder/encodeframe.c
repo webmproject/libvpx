@@ -1584,11 +1584,12 @@ int vp8cx_encode_inter_macroblock
     int intra_error = 0;
     int rate;
     int distortion;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
 
     x->skip = 0;
 
     if (xd->segmentation_enabled)
-        x->encode_breakout = cpi->segment_encode_breakout[xd->mode_info_context->mbmi.segment_id];
+        x->encode_breakout = cpi->segment_encode_breakout[segment_id];
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
@@ -1650,7 +1651,7 @@ int vp8cx_encode_inter_macroblock
         if (cpi->cyclic_refresh_mode_enabled)
         {
             // Clear segment_id back to 0 if not coded (last frame 0,0)
-            if ( (xd->mode_info_context->mbmi.segment_id == 1) &&
+            if ( (segment_id == 1) &&
                  ( (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) ||
                    (xd->mode_info_context->mbmi.mode != ZEROMV) ) )
             {
@@ -1711,10 +1712,20 @@ int vp8cx_encode_inter_macroblock
     }
 
 #if CONFIG_SEGFEATURES
-    // Dont increment usage count if ref frame coded at segment level
-    if ( !segfeature_active( xd, xd->mode_info_context->mbmi.segment_id,
-                             SEG_LVL_REF_FRAME ) )
+
+    // If we have just a single reference frame coded for a segment then
+    // exclude from the reference frame counts used to work out
+    // probabilities. NOTE: At the moment we dont support custom trees
+    // for the reference frame coding for each segment but this is a
+    // possible future action.
+    if ( !segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) ||
+         ( ( check_segref( xd, segment_id, INTRA_FRAME ) +
+             check_segref( xd, segment_id, LAST_FRAME ) +
+             check_segref( xd, segment_id, GOLDEN_FRAME ) +
+             check_segref( xd, segment_id, ALTREF_FRAME ) ) > 1 ) )
+    {
         cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame]++;
+    }
 #else
     cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
 #endif

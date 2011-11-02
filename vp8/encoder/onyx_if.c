@@ -531,7 +531,8 @@ static void init_seg_features(VP8_COMP *cpi)
             xd->update_mb_segmentation_map = 1;
             xd->update_mb_segmentation_data = 1;
 
-            xd->segment_feature_data[1][SEG_LVL_ALT_Q] = -3;
+            xd->segment_feature_data[1][SEG_LVL_ALT_Q] =
+                -(2+(cpi->ni_av_qi >> 3));
             xd->segment_feature_data[1][SEG_LVL_ALT_LF] = -2;
 
             enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
@@ -563,8 +564,7 @@ static void init_seg_features(VP8_COMP *cpi)
 
                 if ( high_q )
                 {
-                    xd->segment_feature_data[1]
-                                            [SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+                    set_segref(xd, 1, ALTREF_FRAME);
                     xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
                     xd->segment_feature_data[1][SEG_LVL_EOB] = 0;
 
@@ -598,10 +598,12 @@ static void init_seg_features(VP8_COMP *cpi)
             enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);
             enable_segfeature(xd, 0, SEG_LVL_MODE);
 
-            // All mbs should use ALTREF_FRAME, ZEROMV
-            xd->segment_feature_data[0][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
+            // All mbs should use ALTREF_FRAME, ZEROMV exclusively
+            clear_segref(xd, 0);
+            set_segref(xd, 0, ALTREF_FRAME);
+            clear_segref(xd, 1);
+            set_segref(xd, 1, ALTREF_FRAME);
             xd->segment_feature_data[0][SEG_LVL_MODE] = ZEROMV;
-            xd->segment_feature_data[1][SEG_LVL_REF_FRAME] = ALTREF_FRAME;
             xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
 
             // Skip all MBs if high Q

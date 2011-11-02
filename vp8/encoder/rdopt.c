@@ -2130,9 +2130,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         {
             unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
 
-            if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME )  &&
-                 ( xd->mode_info_context->mbmi.ref_frame !=
-                   xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME]))
+            // If the segment reference frame feature is enabled....
+            // then do nothing if the current ref frame is not allowed..
+            if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) &&
+                 !check_segref( xd, segment_id,
+                                xd->mode_info_context->mbmi.ref_frame ) )
             {
                 continue;
             }

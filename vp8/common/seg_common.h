@@ -30,5 +30,31 @@ void disable_segfeature( MACROBLOCKD *xd,
 
 int is_segfeature_signed( SEG_LVL_FEATURES feature_id );
 
+void clear_segdata( MACROBLOCKD *xd,
+                    int segment_id,
+                    SEG_LVL_FEATURES feature_id);
+
+void set_segdata( MACROBLOCKD *xd,
+                  int segment_id,
+                  SEG_LVL_FEATURES feature_id,
+                  int seg_data );
+
+int get_segdata( MACROBLOCKD *xd,
+                 int segment_id,
+                 SEG_LVL_FEATURES feature_id );
+
+void clear_segref( MACROBLOCKD *xd, int segment_id );
+
+void set_segref( MACROBLOCKD *xd,
+                 int segment_id,
+                 MV_REFERENCE_FRAME ref_frame );
+
+int check_segref( MACROBLOCKD *xd,
+                  int segment_id,
+                  MV_REFERENCE_FRAME ref_frame );
+
+int check_segref_inter(MACROBLOCKD *xd, int segment_id);
+
+
 #endif /* __INC_SEG_COMMON_H__ */
 
