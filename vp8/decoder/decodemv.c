@@ -96,8 +96,8 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
             if ( pbi->common.mb_no_coeff_skip &&
                  ( !segfeature_active( &pbi->mb,
                                        m->mbmi.segment_id, SEG_LVL_EOB ) ||
-                   (pbi->mb.segment_feature_data[m->mbmi.segment_id]
-                                                [SEG_LVL_EOB] != 0) ) )
+                   ( get_segdata( &pbi->mb,
+                                  m->mbmi.segment_id, SEG_LVL_EOB ) != 0 ) ) )
             {
                 m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
             }
@@ -106,8 +106,8 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
 //#if CONFIG_SEGFEATURES
                 if ( segfeature_active( &pbi->mb,
                                         m->mbmi.segment_id, SEG_LVL_EOB ) &&
-                     (pbi->mb.segment_feature_data[m->mbmi.segment_id]
-                                                  [SEG_LVL_EOB] == 0) )
+                     ( get_segdata( &pbi->mb,
+                                    m->mbmi.segment_id, SEG_LVL_EOB ) == 0 ) )
                 {
                     m->mbmi.mb_skip_coeff = 1;
                 }
@@ -278,9 +278,9 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
             if ( check_segref( xd, segment_id, INTRA_FRAME ) )
                 ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
             else
-                ref_frame = 1;      // note this unchanged = LAST
+                ref_frame = LAST_FRAME;
 
-            if ( ref_frame )
+            if ( ref_frame == LAST_FRAME )
             {
                 // Now consider last vs (golden or alt) flag....
                 // If Last is not enabled
@@ -501,8 +501,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if ( pbi->common.mb_no_coeff_skip &&
          ( !segfeature_active( xd,
                                mbmi->segment_id, SEG_LVL_EOB ) ||
-           (xd->segment_feature_data[mbmi->segment_id]
-                                    [SEG_LVL_EOB] != 0) ) )
+           (get_segdata( xd, mbmi->segment_id, SEG_LVL_EOB ) != 0) ) )
     {
         // Read the macroblock coeff skip flag if this feature is in use,
         // else default to 0
@@ -513,8 +512,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 //#if CONFIG_SEGFEATURES
         if ( segfeature_active( xd,
                                 mbmi->segment_id, SEG_LVL_EOB ) &&
-             (xd->segment_feature_data[mbmi->segment_id]
-                                      [SEG_LVL_EOB] == 0) )
+             (get_segdata( xd, mbmi->segment_id, SEG_LVL_EOB ) == 0) )
         {
             mbmi->mb_skip_coeff = 1;
         }
@@ -541,7 +539,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if ( segfeature_active( xd, mbmi->segment_id, SEG_LVL_MODE ) )
         {
             mbmi->mode =
-                xd->segment_feature_data[mbmi->segment_id][SEG_LVL_MODE];
+                get_segdata( xd, mbmi->segment_id, SEG_LVL_MODE );
         }
         else
         {

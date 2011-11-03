@@ -1179,13 +1179,13 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     {
         // Abs Value
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
-            QIndex = xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
+            QIndex = get_segdata( xd, segment_id, SEG_LVL_ALT_Q );
 
         // Delta Value
         else
         {
             QIndex = cpi->common.base_qindex +
-                     xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
+                     get_segdata( xd, segment_id, SEG_LVL_ALT_Q );
 
             // Clamp to valid range
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;
@@ -1215,7 +1215,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
         {
             x->block[i].eob_max_offset =
-                xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+                get_segdata( xd, segment_id, SEG_LVL_EOB );
         }
         else
             x->block[i].eob_max_offset = 16;
@@ -1242,7 +1242,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
         {
             x->block[i].eob_max_offset =
-                xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+                get_segdata( xd, segment_id, SEG_LVL_EOB );
         }
         else
             x->block[i].eob_max_offset = 16;
@@ -1269,7 +1269,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
     {
         x->block[24].eob_max_offset =
-            xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+            get_segdata( xd, segment_id, SEG_LVL_EOB );
     }
     else
         x->block[24].eob_max_offset = 16;

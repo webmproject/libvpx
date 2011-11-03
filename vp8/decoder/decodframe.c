@@ -85,13 +85,13 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
     {
         /* Abs Value */
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
-            QIndex = xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
+            QIndex = get_segdata( xd, segment_id, SEG_LVL_ALT_Q );
 
         /* Delta Value */
         else
         {
             QIndex = pc->base_qindex +
-                xd->segment_feature_data[segment_id][SEG_LVL_ALT_Q];
+                     get_segdata( xd, segment_id, SEG_LVL_ALT_Q );
             QIndex = (QIndex >= 0) ? ((QIndex <= MAXQ) ? QIndex : MAXQ) : 0;    /* Clamp to valid range */
         }
     }
@@ -804,10 +804,7 @@ static void init_frame(VP8D_COMP *pbi)
         // Reset the segment feature data to the default stats:
         // Features disabled, 0, with delta coding (Default state).
 //#if CONFIG_SEGFEATURES
-        vpx_memset(xd->segment_feature_mask, 0,
-                   sizeof(xd->segment_feature_mask));
-        vpx_memset(xd->segment_feature_data, 0,
-                   sizeof(xd->segment_feature_data));
+        clearall_segfeatures( xd );
 
         xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
 

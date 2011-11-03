@@ -536,7 +536,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             }
             if ( segfeature_active( xd, segment_id, SEG_LVL_MODE )  &&
                  ( this_mode !=
-                   xd->segment_feature_data[segment_id][SEG_LVL_MODE]))
+                   get_segdata( xd, segment_id, SEG_LVL_MODE ) ) )
             {
                 continue;
             }

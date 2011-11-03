@@ -190,7 +190,7 @@ static void tokenize2nd_order_b
 
     if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
     {
-        seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+        seg_eob = get_segdata( xd, segment_id, SEG_LVL_EOB );
     }
 
     b = xd->block + 24;
@@ -326,7 +326,7 @@ static void tokenize1st_order_b
 
     if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
     {
-        seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+        seg_eob = get_segdata( xd, segment_id, SEG_LVL_EOB );
     }
 
     b = xd->block;
@@ -487,7 +487,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int segment_id = x->mode_info_context->mbmi.segment_id;
 
     if ( !segfeature_active( x, segment_id, SEG_LVL_EOB ) ||
-         (x->segment_feature_data[segment_id][SEG_LVL_EOB] != 0) )
+         ( get_segdata( x, segment_id, SEG_LVL_EOB ) != 0) )
     {
         skip_inc = 1;
     }

@@ -336,10 +336,9 @@ static void setup_features(VP8_COMP *cpi)
     xd->update_mb_segmentation_map = 0;
     xd->update_mb_segmentation_data = 0;
     vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
-    vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
 
 //#if CONFIG_SEGFEATURES
-    vpx_memset(xd->segment_feature_mask, 0, sizeof(xd->segment_feature_mask));
+    clearall_segfeatures( xd );
 
     xd->mode_ref_lf_delta_enabled = 0;
     xd->mode_ref_lf_delta_update = 0;
@@ -529,9 +528,8 @@ static void init_seg_features(VP8_COMP *cpi)
             xd->update_mb_segmentation_map = 1;
             xd->update_mb_segmentation_data = 1;
 
-            xd->segment_feature_data[1][SEG_LVL_ALT_Q] =
-                -(2+(cpi->ni_av_qi >> 3));
-            xd->segment_feature_data[1][SEG_LVL_ALT_LF] = -2;
+            set_segdata( xd, 1, SEG_LVL_ALT_Q, -(2+(cpi->ni_av_qi >> 3)) );
+            set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
 
             enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
             enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
@@ -554,20 +552,21 @@ static void init_seg_features(VP8_COMP *cpi)
                 xd->update_mb_segmentation_data = 1;
                 xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
 
-                xd->segment_feature_data[1][SEG_LVL_ALT_Q] = 5;
-                xd->segment_feature_data[1][SEG_LVL_ALT_LF] = -2;
-
+                set_segdata( xd, 1, SEG_LVL_ALT_Q, 5 );
                 enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
+
+                set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
                 enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
                 if ( high_q )
                 {
                     set_segref(xd, 1, ALTREF_FRAME);
-                    xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
-                    xd->segment_feature_data[1][SEG_LVL_EOB] = 0;
-
                     enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
+
+                    set_segdata( xd, 1, SEG_LVL_MODE, ZEROMV );
                     enable_segfeature(xd, 1, SEG_LVL_MODE);
+
+                    set_segdata( xd, 1, SEG_LVL_EOB, 0 );
                     enable_segfeature(xd, 1, SEG_LVL_EOB);
                 }
             }
@@ -601,16 +600,16 @@ static void init_seg_features(VP8_COMP *cpi)
             set_segref(xd, 0, ALTREF_FRAME);
             clear_segref(xd, 1);
             set_segref(xd, 1, ALTREF_FRAME);
-            xd->segment_feature_data[0][SEG_LVL_MODE] = ZEROMV;
-            xd->segment_feature_data[1][SEG_LVL_MODE] = ZEROMV;
+            set_segdata( xd, 0, SEG_LVL_MODE, ZEROMV );
+            set_segdata( xd, 1, SEG_LVL_MODE, ZEROMV );
 
             // Skip all MBs if high Q
             if ( high_q )
             {
                 enable_segfeature(xd, 0, SEG_LVL_EOB);
                 enable_segfeature(xd, 1, SEG_LVL_EOB);
-                xd->segment_feature_data[0][SEG_LVL_EOB] = 0;
-                xd->segment_feature_data[1][SEG_LVL_EOB] = 0;
+                set_segdata( xd, 0, SEG_LVL_EOB, 0 );
+                set_segdata( xd, 1, SEG_LVL_EOB, 0 );
             }
 
             // Enable data udpate

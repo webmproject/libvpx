@@ -227,11 +227,11 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
             /* Abs value */
             if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
             {
-                lvl_seg = xd->segment_feature_data[seg][SEG_LVL_ALT_LF];
+                lvl_seg = get_segdata( xd, seg, SEG_LVL_ALT_LF );
             }
             else  /* Delta Value */
             {
-                lvl_seg += xd->segment_feature_data[seg][SEG_LVL_ALT_LF];
+                lvl_seg += get_segdata( xd, seg, SEG_LVL_ALT_LF );;
                 lvl_seg = (lvl_seg > 0) ? ((lvl_seg > 63) ? 63: lvl_seg) : 0;
             }
         }
@@ -288,7 +288,7 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
 void vp8_loop_filter_frame
 (
     VP8_COMMON *cm,
-    MACROBLOCKD *mbd
+    MACROBLOCKD *xd
 )
 {
     YV12_BUFFER_CONFIG *post = cm->frame_to_show;
@@ -308,7 +308,7 @@ void vp8_loop_filter_frame
     const MODE_INFO *mode_info_context = cm->mi;
 
     /* Initialize the loop filter for this frame. */
-    vp8_loop_filter_frame_init(cm, mbd, cm->filter_level);
+    vp8_loop_filter_frame_init(cm, xd, cm->filter_level);
 
     /* Set up the buffer pointers */
     y_ptr = post->y_buffer;
@@ -396,7 +396,7 @@ void vp8_loop_filter_frame
 void vp8_loop_filter_frame_yonly
 (
     VP8_COMMON *cm,
-    MACROBLOCKD *mbd,
+    MACROBLOCKD *xd,
     int default_filt_lvl
 )
 {
@@ -421,7 +421,7 @@ void vp8_loop_filter_frame_yonly
 #endif
 
     /* Initialize the loop filter for this frame. */
-    vp8_loop_filter_frame_init( cm, mbd, default_filt_lvl);
+    vp8_loop_filter_frame_init( cm, xd, default_filt_lvl);
 
     /* Set up the buffer pointers */
     y_ptr = post->y_buffer;
@@ -503,7 +503,7 @@ void vp8_loop_filter_frame_yonly
 void vp8_loop_filter_partial_frame
 (
     VP8_COMMON *cm,
-    MACROBLOCKD *mbd,
+    MACROBLOCKD *xd,
     int default_filt_lvl
 )
 {
@@ -520,7 +520,7 @@ void vp8_loop_filter_partial_frame
     loop_filter_info lfi;
 
     int filter_level;
-    int alt_flt_enabled = mbd->segmentation_enabled;
+    int alt_flt_enabled = xd->segmentation_enabled;
     FRAME_TYPE frame_type = cm->frame_type;
 
     const MODE_INFO *mode_info_context;
@@ -545,15 +545,15 @@ void vp8_loop_filter_partial_frame
     {
         for (i = 0; i < MAX_MB_SEGMENTS; i++)
         {    /* Abs value */
-            if (mbd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+            if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
             {
-                lvl_seg[i] = mbd->segment_feature_data[i][SEG_LVL_ALT_LF];
+                lvl_seg[i] = get_segdata( xd, i, SEG_LVL_ALT_LF );
             }
             /* Delta Value */
             else
             {
-                lvl_seg[i] = default_filt_lvl
-                        + mbd->segment_feature_data[i][SEG_LVL_ALT_LF];
+                lvl_seg[i] = default_filt_lvl +
+                             get_segdata( xd, i, SEG_LVL_ALT_LF );
                 lvl_seg[i] = (lvl_seg[i] > 0) ?
                         ((lvl_seg[i] > 63) ? 63: lvl_seg[i]) : 0;
             }

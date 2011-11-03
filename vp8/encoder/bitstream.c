@@ -887,7 +887,7 @@ static void encode_ref_frame( vp8_writer *const w,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
 
-    // No segment features or segment reference frame featuure is disabled
+    // No segment features or segment reference frame feature is disabled
     if ( !seg_ref_active )
     {
         if (rf == INTRA_FRAME)
@@ -1108,7 +1108,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 //#if CONFIG_SEGFEATURES
             if ( pc->mb_no_coeff_skip &&
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
-                   (xd->segment_feature_data[segment_id][SEG_LVL_EOB] != 0) ) )
+                   ( get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0 ) ) )
             {
                 vp8_encode_bool(w, mi->mb_skip_coeff, prob_skip_false);
             }
@@ -1320,7 +1320,7 @@ static void write_kfmodes(VP8_COMP *cpi)
 //#if CONFIG_SEGFEATURES
             if ( c->mb_no_coeff_skip &&
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
-                   (xd->segment_feature_data[segment_id][SEG_LVL_EOB] != 0) ) )
+                   (get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0) ) )
             {
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
             }

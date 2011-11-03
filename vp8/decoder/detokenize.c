@@ -656,7 +656,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
 
     if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
     {
-        seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
+        seg_eob = get_segdata( xd, segment_id, SEG_LVL_EOB );
     }
 
     type = 3;
