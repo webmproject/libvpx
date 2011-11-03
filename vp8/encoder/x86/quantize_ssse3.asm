@@ -110,12 +110,14 @@ sym(vp8_fast_quantize_b_ssse3):
     movdqa      [rcx], xmm2                 ;store dqcoeff
     movdqa      [rcx + 16], xmm3            ;store dqcoeff
 
+    mov         rcx, [rsi + vp8_blockd_eob]
+
     sub         edi, edx                    ;check for all zeros in bit mask
     sar         edi, 31                     ;0 or -1
     add         eax, 1
     and         eax, edi                    ;if the bit mask was all zero,
                                             ;then eob = 0
-    mov         [rsi + vp8_blockd_eob], eax
+    mov         BYTE PTR [rcx], al          ;store eob
 
     ; begin epilog
 %if ABI_IS_32BIT

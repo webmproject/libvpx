@@ -274,7 +274,7 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     qcoeff_ptr = d->qcoeff;
     dqcoeff_ptr = d->dqcoeff;
     i0 = !type;
-    eob = d->eob;
+    eob = *d->eob;
 
     /* Now set up a Viterbi trellis to evaluate alternative roundings. */
     rdmult = mb->rdmult * err_mult;
@@ -466,8 +466,8 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     }
     final_eob++;
 
-    d->eob = final_eob;
-    *a = *l = (d->eob != !type);
+    *a = *l = (final_eob != !type);
+    *d->eob = (char)final_eob;
 }
 static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
                                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
@@ -650,7 +650,7 @@ static void inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd,
     {
         BLOCKD *b = &x->block[i];
 
-        if (b->eob > 1)
+        if (*b->eob > 1)
         {
             IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->predictor, 16,
                   *(b->base_dst) + b->dst, b->dst_stride);
@@ -667,7 +667,7 @@ static void inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd,
     {
         BLOCKD *b = &x->block[i];
 
-        if (b->eob > 1)
+        if (*b->eob > 1)
         {
             IDCT_INVOKE(rtcd, idct16)(b->dqcoeff, b->predictor, 8,
                   *(b->base_dst) + b->dst, b->dst_stride);

@@ -37,17 +37,17 @@ void vp8_fast_quantize_b_mmx(BLOCK *b, BLOCKD *d)
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = d->dequant;
 
-    d->eob = vp8_fast_quantize_b_impl_mmx(
-                 coeff_ptr,
-                 zbin_ptr,
-                 qcoeff_ptr,
-                 dequant_ptr,
-                 scan_mask,
+    *d->eob = (char)vp8_fast_quantize_b_impl_mmx(
+                                                 coeff_ptr,
+                                                 zbin_ptr,
+                                                 qcoeff_ptr,
+                                                 dequant_ptr,
+                                                 scan_mask,
 
-                 round_ptr,
-                 quant_ptr,
-                 dqcoeff_ptr
-             );
+                                                 round_ptr,
+                                                 quant_ptr,
+                                                 dqcoeff_ptr
+                                                 );
 }
 
 int vp8_mbblock_error_mmx_impl(short *coeff_ptr, short *dcoef_ptr, int dc);

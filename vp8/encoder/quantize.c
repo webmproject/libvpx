@@ -62,7 +62,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
             }
         }
     }
-    d->eob = eob + 1;
+    *d->eob = (char)(eob + 1);
 }
 
 #else
@@ -97,7 +97,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
             eob = i;                                // last nonzero coeffs
         }
     }
-    d->eob = eob + 1;
+    *d->eob = (char)(eob + 1);
 }
 
 #endif
@@ -152,7 +152,7 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
         }
     }
 
-    d->eob = eob + 1;
+    *d->eob = (char)(eob + 1);
 }
 
 /* Perform regular quantization, with unbiased rounding and no zero bin. */
@@ -210,7 +210,7 @@ void vp8_strict_quantize_b(BLOCK *b, BLOCKD *d)
         }
     }
 
-    d->eob = eob + 1;
+    *d->eob = (char)(eob + 1);
 }
 
 #else
@@ -264,7 +264,7 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
         }
     }
 
-    d->eob = eob + 1;
+    *d->eob = (char)(eob + 1);
 }
 
 #endif
@@ -731,4 +731,3 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
         vp8cx_init_quantizer(cpi);
 
 }
-

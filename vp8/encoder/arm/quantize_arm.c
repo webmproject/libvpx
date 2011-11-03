@@ -46,7 +46,7 @@ void vp8_quantize_mb_neon(MACROBLOCK *x)
                            &x->e_mbd.block[i], &x->e_mbd.block[i+1]);
 
     if (has_2nd_order)
-        x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+        x->quantize_b(&x->block[24], &x->e_mbd.block[24]);
 }
 
 
