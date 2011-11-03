@@ -2010,6 +2010,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     MB_PREDICTION_MODE this_mode;
     int num00;
     int best_mode_index = 0;
+    unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
 
     int i;
     int mode_index;
@@ -2129,38 +2130,39 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
 
 //#if CONFIG_SEGFEATURES
-        // Experimental use of Segment features.
-        if ( xd->segmentation_enabled && !cm->refresh_alt_ref_frame )
+        // If the segment reference frame feature is enabled....
+        // then do nothing if the current ref frame is not allowed..
+        if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) &&
+             !check_segref( xd, segment_id,
+                            xd->mode_info_context->mbmi.ref_frame ) )
         {
-            unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
-
-            // If the segment reference frame feature is enabled....
-            // then do nothing if the current ref frame is not allowed..
-            if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) &&
-                 !check_segref( xd, segment_id,
-                                xd->mode_info_context->mbmi.ref_frame ) )
-            {
-                continue;
-            }
-            if ( segfeature_active( xd, segment_id, SEG_LVL_MODE )  &&
-                 ( this_mode !=
-                   get_segdata( xd, segment_id, SEG_LVL_MODE ) ) )
-            {
-                continue;
-            }
+            continue;
+        }
+        // If the segment mode feature is enabled....
+        // then do nothing if the current mode is not allowed..
+        else if ( segfeature_active( xd, segment_id, SEG_LVL_MODE )  &&
+                  ( this_mode !=
+                    get_segdata( xd, segment_id, SEG_LVL_MODE ) ) )
+        {
+            continue;
         }
 //#if !CONFIG_SEGFEATURES
-        // TBD PGW
-        /*
-        // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
-        // unless ARNR filtering is enabled in which case we want
-        // an unfiltered alternative
-        if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0))
+        // Disable this drop out case if either the mode or ref frame
+        // segment level feature is enabled for this segment. This is to
+        // prevent the possibility that the we end up unable to pick any mode.
+        else if ( !segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) &&
+                  !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
         {
-            if (this_mode != ZEROMV ||
-                x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
-                continue;
-        }*/
+            // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
+            // unless ARNR filtering is enabled in which case we want
+            // an unfiltered alternative
+            if (cpi->is_src_frame_alt_ref && (cpi->oxcf.arnr_max_frames == 0))
+            {
+                if (this_mode != ZEROMV ||
+                    x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
+                    continue;
+            }
+        }
 
         /* everything but intra */
         if (x->e_mbd.mode_info_context->mbmi.ref_frame)
@@ -2650,8 +2652,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[best_mode_index] ++;
 
-
-    if (cpi->is_src_frame_alt_ref &&
+    // This code force Altref,0,0 and skip for the frame that overlays a
+    // an alrtef unless Altref is filtered. However, this is unsafe if
+    // segment level coding of ref frame or mode is enabled for this
+    // segment.
+    if (!segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) &&
+        !segfeature_active( xd, segment_id, SEG_LVL_MODE ) &&
+        cpi->is_src_frame_alt_ref &&
+        (cpi->oxcf.arnr_max_frames == 0) &&
         (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME))
     {
         x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
