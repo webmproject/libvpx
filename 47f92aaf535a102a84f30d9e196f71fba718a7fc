@@ -278,6 +278,23 @@
       "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH//8eE\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1116002
+      },
+      "writtenOn": "2011-11-03T21:11:46Z",
+      "side": 1,
+      "message": "An integer sampling factor is not enough to cover all future use cases. Can we loosen this up to be a float or at least some fraction.\nAn Ideal API for me would be the resolution of the frame restricted to keeping the same aspect ratio for all the streams.",
+      "revId": "47f92aaf535a102a84f30d9e196f71fba718a7fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
