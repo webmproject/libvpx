@@ -232,26 +232,25 @@ static void read_mvcontexts(vp8_reader *bc, MV_CONTEXT *mvc)
 
 // Read the referncence frame
 static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
+                                          vp8_reader *const bc,
                                           unsigned char segment_id )
 {
     MV_REFERENCE_FRAME ref_frame;
+    int seg_ref_active;
 
 #if CONFIG_SEGFEATURES
     MACROBLOCKD *const xd = &pbi->mb;
 
-    // Is the segment level refernce frame feature enabled for this segment
-    if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) )
-    {
-        ref_frame =
-            xd->segment_feature_data[segment_id][SEG_LVL_REF_FRAME];
-    }
-    else
+    seg_ref_active = segfeature_active( xd,
+                                        segment_id,
+                                        SEG_LVL_REF_FRAME );
+#else
+    seg_ref_active = 0;
 #endif
 
-    // Per MB read of the reference frame
+    // Segment reference frame features not available
+    if ( !seg_ref_active )
     {
-        vp8_reader *const bc = &pbi->bc;
-
         ref_frame =
             (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
 
@@ -264,6 +263,79 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
             }
         }
     }
+
+#if CONFIG_SEGFEATURES
+    // Segment reference frame features are enabled
+    else
+    {
+        // If there are no inter reference frames enabled we can set INTRA
+        if ( !check_segref_inter(xd, segment_id) )
+        {
+            ref_frame = INTRA_FRAME;
+        }
+        else
+        {
+            // Else if there are both intra and inter options we need to read
+            // the inter / intra flag, else mark as inter.
+            if ( check_segref( xd, segment_id, INTRA_FRAME ) )
+                ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
+            else
+                ref_frame = 1;      // note this unchanged = LAST
+
+            if ( ref_frame )
+            {
+                // Now consider last vs (golden or alt) flag....
+                // If Last is not enabled
+                if ( !check_segref( xd, segment_id, LAST_FRAME ) )
+                {
+                    // If not golden then it must be altref
+                    if (!check_segref( xd, segment_id, GOLDEN_FRAME ))
+                    {
+                        ref_frame = ALTREF_FRAME;
+                    }
+                    // Not Altref therefore must be Golden
+                    else if (!check_segref( xd, segment_id,
+                                               ALTREF_FRAME ))
+                    {
+                        ref_frame = GOLDEN_FRAME;
+                    }
+                    // Else we must read bit to decide.
+                    else
+                    {
+                        ref_frame = (MV_REFERENCE_FRAME)((int)ref_frame +
+                                    (int)(1 + vp8_read(bc, pbi->prob_gf)));
+                    }
+                }
+                // Both last and at least one of alt or golden are enabled
+                else if ( check_segref( xd, segment_id, GOLDEN_FRAME ) ||
+                          check_segref( xd, segment_id, ALTREF_FRAME ) )
+                {
+                    // Read flag to indicate (golden or altref) vs last
+                    if (vp8_read(bc, pbi->prob_last))
+                    {
+                        // If not golden then it must be altref
+                        if (!check_segref( xd, segment_id, GOLDEN_FRAME ))
+                        {
+                            ref_frame = ALTREF_FRAME;
+                        }
+                        // Not Altref therefore must be Golden
+                        else if (!check_segref( xd, segment_id,
+                                                   ALTREF_FRAME ))
+                        {
+                            ref_frame = GOLDEN_FRAME;
+                        }
+                        else
+                        {
+                            ref_frame = (MV_REFERENCE_FRAME)((int)ref_frame +
+                                        (int)(1 + vp8_read(bc, pbi->prob_gf)));
+                        }
+                    }
+                    // ELSE LAST
+                }
+            }
+        }
+    }
+#endif
 
     return (MV_REFERENCE_FRAME)ref_frame;
 }
@@ -458,7 +530,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
 
     // Read the reference frame
-    mbmi->ref_frame = read_ref_frame( pbi, mbmi->segment_id );
+    mbmi->ref_frame = read_ref_frame( pbi, bc, mbmi->segment_id );
 
     // If reference frame is an Inter frame
     if (mbmi->ref_frame)
@@ -634,15 +706,22 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
     else
     {
-#if CONFIG_SEGFEATURES
-        // TBD HANDLE INTRA MODE CASE
-#endif
-
         /* required for left and above block mv */
         mbmi->mv.as_int = 0;
 
-        /* MB is intra coded */
-        if ((mbmi->mode = (MB_PREDICTION_MODE) vp8_read_ymode(bc, pbi->common.fc.ymode_prob)) == B_PRED)
+#if CONFIG_SEGFEATURES
+        if ( segfeature_active( xd, mbmi->segment_id, SEG_LVL_MODE ) )
+            mbmi->mode = (MB_PREDICTION_MODE)
+                         get_segdata( xd, mbmi->segment_id, SEG_LVL_MODE );
+        else
+#endif
+        {
+            mbmi->mode = (MB_PREDICTION_MODE)
+                         vp8_read_ymode(bc, pbi->common.fc.ymode_prob);
+        }
+
+        // If MB mode is BPRED read the block modes
+        if (mbmi->mode == B_PRED)
         {
             int j = 0;
             do

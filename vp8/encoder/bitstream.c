@@ -873,6 +873,90 @@ static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACRO
     }
 }
 
+// This function encodes the reference frame
+static void encode_ref_frame( vp8_writer *const w,
+                              MACROBLOCKD *xd,
+                              int segment_id,
+                              MV_REFERENCE_FRAME rf,
+                              int prob_intra_coded,
+                              int prob_last_coded,
+                              int prob_gf_coded )
+{
+    int seg_ref_active;
+#if CONFIG_SEGFEATURES
+    seg_ref_active = segfeature_active( xd,
+                                        segment_id,
+                                        SEG_LVL_REF_FRAME );
+#else
+    seg_ref_active = 0;
+#endif
+
+    // No segment features or segment reference frame featuure is disabled
+    if ( !seg_ref_active )
+    {
+        if (rf == INTRA_FRAME)
+        {
+            vp8_write(w, 0, prob_intra_coded);
+        }
+        else    /* inter coded */
+        {
+            vp8_write(w, 1, prob_intra_coded);
+
+            if (rf == LAST_FRAME)
+            {
+                vp8_write(w, 0, prob_last_coded);
+            }
+            else
+            {
+                vp8_write(w, 1, prob_last_coded);
+                vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, prob_gf_coded);
+            }
+        }
+    }
+#if CONFIG_SEGFEATURES
+    else
+    {
+        if (rf == INTRA_FRAME)
+        {
+            // This MB intra coded. If inter also allowed we must code
+            // an explicit inter/intra flag.
+            if ( check_segref_inter( xd, segment_id ) )
+                vp8_write(w, 0, prob_intra_coded);
+        }
+        else    /* inter coded */
+        {
+            // If intra also allowed we must code an explicit intra/inter flag.
+            if ( check_segref( xd, segment_id, INTRA_FRAME ) )
+                vp8_write(w, 1, prob_intra_coded);
+
+            if (rf == LAST_FRAME)
+            {
+                // If GOLDEN or ALTREF allowed we must code explicit flag.
+                if ( check_segref( xd, segment_id, GOLDEN_FRAME ) ||
+                     check_segref( xd, segment_id, ALTREF_FRAME ) )
+                {
+                    vp8_write(w, 0, prob_last_coded);
+                }
+            }
+            else
+            {
+                // if LAST is allowed we must code  explicit flag
+                if ( check_segref( xd, segment_id, LAST_FRAME ) )
+                {
+                    vp8_write(w, 1, prob_last_coded);
+                }
+
+                // if GOLDEN and ALTREF allowed we must code an explicit flag
+                if ( check_segref( xd, segment_id, GOLDEN_FRAME ) &&
+                     check_segref( xd, segment_id, ALTREF_FRAME ) )
+                {
+                    vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, prob_gf_coded);
+                }
+            }
+        }
+    }
+#endif
+}
 
 static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 {
@@ -969,14 +1053,16 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             const MB_PREDICTION_MODE mode = mi->mode;
             const int segment_id = mi->segment_id;
 
-            //MACROBLOCKD *xd = &cpi->mb.e_mbd;
-
             // Distance of Mb to the various image edges.
             // These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
             xd->mb_to_left_edge = -((mb_col * 16) << 3);
             xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
             xd->mb_to_top_edge = -((mb_row * 16)) << 3;
             xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+
+            // Make sure the MacroBlockD mode info pointer is set correctly
+            xd->mode_info_context = m;
+
 #if CONFIG_SEGMENTATION
             xd->up_available = (mb_row != 0);
             xd->left_available = (mb_col != 0);
@@ -1036,20 +1122,23 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 vp8_encode_bool(w, mi->mb_skip_coeff, prob_skip_false);
             }
 
+            // Encode the reference frame.
+            encode_ref_frame( w, xd, segment_id, rf,
+                              cpi->prob_intra_coded,
+                              prob_last_coded, prob_gf_coded );
+
             if (rf == INTRA_FRAME)
             {
-#if CONFIG_SEGFEATURES
-                // Is the segment coding of reference frame enabled
-                if ( !segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) )
-#endif
-                {
-                    vp8_write(w, 0, cpi->prob_intra_coded);
-                }
-
-#ifdef ENTROPY_STATS
+    #ifdef ENTROPY_STATS
                 active_section = 6;
-#endif
+    #endif
+
+#if CONFIG_SEGFEATURES
+                if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
+                    write_ymode(w, mode, pc->fc.ymode_prob);
+#else
                 write_ymode(w, mode, pc->fc.ymode_prob);
+#endif
 
                 if (mode == B_PRED)
                 {
@@ -1062,27 +1151,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                 write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
             }
-            else    /* inter coded */
+            else
             {
                 int_mv best_mv;
                 vp8_prob mv_ref_p [VP8_MVREFS-1];
-
-#if CONFIG_SEGFEATURES
-                // Test to see if segment level coding of ref frame is enabled
-                if ( !segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) )
-#endif
-                {
-                    vp8_write(w, 1, cpi->prob_intra_coded);
-
-                    if (rf == LAST_FRAME)
-                        vp8_write(w, 0, prob_last_coded);
-                    else
-                    {
-                        vp8_write(w, 1, prob_last_coded);
-                        vp8_write(w, (rf == GOLDEN_FRAME)
-                                     ? 0 : 1, prob_gf_coded);
-                    }
-                }
 
                 {
                     int_mv n1, n2;
@@ -1103,10 +1175,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #if CONFIG_SEGFEATURES
                 // Is the segment coding of reference frame enabled
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
-#endif
                 {
                     write_mv_ref(w, mode, mv_ref_p);
-
+                }
+#else
+                write_mv_ref(w, mode, mv_ref_p);
+#endif
+                {
                     switch (mode)   /* new, split require MVs */
                     {
                     case NEWMV:
@@ -1913,7 +1988,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     oh.version = pc->version;
     oh.first_partition_length_in_bytes = 0;
 
-    mb_feature_data_bits = vp8_mb_feature_data_bits;
+    mb_feature_data_bits = vp8_seg_feature_data_bits;
     cx_data += 3;
 
 #if defined(SECTIONBITS_OUTPUT)
