@@ -17,9 +17,8 @@
 #include "tokenize.h"
 #include "vpx_mem/vpx_mem.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
-#endif
 
 /* Global event counters used for accumulating statistics across several
    compressions, then generating context.c = initial stats. */
@@ -185,7 +184,7 @@ static void tokenize2nd_order_b
     ENTROPY_CONTEXT * l;
     int band, rc, v, token;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     int seg_eob = 16;
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -193,7 +192,6 @@ static void tokenize2nd_order_b
     {
         seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
     }
-#endif
 
     b = xd->block + 24;
     qcoeff_ptr = b->qcoeff;
@@ -222,11 +220,8 @@ static void tokenize2nd_order_b
         t++;
     }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     if (c < seg_eob)
-#else
-    if (c < 16)
-#endif
     {
         band = vp8_coef_bands[c];
         t->Token = DCT_EOB_TOKEN;
@@ -325,7 +320,7 @@ static void tokenize1st_order_b
     int band, rc, v;
     int tmp1, tmp2;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     int seg_eob = 16;
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -333,7 +328,6 @@ static void tokenize1st_order_b
     {
         seg_eob = xd->segment_feature_data[segment_id][SEG_LVL_EOB];
     }
-#endif
 
     b = xd->block;
     /* Luma */
@@ -370,11 +364,8 @@ static void tokenize1st_order_b
             t++;
         }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         if (c < seg_eob)
-#else
-        if (c < 16)
-#endif
         {
             band = vp8_coef_bands[c];
             t->Token = DCT_EOB_TOKEN;
@@ -422,11 +413,8 @@ static void tokenize1st_order_b
             pt = vp8_prev_token_class[token];
             t++;
         }
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         if (c < seg_eob)
-#else
-        if (c < 16)
-#endif
         {
             band = vp8_coef_bands[c];
             t->Token = DCT_EOB_TOKEN;
@@ -491,7 +479,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int has_y2_block;
     int b;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     // If the MB is going to be skipped because of a segment level flag
     // exclude this from the skip count stats used to calculate the
     // transmitted skip probability;
@@ -505,9 +493,6 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     }
     else
         skip_inc = 0;
-#else
-    int skip_inc = 1;
-#endif
 
     has_y2_block = (x->mode_info_context->mbmi.mode != B_PRED
 #if CONFIG_I8X8

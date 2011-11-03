@@ -37,9 +37,8 @@
 #include "decoderthreading.h"
 #include "dboolhuff.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
-#endif
 
 #include <assert.h>
 #include <stdio.h>
@@ -81,11 +80,8 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
 
 
     // Set the Q baseline allowing for any segment level adjustment
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     if ( segfeature_active( xd, segment_id, SEG_LVL_ALT_Q ) )
-#else
-    if ( xd->segmentation_enabled )
-#endif
     {
         /* Abs Value */
         if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
@@ -807,10 +803,9 @@ static void init_frame(VP8D_COMP *pbi)
 
         // Reset the segment feature data to the default stats:
         // Features disabled, 0, with delta coding (Default state).
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         vpx_memset(xd->segment_feature_mask, 0,
                    sizeof(xd->segment_feature_mask));
-#endif
         vpx_memset(xd->segment_feature_data, 0,
                    sizeof(xd->segment_feature_data));
 
@@ -883,7 +878,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     int mb_row;
     int i, j, k, l;
-    const int *const mb_feature_data_bits = vp8_seg_feature_data_bits;
     int corrupt_tokens = 0;
     int prev_independent_partitions = pbi->independent_partitions;
 
@@ -1028,58 +1022,41 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
         if (xd->update_mb_segmentation_data)
         {
+            int data;
+
             xd->mb_segement_abs_delta = (unsigned char)vp8_read_bit(bc);
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
             clearall_segfeatures( xd );
 
             // For each segmentation...
-            for (j = 0; j < MAX_MB_SEGMENTS; j++)
+            for (i = 0; i < MAX_MB_SEGMENTS; i++)
             {
                 // For each of the segments features...
-                for (i = 0; i < SEG_LVL_MAX; i++)
+                for (j = 0; j < SEG_LVL_MAX; j++)
                 {
-#else
-            // Clear down feature data structure
-            vpx_memset(xd->segment_feature_data, 0,
-                       sizeof(xd->segment_feature_data));
-
-            // For each segmentation feature...
-            for (i = 0; i < SEG_LVL_MAX; i++)
-            {
-                // For each segmentation...
-                for (j = 0; j < MAX_MB_SEGMENTS; j++)
-                {
-#endif
                     // Is the feature enabled
                     if (vp8_read_bit(bc))
                     {
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
                         // Update the feature data and mask
-                        enable_segfeature(xd, j, i);
-#endif
-                        xd->segment_feature_data[j][i] =
-                            (signed char)vp8_read_literal(
-                                             bc, mb_feature_data_bits[i]);
+                        enable_segfeature(xd, i, j);
 
-#if CONFIG_SEGFEATURES
+                        data = (signed char)vp8_read_literal(
+                                            bc, seg_feature_data_bits(j));
+
+//#if CONFIG_SEGFEATURES
                         // Is the segment data signed..
-                        if ( is_segfeature_signed(i) )
-#else
-                        if ( 1 )
-#endif
+                        if ( is_segfeature_signed(j) )
                         {
                             if (vp8_read_bit(bc))
-                            {
-                                xd->segment_feature_data[j][i] =
-                                    -xd->segment_feature_data[j][i];
-                            }
+                                data = - data;
                         }
                     }
                     else
-                    {
-                        xd->segment_feature_data[j][i] = 0;
-                    }
+                        data = 0;
+
+                    set_segdata(xd, i, j, data);
                 }
             }
         }

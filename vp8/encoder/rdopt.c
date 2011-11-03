@@ -36,9 +36,8 @@
 #include "dct.h"
 #include "vp8/common/systemdependent.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
-#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x)  (x)
@@ -2124,7 +2123,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         // Experimental use of Segment features.
         if ( xd->segmentation_enabled && !cm->refresh_alt_ref_frame )
         {
@@ -2145,7 +2144,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 continue;
             }
         }
-#else
+//#if !CONFIG_SEGFEATURES
+        // TBD PGW
+        /*
         // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
         // unless ARNR filtering is enabled in which case we want
         // an unfiltered alternative
@@ -2154,8 +2155,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             if (this_mode != ZEROMV ||
                 x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
                 continue;
-        }
-#endif
+        }*/
 
         /* everything but intra */
         if (x->e_mbd.mode_info_context->mbmi.ref_frame)
@@ -2169,29 +2169,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vpx_memcpy(mdcounts, frame_mdcounts[x->e_mbd.mode_info_context->mbmi.ref_frame], sizeof(mdcounts));
             lf_or_gf = frame_lf_or_gf[x->e_mbd.mode_info_context->mbmi.ref_frame];
         }
-
-#if !CONFIG_SEGFEATURES
-        // Check to see if the testing frequency for this mode is at its max
-        // If so then prevent it from being tested and increase the threshold for its testing
-        if (cpi->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
-        {
-            if (cpi->mbs_tested_so_far  <= cpi->mode_check_freq[mode_index] * cpi->mode_test_hit_counts[mode_index])
-            {
-                // Increase the threshold for coding this mode to make it less likely to be chosen
-                cpi->rd_thresh_mult[mode_index] += 4;
-
-                if (cpi->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
-                    cpi->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
-
-                cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
-
-                continue;
-            }
-        }
-
-        // We have now reached the point where we are going to test the current mode so increment the counter for the number of times it has been tested
-        cpi->mode_test_hit_counts[mode_index] ++;
-#endif
 
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)

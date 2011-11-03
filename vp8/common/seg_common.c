@@ -10,9 +10,9 @@
 
 #include "vp8/common/seg_common.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 const int segfeaturedata_signed[SEG_LVL_MAX] = {1, 1, 0, 0, 0, 0};
-
+const int vp8_seg_feature_data_bits[SEG_LVL_MAX] = {7, 6, 4, 4, 4, 2};
 
 // These functions provide access to new segment level features.
 // Eventually these function may be "optimized out" but for the moment,
@@ -46,6 +46,11 @@ void disable_segfeature( MACROBLOCKD *xd,
                          SEG_LVL_FEATURES feature_id )
 {
      xd->segment_feature_mask[segment_id] &= ~(1 << feature_id);
+}
+
+int seg_feature_data_bits( SEG_LVL_FEATURES feature_id )
+{
+    return vp8_seg_feature_data_bits[feature_id];
 }
 
 int is_segfeature_signed( SEG_LVL_FEATURES feature_id )
@@ -103,5 +108,3 @@ int check_segref_inter(MACROBLOCKD *xd, int segment_id)
 }
 
 // TBD? Functions to read and write segment data with range / validity checking
-
-#endif

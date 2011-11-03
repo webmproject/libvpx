@@ -25,9 +25,8 @@
 
 #include "defaultcoefcounts.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
-#endif
 
 #if CONFIG_SEGMENTATION
 static int segment_cost = 0;
@@ -883,13 +882,10 @@ static void encode_ref_frame( vp8_writer *const w,
                               int prob_gf_coded )
 {
     int seg_ref_active;
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     seg_ref_active = segfeature_active( xd,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
-#else
-    seg_ref_active = 0;
-#endif
 
     // No segment features or segment reference frame featuure is disabled
     if ( !seg_ref_active )
@@ -913,7 +909,7 @@ static void encode_ref_frame( vp8_writer *const w,
             }
         }
     }
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     else
     {
         if (rf == INTRA_FRAME)
@@ -955,7 +951,6 @@ static void encode_ref_frame( vp8_writer *const w,
             }
         }
     }
-#endif
 }
 
 static void pack_inter_mode_mvs(VP8_COMP *const cpi)
@@ -985,13 +980,12 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     cpi->mb.partition_info = cpi->mb.pi;
 
-    // Calculate the probabilities to be used to code the reference frame based on actual useage this frame
-#if CONFIG_SEGFEATURES
+    // Calculate the probabilities to be used to code the reference frame
+    // based on actual useage this frame
+//#if CONFIG_SEGFEATURES
     cpi->prob_intra_coded = (rf_intra + rf_inter)
                             ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
-#else
-    cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter);
-#endif
+
     if (!cpi->prob_intra_coded)
         cpi->prob_intra_coded = 1;
 
@@ -1111,13 +1105,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
             }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
             if ( pc->mb_no_coeff_skip &&
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                    (xd->segment_feature_data[segment_id][SEG_LVL_EOB] != 0) ) )
-#else
-            if (pc->mb_no_coeff_skip)
-#endif
             {
                 vp8_encode_bool(w, mi->mb_skip_coeff, prob_skip_false);
             }
@@ -1133,12 +1124,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 active_section = 6;
     #endif
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                     write_ymode(w, mode, pc->fc.ymode_prob);
-#else
-                write_ymode(w, mode, pc->fc.ymode_prob);
-#endif
 
                 if (mode == B_PRED)
                 {
@@ -1172,15 +1160,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 active_section = 3;
 #endif
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
                 // Is the segment coding of reference frame enabled
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                 {
                     write_mv_ref(w, mode, mv_ref_p);
                 }
-#else
-                write_mv_ref(w, mode, mv_ref_p);
-#endif
+
                 {
                     switch (mode)   /* new, split require MVs */
                     {
@@ -1268,9 +1254,8 @@ static void write_kfmodes(VP8_COMP *cpi)
     int mb_row = -1;
     int prob_skip_false = 0;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
-#endif
 
     if (c->mb_no_coeff_skip)
     {
@@ -1332,13 +1317,10 @@ static void write_kfmodes(VP8_COMP *cpi)
 #endif
             }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
             if ( c->mb_no_coeff_skip &&
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                    (xd->segment_feature_data[segment_id][SEG_LVL_EOB] != 0) ) )
-#else
-            if (c->mb_no_coeff_skip)
-#endif
             {
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
             }
@@ -1591,12 +1573,10 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
     if (cpi->common.frame_type != KEY_FRAME)
     {
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         new_intra = (rf_intra + rf_inter)
                     ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
-#else
-        new_intra = rf_intra * 255 / (rf_intra + rf_inter);
-#endif
+
         if (!new_intra)
             new_intra = 1;
 
@@ -1988,7 +1968,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     oh.version = pc->version;
     oh.first_partition_length_in_bytes = 0;
 
-    mb_feature_data_bits = vp8_seg_feature_data_bits;
     cx_data += 3;
 
 #if defined(SECTIONBITS_OUTPUT)
@@ -2049,59 +2028,44 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
             vp8_write_bit(bc, (xd->mb_segement_abs_delta) ? 1 : 0);
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
             // For each segments id...
-            for (j = 0; j < MAX_MB_SEGMENTS; j++)
+            for (i = 0; i < MAX_MB_SEGMENTS; i++)
             {
                 // For each segmentation codable feature...
-                for (i = 0; i < SEG_LVL_MAX; i++)
-#else
-            // For each segmentation codable feature...
-            for (i = 0; i < SEG_LVL_MAX; i++)
-            {
-                // For each of the segments id...
-                for (j = 0; j < MAX_MB_SEGMENTS; j++)
-#endif
+                for (j = 0; j < SEG_LVL_MAX; j++)
                 {
-                    Data = xd->segment_feature_data[j][i];
+                    Data = get_segdata( xd, i, j );
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
                     // If the feature is enabled...
-                    if ( segfeature_active( xd, j, i ) )
-#else
-                    // If the feature is enabled...Indicated by non zero
-                    // value in VP8
-                    if (Data)
-#endif
+                    if ( segfeature_active( xd, i, j ) )
                     {
                         vp8_write_bit(bc, 1);
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
                         // Is the segment data signed..
-                        if ( is_segfeature_signed(i) )
-#else
-                        if ( 1 )
-#endif
+                        if ( is_segfeature_signed(j) )
                         {
                             // Encode the relevant feature data
                             if (Data < 0)
                             {
                                 Data = - Data;
                                 vp8_write_literal(bc, Data,
-                                                  mb_feature_data_bits[i]);
+                                                  seg_feature_data_bits(j));
                                 vp8_write_bit(bc, 1);
                             }
                             else
                             {
                                 vp8_write_literal(bc, Data,
-                                                  mb_feature_data_bits[i]);
+                                                  seg_feature_data_bits(j));
                                 vp8_write_bit(bc, 0);
                             }
                         }
                         // Unsigned data element so no sign bit needed
                         else
                             vp8_write_literal(bc, Data,
-                                              mb_feature_data_bits[i]);
+                                              seg_feature_data_bits(j));
                     }
                     else
                         vp8_write_bit(bc, 0);

@@ -92,12 +92,6 @@ DECLARE_ALIGNED(16, short, vp8_default_zig_zag_mask[16]);
 DECLARE_ALIGNED(64, short, vp8_default_zig_zag_mask_8x8[64]);//int64_t
 #endif
 
-#if CONFIG_SEGFEATURES
-const int vp8_seg_feature_data_bits[SEG_LVL_MAX] = {7, 6, 4, 4, 4, 2};
-#else
-const int vp8_seg_feature_data_bits[SEG_LVL_MAX] = {7, 6};
-#endif
-
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
 
 const vp8_tree_index vp8_coef_tree[ 22] =     /* corresponding _CONTEXT_NODEs */

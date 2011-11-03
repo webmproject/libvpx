@@ -34,10 +34,9 @@
 #include "vpx_ports/vpx_timer.h"
 #include "temporal_filter.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 #include "mbgraph.h"
-#endif
 
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -338,9 +337,8 @@ static void setup_features(VP8_COMP *cpi)
     vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
     vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     vpx_memset(xd->segment_feature_mask, 0, sizeof(xd->segment_feature_mask));
-#endif
 
     xd->mode_ref_lf_delta_enabled = 0;
     xd->mode_ref_lf_delta_update = 0;
@@ -458,10 +456,9 @@ static void segmentation_test_function(VP8_PTR ptr)
     feature_data[SEG_LVL_ALT_LF][2] = 0;
     feature_data[SEG_LVL_ALT_LF][3] = 0;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     // Enable features as required
     enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
-#endif
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
@@ -474,7 +471,7 @@ static void segmentation_test_function(VP8_PTR ptr)
 
 }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 static void init_seg_features(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
@@ -656,8 +653,6 @@ static void print_seg_map(VP8_COMP *cpi)
     fclose(statsfile);
 }
 
-#endif
-
 // A simple function to cyclically refresh the background at a lower Q
 static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 {
@@ -741,11 +736,10 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     feature_data[SEG_LVL_ALT_LF][2] = 0;
     feature_data[SEG_LVL_ALT_LF][3] = 0;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     // Enable the loop and quant changes in the feature mask
     enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
     enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
-#endif
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
@@ -2133,7 +2127,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     }
 #endif
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     for (i = 0; i < ( sizeof(cpi->mbgraph_stats) /
                       sizeof(cpi->mbgraph_stats[0]) ); i++)
     {
@@ -2142,7 +2136,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
                                    sizeof(*cpi->mbgraph_stats[i].mb_stats),
                                    1));
     }
-#endif
 
     // Should we use the cyclic refresh method.
     // Currently this is tied to error resilliant mode
@@ -2598,12 +2591,11 @@ void vp8_remove_compressor(VP8_PTR *ptr)
     vpx_free(cpi->tok);
     vpx_free(cpi->cyclic_refresh_map);
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     for (i = 0; i < sizeof(cpi->mbgraph_stats) / sizeof(cpi->mbgraph_stats[0]); i++)
     {
         vpx_free(cpi->mbgraph_stats[i].mb_stats);
     }
-#endif
 
     vp8_remove_common(&cpi->common);
     vpx_free(cpi);
@@ -3698,14 +3690,9 @@ static void encode_frame_to_data_rate
     cpi->mb.e_mbd.segmentation_enabled = 1;
     cpi->mb.e_mbd.update_mb_segmentation_map = 1;
 #else
-    #if CONFIG_SEGFEATURES
-        // Test code for new segment features
-        init_seg_features( cpi );
-    #else
-        // Set default state for segment update flags
-        cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-        cpi->mb.e_mbd.update_mb_segmentation_data = 0;
-    #endif
+//#if CONFIG_SEGFEATURES
+    // Test code for new segment features
+    init_seg_features( cpi );
 #endif
 
     if (cpi->drop_frames_allowed)
@@ -4712,11 +4699,10 @@ static void encode_frame_to_data_rate
 
 #endif
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #if 0
     // Debug stats for segment feature experiments.
     print_seg_map(cpi);
-#endif
 #endif
 
     // If this was a kf or Gf note the Q
@@ -5445,7 +5431,7 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
     cpi->segment_encode_breakout[2] = threshold[2];
     cpi->segment_encode_breakout[3] = threshold[3];
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     // Enable the loop and quant changes in the feature mask
     for ( i = 0; i < 4; i++ )
     {
@@ -5459,7 +5445,6 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
         else
             disable_segfeature(xd, i, SEG_LVL_ALT_LF);
     }
-#endif
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1

@@ -109,10 +109,8 @@ void vp8_set_segment_data(VP8_PTR ptr,
     vpx_memcpy(cpi->mb.e_mbd.segment_feature_data, feature_data,
                sizeof(cpi->mb.e_mbd.segment_feature_data));
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     // TBD ?? Set the feature mask
     // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
     //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
-#endif
-
 }

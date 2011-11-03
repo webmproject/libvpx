@@ -46,9 +46,8 @@ typedef struct
     int src;
     int src_stride;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     int eob_max_offset;
-#endif
 
 } BLOCK;
 

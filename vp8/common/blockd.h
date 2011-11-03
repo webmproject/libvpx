@@ -104,16 +104,12 @@ typedef enum
 {
     SEG_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
     SEG_LVL_ALT_LF = 1,              // Use alternate loop filter value...
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     SEG_LVL_REF_FRAME = 2,           // Optional Segment reference frame
     SEG_LVL_MODE = 3,                // Optional Segment mode
     SEG_LVL_EOB = 4,                 // EOB end stop marker.
     SEG_LVL_TRANSFORM = 5,           // Block transform size.
-
     SEG_LVL_MAX = 6                  // Number of MB level features supported
-#else
-    SEG_LVL_MAX = 2                  // Number of MB level features supported
-#endif
 
 } SEG_LVL_FEATURES;
 
@@ -261,9 +257,8 @@ typedef struct MacroBlockD
 
     // Segment features
     signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     unsigned int segment_feature_mask[MAX_MB_SEGMENTS];
-#endif
 
     /* mode_based Loop filter adjustment */
     unsigned char mode_ref_lf_delta_enabled;

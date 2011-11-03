@@ -15,9 +15,8 @@
 #include "onyxd_int.h"
 #include "vp8/common/findnearmv.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
-#endif
 
 #if CONFIG_SEGMENTATION
 #include "vp8/common/seg_common.h"
@@ -93,21 +92,18 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
             if (pbi->mb.update_mb_segmentation_map)
                 vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
             if ( pbi->common.mb_no_coeff_skip &&
                  ( !segfeature_active( &pbi->mb,
                                        m->mbmi.segment_id, SEG_LVL_EOB ) ||
                    (pbi->mb.segment_feature_data[m->mbmi.segment_id]
                                                 [SEG_LVL_EOB] != 0) ) )
-#else
-            // Read the macroblock coeff skip flag if this feature is in use,
-            // else default to 0
-            if (pbi->common.mb_no_coeff_skip)
-#endif
+            {
                 m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
+            }
             else
             {
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
                 if ( segfeature_active( &pbi->mb,
                                         m->mbmi.segment_id, SEG_LVL_EOB ) &&
                      (pbi->mb.segment_feature_data[m->mbmi.segment_id]
@@ -116,7 +112,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
                     m->mbmi.mb_skip_coeff = 1;
                 }
                 else
-#endif
                     m->mbmi.mb_skip_coeff = 0;
             }
 
@@ -238,15 +233,12 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
     MV_REFERENCE_FRAME ref_frame;
     int seg_ref_active;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     MACROBLOCKD *const xd = &pbi->mb;
 
     seg_ref_active = segfeature_active( xd,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
-#else
-    seg_ref_active = 0;
-#endif
 
     // Segment reference frame features not available
     if ( !seg_ref_active )
@@ -264,7 +256,7 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
         }
     }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     // Segment reference frame features are enabled
     else
     {
@@ -335,7 +327,6 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
             }
         }
     }
-#endif
 
     return (MV_REFERENCE_FRAME)ref_frame;
 }
@@ -500,15 +491,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
             }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
     if ( pbi->common.mb_no_coeff_skip &&
          ( !segfeature_active( xd,
                                mbmi->segment_id, SEG_LVL_EOB ) ||
            (xd->segment_feature_data[mbmi->segment_id]
                                     [SEG_LVL_EOB] != 0) ) )
-#else
-    if (pbi->common.mb_no_coeff_skip)
-#endif
     {
         // Read the macroblock coeff skip flag if this feature is in use,
         // else default to 0
@@ -516,7 +504,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
     else
     {
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         if ( segfeature_active( xd,
                                 mbmi->segment_id, SEG_LVL_EOB ) &&
              (xd->segment_feature_data[mbmi->segment_id]
@@ -525,7 +513,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             mbmi->mb_skip_coeff = 1;
         }
         else
-#endif
             mbmi->mb_skip_coeff = 0;
     }
 
@@ -543,7 +530,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                           mbmi->ref_frame, pbi->common.ref_frame_sign_bias);
         vp8_mv_ref_probs(mv_ref_p, rct);
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         // Is the segment level mode feature enabled for this segment
         if ( segfeature_active( xd, mbmi->segment_id, SEG_LVL_MODE ) )
         {
@@ -554,9 +541,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         {
             mbmi->mode = read_mv_ref(bc, mv_ref_p);
         }
-#else
-        mbmi->mode = read_mv_ref(bc, mv_ref_p);
-#endif
 
         mbmi->uv_mode = DC_PRED;
         switch (mbmi->mode)
@@ -709,12 +693,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         /* required for left and above block mv */
         mbmi->mv.as_int = 0;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         if ( segfeature_active( xd, mbmi->segment_id, SEG_LVL_MODE ) )
             mbmi->mode = (MB_PREDICTION_MODE)
                          get_segdata( xd, mbmi->segment_id, SEG_LVL_MODE );
         else
-#endif
         {
             mbmi->mode = (MB_PREDICTION_MODE)
                          vp8_read_ymode(bc, pbi->common.fc.ymode_prob);
@@ -741,12 +724,11 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
     MODE_INFO *mi = pbi->common.mi;
     int mb_row = -1;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #if 0
     FILE *statsfile;
     statsfile = fopen("decsegmap.stt", "a");
     fprintf(statsfile, "\n" );
-#endif
 #endif
 
     mb_mode_mv_init(pbi);
@@ -772,10 +754,9 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
         mb_to_bottom_edge = ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
         mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #if 0
         fprintf(statsfile, "\n" );
-#endif
 #endif
 
         while (++mb_col < pbi->common.mb_cols)
@@ -818,12 +799,12 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             }
 #endif
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #if 0
             fprintf(statsfile, "%2d%2d%2d   ",
                 mi->mbmi.segment_id, mi->mbmi.ref_frame, mi->mbmi.mode );
 #endif
-#endif
+
 
             mi++;       /* next macroblock */
         }
@@ -831,10 +812,10 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
         mi++;           /* skip left predictor each row */
     }
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #if 0
     fclose(statsfile);
 #endif
-#endif
+
 
 }

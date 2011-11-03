@@ -31,9 +31,8 @@
 #include "vp8/common/subpixel.h"
 #include "vpx_ports/vpx_timer.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 //#define DBG_PRNT_SEGMAP 1
-#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define RTCD(x)     &cpi->common.rtcd.x
@@ -846,7 +845,7 @@ void encode_mb_row(VP8_COMP *cpi,
 #endif
 
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 // debug output
 #if DBG_PRNT_SEGMAP
     {
@@ -855,7 +854,6 @@ void encode_mb_row(VP8_COMP *cpi,
         fprintf(statsfile, "\n" );
         fclose(statsfile);
     }
-#endif
 #endif
 }
 
@@ -967,7 +965,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     int totalrate;
 
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 // debug output
 #if DBG_PRNT_SEGMAP
     {
@@ -976,7 +974,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
         fprintf(statsfile, "\n" );
         fclose(statsfile);
     }
-#endif
 #endif
 
     vpx_memset(segment_counts, 0, sizeof(segment_counts));
@@ -1350,7 +1347,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
                     cpi->prob_gf_coded = 1;
             }
         }
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         else
         {
             // Trap case where cpi->count_mb_ref_frame_usage[] blank.
@@ -1358,7 +1355,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
             cpi->prob_last_coded  = 128;
             cpi->prob_gf_coded    = 128;
         }
-#endif
     }
 #if 0
     // Keep record of the total distortion this time around for future use
@@ -1661,7 +1657,7 @@ int vp8cx_encode_inter_macroblock
                 vp8cx_mb_init_quantizer(cpi, x);
             }
         }
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         else
         {
             //segfeature_test_function(cpi, xd);
@@ -1680,7 +1676,6 @@ int vp8cx_encode_inter_macroblock
             }
 #endif
         }
-#endif
     }
 
     {
@@ -1711,8 +1706,7 @@ int vp8cx_encode_inter_macroblock
             vp8_update_zbin_extra(cpi, x);
     }
 
-#if CONFIG_SEGFEATURES
-
+//#if CONFIG_SEGFEATURES
     // If we have just a single reference frame coded for a segment then
     // exclude from the reference frame counts used to work out
     // probabilities. NOTE: At the moment we dont support custom trees
@@ -1726,9 +1720,6 @@ int vp8cx_encode_inter_macroblock
     {
         cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame]++;
     }
-#else
-    cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame] ++;
-#endif
 
 #if CONFIG_T8X8
     if (xd->segmentation_enabled)

@@ -27,9 +27,8 @@
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
-#endif
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -521,7 +520,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         this_mode = vp8_mode_order[mode_index];
 
-#if CONFIG_SEGFEATURES
+//#if CONFIG_SEGFEATURES
         // Experimental use of Segment features.
         if ( xd->segmentation_enabled && !cm->refresh_alt_ref_frame )
         {
@@ -542,7 +541,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 continue;
             }
         }
-#else
+
+//#if !CONFIG_SEGFEATURES
+        /* TBD PGW
         // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
         // unless ARNR filtering is enabled in which case we want
         // an unfiltered alternative
@@ -552,27 +553,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 x->e_mbd.mode_info_context->mbmi.ref_frame != ALTREF_FRAME)
                 continue;
         }
-
-        // Check to see if the testing frequency for this mode is at its max
-        // If so then prevent it from being tested and increase the threshold for its testing
-        if (cpi->mode_test_hit_counts[mode_index] && (cpi->mode_check_freq[mode_index] > 1))
-        {
-            //if ( (cpi->mbs_tested_so_far / cpi->mode_test_hit_counts[mode_index]) <= cpi->mode_check_freq[mode_index] )
-            if (cpi->mbs_tested_so_far <= (cpi->mode_check_freq[mode_index] * cpi->mode_test_hit_counts[mode_index]))
-            {
-                // Increase the threshold for coding this mode to make it less likely to be chosen
-                cpi->rd_thresh_mult[mode_index] += 4;
-
-                if (cpi->rd_thresh_mult[mode_index] > MAX_THRESHMULT)
-                    cpi->rd_thresh_mult[mode_index] = MAX_THRESHMULT;
-
-                cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
-
-                continue;
-            }
-        }
-#endif
-
+*/
         // We have now reached the point where we are going to test the current mode so increment the counter for the number of times it has been tested
         cpi->mode_test_hit_counts[mode_index] ++;
 

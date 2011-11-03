@@ -106,7 +106,5 @@ extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
 extern short vp8_default_zig_zag_mask_8x8[64];//int64_t
 #endif
-extern const int vp8_seg_feature_data_bits[SEG_LVL_MAX];
-
 void vp8_coef_tree_initialize(void);
 #endif
