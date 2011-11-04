@@ -113,6 +113,16 @@ typedef enum
 
 } SEG_LVL_FEATURES;
 
+// Segment level features.
+typedef enum
+{
+    TX_4X4 = 0,                      // 4x4 dct transform
+    TX_8X8 = 1,                      // 8x8 dct transform
+
+    TX_SIZE_MAX = 2                  // Number of differnt transforms avaialble
+
+} TX_SIZE;
+
 #define VP8_YMODES  (B_PRED + 1)
 #define VP8_UV_MODES (TM_PRED + 1)
 #define VP8_I8X8_MODES (TM_PRED + 1)
