@@ -54,11 +54,9 @@ typedef struct VP8Decompressor
     VP8D_CONFIG oxcf;
 
 
-    const unsigned char *Source;
-    unsigned int   source_sz;
-    const unsigned char *partitions[MAX_PARTITIONS];
-    unsigned int   partition_sizes[MAX_PARTITIONS];
-    unsigned int   num_partitions;
+    const unsigned char *fragments[MAX_PARTITIONS];
+    unsigned int   fragment_sizes[MAX_PARTITIONS];
+    unsigned int   num_fragments;
 
 #if CONFIG_MULTITHREAD
     /* variable for threading */
@@ -112,7 +110,7 @@ typedef struct VP8Decompressor
 #endif
     int ec_enabled;
     int ec_active;
-    int input_partition;
+    int input_fragments;
     int decoded_key_frame;
     int independent_partitions;
     int frame_corrupt_residual;
