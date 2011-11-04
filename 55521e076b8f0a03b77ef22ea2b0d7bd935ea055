@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGH//7+k\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T16:53:03Z",
+      "side": 1,
+      "message": "I don\u0027t see CONFIG_UNIT_TESTS used anywhere?",
+      "revId": "55521e076b8f0a03b77ef22ea2b0d7bd935ea055",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH//7+c\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T16:53:03Z",
+      "side": 1,
+      "message": "alignment. each command needs to start with a hard tab, but then use spaces for alignment after that. Set your tabstop in your editor to 8 to see how this looks.",
+      "revId": "55521e076b8f0a03b77ef22ea2b0d7bd935ea055",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH//7+Y\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T16:53:03Z",
+      "side": 1,
+      "message": "alignment",
+      "revId": "55521e076b8f0a03b77ef22ea2b0d7bd935ea055",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH//7+Q\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T16:53:03Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "55521e076b8f0a03b77ef22ea2b0d7bd935ea055",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH//79A\u003d",
+        "filename": "solution.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T16:53:03Z",
+      "side": 1,
+      "message": "alignment",
+      "revId": "55521e076b8f0a03b77ef22ea2b0d7bd935ea055",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGH//780\u003d",
+        "filename": "third_party/googletest/gtest.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T16:53:03Z",
+      "side": 1,
+      "message": "trailing wsp",
+      "revId": "55521e076b8f0a03b77ef22ea2b0d7bd935ea055",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
