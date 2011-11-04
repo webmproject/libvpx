@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX///88\u003d",
+        "filename": "vp8/common/idctllm_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "new files need copyright header",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///80\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "need file header",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///8w\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "trailing whitespace (several instances this file)",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///8s\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "can remove these comments.",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///8M\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "Scott: Is the IDCT1 variant gone for good? If so, we could remove the distinction between IDCT1 and IDCT16 in this test",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///8U\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "I\u0027d like to see an additional variant of this that exercises the \"add\" portion. ie fill the predictor with a value like i and EXPECT_EQ(i+1) or something like that.",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///8o\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "this if seems overly complicated. The original test simulated a 16x16 block, so you could test ((i\u00260xF) \u003c 4) \u0026\u0026(i\u003c64). The 32 came from the fact that the old code took its pitch in bytes rather than shorts for some strange reason, looks like the new prototypes have fixed this.",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///8Q\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "this is a placeholder that\u0027s basically identical to TestAllOnes. Should update with a test that populates input[] with 16 real values, and ensures the result is correct.",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///8k\u003d",
+        "filename": "vp8/common/x86/idctllm_mmx_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-04T23:02:10Z",
+      "side": 1,
+      "message": "need file header",
+      "revId": "30a3e680d716eef5e1dce19abb27cd30631469b3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
