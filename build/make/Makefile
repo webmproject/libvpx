@@ -20,6 +20,7 @@ ifeq ($(target),)
 all: .DEFAULT
 clean:: .DEFAULT
 install:: .DEFAULT
+test:: .DEFAULT
 
 
 # Note: md5sum is not installed on OS X, but openssl is. Openssl may not be
@@ -78,6 +79,7 @@ qexec=$(if $(quiet),@)
 %: %.o
 %.asm:
 %.a:
+%: %.cc
 
 #
 # Common rules"
@@ -94,6 +96,8 @@ clean::
 dist:
 .PHONY: install
 install::
+.PHONY: test
+test::
 
 $(BUILD_PFX)%.c.d: %.c
 	$(if $(quiet),@echo "    [DEP] $@")
@@ -103,6 +107,15 @@ $(BUILD_PFX)%.c.d: %.c
 $(BUILD_PFX)%.c.o: %.c
 	$(if $(quiet),@echo "    [CC] $@")
 	$(qexec)$(CC) $(INTERNAL_CFLAGS) $(CFLAGS) -c -o $@ $<
+
+$(BUILD_PFX)%.cc.d: %.cc
+	$(if $(quiet),@echo "    [DEP] $@")
+	$(qexec)mkdir -p $(dir $@)
+	$(qexec)g++ $(INTERNAL_CFLAGS) $(CFLAGS) -M $< | $(fmt_deps) > $@
+
+$(BUILD_PFX)%.cc.o: %.cc
+	$(if $(quiet),@echo "    [CXX] $@")
+	$(qexec)g++ $(INTERNAL_CFLAGS) $(CFLAGS) -c -o $@ $<
 
 $(BUILD_PFX)%.asm.d: %.asm
 	$(if $(quiet),@echo "    [DEP] $@")
@@ -175,7 +188,7 @@ cond_enabled=$(if $(filter yes,$($(1))), $(call enabled,$(2)))
 
 find_file1=$(word 1,$(wildcard $(subst //,/,$(addsuffix /$(1),$(2)))))
 find_file=$(foreach f,$(1),$(call find_file1,$(strip $(f)),$(strip $(2))) )
-obj_pats=.c=.c.o $(AS_SFX)=$(AS_SFX).o
+obj_pats=.c=.c.o $(AS_SFX)=$(AS_SFX).o .cc=.cc.o
 objs=$(addprefix $(BUILD_PFX),$(foreach p,$(obj_pats),$(filter %.o,$(1:$(p))) ))
 
 install_map_templates=$(eval $(call install_map_template,$(1),$(2)))
@@ -195,6 +208,12 @@ $(1): $(filter-out -%,$(2))
 $(1):
 	$(if $(quiet),@echo    "    [LD] $$@")
 	$(qexec)$$(LD) $$(strip $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -o $$@ $(2) $(3) $$(extralibs))
+endef
+define linkerxx_template
+$(1): $(filter-out -%,$(2))
+$(1):
+	$(if $(quiet),@echo    "    [LD] $$@")
+	$(qexec)g++ $$(strip $$(INTERNAL_LDFLAGS) $$(LDFLAGS) -o $$@ $(2) $(3) $$(extralibs))
 endef
 # make-3.80 has a bug with expanding large input strings to the eval function,
 # which was triggered in some cases by the following component of
@@ -362,3 +381,4 @@ INSTALL_TARGETS += .install-docs .install-srcs .install-libs .install-bins
 all: $(BUILD_TARGETS)
 install:: $(INSTALL_TARGETS)
 dist: $(INSTALL_TARGETS)
+test::

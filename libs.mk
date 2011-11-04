@@ -128,7 +128,7 @@ INSTALL-LIBS-$(CONFIG_STATIC) += $(LIBSUBDIR)/libvpx.a
 INSTALL-LIBS-$(CONFIG_DEBUG_LIBS) += $(LIBSUBDIR)/libvpx_g.a
 endif
 
-CODEC_SRCS=$(call enabled,CODEC_SRCS)
+CODEC_SRCS=$(filter-out %_test.cc,$(call enabled,CODEC_SRCS))
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(CODEC_SRCS)
 INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(call enabled,CODEC_EXPORTS)
 
@@ -327,6 +327,90 @@ CODEC_DOC_SRCS += vpx/vpx_codec.h \
                   vpx/vpx_encoder.h \
                   vpx/vpx_image.h
 
+##
+## libvpx test directives
+##
+
+ifeq ($(CONFIG_UNIT_TESTS),yes)
+ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
+ifeq ($(CONFIG_MSVS),yes)
+
+LIBVPX_TEST_SRCS=$(filter %_test.cc,$(call enabled,CODEC_SRCS))
+LIBVPX_TEST_BINS=$(sort $(LIBVPX_TEST_SRCS:.cc.o=))
+
+gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
+	@echo "    [CREATE] $@"
+	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+            --lib \
+            --target=$(TOOLCHAIN) \
+            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --name=gtest \
+            --proj-guid=EC00E1EC-AF68-4D92-A255-181690D1C9B1 \
+            --ver=$(CONFIG_VS_VERSION) \
+            --src-path-bare="$(SRC_PATH_BARE)" \
+            --out=gtest.vcproj $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc \
+            -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" -I"$(SRC_PATH_BARE)/third_party/googletest/src"
+
+PROJECTS-$(CONFIG_MSVS) += gtest.vcproj
+
+define unit_test_vcproj_template
+$(notdir $(1:.cc=.vcproj)): $(SRC_PATH_BARE)/$(1)
+	@echo "    [vcproj] $$@"
+	$$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
+            --exe\
+            --target=$$(TOOLCHAIN)\
+            --name=$(notdir $(1:.cc=))\
+            --ver=$$(CONFIG_VS_VERSION)\
+            $$(if $$(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --out=$$@ $$(INTERNAL_CFLAGS) $$(CFLAGS) \
+            -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
+            -L. -lvpxmt -lwinmm -lgtestmt $$^
+endef
+
+$(foreach proj,$(LIBVPX_TEST_BINS),\
+    $(eval $(call unit_test_vcproj_template,$(proj))))
+
+PROJECTS-$(CONFIG_MSVS) += $(foreach proj,$(LIBVPX_TEST_BINS),\
+     $(notdir $(proj:.cc=.vcproj)))
+
+test::
+	@set -e; for t in $(addprefix Win32/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
+endif
+else
+
+include $(SRC_PATH_BARE)/third_party/googletest/gtest.mk
+GTEST_SRCS := $(addprefix third_party/googletest/src/,$(call enabled,GTEST_SRCS))
+GTEST_OBJS=$(call objs,$(GTEST_SRCS))
+$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
+$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
+OBJS-$(BUILD_LIBVPX) += $(GTEST_OBJS)
+LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libgtest.a $(BUILD_PFX)libgtest_g.a
+$(BUILD_PFX)libgtest_g.a: $(GTEST_OBJS)
+
+LIBVPX_TEST_SRCS=$(filter %_test.cc,$(call enabled,CODEC_SRCS))
+LIBVPX_TEST_OBJS=$(call objs,$(LIBVPX_TEST_SRCS))
+$(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
+$(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
+LIBVPX_TEST_BINS=$(sort $(LIBVPX_TEST_OBJS:.cc.o=))
+OBJS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_OBJS)
+
+$(foreach bin,$(LIBVPX_TEST_BINS),\
+    $(if $(BUILD_LIBVPX),$(eval $(bin): libvpx.a libgtest.a ))\
+    $(if $(BUILD_LIBVPX),$(eval $(call linkerxx_template,$(bin),\
+        $(bin).cc.o \
+        -L. -lvpx -lgtest -lpthread -lm)\
+        )))\
+    $(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(bin))))\
+
+test:: $(LIBVPX_TEST_BINS)
+	@set -e; for t in $(LIBVPX_TEST_BINS); do $$t; done
+
+endif
+endif
+
+##
+## documentation directives
+##
 CLEAN-OBJS += libs.doxy
 DOCS-yes += libs.doxy
 libs.doxy: $(CODEC_DOC_SRCS)
