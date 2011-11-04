@@ -55,6 +55,7 @@ int check_segref( MACROBLOCKD *xd,
 
 int check_segref_inter(MACROBLOCKD *xd, int segment_id);
 
+int get_seg_tx_type(MACROBLOCKD *xd, int segment_id);
 
 #endif /* __INC_SEG_COMMON_H__ */
 

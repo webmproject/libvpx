@@ -107,4 +107,11 @@ int check_segref_inter(MACROBLOCKD *xd, int segment_id)
              ~(1 << INTRA_FRAME) ) ? 1 : 0;
 }
 
+int get_seg_tx_type(MACROBLOCKD *xd, int segment_id)
+{
+    if ( segfeature_active(xd, segment_id, SEG_LVL_TRANSFORM) )
+        return get_segdata(xd, segment_id, SEG_LVL_TRANSFORM);
+    else
+        return TX_4X4;
+}
 // TBD? Functions to read and write segment data with range / validity checking

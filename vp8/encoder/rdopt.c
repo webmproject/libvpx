@@ -1041,12 +1041,17 @@ static int rd_cost_mbuv(MACROBLOCK *mb)
 static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int fullpixel)
 {
+#if CONFIG_T8X8
+    int tx_type = get_seg_tx_type(&x->e_mbd,
+                                  x->e_mbd.mode_info_context->mbmi.segment_id);
+#endif
+
     vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
     ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
         x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 
 #if CONFIG_T8X8
-    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+    if( tx_type == TX_8X8 )
        vp8_transform_mbuv_8x8(x);
     else
 #endif

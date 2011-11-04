@@ -479,6 +479,10 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int has_y2_block;
     int b;
 
+#if CONFIG_T8X8
+    int tx_type = get_seg_tx_type(x, x->mode_info_context->mbmi.segment_id);
+#endif
+
 //#if CONFIG_SEGFEATURES
     // If the MB is going to be skipped because of a segment level flag
     // exclude this from the skip count stats used to calculate the
@@ -502,7 +506,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
     x->mode_info_context->mbmi.mb_skip_coeff =
 #if CONFIG_T8X8
-        (x->mode_info_context->mbmi.segment_id >= 2 ?
+        (( tx_type == TX_8X8 ) ?
          mb_is_skippable_8x8(x) :
          mb_is_skippable(x, has_y2_block));
 #else
@@ -516,7 +520,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
         if (!cpi->common.mb_no_coeff_skip)
         {
 #if CONFIG_T8X8
-            if (x->mode_info_context->mbmi.segment_id >= 2)
+            if ( tx_type == TX_8X8 )
                 vp8_stuff_mb_8x8(cpi, x, t) ;
             else
 #endif
@@ -536,7 +540,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     if(has_y2_block)
     {
 #if CONFIG_T8X8
-        if (x->mode_info_context->mbmi.segment_id >= 2)
+        if ( tx_type == TX_8X8 )
         {
             ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
             ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
@@ -551,7 +555,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
     }
 #if CONFIG_T8X8
-    if (x->mode_info_context->mbmi.segment_id >= 2)
+    if ( tx_type == TX_8X8 )
     {
         ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
         ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;

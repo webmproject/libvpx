@@ -481,16 +481,6 @@ static void init_seg_features(VP8_COMP *cpi)
                    (cpi->cq_target_quality > 16 ) ) ||
                  (cpi->ni_av_qi > 32);
 
-#if CONFIG_T8X8
-    // TODO
-    // For now 8x8TX mode just set segments up for 8x8 and 4x4 modes and exit.
-    //enable_segfeature(xd, 0, SEG_LVL_TRANSFORM);
-    //set_segdata( xd, 0, SEG_LVL_TRANSFORM, TX_4X4 );
-    //enable_segfeature(xd, 1, SEG_LVL_TRANSFORM);
-    //set_segdata( xd, 1, SEG_LVL_TRANSFORM, TX_8X8 );
-    return;
-#endif
-
     // For now at least dont enable seg features alongside cyclic refresh.
     if ( cpi->cyclic_refresh_mode_enabled ||
          (cpi->pass != 2) )
@@ -499,6 +489,19 @@ static void init_seg_features(VP8_COMP *cpi)
         vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
         return;
     }
+
+#if CONFIG_T8X8
+    // TODO
+    // For now 8x8TX mode just set segments up for 8x8 and 4x4 modes and exit.
+    enable_segfeature(xd, 0, SEG_LVL_TRANSFORM);
+    set_segdata( xd, 0, SEG_LVL_TRANSFORM, TX_4X4 );
+    enable_segfeature(xd, 2, SEG_LVL_TRANSFORM);
+    set_segdata( xd, 2, SEG_LVL_TRANSFORM, TX_8X8 );
+
+    // Turn on segmentation
+    vp8_enable_segmentation((VP8_PTR)cpi);
+    return;
+#endif
 
     // Disable and clear down for KF
     if ( cm->frame_type == KEY_FRAME  )

@@ -78,7 +78,6 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
     VP8_COMMON *const pc = & pbi->common;
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-
     // Set the Q baseline allowing for any segment level adjustment
 //#if CONFIG_SEGFEATURES
     if ( segfeature_active( xd, segment_id, SEG_LVL_ALT_Q ) )
@@ -210,6 +209,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     MB_PREDICTION_MODE mode;
     int i;
 
+#if CONFIG_T8X8
+    int tx_type = get_seg_tx_type(xd, xd->mode_info_context->mbmi.segment_id);
+#endif
+
+
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
         vp8_reset_mb_tokens_context(xd);
@@ -223,8 +227,10 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             xd->block[i].eob = 0;
             xd->eobs[i] = 0;
         }
-        if (xd->mode_info_context->mbmi.segment_id >= 2)
+        if ( tx_type == TX_8X8 )
+        {
             eobtotal = vp8_decode_mb_tokens_8x8(pbi, xd);
+        }
         else
 #endif
             eobtotal = vp8_decode_mb_tokens(pbi, xd);
@@ -392,7 +398,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     else if (mode == SPLITMV)
     {
 #if CONFIG_T8X8
-        if(xd->mode_info_context->mbmi.segment_id >= 2)
+        if ( tx_type == TX_8X8 )
         {
             DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block_8x8)
                 (xd->qcoeff, xd->block[0].dequant,
@@ -416,7 +422,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
         /* do 2nd order transform on the dc block */
 #if CONFIG_T8X8
-        if(xd->mode_info_context->mbmi.segment_id >= 2)
+        if( tx_type == TX_8X8 )
         {
             DEQUANT_INVOKE(&pbi->dequant, block_8x8)(b);
 #ifdef DEC_DEBUG
@@ -474,7 +480,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         }
     }
 #if CONFIG_T8X8
-    if(xd->mode_info_context->mbmi.segment_id >= 2)
+    if( tx_type == TX_8X8 )
     {
         DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block_8x8)//
             (xd->qcoeff+16*16, xd->block[16].dequant,

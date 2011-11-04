@@ -97,18 +97,24 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
     BLOCK *b = &x->block[0];
 
+#if CONFIG_T8X8
+    int tx_type = get_seg_tx_type(&x->e_mbd,
+                                  x->e_mbd.mode_info_context->mbmi.segment_id);
+#endif
+
     RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mby)(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
+
 #if CONFIG_T8X8
-    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+    if( tx_type == TX_8X8 )
         vp8_transform_intra_mby_8x8(x);
     else
 #endif
     vp8_transform_intra_mby(x);
 
 #if  CONFIG_T8X8
-    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+    if(tx_type == TX_8X8)
       vp8_quantize_mby_8x8(x);
     else
 #endif
@@ -117,7 +123,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     if (x->optimize)
     {
 #if CONFIG_T8X8
-      if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+      if( tx_type == TX_8X8 )
         vp8_optimize_mby_8x8(x, rtcd);
       else
 #endif
@@ -125,7 +131,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     }
 
 #if CONFIG_T8X8
-    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+    if(tx_type == TX_8X8)
       vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     else
 #endif
@@ -169,18 +175,23 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
 void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
+#if CONFIG_T8X8
+    int tx_type = get_seg_tx_type(&x->e_mbd,
+                                  x->e_mbd.mode_info_context->mbmi.segment_id);
+#endif
+
     RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mbuv)(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 #if CONFIG_T8X8
-    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+    if(tx_type == TX_8X8)
         vp8_transform_mbuv_8x8(x);
     else
 #endif
         vp8_transform_mbuv(x);
 
 #if CONFIG_T8X8
-    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+    if(tx_type == TX_8X8)
         vp8_quantize_mbuv_8x8(x);
     else
 #endif
@@ -220,7 +231,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     if (x->optimize)
     {
 #if CONFIG_T8X8
-      if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+      if(tx_type == TX_8X8)
         vp8_optimize_mbuv_8x8(x, rtcd);
       else
 #endif
@@ -228,7 +239,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     }
 
 #if CONFIG_T8X8
-    if(x->e_mbd.mode_info_context->mbmi.segment_id >= 2)
+    if(tx_type == TX_8X8)
       vp8_inverse_transform_mbuv_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     else
 #endif

@@ -247,6 +247,7 @@ double Compute_Wtd_SSE_SubEntropy(MACROBLOCK *x)
                          -sse_4*log(sse_4))/log(2);
       }
     }
+
     if(variance_8[0]+variance_8[1]+variance_8[2]+variance_8[3])
       return (entropy_8[0]*variance_8[0]+
               entropy_8[1]*variance_8[1]+
@@ -1567,8 +1568,11 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
 #if CONFIG_T8X8
-        if( x->e_mbd.mode_info_context->mbmi.segment_id >=2)
+        if ( get_seg_tx_type(&x->e_mbd,
+                             x->e_mbd.mode_info_context->mbmi.segment_id) )
+        {
             cpi->t8x8_count++;
+        }
         else
             cpi->t4x4_count++;
 #endif
@@ -1590,12 +1594,12 @@ int vp8cx_encode_inter_macroblock
     int intra_error = 0;
     int rate;
     int distortion;
-    int segment_id = xd->mode_info_context->mbmi.segment_id;
+    unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
 
     x->skip = 0;
 
     if (xd->segmentation_enabled)
-        x->encode_breakout = cpi->segment_encode_breakout[segment_id];
+        x->encode_breakout = cpi->segment_encode_breakout[*segment_id];
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
@@ -1657,11 +1661,11 @@ int vp8cx_encode_inter_macroblock
         if (cpi->cyclic_refresh_mode_enabled)
         {
             // Clear segment_id back to 0 if not coded (last frame 0,0)
-            if ( (segment_id == 1) &&
+            if ( (*segment_id == 1) &&
                  ( (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) ||
                    (xd->mode_info_context->mbmi.mode != ZEROMV) ) )
             {
-                xd->mode_info_context->mbmi.segment_id = 0;
+                *segment_id = 0;
 
                 /* segment_id changed, so update */
                 vp8cx_mb_init_quantizer(cpi, x);
@@ -1678,7 +1682,7 @@ int vp8cx_encode_inter_macroblock
                 statsfile = fopen("segmap2.stt", "a");
 
                 fprintf(statsfile, "%2d%2d%2d   ",
-                    xd->mode_info_context->mbmi.segment_id,
+                    *segment_id,
                     xd->mode_info_context->mbmi.ref_frame,
                     xd->mode_info_context->mbmi.mode );
 
@@ -1722,11 +1726,11 @@ int vp8cx_encode_inter_macroblock
     // probabilities. NOTE: At the moment we dont support custom trees
     // for the reference frame coding for each segment but this is a
     // possible future action.
-    if ( !segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) ||
-         ( ( check_segref( xd, segment_id, INTRA_FRAME ) +
-             check_segref( xd, segment_id, LAST_FRAME ) +
-             check_segref( xd, segment_id, GOLDEN_FRAME ) +
-             check_segref( xd, segment_id, ALTREF_FRAME ) ) > 1 ) )
+    if ( !segfeature_active( xd, *segment_id, SEG_LVL_REF_FRAME ) ||
+         ( ( check_segref( xd, *segment_id, INTRA_FRAME ) +
+             check_segref( xd, *segment_id, LAST_FRAME ) +
+             check_segref( xd, *segment_id, GOLDEN_FRAME ) +
+             check_segref( xd, *segment_id, ALTREF_FRAME ) ) > 1 ) )
     {
         cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame]++;
     }
@@ -1747,7 +1751,7 @@ int vp8cx_encode_inter_macroblock
         {
 #if CONFIG_T8X8
             if (xd->segmentation_enabled)
-              xd->mode_info_context->mbmi.segment_id |= (vp8_8x8_selection_intra(x) << 1);
+                *segment_id |= (vp8_8x8_selection_intra(x) << 1);
 #endif
             vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
@@ -1760,7 +1764,7 @@ int vp8cx_encode_inter_macroblock
         int ref_fb_idx;
 #if CONFIG_T8X8
         if (xd->segmentation_enabled)
-          xd->mode_info_context->mbmi.segment_id |= (vp8_8x8_selection_inter(x) << 1);
+            *segment_id |= (vp8_8x8_selection_inter(x) << 1);
 #endif
 
         if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
@@ -1790,8 +1794,10 @@ int vp8cx_encode_inter_macroblock
 
     }
 #if CONFIG_T8X8
-    if (x->e_mbd.mode_info_context->mbmi.segment_id >=2)
+    if ( get_seg_tx_type( xd, *segment_id ) == TX_8X8 )
+    {
         cpi->t8x8_count++;
+    }
     else
         cpi->t4x4_count++;
 #endif
