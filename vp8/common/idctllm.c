@@ -399,14 +399,14 @@ static void idctcol (int *blk)
   x4 = (181 * (x4 - x5) + 128) >> 8;
 
   /* fourth stage */
-  blk[8 * 0] = (x7 + x1 ) >> 15;
-  blk[8 * 1] = (x3 + x2 ) >> 15;
-  blk[8 * 2] = (x0 + x4 ) >> 15;
-  blk[8 * 3] = (x8 + x6 ) >> 15;
-  blk[8 * 4] = (x8 - x6 ) >> 15;
-  blk[8 * 5] = (x0 - x4 ) >> 15;
-  blk[8 * 6] = (x3 - x2 ) >> 15;
-  blk[8 * 7] = (x7 - x1 ) >> 15;
+  blk[8 * 0] = (x7 + x1 ) >> 14;
+  blk[8 * 1] = (x3 + x2 ) >> 14;
+  blk[8 * 2] = (x0 + x4 ) >> 14;
+  blk[8 * 3] = (x8 + x6 ) >> 14;
+  blk[8 * 4] = (x8 - x6 ) >> 14;
+  blk[8 * 5] = (x0 - x4 ) >> 14;
+  blk[8 * 6] = (x3 - x2 ) >> 14;
+  blk[8 * 7] = (x7 - x1 ) >> 14;
 }
 
 #define TX_DIM 8
@@ -434,7 +434,7 @@ void vp8_short_idct8x8_c(short *coefs, short *block, int pitch)
     {
         for (j = 0; j < TX_DIM; j++)
         {
-             block[i*shortpitch+j]  = X[i * TX_DIM + j];
+             block[i*shortpitch+j]  = X[i * TX_DIM + j]>>1;
         }
     }
 }
