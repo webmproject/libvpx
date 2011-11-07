@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX///WM\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-07T22:19:08Z",
+      "side": 1,
+      "message": "I\u0027d rather not see this unless at least the default configuration builds. You can work around this with --force-target\u003d at configure time, and I\u0027ll take the rest of the patch (checking it now)",
+      "revId": "54e345a5e18e486e9184a175da9737e797561087",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
