@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX///ow\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1169,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-11-07T14:14:10Z",
+      "side": 1,
+      "message": "I get warning about unused variable rtcd if not compiling with runtime cpu detect. Is there some downside if we use \u0026cpi-\u003ertcd.common-\u003eidct in inverse transform function calls? This way we could remove this line...",
+      "revId": "b7a8dc75d637bf2af0ae4ed4ffab41f7b7dafd1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///o0\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1172,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-11-07T14:14:10Z",
+      "side": 1,
+      "message": "include vp8/common/invtrans.h to prevent implicit declaration warning",
+      "revId": "b7a8dc75d637bf2af0ae4ed4ffab41f7b7dafd1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
