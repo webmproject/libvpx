@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX///ks\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1217,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-07T16:55:21Z",
+      "side": 1,
+      "message": "I wonder if defining this as a new type would make this clearer, since you wouldn\u0027t need the casting.. ie change the type of default_coef_counts and cpi-\u003ecoef_counts to:\n\n  typedef unsiged int coef_counts_t[MAX_ENTROPY_TOKENS];\n  coef_counts_t default_coef_counts [BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS];",
+      "revId": "f0c01413fb2d8a4db9ba6965ca2ee64edd0a0517",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
