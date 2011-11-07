@@ -64,7 +64,8 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
     BLOCK *be = &x->block[ib];
 
     RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
-                (b, b->bmi.as_mode, b->predictor, 16);
+                (*(b->base_dst) + b->dst, b->dst_stride,
+                 b->bmi.as_mode, b->predictor, 16);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 

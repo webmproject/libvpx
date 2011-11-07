@@ -27,7 +27,8 @@
     void sym(MACROBLOCKD *x)
 
 #define prototype_intra4x4_predict(sym) \
-    void sym(BLOCKD *x, int b_mode, unsigned char *predictor, int stride)
+    void sym(unsigned char *src, int src_stride, int b_mode, \
+             unsigned char *dst, int dst_stride)
 
 struct vp8_recon_rtcd_vtable;
 
@@ -79,7 +80,7 @@ extern prototype_build_intra_predictors\
     (vp8_recon_build_intra_predictors_mbuv_s);
 
 #ifndef vp8_recon_intra4x4_predict
-#define vp8_recon_intra4x4_predict vp8_intra4x4_predict
+#define vp8_recon_intra4x4_predict vp8_intra4x4_predict_c
 #endif
 extern prototype_intra4x4_predict\
     (vp8_recon_intra4x4_predict);
