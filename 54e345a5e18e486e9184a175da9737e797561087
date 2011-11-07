@@ -16,6 +16,24 @@
       "revId": "54e345a5e18e486e9184a175da9737e797561087",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///Tg\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1001066
+      },
+      "writtenOn": "2011-11-07T22:38:03Z",
+      "side": 1,
+      "message": "everything built OK with specifying only --force-target",
+      "parentUuid": "AAAAGX///WM\u003d",
+      "revId": "54e345a5e18e486e9184a175da9737e797561087",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
