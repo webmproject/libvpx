@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX///d8\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-07T20:55:32Z",
+      "side": 1,
+      "message": "independent\n\nsince this depends on the enums having static values, add sanity checks (using ct_assert) to vp8/common/asm_com_offsets.c (see vpx_ports/asm_offsets.h for ct_assert)",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///d0\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-07T20:55:32Z",
+      "side": 1,
+      "message": "haven\u0027t looked at the rest of the file closely yet",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///dk\u003d",
+        "filename": "vp8/common/arm/recon_arm.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-07T20:55:32Z",
+      "side": 1,
+      "message": "whitespace",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///dg\u003d",
+        "filename": "vp8/common/recon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-07T20:55:32Z",
+      "side": 1,
+      "message": "be consistent between this prototype and the function definitions (for the names)",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX///eA\u003d",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-07T20:55:32Z",
+      "side": 1,
+      "message": "src? the output is written to the predictor ...\n\nyes, in the overall context, it\u0027s using the destination buffer to get the context, but within the context of this function, the first buffer is the src and the predictor is the dst\n\nadd _c to the function name",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
