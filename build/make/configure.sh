@@ -901,8 +901,12 @@ process_common_toolchain() {
         [ "${AS##*/}" = nasm ] && add_asflags -Ox
         AS_SFX=.asm
         case  ${tgt_os} in
-            win*)
-                add_asflags -f win${bits}
+            win32)
+                add_asflags -f win32
+                enabled debug && add_asflags -g cv8
+            ;;
+            win64)
+                add_asflags -f x64
                 enabled debug && add_asflags -g cv8
             ;;
             linux*|solaris*)
