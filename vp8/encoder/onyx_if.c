@@ -3659,7 +3659,11 @@ static void encode_frame_to_data_rate
         else if (cpi->decimation_count > 0)
         {
             cpi->decimation_count --;
+
             cpi->bits_off_target += cpi->av_per_frame_bandwidth;
+            if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
+                cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
+
             cm->current_video_frame++;
             cpi->frames_since_key++;
 
@@ -3676,9 +3680,11 @@ static void encode_frame_to_data_rate
                 // Propagate bits saved by dropping the frame to higher layers
                 for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
                 {
-                    cpi->layer_context[i].bits_off_target
-                                              += cpi->av_per_frame_bandwidth;
-                    cpi->layer_context[i].buffer_level = cpi->bits_off_target;
+                    LAYER_CONTEXT *lc = &cpi->layer_context[i];
+                    lc->bits_off_target += cpi->av_per_frame_bandwidth;
+                    if (lc->bits_off_target > lc->maximum_buffer_size)
+                        lc->bits_off_target = lc->maximum_buffer_size;
+                    lc->buffer_level = lc->bits_off_target;
                 }
             }
 
