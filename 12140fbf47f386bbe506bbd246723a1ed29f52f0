@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//+/E\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-11-08T12:19:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX///d8\u003d",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX///d0\u003d",
         "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
         "patchSetId": 1
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX///AA\u003d",
+        "filename": "vp8/common/arm/recon_arm.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-11-08T12:19:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX///dk\u003d",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX///dg\u003d",
         "filename": "vp8/common/recon.h",
         "patchSetId": 1
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//++Q\u003d",
+        "filename": "vp8/common/recon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-11-08T12:19:24Z",
+      "side": 1,
+      "message": "I changed the parameters to src, src_stride, b_mode, dst and dst_stride.",
+      "parentUuid": "AAAAGX///dg\u003d",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX///eA\u003d",
         "filename": "vp8/common/reconintra4x4.c",
         "patchSetId": 1
@@ -81,6 +135,24 @@
       "writtenOn": "2011-11-07T20:55:32Z",
       "side": 1,
       "message": "src? the output is written to the predictor ...\n\nyes, in the overall context, it\u0027s using the destination buffer to get the context, but within the context of this function, the first buffer is the src and the predictor is the dst\n\nadd _c to the function name",
+      "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//++U\u003d",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2011-11-08T12:19:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX///eA\u003d",
       "revId": "12140fbf47f386bbe506bbd246723a1ed29f52f0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
