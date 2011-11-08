@@ -773,12 +773,6 @@ void encode_mb_row(VP8_COMP *cpi,
         // Increment the activity mask pointers.
         x->mb_activity_ptr++;
 
-#if CONFIG_SEGMENTATION
-        if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
-            xd->mode_info_context->mbmi.segment_id = 0;
-        else
-            xd->mode_info_context->mbmi.segment_id = 1;
-#endif
         // adjust to the next column of macroblocks
         x->src.y_buffer += 16;
         x->src.u_buffer += 8;

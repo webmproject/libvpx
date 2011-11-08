@@ -328,11 +328,9 @@ static void setup_features(VP8_COMP *cpi)
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     // Set up default state for MB feature flags
-#if CONFIG_SEGMENTATION
-    xd->segmentation_enabled = 1;
-#else
-    xd->segmentation_enabled = 0;
-#endif
+
+    xd->segmentation_enabled = 0;   // Default segmentation disabled
+
     xd->update_mb_segmentation_map = 0;
     xd->update_mb_segmentation_data = 0;
     vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
@@ -3706,16 +3704,8 @@ static void encode_frame_to_data_rate
 
     update_rd_ref_frame_probs(cpi);
 
-    // Test code for segmentation of gf/arf (0,0)
-    //segmentation_test_function((VP8_PTR) cpi);
-#if CONFIG_SEGMENTATION
-    cpi->mb.e_mbd.segmentation_enabled = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-#else
-//#if CONFIG_SEGFEATURES
     // Test code for new segment features
     init_seg_features( cpi );
-#endif
 
     if (cpi->drop_frames_allowed)
     {

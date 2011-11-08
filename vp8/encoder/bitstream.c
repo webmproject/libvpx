@@ -2013,9 +2013,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     }
     else
         vp8_start_encode(bc, cx_data);
-#if CONFIG_SEGMENTATION
-    xd->update_mb_segmentation_map = 1;
-#endif
+
     // Signal whether or not Segmentation is enabled
     vp8_write_bit(bc, (xd->segmentation_enabled) ? 1 : 0);
 
