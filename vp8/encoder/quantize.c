@@ -583,7 +583,7 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
        cpi->zbin_mode_boost +  \
        x->act_zbin_adj ) ) >> 7)
 
-void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
+void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip)
 {
     int i;
     int QIndex;
@@ -607,7 +607,10 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     else
         QIndex = cpi->common.base_qindex;
 
-    if (QIndex != x->q_index)
+    /* This initialization should be called at least once. Use ok_to_skip to
+     * decide if it is ok to skip.
+     */
+    if (!ok_to_skip || QIndex != x->q_index)
     {
         // Y
         zbin_extra = ZBIN_EXTRA_Y;
@@ -716,7 +719,7 @@ void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
     cpi->zbin_mode_boost = 0;
 
     // MB level quantizer setup
-    vp8cx_mb_init_quantizer(cpi, &cpi->mb);
+    vp8cx_mb_init_quantizer(cpi, &cpi->mb, 0);
 }
 
 

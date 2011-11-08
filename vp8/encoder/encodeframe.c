@@ -465,7 +465,7 @@ void encode_mb_row(VP8_COMP *cpi,
             else
                 xd->mode_info_context->mbmi.segment_id = 0;
 
-            vp8cx_mb_init_quantizer(cpi, x);
+            vp8cx_mb_init_quantizer(cpi, x, 1);
         }
         else
             xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
@@ -1255,7 +1255,7 @@ int vp8cx_encode_inter_macroblock
                 xd->mode_info_context->mbmi.segment_id = 0;
 
                 /* segment_id changed, so update */
-                vp8cx_mb_init_quantizer(cpi, x);
+                vp8cx_mb_init_quantizer(cpi, x, 1);
             }
         }
     }

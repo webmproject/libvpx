@@ -20,7 +20,7 @@ extern int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
                                          int recon_uvoffset);
 extern int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x,
                                           TOKENEXTRA **t);
-extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
+extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip);
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 
@@ -163,7 +163,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         else
                             xd->mode_info_context->mbmi.segment_id = 0;
 
-                        vp8cx_mb_init_quantizer(cpi, x);
+                        vp8cx_mb_init_quantizer(cpi, x, 1);
                     }
                     else
                         xd->mode_info_context->mbmi.segment_id = 0; // Set to Segment 0 by default
