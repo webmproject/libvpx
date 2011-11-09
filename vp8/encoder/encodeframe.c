@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include "vp8/common/subpixel.h"
+#include "vp8/common/invtrans.h"
 #include "vpx_ports/vpx_timer.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -1165,6 +1166,11 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
 
+    if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED)
+        vp8_inverse_transform_mby(IF_RTCD(&cpi->rtcd.common->idct), &x->e_mbd);
+
+    vp8_inverse_transform_mbuv(IF_RTCD(&cpi->rtcd.common->idct), &x->e_mbd);
+
     return rate;
 }
 #ifdef SPEEDSTATS
@@ -1337,7 +1343,15 @@ int vp8cx_encode_inter_macroblock
     }
 
     if (!x->skip)
+    {
         vp8_tokenize_mb(cpi, xd, t);
+        if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED)
+        {
+          vp8_inverse_transform_mby(IF_RTCD(&cpi->rtcd.common->idct),
+                                      &x->e_mbd);
+        }
+        vp8_inverse_transform_mbuv(IF_RTCD(&cpi->rtcd.common->idct), &x->e_mbd);
+    }
     else
     {
         if (cpi->common.mb_no_coeff_skip)
