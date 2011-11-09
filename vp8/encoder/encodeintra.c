@@ -37,11 +37,15 @@ int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
 
     if (use_dc_pred)
     {
+        const VP8_ENCODER_RTCD *rtcd = IF_RTCD(&cpi->rtcd);
+
         x->e_mbd.mode_info_context->mbmi.mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
-        vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+        vp8_encode_intra16x16mby(rtcd, x);
+
+        vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     }
     else
     {
@@ -105,8 +109,6 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     if (x->optimize)
         vp8_optimize_mby(x, rtcd);
 
-    vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
-
 }
 
 void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
@@ -121,7 +123,5 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     if (x->optimize)
         vp8_optimize_mbuv(x, rtcd);
-
-    vp8_inverse_transform_mbuv(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
 }
