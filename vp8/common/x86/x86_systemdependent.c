@@ -84,6 +84,10 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
             vp8_build_intra_predictors_mbuv_sse2;
         rtcd->recon.build_intra_predictors_mbuv_s =
             vp8_build_intra_predictors_mbuv_s_sse2;
+        rtcd->recon.build_intra_predictors_mby =
+            vp8_build_intra_predictors_mby_sse2;
+        rtcd->recon.build_intra_predictors_mby_s =
+            vp8_build_intra_predictors_mby_s_sse2;
 
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_sse2;
 
@@ -127,6 +131,10 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
             vp8_build_intra_predictors_mbuv_ssse3;
         rtcd->recon.build_intra_predictors_mbuv_s =
             vp8_build_intra_predictors_mbuv_s_ssse3;
+        rtcd->recon.build_intra_predictors_mby =
+            vp8_build_intra_predictors_mby_ssse3;
+        rtcd->recon.build_intra_predictors_mby_s =
+            vp8_build_intra_predictors_mby_s_ssse3;
     }
 #endif
 
