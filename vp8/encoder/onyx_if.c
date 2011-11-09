@@ -4940,7 +4940,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     int64_t store_reg[8];
 #endif
     VP8_COMP *cpi = (VP8_COMP *) ptr;
-    VP8_COMMON *cm = &cpi->common;
+    VP8_COMMON *cm;
     struct vpx_usec_timer  tsctimer;
     struct vpx_usec_timer  ticktimer;
     struct vpx_usec_timer  cmptimer;
@@ -4949,12 +4949,14 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     if (!cpi)
         return -1;
 
-    if (setjmp(cpi->common.error.jmp)){
+    cm = &cpi->common;
+
+    if (setjmp(cpi->common.error.jmp))
+    {
         cpi->common.error.setjmp = 0;
         return VPX_CODEC_CORRUPT_FRAME;
     }
 
-    cpi->bc.error = &cpi->common.error;
     cpi->common.error.setjmp = 1;
 
 #if HAVE_ARMV7

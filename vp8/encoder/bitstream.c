@@ -221,6 +221,11 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
                     w->buffer[x] += 1;
                 }
 
+                validate_buffer(w->buffer + w->pos,
+                                1,
+                                w->buffer_end,
+                                w->error);
+
                 w->buffer[w->pos++] = (lowvalue >> (24 - offset));
                 lowvalue <<= offset;
                 shift = count;
@@ -281,6 +286,11 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
                             w->buffer[x] += 1;
                         }
 
+                        validate_buffer(w->buffer + w->pos,
+                                        1,
+                                        w->buffer_end,
+                                        w->error);
+
                         w->buffer[w->pos++] = (lowvalue >> (24 - offset));
                         lowvalue <<= offset;
                         shift = count;
@@ -329,6 +339,12 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
                 if (!++count)
                 {
                     count = -8;
+
+                    validate_buffer(w->buffer + w->pos,
+                                    1,
+                                    w->buffer_end,
+                                    w->error);
+
                     w->buffer[w->pos++] = (lowvalue >> 24);
                     lowvalue &= 0xffffff;
                 }
@@ -664,6 +680,11 @@ static void pack_mb_row_tokens_c(VP8_COMP *cpi, vp8_writer *w)
                         w->buffer[x] += 1;
                     }
 
+                    validate_buffer(w->buffer + w->pos,
+                                    1,
+                                    w->buffer_end,
+                                    w->error);
+
                     w->buffer[w->pos++] = (lowvalue >> (24 - offset));
                     lowvalue <<= offset;
                     shift = count;
@@ -724,6 +745,11 @@ static void pack_mb_row_tokens_c(VP8_COMP *cpi, vp8_writer *w)
                                 w->buffer[x] += 1;
                             }
 
+                            validate_buffer(w->buffer + w->pos,
+                                            1,
+                                            w->buffer_end,
+                                            w->error);
+
                             w->buffer[w->pos++] = (lowvalue >> (24 - offset));
                             lowvalue <<= offset;
                             shift = count;
@@ -770,6 +796,12 @@ static void pack_mb_row_tokens_c(VP8_COMP *cpi, vp8_writer *w)
                     if (!++count)
                     {
                         count = -8;
+
+                        validate_buffer(w->buffer + w->pos,
+                                        1,
+                                        w->buffer_end,
+                                        w->error);
+
                         w->buffer[w->pos++] = (lowvalue >> 24);
                         lowvalue &= 0xffffff;
                     }
@@ -1565,6 +1597,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
     oh.first_partition_length_in_bytes = 0;
 
     mb_feature_data_bits = vp8_mb_feature_data_bits;
+
+    cpi->bc.error = &pc->error;
+    cpi->bc2.error = &pc->error;
 
     validate_buffer(cx_data, 3, cx_data_end, &cpi->common.error);
     cx_data += 3;
