@@ -211,7 +211,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             int b_mode = xd->mode_info_context->bmi[i].as_mode;
 
             RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
-                          (b, b_mode, *(b->base_dst) + b->dst, b->dst_stride);
+                          ( *(b->base_dst) + b->dst, b->dst_stride, b_mode,
+                            *(b->base_dst) + b->dst, b->dst_stride );
 
             if (xd->eobs[i] )
             {

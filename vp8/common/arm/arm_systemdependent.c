@@ -63,6 +63,7 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_v6;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_v6;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_v6;
+        rtcd->recon.intra4x4_predict = vp8_intra4x4_predict_armv6;
     }
 #endif
 

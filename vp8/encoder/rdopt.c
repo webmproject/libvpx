@@ -630,7 +630,8 @@ static int rd_pick_intra4x4block(
         rate = bmode_costs[mode];
 
         RECON_INVOKE(&cpi->rtcd.common->recon, intra4x4_predict)
-                     (b, mode, b->predictor, 16);
+                     (*(b->base_dst) + b->dst, b->dst_stride,
+                      mode, b->predictor, 16);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
         x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b(be, b);

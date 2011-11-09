@@ -17,6 +17,7 @@
 extern prototype_copy_block(vp8_copy_mem8x8_v6);
 extern prototype_copy_block(vp8_copy_mem8x4_v6);
 extern prototype_copy_block(vp8_copy_mem16x16_v6);
+extern prototype_intra4x4_predict(vp8_intra4x4_predict_armv6);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
 #undef  vp8_recon_copy8x8
@@ -27,6 +28,9 @@ extern prototype_copy_block(vp8_copy_mem16x16_v6);
 
 #undef  vp8_recon_copy16x16
 #define vp8_recon_copy16x16 vp8_copy_mem16x16_v6
+
+#undef  vp8_recon_intra4x4_predict
+#define vp8_recon_intra4x4_predict vp8_intra4x4_predict_armv6
 #endif
 #endif
 
