@@ -22,7 +22,7 @@
  * so
  *         x * sqrt(2) * cos (pi/8) = x + x * (sqrt(2) *cos(pi/8)-1).
  **************************************************************************/
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 
 static const int cospi8sqrt2minus1 = 20091;
 static const int sinpi8sqrt2      = 35468;

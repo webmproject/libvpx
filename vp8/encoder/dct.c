@@ -10,7 +10,7 @@
 
 
 #include <math.h>
-#include "vpx_ports/config.h"
+#include "vpx_config.h"
 void vp8_short_fdct4x4_c(short *input, short *output, int pitch)
 {
     int i;
