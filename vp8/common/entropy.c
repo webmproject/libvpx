@@ -103,7 +103,7 @@ static const Prob Pcat5[] = { 180, 157, 141, 134, 130};
 static const Prob Pcat6[] =
 { 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129};
 
-static vp8_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[22];
+static vp8_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[26];
 
 void vp8_init_scan_order_mask()
 {
