@@ -2605,6 +2605,7 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
         recon += recon_stride;
     }
 
+    vp8_clear_system_state();
     return total_sse;
 }
 
