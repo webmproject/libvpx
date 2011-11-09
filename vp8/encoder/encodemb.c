@@ -20,6 +20,7 @@
 #include "dct.h"
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
+#include "vp8/common/systemdependent.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -241,6 +242,8 @@ void vp8_transform_mbuv_8x8(MACROBLOCK *x)
 {
     int i;
 
+    vp8_clear_system_state();
+
     for (i = 16; i < 24; i += 4)
     {
         x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
@@ -252,6 +255,8 @@ void vp8_transform_mbuv_8x8(MACROBLOCK *x)
 void vp8_transform_intra_mby_8x8(MACROBLOCK *x)//changed
 {
     int i;
+
+    vp8_clear_system_state();
 
     for (i = 0; i < 9; i += 8)
     {
@@ -277,6 +282,8 @@ void vp8_transform_intra_mby_8x8(MACROBLOCK *x)//changed
 void vp8_transform_mb_8x8(MACROBLOCK *x)
 {
     int i;
+
+    vp8_clear_system_state();
 
     for (i = 0; i < 9; i += 8)
     {
@@ -308,6 +315,8 @@ void vp8_transform_mb_8x8(MACROBLOCK *x)
 void vp8_transform_mby_8x8(MACROBLOCK *x)
 {
     int i;
+
+    vp8_clear_system_state();
 
     for (i = 0; i < 9; i += 8)
     {
