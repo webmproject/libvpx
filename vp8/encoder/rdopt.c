@@ -2146,6 +2146,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         {
             continue;
         }
+        // No 4x4 modes if segment flagged as 8x8
+        else if ( ( get_seg_tx_type( xd, segment_id ) == TX_8X8 ) &&
+                  ( (this_mode == B_PRED) || (this_mode == SPLITMV) ) )
+        {
+            continue;
+        }
 //#if !CONFIG_SEGFEATURES
         // Disable this drop out case if either the mode or ref frame
         // segment level feature is enabled for this segment. This is to

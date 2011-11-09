@@ -488,19 +488,6 @@ static void init_seg_features(VP8_COMP *cpi)
         return;
     }
 
-#if CONFIG_T8X8
-    // TODO
-    // For now 8x8TX mode just set segments up for 8x8 and 4x4 modes and exit.
-    enable_segfeature(xd, 0, SEG_LVL_TRANSFORM);
-    set_segdata( xd, 0, SEG_LVL_TRANSFORM, TX_4X4 );
-    enable_segfeature(xd, 2, SEG_LVL_TRANSFORM);
-    set_segdata( xd, 2, SEG_LVL_TRANSFORM, TX_8X8 );
-
-    // Turn on segmentation
-    vp8_enable_segmentation((VP8_PTR)cpi);
-    return;
-#endif
-
     // Disable and clear down for KF
     if ( cm->frame_type == KEY_FRAME  )
     {
@@ -547,6 +534,16 @@ static void init_seg_features(VP8_COMP *cpi)
 
             // Where relevant assume segment data is delta data
             xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
+
+#if CONFIG_T8X8
+            // 8x8TX test code.
+            // This assignment does not necessarily make sense but is
+            // just to test the mechanism for now.
+            enable_segfeature(xd, 0, SEG_LVL_TRANSFORM);
+            set_segdata( xd, 0, SEG_LVL_TRANSFORM, TX_4X4 );
+            enable_segfeature(xd, 1, SEG_LVL_TRANSFORM);
+            set_segdata( xd, 1, SEG_LVL_TRANSFORM, TX_8X8 );
+#endif
         }
     }
 
@@ -577,8 +574,13 @@ static void init_seg_features(VP8_COMP *cpi)
                     set_segdata( xd, 1, SEG_LVL_MODE, ZEROMV );
                     enable_segfeature(xd, 1, SEG_LVL_MODE);
 
-                    set_segdata( xd, 1, SEG_LVL_EOB, 0 );
-                    enable_segfeature(xd, 1, SEG_LVL_EOB);
+                    if ( !segfeature_active( xd, 1, SEG_LVL_TRANSFORM ) ||
+                         get_seg_tx_type( xd, 1 ) == TX_4X4 )
+                    {
+                        // EOB segment coding not fixed for 8x8 yet
+                        set_segdata( xd, 1, SEG_LVL_EOB, 0 );
+                        enable_segfeature(xd, 1, SEG_LVL_EOB);
+                    }
                 }
             }
 
@@ -617,10 +619,21 @@ static void init_seg_features(VP8_COMP *cpi)
             // Skip all MBs if high Q
             if ( high_q )
             {
-                enable_segfeature(xd, 0, SEG_LVL_EOB);
-                enable_segfeature(xd, 1, SEG_LVL_EOB);
-                set_segdata( xd, 0, SEG_LVL_EOB, 0 );
-                set_segdata( xd, 1, SEG_LVL_EOB, 0 );
+                // EOB segment coding not fixed for 8x8 yet
+                if ( !segfeature_active( xd, 0, SEG_LVL_TRANSFORM ) ||
+                     get_seg_tx_type( xd, 0 ) == TX_4X4 )
+                {
+                    enable_segfeature(xd, 0, SEG_LVL_EOB);
+                    set_segdata( xd, 0, SEG_LVL_EOB, 0 );
+                }
+
+                // EOB segment coding not fixed for 8x8 yet
+                if ( !segfeature_active( xd, 1, SEG_LVL_TRANSFORM ) ||
+                     get_seg_tx_type( xd, 1 ) == TX_4X4 )
+                {
+                    enable_segfeature(xd, 1, SEG_LVL_EOB);
+                    set_segdata( xd, 1, SEG_LVL_EOB, 0 );
+                }
             }
 
             // Enable data udpate
