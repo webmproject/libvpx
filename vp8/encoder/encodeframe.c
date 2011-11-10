@@ -674,25 +674,19 @@ void encode_mb_row(VP8_COMP *cpi,
             vp8_activity_masking(cpi, x);
 
         // Is segmentation enabled
-        // MB level adjutment to quantizer
         if (xd->segmentation_enabled)
         {
-            // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
-#if CONFIG_T8X8
-            // Reset segment_id to 0 or 1 so that the default transform mode is 4x4
-            if (cpi->segmentation_map[map_index+mb_col] <= 3)
-                xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index+mb_col]&1;
-#else
+            // Code to set segment id in xd->mbmi.segment_id
             if (cpi->segmentation_map[map_index+mb_col] <= 3)
                 xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index+mb_col];
-#endif
             else
                 xd->mode_info_context->mbmi.segment_id = 0;
 
             vp8cx_mb_init_quantizer(cpi, x);
         }
         else
-            xd->mode_info_context->mbmi.segment_id = 0;         // Set to Segment 0 by default
+            // Set to Segment 0 by default
+            xd->mode_info_context->mbmi.segment_id = 0;
 
         x->active_ptr = cpi->active_map + map_index + mb_col;
 
@@ -1522,10 +1516,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
     int rate;
 
-#if CONFIG_T8X8
-    if (x->e_mbd.segmentation_enabled)
-        x->e_mbd.update_mb_segmentation_map = 1;
-#endif
     if (cpi->sf.RD && cpi->compressor_speed != 2)
         vp8_rd_pick_intra_mode(cpi, x, &rate);
     else
@@ -1549,10 +1539,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
     else
     {
-#if CONFIG_T8X8
-        if (x->e_mbd.segmentation_enabled)
-            x->e_mbd.mode_info_context->mbmi.segment_id |= (vp8_8x8_selection_intra(x) << 1);
-#endif
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
     }
 #if CONFIG_I8X8
@@ -1729,11 +1715,6 @@ int vp8cx_encode_inter_macroblock
         cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame]++;
     }
 
-#if CONFIG_T8X8
-    if (xd->segmentation_enabled)
-        x->e_mbd.update_mb_segmentation_map = 1;
-#endif
-
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
         if (xd->mode_info_context->mbmi.mode == B_PRED)
@@ -1743,10 +1724,6 @@ int vp8cx_encode_inter_macroblock
         }
         else
         {
-#if CONFIG_T8X8
-            if (xd->segmentation_enabled)
-                *segment_id |= (vp8_8x8_selection_intra(x) << 1);
-#endif
             vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
         }
@@ -1756,10 +1733,6 @@ int vp8cx_encode_inter_macroblock
     else
     {
         int ref_fb_idx;
-#if CONFIG_T8X8
-        if (xd->segmentation_enabled)
-            *segment_id |= (vp8_8x8_selection_inter(x) << 1);
-#endif
 
         if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
             ref_fb_idx = cpi->common.lst_fb_idx;
