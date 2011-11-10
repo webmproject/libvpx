@@ -458,6 +458,9 @@ void vp8_fast_quantize_b_2x2_c(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc] = x;                          // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc] / q2nd;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
+#if CONFIG_EXTEND_QRANGE
+      dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
+#endif
 
       if (y)
       {
@@ -506,6 +509,12 @@ void vp8_fast_quantize_b_8x8_c(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc] = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
+
+#if CONFIG_EXTEND_QRANGE
+      dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
+#endif
+
+
       if (y)
       {
         eob = i;                                // last nonzero coeffs
@@ -561,6 +570,11 @@ void vp8_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc]  = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc]/q2nd;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
+
+#if CONFIG_EXTEND_QRANGE
+      dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
+#endif
+
 
       if (y)
       {
@@ -620,6 +634,9 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc]  = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
+#if CONFIG_EXTEND_QRANGE
+      dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
+#endif
 
       if (y)
       {

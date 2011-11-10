@@ -36,7 +36,11 @@ void vp8_short_fdct8x8_c(short *block, short *coefs, int pitch)
   {
     for (j = 0; j < 8; j++)
     {
+#if !CONFIG_EXTEND_QRANGE
       b[j] = (float)( block[k + j]<<1);
+#else
+      b[j] = (float)( block[k + j]<<3);
+#endif
     }
     /* Horizontal transform */
     for (j = 0; j < 4; j++)

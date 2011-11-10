@@ -1075,6 +1075,9 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
 
+#if CONFIG_EXTEND_QRANGE
+return ;
+#endif
     vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
     vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
 
@@ -1164,6 +1167,11 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
 
+#if CONFIG_EXTEND_QRANGE
+return ;
+#endif
+
+
     if (!x->e_mbd.above_context)
         return;
 
@@ -1227,6 +1235,10 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
+
+#if CONFIG_EXTEND_QRANGE
+return ;
+#endif
 
     if (!x->e_mbd.above_context)
         return;
