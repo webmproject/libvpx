@@ -615,24 +615,17 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     *a = *l = (d->eob != !type);
 }
 
-static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
-                                   ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
-{
-    int sum=0;
-    int i;
-    BLOCKD *bd = &x->block[24];
-
-    if(bd->dequant[0]>=35 && bd->dequant[1]>=35)
-        return;
-
-    for(i=0;i<bd->eob;i++)
-    {
-        int coef = bd->dqcoeff[vp8_default_zig_zag1d[i]];
-        sum+= (coef>=0)?coef:-coef;
-        if(sum>=35)
-            return;
-    }
-
+#if CONFIG_EXTEND_QRANGE
+    /**************************************************************************
+    our inverse hadamard transform effectively is weighted sum of all 16 inputs
+    with weight either 1 or -1. It has a last stage scaling of (sum+1)>>2. And
+    dc only idct is (dc+16)>>5. So if all the sums are between -65 and 63 the
+    output after inverse wht and idct will be all zero. A sum of absolute value
+    smaller than 65 guarantees all 16 different (+1/-1) weighted sums in wht
+    fall between -65 and +65.
+    **************************************************************************/
+#define SUM_2ND_COEFF_THRESH 65
+#else
     /**************************************************************************
     our inverse hadamard transform effectively is weighted sum of all 16 inputs
     with weight either 1 or -1. It has a last stage scaling of (sum+3)>>3. And
@@ -641,7 +634,29 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
     smaller than 35 guarantees all 16 different (+1/-1) weighted sums in wht
     fall between -35 and +35.
     **************************************************************************/
-    if(sum < 35)
+#define SUM_2ND_COEFF_THRESH 35
+
+#endif
+
+static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
+                                   ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
+{
+    int sum=0;
+    int i;
+    BLOCKD *bd = &x->block[24];
+    if(bd->dequant[0]>=SUM_2ND_COEFF_THRESH
+        && bd->dequant[1]>=SUM_2ND_COEFF_THRESH)
+        return;
+
+    for(i=0;i<bd->eob;i++)
+    {
+        int coef = bd->dqcoeff[vp8_default_zig_zag1d[i]];
+        sum+= (coef>=0)?coef:-coef;
+        if(sum>=SUM_2ND_COEFF_THRESH)
+            return;
+    }
+
+    if(sum < SUM_2ND_COEFF_THRESH)
     {
         for(i=0;i<bd->eob;i++)
         {
