@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//9Ng\u003d",
+        "filename": "vp8/encoder/arm/armv5te/vp8_packtokens_armv5.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "Is it possible to put this in a separate file and INCLUDE it to avoid duplication?",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9Nc\u003d",
+        "filename": "vp8/encoder/arm/armv5te/vp8_packtokens_mbrow_armv5.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "this is just so you push 10 instead of 9, right? to keep the stack aligned?",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9NU\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "align with VP8_COMP",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9ME\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "+1? Is bc[0] unique?",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9Mc\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1592,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "you set this in a loop too around line 1903 ... are both necessary?",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9MY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1897,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "Where does this constant 3 come from? Sorry, I\u0027m not too familiar with the bit packing.",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9MU\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1915,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "Curious about this 3 too",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9NI\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1944,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "Only see this used for ARM ... new file in vp8/encoder/arm which includes boolhuff.h and defines this?",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9L8\u003d",
+        "filename": "vp8/encoder/bitstream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "can you name the unsigned chars and int? The others are more self explanatory",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//9Hk\u003d",
+        "filename": "vp8/encoder/bitstream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-11-10T22:18:38Z",
+      "side": 1,
+      "message": "can you keep the a,b,c,d ordering? looking quickly at the asm, should be possible",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
