@@ -32,7 +32,7 @@
 #include "nestegg/include/nestegg/nestegg.h"
 
 #if CONFIG_OS_SUPPORT
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 #include <io.h>
 #define snprintf _snprintf
 #define isatty   _isatty
