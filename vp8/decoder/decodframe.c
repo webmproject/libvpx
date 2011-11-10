@@ -408,7 +408,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #if CONFIG_T8X8
         if( tx_type == TX_8X8 )
         {
-            DEQUANT_INVOKE(&pbi->dequant, block_8x8)(b);
+            DEQUANT_INVOKE(&pbi->dequant, block_2x2)(b);
 #ifdef DEC_DEBUG
             if (dec_debug)
             {

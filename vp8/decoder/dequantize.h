@@ -100,10 +100,10 @@ extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block);
 extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block);
 
 #if CONFIG_T8X8
-#ifndef vp8_dequant_block_8x8
-#define vp8_dequant_block_8x8 vp8_dequantize_b_8x8_c
+#ifndef vp8_dequant_block_2x2
+#define vp8_dequant_block_2x2 vp8_dequantize_b_2x2_c
 #endif
-extern prototype_dequant_block(vp8_dequant_block_8x8);
+extern prototype_dequant_block(vp8_dequant_block_2x2);
 
 #ifndef vp8_dequant_idct_add_8x8
 #define vp8_dequant_idct_add_8x8 vp8_dequant_idct_add_8x8_c
@@ -160,7 +160,7 @@ typedef struct
     vp8_dequant_idct_add_y_block_fn_t    idct_add_y_block;
     vp8_dequant_idct_add_uv_block_fn_t   idct_add_uv_block;
 #if CONFIG_T8X8
-    vp8_dequant_block_fn_t               block_8x8;
+    vp8_dequant_block_fn_t               block_2x2;
     vp8_dequant_idct_add_fn_t            idct_add_8x8;
     vp8_dequant_dc_idct_add_fn_t         dc_idct_add_8x8;
     vp8_dequant_dc_idct_add_y_block_fn_t_8x8 dc_idct_add_y_block_8x8;

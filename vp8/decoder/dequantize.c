@@ -122,7 +122,7 @@ void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
 }
 
 #if CONFIG_T8X8
-void vp8_dequantize_b_8x8_c(BLOCKD *d)//just for 2x2 haar transform
+void vp8_dequantize_b_2x2_c(BLOCKD *d)
 {
     int i;
     short *DQ  = d->dqcoeff;
