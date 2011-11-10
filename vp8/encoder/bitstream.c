@@ -109,7 +109,7 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi)
 {
     VP8_COMMON *const x = & cpi->common;
 
-    vp8_writer *const w = & cpi->bc;
+    vp8_writer *const w = cpi->bc;
 
     {
         vp8_prob Pnew   [VP8_YMODES-1];
@@ -374,20 +374,21 @@ static void write_partition_size(unsigned char *cx_data, int size)
 
 }
 
-static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data, unsigned char * cx_data_end, int num_part, int *size)
+static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
+                                          unsigned char * cx_data_end,
+                                          int num_part)
 {
 
     int i;
     unsigned char *ptr = cx_data;
     unsigned char *ptr_end = cx_data_end;
     unsigned int shift;
-    vp8_writer *w = &cpi->bc2;
-    *size = 3 * (num_part - 1);
-    cpi->partition_sz[0] += *size;
-    ptr = cx_data + (*size);
+    vp8_writer *w;
+    ptr = cx_data;
 
     for (i = 0; i < num_part; i++)
     {
+        w = cpi->bc + i + 1;
         vp8_start_encode(w, ptr, ptr_end);
         {
             unsigned int split;
@@ -597,17 +598,7 @@ static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
         }
 
         vp8_stop_encode(w);
-        *size +=   w->pos;
-
-        /* The first partition size is set earlier */
-        cpi->partition_sz[i + 1] = w->pos;
-
-        if (i < (num_part - 1))
-        {
-            write_partition_size(cx_data, w->pos);
-            cx_data += 3;
-            ptr += w->pos;
-        }
+        ptr += w->pos;
     }
 }
 
@@ -892,7 +883,7 @@ static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACRO
 static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 {
     VP8_COMMON *const pc = & cpi->common;
-    vp8_writer *const w = & cpi->bc;
+    vp8_writer *const w = cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
 
     const int *const rfct = cpi->count_mb_ref_frame_usage;
@@ -1107,7 +1098,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
 static void write_kfmodes(VP8_COMP *cpi)
 {
-    vp8_writer *const bc = & cpi->bc;
+    vp8_writer *const bc = cpi->bc;
     const VP8_COMMON *const c = & cpi->common;
     /* const */
     MODE_INFO *m = c->mi;
@@ -1437,7 +1428,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 static void update_coef_probs(VP8_COMP *cpi)
 {
     int i = 0;
-    vp8_writer *const w = & cpi->bc;
+    vp8_writer *const w = cpi->bc;
     int savings = 0;
 
     vp8_clear_system_state(); //__asm emms;
@@ -1583,7 +1574,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
     int i, j;
     VP8_HEADER oh;
     VP8_COMMON *const pc = & cpi->common;
-    vp8_writer *const bc = & cpi->bc;
+    vp8_writer *const bc = cpi->bc;
     MACROBLOCKD *const xd = & cpi->mb.e_mbd;
     int extra_bytes_packed = 0;
 
@@ -1598,8 +1589,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
 
     mb_feature_data_bits = vp8_mb_feature_data_bits;
 
-    cpi->bc.error = &pc->error;
-    cpi->bc2.error = &pc->error;
+    bc[0].error = &pc->error;
 
     validate_buffer(cx_data, 3, cx_data_end, &cpi->common.error);
     cx_data += 3;
@@ -1879,7 +1869,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
 
     vp8_stop_encode(bc);
 
-    oh.first_partition_length_in_bytes = cpi->bc.pos;
+    cx_data += bc->pos;
+
+    oh.first_partition_length_in_bytes = cpi->bc->pos;
 
     /* update frame tag */
     {
@@ -1893,34 +1885,58 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
         dest[2] = v >> 16;
     }
 
-    *size = VP8_HEADER_SIZE + extra_bytes_packed + cpi->bc.pos;
+    *size = VP8_HEADER_SIZE + extra_bytes_packed + cpi->bc->pos;
+
     cpi->partition_sz[0] = *size;
 
     if (pc->multi_token_partition != ONE_PARTITION)
     {
-        int num_part;
-        int asize;
-        num_part = 1 << pc->multi_token_partition;
+        int num_part = 1 << pc->multi_token_partition;
 
-        pack_tokens_into_partitions(cpi, cx_data + bc->pos, cx_data_end, num_part, &asize);
+        /* partition size table at the end of first partition */
+        cpi->partition_sz[0] += 3 * (num_part - 1);
+        *size += 3 * (num_part - 1);
 
-        *size += asize;
+        validate_buffer(cx_data, 3 * (num_part - 1), cx_data_end,
+                        &pc->error);
+
+        for(i = 1; i < num_part + 1; i++)
+        {
+            cpi->bc[i].error = &pc->error;
+        }
+
+        pack_tokens_into_partitions(cpi, cx_data + 3 * (num_part - 1),
+                                    cx_data_end, num_part);
+
+        for(i = 1; i < num_part; i++)
+        {
+            cpi->partition_sz[i] = cpi->bc[i].pos;
+            write_partition_size(cx_data, cpi->partition_sz[i]);
+            cx_data += 3;
+            *size += cpi->partition_sz[i]; /* add to total */
+        }
+
+        /* add last partition to total size */
+        cpi->partition_sz[i] = cpi->bc[i].pos;
+        *size += cpi->partition_sz[i];
     }
     else
     {
-        vp8_start_encode(&cpi->bc2, cx_data + bc->pos, cx_data_end);
+        bc[1].error = &pc->error;
+
+        vp8_start_encode(&cpi->bc[1], cx_data, cx_data_end);
 
 #if CONFIG_MULTITHREAD
         if (cpi->b_multi_threaded)
-            pack_mb_row_tokens(cpi, &cpi->bc2);
+            pack_mb_row_tokens(cpi, &cpi->bc[1]);
         else
 #endif
-            pack_tokens(&cpi->bc2, cpi->tok, cpi->tok_count);
+            pack_tokens(&cpi->bc[1], cpi->tok, cpi->tok_count);
 
-        vp8_stop_encode(&cpi->bc2);
+        vp8_stop_encode(&cpi->bc[1]);
 
-        *size += cpi->bc2.pos;
-        cpi->partition_sz[1] = cpi->bc2.pos;
+        *size += cpi->bc[1].pos;
+        cpi->partition_sz[1] = cpi->bc[1].pos;
     }
 }
 

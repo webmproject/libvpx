@@ -1436,7 +1436,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         cpi->mt_sync_range = 16;
 #endif
 
-        vpx_free(cpi->tplist);
+    vpx_free(cpi->tplist);
 
     CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
 }

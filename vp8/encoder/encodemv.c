@@ -395,7 +395,7 @@ static void write_component_probs(
 
 void vp8_write_mvprobs(VP8_COMP *cpi)
 {
-    vp8_writer *const w  = & cpi->bc;
+    vp8_writer *const w  = cpi->bc;
     MV_CONTEXT *mvc = cpi->common.fc.mvc;
     int flags[2] = {0, 0};
 #ifdef ENTROPY_STATS

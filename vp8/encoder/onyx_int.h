@@ -314,8 +314,7 @@ typedef struct VP8_COMP
 
     MACROBLOCK mb;
     VP8_COMMON common;
-    vp8_writer bc, bc2;
-    // bool_writer *bc2;
+    vp8_writer bc[9]; // one boolcoder for each partition
 
     VP8_CONFIG oxcf;
 
