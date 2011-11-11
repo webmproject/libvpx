@@ -393,34 +393,18 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 ((int *)b->qcoeff)[0] = 0;
             }
         }
-
     }
     else if (mode == SPLITMV)
     {
-#if CONFIG_T8X8
-        if ( tx_type == TX_8X8 )
-        {
-            DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block_8x8)
-                (xd->qcoeff, xd->block[0].dequant,
-                xd->predictor, xd->dst.y_buffer,
-                xd->dst.y_stride, xd->eobs, xd);
-        }
-        else
-#endif
-        {
-            DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
-                (xd->qcoeff, xd->block[0].dequant,
-                xd->predictor, xd->dst.y_buffer,
-                xd->dst.y_stride, xd->eobs);
-        }
+        DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
+            (xd->qcoeff, xd->block[0].dequant,
+            xd->predictor, xd->dst.y_buffer,
+            xd->dst.y_stride, xd->eobs);
     }
     else
     {
         BLOCKD *b = &xd->block[24];
 
-        DEQUANT_INVOKE(&pbi->dequant, block)(b);
-
-        /* do 2nd order transform on the dc block */
 #if CONFIG_T8X8
         if( tx_type == TX_8X8 )
         {
@@ -455,6 +439,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         else
 #endif
         {
+            DEQUANT_INVOKE(&pbi->dequant, block)(b);
             if (xd->eobs[24] > 1)
             {
                 IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
