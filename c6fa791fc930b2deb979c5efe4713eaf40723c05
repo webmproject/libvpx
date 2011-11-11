@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//8X8\u003d",
+        "filename": "vp8/common/idctllm_test.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-11T23:40:20Z",
+      "side": 1,
+      "message": "should be ((i\u00260xF)\u003c4\u0026\u0026(i\u003c64)). ie using a stride of 16, the 4x4 block should be 0, -1 elsewhere. this change will ripple through to other tests.",
+      "revId": "c6fa791fc930b2deb979c5efe4713eaf40723c05",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
