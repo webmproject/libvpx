@@ -28,10 +28,6 @@
 //#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 
-#if CONFIG_SEGMENTATION
-static int segment_cost = 0;
-#endif
-
 const int vp8cx_base_skip_false_prob[128] =
 {
     255, 255, 255, 255, 255, 255, 255, 255,
@@ -837,39 +833,24 @@ static void write_mb_segid(vp8_writer *w,
         case 0:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[1]);
-#if CONFIG_SEGMENTATION
-            segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[1]);
-#endif
             break;
         case 1:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 1, x->mb_segment_tree_probs[1]);
-#if CONFIG_SEGMENTATION
-            segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_one(x->mb_segment_tree_probs[1]);
-#endif
             break;
         case 2:
             vp8_write(w, 1, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[2]);
-#if CONFIG_SEGMENTATION
-            segment_cost += vp8_cost_one(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[2]);
-#endif
             break;
         case 3:
             vp8_write(w, 1, x->mb_segment_tree_probs[0]);
             vp8_write(w, 1, x->mb_segment_tree_probs[2]);
-#if CONFIG_SEGMENTATION
-            segment_cost += vp8_cost_one(x->mb_segment_tree_probs[0]) + vp8_cost_one(x->mb_segment_tree_probs[2]);
-#endif
             break;
 
             // TRAP.. This should not happen
         default:
             vp8_write(w, 0, x->mb_segment_tree_probs[0]);
             vp8_write(w, 0, x->mb_segment_tree_probs[1]);
-#if CONFIG_SEGMENTATION
-            segment_cost += vp8_cost_zero(x->mb_segment_tree_probs[0]) + vp8_cost_zero(x->mb_segment_tree_probs[1]);
-#endif
             break;
         }
     }
@@ -963,7 +944,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const MV_CONTEXT *mvc = pc->fc.mvc;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 #if CONFIG_SEGMENTATION
-    int left_id, above_id;
     int i;
     int sum;
     int index = 0;
@@ -1058,10 +1038,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             // Make sure the MacroBlockD mode info pointer is set correctly
             xd->mode_info_context = m;
 
-#if CONFIG_SEGMENTATION
-            xd->up_available = (mb_row != 0);
-            xd->left_available = (mb_col != 0);
-#endif
 #ifdef ENTROPY_STATS
             active_section = 9;
 #endif
@@ -1085,12 +1061,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     if (m->mbmi.segment_flag == 0)
                     {
                         vp8_write(w,0,xd->mb_segment_tree_probs[3+sum]);
-                        segment_cost += vp8_cost_zero(xd->mb_segment_tree_probs[3+sum]);
                     }
                     else
                     {
                         vp8_write(w,1,xd->mb_segment_tree_probs[3+sum]);
-                        segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[3+sum]);
                         write_mb_segid(w, mi, &cpi->mb.e_mbd);
                         cpi->segmentation_map[index] = segment_id;
                     }
@@ -1248,7 +1222,6 @@ static void write_kfmodes(VP8_COMP *cpi)
     /* const */
     MODE_INFO *m = c->mi;
 #if CONFIG_SEGMENTATION
-    int left_id, above_id;
     int i;
     int index = 0;
 #endif
@@ -1295,11 +1268,6 @@ static void write_kfmodes(VP8_COMP *cpi)
             const int ym = m->mbmi.mode;
             int segment_id = m->mbmi.segment_id;
 
-#if CONFIG_SEGMENTATION
-            MACROBLOCKD *xd = &cpi->mb.e_mbd;
-            xd->up_available = (mb_row != 0);
-            xd->left_available = (mb_col != 0);
-#endif
 #ifdef MODE_STATS
 #if CONFIG_SEGMENTATION
             segment_modes_intra[segment_id]++;
@@ -1309,7 +1277,6 @@ static void write_kfmodes(VP8_COMP *cpi)
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
 #if CONFIG_SEGMENTATION
-
                 write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
                 cpi->segmentation_map[index] = segment_id;
                 index++;

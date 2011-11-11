@@ -367,6 +367,9 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 
     // Delete sementation map
     vpx_free(cpi->segmentation_map);
+#if CONFIG_SEGMENTATION
+    vpx_free(cpi->last_segmentation_map);
+#endif
     cpi->segmentation_map = 0;
 
     vpx_free(cpi->active_map);
@@ -2124,6 +2127,13 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     // Create the encoder segmentation map and set all entries to 0
     CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
+
+#if CONFIG_SEGMENTATION
+    // And a copy "last_segmentation_map" for temporal coding
+    CHECK_MEM_ERROR(cpi->last_segmentation_map,
+        vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
+#endif
+
     CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
     vpx_memset(cpi->active_map , 1, (cpi->common.mb_rows * cpi->common.mb_cols));
     cpi->active_map_enabled = 0;
@@ -4798,6 +4808,16 @@ static void encode_frame_to_data_rate
 
         cpi->last_frame_percent_intra = cpi->this_frame_percent_intra;
     }
+
+    // Take a copy of the segment map if it changed for future comparison
+#if CONFIG_SEGMENTATION
+    if ( cpi->mb.e_mbd.segmentation_enabled &&
+         cpi->mb.e_mbd.update_mb_segmentation_map )
+    {
+        vpx_memcpy( cpi->last_segmentation_map,
+                    cpi->segmentation_map, cm->MBs );
+    }
+#endif
 
     // Clear the one shot update flags for segmentation map and mode/ref loop filter deltas.
     cpi->mb.e_mbd.update_mb_segmentation_map = 0;

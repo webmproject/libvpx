@@ -234,9 +234,5 @@ void choose_segmap_coding_method( VP8_COMP *cpi,
         xd->mb_segment_tree_probs[1] = prob[1];
         xd->mb_segment_tree_probs[2] = prob[2];
     }
-
-    // ***** TODO
-    // PGW temp test code fix value as spatial
-    xd->temporal_update = 0;
 }
 #endif

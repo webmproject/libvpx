@@ -579,7 +579,6 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int map_index = (mb_row * cpi->common.mb_cols);
 #if CONFIG_SEGMENTATION
-    int left_id, above_id;
     int sum;
 #endif
 #if CONFIG_MULTITHREAD
@@ -783,8 +782,11 @@ void encode_mb_row(VP8_COMP *cpi,
             if (mb_row != 0)
                 sum += (xd->mode_info_context-cm->mb_cols)->mbmi.segment_flag;
 
-            if (xd->mode_info_context->mbmi.segment_id == cpi->segmentation_map[(mb_row*cm->mb_cols) + mb_col])
+            if ( xd->mode_info_context->mbmi.segment_id ==
+                 cpi->last_segmentation_map[(mb_row*cm->mb_cols) + mb_col] )
+            {
                 xd->mode_info_context->mbmi.segment_flag = 0;
+            }
             else
                 xd->mode_info_context->mbmi.segment_flag = 1;
 
@@ -1129,15 +1131,16 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     }
 
-    // Work out the segment probabilites if segmentation is enabled
-    if (xd->segmentation_enabled)
+    // Work out the segment probabilites if segmentation is enabled and
+    // the map is due to be updated
+    if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
     {
         int tot_count;
         int i;
         int count1,count2,count3,count4;
 
         // Set to defaults
-        vpx_memset(xd->mb_segment_tree_probs, 255 , sizeof(xd->mb_segment_tree_probs));
+        vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
 
 #if CONFIG_SEGMENTATION
         // Select the coding strategy for the segment map (temporal or spatial)
