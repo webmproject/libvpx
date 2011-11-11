@@ -1470,8 +1470,8 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     if(framerate < .1)
         framerate = 30;
 
-    cpi->oxcf.frame_rate        = framerate;
-    cpi->output_frame_rate      = cpi->oxcf.frame_rate;
+    cpi->frame_rate             = framerate;
+    cpi->output_frame_rate      = framerate;
     cpi->per_frame_bandwidth    = (int)(cpi->oxcf.target_bandwidth /
                                   cpi->output_frame_rate);
     cpi->av_per_frame_bandwidth = cpi->per_frame_bandwidth;
@@ -1526,6 +1526,18 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cm->version = oxcf->Version;
     vp8_setup_version(cm);
+
+    /* frame rate is not available on the first frame, as it's derived from
+     * the observed timestamps. The actual value used here doesn't matter
+     * too much, as it will adapt quickly. If the reciprocal of the timebase
+     * seems like a reasonable framerate, then use that as a guess, otherwise
+     * use 30.
+     */
+    cpi->frame_rate = (double)(oxcf->timebase.den) /
+                      (double)(oxcf->timebase.num);
+
+    if (cpi->frame_rate > 180)
+        cpi->frame_rate = 30;
 
     // change includes all joint functionality
     vp8_change_config(ptr, oxcf);
@@ -1787,7 +1799,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
                     cpi->oxcf.target_bandwidth, 1000);
 
     // Set up frame rate and related parameters rate control values.
-    vp8_new_frame_rate(cpi, cpi->oxcf.frame_rate);
+    vp8_new_frame_rate(cpi, cpi->frame_rate);
 
     // Set absolute upper and lower quality limits
     cpi->worst_quality               = cpi->oxcf.worst_allowed_q;
@@ -2408,7 +2420,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
         {
             extern int count_mb_seg[4];
             FILE *f = fopen("modes.stt", "a");
-            double dr = (double)cpi->oxcf.frame_rate * (double)bytes * (double)8 / (double)count / (double)1000 ;
+            double dr = (double)cpi->frame_rate * (double)bytes * (double)8 / (double)count / (double)1000 ;
             fprintf(f, "intra_mode in Intra Frames:\n");
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4]);
             fprintf(f, "UV:%8d, %8d, %8d, %8d\n", uv_modes[0], uv_modes[1], uv_modes[2], uv_modes[3]);
@@ -4856,7 +4868,7 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     {
         double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
             *cpi->oxcf.two_pass_vbrmin_section / 100);
-        cpi->twopass.bits_left += (int64_t)(two_pass_min_rate / cpi->oxcf.frame_rate);
+        cpi->twopass.bits_left += (int64_t)(two_pass_min_rate / cpi->frame_rate);
     }
 }
 #endif
@@ -5092,7 +5104,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
                 if(interval > 10000000.0)
                     interval = 10000000;
 
-                avg_duration = 10000000.0 / cpi->oxcf.frame_rate;
+                avg_duration = 10000000.0 / cpi->frame_rate;
                 avg_duration *= (interval - avg_duration + this_duration);
                 avg_duration /= interval;
 
