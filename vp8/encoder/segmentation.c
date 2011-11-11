@@ -114,3 +114,129 @@ void vp8_set_segment_data(VP8_PTR ptr,
     // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
     //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
 }
+
+#if CONFIG_SEGMENTATION
+void choose_segmap_coding_method( VP8_COMP *cpi,
+                                  int * segment_counts )
+{
+    VP8_COMMON *const cm = & cpi->common;
+    MACROBLOCKD *const xd = & cpi->mb.e_mbd;
+
+    int tot_count;
+    int i;
+    int count1,count2,count3,count4;
+    int prob[3];
+    int new_cost, original_cost;
+
+    // Select the coding strategy for the segment map (temporal or spatial)
+    tot_count = segment_counts[12] + segment_counts[13] +
+                segment_counts[14] + segment_counts[15];
+    count1 = segment_counts[12] + segment_counts[13];
+    count2 = segment_counts[14] + segment_counts[15];
+
+    if (tot_count)
+        prob[0] = (count1 * 255) / tot_count;
+
+    if (count1 > 0)
+        prob[1] = (segment_counts[12] * 255) /count1;
+
+    if (count2 > 0)
+        prob[2] = (segment_counts[14] * 255) /count2;
+
+    if (cm->frame_type != KEY_FRAME)
+    {
+        tot_count = segment_counts[4] + segment_counts[7];
+        if (tot_count)
+            xd->mb_segment_tree_probs[3] = (segment_counts[4] * 255)/tot_count;
+
+        tot_count = segment_counts[5] + segment_counts[8];
+        if (tot_count)
+            xd->mb_segment_tree_probs[4] = (segment_counts[5] * 255)/tot_count;
+
+        tot_count = segment_counts[6] + segment_counts[9];
+        if (tot_count)
+            xd->mb_segment_tree_probs[5] = (segment_counts[6] * 255)/tot_count;
+    }
+
+    tot_count = segment_counts[0] + segment_counts[1] +
+                segment_counts[2] + segment_counts[3];
+    count3 = segment_counts[0] + segment_counts[1];
+    count4 = segment_counts[2] + segment_counts[3];
+
+    if (tot_count)
+        xd->mb_segment_tree_probs[0] = (count3 * 255) / tot_count;
+
+    if (count3 > 0)
+        xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) /count3;
+
+    if (count4 > 0)
+        xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) /count4;
+
+    for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
+    {
+        if (xd->mb_segment_tree_probs[i] == 0)
+            xd->mb_segment_tree_probs[i] = 1;
+    }
+
+    original_cost = count1 * vp8_cost_zero(prob[0]) +
+                    count2 * vp8_cost_one(prob[0]);
+
+    if (count1 > 0)
+        original_cost += segment_counts[12] * vp8_cost_zero(prob[1]) +
+                         segment_counts[13] * vp8_cost_one(prob[1]);
+
+    if (count2 > 0)
+        original_cost += segment_counts[14] * vp8_cost_zero(prob[2]) +
+                         segment_counts[15] * vp8_cost_one(prob[2]) ;
+
+    new_cost = 0;
+
+    if (cm->frame_type != KEY_FRAME)
+    {
+        new_cost = segment_counts[4] *
+                        vp8_cost_zero(xd->mb_segment_tree_probs[3]) +
+                   segment_counts[7] *
+                        vp8_cost_one(xd->mb_segment_tree_probs[3]);
+
+        new_cost += segment_counts[5] *
+                        vp8_cost_zero(xd->mb_segment_tree_probs[4]) +
+                    segment_counts[8] *
+                        vp8_cost_one(xd->mb_segment_tree_probs[4]);
+
+        new_cost += segment_counts[6] *
+                        vp8_cost_zero(xd->mb_segment_tree_probs[5]) +
+                    segment_counts[9] *
+                        vp8_cost_one (xd->mb_segment_tree_probs[5]);
+    }
+
+    if (tot_count > 0)
+        new_cost += count3 * vp8_cost_zero(xd->mb_segment_tree_probs[0]) +
+                    count4 * vp8_cost_one(xd->mb_segment_tree_probs[0]);
+
+    if (count3 > 0)
+        new_cost += segment_counts[0] *
+                        vp8_cost_zero(xd->mb_segment_tree_probs[1]) +
+                    segment_counts[1] *
+                        vp8_cost_one(xd->mb_segment_tree_probs[1]);
+
+    if (count4 > 0)
+        new_cost += segment_counts[2] *
+                        vp8_cost_zero(xd->mb_segment_tree_probs[2]) +
+                    segment_counts[3] *
+                        vp8_cost_one(xd->mb_segment_tree_probs[2]) ;
+
+    if (new_cost < original_cost)
+        xd->temporal_update = 1;
+    else
+    {
+        xd->temporal_update = 0;
+        xd->mb_segment_tree_probs[0] = prob[0];
+        xd->mb_segment_tree_probs[1] = prob[1];
+        xd->mb_segment_tree_probs[2] = prob[2];
+    }
+
+    // ***** TODO
+    // PGW temp test code fix value as spatial
+    xd->temporal_update = 0;
+}
+#endif

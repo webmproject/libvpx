@@ -824,7 +824,10 @@ static void write_mv
     vp8_encode_motion_vector(w, &e, mvc);
 }
 
-static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACROBLOCKD *x)
+// This function writes the current macro block's segnment id to the bitstream
+// It should only be called if a segment map update is indicated.
+static void write_mb_segid(vp8_writer *w,
+                           const MB_MODE_INFO *mi, const MACROBLOCKD *x)
 {
     // Encode the MB segment id.
     if (x->segmentation_enabled && x->update_mb_segmentation_map)
@@ -1033,9 +1036,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     update_mbintra_mode_probs(cpi);
 
     vp8_write_mvprobs(cpi);
-#if CONFIG_SEGMENTATION
-    vp8_write_bit(w, (xd->temporal_update) ? 1:0);
-#endif
+
     while (++mb_row < pc->mb_rows)
     {
         int mb_col = -1;
@@ -1090,18 +1091,18 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     {
                         vp8_write(w,1,xd->mb_segment_tree_probs[3+sum]);
                         segment_cost += vp8_cost_one(xd->mb_segment_tree_probs[3+sum]);
-                        write_mb_features(w, mi, &cpi->mb.e_mbd);
+                        write_mb_segid(w, mi, &cpi->mb.e_mbd);
                         cpi->segmentation_map[index] = segment_id;
                     }
                 }
                 else
                 {
-                    write_mb_features(w, mi, &cpi->mb.e_mbd);
+                    write_mb_segid(w, mi, &cpi->mb.e_mbd);
                     cpi->segmentation_map[index] = segment_id;
                 }
                 index++;
 #else
-                write_mb_features(w, mi, &cpi->mb.e_mbd);
+                write_mb_segid(w, mi, &cpi->mb.e_mbd);
 #endif
             }
 
@@ -1309,11 +1310,11 @@ static void write_kfmodes(VP8_COMP *cpi)
             {
 #if CONFIG_SEGMENTATION
 
-                write_mb_features(bc, &m->mbmi, &cpi->mb.e_mbd);
+                write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
                 cpi->segmentation_map[index] = segment_id;
                 index++;
 #else
-                write_mb_features(bc, &m->mbmi, &cpi->mb.e_mbd);
+                write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
 #endif
             }
 
@@ -2020,8 +2021,13 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     // Indicate which features are enabled
     if (xd->segmentation_enabled)
     {
-        // Signal whether or not the segmentation map is being updated.
+        // Indicate whether or not the segmentation map is being updated.
         vp8_write_bit(bc, (xd->update_mb_segmentation_map) ? 1 : 0);
+#if CONFIG_SEGMENTATION
+        // If it is, then indicate the method that will be used.
+        if ( xd->update_mb_segmentation_map )
+            vp8_write_bit(bc, (xd->temporal_update) ? 1:0);
+#endif
         vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
 
         if (xd->update_mb_segmentation_data)

@@ -1004,8 +1004,17 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     xd->segmentation_enabled = (unsigned char)vp8_read_bit(bc);
     if (xd->segmentation_enabled)
     {
-        /* Signal whether or not the segmentation map is being explicitly updated this frame. */
+        // Read whether or not the segmentation map is being explicitly
+        // updated this frame.
         xd->update_mb_segmentation_map = (unsigned char)vp8_read_bit(bc);
+
+#if CONFIG_SEGMENTATION
+        // If so what method will be used.
+        if ( xd->update_mb_segmentation_map )
+            xd->temporal_update = (unsigned char)vp8_read_bit(bc);
+#endif
+
+        // Is the segment data being updated
         xd->update_mb_segmentation_data = (unsigned char)vp8_read_bit(bc);
 
         if (xd->update_mb_segmentation_data)

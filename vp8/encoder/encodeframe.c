@@ -42,12 +42,6 @@
 #define IF_RTCD(x)  NULL
 #endif
 
-#if CONFIG_SEGMENTATION
-#define SEEK_SEGID 12
-#define SEEK_SAMEID 4
-#define SEEK_DIFFID 7
-#endif
-
 #ifdef ENC_DEBUG
 int enc_debug=0;
 int mb_row_debug, mb_col_debug;
@@ -955,8 +949,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
 #if CONFIG_SEGMENTATION
     int segment_counts[MAX_MB_SEGMENTS + SEEK_SEGID];
-    int prob[3];
-    int new_cost, original_cost;
 #else
     int segment_counts[MAX_MB_SEGMENTS];
 #endif
@@ -1098,14 +1090,10 @@ void vp8_encode_frame(VP8_COMP *cpi)
             {
                 int i, j;
 
-                if (xd->segmentation_enabled)
+                for (i = 0; i < cpi->encoding_thread_count; i++)
                 {
-
-                    for (i = 0; i < cpi->encoding_thread_count; i++)
-                    {
-                        for (j = 0; j < 4; j++)
-                            segment_counts[j] += cpi->mb_row_ei[i].segment_counts[j];
-                    }
+                    for (j = 0; j < 4; j++)
+                        segment_counts[j] += cpi->mb_row_ei[i].segment_counts[j];
                 }
             }
 
@@ -1150,92 +1138,10 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
         // Set to defaults
         vpx_memset(xd->mb_segment_tree_probs, 255 , sizeof(xd->mb_segment_tree_probs));
+
 #if CONFIG_SEGMENTATION
-
-        tot_count = segment_counts[12] + segment_counts[13] + segment_counts[14] + segment_counts[15];
-        count1 = segment_counts[12] + segment_counts[13];
-        count2 = segment_counts[14] + segment_counts[15];
-
-        if (tot_count)
-            prob[0] = (count1 * 255) / tot_count;
-
-        if (count1 > 0)
-            prob[1] = (segment_counts[12] * 255) /count1;
-
-        if (count2 > 0)
-            prob[2] = (segment_counts[14] * 255) /count2;
-
-        if (cm->frame_type != KEY_FRAME)
-        {
-            tot_count = segment_counts[4] + segment_counts[7];
-            if (tot_count)
-                xd->mb_segment_tree_probs[3] = (segment_counts[4] * 255)/tot_count;
-
-            tot_count = segment_counts[5] + segment_counts[8];
-            if (tot_count)
-                xd->mb_segment_tree_probs[4] = (segment_counts[5] * 255)/tot_count;
-
-            tot_count = segment_counts[6] + segment_counts[9];
-            if (tot_count)
-                xd->mb_segment_tree_probs[5] = (segment_counts[6] * 255)/tot_count;
-        }
-
-        tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
-        count3 = segment_counts[0] + segment_counts[1];
-        count4 = segment_counts[2] + segment_counts[3];
-
-        if (tot_count)
-            xd->mb_segment_tree_probs[0] = (count3 * 255) / tot_count;
-
-        if (count3 > 0)
-            xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) /count3;
-
-        if (count4 > 0)
-            xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) /count4;
-
-        for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
-        {
-            if (xd->mb_segment_tree_probs[i] == 0)
-                xd->mb_segment_tree_probs[i] = 1;
-        }
-
-        original_cost = count1 * vp8_cost_zero(prob[0]) + count2 * vp8_cost_one(prob[0]);
-
-        if (count1 > 0)
-            original_cost += segment_counts[12] * vp8_cost_zero(prob[1]) + segment_counts[13] * vp8_cost_one(prob[1]);
-
-        if (count2 > 0)
-            original_cost += segment_counts[14] * vp8_cost_zero(prob[2]) + segment_counts[15] * vp8_cost_one(prob[2]) ;
-
-        new_cost = 0;
-
-        if (cm->frame_type != KEY_FRAME)
-        {
-            new_cost = segment_counts[4] * vp8_cost_zero(xd->mb_segment_tree_probs[3]) + segment_counts[7] *  vp8_cost_one(xd->mb_segment_tree_probs[3]);
-
-            new_cost += segment_counts[5] * vp8_cost_zero(xd->mb_segment_tree_probs[4]) + segment_counts[8] * vp8_cost_one(xd->mb_segment_tree_probs[4]);
-
-            new_cost += segment_counts[6] * vp8_cost_zero(xd->mb_segment_tree_probs[5]) + segment_counts[9] * vp8_cost_one (xd->mb_segment_tree_probs[5]);
-        }
-
-        if (tot_count > 0)
-            new_cost += count3 * vp8_cost_zero(xd->mb_segment_tree_probs[0]) + count4 * vp8_cost_one(xd->mb_segment_tree_probs[0]);
-
-        if (count3 > 0)
-            new_cost += segment_counts[0] * vp8_cost_zero(xd->mb_segment_tree_probs[1]) + segment_counts[1] * vp8_cost_one(xd->mb_segment_tree_probs[1]);
-
-        if (count4 > 0)
-            new_cost += segment_counts[2] * vp8_cost_zero(xd->mb_segment_tree_probs[2]) + segment_counts[3] * vp8_cost_one(xd->mb_segment_tree_probs[2]) ;
-
-        if (new_cost < original_cost)
-            xd->temporal_update = 1;
-        else
-        {
-            xd->temporal_update = 0;
-            xd->mb_segment_tree_probs[0] = prob[0];
-            xd->mb_segment_tree_probs[1] = prob[1];
-            xd->mb_segment_tree_probs[2] = prob[2];
-        }
+        // Select the coding strategy for the segment map (temporal or spatial)
+        choose_segmap_coding_method( cpi, segment_counts );
 #else
         tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
         count1 = segment_counts[0] + segment_counts[1];

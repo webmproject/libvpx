@@ -63,7 +63,9 @@ static int vp8_read_uv_mode(vp8_reader *bc, const vp8_prob *p)
     return i;
 }
 
-static void vp8_read_mb_features(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x)
+// This function reads the current macro block's segnment id to from bitstream
+// It should only be called if a segment map update is indicated.
+static void vp8_read_mb_segid(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x)
 {
     /* Is segmentation enabled */
     if (x->segmentation_enabled && x->update_mb_segmentation_map)
@@ -90,7 +92,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
             m->mbmi.segment_id = 0;
 
             if (pbi->mb.update_mb_segmentation_map)
-                vp8_read_mb_features(bc, &m->mbmi, &pbi->mb);
+                vp8_read_mb_segid(bc, &m->mbmi, &pbi->mb);
 
 //#if CONFIG_SEGFEATURES
             if ( pbi->common.mb_no_coeff_skip &&
@@ -419,9 +421,6 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
         }
 
         read_mvcontexts(bc, mvc);
-#if CONFIG_SEGMENTATION
-    xd->temporal_update = vp8_read_bit(bc);
-#endif
     }
 }
 
@@ -480,7 +479,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     }
                     else
                     {
-                        vp8_read_mb_features(bc, &mi->mbmi, xd);
+                        vp8_read_mb_segid(bc, &mi->mbmi, xd);
                         mbmi->segment_flag = 1;
                         pbi->segmentation_map[index] = mbmi->segment_id;
                     }
@@ -488,12 +487,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 }
                 else
                 {
-                    vp8_read_mb_features(bc, &mi->mbmi, xd);
+                    vp8_read_mb_segid(bc, &mi->mbmi, xd);
                     pbi->segmentation_map[index] = mbmi->segment_id;
                 }
                 index++;
 #else
-                vp8_read_mb_features(bc, &mi->mbmi, xd);
+                vp8_read_mb_segid(bc, &mi->mbmi, xd);
 #endif
             }
 
