@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//818\u003d",
+        "filename": "vp8/encoder/arm/armv5te/vp8_packtokens_mbrow_armv5.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-11T09:15:49Z",
+      "side": 1,
+      "message": "yes, 8 byte aligned, especially now that we jump out in case of buffer overflow.",
+      "parentUuid": "AAAAGX//9Nc\u003d",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//9NU\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//82M\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-11T09:15:49Z",
+      "side": 1,
+      "message": "every partition has its own boolcoder, bc[0] is for the control partition",
+      "parentUuid": "AAAAGX//9ME\u003d",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//9Mc\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -81,6 +117,24 @@
       "writtenOn": "2011-11-10T22:18:38Z",
       "side": 1,
       "message": "you set this in a loop too around line 1903 ... are both necessary?",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//82I\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1592,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-11T09:15:49Z",
+      "side": 1,
+      "message": "this is for the single token partition mode...leftover form the patch it depends on",
+      "parentUuid": "AAAAGX//9Mc\u003d",
       "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//82E\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1897,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-11T09:15:49Z",
+      "side": 1,
+      "message": "3 bytes reserved in the bitstream for each token partition size ( excluding the last partition).",
+      "parentUuid": "AAAAGX//9MY\u003d",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//9MU\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -115,6 +187,24 @@
       "writtenOn": "2011-11-10T22:18:38Z",
       "side": 1,
       "message": "Curious about this 3 too",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//82A\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1915,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-11T09:15:49Z",
+      "side": 1,
+      "message": "same as above, just stepping to next size entry",
+      "parentUuid": "AAAAGX//9MU\u003d",
       "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +245,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//81Y\u003d",
+        "filename": "vp8/encoder/bitstream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-11T09:15:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//9L8\u003d",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//9Hk\u003d",
         "filename": "vp8/encoder/bitstream.h",
         "patchSetId": 1
@@ -166,6 +274,24 @@
       "writtenOn": "2011-11-10T22:18:38Z",
       "side": 1,
       "message": "can you keep the a,b,c,d ordering? looking quickly at the asm, should be possible",
+      "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//814\u003d",
+        "filename": "vp8/encoder/bitstream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-11T09:15:49Z",
+      "side": 1,
+      "message": "yes, i was afraid of many changes in asm, but it was trivial",
+      "parentUuid": "AAAAGX//9Hk\u003d",
       "revId": "f92d5ffcede5968ee2c6c3818cf08c950a9a39eb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
