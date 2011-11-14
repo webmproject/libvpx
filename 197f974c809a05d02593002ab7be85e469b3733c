@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//8NQ\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1939,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-11-14T08:02:31Z",
+      "side": 1,
+      "message": "Remove these blank lines",
+      "revId": "197f974c809a05d02593002ab7be85e469b3733c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
