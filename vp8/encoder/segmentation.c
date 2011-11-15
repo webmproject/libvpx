@@ -226,25 +226,26 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
                 pred_context = 0;
                 if (mb_col != 0)
                     pred_context +=
-                        (xd->mode_info_context-1)->mbmi.segment_flag;
+                        (xd->mode_info_context-1)->mbmi.seg_id_predicted;
                 if (mb_row != 0)
+                {
                     pred_context +=
-                        (xd->mode_info_context-cm->mb_cols)->mbmi.segment_flag;
+                        (xd->mode_info_context-cm->mb_cols)->
+                        mbmi.seg_id_predicted;
+                }
 
                 // Test to see if the last frame segment id at the same
-                // locationcorrectly predicts the segment_id for this MB.
+                // location correctly predicts the segment_id for this MB.
                 // Update the prediction flag and count as appropriate;
                 if ( segment_id == cpi->last_segmentation_map[segmap_index] )
                 {
-                    //xd->mode_info_context->mbmi.segment_predicted = 1;
-                    xd->mode_info_context->mbmi.segment_flag = 0;
-                    temporal_predictor_count[pred_context][0]++;
+                    xd->mode_info_context->mbmi.seg_id_predicted = 1;
+                    temporal_predictor_count[pred_context][1]++;
                 }
                 else
                 {
-                    //xd->mode_info_context->mbmi.segment_predicted = 0;
-                    xd->mode_info_context->mbmi.segment_flag = 1;
-                    temporal_predictor_count[pred_context][1]++;
+                    xd->mode_info_context->mbmi.seg_id_predicted = 0;
+                    temporal_predictor_count[pred_context][0]++;
 
                     // Update the "undpredicted" segment count
                     t_unpred_seg_counts[segment_id]++;
@@ -317,8 +318,6 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
          xd->temporal_update = 0;
          vpx_memcpy( xd->mb_segment_tree_probs,
                      no_pred_tree, sizeof(no_pred_tree) );
-         //vpx_memcpy( &xd->mb_segment_pred_probs,
-         //            t_nopred_prob, sizeof(t_nopred_prob) );
     }
 }
 #endif

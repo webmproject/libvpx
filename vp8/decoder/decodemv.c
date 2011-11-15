@@ -459,30 +459,34 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     if (xd->update_mb_segmentation_map)
             {
 #if CONFIG_SEGMENTATION
+                // Is temporal coding of the segment id for this mb enabled.
                 if (xd->temporal_update)
                 {
+                    // Work out a context for decoding seg_id_predicted.
                     pred_context = 0;
-
                     if (mb_col != 0)
-                        pred_context += (mi-1)->mbmi.segment_flag;
+                        pred_context += (mi-1)->mbmi.seg_id_predicted;
                     if (mb_row != 0)
                         pred_context +=
-                            (mi-pbi->common.mb_cols)->mbmi.segment_flag;
+                            (mi-pbi->common.mb_cols)->mbmi.seg_id_predicted;
 
-                    if (vp8_read(bc,
-                                 xd->mb_segment_pred_probs[pred_context]) == 0)
+                    mbmi->seg_id_predicted =
+                        vp8_read(bc,
+                                 xd->mb_segment_pred_probs[pred_context]);
+
+                    if ( mbmi->seg_id_predicted )
                     {
                         mbmi->segment_id = pbi->segmentation_map[index];
-                        mbmi->segment_flag = 0;
                     }
+                    // If the segment id was not predicted decode it explicitly
                     else
                     {
                         vp8_read_mb_segid(bc, &mi->mbmi, xd);
-                        mbmi->segment_flag = 1;
                         pbi->segmentation_map[index] = mbmi->segment_id;
                     }
 
                 }
+                // Normal unpredicted coding mode
                 else
                 {
                     vp8_read_mb_segid(bc, &mi->mbmi, xd);

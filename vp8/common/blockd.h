@@ -181,13 +181,15 @@ typedef struct
     MB_PREDICTION_MODE mode, uv_mode;
     MV_REFERENCE_FRAME ref_frame;
     int_mv mv;
-#if CONFIG_SEGMENTATION
-    unsigned char segment_flag;
-#endif
     unsigned char partitioning;
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
     unsigned char need_to_clamp_mvs;
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
+#if CONFIG_SEGMENTATION
+    // Flag used when temporal prediction of segment map is enabled.
+    // 1 means it is predicted 0 that it must be coded explicitly
+    unsigned char seg_id_predicted;
+#endif
 
 } MB_MODE_INFO;
 

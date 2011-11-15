@@ -1041,26 +1041,28 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
 #if CONFIG_SEGMENTATION
+                // Is temporal coding of the segment map enabled
                 if (xd->temporal_update)
                 {
+                    // Look at whether neighbours were successfully predicted
+                    // to create a context for the seg_id_predicted flag.
                     pred_context = 0;
                     if (mb_col != 0)
-                        pred_context +=  (m-1)->mbmi.segment_flag;
+                        pred_context += (m-1)->mbmi.seg_id_predicted;
                     if (mb_row != 0)
-                        pred_context += (m-pc->mb_cols)->mbmi.segment_flag;
+                        pred_context += (m-pc->mb_cols)->mbmi.seg_id_predicted;
 
-                    if (m->mbmi.segment_flag == 0)
-                    {
-                        vp8_write(w,0,xd->mb_segment_pred_probs[pred_context]);
-                    }
-                    else
-                    {
-                        vp8_write(w,1,xd->mb_segment_pred_probs[pred_context]);
+                    // Code the prediction flag for this mb
+                    vp8_write( w, m->mbmi.seg_id_predicted,
+                               xd->mb_segment_pred_probs[pred_context]);
+
+                    // If the mbs segment id was not predicted code explicitly
+                    if (!m->mbmi.seg_id_predicted)
                         write_mb_segid(w, mi, &cpi->mb.e_mbd);
-                    }
                 }
                 else
                 {
+                    // Normal undpredicted coding
                     write_mb_segid(w, mi, &cpi->mb.e_mbd);
                 }
                 index++;
