@@ -552,7 +552,7 @@ static void macro_block_yrd( MACROBLOCK *mb,
     int d;
 
     ENCODEMB_INVOKE(rtcd, submby)( mb->src_diff, *(mb->block[0].base_src),
-                                   mb->e_mbd.predictor, mb->block[0].src_stride );
+        mb->block[0].src_stride,  mb->e_mbd.predictor, 16);
 
     // Fdct and building the 2nd order block
     for (beptr = mb->block; beptr < mb->block + 16; beptr += 2)
@@ -800,7 +800,8 @@ static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 {
     vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
     ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-        x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
+        x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,
+        &x->e_mbd.predictor[256], &x->e_mbd.predictor[320], 8);
 
     vp8_transform_mbuv(x);
     vp8_quantize_mbuv(x);
@@ -816,7 +817,8 @@ static int rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 {
     vp8_build_inter4x4_predictors_mbuv(&x->e_mbd);
     ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-        x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
+        x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,
+        &x->e_mbd.predictor[256], &x->e_mbd.predictor[320], 8);
 
     vp8_transform_mbuv(x);
     vp8_quantize_mbuv(x);
@@ -845,8 +847,8 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int
         RECON_INVOKE(&cpi->rtcd.common->recon, build_intra_predictors_mbuv)
                      (&x->e_mbd);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
-                      x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor,
-                      x->src.uv_stride);
+                      x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,
+                      &x->e_mbd.predictor[256], &x->e_mbd.predictor[320], 8);
         vp8_transform_mbuv(x);
         vp8_quantize_mbuv(x);
 
