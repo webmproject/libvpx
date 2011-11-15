@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//7dc\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1536,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2011-11-15T07:56:09Z",
+      "side": 1,
+      "message": "Wouldn\u0027t it make more sense to base the first frame rate estimate on the duration passed with the first frame rather than the timebase? Then you\u0027re effectively leaving the decision to the user, which in my mind makes more sense than trying to derive it from the timebase.",
+      "revId": "bdd35c13ccafaa87fbd7d27c2c413743b11b7746",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
