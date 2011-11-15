@@ -18,10 +18,6 @@
 //#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 
-#if CONFIG_SEGMENTATION
-#include "vp8/common/seg_common.h"
-#endif
-
 #if CONFIG_DEBUG
 #include <assert.h>
 #endif
@@ -434,7 +430,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     MACROBLOCKD *const xd  = & pbi->mb;
 
 #if CONFIG_SEGMENTATION
-    int sum;
+    int pred_context;
     int index = mb_row * pbi->common.mb_cols + mb_col;
 #endif
     int_mv *const mv = & mbmi->mv;
@@ -465,14 +461,16 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_SEGMENTATION
                 if (xd->temporal_update)
                 {
-                    sum = 0;
+                    pred_context = 0;
 
                     if (mb_col != 0)
-                        sum += (mi-1)->mbmi.segment_flag;
+                        pred_context += (mi-1)->mbmi.segment_flag;
                     if (mb_row != 0)
-                        sum += (mi-pbi->common.mb_cols)->mbmi.segment_flag;
+                        pred_context +=
+                            (mi-pbi->common.mb_cols)->mbmi.segment_flag;
 
-                    if (vp8_read(bc, xd->mb_segment_tree_probs[3+sum]) == 0)
+                    if (vp8_read(bc,
+                                 xd->mb_segment_pred_probs[pred_context]) == 0)
                     {
                         mbmi->segment_id = pbi->segmentation_map[index];
                         mbmi->segment_flag = 0;

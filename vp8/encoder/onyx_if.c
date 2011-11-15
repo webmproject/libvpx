@@ -152,10 +152,6 @@ extern int b_modes[10]  ;
 extern int inter_y_modes[10] ;
 extern int inter_uv_modes[4] ;
 extern unsigned int inter_b_modes[15];
-#if CONFIG_SEGMENTATION
-extern int segment_modes_intra[MAX_MB_SEGMENTS];
-extern int segment_modes_inter[MAX_MB_SEGMENTS];
-#endif
 #endif
 
 extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
@@ -2529,9 +2525,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                 fprintf(f, "\n");
 
             }
-#if CONFIG_SEGMENTATION
-            fprintf(f, "Segments:%8d, %8d, %8d, %8d\n", segment_modes_intra[0], segment_modes_intra[1], segment_modes_intra[2], segment_modes_intra[3]);
-#endif
 
             fprintf(f, "Modes in Inter Frames:\n");
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d\n",
@@ -2550,10 +2543,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             }
             fprintf(f, "P:%8d, %8d, %8d, %8d\n", count_mb_seg[0], count_mb_seg[1], count_mb_seg[2], count_mb_seg[3]);
             fprintf(f, "PB:%8d, %8d, %8d, %8d\n", inter_b_modes[LEFT4X4], inter_b_modes[ABOVE4X4], inter_b_modes[ZERO4X4], inter_b_modes[NEW4X4]);
-
-#if CONFIG_SEGMENTATION
-            fprintf(f, "Segments:%8d, %8d, %8d, %8d\n", segment_modes_inter[0], segment_modes_inter[1], segment_modes_inter[2], segment_modes_inter[3]);
-#endif
             fclose(f);
         }
 #endif

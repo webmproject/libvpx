@@ -64,10 +64,6 @@ extern unsigned int active_section;
 
 #ifdef MODE_STATS
 int count_mb_seg[4] = { 0, 0, 0, 0 };
-#if CONFIG_SEGMENTATION
-int segment_modes_intra[MAX_MB_SEGMENTS] = { 0, 0, 0, 0 };
-int segment_modes_inter[MAX_MB_SEGMENTS] = { 0, 0, 0, 0 };
-#endif
 #endif
 
 
@@ -945,7 +941,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 #if CONFIG_SEGMENTATION
     int i;
-    int sum;
+    int pred_context;
     int index = 0;
 #endif
     const int *const rfct = cpi->count_mb_ref_frame_usage;
@@ -1042,37 +1038,30 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             active_section = 9;
 #endif
 
-#ifdef MODE_STATS
-#if CONFIG_SEGMENTATION
-            segment_modes_inter[segment_id]++;
-#endif
-#endif
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
 #if CONFIG_SEGMENTATION
                 if (xd->temporal_update)
                 {
-                    sum = 0;
+                    pred_context = 0;
                     if (mb_col != 0)
-                        sum +=  (m-1)->mbmi.segment_flag;
+                        pred_context +=  (m-1)->mbmi.segment_flag;
                     if (mb_row != 0)
-                        sum += (m-pc->mb_cols)->mbmi.segment_flag;
+                        pred_context += (m-pc->mb_cols)->mbmi.segment_flag;
 
                     if (m->mbmi.segment_flag == 0)
                     {
-                        vp8_write(w,0,xd->mb_segment_tree_probs[3+sum]);
+                        vp8_write(w,0,xd->mb_segment_pred_probs[pred_context]);
                     }
                     else
                     {
-                        vp8_write(w,1,xd->mb_segment_tree_probs[3+sum]);
+                        vp8_write(w,1,xd->mb_segment_pred_probs[pred_context]);
                         write_mb_segid(w, mi, &cpi->mb.e_mbd);
-                        cpi->segmentation_map[index] = segment_id;
                     }
                 }
                 else
                 {
                     write_mb_segid(w, mi, &cpi->mb.e_mbd);
-                    cpi->segmentation_map[index] = segment_id;
                 }
                 index++;
 #else
@@ -1268,21 +1257,12 @@ static void write_kfmodes(VP8_COMP *cpi)
             const int ym = m->mbmi.mode;
             int segment_id = m->mbmi.segment_id;
 
-#ifdef MODE_STATS
-#if CONFIG_SEGMENTATION
-            segment_modes_intra[segment_id]++;
-#endif
-#endif
-
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
 #if CONFIG_SEGMENTATION
-                write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
-                cpi->segmentation_map[index] = segment_id;
                 index++;
-#else
-                write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
 #endif
+                write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
             }
 
 //#if CONFIG_SEGFEATURES
@@ -2050,12 +2030,9 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
         if (xd->update_mb_segmentation_map)
         {
- #if CONFIG_SEGMENTATION
-            // Write the probs used to decode the segment id for each macro block.
-            for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
-#else
+            // Send the tree probabilities used to decode unpredicted
+            // macro-block segments
             for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
-#endif
             {
                 int Data = xd->mb_segment_tree_probs[i];
 
@@ -2067,6 +2044,25 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 else
                     vp8_write_bit(bc, 0);
             }
+#if CONFIG_SEGMENTATION
+            // If predictive coding of segment map is enabled send the
+            // prediction probabilities.
+            if ( xd->temporal_update )
+            {
+                for (i = 0; i < SEGMENT_PREDICTION_PROBS; i++)
+                {
+                    int Data = xd->mb_segment_pred_probs[i];
+
+                    if (Data != 255)
+                    {
+                        vp8_write_bit(bc, 1);
+                        vp8_write_literal(bc, Data, 8);
+                    }
+                    else
+                        vp8_write_bit(bc, 0);
+                }
+            }
+#endif
         }
     }
 

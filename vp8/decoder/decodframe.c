@@ -1061,18 +1061,38 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         if (xd->update_mb_segmentation_map)
         {
             /* Which macro block level features are enabled */
-            vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
-#if CONFIG_SEGMENTATION
-            /* Read the probs used to decode the segment id for each macro block. */
-            for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
-#else
+            vpx_memset(xd->mb_segment_tree_probs, 255,
+                       sizeof(xd->mb_segment_tree_probs));
+            vpx_memset(xd->mb_segment_pred_probs, 255,
+                       sizeof(xd->mb_segment_pred_probs));
+
+            // Read the probs used to decode the segment id for each macro
+            // block.
             for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
-#endif
             {
-                /* If not explicitly set value is defaulted to 255 by memset above */
+                // If not explicitly set value is defaulted to 255 by
+                //memset above
                 if (vp8_read_bit(bc))
-                    xd->mb_segment_tree_probs[i] = (vp8_prob)vp8_read_literal(bc, 8);
+                    xd->mb_segment_tree_probs[i] =
+                        (vp8_prob)vp8_read_literal(bc, 8);
             }
+#if CONFIG_SEGMENTATION
+            // If predictive coding of segment map is enabled read the
+            // prediction probabilities.
+            if ( xd->temporal_update )
+            {
+                // Read the prediction probs needed to decode the segment id
+                // when predictive coding enabled
+                for (i = 0; i < SEGMENT_PREDICTION_PROBS; i++)
+                {
+                    // If not explicitly set value is defaulted to 255 by
+                    // memset above
+                    if (vp8_read_bit(bc))
+                        xd->mb_segment_pred_probs[i] =
+                            (vp8_prob)vp8_read_literal(bc, 8);
+                }
+            }
+#endif
         }
     }
 

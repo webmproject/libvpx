@@ -32,6 +32,7 @@ void vpx_log(const char *format, ...);
 #define DCPREDCNTTHRESH 3
 
 #define MB_FEATURE_TREE_PROBS   3
+#define SEGMENT_PREDICTION_PROBS 3
 
 #define MAX_MB_SEGMENTS         4
 
@@ -187,6 +188,7 @@ typedef struct
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
     unsigned char need_to_clamp_mvs;
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
+
 } MB_MODE_INFO;
 
 typedef struct
@@ -258,11 +260,14 @@ typedef struct MacroBlockD
 
     /* Per frame flags that define which MB level features (such as quantizer or loop filter level) */
     /* are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO */
-#if CONFIG_SEGMENTATION
-    vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS + 3];         // Probability Tree used to code Segment number
-    unsigned char temporal_update;
-#else
+
+    // Probability Tree used to code Segment number
     vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
+
+#if CONFIG_SEGMENTATION
+    // Context probabilities when using predictive coding of segment id
+    vp8_prob mb_segment_pred_probs[SEGMENT_PREDICTION_PROBS];
+    unsigned char temporal_update;
 #endif
 
     // Segment features

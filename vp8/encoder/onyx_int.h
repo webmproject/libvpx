@@ -56,12 +56,6 @@
 #define VP8_TEMPORAL_ALT_REF 1
 #endif
 
-#if CONFIG_SEGMENTATION
-#define SEEK_SEGID 12
-#define SEEK_SAMEID 4
-#define SEEK_DIFFID 7
-#endif
-
 typedef struct
 {
     int kf_indicated;
@@ -226,11 +220,7 @@ typedef struct
 typedef struct
 {
     MACROBLOCK  mb;
-#if CONFIG_SEGMENTATION
-    int segment_counts[MAX_MB_SEGMENTS + 8];
-#else
     int segment_counts[MAX_MB_SEGMENTS];
-#endif
     int totalrate;
 } MB_ROW_COMP;
 

@@ -578,9 +578,7 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride;
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int map_index = (mb_row * cpi->common.mb_cols);
-#if CONFIG_SEGMENTATION
-    int sum;
-#endif
+
 #if CONFIG_MULTITHREAD
     const int nsync = cpi->mt_sync_range;
     const int rightmost_col = cm->mb_cols - 1;
@@ -768,43 +766,7 @@ void encode_mb_row(VP8_COMP *cpi,
         recon_yoffset += 16;
         recon_uvoffset += 8;
 
-#if CONFIG_SEGMENTATION
-       //cpi->segmentation_map[mb_row * cm->mb_cols + mb_col] =  xd->mbmi.segment_id;
-        if (cm->frame_type == KEY_FRAME)
-        {
-            segment_counts[xd->mode_info_context->mbmi.segment_id]++;
-        }
-        else
-        {
-            sum = 0;
-            if (mb_col != 0)
-                sum += (xd->mode_info_context-1)->mbmi.segment_flag;
-            if (mb_row != 0)
-                sum += (xd->mode_info_context-cm->mb_cols)->mbmi.segment_flag;
-
-            if ( xd->mode_info_context->mbmi.segment_id ==
-                 cpi->last_segmentation_map[(mb_row*cm->mb_cols) + mb_col] )
-            {
-                xd->mode_info_context->mbmi.segment_flag = 0;
-            }
-            else
-                xd->mode_info_context->mbmi.segment_flag = 1;
-
-            if (xd->mode_info_context->mbmi.segment_flag == 0)
-            {
-                segment_counts[SEEK_SAMEID + sum]++;
-                segment_counts[10]++;
-            }
-            else
-            {
-                segment_counts[SEEK_DIFFID + sum]++;
-                segment_counts[11]++;
-                //calculate individual segment ids
-                segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
-            }
-        }
-        segment_counts[SEEK_SEGID + xd->mode_info_context->mbmi.segment_id] ++;
-#else
+#if !CONFIG_SEGMENTATION
         segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
 #endif
         // skip to next mb
@@ -948,12 +910,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     MACROBLOCKD *const xd = & x->e_mbd;
 
     TOKENEXTRA *tp = cpi->tok;
-
-#if CONFIG_SEGMENTATION
-    int segment_counts[MAX_MB_SEGMENTS + SEEK_SEGID];
-#else
     int segment_counts[MAX_MB_SEGMENTS];
-#endif
     int totalrate;
 
 
@@ -1144,7 +1101,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
 #if CONFIG_SEGMENTATION
         // Select the coding strategy for the segment map (temporal or spatial)
-        choose_segmap_coding_method( cpi, segment_counts );
+        choose_segmap_coding_method( cpi );
 #else
         tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
         count1 = segment_counts[0] + segment_counts[1];
@@ -1159,17 +1116,14 @@ void vp8_encode_frame(VP8_COMP *cpi)
         if (count2 > 0)
             xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) /count2;
 
-#endif
         // Zero probabilities not allowed
-#if CONFIG_SEGMENTATION
-            for (i = 0; i < MB_FEATURE_TREE_PROBS+3; i++)
-#else
-            for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+        for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
+
+        {
+            if (xd->mb_segment_tree_probs[i] == 0)
+                xd->mb_segment_tree_probs[i] = 1;
+        }
 #endif
-            {
-                if (xd->mb_segment_tree_probs[i] == 0)
-                    xd->mb_segment_tree_probs[i] = 1;
-            }
     }
 
     // 256 rate units to the bit
