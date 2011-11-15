@@ -568,7 +568,6 @@ void encode_mb_row(VP8_COMP *cpi,
                    MACROBLOCK  *x,
                    MACROBLOCKD *xd,
                    TOKENEXTRA **tp,
-                   int *segment_counts,
                    int *totalrate)
 {
     int recon_yoffset, recon_uvoffset;
@@ -766,9 +765,6 @@ void encode_mb_row(VP8_COMP *cpi,
         recon_yoffset += 16;
         recon_uvoffset += 8;
 
-#if !CONFIG_SEGMENTATION
-        segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
-#endif
         // skip to next mb
         xd->mode_info_context++;
         x->partition_info++;
@@ -910,7 +906,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     MACROBLOCKD *const xd = & x->e_mbd;
 
     TOKENEXTRA *tp = cpi->tok;
-    int segment_counts[MAX_MB_SEGMENTS];
     int totalrate;
 
 
@@ -925,7 +920,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     }
 #endif
 
-    vpx_memset(segment_counts, 0, sizeof(segment_counts));
     totalrate = 0;
 
     if (cpi->compressor_speed == 2)
@@ -962,8 +956,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     // Reset frame count of inter 0,0 motion vector usage.
     cpi->inter_zz_count = 0;
-
-    vpx_memset(segment_counts, 0, sizeof(segment_counts));
 
     cpi->prediction_error = 0;
     cpi->intra_error = 0;
@@ -1023,7 +1015,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
                 tp = cpi->tok + mb_row * (cm->mb_cols * 16 * 24);
 
-                encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
+                encode_mb_row(cpi, cm, mb_row, x, xd, &tp, &totalrate);
 
                 // adjust to the next row of mbs
                 x->src.y_buffer += 16 * x->src.y_stride * (cpi->encoding_thread_count + 1) - 16 * cm->mb_cols;
@@ -1045,17 +1037,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 cpi->tok_count += cpi->tplist[mb_row].stop - cpi->tplist[mb_row].start;
             }
 
-            if (xd->segmentation_enabled)
-            {
-                int i, j;
-
-                for (i = 0; i < cpi->encoding_thread_count; i++)
-                {
-                    for (j = 0; j < 4; j++)
-                        segment_counts[j] += cpi->mb_row_ei[i].segment_counts[j];
-                }
-            }
-
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
                 totalrate += cpi->mb_row_ei[i].totalrate;
@@ -1071,7 +1052,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
                 vp8_zero(cm->left_context)
 
-                encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
+                encode_mb_row(cpi, cm, mb_row, x, xd, &tp, &totalrate);
 
                 // adjust to the next row of mbs
                 x->src.y_buffer += 16 * x->src.y_stride - 16 * cm->mb_cols;
@@ -1090,41 +1071,11 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     // Work out the segment probabilites if segmentation is enabled and
     // the map is due to be updated
-    if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
-    {
-        int tot_count;
-        int i;
-        int count1,count2,count3,count4;
-
-        // Set to defaults
-        vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
-
-#if CONFIG_SEGMENTATION
-        // Select the coding strategy for the segment map (temporal or spatial)
-        choose_segmap_coding_method( cpi );
-#else
-        tot_count = segment_counts[0] + segment_counts[1] + segment_counts[2] + segment_counts[3];
-        count1 = segment_counts[0] + segment_counts[1];
-        count2 = segment_counts[2] + segment_counts[3];
-
-        if (tot_count)
-            xd->mb_segment_tree_probs[0] = (count1 * 255) / tot_count;
-
-        if (count1 > 0)
-            xd->mb_segment_tree_probs[1] = (segment_counts[0] * 255) /count1;
-
-        if (count2 > 0)
-            xd->mb_segment_tree_probs[2] = (segment_counts[2] * 255) /count2;
-
-        // Zero probabilities not allowed
-        for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
-
-        {
-            if (xd->mb_segment_tree_probs[i] == 0)
-                xd->mb_segment_tree_probs[i] = 1;
-        }
-#endif
-    }
+    //if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
+    //{
+    //    // Select the coding strategy for the segment map (temporal or spatial)
+    //    choose_segmap_coding_method( cpi );
+    //}
 
     // 256 rate units to the bit
     cpi->projected_frame_size = totalrate >> 8;   // projected_frame_size in units of BYTES

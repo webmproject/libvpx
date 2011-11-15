@@ -220,7 +220,6 @@ typedef struct
 typedef struct
 {
     MACROBLOCK  mb;
-    int segment_counts[MAX_MB_SEGMENTS];
     int totalrate;
 } MB_ROW_COMP;
 
@@ -506,9 +505,7 @@ typedef struct VP8_COMP
 #endif
 
     unsigned char *segmentation_map;
-#if CONFIG_SEGMENTATION
     unsigned char *last_segmentation_map;
-#endif
 
     // segment threashold for encode breakout
     int  segment_encode_breakout[MAX_MB_SEGMENTS];

@@ -939,11 +939,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     vp8_writer *const w = & cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
-#if CONFIG_SEGMENTATION
+
     int i;
     int pred_context;
     int index = 0;
-#endif
+
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
@@ -1040,7 +1040,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
-#if CONFIG_SEGMENTATION
                 // Is temporal coding of the segment map enabled
                 if (xd->temporal_update)
                 {
@@ -1066,9 +1065,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     write_mb_segid(w, mi, &cpi->mb.e_mbd);
                 }
                 index++;
-#else
-                write_mb_segid(w, mi, &cpi->mb.e_mbd);
-#endif
             }
 
 //#if CONFIG_SEGFEATURES
@@ -1212,10 +1208,8 @@ static void write_kfmodes(VP8_COMP *cpi)
     const VP8_COMMON *const c = & cpi->common;
     /* const */
     MODE_INFO *m = c->mi;
-#if CONFIG_SEGMENTATION
     int i;
     int index = 0;
-#endif
     int mb_row = -1;
     int prob_skip_false = 0;
 
@@ -1261,9 +1255,7 @@ static void write_kfmodes(VP8_COMP *cpi)
 
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
-#if CONFIG_SEGMENTATION
                 index++;
-#endif
                 write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
             }
 
@@ -1972,11 +1964,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     {
         // Indicate whether or not the segmentation map is being updated.
         vp8_write_bit(bc, (xd->update_mb_segmentation_map) ? 1 : 0);
-#if CONFIG_SEGMENTATION
+
         // If it is, then indicate the method that will be used.
         if ( xd->update_mb_segmentation_map )
             vp8_write_bit(bc, (xd->temporal_update) ? 1:0);
-#endif
+
         vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
 
         if (xd->update_mb_segmentation_data)
@@ -2046,7 +2038,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 else
                     vp8_write_bit(bc, 0);
             }
-#if CONFIG_SEGMENTATION
+
             // If predictive coding of segment map is enabled send the
             // prediction probabilities.
             if ( xd->temporal_update )
@@ -2064,7 +2056,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                         vp8_write_bit(bc, 0);
                 }
             }
-#endif
         }
     }
 

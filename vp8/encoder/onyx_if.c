@@ -363,10 +363,9 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 
     // Delete sementation map
     vpx_free(cpi->segmentation_map);
-#if CONFIG_SEGMENTATION
-    vpx_free(cpi->last_segmentation_map);
-#endif
     cpi->segmentation_map = 0;
+    vpx_free(cpi->last_segmentation_map);
+    cpi->last_segmentation_map = 0;
 
     vpx_free(cpi->active_map);
     cpi->active_map = 0;
@@ -2124,11 +2123,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     // Create the encoder segmentation map and set all entries to 0
     CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
-#if CONFIG_SEGMENTATION
     // And a copy "last_segmentation_map" for temporal coding
     CHECK_MEM_ERROR(cpi->last_segmentation_map,
         vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
-#endif
 
     CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
     vpx_memset(cpi->active_map , 1, (cpi->common.mb_rows * cpi->common.mb_cols));
@@ -3566,6 +3563,9 @@ static void encode_frame_to_data_rate
     unsigned int *frame_flags
 )
 {
+    VP8_COMMON *cm = &cpi->common;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+
     int Q;
     int frame_over_shoot_limit;
     int frame_under_shoot_limit;
@@ -3581,7 +3581,6 @@ static void encode_frame_to_data_rate
     int zbin_oq_low = 0;
     int top_index;
     int bottom_index;
-    VP8_COMMON *cm = &cpi->common;
     int active_worst_qchanged = FALSE;
 
     int overshoot_seen = FALSE;
@@ -3590,7 +3589,6 @@ static void encode_frame_to_data_rate
     int drop_mark75 = drop_mark * 2 / 3;
     int drop_mark50 = drop_mark / 4;
     int drop_mark25 = drop_mark / 8;
-
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
@@ -3609,7 +3607,6 @@ static void encode_frame_to_data_rate
 
     // For an alt ref frame in 2 pass we skip the call to the second pass function that sets the target bandwidth
 #if !(CONFIG_REALTIME_ONLY)
-
     if (cpi->pass == 2)
     {
         if (cpi->common.refresh_alt_ref_frame)
@@ -3660,7 +3657,7 @@ static void encode_frame_to_data_rate
     }
 
     // Set default state for segment based loop filter update flags
-    cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
+    xd->mode_ref_lf_delta_update = 0;
 
     // Set various flags etc to special state if it is a key frame
     if (cm->frame_type == KEY_FRAME)
@@ -3671,10 +3668,10 @@ static void encode_frame_to_data_rate
         setup_features(cpi);
 
         // If segmentation is enabled force a map update for key frames
-        if (cpi->mb.e_mbd.segmentation_enabled)
+        if (xd->segmentation_enabled)
         {
-            cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-            cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+            xd->update_mb_segmentation_map = 1;
+            xd->update_mb_segmentation_data = 1;
         }
 
         // The alternate reference frame cannot be active for a key frame
@@ -4168,10 +4165,10 @@ static void encode_frame_to_data_rate
                 setup_features(cpi);
 
                 // If segmentation is enabled force a map update for key frames
-                if (cpi->mb.e_mbd.segmentation_enabled)
+                if (xd->segmentation_enabled)
                 {
-                    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-                    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+                    xd->update_mb_segmentation_map = 1;
+                    xd->update_mb_segmentation_data = 1;
                 }
 
                 vp8_restore_coding_context(cpi);
@@ -4502,6 +4499,18 @@ static void encode_frame_to_data_rate
         sem_wait(&cpi->h_event_end_lpf);
 #endif
 
+    // Work out the segment probabilites if segmentation is enabled and
+    // the map is due to be updated
+    if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
+    {
+        // Select the coding strategy for the segment map (temporal or spatial)
+        choose_segmap_coding_method( cpi );
+
+        // Take a copy of the segment map if it changed for future comparison
+        vpx_memcpy( cpi->last_segmentation_map,
+                    cpi->segmentation_map, cm->MBs );
+    }
+
     // build the bitstream
     vp8_pack_bitstream(cpi, dest, size);
 
@@ -4798,20 +4807,10 @@ static void encode_frame_to_data_rate
         cpi->last_frame_percent_intra = cpi->this_frame_percent_intra;
     }
 
-    // Take a copy of the segment map if it changed for future comparison
-#if CONFIG_SEGMENTATION
-    if ( cpi->mb.e_mbd.segmentation_enabled &&
-         cpi->mb.e_mbd.update_mb_segmentation_map )
-    {
-        vpx_memcpy( cpi->last_segmentation_map,
-                    cpi->segmentation_map, cm->MBs );
-    }
-#endif
-
     // Clear the one shot update flags for segmentation map and mode/ref loop filter deltas.
-    cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 0;
-    cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
+    xd->update_mb_segmentation_map = 0;
+    xd->update_mb_segmentation_data = 0;
+    xd->mode_ref_lf_delta_update = 0;
 
 
     // Dont increment frame counters if this was an altref buffer update not a real frame

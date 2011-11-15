@@ -1008,11 +1008,9 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         // updated this frame.
         xd->update_mb_segmentation_map = (unsigned char)vp8_read_bit(bc);
 
-#if CONFIG_SEGMENTATION
         // If so what method will be used.
         if ( xd->update_mb_segmentation_map )
             xd->temporal_update = (unsigned char)vp8_read_bit(bc);
-#endif
 
         // Is the segment data being updated
         xd->update_mb_segmentation_data = (unsigned char)vp8_read_bit(bc);
@@ -1060,7 +1058,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
         if (xd->update_mb_segmentation_map)
         {
-            /* Which macro block level features are enabled */
+            // Which macro block level features are enabled
             vpx_memset(xd->mb_segment_tree_probs, 255,
                        sizeof(xd->mb_segment_tree_probs));
             vpx_memset(xd->mb_segment_pred_probs, 255,
@@ -1076,7 +1074,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     xd->mb_segment_tree_probs[i] =
                         (vp8_prob)vp8_read_literal(bc, 8);
             }
-#if CONFIG_SEGMENTATION
+
             // If predictive coding of segment map is enabled read the
             // prediction probabilities.
             if ( xd->temporal_update )
@@ -1092,7 +1090,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                             (vp8_prob)vp8_read_literal(bc, 8);
                 }
             }
-#endif
         }
     }
 
@@ -1282,11 +1279,9 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
-#if CONFIG_SEGMENTATION
      // Create the encoder segmentation map and set all entries to 0
      if (!pbi->segmentation_map)
        CHECK_MEM_ERROR(pbi->segmentation_map, vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
-#endif
 
     /* set up frame new frame for intra coded blocks */
 #if CONFIG_MULTITHREAD

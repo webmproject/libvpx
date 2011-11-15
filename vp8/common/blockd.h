@@ -185,11 +185,10 @@ typedef struct
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
     unsigned char need_to_clamp_mvs;
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
-#if CONFIG_SEGMENTATION
+
     // Flag used when temporal prediction of segment map is enabled.
     // 1 means it is predicted 0 that it must be coded explicitly
     unsigned char seg_id_predicted;
-#endif
 
 } MB_MODE_INFO;
 
@@ -266,11 +265,9 @@ typedef struct MacroBlockD
     // Probability Tree used to code Segment number
     vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
 
-#if CONFIG_SEGMENTATION
     // Context probabilities when using predictive coding of segment id
     vp8_prob mb_segment_pred_probs[SEGMENT_PREDICTION_PROBS];
     unsigned char temporal_update;
-#endif
 
     // Segment features
     signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];

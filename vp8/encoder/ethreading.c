@@ -83,7 +83,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
             MACROBLOCKD *xd = &x->e_mbd;
             TOKENEXTRA *tp ;
 
-            int *segment_counts = mbri->segment_counts;
             int *totalrate = &mbri->totalrate;
 
             if (cpi->b_multi_threaded == FALSE) // we're shutting down
@@ -247,9 +246,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                     recon_yoffset += 16;
                     recon_uvoffset += 8;
-
-                    // Keep track of segment useage
-                    segment_counts[xd->mode_info_context->mbmi.segment_id]++;
 
                     // skip to next mb
                     xd->mode_info_context++;
@@ -437,7 +433,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 
         mb->vector_range             = 32;
 
-        vpx_memset(mbr_ei[i].segment_counts, 0, sizeof(mbr_ei[i].segment_counts));
         mbr_ei[i].totalrate = 0;
 
         mb->partition_info = x->pi + x->e_mbd.mode_info_stride * (i + 1);

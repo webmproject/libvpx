@@ -115,11 +115,10 @@ void vp8_set_segment_data(VP8_PTR ptr,
     //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
 }
 
-#if CONFIG_SEGMENTATION
 // Based on set of segment counts calculate a probability tree
-void calc_segtree_probs( MACROBLOCKD * xd,
-                         int * segcounts,
-                         vp8_prob * segment_tree_probs )
+static void calc_segtree_probs( MACROBLOCKD * xd,
+                                int * segcounts,
+                                vp8_prob * segment_tree_probs )
 {
     int count1,count2;
     int tot_count;
@@ -150,9 +149,9 @@ void calc_segtree_probs( MACROBLOCKD * xd,
 }
 
 // Based on set of segment counts and probabilities calculate a cost estimate
-int cost_segmap( MACROBLOCKD * xd,
-                 int * segcounts,
-                 vp8_prob * probs )
+static int cost_segmap( MACROBLOCKD * xd,
+                        int * segcounts,
+                        vp8_prob * probs )
 {
     int cost;
     int count1,count2;
@@ -198,6 +197,13 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
     vp8_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
     vp8_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
     vp8_prob t_nopred_prob[SEGMENT_PREDICTION_PROBS];
+
+    // Set default state for the segment tree probabilities and the
+    // temporal coding probabilities
+    vpx_memset(xd->mb_segment_tree_probs, 255,
+               sizeof(xd->mb_segment_tree_probs));
+    vpx_memset(xd->mb_segment_pred_probs, 255,
+               sizeof(xd->mb_segment_pred_probs));
 
     vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
     vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
@@ -320,4 +326,3 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
                      no_pred_tree, sizeof(no_pred_tree) );
     }
 }
-#endif
