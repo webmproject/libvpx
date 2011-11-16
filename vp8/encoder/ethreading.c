@@ -248,6 +248,9 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     recon_uvoffset += 8;
 
                     // skip to next mb
+#if CONFIG_NEWNEAR
+                    xd->prev_mode_info_context++;
+#endif
                     xd->mode_info_context++;
                     x->partition_info++;
                     xd->above_context++;
@@ -263,6 +266,10 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     xd->dst.v_buffer + 8);
 
                 // this is to account for the border
+#if CONFIG_NEWNEAR
+                xd->prev_mode_info_context++;
+#endif
+
                 xd->mode_info_context++;
                 x->partition_info++;
 
@@ -270,7 +277,13 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                 x->src.u_buffer += 8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
                 x->src.v_buffer += 8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
 
-                xd->mode_info_context += xd->mode_info_stride * cpi->encoding_thread_count;
+                xd->mode_info_context += xd->mode_info_stride
+                                        * cpi->encoding_thread_count;
+#if CONFIG_NEWNEAR
+                xd->prev_mode_info_context += xd->mode_info_stride
+                                            * cpi->encoding_thread_count;
+#endif
+
                 x->partition_info += xd->mode_info_stride * cpi->encoding_thread_count;
                 x->gf_active_ptr   += cm->mb_cols * cpi->encoding_thread_count;
 
@@ -437,7 +450,12 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 
         mb->partition_info = x->pi + x->e_mbd.mode_info_stride * (i + 1);
 
-        mbd->mode_info_context = cm->mi   + x->e_mbd.mode_info_stride * (i + 1);
+        mbd->mode_info_context = cm->mi
+                                 + x->e_mbd.mode_info_stride * (i + 1);
+#if CONFIG_NEWNEAR
+        mbd->prev_mode_info_context = cm->prev_mi
+                                    + x->e_mbd.mode_info_stride * (i + 1);
+#endif
         mbd->mode_info_stride  = cm->mode_info_stride;
 
         mbd->frame_type = cm->frame_type;

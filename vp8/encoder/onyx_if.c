@@ -2439,7 +2439,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
         {
             extern int count_mb_seg[4];
             char modes_stats_file[250];
-            FILE *f; 
+            FILE *f;
             double dr = (double)cpi->oxcf.frame_rate * (double)cpi->bytes * (double)8 / (double)cpi->count / (double)1000 ;
             sprintf(modes_stats_file, "modes_q%03d.stt",cpi->common.base_qindex);
             f = fopen(modes_stats_file, "w");
@@ -3292,7 +3292,7 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 }
 #endif
 
-#if 0
+#if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 {
 
@@ -4437,6 +4437,11 @@ static void encode_frame_to_data_rate
 
     cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
+#if WRITE_RECON_BUFFER
+    if(cm->show_frame)
+        write_cx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
+#endif
+
 #if CONFIG_MULTITHREAD
     if (cpi->b_multi_threaded)
     {
@@ -4811,6 +4816,20 @@ static void encode_frame_to_data_rate
 #if OUTPUT_YUV_REC
     vp8_write_yuv_rec_frame(cm);
 #endif
+
+#if CONFIG_NEWNEAR
+    if(cm->show_frame)
+    {
+        vpx_memcpy(cm->prev_mip, cm->mip,
+            (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+    }
+    else
+    {
+        vpx_memset(cm->prev_mip, 0,
+            (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+    }
+#endif
+
 
 }
 

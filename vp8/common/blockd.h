@@ -235,6 +235,9 @@ typedef struct MacroBlockD
     YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
     YV12_BUFFER_CONFIG dst;
 
+#if CONFIG_NEWNEAR
+    MODE_INFO *prev_mode_info_context;
+#endif
     MODE_INFO *mode_info_context;
     int mode_info_stride;
 

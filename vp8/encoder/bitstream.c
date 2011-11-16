@@ -948,14 +948,17 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
-    MODE_INFO *m = pc->mi, *ms;
+    MODE_INFO *m = pc->mi;
+#if CONFIG_NEWNEAR
+    MODE_INFO *prev_m = pc->prev_mi;
+#endif
+
     const int mis = pc->mode_info_stride;
     int mb_row = -1;
 
     int prob_last_coded;
     int prob_gf_coded;
     int prob_skip_false = 0;
-    ms = pc->mi - 1;
 
     cpi->mb.partition_info = cpi->mb.pi;
 
@@ -1033,6 +1036,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
             // Make sure the MacroBlockD mode info pointer is set correctly
             xd->mode_info_context = m;
+#if CONFIG_NEWNEAR
+            xd->prev_mode_info_context = prev_m;
+#endif
 
 #ifdef ENTROPY_STATS
             active_section = 9;
@@ -1110,7 +1116,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     int_mv n1, n2;
                     int ct[4];
 
-                    vp8_find_near_mvs(xd, m, &n1, &n2, &best_mv, ct, rf, cpi->common.ref_frame_sign_bias);
+                    vp8_find_near_mvs(xd, m,
+#if CONFIG_NEWNEAR
+                        prev_m,
+#endif
+                        &n1, &n2, &best_mv, ct, rf, cpi->common.ref_frame_sign_bias);
                     vp8_mv_ref_probs(mv_ref_p, ct);
 
 #ifdef ENTROPY_STATS
@@ -1193,10 +1203,19 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             }
 
             ++m;
+#if CONFIG_NEWNEAR
+            ++prev_m;
+            assert((prev_m-cpi->common.prev_mip)==(m-cpi->common.mip));
+            assert((prev_m-cpi->common.prev_mi)==(m-cpi->common.mi));
+#endif
+
             cpi->mb.partition_info++;
         }
 
         ++m;  /* skip L prediction border */
+#if CONFIG_NEWNEAR
+        ++prev_m;
+#endif
         cpi->mb.partition_info++;
     }
 }

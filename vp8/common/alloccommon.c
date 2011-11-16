@@ -116,7 +116,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     oci->mi = oci->mip + oci->mode_info_stride + 1;
 
     /* allocate memory for last frame MODE_INFO array */
-#if CONFIG_ERROR_CONCEALMENT
+#if CONFIG_ERROR_CONCEALMENT || CONFIG_NEWNEAR
     oci->prev_mip = vpx_calloc((oci->mb_cols + 1) * (oci->mb_rows + 1), sizeof(MODE_INFO));
 
     if (!oci->prev_mip)

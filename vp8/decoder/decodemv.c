@@ -425,6 +425,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
 
 
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
+#if CONFIG_NEWNEAR
+                             MODE_INFO *prev_mi,
+#endif
                             int mb_row, int mb_col)
 {
     vp8_reader *const bc = & pbi->bc;
@@ -529,7 +532,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         int_mv nearest, nearby, best_mv;
         vp8_prob mv_ref_p [VP8_MVREFS-1];
 
-        vp8_find_near_mvs(xd, mi, &nearest, &nearby, &best_mv, rct,
+        vp8_find_near_mvs(xd, mi,
+#if CONFIG_NEWNEAR
+            prev_mi,
+#endif
+            &nearest, &nearby, &best_mv, rct,
                           mbmi->ref_frame, pbi->common.ref_frame_sign_bias);
         vp8_mv_ref_probs(mv_ref_p, rct);
 
@@ -725,6 +732,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 {
     MODE_INFO *mi = pbi->common.mi;
+
+#if CONFIG_NEWNEAR
+    MODE_INFO *prev_mi = pbi->common.prev_mi;
+#endif
+
     int mb_row = -1;
 
 //#if CONFIG_SEGFEATURES
@@ -771,7 +783,11 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             if(pbi->common.frame_type == KEY_FRAME)
                 vp8_kfread_modes(pbi, mi, mb_row, mb_col);
             else
-                read_mb_modes_mv(pbi, mi, &mi->mbmi, mb_row, mb_col);
+                read_mb_modes_mv(pbi, mi, &mi->mbmi,
+#if CONFIG_NEWNEAR
+                prev_mi,
+#endif
+                mb_row, mb_col);
 
             //printf("%3d", mi->mbmi.mode);
 
@@ -807,11 +823,15 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             fprintf(statsfile, "%2d%2d%2d   ",
                 mi->mbmi.segment_id, mi->mbmi.ref_frame, mi->mbmi.mode );
 #endif
-
-
+#if CONFIG_NEWNEAR
+            prev_mi++;
+#endif
             mi++;       /* next macroblock */
         }
        // printf("\n");
+#if CONFIG_NEWNEAR
+        prev_mi++;
+#endif
         mi++;           /* skip left predictor each row */
     }
 

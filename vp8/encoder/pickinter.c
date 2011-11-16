@@ -460,7 +460,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     {
         YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
 
-        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &nearest_mv[LAST_FRAME], &near_mv[LAST_FRAME],
+        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context,
+#if CONFIG_NEWNEAR
+                        x->e_mbd.prev_mode_info_context,
+#endif
+            &nearest_mv[LAST_FRAME], &near_mv[LAST_FRAME],
                           &frame_best_ref_mv[LAST_FRAME], MDCounts[LAST_FRAME], LAST_FRAME, cpi->common.ref_frame_sign_bias);
 
         y_buffer[LAST_FRAME] = lst_yv12->y_buffer + recon_yoffset;
@@ -474,8 +478,13 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     {
         YV12_BUFFER_CONFIG *gld_yv12 = &cpi->common.yv12_fb[cpi->common.gld_fb_idx];
 
-        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &nearest_mv[GOLDEN_FRAME], &near_mv[GOLDEN_FRAME],
-                          &frame_best_ref_mv[GOLDEN_FRAME], MDCounts[GOLDEN_FRAME], GOLDEN_FRAME, cpi->common.ref_frame_sign_bias);
+        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context,
+#if CONFIG_NEWNEAR
+            x->e_mbd.prev_mode_info_context,
+#endif
+
+            &nearest_mv[GOLDEN_FRAME], &near_mv[GOLDEN_FRAME],
+            &frame_best_ref_mv[GOLDEN_FRAME], MDCounts[GOLDEN_FRAME], GOLDEN_FRAME, cpi->common.ref_frame_sign_bias);
 
         y_buffer[GOLDEN_FRAME] = gld_yv12->y_buffer + recon_yoffset;
         u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
@@ -488,8 +497,12 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     {
         YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
 
-        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context, &nearest_mv[ALTREF_FRAME], &near_mv[ALTREF_FRAME],
-                          &frame_best_ref_mv[ALTREF_FRAME], MDCounts[ALTREF_FRAME], ALTREF_FRAME, cpi->common.ref_frame_sign_bias);
+        vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context,
+#if CONFIG_NEWNEAR
+                        x->e_mbd.prev_mode_info_context,
+#endif
+                        &nearest_mv[ALTREF_FRAME], &near_mv[ALTREF_FRAME],
+                        &frame_best_ref_mv[ALTREF_FRAME], MDCounts[ALTREF_FRAME], ALTREF_FRAME, cpi->common.ref_frame_sign_bias);
 
         y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
         u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;

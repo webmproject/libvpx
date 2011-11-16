@@ -81,6 +81,41 @@ void vp8_recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s)
 }
 #endif
 
+#if WRITE_RECON_BUFFER
+void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
+{
+
+    // write the frame
+    FILE *yframe;
+    int i;
+    char filename[255];
+
+    sprintf(filename, "dx\\y%04d.raw", this_frame);
+    yframe = fopen(filename, "wb");
+
+    for (i = 0; i < frame->y_height; i++)
+        fwrite(frame->y_buffer + i * frame->y_stride, frame->y_width, 1, yframe);
+
+    fclose(yframe);
+    sprintf(filename, "dx\\u%04d.raw", this_frame);
+    yframe = fopen(filename, "wb");
+
+    for (i = 0; i < frame->uv_height; i++)
+        fwrite(frame->u_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
+
+    fclose(yframe);
+    sprintf(filename, "dx\\v%04d.raw", this_frame);
+    yframe = fopen(filename, "wb");
+
+    for (i = 0; i < frame->uv_height; i++)
+        fwrite(frame->v_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
+
+    fclose(yframe);
+}
+#endif
+
+
+
 void vp8dx_initialize()
 {
     static int init_done = 0;
@@ -540,6 +575,11 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
             return -1;
         }
 
+#if WRITE_RECON_BUFFER
+        if(cm->show_frame)
+            write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
+#endif
+
         if(cm->filter_level)
         {
             /* Apply the loop filter if appropriate. */
@@ -573,6 +613,19 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
                         pbi->common.prev_mi[i].mbmi.segment_id;
             }
         }
+    }
+#endif
+
+#if CONFIG_NEWNEAR
+    if(cm->show_frame)
+    {
+        vpx_memcpy(cm->prev_mip, cm->mip,
+            (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+    }
+    else
+    {
+        vpx_memset(cm->prev_mip, 0,
+            (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
     }
 #endif
 
