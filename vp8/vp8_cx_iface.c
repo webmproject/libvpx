@@ -271,14 +271,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
 
     oxcf->Width                 = cfg.g_w;
     oxcf->Height                = cfg.g_h;
-    /* guess a frame rate if out of whack, use 30 */
-    oxcf->frame_rate = (double)(cfg.g_timebase.den) /
-                       (double)(cfg.g_timebase.num);
-
-    if (oxcf->frame_rate > 180)
-    {
-        oxcf->frame_rate = 30;
-    }
+    oxcf->timebase              = cfg.g_timebase;
 
     oxcf->error_resilient_mode = cfg.g_error_resilient;
 

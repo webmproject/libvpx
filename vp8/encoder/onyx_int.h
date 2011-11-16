@@ -418,6 +418,7 @@ typedef struct VP8_COMP
 
     int buffered_mode;
 
+    double frame_rate;
     int64_t buffer_level;
     int bits_off_target;
 
