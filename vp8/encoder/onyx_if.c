@@ -3490,6 +3490,9 @@ static void encode_frame_to_data_rate
         {
             cpi->decimation_count --;
             cpi->bits_off_target += cpi->av_per_frame_bandwidth;
+            if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
+                cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
+
             cm->current_video_frame++;
             cpi->frames_since_key++;
 
@@ -4320,6 +4323,10 @@ static void encode_frame_to_data_rate
         cpi->bits_off_target -= cpi->projected_frame_size;
     else
         cpi->bits_off_target += cpi->av_per_frame_bandwidth - cpi->projected_frame_size;
+
+    // Clip the buffer level to the maximum specified buffer size
+    if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
+        cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
 
     // Rolling monitors of whether we are over or underspending used to help regulate min and Max Q in two pass.
     cpi->rolling_target_bits = ((cpi->rolling_target_bits * 3) + cpi->this_frame_target + 2) / 4;
