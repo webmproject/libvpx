@@ -16,6 +16,24 @@
       "revId": "bdd35c13ccafaa87fbd7d27c2c413743b11b7746",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//6Pg\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1536,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-16T22:52:49Z",
+      "side": 1,
+      "message": "Generally agree, but restructuring this so that none of the frame-rate based initialization takes place until after the first frame is probably more invasive than we want to get into right now. Will keep it in mind for future cleanup though.",
+      "parentUuid": "AAAAGX//7dc\u003d",
+      "revId": "bdd35c13ccafaa87fbd7d27c2c413743b11b7746",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
