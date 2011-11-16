@@ -1069,14 +1069,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     }
 
-    // Work out the segment probabilites if segmentation is enabled and
-    // the map is due to be updated
-    //if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
-    //{
-    //    // Select the coding strategy for the segment map (temporal or spatial)
-    //    choose_segmap_coding_method( cpi );
-    //}
-
     // 256 rate units to the bit
     cpi->projected_frame_size = totalrate >> 8;   // projected_frame_size in units of BYTES
 

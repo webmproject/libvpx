@@ -9,8 +9,9 @@
  */
 
 
-#include "segmentation.h"
+#include "limits.h"
 #include "vpx_mem/vpx_mem.h"
+#include "segmentation.h"
 
 void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
 {
