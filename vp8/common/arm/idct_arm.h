@@ -25,9 +25,6 @@ extern prototype_second_order(vp8_short_inv_walsh4x4_v6);
 #undef  vp8_idct_idct1_scalar_add
 #define vp8_idct_idct1_scalar_add vp8_dc_only_idct_add_v6
 
-#undef  vp8_idct_iwalsh1
-#define vp8_idct_iwalsh1 vp8_short_inv_walsh4x4_1_v6
-
 #undef  vp8_idct_iwalsh16
 #define vp8_idct_iwalsh16 vp8_short_inv_walsh4x4_v6
 #endif
@@ -45,9 +42,6 @@ extern prototype_second_order(vp8_short_inv_walsh4x4_neon);
 
 #undef  vp8_idct_idct1_scalar_add
 #define vp8_idct_idct1_scalar_add vp8_dc_only_idct_add_neon
-
-#undef  vp8_idct_iwalsh1
-#define vp8_idct_iwalsh1 vp8_short_inv_walsh4x4_1_neon
 
 #undef  vp8_idct_iwalsh16
 #define vp8_idct_iwalsh16 vp8_short_inv_walsh4x4_neon

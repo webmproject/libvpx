@@ -137,8 +137,9 @@ void vp8_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr,
 
 }
 
-void vp8_short_inv_walsh4x4_c(short *input, short *output)
+void vp8_short_inv_walsh4x4_c(short *input, short *mb_dqcoeff)
 {
+    short output[16];
     int i;
     int a1, b1, c1, d1;
     int a2, b2, c2, d2;
@@ -183,22 +184,21 @@ void vp8_short_inv_walsh4x4_c(short *input, short *output)
         ip += 4;
         op += 4;
     }
+
+    for(i = 0; i < 16; i++)
+    {
+        mb_dqcoeff[i * 16] = output[i];
+    }
 }
 
-void vp8_short_inv_walsh4x4_1_c(short *input, short *output)
+void vp8_short_inv_walsh4x4_1_c(short *input, short *mb_dqcoeff)
 {
     int i;
     int a1;
-    short *op = output;
 
     a1 = ((input[0] + 3) >> 3);
-
-    for (i = 0; i < 4; i++)
+    for(i = 0; i < 16; i++)
     {
-        op[0] = a1;
-        op[1] = a1;
-        op[2] = a1;
-        op[3] = a1;
-        op += 4;
+        mb_dqcoeff[i * 16] = a1;
     }
 }

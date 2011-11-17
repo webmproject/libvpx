@@ -11,42 +11,6 @@
 
 %include "vpx_ports/x86_abi_support.asm"
 
-;void vp8_short_inv_walsh4x4_1_mmx(short *input, short *output)
-global sym(vp8_short_inv_walsh4x4_1_mmx)
-sym(vp8_short_inv_walsh4x4_1_mmx):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 2
-    push        rsi
-    push        rdi
-    ; end prolog
-
-    mov     rsi, arg(0)
-    mov     rax, 3
-
-    mov     rdi, arg(1)
-    add     rax, [rsi]          ;input[0] + 3
-
-    movd    mm0, eax
-
-    punpcklwd mm0, mm0          ;x x val val
-
-    punpckldq mm0, mm0          ;val val val val
-
-    psraw   mm0, 3            ;(input[0] + 3) >> 3
-
-    movq  [rdi + 0], mm0
-    movq  [rdi + 8], mm0
-    movq  [rdi + 16], mm0
-    movq  [rdi + 24], mm0
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
 ;void vp8_short_inv_walsh4x4_mmx(short *input, short *output)
 global sym(vp8_short_inv_walsh4x4_mmx)
 sym(vp8_short_inv_walsh4x4_mmx):
@@ -159,10 +123,50 @@ sym(vp8_short_inv_walsh4x4_mmx):
     psraw   mm2, 3
     psraw   mm3, 3
 
-    movq  [rdi + 0], mm0
-    movq  [rdi + 8], mm1
-    movq  [rdi + 16], mm2
-    movq  [rdi + 24], mm3
+;    movq  [rdi + 0], mm0
+;    movq  [rdi + 8], mm1
+;    movq  [rdi + 16], mm2
+;    movq  [rdi + 24], mm3
+
+    movd    eax, mm0
+    psrlq   mm0, 32
+    mov     word ptr[rdi+32*0], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*1], ax
+    movd    eax, mm0
+    mov     word ptr[rdi+32*2], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*3], ax
+
+    movd    ecx, mm1
+    psrlq   mm1, 32
+    mov     word ptr[rdi+32*4], cx
+    shr     ecx, 16
+    mov     word ptr[rdi+32*5], cx
+    movd    ecx, mm1
+    mov     word ptr[rdi+32*6], cx
+    shr     ecx, 16
+    mov     word ptr[rdi+32*7], cx
+
+    movd    eax, mm2
+    psrlq   mm2, 32
+    mov     word ptr[rdi+32*8], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*9], ax
+    movd    eax, mm2
+    mov     word ptr[rdi+32*10], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*11], ax
+
+    movd    ecx, mm3
+    psrlq   mm3, 32
+    mov     word ptr[rdi+32*12], cx
+    shr     ecx, 16
+    mov     word ptr[rdi+32*13], cx
+    movd    ecx, mm3
+    mov     word ptr[rdi+32*14], cx
+    shr     ecx, 16
+    mov     word ptr[rdi+32*15], cx
 
     ; begin epilog
     pop rdi

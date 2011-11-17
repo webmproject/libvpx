@@ -37,6 +37,10 @@
 #define vp8_idct_idct16 vp8_short_idct4x4llm_c
 #endif
 extern prototype_idct(vp8_idct_idct16);
+/* add this prototype to prevent compiler warning about implicit
+ * declaration of vp8_short_idct4x4llm_c function in dequantize.c
+ * when building, for example, neon optimized version */
+extern prototype_idct(vp8_short_idct4x4llm_c);
 
 #ifndef vp8_idct_idct1_scalar_add
 #define vp8_idct_idct1_scalar_add vp8_dc_only_idct_add_c

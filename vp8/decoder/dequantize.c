@@ -42,22 +42,3 @@ void vp8_dequant_idct_add_c(short *input, short *dq,
     vpx_memset(input, 0, 32);
 
 }
-
-void vp8_dequant_dc_idct_add_c(short *input, short *dq,
-                               unsigned char *dest, int stride,
-                               int Dc)
-{
-    int i;
-
-    input[0] = (short)Dc;
-
-    for (i = 1; i < 16; i++)
-    {
-        input[i] = dq[i] * input[i];
-    }
-
-    vp8_short_idct4x4llm_c(input, dest, stride, dest, stride);
-
-    vpx_memset(input, 0, 32);
-
-}

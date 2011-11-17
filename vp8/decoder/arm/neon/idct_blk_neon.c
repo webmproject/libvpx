@@ -15,46 +15,11 @@
 /* place these declarations here because we don't want to maintain them
  * outside of this scope
  */
-void idct_dequant_dc_full_2x_neon(short *input, short *dq,
-                                  unsigned char *dst,
-                                  int stride, short *dc);
-void idct_dequant_dc_0_2x_neon(short *input, short *dq,
-                               unsigned char *dst,
-                               int stride, short *dc);
 void idct_dequant_full_2x_neon(short *q, short *dq,
                                unsigned char *dst, int stride);
 void idct_dequant_0_2x_neon(short *q, short dq,
                             unsigned char *dst, int stride);
 
-void vp8_dequant_dc_idct_add_y_block_neon(short *q, short *dq,
-                                          unsigned char *dst,
-                                          int stride, char *eobs, short *dc)
-{
-    int i;
-
-    for (i = 0; i < 4; i++)
-    {
-        if (((short *)(eobs))[0])
-        {
-            if (((short *)eobs)[0] & 0xfefe)
-                idct_dequant_dc_full_2x_neon (q, dq, dst, stride, dc);
-            else
-                idct_dequant_dc_0_2x_neon(q, dq, dst, stride, dc);
-        }
-
-        if (((short *)(eobs))[1])
-        {
-            if (((short *)eobs)[1] & 0xfefe)
-                idct_dequant_dc_full_2x_neon (q+32, dq, dst+8, stride, dc+2);
-            else
-                idct_dequant_dc_0_2x_neon(q+32, dq, dst+8, stride, dc+2);
-        }
-        q    += 64;
-        dc   += 4;
-        dst  += 4*stride;
-        eobs += 4;
-    }
-}
 
 void vp8_dequant_idct_add_y_block_neon(short *q, short *dq,
                                        unsigned char *dst,

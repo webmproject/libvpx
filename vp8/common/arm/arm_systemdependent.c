@@ -46,7 +46,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_armv6;
 
         rtcd->idct.idct16       = vp8_short_idct4x4llm_v6_dual;
-        rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_v6;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_v6;
 
         rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_armv6;
@@ -80,7 +79,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_neon;
 
         rtcd->idct.idct16       = vp8_short_idct4x4llm_neon;
-        rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_neon;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_neon;
 
         rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_neon;
