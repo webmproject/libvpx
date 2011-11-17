@@ -668,6 +668,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
         *a = *l = (bd->eob != !type);
     }
 }
+#define SUM_2ND_COEFF_THRESH_8X8 32
 static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *x, int type,
                                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
 {
@@ -685,15 +686,7 @@ static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *x, int type,
     coef = bd->dqcoeff[8];
     sum+= (coef>=0)?coef:-coef;
 
-    /**************************************************************************
-    our inverse haar transform effectively is weighted sum of all 4 inputs
-    with weight either 1 or -1. It has a last stage scaling of (sum)>>2. And
-    dc only idct8x8 is effectively (dc+8)>>4. So if all the sums are between
-    -31 and 31, outputs after inverse txfm be all 0s. A sum of absolute value
-    smaller than 32 guarantees all 4 different (+1/-1) weighted sums in wht
-    fall between -31 and +31.
-    **************************************************************************/
-    if(sum < 32)
+    if(sum < SUM_2ND_COEFF_THRESH_8X8)
     {
         bd->qcoeff[0] = 0;
         bd->dqcoeff[0] = 0;
@@ -855,6 +848,7 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
     int best;
     int band;
     int pt;
+    int err_mult = plane_rd_mult[type];
 
     b = &mb->block[i];
     d = &mb->e_mbd.block[i];
@@ -874,8 +868,9 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
     eob = d->eob;
 
     /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-    /* TODO: These should vary with the block type, since the quantizer does. */
-    rdmult = mb->rdmult << 2;
+    rdmult = mb->rdmult * err_mult;
+    if(mb->e_mbd.mode_info_context->mbmi.ref_frame==INTRA_FRAME)
+        rdmult = (rdmult * 9)>>4;
     rddiv = mb->rddiv;
     best_mask[0] = best_mask[1] = 0;
     /* Initialize the sentinel node of the trellis. */
@@ -1055,7 +1050,12 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
             final_eob = i;
         rc = vp8_default_zig_zag1d_8x8[i];
         qcoeff_ptr[rc] = x;
+#if !CONFIG_EXTEND_QRANGE
         dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];
+#else
+        dqcoeff_ptr[rc] = (x * dequant_ptr[rc!=0]+2)>>2;
+#endif
+
         next = tokens[i][best].next;
         best = (best_mask[best] >> i) & 1;
     }
@@ -1075,9 +1075,6 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
 
-#if CONFIG_EXTEND_QRANGE
-return ;
-#endif
     vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
     vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
 
@@ -1151,9 +1148,11 @@ return ;
             *(tl + vp8_block2left[b]);
 
     }
+
     //8x8 always have 2nd roder haar block
     check_reset_8x8_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
             ta + vp8_block2above[24], tl + vp8_block2left[24]);
+
 
 }
 
@@ -1166,10 +1165,6 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
-
-#if CONFIG_EXTEND_QRANGE
-return ;
-#endif
 
 
     if (!x->e_mbd.above_context)
@@ -1223,10 +1218,10 @@ return ;
 
 
     }
-
     //8x8 always have 2nd roder haar block
     check_reset_8x8_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
             ta + vp8_block2above[24], tl + vp8_block2left[24]);
+
 }
 
 void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
@@ -1235,10 +1230,6 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
-
-#if CONFIG_EXTEND_QRANGE
-return ;
-#endif
 
     if (!x->e_mbd.above_context)
         return;
