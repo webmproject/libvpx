@@ -39,7 +39,7 @@ extern int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd);
 extern unsigned int cnt_pm;
 #endif
 
-extern const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES];
+extern const int vp8_ref_frame_order[MAX_MODES];
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 
 extern unsigned int (*vp8_get4x4sse_cs)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
@@ -439,8 +439,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     unsigned char *y_buffer[4];
     unsigned char *u_buffer[4];
     unsigned char *v_buffer[4];
+    int i;
+    int ref_frame_map[4];
 
-    int skip_mode[4] = {0, 0, 0, 0};
     int found_near_mvs[4] = {0, 0, 0, 0};
 
     int have_subp_search = cpi->sf.half_pixel_search;  /* In real-time mode, when Speed >= 15, no sub-pixel search. */
@@ -450,6 +451,17 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     vpx_memset(near_mv, 0, sizeof(near_mv));
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
 
+    /* Setup search priorities */
+    i=0;
+    ref_frame_map[i++] = INTRA_FRAME;
+    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
+        ref_frame_map[i++] = LAST_FRAME;
+    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
+        ref_frame_map[i++] = GOLDEN_FRAME;
+    if (cpi->ref_frame_flags & VP8_ALT_FLAG) // &&(cpi->source_alt_ref_active || cpi->oxcf.number_of_layers > 1)
+        ref_frame_map[i++] = ALTREF_FRAME;
+    for(; i<4; i++)
+        ref_frame_map[i] = -1;
 
     // set up all the refframe dependent pointers.
     if (cpi->ref_frame_flags & VP8_LAST_FLAG)
@@ -459,8 +471,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         u_buffer[LAST_FRAME] = lst_yv12->u_buffer + recon_uvoffset;
         v_buffer[LAST_FRAME] = lst_yv12->v_buffer + recon_uvoffset;
     }
-    else
-        skip_mode[LAST_FRAME] = 1;
 
     if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
     {
@@ -469,19 +479,14 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
         v_buffer[GOLDEN_FRAME] = gld_yv12->v_buffer + recon_uvoffset;
     }
-    else
-        skip_mode[GOLDEN_FRAME] = 1;
 
-    if ((cpi->ref_frame_flags & VP8_ALT_FLAG) &&
-        (cpi->source_alt_ref_active || cpi->oxcf.number_of_layers > 1))
+    if (cpi->ref_frame_flags & VP8_ALT_FLAG)
     {
         YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
         y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
         u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;
         v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
     }
-    else
-        skip_mode[ALTREF_FRAME] = 1;
 
     cpi->mbs_tested_so_far++;          // Count of the number of MBs tested so far this frame
 
@@ -496,14 +501,16 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     {
         int frame_cost;
         int this_rd = INT_MAX;
+        int this_ref_frame = ref_frame_map[vp8_ref_frame_order[mode_index]];
 
         if (best_rd <= cpi->rd_threshes[mode_index])
             continue;
 
-        x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
-
-        if (skip_mode[x->e_mbd.mode_info_context->mbmi.ref_frame])
+        if (this_ref_frame < 0)
             continue;
+
+        x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
+
 
         // Check to see if the testing frequency for this mode is at its max
         // If so then prevent it from being tested and increase the threshold for its testing
