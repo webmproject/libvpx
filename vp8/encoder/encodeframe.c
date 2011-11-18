@@ -1355,7 +1355,8 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
 #if CONFIG_T8X8
         if ( get_seg_tx_type(&x->e_mbd,
-                             x->e_mbd.mode_info_context->mbmi.segment_id) )
+                             x->e_mbd.mode_info_context->mbmi.segment_id)
+             == TX_8X8 )
         {
             cpi->t8x8_count++;
         }

@@ -2146,12 +2146,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         {
             continue;
         }
+#if CONFIG_T8X8
         // No 4x4 modes if segment flagged as 8x8
         else if ( ( get_seg_tx_type( xd, segment_id ) == TX_8X8 ) &&
                   ( (this_mode == B_PRED) || (this_mode == SPLITMV) ) )
         {
             continue;
         }
+#endif
+
 //#if !CONFIG_SEGFEATURES
         // Disable this drop out case if either the mode or ref frame
         // segment level feature is enabled for this segment. This is to
@@ -2729,6 +2732,7 @@ static void set_i8x8_block_modes(MACROBLOCK *x, int *modes)
 
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {
+    MACROBLOCKD *xd = &x->e_mbd;
     int error4x4, error16x16;
     int rate4x4, rate16x16 = 0, rateuv;
     int dist4x4, dist16x16, distuv;
@@ -2761,9 +2765,24 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     mode8x8[2]= x->e_mbd.mode_info_context->bmi[8].as_mode;
     mode8x8[3]= x->e_mbd.mode_info_context->bmi[10].as_mode;
 #endif
+
+#if CONFIG_T8X8
+    if ( get_seg_tx_type( xd,
+                          xd->mode_info_context->mbmi.segment_id ) == TX_4X4 )
+    {
+        error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
+                                             &rate4x4, &rate4x4_tokenonly,
+                                             &dist4x4, error16x16);
+    }
+    else
+    {
+        error4x4 = INT_MAX;
+    }
+#else
     error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                          &rate4x4, &rate4x4_tokenonly,
                                          &dist4x4, error16x16);
+#endif
 
 #if CONFIG_I8X8
     if(error8x8> error16x16)
