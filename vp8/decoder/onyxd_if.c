@@ -359,28 +359,38 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         pbi->fragment_sizes[0] = 0;
     }
 
-    if (pbi->num_fragments <= 1 && pbi->fragment_sizes[0] == 0)
+    if (!pbi->ec_active &&
+        pbi->num_fragments <= 1 && pbi->fragment_sizes[0] == 0)
     {
-       /* This is used to signal that we are missing frames.
-        * We do not know if the missing frame(s) was supposed to update
-        * any of the reference buffers, but we act conservative and
-        * mark only the last buffer as corrupted.
-        */
-        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
-
         /* If error concealment is disabled we won't signal missing frames
          * to the decoder.
          */
-        if (!pbi->ec_active)
+        if (cm->fb_idx_ref_cnt[cm->lst_fb_idx] > 1)
         {
-            /* Signal that we have no frame to show. */
-            cm->show_frame = 0;
-
-            pbi->num_fragments = 0;
-
-            /* Nothing more to do. */
-            return 0;
+            /* The last reference shares buffer with another reference
+             * buffer. Move it to its own buffer before setting it as
+             * corrupt, otherwise we will make multiple buffers corrupt.
+             */
+            const int prev_idx = cm->lst_fb_idx;
+            cm->fb_idx_ref_cnt[prev_idx]--;
+            cm->lst_fb_idx = get_free_fb(cm);
+            vp8_yv12_copy_frame_ptr(&cm->yv12_fb[prev_idx],
+                                    &cm->yv12_fb[cm->lst_fb_idx]);
         }
+        /* This is used to signal that we are missing frames.
+         * We do not know if the missing frame(s) was supposed to update
+         * any of the reference buffers, but we act conservative and
+         * mark only the last buffer as corrupted.
+         */
+        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+
+        /* Signal that we have no frame to show. */
+        cm->show_frame = 0;
+
+        pbi->num_fragments = 0;
+
+        /* Nothing more to do. */
+        return 0;
     }
 
 #if HAVE_ARMV7
