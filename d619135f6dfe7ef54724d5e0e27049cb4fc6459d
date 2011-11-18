@@ -51,6 +51,24 @@
       "revId": "d619135f6dfe7ef54724d5e0e27049cb4fc6459d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//4yM\u003d",
+        "filename": "vp8/common/x86/subpixel_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 964,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-11-18T23:56:27Z",
+      "side": 1,
+      "message": "I would put at the top so it isn\u0027t mixed in with the other functions, just like tables are usually kept at the end of files.  Personal preference. You could updated the assembly style guide for what it should be then cite it back here.",
+      "parentUuid": "AAAAGX//4yY\u003d",
+      "revId": "d619135f6dfe7ef54724d5e0e27049cb4fc6459d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
