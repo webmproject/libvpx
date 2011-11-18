@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//5Iw\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-18T17:03:37Z",
+      "side": 1,
+      "message": "do we need a frame copy here? seems like if you\u0027re changing the last frame pointer around to whatever was \"free\" it may not closely match the frame it was previously pointing to.",
+      "revId": "198cb3f5b05538ae0a029d4ca8cf3645be9501ba",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
