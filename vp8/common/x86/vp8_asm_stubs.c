@@ -12,9 +12,9 @@
 #include "vpx_config.h"
 #include "vpx_ports/mem.h"
 #include "vp8/common/subpixel.h"
+#include "filter_x86.h"
 
 extern const short vp8_six_tap_mmx[8][6*8];
-extern const short vp8_bilinear_filters_mmx[8][2*8];
 
 extern void vp8_filter_block1d_h6_mmx
 (
