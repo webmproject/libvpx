@@ -457,7 +457,7 @@ static int mb_is_skippable_8x8(MACROBLOCKD *x)
     int has_y2_block;
     int skip = 1;
     int i = 0;
- 
+
     has_y2_block = (x->mode_info_context->mbmi.mode != B_PRED
                     && x->mode_info_context->mbmi.mode != SPLITMV);
     if (has_y2_block)

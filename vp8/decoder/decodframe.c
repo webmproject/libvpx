@@ -210,9 +210,10 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     int i;
 
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type(xd, xd->mode_info_context->mbmi.segment_id);
+    int tx_type = get_seg_tx_type( xd,
+                                  xd->mode_info_context->mbmi.segment_id);
+    xd->mode_info_context->mbmi.txfm_size = tx_type;
 #endif
-
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {

@@ -476,18 +476,8 @@ static void init_seg_features(VP8_COMP *cpi)
             // Where relevant assume segment data is delta data
             xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
 
-#if CONFIG_T8X8
-            // 8x8TX test code.
-            // This assignment does not necessarily make sense but is
-            // just to test the mechanism for now.
-            enable_segfeature(xd, 0, SEG_LVL_TRANSFORM);
-            set_segdata( xd, 0, SEG_LVL_TRANSFORM, TX_4X4 );
-            enable_segfeature(xd, 1, SEG_LVL_TRANSFORM);
-            set_segdata( xd, 1, SEG_LVL_TRANSFORM, TX_8X8 );
-#endif
         }
     }
-
     // All other frames if segmentation has been enabled
     else if ( xd->segmentation_enabled )
     {
@@ -586,6 +576,25 @@ static void init_seg_features(VP8_COMP *cpi)
             // No updeates.. leave things as they are.
             xd->update_mb_segmentation_map = 0;
             xd->update_mb_segmentation_data = 0;
+
+#if CONFIG_T8X8
+            {
+                vp8_disable_segmentation((VP8_PTR)cpi);
+                clearall_segfeatures(xd);
+                vp8_enable_segmentation((VP8_PTR)cpi);
+                // 8x8TX test code.
+                // This assignment does not necessarily make sense but is
+                // just to test the mechanism for now.
+                enable_segfeature(xd, 0, SEG_LVL_TRANSFORM);
+                set_segdata( xd, 0, SEG_LVL_TRANSFORM, TX_4X4 );
+                enable_segfeature(xd, 1, SEG_LVL_TRANSFORM);
+                set_segdata( xd, 1, SEG_LVL_TRANSFORM, TX_8X8 );
+                /* force every mb to use 8x8 transform for testing*/
+                vpx_memset(cpi->segmentation_map, 1,
+                    cpi->common.mb_rows * cpi->common.mb_cols);
+
+            }
+#endif
         }
     }
 }

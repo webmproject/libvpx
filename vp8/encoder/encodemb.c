@@ -1277,6 +1277,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 #if CONFIG_T8X8
     int tx_type = get_seg_tx_type(&x->e_mbd,
                                   x->e_mbd.mode_info_context->mbmi.segment_id);
+    x->e_mbd.mode_info_context->mbmi.txfm_size = tx_type;
 #endif
 
     vp8_build_inter_predictors_mb(&x->e_mbd);
