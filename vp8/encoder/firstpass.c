@@ -26,6 +26,7 @@
 #include "vp8/common/swapyv12buffer.h"
 #include <stdio.h>
 #include "rdopt.h"
+#include "ratectrl.h"
 #include "vp8/common/quant_common.h"
 #include "encodemv.h"
 
@@ -42,13 +43,6 @@ extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
-
-//#define GFQ_ADJUSTMENT (40 + ((15*Q)/10))
-//#define GFQ_ADJUSTMENT (80 + ((15*Q)/10))
-#define GFQ_ADJUSTMENT vp8_gf_boost_qadjustment[Q]
-extern int vp8_kf_boost_qadjustment[QINDEX_RANGE];
-
-extern const int vp8_gf_boost_qadjustment[QINDEX_RANGE];
 
 #define IIFACTOR   1.5
 #define IIKFACTOR1 1.40
@@ -849,7 +843,6 @@ void vp8_first_pass(VP8_COMP *cpi)
     cm->current_video_frame++;
 
 }
-extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 
 #define BASE_ERRPERMB   150
 static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
@@ -925,7 +918,7 @@ static int estimate_max_q(VP8_COMP *cpi, double section_err, int section_target_
         bits_per_mb_at_this_q = (int)(.5 + correction_factor
             * speed_correction * cpi->twopass.est_max_qcorrection_factor
             * cpi->twopass.section_max_qfactor
-            * (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+            * (double)vp8_bits_per_mb(INTER_FRAME,Q) / 1.0);
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
@@ -996,7 +989,11 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
         else
             correction_factor = corr_high;
 
-        bits_per_mb_at_this_q = (int)(.5 + correction_factor * speed_correction * cpi->twopass.est_max_qcorrection_factor * (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+        bits_per_mb_at_this_q =
+            (int)(.5 + correction_factor *
+                       speed_correction *
+                       cpi->twopass.est_max_qcorrection_factor *
+                       (double)vp8_bits_per_mb(INTER_FRAME,Q) / 1.0);
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
@@ -1075,7 +1072,10 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
         else
             err_correction_factor = corr_high;
 
-        bits_per_mb_at_this_q = (int)(.5 + err_correction_factor * combined_correction_factor * (double)vp8_bits_per_mb[INTER_FRAME][Q]);
+        bits_per_mb_at_this_q =
+            (int)(.5 + err_correction_factor *
+                       combined_correction_factor *
+                       (double)vp8_bits_per_mb(INTER_FRAME,Q) );
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
@@ -1164,7 +1164,7 @@ static int estimate_cq(VP8_COMP *cpi, double section_err, int section_target_ban
             (int)( .5 + correction_factor *
                         speed_correction *
                         clip_iifactor *
-                        (double)vp8_bits_per_mb[INTER_FRAME][Q] / 1.0);
+                        (double)vp8_bits_per_mb(INTER_FRAME,Q) / 1.0);
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
             break;
@@ -1815,9 +1815,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         // Boost for arf frame
 #if NEW_BOOST
-        Boost = (alt_boost * GFQ_ADJUSTMENT) / 100;
+        Boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
 #else
-        Boost = (cpi->gfu_boost * 3 * GFQ_ADJUSTMENT) / (2 * 100);
+        Boost = (cpi->gfu_boost * 3 * vp8_gfboost_qadjust(Q)) / (2 * 100);
 #endif
         Boost += (i * 50);
 
@@ -1982,9 +1982,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (cpi->source_alt_ref_pending && i == 0)
         {
 #if NEW_BOOST
-            Boost = (alt_boost * GFQ_ADJUSTMENT) / 100;
+            Boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
 #else
-            Boost = (cpi->gfu_boost * 3 * GFQ_ADJUSTMENT) / (2 * 100);
+            Boost = (cpi->gfu_boost * 3 * vp8_gfboost_qadjust(Q)) / (2 * 100);
 #endif
             Boost += (cpi->baseline_gf_interval * 50);
 
@@ -2001,7 +2001,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         else
         {
             // boost based on inter / intra ratio of subsequent frames
-            Boost = (cpi->gfu_boost * GFQ_ADJUSTMENT) / 100;
+            Boost = (cpi->gfu_boost * vp8_gfboost_qadjust(Q)) / 100;
 
             // Set max and minimum boost and hence minimum allocation
             if (Boost > (cpi->baseline_gf_interval * 150))
@@ -2865,9 +2865,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             kf_boost -= 4 * (320 * 240) / (lst_yv12->y_width * lst_yv12->y_height);
 
         kf_boost = (int)((double)kf_boost * 100.0) >> 4;                          // Scale 16 to 100
-
-        // Adjustment to boost based on recent average q
-        //kf_boost = kf_boost * vp8_kf_boost_qadjustment[cpi->ni_av_qi] / 100;
 
         if (kf_boost < 250)                                                      // Min KF boost
             kf_boost = 250;

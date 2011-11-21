@@ -30,6 +30,7 @@ extern void vp8_mv_pred
     int *sr,
     int near_sadidx[]
 );
-void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffset, int near_sadidx[]);
+extern void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffset, int near_sadidx[]);
+extern void vp8_init_me_luts();
 
 #endif

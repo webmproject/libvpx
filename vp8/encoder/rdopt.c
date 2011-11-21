@@ -32,6 +32,7 @@
 #include "variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
+#include "ratectrl.h"
 #include "vpx_mem/vpx_mem.h"
 #include "dct.h"
 #include "vp8/common/systemdependent.h"
@@ -201,53 +202,29 @@ static int rdmult_lut[QINDEX_RANGE]=
 };
 #endif
 /* values are now correlated to quantizer */
-static int sad_per_bit16lut[QINDEX_RANGE] =
+static int sad_per_bit16lut[QINDEX_RANGE];
+static int sad_per_bit4lut[QINDEX_RANGE];
+
+void vp8_init_me_luts()
 {
-    2,  2,  2,  2,  2,  2,  2,  2,
-    2,  2,  2,  2,  2,  2,  2,  2,
-    3,  3,  3,  3,  3,  3,  3,  3,
-    3,  3,  3,  3,  3,  3,  4,  4,
-    4,  4,  4,  4,  4,  4,  4,  4,
-    4,  4,  5,  5,  5,  5,  5,  5,
-    5,  5,  5,  5,  5,  5,  6,  6,
-    6,  6,  6,  6,  6,  6,  6,  6,
-    6,  6,  7,  7,  7,  7,  7,  7,
-    7,  7,  7,  7,  7,  7,  8,  8,
-    8,  8,  8,  8,  8,  8,  8,  8,
-    8,  8,  9,  9,  9,  9,  9,  9,
-    9,  9,  9,  9,  9,  9,  10, 10,
-    10, 10, 10, 10, 10, 10, 11, 11,
-    11, 11, 11, 11, 12, 12, 12, 12,
-    12, 12, 13, 13, 13, 13, 14, 14
-};
-static int sad_per_bit4lut[QINDEX_RANGE] =
-{
-    2,  2,  2,  2,  2,  2,  3,  3,
-    3,  3,  3,  3,  3,  3,  3,  3,
-    3,  3,  3,  3,  4,  4,  4,  4,
-    4,  4,  4,  4,  4,  4,  5,  5,
-    5,  5,  5,  5,  6,  6,  6,  6,
-    6,  6,  6,  6,  6,  6,  6,  6,
-    7,  7,  7,  7,  7,  7,  7,  7,
-    7,  7,  7,  7,  7,  8,  8,  8,
-    8,  8,  9,  9,  9,  9,  9,  9,
-    10, 10, 10, 10, 10, 10, 10, 10,
-    11, 11, 11, 11, 11, 11, 11, 11,
-    12, 12, 12, 12, 12, 12, 12, 12,
-    13, 13, 13, 13, 13, 13, 13, 14,
-    14, 14, 14, 14, 15, 15, 15, 15,
-    16, 16, 16, 16, 17, 17, 17, 18,
-    18, 18, 19, 19, 19, 20, 20, 20,
-};
+    int i;
+
+    // Initialize the sad lut tables using a formulaic calculation for now
+    // This is to make it easier to resolve the impact of experimental changes
+    // to the quantizer tables.
+    for ( i = 0; i < QINDEX_RANGE; i++ )
+    {
+        sad_per_bit16lut[i] =
+            (int)((0.0418*vp8_convert_qindex_to_q(i)) + 2.4107);
+        sad_per_bit4lut[i] = (int)((0.063*vp8_convert_qindex_to_q(i)) + 2.742);
+    }
+}
 
 void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex)
 {
     cpi->mb.sadperbit16 =  sad_per_bit16lut[QIndex];
     cpi->mb.sadperbit4  =  sad_per_bit4lut[QIndex];
 }
-
-
-
 
 
 void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)

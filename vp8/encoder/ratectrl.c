@@ -45,160 +45,6 @@ extern int inter_b_modes[10];
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 
-// Work in progress recalibration of baseline rate tables based on
-// the assumption that bits per mb is inversely proportional to the
-// quantizer value.
-#if !CONFIG_EXTEND_QRANGE
-const int vp8_bits_per_mb[2][QINDEX_RANGE] =
-{
-    // Intra case 450000/Qintra
-    {
-        1125000,900000, 750000, 642857, 562500, 500000, 450000, 450000,
-        409090, 375000, 346153, 321428, 300000, 281250, 264705, 264705,
-        250000, 236842, 225000, 225000, 214285, 214285, 204545, 204545,
-        195652, 195652, 187500, 180000, 180000, 173076, 166666, 160714,
-        155172, 150000, 145161, 140625, 136363, 132352, 128571, 125000,
-        121621, 121621, 118421, 115384, 112500, 109756, 107142, 104651,
-        102272, 100000, 97826,  97826,  95744,  93750,  91836,  90000,
-        88235,  86538,  84905,  83333,  81818,  80357,  78947,  77586,
-        76271,  75000,  73770,  72580,  71428,  70312,  69230,  68181,
-        67164,  66176,  65217,  64285,  63380,  62500,  61643,  60810,
-        60000,  59210,  59210,  58441,  57692,  56962,  56250,  55555,
-        54878,  54216,  53571,  52941,  52325,  51724,  51136,  50561,
-        49450,  48387,  47368,  46875,  45918,  45000,  44554,  44117,
-        43269,  42452,  41666,  40909,  40178,  39473,  38793,  38135,
-        36885,  36290,  35714,  35156,  34615,  34090,  33582,  33088,
-        32608,  32142,  31468,  31034,  30405,  29801,  29220,  28662,
-    },
-    // Inter case 285000/Qinter
-    {
-        712500, 570000, 475000, 407142, 356250, 316666, 285000, 259090,
-        237500, 219230, 203571, 190000, 178125, 167647, 158333, 150000,
-        142500, 135714, 129545, 123913, 118750, 114000, 109615, 105555,
-        101785, 98275,  95000,  91935,  89062,  86363,  83823,  81428,
-        79166,  77027,  75000,  73076,  71250,  69512,  67857,  66279,
-        64772,  63333,  61956,  60638,  59375,  58163,  57000,  55882,
-        54807,  53773,  52777,  51818,  50892,  50000,  49137,  47500,
-        45967,  44531,  43181,  41911,  40714,  39583,  38513,  37500,
-        36538,  35625,  34756,  33928,  33139,  32386,  31666,  30978,
-        30319,  29687,  29081,  28500,  27941,  27403,  26886,  26388,
-        25909,  25446,  25000,  24568,  23949,  23360,  22800,  22265,
-        21755,  21268,  20802,  20357,  19930,  19520,  19127,  18750,
-        18387,  18037,  17701,  17378,  17065,  16764,  16473,  16101,
-        15745,  15405,  15079,  14766,  14467,  14179,  13902,  13636,
-        13380,  13133,  12895,  12666,  12445,  12179,  11924,  11632,
-        11445,  11220,  11003,  10795,  10594,  10401,  10215,  10035,
-    }
-};
-#else
-const int vp8_bits_per_mb[2][QINDEX_RANGE] =
-{
-    // (Updated DEC 2010) Baseline estimate of Bits Per MB at each Q:
-    // 4500000/Qintra
-    {
-        4500000,3600000,3000000,2571428,2250000,2000000,1800000,1636363,
-        1500000,1384615,1285714,1200000,1125000,1058823,1000000, 947368,
-         900000, 818181, 750000, 692307, 642857, 600000, 562500, 529411,
-         500000, 473684, 450000, 428571, 409090, 391304, 375000, 352941,
-         333333, 315789, 300000, 285714, 272727, 260869, 250000, 236842,
-         225000, 214285, 204545, 195652, 187500, 180000, 171428, 163636,
-         156521, 150000, 144000, 138461, 133333, 128571, 123287, 118421,
-         113924, 109756, 105882, 102272,  98901,  95744,  92783,  90000,
-          87378,  84905,  82568,  80357,  77586,  75000,  72580,  70312,
-          68181,  66176,  64285,  62500,  60810,  59210,  57692,  56250,
-          54545,  52941,  51428,  50000,  48648,  47368,  45918,  44554,
-          43269,  42056,  40909,  39647,  38461,  37344,  36290,  35294,
-          34351,  33333,  32374,  31468,  30612,  29801,  28938,  28125,
-          27355,  26627,  25862,  25139,  24456,  23809,  23195,  22613,
-          21951,  21327,  20737,  20179,  19650,  19067,  18518,  18000,
-          17441,  16917,  16423,  15957,  15410,  14900,  14376,  13846,
-    },
-    //2850000/Qinter
-    {
-        2850000,2280000,1900000,1628571,1425000,1266666,1140000,1036363,
-         950000, 876923, 814285, 760000, 712500, 670588, 633333, 600000,
-         570000, 518181, 475000, 438461, 407142, 380000, 356250, 335294,
-         316666, 300000, 285000, 271428, 259090, 247826, 237500, 223529,
-         211111, 200000, 190000, 180952, 172727, 165217, 158333, 150000,
-         142500, 135714, 129545, 123913, 118750, 114000, 108571, 103636,
-          99130,  95000,  91200,  87692,  84444,  81428,  78082,  75000,
-          72151,  69512,  67058,  64772,  62637,  60638,  58762,  57000,
-          55339,  53773,  52293,  50892,  49137,  47500,  45967,  44531,
-          43181,  41911,  40714,  39583,  38513,  37500,  36538,  35625,
-          34545,  33529,  32571,  31666,  30810,  30000,  29081,  28217,
-          27403,  26635,  25909,  25110,  24358,  23651,  22983,  22352,
-          21755,  21111,  20503,  19930,  19387,  18874,  18327,  17812,
-          17325,  16863,  16379,  15921,  15489,  15079,  14690,  14321,
-          13902,  13507,  13133,  12780,  12445,  12076,  11728,  11400,
-          11046,  10714,  10401,  10106,   9760,   9437,   9105,   8769,
-      }
-  };
-  #endif
-
-static const int kf_boost_qadjustment[QINDEX_RANGE] =
-  {
-      128, 129, 130, 131, 132, 133, 134, 135,
-    136, 137, 138, 139, 140, 141, 142, 143,
-    144, 145, 146, 147, 148, 149, 150, 151,
-    152, 153, 154, 155, 156, 157, 158, 159,
-    160, 161, 162, 163, 164, 165, 166, 167,
-    168, 169, 170, 171, 172, 173, 174, 175,
-    176, 177, 178, 179, 180, 181, 182, 183,
-    184, 185, 186, 187, 188, 189, 190, 191,
-    192, 193, 194, 195, 196, 197, 198, 199,
-    200, 200, 201, 201, 202, 203, 203, 203,
-    204, 204, 205, 205, 206, 206, 207, 207,
-    208, 208, 209, 209, 210, 210, 211, 211,
-    212, 212, 213, 213, 214, 214, 215, 215,
-    216, 216, 217, 217, 218, 218, 219, 219,
-    220, 220, 220, 220, 220, 220, 220, 220,
-    220, 220, 220, 220, 220, 220, 220, 220,
-};
-
-//#define GFQ_ADJUSTMENT (Q+100)
-#define GFQ_ADJUSTMENT vp8_gf_boost_qadjustment[Q]
-const int vp8_gf_boost_qadjustment[QINDEX_RANGE] =
-{
-    80, 82, 84, 86, 88, 90, 92, 94,
-    96, 97, 98, 99, 100, 101, 102, 103,
-    104, 105, 106, 107, 108, 109, 110, 111,
-    112, 113, 114, 115, 116, 117, 118, 119,
-    120, 121, 122, 123, 124, 125, 126, 127,
-    128, 129, 130, 131, 132, 133, 134, 135,
-    136, 137, 138, 139, 140, 141, 142, 143,
-    144, 145, 146, 147, 148, 149, 150, 151,
-    152, 153, 154, 155, 156, 157, 158, 159,
-    160, 161, 162, 163, 164, 165, 166, 167,
-    168, 169, 170, 171, 172, 173, 174, 175,
-    176, 177, 178, 179, 180, 181, 182, 183,
-    184, 184, 185, 185, 186, 186, 187, 187,
-    188, 188, 189, 189, 190, 190, 191, 191,
-    192, 192, 193, 193, 194, 194, 194, 194,
-    195, 195, 196, 196, 197, 197, 198, 198
-};
-
-/*
-const int vp8_gf_boost_qadjustment[QINDEX_RANGE] =
-{
-    100,101,102,103,104,105,105,106,
-    106,107,107,108,109,109,110,111,
-    112,113,114,115,116,117,118,119,
-    120,121,122,123,124,125,126,127,
-    128,129,130,131,132,133,134,135,
-    136,137,138,139,140,141,142,143,
-    144,145,146,147,148,149,150,151,
-    152,153,154,155,156,157,158,159,
-    160,161,162,163,164,165,166,167,
-    168,169,170,170,171,171,172,172,
-    173,173,173,174,174,174,175,175,
-    175,176,176,176,177,177,177,177,
-    178,178,179,179,180,180,181,181,
-    182,182,183,183,184,184,185,185,
-    186,186,187,187,188,188,189,189,
-    190,190,191,191,192,192,193,193,
-};
-*/
-
 static const int kf_gf_boost_qlimits[QINDEX_RANGE] =
 {
     150, 155, 160, 165, 170, 175, 180, 185,
@@ -225,7 +71,6 @@ static const int kf_boost_seperation_adjustment[16] =
     30,   40,   50,   55,   60,   65,   70,   75,
     80,   85,   90,   95,  100,  100,  100,  100,
 };
-
 
 static const int gf_adjust_table[101] =
 {
@@ -264,6 +109,37 @@ static const int gf_interval_table[101] =
 };
 
 static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3, 4, 5 };
+
+// These functions use formulaic calculations to make playing with the
+// quantizer tables easier. If necessary they can be replaced by lookup
+// tables if and when things settle down in the experimental bitstream
+double vp8_convert_qindex_to_q( int qindex )
+{
+#if CONFIG_EXTEND_QRANGE
+    // Convert the index to a real Q value (scaled down to match old Q values)
+    return (double)vp8_ac_yquant( qindex, 0 ) / 4.0;
+#else
+    return  (double)vp8_ac_yquant( qindex, 0 );
+#endif
+}
+
+int vp8_gfboost_qadjust( int qindex )
+{
+    return (50.0 * pow(vp8_convert_qindex_to_q(qindex), 0.25) + 0.5);
+}
+
+int kfboost_qadjust( int qindex )
+{
+    return (91.0 * pow(vp8_convert_qindex_to_q(qindex), 0.165) + 0.5);
+}
+
+int vp8_bits_per_mb( FRAME_TYPE frame_type, int qindex  )
+{
+    if ( frame_type == KEY_FRAME )
+        return (int)(4500000 / vp8_convert_qindex_to_q(qindex));
+    else
+        return (int)(2850000 / vp8_convert_qindex_to_q(qindex));
+}
 
 
 void vp8_save_coding_context(VP8_COMP *cpi)
@@ -377,7 +253,7 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
 static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
                               double correction_factor)
 {
-    int Bpm = (int)(.5 + correction_factor * vp8_bits_per_mb[frame_kind][Q]);
+    int Bpm = (int)(.5 + correction_factor * vp8_bits_per_mb(frame_kind, Q));
 
     /* Attempt to retain reasonable accuracy without overflow. The cutoff is
      * chosen such that the maximum product of Bpm and MBs fits 31 bits. The
@@ -433,7 +309,7 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
         kf_boost = (int)(2 * cpi->output_frame_rate - 16);
 
         // adjustment up based on q
-        kf_boost = kf_boost * kf_boost_qadjustment[Q] / 100;
+        kf_boost = kf_boost * kfboost_qadjust(Q) / 100;
 
         // frame separation adjustment ( down)
         if (cpi->frames_since_key  < cpi->output_frame_rate / 2)
@@ -463,20 +339,6 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
     if (cpi->pass != 2)
         cpi->active_worst_quality = cpi->worst_quality;
 
-#if 0
-    {
-        FILE *f;
-
-        f = fopen("kf_boost.stt", "a");
-        //fprintf(f, " %8d %10d %10d %10d %10d %10d %10d\n",
-        //  cpi->common.current_video_frame,  cpi->target_bandwidth, cpi->frames_to_key, kf_boost_qadjustment[cpi->ni_av_qi], cpi->kf_boost, (cpi->this_frame_target *100 / cpi->per_frame_bandwidth), cpi->this_frame_target );
-
-        fprintf(f, " %8u %10d %10d %10d\n",
-                cpi->common.current_video_frame,  cpi->gfu_boost, cpi->baseline_gf_interval, cpi->source_alt_ref_pending);
-
-        fclose(f);
-    }
-#endif
 }
 
 
@@ -566,7 +428,7 @@ static void calc_gf_params(VP8_COMP *cpi)
             // OLD code
 
             // Adjust boost based upon ambient Q
-            Boost = GFQ_ADJUSTMENT;
+            Boost = vp8_gfboost_qadjust(Q);
 
             // Adjust based upon most recently measure intra useage
             Boost = Boost * gf_intra_usage_adjustment[(cpi->this_frame_percent_intra < 15) ? cpi->this_frame_percent_intra : 14] / 100;
@@ -683,7 +545,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             int alt_boost;
             int max_arf_rate;
 
-            alt_boost = (cpi->gfu_boost * 3 * GFQ_ADJUSTMENT) / (2 * 100);
+            alt_boost = (cpi->gfu_boost * 3 * vp8_gfboost_qadjust(Q)) / (2 * 100);
             alt_boost += (cpi->frames_till_gf_update_due * 50);
 
             // If alt ref is not currently active then we have a pottential double hit with GF and ARF so reduce the boost a bit.
@@ -1084,7 +946,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
 
             f = fopen("gf_useaget.stt", "a");
             fprintf(f, " %8ld %10ld %10ld %10ld %10ld\n",
-                    cpi->common.current_video_frame,  cpi->gfu_boost, GFQ_ADJUSTMENT, cpi->gfu_boost, gf_frame_useage);
+                    cpi->common.current_video_frame,  cpi->gfu_boost, vp8_gfboost_qadjust(Q), cpi->gfu_boost, gf_frame_useage);
             fclose(f);
         }
 
@@ -1190,8 +1052,10 @@ void vp8_update_rate_correction_factors(VP8_COMP *cpi, int damp_var)
 
     // Work out how big we would have expected the frame to be at this Q given the current correction factor.
     // Stay in double to avoid int overflow when values are large
-    //projected_size_based_on_q = ((int)(.5 + rate_correction_factor * vp8_bits_per_mb[cpi->common.frame_type][Q]) * cpi->common.MBs) >> BPER_MB_NORMBITS;
-    projected_size_based_on_q = (int)(((.5 + rate_correction_factor * vp8_bits_per_mb[cpi->common.frame_type][Q]) * cpi->common.MBs) / (1 << BPER_MB_NORMBITS));
+    projected_size_based_on_q =
+        (int)(((.5 + rate_correction_factor *
+                     vp8_bits_per_mb(cpi->common.frame_type, Q)) *
+               cpi->common.MBs) / (1 << BPER_MB_NORMBITS));
 
     // Make some allowance for cpi->zbin_over_quant
     if (cpi->zbin_over_quant > 0)
@@ -1322,7 +1186,9 @@ int vp8_regulate_q(VP8_COMP *cpi, int target_bits_per_frame)
 
         do
         {
-            bits_per_mb_at_this_q = (int)(.5 + correction_factor * vp8_bits_per_mb[cpi->common.frame_type][i]);
+            bits_per_mb_at_this_q =
+                (int)(.5 + correction_factor *
+                           vp8_bits_per_mb(cpi->common.frame_type, i ));
 
             if (bits_per_mb_at_this_q <= target_bits_per_mb)
             {

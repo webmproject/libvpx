@@ -157,8 +157,6 @@ extern unsigned int inter_b_modes[15];
 extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
 extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
 
-extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
-
 extern const int qrounding_factors[129];
 extern const int qzbin_factors[129];
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
@@ -311,6 +309,7 @@ void vp8_initialize()
         vp8_initialize_common();
         //vp8_dmachine_specific_config();
         vp8_tokenize_initialize();
+        vp8_init_me_luts();
 
         init_done = 1;
     }
@@ -692,8 +691,8 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 
     for (i = Q; i > 0; i--)
     {
-        if (vp8_bits_per_mb[cpi->common.frame_type][i] >= ((vp8_bits_per_mb[cpi->common.frame_type][Q]*(Q + 128)) / 64))
-            //if ( vp8_bits_per_mb[cpi->common.frame_type][i] >= ((vp8_bits_per_mb[cpi->common.frame_type][Q]*((2*Q)+96))/64) )
+        if ( vp8_bits_per_mb(cpi->common.frame_type, i) >=
+             ((vp8_bits_per_mb(cpi->common.frame_type, Q)*(Q + 128)) / 64))
         {
             break;
         }
