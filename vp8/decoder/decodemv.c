@@ -74,98 +74,99 @@ static void vp8_read_mb_segid(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x)
     }
 }
 extern const int vp8_i8x8_block[4];
-static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_col)
+static void vp8_kfread_modes(VP8D_COMP *pbi,
+                             MODE_INFO *m,
+                             int mb_row,
+                             int mb_col)
 {
     vp8_reader *const bc = & pbi->bc;
     const int mis = pbi->common.mode_info_stride;
     int map_index = mb_row * pbi->common.mb_cols + mb_col;
+    MB_PREDICTION_MODE y_mode;
 
+    // Read the Macroblock segmentation map if it is being updated explicitly
+    // this frame (reset to 0 above by default).
+    m->mbmi.segment_id = 0;
+    if (pbi->mb.update_mb_segmentation_map)
+    {
+        vp8_read_mb_segid(bc, &m->mbmi, &pbi->mb);
+        pbi->segmentation_map[map_index] = m->mbmi.segment_id;
+    }
 
+//#if CONFIG_SEGFEATURES
+    if ( pbi->common.mb_no_coeff_skip &&
+         ( !segfeature_active( &pbi->mb,
+                               m->mbmi.segment_id, SEG_LVL_EOB ) ||
+           ( get_segdata( &pbi->mb,
+                          m->mbmi.segment_id, SEG_LVL_EOB ) != 0 ) ) )
+    {
+        m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
+    }
+    else
+    {
+//#if CONFIG_SEGFEATURES
+        if ( segfeature_active( &pbi->mb,
+                                m->mbmi.segment_id, SEG_LVL_EOB ) &&
+             ( get_segdata( &pbi->mb,
+                            m->mbmi.segment_id, SEG_LVL_EOB ) == 0 ) )
         {
-            MB_PREDICTION_MODE y_mode;
-
-            /* Read the Macroblock segmentation map if it is being updated explicitly this frame (reset to 0 above by default)
-             * By default on a key frame reset all MBs to segment 0
-             */
-            m->mbmi.segment_id = 0;
-
-            if (pbi->mb.update_mb_segmentation_map)
-            {
-                vp8_read_mb_segid(bc, &m->mbmi, &pbi->mb);
-                pbi->segmentation_map[map_index] = m->mbmi.segment_id;
-            }
-
-//#if CONFIG_SEGFEATURES
-            if ( pbi->common.mb_no_coeff_skip &&
-                 ( !segfeature_active( &pbi->mb,
-                                       m->mbmi.segment_id, SEG_LVL_EOB ) ||
-                   ( get_segdata( &pbi->mb,
-                                  m->mbmi.segment_id, SEG_LVL_EOB ) != 0 ) ) )
-            {
-                m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
-            }
-            else
-            {
-//#if CONFIG_SEGFEATURES
-                if ( segfeature_active( &pbi->mb,
-                                        m->mbmi.segment_id, SEG_LVL_EOB ) &&
-                     ( get_segdata( &pbi->mb,
-                                    m->mbmi.segment_id, SEG_LVL_EOB ) == 0 ) )
-                {
-                    m->mbmi.mb_skip_coeff = 1;
-                }
-                else
-                    m->mbmi.mb_skip_coeff = 0;
-            }
+            m->mbmi.mb_skip_coeff = 1;
+        }
+        else
+            m->mbmi.mb_skip_coeff = 0;
+    }
 
 #if CONFIG_QIMODE
-            y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc,
-                pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
+    y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc,
+        pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
 #else
-            y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc, pbi->common.kf_ymode_prob);
+    y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(
+                                      bc, pbi->common.kf_ymode_prob);
 #endif
-            m->mbmi.ref_frame = INTRA_FRAME;
+    m->mbmi.ref_frame = INTRA_FRAME;
 
-            if ((m->mbmi.mode = y_mode) == B_PRED)
-            {
-                int i = 0;
-                do
-                {
-                    const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
-                    const B_PREDICTION_MODE L = left_block_mode(m, i);
+    if ((m->mbmi.mode = y_mode) == B_PRED)
+    {
+        int i = 0;
+        do
+        {
+            const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
+            const B_PREDICTION_MODE L = left_block_mode(m, i);
 
-                    m->bmi[i].as_mode = (B_PREDICTION_MODE) vp8_read_bmode(bc, pbi->common.kf_bmode_prob [A] [L]);
-                }
-                while (++i < 16);
-            }
+            m->bmi[i].as_mode =
+                (B_PREDICTION_MODE) vp8_read_bmode(
+                                        bc, pbi->common.kf_bmode_prob [A] [L]);
+        }
+        while (++i < 16);
+    }
 #if CONFIG_I8X8
-            if((m->mbmi.mode = y_mode) == I8X8_PRED)
-            {
-                int i;
-                int mode8x8;
-                //printf("F%3d:%d:%d:", pbi->common.current_video_frame, mb_row, mb_col);
-                for(i=0;i<4;i++)
-                 {
-                     int ib = vp8_i8x8_block[i];
-                     mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
-                     m->bmi[ib+0].as_mode= mode8x8;
-                     m->bmi[ib+1].as_mode= mode8x8;
-                     m->bmi[ib+4].as_mode= mode8x8;
-                     m->bmi[ib+5].as_mode= mode8x8;
-                 }
-                //printf("%2d%2d%2d%2d\n", m->bmi[0].as_mode,m->bmi[2].as_mode,
-                //                       m->bmi[8].as_mode,m->bmi[10].as_mode);
-           }
-            else
+    if((m->mbmi.mode = y_mode) == I8X8_PRED)
+    {
+        int i;
+        int mode8x8;
+        //printf("F%3d:%d:%d:",
+                 pbi->common.current_video_frame, mb_row, mb_col);
+        for(i=0;i<4;i++)
+         {
+             int ib = vp8_i8x8_block[i];
+             mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
+             m->bmi[ib+0].as_mode= mode8x8;
+             m->bmi[ib+1].as_mode= mode8x8;
+             m->bmi[ib+4].as_mode= mode8x8;
+             m->bmi[ib+5].as_mode= mode8x8;
+         }
+        //printf("%2d%2d%2d%2d\n", m->bmi[0].as_mode,m->bmi[2].as_mode,
+        //                       m->bmi[8].as_mode,m->bmi[10].as_mode);
+   }
+    else
 #endif
 #if CONFIG_UVINTRA
-            m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-                pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
+    m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+        pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
 #else
-            m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-                pbi->common.kf_uv_mode_prob);
+    m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+        pbi->common.kf_uv_mode_prob);
 #endif
-        }
 }
 
 static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
