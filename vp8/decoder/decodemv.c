@@ -78,6 +78,8 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
 {
     vp8_reader *const bc = & pbi->bc;
     const int mis = pbi->common.mode_info_stride;
+    int map_index = mb_row * pbi->common.mb_cols + mb_col;
+
 
         {
             MB_PREDICTION_MODE y_mode;
@@ -88,7 +90,10 @@ static void vp8_kfread_modes(VP8D_COMP *pbi, MODE_INFO *m, int mb_row, int mb_co
             m->mbmi.segment_id = 0;
 
             if (pbi->mb.update_mb_segmentation_map)
+            {
                 vp8_read_mb_segid(bc, &m->mbmi, &pbi->mb);
+                pbi->segmentation_map[map_index] = m->mbmi.segment_id;
+            }
 
 //#if CONFIG_SEGFEATURES
             if ( pbi->common.mb_no_coeff_skip &&
