@@ -3337,7 +3337,7 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     (void) size;
     (void) dest;
     (void) frame_flags;
-    vp8_set_quantizer(cpi, 26);
+    vp8_set_quantizer(cpi, FIRSTPASS_QINDEX);
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);
