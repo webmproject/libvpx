@@ -63,7 +63,7 @@ extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
 static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
 
-
+// TODO #if CONFIG_EXTEND_QRANGE
 static const int cq_level[QINDEX_RANGE] =
 {
     0,0,1,1,2,3,3,4,4,5,6,6,7,8,8,9,
