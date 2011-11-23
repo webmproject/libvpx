@@ -12,6 +12,7 @@
 #include "vp8/encoder/variance.h"
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
+#include "vp8/common/x86/filter_x86.h"
 
 extern void filter_block1d_h6_mmx
 (
@@ -21,7 +22,7 @@ extern void filter_block1d_h6_mmx
     unsigned int pixel_step,
     unsigned int output_height,
     unsigned int output_width,
-    short *vp7_filter
+    short *filter
 );
 extern void filter_block1d_v6_mmx
 (
@@ -31,7 +32,7 @@ extern void filter_block1d_v6_mmx
     unsigned int pixel_step,
     unsigned int output_height,
     unsigned int output_width,
-    short *vp7_filter
+    short *filter
 );
 
 extern unsigned int vp8_get_mb_ss_mmx(const short *src_ptr);
@@ -198,24 +199,6 @@ unsigned int vp8_variance8x16_mmx(
 }
 
 
-
-
-///////////////////////////////////////////////////////////////////////////
-// the mmx function that does the bilinear filtering and var calculation //
-// int one pass                                                          //
-///////////////////////////////////////////////////////////////////////////
-DECLARE_ALIGNED(16, const short, vp8_vp7_bilinear_filters_mmx[8][8]) =
-{
-    { 128, 128, 128, 128,  0,  0,  0,  0 },
-    { 112, 112, 112, 112, 16, 16, 16, 16 },
-    {  96, 96, 96, 96, 32, 32, 32, 32 },
-    {  80, 80, 80, 80, 48, 48, 48, 48 },
-    {  64, 64, 64, 64, 64, 64, 64, 64 },
-    {  48, 48, 48, 48, 80, 80, 80, 80 },
-    {  32, 32, 32, 32, 96, 96, 96, 96 },
-    {  16, 16, 16, 16, 112, 112, 112, 112 }
-};
-
 unsigned int vp8_sub_pixel_variance4x4_mmx
 (
     const unsigned char  *src_ptr,
@@ -232,7 +215,7 @@ unsigned int vp8_sub_pixel_variance4x4_mmx
     vp8_filter_block2d_bil4x4_var_mmx(
         src_ptr, src_pixels_per_line,
         dst_ptr, dst_pixels_per_line,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum, &xxsum
     );
     *sse = xxsum;
@@ -257,7 +240,7 @@ unsigned int vp8_sub_pixel_variance8x8_mmx
     vp8_filter_block2d_bil_var_mmx(
         src_ptr, src_pixels_per_line,
         dst_ptr, dst_pixels_per_line, 8,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum, &xxsum
     );
     *sse = xxsum;
@@ -283,7 +266,7 @@ unsigned int vp8_sub_pixel_variance16x16_mmx
     vp8_filter_block2d_bil_var_mmx(
         src_ptr, src_pixels_per_line,
         dst_ptr, dst_pixels_per_line, 16,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum0, &xxsum0
     );
 
@@ -291,7 +274,7 @@ unsigned int vp8_sub_pixel_variance16x16_mmx
     vp8_filter_block2d_bil_var_mmx(
         src_ptr + 8, src_pixels_per_line,
         dst_ptr + 8, dst_pixels_per_line, 16,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum1, &xxsum1
     );
 
@@ -336,7 +319,7 @@ unsigned int vp8_sub_pixel_variance16x8_mmx
     vp8_filter_block2d_bil_var_mmx(
         src_ptr, src_pixels_per_line,
         dst_ptr, dst_pixels_per_line, 8,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum0, &xxsum0
     );
 
@@ -344,7 +327,7 @@ unsigned int vp8_sub_pixel_variance16x8_mmx
     vp8_filter_block2d_bil_var_mmx(
         src_ptr + 8, src_pixels_per_line,
         dst_ptr + 8, dst_pixels_per_line, 8,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum1, &xxsum1
     );
 
@@ -371,7 +354,7 @@ unsigned int vp8_sub_pixel_variance8x16_mmx
     vp8_filter_block2d_bil_var_mmx(
         src_ptr, src_pixels_per_line,
         dst_ptr, dst_pixels_per_line, 16,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum, &xxsum
     );
     *sse = xxsum;

@@ -12,11 +12,12 @@
 #include "vp8/encoder/variance.h"
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
+#include "vp8/common/x86/filter_x86.h"
 
-extern void filter_block1d_h6_mmx(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
-extern void filter_block1d_v6_mmx(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
-extern void filter_block1d8_h6_sse2(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
-extern void filter_block1d8_v6_sse2(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
+extern void filter_block1d_h6_mmx(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *filter);
+extern void filter_block1d_v6_mmx(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *filter);
+extern void filter_block1d8_h6_sse2(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *filter);
+extern void filter_block1d8_v6_sse2(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *filter);
 
 extern void vp8_filter_block2d_bil4x4_var_mmx
 (
@@ -134,8 +135,6 @@ void vp8_half_vert_variance16x_h_sse2
     int *sum,
     unsigned int *sumsquared
 );
-
-DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[8][8]);
 
 unsigned int vp8_variance4x4_wmt(
     const unsigned char *src_ptr,
@@ -262,7 +261,7 @@ unsigned int vp8_sub_pixel_variance4x4_wmt
     vp8_filter_block2d_bil4x4_var_mmx(
         src_ptr, src_pixels_per_line,
         dst_ptr, dst_pixels_per_line,
-        vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
+        vp8_bilinear_filters_x86_4[xoffset], vp8_bilinear_filters_x86_4[yoffset],
         &xsum, &xxsum
     );
     *sse = xxsum;
