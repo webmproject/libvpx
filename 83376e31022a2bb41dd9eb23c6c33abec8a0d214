@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//3vI\u003d",
+        "filename": "vp8/encoder/arm/armv5te/vp8_packtokens_armv5.asm",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-23T10:29:18Z",
+      "side": 1,
+      "message": "just to keep the stack 8-byte aligned",
+      "parentUuid": "AAAAGX//33o\u003d",
+      "revId": "83376e31022a2bb41dd9eb23c6c33abec8a0d214",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//33A\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2011-11-23T00:20:36Z",
       "side": 1,
       "message": "align",
+      "revId": "83376e31022a2bb41dd9eb23c6c33abec8a0d214",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3u8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-11-23T10:29:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//33A\u003d",
       "revId": "83376e31022a2bb41dd9eb23c6c33abec8a0d214",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
