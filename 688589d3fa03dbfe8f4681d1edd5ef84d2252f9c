@@ -1,0 +1,514 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//3nc\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 21
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3lY\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "this #if block unnecessary, this file isn\u0027t built unless this flag is set.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3nU\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "is this block necessary? seems like it all could be handled by the arbitrary factor code.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3nQ\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "this could be done branchless by adding cpi-\u003eoxcf.mr_down_sampling_factor.num/2 to iw before the divide",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3nM\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "this could be done branchless ((low_res_w+15)\u003e\u003e4)",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3nI\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3nE\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrap long lines (several instances this function)",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3ms\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "if this isn\u0027t a static inline function, it needs a vp8_ prefix.\n\nalso, it\u0027s not obvious that you need to sort them, since you only seem to care about the smallest and largest. you could just keep track of a max_mvx, min_mvx, max_mvy, min_mvy instead, it\u0027s should be less complex (O(n) vs O(n+d)) and you wouldn\u0027t need to keep an array and cnt.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3lo\u003d",
+        "filename": "vp8/encoder/mr_dissim.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "remove this comment.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3lc\u003d",
+        "filename": "vp8/encoder/mr_dissim.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrapping these prototypes is unnecessary, since this file shouldn\u0027t be included unless CONFIG_MULTI_RES_ENCODING is set.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3lQ\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4358,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3j0\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrap long lines in this function",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3lI\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1001,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "can this be handled by the arbitrary factor code?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3lA\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "what about the 4th encoder?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3ko\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1041,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "can this be handled by the arbitrary factor code?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3jc\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "are you sure that having this {lf,gf,af}done logic in the loop is a win vs hoisting it out to set up once before the mode_index loop? Also, these 3 blocks are almost identical and a decent number of lines long, might think about making a function for them.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3jk\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "it seems like the unique code for this loop is the early exit stuff above, and the rest is identical to pick_inter (exept maybe NEWMV, and that is mostly the same). Could you look into factoring this part into a common function/functions somehow, to avoid duplicating?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3ic\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "can this be handled by the arbitrary case?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3iY\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "add a comment as to why we\u0027re not doing this for all encoders.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3iU\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "the reverse order of these is an implementation detail. The user shouldn\u0027t have to point to the end of the arrays, we can calculate that inside vpx_codec_encode_multi().",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3ik\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "not sure a new function is needed here, see my comments in vpx_encoder.c",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3is\u003d",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "this should be done inside vp8e_init() if we\u0027re the base layer",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3iw\u003d",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "can simplify this block to\n\n  if (res)\n      return SAVE_STATUS(ctx, res);",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3io\u003d",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "this could be copied from ctx[0] after it\u0027s been initialized",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3jQ\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 653,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "you have specific requirements for this field, it\u0027s not something the user should be setting arbitrarily. Can this be made private and set up during init_multi? Actually, I suspect all of these mr variables can be determined during init_multi and made private -- you could put them in struct vpx_codec_priv in vpx_codec_internal.h, like cx_data_pad_*.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3jM\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 667,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "this field isn\u0027t accessed at all by the user, is it?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3jE\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 711,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3i8\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "may not be NULL in this usage.\n\nalso, need a doc string for the num_enc parameter",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3jA\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//3i4\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-23T20:43:32Z",
+      "side": 1,
+      "message": "hmm.. I\u0027m confused by this. can each stream have a different timestamp? it\u0027s probably an error for them to have different timebases.. if they can have different timestamps, they probably need different durations too. I\u0027m a little confused by this function.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
