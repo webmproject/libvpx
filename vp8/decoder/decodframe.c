@@ -934,16 +934,38 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         if (!pc->refresh_golden_frame)
             pc->copy_buffer_to_gf = vp8_read_literal(bc, 2);
 
+#if CONFIG_ERROR_CONCEALMENT
+        /* Assume we shouldn't copy to the golden if the bit is missing */
+        xd->corrupted |= vp8dx_bool_error(bc);
+        if (pbi->ec_active && xd->corrupted)
+            pc->copy_buffer_to_gf = 0;
+#endif
+
         pc->copy_buffer_to_arf = 0;
 
         if (!pc->refresh_alt_ref_frame)
             pc->copy_buffer_to_arf = vp8_read_literal(bc, 2);
+
+#if CONFIG_ERROR_CONCEALMENT
+        /* Assume we shouldn't copy to the alt-ref if the bit is missing */
+        xd->corrupted |= vp8dx_bool_error(bc);
+        if (pbi->ec_active && xd->corrupted)
+            pc->copy_buffer_to_arf = 0;
+#endif
+
 
         pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp8_read_bit(bc);
         pc->ref_frame_sign_bias[ALTREF_FRAME] = vp8_read_bit(bc);
     }
 
     pc->refresh_entropy_probs = vp8_read_bit(bc);
+#if CONFIG_ERROR_CONCEALMENT
+    /* Assume we shouldn't refresh the probabilities if the bit is
+     * missing */
+    xd->corrupted |= vp8dx_bool_error(bc);
+    if (pbi->ec_active && xd->corrupted)
+        pc->refresh_entropy_probs = 0;
+#endif
     if (pc->refresh_entropy_probs == 0)
     {
         vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));

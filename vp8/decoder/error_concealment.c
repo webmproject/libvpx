@@ -491,33 +491,6 @@ static void find_neighboring_blocks(MODE_INFO *mi,
     assert(i == 20);
 }
 
-/* Calculates which reference frame type is dominating among the neighbors */
-static MV_REFERENCE_FRAME dominant_ref_frame(EC_BLOCK *neighbors)
-{
-    /* Default to referring to "skip" */
-    MV_REFERENCE_FRAME dom_ref_frame = LAST_FRAME;
-    int max_ref_frame_cnt = 0;
-    int ref_frame_cnt[MAX_REF_FRAMES] = {0};
-    int i;
-    /* Count neighboring reference frames */
-    for (i = 0; i < NUM_NEIGHBORS; ++i)
-    {
-        if (neighbors[i].ref_frame < MAX_REF_FRAMES &&
-            neighbors[i].ref_frame != INTRA_FRAME)
-            ++ref_frame_cnt[neighbors[i].ref_frame];
-    }
-    /* Find maximum */
-    for (i = 0; i < MAX_REF_FRAMES; ++i)
-    {
-        if (ref_frame_cnt[i] > max_ref_frame_cnt)
-        {
-            dom_ref_frame = i;
-            max_ref_frame_cnt = ref_frame_cnt[i];
-        }
-    }
-    return dom_ref_frame;
-}
-
 /* Interpolates all motion vectors for a macroblock from the neighboring blocks'
  * motion vectors.
  */
@@ -591,7 +564,6 @@ void vp8_interpolate_motion(MACROBLOCKD *mb,
 {
     /* Find relevant neighboring blocks */
     EC_BLOCK neighbors[NUM_NEIGHBORS];
-    MV_REFERENCE_FRAME dom_ref_frame;
     int i;
     /* Initialize the array. MAX_REF_FRAMES is interpreted as "doesn't exist" */
     for (i = 0; i < NUM_NEIGHBORS; ++i)
@@ -604,13 +576,11 @@ void vp8_interpolate_motion(MACROBLOCKD *mb,
                                 mb_row, mb_col,
                                 mb_rows, mb_cols,
                                 mb->mode_info_stride);
-    /* Determine the dominant block type */
-    dom_ref_frame = dominant_ref_frame(neighbors);
-    /* Interpolate MVs for the missing blocks
-     * from the dominating MVs */
-    interpolate_mvs(mb, neighbors, dom_ref_frame);
+    /* Interpolate MVs for the missing blocks from the surrounding
+     * blocks which refer to the last frame. */
+    interpolate_mvs(mb, neighbors, LAST_FRAME);
 
-    mb->mode_info_context->mbmi.ref_frame = dom_ref_frame;
+    mb->mode_info_context->mbmi.ref_frame = LAST_FRAME;
     mb->mode_info_context->mbmi.mode = SPLITMV;
     mb->mode_info_context->mbmi.uv_mode = DC_PRED;
     mb->mode_info_context->mbmi.partitioning = 3;
