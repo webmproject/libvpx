@@ -10,7 +10,7 @@
 
 
 #include "vp8/encoder/boolhuff.h"
-#include "vp8/common/blockd.h"
+#include "vpx/internal/vpx_codec_internal.h"
 
 const unsigned int vp8_prob_cost[256] =
 {
@@ -32,3 +32,10 @@ const unsigned int vp8_prob_cost[256] =
     22,   21,   19,   18,   16,   15,   13,   12,   10,    9,    7,    6,    4,    3,    1,   1
 };
 
+int vp8_validate_buffer_arm(const unsigned char *start,
+                            size_t               len,
+                            const unsigned char *end,
+                            struct vpx_internal_error_info *error)
+{
+    return validate_buffer(start, len, end, error);
+}
