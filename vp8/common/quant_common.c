@@ -102,8 +102,8 @@ int vp8_dc_uv_quant(int QIndex, int Delta)
 
     QIndex = QIndex + Delta;
 
-    if (QIndex > 117)
-        QIndex = 117;
+    if (QIndex > 127)
+        QIndex = 127;
     else if (QIndex < 0)
         QIndex = 0;
 

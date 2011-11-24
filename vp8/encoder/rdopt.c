@@ -255,8 +255,6 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
     if (q < 8)
         q = 8;
 
-
-
 #if CONFIG_EXTEND_QRANGE
     cpi->RDMULT *= 16;
 #endif

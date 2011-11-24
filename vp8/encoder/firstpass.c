@@ -535,7 +535,7 @@ void vp8_first_pass(VP8_COMP *cpi)
     //if ( 0 )
     {
         int flag[2] = {1, 1};
-        vp8_initialize_rd_consts(cpi, vp8_dc_quant(cm->base_qindex, cm->y1dc_delta_q));
+        vp8_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
         vpx_memcpy(cm->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
         vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
     }
@@ -895,8 +895,8 @@ static double calc_correction_factor( double err_per_mb,
     double error_term = err_per_mb / err_devisor;
     double correction_factor;
 
-    // Adjustment based on Q to power term.
-    power_term = pt_low + (Q * 0.01);
+    // Adjustment based on actual quantizer to power term.
+    power_term = (vp8_convert_qindex_to_q(Q) * 0.01) + 0.36;
     power_term = (power_term > pt_high) ? pt_high : power_term;
 
     // Adjustments to error term
@@ -973,6 +973,7 @@ static int estimate_max_q(VP8_COMP *cpi,
 
     // Estimate of overhead bits per mb
     // Correction to overhead bits for min allowed Q.
+    // PGW TODO.. This code is broken for the extended Q range
     overhead_bits_per_mb = overhead_bits / num_mbs;
     overhead_bits_per_mb *= pow( 0.98, (double)cpi->twopass.maxq_min_limit );
 
@@ -1013,7 +1014,8 @@ static int estimate_max_q(VP8_COMP *cpi,
     // Adjust maxq_min_limit and maxq_max_limit limits based on
     // averaga q observed in clip for non kf/gf.arf frames
     // Give average a chance to settle though.
-    if ( (cpi->ni_frames >
+    // PGW TODO.. This code is broken for the extended Q range
+    /*if ( (cpi->ni_frames >
                   ((unsigned int)cpi->twopass.total_stats->count >> 8)) &&
          (cpi->ni_frames > 150) )
     {
@@ -1021,7 +1023,7 @@ static int estimate_max_q(VP8_COMP *cpi,
                                   ? (cpi->ni_av_qi + 32) : cpi->worst_quality;
         cpi->twopass.maxq_min_limit = ((cpi->ni_av_qi - 32) > cpi->best_quality)
                                   ? (cpi->ni_av_qi - 32) : cpi->best_quality;
-    }
+    }*/
 
     return Q;
 }
