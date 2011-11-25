@@ -416,9 +416,7 @@ static void init_seg_features(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
-    int high_q = ( (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY) &&
-                   (cpi->cq_target_quality > 16 ) ) ||
-                 (cpi->ni_av_qi > 32);
+    int high_q = ((int)vp8_convert_qindex_to_q(cpi->ni_av_qi) > 32);
 
     // For now at least dont enable seg features alongside cyclic refresh.
     if ( cpi->cyclic_refresh_mode_enabled ||

@@ -882,7 +882,9 @@ static long long estimate_modemvcost(VP8_COMP *cpi,
                  (av_pct_motion * motion_cost) +
                  (av_intra * intra_cost) ) * cpi->common.MBs ) << 9;
 
-    return mv_cost + mode_cost;
+    //return mv_cost + mode_cost;
+    // TODO PGW Fix overhead costs for extended Q range
+    return 0;
 }
 
 static double calc_correction_factor( double err_per_mb,
@@ -911,6 +913,36 @@ static double calc_correction_factor( double err_per_mb,
             ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
 
     return correction_factor;
+}
+
+// Given a current maxQ value sets a range for future values.
+// PGW TODO..
+// This code removes direct dependency on QIndex to determin the range
+// (now uses the actual quantizer) but has not been tuned.
+static double adjust_maxq_qrange(VP8_COMP *cpi, int qindex )
+{
+    int i;
+    double q = vp8_convert_qindex_to_q(qindex);
+
+    // Set the max corresponding to real q * 2.0
+    cpi->twopass.maxq_max_limit = cpi->worst_quality;
+    for ( i = qindex; i < cpi->worst_quality; i++ )
+    {
+        if ( vp8_convert_qindex_to_q(qindex) >= (q * 2.0) )
+        {
+            cpi->twopass.maxq_max_limit = i;
+        }
+    }
+
+    // Set the min corresponding to real q * 0.5
+    cpi->twopass.maxq_min_limit = cpi->best_quality;
+    for ( i = qindex; i > cpi->best_quality; i-- )
+    {
+        if ( vp8_convert_qindex_to_q(qindex) <= (q * 0.5) )
+        {
+            cpi->twopass.maxq_min_limit = i;
+        }
+    }
 }
 
 static int estimate_max_q(VP8_COMP *cpi,
@@ -974,6 +1006,7 @@ static int estimate_max_q(VP8_COMP *cpi,
     // Estimate of overhead bits per mb
     // Correction to overhead bits for min allowed Q.
     // PGW TODO.. This code is broken for the extended Q range
+    //            for now overhead set to 0.
     overhead_bits_per_mb = overhead_bits / num_mbs;
     overhead_bits_per_mb *= pow( 0.98, (double)cpi->twopass.maxq_min_limit );
 
@@ -998,6 +1031,8 @@ static int estimate_max_q(VP8_COMP *cpi,
         // Mode and motion overhead
         // As Q rises in real encode loop rd code will force overhead down
         // We make a crude adjustment for this here as *.98 per Q step.
+        // PGW TODO.. This code is broken for the extended Q range
+        //            for now overhead set to 0.
         overhead_bits_per_mb = (int)((double)overhead_bits_per_mb * 0.98);
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
@@ -1012,18 +1047,15 @@ static int estimate_max_q(VP8_COMP *cpi,
     }
 
     // Adjust maxq_min_limit and maxq_max_limit limits based on
-    // averaga q observed in clip for non kf/gf.arf frames
+    // averaga q observed in clip for non kf/gf/arf frames
     // Give average a chance to settle though.
     // PGW TODO.. This code is broken for the extended Q range
-    /*if ( (cpi->ni_frames >
+    if ( (cpi->ni_frames >
                   ((unsigned int)cpi->twopass.total_stats->count >> 8)) &&
          (cpi->ni_frames > 150) )
     {
-        cpi->twopass.maxq_max_limit = ((cpi->ni_av_qi + 32) < cpi->worst_quality)
-                                  ? (cpi->ni_av_qi + 32) : cpi->worst_quality;
-        cpi->twopass.maxq_min_limit = ((cpi->ni_av_qi - 32) > cpi->best_quality)
-                                  ? (cpi->ni_av_qi - 32) : cpi->best_quality;
-    }*/
+        adjust_maxq_qrange( cpi, cpi->ni_av_qi );
+    }
 
     return Q;
 }
@@ -1102,6 +1134,8 @@ static int estimate_cq( VP8_COMP *cpi,
         // Mode and motion overhead
         // As Q rises in real encode loop rd code will force overhead down
         // We make a crude adjustment for this here as *.98 per Q step.
+        // PGW TODO.. This code is broken for the extended Q range
+        //            for now overhead set to 0.
         overhead_bits_per_mb = (int)((double)overhead_bits_per_mb * 0.98);
 
         if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
@@ -2451,10 +2485,7 @@ void vp8_second_pass(VP8_COMP *cpi)
         // estimate for the clip is bad, but helps prevent excessive
         // variation in Q, especially near the end of a clip
         // where for example a small overspend may cause Q to crash
-        cpi->twopass.maxq_max_limit = ((tmp_q + 32) < cpi->worst_quality)
-                                  ? (tmp_q + 32) : cpi->worst_quality;
-        cpi->twopass.maxq_min_limit = ((tmp_q - 32) > cpi->best_quality)
-                                  ? (tmp_q - 32) : cpi->best_quality;
+        adjust_maxq_qrange(cpi, tmp_q);
 
         cpi->active_worst_quality         = tmp_q;
         cpi->ni_av_qi                     = tmp_q;
