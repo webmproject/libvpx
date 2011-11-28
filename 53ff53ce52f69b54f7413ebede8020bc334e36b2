@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//3A4\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1727,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-28T19:44:03Z",
+      "side": 1,
+      "message": "this will be suboptimal for handling the case when arg_ctrl_cnt \u003d\u003d ARG_CTRL_CNT_MAX and we\u0027re still processing (redundant) options, as the later options will no longer dominate as they did in the beginning of the command line.\n\nSuggest bubbling this block up one level and pushing the arg_ctrl_check down:\n\n  /* Check to see if this has control is already in the list */\n  for(j\u003d0; j\u003carg_ctrl_cnt; j++)\n  {\n      if(arg_ctrls[j][0] \u003d\u003d ctrl_args_map[i])\n      {\n          arg_ctrls[j][1] \u003d arg_parse_enum_or_int(\u0026arg);\n          match \u003d 1;\n          break;\n      }\n  }\n\n  /* Otherwise insert it */\n  assert(arg_ctrl_cnt \u003c ARG_CTRL_CNT_MAX);  \n  if(!match \u0026\u0026 arg_ctrl_cnt \u003c ARG_CTRL_CNT_MAX)\n  {\n      arg_ctrls[arg_ctrl_cnt][0] \u003d ctrl_args_map[i];\n      arg_ctrls[arg_ctrl_cnt][1] \u003d arg_parse_enum_or_int(\u0026arg)\n      arg_ctrl_cnt++;\n  }\n  match \u003d 1;\n\nHere\u0027s a slightly more compact version that doesn\u0027t repeat the assignment:\n\n\n  /* Point either to the next free element or the first instance of this\n   * control.\n   */\n  for(j\u003d0; j\u003carg_ctrl_cnt; j++)\n      if(arg_ctrls[j][0] \u003d\u003d ctrl_args_map[i])\n          break;\n\n  /* Update/insert */\n  assert(j \u003c ARG_CTRL_CNT_MAX);\n  if (j \u003c ARG_CTRL_CNT_MAX)\n  {\n      arg_ctrls[j][0] \u003d ctrl_args_map[i];\n      arg_ctrls[j][1] \u003d arg_parse_enum_or_int(\u0026arg)\n      if(j \u003d\u003d arg_ctrl_cnt)\n          arg_ctrl_cnt++;\n  }",
+      "revId": "53ff53ce52f69b54f7413ebede8020bc334e36b2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
