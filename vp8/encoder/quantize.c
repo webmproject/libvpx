@@ -609,6 +609,9 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip)
 
     /* This initialization should be called at least once. Use ok_to_skip to
      * decide if it is ok to skip.
+     * Before encoding a frame, this function is always called with ok_to_skip
+     * =0, which means no skiping of calculations. The "last" values are
+     * initialized at that time.
      */
     if (!ok_to_skip || QIndex != x->q_index)
     {

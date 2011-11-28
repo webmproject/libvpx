@@ -343,6 +343,9 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         z->block[i].zbin            = x->block[i].zbin;
         z->block[i].zrun_zbin_boost   = x->block[i].zrun_zbin_boost;
         z->block[i].round           = x->block[i].round;
+        z->q_index                  = x->q_index;
+        z->act_zbin_adj             = x->act_zbin_adj;
+        z->last_act_zbin_adj        = x->last_act_zbin_adj;
         /*
         z->block[i].src             = x->block[i].src;
         */
