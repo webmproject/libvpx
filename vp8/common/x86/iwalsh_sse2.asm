@@ -96,8 +96,50 @@ sym(vp8_short_inv_walsh4x4_sse2):
     psraw   xmm5, 3
     psraw   xmm1, 3
 
-    movdqa  [rdi + 0], xmm5
-    movdqa  [rdi + 16], xmm1
+;;    movdqa  [rdi + 0], xmm5
+;;    movdqa  [rdi + 16], xmm1
+
+    movd    eax, xmm5
+    psrldq   xmm5, 4
+    mov     word ptr[rdi+32*0], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*1], ax
+    movd    eax, xmm5
+    psrldq   xmm5, 4
+    mov     word ptr[rdi+32*2], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*3], ax
+
+    movd    eax, xmm5
+    psrldq   xmm5, 4
+    mov     word ptr[rdi+32*4], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*5], ax
+    movd    eax, xmm5
+    mov     word ptr[rdi+32*6], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*7], ax
+
+    movd    eax, xmm1
+    psrldq   xmm1, 4
+    mov     word ptr[rdi+32*8], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*9], ax
+    movd    eax, xmm1
+    psrldq   xmm1, 4
+    mov     word ptr[rdi+32*10], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*11], ax
+
+    movd    eax, xmm1
+    psrldq   xmm1, 4
+    mov     word ptr[rdi+32*12], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*13], ax
+    movd    eax, xmm1
+    mov     word ptr[rdi+32*14], ax
+    shr     eax, 16
+    mov     word ptr[rdi+32*15], ax
 
     ; begin epilog
     pop rdi

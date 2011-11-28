@@ -40,9 +40,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->idct.idct16       = vp8_short_idct4x4llm_mmx;
         rtcd->idct.idct1_scalar_add = vp8_dc_only_idct_add_mmx;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_mmx;
-        rtcd->idct.iwalsh1     = vp8_short_inv_walsh4x4_1_mmx;
-
-
 
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_mmx;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_mmx;

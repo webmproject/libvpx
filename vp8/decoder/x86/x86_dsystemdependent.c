@@ -43,8 +43,6 @@ void vp8_arch_x86_decode_init(VP8D_COMP *pbi)
     {
         pbi->dequant.block               = vp8_dequantize_b_mmx;
         pbi->dequant.idct_add            = vp8_dequant_idct_add_mmx;
-        pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_mmx;
-        pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_mmx;
         pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_mmx;
         pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_mmx;
     }
@@ -52,8 +50,6 @@ void vp8_arch_x86_decode_init(VP8D_COMP *pbi)
 #if HAVE_SSE2
     if (flags & HAS_SSE2)
     {
-        pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_sse2;
-        pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_sse2;
         pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_sse2;
     }
 #endif

@@ -16,14 +16,11 @@ VP8_DX_SRCS-$(ARCH_ARM)  += decoder/arm/dequantize_arm.c
 VP8_DX_SRCS-$(ARCH_ARM)  += decoder/arm/dequantize_arm.h
 
 #File list for armv6
-VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequant_dc_idct_v6$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequant_idct_v6$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/dequantize_v6$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV6)  += decoder/arm/armv6/idct_blk_v6.c
 
 #File list for neon
-VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/idct_dequant_dc_full_2x_neon$(ASM)
-VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/idct_dequant_dc_0_2x_neon$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/dequant_idct_neon$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/idct_dequant_full_2x_neon$(ASM)
 VP8_DX_SRCS-$(HAVE_ARMV7)  += decoder/arm/neon/idct_dequant_0_2x_neon$(ASM)

@@ -21,17 +21,6 @@
              unsigned char *output, \
              int stride)
 
-#define prototype_dequant_dc_idct_add(sym) \
-    void sym(short *input, short *dq, \
-             unsigned char *dst, \
-             int stride, \
-             int dc)
-
-#define prototype_dequant_dc_idct_add_y_block(sym) \
-    void sym(short *q, short *dq, \
-             unsigned char *dst, \
-             int stride, char *eobs, short *dc)
-
 #define prototype_dequant_idct_add_y_block(sym) \
     void sym(short *q, short *dq, \
              unsigned char *dst, \
@@ -60,16 +49,6 @@ extern prototype_dequant_block(vp8_dequant_block);
 #endif
 extern prototype_dequant_idct_add(vp8_dequant_idct_add);
 
-#ifndef vp8_dequant_dc_idct_add
-#define vp8_dequant_dc_idct_add vp8_dequant_dc_idct_add_c
-#endif
-extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add);
-
-#ifndef vp8_dequant_dc_idct_add_y_block
-#define vp8_dequant_dc_idct_add_y_block vp8_dequant_dc_idct_add_y_block_c
-#endif
-extern prototype_dequant_dc_idct_add_y_block(vp8_dequant_dc_idct_add_y_block);
-
 #ifndef vp8_dequant_idct_add_y_block
 #define vp8_dequant_idct_add_y_block vp8_dequant_idct_add_y_block_c
 #endif
@@ -85,10 +64,6 @@ typedef prototype_dequant_block((*vp8_dequant_block_fn_t));
 
 typedef prototype_dequant_idct_add((*vp8_dequant_idct_add_fn_t));
 
-typedef prototype_dequant_dc_idct_add((*vp8_dequant_dc_idct_add_fn_t));
-
-typedef prototype_dequant_dc_idct_add_y_block((*vp8_dequant_dc_idct_add_y_block_fn_t));
-
 typedef prototype_dequant_idct_add_y_block((*vp8_dequant_idct_add_y_block_fn_t));
 
 typedef prototype_dequant_idct_add_uv_block((*vp8_dequant_idct_add_uv_block_fn_t));
@@ -97,8 +72,6 @@ typedef struct
 {
     vp8_dequant_block_fn_t               block;
     vp8_dequant_idct_add_fn_t            idct_add;
-    vp8_dequant_dc_idct_add_fn_t         dc_idct_add;
-    vp8_dequant_dc_idct_add_y_block_fn_t dc_idct_add_y_block;
     vp8_dequant_idct_add_y_block_fn_t    idct_add_y_block;
     vp8_dequant_idct_add_uv_block_fn_t   idct_add_uv_block;
 } vp8_dequant_rtcd_vtable_t;

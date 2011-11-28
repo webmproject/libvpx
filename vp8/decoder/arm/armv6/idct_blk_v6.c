@@ -13,47 +13,6 @@
 #include "vp8/decoder/dequantize.h"
 
 
-void vp8_dequant_dc_idct_add_y_block_v6(short *q, short *dq,
-                                        unsigned char *dst, int stride,
-                                        char *eobs, short *dc)
-{
-    int i;
-
-    for (i = 0; i < 4; i++)
-    {
-        if (eobs[0] > 1)
-            vp8_dequant_dc_idct_add_v6 (q, dq, dst, stride, dc[0]);
-        else if (eobs[0] == 1)
-            vp8_dc_only_idct_add_v6 (dc[0], dst, stride, dst, stride);
-
-        if (eobs[1] > 1)
-        {
-            vp8_dequant_dc_idct_add_v6 (q+16, dq, dst+4, stride, dc[1]);
-        }
-        else if (eobs[1] == 1)
-            vp8_dc_only_idct_add_v6 (dc[1], dst+4, stride, dst+4, stride);
-
-        if (eobs[2] > 1)
-        {
-            vp8_dequant_dc_idct_add_v6 (q+32, dq, dst+8, stride, dc[2]);
-        }
-        else if (eobs[2] == 1)
-            vp8_dc_only_idct_add_v6 (dc[2], dst+8, stride, dst+8, stride);
-
-        if (eobs[3] > 1)
-        {
-            vp8_dequant_dc_idct_add_v6 (q+48, dq, dst+12, stride, dc[3]);
-        }
-        else if (eobs[3] == 1)
-            vp8_dc_only_idct_add_v6 (dc[3], dst+12, stride, dst+12, stride);
-
-        q    += 64;
-        dc   += 4;
-        dst  += 4*stride;
-        eobs += 4;
-    }
-}
-
 void vp8_dequant_idct_add_y_block_v6(short *q, short *dq,
                                      unsigned char *dst,
                                      int stride, char *eobs)

@@ -28,18 +28,6 @@ void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b,
 
 }
 
-static void recon_dcblock(MACROBLOCKD *x)
-{
-    BLOCKD *b = &x->block[24];
-    int i;
-
-    for (i = 0; i < 16; i++)
-    {
-        x->block[i].dqcoeff[0] = b->diff[i];
-    }
-
-}
-
 void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 {
     int i;
@@ -47,9 +35,7 @@ void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *
     if(x->mode_info_context->mbmi.mode != SPLITMV)
     {
         /* do 2nd order transform on the dc block */
-        IDCT_INVOKE(rtcd, iwalsh16)(x->block[24].dqcoeff, x->block[24].diff);
-
-        recon_dcblock(x);
+        IDCT_INVOKE(rtcd, iwalsh16)(x->block[24].dqcoeff, x->dqcoeff);
     }
 
     for (i = 0; i < 16; i++)

@@ -232,45 +232,53 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 }
             }
         }
-
     }
-    else if (mode == SPLITMV)
+    else
     {
+        short *DQC = xd->block[0].dequant;
+
+        /* save the dc dequant constant in case it is overridden */
+        short dc_dequant_temp = DQC[0];
+
+        if (mode != SPLITMV)
+        {
+            BLOCKD *b = &xd->block[24];
+
+            /* do 2nd order transform on the dc block */
+            if (xd->eobs[24] > 1)
+            {
+                DEQUANT_INVOKE(&pbi->dequant, block)(b);
+
+                IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0],
+                    xd->qcoeff);
+                ((int *)b->qcoeff)[0] = 0;
+                ((int *)b->qcoeff)[1] = 0;
+                ((int *)b->qcoeff)[2] = 0;
+                ((int *)b->qcoeff)[3] = 0;
+                ((int *)b->qcoeff)[4] = 0;
+                ((int *)b->qcoeff)[5] = 0;
+                ((int *)b->qcoeff)[6] = 0;
+                ((int *)b->qcoeff)[7] = 0;
+            }
+            else
+            {
+                b->dqcoeff[0] = b->qcoeff[0] * b->dequant[0];
+                IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh1)(&b->dqcoeff[0],
+                    xd->qcoeff);
+                ((int *)b->qcoeff)[0] = 0;
+            }
+
+            /* override the dc dequant constant */
+            DQC[0] = 1;
+        }
+
         DEQUANT_INVOKE (&pbi->dequant, idct_add_y_block)
                         (xd->qcoeff, xd->block[0].dequant,
                          xd->dst.y_buffer,
                          xd->dst.y_stride, xd->eobs);
-    }
-    else
-    {
-        BLOCKD *b = &xd->block[24];
 
-        /* do 2nd order transform on the dc block */
-        if (xd->eobs[24] > 1)
-        {
-            DEQUANT_INVOKE(&pbi->dequant, block)(b);
-
-            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0], b->diff);
-            ((int *)b->qcoeff)[0] = 0;
-            ((int *)b->qcoeff)[1] = 0;
-            ((int *)b->qcoeff)[2] = 0;
-            ((int *)b->qcoeff)[3] = 0;
-            ((int *)b->qcoeff)[4] = 0;
-            ((int *)b->qcoeff)[5] = 0;
-            ((int *)b->qcoeff)[6] = 0;
-            ((int *)b->qcoeff)[7] = 0;
-        }
-        else
-        {
-            b->dqcoeff[0] = b->qcoeff[0] * b->dequant[0];
-            IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh1)(&b->dqcoeff[0], b->diff);
-            ((int *)b->qcoeff)[0] = 0;
-        }
-
-        DEQUANT_INVOKE (&pbi->dequant, dc_idct_add_y_block)
-                        (xd->qcoeff, xd->block[0].dequant,
-                         xd->dst.y_buffer,
-                         xd->dst.y_stride, xd->eobs, xd->block[24].diff);
+        /* restore the dc dequant constant */
+        DQC[0] = dc_dequant_temp;
     }
 
     DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
