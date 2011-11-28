@@ -35,6 +35,15 @@ static unsigned int do_16x16_motion_iteration
     static int dummy_cost[2*mv_max+1];
     int *mvcost[2]    = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
     int *mvsadcost[2] = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
+    int col_min = (ref_mv->as_mv.col>>3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.col & 7)?1:0);
+    int row_min = (ref_mv->as_mv.row>>3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.row & 7)?1:0);
+    int col_max = (ref_mv->as_mv.col>>3) + MAX_FULL_PEL_VAL;
+    int row_max = (ref_mv->as_mv.row>>3) + MAX_FULL_PEL_VAL;
+    int tmp_col_min = x->mv_col_min;
+    int tmp_col_max = x->mv_col_max;
+    int tmp_row_min = x->mv_row_min;
+    int tmp_row_max = x->mv_row_max;
+    int_mv ref_full;
 
     // Further step/diamond searches as necessary
     if (cpi->Speed < 8)
@@ -48,9 +57,22 @@ static unsigned int do_16x16_motion_iteration
         further_steps = 0;
     }
 
+    /* Get intersection of UMV window and valid MV window to reduce # of checks in diamond search. */
+    if (x->mv_col_min < col_min )
+        x->mv_col_min = col_min;
+    if (x->mv_col_max > col_max )
+        x->mv_col_max = col_max;
+    if (x->mv_row_min < row_min )
+        x->mv_row_min = row_min;
+    if (x->mv_row_max > row_max )
+        x->mv_row_max = row_max;
+
+    ref_full.as_mv.col = ref_mv->as_mv.col >> 3;
+    ref_full.as_mv.row = ref_mv->as_mv.row >> 3;
+
     /*cpi->sf.search_method == HEX*/
     best_err = vp8_hex_search(x, b, d,
-                             ref_mv, dst_mv,
+                             &ref_full, dst_mv,
                              step_param,
                              x->errorperbit,
                              &v_fn_ptr,
@@ -72,6 +94,12 @@ static unsigned int do_16x16_motion_iteration
     VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
                     (xd->dst.y_buffer, xd->dst.y_stride,
                      xd->predictor, 16, &best_err);
+
+    /* restore UMV window */
+    x->mv_col_min = tmp_col_min;
+    x->mv_col_max = tmp_col_max;
+    x->mv_row_min = tmp_row_min;
+    x->mv_row_max = tmp_row_max;
 
     return best_err;
 }
