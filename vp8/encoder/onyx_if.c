@@ -205,30 +205,32 @@ void init_minq_luts()
     {
         maxq = vp8_convert_qindex_to_q(i);
 
+
         kf_low_motion_minq[i] = calculate_minq_index( maxq,
-                                                      0.00000006,
-                                                      -0.0000276,
-                                                      0.098,
+                                                      0.0000003,
+                                                      -0.000015,
+                                                      0.074,
                                                       0.0 );
+
         kf_high_motion_minq[i] = calculate_minq_index( maxq,
-                                                       0.00000024,
-                                                       -0.000201,
-                                                       0.154,
+                                                       0.00000034,
+                                                       -0.000125,
+                                                       0.13,
                                                        0.0 );
         gf_low_motion_minq[i] = calculate_minq_index( maxq,
-                                                      0.00000179,
-                                                      -0.000975,
-                                                      0.355,
+                                                      0.0000016,
+                                                      -0.00078,
+                                                      0.315,
                                                       0.0 );
         gf_mid_motion_minq[i] = calculate_minq_index( maxq,
-                                                      0.00000409,
-                                                      -0.00176,
-                                                      0.443,
+                                                      0.00000415,
+                                                      -0.0017,
+                                                      0.425,
                                                       0.0 );
         gf_high_motion_minq[i] = calculate_minq_index( maxq,
-                                                       0.00000819,
-                                                       -0.00286,
-                                                       0.532,
+                                                       0.00000725,
+                                                       -0.00235,
+                                                       0.47,
                                                        0.0  );
         inter_minq[i] = calculate_minq_index( maxq,
                                               0.00000271,
