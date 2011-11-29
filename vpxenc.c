@@ -1442,7 +1442,8 @@ static void show_rate_histogram(struct rate_hist          *hist,
     show_histogram(hist->bucket, buckets, hist->total, scale);
 }
 
-#define ARG_CTRL_CNT_MAX 10
+#define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
+#define ARG_CTRL_CNT_MAX NELEMENTS(vp8_arg_ctrl_map)
 
 int main(int argc, const char **argv_)
 {
@@ -1721,14 +1722,26 @@ int main(int argc, const char **argv_)
         {
             if (arg_match(&arg, ctrl_args[i], argi))
             {
+                int j;
                 match = 1;
 
-                if (arg_ctrl_cnt < ARG_CTRL_CNT_MAX)
+                /* Point either to the next free element or the first
+                * instance of this control.
+                */
+                for(j=0; j<arg_ctrl_cnt; j++)
+                    if(arg_ctrls[j][0] == ctrl_args_map[i])
+                        break;
+
+                /* Update/insert */
+                assert(j < ARG_CTRL_CNT_MAX);
+                if (j < ARG_CTRL_CNT_MAX)
                 {
-                    arg_ctrls[arg_ctrl_cnt][0] = ctrl_args_map[i];
-                    arg_ctrls[arg_ctrl_cnt][1] = arg_parse_enum_or_int(&arg);
-                    arg_ctrl_cnt++;
+                    arg_ctrls[j][0] = ctrl_args_map[i];
+                    arg_ctrls[j][1] = arg_parse_enum_or_int(&arg);
+                    if(j == arg_ctrl_cnt)
+                        arg_ctrl_cnt++;
                 }
+
             }
         }
 
