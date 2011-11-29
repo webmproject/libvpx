@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//22w\u003d",
+        "filename": "examples.mk",
+        "patchSetId": 21
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3nc\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3lY\u003d",
         "filename": "vp8/encoder/mr_dissim.c",
         "patchSetId": 21
@@ -30,6 +48,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "this #if block unnecessary, this file isn\u0027t built unless this flag is set.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//22k\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3lY\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//22c\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Yes. I will change it.",
+      "parentUuid": "AAAAGX//3nU\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3nQ\u003d",
         "filename": "vp8/encoder/mr_dissim.c",
         "patchSetId": 21
@@ -64,6 +118,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "this could be done branchless by adding cpi-\u003eoxcf.mr_down_sampling_factor.num/2 to iw before the divide",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//21s\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "The calculation is similar to mb_cols. \nIf (iw%cpi-\u003eoxcf.mr_down_sampling_factor.num), low_res_w++; Branch part can be removed by adding (cpi-\u003eoxcf.mr_down_sampling_factor.num -1).",
+      "parentUuid": "AAAAGX//3nQ\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//21o\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3nM\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3nI\u003d",
         "filename": "vp8/encoder/mr_dissim.c",
         "patchSetId": 21
@@ -98,6 +188,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "wrap long lines",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//21k\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3nI\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//21g\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3nE\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3ms\u003d",
         "filename": "vp8/encoder/mr_dissim.c",
         "patchSetId": 21
@@ -132,6 +258,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "if this isn\u0027t a static inline function, it needs a vp8_ prefix.\n\nalso, it\u0027s not obvious that you need to sort them, since you only seem to care about the smallest and largest. you could just keep track of a max_mvx, min_mvx, max_mvy, min_mvy instead, it\u0027s should be less complex (O(n) vs O(n+d)) and you wouldn\u0027t need to keep an array and cnt.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//2lA\u003d",
+        "filename": "vp8/encoder/mr_dissim.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Yes. The algorithm changed several times. The current one only needs max/min values. Will change it. Thanks.",
+      "parentUuid": "AAAAGX//3ms\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//208\u003d",
+        "filename": "vp8/encoder/mr_dissim.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3lo\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3lc\u003d",
         "filename": "vp8/encoder/mr_dissim.h",
         "patchSetId": 21
@@ -166,6 +328,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "wrapping these prototypes is unnecessary, since this file shouldn\u0027t be included unless CONFIG_MULTI_RES_ENCODING is set.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//204\u003d",
+        "filename": "vp8/encoder/mr_dissim.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3lc\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//20o\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 4358,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3lQ\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3j0\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 21
@@ -200,6 +398,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "wrap long lines in this function",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//20c\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3j0\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -223,6 +439,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//20Y\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1001,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Did that to hope for better performance. Tested with/without this loop, but didn\u0027t see performance difference. Will remove it for now, and revisit it later if it is needed.",
+      "parentUuid": "AAAAGX//3lI\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3lA\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 21
@@ -234,6 +468,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "what about the 4th encoder?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//20I\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Good catch. Thanks.",
+      "parentUuid": "AAAAGX//3lA\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -257,6 +509,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//20E\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1041,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "same as above.",
+      "parentUuid": "AAAAGX//3ko\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3jc\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 21
@@ -268,6 +538,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "are you sure that having this {lf,gf,af}done logic in the loop is a win vs hoisting it out to set up once before the mode_index loop? Also, these 3 blocks are almost identical and a decent number of lines long, might think about making a function for them.",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//2mg\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1110,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Actually, for video conferencing videos, large percent of MBs skip (if-continue) motion estimation. So, put find_near_mvs here will do less.\nThis part of code is on my list for further optimization.",
+      "parentUuid": "AAAAGX//3jc\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -291,6 +579,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//2mA\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Right. We probably still want to modify the algorithm after API change. Once it is all set, I will move the common part in a function. Thanks.",
+      "parentUuid": "AAAAGX//3jk\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3ic\u003d",
         "filename": "vp8_multi_resolution_encoder.c",
         "patchSetId": 21
@@ -302,6 +608,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "can this be handled by the arbitrary case?",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//2ng\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3ic\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -325,6 +649,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//2nc\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "AAAAGX//3iY\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3iU\u003d",
         "filename": "vp8_multi_resolution_encoder.c",
         "patchSetId": 21
@@ -336,6 +678,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "the reverse order of these is an implementation detail. The user shouldn\u0027t have to point to the end of the arrays, we can calculate that inside vpx_codec_encode_multi().",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//2m8\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 21
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Correct. Done",
+      "parentUuid": "AAAAGX//3iU\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -461,6 +821,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//2ow\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 711,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3jE\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3i8\u003d",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 21
@@ -478,6 +856,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//2o0\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 721,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "If cfg is NULL, it will return res \u003d VPX_CODEC_INVALID_PARAM;\nIs it right?",
+      "parentUuid": "AAAAGX//3i8\u003d",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3jA\u003d",
         "filename": "vpx/vpx_encoder.h",
         "patchSetId": 21
@@ -489,6 +885,24 @@
       "writtenOn": "2011-11-23T20:43:32Z",
       "side": 1,
       "message": "wrap long lines",
+      "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//2oQ\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 21
+      },
+      "lineNbr": 743,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-29T18:28:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//3jA\u003d",
       "revId": "688589d3fa03dbfe8f4681d1edd5ef84d2252f9c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
