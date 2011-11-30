@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//1z4\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-11-30T18:07:01Z",
+      "side": 1,
+      "message": "The RHS is the frame number, 3 \u003d ARF. So the second ref frame slot, which is normally the golden frame, will be the ARF in this case. So in this example, the GF is disabled, and it\u0027ll search intra (ref_frame_map[0] \u003d 0, the LF (ref_frame_map[1] \u003d 1) and the ARF (ref_frame_map[2] \u003d 3)",
+      "parentUuid": "AAAAGX//14A\u003d",
+      "revId": "e55974bf86714e6403f68c010b89fbd62a4f35e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3SQ\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 2
