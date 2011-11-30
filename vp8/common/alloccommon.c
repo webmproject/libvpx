@@ -153,10 +153,10 @@ void vp8_setup_version(VP8_COMMON *cm)
         if (!CONFIG_EXPERIMENTAL)
             vpx_internal_error(&cm->error, VPX_CODEC_UNSUP_BITSTREAM,
                                "Bitstream was created by an experimental "
-                               "encoder");        
+                               "encoder");
         cm->experimental = 1;
     }
-    
+
     switch (cm->version & 0x3)
     {
     case 0:

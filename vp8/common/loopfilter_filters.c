@@ -10,6 +10,7 @@
 
 
 #include <stdlib.h>
+#include "vpx_config.h"
 #include "loopfilter.h"
 #include "onyxc_int.h"
 
