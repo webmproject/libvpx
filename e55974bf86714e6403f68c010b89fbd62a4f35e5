@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAGX//14A\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-11-30T15:42:07Z",
+      "side": 1,
+      "message": "If only GOLDEN_FRAME is disabled, then\nref_frame_map[0] \u003d 0\nref_frame_map[1] \u003d 1\nref_frame_map[2] \u003d 3\nref_frame_map[3] \u003d -1\nIt seems it will skip ALT_REF. Right?",
+      "revId": "e55974bf86714e6403f68c010b89fbd62a4f35e5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//3SQ\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 2
