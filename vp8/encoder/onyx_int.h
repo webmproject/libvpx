@@ -42,8 +42,11 @@
 #define AF_THRESH   25
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
+#if CONFIG_I8X8
+#define MAX_MODES 21
+#else
 #define MAX_MODES 20
-
+#endif
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
 
@@ -74,7 +77,7 @@ typedef struct
     int uv_modes[VP8_UV_MODES];
     int i8x8_modes[VP8_I8X8_MODES];
     int b_modes[10];
-    int inter_y_modes[10];
+    int inter_y_modes[MB_MODE_COUNT];
     int inter_uv_modes[VP8_UV_MODES];
     int inter_b_modes[10];
 #endif
@@ -186,6 +189,9 @@ typedef enum
     THR_SPLITA         = 18,
 
     THR_B_PRED         = 19,
+#if CONFIG_I8X8
+    THR_I8X8_PRED      = 20,
+#endif
 }
 THR_MODES;
 

@@ -77,6 +77,9 @@ void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x
     int i;
 
     if (x->mode_info_context->mbmi.mode != B_PRED &&
+#if CONFIG_I8X8
+        x->mode_info_context->mbmi.mode != I8X8_PRED &&
+#endif
         x->mode_info_context->mbmi.mode != SPLITMV)
     {
         /* do 2nd order transform on the dc block */

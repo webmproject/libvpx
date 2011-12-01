@@ -617,8 +617,7 @@ void encode_mb_row(VP8_COMP *cpi,
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {
 #ifdef ENC_DEBUG
-        //enc_debug = (cpi->count==29 && mb_row==5 && mb_col==0);
-        enc_debug = (cpi->count==4 && mb_row==17 && mb_col==13);
+        enc_debug = (cpi->common.current_video_frame ==1 && mb_row==4 && mb_col==0);
         mb_col_debug=mb_col;
         mb_row_debug=mb_row;
 #endif
@@ -1553,12 +1552,18 @@ int vp8cx_encode_inter_macroblock
             vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
         }
+#if CONFIG_I8X8
+        else if(xd->mode_info_context->mbmi.mode == I8X8_PRED)
+        {
+            vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
+            vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
+        }
+#endif
         else
         {
             vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
         }
-
         sum_intra_stats(cpi, x);
     }
     else

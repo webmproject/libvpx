@@ -719,6 +719,9 @@ static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     tl = (ENTROPY_CONTEXT *)&t_left;
 
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+#if CONFIG_I8X8
+        &&x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
+#endif
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
@@ -768,6 +771,9 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     tl = (ENTROPY_CONTEXT *)&t_left;
 
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+#if CONFIG_I8X8
+        &&x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
+#endif
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
@@ -1082,6 +1088,10 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     tl = (ENTROPY_CONTEXT *)&t_left;
 
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+#if CONFIG_I8X8
+        &&x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
+#endif
+
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? 0 : 3;
 
@@ -1180,6 +1190,9 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     tl = (ENTROPY_CONTEXT *)&t_left;
 
     has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+#if CONFIG_I8X8
+        && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
+#endif
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
     type = has_2nd_order ? 0 : 3;
 

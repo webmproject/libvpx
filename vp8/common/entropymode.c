@@ -29,7 +29,8 @@ const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
 #else
 static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 49, 22, 23, 11, 23, 128};
 #endif
-static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 0, 5874};
+/* TODO: calibrate the baseline distribution */
+static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 2000, 5874};
 #else
 static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 1607, 915, 812, 811, 5455};
 static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 5874};
@@ -168,15 +169,16 @@ const vp8_tree_index vp8_bmode_tree[18] =     /* INTRAMODECONTEXTNODE value */
 
 /* Again, these trees use the same probability indices as their
    explicitly-programmed predecessors. */
-const vp8_tree_index vp8_ymode_tree[8] =
+#if CONFIG_I8X8
+const vp8_tree_index vp8_ymode_tree[10] =
 {
     -DC_PRED, 2,
     4, 6,
     -V_PRED, -H_PRED,
-    -TM_PRED, -B_PRED
+    -TM_PRED, 8,
+    -B_PRED, -I8X8_PRED
 };
 
-#if CONFIG_I8X8
 const vp8_tree_index vp8_kf_ymode_tree[10] =
 {
     -B_PRED, 2,
@@ -193,6 +195,13 @@ const vp8_tree_index vp8_i8x8_mode_tree[6] =
     -H_PRED, -TM_PRED
 };
 #else
+const vp8_tree_index vp8_ymode_tree[8] =
+{
+    -DC_PRED, 2,
+    4, 6,
+    -V_PRED, -H_PRED,
+    -TM_PRED, -B_PRED
+};
 
 const vp8_tree_index vp8_kf_ymode_tree[8] =
 {

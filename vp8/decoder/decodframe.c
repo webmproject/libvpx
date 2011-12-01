@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <stdio.h>
 
+
 #ifdef DEC_DEBUG
 int dec_debug = 0;
 #endif
@@ -134,6 +135,7 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
         vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
                                            xd->dst.u_buffer, xd->dst.v_buffer,
                                            xd->dst.y_stride, xd->dst.uv_stride);
+    }
 #ifdef DEC_DEBUG
         if (dec_debug) {
           int i, j;
@@ -144,7 +146,7 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
           }
         }
 #endif
-    }
+
 }
 
 static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
@@ -270,6 +272,19 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         skip_recon_mb(pbi, xd);
         return;
     }
+
+#ifdef DEC_DEBUG
+        if (dec_debug) {
+          int i, j;
+          printf("Generating predictors\n");
+          for (i=0;i<16;i++) {
+            for (j=0;j<16;j++) printf("%3d ", xd->dst.y_buffer[i*xd->dst.y_stride+j]);
+            printf("\n");
+          }
+        }
+#endif
+
+
 
     if (xd->segmentation_enabled)
         mb_init_dequantizer(pbi, xd);
@@ -597,7 +612,7 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
         }
 
 #ifdef DEC_DEBUG
-        dec_debug = (pc->current_video_frame==0 && mb_row==1 && mb_col==11);
+        dec_debug = (pc->current_video_frame==1 && mb_row==4 && mb_col==0);
 #endif
         decode_macroblock(pbi, xd, mb_row * pc->mb_cols  + mb_col);
 

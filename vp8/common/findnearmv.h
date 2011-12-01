@@ -145,7 +145,6 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
                 return B_DC_PRED;
         }
     }
-
     return (cur_mb->bmi + b - 1)->as_mode;
 }
 

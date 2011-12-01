@@ -80,7 +80,6 @@ void vp8_recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s)
     fclose(yuv_file);
 }
 #endif
-
 #if WRITE_RECON_BUFFER
 void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 {
@@ -581,6 +580,8 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #if WRITE_RECON_BUFFER
         if(cm->show_frame)
             write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
+        else
+            write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame+1000);
 #endif
 
         if(cm->filter_level)

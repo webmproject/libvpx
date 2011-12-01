@@ -137,7 +137,9 @@ static void lf_init_lut(loop_filter_info_n *lfi)
     lfi->mode_lf_lut[H_PRED] = 1;
     lfi->mode_lf_lut[TM_PRED] = 1;
     lfi->mode_lf_lut[B_PRED]  = 0;
-
+#if CONFIG_I8X8
+    lfi->mode_lf_lut[I8X8_PRED]=0;
+#endif
     lfi->mode_lf_lut[ZEROMV]  = 1;
     lfi->mode_lf_lut[NEARESTMV] = 2;
     lfi->mode_lf_lut[NEARMV] = 2;
@@ -321,6 +323,9 @@ void vp8_loop_filter_frame
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+#if CONFIG_I8X8
+                            mode_info_context->mbmi.mode != I8X8_PRED &&
+#endif
                             mode_info_context->mbmi.mode != SPLITMV &&
                             mode_info_context->mbmi.mb_skip_coeff);
 
@@ -432,6 +437,10 @@ void vp8_loop_filter_frame_yonly
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+#if CONFIG_I8X8
+                            mode_info_context->mbmi.mode != I8X8_PRED &&
+#endif
+
                             mode_info_context->mbmi.mode != SPLITMV &&
                             mode_info_context->mbmi.mb_skip_coeff);
 
@@ -569,6 +578,9 @@ void vp8_loop_filter_partial_frame
         for (mb_col = 0; mb_col < mb_cols; mb_col++)
         {
             int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+#if CONFIG_I8X8
+                            mode_info_context->mbmi.mode != I8X8_PRED &&
+#endif
                            mode_info_context->mbmi.mode != SPLITMV &&
                            mode_info_context->mbmi.mb_skip_coeff);
 

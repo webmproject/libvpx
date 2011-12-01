@@ -144,8 +144,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
     {
         int i;
         int mode8x8;
-        //printf("F%3d:%d:%d:",
-                 pbi->common.current_video_frame, mb_row, mb_col);
         for(i=0;i<4;i++)
          {
              int ib = vp8_i8x8_block[i];
@@ -155,8 +153,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
              m->bmi[ib+4].as_mode= mode8x8;
              m->bmi[ib+5].as_mode= mode8x8;
          }
-        //printf("%2d%2d%2d%2d\n", m->bmi[0].as_mode,m->bmi[2].as_mode,
-        //                       m->bmi[8].as_mode,m->bmi[10].as_mode);
    }
     else
 #endif
@@ -724,6 +720,23 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             while (++j < 16);
         }
 
+#if CONFIG_I8X8
+        if(mbmi->mode == I8X8_PRED)
+        {
+            int i;
+            int mode8x8;
+            for(i=0;i<4;i++)
+            {
+                int ib = vp8_i8x8_block[i];
+                mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
+                mi->bmi[ib+0].as_mode= mode8x8;
+                mi->bmi[ib+1].as_mode= mode8x8;
+                mi->bmi[ib+4].as_mode= mode8x8;
+                mi->bmi[ib+5].as_mode= mode8x8;
+            }
+        }
+        else
+#endif
         mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc, pbi->common.fc.uv_mode_prob);
     }
 

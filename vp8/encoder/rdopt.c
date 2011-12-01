@@ -103,6 +103,9 @@ const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES] =
     SPLITMV,
 
     B_PRED,
+#if CONFIG_I8X8
+    I8X8_PRED,
+#endif
 };
 
 const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
@@ -135,6 +138,9 @@ const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
     ALTREF_FRAME,
 
     INTRA_FRAME,
+#if CONFIG_I8X8
+    INTRA_FRAME,
+#endif
 };
 
 static void fill_token_costs(
@@ -1941,6 +1947,29 @@ static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
     }
 }
 
+#if CONFIG_I8X8
+static void set_i8x8_block_modes(MACROBLOCK *x, int *modes)
+{
+    int i;
+    MACROBLOCKD *xd = &x->e_mbd;
+    for(i=0;i<4;i++)
+    {
+        int ib = vp8_i8x8_block[i];
+        x->e_mbd.mode_info_context->bmi[ib+0].as_mode= modes[i];
+        x->e_mbd.mode_info_context->bmi[ib+1].as_mode= modes[i];
+        x->e_mbd.mode_info_context->bmi[ib+4].as_mode= modes[i];
+        x->e_mbd.mode_info_context->bmi[ib+5].as_mode= modes[i];
+    }
+
+    for (i = 0; i < 16; i++)
+    {
+        xd->block[i].bmi = xd->mode_info_context->bmi[i];
+    }
+}
+#endif
+
+
+
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra)
 {
     BLOCK *b = &x->block[0];
@@ -1955,6 +1984,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     MB_PREDICTION_MODE this_mode;
     int num00;
     int best_mode_index = 0;
+#if CONFIG_I8X8
+    int mode8x8[4];
+#endif
     unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
 
     int i;
@@ -2182,6 +2214,37 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
         }
         break;
+#if CONFIG_I8X8
+        case I8X8_PRED:
+        {
+            int tmp_rd;
+            tmp_rd = rd_pick_intra8x8mby_modes(cpi,
+                            x, &rate, &rate_y, &distortion, best_yrd);
+            rate2 += rate;
+            distortion2 += distortion;
+
+            mode8x8[0]= x->e_mbd.mode_info_context->bmi[0].as_mode;
+            mode8x8[1]= x->e_mbd.mode_info_context->bmi[2].as_mode;
+            mode8x8[2]= x->e_mbd.mode_info_context->bmi[8].as_mode;
+            mode8x8[3]= x->e_mbd.mode_info_context->bmi[10].as_mode;
+
+            /* TODO: uv rate maybe over-estimated here since there is UV intra
+                     mode coded in I8X8_PRED prediction */
+            if(tmp_rd < best_yrd)
+            {
+                rate2 += uv_intra_rate;
+                rate_uv = uv_intra_rate_tokenonly;
+                distortion2 += uv_intra_distortion;
+                distortion_uv = uv_intra_distortion;
+            }
+            else
+            {
+                this_rd = INT_MAX;
+                disable_skip = 1;
+            }
+        }
+        break;
+#endif
 
         case SPLITMV:
         {
@@ -2552,7 +2615,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
             vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
 
-            if ((this_mode == B_PRED) || (this_mode == SPLITMV))
+            if ((this_mode == B_PRED)
+#if CONFIG_I8X8
+                ||(this_mode == I8X8_PRED)
+#endif
+                || (this_mode == SPLITMV))
                 for (i = 0; i < 16; i++)
                 {
                     best_bmodes[i] = x->e_mbd.block[i].bmi;
@@ -2637,8 +2704,18 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     if (best_mbmode.mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
+        {
             xd->mode_info_context->bmi[i].as_mode = best_bmodes[i].as_mode;
+            xd->block[i].bmi.as_mode = xd->mode_info_context->bmi[i].as_mode;
+        }
     }
+
+#if CONFIG_I8X8
+    if (best_mbmode.mode == I8X8_PRED)
+    {
+        set_i8x8_block_modes(x, mode8x8);
+    }
+#endif
 
     if (best_mbmode.mode == SPLITMV)
     {
@@ -2656,27 +2733,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
 
 }
-
-#if CONFIG_I8X8
-static void set_i8x8_block_modes(MACROBLOCK *x, int *modes)
-{
-    int i;
-    MACROBLOCKD *xd = &x->e_mbd;
-    for(i=0;i<4;i++)
-    {
-        int ib = vp8_i8x8_block[i];
-        x->e_mbd.mode_info_context->bmi[ib+0].as_mode= modes[i];
-        x->e_mbd.mode_info_context->bmi[ib+1].as_mode= modes[i];
-        x->e_mbd.mode_info_context->bmi[ib+4].as_mode= modes[i];
-        x->e_mbd.mode_info_context->bmi[ib+5].as_mode= modes[i];
-    }
-
-    for (i = 0; i < 16; i++)
-    {
-        xd->block[i].bmi = xd->mode_info_context->bmi[i];
-    }
-}
-#endif
 
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {

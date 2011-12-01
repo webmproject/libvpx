@@ -1104,6 +1104,16 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         write_bmode(w, m->bmi[j].as_mode, pc->fc.bmode_prob);
                     while (++j < 16);
                 }
+#if CONFIG_I8X8
+                if(mode == I8X8_PRED)
+                {
+                    write_i8x8_mode(w, m->bmi[0].as_mode, pc->i8x8_mode_prob);
+                    write_i8x8_mode(w, m->bmi[2].as_mode, pc->i8x8_mode_prob);
+                    write_i8x8_mode(w, m->bmi[8].as_mode, pc->i8x8_mode_prob);
+                    write_i8x8_mode(w, m->bmi[10].as_mode, pc->i8x8_mode_prob);
+                }
+                else
+#endif
 
                 write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
             }

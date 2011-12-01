@@ -90,6 +90,9 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
     /* Clear entropy contexts for Y2 blocks */
     if (x->mode_info_context->mbmi.mode != B_PRED &&
+#if CONFIG_I8X8
+        x->mode_info_context->mbmi.mode != I8X8_PRED &&
+#endif
         x->mode_info_context->mbmi.mode != SPLITMV)
     {
         vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
