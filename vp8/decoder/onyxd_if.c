@@ -80,6 +80,7 @@ void vp8_recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s)
     fclose(yuv_file);
 }
 #endif
+//#define WRITE_RECON_BUFFER 1
 #if WRITE_RECON_BUFFER
 void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 {
@@ -93,21 +94,24 @@ void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->y_height; i++)
-        fwrite(frame->y_buffer + i * frame->y_stride, frame->y_width, 1, yframe);
+        fwrite(frame->y_buffer + i * frame->y_stride,
+            frame->y_width, 1, yframe);
 
     fclose(yframe);
     sprintf(filename, "dx\\u%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; i++)
-        fwrite(frame->u_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
+        fwrite(frame->u_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, yframe);
 
     fclose(yframe);
     sprintf(filename, "dx\\v%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; i++)
-        fwrite(frame->v_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
+        fwrite(frame->v_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, yframe);
 
     fclose(yframe);
 }
@@ -579,9 +583,17 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
 #if WRITE_RECON_BUFFER
         if(cm->show_frame)
+<<<<<<< HEAD
             write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
         else
             write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame+1000);
+=======
+            write_dx_frame_to_file(cm->frame_to_show,
+                cm->current_video_frame);
+        else
+            write_dx_frame_to_file(cm->frame_to_show,
+                cm->current_video_frame+1000);
+>>>>>>> added separate entropy context for alt_ref
 #endif
 
         if(cm->filter_level)

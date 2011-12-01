@@ -2222,10 +2222,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     //************************************************
     // save a copy for later refresh
+#if !CONFIG_MULCONTEXT
     {
         vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
     }
-
+#endif
     update_coef_probs(cpi);
 
 #ifdef ENTROPY_STATS

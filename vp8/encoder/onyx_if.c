@@ -3364,7 +3364,7 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     vp8_first_pass(cpi);
 }
 #endif
-
+//#define WRITE_RECON_BUFFER 1
 #if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 {
@@ -3378,21 +3378,24 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->y_height; i++)
-        fwrite(frame->y_buffer + i * frame->y_stride, frame->y_width, 1, yframe);
+        fwrite(frame->y_buffer + i * frame->y_stride,
+            frame->y_width, 1, yframe);
 
     fclose(yframe);
     sprintf(filename, "cx\\u%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; i++)
-        fwrite(frame->u_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
+        fwrite(frame->u_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, yframe);
 
     fclose(yframe);
     sprintf(filename, "cx\\v%04d.raw", this_frame);
     yframe = fopen(filename, "wb");
 
     for (i = 0; i < frame->uv_height; i++)
-        fwrite(frame->v_buffer + i * frame->uv_stride, frame->uv_width, 1, yframe);
+        fwrite(frame->v_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, yframe);
 
     fclose(yframe);
 }
@@ -4154,7 +4157,13 @@ static void encode_frame_to_data_rate
             resize_key_frame(cpi);
             vp8_setup_key_frame(cpi);
         }
-
+#if CONFIG_MULCONTEXT
+        else
+        {
+            /* setup entropy for nonkey frame */
+            vp8_setup_inter_frame(cpi);
+        }
+#endif
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);
 
@@ -4512,9 +4521,17 @@ static void encode_frame_to_data_rate
 
 #if WRITE_RECON_BUFFER
     if(cm->show_frame)
+<<<<<<< HEAD
         write_cx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
     else
         write_cx_frame_to_file(cm->frame_to_show, cm->current_video_frame+1000);
+=======
+        write_cx_frame_to_file(cm->frame_to_show,
+            cm->current_video_frame);
+    else
+        write_cx_frame_to_file(cm->frame_to_show,
+            cm->current_video_frame+1000);
+>>>>>>> added separate entropy context for alt_ref
 #endif
 
 #if CONFIG_MULTITHREAD
@@ -5309,10 +5326,23 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     }
 
+
+
+#if CONFIG_MULCONTEXT
+    if(cm->refresh_entropy_probs)
+    {
+        if(cm->refresh_alt_ref_frame)
+            vpx_memcpy(&cm->lfc_a, &cm->fc, sizeof(cm->fc));
+        else
+            vpx_memcpy(&cm->lfc, &cm->fc, sizeof(cm->fc));
+    }
+#else
     if (cm->refresh_entropy_probs == 0)
     {
         vpx_memcpy(&cm->fc, &cm->lfc, sizeof(cm->fc));
     }
+#endif
+
 
     // if its a dropped frame honor the requests on subsequent frames
     if (*size > 0)
