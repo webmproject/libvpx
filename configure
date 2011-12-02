@@ -225,6 +225,8 @@ EXPERIMENT_LIST="
     i8x8
     qimode
     uvintra
+    newnear
+    mulcontext
 "
 CONFIG_LIST="
     external_build
