@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//0Q0\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-02T18:19:42Z",
+      "side": 1,
+      "message": "bump this to 4",
+      "revId": "bacfdbbf39fe800c09d74e50f9df6894f00f0d4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//0RI\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-02T18:19:42Z",
+      "side": 1,
+      "message": "this should be made type safe (struct vpx_codec_priv_enc_mr_cfg*, not void*). You may want to split this into a separate init function for encoding and decoding too so you don\u0027t have to change the decoder prototype, but that could be done later.",
+      "revId": "bacfdbbf39fe800c09d74e50f9df6894f00f0d4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//0RE\u003d",
+        "filename": "vpx/internal/vpx_codec_internal.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-02T18:19:42Z",
+      "side": 1,
+      "message": "can you name this something mr specific?",
+      "revId": "bacfdbbf39fe800c09d74e50f9df6894f00f0d4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
