@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//0Fg\u003d",
+        "filename": "vp8/common/x86/intra4x4_predict_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-12-02T21:35:37Z",
+      "side": 1,
+      "message": "only need to write out 13 but must write out 24?",
+      "revId": "8c2aaa81d61acd4dda08952d71180fddb60c9b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//0Fw\u003d",
+        "filename": "vp8/common/x86/intra4x4_predict_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-12-02T21:35:37Z",
+      "side": 1,
+      "message": "I would give the jump labels a different name, say _lbl or something to distinguish them from the %define values",
+      "revId": "8c2aaa81d61acd4dda08952d71180fddb60c9b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//0Fs\u003d",
+        "filename": "vp8/common/x86/intra4x4_predict_ssse3.asm",
+        "patchSetId": 3
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2011-12-02T21:35:37Z",
+      "side": 1,
+      "message": "did you try a jump table for this block?",
+      "revId": "8c2aaa81d61acd4dda08952d71180fddb60c9b6c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
