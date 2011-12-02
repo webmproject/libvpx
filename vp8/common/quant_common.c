@@ -37,7 +37,7 @@ static const int ac_qlookup[QINDEX_RANGE] =
     213,  217,  221,  225,  229,  234,  239,  245,  249,  254,  259,  264,  269,  274,  279,  284,
 };
 #else
-static const int dc_qlookup[QINDEX_RANGE] =
+static int dc_qlookup[QINDEX_RANGE] =
 {
       4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
      20,   22,   24,   26,   28,   30,   32,   34,   36,   38,   40,   38,   40,   42,   44,   47,
@@ -49,7 +49,7 @@ static const int dc_qlookup[QINDEX_RANGE] =
     464,  483,  496,  507,  520,  529,  540,  551,  570,  585,  604,  624,  645,  667,  692,  718,
 
 };
-static const int ac_qlookup[QINDEX_RANGE] =
+static int ac_qlookup[QINDEX_RANGE] =
 {
     4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
     20,   22,   24,   26,   28,   30,   32,   34,   36,   38,   40,   42,   44,   46,   48,   51,
@@ -60,6 +60,40 @@ static const int ac_qlookup[QINDEX_RANGE] =
     524,  540,  556,  572,  588,  604,  622,  640,  658,  676,  696,  716,  736,  756,  776,  796,
     820,  844,  868,  892,  916,  944,  972,  1000, 1032, 1064, 1096, 1128, 1168, 1208, 1252, 1300
 };
+#endif
+
+#if CONFIG_EXTEND_QRANGE
+#define ACDC_MIN 4
+void vp8_init_quant_tables()
+{
+    int i;
+    int current_val = 4;
+    int last_val = 4;
+    int ac_val;
+    int dc_max;
+
+    // Not active by default for now.
+    return;
+
+    for ( i = 0; i < QINDEX_RANGE; i++ )
+    {
+        ac_qlookup[i] = current_val;
+        current_val = (int)((double)current_val * 1.042);
+        if ( current_val == last_val )
+            current_val++;
+        last_val = current_val;
+
+        ac_val = ac_qlookup[i];
+        dc_max = (int)(((double)ac_val * 0.75) + 0.5);
+        dc_qlookup[i] = (0.000000305 * ac_val * ac_val * ac_val) +
+                        (-0.00065 * ac_val * ac_val) +
+                        (0.9 * ac_val) + 0.5;
+        if ( dc_qlookup[i] > dc_max )
+            dc_qlookup[i] = dc_max;
+        if ( dc_qlookup[i] < ACDC_MIN )
+            dc_qlookup[i] = ACDC_MIN;
+    }
+}
 #endif
 
 int vp8_dc_quant(int QIndex, int Delta)
@@ -140,7 +174,9 @@ int vp8_ac2quant(int QIndex, int Delta)
     if (retval < 8)
         retval = 8;
 #else
-    retval = ac_qlookup[ QIndex ];
+    retval = (ac_qlookup[ QIndex ] * 775) / 1000;
+    if (retval < 4)
+        retval = 4;
 #endif
     return retval;
 }

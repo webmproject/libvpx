@@ -195,6 +195,8 @@ int calculate_minq_index( double maxq,
         if ( minqtarget <= vp8_convert_qindex_to_q(i) )
             return i;
     }
+    if ( i == QINDEX_RANGE )
+        return QINDEX_RANGE-1;
 }
 void init_minq_luts()
 {
@@ -251,9 +253,11 @@ void vp8_initialize()
         vp8_initialize_common();
         //vp8_dmachine_specific_config();
         vp8_tokenize_initialize();
+#if CONFIG_EXTEND_QRANGE
+        vp8_init_quant_tables();
+#endif
         vp8_init_me_luts();
         init_minq_luts();
-
         init_done = 1;
     }
 }
@@ -467,7 +471,7 @@ static void init_seg_features(VP8_COMP *cpi)
             xd->update_mb_segmentation_map = 1;
             xd->update_mb_segmentation_data = 1;
 
-            set_segdata( xd, 1, SEG_LVL_ALT_Q, -(2+(cpi->ni_av_qi >> 3)) );
+            set_segdata( xd, 1, SEG_LVL_ALT_Q, -(3+(cpi->ni_av_qi >> 3)) );
             set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
 
             enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
@@ -3281,12 +3285,30 @@ static int decide_key_frame(VP8_COMP *cpi)
     return code_key_frame;
 
 }
-#if !CONFIG_EXTEND_QRANGE
+
+/*#if !CONFIG_EXTEND_QRANGE
 #define FIRSTPASS_QINDEX 26
 #else
 #define FIRSTPASS_QINDEX 49
-#endif
+#endif*/
 
+int find_fp_qindex()
+{
+    int i;
+
+    for ( i = 0; i < QINDEX_RANGE; i++ )
+    {
+        if ( vp8_convert_qindex_to_q(i) >= 30.0 )
+        {
+            break;
+        }
+    }
+
+    if ( i == QINDEX_RANGE )
+        i--;
+
+    return i;
+}
 
 #if !(CONFIG_REALTIME_ONLY)
 static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags)
@@ -3294,7 +3316,9 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     (void) size;
     (void) dest;
     (void) frame_flags;
-    vp8_set_quantizer(cpi, FIRSTPASS_QINDEX);
+
+
+    vp8_set_quantizer(cpi, find_fp_qindex());
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);

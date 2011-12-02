@@ -123,6 +123,9 @@ void vp8dx_initialize()
     if (!init_done)
     {
         vp8_initialize_common();
+#if CONFIG_EXTEND_QRANGE
+        vp8_init_quant_tables();
+#endif
         vp8_scale_machine_specific_config();
         init_done = 1;
     }

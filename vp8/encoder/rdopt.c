@@ -236,28 +236,23 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
                 (cpi->RDMULT * rd_iifactor[cpi->twopass.next_iiratio]) >> 4;
     }
 
-#if !CONFIG_EXTEND_QRANGE
-#else
     if (cpi->RDMULT < 7)
         cpi->RDMULT = 7;
-#endif
+
     cpi->mb.errorperbit = (cpi->RDMULT / 110);
     cpi->mb.errorperbit += (cpi->mb.errorperbit==0);
 
-#if CONFIG_EXTEND_QRANGE
-    if(cpi->mb.errorperbit<1)
-        cpi->mb.errorperbit=1;
-#endif
     vp8_set_speed_features(cpi);
 
+#if CONFIG_EXTEND_QRANGE
+    q = (int)pow(vp8_dc_quant(QIndex,0)>>2, 1.25);
+    q = q << 2;
+    cpi->RDMULT *= 16;
+#else
     q = (int)pow(vp8_dc_quant(QIndex,0), 1.25);
-
+#endif
     if (q < 8)
         q = 8;
-
-#if CONFIG_EXTEND_QRANGE
-    cpi->RDMULT *= 16;
-#endif
 
     if (cpi->RDMULT > 1000)
     {

@@ -13,6 +13,9 @@
 #include "blockd.h"
 #include "onyxc_int.h"
 
+#if CONFIG_EXTEND_QRANGE
+extern void vp8_init_quant_tables();
+#endif
 extern int vp8_ac_yquant(int QIndex);
 extern int vp8_dc_quant(int QIndex, int Delta);
 extern int vp8_dc2quant(int QIndex, int Delta);
