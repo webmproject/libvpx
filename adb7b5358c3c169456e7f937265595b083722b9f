@@ -16,6 +16,24 @@
       "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//zR0\u003d",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-05T23:32:54Z",
+      "side": 1,
+      "message": "For me, buf_align equals stride_align (32 bytes). I think it is ok to use 1 parameter for both in vpx_img_alloc. But, in img_alloc_helper(), still use 2 parameters to make it clear. What do you think?",
+      "parentUuid": "AAAAGX//zT0\u003d",
+      "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
