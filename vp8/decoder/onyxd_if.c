@@ -117,8 +117,6 @@ void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 }
 #endif
 
-
-
 void vp8dx_initialize()
 {
     static int init_done = 0;
@@ -583,17 +581,11 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
 #if WRITE_RECON_BUFFER
         if(cm->show_frame)
-<<<<<<< HEAD
-            write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
-        else
-            write_dx_frame_to_file(cm->frame_to_show, cm->current_video_frame+1000);
-=======
             write_dx_frame_to_file(cm->frame_to_show,
                 cm->current_video_frame);
         else
             write_dx_frame_to_file(cm->frame_to_show,
                 cm->current_video_frame+1000);
->>>>>>> added separate entropy context for alt_ref
 #endif
 
         if(cm->filter_level)

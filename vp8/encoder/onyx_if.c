@@ -4521,17 +4521,11 @@ static void encode_frame_to_data_rate
 
 #if WRITE_RECON_BUFFER
     if(cm->show_frame)
-<<<<<<< HEAD
-        write_cx_frame_to_file(cm->frame_to_show, cm->current_video_frame);
-    else
-        write_cx_frame_to_file(cm->frame_to_show, cm->current_video_frame+1000);
-=======
         write_cx_frame_to_file(cm->frame_to_show,
             cm->current_video_frame);
     else
         write_cx_frame_to_file(cm->frame_to_show,
             cm->current_video_frame+1000);
->>>>>>> added separate entropy context for alt_ref
 #endif
 
 #if CONFIG_MULTITHREAD
