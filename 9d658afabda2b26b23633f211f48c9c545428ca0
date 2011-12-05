@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//znE\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-05T18:35:42Z",
+      "side": 1,
+      "message": "saved_frame_to_show? Not sure what the best name for this is, but last_frame_uf doesn\u0027t seem quite right.",
+      "revId": "9d658afabda2b26b23633f211f48c9c545428ca0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//znM\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-05T18:35:42Z",
+      "side": 1,
+      "message": "This would make more sense if cpi-\u003elast_frame_uf was picklf_candidate_frame or something.",
+      "revId": "9d658afabda2b26b23633f211f48c9c545428ca0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//znA\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-05T18:35:42Z",
+      "side": 1,
+      "message": "Wrap line (good catch on favour)",
+      "revId": "9d658afabda2b26b23633f211f48c9c545428ca0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//zmk\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-05T18:35:42Z",
+      "side": 1,
+      "message": "Replace",
+      "revId": "9d658afabda2b26b23633f211f48c9c545428ca0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//zmo\u003d",
+        "filename": "vp8/encoder/picklpf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-05T18:35:42Z",
+      "side": 1,
+      "message": "C89 /* comments */. Not worth updating code you\u0027re not touching, but your new code is mixed and C89 should be preferred",
+      "revId": "9d658afabda2b26b23633f211f48c9c545428ca0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
