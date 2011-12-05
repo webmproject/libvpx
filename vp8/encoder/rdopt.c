@@ -100,36 +100,39 @@ const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES] =
     B_PRED,
 };
 
-const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
+/* This table determines the search order in reference frame priority order,
+ * which may not necessarily match INTRA,LAST,GOLDEN,ARF
+ */
+const int vp8_ref_frame_order[MAX_MODES] =
 {
-    LAST_FRAME,
-    INTRA_FRAME,
+    1,
+    0,
 
-    LAST_FRAME,
-    LAST_FRAME,
+    1,
+    1,
 
-    GOLDEN_FRAME,
-    GOLDEN_FRAME,
+    2,
+    2,
 
-    ALTREF_FRAME,
-    ALTREF_FRAME,
+    3,
+    3,
 
-    GOLDEN_FRAME,
-    ALTREF_FRAME,
+    2,
+    3,
 
-    INTRA_FRAME,
-    INTRA_FRAME,
-    INTRA_FRAME,
+    0,
+    0,
+    0,
 
-    LAST_FRAME,
-    GOLDEN_FRAME,
-    ALTREF_FRAME,
+    1,
+    2,
+    3,
 
-    LAST_FRAME,
-    GOLDEN_FRAME,
-    ALTREF_FRAME,
+    1,
+    2,
+    3,
 
-    INTRA_FRAME,
+    0,
 };
 
 static void fill_token_costs(
@@ -1789,9 +1792,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     unsigned char *y_buffer[4];
     unsigned char *u_buffer[4];
     unsigned char *v_buffer[4];
+    int ref_frame_map[4];
 
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
     vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
+
+    /* Setup search priorities */
+    i=0;
+    ref_frame_map[i++] = INTRA_FRAME;
+    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
+        ref_frame_map[i++] = LAST_FRAME;
+    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
+        ref_frame_map[i++] = GOLDEN_FRAME;
+    if (cpi->ref_frame_flags & VP8_ALT_FLAG)
+        ref_frame_map[i++] = ALTREF_FRAME;
+    for(; i<4; i++)
+        ref_frame_map[i] = -1;
 
     if (cpi->ref_frame_flags & VP8_LAST_FLAG)
     {
@@ -1852,6 +1868,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         int lf_or_gf = 0;           // Lat Frame (01) or gf/arf (1)
         int disable_skip = 0;
         int other_cost = 0;
+        int this_ref_frame = ref_frame_map[vp8_ref_frame_order[mode_index]];
 
         // Experimental debug code.
         // Record of rd values recorded for this MB. -1 indicates not measured
@@ -1864,6 +1881,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         if (best_rd <= cpi->rd_threshes[mode_index])
             continue;
 
+        if (this_ref_frame < 0)
+            continue;
+
         // These variables hold are rolling total cost and distortion for this mode
         rate2 = 0;
         distortion2 = 0;
@@ -1872,7 +1892,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         x->e_mbd.mode_info_context->mbmi.mode = this_mode;
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
-        x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
+        x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
 
         // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
         // unless ARNR filtering is enabled in which case we want
@@ -1920,13 +1940,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
         if (cpi->zbin_mode_boost_enabled)
         {
-            if ( vp8_ref_frame_order[mode_index] == INTRA_FRAME )
+            if ( this_ref_frame == INTRA_FRAME )
                 cpi->zbin_mode_boost = 0;
             else
             {
                 if (vp8_mode_order[mode_index] == ZEROMV)
                 {
-                    if (vp8_ref_frame_order[mode_index] != LAST_FRAME)
+                    if (this_ref_frame != LAST_FRAME)
                         cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
                     else
                         cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
@@ -1971,8 +1991,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             int tmp_rd;
             int this_rd_thresh;
 
-            this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ? cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
-            this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ? cpi->rd_threshes[THR_NEWG]: this_rd_thresh;
+            this_rd_thresh = (vp8_ref_frame_order[mode_index] == 1) ? cpi->rd_threshes[THR_NEW1] : cpi->rd_threshes[THR_NEW3];
+            this_rd_thresh = (vp8_ref_frame_order[mode_index] == 2) ? cpi->rd_threshes[THR_NEW2] : this_rd_thresh;
 
             tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
                                                      best_yrd, mdcounts,

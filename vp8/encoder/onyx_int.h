@@ -133,32 +133,32 @@ typedef struct
 
 typedef enum
 {
-    THR_ZEROMV         = 0,
+    THR_ZERO1          = 0,
     THR_DC             = 1,
 
-    THR_NEARESTMV      = 2,
-    THR_NEARMV         = 3,
+    THR_NEAREST1       = 2,
+    THR_NEAR1          = 3,
 
-    THR_ZEROG          = 4,
-    THR_NEARESTG       = 5,
+    THR_ZERO2          = 4,
+    THR_NEAREST2       = 5,
 
-    THR_ZEROA          = 6,
-    THR_NEARESTA       = 7,
+    THR_ZERO3          = 6,
+    THR_NEAREST3       = 7,
 
-    THR_NEARG          = 8,
-    THR_NEARA          = 9,
+    THR_NEAR2          = 8,
+    THR_NEAR3          = 9,
 
     THR_V_PRED         = 10,
     THR_H_PRED         = 11,
     THR_TM             = 12,
 
-    THR_NEWMV          = 13,
-    THR_NEWG           = 14,
-    THR_NEWA           = 15,
+    THR_NEW1           = 13,
+    THR_NEW2           = 14,
+    THR_NEW3           = 15,
 
-    THR_SPLITMV        = 16,
-    THR_SPLITG         = 17,
-    THR_SPLITA         = 18,
+    THR_SPLIT1         = 16,
+    THR_SPLIT2         = 17,
+    THR_SPLIT3         = 18,
 
     THR_B_PRED         = 19,
 }
