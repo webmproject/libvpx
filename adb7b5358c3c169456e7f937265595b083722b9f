@@ -52,6 +52,24 @@
       "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//zAU\u003d",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-06T14:01:56Z",
+      "side": 1,
+      "message": "In my example, I need to ensure that each row is 16-byte aligned in y, u, v planes. If choose stride_align \u003d 16, we can only guarantee u\u0026v rows are 8-byte aligned. That is why I pick buf_align \u003d stride_align\u003d32.",
+      "parentUuid": "AAAAGX//zPw\u003d",
+      "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
