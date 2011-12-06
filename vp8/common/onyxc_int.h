@@ -218,6 +218,13 @@ typedef struct VP8Common
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */
 
+#if CONFIG_NEWNEAR
+    int mv_ref_ct[6][4][2];
+    int mode_context[6][4];
+#endif
+
+    int vp8_mode_contexts[6][4];
+
     unsigned int current_video_frame;
 
     int near_boffset[3];

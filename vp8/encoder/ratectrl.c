@@ -267,6 +267,9 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
 #endif
 
+#if CONFIG_NEWNEAR
+    vp8_init_mv_ref_counts(&cpi->common);
+#endif
 }
 #if CONFIG_MULCONTEXT
 void vp8_setup_inter_frame(VP8_COMP *cpi)

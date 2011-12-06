@@ -16,6 +16,7 @@
 #include "blockd.h"
 #include "modecont.h"
 #include "treecoder.h"
+#include "onyxc_int.h"
 
 
 static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias)
@@ -84,7 +85,7 @@ void vp8_find_near_mvs
     int *ref_frame_sign_bias
 );
 
-vp8_prob *vp8_mv_ref_probs(
+vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
     vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
 );
 

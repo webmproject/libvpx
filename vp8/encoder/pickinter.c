@@ -47,7 +47,8 @@ extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 extern const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES];
 
 extern unsigned int (*vp8_get4x4sse_cs)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
-extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
+extern int vp8_cost_mv_ref(VP8_COMMON *pc,
+                           MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
 
 
 int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
@@ -811,7 +812,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max))
                 continue;
 
-            rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
+            rate2 += vp8_cost_mv_ref(&cpi->common, this_mode, mdcounts);
             x->e_mbd.mode_info_context->mbmi.mv.as_int =
                                                     mode_mv[this_mode].as_int;
 

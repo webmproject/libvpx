@@ -1156,18 +1156,20 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             else
             {
                 int_mv best_mv;
+                int ct[4];
+
                 vp8_prob mv_ref_p [VP8_MVREFS-1];
 
                 {
                     int_mv n1, n2;
-                    int ct[4];
 
                     vp8_find_near_mvs(xd, m,
 #if CONFIG_NEWNEAR
                         prev_m,
 #endif
                         &n1, &n2, &best_mv, ct, rf, cpi->common.ref_frame_sign_bias);
-                    vp8_mv_ref_probs(mv_ref_p, ct);
+                    vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
+
 
 #ifdef ENTROPY_STATS
                     accum_mv_refs(mode, ct);
@@ -1183,6 +1185,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                 {
                     write_mv_ref(w, mode, mv_ref_p);
+#if CONFIG_NEWNEAR
+                    vp8_accum_mv_refs(&cpi->common, mode, ct);
+#endif
                 }
 
                 {
@@ -2325,6 +2330,28 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     else
     {
         pack_inter_mode_mvs(cpi);
+
+#if CONFIG_NEWNEAR
+        if(!cpi->common.refresh_alt_ref_frame)
+        {
+            vp8_update_mode_context(&cpi->common);
+            vpx_memcpy( pc->vp8_mode_contexts,
+                        cpi->common.mode_context,
+                        sizeof(cpi->common.mode_context));
+
+            if(0) //(cpi->common.current_video_frame<2)
+            {
+
+                printf("mv_ref_ct on frame %d:\n",
+                        cpi->common.current_video_frame);
+                print_mv_ref_cts(&cpi->common);
+
+                printf("mode_contexts on frame %d:\n",
+                        cpi->common.current_video_frame);
+                print_mode_contexts();
+            }
+        }
+#endif
 
 #ifdef ENTROPY_STATS
         active_section = 1;

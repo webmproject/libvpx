@@ -1852,41 +1852,28 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         return INT_MAX;
 }
 
+
+
 #ifdef ENTROPY_STATS
 void print_mode_context(void)
 {
-    FILE *f = fopen("modecont.c", "w");
+    FILE *f = fopen("modecont.c", "a");
     int i, j;
 
     fprintf(f, "#include \"entropy.h\"\n");
-    fprintf(f, "const int vp8_mode_contexts[6][4] =\n");
+    fprintf(f, "const int vp8_mode_contexts[6][4] =");
     fprintf(f, "{\n");
-
     for (j = 0; j < 6; j++)
     {
-        fprintf(f, "  { // %d \n", j);
+        fprintf(f, "  {/* %d */ ", j);
         fprintf(f, "    ");
-
         for (i = 0; i < 4; i++)
         {
-            int overal_prob;
             int this_prob;
-            int count; // = mv_ref_ct[j][i][0]+mv_ref_ct[j][i][1];
-
-            // Overall probs
-            count = mv_mode_cts[i][0] + mv_mode_cts[i][1];
-
-            if (count)
-                overal_prob = 256 * mv_mode_cts[i][0] / count;
-            else
-                overal_prob = 128;
-
-            if (overal_prob == 0)
-                overal_prob = 1;
+            int count;
 
             // context probs
             count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
-
             if (count)
                 this_prob = 256 * mv_ref_ct[j][i][0] / count;
             else
@@ -1894,12 +1881,8 @@ void print_mode_context(void)
 
             if (this_prob == 0)
                 this_prob = 1;
-
             fprintf(f, "%5d, ", this_prob);
-            //fprintf(f,"%5d, %5d, %8d,", this_prob, overal_prob, (this_prob << 10)/overal_prob);
-            //fprintf(f,"%8d, ", (this_prob << 10)/overal_prob);
         }
-
         fprintf(f, "  },\n");
     }
 
@@ -1908,7 +1891,6 @@ void print_mode_context(void)
 }
 
 /* MV ref count ENTROPY_STATS stats code */
-#ifdef ENTROPY_STATS
 void init_mv_ref_counts()
 {
     vpx_memset(mv_ref_ct, 0, sizeof(mv_ref_ct));
@@ -1964,4 +1946,4 @@ void accum_mv_refs(MB_PREDICTION_MODE m, const int ct[4])
 
 #endif/* END MV ref count ENTROPY_STATS stats code */
 
-#endif
+

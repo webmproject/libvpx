@@ -548,7 +548,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
             &nearest, &nearby, &best_mv, rct,
                           mbmi->ref_frame, pbi->common.ref_frame_sign_bias);
-        vp8_mv_ref_probs(mv_ref_p, rct);
+        vp8_mv_ref_probs(&pbi->common, mv_ref_p, rct);
 
 //#if CONFIG_SEGFEATURES
         // Is the segment level mode feature enabled for this segment
@@ -560,6 +560,10 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         else
         {
             mbmi->mode = read_mv_ref(bc, mv_ref_p);
+
+#if CONFIG_NEWNEAR
+            vp8_accum_mv_refs(&pbi->common, mbmi->mode, rct);
+#endif
         }
 
         mbmi->uv_mode = DC_PRED;

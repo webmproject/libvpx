@@ -1142,11 +1142,13 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode_selected;
 }
 
-int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4])
+int vp8_cost_mv_ref(VP8_COMMON *pc,
+                    MB_PREDICTION_MODE m,
+                    const int near_mv_ref_ct[4])
 {
     vp8_prob p [VP8_MVREFS-1];
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
-    vp8_mv_ref_probs(p, near_mv_ref_ct);
+    vp8_mv_ref_probs(pc, p, near_mv_ref_ct);
     return vp8_cost_token(vp8_mv_ref_tree, p,
                           vp8_mv_ref_encoding_array - NEARESTMV + m);
 }
@@ -1362,7 +1364,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
     // Segmentation method overheads
     rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + segmentation);
-    rate += vp8_cost_mv_ref(SPLITMV, bsi->mdcounts);
+    rate += vp8_cost_mv_ref(&cpi->common, SPLITMV, bsi->mdcounts);
     this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
     br += rate;
 
@@ -2613,7 +2615,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             //intermodecost[mode_index] = vp8_cost_mv_ref(this_mode, mdcounts);   // Experimental debug code
 
             // Add in the Mv/mode cost
-            rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
+            rate2 += vp8_cost_mv_ref(&cpi->common, this_mode, mdcounts);
 
             // Y cost and distortion
             macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
@@ -2674,7 +2676,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
 
             /* Add in the Mv/mode cost */
-            rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
+            rate2 += vp8_cost_mv_ref(&cpi->common,this_mode, mdcounts);
 
             vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.mv, xd);
             vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.second_mv, xd);

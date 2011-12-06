@@ -385,3 +385,103 @@ void vp8_entropy_mode_init()
 
     vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
 }
+
+#if CONFIG_NEWNEAR
+void vp8_init_mv_ref_counts(VP8_COMMON *pc)
+{
+    vpx_memset(pc->mv_ref_ct, 0, sizeof(pc->mv_ref_ct));
+}
+
+void vp8_accum_mv_refs(VP8_COMMON *pc,
+                       MB_PREDICTION_MODE m,
+                       const int ct[4])
+{
+    if (m == ZEROMV)
+    {
+        ++pc->mv_ref_ct [ct[0]] [0] [0];
+    }
+    else
+    {
+        ++pc->mv_ref_ct [ct[0]] [0] [1];
+        if (m == NEARESTMV)
+        {
+            ++pc->mv_ref_ct [ct[1]] [1] [0];
+        }
+        else
+        {
+            ++pc->mv_ref_ct [ct[1]] [1] [1];
+            if (m == NEARMV)
+            {
+                ++pc->mv_ref_ct [ct[2]] [2] [0];
+            }
+            else
+            {
+                ++pc->mv_ref_ct [ct[2]] [2] [1];
+                if (m == NEWMV)
+                {
+                    ++pc->mv_ref_ct [ct[3]] [3] [0];
+                }
+                else
+                {
+                    ++pc->mv_ref_ct [ct[3]] [3] [1];
+                }
+            }
+        }
+    }
+}
+
+void vp8_update_mode_context(VP8_COMMON *pc)
+{
+    int i, j;
+    for (j = 0; j < 6; j++)
+    {
+        for (i = 0; i < 4; i++)
+        {
+            int this_prob;
+            int count;
+            // context probs
+            count = pc->mv_ref_ct[j][i][0] + pc->mv_ref_ct[j][i][1];
+            if (count)
+                this_prob = 256 * pc->mv_ref_ct[j][i][0] / count;
+            else
+                this_prob = 128;
+            if (this_prob == 0)
+                this_prob = 1;
+            if (this_prob == 256)
+                this_prob = 255;
+
+            pc->mode_context[j][i] = this_prob;
+        }
+    }
+}
+#include "vp8/common/modecont.h"
+void print_mode_contexts(VP8_COMMON *pc)
+{
+    int j, i;
+    for(j=0; j<6; j++)
+    {
+        for (i = 0; i < 4; i++)
+        {
+            printf( "%4d ", pc->vp8_mode_contexts[j][i]);
+        }
+        printf("\n");
+    }
+}
+void print_mv_ref_cts(VP8_COMMON *pc)
+{
+    int j, i;
+    for(j=0; j<6; j++)
+    {
+        for (i = 0; i < 4; i++)
+        {
+            printf("(%4d:%4d) ",
+                    pc->mv_ref_ct[j][i][0],
+                    pc->mv_ref_ct[j][i][1]);
+        }
+        printf("\n");
+    }
+}
+
+
+#endif
+

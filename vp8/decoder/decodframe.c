@@ -27,6 +27,7 @@
 
 #include "decodemv.h"
 #include "vp8/common/extend.h"
+#include "vp8/common/modecont.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "error_concealment.h"
 #endif
@@ -862,7 +863,9 @@ static void init_frame(VP8D_COMP *pbi)
         vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
         vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
 #endif
-
+#if CONFIG_NEWNEAR
+        vp8_init_mv_ref_counts(&pbi->common);
+#endif
     }
     else
     {
@@ -1364,8 +1367,30 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     /* Read the mb_no_coeff_skip flag */
     pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
-
     vp8_decode_mode_mvs(pbi);
+#if CONFIG_NEWNEAR
+    if(!pbi->common.refresh_alt_ref_frame)
+    {
+        vp8_update_mode_context(&pbi->common);
+        vpx_memcpy( pc->vp8_mode_contexts,
+                    pbi->common.mode_context,
+                    sizeof(pbi->common.mode_context));
+
+            if(0) //pbi->common.current_video_frame<2)
+            {
+                printf("mv_ref_ct on frame %d:\n",
+                        pbi->common.current_video_frame);
+                print_mv_ref_cts(&pbi->common);
+
+                printf("mode_contexts on frame %d:\n",
+                        pbi->common.current_video_frame);
+                print_mode_contexts();
+            }
+
+
+    }
+#endif
+
 
 #if CONFIG_ERROR_CONCEALMENT
     if (pbi->ec_active &&
