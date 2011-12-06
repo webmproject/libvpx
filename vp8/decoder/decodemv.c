@@ -392,6 +392,17 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
         pbi->prob_intra = (vp8_prob)vp8_read_literal(bc, 8);
         pbi->prob_last  = (vp8_prob)vp8_read_literal(bc, 8);
         pbi->prob_gf    = (vp8_prob)vp8_read_literal(bc, 8);
+#if CONFIG_DUALPRED
+        pbi->common.dual_pred_mode = vp8_read(bc, 128);
+        if (pbi->common.dual_pred_mode)
+            pbi->common.dual_pred_mode += vp8_read(bc, 128);
+        if (pbi->common.dual_pred_mode == HYBRID_PREDICTION)
+        {
+            pbi->prob_dualpred[0] = (vp8_prob)vp8_read_literal(bc, 8);
+            pbi->prob_dualpred[1] = (vp8_prob)vp8_read_literal(bc, 8);
+            pbi->prob_dualpred[2] = (vp8_prob)vp8_read_literal(bc, 8);
+        }
+#endif /* CONFIG_DUALPRED */
 
         if (vp8_read_bit(bc))
         {
@@ -444,6 +455,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mb_to_top_edge -= LEFT_TOP_MARGIN;
     mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
     mbmi->need_to_clamp_mvs = 0;
+#if CONFIG_DUALPRED
+    mbmi->second_ref_frame = 0;
+#endif /* CONFIG_DUALPRED */
     /* Distance of Mb to the various image edges.
      * These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
      */
@@ -666,6 +680,50 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                       mb_to_bottom_edge);
 
         propagate_mv:  /* same MV throughout */
+#if CONFIG_DUALPRED
+            if (pbi->common.dual_pred_mode == DUAL_PREDICTION_ONLY ||
+                (pbi->common.dual_pred_mode == HYBRID_PREDICTION &&
+                 vp8_read(bc, pbi->prob_dualpred[(mi[-1].mbmi.second_ref_frame != INTRA_FRAME) +
+                                                 (mi[-mis].mbmi.second_ref_frame != INTRA_FRAME)])))
+            {
+                mbmi->second_ref_frame = mbmi->ref_frame + 1;
+                if (mbmi->second_ref_frame == 4)
+                    mbmi->second_ref_frame = 1;
+            }
+            if (mbmi->second_ref_frame)
+            {
+                vp8_find_near_mvs(xd, mi, &nearest, &nearby, &best_mv, rct,
+                                  mbmi->second_ref_frame, pbi->common.ref_frame_sign_bias);
+                switch (mbmi->mode) {
+                case ZEROMV:
+                    mbmi->second_mv.as_int = 0;
+                    break;
+                case NEARMV:
+                    mbmi->second_mv.as_int = nearby.as_int;
+                    vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
+                                 mb_to_top_edge, mb_to_bottom_edge);
+                    break;
+                case NEARESTMV:
+                    mbmi->second_mv.as_int = nearest.as_int;
+                    vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
+                                 mb_to_top_edge, mb_to_bottom_edge);
+                    break;
+                case NEWMV:
+                    read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
+                    mbmi->second_mv.as_mv.row += best_mv.as_mv.row;
+                    mbmi->second_mv.as_mv.col += best_mv.as_mv.col;
+                    mbmi->need_to_clamp_mvs |= vp8_check_mv_bounds(&mbmi->second_mv,
+                                                                   mb_to_left_edge,
+                                                                   mb_to_right_edge,
+                                                                   mb_to_top_edge,
+                                                                   mb_to_bottom_edge);
+                    break;
+                default:
+                    break;
+                }
+            }
+#endif /* CONFIG_DUALPRED */
+
 #if CONFIG_ERROR_CONCEALMENT
             if(pbi->ec_enabled)
             {

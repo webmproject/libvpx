@@ -193,6 +193,9 @@ void vp8_create_common(VP8_COMMON *oci)
     vp8_default_bmode_probs(oci->fc.bmode_prob);
 
     oci->mb_no_coeff_skip = 1;
+#if CONFIG_DUALPRED
+    oci->dual_pred_mode = HYBRID_PREDICTION;
+#endif /* CONFIG_DUALPRED */
     oci->no_lpf = 0;
     oci->filter_type = NORMAL_LOOPFILTER;
     oci->use_bilinear_mc_filter = 0;

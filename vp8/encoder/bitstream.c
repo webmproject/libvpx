@@ -959,6 +959,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int prob_last_coded;
     int prob_gf_coded;
     int prob_skip_false = 0;
+#if CONFIG_DUALPRED
+    int prob_dual_pred[3];
+#endif /* CONFIG_DUALPRED */
 
     cpi->mb.partition_info = cpi->mb.pi;
 
@@ -1011,6 +1014,39 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     vp8_write_literal(w, cpi->prob_intra_coded, 8);
     vp8_write_literal(w, prob_last_coded, 8);
     vp8_write_literal(w, prob_gf_coded, 8);
+
+#if CONFIG_DUALPRED
+    if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+    {
+        vp8_write(w, 1, 128);
+        vp8_write(w, 1, 128);
+        for (i = 0; i < 3; i++) {
+        if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
+        {
+            prob_dual_pred[i] = cpi->single_pred_count[i] * 256 /
+                        (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
+            if (prob_dual_pred[i] < 1)
+                prob_dual_pred[i] = 1;
+            else if (prob_dual_pred[i] > 255)
+                prob_dual_pred[i] = 255;
+        }
+        else
+        {
+            prob_dual_pred[i] = 128;
+        }
+        vp8_write_literal(w, prob_dual_pred[i], 8);
+        }
+    }
+    else if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY)
+    {
+        vp8_write(w, 0, 128);
+    }
+    else /* dual prediction only */
+    {
+        vp8_write(w, 1, 128);
+        vp8_write(w, 0, 128);
+    }
+#endif /* CONFIG_DUALPRED */
 
     update_mbintra_mode_probs(cpi);
 
@@ -1153,14 +1189,29 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     switch (mode)   /* new, split require MVs */
                     {
                     case NEWMV:
-
     #ifdef ENTROPY_STATS
                         active_section = 5;
     #endif
 
                         write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
+#if CONFIG_DUALPRED
+                        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+                        {
+                            int t = m[-mis].mbmi.second_ref_frame != INTRA_FRAME;
+                            int l = m[-1  ].mbmi.second_ref_frame != INTRA_FRAME;
+                            vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
+                                      prob_dual_pred[t + l]);
+                        }
+                        if (mi->second_ref_frame)
+                        {
+                            const int second_rf = mi->second_ref_frame;
+                            int_mv n1, n2;
+                            int ct[4];
+                            vp8_find_near_mvs(xd, m, &n1, &n2, &best_mv, ct, second_rf, cpi->common.ref_frame_sign_bias);
+                            write_mv(w, &mi->second_mv.as_mv, &best_mv, mvc);
+                        }
+#endif /* CONFIG_DUALPRED */
                         break;
-
                     case SPLITMV:
                     {
                         int j = 0;
@@ -1207,6 +1258,15 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     }
                     break;
                     default:
+#if CONFIG_DUALPRED
+                        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+                        {
+                            int t = m[-mis].mbmi.second_ref_frame != INTRA_FRAME;
+                            int l = m[-1  ].mbmi.second_ref_frame != INTRA_FRAME;
+                            vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
+                                      prob_dual_pred[t + l]);
+                        }
+#endif /* CONFIG_DUALPRED */
                         break;
                     }
                 }
@@ -1228,6 +1288,15 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
         cpi->mb.partition_info++;
     }
+
+#if CONFIG_DUALPRED
+    if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+    {
+        cpi->prob_dualpred[0] = (prob_dual_pred[0] + cpi->prob_dualpred[0] + 1) >> 1;
+        cpi->prob_dualpred[1] = (prob_dual_pred[1] + cpi->prob_dualpred[1] + 1) >> 1;
+        cpi->prob_dualpred[2] = (prob_dual_pred[2] + cpi->prob_dualpred[2] + 1) >> 1;
+    }
+#endif /* CONFIG_DUALPRED */
 }
 
 

@@ -802,6 +802,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     }
 
     cpi->mbs_tested_so_far = 0;
+    cpi->mbs_dual_count = 0;
 
     // best quality defaults
     sf->RD = 1;
@@ -857,6 +858,21 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITG   ] = 5000;
         sf->thresh_mult[THR_SPLITA   ] = 5000;
 
+#if CONFIG_DUALPRED
+        sf->thresh_mult[THR_DUAL_ZEROLG   ] = 0;
+        sf->thresh_mult[THR_DUAL_NEARESTLG] = 0;
+        sf->thresh_mult[THR_DUAL_NEARLG   ] = 0;
+        sf->thresh_mult[THR_DUAL_ZEROLA   ] = 0;
+        sf->thresh_mult[THR_DUAL_NEARESTLA] = 0;
+        sf->thresh_mult[THR_DUAL_NEARLA   ] = 0;
+        sf->thresh_mult[THR_DUAL_ZEROGA   ] = 0;
+        sf->thresh_mult[THR_DUAL_NEARESTGA] = 0;
+        sf->thresh_mult[THR_DUAL_NEARGA   ] = 0;
+
+        sf->thresh_mult[THR_DUAL_NEWLG    ] = 1000;
+        sf->thresh_mult[THR_DUAL_NEWLA    ] = 1000;
+        sf->thresh_mult[THR_DUAL_NEWGA    ] = 1000;
+#endif /* CONFIG_DUALPRED */
 
         sf->first_step = 0;
         sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -908,6 +924,22 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITMV  ] = 1700;
         sf->thresh_mult[THR_SPLITG   ] = 4500;
         sf->thresh_mult[THR_SPLITA   ] = 4500;
+
+#if CONFIG_DUALPRED
+        sf->thresh_mult[THR_DUAL_ZEROLG   ] = 0;
+        sf->thresh_mult[THR_DUAL_NEARESTLG] = 0;
+        sf->thresh_mult[THR_DUAL_NEARLG   ] = 0;
+        sf->thresh_mult[THR_DUAL_ZEROLA   ] = 0;
+        sf->thresh_mult[THR_DUAL_NEARESTLA] = 0;
+        sf->thresh_mult[THR_DUAL_NEARLA   ] = 0;
+        sf->thresh_mult[THR_DUAL_ZEROGA   ] = 0;
+        sf->thresh_mult[THR_DUAL_NEARESTGA] = 0;
+        sf->thresh_mult[THR_DUAL_NEARGA   ] = 0;
+
+        sf->thresh_mult[THR_DUAL_NEWLG    ] = 1000;
+        sf->thresh_mult[THR_DUAL_NEWLA    ] = 1000;
+        sf->thresh_mult[THR_DUAL_NEWGA    ] = 1000;
+#endif /* CONFIG_DUALPRED */
 #else
         sf->thresh_mult[THR_NEWMV    ] = 1500;
         sf->thresh_mult[THR_NEWG     ] = 1500;
@@ -968,6 +1000,22 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWA     ] = 2000;
                 sf->thresh_mult[THR_SPLITA   ] = 20000;
             }
+
+#if CONFIG_DUALPRED
+            sf->thresh_mult[THR_DUAL_ZEROLG   ] = 1500;
+            sf->thresh_mult[THR_DUAL_NEARESTLG] = 1500;
+            sf->thresh_mult[THR_DUAL_NEARLG   ] = 1500;
+            sf->thresh_mult[THR_DUAL_ZEROLA   ] = 1500;
+            sf->thresh_mult[THR_DUAL_NEARESTLA] = 1500;
+            sf->thresh_mult[THR_DUAL_NEARLA   ] = 1500;
+            sf->thresh_mult[THR_DUAL_ZEROGA   ] = 1500;
+            sf->thresh_mult[THR_DUAL_NEARESTGA] = 1500;
+            sf->thresh_mult[THR_DUAL_NEARGA   ] = 1500;
+
+            sf->thresh_mult[THR_DUAL_NEWLG    ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEWLA    ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEWGA    ] = 2000;
+#endif /* CONFIG_DUALPRED */
         }
 
         if (Speed > 2)
@@ -1007,6 +1055,22 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWA     ] = 2500;
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
+
+#if CONFIG_DUALPRED
+            sf->thresh_mult[THR_DUAL_ZEROLG   ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARESTLG] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARLG   ] = 2000;
+            sf->thresh_mult[THR_DUAL_ZEROLA   ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARESTLA] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARLA   ] = 2000;
+            sf->thresh_mult[THR_DUAL_ZEROGA   ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARESTGA] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARGA   ] = 2000;
+
+            sf->thresh_mult[THR_DUAL_NEWLG    ] = 2500;
+            sf->thresh_mult[THR_DUAL_NEWLA    ] = 2500;
+            sf->thresh_mult[THR_DUAL_NEWGA    ] = 2500;
+#endif /* CONFIG_DUALPRED */
 
             sf->improved_quant = 0;
             sf->improved_dct = 0;
@@ -1065,6 +1129,15 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEWA] = 4;
             }
 
+#if CONFIG_DUALPRED
+            cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 2;
+            cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 2;
+            cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 2;
+            cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 4;
+            cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 4;
+            cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 4;
+#endif /* CONFIG_DUALPRED */
+
             if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
                 sf->thresh_mult[THR_NEARESTG ] = 2000;
@@ -1080,6 +1153,12 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEARA    ] = 2000;
                 sf->thresh_mult[THR_NEWA     ] = 4000;
             }
+
+#if CONFIG_DUALPRED
+            sf->thresh_mult[THR_DUAL_NEWLG    ] = 4000;
+            sf->thresh_mult[THR_DUAL_NEWLA    ] = 4000;
+            sf->thresh_mult[THR_DUAL_NEWGA    ] = 4000;
+#endif /* CONFIG_DUALPRED */
         }
 
         break;
@@ -1113,6 +1192,22 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITG   ] = 10000;
         sf->thresh_mult[THR_SPLITA   ] = 10000;
         sf->search_method = NSTEP;
+
+#if CONFIG_DUALPRED
+        sf->thresh_mult[THR_DUAL_ZEROLG   ] = 1000;
+        sf->thresh_mult[THR_DUAL_NEARESTLG] = 1000;
+        sf->thresh_mult[THR_DUAL_NEARLG   ] = 1000;
+        sf->thresh_mult[THR_DUAL_ZEROLA   ] = 1000;
+        sf->thresh_mult[THR_DUAL_NEARESTLA] = 1000;
+        sf->thresh_mult[THR_DUAL_NEARLA   ] = 1000;
+        sf->thresh_mult[THR_DUAL_ZEROGA   ] = 1000;
+        sf->thresh_mult[THR_DUAL_NEARESTGA] = 1000;
+        sf->thresh_mult[THR_DUAL_NEARGA   ] = 1000;
+
+        sf->thresh_mult[THR_DUAL_NEWLG    ] = 2000;
+        sf->thresh_mult[THR_DUAL_NEWLA    ] = 2000;
+        sf->thresh_mult[THR_DUAL_NEWGA    ] = 2000;
+#endif /* CONFIG_DUALPRED */
 
         if (Speed > 0)
         {
@@ -1201,6 +1296,21 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
 
+#if CONFIG_DUALPRED
+            sf->thresh_mult[THR_DUAL_ZEROLG   ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARESTLG] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARLG   ] = 2000;
+            sf->thresh_mult[THR_DUAL_ZEROLA   ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARESTLA] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARLA   ] = 2000;
+            sf->thresh_mult[THR_DUAL_ZEROGA   ] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARESTGA] = 2000;
+            sf->thresh_mult[THR_DUAL_NEARGA   ] = 2000;
+
+            sf->thresh_mult[THR_DUAL_NEWLG    ] = 2500;
+            sf->thresh_mult[THR_DUAL_NEWLA    ] = 2500;
+            sf->thresh_mult[THR_DUAL_NEWGA    ] = 2500;
+#endif /* CONFIG_DUALPRED */
         }
 
         if (Speed > 2)
@@ -1226,6 +1336,15 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEARA] = 2;
                 cpi->mode_check_freq[THR_NEWA] = 4;
             }
+
+#if CONFIG_DUALPRED
+            cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 2;
+            cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 2;
+            cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 2;
+            cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 4;
+            cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 4;
+            cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 4;
+#endif /* CONFIG_DUALPRED */
 
             sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
             sf->thresh_mult[THR_SPLITG  ] = INT_MAX;
@@ -1289,6 +1408,12 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEARA    ] = 2000;
                 sf->thresh_mult[THR_NEWA     ] = 4000;
             }
+
+#if CONFIG_DUALPRED
+            sf->thresh_mult[THR_DUAL_NEWLG    ] = 4000;
+            sf->thresh_mult[THR_DUAL_NEWLA    ] = 4000;
+            sf->thresh_mult[THR_DUAL_NEWGA    ] = 4000;
+#endif /* CONFIG_DUALPRED */
         }
 
         if (Speed > 5)
@@ -1358,6 +1483,22 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEARA    ] = thresh;
             }
 
+#if CONFIG_DUALPRED
+            sf->thresh_mult[THR_DUAL_ZEROLG   ] = thresh;
+            sf->thresh_mult[THR_DUAL_NEARESTLG] = thresh;
+            sf->thresh_mult[THR_DUAL_NEARLG   ] = thresh;
+            sf->thresh_mult[THR_DUAL_ZEROLA   ] = thresh;
+            sf->thresh_mult[THR_DUAL_NEARESTLA] = thresh;
+            sf->thresh_mult[THR_DUAL_NEARLA   ] = thresh;
+            sf->thresh_mult[THR_DUAL_ZEROGA   ] = thresh;
+            sf->thresh_mult[THR_DUAL_NEARESTGA] = thresh;
+            sf->thresh_mult[THR_DUAL_NEARGA   ] = thresh;
+
+            sf->thresh_mult[THR_DUAL_NEWLG    ] = thresh << 1;
+            sf->thresh_mult[THR_DUAL_NEWLA    ] = thresh << 1;
+            sf->thresh_mult[THR_DUAL_NEWGA    ] = thresh << 1;
+#endif /* CONFIG_DUALPRED */
+
             // Disable other intra prediction modes
             sf->thresh_mult[THR_TM] = INT_MAX;
             sf->thresh_mult[THR_V_PRED] = INT_MAX;
@@ -1393,6 +1534,22 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEARA] = 1 << Tmp;
                 cpi->mode_check_freq[THR_NEWA] = 1 << (Tmp + 1);
             }
+
+#if CONFIG_DUALPRED
+            cpi->mode_check_freq[THR_DUAL_ZEROLG   ] = 1 << (Tmp - 1);
+            cpi->mode_check_freq[THR_DUAL_NEARESTLG] = 1 << (Tmp - 1);
+            cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 1 << Tmp;
+            cpi->mode_check_freq[THR_DUAL_ZEROLA   ] = 1 << (Tmp - 1);
+            cpi->mode_check_freq[THR_DUAL_NEARESTLA] = 1 << (Tmp - 1);
+            cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 1 << Tmp;
+            cpi->mode_check_freq[THR_DUAL_ZEROGA   ] = 1 << (Tmp - 1);
+            cpi->mode_check_freq[THR_DUAL_NEARESTGA] = 1 << (Tmp - 1);
+            cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 1 << Tmp;
+
+            cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 1 << (Tmp + 1);
+            cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 1 << (Tmp + 1);
+            cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 1 << (Tmp + 1);
+#endif /* CONFIG_DUALPRED */
 
             cpi->mode_check_freq[THR_NEWMV] = 1 << (Tmp - 1);
         }
@@ -1439,6 +1596,31 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
     }
 
+#if CONFIG_DUALPRED
+    if ((cpi->ref_frame_flags & (VP8_LAST_FLAG | VP8_GOLD_FLAG)) != (VP8_LAST_FLAG | VP8_GOLD_FLAG))
+    {
+        sf->thresh_mult[THR_DUAL_ZEROLG   ] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEARESTLG] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEARLG   ] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEWLG    ] = INT_MAX;
+    }
+
+    if ((cpi->ref_frame_flags & (VP8_LAST_FLAG | VP8_ALT_FLAG)) != (VP8_LAST_FLAG | VP8_ALT_FLAG))
+    {
+        sf->thresh_mult[THR_DUAL_ZEROLA   ] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEARESTLA] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEARLA   ] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEWLA    ] = INT_MAX;
+    }
+
+    if ((cpi->ref_frame_flags & (VP8_GOLD_FLAG | VP8_ALT_FLAG)) != (VP8_GOLD_FLAG | VP8_ALT_FLAG))
+    {
+        sf->thresh_mult[THR_DUAL_ZEROGA   ] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEARESTGA] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEARGA   ] = INT_MAX;
+        sf->thresh_mult[THR_DUAL_NEWGA    ] = INT_MAX;
+    }
+#endif /* CONFIG_DUALPRED */
 
     // Slow quant, dct and trellis not worthwhile for first pass
     // so make sure they are always turned off.
@@ -2132,6 +2314,11 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->prob_last_coded              = 128;
     cpi->prob_gf_coded                = 128;
     cpi->prob_intra_coded             = 63;
+#if CONFIG_DUALPRED
+    cpi->prob_dualpred[0]             = 128;
+    cpi->prob_dualpred[1]             = 128;
+    cpi->prob_dualpred[2]             = 128;
+#endif /* CONFIG_DUALPRED */
 
     // Prime the recent reference frame useage counters.
     // Hereafter they will be maintained as a sort of moving average

@@ -84,6 +84,10 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 #endif
     rtcd->recon.copy16x16   = vp8_copy_mem16x16_c;
     rtcd->recon.copy8x8     = vp8_copy_mem8x8_c;
+#if CONFIG_DUALPRED
+    rtcd->recon.avg16x16    = vp8_avg_mem16x16_c;
+    rtcd->recon.avg8x8      = vp8_avg_mem8x8_c;
+#endif /* CONFIG_DUALPRED */
     rtcd->recon.copy8x4     = vp8_copy_mem8x4_c;
     rtcd->recon.recon       = vp8_recon_b_c;
 #if CONFIG_I8X8
@@ -112,14 +116,22 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 #endif
 
 
-    rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_c;
-    rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_c;
-    rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_c;
-    rtcd->subpix.sixtap4x4     = vp8_sixtap_predict_c;
-    rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_c;
-    rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_c;
-    rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_c;
-    rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_c;
+    rtcd->subpix.sixtap16x16       = vp8_sixtap_predict16x16_c;
+    rtcd->subpix.sixtap8x8         = vp8_sixtap_predict8x8_c;
+#if CONFIG_DUALPRED
+    rtcd->subpix.sixtap_avg16x16   = vp8_sixtap_predict_avg16x16_c;
+    rtcd->subpix.sixtap_avg8x8     = vp8_sixtap_predict_avg8x8_c;
+#endif /* CONFIG_DUALPRED */
+    rtcd->subpix.sixtap8x4         = vp8_sixtap_predict8x4_c;
+    rtcd->subpix.sixtap4x4         = vp8_sixtap_predict_c;
+    rtcd->subpix.bilinear16x16     = vp8_bilinear_predict16x16_c;
+    rtcd->subpix.bilinear8x8       = vp8_bilinear_predict8x8_c;
+#if CONFIG_DUALPRED
+    rtcd->subpix.bilinear_avg16x16 = vp8_bilinear_predict_avg16x16_c;
+    rtcd->subpix.bilinear_avg8x8   = vp8_bilinear_predict_avg8x8_c;
+#endif /* CONFIG_DUALPRED */
+    rtcd->subpix.bilinear8x4       = vp8_bilinear_predict8x4_c;
+    rtcd->subpix.bilinear4x4       = vp8_bilinear_predict4x4_c;
 
     rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_c;
     rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_c;

@@ -128,6 +128,61 @@ static void filter_block2d_second_pass
     }
 }
 
+#if CONFIG_DUALPRED
+/*
+ * The only functional difference between filter_block2d_second_pass()
+ * and this function is that filter_block2d_second_pass() does a sixtap
+ * filter on the input and stores it in the output. This function
+ * (filter_block2d_second_pass_avg()) does a sixtap filter on the input,
+ * and then averages that with the content already present in the output
+ * ((filter_result + dest + 1) >> 1) and stores that in the output.
+ */
+static void filter_block2d_second_pass_avg
+(
+    int *src_ptr,
+    unsigned char *output_ptr,
+    int output_pitch,
+    unsigned int src_pixels_per_line,
+    unsigned int pixel_step,
+    unsigned int output_height,
+    unsigned int output_width,
+    const short *vp8_filter
+)
+{
+    unsigned int i, j;
+    int  Temp;
+
+    for (i = 0; i < output_height; i++)
+    {
+        for (j = 0; j < output_width; j++)
+        {
+            /* Apply filter */
+            Temp = ((int)src_ptr[-2 * (int)pixel_step] * vp8_filter[0]) +
+                   ((int)src_ptr[-1 * (int)pixel_step] * vp8_filter[1]) +
+                   ((int)src_ptr[0]                 * vp8_filter[2]) +
+                   ((int)src_ptr[pixel_step]         * vp8_filter[3]) +
+                   ((int)src_ptr[2*pixel_step]       * vp8_filter[4]) +
+                   ((int)src_ptr[3*pixel_step]       * vp8_filter[5]) +
+                   (VP8_FILTER_WEIGHT >> 1);   /* Rounding */
+
+            /* Normalize back to 0-255 */
+            Temp = Temp >> VP8_FILTER_SHIFT;
+
+            if (Temp < 0)
+                Temp = 0;
+            else if (Temp > 255)
+                Temp = 255;
+
+            output_ptr[j] = (unsigned char) ((output_ptr[j] + Temp + 1) >> 1);
+            src_ptr++;
+        }
+
+        /* Start next row */
+        src_ptr    += src_pixels_per_line - output_width;
+        output_ptr += output_pitch;
+    }
+}
+#endif /* CONFIG_DUALPRED */
 
 static void filter_block2d
 (
@@ -193,6 +248,32 @@ void vp8_sixtap_predict8x8_c
 
 }
 
+#if CONFIG_DUALPRED
+void vp8_sixtap_predict_avg8x8_c
+(
+    unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int  dst_pitch
+)
+{
+    const short  *HFilter;
+    const short  *VFilter;
+    int FData[13*16];   /* Temp data buffer used in filtering */
+
+    HFilter = vp8_sub_pel_filters[xoffset];   /* 6 tap */
+    VFilter = vp8_sub_pel_filters[yoffset];   /* 6 tap */
+
+    /* First filter 1-D horizontally... */
+    filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData, src_pixels_per_line, 1, 13, 8, HFilter);
+
+    /* then filter verticaly... */
+    filter_block2d_second_pass_avg(FData + 16, dst_ptr, dst_pitch, 8, 8, 8, 8, VFilter);
+}
+#endif /* CONFIG_DUALPRED */
+
 void vp8_sixtap_predict8x4_c
 (
     unsigned char  *src_ptr,
@@ -245,6 +326,33 @@ void vp8_sixtap_predict16x16_c
 
 }
 
+#if CONFIG_DUALPRED
+void vp8_sixtap_predict_avg16x16_c
+(
+    unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int  dst_pitch
+)
+{
+    const short  *HFilter;
+    const short  *VFilter;
+    int FData[21*24];   /* Temp data buffer used in filtering */
+
+    HFilter = vp8_sub_pel_filters[xoffset];   /* 6 tap */
+    VFilter = vp8_sub_pel_filters[yoffset];   /* 6 tap */
+
+    /* First filter 1-D horizontally... */
+    filter_block2d_first_pass(src_ptr - (2 * src_pixels_per_line), FData,
+                              src_pixels_per_line, 1, 21, 16, HFilter);
+
+    /* then filter verticaly... */
+    filter_block2d_second_pass_avg(FData + 32, dst_ptr, dst_pitch,
+                                   16, 16, 16, 16, VFilter);
+}
+#endif /* CONFIG_DUALPRED */
 
 /****************************************************************************
  *
@@ -349,6 +457,46 @@ static void filter_block2d_bil_second_pass
     }
 }
 
+#if CONFIG_DUALPRED
+/*
+ * As before for filter_block2d_second_pass_avg(), the functional difference
+ * between filter_block2d_bil_second_pass() and filter_block2d_bil_second_pass_avg()
+ * is that filter_block2d_bil_second_pass() does a bilinear filter on input
+ * and stores the result in output; filter_block2d_bil_second_pass_avg(),
+ * instead, does a bilinear filter on input, averages the resulting value
+ * with the values already present in the output and stores the result of
+ * that back into the output ((filter_result + dest + 1) >> 1).
+ */
+static void filter_block2d_bil_second_pass_avg
+(
+    unsigned short *src_ptr,
+    unsigned char  *dst_ptr,
+    int             dst_pitch,
+    unsigned int    height,
+    unsigned int    width,
+    const short    *vp8_filter
+)
+{
+    unsigned int  i, j;
+    int  Temp;
+
+    for (i = 0; i < height; i++)
+    {
+        for (j = 0; j < width; j++)
+        {
+            /* Apply filter */
+            Temp = ((int)src_ptr[0]     * vp8_filter[0]) +
+                   ((int)src_ptr[width] * vp8_filter[1]) +
+                   (VP8_FILTER_WEIGHT / 2);
+            dst_ptr[j] = (unsigned int)(((Temp >> VP8_FILTER_SHIFT) + dst_ptr[j] + 1) >> 1);
+            src_ptr++;
+        }
+
+        /* Next row... */
+        dst_ptr += dst_pitch;
+    }
+}
+#endif /* CONFIG_DUALPRED */
 
 /****************************************************************************
  *
@@ -395,6 +543,28 @@ static void filter_block2d_bil
     filter_block2d_bil_second_pass(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
 }
 
+#if CONFIG_DUALPRED
+static void filter_block2d_bil_avg
+(
+    unsigned char *src_ptr,
+    unsigned char *dst_ptr,
+    unsigned int   src_pitch,
+    unsigned int   dst_pitch,
+    const short   *HFilter,
+    const short   *VFilter,
+    int            Width,
+    int            Height
+)
+{
+    unsigned short FData[17*16];    /* Temp data buffer used in filtering */
+
+    /* First filter 1-D horizontally... */
+    filter_block2d_bil_first_pass(src_ptr, FData, src_pitch, Height + 1, Width, HFilter);
+
+    /* then 1-D vertically... */
+    filter_block2d_bil_second_pass_avg(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
+}
+#endif /* CONFIG_DUALPRED */
 
 void vp8_bilinear_predict4x4_c
 (
@@ -454,6 +624,28 @@ void vp8_bilinear_predict8x8_c
 
 }
 
+#if CONFIG_DUALPRED
+void vp8_bilinear_predict_avg8x8_c
+(
+    unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int  dst_pitch
+)
+{
+    const short *HFilter;
+    const short *VFilter;
+
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
+
+    filter_block2d_bil_avg(src_ptr, dst_ptr, src_pixels_per_line,
+                           dst_pitch, HFilter, VFilter, 8, 8);
+}
+#endif /* CONFIG_DUALPRED */
+
 void vp8_bilinear_predict8x4_c
 (
     unsigned char  *src_ptr,
@@ -492,3 +684,25 @@ void vp8_bilinear_predict16x16_c
 
     filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 16, 16);
 }
+
+#if CONFIG_DUALPRED
+void vp8_bilinear_predict_avg16x16_c
+(
+    unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int  dst_pitch
+)
+{
+    const short *HFilter;
+    const short *VFilter;
+
+    HFilter = vp8_bilinear_filters[xoffset];
+    VFilter = vp8_bilinear_filters[yoffset];
+
+    filter_block2d_bil_avg(src_ptr, dst_ptr, src_pixels_per_line,
+                           dst_pitch, HFilter, VFilter, 16, 16);
+}
+#endif /* CONFIG_DUALPRED */

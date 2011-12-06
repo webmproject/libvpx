@@ -49,6 +49,18 @@ extern prototype_copy_block(vp8_recon_copy16x16);
 #endif
 extern prototype_copy_block(vp8_recon_copy8x8);
 
+#if CONFIG_DUALPRED
+#ifndef vp8_recon_avg16x16
+#define vp8_recon_avg16x16 vp8_avg_mem16x16_c
+#endif
+extern prototype_copy_block(vp8_recon_avg16x16);
+
+#ifndef vp8_recon_avg8x8
+#define vp8_recon_avg8x8 vp8_avg_mem8x8_c
+#endif
+extern prototype_copy_block(vp8_recon_avg8x8);
+#endif /* CONFIG_DUALPRED */
+
 #ifndef vp8_recon_copy8x4
 #define vp8_recon_copy8x4 vp8_copy_mem8x4_c
 #endif
@@ -157,6 +169,10 @@ typedef struct vp8_recon_rtcd_vtable
 {
     vp8_copy_block_fn_t  copy16x16;
     vp8_copy_block_fn_t  copy8x8;
+#if CONFIG_DUALPRED
+    vp8_copy_block_fn_t  avg16x16;
+    vp8_copy_block_fn_t  avg8x8;
+#endif /* CONFIG_DUALPRED */
     vp8_copy_block_fn_t  copy8x4;
     vp8_recon_fn_t       recon;
 #if CONFIG_I8X8

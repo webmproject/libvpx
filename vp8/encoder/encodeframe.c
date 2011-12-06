@@ -910,7 +910,7 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
         xd->fullpixel_mask = 0xfffffff8;
 }
 
-void vp8_encode_frame(VP8_COMP *cpi)
+static void encode_frame_internal(VP8_COMP *cpi)
 {
     int mb_row;
     MACROBLOCK *const x = & cpi->mb;
@@ -953,6 +953,12 @@ void vp8_encode_frame(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, sixtap8x8);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, sixtap16x16);
+#if CONFIG_DUALPRED
+        xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap_avg8x8);
+        xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap_avg16x16);
+#endif /* CONFIG_DUALPRED */
     }
     else
     {
@@ -964,6 +970,12 @@ void vp8_encode_frame(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, bilinear8x8);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                       &cpi->common.rtcd.subpix, bilinear16x16);
+#if CONFIG_DUALPRED
+        xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
+                                      &cpi->common.rtcd.subpix, bilinear_avg8x8);
+        xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
+                                      &cpi->common.rtcd.subpix, bilinear_avg16x16);
+#endif /* CONFIG_DUALPRED */
     }
 
     // Reset frame count of inter 0,0 motion vector usage.
@@ -1006,6 +1018,11 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
     // re-initencode frame context.
     init_encode_frame_mb_context(cpi);
+#if CONFIG_DUALPRED
+    cpi->rd_single_diff = cpi->rd_dual_diff = cpi->rd_hybrid_diff = 0;
+    cpi->single_pred_count[0] = cpi->single_pred_count[1] = cpi->single_pred_count[2] = 0;
+    cpi->dual_pred_count[0]   = cpi->dual_pred_count[1]   = cpi->dual_pred_count[2]   = 0;
+#endif /* CONFIG_DUALPRED */
 
     {
         struct vpx_usec_timer  emr_timer;
@@ -1189,6 +1206,121 @@ void vp8_encode_frame(VP8_COMP *cpi)
 #endif
 
 }
+
+void vp8_encode_frame(VP8_COMP *cpi)
+{
+#if CONFIG_DUALPRED
+    if (cpi->sf.RD)
+    {
+        int frame_type, pred_type;
+        int redo = 0;
+
+        /*
+         * This code does a single RD pass over the whole frame assuming
+         * either dual, single or hybrid prediction as per whatever has
+         * worked best for that type of frame in the past.
+         * It also predicts whether another coding mode would have worked
+         * better that this coding mode. If that is the case, it remembers
+         * that for subsequent frames. If the difference is above a certain
+         * threshold, it will actually re-encode the current frame using
+         * that different coding mode.
+         */
+        if (cpi->common.frame_type == KEY_FRAME)
+            frame_type = 0;
+        else if (cpi->is_src_frame_alt_ref && cpi->common.refresh_golden_frame)
+            frame_type = 3;
+        else if (cpi->common.refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
+            frame_type = 1;
+        else
+            frame_type = 2;
+
+        if (cpi->rd_prediction_type_threshes[frame_type][1] >
+                cpi->rd_prediction_type_threshes[frame_type][0] &&
+            cpi->rd_prediction_type_threshes[frame_type][1] >
+                cpi->rd_prediction_type_threshes[frame_type][2])
+            pred_type = DUAL_PREDICTION_ONLY;
+        else if (cpi->rd_prediction_type_threshes[frame_type][0] >
+                    cpi->rd_prediction_type_threshes[frame_type][1] &&
+                 cpi->rd_prediction_type_threshes[frame_type][0] >
+                    cpi->rd_prediction_type_threshes[frame_type][2])
+            pred_type = SINGLE_PREDICTION_ONLY;
+        else
+            pred_type = HYBRID_PREDICTION;
+
+        cpi->common.dual_pred_mode = pred_type;
+        encode_frame_internal(cpi);
+
+        cpi->rd_single_diff /= cpi->common.MBs;
+        cpi->rd_prediction_type_threshes[frame_type][0] += cpi->rd_single_diff;
+        cpi->rd_prediction_type_threshes[frame_type][0] >>= 1;
+        cpi->rd_dual_diff   /= cpi->common.MBs;
+        cpi->rd_prediction_type_threshes[frame_type][1] += cpi->rd_dual_diff;
+        cpi->rd_prediction_type_threshes[frame_type][1] >>= 1;
+        cpi->rd_hybrid_diff /= cpi->common.MBs;
+        cpi->rd_prediction_type_threshes[frame_type][2] += cpi->rd_hybrid_diff;
+        cpi->rd_prediction_type_threshes[frame_type][2] >>= 1;
+
+        /* FIXME make "100" (the threshold at which to re-encode the
+         * current frame) a commandline option. */
+        if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY &&
+            (cpi->rd_dual_diff >= 100 || cpi->rd_hybrid_diff >= 100))
+        {
+            redo = 1;
+            cpi->common.dual_pred_mode = cpi->rd_dual_diff > cpi->rd_hybrid_diff ?
+                        DUAL_PREDICTION_ONLY : HYBRID_PREDICTION;
+        }
+        else if (cpi->common.dual_pred_mode == DUAL_PREDICTION_ONLY &&
+                 (cpi->rd_single_diff >= 100 || cpi->rd_hybrid_diff >= 100))
+        {
+            redo = 1;
+            cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_hybrid_diff ?
+                        SINGLE_PREDICTION_ONLY : HYBRID_PREDICTION;
+        }
+        else if (cpi->common.dual_pred_mode == HYBRID_PREDICTION &&
+                 (cpi->rd_single_diff >= 100 || cpi->rd_dual_diff >= 100))
+        {
+            if (cpi->dual_pred_count == 0)
+            {
+                cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
+            }
+            else if (cpi->single_pred_count == 0)
+            {
+                cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
+            }
+            else
+            {
+                redo = 1;
+                cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_dual_diff ?
+                            SINGLE_PREDICTION_ONLY : DUAL_PREDICTION_ONLY;
+            }
+        }
+
+
+        if (redo)
+        {
+            encode_frame_internal(cpi);
+        }
+
+        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+        {
+            if (cpi->dual_pred_count == 0)
+            {
+                cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
+            }
+            else if (cpi->single_pred_count == 0)
+            {
+                cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
+            }
+        }
+    }
+    else
+#endif /* CONFIG_DUALPRED */
+    {
+        encode_frame_internal(cpi);
+    }
+
+}
+
 void vp8_setup_block_ptrs(MACROBLOCK *x)
 {
     int r, c;
@@ -1416,6 +1548,7 @@ int vp8cx_encode_inter_macroblock
     if (cpi->sf.RD)
     {
         int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
+        int single, dual, hybrid;
 
         /* Are we using the fast quantizer for the mode selection? */
         if(cpi->sf.use_fastquant_for_pick)
@@ -1430,7 +1563,23 @@ int vp8cx_encode_inter_macroblock
             cpi->zbin_mode_boost_enabled = 0;
         }
         vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                               &distortion, &intra_error);
+                               &distortion, &intra_error, &single, &dual, &hybrid);
+#if CONFIG_DUALPRED
+        cpi->rd_single_diff += single;
+        cpi->rd_dual_diff   += dual;
+        cpi->rd_hybrid_diff += hybrid;
+        if (x->e_mbd.mode_info_context->mbmi.ref_frame &&
+            x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+        {
+            MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
+            MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
+            int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
+            if (x->e_mbd.mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
+                cpi->single_pred_count[cnt]++;
+            else
+                cpi->dual_pred_count[cnt]++;
+        }
+#endif /* CONFIG_DUALPRED */
 
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)
@@ -1581,6 +1730,27 @@ int vp8cx_encode_inter_macroblock
         xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
         xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
+#if CONFIG_DUALPRED
+        if (xd->mode_info_context->mbmi.second_ref_frame) {
+            int second_ref_fb_idx;
+
+            cpi->mbs_dual_count++;
+            if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
+                second_ref_fb_idx = cpi->common.lst_fb_idx;
+            else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
+                second_ref_fb_idx = cpi->common.gld_fb_idx;
+            else
+                second_ref_fb_idx = cpi->common.alt_fb_idx;
+
+            xd->second_pre.y_buffer = cpi->common.yv12_fb[second_ref_fb_idx].y_buffer +
+                                            recon_yoffset;
+            xd->second_pre.u_buffer = cpi->common.yv12_fb[second_ref_fb_idx].u_buffer +
+                                            recon_uvoffset;
+            xd->second_pre.v_buffer = cpi->common.yv12_fb[second_ref_fb_idx].v_buffer +
+                                            recon_uvoffset;
+        }
+#endif /* CONFIG_DUALPRED */
+
         if (!x->skip)
         {
             vp8_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
@@ -1591,10 +1761,11 @@ int vp8cx_encode_inter_macroblock
 
         }
         else
+        {
             vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
                                            xd->dst.u_buffer, xd->dst.v_buffer,
                                            xd->dst.y_stride, xd->dst.uv_stride);
-
+        }
     }
 #if CONFIG_T8X8
     if ( get_seg_tx_type( xd, *segment_id ) == TX_8X8 )

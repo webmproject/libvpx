@@ -73,6 +73,16 @@ typedef enum
     BILINEAR = 1
 } INTERPOLATIONFILTERTYPE;
 
+#if CONFIG_DUALPRED
+typedef enum
+{
+    SINGLE_PREDICTION_ONLY = 0,
+    DUAL_PREDICTION_ONLY   = 1,
+    HYBRID_PREDICTION      = 2,
+    NB_PREDICTION_TYPES    = 3,
+} DUALPREDMODE_TYPE;
+#endif /* CONFIG_DUALPRED */
+
 typedef struct VP8_COMMON_RTCD
 {
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -130,6 +140,9 @@ typedef struct VP8Common
     /* profile settings */
     int experimental;
     int mb_no_coeff_skip;
+#if CONFIG_DUALPRED
+    DUALPREDMODE_TYPE dual_pred_mode;
+#endif /* CONFIG_DUALPRED */
     int no_lpf;
     int use_bilinear_mc_filter;
     int full_pixel;

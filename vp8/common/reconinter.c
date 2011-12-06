@@ -62,6 +62,30 @@ void vp8_copy_mem16x16_c(
 
 }
 
+#if CONFIG_DUALPRED
+void vp8_avg_mem16x16_c(
+    unsigned char *src,
+    int src_stride,
+    unsigned char *dst,
+    int dst_stride)
+{
+    int r;
+
+    for (r = 0; r < 16; r++)
+    {
+        int n;
+
+        for (n = 0; n < 16; n++)
+        {
+            dst[n] = (dst[n] + src[n] + 1) >> 1;
+        }
+
+        src += src_stride;
+        dst += dst_stride;
+    }
+}
+#endif /* CONFIG_DUALPRED */
+
 void vp8_copy_mem8x8_c(
     unsigned char *src,
     int src_stride,
@@ -91,6 +115,30 @@ void vp8_copy_mem8x8_c(
     }
 
 }
+
+#if CONFIG_DUALPRED
+void vp8_avg_mem8x8_c(
+    unsigned char *src,
+    int src_stride,
+    unsigned char *dst,
+    int dst_stride)
+{
+    int r;
+
+    for (r = 0; r < 8; r++)
+    {
+        int n;
+
+        for (n = 0; n < 8; n++)
+        {
+            dst[n] = (dst[n] + src[n] + 1) >> 1;
+        }
+
+        src += src_stride;
+        dst += dst_stride;
+    }
+}
+#endif /* CONFIG_DUALPRED */
 
 void vp8_copy_mem8x4_c(
     unsigned char *src,
@@ -388,6 +436,74 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
 
 }
 
+#if CONFIG_DUALPRED
+/*
+ * This function should be called after an initial call to
+ * vp8_build_inter16x16_predictors_mb() or _mby()/_mbuv().
+ * It will run a second sixtap filter on a (different) ref
+ * frame and average the result with the output of the
+ * first sixtap filter. The second reference frame is stored
+ * in x->second_pre (the reference frame index is in
+ * x->mode_info_context->mbmi.second_ref_frame). The second
+ * motion vector is x->mode_info_context->mbmi.second_mv.
+ *
+ * This allows blending prediction from two reference frames
+ * which sometimes leads to better prediction than from a
+ * single reference framer.
+ */
+void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
+                                            unsigned char *dst_y,
+                                            unsigned char *dst_u,
+                                            unsigned char *dst_v,
+                                            int dst_ystride,
+                                            int dst_uvstride)
+{
+    int offset;
+    unsigned char *ptr;
+    unsigned char *uptr, *vptr;
+
+    int mv_row = x->mode_info_context->mbmi.second_mv.as_mv.row;
+    int mv_col = x->mode_info_context->mbmi.second_mv.as_mv.col;
+
+    unsigned char *ptr_base = x->second_pre.y_buffer;
+    int pre_stride = x->block[0].pre_stride;
+
+    ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
+
+    if ((mv_row | mv_col) & 7)
+    {
+        x->subpixel_predict_avg16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, dst_y, dst_ystride);
+    }
+    else
+    {
+        RECON_INVOKE(&x->rtcd->recon, avg16x16)(ptr, pre_stride, dst_y, dst_ystride);
+    }
+
+    /* calc uv motion vectors */
+    mv_row = (mv_row + (mv_row > 0)) >> 1;
+    mv_col = (mv_col + (mv_col > 0)) >> 1;
+
+    mv_row &= x->fullpixel_mask;
+    mv_col &= x->fullpixel_mask;
+
+    pre_stride >>= 1;
+    offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
+    uptr = x->second_pre.u_buffer + offset;
+    vptr = x->second_pre.v_buffer + offset;
+
+    if ((mv_row | mv_col) & 7)
+    {
+        x->subpixel_predict_avg8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, dst_u, dst_uvstride);
+        x->subpixel_predict_avg8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, dst_v, dst_uvstride);
+    }
+    else
+    {
+        RECON_INVOKE(&x->rtcd->recon, avg8x8)(uptr, pre_stride, dst_u, dst_uvstride);
+        RECON_INVOKE(&x->rtcd->recon, avg8x8)(vptr, pre_stride, dst_v, dst_uvstride);
+    }
+}
+#endif /* CONFIG_DUALPRED */
+
 static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
 {
     int i;
@@ -490,6 +606,17 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
     {
         vp8_build_inter16x16_predictors_mb(x, x->predictor, &x->predictor[256],
                                            &x->predictor[320], 16, 8);
+#if CONFIG_DUALPRED
+        if (x->mode_info_context->mbmi.second_ref_frame)
+        {
+            /* 256 = offset of U plane in Y+U+V buffer;
+             * 320 = offset of V plane in Y+U+V buffer.
+             * (256=16x16, 320=16x16+8x8). */
+            vp8_build_2nd_inter16x16_predictors_mb(x, x->predictor,
+                                                   &x->predictor[256],
+                                                   &x->predictor[320], 16, 8);
+        }
+#endif /* CONFIG_DUALPRED */
     }
     else
     {

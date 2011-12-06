@@ -135,6 +135,9 @@ typedef struct VP8Decompressor
     vp8_prob prob_last;
     vp8_prob prob_gf;
     vp8_prob prob_skip_false;
+#if CONFIG_DUALPRED
+    vp8_prob prob_dualpred[3];
+#endif /* CONFIG_DUALPRED */
 
 #if CONFIG_ERROR_CONCEALMENT
     MB_OVERLAP *overlaps;

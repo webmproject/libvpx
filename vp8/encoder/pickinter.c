@@ -44,6 +44,7 @@ extern unsigned int cnt_pm;
 
 extern const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES];
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
+extern const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES];
 
 extern unsigned int (*vp8_get4x4sse_cs)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
 extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
@@ -527,6 +528,11 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         if (best_rd <= cpi->rd_threshes[mode_index])
             continue;
+
+#if CONFIG_DUALPRED
+        if (vp8_second_ref_frame_order[mode_index])
+            continue;
+#endif /* CONFIG_DUALPRED */
 
         x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
 

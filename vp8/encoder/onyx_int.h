@@ -42,11 +42,12 @@
 #define AF_THRESH   25
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
-#if CONFIG_I8X8
-#define MAX_MODES 21
-#else
-#define MAX_MODES 20
-#endif
+#if CONFIG_DUALPRED
+#define MAX_MODES (32 + CONFIG_I8X8)
+#else /* CONFIG_DUALPRED */
+#define MAX_MODES (20 + CONFIG_I8X8)
+#endif /* CONFIG_DUALPRED */
+
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
 
@@ -192,6 +193,24 @@ typedef enum
 #if CONFIG_I8X8
     THR_I8X8_PRED      = 20,
 #endif
+
+#if CONFIG_DUALPRED
+    THR_DUAL_ZEROLG    = 20,
+    THR_DUAL_NEARESTLG = 21,
+    THR_DUAL_NEARLG    = 22,
+
+    THR_DUAL_ZEROLA    = 23,
+    THR_DUAL_NEARESTLA = 24,
+    THR_DUAL_NEARLA    = 25,
+
+    THR_DUAL_ZEROGA    = 26,
+    THR_DUAL_NEARESTGA = 27,
+    THR_DUAL_NEARGA    = 28,
+
+    THR_DUAL_NEWLG     = 29,
+    THR_DUAL_NEWLA     = 30,
+    THR_DUAL_NEWGA     = 31,
+#endif /* CONFIG_DUALPRED */
 }
 THR_MODES;
 
@@ -339,10 +358,16 @@ typedef struct VP8_COMP
     unsigned int mode_test_hit_counts[MAX_MODES];
     unsigned int mode_chosen_counts[MAX_MODES];
     unsigned int mbs_tested_so_far;
+    unsigned int mbs_dual_count;
 
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
     int rd_threshes[MAX_MODES];
+#if CONFIG_DUALPRED
+    int rd_single_diff, rd_dual_diff, rd_hybrid_diff;
+    int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
+    int dual_pred_count[3], single_pred_count[3];
+#endif /* CONFIG_DUALPRED */
 
     int RDMULT;
     int RDDIV ;
@@ -491,6 +516,9 @@ typedef struct VP8_COMP
     int prob_skip_false;
     int last_skip_false_probs[3];
     int last_skip_probs_q[3];
+#if CONFIG_DUALPRED
+    int prob_dualpred[3];
+#endif /* CONFIG_DUALPRED */
     int recent_ref_frame_usage[MAX_REF_FRAMES];
 
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
