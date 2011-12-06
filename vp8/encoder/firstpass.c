@@ -898,7 +898,7 @@ static double calc_correction_factor( double err_per_mb,
     double correction_factor;
 
     // Adjustment based on actual quantizer to power term.
-    power_term = (vp8_convert_qindex_to_q(Q) * 0.01) + 0.36;
+    power_term = (vp8_convert_qindex_to_q(Q) * 0.01) + pt_low;
     power_term = (power_term > pt_high) ? pt_high : power_term;
 
     // Adjustments to error term
@@ -919,29 +919,29 @@ static double calc_correction_factor( double err_per_mb,
 // PGW TODO..
 // This code removes direct dependency on QIndex to determin the range
 // (now uses the actual quantizer) but has not been tuned.
-static double adjust_maxq_qrange(VP8_COMP *cpi, int qindex )
+static double adjust_maxq_qrange(VP8_COMP *cpi)
 {
     int i;
-    double q = vp8_convert_qindex_to_q(qindex);
+    double q;
 
-    // Set the max corresponding to real q * 2.0
+    // Set the max corresponding to cpi->avg_q * 2.0
+    q = cpi->avg_q * 2.0;
     cpi->twopass.maxq_max_limit = cpi->worst_quality;
-    for ( i = qindex; i < cpi->worst_quality; i++ )
+    for ( i = cpi->best_quality; i <= cpi->worst_quality; i++ )
     {
-        if ( vp8_convert_qindex_to_q(qindex) >= (q * 2.0) )
-        {
-            cpi->twopass.maxq_max_limit = i;
-        }
+        cpi->twopass.maxq_max_limit = i;
+        if ( vp8_convert_qindex_to_q(i) >= q )
+            break;
     }
 
-    // Set the min corresponding to real q * 0.5
+    // Set the min corresponding to cpi->avg_q * 0.5
+    q = cpi->avg_q * 0.5;
     cpi->twopass.maxq_min_limit = cpi->best_quality;
-    for ( i = qindex; i > cpi->best_quality; i-- )
+    for ( i = cpi->worst_quality; i >= cpi->best_quality; i-- )
     {
-        if ( vp8_convert_qindex_to_q(qindex) <= (q * 0.5) )
-        {
-            cpi->twopass.maxq_min_limit = i;
-        }
+        cpi->twopass.maxq_min_limit = i;
+        if ( vp8_convert_qindex_to_q(i) <= q )
+            break;
     }
 }
 
@@ -1018,7 +1018,7 @@ static int estimate_max_q(VP8_COMP *cpi,
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, 150.0, 0.40, 0.90, Q);
+            calc_correction_factor(err_per_mb, 150.0, 0.36, 0.90, Q);
 
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
@@ -1054,7 +1054,7 @@ static int estimate_max_q(VP8_COMP *cpi,
                   ((unsigned int)cpi->twopass.total_stats->count >> 8)) &&
          (cpi->ni_frames > 150) )
     {
-        adjust_maxq_qrange( cpi, cpi->ni_av_qi );
+        adjust_maxq_qrange( cpi );
     }
 
     return Q;
@@ -1120,7 +1120,7 @@ static int estimate_cq( VP8_COMP *cpi,
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, 100.0, 0.40, 0.90, Q);
+            calc_correction_factor(err_per_mb, 100.0, 0.36, 0.90, Q);
 
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
@@ -1181,7 +1181,7 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, 150.0, 0.40, 0.90, Q);
+            calc_correction_factor(err_per_mb, 150.0, 0.36, 0.90, Q);
 
         bits_per_mb_at_this_q =
             (int)( .5 + ( err_correction_factor *
@@ -2329,6 +2329,46 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     cpi->per_frame_bandwidth = target_frame_size;                                           // Per frame bit target for this frame
 }
 
+// Make a damped adjustment to the active max q.
+int adjust_active_maxq( int old_maxqi, int new_maxqi )
+{
+    int i;
+    int ret_val = new_maxqi;
+    double old_q;
+    double new_q;
+    double target_q;
+
+    old_q = vp8_convert_qindex_to_q( old_maxqi );
+    new_q = vp8_convert_qindex_to_q( new_maxqi );
+
+    target_q = ((old_q * 7.0) + new_q) / 8.0;
+
+    if ( target_q > old_q )
+    {
+        for ( i = old_maxqi; i <= new_maxqi; i++ )
+        {
+            if ( vp8_convert_qindex_to_q( i ) >= target_q )
+            {
+                ret_val = i;
+                break;
+            }
+        }
+    }
+    else
+    {
+        for ( i = old_maxqi; i >= new_maxqi; i-- )
+        {
+            if ( vp8_convert_qindex_to_q( i ) <= target_q )
+            {
+                ret_val = i;
+                break;
+            }
+        }
+    }
+
+    return ret_val;
+}
+
 void vp8_second_pass(VP8_COMP *cpi)
 {
     int tmp_q;
@@ -2480,15 +2520,16 @@ void vp8_second_pass(VP8_COMP *cpi)
                     (int)(cpi->twopass.bits_left / frames_left),
                     overhead_bits );
 
+        cpi->active_worst_quality         = tmp_q;
+        cpi->ni_av_qi                     = tmp_q;
+        cpi->avg_q                        = vp8_convert_qindex_to_q( tmp_q );
+
         // Limit the maxq value returned subsequently.
         // This increases the risk of overspend or underspend if the initial
         // estimate for the clip is bad, but helps prevent excessive
         // variation in Q, especially near the end of a clip
         // where for example a small overspend may cause Q to crash
-        adjust_maxq_qrange(cpi, tmp_q);
-
-        cpi->active_worst_quality         = tmp_q;
-        cpi->ni_av_qi                     = tmp_q;
+        adjust_maxq_qrange(cpi);
     }
 
     // The last few frames of a clip almost always have to few or too many
@@ -2509,14 +2550,9 @@ void vp8_second_pass(VP8_COMP *cpi)
                     (int)(cpi->twopass.bits_left / frames_left),
                     overhead_bits );
 
-        // Move active_worst_quality but in a damped way
-        if (tmp_q > cpi->active_worst_quality)
-            cpi->active_worst_quality ++;
-        else if (tmp_q < cpi->active_worst_quality)
-            cpi->active_worst_quality --;
-
+        // Make a damped adjustment to active max Q
         cpi->active_worst_quality =
-            ((cpi->active_worst_quality * 3) + tmp_q + 2) / 4;
+            adjust_active_maxq( cpi->active_worst_quality, tmp_q );
     }
 
     cpi->twopass.frames_to_key --;

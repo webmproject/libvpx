@@ -253,7 +253,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 #if CONFIG_EXTEND_QRANGE
     q = (int)pow(vp8_dc_quant(QIndex,0)>>2, 1.25);
     q = q << 2;
-    cpi->RDMULT *= 16;
+    cpi->RDMULT = cpi->RDMULT << 4;
 #else
     q = (int)pow(vp8_dc_quant(QIndex,0), 1.25);
 #endif

@@ -416,13 +416,43 @@ static void segmentation_test_function(VP8_PTR ptr)
 
 }
 
+// Computes a q delta (in "q index" terms) to get from a starting q value
+// to a target value
+// target q value
+static int compute_qdelta( VP8_COMP *cpi, double qstart, double qtarget )
+{
+    int i;
+    int start_index = cpi->worst_quality;
+    int target_index = cpi->worst_quality;
+    int retval = 0;
+
+    // Convert the average q value to an index.
+    for ( i = cpi->best_quality; i < cpi->worst_quality; i++ )
+    {
+        start_index = i;
+        if ( vp8_convert_qindex_to_q(i) >= qstart )
+            break;
+    }
+
+    // Convert the q target to an index
+    for ( i = cpi->best_quality; i < cpi->worst_quality; i++ )
+    {
+        target_index = i;
+        if ( vp8_convert_qindex_to_q(i) >= qtarget )
+            break;
+    }
+
+    return target_index - start_index;
+}
+
 //#if CONFIG_SEGFEATURES
 static void init_seg_features(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
-    int high_q = ((int)vp8_convert_qindex_to_q(cpi->ni_av_qi) > 32);
+    int high_q = (int)(cpi->avg_q > 32.0);
+    int qi_delta;
 
     // For now at least dont enable seg features alongside cyclic refresh.
     if ( cpi->cyclic_refresh_mode_enabled ||
@@ -471,7 +501,8 @@ static void init_seg_features(VP8_COMP *cpi)
             xd->update_mb_segmentation_map = 1;
             xd->update_mb_segmentation_data = 1;
 
-            set_segdata( xd, 1, SEG_LVL_ALT_Q, -(3+(cpi->ni_av_qi >> 3)) );
+            qi_delta = compute_qdelta( cpi, cpi->avg_q, (cpi->avg_q * 0.875) );
+            set_segdata( xd, 1, SEG_LVL_ALT_Q, (qi_delta - 2) );
             set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
 
             enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
@@ -495,7 +526,10 @@ static void init_seg_features(VP8_COMP *cpi)
                 xd->update_mb_segmentation_data = 1;
                 xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
 
-                set_segdata( xd, 1, SEG_LVL_ALT_Q, 5 );
+                qi_delta = compute_qdelta( cpi, cpi->avg_q,
+                                           (cpi->avg_q * 1.125) );
+                set_segdata( xd, 1, SEG_LVL_ALT_Q, (qi_delta + 2) );
+                set_segdata( xd, 1, SEG_LVL_ALT_Q, 0 );
                 enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
 
                 set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
@@ -2242,6 +2276,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->ni_av_qi                     = cpi->oxcf.worst_allowed_q;
     cpi->ni_tot_qi                    = 0;
     cpi->ni_frames                   = 0;
+    cpi->tot_q = 0.0;
+    cpi->avg_q = vp8_convert_qindex_to_q( cpi->oxcf.worst_allowed_q );
     cpi->total_byte_count             = 0;
 
     cpi->drop_frame                  = 0;
@@ -4601,6 +4637,8 @@ static void encode_frame_to_data_rate
     if ((cm->frame_type != KEY_FRAME) && !cm->refresh_golden_frame && !cm->refresh_alt_ref_frame)
     {
         cpi->ni_frames++;
+        cpi->tot_q += vp8_convert_qindex_to_q(Q);
+        cpi->avg_q = cpi->tot_q / (double)cpi->ni_frames;
 
         // Calculate the average Q for normal inter frames (not key or GFU
         // frames).
@@ -4732,7 +4770,7 @@ static void encode_frame_to_data_rate
 
         if (cpi->twopass.total_left_stats->coded_error != 0.0)
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d"
-                       "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f"
+                       "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
                        "%10.3f %8d\n",
                        cpi->common.current_video_frame, cpi->this_frame_target,
@@ -4749,6 +4787,7 @@ static void encode_frame_to_data_rate
 #endif
                        vp8_convert_qindex_to_q(cpi->active_best_quality),
                        vp8_convert_qindex_to_q(cpi->active_worst_quality),
+                       cpi->avg_q,
                        vp8_convert_qindex_to_q(cpi->ni_av_qi),
                        vp8_convert_qindex_to_q(cpi->cq_target_quality),
                        cpi->zbin_over_quant,
@@ -4763,7 +4802,7 @@ static void encode_frame_to_data_rate
                        cpi->tot_recode_hits);
         else
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d"
-                       "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f"
+                       "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
                        "%8d\n",
                        cpi->common.current_video_frame,
@@ -4780,6 +4819,7 @@ static void encode_frame_to_data_rate
 #endif
                        vp8_convert_qindex_to_q(cpi->active_best_quality),
                        vp8_convert_qindex_to_q(cpi->active_worst_quality),
+                       cpi->avg_q,
                        vp8_convert_qindex_to_q(cpi->ni_av_qi),
                        vp8_convert_qindex_to_q(cpi->cq_target_quality),
                        cpi->zbin_over_quant,

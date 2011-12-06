@@ -125,12 +125,26 @@ double vp8_convert_qindex_to_q( int qindex )
 
 int vp8_gfboost_qadjust( int qindex )
 {
-    return (50.0 * pow(vp8_convert_qindex_to_q(qindex), 0.25) + 0.5);
+    int retval;
+    double q;
+
+    q = vp8_convert_qindex_to_q(qindex);
+    retval = (int)( ( 0.00000828 * q * q * q ) +
+                    ( -0.0055 * q * q ) +
+                    ( 1.32 * q ) + 79.3 );
+    return retval;
 }
 
 int kfboost_qadjust( int qindex )
 {
-    return (91.0 * pow(vp8_convert_qindex_to_q(qindex), 0.165) + 0.5);
+    int retval;
+    double q;
+
+    q = vp8_convert_qindex_to_q(qindex);
+    retval = (int)( ( 0.00000973 * q * q * q ) +
+                    ( -0.00613 * q * q ) +
+                    ( 1.316 * q ) + 121.2 );
+    return retval;
 }
 
 int vp8_bits_per_mb( FRAME_TYPE frame_type, int qindex  )

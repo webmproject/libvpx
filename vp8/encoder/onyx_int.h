@@ -391,6 +391,8 @@ typedef struct VP8_COMP
     int ni_tot_qi;
     int ni_frames;
     int avg_frame_qindex;
+    double tot_q;
+    double avg_q;
 
     int zbin_over_quant;
     int zbin_mode_boost;
