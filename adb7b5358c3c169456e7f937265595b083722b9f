@@ -34,6 +34,24 @@
       "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//zPw\u003d",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-06T00:00:32Z",
+      "side": 1,
+      "message": "To preserve the behavior where you can dump the buffer say from the debugger and get something most other tools will accept, I think we want to maintain that the chroma stride is half the luma stride. So I think stride_align only tells you the alignment of the stride on the y plane. Since the stride is halved for the UV, the alignment for those planes gets halved too (the first plane has the same alignment as the y plane, but the second has half that. So to get say n-byte alignment on all 3 planes, you want the base pointer to have 2*n alignment. So buf_align\u003d32, stride_align\u003d16 to get all 3 planes to have 16 byte alignment.\n\nOk to leave it as an extra parameter to img_alloc_helper if you think it makes difference in terms of readability. Put a comment either way to explain the calculation.",
+      "parentUuid": "AAAAGX//zR0\u003d",
+      "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
