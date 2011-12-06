@@ -77,10 +77,10 @@ typedef struct
     int y_modes[VP8_YMODES];
     int uv_modes[VP8_UV_MODES];
     int i8x8_modes[VP8_I8X8_MODES];
-    int b_modes[10];
+    int b_modes[B_MODE_COUNT];
     int inter_y_modes[MB_MODE_COUNT];
     int inter_uv_modes[VP8_UV_MODES];
-    int inter_b_modes[10];
+    int inter_b_modes[B_MODE_COUNT];
 #endif
     /* interframe intra mode probs */
     vp8_prob ymode_prob[VP8_YMODES-1], uv_mode_prob[VP8_UV_MODES-1];

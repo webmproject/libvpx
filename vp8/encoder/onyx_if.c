@@ -148,10 +148,10 @@ extern int y_modes[VP8_YMODES]  ;
 extern int i8x8_modes[VP8_I8X8_MODES];
 extern int uv_modes[VP8_UV_MODES] ;
 extern int uv_modes_y[VP8_YMODES][VP8_UV_MODES];
-extern int b_modes[10]  ;
-extern int inter_y_modes[10] ;
-extern int inter_uv_modes[4] ;
-extern unsigned int inter_b_modes[15];
+extern int b_modes[B_MODE_COUNT];
+extern int inter_y_modes[MB_MODE_COUNT] ;
+extern int inter_uv_modes[VP8_UV_MODES] ;
+extern unsigned int inter_b_modes[B_MODE_COUNT];
 #endif
 
 extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
@@ -2748,10 +2748,14 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             }
 
             fprintf(f, "Modes in Inter Frames:\n");
-            fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d\n",
-                    inter_y_modes[0], inter_y_modes[1], inter_y_modes[2], inter_y_modes[3], inter_y_modes[4],
-                    inter_y_modes[5], inter_y_modes[6], inter_y_modes[7], inter_y_modes[8], inter_y_modes[9]);
-            fprintf(f, "UV:%8d, %8d, %8d, %8d\n", inter_uv_modes[0], inter_uv_modes[1], inter_uv_modes[2], inter_uv_modes[3]);
+            fprintf(f,
+                "Y: %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d\n",
+                    inter_y_modes[0], inter_y_modes[1], inter_y_modes[2],
+                    inter_y_modes[3], inter_y_modes[4], inter_y_modes[5],
+                    inter_y_modes[6], inter_y_modes[7], inter_y_modes[8],
+                    inter_y_modes[9], inter_y_modes[10]);
+            fprintf(f, "UV:%8d, %8d, %8d, %8d\n", inter_uv_modes[0],
+                    inter_uv_modes[1], inter_uv_modes[2], inter_uv_modes[3]);
             fprintf(f, "B: ");
             {
                 int i;

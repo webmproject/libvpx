@@ -25,12 +25,12 @@ extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 
 #ifdef MODE_STATS
-extern unsigned int inter_y_modes[10];
-extern unsigned int inter_uv_modes[4];
-extern unsigned int inter_b_modes[15];
-extern unsigned int y_modes[5];
-extern unsigned int uv_modes[4];
-extern unsigned int b_modes[14];
+extern unsigned int inter_y_modes[MB_MODE_COUNT];
+extern unsigned int inter_uv_modes[VP8_UV_MODES];
+extern unsigned int inter_b_modes[B_MODE_COUNT];
+extern unsigned int y_modes[VP8_YMODES];
+extern unsigned int uv_modes[VP8_UV_MODES];
+extern unsigned int b_modes[B_MODE_COUNT];
 #endif
 extern void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
 
