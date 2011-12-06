@@ -70,6 +70,24 @@
       "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//y+A\u003d",
+        "filename": "vpx/src/vpx_image.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-06T16:55:47Z",
+      "side": 1,
+      "message": "ok, you sold me.",
+      "parentUuid": "AAAAGX//zAU\u003d",
+      "revId": "adb7b5358c3c169456e7f937265595b083722b9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
