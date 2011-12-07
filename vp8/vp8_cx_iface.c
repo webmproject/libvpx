@@ -137,7 +137,8 @@ update_error_state(vpx_codec_alg_priv_t                 *ctx,
 
 static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
                                        const vpx_codec_enc_cfg_t *cfg,
-                                       const struct vp8_extracfg *vp8_cfg)
+                                       const struct vp8_extracfg *vp8_cfg,
+                                       int                        finalize)
 {
     RANGE_CHECK(cfg, g_w,                   1, 16383); /* 14 bits available */
     RANGE_CHECK(cfg, g_h,                   1, 16383); /* 14 bits available */
@@ -193,6 +194,9 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
     RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
+    if(finalize && cfg->rc_end_usage == VPX_CQ)
+        RANGE_CHECK(vp8_cfg, cq_level,
+                    cfg->rc_min_quantizer, cfg->rc_max_quantizer);
 
 #if !(CONFIG_REALTIME_ONLY)
     if (cfg->g_pass == VPX_RC_LAST_PASS)
@@ -439,7 +443,7 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t       *ctx,
     if ((cfg->g_lag_in_frames > ctx->cfg.g_lag_in_frames))
         ERROR("Cannot increase lag_in_frames");
 
-    res = validate_config(ctx, cfg, &ctx->vp8_cfg);
+    res = validate_config(ctx, cfg, &ctx->vp8_cfg, 0);
 
     if (!res)
     {
@@ -505,7 +509,7 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
 
     }
 
-    res = validate_config(ctx, &ctx->cfg, &xcfg);
+    res = validate_config(ctx, &ctx->cfg, &xcfg, 0);
 
     if (!res)
     {
@@ -602,7 +606,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
 
         vp8_initialize();
 
-        res = validate_config(priv, &priv->cfg, &priv->vp8_cfg);
+        res = validate_config(priv, &priv->cfg, &priv->vp8_cfg, 0);
 
         if (!res)
         {
@@ -731,6 +735,9 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 
     if (img)
         res = validate_img(ctx, img);
+
+    if (!res)
+        res = validate_config(ctx, &ctx->cfg, &ctx->vp8_cfg, 1);
 
     pick_quickcompress_mode(ctx, duration, deadline);
     vpx_codec_pkt_list_init(&ctx->pkt_list);
