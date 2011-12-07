@@ -211,9 +211,7 @@ typedef struct VP8Common
 
     vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
 
-#if CONFIG_MULCONTEXT
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
-#endif
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */
 

@@ -844,10 +844,9 @@ static void init_frame(VP8D_COMP *pbi)
         pc->ref_frame_sign_bias[GOLDEN_FRAME] = 0;
         pc->ref_frame_sign_bias[ALTREF_FRAME] = 0;
 
-#if CONFIG_MULCONTEXT
         vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
         vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
-#endif
+
 #if CONFIG_NEWNEAR
         vp8_init_mv_ref_counts(&pbi->common);
 #endif
@@ -1236,12 +1235,10 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             pc->refresh_alt_ref_frame = 0;
 #endif
 
-#if CONFIG_MULCONTEXT
         if(pc->refresh_alt_ref_frame)
             vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
         else
             vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
-#endif
 
         /* Buffer to buffer copy flags. */
         pc->copy_buffer_to_gf = 0;
@@ -1450,7 +1447,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         pc->last_kf_gf_q = pc->base_qindex;
     }
-#if CONFIG_MULCONTEXT
     if(pc->refresh_entropy_probs)
     {
         if(pc->refresh_alt_ref_frame)
@@ -1458,13 +1454,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         else
             vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
     }
-#else
-    if (pc->refresh_entropy_probs == 0)
-    {
-        vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
-        pbi->independent_partitions = prev_independent_partitions;
-    }
-#endif
 
 #ifdef PACKET_TESTING
     {

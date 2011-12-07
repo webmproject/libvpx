@@ -4353,13 +4353,11 @@ static void encode_frame_to_data_rate
             resize_key_frame(cpi);
             vp8_setup_key_frame(cpi);
         }
-#if CONFIG_MULCONTEXT
         else
         {
             /* setup entropy for nonkey frame */
             vp8_setup_inter_frame(cpi);
         }
-#endif
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);
 
@@ -5522,7 +5520,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
 
 
-#if CONFIG_MULCONTEXT
     if(cm->refresh_entropy_probs)
     {
         if(cm->refresh_alt_ref_frame)
@@ -5530,13 +5527,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         else
             vpx_memcpy(&cm->lfc, &cm->fc, sizeof(cm->fc));
     }
-#else
-    if (cm->refresh_entropy_probs == 0)
-    {
-        vpx_memcpy(&cm->fc, &cm->lfc, sizeof(cm->fc));
-    }
-#endif
-
 
     // if its a dropped frame honor the requests on subsequent frames
     if (*size > 0)

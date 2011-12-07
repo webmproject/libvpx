@@ -262,16 +262,13 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     cpi->common.refresh_golden_frame = TRUE;
     cpi->common.refresh_alt_ref_frame = TRUE;
 
-#if CONFIG_MULCONTEXT
     vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
     vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
-#endif
 
 #if CONFIG_NEWNEAR
     vp8_init_mv_ref_counts(&cpi->common);
 #endif
 }
-#if CONFIG_MULCONTEXT
 void vp8_setup_inter_frame(VP8_COMP *cpi)
 {
     if(cpi->common.refresh_alt_ref_frame)
@@ -279,7 +276,6 @@ void vp8_setup_inter_frame(VP8_COMP *cpi)
     else
         vpx_memcpy(&cpi->common.fc, &cpi->common.lfc, sizeof(cpi->common.fc));
 }
-#endif
 
 
 static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
