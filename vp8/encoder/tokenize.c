@@ -93,6 +93,20 @@ static void fill_value_tokens()
     vp8_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
+
+static void calculate_context(VP8_COMP *cpi, TOKENEXTRA *t)
+{
+    int context;
+    
+    context = (t->context_tree - cpi->common.fc.coef_probs[0][0][0])
+              / sizeof(cpi->common.fc.coef_probs[0][0][0]);
+    context = context * 12 + t->Token;
+    if(t->skip_eob_node)
+        context += 4*8*3*12;
+    t->context = context + 2048;
+}
+
+
 static void tokenize2nd_order_b
 (
     MACROBLOCKD *x,
@@ -124,6 +138,7 @@ static void tokenize2nd_order_b
         t->context_tree = cpi->common.fc.coef_probs [1] [0] [pt];
         t->skip_eob_node = 0;
 
+        calculate_context(cpi, t);
         ++cpi->coef_counts       [1] [0] [pt] [DCT_EOB_TOKEN];
         t++;
         *tp = t;
@@ -138,6 +153,7 @@ static void tokenize2nd_order_b
 
     t->context_tree = cpi->common.fc.coef_probs [1] [0] [pt];
     t->skip_eob_node = 0;
+        calculate_context(cpi, t);
     ++cpi->coef_counts       [1] [0] [pt] [token];
     pt = vp8_prev_token_class[token];
     t++;
@@ -157,6 +173,7 @@ static void tokenize2nd_order_b
 
         t->skip_eob_node = ((pt == 0));
 
+        calculate_context(cpi, t);
         ++cpi->coef_counts       [1] [band] [pt] [token];
 
         pt = vp8_prev_token_class[token];
@@ -170,6 +187,7 @@ static void tokenize2nd_order_b
 
         t->skip_eob_node = 0;
 
+        calculate_context(cpi, t);
         ++cpi->coef_counts       [1] [band] [pt] [DCT_EOB_TOKEN];
 
         t++;
@@ -221,6 +239,7 @@ static void tokenize1st_order_b
             t->context_tree = cpi->common.fc.coef_probs [type] [c] [pt];
             t->skip_eob_node = 0;
 
+        calculate_context(cpi, t);
             ++cpi->coef_counts       [type] [c] [pt] [DCT_EOB_TOKEN];
             t++;
             *tp = t;
@@ -236,6 +255,7 @@ static void tokenize1st_order_b
 
         t->context_tree = cpi->common.fc.coef_probs [type] [c] [pt];
         t->skip_eob_node = 0;
+        calculate_context(cpi, t);
         ++cpi->coef_counts       [type] [c] [pt] [token];
         pt = vp8_prev_token_class[token];
         t++;
@@ -254,6 +274,7 @@ static void tokenize1st_order_b
             t->context_tree = cpi->common.fc.coef_probs [type] [band] [pt];
 
             t->skip_eob_node = (pt == 0);
+        calculate_context(cpi, t);
             ++cpi->coef_counts       [type] [band] [pt] [token];
 
             pt = vp8_prev_token_class[token];
@@ -266,6 +287,7 @@ static void tokenize1st_order_b
             t->context_tree = cpi->common.fc.coef_probs [type] [band] [pt];
 
             t->skip_eob_node = 0;
+        calculate_context(cpi, t);
             ++cpi->coef_counts       [type] [band] [pt] [DCT_EOB_TOKEN];
 
             t++;
@@ -292,6 +314,7 @@ static void tokenize1st_order_b
             t->context_tree = cpi->common.fc.coef_probs [2] [0] [pt];
             t->skip_eob_node = 0;
 
+        calculate_context(cpi, t);
             ++cpi->coef_counts       [2] [0] [pt] [DCT_EOB_TOKEN];
             t++;
             *tp = t;
@@ -307,6 +330,7 @@ static void tokenize1st_order_b
 
         t->context_tree = cpi->common.fc.coef_probs [2] [0] [pt];
         t->skip_eob_node = 0;
+        calculate_context(cpi, t);
         ++cpi->coef_counts       [2] [0] [pt] [token];
         pt = vp8_prev_token_class[token];
         t++;
@@ -326,6 +350,7 @@ static void tokenize1st_order_b
 
             t->skip_eob_node = (pt == 0);
 
+        calculate_context(cpi, t);
             ++cpi->coef_counts       [2] [band] [pt] [token];
 
             pt = vp8_prev_token_class[token];
@@ -339,6 +364,7 @@ static void tokenize1st_order_b
 
             t->skip_eob_node = 0;
 
+        calculate_context(cpi, t);
             ++cpi->coef_counts       [2] [band] [pt] [DCT_EOB_TOKEN];
 
             t++;
@@ -500,6 +526,7 @@ static __inline void stuff2nd_order_b
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [1] [0] [pt];
     t->skip_eob_node = 0;
+        calculate_context(cpi, t);
     ++cpi->coef_counts       [1] [0] [pt] [DCT_EOB_TOKEN];
     ++t;
 
@@ -524,6 +551,7 @@ static __inline void stuff1st_order_b
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [0] [1] [pt];
     t->skip_eob_node = 0;
+        calculate_context(cpi, t);
     ++cpi->coef_counts       [0] [1] [pt] [DCT_EOB_TOKEN];
     ++t;
     *tp = t;
@@ -547,6 +575,7 @@ void stuff1st_order_buv
     t->Token = DCT_EOB_TOKEN;
     t->context_tree = cpi->common.fc.coef_probs [2] [0] [pt];
     t->skip_eob_node = 0;
+        calculate_context(cpi, t);
     ++cpi->coef_counts[2] [0] [pt] [DCT_EOB_TOKEN];
     ++t;
     *tp = t;

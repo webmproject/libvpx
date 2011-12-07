@@ -492,7 +492,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     // if we encode a new mv this is important
     // find the best new motion vector
-    for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
+    for (mode_index = 0; mode_index < 1; mode_index++)
     {
         int frame_cost;
         int this_rd = INT_MAX;

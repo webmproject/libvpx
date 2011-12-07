@@ -176,6 +176,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     filt_val = cm->filter_level;
     best_filt_val = filt_val;
 
+goto skip;
     // Get the err using the previous frame's filter value.
     vp8_loop_filter_partial_frame(cm, &cpi->mb.e_mbd, filt_val);
 
@@ -246,6 +247,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         }
     }
 
+skip:
     cm->filter_level = best_filt_val;
 
     if (cm->filter_level < min_filter_level)
@@ -311,6 +313,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     best_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
     filt_best = filt_mid;
 
+goto skip;
     //  Re-instate the unfiltered frame
     vp8_yv12_copy_y_ptr(&cpi->last_frame_uf, cm->frame_to_show);
 
@@ -379,5 +382,6 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         }
     }
 
+skip:
     cm->filter_level = filt_best;
 }

@@ -226,6 +226,7 @@ void vp8_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int co
     unsigned char d[16];
 
 
+    s += 8; cols -= 16;
     for (r = 0; r < rows; r++)
     {
         int sumsq = 0;
@@ -277,6 +278,7 @@ void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
         unsigned char d[16];
         const short *rv2 = rv3 + ((c * 17) & 127);
 
+        s += 8 * pitch; rows -= 8;
         for (i = -8; i <= 6; i++)
         {
             sumsq += s[i*pitch] * s[i*pitch];
@@ -315,7 +317,7 @@ static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
 
     POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,  ppl);
     POSTPROC_INVOKE(rtcd, across)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
-    POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
+    //POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
 
     POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
     POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);

@@ -29,6 +29,7 @@ typedef struct
     short           Extra;
     unsigned char   Token;
     unsigned char   skip_eob_node;
+    unsigned int    context;
 } TOKENEXTRA;
 
 int rd_cost_mby(MACROBLOCKD *);

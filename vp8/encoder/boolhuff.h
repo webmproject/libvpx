@@ -24,7 +24,7 @@
 
 typedef struct
 {
-    unsigned int lowvalue;
+    unsigned long long lowvalue;
     unsigned int range;
     unsigned int value;
     int count;

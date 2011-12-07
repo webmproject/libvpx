@@ -25,6 +25,8 @@
 
 #include "defaultcoefcounts.h"
 
+#define printf(...)
+
 const int vp8cx_base_skip_false_prob[128] =
 {
     255, 255, 255, 255, 255, 255, 255, 255,
@@ -159,6 +161,221 @@ static void write_split(vp8_writer *bc, int x)
     );
 }
 
+#define MAX_BOOL_CACHE_CONTEXTS ((2048+2*4*8*3*12)*128)
+
+typedef unsigned long long bool_cache_entry_t;
+
+static unsigned char bool_cache_validity1[MAX_BOOL_CACHE_CONTEXTS/128/8];
+static unsigned char bool_cache_validity2[MAX_BOOL_CACHE_CONTEXTS/8];
+static bool_cache_entry_t bool_cache_table[MAX_BOOL_CACHE_CONTEXTS];
+
+static unsigned char bit_n(unsigned char *vector, int n)
+{
+    int idx = n >> 3;
+    return (vector[idx] >> (n&7)) & 1;
+}
+
+
+static void set_bit_n(unsigned char *vector, int n)
+{
+    int idx = n >> 3;
+    vector[idx] |= 1 << (n&7);
+}
+
+static int bool_cache_hit1;
+static int bool_cache_hit2;
+static int bool_cache_hit(int context)
+{
+    int hit;
+
+    bool_cache_hit1++;
+    assert(context < MAX_BOOL_CACHE_CONTEXTS);
+    if(!bit_n(bool_cache_validity1, context>>7))
+        return 0;
+    hit= bit_n(bool_cache_validity2, context);
+    if(hit) bool_cache_hit2++;
+    return hit;
+}
+
+
+static void encode_bits_msb(vp8_writer          *w,
+                            int                  v,
+                            const unsigned char *probs,
+                            int n)
+{
+    do
+    {
+        vp8_encode_bool(w, (v >> --n) & 1, *probs++);
+    }
+    while(n);
+}
+
+
+static void bool_cache(int context, vp8_writer *bc)
+{
+    int shift_count;
+    bool_cache_entry_t entry;
+
+    if(!bit_n(bool_cache_validity1, context>>7))
+    {
+        /* This is the first time this top-level context has been hit.
+         * Invalidate the second level contexts
+         */
+        memset(&bool_cache_validity2[context>>3], 0, 16);
+    }
+    set_bit_n(bool_cache_validity1, context>>7);
+    set_bit_n(bool_cache_validity2, context);
+
+    /* Convert the bc into a cache entry */
+    shift_count = bc->count + 24 + 8 * bc->pos;
+    entry = bc->lowvalue;
+    if (bc->pos)
+    {
+        assert(bc->pos < 2);
+        entry += (unsigned long long)bc->buffer[0] << shift_count;
+    }
+    entry <<= 6;
+    entry += shift_count;
+    entry <<= 7;
+    entry += bc->range - 128;
+    bool_cache_table[context] = entry;
+
+}
+
+
+static bool_cache_entry_t bool_cache_lookup(int context)
+{
+    assert(bit_n(bool_cache_validity1, context>>7));
+    assert(bit_n(bool_cache_validity2, context));
+    return bool_cache_table[context];
+}
+
+
+static void splice_bits(BOOL_CODER *cx, bool_cache_entry_t to_splice)
+{
+    unsigned int thismask;
+    int shift_count, count;
+    unsigned long long lowvalue = cx->lowvalue;
+
+    cx->range = (to_splice & 0x7F) + 128;
+    to_splice >>= 7;
+    shift_count = to_splice & 0x3F;
+    to_splice >>= 6;
+
+    count = cx->count + shift_count;
+    lowvalue <<= shift_count;
+    lowvalue += to_splice;
+
+    if(count >=0)
+    {
+        unsigned long long tmp = lowvalue >> count;
+        thismask = 0xffffff << (count & 7) | 255;
+
+        if(tmp >> 32)
+        {
+            int x = cx->pos - 1;
+
+            while (x >= 0 && cx->buffer[x] == 0xff)
+            {
+                cx->buffer[x] = (unsigned char)0;
+                x--;
+            }
+
+            cx->buffer[x] += 1;
+        }
+
+        while(count >= 0)
+        {
+            int out = (tmp >> 24) & 0xff;
+            cx->buffer[cx->pos++] = out;
+            count -= 8;
+            tmp <<= 8;
+        }
+        lowvalue &= thismask;
+    }
+    cx->count = count;
+    cx->lowvalue = lowvalue;
+}
+
+
+void pack_tokens_lut(vp8_writer *w, const TOKENEXTRA *p, int xcount)
+{
+    /* For now, we read from the token array */
+    const TOKENEXTRA *const stop = p + xcount;
+
+    while (p < stop)
+    {
+        const vp8_extra_bit_struct *b;
+        int context;
+
+        /* Encode token */
+        context = (p->context << 7) + (w->range - 128);
+        if (!bool_cache_hit(context))
+        {
+            /* Build the probability vector */
+            int n, i, j, v;
+            unsigned char probs[12], buf[4];
+            vp8_writer tmpbc;
+
+            if (p->skip_eob_node)
+            {
+                n = vp8_coef_encodings[p->Token].Len - 1;
+                i = 2;
+            }
+            else
+            {
+                n = vp8_coef_encodings[p->Token].Len;
+                i = 0;
+            }
+
+            v = vp8_coef_encodings[p->Token].value;
+            j=0;
+            do
+            {
+                const int bb = (v >> --n) & 1;
+                probs[j++] = p->context_tree[i>>1];
+                i = vp8_coef_tree[i+bb];
+            } while(n);
+
+            /* Generate the appropriate bitstream and cache the result */
+            vp8_start_encode(&tmpbc, buf, buf+4);
+            tmpbc.range = w->range;
+            encode_bits_msb(&tmpbc, v, probs, j);
+            bool_cache(context, &tmpbc);
+        }
+        splice_bits(w, bool_cache_lookup(context));
+
+        /* Encode extra bits */
+        b = vp8_extra_bits + p->Token;
+        if (b->Len)
+        {
+            context = b->base_val + (p->Extra >> 1);
+            context = (context << 7) + (w->range - 128);
+            if (!bool_cache_hit(context))
+            {
+                unsigned char buf[4];
+                vp8_writer tmpbc;
+
+                /* Generate the appropriate bitstream and cache the result */
+                vp8_start_encode(&tmpbc, buf, buf+4);
+                tmpbc.range = w->range;
+                encode_bits_msb(&tmpbc, p->Extra >> 1, b->prob, b->Len);
+                bool_cache(context, &tmpbc);
+            }
+            splice_bits(w, bool_cache_lookup(context));
+        }
+
+        /* Encode sign bit */
+        if (b->base_val)
+            vp8_write_bit(w, p->Extra & 1);
+
+        /* Next token */
+        printf("lv=%08x, pos=%ld\n",w->lowvalue,w->pos);
+        ++p;
+    }
+}
+
+
 static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 {
     const TOKENEXTRA *const stop = p + xcount;
@@ -187,6 +404,7 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
         do
         {
             const int bb = (v >> --n) & 1;
+            //printf("E(%d)=%d (v=%d)\n",pp[i>>1],(v >> n) & 1,v);
             split = 1 + (((range - 1) * pp[i>>1]) >> 8);
             i = vp8_coef_tree[i+bb];
 
@@ -252,6 +470,7 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
                 do
                 {
                     const int bb = (v >> --n) & 1;
+            //printf("E(%d)=%d (v=%d)\n",pp[i>>1],(v >> n) & 1,v);
                     split = 1 + (((range - 1) * pp[i>>1]) >> 8);
                     i = b->tree[i+bb];
 
@@ -352,6 +571,7 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 
         }
 
+        printf("lv=%08x, pos=%ld\n",lowvalue,w->pos);
         ++p;
     }
 
@@ -1328,7 +1548,7 @@ static int default_coef_context_savings(VP8_COMP *cpi)
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     cpi->frame_coef_probs [i][j][k],
                     cpi->frame_branch_ct [i][j][k],
-                    cpi->coef_counts [i][j][k],
+                    default_coef_counts [i][j][k],
                     256, 1
                 );
 
@@ -1569,6 +1789,7 @@ static void put_delta_q(vp8_writer *bc, int delta_q)
         vp8_write_bit(bc, 0);
 }
 
+char tmp[128*1024];
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest_end, unsigned long *size)
 {
     int i, j;
@@ -1931,7 +2152,21 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
             pack_mb_row_tokens(cpi, &cpi->bc[1]);
         else
 #endif
-            pack_tokens(&cpi->bc[1], cpi->tok, cpi->tok_count);
+{
+vp8_writer tmpbc;
+
+vp8_start_encode(&tmpbc, tmp, tmp+sizeof(tmp));
+            //pack_tokens_c(&tmpbc, cpi->tok, cpi->tok_count);
+pack_tokens_lut(&cpi->bc[1], cpi->tok, cpi->tok_count);
+//assert(cpi->bc[1].lowvalue == tmpbc.lowvalue);
+//assert(cpi->bc[1].pos == tmpbc.pos);
+
+}
+
+printf("cache hit ratio: %d/%d=%f\n",
+bool_cache_hit2,
+bool_cache_hit1,
+bool_cache_hit2/(float)bool_cache_hit1);
 
         vp8_stop_encode(&cpi->bc[1]);
 
