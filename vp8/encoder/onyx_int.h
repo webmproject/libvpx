@@ -339,7 +339,7 @@ typedef struct VP8_COMP
     int gold_is_alt;  // don't do both alt and gold search ( just do gold).
 
     //int refresh_alt_ref_frame;
-    YV12_BUFFER_CONFIG last_frame_uf;
+    YV12_BUFFER_CONFIG pick_lf_lvl_frame;
 
     TOKENEXTRA *tok;
     unsigned int tok_count;

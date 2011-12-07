@@ -358,7 +358,7 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 
     vp8_de_alloc_frame_buffers(&cpi->common);
 
-    vp8_yv12_de_alloc_frame_buffer(&cpi->last_frame_uf);
+    vp8_yv12_de_alloc_frame_buffer(&cpi->pick_lf_lvl_frame);
     vp8_yv12_de_alloc_frame_buffer(&cpi->scaled_source);
 #if VP8_TEMPORAL_ALT_REF
     vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
@@ -1349,7 +1349,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         height += 16 - (height & 0xf);
 
 
-    if (vp8_yv12_alloc_frame_buffer(&cpi->last_frame_uf,
+    if (vp8_yv12_alloc_frame_buffer(&cpi->pick_lf_lvl_frame,
                                     width, height, VP8BORDERINPIXELS))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate last frame buffer");
