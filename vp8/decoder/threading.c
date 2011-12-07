@@ -898,9 +898,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                 if (pbi->common.filter_level)
                 {
                     int skip_lf = (xd->mode_info_context->mbmi.mode != B_PRED &&
-#if CONFIG_I8X8
                                     xd->mode_info_context->mbmi.mode != I8X8_PRED &&
-#endif
                                     xd->mode_info_context->mbmi.mode != SPLITMV &&
                                     xd->mode_info_context->mbmi.mb_skip_coeff);
 

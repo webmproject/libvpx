@@ -250,7 +250,6 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     vp8_recon_intra_mbuv(IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
 
-#if CONFIG_I8X8
 void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
                               MACROBLOCK *x, int ib)
 {
@@ -328,4 +327,3 @@ void vp8_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
         vp8_encode_intra_uv4x4(rtcd, x, i+20, mode);
     }
 }
-#endif

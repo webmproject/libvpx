@@ -90,9 +90,7 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
     /* Clear entropy contexts for Y2 blocks */
     if (x->mode_info_context->mbmi.mode != B_PRED &&
-#if CONFIG_I8X8
         x->mode_info_context->mbmi.mode != I8X8_PRED &&
-#endif
         x->mode_info_context->mbmi.mode != SPLITMV)
     {
         vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -669,9 +667,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
     scan = vp8_default_zig_zag1d;
     qcoeff_ptr = &xd->qcoeff[0];
     if (xd->mode_info_context->mbmi.mode != B_PRED &&
-#if CONFIG_I8X8
         xd->mode_info_context->mbmi.mode != I8X8_PRED &&
-#endif
         xd->mode_info_context->mbmi.mode != SPLITMV)
     {
         i = 24;

@@ -208,10 +208,8 @@ void clamp_mvs(MACROBLOCKD *xd)
     }
 
 }
-#if CONFIG_I8X8
-extern const int vp8_i8x8_block[4];
 
-#endif
+extern const int vp8_i8x8_block[4];
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                               unsigned int mb_idx)
 {
@@ -267,9 +265,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     mode = xd->mode_info_context->mbmi.mode;
 
     if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV
-#if CONFIG_I8X8
         && mode != I8X8_PRED
-#endif
         &&!vp8dx_bool_error(xd->current_bc)
         )
     {
@@ -301,22 +297,17 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     /* do prediction */
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-#if CONFIG_I8X8
         if(mode != I8X8_PRED)
         {
-#endif
-        RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv)(xd);
-
-        if (mode != B_PRED)
-        {
-            RECON_INVOKE(&pbi->common.rtcd.recon,
-                         build_intra_predictors_mby)(xd);
-        } else {
-            vp8_intra_prediction_down_copy(xd);
+            RECON_INVOKE(&pbi->common.rtcd.recon, build_intra_predictors_mbuv)(xd);
+            if (mode != B_PRED)
+            {
+                RECON_INVOKE(&pbi->common.rtcd.recon,
+                    build_intra_predictors_mby)(xd);
+            } else {
+                vp8_intra_prediction_down_copy(xd);
+            }
         }
-#if CONFIG_I8X8
-        }
-#endif
     }
     else
     {
@@ -344,7 +335,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #endif
 
     /* dequantization and idct */
-#if CONFIG_I8X8
     if (mode == I8X8_PRED)
     {
         for (i = 0; i < 4; i++)
@@ -392,9 +382,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 *(b->base_dst) + b->dst, 8, b->dst_stride);
         }
     }
-    else
-#endif
-    if (mode == B_PRED)
+    else if (mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
         {
@@ -500,13 +488,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
     else
 #endif
-#if CONFIG_I8X8
     if(xd->mode_info_context->mbmi.mode!=I8X8_PRED)
-#endif
-    DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
-                    (xd->qcoeff+16*16, xd->block[16].dequant,
-                     xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
-                     xd->dst.uv_stride, xd->eobs+16);
+        DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
+                (xd->qcoeff+16*16, xd->block[16].dequant,
+                xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
+                xd->dst.uv_stride, xd->eobs+16);
 
 }
 
@@ -593,9 +579,8 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
         }
 #endif
 
-#if CONFIG_I8X8
         update_blockd_bmi(xd);
-#endif
+
         xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
         xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
         xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;

@@ -223,7 +223,6 @@ EXPERIMENT_LIST="
     segfeatures
     t8x8
     csm
-    i8x8
     qimode
     uvintra
     newnear

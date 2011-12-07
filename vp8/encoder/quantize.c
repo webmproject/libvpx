@@ -286,9 +286,7 @@ void vp8_quantize_mby_c(MACROBLOCK *x)
 {
     int i;
     int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-#if CONFIG_I8X8
         && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-#endif
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
     for (i = 0; i < 16; i++)
@@ -302,9 +300,7 @@ void vp8_quantize_mb_c(MACROBLOCK *x)
 {
     int i;
     int has_2nd_order=(x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-#if CONFIG_I8X8
         && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-#endif
         && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
     for (i = 0; i < 24+has_2nd_order; i++)

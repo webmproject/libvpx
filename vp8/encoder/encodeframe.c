@@ -1435,7 +1435,7 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
         }
         while (++b < 16);
     }
-#if CONFIG_I8X8
+
     if(m==I8X8_PRED)
     {
         i8x8_modes[xd->block[0].bmi.as_mode]++;
@@ -1443,7 +1443,6 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
         i8x8_modes[xd->block[8].bmi.as_mode]++;
         i8x8_modes[xd->block[10].bmi.as_mode]++;
     }
-#endif
 #endif
 
     ++cpi->ymode_count[m];
@@ -1488,24 +1487,18 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         vp8_update_zbin_extra(cpi, x);
     }
 
-#if CONFIG_I8X8
     if(x->e_mbd.mode_info_context->mbmi.mode == I8X8_PRED)
     {
         vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
         vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
     }
-    else
-#endif
-    if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
+    else if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
         vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
     else
-    {
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
-    }
-#if CONFIG_I8X8
-        if(x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED)
-#endif
-    vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+
+    if(x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED)
+        vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
 #if CONFIG_T8X8
@@ -1701,13 +1694,11 @@ int vp8cx_encode_inter_macroblock
             vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
         }
-#if CONFIG_I8X8
         else if(xd->mode_info_context->mbmi.mode == I8X8_PRED)
         {
             vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
             vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
         }
-#endif
         else
         {
             vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);

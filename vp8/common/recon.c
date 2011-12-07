@@ -44,7 +44,6 @@ void vp8_recon_b_c
     }
 }
 
-#if CONFIG_I8X8
 void vp8_recon_uv_b_c
 (
     unsigned char *pred_ptr,
@@ -75,7 +74,6 @@ void vp8_recon_uv_b_c
         pred_ptr += 8;
     }
 }
-#endif
 void vp8_recon4b_c
 (
     unsigned char *pred_ptr,

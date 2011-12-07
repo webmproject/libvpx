@@ -12,7 +12,6 @@
 #include "entropymode.h"
 #include "entropy.h"
 #include "vpx_mem/vpx_mem.h"
-#if CONFIG_I8X8
 
 #if CONFIG_QIMODE
 const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
@@ -31,10 +30,6 @@ static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 49, 22, 23, 11, 23, 128}
 #endif
 /* TODO: calibrate the baseline distribution */
 static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 2000, 5874};
-#else
-static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 1607, 915, 812, 811, 5455};
-static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 5874};
-#endif
 
 #if CONFIG_UVINTRA
 static const unsigned int uv_mode_cts  [VP8_UV_MODES] ={ 162, 41, 41, 12};
@@ -53,9 +48,7 @@ static const unsigned int uv_mode_cts  [VP8_UV_MODES] = { 59483, 13605, 16492, 4
 #endif
 
 
-#if CONFIG_I8X8
 static const unsigned int i8x8_mode_cts  [VP8_UV_MODES] = {93, 69, 81, 13};
-#endif
 
 
 #if CONFIG_UVINTRA
@@ -169,7 +162,6 @@ const vp8_tree_index vp8_bmode_tree[18] =     /* INTRAMODECONTEXTNODE value */
 
 /* Again, these trees use the same probability indices as their
    explicitly-programmed predecessors. */
-#if CONFIG_I8X8
 const vp8_tree_index vp8_ymode_tree[10] =
 {
     -DC_PRED, 2,
@@ -194,23 +186,6 @@ const vp8_tree_index vp8_i8x8_mode_tree[6] =
     -V_PRED, 4,
     -H_PRED, -TM_PRED
 };
-#else
-const vp8_tree_index vp8_ymode_tree[8] =
-{
-    -DC_PRED, 2,
-    4, 6,
-    -V_PRED, -H_PRED,
-    -TM_PRED, -B_PRED
-};
-
-const vp8_tree_index vp8_kf_ymode_tree[8] =
-{
-    -B_PRED, 2,
-    4, 6,
-    -DC_PRED, -V_PRED,
-    -H_PRED, -TM_PRED
-};
-#endif
 const vp8_tree_index vp8_uv_mode_tree[6] =
 {
     -DC_PRED, 2,
@@ -245,9 +220,7 @@ struct vp8_token_struct vp8_bmode_encodings   [VP8_BINTRAMODES];
 struct vp8_token_struct vp8_ymode_encodings   [VP8_YMODES];
 struct vp8_token_struct vp8_kf_ymode_encodings [VP8_YMODES];
 struct vp8_token_struct vp8_uv_mode_encodings  [VP8_UV_MODES];
-#if CONFIG_I8X8
 struct vp8_token_struct vp8_i8x8_mode_encodings  [VP8_UV_MODES];
-#endif
 struct vp8_token_struct vp8_mbsplit_encodings [VP8_NUMMBSPLITS];
 
 struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
@@ -314,13 +287,11 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
         256, 1
     );
 #endif
-#if CONFIG_I8X8
     vp8_tree_probs_from_distribution(
         VP8_UV_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
         x->i8x8_mode_prob, bct, i8x8_mode_cts,
         256, 1
         );
-#endif
     vpx_memcpy(x->fc.sub_mv_ref_prob, sub_mv_ref_prob, sizeof(sub_mv_ref_prob));
 
 }
@@ -373,9 +344,7 @@ void vp8_entropy_mode_init()
     vp8_tokens_from_tree(vp8_ymode_encodings,   vp8_ymode_tree);
     vp8_tokens_from_tree(vp8_kf_ymode_encodings, vp8_kf_ymode_tree);
     vp8_tokens_from_tree(vp8_uv_mode_encodings,  vp8_uv_mode_tree);
-#if CONFIG_I8X8
     vp8_tokens_from_tree(vp8_i8x8_mode_encodings,  vp8_i8x8_mode_tree);
-#endif
     vp8_tokens_from_tree(vp8_mbsplit_encodings, vp8_mbsplit_tree);
 
     vp8_tokens_from_tree_offset(vp8_mv_ref_encoding_array,

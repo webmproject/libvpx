@@ -137,9 +137,7 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
                 return B_HE_PRED;
             case TM_PRED:
                 return B_TM_PRED;
-#if CONFIG_I8X8
             case I8X8_PRED:
-#endif
             case B_PRED:
               return (cur_mb->bmi + b + 3)->as_mode;
             default:
@@ -167,9 +165,7 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO
                 return B_HE_PRED;
             case TM_PRED:
                 return B_TM_PRED;
-#if CONFIG_I8X8
             case I8X8_PRED:
-#endif
             case B_PRED:
               return (cur_mb->bmi + b + 12)->as_mode;
             default:

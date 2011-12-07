@@ -551,7 +551,6 @@ void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
         break;
     }
 }
-#if CONFIG_I8X8
 void vp8_intra8x8_predict(BLOCKD *x,
                           int mode,
                           unsigned char *predictor)
@@ -731,4 +730,3 @@ void vp8_intra_uv4x4_predict(BLOCKD *x,
  Current code assumes that a uv 4x4 block use same mode
  as corresponding Y 8x8 area
  */
-#endif

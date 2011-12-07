@@ -148,12 +148,11 @@ static void kfwrite_ymode(vp8_writer *bc, int m, const vp8_prob *p)
     vp8_write_token(bc, vp8_kf_ymode_tree, p, vp8_kf_ymode_encodings + m);
 }
 
-#if CONFIG_I8X8
 static void write_i8x8_mode(vp8_writer *bc, int m, const vp8_prob *p)
 {
     vp8_write_token(bc,vp8_i8x8_mode_tree, p, vp8_i8x8_mode_encodings + m);
 }
-#endif
+
 static void write_uv_mode(vp8_writer *bc, int m, const vp8_prob *p)
 {
     vp8_write_token(bc, vp8_uv_mode_tree, p, vp8_uv_mode_encodings + m);
@@ -1140,7 +1139,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         write_bmode(w, m->bmi[j].as_mode, pc->fc.bmode_prob);
                     while (++j < 16);
                 }
-#if CONFIG_I8X8
                 if(mode == I8X8_PRED)
                 {
                     write_i8x8_mode(w, m->bmi[0].as_mode, pc->i8x8_mode_prob);
@@ -1149,9 +1147,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     write_i8x8_mode(w, m->bmi[10].as_mode, pc->i8x8_mode_prob);
                 }
                 else
-#endif
-
-                write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
+                    write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
             }
             else
             {
@@ -1399,7 +1395,6 @@ static void write_kfmodes(VP8_COMP *cpi)
                 }
                 while (++i < 16);
             }
-#if CONFIG_I8X8
             if(ym == I8X8_PRED)
             {
                 write_i8x8_mode(bc, m->bmi[0].as_mode, c->i8x8_mode_prob);
@@ -1409,11 +1404,10 @@ static void write_kfmodes(VP8_COMP *cpi)
                 m++;
             }
             else
-#endif
 #if CONFIG_UVINTRA
-            write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
+                write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 #else
-            write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob);
+                write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob);
 #endif
         }
         //printf("\n");

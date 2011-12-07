@@ -86,9 +86,7 @@ typedef enum
     V_PRED,             /* vertical prediction */
     H_PRED,             /* horizontal prediction */
     TM_PRED,            /* Truemotion prediction */
-#if CONFIG_I8X8
     I8X8_PRED,           /* 8x8 based prediction, each 8x8 has its own prediction mode */
-#endif
     B_PRED,             /* block based prediction, each block has its own prediction mode */
 
     NEARESTMV,
@@ -345,10 +343,8 @@ static void update_blockd_bmi(MACROBLOCKD *xd)
     int i;
     int is_4x4;
     is_4x4 = (xd->mode_info_context->mbmi.mode == SPLITMV) ||
-#if CONFIG_I8X8
-        (xd->mode_info_context->mbmi.mode==I8X8_PRED)||
-#endif
-        (xd->mode_info_context->mbmi.mode == B_PRED);
+             (xd->mode_info_context->mbmi.mode == I8X8_PRED) ||
+             (xd->mode_info_context->mbmi.mode == B_PRED);
 
     if (is_4x4)
     {

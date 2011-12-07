@@ -845,9 +845,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_V_PRED   ] = 1000;
         sf->thresh_mult[THR_H_PRED   ] = 1000;
         sf->thresh_mult[THR_B_PRED   ] = 2000;
-#if CONFIG_I8X8
         sf->thresh_mult[THR_I8X8_PRED] = 2000;
-#endif
         sf->thresh_mult[THR_TM       ] = 1000;
 
         sf->thresh_mult[THR_NEWMV    ] = 1000;
@@ -886,9 +884,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_V_PRED   ] = 1000;
         sf->thresh_mult[THR_H_PRED   ] = 1000;
         sf->thresh_mult[THR_B_PRED   ] = 2500;
-#if CONFIG_I8X8
         sf->thresh_mult[THR_I8X8_PRED] = 2500;
-#endif
         sf->thresh_mult[THR_TM       ] = 1000;
 
         sf->thresh_mult[THR_NEARESTG ] = 1000;
@@ -974,9 +970,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_V_PRED   ] = 1500;
             sf->thresh_mult[THR_H_PRED   ] = 1500;
             sf->thresh_mult[THR_B_PRED   ] = 5000;
-#if CONFIG_I8X8
             sf->thresh_mult[THR_I8X8_PRED] = 5000;
-#endif
+
             if (cpi->ref_frame_flags & VP8_LAST_FLAG)
             {
                 sf->thresh_mult[THR_NEWMV    ] = 2000;
@@ -1028,9 +1023,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_V_PRED   ] = 2000;
             sf->thresh_mult[THR_H_PRED   ] = 2000;
             sf->thresh_mult[THR_B_PRED   ] = 7500;
-#if CONFIG_I8X8
             sf->thresh_mult[THR_I8X8_PRED] = 7500;
-#endif
 
             if (cpi->ref_frame_flags & VP8_LAST_FLAG)
             {
@@ -1090,10 +1083,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_V_PRED] = 0;
             cpi->mode_check_freq[THR_H_PRED] = 0;
             cpi->mode_check_freq[THR_B_PRED] = 0;
-#if CONFIG_I8X8
             cpi->mode_check_freq[THR_I8X8_PRED]   = 0;
-#endif
-
             cpi->mode_check_freq[THR_NEARG] = 0;
             cpi->mode_check_freq[THR_NEWG] = 0;
             cpi->mode_check_freq[THR_NEARA] = 0;
@@ -1112,10 +1102,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_V_PRED] = 2;
             cpi->mode_check_freq[THR_H_PRED] = 2;
             cpi->mode_check_freq[THR_B_PRED] = 2;
-#if CONFIG_I8X8
             cpi->mode_check_freq[THR_I8X8_PRED]=2;
-#endif
-
 
             if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
@@ -1176,9 +1163,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_V_PRED   ] = 1000;
         sf->thresh_mult[THR_H_PRED   ] = 1000;
         sf->thresh_mult[THR_B_PRED   ] = 2500;
-#if CONFIG_I8X8
-            sf->thresh_mult[THR_I8X8_PRED] = 2500;
-#endif
+        sf->thresh_mult[THR_I8X8_PRED] = 2500;
         sf->thresh_mult[THR_NEARESTG ] = 1000;
         sf->thresh_mult[THR_ZEROG    ] = 1000;
         sf->thresh_mult[THR_NEARG    ] = 1000;
@@ -1220,9 +1205,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_V_PRED   ] = 2000;
             sf->thresh_mult[THR_H_PRED   ] = 2000;
             sf->thresh_mult[THR_B_PRED   ] = 5000;
-#if CONFIG_I8X8
             sf->thresh_mult[THR_I8X8_PRED] = 5000;
-#endif
 
             if (cpi->ref_frame_flags & VP8_LAST_FLAG)
             {
@@ -1269,9 +1252,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_V_PRED   ] = 2000;
             sf->thresh_mult[THR_H_PRED   ] = 2000;
             sf->thresh_mult[THR_B_PRED   ] = 5000;
-#if CONFIG_I8X8
             sf->thresh_mult[THR_I8X8_PRED] = 5000;
-#endif
+
             if (cpi->ref_frame_flags & VP8_LAST_FLAG)
             {
                 sf->thresh_mult[THR_NEWMV    ] = 2000;
@@ -1320,10 +1302,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_V_PRED] = 2;
             cpi->mode_check_freq[THR_H_PRED] = 2;
             cpi->mode_check_freq[THR_B_PRED] = 2;
-#if CONFIG_I8X8
             cpi->mode_check_freq[THR_I8X8_PRED]=2;
-#endif
-
 
             if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
@@ -1371,9 +1350,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_V_PRED] = 4;
             cpi->mode_check_freq[THR_H_PRED] = 4;
             cpi->mode_check_freq[THR_B_PRED] = 4;
-#if CONFIG_I8X8
             cpi->mode_check_freq[THR_I8X8_PRED]=4;
-#endif
+
             if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
                 cpi->mode_check_freq[THR_NEARG] = 2;
@@ -1388,10 +1366,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
             sf->thresh_mult[THR_TM       ] = 2000;
             sf->thresh_mult[THR_B_PRED   ] = 5000;
-#if CONFIG_I8X8
             sf->thresh_mult[THR_I8X8_PRED] = 5000;
-#endif
-
 
             if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
@@ -1420,9 +1395,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         {
             // Disable split MB intra prediction mode
             sf->thresh_mult[THR_B_PRED] = INT_MAX;
-#if CONFIG_I8X8
             sf->thresh_mult[THR_I8X8_PRED] = INT_MAX;
-#endif
         }
 
         if (Speed > 6)
@@ -2720,12 +2693,8 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             sprintf(modes_stats_file, "modes_q%03d.stt",cpi->common.base_qindex);
             f = fopen(modes_stats_file, "w");
             fprintf(f, "intra_mode in Intra Frames:\n");
-#if CONFIG_I8X8
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4], y_modes[5]);
             fprintf(f, "I8:%8d, %8d, %8d, %8d\n", i8x8_modes[0], i8x8_modes[1], i8x8_modes[2], i8x8_modes[3]);
-#else
-            fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4]);
-#endif
             fprintf(f, "UV:%8d, %8d, %8d, %8d\n", uv_modes[0], uv_modes[1], uv_modes[2], uv_modes[3]);
             fprintf(f, "Y-UV:\n");
             {

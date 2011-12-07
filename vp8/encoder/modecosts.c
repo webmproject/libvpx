@@ -52,10 +52,7 @@ void vp8_init_mode_costs(VP8_COMP *c)
 #else
     vp8_cost_tokens(c->mb.intra_uv_mode_cost[0], x->kf_uv_mode_prob, vp8_uv_mode_tree);
 #endif
-#if CONFIG_I8X8
     vp8_cost_tokens(c->mb.i8x8_mode_costs,
                     x->i8x8_mode_prob,vp8_i8x8_mode_tree);
-#endif
-
 
 }

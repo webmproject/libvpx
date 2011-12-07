@@ -42,14 +42,12 @@ static int vp8_kfread_ymode(vp8_reader *bc, const vp8_prob *p)
 
     return i;
 }
-#if CONFIG_I8X8
 static int vp8_read_i8x8_mode(vp8_reader *bc, const vp8_prob *p)
 {
     const int i = vp8_treed_read(bc, vp8_i8x8_mode_tree, p);
 
     return i;
 }
-#endif
 
 
 static int vp8_read_uv_mode(vp8_reader *bc, const vp8_prob *p)
@@ -139,7 +137,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
         }
         while (++i < 16);
     }
-#if CONFIG_I8X8
     if((m->mbmi.mode = y_mode) == I8X8_PRED)
     {
         int i;
@@ -155,13 +152,12 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
          }
    }
     else
-#endif
 #if CONFIG_UVINTRA
-    m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-        pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
+        m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+            pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
 #else
-    m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-        pbi->common.kf_uv_mode_prob);
+        m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+            pbi->common.kf_uv_mode_prob);
 #endif
 }
 
@@ -787,7 +783,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             while (++j < 16);
         }
 
-#if CONFIG_I8X8
         if(mbmi->mode == I8X8_PRED)
         {
             int i;
@@ -803,8 +798,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             }
         }
         else
-#endif
-        mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc, pbi->common.fc.uv_mode_prob);
+            mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc, pbi->common.fc.uv_mode_prob);
     }
 
 }
