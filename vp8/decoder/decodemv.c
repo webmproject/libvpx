@@ -692,8 +692,13 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             }
             if (mbmi->second_ref_frame)
             {
-                vp8_find_near_mvs(xd, mi, &nearest, &nearby, &best_mv, rct,
-                                  mbmi->second_ref_frame, pbi->common.ref_frame_sign_bias);
+                vp8_find_near_mvs(xd, mi,
+#if CONFIG_NEWNEAR
+                                  prev_mi,
+#endif
+                                  &nearest, &nearby, &best_mv, rct,
+                                  (int)mbmi->second_ref_frame,
+                                  pbi->common.ref_frame_sign_bias);
                 switch (mbmi->mode) {
                 case ZEROMV:
                     mbmi->second_mv.as_int = 0;

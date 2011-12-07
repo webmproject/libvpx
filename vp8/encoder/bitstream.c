@@ -1207,7 +1207,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                             const int second_rf = mi->second_ref_frame;
                             int_mv n1, n2;
                             int ct[4];
-                            vp8_find_near_mvs(xd, m, &n1, &n2, &best_mv, ct, second_rf, cpi->common.ref_frame_sign_bias);
+                            vp8_find_near_mvs(xd, m,
+#if CONFIG_NEWNEAR
+                                              prev_m,
+#endif
+                                              &n1, &n2, &best_mv,
+                                              ct, second_rf,
+                                              cpi->common.ref_frame_sign_bias);
                             write_mv(w, &mi->second_mv.as_mv, &best_mv, mvc);
                         }
 #endif /* CONFIG_DUALPRED */
