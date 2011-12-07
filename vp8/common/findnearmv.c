@@ -174,7 +174,7 @@ void vp8_find_near_mvs
     int_mv            near_mvs[4];
     int_mv           *mv = near_mvs;
     int             *cntx = cnt;
-    enum {CNT_INTRA, CNT_NEAREST, CNT_NEAR, CNT_SPLITMV};
+    enum {CNT_ZEROMV, CNT_NEAREST, CNT_NEAR, CNT_SPLITMV};
 
     /* Zero accumulators */
     mv[0].as_int = mv[1].as_int = mv[2].as_int = 0;
@@ -213,7 +213,7 @@ void vp8_find_near_mvs
             *cntx += 2;
         }
         else
-            cnt[CNT_INTRA] += 2;
+            cnt[CNT_ZEROMV] += 2;
     }
     /* Process above left */
     if (aboveleft->mbmi.ref_frame != INTRA_FRAME)
@@ -235,7 +235,7 @@ void vp8_find_near_mvs
             *cntx += 1;
         }
         else
-            cnt[CNT_INTRA] += 1;
+            cnt[CNT_ZEROMV] += 1;
     }
 
     /* If we have three distinct MV's ... */
@@ -263,8 +263,8 @@ void vp8_find_near_mvs
     }
 
     /* Use near_mvs[0] to store the "best" MV */
-    if (cnt[CNT_NEAREST] >= cnt[CNT_INTRA])
-        near_mvs[CNT_INTRA] = near_mvs[CNT_NEAREST];
+    if (cnt[CNT_NEAREST] >= cnt[CNT_ZEROMV])
+        near_mvs[CNT_ZEROMV] = near_mvs[CNT_NEAREST];
 
     /* Set up return values */
     best_mv->as_int = near_mvs[0].as_int;
@@ -286,8 +286,6 @@ vp8_prob *vp8_mv_ref_probs(
     p[1] = vp8_mode_contexts [near_mv_ref_ct[1]] [1];
     p[2] = vp8_mode_contexts [near_mv_ref_ct[2]] [2];
     p[3] = vp8_mode_contexts [near_mv_ref_ct[3]] [3];
-    /*p[3] = vp8_mode_contexts [near_mv_ref_ct[1]
-    + near_mv_ref_ct[2] + near_mv_ref_ct[3]] [3];*/
     return p;
 }
 
