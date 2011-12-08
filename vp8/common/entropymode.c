@@ -9,9 +9,11 @@
  */
 
 
+#include "modecont.h"
 #include "entropymode.h"
 #include "entropy.h"
 #include "vpx_mem/vpx_mem.h"
+
 
 #if CONFIG_QIMODE
 const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
@@ -356,43 +358,59 @@ void vp8_entropy_mode_init()
 }
 
 #if CONFIG_NEWNEAR
-void vp8_init_mv_ref_counts(VP8_COMMON *pc)
+void vp8_init_mode_contexts(VP8_COMMON *pc)
 {
     vpx_memset(pc->mv_ref_ct, 0, sizeof(pc->mv_ref_ct));
+    vpx_memset(pc->mv_ref_ct_a, 0, sizeof(pc->mv_ref_ct_a));
+
+    vpx_memcpy( pc->mode_context,
+                default_vp8_mode_contexts,
+                sizeof (pc->mode_context));
+    vpx_memcpy( pc->mode_context_a,
+                default_vp8_mode_contexts,
+                sizeof (pc->mode_context_a));
+
 }
 
 void vp8_accum_mv_refs(VP8_COMMON *pc,
                        MB_PREDICTION_MODE m,
                        const int ct[4])
 {
+    int (*mv_ref_ct)[4][2];
+
+    if(pc->refresh_alt_ref_frame)
+        mv_ref_ct = pc->mv_ref_ct_a;
+    else
+        mv_ref_ct = pc->mv_ref_ct;
+
     if (m == ZEROMV)
     {
-        ++pc->mv_ref_ct [ct[0]] [0] [0];
+        ++mv_ref_ct [ct[0]] [0] [0];
     }
     else
     {
-        ++pc->mv_ref_ct [ct[0]] [0] [1];
+        ++mv_ref_ct [ct[0]] [0] [1];
         if (m == NEARESTMV)
         {
-            ++pc->mv_ref_ct [ct[1]] [1] [0];
+            ++mv_ref_ct [ct[1]] [1] [0];
         }
         else
         {
-            ++pc->mv_ref_ct [ct[1]] [1] [1];
+            ++mv_ref_ct [ct[1]] [1] [1];
             if (m == NEARMV)
             {
-                ++pc->mv_ref_ct [ct[2]] [2] [0];
+                ++mv_ref_ct [ct[2]] [2] [0];
             }
             else
             {
-                ++pc->mv_ref_ct [ct[2]] [2] [1];
+                ++mv_ref_ct [ct[2]] [2] [1];
                 if (m == NEWMV)
                 {
-                    ++pc->mv_ref_ct [ct[3]] [3] [0];
+                    ++mv_ref_ct [ct[3]] [3] [0];
                 }
                 else
                 {
-                    ++pc->mv_ref_ct [ct[3]] [3] [1];
+                    ++mv_ref_ct [ct[3]] [3] [1];
                 }
             }
         }
@@ -402,24 +420,37 @@ void vp8_accum_mv_refs(VP8_COMMON *pc,
 void vp8_update_mode_context(VP8_COMMON *pc)
 {
     int i, j;
+    int (*mv_ref_ct)[4][2];
+    int (*mode_context)[4];
+
+    if(pc->refresh_alt_ref_frame)
+    {
+        mv_ref_ct = pc->mv_ref_ct_a;
+        mode_context = pc->mode_context_a;
+    }
+    else
+    {
+        mv_ref_ct = pc->mv_ref_ct;
+        mode_context = pc->mode_context;
+    }
+
     for (j = 0; j < 6; j++)
     {
         for (i = 0; i < 4; i++)
         {
             int this_prob;
-            int count;
-            // context probs
-            count = pc->mv_ref_ct[j][i][0] + pc->mv_ref_ct[j][i][1];
+            int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
+
             if (count)
-                this_prob = 256 * pc->mv_ref_ct[j][i][0] / count;
+                this_prob = 256 * mv_ref_ct[j][i][0] / count;
             else
                 this_prob = 128;
+            this_prob = this_prob? (this_prob<255?this_prob:255):1;
             if (this_prob == 0)
                 this_prob = 1;
             if (this_prob == 256)
                 this_prob = 255;
-
-            pc->mode_context[j][i] = this_prob;
+            mode_context[j][i] = this_prob;
         }
     }
 }
@@ -427,14 +458,25 @@ void vp8_update_mode_context(VP8_COMMON *pc)
 void print_mode_contexts(VP8_COMMON *pc)
 {
     int j, i;
+    printf("====================\n");
     for(j=0; j<6; j++)
     {
         for (i = 0; i < 4; i++)
         {
-            printf( "%4d ", pc->vp8_mode_contexts[j][i]);
+            printf( "%4d ", pc->mode_context[j][i]);
         }
         printf("\n");
     }
+    printf("====================\n");
+    for(j=0; j<6; j++)
+    {
+        for (i = 0; i < 4; i++)
+        {
+            printf( "%4d ", pc->mode_context_a[j][i]);
+        }
+        printf("\n");
+    }
+
 }
 void print_mv_ref_cts(VP8_COMMON *pc)
 {

@@ -218,12 +218,13 @@ typedef struct VP8Common
 #if CONFIG_NEWNEAR
     int mv_ref_ct[6][4][2];
     int mode_context[6][4];
+    int mv_ref_ct_a[6][4][2];
+    int mode_context_a[6][4];
 #endif
 
     int vp8_mode_contexts[6][4];
 
     unsigned int current_video_frame;
-
     int near_boffset[3];
     int version;
 

@@ -63,6 +63,8 @@ void vp8_entropy_mode_init(void);
 
 void vp8_init_mbmode_probs(VP8_COMMON *x);
 
+extern void vp8_update_mode_context(VP8_COMMON *pc);;
+
 void   vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES-1]);
 void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1]);
 

@@ -2630,7 +2630,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                                    - cpi->first_time_stamp_ever) / 10000000.000;
             double total_encode_time = (cpi->time_receive_data + cpi->time_compress_data)   / 1000.000;
             double dr = (double)cpi->bytes * (double) 8 / (double)1000  / time_encoded;
-
+#if CONFIG_NEWNEAR&&defined(MODE_STATS)
+            print_mode_contexts(&cpi->common);
+#endif
             if (cpi->b_calculate_psnr)
             {
                 YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
@@ -4361,6 +4363,8 @@ static void encode_frame_to_data_rate
             /* setup entropy for nonkey frame */
             vp8_setup_inter_frame(cpi);
         }
+
+
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);
 

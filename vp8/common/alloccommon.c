@@ -190,12 +190,6 @@ void vp8_create_common(VP8_COMMON *oci)
     vp8_machine_specific_config(oci);
 
     vp8_init_mbmode_probs(oci);
-#if CONFIG_NEWNEAR
-    vp8_init_mv_ref_counts(oci);
-#endif
-    vpx_memcpy( oci->vp8_mode_contexts,
-                default_vp8_mode_contexts,
-                sizeof(default_vp8_mode_contexts));
 
     vp8_default_bmode_probs(oci->fc.bmode_prob);
 

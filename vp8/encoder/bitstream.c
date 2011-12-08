@@ -2319,25 +2319,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         pack_inter_mode_mvs(cpi);
 
 #if CONFIG_NEWNEAR
-        if(!cpi->common.refresh_alt_ref_frame)
-        {
-            vp8_update_mode_context(&cpi->common);
-            vpx_memcpy( pc->vp8_mode_contexts,
-                        cpi->common.mode_context,
-                        sizeof(cpi->common.mode_context));
-
-            if(0) //(cpi->common.current_video_frame<2)
-            {
-
-                printf("mv_ref_ct on frame %d:\n",
-                        cpi->common.current_video_frame);
-                print_mv_ref_cts(&cpi->common);
-
-                printf("mode_contexts on frame %d:\n",
-                        cpi->common.current_video_frame);
-                print_mode_contexts();
-            }
-        }
+        vp8_update_mode_context(&cpi->common);
 #endif
 
 #ifdef ENTROPY_STATS
