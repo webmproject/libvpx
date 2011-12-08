@@ -14,7 +14,7 @@
 #include "third_party/libyuv/include/libyuv/basic_types.h"
 
 #define kMaxStride (2048 * 4)
-//#define IS_ALIGNED(p, a) (!((uintptr_t)(p) & ((a) - 1)))
+#define IS_ALIGNED(p, a) (!((uintptr_t)(p) & ((a) - 1)))
 
 #if defined(COVERAGE_ENABLED) || defined(TARGET_IPHONE_SIMULATOR)
 #define YUV_DISABLE_ASM
@@ -72,7 +72,10 @@ void FastConvertYUVToABGRRow_NEON(const uint8* y_buf,
 #define HAS_REVERSE_ROW_NEON
 #endif
 
-//extern "C" {
+#ifdef __cplusplus
+namespace libyuv {
+extern "C" {
+#endif
 
 #ifdef HAS_ARGBTOYROW_SSSE3
 void ARGBToYRow_SSSE3(const uint8* src_argb, uint8* dst_y, int pix);
@@ -253,6 +256,9 @@ void FastConvertYToARGBRow_SSE2(const uint8* y_buf,
 
 #endif
 
-//}  // extern "C"
+#ifdef __cplusplus
+}  // extern "C"
+}  // namespace libyuv
+#endif
 
 #endif  // LIBYUV_SOURCE_ROW_H_

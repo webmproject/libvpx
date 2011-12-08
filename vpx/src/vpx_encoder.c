@@ -243,6 +243,7 @@ vpx_codec_err_t  vpx_codec_encode(vpx_codec_ctx_t            *ctx,
                 ctx--;
                 if (img) img--;
             }
+            ctx++;
         }
 
         FLOATING_POINT_RESTORE();
