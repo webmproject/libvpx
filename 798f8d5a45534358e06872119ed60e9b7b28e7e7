@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//xsk\u003d",
+        "filename": "vp8/common/generic/systemdependent.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-12-08T16:42:40Z",
+      "side": 1,
+      "message": "This #if #endif if can be removed?",
+      "revId": "798f8d5a45534358e06872119ed60e9b7b28e7e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//xr0\u003d",
+        "filename": "vp8/common/x86/x86_systemdependent.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2011-12-08T16:42:40Z",
+      "side": 1,
+      "message": "would it be better that this function be in idct_blk_mmx.c?? I knew there is not one \"dequantize_mmx.c\".",
+      "revId": "798f8d5a45534358e06872119ed60e9b7b28e7e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
