@@ -4180,6 +4180,9 @@ static void encode_frame_to_data_rate
     if (cpi->active_best_quality < cpi->best_quality)
         cpi->active_best_quality = cpi->best_quality;
 
+    if (cpi->active_best_quality > cpi->worst_quality)
+        cpi->active_best_quality = cpi->worst_quality;
+
     if ( cpi->active_worst_quality < cpi->active_best_quality )
         cpi->active_worst_quality = cpi->active_best_quality;
 

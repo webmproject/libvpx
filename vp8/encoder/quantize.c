@@ -965,18 +965,17 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
     int i;
     int quant_val;
     int Q;
-
-    int zbin_boost[16] = {0, 0, 8, 10, 12, 14, 16, 20, 24, 28, 32, 36, 40, 44, 44, 44};
-
+    int zbin_boost[16] = { 0,  0,  8, 10, 12, 14, 16, 20,
+                          24, 28, 32, 36, 40, 44, 44, 44};
     int qrounding_factor = 48;
-#if CONFIG_EXTEND_QRANGE
-    int qzbin_factor = (vp8_dc_quant(Q,0) < 148) ? 84 : 80;
-#else
-    int qzbin_factor = (vp8_dc_quant(Q,0) < 37) ? 84: 80;
-#endif
 
     for (Q = 0; Q < QINDEX_RANGE; Q++)
     {
+#if CONFIG_EXTEND_QRANGE
+        int qzbin_factor = (vp8_dc_quant(Q,0) < 148) ? 84 : 80;
+#else
+        int qzbin_factor = (vp8_dc_quant(Q,0) < 37) ? 84: 80;
+#endif
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
         cpi->Y1quant_fast[Q][0] = (1 << 16) / quant_val;
