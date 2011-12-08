@@ -43,7 +43,11 @@ typedef struct frame_contexts
 {
     vp8_prob bmode_prob [VP8_BINTRAMODES-1];
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
+#if CONFIG_UVINTRA
+    vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+#else
     vp8_prob uv_mode_prob [VP8_UV_MODES-1];
+#endif
     vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 #if CONFIG_T8X8

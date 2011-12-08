@@ -410,7 +410,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             }
             while (++i < 4);
         }
-
+#if CONFIG_UVINTRA
+        //vp8_read_bit(bc);
+#else
         if (vp8_read_bit(bc))
         {
             int i = 0;
@@ -421,7 +423,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             }
             while (++i < 3);
         }
-
+#endif /* CONFIG_UVINTRA */
         read_mvcontexts(bc, mvc);
     }
 }
@@ -798,7 +800,13 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             }
         }
         else
-            mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc, pbi->common.fc.uv_mode_prob);
+#if CONFIG_UVINTRA
+            mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+                                    pbi->common.fc.uv_mode_prob[mbmi->mode]);
+#else
+            mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
+                                    pbi->common.fc.uv_mode_prob);
+#endif /*CONFIG_UVINTRA*/
     }
 
 }

@@ -2591,6 +2591,12 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     vp8_loop_filter_init(cm);
 
     cpi->common.error.setjmp = 0;
+
+#if CONFIG_UVINTRA
+    vp8_zero(cpi->y_uv_mode_count)
+#endif
+
+
     return (VP8_PTR) cpi;
 
 }
@@ -2698,7 +2704,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4], y_modes[5]);
             fprintf(f, "I8:%8d, %8d, %8d, %8d\n", i8x8_modes[0], i8x8_modes[1], i8x8_modes[2], i8x8_modes[3]);
             fprintf(f, "UV:%8d, %8d, %8d, %8d\n", uv_modes[0], uv_modes[1], uv_modes[2], uv_modes[3]);
-            fprintf(f, "Y-UV:\n");
+            fprintf(f, "KeyFrame Y-UV:\n");
             {
                 int i;
                 for(i=0;i<VP8_YMODES;i++)
@@ -2707,6 +2713,17 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                         uv_modes_y[i][1], uv_modes_y[i][2], uv_modes_y[i][3]);
                 }
             }
+#if CONFIG_UVINTRA
+            fprintf(f, "Inter Y-UV:\n");
+            {
+                int i;
+                for(i=0;i<VP8_YMODES;i++)
+                {
+                    fprintf(f, "%2d:%8d, %8d, %8d, %8d\n",i,cpi->y_uv_mode_count[i][0],
+                        cpi->y_uv_mode_count[i][1], cpi->y_uv_mode_count[i][2], cpi->y_uv_mode_count[i][3]);
+                }
+            }
+#endif
             fprintf(f, "B: ");
             {
                 int i;
