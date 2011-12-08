@@ -1196,10 +1196,17 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_NEW1 ] = 1 << (Tmp - 1);
         }
 
-        cm->filter_type = NORMAL_LOOPFILTER;
+        if(cm->version == 0)
+        {
+            cm->filter_type = NORMAL_LOOPFILTER;
 
-        if (Speed >= 14)
+            if (Speed >= 14)
+                cm->filter_type = SIMPLE_LOOPFILTER;
+        }
+        else
+        {
             cm->filter_type = SIMPLE_LOOPFILTER;
+        }
 
         if (Speed >= 15)
         {
