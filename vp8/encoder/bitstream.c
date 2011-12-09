@@ -167,7 +167,8 @@ typedef unsigned long long bool_cache_entry_t;
 
 static unsigned char bool_cache_validity1[MAX_BOOL_CACHE_CONTEXTS/128/8];
 static unsigned char bool_cache_validity2[MAX_BOOL_CACHE_CONTEXTS/8];
-static bool_cache_entry_t bool_cache_table[MAX_BOOL_CACHE_CONTEXTS];
+#define BOOL_CACHE_BUCKETS (32*1024)
+static bool_cache_entry_t bool_cache_table[BOOL_CACHE_BUCKETS];
 
 static unsigned char bit_n(unsigned char *vector, int n)
 {
@@ -184,17 +185,24 @@ static void set_bit_n(unsigned char *vector, int n)
 
 static int bool_cache_hit1;
 static int bool_cache_hit2;
-static int bool_cache_hit(int context)
+static bool_cache_entry_t bool_cache_hit(int context)
 {
-    int hit;
+    bool_cache_entry_t entry;
 
     bool_cache_hit1++;
     assert(context < MAX_BOOL_CACHE_CONTEXTS);
     if(!bit_n(bool_cache_validity1, context>>7))
         return 0;
-    hit= bit_n(bool_cache_validity2, context);
-    if(hit) bool_cache_hit2++;
-    return hit;
+    if(!bit_n(bool_cache_validity2, context))
+        return 0;
+
+    entry = bool_cache_table[context & (BOOL_CACHE_BUCKETS-1)];
+    if((context >> 15) == (entry & 0x1F))
+    {
+        bool_cache_hit2++;
+        return entry;
+    }
+    return 0;
 }
 
 
@@ -238,16 +246,10 @@ static void bool_cache(int context, vp8_writer *bc)
     entry += shift_count;
     entry <<= 7;
     entry += bc->range - 128;
-    bool_cache_table[context] = entry;
+    entry <<= 5;
+    entry += context >> 15;
+    bool_cache_table[context & (BOOL_CACHE_BUCKETS-1)] = entry;
 
-}
-
-
-static bool_cache_entry_t bool_cache_lookup(int context)
-{
-    assert(bit_n(bool_cache_validity1, context>>7));
-    assert(bit_n(bool_cache_validity2, context));
-    return bool_cache_table[context];
 }
 
 
@@ -257,6 +259,7 @@ static void splice_bits(BOOL_CODER *cx, bool_cache_entry_t to_splice)
     int shift_count, count;
     unsigned long long lowvalue = cx->lowvalue;
 
+    to_splice >>= 5;
     cx->range = (to_splice & 0x7F) + 128;
     to_splice >>= 7;
     shift_count = to_splice & 0x3F;
@@ -307,10 +310,11 @@ void pack_tokens_lut(vp8_writer *w, const TOKENEXTRA *p, int xcount)
     {
         const vp8_extra_bit_struct *b;
         int context;
+        bool_cache_entry_t entry;
 
         /* Encode token */
         context = (p->context << 7) + (w->range - 128);
-        if (!bool_cache_hit(context))
+        if (!(entry = bool_cache_hit(context)))
         {
             /* Build the probability vector */
             int n, i, j, v;
@@ -342,8 +346,9 @@ void pack_tokens_lut(vp8_writer *w, const TOKENEXTRA *p, int xcount)
             tmpbc.range = w->range;
             encode_bits_msb(&tmpbc, v, probs, j);
             bool_cache(context, &tmpbc);
+            entry = bool_cache_hit(context);
         }
-        splice_bits(w, bool_cache_lookup(context));
+        splice_bits(w, entry);
 
         /* Encode extra bits */
         b = vp8_extra_bits + p->Token;
@@ -351,7 +356,7 @@ void pack_tokens_lut(vp8_writer *w, const TOKENEXTRA *p, int xcount)
         {
             context = b->base_val + (p->Extra >> 1);
             context = (context << 7) + (w->range - 128);
-            if (!bool_cache_hit(context))
+            if (!(entry = bool_cache_hit(context)))
             {
                 unsigned char buf[4];
                 vp8_writer tmpbc;
@@ -361,8 +366,9 @@ void pack_tokens_lut(vp8_writer *w, const TOKENEXTRA *p, int xcount)
                 tmpbc.range = w->range;
                 encode_bits_msb(&tmpbc, p->Extra >> 1, b->prob, b->Len);
                 bool_cache(context, &tmpbc);
+                entry = bool_cache_hit(context);
             }
-            splice_bits(w, bool_cache_lookup(context));
+            splice_bits(w, entry);
         }
 
         /* Encode sign bit */
@@ -2163,6 +2169,7 @@ pack_tokens_lut(&cpi->bc[1], cpi->tok, cpi->tok_count);
 
 }
 
+//#undef printf
 printf("cache hit ratio: %d/%d=%f\n",
 bool_cache_hit2,
 bool_cache_hit1,
