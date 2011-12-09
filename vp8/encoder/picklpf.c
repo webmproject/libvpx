@@ -289,7 +289,11 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     int Bias = 0;                       // Bias against raising loop filter and in favor of lowering it
 
+    int ss_err[MAX_LOOP_FILTER];
+
     YV12_BUFFER_CONFIG * saved_frame = cm->frame_to_show;
+
+    vpx_memset(ss_err, 0, sizeof(ss_err));
 
     /* Replace unfiltered frame buffer with a new one */
     cm->frame_to_show = &cpi->pick_lf_lvl_frame;
@@ -320,6 +324,9 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     best_err = vp8_calc_ss_err(sd, cm->frame_to_show,
                                IF_RTCD(&cpi->rtcd.variance));
+
+    ss_err[filt_mid] = best_err;
+
     filt_best = filt_mid;
 
     while (filter_step > 0)
@@ -335,13 +342,19 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
         if ((filt_direction <= 0) && (filt_low != filt_mid))
         {
-            // Get Low filter error score
-            vp8_yv12_copy_y_ptr(saved_frame, cm->frame_to_show);
-            vp8cx_set_alt_lf_level(cpi, filt_low);
-            vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_low);
+            if(ss_err[filt_low] == 0)
+            {
+                // Get Low filter error score
+                vp8_yv12_copy_y_ptr(saved_frame, cm->frame_to_show);
+                vp8cx_set_alt_lf_level(cpi, filt_low);
+                vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_low);
 
-            filt_err = vp8_calc_ss_err(sd, cm->frame_to_show,
-                                       IF_RTCD(&cpi->rtcd.variance));
+                filt_err = vp8_calc_ss_err(sd, cm->frame_to_show,
+                                           IF_RTCD(&cpi->rtcd.variance));
+                ss_err[filt_low] = filt_err;
+            }
+            else
+                filt_err = ss_err[filt_low];
 
             // If value is close to the best so far then bias towards a lower loop filter value.
             if ((filt_err - Bias) < best_err)
@@ -357,12 +370,18 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         // Now look at filt_high
         if ((filt_direction >= 0) && (filt_high != filt_mid))
         {
-            vp8_yv12_copy_y_ptr(saved_frame, cm->frame_to_show);
-            vp8cx_set_alt_lf_level(cpi, filt_high);
-            vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_high);
+            if(ss_err[filt_high] == 0)
+            {
+                vp8_yv12_copy_y_ptr(saved_frame, cm->frame_to_show);
+                vp8cx_set_alt_lf_level(cpi, filt_high);
+                vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_high);
 
-            filt_err = vp8_calc_ss_err(sd, cm->frame_to_show,
-                                       IF_RTCD(&cpi->rtcd.variance));
+                filt_err = vp8_calc_ss_err(sd, cm->frame_to_show,
+                                           IF_RTCD(&cpi->rtcd.variance));
+                ss_err[filt_high] = filt_err;
+            }
+            else
+                filt_err = ss_err[filt_high];
 
             // Was it better than the previous best?
             if (filt_err < (best_err - Bias))
