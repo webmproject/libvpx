@@ -331,6 +331,7 @@ static void update_mbgraph_frame_stats
     int mb_col, mb_row, offset = 0;
     int mb_y_offset = 0, arf_y_offset = 0, gld_y_offset = 0;
     int_mv arf_top_mv, gld_top_mv;
+    MODE_INFO mi_local;
 
     // Set up limit values for motion vectors to prevent them extending outside the UMV borders
     arf_top_mv.as_int = 0;
@@ -341,6 +342,7 @@ static void update_mbgraph_frame_stats
     xd->dst.y_stride  = buf->y_stride;
     xd->pre.y_stride  = buf->y_stride;
     xd->dst.uv_stride = buf->uv_stride;
+    xd->mode_info_context = &mi_local;
 
     for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
     {
