@@ -288,12 +288,33 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
         }
     }
 
-    fill_token_costs(
-        cpi->mb.token_costs,
-        (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs
-    );
+    {
+      // build token cost array for the type of frame we have now
+      FRAME_CONTEXT *l = &cpi->lfc_n;
 
-    vp8_init_mode_costs(cpi);
+      if(cpi->common.refresh_alt_ref_frame)
+          l = &cpi->lfc_a;
+      else if(cpi->common.refresh_golden_frame)
+          l = &cpi->lfc_g;
+
+      fill_token_costs(
+          cpi->mb.token_costs,
+          (const vp8_prob( *)[8][3][11]) l->coef_probs
+      );
+      /*
+      fill_token_costs(
+          cpi->mb.token_costs,
+          (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs);
+      */
+
+
+      // TODO make these mode costs depend on last,alt or gold too.  (jbb)
+      vp8_init_mode_costs(cpi);
+
+      // TODO figure onnnnuut why making mv cost frame type dependent didn't help (jbb)
+      //vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) l->mvc, flags);
+
+    }
 
 }
 

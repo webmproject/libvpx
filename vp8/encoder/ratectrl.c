@@ -304,6 +304,8 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     // Setup for Key frame:
 
     vp8_default_coef_probs(& cpi->common);
+
+
     vp8_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
 
     vpx_memcpy(cpi->common.fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
@@ -313,6 +315,12 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     }
 
     vpx_memset(cpi->common.fc.pre_mvc, 0, sizeof(cpi->common.fc.pre_mvc));  //initialize pre_mvc to all zero.
+
+    // Make sure we initialize separate contexts for altref,gold, and normal.
+    // TODO shouldn't need 3 different copies of structure to do this!
+    vpx_memcpy(&cpi->lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
+    vpx_memcpy(&cpi->lfc_g, &cpi->common.fc, sizeof(cpi->common.fc));
+    vpx_memcpy(&cpi->lfc_n, &cpi->common.fc, sizeof(cpi->common.fc));
 
     //cpi->common.filter_level = 0;      // Reset every key frame.
     cpi->common.filter_level = cpi->common.base_qindex * 3 / 8 ;

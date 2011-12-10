@@ -39,7 +39,12 @@
 #define IF_RTCD(x)  NULL
 #endif
 extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
-
+extern void vp8_calc_ref_frame_costs(int *ref_frame_cost,
+                                     int prob_intra,
+                                     int prob_last,
+                                     int prob_garf
+                                    );
+extern void vp8_convert_rfct_to_prob(VP8_COMP *const cpi);
 extern void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex);
 extern void vp8_auto_select_speed(VP8_COMP *cpi);
 extern void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
@@ -636,55 +641,23 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     vpx_memset(cm->above_context, 0,
                sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
-    xd->ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
-
     // Special case treatment when GF and ARF are not sensible options for reference
     if (cpi->ref_frame_flags == VP8_LAST_FLAG)
-    {
-        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(255);
-        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(255)
-                                        + vp8_cost_zero(128);
-        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(255)
-                                        + vp8_cost_one(128);
-    }
+        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+                                 cpi->prob_intra_coded,255,128);
     else if ((cpi->oxcf.number_of_layers > 1) &&
                (cpi->ref_frame_flags == VP8_GOLD_FLAG))
-    {
-        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(1);
-        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(1)
-                                        + vp8_cost_zero(255);
-        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(1)
-                                        + vp8_cost_one(255);
-    }
+        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+                                 cpi->prob_intra_coded,1,255);
     else if ((cpi->oxcf.number_of_layers > 1) &&
                 (cpi->ref_frame_flags == VP8_ALT_FLAG))
-    {
-        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(1);
-        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(1)
-                                        + vp8_cost_zero(1);
-        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(1)
-                                        + vp8_cost_one(1);
-    }
+        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+                                 cpi->prob_intra_coded,1,1);
     else
-    {
-        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(cpi->prob_last_coded);
-        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_zero(cpi->prob_gf_coded);
-        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_one(cpi->prob_gf_coded);
-    }
+        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+                                 cpi->prob_intra_coded,
+                                 cpi->prob_last_coded,
+                                 cpi->prob_gf_coded);
 
     xd->fullpixel_mask = 0xffffffff;
     if(cm->full_pixel)
@@ -966,31 +939,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     if ((cm->frame_type != KEY_FRAME) && ((cpi->oxcf.number_of_layers > 1) ||
         (!cm->refresh_alt_ref_frame && !cm->refresh_golden_frame)))
     {
-        const int *const rfct = cpi->count_mb_ref_frame_usage;
-        const int rf_intra = rfct[INTRA_FRAME];
-        const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-
-        if ((rf_intra + rf_inter) > 0)
-        {
-            cpi->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
-
-            if (cpi->prob_intra_coded < 1)
-                cpi->prob_intra_coded = 1;
-
-            if ((cm->frames_since_golden > 0) || cpi->source_alt_ref_active)
-            {
-                cpi->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-                if (cpi->prob_last_coded < 1)
-                    cpi->prob_last_coded = 1;
-
-                cpi->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                                     ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-                if (cpi->prob_gf_coded < 1)
-                    cpi->prob_gf_coded = 1;
-            }
-        }
+      vp8_convert_rfct_to_prob(cpi);
     }
 
 #if 0
