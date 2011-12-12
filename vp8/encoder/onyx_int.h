@@ -599,7 +599,7 @@ typedef struct VP8_COMP
     unsigned int time_pick_lpf;
     unsigned int time_encode_mb_row;
 
-    int base_skip_false_prob[128];
+    int base_skip_false_prob[QINDEX_RANGE];
 
     struct twopass_rc
     {

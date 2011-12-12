@@ -107,18 +107,21 @@ static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONF
 static int get_min_filter_level(VP8_COMP *cpi, int base_qindex)
 {
     int min_filter_level;
+    /*int q = (int) vp8_convert_qindex_to_q(base_qindex);
 
     if (cpi->source_alt_ref_active && cpi->common.refresh_golden_frame && !cpi->common.refresh_alt_ref_frame)
         min_filter_level = 0;
     else
     {
-        if (base_qindex <= 6)
+        if (q <= 10)
             min_filter_level = 0;
-        else if (base_qindex <= 16)
+        else if (q <= 64)
             min_filter_level = 1;
         else
-            min_filter_level = (base_qindex / 8);
+            min_filter_level = (q >> 6);
     }
+    */
+    min_filter_level = 0;
 
     return min_filter_level;
 }

@@ -9,6 +9,7 @@
  */
 
 #include "type_aliases.h"
+#include "onyxc_int.h"
 #include "vp8/common/blockd.h"
 
 #ifndef __INC_SEG_COMMON_H__
