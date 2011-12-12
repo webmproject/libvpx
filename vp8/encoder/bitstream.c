@@ -878,7 +878,28 @@ static void write_mb_features(vp8_writer *w, const MB_MODE_INFO *mi, const MACRO
         }
     }
 }
+void vp8_convert_rfct_to_prob(VP8_COMP *const cpi)
+{
+    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    const int rf_intra = rfct[INTRA_FRAME];
+    const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
+    // Calculate the probabilities used to code the ref frame based on useage
+    if (!(cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter)))
+        cpi->prob_intra_coded = 1;
+
+    cpi->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
+
+    if (!cpi->prob_last_coded)
+        cpi->prob_last_coded = 1;
+
+    cpi->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+                  ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
+
+    if (!cpi->prob_gf_coded)
+        cpi->prob_gf_coded = 1;
+
+}
 
 static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 {
@@ -886,36 +907,17 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     vp8_writer *const w = cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
 
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
-    const int rf_intra = rfct[INTRA_FRAME];
-    const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
     MODE_INFO *m = pc->mi, *ms;
     const int mis = pc->mode_info_stride;
     int mb_row = -1;
 
-    int prob_last_coded;
-    int prob_gf_coded;
     int prob_skip_false = 0;
     ms = pc->mi - 1;
 
     cpi->mb.partition_info = cpi->mb.pi;
 
-    // Calculate the probabilities to be used to code the reference frame based on actual useage this frame
-    if (!(cpi->prob_intra_coded = rf_intra * 255 / (rf_intra + rf_inter)))
-        cpi->prob_intra_coded = 1;
-
-    prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-    if (!prob_last_coded)
-        prob_last_coded = 1;
-
-    prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                    ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-    if (!prob_gf_coded)
-        prob_gf_coded = 1;
-
+    vp8_convert_rfct_to_prob(cpi);
 
 #ifdef ENTROPY_STATS
     active_section = 1;
@@ -936,8 +938,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     }
 
     vp8_write_literal(w, cpi->prob_intra_coded, 8);
-    vp8_write_literal(w, prob_last_coded, 8);
-    vp8_write_literal(w, prob_gf_coded, 8);
+    vp8_write_literal(w, cpi->prob_last_coded, 8);
+    vp8_write_literal(w, cpi->prob_gf_coded, 8);
 
     update_mbintra_mode_probs(cpi);
 
@@ -999,11 +1001,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 vp8_write(w, 1, cpi->prob_intra_coded);
 
                 if (rf == LAST_FRAME)
-                    vp8_write(w, 0, prob_last_coded);
+                    vp8_write(w, 0, cpi->prob_last_coded);
                 else
                 {
-                    vp8_write(w, 1, prob_last_coded);
-                    vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, prob_gf_coded);
+                    vp8_write(w, 1, cpi->prob_last_coded);
+                    vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, cpi->prob_gf_coded);
                 }
 
                 {
@@ -1355,6 +1357,24 @@ static int default_coef_context_savings(VP8_COMP *cpi)
     return savings;
 }
 
+void vp8_calc_ref_frame_costs(int *ref_frame_cost,
+                              int prob_intra,
+                              int prob_last,
+                              int prob_garf
+                             )
+{
+    ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(prob_intra);
+    ref_frame_cost[LAST_FRAME]    = vp8_cost_one(prob_intra)
+                                    + vp8_cost_zero(prob_last);
+    ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(prob_intra)
+                                    + vp8_cost_one(prob_last)
+                                    + vp8_cost_zero(prob_garf);
+    ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(prob_intra)
+                                    + vp8_cost_one(prob_last)
+                                    + vp8_cost_one(prob_garf);
+
+}
+
 int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
     int savings = 0;
@@ -1362,7 +1382,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-    int new_intra, new_last, gf_last, oldtotal, newtotal;
+    int new_intra, new_last, new_garf, oldtotal, newtotal;
     int ref_frame_cost[MAX_REF_FRAMES];
 
     vp8_clear_system_state(); //__asm emms;
@@ -1374,19 +1394,11 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
         new_last = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
 
-        gf_last = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+        new_garf = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
                   ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
 
-        // new costs
-        ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(new_intra);
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(new_intra)
-                                        + vp8_cost_zero(new_last);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(new_intra)
-                                        + vp8_cost_one(new_last)
-                                        + vp8_cost_zero(gf_last);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(new_intra)
-                                        + vp8_cost_one(new_last)
-                                        + vp8_cost_one(gf_last);
+
+        vp8_calc_ref_frame_costs(ref_frame_cost,new_intra,new_last,new_garf);
 
         newtotal =
             rfct[INTRA_FRAME] * ref_frame_cost[INTRA_FRAME] +
@@ -1396,15 +1408,8 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
 
         // old costs
-        ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(cpi->prob_last_coded);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_zero(cpi->prob_gf_coded);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_one(cpi->prob_gf_coded);
+        vp8_calc_ref_frame_costs(ref_frame_cost,cpi->prob_intra_coded,
+                                 cpi->prob_last_coded,cpi->prob_gf_coded);
 
         oldtotal =
             rfct[INTRA_FRAME] * ref_frame_cost[INTRA_FRAME] +

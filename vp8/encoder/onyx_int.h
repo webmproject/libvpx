@@ -568,6 +568,11 @@ typedef struct VP8_COMP
 
     int base_skip_false_prob[128];
 
+    FRAME_CONTEXT lfc_n; /* last frame entropy */
+    FRAME_CONTEXT lfc_a; /* last alt ref entropy */
+    FRAME_CONTEXT lfc_g; /* last gold ref entropy */
+
+
     struct twopass_rc
     {
         unsigned int section_intra_rating;
