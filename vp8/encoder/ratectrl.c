@@ -45,6 +45,7 @@ extern int inter_b_modes[B_MODE_COUNT];
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 
+#if !CONFIG_EXTEND_QRANGE
 static const int kf_gf_boost_qlimits[QINDEX_RANGE] =
 {
     150, 155, 160, 165, 170, 175, 180, 185,
@@ -64,6 +65,7 @@ static const int kf_gf_boost_qlimits[QINDEX_RANGE] =
     600, 600, 600, 600, 600, 600, 600, 600,
     600, 600, 600, 600, 600, 600, 600, 600,
 };
+#endif
 
 // % adjustment to target kf size based on seperation from previous frame
 static const int kf_boost_seperation_adjustment[16] =
@@ -499,8 +501,17 @@ static void calc_gf_params(VP8_COMP *cpi)
         }
 
         // Apply an upper limit based on Q for 1 pass encodes
+#if !CONFIG_EXTEND_QRANGE
         if (Boost > kf_gf_boost_qlimits[Q] && (cpi->pass == 0))
             Boost = kf_gf_boost_qlimits[Q];
+#else
+        // TODO.
+        // This is a temporay measure oas one pass not really supported yet in
+        // the experimental branch
+        if (Boost > 600 && (cpi->pass == 0))
+            Boost = 600;
+
+#endif
 
         // Apply lower limits to boost.
         else if (Boost < 110)

@@ -63,20 +63,27 @@ extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
 static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
 
-// TODO #if CONFIG_EXTEND_QRANGE
-static const int cq_level[QINDEX_RANGE] =
-{
-    0,0,1,1,2,3,3,4,4,5,6,6,7,8,8,9,
-    9,10,11,11,12,13,13,14,15,15,16,17,17,18,19,20,
-    20,21,22,22,23,24,24,25,26,27,27,28,29,30,30,31,
-    32,33,33,34,35,36,36,37,38,39,39,40,41,42,42,43,
-    44,45,46,46,47,48,49,50,50,51,52,53,54,55,55,56,
-    57,58,59,60,60,61,62,63,64,65,66,67,67,68,69,70,
-    71,72,73,74,75,75,76,77,78,79,80,81,82,83,84,85,
-    86,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100
-};
-
 static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
+
+static int select_cq_level( int qindex )
+{
+    int ret_val = QINDEX_RANGE - 1;
+    int i;
+
+    double target_q = ( vp8_convert_qindex_to_q( qindex ) * 0.5847 ) + 1.0;
+
+    for ( i = 0; i < QINDEX_RANGE; i++ )
+    {
+        if ( target_q <= vp8_convert_qindex_to_q( i ) )
+        {
+            ret_val = i;
+            break;
+        }
+    }
+
+    return ret_val;
+}
+
 
 // Resets the first pass file to the given position using a relative seek from the current position
 static void reset_fpf_position(VP8_COMP *cpi, FIRSTPASS_STATS *Position)
@@ -1143,7 +1150,7 @@ static int estimate_cq( VP8_COMP *cpi,
     }
 
     // Clip value to range "best allowed to (worst allowed - 1)"
-    Q = cq_level[Q];
+    Q = select_cq_level( Q );
     if ( Q >= cpi->worst_quality )
         Q = cpi->worst_quality - 1;
     if ( Q < cpi->best_quality )
