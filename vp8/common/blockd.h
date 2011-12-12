@@ -187,7 +187,6 @@ typedef struct
     short *qcoeff;
     short *dqcoeff;
     unsigned char  *predictor;
-    short *diff;
     short *dequant;
 
     /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
@@ -206,7 +205,6 @@ typedef struct
 
 typedef struct MacroBlockD
 {
-    DECLARE_ALIGNED(16, short, diff[400]);      /* from idct diff */
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
     DECLARE_ALIGNED(16, short, qcoeff[400]);
     DECLARE_ALIGNED(16, short, dqcoeff[400]);
