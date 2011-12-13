@@ -514,17 +514,19 @@ static __inline void stuff1st_order_b
     TOKENEXTRA **tp,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
+    int type,
     VP8_COMP *cpi
 )
 {
     int pt; /* near block/prev token context index */
+    int band;
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-
+    band = type ? 0 : 1;
     t->Token = DCT_EOB_TOKEN;
-    t->context_tree = cpi->common.fc.coef_probs [0] [1] [pt];
+    t->context_tree = cpi->common.fc.coef_probs [type] [band] [pt];
     t->skip_eob_node = 0;
-    ++cpi->coef_counts       [0] [1] [pt] [DCT_EOB_TOKEN];
+    ++cpi->coef_counts       [type] [band] [pt] [DCT_EOB_TOKEN];
     ++t;
     *tp = t;
     pt = 0; /* 0 <-> all coeff data is zero */
@@ -561,15 +563,19 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
     int plane_type;
     int b;
-
-    stuff2nd_order_b(t,
+    plane_type = 3;
+    if((x->mode_info_context->mbmi.mode != B_PRED
+                        && x->mode_info_context->mbmi.mode != SPLITMV))
+    {
+        stuff2nd_order_b(t,
                      A + vp8_block2above[24], L + vp8_block2left[24], cpi);
-    plane_type = 0;
+        plane_type = 0;
+    }
 
     for (b = 0; b < 16; b++)
         stuff1st_order_b(t,
                          A + vp8_block2above[b],
-                         L + vp8_block2left[b], cpi);
+                         L + vp8_block2left[b], plane_type, cpi);
 
     for (b = 16; b < 24; b++)
         stuff1st_order_buv(t,
