@@ -157,8 +157,8 @@ while (<STDIN>)
     s/\sPRESERVE8/@ PRESERVE8/g;
 
     # Strip PROC and ENDPROC
-    s/PROC/@/g;
-    s/ENDP/@/g;
+    s/\bPROC\b/@/g;
+    s/\bENDP\b/@/g;
 
     # EQU directive
     s/(.*)EQU(.*)/.set $1, $2/;
