@@ -13,21 +13,12 @@
 
 #include <stddef.h>  // for NULL, size_t
 
-#ifndef WIN32
+#if !(defined(_MSC_VER) && (_MSC_VER < 1600))
 #include <stdint.h>  // for uintptr_t
 #endif
 
 #ifndef INT_TYPES_DEFINED
 #define INT_TYPES_DEFINED
-#ifdef COMPILER_MSVC
-typedef __int64 int64;
-#else
-typedef long long int64;
-#endif /* COMPILER_MSVC */
-typedef int int32;
-typedef short int16;
-typedef char int8;
-
 #ifdef COMPILER_MSVC
 typedef unsigned __int64 uint64;
 typedef __int64 int64;
@@ -38,9 +29,20 @@ typedef __int64 int64;
 #define UINT64_C(x) x ## UI64
 #endif
 #define INT64_F "I64"
-#else
+#else  // COMPILER_MSVC
+#ifdef __LP64__
+typedef unsigned long uint64;
+typedef long int64;
+#ifndef INT64_C
+#define INT64_C(x) x ## L
+#endif
+#ifndef UINT64_C
+#define UINT64_C(x) x ## UL
+#endif
+#define INT64_F "l"
+#else  // __LP64__
 typedef unsigned long long uint64;
-//typedef long long int64;
+typedef long long int64;
 #ifndef INT64_C
 #define INT64_C(x) x ## LL
 #endif
@@ -48,10 +50,14 @@ typedef unsigned long long uint64;
 #define UINT64_C(x) x ## ULL
 #endif
 #define INT64_F "ll"
-#endif /* COMPILER_MSVC */
+#endif  // __LP64__
+#endif  // COMPILER_MSVC
 typedef unsigned int uint32;
+typedef int int32;
 typedef unsigned short uint16;
+typedef short int16;
 typedef unsigned char uint8;
+typedef char int8;
 #endif  // INT_TYPES_DEFINED
 
 // Detect compiler is for x86 or x64.
@@ -60,7 +66,6 @@ typedef unsigned char uint8;
 #define CPU_X86 1
 #endif
 
-#define IS_ALIGNED(p, a) (0==((uintptr_t)(p) & ((a)-1)))
 #define ALIGNP(p, t) \
   ((uint8*)((((uintptr_t)(p) + \
   ((t)-1)) & ~((t)-1))))

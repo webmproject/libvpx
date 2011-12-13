@@ -78,6 +78,8 @@ static void die_codec(vpx_codec_ctx_t *ctx, const char *s) {
     exit(EXIT_FAILURE);
 }
 
+int (*read_frame_p)(FILE *f, vpx_image_t *img);
+
 static int read_frame(FILE *f, vpx_image_t *img) {
     size_t nbytes, to_read;
     int    res = 1;
@@ -89,6 +91,55 @@ static int read_frame(FILE *f, vpx_image_t *img) {
         if(nbytes > 0)
             printf("Warning: Read partial frame. Check your width & height!\n");
     }
+    return res;
+}
+
+static int read_frame_by_row(FILE *f, vpx_image_t *img) {
+    size_t nbytes, to_read;
+    int    res = 1;
+    int plane;
+
+    for (plane = 0; plane < 3; plane++)
+    {
+        unsigned char *ptr;
+        int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
+        int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
+        int r;
+
+        /* Determine the correct plane based on the image format. The for-loop
+         * always counts in Y,U,V order, but this may not match the order of
+         * the data on disk.
+         */
+        switch (plane)
+        {
+        case 1:
+            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? VPX_PLANE_V : VPX_PLANE_U];
+            break;
+        case 2:
+            ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?VPX_PLANE_U : VPX_PLANE_V];
+            break;
+        default:
+            ptr = img->planes[plane];
+        }
+
+        for (r = 0; r < h; r++)
+        {
+            to_read = w;
+
+            nbytes = fread(ptr, 1, to_read, f);
+            if(nbytes != to_read) {
+                res = 0;
+                if(nbytes > 0)
+                    printf("Warning: Read partial frame. Check your width & height!\n");
+                break;
+            }
+
+            ptr += img->stride[plane];
+        }
+        if (!res)
+            break;
+    }
+
     return res;
 }
 
@@ -262,8 +313,13 @@ int main(int argc, char **argv)
 
     /* Allocate image for each encoder */
     for (i=0; i< NUM_ENCODERS; i++)
-        if(!vpx_img_alloc(&raw[i], VPX_IMG_FMT_I420, cfg[i].g_w, cfg[i].g_h, 1))
+        if(!vpx_img_alloc(&raw[i], VPX_IMG_FMT_I420, cfg[i].g_w, cfg[i].g_h, 32))
             die("Failed to allocate image", cfg[i].g_w, cfg[i].g_h);
+
+    if (raw[0].stride[VPX_PLANE_Y] == raw[0].d_w)
+        read_frame_p = read_frame;
+    else
+        read_frame_p = read_frame_by_row;
 
     for (i=0; i< NUM_ENCODERS; i++)
         write_ivf_file_header(outfile[i], &cfg[i], 0);
@@ -305,35 +361,22 @@ int main(int argc, char **argv)
         const vpx_codec_cx_pkt_t *pkt[NUM_ENCODERS];
 
         flags = 0;
-        frame_avail = read_frame(infile, &raw[0]);
+        frame_avail = read_frame_p(infile, &raw[0]);
 
-        for ( i=1; i<NUM_ENCODERS; i++)
+        if(frame_avail)
         {
-            if(frame_avail)
+            for ( i=1; i<NUM_ENCODERS; i++)
             {
                 /*Scale the image down a number of times by downsampling factor*/
-                int src_uvwidth = (raw[i-1].d_w + 1) >> 1;
-                int src_uvheight = (raw[i-1].d_h + 1) >> 1;
-                const unsigned char* src_y = raw[i-1].planes[VPX_PLANE_Y];
-                const unsigned char* src_u = raw[i-1].planes[VPX_PLANE_Y]
-                                             + raw[i-1].d_w*raw[i-1].d_h;
-                const unsigned char* src_v = raw[i-1].planes[VPX_PLANE_Y]
-                                             + raw[i-1].d_w*raw[i-1].d_h
-                                             + src_uvwidth*src_uvheight;
-                int dst_uvwidth = (raw[i].d_w + 1) >> 1;
-                int dst_uvheight = (raw[i].d_h + 1) >> 1;
-                unsigned char* dst_y = raw[i].planes[VPX_PLANE_Y];
-                unsigned char* dst_u = raw[i].planes[VPX_PLANE_Y]
-                                       + raw[i].d_w*raw[i].d_h;
-                unsigned char* dst_v = raw[i].planes[VPX_PLANE_Y]
-                                       + raw[i].d_w*raw[i].d_h
-                                       + dst_uvwidth*dst_uvheight;
-
                 /* FilterMode 1 or 2 give better psnr than FilterMode 0. */
-                I420Scale(src_y, raw[i-1].d_w, src_u, src_uvwidth, src_v,
-                          src_uvwidth, raw[i-1].d_w, raw[i-1].d_h,
-                          dst_y, raw[i].d_w, dst_u, dst_uvwidth,
-                          dst_v, dst_uvwidth, raw[i].d_w, raw[i].d_h, 1);
+                I420Scale(raw[i-1].planes[VPX_PLANE_Y], raw[i-1].stride[VPX_PLANE_Y],
+                          raw[i-1].planes[VPX_PLANE_U], raw[i-1].stride[VPX_PLANE_U],
+                          raw[i-1].planes[VPX_PLANE_V], raw[i-1].stride[VPX_PLANE_V],
+                          raw[i-1].d_w, raw[i-1].d_h,
+                          raw[i].planes[VPX_PLANE_Y], raw[i].stride[VPX_PLANE_Y],
+                          raw[i].planes[VPX_PLANE_U], raw[i].stride[VPX_PLANE_U],
+                          raw[i].planes[VPX_PLANE_V], raw[i].stride[VPX_PLANE_V],
+                          raw[i].d_w, raw[i].d_h, 1);
             }
         }
 

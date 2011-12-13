@@ -13,7 +13,10 @@
 
 #include "third_party/libyuv/include/libyuv/basic_types.h"
 
-//namespace libyuv {
+#ifdef __cplusplus
+namespace libyuv {
+extern "C" {
+#endif
 
 // Supported filtering
 typedef enum {
@@ -42,16 +45,8 @@ int I420Scale(const uint8* src_y, int src_stride_y,
               int dst_width, int dst_height,
               FilterMode filtering);
 
-// Legacy API
-// If dst_height_offset is non-zero, the image is offset by that many pixels
-// and stretched to (dst_height - dst_height_offset * 2) pixels high,
-// instead of dst_height.
-int Scale_1(const uint8* src, int src_width, int src_height,
-          uint8* dst, int dst_width, int dst_height, int dst_height_offset,
-          int interpolate);
-
-// Same, but specified src terms of each plane location and stride.
-int Scale_2(const uint8* src_y, const uint8* src_u, const uint8* src_v,
+// Legacy API.  Deprecated
+int Scale(const uint8* src_y, const uint8* src_u, const uint8* src_v,
           int src_stride_y, int src_stride_u, int src_stride_v,
           int src_width, int src_height,
           uint8* dst_y, uint8* dst_u, uint8* dst_v,
@@ -59,9 +54,17 @@ int Scale_2(const uint8* src_y, const uint8* src_u, const uint8* src_v,
           int dst_width, int dst_height,
           int interpolate);
 
+// Legacy API.  Deprecated
+int ScaleOffset(const uint8* src, int src_width, int src_height,
+                uint8* dst, int dst_width, int dst_height, int dst_yoffset,
+                int interpolate);
+
 // For testing, allow disabling of optimizations.
 void SetUseReferenceImpl(int use);
 
-//} // namespace libyuv
+#ifdef __cplusplus
+}  // extern "C"
+}  // namespace libyuv
+#endif
 
 #endif // INCLUDE_LIBYUV_SCALE_H_
