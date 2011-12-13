@@ -16,6 +16,24 @@
       "revId": "8bc60e47490abd415a3906347f1dc71707320360",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//vxY\u003d",
+        "filename": "build/make/ads2gas_apple.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-13T18:32:19Z",
+      "side": 1,
+      "message": "What is the export trick? Exporting both versions of the symbol (with and without _)?\n\nThat would not work because this looks for the label later on in the function and fixes it:\n\n bl vp8_validate_buffer_arm\nbecomes\n bl _vp8_validate_buffer_arm",
+      "parentUuid": "AAAAGX//v9g\u003d",
+      "revId": "8bc60e47490abd415a3906347f1dc71707320360",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
