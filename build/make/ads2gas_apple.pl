@@ -30,6 +30,8 @@ my @mapping_list = ("\$0", "\$1", "\$2", "\$3", "\$4", "\$5", "\$6", "\$7", "\$8
 
 my @incoming_array;
 
+my @imported_functions;
+
 # Perl trim function to remove whitespace from the start and end of the string
 sub trim($)
 {
@@ -132,7 +134,18 @@ while (<STDIN>)
     # Make function visible to linker, and make additional symbol with
     # prepended underscore
     s/EXPORT\s+\|([\$\w]*)\|/.globl _$1\n\t.globl $1/;
-    s/IMPORT\s+\|([\$\w]*)\|/.globl $1/;
+
+    # Prepend imported functions with _
+    if (s/IMPORT\s+\|([\$\w]*)\|/.globl $1/)
+    {
+        $function = trim($1);
+        push(@imported_functions, $function);
+    }
+
+    foreach $function (@imported_functions)
+    {
+        s/$function/_$function/;
+    }
 
     # No vertical bars required; make additional symbol with prepended
     # underscore
