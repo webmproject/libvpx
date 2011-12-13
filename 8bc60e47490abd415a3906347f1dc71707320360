@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//v9g\u003d",
+        "filename": "build/make/ads2gas_apple.pl",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2011-12-13T07:43:21Z",
+      "side": 1,
+      "message": "would the EXPORT trick have worked here too?",
+      "revId": "8bc60e47490abd415a3906347f1dc71707320360",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
