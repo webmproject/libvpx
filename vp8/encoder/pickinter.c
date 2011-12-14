@@ -432,23 +432,16 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int saddone=0;
     int sr=0;    //search range got from mv_pred(). It uses step_param levels. (0-7)
 
-    int_mv nearest_mv[4];
-    int_mv near_mv[4];
-    int_mv frame_best_ref_mv[4];
-    int MDCounts[4][4];
     unsigned char *y_buffer[4];
     unsigned char *u_buffer[4];
     unsigned char *v_buffer[4];
     int i;
     int ref_frame_map[4];
-
-    int found_near_mvs[4] = {0, 0, 0, 0};
+    int sign_bias = 0;
 
     int have_subp_search = cpi->sf.half_pixel_search;  /* In real-time mode, when Speed >= 15, no sub-pixel search. */
 
     vpx_memset(mode_mv, 0, sizeof(mode_mv));
-    vpx_memset(nearest_mv, 0, sizeof(nearest_mv));
-    vpx_memset(near_mv, 0, sizeof(near_mv));
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
 
     /* Setup search priorities */
@@ -462,6 +455,22 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         ref_frame_map[i++] = ALTREF_FRAME;
     for(; i<4; i++)
         ref_frame_map[i] = -1;
+
+    /* Check to see if there is at least 1 valid reference frame that we need
+     * to calculate near_mvs.
+     */
+    if (ref_frame_map[1] > 0)
+    {
+        vp8_find_near_mvs(&x->e_mbd,
+                          x->e_mbd.mode_info_context,
+                          &mode_mv[NEARESTMV], &mode_mv[NEARMV],
+                          &best_ref_mv,
+                          mdcounts,
+                          ref_frame_map[1],
+                          cpi->common.ref_frame_sign_bias);
+
+        sign_bias = cpi->common.ref_frame_sign_bias[ref_frame_map[1]];
+    }
 
     // set up all the refframe dependent pointers.
     if (cpi->ref_frame_flags & VP8_LAST_FLAG)
@@ -531,21 +540,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             }
         }
 
-        // If nearby MVs haven't been found for this reference frame then do it now.
-        if (x->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
-            !found_near_mvs[x->e_mbd.mode_info_context->mbmi.ref_frame])
-        {
-            int ref_frame = x->e_mbd.mode_info_context->mbmi.ref_frame;
-            vp8_find_near_mvs(&x->e_mbd,
-                              x->e_mbd.mode_info_context,
-                              &nearest_mv[ref_frame], &near_mv[ref_frame],
-                              &frame_best_ref_mv[ref_frame],
-                              MDCounts[ref_frame],
-                              ref_frame,
-                              cpi->common.ref_frame_sign_bias);
-            found_near_mvs[ref_frame] = 1;
-        }
-
         // We have now reached the point where we are going to test the current mode so increment the counter for the number of times it has been tested
         cpi->mode_test_hit_counts[mode_index] ++;
 
@@ -571,10 +565,19 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             x->e_mbd.pre.y_buffer = y_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
             x->e_mbd.pre.u_buffer = u_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
             x->e_mbd.pre.v_buffer = v_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
-            mode_mv[NEARESTMV] = nearest_mv[x->e_mbd.mode_info_context->mbmi.ref_frame];
-            mode_mv[NEARMV] = near_mv[x->e_mbd.mode_info_context->mbmi.ref_frame];
-            best_ref_mv = frame_best_ref_mv[x->e_mbd.mode_info_context->mbmi.ref_frame];
-            memcpy(mdcounts, MDCounts[x->e_mbd.mode_info_context->mbmi.ref_frame], sizeof(mdcounts));
+
+            if (sign_bias !=
+                cpi->common.ref_frame_sign_bias[x->e_mbd.mode_info_context->mbmi.ref_frame])
+            {
+                mode_mv[NEARESTMV].as_mv.row *= -1;
+                mode_mv[NEARESTMV].as_mv.col *= -1;
+                mode_mv[NEARMV].as_mv.row *= -1;
+                mode_mv[NEARMV].as_mv.col *= -1;
+                best_ref_mv.as_mv.row *= -1;
+                best_ref_mv.as_mv.col *= -1;
+                sign_bias
+                = cpi->common.ref_frame_sign_bias[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            }
         }
 
         // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
@@ -910,7 +913,14 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         pick_intra_mbuv_mode(x);
     }
 
-    update_mvcount(cpi, &x->e_mbd, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
+    if (sign_bias
+        != cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame])
+    {
+        best_ref_mv.as_mv.row *= -1;
+        best_ref_mv.as_mv.col *= -1;
+    }
+
+    update_mvcount(cpi, &x->e_mbd, &best_ref_mv);
 }
 
 
