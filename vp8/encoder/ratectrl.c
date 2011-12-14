@@ -940,6 +940,8 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             if (cpi->active_worst_quality <= cpi->active_best_quality)
                 cpi->active_worst_quality = cpi->active_best_quality + 1;
 
+            if(cpi->active_worst_quality > 127)
+                cpi->active_worst_quality = 127;
         }
         // Unbuffered mode (eg. video conferencing)
         else
