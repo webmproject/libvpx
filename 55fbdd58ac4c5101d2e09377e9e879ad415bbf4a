@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//vTU\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1210,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-14T14:50:47Z",
+      "side": 1,
+      "message": "Does removing the line:\ncm-\u003efilter_type \u003d NORMAL_LOOPFILTER;\n\nin original file give same result?",
+      "revId": "55fbdd58ac4c5101d2e09377e9e879ad415bbf4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
