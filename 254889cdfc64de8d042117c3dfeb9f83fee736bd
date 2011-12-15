@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//ulY\u003d",
+        "filename": "vp8/common/reconinter.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 0,
+      "message": "since this is the header file declaring these functions, do they need to be \"extern\"?",
+      "revId": "254889cdfc64de8d042117c3dfeb9f83fee736bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}

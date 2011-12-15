@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//ul0\u003d",
+        "filename": "vp8/common/dequantize.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "vp8/common is now the current directory. should be \"dequantize.h\" and \"idct.h\" below",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ulw\u003d",
+        "filename": "vp8/common/idct_blk.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "\"dequantize.h\"",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ulk\u003d",
+        "filename": "vp8/common/invtrans.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "\"onyxc_int.h\"",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ulM\u003d",
+        "filename": "vp8/common/x86/idct_blk_mmx.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "extern?",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ulA\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "?",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uk8\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "?",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uko\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 655,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "IF_RTCD?",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ukk\u003d",
+        "filename": "vp8/vp8_common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "interleave with the rest above in alphabetical?",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ukg\u003d",
+        "filename": "vp8/vp8_common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "interleave below?",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ukc\u003d",
+        "filename": "vp8/vp8_common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "-",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//ukQ\u003d",
+        "filename": "vp8/vp8_common.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2011-12-15T19:05:20Z",
+      "side": 1,
+      "message": "alphabetical (and for ARMV6/7 below)",
+      "revId": "52416000709ae49196cd7dbdc5f754495cbbd0ae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
