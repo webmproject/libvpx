@@ -237,7 +237,7 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
                 if (mb_row != 0)
                 {
                     pred_context +=
-                        (xd->mode_info_context-cm->mb_cols)->
+                        (xd->mode_info_context-cm->mode_info_stride)->
                         mbmi.seg_id_predicted;
                 }
 
