@@ -159,30 +159,6 @@ extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
 
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
 
-/*#if CONFIG_EXTEND_QRANGE
-int vp8cx_base_skip_false_prob[QINDEX_RANGE];
-#else
-int vp8cx_base_skip_false_prob[QINDEX_RANGE] =
-{
-    255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255,
-    255, 255, 255, 255, 255, 255, 255, 255,
-    251, 248, 244, 240, 236, 232, 229, 225,
-    221, 217, 213, 208, 204, 199, 194, 190,
-    187, 183, 179, 175, 172, 168, 164, 160,
-    157, 153, 149, 145, 142, 138, 134, 130,
-    127, 124, 120, 117, 114, 110, 107, 104,
-    101, 98,  95,  92,  89,  86,  83, 80,
-    77,  74,  71,  68,  65,  62,  59, 56,
-    53,  50,  47,  44,  41,  38,  35, 32,
-    30,  28,  26,  24,  22,  20,  18, 16,
-
-};
-#endif*/
 int vp8cx_base_skip_false_prob[QINDEX_RANGE];
 
 // Tables relating active max Q to active min Q
