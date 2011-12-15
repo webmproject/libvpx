@@ -16,6 +16,24 @@
       "revId": "55fbdd58ac4c5101d2e09377e9e879ad415bbf4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//u6Q\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1210,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-15T00:04:09Z",
+      "side": 1,
+      "message": "I don\u0027t think that would properly handle transitions between the speed steps (ie, if we\u0027re at speed 14 and switch to simple lf, we want to switch back to normal lf when the speed goes up to 13. LGTM, you can merge if you agree.",
+      "parentUuid": "AAAAGX//vTU\u003d",
+      "revId": "55fbdd58ac4c5101d2e09377e9e879ad415bbf4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
