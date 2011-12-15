@@ -10,9 +10,8 @@
 
 
 #include "vpx_config.h"
-#include "vp8/decoder/dequantize.h"
+#include "vp8/common/dequantize.h"
 #include "vp8/common/idct.h"
-#include "vpx_mem/vpx_mem.h"
 
 #if HAVE_ARMV7
 extern void vp8_dequantize_b_loop_neon(short *Q, short *DQC, short *DQ);

@@ -1091,8 +1091,10 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x )
 #endif
 }
 
-int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t, int mb_row, int mb_col)
+int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+                                   int mb_row, int mb_col)
 {
+    MACROBLOCKD *xd = &x->e_mbd;
     int rate;
 
     if (cpi->sf.RD && cpi->compressor_speed != 2)
@@ -1112,14 +1114,17 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
         vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
 
     vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
 
-    if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED)
-        vp8_inverse_transform_mby(IF_RTCD(&cpi->rtcd.common->idct), &x->e_mbd);
+    if (xd->mode_info_context->mbmi.mode != B_PRED)
+        vp8_inverse_transform_mby(xd, IF_RTCD(&cpi->common.rtcd));
 
-    vp8_inverse_transform_mbuv(IF_RTCD(&cpi->rtcd.common->idct), &x->e_mbd);
-
+    DEQUANT_INVOKE (&cpi->common.rtcd.dequant, idct_add_uv_block)
+                    (xd->qcoeff+16*16, xd->block[16].dequant,
+                     xd->dst.u_buffer, xd->dst.v_buffer,
+                     xd->dst.uv_stride, xd->eobs+16);
     return rate;
 }
 #ifdef SPEEDSTATS
@@ -1312,12 +1317,14 @@ int vp8cx_encode_inter_macroblock
     if (!x->skip)
     {
         vp8_tokenize_mb(cpi, xd, t);
-        if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED)
-        {
-          vp8_inverse_transform_mby(IF_RTCD(&cpi->rtcd.common->idct),
-                                      &x->e_mbd);
-        }
-        vp8_inverse_transform_mbuv(IF_RTCD(&cpi->rtcd.common->idct), &x->e_mbd);
+
+        if (xd->mode_info_context->mbmi.mode != B_PRED)
+            vp8_inverse_transform_mby(xd, IF_RTCD(&cpi->common.rtcd));
+
+        DEQUANT_INVOKE (&cpi->common.rtcd.dequant, idct_add_uv_block)
+                        (xd->qcoeff+16*16, xd->block[16].dequant,
+                         xd->dst.u_buffer, xd->dst.v_buffer,
+                         xd->dst.uv_stride, xd->eobs+16);
     }
     else
     {

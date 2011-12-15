@@ -22,13 +22,13 @@ extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_v6);
 #undef  vp8_dequant_block
 #define vp8_dequant_block vp8_dequantize_b_v6
 
-#undef vp8_dequant_idct_add
+#undef  vp8_dequant_idct_add
 #define vp8_dequant_idct_add vp8_dequant_idct_add_v6
 
-#undef vp8_dequant_idct_add_y_block
+#undef  vp8_dequant_idct_add_y_block
 #define vp8_dequant_idct_add_y_block vp8_dequant_idct_add_y_block_v6
 
-#undef vp8_dequant_idct_add_uv_block
+#undef  vp8_dequant_idct_add_uv_block
 #define vp8_dequant_idct_add_uv_block vp8_dequant_idct_add_uv_block_v6
 #endif
 #endif
@@ -44,13 +44,13 @@ extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_neon);
 #undef  vp8_dequant_block
 #define vp8_dequant_block vp8_dequantize_b_neon
 
-#undef vp8_dequant_idct_add
+#undef  vp8_dequant_idct_add
 #define vp8_dequant_idct_add vp8_dequant_idct_add_neon
 
-#undef vp8_dequant_idct_add_y_block
+#undef  vp8_dequant_idct_add_y_block
 #define vp8_dequant_idct_add_y_block vp8_dequant_idct_add_y_block_neon
 
-#undef vp8_dequant_idct_add_uv_block
+#undef  vp8_dequant_idct_add_uv_block
 #define vp8_dequant_idct_add_uv_block vp8_dequant_idct_add_uv_block_neon
 #endif
 

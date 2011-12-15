@@ -22,6 +22,7 @@
 #if CONFIG_POSTPROC
 #include "postproc.h"
 #endif
+#include "dequantize.h"
 
 /*#ifdef PACKET_TESTING*/
 #include "header.h"
@@ -73,6 +74,7 @@ typedef enum
 typedef struct VP8_COMMON_RTCD
 {
 #if CONFIG_RUNTIME_CPU_DETECT
+    vp8_dequant_rtcd_vtable_t        dequant;
     vp8_idct_rtcd_vtable_t        idct;
     vp8_recon_rtcd_vtable_t       recon;
     vp8_subpix_rtcd_vtable_t      subpix;
