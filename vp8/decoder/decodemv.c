@@ -479,7 +479,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 pred_context += (mi-1)->mbmi.seg_id_predicted;
             if (mb_row != 0)
                 pred_context +=
-                    (mi-pbi->common.mb_cols)->mbmi.seg_id_predicted;
+                    (mi-pbi->common.mode_info_stride)->mbmi.seg_id_predicted;
 
             mbmi->seg_id_predicted =
                 vp8_read(bc,

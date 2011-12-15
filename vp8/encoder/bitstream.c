@@ -944,7 +944,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     int i;
     int pred_context;
-    int index = 0;
 
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
@@ -1093,7 +1092,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     if (mb_col != 0)
                         pred_context += (m-1)->mbmi.seg_id_predicted;
                     if (mb_row != 0)
-                        pred_context += (m-pc->mb_cols)->mbmi.seg_id_predicted;
+                        pred_context += (m-pc->mode_info_stride)->mbmi.seg_id_predicted;
 
                     // Code the prediction flag for this mb
                     vp8_write( w, m->mbmi.seg_id_predicted,
@@ -1108,7 +1107,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     // Normal undpredicted coding
                     write_mb_segid(w, mi, &cpi->mb.e_mbd);
                 }
-                index++;
             }
 
 //#if CONFIG_SEGFEATURES
@@ -1329,7 +1327,6 @@ static void write_kfmodes(VP8_COMP *cpi)
     /* const */
     MODE_INFO *m = c->mi;
     int i;
-    int index = 0;
     int mb_row = -1;
     int prob_skip_false = 0;
 
@@ -1375,7 +1372,6 @@ static void write_kfmodes(VP8_COMP *cpi)
 
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
-                index++;
                 write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
             }
 
