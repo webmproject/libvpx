@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//uvk\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 539,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-15T14:07:00Z",
+      "side": 1,
+      "message": "I put find_near_mvs here just because I was not sure which refer frame will be done first. But, I think I can always do LAST_FRAME at the beginning, and adjust the value in for-loop. For majority of time, LAST_FRAME is chosen any way. Thanks.",
+      "parentUuid": "AAAAGX//u58\u003d",
+      "revId": "881146add9157bf3fd2528815952b8a53fc247af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//u5c\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2011-12-15T00:24:43Z",
       "side": 1,
       "message": "this initial copy could be done at the time we call vp8_find_near_mvs() then just switch the signs whenever the sign_bias changes. This would avoid recopying the data for every mode_index.",
+      "revId": "881146add9157bf3fd2528815952b8a53fc247af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uvg\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 579,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-15T14:07:00Z",
+      "side": 1,
+      "message": "Yes, I can fix this by keeping track of sign_bias.",
+      "parentUuid": "AAAAGX//u5c\u003d",
       "revId": "881146add9157bf3fd2528815952b8a53fc247af",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
