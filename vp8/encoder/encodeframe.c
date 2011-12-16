@@ -1186,23 +1186,8 @@ int vp8cx_encode_inter_macroblock
     }
     else
     {
-#if CONFIG_MULTI_RES_ENCODING
-        if (cpi->oxcf.mr_encoder_id == 0)
-        {
-            /* Lowest-resolution encoding */
-            vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                                    &distortion, &intra_error);
-
-        }else
-        {
-            /* Higher-resolution encoding */
-            vp8_mr_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                                &distortion, &intra_error, mb_row, mb_col);
-        }
-#else
         vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                            &distortion, &intra_error);
-#endif
+                            &distortion, &intra_error, mb_row, mb_col);
     }
 
     cpi->prediction_error += distortion;

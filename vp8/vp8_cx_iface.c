@@ -361,6 +361,10 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     }
 
 #if CONFIG_MULTI_RES_ENCODING
+    /* When mr_cfg is NULL, oxcf->mr_total_resolutions and oxcf->mr_encoder_id
+     * are both memset to 0, which ensures the correct logic under this
+     * situation.
+     */
     if(mr_cfg)
     {
         oxcf->mr_total_resolutions        = mr_cfg->mr_total_resolutions;
