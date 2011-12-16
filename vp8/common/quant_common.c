@@ -89,7 +89,8 @@ void vp8_init_quant_tables()
     {
         ac_qlookup[i] = current_val;
         //current_val = (int)((double)current_val * 1.045);
-        current_val = (int)((double)current_val * 1.04);
+        //current_val = (int)((double)current_val * 1.04);
+        current_val = (int)((double)current_val * 1.018);
         if ( current_val == last_val )
             current_val++;
         last_val = current_val;
@@ -99,8 +100,8 @@ void vp8_init_quant_tables()
         dc_qlookup[i] = (0.000000305 * ac_val * ac_val * ac_val) +
                         (-0.00065 * ac_val * ac_val) +
                         (0.9 * ac_val) + 0.5;
-        if ( dc_qlookup[i] > dc_max )
-            dc_qlookup[i] = dc_max;
+        //if ( dc_qlookup[i] > dc_max )
+        //    dc_qlookup[i] = dc_max;
         if ( dc_qlookup[i] < ACDC_MIN )
             dc_qlookup[i] = ACDC_MIN;
     }
