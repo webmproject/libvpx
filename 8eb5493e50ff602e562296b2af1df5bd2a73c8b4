@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//uBc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-12-16T18:25:28Z",
+      "side": 1,
+      "message": "if necessary? can\u0027t we just say \nxd-\u003emode_info_context-\u003embmi.mb_skip_coeff \u003d (eobtotal\u003d\u003d0);",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uBw\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-12-16T18:25:28Z",
+      "side": 1,
+      "message": "seems wasteful to memset the full set of 25 should be a better way.",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uBk\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-12-16T18:25:28Z",
+      "side": 1,
+      "message": "would a switch on eobs be faster ( one jump table instead of 2 ifs ) / not sure?",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uBY\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-12-16T18:25:28Z",
+      "side": 1,
+      "message": "move inside idct or move the others out.   inconsistent..",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uBs\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-12-16T18:25:28Z",
+      "side": 1,
+      "message": "shouldn\u0027t this be in the walsh function itself we are inconsistent with what we do here.",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uBo\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-12-16T18:25:28Z",
+      "side": 1,
+      "message": "move to the walsh",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uBU\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2011-12-16T18:25:28Z",
+      "side": 1,
+      "message": "why? I see it in the old code just don\u0027t know what we are doing and the comment doesn\u0027t explain why we do it.",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
