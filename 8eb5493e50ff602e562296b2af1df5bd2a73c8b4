@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAGX//uA4\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2011-12-16T18:47:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAGX//uBc\u003d",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAGX//uBw\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 1
@@ -81,6 +99,24 @@
       "writtenOn": "2011-12-16T18:25:28Z",
       "side": 1,
       "message": "shouldn\u0027t this be in the walsh function itself we are inconsistent with what we do here.",
+      "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//uA0\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2011-12-16T18:47:31Z",
+      "side": 1,
+      "message": "Eventually, this and the dequantize will be moved into the walsh",
+      "parentUuid": "AAAAGX//uBs\u003d",
       "revId": "8eb5493e50ff602e562296b2af1df5bd2a73c8b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
