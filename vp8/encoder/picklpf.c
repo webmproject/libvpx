@@ -289,7 +289,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     int Bias = 0;                       // Bias against raising loop filter and in favor of lowering it
 
-    int ss_err[MAX_LOOP_FILTER];
+    int ss_err[MAX_LOOP_FILTER + 1];
 
     YV12_BUFFER_CONFIG * saved_frame = cm->frame_to_show;
 
