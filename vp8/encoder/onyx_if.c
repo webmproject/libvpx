@@ -381,17 +381,6 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 
     vpx_free(cpi->mb.pip);
     cpi->mb.pip = 0;
-
-#if !(CONFIG_REALTIME_ONLY)
-    vpx_free(cpi->twopass.total_stats);
-    cpi->twopass.total_stats = 0;
-
-    vpx_free(cpi->twopass.total_left_stats);
-    cpi->twopass.total_left_stats = 0;
-
-    vpx_free(cpi->twopass.this_frame_stats);
-    cpi->twopass.this_frame_stats = 0;
-#endif
 }
 
 static void enable_segmentation(VP8_PTR ptr)
@@ -1397,25 +1386,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
     CHECK_MEM_ERROR(cpi->mb_norm_activity_map,
                     vpx_calloc(sizeof(unsigned int),
                     cm->mb_rows * cm->mb_cols));
-
-#if !(CONFIG_REALTIME_ONLY)
-        vpx_free(cpi->twopass.total_stats);
-
-    cpi->twopass.total_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
-
-    vpx_free(cpi->twopass.total_left_stats);
-    cpi->twopass.total_left_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
-
-        vpx_free(cpi->twopass.this_frame_stats);
-
-    cpi->twopass.this_frame_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
-
-    if( !cpi->twopass.total_stats ||
-        !cpi->twopass.total_left_stats ||
-        !cpi->twopass.this_frame_stats)
-        vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
-                           "Failed to allocate firstpass stats");
-#endif
 
 #if CONFIG_MULTITHREAD
     if (width < 640)
