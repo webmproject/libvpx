@@ -11,9 +11,9 @@
 #include "vpx_config.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/common/filter.h"
-#include "vp8/common/arm/bilinearfilter_arm.h"
 
 #if HAVE_ARMV6
+#include "vp8/common/arm/bilinearfilter_arm.h"
 
 unsigned int vp8_sub_pixel_variance8x8_armv6
 (

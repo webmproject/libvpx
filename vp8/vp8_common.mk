@@ -115,8 +115,6 @@ endif
 
 # common (c)
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.c
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.h
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/filter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/idct_arm.h
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/loopfilter_arm.c
@@ -128,6 +126,8 @@ VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/dequantize_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/dequantize_arm.h
 
 # common (armv6)
+VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.c
+VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/bilinearfilter_arm.h
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/bilinearfilter_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem8x4_v6$(ASM)
 VP8_COMMON_SRCS-$(HAVE_ARMV6)  += common/arm/armv6/copymem8x8_v6$(ASM)
