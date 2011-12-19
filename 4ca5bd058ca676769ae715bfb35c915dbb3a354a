@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//tfc\u003d",
+        "filename": "vp8/common/x86/loopfilter_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 1394,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2011-12-19T20:28:38Z",
+      "side": 1,
+      "message": "lea rdx, [rcx+rax]",
+      "revId": "4ca5bd058ca676769ae715bfb35c915dbb3a354a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//tfU\u003d",
+        "filename": "vp8/common/x86/loopfilter_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 1399,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2011-12-19T20:28:38Z",
+      "side": 1,
+      "message": "And since you\u0027re only using rdx once, you could also eliminate the lea altogether and just use movdqa xmm0, [rcx+rax] before negating rax.",
+      "revId": "4ca5bd058ca676769ae715bfb35c915dbb3a354a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
