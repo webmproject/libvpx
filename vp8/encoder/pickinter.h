@@ -16,14 +16,8 @@
 
 extern void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                                 int recon_uvoffset, int *returnrate,
-                                int *returndistortion, int *returnintra);
+                                int *returndistortion, int *returnintra,
+                                int mb_row, int mb_col);
 extern void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate);
-
-#if CONFIG_MULTI_RES_ENCODING
-extern void vp8_mr_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x,
-                                   int recon_yoffset, int recon_uvoffset,
-                                   int *returnrate, int *returndistortion,
-                                   int *returnintra, int mb_row, int mb_col);
-#endif
 
 #endif
