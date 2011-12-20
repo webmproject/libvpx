@@ -1857,7 +1857,7 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 //
 // Table that converts 0-63 Q range values passed in outside to the Qindex
 // range used internally.
-/*#if CONFIG_EXTEND_QRANGE
+#if CONFIG_EXTEND_QRANGE
 static const int q_trans[] =
 {
      0,    4,   8,  12,  16,  20,  24,  28,
@@ -1869,7 +1869,7 @@ static const int q_trans[] =
     192, 196, 200, 204, 208, 212, 216, 220,
     224, 228, 232, 236, 240, 244, 249, 255,
 };
-#else*/
+#else
 static const int q_trans[] =
 {
     0,   1,  2,  3,  4,  5,  7,  8,
@@ -1881,7 +1881,7 @@ static const int q_trans[] =
     82,  85, 88, 91, 94, 97, 100, 103,
     106, 109, 112, 115, 118, 121, 124, 127,
 };
-//#endif
+#endif
 
 int vp8_reverse_trans(int x)
 {
