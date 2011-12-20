@@ -412,7 +412,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
                 && (ctx->base.init_flags & VPX_CODEC_USE_POSTPROC))
             {
                 ctx->postproc_cfg.post_proc_flag =
-                    VP8_DEBLOCK | VP8_DEMACROBLOCK;
+                    VP8_DEBLOCK | VP8_DEMACROBLOCK | VP8_MFQE;
                 ctx->postproc_cfg.deblocking_level = 4;
                 ctx->postproc_cfg.noise_level = 0;
             }
