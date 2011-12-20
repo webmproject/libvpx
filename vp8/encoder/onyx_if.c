@@ -658,6 +658,37 @@ static int thresh_mult_map_split2[] = {
     RT(0), 10000, RT(1), 20000, RT(2), 50000, RT(3), INT_MAX, INT_MAX
 };
 
+static int mode_check_freq_map_zn2[] = {
+    /* {zero,nearest}{2,3} */
+    0, RT(10), 1<<1, RT(11), 1<<2, RT(12), 1<<3, INT_MAX
+};
+
+static int mode_check_freq_map_vhbpred[] = {
+    0, GOOD(5), 2, RT(0), 0, RT(3), 2, RT(5), 4, INT_MAX
+};
+
+static int mode_check_freq_map_near2[] = {
+    0, GOOD(5), 2, RT(0), 0, RT(3), 2, RT(10), 1<<2, RT(11), 1<<3, RT(12), 1<<4,
+    INT_MAX
+};
+
+static int mode_check_freq_map_new1[] = {
+    0, RT(10), 1<<1, RT(11), 1<<2, RT(12), 1<<3, INT_MAX
+};
+
+static int mode_check_freq_map_new2[] = {
+    0, GOOD(5), 4, RT(0), 0, RT(3), 4, RT(10), 1<<3, RT(11), 1<<4, RT(12), 1<<5,
+    INT_MAX
+};
+
+static int mode_check_freq_map_split1[] = {
+    0, GOOD(2), 2, GOOD(3), 7, RT(1), 2, RT(2), 7, INT_MAX
+};
+
+static int mode_check_freq_map_split2[] = {
+    0, GOOD(1), 2, GOOD(2), 4, GOOD(3), 15, RT(1), 4, RT(2), 15, INT_MAX
+};
+
 void vp8_set_speed_features(VP8_COMP *cpi)
 {
     SPEED_FEATURES *sf = &cpi->sf;
@@ -744,6 +775,36 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->thresh_mult[THR_SPLIT2] =
     sf->thresh_mult[THR_SPLIT3] = speed_map(Speed, thresh_mult_map_split2);
 
+    cpi->mode_check_freq[THR_ZERO1] =
+    cpi->mode_check_freq[THR_NEAREST1] =
+    cpi->mode_check_freq[THR_NEAR1] =
+    cpi->mode_check_freq[THR_TM]     =
+    cpi->mode_check_freq[THR_DC] = 0; /* always */
+
+    cpi->mode_check_freq[THR_ZERO2] =
+    cpi->mode_check_freq[THR_ZERO3] =
+    cpi->mode_check_freq[THR_NEAREST2] =
+    cpi->mode_check_freq[THR_NEAREST3] = speed_map(Speed,
+                                                   mode_check_freq_map_zn2);
+
+    cpi->mode_check_freq[THR_NEAR2]  =
+    cpi->mode_check_freq[THR_NEAR3]  = speed_map(Speed,
+                                                 mode_check_freq_map_near2);
+
+    cpi->mode_check_freq[THR_V_PRED] =
+    cpi->mode_check_freq[THR_H_PRED] =
+    cpi->mode_check_freq[THR_B_PRED] = speed_map(Speed,
+                                                 mode_check_freq_map_vhbpred);
+    cpi->mode_check_freq[THR_NEW1]   = speed_map(Speed,
+                                                 mode_check_freq_map_new1);
+    cpi->mode_check_freq[THR_NEW2]   =
+    cpi->mode_check_freq[THR_NEW3]   = speed_map(Speed,
+                                                 mode_check_freq_map_new2);
+    cpi->mode_check_freq[THR_SPLIT1] = speed_map(Speed,
+                                                 mode_check_freq_map_split1);
+    cpi->mode_check_freq[THR_SPLIT2] =
+    cpi->mode_check_freq[THR_SPLIT3] = speed_map(Speed,
+                                                 mode_check_freq_map_split2);
     Speed = cpi->Speed;
     switch (Mode)
     {
@@ -762,25 +823,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->no_skip_block4x4_search = 0;
 
             sf->first_step = 1;
-
-            cpi->mode_check_freq[THR_SPLIT2] = 2;
-            cpi->mode_check_freq[THR_SPLIT3] = 2;
-            cpi->mode_check_freq[THR_SPLIT1 ] = 0;
-        }
-
-        if (Speed > 1)
-        {
-            cpi->mode_check_freq[THR_SPLIT2] = 4;
-            cpi->mode_check_freq[THR_SPLIT3] = 4;
-            cpi->mode_check_freq[THR_SPLIT1 ] = 2;
         }
 
         if (Speed > 2)
         {
-            cpi->mode_check_freq[THR_SPLIT2] = 15;
-            cpi->mode_check_freq[THR_SPLIT3] = 15;
-            cpi->mode_check_freq[THR_SPLIT1 ] = 7;
-
             sf->improved_quant = 0;
             sf->improved_dct = 0;
 
@@ -792,14 +838,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         if (Speed > 3)
         {
-            cpi->mode_check_freq[THR_V_PRED] = 0;
-            cpi->mode_check_freq[THR_H_PRED] = 0;
-            cpi->mode_check_freq[THR_B_PRED] = 0;
-            cpi->mode_check_freq[THR_NEAR2] = 0;
-            cpi->mode_check_freq[THR_NEW2] = 0;
-            cpi->mode_check_freq[THR_NEAR3] = 0;
-            cpi->mode_check_freq[THR_NEW3] = 0;
-
             sf->auto_filter = 1;
             sf->recode_loop = 0; // recode loop off
             sf->RD = 0;         // Turn rd off
@@ -809,22 +847,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         if (Speed > 4)
         {
             sf->auto_filter = 0;                     // Faster selection of loop filter
-
-            cpi->mode_check_freq[THR_V_PRED] = 2;
-            cpi->mode_check_freq[THR_H_PRED] = 2;
-            cpi->mode_check_freq[THR_B_PRED] = 2;
-
-            if (ref_frames > 2)
-            {
-                cpi->mode_check_freq[THR_NEAR2] = 2;
-                cpi->mode_check_freq[THR_NEW2] = 4;
-            }
-
-            if (ref_frames > 3)
-            {
-                cpi->mode_check_freq[THR_NEAR3] = 2;
-                cpi->mode_check_freq[THR_NEW3] = 4;
-            }
         }
 
         break;
@@ -838,10 +860,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         if (Speed > 0)
         {
-            cpi->mode_check_freq[THR_SPLIT2] = 4;
-            cpi->mode_check_freq[THR_SPLIT3] = 4;
-            cpi->mode_check_freq[THR_SPLIT1 ] = 2;
-
             sf->improved_quant = 0;
             sf->improved_dct = 0;
 
@@ -850,65 +868,20 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->first_step = 1;
         }
 
-        if (Speed > 1)
-        {
-            cpi->mode_check_freq[THR_SPLIT1 ] = 7;
-            cpi->mode_check_freq[THR_SPLIT2] = 15;
-            cpi->mode_check_freq[THR_SPLIT3] = 15;
-        }
-
         if (Speed > 2)
-        {
             sf->auto_filter = 0;                     // Faster selection of loop filter
-
-            cpi->mode_check_freq[THR_V_PRED] = 2;
-            cpi->mode_check_freq[THR_H_PRED] = 2;
-            cpi->mode_check_freq[THR_B_PRED] = 2;
-
-            if (ref_frames > 2)
-            {
-                cpi->mode_check_freq[THR_NEAR2] = 2;
-                cpi->mode_check_freq[THR_NEW2] = 4;
-            }
-
-            if (ref_frames > 3)
-            {
-                cpi->mode_check_freq[THR_NEAR3] = 2;
-                cpi->mode_check_freq[THR_NEW3] = 4;
-            }
-        }
 
         if (Speed > 3)
         {
             sf->RD = 0;
-
             sf->auto_filter = 1;
         }
 
         if (Speed > 4)
         {
             sf->auto_filter = 0;                     // Faster selection of loop filter
-
             sf->search_method = HEX;
-            //sf->search_method = DIAMOND;
-
             sf->iterative_sub_pixel = 0;
-
-            cpi->mode_check_freq[THR_V_PRED] = 4;
-            cpi->mode_check_freq[THR_H_PRED] = 4;
-            cpi->mode_check_freq[THR_B_PRED] = 4;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEAR2] = 2;
-                cpi->mode_check_freq[THR_NEW2] = 4;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEAR3] = 2;
-                cpi->mode_check_freq[THR_NEW3] = 4;
-            }
         }
 
         if (Speed > 6)
@@ -973,35 +946,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         }
 
         if (Speed > 8)
-        {
             sf->quarter_pixel_search = 0;
-        }
-
-        if (Speed > 9)
-        {
-            int Tmp = cpi->Speed - 8;
-
-            if (Tmp > 4)
-                Tmp = 4;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                cpi->mode_check_freq[THR_ZERO2] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEAREST2] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEAR2] = 1 << Tmp;
-                cpi->mode_check_freq[THR_NEW2] = 1 << (Tmp + 1);
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                cpi->mode_check_freq[THR_ZERO3] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEAREST3] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEAR3] = 1 << Tmp;
-                cpi->mode_check_freq[THR_NEW3] = 1 << (Tmp + 1);
-            }
-
-            cpi->mode_check_freq[THR_NEW1 ] = 1 << (Tmp - 1);
-        }
 
         if(cm->version == 0)
         {
@@ -1015,10 +960,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cm->filter_type = SIMPLE_LOOPFILTER;
         }
 
+        // This has a big hit on quality. Last resort
         if (Speed >= 15)
-        {
-            sf->half_pixel_search = 0;        // This has a big hit on quality. Last resort
-        }
+            sf->half_pixel_search = 0;
 
         vpx_memset(cpi->error_bins, 0, sizeof(cpi->error_bins));
 
