@@ -278,7 +278,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
     // for key frames, golden frames and arf frames.
     // if (cpi->common.refresh_golden_frame ||
     //     cpi->common.refresh_alt_ref_frame)
-    QIndex=(QIndex<0)? 0 : ((QIndex>127)?127 : QIndex);
+    QIndex=(QIndex<0)? 0 : ((QIndex>MAXQ)?MAXQ : QIndex);
 
     cpi->RDMULT = compute_rd_mult(QIndex);
 

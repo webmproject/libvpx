@@ -157,10 +157,33 @@ extern unsigned int inter_b_modes[B_MODE_COUNT];
 extern void (*vp8_short_fdct4x4)(short *input, short *output, int pitch);
 extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
 
-extern const int qrounding_factors[129];
-extern const int qzbin_factors[129];
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
-extern const int vp8cx_base_skip_false_prob[128];
+
+/*#if CONFIG_EXTEND_QRANGE
+int vp8cx_base_skip_false_prob[QINDEX_RANGE];
+#else
+int vp8cx_base_skip_false_prob[QINDEX_RANGE] =
+{
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    255, 255, 255, 255, 255, 255, 255, 255,
+    251, 248, 244, 240, 236, 232, 229, 225,
+    221, 217, 213, 208, 204, 199, 194, 190,
+    187, 183, 179, 175, 172, 168, 164, 160,
+    157, 153, 149, 145, 142, 138, 134, 130,
+    127, 124, 120, 117, 114, 110, 107, 104,
+    101, 98,  95,  92,  89,  86,  83, 80,
+    77,  74,  71,  68,  65,  62,  59, 56,
+    53,  50,  47,  44,  41,  38,  35, 32,
+    30,  28,  26,  24,  22,  20,  18, 16,
+
+};
+#endif*/
+int vp8cx_base_skip_false_prob[QINDEX_RANGE];
 
 // Tables relating active max Q to active min Q
 static int kf_low_motion_minq[QINDEX_RANGE];
@@ -243,6 +266,28 @@ void init_minq_luts()
     }
 }
 
+void init_base_skip_probs()
+{
+    int i;
+    double q;
+    int skip_prob;
+
+    for ( i = 0; i < QINDEX_RANGE; i++ )
+    {
+        q = vp8_convert_qindex_to_q(i);
+
+        // Exponential decay caluclation of baseline skip prob with clamping
+        // Based on crude best fit of old table.
+        skip_prob = (int)( 564.25 * pow( 2.71828, (-0.012*q) ) );
+        if ( skip_prob < 1 )
+            skip_prob = 1;
+        else if ( skip_prob > 255 )
+            skip_prob = 255;
+
+        vp8cx_base_skip_false_prob[i] = skip_prob;
+    }
+}
+
 void vp8_initialize()
 {
     static int init_done = 0;
@@ -258,6 +303,7 @@ void vp8_initialize()
 #endif
         vp8_init_me_luts();
         init_minq_luts();
+        init_base_skip_probs();
         init_done = 1;
     }
 }
@@ -1829,7 +1875,25 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 }
 
 
-// Quant MOD
+// TODO perhaps change number of steps expose to outside world when setting
+// max and min limits. Also this will likely want refining for the extended Q
+// range.
+//
+// Table that converts 0-63 Q range values passed in outside to the Qindex
+// range used internally.
+/*#if CONFIG_EXTEND_QRANGE
+static const int q_trans[] =
+{
+     0,    4,   8,  12,  16,  20,  24,  28,
+    32,   36,  40,  44,  48,  52,  56,  60,
+    64,   68,  72,  76,  80,  84,  88,  92,
+    96,  100, 104, 108, 112, 116, 120, 124,
+    128, 132, 136, 140, 144, 148, 152, 156,
+    160, 164, 168, 172, 176, 180, 184, 188,
+    192, 196, 200, 204, 208, 212, 216, 220,
+    224, 228, 232, 236, 240, 244, 249, 255,
+};
+#else*/
 static const int q_trans[] =
 {
     0,   1,  2,  3,  4,  5,  7,  8,
@@ -1841,6 +1905,7 @@ static const int q_trans[] =
     82,  85, 88, 91, 94, 97, 100, 103,
     106, 109, 112, 115, 118, 121, 124, 127,
 };
+//#endif
 
 int vp8_reverse_trans(int x)
 {
@@ -4292,11 +4357,6 @@ static void encode_frame_to_data_rate
     {
         vp8_clear_system_state();  //__asm emms;
 
-        /*
-        if(cpi->is_src_frame_alt_ref)
-            Q = 127;
-            */
-
         vp8_set_quantizer(cpi, Q);
         this_q = Q;
 
@@ -4344,7 +4404,8 @@ static void encode_frame_to_data_rate
                         */
                 }
 
-                //as this is for cost estimate, let's make sure it does not go extreme eitehr way
+                // as this is for cost estimate, let's make sure it does not
+                // get extreme either way
                 if (cpi->prob_skip_false < 5)
                     cpi->prob_skip_false = 5;
 

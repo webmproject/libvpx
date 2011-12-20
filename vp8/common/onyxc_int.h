@@ -32,7 +32,16 @@
 void vp8_initialize_common(void);
 
 #define MINQ 0
+
+/*#if CONFIG_EXTEND_QRANGE
+#define MAXQ 255
+#define QINDEX_BITS 8
+#else*/
 #define MAXQ 127
+#define QINDEX_BITS 7
+//#endif
+
+
 #define QINDEX_RANGE (MAXQ + 1)
 
 #define NUM_YV12_BUFFERS 4

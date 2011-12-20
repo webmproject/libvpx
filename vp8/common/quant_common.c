@@ -84,6 +84,10 @@ static int ac_qlookup[QINDEX_RANGE] =
     155,  158,  161,  164,  167,  170,  173,  177,  181,  185,  189,  193,  197,  201,  205,  209,
     213,  217,  221,  225,  229,  234,  239,  245,  249,  254,  259,  264,  269,  274,  279,  284,
 };
+
+//static int dc_qlookup[QINDEX_RANGE];
+//static int ac_qlookup[QINDEX_RANGE];
+
 #endif
 
 #if CONFIG_EXTEND_QRANGE
@@ -109,6 +113,7 @@ void vp8_init_quant_tables()
     {
         ac_qlookup[i] = current_val;
         current_val = (int)((double)current_val * 1.042);
+        //current_val = (int)((double)current_val * 1.01765);
         if ( current_val == last_val )
             current_val++;
         last_val = current_val;
@@ -132,8 +137,8 @@ int vp8_dc_quant(int QIndex, int Delta)
 
     QIndex = QIndex + Delta;
 
-    if (QIndex > 127)
-        QIndex = 127;
+    if (QIndex > MAXQ)
+        QIndex = MAXQ;
     else if (QIndex < 0)
         QIndex = 0;
 
@@ -147,8 +152,8 @@ int vp8_dc2quant(int QIndex, int Delta)
 
     QIndex = QIndex + Delta;
 
-    if (QIndex > 127)
-        QIndex = 127;
+    if (QIndex > MAXQ)
+        QIndex = MAXQ;
     else if (QIndex < 0)
         QIndex = 0;
 
@@ -166,8 +171,8 @@ int vp8_dc_uv_quant(int QIndex, int Delta)
 
     QIndex = QIndex + Delta;
 
-    if (QIndex > 127)
-        QIndex = 127;
+    if (QIndex > MAXQ)
+        QIndex = MAXQ;
     else if (QIndex < 0)
         QIndex = 0;
 
@@ -180,8 +185,8 @@ int vp8_ac_yquant(int QIndex)
 {
     int retval;
 
-    if (QIndex > 127)
-        QIndex = 127;
+    if (QIndex > MAXQ)
+        QIndex = MAXQ;
     else if (QIndex < 0)
         QIndex = 0;
 
@@ -195,8 +200,8 @@ int vp8_ac2quant(int QIndex, int Delta)
 
     QIndex = QIndex + Delta;
 
-    if (QIndex > 127)
-        QIndex = 127;
+    if (QIndex > MAXQ)
+        QIndex = MAXQ;
     else if (QIndex < 0)
         QIndex = 0;
 #if !CONFIG_EXTEND_QRANGE
@@ -216,8 +221,8 @@ int vp8_ac_uv_quant(int QIndex, int Delta)
 
     QIndex = QIndex + Delta;
 
-    if (QIndex > 127)
-        QIndex = 127;
+    if (QIndex > MAXQ)
+        QIndex = MAXQ;
     else if (QIndex < 0)
         QIndex = 0;
 

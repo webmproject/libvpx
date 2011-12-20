@@ -1204,7 +1204,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         int Q, q_update;
 
-        Q = vp8_read_literal(bc, 7);  /* AC 1st order Q = default */
+        Q = vp8_read_literal(bc, QINDEX_BITS);  /* AC 1st order Q = default */
         pc->base_qindex = Q;
         q_update = 0;
         pc->y1dc_delta_q = get_delta_q(bc, pc->y1dc_delta_q, &q_update);
