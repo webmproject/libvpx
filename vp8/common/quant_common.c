@@ -39,30 +39,6 @@ static const int ac_qlookup[QINDEX_RANGE] =
 #else
 /*static int dc_qlookup[QINDEX_RANGE] =
 {
-      4,    5,    6,    7,    8,    9,   10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
-     20,   22,   24,   26,   28,   30,   32,   34,   36,   38,   40,   38,   40,   42,   44,   47,
-     50,   53,   56,   59,   62,   65,   68,   68,   72,   76,   80,   80,   84,   84,   86,   90,
-     91,   96,   98,  102,  107,  112,  118,  124,  130,  136,  142,  148,  150,  156,  162,  168,
-    174,  180,  182,  188,  196,  200,  204,  208,  212,  216,  220,  224,  228,  232,  236,  240,
-    244,  249,  255,  260,  264,  269,  276,  281,  288,  293,  300,  303,  307,  312,  317,  323,
-    328,  331,  338,  344,  347,  354,  366,  378,  386,  398,  401,  411,  422,  432,  441,  451,
-    464,  483,  496,  507,  520,  529,  540,  551,  570,  585,  604,  624,  645,  667,  692,  718,
-
-};
-static int ac_qlookup[QINDEX_RANGE] =
-{
-    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,   16,   17,   18,   19,
-    20,   22,   24,   26,   28,   30,   32,   34,   36,   38,   40,   42,   44,   46,   48,   51,
-    54,   57,   60,   63,   66,   69,   72,   76,   80,   84,   88,   92,   96,   100,  105,  110,
-    115,  120,  125,  130,  135,  140,  146,  152,  158,  164,  170,  176,  182,  188,  194,  200,
-    206,  212,  218,  224,  232,  240,  248,  256,  264,  272,  280,  288,  296,  304,  312,  320,
-    330,  340,  350,  360,  370,  380,  392,  404,  416,  428,  440,  454,  468,  482,  496,  510,
-    524,  540,  556,  572,  588,  604,  622,  640,  658,  676,  696,  716,  736,  756,  776,  796,
-    820,  844,  868,  892,  916,  944,  972,  1000, 1032, 1064, 1096, 1128, 1168, 1208, 1252, 1300
-};*/
-
-static int dc_qlookup[QINDEX_RANGE] =
-{
     4,    5,    6,    7,    8,    9,    10,   10,   11,   12,   13,   14,   15,   16,   17,   17,
     18,   19,   20,   20,   21,   21,   22,   22,   23,   23,   24,   25,   25,   26,   27,   28,
     29,   30,   31,   32,   33,   34,   35,   36,   37,   37,   38,   39,   40,   41,   42,   43,
@@ -83,10 +59,10 @@ static int ac_qlookup[QINDEX_RANGE] =
     110,  112,  114,  116,  119,  122,  125,  128,  131,  134,  137,  140,  143,  146,  149,  152,
     155,  158,  161,  164,  167,  170,  173,  177,  181,  185,  189,  193,  197,  201,  205,  209,
     213,  217,  221,  225,  229,  234,  239,  245,  249,  254,  259,  264,  269,  274,  279,  284,
-};
+};*/
 
-//static int dc_qlookup[QINDEX_RANGE];
-//static int ac_qlookup[QINDEX_RANGE];
+static int dc_qlookup[QINDEX_RANGE];
+static int ac_qlookup[QINDEX_RANGE];
 
 #endif
 
@@ -95,25 +71,25 @@ static int ac_qlookup[QINDEX_RANGE] =
 void vp8_init_quant_tables()
 {
     int i;
-    int current_val = 4;
-    int last_val = 4;
+    int current_val = 16;
+    int last_val = 16;
     int ac_val;
     int dc_max;
 
-    for ( i = 0; i < QINDEX_RANGE; i++ )
+    /*for ( i = 0; i < QINDEX_RANGE; i++ )
     {
         ac_qlookup[i] = ac_qlookup[i] << 2;
         dc_qlookup[i] = dc_qlookup[i] << 2;
     }
 
     // Not active by default for now.
-    return;
+    return;*/
 
     for ( i = 0; i < QINDEX_RANGE; i++ )
     {
         ac_qlookup[i] = current_val;
-        current_val = (int)((double)current_val * 1.042);
-        //current_val = (int)((double)current_val * 1.01765);
+        //current_val = (int)((double)current_val * 1.045);
+        current_val = (int)((double)current_val * 1.04);
         if ( current_val == last_val )
             current_val++;
         last_val = current_val;

@@ -951,7 +951,7 @@ static double adjust_maxq_qrange(VP8_COMP *cpi)
             break;
     }
 }
-
+#define ERR_DEVISOR   150.0
 static int estimate_max_q(VP8_COMP *cpi,
                           FIRSTPASS_STATS * fpstats,
                           int section_target_bandwitdh,
@@ -1025,7 +1025,7 @@ static int estimate_max_q(VP8_COMP *cpi,
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, 150.0, 0.36, 0.90, Q);
+            calc_correction_factor(err_per_mb, ERR_DEVISOR, 0.36, 0.90, Q);
 
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
@@ -1188,7 +1188,7 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, 150.0, 0.36, 0.90, Q);
+            calc_correction_factor(err_per_mb, ERR_DEVISOR, 0.36, 0.90, Q);
 
         bits_per_mb_at_this_q =
             (int)( .5 + ( err_correction_factor *
@@ -1262,7 +1262,7 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
     {
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, 150.0, pow_lowq, pow_highq, Q);
+            calc_correction_factor(err_per_mb, ERR_DEVISOR, pow_lowq, pow_highq, Q);
 
         bits_per_mb_at_this_q =
             (int)(.5 + ( err_correction_factor *
