@@ -602,6 +602,62 @@ static void set_default_lf_deltas(VP8_COMP *cpi)
     cpi->mb.e_mbd.mode_lf_deltas[3] = 4;               // Split mv
 }
 
+/* Convenience macros for mapping speed and mode into a continuous
+ * range
+ */
+#define GOOD(x) (x+1)
+#define RT(x) (x+7)
+
+static int speed_map(int speed, int *map)
+{
+    int res;
+
+    do
+    {
+        res = *map++;
+    } while(speed >= *map++);
+    return res;
+}
+
+static int thresh_mult_map_znn[] = {
+    /* map common to zero, nearest, and near */
+    0, GOOD(2), 1500, GOOD(3), 2000, RT(0), 1000, RT(2), 2000, INT_MAX
+};
+
+static int thresh_mult_map_vhpred[] = {
+    1000, GOOD(2), 1500, GOOD(3), 2000, RT(0), 1000, RT(1), 2000,
+    RT(7), INT_MAX, INT_MAX
+};
+
+static int thresh_mult_map_bpred[] = {
+    2000, GOOD(0), 2500, GOOD(2), 5000, GOOD(3), 7500, RT(0), 2500, RT(1), 5000,
+    RT(6), INT_MAX, INT_MAX
+};
+
+static int thresh_mult_map_tm[] = {
+    1000, GOOD(2), 1500, GOOD(3), 2000, RT(0), 0, RT(1), 1000, RT(2), 2000,
+    RT(7), INT_MAX, INT_MAX
+};
+
+static int thresh_mult_map_new1[] = {
+    1000, GOOD(2), 2000, RT(0), 2000, INT_MAX
+};
+
+static int thresh_mult_map_new2[] = {
+    1000, GOOD(2), 2000, GOOD(3), 2500, GOOD(5), 4000, RT(0), 2000, RT(2), 2500,
+    RT(5), 4000, INT_MAX
+};
+
+static int thresh_mult_map_split1[] = {
+    2500, GOOD(0), 1700, GOOD(2), 10000, GOOD(3), 25000, GOOD(4), INT_MAX,
+    RT(0), 5000, RT(1), 10000, RT(2), 25000, RT(3), INT_MAX, INT_MAX
+};
+
+static int thresh_mult_map_split2[] = {
+    5000, GOOD(0), 4500, GOOD(2), 20000, GOOD(3), 50000, GOOD(4), INT_MAX,
+    RT(0), 10000, RT(1), 20000, RT(2), 50000, RT(3), INT_MAX, INT_MAX
+};
+
 void vp8_set_speed_features(VP8_COMP *cpi)
 {
     SPEED_FEATURES *sf = &cpi->sf;
@@ -653,93 +709,51 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     if (cpi->ref_frame_flags & VP8_ALT_FLAG)
         ref_frames++;
 
+    /* Convert speed to continuous range, with clamping */
+    if (Mode == 0)
+        Speed = 0;
+    else if (Mode == 2)
+        Speed = RT(Speed);
+    else
+    {
+        if (Speed > 5)
+            Speed = 5;
+        Speed = GOOD(Speed);
+    }
+
+    sf->thresh_mult[THR_ZERO1] =
+    sf->thresh_mult[THR_NEAREST1] =
+    sf->thresh_mult[THR_NEAR1] =
+    sf->thresh_mult[THR_DC] = 0; /* always */
+
+    sf->thresh_mult[THR_ZERO2] =
+    sf->thresh_mult[THR_ZERO3] =
+    sf->thresh_mult[THR_NEAREST2] =
+    sf->thresh_mult[THR_NEAREST3] =
+    sf->thresh_mult[THR_NEAR2]  =
+    sf->thresh_mult[THR_NEAR3]  = speed_map(Speed, thresh_mult_map_znn);
+
+    sf->thresh_mult[THR_V_PRED] =
+    sf->thresh_mult[THR_H_PRED] = speed_map(Speed, thresh_mult_map_vhpred);
+    sf->thresh_mult[THR_B_PRED] = speed_map(Speed, thresh_mult_map_bpred);
+    sf->thresh_mult[THR_TM]     = speed_map(Speed, thresh_mult_map_tm);
+    sf->thresh_mult[THR_NEW1]   = speed_map(Speed, thresh_mult_map_new1);
+    sf->thresh_mult[THR_NEW2]   =
+    sf->thresh_mult[THR_NEW3]   = speed_map(Speed, thresh_mult_map_new2);
+    sf->thresh_mult[THR_SPLIT1] = speed_map(Speed, thresh_mult_map_split1);
+    sf->thresh_mult[THR_SPLIT2] =
+    sf->thresh_mult[THR_SPLIT3] = speed_map(Speed, thresh_mult_map_split2);
+
+    Speed = cpi->Speed;
     switch (Mode)
     {
 #if !(CONFIG_REALTIME_ONLY)
     case 0: // best quality mode
-        sf->thresh_mult[THR_ZERO1    ] = 0;
-        sf->thresh_mult[THR_ZERO2    ] = 0;
-        sf->thresh_mult[THR_ZERO3    ] = 0;
-        sf->thresh_mult[THR_NEAREST1 ] = 0;
-        sf->thresh_mult[THR_NEAREST2 ] = 0;
-        sf->thresh_mult[THR_NEAREST3 ] = 0;
-        sf->thresh_mult[THR_NEAR1    ] = 0;
-        sf->thresh_mult[THR_NEAR2    ] = 0;
-        sf->thresh_mult[THR_NEAR3    ] = 0;
-
-        sf->thresh_mult[THR_DC       ] = 0;
-
-        sf->thresh_mult[THR_V_PRED   ] = 1000;
-        sf->thresh_mult[THR_H_PRED   ] = 1000;
-        sf->thresh_mult[THR_B_PRED   ] = 2000;
-        sf->thresh_mult[THR_TM       ] = 1000;
-
-        sf->thresh_mult[THR_NEW1     ] = 1000;
-        sf->thresh_mult[THR_NEW2     ] = 1000;
-        sf->thresh_mult[THR_NEW3     ] = 1000;
-
-        sf->thresh_mult[THR_SPLIT1   ] = 2500;
-        sf->thresh_mult[THR_SPLIT2   ] = 5000;
-        sf->thresh_mult[THR_SPLIT3   ] = 5000;
-
-
         sf->first_step = 0;
         sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
         break;
     case 1:
     case 3:
-        sf->thresh_mult[THR_NEAREST1 ] = 0;
-        sf->thresh_mult[THR_ZERO1    ] = 0;
-        sf->thresh_mult[THR_DC       ] = 0;
-        sf->thresh_mult[THR_NEAR1    ] = 0;
-        sf->thresh_mult[THR_V_PRED   ] = 1000;
-        sf->thresh_mult[THR_H_PRED   ] = 1000;
-        sf->thresh_mult[THR_B_PRED   ] = 2500;
-        sf->thresh_mult[THR_TM       ] = 1000;
-
-        sf->thresh_mult[THR_NEAREST2 ] = 1000;
-        sf->thresh_mult[THR_NEAREST3 ] = 1000;
-
-        sf->thresh_mult[THR_ZERO2    ] = 1000;
-        sf->thresh_mult[THR_ZERO3    ] = 1000;
-        sf->thresh_mult[THR_NEAR2    ] = 1000;
-        sf->thresh_mult[THR_NEAR3    ] = 1000;
-
-#if 1
-        sf->thresh_mult[THR_ZERO1    ] = 0;
-        sf->thresh_mult[THR_ZERO2    ] = 0;
-        sf->thresh_mult[THR_ZERO3    ] = 0;
-        sf->thresh_mult[THR_NEAREST1 ] = 0;
-        sf->thresh_mult[THR_NEAREST2 ] = 0;
-        sf->thresh_mult[THR_NEAREST3 ] = 0;
-        sf->thresh_mult[THR_NEAR1    ] = 0;
-        sf->thresh_mult[THR_NEAR2    ] = 0;
-        sf->thresh_mult[THR_NEAR3    ] = 0;
-
-//        sf->thresh_mult[THR_DC       ] = 0;
-
-//        sf->thresh_mult[THR_V_PRED   ] = 1000;
-//        sf->thresh_mult[THR_H_PRED   ] = 1000;
-//        sf->thresh_mult[THR_B_PRED   ] = 2000;
-//        sf->thresh_mult[THR_TM       ] = 1000;
-
-        sf->thresh_mult[THR_NEW1     ] = 1000;
-        sf->thresh_mult[THR_NEW2     ] = 1000;
-        sf->thresh_mult[THR_NEW3     ] = 1000;
-
-        sf->thresh_mult[THR_SPLIT1   ] = 1700;
-        sf->thresh_mult[THR_SPLIT2   ] = 4500;
-        sf->thresh_mult[THR_SPLIT3   ] = 4500;
-#else
-        sf->thresh_mult[THR_NEW1     ] = 1500;
-        sf->thresh_mult[THR_NEW2     ] = 1500;
-        sf->thresh_mult[THR_NEW3     ] = 1500;
-
-        sf->thresh_mult[THR_SPLIT1   ] = 5000;
-        sf->thresh_mult[THR_SPLIT2   ] = 10000;
-        sf->thresh_mult[THR_SPLIT3   ] = 10000;
-#endif
-
         if (Speed > 0)
         {
             /* Disable coefficient optimization above speed 0 */
@@ -759,35 +773,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_SPLIT2] = 4;
             cpi->mode_check_freq[THR_SPLIT3] = 4;
             cpi->mode_check_freq[THR_SPLIT1 ] = 2;
-
-            sf->thresh_mult[THR_TM       ] = 1500;
-            sf->thresh_mult[THR_V_PRED   ] = 1500;
-            sf->thresh_mult[THR_H_PRED   ] = 1500;
-            sf->thresh_mult[THR_B_PRED   ] = 5000;
-
-            if (ref_frames > 1)
-            {
-                sf->thresh_mult[THR_NEW1     ] = 2000;
-                sf->thresh_mult[THR_SPLIT1   ] = 10000;
-            }
-
-            if (ref_frames > 2)
-            {
-                sf->thresh_mult[THR_NEAREST2 ] = 1500;
-                sf->thresh_mult[THR_ZERO2    ] = 1500;
-                sf->thresh_mult[THR_NEAR2    ] = 1500;
-                sf->thresh_mult[THR_NEW2     ] = 2000;
-                sf->thresh_mult[THR_SPLIT2   ] = 20000;
-            }
-
-            if (ref_frames > 3)
-            {
-                sf->thresh_mult[THR_NEAREST3 ] = 1500;
-                sf->thresh_mult[THR_ZERO3    ] = 1500;
-                sf->thresh_mult[THR_NEAR3    ] = 1500;
-                sf->thresh_mult[THR_NEW3     ] = 2000;
-                sf->thresh_mult[THR_SPLIT3   ] = 20000;
-            }
         }
 
         if (Speed > 2)
@@ -795,35 +780,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_SPLIT2] = 15;
             cpi->mode_check_freq[THR_SPLIT3] = 15;
             cpi->mode_check_freq[THR_SPLIT1 ] = 7;
-
-            sf->thresh_mult[THR_TM       ] = 2000;
-            sf->thresh_mult[THR_V_PRED   ] = 2000;
-            sf->thresh_mult[THR_H_PRED   ] = 2000;
-            sf->thresh_mult[THR_B_PRED   ] = 7500;
-
-            if (ref_frames > 1)
-            {
-                sf->thresh_mult[THR_NEW1     ] = 2000;
-                sf->thresh_mult[THR_SPLIT1   ] = 25000;
-            }
-
-            if (ref_frames > 2)
-            {
-                sf->thresh_mult[THR_NEAREST2 ] = 2000;
-                sf->thresh_mult[THR_ZERO2    ] = 2000;
-                sf->thresh_mult[THR_NEAR2    ] = 2000;
-                sf->thresh_mult[THR_NEW2     ] = 2500;
-                sf->thresh_mult[THR_SPLIT2   ] = 50000;
-            }
-
-            if (ref_frames > 3)
-            {
-                sf->thresh_mult[THR_NEAREST3 ] = 2000;
-                sf->thresh_mult[THR_ZERO3    ] = 2000;
-                sf->thresh_mult[THR_NEAR3    ] = 2000;
-                sf->thresh_mult[THR_NEW3     ] = 2500;
-                sf->thresh_mult[THR_SPLIT3   ] = 50000;
-            }
 
             sf->improved_quant = 0;
             sf->improved_dct = 0;
@@ -836,10 +792,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         if (Speed > 3)
         {
-            sf->thresh_mult[THR_SPLIT3  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLIT2  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLIT1   ] = INT_MAX;
-
             cpi->mode_check_freq[THR_V_PRED] = 0;
             cpi->mode_check_freq[THR_H_PRED] = 0;
             cpi->mode_check_freq[THR_B_PRED] = 0;
@@ -873,22 +825,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEAR3] = 2;
                 cpi->mode_check_freq[THR_NEW3] = 4;
             }
-
-            if (ref_frames > 2)
-            {
-                sf->thresh_mult[THR_NEAREST2 ] = 2000;
-                sf->thresh_mult[THR_ZERO2    ] = 2000;
-                sf->thresh_mult[THR_NEAR2    ] = 2000;
-                sf->thresh_mult[THR_NEW2     ] = 4000;
-            }
-
-            if (ref_frames > 3)
-            {
-                sf->thresh_mult[THR_NEAREST3 ] = 2000;
-                sf->thresh_mult[THR_ZERO3    ] = 2000;
-                sf->thresh_mult[THR_NEAR3    ] = 2000;
-                sf->thresh_mult[THR_NEW3     ] = 4000;
-            }
         }
 
         break;
@@ -898,26 +834,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->recode_loop = 0;
         sf->auto_filter = 1;
         sf->iterative_sub_pixel = 1;
-        sf->thresh_mult[THR_NEAREST1 ] = 0;
-        sf->thresh_mult[THR_ZERO1    ] = 0;
-        sf->thresh_mult[THR_DC       ] = 0;
-        sf->thresh_mult[THR_TM       ] = 0;
-        sf->thresh_mult[THR_NEAR1    ] = 0;
-        sf->thresh_mult[THR_V_PRED   ] = 1000;
-        sf->thresh_mult[THR_H_PRED   ] = 1000;
-        sf->thresh_mult[THR_B_PRED   ] = 2500;
-        sf->thresh_mult[THR_NEAREST2 ] = 1000;
-        sf->thresh_mult[THR_ZERO2    ] = 1000;
-        sf->thresh_mult[THR_NEAR2    ] = 1000;
-        sf->thresh_mult[THR_NEAREST3 ] = 1000;
-        sf->thresh_mult[THR_ZERO3    ] = 1000;
-        sf->thresh_mult[THR_NEAR3    ] = 1000;
-        sf->thresh_mult[THR_NEW1     ] = 2000;
-        sf->thresh_mult[THR_NEW2     ] = 2000;
-        sf->thresh_mult[THR_NEW3     ] = 2000;
-        sf->thresh_mult[THR_SPLIT1   ] = 5000;
-        sf->thresh_mult[THR_SPLIT2   ] = 10000;
-        sf->thresh_mult[THR_SPLIT3   ] = 10000;
         sf->search_method = NSTEP;
 
         if (Speed > 0)
@@ -925,39 +841,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_SPLIT2] = 4;
             cpi->mode_check_freq[THR_SPLIT3] = 4;
             cpi->mode_check_freq[THR_SPLIT1 ] = 2;
-
-            sf->thresh_mult[THR_DC       ] = 0;
-            sf->thresh_mult[THR_TM       ] = 1000;
-            sf->thresh_mult[THR_V_PRED   ] = 2000;
-            sf->thresh_mult[THR_H_PRED   ] = 2000;
-            sf->thresh_mult[THR_B_PRED   ] = 5000;
-
-            if (ref_frames > 1)
-            {
-                sf->thresh_mult[THR_NEAREST1 ] = 0;
-                sf->thresh_mult[THR_ZERO1    ] = 0;
-                sf->thresh_mult[THR_NEAR1    ] = 0;
-                sf->thresh_mult[THR_NEW1     ] = 2000;
-                sf->thresh_mult[THR_SPLIT1   ] = 10000;
-            }
-
-            if (ref_frames > 2)
-            {
-                sf->thresh_mult[THR_NEAREST2 ] = 1000;
-                sf->thresh_mult[THR_ZERO2    ] = 1000;
-                sf->thresh_mult[THR_NEAR2    ] = 1000;
-                sf->thresh_mult[THR_NEW2     ] = 2000;
-                sf->thresh_mult[THR_SPLIT2   ] = 20000;
-            }
-
-            if (ref_frames > 3)
-            {
-                sf->thresh_mult[THR_NEAREST3 ] = 1000;
-                sf->thresh_mult[THR_ZERO3    ] = 1000;
-                sf->thresh_mult[THR_NEAR3    ] = 1000;
-                sf->thresh_mult[THR_NEW3     ] = 2000;
-                sf->thresh_mult[THR_SPLIT3   ] = 20000;
-            }
 
             sf->improved_quant = 0;
             sf->improved_dct = 0;
@@ -972,36 +855,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_SPLIT1 ] = 7;
             cpi->mode_check_freq[THR_SPLIT2] = 15;
             cpi->mode_check_freq[THR_SPLIT3] = 15;
-
-            sf->thresh_mult[THR_TM       ] = 2000;
-            sf->thresh_mult[THR_V_PRED   ] = 2000;
-            sf->thresh_mult[THR_H_PRED   ] = 2000;
-            sf->thresh_mult[THR_B_PRED   ] = 5000;
-
-            if (ref_frames > 1)
-            {
-                sf->thresh_mult[THR_NEW1     ] = 2000;
-                sf->thresh_mult[THR_SPLIT1   ] = 25000;
-            }
-
-            if (ref_frames > 2)
-            {
-                sf->thresh_mult[THR_NEAREST2 ] = 2000;
-                sf->thresh_mult[THR_ZERO2    ] = 2000;
-                sf->thresh_mult[THR_NEAR2    ] = 2000;
-                sf->thresh_mult[THR_NEW2     ] = 2500;
-                sf->thresh_mult[THR_SPLIT2   ] = 50000;
-            }
-
-            if (ref_frames > 3)
-            {
-                sf->thresh_mult[THR_NEAREST3 ] = 2000;
-                sf->thresh_mult[THR_ZERO3    ] = 2000;
-                sf->thresh_mult[THR_NEAR3    ] = 2000;
-                sf->thresh_mult[THR_NEW3     ] = 2500;
-                sf->thresh_mult[THR_SPLIT3   ] = 50000;
-            }
-
         }
 
         if (Speed > 2)
@@ -1023,11 +876,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEAR3] = 2;
                 cpi->mode_check_freq[THR_NEW3] = 4;
             }
-
-            sf->thresh_mult[THR_SPLIT1   ] = INT_MAX;
-            sf->thresh_mult[THR_SPLIT2  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLIT3  ] = INT_MAX;
-
         }
 
         if (Speed > 3)
@@ -1061,31 +909,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEAR3] = 2;
                 cpi->mode_check_freq[THR_NEW3] = 4;
             }
-
-            sf->thresh_mult[THR_TM       ] = 2000;
-            sf->thresh_mult[THR_B_PRED   ] = 5000;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                sf->thresh_mult[THR_NEAREST2 ] = 2000;
-                sf->thresh_mult[THR_ZERO2    ] = 2000;
-                sf->thresh_mult[THR_NEAR2    ] = 2000;
-                sf->thresh_mult[THR_NEW2     ] = 4000;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                sf->thresh_mult[THR_NEAREST3 ] = 2000;
-                sf->thresh_mult[THR_ZERO3    ] = 2000;
-                sf->thresh_mult[THR_NEAR3    ] = 2000;
-                sf->thresh_mult[THR_NEW3     ] = 4000;
-            }
-        }
-
-        if (Speed > 5)
-        {
-            // Disable split MB intra prediction mode
-            sf->thresh_mult[THR_B_PRED] = INT_MAX;
         }
 
         if (Speed > 6)
@@ -1145,11 +968,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEAREST3 ] = thresh;
                 sf->thresh_mult[THR_NEAR3    ] = thresh;
             }
-
-            // Disable other intra prediction modes
-            sf->thresh_mult[THR_TM] = INT_MAX;
-            sf->thresh_mult[THR_V_PRED] = INT_MAX;
-            sf->thresh_mult[THR_H_PRED] = INT_MAX;
 
             sf->improved_mv_pred = 0;
         }
@@ -1287,6 +1105,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     frames_at_speed[cpi->Speed]++;
 #endif
 }
+#undef GOOD
+#undef RT
+
 static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 {
     int width = (cpi->oxcf.Width + 15) & ~15;
