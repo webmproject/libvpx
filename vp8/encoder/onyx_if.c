@@ -383,29 +383,23 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     cpi->mb.pip = 0;
 }
 
-static void enable_segmentation(VP8_PTR ptr)
+static void enable_segmentation(VP8_COMP *cpi)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
     // Set the appropriate feature bit
     cpi->mb.e_mbd.segmentation_enabled = 1;
     cpi->mb.e_mbd.update_mb_segmentation_map = 1;
     cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
-static void disable_segmentation(VP8_PTR ptr)
+static void disable_segmentation(VP8_COMP *cpi)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
     // Clear the appropriate feature bit
     cpi->mb.e_mbd.segmentation_enabled = 0;
 }
 
 // Valid values for a segment are 0 to 3
 // Segmentation map is arrange as [Rows][Columns]
-static void set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_map)
+static void set_segmentation_map(VP8_COMP *cpi, unsigned char *segmentation_map)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
     // Copy in the new segmentation map
     vpx_memcpy(cpi->segmentation_map, segmentation_map, (cpi->common.mb_rows * cpi->common.mb_cols));
 
@@ -422,19 +416,15 @@ static void set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_map)
 // abs_delta = SEGMENT_DELTADATA (deltas) abs_delta = SEGMENT_ABSDATA (use the absolute values given).
 //
 //
-static void set_segment_data(VP8_PTR ptr, signed char *feature_data, unsigned char abs_delta)
+static void set_segment_data(VP8_COMP *cpi, signed char *feature_data, unsigned char abs_delta)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
     cpi->mb.e_mbd.mb_segement_abs_delta = abs_delta;
     vpx_memcpy(cpi->segment_feature_data, feature_data, sizeof(cpi->segment_feature_data));
 }
 
 
-static void segmentation_test_function(VP8_PTR ptr)
+static void segmentation_test_function(VP8_COMP *cpi)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
     unsigned char *seg_map;
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
 
@@ -462,10 +452,10 @@ static void segmentation_test_function(VP8_PTR ptr)
     }*/
 
     // Set the segmentation Map
-    set_segmentation_map(ptr, seg_map);
+    set_segmentation_map(cpi, seg_map);
 
     // Activate segmentation.
-    enable_segmentation(ptr);
+    enable_segmentation(cpi);
 
     // Set up the quant segment data
     feature_data[MB_LVL_ALT_Q][0] = 0;
@@ -480,7 +470,7 @@ static void segmentation_test_function(VP8_PTR ptr)
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-    set_segment_data(ptr, &feature_data[0][0], SEGMENT_DELTADATA);
+    set_segment_data(cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
     // Delete sementation map
         vpx_free(seg_map);
@@ -554,10 +544,10 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     }
 
     // Set the segmentation Map
-    set_segmentation_map((VP8_PTR)cpi, seg_map);
+    set_segmentation_map(cpi, seg_map);
 
     // Activate segmentation.
-    enable_segmentation((VP8_PTR)cpi);
+    enable_segmentation(cpi);
 
     // Set up the quant segment data
     feature_data[MB_LVL_ALT_Q][0] = 0;
@@ -573,7 +563,7 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-    set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+    set_segment_data(cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
     // Delete sementation map
     vpx_free(seg_map);
@@ -1475,9 +1465,8 @@ rescale(int val, int num, int denom)
 }
 
 
-static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
+static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
 
     cpi->oxcf = *oxcf;
@@ -1502,7 +1491,7 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         cpi->frame_rate = 30;
 
     // change includes all joint functionality
-    vp8_change_config(ptr, oxcf);
+    vp8_change_config(cpi, oxcf);
 
     // Initialize active best and worst q and average q values.
     cpi->active_worst_quality         = cpi->oxcf.worst_allowed_q;
@@ -1593,9 +1582,8 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 }
 
 
-void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
+void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
 
     if (!cpi)
@@ -1886,19 +1874,14 @@ static void cal_mvsadcosts(int *mvsadcost[2])
     while (++i <= mvfp_max);
 }
 
-VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
+struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 {
     int i;
-    volatile union
-    {
-        VP8_COMP *cpi;
-        VP8_PTR   ptr;
-    } ctx;
 
     VP8_COMP *cpi;
     VP8_COMMON *cm;
 
-    cpi = ctx.cpi = vpx_memalign(32, sizeof(VP8_COMP));
+    cpi = vpx_memalign(32, sizeof(VP8_COMP));
     // Check that the CPI instance is valid
     if (!cpi)
         return 0;
@@ -1909,10 +1892,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     if (setjmp(cm->error.jmp))
     {
-        VP8_PTR ptr = ctx.ptr;
-
-        ctx.cpi->common.error.setjmp = 0;
-        vp8_remove_compressor(&ptr);
+        cpi->common.error.setjmp = 0;
+        vp8_remove_compressor(&cpi);
         return 0;
     }
 
@@ -1923,7 +1904,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     vp8_create_common(&cpi->common);
     vp8_cmachine_specific_config(cpi);
 
-    init_config((VP8_PTR)cpi, oxcf);
+    init_config(cpi, oxcf);
 
     memcpy(cpi->base_skip_false_prob, vp8cx_base_skip_false_prob, sizeof(vp8cx_base_skip_false_prob));
     cpi->common.current_video_frame   = 0;
@@ -2002,7 +1983,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         cpi->cyclic_refresh_map = (signed char *) NULL;
 
     // Test function for segmentation
-    //segmentation_test_function((VP8_PTR) cpi);
+    //segmentation_test_function( cpi);
 
 #ifdef ENTROPY_STATS
     init_context_counters();
@@ -2222,14 +2203,14 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         vp8_cal_low_res_mb_cols(cpi);
 #endif
 
-    return (VP8_PTR) cpi;
+    return  cpi;
 
 }
 
 
-void vp8_remove_compressor(VP8_PTR *ptr)
+void vp8_remove_compressor(VP8_COMP **ptr)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(*ptr);
+    VP8_COMP *cpi = *ptr;
 
     if (!cpi)
         return;
@@ -2640,20 +2621,16 @@ static void generate_psnr_packet(VP8_COMP *cpi)
 }
 
 
-int vp8_use_as_reference(VP8_PTR ptr, int ref_frame_flags)
+int vp8_use_as_reference(VP8_COMP *cpi, int ref_frame_flags)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
     if (ref_frame_flags > 7)
         return -1 ;
 
     cpi->ref_frame_flags = ref_frame_flags;
     return 0;
 }
-int vp8_update_reference(VP8_PTR ptr, int ref_frame_flags)
+int vp8_update_reference(VP8_COMP *cpi, int ref_frame_flags)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
-
     if (ref_frame_flags > 7)
         return -1 ;
 
@@ -2673,9 +2650,8 @@ int vp8_update_reference(VP8_PTR ptr, int ref_frame_flags)
     return 0;
 }
 
-int vp8_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+int vp8_get_reference(VP8_COMP *cpi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
     int ref_fb_idx;
 
@@ -2692,9 +2668,8 @@ int vp8_get_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
 
     return 0;
 }
-int vp8_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+int vp8_set_reference(VP8_COMP *cpi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
     VP8_COMMON *cm = &cpi->common;
 
     int ref_fb_idx;
@@ -2712,9 +2687,8 @@ int vp8_set_reference(VP8_PTR ptr, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONF
 
     return 0;
 }
-int vp8_update_entropy(VP8_PTR comp, int update)
+int vp8_update_entropy(VP8_COMP *cpi, int update)
 {
-    VP8_COMP *cpi = (VP8_COMP *) comp;
     VP8_COMMON *cm = &cpi->common;
     cm->refresh_entropy_probs = update;
 
@@ -3371,7 +3345,7 @@ static void encode_frame_to_data_rate
     vp8_clear_system_state();
 
     // Test code for segmentation of gf/arf (0,0)
-    //segmentation_test_function((VP8_PTR) cpi);
+    //segmentation_test_function( cpi);
 
     if (cpi->compressor_speed == 2)
     {
@@ -3469,9 +3443,9 @@ static void encode_frame_to_data_rate
     // Test code for segmentation
     //if ( (cm->frame_type == KEY_FRAME) || ((cm->current_video_frame % 2) == 0))
     //if ( (cm->current_video_frame % 2) == 0 )
-    //  enable_segmentation((VP8_PTR)cpi);
+    //  enable_segmentation(cpi);
     //else
-    //  disable_segmentation((VP8_PTR)cpi);
+    //  disable_segmentation(cpi);
 
 #if 0
     // Experimental code for lagged compress and one pass
@@ -4768,12 +4742,11 @@ extern void vp8_pop_neon(int64_t *store);
 #endif
 
 
-int vp8_receive_raw_frame(VP8_PTR ptr, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time)
+int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time)
 {
 #if HAVE_ARMV7
     int64_t store_reg[8];
 #endif
-    VP8_COMP              *cpi = (VP8_COMP *) ptr;
     VP8_COMMON            *cm = &cpi->common;
     struct vpx_usec_timer  timer;
     int                    res = 0;
@@ -4822,12 +4795,11 @@ static int frame_is_reference(const VP8_COMP *cpi)
 }
 
 
-int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, unsigned char *dest_end, int64_t *time_stamp, int64_t *time_end, int flush)
+int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, unsigned char *dest_end, int64_t *time_stamp, int64_t *time_end, int flush)
 {
 #if HAVE_ARMV7
     int64_t store_reg[8];
 #endif
-    VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm;
     struct vpx_usec_timer  tsctimer;
     struct vpx_usec_timer  ticktimer;
@@ -5313,10 +5285,8 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     return 0;
 }
 
-int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags)
+int vp8_get_preview_raw_frame(VP8_COMP *cpi, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags)
 {
-    VP8_COMP *cpi = (VP8_COMP *) comp;
-
     if (cpi->common.refresh_alt_ref_frame)
         return -1;
     else
@@ -5345,9 +5315,8 @@ int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflag
     }
 }
 
-int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4])
+int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4])
 {
-    VP8_COMP *cpi = (VP8_COMP *) comp;
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
 
     if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
@@ -5355,15 +5324,15 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
 
     if (!map)
     {
-        disable_segmentation((VP8_PTR)cpi);
+        disable_segmentation(cpi);
         return 0;
     }
 
     // Set the segmentation Map
-    set_segmentation_map((VP8_PTR)cpi, map);
+    set_segmentation_map(cpi, map);
 
     // Activate segmentation.
-    enable_segmentation((VP8_PTR)cpi);
+    enable_segmentation(cpi);
 
     // Set up the quant segment data
     feature_data[MB_LVL_ALT_Q][0] = delta_q[0];
@@ -5384,15 +5353,13 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
 
     // Initialise the feature data structure
     // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
-    set_segment_data((VP8_PTR)cpi, &feature_data[0][0], SEGMENT_DELTADATA);
+    set_segment_data(cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
     return 0;
 }
 
-int vp8_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols)
+int vp8_set_active_map(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigned int cols)
 {
-    VP8_COMP *cpi = (VP8_COMP *) comp;
-
     if (rows == cpi->common.mb_rows && cols == cpi->common.mb_cols)
     {
         if (map)
@@ -5412,10 +5379,8 @@ int vp8_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsi
     }
 }
 
-int vp8_set_internal_size(VP8_PTR comp, VPX_SCALING horiz_mode, VPX_SCALING vert_mode)
+int vp8_set_internal_size(VP8_COMP *cpi, VPX_SCALING horiz_mode, VPX_SCALING vert_mode)
 {
-    VP8_COMP *cpi = (VP8_COMP *) comp;
-
     if (horiz_mode <= ONETWO)
         cpi->common.horiz_scale = horiz_mode;
     else
@@ -5457,8 +5422,7 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const 
 }
 
 
-int vp8_get_quantizer(VP8_PTR c)
+int vp8_get_quantizer(VP8_COMP *cpi)
 {
-    VP8_COMP   *cpi = (VP8_COMP *) c;
     return cpi->common.base_qindex;
 }
