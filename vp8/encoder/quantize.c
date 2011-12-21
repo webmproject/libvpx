@@ -1271,10 +1271,8 @@ void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
 void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
 {
     VP8_COMMON *cm = &cpi->common;
-    MACROBLOCKD *mbd = &cpi->mb.e_mbd;
     int update = 0;
     int new_delta_q;
-    int i;
     cm->base_qindex = Q;
 
     /* if any of the delta_q values are changing update flag has to be set */
