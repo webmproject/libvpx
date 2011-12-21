@@ -17,6 +17,10 @@
 #include "blockd.h"
 #include "onyxc_int.h"
 
+#if CONFIG_MULTITHREAD
+#include "vpx_mem/vpx_mem.h"
+#endif
+
 static void eob_adjust(char *eobs, short *diff)
 {
     /* eob adjust.... the idct can only skip if both the dc and eob are zero */
@@ -36,6 +40,10 @@ static void vp8_inverse_transform_mby(MACROBLOCKD *xd,
     /* save the dc dequant constant in case it is overridden */
     short dc_dequant_temp = DQC[0];
 
+#if CONFIG_MULTITHREAD
+    DECLARE_ALIGNED(16, short, local_dequant[16]);
+#endif
+
     if (xd->mode_info_context->mbmi.mode != SPLITMV)
     {
         /* do 2nd order transform on the dc block */
@@ -51,11 +59,18 @@ static void vp8_inverse_transform_mby(MACROBLOCKD *xd,
         }
         eob_adjust(xd->eobs, xd->qcoeff);
 
+#if CONFIG_MULTITHREAD
+        DQC = local_dequant;
+
+        vpx_memcpy(DQC, xd->block[0].dequant,
+                   sizeof(local_dequant));
+#endif
+
         /* override the dc dequant constant */
         DQC[0] = 1;
     }
     DEQUANT_INVOKE (&rtcd->dequant, idct_add_y_block)
-                    (xd->qcoeff, xd->block[0].dequant,
+                    (xd->qcoeff, DQC,
                      xd->dst.y_buffer,
                      xd->dst.y_stride, xd->eobs);
 
