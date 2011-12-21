@@ -92,7 +92,7 @@ vp8_lookahead_pop(struct lookahead_ctx *ctx,
  */
 struct lookahead_entry*
 vp8_lookahead_peek(struct lookahead_ctx *ctx,
-                   int                   index);
+                   unsigned int          index);
 
 
 /**\brief Get the number of frames currently in the lookahead queue

@@ -1206,7 +1206,7 @@ static void sum_probs_over_prev_coef_context(
     {
         for (j=0; j < PREV_COEF_CONTEXTS; ++j)
         {
-            const int tmp = out[i];
+            const unsigned int tmp = out[i];
             out[i] += probs[j][i];
             /* check for wrap */
             if (out[i] < tmp)

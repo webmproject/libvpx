@@ -484,7 +484,8 @@ static void setup_token_decoder(VP8D_COMP *pbi,
                                 const unsigned char* token_part_sizes)
 {
     vp8_reader *bool_decoder = &pbi->bc2;
-    int fragment_idx, partition_idx;
+    unsigned int partition_idx;
+    int fragment_idx;
     int num_token_partitions;
     const unsigned char *first_fragment_end = pbi->fragments[0] +
                                           pbi->fragment_sizes[0];

@@ -807,7 +807,7 @@ write_webm_file_footer(EbmlGlobal *glob, long hash)
 
     {
         EbmlLoc start;
-        int i;
+        unsigned int i;
 
         glob->cue_pos = ftello(glob->stream);
         Ebml_StartSubElement(glob, &start, Cues);

@@ -1080,10 +1080,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         if (Speed > 6)
         {
-            unsigned int i, sum = 0;
+            unsigned int sum = 0;
             unsigned int total_mbs = cm->MBs;
-            int thresh;
-            int total_skip;
+            int i, thresh;
+            unsigned int total_skip;
 
             int min = 2000;
 
@@ -1513,8 +1513,8 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     // Temporal scalabilty
     if (cpi->oxcf.number_of_layers > 1)
     {
-        int i;
-        int prev_layer_frame_rate=0;
+        unsigned int i;
+        double prev_layer_frame_rate=0;
 
         for (i=0; i<cpi->oxcf.number_of_layers; i++)
         {
@@ -3539,7 +3539,7 @@ static void encode_frame_to_data_rate
 
             if (cpi->oxcf.number_of_layers > 1)
             {
-                int i;
+                unsigned int i;
 
                 // Propagate bits saved by dropping the frame to higher layers
                 for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
@@ -4316,7 +4316,7 @@ static void encode_frame_to_data_rate
 
     if (cpi->oxcf.number_of_layers > 1)
     {
-        int i;
+        unsigned int i;
         for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
           cpi->layer_context[i].total_byte_count += (*size);
     }
@@ -4427,7 +4427,7 @@ static void encode_frame_to_data_rate
     // Propagate values to higher temporal layers
     if (cpi->oxcf.number_of_layers > 1)
     {
-        int i;
+        unsigned int i;
 
         for (i=cpi->current_layer+1; i<cpi->oxcf.number_of_layers; i++)
         {

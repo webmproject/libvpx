@@ -48,7 +48,7 @@ vp8_lookahead_destroy(struct lookahead_ctx *ctx)
     {
         if(ctx->buf)
         {
-            int i;
+            unsigned int i;
 
             for(i = 0; i < ctx->max_sz; i++)
                 vp8_yv12_de_alloc_frame_buffer(&ctx->buf[i].img);
@@ -65,7 +65,7 @@ vp8_lookahead_init(unsigned int width,
                    unsigned int depth)
 {
     struct lookahead_ctx *ctx = NULL;
-    int i;
+    unsigned int i;
 
     /* Clamp the lookahead queue depth */
     if(depth < 1)
@@ -188,7 +188,7 @@ vp8_lookahead_pop(struct lookahead_ctx *ctx,
 
 struct lookahead_entry*
 vp8_lookahead_peek(struct lookahead_ctx *ctx,
-                   int                   index)
+                   unsigned int          index)
 {
     struct lookahead_entry* buf = NULL;
 

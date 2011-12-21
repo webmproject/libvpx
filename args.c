@@ -57,7 +57,7 @@ int arg_match(struct arg *arg_, const struct arg_def *def, char **argv)
     }
     else if (def->long_name)
     {
-        int name_len = strlen(def->long_name);
+        const size_t name_len = strlen(def->long_name);
 
         if (strlen(arg.argv[0]) >= name_len + 2
             && arg.argv[0][1] == '-'
