@@ -9,7 +9,6 @@
 ##
 
 VP8_COMMON_SRCS-yes += vp8_common.mk
-VP8_COMMON_SRCS-yes += common/type_aliases.h
 VP8_COMMON_SRCS-yes += common/pragmas.h
 VP8_COMMON_SRCS-yes += common/ppflags.h
 VP8_COMMON_SRCS-yes += common/onyx.h
@@ -35,7 +34,6 @@ VP8_COMMON_SRCS-yes += common/idctllm.c
 VP8_COMMON_SRCS-yes += common/alloccommon.h
 VP8_COMMON_SRCS-yes += common/blockd.h
 VP8_COMMON_SRCS-yes += common/common.h
-VP8_COMMON_SRCS-yes += common/common_types.h
 VP8_COMMON_SRCS-yes += common/entropy.h
 VP8_COMMON_SRCS-yes += common/entropymode.h
 VP8_COMMON_SRCS-yes += common/entropymv.h

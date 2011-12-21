@@ -259,7 +259,7 @@ typedef struct
     int buffer_level;
     int bits_off_target;
 
-    long long total_actual_bits;
+    int64_t total_actual_bits;
     int total_target_vs_actual;
 
     int worst_quality;
@@ -279,7 +279,7 @@ typedef struct
     int zbin_over_quant;
 
     int inter_frame_target;
-    INT64 total_byte_count;
+    int64_t total_byte_count;
 
     int filter_level;
 
@@ -673,8 +673,8 @@ typedef struct VP8_COMP
     unsigned int current_layer;
     LAYER_CONTEXT layer_context[MAX_LAYERS];
 
-    long long frames_in_layer[MAX_LAYERS];
-    long long bytes_in_layer[MAX_LAYERS];
+    int64_t frames_in_layer[MAX_LAYERS];
+    int64_t bytes_in_layer[MAX_LAYERS];
     double sum_psnr[MAX_LAYERS];
     double sum_psnr_p[MAX_LAYERS];
     double total_error2[MAX_LAYERS];

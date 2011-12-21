@@ -1775,7 +1775,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
       cpi->active_best_quality = cpi->oxcf.worst_allowed_q;
     }
 
-    cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? TRUE : FALSE;
+    cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? 1 : 0;
 
     cpi->cq_target_quality = cpi->oxcf.cq_level;
 
@@ -1994,11 +1994,11 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->frames_since_key = 8;        // Give a sensible default for the first frame.
     cpi->key_frame_frequency = cpi->oxcf.key_freq;
-    cpi->this_key_frame_forced = FALSE;
-    cpi->next_key_frame_forced = FALSE;
+    cpi->this_key_frame_forced = 0;
+    cpi->next_key_frame_forced = 0;
 
-    cpi->source_alt_ref_pending = FALSE;
-    cpi->source_alt_ref_active = FALSE;
+    cpi->source_alt_ref_pending = 0;
+    cpi->source_alt_ref_active = 0;
     cpi->common.refresh_alt_ref_frame = 0;
 
     cpi->b_calculate_psnr = CONFIG_INTERNAL_STATS;
@@ -2844,10 +2844,10 @@ static void update_alt_ref_frame_stats(VP8_COMP *cpi)
     cpi->common.frames_since_golden = 0;
 
     // Clear the alternate reference update pending flag.
-    cpi->source_alt_ref_pending = FALSE;
+    cpi->source_alt_ref_pending = 0;
 
     // Set the alternate refernce frame active flag
-    cpi->source_alt_ref_active = TRUE;
+    cpi->source_alt_ref_active = 1;
 
 
 }
@@ -2910,12 +2910,12 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
         if (cpi->oxcf.fixed_q >= 0 &&
             cpi->oxcf.play_alternate && !cpi->common.refresh_alt_ref_frame)
         {
-            cpi->source_alt_ref_pending = TRUE;
+            cpi->source_alt_ref_pending = 1;
             cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
         }
 
         if (!cpi->source_alt_ref_pending)
-            cpi->source_alt_ref_active = FALSE;
+            cpi->source_alt_ref_active = 0;
 
         // Decrement count down till next gf
         if (cpi->frames_till_gf_update_due > 0)
@@ -3002,12 +3002,12 @@ static int decide_key_frame(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
 
-    int code_key_frame = FALSE;
+    int code_key_frame = 0;
 
     cpi->kf_boost = 0;
 
     if (cpi->Speed > 11)
-        return FALSE;
+        return 0;
 
     // Clear down mmx registers
     vp8_clear_system_state();  //__asm emms;
@@ -3049,10 +3049,10 @@ static int decide_key_frame(VP8_COMP *cpi)
             && (change > .25 || change2 > .25))
         {
             /*(change > 1.4 || change < .75)&& cpi->this_frame_percent_intra > cpi->last_frame_percent_intra + 3*/
-            return TRUE;
+            return 1;
         }
 
-        return FALSE;
+        return 0;
 
     }
 
@@ -3062,7 +3062,7 @@ static int decide_key_frame(VP8_COMP *cpi)
         ((cpi->this_frame_percent_intra > 95) &&
          (cpi->this_frame_percent_intra >= (cpi->last_frame_percent_intra + 5))))
     {
-        code_key_frame = TRUE;
+        code_key_frame = 1;
     }
     // in addition if the following are true and this is not a golden frame then code a key frame
     // Note that on golden frames there often seems to be a pop in intra useage anyway hence this
@@ -3075,7 +3075,7 @@ static int decide_key_frame(VP8_COMP *cpi)
               (cpi->this_frame_percent_intra > (cpi->last_frame_percent_intra + 10))))
     {
         if (!cm->refresh_golden_frame)
-            code_key_frame = TRUE;
+            code_key_frame = 1;
     }
 
     return code_key_frame;
@@ -3131,11 +3131,11 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
 
 // Function to test for conditions that indeicate we should loop
 // back and recode a frame.
-static BOOL recode_loop_test( VP8_COMP *cpi,
+static int recode_loop_test( VP8_COMP *cpi,
                               int high_limit, int low_limit,
                               int q, int maxq, int minq )
 {
-    BOOL    force_recode = FALSE;
+    int force_recode = 0;
     VP8_COMMON *cm = &cpi->common;
 
     // Is frame recode allowed at all
@@ -3151,7 +3151,7 @@ static BOOL recode_loop_test( VP8_COMP *cpi,
         if ( ((cpi->projected_frame_size > high_limit) && (q < maxq)) ||
              ((cpi->projected_frame_size < low_limit) && (q > minq)) )
         {
-            force_recode = TRUE;
+            force_recode = 1;
         }
         // Special Constrained quality tests
         else if (cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY)
@@ -3161,14 +3161,14 @@ static BOOL recode_loop_test( VP8_COMP *cpi,
                  (cpi->projected_frame_size <
                      ((cpi->this_frame_target * 7) >> 3)))
             {
-                force_recode = TRUE;
+                force_recode = 1;
             }
             // Severe undershoot and between auto and user cq level
             else if ( (q > cpi->oxcf.cq_level) &&
                       (cpi->projected_frame_size < cpi->min_frame_bandwidth) &&
                       (cpi->active_best_quality > cpi->oxcf.cq_level))
             {
-                force_recode = TRUE;
+                force_recode = 1;
                 cpi->active_best_quality = cpi->oxcf.cq_level;
             }
         }
@@ -3319,7 +3319,7 @@ static void encode_frame_to_data_rate
     int frame_over_shoot_limit;
     int frame_under_shoot_limit;
 
-    int Loop = FALSE;
+    int Loop = 0;
     int loop_count;
     int this_q;
     int last_zbin_oq;
@@ -3331,10 +3331,10 @@ static void encode_frame_to_data_rate
     int top_index;
     int bottom_index;
     VP8_COMMON *cm = &cpi->common;
-    int active_worst_qchanged = FALSE;
+    int active_worst_qchanged = 0;
 
-    int overshoot_seen = FALSE;
-    int undershoot_seen = FALSE;
+    int overshoot_seen = 0;
+    int undershoot_seen = 0;
     int drop_mark = cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100;
     int drop_mark75 = drop_mark * 2 / 3;
     int drop_mark50 = drop_mark / 4;
@@ -3385,12 +3385,12 @@ static void encode_frame_to_data_rate
     // Enable or disable mode based tweaking of the zbin
     // For 2 Pass Only used where GF/ARF prediction quality
     // is above a threshold
-    cpi->zbin_mode_boost_enabled = TRUE;
+    cpi->zbin_mode_boost_enabled = 1;
     if (cpi->pass == 2)
     {
         if ( cpi->gfu_boost <= 400 )
         {
-            cpi->zbin_mode_boost_enabled = FALSE;
+            cpi->zbin_mode_boost_enabled = 0;
         }
     }
 
@@ -3431,7 +3431,7 @@ static void encode_frame_to_data_rate
         }
 
         // The alternate reference frame cannot be active for a key frame
-        cpi->source_alt_ref_active = FALSE;
+        cpi->source_alt_ref_active = 0;
 
         // Reset the RD threshold multipliers to default of * 1 (128)
         for (i = 0; i < MAX_MODES; i++)
@@ -3943,7 +3943,7 @@ static void encode_frame_to_data_rate
                 vp8_pick_frame_size(cpi);
 
                 // Clear the Alt reference frame active flag when we have a key frame
-                cpi->source_alt_ref_active = FALSE;
+                cpi->source_alt_ref_active = 0;
 
                 // Reset the loop filter deltas and segmentation map
                 setup_features(cpi);
@@ -3968,7 +3968,7 @@ static void encode_frame_to_data_rate
                 q_high = cpi->active_worst_quality;
 
                 loop_count++;
-                Loop = TRUE;
+                Loop = 1;
 
                 continue;
             }
@@ -3996,10 +3996,10 @@ static void encode_frame_to_data_rate
             }
 
             // If we have updated the active max Q do not call vp8_update_rate_correction_factors() this loop.
-            active_worst_qchanged = TRUE;
+            active_worst_qchanged = 1;
         }
         else
-            active_worst_qchanged = FALSE;
+            active_worst_qchanged = 0;
 
 #if !(CONFIG_REALTIME_ONLY)
         // Special case handling for forced key frames
@@ -4035,7 +4035,7 @@ static void encode_frame_to_data_rate
             else if (Q < q_low)
                 Q = q_low;
 
-            Loop = ((Q != last_q)) ? TRUE : FALSE;
+            Loop = ((Q != last_q)) ? 1 : 0;
         }
 
         // Is the projected frame size out of range and are we allowed to attempt to recode.
@@ -4092,7 +4092,7 @@ static void encode_frame_to_data_rate
                     }
                 }
 
-                overshoot_seen = TRUE;
+                overshoot_seen = 1;
             }
             // Frame is too small
             else
@@ -4142,7 +4142,7 @@ static void encode_frame_to_data_rate
                     }
                 }
 
-                undershoot_seen = TRUE;
+                undershoot_seen = 1;
             }
 
             // Clamp Q to upper and lower limits:
@@ -4154,18 +4154,18 @@ static void encode_frame_to_data_rate
             // Clamp cpi->zbin_over_quant
             cpi->zbin_over_quant = (cpi->zbin_over_quant < zbin_oq_low) ? zbin_oq_low : (cpi->zbin_over_quant > zbin_oq_high) ? zbin_oq_high : cpi->zbin_over_quant;
 
-            //Loop = ((Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant)) ? TRUE : FALSE;
-            Loop = ((Q != last_q)) ? TRUE : FALSE;
+            //Loop = ((Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant)) ? 1 : 0;
+            Loop = ((Q != last_q)) ? 1 : 0;
             last_zbin_oq = cpi->zbin_over_quant;
         }
         else
 #endif
-            Loop = FALSE;
+            Loop = 0;
 
         if (cpi->is_src_frame_alt_ref)
-            Loop = FALSE;
+            Loop = 0;
 
-        if (Loop == TRUE)
+        if (Loop == 1)
         {
             vp8_restore_coding_context(cpi);
             loop_count++;
@@ -4174,7 +4174,7 @@ static void encode_frame_to_data_rate
 #endif
         }
     }
-    while (Loop == TRUE);
+    while (Loop == 1);
 
 #if 0
     // Experimental code for lagged and one pass
@@ -4383,7 +4383,7 @@ static void encode_frame_to_data_rate
         (cpi->buffer_level < cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100) &&
         (cpi->projected_frame_size > (4 * cpi->this_frame_target)))
     {
-        cpi->drop_frame = TRUE;
+        cpi->drop_frame = 1;
     }
 
 #endif
@@ -4853,7 +4853,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
             cm->refresh_golden_frame = 0;
             cm->refresh_last_frame = 0;
             cm->show_frame = 0;
-            cpi->source_alt_ref_pending = FALSE;  // Clear Pending alt Ref flag.
+            cpi->source_alt_ref_pending = 0;  // Clear Pending alt Ref flag.
             cpi->is_src_frame_alt_ref = 0;
         }
     }

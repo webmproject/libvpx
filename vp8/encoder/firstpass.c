@@ -861,7 +861,7 @@ double bitcost( double prob )
 {
     return -(log( prob ) / log( 2.0 ));
 }
-static long long estimate_modemvcost(VP8_COMP *cpi,
+static int64_t estimate_modemvcost(VP8_COMP *cpi,
                                      FIRSTPASS_STATS * fpstats)
 {
     int mv_cost;
@@ -1376,7 +1376,7 @@ static int detect_transition_to_still(
     double loop_decay_rate,
     double decay_accumulator )
 {
-    BOOL trans_to_still = FALSE;
+    int trans_to_still = 0;
 
     // Break clause to detect very still sections after motion
     // For example a static image after a fade or other transition
@@ -1406,7 +1406,7 @@ static int detect_transition_to_still(
 
         // Only if it does do we signal a transition to still
         if ( j == still_interval )
-            trans_to_still = TRUE;
+            trans_to_still = 1;
     }
 
     return trans_to_still;
@@ -1415,14 +1415,14 @@ static int detect_transition_to_still(
 // This function detects a flash through the high relative pcnt_second_ref
 // score in the frame following a flash frame. The offset passed in should
 // reflect this
-static BOOL detect_flash( VP8_COMP *cpi, int offset )
+static int detect_flash( VP8_COMP *cpi, int offset )
 {
     FIRSTPASS_STATS next_frame;
 
-    BOOL flash_detected = FALSE;
+    int flash_detected = 0;
 
     // Read the frame data.
-    // The return is FALSE (no flash detected) if not a valid frame
+    // The return is 0 (no flash detected) if not a valid frame
     if ( read_frame_stats(cpi, &next_frame, offset) != EOF )
     {
         // What we are looking for here is a situation where there is a
@@ -1433,7 +1433,7 @@ static BOOL detect_flash( VP8_COMP *cpi, int offset )
         if ( (next_frame.pcnt_second_ref > next_frame.pcnt_inter) &&
              (next_frame.pcnt_second_ref >= 0.5 ) )
         {
-            flash_detected = TRUE;
+            flash_detected = 1;
 
             /*if (1)
             {
@@ -1548,7 +1548,7 @@ static int calc_arf_boost(
     double mv_in_out_accumulator = 0.0;
     double abs_mv_in_out_accumulator = 0.0;
     double r;
-    BOOL flash_detected = FALSE;
+    int flash_detected = 0;
 
     // Search forward from the proposed arf/next gf position
     for ( i = 0; i < f_frames; i++ )
@@ -1677,7 +1677,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     int alt_boost = 0;
     int f_boost = 0;
     int b_boost = 0;
-    BOOL flash_detected;
+    int flash_detected;
 
     cpi->twopass.gf_group_bits = 0;
     cpi->twopass.gf_decay_rate = 0;
@@ -1751,7 +1751,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                                          loop_decay_rate,
                                          decay_accumulator ) )
         {
-            allow_alt_ref = FALSE;
+            allow_alt_ref = 0;
             boost_score = old_boost_score;
             break;
         }
@@ -1923,7 +1923,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
             int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
 
-            cpi->source_alt_ref_pending = TRUE;
+            cpi->source_alt_ref_pending = 1;
 
             // For alt ref frames the error score for the end frame of the
             // group (the alt ref frame) should not contribute to the group
@@ -1989,13 +1989,13 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
         else
         {
-            cpi->source_alt_ref_pending = FALSE;
+            cpi->source_alt_ref_pending = 0;
             cpi->baseline_gf_interval = i;
         }
     }
     else
     {
-        cpi->source_alt_ref_pending = FALSE;
+        cpi->source_alt_ref_pending = 0;
         cpi->baseline_gf_interval = i;
     }
 
@@ -2341,7 +2341,7 @@ void vp8_second_pass(VP8_COMP *cpi)
             cpi->twopass.gf_group_error_left = cpi->twopass.kf_group_error_left;
             cpi->baseline_gf_interval = cpi->twopass.frames_to_key;
             cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
-            cpi->source_alt_ref_pending = FALSE;
+            cpi->source_alt_ref_pending = 0;
         }
 
     }
@@ -2493,9 +2493,9 @@ void vp8_second_pass(VP8_COMP *cpi)
 }
 
 
-static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRSTPASS_STATS *this_frame, FIRSTPASS_STATS *next_frame)
+static int test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRSTPASS_STATS *this_frame, FIRSTPASS_STATS *next_frame)
 {
-    BOOL is_viable_kf = FALSE;
+    int is_viable_kf = 0;
 
     // Does the frame satisfy the primary criteria of a key frame
     //      If so, then examine how well it predicts subsequent frames
@@ -2569,13 +2569,13 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
 
         // If there is tolerable prediction for at least the next 3 frames then break out else discard this pottential key frame and move on
         if (boost_score > 5.0 && (i > 3))
-            is_viable_kf = TRUE;
+            is_viable_kf = 1;
         else
         {
             // Reset the file position
             reset_fpf_position(cpi, start_pos);
 
-            is_viable_kf = FALSE;
+            is_viable_kf = 0;
         }
     }
 
@@ -2611,7 +2611,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     cpi->this_key_frame_forced = cpi->next_key_frame_forced;
 
     // Clear the alt ref active flag as this can never be active on a key frame
-    cpi->source_alt_ref_active = FALSE;
+    cpi->source_alt_ref_active = 0;
 
     // Kf is always a gf so clear frames till next gf counter
     cpi->frames_till_gf_update_due = 0;
@@ -2727,10 +2727,10 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // Reset to the start of the group
         reset_fpf_position(cpi, current_pos);
 
-        cpi->next_key_frame_forced = TRUE;
+        cpi->next_key_frame_forced = 1;
     }
     else
-        cpi->next_key_frame_forced = FALSE;
+        cpi->next_key_frame_forced = 0;
 
     // Special case for the last frame of the file
     if (cpi->twopass.stats_in >= cpi->twopass.stats_in_end)
@@ -3034,8 +3034,8 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     if (cpi->oxcf.allow_spatial_resampling)
     {
-        int resample_trigger = FALSE;
-        int last_kf_resampled = FALSE;
+        int resample_trigger = 0;
+        int last_kf_resampled = 0;
         int kf_q;
         int scale_val = 0;
         int hr, hs, vr, vs;
@@ -3053,7 +3053,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         double effective_size_ratio;
 
         if ((cpi->common.Width != cpi->oxcf.Width) || (cpi->common.Height != cpi->oxcf.Height))
-            last_kf_resampled = TRUE;
+            last_kf_resampled = 1;
 
         // Set back to unscaled by defaults
         cpi->common.horiz_scale = NORMAL;
@@ -3117,9 +3117,9 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 (last_kf_resampled && (projected_buffer_level < (cpi->oxcf.resample_up_water_mark * cpi->oxcf.optimal_buffer_level / 100))))
                 //( ((cpi->buffer_level < (cpi->oxcf.resample_down_water_mark * cpi->oxcf.optimal_buffer_level / 100))) &&
                 //  ((projected_buffer_level < (cpi->oxcf.resample_up_water_mark * cpi->oxcf.optimal_buffer_level / 100))) ))
-                resample_trigger = TRUE;
+                resample_trigger = 1;
             else
-                resample_trigger = FALSE;
+                resample_trigger = 0;
         }
         else
         {
@@ -3129,9 +3129,9 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             if ((last_kf_resampled && (kf_q > cpi->worst_quality)) ||                                               // If triggered last time the threshold for triggering again is reduced
                 ((kf_q > cpi->worst_quality) &&                                                                  // Projected Q higher than allowed and ...
                  (over_spend > clip_bits / 20)))                                                               // ... Overspend > 5% of total bits
-                resample_trigger = TRUE;
+                resample_trigger = 1;
             else
-                resample_trigger = FALSE;
+                resample_trigger = 0;
 
         }
 
