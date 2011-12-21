@@ -41,7 +41,6 @@ VP8_COMMON_SRCS-yes += common/entropymode.h
 VP8_COMMON_SRCS-yes += common/entropymv.h
 VP8_COMMON_SRCS-yes += common/extend.h
 VP8_COMMON_SRCS-yes += common/findnearmv.h
-VP8_COMMON_SRCS-yes += common/g_common.h
 VP8_COMMON_SRCS-yes += common/header.h
 VP8_COMMON_SRCS-yes += common/idct.h
 VP8_COMMON_SRCS-yes += common/invtrans.h

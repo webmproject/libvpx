@@ -9,7 +9,6 @@
  */
 
 
-#include "g_common.h"
 #include "subpixel.h"
 #include "loopfilter.h"
 #include "recon.h"

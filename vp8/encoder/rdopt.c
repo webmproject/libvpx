@@ -28,7 +28,6 @@
 #include "encodemb.h"
 #include "quantize.h"
 #include "vp8/common/idct.h"
-#include "vp8/common/g_common.h"
 #include "variance.h"
 #include "mcomp.h"
 #include "rdopt.h"

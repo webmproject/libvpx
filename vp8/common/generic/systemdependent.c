@@ -10,7 +10,6 @@
 
 
 #include "vpx_config.h"
-#include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/recon.h"
