@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//sPs\u003d",
+        "filename": "vp8/common/onyx.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-21T16:57:54Z",
+      "side": 1,
+      "message": "It will have build error if I switch the above two function prototypes. So, is it more clear to add \nstruct VP8_COMP;\nin the front?",
+      "revId": "a8aea11f440efb679d7af8d33f5e84cc93f4cb8a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
