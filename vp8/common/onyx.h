@@ -24,7 +24,8 @@ extern "C"
 #include "vpx_scale/yv12config.h"
 #include "type_aliases.h"
 #include "ppflags.h"
-    typedef int *VP8_PTR;
+
+    struct VP8_COMP;
 
     /* Create/destroy static data structures. */
 
@@ -226,27 +227,27 @@ extern "C"
 
     void vp8_initialize();
 
-    VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf);
-    void vp8_remove_compressor(VP8_PTR *comp);
+    struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf);
+    void vp8_remove_compressor(struct VP8_COMP* *comp);
 
-    void vp8_init_config(VP8_PTR onyx, VP8_CONFIG *oxcf);
-    void vp8_change_config(VP8_PTR onyx, VP8_CONFIG *oxcf);
+    void vp8_init_config(struct VP8_COMP* onyx, VP8_CONFIG *oxcf);
+    void vp8_change_config(struct VP8_COMP* onyx, VP8_CONFIG *oxcf);
 
 // receive a frames worth of data caller can assume that a copy of this frame is made
 // and not just a copy of the pointer..
-    int vp8_receive_raw_frame(VP8_PTR comp, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time_stamp);
-    int vp8_get_compressed_data(VP8_PTR comp, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, unsigned char *dest_end, int64_t *time_stamp, int64_t *time_end, int flush);
-    int vp8_get_preview_raw_frame(VP8_PTR comp, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags);
+    int vp8_receive_raw_frame(struct VP8_COMP* comp, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time_stamp);
+    int vp8_get_compressed_data(struct VP8_COMP* comp, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, unsigned char *dest_end, int64_t *time_stamp, int64_t *time_end, int flush);
+    int vp8_get_preview_raw_frame(struct VP8_COMP* comp, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *flags);
 
-    int vp8_use_as_reference(VP8_PTR comp, int ref_frame_flags);
-    int vp8_update_reference(VP8_PTR comp, int ref_frame_flags);
-    int vp8_get_reference(VP8_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
-    int vp8_set_reference(VP8_PTR comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
-    int vp8_update_entropy(VP8_PTR comp, int update);
-    int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4]);
-    int vp8_set_active_map(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned int cols);
-    int vp8_set_internal_size(VP8_PTR comp, VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
-    int vp8_get_quantizer(VP8_PTR c);
+    int vp8_use_as_reference(struct VP8_COMP* comp, int ref_frame_flags);
+    int vp8_update_reference(struct VP8_COMP* comp, int ref_frame_flags);
+    int vp8_get_reference(struct VP8_COMP* comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
+    int vp8_set_reference(struct VP8_COMP* comp, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd);
+    int vp8_update_entropy(struct VP8_COMP* comp, int update);
+    int vp8_set_roimap(struct VP8_COMP* comp, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4]);
+    int vp8_set_active_map(struct VP8_COMP* comp, unsigned char *map, unsigned int rows, unsigned int cols);
+    int vp8_set_internal_size(struct VP8_COMP* comp, VPX_SCALING horiz_mode, VPX_SCALING vert_mode);
+    int vp8_get_quantizer(struct VP8_COMP* c);
 
 #ifdef __cplusplus
 }

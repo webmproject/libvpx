@@ -83,7 +83,7 @@ struct vpx_codec_alg_priv
     vpx_codec_enc_cfg_t     cfg;
     struct vp8_extracfg     vp8_cfg;
     VP8_CONFIG              oxcf;
-    VP8_PTR             cpi;
+    struct VP8_COMP        *cpi;
     unsigned char          *cx_data;
     unsigned int            cx_data_sz;
     vpx_image_t             preview_img;
@@ -556,7 +556,7 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
     vpx_codec_enc_cfg_t       *cfg;
     unsigned int               i;
 
-    VP8_PTR optr;
+    struct VP8_COMP *optr;
 
     if (!ctx->priv)
     {
