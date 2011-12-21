@@ -442,17 +442,13 @@ void vp8_update_mode_context(VP8_COMMON *pc)
         {
             int this_prob;
             int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
-
-            if (count)
+            /* preventing rare occurances from skewing the probs */
+            if (count>=4)
+            {
                 this_prob = 256 * mv_ref_ct[j][i][0] / count;
-            else
-                this_prob = 128;
-            this_prob = this_prob? (this_prob<255?this_prob:255):1;
-            if (this_prob == 0)
-                this_prob = 1;
-            if (this_prob == 256)
-                this_prob = 255;
-            mode_context[j][i] = this_prob;
+                this_prob = this_prob? (this_prob<255?this_prob:255):1;
+                mode_context[j][i] = this_prob;
+            }
         }
     }
 }
