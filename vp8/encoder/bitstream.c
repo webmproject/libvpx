@@ -922,7 +922,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const MV_CONTEXT *mvc = pc->fc.mvc;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
+#if CONFIG_DUALPRED
     int i;
+#endif
     int pred_context;
 
     const int *const rfct = cpi->count_mb_ref_frame_usage;
@@ -1306,7 +1308,6 @@ static void write_kfmodes(VP8_COMP *cpi)
     const VP8_COMMON *const c = & cpi->common;
     /* const */
     MODE_INFO *m = c->mi;
-    int i;
     int mb_row = -1;
     int prob_skip_false = 0;
 
@@ -1601,7 +1602,9 @@ static int default_coef_context_savings(VP8_COMP *cpi)
 int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
     int savings = 0;
+#if CONFIG_T8X8
     int i=0;
+#endif
 
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
@@ -1671,7 +1674,6 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
 
 #if CONFIG_T8X8
-    i = 0;
     do
     {
         int j = 0;
@@ -2001,7 +2003,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     int extra_bytes_packed = 0;
 
     unsigned char *cx_data = dest;
-    const int *mb_feature_data_bits;
 
     oh.show_frame = (int) pc->show_frame;
     oh.type = (int)pc->frame_type;

@@ -113,6 +113,6 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 #endif
 
-
+void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 
 #endif

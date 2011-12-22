@@ -19,4 +19,9 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *, MACROBLOCK *x);
 void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *, MACROBLOCK *mb);
 void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
                               MACROBLOCK *x, int ib);
+void vp8_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
+void vp8_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
+void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
+                              MACROBLOCK *x, int ib);
+
 #endif

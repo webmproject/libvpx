@@ -25,6 +25,7 @@
 #include "pickinter.h"
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/reconintra.h"
+#include "vp8/common/seg_common.h"
 #include <stdio.h>
 #include <math.h>
 #include <limits.h>

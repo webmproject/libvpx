@@ -25,6 +25,7 @@
 #include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/findnearmv.h"
+#include "vp8/common/quant_common.h"
 #include "encodemb.h"
 #include "quantize.h"
 #include "vp8/common/idct.h"
@@ -226,7 +227,6 @@ static int rd_iifactor [ 32 ] =  {    4,   4,   3,   2,   1,   0,   0,   0,
                                  };
 
 // 3* dc_qlookup[Q]*dc_qlookup[Q];
-static int rdmult_lut[QINDEX_RANGE];
 
 /* values are now correlated to quantizer */
 static int sad_per_bit16lut[QINDEX_RANGE];
@@ -1005,7 +1005,6 @@ int rd_pick_intra8x8mby_modes(VP8_COMP *cpi,
     for (i = 0; i < 4; i++)
     {
         MODE_INFO *const mic = xd->mode_info_context;
-        const int mis = xd->mode_info_stride;
         B_PREDICTION_MODE UNINITIALIZED_IS_SAFE(best_mode);
         int UNINITIALIZED_IS_SAFE(r), UNINITIALIZED_IS_SAFE(ry), UNINITIALIZED_IS_SAFE(d);
 
@@ -2033,7 +2032,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
-    VP8_COMMON *cm = &cpi->common;
     union b_mode_info best_bmodes[16];
     MB_MODE_INFO best_mbmode;
     PARTITION_INFO best_partition;
@@ -2993,7 +2991,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {
+#if CONFIG_T8X8
     MACROBLOCKD *xd = &x->e_mbd;
+#endif
     int error4x4, error16x16;
     int rate4x4, rate16x16 = 0, rateuv;
     int dist4x4, dist16x16, distuv;

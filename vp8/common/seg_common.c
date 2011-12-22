@@ -42,6 +42,7 @@ void enable_segfeature( MACROBLOCKD *xd,
 {
      xd->segment_feature_mask[segment_id] |= (0x01 << feature_id);
 }
+
 void disable_segfeature( MACROBLOCKD *xd,
                          int segment_id,
                          SEG_LVL_FEATURES feature_id )

@@ -183,8 +183,7 @@ static int do_16x16_zerozero_search
 {
     MACROBLOCK  * const x  = &cpi->mb;
     MACROBLOCKD * const xd = &x->e_mbd;
-    unsigned int err, tmp_err;
-    int_mv tmp_mv;
+    unsigned int err;
     int n;
 
     for (n = 0; n < 16; n++) {
