@@ -760,10 +760,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             int sadpb = x->sadperbit16;
             int_mv mvp_full;
 
-            int col_min = (best_ref_mv.as_mv.col>>3)
-                         - MAX_FULL_PEL_VAL + ((best_ref_mv.as_mv.col & 7)?1:0);
-            int row_min = (best_ref_mv.as_mv.row>>3)
-                         - MAX_FULL_PEL_VAL + ((best_ref_mv.as_mv.row & 7)?1:0);
+            int col_min = ((best_ref_mv.as_mv.col+7)>>3) - MAX_FULL_PEL_VAL;
+            int row_min = ((best_ref_mv.as_mv.row+7)>>3) - MAX_FULL_PEL_VAL;
             int col_max = (best_ref_mv.as_mv.col>>3)
                          + MAX_FULL_PEL_VAL;
             int row_max = (best_ref_mv.as_mv.row>>3)
@@ -1067,7 +1065,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.mb_skip_coeff =
-                                        (cpi->common.mb_no_coeff_skip) ? 1 : 0;
+                                        (cpi->common.mb_no_coeff_skip);
         x->e_mbd.mode_info_context->mbmi.partitioning = 0;
 
         return;

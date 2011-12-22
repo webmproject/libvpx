@@ -1775,7 +1775,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
       cpi->active_best_quality = cpi->oxcf.worst_allowed_q;
     }
 
-    cpi->buffered_mode = (cpi->oxcf.optimal_buffer_level > 0) ? 1 : 0;
+    cpi->buffered_mode = cpi->oxcf.optimal_buffer_level > 0;
 
     cpi->cq_target_quality = cpi->oxcf.cq_level;
 
@@ -4035,7 +4035,7 @@ static void encode_frame_to_data_rate
             else if (Q < q_low)
                 Q = q_low;
 
-            Loop = ((Q != last_q)) ? 1 : 0;
+            Loop = Q != last_q;
         }
 
         // Is the projected frame size out of range and are we allowed to attempt to recode.
@@ -4154,8 +4154,8 @@ static void encode_frame_to_data_rate
             // Clamp cpi->zbin_over_quant
             cpi->zbin_over_quant = (cpi->zbin_over_quant < zbin_oq_low) ? zbin_oq_low : (cpi->zbin_over_quant > zbin_oq_high) ? zbin_oq_high : cpi->zbin_over_quant;
 
-            //Loop = ((Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant)) ? 1 : 0;
-            Loop = ((Q != last_q)) ? 1 : 0;
+            //Loop = (Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant);
+            Loop = Q != last_q;
             last_zbin_oq = cpi->zbin_over_quant;
         }
         else

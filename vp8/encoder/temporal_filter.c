@@ -186,7 +186,7 @@ static int vp8_temporal_filter_find_matching_mb_c
     if (cpi->Speed < 8)
     {
         step_param = cpi->sf.first_step +
-                    ((cpi->Speed > 5) ? 1 : 0);
+                    (cpi->Speed > 5);
         further_steps =
             (cpi->sf.max_step_search_steps - 1)-step_param;
     }

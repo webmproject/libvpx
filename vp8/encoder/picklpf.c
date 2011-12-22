@@ -186,7 +186,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     best_err = calc_partial_ssl_err(sd, cm->frame_to_show,
                                     IF_RTCD(&cpi->rtcd.variance));
 
-    filt_val -= (1 + ((filt_val > 10) ? 1 : 0));
+    filt_val -= 1 + (filt_val > 10);
 
     // Search lower filter levels
     while (filt_val >= min_filter_level)
@@ -209,11 +209,11 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
             break;
 
         // Adjust filter level
-        filt_val -= (1 + ((filt_val > 10) ? 1 : 0));
+        filt_val -= 1 + (filt_val > 10);
     }
 
     // Search up (note that we have already done filt_val = cm->filter_level)
-    filt_val = cm->filter_level + (1 + ((filt_val > 10) ? 1 : 0));
+    filt_val = cm->filter_level + 1 + (filt_val > 10);
 
     if (best_filt_val == cm->filter_level)
     {
@@ -243,7 +243,7 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
                 break;
 
             // Adjust filter level
-            filt_val += (1 + ((filt_val > 10) ? 1 : 0));
+            filt_val += 1 + (filt_val > 10);
         }
     }
 

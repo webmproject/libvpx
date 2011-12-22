@@ -60,10 +60,10 @@ static unsigned int vp8_check_mv_bounds(int_mv *mv, int mb_to_left_edge,
                                 int mb_to_bottom_edge)
 {
     unsigned int need_to_clamp;
-    need_to_clamp = (mv->as_mv.col < mb_to_left_edge) ? 1 : 0;
-    need_to_clamp |= (mv->as_mv.col > mb_to_right_edge) ? 1 : 0;
-    need_to_clamp |= (mv->as_mv.row < mb_to_top_edge) ? 1 : 0;
-    need_to_clamp |= (mv->as_mv.row > mb_to_bottom_edge) ? 1 : 0;
+    need_to_clamp = (mv->as_mv.col < mb_to_left_edge);
+    need_to_clamp |= (mv->as_mv.col > mb_to_right_edge);
+    need_to_clamp |= (mv->as_mv.row < mb_to_top_edge);
+    need_to_clamp |= (mv->as_mv.row > mb_to_bottom_edge);
     return need_to_clamp;
 }
 
