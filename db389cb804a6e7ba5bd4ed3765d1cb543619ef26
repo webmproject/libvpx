@@ -33,6 +33,24 @@
       "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//rdw\u003d",
+        "filename": "vp8/common/invtrans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-22T19:00:15Z",
+      "side": 1,
+      "message": "What\u0027s the other thread doing that\u0027s accessing these coefficients? Is this only related to DQC[0] being modified, or are the other coefficients being accessed too? I\u0027m not sure we\u0027re not trading one race condition for another here.",
+      "parentUuid": "AAAAGX//rj8\u003d",
+      "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
