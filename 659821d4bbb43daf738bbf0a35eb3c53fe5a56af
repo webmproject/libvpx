@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAGX//rkc\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-22T14:37:57Z",
+      "side": 1,
+      "message": "Is the following way you mentioned before better?\nint col_min \u003d ((best_ref_mv.as_mv.col + 7)\u003e\u003e3)\n                         - MAX_FULL_PEL_VAL;",
+      "revId": "659821d4bbb43daf738bbf0a35eb3c53fe5a56af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//rkY\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1389,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-22T14:37:57Z",
+      "side": 1,
+      "message": "same as in pick_inter",
+      "revId": "659821d4bbb43daf738bbf0a35eb3c53fe5a56af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//rkU\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2020,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-22T14:37:57Z",
+      "side": 1,
+      "message": "same as in pick_inter",
+      "revId": "659821d4bbb43daf738bbf0a35eb3c53fe5a56af",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
