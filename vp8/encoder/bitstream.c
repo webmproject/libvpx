@@ -1644,20 +1644,20 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
 
 
     // Signal whether or not Segmentation is enabled
-    vp8_write_bit(bc, (xd->segmentation_enabled) ? 1 : 0);
+    vp8_write_bit(bc, xd->segmentation_enabled);
 
     // Indicate which features are enabled
     if (xd->segmentation_enabled)
     {
         // Signal whether or not the segmentation map is being updated.
-        vp8_write_bit(bc, (xd->update_mb_segmentation_map) ? 1 : 0);
-        vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
+        vp8_write_bit(bc, xd->update_mb_segmentation_map);
+        vp8_write_bit(bc, xd->update_mb_segmentation_data);
 
         if (xd->update_mb_segmentation_data)
         {
             signed char Data;
 
-            vp8_write_bit(bc, (xd->mb_segement_abs_delta) ? 1 : 0);
+            vp8_write_bit(bc, xd->mb_segement_abs_delta);
 
             // For each segmentation feature (Quant and loop filter level)
             for (i = 0; i < MB_LVL_MAX; i++)
@@ -1714,7 +1714,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
     vp8_write_literal(bc, pc->sharpness_level, 3);
 
     // Write out loop filter deltas applied at the MB level based on mode or ref frame (if they are enabled).
-    vp8_write_bit(bc, (xd->mode_ref_lf_delta_enabled) ? 1 : 0);
+    vp8_write_bit(bc, xd->mode_ref_lf_delta_enabled);
 
     if (xd->mode_ref_lf_delta_enabled)
     {
