@@ -51,6 +51,24 @@
       "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//rc0\u003d",
+        "filename": "vp8/common/invtrans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2011-12-22T19:47:33Z",
+      "side": 1,
+      "message": "It seems all threads share/use same set of xd-\u003eblock[0].dequant. This change keeps DQC[0] local, so it won\u0027t cause problems for other threads. It sounds right.",
+      "parentUuid": "AAAAGX//rdw\u003d",
+      "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
