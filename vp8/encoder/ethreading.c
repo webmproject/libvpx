@@ -38,7 +38,7 @@ static THREAD_FUNCTION loopfilter_thread(void *p_data)
 
         if (sem_wait(&cpi->h_event_start_lpf) == 0)
         {
-            if (cpi->b_multi_threaded == FALSE) // we're shutting down
+            if (cpi->b_multi_threaded == 0) // we're shutting down
                 break;
 
             loopfilter_frame(cpi, cm);
@@ -78,7 +78,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
             int *segment_counts = mbri->segment_counts;
             int *totalrate = &mbri->totalrate;
 
-            if (cpi->b_multi_threaded == FALSE) // we're shutting down
+            if (cpi->b_multi_threaded == 0) // we're shutting down
                 break;
 
             for (mb_row = ithread + 1; mb_row < cm->mb_rows; mb_row += (cpi->encoding_thread_count + 1))

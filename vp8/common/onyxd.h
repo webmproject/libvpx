@@ -18,7 +18,6 @@
 extern "C"
 {
 #endif
-#include "type_aliases.h"
 #include "vpx_scale/yv12config.h"
 #include "ppflags.h"
 #include "vpx_ports/mem.h"

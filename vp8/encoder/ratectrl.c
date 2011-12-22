@@ -332,8 +332,8 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     else
         cpi->frames_till_gf_update_due = cpi->goldfreq;
 
-    cpi->common.refresh_golden_frame = TRUE;
-    cpi->common.refresh_alt_ref_frame = TRUE;
+    cpi->common.refresh_golden_frame = 1;
+    cpi->common.refresh_alt_ref_frame = 1;
 }
 
 
@@ -471,7 +471,7 @@ static void calc_gf_params(VP8_COMP *cpi)
     if (cpi->pass != 2)
     {
         // Single Pass lagged mode: TBD
-        if (FALSE)
+        if (0)
         {
         }
 
@@ -598,14 +598,14 @@ static void calc_gf_params(VP8_COMP *cpi)
     if (cpi->pass != 2)
     {
         // For now Alt ref is not allowed except in 2 pass modes.
-        cpi->source_alt_ref_pending = FALSE;
+        cpi->source_alt_ref_pending = 0;
 
         /*if ( cpi->oxcf.fixed_q == -1)
         {
             if ( cpi->oxcf.play_alternate && (cpi->last_boost > (100 + (AF_THRESH*cpi->frames_till_gf_update_due)) ) )
-                cpi->source_alt_ref_pending = TRUE;
+                cpi->source_alt_ref_pending = 1;
             else
-                cpi->source_alt_ref_pending = FALSE;
+                cpi->source_alt_ref_pending = 0;
         }*/
     }
 }
@@ -982,7 +982,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
 #endif
             //vpx_log("Decoder: Drop frame due to bandwidth: %d \n",cpi->buffer_level, cpi->av_per_frame_bandwidth);
 
-            cpi->drop_frame = TRUE;
+            cpi->drop_frame = 1;
         }
 
 #if 0
@@ -990,7 +990,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         else if ((cpi->buffer_level < cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100) &&
                  (cpi->drop_count < cpi->max_drop_count) && (cpi->pass == 0))
         {
-            cpi->drop_frame = TRUE;
+            cpi->drop_frame = 1;
         }
 
 #endif
@@ -1036,11 +1036,11 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         {
             // For one pass throw a GF if recent frame intra useage is low or the GF useage is high
             if ((cpi->pass == 0) && (cpi->this_frame_percent_intra < 15 || gf_frame_useage >= 5))
-                cpi->common.refresh_golden_frame = TRUE;
+                cpi->common.refresh_golden_frame = 1;
 
             // Two pass GF descision
             else if (cpi->pass == 2)
-                cpi->common.refresh_golden_frame = TRUE;
+                cpi->common.refresh_golden_frame = 1;
         }
 
 #if 0
@@ -1058,7 +1058,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
 
 #endif
 
-        if (cpi->common.refresh_golden_frame == TRUE)
+        if (cpi->common.refresh_golden_frame == 1)
         {
 #if 0
 
@@ -1543,7 +1543,7 @@ int vp8_pick_frame_size(VP8_COMP *cpi)
         // Check if we're dropping the frame:
         if (cpi->drop_frame)
         {
-            cpi->drop_frame = FALSE;
+            cpi->drop_frame = 0;
             cpi->drop_count++;
             return 0;
         }

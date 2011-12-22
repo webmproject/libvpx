@@ -21,9 +21,6 @@ void vpx_log(const char *format, ...);
 #include "subpixel.h"
 #include "vpx_ports/mem.h"
 
-#define TRUE    1
-#define FALSE   0
-
 /*#define DCPRED 1*/
 #define DCPREDSIMTHRESH 0
 #define DCPREDCNTTHRESH 3

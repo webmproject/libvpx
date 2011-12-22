@@ -15,7 +15,7 @@
 #include "vpx_ports/mem.h"
 #include "detokenize.h"
 
-#define BOOL_DATA UINT8
+#define BOOL_DATA unsigned char
 
 #define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
 DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
@@ -157,10 +157,10 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     DECODE_AND_APPLYSIGN(val) \
     Prob = coef_probs + (ENTROPY_NODES*2); \
     if(c < 15){\
-        qcoeff_ptr [ scan[c] ] = (INT16) v; \
+        qcoeff_ptr [ scan[c] ] = (int16_t) v; \
         ++c; \
         goto DO_WHILE; }\
-    qcoeff_ptr [ 15 ] = (INT16) v; \
+    qcoeff_ptr [ 15 ] = (int16_t) v; \
     goto BLOCK_FINISHED;
 
 
@@ -172,7 +172,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     {\
         range = range-split;\
         value = value-bigsplit;\
-        val += ((UINT16)1<<bits_count);\
+        val += ((uint16_t)1<<bits_count);\
     }\
     else\
     {\
@@ -340,12 +340,12 @@ ONE_CONTEXT_NODE_0_:
 
     if (c < 15)
     {
-        qcoeff_ptr [ scan[c] ] = (INT16) v;
+        qcoeff_ptr [ scan[c] ] = (int16_t) v;
         ++c;
         goto DO_WHILE;
     }
 
-    qcoeff_ptr [ 15 ] = (INT16) v;
+    qcoeff_ptr [ 15 ] = (int16_t) v;
 BLOCK_FINISHED:
     eobs[i] = c;
     eobtotal += c;
