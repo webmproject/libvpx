@@ -16,6 +16,23 @@
       "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//rj8\u003d",
+        "filename": "vp8/common/invtrans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2011-12-22T15:13:22Z",
+      "side": 1,
+      "message": "I would rather not have to copy, but for now, it is ok.  We could either move the dequantization out of the idct, or we could keep a copy of cpi-\u003eY1quant[] in the thread.",
+      "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
