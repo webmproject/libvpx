@@ -102,6 +102,7 @@ vp8_multi_resolution_encoder.SRCS  \
                          += third_party/libyuv/include/libyuv/basic_types.h  \
                             third_party/libyuv/include/libyuv/cpu_id.h  \
                             third_party/libyuv/include/libyuv/scale.h  \
+                            third_party/libyuv/source/row.h \
                             third_party/libyuv/source/scale.c  \
                             third_party/libyuv/source/cpu_id.c
 vp8_multi_resolution_encoder.GUID         = 04f8738e-63c8-423b-90fa-7c2703a374de
