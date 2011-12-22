@@ -57,7 +57,7 @@ struct vpx_codec_alg_priv
     vp8_stream_info_t       si;
     int                     defer_alloc;
     int                     decoder_init;
-    VP8D_PTR                pbi;
+    struct VP8D_COMP       *pbi;
     int                     postproc_cfg_set;
     vp8_postproc_cfg_t      postproc_cfg;
 #if CONFIG_POSTPROC_VISUALIZER
@@ -389,7 +389,7 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
         if (!res)
         {
             VP8D_CONFIG oxcf;
-            VP8D_PTR optr;
+            struct VP8D_COMP* optr;
 
             vp8dx_initialize();
 

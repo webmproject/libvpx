@@ -44,7 +44,7 @@ typedef struct
 } DATARATE;
 
 
-typedef struct VP8Decompressor
+typedef struct VP8D_COMP
 {
     DECLARE_ALIGNED(16, MACROBLOCKD, mb);
 
