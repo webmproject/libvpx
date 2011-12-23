@@ -69,6 +69,24 @@
       "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAGX//rTY\u003d",
+        "filename": "vp8/common/invtrans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2011-12-23T00:48:52Z",
+      "side": 1,
+      "message": "ok, I understand what\u0027s happening now and where we do this copy already in the decoder.\n\nIt\u0027d be better to avoid the copy, even just the one element, because this is the common case. As a hack, we could expand cpi-\u003ecommon.Y1Dequant to [128][32] and populate the elements [16,31] as would work for this case, then we just need to adjust the pointer in this function. Ultimately, I\u0027d like to see a solution that reduced the size of Y1Dequant and friends to [128][2] as there are only two unique values in the array, and them build the vector of 16 (probably in MACROBLOCKD) whenever the active Q changes (setup_mb_quantizer). This could even be done once per frame, where we build the vectors for the Qs in use on that frame, saving a good chunk of memory in that struct.",
+      "parentUuid": "AAAAGX//rc0\u003d",
+      "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
