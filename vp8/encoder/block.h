@@ -45,10 +45,6 @@ typedef struct
     unsigned char **base_src;
     int src;
     int src_stride;
-
-//  MV  enc_mv;
-    int force_empty;
-
 } BLOCK;
 
 typedef struct
