@@ -103,7 +103,6 @@ typedef struct
     int mv_row_min;
     int mv_row_max;
 
-    int vector_range;    // Used to monitor limiting range of recent vectors to guide search.
     int skip;
 
     int encode_breakout;

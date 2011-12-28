@@ -595,8 +595,6 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     // Activity map pointer
     x->mb_activity_ptr = cpi->mb_activity_map;
 
-    x->vector_range = 32;
-
     x->act_zbin_adj = 0;
 
     x->partition_info = x->pi;

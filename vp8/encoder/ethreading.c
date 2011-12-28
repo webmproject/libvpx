@@ -302,7 +302,6 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
     z->mv_col_max    = x->mv_col_max;
     z->mv_row_min    = x->mv_row_min;
     z->mv_row_max    = x->mv_row_max;
-    z->vector_range = x->vector_range ;
     */
 
     z->vp8_short_fdct4x4     = x->vp8_short_fdct4x4;
@@ -418,8 +417,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mbd->rtcd                   = xd->rtcd;
 #endif
         mb->gf_active_ptr            = x->gf_active_ptr;
-
-        mb->vector_range             = 32;
 
         vpx_memset(mbr_ei[i].segment_counts, 0, sizeof(mbr_ei[i].segment_counts));
         mbr_ei[i].totalrate = 0;
