@@ -87,6 +87,24 @@
       "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3///Y0\u003d",
+        "filename": "vp8/common/invtrans.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-01-03T19:27:05Z",
+      "side": 1,
+      "message": "we do the copy in threading.c.  \n\nI agree it is better to avoid the copy (as mentioned previously) but this is WIP.  At one time, I tried to remove the dequant from BLOCKD, but am not sure what troubles I encountered.  I will try your idea.",
+      "parentUuid": "AAAAGX//rTY\u003d",
+      "revId": "db389cb804a6e7ba5bd4ed3765d1cb543619ef26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
