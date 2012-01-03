@@ -18,7 +18,6 @@
 #include "vp8/common/invtrans.h"
 #include "vp8/common/recon.h"
 #include "dct.h"
-#include "vp8/common/g_common.h"
 #include "encodeintra.h"
 
 

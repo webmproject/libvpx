@@ -23,7 +23,6 @@
 #include "ratectrl.h"
 #include "vp8/common/quant_common.h"
 #include "segmentation.h"
-#include "vp8/common/g_common.h"
 #include "vpx_scale/yv12extend.h"
 #if CONFIG_POSTPROC
 #include "vp8/common/postproc.h"

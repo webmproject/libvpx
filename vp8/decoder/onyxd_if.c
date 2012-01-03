@@ -20,7 +20,6 @@
 #include "vpx_scale/yv12extend.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/swapyv12buffer.h"
-#include "vp8/common/g_common.h"
 #include "vp8/common/threading.h"
 #include "decoderthreading.h"
 #include <stdio.h>
