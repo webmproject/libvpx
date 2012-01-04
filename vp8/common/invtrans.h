@@ -36,13 +36,7 @@ static void eob_adjust(char *eobs, short *diff)
 static void vp8_inverse_transform_mby(MACROBLOCKD *xd,
                                       const VP8_COMMON_RTCD *rtcd)
 {
-    short *DQC = xd->block[0].dequant;
-    /* save the dc dequant constant in case it is overridden */
-    short dc_dequant_temp = DQC[0];
-
-#if CONFIG_MULTITHREAD
-    DECLARE_ALIGNED(16, short, local_dequant[16]);
-#endif
+    short *DQC = xd->dequant_y1;
 
     if (xd->mode_info_context->mbmi.mode != SPLITMV)
     {
@@ -59,22 +53,11 @@ static void vp8_inverse_transform_mby(MACROBLOCKD *xd,
         }
         eob_adjust(xd->eobs, xd->qcoeff);
 
-#if CONFIG_MULTITHREAD
-        DQC = local_dequant;
-
-        vpx_memcpy(DQC, xd->block[0].dequant,
-                   sizeof(local_dequant));
-#endif
-
-        /* override the dc dequant constant */
-        DQC[0] = 1;
+        DQC = xd->dequant_y1_dc;
     }
     DEQUANT_INVOKE (&rtcd->dequant, idct_add_y_block)
                     (xd->qcoeff, DQC,
                      xd->dst.y_buffer,
                      xd->dst.y_stride, xd->eobs);
-
-    /* restore the dc dequant constant */
-    DQC[0] = dc_dequant_temp;
 }
 #endif

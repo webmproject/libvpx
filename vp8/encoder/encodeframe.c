@@ -1120,7 +1120,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
         vp8_inverse_transform_mby(xd, IF_RTCD(&cpi->common.rtcd));
 
     DEQUANT_INVOKE (&cpi->common.rtcd.dequant, idct_add_uv_block)
-                    (xd->qcoeff+16*16, xd->block[16].dequant,
+                    (xd->qcoeff+16*16, xd->dequant_uv,
                      xd->dst.u_buffer, xd->dst.v_buffer,
                      xd->dst.uv_stride, xd->eobs+16);
     return rate;
@@ -1305,7 +1305,7 @@ int vp8cx_encode_inter_macroblock
             vp8_inverse_transform_mby(xd, IF_RTCD(&cpi->common.rtcd));
 
         DEQUANT_INVOKE (&cpi->common.rtcd.dequant, idct_add_uv_block)
-                        (xd->qcoeff+16*16, xd->block[16].dequant,
+                        (xd->qcoeff+16*16, xd->dequant_uv,
                          xd->dst.u_buffer, xd->dst.v_buffer,
                          xd->dst.uv_stride, xd->eobs+16);
     }

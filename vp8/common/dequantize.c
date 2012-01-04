@@ -14,12 +14,11 @@
 #include "vp8/common/idct.h"
 #include "vpx_mem/vpx_mem.h"
 
-void vp8_dequantize_b_c(BLOCKD *d)
+void vp8_dequantize_b_c(BLOCKD *d, short *DQC)
 {
     int i;
     short *DQ  = d->dqcoeff;
     short *Q   = d->qcoeff;
-    short *DQC = d->dequant;
 
     for (i = 0; i < 16; i++)
     {

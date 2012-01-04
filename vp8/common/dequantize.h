@@ -14,7 +14,7 @@
 #include "vp8/common/blockd.h"
 
 #define prototype_dequant_block(sym) \
-    void sym(BLOCKD *x)
+    void sym(BLOCKD *x, short *DQC)
 
 #define prototype_dequant_idct_add(sym) \
     void sym(short *input, short *dq, \
