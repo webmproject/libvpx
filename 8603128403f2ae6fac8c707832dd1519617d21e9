@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAG3//+ik\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 708,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-04T23:14:24Z",
+      "side": 1,
+      "message": "our coding standard has us doing ifs like this: \n\nif ( ...) \n{\n     do work;\n}",
+      "revId": "8603128403f2ae6fac8c707832dd1519617d21e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//+iY\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 726,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-04T23:14:24Z",
+      "side": 1,
+      "message": "// TODO:  SIMD optimize this...",
+      "revId": "8603128403f2ae6fac8c707832dd1519617d21e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//+ig\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 748,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-04T23:14:24Z",
+      "side": 1,
+      "message": "I think we have a block copy function for each of these.",
+      "revId": "8603128403f2ae6fac8c707832dd1519617d21e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//+hs\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 771,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-04T23:14:24Z",
+      "side": 1,
+      "message": "I think in order for us to use this we need to make sure that it won\u0027t hurt us on frames where the q is lower or pretty close on the current frame to the previous or if the current frame can refer to the previous frame.     I think we need to monitor the situation.",
+      "revId": "8603128403f2ae6fac8c707832dd1519617d21e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//+ho\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 792,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-04T23:14:24Z",
+      "side": 1,
+      "message": "not clear to me that this this works properly on keyframes.  I don\u0027t know what the mvs are initialized to if any.   probably should add an if on frame type.",
+      "revId": "8603128403f2ae6fac8c707832dd1519617d21e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//+hw\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 812,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-04T23:14:24Z",
+      "side": 1,
+      "message": "seems like we could do this with fewer lines of code.  loop?",
+      "revId": "8603128403f2ae6fac8c707832dd1519617d21e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//+h0\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-04T23:14:24Z",
+      "side": 1,
+      "message": "Also we ideally need to be able to do both de(macro)blocking and quality enhancement in conjunction.  Since the code from the prior frame would presumably be deblocked already we don\u0027t need it in the other section but I think that means we need to fold calls to deblock / demacroblock into this code. In the case of no deblocker we have a copy block function.",
+      "revId": "8603128403f2ae6fac8c707832dd1519617d21e9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
