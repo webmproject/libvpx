@@ -1237,7 +1237,7 @@ static vpx_codec_enc_cfg_map_t vp8e_usage_cfg_map[] =
         /* keyframing settings (kf) */
         VPX_KF_AUTO,        /* g_kfmode*/
         0,                  /* kf_min_dist */
-        9999,               /* kf_max_dist */
+        128,                /* kf_max_dist */
 
 #if VPX_ENCODER_ABI_VERSION == (1 + VPX_CODEC_ABI_VERSION)
         1,                  /* g_delete_first_pass_file */
