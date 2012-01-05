@@ -2670,6 +2670,8 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
 #if CONFIG_INTERNAL_STATS
 
+        vp8_clear_system_state();
+
         if (cpi->pass != 1)
         {
             FILE *f = fopen("opsnr.stt", "a");
