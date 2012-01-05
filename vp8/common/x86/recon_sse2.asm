@@ -559,11 +559,491 @@ sym(vp8_intra_pred_uv_ho_%1):
 vp8_intra_pred_uv_ho mmx2
 vp8_intra_pred_uv_ho ssse3
 
+;void vp8_intra_pred_y_dc_sse2(
+;    unsigned char *dst,
+;    int dst_stride
+;    unsigned char *src,
+;    int src_stride,
+;    )
+global sym(vp8_intra_pred_y_dc_sse2)
+sym(vp8_intra_pred_y_dc_sse2):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 4
+    push        rsi
+    push        rdi
+    ; end prolog
+
+    ; from top
+    mov         rsi,        arg(2) ;src;
+    movsxd      rax,        dword ptr arg(3) ;src_stride;
+    sub         rsi,        rax
+    pxor        xmm0,       xmm0
+    movdqa      xmm1,       [rsi]
+    psadbw      xmm1,       xmm0
+    movq        xmm2,       xmm1
+    punpckhqdq  xmm1,       xmm1
+    paddw       xmm1,       xmm2
+
+    ; from left
+    dec         rsi
+    lea         rdi,        [rax*3]
+    movzx       ecx,        byte [rsi+rax]
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    add         ecx,        edx
+    lea         rsi,        [rsi+rax*4]
+    movzx       edx,        byte [rsi]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    add         ecx,        edx
+    lea         rsi,        [rsi+rax*4]
+    movzx       edx,        byte [rsi]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    add         ecx,        edx
+    lea         rsi,        [rsi+rax*4]
+    movzx       edx,        byte [rsi]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*4]
+    add         ecx,        edx
+
+    ; add up
+    pextrw      edx,        xmm1, 0x0
+    lea         edx,        [edx+ecx+16]
+    sar         edx,        5
+    movd        xmm1,       edx
+    ; FIXME use pshufb for ssse3 version
+    pshuflw     xmm1,       xmm1, 0x0
+    punpcklqdq  xmm1,       xmm1
+    packuswb    xmm1,       xmm1
+
+    ; write out
+    mov         rsi,        2
+    mov         rdi,        arg(0) ;dst;
+    movsxd      rcx,        dword ptr arg(1) ;dst_stride
+    lea         rax,        [rcx*3]
+
+.label
+    movdqa [rdi      ],     xmm1
+    movdqa [rdi+rcx  ],     xmm1
+    movdqa [rdi+rcx*2],     xmm1
+    movdqa [rdi+rax  ],     xmm1
+    lea         rdi,        [rdi+rcx*4]
+    movdqa [rdi      ],     xmm1
+    movdqa [rdi+rcx  ],     xmm1
+    movdqa [rdi+rcx*2],     xmm1
+    movdqa [rdi+rax  ],     xmm1
+    lea         rdi,        [rdi+rcx*4]
+    dec         rsi
+    jnz .label
+
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+;void vp8_intra_pred_y_dctop_sse2(
+;    unsigned char *dst,
+;    int dst_stride
+;    unsigned char *src,
+;    int src_stride,
+;    )
+global sym(vp8_intra_pred_y_dctop_sse2)
+sym(vp8_intra_pred_y_dctop_sse2):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 4
+    push        rsi
+    GET_GOT     rbx
+    ; end prolog
+
+    ; from top
+    mov         rcx,        arg(2) ;src;
+    movsxd      rax,        dword ptr arg(3) ;src_stride;
+    sub         rcx,        rax
+    pxor        xmm0,       xmm0
+    movdqa      xmm1,       [rcx]
+    psadbw      xmm1,       xmm0
+    movdqa      xmm2,       xmm1
+    punpckhqdq  xmm1,       xmm1
+    paddw       xmm1,       xmm2
+
+    ; add up
+    paddw       xmm1,       [GLOBAL(dc_8)]
+    psraw       xmm1,       4
+    ; FIXME use pshufb for ssse3 version
+    pshuflw     xmm1,       xmm1, 0x0
+    punpcklqdq  xmm1,       xmm1
+    packuswb    xmm1,       xmm1
+
+    ; write out
+    mov         rsi,        2
+    mov         rdx,        arg(0) ;dst;
+    movsxd      rcx,        dword ptr arg(1) ;dst_stride
+    lea         rax,        [rcx*3]
+
+.label
+    movdqa [rdx      ],     xmm1
+    movdqa [rdx+rcx  ],     xmm1
+    movdqa [rdx+rcx*2],     xmm1
+    movdqa [rdx+rax  ],     xmm1
+    lea         rdx,        [rdx+rcx*4]
+    movdqa [rdx      ],     xmm1
+    movdqa [rdx+rcx  ],     xmm1
+    movdqa [rdx+rcx*2],     xmm1
+    movdqa [rdx+rax  ],     xmm1
+    lea         rdx,        [rdx+rcx*4]
+    dec         rsi
+    jnz .label
+
+    ; begin epilog
+    RESTORE_GOT
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+;void vp8_intra_pred_y_dcleft_sse2(
+;    unsigned char *dst,
+;    int dst_stride
+;    unsigned char *src,
+;    int src_stride,
+;    )
+global sym(vp8_intra_pred_y_dcleft_sse2)
+sym(vp8_intra_pred_y_dcleft_sse2):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 4
+    push        rsi
+    push        rdi
+    ; end prolog
+
+    ; from left
+    mov         rsi,        arg(2) ;src;
+    movsxd      rax,        dword ptr arg(3) ;src_stride;
+    dec         rsi
+    lea         rdi,        [rax*3]
+    movzx       ecx,        byte [rsi]
+    movzx       edx,        byte [rsi+rax]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    add         ecx,        edx
+    lea         rsi,        [rsi+rax*4]
+    movzx       edx,        byte [rsi]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    add         ecx,        edx
+    lea         rsi,        [rsi+rax*4]
+    movzx       edx,        byte [rsi]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    add         ecx,        edx
+    lea         rsi,        [rsi+rax*4]
+    movzx       edx,        byte [rsi]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rax*2]
+    add         ecx,        edx
+    movzx       edx,        byte [rsi+rdi]
+    lea         edx,        [ecx+edx+8]
+
+    ; add up
+    shr         edx,        4
+    movd        xmm1,       edx
+    ; FIXME use pshufb for ssse3 version
+    pshuflw     xmm1,       xmm1, 0x0
+    punpcklqdq  xmm1,       xmm1
+    packuswb    xmm1,       xmm1
+
+    ; write out
+    mov         rsi,        2
+    mov         rdi,        arg(0) ;dst;
+    movsxd      rcx,        dword ptr arg(1) ;dst_stride
+    lea         rax,        [rcx*3]
+
+.label
+    movdqa [rdi      ],     xmm1
+    movdqa [rdi+rcx  ],     xmm1
+    movdqa [rdi+rcx*2],     xmm1
+    movdqa [rdi+rax  ],     xmm1
+    lea         rdi,        [rdi+rcx*4]
+    movdqa [rdi      ],     xmm1
+    movdqa [rdi+rcx  ],     xmm1
+    movdqa [rdi+rcx*2],     xmm1
+    movdqa [rdi+rax  ],     xmm1
+    lea         rdi,        [rdi+rcx*4]
+    dec         rsi
+    jnz .label
+
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+;void vp8_intra_pred_y_dc128_sse2(
+;    unsigned char *dst,
+;    int dst_stride
+;    unsigned char *src,
+;    int src_stride,
+;    )
+global sym(vp8_intra_pred_y_dc128_sse2)
+sym(vp8_intra_pred_y_dc128_sse2):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 4
+    push        rsi
+    GET_GOT     rbx
+    ; end prolog
+
+    ; write out
+    mov         rsi,        2
+    movdqa      xmm1,       [GLOBAL(dc_128)]
+    mov         rax,        arg(0) ;dst;
+    movsxd      rdx,        dword ptr arg(1) ;dst_stride
+    lea         rcx,        [rdx*3]
+
+.label
+    movdqa [rax      ],     xmm1
+    movdqa [rax+rdx  ],     xmm1
+    movdqa [rax+rdx*2],     xmm1
+    movdqa [rax+rcx  ],     xmm1
+    lea         rax,        [rax+rdx*4]
+    movdqa [rax      ],     xmm1
+    movdqa [rax+rdx  ],     xmm1
+    movdqa [rax+rdx*2],     xmm1
+    movdqa [rax+rcx  ],     xmm1
+    lea         rax,        [rax+rdx*4]
+    dec         rsi
+    jnz .label
+
+    ; begin epilog
+    RESTORE_GOT
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+;void vp8_intra_pred_y_tm_sse2(
+;    unsigned char *dst,
+;    int dst_stride
+;    unsigned char *src,
+;    int src_stride,
+;    )
+%macro vp8_intra_pred_y_tm 1
+global sym(vp8_intra_pred_y_tm_%1)
+sym(vp8_intra_pred_y_tm_%1):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 4
+    push        rsi
+    push        rdi
+    GET_GOT     rbx
+    ; end prolog
+
+    ; read top row
+    mov         edx,        8
+    mov         rsi,        arg(2) ;src;
+    movsxd      rax,        dword ptr arg(3) ;src_stride;
+    sub         rsi,        rax
+    pxor        xmm0,       xmm0
+%ifidn %1, ssse3
+    movdqa      xmm3,       [GLOBAL(dc_1024)]
+%endif
+    movdqa      xmm1,       [rsi]
+    movdqa      xmm2,       xmm1
+    punpcklbw   xmm1,       xmm0
+    punpckhbw   xmm2,       xmm0
+
+    ; set up left ptrs ans subtract topleft
+    movd        xmm4,       [rsi-1]
+    lea         rsi,        [rsi+rax-1]
+%ifidn %1, sse2
+    punpcklbw   xmm4,       xmm0
+    pshuflw     xmm4,       xmm4, 0x0
+    punpcklqdq  xmm4,       xmm4
+%else
+    pshufb      xmm4,       xmm3
+%endif
+    psubw       xmm1,       xmm4
+    psubw       xmm2,       xmm4
+
+    ; set up dest ptrs
+    mov         rdi,        arg(0) ;dst;
+    movsxd      rcx,        dword ptr arg(1) ;dst_stride
+vp8_intra_pred_y_tm_%1_loop:
+    movd        xmm4,       [rsi]
+    movd        xmm5,       [rsi+rax]
+%ifidn %1, sse2
+    punpcklbw   xmm4,       xmm0
+    punpcklbw   xmm5,       xmm0
+    pshuflw     xmm4,       xmm4, 0x0
+    pshuflw     xmm5,       xmm5, 0x0
+    punpcklqdq  xmm4,       xmm4
+    punpcklqdq  xmm5,       xmm5
+%else
+    pshufb      xmm4,       xmm3
+    pshufb      xmm5,       xmm3
+%endif
+    movdqa      xmm6,       xmm4
+    movdqa      xmm7,       xmm5
+    paddw       xmm4,       xmm1
+    paddw       xmm6,       xmm2
+    paddw       xmm5,       xmm1
+    paddw       xmm7,       xmm2
+    packuswb    xmm4,       xmm6
+    packuswb    xmm5,       xmm7
+    movdqa [rdi    ],       xmm4
+    movdqa [rdi+rcx],       xmm5
+    lea         rsi,        [rsi+rax*2]
+    lea         rdi,        [rdi+rcx*2]
+    dec         edx
+    jnz vp8_intra_pred_y_tm_%1_loop
+
+    ; begin epilog
+    RESTORE_GOT
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+%endmacro
+
+vp8_intra_pred_y_tm sse2
+vp8_intra_pred_y_tm ssse3
+
+;void vp8_intra_pred_y_ve_sse2(
+;    unsigned char *dst,
+;    int dst_stride
+;    unsigned char *src,
+;    int src_stride,
+;    )
+global sym(vp8_intra_pred_y_ve_sse2)
+sym(vp8_intra_pred_y_ve_sse2):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 4
+    push        rsi
+    ; end prolog
+
+    ; read from top
+    mov         rax,        arg(2) ;src;
+    movsxd      rdx,        dword ptr arg(3) ;src_stride;
+    sub         rax,        rdx
+    movdqa      xmm1,       [rax]
+
+    ; write out
+    mov         rsi,        2
+    mov         rax,        arg(0) ;dst;
+    movsxd      rdx,        dword ptr arg(1) ;dst_stride
+    lea         rcx,        [rdx*3]
+
+.label
+    movdqa [rax      ],     xmm1
+    movdqa [rax+rdx  ],     xmm1
+    movdqa [rax+rdx*2],     xmm1
+    movdqa [rax+rcx  ],     xmm1
+    lea         rax,        [rax+rdx*4]
+    movdqa [rax      ],     xmm1
+    movdqa [rax+rdx  ],     xmm1
+    movdqa [rax+rdx*2],     xmm1
+    movdqa [rax+rcx  ],     xmm1
+    lea         rax,        [rax+rdx*4]
+    dec         rsi
+    jnz .label
+
+    ; begin epilog
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
+;void vp8_intra_pred_y_ho_sse2(
+;    unsigned char *dst,
+;    int dst_stride
+;    unsigned char *src,
+;    int src_stride,
+;    )
+global sym(vp8_intra_pred_y_ho_sse2)
+sym(vp8_intra_pred_y_ho_sse2):
+    push        rbp
+    mov         rbp, rsp
+    SHADOW_ARGS_TO_STACK 4
+    push        rsi
+    push        rdi
+    ; end prolog
+
+    ; read from left and write out
+    mov         edx,        8
+    mov         rsi,        arg(2) ;src;
+    movsxd      rax,        dword ptr arg(3) ;src_stride;
+    mov         rdi,        arg(0) ;dst;
+    movsxd      rcx,        dword ptr arg(1) ;dst_stride
+    dec         rsi
+
+vp8_intra_pred_y_ho_sse2_loop:
+    movd        xmm0,       [rsi]
+    movd        xmm1,       [rsi+rax]
+    ; FIXME use pshufb for ssse3 version
+    punpcklbw   xmm0,       xmm0
+    punpcklbw   xmm1,       xmm1
+    pshuflw     xmm0,       xmm0, 0x0
+    pshuflw     xmm1,       xmm1, 0x0
+    punpcklqdq  xmm0,       xmm0
+    punpcklqdq  xmm1,       xmm1
+    movdqa [rdi    ],       xmm0
+    movdqa [rdi+rcx],       xmm1
+    lea         rsi,        [rsi+rax*2]
+    lea         rdi,        [rdi+rcx*2]
+    dec         edx
+    jnz vp8_intra_pred_y_ho_sse2_loop
+
+    ; begin epilog
+    pop         rdi
+    pop         rsi
+    UNSHADOW_ARGS
+    pop         rbp
+    ret
+
 SECTION_RODATA
+align 16
 dc_128:
-    times 8 db 128
+    times 16 db 128
 dc_4:
     times 4 dw 4
+align 16
+dc_8:
+    times 8 dw 8
 align 16
 dc_1024:
     times 8 dw 0x400

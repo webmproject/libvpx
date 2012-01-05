@@ -85,6 +85,10 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
             vp8_build_intra_predictors_mbuv_sse2;
         rtcd->recon.build_intra_predictors_mbuv_s =
             vp8_build_intra_predictors_mbuv_s_sse2;
+        rtcd->recon.build_intra_predictors_mby =
+            vp8_build_intra_predictors_mby_sse2;
+        rtcd->recon.build_intra_predictors_mby_s =
+            vp8_build_intra_predictors_mby_s_sse2;
 
         rtcd->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_sse2;
         rtcd->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_sse2;
@@ -131,6 +135,10 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
             vp8_build_intra_predictors_mbuv_ssse3;
         rtcd->recon.build_intra_predictors_mbuv_s =
             vp8_build_intra_predictors_mbuv_s_ssse3;
+        rtcd->recon.build_intra_predictors_mby =
+            vp8_build_intra_predictors_mby_ssse3;
+        rtcd->recon.build_intra_predictors_mby_s =
+            vp8_build_intra_predictors_mby_s_ssse3;
     }
 #endif
 
