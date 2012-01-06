@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAG3//8uo\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-06T20:43:30Z",
+      "side": 1,
+      "message": "2011",
+      "revId": "305fe90e9cc1f98b3bf46b5082623082b1c3316e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//8uM\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-06T20:43:30Z",
+      "side": 1,
+      "message": "$(@D)",
+      "revId": "305fe90e9cc1f98b3bf46b5082623082b1c3316e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//8uE\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-06T20:43:30Z",
+      "side": 1,
+      "message": "$(@D)",
+      "revId": "305fe90e9cc1f98b3bf46b5082623082b1c3316e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//8uA\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-06T20:43:30Z",
+      "side": 1,
+      "message": ".PHONY: clean",
+      "revId": "305fe90e9cc1f98b3bf46b5082623082b1c3316e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//8t8\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-06T20:43:30Z",
+      "side": 1,
+      "message": "$(RM)",
+      "revId": "305fe90e9cc1f98b3bf46b5082623082b1c3316e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//8t4\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-06T20:43:30Z",
+      "side": 1,
+      "message": "I think you should prefer $(RM) -r here",
+      "revId": "305fe90e9cc1f98b3bf46b5082623082b1c3316e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
