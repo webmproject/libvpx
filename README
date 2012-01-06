@@ -44,11 +44,9 @@ COMPILING THE APPLICATIONS/LIBRARIES:
 
     armv5te-linux-rvct
     armv5te-linux-gcc
-    armv5te-symbian-gcc
     armv6-darwin-gcc
     armv6-linux-rvct
     armv6-linux-gcc
-    armv6-symbian-gcc
     iwmmxt-linux-rvct
     iwmmxt-linux-gcc
     iwmmxt2-linux-rvct

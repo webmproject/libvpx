@@ -678,11 +678,9 @@ process_common_toolchain() {
 
         case ${tgt_cc} in
         gcc)
-        if enabled iwmmxt || enabled iwmmxt2
+            if enabled iwmmxt || enabled iwmmxt2
             then
                 CROSS=${CROSS:-arm-iwmmxt-linux-gnueabi-}
-            elif enabled symbian; then
-                CROSS=${CROSS:-arm-none-symbianelf-}
             else
                 CROSS=${CROSS:-arm-none-linux-gnueabi-}
             fi
@@ -692,7 +690,7 @@ process_common_toolchain() {
             arch_int=${arch_int%%te}
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
-        if enabled iwmmxt || enabled iwmmxt2
+            if enabled iwmmxt || enabled iwmmxt2
             then
                 check_add_asflags -mcpu=${tgt_isa}
             elif enabled armv7
@@ -801,19 +799,6 @@ process_common_toolchain() {
                 enabled shared && add_cflags --shared
             fi
         ;;
-
-        symbian*)
-            enable symbian
-            # Add the paths for the alternate libc
-            for d in include/libc; do
-                try_dir="${alt_libc}/${d}"
-                [ -d "${try_dir}" ] && add_cflags -I"${try_dir}"
-            done
-            for d in release/armv5/urel; do
-                try_dir="${alt_libc}/${d}"
-                [ -d "${try_dir}" ] && add_ldflags -L"${try_dir}"
-            done
-            add_cflags -DIMPORT_C=
 
         esac
     ;;
