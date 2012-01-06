@@ -384,10 +384,22 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
         vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
 
-        for (i = 0; i < 25; i++)
-        {
-            zd->block[i].dequant = xd->block[i].dequant;
-        }
+        vpx_memcpy(zd->dequant_y1_dc, xd->dequant_y1_dc, sizeof(xd->dequant_y1_dc));
+        vpx_memcpy(zd->dequant_y1, xd->dequant_y1, sizeof(xd->dequant_y1));
+        vpx_memcpy(zd->dequant_y2, xd->dequant_y2, sizeof(xd->dequant_y2));
+        vpx_memcpy(zd->dequant_uv, xd->dequant_uv, sizeof(xd->dequant_uv));
+
+#if 1
+        /*TODO:  Remove dequant from BLOCKD.  This is a temporary solution until
+         * the quantizer code uses a passed in pointer to the dequant constants.
+         * This will also require modifications to the x86 and neon assembly.
+         * */
+        for (i = 0; i < 16; i++)
+            zd->block[i].dequant = zd->dequant_y1;
+        for (i = 16; i < 24; i++)
+            zd->block[i].dequant = zd->dequant_uv;
+        zd->block[24].dequant = zd->dequant_y2;
+#endif
     }
 }
 

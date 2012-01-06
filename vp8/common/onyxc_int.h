@@ -93,9 +93,9 @@ typedef struct VP8Common
 {
     struct vpx_internal_error_info  error;
 
-    DECLARE_ALIGNED(16, short, Y1dequant[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, Y2dequant[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, UVdequant[QINDEX_RANGE][16]);
+    DECLARE_ALIGNED(16, short, Y1dequant[QINDEX_RANGE][2]);
+    DECLARE_ALIGNED(16, short, Y2dequant[QINDEX_RANGE][2]);
+    DECLARE_ALIGNED(16, short, UVdequant[QINDEX_RANGE][2]);
 
     int Width;
     int Height;

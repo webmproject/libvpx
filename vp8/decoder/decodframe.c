@@ -42,7 +42,6 @@
 
 void vp8cx_init_de_quantizer(VP8D_COMP *pbi)
 {
-    int i;
     int Q;
     VP8_COMMON *const pc = & pbi->common;
 
@@ -52,15 +51,9 @@ void vp8cx_init_de_quantizer(VP8D_COMP *pbi)
         pc->Y2dequant[Q][0] = (short)vp8_dc2quant(Q, pc->y2dc_delta_q);
         pc->UVdequant[Q][0] = (short)vp8_dc_uv_quant(Q, pc->uvdc_delta_q);
 
-        /* all the ac values = ; */
-        for (i = 1; i < 16; i++)
-        {
-            int rc = vp8_default_zig_zag1d[i];
-
-            pc->Y1dequant[Q][rc] = (short)vp8_ac_yquant(Q);
-            pc->Y2dequant[Q][rc] = (short)vp8_ac2quant(Q, pc->y2ac_delta_q);
-            pc->UVdequant[Q][rc] = (short)vp8_ac_uv_quant(Q, pc->uvac_delta_q);
-        }
+        pc->Y1dequant[Q][1] = (short)vp8_ac_yquant(Q);
+        pc->Y2dequant[Q][1] = (short)vp8_ac2quant(Q, pc->y2ac_delta_q);
+        pc->UVdequant[Q][1] = (short)vp8_ac_uv_quant(Q, pc->uvac_delta_q);
     }
 }
 
@@ -88,19 +81,19 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
     else
         QIndex = pc->base_qindex;
 
-    /* Set up the block level dequant pointers */
-    for (i = 0; i < 16; i++)
+    /* Set up the macroblock dequant constants */
+    xd->dequant_y1_dc[0] = 1;
+    xd->dequant_y1[0] = pc->Y1dequant[QIndex][0];
+    xd->dequant_y2[0] = pc->Y2dequant[QIndex][0];
+    xd->dequant_uv[0] = pc->UVdequant[QIndex][0];
+
+    for (i = 1; i < 16; i++)
     {
-        xd->block[i].dequant = pc->Y1dequant[QIndex];
+        xd->dequant_y1_dc[i] =
+        xd->dequant_y1[i] = pc->Y1dequant[QIndex][1];
+        xd->dequant_y2[i] = pc->Y2dequant[QIndex][1];
+        xd->dequant_uv[i] = pc->UVdequant[QIndex][1];
     }
-
-    for (i = 16; i < 24; i++)
-    {
-        xd->block[i].dequant = pc->UVdequant[QIndex];
-    }
-
-    xd->block[24].dequant = pc->Y2dequant[QIndex];
-
 }
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -180,6 +173,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         }
         else
         {
+            short *DQC = xd->dequant_y1;
+
             /* clear out residual eob info */
             if(xd->mode_info_context->mbmi.mb_skip_coeff)
                 vpx_memset(xd->eobs, 0, 25);
@@ -200,13 +195,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                     if (xd->eobs[i] > 1)
                     {
                         DEQUANT_INVOKE(&pbi->common.rtcd.dequant, idct_add)
-                            (b->qcoeff, b->dequant,
+                            (b->qcoeff, DQC,
                             *(b->base_dst) + b->dst, b->dst_stride);
                     }
                     else
                     {
                         IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
-                            (b->qcoeff[0] * b->dequant[0],
+                            (b->qcoeff[0] * DQC[0],
                             *(b->base_dst) + b->dst, b->dst_stride,
                             *(b->base_dst) + b->dst, b->dst_stride);
                         ((int *)b->qcoeff)[0] = 0;
@@ -233,10 +228,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         /* dequantization and idct */
         if (mode != B_PRED)
         {
-            short *DQC = xd->block[0].dequant;
-
-            /* save the dc dequant constant in case it is overridden */
-            short dc_dequant_temp = DQC[0];
+            short *DQC = xd->dequant_y1;
 
             if (mode != SPLITMV)
             {
@@ -245,7 +237,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 /* do 2nd order transform on the dc block */
                 if (xd->eobs[24] > 1)
                 {
-                    DEQUANT_INVOKE(&pbi->common.rtcd.dequant, block)(b);
+                    DEQUANT_INVOKE(&pbi->common.rtcd.dequant, block)(b,
+                        xd->dequant_y2);
 
                     IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh16)(&b->dqcoeff[0],
                         xd->qcoeff);
@@ -260,7 +253,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 }
                 else
                 {
-                    b->dqcoeff[0] = b->qcoeff[0] * b->dequant[0];
+                    b->dqcoeff[0] = b->qcoeff[0] * xd->dequant_y2[0];
                     IDCT_INVOKE(RTCD_VTABLE(idct), iwalsh1)(&b->dqcoeff[0],
                         xd->qcoeff);
                     ((int *)b->qcoeff)[0] = 0;
@@ -269,20 +262,17 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 /* override the dc dequant constant in order to preserve the
                  * dc components
                  */
-                DQC[0] = 1;
+                DQC = xd->dequant_y1_dc;
             }
 
             DEQUANT_INVOKE (&pbi->common.rtcd.dequant, idct_add_y_block)
-                            (xd->qcoeff, xd->block[0].dequant,
+                            (xd->qcoeff, DQC,
                              xd->dst.y_buffer,
                              xd->dst.y_stride, xd->eobs);
-
-            /* restore the dc dequant constant */
-            DQC[0] = dc_dequant_temp;
         }
 
         DEQUANT_INVOKE (&pbi->common.rtcd.dequant, idct_add_uv_block)
-                        (xd->qcoeff+16*16, xd->block[16].dequant,
+                        (xd->qcoeff+16*16, xd->dequant_uv,
                          xd->dst.u_buffer, xd->dst.v_buffer,
                          xd->dst.uv_stride, xd->eobs+16);
     }
