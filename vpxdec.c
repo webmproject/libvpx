@@ -124,11 +124,13 @@ static const arg_def_t pp_disp_b_modes = ARG_DEF(NULL, "pp-dbg-b-modes", 1,
                                        "Display only selected block modes");
 static const arg_def_t pp_disp_mvs = ARG_DEF(NULL, "pp-dbg-mvs", 1,
                                        "Draw only selected motion vectors");
+static const arg_def_t mfqe = ARG_DEF(NULL, "mfqe", 0,
+                                       "Enable multiframe quality enhancement");
 
 static const arg_def_t *vp8_pp_args[] =
 {
     &addnoise_level, &deblock, &demacroblock_level, &pp_debug_info,
-    &pp_disp_ref_frame, &pp_disp_mb_modes, &pp_disp_b_modes, &pp_disp_mvs,
+    &pp_disp_ref_frame, &pp_disp_mb_modes, &pp_disp_b_modes, &pp_disp_mvs, &mfqe,
     NULL
 };
 #endif
@@ -802,6 +804,11 @@ int main(int argc, const char **argv_)
         {
             postproc = 1;
             vp8_pp_cfg.post_proc_flag |= VP8_DEBLOCK;
+        }
+        else if (arg_match(&arg, &mfqe, argi))
+        {
+            postproc = 1;
+            vp8_pp_cfg.post_proc_flag |= VP8_MFQE;
         }
         else if (arg_match(&arg, &pp_debug_info, argi))
         {
