@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAG3//72U\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-09T22:31:39Z",
+      "side": 1,
+      "message": "can you add -f to silence? or is this comment obsolete, I don\u0027t see any rmdir.",
+      "revId": "2107fa68655cb9bcca349d8f0fc6b9ab125449eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//72k\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-09T22:31:39Z",
+      "side": 1,
+      "message": "how fragile is this? can this be derived somehow? What happens when they update the NDK? Does the NDK support windows (or other) hosts too?",
+      "revId": "2107fa68655cb9bcca349d8f0fc6b9ab125449eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//72o\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-09T22:31:39Z",
+      "side": 1,
+      "message": "enable",
+      "revId": "2107fa68655cb9bcca349d8f0fc6b9ab125449eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
