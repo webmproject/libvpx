@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//71o\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-09T22:45:47Z",
+      "side": 1,
+      "message": "I\u0027m always reluctant to add rm -rf to scripts.  I can\u0027t tell what is the normal makefile operation.  Should the directory be removed regardless?  I did have rmdir before, but there was not a way to silence it with -f.  I\u0027ll update the comment and the code.\n\nDone.",
+      "parentUuid": "AAAAG3//72U\u003d",
+      "revId": "2107fa68655cb9bcca349d8f0fc6b9ab125449eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//72k\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//71A\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-09T22:45:47Z",
+      "side": 1,
+      "message": "The windows is a good question.  I haven\u0027t investigated that yet.\n\nIt\u0027s as fragile as the iOS SDK.  Meaning that when a new one comes out, we need to update it.  The difference with the two is that iOS puts the sdk in one place.  The NDK doesn\u0027t have a default directory.\n\nI haven\u0027t found a way of deriving the longer paths.\n\nThis will have to be revisited later when we support a x86 android build.  I don\u0027t believe the NDK has yasm, so that\u0027s a little ways off as of yet.",
+      "parentUuid": "AAAAG3//72k\u003d",
+      "revId": "2107fa68655cb9bcca349d8f0fc6b9ab125449eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//72o\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2012-01-09T22:31:39Z",
       "side": 1,
       "message": "enable",
+      "revId": "2107fa68655cb9bcca349d8f0fc6b9ab125449eb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//71c\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-09T22:45:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAG3//72o\u003d",
       "revId": "2107fa68655cb9bcca349d8f0fc6b9ab125449eb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
