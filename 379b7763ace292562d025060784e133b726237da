@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//7L8\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-10T22:52:59Z",
+      "side": 1,
+      "message": "Close enough, the default for RM is actually \u0027rm -f\u0027.",
+      "parentUuid": "AAAAG3//7Po\u003d",
+      "revId": "379b7763ace292562d025060784e133b726237da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//7Qg\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 5
