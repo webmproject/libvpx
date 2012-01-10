@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//7Ps\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-10T22:49:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAG3//7Qo\u003d",
+      "revId": "379b7763ace292562d025060784e133b726237da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//7Qw\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//7Po\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-10T22:49:00Z",
+      "side": 1,
+      "message": "I\u0027m not sure that I follow entirely, but I think I\u0027ve addressed the issue.",
+      "parentUuid": "AAAAG3//7Qw\u003d",
+      "revId": "379b7763ace292562d025060784e133b726237da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//7Qg\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2012-01-10T21:04:01Z",
       "side": 1,
       "message": "The paths look relatively consistent between the archives, can you at least form prebuilt/\u003cdir\u003e/bin from a uname return? (linux-x86/darwin-x86/windows)?\n\nSimilar to what John mentioned, it might also be less fragile to list the toolchain directory and extract the newest arm-linux-arndroidabi- to form the prefix of the path",
+      "revId": "379b7763ace292562d025060784e133b726237da",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//7MM\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-10T22:49:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAG3//7Qg\u003d",
       "revId": "379b7763ace292562d025060784e133b726237da",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
