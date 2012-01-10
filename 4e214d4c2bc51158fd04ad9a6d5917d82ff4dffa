@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAG3//7ls\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-01-10T08:07:23Z",
+      "side": 1,
+      "message": "wouldn\u0027t be enough to just add --sysroot\u003d${alt_libc} to both cflags and ldflags?",
+      "revId": "4e214d4c2bc51158fd04ad9a6d5917d82ff4dffa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
