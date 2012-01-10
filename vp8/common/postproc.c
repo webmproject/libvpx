@@ -797,6 +797,12 @@ static void multiframe_quality_enhance_block
     }
 }
 
+#if CONFIG_RUNTIME_CPU_DETECT
+#define RTCD_VTABLE(oci) (&(oci)->rtcd.postproc)
+#else
+#define RTCD_VTABLE(oci) NULL
+#endif
+
 void vp8_multiframe_quality_enhance
 (
     VP8_COMMON *cm
@@ -808,11 +814,10 @@ void vp8_multiframe_quality_enhance
     FRAME_TYPE frame_type = cm->frame_type;
     /* Point at base of Mb MODE_INFO list has motion vectors etc */
     const MODE_INFO *mode_info_context = cm->mi;
-    int qcurr = cm->base_qindex;
-    int qprev = cm->postproc_state.last_base_qindex;
-
     int mb_row;
     int mb_col;
+    int qcurr = cm->base_qindex;
+    int qprev = cm->postproc_state.last_base_qindex;
 
     unsigned char *y_ptr, *u_ptr, *v_ptr;
     unsigned char *yd_ptr, *ud_ptr, *vd_ptr;
@@ -896,11 +901,6 @@ void vp8_multiframe_quality_enhance
     }
 }
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define RTCD_VTABLE(oci) (&(oci)->rtcd.postproc)
-#else
-#define RTCD_VTABLE(oci) NULL
-#endif
 int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags)
 {
     int q = oci->filter_level * 10 / 6;
@@ -926,11 +926,44 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         return 0;
     }
 
+    /* Allocate post_proc_buffer_int if needed */
+    if ((flags & VP8D_MFQE) && !oci->post_proc_buffer_int_used)
+    {
+        if ((flags & VP8D_DEBLOCK) || (flags & VP8D_DEMACROBLOCK))
+        {
+            if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer_int, oci->Width, oci->Height, VP8BORDERINPIXELS) >= 0)
+            {
+                oci->post_proc_buffer_int_used = 1;
+            }
+        }
+    }
+
 #if ARCH_X86||ARCH_X86_64
     vpx_reset_mmx_state();
 #endif
 
-    if (flags & VP8D_DEMACROBLOCK)
+    if ((flags & VP8D_MFQE) &&
+         oci->current_video_frame >= 2 &&
+         oci->base_qindex - oci->postproc_state.last_base_qindex >= 10)
+    {
+        vp8_multiframe_quality_enhance(oci);
+        if (((flags & VP8D_DEBLOCK) || (flags & VP8D_DEMACROBLOCK)) &&
+            oci->post_proc_buffer_int_used)
+        {
+            vp8_yv12_copy_frame_ptr(&oci->post_proc_buffer, &oci->post_proc_buffer_int);
+            if (flags & VP8D_DEMACROBLOCK)
+            {
+                vp8_deblock_and_de_macro_block(&oci->post_proc_buffer_int, &oci->post_proc_buffer,
+                                               q + (deblock_level - 5) * 10, 1, 0, RTCD_VTABLE(oci));
+            }
+            else if (flags & VP8D_DEBLOCK)
+            {
+                vp8_deblock(&oci->post_proc_buffer_int, &oci->post_proc_buffer,
+                            q, 1, 0, RTCD_VTABLE(oci));
+            }
+        }
+    }
+    else if (flags & VP8D_DEMACROBLOCK)
     {
         vp8_deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
                                        q + (deblock_level - 5) * 10, 1, 0, RTCD_VTABLE(oci));
@@ -939,12 +972,6 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     {
         vp8_deblock(oci->frame_to_show, &oci->post_proc_buffer,
                     q, 1, 0, RTCD_VTABLE(oci));
-    }
-    else if ((flags & VP8D_MFQE) &&
-             oci->current_video_frame >= 2 &&
-             oci->base_qindex - oci->postproc_state.last_base_qindex >= 10)
-    {
-        vp8_multiframe_quality_enhance(oci);
     }
     else
     {

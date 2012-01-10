@@ -114,6 +114,8 @@ typedef struct VP8Common
     YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG temp_scale_frame;
 
+    YV12_BUFFER_CONFIG post_proc_buffer_int;
+    int post_proc_buffer_int_used;
 
     FRAME_TYPE last_frame_type;  /* Save last frame's frame type for motion search. */
     FRAME_TYPE frame_type;
