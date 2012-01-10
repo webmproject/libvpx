@@ -87,10 +87,6 @@ all_platforms="${all_platforms} armv6-darwin-gcc"
 all_platforms="${all_platforms} armv6-linux-rvct"
 all_platforms="${all_platforms} armv6-linux-gcc"
 all_platforms="${all_platforms} armv6-none-rvct"
-all_platforms="${all_platforms} iwmmxt-linux-rvct"
-all_platforms="${all_platforms} iwmmxt-linux-gcc"
-all_platforms="${all_platforms} iwmmxt2-linux-rvct"
-all_platforms="${all_platforms} iwmmxt2-linux-gcc"
 all_platforms="${all_platforms} armv7-darwin-gcc"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-rvct"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-gcc"     #neon Cortex-A8
@@ -196,8 +192,6 @@ ARCH_EXT_LIST="
     armv5te
     armv6
     armv7
-    iwmmxt
-    iwmmxt2
 
     mips32
 
