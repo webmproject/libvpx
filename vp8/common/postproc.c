@@ -29,6 +29,7 @@
     ( (0.439*(float)(t>>16)) - (0.368*(float)(t>>8&0xff)) - (0.071*(float)(t&0xff)) + 128)
 
 /* global constants */
+#define MFQE_PRECISION 4
 #if CONFIG_POSTPROC_VISUALIZER
 static const unsigned char MB_PREDICTION_MODE_colors[MB_MODE_COUNT][3] =
 {
@@ -745,27 +746,26 @@ static void multiframe_quality_enhance_block
     // These thresholds should be adapted later based on qcurr and qprev
     if (sad < thr)
     {
-        static const int precision = 4;
-        static const int roundoff = (1 << (precision - 1));
-        int ifactor = (sad << precision) / thr;
+        static const int roundoff = (1 << (MFQE_PRECISION - 1));
+        int ifactor = (sad << MFQE_PRECISION) / thr;
         // TODO: SIMD optimize this section
         if (ifactor)
         {
-            int icfactor = (1 << precision) - ifactor;
+            int icfactor = (1 << MFQE_PRECISION) - ifactor;
             for (yp = y, ydp = yd, i = 0; i < blksize; ++i, yp += y_stride, ydp += yd_stride)
             {
                 for (j = 0; j < blksize; ++j)
-                    ydp[j] = (int)((yp[j] * ifactor + ydp[j] * icfactor + roundoff) >> precision);
+                    ydp[j] = (int)((yp[j] * ifactor + ydp[j] * icfactor + roundoff) >> MFQE_PRECISION);
             }
             for (up = u, udp = ud, i = 0; i < blksizeby2; ++i, up += uv_stride, udp += uvd_stride)
             {
                 for (j = 0; j < blksizeby2; ++j)
-                    udp[j] = (int)((up[j] * ifactor + udp[j] * icfactor + roundoff) >> precision);
+                    udp[j] = (int)((up[j] * ifactor + udp[j] * icfactor + roundoff) >> MFQE_PRECISION);
             }
             for (vp = v, vdp = vd, i = 0; i < blksizeby2; ++i, vp += uv_stride, vdp += uvd_stride)
             {
                 for (j = 0; j < blksizeby2; ++j)
-                    vdp[j] = (int)((vp[j] * ifactor + vdp[j] * icfactor + roundoff) >> precision);
+                    vdp[j] = (int)((vp[j] * ifactor + vdp[j] * icfactor + roundoff) >> MFQE_PRECISION);
             }
         }
     }
