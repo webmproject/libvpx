@@ -603,8 +603,8 @@ process_common_toolchain() {
 
     # Enable the architecture family
     case ${tgt_isa} in
-        arm*|iwmmxt*) enable arm;;
-    mips*)        enable mips;;
+        arm*) enable arm;;
+        mips*) enable mips;;
     esac
 
     # PIC is probably what we want when building shared libs
@@ -665,35 +665,25 @@ process_common_toolchain() {
 
     # Process ARM architecture variants
     case ${toolchain} in
-    arm*|iwmmxt*)
-    # on arm, isa versions are supersets
-    enabled armv7a && soft_enable armv7 ### DEBUG
-    enabled armv7 && soft_enable armv6
-    enabled armv7 || enabled armv6 && soft_enable armv5te
-    enabled armv7 || enabled armv6 && soft_enable fast_unaligned
-    enabled iwmmxt2 && soft_enable iwmmxt
-    enabled iwmmxt && soft_enable armv5te
+    arm*)
+        # on arm, isa versions are supersets
+        enabled armv7a && soft_enable armv7 ### DEBUG
+        enabled armv7 && soft_enable armv6
+        enabled armv7 || enabled armv6 && soft_enable armv5te
+        enabled armv7 || enabled armv6 && soft_enable fast_unaligned
 
-    asm_conversion_cmd="cat"
+        asm_conversion_cmd="cat"
 
         case ${tgt_cc} in
         gcc)
-            if enabled iwmmxt || enabled iwmmxt2
-            then
-                CROSS=${CROSS:-arm-iwmmxt-linux-gnueabi-}
-            else
-                CROSS=${CROSS:-arm-none-linux-gnueabi-}
-            fi
+            CROSS=${CROSS:-arm-none-linux-gnueabi-}
             link_with_cc=gcc
             setup_gnu_toolchain
             arch_int=${tgt_isa##armv}
             arch_int=${arch_int%%te}
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
-            if enabled iwmmxt || enabled iwmmxt2
-            then
-                check_add_asflags -mcpu=${tgt_isa}
-            elif enabled armv7
+            if enabled armv7
             then
                 check_add_cflags -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp  #-ftree-vectorize
                 check_add_asflags -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp  #-march=armv7-a
