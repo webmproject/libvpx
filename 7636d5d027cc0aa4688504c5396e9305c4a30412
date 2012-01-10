@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAG3//7MA\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-10T22:53:48Z",
+      "side": 1,
+      "message": "Doing this you\u0027ll want at least \u0027-print -quit\u0027 to ensure one result. As long at the installs aren\u0027t mixed a sort might be useful to pull the latest",
+      "revId": "7636d5d027cc0aa4688504c5396e9305c4a30412",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
