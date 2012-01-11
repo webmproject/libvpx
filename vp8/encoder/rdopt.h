@@ -69,6 +69,54 @@ extern void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue);
 extern void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset, int *returnrate, int *returndistortion, int *returnintra);
 extern void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate);
 
+
+static void get_plane_pointers(const YV12_BUFFER_CONFIG *fb,
+                               unsigned char            *plane[3],
+                               unsigned int              recon_yoffset,
+                               unsigned int              recon_uvoffset)
+{
+    plane[0] = fb->y_buffer + recon_yoffset;
+    plane[1] = fb->u_buffer + recon_uvoffset;
+    plane[2] = fb->u_buffer + recon_uvoffset;
+}
+
+
+static void get_predictor_pointers(const VP8_COMP *cpi,
+                                       unsigned char  *plane[4][3],
+                                       unsigned int    recon_yoffset,
+                                       unsigned int    recon_uvoffset)
+{
+    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
+        get_plane_pointers(&cpi->common.yv12_fb[cpi->common.lst_fb_idx],
+                           plane[LAST_FRAME], recon_yoffset, recon_uvoffset);
+
+    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
+        get_plane_pointers(&cpi->common.yv12_fb[cpi->common.gld_fb_idx],
+                           plane[GOLDEN_FRAME], recon_yoffset, recon_uvoffset);
+
+    if (cpi->ref_frame_flags & VP8_ALT_FLAG)
+        get_plane_pointers(&cpi->common.yv12_fb[cpi->common.alt_fb_idx],
+                           plane[ALTREF_FRAME], recon_yoffset, recon_uvoffset);
+}
+
+
+static void get_reference_search_order(const VP8_COMP *cpi,
+                                           int             ref_frame_map[4])
+{
+    int i=0;
+
+    ref_frame_map[i++] = INTRA_FRAME;
+    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
+        ref_frame_map[i++] = LAST_FRAME;
+    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
+        ref_frame_map[i++] = GOLDEN_FRAME;
+    if (cpi->ref_frame_flags & VP8_ALT_FLAG)
+        ref_frame_map[i++] = ALTREF_FRAME;
+    for(; i<4; i++)
+        ref_frame_map[i] = -1;
+}
+
+
 extern void vp8_mv_pred
 (
     VP8_COMP *cpi,
