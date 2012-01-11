@@ -1751,7 +1751,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int saddone=0;
     int sr=0;    //search range got from mv_pred(). It uses step_param levels. (0-7)
 
-    int frame_lf_or_gf[4];
     unsigned char *y_buffer[4];
     unsigned char *u_buffer[4];
     unsigned char *v_buffer[4];
@@ -1797,7 +1796,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         y_buffer[LAST_FRAME] = lst_yv12->y_buffer + recon_yoffset;
         u_buffer[LAST_FRAME] = lst_yv12->u_buffer + recon_uvoffset;
         v_buffer[LAST_FRAME] = lst_yv12->v_buffer + recon_uvoffset;
-        frame_lf_or_gf[LAST_FRAME] = 0;
     }
 
     if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
@@ -1807,7 +1805,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         y_buffer[GOLDEN_FRAME] = gld_yv12->y_buffer + recon_yoffset;
         u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
         v_buffer[GOLDEN_FRAME] = gld_yv12->v_buffer + recon_uvoffset;
-        frame_lf_or_gf[GOLDEN_FRAME] = 1;
     }
 
     if (cpi->ref_frame_flags & VP8_ALT_FLAG)
@@ -1817,7 +1814,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
         u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;
         v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
-        frame_lf_or_gf[ALTREF_FRAME] = 1;
     }
 
     *returnintra = INT_MAX;
@@ -1832,7 +1828,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
         int this_rd = INT_MAX;
-        int lf_or_gf = 0;           // Lat Frame (01) or gf/arf (1)
         int disable_skip = 0;
         int other_cost = 0;
         int this_ref_frame = ref_frame_map[vp8_ref_frame_order[mode_index]];
@@ -1882,8 +1877,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 sign_bias
                 = cpi->common.ref_frame_sign_bias[x->e_mbd.mode_info_context->mbmi.ref_frame];
             }
-
-            lf_or_gf = frame_lf_or_gf[x->e_mbd.mode_info_context->mbmi.ref_frame];
         }
 
         // Check to see if the testing frequency for this mode is at its max
