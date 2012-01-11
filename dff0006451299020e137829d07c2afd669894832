@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAG3//66k\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-11T06:30:54Z",
+      "side": 1,
+      "message": "This should be one of your android targets now, e.g., armv7-android-gcc. If you use that one maybe a note about setting TARGET_ARCH_ABI when using ndk-build (assuming I\u0027m doing it correctly).",
+      "revId": "dff0006451299020e137829d07c2afd669894832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//66c\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 7
+      },
+      "lineNbr": 751,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-11T06:30:54Z",
+      "side": 1,
+      "message": "you should quote arm-linux-androideabi-gcc*; don\u0027t want to glob something from the cwd.",
+      "revId": "dff0006451299020e137829d07c2afd669894832",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
