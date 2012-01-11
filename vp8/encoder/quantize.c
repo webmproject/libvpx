@@ -1271,30 +1271,18 @@ void vp8cx_frame_init_quantizer(VP8_COMP *cpi)
 void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
 {
     VP8_COMMON *cm = &cpi->common;
-    int update = 0;
-    int new_delta_q;
-    cm->base_qindex = Q;
 
-    /* if any of the delta_q values are changing update flag has to be set */
-    /* currently only y2dc_delta_q may change */
-
+    // if any of the delta_q values are changing update flag will
+    // have to be set.
     cm->y1dc_delta_q = 0;
     cm->y2ac_delta_q = 0;
     cm->uvdc_delta_q = 0;
     cm->uvac_delta_q = 0;
+    cm->y2dc_delta_q = 0;
 
-    if (Q < 4)
-    {
-        new_delta_q = 4-Q;
-    }
-    else
-        new_delta_q = 0;
-
-    update |= cm->y2dc_delta_q != new_delta_q;
-    cm->y2dc_delta_q = new_delta_q;
-
-    /* quantizer has to be reinitialized for any delta_q changes */
-    if(update)
-        vp8cx_init_quantizer(cpi);
+    // quantizer has to be reinitialized if any delta_q changes.
+    // As there are not any here for now this is inactive code.
+    //if(update)
+    //    vp8cx_init_quantizer(cpi);
 }
 

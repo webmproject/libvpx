@@ -383,6 +383,7 @@ typedef struct VP8_COMP
     int this_frame_target;
     int projected_frame_size;
     int last_q[2];                   // Separate values for Intra/Inter
+    int last_boosted_qindex;         // Last boosted GF/KF/ARF q
 
     double rate_correction_factor;
     double key_frame_rate_correction_factor;
@@ -483,11 +484,7 @@ typedef struct VP8_COMP
 #endif
     MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
     int mbgraph_n_frames;             // number of frames filled in the above
-    int mbgraph_use_arf_segmentation; // set if part of an ARF is considered to be a
-                                      // poor predictor, and thus coeffs are skipped
-                                      // or coded at a higher Q using MB-segmentation
-                                      // this value is the number of MBs that are
-                                      // poor predictors (> 0 and < common.MBs)
+    int static_mb_pct;                // % forced skip mbs by segmentation
 
     int decimation_factor;
     int decimation_count;

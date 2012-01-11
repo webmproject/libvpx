@@ -24,7 +24,7 @@
 #include "encodemv.h"
 
 
-#define MIN_BPB_FACTOR          0.01
+#define MIN_BPB_FACTOR          0.005
 #define MAX_BPB_FACTOR          50
 
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
@@ -1477,6 +1477,14 @@ void vp8_compute_frame_size_bounds(VP8_COMP *cpi, int *frame_under_shoot_limit, 
                 }
             }
         }
+
+        // For very small rate targets where the fractional adjustment
+        // (eg * 7/8) may be tiny make sure there is at least a minimum
+        // range.
+        *frame_over_shoot_limit += 200;
+        *frame_under_shoot_limit -= 200;
+        if ( *frame_under_shoot_limit < 0 )
+            *frame_under_shoot_limit = 0;
     }
 }
 

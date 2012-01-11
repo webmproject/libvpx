@@ -477,12 +477,16 @@ void separate_arf_mbs
     //if ( ncnt[1] && (ncnt[0] / ncnt[1] < 10) )
     if ( 1 )
     {
-        cpi->mbgraph_use_arf_segmentation = ncnt[1];
+        // Note % of blocks that are marked as static
+        cpi->static_mb_pct =
+            (ncnt[1] * 100) / cm->MBs;
+
         vp8_enable_segmentation((VP8_PTR) cpi);
     }
     else
     {
-        cpi->mbgraph_use_arf_segmentation = 0;
+        cpi->static_mb_pct = 0;
+
         vp8_disable_segmentation((VP8_PTR) cpi);
     }
 

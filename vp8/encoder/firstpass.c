@@ -3032,10 +3032,26 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         // We do three calculations for kf size.
         // The first is based on the error score for the whole kf group.
-        // The second (optionaly) on the key frames own error if this is smaller than the average for the group.
-        // The final one insures that the frame receives at least the allocation it would have received based on its own error score vs the error score remaining
-
-        allocation_chunks = ((cpi->twopass.frames_to_key - 1) * 100) + kf_boost;           // cpi->twopass.frames_to_key-1 because key frame itself is taken care of by kf_boost
+        // The second (optionaly) on the key frames own error if this is
+        // smaller than the average for the group.
+        // The final one insures that the frame receives at least the
+        // allocation it would have received based on its own error score vs
+        // the error score remaining
+        // Special case if the sequence appears almost totaly static
+        // as measured by the decay accumulator. In this case we want to
+        // spend almost all of the bits on the key frame.
+        // cpi->twopass.frames_to_key-1 because key frame itself is taken
+        // care of by kf_boost.
+        if ( decay_accumulator >= 0.99 )
+        {
+            allocation_chunks =
+                ((cpi->twopass.frames_to_key - 1) * 10) + kf_boost;
+        }
+        else
+        {
+            allocation_chunks =
+                ((cpi->twopass.frames_to_key - 1) * 100) + kf_boost;
+        }
 
         // Normalize Altboost and allocations chunck down to prevent overflow
         while (kf_boost > 1000)

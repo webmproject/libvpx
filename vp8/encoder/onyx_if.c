@@ -492,6 +492,7 @@ static void init_seg_features(VP8_COMP *cpi)
         vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
         xd->update_mb_segmentation_map = 0;
         xd->update_mb_segmentation_data = 0;
+        cpi->static_mb_pct = 0;
 
         // Disable segmentation
         vp8_disable_segmentation((VP8_PTR)cpi);
@@ -507,6 +508,7 @@ static void init_seg_features(VP8_COMP *cpi)
         vpx_memset( cpi->segmentation_map, 0, (cm->mb_rows * cm->mb_cols));
         xd->update_mb_segmentation_map = 0;
         xd->update_mb_segmentation_data = 0;
+        cpi->static_mb_pct = 0;
 
         // Disable segmentation and individual segment features by default
         vp8_disable_segmentation((VP8_PTR)cpi);
@@ -557,7 +559,7 @@ static void init_seg_features(VP8_COMP *cpi)
                 set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
                 enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
-                if ( high_q )
+                if ( high_q || (cpi->static_mb_pct == 100) )
                 {
                     set_segref(xd, 1, ALTREF_FRAME);
                     enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
@@ -1973,6 +1975,8 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->total_actual_bits            = 0;
     cpi->total_target_vs_actual       = 0;
 
+    cpi->static_mb_pct = 0;
+
 #if VP8_TEMPORAL_ALT_REF
     {
         int i;
@@ -2233,6 +2237,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     {
         cpi->last_q[0] = cpi->oxcf.fixed_q;
         cpi->last_q[1] = cpi->oxcf.fixed_q;
+        cpi->last_boosted_qindex = cpi->oxcf.fixed_q;
     }
 
     cpi->Speed = cpi->oxcf.cpu_used;
@@ -2694,6 +2699,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                 fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%8.0f\n",
                         dr, cpi->total / cpi->count, total_psnr, cpi->totalp / cpi->count, total_psnr2, total_ssim,
                         total_encode_time);
+//                fprintf(f, "%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%7.3f\t%8.0f %10ld\n",
+//                        dr, cpi->total / cpi->count, total_psnr, cpi->totalp / cpi->count, total_psnr2, total_ssim,
+//                        total_encode_time, cpi->tot_recode_hits);
             }
 
             if (cpi->b_calculate_ssimg)
@@ -2702,6 +2710,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                 fprintf(f, "%7.3f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%8.0f\n", dr,
                         cpi->total_ssimg_y / cpi->count, cpi->total_ssimg_u / cpi->count,
                         cpi->total_ssimg_v / cpi->count, cpi->total_ssimg_all / cpi->count, total_encode_time);
+//                fprintf(f, "%7.3f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%8.0f  %10ld\n", dr,
+//                        cpi->total_ssimg_y / cpi->count, cpi->total_ssimg_u / cpi->count,
+//                        cpi->total_ssimg_v / cpi->count, cpi->total_ssimg_all / cpi->count, total_encode_time, cpi->tot_recode_hits);
             }
 
             fclose(f);
@@ -4134,10 +4145,15 @@ static void encode_frame_to_data_rate
                 // based on the ambient Q to reduce the risk of popping
                 if ( cpi->this_key_frame_forced )
                 {
-                    if ( cpi->active_best_quality > cpi->avg_frame_qindex * 7/8)
-                        cpi->active_best_quality = cpi->avg_frame_qindex * 7/8;
-                    else if ( cpi->active_best_quality < cpi->avg_frame_qindex >> 2 )
-                        cpi->active_best_quality = cpi->avg_frame_qindex >> 2;
+                    int delta_qindex;
+                    int qindex = cpi->last_boosted_qindex;
+
+                    delta_qindex = compute_qdelta( cpi, qindex,
+                                                   (qindex * 0.75) );
+
+                    cpi->active_best_quality = qindex + delta_qindex;
+                    if (cpi->active_best_quality < cpi->best_quality)
+                        cpi->active_best_quality = cpi->best_quality;
                 }
             }
             // One pass more conservative
@@ -4248,8 +4264,16 @@ static void encode_frame_to_data_rate
     if ( cpi->active_worst_quality < cpi->active_best_quality )
         cpi->active_worst_quality = cpi->active_best_quality;
 
-    // Determine initial Q to try
-    Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+    // Specuial case code to try and match quality with forced key frames
+    if ( (cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced )
+    {
+        Q = cpi->last_boosted_qindex;
+    }
+    else
+    {
+        // Determine initial Q to try
+        Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+    }
     last_zbin_oq = cpi->zbin_over_quant;
 
     // Set highest allowed value for Zbin over quant
@@ -4527,23 +4551,32 @@ static void encode_frame_to_data_rate
                                          &cm->yv12_fb[cm->new_fb_idx],
                                          IF_RTCD(&cpi->rtcd.variance));
 
+            int high_err_target = cpi->ambient_err;
+            int low_err_target = ((cpi->ambient_err * 3) >> 2);
+
             // The key frame is not good enough
-            if ( kf_err > ((cpi->ambient_err * 7) >> 3) )
+            if ( (kf_err > high_err_target) &&
+                 (cpi->projected_frame_size <= frame_over_shoot_limit) )
             {
                 // Lower q_high
                 q_high = (Q > q_low) ? (Q - 1) : q_low;
 
                 // Adjust Q
-                Q = (q_high + q_low) >> 1;
+                Q = (Q * high_err_target) / kf_err;
+                if ( Q < ((q_high + q_low) >> 1))
+                    Q = (q_high + q_low) >> 1;
             }
             // The key frame is much better than the previous frame
-            else if ( kf_err < (cpi->ambient_err >> 1) )
+            else if ( (kf_err < low_err_target) &&
+                      (cpi->projected_frame_size >= frame_under_shoot_limit) )
             {
                 // Raise q_low
                 q_low = (Q < q_high) ? (Q + 1) : q_high;
 
                 // Adjust Q
-                Q = (q_high + q_low + 1) >> 1;
+                Q = (Q * low_err_target) / kf_err;
+                if ( Q > ((q_high + q_low + 1) >> 1))
+                    Q = (q_high + q_low + 1) >> 1;
             }
 
             // Clamp Q to upper and lower limits:
@@ -4569,14 +4602,12 @@ static void encode_frame_to_data_rate
             // Frame is too large
             if (cpi->projected_frame_size > cpi->this_frame_target)
             {
-                //if ( cpi->zbin_over_quant == 0 )
                 q_low = (Q < q_high) ? (Q + 1) : q_high; // Raise Qlow as to at least the current value
 
                 if (cpi->zbin_over_quant > 0)            // If we are using over quant do the same for zbin_oq_low
                     zbin_oq_low = (cpi->zbin_over_quant < zbin_oq_high) ? (cpi->zbin_over_quant + 1) : zbin_oq_high;
 
-                //if ( undershoot_seen || (Q == MAXQ) )
-                if (undershoot_seen)
+                if ( undershoot_seen || (loop_count > 1) )
                 {
                     // Update rate_correction_factor unless cpi->active_worst_quality has changed.
                     if (!active_worst_qchanged)
@@ -4619,7 +4650,7 @@ static void encode_frame_to_data_rate
                 else                                    // else lower zbin_oq_high
                     zbin_oq_high = (cpi->zbin_over_quant > zbin_oq_low) ? (cpi->zbin_over_quant - 1) : zbin_oq_low;
 
-                if (overshoot_seen)
+                if ( overshoot_seen || (loop_count > 1) )
                 {
                     // Update rate_correction_factor unless cpi->active_worst_quality has changed.
                     if (!active_worst_qchanged)
@@ -4845,6 +4876,20 @@ static void encode_frame_to_data_rate
 
     cpi->last_q[cm->frame_type] = cm->base_qindex;
 
+    // Keep record of last boosted (KF/KF/ARF) Q value.
+    // If the current frame is coded at a lower Q then we also update it.
+    // If all mbs in this group are skipped only update if the Q value is
+    // better than that already stored.
+    // This is used to help set quality in forced key frames to reduce popping
+    if ( (cm->base_qindex < cpi->last_boosted_qindex) ||
+         ( (cpi->static_mb_pct < 100) &&
+           ( (cm->frame_type == KEY_FRAME) ||
+             cm->refresh_alt_ref_frame ||
+             (cm->refresh_golden_frame && !cpi->is_src_frame_alt_ref) ) ) )
+    {
+        cpi->last_boosted_qindex = cm->base_qindex;
+    }
+
     if (cm->frame_type == KEY_FRAME)
     {
         vp8_adjust_key_frame_context(cpi);
@@ -4991,7 +5036,7 @@ static void encode_frame_to_data_rate
 
         if (cpi->twopass.total_left_stats->coded_error != 0.0)
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d"
-                       "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f"
+                       "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
                        "%10.3f %8d\n",
                        cpi->common.current_video_frame, cpi->this_frame_target,
@@ -5023,7 +5068,7 @@ static void encode_frame_to_data_rate
                        cpi->tot_recode_hits);
         else
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d"
-                       "%6.2f %6.2f %6.2f %6.2f %6.2f %6.2f %6.2f"
+                       "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
                        "%8d\n",
                        cpi->common.current_video_frame,
