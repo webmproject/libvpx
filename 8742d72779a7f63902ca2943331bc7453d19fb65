@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//6IE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-12T18:58:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAG3//6ZQ\u003d",
+      "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//6d0\u003d",
         "filename": "README",
         "patchSetId": 9
@@ -30,6 +48,24 @@
       "writtenOn": "2012-01-11T23:53:35Z",
       "side": 1,
       "message": "armv6 target too. It won\u0027t use the best compiler options for most targets (which have armv7a cores but no neon) but it is necessary for Tegra2. Libraries built targeting older arches can be linked in to newer platforms w/o issue",
+      "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//6IA\u003d",
+        "filename": "README",
+        "patchSetId": 9
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-12T18:58:56Z",
+      "side": 1,
+      "message": "there is no way to build it from within the Android.mk system, won\u0027t modify.",
+      "parentUuid": "AAAAG3//6d0\u003d",
       "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//6Hc\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-12T18:58:56Z",
+      "side": 1,
+      "message": "RTCD is enabled.  The handling of CPU detect is partway (cpufeatures library) implemented.  A follow up CL is intended.",
+      "parentUuid": "AAAAG3//6dk\u003d",
+      "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//6dg\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 9
@@ -64,6 +118,24 @@
       "writtenOn": "2012-01-11T23:53:35Z",
       "side": 1,
       "message": "What does x86 need?",
+      "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//6H8\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-12T18:58:56Z",
+      "side": 1,
+      "message": "a lot more than what I\u0027m going to put into for this CL.  This it to get ARM working.  This can be revisited in the future.",
+      "parentUuid": "AAAAG3//6dg\u003d",
       "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -98,6 +170,24 @@
       "writtenOn": "2012-01-11T23:53:35Z",
       "side": 1,
       "message": "ah, neon is separate to append .neon?",
+      "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//6H4\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-12T18:58:56Z",
+      "side": 1,
+      "message": "yes.  As not to use the neon compiler for c code so that autovectorization can\u0027t occur.",
+      "parentUuid": "AAAAG3//6dQ\u003d",
       "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
