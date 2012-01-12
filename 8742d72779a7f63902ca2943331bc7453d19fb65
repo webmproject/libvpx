@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAG3//6EE\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 9
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-12T19:46:51Z",
+      "side": 1,
+      "message": "Implemented in this CL.  RTCD feature detection uses the Android library.",
+      "parentUuid": "AAAAG3//6Hc\u003d",
+      "revId": "8742d72779a7f63902ca2943331bc7453d19fb65",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAG3//6dg\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 9
