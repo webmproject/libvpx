@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAG3//6BI\u003d",
+        "filename": "vpx_ports/arm_cpudetect.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-12T20:35:22Z",
+      "side": 1,
+      "message": "!\u003d 0 is a bit redundant",
+      "revId": "1fdab7d180aec39b1b46dae8e9f64441559daa22",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAG3//6BE\u003d",
+        "filename": "vpx_ports/arm_cpudetect.c",
+        "patchSetId": 11
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-12T20:35:22Z",
+      "side": 1,
+      "message": "These blocks are big, can you add some // defined(...) comments to mark the areas you added?",
+      "revId": "1fdab7d180aec39b1b46dae8e9f64441559daa22",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
