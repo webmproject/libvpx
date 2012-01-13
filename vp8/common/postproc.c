@@ -329,21 +329,19 @@ static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
         YV12_BUFFER_CONFIG         *post,
         int                         q,
         int                         low_var_thresh,
-        int                         flag,
-        vp8_postproc_rtcd_vtable_t *rtcd)
+        int                         flag)
 {
     double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
     int ppl = (int)(level + .5);
     (void) low_var_thresh;
     (void) flag;
 
-    POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,  ppl);
-    POSTPROC_INVOKE(rtcd, across)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
-    POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
+    vp8_post_proc_down_and_across(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,  ppl);
+    vp8_mbpost_proc_across_ip(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
+    vp8_mbpost_proc_down(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
 
-
-    POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
-    POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
+    vp8_post_proc_down_and_across(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
+    vp8_post_proc_down_and_across(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
 
 }
 
@@ -351,25 +349,23 @@ void vp8_deblock(YV12_BUFFER_CONFIG         *source,
                  YV12_BUFFER_CONFIG         *post,
                  int                         q,
                  int                         low_var_thresh,
-                 int                         flag,
-                 vp8_postproc_rtcd_vtable_t *rtcd)
+                 int                         flag)
 {
     double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
     int ppl = (int)(level + .5);
     (void) low_var_thresh;
     (void) flag;
 
-    POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,   ppl);
-    POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride,  source->uv_height, source->uv_width, ppl);
-    POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
+    vp8_post_proc_down_and_across(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,   ppl);
+    vp8_post_proc_down_and_across(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride,  source->uv_height, source->uv_width, ppl);
+    vp8_post_proc_down_and_across(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
 }
 
 void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
                   YV12_BUFFER_CONFIG         *post,
                   int                         q,
                   int                         low_var_thresh,
-                  int                         flag,
-                  vp8_postproc_rtcd_vtable_t *rtcd)
+                  int                         flag)
 {
     double level = 6.0e-05 * q * q * q - .0067 * q * q + .306 * q + .0065;
     int ppl = (int)(level + .5);
@@ -377,7 +373,7 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
     (void) low_var_thresh;
     (void) flag;
 
-    POSTPROC_INVOKE(rtcd, downacross)(
+    vp8_post_proc_down_and_across(
         source->y_buffer + 2 * source->y_stride + 2,
         source->y_buffer + 2 * source->y_stride + 2,
         source->y_stride,
@@ -385,14 +381,14 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
         source->y_height - 4,
         source->y_width - 4,
         ppl);
-    POSTPROC_INVOKE(rtcd, downacross)(
+    vp8_post_proc_down_and_across(
         source->u_buffer + 2 * source->uv_stride + 2,
         source->u_buffer + 2 * source->uv_stride + 2,
         source->uv_stride,
         source->uv_stride,
         source->uv_height - 4,
         source->uv_width - 4, ppl);
-    POSTPROC_INVOKE(rtcd, downacross)(
+    vp8_post_proc_down_and_across(
         source->v_buffer + 2 * source->uv_stride + 2,
         source->v_buffer + 2 * source->uv_stride + 2,
         source->uv_stride,
@@ -803,12 +799,6 @@ static void multiframe_quality_enhance_block
     }
 }
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define RTCD_VTABLE(oci) (&(oci)->rtcd.postproc)
-#else
-#define RTCD_VTABLE(oci) NULL
-#endif
-
 void vp8_multiframe_quality_enhance
 (
     VP8_COMMON *cm
@@ -967,12 +957,12 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             if (flags & VP8D_DEMACROBLOCK)
             {
                 vp8_deblock_and_de_macro_block(&oci->post_proc_buffer_int, &oci->post_proc_buffer,
-                                               q + (deblock_level - 5) * 10, 1, 0, RTCD_VTABLE(oci));
+                                               q + (deblock_level - 5) * 10, 1, 0);
             }
             else if (flags & VP8D_DEBLOCK)
             {
                 vp8_deblock(&oci->post_proc_buffer_int, &oci->post_proc_buffer,
-                            q, 1, 0, RTCD_VTABLE(oci));
+                            q, 1, 0);
             }
         }
         /* Move partially towards the base q of the previous frame */
@@ -981,13 +971,13 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     else if (flags & VP8D_DEMACROBLOCK)
     {
         vp8_deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
-                                       q + (deblock_level - 5) * 10, 1, 0, RTCD_VTABLE(oci));
+                                       q + (deblock_level - 5) * 10, 1, 0);
         oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
     else if (flags & VP8D_DEBLOCK)
     {
         vp8_deblock(oci->frame_to_show, &oci->post_proc_buffer,
-                    q, 1, 0, RTCD_VTABLE(oci));
+                    q, 1, 0);
         oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
     else
@@ -1004,7 +994,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             fillrd(&oci->postproc_state, 63 - q, noise_level);
         }
 
-        POSTPROC_INVOKE(RTCD_VTABLE(oci), addnoise)
+        vp8_plane_add_noise
         (oci->post_proc_buffer.y_buffer,
          oci->postproc_state.noise,
          oci->postproc_state.blackclamp,
@@ -1302,7 +1292,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
                                 U = B_PREDICTION_MODE_colors[bmi->as_mode][1];
                                 V = B_PREDICTION_MODE_colors[bmi->as_mode][2];
 
-                                POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_b)
+                                vp8_blend_b
                                     (yl+bx, ul+(bx>>1), vl+(bx>>1), Y, U, V, 0xc000, y_stride);
                             }
                             bmi++;
@@ -1319,7 +1309,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
                     U = MB_PREDICTION_MODE_colors[mi->mbmi.mode][1];
                     V = MB_PREDICTION_MODE_colors[mi->mbmi.mode][2];
 
-                    POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_inner)
+                    vp8_blend_mb_inner
                         (y_ptr+x, u_ptr+(x>>1), v_ptr+(x>>1), Y, U, V, 0xc000, y_stride);
                 }
 
@@ -1358,7 +1348,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
                     U = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][1];
                     V = MV_REFERENCE_FRAME_colors[mi->mbmi.ref_frame][2];
 
-                    POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_mb_outer)
+                    vp8_blend_mb_outer
                         (y_ptr+x, u_ptr+(x>>1), v_ptr+(x>>1), Y, U, V, 0xc000, y_stride);
                 }
 

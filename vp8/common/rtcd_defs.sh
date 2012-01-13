@@ -88,7 +88,7 @@ vp8_short_idct4x4llm_media=vp8_short_idct4x4llm_v6_dual
 
 #iwalsh1
 prototype void vp8_short_inv_walsh4x4_1 "short *input, short *output"
-specialize vp8_short_inv_walsh4x4_1 c #no asm yet
+# no asm yet
 
 #iwalsh16
 prototype void vp8_short_inv_walsh4x4 "short *input, short *output"
@@ -130,3 +130,33 @@ specialize vp8_build_intra_predictors_mbuv_s sse2 ssse3
 prototype void vp8_intra4x4_predict "unsigned char *src, int src_stride, int b_mode, unsigned char *dst, int dst_stride"
 specialize vp8_intra4x4_predict media
 vp8_intra4x4_predict_media=vp8_intra4x4_predict_armv6
+
+#
+# Postproc
+#
+if [ "$CONFIG_POSTPROC" = "yes" ]; then
+    prototype void vp8_mbpost_proc_down "unsigned char *dst, int pitch, int rows, int cols,int flimit"
+    specialize vp8_mbpost_proc_down mmx sse2
+    vp8_mbpost_proc_down_sse2=vp8_mbpost_proc_down_xmm
+
+    prototype void vp8_mbpost_proc_across_ip "unsigned char *dst, int pitch, int rows, int cols,int flimit"
+    specialize vp8_mbpost_proc_across_ip sse2
+    vp8_mbpost_proc_across_ip_sse2=vp8_mbpost_proc_across_ip_xmm
+
+    prototype void vp8_post_proc_down_and_across "unsigned char *src, unsigned char *dst, int src_pitch, int dst_pitch, int rows, int cols, int flimit"
+    specialize vp8_post_proc_down_and_across mmx sse2
+    vp8_post_proc_down_and_across_sse2=vp8_post_proc_down_and_across_xmm
+
+    prototype void vp8_plane_add_noise "unsigned char *s, char *noise, char blackclamp[16], char whiteclamp[16], char bothclamp[16], unsigned int w, unsigned int h, int pitch"
+    specialize vp8_plane_add_noise mmx sse2
+    vp8_plane_add_noise_sse2=vp8_plane_add_noise_wmt
+
+    prototype void vp8_blend_mb_inner "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
+    # no asm yet
+
+    prototype void vp8_blend_mb_outer "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
+    # no asm yet
+
+    prototype void vp8_blend_b "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
+    # no asm yet
+fi

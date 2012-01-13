@@ -73,9 +73,6 @@ typedef struct VP8_COMMON_RTCD
 {
 #if CONFIG_RUNTIME_CPU_DETECT
     vp8_subpix_rtcd_vtable_t      subpix;
-#if CONFIG_POSTPROC
-    vp8_postproc_rtcd_vtable_t    postproc;
-#endif
     int                           flags;
 #else
     int unused;

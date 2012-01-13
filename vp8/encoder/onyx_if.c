@@ -3624,11 +3624,11 @@ static void encode_frame_to_data_rate
 
         if (cm->frame_type == KEY_FRAME)
         {
-            vp8_de_noise(cpi->Source, cpi->Source, l , 1,  0, RTCD(postproc));
+            vp8_de_noise(cpi->Source, cpi->Source, l , 1,  0);
         }
         else
         {
-            vp8_de_noise(cpi->Source, cpi->Source, l , 1,  0, RTCD(postproc));
+            vp8_de_noise(cpi->Source, cpi->Source, l , 1,  0);
 
             src = cpi->Source->y_buffer;
 

@@ -76,17 +76,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_c;
     rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_c;
     rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_c;
-
-#if CONFIG_POSTPROC || (CONFIG_VP8_ENCODER && CONFIG_INTERNAL_STATS)
-    rtcd->postproc.down             = vp8_mbpost_proc_down_c;
-    rtcd->postproc.across           = vp8_mbpost_proc_across_ip_c;
-    rtcd->postproc.downacross       = vp8_post_proc_down_and_across_c;
-    rtcd->postproc.addnoise         = vp8_plane_add_noise_c;
-    rtcd->postproc.blend_mb_inner   = vp8_blend_mb_inner_c;
-    rtcd->postproc.blend_mb_outer   = vp8_blend_mb_outer_c;
-    rtcd->postproc.blend_b          = vp8_blend_b_c;
-#endif
-
 #endif
 
 #if ARCH_X86 || ARCH_X86_64
