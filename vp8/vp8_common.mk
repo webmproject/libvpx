@@ -39,7 +39,6 @@ VP8_COMMON_SRCS-yes += common/entropymv.h
 VP8_COMMON_SRCS-yes += common/extend.h
 VP8_COMMON_SRCS-yes += common/findnearmv.h
 VP8_COMMON_SRCS-yes += common/header.h
-VP8_COMMON_SRCS-yes += common/idct.h
 VP8_COMMON_SRCS-yes += common/invtrans.h
 VP8_COMMON_SRCS-yes += common/loopfilter.h
 VP8_COMMON_SRCS-yes += common/modecont.h
@@ -77,7 +76,6 @@ VP8_COMMON_SRCS-yes += common/treecoder.c
 
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.h
-VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/subpixel_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/recon_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/postproc_x86.h
@@ -112,7 +110,6 @@ endif
 # common (c)
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/filter_arm.c
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/idct_arm.h
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/recon_arm.h
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/reconintra_arm.c

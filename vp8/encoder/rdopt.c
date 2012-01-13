@@ -13,6 +13,8 @@
 #include <math.h>
 #include <limits.h>
 #include <assert.h>
+#include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vp8/common/pragmas.h"
 
 #include "tokenize.h"
@@ -27,7 +29,6 @@
 #include "vp8/common/findnearmv.h"
 #include "encodemb.h"
 #include "quantize.h"
-#include "vp8/common/idct.h"
 #include "variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
@@ -683,7 +684,7 @@ static int rd_pick_intra4x4block(
     }
     b->bmi.as_mode = (B_PREDICTION_MODE)(*best_mode);
 
-    IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff,
+    vp8_short_idct4x4llm(best_dqcoeff,
         best_predictor, 16, *(b->base_dst) + b->dst, b->dst_stride);
 
     return best_rd;

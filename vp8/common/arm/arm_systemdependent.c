@@ -15,7 +15,6 @@
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/recon.h"
-#include "vp8/common/idct.h"
 #include "vp8/common/onyxc_int.h"
 
 void vp8_arch_arm_common_init(VP8_COMMON *ctx)
@@ -44,9 +43,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_armv6;
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_armv6;
 
-        rtcd->idct.idct16       = vp8_short_idct4x4llm_v6_dual;
-        rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_v6;
-
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_v6;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_v6;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_v6;
@@ -65,9 +61,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_neon;
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_neon;
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_neon;
-
-        rtcd->idct.idct16       = vp8_short_idct4x4llm_neon;
-        rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_neon;
 
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_neon;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_neon;

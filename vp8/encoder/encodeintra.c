@@ -10,7 +10,7 @@
 
 
 #include "vpx_config.h"
-#include "vp8/common/idct.h"
+#include "vpx_rtcd.h"
 #include "quantize.h"
 #include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
@@ -78,12 +78,12 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 
     if (*b->eob > 1)
     {
-        IDCT_INVOKE(IF_RTCD(&rtcd->common->idct), idct16)(b->dqcoeff,
+        vp8_short_idct4x4llm(b->dqcoeff,
             b->predictor, 16, *(b->base_dst) + b->dst, b->dst_stride);
     }
     else
     {
-        IDCT_INVOKE(IF_RTCD(&rtcd->common->idct), idct1_scalar_add)
+        vp8_dc_only_idct_add
             (b->dqcoeff[0], b->predictor, 16, *(b->base_dst) + b->dst,
                 b->dst_stride);
     }

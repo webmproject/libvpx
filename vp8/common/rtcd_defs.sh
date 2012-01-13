@@ -76,3 +76,25 @@ vp8_loop_filter_simple_bh_mmx=vp8_loop_filter_bhs_mmx
 vp8_loop_filter_simple_bh_sse2=vp8_loop_filter_bhs_sse2
 vp8_loop_filter_simple_bh_media=vp8_loop_filter_bhs_armv6
 vp8_loop_filter_simple_bh_neon=vp8_loop_filter_bhs_neon
+
+#
+# IDCT
+#
+#idct16
+prototype void vp8_short_idct4x4llm "short *input, unsigned char *pred, int pitch, unsigned char *dst, int dst_stride"
+specialize vp8_short_idct4x4llm mmx media neon
+vp8_short_idct4x4llm_media=vp8_short_idct4x4llm_v6_dual
+
+#iwalsh1
+prototype void vp8_short_inv_walsh4x4_1 "short *input, short *output"
+specialize vp8_short_inv_walsh4x4_1 c #no asm yet
+
+#iwalsh16
+prototype void vp8_short_inv_walsh4x4 "short *input, short *output"
+specialize vp8_short_inv_walsh4x4 mmx sse2 media neon
+vp8_short_inv_walsh4x4_media=vp8_short_inv_walsh4x4_v6
+
+#idct1_scalar_add
+prototype void vp8_dc_only_idct_add "short input, unsigned char *pred, int pred_stride, unsigned char *dst, int dst_stride"
+specialize vp8_dc_only_idct_add	mmx media neon
+vp8_dc_only_idct_add_media=vp8_dc_only_idct_add_v6
