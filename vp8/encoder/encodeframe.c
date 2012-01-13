@@ -29,13 +29,6 @@
 #include "vp8/common/invtrans.h"
 #include "vpx_ports/vpx_timer.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define RTCD(x)     &cpi->common.rtcd.x
-#define IF_RTCD(x)  (x)
-#else
-#define RTCD(x)     NULL
-#define IF_RTCD(x)  NULL
-#endif
 extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 extern void vp8_calc_ref_frame_costs(int *ref_frame_cost,
                                      int prob_intra,
@@ -1097,11 +1090,11 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
     }
 
     if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
-        vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
+        vp8_encode_intra4x4mby(x);
     else
-        vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+        vp8_encode_intra16x16mby(x);
 
-    vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+    vp8_encode_intra16x16mbuv(x);
 
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
@@ -1239,15 +1232,15 @@ int vp8cx_encode_inter_macroblock
 
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
+        vp8_encode_intra16x16mbuv(x);
 
         if (xd->mode_info_context->mbmi.mode == B_PRED)
         {
-            vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
+            vp8_encode_intra4x4mby(x);
         }
         else
         {
-            vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
+            vp8_encode_intra16x16mby(x);
         }
 
         sum_intra_stats(cpi, x);
@@ -1269,7 +1262,7 @@ int vp8cx_encode_inter_macroblock
 
         if (!x->skip)
         {
-            vp8_encode_inter16x16(IF_RTCD(&cpi->rtcd), x);
+            vp8_encode_inter16x16(x);
 
             // Clear mb_skip_coeff if mb_no_coeff_skip is not set
             if (!cpi->common.mb_no_coeff_skip)

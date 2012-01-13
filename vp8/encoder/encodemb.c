@@ -19,11 +19,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#else
-#define IF_RTCD(x) NULL
-#endif
 void vp8_subtract_b_c(BLOCK *be, BLOCKD *bd, int pitch)
 {
     unsigned char *src_ptr = (*(be->base_src) + be->src);
@@ -98,7 +93,7 @@ void vp8_subtract_mby_c(short *diff, unsigned char *src, int src_stride,
     }
 }
 
-static void vp8_subtract_mb(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
+static void vp8_subtract_mb(MACROBLOCK *x)
 {
     BLOCK *b = &x->block[0];
 
@@ -227,8 +222,7 @@ static const int plane_rd_mult[4]=
 };
 
 static void optimize_b(MACROBLOCK *mb, int ib, int type,
-                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                       const VP8_ENCODER_RTCD *rtcd)
+                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
 {
     BLOCK *b;
     BLOCKD *d;
@@ -509,7 +503,7 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
     }
 }
 
-static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
+static void optimize_mb(MACROBLOCK *x)
 {
     int b;
     int type;
@@ -532,27 +526,27 @@ static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     for (b = 0; b < 16; b++)
     {
         optimize_b(x, b, type,
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 
     for (b = 16; b < 24; b++)
     {
         optimize_b(x, b, PLANE_TYPE_UV,
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 
     if (has_2nd_order)
     {
         b=24;
         optimize_b(x, b, PLANE_TYPE_Y2,
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
         check_reset_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 }
 
 
-void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
+void vp8_optimize_mby(MACROBLOCK *x)
 {
     int b;
     int type;
@@ -581,7 +575,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     for (b = 0; b < 16; b++)
     {
         optimize_b(x, b, type,
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 
 
@@ -589,13 +583,13 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     {
         b=24;
         optimize_b(x, b, PLANE_TYPE_Y2,
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
         check_reset_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
             ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 }
 
-void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
+void vp8_optimize_mbuv(MACROBLOCK *x)
 {
     int b;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
@@ -617,26 +611,26 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     for (b = 16; b < 24; b++)
     {
         optimize_b(x, b, PLANE_TYPE_UV,
-            ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+            ta + vp8_block2above[b], tl + vp8_block2left[b]);
     }
 }
 
-void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
+void vp8_encode_inter16x16(MACROBLOCK *x)
 {
     vp8_build_inter_predictors_mb(&x->e_mbd);
 
-    vp8_subtract_mb(rtcd, x);
+    vp8_subtract_mb(x);
 
     transform_mb(x);
 
     vp8_quantize_mb(x);
 
     if (x->optimize)
-        optimize_mb(x, rtcd);
+        optimize_mb(x);
 }
 
 /* this funciton is used by first pass only */
-void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
+void vp8_encode_inter16x16y(MACROBLOCK *x)
 {
     BLOCK *b = &x->block[0];
 

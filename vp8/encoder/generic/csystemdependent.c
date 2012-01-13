@@ -24,12 +24,6 @@ extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
 
 void vp8_cmachine_specific_config(VP8_COMP *cpi)
 {
-#if CONFIG_RUNTIME_CPU_DETECT
-#if !(CONFIG_REALTIME_ONLY)
-    cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
-#endif
-#endif
-
     // Pure C:
     vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame;
 

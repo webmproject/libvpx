@@ -25,12 +25,6 @@
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#else
-#define IF_RTCD(x)  NULL
-#endif
-
 extern int VP8_UVSSE(MACROBLOCK *x);
 
 #ifdef SPEEDSTATS
@@ -131,7 +125,6 @@ static int get_prediction_error(BLOCK *be, BLOCKD *b)
 }
 
 static int pick_intra4x4block(
-    const VP8_ENCODER_RTCD *rtcd,
     MACROBLOCK *x,
     int ib,
     B_PREDICTION_MODE *best_mode,
@@ -169,14 +162,13 @@ static int pick_intra4x4block(
     }
 
     b->bmi.as_mode = (B_PREDICTION_MODE)(*best_mode);
-    vp8_encode_intra4x4block(rtcd, x, ib);
+    vp8_encode_intra4x4block(x, ib);
     return best_rd;
 }
 
 
 static int pick_intra4x4mby_modes
 (
-    const VP8_ENCODER_RTCD *rtcd,
     MACROBLOCK *mb,
     int *Rate,
     int *best_dist
@@ -210,7 +202,7 @@ static int pick_intra4x4mby_modes
         }
 
 
-        pick_intra4x4block(rtcd, mb, i, &best_mode, bmode_costs, &r, &d);
+        pick_intra4x4block(mb, i, &best_mode, bmode_costs, &r, &d);
 
         cost += r;
         distortion += d;
@@ -664,7 +656,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         case B_PRED:
             /* Pass best so far to pick_intra4x4mby_modes to use as breakout */
             distortion2 = best_sse;
-            pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate, &distortion2);
+            pick_intra4x4mby_modes(x, &rate, &distortion2);
 
             if (distortion2 == INT_MAX)
             {
@@ -1084,7 +1076,7 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     }
     x->e_mbd.mode_info_context->mbmi.mode = best_mode;
 
-    error4x4 = pick_intra4x4mby_modes(IF_RTCD(&cpi->rtcd), x, &rate,
+    error4x4 = pick_intra4x4mby_modes(x, &rate,
                                       &best_sse);
     if (error4x4 < error16x16)
     {

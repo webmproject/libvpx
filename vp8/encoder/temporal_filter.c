@@ -332,7 +332,7 @@ static void vp8_temporal_filter_iterate_c
                          predictor);
 
                     // Apply the filter (YUV)
-                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, apply)
+                    vp8_temporal_filter_apply
                         (f->y_buffer + mb_y_offset,
                          f->y_stride,
                          predictor,
@@ -342,7 +342,7 @@ static void vp8_temporal_filter_iterate_c
                          accumulator,
                          count);
 
-                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, apply)
+                    vp8_temporal_filter_apply
                         (f->u_buffer + mb_uv_offset,
                          f->uv_stride,
                          predictor + 256,
@@ -352,7 +352,7 @@ static void vp8_temporal_filter_iterate_c
                          accumulator + 256,
                          count + 256);
 
-                    TEMPORAL_INVOKE(&cpi->rtcd.temporal, apply)
+                    vp8_temporal_filter_apply
                         (f->v_buffer + mb_uv_offset,
                          f->uv_stride,
                          predictor + 320,

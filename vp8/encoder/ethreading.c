@@ -425,9 +425,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mbd->subpixel_predict8x4     = xd->subpixel_predict8x4;
         mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
-#if CONFIG_RUNTIME_CPU_DETECT
-        mbd->rtcd                   = xd->rtcd;
-#endif
         mb->gf_active_ptr            = x->gf_active_ptr;
 
         vpx_memset(mbr_ei[i].segment_counts, 0, sizeof(mbr_ei[i].segment_counts));

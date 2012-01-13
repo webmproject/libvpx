@@ -34,13 +34,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/systemdependent.h"
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x)  (x)
-#else
-#define IF_RTCD(x)  NULL
-#endif
-
-
 extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))

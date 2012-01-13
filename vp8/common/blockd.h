@@ -287,10 +287,6 @@ typedef struct macroblockd
      */
     DECLARE_ALIGNED(32, unsigned char, y_buf[22*32]);
 #endif
-
-#if CONFIG_RUNTIME_CPU_DETECT
-    struct VP8_COMMON_RTCD  *rtcd;
-#endif
 } MACROBLOCKD;
 
 

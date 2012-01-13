@@ -26,7 +26,6 @@
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
-#include "temporal_filter.h"
 #include "vp8/common/findnearmv.h"
 #include "lookahead.h"
 
@@ -219,12 +218,6 @@ typedef struct
     int ithread;
     void *ptr1;
 } LPFTHREAD_DATA;
-
-
-typedef struct VP8_ENCODER_RTCD
-{
-    vp8_temporal_rtcd_vtable_t  temporal;
-} VP8_ENCODER_RTCD;
 
 enum
 {
@@ -609,9 +602,6 @@ typedef struct VP8_COMP
         double est_max_qcorrection_factor;
     } twopass;
 
-#if CONFIG_RUNTIME_CPU_DETECT
-    VP8_ENCODER_RTCD            rtcd;
-#endif
 #if VP8_TEMPORAL_ALT_REF
     YV12_BUFFER_CONFIG alt_ref_buffer;
     YV12_BUFFER_CONFIG *frames[MAX_LAG_BUFFERS];

@@ -114,26 +114,4 @@ void vp8_subtract_b_sse2(BLOCK *be, BLOCKD *bd, int pitch)
 
 void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 {
-#if CONFIG_RUNTIME_CPU_DETECT
-    int flags = x86_simd_caps();
-
-    /* Note:
-     *
-     * This platform can be built without runtime CPU detection as well. If
-     * you modify any of the function mappings present in this file, be sure
-     * to also update them in static mapings (<arch>/filename_<arch>.h)
-     */
-
-    /* Override default functions with fastest ones for this CPU. */
-#if HAVE_SSE2
-    if (flags & HAS_SSE2)
-    {
-#if !(CONFIG_REALTIME_ONLY)
-        cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
-#endif
-
-    }
-#endif
-
-#endif
 }

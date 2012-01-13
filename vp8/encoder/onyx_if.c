@@ -31,7 +31,6 @@
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
-#include "temporal_filter.h"
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
@@ -42,14 +41,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <limits.h>
-
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#define RTCD(x) &cpi->common.rtcd.x
-#else
-#define IF_RTCD(x) NULL
-#define RTCD(x) NULL
-#endif
 
 extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);

@@ -31,12 +31,6 @@
 
 //#define OUTPUT_FPF 1
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define IF_RTCD(x) (x)
-#else
-#define IF_RTCD(x) NULL
-#endif
-
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
@@ -674,7 +668,7 @@ void vp8_first_pass(VP8_COMP *cpi)
                     d->bmi.mv.as_mv.col <<= 3;
                     this_error = motion_error;
                     vp8_set_mbmode_and_mvs(x, NEWMV, &d->bmi.mv);
-                    vp8_encode_inter16x16y(IF_RTCD(&cpi->rtcd), x);
+                    vp8_encode_inter16x16y(x);
                     sum_mvr += d->bmi.mv.as_mv.row;
                     sum_mvr_abs += abs(d->bmi.mv.as_mv.row);
                     sum_mvc += d->bmi.mv.as_mv.col;

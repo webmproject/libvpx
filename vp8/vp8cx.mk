@@ -84,7 +84,6 @@ VP8_CX_SRCS-yes += encoder/variance_c.c
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
-VP8_CX_SRCS-yes += encoder/temporal_filter.h
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.c
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.h
 
@@ -93,7 +92,6 @@ VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
 VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.c
 endif
 
-VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/temporal_filter_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/x86_csystemdependent.c
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/variance_mmx.c
 VP8_CX_SRCS-$(HAVE_MMX) += encoder/x86/variance_impl_mmx.asm
