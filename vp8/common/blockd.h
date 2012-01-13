@@ -200,7 +200,7 @@ typedef struct blockd
     union b_mode_info bmi;
 } BLOCKD;
 
-typedef struct MacroBlockD
+typedef struct macroblockd
 {
     DECLARE_ALIGNED(16, unsigned char,  predictor[384]);
     DECLARE_ALIGNED(16, short, qcoeff[400]);

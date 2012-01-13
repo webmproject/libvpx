@@ -13,7 +13,6 @@
 #include "vpx_ports/x86.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
-#include "vp8/common/recon.h"
 #include "vp8/common/pragmas.h"
 #include "vp8/common/onyxc_int.h"
 
@@ -35,10 +34,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
     if (flags & HAS_MMX)
     {
-        rtcd->recon.copy8x8     = vp8_copy_mem8x8_mmx;
-        rtcd->recon.copy8x4     = vp8_copy_mem8x4_mmx;
-        rtcd->recon.copy16x16   = vp8_copy_mem16x16_mmx;
-
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_mmx;
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_mmx;
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_mmx;
@@ -61,16 +56,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
     if (flags & HAS_SSE2)
     {
-        rtcd->recon.copy16x16   = vp8_copy_mem16x16_sse2;
-        rtcd->recon.build_intra_predictors_mbuv =
-            vp8_build_intra_predictors_mbuv_sse2;
-        rtcd->recon.build_intra_predictors_mbuv_s =
-            vp8_build_intra_predictors_mbuv_s_sse2;
-        rtcd->recon.build_intra_predictors_mby =
-            vp8_build_intra_predictors_mby_sse2;
-        rtcd->recon.build_intra_predictors_mby_s =
-            vp8_build_intra_predictors_mby_s_sse2;
-
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_sse2;
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_sse2;
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_sse2;
@@ -97,15 +82,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->subpix.sixtap4x4     = vp8_sixtap_predict4x4_ssse3;
         rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_ssse3;
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_ssse3;
-
-        rtcd->recon.build_intra_predictors_mbuv =
-            vp8_build_intra_predictors_mbuv_ssse3;
-        rtcd->recon.build_intra_predictors_mbuv_s =
-            vp8_build_intra_predictors_mbuv_s_ssse3;
-        rtcd->recon.build_intra_predictors_mby =
-            vp8_build_intra_predictors_mby_ssse3;
-        rtcd->recon.build_intra_predictors_mby_s =
-            vp8_build_intra_predictors_mby_s_ssse3;
     }
 #endif
 

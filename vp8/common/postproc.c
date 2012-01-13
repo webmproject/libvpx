@@ -10,10 +10,10 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vpx_scale/yv12config.h"
 #include "postproc.h"
 #include "common.h"
-#include "recon.h"
 #include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
 #include "systemdependent.h"
@@ -779,13 +779,13 @@ static void multiframe_quality_enhance_block
     {
         if (blksize == 16)
         {
-            vp8_recon_copy16x16(y, y_stride, yd, yd_stride);
-            vp8_recon_copy8x8(u, uv_stride, ud, uvd_stride);
-            vp8_recon_copy8x8(v, uv_stride, vd, uvd_stride);
+            vp8_copy_mem16x16(y, y_stride, yd, yd_stride);
+            vp8_copy_mem8x8(u, uv_stride, ud, uvd_stride);
+            vp8_copy_mem8x8(v, uv_stride, vd, uvd_stride);
         }
         else if (blksize == 8)
         {
-            vp8_recon_copy8x8(y, y_stride, yd, yd_stride);
+            vp8_copy_mem8x8(y, y_stride, yd, yd_stride);
             for (up = u, udp = ud, i = 0; i < blksizeby2; ++i, up += uv_stride, udp += uvd_stride)
                 vpx_memcpy(udp, up, blksizeby2);
             for (vp = v, vdp = vd, i = 0; i < blksizeby2; ++i, vp += uv_stride, vdp += uvd_stride)
@@ -886,9 +886,9 @@ void vp8_multiframe_quality_enhance
             }
             else
             {
-                vp8_recon_copy16x16(y_ptr, show->y_stride, yd_ptr, dest->y_stride);
-                vp8_recon_copy8x8(u_ptr, show->uv_stride, ud_ptr, dest->uv_stride);
-                vp8_recon_copy8x8(v_ptr, show->uv_stride, vd_ptr, dest->uv_stride);
+                vp8_copy_mem16x16(y_ptr, show->y_stride, yd_ptr, dest->y_stride);
+                vp8_copy_mem8x8(u_ptr, show->uv_stride, ud_ptr, dest->uv_stride);
+                vp8_copy_mem8x8(v_ptr, show->uv_stride, vd_ptr, dest->uv_stride);
             }
             y_ptr += 16;
             u_ptr += 8;

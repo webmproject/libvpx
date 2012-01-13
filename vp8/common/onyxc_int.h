@@ -13,11 +13,11 @@
 #define __INC_VP8C_INT_H
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "loopfilter.h"
 #include "entropymv.h"
 #include "entropy.h"
-#include "recon.h"
 #if CONFIG_POSTPROC
 #include "postproc.h"
 #endif
@@ -72,7 +72,6 @@ typedef enum
 typedef struct VP8_COMMON_RTCD
 {
 #if CONFIG_RUNTIME_CPU_DETECT
-    vp8_recon_rtcd_vtable_t       recon;
     vp8_subpix_rtcd_vtable_t      subpix;
 #if CONFIG_POSTPROC
     vp8_postproc_rtcd_vtable_t    postproc;

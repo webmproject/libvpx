@@ -24,7 +24,6 @@
 #include "rdopt.h"
 #include "pickinter.h"
 #include "vp8/common/findnearmv.h"
-#include "vp8/common/reconintra.h"
 #include <stdio.h>
 #include <limits.h>
 #include "vp8/common/subpixel.h"
@@ -299,7 +298,7 @@ static void build_activity_map( VP8_COMP *cpi )
             recon_yoffset += 16;
 #endif
             //Copy current mb to a buffer
-            RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+            vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
             // measure activity
             mb_activity = mb_activity_measure( cpi, x, mb_row, mb_col );
@@ -441,7 +440,7 @@ void encode_mb_row(VP8_COMP *cpi,
         x->rdmult = cpi->RDMULT;
 
         //Copy current mb to a buffer
-        RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+        vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
 #if CONFIG_MULTITHREAD
         if ((cpi->b_multi_threaded != 0) && (mb_row != 0))

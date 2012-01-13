@@ -12,11 +12,9 @@
 #include "vpx_config.h"
 #include "vpx_rtcd.h"
 #include "quantize.h"
-#include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
 #include "encodemb.h"
 #include "vp8/common/invtrans.h"
-#include "vp8/common/recon.h"
 #include "dct.h"
 #include "encodeintra.h"
 
@@ -66,7 +64,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
     BLOCKD *b = &x->e_mbd.block[ib];
     BLOCK *be = &x->block[ib];
 
-    RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
+    vp8_intra4x4_predict
                 (*(b->base_dst) + b->dst, b->dst_stride,
                  b->bmi.as_mode, b->predictor, 16);
 
@@ -106,7 +104,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     BLOCK *b = &x->block[0];
     MACROBLOCKD *xd = &x->e_mbd;
 
-    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mby_s)(&x->e_mbd);
+    vp8_build_intra_predictors_mby_s(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby) (x->src_diff, *(b->base_src),
         b->src_stride, xd->dst.y_buffer, xd->dst.y_stride);
@@ -123,7 +121,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
     MACROBLOCKD *xd = &x->e_mbd;
 
-    RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mbuv_s)(&x->e_mbd);
+    vp8_build_intra_predictors_mbuv_s(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer,
         x->src.v_buffer, x->src.uv_stride, xd->dst.u_buffer,

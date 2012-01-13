@@ -12,7 +12,6 @@
 #include "onyxd_int.h"
 #include "decodemv.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp8/common/recon.h"
 #include "vp8/common/findnearmv.h"
 
 #include <assert.h>

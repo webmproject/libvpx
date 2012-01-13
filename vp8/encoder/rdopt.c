@@ -24,7 +24,6 @@
 #include "encodeintra.h"
 #include "vp8/common/entropymode.h"
 #include "vp8/common/reconinter.h"
-#include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/findnearmv.h"
 #include "encodemb.h"
@@ -653,7 +652,7 @@ static int rd_pick_intra4x4block(
 
         rate = bmode_costs[mode];
 
-        RECON_INVOKE(&cpi->rtcd.common->recon, intra4x4_predict)
+        vp8_intra4x4_predict
                      (*(b->base_dst) + b->dst, b->dst_stride,
                       mode, b->predictor, 16);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
@@ -773,7 +772,7 @@ static int rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
     {
         x->e_mbd.mode_info_context->mbmi.mode = mode;
 
-        RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+        vp8_build_intra_predictors_mby
             (&x->e_mbd);
 
         macro_block_yrd(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
@@ -868,7 +867,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int
         int this_rd;
 
         x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-        RECON_INVOKE(&cpi->rtcd.common->recon, build_intra_predictors_mbuv)
+        vp8_build_intra_predictors_mbuv
                      (&x->e_mbd);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
                       x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,
@@ -1948,7 +1947,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         case H_PRED:
         case TM_PRED:
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-            RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+            vp8_build_intra_predictors_mby
                 (&x->e_mbd);
             macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb)) ;
             rate2 += rate_y;

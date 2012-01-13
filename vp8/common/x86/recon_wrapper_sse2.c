@@ -9,9 +9,9 @@
  */
 
 #include "vpx_config.h"
-#include "vp8/common/recon.h"
-#include "recon_x86.h"
+#include "vpx_rtcd.h"
 #include "vpx_mem/vpx_mem.h"
+#include "vp8/common/blockd.h"
 
 #define build_intra_predictors_mbuv_prototype(sym) \
     void sym(unsigned char *dst, int dst_stride, \

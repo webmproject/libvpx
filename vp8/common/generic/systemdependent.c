@@ -13,7 +13,6 @@
 #include "vpx_rtcd.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
-#include "vp8/common/recon.h"
 #include "vp8/common/onyxc_int.h"
 
 #if CONFIG_MULTITHREAD
@@ -68,22 +67,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
     VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
-
-
-    rtcd->recon.copy16x16   = vp8_copy_mem16x16_c;
-    rtcd->recon.copy8x8     = vp8_copy_mem8x8_c;
-    rtcd->recon.copy8x4     = vp8_copy_mem8x4_c;
-
-    rtcd->recon.build_intra_predictors_mby =
-        vp8_build_intra_predictors_mby;
-    rtcd->recon.build_intra_predictors_mby_s =
-        vp8_build_intra_predictors_mby_s;
-    rtcd->recon.build_intra_predictors_mbuv =
-        vp8_build_intra_predictors_mbuv;
-    rtcd->recon.build_intra_predictors_mbuv_s =
-        vp8_build_intra_predictors_mbuv_s;
-    rtcd->recon.intra4x4_predict =
-        vp8_intra4x4_predict_c;
 
     rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_c;
     rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_c;

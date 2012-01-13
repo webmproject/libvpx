@@ -61,7 +61,7 @@ static void vp8_temporal_filter_predictors_mb_c
     }
     else
     {
-        RECON_INVOKE(&x->rtcd->recon, copy16x16)(yptr, stride, &pred[0], 16);
+        vp8_copy_mem16x16(yptr, stride, &pred[0], 16);
     }
 
     // U & V
@@ -81,8 +81,8 @@ static void vp8_temporal_filter_predictors_mb_c
     }
     else
     {
-        RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, stride, &pred[256], 8);
-        RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, stride, &pred[320], 8);
+        vp8_copy_mem8x8(uptr, stride, &pred[256], 8);
+        vp8_copy_mem8x8(vptr, stride, &pred[320], 8);
     }
 }
 void vp8_temporal_filter_apply_c

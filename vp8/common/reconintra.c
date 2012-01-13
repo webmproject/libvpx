@@ -10,15 +10,15 @@
 
 
 #include "vpx_config.h"
-#include "recon.h"
-#include "reconintra.h"
+#include "vpx_rtcd.h"
 #include "vpx_mem/vpx_mem.h"
+#include "blockd.h"
 
 /* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *x) and
  * vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
  */
 
-void vp8_build_intra_predictors_mby(MACROBLOCKD *x)
+void vp8_build_intra_predictors_mby_c(MACROBLOCKD *x)
 {
 
     unsigned char *yabove_row = x->dst.y_buffer - x->dst.y_stride;
@@ -136,7 +136,7 @@ void vp8_build_intra_predictors_mby(MACROBLOCKD *x)
     }
 }
 
-void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
+void vp8_build_intra_predictors_mby_s_c(MACROBLOCKD *x)
 {
 
     unsigned char *yabove_row = x->dst.y_buffer - x->dst.y_stride;
@@ -262,7 +262,7 @@ void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x)
     }
 }
 
-void vp8_build_intra_predictors_mbuv(MACROBLOCKD *x)
+void vp8_build_intra_predictors_mbuv_c(MACROBLOCKD *x)
 {
     unsigned char *uabove_row = x->dst.u_buffer - x->dst.uv_stride;
     unsigned char uleft_col[16];
@@ -400,7 +400,7 @@ void vp8_build_intra_predictors_mbuv(MACROBLOCKD *x)
     }
 }
 
-void vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x)
+void vp8_build_intra_predictors_mbuv_s_c(MACROBLOCKD *x)
 {
     unsigned char *uabove_row = x->dst.u_buffer - x->dst.uv_stride;
     unsigned char uleft_col[16];

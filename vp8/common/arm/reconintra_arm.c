@@ -10,10 +10,9 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vp8/common/blockd.h"
-#include "vp8/common/reconintra.h"
 #include "vpx_mem/vpx_mem.h"
-#include "vp8/common/recon.h"
 
 #if HAVE_NEON
 extern void vp8_build_intra_predictors_mby_neon_func(

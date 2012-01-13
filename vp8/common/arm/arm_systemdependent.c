@@ -14,7 +14,6 @@
 #include "vp8/common/pragmas.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
-#include "vp8/common/recon.h"
 #include "vp8/common/onyxc_int.h"
 
 void vp8_arch_arm_common_init(VP8_COMMON *ctx)
@@ -42,11 +41,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_armv6;
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_armv6;
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_armv6;
-
-        rtcd->recon.copy16x16   = vp8_copy_mem16x16_v6;
-        rtcd->recon.copy8x8     = vp8_copy_mem8x8_v6;
-        rtcd->recon.copy8x4     = vp8_copy_mem8x4_v6;
-        rtcd->recon.intra4x4_predict = vp8_intra4x4_predict_armv6;
     }
 #endif
 
@@ -61,14 +55,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_neon;
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_neon;
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_neon;
-
-        rtcd->recon.copy16x16   = vp8_copy_mem16x16_neon;
-        rtcd->recon.copy8x8     = vp8_copy_mem8x8_neon;
-        rtcd->recon.copy8x4     = vp8_copy_mem8x4_neon;
-        rtcd->recon.build_intra_predictors_mby =
-            vp8_build_intra_predictors_mby_neon;
-        rtcd->recon.build_intra_predictors_mby_s =
-            vp8_build_intra_predictors_mby_s_neon;
     }
 #endif
 

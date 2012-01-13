@@ -10,13 +10,12 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "encodemb.h"
 #include "vp8/common/reconinter.h"
 #include "quantize.h"
 #include "tokenize.h"
 #include "vp8/common/invtrans.h"
-#include "vp8/common/recon.h"
-#include "vp8/common/reconintra.h"
 #include "dct.h"
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"

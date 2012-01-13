@@ -576,7 +576,7 @@ void vp8_first_pass(VP8_COMP *cpi)
             xd->left_available = (mb_col != 0);
 
             //Copy current mb to a buffer
-            RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
+            vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
             // do intra 16x16 prediction
             this_error = vp8_encode_intra(cpi, x, use_dc_pred);

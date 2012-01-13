@@ -19,7 +19,6 @@
 #include "vp8/common/findnearmv.h"
 #include "encodemb.h"
 #include "vp8/common/reconinter.h"
-#include "vp8/common/reconintra.h"
 #include "vp8/common/reconintra4x4.h"
 #include "variance.h"
 #include "mcomp.h"
@@ -155,7 +154,7 @@ static int pick_intra4x4block(
         int this_rd;
 
         rate = mode_costs[mode];
-        RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
+        vp8_intra4x4_predict
                      (*(b->base_dst) + b->dst, b->dst_stride,
                       mode, b->predictor, 16);
         distortion = get_prediction_error(be, b, &rtcd->variance);
@@ -699,7 +698,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         case V_PRED:
         case H_PRED:
         case TM_PRED:
-            RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+            vp8_build_intra_predictors_mby
                 (&x->e_mbd);
             distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
                                           (*(b->base_src), b->src_stride,
@@ -1070,7 +1069,7 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     for (mode = DC_PRED; mode <= TM_PRED; mode ++)
     {
         x->e_mbd.mode_info_context->mbmi.mode = mode;
-        RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+        vp8_build_intra_predictors_mby
             (&x->e_mbd);
         distortion = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
             (*(b->base_src), b->src_stride, x->e_mbd.predictor, 16, &sse);

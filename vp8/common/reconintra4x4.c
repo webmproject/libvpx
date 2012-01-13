@@ -9,7 +9,9 @@
  */
 
 
-#include "recon.h"
+#include "vpx_config.h"
+#include "vpx_rtcd.h"
+#include "blockd.h"
 
 void vp8_intra4x4_predict_c(unsigned char *src, int src_stride,
                             int b_mode,
