@@ -129,27 +129,29 @@ int main(int argc, char **argv) {
     int                  got_data;
     int                  flags = 0;
     int                  i;
+    int                  pts = 0;              // PTS starts at 0
+    int                  frame_duration = 1;   // 1 timebase tick per frame
 
     int                  layering_mode = 0;
     int                  frames_in_layer[MAX_LAYERS] = {0};
     int                  layer_flags[MAX_PERIODICITY] = {0};
 
     // Check usage and arguments
-    if (argc < 7)
-        die("Usage: %s <infile> <outfile> <width> <height> <mode> "
-            "<Rate_0> ... <Rate_nlayers-1>\n", argv[0]);
+    if (argc < 9)
+        die("Usage: %s <infile> <outfile> <width> <height> <rate_num> "
+            " <rate_den> <mode> <Rate_0> ... <Rate_nlayers-1>\n", argv[0]);
 
     width  = strtol (argv[3], NULL, 0);
     height = strtol (argv[4], NULL, 0);
     if (width < 16 || width%2 || height <16 || height%2)
         die ("Invalid resolution: %d x %d", width, height);
 
-    if (!sscanf(argv[5], "%d", &layering_mode))
-        die ("Invalid mode %s", argv[5]);
+    if (!sscanf(argv[7], "%d", &layering_mode))
+        die ("Invalid mode %s", argv[7]);
     if (layering_mode<0 || layering_mode>6)
-        die ("Invalid mode (0..6) %s", argv[5]);
+        die ("Invalid mode (0..6) %s", argv[7]);
 
-    if (argc != 6+mode_to_num_layers[layering_mode])
+    if (argc != 8+mode_to_num_layers[layering_mode])
         die ("Invalid number of arguments");
 
     if (!vpx_img_alloc (&raw, VPX_IMG_FMT_I420, width, height, 1))
@@ -168,8 +170,14 @@ int main(int argc, char **argv) {
     cfg.g_w = width;
     cfg.g_h = height;
 
-    for (i=6; i<6+mode_to_num_layers[layering_mode]; i++)
-        if (!sscanf(argv[i], "%d", &cfg.ts_target_bitrate[i-6]))
+    // Timebase format e.g. 30fps: numerator=1, demoninator=30
+    if (!sscanf (argv[5], "%d", &cfg.g_timebase.num ))
+        die ("Invalid timebase numerator %s", argv[5]);
+    if (!sscanf (argv[6], "%d", &cfg.g_timebase.den ))
+        die ("Invalid timebase denominator %s", argv[6]);
+
+    for (i=8; i<8+mode_to_num_layers[layering_mode]; i++)
+        if (!sscanf(argv[i], "%d", &cfg.ts_target_bitrate[i-8]))
             die ("Invalid data rate %s", argv[i]);
 
     // Real time parameters
@@ -193,7 +201,7 @@ int main(int argc, char **argv) {
     cfg.kf_min_dist = cfg.kf_max_dist = 1000;
 
     // Temporal scaling parameters:
-    // NOTE: The 3 prediction frames cannot be used interchangebly due to
+    // NOTE: The 3 prediction frames cannot be used interchangeably due to
     // differences in the way they are handled throughout the code. The
     // frames should be allocated to layers in the order LAST, GF, ARF.
     // Other combinations work, but may produce slightly inferior results.
@@ -210,14 +218,15 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[1] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
 
+#if 1
         // 0=L, 1=GF, Intra-layer prediction enabled
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
                          VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF |
                          VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF;
         layer_flags[1] = VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST |
                          VP8_EFLAG_NO_REF_ARF;
-#if 0
-        // 0=L, 1=GF, Intra-layer 1 prediction disabled
+#else
+        // 0=L, 1=GF, Intra-layer prediction disabled
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
                          VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF |
                          VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF;
@@ -275,7 +284,7 @@ int main(int argc, char **argv) {
     case 3:
     {
         // 3-layers, 4-frame period
-        int ids[6] = {0,2,1,2};
+        int ids[4] = {0,2,1,2};
         cfg.ts_number_layers     = 3;
         cfg.ts_periodicity       = 4;
         cfg.ts_rate_decimator[0] = 4;
@@ -295,13 +304,12 @@ int main(int argc, char **argv) {
                          VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
                          VP8_EFLAG_NO_UPD_ARF;
         break;
-        cfg.ts_rate_decimator[2] = 1;
     }
 
     case 4:
     {
         // 3-layers, 4-frame period
-        int ids[6] = {0,2,1,2};
+        int ids[4] = {0,2,1,2};
         cfg.ts_number_layers     = 3;
         cfg.ts_periodicity       = 4;
         cfg.ts_rate_decimator[0] = 4;
@@ -326,7 +334,7 @@ int main(int argc, char **argv) {
     case 5:
     {
         // 3-layers, 4-frame period
-        int ids[6] = {0,2,1,2};
+        int ids[4] = {0,2,1,2};
         cfg.ts_number_layers     = 3;
         cfg.ts_periodicity       = 4;
         cfg.ts_rate_decimator[0] = 4;
@@ -417,7 +425,7 @@ int main(int argc, char **argv) {
         flags = layer_flags[frame_cnt % cfg.ts_periodicity];
 
         frame_avail = read_frame(infile, &raw);
-        if (vpx_codec_encode(&codec, frame_avail? &raw : NULL, frame_cnt,
+        if (vpx_codec_encode(&codec, frame_avail? &raw : NULL, pts,
                             1, flags, VPX_DL_REALTIME))
             die_codec(&codec, "Failed to encode frame");
 
@@ -446,6 +454,7 @@ int main(int argc, char **argv) {
             fflush (stdout);
         }
         frame_cnt++;
+        pts += frame_duration;
     }
     printf ("\n");
     fclose (infile);

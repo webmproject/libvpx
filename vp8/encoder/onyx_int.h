@@ -253,6 +253,9 @@ typedef struct
     int starting_buffer_level;
     int optimal_buffer_level;
     int maximum_buffer_size;
+    int starting_buffer_level_in_ms;
+    int optimal_buffer_level_in_ms;
+    int maximum_buffer_size_in_ms;
 
     int avg_frame_size_for_layer;
 
@@ -421,6 +424,7 @@ typedef struct VP8_COMP
     int buffered_mode;
 
     double frame_rate;
+    double ref_frame_rate;
     int64_t buffer_level;
     int bits_off_target;
 

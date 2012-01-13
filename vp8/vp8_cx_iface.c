@@ -335,6 +335,10 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->under_shoot_pct          = cfg.rc_undershoot_pct;
     oxcf->over_shoot_pct           = cfg.rc_overshoot_pct;
 
+    oxcf->maximum_buffer_size_in_ms   = cfg.rc_buf_sz;
+    oxcf->starting_buffer_level_in_ms = cfg.rc_buf_initial_sz;
+    oxcf->optimal_buffer_level_in_ms  = cfg.rc_buf_optimal_sz;
+
     oxcf->maximum_buffer_size      = cfg.rc_buf_sz;
     oxcf->starting_buffer_level    = cfg.rc_buf_initial_sz;
     oxcf->optimal_buffer_level     = cfg.rc_buf_optimal_sz;

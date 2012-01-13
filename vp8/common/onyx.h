@@ -147,9 +147,13 @@ extern "C"
         int over_shoot_pct;
 
         // buffering parameters
-        int64_t starting_buffer_level;  // in seconds
+        int64_t starting_buffer_level;  // in bytes
         int64_t optimal_buffer_level;
         int64_t maximum_buffer_size;
+
+        int64_t starting_buffer_level_in_ms;  // in milli-seconds
+        int64_t optimal_buffer_level_in_ms;
+        int64_t maximum_buffer_size_in_ms;
 
         // controlling quality
         int fixed_q;
