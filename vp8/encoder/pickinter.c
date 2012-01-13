@@ -31,7 +31,7 @@
 #define IF_RTCD(x)  NULL
 #endif
 
-extern int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd);
+extern int VP8_UVSSE(MACROBLOCK *x);
 
 #ifdef SPEEDSTATS
 extern unsigned int cnt_pm;
@@ -40,7 +40,6 @@ extern unsigned int cnt_pm;
 extern const int vp8_ref_frame_order[MAX_MODES];
 extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
 
-extern unsigned int (*vp8_get4x4sse_cs)(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride);
 extern int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4]);
 
 
@@ -120,14 +119,14 @@ unsigned int vp8_get4x4sse_cs_c
     return distortion;
 }
 
-static int get_prediction_error(BLOCK *be, BLOCKD *b, const vp8_variance_rtcd_vtable_t *rtcd)
+static int get_prediction_error(BLOCK *be, BLOCKD *b)
 {
     unsigned char *sptr;
     unsigned char *dptr;
     sptr = (*(be->base_src) + be->src);
     dptr = b->predictor;
 
-    return VARIANCE_INVOKE(rtcd, get4x4sse_cs)(sptr, be->src_stride, dptr, 16);
+    return vp8_get4x4sse_cs(sptr, be->src_stride, dptr, 16);
 
 }
 
@@ -157,7 +156,7 @@ static int pick_intra4x4block(
         vp8_intra4x4_predict
                      (*(b->base_dst) + b->dst, b->dst_stride,
                       mode, b->predictor, 16);
-        distortion = get_prediction_error(be, b, &rtcd->variance);
+        distortion = get_prediction_error(be, b);
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
         if (this_rd < best_rd)
@@ -674,8 +673,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             else
             {
                 rate2 += rate;
-                distortion2 = VARIANCE_INVOKE
-                                (&cpi->rtcd.variance, var16x16)(
+                distortion2 = vp8_variance16x16(
                                     *(b->base_src), b->src_stride,
                                     x->e_mbd.predictor, 16, &sse);
                 this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
@@ -700,7 +698,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         case TM_PRED:
             vp8_build_intra_predictors_mby
                 (&x->e_mbd);
-            distortion2 = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
+            distortion2 = vp8_variance16x16
                                           (*(b->base_src), b->src_stride,
                                           x->e_mbd.predictor, 16, &sse);
             rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
@@ -937,7 +935,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 // Check u and v to make sure skip is ok
                 int sse2 = 0;
 
-                sse2 = VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
+                sse2 = VP8_UVSSE(x);
 
                 if (sse2 * 2 < x->encode_breakout)
                     x->skip = 1;
@@ -1071,7 +1069,7 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
         x->e_mbd.mode_info_context->mbmi.mode = mode;
         vp8_build_intra_predictors_mby
             (&x->e_mbd);
-        distortion = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
+        distortion = vp8_variance16x16
             (*(b->base_src), b->src_stride, x->e_mbd.predictor, 16, &sse);
         rate = x->mbmode_cost[x->e_mbd.frame_type][mode];
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);

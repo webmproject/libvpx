@@ -21,7 +21,6 @@ VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/encodemb_arm.h
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.c
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.h
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/variance_arm.c
-VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/variance_arm.h
 
 #File list for edsp
 # encoder

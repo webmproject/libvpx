@@ -94,25 +94,22 @@ static double similarity
     return ssim_n * 1.0 / ssim_d;
 }
 
-static double ssim_16x16(unsigned char *s,int sp, unsigned char *r,int rp,
-            const vp8_variance_rtcd_vtable_t *rtcd)
+static double ssim_16x16(unsigned char *s,int sp, unsigned char *r,int rp)
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
-    SSIMPF_INVOKE(rtcd,16x16)(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    vp8_ssim_parms_16x16(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
     return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 256);
 }
-static double ssim_8x8(unsigned char *s,int sp, unsigned char *r,int rp,
-                const vp8_variance_rtcd_vtable_t *rtcd)
+static double ssim_8x8(unsigned char *s,int sp, unsigned char *r,int rp)
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
-    SSIMPF_INVOKE(rtcd,8x8)(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    vp8_ssim_parms_8x8(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
     return similarity(sum_s, sum_r, sum_sq_s, sum_sq_r, sum_sxr, 64);
 }
 
 // TODO: (jbb) tried to scale this function such that we may be able to use it
 // for distortion metric in mode selection code ( provided we do a reconstruction)
-long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
-           const vp8_variance_rtcd_vtable_t *rtcd)
+long dssim(unsigned char *s,int sp, unsigned char *r,int rp)
 {
     unsigned long sum_s=0,sum_r=0,sum_sq_s=0,sum_sq_r=0,sum_sxr=0;
     int64_t ssim3;
@@ -125,7 +122,7 @@ long dssim(unsigned char *s,int sp, unsigned char *r,int rp,
     c1 = cc1*16;
     c2 = cc2*16;
 
-    SSIMPF_INVOKE(rtcd,16x16)(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
+    vp8_ssim_parms_16x16(s, sp, r, rp, &sum_s, &sum_r, &sum_sq_s, &sum_sq_r, &sum_sxr);
     ssim_n1 = (2*sum_s*sum_r+ c1);
 
     ssim_n2 =((int64_t) 2*256*sum_sxr-(int64_t) 2*sum_s*sum_r+c2);
@@ -154,8 +151,7 @@ double vp8_ssim2
     int stride_img1,
     int stride_img2,
     int width,
-    int height,
-    const vp8_variance_rtcd_vtable_t *rtcd
+    int height
 )
 {
     int i,j;
@@ -167,7 +163,7 @@ double vp8_ssim2
     {
         for(j=0; j < width-8; j+=4 )
         {
-            double v = ssim_8x8(img1+j, stride_img1, img2+j, stride_img2, rtcd);
+            double v = ssim_8x8(img1+j, stride_img1, img2+j, stride_img2);
             ssim_total += v;
             samples++;
         }
@@ -180,8 +176,7 @@ double vp8_calc_ssim
     YV12_BUFFER_CONFIG *source,
     YV12_BUFFER_CONFIG *dest,
     int lumamask,
-    double *weight,
-    const vp8_variance_rtcd_vtable_t *rtcd
+    double *weight
 )
 {
     double a, b, c;
@@ -189,15 +184,15 @@ double vp8_calc_ssim
 
     a = vp8_ssim2(source->y_buffer, dest->y_buffer,
                  source->y_stride, dest->y_stride, source->y_width,
-                 source->y_height, rtcd);
+                 source->y_height);
 
     b = vp8_ssim2(source->u_buffer, dest->u_buffer,
                  source->uv_stride, dest->uv_stride, source->uv_width,
-                 source->uv_height, rtcd);
+                 source->uv_height);
 
     c = vp8_ssim2(source->v_buffer, dest->v_buffer,
                  source->uv_stride, dest->uv_stride, source->uv_width,
-                 source->uv_height, rtcd);
+                 source->uv_height);
 
     ssimv = a * .8 + .1 * (b + c);
 
@@ -212,8 +207,7 @@ double vp8_calc_ssimg
     YV12_BUFFER_CONFIG *dest,
     double *ssim_y,
     double *ssim_u,
-    double *ssim_v,
-    const vp8_variance_rtcd_vtable_t *rtcd
+    double *ssim_v
 )
 {
     double ssim_all = 0;
@@ -221,15 +215,15 @@ double vp8_calc_ssimg
 
     a = vp8_ssim2(source->y_buffer, dest->y_buffer,
                  source->y_stride, dest->y_stride, source->y_width,
-                 source->y_height, rtcd);
+                 source->y_height);
 
     b = vp8_ssim2(source->u_buffer, dest->u_buffer,
                  source->uv_stride, dest->uv_stride, source->uv_width,
-                 source->uv_height, rtcd);
+                 source->uv_height);
 
     c = vp8_ssim2(source->v_buffer, dest->v_buffer,
                  source->uv_stride, dest->uv_stride, source->uv_width,
-                 source->uv_height, rtcd);
+                 source->uv_height);
     *ssim_y = a;
     *ssim_u = b;
     *ssim_v = c;

@@ -97,7 +97,6 @@ endif
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodemb_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/dct_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/mcomp_x86.h
-VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/variance_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/temporal_filter_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/x86_csystemdependent.c

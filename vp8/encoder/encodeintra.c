@@ -53,7 +53,7 @@ int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
         }
     }
 
-    intra_pred_var = VARIANCE_INVOKE(&cpi->rtcd.variance, getmbss)(x->src_diff);
+    intra_pred_var = vp8_get_mb_ss(x->src_diff);
 
     return intra_pred_var;
 }

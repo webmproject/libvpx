@@ -25,53 +25,6 @@ extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
 void vp8_cmachine_specific_config(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
-    cpi->rtcd.variance.sad16x16              = vp8_sad16x16_c;
-    cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;
-    cpi->rtcd.variance.sad8x16               = vp8_sad8x16_c;
-    cpi->rtcd.variance.sad8x8                = vp8_sad8x8_c;
-    cpi->rtcd.variance.sad4x4                = vp8_sad4x4_c;
-
-    cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_c;
-    cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_c;
-    cpi->rtcd.variance.sad8x16x3             = vp8_sad8x16x3_c;
-    cpi->rtcd.variance.sad8x8x3              = vp8_sad8x8x3_c;
-    cpi->rtcd.variance.sad4x4x3              = vp8_sad4x4x3_c;
-
-    cpi->rtcd.variance.sad16x16x8            = vp8_sad16x16x8_c;
-    cpi->rtcd.variance.sad16x8x8             = vp8_sad16x8x8_c;
-    cpi->rtcd.variance.sad8x16x8             = vp8_sad8x16x8_c;
-    cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_c;
-    cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_c;
-
-    cpi->rtcd.variance.sad16x16x4d           = vp8_sad16x16x4d_c;
-    cpi->rtcd.variance.sad16x8x4d            = vp8_sad16x8x4d_c;
-    cpi->rtcd.variance.sad8x16x4d            = vp8_sad8x16x4d_c;
-    cpi->rtcd.variance.sad8x8x4d             = vp8_sad8x8x4d_c;
-    cpi->rtcd.variance.sad4x4x4d             = vp8_sad4x4x4d_c;
-#if ARCH_X86 || ARCH_X86_64
-    cpi->rtcd.variance.copy32xn              = vp8_copy32xn_c;
-#endif
-    cpi->rtcd.variance.var4x4                = vp8_variance4x4_c;
-    cpi->rtcd.variance.var8x8                = vp8_variance8x8_c;
-    cpi->rtcd.variance.var8x16               = vp8_variance8x16_c;
-    cpi->rtcd.variance.var16x8               = vp8_variance16x8_c;
-    cpi->rtcd.variance.var16x16              = vp8_variance16x16_c;
-
-    cpi->rtcd.variance.subpixvar4x4          = vp8_sub_pixel_variance4x4_c;
-    cpi->rtcd.variance.subpixvar8x8          = vp8_sub_pixel_variance8x8_c;
-    cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_c;
-    cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_c;
-    cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_c;
-    cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_c;
-    cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_c;
-    cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_c;
-    cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_c;
-
-    cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;
-    cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;
-
-    cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_c;
-
     cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
     cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
     cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
@@ -94,10 +47,6 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
 #if !(CONFIG_REALTIME_ONLY)
     cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
-#endif
-#if CONFIG_INTERNAL_STATS
-    cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_c;
-    cpi->rtcd.variance.ssimpf_16x16          = vp8_ssim_parms_16x16_c;
 #endif
 #endif
 

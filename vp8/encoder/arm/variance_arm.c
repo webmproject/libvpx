@@ -9,6 +9,7 @@
  */
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/common/filter.h"
 

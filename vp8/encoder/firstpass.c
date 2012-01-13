@@ -409,7 +409,7 @@ static void zz_motion_search( VP8_COMP *cpi, MACROBLOCK * x, YV12_BUFFER_CONFIG 
 
     ref_ptr = (unsigned char *)(*(d->base_pre) + d->pre );
 
-    VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16) ( src_ptr, src_stride, ref_ptr, ref_stride, (unsigned int *)(best_motion_err));
+    vp8_mse16x16 ( src_ptr, src_stride, ref_ptr, ref_stride, (unsigned int *)(best_motion_err));
 }
 
 static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
@@ -433,7 +433,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
     int new_mv_mode_penalty = 256;
 
     // override the default variance function to use MSE
-    v_fn_ptr.vf    = VARIANCE_INVOKE(IF_RTCD(&cpi->rtcd.variance), mse16x16);
+    v_fn_ptr.vf    = vp8_mse16x16;
 
     // Set up pointers for this macro block recon buffer
     xd->pre.y_buffer = recon_buffer->y_buffer + recon_yoffset;

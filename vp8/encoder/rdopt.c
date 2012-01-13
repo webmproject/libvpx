@@ -453,7 +453,7 @@ int vp8_mbuverror_c(MACROBLOCK *mb)
     return error;
 }
 
-int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
+int VP8_UVSSE(MACROBLOCK *x)
 {
     unsigned char *uptr, *vptr;
     unsigned char *upred_ptr = (*(x->block[16].base_src) + x->block[16].src);
@@ -486,17 +486,17 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
 
     if ((mv_row | mv_col) & 7)
     {
-        VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride,
+        vp8_sub_pixel_variance8x8(uptr, pre_stride,
             mv_col & 7, mv_row & 7, upred_ptr, uv_stride, &sse2);
-        VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride,
+        vp8_sub_pixel_variance8x8(vptr, pre_stride,
             mv_col & 7, mv_row & 7, vpred_ptr, uv_stride, &sse1);
         sse2 += sse1;
     }
     else
     {
-        VARIANCE_INVOKE(rtcd, var8x8)(uptr, pre_stride,
+        vp8_variance8x8(uptr, pre_stride,
             upred_ptr, uv_stride, &sse2);
-        VARIANCE_INVOKE(rtcd, var8x8)(vptr, pre_stride,
+        vp8_variance8x8(vptr, pre_stride,
             vpred_ptr, uv_stride, &sse1);
         sse2 += sse1;
     }
@@ -2137,7 +2137,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 if(threshold < x->encode_breakout)
                     threshold = x->encode_breakout;
 
-                var = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16)
+                var = vp8_variance16x16
                         (*(b->base_src), b->src_stride,
                         x->e_mbd.predictor, 16, &sse);
 
@@ -2150,7 +2150,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                         (sse /2 > var && sse-var < 64))
                     {
                         // Check u and v to make sure skip is ok
-                        int sse2=  VP8_UVSSE(x, IF_RTCD(&cpi->rtcd.variance));
+                        int sse2=  VP8_UVSSE(x);
                         if (sse2 * 2 < threshold)
                         {
                             x->skip = 1;

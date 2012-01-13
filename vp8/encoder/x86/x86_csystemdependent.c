@@ -127,33 +127,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #if HAVE_MMX
     if (flags & HAS_MMX)
     {
-        cpi->rtcd.variance.sad16x16              = vp8_sad16x16_mmx;
-        cpi->rtcd.variance.sad16x8               = vp8_sad16x8_mmx;
-        cpi->rtcd.variance.sad8x16               = vp8_sad8x16_mmx;
-        cpi->rtcd.variance.sad8x8                = vp8_sad8x8_mmx;
-        cpi->rtcd.variance.sad4x4                = vp8_sad4x4_mmx;
-
-        cpi->rtcd.variance.var4x4                = vp8_variance4x4_mmx;
-        cpi->rtcd.variance.var8x8                = vp8_variance8x8_mmx;
-        cpi->rtcd.variance.var8x16               = vp8_variance8x16_mmx;
-        cpi->rtcd.variance.var16x8               = vp8_variance16x8_mmx;
-        cpi->rtcd.variance.var16x16              = vp8_variance16x16_mmx;
-
-        cpi->rtcd.variance.subpixvar4x4          = vp8_sub_pixel_variance4x4_mmx;
-        cpi->rtcd.variance.subpixvar8x8          = vp8_sub_pixel_variance8x8_mmx;
-        cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_mmx;
-        cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_mmx;
-        cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_mmx;
-        cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_mmx;
-        cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_mmx;
-        cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_mmx;
-        cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_mmx;
-
-        cpi->rtcd.variance.mse16x16              = vp8_mse16x16_mmx;
-        cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_mmx;
-
-        cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_mmx;
-
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_mmx;
         cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_mmx;
         cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_mmx;
@@ -175,34 +148,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #if HAVE_SSE2
     if (flags & HAS_SSE2)
     {
-        cpi->rtcd.variance.sad16x16              = vp8_sad16x16_wmt;
-        cpi->rtcd.variance.sad16x8               = vp8_sad16x8_wmt;
-        cpi->rtcd.variance.sad8x16               = vp8_sad8x16_wmt;
-        cpi->rtcd.variance.sad8x8                = vp8_sad8x8_wmt;
-        cpi->rtcd.variance.sad4x4                = vp8_sad4x4_wmt;
-        cpi->rtcd.variance.copy32xn              = vp8_copy32xn_sse2;
-
-        cpi->rtcd.variance.var4x4                = vp8_variance4x4_wmt;
-        cpi->rtcd.variance.var8x8                = vp8_variance8x8_wmt;
-        cpi->rtcd.variance.var8x16               = vp8_variance8x16_wmt;
-        cpi->rtcd.variance.var16x8               = vp8_variance16x8_wmt;
-        cpi->rtcd.variance.var16x16              = vp8_variance16x16_wmt;
-
-        cpi->rtcd.variance.subpixvar4x4          = vp8_sub_pixel_variance4x4_wmt;
-        cpi->rtcd.variance.subpixvar8x8          = vp8_sub_pixel_variance8x8_wmt;
-        cpi->rtcd.variance.subpixvar8x16         = vp8_sub_pixel_variance8x16_wmt;
-        cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_wmt;
-        cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_wmt;
-        cpi->rtcd.variance.halfpixvar16x16_h     = vp8_variance_halfpixvar16x16_h_wmt;
-        cpi->rtcd.variance.halfpixvar16x16_v     = vp8_variance_halfpixvar16x16_v_wmt;
-        cpi->rtcd.variance.halfpixvar16x16_hv    = vp8_variance_halfpixvar16x16_hv_wmt;
-        cpi->rtcd.variance.subpixmse16x16        = vp8_sub_pixel_mse16x16_wmt;
-
-        cpi->rtcd.variance.mse16x16              = vp8_mse16x16_wmt;
-        cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_sse2;
-
-        /* cpi->rtcd.variance.get4x4sse_cs  not implemented for wmt */;
-
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_sse2;
         cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_sse2;
         cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_sse2;
@@ -224,31 +169,13 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
 #endif
 
-#if CONFIG_INTERNAL_STATS
-#if ARCH_X86_64
-        cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_sse2;
-        cpi->rtcd.variance.ssimpf_16x16          = vp8_ssim_parms_16x16_sse2;
-#endif
-#endif
     }
 #endif
 
 #if HAVE_SSE3
     if (flags & HAS_SSE3)
     {
-        cpi->rtcd.variance.sad16x16              = vp8_sad16x16_sse3;
-        cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_sse3;
-        cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_sse3;
-        cpi->rtcd.variance.sad8x16x3             = vp8_sad8x16x3_sse3;
-        cpi->rtcd.variance.sad8x8x3              = vp8_sad8x8x3_sse3;
-        cpi->rtcd.variance.sad4x4x3              = vp8_sad4x4x3_sse3;
         cpi->rtcd.search.full_search             = vp8_full_search_sadx3;
-        cpi->rtcd.variance.sad16x16x4d           = vp8_sad16x16x4d_sse3;
-        cpi->rtcd.variance.sad16x8x4d            = vp8_sad16x8x4d_sse3;
-        cpi->rtcd.variance.sad8x16x4d            = vp8_sad8x16x4d_sse3;
-        cpi->rtcd.variance.sad8x8x4d             = vp8_sad8x8x4d_sse3;
-        cpi->rtcd.variance.sad4x4x4d             = vp8_sad4x4x4d_sse3;
-        cpi->rtcd.variance.copy32xn              = vp8_copy32xn_sse3;
         cpi->rtcd.search.diamond_search          = vp8_diamond_search_sadx4;
         cpi->rtcd.search.refining_search         = vp8_refining_search_sadx4;
     }
@@ -257,12 +184,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #if HAVE_SSSE3
     if (flags & HAS_SSSE3)
     {
-        cpi->rtcd.variance.sad16x16x3            = vp8_sad16x16x3_ssse3;
-        cpi->rtcd.variance.sad16x8x3             = vp8_sad16x8x3_ssse3;
-
-        cpi->rtcd.variance.subpixvar16x8         = vp8_sub_pixel_variance16x8_ssse3;
-        cpi->rtcd.variance.subpixvar16x16        = vp8_sub_pixel_variance16x16_ssse3;
-
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
     }
 #endif
@@ -272,11 +193,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #if HAVE_SSE4_1
     if (flags & HAS_SSE4_1)
     {
-        cpi->rtcd.variance.sad16x16x8            = vp8_sad16x16x8_sse4;
-        cpi->rtcd.variance.sad16x8x8             = vp8_sad16x8x8_sse4;
-        cpi->rtcd.variance.sad8x16x8             = vp8_sad8x16x8_sse4;
-        cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_sse4;
-        cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_sse4;
         cpi->rtcd.search.full_search             = vp8_full_search_sadx8;
 
         cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse4;

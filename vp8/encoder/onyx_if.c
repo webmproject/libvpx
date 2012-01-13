@@ -69,7 +69,7 @@ extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_
 
 int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 
-int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
+int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest);
 
 extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance);
 
@@ -85,8 +85,7 @@ extern double vp8_calc_ssim
     YV12_BUFFER_CONFIG *source,
     YV12_BUFFER_CONFIG *dest,
     int lumamask,
-    double *weight,
-    const vp8_variance_rtcd_vtable_t *rtcd
+    double *weight
 );
 
 
@@ -96,8 +95,7 @@ extern double vp8_calc_ssimg
     YV12_BUFFER_CONFIG *dest,
     double *ssim_y,
     double *ssim_u,
-    double *ssim_v,
-    const vp8_variance_rtcd_vtable_t *rtcd
+    double *ssim_v
 );
 
 
@@ -1947,62 +1945,62 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     vp8cx_create_encoder_threads(cpi);
 #endif
 
-    cpi->fn_ptr[BLOCK_16X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
-    cpi->fn_ptr[BLOCK_16X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16);
-    cpi->fn_ptr[BLOCK_16X16].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x16);
-    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_h  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_h);
-    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_v  = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_v);
-    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_hv = VARIANCE_INVOKE(&cpi->rtcd.variance, halfpixvar16x16_hv);
-    cpi->fn_ptr[BLOCK_16X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x3);
-    cpi->fn_ptr[BLOCK_16X16].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x8);
-    cpi->fn_ptr[BLOCK_16X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16x4d);
+    cpi->fn_ptr[BLOCK_16X16].sdf            = vp8_sad16x16;
+    cpi->fn_ptr[BLOCK_16X16].vf             = vp8_variance16x16;
+    cpi->fn_ptr[BLOCK_16X16].svf            = vp8_sub_pixel_variance16x16;
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_h  = vp8_variance_halfpixvar16x16_h;
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_v  = vp8_variance_halfpixvar16x16_v;
+    cpi->fn_ptr[BLOCK_16X16].svf_halfpix_hv = vp8_variance_halfpixvar16x16_hv;
+    cpi->fn_ptr[BLOCK_16X16].sdx3f          = vp8_sad16x16x3;
+    cpi->fn_ptr[BLOCK_16X16].sdx8f          = vp8_sad16x16x8;
+    cpi->fn_ptr[BLOCK_16X16].sdx4df         = vp8_sad16x16x4d;
 
-    cpi->fn_ptr[BLOCK_16X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8);
-    cpi->fn_ptr[BLOCK_16X8].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x8);
-    cpi->fn_ptr[BLOCK_16X8].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x8);
+    cpi->fn_ptr[BLOCK_16X8].sdf            = vp8_sad16x8;
+    cpi->fn_ptr[BLOCK_16X8].vf             = vp8_variance16x8;
+    cpi->fn_ptr[BLOCK_16X8].svf            = vp8_sub_pixel_variance16x8;
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_16X8].svf_halfpix_hv = NULL;
-    cpi->fn_ptr[BLOCK_16X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x3);
-    cpi->fn_ptr[BLOCK_16X8].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x8);
-    cpi->fn_ptr[BLOCK_16X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x8x4d);
+    cpi->fn_ptr[BLOCK_16X8].sdx3f          = vp8_sad16x8x3;
+    cpi->fn_ptr[BLOCK_16X8].sdx8f          = vp8_sad16x8x8;
+    cpi->fn_ptr[BLOCK_16X8].sdx4df         = vp8_sad16x8x4d;
 
-    cpi->fn_ptr[BLOCK_8X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16);
-    cpi->fn_ptr[BLOCK_8X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var8x16);
-    cpi->fn_ptr[BLOCK_8X16].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar8x16);
+    cpi->fn_ptr[BLOCK_8X16].sdf            = vp8_sad8x16;
+    cpi->fn_ptr[BLOCK_8X16].vf             = vp8_variance8x16;
+    cpi->fn_ptr[BLOCK_8X16].svf            = vp8_sub_pixel_variance8x16;
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_8X16].svf_halfpix_hv = NULL;
-    cpi->fn_ptr[BLOCK_8X16].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x3);
-    cpi->fn_ptr[BLOCK_8X16].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x8);
-    cpi->fn_ptr[BLOCK_8X16].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x16x4d);
+    cpi->fn_ptr[BLOCK_8X16].sdx3f          = vp8_sad8x16x3;
+    cpi->fn_ptr[BLOCK_8X16].sdx8f          = vp8_sad8x16x8;
+    cpi->fn_ptr[BLOCK_8X16].sdx4df         = vp8_sad8x16x4d;
 
-    cpi->fn_ptr[BLOCK_8X8].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8);
-    cpi->fn_ptr[BLOCK_8X8].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var8x8);
-    cpi->fn_ptr[BLOCK_8X8].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar8x8);
+    cpi->fn_ptr[BLOCK_8X8].sdf            = vp8_sad8x8;
+    cpi->fn_ptr[BLOCK_8X8].vf             = vp8_variance8x8;
+    cpi->fn_ptr[BLOCK_8X8].svf            = vp8_sub_pixel_variance8x8;
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_8X8].svf_halfpix_hv = NULL;
-    cpi->fn_ptr[BLOCK_8X8].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x3);
-    cpi->fn_ptr[BLOCK_8X8].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x8);
-    cpi->fn_ptr[BLOCK_8X8].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad8x8x4d);
+    cpi->fn_ptr[BLOCK_8X8].sdx3f          = vp8_sad8x8x3;
+    cpi->fn_ptr[BLOCK_8X8].sdx8f          = vp8_sad8x8x8;
+    cpi->fn_ptr[BLOCK_8X8].sdx4df         = vp8_sad8x8x4d;
 
-    cpi->fn_ptr[BLOCK_4X4].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4);
-    cpi->fn_ptr[BLOCK_4X4].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var4x4);
-    cpi->fn_ptr[BLOCK_4X4].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar4x4);
+    cpi->fn_ptr[BLOCK_4X4].sdf            = vp8_sad4x4;
+    cpi->fn_ptr[BLOCK_4X4].vf             = vp8_variance4x4;
+    cpi->fn_ptr[BLOCK_4X4].svf            = vp8_sub_pixel_variance4x4;
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_h  = NULL;
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_v  = NULL;
     cpi->fn_ptr[BLOCK_4X4].svf_halfpix_hv = NULL;
-    cpi->fn_ptr[BLOCK_4X4].sdx3f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x3);
-    cpi->fn_ptr[BLOCK_4X4].sdx8f          = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x8);
-    cpi->fn_ptr[BLOCK_4X4].sdx4df         = VARIANCE_INVOKE(&cpi->rtcd.variance, sad4x4x4d);
+    cpi->fn_ptr[BLOCK_4X4].sdx3f          = vp8_sad4x4x3;
+    cpi->fn_ptr[BLOCK_4X4].sdx8f          = vp8_sad4x4x8;
+    cpi->fn_ptr[BLOCK_4X4].sdx4df         = vp8_sad4x4x4d;
 
 #if ARCH_X86 || ARCH_X86_64
-    cpi->fn_ptr[BLOCK_16X16].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
-    cpi->fn_ptr[BLOCK_16X8].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
-    cpi->fn_ptr[BLOCK_8X16].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
-    cpi->fn_ptr[BLOCK_8X8].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
-    cpi->fn_ptr[BLOCK_4X4].copymem        = VARIANCE_INVOKE(&cpi->rtcd.variance, copy32xn);
+    cpi->fn_ptr[BLOCK_16X16].copymem      = vp8_copy32xn;
+    cpi->fn_ptr[BLOCK_16X8].copymem       = vp8_copy32xn;
+    cpi->fn_ptr[BLOCK_8X16].copymem       = vp8_copy32xn;
+    cpi->fn_ptr[BLOCK_8X8].copymem        = vp8_copy32xn;
+    cpi->fn_ptr[BLOCK_4X4].copymem        = vp8_copy32xn;
 #endif
 
     cpi->full_search_sad = SEARCH_INVOKE(&cpi->rtcd.search, full_search);
@@ -2334,8 +2332,7 @@ void vp8_remove_compressor(VP8_COMP **ptr)
 
 static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
                                  unsigned char *recon, int recon_stride,
-                                 unsigned int cols, unsigned int rows,
-                                 vp8_variance_rtcd_vtable_t *rtcd)
+                                 unsigned int cols, unsigned int rows)
 {
     unsigned int row, col;
     uint64_t total_sse = 0;
@@ -2347,7 +2344,7 @@ static uint64_t calc_plane_error(unsigned char *orig, int orig_stride,
         {
             unsigned int sse;
 
-            VARIANCE_INVOKE(rtcd, mse16x16)(orig + col, orig_stride,
+            vp8_mse16x16(orig + col, orig_stride,
                                             recon + col, recon_stride,
                                             &sse);
             total_sse += sse;
@@ -2408,8 +2405,7 @@ static void generate_psnr_packet(VP8_COMP *cpi)
     pkt.kind = VPX_CODEC_PSNR_PKT;
     sse = calc_plane_error(orig->y_buffer, orig->y_stride,
                            recon->y_buffer, recon->y_stride,
-                           width, height,
-                           IF_RTCD(&cpi->rtcd.variance));
+                           width, height);
     pkt.data.psnr.sse[0] = sse;
     pkt.data.psnr.sse[1] = sse;
     pkt.data.psnr.samples[0] = width * height;
@@ -2420,8 +2416,7 @@ static void generate_psnr_packet(VP8_COMP *cpi)
 
     sse = calc_plane_error(orig->u_buffer, orig->uv_stride,
                            recon->u_buffer, recon->uv_stride,
-                           width, height,
-                           IF_RTCD(&cpi->rtcd.variance));
+                           width, height);
     pkt.data.psnr.sse[0] += sse;
     pkt.data.psnr.sse[2] = sse;
     pkt.data.psnr.samples[0] += width * height;
@@ -2429,8 +2424,7 @@ static void generate_psnr_packet(VP8_COMP *cpi)
 
     sse = calc_plane_error(orig->v_buffer, orig->uv_stride,
                            recon->v_buffer, recon->uv_stride,
-                           width, height,
-                           IF_RTCD(&cpi->rtcd.variance));
+                           width, height);
     pkt.data.psnr.sse[0] += sse;
     pkt.data.psnr.sse[3] = sse;
     pkt.data.psnr.samples[0] += width * height;
@@ -3819,8 +3813,7 @@ static void encode_frame_to_data_rate
         {
             int last_q = Q;
             int kf_err = vp8_calc_ss_err(cpi->Source,
-                                         &cm->yv12_fb[cm->new_fb_idx],
-                                         IF_RTCD(&cpi->rtcd.variance));
+                                         &cm->yv12_fb[cm->new_fb_idx]);
 
             // The key frame is not good enough
             if ( kf_err > ((cpi->ambient_err * 7) >> 3) )
@@ -4016,8 +4009,7 @@ static void encode_frame_to_data_rate
     if ( cpi->next_key_frame_forced && (cpi->twopass.frames_to_key == 0) )
     {
         cpi->ambient_err = vp8_calc_ss_err(cpi->Source,
-                                           &cm->yv12_fb[cm->new_fb_idx],
-                                           IF_RTCD(&cpi->rtcd.variance));
+                                           &cm->yv12_fb[cm->new_fb_idx]);
     }
 
     /* This frame's MVs are saved and will be used in next frame's MV predictor.
@@ -4961,16 +4953,13 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 int64_t sq_error, sq_error2;
 
                 ye = calc_plane_error(orig->y_buffer, orig->y_stride,
-                  recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height,
-                  IF_RTCD(&cpi->rtcd.variance));
+                  recon->y_buffer, recon->y_stride, orig->y_width, orig->y_height);
 
                 ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
-                  recon->u_buffer, recon->uv_stride, orig->uv_width, orig->uv_height,
-                  IF_RTCD(&cpi->rtcd.variance));
+                  recon->u_buffer, recon->uv_stride, orig->uv_width, orig->uv_height);
 
                 ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
-                  recon->v_buffer, recon->uv_stride, orig->uv_width, orig->uv_height,
-                  IF_RTCD(&cpi->rtcd.variance));
+                  recon->v_buffer, recon->uv_stride, orig->uv_width, orig->uv_height);
 
                 sq_error = ye + ue + ve;
 
@@ -4985,20 +4974,17 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                     double frame_psnr2, frame_ssim2 = 0;
                     double weight = 0;
 
-                    vp8_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0, IF_RTCD(&cm->rtcd.postproc));
+                    vp8_deblock(cm->frame_to_show, &cm->post_proc_buffer, cm->filter_level * 10 / 6, 1, 0);
                     vp8_clear_system_state();
 
                     ye = calc_plane_error(orig->y_buffer, orig->y_stride,
-                      pp->y_buffer, pp->y_stride, orig->y_width, orig->y_height,
-                      IF_RTCD(&cpi->rtcd.variance));
+                      pp->y_buffer, pp->y_stride, orig->y_width, orig->y_height);
 
                     ue = calc_plane_error(orig->u_buffer, orig->uv_stride,
-                      pp->u_buffer, pp->uv_stride, orig->uv_width, orig->uv_height,
-                      IF_RTCD(&cpi->rtcd.variance));
+                      pp->u_buffer, pp->uv_stride, orig->uv_width, orig->uv_height);
 
                     ve = calc_plane_error(orig->v_buffer, orig->uv_stride,
-                      pp->v_buffer, pp->uv_stride, orig->uv_width, orig->uv_height,
-                      IF_RTCD(&cpi->rtcd.variance));
+                      pp->v_buffer, pp->uv_stride, orig->uv_width, orig->uv_height);
 
                     sq_error2 = ye + ue + ve;
 
@@ -5011,8 +4997,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                     cpi->totalp  += frame_psnr2;
 
                     frame_ssim2 = vp8_calc_ssim(cpi->Source,
-                      &cm->post_proc_buffer, 1, &weight,
-                      IF_RTCD(&cpi->rtcd.variance));
+                      &cm->post_proc_buffer, 1, &weight);
 
                     cpi->summed_quality += frame_ssim2 * weight;
                     cpi->summed_weights += weight;
@@ -5042,7 +5027,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
             {
                 double y, u, v, frame_all;
                 frame_all =  vp8_calc_ssimg(cpi->Source, cm->frame_to_show,
-                    &y, &u, &v, IF_RTCD(&cpi->rtcd.variance));
+                    &y, &u, &v);
 
                 if (cpi->oxcf.number_of_layers > 1)
                 {
@@ -5222,14 +5207,13 @@ int vp8_set_internal_size(VP8_COMP *cpi, VPX_SCALING horiz_mode, VPX_SCALING ver
 
 
 
-int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd)
+int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest)
 {
     int i, j;
     int Total = 0;
 
     unsigned char *src = source->y_buffer;
     unsigned char *dst = dest->y_buffer;
-    (void)rtcd;
 
     // Loop through the Y plane raw and reconstruction data summing (square differences)
     for (i = 0; i < source->y_height; i += 16)
@@ -5237,7 +5221,7 @@ int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const 
         for (j = 0; j < source->y_width; j += 16)
         {
             unsigned int sse;
-            Total += VARIANCE_INVOKE(rtcd, mse16x16)(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
+            Total += vp8_mse16x16(src + j, source->y_stride, dst + j, dest->y_stride, &sse);
         }
 
         src += 16 * source->y_stride;
