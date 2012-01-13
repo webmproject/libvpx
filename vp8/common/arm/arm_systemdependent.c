@@ -47,17 +47,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->idct.idct16       = vp8_short_idct4x4llm_v6_dual;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_v6;
 
-        rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_armv6;
-        rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_armv6;
-        rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_armv6;
-        rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_armv6;
-        rtcd->loopfilter.simple_mb_v =
-                vp8_loop_filter_simple_vertical_edge_armv6;
-        rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_armv6;
-        rtcd->loopfilter.simple_mb_h =
-                vp8_loop_filter_simple_horizontal_edge_armv6;
-        rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_armv6;
-
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_v6;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_v6;
         rtcd->recon.copy8x4     = vp8_copy_mem8x4_v6;
@@ -79,15 +68,6 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
 
         rtcd->idct.idct16       = vp8_short_idct4x4llm_neon;
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_neon;
-
-        rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_neon;
-        rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_neon;
-        rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_neon;
-        rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_neon;
-        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_mbvs_neon;
-        rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_neon;
-        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_mbhs_neon;
-        rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_neon;
 
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_neon;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_neon;

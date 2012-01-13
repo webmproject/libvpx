@@ -53,15 +53,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_mmx;
         rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_mmx;
 
-        rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_mmx;
-        rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_mmx;
-        rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_mmx;
-        rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_mmx;
-        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_simple_vertical_edge_mmx;
-        rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_mmx;
-        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_simple_horizontal_edge_mmx;
-        rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_mmx;
-
 #if CONFIG_POSTPROC
         rtcd->postproc.down        = vp8_mbpost_proc_down_mmx;
         /*rtcd->postproc.across      = vp8_mbpost_proc_across_ip_c;*/
@@ -92,15 +83,6 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_sse2;
         rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_sse2;
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_sse2;
-
-        rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_sse2;
-        rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_sse2;
-        rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_sse2;
-        rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_sse2;
-        rtcd->loopfilter.simple_mb_v = vp8_loop_filter_simple_vertical_edge_sse2;
-        rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_sse2;
-        rtcd->loopfilter.simple_mb_h = vp8_loop_filter_simple_horizontal_edge_sse2;
-        rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_sse2;
 
 #if CONFIG_POSTPROC
         rtcd->postproc.down        = vp8_mbpost_proc_down_xmm;

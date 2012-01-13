@@ -100,15 +100,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_c;
     rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_c;
 
-    rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_c;
-    rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_c;
-    rtcd->loopfilter.normal_mb_h = vp8_loop_filter_mbh_c;
-    rtcd->loopfilter.normal_b_h  = vp8_loop_filter_bh_c;
-    rtcd->loopfilter.simple_mb_v = vp8_loop_filter_simple_vertical_edge_c;
-    rtcd->loopfilter.simple_b_v  = vp8_loop_filter_bvs_c;
-    rtcd->loopfilter.simple_mb_h = vp8_loop_filter_simple_horizontal_edge_c;
-    rtcd->loopfilter.simple_b_h  = vp8_loop_filter_bhs_c;
-
 #if CONFIG_POSTPROC || (CONFIG_VP8_ENCODER && CONFIG_INTERNAL_STATS)
     rtcd->postproc.down             = vp8_mbpost_proc_down_c;
     rtcd->postproc.across           = vp8_mbpost_proc_across_ip_c;

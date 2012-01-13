@@ -12,10 +12,19 @@
 #include "vpx_config.h"
 #include "vp8/common/loopfilter.h"
 
+#define prototype_loopfilter(sym) \
+    void sym(unsigned char *src, int pitch, const unsigned char *blimit,\
+             const unsigned char *limit, const unsigned char *thresh, int count)
+
+#define prototype_simple_loopfilter(sym) \
+    void sym(unsigned char *y, int ystride, const unsigned char *blimit)
+
 prototype_loopfilter(vp8_mbloop_filter_vertical_edge_mmx);
 prototype_loopfilter(vp8_mbloop_filter_horizontal_edge_mmx);
 prototype_loopfilter(vp8_loop_filter_vertical_edge_mmx);
 prototype_loopfilter(vp8_loop_filter_horizontal_edge_mmx);
+prototype_simple_loopfilter(vp8_loop_filter_simple_horizontal_edge_mmx);
+prototype_simple_loopfilter(vp8_loop_filter_simple_vertical_edge_mmx);
 
 #if HAVE_SSE2 && ARCH_X86_64
 prototype_loopfilter(vp8_loop_filter_bv_y_sse2);

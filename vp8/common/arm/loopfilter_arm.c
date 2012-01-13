@@ -10,8 +10,13 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/onyxc_int.h"
+
+#define prototype_loopfilter(sym) \
+    void sym(unsigned char *src, int pitch, const unsigned char *blimit,\
+             const unsigned char *limit, const unsigned char *thresh, int count)
 
 #if HAVE_MEDIA
 extern prototype_loopfilter(vp8_loop_filter_horizontal_edge_armv6);

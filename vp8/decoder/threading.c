@@ -442,39 +442,39 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
                                     lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
                                     if (mb_col > 0)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, normal_mb_v)
+                                        vp8_loop_filter_mbv
                                         (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
 
                                     if (!skip_lf)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, normal_b_v)
+                                        vp8_loop_filter_bv
                                         (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
 
                                     /* don't apply across umv border */
                                     if (mb_row > 0)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, normal_mb_h)
+                                        vp8_loop_filter_mbh
                                         (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
 
                                     if (!skip_lf)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, normal_b_h)
+                                        vp8_loop_filter_bh
                                         (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer,  recon_y_stride, recon_uv_stride, &lfi);
                                 }
                                 else
                                 {
                                     if (mb_col > 0)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, simple_mb_v)
+                                        vp8_loop_filter_simple_mbv
                                         (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
 
                                     if (!skip_lf)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, simple_b_v)
+                                        vp8_loop_filter_simple_bv
                                         (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
 
                                     /* don't apply across umv border */
                                     if (mb_row > 0)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, simple_mb_h)
+                                        vp8_loop_filter_simple_mbh
                                         (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
 
                                     if (!skip_lf)
-                                        LF_INVOKE(&pc->rtcd.loopfilter, simple_b_h)
+                                        vp8_loop_filter_simple_bh
                                         (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
                                 }
                             }
@@ -940,39 +940,39 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
                             lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
                             if (mb_col > 0)
-                                LF_INVOKE(&pc->rtcd.loopfilter, normal_mb_v)
+                                vp8_loop_filter_mbv
                                 (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
 
                             if (!skip_lf)
-                                LF_INVOKE(&pc->rtcd.loopfilter, normal_b_v)
+                                vp8_loop_filter_bv
                                 (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
 
                             /* don't apply across umv border */
                             if (mb_row > 0)
-                                LF_INVOKE(&pc->rtcd.loopfilter, normal_mb_h)
+                                vp8_loop_filter_mbh
                                 (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
 
                             if (!skip_lf)
-                                LF_INVOKE(&pc->rtcd.loopfilter, normal_b_h)
+                                vp8_loop_filter_bh
                                 (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer,  recon_y_stride, recon_uv_stride, &lfi);
                         }
                         else
                         {
                             if (mb_col > 0)
-                                LF_INVOKE(&pc->rtcd.loopfilter, simple_mb_v)
+                                vp8_loop_filter_simple_mbv
                                 (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
 
                             if (!skip_lf)
-                                LF_INVOKE(&pc->rtcd.loopfilter, simple_b_v)
+                                vp8_loop_filter_simple_bv
                                 (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
 
                             /* don't apply across umv border */
                             if (mb_row > 0)
-                                LF_INVOKE(&pc->rtcd.loopfilter, simple_mb_h)
+                                vp8_loop_filter_simple_mbh
                                 (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
 
                             if (!skip_lf)
-                                LF_INVOKE(&pc->rtcd.loopfilter, simple_b_h)
+                                vp8_loop_filter_simple_bh
                                 (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
                         }
                     }
