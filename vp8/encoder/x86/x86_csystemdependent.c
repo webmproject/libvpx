@@ -127,13 +127,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #if HAVE_MMX
     if (flags & HAS_MMX)
     {
-        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_mmx;
-        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_mmx;
-        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_mmx;
-        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_mmx;
-
-        cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
-
         cpi->rtcd.encodemb.berr                  = vp8_block_error_mmx;
         cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_mmx;
         cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_mmx;
@@ -148,13 +141,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
 #if HAVE_SSE2
     if (flags & HAS_SSE2)
     {
-        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_sse2;
-        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_sse2;
-        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_sse2;
-        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_sse2;
-
-        cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_sse2 ;
-
         cpi->rtcd.encodemb.berr                  = vp8_block_error_xmm;
         cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_xmm;
         cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_xmm;

@@ -16,7 +16,6 @@
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/arm_csystemdependent.c
 
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.c
-VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/dct_arm.h
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/encodemb_arm.h
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.c
 VP8_CX_SRCS-$(ARCH_ARM)  += encoder/arm/quantize_arm.h

@@ -16,7 +16,6 @@
 #include "quantize.h"
 #include "tokenize.h"
 #include "vp8/common/invtrans.h"
-#include "dct.h"
 #include "vpx_mem/vpx_mem.h"
 #include "rdopt.h"
 
@@ -127,7 +126,7 @@ void vp8_transform_mbuv(MACROBLOCK *x)
 
     for (i = 16; i < 24; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+        x->short_fdct8x4(&x->block[i].src_diff[0],
             &x->block[i].coeff[0], 16);
     }
 }
@@ -139,7 +138,7 @@ void vp8_transform_intra_mby(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+        x->short_fdct8x4(&x->block[i].src_diff[0],
             &x->block[i].coeff[0], 32);
     }
 
@@ -159,7 +158,7 @@ static void transform_mb(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+        x->short_fdct8x4(&x->block[i].src_diff[0],
             &x->block[i].coeff[0], 32);
     }
 
@@ -169,7 +168,7 @@ static void transform_mb(MACROBLOCK *x)
 
     for (i = 16; i < 24; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+        x->short_fdct8x4(&x->block[i].src_diff[0],
             &x->block[i].coeff[0], 16);
     }
 
@@ -187,7 +186,7 @@ static void transform_mby(MACROBLOCK *x)
 
     for (i = 0; i < 16; i += 2)
     {
-        x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
+        x->short_fdct8x4(&x->block[i].src_diff[0],
             &x->block[i].coeff[0], 32);
     }
 

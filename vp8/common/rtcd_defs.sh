@@ -392,5 +392,20 @@ if [ "$CONFIG_INTERNAL_STATS" = "yes" ]; then
     specialize vp8_ssim_parms_16x16 $sse2_on_x86_64
 fi
 
+#
+# Forward DCT
+#
+prototype void vp8_short_fdct4x4 "short *input, short *output, int pitch"
+specialize vp8_short_fdct4x4 mmx sse2 media neon
+vp8_short_fdct4x4_media=vp8_short_fdct4x4_armv6
+
+prototype void vp8_short_fdct8x4 "short *input, short *output, int pitch"
+specialize vp8_short_fdct8x4 mmx sse2 media neon
+vp8_short_fdct8x4_media=vp8_short_fdct8x4_armv6
+
+prototype void vp8_short_walsh4x4 "short *input, short *output, int pitch"
+specialize vp8_short_walsh4x4 mmx sse2 media neon
+vp8_short_walsh4x4_media=vp8_short_walsh4x4_armv6
+
 # End of encoder only functions
 fi

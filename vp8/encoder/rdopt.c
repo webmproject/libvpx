@@ -32,7 +32,6 @@
 #include "mcomp.h"
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
-#include "dct.h"
 #include "vp8/common/systemdependent.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -580,7 +579,7 @@ static void macro_block_yrd( MACROBLOCK *mb,
     // Fdct and building the 2nd order block
     for (beptr = mb->block; beptr < mb->block + 16; beptr += 2)
     {
-        mb->vp8_short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
+        mb->short_fdct8x4(beptr->src_diff, beptr->coeff, 32);
         *Y2DCPtr++ = beptr->coeff[0];
         *Y2DCPtr++ = beptr->coeff[16];
     }
@@ -656,7 +655,7 @@ static int rd_pick_intra4x4block(
                      (*(b->base_dst) + b->dst, b->dst_stride,
                       mode, b->predictor, 16);
         ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), subb)(be, b, 16);
-        x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+        x->short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b(be, b);
 
         tempa = ta;
@@ -1028,7 +1027,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
 
             vp8_build_inter_predictors_b(bd, 16, x->e_mbd.subpixel_predict);
             ENCODEMB_INVOKE(rtcd, subb)(be, bd, 16);
-            x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+            x->short_fdct4x4(be->src_diff, be->coeff, 32);
 
             // set to 0 no way to account for 2nd order DC so discount
             //be->coeff[0] = 0;

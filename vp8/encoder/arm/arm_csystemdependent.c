@@ -32,12 +32,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 #if HAVE_MEDIA
     if (flags & HAS_MEDIA)
     {
-        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_armv6;
-        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_armv6;
-        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_armv6;
-        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_armv6;
-        cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_armv6;
-
         /*cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
         cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_c;
         cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;*/
@@ -53,12 +47,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 #if HAVE_NEON
     if (flags & HAS_NEON)
     {
-        cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_neon;
-        cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_neon;
-        cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_neon;
-        cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_neon;
-        cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_neon;
-
         /*cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
         cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_c;
         cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;*/

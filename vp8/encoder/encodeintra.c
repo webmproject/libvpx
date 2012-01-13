@@ -15,7 +15,6 @@
 #include "vp8/common/reconintra4x4.h"
 #include "encodemb.h"
 #include "vp8/common/invtrans.h"
-#include "dct.h"
 #include "encodeintra.h"
 
 
@@ -70,7 +69,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 
     ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
-    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+    x->short_fdct4x4(be->src_diff, be->coeff, 32);
 
     x->quantize_b(be, b);
 

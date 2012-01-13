@@ -25,12 +25,6 @@ extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
 void vp8_cmachine_specific_config(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
-    cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
-    cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
-    cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
-    cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
-    cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
-
     cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
     cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_c;
     cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;
