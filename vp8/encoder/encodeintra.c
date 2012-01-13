@@ -67,7 +67,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
                 (*(b->base_dst) + b->dst, b->dst_stride,
                  b->bmi.as_mode, b->predictor, 16);
 
-    ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
+    vp8_subtract_b(be, b, 16);
 
     x->short_fdct4x4(be->src_diff, be->coeff, 32);
 
@@ -105,7 +105,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_build_intra_predictors_mby_s(&x->e_mbd);
 
-    ENCODEMB_INVOKE(&rtcd->encodemb, submby) (x->src_diff, *(b->base_src),
+    vp8_subtract_mby(x->src_diff, *(b->base_src),
         b->src_stride, xd->dst.y_buffer, xd->dst.y_stride);
 
     vp8_transform_intra_mby(x);
@@ -122,7 +122,7 @@ void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_build_intra_predictors_mbuv_s(&x->e_mbd);
 
-    ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer,
+    vp8_subtract_mbuv(x->src_diff, x->src.u_buffer,
         x->src.v_buffer, x->src.uv_stride, xd->dst.u_buffer,
         xd->dst.v_buffer, xd->dst.uv_stride);
 

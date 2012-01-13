@@ -437,5 +437,32 @@ specialize vp8_quantize_mby neon
 prototype void vp8_quantize_mbuv "struct macroblock *"
 specialize vp8_quantize_mbuv neon
 
+#
+# Block subtraction
+#
+prototype int vp8_block_error "short *coeff, short *dqcoeff"
+specialize vp8_block_error mmx sse2
+vp8_block_error_sse2=vp8_block_error_xmm
+
+prototype int vp8_mbblock_error "struct macroblock *mb, int dc"
+specialize vp8_mbblock_error mmx sse2
+vp8_mbblock_error_sse2=vp8_mbblock_error_xmm
+
+prototype int vp8_mbuverror "struct macroblock *mb"
+specialize vp8_mbuverror mmx sse2
+vp8_mbuverror_sse2=vp8_mbuverror_xmm
+
+prototype void vp8_subtract_b "struct block *be, struct blockd *bd, int pitch"
+specialize vp8_subtract_b mmx sse2 media neon
+vp8_subtract_b_media=vp8_subtract_b_armv6
+
+prototype void vp8_subtract_mby "short *diff, unsigned char *src, int src_stride, unsigned char *pred, int pred_stride"
+specialize vp8_subtract_mby mmx sse2 media neon
+vp8_subtract_mby_media=vp8_subtract_mby_armv6
+
+prototype void vp8_subtract_mbuv "short *diff, unsigned char *usrc, unsigned char *vsrc, int src_stride, unsigned char *upred, unsigned char *vpred, int pred_stride"
+specialize vp8_subtract_mbuv mmx sse2 media neon
+vp8_subtract_mbuv_media=vp8_subtract_mbuv_armv6
+
 # End of encoder only functions
 fi

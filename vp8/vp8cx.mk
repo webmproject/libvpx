@@ -93,7 +93,6 @@ VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
 VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.c
 endif
 
-VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodemb_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/mcomp_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/temporal_filter_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/x86_csystemdependent.c

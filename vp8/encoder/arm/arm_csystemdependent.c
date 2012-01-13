@@ -29,29 +29,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
     }
 #endif
 
-#if HAVE_MEDIA
-    if (flags & HAS_MEDIA)
-    {
-        /*cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
-        cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_c;
-        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;*/
-        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_armv6;
-        cpi->rtcd.encodemb.submby                = vp8_subtract_mby_armv6;
-        cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_armv6;
-    }
-#endif /* HAVE_MEDIA */
-
-#if HAVE_NEON
-    if (flags & HAS_NEON)
-    {
-        /*cpi->rtcd.encodemb.berr                  = vp8_block_error_c;
-        cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_c;
-        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_c;*/
-        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_neon;
-        cpi->rtcd.encodemb.submby                = vp8_subtract_mby_neon;
-        cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_neon;
-    }
-#endif /* HAVE_NEON */
 #endif /* CONFIG_RUNTIME_CPU_DETECT */
 
 #if HAVE_NEON

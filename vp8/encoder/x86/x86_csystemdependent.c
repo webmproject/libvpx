@@ -125,29 +125,9 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
      */
 
     /* Override default functions with fastest ones for this CPU. */
-#if HAVE_MMX
-    if (flags & HAS_MMX)
-    {
-        cpi->rtcd.encodemb.berr                  = vp8_block_error_mmx;
-        cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_mmx;
-        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_mmx;
-        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_mmx;
-        cpi->rtcd.encodemb.submby                = vp8_subtract_mby_mmx;
-        cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_mmx;
-
-        /*cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_mmx;*/
-    }
-#endif
-
 #if HAVE_SSE2
     if (flags & HAS_SSE2)
     {
-        cpi->rtcd.encodemb.berr                  = vp8_block_error_xmm;
-        cpi->rtcd.encodemb.mberr                 = vp8_mbblock_error_xmm;
-        cpi->rtcd.encodemb.mbuverr               = vp8_mbuverror_xmm;
-        cpi->rtcd.encodemb.subb                  = vp8_subtract_b_sse2;
-        cpi->rtcd.encodemb.submby                = vp8_subtract_mby_sse2;
-        cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
 #if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
 #endif
