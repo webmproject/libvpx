@@ -25,9 +25,6 @@ extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
 void vp8_cmachine_specific_config(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
-    cpi->rtcd.search.full_search             = vp8_full_search_sad;
-    cpi->rtcd.search.refining_search         = vp8_refining_search_sad;
-    cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
 #if !(CONFIG_REALTIME_ONLY)
     cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
 #endif

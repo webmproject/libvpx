@@ -96,7 +96,7 @@ typedef unsigned int (*vp8_get16x16prederror_fn_t)
      int  ref_stride
     );
 
-typedef struct
+typedef struct variance_vtable
 {
     vp8_sad_fn_t            sdf;
     vp8_variance_fn_t       vf;

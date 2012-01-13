@@ -1009,7 +1009,7 @@ cal_neighbors:
 #undef CHECK_POINT
 #undef CHECK_BETTER
 
-int vp8_diamond_search_sad
+int vp8_diamond_search_sad_c
 (
     MACROBLOCK *x,
     BLOCK *b,
@@ -1292,7 +1292,7 @@ int vp8_diamond_search_sadx4
         + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
 }
 
-int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
+int vp8_full_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                         int sad_per_bit, int distance,
                         vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2],
                         int_mv *center_mv)
@@ -1674,7 +1674,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         return INT_MAX;
 }
 
-int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
+int vp8_refining_search_sad_c(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
                             int error_per_bit, int search_range,
                             vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2],
                             int_mv *center_mv)
