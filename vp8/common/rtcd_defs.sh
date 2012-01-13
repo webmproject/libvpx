@@ -9,6 +9,7 @@ struct block;
 struct macroblock;
 struct variance_vtable;
 union int_mv;
+struct yv12_buffer_config;
 EOF
 }
 forward_decls common_forward_decls
@@ -488,6 +489,12 @@ if [ "$CONFIG_REALTIME_ONLY" != "yes" ]; then
     prototype void vp8_temporal_filter_apply "unsigned char *frame1, unsigned int stride, unsigned char *frame2, unsigned int block_size, int strength, int filter_weight, unsigned int *accumulator, unsigned short *count"
     specialize vp8_temporal_filter_apply sse2
 fi
+
+#
+# Pick Loopfilter
+#
+prototype void vp8_yv12_copy_partial_frame "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc"
+specialize vp8_yv12_copy_partial_frame neon
 
 # End of encoder only functions
 fi

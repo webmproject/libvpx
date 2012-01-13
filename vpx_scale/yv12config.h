@@ -37,7 +37,7 @@ extern "C"
               }
               YUV_TYPE;
 
-    typedef struct
+    typedef struct yv12_buffer_config
     {
         int   y_width;
         int   y_height;
