@@ -21,7 +21,7 @@ extern void vp8_yv12_copy_partial_frame_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_B
 void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
-    int flags = cpi->common.rtcd.flags;
+    int flags = cpi->common.cpu_caps;
 
 #if HAVE_EDSP
     if (flags & HAS_EDSP)

@@ -18,7 +18,6 @@ void vpx_log(const char *format, ...);
 #include "vpx_scale/yv12config.h"
 #include "mv.h"
 #include "treecoder.h"
-#include "subpixel.h"
 #include "vpx_ports/mem.h"
 
 /*#define DCPRED 1*/
@@ -199,6 +198,8 @@ typedef struct blockd
 
     union b_mode_info bmi;
 } BLOCKD;
+
+typedef void (*vp8_subpix_fn_t)(unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch);
 
 typedef struct macroblockd
 {

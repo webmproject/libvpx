@@ -12,7 +12,6 @@
 #include "vpx_config.h"
 #include "vpx_rtcd.h"
 #include "vpx/vpx_integer.h"
-#include "subpixel.h"
 #include "blockd.h"
 #include "reconinter.h"
 #if CONFIG_RUNTIME_CPU_DETECT

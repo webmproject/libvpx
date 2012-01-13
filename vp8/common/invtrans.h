@@ -33,8 +33,7 @@ static void eob_adjust(char *eobs, short *diff)
     }
 }
 
-static void vp8_inverse_transform_mby(MACROBLOCKD *xd,
-                                      const VP8_COMMON_RTCD *rtcd)
+static void vp8_inverse_transform_mby(MACROBLOCKD *xd)
 {
     short *DQC = xd->dequant_y1;
 

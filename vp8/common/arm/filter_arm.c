@@ -10,9 +10,9 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include <math.h>
 #include "vp8/common/filter.h"
-#include "vp8/common/subpixel.h"
 #include "vpx_ports/mem.h"
 
 extern void vp8_filter_block2d_first_pass_armv6
@@ -87,7 +87,7 @@ extern void vp8_filter_block2d_second_pass_only_armv6
 );
 
 #if HAVE_MEDIA
-void vp8_sixtap_predict_armv6
+void vp8_sixtap_predict4x4_armv6
 (
     unsigned char  *src_ptr,
     int  src_pixels_per_line,

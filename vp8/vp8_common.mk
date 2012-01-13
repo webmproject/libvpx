@@ -50,7 +50,6 @@ VP8_COMMON_SRCS-yes += common/reconintra4x4.h
 VP8_COMMON_SRCS-yes += common/rtcd.c
 VP8_COMMON_SRCS-yes += common/rtcd_defs.sh
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
-VP8_COMMON_SRCS-yes += common/subpixel.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h
 VP8_COMMON_SRCS-yes += common/systemdependent.h
 VP8_COMMON_SRCS-yes += common/threading.h
@@ -74,8 +73,6 @@ VP8_COMMON_SRCS-yes += common/treecoder.c
 
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.h
-VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/subpixel_x86.h
-VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/x86_systemdependent.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp8_asm_stubs.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/loopfilter_x86.c
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC) += common/postproc.h
@@ -104,11 +101,9 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_block_sse2.asm
 endif
 
 # common (c)
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/filter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/reconintra_arm.c
-VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/subpixel_arm.h
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/dequantize_arm.c
 
 # common (media)

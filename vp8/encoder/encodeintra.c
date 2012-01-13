@@ -42,7 +42,7 @@ int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_dc_pred)
 
         vp8_encode_intra16x16mby(rtcd, x);
 
-        vp8_inverse_transform_mby(&x->e_mbd, IF_RTCD(&cpi->common.rtcd));
+        vp8_inverse_transform_mby(&x->e_mbd);
     }
     else
     {

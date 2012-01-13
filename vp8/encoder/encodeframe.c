@@ -26,7 +26,6 @@
 #include "vp8/common/findnearmv.h"
 #include <stdio.h>
 #include <limits.h>
-#include "vp8/common/subpixel.h"
 #include "vp8/common/invtrans.h"
 #include "vpx_ports/vpx_timer.h"
 
@@ -686,25 +685,17 @@ void vp8_encode_frame(VP8_COMP *cpi)
     // Functions setup for all frame types so we can use MC in AltRef
     if (cm->mcomp_filter_type == SIXTAP)
     {
-        xd->subpixel_predict        = SUBPIX_INVOKE(
-                                        &cpi->common.rtcd.subpix, sixtap4x4);
-        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-                                        &cpi->common.rtcd.subpix, sixtap8x4);
-        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-                                        &cpi->common.rtcd.subpix, sixtap8x8);
-        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-                                        &cpi->common.rtcd.subpix, sixtap16x16);
+        xd->subpixel_predict        = vp8_sixtap_predict4x4;
+        xd->subpixel_predict8x4     = vp8_sixtap_predict8x4;
+        xd->subpixel_predict8x8     = vp8_sixtap_predict8x8;
+        xd->subpixel_predict16x16   = vp8_sixtap_predict16x16;
     }
     else
     {
-        xd->subpixel_predict        = SUBPIX_INVOKE(
-                                        &cpi->common.rtcd.subpix, bilinear4x4);
-        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-                                        &cpi->common.rtcd.subpix, bilinear8x4);
-        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-                                        &cpi->common.rtcd.subpix, bilinear8x8);
-        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-                                      &cpi->common.rtcd.subpix, bilinear16x16);
+        xd->subpixel_predict        = vp8_bilinear_predict4x4;
+        xd->subpixel_predict8x4     = vp8_bilinear_predict8x4;
+        xd->subpixel_predict8x8     = vp8_bilinear_predict8x8;
+        xd->subpixel_predict16x16   = vp8_bilinear_predict16x16;
     }
 
     // Reset frame count of inter 0,0 motion vector useage.
@@ -1116,7 +1107,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
 
     if (xd->mode_info_context->mbmi.mode != B_PRED)
-        vp8_inverse_transform_mby(xd, IF_RTCD(&cpi->common.rtcd));
+        vp8_inverse_transform_mby(xd);
 
     vp8_dequant_idct_add_uv_block
                     (xd->qcoeff+16*16, xd->dequant_uv,
@@ -1301,7 +1292,7 @@ int vp8cx_encode_inter_macroblock
         vp8_tokenize_mb(cpi, xd, t);
 
         if (xd->mode_info_context->mbmi.mode != B_PRED)
-            vp8_inverse_transform_mby(xd, IF_RTCD(&cpi->common.rtcd));
+            vp8_inverse_transform_mby(xd);
 
         vp8_dequant_idct_add_uv_block
                         (xd->qcoeff+16*16, xd->dequant_uv,

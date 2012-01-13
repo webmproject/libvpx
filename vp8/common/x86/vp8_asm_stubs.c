@@ -10,8 +10,8 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vpx_ports/mem.h"
-#include "vp8/common/subpixel.h"
 #include "filter_x86.h"
 
 extern const short vp8_six_tap_mmx[8][6*8];
@@ -114,7 +114,6 @@ extern void vp8_filter_block1d8_v6_only_sse2
     unsigned int   output_height,
     const short   *vp8_filter
 );
-extern prototype_subpixel_predict(vp8_bilinear_predict8x8_mmx);
 
 
 #if HAVE_MMX

@@ -651,5 +651,5 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     vp8_quantize_mby(x);
 
-    vp8_inverse_transform_mby(&x->e_mbd, IF_RTCD(rtcd->common));
+    vp8_inverse_transform_mby(&x->e_mbd);
 }

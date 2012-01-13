@@ -11,8 +11,11 @@
 
 #include "vpx_config.h"
 #include "vpx_rtcd.h"
-#include "vp8/common/subpixel.h"
-#include "vp8/common/loopfilter.h"
+#if ARCH_ARM
+#include "vpx_ports/arm.h"
+#elif ARCH_X86 || ARCH_X86_64
+#include "vpx_ports/x86.h"
+#endif
 #include "vp8/common/onyxc_int.h"
 
 #if CONFIG_MULTITHREAD
@@ -23,9 +26,6 @@
 typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 #endif
 #endif
-
-extern void vp8_arch_x86_common_init(VP8_COMMON *ctx);
-extern void vp8_arch_arm_common_init(VP8_COMMON *ctx);
 
 #if CONFIG_MULTITHREAD
 static int get_cpu_count()
@@ -65,30 +65,15 @@ static int get_cpu_count()
 
 void vp8_machine_specific_config(VP8_COMMON *ctx)
 {
-#if CONFIG_RUNTIME_CPU_DETECT
-    VP8_COMMON_RTCD *rtcd = &ctx->rtcd;
-
-    rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_c;
-    rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_c;
-    rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_c;
-    rtcd->subpix.sixtap4x4     = vp8_sixtap_predict_c;
-    rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_c;
-    rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_c;
-    rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_c;
-    rtcd->subpix.bilinear4x4   = vp8_bilinear_predict4x4_c;
-#endif
-
-#if ARCH_X86 || ARCH_X86_64
-    vp8_arch_x86_common_init(ctx);
-#endif
-
-#if ARCH_ARM
-    vp8_arch_arm_common_init(ctx);
-#endif
-
 #if CONFIG_MULTITHREAD
     ctx->processor_core_count = get_cpu_count();
 #endif /* CONFIG_MULTITHREAD */
+
+#if ARCH_ARM
+    ctx->cpu_caps = arm_cpu_caps();
+#elif ARCH_X86 || ARCH_X86_64
+    ctx->cpu_caps = x86_simd_caps();
+#endif
 
     vpx_rtcd();
 }

@@ -25,7 +25,6 @@ extern void vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc,
 void vp8_cmachine_specific_config(VP8_COMP *cpi)
 {
 #if CONFIG_RUNTIME_CPU_DETECT
-    cpi->rtcd.common                    = &cpi->common.rtcd;
     cpi->rtcd.variance.sad16x16              = vp8_sad16x16_c;
     cpi->rtcd.variance.sad16x8               = vp8_sad16x8_c;
     cpi->rtcd.variance.sad8x16               = vp8_sad8x16_c;

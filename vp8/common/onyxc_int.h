@@ -69,16 +69,6 @@ typedef enum
     BILINEAR = 1
 } INTERPOLATIONFILTERTYPE;
 
-typedef struct VP8_COMMON_RTCD
-{
-#if CONFIG_RUNTIME_CPU_DETECT
-    vp8_subpix_rtcd_vtable_t      subpix;
-    int                           flags;
-#else
-    int unused;
-#endif
-} VP8_COMMON_RTCD;
-
 typedef struct VP8Common
 
 {
@@ -194,15 +184,13 @@ typedef struct VP8Common
     double bitrate;
     double framerate;
 
-#if CONFIG_RUNTIME_CPU_DETECT
-    VP8_COMMON_RTCD rtcd;
-#endif
 #if CONFIG_MULTITHREAD
     int processor_core_count;
 #endif
 #if CONFIG_POSTPROC
     struct postproc_state  postproc_state;
 #endif
+    int cpu_caps;
 } VP8_COMMON;
 
 #endif

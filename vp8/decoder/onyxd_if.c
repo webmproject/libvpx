@@ -76,9 +76,6 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     vp8dx_initialize();
 
     vp8_create_common(&pbi->common);
-#if CONFIG_RUNTIME_CPU_DETECT
-    pbi->mb.rtcd = &pbi->common.rtcd;
-#endif
 
     pbi->common.current_video_frame = 0;
     pbi->ready_for_new_data = 1;
@@ -391,7 +388,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
 
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
+    if (cm->cpu_caps & HAS_NEON)
 #endif
     {
         vp8_push_neon(dx_store_reg);
@@ -404,7 +401,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
     {
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->rtcd.flags & HAS_NEON)
+        if (cm->cpu_caps & HAS_NEON)
 #endif
         {
             vp8_pop_neon(dx_store_reg);
@@ -433,7 +430,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
     {
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
-        if (cm->rtcd.flags & HAS_NEON)
+        if (cm->cpu_caps & HAS_NEON)
 #endif
         {
             vp8_pop_neon(dx_store_reg);
@@ -454,7 +451,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
         {
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
+            if (cm->cpu_caps & HAS_NEON)
 #endif
             {
                 vp8_pop_neon(dx_store_reg);
@@ -472,7 +469,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
         {
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
+            if (cm->cpu_caps & HAS_NEON)
 #endif
             {
                 vp8_pop_neon(dx_store_reg);
@@ -562,7 +559,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
 
 #if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
-    if (cm->rtcd.flags & HAS_NEON)
+    if (cm->cpu_caps & HAS_NEON)
 #endif
     {
         vp8_pop_neon(dx_store_reg);
