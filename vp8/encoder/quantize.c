@@ -103,7 +103,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 #endif
 
 #ifdef EXACT_QUANT
-void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
+void vp8_regular_quantize_b_c(BLOCK *b, BLOCKD *d)
 {
     int i, rc, eob;
     int zbin;
@@ -156,7 +156,7 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
 }
 
 /* Perform regular quantization, with unbiased rounding and no zero bin. */
-void vp8_strict_quantize_b(BLOCK *b, BLOCKD *d)
+void vp8_strict_quantize_b_c(BLOCK *b, BLOCKD *d)
 {
     int i;
     int rc;
@@ -215,7 +215,7 @@ void vp8_strict_quantize_b(BLOCK *b, BLOCKD *d)
 
 #else
 
-void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
+void vp8_regular_quantize_b_c(BLOCK *b, BLOCKD *d)
 {
     int i, rc, eob;
     int zbin;

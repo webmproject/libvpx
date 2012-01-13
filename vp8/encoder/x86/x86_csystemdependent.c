@@ -10,6 +10,7 @@
 
 
 #include "vpx_config.h"
+#include "vpx_rtcd.h"
 #include "vpx_ports/x86.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/encoder/onyx_int.h"
@@ -147,10 +148,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.subb                  = vp8_subtract_b_sse2;
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_sse2;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
-
-        cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse2;
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
-
 #if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
 #endif
@@ -167,21 +164,10 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
     }
 #endif
 
-#if HAVE_SSSE3
-    if (flags & HAS_SSSE3)
-    {
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_ssse3;
-    }
-#endif
-
-
-
 #if HAVE_SSE4_1
     if (flags & HAS_SSE4_1)
     {
         cpi->rtcd.search.full_search             = vp8_full_search_sadx8;
-
-        cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse4;
     }
 #endif
 

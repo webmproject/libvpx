@@ -224,7 +224,6 @@ typedef struct
 typedef struct VP8_ENCODER_RTCD
 {
     vp8_encodemb_rtcd_vtable_t  encodemb;
-    vp8_quantize_rtcd_vtable_t  quantize;
     vp8_search_rtcd_vtable_t    search;
     vp8_temporal_rtcd_vtable_t  temporal;
 } VP8_ENCODER_RTCD;

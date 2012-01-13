@@ -38,9 +38,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.subb                  = vp8_subtract_b_armv6;
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_armv6;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_armv6;
-
-        /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;*/
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_armv6;
     }
 #endif /* HAVE_MEDIA */
 
@@ -53,11 +50,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.subb                  = vp8_subtract_b_neon;
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_neon;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_neon;
-
-        /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;
-        cpi->rtcd.quantize.quantb_pair           = vp8_regular_quantize_b_pair;*/
-        cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;
-        cpi->rtcd.quantize.fastquantb_pair       = vp8_fast_quantize_b_pair_neon;
     }
 #endif /* HAVE_NEON */
 #endif /* CONFIG_RUNTIME_CPU_DETECT */
