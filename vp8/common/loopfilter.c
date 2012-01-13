@@ -342,18 +342,26 @@ void vp8_loop_filter_frame
                     lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
                     if (mb_col > 0)
+#if CONFIG_NEWLPF
+                        vp8_loop_filter_mbv_c
+                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+#else
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_v)
                         (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
-
+#endif
                     if (!skip_lf)
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
                         (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
                     /* don't apply across umv border */
                     if (mb_row > 0)
+#if CONFIG_NEWLPF
+                        vp8_loop_filter_mbh_c
+                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+#else
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_h)
                         (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
-
+#endif
                     if (!skip_lf)
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
                         (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
@@ -454,8 +462,13 @@ void vp8_loop_filter_frame_yonly
                     lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
                     if (mb_col > 0)
+#if CONFIG_NEWLPF
+                        vp8_loop_filter_mbv_c
+                        (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+#else
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_v)
                         (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+#endif
 
                     if (!skip_lf)
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
@@ -463,9 +476,13 @@ void vp8_loop_filter_frame_yonly
 
                     /* don't apply across umv border */
                     if (mb_row > 0)
+#if CONFIG_NEWLPF
+                        vp8_loop_filter_mbh_c
+                        (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+#else
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_h)
                         (y_ptr, 0, 0, post->y_stride, 0, &lfi);
-
+#endif
                     if (!skip_lf)
                         LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
                         (y_ptr, 0, 0, post->y_stride, 0, &lfi);

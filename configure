@@ -226,6 +226,7 @@ EXPERIMENT_LIST="
     qimode
     uvintra
     newnear
+    newlpf
 "
 CONFIG_LIST="
     external_build
