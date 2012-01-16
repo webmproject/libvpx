@@ -17,7 +17,14 @@ extern "C"
 #endif
 
 #define VP7BORDERINPIXELS       48
+
+#if CONFIG_ENHANCED_INTERP
+#define VP8BORDERINPIXELS       64
+#define INTERP_EXTEND            4
+#else
 #define VP8BORDERINPIXELS       32
+#define INTERP_EXTEND            3
+#endif
 
     /*************************************
      For INT_YUV:

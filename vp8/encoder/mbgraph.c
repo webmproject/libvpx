@@ -335,8 +335,8 @@ static void update_mbgraph_frame_stats
     // Set up limit values for motion vectors to prevent them extending outside the UMV borders
     arf_top_mv.as_int = 0;
     gld_top_mv.as_int = 0;
-    x->mv_row_min     = -(VP8BORDERINPIXELS - 19);
-    x->mv_row_max     = (cm->mb_rows - 1) * 16 + VP8BORDERINPIXELS - 19;
+    x->mv_row_min     = -(VP8BORDERINPIXELS - 16 - INTERP_EXTEND);
+    x->mv_row_max     = (cm->mb_rows - 1) * 16 + VP8BORDERINPIXELS - 16 - INTERP_EXTEND;
     xd->up_available  = 0;
     xd->dst.y_stride  = buf->y_stride;
     xd->pre.y_stride  = buf->y_stride;
@@ -353,8 +353,8 @@ static void update_mbgraph_frame_stats
         // Set up limit values for motion vectors to prevent them extending outside the UMV borders
         arf_left_mv.as_int = arf_top_mv.as_int;
         gld_left_mv.as_int = gld_top_mv.as_int;
-        x->mv_col_min      = -(VP8BORDERINPIXELS - 19);
-        x->mv_col_max      = (cm->mb_cols - 1) * 16 + VP8BORDERINPIXELS - 19;
+        x->mv_col_min      = -(VP8BORDERINPIXELS - 16 - INTERP_EXTEND);
+        x->mv_col_max      = (cm->mb_cols - 1) * 16 + VP8BORDERINPIXELS - 16 - INTERP_EXTEND;
         xd->left_available = 0;
 
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)

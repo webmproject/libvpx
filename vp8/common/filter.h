@@ -8,15 +8,17 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
 #ifndef FILTER_H
 #define FILTER_H
+
+#include "vpx_config.h"
+#include "vpx_scale/yv12config.h"
 
 #define BLOCK_HEIGHT_WIDTH 4
 #define VP8_FILTER_WEIGHT 128
 #define VP8_FILTER_SHIFT  7
 
 extern const short vp8_bilinear_filters[8][2];
-extern const short vp8_sub_pel_filters[8][6];
+extern const short vp8_sub_pel_filters[8][INTERP_EXTEND*2];
 
 #endif //FILTER_H

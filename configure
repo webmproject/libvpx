@@ -227,6 +227,7 @@ EXPERIMENT_LIST="
     uvintra
     newnear
     newlpf
+    enhanced_interp
 "
 CONFIG_LIST="
     external_build

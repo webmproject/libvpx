@@ -268,6 +268,7 @@ void vp8_initialize()
 {
     static int init_done = 0;
 
+
     if (!init_done)
     {
         vp8_scale_machine_specific_config();
