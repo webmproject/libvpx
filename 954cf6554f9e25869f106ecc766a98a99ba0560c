@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn///G8\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "In an Android project place the libvpx folder in the jni folder.\n\nIn an Android project place libvpx in the jni folder.\n\nIn an Android project place a libvpx checkout in the jni folder.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///G4\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "Run the configure script from the jni directory.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///Fs\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "Can we make disable-examples and (maybe?) realtime-only default for the arm build?",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///GA\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "Running ndk-build will make libvpx as part of your project.\n\nRunning ndk-build will build libvpx and include it in your project.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///F0\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "is this for the -REMOVE vars? The first sentence seems unnecessary.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///Fo\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "Override the relative path with the path to libvpx.\n\nOverride the relative path with the configured path to libvpx.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///FY\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "Creates? Include the list[s?] of files to be built.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///E4\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "but exclude vpx_config.c because [it\u0027s generated?]",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///E0\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "so ...?",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///Ew\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "disable examples\n enable realtime-only",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///Es\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "only for v7?",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn///HY\u003d",
+        "filename": "vpx_ports/arm_cpudetect.c",
+        "patchSetId": 12
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-17T22:47:20Z",
+      "side": 1,
+      "message": "Where was this #endif previously?\n\nAhh, never mind. This isn\u0027t the endif for __linux__, it\u0027s the end of the else case for __ANDROID__\n\nThe level that __linux__ was at is continued below.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
