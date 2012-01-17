@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn///Dc\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 960,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-01-17T23:22:05Z",
+      "side": 1,
+      "message": "Not sure we need this memset!",
+      "revId": "57d5ebfbb8333091b102d8a72e6b5ae4eedc32dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
