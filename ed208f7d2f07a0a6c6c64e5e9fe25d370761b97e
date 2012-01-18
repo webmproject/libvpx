@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//+ps\u003d",
+        "filename": "vp8/common/x86/postproc_sse2.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 336,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-01-18T18:47:20Z",
+      "side": 1,
+      "message": "You can probably get better performance if you unroll the above loops.  Calculate the address after the movq.  You could do movq [rdi+rax], movq[rdi+rax*2], and then calculate rax.",
+      "revId": "ed208f7d2f07a0a6c6c64e5e9fe25d370761b97e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
