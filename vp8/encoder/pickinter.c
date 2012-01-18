@@ -490,10 +490,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int saddone=0;
     int sr=0;    //search range got from mv_pred(). It uses step_param levels. (0-7)
 
-    unsigned char *y_buffer[4];
-    unsigned char *u_buffer[4];
-    unsigned char *v_buffer[4];
-    int i;
+    unsigned char *plane[4][3];
     int ref_frame_map[4];
     int sign_bias = 0;
 
@@ -515,16 +512,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
 
     /* Setup search priorities */
-    i=0;
-    ref_frame_map[i++] = INTRA_FRAME;
-    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
-        ref_frame_map[i++] = LAST_FRAME;
-    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-        ref_frame_map[i++] = GOLDEN_FRAME;
-    if (cpi->ref_frame_flags & VP8_ALT_FLAG) // &&(cpi->source_alt_ref_active || cpi->oxcf.number_of_layers > 1)
-        ref_frame_map[i++] = ALTREF_FRAME;
-    for(; i<4; i++)
-        ref_frame_map[i] = -1;
+    get_reference_search_order(cpi, ref_frame_map);
 
     /* Check to see if there is at least 1 valid reference frame that we need
      * to calculate near_mvs.
@@ -542,30 +530,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         sign_bias = cpi->common.ref_frame_sign_bias[ref_frame_map[1]];
     }
 
-    // set up all the refframe dependent pointers.
-    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
-    {
-        YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
-        y_buffer[LAST_FRAME] = lst_yv12->y_buffer + recon_yoffset;
-        u_buffer[LAST_FRAME] = lst_yv12->u_buffer + recon_uvoffset;
-        v_buffer[LAST_FRAME] = lst_yv12->v_buffer + recon_uvoffset;
-    }
-
-    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-    {
-        YV12_BUFFER_CONFIG *gld_yv12 = &cpi->common.yv12_fb[cpi->common.gld_fb_idx];
-        y_buffer[GOLDEN_FRAME] = gld_yv12->y_buffer + recon_yoffset;
-        u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
-        v_buffer[GOLDEN_FRAME] = gld_yv12->v_buffer + recon_uvoffset;
-    }
-
-    if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-    {
-        YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
-        y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
-        u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;
-        v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
-    }
+    get_predictor_pointers(cpi, plane, recon_yoffset, recon_uvoffset);
 
     cpi->mbs_tested_so_far++; // Count of the number of MBs tested so far this frame
 
@@ -609,9 +574,9 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         // everything but intra
         if (x->e_mbd.mode_info_context->mbmi.ref_frame)
         {
-            x->e_mbd.pre.y_buffer = y_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
-            x->e_mbd.pre.u_buffer = u_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
-            x->e_mbd.pre.v_buffer = v_buffer[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            x->e_mbd.pre.y_buffer = plane[this_ref_frame][0];
+            x->e_mbd.pre.u_buffer = plane[this_ref_frame][1];
+            x->e_mbd.pre.v_buffer = plane[this_ref_frame][2];
 
             if (sign_bias !=
                 cpi->common.ref_frame_sign_bias[x->e_mbd.mode_info_context->mbmi.ref_frame])
