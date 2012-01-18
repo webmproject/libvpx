@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//+s0\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn///G8\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn///G4\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2012-01-17T22:47:20Z",
       "side": 1,
       "message": "Run the configure script from the jni directory.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+ss\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn///G4\u003d",
       "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -71,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//+so\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "default to enabling realtime-only mode for Android ARM.",
+      "parentUuid": "AAAAHn//+0g\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn///GA\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 12
@@ -82,6 +136,24 @@
       "writtenOn": "2012-01-17T22:47:20Z",
       "side": 1,
       "message": "Running ndk-build will make libvpx as part of your project.\n\nRunning ndk-build will build libvpx and include it in your project.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+uQ\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn///GA\u003d",
       "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -105,6 +177,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//+sk\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "I\u0027m duplicating the rule here.  I wanted to reference where it was originally.",
+      "parentUuid": "AAAAHn///F0\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn///Fo\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 12
@@ -116,6 +206,24 @@
       "writtenOn": "2012-01-17T22:47:20Z",
       "side": 1,
       "message": "Override the relative path with the path to libvpx.\n\nOverride the relative path with the configured path to libvpx.",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+sg\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "SRC_PATH_BARE is from the libvpx configure process.  I think my text references that.",
+      "parentUuid": "AAAAHn///Fo\u003d",
       "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -139,6 +247,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//+uA\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn///FY\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn///E4\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 12
@@ -150,6 +276,24 @@
       "writtenOn": "2012-01-17T22:47:20Z",
       "side": 1,
       "message": "but exclude vpx_config.c because [it\u0027s generated?]",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+t0\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn///E4\u003d",
       "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -173,6 +317,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//+t4\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn///E0\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn///Ew\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 12
@@ -184,6 +346,24 @@
       "writtenOn": "2012-01-17T22:47:20Z",
       "side": 1,
       "message": "disable examples\n enable realtime-only",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+tg\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 772,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "soft",
+      "parentUuid": "AAAAHn///Ew\u003d",
       "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -219,6 +399,42 @@
       "side": 1,
       "message": "maybe is safe to assume that the only other alternative for android is armv6 (armv7 w/o neon). i\u0027m not aware of any armv5 devices out there...",
       "parentUuid": "AAAAHn///Es\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+to\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "The only choices are v5 and v7.  If you are compiling for v5 then there is no point in doing RTCD.  If v7, then there is the possibility of not having NEON and needing to fallback to v6 optimizations.",
+      "parentUuid": "AAAAHn///Es\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+ts\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-18T17:38:52Z",
+      "side": 1,
+      "message": "Android supports armeabi and armeabi-v7a.  The way that I read that is armeabi is v5 and armeabi-v7a is at least v6 assembly and possibly NEON.  My main reason for including the v5 is that the emulator has not handled neon well in the past.  So you could build a v5 to run locally to make sure everything is working, and then run v6/v7 on device.",
+      "parentUuid": "AAAAHn//+0c\u003d",
       "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
