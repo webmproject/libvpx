@@ -1644,8 +1644,6 @@ int main(int argc, const char **argv_)
             cfg.rc_resize_up_thresh = arg_parse_uint(&arg);
         else if (arg_match(&arg, &resize_down_thresh, argi))
             cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &resize_down_thresh, argi))
-            cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
         else if (arg_match(&arg, &end_usage, argi))
             cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &target_bitrate, argi))
