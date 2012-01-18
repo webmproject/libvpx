@@ -962,20 +962,25 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
                             q, 1, 0, RTCD_VTABLE(oci));
             }
         }
+        /* Move partially towards the base q of the previous frame */
+        oci->postproc_state.last_base_qindex = (3*oci->postproc_state.last_base_qindex + oci->base_qindex)>>2;
     }
     else if (flags & VP8D_DEMACROBLOCK)
     {
         vp8_deblock_and_de_macro_block(oci->frame_to_show, &oci->post_proc_buffer,
                                        q + (deblock_level - 5) * 10, 1, 0, RTCD_VTABLE(oci));
+        oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
     else if (flags & VP8D_DEBLOCK)
     {
         vp8_deblock(oci->frame_to_show, &oci->post_proc_buffer,
                     q, 1, 0, RTCD_VTABLE(oci));
+        oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
     else
     {
         vp8_yv12_copy_frame_ptr(oci->frame_to_show, &oci->post_proc_buffer);
+        oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
 
     if (flags & VP8D_ADDNOISE)
@@ -1361,6 +1366,5 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     dest->y_width = oci->Width;
     dest->y_height = oci->Height;
     dest->uv_height = dest->y_height / 2;
-    oci->postproc_state.last_base_qindex = oci->base_qindex;
     return 0;
 }
