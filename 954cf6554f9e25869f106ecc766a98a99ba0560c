@@ -53,6 +53,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//+0g\u003d",
+        "filename": "build/make/Android.mk",
+        "patchSetId": 12
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-01-18T09:03:54Z",
+      "side": 1,
+      "message": "examples might be useful, but realtime-only is most of the time what we want on arm",
+      "parentUuid": "AAAAHn///Fs\u003d",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn///GA\u003d",
         "filename": "build/make/Android.mk",
         "patchSetId": 12
@@ -183,6 +201,24 @@
       "writtenOn": "2012-01-17T22:47:20Z",
       "side": 1,
       "message": "only for v7?",
+      "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+0c\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 773,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-01-18T09:03:54Z",
+      "side": 1,
+      "message": "maybe is safe to assume that the only other alternative for android is armv6 (armv7 w/o neon). i\u0027m not aware of any armv5 devices out there...",
+      "parentUuid": "AAAAHn///Es\u003d",
       "revId": "954cf6554f9e25869f106ecc766a98a99ba0560c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
