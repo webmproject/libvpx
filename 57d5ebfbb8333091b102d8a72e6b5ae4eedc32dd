@@ -16,6 +16,23 @@
       "revId": "57d5ebfbb8333091b102d8a72e6b5ae4eedc32dd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//+/0\u003d",
+        "filename": "vp8/common/x86/postproc_sse2.asm",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-18T00:14:44Z",
+      "side": 1,
+      "message": "pshufb is not an SSE2 instruction (hat tip to derf)",
+      "revId": "57d5ebfbb8333091b102d8a72e6b5ae4eedc32dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
