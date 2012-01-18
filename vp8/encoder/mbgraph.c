@@ -478,15 +478,19 @@ void separate_arf_mbs
     if ( 1 )
     {
         // Note % of blocks that are marked as static
-        cpi->static_mb_pct =
-            (ncnt[1] * 100) / cm->MBs;
+        if ( cm->MBs )
+            cpi->static_mb_pct = (ncnt[1] * 100) / cm->MBs;
+
+        // This error case should not be reachable as this function should
+        // never be called with the common data structure unititialized.
+        else
+            cpi->static_mb_pct = 0;
 
         vp8_enable_segmentation((VP8_PTR) cpi);
     }
     else
     {
         cpi->static_mb_pct = 0;
-
         vp8_disable_segmentation((VP8_PTR) cpi);
     }
 

@@ -4554,6 +4554,9 @@ static void encode_frame_to_data_rate
             int high_err_target = cpi->ambient_err;
             int low_err_target = ((cpi->ambient_err * 3) >> 2);
 
+            // Prevent possible divide by zero error below for perfect KF
+            kf_err += (!kf_err);
+
             // The key frame is not good enough
             if ( (kf_err > high_err_target) &&
                  (cpi->projected_frame_size <= frame_over_shoot_limit) )
