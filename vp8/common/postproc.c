@@ -178,6 +178,12 @@ void vp8_post_proc_down_and_across_c
         p_src = dst_ptr;
         p_dst = dst_ptr;
 
+        for (i = -8; i<0; i++)
+          p_src[i]=p_src[0];
+
+        for (i = cols; i<cols+8; i++)
+          p_src[i]=p_src[cols-1];
+
         for (i = 0; i < 8; i++)
             d[i] = p_src[i];
 
@@ -228,11 +234,18 @@ void vp8_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int co
     unsigned char *s = src;
     unsigned char d[16];
 
-
     for (r = 0; r < rows; r++)
     {
         int sumsq = 0;
         int sum   = 0;
+
+        for (i = -8; i<0; i++)
+          s[i]=s[0];
+
+        // 17 avoids valgrind warning - we buffer values in c in d
+        // and only write them when we've read 8 ahead...
+        for (i = cols; i<cols+17; i++)
+          s[i]=s[cols-1];
 
         for (i = -8; i <= 6; i++)
         {
@@ -272,13 +285,21 @@ void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
     int r, c, i;
     const short *rv3 = &vp8_rv[63&rand()];
 
-    for (c = 0; c < cols; c++)
+    for (c = 0; c < cols; c++ )
     {
         unsigned char *s = &dst[c];
         int sumsq = 0;
         int sum   = 0;
         unsigned char d[16];
         const short *rv2 = rv3 + ((c * 17) & 127);
+
+        for (i = -8; i < 0; i++)
+          s[i*pitch]=s[0];
+
+        // 17 avoids valgrind warning - we buffer values in c in d
+        // and only write them when we've read 8 ahead...
+        for (i = rows; i < rows+17; i++)
+          s[i*pitch]=s[(rows-1)*pitch];
 
         for (i = -8; i <= 6; i++)
         {
@@ -319,6 +340,7 @@ static void vp8_deblock_and_de_macro_block(YV12_BUFFER_CONFIG         *source,
     POSTPROC_INVOKE(rtcd, downacross)(source->y_buffer, post->y_buffer, source->y_stride,  post->y_stride, source->y_height, source->y_width,  ppl);
     POSTPROC_INVOKE(rtcd, across)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
     POSTPROC_INVOKE(rtcd, down)(post->y_buffer, post->y_stride, post->y_height, post->y_width, q2mbl(q));
+
 
     POSTPROC_INVOKE(rtcd, downacross)(source->u_buffer, post->u_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
     POSTPROC_INVOKE(rtcd, downacross)(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
@@ -935,6 +957,10 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
             {
                 oci->post_proc_buffer_int_used = 1;
             }
+            // insure that postproc is set to all 0's so that post proc
+            // doesn't pull random data in from edge
+            vpx_memset((&oci->post_proc_buffer_int)->buffer_alloc,126,(&oci->post_proc_buffer)->frame_size);
+
         }
     }
 

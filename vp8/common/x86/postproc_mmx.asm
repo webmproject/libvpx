@@ -151,6 +151,23 @@ sym(vp8_post_proc_down_and_across_mmx):
         sub         rsi, rdx
         sub         rdi, rdx
 
+        ; dup the first byte into the left border 8 times
+        movq        mm1,   [rdi]
+        punpcklbw   mm1,   mm1
+        punpcklwd   mm1,   mm1
+        punpckldq   mm1,   mm1
+
+        mov         rdx,    -8
+        movq        [rdi+rdx], mm1
+
+        ; dup the last byte into the right border
+        movsxd      rdx,    dword arg(5)
+        movq        mm1,   [rdi + rdx + -1]
+        punpcklbw   mm1,   mm1
+        punpcklwd   mm1,   mm1
+        punpckldq   mm1,   mm1
+        movq        [rdi+rdx], mm1
+
 
         push        rax
         xor         rdx,    rdx
@@ -298,7 +315,35 @@ sym(vp8_mbpost_proc_down_mmx):
             pxor        mm0,        mm0     ;
 
             movsxd      rax,        dword ptr arg(1) ;pitch       ;
+
+            ; this copies the last row down into the border 8 rows
+            mov         rdi,        rsi
+            mov         rdx,        arg(2)
+            sub         rdx,        9
+            imul        rdx,        rax
+            lea         rdi,        [rdi+rdx]
+            movq        mm1,        QWORD ptr[rdi]              ; first row
+            mov         rcx,        8
+.init_borderd                                                    ; initialize borders
+            lea         rdi,        [rdi + rax]
+            movq        [rdi],      xmm1
+
+            dec         rcx
+            jne         .init_borderd
+
             neg         rax                                     ; rax = -pitch
+
+            ; this copies the first row up into the border 8 rows
+            mov         rdi,        rsi
+            movq        mm1,        QWORD ptr[rdi]              ; first row
+            mov         rcx,        8
+.init_border                                                    ; initialize borders
+            lea         rdi,        [rdi + rax]
+            movq        [rdi],      mm1
+
+            dec         rcx
+            jne         .init_border
+
 
             lea         rsi,        [rsi + rax*8];              ; rdi = s[-pitch*8]
             neg         rax
