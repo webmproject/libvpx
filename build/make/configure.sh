@@ -477,7 +477,11 @@ process_common_cmdline() {
         --libdir=*)
         libdir="${optval}"
         ;;
-        --libc|--as|--prefix|--libdir)
+        --sdk-path=*)
+        [ -d "${optval}" ] || die "Not a directory: ${optval}"
+        sdk_path="${optval}"
+        ;;
+        --libc|--as|--prefix|--libdir|--sdk-path)
         die "Option ${opt} requires argument"
         ;;
         --help|-h) show_help
@@ -728,8 +732,45 @@ process_common_toolchain() {
             disable multithread
             disable os_support
             ;;
+
+        android*)
+            SDK_PATH=${sdk_path}
+            COMPILER_LOCATION=`find "${SDK_PATH}" \
+                               -name "arm-linux-androideabi-gcc*" -print -quit`
+            TOOLCHAIN_PATH=${COMPILER_LOCATION%/*}/arm-linux-androideabi-
+            CC=${TOOLCHAIN_PATH}gcc
+            AR=${TOOLCHAIN_PATH}ar
+            LD=${TOOLCHAIN_PATH}gcc
+            AS=${TOOLCHAIN_PATH}as
+            STRIP=${TOOLCHAIN_PATH}strip
+            NM=${TOOLCHAIN_PATH}nm
+
+            if [ -z "${alt_libc}" ]; then
+                alt_libc=`find "${SDK_PATH}" -name arch-arm -print | \
+                          awk '{n = split($0,a,"/"); \
+                                split(a[n-1],b,"-"); \
+                                print $0 " " b[2]}' | \
+                          sort -g -k 2 | \
+                          awk '{ print $1 }' | tail -1`
+            fi
+
+            add_cflags "--sysroot=${alt_libc}"
+            add_ldflags "--sysroot=${alt_libc}"
+
+            enable pic
+            soft_enable realtime_only
+            if enabled armv7
+            then
+                enable runtime_cpu_detect
+            fi
+          ;;
+
         darwin*)
-            SDK_PATH=/Developer/Platforms/iPhoneOS.platform/Developer
+            if [ -z "${sdk_path}" ]; then
+                SDK_PATH=/Developer/Platforms/iPhoneOS.platform/Developer
+            else
+                SDK_PATH=${sdk_path}
+            fi
             TOOLCHAIN_PATH=${SDK_PATH}/usr/bin
             CC=${TOOLCHAIN_PATH}/gcc
             AR=${TOOLCHAIN_PATH}/ar
@@ -747,10 +788,11 @@ process_common_toolchain() {
             add_cflags -arch ${tgt_isa}
             add_ldflags -arch_only ${tgt_isa}
 
-            add_cflags  "-isysroot ${SDK_PATH}/SDKs/iPhoneOS5.0.sdk"
+            if [ -z "${alt_libc}" ]; then
+                alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.0.sdk
+            fi
 
-            # This should be overridable
-            alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.0.sdk
+            add_cflags  "-isysroot ${alt_libc}"
 
             # Add the paths for the alternate libc
             for d in usr/include; do
@@ -976,6 +1018,7 @@ EOF
     if enabled multithread; then
         case ${toolchain} in
             *-win*);;
+            *-android-gcc);;
             *) check_header pthread.h && add_extralibs -lpthread
         esac
     fi

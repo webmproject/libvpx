@@ -25,6 +25,7 @@ Advanced options:
   ${toggle_unit_tests}            build unit tests
   --libc=PATH                     path to alternate libc
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
+  --sdk-path=PATH                 path to root of sdk (iOS, android builds only)
   ${toggle_fast_unaligned}        don't use unaligned accesses, even when
                                   supported by hardware [auto]
   ${toggle_codec_srcs}            in/exclude codec library source code
@@ -80,6 +81,7 @@ EOF
 
 # all_platforms is a list of all supported target platforms. Maintain
 # alphabetically by architecture, generic-gnu last.
+all_platforms="${all_platforms} armv5te-android-gcc"
 all_platforms="${all_platforms} armv5te-linux-rvct"
 all_platforms="${all_platforms} armv5te-linux-gcc"
 all_platforms="${all_platforms} armv5te-none-rvct"
@@ -87,6 +89,7 @@ all_platforms="${all_platforms} armv6-darwin-gcc"
 all_platforms="${all_platforms} armv6-linux-rvct"
 all_platforms="${all_platforms} armv6-linux-gcc"
 all_platforms="${all_platforms} armv6-none-rvct"
+all_platforms="${all_platforms} armv7-android-gcc"   #neon Cortex-A8
 all_platforms="${all_platforms} armv7-darwin-gcc"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-rvct"    #neon Cortex-A8
 all_platforms="${all_platforms} armv7-linux-gcc"     #neon Cortex-A8
