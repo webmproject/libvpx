@@ -77,7 +77,7 @@ static void get_plane_pointers(const YV12_BUFFER_CONFIG *fb,
 {
     plane[0] = fb->y_buffer + recon_yoffset;
     plane[1] = fb->u_buffer + recon_uvoffset;
-    plane[2] = fb->u_buffer + recon_uvoffset;
+    plane[2] = fb->v_buffer + recon_uvoffset;
 }
 
 
