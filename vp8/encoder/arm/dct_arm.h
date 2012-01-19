@@ -12,7 +12,7 @@
 #ifndef DCT_ARM_H
 #define DCT_ARM_H
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 extern prototype_fdct(vp8_short_walsh4x4_armv6);
 extern prototype_fdct(vp8_short_fdct4x4_armv6);
 extern prototype_fdct(vp8_short_fdct8x4_armv6);
@@ -34,9 +34,9 @@ extern prototype_fdct(vp8_short_fdct8x4_armv6);
 #define vp8_fdct_fast8x4 vp8_short_fdct8x4_armv6
 #endif
 
-#endif /* HAVE_ARMV6 */
+#endif /* HAVE_MEDIA */
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 extern prototype_fdct(vp8_short_fdct4x4_neon);
 extern prototype_fdct(vp8_short_fdct8x4_neon);
 extern prototype_fdct(vp8_fast_fdct4x4_neon);
@@ -60,6 +60,6 @@ extern prototype_fdct(vp8_short_walsh4x4_neon);
 #define vp8_fdct_walsh_short4x4 vp8_short_walsh4x4_neon
 #endif
 
-#endif
+#endif /* HAVE_NEON */
 
 #endif

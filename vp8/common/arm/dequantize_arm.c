@@ -13,15 +13,15 @@
 #include "vp8/common/dequantize.h"
 #include "vp8/common/idct.h"
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 extern void vp8_dequantize_b_loop_neon(short *Q, short *DQC, short *DQ);
 #endif
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 extern void vp8_dequantize_b_loop_v6(short *Q, short *DQC, short *DQ);
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 
 void vp8_dequantize_b_neon(BLOCKD *d, short *DQC)
 {
@@ -32,7 +32,7 @@ void vp8_dequantize_b_neon(BLOCKD *d, short *DQC)
 }
 #endif
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 void vp8_dequantize_b_v6(BLOCKD *d, short *DQC)
 {
     short *DQ  = d->dqcoeff;

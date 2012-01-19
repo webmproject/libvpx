@@ -12,7 +12,7 @@
 #ifndef SUBPIXEL_ARM_H
 #define SUBPIXEL_ARM_H
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 extern prototype_subpixel_predict(vp8_sixtap_predict16x16_armv6);
 extern prototype_subpixel_predict(vp8_sixtap_predict8x8_armv6);
 extern prototype_subpixel_predict(vp8_sixtap_predict8x4_armv6);
@@ -49,7 +49,7 @@ extern prototype_subpixel_predict(vp8_bilinear_predict4x4_armv6);
 #endif
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 extern prototype_subpixel_predict(vp8_sixtap_predict16x16_neon);
 extern prototype_subpixel_predict(vp8_sixtap_predict8x8_neon);
 extern prototype_subpixel_predict(vp8_sixtap_predict8x4_neon);

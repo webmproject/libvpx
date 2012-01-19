@@ -16,7 +16,7 @@
 
 void vp8_arch_arm_vpx_scale_init()
 {
-#if HAVE_ARMV7
+#if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
     int flags = arm_cpu_caps();
     if (flags & HAS_NEON)

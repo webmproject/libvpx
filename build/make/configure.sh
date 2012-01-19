@@ -671,10 +671,22 @@ process_common_toolchain() {
     case ${toolchain} in
     arm*)
         # on arm, isa versions are supersets
-        enabled armv7a && soft_enable armv7 ### DEBUG
-        enabled armv7 && soft_enable armv6
-        enabled armv7 || enabled armv6 && soft_enable armv5te
-        enabled armv7 || enabled armv6 && soft_enable fast_unaligned
+        case ${tgt_isa} in
+        armv7)
+            soft_enable neon
+            soft_enable media
+            soft_enable edsp
+            soft_enable fast_unaligned
+            ;;
+        armv6)
+            soft_enable media
+            soft_enable edsp
+            soft_enable fast_unaligned
+            ;;
+        armv5te)
+            soft_enable edsp
+            ;;
+        esac
 
         asm_conversion_cmd="cat"
 
@@ -687,10 +699,14 @@ process_common_toolchain() {
             arch_int=${arch_int%%te}
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
-            if enabled armv7
-            then
-                check_add_cflags -march=armv7-a -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp  #-ftree-vectorize
-                check_add_asflags -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp  #-march=armv7-a
+            if [ ${tgt_isa} == "armv7" ]; then
+                if enabled neon
+                then
+                    check_add_cflags -mfpu=neon #-ftree-vectorize
+                    check_add_asflags -mfpu=neon
+                fi
+                check_add_cflags -march=armv7-a -mcpu=cortex-a8 -mfloat-abi=softfp
+                check_add_asflags -mcpu=cortex-a8 -mfloat-abi=softfp  #-march=armv7-a
             else
                 check_add_cflags -march=${tgt_isa}
                 check_add_asflags -march=${tgt_isa}
@@ -708,10 +724,14 @@ process_common_toolchain() {
             tune_cflags="--cpu="
             tune_asflags="--cpu="
             if [ -z "${tune_cpu}" ]; then
-            if enabled armv7
-                then
-                    check_add_cflags --cpu=Cortex-A8 --fpu=softvfp+vfpv3
-                    check_add_asflags --cpu=Cortex-A8 --fpu=softvfp+vfpv3
+                if [ ${tgt_isa} == "armv7" ]; then
+                    if enabled neon
+                    then
+                        check_add_cflags --fpu=softvfp+vfpv3
+                        check_add_asflags --fpu=softvfp+vfpv3
+                    fi
+                    check_add_cflags --cpu=Cortex-A8
+                    check_add_asflags --cpu=Cortex-A8
                 else
                     check_add_cflags --cpu=${tgt_isa##armv}
                     check_add_asflags --cpu=${tgt_isa##armv}
@@ -759,8 +779,7 @@ process_common_toolchain() {
 
             enable pic
             soft_enable realtime_only
-            if enabled armv7
-            then
+            if [ ${tgt_isa} == "armv7" ]; then
                 enable runtime_cpu_detect
             fi
           ;;
