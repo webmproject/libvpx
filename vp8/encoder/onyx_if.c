@@ -4706,8 +4706,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
     if (cpi->source)
     {
-        cpi->un_scaled_source =
         cpi->Source = force_src_buffer ? force_src_buffer : &cpi->source->img;
+        cpi->un_scaled_source = cpi->Source;
         *time_stamp = cpi->source->ts_start;
         *time_end = cpi->source->ts_end;
         *frame_flags = cpi->source->flags;
