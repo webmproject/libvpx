@@ -736,7 +736,7 @@ static void multiframe_quality_enhance_block
          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     };
     int blksizeby2 = blksize >> 1;
-    int blksizesq = blksize * blksize;
+    int qdiff = qcurr - qprev;
 
     int i, j;
     unsigned char *yp;
@@ -749,27 +749,28 @@ static void multiframe_quality_enhance_block
     unsigned int act, sse, sad, thr;
     if (blksize == 16)
     {
-        act = vp8_variance_var16x16(y, y_stride, VP8_ZEROS, 0, &sse);
-        sad = vp8_variance_sad16x16(y, y_stride, yd, yd_stride, 0);
+        act = (vp8_variance_var16x16(yd, yd_stride, VP8_ZEROS, 0, &sse)+128)>>8;
+        sad = (vp8_variance_sad16x16(y, y_stride, yd, yd_stride, 0)+128)>>8;
     }
     else if (blksize == 8)
     {
-        act = vp8_variance_var8x8(y, y_stride, VP8_ZEROS, 0, &sse);
-        sad = vp8_variance_sad8x8(y, y_stride, yd, yd_stride, 0);
+        act = (vp8_variance_var8x8(yd, yd_stride, VP8_ZEROS, 0, &sse)+32)>>6;
+        sad = (vp8_variance_sad8x8(y, y_stride, yd, yd_stride, 0)+32)>>6;
     }
     else
     {
-        act = vp8_variance_var4x4(y, y_stride, VP8_ZEROS, 0, &sse);
-        sad = vp8_variance_sad4x4(y, y_stride, yd, yd_stride, 0);
+        act = (vp8_variance_var4x4(yd, yd_stride, VP8_ZEROS, 0, &sse)+8)>>4;
+        sad = (vp8_variance_sad4x4(y, y_stride, yd, yd_stride, 0)+8)>>4;
     }
-
-    thr = 6 * blksizesq + (act >> 3);
-    if (thr > 12 * blksizesq) thr = 12 * blksizesq;
-    // These thresholds should be adapted later based on qcurr and qprev
+    /* thr = qdiff/8 + log2(act) + log4(qprev) */
+    thr = (qdiff>>3);
+    while (act>>=1) thr++;
+    while (qprev>>=2) thr++;
     if (sad < thr)
     {
         static const int roundoff = (1 << (MFQE_PRECISION - 1));
         int ifactor = (sad << MFQE_PRECISION) / thr;
+        ifactor >>= (qdiff >> 5);
         // TODO: SIMD optimize this section
         if (ifactor)
         {
@@ -861,41 +862,44 @@ void vp8_multiframe_quality_enhance
             if (((frame_type == INTER_FRAME &&
                   abs(mode_info_context->mbmi.mv.as_mv.row) <= 10 &&
                   abs(mode_info_context->mbmi.mv.as_mv.col) <= 10) ||
-                 (frame_type == KEY_FRAME)) &&
-                mode_info_context->mbmi.mode != B_PRED)
+                 (frame_type == KEY_FRAME)))
             {
-                multiframe_quality_enhance_block(16,
-                                                 qcurr,
-                                                 qprev,
-                                                 y_ptr,
-                                                 u_ptr,
-                                                 v_ptr,
-                                                 show->y_stride,
-                                                 show->uv_stride,
-                                                 yd_ptr,
-                                                 ud_ptr,
-                                                 vd_ptr,
-                                                 dest->y_stride,
-                                                 dest->uv_stride);
-            }
-            else if (mode_info_context->mbmi.mode == B_PRED)
-            {
-                int i, j;
-                for (i=0; i<2; ++i)
-                    for (j=0; j<2; ++j)
-                        multiframe_quality_enhance_block(8,
-                                                         qcurr,
-                                                         qprev,
-                                                         y_ptr + 8*(i*show->y_stride+j),
-                                                         u_ptr + 4*(i*show->uv_stride+j),
-                                                         v_ptr + 4*(i*show->uv_stride+j),
-                                                         show->y_stride,
-                                                         show->uv_stride,
-                                                         yd_ptr + 8*(i*dest->y_stride+j),
-                                                         ud_ptr + 4*(i*dest->uv_stride+j),
-                                                         vd_ptr + 4*(i*dest->uv_stride+j),
-                                                         dest->y_stride,
-                                                         dest->uv_stride);
+                if (mode_info_context->mbmi.mode == B_PRED || mode_info_context->mbmi.mode == SPLITMV)
+                {
+                    int i, j;
+                    for (i=0; i<2; ++i)
+                        for (j=0; j<2; ++j)
+                            multiframe_quality_enhance_block(8,
+                                                             qcurr,
+                                                             qprev,
+                                                             y_ptr + 8*(i*show->y_stride+j),
+                                                             u_ptr + 4*(i*show->uv_stride+j),
+                                                             v_ptr + 4*(i*show->uv_stride+j),
+                                                             show->y_stride,
+                                                             show->uv_stride,
+                                                             yd_ptr + 8*(i*dest->y_stride+j),
+                                                             ud_ptr + 4*(i*dest->uv_stride+j),
+                                                             vd_ptr + 4*(i*dest->uv_stride+j),
+                                                             dest->y_stride,
+                                                             dest->uv_stride);
+                }
+                else
+                {
+                    multiframe_quality_enhance_block(16,
+                                                     qcurr,
+                                                     qprev,
+                                                     y_ptr,
+                                                     u_ptr,
+                                                     v_ptr,
+                                                     show->y_stride,
+                                                     show->uv_stride,
+                                                     yd_ptr,
+                                                     ud_ptr,
+                                                     vd_ptr,
+                                                     dest->y_stride,
+                                                     dest->uv_stride);
+
+                }
             }
             else
             {
