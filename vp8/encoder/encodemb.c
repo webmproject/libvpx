@@ -656,7 +656,6 @@ static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *x, int type,
                                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
 {
     int sum=0;
-    int i;
     BLOCKD *bd = &x->block[24];
     int coef;
 
@@ -802,7 +801,6 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 #if CONFIG_T8X8
 void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
                     ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                    ENTROPY_CONTEXT *a1, ENTROPY_CONTEXT *l1,
                     const VP8_ENCODER_RTCD *rtcd)
 {
     BLOCK *b;
@@ -1010,7 +1008,7 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
 
     /* Now pick the best path through the whole trellis. */
     band = vp8_coef_bands_8x8[i + 1];
-    VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
     rate0 = tokens[next][0].rate;
     rate1 = tokens[next][1].rate;
     error0 = tokens[next][0].error;
@@ -1051,7 +1049,6 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
     int type;
-    int has_2nd_order;
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
@@ -1062,79 +1059,28 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-    has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-        &&x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
-    type = has_2nd_order ? 0 : 3;
-
+    type = 0;
     for (b = 0; b < 16; b+=4)
     {
         optimize_b_8x8(x, b, type,
-            ta + vp8_block2above[b], tl + vp8_block2left[b],
-            ta + vp8_block2above[b+1], tl + vp8_block2left[b+4],
+            ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
             rtcd);
-
-        if(b==0)
-        {
-          *(ta + vp8_block2above[1]) = *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[5]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[1]) = *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[5]) = *(tl + vp8_block2left[b]);
-        }
-        else if(b==4)
-        {
-          *(ta + vp8_block2above[2]) = *(ta + vp8_block2above[3]) = *(ta + vp8_block2above[6]) = *(ta + vp8_block2above[7]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[2]) = *(tl + vp8_block2left[3]) = *(tl + vp8_block2left[6]) = *(tl + vp8_block2left[7]) = *(tl + vp8_block2left[b]);
-          *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[1]);
-          *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[1]);
-        }
-        else if(b==8)
-        {
-          *(ta + vp8_block2above[9]) = *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[13]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[9]) = *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[13]) = *(tl + vp8_block2left[b]);
-
-        }
-        else if(b==12)
-        {
-          *(ta + vp8_block2above[10]) = *(ta + vp8_block2above[11]) = *(ta + vp8_block2above[14]) = *(ta + vp8_block2above[15]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[10]) = *(tl + vp8_block2left[11]) = *(tl + vp8_block2left[14]) = *(tl + vp8_block2left[15]) = *(tl + vp8_block2left[b]);
-          *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[8]);
-          *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[8]);
-
-        }
-
-
-
+        *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
+        *(tl + vp8_block2left_8x8[b] + 1)  = *(tl + vp8_block2left_8x8[b] );
     }
 
-    for (b = 16; b < 20; b+=4)
+    for (b = 16; b < 24; b+=4)
     {
-        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
-            ta + vp8_block2above[b], tl + vp8_block2left[b],
-            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
+        optimize_b_8x8(x, b, PLANE_TYPE_UV,
+            ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
             rtcd);
-        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
-            *(ta + vp8_block2above[b]);
-        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
-            *(tl + vp8_block2left[b]);
-
-    }
-
-    for (b = 20; b < 24; b+=4)
-    {
-        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
-            ta + vp8_block2above[b], tl + vp8_block2left[b],
-            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
-            rtcd);
-        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
-            *(ta + vp8_block2above[b]);
-        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
-            *(tl + vp8_block2left[b]);
-
+        *(ta + vp8_block2above_8x8[b]+1) = *(ta + vp8_block2above_8x8[b]);
+        *(tl + vp8_block2left_8x8[b]+1 ) = *(tl + vp8_block2left_8x8[b]);
     }
 
     //8x8 always have 2nd roder haar block
     check_reset_8x8_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
-            ta + vp8_block2above[24], tl + vp8_block2left[24]);
-
+            ta + vp8_block2above_8x8[24], tl + vp8_block2left_8x8[24]);
 
 }
 
@@ -1160,50 +1106,18 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
-
-    has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-        && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
-    type = has_2nd_order ? 0 : 3;
-
+    type = 0;
     for (b = 0; b < 16; b+=4)
     {
         optimize_b_8x8(x, b, type,
         ta + vp8_block2above[b], tl + vp8_block2left[b],
-        ta + vp8_block2above[b+1], tl + vp8_block2left[b+4],
         rtcd);
-        if(b==0)
-        {
-          *(ta + vp8_block2above[1]) = *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[5]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[1]) = *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[5]) = *(tl + vp8_block2left[b]);
-        }
-        else if(b==4)
-        {
-          *(ta + vp8_block2above[2]) = *(ta + vp8_block2above[3]) = *(ta + vp8_block2above[6]) = *(ta + vp8_block2above[7]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[2]) = *(tl + vp8_block2left[3]) = *(tl + vp8_block2left[6]) = *(tl + vp8_block2left[7]) = *(tl + vp8_block2left[b]);
-          *(ta + vp8_block2above[4]) = *(ta + vp8_block2above[1]);
-          *(tl + vp8_block2left[4]) = *(tl + vp8_block2left[1]);
-        }
-        else if(b==8)
-        {
-          *(ta + vp8_block2above[9]) = *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[13]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[9]) = *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[13]) = *(tl + vp8_block2left[b]);
-
-        }
-        else if(b==12)
-        {
-          *(ta + vp8_block2above[10]) = *(ta + vp8_block2above[11]) = *(ta + vp8_block2above[14]) = *(ta + vp8_block2above[15]) = *(ta + vp8_block2above[b]);
-          *(tl + vp8_block2left[10]) = *(tl + vp8_block2left[11]) = *(tl + vp8_block2left[14]) = *(tl + vp8_block2left[15]) = *(tl + vp8_block2left[b]);
-          *(ta + vp8_block2above[12]) = *(ta + vp8_block2above[8]);
-          *(tl + vp8_block2left[12]) = *(tl + vp8_block2left[8]);
-
-        }
-
-
+        *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
+        *(tl + vp8_block2left_8x8[b] + 1)  = *(tl + vp8_block2left_8x8[b] );
     }
     //8x8 always have 2nd roder haar block
     check_reset_8x8_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
-            ta + vp8_block2above[24], tl + vp8_block2left[24]);
+            ta + vp8_block2above_8x8[24], tl + vp8_block2left_8x8[24]);
 
 }
 
@@ -1226,30 +1140,13 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-    for (b = 16; b < 20; b+=4)
+    for (b = 16; b < 24; b+=4)
     {
-        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
-            ta + vp8_block2above[b], tl + vp8_block2left[b],
-            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
+        optimize_b_8x8(x, b, PLANE_TYPE_UV,
+            ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
             rtcd);
-        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
-            *(ta + vp8_block2above[b]);
-        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
-            *(tl + vp8_block2left[b]);
-
-    }
-
-    for (b = 20; b < 24; b+=4)
-    {
-        optimize_b_8x8(x, b, PLANE_TYPE_UV, //vp8_block2type[b],
-            ta + vp8_block2above[b], tl + vp8_block2left[b],
-            ta + vp8_block2above[b+1], tl + vp8_block2left[b+2],
-            rtcd);
-        *(ta + vp8_block2above[b+1]) = *(ta + vp8_block2above[b+2]) = *(ta + vp8_block2above[b+3]) =
-            *(ta + vp8_block2above[b]);
-        *(tl + vp8_block2left[b+1]) = *(tl + vp8_block2left[b+2]) = *(tl + vp8_block2left[b+3]) =
-            *(tl + vp8_block2left[b]);
-
+        *(ta + vp8_block2above_8x8[b]+1) = *(ta + vp8_block2above_8x8[b]);
+        *(tl + vp8_block2left_8x8[b]+1 ) = *(tl + vp8_block2left_8x8[b]);
     }
 
 }

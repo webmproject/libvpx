@@ -690,8 +690,7 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
 
 static int cost_coeffs_8x8(MACROBLOCK *mb,
                            BLOCKD *b, int type,
-                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                           ENTROPY_CONTEXT *a1, ENTROPY_CONTEXT *l1)
+                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
 {
     int c = !type;              /* start at coef 0, unless Y with Y2 */
     int eob = b->eob;
@@ -699,7 +698,7 @@ static int cost_coeffs_8x8(MACROBLOCK *mb,
     int cost = 0;
     short *qcoeff_ptr = b->qcoeff;
 
-    VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
 # define QC8X8( I)  ( qcoeff_ptr [vp8_default_zig_zag1d_8x8[I]] )
 
@@ -738,8 +737,7 @@ static int vp8_rdcost_mby_8x8(MACROBLOCK *mb)
 
     for (b = 0; b < 16; b+=4)
         cost += cost_coeffs_8x8(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
-                    ta + vp8_block2above[b], tl + vp8_block2left[b],
-                    ta + vp8_block2above[b+1], tl + vp8_block2left[b+4]);
+                    ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b]);
 
     cost += cost_coeffs_2x2(mb, x->block + 24, PLANE_TYPE_Y2,
                 ta + vp8_block2above[24], tl + vp8_block2left[24]);
@@ -1204,10 +1202,8 @@ static int rd_cost_mbuv_8x8(MACROBLOCK *mb)
 
     for (b = 16; b < 24; b+=4)
         cost += cost_coeffs_8x8(mb, x->block + b, PLANE_TYPE_UV,
-                                ta + vp8_block2above[b],
-                                tl + vp8_block2left[b],
-                                ta + vp8_block2above[b+1],
-                                tl + vp8_block2left[b+2]);
+                                ta + vp8_block2above_8x8[b],
+                                tl + vp8_block2left_8x8[b]);
 
     return cost;
 }

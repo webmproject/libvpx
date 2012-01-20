@@ -321,20 +321,9 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
     coef_probs = oc->fc.coef_probs_8x8 [type] [ 0 ] [0];
 
 BLOCK_LOOP_8x8:
-    a = A + vp8_block2above[i];
-    l = L + vp8_block2left[i];
+    a = A + vp8_block2above_8x8[i];
+    l = L + vp8_block2left_8x8[i];
 
-    if(i < 16)
-    {
-       a1 = A + vp8_block2above[i+1];
-       l1 = L + vp8_block2left[i+4];
-    }
-    else if(i<24)
-    {
-      a1 = A + vp8_block2above[i+1];
-      l1 = L + vp8_block2left[i+2];
-
-    }
     c = (INT16)(!type);
 
 //    Dest = ((A)!=0) + ((B)!=0);
@@ -350,7 +339,7 @@ BLOCK_LOOP_8x8:
     }
     else
     {
-      VP8_COMBINEENTROPYCONTEXTS_8x8(v, *a, *l, *a1, *l1);
+      VP8_COMBINEENTROPYCONTEXTS(v, *a, *l);
       if ( segfeature_active( x, segment_id, SEG_LVL_EOB ) )
       {
           seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
@@ -549,45 +538,10 @@ ONE_CONTEXT_NODE_0_8x8_:
 
 BLOCK_FINISHED_8x8:
     *a = *l = ((eobs[i] = c) != !type);   // any nonzero data?
-    /*if (i!=24) {
-      *(A + vp8_block2above[i+1]) = *(A + vp8_block2above[i+2]) = *(A + vp8_block2above[i+3]) = *a;
-      *(L + vp8_block2left[i+1]) = *(L + vp8_block2left[i+2]) = *(L + vp8_block2left[i+3]) = *l;
-    }*/
-
     if (i!=24)
     {
-      if(i==0)
-      {
-        *(A + vp8_block2above[1]) = *(A + vp8_block2above[4]) = *(A + vp8_block2above[5]) = *a;
-        *(L + vp8_block2left[1]) = *(L + vp8_block2left[4]) = *(L + vp8_block2left[5]) = *l;
-      }
-      else if(i==4)
-      {
-        *(A + vp8_block2above[2]) = *(A + vp8_block2above[3]) = *(A + vp8_block2above[6]) = *(A + vp8_block2above[7]) = *a;
-        *(L + vp8_block2left[2]) = *(L + vp8_block2left[3]) = *(L + vp8_block2left[6]) = *(L + vp8_block2left[7]) = *l;
-        *(A + vp8_block2above[4]) = *(A + vp8_block2above[1]);
-        *(L + vp8_block2left[4]) = *(L + vp8_block2left[1]);
-      }
-      else if(i==8)
-      {
-        *(A + vp8_block2above[9]) = *(A + vp8_block2above[12]) = *(A + vp8_block2above[13]) = *a;
-        *(L + vp8_block2left[9]) = *(L + vp8_block2left[12]) = *(L + vp8_block2left[13]) = *l;
-
-      }
-      else if(i==12)
-      {
-        *(A + vp8_block2above[10]) = *(A + vp8_block2above[11]) = *(A + vp8_block2above[14]) = *(A + vp8_block2above[15]) = *a;
-        *(L + vp8_block2left[10]) = *(L + vp8_block2left[11]) = *(L + vp8_block2left[14]) = *(L + vp8_block2left[15]) = *l;
-        *(A + vp8_block2above[12]) = *(A + vp8_block2above[8]);
-        *(L + vp8_block2left[12]) = *(L + vp8_block2left[8]);
-
-      }
-      else
-      {
-        *(A + vp8_block2above[i+1]) = *(A + vp8_block2above[i+2]) = *(A + vp8_block2above[i+3]) = *a;
-        *(L + vp8_block2left[i+1]) = *(L + vp8_block2left[i+2]) = *(L + vp8_block2left[i+3]) = *l;
-
-      }
+        *(a + 1)    =  *a;
+        *(l + 1)    = *l;
     }
 
     eobtotal += c;

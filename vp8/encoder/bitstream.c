@@ -2429,6 +2429,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                             ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
                         const int s = old_b - new_b - update_b;
                         const int u = s > 0 ? 1 : 0;
+
 #ifdef ENTROPY_STATS
                         ++ tree_update_hist_8x8 [i][j][k][t] [u];
 #endif
