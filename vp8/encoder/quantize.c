@@ -1272,6 +1272,8 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
 {
     VP8_COMMON *cm = &cpi->common;
 
+    cm->base_qindex = Q;
+
     // if any of the delta_q values are changing update flag will
     // have to be set.
     cm->y1dc_delta_q = 0;
