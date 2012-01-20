@@ -68,12 +68,13 @@ static int get_inter_mbpred_error(MACROBLOCK *mb,
     BLOCKD *d = &mb->e_mbd.block[0];
     unsigned char *what = (*(b->base_src) + b->src);
     int what_stride = b->src_stride;
-    unsigned char *in_what = *(d->base_pre) + d->pre ;
-    int in_what_stride = d->pre_stride;
+    int pre_stride = mb->e_mbd.pre.y_stride;
+    unsigned char *in_what = mb->e_mbd.pre.y_buffer + d->offset ;
+    int in_what_stride = pre_stride;
     int xoffset = this_mv.as_mv.col & 7;
     int yoffset = this_mv.as_mv.row & 7;
 
-    in_what += (this_mv.as_mv.row >> 3) * d->pre_stride + (this_mv.as_mv.col >> 3);
+    in_what += (this_mv.as_mv.row >> 3) * pre_stride + (this_mv.as_mv.col >> 3);
 
     if (xoffset | yoffset)
     {
@@ -136,6 +137,8 @@ static int pick_intra4x4block(
 
     BLOCKD *b = &x->e_mbd.block[ib];
     BLOCK *be = &x->block[ib];
+    int dst_stride = x->e_mbd.dst.y_stride;
+    unsigned char *base_dst = x->e_mbd.dst.y_buffer;
     B_PREDICTION_MODE mode;
     int best_rd = INT_MAX;       // 1<<30
     int rate;
@@ -147,7 +150,7 @@ static int pick_intra4x4block(
 
         rate = mode_costs[mode];
         vp8_intra4x4_predict
-                     (*(b->base_dst) + b->dst, b->dst_stride,
+                     (base_dst + b->offset, dst_stride,
                       mode, b->predictor, 16);
         distortion = get_prediction_error(be, b);
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);

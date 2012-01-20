@@ -164,9 +164,9 @@ static int vp8_temporal_filter_find_matching_mb_c
     unsigned char **base_src = b->base_src;
     int src = b->src;
     int src_stride = b->src_stride;
-    unsigned char **base_pre = d->base_pre;
-    int pre = d->pre;
-    int pre_stride = d->pre_stride;
+    unsigned char *base_pre = x->e_mbd.pre.y_buffer;
+    int pre = d->offset;
+    int pre_stride = x->e_mbd.pre.y_stride;
 
     best_ref_mv1.as_int = 0;
     best_ref_mv1_full.as_mv.col = best_ref_mv1.as_mv.col >>3;
@@ -177,9 +177,9 @@ static int vp8_temporal_filter_find_matching_mb_c
     b->src_stride = arf_frame->y_stride;
     b->src = mb_offset;
 
-    d->base_pre = &frame_ptr->y_buffer;
-    d->pre_stride = frame_ptr->y_stride;
-    d->pre = mb_offset;
+    x->e_mbd.pre.y_buffer = frame_ptr->y_buffer;
+    x->e_mbd.pre.y_stride = frame_ptr->y_stride;
+    d->offset = mb_offset;
 
     // Further step/diamond searches as necessary
     if (cpi->Speed < 8)
@@ -221,9 +221,9 @@ static int vp8_temporal_filter_find_matching_mb_c
     b->base_src = base_src;
     b->src = src;
     b->src_stride = src_stride;
-    d->base_pre = base_pre;
-    d->pre = pre;
-    d->pre_stride = pre_stride;
+    x->e_mbd.pre.y_buffer = base_pre;
+    d->offset = pre;
+    x->e_mbd.pre.y_stride = pre_stride;
 
     return bestsme;
 }

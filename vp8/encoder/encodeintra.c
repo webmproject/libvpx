@@ -53,9 +53,10 @@ void vp8_encode_intra4x4block(MACROBLOCK *x, int ib)
 {
     BLOCKD *b = &x->e_mbd.block[ib];
     BLOCK *be = &x->block[ib];
+    int dst_stride = x->e_mbd.dst.y_stride;
+    unsigned char *base_dst = x->e_mbd.dst.y_buffer;
 
-    vp8_intra4x4_predict
-                (*(b->base_dst) + b->dst, b->dst_stride,
+    vp8_intra4x4_predict(base_dst + b->offset, dst_stride,
                  b->bmi.as_mode, b->predictor, 16);
 
     vp8_subtract_b(be, b, 16);
@@ -66,14 +67,14 @@ void vp8_encode_intra4x4block(MACROBLOCK *x, int ib)
 
     if (*b->eob > 1)
     {
-        vp8_short_idct4x4llm(b->dqcoeff,
-            b->predictor, 16, *(b->base_dst) + b->dst, b->dst_stride);
+      vp8_short_idct4x4llm(b->dqcoeff,
+            b->predictor, 16, base_dst + b->offset, dst_stride);
     }
     else
     {
-        vp8_dc_only_idct_add
-            (b->dqcoeff[0], b->predictor, 16, *(b->base_dst) + b->dst,
-                b->dst_stride);
+      vp8_dc_only_idct_add
+            (b->dqcoeff[0], b->predictor, 16, base_dst + b->offset,
+                dst_stride);
     }
 }
 

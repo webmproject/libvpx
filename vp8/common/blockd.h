@@ -185,15 +185,7 @@ typedef struct blockd
     unsigned char  *predictor;
     short *dequant;
 
-    /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
-    unsigned char **base_pre;
-    int pre;
-    int pre_stride;
-
-    unsigned char **base_dst;
-    int dst;
-    int dst_stride;
-
+    int offset;
     char *eob;
 
     union b_mode_info bmi;

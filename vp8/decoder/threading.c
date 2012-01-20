@@ -171,14 +171,16 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
     if (xd->mode_info_context->mbmi.mode == B_PRED)
     {
         short *DQC = xd->dequant_y1;
+        int dst_stride = xd->dst.y_stride;
+        unsigned char *base_dst = xd->dst.y_buffer;
 
         for (i = 0; i < 16; i++)
         {
             BLOCKD *b = &xd->block[i];
             int b_mode = xd->mode_info_context->bmi[i].as_mode;
 
-            vp8mt_predict_intra4x4(pbi, xd, b_mode, *(b->base_dst) + b->dst,
-                                   b->dst_stride, mb_row, mb_col, i);
+            vp8mt_predict_intra4x4(pbi, xd, b_mode, base_dst + b->offset,
+                                   dst_stride, mb_row, mb_col, i);
 
             if (xd->eobs[i] )
             {
@@ -186,14 +188,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
                 {
                     vp8_dequant_idct_add
                         (b->qcoeff, DQC,
-                        *(b->base_dst) + b->dst, b->dst_stride);
+                        base_dst + b->offset, dst_stride);
                 }
                 else
                 {
                     vp8_dc_only_idct_add
                         (b->qcoeff[0] * DQC[0],
-                        *(b->base_dst) + b->dst, b->dst_stride,
-                        *(b->base_dst) + b->dst, b->dst_stride);
+                        base_dst + b->offset, dst_stride,
+                        base_dst + b->offset, dst_stride);
                     ((int *)b->qcoeff)[0] = 0;
                 }
             }

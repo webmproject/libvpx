@@ -617,12 +617,15 @@ void vp8mt_predict_intra4x4(VP8D_COMP *pbi,
     unsigned char top_left; /* = Above[-1]; */
 
     BLOCKD *x = &xd->block[num];
+    int dst_stride = xd->dst.y_stride;
+    unsigned char *base_dst = xd->dst.y_buffer;
+
 
     /*Caution: For some b_mode, it needs 8 pixels (4 above + 4 above-right).*/
     if (num < 4 && pbi->common.filter_level)
         Above = pbi->mt_yabove_row[mb_row] + mb_col*16 + num*4 + 32;
     else
-        Above = *(x->base_dst) + x->dst - x->dst_stride;
+        Above = base_dst + x->offset - dst_stride;
 
     if (num%4==0 && pbi->common.filter_level)
     {
@@ -630,10 +633,10 @@ void vp8mt_predict_intra4x4(VP8D_COMP *pbi,
             Left[i] = pbi->mt_yleft_col[mb_row][num + i];
     }else
     {
-        Left[0] = (*(x->base_dst))[x->dst - 1];
-        Left[1] = (*(x->base_dst))[x->dst - 1 + x->dst_stride];
-        Left[2] = (*(x->base_dst))[x->dst - 1 + 2 * x->dst_stride];
-        Left[3] = (*(x->base_dst))[x->dst - 1 + 3 * x->dst_stride];
+        Left[0] = (base_dst)[x->offset - 1];
+        Left[1] = (base_dst)[x->offset - 1 + dst_stride];
+        Left[2] = (base_dst)[x->offset - 1 + 2 * dst_stride];
+        Left[3] = (base_dst)[x->offset - 1 + 3 * dst_stride];
     }
 
     if ((num==4 || num==8 || num==12) && pbi->common.filter_level)
@@ -918,19 +921,22 @@ void vp8mt_intra_prediction_down_copy(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row
     unsigned int *dst_ptr0;
     unsigned int *dst_ptr1;
     unsigned int *dst_ptr2;
+    int dst_stride = x->dst.y_stride;
+    unsigned char *base_dst = x->dst.y_buffer;
+
 
     if (pbi->common.filter_level)
         above_right = pbi->mt_yabove_row[mb_row] + mb_col*16 + 32 +16;
     else
-        above_right = *(x->block[0].base_dst) + x->block[0].dst - x->block[0].dst_stride + 16;
+        above_right = base_dst + x->block[0].offset - dst_stride + 16;
 
     src_ptr = (unsigned int *)above_right;
     /*dst_ptr0 = (unsigned int *)(above_right + 4 * x->block[0].dst_stride);
     dst_ptr1 = (unsigned int *)(above_right + 8 * x->block[0].dst_stride);
     dst_ptr2 = (unsigned int *)(above_right + 12 * x->block[0].dst_stride);*/
-    dst_ptr0 = (unsigned int *)(*(x->block[0].base_dst) + x->block[0].dst + 16 + 3 * x->block[0].dst_stride);
-    dst_ptr1 = (unsigned int *)(*(x->block[0].base_dst) + x->block[0].dst + 16 + 7 * x->block[0].dst_stride);
-    dst_ptr2 = (unsigned int *)(*(x->block[0].base_dst) + x->block[0].dst + 16 + 11 * x->block[0].dst_stride);
+    dst_ptr0 = (unsigned int *)(base_dst + x->block[0].offset + 16 + 3 * dst_stride);
+    dst_ptr1 = (unsigned int *)(base_dst + x->block[0].offset + 16 + 7 * dst_stride);
+    dst_ptr2 = (unsigned int *)(base_dst + x->block[0].offset + 16 + 11 * dst_stride);
     *dst_ptr0 = *src_ptr;
     *dst_ptr1 = *src_ptr;
     *dst_ptr2 = *src_ptr;

@@ -304,12 +304,13 @@ void vp8_intra4x4_predict_c(unsigned char *src, int src_stride,
  */
 void vp8_intra_prediction_down_copy(MACROBLOCKD *x)
 {
-    unsigned char *above_right = *(x->block[0].base_dst) + x->block[0].dst - x->block[0].dst_stride + 16;
+    int dst_stride = x->dst.y_stride;
+    unsigned char *above_right = x->dst.y_buffer - dst_stride + 16;
 
     unsigned int *src_ptr = (unsigned int *)above_right;
-    unsigned int *dst_ptr0 = (unsigned int *)(above_right + 4 * x->block[0].dst_stride);
-    unsigned int *dst_ptr1 = (unsigned int *)(above_right + 8 * x->block[0].dst_stride);
-    unsigned int *dst_ptr2 = (unsigned int *)(above_right + 12 * x->block[0].dst_stride);
+    unsigned int *dst_ptr0 = (unsigned int *)(above_right + 4 * dst_stride);
+    unsigned int *dst_ptr1 = (unsigned int *)(above_right + 8 * dst_stride);
+    unsigned int *dst_ptr2 = (unsigned int *)(above_right + 12 * dst_stride);
 
     *dst_ptr0 = *src_ptr;
     *dst_ptr1 = *src_ptr;
