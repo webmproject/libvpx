@@ -2206,7 +2206,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 #if CONFIG_T8X8
         // No 4x4 modes if segment flagged as 8x8
         else if ( ( get_seg_tx_type( xd, segment_id ) == TX_8X8 ) &&
-                  ( (this_mode == B_PRED) || (this_mode == SPLITMV) ) )
+                  ( (this_mode == B_PRED)
+                  ||(this_mode == I8X8_PRED)
+                  || (this_mode == SPLITMV) ) )
         {
             continue;
         }
@@ -3015,13 +3017,24 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
                                             &rate16x16, &rate16x16_tokenonly,
                                             &dist16x16);
     mode16x16 = x->e_mbd.mode_info_context->mbmi.mode;
-    error8x8 = rd_pick_intra8x8mby_modes(cpi, x,
-                                         &rate8x8, &rate8x8_tokenonly,
-                                         &dist8x8, error16x16);
-    mode8x8[0]= x->e_mbd.mode_info_context->bmi[0].as_mode;
-    mode8x8[1]= x->e_mbd.mode_info_context->bmi[2].as_mode;
-    mode8x8[2]= x->e_mbd.mode_info_context->bmi[8].as_mode;
-    mode8x8[3]= x->e_mbd.mode_info_context->bmi[10].as_mode;
+#if CONFIG_T8X8
+    if ( get_seg_tx_type( xd,
+                          xd->mode_info_context->mbmi.segment_id ) == TX_8X8)
+    {
+        error8x8 = INT_MAX;
+    }
+    else
+#else
+    {
+        error8x8 = rd_pick_intra8x8mby_modes(cpi, x,
+                                            &rate8x8, &rate8x8_tokenonly,
+                                            &dist8x8, error16x16);
+        mode8x8[0]= x->e_mbd.mode_info_context->bmi[0].as_mode;
+        mode8x8[1]= x->e_mbd.mode_info_context->bmi[2].as_mode;
+        mode8x8[2]= x->e_mbd.mode_info_context->bmi[8].as_mode;
+        mode8x8[3]= x->e_mbd.mode_info_context->bmi[10].as_mode;
+    }
+#endif
 
 #if CONFIG_T8X8
     if ( get_seg_tx_type( xd,
