@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//8NM\u003d",
+        "filename": "vp8/encoder/arm/variance_arm.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-23T18:13:41Z",
+      "side": 0,
+      "message": "So this has a very curious issue. This call to neon_func is the actual correct version of this function. However, by checking [xy]offset we take shortcuts.\n\nAs John suggests, these wrapper functions should be consolidated and reworked. Not a blocker to this patchset.",
+      "revId": "2669ce160e59bcaaeadbef201c13fc410471349d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
