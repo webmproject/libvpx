@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//8N0\u003d",
+        "filename": "vp8/common/dequantize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-23T18:04:02Z",
+      "side": 1,
+      "message": "--target\u003darmv6-linux-gcc\n\n vp8/common/dequantize.c: In function \u0027vp8_dequant_idct_add_c\u0027:\n vp8/common/dequantize.c:39:5: warning: implicit declaration of function \u0027vp8_short_idct4x4llm_c\u0027\n\nBecause armv6 provides an optimized function and rtcd is not enabled this is not declared. It can be be forward declared at the top of the file (which is ugly) or set to call optimized function by using vp8_short_idct4x4llm (which seems like the best option). This will allow RTCD with all simd disabled to still call the C version and have the additional benefit of calling the optimized version if for some reason there exists no optimized call to vp8_dequant_idct_add",
+      "revId": "2c06435a658a026d3ff903ea70ef349c2fc933a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
