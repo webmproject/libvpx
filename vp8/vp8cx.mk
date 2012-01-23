@@ -87,8 +87,10 @@ VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.h
+VP8_CX_SRCS-yes += encoder/find_rotation.c
 VP8_CX_SRCS-yes += encoder/mbgraph.c
 VP8_CX_SRCS-yes += encoder/mbgraph.h
+
 
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
