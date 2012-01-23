@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//8Ow\u003d",
+        "filename": ".mailmap",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-01-23T17:47:39Z",
+      "side": 1,
+      "message": "erm?",
+      "revId": "311e8a301da1025295331b6b29b01336bc0a4ec9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
