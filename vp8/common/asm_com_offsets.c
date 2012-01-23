@@ -35,7 +35,7 @@ END
 /* add asserts for any offset that is not supported by assembly code */
 /* add asserts for any size that is not supported by assembly code */
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 /* switch case in vp8_intra4x4_predict_armv6 is based on these enumerated values */
 ct_assert(B_DC_PRED, B_DC_PRED == 0);
 ct_assert(B_TM_PRED, B_TM_PRED == 1);
@@ -49,7 +49,7 @@ ct_assert(B_HD_PRED, B_HD_PRED == 8);
 ct_assert(B_HU_PRED, B_HU_PRED == 9);
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 /* vp8_yv12_extend_frame_borders_neon makes several assumptions based on this */
 ct_assert(VP8BORDERINPIXELS_VAL, VP8BORDERINPIXELS == 32)
 #endif

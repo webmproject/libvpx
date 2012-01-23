@@ -15,7 +15,7 @@
 #include "vpx_config.h"
 #include "vpx_scale/yv12config.h"
 
-#if HAVE_ARMV7
+#if HAVE_NEON
     void vp8_yv12_extend_frame_borders_neon(YV12_BUFFER_CONFIG *ybf);
 
     /* Copy Y,U,V buffer data from src to dst, filling border of dst as well. */

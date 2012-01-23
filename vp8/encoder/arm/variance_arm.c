@@ -12,7 +12,7 @@
 #include "vp8/encoder/variance.h"
 #include "vp8/common/filter.h"
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 #include "vp8/common/arm/bilinearfilter_arm.h"
 
 unsigned int vp8_sub_pixel_variance8x8_armv6
@@ -91,10 +91,10 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
     return var;
 }
 
-#endif /* HAVE_ARMV6 */
+#endif /* HAVE_MEDIA */
 
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 
 unsigned int vp8_sub_pixel_variance16x16_neon
 (

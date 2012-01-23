@@ -12,7 +12,7 @@
 #ifndef VARIANCE_ARM_H
 #define VARIANCE_ARM_H
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 
 extern prototype_sad(vp8_sad16x16_armv6);
 extern prototype_variance(vp8_variance16x16_armv6);
@@ -55,10 +55,10 @@ extern prototype_variance(vp8_mse16x16_armv6);
 
 #endif /* !CONFIG_RUNTIME_CPU_DETECT */
 
-#endif /* HAVE_ARMV6 */
+#endif /* HAVE_MEDIA */
 
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 extern prototype_sad(vp8_sad4x4_neon);
 extern prototype_sad(vp8_sad8x8_neon);
 extern prototype_sad(vp8_sad8x16_neon);
@@ -148,8 +148,8 @@ extern prototype_get16x16prederror(vp8_get4x4sse_cs_neon);
 
 #undef  vp8_variance_get4x4sse_cs
 #define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_neon
-#endif
+#endif  /* !CONFIG_RUNTIME_CPU_DETECT */
 
-#endif
+#endif  /* HAVE_NEON */
 
 #endif

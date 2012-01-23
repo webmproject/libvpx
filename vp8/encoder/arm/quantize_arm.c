@@ -16,7 +16,7 @@
 #include "vp8/common/entropy.h"
 
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 
 /* vp8_quantize_mbX functions here differs from corresponding ones in
  * quantize.c only by using quantize_b_pair function pointer instead of
@@ -59,4 +59,4 @@ void vp8_quantize_mbuv_neon(MACROBLOCK *x)
                            &x->e_mbd.block[i], &x->e_mbd.block[i+1]);
 }
 
-#endif /* HAVE_ARMV7 */
+#endif /* HAVE_NEON */

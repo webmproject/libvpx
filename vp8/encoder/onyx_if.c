@@ -63,7 +63,7 @@ extern unsigned int vp8_get_processor_freq();
 extern void print_tree_update_probs();
 extern void vp8cx_create_encoder_threads(VP8_COMP *cpi);
 extern void vp8cx_remove_encoder_threads(VP8_COMP *cpi);
-#if HAVE_ARMV7
+#if HAVE_NEON
 extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 #endif
@@ -4567,7 +4567,7 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 #endif
 
 //For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.
-#if HAVE_ARMV7
+#if HAVE_NEON
 extern void vp8_push_neon(int64_t *store);
 extern void vp8_pop_neon(int64_t *store);
 #endif
@@ -4575,14 +4575,14 @@ extern void vp8_pop_neon(int64_t *store);
 
 int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_CONFIG *sd, int64_t time_stamp, int64_t end_time)
 {
-#if HAVE_ARMV7
+#if HAVE_NEON
     int64_t store_reg[8];
 #endif
     VP8_COMMON            *cm = &cpi->common;
     struct vpx_usec_timer  timer;
     int                    res = 0;
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
     if (cm->rtcd.flags & HAS_NEON)
 #endif
@@ -4599,7 +4599,7 @@ int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_C
     vpx_usec_timer_mark(&timer);
     cpi->time_receive_data += vpx_usec_timer_elapsed(&timer);
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
     if (cm->rtcd.flags & HAS_NEON)
 #endif
@@ -4628,7 +4628,7 @@ static int frame_is_reference(const VP8_COMP *cpi)
 
 int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned long *size, unsigned char *dest, unsigned char *dest_end, int64_t *time_stamp, int64_t *time_end, int flush)
 {
-#if HAVE_ARMV7
+#if HAVE_NEON
     int64_t store_reg[8];
 #endif
     VP8_COMMON *cm;
@@ -4650,7 +4650,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
     cpi->common.error.setjmp = 1;
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
     if (cm->rtcd.flags & HAS_NEON)
 #endif
@@ -4725,7 +4725,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
         if (cm->rtcd.flags & HAS_NEON)
 #endif
@@ -5114,7 +5114,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 #endif
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
     if (cm->rtcd.flags & HAS_NEON)
 #endif
