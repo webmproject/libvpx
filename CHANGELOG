@@ -1,3 +1,51 @@
+2012-01-27 v1.0.0 "Duclair"
+  Our fourth named release, focused on performance and features related to
+  real-time encoding. It also fixes a decoder crash bug introduced in
+  v0.9.7, so all users of that release are encouraged to upgrade.
+
+  - Upgrading:
+      This release is ABI incompatible with prior releases of libvpx, so the
+      "major" version number has been bumped to 1. You must recompile your
+      applications against the latest version of the libvpx headers. The
+      API remains compatible, and this should not require code changes in most
+      applications.
+
+  - Enhancements:
+      This release introduces several substantial new features to the encoder,
+      of particular interest to real time streaming applications.
+
+      Temporal scalability allows the encoder to produce a stream that can
+      be decimated to different frame rates, with independent rate targetting
+      for each substream.
+
+      Multiframe quality enhancement postprocessing can make visual quality
+      more consistent in the presence of frames that are substantially
+      different quality than the surrounding frames, as in the temporal
+      scalability case and in some forced keyframe scenarios.
+
+      Multiple-resolution encoding support allows the encoding of the
+      same content at different resolutions faster than encoding them
+      separately.
+
+  - Speed:
+      Optimization targets for this release included the decoder and the real-
+      time modes of the encoder. Decoder speed on x86 has improved 10.5% with
+      this release. Encoder improvements followed a curve where speeds 1-3
+      improved 4.0%-1.5%, speeds 4-8 improved <1%, and speeds 9-16 improved
+      1.5% to 10.5%, respectively. "Best" mode speed is consistent with the
+      Cayuga release.
+
+  - Quality:
+      Encoder quality in the single stream case is consistent with the Cayuga
+      release.
+
+  - Bug Fixes:
+      This release fixes an OOB read decoder crash bug present in v0.9.7
+      related to the clamping of motion vectors in SPLITMV blocks. This
+      behavior could be triggered by corrupt input or by starting
+      decoding from a P-frame.
+
+
 2011-08-15 v0.9.7-p1 "Cayuga" patch 1
   This is an incremental bugfix release against Cayuga. All users of that
   release are strongly encouraged to upgrade.
