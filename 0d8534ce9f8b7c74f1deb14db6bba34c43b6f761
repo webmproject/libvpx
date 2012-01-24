@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//71M\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 8
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-24T00:45:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//8P0\u003d",
+      "revId": "0d8534ce9f8b7c74f1deb14db6bba34c43b6f761",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//8QA\u003d",
         "filename": "build/make/rtcd.sh",
         "patchSetId": 8
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//71E\u003d",
+        "filename": "build/make/rtcd.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-24T00:45:41Z",
+      "side": 1,
+      "message": "obsoleted in later patch sets",
+      "parentUuid": "AAAAHn//8QA\u003d",
+      "revId": "0d8534ce9f8b7c74f1deb14db6bba34c43b6f761",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//8P4\u003d",
         "filename": "build/make/rtcd.sh",
         "patchSetId": 8
@@ -47,6 +83,24 @@
       "writtenOn": "2012-01-23T17:33:03Z",
       "side": 1,
       "message": "build/make/configure.sh groups all these in an | at the end",
+      "revId": "0d8534ce9f8b7c74f1deb14db6bba34c43b6f761",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//71A\u003d",
+        "filename": "build/make/rtcd.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-24T00:45:41Z",
+      "side": 1,
+      "message": "undecided which style I like better here.",
+      "parentUuid": "AAAAHn//8P4\u003d",
       "revId": "0d8534ce9f8b7c74f1deb14db6bba34c43b6f761",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
