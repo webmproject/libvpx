@@ -16,6 +16,24 @@
       "revId": "2c06435a658a026d3ff903ea70ef349c2fc933a1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//71Y\u003d",
+        "filename": "vp8/common/dequantize.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-24T00:43:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//8N0\u003d",
+      "revId": "2c06435a658a026d3ff903ea70ef349c2fc933a1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
