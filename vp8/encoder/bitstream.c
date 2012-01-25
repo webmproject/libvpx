@@ -1013,6 +1013,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     int ct[4];
 
                     vp8_find_near_mvs(xd, m, &n1, &n2, &best_mv, ct, rf, cpi->common.ref_frame_sign_bias);
+                    vp8_clamp_mv2(&best_mv, xd);
+
                     vp8_mv_ref_probs(mv_ref_p, ct);
 
 #ifdef ENTROPY_STATS

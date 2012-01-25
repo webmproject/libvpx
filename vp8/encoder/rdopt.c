@@ -1726,8 +1726,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     union b_mode_info best_bmodes[16];
     MB_MODE_INFO best_mbmode;
     PARTITION_INFO best_partition;
+    int_mv best_ref_mv_sb[2];
+    int_mv mode_mv_sb[2][MB_MODE_COUNT];
     int_mv best_ref_mv;
-    int_mv mode_mv[MB_MODE_COUNT];
+    int_mv *mode_mv;
     MB_PREDICTION_MODE this_mode;
     int num00;
     int best_mode_index = 0;
@@ -1755,7 +1757,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int ref_frame_map[4];
     int sign_bias = 0;
 
-    vpx_memset(mode_mv, 0, sizeof(mode_mv));
+    mode_mv = mode_mv_sb[sign_bias];
+    best_ref_mv.as_int = 0;
+    vpx_memset(mode_mv_sb, 0, sizeof(mode_mv_sb));
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
     vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
 
@@ -1767,15 +1771,16 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
      */
     if (ref_frame_map[1] > 0)
     {
-        vp8_find_near_mvs(&x->e_mbd,
-                          x->e_mbd.mode_info_context,
-                          &mode_mv[NEARESTMV], &mode_mv[NEARMV],
-                          &best_ref_mv,
-                          mdcounts,
-                          ref_frame_map[1],
-                          cpi->common.ref_frame_sign_bias);
+        sign_bias = vp8_find_near_mvs_bias(&x->e_mbd,
+                                           x->e_mbd.mode_info_context,
+                                           mode_mv_sb,
+                                           best_ref_mv_sb,
+                                           mdcounts,
+                                           ref_frame_map[1],
+                                           cpi->common.ref_frame_sign_bias);
 
-        sign_bias = cpi->common.ref_frame_sign_bias[ref_frame_map[1]];
+        mode_mv = mode_mv_sb[sign_bias];
+        best_ref_mv.as_int = best_ref_mv_sb[sign_bias].as_int;
     }
 
     get_predictor_pointers(cpi, plane, recon_yoffset, recon_uvoffset);
@@ -1829,17 +1834,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             x->e_mbd.pre.u_buffer = plane[this_ref_frame][1];
             x->e_mbd.pre.v_buffer = plane[this_ref_frame][2];
 
-            if (sign_bias !=
-                cpi->common.ref_frame_sign_bias[x->e_mbd.mode_info_context->mbmi.ref_frame])
+            if (sign_bias != cpi->common.ref_frame_sign_bias[this_ref_frame])
             {
-                mode_mv[NEARESTMV].as_mv.row *= -1;
-                mode_mv[NEARESTMV].as_mv.col *= -1;
-                mode_mv[NEARMV].as_mv.row *= -1;
-                mode_mv[NEARMV].as_mv.col *= -1;
-                best_ref_mv.as_mv.row *= -1;
-                best_ref_mv.as_mv.col *= -1;
-                sign_bias
-                = cpi->common.ref_frame_sign_bias[x->e_mbd.mode_info_context->mbmi.ref_frame];
+                sign_bias = cpi->common.ref_frame_sign_bias[this_ref_frame];
+                mode_mv = mode_mv_sb[sign_bias];
+                best_ref_mv.as_int = best_ref_mv_sb[sign_bias].as_int;
             }
         }
 
@@ -2372,10 +2371,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     if (sign_bias
         != cpi->common.ref_frame_sign_bias[xd->mode_info_context->mbmi.ref_frame])
-    {
-        best_ref_mv.as_mv.row *= -1;
-        best_ref_mv.as_mv.col *= -1;
-    }
+        best_ref_mv.as_int = best_ref_mv_sb[!sign_bias].as_int;
 
     rd_update_mvcount(cpi, x, &best_ref_mv);
 }
