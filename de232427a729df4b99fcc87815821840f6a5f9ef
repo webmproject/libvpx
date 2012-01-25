@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//7BI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 457,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-25T00:21:56Z",
+      "side": 1,
+      "message": "s/-/_/g could be y//",
+      "revId": "de232427a729df4b99fcc87815821840f6a5f9ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//7BQ\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-25T00:21:56Z",
+      "side": 1,
+      "message": "I think grep -q is already in use elsewhere.",
+      "revId": "de232427a729df4b99fcc87815821840f6a5f9ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//7BE\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 461,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-25T00:21:56Z",
+      "side": 1,
+      "message": "long line",
+      "revId": "de232427a729df4b99fcc87815821840f6a5f9ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//7BA\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-25T00:21:56Z",
+      "side": 1,
+      "message": "long lines.",
+      "revId": "de232427a729df4b99fcc87815821840f6a5f9ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//7AE\u003d",
+        "filename": "vp8/common/arm/reconintra_arm.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-01-25T00:21:56Z",
+      "side": 1,
+      "message": "some of these blocks are big, worth it in this change to add // HAVE_NEON comments, etc.?",
+      "revId": "de232427a729df4b99fcc87815821840f6a5f9ef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
