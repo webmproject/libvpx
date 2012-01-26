@@ -77,6 +77,19 @@ void vp8_find_near_mvs
     int *ref_frame_sign_bias
 );
 
+
+int vp8_find_near_mvs_bias
+(
+    MACROBLOCKD *xd,
+    const MODE_INFO *here,
+    int_mv mode_mv_sb[2][MB_MODE_COUNT],
+    int_mv best_mv_sb[2],
+    int cnt[4],
+    int refframe,
+    int *ref_frame_sign_bias
+);
+
+
 vp8_prob *vp8_mv_ref_probs(
     vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
 );
