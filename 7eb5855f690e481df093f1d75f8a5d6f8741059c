@@ -16,6 +16,24 @@
       "revId": "7eb5855f690e481df093f1d75f8a5d6f8741059c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//5i8\u003d",
+        "filename": "build/make/rtcd.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-26T15:51:15Z",
+      "side": 1,
+      "message": "nice catch. added to the jenkins build test, will fix here.",
+      "parentUuid": "AAAAHn//5mQ\u003d",
+      "revId": "7eb5855f690e481df093f1d75f8a5d6f8741059c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
