@@ -215,7 +215,6 @@ static void fill_token_costs(
     for (i = 0; i < BLOCK_TYPES; i++)
         for (j = 0; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
-
                 vp8_cost_tokens((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
 
 }
@@ -363,6 +362,12 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
         (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs
     );
 
+#if CONFIG_T8X8
+    fill_token_costs(
+        cpi->mb.token_costs_8x8,
+        (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs_8x8
+    );
+#endif
 #if CONFIG_QIMODE
     //rough estimate for costing
     cpi->common.kf_ymode_probs_index = cpi->common.base_qindex>>4;
@@ -665,6 +670,7 @@ static void macro_block_yrd( MACROBLOCK *mb,
     // rate
     *Rate = vp8_rdcost_mby(mb);
 }
+
 
 static void copy_predictor(unsigned char *dst, const unsigned char *predictor)
 {
