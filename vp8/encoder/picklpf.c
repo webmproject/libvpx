@@ -36,6 +36,15 @@ extern void
 (*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
                                    YV12_BUFFER_CONFIG *dst_ybc,
                                    int Fraction);
+
+extern void vp8_loop_filter_frame_segment
+(
+    VP8_COMMON *cm,
+    MACROBLOCKD *xd,
+    int default_filt_lvl,
+    int segment
+);
+
 void
 vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction)
 {
@@ -63,7 +72,6 @@ vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst
 
     vpx_memcpy(dst_y, src_y, ystride *(linestocopy + 16));
 }
-
 static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, int Fraction, const vp8_variance_rtcd_vtable_t *rtcd)
 {
     int i, j;
@@ -261,7 +269,8 @@ void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val)
 {
 }
 
-void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
+
+void vp8cx_pick_filter_level_sg(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi, int segment)
 {
     VP8_COMMON *cm = &cpi->common;
 
@@ -315,7 +324,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     // Get baseline error score
     vp8cx_set_alt_lf_level(cpi, filt_mid);
-    vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_mid);
+    vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_mid,segment);
 
     best_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
     filt_best = filt_mid;
@@ -353,7 +362,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         {
             // Get Low filter error score
             vp8cx_set_alt_lf_level(cpi, filt_low);
-            vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_low);
+            vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_low, segment);
 
             filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
 
@@ -390,7 +399,7 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         if ((filt_direction >= 0) && (filt_high != filt_mid))
         {
             vp8cx_set_alt_lf_level(cpi, filt_high);
-            vp8_loop_filter_frame_yonly(cm, &cpi->mb.e_mbd, filt_high);
+            vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_high, segment);
 
             filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
 
@@ -434,4 +443,45 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
     }
 
     cm->filter_level = filt_best;
+}
+
+void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
+{
+    VP8_COMMON *oci = &cpi->common;
+    MODE_INFO *mi = oci->mi;
+    int filt_lev[2];
+    int i, j;
+    MACROBLOCKD * const xd = &cpi->mb.e_mbd;
+    int max_seg;
+    int mb_index = 0;
+
+    // pick the loop filter for each segment after segment 0
+    for (i = 1; i < MAX_MB_SEGMENTS; i++)
+    {
+        // if the segment loop filter is active
+        if (segfeature_active(xd, i, SEG_LVL_ALT_LF))
+        {
+            set_segdata(xd, i, SEG_LVL_ALT_LF, 0);
+            vp8cx_pick_filter_level_sg(sd, cpi, i);
+            filt_lev[i] = oci->filter_level;
+        }
+    }
+
+    // do the 0 segment ( this filter also picks the filter value for all
+    // the not enabled features )
+
+    // TODO : Fix the code if segment 0 is the one with seg_lvl_alt_lf on
+    // right now assumes segment 0 gets base loop filter and the rest are
+    // deltas off of segment 0.
+    set_segdata(xd, 0, SEG_LVL_ALT_LF, 0);
+    vp8cx_pick_filter_level_sg(sd, cpi, 0);
+    filt_lev[0] = oci->filter_level;
+
+    // convert the best filter level for the mbs of the segment to
+    // a delta from 0
+    for (i = 1; i < MAX_MB_SEGMENTS; i++)
+        if (segfeature_active(xd, i, SEG_LVL_ALT_LF))
+        {
+            set_segdata(xd, i, SEG_LVL_ALT_LF, filt_lev[i] - filt_lev[0]);
+        }
 }

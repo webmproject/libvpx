@@ -580,6 +580,138 @@ void vp8_loop_filter_frame_yonly
 
 }
 
+// TODO: Multiple copies of loop filtering code should be pruned and
+// cut down.   This just adds yet another so that I can do an if
+// on segment.
+void vp8_loop_filter_frame_segment(VP8_COMMON *cm, MACROBLOCKD *xd,
+                                   int default_filt_lvl, int segment)
+{
+    YV12_BUFFER_CONFIG *post = cm->frame_to_show;
+
+    unsigned char *y_ptr;
+    int mb_row;
+    int mb_col;
+
+    loop_filter_info_n *lfi_n = &cm->lf_info;
+    loop_filter_info lfi;
+
+    int filter_level;
+    FRAME_TYPE frame_type = cm->frame_type;
+
+    /* Point at base of Mb MODE_INFO list */
+    const MODE_INFO *mode_info_context = cm->mi;
+
+#if 0
+    if(default_filt_lvl == 0) /* no filter applied */
+    return;
+#endif
+
+    /* Initialize the loop filter for this frame. */
+    vp8_loop_filter_frame_init(cm, xd, default_filt_lvl);
+
+    /* Set up the buffer pointers */
+    y_ptr = post->y_buffer;
+
+    /* vp8_filter each macro block */
+    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+    {
+        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+        {
+            int skip_lf = (mode_info_context->mbmi.mode != B_PRED
+                           && mode_info_context->mbmi.mode != I8X8_PRED
+                           && mode_info_context->mbmi.mode != SPLITMV
+                           && mode_info_context->mbmi.mb_skip_coeff);
+
+            const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi
+                    .mode];
+            const int seg = mode_info_context->mbmi.segment_id;
+            const int ref_frame = mode_info_context->mbmi.ref_frame;
+
+            filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+
+            // check if this mb has filtering applied
+            //    and then whether it is the right segment or
+            //    if not whether the passed in segment is 0 and this
+            //    segment has no alt lf
+
+            // TODO: Make this work for when segment 0 has the alt lv enabled
+            if (filter_level
+                && (seg == segment
+                    || (!segfeature_active(xd, seg, SEG_LVL_ALT_LF)
+                        && segment == 0)))
+            {
+                if (cm->filter_type == NORMAL_LOOPFILTER)
+                {
+                    const int hev_index =
+                            lfi_n->hev_thr_lut[frame_type][filter_level];
+                    lfi.mblim = lfi_n->mblim[filter_level];
+                    lfi.blim = lfi_n->blim[filter_level];
+                    lfi.lim = lfi_n->lim[filter_level];
+                    lfi.hev_thr = lfi_n->hev_thr[hev_index];
+
+                    if (mb_col > 0)
+#if CONFIG_NEWLPF
+                        vp8_loop_filter_mbv_c(y_ptr, 0, 0, post->y_stride, 0,
+                                              &lfi);
+#else
+                    LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_v)
+                    (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+#endif
+
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)(
+                                y_ptr, 0, 0, post->y_stride, 0, &lfi);
+
+                    /* don't apply across umv border */
+                    if (mb_row > 0)
+#if CONFIG_NEWLPF
+                        vp8_loop_filter_mbh_c(y_ptr, 0, 0, post->y_stride, 0,
+                                              &lfi);
+#else
+                    LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_h)
+                    (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+#endif
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)(
+                                y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                }
+                else
+                {
+                    if (mb_col > 0)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_mb_v)(
+                                y_ptr, post->y_stride,
+                                lfi_n->mblim[filter_level]);
+
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_b_v)(
+                                y_ptr, post->y_stride,
+                                lfi_n->blim[filter_level]);
+
+                    /* don't apply across umv border */
+                    if (mb_row > 0)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_mb_h)(
+                                y_ptr, post->y_stride,
+                                lfi_n->mblim[filter_level]);
+
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_b_h)(
+                                y_ptr, post->y_stride,
+                                lfi_n->blim[filter_level]);
+                }
+            }
+
+            y_ptr += 16;
+            mode_info_context++; /* step to next MB */
+
+        }
+
+        y_ptr += post->y_stride * 16 - post->y_width;
+        mode_info_context++; /* Skip border mb */
+    }
+
+}
+
+
 void vp8_loop_filter_partial_frame
 (
     VP8_COMMON *cm,
