@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//5eg\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-26T17:37:17Z",
+      "side": 1,
+      "message": "agree",
+      "parentUuid": "AAAAHn//5gM\u003d",
+      "revId": "9c4194a77cbe86e9a8d03ce6839505c311216c50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//5f0\u003d",
         "filename": "vp8/common/findnearmv.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-01-26T16:47:30Z",
       "side": 1,
       "message": "If alt_ref is disabled, mode_mv_sb[1] is not needed. Maybe still keep *-1 in pick_inter_mode when it is really needed. Then do clamping after sign adjustment?",
+      "revId": "9c4194a77cbe86e9a8d03ce6839505c311216c50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//5cU\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-26T17:37:17Z",
+      "side": 1,
+      "message": "Agree that there are cases where you could skip the !sign_bias case, but assuming it\u0027s needed it should be faster to keep the *-1 and clamp here, as you\u0027d only have to do it once instead of every time you switch sign.\n\nIf ref_frame_sign_bias were uint8_t*, then we could test all 4 biases at once and if any of them were set, then do the !sign_bias case. Suggest we do that as a separate commit to keep this one to just what\u0027s necessary to fix the bug.",
+      "parentUuid": "AAAAHn//5f0\u003d",
       "revId": "9c4194a77cbe86e9a8d03ce6839505c311216c50",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
