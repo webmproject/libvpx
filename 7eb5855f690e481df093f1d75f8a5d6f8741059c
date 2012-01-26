@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//5mQ\u003d",
+        "filename": "build/make/rtcd.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-01-26T14:04:55Z",
+      "side": 1,
+      "message": "this will fail for generic-gnu target.\ngeneric target is an easy/sure way to get rid of all platform specific asm optimizations.",
+      "revId": "7eb5855f690e481df093f1d75f8a5d6f8741059c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
