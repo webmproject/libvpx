@@ -541,6 +541,20 @@ static void init_seg_features(VP8_COMP *cpi)
     // All other frames if segmentation has been enabled
     else if ( xd->segmentation_enabled )
     {
+        int i;
+
+        // clears prior frame seg lev refs
+        for (i = 0; i < MAX_MB_SEGMENTS; i++)
+        {
+            // only do it if the force drop the background stuff is off
+            if(!segfeature_active(xd, i, SEG_LVL_MODE))
+            {
+                disable_segfeature(xd,i,SEG_LVL_REF_FRAME);
+                set_segdata( xd,i, SEG_LVL_REF_FRAME, 0xffffff);
+            }
+        }
+
+
         // First normal frame in a valid gf or alt ref group
         if ( cpi->common.frames_since_golden == 0 )
         {

@@ -1992,7 +1992,31 @@ static void decide_kf_ymode_entropy(VP8_COMP *cpi)
 
 }
 #endif
+static segment_reference_frames(VP8_COMP *cpi)
+{
+    VP8_COMMON *oci = &cpi->common;
+    MODE_INFO *mi = oci->mi;
+    int ref[MAX_MB_SEGMENTS]={0};
+    int i,j;
+    int mb_index=0;
+    MACROBLOCKD *const xd = & cpi->mb.e_mbd;
 
+    for (i = 0; i < oci->mb_rows; i++)
+    {
+        for (j = 0; j < oci->mb_cols; j++, mb_index++)
+        {
+            ref[mi[mb_index].mbmi.segment_id]|=(1<<mi[mb_index].mbmi.ref_frame);
+        }
+        mb_index++;
+    }
+    for (i = 0; i < MAX_MB_SEGMENTS; i++)
+    {
+        enable_segfeature(xd,i,SEG_LVL_REF_FRAME);
+        set_segdata( xd,i, SEG_LVL_REF_FRAME, ref[i]);
+    }
+
+
+}
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 {
     int i, j;
@@ -2065,6 +2089,8 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
             vp8_write_bit(bc, (xd->temporal_update) ? 1:0);
 
         vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
+
+        segment_reference_frames(cpi);
 
         if (xd->update_mb_segmentation_data)
         {
