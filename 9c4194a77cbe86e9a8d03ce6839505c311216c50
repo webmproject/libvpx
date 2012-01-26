@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//5gM\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-01-26T16:47:30Z",
+      "side": 1,
+      "message": "in should also be clamped.",
+      "revId": "9c4194a77cbe86e9a8d03ce6839505c311216c50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//5f0\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-01-26T16:47:30Z",
+      "side": 1,
+      "message": "If alt_ref is disabled, mode_mv_sb[1] is not needed. Maybe still keep *-1 in pick_inter_mode when it is really needed. Then do clamping after sign adjustment?",
+      "revId": "9c4194a77cbe86e9a8d03ce6839505c311216c50",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
