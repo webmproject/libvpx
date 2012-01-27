@@ -121,6 +121,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
     y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(
                                       bc, pbi->common.kf_ymode_prob);
 #endif
+
     m->mbmi.ref_frame = INTRA_FRAME;
 
     if ((m->mbmi.mode = y_mode) == B_PRED)
@@ -236,6 +237,7 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
     int seg_ref_active;
 
 //#if CONFIG_SEGFEATURES
+    VP8_COMMON *const cm = & pbi->common;
     MACROBLOCKD *const xd = &pbi->mb;
 
     seg_ref_active = segfeature_active( xd,
@@ -246,14 +248,14 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
     if ( !seg_ref_active )
     {
         ref_frame =
-            (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
+            (MV_REFERENCE_FRAME) vp8_read(bc, cm->prob_intra_coded);
 
         if (ref_frame)
         {
-            if (vp8_read(bc, pbi->prob_last))
+            if (vp8_read(bc, cm->prob_last_coded))
             {
                 ref_frame = (MV_REFERENCE_FRAME)((int)ref_frame +
-                            (int)(1 + vp8_read(bc, pbi->prob_gf)));
+                            (int)(1 + vp8_read(bc, cm->prob_gf_coded)));
             }
         }
     }
@@ -272,7 +274,8 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
             // Else if there are both intra and inter options we need to read
             // the inter / intra flag, else mark as inter.
             if ( check_segref( xd, segment_id, INTRA_FRAME ) )
-                ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
+                ref_frame =
+                    (MV_REFERENCE_FRAME) vp8_read(bc, cm->prob_intra_coded);
             else
                 ref_frame = LAST_FRAME;
 
@@ -296,8 +299,9 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                     // Else we must read bit to decide.
                     else
                     {
-                        ref_frame = (MV_REFERENCE_FRAME)((int)ref_frame +
-                                    (int)(1 + vp8_read(bc, pbi->prob_gf)));
+                        ref_frame =
+                            (MV_REFERENCE_FRAME)((int)ref_frame +
+                            (int)(1 + vp8_read(bc, cm->prob_gf_coded)));
                     }
                 }
                 // Both last and at least one of alt or golden are enabled
@@ -305,7 +309,7 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                           check_segref( xd, segment_id, ALTREF_FRAME ) )
                 {
                     // Read flag to indicate (golden or altref) vs last
-                    if (vp8_read(bc, pbi->prob_last))
+                    if (vp8_read(bc, cm->prob_last_coded))
                     {
                         // If not golden then it must be altref
                         if (!check_segref( xd, segment_id, GOLDEN_FRAME ))
@@ -320,8 +324,9 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                         }
                         else
                         {
-                            ref_frame = (MV_REFERENCE_FRAME)((int)ref_frame +
-                                        (int)(1 + vp8_read(bc, pbi->prob_gf)));
+                            ref_frame =
+                                (MV_REFERENCE_FRAME)((int)ref_frame +
+                                (int)(1 + vp8_read(bc, cm->prob_gf_coded)));
                         }
                     }
                     // ELSE LAST
@@ -370,6 +375,7 @@ static const unsigned char mbsplit_fill_offset[4][16] = {
 
 static void mb_mode_mv_init(VP8D_COMP *pbi)
 {
+    VP8_COMMON *const cm = & pbi->common;
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
 
@@ -385,14 +391,17 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
 
     if(pbi->common.frame_type != KEY_FRAME)
     {
-        pbi->prob_intra = (vp8_prob)vp8_read_literal(bc, 8);
-        pbi->prob_last  = (vp8_prob)vp8_read_literal(bc, 8);
-        pbi->prob_gf    = (vp8_prob)vp8_read_literal(bc, 8);
+        // Decode the baseline probabilities for decoding reference frame
+        cm->prob_intra_coded = (vp8_prob)vp8_read_literal(bc, 8);
+        cm->prob_last_coded  = (vp8_prob)vp8_read_literal(bc, 8);
+        cm->prob_gf_coded    = (vp8_prob)vp8_read_literal(bc, 8);
+
+
 #if CONFIG_DUALPRED
         pbi->common.dual_pred_mode = vp8_read(bc, 128);
-        if (pbi->common.dual_pred_mode)
-            pbi->common.dual_pred_mode += vp8_read(bc, 128);
-        if (pbi->common.dual_pred_mode == HYBRID_PREDICTION)
+        if (cm->dual_pred_mode)
+            cm->dual_pred_mode += vp8_read(bc, 128);
+        if (cm->dual_pred_mode == HYBRID_PREDICTION)
         {
             pbi->prob_dualpred[0] = (vp8_prob)vp8_read_literal(bc, 8);
             pbi->prob_dualpred[1] = (vp8_prob)vp8_read_literal(bc, 8);
@@ -406,7 +415,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
 
             do
             {
-                pbi->common.fc.ymode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
+                cm->fc.ymode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
             }
             while (++i < 4);
         }
@@ -419,7 +428,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
 
             do
             {
-                pbi->common.fc.uv_mode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
+                cm->fc.uv_mode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
             }
             while (++i < 3);
         }

@@ -1351,7 +1351,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
-     // Create the encoder segmentation map and set all entries to 0
+     // Create the segmentation map structure and set to 0
      if (!pc->last_frame_seg_map)
        CHECK_MEM_ERROR(pc->last_frame_seg_map,
                        vpx_calloc((pc->mb_rows * pc->mb_cols), 1));

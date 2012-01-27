@@ -208,7 +208,6 @@ typedef struct VP8Common
     ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
     ENTROPY_CONTEXT_PLANES left_context;  /* (up to) 4 contexts "" */
 
-
     /* keyframe block modes are predicted by their above, left neighbors */
 
     vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
@@ -226,6 +225,11 @@ typedef struct VP8Common
 #endif
 
     vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
+
+    vp8_prob prob_intra_coded;
+    vp8_prob prob_last_coded;
+    vp8_prob prob_gf_coded;
+
     // Context probabilities when using predictive coding of segment id
     vp8_prob segment_pred_probs[PREDICTION_PROBS];
     unsigned char temporal_update;

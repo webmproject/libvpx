@@ -129,10 +129,6 @@ typedef struct VP8Decompressor
     vp8_dequant_rtcd_vtable_t        dequant;
 #endif
 
-
-    vp8_prob prob_intra;
-    vp8_prob prob_last;
-    vp8_prob prob_gf;
     vp8_prob prob_skip_false;
 #if CONFIG_DUALPRED
     vp8_prob prob_dualpred[3];

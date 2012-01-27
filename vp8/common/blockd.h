@@ -191,8 +191,7 @@ typedef struct
     unsigned char need_to_clamp_mvs;
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
 
-    // Flag used when temporal prediction of segment map is enabled.
-    // 1 means it is predicted 0 that it must be coded explicitly
+    // Flags used for prediction status of various bistream signals
     unsigned char seg_id_predicted;
 
 } MB_MODE_INFO;
@@ -300,8 +299,8 @@ typedef struct MacroBlockD
     int mb_to_top_edge;
     int mb_to_bottom_edge;
 
+    // TODO this is not used in the decoder so should not be in this structure
     int ref_frame_cost[MAX_REF_FRAMES];
-
 
     unsigned int frames_since_golden;
     unsigned int frames_till_alt_ref_frame;
