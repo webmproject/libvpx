@@ -1066,7 +1066,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
                 // Is temporal coding of the segment map enabled
-                if (xd->temporal_update)
+                if (pc->temporal_update)
                 {
                     // Look at whether neighbours were successfully predicted
                     // to create a context for the seg_id_predicted flag.
@@ -1078,7 +1078,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                     // Code the prediction flag for this mb
                     vp8_write( w, m->mbmi.seg_id_predicted,
-                               xd->mb_segment_pred_probs[pred_context]);
+                               pc->segment_pred_probs[pred_context]);
 
                     // If the mbs segment id was not predicted code explicitly
                     if (!m->mbmi.seg_id_predicted)
@@ -1172,7 +1172,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
 
 //#if CONFIG_SEGFEATURES
-                // Is the segment coding of reference frame enabled
+                // Is the segment coding of mode enabled
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                 {
                     write_mv_ref(w, mode, mv_ref_p);
@@ -2086,7 +2086,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
         // If it is, then indicate the method that will be used.
         if ( xd->update_mb_segmentation_map )
-            vp8_write_bit(bc, (xd->temporal_update) ? 1:0);
+            vp8_write_bit(bc, (pc->temporal_update) ? 1:0);
 
         vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
 
@@ -2162,11 +2162,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
             // If predictive coding of segment map is enabled send the
             // prediction probabilities.
-            if ( xd->temporal_update )
+            if ( pc->temporal_update )
             {
-                for (i = 0; i < SEGMENT_PREDICTION_PROBS; i++)
+                for (i = 0; i < PREDICTION_PROBS; i++)
                 {
-                    int Data = xd->mb_segment_pred_probs[i];
+                    int Data = pc->segment_pred_probs[i];
 
                     if (Data != 255)
                     {
@@ -2180,7 +2180,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         }
     }
 
-    // Code to determine whether or not to update the scan order.
+    // Encode the loop filter level and type
     vp8_write_bit(bc, pc->filter_type);
     vp8_write_literal(bc, pc->filter_level, 6);
     vp8_write_literal(bc, pc->sharpness_level, 3);

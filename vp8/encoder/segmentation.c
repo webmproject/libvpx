@@ -191,20 +191,20 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
     int segmap_index = 0;
     unsigned char segment_id;
 
-    int temporal_predictor_count[SEGMENT_PREDICTION_PROBS][2];
+    int temporal_predictor_count[PREDICTION_PROBS][2];
     int no_pred_segcounts[MAX_MB_SEGMENTS];
     int t_unpred_seg_counts[MAX_MB_SEGMENTS];
 
     vp8_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
     vp8_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
-    vp8_prob t_nopred_prob[SEGMENT_PREDICTION_PROBS];
+    vp8_prob t_nopred_prob[PREDICTION_PROBS];
 
     // Set default state for the segment tree probabilities and the
     // temporal coding probabilities
     vpx_memset(xd->mb_segment_tree_probs, 255,
                sizeof(xd->mb_segment_tree_probs));
-    vpx_memset(xd->mb_segment_pred_probs, 255,
-               sizeof(xd->mb_segment_pred_probs));
+    vpx_memset(cm->segment_pred_probs, 255,
+               sizeof(cm->segment_pred_probs));
 
     vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
     vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
@@ -244,7 +244,7 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
                 // Test to see if the last frame segment id at the same
                 // location correctly predicts the segment_id for this MB.
                 // Update the prediction flag and count as appropriate;
-                if ( segment_id == cpi->last_segmentation_map[segmap_index] )
+                if ( segment_id == cm->last_frame_seg_map[segmap_index] )
                 {
                     xd->mode_info_context->mbmi.seg_id_predicted = 1;
                     temporal_predictor_count[pred_context][1]++;
@@ -284,7 +284,7 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
         t_pred_cost = cost_segmap( xd, t_unpred_seg_counts, t_pred_tree );
 
         // Add in the cost of the signalling for each prediction context
-        for ( i = 0; i < SEGMENT_PREDICTION_PROBS; i++ )
+        for ( i = 0; i < PREDICTION_PROBS; i++ )
         {
             tot_count = temporal_predictor_count[i][0] +
                         temporal_predictor_count[i][1];
@@ -314,15 +314,15 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
     // Now choose which coding method to use.
     if ( t_pred_cost < no_pred_cost )
     {
-         xd->temporal_update = 1;
+         cm->temporal_update = 1;
          vpx_memcpy( xd->mb_segment_tree_probs,
                      t_pred_tree, sizeof(t_pred_tree) );
-         vpx_memcpy( &xd->mb_segment_pred_probs,
+         vpx_memcpy( &cm->segment_pred_probs,
                      t_nopred_prob, sizeof(t_nopred_prob) );
     }
     else
     {
-         xd->temporal_update = 0;
+         cm->temporal_update = 0;
          vpx_memcpy( xd->mb_segment_tree_probs,
                      no_pred_tree, sizeof(no_pred_tree) );
     }

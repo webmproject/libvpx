@@ -1063,7 +1063,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
         // If so what method will be used.
         if ( xd->update_mb_segmentation_map )
-            xd->temporal_update = (unsigned char)vp8_read_bit(bc);
+            pc->temporal_update = (unsigned char)vp8_read_bit(bc);
 
         // Is the segment data being updated
         xd->update_mb_segmentation_data = (unsigned char)vp8_read_bit(bc);
@@ -1114,8 +1114,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             // Which macro block level features are enabled
             vpx_memset(xd->mb_segment_tree_probs, 255,
                        sizeof(xd->mb_segment_tree_probs));
-            vpx_memset(xd->mb_segment_pred_probs, 255,
-                       sizeof(xd->mb_segment_pred_probs));
+            vpx_memset(pc->segment_pred_probs, 255,
+                       sizeof(pc->segment_pred_probs));
 
             // Read the probs used to decode the segment id for each macro
             // block.
@@ -1130,16 +1130,16 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
             // If predictive coding of segment map is enabled read the
             // prediction probabilities.
-            if ( xd->temporal_update )
+            if ( pc->temporal_update )
             {
                 // Read the prediction probs needed to decode the segment id
                 // when predictive coding enabled
-                for (i = 0; i < SEGMENT_PREDICTION_PROBS; i++)
+                for (i = 0; i < PREDICTION_PROBS; i++)
                 {
                     // If not explicitly set value is defaulted to 255 by
                     // memset above
                     if (vp8_read_bit(bc))
-                        xd->mb_segment_pred_probs[i] =
+                        pc->segment_pred_probs[i] =
                             (vp8_prob)vp8_read_literal(bc, 8);
                 }
             }
@@ -1352,8 +1352,9 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
      // Create the encoder segmentation map and set all entries to 0
-     if (!pbi->segmentation_map)
-       CHECK_MEM_ERROR(pbi->segmentation_map, vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
+     if (!pc->last_frame_seg_map)
+       CHECK_MEM_ERROR(pc->last_frame_seg_map,
+                       vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
 
     /* set up frame new frame for intra coded blocks */
 #if CONFIG_MULTITHREAD

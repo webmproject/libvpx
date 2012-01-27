@@ -202,8 +202,8 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
         return;
 
     // Delete sementation map
-    if (pbi->segmentation_map != 0)
-        vpx_free(pbi->segmentation_map);
+    if (pbi->common.last_frame_seg_map != 0)
+        vpx_free(pbi->common.last_frame_seg_map);
 
 #if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd)

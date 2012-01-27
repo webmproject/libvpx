@@ -89,7 +89,6 @@ typedef struct VP8Decompressor
     const unsigned char *partitions[MAX_PARTITIONS];
     unsigned int   partition_sizes[MAX_PARTITIONS];
     unsigned int   num_partitions;
-    unsigned char *segmentation_map;
 
 #if CONFIG_MULTITHREAD
     /* variable for threading */

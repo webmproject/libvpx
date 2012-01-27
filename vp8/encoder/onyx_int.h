@@ -542,10 +542,7 @@ typedef struct VP8_COMP
     int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
 #endif
 
-
-
     unsigned char *segmentation_map;
-    unsigned char *last_segmentation_map;
 
     // segment threashold for encode breakout
     int  segment_encode_breakout[MAX_MB_SEGMENTS];

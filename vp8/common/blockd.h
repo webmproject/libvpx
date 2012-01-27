@@ -32,7 +32,7 @@ void vpx_log(const char *format, ...);
 #define DCPREDCNTTHRESH 3
 
 #define MB_FEATURE_TREE_PROBS   3
-#define SEGMENT_PREDICTION_PROBS 3
+#define PREDICTION_PROBS 3
 
 #define MAX_MB_SEGMENTS         4
 
@@ -278,9 +278,6 @@ typedef struct MacroBlockD
     // Probability Tree used to code Segment number
     vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
 
-    // Context probabilities when using predictive coding of segment id
-    vp8_prob mb_segment_pred_probs[SEGMENT_PREDICTION_PROBS];
-    unsigned char temporal_update;
 
     // Segment features
     signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];

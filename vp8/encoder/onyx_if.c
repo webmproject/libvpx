@@ -333,8 +333,8 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     // Delete sementation map
     vpx_free(cpi->segmentation_map);
     cpi->segmentation_map = 0;
-    vpx_free(cpi->last_segmentation_map);
-    cpi->last_segmentation_map = 0;
+    vpx_free(cpi->common.last_frame_seg_map);
+    cpi->common.last_frame_seg_map = 0;
 
     vpx_free(cpi->active_map);
     cpi->active_map = 0;
@@ -2380,7 +2380,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
     // And a copy "last_segmentation_map" for temporal coding
-    CHECK_MEM_ERROR(cpi->last_segmentation_map,
+    CHECK_MEM_ERROR(cm->last_frame_seg_map,
         vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
     CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
@@ -4866,7 +4866,7 @@ static void encode_frame_to_data_rate
         choose_segmap_coding_method( cpi );
 
         // Take a copy of the segment map if it changed for future comparison
-        vpx_memcpy( cpi->last_segmentation_map,
+        vpx_memcpy( cm->last_frame_seg_map,
                     cpi->segmentation_map, cm->MBs );
     }
 

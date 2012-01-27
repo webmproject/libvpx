@@ -83,12 +83,12 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
     MB_PREDICTION_MODE y_mode;
 
     // Read the Macroblock segmentation map if it is being updated explicitly
-    // this frame (reset to 0 above by default).
+    // this frame (reset to 0 by default).
     m->mbmi.segment_id = 0;
     if (pbi->mb.update_mb_segmentation_map)
     {
         vp8_read_mb_segid(bc, &m->mbmi, &pbi->mb);
-        pbi->segmentation_map[map_index] = m->mbmi.segment_id;
+        pbi->common.last_frame_seg_map[map_index] = m->mbmi.segment_id;
     }
 
 //#if CONFIG_SEGFEATURES
@@ -435,6 +435,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
                             int mb_row, int mb_col)
 {
+    VP8_COMMON *const cm = & pbi->common;
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
     const int mis = pbi->common.mode_info_stride;
@@ -473,7 +474,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if (xd->update_mb_segmentation_map)
         {
             // Is temporal coding of the segment id for this mb enabled.
-            if (xd->temporal_update)
+            if (cm->temporal_update)
             {
                 // Work out a context for decoding seg_id_predicted.
                 pred_context = 0;
@@ -481,21 +482,21 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     pred_context += (mi-1)->mbmi.seg_id_predicted;
                 if (mb_row != 0)
                     pred_context +=
-                        (mi-pbi->common.mode_info_stride)->mbmi.seg_id_predicted;
+                        (mi-cm->mode_info_stride)->mbmi.seg_id_predicted;
 
                 mbmi->seg_id_predicted =
                     vp8_read(bc,
-                             xd->mb_segment_pred_probs[pred_context]);
+                             cm->segment_pred_probs[pred_context]);
 
                 if ( mbmi->seg_id_predicted )
                 {
-                    mbmi->segment_id = pbi->segmentation_map[index];
+                    mbmi->segment_id = cm->last_frame_seg_map[index];
                 }
                 // If the segment id was not predicted decode it explicitly
                 else
                 {
                     vp8_read_mb_segid(bc, &mi->mbmi, xd);
-                    pbi->segmentation_map[index] = mbmi->segment_id;
+                    cm->last_frame_seg_map[index] = mbmi->segment_id;
                 }
 
             }
@@ -503,7 +504,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             else
             {
                 vp8_read_mb_segid(bc, &mi->mbmi, xd);
-                pbi->segmentation_map[index] = mbmi->segment_id;
+                cm->last_frame_seg_map[index] = mbmi->segment_id;
             }
             index++;
         }

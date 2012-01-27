@@ -181,6 +181,9 @@ typedef struct VP8Common
     MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 
 
+    // Persistent mb segment id map used in prediction.
+    unsigned char * last_frame_seg_map;
+
     INTERPOLATIONFILTERTYPE mcomp_filter_type;
     LOOPFILTERTYPE filter_type;
 
@@ -223,6 +226,10 @@ typedef struct VP8Common
 #endif
 
     vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
+    // Context probabilities when using predictive coding of segment id
+    vp8_prob segment_pred_probs[PREDICTION_PROBS];
+    unsigned char temporal_update;
+
 
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */
