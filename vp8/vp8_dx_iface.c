@@ -700,7 +700,7 @@ static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
         return VPX_CODEC_INVALID_PARAM;
 }
 
-extern int vp8_references_buffer( VP8_COMMON *oci, int ref_frame );
+extern int vp8dx_references_buffer( VP8_COMMON *oci, int ref_frame );
 static vpx_codec_err_t vp8_get_last_ref_frame(vpx_codec_alg_priv_t *ctx,
                                               int ctrl_id,
                                               va_list args)
@@ -712,9 +712,9 @@ static vpx_codec_err_t vp8_get_last_ref_frame(vpx_codec_alg_priv_t *ctx,
     if (ref_info)
     {
         *ref_info =
-            (vp8_references_buffer( oci, ALTREF_FRAME )?VP8_ALTR_FRAME:0) |
-            (vp8_references_buffer( oci, GOLDEN_FRAME )?VP8_GOLD_FRAME:0) |
-            (vp8_references_buffer( oci, LAST_FRAME )?VP8_LAST_FRAME:0);
+            (vp8dx_references_buffer( oci, ALTREF_FRAME )?VP8_ALTR_FRAME:0) |
+            (vp8dx_references_buffer( oci, GOLDEN_FRAME )?VP8_GOLD_FRAME:0) |
+            (vp8dx_references_buffer( oci, LAST_FRAME )?VP8_LAST_FRAME:0);
 
         return VPX_CODEC_OK;
     }
@@ -752,6 +752,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
     {VP8_SET_DBG_DISPLAY_MV,        vp8_set_dbg_options},
     {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
     {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
+    {VP8D_GET_LAST_REF_USED,        vp8_get_last_ref_frame},
     { -1, NULL},
 };
 
