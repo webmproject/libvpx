@@ -114,7 +114,7 @@ static void write_ivf_frame_header(FILE *outfile,
     if(fwrite(header, 1, 12, outfile));
 }
 
-static int mode_to_num_layers[7] = {2, 2, 3, 3, 3, 3, 5};
+static int mode_to_num_layers[9] = {2, 2, 3, 3, 3, 3, 5, 2, 3};
 
 int main(int argc, char **argv) {
     FILE                *infile, *outfile[MAX_LAYERS];
@@ -135,6 +135,8 @@ int main(int argc, char **argv) {
     int                  layering_mode = 0;
     int                  frames_in_layer[MAX_LAYERS] = {0};
     int                  layer_flags[MAX_PERIODICITY] = {0};
+    int                  flag_periodicity;
+    int                  max_intra_size_pct;
 
     // Check usage and arguments
     if (argc < 9)
@@ -148,8 +150,8 @@ int main(int argc, char **argv) {
 
     if (!sscanf(argv[7], "%d", &layering_mode))
         die ("Invalid mode %s", argv[7]);
-    if (layering_mode<0 || layering_mode>6)
-        die ("Invalid mode (0..6) %s", argv[7]);
+    if (layering_mode<0 || layering_mode>8)
+        die ("Invalid mode (0..8) %s", argv[7]);
 
     if (argc != 8+mode_to_num_layers[layering_mode])
         die ("Invalid number of arguments");
@@ -181,13 +183,13 @@ int main(int argc, char **argv) {
             die ("Invalid data rate %s", argv[i]);
 
     // Real time parameters
-    cfg.rc_dropframe_thresh = 0;
+    cfg.rc_dropframe_thresh = 0;  // 30
     cfg.rc_end_usage        = VPX_CBR;
     cfg.rc_resize_allowed   = 0;
-    cfg.rc_min_quantizer    = 4;
-    cfg.rc_max_quantizer    = 63;
-    cfg.rc_undershoot_pct   = 98;
-    cfg.rc_overshoot_pct    = 100;
+    cfg.rc_min_quantizer    = 8;
+    cfg.rc_max_quantizer    = 56;
+    cfg.rc_undershoot_pct   = 100;
+    cfg.rc_overshoot_pct    = 15;
     cfg.rc_buf_initial_sz   = 500;
     cfg.rc_buf_optimal_sz   = 600;
     cfg.rc_buf_sz           = 1000;
@@ -218,6 +220,7 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[1] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
 
+        flag_periodicity = cfg.ts_periodicity;
 #if 1
         // 0=L, 1=GF, Intra-layer prediction enabled
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
@@ -246,6 +249,8 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[1] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
 
+        flag_periodicity = cfg.ts_periodicity;
+
         // 0=L, 1=GF, Intra-layer prediction enabled
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
                          VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
@@ -267,6 +272,8 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[1] = 3;
         cfg.ts_rate_decimator[2] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
+
+        flag_periodicity = cfg.ts_periodicity;
 
         // 0=L, 1=GF, 2=ARF, Intra-layer prediction enabled
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
@@ -291,6 +298,8 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[1] = 2;
         cfg.ts_rate_decimator[2] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
+
+        flag_periodicity = cfg.ts_periodicity;
 
         // 0=L, 1=GF, 2=ARF, Intra-layer prediction disabled
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
@@ -317,6 +326,8 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[2] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
 
+        flag_periodicity = cfg.ts_periodicity;
+
         // 0=L, 1=GF, 2=ARF, Intra-layer prediction enabled in layer 1,
         // disabled in layer 2
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
@@ -341,6 +352,8 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[1] = 2;
         cfg.ts_rate_decimator[2] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
+
+        flag_periodicity = cfg.ts_periodicity;
 
         // 0=L, 1=GF, 2=ARF, Intra-layer prediction enabled
         layer_flags[0] = VPX_EFLAG_FORCE_KF  |
@@ -368,6 +381,8 @@ int main(int argc, char **argv) {
         cfg.ts_rate_decimator[4] = 1;
         memcpy(cfg.ts_layer_id, ids, sizeof(ids));
 
+        flag_periodicity = cfg.ts_periodicity;
+
         layer_flags[0]  = VPX_EFLAG_FORCE_KF;
         layer_flags[1]  =
         layer_flags[3]  =
@@ -391,6 +406,70 @@ int main(int argc, char **argv) {
         break;
     }
 
+    case 7:
+    {
+        // 2-layers
+        int ids[2] = {0,1};
+        cfg.ts_number_layers     = 2;
+        cfg.ts_periodicity       = 2;
+        cfg.ts_rate_decimator[0] = 2;
+        cfg.ts_rate_decimator[1] = 1;
+        memcpy(cfg.ts_layer_id, ids, sizeof(ids));
+
+        flag_periodicity = 8;
+
+        // 0=L, 1=GF
+        layer_flags[0] = VPX_EFLAG_FORCE_KF  |
+                         VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[1] = VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[2] =
+        layer_flags[4] =
+        layer_flags[6] = VP8_EFLAG_NO_REF_GF  | VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_GF  | VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[3] =
+        layer_flags[5] = VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_LAST;
+        layer_flags[7] = VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
+                         VP8_EFLAG_NO_UPD_ARF |
+                         VP8_EFLAG_NO_UPD_ENTROPY;
+        break;
+    }
+
+    case 8:
+    {
+        // 3-layers
+        int ids[4] = {0,2,1,2};
+        cfg.ts_number_layers     = 3;
+        cfg.ts_periodicity       = 4;
+        cfg.ts_rate_decimator[0] = 4;
+        cfg.ts_rate_decimator[1] = 2;
+        cfg.ts_rate_decimator[2] = 1;
+        memcpy(cfg.ts_layer_id, ids, sizeof(ids));
+
+        flag_periodicity = 8;
+
+        // 0=L, 1=GF, 2=ARF
+        layer_flags[0] = VPX_EFLAG_FORCE_KF  |
+                         VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[1] = VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
+        layer_flags[2] = VP8_EFLAG_NO_REF_GF   | VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[3] =
+        layer_flags[5] = VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF;
+        layer_flags[4] = VP8_EFLAG_NO_REF_GF | VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_GF | VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[6] = VP8_EFLAG_NO_REF_ARF |
+                         VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[7] = VP8_EFLAG_NO_UPD_LAST | VP8_EFLAG_NO_UPD_GF |
+                         VP8_EFLAG_NO_UPD_ARF |
+                         VP8_EFLAG_NO_UPD_ENTROPY;
+        break;
+    }
     default:
         break;
     }
@@ -414,15 +493,26 @@ int main(int argc, char **argv) {
         die_codec (&codec, "Failed to initialize encoder");
 
     // Cap CPU & first I-frame size
-    vpx_codec_control (&codec, VP8E_SET_CPUUSED, -6);
-    vpx_codec_control (&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT, 600);
+    vpx_codec_control (&codec, VP8E_SET_CPUUSED,                -6);
+    vpx_codec_control (&codec, VP8E_SET_STATIC_THRESHOLD,      800);
+    vpx_codec_control (&codec, VP8E_SET_NOISE_SENSITIVITY,       2);
+
+    max_intra_size_pct = (int) (((double)cfg.rc_buf_optimal_sz * 0.5)
+                         * ((double) cfg.g_timebase.den / cfg.g_timebase.num)
+                         / 10.0);
+    //printf ("max_intra_size_pct=%d\n", max_intra_size_pct);
+
+    vpx_codec_control(&codec, VP8E_SET_MAX_INTRA_BITRATE_PCT,
+                      max_intra_size_pct);
+    //    vpx_codec_control (&codec, VP8E_SET_TOKEN_PARTITIONS,
+    //                      static_cast<vp8e_token_partitions>(_tokenPartitions));
 
     frame_avail = 1;
     while (frame_avail || got_data) {
         vpx_codec_iter_t iter = NULL;
         const vpx_codec_cx_pkt_t *pkt;
 
-        flags = layer_flags[frame_cnt % cfg.ts_periodicity];
+        flags = layer_flags[frame_cnt % flag_periodicity];
 
         frame_avail = read_frame(infile, &raw);
         if (vpx_codec_encode(&codec, frame_avail? &raw : NULL, pts,
