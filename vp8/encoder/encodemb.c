@@ -907,9 +907,9 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
                 band = vp8_coef_bands_8x8[i + 1];
                 pt = vp8_prev_token_class[t0];
                 rate0 +=
-                    mb->token_costs[type][band][pt][tokens[next][0].token];
+                    mb->token_costs_8x8[type][band][pt][tokens[next][0].token];
                 rate1 +=
-                    mb->token_costs[type][band][pt][tokens[next][1].token];
+                    mb->token_costs_8x8[type][band][pt][tokens[next][1].token];
             }
             rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
             rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
@@ -966,13 +966,13 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
                 if(t0!=DCT_EOB_TOKEN)
                 {
                     pt = vp8_prev_token_class[t0];
-                    rate0 += mb->token_costs[type][band][pt][
+                    rate0 += mb->token_costs_8x8[type][band][pt][
                         tokens[next][0].token];
                 }
                 if(t1!=DCT_EOB_TOKEN)
                 {
                     pt = vp8_prev_token_class[t1];
-                    rate1 += mb->token_costs[type][band][pt][
+                    rate1 += mb->token_costs_8x8[type][band][pt][
                         tokens[next][1].token];
                 }
             }
@@ -1013,12 +1013,12 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
             /* Update the cost of each path if we're past the EOB token. */
             if (t0 != DCT_EOB_TOKEN)
             {
-                tokens[next][0].rate += mb->token_costs[type][band][0][t0];
+                tokens[next][0].rate += mb->token_costs_8x8[type][band][0][t0];
                 tokens[next][0].token = ZERO_TOKEN;
             }
             if (t1 != DCT_EOB_TOKEN)
             {
-                tokens[next][1].rate += mb->token_costs[type][band][0][t1];
+                tokens[next][1].rate += mb->token_costs_8x8[type][band][0][t1];
                 tokens[next][1].token = ZERO_TOKEN;
             }
             /* Don't update next, because we didn't add a new node. */
@@ -1034,8 +1034,8 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
     error1 = tokens[next][1].error;
     t0 = tokens[next][0].token;
     t1 = tokens[next][1].token;
-    rate0 += mb->token_costs[type][band][pt][t0];
-    rate1 += mb->token_costs[type][band][pt][t1];
+    rate0 += mb->token_costs_8x8[type][band][pt][t0];
+    rate1 += mb->token_costs_8x8[type][band][pt][t1];
     rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
     rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
     if (rd_cost0 == rd_cost1)
