@@ -606,3 +606,26 @@ int vp8dx_get_raw_frame(VP8D_COMP *pbi, YV12_BUFFER_CONFIG *sd, int64_t *time_st
     vp8_clear_system_state();
     return ret;
 }
+
+
+/* This function as written isn't decoder specific, but the encoder has
+ * much faster ways of computing this, so it's ok for it to live in a
+ * decode specific file.
+ */
+int vp8dx_references_buffer( VP8_COMMON *oci, int ref_frame )
+{
+    const MODE_INFO *mi = oci->mi;
+    int mb_row, mb_col;
+
+    for (mb_row = 0; mb_row < oci->mb_rows; mb_row++)
+    {
+        for (mb_col = 0; mb_col < oci->mb_cols; mb_col++,mi++)
+        {
+            if( mi->mbmi.ref_frame == ref_frame)
+              return 1;
+        }
+        mi++;
+    }
+    return 0;
+
+}

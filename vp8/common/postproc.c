@@ -696,23 +696,6 @@ static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int hei
     }
 }
 
-int vp8_references_buffer( VP8_COMMON *oci, int ref_frame )
-{
-    const MODE_INFO *mi = oci->mi;
-    int mb_row, mb_col;
-
-    for (mb_row = 0; mb_row < oci->mb_rows; mb_row++)
-    {
-        for (mb_col = 0; mb_col < oci->mb_cols; mb_col++,mi++)
-        {
-            if( mi->mbmi.ref_frame == ref_frame)
-              return 1;
-        }
-        mi++;
-    }
-    return 0;
-
-}
 
 static void multiframe_quality_enhance_block
 (
