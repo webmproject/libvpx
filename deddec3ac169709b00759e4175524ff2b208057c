@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//4F4\u003d",
+        "filename": "vp8/encoder/sad_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-01-27T21:14:17Z",
+      "side": 1,
+      "message": "This early exit is an optimization strategy used in x86 code. (Actually, it is not used in sse3 and later code anymore.) I am not sure if it is a good idea to add it in c reference. (?)",
+      "revId": "deddec3ac169709b00759e4175524ff2b208057c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
