@@ -19,7 +19,7 @@
   %define     end_ptr       rcx
   %define     ret_var       rbx
   %define     result_ptr    arg(4)
-  %define     max_err       arg(4)
+  %define     max_sad       arg(4)
   %define     height        dword ptr arg(4)
     push        rbp
     mov         rbp,        rsp
@@ -42,7 +42,7 @@
     %define     end_ptr     r10
     %define     ret_var     r11
     %define     result_ptr  [rsp+xmm_stack_space+8+4*8]
-    %define     max_err     [rsp+xmm_stack_space+8+4*8]
+    %define     max_sad     [rsp+xmm_stack_space+8+4*8]
     %define     height      dword ptr [rsp+xmm_stack_space+8+4*8]
   %else
     %define     src_ptr     rdi
@@ -52,7 +52,7 @@
     %define     end_ptr     r9
     %define     ret_var     r10
     %define     result_ptr  r8
-    %define     max_err     r8
+    %define     max_sad     r8
     %define     height      r8
   %endif
 %endif
@@ -67,7 +67,7 @@
   %define     end_ptr
   %define     ret_var
   %define     result_ptr
-  %define     max_err
+  %define     max_sad
   %define     height
 
 %if ABI_IS_32BIT
@@ -587,7 +587,7 @@ sym(vp8_sad4x4x3_sse3):
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
-;    int  max_err)
+;    int  max_sad)
 ;%define lddqu movdqu
 global sym(vp8_sad16x16_sse3)
 sym(vp8_sad16x16_sse3):

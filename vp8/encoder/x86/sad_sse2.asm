@@ -89,7 +89,7 @@ sym(vp8_sad16x16_wmt):
 ;    int  src_stride,
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
-;    int  max_err)
+;    int  max_sad)
 global sym(vp8_sad8x16_wmt)
 sym(vp8_sad8x16_wmt):
     push        rbp

@@ -13,40 +13,15 @@
 #include "vpx_config.h"
 #include "vpx/vpx_integer.h"
 
-unsigned int vp8_sad16x16_c(
-    const unsigned char *src_ptr,
-    int  src_stride,
-    const unsigned char *ref_ptr,
-    int  ref_stride,
-    int max_sad)
-{
-
-    int r, c;
-    unsigned int sad = 0;
-
-    for (r = 0; r < 16; r++)
-    {
-        for (c = 0; c < 16; c++)
-        {
-            sad += abs(src_ptr[c] - ref_ptr[c]);
-        }
-
-        src_ptr += src_stride;
-        ref_ptr += ref_stride;
-    }
-
-    return sad;
-}
-
-
 static __inline
 unsigned int sad_mx_n_c(
     const unsigned char *src_ptr,
     int  src_stride,
     const unsigned char *ref_ptr,
     int  ref_stride,
-    int m,
-    int n)
+    int  max_sad,
+    int  m,
+    int  n)
 {
 
     int r, c;
@@ -59,11 +34,29 @@ unsigned int sad_mx_n_c(
             sad += abs(src_ptr[c] - ref_ptr[c]);
         }
 
+        if (sad > max_sad)
+          break;
+
         src_ptr += src_stride;
         ref_ptr += ref_stride;
     }
 
     return sad;
+}
+
+/* max_sad is provided as an optional optimization point. Alternative
+ * implementations of these functions are not required to check it.
+ */
+
+unsigned int vp8_sad16x16_c(
+    const unsigned char *src_ptr,
+    int  src_stride,
+    const unsigned char *ref_ptr,
+    int  ref_stride,
+    int  max_sad)
+{
+
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 16, 16);
 }
 
 
@@ -72,10 +65,10 @@ unsigned int vp8_sad8x8_c(
     int  src_stride,
     const unsigned char *ref_ptr,
     int  ref_stride,
-    int max_sad)
+    int  max_sad)
 {
 
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 8, 8);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 8, 8);
 }
 
 
@@ -84,10 +77,10 @@ unsigned int vp8_sad16x8_c(
     int  src_stride,
     const unsigned char *ref_ptr,
     int  ref_stride,
-    int max_sad)
+    int  max_sad)
 {
 
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 16, 8);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 16, 8);
 
 }
 
@@ -97,10 +90,10 @@ unsigned int vp8_sad8x16_c(
     int  src_stride,
     const unsigned char *ref_ptr,
     int  ref_stride,
-    int max_sad)
+    int  max_sad)
 {
 
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 8, 16);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 8, 16);
 }
 
 
@@ -109,10 +102,10 @@ unsigned int vp8_sad4x4_c(
     int  src_stride,
     const unsigned char *ref_ptr,
     int  ref_stride,
-    int max_sad)
+    int  max_sad)
 {
 
-    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, 4, 4);
+    return sad_mx_n_c(src_ptr, src_stride, ref_ptr, ref_stride, max_sad, 4, 4);
 }
 
 void vp8_sad16x16x3_c(
