@@ -18,19 +18,19 @@ void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
 #if CONFIG_RUNTIME_CPU_DETECT
     int flags = pbi->common.rtcd.flags;
 
-#if HAVE_ARMV5TE
+#if HAVE_EDSP
     if (flags & HAS_EDSP)
     {
     }
 #endif
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
     if (flags & HAS_MEDIA)
     {
     }
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
     if (flags & HAS_NEON)
     {
     }

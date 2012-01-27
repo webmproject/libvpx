@@ -12,7 +12,7 @@
 #ifndef DEQUANTIZE_ARM_H
 #define DEQUANTIZE_ARM_H
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 extern prototype_dequant_block(vp8_dequantize_b_v6);
 extern prototype_dequant_idct_add(vp8_dequant_idct_add_v6);
 extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block_v6);
@@ -33,7 +33,7 @@ extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_v6);
 #endif
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 extern prototype_dequant_block(vp8_dequantize_b_neon);
 extern prototype_dequant_idct_add(vp8_dequant_idct_add_neon);
 extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block_neon);

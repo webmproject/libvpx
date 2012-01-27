@@ -26,13 +26,13 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
     rtcd->flags = flags;
 
     /* Override default functions with fastest ones for this CPU. */
-#if HAVE_ARMV5TE
+#if HAVE_EDSP
     if (flags & HAS_EDSP)
     {
     }
 #endif
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
     if (flags & HAS_MEDIA)
     {
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_armv6;
@@ -71,7 +71,7 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
     }
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
     if (flags & HAS_NEON)
     {
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_neon;

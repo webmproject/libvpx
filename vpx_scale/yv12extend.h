@@ -16,7 +16,7 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx_scale/generic/yv12extend_generic.h"
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 #include "vpx_scale/arm/yv12extend_arm.h"
 #endif
 

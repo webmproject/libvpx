@@ -12,7 +12,7 @@
 #ifndef __INC_BITSTREAM_H
 #define __INC_BITSTREAM_H
 
-#if HAVE_ARMV5TE
+#if HAVE_EDSP
 void vp8cx_pack_tokens_armv5(vp8_writer *w, const TOKENEXTRA *p, int xcount,
                              vp8_token *,
                              vp8_extra_bit_struct *,

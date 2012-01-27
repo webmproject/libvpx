@@ -88,7 +88,7 @@ END
  * change they will have to be adjusted.
  */
 
-#if HAVE_ARMV5TE
+#if HAVE_EDSP
 ct_assert(TOKENEXTRA_SZ, sizeof(TOKENEXTRA) == 8)
 ct_assert(vp8_extra_bit_struct_sz, sizeof(vp8_extra_bit_struct) == 16)
 #endif

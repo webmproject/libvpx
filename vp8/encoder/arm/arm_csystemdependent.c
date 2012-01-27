@@ -23,13 +23,13 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 #if CONFIG_RUNTIME_CPU_DETECT
     int flags = cpi->common.rtcd.flags;
 
-#if HAVE_ARMV5TE
+#if HAVE_EDSP
     if (flags & HAS_EDSP)
     {
     }
 #endif
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
     if (flags & HAS_MEDIA)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_armv6;
@@ -74,9 +74,9 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         /*cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b;*/
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_armv6;
     }
-#endif
+#endif /* HAVE_MEDIA */
 
-#if HAVE_ARMV7
+#if HAVE_NEON
     if (flags & HAS_NEON)
     {
         cpi->rtcd.variance.sad16x16              = vp8_sad16x16_neon;
@@ -123,10 +123,10 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_neon;
         cpi->rtcd.quantize.fastquantb_pair       = vp8_fast_quantize_b_pair_neon;
     }
-#endif /* HAVE_ARMV7 */
+#endif /* HAVE_NEON */
 #endif /* CONFIG_RUNTIME_CPU_DETECT */
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 #if CONFIG_RUNTIME_CPU_DETECT
     if (flags & HAS_NEON)
 #endif

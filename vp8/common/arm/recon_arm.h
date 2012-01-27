@@ -12,7 +12,7 @@
 #ifndef RECON_ARM_H
 #define RECON_ARM_H
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 
 extern prototype_copy_block(vp8_copy_mem8x8_v6);
 extern prototype_copy_block(vp8_copy_mem8x4_v6);
@@ -34,7 +34,7 @@ extern prototype_intra4x4_predict(vp8_intra4x4_predict_armv6);
 #endif
 #endif
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 
 extern prototype_copy_block(vp8_copy_mem8x8_neon);
 extern prototype_copy_block(vp8_copy_mem8x4_neon);

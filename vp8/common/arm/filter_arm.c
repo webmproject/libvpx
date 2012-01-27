@@ -86,7 +86,7 @@ extern void vp8_filter_block2d_second_pass_only_armv6
     const short *vp8_filter
 );
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 void vp8_sixtap_predict_armv6
 (
     unsigned char  *src_ptr,

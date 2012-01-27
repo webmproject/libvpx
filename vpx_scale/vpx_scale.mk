@@ -15,10 +15,10 @@ SCALE_SRCS-$(ARCH_ARM)    += arm/yv12extend_arm.h
 SCALE_SRCS-$(ARCH_ARM)    += arm/scalesystemdependent.c
 
 #neon
-SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copyframe_func_neon$(ASM)
-SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copy_y_neon$(ASM)
-SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_copysrcframe_func_neon$(ASM)
-SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/vp8_vpxyv12_extendframeborders_neon$(ASM)
-SCALE_SRCS-$(HAVE_ARMV7)  += arm/neon/yv12extend_arm.c
+SCALE_SRCS-$(HAVE_NEON)  += arm/neon/vp8_vpxyv12_copyframe_func_neon$(ASM)
+SCALE_SRCS-$(HAVE_NEON)  += arm/neon/vp8_vpxyv12_copy_y_neon$(ASM)
+SCALE_SRCS-$(HAVE_NEON)  += arm/neon/vp8_vpxyv12_copysrcframe_func_neon$(ASM)
+SCALE_SRCS-$(HAVE_NEON)  += arm/neon/vp8_vpxyv12_extendframeborders_neon$(ASM)
+SCALE_SRCS-$(HAVE_NEON)  += arm/neon/yv12extend_arm.c
 
 SCALE_SRCS-no += $(SCALE_SRCS_REMOVE-yes)

@@ -12,7 +12,7 @@
 #ifndef ENCODEMB_ARM_H
 #define ENCODEMB_ARM_H
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 extern prototype_subb(vp8_subtract_b_armv6);
 extern prototype_submby(vp8_subtract_mby_armv6);
 extern prototype_submbuv(vp8_subtract_mbuv_armv6);
@@ -28,9 +28,9 @@ extern prototype_submbuv(vp8_subtract_mbuv_armv6);
 #define vp8_encodemb_submbuv vp8_subtract_mbuv_armv6
 #endif
 
-#endif /* HAVE_ARMV6 */
+#endif /* HAVE_MEDIA */
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 //extern prototype_berr(vp8_block_error_c);
 //extern prototype_mberr(vp8_mbblock_error_c);
 //extern prototype_mbuverr(vp8_mbuverror_c);
@@ -59,6 +59,6 @@ extern prototype_submbuv(vp8_subtract_mbuv_neon);
 #define vp8_encodemb_submbuv vp8_subtract_mbuv_neon
 #endif
 
-#endif
+#endif /* HAVE_NEON */
 
 #endif

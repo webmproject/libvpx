@@ -192,9 +192,9 @@ ARCH_LIST="
     ppc64
 "
 ARCH_EXT_LIST="
-    armv5te
-    armv6
-    armv7
+    edsp
+    media
+    neon
 
     mips32
 

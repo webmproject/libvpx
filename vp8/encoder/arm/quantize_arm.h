@@ -12,7 +12,7 @@
 #ifndef QUANTIZE_ARM_H
 #define QUANTIZE_ARM_H
 
-#if HAVE_ARMV6
+#if HAVE_MEDIA
 
 extern prototype_quantize_block(vp8_fast_quantize_b_armv6);
 
@@ -21,10 +21,10 @@ extern prototype_quantize_block(vp8_fast_quantize_b_armv6);
 #define vp8_quantize_fastquantb vp8_fast_quantize_b_armv6
 #endif
 
-#endif /* HAVE_ARMV6 */
+#endif /* HAVE_MEDIA */
 
 
-#if HAVE_ARMV7
+#if HAVE_NEON
 
 extern prototype_quantize_block(vp8_fast_quantize_b_neon);
 extern prototype_quantize_block_pair(vp8_fast_quantize_b_pair_neon);
@@ -46,7 +46,7 @@ extern prototype_quantize_block_pair(vp8_fast_quantize_b_pair_neon);
 #define vp8_quantize_mby vp8_quantize_mby_neon
 #endif
 
-#endif /* HAVE_ARMV7 */
+#endif /* HAVE_NEON */
 
 #endif
 
