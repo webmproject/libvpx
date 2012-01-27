@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//4k0\u003d",
+        "filename": "vp8/common/dequantize.c",
+        "patchSetId": 9
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-01-27T07:14:00Z",
+      "side": 1,
+      "message": "there is a warning here as vp8_dequant_idct_add_c calls explicitly vp8_short_idct4x4llm_c. Should it be defined here locally as this module is clearly a generic C version only?",
+      "revId": "827ea1d9d7fa00385a69213038189e9fca1106cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//4kE\u003d",
+        "filename": "vp8/common/rtcd_defs.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-01-27T07:14:00Z",
+      "side": 1,
+      "message": "neon missing",
+      "revId": "827ea1d9d7fa00385a69213038189e9fca1106cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
