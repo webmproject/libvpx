@@ -79,6 +79,7 @@ VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/filter_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/vp8_asm_stubs.c
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/loopfilter_x86.c
+VP8_COMMON_SRCS-$(CONFIG_POSTPROC) += common/mfqe.c
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC) += common/postproc.h
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC) += common/postproc.c
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/dequantize_mmx.asm
@@ -112,6 +113,7 @@ VP8_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/sad_sse4.asm
 ifeq ($(CONFIG_POSTPROC),yes)
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/postproc_x86.c
 VP8_COMMON_SRCS-$(HAVE_MMX) += common/x86/postproc_mmx.asm
+VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/mfqe_sse2.asm
 VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 

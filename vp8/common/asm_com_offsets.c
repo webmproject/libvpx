@@ -15,6 +15,10 @@
 #include "vpx_scale/yv12config.h"
 #include "vp8/common/blockd.h"
 
+#if CONFIG_POSTPROC
+#include "postproc.h"
+#endif /* CONFIG_POSTPROC */
+
 BEGIN
 
 /* vpx_scale */
@@ -29,6 +33,11 @@ DEFINE(yv12_buffer_config_u_buffer,             offsetof(YV12_BUFFER_CONFIG, u_b
 DEFINE(yv12_buffer_config_v_buffer,             offsetof(YV12_BUFFER_CONFIG, v_buffer));
 DEFINE(yv12_buffer_config_border,               offsetof(YV12_BUFFER_CONFIG, border));
 DEFINE(VP8BORDERINPIXELS_VAL,                   VP8BORDERINPIXELS);
+
+#if CONFIG_POSTPROC
+/* mfqe.c / filter_by_weight */
+DEFINE(MFQE_PRECISION_VAL,                      MFQE_PRECISION);
+#endif /* CONFIG_POSTPROC */
 
 END
 
@@ -53,3 +62,10 @@ ct_assert(B_HU_PRED, B_HU_PRED == 9);
 /* vp8_yv12_extend_frame_borders_neon makes several assumptions based on this */
 ct_assert(VP8BORDERINPIXELS_VAL, VP8BORDERINPIXELS == 32)
 #endif
+
+#if HAVE_SSE2
+#if CONFIG_POSTPROC
+/* vp8_filter_by_weight16x16 and 8x8 */
+ct_assert(MFQE_PRECISION_VAL, MFQE_PRECISION == 4)
+#endif /* CONFIG_POSTPROC */
+#endif /* HAVE_SSE2 */
