@@ -17,6 +17,7 @@
 
 //#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
+#include "vp8/common/pred_common.h"
 
 #if CONFIG_DEBUG
 #include <assert.h>
@@ -437,6 +438,67 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     }
 }
 
+// This function either reads the segment id for the current macroblock from
+// the bitstream or if the value is temporally predicted asserts the predicted
+// value
+static void read_mb_segment_id ( VP8D_COMP *pbi,
+                                 int mb_row, int mb_col )
+{
+    vp8_reader *const bc = & pbi->bc;
+    VP8_COMMON *const cm = & pbi->common;
+    MACROBLOCKD *const xd  = & pbi->mb;
+    MODE_INFO *mi = xd->mode_info_context;
+    MB_MODE_INFO *mbmi = &mi->mbmi;
+    int index = mb_row * pbi->common.mb_cols + mb_col;
+
+    if (xd->segmentation_enabled)
+    {
+        if (xd->update_mb_segmentation_map)
+        {
+            // Is temporal coding of the segment id for this mb enabled.
+            if (cm->temporal_update)
+            {
+                // Get the context based probability for reading the
+                // prediction status flag
+                vp8_prob pred_prob =
+                    get_pred_prob( cm, xd, PRED_SEG_ID );
+
+                // Read the prediction status flag
+                unsigned char seg_pred_flag =
+                    (unsigned char)vp8_read(bc, pred_prob );
+
+                // Store the prediction flag.
+                set_pred_flag( xd, PRED_SEG_ID, seg_pred_flag );
+
+                // If the value is flagged as correctly predicted
+                // then use the predicted value
+                if ( seg_pred_flag )
+                {
+                    mbmi->segment_id = get_pred_mb_segid( cm, index );
+                }
+                // Else .... decode it explicitly
+                else
+                {
+                    vp8_read_mb_segid(bc, mbmi, xd );
+                    cm->last_frame_seg_map[index] = mbmi->segment_id;
+                }
+
+            }
+            // Normal unpredicted coding mode
+            else
+            {
+                vp8_read_mb_segid(bc, mbmi, xd);
+                cm->last_frame_seg_map[index] = mbmi->segment_id;
+            }
+        }
+    }
+    else
+    {
+        // The encoder explicitly sets the segment_id to 0
+        // when segmentation is disabled
+        mbmi->segment_id = 0;
+    }
+}
 
 static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_NEWNEAR
@@ -477,53 +539,13 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mb_to_right_edge = ((pbi->common.mb_cols - 1 - mb_col) * 16) << 3;
     mb_to_right_edge += RIGHT_BOTTOM_MARGIN;
 
-    /* If required read in new segmentation data for this MB */
-    if (xd->segmentation_enabled)
-    {
-        if (xd->update_mb_segmentation_map)
-        {
-            // Is temporal coding of the segment id for this mb enabled.
-            if (cm->temporal_update)
-            {
-                // Work out a context for decoding seg_id_predicted.
-                pred_context = 0;
-                if (mb_col != 0)
-                    pred_context += (mi-1)->mbmi.seg_id_predicted;
-                if (mb_row != 0)
-                    pred_context +=
-                        (mi-cm->mode_info_stride)->mbmi.seg_id_predicted;
+    // Make sure the MACROBLOCKD mode info pointer is pointed at the
+    // correct entry for the current macroblock.
+    xd->mode_info_context = mi;
 
-                mbmi->seg_id_predicted =
-                    vp8_read(bc,
-                             cm->segment_pred_probs[pred_context]);
+    // Read the macroblock segment id.
+    read_mb_segment_id ( pbi, mb_row, mb_col );
 
-                if ( mbmi->seg_id_predicted )
-                {
-                    mbmi->segment_id = cm->last_frame_seg_map[index];
-                }
-                // If the segment id was not predicted decode it explicitly
-                else
-                {
-                    vp8_read_mb_segid(bc, &mi->mbmi, xd);
-                    cm->last_frame_seg_map[index] = mbmi->segment_id;
-                }
-
-            }
-            // Normal unpredicted coding mode
-            else
-            {
-                vp8_read_mb_segid(bc, &mi->mbmi, xd);
-                cm->last_frame_seg_map[index] = mbmi->segment_id;
-            }
-            index++;
-        }
-    }
-    else
-    {
-        // The encoder explicitly sets the segment_id to 0
-        // when segmentation is disabled
-        mbmi->segment_id = 0;
-    }
 //#if CONFIG_SEGFEATURES
     if ( pbi->common.mb_no_coeff_skip &&
          ( !segfeature_active( xd,

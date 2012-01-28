@@ -12,6 +12,7 @@
 #include "limits.h"
 #include "vpx_mem/vpx_mem.h"
 #include "segmentation.h"
+#include "vp8/common/pred_common.h"
 
 void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
 {
@@ -57,7 +58,7 @@ void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
                 }
 
                 x->gf_active_ptr++;          // Step onto next entry
-                this_mb_mode_info++;           // skip to next mb
+                this_mb_mode_info++;         // skip to next mb
 
             }
 
@@ -229,34 +230,22 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
             // Temporal prediction not allowed on key frames
             if (cm->frame_type != KEY_FRAME)
             {
-                // Get temporal prediction context
-                pred_context = 0;
-                if (mb_col != 0)
-                    pred_context +=
-                        (xd->mode_info_context-1)->mbmi.seg_id_predicted;
-                if (mb_row != 0)
-                {
-                    pred_context +=
-                        (xd->mode_info_context-cm->mode_info_stride)->
-                        mbmi.seg_id_predicted;
-                }
+                // Test to see if the segment id matches the predicted value.
+                int seg_predicted =
+                    (segment_id == get_pred_mb_segid( cm, segmap_index ));
 
-                // Test to see if the last frame segment id at the same
-                // location correctly predicts the segment_id for this MB.
-                // Update the prediction flag and count as appropriate;
-                if ( segment_id == cm->last_frame_seg_map[segmap_index] )
-                {
-                    xd->mode_info_context->mbmi.seg_id_predicted = 1;
-                    temporal_predictor_count[pred_context][1]++;
-                }
-                else
-                {
-                    xd->mode_info_context->mbmi.seg_id_predicted = 0;
-                    temporal_predictor_count[pred_context][0]++;
+                // Get the segment id prediction context
+                pred_context =
+                    get_pred_context( cm, xd, PRED_SEG_ID );
 
+                // Store the prediction status for this mb and update counts
+                // as appropriate
+                set_pred_flag( xd, PRED_SEG_ID, seg_predicted );
+                temporal_predictor_count[pred_context][seg_predicted]++;
+
+                if ( !seg_predicted )
                     // Update the "undpredicted" segment count
                     t_unpred_seg_counts[segment_id]++;
-                }
             }
 
             // Step on to the next mb

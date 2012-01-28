@@ -1393,6 +1393,9 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 
+    // Resset the macroblock mode info context to the start of the list
+    xd->mode_info_context = pc->mi;
+
 #if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {

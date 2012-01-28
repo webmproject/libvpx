@@ -27,6 +27,7 @@
 
 //#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
+#include "vp8/common/pred_common.h"
 
 #if defined(SECTIONBITS_OUTPUT)
 unsigned __int64 Sectionbits[500];
@@ -944,6 +945,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int prob_dual_pred[3];
 #endif /* CONFIG_DUALPRED */
 
+    // Values used in prediction model coding
+    vp8_prob pred_prob;
+    unsigned char prediction_flag;
+
     cpi->mb.partition_info = cpi->mb.pi;
 
     // Calculate the probabilities to be used to code the reference frame
@@ -1053,6 +1058,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
             // Make sure the MacroBlockD mode info pointer is set correctly
             xd->mode_info_context = m;
+
 #if CONFIG_NEWNEAR
             xd->prev_mode_info_context = prev_m;
 #endif
@@ -1066,20 +1072,16 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 // Is temporal coding of the segment map enabled
                 if (pc->temporal_update)
                 {
-                    // Look at whether neighbours were successfully predicted
-                    // to create a context for the seg_id_predicted flag.
-                    pred_context = 0;
-                    if (mb_col != 0)
-                        pred_context += (m-1)->mbmi.seg_id_predicted;
-                    if (mb_row != 0)
-                        pred_context += (m-pc->mode_info_stride)->mbmi.seg_id_predicted;
+                    prediction_flag =
+                        get_pred_flag( xd, PRED_SEG_ID );
+                    pred_prob =
+                        get_pred_prob( pc, xd, PRED_SEG_ID);
 
-                    // Code the prediction flag for this mb
-                    vp8_write( w, m->mbmi.seg_id_predicted,
-                               pc->segment_pred_probs[pred_context]);
+                    // Code the segment id prediction flag for this mb
+                    vp8_write( w, prediction_flag, pred_prob );
 
                     // If the mbs segment id was not predicted code explicitly
-                    if (!m->mbmi.seg_id_predicted)
+                    if (!prediction_flag)
                         write_mb_segid(w, mi, &cpi->mb.e_mbd);
                 }
                 else
