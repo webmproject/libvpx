@@ -2345,9 +2345,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->frames_till_gf_update_due      = 0;
     cpi->gf_overspend_bits            = 0;
     cpi->non_gf_bitrate_adjustment     = 0;
-    cpi->prob_last_coded              = 128;
-    cpi->prob_gf_coded                = 128;
-    cpi->prob_intra_coded             = 63;
+    cm->prob_last_coded               = 128;
+    cm->prob_gf_coded                 = 128;
+    cm->prob_intra_coded              = 63;
 #if CONFIG_DUALPRED
     cpi->prob_dualpred[0]             = 128;
     cpi->prob_dualpred[1]             = 128;
@@ -3424,36 +3424,36 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
 
     if (cm->frame_type == KEY_FRAME)
     {
-        cpi->prob_intra_coded = 255;
-        cpi->prob_last_coded  = 128;
-        cpi->prob_gf_coded  = 128;
+        cm->prob_intra_coded = 255;
+        cm->prob_last_coded  = 128;
+        cm->prob_gf_coded  = 128;
     }
     else if (!(rf_intra + rf_inter))
     {
         // This is a trap in case this function is called with cpi->recent_ref_frame_usage[] blank.
-        cpi->prob_intra_coded = 63;
-        cpi->prob_last_coded  = 128;
-        cpi->prob_gf_coded    = 128;
+        cm->prob_intra_coded = 63;
+        cm->prob_last_coded  = 128;
+        cm->prob_gf_coded    = 128;
     }
     else
     {
-        cpi->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
+        cm->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
 
-        if (cpi->prob_intra_coded < 1)
-            cpi->prob_intra_coded = 1;
+        if (cm->prob_intra_coded < 1)
+            cm->prob_intra_coded = 1;
 
         if ((cm->frames_since_golden > 0) || cpi->source_alt_ref_active)
         {
-            cpi->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
+            cm->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
 
-            if (cpi->prob_last_coded < 1)
-                cpi->prob_last_coded = 1;
+            if (cm->prob_last_coded < 1)
+                cm->prob_last_coded = 1;
 
-            cpi->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+            cm->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
                                  ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
 
-            if (cpi->prob_gf_coded < 1)
-                cpi->prob_gf_coded = 1;
+            if (cm->prob_gf_coded < 1)
+                cm->prob_gf_coded = 1;
         }
     }
 
@@ -3464,61 +3464,63 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
 
     if (cm->frame_type == KEY_FRAME)
     {
-        cpi->prob_intra_coded = 255;
-        cpi->prob_last_coded  = 128;
-        cpi->prob_gf_coded  = 128;
+        cm->prob_intra_coded = 255;
+        cm->prob_last_coded  = 128;
+        cm->prob_gf_coded  = 128;
     }
     else if (!(rf_intra + rf_inter))
     {
-        // This is a trap in case this function is called with cpi->recent_ref_frame_usage[] blank.
-        cpi->prob_intra_coded = 63;
-        cpi->prob_last_coded  = 128;
-        cpi->prob_gf_coded    = 128;
+        // This is a trap in case this function is called with
+        // cpi->recent_ref_frame_usage[] blank.
+        cm->prob_intra_coded = 63;
+        cm->prob_last_coded  = 128;
+        cm->prob_gf_coded    = 128;
     }
     else
     {
-        cpi->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
+        cm->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
 
-        if (cpi->prob_intra_coded < 1)
-            cpi->prob_intra_coded = 1;
+        if (cm->prob_intra_coded < 1)
+            cm->prob_intra_coded = 1;
 
-        cpi->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
+        cm->prob_last_coded =
+            rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
 
-        if (cpi->prob_last_coded < 1)
-            cpi->prob_last_coded = 1;
+        if (cm->prob_last_coded < 1)
+            cm->prob_last_coded = 1;
 
-        cpi->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                             ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
+        cm->prob_gf_coded =
+            (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+                ? (rfct[GOLDEN_FRAME] * 255) /
+                  (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
 
-        if (cpi->prob_gf_coded < 1)
-            cpi->prob_gf_coded = 1;
+        if (cm->prob_gf_coded < 1)
+            cm->prob_gf_coded = 1;
     }
 
-    // update reference frame costs since we can do better than what we got last frame.
+    // update reference frame costs since we can do better than what we got
+    // last frame.
 
     if (cpi->common.refresh_alt_ref_frame)
     {
-        cpi->prob_intra_coded += 40;
-        cpi->prob_last_coded = 200;
-        cpi->prob_gf_coded = 1;
+        cm->prob_intra_coded += 40;
+        cm->prob_last_coded = 200;
+        cm->prob_gf_coded = 1;
     }
     else if (cpi->common.frames_since_golden == 0)
     {
-        cpi->prob_last_coded = 214;
-        cpi->prob_gf_coded = 1;
+        cm->prob_last_coded = 214;
+        cm->prob_gf_coded = 1;
     }
     else if (cpi->common.frames_since_golden == 1)
     {
-        cpi->prob_last_coded = 192;
-        cpi->prob_gf_coded = 220;
+        cm->prob_last_coded = 192;
+        cm->prob_gf_coded = 220;
     }
     else if (cpi->source_alt_ref_active)
     {
-        //int dist = cpi->common.frames_till_alt_ref_frame + cpi->common.frames_since_golden;
-        cpi->prob_gf_coded -= 20;
-
-        if (cpi->prob_gf_coded < 10)
-            cpi->prob_gf_coded = 10;
+        cm->prob_gf_coded =
+            ( cm->prob_gf_coded > 30 ) ? cm->prob_gf_coded - 20 : 10;
     }
 
 #endif

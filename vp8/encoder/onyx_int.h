@@ -506,10 +506,6 @@ typedef struct VP8_COMP
     int vert_scale;
     int pass;
 
-
-    int prob_intra_coded;
-    int prob_last_coded;
-    int prob_gf_coded;
     int prob_skip_false;
     int last_skip_false_probs[3];
     int last_skip_probs_q[3];

@@ -880,30 +880,30 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     vpx_memset(cm->above_context, 0,
                sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
-    xd->ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
+    xd->ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cm->prob_intra_coded);
 
     // Special case treatment when GF and ARF are not sensible options for reference
     if (cpi->ref_frame_flags == VP8_LAST_FLAG)
     {
-        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
+        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cm->prob_intra_coded)
                                         + vp8_cost_zero(255);
-        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
+        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
                                         + vp8_cost_one(255)
                                         + vp8_cost_zero(128);
-        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
+        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
                                         + vp8_cost_one(255)
                                         + vp8_cost_one(128);
     }
     else
     {
-        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(cpi->prob_last_coded);
-        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_zero(cpi->prob_gf_coded);
-        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_one(cpi->prob_gf_coded);
+        xd->ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cm->prob_intra_coded)
+                                        + vp8_cost_zero(cm->prob_last_coded);
+        xd->ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
+                                        + vp8_cost_one(cm->prob_last_coded)
+                                        + vp8_cost_zero(cm->prob_gf_coded);
+        xd->ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
+                                        + vp8_cost_one(cm->prob_last_coded)
+                                        + vp8_cost_one(cm->prob_gf_coded);
     }
 
     xd->fullpixel_mask = 0xffffffff;
@@ -1173,32 +1173,35 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
         if ((rf_intra + rf_inter) > 0)
         {
-            cpi->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
+            cm->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
 
-            if (cpi->prob_intra_coded < 1)
-                cpi->prob_intra_coded = 1;
+            if (cm->prob_intra_coded < 1)
+                cm->prob_intra_coded = 1;
 
             if ((cm->frames_since_golden > 0) || cpi->source_alt_ref_active)
             {
-                cpi->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
+                cm->prob_last_coded =
+                    rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
 
-                if (cpi->prob_last_coded < 1)
-                    cpi->prob_last_coded = 1;
+                if (cm->prob_last_coded < 1)
+                    cm->prob_last_coded = 1;
 
-                cpi->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                                     ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
+                cm->prob_gf_coded  =
+                    (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+                    ? (rfct[GOLDEN_FRAME] * 255) /
+                         (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
 
-                if (cpi->prob_gf_coded < 1)
-                    cpi->prob_gf_coded = 1;
+                if (cm->prob_gf_coded < 1)
+                    cm->prob_gf_coded = 1;
             }
         }
 //#if CONFIG_SEGFEATURES
         else
         {
             // Trap case where cpi->count_mb_ref_frame_usage[] blank.
-            cpi->prob_intra_coded = 63;
-            cpi->prob_last_coded  = 128;
-            cpi->prob_gf_coded    = 128;
+            cm->prob_intra_coded = 63;
+            cm->prob_last_coded  = 128;
+            cm->prob_gf_coded    = 128;
         }
     }
 #if 0

@@ -836,12 +836,10 @@ static void write_mb_segid(vp8_writer *w,
 
 // This function encodes the reference frame
 static void encode_ref_frame( vp8_writer *const w,
+                              VP8_COMMON *const cm,
                               MACROBLOCKD *xd,
                               int segment_id,
-                              MV_REFERENCE_FRAME rf,
-                              int prob_intra_coded,
-                              int prob_last_coded,
-                              int prob_gf_coded )
+                              MV_REFERENCE_FRAME rf )
 {
     int seg_ref_active;
 //#if CONFIG_SEGFEATURES
@@ -849,29 +847,31 @@ static void encode_ref_frame( vp8_writer *const w,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
 
-    // No segment features or segment reference frame feature is disabled
+    // If segment level coding of this signal is disabled...
     if ( !seg_ref_active )
     {
         if (rf == INTRA_FRAME)
         {
-            vp8_write(w, 0, prob_intra_coded);
+            vp8_write(w, 0, cm->prob_intra_coded);
         }
         else    /* inter coded */
         {
-            vp8_write(w, 1, prob_intra_coded);
+            vp8_write(w, 1, cm->prob_intra_coded);
 
             if (rf == LAST_FRAME)
             {
-                vp8_write(w, 0, prob_last_coded);
+                vp8_write(w, 0, cm->prob_last_coded);
             }
             else
             {
-                vp8_write(w, 1, prob_last_coded);
-                vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, prob_gf_coded);
+                vp8_write(w, 1, cm->prob_last_coded);
+
+                vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, cm->prob_gf_coded);
             }
         }
     }
 //#if CONFIG_SEGFEATURES
+    // Else use the segment
     else
     {
         if (rf == INTRA_FRAME)
@@ -879,13 +879,13 @@ static void encode_ref_frame( vp8_writer *const w,
             // This MB intra coded. If inter also allowed we must code
             // an explicit inter/intra flag.
             if ( check_segref_inter( xd, segment_id ) )
-                vp8_write(w, 0, prob_intra_coded);
+                vp8_write(w, 0, cm->prob_intra_coded);
         }
         else    /* inter coded */
         {
             // If intra also allowed we must code an explicit intra/inter flag.
             if ( check_segref( xd, segment_id, INTRA_FRAME ) )
-                vp8_write(w, 1, prob_intra_coded);
+                vp8_write(w, 1, cm->prob_intra_coded);
 
             if (rf == LAST_FRAME)
             {
@@ -893,7 +893,7 @@ static void encode_ref_frame( vp8_writer *const w,
                 if ( check_segref( xd, segment_id, GOLDEN_FRAME ) ||
                      check_segref( xd, segment_id, ALTREF_FRAME ) )
                 {
-                    vp8_write(w, 0, prob_last_coded);
+                    vp8_write(w, 0, cm->prob_last_coded);
                 }
             }
             else
@@ -901,14 +901,14 @@ static void encode_ref_frame( vp8_writer *const w,
                 // if LAST is allowed we must code  explicit flag
                 if ( check_segref( xd, segment_id, LAST_FRAME ) )
                 {
-                    vp8_write(w, 1, prob_last_coded);
+                    vp8_write(w, 1, cm->prob_last_coded);
                 }
 
                 // if GOLDEN and ALTREF allowed we must code an explicit flag
                 if ( check_segref( xd, segment_id, GOLDEN_FRAME ) &&
                      check_segref( xd, segment_id, ALTREF_FRAME ) )
                 {
-                    vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, prob_gf_coded);
+                    vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, cm->prob_gf_coded);
                 }
             }
         }
@@ -939,8 +939,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const int mis = pc->mode_info_stride;
     int mb_row = -1;
 
-    int prob_last_coded;
-    int prob_gf_coded;
     int prob_skip_false = 0;
 #if CONFIG_DUALPRED
     int prob_dual_pred[3];
@@ -951,22 +949,22 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     // Calculate the probabilities to be used to code the reference frame
     // based on actual useage this frame
 //#if CONFIG_SEGFEATURES
-    cpi->prob_intra_coded = (rf_intra + rf_inter)
+    pc->prob_intra_coded = (rf_intra + rf_inter)
                             ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
 
-    if (!cpi->prob_intra_coded)
-        cpi->prob_intra_coded = 1;
+    if (!pc->prob_intra_coded)
+        pc->prob_intra_coded = 1;
 
-    prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
+    pc->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
 
-    if (!prob_last_coded)
-        prob_last_coded = 1;
+    if (!pc->prob_last_coded)
+        pc->prob_last_coded = 1;
 
-    prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+   pc->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
                     ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
 
-    if (!prob_gf_coded)
-        prob_gf_coded = 1;
+    if (!pc->prob_gf_coded)
+       pc->prob_gf_coded = 1;
 
 
 #ifdef ENTROPY_STATS
@@ -994,9 +992,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         vp8_write_literal(w, prob_skip_false, 8);
     }
 
-    vp8_write_literal(w, cpi->prob_intra_coded, 8);
-    vp8_write_literal(w, prob_last_coded, 8);
-    vp8_write_literal(w, prob_gf_coded, 8);
+    vp8_write_literal(w, pc->prob_intra_coded, 8);
+    vp8_write_literal(w, pc->prob_last_coded, 8);
+    vp8_write_literal(w, pc->prob_gf_coded, 8);
 
 #if CONFIG_DUALPRED
     if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
@@ -1100,9 +1098,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             }
 
             // Encode the reference frame.
-            encode_ref_frame( w, xd, segment_id, rf,
-                              cpi->prob_intra_coded,
-                              prob_last_coded, prob_gf_coded );
+            encode_ref_frame( w, pc, xd,
+                              segment_id, rf );
 
             if (rf == INTRA_FRAME)
             {
@@ -1605,7 +1602,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 #if CONFIG_T8X8
     int i=0;
 #endif
-
+    VP8_COMMON *const cm = & cpi->common;
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
@@ -1647,15 +1644,15 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
 
         // old costs
-        ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cpi->prob_intra_coded);
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_zero(cpi->prob_last_coded);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_zero(cpi->prob_gf_coded);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cpi->prob_intra_coded)
-                                        + vp8_cost_one(cpi->prob_last_coded)
-                                        + vp8_cost_one(cpi->prob_gf_coded);
+        ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cm->prob_intra_coded);
+        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cm->prob_intra_coded)
+                                        + vp8_cost_zero(cm->prob_last_coded);
+        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
+                                        + vp8_cost_one(cm->prob_last_coded)
+                                        + vp8_cost_zero(cm->prob_gf_coded);
+        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
+                                        + vp8_cost_one(cm->prob_last_coded)
+                                        + vp8_cost_one(cm->prob_gf_coded);
 
         oldtotal =
             rfct[INTRA_FRAME] * ref_frame_cost[INTRA_FRAME] +
