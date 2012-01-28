@@ -234,6 +234,11 @@ typedef struct VP8Common
     vp8_prob segment_pred_probs[PREDICTION_PROBS];
     unsigned char temporal_update;
 
+#if CONFIG_COMPRED
+    // Context probabilities for reference frame prediction
+    vp8_prob ref_pred_probs[PREDICTION_PROBS];
+    vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
+#endif
 
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */

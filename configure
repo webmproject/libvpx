@@ -226,6 +226,7 @@ EXPERIMENT_LIST="
     qimode
     uvintra
     newnear
+    compred
     newlpf
     enhanced_interp
 "

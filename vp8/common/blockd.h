@@ -194,6 +194,15 @@ typedef struct
     // Flags used for prediction status of various bistream signals
     unsigned char seg_id_predicted;
 
+#if CONFIG_COMPRED
+    unsigned char ref_predicted;
+#endif
+
+    // Indicates if the mb is part of the image (1) vs border (0)
+    // This can be useful in determining whether the MB provides
+    // a valid predictor
+    unsigned char mb_in_image;
+
 } MB_MODE_INFO;
 
 typedef struct

@@ -20,17 +20,37 @@
 
 extern  void vp8_init_scan_order_mask();
 
-static void update_mode_info_border(MODE_INFO *mi, int rows, int cols)
+static void update_mode_info_border( VP8_COMMON *cpi, MODE_INFO *mi_base )
 {
+    int stride = cpi->mode_info_stride;
     int i;
-    vpx_memset(mi - cols - 2, 0, sizeof(MODE_INFO) * (cols + 1));
 
-    for (i = 0; i < rows; i++)
+    // Clear down top border row
+    vpx_memset(mi_base, 0, sizeof(MODE_INFO) * cpi->mode_info_stride);
+
+    // Clear left border column
+    for (i = 1; i < cpi->mb_rows+1; i++)
     {
-        /* TODO(holmer): Bug? This updates the last element of each row
-         * rather than the border element!
-         */
-        vpx_memset(&mi[i*cols-1], 0, sizeof(MODE_INFO));
+        vpx_memset(&mi_base[i*stride], 0, sizeof(MODE_INFO));
+    }
+}
+static void update_mode_info_in_image( VP8_COMMON *cpi, MODE_INFO *mi )
+{
+    int stride = cpi->mode_info_stride;
+    int rows = cpi->mb_rows;
+    int cols = cpi->mb_cols;
+    int i, j;
+
+    // For each in image mode_info element set the in image flag to 1
+    for (i = 0; i < cpi->mb_rows; i++)
+    {
+        for (j = 0; j < cpi->mb_cols; j++)
+        {
+            mi->mbmi.mb_in_image = 1;
+            mi++;   // Next element in the row
+        }
+
+        mi++;       // Step over border element at start of next row
     }
 }
 
@@ -139,9 +159,11 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
         return 1;
     }
 
-    update_mode_info_border(oci->mi, oci->mb_rows, oci->mb_cols);
+    update_mode_info_border(oci, oci->mip);
+    update_mode_info_in_image(oci, oci->mi);
 #if CONFIG_ERROR_CONCEALMENT
-    update_mode_info_border(oci->prev_mi, oci->mb_rows, oci->mb_cols);
+    update_mode_info_border(oci, oci->prev_mip);
+    update_mode_info_in_image(oci, oci->prev_mi);
 #endif
 
     return 0;
