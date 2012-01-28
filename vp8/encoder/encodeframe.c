@@ -31,6 +31,7 @@
 #include <limits.h>
 #include "vp8/common/subpixel.h"
 #include "vpx_ports/vpx_timer.h"
+#include "vp8/common/pred_common.h"
 
 //#if CONFIG_SEGFEATURES
 //#define DBG_PRNT_SEGMAP 1
@@ -880,6 +881,13 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     vpx_memset(cm->above_context, 0,
                sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);
 
+
+//#if CONFIG_COMPRED
+// TODO... this will all need changing for new reference frame coding model
+// in addition... ref_frame_cost should not be in the MACROBLOCKD structure as
+// it is only referenced in the encoder.
+//#endif
+
     xd->ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cm->prob_intra_coded);
 
     // Special case treatment when GF and ARF are not sensible options for reference
@@ -921,6 +929,12 @@ static void encode_frame_internal(VP8_COMP *cpi)
     TOKENEXTRA *tp = cpi->tok;
     int totalrate;
 
+#if CONFIG_COMPRED
+    // Compute a modified set of reference frame probabilities to use when
+    // prediction fails. These are based on the current genreal estimates for
+    // this frame which may be updated with each itteration of the recode loop.
+    compute_mod_refprobs( cm );
+#endif
 
 //#if CONFIG_SEGFEATURES
 // debug output
@@ -1529,11 +1543,16 @@ int vp8cx_encode_inter_macroblock
     int recon_yoffset, int recon_uvoffset
 )
 {
+    VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *const xd = &x->e_mbd;
     int intra_error = 0;
     int rate;
     int distortion;
     unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
+    int seg_ref_active;
+#if CONFIG_COMPRED
+     unsigned char ref_pred_flag;
+#endif
 
     x->skip = 0;
 
@@ -1677,18 +1696,42 @@ int vp8cx_encode_inter_macroblock
     }
 
 //#if CONFIG_SEGFEATURES
+    seg_ref_active = segfeature_active( xd, *segment_id, SEG_LVL_REF_FRAME );
+
+#if CONFIG_COMPRED
+    // SET VARIOUS PREDICTION FLAGS
+
+    // Did the chosen reference frame match its predicted value.
+    // If the reference frame is predicted at the segment level we
+    // mark it as correctly predicted
+    ref_pred_flag = ( (xd->mode_info_context->mbmi.ref_frame ==
+                          get_pred_ref( cm, xd )) ||
+                       seg_ref_active );
+    set_pred_flag( xd, PRED_REF, ref_pred_flag );
+#endif
+
     // If we have just a single reference frame coded for a segment then
     // exclude from the reference frame counts used to work out
     // probabilities. NOTE: At the moment we dont support custom trees
     // for the reference frame coding for each segment but this is a
     // possible future action.
-    if ( !segfeature_active( xd, *segment_id, SEG_LVL_REF_FRAME ) ||
+    if ( !seg_ref_active ||
          ( ( check_segref( xd, *segment_id, INTRA_FRAME ) +
              check_segref( xd, *segment_id, LAST_FRAME ) +
              check_segref( xd, *segment_id, GOLDEN_FRAME ) +
              check_segref( xd, *segment_id, ALTREF_FRAME ) ) > 1 ) )
     {
-        cpi->count_mb_ref_frame_usage[xd->mode_info_context->mbmi.ref_frame]++;
+// TODO this may not be a good idea as it makes sample size small and means
+// the predictor functions cannot use data about most likely value only most
+// likely unpredicted value.
+//#if CONFIG_COMPRED
+//        // Only update count for incorrectly predicted cases
+//        if ( !ref_pred_flag )
+//#endif
+        {
+            cpi->count_mb_ref_frame_usage
+                [xd->mode_info_context->mbmi.ref_frame]++;
+        }
     }
 
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)

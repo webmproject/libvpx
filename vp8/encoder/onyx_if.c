@@ -37,6 +37,7 @@
 //#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 #include "mbgraph.h"
+#include "vp8/common/pred_common.h"
 
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -267,7 +268,6 @@ void init_base_skip_probs()
 void vp8_initialize()
 {
     static int init_done = 0;
-
 
     if (!init_done)
     {
@@ -574,7 +574,14 @@ static void init_seg_features(VP8_COMP *cpi)
                 set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
                 enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
+#if CONFIG_COMPRED
+                // Segment coding disabled for compred testing
                 if ( high_q || (cpi->static_mb_pct == 100) )
+                //if ( 0 )
+#else
+                if ( high_q || (cpi->static_mb_pct == 100) )
+                //if ( 0 )
+#endif
                 {
                     set_segref(xd, 1, ALTREF_FRAME);
                     enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
@@ -610,11 +617,20 @@ static void init_seg_features(VP8_COMP *cpi)
 
         // Special case where we are coding over the top of a previous
         // alt ref frame
+#if CONFIG_COMPRED
+        // Segment coding disabled for compred testing
         else if ( cpi->is_src_frame_alt_ref )
+        //else if ( 0 )
+#else
+        else if ( cpi->is_src_frame_alt_ref )
+        //else if ( 0 )
+#endif
         {
             // Enable mode and ref frame features for segment 0 as well
             enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);
             enable_segfeature(xd, 0, SEG_LVL_MODE);
+            enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
+            enable_segfeature(xd, 1, SEG_LVL_MODE);
 
             // All mbs should use ALTREF_FRAME, ZEROMV exclusively
             clear_segref(xd, 0);
@@ -2379,7 +2395,7 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     // Create the encoder segmentation map and set all entries to 0
     CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
-    // And a copy "last_segmentation_map" for temporal coding
+    // And a copy in common for temporal coding
     CHECK_MEM_ERROR(cm->last_frame_seg_map,
         vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
@@ -3411,6 +3427,7 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
     }
 }
 
+#if !CONFIG_COMPRED
 // This function updates the reference frame probability estimates that
 // will be used during mode selection
 static void update_rd_ref_frame_probs(VP8_COMP *cpi)
@@ -3525,7 +3542,7 @@ static void update_rd_ref_frame_probs(VP8_COMP *cpi)
 
 #endif
 }
-
+#endif
 
 // 1 = key, 0 = inter
 static int decide_key_frame(VP8_COMP *cpi)
@@ -3865,6 +3882,133 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
 }
 
+#if CONFIG_COMPRED
+// This function updates the reference frame prediction stats
+static void update_refpred_stats( VP8_COMP *cpi )
+{
+    VP8_COMMON *const cm = & cpi->common;
+    MACROBLOCKD *const xd = & cpi->mb.e_mbd;
+
+    int mb_row, mb_col;
+    int i;
+    int tot_count;
+    int ref_pred_count[PREDICTION_PROBS][2];
+    vp8_prob new_pred_probs[PREDICTION_PROBS];
+    unsigned char pred_context;
+    unsigned char pred_flag;
+
+    int old_cost, new_cost;
+
+    // Clear the prediction hit counters
+    vpx_memset(ref_pred_count, 0, sizeof(ref_pred_count));
+
+    // Set the prediction probability structures to defaults
+    if ( cm->frame_type == KEY_FRAME )
+    {
+        // Set the prediction probabilities to defaults
+        cm->ref_pred_probs[0] = 120;
+        cm->ref_pred_probs[1] = 80;
+        cm->ref_pred_probs[2] = 40;
+        vpx_memset(cpi->ref_probs_update, 0, sizeof(cpi->ref_probs_update) );
+    }
+    else
+    {
+        // For non-key frames.......
+
+        // Scan through the macroblocks and collate prediction counts.
+        xd->mode_info_context = cm->mi;
+        for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+        {
+            for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+            {
+                // Get the prediction context and status
+                pred_flag = get_pred_flag( xd, PRED_REF );
+                pred_context = get_pred_context( cm, xd, PRED_REF );
+
+                // Count prediction success
+                ref_pred_count[pred_context][pred_flag]++;
+
+                // Step on to the next mb
+                xd->mode_info_context++;
+            }
+
+            // this is to account for the border in mode_info_context
+            xd->mode_info_context++;
+        }
+
+        // TEMP / Print out prediction quality numbers
+        if (0)
+        {
+            FILE *f = fopen("predquality.stt", "a");
+            int pred0, pred1, pred2;
+
+
+            pred0 = ref_pred_count[0][0] + ref_pred_count[0][1];
+            if ( pred0 )
+                pred0 = (ref_pred_count[0][1] * 255) / pred0;
+
+            pred1 = ref_pred_count[1][0] + ref_pred_count[1][1];
+            if ( pred1 )
+                pred1 = (ref_pred_count[1][1] * 255) / pred1;
+
+            pred2 = ref_pred_count[2][0] + ref_pred_count[2][1];
+            if ( pred2 )
+                pred2 = (ref_pred_count[2][1] * 255) / pred2;
+
+            fprintf(f, "%8d: %8d %8d: %8d %8d: %8d %8d\n",
+                        cm->current_video_frame,
+                        pred0, ref_pred_count[0][1],
+                        pred1, ref_pred_count[1][1],
+                        pred2, ref_pred_count[2][1] );
+            fclose(f);
+        }
+
+        // From the prediction counts set the probabilities for each context
+        for ( i = 0; i < PREDICTION_PROBS; i++ )
+        {
+            // MB reference frame not relevent to key frame encoding
+            if ( cm->frame_type != KEY_FRAME )
+            {
+                // Work out the probabilities for the reference frame predictor
+                tot_count = ref_pred_count[i][0] + ref_pred_count[i][1];
+                if ( tot_count )
+                {
+                    new_pred_probs[i] =
+                        ( ref_pred_count[i][0] * 255 ) / tot_count;
+
+                    // Clamp to minimum allowed value
+                    new_pred_probs[i] += !new_pred_probs[i];
+                }
+                else
+                    new_pred_probs[i] = 128;
+            }
+            else
+                new_pred_probs[i] = 128;
+
+            // Decide whether or not to update the reference frame probs.
+            // Returned costs are in 1/256 bit units.
+            old_cost =
+                (ref_pred_count[i][0] * vp8_cost_zero(cm->ref_pred_probs[i])) +
+                (ref_pred_count[i][1] * vp8_cost_one(cm->ref_pred_probs[i]));
+
+            new_cost =
+                (ref_pred_count[i][0] * vp8_cost_zero(new_pred_probs[i])) +
+                (ref_pred_count[i][1] * vp8_cost_one(new_pred_probs[i]));
+
+            // Cost saving must be >= 8 bits (2048 in these units)
+            if ( (old_cost - new_cost) >= 2048 )
+            {
+                cpi->ref_probs_update[i] = 1;
+                cm->ref_pred_probs[i] = new_pred_probs[i];
+            }
+            else
+                cpi->ref_probs_update[i] = 0;
+
+        }
+    }
+}
+#endif
+
 static void encode_frame_to_data_rate
 (
     VP8_COMP *cpi,
@@ -4021,7 +4165,9 @@ static void encode_frame_to_data_rate
     }
 #endif
 
+#if !CONFIG_COMPRED
     update_rd_ref_frame_probs(cpi);
+#endif
 
     // Test code for new segment features
     init_seg_features( cpi );
@@ -4871,6 +5017,12 @@ static void encode_frame_to_data_rate
         vpx_memcpy( cm->last_frame_seg_map,
                     cpi->segmentation_map, cm->MBs );
     }
+
+#if CONFIG_COMPRED
+    // Update the common prediction model probabilities to reflect
+    // the what was seen in the current frame.
+    update_refpred_stats( cpi );
+#endif
 
     // build the bitstream
     vp8_pack_bitstream(cpi, dest, size);

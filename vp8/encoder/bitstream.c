@@ -851,6 +851,49 @@ static void encode_ref_frame( vp8_writer *const w,
     // If segment level coding of this signal is disabled...
     if ( !seg_ref_active )
     {
+#if CONFIG_COMPRED
+        // Values used in prediction model coding
+        unsigned char prediction_flag;
+        vp8_prob pred_prob;
+
+        // Get the context probability the prediction flag
+        pred_prob = get_pred_prob( cm, xd, PRED_REF );
+
+        // Code the prediction flag
+        prediction_flag = get_pred_flag( xd, PRED_REF );
+        vp8_write( w, prediction_flag, pred_prob );
+
+        // If not predicted correctly then code value explicitly
+        if ( !prediction_flag )
+        {
+            // Get the predicted value so that it can be excluded.
+            MV_REFERENCE_FRAME pred_rf = get_pred_ref( cm, xd );
+
+            vp8_prob * mod_refprobs = cm->mod_refprobs[pred_rf];
+
+            if ( mod_refprobs[0] )
+            {
+                vp8_write(w, (rf != INTRA_FRAME), mod_refprobs[0] );
+            }
+
+            // Inter coded
+            if (rf != INTRA_FRAME)
+            {
+                if ( mod_refprobs[1] )
+                {
+                    vp8_write(w, (rf != LAST_FRAME), mod_refprobs[1] );
+                }
+
+                if (rf != LAST_FRAME)
+                {
+                    if ( mod_refprobs[2] )
+                    {
+                        vp8_write(w, (rf != GOLDEN_FRAME), mod_refprobs[2] );
+                    }
+                }
+            }
+        }
+#else
         if (rf == INTRA_FRAME)
         {
             vp8_write(w, 0, cm->prob_intra_coded);
@@ -870,6 +913,7 @@ static void encode_ref_frame( vp8_writer *const w,
                 vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, cm->prob_gf_coded);
             }
         }
+#endif
     }
 //#if CONFIG_SEGFEATURES
     // Else use the segment
@@ -971,6 +1015,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     if (!pc->prob_gf_coded)
        pc->prob_gf_coded = 1;
 
+#if CONFIG_COMPRED
+    // Compute a modified set of probabilities to use when prediction of the
+    // reference frame fails
+    compute_mod_refprobs( pc );
+#endif
 
 #ifdef ENTROPY_STATS
     active_section = 1;
@@ -1598,6 +1647,9 @@ static int default_coef_context_savings(VP8_COMP *cpi)
     return savings;
 }
 
+#if CONFIG_COMPRED
+// TODO... this will all need changing for new reference frame coding model
+#endif
 int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
     int savings = 0;
@@ -2178,6 +2230,24 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
             }
         }
     }
+
+#if CONFIG_COMPRED
+    // Encode the common prediction model status flag probability updates for
+    // the reference frame
+    if ( pc->frame_type != KEY_FRAME )
+    {
+        for (i = 0; i < PREDICTION_PROBS; i++)
+        {
+            if ( cpi->ref_probs_update[i] )
+            {
+                vp8_write_bit(bc, 1);
+                vp8_write_literal(bc, pc->ref_pred_probs[i], 8);
+            }
+            else
+                vp8_write_bit(bc, 0);
+        }
+    }
+#endif
 
     // Encode the loop filter level and type
     vp8_write_bit(bc, pc->filter_type);

@@ -512,13 +512,14 @@ typedef struct VP8_COMP
 #if CONFIG_DUALPRED
     int prob_dualpred[3];
 #endif /* CONFIG_DUALPRED */
-    int recent_ref_frame_usage[MAX_REF_FRAMES];
 
+    int recent_ref_frame_usage[MAX_REF_FRAMES];
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
     int this_frame_percent_intra;
     int last_frame_percent_intra;
-
     int ref_frame_flags;
+
+    unsigned char ref_probs_update[PREDICTION_PROBS];
 
     SPEED_FEATURES sf;
     int error_bins[1024];

@@ -248,6 +248,65 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
     // Segment reference frame features not available
     if ( !seg_ref_active )
     {
+#if CONFIG_COMPRED
+        // Values used in prediction model coding
+        unsigned char prediction_flag;
+        vp8_prob pred_prob;
+        MV_REFERENCE_FRAME pred_ref;
+
+        // Get the context probability the prediction flag
+        pred_prob = get_pred_prob( cm, xd, PRED_REF );
+
+        // Read the prediction status flag
+        prediction_flag = (unsigned char)vp8_read( bc, pred_prob );
+
+        // Store the prediction flag.
+        set_pred_flag( xd, PRED_REF, prediction_flag );
+
+        // Get the predicted reference frame.
+        pred_ref = get_pred_ref( cm, xd );
+
+        // If correctly predicted then use the predicted value
+        if ( prediction_flag )
+        {
+            ref_frame = pred_ref;
+        }
+        // else decode the explicitly coded value
+        else
+        {
+            vp8_prob * mod_refprobs = cm->mod_refprobs[pred_ref];
+
+            // Default to INTRA_FRAME (value 0)
+            ref_frame = INTRA_FRAME;
+
+            // Do we need to decode the Intra/Inter branch
+            if ( mod_refprobs[0] )
+                ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, mod_refprobs[0]);
+            else
+                ref_frame ++;
+
+            if (ref_frame)
+            {
+                // Do we need to decode the Last/Gf_Arf branch
+                if ( mod_refprobs[1] )
+                    ref_frame += vp8_read(bc, mod_refprobs[1]);
+                else
+                    ref_frame++;
+
+                if ( ref_frame > 1 )
+                {
+                    // Do we need to decode the GF/Arf branch
+                    if ( mod_refprobs[2] )
+                        ref_frame += vp8_read(bc, mod_refprobs[2]);
+                    else
+                    {
+                        ref_frame = (pred_ref == GOLDEN_FRAME)
+                                    ? ALTREF_FRAME : GOLDEN_FRAME;
+                    }
+                }
+            }
+        }
+#else
         ref_frame =
             (MV_REFERENCE_FRAME) vp8_read(bc, cm->prob_intra_coded);
 
@@ -259,12 +318,20 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                             (int)(1 + vp8_read(bc, cm->prob_gf_coded)));
             }
         }
+#endif
     }
 
 //#if CONFIG_SEGFEATURES
     // Segment reference frame features are enabled
     else
     {
+#if CONFIG_COMPRED
+        // The reference frame for the mb is considered as correclty predicted
+        // if it is signaled at the segment level for the purposes of the
+        // common prediction model
+        set_pred_flag( xd, PRED_REF, 1 );
+#endif
+
         // If there are no inter reference frames enabled we can set INTRA
         if ( !check_segref_inter(xd, segment_id) )
         {
@@ -397,6 +464,11 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
         cm->prob_last_coded  = (vp8_prob)vp8_read_literal(bc, 8);
         cm->prob_gf_coded    = (vp8_prob)vp8_read_literal(bc, 8);
 
+#if CONFIG_COMPRED
+        // Computes a modified set of probabilities for use when reference
+        // frame prediction fails.
+        compute_mod_refprobs( cm );
+#endif
 
 #if CONFIG_DUALPRED
         pbi->common.dual_pred_mode = vp8_read(bc, 128);

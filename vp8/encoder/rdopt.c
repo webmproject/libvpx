@@ -40,13 +40,13 @@
 
 //#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
+#include "vp8/common/pred_common.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x)  (x)
 #else
 #define IF_RTCD(x)  NULL
 #endif
-
 
 extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
@@ -2030,6 +2030,66 @@ static void set_i8x8_block_modes(MACROBLOCK *x, int *modes)
     }
 }
 
+#if CONFIG_COMPRED
+void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
+{
+    VP8_COMMON *cm = &cpi->common;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+    vp8_prob * mod_refprobs;
+
+    unsigned int cost;
+    int pred_ref ;
+    int pred_flag;
+    int i;
+
+    vp8_prob pred_prob;
+
+    // Get the predicted reference for this mb
+    pred_ref = get_pred_ref( cm, xd );
+
+    // Get the context probability for the prediction flag
+    pred_prob = get_pred_prob( cm, xd, PRED_REF );
+
+    // Get the set of probailities to use if prediction fails
+    mod_refprobs = cm->mod_refprobs[pred_ref];
+
+    // For each possible selected reference frame work out a cost.
+    // TODO: correct handling of costs if segment indicates only a subset of
+    // reference frames are allowed... though mostly this should come out
+    // in the wash.
+    for ( i = 0; i < MAX_REF_FRAMES; i++ )
+    {
+        pred_flag = (i == pred_ref);
+
+        // Get the prediction for the current mb
+        cost = vp8_cost_bit( pred_prob, pred_flag );
+
+        // for incorectly predicted cases
+        if ( ! pred_flag )
+        {
+            if ( mod_refprobs[0] )
+                cost += vp8_cost_bit( (i != INTRA_FRAME), mod_refprobs[0] );
+
+            // Inter coded
+            if (i != INTRA_FRAME)
+            {
+                if ( mod_refprobs[1] )
+                    cost += vp8_cost_bit( (i != LAST_FRAME), mod_refprobs[1] );
+
+                if (i != LAST_FRAME)
+                {
+                    if ( mod_refprobs[2] )
+                        cost += vp8_cost_bit( (i != GOLDEN_FRAME),
+                                              mod_refprobs[2] );
+                }
+            }
+        }
+
+        ref_costs[i] = cost;
+    }
+}
+#endif
+
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
                             int *returnrate, int *returndistortion, int *returnintra,
                             int *best_single_rd_diff, int *best_dual_rd_diff,
@@ -2089,8 +2149,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     unsigned char *u_buffer[4];
     unsigned char *v_buffer[4];
 
+#if CONFIG_COMPRED
+    unsigned int ref_costs[MAX_REF_FRAMES];
+#endif
+
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
     vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
+
 #if CONFIG_DUALPRED
     for (i = 0; i < 4; i++)
     {
@@ -2157,6 +2222,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
     rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
     uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
+
+#if CONFIG_COMPRED
+    // Get estimates of reference frame costs for each reference frame
+    // that depend on the current prediction etc.
+    vp8_estimate_ref_frame_costs( cpi, ref_costs );
+#endif
 
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
@@ -2733,11 +2804,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         }
 #endif /* CONFIG_DUALPRED */
 
-        /* Estimate the reference frame signaling cost and add it
-         * to the rolling cost variable.
-         */
+
+        // Estimate the reference frame signaling cost and add it
+        // to the rolling cost variable.
+#if CONFIG_COMPRED
+        rate2 += ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
+#else
         rate2 +=
             x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+#endif
 
         if (!disable_skip)
         {
@@ -2818,8 +2893,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
             }
 
+#if CONFIG_COMPRED
+            other_cost += ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
+#else
             other_cost +=
-            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+                x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+#endif
 
             /* Calculate the final y RD estimate for this mode */
             best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
