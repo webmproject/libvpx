@@ -411,7 +411,7 @@ specialize vp8_short_fdct8x4 mmx sse2 media neon
 vp8_short_fdct8x4_media=vp8_short_fdct8x4_armv6
 
 prototype void vp8_short_walsh4x4 "short *input, short *output, int pitch"
-specialize vp8_short_walsh4x4 mmx sse2 media neon
+specialize vp8_short_walsh4x4 sse2 media neon
 vp8_short_walsh4x4_media=vp8_short_walsh4x4_armv6
 
 #
