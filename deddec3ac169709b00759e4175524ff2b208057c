@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//3RA\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-30T20:20:30Z",
+      "side": 1,
+      "message": "why? The prototype is of type int.",
+      "parentUuid": "AAAAHn//4AQ\u003d",
+      "revId": "deddec3ac169709b00759e4175524ff2b208057c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//4F4\u003d",
         "filename": "vp8/encoder/sad_c.c",
         "patchSetId": 1
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "I tried once to add the early exit in sse3 sad code, but didn\u0027t see improvement. I didn\u0027t test how well it works on sse2 platform. I guess it won\u0027t be a problem to remove it, but hope to hear more opinions from others.",
       "parentUuid": "AAAAHn//4AU\u003d",
+      "revId": "deddec3ac169709b00759e4175524ff2b208057c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//3RY\u003d",
+        "filename": "vp8/encoder/sad_c.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-01-30T20:20:30Z",
+      "side": 1,
+      "message": "it\u0027s probably not a win on architectures with wide simd, but for something like armv6 I\u0027d expect it could be worth testing for early exit.\n\nIn terms of this change, I think it\u0027d be worth writing a comment above this reference implementation that says that the assembly need not implement this early-out behavior exactly or at all.",
+      "parentUuid": "AAAAHn//39g\u003d",
       "revId": "deddec3ac169709b00759e4175524ff2b208057c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
