@@ -187,7 +187,7 @@ int calculate_minq_index( double maxq,
                    c );
 
     if ( minqtarget > maxq )
-        maxq = maxq;
+        minqtarget = maxq;
 
     for ( i = 0; i < QINDEX_RANGE; i++ )
     {
