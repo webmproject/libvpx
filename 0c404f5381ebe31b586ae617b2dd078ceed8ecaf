@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//21Q\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 768,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-31T02:01:07Z",
+      "side": 1,
+      "message": "You may want to have one of these for each 16x16, 8x8, 4x4 as there isn\u0027t a ton of shared code. do variance and sad, check ifactor, apply filter or copy block.  All of that could be done in asm if necessary.  This is a good start.  That could be done later depending on where the hotspots are.",
+      "revId": "0c404f5381ebe31b586ae617b2dd078ceed8ecaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//21g\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 805,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-31T02:01:07Z",
+      "side": 1,
+      "message": "Why not move these up into the variance_plus_sad function?",
+      "revId": "0c404f5381ebe31b586ae617b2dd078ceed8ecaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//21c\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-01-31T02:01:07Z",
+      "side": 1,
+      "message": "I would think bilinear_filter_blocks would be a better name.",
+      "revId": "0c404f5381ebe31b586ae617b2dd078ceed8ecaf",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
