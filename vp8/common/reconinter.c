@@ -9,6 +9,7 @@
  */
 
 
+#include <limits.h>
 #include "vpx_config.h"
 #include "vpx_rtcd.h"
 #include "vpx/vpx_integer.h"
@@ -223,19 +224,10 @@ void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x)
     int pre_stride = x->pre.uv_stride;
 
     /* calc uv motion vectors */
-    if (mv_row < 0)
-        mv_row -= 1;
-    else
-        mv_row += 1;
-
-    if (mv_col < 0)
-        mv_col -= 1;
-    else
-        mv_col += 1;
-
+    mv_row += 1 | (mv_row >> (sizeof(int) * CHAR_BIT - 1));
+    mv_col += 1 | (mv_col >> (sizeof(int) * CHAR_BIT - 1));
     mv_row /= 2;
     mv_col /= 2;
-
     mv_row &= x->fullpixel_mask;
     mv_col &= x->fullpixel_mask;
 
@@ -278,8 +270,7 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x)
                    + x->block[yoffset+4].bmi.mv.as_mv.row
                    + x->block[yoffset+5].bmi.mv.as_mv.row;
 
-            if (temp < 0) temp -= 4;
-            else temp += 4;
+            temp += 4 + ((temp >> (sizeof(int) * CHAR_BIT - 1)) << 3);
 
             x->block[uoffset].bmi.mv.as_mv.row = (temp / 8) & x->fullpixel_mask;
 
@@ -288,15 +279,11 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x)
                    + x->block[yoffset+4].bmi.mv.as_mv.col
                    + x->block[yoffset+5].bmi.mv.as_mv.col;
 
-            if (temp < 0) temp -= 4;
-            else temp += 4;
+            temp += 4 + ((temp >> (sizeof(int) * CHAR_BIT - 1)) << 3);
 
             x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & x->fullpixel_mask;
 
-            x->block[voffset].bmi.mv.as_mv.row =
-                x->block[uoffset].bmi.mv.as_mv.row ;
-            x->block[voffset].bmi.mv.as_mv.col =
-                x->block[uoffset].bmi.mv.as_mv.col ;
+            x->block[voffset].bmi.mv.as_int = x->block[uoffset].bmi.mv.as_int;
         }
     }
 
@@ -429,19 +416,10 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
     }
 
     /* calc uv motion vectors */
-    if ( _16x16mv.as_mv.row < 0)
-      _16x16mv.as_mv.row -= 1;
-    else
-      _16x16mv.as_mv.row += 1;
-
-    if (_16x16mv.as_mv.col < 0)
-        _16x16mv.as_mv.col -= 1;
-    else
-        _16x16mv.as_mv.col += 1;
-
+    _16x16mv.as_mv.row += 1 | (_16x16mv.as_mv.row >> (sizeof(int) * CHAR_BIT - 1));
+    _16x16mv.as_mv.col += 1 | (_16x16mv.as_mv.col >> (sizeof(int) * CHAR_BIT - 1));
     _16x16mv.as_mv.row /= 2;
     _16x16mv.as_mv.col /= 2;
-
     _16x16mv.as_mv.row &= x->fullpixel_mask;
     _16x16mv.as_mv.col &= x->fullpixel_mask;
 
@@ -580,8 +558,7 @@ void build_4x4uvmvs(MACROBLOCKD *x)
                  + x->mode_info_context->bmi[yoffset + 4].mv.as_mv.row
                  + x->mode_info_context->bmi[yoffset + 5].mv.as_mv.row;
 
-            if (temp < 0) temp -= 4;
-            else temp += 4;
+            temp += 4 + ((temp >> (sizeof(int) * CHAR_BIT - 1)) << 3);
 
             x->block[uoffset].bmi.mv.as_mv.row = (temp / 8) & x->fullpixel_mask;
 
@@ -590,18 +567,14 @@ void build_4x4uvmvs(MACROBLOCKD *x)
                  + x->mode_info_context->bmi[yoffset + 4].mv.as_mv.col
                  + x->mode_info_context->bmi[yoffset + 5].mv.as_mv.col;
 
-            if (temp < 0) temp -= 4;
-            else temp += 4;
+            temp += 4 + ((temp >> (sizeof(int) * CHAR_BIT - 1)) << 3);
 
             x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & x->fullpixel_mask;
 
             if (x->mode_info_context->mbmi.need_to_clamp_mvs)
                 clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.mv.as_mv, x);
 
-            x->block[voffset].bmi.mv.as_mv.row =
-                x->block[uoffset].bmi.mv.as_mv.row ;
-            x->block[voffset].bmi.mv.as_mv.col =
-                x->block[uoffset].bmi.mv.as_mv.col ;
+            x->block[voffset].bmi.mv.as_int = x->block[uoffset].bmi.mv.as_int;
         }
     }
 }
