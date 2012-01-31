@@ -1979,11 +1979,8 @@ int vp8cx_encode_inter_macroblock
     // SET VARIOUS PREDICTION FLAGS
 
     // Did the chosen reference frame match its predicted value.
-    // If the reference frame is predicted at the segment level we
-    // mark it as correctly predicted
     ref_pred_flag = ( (xd->mode_info_context->mbmi.ref_frame ==
-                          get_pred_ref( cm, xd )) ||
-                       seg_ref_active );
+                           get_pred_ref( cm, xd )) );
     set_pred_flag( xd, PRED_REF, ref_pred_flag );
 #endif
 

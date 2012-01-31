@@ -843,13 +843,27 @@ static void encode_ref_frame( vp8_writer *const w,
                               MV_REFERENCE_FRAME rf )
 {
     int seg_ref_active;
+    int seg_ref_count = 0;
 //#if CONFIG_SEGFEATURES
     seg_ref_active = segfeature_active( xd,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
 
+#if CONFIG_COMPRED
+    if ( seg_ref_active )
+    {
+        seg_ref_count = check_segref( xd, segment_id, INTRA_FRAME ) +
+                        check_segref( xd, segment_id, LAST_FRAME ) +
+                        check_segref( xd, segment_id, GOLDEN_FRAME ) +
+                        check_segref( xd, segment_id, ALTREF_FRAME );
+    }
+
     // If segment level coding of this signal is disabled...
-    if ( !seg_ref_active )
+    // or the segment allows multiple reference frame options
+    if ( !seg_ref_active || (seg_ref_count > 1) )
+#else
+    if ( !seg_ref_active  )
+#endif
     {
 #if CONFIG_COMPRED
         // Values used in prediction model coding
@@ -869,7 +883,24 @@ static void encode_ref_frame( vp8_writer *const w,
             // Get the predicted value so that it can be excluded.
             MV_REFERENCE_FRAME pred_rf = get_pred_ref( cm, xd );
 
-            vp8_prob * mod_refprobs = cm->mod_refprobs[pred_rf];
+            //vp8_prob * mod_refprobs = cm->mod_refprobs[pred_rf];
+            vp8_prob mod_refprobs[PREDICTION_PROBS];
+
+            vpx_memcpy( mod_refprobs,
+                        cm->mod_refprobs[pred_rf], sizeof(mod_refprobs) );
+
+            // If segment coding enabled blank out options that cant occur by
+            // setting the branch probability to 0.
+            if ( seg_ref_active )
+            {
+                mod_refprobs[INTRA_FRAME] *=
+                    check_segref( xd, segment_id, INTRA_FRAME );
+                mod_refprobs[LAST_FRAME] *=
+                    check_segref( xd, segment_id, LAST_FRAME );
+                mod_refprobs[GOLDEN_FRAME] *=
+                    ( check_segref( xd, segment_id, GOLDEN_FRAME ) *
+                      check_segref( xd, segment_id, ALTREF_FRAME ) );
+            }
 
             if ( mod_refprobs[0] )
             {
@@ -915,7 +946,12 @@ static void encode_ref_frame( vp8_writer *const w,
         }
 #endif
     }
+
+    // if using the prediction mdoel we have nothing further to do because
+    // the reference frame is fully coded by the segment
+
 //#if CONFIG_SEGFEATURES
+#if !CONFIG_COMPRED
     // Else use the segment
     else
     {
@@ -958,6 +994,7 @@ static void encode_ref_frame( vp8_writer *const w,
             }
         }
     }
+#endif
 }
 
 #if CONFIG_SUPERBLOCKS

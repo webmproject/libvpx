@@ -91,7 +91,8 @@ static unsigned int do_16x16_motion_iteration
 
     vp8_set_mbmode_and_mvs(x, NEWMV, dst_mv);
     vp8_build_inter16x16_predictors_mby(xd);
-    VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+    //VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+    best_err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (xd->dst.y_buffer, xd->dst.y_stride,
                      xd->predictor, 16, &best_err);
 
@@ -138,7 +139,8 @@ static int do_16x16_motion_search
     // FIXME should really use something like near/nearest MV and/or MV prediction
     xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
     xd->pre.y_stride = ref->y_stride;
-    VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+    //VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+    err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (ref->y_buffer + mb_y_offset,
                      ref->y_stride, xd->dst.y_buffer,
                      xd->dst.y_stride, &err);
@@ -203,10 +205,12 @@ static int do_16x16_zerozero_search
     // FIXME should really use something like near/nearest MV and/or MV prediction
     xd->pre.y_buffer = ref->y_buffer + mb_y_offset;
     xd->pre.y_stride = ref->y_stride;
-    VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+    //VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+    err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (ref->y_buffer + mb_y_offset,
                      ref->y_stride, xd->dst.y_buffer,
                      xd->dst.y_stride, &err);
+
     dst_mv->as_int = 0;
 
     return err;
@@ -232,7 +236,8 @@ static int find_best_16x16_intra
 
         xd->mode_info_context->mbmi.mode = mode;
         RECON_INVOKE(&cpi->rtcd.common->recon, build_intra_predictors_mby)(xd);
-        VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+        //VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
+        err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                         (xd->predictor, 16,
                          buf->y_buffer + mb_y_offset,
                          buf->y_stride, &err);

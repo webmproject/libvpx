@@ -474,7 +474,7 @@ static void init_seg_features(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
-    int high_q = (int)(cpi->avg_q > 32.0);
+    int high_q = (int)(cpi->avg_q > 48.0);
     int qi_delta;
 
     // For now at least dont enable seg features alongside cyclic refresh.
@@ -575,15 +575,10 @@ static void init_seg_features(VP8_COMP *cpi)
                 set_segdata( xd, 1, SEG_LVL_ALT_LF, -2 );
                 enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
-#if CONFIG_COMPRED
                 // Segment coding disabled for compred testing
                 if ( high_q || (cpi->static_mb_pct == 100) )
-                //if ( 0 )
-#else
-                if ( high_q || (cpi->static_mb_pct == 100) )
-                //if ( 0 )
-#endif
                 {
+                    //set_segref(xd, 1, LAST_FRAME);
                     set_segref(xd, 1, ALTREF_FRAME);
                     enable_segfeature(xd, 1, SEG_LVL_REF_FRAME);
 
@@ -618,14 +613,8 @@ static void init_seg_features(VP8_COMP *cpi)
 
         // Special case where we are coding over the top of a previous
         // alt ref frame
-#if CONFIG_COMPRED
         // Segment coding disabled for compred testing
         else if ( cpi->is_src_frame_alt_ref )
-        //else if ( 0 )
-#else
-        else if ( cpi->is_src_frame_alt_ref )
-        //else if ( 0 )
-#endif
         {
             // Enable mode and ref frame features for segment 0 as well
             enable_segfeature(xd, 0, SEG_LVL_REF_FRAME);

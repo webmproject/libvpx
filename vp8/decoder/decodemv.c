@@ -236,6 +236,7 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
 {
     MV_REFERENCE_FRAME ref_frame;
     int seg_ref_active;
+    int seg_ref_count = 0;
 
 //#if CONFIG_SEGFEATURES
     VP8_COMMON *const cm = & pbi->common;
@@ -245,8 +246,25 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
 
-    // Segment reference frame features not available
+
+#if CONFIG_COMPRED
+
+    // If segment coding enabled does the segment allow for more than one
+    // possible reference frame
+    if ( seg_ref_active )
+    {
+        seg_ref_count = check_segref( xd, segment_id, INTRA_FRAME ) +
+                        check_segref( xd, segment_id, LAST_FRAME ) +
+                        check_segref( xd, segment_id, GOLDEN_FRAME ) +
+                        check_segref( xd, segment_id, ALTREF_FRAME );
+    }
+
+    // Segment reference frame features not available or allows for
+    // multiple reference frame options
+    if ( !seg_ref_active || (seg_ref_count > 1) )
+#else
     if ( !seg_ref_active )
+#endif
     {
 #if CONFIG_COMPRED
         // Values used in prediction model coding
@@ -274,7 +292,23 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
         // else decode the explicitly coded value
         else
         {
-            vp8_prob * mod_refprobs = cm->mod_refprobs[pred_ref];
+            //vp8_prob * mod_refprobs = cm->mod_refprobs[pred_ref];
+            vp8_prob mod_refprobs[PREDICTION_PROBS];
+            vpx_memcpy( mod_refprobs,
+                        cm->mod_refprobs[pred_ref], sizeof(mod_refprobs) );
+
+            // If segment coding enabled blank out options that cant occur by
+            // setting the branch probability to 0.
+            if ( seg_ref_active )
+            {
+                mod_refprobs[INTRA_FRAME] *=
+                    check_segref( xd, segment_id, INTRA_FRAME );
+                mod_refprobs[LAST_FRAME] *=
+                    check_segref( xd, segment_id, LAST_FRAME );
+                mod_refprobs[GOLDEN_FRAME] *=
+                    ( check_segref( xd, segment_id, GOLDEN_FRAME ) *
+                      check_segref( xd, segment_id, ALTREF_FRAME ) );
+            }
 
             // Default to INTRA_FRAME (value 0)
             ref_frame = INTRA_FRAME;
@@ -300,8 +334,19 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                         ref_frame += vp8_read(bc, mod_refprobs[2]);
                     else
                     {
-                        ref_frame = (pred_ref == GOLDEN_FRAME)
-                                    ? ALTREF_FRAME : GOLDEN_FRAME;
+                        if ( seg_ref_active )
+                        {
+                            if ( (pred_ref == GOLDEN_FRAME) ||
+                                 !check_segref( xd, segment_id, GOLDEN_FRAME) )
+                            {
+                                ref_frame = ALTREF_FRAME;
+                            }
+                            else
+                                ref_frame = GOLDEN_FRAME;
+                        }
+                        else
+                            ref_frame = (pred_ref == GOLDEN_FRAME)
+                                        ? ALTREF_FRAME : GOLDEN_FRAME;
                     }
                 }
             }
@@ -330,8 +375,8 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
         // if it is signaled at the segment level for the purposes of the
         // common prediction model
         set_pred_flag( xd, PRED_REF, 1 );
-#endif
-
+        ref_frame = get_pred_ref( cm, xd );
+#else
         // If there are no inter reference frames enabled we can set INTRA
         if ( !check_segref_inter(xd, segment_id) )
         {
@@ -401,6 +446,7 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                 }
             }
         }
+#endif
     }
 
     return (MV_REFERENCE_FRAME)ref_frame;

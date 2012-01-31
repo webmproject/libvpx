@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2012 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -157,11 +157,18 @@ MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
 
     unsigned char left_pred;
     unsigned char above_pred;
+    unsigned char frame_allowed[MAX_REF_FRAMES];
 
     MV_REFERENCE_FRAME left;
     MV_REFERENCE_FRAME above;
     MV_REFERENCE_FRAME above_left;
     MV_REFERENCE_FRAME pred_ref = LAST_FRAME;
+
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
+    int seg_ref_active;
+
+    // Is segment coding ennabled
+    seg_ref_active = segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME );
 
     // Reference frame used by neighbours
     left = (m - 1)->mbmi.ref_frame;
@@ -173,6 +180,32 @@ MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
     left_pred = (m - 1)->mbmi.ref_predicted;
     above_pred = (m - cm->mode_info_stride)->mbmi.ref_predicted;
 
+    // Special case treatment if segment coding is enabled.
+    // Dont allow prediction of a reference frame that the segment
+    // does not allow
+    if ( seg_ref_active )
+    {
+        frame_allowed[INTRA_FRAME] =
+            check_segref( xd, segment_id, INTRA_FRAME );
+        frame_allowed[LAST_FRAME] =
+            check_segref( xd, segment_id, LAST_FRAME );
+        frame_allowed[GOLDEN_FRAME] =
+            check_segref( xd, segment_id, GOLDEN_FRAME );
+        frame_allowed[ALTREF_FRAME] =
+            check_segref( xd, segment_id, ALTREF_FRAME );
+    }
+    else
+    {
+        frame_allowed[INTRA_FRAME] = 1;
+        frame_allowed[LAST_FRAME] = 1;
+        frame_allowed[GOLDEN_FRAME] = 1;
+        frame_allowed[ALTREF_FRAME] = 1;
+    }
+
+    // Dont predict if not allowed
+    left_pred = left_pred * frame_allowed[left];
+    above_pred = above_pred * frame_allowed[above];
+
     // Boost prediction scores of above / left if they are predicted and match
     // the above left.
     if ( left_pred )
@@ -181,7 +214,7 @@ MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
         above_pred += (above == above_left);
 
     // Only consider "in image" mbs as giving valid prediction.
-    if ( (left == above) &&
+    if ( (left == above) && frame_allowed[left] &&
          ((m - 1)->mbmi.mb_in_image ||
           (m - cm->mode_info_stride)->mbmi.mb_in_image) )
     {
@@ -195,17 +228,44 @@ MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
     {
         pred_ref = above;
     }
-    else
+    // If we reach this clause left_pred and above_pred must be the same
+    else if ( left_pred > 0 )
     {
         // Choose from above or left.
         // For now this is based on a fixed preference order.
         // Last,Altref,Golden
-        if ( (left == LAST_FRAME) || (above == LAST_FRAME) )
+        if ( frame_allowed[LAST_FRAME] &&
+             ((left == LAST_FRAME) || (above == LAST_FRAME)) )
+        {
             pred_ref = LAST_FRAME;
-        else if ( (left == ALTREF_FRAME) || (above == ALTREF_FRAME) )
+        }
+        else if ( frame_allowed[ALTREF_FRAME] &&
+                  ((left == ALTREF_FRAME) || (above == ALTREF_FRAME)) )
+        {
             pred_ref = ALTREF_FRAME;
-        else if ( (left == GOLDEN_FRAME) || (above == GOLDEN_FRAME) )
+        }
+        else if ( frame_allowed[GOLDEN_FRAME] &&
+                  ((left == GOLDEN_FRAME) || (above == GOLDEN_FRAME)) )
+        {
             pred_ref = GOLDEN_FRAME;
+        }
+        else
+        {
+            pred_ref = INTRA_FRAME;
+        }
+    }
+    // No prediction case.. choose in fixed order from allowed options
+    // TBD could order based onf frequency.
+    else
+    {
+        if ( frame_allowed[LAST_FRAME] )
+            pred_ref = LAST_FRAME;
+        else if ( frame_allowed[ALTREF_FRAME] )
+            pred_ref = ALTREF_FRAME;
+        else if ( frame_allowed[GOLDEN_FRAME] )
+            pred_ref = GOLDEN_FRAME;
+        else
+            pred_ref = INTRA_FRAME;
     }
 
     return pred_ref;
@@ -246,6 +306,10 @@ void calc_ref_probs( int * count, vp8_prob * probs )
 
 }
 
+// Computes a set of modified conditional probabilities for the reference frame
+// Values willbe set to 0 for reference frame options that are not possible
+// because wither they were predicted and prediction has failed or because
+// they are not allowed for a given segment.
 void compute_mod_refprobs( VP8_COMMON *const cm )
 {
     int norm_cnt[MAX_REF_FRAMES];
@@ -255,6 +319,7 @@ void compute_mod_refprobs( VP8_COMMON *const cm )
     int gfarf_count;
     int gf_count;
     int arf_count;
+    int i;
 
     intra_count = cm->prob_intra_coded;
     inter_count = (255 - intra_count);
@@ -292,6 +357,5 @@ void compute_mod_refprobs( VP8_COMMON *const cm )
     norm_cnt[3] = 0;
     calc_ref_probs( norm_cnt, cm->mod_refprobs[ALTREF_FRAME] );
     cm->mod_refprobs[ALTREF_FRAME][2] = 0;  // This branch implicit
-
 }
 #endif
