@@ -2141,7 +2141,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
         vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
 
-        segment_reference_frames(cpi);
+        //segment_reference_frames(cpi);
 
         if (xd->update_mb_segmentation_data)
         {

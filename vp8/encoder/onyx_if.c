@@ -541,6 +541,7 @@ static void init_seg_features(VP8_COMP *cpi)
     // All other frames if segmentation has been enabled
     else if ( xd->segmentation_enabled )
     {
+/*
         int i;
 
         // clears prior frame seg lev refs
@@ -553,7 +554,7 @@ static void init_seg_features(VP8_COMP *cpi)
                 set_segdata( xd,i, SEG_LVL_REF_FRAME, 0xffffff);
             }
         }
-
+*/
 
         // First normal frame in a valid gf or alt ref group
         if ( cpi->common.frames_since_golden == 0 )
