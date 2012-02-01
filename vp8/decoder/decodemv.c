@@ -490,7 +490,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             {
                 cm->fc.ymode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
             }
-            while (++i < 4);
+            while (++i < VP8_YMODES-1);
         }
 #if CONFIG_UVINTRA
         //vp8_read_bit(bc);
@@ -503,7 +503,7 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             {
                 cm->fc.uv_mode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
             }
-            while (++i < 3);
+            while (++i < VP8_UV_MODES-1);
         }
 #endif /* CONFIG_UVINTRA */
         read_mvcontexts(bc, mvc);
