@@ -158,57 +158,6 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
 
 }
 
-static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
-{
-    /* If the MV points so far into the UMV border that no visible pixels
-     * are used for reconstruction, the subpel part of the MV can be
-     * discarded and the MV limited to 16 pixels with equivalent results.
-     *
-     * This limit kicks in at 19 pixels for the top and left edges, for
-     * the 16 pixels plus 3 taps right of the central pixel when subpel
-     * filtering. The bottom and right edges use 16 pixels plus 2 pixels
-     * left of the central pixel when filtering.
-     */
-    if (mv->col < (xd->mb_to_left_edge - (19 << 3)))
-        mv->col = xd->mb_to_left_edge - (16 << 3);
-    else if (mv->col > xd->mb_to_right_edge + (18 << 3))
-        mv->col = xd->mb_to_right_edge + (16 << 3);
-
-    if (mv->row < (xd->mb_to_top_edge - (19 << 3)))
-        mv->row = xd->mb_to_top_edge - (16 << 3);
-    else if (mv->row > xd->mb_to_bottom_edge + (18 << 3))
-        mv->row = xd->mb_to_bottom_edge + (16 << 3);
-}
-
-/* A version of the above function for chroma block MVs.*/
-static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
-{
-    mv->col = (2*mv->col < (xd->mb_to_left_edge - (19 << 3))) ? (xd->mb_to_left_edge - (16 << 3)) >> 1 : mv->col;
-    mv->col = (2*mv->col > xd->mb_to_right_edge + (18 << 3)) ? (xd->mb_to_right_edge + (16 << 3)) >> 1 : mv->col;
-
-    mv->row = (2*mv->row < (xd->mb_to_top_edge - (19 << 3))) ? (xd->mb_to_top_edge - (16 << 3)) >> 1 : mv->row;
-    mv->row = (2*mv->row > xd->mb_to_bottom_edge + (18 << 3)) ? (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
-}
-
-void clamp_mvs(MACROBLOCKD *xd)
-{
-    if (xd->mode_info_context->mbmi.mode == SPLITMV)
-    {
-        int i;
-
-        for (i=0; i<16; i++)
-            clamp_mv_to_umv_border(&xd->block[i].bmi.mv.as_mv, xd);
-        for (i=16; i<24; i++)
-            clamp_uvmv_to_umv_border(&xd->block[i].bmi.mv.as_mv, xd);
-    }
-    else
-    {
-        clamp_mv_to_umv_border(&xd->mode_info_context->mbmi.mv.as_mv, xd);
-        clamp_uvmv_to_umv_border(&xd->block[16].bmi.mv.as_mv, xd);
-    }
-
-}
-
 extern const int vp8_i8x8_block[4];
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                               unsigned int mb_idx)
@@ -254,12 +203,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             printf("\n");
         }
 #endif
-    }
-
-    /* Perform temporary clamping of the MV to be used for prediction */
-    if (xd->mode_info_context->mbmi.need_to_clamp_mvs)
-    {
-        clamp_mvs(xd);
     }
 
     mode = xd->mode_info_context->mbmi.mode;
