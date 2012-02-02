@@ -413,12 +413,11 @@ void get_lower_res_motion_info(VP8_COMP *cpi, MACROBLOCKD *xd, int *dissim,
          * such as 2, 4, 8. Will revisit it if needed.
          * Should also try using a look-up table to see if it helps
          * performance. */
-        int round = cpi->oxcf.mr_down_sampling_factor.num/2;
         int parent_mb_row, parent_mb_col;
 
-        parent_mb_row = (mb_row*cpi->oxcf.mr_down_sampling_factor.den+round)
+        parent_mb_row = mb_row*cpi->oxcf.mr_down_sampling_factor.den
                     /cpi->oxcf.mr_down_sampling_factor.num;
-        parent_mb_col = (mb_col*cpi->oxcf.mr_down_sampling_factor.den+round)
+        parent_mb_col = mb_col*cpi->oxcf.mr_down_sampling_factor.den
                     /cpi->oxcf.mr_down_sampling_factor.num;
         parent_mb_index = parent_mb_row*cpi->mr_low_res_mb_cols + parent_mb_col;
     }
