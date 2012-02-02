@@ -261,7 +261,6 @@ typedef struct macroblockd
     int ref_frame_cost[MAX_REF_FRAMES];
 
 
-    unsigned int frames_since_golden;
     unsigned int frames_till_alt_ref_frame;
     vp8_subpix_fn_t  subpixel_predict;
     vp8_subpix_fn_t  subpixel_predict8x4;

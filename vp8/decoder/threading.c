@@ -47,7 +47,6 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         mbd->mode_info_stride  = pc->mode_info_stride;
 
         mbd->frame_type = pc->frame_type;
-        mbd->frames_since_golden      = pc->frames_since_golden;
         mbd->frames_till_alt_ref_frame  = pc->frames_till_alt_ref_frame;
 
         mbd->pre = pc->yv12_fb[pc->lst_fb_idx];

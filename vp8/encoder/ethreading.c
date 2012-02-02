@@ -437,7 +437,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 
         mbd->frame_type = cm->frame_type;
 
-        mbd->frames_since_golden = cm->frames_since_golden;
         mbd->frames_till_alt_ref_frame = cm->frames_till_alt_ref_frame;
 
         mb->src = * cpi->Source;
