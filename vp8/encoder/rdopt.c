@@ -2628,12 +2628,17 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
 #if CONFIG_DUALPRED
+#if CONFIG_COMPRED
+            dualmode_cost =
+                vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 0 );
+#else
             {
                 MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
                 MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
                 int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
                 dualmode_cost = vp8_cost_bit(cm->prob_dualpred[cnt], 0);
             }
+#endif
 #endif /* CONFIG_DUALPRED */
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
@@ -2788,12 +2793,17 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             /* We don't include the cost of the second reference here, because there are only
              * three options: Last/Golden, ARF/Last or Golden/ARF, or in other words if you
              * present them in that order, the second one is always known if the first is known */
+#if CONFIG_COMPRED
+            dualmode_cost =
+                vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 1 );
+#else
             {
                 MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
                 MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
                 int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
                 dualmode_cost = vp8_cost_bit(cm->prob_dualpred[cnt], 1);
             }
+#endif
         }
 #endif /* CONFIG_DUALPRED */
 

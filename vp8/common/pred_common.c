@@ -33,10 +33,16 @@ unsigned char get_pred_context( VP8_COMMON *const cm,
 
 
 #if CONFIG_COMPRED
-
     case PRED_REF:
         pred_context = (m - 1)->mbmi.ref_predicted +
                        (m - cm->mode_info_stride)->mbmi.ref_predicted;
+        break;
+
+    case PRED_DUAL:
+        // Second ref not INTRA indicates use of dual pred in neighbour
+        pred_context =
+            ((m - 1)->mbmi.second_ref_frame != INTRA_FRAME) +
+            ((m - cm->mode_info_stride)->mbmi.second_ref_frame != INTRA_FRAME);
         break;
 #endif
 
@@ -68,9 +74,13 @@ vp8_prob get_pred_prob( VP8_COMMON *const cm,
         break;
 
 #if CONFIG_COMPRED
-
     case PRED_REF:
         pred_probability = cm->ref_pred_probs[pred_context];
+        break;
+
+    case PRED_DUAL:
+        // Second ref non zero indicates use of dual pred in neighbour
+        pred_probability = cm->prob_dualpred[pred_context];
         break;
 #endif
 
@@ -276,7 +286,6 @@ void compute_mod_refprobs( VP8_COMMON *const cm )
     int gfarf_count;
     int gf_count;
     int arf_count;
-    int i;
 
     intra_count = cm->prob_intra_coded;
     inter_count = (255 - intra_count);

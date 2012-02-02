@@ -839,11 +839,16 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                       mb_to_bottom_edge);
 
         propagate_mv:  /* same MV throughout */
+
 #if CONFIG_DUALPRED
-            if (pbi->common.dual_pred_mode == DUAL_PREDICTION_ONLY ||
-                (pbi->common.dual_pred_mode == HYBRID_PREDICTION &&
-                 vp8_read(bc, cm->prob_dualpred[(mi[-1].mbmi.second_ref_frame != INTRA_FRAME) +
-                                                (mi[-mis].mbmi.second_ref_frame != INTRA_FRAME)])))
+            if ( cm->dual_pred_mode == DUAL_PREDICTION_ONLY ||
+                 (cm->dual_pred_mode == HYBRID_PREDICTION &&
+#if CONFIG_COMPRED
+                     vp8_read(bc, get_pred_prob( cm, xd, PRED_DUAL ))) )
+#else
+                     vp8_read(bc, cm->prob_dualpred[(mi[-1].mbmi.second_ref_frame != INTRA_FRAME) +
+                                                    (mi[-mis].mbmi.second_ref_frame != INTRA_FRAME)])))
+#endif
             {
                 mbmi->second_ref_frame = mbmi->ref_frame + 1;
                 if (mbmi->second_ref_frame == 4)
