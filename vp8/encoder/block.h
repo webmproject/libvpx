@@ -74,6 +74,8 @@ typedef struct macroblock
     PARTITION_INFO *pi;   /* Corresponds to upper left visible macroblock */
     PARTITION_INFO *pip;  /* Base of allocated array */
 
+    int ref_frame_cost[MAX_REF_FRAMES];
+
     search_site *ss;
     int ss_count;
     int searches_per_step;

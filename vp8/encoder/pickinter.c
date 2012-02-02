@@ -641,7 +641,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         /* Work out the cost assosciated with selecting the reference frame */
         frame_cost =
-            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
         rate2 += frame_cost;
 
         /* Only consider ZEROMV/ALTREF_FRAME for alt ref frame,

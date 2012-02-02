@@ -629,18 +629,18 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
 
     // Special case treatment when GF and ARF are not sensible options for reference
     if (cpi->ref_frame_flags == VP8_LAST_FLAG)
-        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+        vp8_calc_ref_frame_costs(x->ref_frame_cost,
                                  cpi->prob_intra_coded,255,128);
     else if ((cpi->oxcf.number_of_layers > 1) &&
                (cpi->ref_frame_flags == VP8_GOLD_FLAG))
-        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+        vp8_calc_ref_frame_costs(x->ref_frame_cost,
                                  cpi->prob_intra_coded,1,255);
     else if ((cpi->oxcf.number_of_layers > 1) &&
                 (cpi->ref_frame_flags == VP8_ALT_FLAG))
-        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+        vp8_calc_ref_frame_costs(x->ref_frame_cost,
                                  cpi->prob_intra_coded,1,1);
     else
-        vp8_calc_ref_frame_costs(xd->ref_frame_cost,
+        vp8_calc_ref_frame_costs(x->ref_frame_cost,
                                  cpi->prob_intra_coded,
                                  cpi->prob_last_coded,
                                  cpi->prob_gf_coded);

@@ -2198,7 +2198,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
          * to the rolling cost variable.
          */
         rate2 +=
-            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
 
         if (!disable_skip)
         {
@@ -2258,7 +2258,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             }
 
             other_cost +=
-            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+            x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
 
             /* Calculate the final y RD estimate for this mode */
             best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
