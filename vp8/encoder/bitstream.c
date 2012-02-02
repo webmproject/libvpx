@@ -1419,9 +1419,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #if CONFIG_DUALPRED
     if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
     {
-        cpi->prob_dualpred[0] = (prob_dual_pred[0] + cpi->prob_dualpred[0] + 1) >> 1;
-        cpi->prob_dualpred[1] = (prob_dual_pred[1] + cpi->prob_dualpred[1] + 1) >> 1;
-        cpi->prob_dualpred[2] = (prob_dual_pred[2] + cpi->prob_dualpred[2] + 1) >> 1;
+        pc->prob_dualpred[0] = (prob_dual_pred[0] + pc->prob_dualpred[0] + 1) >> 1;
+        pc->prob_dualpred[1] = (prob_dual_pred[1] + pc->prob_dualpred[1] + 1) >> 1;
+        pc->prob_dualpred[2] = (prob_dual_pred[2] + pc->prob_dualpred[2] + 1) >> 1;
     }
 #endif /* CONFIG_DUALPRED */
 }
@@ -1782,9 +1782,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #if CONFIG_DUALPRED
     if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
     {
-        cpi->prob_dualpred[0] = (prob_dual_pred[0] + cpi->prob_dualpred[0] + 1) >> 1;
-        cpi->prob_dualpred[1] = (prob_dual_pred[1] + cpi->prob_dualpred[1] + 1) >> 1;
-        cpi->prob_dualpred[2] = (prob_dual_pred[2] + cpi->prob_dualpred[2] + 1) >> 1;
+        pc->prob_dualpred[0] = (prob_dual_pred[0] + pc->prob_dualpred[0] + 1) >> 1;
+        pc->prob_dualpred[1] = (prob_dual_pred[1] + pc->prob_dualpred[1] + 1) >> 1;
+        pc->prob_dualpred[2] = (prob_dual_pred[2] + pc->prob_dualpred[2] + 1) >> 1;
     }
 #endif /* CONFIG_DUALPRED */
 }

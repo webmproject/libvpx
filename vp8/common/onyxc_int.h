@@ -241,6 +241,10 @@ typedef struct VP8Common
     vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
 #endif
 
+#if CONFIG_DUALPRED
+    vp8_prob prob_dualpred[3];
+#endif /* CONFIG_DUALPRED */
+
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */

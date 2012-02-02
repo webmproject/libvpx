@@ -22,7 +22,8 @@ typedef enum
     PRED_SEG_ID = 0,               // Segment identifier
 
 #if CONFIG_COMPRED
-    PRED_REF = 1
+    PRED_REF = 1,
+    PRED_DUAL = 2
 #endif
 
 } PRED_ID;

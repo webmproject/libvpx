@@ -509,9 +509,6 @@ typedef struct VP8_COMP
     int prob_skip_false;
     int last_skip_false_probs[3];
     int last_skip_probs_q[3];
-#if CONFIG_DUALPRED
-    int prob_dualpred[3];
-#endif /* CONFIG_DUALPRED */
 
     int recent_ref_frame_usage[MAX_REF_FRAMES];
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];

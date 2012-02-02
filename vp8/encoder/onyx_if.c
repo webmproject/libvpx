@@ -2355,9 +2355,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cm->prob_gf_coded                 = 128;
     cm->prob_intra_coded              = 63;
 #if CONFIG_DUALPRED
-    cpi->prob_dualpred[0]             = 128;
-    cpi->prob_dualpred[1]             = 128;
-    cpi->prob_dualpred[2]             = 128;
+    cm->prob_dualpred[0]             = 128;
+    cm->prob_dualpred[1]             = 128;
+    cm->prob_dualpred[2]             = 128;
 #endif /* CONFIG_DUALPRED */
 
     // Prime the recent reference frame useage counters.

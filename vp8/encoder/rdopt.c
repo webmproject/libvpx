@@ -2103,6 +2103,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                             int *best_single_rd_diff, int *best_dual_rd_diff,
                             int *best_hybrid_rd_diff)
 {
+    VP8_COMMON *cm = &cpi->common;
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
@@ -2631,7 +2632,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
                 MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
                 int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
-                dualmode_cost = vp8_cost_bit(cpi->prob_dualpred[cnt], 0);
+                dualmode_cost = vp8_cost_bit(cm->prob_dualpred[cnt], 0);
             }
 #endif /* CONFIG_DUALPRED */
 
@@ -2791,7 +2792,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
                 MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
                 int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
-                dualmode_cost = vp8_cost_bit(cpi->prob_dualpred[cnt], 1);
+                dualmode_cost = vp8_cost_bit(cm->prob_dualpred[cnt], 1);
             }
         }
 #endif /* CONFIG_DUALPRED */

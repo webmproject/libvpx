@@ -521,9 +521,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             cm->dual_pred_mode += vp8_read(bc, 128);
         if (cm->dual_pred_mode == HYBRID_PREDICTION)
         {
-            pbi->prob_dualpred[0] = (vp8_prob)vp8_read_literal(bc, 8);
-            pbi->prob_dualpred[1] = (vp8_prob)vp8_read_literal(bc, 8);
-            pbi->prob_dualpred[2] = (vp8_prob)vp8_read_literal(bc, 8);
+            cm->prob_dualpred[0] = (vp8_prob)vp8_read_literal(bc, 8);
+            cm->prob_dualpred[1] = (vp8_prob)vp8_read_literal(bc, 8);
+            cm->prob_dualpred[2] = (vp8_prob)vp8_read_literal(bc, 8);
         }
 #endif /* CONFIG_DUALPRED */
 
@@ -842,8 +842,8 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_DUALPRED
             if (pbi->common.dual_pred_mode == DUAL_PREDICTION_ONLY ||
                 (pbi->common.dual_pred_mode == HYBRID_PREDICTION &&
-                 vp8_read(bc, pbi->prob_dualpred[(mi[-1].mbmi.second_ref_frame != INTRA_FRAME) +
-                                                 (mi[-mis].mbmi.second_ref_frame != INTRA_FRAME)])))
+                 vp8_read(bc, cm->prob_dualpred[(mi[-1].mbmi.second_ref_frame != INTRA_FRAME) +
+                                                (mi[-mis].mbmi.second_ref_frame != INTRA_FRAME)])))
             {
                 mbmi->second_ref_frame = mbmi->ref_frame + 1;
                 if (mbmi->second_ref_frame == 4)
