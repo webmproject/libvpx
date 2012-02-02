@@ -595,8 +595,6 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
 
     xd->frame_type = cm->frame_type;
 
-    xd->frames_till_alt_ref_frame = cm->frames_till_alt_ref_frame;
-
     // reset intra mode contexts
     if (cm->frame_type == KEY_FRAME)
         vp8_init_mbmode_probs(cm);
