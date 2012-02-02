@@ -58,7 +58,7 @@ static int vp8_read_uv_mode(vp8_reader *bc, const vp8_prob *p)
     return i;
 }
 
-// This function reads the current macro block's segnment id to from bitstream
+// This function reads the current macro block's segnent id from the bitstream
 // It should only be called if a segment map update is indicated.
 static void vp8_read_mb_segid(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x)
 {
@@ -923,6 +923,108 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
 }
 
+#if CONFIG_SUPERBLOCKS
+void vp8_decode_mode_mvs(VP8D_COMP *pbi)
+{
+    int i;
+    VP8_COMMON *cm = &pbi->common;
+    int sb_row, sb_col;
+    int sb_rows = (cm->mb_rows + 1)>>1;
+    int sb_cols = (cm->mb_cols + 1)>>1;
+    MODE_INFO *mi = cm->mi;
+    int row_delta[4] = {-1,  0, +1,  0};
+    int col_delta[4] = {+1, +1, -1, +1};
+
+#if CONFIG_NEWNEAR
+    MODE_INFO *prev_mi = cm->prev_mi;
+#endif
+
+    mb_mode_mv_init(pbi);
+
+#if CONFIG_QIMODE
+    if(cm->frame_type==KEY_FRAME && !cm->kf_ymode_probs_update)
+    {
+        cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
+    }
+#endif
+
+    for (sb_row=0; sb_row<sb_rows; sb_row++)
+    {
+        int mb_col = -col_delta[0];
+        int mb_row = (sb_row <<1)-row_delta[0];
+
+        for (sb_col=0; sb_col<sb_cols; sb_col++)
+        {
+            for ( i=0; i<4; i++ )
+            {
+                int mb_to_top_edge;
+                int mb_to_bottom_edge;
+
+#if CONFIG_ERROR_CONCEALMENT
+                int mb_num;
+#endif
+                int offset_extended = row_delta[(i+1) & 0x3]
+                                    * cm->mode_info_stride + col_delta[(i+1) & 0x3];
+                int dy = row_delta[i];
+                int dx = col_delta[i];
+
+                mb_row += dy;
+                mb_col += dx;
+
+                if ((mb_row >= cm->mb_rows) || (mb_col >= cm->mb_cols))
+                {
+#if CONFIG_NEWNEAR
+                    prev_mi += offset_extended;
+#endif
+                    mi += offset_extended;       /* next macroblock */
+                    continue;
+                }
+
+                pbi->mb.mb_to_top_edge =
+                mb_to_top_edge = -((mb_row * 16)) << 3;
+                mb_to_top_edge -= LEFT_TOP_MARGIN;
+
+                pbi->mb.mb_to_bottom_edge =
+                mb_to_bottom_edge = ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
+                mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
+
+#if CONFIG_ERROR_CONCEALMENT
+                mb_num = mb_row * pbi->common.mb_cols + mb_col;
+#endif
+                /*read_mb_modes_mv(pbi, cm->mode_info_context, &cm->mode_info_context->mbmi, mb_row, mb_col);*/
+                if(pbi->common.frame_type == KEY_FRAME)
+                    vp8_kfread_modes(pbi, mi, mb_row, mb_col);
+                else
+                    read_mb_modes_mv(pbi, mi, &mi->mbmi,
+#if CONFIG_NEWNEAR
+                    prev_mi,
+#endif
+                    mb_row, mb_col);
+
+#if CONFIG_ERROR_CONCEALMENT
+                /* look for corruption. set mvs_corrupt_from_mb to the current
+                 * mb_num if the frame is corrupt from this macroblock. */
+                if (vp8dx_bool_error(&pbi->bc) && mb_num < pbi->mvs_corrupt_from_mb)
+                {
+                    pbi->mvs_corrupt_from_mb = mb_num;
+                    /* no need to continue since the partition is corrupt from
+                     * here on.
+                     */
+                    return;
+                }
+#endif
+
+#if CONFIG_NEWNEAR
+                prev_mi += offset_extended;
+#endif
+                mi += offset_extended;       /* next macroblock */
+            }
+        }
+
+        mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
+    }
+}
+#else
 void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 {
     MODE_INFO *mi = pbi->common.mi;
@@ -1036,3 +1138,5 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
 
 }
+#endif /* CONFIG_SUPERBLOCKS */
+

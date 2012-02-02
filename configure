@@ -229,6 +229,7 @@ EXPERIMENT_LIST="
     compred
     newlpf
     enhanced_interp
+    superblocks
 "
 CONFIG_LIST="
     external_build

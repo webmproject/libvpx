@@ -160,6 +160,13 @@ static int pick_intra4x4block(
     {
         int this_rd;
 
+#if CONFIG_SUPERBLOCKS
+        // Pre-empt mode range being restored to B_HU_PRED in the loop above:
+        // Ignore modes that need the above-right data
+        if (mode==B_LD_PRED || mode==B_VL_PRED)
+            continue;
+#endif
+
         rate = mode_costs[mode];
         RECON_INVOKE(&rtcd->common->recon, intra4x4_predict)
                      (b, mode, b->predictor);
@@ -196,7 +203,9 @@ static int pick_intra4x4mby_modes
     int distortion = 0;
     unsigned int *bmode_costs;
 
+#if !CONFIG_SUPERBLOCKS
     vp8_intra_prediction_down_copy(xd);
+#endif
 
     bmode_costs = mb->inter_bmode_costs;
 

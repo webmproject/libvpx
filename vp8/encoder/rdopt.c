@@ -738,6 +738,11 @@ static int rd_pick_intra4x4block(
         int this_rd;
         int ratey;
 
+#if CONFIG_SUPERBLOCKS
+        // Ignore modes thact need the above-right data
+        if (mode==B_LD_PRED || mode==B_VL_PRED)
+            continue;
+#endif
         rate = bmode_costs[mode];
 
         RECON_INVOKE(&cpi->rtcd.common->recon, intra4x4_predict)
@@ -796,7 +801,9 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
+#if !CONFIG_SUPERBLOCKS
     vp8_intra_prediction_down_copy(xd);
+#endif
 
     bmode_costs = mb->inter_bmode_costs;
 
@@ -1728,6 +1735,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     return bsi.segment_rd;
 }
 
+/* Order arr in increasing order, original position stored in idx */
 static void insertsortmv(int arr[], int len)
 {
     int i, j, k;
@@ -2321,7 +2329,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vpx_memcpy(mdcounts, frame_mdcounts[x->e_mbd.mode_info_context->mbmi.ref_frame], sizeof(mdcounts));
         }
 
-        // Experimental code. Special case for gf and arf zeromv modes. Increase zbin size to supress noise
+        // Experimental code. Special case for gf and arf zeromv modes.
+        // Increase zbin size to suppress noise
         if (cpi->zbin_mode_boost_enabled)
         {
             if ( vp8_ref_frame_order[mode_index] == INTRA_FRAME )

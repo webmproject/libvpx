@@ -214,7 +214,7 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
     // First of all generate stats regarding how well the last segment map
     // predicts this one
 
-    // Initialize macroblod decoder mode info context for to the first mb
+    // Initialize macroblock decoder mode info context for the first mb
     // in the frame
     xd->mode_info_context = cm->mi;
 
@@ -244,7 +244,7 @@ void choose_segmap_coding_method( VP8_COMP *cpi )
                 temporal_predictor_count[pred_context][seg_predicted]++;
 
                 if ( !seg_predicted )
-                    // Update the "undpredicted" segment count
+                    // Update the "unpredicted" segment count
                     t_unpred_seg_counts[segment_id]++;
             }
 
