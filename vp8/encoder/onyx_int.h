@@ -519,7 +519,7 @@ typedef struct VP8_COMP
     int last_frame_percent_intra;
     int ref_frame_flags;
 
-    unsigned char ref_probs_update[PREDICTION_PROBS];
+    unsigned char ref_pred_probs_update[PREDICTION_PROBS];
 
     SPEED_FEATURES sf;
     int error_bins[1024];

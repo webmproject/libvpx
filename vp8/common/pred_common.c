@@ -155,10 +155,6 @@ MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
 {
     MODE_INFO *m = xd->mode_info_context;
 
-    unsigned char left_pred;
-    unsigned char above_pred;
-    unsigned char frame_allowed[MAX_REF_FRAMES];
-
     MV_REFERENCE_FRAME left;
     MV_REFERENCE_FRAME above;
     MV_REFERENCE_FRAME above_left;
@@ -166,106 +162,67 @@ MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
 
     int segment_id = xd->mode_info_context->mbmi.segment_id;
     int seg_ref_active;
+    int i;
+
+    unsigned char frame_allowed[MAX_REF_FRAMES] = {1,1,1,1};
+    unsigned char ref_score[MAX_REF_FRAMES];
+    unsigned char best_score = 0;
+    unsigned char left_in_image;
+    unsigned char above_in_image;
+    unsigned char above_left_in_image;
 
     // Is segment coding ennabled
     seg_ref_active = segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME );
-
-    // Reference frame used by neighbours
-    left = (m - 1)->mbmi.ref_frame;
-    above = (m - cm->mode_info_stride)->mbmi.ref_frame;
-    above_left = (m - 1 - cm->mode_info_stride)->mbmi.ref_frame;
-
-    // Reference frame prediction status of immediate neigbours.
-    // This can only be set if the mb is "in image"
-    left_pred = (m - 1)->mbmi.ref_predicted;
-    above_pred = (m - cm->mode_info_stride)->mbmi.ref_predicted;
 
     // Special case treatment if segment coding is enabled.
     // Dont allow prediction of a reference frame that the segment
     // does not allow
     if ( seg_ref_active )
     {
-        frame_allowed[INTRA_FRAME] =
-            check_segref( xd, segment_id, INTRA_FRAME );
-        frame_allowed[LAST_FRAME] =
-            check_segref( xd, segment_id, LAST_FRAME );
-        frame_allowed[GOLDEN_FRAME] =
-            check_segref( xd, segment_id, GOLDEN_FRAME );
-        frame_allowed[ALTREF_FRAME] =
-            check_segref( xd, segment_id, ALTREF_FRAME );
+        for ( i = 0; i < MAX_REF_FRAMES; i++ )
+        {
+            frame_allowed[i] =
+                check_segref( xd, segment_id, i );
+
+            // Score set to 0 if ref frame not allowed
+            ref_score[i] = cm->ref_scores[i] * frame_allowed[i];
+        }
     }
     else
+        vpx_memcpy( ref_score, cm->ref_scores, sizeof(ref_score) );
+
+    // Reference frames used by neighbours
+    left = (m - 1)->mbmi.ref_frame;
+    above = (m - cm->mode_info_stride)->mbmi.ref_frame;
+    above_left = (m - 1 - cm->mode_info_stride)->mbmi.ref_frame;
+
+    // Are neighbours in image
+    left_in_image = (m - 1)->mbmi.mb_in_image;
+    above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
+    above_left_in_image = (m - 1 - cm->mode_info_stride)->mbmi.mb_in_image;
+
+    // Adjust scores for candidate reference frames based on neigbours
+    if  ( frame_allowed[left] && left_in_image )
     {
-        frame_allowed[INTRA_FRAME] = 1;
-        frame_allowed[LAST_FRAME] = 1;
-        frame_allowed[GOLDEN_FRAME] = 1;
-        frame_allowed[ALTREF_FRAME] = 1;
+        ref_score[left] += 16;
+        if ( above_left_in_image && (left == above_left) )
+            ref_score[left] += 4;
+    }
+    if  ( frame_allowed[above] && above_in_image )
+    {
+        ref_score[above] += 16;
+        if ( above_left_in_image && (above == above_left) )
+            ref_score[above] += 4;
     }
 
-    // Dont predict if not allowed
-    left_pred = left_pred * frame_allowed[left];
-    above_pred = above_pred * frame_allowed[above];
-
-    // Boost prediction scores of above / left if they are predicted and match
-    // the above left.
-    if ( left_pred )
-        left_pred += (left == above_left);
-    if ( above_pred )
-        above_pred += (above == above_left);
-
-    // Only consider "in image" mbs as giving valid prediction.
-    if ( (left == above) && frame_allowed[left] &&
-         ((m - 1)->mbmi.mb_in_image ||
-          (m - cm->mode_info_stride)->mbmi.mb_in_image) )
+    // Now choose the candidate with the highest score
+    for ( i = 0; i < MAX_REF_FRAMES; i++ )
     {
-        pred_ref = left;
-    }
-    else if ( left_pred > above_pred )
-    {
-        pred_ref = left;
-    }
-    else if ( above_pred > left_pred )
-    {
-        pred_ref = above;
-    }
-    // If we reach this clause left_pred and above_pred must be the same
-    else if ( left_pred > 0 )
-    {
-        // Choose from above or left.
-        // For now this is based on a fixed preference order.
-        // Last,Altref,Golden
-        if ( frame_allowed[LAST_FRAME] &&
-             ((left == LAST_FRAME) || (above == LAST_FRAME)) )
+        if ( ref_score[i] > best_score  )
         {
-            pred_ref = LAST_FRAME;
+            pred_ref = i;
+            best_score = ref_score[i];
         }
-        else if ( frame_allowed[ALTREF_FRAME] &&
-                  ((left == ALTREF_FRAME) || (above == ALTREF_FRAME)) )
-        {
-            pred_ref = ALTREF_FRAME;
-        }
-        else if ( frame_allowed[GOLDEN_FRAME] &&
-                  ((left == GOLDEN_FRAME) || (above == GOLDEN_FRAME)) )
-        {
-            pred_ref = GOLDEN_FRAME;
-        }
-        else
-        {
-            pred_ref = INTRA_FRAME;
-        }
-    }
-    // No prediction case.. choose in fixed order from allowed options
-    // TBD could order based onf frequency.
-    else
-    {
-        if ( frame_allowed[LAST_FRAME] )
-            pred_ref = LAST_FRAME;
-        else if ( frame_allowed[ALTREF_FRAME] )
-            pred_ref = ALTREF_FRAME;
-        else if ( frame_allowed[GOLDEN_FRAME] )
-            pred_ref = GOLDEN_FRAME;
-        else
-            pred_ref = INTRA_FRAME;
     }
 
     return pred_ref;
@@ -357,5 +314,13 @@ void compute_mod_refprobs( VP8_COMMON *const cm )
     norm_cnt[3] = 0;
     calc_ref_probs( norm_cnt, cm->mod_refprobs[ALTREF_FRAME] );
     cm->mod_refprobs[ALTREF_FRAME][2] = 0;  // This branch implicit
+
+    // Score the reference frames based on overal frequency.
+    // These scores contribute to the prediction choices.
+    // Max score 17 min 1
+    cm->ref_scores[INTRA_FRAME] = 1 + (intra_count * 16 / 255);
+    cm->ref_scores[LAST_FRAME] = 1 + (last_count * 16 / 255);
+    cm->ref_scores[GOLDEN_FRAME] = 1 + (gf_count * 16 / 255);
+    cm->ref_scores[ALTREF_FRAME] = 1 + (arf_count * 16 / 255);
 }
 #endif

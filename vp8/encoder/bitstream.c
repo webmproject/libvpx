@@ -869,21 +869,24 @@ static void encode_ref_frame( vp8_writer *const w,
         // Values used in prediction model coding
         unsigned char prediction_flag;
         vp8_prob pred_prob;
+        MV_REFERENCE_FRAME pred_rf;
 
         // Get the context probability the prediction flag
         pred_prob = get_pred_prob( cm, xd, PRED_REF );
 
-        // Code the prediction flag
-        prediction_flag = get_pred_flag( xd, PRED_REF );
+        // Get the predicted value.
+        pred_rf = get_pred_ref( cm, xd );
+
+        // Did the chosen reference frame match its predicted value.
+        prediction_flag =
+            ( xd->mode_info_context->mbmi.ref_frame == pred_rf );
+
+        set_pred_flag( xd, PRED_REF, prediction_flag );
         vp8_write( w, prediction_flag, pred_prob );
 
         // If not predicted correctly then code value explicitly
         if ( !prediction_flag )
         {
-            // Get the predicted value so that it can be excluded.
-            MV_REFERENCE_FRAME pred_rf = get_pred_ref( cm, xd );
-
-            //vp8_prob * mod_refprobs = cm->mod_refprobs[pred_rf];
             vp8_prob mod_refprobs[PREDICTION_PROBS];
 
             vpx_memcpy( mod_refprobs,
@@ -997,6 +1000,42 @@ static void encode_ref_frame( vp8_writer *const w,
 #endif
 }
 
+// Update the probabilities used to encode reference frame data
+static void update_ref_probs( VP8_COMP *const cpi )
+{
+    VP8_COMMON *const cm = & cpi->common;
+
+    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    const int rf_intra = rfct[INTRA_FRAME];
+    const int rf_inter = rfct[LAST_FRAME] +
+                         rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
+
+//#if CONFIG_SEGFEATURES
+    cm->prob_intra_coded = (rf_intra + rf_inter)
+                            ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
+
+    if (!cm->prob_intra_coded)
+        cm->prob_intra_coded = 1;
+
+    cm->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
+
+    if (!cm->prob_last_coded)
+        cm->prob_last_coded = 1;
+
+    cm->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+                        ? (rfct[GOLDEN_FRAME] * 255) /
+                          (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
+
+    if (!cm->prob_gf_coded)
+       cm->prob_gf_coded = 1;
+
+#if CONFIG_COMPRED
+    // Compute a modified set of probabilities to use when prediction of the
+    // reference frame fails
+    compute_mod_refprobs( cm );
+#endif
+}
+
 #if CONFIG_SUPERBLOCKS
 static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 {
@@ -1010,9 +1049,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
     int pred_context;
 
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
-    const int rf_intra = rfct[INTRA_FRAME];
-    const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
     MODE_INFO *m = pc->mi;
 #if CONFIG_NEWNEAR
     MODE_INFO *prev_m = pc->prev_mi;
@@ -1036,31 +1072,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     cpi->mb.partition_info = cpi->mb.pi;
 
-    // Calculate the probabilities to be used to code the reference frame
-    // based on actual useage this frame
-//#if CONFIG_SEGFEATURES
-    pc->prob_intra_coded = (rf_intra + rf_inter)
-                            ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
-
-    if (!pc->prob_intra_coded)
-        pc->prob_intra_coded = 1;
-
-    pc->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-    if (!pc->prob_last_coded)
-        pc->prob_last_coded = 1;
-
-    pc->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                    ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-    if (!pc->prob_gf_coded)
-        pc->prob_gf_coded = 1;
-
-#if CONFIG_COMPRED
-    // Compute a modified set of probabilities to use when prediction of the
-    // reference frame fails
-    compute_mod_refprobs( pc );
-#endif
+    // Update the probabilities used to encode reference frame data
+    update_ref_probs( cpi );
 
 #ifdef ENTROPY_STATS
     active_section = 1;
@@ -1425,9 +1438,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
     int pred_context;
 
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
-    const int rf_intra = rfct[INTRA_FRAME];
-    const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
     MODE_INFO *m = pc->mi;
 #if CONFIG_NEWNEAR
@@ -1448,31 +1458,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     cpi->mb.partition_info = cpi->mb.pi;
 
-    // Calculate the probabilities to be used to code the reference frame
-    // based on actual useage this frame
-//#if CONFIG_SEGFEATURES
-    pc->prob_intra_coded = (rf_intra + rf_inter)
-                            ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
-
-    if (!pc->prob_intra_coded)
-        pc->prob_intra_coded = 1;
-
-    pc->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-    if (!pc->prob_last_coded)
-        pc->prob_last_coded = 1;
-
-   pc->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                    ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-    if (!pc->prob_gf_coded)
-       pc->prob_gf_coded = 1;
-
-#if CONFIG_COMPRED
-    // Compute a modified set of probabilities to use when prediction of the
-    // reference frame fails
-    compute_mod_refprobs( pc );
-#endif
+    // Update the probabilities used to encode reference frame data
+    update_ref_probs( cpi );
 
 #ifdef ENTROPY_STATS
     active_section = 1;
@@ -2825,7 +2812,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     {
         for (i = 0; i < PREDICTION_PROBS; i++)
         {
-            if ( cpi->ref_probs_update[i] )
+            if ( cpi->ref_pred_probs_update[i] )
             {
                 vp8_write_bit(bc, 1);
                 vp8_write_literal(bc, pc->ref_pred_probs[i], 8);

@@ -1982,6 +1982,7 @@ int vp8cx_encode_inter_macroblock
     ref_pred_flag = ( (xd->mode_info_context->mbmi.ref_frame ==
                            get_pred_ref( cm, xd )) );
     set_pred_flag( xd, PRED_REF, ref_pred_flag );
+
 #endif
 
     // If we have just a single reference frame coded for a segment then

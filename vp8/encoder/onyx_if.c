@@ -3418,6 +3418,7 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
 }
 
 #if !CONFIG_COMPRED
+//#if 1
 // This function updates the reference frame probability estimates that
 // will be used during mode selection
 static void update_rd_ref_frame_probs(VP8_COMP *cpi)
@@ -3899,7 +3900,9 @@ static void update_refpred_stats( VP8_COMP *cpi )
         cm->ref_pred_probs[0] = 120;
         cm->ref_pred_probs[1] = 80;
         cm->ref_pred_probs[2] = 40;
-        vpx_memset(cpi->ref_probs_update, 0, sizeof(cpi->ref_probs_update) );
+
+        vpx_memset(cpi->ref_pred_probs_update, 0,
+                   sizeof(cpi->ref_pred_probs_update) );
     }
     else
     {
@@ -3988,11 +3991,11 @@ static void update_refpred_stats( VP8_COMP *cpi )
             // Cost saving must be >= 8 bits (2048 in these units)
             if ( (old_cost - new_cost) >= 2048 )
             {
-                cpi->ref_probs_update[i] = 1;
+                cpi->ref_pred_probs_update[i] = 1;
                 cm->ref_pred_probs[i] = new_pred_probs[i];
             }
             else
-                cpi->ref_probs_update[i] = 0;
+                cpi->ref_pred_probs_update[i] = 0;
 
         }
     }
@@ -4156,6 +4159,7 @@ static void encode_frame_to_data_rate
 #endif
 
 #if !CONFIG_COMPRED
+//#if 1
     update_rd_ref_frame_probs(cpi);
 #endif
 

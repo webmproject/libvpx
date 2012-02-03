@@ -292,7 +292,6 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
         // else decode the explicitly coded value
         else
         {
-            //vp8_prob * mod_refprobs = cm->mod_refprobs[pred_ref];
             vp8_prob mod_refprobs[PREDICTION_PROBS];
             vpx_memcpy( mod_refprobs,
                         cm->mod_refprobs[pred_ref], sizeof(mod_refprobs) );

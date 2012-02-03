@@ -236,6 +236,7 @@ typedef struct VP8Common
 
 #if CONFIG_COMPRED
     // Context probabilities for reference frame prediction
+    unsigned char ref_scores[MAX_REF_FRAMES];
     vp8_prob ref_pred_probs[PREDICTION_PROBS];
     vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
 #endif
