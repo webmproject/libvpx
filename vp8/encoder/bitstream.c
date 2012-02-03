@@ -2248,24 +2248,27 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
     const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-    int new_intra, new_last, gf_last, oldtotal, newtotal;
+    int new_intra, new_last, new_gf_alt, oldtotal, newtotal;
     int ref_frame_cost[MAX_REF_FRAMES];
 
     vp8_clear_system_state(); //__asm emms;
 
+    // Estimate reference frame cost savings.
+    // For now this is just based on projected overall frequency of
+    // each reference frame coded using an unpredicted coding tree.
     if (cpi->common.frame_type != KEY_FRAME)
     {
-//#if CONFIG_SEGFEATURES
         new_intra = (rf_intra + rf_inter)
                     ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
-
-        if (!new_intra)
-            new_intra = 1;
+        new_intra += !new_intra;
 
         new_last = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
+        new_last += !new_last;
 
-        gf_last = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                  ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
+        new_gf_alt = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
+            ? (rfct[GOLDEN_FRAME] * 255) /
+              (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
+        new_gf_alt += !new_gf_alt;
 
         // new costs
         ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(new_intra);
@@ -2273,17 +2276,16 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
                                         + vp8_cost_zero(new_last);
         ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(new_intra)
                                         + vp8_cost_one(new_last)
-                                        + vp8_cost_zero(gf_last);
+                                        + vp8_cost_zero(new_gf_alt);
         ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(new_intra)
                                         + vp8_cost_one(new_last)
-                                        + vp8_cost_one(gf_last);
+                                        + vp8_cost_one(new_gf_alt);
 
         newtotal =
             rfct[INTRA_FRAME] * ref_frame_cost[INTRA_FRAME] +
             rfct[LAST_FRAME] * ref_frame_cost[LAST_FRAME] +
             rfct[GOLDEN_FRAME] * ref_frame_cost[GOLDEN_FRAME] +
             rfct[ALTREF_FRAME] * ref_frame_cost[ALTREF_FRAME];
-
 
         // old costs
         ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cm->prob_intra_coded);
@@ -2303,8 +2305,15 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
             rfct[ALTREF_FRAME] * ref_frame_cost[ALTREF_FRAME];
 
         savings += (oldtotal - newtotal) / 256;
-    }
 
+        // Update the reference frame probability numbers to reflect
+        // the observed counts in this frame. Doing this here insures
+        // that if there are multiple recode iterations the baseline
+        // probabilities used are updated in each iteration.
+        cm->prob_intra_coded = new_intra;
+        cm->prob_last_coded = new_last;
+        cm->prob_gf_coded = new_gf_alt;
+    }
 
     if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
         savings += independent_coef_context_savings(cpi);

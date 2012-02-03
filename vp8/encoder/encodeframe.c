@@ -1435,48 +1435,6 @@ static void encode_frame_internal(VP8_COMP *cpi)
     }
 #endif
 
-    // Adjust the projected reference frame usage probability numbers to reflect
-    // what we have just seen. This may be usefull when we make multiple itterations
-    // of the recode loop rather than continuing to use values from the previous frame.
-    if ((cm->frame_type != KEY_FRAME) && !cm->refresh_alt_ref_frame && !cm->refresh_golden_frame)
-    {
-        const int *const rfct = cpi->count_mb_ref_frame_usage;
-        const int rf_intra = rfct[INTRA_FRAME];
-        const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-
-        if ((rf_intra + rf_inter) > 0)
-        {
-            cm->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
-
-            if (cm->prob_intra_coded < 1)
-                cm->prob_intra_coded = 1;
-
-            if ((cm->frames_since_golden > 0) || cpi->source_alt_ref_active)
-            {
-                cm->prob_last_coded =
-                    rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-                if (cm->prob_last_coded < 1)
-                    cm->prob_last_coded = 1;
-
-                cm->prob_gf_coded  =
-                    (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                    ? (rfct[GOLDEN_FRAME] * 255) /
-                         (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-                if (cm->prob_gf_coded < 1)
-                    cm->prob_gf_coded = 1;
-            }
-        }
-//#if CONFIG_SEGFEATURES
-        else
-        {
-            // Trap case where cpi->count_mb_ref_frame_usage[] blank.
-            cm->prob_intra_coded = 63;
-            cm->prob_last_coded  = 128;
-            cm->prob_gf_coded    = 128;
-        }
-    }
 #if 0
     // Keep record of the total distortion this time around for future use
     cpi->last_frame_distortion = cpi->frame_distortion;
