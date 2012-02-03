@@ -391,6 +391,7 @@ LDFLAGS = ${LDFLAGS}
 ASFLAGS = ${ASFLAGS}
 extralibs = ${extralibs}
 AS_SFX    = ${AS_SFX:-.asm}
+EXE_SFX   = ${EXE_SFX}
 RTCD_OPTIONS = ${RTCD_OPTIONS}
 EOF
 
@@ -540,6 +541,7 @@ setup_gnu_toolchain() {
     STRIP=${STRIP:-${CROSS}strip}
     NM=${NM:-${CROSS}nm}
         AS_SFX=.s
+        EXE_SFX=
 }
 
 process_common_toolchain() {
@@ -592,6 +594,9 @@ process_common_toolchain() {
                 ;;
             *solaris2.10)
                 tgt_os=solaris
+                ;;
+            *os2*)
+                tgt_os=os2
                 ;;
         esac
 
@@ -919,6 +924,9 @@ process_common_toolchain() {
                 LD=${LD:-${CROSS}gcc}
                 CROSS=${CROSS:-g}
                 ;;
+            os2)
+                AS=${AS:-nasm}
+                ;;
         esac
 
         AS="${alt_as:-${AS:-auto}}"
@@ -988,6 +996,11 @@ process_common_toolchain() {
                 # code that still relies on inline assembly.
                 # enabled icc && ! enabled pic && add_cflags -fno-pic -mdynamic-no-pic
                 enabled icc && ! enabled pic && add_cflags -fno-pic
+            ;;
+            os2)
+                add_asflags -f aout
+                enabled debug && add_asflags -g
+                EXE_SFX=.exe
             ;;
             *) log "Warning: Unknown os $tgt_os while setting up $AS flags"
             ;;
