@@ -76,9 +76,7 @@ void vp8_find_near_mvs
 (
     MACROBLOCKD *xd,
     const MODE_INFO *here,
-#if CONFIG_NEWNEAR
     const MODE_INFO *lfhere,
-#endif
     int_mv *nearest, int_mv *nearby, int_mv *best,
     int near_mv_ref_cts[4],
     int refframe,

@@ -253,9 +253,7 @@ typedef struct MacroBlockD
 #endif /* CONFIG_DUALPRED */
     YV12_BUFFER_CONFIG dst;
 
-#if CONFIG_NEWNEAR
     MODE_INFO *prev_mode_info_context;
-#endif
     MODE_INFO *mode_info_context;
     int mode_info_stride;
 

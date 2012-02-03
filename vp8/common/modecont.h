@@ -13,7 +13,5 @@
 #define __INC_MODECONT_H
 
 extern const int default_vp8_mode_contexts[6][4];
-#if CONFIG_NEWNEAR
 extern const int default_vp8_mode_contexts_a[6][4];
-#endif
 #endif

@@ -1050,9 +1050,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int pred_context;
 
     MODE_INFO *m = pc->mi;
-#if CONFIG_NEWNEAR
     MODE_INFO *prev_m = pc->prev_mi;
-#endif
 
     const int mis = pc->mode_info_stride;
     int mb_row, mb_col;
@@ -1186,9 +1184,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                 // Make sure the MacroBlockD mode info pointer is set correctly
                 xd->mode_info_context = m;
-#if CONFIG_NEWNEAR
                 xd->prev_mode_info_context = prev_m;
-#endif
 
 #ifdef ENTROPY_STATS
                 active_section = 9;
@@ -1280,9 +1276,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         int ct[4];
 
                         vp8_find_near_mvs(xd, m,
-#if CONFIG_NEWNEAR
                                           prev_m,
-#endif
                                           &n1, &n2, &best_mv, ct, rf,
                                           cpi->common.ref_frame_sign_bias);
                         vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
@@ -1301,9 +1295,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                     {
                         write_mv_ref(w, mode, mv_ref_p);
-#if CONFIG_NEWNEAR
                         vp8_accum_mv_refs(&cpi->common, mode, ct);
-#endif
                     }
 
 
@@ -1338,9 +1330,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                                 int_mv n1, n2;
                                 int ct[4];
                                 vp8_find_near_mvs(xd, m,
-#if CONFIG_NEWNEAR
                                                   prev_m,
-#endif
                                                   &n1, &n2, &best_mv,
                                                   ct, second_rf,
                                                   cpi->common.ref_frame_sign_bias);
@@ -1416,11 +1406,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     }
                 }
 
-#if CONFIG_NEWNEAR
                 prev_m += offset_extended;
                 assert((prev_m-cpi->common.prev_mip)==(m-cpi->common.mip));
                 assert((prev_m-cpi->common.prev_mi)==(m-cpi->common.mi));
-#endif
 
                 // skip to next MB
                 mb_row += dy;
@@ -1461,9 +1449,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
 
     MODE_INFO *m = pc->mi;
-#if CONFIG_NEWNEAR
     MODE_INFO *prev_m = pc->prev_mi;
-#endif
 
     const int mis = pc->mode_info_stride;
     int mb_row = -1;
@@ -1575,9 +1561,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             // Make sure the MacroBlockD mode info pointer is set correctly
             xd->mode_info_context = m;
 
-#if CONFIG_NEWNEAR
             xd->prev_mode_info_context = prev_m;
-#endif
 
 #ifdef ENTROPY_STATS
             active_section = 9;
@@ -1670,9 +1654,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     int_mv n1, n2;
 
                     vp8_find_near_mvs(xd, m,
-#if CONFIG_NEWNEAR
                         prev_m,
-#endif
                         &n1, &n2, &best_mv, ct, rf, cpi->common.ref_frame_sign_bias);
                     vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
 
@@ -1691,9 +1673,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                 {
                     write_mv_ref(w, mode, mv_ref_p);
-#if CONFIG_NEWNEAR
                     vp8_accum_mv_refs(&cpi->common, mode, ct);
-#endif
                 }
 
                 {
@@ -1725,9 +1705,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                             int_mv n1, n2;
                             int ct[4];
                             vp8_find_near_mvs(xd, m,
-#if CONFIG_NEWNEAR
                                               prev_m,
-#endif
                                               &n1, &n2, &best_mv,
                                               ct, second_rf,
                                               cpi->common.ref_frame_sign_bias);
@@ -1802,19 +1780,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             }
 
             ++m;
-#if CONFIG_NEWNEAR
             ++prev_m;
             assert((prev_m-cpi->common.prev_mip)==(m-cpi->common.mip));
             assert((prev_m-cpi->common.prev_mi)==(m-cpi->common.mi));
-#endif
-
             cpi->mb.partition_info++;
         }
 
         ++m;  /* skip L prediction border */
-#if CONFIG_NEWNEAR
         ++prev_m;
-#endif
         cpi->mb.partition_info++;
     }
 
@@ -3020,9 +2993,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     {
         pack_inter_mode_mvs(cpi);
 
-#if CONFIG_NEWNEAR
         vp8_update_mode_context(&cpi->common);
-#endif
 
 #ifdef ENTROPY_STATS
         active_section = 1;

@@ -624,12 +624,10 @@ void encode_sb_row (VP8_COMP *cpi,
                 x->partition_info     += offset_extended;
                 xd->mode_info_context += offset_extended;
 
-#if CONFIG_NEWNEAR
                 xd->prev_mode_info_context += offset_extended;
 
                 assert((xd->prev_mode_info_context - cpi->common.prev_mip)
                     ==(xd->mode_info_context - cpi->common.mip));
-#endif
                 continue;
             }
 
@@ -787,12 +785,10 @@ void encode_sb_row (VP8_COMP *cpi,
             x->partition_info     += offset_extended;
             xd->mode_info_context += offset_extended;
 
-#if CONFIG_NEWNEAR
             xd->prev_mode_info_context += offset_extended;
 
             assert((xd->prev_mode_info_context - cpi->common.prev_mip)
                 ==(xd->mode_info_context - cpi->common.mip));
-#endif
         }
     }
 
@@ -806,9 +802,7 @@ void encode_sb_row (VP8_COMP *cpi,
         xd->dst.v_buffer + 8);*/
 
     // this is to account for the border
-#if CONFIG_NEWNEAR
     xd->prev_mode_info_context += 1 - (cm->mb_cols & 0x1) + xd->mode_info_stride;
-#endif
     xd->mode_info_context += 1 - (cm->mb_cols & 0x1) + xd->mode_info_stride;
     x->partition_info     += 1 - (cm->mb_cols & 0x1) + xd->mode_info_stride;
     x->gf_active_ptr      += cm->mb_cols - (cm->mb_cols & 0x1);
@@ -1033,11 +1027,9 @@ void encode_mb_row(VP8_COMP *cpi,
         // skip to next mb
         xd->mode_info_context++;
 
-#if CONFIG_NEWNEAR
         xd->prev_mode_info_context++;
         assert((xd->prev_mode_info_context - cpi->common.prev_mip)
             ==(xd->mode_info_context - cpi->common.mip));
-#endif
         x->partition_info++;
 
         xd->above_context++;
@@ -1057,9 +1049,7 @@ void encode_mb_row(VP8_COMP *cpi,
         xd->dst.v_buffer + 8);
 
     // this is to account for the border
-#if CONFIG_NEWNEAR
     xd->prev_mode_info_context++;
-#endif
     xd->mode_info_context++;
     x->partition_info++;
 
@@ -1104,10 +1094,7 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
 
     xd->mode_info_context = cm->mi;
     xd->mode_info_stride = cm->mode_info_stride;
-#if CONFIG_NEWNEAR
     xd->prev_mode_info_context = cm->prev_mi;
-#endif
-
 
     xd->frame_type = cm->frame_type;
 
@@ -1274,10 +1261,7 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
     xd->mode_info_context = cm->mi;
 
-#if CONFIG_NEWNEAR
     xd->prev_mode_info_context = cm->prev_mi;
-#endif
-
 
     vp8_zero(cpi->MVcount);
     vp8_zero(cpi->coef_counts);
@@ -1338,10 +1322,8 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
                 xd->mode_info_context += xd->mode_info_stride
                                         * cpi->encoding_thread_count;
-#if CONFIG_NEWNEAR
                 xd->prev_mode_info_context += xd->mode_info_stride
                                             * cpi->encoding_thread_count;
-#endif
 
                 x->partition_info  += xd->mode_info_stride * cpi->encoding_thread_count;
                 x->gf_active_ptr   += cm->mb_cols * cpi->encoding_thread_count;

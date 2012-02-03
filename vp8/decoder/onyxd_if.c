@@ -624,7 +624,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
     }
 #endif
 
-#if CONFIG_NEWNEAR
     if(cm->show_frame)
     {
         vpx_memcpy(cm->prev_mip, cm->mip,
@@ -635,7 +634,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         vpx_memset(cm->prev_mip, 0,
             (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
     }
-#endif
 
     /*vp8_print_modes_and_motion_vectors( cm->mi, cm->mb_rows,cm->mb_cols, cm->current_video_frame);*/
 

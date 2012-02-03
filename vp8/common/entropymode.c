@@ -359,7 +359,6 @@ void vp8_entropy_mode_init()
     vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
 }
 
-#if CONFIG_NEWNEAR
 void vp8_init_mode_contexts(VP8_COMMON *pc)
 {
     vpx_memset(pc->mv_ref_ct, 0, sizeof(pc->mv_ref_ct));
@@ -490,7 +489,4 @@ void print_mv_ref_cts(VP8_COMMON *pc)
         printf("\n");
     }
 }
-
-
-#endif
 

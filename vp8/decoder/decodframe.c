@@ -947,17 +947,10 @@ static void init_frame(VP8D_COMP *pbi)
         vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
         vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
 
-#if CONFIG_NEWNEAR
         vp8_init_mode_contexts(&pbi->common);
         vpx_memcpy( pbi->common.vp8_mode_contexts,
                     pbi->common.mode_context,
                     sizeof(pbi->common.mode_context));
-
-#else
-        vpx_memcpy( pbi->common.vp8_mode_contexts,
-                    default_vp8_mode_contexts,
-                    sizeof(default_vp8_mode_contexts));
-#endif /* CONFIG_NEWNEAR */
     }
     else
     {
@@ -1366,20 +1359,16 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         if(pc->refresh_alt_ref_frame)
         {
             vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
-#if CONFIG_NEWNEAR
             vpx_memcpy( pc->vp8_mode_contexts,
                         pc->mode_context_a,
                         sizeof(pc->vp8_mode_contexts));
-#endif
         }
         else
         {
             vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
-#if CONFIG_NEWNEAR
             vpx_memcpy( pc->vp8_mode_contexts,
                         pc->mode_context,
                         sizeof(pc->vp8_mode_contexts));
-#endif
         }
 
         /* Buffer to buffer copy flags. */
@@ -1493,13 +1482,10 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
     vp8_decode_mode_mvs(pbi);
-#if CONFIG_NEWNEAR
     if(pbi->common.frame_type != KEY_FRAME)
     {
         vp8_update_mode_context(&pbi->common);
     }
-#endif
-
 
 #if CONFIG_ERROR_CONCEALMENT
     if (pbi->ec_active &&
