@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *  Copyright (c) 2012 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -393,16 +393,15 @@ int main(int argc, char **argv) {
         layer_flags[13] =
         layer_flags[15] = VP8_EFLAG_NO_UPD_LAST |
                           VP8_EFLAG_NO_UPD_GF   |
-                          VP8_EFLAG_NO_UPD_ARF  |
-                          VP8_EFLAG_NO_UPD_ENTROPY;
+                          VP8_EFLAG_NO_UPD_ARF;
         layer_flags[2]  =
         layer_flags[6]  =
         layer_flags[10] =
-        layer_flags[14] = 0;
+        layer_flags[14] = VP8_EFLAG_NO_UPD_ARF | VP8_EFLAG_NO_UPD_GF;
         layer_flags[4]  =
-        layer_flags[12] = VP8_EFLAG_NO_REF_LAST;
-        layer_flags[8]  = VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF |
-                          VP8_EFLAG_NO_UPD_ENTROPY;
+        layer_flags[12] = VP8_EFLAG_NO_REF_LAST |
+                          VP8_EFLAG_NO_UPD_ARF;
+        layer_flags[8]  = VP8_EFLAG_NO_REF_LAST | VP8_EFLAG_NO_REF_GF;
         break;
     }
 
@@ -520,7 +519,8 @@ int main(int argc, char **argv) {
             die_codec(&codec, "Failed to encode frame");
 
         // Reset KF flag
-        layer_flags[0] &= ~VPX_EFLAG_FORCE_KF;
+        if (layering_mode != 6)
+            layer_flags[0] &= ~VPX_EFLAG_FORCE_KF;
 
         got_data = 0;
         while ( (pkt = vpx_codec_get_cx_data(&codec, &iter)) ) {
