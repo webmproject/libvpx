@@ -1399,13 +1399,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         pbi->independent_partitions = 1;
 
+        if(vp8_read_bit(bc))
+        {
         /* read coef probability tree */
         for (i = 0; i < BLOCK_TYPES; i++)
             for (j = 0; j < COEF_BANDS; j++)
                 for (k = 0; k < PREV_COEF_CONTEXTS; k++)
                     for (l = 0; l < ENTROPY_NODES; l++)
                     {
-
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
 
                         if (vp8_read(bc, vp8_coef_update_probs [i][j][k][l]))
@@ -1415,14 +1416,13 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                         }
                         if (k > 0 && *p != pc->fc.coef_probs[i][j][k-1][l])
                             pbi->independent_partitions = 0;
-
                     }
+        }
     }
 #if CONFIG_T8X8
-    if(pbi->common.txfm_mode == ALLOW_8X8)
+    if(pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc))
     {
         // read coef probability tree
-
         for (i = 0; i < BLOCK_TYPES; i++)
             for (j = 0; j < COEF_BANDS; j++)
                 for (k = 0; k < PREV_COEF_CONTEXTS; k++)
