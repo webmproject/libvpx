@@ -358,7 +358,6 @@ typedef struct VP8_COMP
     unsigned int mode_test_hit_counts[MAX_MODES];
     unsigned int mode_chosen_counts[MAX_MODES];
     unsigned int mbs_tested_so_far;
-    unsigned int mbs_dual_count;
 
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];

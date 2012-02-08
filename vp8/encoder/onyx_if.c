@@ -847,7 +847,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     }
 
     cpi->mbs_tested_so_far = 0;
-    cpi->mbs_dual_count = 0;
 
     // best quality defaults
     sf->RD = 1;

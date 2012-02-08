@@ -1994,7 +1994,6 @@ int vp8cx_encode_inter_macroblock
         if (xd->mode_info_context->mbmi.second_ref_frame) {
             int second_ref_fb_idx;
 
-            cpi->mbs_dual_count++;
             if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
                 second_ref_fb_idx = cpi->common.lst_fb_idx;
             else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
