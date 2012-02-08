@@ -1537,21 +1537,21 @@ void vp8_encode_frame(VP8_COMP *cpi)
         if (redo)
         {
             encode_frame_internal(cpi);
-        }
 
-        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
-        {
-            if (cpi->dual_pred_count[0] == 0 &&
-                cpi->dual_pred_count[1] == 0 &&
-                cpi->dual_pred_count[2] == 0)
+            if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
             {
-                cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
-            }
-            else if (cpi->single_pred_count[0] == 0 &&
-                     cpi->single_pred_count[1] == 0 &&
-                     cpi->single_pred_count[2] == 0)
-            {
-                cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
+                if (cpi->dual_pred_count[0] == 0 &&
+                    cpi->dual_pred_count[1] == 0 &&
+                    cpi->dual_pred_count[2] == 0)
+                {
+                    cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
+                }
+                else if (cpi->single_pred_count[0] == 0 &&
+                         cpi->single_pred_count[1] == 0 &&
+                         cpi->single_pred_count[2] == 0)
+                {
+                    cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
+                }
             }
         }
     }
