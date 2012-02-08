@@ -1811,13 +1811,21 @@ int vp8cx_encode_inter_macroblock
         if (x->e_mbd.mode_info_context->mbmi.ref_frame &&
             x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
         {
-            MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
+            unsigned char pred_context;
+
+#if CONFIG_COMPRED
+            pred_context = get_pred_context( cm, xd, PRED_DUAL );
+#else
+            MB_MODE_INFO *t = &x->e_mbd.mode_info_context
+                              [-cpi->common.mode_info_stride].mbmi;
             MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
-            int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
-            if (x->e_mbd.mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
-                cpi->single_pred_count[cnt]++;
+            pred_context = (t->second_ref_frame != INTRA_FRAME) +
+                           (l->second_ref_frame != INTRA_FRAME);
+#endif
+            if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
+                cpi->single_pred_count[pred_context]++;
             else
-                cpi->dual_pred_count[cnt]++;
+                cpi->dual_pred_count[pred_context]++;
         }
 #endif /* CONFIG_DUALPRED */
 

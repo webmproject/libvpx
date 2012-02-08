@@ -1057,8 +1057,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int row, col;
 
     int prob_skip_false = 0;
+
 #if CONFIG_DUALPRED
+#if !CONFIG_COMPRED
     int prob_dual_pred[3];
+#endif
 #endif /* CONFIG_DUALPRED */
 
     // Values used in prediction model coding
@@ -1111,8 +1114,20 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         {
             if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
             {
+#if CONFIG_COMPRED
+                pc->prob_dualpred[i] = cpi->single_pred_count[i] * 255 /
+                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
+                if (pc->prob_dualpred[i] < 1)
+                    pc->prob_dualpred[i] = 1;
+            }
+            else
+            {
+                pc->prob_dualpred[i] = 128;
+            }
+            vp8_write_literal(w, pc->prob_dualpred[i], 8);
+#else
                 prob_dual_pred[i] = cpi->single_pred_count[i] * 256 /
-                            (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
+                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
                 if (prob_dual_pred[i] < 1)
                     prob_dual_pred[i] = 1;
                 else if (prob_dual_pred[i] > 255)
@@ -1123,9 +1138,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 prob_dual_pred[i] = 128;
             }
             vp8_write_literal(w, prob_dual_pred[i], 8);
-
-#if CONFIG_COMPRED
-            pc->prob_dualpred[i] = prob_dual_pred[i];
 #endif
         }
     }
@@ -1457,7 +1469,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int prob_skip_false = 0;
 
 #if CONFIG_DUALPRED
+#if !CONFIG_COMPRED
     int prob_dual_pred[3];
+#endif
 #endif /* CONFIG_DUALPRED */
 
     // Values used in prediction model coding
@@ -1507,8 +1521,20 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         {
             if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
             {
+#if CONFIG_COMPRED
+                pc->prob_dualpred[i] = cpi->single_pred_count[i] * 255 /
+                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
+                if (pc->prob_dualpred[i] < 1)
+                    pc->prob_dualpred[i] = 1;
+            }
+            else
+            {
+                pc->prob_dualpred[i] = 128;
+            }
+            vp8_write_literal(w, pc->prob_dualpred[i], 8);
+#else
                 prob_dual_pred[i] = cpi->single_pred_count[i] * 256 /
-                            (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
+                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
                 if (prob_dual_pred[i] < 1)
                     prob_dual_pred[i] = 1;
                 else if (prob_dual_pred[i] > 255)
@@ -1519,9 +1545,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 prob_dual_pred[i] = 128;
             }
             vp8_write_literal(w, prob_dual_pred[i], 8);
-
-#if CONFIG_COMPRED
-            pc->prob_dualpred[i] = prob_dual_pred[i];
 #endif
         }
     }

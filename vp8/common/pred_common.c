@@ -39,10 +39,27 @@ unsigned char get_pred_context( VP8_COMMON *const cm,
         break;
 
     case PRED_DUAL:
-        // Second ref not INTRA indicates use of dual pred in neighbour
-        pred_context =
-            ((m - 1)->mbmi.second_ref_frame != INTRA_FRAME) +
-            ((m - cm->mode_info_stride)->mbmi.second_ref_frame != INTRA_FRAME);
+        // Context based on use of dual pred flag by neighbours
+        //pred_context =
+        //    ((m - 1)->mbmi.second_ref_frame != INTRA_FRAME) +
+        //    ((m - cm->mode_info_stride)->mbmi.second_ref_frame != INTRA_FRAME);
+
+        // Context based on mode
+        //if ( m->mbmi.mode == ZEROMV )
+        //    pred_context = 0;
+        //else if ( (m->mbmi.mode == NEARESTMV) || (m->mbmi.mode == NEARMV) )
+        //    pred_context = 1;
+        //else
+        //    pred_context = 2;
+
+        // Context based on reference frame
+        if ( m->mbmi.ref_frame == LAST_FRAME )
+            pred_context = 0;
+        else if ( m->mbmi.ref_frame == GOLDEN_FRAME )
+            pred_context = 1;
+        else
+            pred_context = 2;
+
         break;
 #endif
 
@@ -79,7 +96,9 @@ vp8_prob get_pred_prob( VP8_COMMON *const cm,
         break;
 
     case PRED_DUAL:
-        // Second ref non zero indicates use of dual pred in neighbour
+        // In keeping with convention elsewhre the probability returned is
+        // the probability of a "0" outcome which in this case means the
+        // probability of dual pred off.
         pred_probability = cm->prob_dualpred[pred_context];
         break;
 #endif
