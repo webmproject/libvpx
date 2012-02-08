@@ -1511,18 +1511,21 @@ void vp8_encode_frame(VP8_COMP *cpi)
             cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_hybrid_diff ?
                         SINGLE_PREDICTION_ONLY : HYBRID_PREDICTION;
         }
-        else if (cpi->common.dual_pred_mode == HYBRID_PREDICTION &&
-                 (cpi->rd_single_diff >= 100 || cpi->rd_dual_diff >= 100))
+        else if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
         {
-            if (cpi->dual_pred_count == 0)
+            if (cpi->dual_pred_count[0] == 0 &&
+                cpi->dual_pred_count[1] == 0 &&
+                cpi->dual_pred_count[2] == 0)
             {
                 cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
             }
-            else if (cpi->single_pred_count == 0)
+            else if (cpi->single_pred_count[0] == 0 &&
+                     cpi->single_pred_count[1] == 0 &&
+                     cpi->single_pred_count[2] == 0)
             {
                 cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
             }
-            else
+            else if (cpi->rd_single_diff >= 100 || cpi->rd_dual_diff >= 100)
             {
                 redo = 1;
                 cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_dual_diff ?
@@ -1538,11 +1541,15 @@ void vp8_encode_frame(VP8_COMP *cpi)
 
         if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
         {
-            if (cpi->dual_pred_count == 0)
+            if (cpi->dual_pred_count[0] == 0 &&
+                cpi->dual_pred_count[1] == 0 &&
+                cpi->dual_pred_count[2] == 0)
             {
                 cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
             }
-            else if (cpi->single_pred_count == 0)
+            else if (cpi->single_pred_count[0] == 0 &&
+                     cpi->single_pred_count[1] == 0 &&
+                     cpi->single_pred_count[2] == 0)
             {
                 cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
             }
