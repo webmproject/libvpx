@@ -168,12 +168,12 @@ $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_OBJS,BUILD_OBJS):=yes)
 # Create build/install dependencies for all examples. The common case
 # is handled here. The MSVS case is handled below.
 NOT_MSVS = $(if $(CONFIG_MSVS),,yes)
-DIST-BINS-$(NOT_MSVS)      += $(addprefix bin/,$(ALL_EXAMPLES:.c=))
-INSTALL-BINS-$(NOT_MSVS)   += $(addprefix bin/,$(UTILS:.c=))
+DIST-BINS-$(NOT_MSVS)      += $(addprefix bin/,$(ALL_EXAMPLES:.c=$(EXE_SFX)))
+INSTALL-BINS-$(NOT_MSVS)   += $(addprefix bin/,$(UTILS:.c=$(EXE_SFX)))
 DIST-SRCS-yes              += $(ALL_SRCS)
 INSTALL-SRCS-yes           += $(UTIL_SRCS)
 OBJS-$(NOT_MSVS)           += $(if $(BUILD_OBJS),$(call objs,$(ALL_SRCS)))
-BINS-$(NOT_MSVS)           += $(addprefix $(BUILD_PFX),$(ALL_EXAMPLES:.c=))
+BINS-$(NOT_MSVS)           += $(addprefix $(BUILD_PFX),$(ALL_EXAMPLES:.c=$(EXE_SFX)))
 
 
 # Instantiate linker template for all examples.
@@ -183,7 +183,7 @@ $(foreach bin,$(BINS-yes),\
     $(if $(BUILD_OBJS),$(eval $(bin):\
         $(LIB_PATH)/lib$(CODEC_LIB)$(CODEC_LIB_SUF)))\
     $(if $(BUILD_OBJS),$(eval $(call linker_template,$(bin),\
-        $(call objs,$($(notdir $(bin)).SRCS)) \
+        $(call objs,$($(notdir $(bin:$(EXE_SFX)=)).SRCS)) \
         -l$(CODEC_LIB) $(addprefix -l,$(CODEC_EXTRA_LIBS))\
         )))\
     $(if $(LIPO_OBJS),$(eval $(call lipo_bin_template,$(bin))))\

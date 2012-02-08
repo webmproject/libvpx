@@ -19,11 +19,15 @@
 #include "vp8/common/onyxc_int.h"
 
 #if CONFIG_MULTITHREAD
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H && !defined(__OS2__)
 #include <unistd.h>
 #elif defined(_WIN32)
 #include <windows.h>
 typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
+#elif defined(__OS2__)
+#define INCL_DOS
+#define INCL_DOSSPINLOCK
+#include <os2.h>
 #endif
 #endif
 
@@ -32,7 +36,7 @@ static int get_cpu_count()
 {
     int core_count = 16;
 
-#if HAVE_UNISTD_H
+#if HAVE_UNISTD_H && !defined(__OS2__)
 #if defined(_SC_NPROCESSORS_ONLN)
     core_count = sysconf(_SC_NPROCESSORS_ONLN);
 #elif defined(_SC_NPROC_ONLN)
@@ -54,6 +58,21 @@ static int get_cpu_count()
             GetSystemInfo(&sysinfo);
 
         core_count = sysinfo.dwNumberOfProcessors;
+    }
+#elif defined(__OS2__)
+    {
+        ULONG proc_id;
+        ULONG status;
+
+        core_count = 0;
+        for (proc_id = 1; ; proc_id++)
+        {
+            if (DosGetProcessorStatus(proc_id, &status))
+                break;
+
+            if (status == PROC_ONLINE)
+                core_count++;
+        }
     }
 #else
     /* other platforms */
