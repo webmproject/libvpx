@@ -112,8 +112,8 @@ vp8_filt_fpo16x16s_4_0_loop_neon
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [lr]               ;store sse
-    vshr.s32        d10, d10, #8
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #8
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     pop             {pc}
@@ -208,8 +208,8 @@ vp8_filt_spo16x16s_0_4_loop_neon
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [lr]               ;store sse
-    vshr.s32        d10, d10, #8
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #8
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     pop             {pc}
@@ -327,8 +327,8 @@ vp8_filt16x16s_4_4_loop_neon
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [lr]               ;store sse
-    vshr.s32        d10, d10, #8
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #8
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     pop             {pc}
@@ -560,8 +560,8 @@ sub_pixel_variance16x16s_neon_loop
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [lr]               ;store sse
-    vshr.s32        d10, d10, #8
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #8
+    vsub.u32        d0, d1, d10
 
     add             sp, sp, #256
     vmov.32         r0, d0[0]                   ;return

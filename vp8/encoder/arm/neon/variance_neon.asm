@@ -77,14 +77,14 @@ variance16x16_neon_loop
     ;vmov.32        r1, d1[0]
     ;mul            r0, r0, r0
     ;str            r1, [r12]
-    ;sub            r0, r1, r0, asr #8
+    ;sub            r0, r1, r0, lsr #8
 
-    ;sum is in [-255x256, 255x256]. sumxsum is 32-bit. Shift to right should
-    ;have sign-bit exension, which is vshr.s. Have to use s32 to make it right.
+    ; while sum is signed, sum * sum is always positive and must be treated as
+    ; unsigned to avoid propagating the sign bit.
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [r12]              ;store sse
-    vshr.s32        d10, d10, #8
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #8
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     bx              lr
@@ -145,8 +145,8 @@ variance16x8_neon_loop
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [r12]              ;store sse
-    vshr.s32        d10, d10, #7
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #7
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     bx              lr
@@ -200,8 +200,8 @@ variance8x16_neon_loop
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [r12]              ;store sse
-    vshr.s32        d10, d10, #7
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #7
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     bx              lr
@@ -265,8 +265,8 @@ variance8x8_neon_loop
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [r12]              ;store sse
-    vshr.s32        d10, d10, #6
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #6
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     bx              lr

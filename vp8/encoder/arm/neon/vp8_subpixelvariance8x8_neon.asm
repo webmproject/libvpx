@@ -206,8 +206,8 @@ sub_pixel_variance8x8_neon_loop
 
     vmull.s32       q5, d0, d0
     vst1.32         {d1[0]}, [lr]               ;store sse
-    vshr.s32        d10, d10, #6
-    vsub.s32        d0, d1, d10
+    vshr.u32        d10, d10, #6
+    vsub.u32        d0, d1, d10
 
     vmov.32         r0, d0[0]                   ;return
     pop             {r4-r5, pc}

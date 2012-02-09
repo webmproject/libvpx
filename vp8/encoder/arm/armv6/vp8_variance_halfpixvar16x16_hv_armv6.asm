@@ -210,7 +210,7 @@ loop
     ldr     r6, [sp, #40]       ; get address of sse
     mul     r0, r8, r8          ; sum * sum
     str     r11, [r6]           ; store sse
-    sub     r0, r11, r0, asr #8 ; return (sse - ((sum * sum) >> 8))
+    sub     r0, r11, r0, lsr #8 ; return (sse - ((sum * sum) >> 8))
 
     ldmfd   sp!, {r4-r12, pc}
 

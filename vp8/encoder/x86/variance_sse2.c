@@ -148,7 +148,7 @@ unsigned int vp8_variance4x4_wmt(
 
     vp8_get4x4var_mmx(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg) ;
     *sse = var;
-    return (var - ((avg * avg) >> 4));
+    return (var - ((unsigned int)(avg * avg) >> 4));
 
 }
 
@@ -165,7 +165,7 @@ unsigned int vp8_variance8x8_wmt
 
     vp8_get8x8var_sse2(src_ptr, source_stride, ref_ptr, recon_stride, &var, &avg) ;
     *sse = var;
-    return (var - ((avg * avg) >> 6));
+    return (var - ((unsigned int)(avg * avg) >> 6));
 
 }
 
@@ -220,7 +220,7 @@ unsigned int vp8_variance16x8_wmt
     var = sse0 + sse1;
     avg = sum0 + sum1;
     *sse = var;
-    return (var - ((avg * avg) >> 7));
+    return (var - ((unsigned int)(avg * avg) >> 7));
 
 }
 
@@ -241,7 +241,7 @@ unsigned int vp8_variance8x16_wmt
     var = sse0 + sse1;
     avg = sum0 + sum1;
     *sse = var;
-    return (var - ((avg * avg) >> 7));
+    return (var - ((unsigned int)(avg * avg) >> 7));
 
 }
 

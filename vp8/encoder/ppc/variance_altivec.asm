@@ -98,7 +98,7 @@
     stw     r4, 0(r7)           ;# sse
 
     mullw   r3, r3, r3          ;# sum*sum
-    srawi   r3, r3, \DS         ;# (sum*sum) >> DS
+    srlwi   r3, r3, \DS         ;# (sum*sum) >> DS
     subf    r3, r3, r4          ;# sse - ((sum*sum) >> DS)
 .endm
 
@@ -142,7 +142,7 @@
     stw     r4, 0(r7)           ;# sse
 
     mullw   r3, r3, r3          ;# sum*sum
-    srawi   r3, r3, \DS         ;# (sum*sum) >> 8
+    srlwi   r3, r3, \DS         ;# (sum*sum) >> 8
     subf    r3, r3, r4          ;# sse - ((sum*sum) >> 8)
 .endm
 
@@ -367,7 +367,7 @@ vp8_variance4x4_ppc:
     stw     r4, 0(r7)           ;# sse
 
     mullw   r3, r3, r3          ;# sum*sum
-    srawi   r3, r3, 4           ;# (sum*sum) >> 4
+    srlwi   r3, r3, 4           ;# (sum*sum) >> 4
     subf    r3, r3, r4          ;# sse - ((sum*sum) >> 4)
 
     epilogue
