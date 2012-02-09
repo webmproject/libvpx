@@ -34,7 +34,6 @@
 #include "vpx_ports/vpx_timer.h"
 #include "temporal_filter.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 #include "mbgraph.h"
 #include "vp8/common/pred_common.h"
@@ -298,7 +297,6 @@ static void setup_features(VP8_COMP *cpi)
     xd->update_mb_segmentation_data = 0;
     vpx_memset(xd->mb_segment_tree_probs, 255, sizeof(xd->mb_segment_tree_probs));
 
-//#if CONFIG_SEGFEATURES
     clearall_segfeatures( xd );
 
     xd->mode_ref_lf_delta_enabled = 0;
@@ -422,7 +420,6 @@ static void segmentation_test_function(VP8_PTR ptr)
     feature_data[SEG_LVL_ALT_LF][2] = 0;
     feature_data[SEG_LVL_ALT_LF][3] = 0;
 
-//#if CONFIG_SEGFEATURES
     // Enable features as required
     enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
 
@@ -466,7 +463,6 @@ static int compute_qdelta( VP8_COMP *cpi, double qstart, double qtarget )
     return target_index - start_index;
 }
 
-//#if CONFIG_SEGFEATURES
 static void init_seg_features(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
@@ -791,7 +787,6 @@ static void cyclic_background_refresh(VP8_COMP *cpi, int Q, int lf_adjustment)
     feature_data[SEG_LVL_ALT_LF][2] = 0;
     feature_data[SEG_LVL_ALT_LF][3] = 0;
 
-//#if CONFIG_SEGFEATURES
     // Enable the loop and quant changes in the feature mask
     enable_segfeature(xd, 1, SEG_LVL_ALT_Q);
     enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
@@ -2398,7 +2393,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     }
 #endif
 
-//#if CONFIG_SEGFEATURES
     for (i = 0; i < ( sizeof(cpi->mbgraph_stats) /
                       sizeof(cpi->mbgraph_stats[0]) ); i++)
     {
@@ -2893,7 +2887,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
     vpx_free(cpi->tok);
     vpx_free(cpi->cyclic_refresh_map);
 
-//#if CONFIG_SEGFEATURES
     for (i = 0; i < sizeof(cpi->mbgraph_stats) / sizeof(cpi->mbgraph_stats[0]); i++)
     {
         vpx_free(cpi->mbgraph_stats[i].mb_stats);
@@ -5106,7 +5099,6 @@ static void encode_frame_to_data_rate
 
 #endif
 
-//#if CONFIG_SEGFEATURES
 #if 0
     // Debug stats for segment feature experiments.
     print_seg_map(cpi);
@@ -5853,7 +5845,6 @@ int vp8_set_roimap(VP8_PTR comp, unsigned char *map, unsigned int rows, unsigned
     cpi->segment_encode_breakout[2] = threshold[2];
     cpi->segment_encode_breakout[3] = threshold[3];
 
-//#if CONFIG_SEGFEATURES
     // Enable the loop and quant changes in the feature mask
     for ( i = 0; i < 4; i++ )
     {

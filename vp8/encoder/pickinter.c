@@ -27,7 +27,6 @@
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -544,7 +543,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         this_mode = vp8_mode_order[mode_index];
 
-//#if CONFIG_SEGFEATURES
         // If the segment reference frame feature is enabled....
         // then do nothing if the current ref frame is not allowed..
         if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) &&
@@ -569,7 +567,6 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             continue;
         }
 #endif
-//#if !CONFIG_SEGFEATURES
         // Disable this drop out case if either the mode or ref frame
         // segment level feature is enabled for this segment. This is to
         // prevent the possibility that the we end up unable to pick any mode.

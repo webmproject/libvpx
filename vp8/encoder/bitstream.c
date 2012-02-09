@@ -25,7 +25,6 @@
 
 #include "defaultcoefcounts.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
 
@@ -844,7 +843,6 @@ static void encode_ref_frame( vp8_writer *const w,
 {
     int seg_ref_active;
     int seg_ref_count = 0;
-//#if CONFIG_SEGFEATURES
     seg_ref_active = segfeature_active( xd,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
@@ -938,7 +936,6 @@ static void update_ref_probs( VP8_COMP *const cpi )
     const int rf_inter = rfct[LAST_FRAME] +
                          rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
 
-//#if CONFIG_SEGFEATURES
     cm->prob_intra_coded = (rf_intra + rf_inter)
                             ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
 
@@ -1130,7 +1127,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     }
                 }
 
-//#if CONFIG_SEGFEATURES
                 if ( pc->mb_no_coeff_skip &&
                      ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                        ( get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0 ) ) )
@@ -1148,7 +1144,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     active_section = 6;
 #endif
 
-//#if CONFIG_SEGFEATURES
                     if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                         write_ymode(w, mode, pc->fc.ymode_prob);
 
@@ -1207,7 +1202,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     active_section = 3;
 #endif
 
-//#if CONFIG_SEGFEATURES
                     // Is the segment coding of mode enabled
                     if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                     {
@@ -1471,7 +1465,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 }
             }
 
-//#if CONFIG_SEGFEATURES
             if ( pc->mb_no_coeff_skip &&
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                    ( get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0 ) ) )
@@ -1489,7 +1482,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 active_section = 6;
     #endif
 
-//#if CONFIG_SEGFEATURES
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                     write_ymode(w, mode, pc->fc.ymode_prob);
 
@@ -1548,7 +1540,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 active_section = 3;
 #endif
 
-//#if CONFIG_SEGFEATURES
                 // Is the segment coding of mode enabled
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                 {
@@ -1671,7 +1662,6 @@ static void write_kfmodes(VP8_COMP *cpi)
     int col_delta[4] = {+1, -1, +1, +1};
     const int mis = c->mode_info_stride;
 
-//#if CONFIG_SEGFEATURES
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     if (c->mb_no_coeff_skip)
@@ -1734,7 +1724,6 @@ static void write_kfmodes(VP8_COMP *cpi)
                     write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
                 }
 
-//#if CONFIG_SEGFEATURES
                 if ( c->mb_no_coeff_skip &&
                      ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                        (get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0) ) )
@@ -1798,7 +1787,6 @@ static void write_kfmodes(VP8_COMP *cpi)
     int mb_row = -1;
     int prob_skip_false = 0;
 
-//#if CONFIG_SEGFEATURES
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     if (c->mb_no_coeff_skip)
@@ -1843,7 +1831,6 @@ static void write_kfmodes(VP8_COMP *cpi)
                 write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
             }
 
-//#if CONFIG_SEGFEATURES
             if ( c->mb_no_coeff_skip &&
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                    (get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0) ) )
@@ -2596,7 +2583,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
             vp8_write_bit(bc, (xd->mb_segement_abs_delta) ? 1 : 0);
 
-//#if CONFIG_SEGFEATURES
             // For each segments id...
             for (i = 0; i < MAX_MB_SEGMENTS; i++)
             {
@@ -2605,13 +2591,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 {
                     Data = get_segdata( xd, i, j );
 
-//#if CONFIG_SEGFEATURES
                     // If the feature is enabled...
                     if ( segfeature_active( xd, i, j ) )
                     {
                         vp8_write_bit(bc, 1);
 
-//#if CONFIG_SEGFEATURES
                         // Is the segment data signed..
                         if ( is_segfeature_signed(j) )
                         {

@@ -16,7 +16,6 @@
 #include "vpx_ports/mem.h"
 #include "detokenize.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 
 #define BOOL_DATA UINT8
@@ -646,7 +645,6 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
     INT16 v;
     const vp8_prob *Prob;
 
-//#if CONFIG_SEGFEATURES
     int seg_eob = 16;
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -693,7 +691,6 @@ BLOCK_LOOP:
     Prob += v * ENTROPY_NODES;
 
 DO_WHILE:
-//#if CONFIG_SEGFEATURES
     if ( c == seg_eob )
         goto BLOCK_FINISHED;
 

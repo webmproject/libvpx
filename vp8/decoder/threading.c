@@ -72,7 +72,6 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         vpx_memcpy(mbd->segment_feature_data,
                    xd->segment_feature_data,
                    sizeof(xd->segment_feature_data));
-//#if CONFIG_SEGFEATURES
         vpx_memcpy(mbd->segment_feature_mask,
                    xd->segment_feature_mask,
                    sizeof(xd->segment_feature_mask));

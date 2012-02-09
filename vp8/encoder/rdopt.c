@@ -38,7 +38,6 @@
 #include "dct.h"
 #include "vp8/common/systemdependent.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
 
@@ -2248,7 +2247,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         x->e_mbd.mode_info_context->mbmi.second_ref_frame = vp8_second_ref_frame_order[mode_index];
 #endif /* CONFIG_DUALPRED */
 
-//#if CONFIG_SEGFEATURES
         // If the segment reference frame feature is enabled....
         // then do nothing if the current ref frame is not allowed..
         if ( segfeature_active( xd, segment_id, SEG_LVL_REF_FRAME ) &&
@@ -2276,7 +2274,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         }
 #endif
 
-//#if !CONFIG_SEGFEATURES
         // Disable this drop out case if either the mode or ref frame
         // segment level feature is enabled for this segment. This is to
         // prevent the possibility that the we end up unable to pick any mode.

@@ -17,7 +17,6 @@
 #include "tokenize.h"
 #include "vpx_mem/vpx_mem.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 
 /* Global event counters used for accumulating statistics across several
@@ -184,7 +183,6 @@ static void tokenize2nd_order_b
     ENTROPY_CONTEXT * l;
     int band, rc, v, token;
 
-//#if CONFIG_SEGFEATURES
     int seg_eob = 16;
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -220,7 +218,6 @@ static void tokenize2nd_order_b
         t++;
     }
 
-//#if CONFIG_SEGFEATURES
     if (c < seg_eob)
     {
         band = vp8_coef_bands[c];
@@ -320,7 +317,6 @@ static void tokenize1st_order_b
     int band, rc, v;
     int tmp1, tmp2;
 
-//#if CONFIG_SEGFEATURES
     int seg_eob = 16;
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -364,7 +360,6 @@ static void tokenize1st_order_b
             t++;
         }
 
-//#if CONFIG_SEGFEATURES
         if (c < seg_eob)
         {
             band = vp8_coef_bands[c];
@@ -413,7 +408,7 @@ static void tokenize1st_order_b
             pt = vp8_prev_token_class[token];
             t++;
         }
-//#if CONFIG_SEGFEATURES
+
         if (c < seg_eob)
         {
             band = vp8_coef_bands[c];
@@ -483,7 +478,6 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int tx_type = get_seg_tx_type(x, x->mode_info_context->mbmi.segment_id);
 #endif
 
-//#if CONFIG_SEGFEATURES
     // If the MB is going to be skipped because of a segment level flag
     // exclude this from the skip count stats used to calculate the
     // transmitted skip probability;

@@ -217,9 +217,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_sse2;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
 
-//#if !CONFIG_SEGFEATURES
-//        cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse2;
-//#endif
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
 
 #if !(CONFIG_REALTIME_ONLY)
@@ -280,10 +277,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_sse4;
         cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_sse4;
         cpi->rtcd.search.full_search             = vp8_full_search_sadx8;
-
-//#if !CONFIG_SEGFEATURES
-//        cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse4;
-//#endif
     }
 #endif
 

@@ -33,7 +33,6 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vp8/common/pred_common.h"
 
-//#if CONFIG_SEGFEATURES
 //#define DBG_PRNT_SEGMAP 1
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -807,7 +806,6 @@ void encode_sb_row (VP8_COMP *cpi,
     x->partition_info     += 1 - (cm->mb_cols & 0x1) + xd->mode_info_stride;
     x->gf_active_ptr      += cm->mb_cols - (cm->mb_cols & 0x1);
 
-//#if CONFIG_SEGFEATURES
 // debug output
 #if DBG_PRNT_SEGMAP
     {
@@ -1061,7 +1059,6 @@ void encode_mb_row(VP8_COMP *cpi,
 #endif
 
 
-//#if CONFIG_SEGFEATURES
 // debug output
 #if DBG_PRNT_SEGMAP
     {
@@ -1186,7 +1183,6 @@ static void encode_frame_internal(VP8_COMP *cpi)
     // this frame which may be updated with each itteration of the recode loop.
     compute_mod_refprobs( cm );
 
-//#if CONFIG_SEGFEATURES
 // debug output
 #if DBG_PRNT_SEGMAP
     {
@@ -1878,7 +1874,6 @@ int vp8cx_encode_inter_macroblock
                 vp8cx_mb_init_quantizer(cpi, x);
             }
         }
-//#if CONFIG_SEGFEATURES
         else
         {
             //segfeature_test_function(cpi, xd);
@@ -1927,7 +1922,6 @@ int vp8cx_encode_inter_macroblock
             vp8_update_zbin_extra(cpi, x);
     }
 
-//#if CONFIG_SEGFEATURES
     seg_ref_active = segfeature_active( xd, *segment_id, SEG_LVL_REF_FRAME );
 
     // SET VARIOUS PREDICTION FLAGS

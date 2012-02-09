@@ -14,9 +14,7 @@
 #include "onyxc_int.h"
 #include "vpx_mem/vpx_mem.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
-//#endif
 
 typedef unsigned char uc;
 
@@ -244,7 +242,6 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
 
 
         // Set the baseline filter values for each segment
-//#if CONFIG_SEGFEATURES
         if ( segfeature_active( xd, seg, SEG_LVL_ALT_LF ) )
         {
             /* Abs value */

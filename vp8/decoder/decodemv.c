@@ -15,7 +15,6 @@
 #include "onyxd_int.h"
 #include "vp8/common/findnearmv.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
 
@@ -92,7 +91,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
         pbi->common.last_frame_seg_map[map_index] = m->mbmi.segment_id;
     }
 
-//#if CONFIG_SEGFEATURES
     if ( pbi->common.mb_no_coeff_skip &&
          ( !segfeature_active( &pbi->mb,
                                m->mbmi.segment_id, SEG_LVL_EOB ) ||
@@ -103,7 +101,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
     }
     else
     {
-//#if CONFIG_SEGFEATURES
         if ( segfeature_active( &pbi->mb,
                                 m->mbmi.segment_id, SEG_LVL_EOB ) &&
              ( get_segdata( &pbi->mb,
@@ -238,7 +235,6 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
     int seg_ref_active;
     int seg_ref_count = 0;
 
-//#if CONFIG_SEGFEATURES
     VP8_COMMON *const cm = & pbi->common;
     MACROBLOCKD *const xd = &pbi->mb;
 
@@ -345,7 +341,6 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
         }
     }
 
-//#if CONFIG_SEGFEATURES
     // Segment reference frame features are enabled
     else
     {
@@ -567,7 +562,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     // Read the macroblock segment id.
     read_mb_segment_id ( pbi, mb_row, mb_col );
 
-//#if CONFIG_SEGFEATURES
     if ( pbi->common.mb_no_coeff_skip &&
          ( !segfeature_active( xd,
                                mbmi->segment_id, SEG_LVL_EOB ) ||
@@ -579,7 +573,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
     else
     {
-//#if CONFIG_SEGFEATURES
         if ( segfeature_active( xd,
                                 mbmi->segment_id, SEG_LVL_EOB ) &&
              (get_segdata( xd, mbmi->segment_id, SEG_LVL_EOB ) == 0) )
@@ -606,7 +599,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                           mbmi->ref_frame, pbi->common.ref_frame_sign_bias);
         vp8_mv_ref_probs(&pbi->common, mv_ref_p, rct);
 
-//#if CONFIG_SEGFEATURES
         // Is the segment level mode feature enabled for this segment
         if ( segfeature_active( xd, mbmi->segment_id, SEG_LVL_MODE ) )
         {
@@ -819,7 +811,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         /* required for left and above block mv */
         mbmi->mv.as_int = 0;
 
-//#if CONFIG_SEGFEATURES
         if ( segfeature_active( xd, mbmi->segment_id, SEG_LVL_MODE ) )
             mbmi->mode = (MB_PREDICTION_MODE)
                          get_segdata( xd, mbmi->segment_id, SEG_LVL_MODE );
@@ -968,7 +959,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
     int mb_row = -1;
 
-//#if CONFIG_SEGFEATURES
 #if 0
     FILE *statsfile;
     statsfile = fopen("decsegmap.stt", "a");
@@ -998,7 +988,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
         mb_to_bottom_edge = ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
         mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
 
-//#if CONFIG_SEGFEATURES
 #if 0
         fprintf(statsfile, "\n" );
 #endif
@@ -1045,7 +1034,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             }
 #endif
 
-//#if CONFIG_SEGFEATURES
 #if 0
             fprintf(statsfile, "%2d%2d%2d   ",
                 mi->mbmi.segment_id, mi->mbmi.ref_frame, mi->mbmi.mode );
@@ -1058,7 +1046,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
         mi++;           /* skip left predictor each row */
     }
 
-//#if CONFIG_SEGFEATURES
 #if 0
     fclose(statsfile);
 #endif

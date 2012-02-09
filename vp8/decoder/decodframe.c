@@ -38,7 +38,6 @@
 #include "decoderthreading.h"
 #include "dboolhuff.h"
 
-//#if CONFIG_SEGFEATURES
 #include "vp8/common/seg_common.h"
 
 #include <assert.h>
@@ -81,7 +80,6 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
     // Set the Q baseline allowing for any segment level adjustment
-//#if CONFIG_SEGFEATURES
     if ( segfeature_active( xd, segment_id, SEG_LVL_ALT_Q ) )
     {
         /* Abs Value */
@@ -923,7 +921,6 @@ static void init_frame(VP8D_COMP *pbi)
 
         // Reset the segment feature data to the default stats:
         // Features disabled, 0, with delta coding (Default state).
-//#if CONFIG_SEGFEATURES
         clearall_segfeatures( xd );
 
         xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
@@ -1167,7 +1164,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
             xd->mb_segement_abs_delta = (unsigned char)vp8_read_bit(bc);
 
-//#if CONFIG_SEGFEATURES
             clearall_segfeatures( xd );
 
             // For each segmentation...
@@ -1179,14 +1175,12 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     // Is the feature enabled
                     if (vp8_read_bit(bc))
                     {
-//#if CONFIG_SEGFEATURES
                         // Update the feature data and mask
                         enable_segfeature(xd, i, j);
 
                         data = (signed char)vp8_read_literal(
                                             bc, seg_feature_data_bits(j));
 
-//#if CONFIG_SEGFEATURES
                         // Is the segment data signed..
                         if ( is_segfeature_signed(j) )
                         {
