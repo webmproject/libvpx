@@ -32,7 +32,6 @@ unsigned char get_pred_context( VP8_COMMON *const cm,
         break;
 
 
-#if CONFIG_COMPRED
     case PRED_REF:
         pred_context = (m - 1)->mbmi.ref_predicted +
                        (m - cm->mode_info_stride)->mbmi.ref_predicted;
@@ -58,7 +57,6 @@ unsigned char get_pred_context( VP8_COMMON *const cm,
             pred_context = 1;
 
         break;
-#endif
 
     default:
         // TODO *** add error trap code.
@@ -87,7 +85,6 @@ vp8_prob get_pred_prob( VP8_COMMON *const cm,
         pred_probability = cm->segment_pred_probs[pred_context];
         break;
 
-#if CONFIG_COMPRED
     case PRED_REF:
         pred_probability = cm->ref_pred_probs[pred_context];
         break;
@@ -98,7 +95,6 @@ vp8_prob get_pred_prob( VP8_COMMON *const cm,
         // probability of dual pred off.
         pred_probability = cm->prob_dualpred[pred_context];
         break;
-#endif
 
     default:
         // TODO *** add error trap code.
@@ -122,12 +118,9 @@ unsigned char get_pred_flag( MACROBLOCKD *const xd,
         pred_flag = xd->mode_info_context->mbmi.seg_id_predicted;
         break;
 
-#if CONFIG_COMPRED
-
     case PRED_REF:
         pred_flag = xd->mode_info_context->mbmi.ref_predicted;
         break;
-#endif
 
     default:
         // TODO *** add error trap code.
@@ -150,12 +143,9 @@ void set_pred_flag( MACROBLOCKD *const xd,
         xd->mode_info_context->mbmi.seg_id_predicted = pred_flag;
         break;
 
-#if CONFIG_COMPRED
-
     case PRED_REF:
         xd->mode_info_context->mbmi.ref_predicted = pred_flag;
         break;
-#endif
 
     default:
         // TODO *** add error trap code.
@@ -175,7 +165,6 @@ unsigned char get_pred_mb_segid( VP8_COMMON *const cm, int MbIndex )
     return cm->last_frame_seg_map[MbIndex];
 }
 
-#if CONFIG_COMPRED
 MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
                                  MACROBLOCKD *const xd )
 {
@@ -348,4 +337,3 @@ void compute_mod_refprobs( VP8_COMMON *const cm )
     cm->ref_scores[GOLDEN_FRAME] = 1 + (gf_count * 16 / 255);
     cm->ref_scores[ALTREF_FRAME] = 1 + (arf_count * 16 / 255);
 }
-#endif

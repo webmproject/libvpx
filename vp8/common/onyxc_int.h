@@ -49,11 +49,7 @@ void vp8_initialize_common(void);
 #define MAX_PARTITIONS 9
 
 #if CONFIG_DUALPRED
-#if CONFIG_COMPRED
 #define DUAL_PRED_CONTEXTS   2
-#else
-#define DUAL_PRED_CONTEXTS   3
-#endif
 #endif /* CONFIG_DUALPRED */
 
 typedef struct frame_contexts
@@ -242,12 +238,10 @@ typedef struct VP8Common
     vp8_prob segment_pred_probs[PREDICTION_PROBS];
     unsigned char temporal_update;
 
-#if CONFIG_COMPRED
     // Context probabilities for reference frame prediction
     unsigned char ref_scores[MAX_REF_FRAMES];
     vp8_prob ref_pred_probs[PREDICTION_PROBS];
     vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
-#endif
 
 #if CONFIG_DUALPRED
     vp8_prob prob_dualpred[DUAL_PRED_CONTEXTS];

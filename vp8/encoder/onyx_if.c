@@ -3415,124 +3415,6 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
     }
 }
 
-#if !CONFIG_COMPRED
-//#if 1
-// This function updates the reference frame probability estimates that
-// will be used during mode selection
-static void update_rd_ref_frame_probs(VP8_COMP *cpi)
-{
-    VP8_COMMON *cm = &cpi->common;
-
-#if 0
-    const int *const rfct = cpi->recent_ref_frame_usage;
-    const int rf_intra = rfct[INTRA_FRAME];
-    const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-
-    if (cm->frame_type == KEY_FRAME)
-    {
-        cm->prob_intra_coded = 255;
-        cm->prob_last_coded  = 128;
-        cm->prob_gf_coded  = 128;
-    }
-    else if (!(rf_intra + rf_inter))
-    {
-        // This is a trap in case this function is called with cpi->recent_ref_frame_usage[] blank.
-        cm->prob_intra_coded = 63;
-        cm->prob_last_coded  = 128;
-        cm->prob_gf_coded    = 128;
-    }
-    else
-    {
-        cm->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
-
-        if (cm->prob_intra_coded < 1)
-            cm->prob_intra_coded = 1;
-
-        if ((cm->frames_since_golden > 0) || cpi->source_alt_ref_active)
-        {
-            cm->prob_last_coded = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-            if (cm->prob_last_coded < 1)
-                cm->prob_last_coded = 1;
-
-            cm->prob_gf_coded = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                                 ? (rfct[GOLDEN_FRAME] * 255) / (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-            if (cm->prob_gf_coded < 1)
-                cm->prob_gf_coded = 1;
-        }
-    }
-
-#else
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
-    const int rf_intra = rfct[INTRA_FRAME];
-    const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-
-    if (cm->frame_type == KEY_FRAME)
-    {
-        cm->prob_intra_coded = 255;
-        cm->prob_last_coded  = 128;
-        cm->prob_gf_coded  = 128;
-    }
-    else if (!(rf_intra + rf_inter))
-    {
-        // This is a trap in case this function is called with
-        // cpi->recent_ref_frame_usage[] blank.
-        cm->prob_intra_coded = 63;
-        cm->prob_last_coded  = 128;
-        cm->prob_gf_coded    = 128;
-    }
-    else
-    {
-        cm->prob_intra_coded = (rf_intra * 255) / (rf_intra + rf_inter);
-
-        if (cm->prob_intra_coded < 1)
-            cm->prob_intra_coded = 1;
-
-        cm->prob_last_coded =
-            rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-
-        if (cm->prob_last_coded < 1)
-            cm->prob_last_coded = 1;
-
-        cm->prob_gf_coded =
-            (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-                ? (rfct[GOLDEN_FRAME] * 255) /
-                  (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-
-        if (cm->prob_gf_coded < 1)
-            cm->prob_gf_coded = 1;
-    }
-
-    // update reference frame costs since we can do better than what we got
-    // last frame.
-
-    if (cpi->common.refresh_alt_ref_frame)
-    {
-        cm->prob_intra_coded += 40;
-        cm->prob_last_coded = 200;
-        cm->prob_gf_coded = 1;
-    }
-    else if (cpi->common.frames_since_golden == 0)
-    {
-        cm->prob_last_coded = 214;
-        cm->prob_gf_coded = 1;
-    }
-    else if (cpi->common.frames_since_golden == 1)
-    {
-        cm->prob_last_coded = 192;
-        cm->prob_gf_coded = 220;
-    }
-    else if (cpi->source_alt_ref_active)
-    {
-        cm->prob_gf_coded =
-            ( cm->prob_gf_coded > 30 ) ? cm->prob_gf_coded - 20 : 10;
-    }
-
-#endif
-}
-#endif
-
 // 1 = key, 0 = inter
 static int decide_key_frame(VP8_COMP *cpi)
 {
@@ -3871,7 +3753,6 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
 }
 
-#if CONFIG_COMPRED
 // This function updates the reference frame prediction stats
 static void update_refpred_stats( VP8_COMP *cpi )
 {
@@ -3927,33 +3808,6 @@ static void update_refpred_stats( VP8_COMP *cpi )
             xd->mode_info_context++;
         }
 
-        // TEMP / Print out prediction quality numbers
-        if (0)
-        {
-            FILE *f = fopen("predquality.stt", "a");
-            int pred0, pred1, pred2;
-
-
-            pred0 = ref_pred_count[0][0] + ref_pred_count[0][1];
-            if ( pred0 )
-                pred0 = (ref_pred_count[0][1] * 255) / pred0;
-
-            pred1 = ref_pred_count[1][0] + ref_pred_count[1][1];
-            if ( pred1 )
-                pred1 = (ref_pred_count[1][1] * 255) / pred1;
-
-            pred2 = ref_pred_count[2][0] + ref_pred_count[2][1];
-            if ( pred2 )
-                pred2 = (ref_pred_count[2][1] * 255) / pred2;
-
-            fprintf(f, "%8d: %8d %8d: %8d %8d: %8d %8d\n",
-                        cm->current_video_frame,
-                        pred0, ref_pred_count[0][1],
-                        pred1, ref_pred_count[1][1],
-                        pred2, ref_pred_count[2][1] );
-            fclose(f);
-        }
-
         // From the prediction counts set the probabilities for each context
         for ( i = 0; i < PREDICTION_PROBS; i++ )
         {
@@ -3998,7 +3852,6 @@ static void update_refpred_stats( VP8_COMP *cpi )
         }
     }
 }
-#endif
 
 static void encode_frame_to_data_rate
 (
@@ -4156,10 +4009,11 @@ static void encode_frame_to_data_rate
     }
 #endif
 
-#if !CONFIG_COMPRED
-//#if 1
-    update_rd_ref_frame_probs(cpi);
-#endif
+//#if !CONFIG_COMPRED
+    // This function has been deprecated for now but we may want to do
+    // something here at a late date
+    //update_rd_ref_frame_probs(cpi);
+//#endif
 
     // Test code for new segment features
     init_seg_features( cpi );
@@ -5010,11 +4864,9 @@ static void encode_frame_to_data_rate
                     cpi->segmentation_map, cm->MBs );
     }
 
-#if CONFIG_COMPRED
     // Update the common prediction model probabilities to reflect
     // the what was seen in the current frame.
     update_refpred_stats( cpi );
-#endif
 
     // build the bitstream
     vp8_pack_bitstream(cpi, dest, size);

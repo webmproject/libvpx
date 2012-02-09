@@ -1239,7 +1239,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         }
     }
 
-#if CONFIG_COMPRED
     // Read common prediction model status flag probability updates for the
     // reference frame
     if ( pc->frame_type == KEY_FRAME )
@@ -1257,7 +1256,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 pc->ref_pred_probs[i] = (vp8_prob)vp8_read_literal(bc, 8);
         }
     }
-#endif
 
     /* Read the loop filter level and type */
     pc->filter_type = (LOOPFILTERTYPE) vp8_read_bit(bc);

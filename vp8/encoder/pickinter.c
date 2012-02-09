@@ -601,7 +601,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
 
 // #if CONFIG_COMPRED
-// TODO... this will all need changing for new reference frame coding model
+// TODO... this will need changing for new reference frame coding model
 // #endif
         // Work out the cost assosciated with selecting the reference frame
         frame_cost =

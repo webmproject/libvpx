@@ -20,11 +20,8 @@
 typedef enum
 {
     PRED_SEG_ID = 0,               // Segment identifier
-
-#if CONFIG_COMPRED
     PRED_REF = 1,
     PRED_DUAL = 2
-#endif
 
 } PRED_ID;
 
@@ -47,11 +44,8 @@ extern void set_pred_flag( MACROBLOCKD *const xd,
 
 extern unsigned char get_pred_mb_segid( VP8_COMMON *const cm, int MbIndex );
 
-#if CONFIG_COMPRED
 extern MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
                                         MACROBLOCKD *const xd );
 extern void compute_mod_refprobs( VP8_COMMON *const cm );
-
-#endif
 
 #endif /* __INC_PRED_COMMON_H__ */

@@ -246,9 +246,6 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
 
-
-#if CONFIG_COMPRED
-
     // If segment coding enabled does the segment allow for more than one
     // possible reference frame
     if ( seg_ref_active )
@@ -262,11 +259,7 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
     // Segment reference frame features not available or allows for
     // multiple reference frame options
     if ( !seg_ref_active || (seg_ref_count > 1) )
-#else
-    if ( !seg_ref_active )
-#endif
     {
-#if CONFIG_COMPRED
         // Values used in prediction model coding
         unsigned char prediction_flag;
         vp8_prob pred_prob;
@@ -350,102 +343,17 @@ static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
                 }
             }
         }
-#else
-        ref_frame =
-            (MV_REFERENCE_FRAME) vp8_read(bc, cm->prob_intra_coded);
-
-        if (ref_frame)
-        {
-            if (vp8_read(bc, cm->prob_last_coded))
-            {
-                ref_frame = (MV_REFERENCE_FRAME)((int)ref_frame +
-                            (int)(1 + vp8_read(bc, cm->prob_gf_coded)));
-            }
-        }
-#endif
     }
 
 //#if CONFIG_SEGFEATURES
     // Segment reference frame features are enabled
     else
     {
-#if CONFIG_COMPRED
         // The reference frame for the mb is considered as correclty predicted
         // if it is signaled at the segment level for the purposes of the
         // common prediction model
         set_pred_flag( xd, PRED_REF, 1 );
         ref_frame = get_pred_ref( cm, xd );
-#else
-        // If there are no inter reference frames enabled we can set INTRA
-        if ( !check_segref_inter(xd, segment_id) )
-        {
-            ref_frame = INTRA_FRAME;
-        }
-        else
-        {
-            // Else if there are both intra and inter options we need to read
-            // the inter / intra flag, else mark as inter.
-            if ( check_segref( xd, segment_id, INTRA_FRAME ) )
-                ref_frame =
-                    (MV_REFERENCE_FRAME) vp8_read(bc, cm->prob_intra_coded);
-            else
-                ref_frame = LAST_FRAME;
-
-            if ( ref_frame == LAST_FRAME )
-            {
-                // Now consider last vs (golden or alt) flag....
-                // If Last is not enabled
-                if ( !check_segref( xd, segment_id, LAST_FRAME ) )
-                {
-                    // If not golden then it must be altref
-                    if (!check_segref( xd, segment_id, GOLDEN_FRAME ))
-                    {
-                        ref_frame = ALTREF_FRAME;
-                    }
-                    // Not Altref therefore must be Golden
-                    else if (!check_segref( xd, segment_id,
-                                               ALTREF_FRAME ))
-                    {
-                        ref_frame = GOLDEN_FRAME;
-                    }
-                    // Else we must read bit to decide.
-                    else
-                    {
-                        ref_frame =
-                            (MV_REFERENCE_FRAME)((int)ref_frame +
-                            (int)(1 + vp8_read(bc, cm->prob_gf_coded)));
-                    }
-                }
-                // Both last and at least one of alt or golden are enabled
-                else if ( check_segref( xd, segment_id, GOLDEN_FRAME ) ||
-                          check_segref( xd, segment_id, ALTREF_FRAME ) )
-                {
-                    // Read flag to indicate (golden or altref) vs last
-                    if (vp8_read(bc, cm->prob_last_coded))
-                    {
-                        // If not golden then it must be altref
-                        if (!check_segref( xd, segment_id, GOLDEN_FRAME ))
-                        {
-                            ref_frame = ALTREF_FRAME;
-                        }
-                        // Not Altref therefore must be Golden
-                        else if (!check_segref( xd, segment_id,
-                                                   ALTREF_FRAME ))
-                        {
-                            ref_frame = GOLDEN_FRAME;
-                        }
-                        else
-                        {
-                            ref_frame =
-                                (MV_REFERENCE_FRAME)((int)ref_frame +
-                                (int)(1 + vp8_read(bc, cm->prob_gf_coded)));
-                        }
-                    }
-                    // ELSE LAST
-                }
-            }
-        }
-#endif
     }
 
     return (MV_REFERENCE_FRAME)ref_frame;
@@ -509,11 +417,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
         cm->prob_last_coded  = (vp8_prob)vp8_read_literal(bc, 8);
         cm->prob_gf_coded    = (vp8_prob)vp8_read_literal(bc, 8);
 
-#if CONFIG_COMPRED
         // Computes a modified set of probabilities for use when reference
         // frame prediction fails.
         compute_mod_refprobs( cm );
-#endif
 
 #if CONFIG_DUALPRED
         pbi->common.dual_pred_mode = vp8_read(bc, 128);
@@ -837,12 +743,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_DUALPRED
             if ( cm->dual_pred_mode == DUAL_PREDICTION_ONLY ||
                  (cm->dual_pred_mode == HYBRID_PREDICTION &&
-#if CONFIG_COMPRED
                      vp8_read(bc, get_pred_prob( cm, xd, PRED_DUAL ))) )
-#else
-                     vp8_read(bc, cm->prob_dualpred[(mi[-1].mbmi.second_ref_frame != INTRA_FRAME) +
-                                                    (mi[-mis].mbmi.second_ref_frame != INTRA_FRAME)])))
-#endif
             {
                 mbmi->second_ref_frame = mbmi->ref_frame + 1;
                 if (mbmi->second_ref_frame == 4)

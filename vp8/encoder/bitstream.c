@@ -849,7 +849,6 @@ static void encode_ref_frame( vp8_writer *const w,
                                         segment_id,
                                         SEG_LVL_REF_FRAME );
 
-#if CONFIG_COMPRED
     if ( seg_ref_active )
     {
         seg_ref_count = check_segref( xd, segment_id, INTRA_FRAME ) +
@@ -861,11 +860,7 @@ static void encode_ref_frame( vp8_writer *const w,
     // If segment level coding of this signal is disabled...
     // or the segment allows multiple reference frame options
     if ( !seg_ref_active || (seg_ref_count > 1) )
-#else
-    if ( !seg_ref_active  )
-#endif
     {
-#if CONFIG_COMPRED
         // Values used in prediction model coding
         unsigned char prediction_flag;
         vp8_prob pred_prob;
@@ -927,77 +922,10 @@ static void encode_ref_frame( vp8_writer *const w,
                 }
             }
         }
-#else
-        if (rf == INTRA_FRAME)
-        {
-            vp8_write(w, 0, cm->prob_intra_coded);
-        }
-        else    /* inter coded */
-        {
-            vp8_write(w, 1, cm->prob_intra_coded);
-
-            if (rf == LAST_FRAME)
-            {
-                vp8_write(w, 0, cm->prob_last_coded);
-            }
-            else
-            {
-                vp8_write(w, 1, cm->prob_last_coded);
-
-                vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, cm->prob_gf_coded);
-            }
-        }
-#endif
     }
 
     // if using the prediction mdoel we have nothing further to do because
     // the reference frame is fully coded by the segment
-
-//#if CONFIG_SEGFEATURES
-#if !CONFIG_COMPRED
-    // Else use the segment
-    else
-    {
-        if (rf == INTRA_FRAME)
-        {
-            // This MB intra coded. If inter also allowed we must code
-            // an explicit inter/intra flag.
-            if ( check_segref_inter( xd, segment_id ) )
-                vp8_write(w, 0, cm->prob_intra_coded);
-        }
-        else    /* inter coded */
-        {
-            // If intra also allowed we must code an explicit intra/inter flag.
-            if ( check_segref( xd, segment_id, INTRA_FRAME ) )
-                vp8_write(w, 1, cm->prob_intra_coded);
-
-            if (rf == LAST_FRAME)
-            {
-                // If GOLDEN or ALTREF allowed we must code explicit flag.
-                if ( check_segref( xd, segment_id, GOLDEN_FRAME ) ||
-                     check_segref( xd, segment_id, ALTREF_FRAME ) )
-                {
-                    vp8_write(w, 0, cm->prob_last_coded);
-                }
-            }
-            else
-            {
-                // if LAST is allowed we must code  explicit flag
-                if ( check_segref( xd, segment_id, LAST_FRAME ) )
-                {
-                    vp8_write(w, 1, cm->prob_last_coded);
-                }
-
-                // if GOLDEN and ALTREF allowed we must code an explicit flag
-                if ( check_segref( xd, segment_id, GOLDEN_FRAME ) &&
-                     check_segref( xd, segment_id, ALTREF_FRAME ) )
-                {
-                    vp8_write(w, (rf == GOLDEN_FRAME) ? 0 : 1, cm->prob_gf_coded);
-                }
-            }
-        }
-    }
-#endif
 }
 
 // Update the probabilities used to encode reference frame data
@@ -1029,11 +957,9 @@ static void update_ref_probs( VP8_COMP *const cpi )
     if (!cm->prob_gf_coded)
        cm->prob_gf_coded = 1;
 
-#if CONFIG_COMPRED
     // Compute a modified set of probabilities to use when prediction of the
     // reference frame fails
     compute_mod_refprobs( cm );
-#endif
 }
 
 #if CONFIG_SUPERBLOCKS
@@ -1057,12 +983,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int row, col;
 
     int prob_skip_false = 0;
-
-#if CONFIG_DUALPRED
-#if !CONFIG_COMPRED
-    int prob_dual_pred[DUAL_PRED_CONTEXTS];
-#endif
-#endif /* CONFIG_DUALPRED */
 
     // Values used in prediction model coding
     vp8_prob pred_prob;
@@ -1114,7 +1034,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         {
             if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
             {
-#if CONFIG_COMPRED
                 pc->prob_dualpred[i] = cpi->single_pred_count[i] * 255 /
                     (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
                 if (pc->prob_dualpred[i] < 1)
@@ -1125,20 +1044,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 pc->prob_dualpred[i] = 128;
             }
             vp8_write_literal(w, pc->prob_dualpred[i], 8);
-#else
-                prob_dual_pred[i] = cpi->single_pred_count[i] * 256 /
-                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
-                if (prob_dual_pred[i] < 1)
-                    prob_dual_pred[i] = 1;
-                else if (prob_dual_pred[i] > 255)
-                    prob_dual_pred[i] = 255;
-            }
-            else
-            {
-                prob_dual_pred[i] = 128;
-            }
-            vp8_write_literal(w, prob_dual_pred[i], 8);
-#endif
         }
     }
     else if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY)
@@ -1324,17 +1229,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #if CONFIG_DUALPRED
                             if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                             {
-#if CONFIG_COMPRED
                                 vp8_write(w,
                                           mi->second_ref_frame != INTRA_FRAME,
                                           get_pred_prob( pc, xd, PRED_DUAL ) );
-#else
-
-                                int t = m[-mis].mbmi.second_ref_frame != INTRA_FRAME;
-                                int l = m[-1  ].mbmi.second_ref_frame != INTRA_FRAME;
-                                vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                          prob_dual_pred[t + l]);
-#endif
                             }
                             if (mi->second_ref_frame)
                             {
@@ -1400,17 +1297,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #if CONFIG_DUALPRED
                             if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                             {
-#if CONFIG_COMPRED
-
                                 vp8_write(w,
                                           mi->second_ref_frame != INTRA_FRAME,
                                           get_pred_prob( pc, xd, PRED_DUAL ) );
-#else
-                                int t = m[-mis].mbmi.second_ref_frame != INTRA_FRAME;
-                                int l = m[-1  ].mbmi.second_ref_frame != INTRA_FRAME;
-                                vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                          prob_dual_pred[t + l]);
-#endif
                             }
 #endif /* CONFIG_DUALPRED */
                             break;
@@ -1434,17 +1323,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         m += mis + (1- (pc->mb_cols & 0x1));
         cpi->mb.partition_info += mis + (1- (pc->mb_cols & 0x1));
     }
-
-#if !CONFIG_COMPRED
-#if CONFIG_DUALPRED
-    if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
-    {
-        pc->prob_dualpred[0] = (prob_dual_pred[0] + pc->prob_dualpred[0] + 1) >> 1;
-        pc->prob_dualpred[1] = (prob_dual_pred[1] + pc->prob_dualpred[1] + 1) >> 1;
-        pc->prob_dualpred[2] = (prob_dual_pred[2] + pc->prob_dualpred[2] + 1) >> 1;
-    }
-#endif /* CONFIG_DUALPRED */
-#endif
 }
 #else
 static void pack_inter_mode_mvs(VP8_COMP *const cpi)
@@ -1467,12 +1345,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int mb_row = -1;
 
     int prob_skip_false = 0;
-
-#if CONFIG_DUALPRED
-#if !CONFIG_COMPRED
-    int prob_dual_pred[DUAL_PRED_CONTEXTS];
-#endif
-#endif /* CONFIG_DUALPRED */
 
     // Values used in prediction model coding
     vp8_prob pred_prob;
@@ -1521,7 +1393,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         {
             if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
             {
-#if CONFIG_COMPRED
                 pc->prob_dualpred[i] = cpi->single_pred_count[i] * 255 /
                     (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
                 if (pc->prob_dualpred[i] < 1)
@@ -1532,20 +1403,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 pc->prob_dualpred[i] = 128;
             }
             vp8_write_literal(w, pc->prob_dualpred[i], 8);
-#else
-                prob_dual_pred[i] = cpi->single_pred_count[i] * 256 /
-                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
-                if (prob_dual_pred[i] < 1)
-                    prob_dual_pred[i] = 1;
-                else if (prob_dual_pred[i] > 255)
-                    prob_dual_pred[i] = 255;
-            }
-            else
-            {
-                prob_dual_pred[i] = 128;
-            }
-            vp8_write_literal(w, prob_dual_pred[i], 8);
-#endif
         }
     }
     else if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY)
@@ -1711,16 +1568,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #if CONFIG_DUALPRED
                         if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                         {
-#if CONFIG_COMPRED
-
                             vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
                                       get_pred_prob( pc, xd, PRED_DUAL ) );
-#else
-                            int t = m[-mis].mbmi.second_ref_frame != INTRA_FRAME;
-                            int l = m[-1  ].mbmi.second_ref_frame != INTRA_FRAME;
-                            vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                      prob_dual_pred[t + l]);
-#endif
                         }
                         if (mi->second_ref_frame)
                         {
@@ -1785,16 +1634,8 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #if CONFIG_DUALPRED
                         if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                         {
-#if CONFIG_COMPRED
-
                             vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
                                       get_pred_prob( pc, xd, PRED_DUAL ) );
-#else
-                            int t = m[-mis].mbmi.second_ref_frame != INTRA_FRAME;
-                            int l = m[-1  ].mbmi.second_ref_frame != INTRA_FRAME;
-                            vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                      prob_dual_pred[t + l]);
-#endif
                         }
 #endif /* CONFIG_DUALPRED */
                         break;
@@ -1813,17 +1654,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         ++prev_m;
         cpi->mb.partition_info++;
     }
-
-#if !CONFIG_COMPRED
-#if CONFIG_DUALPRED
-    if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
-    {
-        pc->prob_dualpred[0] = (prob_dual_pred[0] + pc->prob_dualpred[0] + 1) >> 1;
-        pc->prob_dualpred[1] = (prob_dual_pred[1] + pc->prob_dualpred[1] + 1) >> 1;
-        pc->prob_dualpred[2] = (prob_dual_pred[2] + pc->prob_dualpred[2] + 1) >> 1;
-    }
-#endif /* CONFIG_DUALPRED */
-#endif
 }
 #endif // CONFIG_SUPERBLOCKS
 
@@ -2258,9 +2088,6 @@ static int default_coef_context_savings(VP8_COMP *cpi)
     return savings;
 }
 
-#if CONFIG_COMPRED
-// TODO... this will all need changing for new reference frame coding model
-#endif
 int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
     int savings = 0;
@@ -2851,7 +2678,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         }
     }
 
-#if CONFIG_COMPRED
     // Encode the common prediction model status flag probability updates for
     // the reference frame
     if ( pc->frame_type != KEY_FRAME )
@@ -2867,7 +2693,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 vp8_write_bit(bc, 0);
         }
     }
-#endif
 
     // Encode the loop filter level and type
     vp8_write_bit(bc, pc->filter_type);

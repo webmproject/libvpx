@@ -2038,7 +2038,6 @@ static void set_i8x8_block_modes(MACROBLOCK *x, int *modes)
     }
 }
 
-#if CONFIG_COMPRED
 void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
 {
     VP8_COMMON *cm = &cpi->common;
@@ -2096,7 +2095,6 @@ void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
         ref_costs[i] = cost;
     }
 }
-#endif
 
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
                             int *returnrate, int *returndistortion, int *returnintra,
@@ -2158,9 +2156,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     unsigned char *u_buffer[4];
     unsigned char *v_buffer[4];
 
-#if CONFIG_COMPRED
     unsigned int ref_costs[MAX_REF_FRAMES];
-#endif
 
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
     vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
@@ -2226,11 +2222,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
     uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
 
-#if CONFIG_COMPRED
     // Get estimates of reference frame costs for each reference frame
     // that depend on the current prediction etc.
     vp8_estimate_ref_frame_costs( cpi, ref_costs );
-#endif
 
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
@@ -2622,17 +2616,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
 #if CONFIG_DUALPRED
-#if CONFIG_COMPRED
             dualmode_cost =
                 vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 0 );
-#else
-            {
-                MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
-                MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
-                int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
-                dualmode_cost = vp8_cost_bit(cm->prob_dualpred[cnt], 0);
-            }
-#endif
 #endif /* CONFIG_DUALPRED */
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
@@ -2787,17 +2772,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             /* We don't include the cost of the second reference here, because there are only
              * three options: Last/Golden, ARF/Last or Golden/ARF, or in other words if you
              * present them in that order, the second one is always known if the first is known */
-#if CONFIG_COMPRED
             dualmode_cost =
                 vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 1 );
-#else
-            {
-                MB_MODE_INFO *t = &x->e_mbd.mode_info_context[-cpi->common.mode_info_stride].mbmi;
-                MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
-                int cnt = (t->second_ref_frame != INTRA_FRAME) + (l->second_ref_frame != INTRA_FRAME);
-                dualmode_cost = vp8_cost_bit(cm->prob_dualpred[cnt], 1);
-            }
-#endif
         }
 #endif /* CONFIG_DUALPRED */
 
@@ -2821,12 +2797,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         // Estimate the reference frame signaling cost and add it
         // to the rolling cost variable.
-#if CONFIG_COMPRED
         rate2 += ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
-#else
-        rate2 +=
-            x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
-#endif
 
         if (!disable_skip)
         {
@@ -2907,12 +2878,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
             }
 
-#if CONFIG_COMPRED
             other_cost += ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
-#else
-            other_cost +=
-                x->e_mbd.ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
-#endif
 
             /* Calculate the final y RD estimate for this mode */
             best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),

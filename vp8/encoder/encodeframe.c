@@ -1181,12 +1181,10 @@ static void encode_frame_internal(VP8_COMP *cpi)
     TOKENEXTRA *tp = cpi->tok;
     int totalrate;
 
-#if CONFIG_COMPRED
     // Compute a modified set of reference frame probabilities to use when
     // prediction fails. These are based on the current genreal estimates for
     // this frame which may be updated with each itteration of the recode loop.
     compute_mod_refprobs( cm );
-#endif
 
 //#if CONFIG_SEGFEATURES
 // debug output
@@ -1785,9 +1783,7 @@ int vp8cx_encode_inter_macroblock
     int distortion;
     unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
     int seg_ref_active;
-#if CONFIG_COMPRED
      unsigned char ref_pred_flag;
-#endif
 
     x->skip = 0;
 
@@ -1824,15 +1820,8 @@ int vp8cx_encode_inter_macroblock
         {
             unsigned char pred_context;
 
-#if CONFIG_COMPRED
             pred_context = get_pred_context( cm, xd, PRED_DUAL );
-#else
-            MB_MODE_INFO *t = &x->e_mbd.mode_info_context
-                              [-cpi->common.mode_info_stride].mbmi;
-            MB_MODE_INFO *l = &x->e_mbd.mode_info_context[-1].mbmi;
-            pred_context = (t->second_ref_frame != INTRA_FRAME) +
-                           (l->second_ref_frame != INTRA_FRAME);
-#endif
+
             if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
                 cpi->single_pred_count[pred_context]++;
             else
@@ -1941,15 +1930,12 @@ int vp8cx_encode_inter_macroblock
 //#if CONFIG_SEGFEATURES
     seg_ref_active = segfeature_active( xd, *segment_id, SEG_LVL_REF_FRAME );
 
-#if CONFIG_COMPRED
     // SET VARIOUS PREDICTION FLAGS
 
     // Did the chosen reference frame match its predicted value.
     ref_pred_flag = ( (xd->mode_info_context->mbmi.ref_frame ==
                            get_pred_ref( cm, xd )) );
     set_pred_flag( xd, PRED_REF, ref_pred_flag );
-
-#endif
 
     // If we have just a single reference frame coded for a segment then
     // exclude from the reference frame counts used to work out
