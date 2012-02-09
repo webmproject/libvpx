@@ -66,7 +66,11 @@ static const struct extraconfig_map extracfg_map[] =
             0,                          /* noise_sensitivity */
             0,                          /* Sharpness */
             0,                          /* static_thresh */
+#if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
+            VP8_EIGHT_TOKENPARTITION,
+#else
             VP8_ONE_TOKENPARTITION,     /* token_partitions */
+#endif
             0,                          /* arnr_max_frames */
             3,                          /* arnr_strength */
             3,                          /* arnr_type*/
@@ -240,6 +244,11 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
         RANGE_CHECK_HI(cfg, ts_layer_id[i], cfg->ts_number_layers-1);
     }
+
+#if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
+    if(cfg->g_threads > (1 << vp8_cfg->token_partitions))
+        ERROR("g_threads cannot be bigger than number of token partitions");
+#endif
 
     return VPX_CODEC_OK;
 }
@@ -919,16 +928,28 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 
                     for (i = 0; i < num_partitions; ++i)
                     {
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+                        pkt.data.frame.buf = cpi->partition_d[i];
+#else
                         pkt.data.frame.buf = cx_data;
+                        cx_data += cpi->partition_sz[i];
+                        cx_data_sz -= cpi->partition_sz[i];
+#endif
                         pkt.data.frame.sz = cpi->partition_sz[i];
                         pkt.data.frame.partition_id = i;
                         /* don't set the fragment bit for the last partition */
                         if (i == (num_partitions - 1))
                             pkt.data.frame.flags &= ~VPX_FRAME_IS_FRAGMENT;
                         vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
-                        cx_data += cpi->partition_sz[i];
-                        cx_data_sz -= cpi->partition_sz[i];
                     }
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+                    /* In lagged mode the encoder can buffer multiple frames.
+                     * We don't want this in partitioned output because
+                     * partitions are spread all over the output buffer.
+                     * So, force an exit!
+                     */
+                    cx_data_sz -= ctx->cx_data_sz / 2;
+#endif
                 }
                 else
                 {

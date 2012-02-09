@@ -24,6 +24,7 @@
 #include "bitstream.h"
 
 #include "defaultcoefcounts.h"
+#include "vp8/common/common.h"
 
 const int vp8cx_base_skip_false_prob[128] =
 {
@@ -159,7 +160,7 @@ static void write_split(vp8_writer *bc, int x)
     );
 }
 
-static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
+void vp8_pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 {
     const TOKENEXTRA *const stop = p + xcount;
     unsigned int split;
@@ -398,7 +399,7 @@ static void pack_tokens_into_partitions_c(VP8_COMP *cpi, unsigned char *cx_data,
             const TOKENEXTRA *stop = cpi->tplist[mb_row].stop;
             int tokens = stop - p;
 
-            pack_tokens_c(w, p, tokens);
+            vp8_pack_tokens_c(w, p, tokens);
         }
 
         vp8_stop_encode(w);
@@ -417,7 +418,7 @@ static void pack_mb_row_tokens_c(VP8_COMP *cpi, vp8_writer *w)
         const TOKENEXTRA *stop = cpi->tplist[mb_row].stop;
         int tokens = stop - p;
 
-        pack_tokens_c(w, p, tokens);
+        vp8_pack_tokens_c(w, p, tokens);
     }
 
 }
@@ -783,6 +784,7 @@ static void write_kfmodes(VP8_COMP *cpi)
     }
 }
 
+#if 0
 /* This function is used for debugging probability trees. */
 static void print_prob_tree(vp8_prob
      coef_probs[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES])
@@ -814,6 +816,7 @@ static void print_prob_tree(vp8_prob
     fprintf(f, "}\n");
     fclose(f);
 }
+#endif
 
 static void sum_probs_over_prev_coef_context(
         const unsigned int probs[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS],
@@ -943,7 +946,6 @@ static int default_coef_context_savings(VP8_COMP *cpi)
 
                 int t = 0;      /* token/prob index */
 
-
                 vp8_tree_probs_from_distribution(
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     cpi->frame_coef_probs [i][j][k],
@@ -1048,10 +1050,33 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
     return savings;
 }
 
-static void update_coef_probs(VP8_COMP *cpi)
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+int vp8_update_coef_context(VP8_COMP *cpi)
+{
+    int savings = 0;
+
+
+    if (cpi->common.frame_type == KEY_FRAME)
+    {
+        /* Reset to default counts/probabilities at key frames */
+        vp8_copy(cpi->coef_counts, default_coef_counts);
+    }
+
+    if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
+        savings += independent_coef_context_savings(cpi);
+    else
+        savings += default_coef_context_savings(cpi);
+
+    return savings;
+}
+#endif
+
+void vp8_update_coef_probs(VP8_COMP *cpi)
 {
     int i = 0;
+#if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
     vp8_writer *const w = cpi->bc;
+#endif
     int savings = 0;
 
     vp8_clear_system_state(); //__asm emms;
@@ -1131,7 +1156,11 @@ static void update_coef_probs(VP8_COMP *cpi)
                         cpi->common.frame_type == KEY_FRAME && newp != *Pold)
                         u = 1;
 
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+                    cpi->update_probs[i][j][k][t] = u;
+#else
                     vp8_write(w, u, upd);
+#endif
 
 
 #ifdef ENTROPY_STATS
@@ -1143,7 +1172,9 @@ static void update_coef_probs(VP8_COMP *cpi)
                         /* send/use new probability */
 
                         *Pold = newp;
+#if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
                         vp8_write_literal(w, newp, 8);
+#endif
 
                         savings += s;
 
@@ -1172,6 +1203,50 @@ static void update_coef_probs(VP8_COMP *cpi)
     while (++i < BLOCK_TYPES);
 
 }
+
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+static void pack_coef_probs(VP8_COMP *cpi)
+{
+    int i = 0;
+    vp8_writer *const w = cpi->bc;
+
+    do
+    {
+        int j = 0;
+
+        do
+        {
+            int k = 0;
+
+            do
+            {
+                int t = 0;      /* token/prob index */
+
+                do
+                {
+                    const vp8_prob newp = cpi->common.fc.coef_probs [i][j][k][t];
+                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+
+                    const char u = cpi->update_probs[i][j][k][t] ;
+
+                    vp8_write(w, u, upd);
+
+                    if (u)
+                    {
+                        /* send/use new probability */
+                        vp8_write_literal(w, newp, 8);
+                    }
+                }
+                while (++t < ENTROPY_NODES);
+            }
+            while (++k < PREV_COEF_CONTEXTS);
+        }
+        while (++j < COEF_BANDS);
+    }
+    while (++i < BLOCK_TYPES);
+}
+#endif
+
 #ifdef PACKET_TESTING
 FILE *vpxlogc = 0;
 #endif
@@ -1434,6 +1509,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
         vp8_write_bit(bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);
     }
 
+#if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
     if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
     {
         if (pc->frame_type == KEY_FRAME)
@@ -1441,6 +1517,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
         else
             pc->refresh_entropy_probs = 0;
     }
+#endif
 
     vp8_write_bit(bc, pc->refresh_entropy_probs);
 
@@ -1458,13 +1535,17 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
 
     vp8_clear_system_state();  //__asm emms;
 
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+    pack_coef_probs(cpi);
+#else
     if (pc->refresh_entropy_probs == 0)
     {
         // save a copy for later refresh
         vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
     }
 
-    update_coef_probs(cpi);
+    vp8_update_coef_probs(cpi);
+#endif
 
 #ifdef ENTROPY_STATS
     active_section = 2;
@@ -1512,6 +1593,45 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
 
     cpi->partition_sz[0] = *size;
 
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+    {
+        const int num_part = (1 << pc->multi_token_partition);
+        unsigned char * dp = cpi->partition_d[0] + cpi->partition_sz[0];
+
+        if (num_part > 1)
+        {
+            /* write token part sizes (all but last) if more than 1 */
+            validate_buffer(dp, 3 * (num_part - 1), cpi->partition_d_end[0],
+                            &pc->error);
+
+            cpi->partition_sz[0] += 3*(num_part-1);
+
+            for(i = 1; i < num_part; i++)
+            {
+                write_partition_size(dp, cpi->partition_sz[i]);
+                dp += 3;
+            }
+        }
+
+        if (!cpi->output_partition)
+        {
+            /* concatenate partition buffers */
+            for(i = 0; i < num_part; i++)
+            {
+                vpx_memmove(dp, cpi->partition_d[i+1], cpi->partition_sz[i+1]);
+                cpi->partition_d[i+1] = dp;
+                dp += cpi->partition_sz[i+1];
+            }
+        }
+
+        /* update total size */
+        *size = 0;
+        for(i = 0; i < num_part+1; i++)
+        {
+            *size += cpi->partition_sz[i];
+        }
+    }
+#else
     if (pc->multi_token_partition != ONE_PARTITION)
     {
         int num_part = 1 << pc->multi_token_partition;
@@ -1561,6 +1681,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
         *size += cpi->bc[1].pos;
         cpi->partition_sz[1] = cpi->bc[1].pos;
     }
+#endif
 }
 
 #ifdef ENTROPY_STATS

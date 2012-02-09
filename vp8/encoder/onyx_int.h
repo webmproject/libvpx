@@ -443,9 +443,12 @@ typedef struct VP8_COMP
     unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
 
     unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
+
     //DECLARE_ALIGNED(16, int, coef_counts_backup [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS]);   //not used any more
     //save vp8_tree_probs_from_distribution result for each frame to avoid repeat calculation
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    char update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
     int gfu_boost;
@@ -543,6 +546,8 @@ typedef struct VP8_COMP
 
     TOKENLIST *tplist;
     unsigned int partition_sz[MAX_PARTITIONS];
+    unsigned char *partition_d[MAX_PARTITIONS];
+    unsigned char *partition_d_end[MAX_PARTITIONS];
     // end of multithread data
 
 
