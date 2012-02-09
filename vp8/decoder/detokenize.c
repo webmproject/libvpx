@@ -78,13 +78,8 @@ DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) = {
 #define CAT5_PROB3 157
 #define CAT5_PROB4 180
 
-#if CONFIG_EXTEND_QRANGE
 static const unsigned char cat6_prob[14] =
 { 129, 130, 133, 140, 153, 177, 196, 230, 243, 249, 252, 254, 254, 0 };
-#else
-static const unsigned char cat6_prob[12] =
-{ 129, 130, 133, 140, 153, 177, 196, 230, 243, 254, 254, 0 };
-#endif
 
 void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
@@ -379,7 +374,7 @@ CHECK_0_8x8_:
     DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_FIVE_CONTEXT_NODE],
                                 CAT_FIVE_CONTEXT_NODE_0_8x8_);
     val = CAT6_MIN_VAL;
-    bits_count = CONFIG_EXTEND_QRANGE?12:10;
+    bits_count = 12;
     do
     {
         DECODE_EXTRABIT_AND_ADJUST_VAL(cat6_prob[bits_count], bits_count);
@@ -718,7 +713,7 @@ CHECK_0_:
                               CAT_FIVE_CONTEXT_NODE_0_);
 
     val = CAT6_MIN_VAL;
-    bits_count = CONFIG_EXTEND_QRANGE?12:10;
+    bits_count = 12;
 
     do
     {

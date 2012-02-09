@@ -460,9 +460,7 @@ void vp8_fast_quantize_b_2x2_c(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc] = x;                          // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc] / q2nd;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
-#if CONFIG_EXTEND_QRANGE
       dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
-#endif
 
       if (y)
       {
@@ -511,11 +509,7 @@ void vp8_fast_quantize_b_8x8_c(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc] = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
-
-#if CONFIG_EXTEND_QRANGE
       dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
-#endif
-
 
       if (y)
       {
@@ -572,10 +566,7 @@ void vp8_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc]  = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc]/q2nd;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
-
-#if CONFIG_EXTEND_QRANGE
       dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
-#endif
 
 
       if (y)
@@ -636,9 +627,7 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc]  = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
-#if CONFIG_EXTEND_QRANGE
       dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
-#endif
 
       if (y)
       {
@@ -971,11 +960,8 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
 
     for (Q = 0; Q < QINDEX_RANGE; Q++)
     {
-#if CONFIG_EXTEND_QRANGE
         int qzbin_factor = (vp8_dc_quant(Q,0) < 148) ? 84 : 80;
-#else
-        int qzbin_factor = (vp8_dc_quant(Q,0) < 37) ? 84: 80;
-#endif
+
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
         cpi->Y1quant_fast[Q][0] = (1 << 16) / quant_val;
@@ -1046,14 +1032,11 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
     int Q;
     int zbin_boost[16] = {0, 0, 8, 10, 12, 14, 16, 20, 24, 28, 32, 36, 40, 44, 44, 44};
     int qrounding_factor = 48;
-#if CONFIG_EXTEND_QRANGE
-    int qzbin_factor = vp8_dc_quant(Q,0) < 148 ) ? 84: 80;
-#else
-    int qzbin_factor = vp8_dc_quant(Q,0) < 37 ) ? 84: 80;
-#endif
 
     for (Q = 0; Q < QINDEX_RANGE; Q++)
     {
+        int qzbin_factor = vp8_dc_quant(Q,0) < 148 ) ? 84: 80;
+
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
         cpi->Y1quant[Q][0] = (1 << 16) / quant_val;

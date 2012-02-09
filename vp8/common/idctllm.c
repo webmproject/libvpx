@@ -80,20 +80,11 @@ void vp8_short_idct4x4llm_c(short *input, short *output, int pitch)
         temp2 = (ip[3] * sinpi8sqrt2 + rounding) >> 16;
         d1 = temp1 + temp2;
 
-
-#if !CONFIG_EXTEND_QRANGE
-        op[0] = (a1 + d1 + 4) >> 3;
-        op[3] = (a1 - d1 + 4) >> 3;
-
-        op[1] = (b1 + c1 + 4) >> 3;
-        op[2] = (b1 - c1 + 4) >> 3;
-#else
         op[0] = (a1 + d1 + 16) >> 5;
         op[3] = (a1 - d1 + 16) >> 5;
 
         op[1] = (b1 + c1 + 16) >> 5;
         op[2] = (b1 - c1 + 16) >> 5;
-#endif
 
         ip += shortpitch;
         op += shortpitch;
@@ -106,11 +97,7 @@ void vp8_short_idct4x4llm_1_c(short *input, short *output, int pitch)
     int a1;
     short *op = output;
     int shortpitch = pitch >> 1;
-#if !CONFIG_EXTEND_QRANGE
-    a1 = ((input[0] + 4) >> 3);
-#else
     a1 = ((input[0] + 16) >> 5);
-#endif
     for (i = 0; i < 4; i++)
     {
         op[0] = a1;
@@ -123,11 +110,7 @@ void vp8_short_idct4x4llm_1_c(short *input, short *output, int pitch)
 
 void vp8_dc_only_idct_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride)
 {
-#if !CONFIG_EXTEND_QRANGE
-    int a1 = ((input_dc + 4) >> 3);
-#else
     int a1 = ((input_dc + 16) >> 5);
-#endif
     int r, c;
 
     for (r = 0; r < 4; r++)
@@ -189,17 +172,11 @@ void vp8_short_inv_walsh4x4_c(short *input, short *output)
         c2 = a1 - b1;
         d2 = d1 - c1;
 
-#if !CONFIG_EXTEND_QRANGE
-        op[0] = (a2 + 3) >> 3;
-        op[1] = (b2 + 3) >> 3;
-        op[2] = (c2 + 3) >> 3;
-        op[3] = (d2 + 3) >> 3;
-#else
         op[0] = (a2 + 1) >> 2;
         op[1] = (b2 + 1) >> 2;
         op[2] = (c2 + 1) >> 2;
         op[3] = (d2 + 1) >> 2;
-#endif
+
         ip += 4;
         op += 4;
     }
@@ -211,11 +188,7 @@ void vp8_short_inv_walsh4x4_1_c(short *input, short *output)
     int a1;
     short *op = output;
 
-#if !CONFIG_EXTEND_QRANGE
-    a1 = (input[0] + 3 )>> 3;
-#else
     a1 = (input[0] + 1 )>> 2;
-#endif
 
     for (i = 0; i < 4; i++)
     {

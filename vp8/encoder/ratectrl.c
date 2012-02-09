@@ -45,28 +45,6 @@ extern int inter_b_modes[B_MODE_COUNT];
 // Bits Per MB at different Q (Multiplied by 512)
 #define BPER_MB_NORMBITS    9
 
-#if !CONFIG_EXTEND_QRANGE
-static const int kf_gf_boost_qlimits[QINDEX_RANGE] =
-{
-    150, 155, 160, 165, 170, 175, 180, 185,
-    190, 195, 200, 205, 210, 215, 220, 225,
-    230, 235, 240, 245, 250, 255, 260, 265,
-    270, 275, 280, 285, 290, 295, 300, 305,
-    310, 320, 330, 340, 350, 360, 370, 380,
-    390, 400, 410, 420, 430, 440, 450, 460,
-    470, 480, 490, 500, 510, 520, 530, 540,
-    550, 560, 570, 580, 590, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-    600, 600, 600, 600, 600, 600, 600, 600,
-};
-#endif
-
 // % adjustment to target kf size based on seperation from previous frame
 static const int kf_boost_seperation_adjustment[16] =
 {
@@ -117,12 +95,8 @@ static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3,
 // tables if and when things settle down in the experimental bitstream
 double vp8_convert_qindex_to_q( int qindex )
 {
-#if CONFIG_EXTEND_QRANGE
     // Convert the index to a real Q value (scaled down to match old Q values)
     return (double)vp8_ac_yquant( qindex, 0 ) / 4.0;
-#else
-    return  (double)vp8_ac_yquant( qindex, 0 );
-#endif
 }
 
 int vp8_gfboost_qadjust( int qindex )
@@ -494,17 +468,11 @@ static void calc_gf_params(VP8_COMP *cpi)
         }
 
         // Apply an upper limit based on Q for 1 pass encodes
-#if !CONFIG_EXTEND_QRANGE
-        if (Boost > kf_gf_boost_qlimits[Q] && (cpi->pass == 0))
-            Boost = kf_gf_boost_qlimits[Q];
-#else
         // TODO.
         // This is a temporay measure oas one pass not really supported yet in
         // the experimental branch
         if (Boost > 600 && (cpi->pass == 0))
             Boost = 600;
-
-#endif
 
         // Apply lower limits to boost.
         else if (Boost < 110)

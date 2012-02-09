@@ -275,9 +275,7 @@ void vp8_initialize()
         vp8_initialize_common();
         //vp8_dmachine_specific_config();
         vp8_tokenize_initialize();
-#if CONFIG_EXTEND_QRANGE
         vp8_init_quant_tables();
-#endif
         vp8_init_me_luts();
         init_minq_luts();
         init_base_skip_probs();
@@ -1879,7 +1877,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
 //
 // Table that converts 0-63 Q range values passed in outside to the Qindex
 // range used internally.
-#if CONFIG_EXTEND_QRANGE
 static const int q_trans[] =
 {
      0,    4,   8,  12,  16,  20,  24,  28,
@@ -1891,19 +1888,6 @@ static const int q_trans[] =
     192, 196, 200, 204, 208, 212, 216, 220,
     224, 228, 232, 236, 240, 244, 249, 255,
 };
-#else
-static const int q_trans[] =
-{
-    0,   1,  2,  3,  4,  5,  7,  8,
-    9,  10, 12, 13, 15, 17, 18, 19,
-    20,  21, 23, 24, 25, 26, 27, 28,
-    29,  30, 31, 33, 35, 37, 39, 41,
-    43,  45, 47, 49, 51, 53, 55, 57,
-    59,  61, 64, 67, 70, 73, 76, 79,
-    82,  85, 88, 91, 94, 97, 100, 103,
-    106, 109, 112, 115, 118, 121, 124, 127,
-};
-#endif
 
 int vp8_reverse_trans(int x)
 {
@@ -3500,12 +3484,6 @@ static int decide_key_frame(VP8_COMP *cpi)
 
 }
 
-/*#if !CONFIG_EXTEND_QRANGE
-#define FIRSTPASS_QINDEX 26
-#else
-#define FIRSTPASS_QINDEX 49
-#endif*/
-
 int find_fp_qindex()
 {
     int i;
@@ -5062,11 +5040,7 @@ static void encode_frame_to_data_rate
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
                        (int)cpi->total_actual_bits,
                        vp8_convert_qindex_to_q(cm->base_qindex),
-#if CONFIG_EXTEND_QRANGE
                         (double)vp8_dc_quant(cm->base_qindex,0)/4.0,
-#else
-                        (double)vp8_dc_quant(cm->base_qindex,0),
-#endif
                        vp8_convert_qindex_to_q(cpi->active_best_quality),
                        vp8_convert_qindex_to_q(cpi->active_worst_quality),
                        cpi->avg_q,
@@ -5094,11 +5068,7 @@ static void encode_frame_to_data_rate
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
                        (int)cpi->total_actual_bits,
                        vp8_convert_qindex_to_q(cm->base_qindex),
-#if CONFIG_EXTEND_QRANGE
                         (double)vp8_dc_quant(cm->base_qindex,0)/4.0,
-#else
-                        (double)vp8_dc_quant(cm->base_qindex,0),
-#endif
                        vp8_convert_qindex_to_q(cpi->active_best_quality),
                        vp8_convert_qindex_to_q(cpi->active_worst_quality),
                        cpi->avg_q,

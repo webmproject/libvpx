@@ -131,11 +131,7 @@ void vp8_dequantize_b_2x2_c(BLOCKD *d)
 
     for (i = 0; i < 16; i++)
     {
-#if CONFIG_EXTEND_QRANGE
         DQ[i] = (short)((Q[i] * DQC[i]+2)>>2);
-#else
-       DQ[i] = (short)(Q[i] * DQC[i]);
-#endif
     }
 #ifdef DEC_DEBUG
     if (dec_debug) {
@@ -168,20 +164,12 @@ void vp8_dequant_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
     }
 #endif
 
-#if CONFIG_EXTEND_QRANGE
-      input[0]= (input[0] * dq[0]+2)>>2;
-#else
-      input[0]= input[0] * dq[0];
-#endif
+    input[0]= (input[0] * dq[0]+2)>>2;
 
     // recover quantizer for 4 4x4 blocks
     for (i = 1; i < 64; i++)
     {
-#if CONFIG_EXTEND_QRANGE
       input[i]=(input[i] * dq[1]+2)>>2;
-#else
-      input[i]=input[i] * dq[1];
-#endif
     }
 #ifdef DEC_DEBUG
     if (dec_debug) {
@@ -274,11 +262,7 @@ void vp8_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
 #endif
     for (i = 1; i < 64; i++)
     {
-#if CONFIG_EXTEND_QRANGE
         input[i]=(input[i] * dq[1]+2)>>2;
-#else
-        input[i]=input[i] * dq[1];
-#endif
     }
 
 #ifdef DEC_DEBUG

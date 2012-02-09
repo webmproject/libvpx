@@ -36,11 +36,7 @@ void vp8_short_fdct8x8_c(short *block, short *coefs, int pitch)
   {
     for (j = 0; j < 8; j++)
     {
-#if !CONFIG_EXTEND_QRANGE
-      b[j] = (float)( block[k + j]<<1);
-#else
       b[j] = (float)( block[k + j]<<3);
-#endif
     }
     /* Horizontal transform */
     for (j = 0; j < 4; j++)
@@ -140,17 +136,11 @@ void vp8_short_fdct4x4_c(short *input, short *output, int pitch)
 
     for (i = 0; i < 4; i++)
     {
-#if CONFIG_EXTEND_QRANGE
         a1 = ((ip[0] + ip[3])<<5);
         b1 = ((ip[1] + ip[2])<<5);
         c1 = ((ip[1] - ip[2])<<5);
         d1 = ((ip[0] - ip[3])<<5);
-#else
-        a1 = ((ip[0] + ip[3])<<3);
-        b1 = ((ip[1] + ip[2])<<3);
-        c1 = ((ip[1] - ip[2])<<3);
-        d1 = ((ip[0] - ip[3])<<3);
-#endif
+
         op[0] = a1 + b1;
         op[2] = a1 - b1;
 
@@ -198,22 +188,12 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
 
     for (i = 0; i < 4; i++)
     {
-#if !CONFIG_EXTEND_QRANGE
-        a1 = ((ip[0] + ip[2])<<2);
-        d1 = ((ip[1] + ip[3])<<2);
-        c1 = ((ip[1] - ip[3])<<2);
-        b1 = ((ip[0] - ip[2])<<2);
-
-        op[0] = a1 + d1 + (a1!=0);
-#else
         a1 = ((ip[0] + ip[2]));
         d1 = ((ip[1] + ip[3]));
         c1 = ((ip[1] - ip[3]));
         b1 = ((ip[0] - ip[2]));
 
-
         op[0] = a1 + d1;
-#endif
         op[1] = b1 + c1;
         op[2] = b1 - c1;
         op[3] = a1 - d1;
@@ -241,17 +221,11 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
         c2 += c2<0;
         d2 += d2<0;
 
-#if !CONFIG_EXTEND_QRANGE
-        op[0] = (a2+3) >> 3;
-        op[4] = (b2+3) >> 3;
-        op[8] = (c2+3) >> 3;
-        op[12]= (d2+3) >> 3;
-#else
         op[0] = (a2+1) >> 2;
         op[4] = (b2+1) >> 2;
         op[8] = (c2+1) >> 2;
         op[12]= (d2+1) >> 2;
-#endif
+
         ip++;
         op++;
     }

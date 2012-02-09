@@ -119,14 +119,8 @@ static const Prob Pcat2[] = { 165, 145};
 static const Prob Pcat3[] = { 173, 148, 140};
 static const Prob Pcat4[] = { 176, 155, 140, 135};
 static const Prob Pcat5[] = { 180, 157, 141, 134, 130};
-#if CONFIG_EXTEND_QRANGE
 static const Prob Pcat6[] =
 { 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129};
-#else
-static const Prob Pcat6[] =
-{ 254, 254, 243, 230, 196, 177, 153, 140, 133, 130, 129};
-
-#endif
 
 static vp8_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[26];
 
@@ -166,11 +160,7 @@ static void init_bit_trees()
     init_bit_tree(cat3, 3);
     init_bit_tree(cat4, 4);
     init_bit_tree(cat5, 5);
-#if CONFIG_EXTEND_QRANGE
     init_bit_tree(cat6, 13);
-#else
-    init_bit_tree(cat6, 11);
-#endif
 }
 
 vp8_extra_bit_struct vp8_extra_bits[12] =
@@ -185,11 +175,7 @@ vp8_extra_bit_struct vp8_extra_bits[12] =
     { cat3, Pcat3, 3, 11},
     { cat4, Pcat4, 4, 19},
     { cat5, Pcat5, 5, 35},
-#if CONFIG_EXTEND_QRANGE
     { cat6, Pcat6, 13, 67},
-#else
-    { cat6, Pcat6, 11, 67},
-#endif
     { 0, 0, 0, 0}
 };
 

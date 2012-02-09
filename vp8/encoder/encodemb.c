@@ -355,11 +355,7 @@ struct vp8_token_state{
 // TODO: experiments to find optimal multiple numbers
 #define Y1_RD_MULT 4
 #define UV_RD_MULT 2
-#if !CONFIG_EXTEND_QRANGE
-#define Y2_RD_MULT 16
-#else
 #define Y2_RD_MULT 4
-#endif
 
 static const int plane_rd_mult[4]=
 {
@@ -615,7 +611,6 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     *a = *l = (d->eob != !type);
 }
 
-#if CONFIG_EXTEND_QRANGE
     /**************************************************************************
     our inverse hadamard transform effectively is weighted sum of all 16 inputs
     with weight either 1 or -1. It has a last stage scaling of (sum+1)>>2. And
@@ -625,18 +620,6 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     fall between -65 and +65.
     **************************************************************************/
 #define SUM_2ND_COEFF_THRESH 65
-#else
-    /**************************************************************************
-    our inverse hadamard transform effectively is weighted sum of all 16 inputs
-    with weight either 1 or -1. It has a last stage scaling of (sum+3)>>3. And
-    dc only idct is (dc+4)>>3. So if all the sums are between -35 and 29, the
-    output after inverse wht and idct will be all zero. A sum of absolute value
-    smaller than 35 guarantees all 16 different (+1/-1) weighted sums in wht
-    fall between -35 and +35.
-    **************************************************************************/
-#define SUM_2ND_COEFF_THRESH 35
-
-#endif
 
 static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
                                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
@@ -1052,11 +1035,7 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
             final_eob = i;
         rc = vp8_default_zig_zag1d_8x8[i];
         qcoeff_ptr[rc] = x;
-#if !CONFIG_EXTEND_QRANGE
-        dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];
-#else
         dqcoeff_ptr[rc] = (x * dequant_ptr[rc!=0]+2)>>2;
-#endif
 
         next = tokens[i][best].next;
         best = (best_mask[best] >> i) & 1;

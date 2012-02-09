@@ -50,11 +50,7 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 #define PROB_UPDATE_BASELINE_COST   7
 
 #define MAX_PROB                255
-#if CONFIG_EXTEND_QRANGE
 #define DCT_MAX_VALUE           8192
-#else
-#define DCT_MAX_VALUE           2048
-#endif
 
 /* Coefficients are predicted via a 3-dimensional probability table. */
 

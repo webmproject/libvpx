@@ -251,12 +251,7 @@ int compute_rd_mult( int qindex )
     int q;
 
     q = vp8_dc_quant(qindex,0);
-#if CONFIG_EXTEND_QRANGE
     return (3 * q * q) >> 4;
-#else
-    return (3 * q * q);
-#endif
-
 }
 
 void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex)
@@ -309,13 +304,10 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 
     vp8_set_speed_features(cpi);
 
-#if CONFIG_EXTEND_QRANGE
     q = (int)pow(vp8_dc_quant(QIndex,0)>>2, 1.25);
     q = q << 2;
     cpi->RDMULT = cpi->RDMULT << 4;
-#else
-    q = (int)pow(vp8_dc_quant(QIndex,0), 1.25);
-#endif
+
     if (q < 8)
         q = 8;
 
@@ -659,11 +651,7 @@ static void macro_block_yrd( MACROBLOCK *mb,
     // Distortion
     d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
 
-#if CONFIG_EXTEND_QRANGE
     d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
-#else
-    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff);
-#endif
 
     *Distortion = (d >> 4);
 
