@@ -521,9 +521,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             cm->dual_pred_mode += vp8_read(bc, 128);
         if (cm->dual_pred_mode == HYBRID_PREDICTION)
         {
-            cm->prob_dualpred[0] = (vp8_prob)vp8_read_literal(bc, 8);
-            cm->prob_dualpred[1] = (vp8_prob)vp8_read_literal(bc, 8);
-            cm->prob_dualpred[2] = (vp8_prob)vp8_read_literal(bc, 8);
+            int i;
+            for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
+                cm->prob_dualpred[i] = (vp8_prob)vp8_read_literal(bc, 8);
         }
 #endif /* CONFIG_DUALPRED */
 

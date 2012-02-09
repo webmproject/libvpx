@@ -1284,8 +1284,8 @@ static void encode_frame_internal(VP8_COMP *cpi)
     init_encode_frame_mb_context(cpi);
 #if CONFIG_DUALPRED
     cpi->rd_single_diff = cpi->rd_dual_diff = cpi->rd_hybrid_diff = 0;
-    cpi->single_pred_count[0] = cpi->single_pred_count[1] = cpi->single_pred_count[2] = 0;
-    cpi->dual_pred_count[0]   = cpi->dual_pred_count[1]   = cpi->dual_pred_count[2]   = 0;
+    vpx_memset(cpi->single_pred_count, 0, sizeof(cpi->single_pred_count));
+    vpx_memset(cpi->dual_pred_count, 0, sizeof(cpi->dual_pred_count));
 #endif /* CONFIG_DUALPRED */
 
     {
@@ -1513,15 +1513,21 @@ void vp8_encode_frame(VP8_COMP *cpi)
         }
         else if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
         {
-            if (cpi->dual_pred_count[0] == 0 &&
-                cpi->dual_pred_count[1] == 0 &&
-                cpi->dual_pred_count[2] == 0)
+            int single_count_zero = 0;
+            int dual_count_zero = 0;
+            int i;
+
+            for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
+            {
+                single_count_zero += cpi->single_pred_count[i];
+                dual_count_zero += cpi->dual_pred_count[i];
+            }
+
+            if (dual_count_zero == 0)
             {
                 cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
             }
-            else if (cpi->single_pred_count[0] == 0 &&
-                     cpi->single_pred_count[1] == 0 &&
-                     cpi->single_pred_count[2] == 0)
+            else if (single_count_zero == 0)
             {
                 cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
             }
@@ -1533,22 +1539,27 @@ void vp8_encode_frame(VP8_COMP *cpi)
             }
         }
 
-
         if (redo)
         {
             encode_frame_internal(cpi);
 
             if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
             {
-                if (cpi->dual_pred_count[0] == 0 &&
-                    cpi->dual_pred_count[1] == 0 &&
-                    cpi->dual_pred_count[2] == 0)
+                int single_count_zero = 0;
+                int dual_count_zero = 0;
+                int i;
+
+                for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
+                {
+                    single_count_zero += cpi->single_pred_count[i];
+                    dual_count_zero += cpi->dual_pred_count[i];
+                }
+
+                if (dual_count_zero == 0)
                 {
                     cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
                 }
-                else if (cpi->single_pred_count[0] == 0 &&
-                         cpi->single_pred_count[1] == 0 &&
-                         cpi->single_pred_count[2] == 0)
+                else if (single_count_zero == 0)
                 {
                     cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
                 }

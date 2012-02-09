@@ -365,7 +365,8 @@ typedef struct VP8_COMP
 #if CONFIG_DUALPRED
     int rd_single_diff, rd_dual_diff, rd_hybrid_diff;
     int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
-    int dual_pred_count[3], single_pred_count[3];
+    int dual_pred_count[DUAL_PRED_CONTEXTS];
+    int single_pred_count[DUAL_PRED_CONTEXTS];
 #endif /* CONFIG_DUALPRED */
 
     int RDMULT;

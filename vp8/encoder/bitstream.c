@@ -1060,7 +1060,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
 #if CONFIG_DUALPRED
 #if !CONFIG_COMPRED
-    int prob_dual_pred[3];
+    int prob_dual_pred[DUAL_PRED_CONTEXTS];
 #endif
 #endif /* CONFIG_DUALPRED */
 
@@ -1110,7 +1110,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     {
         vp8_write(w, 1, 128);
         vp8_write(w, 1, 128);
-        for (i = 0; i < 3; i++)
+        for (i = 0; i < DUAL_PRED_CONTEXTS; i++)
         {
             if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
             {
@@ -1470,7 +1470,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
 #if CONFIG_DUALPRED
 #if !CONFIG_COMPRED
-    int prob_dual_pred[3];
+    int prob_dual_pred[DUAL_PRED_CONTEXTS];
 #endif
 #endif /* CONFIG_DUALPRED */
 
@@ -1517,7 +1517,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     {
         vp8_write(w, 1, 128);
         vp8_write(w, 1, 128);
-        for (i = 0; i < 3; i++)
+        for (i = 0; i < DUAL_PRED_CONTEXTS; i++)
         {
             if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
             {

@@ -48,6 +48,14 @@ void vp8_initialize_common(void);
 
 #define MAX_PARTITIONS 9
 
+#if CONFIG_DUALPRED
+#if CONFIG_COMPRED
+#define DUAL_PRED_CONTEXTS   2
+#else
+#define DUAL_PRED_CONTEXTS   3
+#endif
+#endif /* CONFIG_DUALPRED */
+
 typedef struct frame_contexts
 {
     vp8_prob bmode_prob [VP8_BINTRAMODES-1];
@@ -242,7 +250,7 @@ typedef struct VP8Common
 #endif
 
 #if CONFIG_DUALPRED
-    vp8_prob prob_dualpred[3];
+    vp8_prob prob_dualpred[DUAL_PRED_CONTEXTS];
 #endif /* CONFIG_DUALPRED */
 
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */

@@ -41,24 +41,21 @@ unsigned char get_pred_context( VP8_COMMON *const cm,
     case PRED_DUAL:
         // Context based on use of dual pred flag by neighbours
         //pred_context =
-        //    ((m - 1)->mbmi.second_ref_frame != INTRA_FRAME) +
+        //   ((m - 1)->mbmi.second_ref_frame != INTRA_FRAME) +
         //    ((m - cm->mode_info_stride)->mbmi.second_ref_frame != INTRA_FRAME);
 
-        // Context based on mode
-        //if ( m->mbmi.mode == ZEROMV )
-        //    pred_context = 0;
-        //else if ( (m->mbmi.mode == NEARESTMV) || (m->mbmi.mode == NEARMV) )
-        //    pred_context = 1;
+        // Context based on mode and reference frame
+        //if ( m->mbmi.ref_frame == LAST_FRAME )
+        //    pred_context = 0 + (m->mbmi.mode != ZEROMV);
+        //else if ( m->mbmi.ref_frame == GOLDEN_FRAME )
+        //    pred_context = 2 + (m->mbmi.mode != ZEROMV);
         //else
-        //    pred_context = 2;
+        //    pred_context = 4 + (m->mbmi.mode != ZEROMV);
 
-        // Context based on reference frame
         if ( m->mbmi.ref_frame == LAST_FRAME )
             pred_context = 0;
-        else if ( m->mbmi.ref_frame == GOLDEN_FRAME )
-            pred_context = 1;
         else
-            pred_context = 2;
+            pred_context = 1;
 
         break;
 #endif
