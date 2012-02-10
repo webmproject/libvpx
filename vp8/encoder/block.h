@@ -47,6 +47,9 @@ typedef struct
     int src_stride;
 
     int eob_max_offset;
+#if CONFIG_T8X8
+    int eob_max_offset_8x8;
+#endif
 
 } BLOCK;
 

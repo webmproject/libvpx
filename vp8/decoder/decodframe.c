@@ -165,9 +165,22 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     int i;
 
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type( xd,
-                                  xd->mode_info_context->mbmi.segment_id);
-    xd->mode_info_context->mbmi.txfm_size = tx_type;
+    int tx_type;
+    if( pbi->common.txfm_mode==ONLY_4X4 )
+    {
+        xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+    }
+    else if( pbi->common.txfm_mode == ALLOW_8X8 )
+    {
+        if( xd->mode_info_context->mbmi.mode ==B_PRED
+            ||xd->mode_info_context->mbmi.mode ==I8X8_PRED
+            ||xd->mode_info_context->mbmi.mode ==SPLITMV)
+            xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+        else
+            xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+    }
+
+    tx_type = xd->mode_info_context->mbmi.txfm_size;
 #endif
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
@@ -1243,6 +1256,10 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
     /* Read the loop filter level and type */
+#if CONFIG_T8X8
+    pc->txfm_mode = (TXFM_MODE) vp8_read_bit(bc);
+#endif
+
     pc->filter_type = (LOOPFILTERTYPE) vp8_read_bit(bc);
     pc->filter_level = vp8_read_literal(bc, 6);
     pc->sharpness_level = vp8_read_literal(bc, 3);
@@ -1420,6 +1437,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     }
     }
 #if CONFIG_T8X8
+    if(pbi->common.txfm_mode == ALLOW_8X8)
     {
         // read coef probability tree
 

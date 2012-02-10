@@ -937,6 +937,11 @@ void encode_mb_row(VP8_COMP *cpi,
 
         x->active_ptr = cpi->active_map + map_index + mb_col;
 
+#if CONFIG_T8X8
+        /* force 4x4 transform for mode selection */
+        xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+#endif
+
         if (cm->frame_type == KEY_FRAME)
         {
             *totalrate += vp8cx_encode_intra_macro_block(cpi, x, tp);
@@ -1727,6 +1732,22 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         vp8_update_zbin_extra(cpi, x);
     }
 
+#if CONFIG_T8X8
+    /* test code: set transform size based on mode selection */
+    if(cpi->common.txfm_mode == ALLOW_8X8
+        && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != B_PRED)
+    {
+        x->e_mbd.mode_info_context->mbmi.txfm_size = TX_8X8;
+        cpi->t8x8_count++;
+    }
+    else
+    {
+        x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
+        cpi->t4x4_count ++;
+    }
+#endif
+
     if(x->e_mbd.mode_info_context->mbmi.mode == I8X8_PRED)
     {
         vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
@@ -1741,16 +1762,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
-#if CONFIG_T8X8
-        if ( get_seg_tx_type(&x->e_mbd,
-                             x->e_mbd.mode_info_context->mbmi.segment_id)
-             == TX_8X8 )
-        {
-            cpi->t8x8_count++;
-        }
-        else
-            cpi->t4x4_count++;
-#endif
+
     return rate;
 }
 #ifdef SPEEDSTATS
@@ -1817,6 +1829,22 @@ int vp8cx_encode_inter_macroblock
                 cpi->dual_pred_count[pred_context]++;
         }
 
+#if CONFIG_T8X8
+        /* test code: set transform size based on mode selection */
+        if( cpi->common.txfm_mode == ALLOW_8X8
+            && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
+            && x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+            && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+        {
+            x->e_mbd.mode_info_context->mbmi.txfm_size = TX_8X8;
+            cpi->t8x8_count ++;
+        }
+        else
+        {
+            x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
+            cpi->t4x4_count++;
+        }
+#endif
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)
         {
@@ -1825,7 +1853,6 @@ int vp8cx_encode_inter_macroblock
             cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
                                                       quantb_pair);
         }
-
         /* restore cpi->zbin_mode_boost_enabled */
         cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
 
@@ -2015,14 +2042,6 @@ int vp8cx_encode_inter_macroblock
                                            xd->dst.y_stride, xd->dst.uv_stride);
         }
     }
-#if CONFIG_T8X8
-    if ( get_seg_tx_type( xd, *segment_id ) == TX_8X8 )
-    {
-        cpi->t8x8_count++;
-    }
-    else
-        cpi->t4x4_count++;
-#endif
 
     if (!x->skip)
     {
@@ -2066,6 +2085,5 @@ int vp8cx_encode_inter_macroblock
             cpi->skip_false_count ++;
         }
     }
-
     return rate;
 }

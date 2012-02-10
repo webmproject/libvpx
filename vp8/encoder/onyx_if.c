@@ -579,16 +579,11 @@ static void init_seg_features(VP8_COMP *cpi)
                     set_segdata( xd, 1, SEG_LVL_MODE, ZEROMV );
                     enable_segfeature(xd, 1, SEG_LVL_MODE);
 
-                    if ( !segfeature_active( xd, 1, SEG_LVL_TRANSFORM ) ||
-                         get_seg_tx_type( xd, 1 ) == TX_4X4 )
-                    {
-                        // EOB segment coding not fixed for 8x8 yet
-                        set_segdata( xd, 1, SEG_LVL_EOB, 0 );
-                        enable_segfeature(xd, 1, SEG_LVL_EOB);
-                    }
+                    // EOB segment coding not fixed for 8x8 yet
+                    set_segdata( xd, 1, SEG_LVL_EOB, 0 );
+                    enable_segfeature(xd, 1, SEG_LVL_EOB);
                 }
             }
-
             // Disable segmentation and clear down features if alt ref
             // is not active for this group
             else
@@ -627,23 +622,11 @@ static void init_seg_features(VP8_COMP *cpi)
             // Skip all MBs if high Q
             if ( high_q )
             {
-                // EOB segment coding not fixed for 8x8 yet
-                if ( !segfeature_active( xd, 0, SEG_LVL_TRANSFORM ) ||
-                     get_seg_tx_type( xd, 0 ) == TX_4X4 )
-                {
-                    enable_segfeature(xd, 0, SEG_LVL_EOB);
-                    set_segdata( xd, 0, SEG_LVL_EOB, 0 );
-                }
-
-                // EOB segment coding not fixed for 8x8 yet
-                if ( !segfeature_active( xd, 1, SEG_LVL_TRANSFORM ) ||
-                     get_seg_tx_type( xd, 1 ) == TX_4X4 )
-                {
-                    enable_segfeature(xd, 1, SEG_LVL_EOB);
-                    set_segdata( xd, 1, SEG_LVL_EOB, 0 );
-                }
+                enable_segfeature(xd, 0, SEG_LVL_EOB);
+                set_segdata( xd, 0, SEG_LVL_EOB, 0 );
+                enable_segfeature(xd, 1, SEG_LVL_EOB);
+                set_segdata( xd, 1, SEG_LVL_EOB, 0 );
             }
-
             // Enable data udpate
             xd->update_mb_segmentation_data = 1;
         }
@@ -653,25 +636,6 @@ static void init_seg_features(VP8_COMP *cpi)
             // No updeates.. leave things as they are.
             xd->update_mb_segmentation_map = 0;
             xd->update_mb_segmentation_data = 0;
-
-#if CONFIG_T8X8
-            {
-                vp8_disable_segmentation((VP8_PTR)cpi);
-                clearall_segfeatures(xd);
-                vp8_enable_segmentation((VP8_PTR)cpi);
-                // 8x8TX test code.
-                // This assignment does not necessarily make sense but is
-                // just to test the mechanism for now.
-                enable_segfeature(xd, 0, SEG_LVL_TRANSFORM);
-                set_segdata( xd, 0, SEG_LVL_TRANSFORM, TX_4X4 );
-                enable_segfeature(xd, 1, SEG_LVL_TRANSFORM);
-                set_segdata( xd, 1, SEG_LVL_TRANSFORM, TX_8X8 );
-                /* force every mb to use 8x8 transform for testing*/
-                vpx_memset(cpi->segmentation_map, 1,
-                    cpi->common.mb_rows * cpi->common.mb_cols);
-
-            }
-#endif
         }
     }
 }
@@ -2645,7 +2609,9 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 #if CONFIG_INTERNAL_STATS
 
         vp8_clear_system_state();
-
+#if CONFIG_T8X8
+        printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
+#endif
         if (cpi->pass != 1)
         {
             FILE *f = fopen("opsnr.stt", "a");

@@ -107,6 +107,7 @@ static void fill_value_tokens()
 #if CONFIG_T8X8
 static void tokenize2nd_order_b_8x8
 (
+     MACROBLOCKD *xd,
     const BLOCKD *const b,
     TOKENEXTRA **tp,
     const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
@@ -122,6 +123,16 @@ static void tokenize2nd_order_b_8x8
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
     int x;
     const short *qcoeff_ptr = b->qcoeff;
+
+    int seg_eob = 64;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
+
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        seg_eob = get_segdata( xd, segment_id, SEG_LVL_EOB );
+    }
+
+
     VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
     assert(eob<=4);
@@ -158,7 +169,7 @@ static void tokenize2nd_order_b_8x8
 
         ++cpi->coef_counts_8x8       [type] [band] [pt] [x];
     }
-    while (pt = vp8_prev_token_class[x], ++t, c < eob  &&  ++c < 4);
+    while (pt = vp8_prev_token_class[x], ++t, c < eob  &&  ++c <seg_eob);
 
     *tp = t;
     pt = (c != !type); /* 0 <-> all coeff data is zero */
@@ -239,6 +250,7 @@ static void tokenize2nd_order_b
 #if CONFIG_T8X8
 static void tokenize1st_order_b_8x8
 (
+     MACROBLOCKD *xd,
     const BLOCKD *const b,
     TOKENEXTRA **tp,
     const int type,     /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
@@ -256,6 +268,15 @@ static void tokenize1st_order_b_8x8
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
     int x;
     const short *qcoeff_ptr = b->qcoeff;
+
+    int seg_eob = 64;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
+
+    if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )
+    {
+        seg_eob = get_segdata( xd, segment_id, SEG_LVL_EOB );
+    }
+
     VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
 
     do
@@ -287,7 +308,7 @@ static void tokenize1st_order_b_8x8
 
         ++cpi->coef_counts_8x8       [type] [band] [pt] [x];
     }
-    while (pt = vp8_prev_token_class[x], ++t, c < eob  &&  ++c < 64);
+    while (pt = vp8_prev_token_class[x], ++t, c < eob  &&  ++c < seg_eob);
 
     *tp = t;
     pt = (c != !type); /* 0 <-> all coeff data is zero */
@@ -475,7 +496,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int b;
 
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type(x, x->mode_info_context->mbmi.segment_id);
+    int tx_type = x->mode_info_context->mbmi.txfm_size;
 #endif
 
     // If the MB is going to be skipped because of a segment level flag
@@ -536,7 +557,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
         {
             ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
             ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
-            tokenize2nd_order_b_8x8(x->block + 24, t, 1, x->frame_type,
+            tokenize2nd_order_b_8x8(x,
+                        x->block + 24, t, 1, x->frame_type,
                        A + vp8_block2above[24], L + vp8_block2left[24], cpi);
         }
         else
@@ -553,7 +575,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
         ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
         for (b = 0; b < 16; b+=4)
         {
-            tokenize1st_order_b_8x8(x->block + b, t, plane_type, x->frame_type,
+            tokenize1st_order_b_8x8(x,
+                                x->block + b, t, plane_type, x->frame_type,
                                 A + vp8_block2above[b],
                                 L + vp8_block2left[b],
                                 A + vp8_block2above[b+1],
@@ -592,7 +615,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
         }
 
         for (b = 16; b < 24; b+=4) {
-            tokenize1st_order_b_8x8(x->block + b, t, 2, x->frame_type,
+            tokenize1st_order_b_8x8(x,
+                                    x->block + b, t, 2, x->frame_type,
                                     A + vp8_block2above[b],
                                     L + vp8_block2left[b],
                                     A + vp8_block2above[b+1],

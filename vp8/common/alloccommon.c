@@ -211,6 +211,9 @@ void vp8_create_common(VP8_COMMON *oci)
 
     vp8_default_bmode_probs(oci->fc.bmode_prob);
 
+#if CONFIG_T8X8
+    oci->txfm_mode = ONLY_4X4;
+#endif
     oci->mb_no_coeff_skip = 1;
     oci->dual_pred_mode = HYBRID_PREDICTION;
     oci->no_lpf = 0;

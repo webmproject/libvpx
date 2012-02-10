@@ -90,6 +90,15 @@ typedef enum
     NB_PREDICTION_TYPES    = 3,
 } DUALPREDMODE_TYPE;
 
+#if CONFIG_T8X8
+/* TODO: allows larger transform */
+typedef enum
+{
+    ONLY_4X4            = 0,
+    ALLOW_8X8           = 1
+} TXFM_MODE;
+#endif /* CONFIG_T8X8 */
+
 typedef struct VP8_COMMON_RTCD
 {
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -147,6 +156,9 @@ typedef struct VP8Common
     /* profile settings */
     int experimental;
     int mb_no_coeff_skip;
+#if CONFIG_T8X8
+    TXFM_MODE txfm_mode;
+#endif
     DUALPREDMODE_TYPE dual_pred_mode;
     int no_lpf;
     int use_bilinear_mc_filter;

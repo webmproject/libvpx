@@ -472,50 +472,52 @@ void vp8_fast_quantize_b_2x2_c(BLOCK *b, BLOCKD *d)
 
 void vp8_fast_quantize_b_8x8_c(BLOCK *b, BLOCKD *d)
 {
-  int i, rc, eob;
-  int zbin;
-  int x, y, z, sz;
-  short *coeff_ptr  = b->coeff;
-  short *zbin_ptr   = b->zbin;
-  short *round_ptr  = b->round;
-  short *quant_ptr  = b->quant;
-  short *qcoeff_ptr = d->qcoeff;
-  short *dqcoeff_ptr = d->dqcoeff;
-  short *dequant_ptr = d->dequant;
-  //double q1st = 2;
-  vpx_memset(qcoeff_ptr, 0, 64*sizeof(short));
-  vpx_memset(dqcoeff_ptr, 0, 64*sizeof(short));
+    int i, rc, eob;
+    int zbin;
+    int x, y, z, sz;
+    short *coeff_ptr  = b->coeff;
+    short *zbin_ptr   = b->zbin;
+    short *round_ptr  = b->round;
+    short *quant_ptr  = b->quant;
+    short *qcoeff_ptr = d->qcoeff;
+    short *dqcoeff_ptr = d->dqcoeff;
+    short *dequant_ptr = d->dequant;
+    //double q1st = 2;
+    vpx_memset(qcoeff_ptr, 0, 64*sizeof(short));
+    vpx_memset(dqcoeff_ptr, 0, 64*sizeof(short));
 
-  eob = -1;
+    eob = -1;
 
-  for (i = 0; i < 64; i++)
-  {
 
-    rc   = vp8_default_zig_zag1d_8x8[i];
-    z    = coeff_ptr[rc];
-    //zbin = zbin_ptr[rc!=0]/q1st ;
-    zbin = zbin_ptr[rc!=0] ;
 
-    sz = (z >> 31);                                 // sign of z
-    x  = (z ^ sz) - sz;                             // x = abs(z)
-
-    if (x >= zbin)
+    for (i = 0; i < 64; i++)
     {
-      //y  = ((int)((x + round_ptr[rc!=0] / q1st) * quant_ptr[rc!=0] * q1st)) >> 16;
-      y  = ((int)((x + round_ptr[rc!=0]) * quant_ptr[rc!=0])) >> 16;
-      x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc] = x;                         // write to destination
-      //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
-      dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
 
-      if (y)
-      {
-        eob = i;                                // last nonzero coeffs
-      }
+        rc   = vp8_default_zig_zag1d_8x8[i];
+        z    = coeff_ptr[rc];
+        //zbin = zbin_ptr[rc!=0]/q1st ;
+        zbin = zbin_ptr[rc!=0] ;
+
+        sz = (z >> 31);                                 // sign of z
+        x  = (z ^ sz) - sz;                             // x = abs(z)
+
+        if (x >= zbin)
+        {
+            //y  = ((int)((x + round_ptr[rc!=0] / q1st) * quant_ptr[rc!=0] * q1st)) >> 16;
+            y  = ((int)((x + round_ptr[rc!=0]) * quant_ptr[rc!=0])) >> 16;
+            x  = (y ^ sz) - sz;                         // get the sign back
+            qcoeff_ptr[rc] = x;                         // write to destination
+            //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
+            dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
+            dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
+
+            if (y)
+            {
+                eob = i;                                // last nonzero coeffs
+            }
+        }
     }
-  }
-  d->eob = eob + 1;
+    d->eob = eob + 1;
 }
 
 #endif //EXACT_FASTQUANT
@@ -542,7 +544,7 @@ void vp8_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d)
 
   eob = -1;
 
-  for (i = 0; i < 4; i++)
+  for (i = 0; i < b->eob_max_offset_8x8; i++)
   {
     rc   = vp8_default_zig_zag1d[i];
     z    = coeff_ptr[rc];
@@ -600,7 +602,7 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
 
   eob = -1;
 
-  for (i = 0; i < 64; i++)
+  for (i = 0; i < b->eob_max_offset_8x8; i++)
   {
 
     rc   = vp8_default_zig_zag1d_8x8[i];
@@ -1138,9 +1140,18 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         {
             x->block[i].eob_max_offset =
                 get_segdata( xd, segment_id, SEG_LVL_EOB );
+#if CONFIG_T8X8
+            x->block[i].eob_max_offset_8x8 =
+                get_segdata( xd, segment_id, SEG_LVL_EOB );
+#endif
         }
         else
+        {
             x->block[i].eob_max_offset = 16;
+#if CONFIG_T8X8
+            x->block[i].eob_max_offset_8x8 = 64;
+#endif
+        }
     }
 
     // UV
@@ -1165,9 +1176,20 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
         {
             x->block[i].eob_max_offset =
                 get_segdata( xd, segment_id, SEG_LVL_EOB );
+#if CONFIG_T8X8
+            x->block[i].eob_max_offset_8x8 =
+                get_segdata( xd, segment_id, SEG_LVL_EOB );
+#endif
+
         }
         else
+        {
             x->block[i].eob_max_offset = 16;
+#if CONFIG_T8X8
+            x->block[i].eob_max_offset_8x8 = 64;
+#endif
+
+        }
     }
 
     // Y2
@@ -1191,9 +1213,18 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     {
         x->block[24].eob_max_offset =
             get_segdata( xd, segment_id, SEG_LVL_EOB );
+#if CONFIG_T8X8
+        x->block[24].eob_max_offset_8x8 =
+            get_segdata( xd, segment_id, SEG_LVL_EOB );
+#endif
     }
     else
+    {
         x->block[24].eob_max_offset = 16;
+#if CONFIG_T8X8
+        x->block[24].eob_max_offset_8x8 = 64;
+#endif
+    }
 
     /* save this macroblock QIndex for vp8_update_zbin_extra() */
     x->q_index = QIndex;

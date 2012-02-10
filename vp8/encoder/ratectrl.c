@@ -225,6 +225,10 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
 
     vpx_memset(cpi->common.fc.pre_mvc, 0, sizeof(cpi->common.fc.pre_mvc));  //initialize pre_mvc to all zero.
 
+#if CONFIG_T8X8
+    cpi->common.txfm_mode = ONLY_4X4;
+#endif
+
     //cpi->common.filter_level = 0;      // Reset every key frame.
     cpi->common.filter_level = cpi->common.base_qindex * 3 / 8 ;
 
@@ -251,6 +255,13 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
 }
 void vp8_setup_inter_frame(VP8_COMP *cpi)
 {
+#if CONFIG_T8X8
+    if(cpi->common.Width * cpi->common.Height > 640*360)
+        cpi->common.txfm_mode = ALLOW_8X8;
+    else
+        cpi->common.txfm_mode = ONLY_4X4;
+#endif
+
     if(cpi->common.refresh_alt_ref_frame)
     {
         vpx_memcpy( &cpi->common.fc,

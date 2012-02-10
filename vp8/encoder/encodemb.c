@@ -1258,9 +1258,7 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type(&x->e_mbd,
-                                  x->e_mbd.mode_info_context->mbmi.segment_id);
-    x->e_mbd.mode_info_context->mbmi.txfm_size = tx_type;
+    int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
 #endif
 
     vp8_build_inter_predictors_mb(&x->e_mbd);
@@ -1357,8 +1355,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type(&x->e_mbd,
-                                  x->e_mbd.mode_info_context->mbmi.segment_id);
+    int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
 #endif
 
     BLOCK *b = &x->block[0];

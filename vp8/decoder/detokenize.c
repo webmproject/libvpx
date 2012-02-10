@@ -292,6 +292,9 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
     INT16 v;
     const vp8_prob *Prob;//
 
+    int seg_eob;
+    int segment_id = x->mode_info_context->mbmi.segment_id;
+
     type = 3;
     i = 0;
     stop = 16;
@@ -338,16 +341,32 @@ BLOCK_LOOP_8x8:
     if(i==24)
     {
       VP8_COMBINEENTROPYCONTEXTS(v, *a, *l);
+      if ( segfeature_active( x, segment_id, SEG_LVL_EOB ) )
+      {
+          seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
+      }
+      else
+          seg_eob = 64;
     }
     else
     {
       VP8_COMBINEENTROPYCONTEXTS_8x8(v, *a, *l, *a1, *l1);
+      if ( segfeature_active( x, segment_id, SEG_LVL_EOB ) )
+      {
+          seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
+      }
+      else
+          seg_eob = 64;
     }
 
     Prob = coef_probs;
     Prob += v * ENTROPY_NODES;
 
 DO_WHILE_8x8:
+//#if CONFIG_SEGFEATURES
+    if ( c == seg_eob )
+        goto BLOCK_FINISHED_8x8;
+
     if(i==24)
       Prob += coef_bands_x[c];
     else

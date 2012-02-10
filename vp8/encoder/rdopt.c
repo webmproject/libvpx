@@ -647,11 +647,147 @@ static void macro_block_yrd( MACROBLOCK *mb,
     d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
 
     *Distortion = (d >> 4);
-
     // rate
     *Rate = vp8_rdcost_mby(mb);
 }
 
+#if CONFIG_T8X8
+
+static int cost_coeffs_2x2(MACROBLOCK *mb,
+                           BLOCKD *b, int type,
+                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l)
+{
+    int c = !type;              /* start at coef 0, unless Y with Y2 */
+    int eob = b->eob;
+    int pt ;    /* surrounding block/prev coef predictor */
+    int cost = 0;
+    short *qcoeff_ptr = b->qcoeff;
+
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+    assert(eob<=4);
+
+# define QC2X2( I)  ( qcoeff_ptr [vp8_default_zig_zag1d[I]] )
+
+    for (; c < eob; c++)
+    {
+        int v = QC2X2(c);
+        int t = vp8_dct_value_tokens_ptr[v].Token;
+        cost += mb->token_costs_8x8[type] [vp8_coef_bands[c]] [pt] [t];
+        cost += vp8_dct_value_cost_ptr[v];
+        pt = vp8_prev_token_class[t];
+    }
+
+# undef QC2X2
+    if (c < 4)
+        cost += mb->token_costs_8x8 [type][vp8_coef_bands[c]]
+                                    [pt] [DCT_EOB_TOKEN];
+
+    pt = (c != !type); // is eob first coefficient;
+    *a = *l = pt;
+    return cost;
+}
+
+
+static int cost_coeffs_8x8(MACROBLOCK *mb,
+                           BLOCKD *b, int type,
+                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                           ENTROPY_CONTEXT *a1, ENTROPY_CONTEXT *l1)
+{
+    int c = !type;              /* start at coef 0, unless Y with Y2 */
+    int eob = b->eob;
+    int pt ;    /* surrounding block/prev coef predictor */
+    int cost = 0;
+    short *qcoeff_ptr = b->qcoeff;
+
+    VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
+
+# define QC8X8( I)  ( qcoeff_ptr [vp8_default_zig_zag1d_8x8[I]] )
+
+    for (; c < eob; c++)
+    {
+        int v = QC8X8(c);
+        int t = vp8_dct_value_tokens_ptr[v].Token;
+        cost += mb->token_costs_8x8[type] [vp8_coef_bands_8x8[c]] [pt] [t];
+        cost += vp8_dct_value_cost_ptr[v];
+        pt = vp8_prev_token_class[t];
+    }
+
+# undef QC8X8
+    if (c < 64)
+        cost += mb->token_costs_8x8 [type][vp8_coef_bands_8x8[c]]
+                                    [pt] [DCT_EOB_TOKEN];
+
+    pt = (c != !type); // is eob first coefficient;
+    *a = *l = pt;
+    return cost;
+}
+static int vp8_rdcost_mby_8x8(MACROBLOCK *mb)
+{
+    int cost = 0;
+    int b;
+    MACROBLOCKD *x = &mb->e_mbd;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
+    for (b = 0; b < 16; b+=4)
+        cost += cost_coeffs_8x8(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
+                    ta + vp8_block2above[b], tl + vp8_block2left[b],
+                    ta + vp8_block2above[b+4], tl + vp8_block2left[b+4]);
+
+    cost += cost_coeffs_2x2(mb, x->block + 24, PLANE_TYPE_Y2,
+                ta + vp8_block2above[24], tl + vp8_block2left[24]);
+    return cost;
+}
+
+static void macro_block_yrd_8x8( MACROBLOCK *mb,
+                             int *Rate,
+                             int *Distortion,
+                             const VP8_ENCODER_RTCD *rtcd)
+{
+    int b;
+    MACROBLOCKD *const x = &mb->e_mbd;
+    BLOCK   *const mb_y2 = mb->block + 24;
+    BLOCKD *const x_y2  = x->block + 24;
+    short *Y2DCPtr = mb_y2->src_diff;
+    BLOCK *beptr;
+    int d;
+
+    ENCODEMB_INVOKE(&rtcd->encodemb, submby)
+        ( mb->src_diff, *(mb->block[0].base_src),
+        mb->e_mbd.predictor, mb->block[0].src_stride );
+
+    vp8_transform_mby_8x8(mb);
+    vp8_quantize_mby_8x8(mb);
+
+    /* remove 1st order dc to properly combine 1st/2nd order distortion */
+    mb->coeff[0] = 0;
+    mb->coeff[64] = 0;
+    mb->coeff[128] = 0;
+    mb->coeff[192] = 0;
+    mb->e_mbd.dqcoeff[0] = 0;
+    mb->e_mbd.dqcoeff[64] = 0;
+    mb->e_mbd.dqcoeff[128] = 0;
+    mb->e_mbd.dqcoeff[192] = 0;
+    d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0) << 2;
+
+#if CONFIG_EXTEND_QRANGE
+    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
+#else
+    d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff);
+#endif
+
+    *Distortion = (d >> 4);
+    // rate
+    *Rate = vp8_rdcost_mby_8x8(mb);
+}
+#endif
 
 static void copy_predictor(unsigned char *dst, const unsigned char *predictor)
 {
@@ -1044,8 +1180,7 @@ static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int fullpixel)
 {
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type(&x->e_mbd,
-                                  x->e_mbd.mode_info_context->mbmi.segment_id);
+    int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
 #endif
 
     ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
@@ -2247,16 +2382,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         {
             continue;
         }
-#if CONFIG_T8X8
-        // No 4x4 modes if segment flagged as 8x8
-        else if ( ( get_seg_tx_type( xd, segment_id ) == TX_8X8 ) &&
-                  ( (this_mode == B_PRED)
-                  ||(this_mode == I8X8_PRED)
-                  || (this_mode == SPLITMV) ) )
-        {
-            continue;
-        }
-#endif
 
         // Disable this drop out case if either the mode or ref frame
         // segment level feature is enabled for this segment. This is to
@@ -2404,7 +2529,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
             RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
                 (&x->e_mbd);
-            macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb)) ;
+#if CONFIG_T8X8
+            if(cpi->common.txfm_mode == ALLOW_8X8)
+                macro_block_yrd_8x8(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd)) ;
+            else
+#endif
+                macro_block_yrd(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd.encodemb)) ;
             rate2 += rate_y;
             distortion2 += distortion;
             rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
@@ -2628,15 +2760,21 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                     }
                 }
             }
-
-
             //intermodecost[mode_index] = vp8_cost_mv_ref(this_mode, mdcounts);   // Experimental debug code
 
             // Add in the Mv/mode cost
             rate2 += vp8_cost_mv_ref(&cpi->common, this_mode, mdcounts);
 
             // Y cost and distortion
-            macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
+#if CONFIG_T8X8
+            if(cpi->common.txfm_mode == ALLOW_8X8)
+                macro_block_yrd_8x8(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd));
+            else
+#endif
+                macro_block_yrd(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd.encodemb));
+
             rate2 += rate_y;
             distortion2 += distortion;
 
@@ -3027,42 +3165,18 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
                                             &rate16x16, &rate16x16_tokenonly,
                                             &dist16x16);
     mode16x16 = x->e_mbd.mode_info_context->mbmi.mode;
-#if CONFIG_T8X8
-    if ( get_seg_tx_type( xd,
-                          xd->mode_info_context->mbmi.segment_id ) == TX_8X8)
-    {
-        error8x8 = INT_MAX;
-    }
-    else
-#else
-    {
-        error8x8 = rd_pick_intra8x8mby_modes(cpi, x,
-                                            &rate8x8, &rate8x8_tokenonly,
-                                            &dist8x8, error16x16);
-        mode8x8[0]= x->e_mbd.mode_info_context->bmi[0].as_mode;
-        mode8x8[1]= x->e_mbd.mode_info_context->bmi[2].as_mode;
-        mode8x8[2]= x->e_mbd.mode_info_context->bmi[8].as_mode;
-        mode8x8[3]= x->e_mbd.mode_info_context->bmi[10].as_mode;
-    }
-#endif
 
-#if CONFIG_T8X8
-    if ( get_seg_tx_type( xd,
-                          xd->mode_info_context->mbmi.segment_id ) == TX_4X4 )
-    {
-        error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
-                                             &rate4x4, &rate4x4_tokenonly,
-                                             &dist4x4, error16x16);
-    }
-    else
-    {
-        error4x4 = INT_MAX;
-    }
-#else
+    error8x8 = rd_pick_intra8x8mby_modes(cpi, x,
+                &rate8x8, &rate8x8_tokenonly,
+                &dist8x8, error16x16);
+    mode8x8[0]= x->e_mbd.mode_info_context->bmi[0].as_mode;
+    mode8x8[1]= x->e_mbd.mode_info_context->bmi[2].as_mode;
+    mode8x8[2]= x->e_mbd.mode_info_context->bmi[8].as_mode;
+    mode8x8[3]= x->e_mbd.mode_info_context->bmi[10].as_mode;
+
     error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                          &rate4x4, &rate4x4_tokenonly,
                                          &dist4x4, error16x16);
-#endif
 
     if(error8x8> error16x16)
     {

@@ -405,6 +405,8 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
         (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
+
+
 void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
                                         unsigned char *dst_y,
                                         unsigned char *dst_u,
@@ -559,6 +561,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
             clamp_mv_to_umv_border(&x->block[10].bmi.mv.as_mv, x);
         }
 
+
         build_inter_predictors4b(x, &x->block[ 0], 16);
         build_inter_predictors4b(x, &x->block[ 2], 16);
         build_inter_predictors4b(x, &x->block[ 8], 16);
@@ -641,6 +644,9 @@ void build_4x4uvmvs(MACROBLOCKD *x)
             else temp += 4;
 
             x->block[uoffset].bmi.mv.as_mv.col = (temp / 8) & x->fullpixel_mask;
+
+            if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+                clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.mv.as_mv, x);
 
             if (x->mode_info_context->mbmi.need_to_clamp_mvs)
                 clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.mv.as_mv, x);

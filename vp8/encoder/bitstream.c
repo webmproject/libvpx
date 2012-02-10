@@ -2145,60 +2145,61 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
 
 #if CONFIG_T8X8
-    do
+    /* do not do this if not evena allowed */
+    if(cpi->common.txfm_mode == ALLOW_8X8)
     {
-        int j = 0;
-
         do
         {
-            int k = 0;
-
+            int j = 0;
             do
             {
-                /* at every context */
-
-                /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [ENTROPY_NODES];
-                //unsigned int branch_ct   [ENTROPY_NODES] [2];
-
-                int t = 0;      /* token/prob index */
-
-                vp8_tree_probs_from_distribution(
-                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                    cpi->frame_coef_probs_8x8 [i][j][k], cpi->frame_branch_ct_8x8 [i][j][k], cpi->coef_counts_8x8 [i][j][k],
-                    256, 1
-                );
-
+                int k = 0;
                 do
                 {
-                    const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
-                    const vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
+                    /* at every context */
+                    /* calc probs and branch cts for this frame only */
+                    //vp8_prob new_p           [ENTROPY_NODES];
+                    //unsigned int branch_ct   [ENTROPY_NODES] [2];
+                    int t = 0;      /* token/prob index */
+                    vp8_tree_probs_from_distribution(
+                        MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                        cpi->frame_coef_probs_8x8 [i][j][k],
+                        cpi->frame_branch_ct_8x8 [i][j][k],
+                        cpi->coef_counts_8x8 [i][j][k],
+                        256, 1
+                        );
 
-                    const vp8_prob old = cpi->common.fc.coef_probs_8x8 [i][j][k][t];
-                    const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                    do
+                    {
+                        const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
+                        const vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
 
-                    const int old_b = vp8_cost_branch(ct, old);
-                    const int new_b = vp8_cost_branch(ct, newp);
+                        const vp8_prob old = cpi->common.fc.coef_probs_8x8 [i][j][k][t];
+                        const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
 
-                    const int update_b = 8 +
-                                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+                        const int old_b = vp8_cost_branch(ct, old);
+                        const int new_b = vp8_cost_branch(ct, newp);
 
-                    const int s = old_b - new_b - update_b;
+                        const int update_b = 8 +
+                            ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
 
-                    if (s > 0)
-                        savings += s;
+                        const int s = old_b - new_b - update_b;
+
+                        if (s > 0)
+                            savings += s;
+
+
+                    }
+                    while (++t < MAX_ENTROPY_TOKENS - 1);
 
 
                 }
-                while (++t < MAX_ENTROPY_TOKENS - 1);
-
-
+                while (++k < PREV_COEF_CONTEXTS);
             }
-            while (++k < PREV_COEF_CONTEXTS);
+            while (++j < COEF_BANDS);
         }
-        while (++j < COEF_BANDS);
+        while (++i < BLOCK_TYPES);
     }
-    while (++i < BLOCK_TYPES);
 #endif
 
 
@@ -2329,91 +2330,94 @@ static void update_coef_probs(VP8_COMP *cpi)
     while (++i < BLOCK_TYPES);
 
 #if CONFIG_T8X8
-    i = 0;
-    do
+    /* do not do this if not evena allowed */
+    if(cpi->common.txfm_mode == ALLOW_8X8)
     {
-        int j = 0;
-
+        i = 0;
         do
         {
-            int k = 0;
+            int j = 0;
 
             do
             {
-                //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
-                /* at every context */
-
-                /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [ENTROPY_NODES];
-                //unsigned int branch_ct   [ENTROPY_NODES] [2];
-
-                int t = 0;      /* token/prob index */
-
-                //vp8_tree_probs_from_distribution(
-                //    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                //    new_p, branch_ct, (unsigned int *)cpi->coef_counts [i][j][k],
-                //    256, 1
-                //    );
+                int k = 0;
 
                 do
                 {
-                    const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
-                    const vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
+                    //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
+                    /* at every context */
 
-                    vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
-                    const vp8_prob old = *Pold;
-                    const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                    /* calc probs and branch cts for this frame only */
+                    //vp8_prob new_p           [ENTROPY_NODES];
+                    //unsigned int branch_ct   [ENTROPY_NODES] [2];
 
-                    const int old_b = vp8_cost_branch(ct, old);
-                    const int new_b = vp8_cost_branch(ct, newp);
+                    int t = 0;      /* token/prob index */
 
-                    const int update_b = 8 +
-                                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+                    //vp8_tree_probs_from_distribution(
+                    //    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                    //    new_p, branch_ct, (unsigned int *)cpi->coef_counts [i][j][k],
+                    //    256, 1
+                    //    );
 
-                    const int s = old_b - new_b - update_b;
-                    const int u = s > 0 ? 1 : 0;
+                    do
+                    {
+                        const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
+                        const vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
 
-                    vp8_write(w, u, upd);
+                        vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
+                        const vp8_prob old = *Pold;
+                        const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+
+                        const int old_b = vp8_cost_branch(ct, old);
+                        const int new_b = vp8_cost_branch(ct, newp);
+
+                        const int update_b = 8 +
+                            ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+
+                        const int s = old_b - new_b - update_b;
+                        const int u = s > 0 ? 1 : 0;
+
+                        vp8_write(w, u, upd);
 
 
 #ifdef ENTROPY_STATS
-                    ++ tree_update_hist_8x8 [i][j][k][t] [u];
+                        ++ tree_update_hist_8x8 [i][j][k][t] [u];
 #endif
 
-                    if (u)
-                    {
-                        /* send/use new probability */
+                        if (u)
+                        {
+                            /* send/use new probability */
 
-                        *Pold = newp;
-                        vp8_write_literal(w, newp, 8);
+                            *Pold = newp;
+                            vp8_write_literal(w, newp, 8);
 
-                        savings += s;
+                            savings += s;
+
+                        }
 
                     }
+                    while (++t < MAX_ENTROPY_TOKENS - 1);
 
-                }
-                while (++t < MAX_ENTROPY_TOKENS - 1);
-
-                /* Accum token counts for generation of default statistics */
+                    /* Accum token counts for generation of default statistics */
 #ifdef ENTROPY_STATS
-                t = 0;
+                    t = 0;
 
-                do
-                {
-                    context_counters_8x8 [i][j][k][t] += cpi->coef_counts_8x8 [i][j][k][t];
+                    do
+                    {
+                        context_counters_8x8 [i][j][k][t] += cpi->coef_counts_8x8 [i][j][k][t];
+                    }
+                    while (++t < MAX_ENTROPY_TOKENS);
+
+#endif
                 }
-                while (++t < MAX_ENTROPY_TOKENS);
-
-#endif
-
+                while (++k < PREV_COEF_CONTEXTS);
             }
-            while (++k < PREV_COEF_CONTEXTS);
+            while (++j < COEF_BANDS);
         }
-        while (++j < COEF_BANDS);
+        while (++i < BLOCK_TYPES);
     }
-    while (++i < BLOCK_TYPES);
-#endif
 
+#endif
 }
 #ifdef PACKET_TESTING
 FILE *vpxlogc = 0;
@@ -2663,6 +2667,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 vp8_write_bit(bc, 0);
         }
     }
+
+#if CONFIG_T8X8
+    vp8_write_bit(bc, pc->txfm_mode);
+#endif
 
     // Encode the loop filter level and type
     vp8_write_bit(bc, pc->filter_type);

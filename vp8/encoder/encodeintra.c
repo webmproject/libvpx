@@ -100,9 +100,7 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     BLOCK *b = &x->block[0];
 
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type(&x->e_mbd,
-                                  x->e_mbd.mode_info_context->mbmi.segment_id);
-    x->e_mbd.mode_info_context->mbmi.txfm_size = tx_type;
+    int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
 #endif
 
     RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mby)(&x->e_mbd);
@@ -179,11 +177,8 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 void vp8_encode_intra16x16mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
 #if CONFIG_T8X8
-    int tx_type = get_seg_tx_type(&x->e_mbd,
-                                  x->e_mbd.mode_info_context->mbmi.segment_id);
-    x->e_mbd.mode_info_context->mbmi.txfm_size = tx_type;
+    int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
 #endif
-
     RECON_INVOKE(&rtcd->common->recon, build_intra_predictors_mbuv)(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submbuv)(x->src_diff, x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);

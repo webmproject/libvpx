@@ -359,6 +359,9 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         */
         z->block[i].src_stride      = x->block[i].src_stride;
         z->block[i].eob_max_offset  = x->block[i].eob_max_offset;
+#if CONFIG_T8X8
+        z->block[i].eob_max_offset_8x8  = x->block[i].eob_max_offset_8x8;
+#endif
     }
 
     {
