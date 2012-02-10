@@ -21,8 +21,6 @@
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/g_common.h"
-#include "vp8/common/threading.h"
-#include "decoderthreading.h"
 #include <stdio.h>
 #include <assert.h>
 
@@ -155,11 +153,6 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     pbi->common.current_video_frame = 0;
     pbi->ready_for_new_data = 1;
 
-#if CONFIG_MULTITHREAD
-    pbi->max_threads = oxcf->max_threads;
-    vp8_decoder_create_threads(pbi);
-#endif
-
     /* vp8cx_init_de_quantizer() is first called here. Add check in frame_init_dequantizer() to avoid
      *  unnecessary calling of vp8cx_init_de_quantizer() for every frame.
      */
@@ -203,11 +196,6 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
     if (pbi->common.last_frame_seg_map != 0)
         vpx_free(pbi->common.last_frame_seg_map);
 
-#if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd)
-        vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
-    vp8_decoder_remove_threads(pbi);
-#endif
 #if CONFIG_ERROR_CONCEALMENT
     vp8_de_alloc_overlap_lists(pbi);
 #endif
@@ -540,26 +528,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         return retcode;
     }
 
-#if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd && cm->multi_token_partition != ONE_PARTITION)
-    {
-        if (swap_frame_buffers (cm))
-        {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
-#endif
-            {
-                vp8_pop_neon(dx_store_reg);
-            }
-#endif
-            pbi->common.error.error_code = VPX_CODEC_ERROR;
-            pbi->common.error.setjmp = 0;
-            pbi->num_partitions = 0;
-            return -1;
-        }
-    } else
-#endif
     {
         if (swap_frame_buffers (cm))
         {

@@ -17,53 +17,8 @@
 #include "vp8/common/idct.h"
 #include "vp8/common/onyxc_int.h"
 
-#if CONFIG_MULTITHREAD
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#elif defined(_WIN32)
-#include <windows.h>
-typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-#endif
-#endif
-
 extern void vp8_arch_x86_common_init(VP8_COMMON *ctx);
 extern void vp8_arch_arm_common_init(VP8_COMMON *ctx);
-
-#if CONFIG_MULTITHREAD
-static int get_cpu_count()
-{
-    int core_count = 16;
-
-#if HAVE_UNISTD_H
-#if defined(_SC_NPROCESSORS_ONLN)
-    core_count = sysconf(_SC_NPROCESSORS_ONLN);
-#elif defined(_SC_NPROC_ONLN)
-    core_count = sysconf(_SC_NPROC_ONLN);
-#endif
-#elif defined(_WIN32)
-    {
-        PGNSI pGNSI;
-        SYSTEM_INFO sysinfo;
-
-        /* Call GetNativeSystemInfo if supported or
-         * GetSystemInfo otherwise. */
-
-        pGNSI = (PGNSI) GetProcAddress(
-                GetModuleHandle(TEXT("kernel32.dll")), "GetNativeSystemInfo");
-        if (pGNSI != NULL)
-            pGNSI(&sysinfo);
-        else
-            GetSystemInfo(&sysinfo);
-
-        core_count = sysinfo.dwNumberOfProcessors;
-    }
-#else
-    /* other platforms */
-#endif
-
-    return core_count > 0 ? core_count : 1;
-}
-#endif
 
 void vp8_machine_specific_config(VP8_COMMON *ctx)
 {
@@ -156,7 +111,4 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_c;
     rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_c;
 
-#if CONFIG_MULTITHREAD
-    ctx->processor_core_count = get_cpu_count();
-#endif /* CONFIG_MULTITHREAD */
 }

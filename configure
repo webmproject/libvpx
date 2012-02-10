@@ -34,7 +34,6 @@ Advanced options:
   ${toggle_internal_stats}        output of encoder internal stats for debug, if supported (encoders)
   ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
-  ${toggle_multithread}           multithreaded encoding and decoding.
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
@@ -159,7 +158,6 @@ enable optimizations
 enable fast_unaligned #allow unaligned accesses, if supported by hw
 enable md5
 enable spatial_resampling
-enable multithread
 enable os_support
 
 [ -d ${source_path}/../include ] && enable alt_tree_layout
@@ -257,7 +255,6 @@ CONFIG_LIST="
     dc_recon
     runtime_cpu_detect
     postproc
-    multithread
     internal_stats
     ${CODECS}
     ${CODEC_FAMILIES}
@@ -303,7 +300,6 @@ CMDLINE_SELECT="
     dequant_tokens
     dc_recon
     postproc
-    multithread
     internal_stats
     ${CODECS}
     ${CODEC_FAMILIES}
@@ -404,7 +400,6 @@ process_targets() {
     enabled debug_libs && DIST_DIR="${DIST_DIR}-debug"
     enabled codec_srcs && DIST_DIR="${DIST_DIR}-src"
     ! enabled postproc && DIST_DIR="${DIST_DIR}-nopost"
-    ! enabled multithread && DIST_DIR="${DIST_DIR}-nomt"
     ! enabled install_docs && DIST_DIR="${DIST_DIR}-nodocs"
     DIST_DIR="${DIST_DIR}-${tgt_isa}-${tgt_os}"
     case "${tgt_os}" in

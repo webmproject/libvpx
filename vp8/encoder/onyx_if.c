@@ -30,7 +30,6 @@
 #endif
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/swapyv12buffer.h"
-#include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
 #include "temporal_filter.h"
 
@@ -1787,17 +1786,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
                            "Failed to allocate firstpass stats");
 #endif
 
-#if CONFIG_MULTITHREAD
-    if (width < 640)
-        cpi->mt_sync_range = 1;
-    else if (width <= 1280)
-        cpi->mt_sync_range = 4;
-    else if (width <= 2560)
-        cpi->mt_sync_range = 8;
-    else
-        cpi->mt_sync_range = 16;
-#endif
-
         vpx_free(cpi->tplist);
 
     CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
@@ -2494,10 +2482,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     init_mv_ref_counts();
 #endif
 
-#if CONFIG_MULTITHREAD
-    vp8cx_create_encoder_threads(cpi);
-#endif
-
     cpi->fn_ptr[BLOCK_16X16].sdf            = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16);
     cpi->fn_ptr[BLOCK_16X16].vf             = VARIANCE_INVOKE(&cpi->rtcd.variance, var16x16);
     cpi->fn_ptr[BLOCK_16X16].svf            = VARIANCE_INVOKE(&cpi->rtcd.variance, subpixvar16x16);
@@ -2815,10 +2799,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 #endif
 
     }
-
-#if CONFIG_MULTITHREAD
-    vp8cx_remove_encoder_threads(cpi);
-#endif
 
     dealloc_compressor_data(cpi);
     vpx_free(cpi->mb.ss);
@@ -3646,11 +3626,6 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
         vpx_usec_timer_mark(&timer);
         cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
     }
-
-#if CONFIG_MULTITHREAD
-    if (cpi->b_multi_threaded)
-        sem_post(&cpi->h_event_end_lpf); /* signal that we have set filter_level */
-#endif
 
     if (cm->filter_level > 0)
     {
@@ -4737,13 +4712,6 @@ static void encode_frame_to_data_rate
             cm->current_video_frame+1000);
 #endif
 
-#if CONFIG_MULTITHREAD
-    if (cpi->b_multi_threaded)
-    {
-        sem_post(&cpi->h_event_start_lpf); /* start loopfilter in separate thread */
-    }
-    else
-#endif
     {
         loopfilter_frame(cpi, cm);
     }
@@ -4754,12 +4722,6 @@ static void encode_frame_to_data_rate
     {
         cm->refresh_entropy_probs = 0;
     }
-
-#if CONFIG_MULTITHREAD
-    /* wait that filter_level is picked so that we can continue with stream packing */
-    if (cpi->b_multi_threaded)
-        sem_wait(&cpi->h_event_end_lpf);
-#endif
 
     // Work out the segment probabilites if segmentation is enabled and
     // the map is due to be updated
@@ -4779,14 +4741,6 @@ static void encode_frame_to_data_rate
 
     // build the bitstream
     vp8_pack_bitstream(cpi, dest, size);
-
-#if CONFIG_MULTITHREAD
-    /* wait for loopfilter thread done */
-    if (cpi->b_multi_threaded)
-    {
-        sem_wait(&cpi->h_event_end_lpf);
-    }
-#endif
 
     /* Move storing frame_type out of the above loop since it is also
      * needed in motion search besides loopfilter */

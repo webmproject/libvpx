@@ -42,7 +42,6 @@ VP8_CX_SRCS-yes += encoder/encodeframe.c
 VP8_CX_SRCS-yes += encoder/encodeintra.c
 VP8_CX_SRCS-yes += encoder/encodemb.c
 VP8_CX_SRCS-yes += encoder/encodemv.c
-VP8_CX_SRCS-$(CONFIG_MULTITHREAD) += encoder/ethreading.c
 VP8_CX_SRCS-yes += encoder/firstpass.c
 VP8_CX_SRCS-yes += encoder/generic/csystemdependent.c
 VP8_CX_SRCS-yes += encoder/block.h

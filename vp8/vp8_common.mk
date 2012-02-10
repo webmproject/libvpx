@@ -58,7 +58,6 @@ VP8_COMMON_SRCS-yes += common/setupintrarecon.h
 VP8_COMMON_SRCS-yes += common/subpixel.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h
 VP8_COMMON_SRCS-yes += common/systemdependent.h
-VP8_COMMON_SRCS-yes += common/threading.h
 VP8_COMMON_SRCS-yes += common/treecoder.h
 VP8_COMMON_SRCS-yes += common/invtrans.c
 VP8_COMMON_SRCS-yes += common/loopfilter.c

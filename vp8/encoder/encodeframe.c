@@ -834,16 +834,6 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int map_index = (mb_row * cpi->common.mb_cols);
 
-#if CONFIG_MULTITHREAD
-    const int nsync = cpi->mt_sync_range;
-    const int rightmost_col = cm->mb_cols - 1;
-    volatile const int *last_row_current_mb_col;
-
-    if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
-        last_row_current_mb_col = &cpi->mt_current_mb_col[mb_row - 1];
-    else
-        last_row_current_mb_col = &rightmost_col;
-#endif
     // Reset the left context
     vp8_zero(cm->left_context)
 
@@ -901,21 +891,6 @@ void encode_mb_row(VP8_COMP *cpi,
 
         //Copy current mb to a buffer
         RECON_INVOKE(&xd->rtcd->recon, copy16x16)(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
-
-#if CONFIG_MULTITHREAD
-        if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
-        {
-            if ((mb_col & (nsync - 1)) == 0)
-            {
-                while (mb_col > (*last_row_current_mb_col - nsync)
-                        && (*last_row_current_mb_col) != (cm->mb_cols - 1))
-                {
-                    x86_pause_hint();
-                    thread_sleep(0);
-                }
-            }
-        }
-#endif
 
         if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
             vp8_activity_masking(cpi, x);
@@ -1036,12 +1011,6 @@ void encode_mb_row(VP8_COMP *cpi,
         x->partition_info++;
 
         xd->above_context++;
-#if CONFIG_MULTITHREAD
-        if (cpi->b_multi_threaded != 0)
-        {
-            cpi->mt_current_mb_col[mb_row] = mb_col;
-        }
-#endif
     }
 
     //extend the recon for intra prediction
@@ -1055,14 +1024,6 @@ void encode_mb_row(VP8_COMP *cpi,
     xd->prev_mode_info_context++;
     xd->mode_info_context++;
     x->partition_info++;
-
-#if CONFIG_MULTITHREAD
-    if ((cpi->b_multi_threaded != 0) && (mb_row == cm->mb_rows - 1))
-    {
-        sem_post(&cpi->h_event_end_encoding); /* signal frame encoding end */
-    }
-#endif
-
 
 // debug output
 #if DBG_PRNT_SEGMAP
@@ -1286,61 +1247,6 @@ static void encode_frame_internal(VP8_COMP *cpi)
         struct vpx_usec_timer  emr_timer;
         vpx_usec_timer_start(&emr_timer);
 
-#if CONFIG_MULTITHREAD
-        if (cpi->b_multi_threaded)
-        {
-            int i;
-
-            vp8cx_init_mbrthread_data(cpi, x, cpi->mb_row_ei, 1,  cpi->encoding_thread_count);
-
-            for (i = 0; i < cm->mb_rows; i++)
-                cpi->mt_current_mb_col[i] = -1;
-
-            for (i = 0; i < cpi->encoding_thread_count; i++)
-            {
-                sem_post(&cpi->h_event_start_encoding[i]);
-            }
-
-            for (mb_row = 0; mb_row < cm->mb_rows; mb_row += (cpi->encoding_thread_count + 1))
-            {
-                //vp8_zero(cm->left_context)
-
-                tp = cpi->tok + mb_row * (cm->mb_cols * 16 * 24);
-
-                encode_mb_row(cpi, cm, mb_row, x, xd, &tp, &totalrate);
-
-                // adjust to the next row of mbs
-                x->src.y_buffer += 16 * x->src.y_stride * (cpi->encoding_thread_count + 1) - 16 * cm->mb_cols;
-                x->src.u_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
-                x->src.v_buffer +=  8 * x->src.uv_stride * (cpi->encoding_thread_count + 1) - 8 * cm->mb_cols;
-
-                xd->mode_info_context += xd->mode_info_stride
-                                        * cpi->encoding_thread_count;
-                xd->prev_mode_info_context += xd->mode_info_stride
-                                            * cpi->encoding_thread_count;
-
-                x->partition_info  += xd->mode_info_stride * cpi->encoding_thread_count;
-                x->gf_active_ptr   += cm->mb_cols * cpi->encoding_thread_count;
-
-            }
-
-            sem_wait(&cpi->h_event_end_encoding); /* wait for other threads to finish */
-
-            cpi->tok_count = 0;
-
-            for (mb_row = 0; mb_row < cm->mb_rows; mb_row ++)
-            {
-                cpi->tok_count += cpi->tplist[mb_row].stop - cpi->tplist[mb_row].start;
-            }
-
-            for (i = 0; i < cpi->encoding_thread_count; i++)
-            {
-                totalrate += cpi->mb_row_ei[i].totalrate;
-            }
-
-        }
-        else
-#endif
         {
 #if CONFIG_SUPERBLOCKS
             // for each superblock row in the image

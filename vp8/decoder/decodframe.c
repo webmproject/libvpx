@@ -34,8 +34,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/idct.h"
 #include "dequantize.h"
-#include "vp8/common/threading.h"
-#include "decoderthreading.h"
 #include "dboolhuff.h"
 
 #include "vp8/common/seg_common.h"
@@ -797,12 +795,6 @@ static void setup_token_decoder_partition_input(VP8D_COMP *pbi)
 
         bool_decoder++;
     }
-
-#if CONFIG_MULTITHREAD
-    /* Clamp number of decoder threads */
-    if (pbi->decoding_thread_count > pbi->num_partitions - 1)
-        pbi->decoding_thread_count = pbi->num_partitions - 1;
-#endif
 }
 
 
@@ -892,12 +884,6 @@ static void setup_token_decoder(VP8D_COMP *pbi,
         partition += partition_size;
         bool_decoder++;
     }
-
-#if CONFIG_MULTITHREAD
-    /* Clamp number of decoder threads */
-    if (pbi->decoding_thread_count > num_part - 1)
-        pbi->decoding_thread_count = num_part - 1;
-#endif
 }
 
 
@@ -1123,10 +1109,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 }
 #endif
 
-#if CONFIG_MULTITHREAD
-                if (pbi->b_multithreaded_rd)
-                    vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
-#endif
             }
         }
     }
@@ -1467,10 +1449,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                        vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
 
     /* set up frame new frame for intra coded blocks */
-#if CONFIG_MULTITHREAD
-    if (!(pbi->b_multithreaded_rd) || pc->multi_token_partition == ONE_PARTITION || !(pc->filter_level))
-#endif
-        vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
+    vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
 
     vp8_setup_block_dptrs(xd);
 
@@ -1503,18 +1482,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     // Resset the macroblock mode info context to the start of the list
     xd->mode_info_context = pc->mi;
 
-#if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
-    {
-        int i;
-        pbi->frame_corrupt_residual = 0;
-        vp8mt_decode_mb_rows(pbi, xd);
-        vp8_yv12_extend_frame_borders_ptr(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
-        for (i = 0; i < pbi->decoding_thread_count; ++i)
-            corrupt_tokens |= pbi->mb_row_di[i].mbd.corrupted;
-    }
-    else
-#endif
     {
         int ibc = 0;
         int num_part = 1 << pc->multi_token_partition;

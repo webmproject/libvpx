@@ -23,7 +23,6 @@
 #include "encodemb.h"
 #include "quantize.h"
 #include "vp8/common/entropy.h"
-#include "vp8/common/threading.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
@@ -542,27 +541,6 @@ typedef struct VP8_COMP
     int cyclic_refresh_mode_index;
     int cyclic_refresh_q;
     signed char *cyclic_refresh_map;
-
-#if CONFIG_MULTITHREAD
-    // multithread data
-    int * mt_current_mb_col;
-    int mt_sync_range;
-    int b_multi_threaded;
-    int encoding_thread_count;
-
-    pthread_t *h_encoding_thread;
-    pthread_t h_filter_thread;
-
-    MB_ROW_COMP *mb_row_ei;
-    ENCODETHREAD_DATA *en_thread_data;
-    LPFTHREAD_DATA lpf_thread_data;
-
-    //events
-    sem_t *h_event_start_encoding;
-    sem_t h_event_end_encoding;
-    sem_t h_event_start_lpf;
-    sem_t h_event_end_lpf;
-#endif
 
     TOKENLIST *tplist;
     unsigned int partition_sz[MAX_PARTITIONS];
