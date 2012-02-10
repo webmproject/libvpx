@@ -19,6 +19,7 @@
 #include "systemdependent.h"
 #include "../encoder/variance.h"
 
+#include <limits.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -729,17 +730,17 @@ static void multiframe_quality_enhance_block
     if (blksize == 16)
     {
         act = (vp8_variance16x16(yd, yd_stride, VP8_ZEROS, 0, &sse)+128)>>8;
-        sad = (vp8_sad16x16(y, y_stride, yd, yd_stride, 0)+128)>>8;
+        sad = (vp8_sad16x16(y, y_stride, yd, yd_stride, INT_MAX)+128)>>8;
     }
     else if (blksize == 8)
     {
         act = (vp8_variance8x8(yd, yd_stride, VP8_ZEROS, 0, &sse)+32)>>6;
-        sad = (vp8_sad8x8(y, y_stride, yd, yd_stride, 0)+32)>>6;
+        sad = (vp8_sad8x8(y, y_stride, yd, yd_stride, INT_MAX)+32)>>6;
     }
     else
     {
         act = (vp8_variance4x4(yd, yd_stride, VP8_ZEROS, 0, &sse)+8)>>4;
-        sad = (vp8_sad4x4(y, y_stride, yd, yd_stride, 0)+8)>>4;
+        sad = (vp8_sad4x4(y, y_stride, yd, yd_stride, INT_MAX)+8)>>4;
     }
     /* thr = qdiff/8 + log2(act) + log4(qprev) */
     thr = (qdiff>>3);
