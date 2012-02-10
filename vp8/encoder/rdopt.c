@@ -2821,35 +2821,35 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         {
             if (!mode_excluded)
             {
-            // Note index of best mode so far
-            best_mode_index = mode_index;
+                // Note index of best mode so far
+                best_mode_index = mode_index;
 
-            if (this_mode <= B_PRED)
-            {
-                x->e_mbd.mode_info_context->mbmi.uv_mode = uv_intra_mode;
-                /* required for left and above block mv */
-                x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
-            }
-
-            other_cost += ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
-
-            /* Calculate the final y RD estimate for this mode */
-            best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
-                              (distortion2-distortion_uv));
-
-            *returnrate = rate2;
-            *returndistortion = distortion2;
-            best_rd = this_rd;
-            vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
-            vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
-
-            if ((this_mode == B_PRED)
-                ||(this_mode == I8X8_PRED)
-                || (this_mode == SPLITMV))
-                for (i = 0; i < 16; i++)
+                if (this_mode <= B_PRED)
                 {
-                    best_bmodes[i] = x->e_mbd.block[i].bmi;
+                    x->e_mbd.mode_info_context->mbmi.uv_mode = uv_intra_mode;
+                    /* required for left and above block mv */
+                    x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
                 }
+
+                other_cost += ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
+
+                /* Calculate the final y RD estimate for this mode */
+                best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
+                                  (distortion2-distortion_uv));
+
+                *returnrate = rate2;
+                *returndistortion = distortion2;
+                best_rd = this_rd;
+                vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
+                vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
+
+                if ((this_mode == B_PRED)
+                    ||(this_mode == I8X8_PRED)
+                    || (this_mode == SPLITMV))
+                    for (i = 0; i < 16; i++)
+                    {
+                        best_bmodes[i] = x->e_mbd.block[i].bmi;
+                    }
             }
 
             // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
