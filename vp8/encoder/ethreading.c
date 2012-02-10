@@ -390,10 +390,8 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->subpixel_predict8x4      = xd->subpixel_predict8x4;
         zd->subpixel_predict8x8      = xd->subpixel_predict8x8;
         zd->subpixel_predict16x16    = xd->subpixel_predict16x16;
-#if CONFIG_DUALPRED
         zd->subpixel_predict_avg8x8  = xd->subpixel_predict_avg8x8;
         zd->subpixel_predict_avg16x16 = xd->subpixel_predict_avg16x16;
-#endif /* CONFIG_DUALPRED */
         zd->segmentation_enabled     = xd->segmentation_enabled;
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
 
@@ -434,10 +432,8 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
         mbd->subpixel_predict8x4     = xd->subpixel_predict8x4;
         mbd->subpixel_predict8x8     = xd->subpixel_predict8x8;
         mbd->subpixel_predict16x16   = xd->subpixel_predict16x16;
-#if CONFIG_DUALPRED
         mbd->subpixel_predict_avg8x8 = xd->subpixel_predict_avg8x8;
         mbd->subpixel_predict_avg16x16 = xd->subpixel_predict_avg16x16;
-#endif /* CONFIG_DUALPRED */
 #if CONFIG_RUNTIME_CPU_DETECT
         mbd->rtcd                   = xd->rtcd;
 #endif

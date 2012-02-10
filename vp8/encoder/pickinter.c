@@ -531,10 +531,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         if (best_rd <= cpi->rd_threshes[mode_index])
             continue;
 
-#if CONFIG_DUALPRED
         if (vp8_second_ref_frame_order[mode_index])
             continue;
-#endif /* CONFIG_DUALPRED */
 
         x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
 

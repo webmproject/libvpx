@@ -1214,12 +1214,10 @@ static void encode_frame_internal(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, sixtap8x8);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, sixtap16x16);
-#if CONFIG_DUALPRED
         xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, sixtap_avg8x8);
         xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, sixtap_avg16x16);
-#endif /* CONFIG_DUALPRED */
     }
     else
     {
@@ -1231,12 +1229,10 @@ static void encode_frame_internal(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, bilinear8x8);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                       &cpi->common.rtcd.subpix, bilinear16x16);
-#if CONFIG_DUALPRED
         xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
                                       &cpi->common.rtcd.subpix, bilinear_avg8x8);
         xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
                                       &cpi->common.rtcd.subpix, bilinear_avg16x16);
-#endif /* CONFIG_DUALPRED */
     }
 
     // Reset frame count of inter 0,0 motion vector usage.
@@ -1276,11 +1272,10 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
     // re-initencode frame context.
     init_encode_frame_mb_context(cpi);
-#if CONFIG_DUALPRED
+
     cpi->rd_single_diff = cpi->rd_dual_diff = cpi->rd_hybrid_diff = 0;
     vpx_memset(cpi->single_pred_count, 0, sizeof(cpi->single_pred_count));
     vpx_memset(cpi->dual_pred_count, 0, sizeof(cpi->dual_pred_count));
-#endif /* CONFIG_DUALPRED */
 
     {
         struct vpx_usec_timer  emr_timer;
@@ -1438,7 +1433,6 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
 void vp8_encode_frame(VP8_COMP *cpi)
 {
-#if CONFIG_DUALPRED
     if (cpi->sf.RD)
     {
         int frame_type, pred_type;
@@ -1561,7 +1555,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
         }
     }
     else
-#endif /* CONFIG_DUALPRED */
     {
         encode_frame_internal(cpi);
     }
@@ -1807,7 +1800,7 @@ int vp8cx_encode_inter_macroblock
         }
         vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
                                &distortion, &intra_error, &single, &dual, &hybrid);
-#if CONFIG_DUALPRED
+
         cpi->rd_single_diff += single;
         cpi->rd_dual_diff   += dual;
         cpi->rd_hybrid_diff += hybrid;
@@ -1823,7 +1816,6 @@ int vp8cx_encode_inter_macroblock
             else
                 cpi->dual_pred_count[pred_context]++;
         }
-#endif /* CONFIG_DUALPRED */
 
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)
@@ -1989,7 +1981,6 @@ int vp8cx_encode_inter_macroblock
         xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
         xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
-#if CONFIG_DUALPRED
         if (xd->mode_info_context->mbmi.second_ref_frame) {
             int second_ref_fb_idx;
 
@@ -2007,7 +1998,6 @@ int vp8cx_encode_inter_macroblock
             xd->second_pre.v_buffer = cpi->common.yv12_fb[second_ref_fb_idx].v_buffer +
                                             recon_uvoffset;
         }
-#endif /* CONFIG_DUALPRED */
 
         if (!x->skip)
         {

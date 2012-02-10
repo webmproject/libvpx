@@ -416,7 +416,6 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
         // frame prediction fails.
         compute_mod_refprobs( cm );
 
-#if CONFIG_DUALPRED
         pbi->common.dual_pred_mode = vp8_read(bc, 128);
         if (cm->dual_pred_mode)
             cm->dual_pred_mode += vp8_read(bc, 128);
@@ -426,7 +425,6 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
                 cm->prob_dualpred[i] = (vp8_prob)vp8_read_literal(bc, 8);
         }
-#endif /* CONFIG_DUALPRED */
 
         if (vp8_read_bit(bc))
         {
@@ -541,9 +539,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mb_to_top_edge -= LEFT_TOP_MARGIN;
     mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
     mbmi->need_to_clamp_mvs = 0;
-#if CONFIG_DUALPRED
     mbmi->second_ref_frame = 0;
-#endif /* CONFIG_DUALPRED */
     /* Distance of Mb to the various image edges.
      * These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
      */
@@ -732,7 +728,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
         propagate_mv:  /* same MV throughout */
 
-#if CONFIG_DUALPRED
             if ( cm->dual_pred_mode == DUAL_PREDICTION_ONLY ||
                  (cm->dual_pred_mode == HYBRID_PREDICTION &&
                      vp8_read(bc, get_pred_prob( cm, xd, PRED_DUAL ))) )
@@ -776,7 +771,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     break;
                 }
             }
-#endif /* CONFIG_DUALPRED */
 
 #if CONFIG_ERROR_CONCEALMENT
             if(pbi->ec_enabled)

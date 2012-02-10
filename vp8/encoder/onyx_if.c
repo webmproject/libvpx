@@ -893,7 +893,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITG   ] = 5000;
         sf->thresh_mult[THR_SPLITA   ] = 5000;
 
-#if CONFIG_DUALPRED
         sf->thresh_mult[THR_DUAL_ZEROLG   ] = 0;
         sf->thresh_mult[THR_DUAL_NEARESTLG] = 0;
         sf->thresh_mult[THR_DUAL_NEARLG   ] = 0;
@@ -907,7 +906,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_DUAL_NEWLG    ] = 1000;
         sf->thresh_mult[THR_DUAL_NEWLA    ] = 1000;
         sf->thresh_mult[THR_DUAL_NEWGA    ] = 1000;
-#endif /* CONFIG_DUALPRED */
 
         sf->first_step = 0;
         sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
@@ -958,7 +956,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITG   ] = 4500;
         sf->thresh_mult[THR_SPLITA   ] = 4500;
 
-#if CONFIG_DUALPRED
         sf->thresh_mult[THR_DUAL_ZEROLG   ] = 0;
         sf->thresh_mult[THR_DUAL_NEARESTLG] = 0;
         sf->thresh_mult[THR_DUAL_NEARLG   ] = 0;
@@ -972,7 +969,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_DUAL_NEWLG    ] = 1000;
         sf->thresh_mult[THR_DUAL_NEWLA    ] = 1000;
         sf->thresh_mult[THR_DUAL_NEWGA    ] = 1000;
-#endif /* CONFIG_DUALPRED */
 #else
         sf->thresh_mult[THR_NEWMV    ] = 1500;
         sf->thresh_mult[THR_NEWG     ] = 1500;
@@ -1033,7 +1029,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 20000;
             }
 
-#if CONFIG_DUALPRED
             sf->thresh_mult[THR_DUAL_ZEROLG   ] = 1500;
             sf->thresh_mult[THR_DUAL_NEARESTLG] = 1500;
             sf->thresh_mult[THR_DUAL_NEARLG   ] = 1500;
@@ -1047,7 +1042,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_DUAL_NEWLG    ] = 2000;
             sf->thresh_mult[THR_DUAL_NEWLA    ] = 2000;
             sf->thresh_mult[THR_DUAL_NEWGA    ] = 2000;
-#endif /* CONFIG_DUALPRED */
         }
 
         if (Speed > 2)
@@ -1086,7 +1080,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
 
-#if CONFIG_DUALPRED
             sf->thresh_mult[THR_DUAL_ZEROLG   ] = 2000;
             sf->thresh_mult[THR_DUAL_NEARESTLG] = 2000;
             sf->thresh_mult[THR_DUAL_NEARLG   ] = 2000;
@@ -1100,7 +1093,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_DUAL_NEWLG    ] = 2500;
             sf->thresh_mult[THR_DUAL_NEWLA    ] = 2500;
             sf->thresh_mult[THR_DUAL_NEWGA    ] = 2500;
-#endif /* CONFIG_DUALPRED */
 
             sf->improved_quant = 0;
             sf->improved_dct = 0;
@@ -1153,14 +1145,12 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEWA] = 4;
             }
 
-#if CONFIG_DUALPRED
             cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 2;
             cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 2;
             cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 2;
             cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 4;
             cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 4;
             cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 4;
-#endif /* CONFIG_DUALPRED */
 
             if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
             {
@@ -1178,11 +1168,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWA     ] = 4000;
             }
 
-#if CONFIG_DUALPRED
             sf->thresh_mult[THR_DUAL_NEWLG    ] = 4000;
             sf->thresh_mult[THR_DUAL_NEWLA    ] = 4000;
             sf->thresh_mult[THR_DUAL_NEWGA    ] = 4000;
-#endif /* CONFIG_DUALPRED */
         }
 
         break;
@@ -1215,7 +1203,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITA   ] = 10000;
         sf->search_method = NSTEP;
 
-#if CONFIG_DUALPRED
         sf->thresh_mult[THR_DUAL_ZEROLG   ] = 1000;
         sf->thresh_mult[THR_DUAL_NEARESTLG] = 1000;
         sf->thresh_mult[THR_DUAL_NEARLG   ] = 1000;
@@ -1229,7 +1216,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_DUAL_NEWLG    ] = 2000;
         sf->thresh_mult[THR_DUAL_NEWLA    ] = 2000;
         sf->thresh_mult[THR_DUAL_NEWGA    ] = 2000;
-#endif /* CONFIG_DUALPRED */
 
         if (Speed > 0)
         {
@@ -1315,7 +1301,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_SPLITA   ] = 50000;
             }
 
-#if CONFIG_DUALPRED
             sf->thresh_mult[THR_DUAL_ZEROLG   ] = 2000;
             sf->thresh_mult[THR_DUAL_NEARESTLG] = 2000;
             sf->thresh_mult[THR_DUAL_NEARLG   ] = 2000;
@@ -1329,7 +1314,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_DUAL_NEWLG    ] = 2500;
             sf->thresh_mult[THR_DUAL_NEWLA    ] = 2500;
             sf->thresh_mult[THR_DUAL_NEWGA    ] = 2500;
-#endif /* CONFIG_DUALPRED */
         }
 
         if (Speed > 2)
@@ -1353,14 +1337,12 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEWA] = 4;
             }
 
-#if CONFIG_DUALPRED
             cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 2;
             cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 2;
             cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 2;
             cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 4;
             cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 4;
             cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 4;
-#endif /* CONFIG_DUALPRED */
 
             sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
             sf->thresh_mult[THR_SPLITG  ] = INT_MAX;
@@ -1421,11 +1403,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEWA     ] = 4000;
             }
 
-#if CONFIG_DUALPRED
             sf->thresh_mult[THR_DUAL_NEWLG    ] = 4000;
             sf->thresh_mult[THR_DUAL_NEWLA    ] = 4000;
             sf->thresh_mult[THR_DUAL_NEWGA    ] = 4000;
-#endif /* CONFIG_DUALPRED */
         }
 
         if (Speed > 5)
@@ -1493,7 +1473,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 sf->thresh_mult[THR_NEARA    ] = thresh;
             }
 
-#if CONFIG_DUALPRED
             sf->thresh_mult[THR_DUAL_ZEROLG   ] = thresh;
             sf->thresh_mult[THR_DUAL_NEARESTLG] = thresh;
             sf->thresh_mult[THR_DUAL_NEARLG   ] = thresh;
@@ -1507,7 +1486,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_DUAL_NEWLG    ] = thresh << 1;
             sf->thresh_mult[THR_DUAL_NEWLA    ] = thresh << 1;
             sf->thresh_mult[THR_DUAL_NEWGA    ] = thresh << 1;
-#endif /* CONFIG_DUALPRED */
 
             // Disable other intra prediction modes
             sf->thresh_mult[THR_TM] = INT_MAX;
@@ -1545,7 +1523,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                 cpi->mode_check_freq[THR_NEWA] = 1 << (Tmp + 1);
             }
 
-#if CONFIG_DUALPRED
             cpi->mode_check_freq[THR_DUAL_ZEROLG   ] = 1 << (Tmp - 1);
             cpi->mode_check_freq[THR_DUAL_NEARESTLG] = 1 << (Tmp - 1);
             cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 1 << Tmp;
@@ -1559,7 +1536,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 1 << (Tmp + 1);
             cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 1 << (Tmp + 1);
             cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 1 << (Tmp + 1);
-#endif /* CONFIG_DUALPRED */
 
             cpi->mode_check_freq[THR_NEWMV] = 1 << (Tmp - 1);
         }
@@ -1606,7 +1582,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_SPLITA   ] = INT_MAX;
     }
 
-#if CONFIG_DUALPRED
     if ((cpi->ref_frame_flags & (VP8_LAST_FLAG | VP8_GOLD_FLAG)) != (VP8_LAST_FLAG | VP8_GOLD_FLAG))
     {
         sf->thresh_mult[THR_DUAL_ZEROLG   ] = INT_MAX;
@@ -1630,7 +1605,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_DUAL_NEARGA   ] = INT_MAX;
         sf->thresh_mult[THR_DUAL_NEWGA    ] = INT_MAX;
     }
-#endif /* CONFIG_DUALPRED */
 
     // Slow quant, dct and trellis not worthwhile for first pass
     // so make sure they are always turned off.
@@ -2332,10 +2306,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cm->prob_last_coded               = 128;
     cm->prob_gf_coded                 = 128;
     cm->prob_intra_coded              = 63;
-#if CONFIG_DUALPRED
     for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
         cm->prob_dualpred[i]         = 128;
-#endif /* CONFIG_DUALPRED */
 
     // Prime the recent reference frame useage counters.
     // Hereafter they will be maintained as a sort of moving average

@@ -105,7 +105,6 @@ const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES] =
     B_PRED,
     I8X8_PRED,
 
-#if CONFIG_DUALPRED
     /* dual prediction modes */
     ZEROMV,
     NEARESTMV,
@@ -122,7 +121,6 @@ const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES] =
     NEWMV,
     NEWMV,
     NEWMV,
-#endif /* CONFIG_DUALPRED */
 };
 
 const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
@@ -157,7 +155,6 @@ const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
     INTRA_FRAME,
     INTRA_FRAME,
 
-#if CONFIG_DUALPRED
     /* dual prediction modes */
     LAST_FRAME,
     LAST_FRAME,
@@ -174,10 +171,8 @@ const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
     LAST_FRAME,
     ALTREF_FRAME,
     GOLDEN_FRAME,
-#endif /* CONFIG_DUALPRED */
 };
 
-#if CONFIG_DUALPRED
 const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES] =
 {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -201,7 +196,6 @@ const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES] =
     LAST_FRAME,
     ALTREF_FRAME,
 };
-#endif /* CONFIG_DUALPRED */
 
 static void fill_token_costs(
     unsigned int c      [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS],
@@ -2110,11 +2104,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int distortion;
     int best_rd = INT_MAX;
     int best_intra_rd = INT_MAX;
-#if CONFIG_DUALPRED
     int best_dual_rd = INT_MAX;
     int best_single_rd = INT_MAX;
     int best_hybrid_rd = INT_MAX;
-#endif /* CONFIG_DUALPRED */
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
@@ -2135,9 +2127,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int_mv frame_nearest_mv[4];
     int_mv frame_near_mv[4];
     int_mv frame_best_ref_mv[4];
-#if CONFIG_DUALPRED
     int_mv mc_search_result[4];
-#endif /* CONFIG_DUALPRED */
     int frame_mdcounts[4][4];
     unsigned char *y_buffer[4];
     unsigned char *u_buffer[4];
@@ -2148,13 +2138,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
     vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
 
-#if CONFIG_DUALPRED
     for (i = 0; i < 4; i++)
     {
 #define INVALID_MV 0x80008000
         mc_search_result[i].as_int = INVALID_MV;
     }
-#endif /* CONFIG_DUALPRED */
 
     if (cpi->ref_frame_flags & VP8_LAST_FLAG)
     {
@@ -2218,10 +2206,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         int this_rd = INT_MAX;
         int disable_skip = 0;
         int other_cost = 0;
-#if CONFIG_DUALPRED
         int dualmode_cost = 0;
         int mode_excluded = 0;
-#endif /* CONFIG_DUALPRED */
 
         // Experimental debug code.
         // Record of rd values recorded for this MB. -1 indicates not measured
@@ -2243,9 +2229,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         x->e_mbd.mode_info_context->mbmi.mode = this_mode;
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
-#if CONFIG_DUALPRED
         x->e_mbd.mode_info_context->mbmi.second_ref_frame = vp8_second_ref_frame_order[mode_index];
-#endif /* CONFIG_DUALPRED */
 
         // If the segment reference frame feature is enabled....
         // then do nothing if the current ref frame is not allowed..
@@ -2327,9 +2311,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_update_zbin_extra(cpi, x);
         }
 
-#if CONFIG_DUALPRED
         if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame)
-#endif /* CONFIG_DUALPRED */
         switch (this_mode)
         {
         case B_PRED:
@@ -2569,9 +2551,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                              &cpi->fn_ptr[BLOCK_16X16],
                                              x->mvcost, &dis, &sse);
             }
-#if CONFIG_DUALPRED
             mc_search_result[x->e_mbd.mode_info_context->mbmi.ref_frame].as_int = d->bmi.mv.as_int;
-#endif /* CONFIG_DUALPRED */
 
             mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
@@ -2600,10 +2580,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
             vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
-#if CONFIG_DUALPRED
             dualmode_cost =
                 vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 0 );
-#endif /* CONFIG_DUALPRED */
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
                 x->skip = 1;
@@ -2667,15 +2645,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             rd_inter16x16_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
             rate2 += rate_uv;
             distortion2 += distortion_uv;
-#if CONFIG_DUALPRED
             mode_excluded = cpi->common.dual_pred_mode == DUAL_PREDICTION_ONLY;
-#endif /* CONFIG_DUALPRED */
             break;
 
         default:
             break;
         }
-#if CONFIG_DUALPRED
         else /* x->e_mbd.mode_info_context->mbmi.second_ref_frame != 0 */
         {
             int ref1 = x->e_mbd.mode_info_context->mbmi.ref_frame;
@@ -2760,7 +2735,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             dualmode_cost =
                 vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 1 );
         }
-#endif /* CONFIG_DUALPRED */
 
         // Where skip is allowable add in the default per mb cost for the no skip case.
         // where we then decide to skip we have to delete this and replace it with the
@@ -2772,12 +2746,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             rate2 += prob_skip_cost;
         }
 
-#if CONFIG_DUALPRED
         if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
         {
             rate2 += dualmode_cost;
         }
-#endif /* CONFIG_DUALPRED */
 
 
         // Estimate the reference frame signaling cost and add it
@@ -2833,7 +2805,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             *returnintra = distortion2 ;
         }
 
-#if CONFIG_DUALPRED
         if (!disable_skip &&
             (this_mode == SPLITMV || x->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME))
         {
@@ -2844,15 +2815,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             if (this_rd < best_hybrid_rd)
                 best_hybrid_rd = this_rd;
         }
-#endif /* CONFIG_DUALPRED */
 
         // Did this mode help.. i.i is it the new best mode
         if (this_rd < best_rd || x->skip)
         {
-#if CONFIG_DUALPRED
             if (!mode_excluded)
             {
-#endif /* CONFIG_DUALPRED */
             // Note index of best mode so far
             best_mode_index = mode_index;
 
@@ -2882,9 +2850,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 {
                     best_bmodes[i] = x->e_mbd.block[i].bmi;
                 }
-#if CONFIG_DUALPRED
             }
-#endif /* CONFIG_DUALPRED */
 
             // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
             cpi->rd_thresh_mult[mode_index] = (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ? cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
@@ -2902,7 +2868,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
         }
 
-#if CONFIG_DUALPRED
         /* keep record of best dual/single-only prediction */
         if (!disable_skip &&
             x->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
@@ -2942,7 +2907,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 if (0) printf("hybrid rd [DMC: %d]: %d\n", best_hybrid_rd, hybrid_rd);
             }
         }
-#endif /* CONFIG_DUALPRED */
 
         if (x->skip)
             break;
@@ -2996,9 +2960,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                         (cpi->common.mb_no_coeff_skip) ? 1 : 0;
         x->e_mbd.mode_info_context->mbmi.partitioning = 0;
 
-#if CONFIG_DUALPRED
         *best_single_rd_diff = *best_dual_rd_diff = *best_hybrid_rd_diff = 0;
-#endif /* CONFIG_DUALPRED */
 
         return;
     }
@@ -3034,11 +2996,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     rd_update_mvcount(cpi, x, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 
-#if CONFIG_DUALPRED
     *best_single_rd_diff = best_rd - best_single_rd;
     *best_dual_rd_diff   = best_rd - best_dual_rd;
     *best_hybrid_rd_diff = best_rd - best_hybrid_rd;
-#endif /* CONFIG_DUALPRED */
 }
 
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)

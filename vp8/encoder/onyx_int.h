@@ -42,11 +42,7 @@
 #define AF_THRESH   25
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
-#if CONFIG_DUALPRED
 #define MAX_MODES 33
-#else /* CONFIG_DUALPRED */
-#define MAX_MODES 21
-#endif /* CONFIG_DUALPRED */
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -194,7 +190,6 @@ typedef enum
     THR_B_PRED         = 19,
     THR_I8X8_PRED      = 20,
 
-#if CONFIG_DUALPRED
     THR_DUAL_ZEROLG    = 21,
     THR_DUAL_NEARESTLG = 22,
     THR_DUAL_NEARLG    = 23,
@@ -210,7 +205,6 @@ typedef enum
     THR_DUAL_NEWLG     = 30,
     THR_DUAL_NEWLA     = 31,
     THR_DUAL_NEWGA     = 32,
-#endif /* CONFIG_DUALPRED */
 }
 THR_MODES;
 
@@ -362,12 +356,10 @@ typedef struct VP8_COMP
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
     int rd_threshes[MAX_MODES];
-#if CONFIG_DUALPRED
     int rd_single_diff, rd_dual_diff, rd_hybrid_diff;
     int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
     int dual_pred_count[DUAL_PRED_CONTEXTS];
     int single_pred_count[DUAL_PRED_CONTEXTS];
-#endif /* CONFIG_DUALPRED */
 
     int RDMULT;
     int RDDIV ;

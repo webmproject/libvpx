@@ -34,7 +34,6 @@ extern prototype_subpixel_predict(vp8_subpix_sixtap16x16);
 #endif
 extern prototype_subpixel_predict(vp8_subpix_sixtap8x8);
 
-#if CONFIG_DUALPRED
 #ifndef vp8_subpix_sixtap_avg16x16
 #define vp8_subpix_sixtap_avg16x16 vp8_sixtap_predict_avg16x16_c
 #endif
@@ -44,8 +43,6 @@ extern prototype_subpixel_predict(vp8_subpix_sixtap_avg16x16);
 #define vp8_subpix_sixtap_avg8x8 vp8_sixtap_predict_avg8x8_c
 #endif
 extern prototype_subpixel_predict(vp8_subpix_sixtap_avg8x8);
-#endif /* CONFIG_DUALPRED */
-
 #ifndef vp8_subpix_sixtap8x4
 #define vp8_subpix_sixtap8x4 vp8_sixtap_predict8x4_c
 #endif
@@ -66,7 +63,6 @@ extern prototype_subpixel_predict(vp8_subpix_bilinear16x16);
 #endif
 extern prototype_subpixel_predict(vp8_subpix_bilinear8x8);
 
-#if CONFIG_DUALPRED
 #ifndef vp8_subpix_bilinear_avg16x16
 #define vp8_subpix_bilinear_avg16x16 vp8_bilinear_predict_avg16x16_c
 #endif
@@ -76,7 +72,6 @@ extern prototype_subpixel_predict(vp8_subpix_bilinear_avg16x16);
 #define vp8_subpix_bilinear_avg8x8 vp8_bilinear_predict_avg8x8_c
 #endif
 extern prototype_subpixel_predict(vp8_subpix_bilinear_avg8x8);
-#endif /* CONFIG_DUALPRED */
 
 #ifndef vp8_subpix_bilinear8x4
 #define vp8_subpix_bilinear8x4 vp8_bilinear_predict8x4_c
@@ -93,18 +88,14 @@ typedef struct
 {
     vp8_subpix_fn_t  sixtap16x16;
     vp8_subpix_fn_t  sixtap8x8;
-#if CONFIG_DUALPRED
     vp8_subpix_fn_t  sixtap_avg16x16;
     vp8_subpix_fn_t  sixtap_avg8x8;
-#endif /* CONFIG_DUALPRED */
     vp8_subpix_fn_t  sixtap8x4;
     vp8_subpix_fn_t  sixtap4x4;
     vp8_subpix_fn_t  bilinear16x16;
     vp8_subpix_fn_t  bilinear8x8;
-#if CONFIG_DUALPRED
     vp8_subpix_fn_t  bilinear_avg16x16;
     vp8_subpix_fn_t  bilinear_avg8x8;
-#endif /* CONFIG_DUALPRED */
     vp8_subpix_fn_t  bilinear8x4;
     vp8_subpix_fn_t  bilinear4x4;
 } vp8_subpix_rtcd_vtable_t;

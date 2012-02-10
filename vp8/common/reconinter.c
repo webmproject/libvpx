@@ -62,7 +62,6 @@ void vp8_copy_mem16x16_c(
 
 }
 
-#if CONFIG_DUALPRED
 void vp8_avg_mem16x16_c(
     unsigned char *src,
     int src_stride,
@@ -84,7 +83,6 @@ void vp8_avg_mem16x16_c(
         dst += dst_stride;
     }
 }
-#endif /* CONFIG_DUALPRED */
 
 void vp8_copy_mem8x8_c(
     unsigned char *src,
@@ -116,7 +114,6 @@ void vp8_copy_mem8x8_c(
 
 }
 
-#if CONFIG_DUALPRED
 void vp8_avg_mem8x8_c(
     unsigned char *src,
     int src_stride,
@@ -138,7 +135,6 @@ void vp8_avg_mem8x8_c(
         dst += dst_stride;
     }
 }
-#endif /* CONFIG_DUALPRED */
 
 void vp8_copy_mem8x4_c(
     unsigned char *src,
@@ -478,7 +474,6 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
 
 }
 
-#if CONFIG_DUALPRED
 /*
  * This function should be called after an initial call to
  * vp8_build_inter16x16_predictors_mb() or _mby()/_mbuv().
@@ -544,7 +539,6 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
         RECON_INVOKE(&x->rtcd->recon, avg8x8)(vptr, pre_stride, dst_v, dst_uvstride);
     }
 }
-#endif /* CONFIG_DUALPRED */
 
 static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
 {
@@ -665,7 +659,7 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
     {
         vp8_build_inter16x16_predictors_mb(x, x->predictor, &x->predictor[256],
                                            &x->predictor[320], 16, 8);
-#if CONFIG_DUALPRED
+
         if (x->mode_info_context->mbmi.second_ref_frame)
         {
             /* 256 = offset of U plane in Y+U+V buffer;
@@ -675,7 +669,6 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
                                                    &x->predictor[256],
                                                    &x->predictor[320], 16, 8);
         }
-#endif /* CONFIG_DUALPRED */
     }
     else
     {

@@ -221,7 +221,6 @@ static void filter_block2d_second_pass
     }
 }
 
-#if CONFIG_DUALPRED
 /*
  * The only functional difference between filter_block2d_second_pass()
  * and this function is that filter_block2d_second_pass() does a sixtap
@@ -299,7 +298,6 @@ static void filter_block2d_second_pass_avg
         output_ptr += output_pitch;
     }
 }
-#endif /* CONFIG_DUALPRED */
 
 static void filter_block2d
 (
@@ -368,7 +366,6 @@ void vp8_sixtap_predict8x8_c
 
 }
 
-#if CONFIG_DUALPRED
 void vp8_sixtap_predict_avg8x8_c
 (
     unsigned char  *src_ptr,
@@ -394,7 +391,6 @@ void vp8_sixtap_predict_avg8x8_c
     /* then filter verticaly... */
     filter_block2d_second_pass_avg(FData + 8*(INTERP_EXTEND-1), dst_ptr, dst_pitch, 8, 8, 8, 8, VFilter);
 }
-#endif /* CONFIG_DUALPRED */
 
 void vp8_sixtap_predict8x4_c
 (
@@ -452,7 +448,6 @@ void vp8_sixtap_predict16x16_c
 
 }
 
-#if CONFIG_DUALPRED
 void vp8_sixtap_predict_avg16x16_c
 (
     unsigned char  *src_ptr,
@@ -479,7 +474,6 @@ void vp8_sixtap_predict_avg16x16_c
     filter_block2d_second_pass_avg(FData + 16*(INTERP_EXTEND-1), dst_ptr, dst_pitch,
                                    16, 16, 16, 16, VFilter);
 }
-#endif /* CONFIG_DUALPRED */
 
 /****************************************************************************
  *
@@ -584,7 +578,6 @@ static void filter_block2d_bil_second_pass
     }
 }
 
-#if CONFIG_DUALPRED
 /*
  * As before for filter_block2d_second_pass_avg(), the functional difference
  * between filter_block2d_bil_second_pass() and filter_block2d_bil_second_pass_avg()
@@ -623,7 +616,6 @@ static void filter_block2d_bil_second_pass_avg
         dst_ptr += dst_pitch;
     }
 }
-#endif /* CONFIG_DUALPRED */
 
 /****************************************************************************
  *
@@ -670,7 +662,6 @@ static void filter_block2d_bil
     filter_block2d_bil_second_pass(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
 }
 
-#if CONFIG_DUALPRED
 static void filter_block2d_bil_avg
 (
     unsigned char *src_ptr,
@@ -691,7 +682,6 @@ static void filter_block2d_bil_avg
     /* then 1-D vertically... */
     filter_block2d_bil_second_pass_avg(FData, dst_ptr, dst_pitch, Height, Width, VFilter);
 }
-#endif /* CONFIG_DUALPRED */
 
 void vp8_bilinear_predict4x4_c
 (
@@ -751,7 +741,6 @@ void vp8_bilinear_predict8x8_c
 
 }
 
-#if CONFIG_DUALPRED
 void vp8_bilinear_predict_avg8x8_c
 (
     unsigned char  *src_ptr,
@@ -771,7 +760,6 @@ void vp8_bilinear_predict_avg8x8_c
     filter_block2d_bil_avg(src_ptr, dst_ptr, src_pixels_per_line,
                            dst_pitch, HFilter, VFilter, 8, 8);
 }
-#endif /* CONFIG_DUALPRED */
 
 void vp8_bilinear_predict8x4_c
 (
@@ -812,7 +800,6 @@ void vp8_bilinear_predict16x16_c
     filter_block2d_bil(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter, 16, 16);
 }
 
-#if CONFIG_DUALPRED
 void vp8_bilinear_predict_avg16x16_c
 (
     unsigned char  *src_ptr,
@@ -832,4 +819,3 @@ void vp8_bilinear_predict_avg16x16_c
     filter_block2d_bil_avg(src_ptr, dst_ptr, src_pixels_per_line,
                            dst_pitch, HFilter, VFilter, 16, 16);
 }
-#endif /* CONFIG_DUALPRED */

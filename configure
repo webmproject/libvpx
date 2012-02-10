@@ -217,7 +217,6 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    dualpred
     extend_qrange
     segmentation
     segfeatures

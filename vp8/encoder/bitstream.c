@@ -967,9 +967,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const MV_CONTEXT *mvc = pc->fc.mvc;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
-#if CONFIG_DUALPRED
     int i;
-#endif
     int pred_context;
 
     MODE_INFO *m = pc->mi;
@@ -1022,7 +1020,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     vp8_write_literal(w, pc->prob_last_coded, 8);
     vp8_write_literal(w, pc->prob_gf_coded, 8);
 
-#if CONFIG_DUALPRED
     if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
     {
         vp8_write(w, 1, 128);
@@ -1052,7 +1049,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         vp8_write(w, 1, 128);
         vp8_write(w, 0, 128);
     }
-#endif /* CONFIG_DUALPRED */
 
     update_mbintra_mode_probs(cpi);
 
@@ -1220,7 +1216,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
 
                             write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
-#if CONFIG_DUALPRED
+
                             if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                             {
                                 vp8_write(w,
@@ -1239,7 +1235,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                                                   cpi->common.ref_frame_sign_bias);
                                 write_mv(w, &mi->second_mv.as_mv, &best_mv, mvc);
                             }
-#endif /* CONFIG_DUALPRED */
                             break;
 
                         case SPLITMV:
@@ -1288,14 +1283,12 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         }
                         break;
                         default:
-#if CONFIG_DUALPRED
                             if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                             {
                                 vp8_write(w,
                                           mi->second_ref_frame != INTRA_FRAME,
                                           get_pred_prob( pc, xd, PRED_DUAL ) );
                             }
-#endif /* CONFIG_DUALPRED */
                             break;
                         }
                     }
@@ -1326,9 +1319,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const MV_CONTEXT *mvc = pc->fc.mvc;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
-#if CONFIG_DUALPRED
     int i;
-#endif
     int pred_context;
 
 
@@ -1378,7 +1369,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     vp8_write_literal(w, pc->prob_last_coded, 8);
     vp8_write_literal(w, pc->prob_gf_coded, 8);
 
-#if CONFIG_DUALPRED
     if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
     {
         vp8_write(w, 1, 128);
@@ -1408,7 +1398,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
         vp8_write(w, 1, 128);
         vp8_write(w, 0, 128);
     }
-#endif /* CONFIG_DUALPRED */
 
     update_mbintra_mode_probs(cpi);
 
@@ -1556,7 +1545,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     #endif
 
                         write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
-#if CONFIG_DUALPRED
+
                         if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                         {
                             vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
@@ -1574,7 +1563,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                                               cpi->common.ref_frame_sign_bias);
                             write_mv(w, &mi->second_mv.as_mv, &best_mv, mvc);
                         }
-#endif /* CONFIG_DUALPRED */
                         break;
                     case SPLITMV:
                     {
@@ -1622,13 +1610,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     }
                     break;
                     default:
-#if CONFIG_DUALPRED
                         if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                         {
                             vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
                                       get_pred_prob( pc, xd, PRED_DUAL ) );
                         }
-#endif /* CONFIG_DUALPRED */
                         break;
                     }
                 }

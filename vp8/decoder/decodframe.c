@@ -134,14 +134,13 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd)
         vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
                                            xd->dst.u_buffer, xd->dst.v_buffer,
                                            xd->dst.y_stride, xd->dst.uv_stride);
-#if CONFIG_DUALPRED
+
         if (xd->mode_info_context->mbmi.second_ref_frame)
         {
             vp8_build_2nd_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
                                                    xd->dst.u_buffer, xd->dst.v_buffer,
                                                    xd->dst.y_stride, xd->dst.uv_stride);
         }
-#endif /* CONFIG_DUALPRED */
     }
 #ifdef DEC_DEBUG
         if (dec_debug) {
@@ -571,7 +570,6 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd)
             xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer +recon_uvoffset;
             xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer +recon_uvoffset;
 
-#if CONFIG_DUALPRED
             if (xd->mode_info_context->mbmi.second_ref_frame)
             {
                 int second_ref_fb_idx;
@@ -592,7 +590,6 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd)
                 xd->second_pre.v_buffer =
                        pc->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
             }
-#endif /* CONFIG_DUALPRED */
 
             if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME)
             {
@@ -697,7 +694,6 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
         xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
         xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
-#if CONFIG_DUALPRED
         if (xd->mode_info_context->mbmi.second_ref_frame)
         {
             int second_ref_fb_idx;
@@ -714,7 +710,6 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
             xd->second_pre.u_buffer = pc->yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
             xd->second_pre.v_buffer = pc->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
         }
-#endif /* CONFIG_DUALPRED */
 
         if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME)
         {
@@ -964,10 +959,8 @@ static void init_frame(VP8D_COMP *pbi)
             xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x4);
             xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x8);
             xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap16x16);
-#if CONFIG_DUALPRED
             xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg8x8);
             xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg16x16);
-#endif /* CONFIG_DUALPRED */
         }
         else
         {
@@ -975,10 +968,8 @@ static void init_frame(VP8D_COMP *pbi)
             xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x4);
             xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x8);
             xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear16x16);
-#if CONFIG_DUALPRED
             xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg8x8);
             xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg16x16);
-#endif /* CONFIG_DUALPRED */
         }
 
         if (pbi->decoded_key_frame && pbi->ec_enabled && !pbi->ec_active)

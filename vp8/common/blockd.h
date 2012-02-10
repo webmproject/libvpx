@@ -176,15 +176,11 @@ typedef enum
 typedef struct
 {
     MB_PREDICTION_MODE mode, uv_mode;
-    MV_REFERENCE_FRAME ref_frame;
+    MV_REFERENCE_FRAME ref_frame, second_ref_frame;
 #if CONFIG_T8X8
     TX_SIZE txfm_size;
 #endif
-    int_mv mv;
-#if CONFIG_DUALPRED
-    MV_REFERENCE_FRAME second_ref_frame;
-    int_mv second_mv;
-#endif
+    int_mv mv, second_mv;
     unsigned char partitioning;
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
     unsigned char need_to_clamp_mvs;
@@ -242,11 +238,9 @@ typedef struct MacroBlockD
     int fullpixel_mask;
 
     YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
-#if CONFIG_DUALPRED
     struct {
         uint8_t *y_buffer, *u_buffer, *v_buffer;
     } second_pre;
-#endif /* CONFIG_DUALPRED */
     YV12_BUFFER_CONFIG dst;
 
     MODE_INFO *prev_mode_info_context;
@@ -310,10 +304,8 @@ typedef struct MacroBlockD
     vp8_subpix_fn_t  subpixel_predict8x4;
     vp8_subpix_fn_t  subpixel_predict8x8;
     vp8_subpix_fn_t  subpixel_predict16x16;
-#if CONFIG_DUALPRED
     vp8_subpix_fn_t  subpixel_predict_avg8x8;
     vp8_subpix_fn_t  subpixel_predict_avg16x16;
-#endif /* CONFIG_DUALPRED */
 
     void *current_bc;
 

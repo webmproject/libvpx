@@ -42,9 +42,7 @@ void vp8_initialize_common(void);
 
 #define MAX_PARTITIONS 9
 
-#if CONFIG_DUALPRED
 #define DUAL_PRED_CONTEXTS   2
-#endif /* CONFIG_DUALPRED */
 
 typedef struct frame_contexts
 {
@@ -84,7 +82,6 @@ typedef enum
     BILINEAR = 1
 } INTERPOLATIONFILTERTYPE;
 
-#if CONFIG_DUALPRED
 typedef enum
 {
     SINGLE_PREDICTION_ONLY = 0,
@@ -92,7 +89,6 @@ typedef enum
     HYBRID_PREDICTION      = 2,
     NB_PREDICTION_TYPES    = 3,
 } DUALPREDMODE_TYPE;
-#endif /* CONFIG_DUALPRED */
 
 typedef struct VP8_COMMON_RTCD
 {
@@ -151,9 +147,7 @@ typedef struct VP8Common
     /* profile settings */
     int experimental;
     int mb_no_coeff_skip;
-#if CONFIG_DUALPRED
     DUALPREDMODE_TYPE dual_pred_mode;
-#endif /* CONFIG_DUALPRED */
     int no_lpf;
     int use_bilinear_mc_filter;
     int full_pixel;
@@ -237,9 +231,7 @@ typedef struct VP8Common
     vp8_prob ref_pred_probs[PREDICTION_PROBS];
     vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
 
-#if CONFIG_DUALPRED
     vp8_prob prob_dualpred[DUAL_PRED_CONTEXTS];
-#endif /* CONFIG_DUALPRED */
 
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */
