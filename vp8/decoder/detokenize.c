@@ -346,14 +346,14 @@ BLOCK_LOOP_8x8:
           seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
       }
       else
-          seg_eob = 64;
+          seg_eob = 4;
     }
     else
     {
       VP8_COMBINEENTROPYCONTEXTS_8x8(v, *a, *l, *a1, *l1);
       if ( segfeature_active( x, segment_id, SEG_LVL_EOB ) )
       {
-          seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
+          seg_eob = get_segdata( x, segment_id, SE_LVL_EOB );
       }
       else
           seg_eob = 64;
@@ -363,7 +363,6 @@ BLOCK_LOOP_8x8:
     Prob += v * ENTROPY_NODES;
 
 DO_WHILE_8x8:
-//#if CONFIG_SEGFEATURES
     if ( c == seg_eob )
         goto BLOCK_FINISHED_8x8;
 

@@ -124,7 +124,7 @@ static void tokenize2nd_order_b_8x8
     int x;
     const short *qcoeff_ptr = b->qcoeff;
 
-    int seg_eob = 64;
+    int seg_eob = 4;
     int segment_id = xd->mode_info_context->mbmi.segment_id;
 
     if ( segfeature_active( xd, segment_id, SEG_LVL_EOB ) )

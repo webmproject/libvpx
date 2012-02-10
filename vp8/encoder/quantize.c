@@ -1222,7 +1222,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     {
         x->block[24].eob_max_offset = 16;
 #if CONFIG_T8X8
-        x->block[24].eob_max_offset_8x8 = 64;
+        x->block[24].eob_max_offset_8x8 = 4;
 #endif
     }
 
