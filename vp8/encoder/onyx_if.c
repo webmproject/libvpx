@@ -323,6 +323,9 @@ static void setup_features(VP8_COMP *cpi)
 }
 
 
+static void dealloc_raw_frame_buffers(VP8_COMP *cpi);
+
+
 static void dealloc_compressor_data(VP8_COMP *cpi)
 {
     vpx_free(cpi->tplist);
@@ -349,10 +352,7 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 
     vp8_yv12_de_alloc_frame_buffer(&cpi->pick_lf_lvl_frame);
     vp8_yv12_de_alloc_frame_buffer(&cpi->scaled_source);
-#if VP8_TEMPORAL_ALT_REF
-    vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
-#endif
-    vp8_lookahead_destroy(cpi->lookahead);
+    dealloc_raw_frame_buffers(cpi);
 
     vpx_free(cpi->tok);
     cpi->tok = 0;
@@ -1044,6 +1044,16 @@ static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 #endif
 }
 
+
+static void dealloc_raw_frame_buffers(VP8_COMP *cpi)
+{
+#if VP8_TEMPORAL_ALT_REF
+    vp8_yv12_de_alloc_frame_buffer(&cpi->alt_ref_buffer);
+#endif
+    vp8_lookahead_destroy(cpi->lookahead);
+}
+
+
 static int vp8_alloc_partition_data(VP8_COMP *cpi)
 {
         vpx_free(cpi->mb.pip);
@@ -1387,6 +1397,7 @@ void update_layer_contexts (VP8_COMP *cpi)
 void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 {
     VP8_COMMON *cm = &cpi->common;
+    int last_w, last_h;
 
     if (!cpi)
         return;
@@ -1594,6 +1605,10 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 
     cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
+
+    last_w = cm->Width;
+    last_h = cm->Height;
+
     cm->Width       = cpi->oxcf.Width;
     cm->Height      = cpi->oxcf.Height;
 
@@ -1618,6 +1633,9 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         cm->Width = (hs - 1 + cpi->oxcf.Width * hr) / hs;
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
+
+    if (last_w != cm->Width || last_h != cm->Height)
+        cpi->force_next_frame_intra = 1;
 
     if (((cm->Width + 15) & 0xfffffff0) !=
           cm->yv12_fb[cm->lst_fb_idx].y_width ||
@@ -3147,15 +3165,9 @@ static void encode_frame_to_data_rate
     // Test code for segmentation of gf/arf (0,0)
     //segmentation_test_function( cpi);
 
-    if (cpi->compressor_speed == 2)
+    if(cpi->force_next_frame_intra)
     {
-        if(cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
-        {
-            if(cpi->force_next_frame_intra)
-            {
-                cm->frame_type = KEY_FRAME;  /* delayed intra frame */
-            }
-        }
+        cm->frame_type = KEY_FRAME;  /* delayed intra frame */
         cpi->force_next_frame_intra = 0;
     }
 
@@ -4550,6 +4562,15 @@ int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_C
 #endif
 
     vpx_usec_timer_start(&timer);
+
+    /* Reinit the lookahead buffer if the frame size changes */
+    if (sd->y_width != cpi->common.Width || sd->y_height != cpi->common.Height)
+    {
+        assert(cpi->oxcf.lag_in_frames < 2);
+        dealloc_raw_frame_buffers(cpi);
+        alloc_raw_frame_buffers(cpi);
+    }
+
     if(vp8_lookahead_push(cpi->lookahead, sd, time_stamp, end_time,
                           frame_flags, cpi->active_map_enabled ? cpi->active_map : NULL))
         res = -1;
