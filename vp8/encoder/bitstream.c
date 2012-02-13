@@ -2662,7 +2662,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     vp8_write_bit(bc, (xd->segmentation_enabled) ? 1 : 0);
 
     // Indicate which features are enabled
-    if (xd->segmentation_enabled)
+    if ( xd->segmentation_enabled )
     {
         // Indicate whether or not the segmentation map is being updated.
         vp8_write_bit(bc, (xd->update_mb_segmentation_map) ? 1 : 0);
@@ -2689,6 +2689,58 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 {
                     Data = get_segdata( xd, i, j );
 
+
+#if CONFIG_FEATUREUPDATES
+
+                    // check if there's an update
+                    if(segfeature_changed( xd,i,j) )
+                    {
+                        vp8_write_bit(bc, 1);
+
+                        if ( segfeature_active( xd, i, j ) )
+                        {
+                            // this bit is to say we are still
+                            // active/  if we were inactive
+                            // this is unnecessary
+                            if ( old_segfeature_active( xd, i, j ))
+                            {
+                                vp8_write_bit(bc, 1);
+                            }
+                            // Is the segment data signed..
+                            if ( is_segfeature_signed(j) )
+                            {
+                                // Encode the relevant feature data
+                                if (Data < 0)
+                                {
+                                    Data = - Data;
+                                    vp8_write_literal(bc, Data,
+                                            seg_feature_data_bits(j));
+                                    vp8_write_bit(bc, 1);
+                                }
+                                else
+                                {
+                                    vp8_write_literal(bc, Data,
+                                            seg_feature_data_bits(j));
+                                    vp8_write_bit(bc, 0);
+                                }
+                            }
+                            // Unsigned data element so no sign bit needed
+                            else
+                            vp8_write_literal(bc, Data,
+                                    seg_feature_data_bits(j));
+                        }
+                        // feature is inactive now
+                        else if ( old_segfeature_active( xd, i, j ))
+                        {
+                           vp8_write_bit(bc, 0);
+                        }
+                    }
+                    else
+                    {
+                        vp8_write_bit(bc,0);
+                    }
+#else
+
                     // If the feature is enabled...
                     if ( segfeature_active( xd, i, j ) )
                     {
@@ -2702,26 +2754,32 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                             {
                                 Data = - Data;
                                 vp8_write_literal(bc, Data,
-                                                  seg_feature_data_bits(j));
+                                        seg_feature_data_bits(j));
                                 vp8_write_bit(bc, 1);
                             }
                             else
                             {
                                 vp8_write_literal(bc, Data,
-                                                  seg_feature_data_bits(j));
+                                        seg_feature_data_bits(j));
                                 vp8_write_bit(bc, 0);
                             }
                         }
                         // Unsigned data element so no sign bit needed
                         else
                             vp8_write_literal(bc, Data,
-                                              seg_feature_data_bits(j));
+                                    seg_feature_data_bits(j));
                     }
                     else
                         vp8_write_bit(bc, 0);
+#endif
                 }
             }
         }
+
+#if CONFIG_FEATUREUPDATES
+        // save the segment info for updates next frame
+        save_segment_info ( xd );
+#endif
 
         if (xd->update_mb_segmentation_map)
         {

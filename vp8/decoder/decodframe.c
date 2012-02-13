@@ -1158,6 +1158,39 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 // For each of the segments features...
                 for (j = 0; j < SEG_LVL_MAX; j++)
                 {
+
+#if CONFIG_FEATUREUPDATES
+                    // feature updated?
+                    if (vp8_read_bit(bc))
+                    {
+                        int active=1;
+
+                        if ( segfeature_active( xd, i, j ))
+                            active=vp8_read_bit(bc);
+
+                        // Is the feature enabled
+                        if (active)
+                        {
+                            // Update the feature data and mask
+                            enable_segfeature(xd, i, j);
+
+                            data = (signed char)vp8_read_literal(
+                                                bc, seg_feature_data_bits(j));
+
+                            // Is the segment data signed..
+                            if ( is_segfeature_signed(j) )
+                            {
+                                if (vp8_read_bit(bc))
+                                    data = - data;
+                            }
+                        }
+                        else
+                            data = 0;
+
+                        set_segdata(xd, i, j, data);
+                    }
+
+#else
                     // Is the feature enabled
                     if (vp8_read_bit(bc))
                     {
@@ -1178,6 +1211,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                         data = 0;
 
                     set_segdata(xd, i, j, data);
+#endif
                 }
             }
         }

@@ -46,6 +46,27 @@ int get_segdata( MACROBLOCKD *xd,
                  int segment_id,
                  SEG_LVL_FEATURES feature_id );
 
+#if CONFIG_FEATUREUPDATES
+
+int old_segfeature_active( MACROBLOCKD *xd,
+                           int segment_id,
+                           SEG_LVL_FEATURES feature_id );
+
+int get_old_segdata( MACROBLOCKD *xd,
+                     int segment_id,
+                     SEG_LVL_FEATURES feature_id );
+
+void save_segment_info ( MACROBLOCKD *xd );
+
+int segfeature_changed( MACROBLOCKD *xd,
+                        int segment_id,
+                        SEG_LVL_FEATURES feature_id );
+
+
+
+#endif
+
+
 void clear_segref( MACROBLOCKD *xd, int segment_id );
 
 void set_segref( MACROBLOCKD *xd,

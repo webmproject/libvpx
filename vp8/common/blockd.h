@@ -279,6 +279,12 @@ typedef struct MacroBlockD
     signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
     unsigned int segment_feature_mask[MAX_MB_SEGMENTS];
 
+#if CONFIG_FEATUREUPDATES
+    // keep around the last set so we can figure out what updates...
+    unsigned int old_segment_feature_mask[MAX_MB_SEGMENTS];
+    signed char old_segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
+#endif
+
     /* mode_based Loop filter adjustment */
     unsigned char mode_ref_lf_delta_enabled;
     unsigned char mode_ref_lf_delta_update;
