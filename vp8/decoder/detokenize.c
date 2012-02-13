@@ -353,7 +353,7 @@ BLOCK_LOOP_8x8:
       VP8_COMBINEENTROPYCONTEXTS_8x8(v, *a, *l, *a1, *l1);
       if ( segfeature_active( x, segment_id, SEG_LVL_EOB ) )
       {
-          seg_eob = get_segdata( x, segment_id, SE_LVL_EOB );
+          seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
       }
       else
           seg_eob = 64;
