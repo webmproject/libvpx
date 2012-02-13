@@ -359,7 +359,6 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     vpx_free(cpi->mb.pip);
     cpi->mb.pip = 0;
 
-#if !(CONFIG_REALTIME_ONLY)
     vpx_free(cpi->twopass.total_stats);
     cpi->twopass.total_stats = 0;
 
@@ -368,7 +367,6 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 
     vpx_free(cpi->twopass.this_frame_stats);
     cpi->twopass.this_frame_stats = 0;
-#endif
 }
 
 static void segmentation_test_function(VP8_PTR ptr)
@@ -828,7 +826,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     switch (Mode)
     {
-#if !(CONFIG_REALTIME_ONLY)
     case 0: // best quality mode
         sf->thresh_mult[THR_ZEROMV   ] = 0;
         sf->thresh_mult[THR_ZEROG    ] = 0;
@@ -1137,7 +1134,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         }
 
         break;
-#endif
     case 2:
         sf->optimize_coefficients = 0;
         sf->recode_loop = 0;
@@ -1767,7 +1763,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
                     vpx_calloc(sizeof(unsigned int),
                     cm->mb_rows * cm->mb_cols));
 
-#if !(CONFIG_REALTIME_ONLY)
         vpx_free(cpi->twopass.total_stats);
 
     cpi->twopass.total_stats = vpx_calloc(1, sizeof(FIRSTPASS_STATS));
@@ -1784,7 +1779,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         !cpi->twopass.this_frame_stats)
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate firstpass stats");
-#endif
 
         vpx_free(cpi->tplist);
 
@@ -2443,8 +2437,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->output_pkt_list = oxcf->output_pkt_list;
 
-#if !(CONFIG_REALTIME_ONLY)
-
     if (cpi->pass == 1)
     {
         vp8_init_first_pass(cpi);
@@ -2460,8 +2452,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
                             + (packets - 1) * packet_sz);
         vp8_init_second_pass(cpi);
     }
-
-#endif
 
     if (cpi->compressor_speed == 2)
     {
@@ -2575,14 +2565,10 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
     if (cpi && (cpi->common.current_video_frame > 0))
     {
-#if !(CONFIG_REALTIME_ONLY)
-
         if (cpi->pass == 2)
         {
             vp8_end_second_pass(cpi);
         }
-
-#endif
 
 #ifdef ENTROPY_STATS
         print_context_counters();
@@ -3413,7 +3399,6 @@ int find_fp_qindex()
     return i;
 }
 
-#if !(CONFIG_REALTIME_ONLY)
 static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags)
 {
     (void) size;
@@ -3426,7 +3411,7 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);
 }
-#endif
+
 //#define WRITE_RECON_BUFFER 1
 #if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
@@ -3788,7 +3773,6 @@ static void encode_frame_to_data_rate
     }
 
     // For an alt ref frame in 2 pass we skip the call to the second pass function that sets the target bandwidth
-#if !(CONFIG_REALTIME_ONLY)
     if (cpi->pass == 2)
     {
         if (cpi->common.refresh_alt_ref_frame)
@@ -3798,7 +3782,6 @@ static void encode_frame_to_data_rate
         }
     }
     else
-#endif
         cpi->per_frame_bandwidth  = (int)(cpi->target_bandwidth / cpi->output_frame_rate);
 
     // Default turn off buffer to buffer copying
@@ -4195,7 +4178,7 @@ static void encode_frame_to_data_rate
 
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
-#if !(CONFIG_REALTIME_ONLY) && CONFIG_POSTPROC
+#if CONFIG_POSTPROC
 
     if (cpi->oxcf.noise_sensitivity > 0)
     {
@@ -4435,7 +4418,6 @@ static void encode_frame_to_data_rate
         else
             active_worst_qchanged = FALSE;
 
-#if !(CONFIG_REALTIME_ONLY)
         // Special case handling for forced key frames
         if ( (cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced )
         {
@@ -4603,7 +4585,6 @@ static void encode_frame_to_data_rate
             last_zbin_oq = cpi->zbin_over_quant;
         }
         else
-#endif
             Loop = FALSE;
 
         if (cpi->is_src_frame_alt_ref)
@@ -5164,7 +5145,6 @@ static void check_gf_quality(VP8_COMP *cpi)
 #endif
 }
 
-#if !(CONFIG_REALTIME_ONLY)
 static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest, unsigned int *frame_flags)
 {
 
@@ -5181,7 +5161,6 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
         cpi->twopass.bits_left += (int64_t)(two_pass_min_rate / cpi->oxcf.frame_rate);
     }
 }
-#endif
 
 //For ARM NEON, d8-d15 are callee-saved registers, and need to be saved by us.
 #if HAVE_ARMV7
@@ -5272,7 +5251,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     cpi->source = NULL;
 
-#if !(CONFIG_REALTIME_ONLY)
     // Should we code an alternate reference frame
     if (cpi->oxcf.error_resilient_mode == 0 &&
         cpi->oxcf.play_alternate &&
@@ -5297,7 +5275,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
             cpi->is_src_frame_alt_ref = 0;
         }
     }
-#endif
 
     if (!cpi->source)
     {
@@ -5324,15 +5301,11 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     else
     {
         *size = 0;
-#if !(CONFIG_REALTIME_ONLY)
-
         if (flush && cpi->pass == 1 && !cpi->twopass.first_pass_done)
         {
             vp8_end_first_pass(cpi);    /* get last stats packet */
             cpi->twopass.first_pass_done = 1;
         }
-
-#endif
 
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -5447,8 +5420,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
         assert(i < NUM_YV12_BUFFERS );
     }
-#if !(CONFIG_REALTIME_ONLY)
-
     if (cpi->pass == 1)
     {
         Pass1Encode(cpi, size, dest, frame_flags);
@@ -5458,8 +5429,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         Pass2Encode(cpi, size, dest, frame_flags);
     }
     else
-#endif
-    encode_frame_to_data_rate(cpi, size, dest, frame_flags);
+        encode_frame_to_data_rate(cpi, size, dest, frame_flags);
 
     if (cpi->compressor_speed == 2)
     {

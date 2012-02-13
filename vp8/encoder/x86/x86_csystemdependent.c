@@ -218,10 +218,7 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
 
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
-
-#if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
-#endif
 
 #if CONFIG_INTERNAL_STATS
 #if ARCH_X86_64

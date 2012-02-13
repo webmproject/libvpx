@@ -35,7 +35,6 @@ Advanced options:
   ${toggle_mem_tracker}           track memory usage
   ${toggle_postproc}              postprocessing
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
-  ${toggle_realtime_only}         enable this option while building for real-time encoding
   ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
@@ -263,7 +262,6 @@ CONFIG_LIST="
     decoders
     static_msvcrt
     spatial_resampling
-    realtime_only
     error_concealment
     shared
     static
@@ -307,7 +305,6 @@ CMDLINE_SELECT="
     static_msvcrt
     mem_tracker
     spatial_resampling
-    realtime_only
     error_concealment
     shared
     static

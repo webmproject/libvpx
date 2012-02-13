@@ -101,9 +101,7 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.search.full_search             = vp8_full_search_sad;
     cpi->rtcd.search.refining_search         = vp8_refining_search_sad;
     cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
-#if !(CONFIG_REALTIME_ONLY)
     cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
-#endif
 #if CONFIG_INTERNAL_STATS
     cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_c;
     cpi->rtcd.variance.ssimpf_16x16          = vp8_ssim_parms_16x16_c;

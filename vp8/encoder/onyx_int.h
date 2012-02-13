@@ -36,7 +36,7 @@
 
 #define KEY_FRAME_CONTEXT 5
 
-#define MAX_LAG_BUFFERS (CONFIG_REALTIME_ONLY? 1 : 25)
+#define MAX_LAG_BUFFERS 25
 
 #define AF_THRESH   25
 #define AF_THRESH2  100
@@ -51,9 +51,7 @@
 #define MV_ZBIN_BOOST        4
 #define ZBIN_OQ_MAX 192
 
-#if !(CONFIG_REALTIME_ONLY)
 #define VP8_TEMPORAL_ALT_REF 1
-#endif
 
 typedef struct
 {

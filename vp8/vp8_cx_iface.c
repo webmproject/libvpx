@@ -56,13 +56,8 @@ static const struct extraconfig_map extracfg_map[] =
         0,
         {
             NULL,
-#if !(CONFIG_REALTIME_ONLY)
             VP8_BEST_QUALITY_ENCODING,  /* Encoding Mode */
             0,                          /* cpu_used      */
-#else
-            VP8_REAL_TIME_ENCODING,     /* Encoding Mode */
-            4,                          /* cpu_used      */
-#endif
             0,                          /* enable_auto_alt_ref */
             0,                          /* noise_sensitivity */
             0,                          /* Sharpness */
@@ -149,11 +144,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
     RANGE_CHECK_HI(cfg, rc_min_quantizer,   cfg->rc_max_quantizer);
     RANGE_CHECK_HI(cfg, g_threads,          64);
-#if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
-#else
-    RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
-#endif
     RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
     RANGE_CHECK_HI(cfg, rc_undershoot_pct,  1000);
     RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
@@ -164,11 +155,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
-#if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
-#else
-    RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_ONE_PASS);
-#endif
 
     /* VP8 does not support a lower bound on the keyframe interval in
      * automatic keyframe placement mode.
@@ -181,13 +168,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_BOOL(vp8_cfg,               enable_auto_alt_ref);
     RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
 
-#if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_BEST_QUALITY_ENCODING, VP8_REAL_TIME_ENCODING);
     RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
-#else
-    RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_REAL_TIME_ENCODING, VP8_REAL_TIME_ENCODING);
-    RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 0);
-#endif
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
     RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
@@ -196,7 +178,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
     RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
 
-#if !(CONFIG_REALTIME_ONLY)
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
         size_t           packet_sz = sizeof(FIRSTPASS_STATS);
@@ -218,7 +199,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
         if ((int)(stats->count + 0.5) != n_packets - 1)
             ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
-#endif
 
     return VPX_CODEC_OK;
 }
@@ -618,7 +598,6 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 {
     unsigned int new_qc;
 
-#if !(CONFIG_REALTIME_ONLY)
     /* Use best quality mode if no deadline is given. */
     new_qc = MODE_BESTQUALITY;
 
@@ -636,10 +615,6 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
          */
         new_qc = (deadline > duration_us) ? MODE_GOODQUALITY : MODE_REALTIME;
     }
-
-#else
-    new_qc = MODE_REALTIME;
-#endif
 
     switch (ctx->deprecated_mode)
     {

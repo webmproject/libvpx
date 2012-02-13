@@ -13,7 +13,7 @@
 #include "lookahead.h"
 #include "vp8/common/extend.h"
 
-#define MAX_LAG_BUFFERS (CONFIG_REALTIME_ONLY? 1 : 25)
+#define MAX_LAG_BUFFERS 25
 
 struct lookahead_ctx
 {
