@@ -2855,7 +2855,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                                    &x->e_mbd.predictor[320], 16, 8);
 
             /* Y cost and distortion */
-            macro_block_yrd(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
+#if CONFIG_T8X8
+             if(cpi->common.txfm_mode == ALLOW_8X8)
+                macro_block_yrd_8x8(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd));
+            else
+#endif
+                macro_block_yrd(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd.encodemb));
+
             rate2 += rate_y;
             distortion2 += distortion;
 
