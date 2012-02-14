@@ -1445,58 +1445,43 @@ static void show_rate_histogram(struct rate_hist          *hist,
 #define NELEMENTS(x) (sizeof(x)/sizeof(x[0]))
 #define ARG_CTRL_CNT_MAX NELEMENTS(vp8_arg_ctrl_map)
 
-int main(int argc, const char **argv_)
+
+/* Configuration elements common to all streams */
+struct global_config
 {
-    vpx_codec_ctx_t        encoder;
-    const char                  *in_fn = NULL, *out_fn = NULL, *stats_fn = NULL;
-    int                    i;
-    FILE                  *infile, *outfile;
-    vpx_codec_enc_cfg_t    cfg;
-    vpx_codec_err_t        res;
-    int                    pass, one_pass_only = 0;
-    stats_io_t             stats;
-    vpx_image_t            raw;
-    const struct codec_item  *codec = codecs;
-    int                    frame_avail, got_data;
-
-    struct arg               arg;
-    char                   **argv, **argi, **argj;
-    int                      arg_usage = 0, arg_passes = 1, arg_deadline = 0;
-    int                      arg_ctrls[ARG_CTRL_CNT_MAX][2], arg_ctrl_cnt = 0;
-    int                      arg_limit = 0;
-    static const arg_def_t **ctrl_args = no_args;
-    static const int        *ctrl_args_map = NULL;
-    int                      verbose = 0, show_psnr = 0;
-    int                      arg_use_i420 = 1;
-    unsigned long            cx_time = 0;
-    unsigned int             file_type, fourcc;
-    y4m_input                y4m;
-    struct vpx_rational      arg_framerate = {30, 1};
-    int                      arg_have_framerate = 0;
-    int                      write_webm = 1;
-    EbmlGlobal               ebml = {0};
-    uint32_t                 hash = 0;
-    uint64_t                 psnr_sse_total = 0;
-    uint64_t                 psnr_samples_total = 0;
-    double                   psnr_totals[4] = {0, 0, 0, 0};
-    int                      psnr_count = 0;
-    stereo_format_t          stereo_fmt = STEREO_FORMAT_MONO;
-    int                      counts[64]={0};
-    int                      show_q_hist_buckets=0;
-    int                      show_rate_hist_buckets=0;
-    struct rate_hist         rate_hist={0};
-
-    exec_name = argv_[0];
-    ebml.last_pts_ms = -1;
-
-    if (argc < 3)
-        usage_exit();
+    const struct codec_item  *codec;
+    int                       passes;
+    int                       pass;
+    const char               *stats_fn;
+    const char               *out_fn;
+    int                       usage;
+    int                       deadline;
+    int                       use_i420;
+    int                       verbose;
+    int                       limit;
+    int                       show_psnr;
+    int                       have_framerate;
+    struct vpx_rational       framerate;
+    int                       write_webm;
+    int                       debug;
+    int                       show_q_hist_buckets;
+    int                       show_rate_hist_buckets;
+};
 
 
-    /* First parse the codec and usage values, because we want to apply other
-     * parameters on top of the default configuration provided by the codec.
-     */
-    argv = argv_dup(argc - 1, argv_ + 1);
+static void parse_global_config(struct global_config *global, char **argv)
+{
+    char       **argi, **argj;
+    struct arg   arg;
+
+    /* Initialize default parameters */
+    memset(global, 0, sizeof(*global));
+    global->codec = codecs;
+    global->passes = 1;
+    global->use_i420 = 1;
+    global->framerate.num = 30;
+    global->framerate.den = 1;
+    global->write_webm = 1;
 
     for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
     {
@@ -1511,7 +1496,7 @@ int main(int argc, const char **argv_)
                     k = j;
 
             if (k >= 0)
-                codec = codecs + k;
+                global->codec = codecs + k;
             else
                 die("Error: Unrecognized argument (%s) to --codec\n",
                     arg.val);
@@ -1519,82 +1504,131 @@ int main(int argc, const char **argv_)
         }
         else if (arg_match(&arg, &passes, argi))
         {
-            arg_passes = arg_parse_uint(&arg);
+            global->passes = arg_parse_uint(&arg);
 
-            if (arg_passes < 1 || arg_passes > 2)
-                die("Error: Invalid number of passes (%d)\n", arg_passes);
+            if (global->passes < 1 || global->passes > 2)
+                die("Error: Invalid number of passes (%d)\n", global->passes);
         }
         else if (arg_match(&arg, &pass_arg, argi))
         {
-            one_pass_only = arg_parse_uint(&arg);
+            global->pass = arg_parse_uint(&arg);
 
-            if (one_pass_only < 1 || one_pass_only > 2)
-                die("Error: Invalid pass selected (%d)\n", one_pass_only);
+            if (global->pass < 1 || global->pass > 2)
+                die("Error: Invalid pass selected (%d)\n",
+                    global->pass);
         }
         else if (arg_match(&arg, &fpf_name, argi))
-            stats_fn = arg.val;
+            global->stats_fn = arg.val;
         else if (arg_match(&arg, &usage, argi))
-            arg_usage = arg_parse_uint(&arg);
+            global->usage = arg_parse_uint(&arg);
         else if (arg_match(&arg, &deadline, argi))
-            arg_deadline = arg_parse_uint(&arg);
+            global->deadline = arg_parse_uint(&arg);
         else if (arg_match(&arg, &best_dl, argi))
-            arg_deadline = VPX_DL_BEST_QUALITY;
+            global->deadline = VPX_DL_BEST_QUALITY;
         else if (arg_match(&arg, &good_dl, argi))
-            arg_deadline = VPX_DL_GOOD_QUALITY;
+            global->deadline = VPX_DL_GOOD_QUALITY;
         else if (arg_match(&arg, &rt_dl, argi))
-            arg_deadline = VPX_DL_REALTIME;
+            global->deadline = VPX_DL_REALTIME;
         else if (arg_match(&arg, &use_yv12, argi))
-        {
-            arg_use_i420 = 0;
-        }
+            global->use_i420 = 0;
         else if (arg_match(&arg, &use_i420, argi))
-        {
-            arg_use_i420 = 1;
-        }
+            global->use_i420 = 1;
         else if (arg_match(&arg, &verbosearg, argi))
-            verbose = 1;
+            global->verbose = 1;
         else if (arg_match(&arg, &limit, argi))
-            arg_limit = arg_parse_uint(&arg);
+            global->limit = arg_parse_uint(&arg);
         else if (arg_match(&arg, &psnrarg, argi))
-            show_psnr = 1;
+            global->show_psnr = 1;
         else if (arg_match(&arg, &framerate, argi))
         {
-            arg_framerate = arg_parse_rational(&arg);
-            arg_have_framerate = 1;
+            global->framerate = arg_parse_rational(&arg);
+            global->have_framerate = 1;
         }
         else if (arg_match(&arg, &use_ivf, argi))
-            write_webm = 0;
+            global->write_webm = 0;
         else if (arg_match(&arg, &outputfile, argi))
-            out_fn = arg.val;
+            global->out_fn = arg.val;
         else if (arg_match(&arg, &debugmode, argi))
-            ebml.debug = 1;
+            global->debug = 1;
         else if (arg_match(&arg, &q_hist_n, argi))
-            show_q_hist_buckets = arg_parse_uint(&arg);
+            global->show_q_hist_buckets = arg_parse_uint(&arg);
         else if (arg_match(&arg, &rate_hist_n, argi))
-            show_rate_hist_buckets = arg_parse_uint(&arg);
+            global->show_rate_hist_buckets = arg_parse_uint(&arg);
         else
             argj++;
     }
 
-    /* Ensure that --passes and --pass are consistent. If --pass is set and --passes=2,
-     * ensure --fpf was set.
+    /* Validate global config */
+
+    /* Ensure that --passes and --pass are consistent. If --pass is set and
+     * --passes=2, ensure --fpf was set.
      */
-    if (one_pass_only)
+    if (global->pass)
     {
         /* DWIM: Assume the user meant passes=2 if pass=2 is specified */
-        if (one_pass_only > arg_passes)
+        if (global->pass > global->passes)
         {
             fprintf(stderr, "Warning: Assuming --pass=%d implies --passes=%d\n",
-                   one_pass_only, one_pass_only);
-            arg_passes = one_pass_only;
+                    global->pass, global->pass);
+            global->passes = global->pass;
         }
 
-        if (arg_passes == 2 && !stats_fn)
-            die("Must specify --fpf when --pass=%d and --passes=2\n", one_pass_only);
+        if (global->passes == 2 && !global->stats_fn)
+            die("Must specify --fpf when --pass=%d and --passes=2\n",
+                global->pass);
     }
+}
+
+
+int main(int argc, const char **argv_)
+{
+    vpx_codec_ctx_t        encoder;
+    const char            *in_fn = NULL;
+    int                    i;
+    FILE                  *infile, *outfile;
+    vpx_codec_enc_cfg_t    cfg;
+    vpx_codec_err_t        res;
+    int                    pass;
+    stats_io_t             stats;
+    vpx_image_t            raw;
+    int                    frame_avail, got_data;
+
+    struct global_config     global;
+    struct arg               arg;
+    char                   **argv, **argi, **argj;
+    int                      arg_ctrls[ARG_CTRL_CNT_MAX][2], arg_ctrl_cnt = 0;
+    static const arg_def_t **ctrl_args = no_args;
+    static const int        *ctrl_args_map = NULL;
+    unsigned long            cx_time = 0;
+    unsigned int             file_type, fourcc;
+    y4m_input                y4m;
+
+    EbmlGlobal               ebml = {0};
+    uint32_t                 hash = 0;
+    uint64_t                 psnr_sse_total = 0;
+    uint64_t                 psnr_samples_total = 0;
+    double                   psnr_totals[4] = {0, 0, 0, 0};
+    int                      psnr_count = 0;
+    stereo_format_t          stereo_fmt = STEREO_FORMAT_MONO;
+    int                      counts[64]={0};
+    struct rate_hist         rate_hist={0};
+
+    exec_name = argv_[0];
+    ebml.last_pts_ms = -1;
+
+    if (argc < 3)
+        usage_exit();
+
+    /* First parse the global configuration values, because we want to apply
+     * other parameters on top of the default configuration provided by the
+     * codec.
+     */
+    argv = argv_dup(argc - 1, argv_ + 1);
+    parse_global_config(&global, argv);
 
     /* Populate encoder configuration */
-    res = vpx_codec_enc_config_default(codec->iface, &cfg, arg_usage);
+    res = vpx_codec_enc_config_default(global.codec->iface, &cfg,
+                                       global.usage);
 
     if (res)
     {
@@ -1666,7 +1700,7 @@ int main(int argc, const char **argv_)
         {
             cfg.rc_2pass_vbr_bias_pct = arg_parse_uint(&arg);
 
-            if (arg_passes < 2)
+            if (global.passes < 2)
                 fprintf(stderr,
                         "Warning: option %s ignored in one-pass mode.\n",
                         arg.name);
@@ -1675,7 +1709,7 @@ int main(int argc, const char **argv_)
         {
             cfg.rc_2pass_vbr_minsection_pct = arg_parse_uint(&arg);
 
-            if (arg_passes < 2)
+            if (global.passes < 2)
                 fprintf(stderr,
                         "Warning: option %s ignored in one-pass mode.\n",
                         arg.name);
@@ -1684,7 +1718,7 @@ int main(int argc, const char **argv_)
         {
             cfg.rc_2pass_vbr_maxsection_pct = arg_parse_uint(&arg);
 
-            if (arg_passes < 2)
+            if (global.passes < 2)
                 fprintf(stderr,
                         "Warning: option %s ignored in one-pass mode.\n",
                         arg.name);
@@ -1702,7 +1736,7 @@ int main(int argc, const char **argv_)
     /* Handle codec specific options */
 #if CONFIG_VP8_ENCODER
 
-    if (codec->iface == &vpx_codec_vp8_cx_algo)
+    if (global.codec->iface == &vpx_codec_vp8_cx_algo)
     {
         ctrl_args = vp8_args;
         ctrl_args_map = vp8_arg_ctrl_map;
@@ -1758,12 +1792,12 @@ int main(int argc, const char **argv_)
     if (!in_fn)
         usage_exit();
 
-    if(!out_fn)
+    if(!global.out_fn)
         die("Error: Output file is required (specify with -o)\n");
 
     memset(&stats, 0, sizeof(stats));
 
-    for (pass = one_pass_only ? one_pass_only - 1 : 0; pass < arg_passes; pass++)
+    for (pass = global.pass ? global.pass - 1 : 0; pass < global.passes; pass++)
     {
         int frames_in = 0, frames_out = 0;
         int64_t nbytes = 0;
@@ -1796,13 +1830,13 @@ int main(int argc, const char **argv_)
                 /* Use the frame rate from the file only if none was specified
                  * on the command-line.
                  */
-                if (!arg_have_framerate)
+                if (!global.have_framerate)
                 {
-                    arg_framerate.num = y4m.fps_n;
-                    arg_framerate.den = y4m.fps_d;
+                    global.framerate.num = y4m.fps_n;
+                    global.framerate.den = y4m.fps_d;
                 }
 
-                arg_use_i420 = 0;
+                global.use_i420 = 0;
             }
             else
             {
@@ -1817,10 +1851,10 @@ int main(int argc, const char **argv_)
             switch (fourcc)
             {
             case 0x32315659:
-                arg_use_i420 = 0;
+                global.use_i420 = 0;
                 break;
             case 0x30323449:
-                arg_use_i420 = 1;
+                global.use_i420 = 1;
                 break;
             default:
                 fprintf(stderr, "Unsupported fourcc (%08x) in IVF\n", fourcc);
@@ -1841,12 +1875,13 @@ int main(int argc, const char **argv_)
 
 #define SHOW(field) fprintf(stderr, "    %-28s = %d\n", #field, cfg.field)
 
-        if (verbose && pass == 0)
+        if (global.verbose && pass == 0)
         {
-            fprintf(stderr, "Codec: %s\n", vpx_codec_iface_name(codec->iface));
+            fprintf(stderr, "Codec: %s\n",
+                    vpx_codec_iface_name(global.codec->iface));
             fprintf(stderr, "Source file: %s Format: %s\n", in_fn,
-                    arg_use_i420 ? "I420" : "YV12");
-            fprintf(stderr, "Destination file: %s\n", out_fn);
+                    global.use_i420 ? "I420" : "YV12");
+            fprintf(stderr, "Destination file: %s\n", global.out_fn);
             fprintf(stderr, "Encoder parameters:\n");
 
             SHOW(g_usage);
@@ -1880,21 +1915,21 @@ int main(int argc, const char **argv_)
             SHOW(kf_max_dist);
         }
 
-        if(pass == (one_pass_only ? one_pass_only - 1 : 0)) {
+        if(pass == (global.pass ? global.pass - 1 : 0)) {
             if (file_type == FILE_TYPE_Y4M)
                 /*The Y4M reader does its own allocation.
                   Just initialize this here to avoid problems if we never read any
                    frames.*/
                 memset(&raw, 0, sizeof(raw));
             else
-                vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
+                vpx_img_alloc(&raw, global.use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
                               cfg.g_w, cfg.g_h, 1);
 
-            init_rate_histogram(&rate_hist, &cfg, &arg_framerate);
+            init_rate_histogram(&rate_hist, &cfg, &global.framerate);
         }
 
-        outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb")
-                                      : set_binary_mode(stdout);
+        outfile = strcmp(global.out_fn, "-") ? fopen(global.out_fn, "wb")
+                                             : set_binary_mode(stdout);
 
         if (!outfile)
         {
@@ -1902,15 +1937,15 @@ int main(int argc, const char **argv_)
             return EXIT_FAILURE;
         }
 
-        if(write_webm && fseek(outfile, 0, SEEK_CUR))
+        if(global.write_webm && fseek(outfile, 0, SEEK_CUR))
         {
             fprintf(stderr, "WebM output to pipes not supported.\n");
             return EXIT_FAILURE;
         }
 
-        if (stats_fn)
+        if (global.stats_fn)
         {
-            if (!stats_open_file(&stats, stats_fn, pass))
+            if (!stats_open_file(&stats, global.stats_fn, pass))
             {
                 fprintf(stderr, "Failed to open statistics store\n");
                 return EXIT_FAILURE;
@@ -1925,7 +1960,7 @@ int main(int argc, const char **argv_)
             }
         }
 
-        cfg.g_pass = arg_passes == 2
+        cfg.g_pass = global.passes == 2
                      ? pass ? VPX_RC_LAST_PASS : VPX_RC_FIRST_PASS
                  : VPX_RC_ONE_PASS;
 #if VPX_ENCODER_ABI_VERSION > (1 + VPX_CODEC_ABI_VERSION)
@@ -1937,18 +1972,18 @@ int main(int argc, const char **argv_)
 
 #endif
 
-        if(write_webm)
+        if(global.write_webm)
         {
             ebml.stream = outfile;
-            write_webm_file_header(&ebml, &cfg, &arg_framerate, stereo_fmt);
+            write_webm_file_header(&ebml, &cfg, &global.framerate, stereo_fmt);
         }
         else
-            write_ivf_file_header(outfile, &cfg, codec->fourcc, 0);
+            write_ivf_file_header(outfile, &cfg, global.codec->fourcc, 0);
 
 
         /* Construct Encoder Context */
-        vpx_codec_enc_init(&encoder, codec->iface, &cfg,
-                           show_psnr ? VPX_CODEC_USE_PSNR : 0);
+        vpx_codec_enc_init(&encoder, global.codec->iface, &cfg,
+                           global.show_psnr ? VPX_CODEC_USE_PSNR : 0);
         ctx_exit_on_error(&encoder, "Failed to initialize encoder");
 
         /* Note that we bypass the vpx_codec_control wrapper macro because
@@ -1974,7 +2009,7 @@ int main(int argc, const char **argv_)
             struct vpx_usec_timer timer;
             int64_t frame_start, next_frame_start;
 
-            if (!arg_limit || frames_in < arg_limit)
+            if (!global.limit || frames_in < global.limit)
             {
                 frame_avail = read_frame(infile, &raw, file_type, &y4m,
                                          &detect);
@@ -1984,7 +2019,7 @@ int main(int argc, const char **argv_)
 
                 fprintf(stderr,
                         "\rPass %d/%d frame %4d/%-4d %7"PRId64"B \033[K",
-                        pass + 1, arg_passes, frames_in, frames_out, nbytes);
+                        pass + 1, global.passes, frames_in, frames_out, nbytes);
             }
             else
                 frame_avail = 0;
@@ -1992,13 +2027,13 @@ int main(int argc, const char **argv_)
             vpx_usec_timer_start(&timer);
 
             frame_start = (cfg.g_timebase.den * (int64_t)(frames_in - 1)
-                          * arg_framerate.den) / cfg.g_timebase.num / arg_framerate.num;
+                          * global.framerate.den) / cfg.g_timebase.num / global.framerate.num;
             next_frame_start = (cfg.g_timebase.den * (int64_t)(frames_in)
-                                * arg_framerate.den)
-                                / cfg.g_timebase.num / arg_framerate.num;
+                                * global.framerate.den)
+                                / cfg.g_timebase.num / global.framerate.num;
             vpx_codec_encode(&encoder, frame_avail ? &raw : NULL, frame_start,
                              next_frame_start - frame_start,
-                             0, arg_deadline);
+                             0, global.deadline);
             vpx_usec_timer_mark(&timer);
             cx_time += vpx_usec_timer_elapsed(&timer);
             ctx_exit_on_error(&encoder, "Failed to encode frame");
@@ -2026,7 +2061,7 @@ int main(int argc, const char **argv_)
                             (unsigned long)pkt->data.frame.sz);
 
                     update_rate_histogram(&rate_hist, &cfg, pkt);
-                    if(write_webm)
+                    if(global.write_webm)
                     {
                         /* Update the hash */
                         if(!ebml.debug)
@@ -2054,7 +2089,7 @@ int main(int argc, const char **argv_)
                     break;
                 case VPX_CODEC_PSNR_PKT:
 
-                    if (show_psnr)
+                    if (global.show_psnr)
                     {
                         int i;
 
@@ -2080,14 +2115,14 @@ int main(int argc, const char **argv_)
         fprintf(stderr,
                "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
                " %7lu %s (%.2f fps)\033[K", pass + 1,
-               arg_passes, frames_in, frames_out, nbytes,
+               global.passes, frames_in, frames_out, nbytes,
                frames_in ? (unsigned long)(nbytes * 8 / frames_in) : 0,
-               frames_in ? nbytes * 8 *(int64_t)arg_framerate.num / arg_framerate.den / frames_in : 0,
+               frames_in ? nbytes * 8 *(int64_t)global.framerate.num / global.framerate.den / frames_in : 0,
                cx_time > 9999999 ? cx_time / 1000 : cx_time,
                cx_time > 9999999 ? "ms" : "us",
                cx_time > 0 ? (float)frames_in * 1000000.0 / (float)cx_time : 0);
 
-        if ( (show_psnr) && (psnr_count>0) )
+        if ( (global.show_psnr) && (psnr_count>0) )
         {
             int i;
             double ovpsnr = vp8_mse2psnr(psnr_samples_total, 255.0,
@@ -2108,7 +2143,7 @@ int main(int argc, const char **argv_)
         if (file_type == FILE_TYPE_Y4M)
             y4m_input_close(&y4m);
 
-        if(write_webm)
+        if(global.write_webm)
         {
             write_webm_file_footer(&ebml, hash);
             free(ebml.cue_list);
@@ -2117,22 +2152,23 @@ int main(int argc, const char **argv_)
         else
         {
             if (!fseek(outfile, 0, SEEK_SET))
-                write_ivf_file_header(outfile, &cfg, codec->fourcc, frames_out);
+                write_ivf_file_header(outfile, &cfg, global.codec->fourcc,
+                                      frames_out);
         }
 
         fclose(outfile);
-        stats_close(&stats, arg_passes-1);
+        stats_close(&stats, global.passes-1);
         fprintf(stderr, "\n");
 
-        if (one_pass_only)
+        if (global.pass)
             break;
     }
 
-    if (show_q_hist_buckets)
-        show_q_histogram(counts, show_q_hist_buckets);
+    if (global.show_q_hist_buckets)
+        show_q_histogram(counts, global.show_q_hist_buckets);
 
-    if (show_rate_hist_buckets)
-        show_rate_histogram(&rate_hist, &cfg, show_rate_hist_buckets);
+    if (global.show_rate_hist_buckets)
+        show_rate_histogram(&rate_hist, &cfg, global.show_rate_hist_buckets);
     destroy_rate_histogram(&rate_hist);
 
     vpx_img_free(&raw);
