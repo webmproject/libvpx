@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//ugY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 813,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-14T19:36:30Z",
+      "side": 1,
+      "message": "Does not appear to be used?",
+      "revId": "2f0a189d8d532c9568944e1c8f1e1a2d3d9cd0d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//ugI\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1534,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-14T19:36:30Z",
+      "side": 1,
+      "message": "Not sure why this change is necessary.",
+      "revId": "2f0a189d8d532c9568944e1c8f1e1a2d3d9cd0d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//uf8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1641,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-14T19:36:30Z",
+      "side": 1,
+      "message": "Is this used?",
+      "revId": "2f0a189d8d532c9568944e1c8f1e1a2d3d9cd0d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//ueg\u003d",
+        "filename": "vp8/encoder/bitstream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-14T19:36:30Z",
+      "side": 1,
+      "message": "Should this now be included in the new rtcd implementation?",
+      "revId": "2f0a189d8d532c9568944e1c8f1e1a2d3d9cd0d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//ufY\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-14T19:36:30Z",
+      "side": 1,
+      "message": "Did you intend to create another copy of default_coef_counts?",
+      "revId": "2f0a189d8d532c9568944e1c8f1e1a2d3d9cd0d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//ufc\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-14T19:36:30Z",
+      "side": 1,
+      "message": "Did you intend to create another copy of default_coef_counts?",
+      "revId": "2f0a189d8d532c9568944e1c8f1e1a2d3d9cd0d5",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
