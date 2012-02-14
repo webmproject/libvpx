@@ -295,10 +295,27 @@ struct detect_buffer {
 };
 
 
-#define IVF_FRAME_HDR_SZ (4+8) /* 4 byte size + 8 byte timestamp */
-static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
-                      y4m_input *y4m, struct detect_buffer *detect)
+struct input_state
 {
+    char                 *fn;
+    FILE                 *file;
+    y4m_input             y4m;
+    struct detect_buffer  detect;
+    enum video_file_type  file_type;
+    unsigned int          w;
+    unsigned int          h;
+    struct vpx_rational   framerate;
+    int                   use_i420;
+};
+
+
+#define IVF_FRAME_HDR_SZ (4+8) /* 4 byte size + 8 byte timestamp */
+static int read_frame(struct input_state *input, vpx_image_t *img)
+{
+    FILE *f = input->file;
+    enum video_file_type file_type = input->file_type;
+    y4m_input *y4m = &input->y4m;
+    struct detect_buffer *detect = &input->detect;
     int plane = 0;
     int shortread = 0;
 
@@ -382,14 +399,15 @@ unsigned int file_is_y4m(FILE      *infile,
 }
 
 #define IVF_FILE_HDR_SZ (32)
-unsigned int file_is_ivf(FILE *infile,
-                         unsigned int *fourcc,
-                         unsigned int *width,
-                         unsigned int *height,
-                         struct detect_buffer *detect)
+unsigned int file_is_ivf(struct input_state *input,
+                         unsigned int *fourcc)
 {
     char raw_hdr[IVF_FILE_HDR_SZ];
     int is_ivf = 0;
+    FILE *infile = input->file;
+    unsigned int *width = &input->w;
+    unsigned int *height = &input->h;
+    struct detect_buffer *detect = &input->detect;
 
     if(memcmp(detect->buf, "DKIF", 4) != 0)
         return 0;
@@ -1489,8 +1507,6 @@ static void parse_global_config(struct global_config *global, char **argv)
     global->codec = codecs;
     global->passes = 1;
     global->use_i420 = 1;
-    global->framerate.num = 30;
-    global->framerate.den = 1;
     global->write_webm = 1;
 
     for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
@@ -1590,12 +1606,73 @@ static void parse_global_config(struct global_config *global, char **argv)
 }
 
 
+void open_input_file(struct input_state *input)
+{
+    unsigned int fourcc;
+
+    /* Parse certain options from the input file, if possible */
+    input->file = strcmp(input->fn, "-") ? fopen(input->fn, "rb")
+                                         : set_binary_mode(stdin);
+
+    if (!input->file)
+        fatal("Failed to open input file");
+
+    /* For RAW input sources, these bytes will applied on the first frame
+     *  in read_frame().
+     */
+    input->detect.buf_read = fread(input->detect.buf, 1, 4, input->file);
+    input->detect.position = 0;
+
+    if (input->detect.buf_read == 4
+        && file_is_y4m(input->file, &input->y4m, input->detect.buf))
+    {
+        if (y4m_input_open(&input->y4m, input->file, input->detect.buf, 4) >= 0)
+        {
+            input->file_type = FILE_TYPE_Y4M;
+            input->w = input->y4m.pic_w;
+            input->h = input->y4m.pic_h;
+            input->framerate.num = input->y4m.fps_n;
+            input->framerate.den = input->y4m.fps_d;
+            input->use_i420 = 0;
+        }
+        else
+            fatal("Unsupported Y4M stream.");
+    }
+    else if (input->detect.buf_read == 4 && file_is_ivf(input, &fourcc))
+    {
+        input->file_type = FILE_TYPE_IVF;
+        switch (fourcc)
+        {
+        case 0x32315659:
+            input->use_i420 = 0;
+            break;
+        case 0x30323449:
+            input->use_i420 = 1;
+            break;
+        default:
+            fatal("Unsupported fourcc (%08x) in IVF", fourcc);
+        }
+    }
+    else
+    {
+        input->file_type = FILE_TYPE_RAW;
+    }
+}
+
+
+static void close_input_file(struct input_state *input)
+{
+    fclose(input->file);
+    if (input->file_type == FILE_TYPE_Y4M)
+        y4m_input_close(&input->y4m);
+}
+
+
 int main(int argc, const char **argv_)
 {
     vpx_codec_ctx_t        encoder;
-    const char            *in_fn = NULL;
     int                    i;
-    FILE                  *infile, *outfile;
+    FILE                  *outfile;
     vpx_codec_enc_cfg_t    cfg;
     vpx_codec_err_t        res;
     int                    pass;
@@ -1603,6 +1680,7 @@ int main(int argc, const char **argv_)
     vpx_image_t            raw;
     int                    frame_avail, got_data;
 
+    struct input_state       input = {0};
     struct global_config     global;
     struct arg               arg;
     char                   **argv, **argi, **argj;
@@ -1610,8 +1688,6 @@ int main(int argc, const char **argv_)
     static const arg_def_t **ctrl_args = no_args;
     static const int        *ctrl_args_map = NULL;
     unsigned long            cx_time = 0;
-    unsigned int             file_type, fourcc;
-    y4m_input                y4m;
 
     EbmlGlobal               ebml = {0};
     uint32_t                 hash = 0;
@@ -1653,6 +1729,11 @@ int main(int argc, const char **argv_)
      */
     cfg.g_w = 0;
     cfg.g_h = 0;
+
+    /* Setup default input stream settings */
+    input.framerate.num = 30;
+    input.framerate.den = 1;
+    input.use_i420 = 1;
 
     /* Now parse the remainder of the parameters. */
     for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
@@ -1787,9 +1868,9 @@ int main(int argc, const char **argv_)
             die("Error: Unrecognized option %s\n", *argi);
 
     /* Handle non-option arguments */
-    in_fn = argv[0];
+    input.fn = argv[0];
 
-    if (!in_fn)
+    if (!input.fn)
         usage_exit();
 
     if(!global.out_fn)
@@ -1801,67 +1882,26 @@ int main(int argc, const char **argv_)
     {
         int frames_in = 0, frames_out = 0;
         int64_t nbytes = 0;
-        struct detect_buffer detect;
 
-        /* Parse certain options from the input file, if possible */
-        infile = strcmp(in_fn, "-") ? fopen(in_fn, "rb")
-                                    : set_binary_mode(stdin);
+        open_input_file(&input);
 
-        if (!infile)
-            fatal("Failed to open input file");
-
-        /* For RAW input sources, these bytes will applied on the first frame
-         *  in read_frame().
-         */
-        detect.buf_read = fread(detect.buf, 1, 4, infile);
-        detect.position = 0;
-
-        if (detect.buf_read == 4 && file_is_y4m(infile, &y4m, detect.buf))
+        /* Update configuration settings parsed from the file */
+        if(input.w && input.h)
         {
-            if (y4m_input_open(&y4m, infile, detect.buf, 4) >= 0)
-            {
-                file_type = FILE_TYPE_Y4M;
-                cfg.g_w = y4m.pic_w;
-                cfg.g_h = y4m.pic_h;
-
-                /* Use the frame rate from the file only if none was specified
-                 * on the command-line.
-                 */
-                if (!global.have_framerate)
-                {
-                    global.framerate.num = y4m.fps_n;
-                    global.framerate.den = y4m.fps_d;
-                }
-
-                global.use_i420 = 0;
-            }
-            else
-                fatal("Unsupported Y4M stream.");
-        }
-        else if (detect.buf_read == 4 &&
-                 file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, &detect))
-        {
-            file_type = FILE_TYPE_IVF;
-            switch (fourcc)
-            {
-            case 0x32315659:
-                global.use_i420 = 0;
-                break;
-            case 0x30323449:
-                global.use_i420 = 1;
-                break;
-            default:
-                fatal("Unsupported fourcc (%08x) in IVF", fourcc);
-            }
-        }
-        else
-        {
-            file_type = FILE_TYPE_RAW;
+            cfg.g_w = input.w;
+            cfg.g_h = input.h;
         }
 
         if(!cfg.g_w || !cfg.g_h)
             fatal("Specify stream dimensions with --width (-w) "
                   " and --height (-h).\n");
+
+        /* Use the frame rate from the file only if none was specified
+         * on the command-line.
+         */
+        if (!global.have_framerate)
+            global.framerate = input.framerate;
+
 
 #define SHOW(field) fprintf(stderr, "    %-28s = %d\n", #field, cfg.field)
 
@@ -1869,7 +1909,7 @@ int main(int argc, const char **argv_)
         {
             fprintf(stderr, "Codec: %s\n",
                     vpx_codec_iface_name(global.codec->iface));
-            fprintf(stderr, "Source file: %s Format: %s\n", in_fn,
+            fprintf(stderr, "Source file: %s Format: %s\n", input.fn,
                     global.use_i420 ? "I420" : "YV12");
             fprintf(stderr, "Destination file: %s\n", global.out_fn);
             fprintf(stderr, "Encoder parameters:\n");
@@ -1906,7 +1946,7 @@ int main(int argc, const char **argv_)
         }
 
         if(pass == (global.pass ? global.pass - 1 : 0)) {
-            if (file_type == FILE_TYPE_Y4M)
+            if (input.file_type == FILE_TYPE_Y4M)
                 /*The Y4M reader does its own allocation.
                   Just initialize this here to avoid problems if we never read any
                    frames.*/
@@ -1989,8 +2029,7 @@ int main(int argc, const char **argv_)
 
             if (!global.limit || frames_in < global.limit)
             {
-                frame_avail = read_frame(infile, &raw, file_type, &y4m,
-                                         &detect);
+                frame_avail = read_frame(&input, &raw);
 
                 if (frame_avail)
                     frames_in++;
@@ -2117,9 +2156,7 @@ int main(int argc, const char **argv_)
 
         vpx_codec_destroy(&encoder);
 
-        fclose(infile);
-        if (file_type == FILE_TYPE_Y4M)
-            y4m_input_close(&y4m);
+        close_input_file(&input);
 
         if(global.write_webm)
         {
