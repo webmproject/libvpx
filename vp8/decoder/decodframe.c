@@ -28,9 +28,6 @@
 #include "decodemv.h"
 #include "vp8/common/extend.h"
 #include "vp8/common/modecont.h"
-#if CONFIG_ERROR_CONCEALMENT
-#include "error_concealment.h"
-#endif
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/idct.h"
 #include "dequantize.h"
@@ -272,20 +269,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     throw_residual = (!pbi->independent_partitions &&
                       pbi->frame_corrupt_residual);
     throw_residual = (throw_residual || vp8dx_bool_error(xd->current_bc));
-
-#if CONFIG_ERROR_CONCEALMENT
-    if (pbi->ec_active &&
-        (mb_idx >= pbi->mvs_corrupt_from_mb || throw_residual))
-    {
-        /* MB with corrupt residuals or corrupt mode/motion vectors.
-         * Better to use the predictor as reconstruction.
-         */
-        pbi->frame_corrupt_residual = 1;
-        vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));
-        vp8_conceal_corrupt_mb(xd);
-        return;
-    }
-#endif
 
     /* dequantization and idct */
     if (mode == I8X8_PRED)
@@ -534,32 +517,6 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd)
             xd->up_available = (mb_row != 0);
             xd->left_available = (mb_col != 0);
 
-#if CONFIG_ERROR_CONCEALMENT
-            {
-                int corrupt_residual = (!pbi->independent_partitions &&
-                                       pbi->frame_corrupt_residual) ||
-                                       vp8dx_bool_error(xd->current_bc);
-                if (pbi->ec_active &&
-                    xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
-                    corrupt_residual)
-                {
-                    /* We have an intra block with corrupt coefficients, better
-                     * to conceal with an inter block. Interpolate MVs from
-                     * neighboring MBs.
-                     *
-                     * Note that for the first mb with corrupt residual in a
-                     * frame, we might not discover that before decoding the
-                     * residual. That happens after this check, and therefore
-                     * no inter concealment will be done.
-                     */
-                    vp8_interpolate_motion(xd,
-                                           mb_row, mb_col,
-                                           pc->mb_rows, pc->mb_cols,
-                                           pc->mode_info_stride);
-                }
-            }
-#endif
-
             update_blockd_bmi(xd);
 
             recon_yoffset = (mb_row * recon_y_stride * 16) + (mb_col * 16);
@@ -658,32 +615,6 @@ decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
          */
         xd->mb_to_left_edge = -((mb_col * 16) << 3);
         xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
-
-#if CONFIG_ERROR_CONCEALMENT
-        {
-            int corrupt_residual = (!pbi->independent_partitions &&
-                                   pbi->frame_corrupt_residual) ||
-                                   vp8dx_bool_error(xd->current_bc);
-            if (pbi->ec_active &&
-                xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME &&
-                corrupt_residual)
-            {
-                /* We have an intra block with corrupt coefficients, better to
-                 * conceal with an inter block. Interpolate MVs from neighboring
-                 * MBs.
-                 *
-                 * Note that for the first mb with corrupt residual in a frame,
-                 * we might not discover that before decoding the residual. That
-                 * happens after this check, and therefore no inter concealment
-                 * will be done.
-                 */
-                vp8_interpolate_motion(xd,
-                                       mb_row, mb_col,
-                                       pc->mb_rows, pc->mb_cols,
-                                       pc->mode_info_stride);
-            }
-        }
-#endif
 
         update_blockd_bmi(xd);
 
@@ -821,7 +752,7 @@ static void setup_token_decoder(VP8D_COMP *pbi,
             (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
     /* Only update the multi_token_partition field if we are sure the value
      * is correct. */
-    if (!pbi->ec_active || !vp8dx_bool_error(&pbi->bc))
+    if (!vp8dx_bool_error(&pbi->bc))
         pc->multi_token_partition = multi_token_partition;
 
     num_part = 1 << pc->multi_token_partition;
@@ -853,8 +784,6 @@ static void setup_token_decoder(VP8D_COMP *pbi,
         {
             if (read_is_valid(partition_size_ptr, 3, user_data_end))
                 partition_size = read_partition_size(partition_size_ptr);
-            else if (pbi->ec_active)
-                partition_size = bytes_left;
             else
                 vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                    "Truncated partition size data");
@@ -868,12 +797,9 @@ static void setup_token_decoder(VP8D_COMP *pbi,
          */
         if (!read_is_valid(partition, partition_size, user_data_end))
         {
-            if (pbi->ec_active)
-                partition_size = bytes_left;
-            else
-                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                   "Truncated packet or corrupt partition "
-                                   "%d length", i + 1);
+            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                               "Truncated packet or corrupt partition "
+                               "%d length", i + 1);
         }
 
         if (vp8dx_start_decode(bool_decoder, partition, partition_size))
@@ -970,9 +896,6 @@ static void init_frame(VP8D_COMP *pbi)
             xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg8x8);
             xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg16x16);
         }
-
-        if (pbi->decoded_key_frame && pbi->ec_enabled && !pbi->ec_active)
-            pbi->ec_active = 1;
     }
 
     xd->left_context = &pc->left_context;
@@ -1014,21 +937,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     if (data_end - data < 3)
     {
-        if (pbi->ec_active)
-        {
-            /* Declare the missing frame as an inter frame since it will
-               be handled as an inter frame when we have estimated its
-               motion vectors. */
-            pc->frame_type = INTER_FRAME;
-            pc->version = 0;
-            pc->show_frame = 1;
-            first_partition_length_in_bytes = 0;
-        }
-        else
-        {
-            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                               "Truncated packet");
-        }
+        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Truncated packet");
     }
     else
     {
@@ -1038,7 +948,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         first_partition_length_in_bytes =
             (data[0] | (data[1] << 8) | (data[2] << 16)) >> 5;
 
-        if (!pbi->ec_active && (data + first_partition_length_in_bytes > data_end
+        if ((data + first_partition_length_in_bytes > data_end
             || data + first_partition_length_in_bytes < data))
             vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
                                "Truncated packet or corrupt partition 0 length");
@@ -1056,7 +966,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             /* When error concealment is enabled we should only check the sync
              * code if we have enough bits available
              */
-            if (!pbi->ec_active || data + 3 < data_end)
+            if (data + 3 < data_end)
             {
                 if (data[0] != 0x9d || data[1] != 0x01 || data[2] != 0x2a)
                     vpx_internal_error(&pc->error, VPX_CODEC_UNSUP_BITSTREAM,
@@ -1067,7 +977,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
              * if we have enough data. Otherwise we will end up with the wrong
              * size.
              */
-            if (!pbi->ec_active || data + 6 < data_end)
+            if (data + 6 < data_end)
             {
                 pc->Width = (data[3] | (data[4] << 8)) & 0x3fff;
                 pc->horiz_scale = data[4] >> 6;
@@ -1097,18 +1007,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 if (vp8_alloc_frame_buffers(pc, pc->Width, pc->Height))
                     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                        "Failed to allocate frame buffers");
-
-#if CONFIG_ERROR_CONCEALMENT
-                pbi->overlaps = NULL;
-                if (pbi->ec_enabled)
-                {
-                    if (vp8_alloc_overlap_lists(pbi))
-                        vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                                           "Failed to allocate overlap lists "
-                                           "for error concealment");
-                }
-#endif
-
             }
         }
     }
@@ -1357,20 +1255,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         /* Should the GF or ARF be updated from the current frame */
         pc->refresh_golden_frame = vp8_read_bit(bc);
-#if CONFIG_ERROR_CONCEALMENT
-        /* Assume we shouldn't refresh golden if the bit is missing */
-        xd->corrupted |= vp8dx_bool_error(bc);
-        if (pbi->ec_active && xd->corrupted)
-            pc->refresh_golden_frame = 0;
-#endif
-
         pc->refresh_alt_ref_frame = vp8_read_bit(bc);
-#if CONFIG_ERROR_CONCEALMENT
-        /* Assume we shouldn't refresh altref if the bit is missing */
-        xd->corrupted |= vp8dx_bool_error(bc);
-        if (pbi->ec_active && xd->corrupted)
-            pc->refresh_alt_ref_frame = 0;
-#endif
 
         if(pc->refresh_alt_ref_frame)
         {
@@ -1409,13 +1294,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
     pc->refresh_last_frame = pc->frame_type == KEY_FRAME  ||  vp8_read_bit(bc);
-
-#if CONFIG_ERROR_CONCEALMENT
-    /* Assume we should refresh the last frame if the bit is missing */
-    xd->corrupted |= vp8dx_bool_error(bc);
-    if (pbi->ec_active && xd->corrupted)
-        pc->refresh_last_frame = 1;
-#endif
 
     if (0)
     {
@@ -1500,16 +1378,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         vp8_update_mode_context(&pbi->common);
     }
-
-#if CONFIG_ERROR_CONCEALMENT
-    if (pbi->ec_active &&
-            pbi->mvs_corrupt_from_mb < (unsigned int)pc->mb_cols * pc->mb_rows)
-    {
-        /* Motion vectors are missing in this frame. We will try to estimate
-         * them and then continue decoding the frame as usual */
-        vp8_estimate_missing_mvs(pbi);
-    }
-#endif
 
     vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 

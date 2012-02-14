@@ -87,9 +87,6 @@ static const arg_def_t threadsarg = ARG_DEF("t", "threads", 1,
                                     "Max threads to use");
 static const arg_def_t verbosearg = ARG_DEF("v", "verbose", 0,
                                   "Show version string");
-static const arg_def_t error_concealment = ARG_DEF(NULL, "error-concealment", 0,
-                                       "Enable decoder error-concealment");
-
 
 #if CONFIG_MD5
 static const arg_def_t md5arg = ARG_DEF(NULL, "md5", 0,
@@ -103,7 +100,6 @@ static const arg_def_t *all_args[] =
 #if CONFIG_MD5
     &md5arg,
 #endif
-    &error_concealment,
     NULL
 };
 
@@ -704,7 +700,6 @@ int main(int argc, const char **argv_)
     FILE                  *infile;
     int                    frame_in = 0, frame_out = 0, flipuv = 0, noblit = 0, do_md5 = 0, progress = 0;
     int                    stop_after = 0, postproc = 0, summary = 0, quiet = 1;
-    int                    ec_enabled = 0;
     vpx_codec_iface_t       *iface = NULL;
     unsigned int           fourcc;
     unsigned long          dx_time = 0;
@@ -849,10 +844,6 @@ int main(int argc, const char **argv_)
                 vp8_dbg_display_mv = flags;
             }
         }
-        else if (arg_match(&arg, &error_concealment, argi))
-        {
-            ec_enabled = 1;
-        }
 
 #endif
         else
@@ -973,8 +964,7 @@ int main(int argc, const char **argv_)
             break;
         }
 
-    dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0) |
-                (ec_enabled ? VPX_CODEC_USE_ERROR_CONCEALMENT : 0);
+    dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0);
     if (vpx_codec_dec_init(&decoder, iface ? iface :  ifaces[0].iface, &cfg,
                            dec_flags))
     {

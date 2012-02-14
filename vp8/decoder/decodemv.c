@@ -395,12 +395,6 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
 
-#if CONFIG_ERROR_CONCEALMENT
-    /* Default is that no macroblock is corrupt, therefore we initialize
-     * mvs_corrupt_from_mb to something very big, which we can be sure is
-     * outside the frame. */
-    pbi->mvs_corrupt_from_mb = UINT_MAX;
-#endif
     pbi->prob_skip_false = 0;
     if (pbi->common.mb_no_coeff_skip)
         pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
@@ -772,27 +766,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 }
             }
 
-#if CONFIG_ERROR_CONCEALMENT
-            if(pbi->ec_enabled)
-            {
-                mi->bmi[ 0].mv.as_int =
-                mi->bmi[ 1].mv.as_int =
-                mi->bmi[ 2].mv.as_int =
-                mi->bmi[ 3].mv.as_int =
-                mi->bmi[ 4].mv.as_int =
-                mi->bmi[ 5].mv.as_int =
-                mi->bmi[ 6].mv.as_int =
-                mi->bmi[ 7].mv.as_int =
-                mi->bmi[ 8].mv.as_int =
-                mi->bmi[ 9].mv.as_int =
-                mi->bmi[10].mv.as_int =
-                mi->bmi[11].mv.as_int =
-                mi->bmi[12].mv.as_int =
-                mi->bmi[13].mv.as_int =
-                mi->bmi[14].mv.as_int =
-                mi->bmi[15].mv.as_int = mv->as_int;
-            }
-#endif
             break;
         default:;
   #if CONFIG_DEBUG
@@ -886,9 +859,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                 int mb_to_top_edge;
                 int mb_to_bottom_edge;
 
-#if CONFIG_ERROR_CONCEALMENT
-                int mb_num;
-#endif
                 int offset_extended = row_delta[(i+1) & 0x3]
                                     * cm->mode_info_stride + col_delta[(i+1) & 0x3];
                 int dy = row_delta[i];
@@ -912,9 +882,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                 mb_to_bottom_edge = ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
                 mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
 
-#if CONFIG_ERROR_CONCEALMENT
-                mb_num = mb_row * pbi->common.mb_cols + mb_col;
-#endif
                 /*read_mb_modes_mv(pbi, cm->mode_info_context, &cm->mode_info_context->mbmi, mb_row, mb_col);*/
                 if(pbi->common.frame_type == KEY_FRAME)
                     vp8_kfread_modes(pbi, mi, mb_row, mb_col);
@@ -922,19 +889,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                     read_mb_modes_mv(pbi, mi, &mi->mbmi,
                     prev_mi,
                     mb_row, mb_col);
-
-#if CONFIG_ERROR_CONCEALMENT
-                /* look for corruption. set mvs_corrupt_from_mb to the current
-                 * mb_num if the frame is corrupt from this macroblock. */
-                if (vp8dx_bool_error(&pbi->bc) && mb_num < pbi->mvs_corrupt_from_mb)
-                {
-                    pbi->mvs_corrupt_from_mb = mb_num;
-                    /* no need to continue since the partition is corrupt from
-                     * here on.
-                     */
-                    return;
-                }
-#endif
 
                 prev_mi += offset_extended;
                 mi += offset_extended;       /* next macroblock */
@@ -988,9 +942,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
         while (++mb_col < pbi->common.mb_cols)
         {
-#if CONFIG_ERROR_CONCEALMENT
-            int mb_num = mb_row * pbi->common.mb_cols + mb_col;
-#endif
             /*read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
             if(pbi->common.frame_type == KEY_FRAME)
                 vp8_kfread_modes(pbi, mi, mb_row, mb_col);
@@ -1015,19 +966,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                 printf("F%3d:%d:%d\n", pbi->common.current_video_frame, mb_row, mb_col);
             }
             */
-#if CONFIG_ERROR_CONCEALMENT
-            /* look for corruption. set mvs_corrupt_from_mb to the current
-             * mb_num if the frame is corrupt from this macroblock. */
-            if (vp8dx_bool_error(&pbi->bc) && mb_num < pbi->mvs_corrupt_from_mb)
-            {
-                pbi->mvs_corrupt_from_mb = mb_num;
-                /* no need to continue since the partition is corrupt from
-                 * here on.
-                 */
-                return;
-            }
-#endif
-
 #if 0
             fprintf(statsfile, "%2d%2d%2d   ",
                 mi->mbmi.segment_id, mi->mbmi.ref_frame, mi->mbmi.mode );

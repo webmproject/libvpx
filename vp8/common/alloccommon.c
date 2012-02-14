@@ -157,10 +157,6 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
 
     update_mode_info_border(oci, oci->mip);
     update_mode_info_in_image(oci, oci->mi);
-#if CONFIG_ERROR_CONCEALMENT
-    update_mode_info_border(oci, oci->prev_mip);
-    update_mode_info_in_image(oci, oci->prev_mi);
-#endif
 
     return 0;
 }

@@ -16,9 +16,6 @@
 #include "treereader.h"
 #include "vp8/common/onyxc_int.h"
 #include "dequantize.h"
-#if CONFIG_ERROR_CONCEALMENT
-#include "ec_types.h"
-#endif
 
 //#define DEC_DEBUG
 
@@ -103,13 +100,6 @@ typedef struct VP8Decompressor
 
     vp8_prob prob_skip_false;
 
-#if CONFIG_ERROR_CONCEALMENT
-    MB_OVERLAP *overlaps;
-    /* the mb num from which modes and mvs (first partition) are corrupt */
-    unsigned int mvs_corrupt_from_mb;
-#endif
-    int ec_enabled;
-    int ec_active;
     int input_partition;
     int decoded_key_frame;
     int independent_partitions;
