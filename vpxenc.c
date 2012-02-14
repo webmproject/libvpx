@@ -84,14 +84,37 @@ static const struct codec_item
 
 static void usage_exit();
 
+#define LOG_ERROR(label) do \
+{\
+    const char *l=label;\
+    va_list ap;\
+    va_start(ap, fmt);\
+    if(l)\
+        fprintf(stderr, "%s: ", l);\
+    vfprintf(stderr, fmt, ap);\
+    fprintf(stderr, "\n");\
+    va_end(ap);\
+} while(0)
+
 void die(const char *fmt, ...)
 {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
+    LOG_ERROR(NULL);
     usage_exit();
 }
+
+
+void fatal(const char *fmt, ...)
+{
+    LOG_ERROR("Fatal");
+    exit(EXIT_FAILURE);
+}
+
+
+void warn(const char *fmt, ...)
+{
+    LOG_ERROR("Warning");
+}
+
 
 static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s)
 {
@@ -153,10 +176,7 @@ int stats_open_file(stats_io_t *stats, const char *fpf, int pass)
         stats->file = fopen(fpf, "rb");
 
         if (fseek(stats->file, 0, SEEK_END))
-        {
-            fprintf(stderr, "First-pass stats file must be seekable!\n");
-            exit(EXIT_FAILURE);
-        }
+            fatal("First-pass stats file must be seekable!");
 
         stats->buf.sz = stats->buf_alloc_sz = ftell(stats->file);
         rewind(stats->file);
@@ -164,11 +184,8 @@ int stats_open_file(stats_io_t *stats, const char *fpf, int pass)
         stats->buf.buf = malloc(stats->buf_alloc_sz);
 
         if (!stats->buf.buf)
-        {
-            fprintf(stderr, "Failed to allocate first-pass stats buffer (%lu bytes)\n",
-                    (unsigned long)stats->buf_alloc_sz);
-            exit(EXIT_FAILURE);
-        }
+            fatal("Failed to allocate first-pass stats buffer (%lu bytes)",
+                  (unsigned long)stats->buf_alloc_sz);
 
         nbytes = fread(stats->buf.buf, 1, stats->buf.sz, stats->file);
         res = (nbytes == stats->buf.sz);
@@ -240,11 +257,7 @@ void stats_write(stats_io_t *stats, const void *pkt, size_t len)
                 stats->buf_alloc_sz = new_sz;
             }
             else
-            {
-                fprintf(stderr,
-                        "\nFailed to realloc firstpass stats buffer.\n");
-                exit(EXIT_FAILURE);
-            }
+                fatal("Failed to realloc firstpass stats buffer.");
         }
 
         memcpy(stats->buf_ptr, pkt, len);
@@ -391,8 +404,8 @@ unsigned int file_is_ivf(FILE *infile,
             is_ivf = 1;
 
             if (mem_get_le16(raw_hdr + 4) != 0)
-                fprintf(stderr, "Error: Unrecognized IVF version! This file may not"
-                        " decode properly.");
+                warn("Unrecognized IVF version! This file may not decode "
+                     "properly.");
 
             *fourcc = mem_get_le32(raw_hdr + 8);
         }
@@ -762,10 +775,7 @@ write_webm_block(EbmlGlobal                *glob,
             if(new_cue_list)
                 glob->cue_list = new_cue_list;
             else
-            {
-                fprintf(stderr, "\nFailed to realloc cue list.\n");
-                exit(EXIT_FAILURE);
-            }
+                fatal("Failed to realloc cue list.");
 
             cue = &glob->cue_list[glob->cues];
             cue->time = glob->cluster_timecode;
@@ -1568,8 +1578,8 @@ static void parse_global_config(struct global_config *global, char **argv)
         /* DWIM: Assume the user meant passes=2 if pass=2 is specified */
         if (global->pass > global->passes)
         {
-            fprintf(stderr, "Warning: Assuming --pass=%d implies --passes=%d\n",
-                    global->pass, global->pass);
+            warn("Assuming --pass=%d implies --passes=%d\n",
+                 global->pass, global->pass);
             global->passes = global->pass;
         }
 
@@ -1631,11 +1641,7 @@ int main(int argc, const char **argv_)
                                        global.usage);
 
     if (res)
-    {
-        fprintf(stderr, "Failed to get config: %s\n",
-                vpx_codec_err_to_string(res));
-        return EXIT_FAILURE;
-    }
+        fatal("Failed to get config: %s", vpx_codec_err_to_string(res));
 
     /* Change the default timebase to a high enough value so that the encoder
      * will always create strictly increasing timestamps.
@@ -1701,27 +1707,21 @@ int main(int argc, const char **argv_)
             cfg.rc_2pass_vbr_bias_pct = arg_parse_uint(&arg);
 
             if (global.passes < 2)
-                fprintf(stderr,
-                        "Warning: option %s ignored in one-pass mode.\n",
-                        arg.name);
+                warn("option %s ignored in one-pass mode.\n", arg.name);
         }
         else if (arg_match(&arg, &minsection_pct, argi))
         {
             cfg.rc_2pass_vbr_minsection_pct = arg_parse_uint(&arg);
 
             if (global.passes < 2)
-                fprintf(stderr,
-                        "Warning: option %s ignored in one-pass mode.\n",
-                        arg.name);
+                warn("option %s ignored in one-pass mode.\n", arg.name);
         }
         else if (arg_match(&arg, &maxsection_pct, argi))
         {
             cfg.rc_2pass_vbr_maxsection_pct = arg_parse_uint(&arg);
 
             if (global.passes < 2)
-                fprintf(stderr,
-                        "Warning: option %s ignored in one-pass mode.\n",
-                        arg.name);
+                warn("option %s ignored in one-pass mode.\n", arg.name);
         }
         else if (arg_match(&arg, &kf_min_dist, argi))
             cfg.kf_min_dist = arg_parse_uint(&arg);
@@ -1808,10 +1808,7 @@ int main(int argc, const char **argv_)
                                     : set_binary_mode(stdin);
 
         if (!infile)
-        {
-            fprintf(stderr, "Failed to open input file\n");
-            return EXIT_FAILURE;
-        }
+            fatal("Failed to open input file");
 
         /* For RAW input sources, these bytes will applied on the first frame
          *  in read_frame().
@@ -1839,10 +1836,7 @@ int main(int argc, const char **argv_)
                 global.use_i420 = 0;
             }
             else
-            {
-                fprintf(stderr, "Unsupported Y4M stream.\n");
-                return EXIT_FAILURE;
-            }
+                fatal("Unsupported Y4M stream.");
         }
         else if (detect.buf_read == 4 &&
                  file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, &detect))
@@ -1857,8 +1851,7 @@ int main(int argc, const char **argv_)
                 global.use_i420 = 1;
                 break;
             default:
-                fprintf(stderr, "Unsupported fourcc (%08x) in IVF\n", fourcc);
-                return EXIT_FAILURE;
+                fatal("Unsupported fourcc (%08x) in IVF", fourcc);
             }
         }
         else
@@ -1867,11 +1860,8 @@ int main(int argc, const char **argv_)
         }
 
         if(!cfg.g_w || !cfg.g_h)
-        {
-            fprintf(stderr, "Specify stream dimensions with --width (-w) "
-                            " and --height (-h).\n");
-            return EXIT_FAILURE;
-        }
+            fatal("Specify stream dimensions with --width (-w) "
+                  " and --height (-h).\n");
 
 #define SHOW(field) fprintf(stderr, "    %-28s = %d\n", #field, cfg.field)
 
@@ -1932,32 +1922,20 @@ int main(int argc, const char **argv_)
                                              : set_binary_mode(stdout);
 
         if (!outfile)
-        {
-            fprintf(stderr, "Failed to open output file\n");
-            return EXIT_FAILURE;
-        }
+            fatal("Failed to open output file");
 
         if(global.write_webm && fseek(outfile, 0, SEEK_CUR))
-        {
-            fprintf(stderr, "WebM output to pipes not supported.\n");
-            return EXIT_FAILURE;
-        }
+            fatal("WebM output to pipes not supported.");
 
         if (global.stats_fn)
         {
             if (!stats_open_file(&stats, global.stats_fn, pass))
-            {
-                fprintf(stderr, "Failed to open statistics store\n");
-                return EXIT_FAILURE;
-            }
+                fatal("Failed to open statistics store");
         }
         else
         {
             if (!stats_open_mem(&stats, pass))
-            {
-                fprintf(stderr, "Failed to open statistics store\n");
-                return EXIT_FAILURE;
-            }
+                fatal("Failed to open statistics store");
         }
 
         cfg.g_pass = global.passes == 2
