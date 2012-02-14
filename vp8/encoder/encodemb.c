@@ -1035,7 +1035,7 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
             final_eob = i;
         rc = vp8_default_zig_zag1d_8x8[i];
         qcoeff_ptr[rc] = x;
-        dqcoeff_ptr[rc] = (x * dequant_ptr[rc!=0]+2)>>2;
+        dqcoeff_ptr[rc] = (x * dequant_ptr[rc!=0]);
 
         next = tokens[i][best].next;
         best = (best_mask[best] >> i) & 1;

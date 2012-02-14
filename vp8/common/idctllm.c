@@ -211,7 +211,8 @@ void vp8_short_idct8x8_1_c(short *input, short *output, int pitch)
     short *op = output;
     short *orig_op = output;
     int shortpitch = pitch >> 1;
-    a1 = ((input[0] + 4) >> 3);
+    //a1 = ((input[0] + 4) >> 3);
+    a1 = ((input[0] + 16) >> 5);
     for (b = 0; b < 4; b++)
     {
         for (i = 0; i < 4; i++)
@@ -228,7 +229,8 @@ void vp8_short_idct8x8_1_c(short *input, short *output, int pitch)
 
 void vp8_dc_only_idct_add_8x8_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride)
 {
-    int a1 = ((input_dc + 4) >> 3);
+    //int a1 = ((input_dc + 4) >> 3);
+    int a1 = ((input_dc + 16) >> 5);
     int r, c, b;
     unsigned char *orig_pred = pred_ptr;
     unsigned char *orig_dst = dst_ptr;
@@ -394,7 +396,7 @@ void vp8_short_idct8x8_c(short *coefs, short *block, int pitch)
     {
         for (j = 0; j < TX_DIM; j++)
         {
-             X[i * TX_DIM + j] = (int)coefs[i * TX_DIM + j];
+             X[i * TX_DIM + j] = (int)(coefs[i * TX_DIM + j]+2)>>2;
         }
     }
   for (i = 0; i < 8; i++)

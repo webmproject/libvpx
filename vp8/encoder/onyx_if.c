@@ -3411,7 +3411,6 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);
 }
-
 //#define WRITE_RECON_BUFFER 1
 #if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
