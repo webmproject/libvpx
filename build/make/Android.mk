@@ -118,6 +118,10 @@ $(ASM_CNV_PATH)/libvpx/%.asm.s: $(LIBVPX_PATH)/%.asm $(ASM_CNV_OFFSETS_DEPEND)
 	@mkdir -p $(dir $@)
 	@$(CONFIG_DIR)/$(ASM_CONVERSION) <$< > $@
 
+# For building vpx_rtcd.h, which has a rule in libs.mk
+TGT_ISA:=$(word 1, $(subst -, ,$(TOOLCHAIN)))
+target := libs
+$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_rtcd.h
 
 LOCAL_SRC_FILES += vpx_config.c
 
@@ -171,6 +175,7 @@ clean:
 	@$(RM) $(CODEC_SRCS_ASM_ADS2GAS) $(CODEC_SRCS_ASM_NEON_ADS2GAS)
 	@$(RM) $(patsubst %.asm, %.*, $(ASM_CNV_OFFSETS_DEPEND))
 	@$(RM) -r $(ASM_CNV_PATH)
+	@$(RM) $(CLEAN-OBJS)
 
 include $(BUILD_SHARED_LIBRARY)
 
