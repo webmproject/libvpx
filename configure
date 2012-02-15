@@ -226,7 +226,7 @@ EXPERIMENT_LIST="
     newlpf
     enhanced_interp
     superblocks
-    feature_updates
+    featureupdates
 "
 CONFIG_LIST="
     external_build

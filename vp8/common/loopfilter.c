@@ -576,7 +576,7 @@ void vp8_loop_filter_frame_yonly
     }
 
 }
-
+#if CONFIG_FEATUREUPDATES
 // TODO: Multiple copies of loop filtering code should be pruned and
 // cut down.   This just adds yet another so that I can do an if
 // on segment.
@@ -707,7 +707,7 @@ void vp8_loop_filter_frame_segment(VP8_COMMON *cm, MACROBLOCKD *xd,
     }
 
 }
-
+#endif
 
 void vp8_loop_filter_partial_frame
 (
