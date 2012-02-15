@@ -353,7 +353,7 @@ typedef struct VP8_COMP
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
     int rd_threshes[MAX_MODES];
-    int rd_single_diff, rd_dual_diff, rd_hybrid_diff;
+    int64_t rd_single_diff, rd_dual_diff, rd_hybrid_diff;
     int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
     int dual_pred_count[DUAL_PRED_CONTEXTS];
     int single_pred_count[DUAL_PRED_CONTEXTS];

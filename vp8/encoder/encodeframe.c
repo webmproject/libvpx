@@ -1348,6 +1348,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     {
         int frame_type, pred_type;
         int redo = 0;
+        int single_diff, dual_diff, hybrid_diff;
 
         /*
          * This code does a single RD pass over the whole frame assuming
@@ -1384,27 +1385,27 @@ void vp8_encode_frame(VP8_COMP *cpi)
         cpi->common.dual_pred_mode = pred_type;
         encode_frame_internal(cpi);
 
-        cpi->rd_single_diff /= cpi->common.MBs;
-        cpi->rd_prediction_type_threshes[frame_type][0] += cpi->rd_single_diff;
+        single_diff = cpi->rd_single_diff / cpi->common.MBs;
+        cpi->rd_prediction_type_threshes[frame_type][0] += single_diff;
         cpi->rd_prediction_type_threshes[frame_type][0] >>= 1;
-        cpi->rd_dual_diff   /= cpi->common.MBs;
-        cpi->rd_prediction_type_threshes[frame_type][1] += cpi->rd_dual_diff;
+        dual_diff   = cpi->rd_dual_diff   / cpi->common.MBs;
+        cpi->rd_prediction_type_threshes[frame_type][1] += dual_diff;
         cpi->rd_prediction_type_threshes[frame_type][1] >>= 1;
-        cpi->rd_hybrid_diff /= cpi->common.MBs;
-        cpi->rd_prediction_type_threshes[frame_type][2] += cpi->rd_hybrid_diff;
+        hybrid_diff = cpi->rd_hybrid_diff / cpi->common.MBs;
+        cpi->rd_prediction_type_threshes[frame_type][2] += hybrid_diff;
         cpi->rd_prediction_type_threshes[frame_type][2] >>= 1;
 
         /* FIXME make "100" (the threshold at which to re-encode the
          * current frame) a commandline option. */
         if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY &&
-            (cpi->rd_dual_diff >= 100 || cpi->rd_hybrid_diff >= 100))
+            (dual_diff >= 100 || hybrid_diff >= 100))
         {
             redo = 1;
             cpi->common.dual_pred_mode = cpi->rd_dual_diff > cpi->rd_hybrid_diff ?
                         DUAL_PREDICTION_ONLY : HYBRID_PREDICTION;
         }
         else if (cpi->common.dual_pred_mode == DUAL_PREDICTION_ONLY &&
-                 (cpi->rd_single_diff >= 100 || cpi->rd_hybrid_diff >= 100))
+                 (single_diff >= 100 || hybrid_diff >= 100))
         {
             redo = 1;
             cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_hybrid_diff ?
@@ -1430,7 +1431,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
             {
                 cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
             }
-            else if (cpi->rd_single_diff >= 100 || cpi->rd_dual_diff >= 100)
+            else if (single_diff >= 100 || dual_diff >= 100)
             {
                 redo = 1;
                 cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_dual_diff ?

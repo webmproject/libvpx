@@ -3142,9 +3142,18 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     rd_update_mvcount(cpi, x, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
 
-    *best_single_rd_diff = best_rd - best_single_rd;
-    *best_dual_rd_diff   = best_rd - best_dual_rd;
-    *best_hybrid_rd_diff = best_rd - best_hybrid_rd;
+    if (best_single_rd == INT_MAX)
+        *best_single_rd_diff = INT_MIN;
+    else
+        *best_single_rd_diff = best_rd - best_single_rd;
+    if (best_dual_rd == INT_MAX)
+        *best_dual_rd_diff = INT_MIN;
+    else
+        *best_dual_rd_diff   = best_rd - best_dual_rd;
+    if (best_hybrid_rd == INT_MAX)
+        *best_hybrid_rd_diff = INT_MIN;
+    else
+        *best_hybrid_rd_diff = best_rd - best_hybrid_rd;
 }
 
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
