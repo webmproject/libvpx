@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//tws\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-15T19:01:22Z",
+      "side": 1,
+      "message": "The inner loops for vp8_pack_tokens_c, pack_tokens_into_partitions_c, and pack_mb_row_tokens_c are the same.  Maybe now is a good time to consolidate the similar code into a function.",
+      "revId": "765e9c4552c06958550372d4da7ab060bddd57d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//txA\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 816,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-15T19:01:22Z",
+      "side": 1,
+      "message": "not used",
+      "revId": "765e9c4552c06958550372d4da7ab060bddd57d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//txY\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-15T19:01:22Z",
+      "side": 1,
+      "message": "why is the extend in the loop?",
+      "revId": "765e9c4552c06958550372d4da7ab060bddd57d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//txk\u003d",
+        "filename": "vp8/encoder/ethreading.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-15T19:01:22Z",
+      "side": 1,
+      "message": "why is this extend in the loop?",
+      "revId": "765e9c4552c06958550372d4da7ab060bddd57d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
