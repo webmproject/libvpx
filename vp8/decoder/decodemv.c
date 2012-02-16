@@ -334,8 +334,7 @@ static void decode_split_mv(vp8_reader *const bc, MODE_INFO *mi,
     mbmi->partitioning = s;
 }
 
-static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
-                            int mb_col)
+static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi)
 {
     vp8_reader *const bc = & pbi->bc;
     mbmi->ref_frame = (MV_REFERENCE_FRAME) vp8_read(bc, pbi->prob_intra);
@@ -426,13 +425,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
         if( vp8_read(bc, vp8_mode_contexts [cnt[CNT_INTRA]] [0]) )
         {
-            /* Distance of Mb to the various image edges.
-             * These specified to 8th pel as they are always compared to MV
-             * values that are in 1/8th pel units
-             */
-            pbi->mb.mb_to_left_edge =  -((mb_col * 16) << 3);
-            pbi->mb.mb_to_right_edge =
-                ((pbi->common.mb_cols - 1 - mb_col) * 16) << 3;
 
             /* If we have three distinct MV's ... */
             /* See if above-left MV can be merged with NEAREST */
@@ -593,7 +585,7 @@ static void read_mb_features(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x)
 }
 
 static void decode_mb_mode_mvs(VP8D_COMP *pbi, MODE_INFO *mi,
-                               MB_MODE_INFO *mbmi, int mb_col)
+                               MB_MODE_INFO *mbmi)
 {
     /* Read the Macroblock segmentation map if it is being updated explicitly
      * this frame (reset to 0 above by default)
@@ -614,7 +606,7 @@ static void decode_mb_mode_mvs(VP8D_COMP *pbi, MODE_INFO *mi,
     if(pbi->common.frame_type == KEY_FRAME)
         read_kf_modes(pbi, mi);
     else
-        read_mb_modes_mv(pbi, mi, &mi->mbmi, mb_col);
+        read_mb_modes_mv(pbi, mi, &mi->mbmi);
 
 }
 
@@ -622,16 +614,20 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 {
     MODE_INFO *mi = pbi->common.mi;
     int mb_row = -1;
+    int mb_to_right_edge_start;
 
     mb_mode_mv_init(pbi);
+
+    pbi->mb.mb_to_top_edge = 0;
+    pbi->mb.mb_to_bottom_edge = ((pbi->common.mb_rows - 1) * 16) << 3;
+    mb_to_right_edge_start = ((pbi->common.mb_cols - 1) * 16) << 3;
 
     while (++mb_row < pbi->common.mb_rows)
     {
         int mb_col = -1;
 
-        pbi->mb.mb_to_top_edge =  -((mb_row * 16)) << 3;
-        pbi->mb.mb_to_bottom_edge =
-            ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
+        pbi->mb.mb_to_left_edge =  0;
+        pbi->mb.mb_to_right_edge = mb_to_right_edge_start;
 
         while (++mb_col < pbi->common.mb_cols)
         {
@@ -639,7 +635,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             int mb_num = mb_row * pbi->common.mb_cols + mb_col;
 #endif
 
-            decode_mb_mode_mvs(pbi, mi, &mi->mbmi, mb_col);
+            decode_mb_mode_mvs(pbi, mi, &mi->mbmi);
 
 #if CONFIG_ERROR_CONCEALMENT
             /* look for corruption. set mvs_corrupt_from_mb to the current
@@ -654,8 +650,12 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
             }
 #endif
 
+            pbi->mb.mb_to_left_edge -= (16 << 3);
+            pbi->mb.mb_to_right_edge -= (16 << 3);
             mi++;       /* next macroblock */
         }
+        pbi->mb.mb_to_top_edge -= (16 << 3);
+        pbi->mb.mb_to_bottom_edge -= (16 << 3);
 
         mi++;           /* skip left predictor each row */
     }
