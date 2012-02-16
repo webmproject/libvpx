@@ -585,7 +585,6 @@ void vp8_edge_pixel_interpolation
 }
 #endif  // EDGE_PIXEL_FILTER
 
-#if CONFIG_DUALPRED
 /*
  * The only functional difference between filter_block2d_second_pass()
  * and this function is that filter_block2d_second_pass() does a sixtap

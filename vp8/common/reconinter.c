@@ -380,28 +380,28 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
      * filtering. The bottom and right edges use 16 pixels plus 2 pixels
      * left of the central pixel when filtering.
      */
-    if (mv->col < (xd->mb_to_left_edge - (19 << 3)))
+    if (mv->col < (xd->mb_to_left_edge - ((16+INTERP_EXTEND) << 3)))
         mv->col = xd->mb_to_left_edge - (16 << 3);
-    else if (mv->col > xd->mb_to_right_edge + (18 << 3))
+    else if (mv->col > xd->mb_to_right_edge + ((15+INTERP_EXTEND) << 3))
         mv->col = xd->mb_to_right_edge + (16 << 3);
 
-    if (mv->row < (xd->mb_to_top_edge - (19 << 3)))
+    if (mv->row < (xd->mb_to_top_edge - ((16+INTERP_EXTEND) << 3)))
         mv->row = xd->mb_to_top_edge - (16 << 3);
-    else if (mv->row > xd->mb_to_bottom_edge + (18 << 3))
+    else if (mv->row > xd->mb_to_bottom_edge + ((15+INTERP_EXTEND) << 3))
         mv->row = xd->mb_to_bottom_edge + (16 << 3);
 }
 
 /* A version of the above function for chroma block MVs.*/
 static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
 {
-    mv->col = (2*mv->col < (xd->mb_to_left_edge - (19 << 3))) ?
+    mv->col = (2*mv->col < (xd->mb_to_left_edge - ((16+INTERP_EXTEND) << 3))) ?
         (xd->mb_to_left_edge - (16 << 3)) >> 1 : mv->col;
-    mv->col = (2*mv->col > xd->mb_to_right_edge + (18 << 3)) ?
+    mv->col = (2*mv->col > xd->mb_to_right_edge + ((15+INTERP_EXTEND) << 3)) ?
         (xd->mb_to_right_edge + (16 << 3)) >> 1 : mv->col;
 
-    mv->row = (2*mv->row < (xd->mb_to_top_edge - (19 << 3))) ?
+    mv->row = (2*mv->row < (xd->mb_to_top_edge - ((16+INTERP_EXTEND) << 3))) ?
         (xd->mb_to_top_edge - (16 << 3)) >> 1 : mv->row;
-    mv->row = (2*mv->row > xd->mb_to_bottom_edge + (18 << 3)) ?
+    mv->row = (2*mv->row > xd->mb_to_bottom_edge + ((15+INTERP_EXTEND) << 3)) ?
         (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
@@ -682,4 +682,3 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
         build_inter4x4_predictors_mb(x);
     }
 }
-
