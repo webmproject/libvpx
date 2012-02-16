@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//s28\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-02-16T12:14:44Z",
+      "side": 1,
+      "message": "ok, i have done it in a separate patch.",
+      "parentUuid": "AAAAHn//tws\u003d",
+      "revId": "765e9c4552c06958550372d4da7ab060bddd57d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//txA\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 2
@@ -64,6 +82,24 @@
       "writtenOn": "2012-02-15T19:01:22Z",
       "side": 1,
       "message": "why is this extend in the loop?",
+      "revId": "765e9c4552c06958550372d4da7ab060bddd57d8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//s8M\u003d",
+        "filename": "vp8/encoder/ethreading.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-02-16T12:14:44Z",
+      "side": 1,
+      "message": "I think we had a race condition here. The last MB of the row was signaled ready, while the extension was not done yet. The thread encoding the row below could encode the last MB before the extension has finished.",
+      "parentUuid": "AAAAHn//txk\u003d",
       "revId": "765e9c4552c06958550372d4da7ab060bddd57d8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
