@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//sw4\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-16T16:36:45Z",
+      "side": 1,
+      "message": "Just cut/paste leftover.  Will remove.",
+      "parentUuid": "AAAAHn//tWY\u003d",
+      "revId": "8be2144e231d0711b58c0160ee057f9d0b6f45d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//tWE\u003d",
         "filename": "vp8/decoder/decodemv.c",
         "patchSetId": 3
@@ -70,6 +88,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//swU\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 435,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-16T16:36:45Z",
+      "side": 1,
+      "message": "Nope.  Will be done in a future commit.  These calculations can be done with adds/subtracts instead of using multiplies.",
+      "parentUuid": "AAAAHn//tVA\u003d",
+      "revId": "8be2144e231d0711b58c0160ee057f9d0b6f45d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//tTs\u003d",
         "filename": "vp8/decoder/decodemv.c",
         "patchSetId": 3
@@ -81,6 +117,24 @@
       "writtenOn": "2012-02-15T23:57:27Z",
       "side": 1,
       "message": "future commit: might be worth adding yet another clamp function doesn\u0027t operate in-place.",
+      "revId": "8be2144e231d0711b58c0160ee057f9d0b6f45d4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//swM\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 528,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-02-16T16:36:45Z",
+      "side": 1,
+      "message": "Ok.  Lets discuss when you get in.",
+      "parentUuid": "AAAAHn//tTs\u003d",
       "revId": "8be2144e231d0711b58c0160ee057f9d0b6f45d4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
