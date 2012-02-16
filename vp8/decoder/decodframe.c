@@ -827,6 +827,12 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             }
         }
     }
+    else
+    {
+        /* No segmentation updates on this frame */
+        xd->update_mb_segmentation_map = 0;
+        xd->update_mb_segmentation_data = 0;
+    }
 
     /* Read the loop filter level and type */
     pc->filter_type = (LOOPFILTERTYPE) vp8_read_bit(bc);
