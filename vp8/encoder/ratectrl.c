@@ -471,13 +471,6 @@ static void calc_gf_params(VP8_COMP *cpi)
 #endif
         }
 
-        // golden frame boost without recode loop often goes awry.  be safe by keeping numbers down.
-        if (!cpi->sf.recode_loop)
-        {
-            if (cpi->compressor_speed == 2)
-                Boost = Boost / 2;
-        }
-
         // Apply an upper limit based on Q for 1 pass encodes
         // TODO.
         // This is a temporay measure oas one pass not really supported yet in

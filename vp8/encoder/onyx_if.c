@@ -792,6 +792,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     VP8_COMMON *cm = &cpi->common;
     int last_improved_quant = sf->improved_quant;
 
+    // Only modes 0 and 1 supported for now in experimental code basae
+    if ( Mode > 1 )
+        Mode = 1;
+
     // Initialise default mode frequency sampling variables
     for (i = 0; i < MAX_MODES; i ++)
     {
@@ -871,7 +875,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
         break;
     case 1:
-    case 3:
         sf->thresh_mult[THR_NEARESTMV] = 0;
         sf->thresh_mult[THR_ZEROMV   ] = 0;
         sf->thresh_mult[THR_DC       ] = 0;
@@ -890,7 +893,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_NEARG    ] = 1000;
         sf->thresh_mult[THR_NEARA    ] = 1000;
 
-#if 1
         sf->thresh_mult[THR_ZEROMV   ] = 0;
         sf->thresh_mult[THR_ZEROG    ] = 0;
         sf->thresh_mult[THR_ZEROA    ] = 0;
@@ -900,13 +902,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_NEARMV   ] = 0;
         sf->thresh_mult[THR_NEARG    ] = 0;
         sf->thresh_mult[THR_NEARA    ] = 0;
-
-//        sf->thresh_mult[THR_DC       ] = 0;
-
-//        sf->thresh_mult[THR_V_PRED   ] = 1000;
-//        sf->thresh_mult[THR_H_PRED   ] = 1000;
-//        sf->thresh_mult[THR_B_PRED   ] = 2000;
-//        sf->thresh_mult[THR_TM       ] = 1000;
 
         sf->thresh_mult[THR_NEWMV    ] = 1000;
         sf->thresh_mult[THR_NEWG     ] = 1000;
@@ -929,15 +924,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_DUAL_NEWLG    ] = 1000;
         sf->thresh_mult[THR_DUAL_NEWLA    ] = 1000;
         sf->thresh_mult[THR_DUAL_NEWGA    ] = 1000;
-#else
-        sf->thresh_mult[THR_NEWMV    ] = 1500;
-        sf->thresh_mult[THR_NEWG     ] = 1500;
-        sf->thresh_mult[THR_NEWA     ] = 1500;
-
-        sf->thresh_mult[THR_SPLITMV  ] = 5000;
-        sf->thresh_mult[THR_SPLITG   ] = 10000;
-        sf->thresh_mult[THR_SPLITA   ] = 10000;
-#endif
 
         if (Speed > 0)
         {
@@ -1063,453 +1049,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         }
 
-        if (Speed > 3)
-        {
-            sf->thresh_mult[THR_SPLITA  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITG  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
-
-            cpi->mode_check_freq[THR_V_PRED] = 0;
-            cpi->mode_check_freq[THR_H_PRED] = 0;
-            cpi->mode_check_freq[THR_B_PRED] = 0;
-            cpi->mode_check_freq[THR_I8X8_PRED]   = 0;
-            cpi->mode_check_freq[THR_NEARG] = 0;
-            cpi->mode_check_freq[THR_NEWG] = 0;
-            cpi->mode_check_freq[THR_NEARA] = 0;
-            cpi->mode_check_freq[THR_NEWA] = 0;
-
-            sf->auto_filter = 1;
-            sf->recode_loop = 0; // recode loop off
-            sf->RD = 0;         // Turn rd off
-
-        }
-
-        if (Speed > 4)
-        {
-            sf->auto_filter = 0;                     // Faster selection of loop filter
-
-            cpi->mode_check_freq[THR_V_PRED] = 2;
-            cpi->mode_check_freq[THR_H_PRED] = 2;
-            cpi->mode_check_freq[THR_B_PRED] = 2;
-            cpi->mode_check_freq[THR_I8X8_PRED]=2;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARG] = 2;
-                cpi->mode_check_freq[THR_NEWG] = 4;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARA] = 2;
-                cpi->mode_check_freq[THR_NEWA] = 4;
-            }
-
-            cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 2;
-            cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 2;
-            cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 2;
-            cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 4;
-            cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 4;
-            cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 4;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTG ] = 2000;
-                sf->thresh_mult[THR_ZEROG    ] = 2000;
-                sf->thresh_mult[THR_NEARG    ] = 2000;
-                sf->thresh_mult[THR_NEWG     ] = 4000;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTA ] = 2000;
-                sf->thresh_mult[THR_ZEROA    ] = 2000;
-                sf->thresh_mult[THR_NEARA    ] = 2000;
-                sf->thresh_mult[THR_NEWA     ] = 4000;
-            }
-
-            sf->thresh_mult[THR_DUAL_NEWLG    ] = 4000;
-            sf->thresh_mult[THR_DUAL_NEWLA    ] = 4000;
-            sf->thresh_mult[THR_DUAL_NEWGA    ] = 4000;
-        }
-
         break;
-    case 2:
-        sf->optimize_coefficients = 0;
-        sf->recode_loop = 0;
-        sf->auto_filter = 1;
-        sf->iterative_sub_pixel = 1;
-        sf->thresh_mult[THR_NEARESTMV] = 0;
-        sf->thresh_mult[THR_ZEROMV   ] = 0;
-        sf->thresh_mult[THR_DC       ] = 0;
-        sf->thresh_mult[THR_TM       ] = 0;
-        sf->thresh_mult[THR_NEARMV   ] = 0;
-        sf->thresh_mult[THR_V_PRED   ] = 1000;
-        sf->thresh_mult[THR_H_PRED   ] = 1000;
-        sf->thresh_mult[THR_B_PRED   ] = 2500;
-        sf->thresh_mult[THR_I8X8_PRED] = 2500;
-        sf->thresh_mult[THR_NEARESTG ] = 1000;
-        sf->thresh_mult[THR_ZEROG    ] = 1000;
-        sf->thresh_mult[THR_NEARG    ] = 1000;
-        sf->thresh_mult[THR_NEARESTA ] = 1000;
-        sf->thresh_mult[THR_ZEROA    ] = 1000;
-        sf->thresh_mult[THR_NEARA    ] = 1000;
-        sf->thresh_mult[THR_NEWMV    ] = 2000;
-        sf->thresh_mult[THR_NEWG     ] = 2000;
-        sf->thresh_mult[THR_NEWA     ] = 2000;
-        sf->thresh_mult[THR_SPLITMV  ] = 5000;
-        sf->thresh_mult[THR_SPLITG   ] = 10000;
-        sf->thresh_mult[THR_SPLITA   ] = 10000;
-        sf->search_method = NSTEP;
-
-        sf->thresh_mult[THR_DUAL_ZEROLG   ] = 1000;
-        sf->thresh_mult[THR_DUAL_NEARESTLG] = 1000;
-        sf->thresh_mult[THR_DUAL_NEARLG   ] = 1000;
-        sf->thresh_mult[THR_DUAL_ZEROLA   ] = 1000;
-        sf->thresh_mult[THR_DUAL_NEARESTLA] = 1000;
-        sf->thresh_mult[THR_DUAL_NEARLA   ] = 1000;
-        sf->thresh_mult[THR_DUAL_ZEROGA   ] = 1000;
-        sf->thresh_mult[THR_DUAL_NEARESTGA] = 1000;
-        sf->thresh_mult[THR_DUAL_NEARGA   ] = 1000;
-
-        sf->thresh_mult[THR_DUAL_NEWLG    ] = 2000;
-        sf->thresh_mult[THR_DUAL_NEWLA    ] = 2000;
-        sf->thresh_mult[THR_DUAL_NEWGA    ] = 2000;
-
-        if (Speed > 0)
-        {
-            cpi->mode_check_freq[THR_SPLITG] = 4;
-            cpi->mode_check_freq[THR_SPLITA] = 4;
-            cpi->mode_check_freq[THR_SPLITMV] = 2;
-
-            sf->thresh_mult[THR_DC       ] = 0;
-            sf->thresh_mult[THR_TM       ] = 1000;
-            sf->thresh_mult[THR_V_PRED   ] = 2000;
-            sf->thresh_mult[THR_H_PRED   ] = 2000;
-            sf->thresh_mult[THR_B_PRED   ] = 5000;
-            sf->thresh_mult[THR_I8X8_PRED] = 5000;
-
-            if (cpi->ref_frame_flags & VP8_LAST_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTMV] = 0;
-                sf->thresh_mult[THR_ZEROMV   ] = 0;
-                sf->thresh_mult[THR_NEARMV   ] = 0;
-                sf->thresh_mult[THR_NEWMV    ] = 2000;
-                sf->thresh_mult[THR_SPLITMV  ] = 10000;
-            }
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTG ] = 1000;
-                sf->thresh_mult[THR_ZEROG    ] = 1000;
-                sf->thresh_mult[THR_NEARG    ] = 1000;
-                sf->thresh_mult[THR_NEWG     ] = 2000;
-                sf->thresh_mult[THR_SPLITG   ] = 20000;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTA ] = 1000;
-                sf->thresh_mult[THR_ZEROA    ] = 1000;
-                sf->thresh_mult[THR_NEARA    ] = 1000;
-                sf->thresh_mult[THR_NEWA     ] = 2000;
-                sf->thresh_mult[THR_SPLITA   ] = 20000;
-            }
-
-            sf->improved_quant = 0;
-            sf->improved_dct = 0;
-
-            sf->use_fastquant_for_pick = 1;
-            sf->no_skip_block4x4_search = 0;
-            sf->first_step = 1;
-        }
-
-        if (Speed > 1)
-        {
-            cpi->mode_check_freq[THR_SPLITMV] = 7;
-            cpi->mode_check_freq[THR_SPLITG] = 15;
-            cpi->mode_check_freq[THR_SPLITA] = 15;
-
-            sf->thresh_mult[THR_TM       ] = 2000;
-            sf->thresh_mult[THR_V_PRED   ] = 2000;
-            sf->thresh_mult[THR_H_PRED   ] = 2000;
-            sf->thresh_mult[THR_B_PRED   ] = 5000;
-            sf->thresh_mult[THR_I8X8_PRED] = 5000;
-
-            if (cpi->ref_frame_flags & VP8_LAST_FLAG)
-            {
-                sf->thresh_mult[THR_NEWMV    ] = 2000;
-                sf->thresh_mult[THR_SPLITMV  ] = 25000;
-            }
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTG ] = 2000;
-                sf->thresh_mult[THR_ZEROG    ] = 2000;
-                sf->thresh_mult[THR_NEARG    ] = 2000;
-                sf->thresh_mult[THR_NEWG     ] = 2500;
-                sf->thresh_mult[THR_SPLITG   ] = 50000;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTA ] = 2000;
-                sf->thresh_mult[THR_ZEROA    ] = 2000;
-                sf->thresh_mult[THR_NEARA    ] = 2000;
-                sf->thresh_mult[THR_NEWA     ] = 2500;
-                sf->thresh_mult[THR_SPLITA   ] = 50000;
-            }
-
-            sf->thresh_mult[THR_DUAL_ZEROLG   ] = 2000;
-            sf->thresh_mult[THR_DUAL_NEARESTLG] = 2000;
-            sf->thresh_mult[THR_DUAL_NEARLG   ] = 2000;
-            sf->thresh_mult[THR_DUAL_ZEROLA   ] = 2000;
-            sf->thresh_mult[THR_DUAL_NEARESTLA] = 2000;
-            sf->thresh_mult[THR_DUAL_NEARLA   ] = 2000;
-            sf->thresh_mult[THR_DUAL_ZEROGA   ] = 2000;
-            sf->thresh_mult[THR_DUAL_NEARESTGA] = 2000;
-            sf->thresh_mult[THR_DUAL_NEARGA   ] = 2000;
-
-            sf->thresh_mult[THR_DUAL_NEWLG    ] = 2500;
-            sf->thresh_mult[THR_DUAL_NEWLA    ] = 2500;
-            sf->thresh_mult[THR_DUAL_NEWGA    ] = 2500;
-        }
-
-        if (Speed > 2)
-        {
-            sf->auto_filter = 0;                     // Faster selection of loop filter
-
-            cpi->mode_check_freq[THR_V_PRED] = 2;
-            cpi->mode_check_freq[THR_H_PRED] = 2;
-            cpi->mode_check_freq[THR_B_PRED] = 2;
-            cpi->mode_check_freq[THR_I8X8_PRED]=2;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARG] = 2;
-                cpi->mode_check_freq[THR_NEWG] = 4;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARA] = 2;
-                cpi->mode_check_freq[THR_NEWA] = 4;
-            }
-
-            cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 2;
-            cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 2;
-            cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 2;
-            cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 4;
-            cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 4;
-            cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 4;
-
-            sf->thresh_mult[THR_SPLITMV  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITG  ] = INT_MAX;
-            sf->thresh_mult[THR_SPLITA  ] = INT_MAX;
-
-        }
-
-        if (Speed > 3)
-        {
-            sf->RD = 0;
-
-            sf->auto_filter = 1;
-        }
-
-        if (Speed > 4)
-        {
-            sf->auto_filter = 0;                     // Faster selection of loop filter
-
-            sf->search_method = HEX;
-            //sf->search_method = DIAMOND;
-
-            sf->iterative_sub_pixel = 0;
-
-            cpi->mode_check_freq[THR_V_PRED] = 4;
-            cpi->mode_check_freq[THR_H_PRED] = 4;
-            cpi->mode_check_freq[THR_B_PRED] = 4;
-            cpi->mode_check_freq[THR_I8X8_PRED]=4;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARG] = 2;
-                cpi->mode_check_freq[THR_NEWG] = 4;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                cpi->mode_check_freq[THR_NEARA] = 2;
-                cpi->mode_check_freq[THR_NEWA] = 4;
-            }
-
-            sf->thresh_mult[THR_TM       ] = 2000;
-            sf->thresh_mult[THR_B_PRED   ] = 5000;
-            sf->thresh_mult[THR_I8X8_PRED] = 5000;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTG ] = 2000;
-                sf->thresh_mult[THR_ZEROG    ] = 2000;
-                sf->thresh_mult[THR_NEARG    ] = 2000;
-                sf->thresh_mult[THR_NEWG     ] = 4000;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                sf->thresh_mult[THR_NEARESTA ] = 2000;
-                sf->thresh_mult[THR_ZEROA    ] = 2000;
-                sf->thresh_mult[THR_NEARA    ] = 2000;
-                sf->thresh_mult[THR_NEWA     ] = 4000;
-            }
-
-            sf->thresh_mult[THR_DUAL_NEWLG    ] = 4000;
-            sf->thresh_mult[THR_DUAL_NEWLA    ] = 4000;
-            sf->thresh_mult[THR_DUAL_NEWGA    ] = 4000;
-        }
-
-        if (Speed > 5)
-        {
-            // Disable split MB intra prediction mode
-            sf->thresh_mult[THR_B_PRED] = INT_MAX;
-            sf->thresh_mult[THR_I8X8_PRED] = INT_MAX;
-        }
-
-        if (Speed > 6)
-        {
-            unsigned int i, sum = 0;
-            unsigned int total_mbs = cm->MBs;
-            int thresh;
-            int total_skip;
-
-            int min = 2000;
-
-            if (cpi->oxcf.encode_breakout > 2000)
-                min = cpi->oxcf.encode_breakout;
-
-            min >>= 7;
-
-            for (i = 0; i < min; i++)
-            {
-                sum += cpi->error_bins[i];
-            }
-
-            total_skip = sum;
-            sum = 0;
-
-            // i starts from 2 to make sure thresh started from 2048
-            for (; i < 1024; i++)
-            {
-                sum += cpi->error_bins[i];
-
-                if (10 * sum >= (unsigned int)(cpi->Speed - 6)*(total_mbs - total_skip))
-                    break;
-            }
-
-            i--;
-            thresh = (i << 7);
-
-            if (thresh < 2000)
-                thresh = 2000;
-
-            if (cpi->ref_frame_flags & VP8_LAST_FLAG)
-            {
-                sf->thresh_mult[THR_NEWMV] = thresh;
-                sf->thresh_mult[THR_NEARESTMV ] = thresh >> 1;
-                sf->thresh_mult[THR_NEARMV    ] = thresh >> 1;
-            }
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                sf->thresh_mult[THR_NEWG] = thresh << 1;
-                sf->thresh_mult[THR_NEARESTG ] = thresh;
-                sf->thresh_mult[THR_NEARG    ] = thresh;
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                sf->thresh_mult[THR_NEWA] = thresh << 1;
-                sf->thresh_mult[THR_NEARESTA ] = thresh;
-                sf->thresh_mult[THR_NEARA    ] = thresh;
-            }
-
-            sf->thresh_mult[THR_DUAL_ZEROLG   ] = thresh;
-            sf->thresh_mult[THR_DUAL_NEARESTLG] = thresh;
-            sf->thresh_mult[THR_DUAL_NEARLG   ] = thresh;
-            sf->thresh_mult[THR_DUAL_ZEROLA   ] = thresh;
-            sf->thresh_mult[THR_DUAL_NEARESTLA] = thresh;
-            sf->thresh_mult[THR_DUAL_NEARLA   ] = thresh;
-            sf->thresh_mult[THR_DUAL_ZEROGA   ] = thresh;
-            sf->thresh_mult[THR_DUAL_NEARESTGA] = thresh;
-            sf->thresh_mult[THR_DUAL_NEARGA   ] = thresh;
-
-            sf->thresh_mult[THR_DUAL_NEWLG    ] = thresh << 1;
-            sf->thresh_mult[THR_DUAL_NEWLA    ] = thresh << 1;
-            sf->thresh_mult[THR_DUAL_NEWGA    ] = thresh << 1;
-
-            // Disable other intra prediction modes
-            sf->thresh_mult[THR_TM] = INT_MAX;
-            sf->thresh_mult[THR_V_PRED] = INT_MAX;
-            sf->thresh_mult[THR_H_PRED] = INT_MAX;
-
-            sf->improved_mv_pred = 0;
-        }
-
-        if (Speed > 8)
-        {
-            sf->quarter_pixel_search = 0;
-        }
-
-        if (Speed > 9)
-        {
-            int Tmp = cpi->Speed - 8;
-
-            if (Tmp > 4)
-                Tmp = 4;
-
-            if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
-            {
-                cpi->mode_check_freq[THR_ZEROG] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEARESTG] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEARG] = 1 << Tmp;
-                cpi->mode_check_freq[THR_NEWG] = 1 << (Tmp + 1);
-            }
-
-            if (cpi->ref_frame_flags & VP8_ALT_FLAG)
-            {
-                cpi->mode_check_freq[THR_ZEROA] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEARESTA] = 1 << (Tmp - 1);
-                cpi->mode_check_freq[THR_NEARA] = 1 << Tmp;
-                cpi->mode_check_freq[THR_NEWA] = 1 << (Tmp + 1);
-            }
-
-            cpi->mode_check_freq[THR_DUAL_ZEROLG   ] = 1 << (Tmp - 1);
-            cpi->mode_check_freq[THR_DUAL_NEARESTLG] = 1 << (Tmp - 1);
-            cpi->mode_check_freq[THR_DUAL_NEARLG   ] = 1 << Tmp;
-            cpi->mode_check_freq[THR_DUAL_ZEROLA   ] = 1 << (Tmp - 1);
-            cpi->mode_check_freq[THR_DUAL_NEARESTLA] = 1 << (Tmp - 1);
-            cpi->mode_check_freq[THR_DUAL_NEARLA   ] = 1 << Tmp;
-            cpi->mode_check_freq[THR_DUAL_ZEROGA   ] = 1 << (Tmp - 1);
-            cpi->mode_check_freq[THR_DUAL_NEARESTGA] = 1 << (Tmp - 1);
-            cpi->mode_check_freq[THR_DUAL_NEARGA   ] = 1 << Tmp;
-
-            cpi->mode_check_freq[THR_DUAL_NEWLG    ] = 1 << (Tmp + 1);
-            cpi->mode_check_freq[THR_DUAL_NEWLA    ] = 1 << (Tmp + 1);
-            cpi->mode_check_freq[THR_DUAL_NEWGA    ] = 1 << (Tmp + 1);
-
-            cpi->mode_check_freq[THR_NEWMV] = 1 << (Tmp - 1);
-        }
-
-        cm->filter_type = NORMAL_LOOPFILTER;
-
-        if (Speed >= 14)
-            cm->filter_type = SIMPLE_LOOPFILTER;
-
-        if (Speed >= 15)
-        {
-            sf->half_pixel_search = 0;        // This has a big hit on quality. Last resort
-        }
-
-        vpx_memset(cpi->error_bins, 0, sizeof(cpi->error_bins));
 
     }; /* switch */
 
@@ -1646,18 +1186,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     {
         cpi->find_fractional_mv_step = vp8_find_best_half_pixel_step;
     }
-    else
-    {
-        cpi->find_fractional_mv_step = vp8_skip_fractional_mv_step;
-    }
 
     if (cpi->sf.optimize_coefficients == 1 && cpi->pass!=1)
         cpi->mb.optimize = 1;
     else
         cpi->mb.optimize = 0;
-
-    if (cpi->common.full_pixel)
-        cpi->find_fractional_mv_step = vp8_skip_fractional_mv_step;
 
 #ifdef SPEEDSTATS
     frames_at_speed[cpi->Speed]++;
@@ -1930,44 +1463,12 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     switch (cpi->oxcf.Mode)
     {
-
-    case MODE_REALTIME:
-        cpi->pass = 0;
-        cpi->compressor_speed = 2;
-
-        if (cpi->oxcf.cpu_used < -16)
-        {
-            cpi->oxcf.cpu_used = -16;
-        }
-
-        if (cpi->oxcf.cpu_used > 16)
-            cpi->oxcf.cpu_used = 16;
-
-        break;
-
-    case MODE_GOODQUALITY:
-        cpi->pass = 0;
-        cpi->compressor_speed = 1;
-
-        if (cpi->oxcf.cpu_used < -5)
-        {
-            cpi->oxcf.cpu_used = -5;
-        }
-
-        if (cpi->oxcf.cpu_used > 5)
-            cpi->oxcf.cpu_used = 5;
-
-        break;
-
-    case MODE_BESTQUALITY:
-        cpi->pass = 0;
-        cpi->compressor_speed = 0;
-        break;
-
+    // Real time and one pass deprecated in test code base
     case MODE_FIRSTPASS:
         cpi->pass = 1;
         cpi->compressor_speed = 1;
         break;
+
     case MODE_SECONDPASS:
         cpi->pass = 2;
         cpi->compressor_speed = 1;
@@ -1981,6 +1482,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
             cpi->oxcf.cpu_used = 5;
 
         break;
+
     case MODE_SECONDPASS_BEST:
         cpi->pass = 2;
         cpi->compressor_speed = 0;
@@ -2453,13 +1955,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
         vp8_init_second_pass(cpi);
     }
 
-    if (cpi->compressor_speed == 2)
-    {
-        cpi->cpu_freq            = 0; //vp8_get_processor_freq();
-        cpi->avg_encode_time      = 0;
-        cpi->avg_pick_mode_time    = 0;
-    }
-
     vp8_set_speed_features(cpi);
 
     // Set starting values of RD threshold multipliers (128 = *1)
@@ -2627,25 +2122,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             fclose(f);
 #endif
 
-        }
-
-#endif
-
-
-#ifdef SPEEDSTATS
-
-        if (cpi->compressor_speed == 2)
-        {
-            int i;
-            FILE *f = fopen("cxspeed.stt", "a");
-            cnt_pm /= cpi->common.MBs;
-
-            for (i = 0; i < 16; i++)
-                fprintf(f, "%5d", frames_at_speed[i]);
-
-            fprintf(f, "\n");
-            //fprintf(f, "%10d PM %10d %10d %10d EF %10d %10d %10d\n", cpi->Speed, cpi->avg_pick_mode_time, (tot_pm/cnt_pm), cnt_pm,  cpi->avg_encode_time, 0, 0);
-            fclose(f);
         }
 
 #endif
@@ -3311,50 +2787,6 @@ static int decide_key_frame(VP8_COMP *cpi)
     // Clear down mmx registers
     vp8_clear_system_state();  //__asm emms;
 
-    if ((cpi->compressor_speed == 2) && (cpi->Speed >= 5) && (cpi->sf.RD == 0))
-    {
-        double change = 1.0 * abs((int)(cpi->intra_error - cpi->last_intra_error)) / (1 + cpi->last_intra_error);
-        double change2 = 1.0 * abs((int)(cpi->prediction_error - cpi->last_prediction_error)) / (1 + cpi->last_prediction_error);
-        double minerror = cm->MBs * 256;
-
-#if 0
-
-        if (10 * cpi->intra_error / (1 + cpi->prediction_error) < 15
-            && cpi->prediction_error > minerror
-            && (change > .25 || change2 > .25))
-        {
-            FILE *f = fopen("intra_inter.stt", "a");
-
-            if (cpi->prediction_error <= 0)
-                cpi->prediction_error = 1;
-
-            fprintf(f, "%d %d %d %d %14.4f\n",
-                    cm->current_video_frame,
-                    (int) cpi->prediction_error,
-                    (int) cpi->intra_error,
-                    (int)((10 * cpi->intra_error) / cpi->prediction_error),
-                    change);
-
-            fclose(f);
-        }
-
-#endif
-
-        cpi->last_intra_error = cpi->intra_error;
-        cpi->last_prediction_error = cpi->prediction_error;
-
-        if (10 * cpi->intra_error / (1 + cpi->prediction_error) < 15
-            && cpi->prediction_error > minerror
-            && (change > .25 || change2 > .25))
-        {
-            /*(change > 1.4 || change < .75)&& cpi->this_frame_percent_intra > cpi->last_frame_percent_intra + 3*/
-            return TRUE;
-        }
-
-        return FALSE;
-
-    }
-
     // If the following are true we might as well code a key frame
     if (((cpi->this_frame_percent_intra == 100) &&
          (cpi->this_frame_percent_intra > (cpi->last_frame_percent_intra + 2))) ||
@@ -3758,18 +3190,6 @@ static void encode_frame_to_data_rate
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
-
-    if (cpi->compressor_speed == 2)
-    {
-        if(cpi->oxcf.auto_key && cm->frame_type != KEY_FRAME)
-        {
-            if(cpi->force_next_frame_intra)
-            {
-                cm->frame_type = KEY_FRAME;  /* delayed intra frame */
-            }
-        }
-        cpi->force_next_frame_intra = 0;
-    }
 
     // For an alt ref frame in 2 pass we skip the call to the second pass function that sets the target bandwidth
     if (cpi->pass == 2)
@@ -4345,13 +3765,7 @@ static void encode_frame_to_data_rate
         {
             int key_frame_decision = decide_key_frame(cpi);
 
-            if (cpi->compressor_speed == 2)
-            {
-                /* we don't do re-encoding in realtime mode
-                 * if key frame is decided than we force it on next frame */
-                cpi->force_next_frame_intra = key_frame_decision;
-            }
-            else if (key_frame_decision)
+            if (key_frame_decision)
             {
                 // Reset all our sizing numbers and recode
                 cm->frame_type = KEY_FRAME;
@@ -5374,13 +4788,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
         cpi->last_end_time_stamp_seen = cpi->source->ts_end;
     }
 
-    if (cpi->compressor_speed == 2)
-    {
-        check_gf_quality(cpi);
-        vpx_usec_timer_start(&tsctimer);
-        vpx_usec_timer_start(&ticktimer);
-    }
-
     // start with a 0 size frame
     *size = 0;
 
@@ -5429,39 +4836,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     }
     else
         encode_frame_to_data_rate(cpi, size, dest, frame_flags);
-
-    if (cpi->compressor_speed == 2)
-    {
-        unsigned int duration, duration2;
-        vpx_usec_timer_mark(&tsctimer);
-        vpx_usec_timer_mark(&ticktimer);
-
-        duration = vpx_usec_timer_elapsed(&ticktimer);
-        duration2 = (unsigned int)((double)duration / 2);
-
-        if (cm->frame_type != KEY_FRAME)
-        {
-            if (cpi->avg_encode_time == 0)
-                cpi->avg_encode_time = duration;
-            else
-                cpi->avg_encode_time = (7 * cpi->avg_encode_time + duration) >> 3;
-        }
-
-        if (duration2)
-        {
-            //if(*frame_flags!=1)
-            {
-
-                if (cpi->avg_pick_mode_time == 0)
-                    cpi->avg_pick_mode_time = duration2;
-                else
-                    cpi->avg_pick_mode_time = (7 * cpi->avg_pick_mode_time + duration2) >> 3;
-            }
-        }
-
-    }
-
-
 
     if(cm->refresh_entropy_probs)
     {

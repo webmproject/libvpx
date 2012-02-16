@@ -1002,7 +1002,7 @@ static int estimate_max_q(VP8_COMP *cpi,
 
     // Corrections for higher compression speed settings
     // (reduced compression expected)
-    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    if (cpi->compressor_speed == 1)
     {
         if (cpi->oxcf.cpu_used <= 5)
             speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
@@ -1105,7 +1105,7 @@ static int estimate_cq( VP8_COMP *cpi,
 
     // Corrections for higher compression speed settings
     // (reduced compression expected)
-    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    if (cpi->compressor_speed == 1)
     {
         if (cpi->oxcf.cpu_used <= 5)
             speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
@@ -1173,7 +1173,7 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
     target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
 
     // Corrections for higher compression speed settings (reduced compression expected)
-    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    if (cpi->compressor_speed == 1)
     {
         if (cpi->oxcf.cpu_used <= 5)
             speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
@@ -1246,7 +1246,7 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
         iiratio_correction_factor = 0.5;
 
     // Corrections for higher compression speed settings (reduced compression expected)
-    if ((cpi->compressor_speed == 3) || (cpi->compressor_speed == 1))
+    if (cpi->compressor_speed == 1)
     {
         if (cpi->oxcf.cpu_used <= 5)
             speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);

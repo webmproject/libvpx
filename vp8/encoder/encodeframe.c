@@ -22,7 +22,6 @@
 #include "encodeintra.h"
 #include "vp8/common/reconinter.h"
 #include "rdopt.h"
-#include "pickinter.h"
 #include "vp8/common/findnearmv.h"
 #include "vp8/common/reconintra.h"
 #include "vp8/common/seg_common.h"
@@ -1161,14 +1160,6 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
     totalrate = 0;
 
-    if (cpi->compressor_speed == 2)
-    {
-        if (cpi->oxcf.cpu_used < 0)
-            cpi->Speed = -(cpi->oxcf.cpu_used);
-        else
-            vp8_auto_select_speed(cpi);
-    }
-
     // Functions setup for all frame types so we can use MC in AltRef
     if (cm->mcomp_filter_type == SIXTAP)
     {
@@ -1579,10 +1570,11 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
     int rate;
 
-    if (cpi->sf.RD && cpi->compressor_speed != 2)
-        vp8_rd_pick_intra_mode(cpi, x, &rate);
-    else
-        vp8_pick_intra_mode(cpi, x, &rate);
+    // Non rd path deprecated in test code base
+    //if (cpi->sf.RD && cpi->compressor_speed != 2)
+    vp8_rd_pick_intra_mode(cpi, x, &rate);
+    //else
+    //   vp8_pick_intra_mode(cpi, x, &rate);
 
     if(cpi->oxcf.tuning == VP8_TUNE_SSIM)
     {
@@ -1651,7 +1643,8 @@ int vp8cx_encode_inter_macroblock
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
-    if (cpi->sf.RD)
+    //if (cpi->sf.RD)
+    // For now this codebase is limited to a single rd encode path
     {
         int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
         int single, dual, hybrid;
@@ -1715,9 +1708,10 @@ int vp8cx_encode_inter_macroblock
         cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
 
     }
-    else
-        vp8_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                            &distortion, &intra_error);
+    //else
+    // The non rd encode path has been deleted from this code base
+    // to simplify development
+    //    vp8_pick_inter_mode
 
     cpi->prediction_error += distortion;
     cpi->intra_error += intra_error;
