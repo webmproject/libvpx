@@ -396,7 +396,8 @@ void vp8_short_idct8x8_c(short *coefs, short *block, int pitch)
     {
         for (j = 0; j < TX_DIM; j++)
         {
-             X[i * TX_DIM + j] = (int)(coefs[i * TX_DIM + j]+2)>>2;
+             X[i * TX_DIM + j] = (int)(coefs[i * TX_DIM + j]+1
+                                    + (coefs[i * TX_DIM + j]<0))>>2;
         }
     }
   for (i = 0; i < 8; i++)
@@ -487,7 +488,7 @@ void vp8_short_ihaar2x2_c(short *input, short *output, int pitch)
        op[i] = 0;
    }
 
-   op[0] = (ip[0] + ip[1] + ip[4] + ip[8])>>1;
+   op[0] = (ip[0] + ip[1] + ip[4] + ip[8] + 1)>>1;
    op[1] = (ip[0] - ip[1] + ip[4] - ip[8])>>1;
    op[4] = (ip[0] + ip[1] - ip[4] - ip[8])>>1;
    op[8] = (ip[0] - ip[1] - ip[4] + ip[8])>>1;
