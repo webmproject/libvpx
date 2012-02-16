@@ -796,6 +796,8 @@ process_common_toolchain() {
             add_cflags "--sysroot=${alt_libc}"
             add_ldflags "--sysroot=${alt_libc}"
 
+            add_cflags "-I${SDK_PATH}/sources/android/cpufeatures/"
+
             enable pic
             soft_enable realtime_only
             if [ ${tgt_isa} == "armv7" ]; then
