@@ -20,6 +20,11 @@
 extern unsigned int active_section;
 #endif
 
+//#define DEBUG_ENC_MV
+#ifdef DEBUG_ENC_MV
+int enc_mvcount = 0;
+#endif
+
 static void encode_mvcomponent(
     vp8_writer *const w,
     const int v,
@@ -32,8 +37,7 @@ static void encode_mvcomponent(
     if (x < mvnum_short)     // Small
     {
         vp8_write(w, 0, p [mvpis_short]);
-        vp8_treed_write(w, vp8_small_mvtree, p + MVPshort, x, 3);
-
+        vp8_treed_write(w, vp8_small_mvtree, p + MVPshort, x, mvnum_short_bits);
         if (!x)
             return;         // no sign bit
     }
@@ -46,17 +50,17 @@ static void encode_mvcomponent(
         do
             vp8_write(w, (x >> i) & 1, p [MVPbits + i]);
 
-        while (++i < 3);
+        while (++i < mvnum_short_bits);
 
         i = mvlong_width - 1;  /* Skip bit 3, which is sometimes implicit */
 
         do
             vp8_write(w, (x >> i) & 1, p [MVPbits + i]);
 
-        while (--i > 3);
+        while (--i > mvnum_short_bits);
 
-        if (x & 0xFFF0)
-            vp8_write(w, (x >> 3) & 1, p [MVPbits + 3]);
+        if (x & ~((2<<mvnum_short_bits)-1))
+            vp8_write(w, (x >> mvnum_short_bits) & 1, p [MVPbits + mvnum_short_bits]);
     }
 
     vp8_write(w, v < 0, p [MVPsign]);
@@ -91,9 +95,17 @@ void vp8_encode_motion_vector(vp8_writer *w, const MV *mv, const MV_CONTEXT *mvc
         }
     }
 #endif
-
-    encode_mvcomponent(w, mv->row >> 1, &mvc[0]);
-    encode_mvcomponent(w, mv->col >> 1, &mvc[1]);
+    encode_mvcomponent(w, mv->row >> MV_SHIFT, &mvc[0]);
+    encode_mvcomponent(w, mv->col >> MV_SHIFT, &mvc[1]);
+#ifdef DEBUG_ENC_MV
+    {
+    int i;
+    printf("%d: %d %d\n", enc_mvcount++, mv->row, mv->col);
+    for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[0])->prob[i]); printf("\n");
+    for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[1])->prob[i]); printf("\n");
+    fflush(stdout);
+    }
+#endif
 }
 
 
@@ -106,7 +118,7 @@ static unsigned int cost_mvcomponent(const int v, const struct mv_context *mvc)
     if (x < mvnum_short)
     {
         cost = vp8_cost_zero(p [mvpis_short])
-               + vp8_treed_cost(vp8_small_mvtree, p + MVPshort, x, 3);
+               + vp8_treed_cost(vp8_small_mvtree, p + MVPshort, x, mvnum_short_bits);
 
         if (!x)
             return cost;
@@ -119,17 +131,17 @@ static unsigned int cost_mvcomponent(const int v, const struct mv_context *mvc)
         do
             cost += vp8_cost_bit(p [MVPbits + i], (x >> i) & 1);
 
-        while (++i < 3);
+        while (++i < mvnum_short_bits);
 
         i = mvlong_width - 1;  /* Skip bit 3, which is sometimes implicit */
 
         do
             cost += vp8_cost_bit(p [MVPbits + i], (x >> i) & 1);
 
-        while (--i > 3);
+        while (--i > mvnum_short_bits);
 
-        if (x & 0xFFF0)
-            cost += vp8_cost_bit(p [MVPbits + 3], (x >> 3) & 1);
+        if (x & ~((2<<mvnum_short_bits)-1))
+            cost += vp8_cost_bit(p [MVPbits + mvnum_short_bits], (x >> mvnum_short_bits) & 1);
     }
 
     return cost;   // + vp8_cost_bit( p [MVPsign], v < 0);
@@ -258,7 +270,7 @@ static void write_component_probs(
     {
         const int c = events [mv_max];
 
-        is_short_ct [0] += c;     // Short vector
+        is_short_ct [0] += c;    // Short vector
         short_ct [0] += c;       // Magnitude distribution
     }
 
@@ -342,7 +354,7 @@ static void write_component_probs(
         int j = 0;
 
         vp8_tree_probs_from_distribution(
-            8, vp8_small_mvencodings, vp8_small_mvtree,
+            mvnum_short, vp8_small_mvencodings, vp8_small_mvtree,
             p, short_bct, short_ct,
             256, 1
         );
@@ -398,6 +410,15 @@ void vp8_write_mvprobs(VP8_COMP *cpi)
     vp8_writer *const w  = & cpi->bc;
     MV_CONTEXT *mvc = cpi->common.fc.mvc;
     int flags[2] = {0, 0};
+#ifdef DEBUG_ENC_MV
+    {
+    int i;
+    printf("Writing probs\n");
+    for (i=0; i<MVPcount;++i) printf("  %d", vp8_default_mv_context[0].prob[i]); printf("\n");
+    for (i=0; i<MVPcount;++i) printf("  %d", vp8_default_mv_context[1].prob[i]); printf("\n");
+    fflush(stdout);
+    }
+#endif
 #ifdef ENTROPY_STATS
     active_section = 4;
 #endif

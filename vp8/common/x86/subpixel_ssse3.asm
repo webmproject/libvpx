@@ -1495,6 +1495,25 @@ k2_k4:
     times 8 db  36,  -11
     times 8 db  12,   -6
 align 16
+%if CONFIG_SIXTEENTH_SUBPEL_UV
+vp8_bilinear_filters_ssse3:
+    times 8 db 128, 0
+    times 8 db 120, 8
+    times 8 db 112, 16
+    times 8 db 104, 24
+    times 8 db 96,  32
+    times 8 db 88,  40
+    times 8 db 80,  48
+    times 8 db 72,  56
+    times 8 db 64,  64
+    times 8 db 56,  72
+    times 8 db 48,  80
+    times 8 db 40,  88
+    times 8 db 32,  96
+    times 8 db 24,  104
+    times 8 db 16,  112
+    times 8 db 8,   120
+%else
 vp8_bilinear_filters_ssse3:
     times 8 db 128, 0
     times 8 db 112, 16
@@ -1504,4 +1523,5 @@ vp8_bilinear_filters_ssse3:
     times 8 db 48,  80
     times 8 db 32,  96
     times 8 db 16,  112
+%endif
 

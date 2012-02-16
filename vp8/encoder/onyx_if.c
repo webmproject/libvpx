@@ -1365,6 +1365,9 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
             (TOKEN_PARTITION) cpi->oxcf.token_partitions;
 
     setup_features(cpi);
+#if CONFIG_HIGH_PRECISION_MV
+    cpi->mb.e_mbd.allow_high_precision_mv = 1;   // Default mv precision adaptation
+#endif
 
     {
         int i;
@@ -2994,6 +2997,9 @@ static void encode_frame_to_data_rate
 
         // Reset the loop filter deltas and segmentation map
         setup_features(cpi);
+#if CONFIG_HIGH_PRECISION_MV
+        xd->allow_high_precision_mv = 1;   // Default mv precision adaptation
+#endif
 
         // If segmentation is enabled force a map update for key frames
         if (xd->segmentation_enabled)

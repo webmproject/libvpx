@@ -290,8 +290,8 @@ typedef struct MacroBlockD
     /* Delta values have the range +/- MAX_LOOP_FILTER */
     signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];                /* 0 = Intra, Last, GF, ARF */
     signed char ref_lf_deltas[MAX_REF_LF_DELTAS];                     /* 0 = Intra, Last, GF, ARF */
-    signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];                      /* 0 = BPRED, ZERO_MV, MV, SPLIT */
-    signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];                           /* 0 = BPRED, ZERO_MV, MV, SPLIT */
+    signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];              /* 0 = BPRED, ZERO_MV, MV, SPLIT */
+    signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];                   /* 0 = BPRED, ZERO_MV, MV, SPLIT */
 
     /* Distance of MB away from frame edges */
     int mb_to_left_edge;
@@ -310,6 +310,9 @@ typedef struct MacroBlockD
     vp8_subpix_fn_t  subpixel_predict16x16;
     vp8_subpix_fn_t  subpixel_predict_avg8x8;
     vp8_subpix_fn_t  subpixel_predict_avg16x16;
+#if CONFIG_HIGH_PRECISION_MV
+    int allow_high_precision_mv;
+#endif /* CONFIG_HIGH_PRECISION_MV */
 
     void *current_bc;
 

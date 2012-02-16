@@ -21,6 +21,12 @@
 #if CONFIG_DEBUG
 #include <assert.h>
 #endif
+
+//#define DEBUG_DEC_MV
+#ifdef DEBUG_DEC_MV
+int dec_mvcount = 0;
+#endif
+
 static int vp8_read_bmode(vp8_reader *bc, const vp8_prob *p)
 {
     const int i = vp8_treed_read(bc, vp8_bmode_tree, p);
@@ -173,7 +179,7 @@ static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
         {
             x += vp8_read(r, p [MVPbits + i]) << i;
         }
-        while (++i < 3);
+        while (++i < mvnum_short_bits);
 
         i = mvlong_width - 1;  /* Skip bit 3, which is sometimes implicit */
 
@@ -181,10 +187,10 @@ static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
         {
             x += vp8_read(r, p [MVPbits + i]) << i;
         }
-        while (--i > 3);
+        while (--i > mvnum_short_bits);
 
-        if (!(x & 0xFFF0)  ||  vp8_read(r, p [MVPbits + 3]))
-            x += 8;
+        if (!(x & ~((2<<mvnum_short_bits)-1))  ||  vp8_read(r, p [MVPbits + mvnum_short_bits]))
+            x += (mvnum_short);
     }
     else   /* small */
         x = vp8_treed_read(r, vp8_small_mvtree, p + MVPshort);
@@ -197,8 +203,14 @@ static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
 
 static void read_mv(vp8_reader *r, MV *mv, const MV_CONTEXT *mvc)
 {
-    mv->row = (short)(read_mvcomponent(r,   mvc) << 1);
-    mv->col = (short)(read_mvcomponent(r, ++mvc) << 1);
+    mv->row = (short)(read_mvcomponent(r,   mvc) << MV_SHIFT);
+    mv->col = (short)(read_mvcomponent(r, ++mvc) << MV_SHIFT);
+#ifdef DEBUG_DEC_MV
+    int i;
+    printf("%d: %d %d\n", dec_mvcount++, mv->row, mv->col);
+    for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[-1])->prob[i]); printf("\n");
+    for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[0])->prob[i]); printf("\n");
+#endif
 }
 
 
@@ -985,4 +997,3 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
 }
 #endif /* CONFIG_SUPERBLOCKS */
-

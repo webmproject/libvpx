@@ -225,6 +225,28 @@ struct vp8_token_struct vp8_mbsplit_encodings [VP8_NUMMBSPLITS];
 struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
 struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
+#if CONFIG_HIGH_PRECISION_MV
+const vp8_tree_index vp8_small_mvtree [30] =
+{
+     2,  16,
+     4,  10,
+     6,   8,
+    -0,  -1,
+    -2,  -3,
+    12,  14,
+    -4,  -5,
+    -6,  -7,
+    18,  24,
+    20,  22,
+    -8,  -9,
+   -10, -11,
+    26,  28,
+   -12, -13,
+   -14, -15
+};
+struct vp8_token_struct vp8_small_mvencodings [16];
+
+#else
 
 const vp8_tree_index vp8_small_mvtree [14] =
 {
@@ -236,8 +258,10 @@ const vp8_tree_index vp8_small_mvtree [14] =
     -4, -5,
     -6, -7
 };
-
 struct vp8_token_struct vp8_small_mvencodings [8];
+
+#endif  /* CONFIG_HIGH_PRECISION_MV */
+
 
 void vp8_init_mbmode_probs(VP8_COMMON *x)
 {
@@ -489,4 +513,3 @@ void print_mv_ref_cts(VP8_COMMON *pc)
         printf("\n");
     }
 }
-

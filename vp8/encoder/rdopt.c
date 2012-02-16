@@ -530,10 +530,17 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd)
 
     if ((mv_row | mv_col) & 7)
     {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+        VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride,
+            (mv_col & 7)<<1, (mv_row & 7)<<1, upred_ptr, uv_stride, &sse2);
+        VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride,
+            (mv_col & 7)<<1, (mv_row & 7)<<1, vpred_ptr, uv_stride, &sse1);
+#else
         VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride,
             mv_col & 7, mv_row & 7, upred_ptr, uv_stride, &sse2);
         VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride,
             mv_col & 7, mv_row & 7, vpred_ptr, uv_stride, &sse1);
+#endif
         sse2 += sse1;
     }
     else
@@ -1654,7 +1661,6 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
                         bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost,
                         &distortion, &sse);
-
                 }
             } /* NEW4X4 */
 
@@ -1700,8 +1706,10 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
         segmentyrate += bestlabelyrate;
         this_segment_rd += best_label_rd;
 
-        if (this_segment_rd >= bsi->segment_rd)
+        if (this_segment_rd >= bsi->segment_rd) {
             break;
+        }
+
 
     } /* for each label */
 
@@ -1775,6 +1783,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
         int sr;
 
         rd_check_segment(cpi, x, &bsi, BLOCK_8X8);
+
 
         if (bsi.segment_rd < best_rd)
         {
@@ -2146,18 +2155,18 @@ static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
             if (x->partition_info->bmi[i].mode == NEW4X4)
             {
                 cpi->MVcount[0][mv_max+((x->partition_info->bmi[i].mv.as_mv.row
-                                          - best_ref_mv->as_mv.row) >> 1)]++;
+                                          - best_ref_mv->as_mv.row) >> MV_SHIFT)]++;
                 cpi->MVcount[1][mv_max+((x->partition_info->bmi[i].mv.as_mv.col
-                                          - best_ref_mv->as_mv.col) >> 1)]++;
+                                          - best_ref_mv->as_mv.col) >> MV_SHIFT)]++;
             }
         }
     }
     else if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV)
     {
         cpi->MVcount[0][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
-                                          - best_ref_mv->as_mv.row) >> 1)]++;
+                                          - best_ref_mv->as_mv.row) >> MV_SHIFT)]++;
         cpi->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
-                                          - best_ref_mv->as_mv.col) >> 1)]++;
+                                          - best_ref_mv->as_mv.col) >> MV_SHIFT)]++;
     }
 }
 
@@ -2472,6 +2481,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             vp8_update_zbin_extra(cpi, x);
         }
+
 
         if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame)
         switch (this_mode)

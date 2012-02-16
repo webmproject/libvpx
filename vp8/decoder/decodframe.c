@@ -1029,6 +1029,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     /* Is segmentation enabled */
     xd->segmentation_enabled = (unsigned char)vp8_read_bit(bc);
+
     if (xd->segmentation_enabled)
     {
         // Read whether or not the segmentation map is being explicitly
@@ -1285,6 +1286,11 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
         pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp8_read_bit(bc);
         pc->ref_frame_sign_bias[ALTREF_FRAME] = vp8_read_bit(bc);
+
+#if CONFIG_HIGH_PRECISION_MV
+        /* Is high precision mv allowed */
+        xd->allow_high_precision_mv = (unsigned char)vp8_read_bit(bc);
+#endif
     }
 
     pc->refresh_entropy_probs = vp8_read_bit(bc);
@@ -1471,4 +1477,3 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     return 0;
 }
-

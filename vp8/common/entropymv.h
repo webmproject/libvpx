@@ -13,16 +13,32 @@
 #define __INC_ENTROPYMV_H
 
 #include "treecoder.h"
+#include "vpx_config.h"
+
+#if CONFIG_HIGH_PRECISION_MV
+#define MV_SHIFT 0
+#else
+#define MV_SHIFT 1
+#endif
 
 enum
 {
+#if CONFIG_HIGH_PRECISION_MV
+    mv_max  = 2047,              /* max absolute value of a MV component */
+    MVvals = (2 * mv_max) + 1,   /* # possible values "" */
+    mvlong_width = 11,       /* Large MVs have 9 bit magnitudes */
+    mvnum_short = 16,         /* magnitudes 0 through 15 */
+    mvnum_short_bits = 4,         /* number of bits for short mvs */
+#else
     mv_max  = 1023,              /* max absolute value of a MV component */
     MVvals = (2 * mv_max) + 1,   /* # possible values "" */
-    mvfp_max  = 255,              /* max absolute value of a full pixel MV component */
-    MVfpvals = (2 * mvfp_max) +1, /* # possible full pixel MV values */
-
     mvlong_width = 10,       /* Large MVs have 9 bit magnitudes */
     mvnum_short = 8,         /* magnitudes 0 through 7 */
+    mvnum_short_bits = 3,         /* number of bits for short mvs */
+#endif
+
+    mvfp_max  = 255,              /* max absolute value of a full pixel MV component */
+    MVfpvals = (2 * mvfp_max) + 1, /* # possible full pixel MV values */
 
     /* probability offsets for coding each MV component */
 

@@ -204,6 +204,27 @@ unsigned int vp8_variance8x16_mmx(
 // the mmx function that does the bilinear filtering and var calculation //
 // int one pass                                                          //
 ///////////////////////////////////////////////////////////////////////////
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+DECLARE_ALIGNED(16, const short, vp8_vp7_bilinear_filters_mmx[16][8]) =
+{
+    { 128, 128, 128, 128,  0,  0,  0,  0 },
+    { 120, 120, 120, 120,  8,  8,  8,  8 },
+    { 112, 112, 112, 112, 16, 16, 16, 16 },
+    { 104, 104, 104, 104, 24, 24, 24, 24 },
+    {  96, 96, 96, 96, 32, 32, 32, 32 },
+    {  88, 88, 88, 88, 40, 40, 40, 40 },
+    {  80, 80, 80, 80, 48, 48, 48, 48 },
+    {  72, 72, 72, 72, 56, 56, 56, 56 },
+    {  64, 64, 64, 64, 64, 64, 64, 64 },
+    {  56, 56, 56, 56, 72, 72, 72, 72 },
+    {  48, 48, 48, 48, 80, 80, 80, 80 },
+    {  40, 40, 40, 40, 88, 88, 88, 88 },
+    {  32, 32, 32, 32, 96, 96, 96, 96 },
+    {  24, 24, 24, 24, 104, 104, 104, 104 },
+    {  16, 16, 16, 16, 112, 112, 112, 112 },
+    {   8,  8,  8,  8, 120, 120, 120, 120 }
+};
+#else
 DECLARE_ALIGNED(16, const short, vp8_vp7_bilinear_filters_mmx[8][8]) =
 {
     { 128, 128, 128, 128,  0,  0,  0,  0 },
@@ -215,6 +236,7 @@ DECLARE_ALIGNED(16, const short, vp8_vp7_bilinear_filters_mmx[8][8]) =
     {  32, 32, 32, 32, 96, 96, 96, 96 },
     {  16, 16, 16, 16, 112, 112, 112, 112 }
 };
+#endif
 
 unsigned int vp8_sub_pixel_variance4x4_mmx
 (
@@ -279,14 +301,12 @@ unsigned int vp8_sub_pixel_variance16x16_mmx
     int xsum0, xsum1;
     unsigned int xxsum0, xxsum1;
 
-
     vp8_filter_block2d_bil_var_mmx(
         src_ptr, src_pixels_per_line,
         dst_ptr, dst_pixels_per_line, 16,
         vp8_vp7_bilinear_filters_mmx[xoffset], vp8_vp7_bilinear_filters_mmx[yoffset],
         &xsum0, &xxsum0
     );
-
 
     vp8_filter_block2d_bil_var_mmx(
         src_ptr + 8, src_pixels_per_line,
@@ -386,8 +406,13 @@ unsigned int vp8_variance_halfpixvar16x16_h_mmx(
     int  recon_stride,
     unsigned int *sse)
 {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 8, 0,
+                                           ref_ptr, recon_stride, sse);
+#else
     return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 4, 0,
                                            ref_ptr, recon_stride, sse);
+#endif
 }
 
 
@@ -398,8 +423,13 @@ unsigned int vp8_variance_halfpixvar16x16_v_mmx(
     int  recon_stride,
     unsigned int *sse)
 {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 0, 8,
+                                           ref_ptr, recon_stride, sse);
+#else
     return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 0, 4,
                                            ref_ptr, recon_stride, sse);
+#endif
 }
 
 
@@ -410,6 +440,11 @@ unsigned int vp8_variance_halfpixvar16x16_hv_mmx(
     int  recon_stride,
     unsigned int *sse)
 {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 8, 8,
+                                           ref_ptr, recon_stride, sse);
+#else
     return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 4, 4,
                                            ref_ptr, recon_stride, sse);
+#endif
 }

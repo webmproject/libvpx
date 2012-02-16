@@ -50,14 +50,20 @@ static void vp8_temporal_filter_predictors_mb_c
 {
     int offset;
     unsigned char *yptr, *uptr, *vptr;
+    int omv_row, omv_col;
 
     // Y
     yptr = y_mb_ptr + (mv_row >> 3) * stride + (mv_col >> 3);
 
     if ((mv_row | mv_col) & 7)
     {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
         x->subpixel_predict16x16(yptr, stride,
-                                    mv_col & 7, mv_row & 7, &pred[0], 16);
+                                 (mv_col & 7)<<1, (mv_row & 7)<<1, &pred[0], 16);
+#else
+        x->subpixel_predict16x16(yptr, stride,
+                                 mv_col & 7, mv_row & 7, &pred[0], 16);
+#endif
     }
     else
     {
@@ -65,6 +71,8 @@ static void vp8_temporal_filter_predictors_mb_c
     }
 
     // U & V
+    omv_row = mv_row;
+    omv_col = mv_col;
     mv_row >>= 1;
     mv_col >>= 1;
     stride = (stride + 1) >> 1;
@@ -72,6 +80,15 @@ static void vp8_temporal_filter_predictors_mb_c
     uptr = u_mb_ptr + offset;
     vptr = v_mb_ptr + offset;
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    if ((omv_row | omv_col) & 15)
+    {
+        x->subpixel_predict8x8(uptr, stride,
+                            (omv_col & 15), (omv_row & 15), &pred[256], 8);
+        x->subpixel_predict8x8(vptr, stride,
+                            (omv_col & 15), (omv_row & 15), &pred[320], 8);
+    }
+#else
     if ((mv_row | mv_col) & 7)
     {
         x->subpixel_predict8x8(uptr, stride,
@@ -79,6 +96,7 @@ static void vp8_temporal_filter_predictors_mb_c
         x->subpixel_predict8x8(vptr, stride,
                             mv_col & 7, mv_row & 7, &pred[320], 8);
     }
+#endif
     else
     {
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, stride, &pred[256], 8);

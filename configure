@@ -226,6 +226,8 @@ EXPERIMENT_LIST="
     enhanced_interp
     superblocks
     featureupdates
+    high_precision_mv
+    sixteenth_subpel_uv
 "
 CONFIG_LIST="
     external_build

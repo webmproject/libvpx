@@ -2945,6 +2945,11 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         // Indicate reference frame sign bias for Golden and ARF frames (always 0 for last frame buffer)
         vp8_write_bit(bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
         vp8_write_bit(bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);
+
+#if CONFIG_HIGH_PRECISION_MV
+        // Signal whether to allow high MV precision
+        vp8_write_bit(bc, (xd->allow_high_precision_mv) ? 1 : 0);
+#endif
     }
 
     if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
