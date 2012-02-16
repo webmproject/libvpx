@@ -566,7 +566,6 @@ void vp8_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc]  = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc]/q2nd;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
-      dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
 
 
       if (y)
@@ -627,7 +626,6 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
       qcoeff_ptr[rc]  = x;                         // write to destination
       //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
       dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
-      dqcoeff_ptr[rc] = (dqcoeff_ptr[rc]+2)>>2;
 
       if (y)
       {

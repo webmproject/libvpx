@@ -777,11 +777,7 @@ static void macro_block_yrd_8x8( MACROBLOCK *mb,
     mb->e_mbd.dqcoeff[192] = 0;
     d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0) << 2;
 
-#if CONFIG_EXTEND_QRANGE
-    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
-#else
-    d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff);
-#endif
+    d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
 
     *Distortion = (d >> 4);
     // rate
