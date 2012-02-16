@@ -739,7 +739,7 @@ static int vp8_rdcost_mby_8x8(MACROBLOCK *mb)
     for (b = 0; b < 16; b+=4)
         cost += cost_coeffs_8x8(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
                     ta + vp8_block2above[b], tl + vp8_block2left[b],
-                    ta + vp8_block2above[b+4], tl + vp8_block2left[b+4]);
+                    ta + vp8_block2above[b+1], tl + vp8_block2left[b+4]);
 
     cost += cost_coeffs_2x2(mb, x->block + 24, PLANE_TYPE_Y2,
                 ta + vp8_block2above[24], tl + vp8_block2left[24]);
@@ -1175,18 +1175,9 @@ static int rd_cost_mbuv(MACROBLOCK *mb)
 static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int fullpixel)
 {
-#if CONFIG_T8X8
-    int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
-#endif
-
     ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
         x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
 
-#if CONFIG_T8X8
-    if( tx_type == TX_8X8 )
-       vp8_transform_mbuv_8x8(x);
-    else
-#endif
     vp8_transform_mbuv(x);
     vp8_quantize_mbuv(x);
 
@@ -1195,6 +1186,49 @@ static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
     return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
+#if CONFIG_T8X8
+static int rd_cost_mbuv_8x8(MACROBLOCK *mb)
+{
+    int b;
+    int cost = 0;
+    MACROBLOCKD *x = &mb->e_mbd;
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+
+    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+
+    for (b = 16; b < 24; b+=4)
+        cost += cost_coeffs_8x8(mb, x->block + b, PLANE_TYPE_UV,
+                                ta + vp8_block2above[b],
+                                tl + vp8_block2left[b],
+                                ta + vp8_block2above[b+1],
+                                tl + vp8_block2left[b+2]);
+
+    return cost;
+}
+
+
+static int rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+                            int *distortion, int fullpixel)
+{
+    ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
+        x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
+
+    vp8_transform_mbuv_8x8(x);
+
+    vp8_quantize_mbuv_8x8(x);
+
+    *rate       = rd_cost_mbuv_8x8(x);
+    *distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
+
+    return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
+}
+#endif
 
 static int rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                           int *distortion, int fullpixel)
@@ -2776,7 +2810,17 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
             // UV cost and distortion
             vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
-            rd_inter16x16_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+
+#if CONFIG_T8X8
+            if(cpi->common.txfm_mode == ALLOW_8X8)
+                rd_inter16x16_uv_8x8(cpi, x, &rate_uv,
+                                    &distortion_uv,
+                                    cpi->common.full_pixel);
+            else
+#endif
+                rd_inter16x16_uv(cpi, x, &rate_uv,
+                                    &distortion_uv,
+                                    cpi->common.full_pixel);
             rate2 += rate_uv;
             distortion2 += distortion_uv;
             mode_excluded = cpi->common.dual_pred_mode == DUAL_PREDICTION_ONLY;
@@ -2864,7 +2908,16 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             distortion2 += distortion;
 
             /* UV cost and distortion */
-            rd_inter16x16_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+#if CONFIG_T8X8
+            if(cpi->common.txfm_mode == ALLOW_8X8)
+                rd_inter16x16_uv_8x8(cpi, x, &rate_uv,
+                                    &distortion_uv,
+                                    cpi->common.full_pixel);
+            else
+#endif
+                rd_inter16x16_uv(cpi, x, &rate_uv,
+                                    &distortion_uv,
+                                    cpi->common.full_pixel);
             rate2 += rate_uv;
             distortion2 += distortion_uv;
 
