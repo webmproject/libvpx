@@ -120,10 +120,10 @@ void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) //pitch = 8
        op1[i] = 0;
    }
 
-   op1[0]=ip1[0] + ip1[1] + ip1[4] + ip1[8];
-   op1[1]=ip1[0] - ip1[1] + ip1[4] - ip1[8];
-   op1[4]=ip1[0] + ip1[1] - ip1[4] - ip1[8];
-   op1[8]=ip1[0] - ip1[1] - ip1[4] + ip1[8];
+   op1[0]=(ip1[0] + ip1[1] + ip1[4] + ip1[8])>>1;
+   op1[1]=(ip1[0] - ip1[1] + ip1[4] - ip1[8])>>1;
+   op1[4]=(ip1[0] + ip1[1] - ip1[4] - ip1[8])>>1;
+   op1[8]=(ip1[0] - ip1[1] - ip1[4] + ip1[8])>>1;
 
 }
 #endif

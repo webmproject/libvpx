@@ -487,10 +487,10 @@ void vp8_short_ihaar2x2_c(short *input, short *output, int pitch)
        op[i] = 0;
    }
 
-   op[0] = (ip[0] + ip[1] + ip[4] + ip[8])>>2;
-   op[1] = (ip[0] - ip[1] + ip[4] - ip[8])>>2;
-   op[4] = (ip[0] + ip[1] - ip[4] - ip[8])>>2;
-   op[8] = (ip[0] - ip[1] - ip[4] + ip[8])>>2;
+   op[0] = (ip[0] + ip[1] + ip[4] + ip[8])>>1;
+   op[1] = (ip[0] - ip[1] + ip[4] - ip[8])>>1;
+   op[4] = (ip[0] + ip[1] - ip[4] - ip[8])>>1;
+   op[8] = (ip[0] - ip[1] - ip[4] + ip[8])>>1;
 }
 
 void vp8_short_ihaar2x2_1_c(short *input, short *output, int pitch)
