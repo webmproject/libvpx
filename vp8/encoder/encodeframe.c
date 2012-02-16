@@ -1395,23 +1395,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
         cpi->rd_prediction_type_threshes[frame_type][2] += hybrid_diff;
         cpi->rd_prediction_type_threshes[frame_type][2] >>= 1;
 
-        /* FIXME make "100" (the threshold at which to re-encode the
-         * current frame) a commandline option. */
-        if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY &&
-            (dual_diff >= 100 || hybrid_diff >= 100))
-        {
-            redo = 1;
-            cpi->common.dual_pred_mode = cpi->rd_dual_diff > cpi->rd_hybrid_diff ?
-                        DUAL_PREDICTION_ONLY : HYBRID_PREDICTION;
-        }
-        else if (cpi->common.dual_pred_mode == DUAL_PREDICTION_ONLY &&
-                 (single_diff >= 100 || hybrid_diff >= 100))
-        {
-            redo = 1;
-            cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_hybrid_diff ?
-                        SINGLE_PREDICTION_ONLY : HYBRID_PREDICTION;
-        }
-        else if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
         {
             int single_count_zero = 0;
             int dual_count_zero = 0;
@@ -1430,39 +1414,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
             else if (single_count_zero == 0)
             {
                 cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
-            }
-            else if (single_diff >= 100 || dual_diff >= 100)
-            {
-                redo = 1;
-                cpi->common.dual_pred_mode = cpi->rd_single_diff > cpi->rd_dual_diff ?
-                            SINGLE_PREDICTION_ONLY : DUAL_PREDICTION_ONLY;
-            }
-        }
-
-        if (redo)
-        {
-            encode_frame_internal(cpi);
-
-            if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
-            {
-                int single_count_zero = 0;
-                int dual_count_zero = 0;
-                int i;
-
-                for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
-                {
-                    single_count_zero += cpi->single_pred_count[i];
-                    dual_count_zero += cpi->dual_pred_count[i];
-                }
-
-                if (dual_count_zero == 0)
-                {
-                    cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
-                }
-                else if (single_count_zero == 0)
-                {
-                    cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
-                }
             }
         }
     }
