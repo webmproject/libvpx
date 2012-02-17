@@ -925,7 +925,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     if (pc->mb_no_coeff_skip)
     {
-        prob_skip_false = cpi->skip_false_count * 256 / (cpi->skip_false_count + cpi->skip_true_count);
+        int total_mbs = pc->mb_rows * pc->mb_cols;
+
+        prob_skip_false = (total_mbs - cpi->skip_true_count ) * 256 / total_mbs;
 
         if (prob_skip_false <= 1)
             prob_skip_false = 1;
@@ -1112,7 +1114,9 @@ static void write_kfmodes(VP8_COMP *cpi)
 
     if (c->mb_no_coeff_skip)
     {
-        prob_skip_false = cpi->skip_false_count * 256 / (cpi->skip_false_count + cpi->skip_true_count);
+        int total_mbs = c->mb_rows * c->mb_cols;
+
+        prob_skip_false = (total_mbs - cpi->skip_true_count ) * 256 / total_mbs;
 
         if (prob_skip_false <= 1)
             prob_skip_false = 1;

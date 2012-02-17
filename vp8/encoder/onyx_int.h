@@ -504,7 +504,6 @@ typedef struct VP8_COMP
     int gf_bad_count;
     int gf_update_recommended;
     int skip_true_count;
-    int skip_false_count;
 
     unsigned char *segmentation_map;
     signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            // Segment data (can be deltas or absolute values)

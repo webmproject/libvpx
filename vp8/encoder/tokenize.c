@@ -378,30 +378,27 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(x, has_y2_block);
     if (x->mode_info_context->mbmi.mb_skip_coeff)
     {
-        cpi->skip_true_count++;
-
         if (!cpi->common.mb_no_coeff_skip)
-            vp8_stuff_mb(cpi, x, t) ;
+        {
+            vp8_stuff_mb(cpi, x, t);
+        }
         else
         {
             vp8_fix_contexts(x);
+            cpi->skip_true_count++;
         }
 
         return;
     }
-
-    cpi->skip_false_count++;
 
     plane_type = 3;
     if(has_y2_block)
     {
         tokenize2nd_order_b(x, t, cpi);
         plane_type = 0;
-
     }
 
     tokenize1st_order_b(x, t, plane_type, cpi);
-
 }
 
 

@@ -696,7 +696,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     cpi->prediction_error = 0;
     cpi->intra_error = 0;
     cpi->skip_true_count = 0;
-    cpi->skip_false_count = 0;
 
 #if 0
     // Experimental code
@@ -1094,6 +1093,7 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
     vp8_encode_intra16x16mbuv(x);
 
     sum_intra_stats(cpi, x);
+
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
 
     if (xd->mode_info_context->mbmi.mode != B_PRED)
@@ -1260,11 +1260,6 @@ int vp8cx_encode_inter_macroblock
         if (!x->skip)
         {
             vp8_encode_inter16x16(x);
-
-            // Clear mb_skip_coeff if mb_no_coeff_skip is not set
-            if (!cpi->common.mb_no_coeff_skip)
-                xd->mode_info_context->mbmi.mb_skip_coeff = 0;
-
         }
         else
             vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
@@ -1287,17 +1282,17 @@ int vp8cx_encode_inter_macroblock
     }
     else
     {
+        /* always set mb_skip_coeff as it is needed by the loopfilter */
+        xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+
         if (cpi->common.mb_no_coeff_skip)
         {
-            xd->mode_info_context->mbmi.mb_skip_coeff = 1;
             cpi->skip_true_count ++;
             vp8_fix_contexts(xd);
         }
         else
         {
             vp8_stuff_mb(cpi, xd, t);
-            xd->mode_info_context->mbmi.mb_skip_coeff = 0;
-            cpi->skip_false_count ++;
         }
     }
 
