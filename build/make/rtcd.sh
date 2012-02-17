@@ -196,8 +196,8 @@ filter() {
 # Helper functions for generating the arch specific RTCD files
 #
 common_top() {
-  local outfile_basename=$(basename ${outfile:-rtcd.h})
-  local include_guard=$(echo -n $outfile_basename | tr '[a-z]' '[A-Z]' | tr -c '[A-Z]' _)
+  local outfile_basename=$(basename ${symbol:-rtcd.h})
+  local include_guard=$(echo $outfile_basename | tr '[a-z]' '[A-Z]' | tr -c '[A-Z]' _)
   cat <<EOF
 #ifndef ${include_guard}
 #define ${include_guard}
@@ -225,7 +225,7 @@ x86() {
 
   # Assign the helper variable for each enabled extension
   for opt in $ALL_ARCHS; do
-    local uc=$(echo -n $opt | tr '[a-z]' '[A-Z]')
+    local uc=$(echo $opt | tr '[a-z]' '[A-Z]')
     eval "have_${opt}=\"flags & HAS_${uc}\""
   done
 
@@ -253,7 +253,7 @@ arm() {
 
   # Assign the helper variable for each enabled extension
   for opt in $ALL_ARCHS; do
-    local uc=$(echo -n $opt | tr '[a-z]' '[A-Z]')
+    local uc=$(echo $opt | tr '[a-z]' '[A-Z]')
     eval "have_${opt}=\"flags & HAS_${uc}\""
   done
 
