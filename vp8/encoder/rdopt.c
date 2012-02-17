@@ -2270,6 +2270,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int best_hybrid_rd = INT_MAX;
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
+    int uv_intra_tteob = 0;
+#if CONFIG_T8X8
+    int uv_intra_rate_8x8, uv_intra_distortion_8x8, uv_intra_rate_tokenonly_8x8;
+    int uv_intra_tteob_8x8=0;
+#endif
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
     int best_yrd = INT_MAX;
@@ -2357,6 +2362,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
     rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
     uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
+    for(i=16; i<24; i++)
+        uv_intra_tteob += x->e_mbd.block[i].eob;
+
+#if CONFIG_T8X8
+        uv_intra_tteob_8x8 = uv_intra_tteob;
+#endif
 
     // Get estimates of reference frame costs for each reference frame
     // that depend on the current prediction etc.
@@ -2953,12 +2964,43 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             if (cpi->common.mb_no_coeff_skip)
             {
                 int tteob;
-
+                int has_y2_block = ( this_mode!=SPLITMV
+                                    &&this_mode!=B_PRED
+                                    &&this_mode!=I8X8_PRED);
                 tteob = 0;
+                if(has_y2_block)
+                    tteob += x->e_mbd.block[24].eob;
 
-                for (i = 0; i <= 24; i++)
+#if CONFIG_T8X8
+                if(cpi->common.txfm_mode ==ALLOW_8X8 && has_y2_block)
                 {
-                    tteob += x->e_mbd.block[i].eob;
+                    for (i = 0; i < 16; i+=4)
+                        tteob += (x->e_mbd.block[i].eob > 1);
+                    if(x->e_mbd.mode_info_context->mbmi.ref_frame!=INTRA_FRAME)
+                    {
+                        tteob += x->e_mbd.block[16].eob;
+                        tteob += x->e_mbd.block[20].eob;
+                    }
+                    else
+                    {
+                        tteob += uv_intra_tteob_8x8;
+                    }
+                }
+                else
+#endif
+                {
+                    for (i = 0; i < 16; i++)
+                        tteob += (x->e_mbd.block[i].eob > has_y2_block);
+
+                    if(x->e_mbd.mode_info_context->mbmi.ref_frame!=INTRA_FRAME)
+                    {
+                        for (i = 16; i < 24; i++)
+                            tteob += x->e_mbd.block[i].eob;
+                    }
+                    else
+                    {
+                        tteob += uv_intra_tteob;
+                    }
                 }
 
                 if (tteob == 0)
