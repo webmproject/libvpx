@@ -186,17 +186,19 @@ void vp8_setup_version(VP8_COMMON *cm)
         cm->full_pixel = 0;
         break;
     case 2:
+    case 3:
         cm->no_lpf = 1;
         cm->filter_type = NORMAL_LOOPFILTER;
         cm->use_bilinear_mc_filter = 1;
         cm->full_pixel = 0;
         break;
-    case 3:
-        cm->no_lpf = 1;
-        cm->filter_type = SIMPLE_LOOPFILTER;
-        cm->use_bilinear_mc_filter = 1;
-        cm->full_pixel = 1;
-        break;
+    // Full pel only code deprecated in experimental code base
+    //case 3:
+    //    cm->no_lpf = 1;
+    //    cm->filter_type = SIMPLE_LOOPFILTER;
+    //    cm->use_bilinear_mc_filter = 1;
+    //    cm->full_pixel = 1;
+    //    break;
     }
 }
 void vp8_create_common(VP8_COMMON *oci)
