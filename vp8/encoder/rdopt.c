@@ -1737,6 +1737,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int best_intra_rd = INT_MAX;
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
+    int uv_intra_tteob = 0;
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
     int best_yrd = INT_MAX;
@@ -1787,6 +1788,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
     rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
     uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
+    /*
+     * Total of the eobs is used later to further adjust rate2. Since uv block's
+     * intra eobs will be overwritten when we check inter modes in following
+     * for-loop, we need to save uv_intra_tteob here.
+     */
+    for (i = 16; i < 24; i++)
+        uv_intra_tteob += x->e_mbd.eobs[i];
 
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
@@ -2209,9 +2217,18 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
                 tteob = 0;
 
-                for (i = 0; i <= 24; i++)
+                if (x->e_mbd.mode_info_context->mbmi.ref_frame)
                 {
-                    tteob += x->e_mbd.eobs[i];
+                    for (i = 0; i <= 24; i++)
+                        tteob += x->e_mbd.eobs[i];
+                }
+                else
+                {
+                    for (i = 0; i < 16; i++)
+                        tteob += x->e_mbd.eobs[i];
+
+                    tteob += uv_intra_tteob;
+                    tteob += x->e_mbd.eobs[24];
                 }
 
                 if (tteob == 0)
