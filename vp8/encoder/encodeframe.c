@@ -733,41 +733,6 @@ void encode_sb_row (VP8_COMP *cpi,
                 if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
                     (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                     cpi->inter_zz_count ++;
-
-                // Actions required if segmentation enabled
-                if ( xd->segmentation_enabled )
-                {
-                    // Special case code for cyclic refresh
-                    // If cyclic update enabled then copy xd->mbmi.segment_id;
-                    // (which may have been updated based on mode during
-                    // vp8cx_encode_inter_macroblock()) back into the global
-                    // segmentation map
-                    if (cpi->cyclic_refresh_mode_enabled)
-                    {
-                        cpi->segmentation_map[map_index] =
-                            xd->mode_info_context->mbmi.segment_id;
-
-                        // If the block has been refreshed mark it as clean (the
-                        // magnitude of the -ve influences how long it will be
-                        // before we consider another refresh):
-                        // Else if it was coded (last frame 0,0) and has not
-                        // already been refreshed then mark it as a candidate
-                        // for cleanup next time (marked 0)
-                        // else mark it as dirty (1).
-                        if (xd->mode_info_context->mbmi.segment_id)
-                            cpi->cyclic_refresh_map[map_index] = -1;
-
-                        else if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
-                                 (xd->mode_info_context->mbmi.ref_frame ==
-                                  LAST_FRAME))
-                        {
-                            if (cpi->cyclic_refresh_map[map_index] == 1)
-                                cpi->cyclic_refresh_map[map_index] = 0;
-                        }
-                        else
-                            cpi->cyclic_refresh_map[map_index] = 1;
-                    }
-                }
             }
 
             // TODO Make sure partitioning works with this new scheme
@@ -948,41 +913,6 @@ void encode_mb_row(VP8_COMP *cpi,
             // Count of last ref frame 0,0 usage
             if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 cpi->inter_zz_count ++;
-
-            // Actions required if segmentation enabled
-            if ( xd->segmentation_enabled )
-            {
-                // Special case code for cyclic refresh
-                // If cyclic update enabled then copy xd->mbmi.segment_id;
-                // (which may have been updated based on mode during
-                // vp8cx_encode_inter_macroblock()) back into the global
-                // segmentation map
-                if (cpi->cyclic_refresh_mode_enabled)
-                {
-                    cpi->segmentation_map[map_index+mb_col] =
-                        xd->mode_info_context->mbmi.segment_id;
-
-                    // If the block has been refreshed mark it as clean (the
-                    // magnitude of the -ve influences how long it will be
-                    // before we consider another refresh):
-                    // Else if it was coded (last frame 0,0) and has not
-                    // already been refreshed then mark it as a candidate
-                    // for cleanup next time (marked 0)
-                    // else mark it as dirty (1).
-                    if (xd->mode_info_context->mbmi.segment_id)
-                        cpi->cyclic_refresh_map[map_index+mb_col] = -1;
-
-                    else if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
-                             (xd->mode_info_context->mbmi.ref_frame ==
-                              LAST_FRAME))
-                    {
-                        if (cpi->cyclic_refresh_map[map_index+mb_col] == 1)
-                            cpi->cyclic_refresh_map[map_index+mb_col] = 0;
-                    }
-                    else
-                        cpi->cyclic_refresh_map[map_index+mb_col] = 1;
-                }
-            }
         }
 
         cpi->tplist[mb_row].stop = *tp;
@@ -1720,49 +1650,6 @@ int vp8cx_encode_inter_macroblock
     {
         // Adjust the zbin based on this MB rate.
         adjust_act_zbin( cpi, x );
-    }
-
-#if 0
-    // Experimental RD code
-    cpi->frame_distortion += distortion;
-    cpi->last_mb_distortion = distortion;
-#endif
-
-    // MB level adjutment to quantizer setup
-    if (xd->segmentation_enabled)
-    {
-        // If cyclic update enabled
-        if (cpi->cyclic_refresh_mode_enabled)
-        {
-            // Clear segment_id back to 0 if not coded (last frame 0,0)
-            if ( (*segment_id == 1) &&
-                 ( (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME) ||
-                   (xd->mode_info_context->mbmi.mode != ZEROMV) ) )
-            {
-                *segment_id = 0;
-
-                /* segment_id changed, so update */
-                vp8cx_mb_init_quantizer(cpi, x);
-            }
-        }
-        else
-        {
-            //segfeature_test_function(cpi, xd);
-#if DBG_PRNT_SEGMAP
-            // Debug output
-            {
-                FILE *statsfile;
-                statsfile = fopen("segmap2.stt", "a");
-
-                fprintf(statsfile, "%2d%2d%2d   ",
-                    *segment_id,
-                    xd->mode_info_context->mbmi.ref_frame,
-                    xd->mode_info_context->mbmi.mode );
-
-                fclose(statsfile);
-            }
-#endif
-        }
     }
 
     {

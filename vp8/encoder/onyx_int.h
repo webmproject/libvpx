@@ -532,13 +532,6 @@ typedef struct VP8_COMP
 
     unsigned char *active_map;
     unsigned int active_map_enabled;
-    // Video conferencing cyclic refresh mode flags etc
-    // This is a mode designed to clean up the background over time in live encoding scenarious. It uses segmentation
-    int cyclic_refresh_mode_enabled;
-    int cyclic_refresh_mode_max_mbs_perframe;
-    int cyclic_refresh_mode_index;
-    int cyclic_refresh_q;
-    signed char *cyclic_refresh_map;
 
     TOKENLIST *tplist;
     unsigned int partition_sz[MAX_PARTITIONS];
