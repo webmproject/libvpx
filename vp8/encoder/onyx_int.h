@@ -525,6 +525,7 @@ typedef struct VP8_COMP
     int mt_sync_range;
     int b_multi_threaded;
     int encoding_thread_count;
+    int b_lpf_running;
 
     pthread_t *h_encoding_thread;
     pthread_t h_filter_thread;
