@@ -688,10 +688,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
         xd->subpixel_predict16x16   = vp8_bilinear_predict16x16;
     }
 
-    // Reset frame count of inter 0,0 motion vector useage.
+    // Reset frame count of inter 0,0 motion vector usage.
     cpi->inter_zz_count = 0;
-
-    vpx_memset(segment_counts, 0, sizeof(segment_counts));
 
     cpi->prediction_error = 0;
     cpi->intra_error = 0;
