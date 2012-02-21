@@ -112,7 +112,12 @@ void vp8_encode_intra16x16mbuv(MACROBLOCK *x)
 {
     MACROBLOCKD *xd = &x->e_mbd;
 
-    vp8_build_intra_predictors_mbuv_s(&x->e_mbd);
+    vp8_build_intra_predictors_mbuv_s(xd, xd->dst.u_buffer - xd->dst.uv_stride,
+                                      xd->dst.v_buffer - xd->dst.uv_stride,
+                                      xd->dst.u_buffer - 1,
+                                      xd->dst.v_buffer - 1,
+                                      xd->dst.uv_stride,
+                                      xd->dst.u_buffer, xd->dst.v_buffer);
 
     vp8_subtract_mbuv(x->src_diff, x->src.u_buffer,
         x->src.v_buffer, x->src.uv_stride, xd->dst.u_buffer,

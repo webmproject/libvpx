@@ -95,31 +95,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
     }
     else if (!vp8dx_bool_error(xd->current_bc))
     {
+        int eobtotal;
         eobtotal = vp8_decode_mb_tokens(pbi, xd);
-    }
 
-    eobtotal |= (xd->mode_info_context->mbmi.mode == B_PRED ||
-                  xd->mode_info_context->mbmi.mode == SPLITMV);
-    if (!eobtotal && !vp8dx_bool_error(xd->current_bc))
-    {
-        /* Special case:  Force the loopfilter to skip when eobtotal and
-         * mb_skip_coeff are zero.
-         * */
-        xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-
-        /*mt_skip_recon_mb(pbi, xd, mb_row, mb_col);*/
-        if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
-        {
-            vp8mt_build_intra_predictors_mbuv_s(pbi, xd, mb_row, mb_col);
-            vp8mt_build_intra_predictors_mby_s(pbi, xd, mb_row, mb_col);
-        }
-        else
-        {
-            vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
-                                               xd->dst.u_buffer, xd->dst.v_buffer,
-                                               xd->dst.y_stride, xd->dst.uv_stride);
-        }
-        return;
+        /* Special case:  Force the loopfilter to skip when eobtotal is zero */
+        xd->mode_info_context->mbmi.mb_skip_coeff = (eobtotal==0);
     }
 
     if (xd->segmentation_enabled)
@@ -128,7 +108,33 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
     /* do prediction */
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
-        vp8mt_build_intra_predictors_mbuv_s(pbi, xd, mb_row, mb_col);
+        if (pbi->common.filter_level)
+        {
+            unsigned char *uabove_row;
+            unsigned char *vabove_row;
+            unsigned char * uleft_col;
+            unsigned char * vleft_col;
+            uabove_row = pbi->mt_uabove_row[mb_row] + mb_col*8 +16;
+            vabove_row = pbi->mt_vabove_row[mb_row] + mb_col*8 +16;
+            uleft_col = pbi->mt_uleft_col[mb_row];
+            vleft_col = pbi->mt_vleft_col[mb_row];
+            vp8_build_intra_predictors_mbuv_s(xd, uabove_row,
+                                            vabove_row,
+                                            uleft_col,
+                                            vleft_col,
+                                            1,
+                                            xd->dst.u_buffer, xd->dst.v_buffer);
+        }
+        else
+        {
+            vp8_build_intra_predictors_mbuv_s(xd,
+                                        xd->dst.u_buffer - xd->dst.uv_stride,
+                                        xd->dst.v_buffer - xd->dst.uv_stride,
+                                        xd->dst.u_buffer - 1,
+                                        xd->dst.v_buffer - 1,
+                                        xd->dst.uv_stride,
+                                        xd->dst.u_buffer, xd->dst.v_buffer);
+        }
 
         if (xd->mode_info_context->mbmi.mode != B_PRED)
         {
