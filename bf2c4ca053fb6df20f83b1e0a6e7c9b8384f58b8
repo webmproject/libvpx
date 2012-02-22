@@ -16,6 +16,24 @@
       "revId": "bf2c4ca053fb6df20f83b1e0a6e7c9b8384f58b8",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//prc\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 646,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-02-22T00:18:03Z",
+      "side": 1,
+      "message": "doh.. of course.",
+      "parentUuid": "AAAAHn//puA\u003d",
+      "revId": "bf2c4ca053fb6df20f83b1e0a6e7c9b8384f58b8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
