@@ -257,8 +257,6 @@ static void tokenize1st_order_b_8x8
     const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
-    ENTROPY_CONTEXT *a1,
-    ENTROPY_CONTEXT *l1,
     VP8_COMP *cpi
 )
 {
@@ -277,7 +275,7 @@ static void tokenize1st_order_b_8x8
         seg_eob = get_segdata( xd, segment_id, SEG_LVL_EOB );
     }
 
-    VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
     do
     {
@@ -559,7 +557,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
             ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
             tokenize2nd_order_b_8x8(x,
                         x->block + 24, t, 1, x->frame_type,
-                       A + vp8_block2above[24], L + vp8_block2left[24], cpi);
+                        A + vp8_block2above_8x8[24],
+                        L + vp8_block2left_8x8[24], cpi);
         }
         else
 #endif
@@ -576,56 +575,22 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
         for (b = 0; b < 16; b+=4)
         {
             tokenize1st_order_b_8x8(x,
-                                x->block + b, t, plane_type, x->frame_type,
-                                A + vp8_block2above[b],
-                                L + vp8_block2left[b],
-                                A + vp8_block2above[b+1],
-                                L + vp8_block2left[b+4],
-                                cpi);
-          /* *(A + vp8_block2above[b+1]) = *(A + vp8_block2above[b+2]) = *(A + vp8_block2above[b+3]) =
-                *(A + vp8_block2above[b]);
-            *(L + vp8_block2left[b+1]) = *(L + vp8_block2left[b+2]) = *(L + vp8_block2left[b+3]) =
-                *(L + vp8_block2left[b]);*/
-            // build coeff context for 8x8 transform
-              if(b==0)
-              {
-                *(A + vp8_block2above[1]) = *(A + vp8_block2above[4]) = *(A + vp8_block2above[5]) = *(A + vp8_block2above[b]);
-                *(L + vp8_block2left[1]) = *(L + vp8_block2left[4]) = *(L + vp8_block2left[5]) = *(L + vp8_block2left[b]);
-              }
-              else if(b==4)
-              {
-                *(A + vp8_block2above[2]) = *(A + vp8_block2above[3]) = *(A + vp8_block2above[6]) = *(A + vp8_block2above[7]) = *(A + vp8_block2above[b]);
-                *(L + vp8_block2left[2]) = *(L + vp8_block2left[3]) = *(L + vp8_block2left[6]) = *(L + vp8_block2left[7]) = *(L + vp8_block2left[b]);
-                *(A + vp8_block2above[4]) = *(A + vp8_block2above[1]);
-                *(L + vp8_block2left[4]) = *(L + vp8_block2left[1]);
-              }
-              else if(b==8)
-              {
-                *(A + vp8_block2above[9]) = *(A + vp8_block2above[12]) = *(A + vp8_block2above[13]) = *(A + vp8_block2above[b]);
-                *(L + vp8_block2left[9]) = *(L + vp8_block2left[12]) = *(L + vp8_block2left[13]) = *(L + vp8_block2left[b]);
-              }
-              else if(b==12)
-              {
-                *(A + vp8_block2above[10]) = *(A + vp8_block2above[11]) = *(A + vp8_block2above[14]) = *(A + vp8_block2above[15]) = *(A + vp8_block2above[b]);
-                *(L + vp8_block2left[10]) = *(L + vp8_block2left[11]) = *(L + vp8_block2left[14]) = *(L + vp8_block2left[15]) = *(L + vp8_block2left[b]);
-                *(A + vp8_block2above[12]) = *(A + vp8_block2above[8]);
-                *(L + vp8_block2left[12]) = *(L + vp8_block2left[8]);
-             }
-
+                x->block + b, t, plane_type, x->frame_type,
+                A + vp8_block2above_8x8[b],
+                L + vp8_block2left_8x8[b],
+                cpi);
+            *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
+            *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b] );
         }
-
-        for (b = 16; b < 24; b+=4) {
+        for (b = 16; b < 24; b+=4)
+        {
             tokenize1st_order_b_8x8(x,
-                                    x->block + b, t, 2, x->frame_type,
-                                    A + vp8_block2above[b],
-                                    L + vp8_block2left[b],
-                                    A + vp8_block2above[b+1],
-                                    L + vp8_block2left[b+2],
-                                    cpi);
-            *(A + vp8_block2above[b+1]) = *(A + vp8_block2above[b+2]) = *(A + vp8_block2above[b+3]) =
-                *(A + vp8_block2above[b]);
-            *(L + vp8_block2left[b+1]) = *(L + vp8_block2left[b+2]) = *(L + vp8_block2left[b+3]) =
-                *(L + vp8_block2left[b]);
+                x->block + b, t, 2, x->frame_type,
+                A + vp8_block2above_8x8[b],
+                L + vp8_block2left_8x8[b],
+                cpi);
+            *(A + vp8_block2above_8x8[b]+1) = *(A + vp8_block2above_8x8[b]);
+            *(L + vp8_block2left_8x8[b]+1 ) = *(L + vp8_block2left_8x8[b]);
         }
     }
     else
@@ -806,14 +771,12 @@ static __inline void stuff1st_order_b_8x8
     const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
-    ENTROPY_CONTEXT *a1,
-    ENTROPY_CONTEXT *l1,
     VP8_COMP *cpi
 )
 {
     int pt; /* near block/prev token context index */
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
-    VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
     (void) frametype;
     (void) type;
     (void) b;
@@ -840,14 +803,12 @@ void stuff1st_order_buv_8x8
     const FRAME_TYPE frametype,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
-    ENTROPY_CONTEXT *a1,
-    ENTROPY_CONTEXT *l1,
     VP8_COMP *cpi
 )
 {
     int pt; /* near block/prev token context index */
     TOKENEXTRA *t = *tp;        /* store tokens starting here */
-    VP8_COMBINEENTROPYCONTEXTS_8x8(pt, *a, *l, *a1, *l1);
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
     (void) frametype;
     (void) type;
     (void) b;
@@ -872,80 +833,29 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     int b;
 
     stuff2nd_order_b_8x8(x->block + 24, t, 1, x->frame_type,
-                         A + vp8_block2above[24], L + vp8_block2left[24], cpi);
+                         A + vp8_block2above_8x8[24],
+                         L + vp8_block2left_8x8[24], cpi);
     plane_type = 0;
 
-    for (b = 0; b < 16; b+=4) {
+    for (b = 0; b < 16; b+=4)
+    {
         stuff1st_order_b_8x8(x->block + b, t, plane_type, x->frame_type,
-                             A + vp8_block2above[b],
-                             L + vp8_block2left[b],
-                             A + vp8_block2above[b+1],
-                             L + vp8_block2left[b+4],
-                             cpi);
-        // build coeff context for 8x8 transform
-        if(b==0)
-        {
-          *(A + vp8_block2above[1]) = *(A + vp8_block2above[4]) = *(A + vp8_block2above[5]) = *(A + vp8_block2above[b]);
-          *(L + vp8_block2left[1]) = *(L + vp8_block2left[4]) = *(L + vp8_block2left[5]) = *(L + vp8_block2left[b]);
-        }
-        else if(b==4)
-        {
-          *(A + vp8_block2above[2]) = *(A + vp8_block2above[3]) = *(A + vp8_block2above[6]) = *(A + vp8_block2above[7]) = *(A + vp8_block2above[b]);
-          *(L + vp8_block2left[2]) = *(L + vp8_block2left[3]) = *(L + vp8_block2left[6]) = *(L + vp8_block2left[7]) = *(L + vp8_block2left[b]);
-          *(A + vp8_block2above[4]) = *(A + vp8_block2above[1]);
-          *(L + vp8_block2left[4]) = *(L + vp8_block2left[1]);
-        }
-        else if(b==8)
-        {
-          *(A + vp8_block2above[9]) = *(A + vp8_block2above[12]) = *(A + vp8_block2above[13]) = *(A + vp8_block2above[b]);
-          *(L + vp8_block2left[9]) = *(L + vp8_block2left[12]) = *(L + vp8_block2left[13]) = *(L + vp8_block2left[b]);
-
-        }
-        else if(b==12)
-        {
-          *(A + vp8_block2above[10]) = *(A + vp8_block2above[11]) = *(A + vp8_block2above[14]) = *(A + vp8_block2above[15]) = *(A + vp8_block2above[b]);
-          *(L + vp8_block2left[10]) = *(L + vp8_block2left[11]) = *(L + vp8_block2left[14]) = *(L + vp8_block2left[15]) = *(L + vp8_block2left[b]);
-          *(A + vp8_block2above[12]) = *(A + vp8_block2above[8]);
-          *(L + vp8_block2left[12]) = *(L + vp8_block2left[8]);
-
-        }
-
+            A + vp8_block2above_8x8[b],
+            L + vp8_block2left_8x8[b],
+            cpi);
+        *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
+        *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b] );
     }
-    /*
-    for (b = 0; b < 16; b+=4) {
-        stuff1st_order_b_8x8(x->block + b, t, plane_type, x->frame_type,
-                             A + vp8_block2above[b],
-                             L + vp8_block2left[b], cpi);
-        *(A + vp8_block2above[b+1]) = *(A + vp8_block2above[b+2]) = *(A + vp8_block2above[b+3]) =
-            *(A + vp8_block2above[b]);
-        *(L + vp8_block2left[b+1]) = *(L + vp8_block2left[b+2]) = *(L + vp8_block2left[b+3]) =
-            *(L + vp8_block2left[b]);
-    }
-    */
 
-    for (b = 16; b < 24; b+=4) {
-      stuff1st_order_buv_8x8(x->block + b, t, 2, x->frame_type,
-                             A + vp8_block2above[b],
-                             L + vp8_block2left[b],
-                             A + vp8_block2above[b+1],
-                             L + vp8_block2left[b+2],
-                             cpi);
-      *(A + vp8_block2above[b+1]) = *(A + vp8_block2above[b+2]) = *(A + vp8_block2above[b+3]) =
-          *(A + vp8_block2above[b]);
-      *(L + vp8_block2left[b+1]) = *(L + vp8_block2left[b+2]) = *(L + vp8_block2left[b+3]) =
-          *(L + vp8_block2left[b]);
-    }
-    /*
-    for (b = 16; b < 24; b+=4) {
+    for (b = 16; b < 24; b+=4)
+    {
         stuff1st_order_buv_8x8(x->block + b, t, 2, x->frame_type,
-                               A + vp8_block2above[b],
-                               L + vp8_block2left[b], cpi);
-        *(A + vp8_block2above[b+1]) = *(A + vp8_block2above[b+2]) = *(A + vp8_block2above[b+3]) =
-            *(A + vp8_block2above[b]);
-        *(L + vp8_block2left[b+1]) = *(L + vp8_block2left[b+2]) = *(L + vp8_block2left[b+3]) =
-            *(L + vp8_block2left[b]);
+            A + vp8_block2above[b],
+            L + vp8_block2left[b],
+            cpi);
+        *(A + vp8_block2above_8x8[b]+1) = *(A + vp8_block2above_8x8[b]);
+        *(L + vp8_block2left_8x8[b]+1 ) = *(L + vp8_block2left_8x8[b]);
     }
-    */
 }
 #endif
 
