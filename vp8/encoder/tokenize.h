@@ -33,6 +33,13 @@ typedef struct
 
 int rd_cost_mby(MACROBLOCKD *);
 
+extern int mby_is_skippable(MACROBLOCKD *x,int has_y2_block);
+extern int mbuv_is_skippable(MACROBLOCKD *x);
+extern int mb_is_skippable(MACROBLOCKD *x,int has_y2_block);
+extern int mby_is_skippable_8x8(MACROBLOCKD *x);
+extern int mbuv_is_skippable_8x8(MACROBLOCKD *x);
+extern int mb_is_skippable_8x8(MACROBLOCKD *x);
+
 #ifdef ENTROPY_STATS
 void init_context_counters();
 void print_context_counters();

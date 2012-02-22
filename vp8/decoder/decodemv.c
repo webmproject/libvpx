@@ -644,7 +644,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     const int mis = pbi->common.mode_info_stride;
     MACROBLOCKD *const xd  = & pbi->mb;
 
-    int pred_context;
     int index = mb_row * pbi->common.mb_cols + mb_col;
     int_mv *const mv = & mbmi->mv;
     int mb_to_left_edge;

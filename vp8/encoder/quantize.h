@@ -108,6 +108,9 @@ extern prototype_quantize_mb(vp8_quantize_mby);
 extern void vp8_strict_quantize_b(BLOCK *b,BLOCKD *d);
 extern void vp8_strict_quantize_b_8x8(BLOCK *b,BLOCKD *d);
 extern void vp8_strict_quantize_b_2x2(BLOCK *b,BLOCKD *d);
+extern prototype_quantize_mb(vp8_quantize_mby_8x8);
+extern prototype_quantize_mb(vp8_quantize_mbuv_8x8);
+
 struct VP8_COMP;
 extern void vp8_set_quantizer(struct VP8_COMP *cpi, int Q);
 extern void vp8cx_frame_init_quantizer(struct VP8_COMP *cpi);

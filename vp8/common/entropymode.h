@@ -65,8 +65,11 @@ extern struct vp8_token_struct vp8_small_mvencodings_hp [16];
 void vp8_entropy_mode_init(void);
 
 void vp8_init_mbmode_probs(VP8_COMMON *x);
-
+extern void vp8_init_mode_contexts(VP8_COMMON *pc);
 extern void vp8_update_mode_context(VP8_COMMON *pc);;
+extern void vp8_accum_mv_refs(VP8_COMMON *pc,
+                               MB_PREDICTION_MODE m,
+                               const int ct[4]);
 
 void   vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES-1]);
 void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1]);

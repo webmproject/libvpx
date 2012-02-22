@@ -265,8 +265,8 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
 
     char *eobs = x->eobs;
 
-    ENTROPY_CONTEXT *a, *a1;
-    ENTROPY_CONTEXT *l, *l1;
+    ENTROPY_CONTEXT *a;
+    ENTROPY_CONTEXT *l;
     int i;
 
     int eobtotal = 0;

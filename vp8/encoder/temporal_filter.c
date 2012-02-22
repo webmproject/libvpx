@@ -116,7 +116,7 @@ void vp8_temporal_filter_apply_c
     unsigned short *count
 )
 {
-    int i, j, k;
+    unsigned int i, j, k;
     int modifier;
     int byte = 0;
 
