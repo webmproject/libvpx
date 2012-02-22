@@ -442,7 +442,7 @@ static void tokenize1st_order_b
 }
 
 
-static int mb_is_skippable(MACROBLOCKD *x, int has_y2_block)
+int mby_is_skippable(MACROBLOCKD *x, int has_y2_block)
 {
     int skip = 1;
     int i = 0;
@@ -451,33 +451,51 @@ static int mb_is_skippable(MACROBLOCKD *x, int has_y2_block)
     {
         for (i = 0; i < 16; i++)
             skip &= (x->block[i].eob < 2);
+        skip &= (!x->block[24].eob);
     }
-
-    for (; i < 24 + has_y2_block; i++)
-        skip &= (!x->block[i].eob);
-
+    else
+    {
+        for (i = 0; i < 16; i++)
+            skip &= (!x->block[i].eob);
+    }
     return skip;
 }
 
-
-static int mb_is_skippable_8x8(MACROBLOCKD *x)
+int mbuv_is_skippable(MACROBLOCKD *x)
 {
-    int has_y2_block;
+    int skip = 1;
+    int i;
+
+    for (i = 16; i < 24; i++)
+        skip &= (!x->block[i].eob);
+    return skip;
+}
+
+int mb_is_skippable(MACROBLOCKD *x, int has_y2_block)
+{
+    return (mby_is_skippable(x, has_y2_block) &
+            mbuv_is_skippable(x));
+}
+
+int mby_is_skippable_8x8(MACROBLOCKD *x)
+{
     int skip = 1;
     int i = 0;
 
-    has_y2_block = (x->mode_info_context->mbmi.mode != B_PRED
-                    && x->mode_info_context->mbmi.mode != SPLITMV);
-    if (has_y2_block)
-    {
-        for (i = 0; i < 16; i+=4)
-            skip &= (x->block[i].eob < 2);
-    }
-
-    for (; i < 24 + has_y2_block; i+=4)
-        skip &= (!x->block[i].eob);
-
+    for (i = 0; i < 16; i+=4)
+        skip &= (x->block[i].eob < 2);
+    skip &= (!x->block[24].eob);
     return skip;
+}
+
+int mbuv_is_skippable_8x8(MACROBLOCKD *x)
+{
+    return (!x->block[16].eob) & (!x->block[20].eob);
+}
+
+int mb_is_skippable_8x8(MACROBLOCKD *x)
+{
+    return (mby_is_skippable_8x8(x) & mbuv_is_skippable_8x8(x));
 }
 
 

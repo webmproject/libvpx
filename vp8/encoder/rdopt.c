@@ -2465,9 +2465,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int best_hybrid_rd = INT_MAX;
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
-    int uv_intra_tteob = 0;
-    int uv_intra_rate_8x8, uv_intra_distortion_8x8, uv_intra_rate_tokenonly_8x8;
-    int uv_intra_tteob_8x8=0;
+    int uv_intra_skippable = 0;
+    int uv_intra_skippable_8x8=0;
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
     int best_yrd = INT_MAX;
@@ -2555,10 +2554,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
     rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
     uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
-    for(i=16; i<24; i++)
-        uv_intra_tteob += x->e_mbd.block[i].eob;
 
-        uv_intra_tteob_8x8 = uv_intra_tteob;
+    uv_intra_skippable = mbuv_is_skippable(&x->e_mbd);
+
+    /* rough estimate for now */
+    uv_intra_skippable_8x8 = uv_intra_skippable;
 
     // Get estimates of reference frame costs for each reference frame
     // that depend on the current prediction etc.
@@ -3169,45 +3169,28 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             // Test for the condition where skip block will be activated because there are no non zero coefficients and make any necessary adjustment for rate
             if (cpi->common.mb_no_coeff_skip)
             {
-                int tteob;
-                int has_y2_block = ( this_mode!=SPLITMV
+                int mb_skippable;
+                int has_y2 = ( this_mode!=SPLITMV
                                     &&this_mode!=B_PRED
                                     &&this_mode!=I8X8_PRED);
-                tteob = 0;
-                if(has_y2_block)
-                    tteob += x->e_mbd.block[24].eob;
-
-                if(cpi->common.txfm_mode ==ALLOW_8X8 && has_y2_block)
+                if((cpi->common.txfm_mode == ALLOW_8X8) && has_y2)
                 {
-                    for (i = 0; i < 16; i+=4)
-                        tteob += (x->e_mbd.block[i].eob > 1);
                     if(x->e_mbd.mode_info_context->mbmi.ref_frame!=INTRA_FRAME)
-                    {
-                        tteob += x->e_mbd.block[16].eob;
-                        tteob += x->e_mbd.block[20].eob;
-                    }
+                        mb_skippable = mb_is_skippable_8x8(&x->e_mbd);
                     else
-                    {
-                        tteob += uv_intra_tteob_8x8;
-                    }
+                        mb_skippable = uv_intra_skippable_8x8
+                                     & mby_is_skippable_8x8(&x->e_mbd);
                 }
                 else
                 {
-                    for (i = 0; i < 16; i++)
-                        tteob += (x->e_mbd.block[i].eob > has_y2_block);
-
                     if(x->e_mbd.mode_info_context->mbmi.ref_frame!=INTRA_FRAME)
-                    {
-                        for (i = 16; i < 24; i++)
-                            tteob += x->e_mbd.block[i].eob;
-                    }
+                        mb_skippable = mb_is_skippable(&x->e_mbd, has_y2);
                     else
-                    {
-                        tteob += uv_intra_tteob;
-                    }
+                        mb_skippable = uv_intra_skippable
+                                     & mby_is_skippable(&x->e_mbd, has_y2);
                 }
 
-                if (tteob == 0)
+                if (mb_skippable)
                 {
                     rate2 -= (rate_y + rate_uv);
                     //for best_yrd calculation
