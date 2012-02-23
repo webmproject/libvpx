@@ -299,9 +299,6 @@ typedef struct MacroBlockD
     int mb_to_top_edge;
     int mb_to_bottom_edge;
 
-    // TODO this is not used in the decoder so should not be in this structure
-    int ref_frame_cost[MAX_REF_FRAMES];
-
     unsigned int frames_since_golden;
     unsigned int frames_till_alt_ref_frame;
     vp8_subpix_fn_t  subpixel_predict;
