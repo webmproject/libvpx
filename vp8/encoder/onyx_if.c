@@ -2321,87 +2321,6 @@ void vp8_write_yuv_rec_frame(VP8_COMMON *cm)
 }
 #endif
 
-
-static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
-{
-    VP8_COMMON *cm = &cpi->common;
-
-    // are we resizing the image
-    if (cm->horiz_scale != 0 || cm->vert_scale != 0)
-    {
-#if CONFIG_SPATIAL_RESAMPLING
-        int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-        int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
-        int tmp_height;
-
-        if (cm->vert_scale == 3)
-            tmp_height = 9;
-        else
-            tmp_height = 11;
-
-        Scale2Ratio(cm->horiz_scale, &hr, &hs);
-        Scale2Ratio(cm->vert_scale, &vr, &vs);
-
-        vp8_scale_frame(sd, &cpi->scaled_source, cm->temp_scale_frame.y_buffer,
-                        tmp_height, hs, hr, vs, vr, 0);
-
-        vp8_yv12_extend_frame_borders(&cpi->scaled_source);
-        cpi->Source = &cpi->scaled_source;
-#endif
-    }
-    else
-        cpi->Source = sd;
-}
-
-
-static void resize_key_frame(VP8_COMP *cpi)
-{
-#if CONFIG_SPATIAL_RESAMPLING
-    VP8_COMMON *cm = &cpi->common;
-
-    // Do we need to apply resampling for one pass cbr.
-    // In one pass this is more limited than in two pass cbr
-    // The test and any change is only made one per key frame sequence
-    if (cpi->oxcf.allow_spatial_resampling && (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER))
-    {
-        int UNINITIALIZED_IS_SAFE(hr), UNINITIALIZED_IS_SAFE(hs);
-        int UNINITIALIZED_IS_SAFE(vr), UNINITIALIZED_IS_SAFE(vs);
-        int new_width, new_height;
-
-        // If we are below the resample DOWN watermark then scale down a notch.
-        if (cpi->buffer_level < (cpi->oxcf.resample_down_water_mark * cpi->oxcf.optimal_buffer_level / 100))
-        {
-            cm->horiz_scale = (cm->horiz_scale < ONETWO) ? cm->horiz_scale + 1 : ONETWO;
-            cm->vert_scale = (cm->vert_scale < ONETWO) ? cm->vert_scale + 1 : ONETWO;
-        }
-        // Should we now start scaling back up
-        else if (cpi->buffer_level > (cpi->oxcf.resample_up_water_mark * cpi->oxcf.optimal_buffer_level / 100))
-        {
-            cm->horiz_scale = (cm->horiz_scale > NORMAL) ? cm->horiz_scale - 1 : NORMAL;
-            cm->vert_scale = (cm->vert_scale > NORMAL) ? cm->vert_scale - 1 : NORMAL;
-        }
-
-        // Get the new hieght and width
-        Scale2Ratio(cm->horiz_scale, &hr, &hs);
-        Scale2Ratio(cm->vert_scale, &vr, &vs);
-        new_width = ((hs - 1) + (cpi->oxcf.Width * hr)) / hs;
-        new_height = ((vs - 1) + (cpi->oxcf.Height * vr)) / vs;
-
-        // If the image size has changed we need to reallocate the buffers
-        // and resample the source image
-        if ((cm->Width != new_width) || (cm->Height != new_height))
-        {
-            cm->Width = new_width;
-            cm->Height = new_height;
-            vp8_alloc_compressor_data(cpi);
-            scale_and_extend_source(cpi->un_scaled_source, cpi);
-        }
-    }
-
-#endif
-}
-
-
 static void update_alt_ref_frame_stats(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
@@ -2557,8 +2476,6 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 
 
     vp8_set_quantizer(cpi, find_fp_qindex());
-
-    scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);
 }
 //#define WRITE_RECON_BUFFER 1
@@ -3038,7 +2955,7 @@ static void encode_frame_to_data_rate
         }
 
         // Note that we should not throw out a key frame (especially when spatial resampling is enabled).
-        if ((cm->frame_type == KEY_FRAME)) // && cpi->oxcf.allow_spatial_resampling )
+        if ((cm->frame_type == KEY_FRAME))
         {
             cpi->decimation_count = cpi->decimation_factor;
         }
@@ -3199,8 +3116,6 @@ static void encode_frame_to_data_rate
 
     loop_count = 0;
 
-
-    scale_and_extend_source(cpi->un_scaled_source, cpi);
 #if CONFIG_POSTPROC
 
     if (cpi->oxcf.noise_sensitivity > 0)
@@ -3320,17 +3235,11 @@ static void encode_frame_to_data_rate
             }
         }
 
+        // Set up entropy depending on frame type.
         if (cm->frame_type == KEY_FRAME)
-        {
-            resize_key_frame(cpi);
             vp8_setup_key_frame(cpi);
-        }
         else
-        {
-            /* setup entropy for nonkey frame */
             vp8_setup_inter_frame(cpi);
-        }
-
 
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);

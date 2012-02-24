@@ -154,11 +154,6 @@ extern "C"
         int best_allowed_q;
         int cq_level;
 
-        // allow internal resizing ( currently disabled in the build !!!!!)
-        int allow_spatial_resampling;
-        int resample_down_water_mark;
-        int resample_up_water_mark;
-
         // allow internal frame rate alterations
         int allow_df;
         int drop_frames_water_mark;
