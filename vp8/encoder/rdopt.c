@@ -2390,13 +2390,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         int dualmode_cost = 0;
         int mode_excluded = 0;
 
-        // Experimental debug code.
-        // Record of rd values recorded for this MB. -1 indicates not measured
-        //all_rds[mode_index] = -1;
-        //all_rates[mode_index] = -1;
-        //all_dist[mode_index] = -1;
-        //intermodecost[mode_index] = -1;
-
         // Test best rd so far against threshold for trying this mode.
         if (best_rd <= cpi->rd_threshes[mode_index])
             continue;

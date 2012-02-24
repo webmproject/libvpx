@@ -486,8 +486,6 @@ typedef struct VP8_COMP
     int compressor_speed;
 
     int interquantizer;
-    int auto_gold;
-    int auto_adjust_gold_quantizer;
     int goldfreq;
     int auto_worst_q;
     int cpu_used;

@@ -1231,8 +1231,6 @@ static void init_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->oxcf = *oxcf;
 
-    cpi->auto_gold = 1;
-    cpi->auto_adjust_gold_quantizer = 1;
     cpi->goldfreq = 7;
 
     cm->version = oxcf->Version;
@@ -1320,37 +1318,11 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
         break;
     }
 
-
     cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
     cpi->oxcf.best_allowed_q = q_trans[oxcf->best_allowed_q];
     cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
 
-    if (oxcf->fixed_q >= 0)
-    {
-        if (oxcf->worst_allowed_q < 0)
-            cpi->oxcf.fixed_q = q_trans[0];
-        else
-            cpi->oxcf.fixed_q = q_trans[oxcf->worst_allowed_q];
-
-        if (oxcf->alt_q < 0)
-            cpi->oxcf.alt_q = q_trans[0];
-        else
-            cpi->oxcf.alt_q = q_trans[oxcf->alt_q];
-
-        if (oxcf->key_q < 0)
-            cpi->oxcf.key_q = q_trans[0];
-        else
-            cpi->oxcf.key_q = q_trans[oxcf->key_q];
-
-        if (oxcf->gold_q < 0)
-            cpi->oxcf.gold_q = q_trans[0];
-        else
-            cpi->oxcf.gold_q = q_trans[oxcf->gold_q];
-
-    }
-
-    cpi->baseline_gf_interval =
-        cpi->oxcf.alt_freq ? cpi->oxcf.alt_freq : DEFAULT_GF_INTERVAL;
+    cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
     cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
 
@@ -2434,10 +2406,6 @@ static void update_alt_ref_frame_stats(VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
 
-    // Select an interval before next GF or altref
-    if (!cpi->auto_gold)
-        cpi->frames_till_gf_update_due = cpi->goldfreq;
-
     // Update data structure that monitors level of reference to last GF
     vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
     cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
@@ -2460,10 +2428,6 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
     // Update the Golden frame usage counts.
     if (cm->refresh_golden_frame)
     {
-        // Select an interval before next GF
-        if (!cpi->auto_gold)
-            cpi->frames_till_gf_update_due = cpi->goldfreq;
-
         // Update data structure that monitors level of reference to last GF
         vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
         cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
@@ -3110,37 +3074,6 @@ static void encode_frame_to_data_rate
         return;
     }
 
-    // Reduce active_worst_allowed_q for CBR if our buffer is getting too full.
-    // This has a knock on effect on active best quality as well.
-    // For CBR if the buffer reaches its maximum level then we can no longer
-    // save up bits for later frames so we might as well use them up
-    // on the current frame.
-    if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
-        (cpi->buffer_level >= cpi->oxcf.optimal_buffer_level) && cpi->buffered_mode)
-    {
-        int Adjustment = cpi->active_worst_quality / 4;       // Max adjustment is 1/4
-
-        if (Adjustment)
-        {
-            int buff_lvl_step;
-
-            if (cpi->buffer_level < cpi->oxcf.maximum_buffer_size)
-            {
-                buff_lvl_step = (cpi->oxcf.maximum_buffer_size - cpi->oxcf.optimal_buffer_level) / Adjustment;
-
-                if (buff_lvl_step)
-                    Adjustment = (cpi->buffer_level - cpi->oxcf.optimal_buffer_level) / buff_lvl_step;
-                else
-                    Adjustment = 0;
-            }
-
-            cpi->active_worst_quality -= Adjustment;
-
-            if(cpi->active_worst_quality < cpi->active_best_quality)
-                cpi->active_worst_quality = cpi->active_best_quality;
-        }
-    }
-
     vp8_clear_system_state();
 
     // Set an active best quality and if necessary active worst quality
@@ -3218,24 +3151,6 @@ static void encode_frame_to_data_rate
                 cpi->active_best_quality = cpi->oxcf.cq_level;
             else
                 cpi->active_best_quality = cpi->cq_target_quality;
-        }
-    }
-
-    // If CBR and the buffer is as full then it is reasonable to allow
-    // higher quality on the frames to prevent bits just going to waste.
-    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-    {
-        // Note that the use of >= here elliminates the risk of a devide
-        // by 0 error in the else if clause
-        if (cpi->buffer_level >= cpi->oxcf.maximum_buffer_size)
-            cpi->active_best_quality = cpi->best_quality;
-
-        else if (cpi->buffer_level > cpi->oxcf.optimal_buffer_level)
-        {
-            int Fraction = ((cpi->buffer_level - cpi->oxcf.optimal_buffer_level) * 128) / (cpi->oxcf.maximum_buffer_size - cpi->oxcf.optimal_buffer_level);
-            int min_qadjustment = ((cpi->active_best_quality - cpi->best_quality) * Fraction) / 128;
-
-            cpi->active_best_quality -= min_qadjustment;
         }
     }
 
@@ -3428,27 +3343,7 @@ static void encode_frame_to_data_rate
         if (frame_over_shoot_limit == 0)
             frame_over_shoot_limit = 1;
 
-        // Are we are overshooting and up against the limit of active max Q.
-        if ((cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)     &&
-            (Q == cpi->active_worst_quality)                      &&
-            (cpi->active_worst_quality < cpi->worst_quality)      &&
-            (cpi->projected_frame_size > frame_over_shoot_limit))
-        {
-            int over_size_percent = ((cpi->projected_frame_size - frame_over_shoot_limit) * 100) / frame_over_shoot_limit;
-
-            // If so is there any scope for relaxing it
-            while ((cpi->active_worst_quality < cpi->worst_quality) && (over_size_percent > 0))
-            {
-                cpi->active_worst_quality++;
-                top_index = cpi->active_worst_quality;
-                over_size_percent = (int)(over_size_percent * 0.96);        // Assume 1 qstep = about 4% on frame size.
-            }
-
-            // If we have updated the active max Q do not call vp8_update_rate_correction_factors() this loop.
-            active_worst_qchanged = TRUE;
-        }
-        else
-            active_worst_qchanged = FALSE;
+        active_worst_qchanged = FALSE;
 
         // Special case handling for forced key frames
         if ( (cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced )
@@ -3803,19 +3698,6 @@ static void encode_frame_to_data_rate
         cpi->ni_tot_qi += Q;
         cpi->ni_av_qi = (cpi->ni_tot_qi / cpi->ni_frames);
     }
-
-#if 0
-
-    // If the frame was massively oversize and we are below optimal buffer level drop next frame
-    if ((cpi->drop_frames_allowed) &&
-        (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
-        (cpi->buffer_level < cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100) &&
-        (cpi->projected_frame_size > (4 * cpi->this_frame_target)))
-    {
-        cpi->drop_frame = TRUE;
-    }
-
-#endif
 
     // Set the count for maximum consequative dropped frames based upon the ratio of
     // this frame size to the target average per frame bandwidth.
