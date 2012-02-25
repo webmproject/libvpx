@@ -87,7 +87,7 @@ unsigned int vp8_sub_pixel_variance16x16_ssse3
 
     // note we could avoid these if statements if the calling function
     // just called the appropriate functions inside.
-    if (xoffset == HALFNDX && yoffset == HALFNDX)
+    if (xoffset == HALFNDX && yoffset == 0)
     {
         vp8_half_horiz_variance16x_h_sse2(
             src_ptr, src_pixels_per_line,
