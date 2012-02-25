@@ -738,16 +738,7 @@ int vp8_pick_frame_size(VP8_COMP *cpi)
     if (cm->frame_type == KEY_FRAME)
         calc_iframe_target_size(cpi);
     else
-    {
         calc_pframe_target_size(cpi);
 
-        // Check if we're dropping the frame:
-        if (cpi->drop_frame)
-        {
-            cpi->drop_frame = FALSE;
-            cpi->drop_count++;
-            return 0;
-        }
-    }
     return 1;
 }

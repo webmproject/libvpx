@@ -269,9 +269,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         oxcf->lag_in_frames           = cfg.g_lag_in_frames;
     }
 
-    oxcf->allow_df               = (cfg.rc_dropframe_thresh > 0);
-    oxcf->drop_frames_water_mark   = cfg.rc_dropframe_thresh;
-
     // VBR only supported for now.
     // CBR code has been deprectated for experimental phase.
     // CQ mode not yet tested
@@ -343,8 +340,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         printf("fixed_q: %d\n",  oxcf->fixed_q);
         printf("worst_allowed_q: %d\n", oxcf->worst_allowed_q);
         printf("best_allowed_q: %d\n", oxcf->best_allowed_q);
-        printf("allow_df: %d\n", oxcf->allow_df);
-        printf("drop_frames_water_mark: %d\n", oxcf->drop_frames_water_mark);
         printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
         printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
         printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);

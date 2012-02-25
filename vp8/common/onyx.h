@@ -154,10 +154,6 @@ extern "C"
         int best_allowed_q;
         int cq_level;
 
-        // allow internal frame rate alterations
-        int allow_df;
-        int drop_frames_water_mark;
-
         // two pass datarate control
         int two_pass_vbrbias;        // two pass datarate control tweaks
         int two_pass_vbrmin_section;

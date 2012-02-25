@@ -1413,9 +1413,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     cpi->cq_target_quality = cpi->oxcf.cq_level;
 
-    // Only allow dropped frames in buffered mode
-    cpi->drop_frames_allowed = cpi->oxcf.allow_df && cpi->buffered_mode;
-
     if (!cm->use_bilinear_mc_filter)
         cm->mcomp_filter_type = SIXTAP;
     else
@@ -1667,11 +1664,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->tot_q = 0.0;
     cpi->avg_q = vp8_convert_qindex_to_q( cpi->oxcf.worst_allowed_q );
     cpi->total_byte_count             = 0;
-
-    cpi->drop_frame                  = 0;
-    cpi->drop_count                  = 0;
-    cpi->max_drop_count               = 0;
-    cpi->max_consec_dropped_frames     = 4;
 
     cpi->rate_correction_factor         = 1.0;
     cpi->key_frame_rate_correction_factor = 1.0;
@@ -2514,7 +2506,6 @@ void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
     fclose(yframe);
 }
 #endif
-// return of 0 means drop frame
 
 // Function to test for conditions that indeicate we should loop
 // back and recode a frame.
@@ -2818,10 +2809,6 @@ static void encode_frame_to_data_rate
 
     int overshoot_seen = FALSE;
     int undershoot_seen = FALSE;
-    int drop_mark = cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100;
-    int drop_mark75 = drop_mark * 2 / 3;
-    int drop_mark50 = drop_mark / 4;
-    int drop_mark25 = drop_mark / 8;
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
@@ -2907,81 +2894,6 @@ static void encode_frame_to_data_rate
 
     // Test code for new segment features
     init_seg_features( cpi );
-
-    if (cpi->drop_frames_allowed)
-    {
-        // The reset to decimation 0 is only done here for one pass.
-        // Once it is set two pass leaves decimation on till the next kf.
-        if ((cpi->buffer_level > drop_mark) && (cpi->decimation_factor > 0))
-            cpi->decimation_factor --;
-
-        if (cpi->buffer_level > drop_mark75 && cpi->decimation_factor > 0)
-            cpi->decimation_factor = 1;
-
-        else if (cpi->buffer_level < drop_mark25 && (cpi->decimation_factor == 2 || cpi->decimation_factor == 3))
-        {
-            cpi->decimation_factor = 3;
-        }
-        else if (cpi->buffer_level < drop_mark50 && (cpi->decimation_factor == 1 || cpi->decimation_factor == 2))
-        {
-            cpi->decimation_factor = 2;
-        }
-        else if (cpi->buffer_level < drop_mark75 && (cpi->decimation_factor == 0 || cpi->decimation_factor == 1))
-        {
-            cpi->decimation_factor = 1;
-        }
-
-        //vpx_log("Encoder: Decimation Factor: %d \n",cpi->decimation_factor);
-    }
-
-    // The following decimates the frame rate according to a regular pattern (i.e. to 1/2 or 2/3 frame rate)
-    // This can be used to help prevent buffer under-run in CBR mode. Alternatively it might be desirable in
-    // some situations to drop frame rate but throw more bits at each frame.
-    //
-    // Note that dropping a key frame can be problematic if spatial resampling is also active
-    if (cpi->decimation_factor > 0)
-    {
-        switch (cpi->decimation_factor)
-        {
-        case 1:
-            cpi->per_frame_bandwidth  = cpi->per_frame_bandwidth * 3 / 2;
-            break;
-        case 2:
-            cpi->per_frame_bandwidth  = cpi->per_frame_bandwidth * 5 / 4;
-            break;
-        case 3:
-            cpi->per_frame_bandwidth  = cpi->per_frame_bandwidth * 5 / 4;
-            break;
-        }
-
-        // Note that we should not throw out a key frame (especially when spatial resampling is enabled).
-        if ((cm->frame_type == KEY_FRAME))
-        {
-            cpi->decimation_count = cpi->decimation_factor;
-        }
-        else if (cpi->decimation_count > 0)
-        {
-            cpi->decimation_count --;
-            cpi->bits_off_target += cpi->av_per_frame_bandwidth;
-
-            // Clip the buffer level at the maximum buffer size
-            if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
-                cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
-
-            cm->current_video_frame++;
-            cpi->frames_since_key++;
-
-#if CONFIG_INTERNAL_STATS
-            cpi->count ++;
-#endif
-
-            cpi->buffer_level = cpi->bits_off_target;
-
-            return;
-        }
-        else
-            cpi->decimation_count = cpi->decimation_factor;
-    }
 
     // Decide how big to make the frame
     if (!vp8_pick_frame_size(cpi))
@@ -3606,17 +3518,6 @@ static void encode_frame_to_data_rate
         // frames).
         cpi->ni_tot_qi += Q;
         cpi->ni_av_qi = (cpi->ni_tot_qi / cpi->ni_frames);
-    }
-
-    // Set the count for maximum consequative dropped frames based upon the ratio of
-    // this frame size to the target average per frame bandwidth.
-    // (cpi->av_per_frame_bandwidth > 0) is just a sanity check to prevent / 0.
-    if (cpi->drop_frames_allowed && (cpi->av_per_frame_bandwidth > 0))
-    {
-        cpi->max_drop_count = cpi->projected_frame_size / cpi->av_per_frame_bandwidth;
-
-        if (cpi->max_drop_count > cpi->max_consec_dropped_frames)
-            cpi->max_drop_count = cpi->max_consec_dropped_frames;
     }
 
     // Update the buffer level variable.
