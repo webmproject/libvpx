@@ -373,8 +373,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
         cpi->inter_frame_target = cpi->this_frame_target;
 
     // Adjust target frame size for Golden Frames:
-    if ( cpi->oxcf.error_resilient_mode == 0 &&
-         (cpi->frames_till_gf_update_due == 0) )
+    if ( cpi->frames_till_gf_update_due == 0 )
     {
         //int Boost = 0;
         int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;

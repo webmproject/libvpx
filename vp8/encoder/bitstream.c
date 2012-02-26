@@ -1931,84 +1931,6 @@ static int prob_update_savings(const unsigned int *ct,
     return old_b - new_b - update_b;
 }
 
-static int independent_coef_context_savings(VP8_COMP *cpi)
-{
-    int savings = 0;
-    int i = 0;
-    do
-    {
-        int j = 0;
-        do
-        {
-            int k = 0;
-            unsigned int prev_coef_count_sum[MAX_ENTROPY_TOKENS] = {0};
-            int prev_coef_savings[MAX_ENTROPY_TOKENS] = {0};
-            /* Calculate new probabilities given the constraint that
-             * they must be equal over the prev coef contexts
-             */
-            if (cpi->common.frame_type == KEY_FRAME)
-            {
-                /* Reset to default probabilities at key frames */
-                sum_probs_over_prev_coef_context(default_coef_counts[i][j],
-                                                 prev_coef_count_sum);
-            }
-            else
-            {
-                sum_probs_over_prev_coef_context(cpi->coef_counts[i][j],
-                                                 prev_coef_count_sum);
-            }
-            do
-            {
-                /* at every context */
-
-                /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [ENTROPY_NODES];
-                //unsigned int branch_ct   [ENTROPY_NODES] [2];
-
-                int t = 0;      /* token/prob index */
-
-                vp8_tree_probs_from_distribution(
-                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                    cpi->frame_coef_probs[i][j][k],
-                    cpi->frame_branch_ct [i][j][k],
-                    prev_coef_count_sum,
-                    256, 1);
-
-                do
-                {
-                    const unsigned int *ct  = cpi->frame_branch_ct [i][j][k][t];
-                    const vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
-                    const vp8_prob oldp = cpi->common.fc.coef_probs [i][j][k][t];
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
-                    const int s = prob_update_savings(ct, oldp, newp, upd);
-
-                    if (cpi->common.frame_type != KEY_FRAME ||
-                        (cpi->common.frame_type == KEY_FRAME && newp != oldp))
-                        prev_coef_savings[t] += s;
-                }
-                while (++t < ENTROPY_NODES);
-            }
-            while (++k < PREV_COEF_CONTEXTS);
-            k = 0;
-            do
-            {
-                /* We only update probabilities if we can save bits, except
-                 * for key frames where we have to update all probabilities
-                 * to get the equal probabilities across the prev coef
-                 * contexts.
-                 */
-                if (prev_coef_savings[k] > 0 ||
-                    cpi->common.frame_type == KEY_FRAME)
-                    savings += prev_coef_savings[k];
-            }
-            while (++k < ENTROPY_NODES);
-        }
-        while (++j < COEF_BANDS);
-    }
-    while (++i < BLOCK_TYPES);
-    return savings;
-}
-
 static int default_coef_context_savings(VP8_COMP *cpi)
 {
     int savings = 0;
@@ -2138,11 +2060,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
         cm->prob_gf_coded = new_gf_alt;
     }
 
-    if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
-        savings += independent_coef_context_savings(cpi);
-    else
-        savings += default_coef_context_savings(cpi);
-
+    savings += default_coef_context_savings(cpi);
 
 #if CONFIG_T8X8
     /* do not do this if not evena allowed */
@@ -2221,25 +2139,6 @@ static void update_coef_probs(VP8_COMP *cpi)
         {
             int k = 0;
             int prev_coef_savings[ENTROPY_NODES] = {0};
-            if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
-            {
-                for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
-                {
-                    int t;      /* token/prob index */
-                    for (t = 0; t < ENTROPY_NODES; ++t)
-                    {
-                        const unsigned int *ct = cpi->frame_branch_ct [i][j]
-                                                                      [k][t];
-                        const vp8_prob newp = cpi->frame_coef_probs[i][j][k][t];
-                        const vp8_prob oldp = cpi->common.fc.coef_probs[i][j]
-                                                                       [k][t];
-                        const vp8_prob upd = vp8_coef_update_probs[i][j][k][t];
-                        prev_coef_savings[t] +=
-                                prob_update_savings(ct, oldp, newp, upd);
-                    }
-                }
-                k = 0;
-            }
             do
             {
                 //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
@@ -2260,23 +2159,14 @@ static void update_coef_probs(VP8_COMP *cpi)
                     const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
                     int s = prev_coef_savings[t];
                     int u = 0;
-                    if (!(cpi->oxcf.error_resilient_mode &
-                            VPX_ERROR_RESILIENT_PARTITIONS))
-                    {
-                        s = prob_update_savings(
-                                cpi->frame_branch_ct [i][j][k][t],
-                                *Pold, newp, upd);
-                    }
+
+                    s = prob_update_savings(
+                            cpi->frame_branch_ct [i][j][k][t],
+                            *Pold, newp, upd);
+
                     if (s > 0)
                         u = 1;
-                    /* Force updates on key frames if the new is different,
-                     * so that we can be sure we end up with equal probabilities
-                     * over the prev coef contexts.
-                     */
-                    if ((cpi->oxcf.error_resilient_mode &
-                            VPX_ERROR_RESILIENT_PARTITIONS) &&
-                        cpi->common.frame_type == KEY_FRAME && newp != *Pold)
-                        u = 1;
+
                     update += u;
                 }
                 while (++t < ENTROPY_NODES);
@@ -2303,25 +2193,7 @@ static void update_coef_probs(VP8_COMP *cpi)
             {
                 int k = 0;
                 int prev_coef_savings[ENTROPY_NODES] = {0};
-                if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
-                {
-                    for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
-                    {
-                        int t;      /* token/prob index */
-                        for (t = 0; t < ENTROPY_NODES; ++t)
-                        {
-                            const unsigned int *ct = cpi->frame_branch_ct [i][j]
-                            [k][t];
-                            const vp8_prob newp = cpi->frame_coef_probs[i][j][k][t];
-                            const vp8_prob oldp = cpi->common.fc.coef_probs[i][j]
-                            [k][t];
-                            const vp8_prob upd = vp8_coef_update_probs[i][j][k][t];
-                            prev_coef_savings[t] +=
-                                prob_update_savings(ct, oldp, newp, upd);
-                        }
-                    }
-                    k = 0;
-                }
+
                 do
                 {
                     //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
@@ -2343,23 +2215,14 @@ static void update_coef_probs(VP8_COMP *cpi)
                         const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
                         int s = prev_coef_savings[t];
                         int u = 0;
-                        if (!(cpi->oxcf.error_resilient_mode &
-                            VPX_ERROR_RESILIENT_PARTITIONS))
-                        {
-                            s = prob_update_savings(
-                                cpi->frame_branch_ct [i][j][k][t],
-                                *Pold, newp, upd);
-                        }
+
+                        s = prob_update_savings(
+                            cpi->frame_branch_ct [i][j][k][t],
+                            *Pold, newp, upd);
+
                         if (s > 0)
                             u = 1;
-                        /* Force updates on key frames if the new is different,
-                        * so that we can be sure we end up with equal probabilities
-                        * over the prev coef contexts.
-                        */
-                        if ((cpi->oxcf.error_resilient_mode &
-                            VPX_ERROR_RESILIENT_PARTITIONS) &&
-                            cpi->common.frame_type == KEY_FRAME && newp != *Pold)
-                            u = 1;
+
                         vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
                         ++ tree_update_hist [i][j][k][t] [u];
@@ -2850,8 +2713,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     if (xd->mode_ref_lf_delta_enabled)
     {
         // Do the deltas need to be updated
-        int send_update = xd->mode_ref_lf_delta_update
-                          || cpi->oxcf.error_resilient_mode;
+        int send_update = xd->mode_ref_lf_delta_update;
 
         vp8_write_bit(bc, send_update);
         if (send_update)
@@ -2864,8 +2726,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
                 Data = xd->ref_lf_deltas[i];
 
                 // Frame level data
-                if (xd->ref_lf_deltas[i] != xd->last_ref_lf_deltas[i]
-                    || cpi->oxcf.error_resilient_mode)
+                if (xd->ref_lf_deltas[i] != xd->last_ref_lf_deltas[i])
                 {
                     xd->last_ref_lf_deltas[i] = xd->ref_lf_deltas[i];
                     vp8_write_bit(bc, 1);
@@ -2891,8 +2752,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
             {
                 Data = xd->mode_lf_deltas[i];
 
-                if (xd->mode_lf_deltas[i] != xd->last_mode_lf_deltas[i]
-                    || cpi->oxcf.error_resilient_mode)
+                if (xd->mode_lf_deltas[i] != xd->last_mode_lf_deltas[i])
                 {
                     xd->last_mode_lf_deltas[i] = xd->mode_lf_deltas[i];
                     vp8_write_bit(bc, 1);
@@ -2950,14 +2810,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         // Signal whether to allow high MV precision
         vp8_write_bit(bc, (xd->allow_high_precision_mv) ? 1 : 0);
 #endif
-    }
-
-    if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
-    {
-        if (pc->frame_type == KEY_FRAME)
-            pc->refresh_entropy_probs = 1;
-        else
-            pc->refresh_entropy_probs = 0;
     }
 
     vp8_write_bit(bc, pc->refresh_entropy_probs);
