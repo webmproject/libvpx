@@ -1738,11 +1738,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int uv_intra_tteob = 0;
+    int uv_intra_done = 0;
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
     int best_yrd = INT_MAX;
 
-    MB_PREDICTION_MODE uv_intra_mode;
+    MB_PREDICTION_MODE uv_intra_mode = 0;
     int_mv mvp;
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
     int saddone=0;
@@ -1785,17 +1786,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     x->skip = 0;
 
-    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-    rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
-    uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
-    /*
-     * Total of the eobs is used later to further adjust rate2. Since uv block's
-     * intra eobs will be overwritten when we check inter modes in following
-     * for-loop, we need to save uv_intra_tteob here.
-     */
-    for (i = 16; i < 24; i++)
-        uv_intra_tteob += x->e_mbd.eobs[i];
-
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
         int this_rd = INT_MAX;
@@ -1817,7 +1807,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         this_mode = vp8_mode_order[mode_index];
 
         x->e_mbd.mode_info_context->mbmi.mode = this_mode;
-        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
 
         // Only consider ZEROMV/ALTREF_FRAME for alt ref frame,
@@ -1886,6 +1875,24 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             }
 
             vp8_update_zbin_extra(cpi, x);
+        }
+
+        if(!uv_intra_done && this_ref_frame == INTRA_FRAME)
+        {
+            rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate,
+                                    &uv_intra_rate_tokenonly,
+                                    &uv_intra_distortion);
+            uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
+
+            /*
+             * Total of the eobs is used later to further adjust rate2. Since uv
+             * block's intra eobs will be overwritten when we check inter modes,
+             * we need to save uv_intra_tteob here.
+             */
+            for (i = 16; i < 24; i++)
+                uv_intra_tteob += x->e_mbd.eobs[i];
+
+            uv_intra_done = 1;
         }
 
         switch (this_mode)
