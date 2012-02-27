@@ -4575,7 +4575,7 @@ int vp8_receive_raw_frame(VP8_COMP *cpi, unsigned int frame_flags, YV12_BUFFER_C
     vpx_usec_timer_start(&timer);
 
     /* Reinit the lookahead buffer if the frame size changes */
-    if (sd->y_width != cpi->common.Width || sd->y_height != cpi->common.Height)
+    if (sd->y_width != cpi->oxcf.Width || sd->y_height != cpi->oxcf.Height)
     {
         assert(cpi->oxcf.lag_in_frames < 2);
         dealloc_raw_frame_buffers(cpi);
