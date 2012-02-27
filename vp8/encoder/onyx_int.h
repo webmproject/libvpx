@@ -436,13 +436,6 @@ typedef struct VP8_COMP
 
     int cq_target_quality;
 
-    int drop_frames_allowed;          // Are we permitted to drop frames?
-    int drop_frame;                  // Drop this frame?
-    int drop_count;                  // How many frames have we dropped?
-    int max_drop_count;               // How many frames should we drop?
-    int max_consec_dropped_frames;     // Limit number of consecutive frames that can be dropped.
-
-
     int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
     int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
 
