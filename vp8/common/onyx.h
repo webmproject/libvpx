@@ -170,12 +170,6 @@ extern "C"
         int token_partitions; // how many token partitions to create for multi core decoding
         int encode_breakout;  // early breakout encode threshold : for video conf recommend 800
 
-        unsigned int error_resilient_mode; // Bitfield defining the error
-                                   // resiliency features to enable. Can provide
-                                   // decodable frames after losses in previous
-                                   // frames and decodable partitions after
-                                   // losses in the same frame.
-
         int arnr_max_frames;
         int arnr_strength ;
         int arnr_type     ;

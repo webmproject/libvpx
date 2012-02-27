@@ -3425,10 +3425,8 @@ static void encode_frame_to_data_rate
     // For inter frames the current default behavior is that when
     // cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
     // This is purely an encoder decision at present.
-    if (!cpi->oxcf.error_resilient_mode && cm->refresh_golden_frame)
+    if (cm->refresh_golden_frame)
         cm->copy_buffer_to_arf  = 2;
-    else
-        cm->copy_buffer_to_arf  = 0;
 
     cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
@@ -3446,11 +3444,6 @@ static void encode_frame_to_data_rate
     }
 
     update_reference_frames(cm);
-
-    if (cpi->oxcf.error_resilient_mode)
-    {
-        cm->refresh_entropy_probs = 0;
-    }
 
     // Work out the segment probabilites if segmentation is enabled and
     // the map is due to be updated
@@ -3714,16 +3707,12 @@ static void encode_frame_to_data_rate
     if (cpi->gold_is_alt)
         cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
 
-
-    if (!cpi->oxcf.error_resilient_mode)
-    {
-        if (cpi->oxcf.play_alternate && cm->refresh_alt_ref_frame && (cm->frame_type != KEY_FRAME))
-            // Update the alternate reference frame stats as appropriate.
-            update_alt_ref_frame_stats(cpi);
-        else
-            // Update the Golden frame stats as appropriate.
-            update_golden_frame_stats(cpi);
-    }
+    if (cpi->oxcf.play_alternate && cm->refresh_alt_ref_frame && (cm->frame_type != KEY_FRAME))
+        // Update the alternate reference frame stats as appropriate.
+        update_alt_ref_frame_stats(cpi);
+    else
+        // Update the Golden frame stats as appropriate.
+        update_golden_frame_stats(cpi);
 
     if (cm->frame_type == KEY_FRAME)
     {
@@ -3948,8 +3937,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
     cpi->source = NULL;
 
     // Should we code an alternate reference frame
-    if (cpi->oxcf.error_resilient_mode == 0 &&
-        cpi->oxcf.play_alternate &&
+    if (cpi->oxcf.play_alternate &&
         cpi->source_alt_ref_pending)
     {
         if ((cpi->source = vp8_lookahead_peek(cpi->lookahead,

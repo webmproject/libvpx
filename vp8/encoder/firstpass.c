@@ -2353,19 +2353,6 @@ void vp8_second_pass(VP8_COMP *cpi)
         // Define next KF group and assign bits to it
         vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
         find_next_key_frame(cpi, &this_frame_copy);
-
-        // Special case: Error error_resilient_mode mode does not make much sense for two pass but with its current meaning but this code is designed to stop
-        // outlandish behaviour if someone does set it when using two pass. It effectively disables GF groups.
-        // This is temporary code till we decide what should really happen in this case.
-        if (cpi->oxcf.error_resilient_mode)
-        {
-            cpi->twopass.gf_group_bits = cpi->twopass.kf_group_bits;
-            cpi->twopass.gf_group_error_left = cpi->twopass.kf_group_error_left;
-            cpi->baseline_gf_interval = cpi->twopass.frames_to_key;
-            cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
-            cpi->source_alt_ref_pending = FALSE;
-        }
-
     }
 
     // Is this a GF / ARF (Note that a KF is always also a GF)
@@ -2391,26 +2378,9 @@ void vp8_second_pass(VP8_COMP *cpi)
     // Otherwise this is an ordinary frame
     else
     {
-        // Special case: Error error_resilient_mode mode does not make much sense for two pass but with its current meaning but this code is designed to stop
-        // outlandish behaviour if someone does set it when using two pass. It effectively disables GF groups.
-        // This is temporary code till we decide what should really happen in this case.
-        if (cpi->oxcf.error_resilient_mode)
-        {
-            cpi->frames_till_gf_update_due = cpi->twopass.frames_to_key;
-
-            if (cpi->common.frame_type != KEY_FRAME)
-            {
-                // Assign bits from those allocated to the GF group
-                vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
-                assign_std_frame_bits(cpi, &this_frame_copy);
-            }
-        }
-        else
-        {
-            // Assign bits from those allocated to the GF group
-            vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
-            assign_std_frame_bits(cpi, &this_frame_copy);
-        }
+        // Assign bits from those allocated to the GF group
+        vpx_memcpy(&this_frame_copy, &this_frame, sizeof(this_frame));
+        assign_std_frame_bits(cpi, &this_frame_copy);
     }
 
     // Keep a globally available copy of this and the next frame's iiratio.

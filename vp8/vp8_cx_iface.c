@@ -243,8 +243,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         oxcf->frame_rate = 30;
     }
 
-    oxcf->error_resilient_mode    = cfg.g_error_resilient;
-
     switch (cfg.g_pass)
     {
     case VPX_RC_ONE_PASS:
