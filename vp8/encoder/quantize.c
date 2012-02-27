@@ -1100,7 +1100,7 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     if ( segfeature_active( xd, segment_id, SEG_LVL_ALT_Q ) )
     {
         // Abs Value
-        if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+        if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
             QIndex = get_segdata( xd, segment_id, SEG_LVL_ALT_Q );
 
         // Delta Value

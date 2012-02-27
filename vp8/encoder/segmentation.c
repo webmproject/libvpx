@@ -106,7 +106,7 @@ void vp8_set_segment_data(VP8_PTR ptr,
 {
     VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
-    cpi->mb.e_mbd.mb_segement_abs_delta = abs_delta;
+    cpi->mb.e_mbd.mb_segment_abs_delta = abs_delta;
 
     vpx_memcpy(cpi->mb.e_mbd.segment_feature_data, feature_data,
                sizeof(cpi->mb.e_mbd.segment_feature_data));

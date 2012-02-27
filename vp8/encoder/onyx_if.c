@@ -454,7 +454,7 @@ static void init_seg_features(VP8_COMP *cpi)
             enable_segfeature(xd, 1, SEG_LVL_ALT_LF);
 
             // Where relevant assume segment data is delta data
-            xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
+            xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
 
         }
     }
@@ -484,7 +484,7 @@ static void init_seg_features(VP8_COMP *cpi)
             {
                 xd->update_mb_segmentation_map = 0;
                 xd->update_mb_segmentation_data = 1;
-                xd->mb_segement_abs_delta = SEGMENT_DELTADATA;
+                xd->mb_segment_abs_delta = SEGMENT_DELTADATA;
 
                 qi_delta = compute_qdelta( cpi, cpi->avg_q,
                                            (cpi->avg_q * 1.125) );

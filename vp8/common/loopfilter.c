@@ -245,7 +245,7 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
         if ( segfeature_active( xd, seg, SEG_LVL_ALT_LF ) )
         {
             /* Abs value */
-            if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+            if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
             {
                 lvl_seg = get_segdata( xd, seg, SEG_LVL_ALT_LF );
             }
@@ -754,7 +754,7 @@ void vp8_loop_filter_partial_frame
     {
         for (i = 0; i < MAX_MB_SEGMENTS; i++)
         {    /* Abs value */
-            if (xd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+            if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
             {
                 lvl_seg[i] = get_segdata( xd, i, SEG_LVL_ALT_LF );
             }

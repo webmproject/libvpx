@@ -2543,7 +2543,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         {
             signed char Data;
 
-            vp8_write_bit(bc, (xd->mb_segement_abs_delta) ? 1 : 0);
+            vp8_write_bit(bc, (xd->mb_segment_abs_delta) ? 1 : 0);
 
             // For each segments id...
             for (i = 0; i < MAX_MB_SEGMENTS; i++)
