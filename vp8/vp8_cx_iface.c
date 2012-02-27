@@ -272,10 +272,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->allow_df               = (cfg.rc_dropframe_thresh > 0);
     oxcf->drop_frames_water_mark   = cfg.rc_dropframe_thresh;
 
-    oxcf->allow_spatial_resampling = cfg.rc_resize_allowed;
-    oxcf->resample_up_water_mark   = cfg.rc_resize_up_thresh;
-    oxcf->resample_down_water_mark = cfg.rc_resize_down_thresh;
-
     // VBR only supported for now.
     // CBR code has been deprectated for experimental phase.
     // CQ mode not yet tested
@@ -347,9 +343,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         printf("fixed_q: %d\n",  oxcf->fixed_q);
         printf("worst_allowed_q: %d\n", oxcf->worst_allowed_q);
         printf("best_allowed_q: %d\n", oxcf->best_allowed_q);
-        printf("allow_spatial_resampling: %d\n",  oxcf->allow_spatial_resampling);
-        printf("resample_down_water_mark: %d\n", oxcf->resample_down_water_mark);
-        printf("resample_up_water_mark: %d\n", oxcf->resample_up_water_mark);
         printf("allow_df: %d\n", oxcf->allow_df);
         printf("drop_frames_water_mark: %d\n", oxcf->drop_frames_water_mark);
         printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
