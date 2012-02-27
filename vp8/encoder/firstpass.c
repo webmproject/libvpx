@@ -349,33 +349,8 @@ static int frame_max_bits(VP8_COMP *cpi)
     // Max allocation for a single frame based on the max section guidelines passed in and how many bits are left
     int max_bits;
 
-    // For CBR we need to also consider buffer fullness.
-    // If we are running below the optimal level then we need to gradually tighten up on max_bits.
-    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-    {
-        double buffer_fullness_ratio = (double)cpi->buffer_level / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.optimal_buffer_level);
-
-        // For CBR base this on the target average bits per frame plus the maximum sedction rate passed in by the user
-        max_bits = (int)(cpi->av_per_frame_bandwidth * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
-
-        // If our buffer is below the optimum level
-        if (buffer_fullness_ratio < 1.0)
-        {
-            // The lower of max_bits / 4 or cpi->av_per_frame_bandwidth / 4.
-            int min_max_bits = ((cpi->av_per_frame_bandwidth >> 2) < (max_bits >> 2)) ? cpi->av_per_frame_bandwidth >> 2 : max_bits >> 2;
-
-            max_bits = (int)(max_bits * buffer_fullness_ratio);
-
-            if (max_bits < min_max_bits)
-                max_bits = min_max_bits;       // Lowest value we will set ... which should allow the buffer to refil.
-        }
-    }
-    // VBR
-    else
-    {
-        // For VBR base this on the bits and frames left plus the two_pass_vbrmax_section rate passed in by the user
-        max_bits = (int)(((double)cpi->twopass.bits_left / (cpi->twopass.total_stats->count - (double)cpi->common.current_video_frame)) * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
-    }
+    // For VBR base this on the bits and frames left plus the two_pass_vbrmax_section rate passed in by the user
+    max_bits = (int)(((double)cpi->twopass.bits_left / (cpi->twopass.total_stats->count - (double)cpi->common.current_video_frame)) * ((double)cpi->oxcf.two_pass_vbrmax_section / 100.0));
 
     // Trap case where we are out of bits
     if (max_bits < 0)
@@ -1828,35 +1803,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     cpi->twopass.gf_decay_rate =
         (i > 0) ? (int)(100.0 * (1.0 - decay_accumulator)) / i : 0;
 
-    // When using CBR apply additional buffer related upper limits
-    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-    {
-        double max_boost;
-
-        // For cbr apply buffer related limits
-        if (cpi->drop_frames_allowed)
-        {
-            int df_buffer_level = cpi->oxcf.drop_frames_water_mark *
-                                  (cpi->oxcf.optimal_buffer_level / 100);
-
-            if (cpi->buffer_level > df_buffer_level)
-                max_boost = ((double)((cpi->buffer_level - df_buffer_level) * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
-            else
-                max_boost = 0.0;
-        }
-        else if (cpi->buffer_level > 0)
-        {
-            max_boost = ((double)(cpi->buffer_level * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
-        }
-        else
-        {
-            max_boost = 0.0;
-        }
-
-        if (boost_score > max_boost)
-            boost_score = max_boost;
-    }
-
     // Dont allow conventional gf too near the next kf
     if ((cpi->twopass.frames_to_key - i) < MIN_GF_INTERVAL)
     {
@@ -2173,13 +2119,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             {
                 gf_bits = alt_gf_bits;
             }
-        }
-
-        // Apply an additional limit for CBR
-        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-        {
-            if (cpi->twopass.gf_bits > (cpi->buffer_level >> 1))
-                cpi->twopass.gf_bits = cpi->buffer_level >> 1;
         }
 
         // Dont allow a negative value for gf_bits
@@ -2839,51 +2778,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         max_grp_bits = (int64_t)max_bits * (int64_t)cpi->twopass.frames_to_key;
         if (cpi->twopass.kf_group_bits > max_grp_bits)
             cpi->twopass.kf_group_bits = max_grp_bits;
-
-        // Additional special case for CBR if buffer is getting full.
-        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-        {
-            int opt_buffer_lvl = cpi->oxcf.optimal_buffer_level;
-            int buffer_lvl = cpi->buffer_level;
-
-            // If the buffer is near or above the optimal and this kf group is
-            // not being allocated much then increase the allocation a bit.
-            if (buffer_lvl >= opt_buffer_lvl)
-            {
-                int high_water_mark = (opt_buffer_lvl +
-                                       cpi->oxcf.maximum_buffer_size) >> 1;
-
-                int64_t av_group_bits;
-
-                // Av bits per frame * number of frames
-                av_group_bits = (int64_t)cpi->av_per_frame_bandwidth *
-                                (int64_t)cpi->twopass.frames_to_key;
-
-                // We are at or above the maximum.
-                if (cpi->buffer_level >= high_water_mark)
-                {
-                    int64_t min_group_bits;
-
-                    min_group_bits = av_group_bits +
-                                     (int64_t)(buffer_lvl -
-                                                 high_water_mark);
-
-                    if (cpi->twopass.kf_group_bits < min_group_bits)
-                        cpi->twopass.kf_group_bits = min_group_bits;
-                }
-                // We are above optimal but below the maximum
-                else if (cpi->twopass.kf_group_bits < av_group_bits)
-                {
-                    int64_t bits_below_av = av_group_bits -
-                                              cpi->twopass.kf_group_bits;
-
-                    cpi->twopass.kf_group_bits +=
-                       (int64_t)((double)bits_below_av *
-                                   (double)(buffer_lvl - opt_buffer_lvl) /
-                                   (double)(high_water_mark - opt_buffer_lvl));
-                }
-            }
-        }
     }
     else
         cpi->twopass.kf_group_bits = 0;
@@ -2963,33 +2857,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         //    cpi->twopass.section_max_qfactor = 1.0;
     }
 
-    // When using CBR apply additional buffer fullness related upper limits
-    if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-    {
-        double max_boost;
-
-        if (cpi->drop_frames_allowed)
-        {
-            int df_buffer_level = cpi->oxcf.drop_frames_water_mark * (cpi->oxcf.optimal_buffer_level / 100);
-
-            if (cpi->buffer_level > df_buffer_level)
-                max_boost = ((double)((cpi->buffer_level - df_buffer_level) * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
-            else
-                max_boost = 0.0;
-        }
-        else if (cpi->buffer_level > 0)
-        {
-            max_boost = ((double)(cpi->buffer_level * 2 / 3) * 16.0) / DOUBLE_DIVIDE_CHECK((double)cpi->av_per_frame_bandwidth);
-        }
-        else
-        {
-            max_boost = 0.0;
-        }
-
-        if (boost_score > max_boost)
-            boost_score = max_boost;
-    }
-
     // Reset the first pass file position
     reset_fpf_position(cpi, start_position);
 
@@ -3064,13 +2931,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         // Calculate the number of bits to be spent on the key frame
         cpi->twopass.kf_bits  = (int)((double)kf_boost * ((double)cpi->twopass.kf_group_bits / (double)allocation_chunks));
-
-        // Apply an additional limit for CBR
-        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-        {
-            if (cpi->twopass.kf_bits > ((3 * cpi->buffer_level) >> 2))
-                cpi->twopass.kf_bits = (3 * cpi->buffer_level) >> 2;
-        }
 
         // If the key frame is actually easier than the average for the
         // kf group (which does sometimes happen... eg a blank intro frame)
@@ -3154,15 +3014,10 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         //if ( av_bits_per_frame < 0.0 )
         //  av_bits_per_frame = 0.0
 
-        // CBR... Use the clip average as the target for deciding resample
-        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-        {
-            bits_per_frame = av_bits_per_frame;
-        }
-
         // In VBR we want to avoid downsampling in easy section unless we are under extreme pressure
         // So use the larger of target bitrate for this sectoion or average bitrate for sequence
-        else
+        //else
+        // TBD deprecatae spatial resampling for experminetal
         {
             bits_per_frame = cpi->twopass.kf_group_bits / cpi->twopass.frames_to_key;     // This accounts for how hard the section is...
 
@@ -3197,20 +3052,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             fclose(f);
         }
 
-        // The trigger for spatial resampling depends on the various parameters such as whether we are streaming (CBR) or VBR.
-        if (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER)
-        {
-            // Trigger resample if we are projected to fall below down sample level or
-            // resampled last time and are projected to remain below the up sample level
-            if ((projected_buffer_level < (cpi->oxcf.resample_down_water_mark * cpi->oxcf.optimal_buffer_level / 100)) ||
-                (last_kf_resampled && (projected_buffer_level < (cpi->oxcf.resample_up_water_mark * cpi->oxcf.optimal_buffer_level / 100))))
-                //( ((cpi->buffer_level < (cpi->oxcf.resample_down_water_mark * cpi->oxcf.optimal_buffer_level / 100))) &&
-                //  ((projected_buffer_level < (cpi->oxcf.resample_up_water_mark * cpi->oxcf.optimal_buffer_level / 100))) ))
-                resample_trigger = TRUE;
-            else
-                resample_trigger = FALSE;
-        }
-        else
+        // The trigger for spatial resampling depends on the various parameters.
         {
             int64_t clip_bits = (int64_t)(cpi->twopass.total_stats->count * cpi->oxcf.target_bandwidth / DOUBLE_DIVIDE_CHECK((double)cpi->oxcf.frame_rate));
             int64_t over_spend = cpi->oxcf.starting_buffer_level - cpi->buffer_level;

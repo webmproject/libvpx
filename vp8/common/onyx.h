@@ -53,7 +53,6 @@ extern "C"
 
     typedef enum
     {
-        MODE_REALTIME       = 0x0,
         MODE_GOODQUALITY    = 0x1,
         MODE_BESTQUALITY    = 0x2,
         MODE_FIRSTPASS      = 0x3,
@@ -175,10 +174,6 @@ extern "C"
         // these parameters aren't to be used in final build don't use!!!
         int play_alternate;
         int alt_freq;
-        int alt_q;
-        int key_q;
-        int gold_q;
-
 
         int multi_threaded;   // how many threads to run the encoder on
         int token_partitions; // how many token partitions to create for multi core decoding

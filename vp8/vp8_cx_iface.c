@@ -276,18 +276,14 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->resample_up_water_mark   = cfg.rc_resize_up_thresh;
     oxcf->resample_down_water_mark = cfg.rc_resize_down_thresh;
 
-    if (cfg.rc_end_usage == VPX_VBR)
-    {
-        oxcf->end_usage          = USAGE_LOCAL_FILE_PLAYBACK;
-    }
-    else if (cfg.rc_end_usage == VPX_CBR)
-    {
-        oxcf->end_usage          = USAGE_STREAM_FROM_SERVER;
-    }
-    else if (cfg.rc_end_usage == VPX_CQ)
-    {
-        oxcf->end_usage          = USAGE_CONSTRAINED_QUALITY;
-    }
+    // VBR only supported for now.
+    // CBR code has been deprectated for experimental phase.
+    // CQ mode not yet tested
+    oxcf->end_usage          = USAGE_LOCAL_FILE_PLAYBACK;
+    /*if (cfg.rc_end_usage == VPX_CQ)
+        oxcf->end_usage      = USAGE_CONSTRAINED_QUALITY;
+    else
+        oxcf->end_usage      = USAGE_LOCAL_FILE_PLAYBACK;*/
 
     oxcf->target_bandwidth       = cfg.rc_target_bitrate;
     oxcf->rc_max_intra_bitrate_pct = vp8_cfg.rc_max_intra_bitrate_pct;
@@ -599,35 +595,10 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
     unsigned int new_qc;
 
     /* Use best quality mode if no deadline is given. */
-    new_qc = MODE_BESTQUALITY;
-
     if (deadline)
-    {
-        uint64_t     duration_us;
-
-        /* Convert duration parameter from stream timebase to microseconds */
-        duration_us = (uint64_t)duration * 1000000
-                      * (uint64_t)ctx->cfg.g_timebase.num
-                      / (uint64_t)ctx->cfg.g_timebase.den;
-
-        /* If the deadline is more that the duration this frame is to be shown,
-         * use good quality mode. Otherwise use realtime mode.
-         */
-        new_qc = (deadline > duration_us) ? MODE_GOODQUALITY : MODE_REALTIME;
-    }
-
-    switch (ctx->deprecated_mode)
-    {
-    case VP8_BEST_QUALITY_ENCODING:
-        new_qc = MODE_BESTQUALITY;
-        break;
-    case VP8_GOOD_QUALITY_ENCODING:
         new_qc = MODE_GOODQUALITY;
-        break;
-    case VP8_REAL_TIME_ENCODING:
-        new_qc = MODE_REALTIME;
-        break;
-    }
+    else
+        new_qc = MODE_BESTQUALITY;
 
     if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
         new_qc = MODE_FIRSTPASS;
