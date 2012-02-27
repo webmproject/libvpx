@@ -2214,22 +2214,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             if (cpi->common.mb_no_coeff_skip)
             {
                 int tteob;
+                int has_y2_block = (this_mode!=SPLITMV && this_mode!=B_PRED);
 
                 tteob = 0;
+                if(has_y2_block)
+                    tteob += x->e_mbd.eobs[24];
+
+                for (i = 0; i < 16; i++)
+                    tteob += (x->e_mbd.eobs[i] > has_y2_block);
 
                 if (x->e_mbd.mode_info_context->mbmi.ref_frame)
                 {
-                    for (i = 0; i <= 24; i++)
+                    for (i = 16; i < 24; i++)
                         tteob += x->e_mbd.eobs[i];
                 }
                 else
-                {
-                    for (i = 0; i < 16; i++)
-                        tteob += x->e_mbd.eobs[i];
-
                     tteob += uv_intra_tteob;
-                    tteob += x->e_mbd.eobs[24];
-                }
 
                 if (tteob == 0)
                 {
