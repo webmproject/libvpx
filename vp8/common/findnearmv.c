@@ -21,6 +21,7 @@ const unsigned char vp8_mbsplit_offset[4][16] = {
 /* Predict motion vectors using those from already-decoded nearby blocks.
    Note that we only consider one 4x4 subblock from each candidate 16x16
    macroblock.   */
+
 void vp8_find_near_mvs
 (
     MACROBLOCKD *xd,
@@ -145,6 +146,27 @@ void vp8_find_near_mvs
     nearest->as_int = near_mvs[CNT_NEAREST].as_int;
     nearby->as_int = near_mvs[CNT_NEAR].as_int;
 
+    /* Make sure that the 1/8th bits of the Mvs are zero if high_precision
+     * is not being used, by truncating the last bit towards 0
+     */
+#if CONFIG_HIGH_PRECISION_MV
+    if (!xd->allow_high_precision_mv)
+    {
+        if (best_mv->as_mv.row & 1)
+            best_mv->as_mv.row += (best_mv->as_mv.row > 0 ? -1 : 1);
+        if (best_mv->as_mv.col & 1)
+            best_mv->as_mv.col += (best_mv->as_mv.col > 0 ? -1 : 1);
+        if (nearest->as_mv.row & 1)
+            nearest->as_mv.row += (nearest->as_mv.row > 0 ? -1 : 1);
+        if (nearest->as_mv.col & 1)
+            nearest->as_mv.col += (nearest->as_mv.col > 0 ? -1 : 1);
+        if (nearby->as_mv.row & 1)
+            nearby->as_mv.row += (nearby->as_mv.row > 0 ? -1 : 1);
+        if (nearby->as_mv.col & 1)
+            nearby->as_mv.col += (nearby->as_mv.col > 0 ? -1 : 1);
+    }
+#endif
+
     //TODO: move clamp outside findnearmv
     vp8_clamp_mv2(nearest, xd);
     vp8_clamp_mv2(nearby, xd);
@@ -161,4 +183,3 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
     p[3] = pc->vp8_mode_contexts [near_mv_ref_ct[3]] [3];
     return p;
 }
-

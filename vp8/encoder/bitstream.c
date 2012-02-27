@@ -46,7 +46,6 @@ extern unsigned int active_section;
 int count_mb_seg[4] = { 0, 0, 0, 0 };
 #endif
 
-
 static void update_mode(
     vp8_writer *const w,
     int n,
@@ -389,6 +388,20 @@ static void write_mv
     vp8_encode_motion_vector(w, &e, mvc);
 }
 
+#if CONFIG_HIGH_PRECISION_MV
+static void write_mv_hp
+(
+    vp8_writer *w, const MV *mv, const int_mv *ref, const MV_CONTEXT_HP *mvc
+)
+{
+    MV e;
+    e.row = mv->row - ref->as_mv.row;
+    e.col = mv->col - ref->as_mv.col;
+
+    vp8_encode_motion_vector_hp(w, &e, mvc);
+}
+#endif
+
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
 static void write_mb_segid(vp8_writer *w,
@@ -556,6 +569,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     VP8_COMMON *const pc = & cpi->common;
     vp8_writer *const w = & cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
+#if CONFIG_HIGH_PRECISION_MV
+    const MV_CONTEXT_HP *mvc_hp = pc->fc.mvc_hp;
+#endif
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     int i;
@@ -643,6 +659,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     update_mbintra_mode_probs(cpi);
 
+#if CONFIG_HIGH_PRECISION_MV
+    if (xd->allow_high_precision_mv)
+        vp8_write_mvprobs_hp(cpi);
+    else
+#endif
     vp8_write_mvprobs(cpi);
 
     mb_row = 0;
@@ -806,6 +827,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                             active_section = 5;
 #endif
 
+#if CONFIG_HIGH_PRECISION_MV
+                            if (xd->allow_high_precision_mv)
+                                write_mv_hp(w, &mi->mv.as_mv, &best_mv, mvc_hp);
+                            else
+#endif
                             write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
 
                             if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
@@ -824,7 +850,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                                                   &n1, &n2, &best_mv,
                                                   ct, second_rf,
                                                   cpi->common.ref_frame_sign_bias);
-                                write_mv(w, &mi->second_mv.as_mv, &best_mv, mvc);
+#if CONFIG_HIGH_PRECISION_MV
+                                if (xd->allow_high_precision_mv)
+                                    write_mv_hp(w, &mi->second_mv.as_mv,
+                                                &best_mv, mvc_hp);
+                                else
+#endif
+                                write_mv(w, &mi->second_mv.as_mv, &best_mv,
+                                         mvc);
                             }
                             break;
 
@@ -867,7 +900,15 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #ifdef ENTROPY_STATS
                                     active_section = 11;
 #endif
-                                    write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_HIGH_PRECISION_MV
+                                    if (xd->allow_high_precision_mv)
+                                        write_mv_hp(w, &blockmv.as_mv, &best_mv,
+                                                    (const MV_CONTEXT_HP *)
+                                                    mvc_hp);
+                                    else
+#endif
+                                    write_mv(w, &blockmv.as_mv, &best_mv,
+                                             (const MV_CONTEXT *) mvc);
                                 }
                             }
                             while (++j < cpi->mb.partition_info->count);
@@ -908,6 +949,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     VP8_COMMON *const pc = & cpi->common;
     vp8_writer *const w = & cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
+#if CONFIG_HIGH_PRECISION_MV
+    const MV_CONTEXT_HP *mvc_hp = pc->fc.mvc_hp;
+#endif
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     int i;
@@ -992,6 +1036,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     update_mbintra_mode_probs(cpi);
 
+#if CONFIG_HIGH_PRECISION_MV
+    if (xd->allow_high_precision_mv)
+        vp8_write_mvprobs_hp(cpi);
+    else
+#endif
     vp8_write_mvprobs(cpi);
 
     while (++mb_row < pc->mb_rows)
@@ -1058,9 +1107,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
             if (rf == INTRA_FRAME)
             {
-    #ifdef ENTROPY_STATS
+#ifdef ENTROPY_STATS
                 active_section = 6;
-    #endif
+#endif
 
                 if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
                     write_ymode(w, mode, pc->fc.ymode_prob);
@@ -1131,11 +1180,17 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     switch (mode)   /* new, split require MVs */
                     {
                     case NEWMV:
-    #ifdef ENTROPY_STATS
+#ifdef ENTROPY_STATS
                         active_section = 5;
-    #endif
+#endif
 
+#if CONFIG_HIGH_PRECISION_MV
+                        if (xd->allow_high_precision_mv)
+                            write_mv_hp(w, &mi->mv.as_mv, &best_mv, mvc_hp);
+                        else
+#endif
                         write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
+
 
                         if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
                         {
@@ -1152,6 +1207,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                                               &n1, &n2, &best_mv,
                                               ct, second_rf,
                                               cpi->common.ref_frame_sign_bias);
+#if CONFIG_HIGH_PRECISION_MV
+                            if (xd->allow_high_precision_mv)
+                                write_mv_hp(w, &mi->second_mv.as_mv, &best_mv, mvc_hp);
+                            else
+#endif
                             write_mv(w, &mi->second_mv.as_mv, &best_mv, mvc);
                         }
                         break;
@@ -1159,9 +1219,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     {
                         int j = 0;
 
-    #ifdef MODE_STATS
+#ifdef MODE_STATS
                         ++count_mb_seg [mi->partitioning];
-    #endif
+#endif
 
                         write_split(w, mi->partitioning);
 
@@ -1176,13 +1236,13 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                             blockmode =  cpi->mb.partition_info->bmi[j].mode;
                             blockmv =  cpi->mb.partition_info->bmi[j].mv;
-    #if CONFIG_DEBUG
+#if CONFIG_DEBUG
                             while (j != L[++k])
                                 if (k >= 16)
                                     assert(0);
-    #else
+#else
                             while (j != L[++k]);
-    #endif
+#endif
                             leftmv.as_int = left_block_mv(m, k);
                             abovemv.as_int = above_block_mv(m, k, mis);
                             mv_contz = vp8_mv_cont(&leftmv, &abovemv);
@@ -1191,9 +1251,14 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                             if (blockmode == NEW4X4)
                             {
-    #ifdef ENTROPY_STATS
+#ifdef ENTROPY_STATS
                                 active_section = 11;
-    #endif
+#endif
+#if CONFIG_HIGH_PRECISION_MV
+                                if (xd->allow_high_precision_mv)
+                                    write_mv_hp(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT_HP *) mvc_hp);
+                                else
+#endif
                                 write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
                             }
                         }

@@ -15,27 +15,13 @@
 #include "treecoder.h"
 #include "vpx_config.h"
 
-#if CONFIG_HIGH_PRECISION_MV
-#define MV_SHIFT 0
-#else
-#define MV_SHIFT 1
-#endif
-
 enum
 {
-#if CONFIG_HIGH_PRECISION_MV
-    mv_max  = 2047,              /* max absolute value of a MV component */
-    MVvals = (2 * mv_max) + 1,   /* # possible values "" */
-    mvlong_width = 11,       /* Large MVs have 9 bit magnitudes */
-    mvnum_short = 16,         /* magnitudes 0 through 15 */
-    mvnum_short_bits = 4,         /* number of bits for short mvs */
-#else
     mv_max  = 1023,              /* max absolute value of a MV component */
     MVvals = (2 * mv_max) + 1,   /* # possible values "" */
     mvlong_width = 10,       /* Large MVs have 9 bit magnitudes */
     mvnum_short = 8,         /* magnitudes 0 through 7 */
     mvnum_short_bits = 3,         /* number of bits for short mvs */
-#endif
 
     mvfp_max  = 255,              /* max absolute value of a full pixel MV component */
     MVfpvals = (2 * mvfp_max) + 1, /* # possible full pixel MV values */
@@ -56,5 +42,35 @@ typedef struct mv_context
 } MV_CONTEXT;
 
 extern const MV_CONTEXT vp8_mv_update_probs[2], vp8_default_mv_context[2];
+
+#if CONFIG_HIGH_PRECISION_MV
+enum
+{
+    mv_max_hp  = 2047,              /* max absolute value of a MV component */
+    MVvals_hp = (2 * mv_max_hp) + 1,   /* # possible values "" */
+    mvlong_width_hp = 11,       /* Large MVs have 9 bit magnitudes */
+    mvnum_short_hp = 16,         /* magnitudes 0 through 15 */
+    mvnum_short_bits_hp = 4,         /* number of bits for short mvs */
+
+    mvfp_max_hp  = 255,              /* max absolute value of a full pixel MV component */
+    MVfpvals_hp = (2 * mvfp_max_hp) + 1, /* # possible full pixel MV values */
+
+    /* probability offsets for coding each MV component */
+
+    mvpis_short_hp = 0,         /* short (<= 7) vs long (>= 8) */
+    MVPsign_hp,                /* sign for non-zero */
+    MVPshort_hp,               /* 8 short values = 7-position tree */
+
+    MVPbits_hp = MVPshort_hp + mvnum_short_hp - 1, /* mvlong_width long value bits */
+    MVPcount_hp = MVPbits_hp + mvlong_width_hp    /* (with independent probabilities) */
+};
+
+typedef struct mv_context_hp
+{
+    vp8_prob prob[MVPcount_hp];  /* often come in row, col pairs */
+} MV_CONTEXT_HP;
+
+extern const MV_CONTEXT_HP vp8_mv_update_probs_hp[2], vp8_default_mv_context_hp[2];
+#endif /* CONFIG_HIGH_PRECISION_MV */
 
 #endif

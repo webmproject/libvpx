@@ -738,6 +738,10 @@ static void init_frame(VP8D_COMP *pbi)
     {
         /* Various keyframe initializations */
         vpx_memcpy(pc->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
+#if CONFIG_HIGH_PRECISION_MV
+        vpx_memcpy(pc->fc.mvc_hp, vp8_default_mv_context_hp,
+                   sizeof(vp8_default_mv_context_hp));
+#endif
 
         vp8_init_mbmode_probs(pc);
 

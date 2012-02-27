@@ -45,7 +45,7 @@ DECLARE_ALIGNED(16, const short, vp8_bilinear_filters[SUBPEL_SHIFTS][2]) =
 };
 
 #if CONFIG_ENHANCED_INTERP
-#define FILTER_ALPHA 0
+#define FILTER_ALPHA 60
 DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters[SUBPEL_SHIFTS][2*INTERP_EXTEND]) =
 {
     /* Generated using MATLAB:

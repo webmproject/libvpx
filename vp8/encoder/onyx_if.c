@@ -79,6 +79,14 @@ static void set_default_lf_deltas(VP8_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
+#if CONFIG_HIGH_PRECISION_MV
+#define ALTREF_HIGH_PRECISION_MV 1      /* whether to use high precision mv for altref computation */
+#define HIGH_PRECISION_MV_QTHRESH 200   /* Q threshold for use of high precision mv */
+                                        /* Choose a very high value for now so
+                                         * that HIGH_PRECISION is always chosen
+                                         */
+#endif
+
 #if CONFIG_INTERNAL_STATS
 #include "math.h"
 
@@ -1334,7 +1342,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
 
     setup_features(cpi);
 #if CONFIG_HIGH_PRECISION_MV
-    cpi->mb.e_mbd.allow_high_precision_mv = 1;   // Default mv precision adaptation
+    cpi->mb.e_mbd.allow_high_precision_mv = 0;   // Default mv precision adaptation
 #endif
 
     {
@@ -1473,7 +1481,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->alt_ref_source = NULL;
     cpi->is_src_frame_alt_ref = 0;
 
-
 #if 0
     // Experimental RD Code
     cpi->frame_distortion = 0;
@@ -1501,6 +1508,26 @@ static void cal_mvsadcosts(int *mvsadcost[2])
     }
     while (++i <= mvfp_max);
 }
+
+#if CONFIG_HIGH_PRECISION_MV
+static void cal_mvsadcosts_hp(int *mvsadcost[2])
+{
+    int i = 1;
+
+    mvsadcost [0] [0] = 300;
+    mvsadcost [1] [0] = 300;
+
+    do
+    {
+        double z = 256 * (2 * (log2f(8 * i) + .6));
+        mvsadcost [0][i] = (int) z;
+        mvsadcost [1][i] = (int) z;
+        mvsadcost [0][-i] = (int) z;
+        mvsadcost [1][-i] = (int) z;
+    }
+    while (++i <= mvfp_max_hp);
+}
+#endif
 
 VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 {
@@ -1672,6 +1699,15 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->mb.mvsadcost[1] = &cpi->mb.mvsadcosts[1][mvfp_max+1];
 
     cal_mvsadcosts(cpi->mb.mvsadcost);
+
+#if CONFIG_HIGH_PRECISION_MV
+    cpi->mb.mvcost_hp[0] = &cpi->mb.mvcosts_hp[0][mv_max_hp+1];
+    cpi->mb.mvcost_hp[1] = &cpi->mb.mvcosts_hp[1][mv_max_hp+1];
+    cpi->mb.mvsadcost_hp[0] = &cpi->mb.mvsadcosts_hp[0][mvfp_max_hp+1];
+    cpi->mb.mvsadcost_hp[1] = &cpi->mb.mvsadcosts_hp[1][mvfp_max_hp+1];
+
+    cal_mvsadcosts_hp(cpi->mb.mvsadcost_hp);
+#endif
 
     for (i = 0; i < KEY_FRAME_CONTEXT; i++)
     {
@@ -2861,9 +2897,6 @@ static void encode_frame_to_data_rate
 
         // Reset the loop filter deltas and segmentation map
         setup_features(cpi);
-#if CONFIG_HIGH_PRECISION_MV
-        xd->allow_high_precision_mv = 1;   // Default mv precision adaptation
-#endif
 
         // If segmentation is enabled force a map update for key frames
         if (xd->segmentation_enabled)
@@ -3023,6 +3056,14 @@ static void encode_frame_to_data_rate
     vp8_save_coding_context(cpi);
 
     loop_count = 0;
+
+#if CONFIG_HIGH_PRECISION_MV
+    /* Decide this based on various factors */
+    if (cm->frame_type != KEY_FRAME)
+    {
+        xd->allow_high_precision_mv = (Q < HIGH_PRECISION_MV_QTHRESH);
+    }
+#endif
 
 #if CONFIG_POSTPROC
 
@@ -3460,6 +3501,7 @@ static void encode_frame_to_data_rate
     // build the bitstream
     vp8_pack_bitstream(cpi, dest, size);
 
+
     /* Move storing frame_type out of the above loop since it is also
      * needed in motion search besides loopfilter */
     cm->last_frame_type = cm->frame_type;
@@ -3755,7 +3797,7 @@ static void encode_frame_to_data_rate
         fclose(recon_file);
     }
 #endif
-#if OUTPUT_YUV_REC
+#ifdef OUTPUT_YUV_REC
     vp8_write_yuv_rec_frame(cm);
 #endif
 
@@ -3932,6 +3974,9 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
     cpi->source = NULL;
 
+#if CONFIG_HIGH_PRECISION_MV
+    cpi->mb.e_mbd.allow_high_precision_mv = ALTREF_HIGH_PRECISION_MV;
+#endif
     // Should we code an alternate reference frame
     if (cpi->oxcf.play_alternate &&
         cpi->source_alt_ref_pending)

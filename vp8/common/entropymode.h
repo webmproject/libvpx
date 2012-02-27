@@ -56,11 +56,10 @@ extern struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
 extern struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
 extern const vp8_tree_index vp8_small_mvtree[];
-
-#if CONFIG_HIGH_PRECISION_MV
-extern struct vp8_token_struct vp8_small_mvencodings [16];
-#else
 extern struct vp8_token_struct vp8_small_mvencodings [8];
+#if CONFIG_HIGH_PRECISION_MV
+extern const vp8_tree_index vp8_small_mvtree_hp[];
+extern struct vp8_token_struct vp8_small_mvencodings_hp [16];
 #endif
 
 void vp8_entropy_mode_init(void);

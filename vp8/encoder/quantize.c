@@ -75,7 +75,7 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 
 void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 {
-    int i, rc, eob;
+    int i, rc, eob, nonzeros;
     int x, y, z, sz;
     short *coeff_ptr   = b->coeff;
     short *round_ptr   = b->round;
@@ -1295,4 +1295,3 @@ void vp8_set_quantizer(struct VP8_COMP *cpi, int Q)
     //if(update)
     //    vp8cx_init_quantizer(cpi);
 }
-

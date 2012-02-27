@@ -12,7 +12,7 @@
 #include "entropymv.h"
 
 #if CONFIG_HIGH_PRECISION_MV
-const MV_CONTEXT vp8_mv_update_probs[2] =
+const MV_CONTEXT_HP vp8_mv_update_probs_hp[2] =
 {
     {{
         237,
@@ -27,7 +27,7 @@ const MV_CONTEXT vp8_mv_update_probs[2] =
         254, 254, 254, 254, 254, 251, 251, 254, 254, 254, 254
     }}
 };
-const MV_CONTEXT vp8_default_mv_context[2] =
+const MV_CONTEXT_HP vp8_default_mv_context_hp[2] =
 {
     {{
         /* row */
@@ -44,7 +44,8 @@ const MV_CONTEXT vp8_default_mv_context[2] =
         128, 130, 130,  74, 148, 180, 203, 236, 254, 254, 254 /* long bits */
     }}
 };
-#else
+#endif  /* CONFIG_HIGH_PRECISION_MV */
+
 const MV_CONTEXT vp8_mv_update_probs[2] =
 {
     {{
@@ -77,4 +78,3 @@ const MV_CONTEXT vp8_default_mv_context[2] =
         128, 130, 130,  74, 148, 180, 203, 236, 254, 254 /* long bits */
     }}
 };
-#endif  /* CONFIG_HIGH_PRECISION_MV */

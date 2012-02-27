@@ -605,7 +605,7 @@ void encode_sb_row (VP8_COMP *cpi,
                                   xd->mode_info_stride + col_delta[(i+1) & 0x3];
             int offset_unextended = row_delta[(i+1) & 0x3] *
                                     cm->mb_cols + col_delta[(i+1) & 0x3];
-           int dy = row_delta[i];
+            int dy = row_delta[i];
             int dx = col_delta[i];
 
             mb_row += dy;
@@ -1108,6 +1108,9 @@ static void encode_frame_internal(VP8_COMP *cpi)
     xd->prev_mode_info_context = cm->prev_mi;
 
     vp8_zero(cpi->MVcount);
+#if CONFIG_HIGH_PRECISION_MV
+    vp8_zero(cpi->MVcount_hp);
+#endif
     vp8_zero(cpi->coef_counts);
 
     vp8cx_frame_init_quantizer(cpi);

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
  *
  *  Use of this source code is governed by a BSD-style license
  *  that can be found in the LICENSE file in the root of the source
@@ -203,13 +203,13 @@ static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
 
 static void read_mv(vp8_reader *r, MV *mv, const MV_CONTEXT *mvc)
 {
-    mv->row = (short)(read_mvcomponent(r,   mvc) << MV_SHIFT);
-    mv->col = (short)(read_mvcomponent(r, ++mvc) << MV_SHIFT);
+    mv->row = (short)(read_mvcomponent(r,   mvc) << 1);
+    mv->col = (short)(read_mvcomponent(r, ++mvc) << 1);
 #ifdef DEBUG_DEC_MV
     int i;
-    printf("%d: %d %d\n", dec_mvcount++, mv->row, mv->col);
-    for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[-1])->prob[i]); printf("\n");
-    for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[0])->prob[i]); printf("\n");
+    printf("%d (np): %d %d\n", dec_mvcount++, mv->row, mv->col);
+    //for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[-1])->prob[i]); printf("\n");
+    //for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[0])->prob[i]); printf("\n");
 #endif
 }
 
@@ -237,6 +237,79 @@ static void read_mvcontexts(vp8_reader *bc, MV_CONTEXT *mvc)
     }
     while (++i < 2);
 }
+
+#if CONFIG_HIGH_PRECISION_MV
+static int read_mvcomponent_hp(vp8_reader *r, const MV_CONTEXT_HP *mvc)
+{
+    const vp8_prob *const p = (const vp8_prob *) mvc;
+    int x = 0;
+
+    if (vp8_read(r, p [mvpis_short_hp]))  /* Large */
+    {
+        int i = 0;
+
+        do
+        {
+            x += vp8_read(r, p [MVPbits_hp + i]) << i;
+        }
+        while (++i < mvnum_short_bits_hp);
+
+        i = mvlong_width_hp - 1;  /* Skip bit 3, which is sometimes implicit */
+
+        do
+        {
+            x += vp8_read(r, p [MVPbits_hp + i]) << i;
+        }
+        while (--i > mvnum_short_bits_hp);
+
+        if (!(x & ~((2<<mvnum_short_bits_hp)-1))  ||  vp8_read(r, p [MVPbits_hp + mvnum_short_bits_hp]))
+            x += (mvnum_short_hp);
+    }
+    else   /* small */
+        x = vp8_treed_read(r, vp8_small_mvtree_hp, p + MVPshort_hp);
+
+    if (x  &&  vp8_read(r, p [MVPsign_hp]))
+        x = -x;
+
+    return x;
+}
+
+static void read_mv_hp(vp8_reader *r, MV *mv, const MV_CONTEXT_HP *mvc)
+{
+    mv->row = (short)(read_mvcomponent_hp(r,   mvc));
+    mv->col = (short)(read_mvcomponent_hp(r, ++mvc));
+#ifdef DEBUG_DEC_MV
+    int i;
+    printf("%d (hp): %d %d\n", dec_mvcount++, mv->row, mv->col);
+    //for (i=0; i<MVPcount_hp;++i) printf("  %d", (&mvc[-1])->prob[i]); printf("\n");
+    //for (i=0; i<MVPcount_hp;++i) printf("  %d", (&mvc[0])->prob[i]); printf("\n");
+#endif
+}
+
+static void read_mvcontexts_hp(vp8_reader *bc, MV_CONTEXT_HP *mvc)
+{
+    int i = 0;
+
+    do
+    {
+        const vp8_prob *up = vp8_mv_update_probs_hp[i].prob;
+        vp8_prob *p = (vp8_prob *)(mvc + i);
+        vp8_prob *const pstop = p + MVPcount_hp;
+
+        do
+        {
+            if (vp8_read(bc, *up++))
+            {
+                const vp8_prob x = (vp8_prob)vp8_read_literal(bc, 7);
+
+                *p = x ? x << 1 : 1;
+            }
+        }
+        while (++p < pstop);
+    }
+    while (++i < 2);
+}
+#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 // Read the referncence frame
 static MV_REFERENCE_FRAME read_ref_frame( VP8D_COMP *pbi,
@@ -406,6 +479,10 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     VP8_COMMON *const cm = & pbi->common;
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
+    MACROBLOCKD *const xd  = & pbi->mb;
+#endif
 
     pbi->prob_skip_false = 0;
     if (pbi->common.mb_no_coeff_skip)
@@ -456,6 +533,11 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             while (++i < VP8_UV_MODES-1);
         }
 #endif /* CONFIG_UVINTRA */
+#if CONFIG_HIGH_PRECISION_MV
+        if (xd->allow_high_precision_mv)
+            read_mvcontexts_hp(bc, mvc_hp);
+        else
+#endif
         read_mvcontexts(bc, mvc);
     }
 }
@@ -529,6 +611,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     VP8_COMMON *const cm = & pbi->common;
     vp8_reader *const bc = & pbi->bc;
     MV_CONTEXT *const mvc = pbi->common.fc.mvc;
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
+#endif
     const int mis = pbi->common.mode_info_stride;
     MACROBLOCKD *const xd  = & pbi->mb;
 
@@ -640,6 +725,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 switch (sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
                 {
                 case NEW4X4:
+#if CONFIG_HIGH_PRECISION_MV
+                    if (xd->allow_high_precision_mv)
+                        read_mv_hp(bc, &blockmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+                    else
+#endif
                     read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
                     blockmv.as_mv.row += best_mv.as_mv.row;
                     blockmv.as_mv.col += best_mv.as_mv.col;
@@ -717,6 +807,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             goto propagate_mv;
 
         case NEWMV:
+#if CONFIG_HIGH_PRECISION_MV
+            if (xd->allow_high_precision_mv)
+                read_mv_hp(bc, &mv->as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+            else
+#endif
             read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
             mv->as_mv.row += best_mv.as_mv.row;
             mv->as_mv.col += best_mv.as_mv.col;
@@ -764,6 +859,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                  mb_to_top_edge, mb_to_bottom_edge);
                     break;
                 case NEWMV:
+#if CONFIG_HIGH_PRECISION_MV
+                    if (xd->allow_high_precision_mv)
+                        read_mv_hp(bc, &mbmi->second_mv.as_mv,
+                                   (const MV_CONTEXT_HP *) mvc_hp);
+                    else
+#endif
                     read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
                     mbmi->second_mv.as_mv.row += best_mv.as_mv.row;
                     mbmi->second_mv.as_mv.col += best_mv.as_mv.col;

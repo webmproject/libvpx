@@ -97,6 +97,12 @@ typedef struct
     int *mvcost[2];
     int mvsadcosts[2][MVfpvals+1];
     int *mvsadcost[2];
+#if CONFIG_HIGH_PRECISION_MV
+    int mvcosts_hp[2][MVvals_hp+1];
+    int *mvcost_hp[2];
+    int mvsadcosts_hp[2][MVfpvals_hp+1];
+    int *mvsadcost_hp[2];
+#endif
     int mbmode_cost[2][MB_MODE_COUNT];
     int intra_uv_mode_cost[2][MB_MODE_COUNT];
     unsigned int bmode_costs[10][10][10];
@@ -119,6 +125,9 @@ typedef struct
 
     unsigned char *active_ptr;
     MV_CONTEXT *mvc;
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP *mvc_hp;
+#endif
 
     unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS]
                             [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];

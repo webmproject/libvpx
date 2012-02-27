@@ -1601,7 +1601,12 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                         bestsme = cpi->diamond_search_sad(x, c, e, &mvp_full,
                                                 &mode_mv[NEW4X4], step_param,
                                                 sadpb, &num00, v_fn_ptr,
-                                                x->mvcost, bsi->ref_mv);
+#if CONFIG_HIGH_PRECISION_MV
+                                                x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                                                x->mvcost,
+#endif
+                                                bsi->ref_mv);
 
                         n = num00;
                         num00 = 0;
@@ -1618,7 +1623,12 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                                                     &mvp_full, &temp_mv,
                                                     step_param + n, sadpb,
                                                     &num00, v_fn_ptr,
-                                                    x->mvcost, bsi->ref_mv);
+#if CONFIG_HIGH_PRECISION_MV
+                                                    x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                                                    x->mvcost,
+#endif
+                                                    bsi->ref_mv);
 
                                 if (thissme < bestsme)
                                 {
@@ -1639,7 +1649,12 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
                         thissme = cpi->full_search_sad(x, c, e, &mvp_full,
                                                        sadpb, 16, v_fn_ptr,
-                                                       x->mvcost, bsi->ref_mv);
+#if CONFIG_HIGH_PRECISION_MV
+                                                       x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                                                       x->mvcost,
+#endif
+                                                       bsi->ref_mv);
 
                         if (thissme < bestsme)
                         {
@@ -1659,7 +1674,12 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                     int distortion;
                     unsigned int sse;
                     cpi->find_fractional_mv_step(x, c, e, &mode_mv[NEW4X4],
-                        bsi->ref_mv, x->errorperbit, v_fn_ptr, x->mvcost,
+                        bsi->ref_mv, x->errorperbit, v_fn_ptr,
+#if CONFIG_HIGH_PRECISION_MV
+                        x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                        x->mvcost,
+#endif
                         &distortion, &sse);
                 }
             } /* NEW4X4 */
@@ -2154,19 +2174,43 @@ static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
         {
             if (x->partition_info->bmi[i].mode == NEW4X4)
             {
-                cpi->MVcount[0][mv_max+((x->partition_info->bmi[i].mv.as_mv.row
-                                          - best_ref_mv->as_mv.row) >> MV_SHIFT)]++;
-                cpi->MVcount[1][mv_max+((x->partition_info->bmi[i].mv.as_mv.col
-                                          - best_ref_mv->as_mv.col) >> MV_SHIFT)]++;
+#if CONFIG_HIGH_PRECISION_MV
+                if (x->e_mbd.allow_high_precision_mv)
+                {
+                    cpi->MVcount_hp[0][mv_max_hp+(x->partition_info->bmi[i].mv.as_mv.row
+                                              - best_ref_mv->as_mv.row)]++;
+                    cpi->MVcount_hp[1][mv_max_hp+(x->partition_info->bmi[i].mv.as_mv.col
+                                              - best_ref_mv->as_mv.col)]++;
+                }
+                else
+#endif
+                {
+                    cpi->MVcount[0][mv_max+((x->partition_info->bmi[i].mv.as_mv.row
+                                              - best_ref_mv->as_mv.row) >> 1)]++;
+                    cpi->MVcount[1][mv_max+((x->partition_info->bmi[i].mv.as_mv.col
+                                              - best_ref_mv->as_mv.col) >> 1)]++;
+                }
             }
         }
     }
     else if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV)
     {
-        cpi->MVcount[0][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
-                                          - best_ref_mv->as_mv.row) >> MV_SHIFT)]++;
-        cpi->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
-                                          - best_ref_mv->as_mv.col) >> MV_SHIFT)]++;
+#if CONFIG_HIGH_PRECISION_MV
+        if (x->e_mbd.allow_high_precision_mv)
+        {
+            cpi->MVcount_hp[0][mv_max_hp+(x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
+                                              - best_ref_mv->as_mv.row)]++;
+            cpi->MVcount_hp[1][mv_max_hp+(x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
+                                              - best_ref_mv->as_mv.col)]++;
+        }
+        else
+#endif
+        {
+            cpi->MVcount[0][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
+                                              - best_ref_mv->as_mv.row) >> 1)]++;
+            cpi->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
+                                              - best_ref_mv->as_mv.col) >> 1)]++;
+        }
     }
 }
 
@@ -2640,7 +2684,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 bestsme = cpi->diamond_search_sad(x, b, d, &mvp_full, &d->bmi.mv,
                                         step_param, sadpb, &num00,
                                         &cpi->fn_ptr[BLOCK_16X16],
-                                        x->mvcost, &best_ref_mv);
+#if CONFIG_HIGH_PRECISION_MV
+                                        x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                                        x->mvcost,
+#endif
+                                        &best_ref_mv);
                 mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
                 // Further step/diamond searches as necessary
@@ -2664,7 +2713,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                     {
                         thissme = cpi->diamond_search_sad(x, b, d, &mvp_full,
                                     &d->bmi.mv, step_param + n, sadpb, &num00,
-                                    &cpi->fn_ptr[BLOCK_16X16], x->mvcost,
+                                    &cpi->fn_ptr[BLOCK_16X16],
+#if CONFIG_HIGH_PRECISION_MV
+                                    x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                                    x->mvcost,
+#endif
                                     &best_ref_mv);
 
                         /* check to see if refining search is needed. */
@@ -2696,7 +2750,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 //thissme = cpi->full_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
                 thissme = cpi->refining_search_sad(x, b, d, &d->bmi.mv, sadpb,
                                        search_range, &cpi->fn_ptr[BLOCK_16X16],
-                                       x->mvcost, &best_ref_mv);
+#if CONFIG_HIGH_PRECISION_MV
+                                       x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                                       x->mvcost,
+#endif
+                                       &best_ref_mv);
 
                 if (thissme < bestsme)
                 {
@@ -2721,7 +2780,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 cpi->find_fractional_mv_step(x, b, d, &d->bmi.mv, &best_ref_mv,
                                              x->errorperbit,
                                              &cpi->fn_ptr[BLOCK_16X16],
-                                             x->mvcost, &dis, &sse);
+#if CONFIG_HIGH_PRECISION_MV
+                                             x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
+#else
+                                             x->mvcost,
+#endif
+                                             &dis, &sse);
             }
             mc_search_result[x->e_mbd.mode_info_context->mbmi.ref_frame].as_int = d->bmi.mv.as_int;
 

@@ -148,6 +148,10 @@ void vp8_save_coding_context(VP8_COMP *cpi)
 
     vp8_copy(cc->mvc,      cpi->common.fc.mvc);
     vp8_copy(cc->mvcosts,  cpi->mb.mvcosts);
+#if CONFIG_HIGH_PRECISION_MV
+    vp8_copy(cc->mvc_hp,      cpi->common.fc.mvc_hp);
+    vp8_copy(cc->mvcosts_hp,  cpi->mb.mvcosts_hp);
+#endif
 
     vp8_copy(cc->kf_ymode_prob,   cpi->common.kf_ymode_prob);
     vp8_copy(cc->ymode_prob,   cpi->common.fc.ymode_prob);
@@ -187,6 +191,11 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
     vp8_copy(cpi->common.fc.mvc, cc->mvc);
 
     vp8_copy(cpi->mb.mvcosts, cc->mvcosts);
+#if CONFIG_HIGH_PRECISION_MV
+    vp8_copy(cpi->common.fc.mvc_hp, cc->mvc_hp);
+
+    vp8_copy(cpi->mb.mvcosts_hp, cc->mvcosts_hp);
+#endif
     vp8_copy(cpi->common.kf_ymode_prob,   cc->kf_ymode_prob);
     vp8_copy(cpi->common.fc.ymode_prob,   cc->ymode_prob);
     vp8_copy(cpi->common.kf_uv_mode_prob,  cc->kf_uv_mode_prob);
@@ -222,8 +231,16 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
         int flag[2] = {1, 1};
         vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flag);
     }
-
     vpx_memset(cpi->common.fc.pre_mvc, 0, sizeof(cpi->common.fc.pre_mvc));  //initialize pre_mvc to all zero.
+#if CONFIG_HIGH_PRECISION_MV
+    vpx_memcpy(cpi->common.fc.mvc_hp, vp8_default_mv_context_hp, sizeof(vp8_default_mv_context_hp));
+    {
+        int flag[2] = {1, 1};
+        vp8_build_component_cost_table_hp(cpi->mb.mvcost_hp, (const MV_CONTEXT_HP *) cpi->common.fc.mvc_hp, flag);
+    }
+    vpx_memset(cpi->common.fc.pre_mvc_hp, 0, sizeof(cpi->common.fc.pre_mvc_hp));  //initialize pre_mvc to all zero.
+#endif
+
 
 #if CONFIG_T8X8
     cpi->common.txfm_mode = ONLY_4X4;

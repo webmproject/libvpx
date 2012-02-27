@@ -35,6 +35,11 @@ static unsigned int do_16x16_motion_iteration
     static int dummy_cost[2*mv_max+1];
     int *mvcost[2]    = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
     int *mvsadcost[2] = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
+#if CONFIG_HIGH_PRECISION_MV
+    static int dummy_cost_hp[2*mv_max_hp+1];
+    int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost[mv_max_hp+1] };
+    int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost[mv_max_hp+1] };
+#endif
     int col_min = (ref_mv->as_mv.col>>3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.col & 7)?1:0);
     int row_min = (ref_mv->as_mv.row>>3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.row & 7)?1:0);
     int col_max = (ref_mv->as_mv.col>>3) + MAX_FULL_PEL_VAL;
@@ -76,7 +81,12 @@ static unsigned int do_16x16_motion_iteration
                              step_param,
                              x->errorperbit,
                              &v_fn_ptr,
-                             mvsadcost, mvcost, ref_mv);
+#if CONFIG_HIGH_PRECISION_MV
+                             xd->allow_high_precision_mv?mvsadcost_hp:mvsadcost, xd->allow_high_precision_mv?mvcost_hp:mvcost,
+#else
+                             mvsadcost, mvcost,
+#endif
+                             ref_mv);
 
     // Try sub-pixel MC
     //if (bestsme > error_thresh && bestsme < INT_MAX)
@@ -86,7 +96,12 @@ static unsigned int do_16x16_motion_iteration
         best_err = cpi->find_fractional_mv_step(x, b, d,
                                                dst_mv, ref_mv,
                                                x->errorperbit, &v_fn_ptr,
-                                               mvcost, &distortion, &sse);
+#if CONFIG_HIGH_PRECISION_MV
+                                               xd->allow_high_precision_mv?mvcost_hp:mvcost,
+#else
+                                               mvcost,
+#endif
+                                               &distortion, &sse);
     }
 
     vp8_set_mbmode_and_mvs(x, NEWMV, dst_mv);

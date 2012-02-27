@@ -58,6 +58,10 @@ typedef struct frame_contexts
 #endif
     MV_CONTEXT mvc[2];
     MV_CONTEXT pre_mvc[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP mvc_hp[2];
+    MV_CONTEXT_HP pre_mvc_hp[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
+#endif
 } FRAME_CONTEXT;
 
 typedef enum

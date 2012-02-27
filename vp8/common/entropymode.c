@@ -226,7 +226,7 @@ struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
 struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
 #if CONFIG_HIGH_PRECISION_MV
-const vp8_tree_index vp8_small_mvtree [30] =
+const vp8_tree_index vp8_small_mvtree_hp [30] =
 {
      2,  16,
      4,  10,
@@ -244,9 +244,8 @@ const vp8_tree_index vp8_small_mvtree [30] =
    -12, -13,
    -14, -15
 };
-struct vp8_token_struct vp8_small_mvencodings [16];
-
-#else
+struct vp8_token_struct vp8_small_mvencodings_hp [16];
+#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 const vp8_tree_index vp8_small_mvtree [14] =
 {
@@ -260,7 +259,6 @@ const vp8_tree_index vp8_small_mvtree [14] =
 };
 struct vp8_token_struct vp8_small_mvencodings [8];
 
-#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 
 void vp8_init_mbmode_probs(VP8_COMMON *x)
@@ -381,6 +379,9 @@ void vp8_entropy_mode_init()
                                 vp8_sub_mv_ref_tree, LEFT4X4);
 
     vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
+#if CONFIG_HIGH_PRECISION_MV
+    vp8_tokens_from_tree(vp8_small_mvencodings_hp, vp8_small_mvtree_hp);
+#endif
 }
 
 void vp8_init_mode_contexts(VP8_COMMON *pc)

@@ -17,5 +17,10 @@
 void vp8_write_mvprobs(VP8_COMP *);
 void vp8_encode_motion_vector(vp8_writer *, const MV *, const MV_CONTEXT *);
 void vp8_build_component_cost_table(int *mvcost[2], const MV_CONTEXT *mvc, int mvc_flag[2]);
+#if CONFIG_HIGH_PRECISION_MV
+void vp8_write_mvprobs_hp(VP8_COMP *);
+void vp8_encode_motion_vector_hp(vp8_writer *, const MV *, const MV_CONTEXT_HP *);
+void vp8_build_component_cost_table_hp(int *mvcost[2], const MV_CONTEXT_HP *mvc, int mvc_flag[2]);
+#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 #endif
