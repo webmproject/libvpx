@@ -1332,10 +1332,6 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cm->refresh_last_frame = 1;
     cm->refresh_entropy_probs = 1;
 
-    if (cpi->oxcf.token_partitions >= 0 && cpi->oxcf.token_partitions <= 3)
-        cm->multi_token_partition =
-            (TOKEN_PARTITION) cpi->oxcf.token_partitions;
-
     setup_features(cpi);
 #if CONFIG_HIGH_PRECISION_MV
     cpi->mb.e_mbd.allow_high_precision_mv = 1;   // Default mv precision adaptation

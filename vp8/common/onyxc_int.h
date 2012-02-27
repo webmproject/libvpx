@@ -64,14 +64,6 @@ typedef struct frame_contexts
 
 typedef enum
 {
-    ONE_PARTITION  = 0,
-    TWO_PARTITION  = 1,
-    FOUR_PARTITION = 2,
-    EIGHT_PARTITION = 3
-} TOKEN_PARTITION;
-
-typedef enum
-{
     RECON_CLAMP_REQUIRED        = 0,
     RECON_CLAMP_NOTREQUIRED     = 1
 } CLAMP_TYPE;
@@ -258,8 +250,6 @@ typedef struct VP8Common
     unsigned int current_video_frame;
     int near_boffset[3];
     int version;
-
-    TOKEN_PARTITION multi_token_partition;
 
 #ifdef PACKET_TESTING
     VP8_HEADER oh;

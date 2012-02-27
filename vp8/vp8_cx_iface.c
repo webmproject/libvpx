@@ -229,7 +229,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
                                        vpx_codec_enc_cfg_t cfg,
                                        struct vp8_extracfg vp8_cfg)
 {
-    oxcf->multi_threaded         = cfg.g_threads;
     oxcf->Version               = cfg.g_profile;    
     oxcf->Version              |= vp8_cfg.experimental? 0x4 : 0;
 
@@ -308,7 +307,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->play_alternate         =  vp8_cfg.enable_auto_alt_ref;
     oxcf->noise_sensitivity      =  vp8_cfg.noise_sensitivity;
     oxcf->Sharpness             =  vp8_cfg.Sharpness;
-    oxcf->token_partitions       =  vp8_cfg.token_partitions;
 
     oxcf->two_pass_stats_in        =  cfg.rc_twopass_stats_in;
     oxcf->output_pkt_list         =  vp8_cfg.pkt_list;
@@ -345,7 +343,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
         printf("play_alternate: %d\n", oxcf->play_alternate);
         printf("Version: %d\n", oxcf->Version);
-        printf("multi_threaded: %d\n",   oxcf->multi_threaded);
         printf("encode_breakout: %d\n", oxcf->encode_breakout);
     */
     return VPX_CODEC_OK;
@@ -688,8 +685,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         if (ctx->base.init_flags & VPX_CODEC_USE_PSNR)
             ((VP8_COMP *)ctx->cpi)->b_calculate_psnr = 1;
 
-        if (ctx->base.init_flags & VPX_CODEC_USE_OUTPUT_PARTITION)
-            ((VP8_COMP *)ctx->cpi)->output_partition = 1;
+        //if (ctx->base.init_flags & VPX_CODEC_USE_OUTPUT_PARTITION)
+        //    ((VP8_COMP *)ctx->cpi)->output_partition = 1;
 
         /* Convert API flags to internal codec lib flags */
         lib_flags = (flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
@@ -758,11 +755,10 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                 if (cpi->droppable)
                     pkt.data.frame.flags |= VPX_FRAME_IS_DROPPABLE;
 
-                if (cpi->output_partition)
+                /*if (cpi->output_partition)
                 {
                     int i;
-                    const int num_partitions =
-                            (1 << cpi->common.multi_token_partition) + 1;
+                    const int num_partitions = 1;
 
                     pkt.data.frame.flags |= VPX_FRAME_IS_FRAGMENT;
 
@@ -771,7 +767,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                         pkt.data.frame.buf = cx_data;
                         pkt.data.frame.sz = cpi->partition_sz[i];
                         pkt.data.frame.partition_id = i;
-                        /* don't set the fragment bit for the last partition */
+                        // don't set the fragment bit for the last partition
                         if (i == (num_partitions - 1))
                             pkt.data.frame.flags &= ~VPX_FRAME_IS_FRAGMENT;
                         vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
@@ -779,7 +775,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                         cx_data_sz -= cpi->partition_sz[i];
                     }
                 }
-                else
+                else*/
                 {
                     pkt.data.frame.buf = cx_data;
                     pkt.data.frame.sz  = size;

@@ -393,9 +393,6 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             oxcf.Version = 9;
             oxcf.postprocess = 0;
             oxcf.max_threads = ctx->cfg.threads;
-            oxcf.input_partition =
-                    (ctx->base.init_flags & VPX_CODEC_USE_INPUT_PARTITION);
-
             optr = vp8dx_create_decompressor(&oxcf);
 
             /* If postprocessing was enabled by the application and a

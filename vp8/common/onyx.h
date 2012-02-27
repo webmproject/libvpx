@@ -166,8 +166,6 @@ extern "C"
         int play_alternate;
         int alt_freq;
 
-        int multi_threaded;   // how many threads to run the encoder on
-        int token_partitions; // how many token partitions to create for multi core decoding
         int encode_breakout;  // early breakout encode threshold : for video conf recommend 800
 
         int arnr_max_frames;

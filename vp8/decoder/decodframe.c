@@ -692,43 +692,6 @@ static unsigned int read_partition_size(const unsigned char *cx_size)
     return size;
 }
 
-static void setup_token_decoder_partition_input(VP8D_COMP *pbi)
-{
-    vp8_reader *bool_decoder = &pbi->bc2;
-    int part_idx = 1;
-    int num_token_partitions;
-
-    TOKEN_PARTITION multi_token_partition =
-            (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
-    if (!vp8dx_bool_error(&pbi->bc))
-        pbi->common.multi_token_partition = multi_token_partition;
-    num_token_partitions = 1 << pbi->common.multi_token_partition;
-    if (num_token_partitions + 1 > pbi->num_partitions)
-        vpx_internal_error(&pbi->common.error, VPX_CODEC_CORRUPT_FRAME,
-                           "Partitions missing");
-    assert(vp8dx_bool_error(&pbi->bc) ||
-           multi_token_partition == pbi->common.multi_token_partition);
-    if (pbi->num_partitions > 2)
-    {
-        CHECK_MEM_ERROR(pbi->mbc, vpx_malloc((pbi->num_partitions - 1) *
-                                             sizeof(vp8_reader)));
-        bool_decoder = pbi->mbc;
-    }
-
-    for (; part_idx < pbi->num_partitions; ++part_idx)
-    {
-        if (vp8dx_start_decode(bool_decoder,
-                               pbi->partitions[part_idx],
-                               pbi->partition_sizes[part_idx]))
-            vpx_internal_error(&pbi->common.error, VPX_CODEC_MEM_ERROR,
-                               "Failed to allocate bool decoder %d",
-                               part_idx);
-
-        bool_decoder++;
-    }
-}
-
-
 static int read_is_valid(const unsigned char *start,
                          size_t               len,
                          const unsigned char *end)
@@ -740,88 +703,37 @@ static int read_is_valid(const unsigned char *start,
 static void setup_token_decoder(VP8D_COMP *pbi,
                                 const unsigned char *cx_data)
 {
-    int num_part;
-    int i;
     VP8_COMMON          *pc = &pbi->common;
     const unsigned char *user_data_end = pbi->Source + pbi->source_sz;
     vp8_reader          *bool_decoder;
     const unsigned char *partition;
 
-    /* Parse number of token partitions to use */
-    const TOKEN_PARTITION multi_token_partition =
-            (TOKEN_PARTITION)vp8_read_literal(&pbi->bc, 2);
-    /* Only update the multi_token_partition field if we are sure the value
-     * is correct. */
-    if (!vp8dx_bool_error(&pbi->bc))
-        pc->multi_token_partition = multi_token_partition;
+    ptrdiff_t            partition_size;
+    ptrdiff_t            bytes_left;
 
-    num_part = 1 << pc->multi_token_partition;
+    // Dummy read for now
+    vp8_read_literal(&pbi->bc, 2);
 
-    /* Set up pointers to the first partition */
+    // Set up pointers to token partition
     partition = cx_data;
     bool_decoder = &pbi->bc2;
+    bytes_left = user_data_end - partition;
+    partition_size = bytes_left;
 
-    if (num_part > 1)
+    /* Validate the calculated partition length. If the buffer
+     * described by the partition can't be fully read, then restrict
+     * it to the portion that can be (for EC mode) or throw an error.
+     */
+    if (!read_is_valid(partition, partition_size, user_data_end))
     {
-        CHECK_MEM_ERROR(pbi->mbc, vpx_malloc(num_part * sizeof(vp8_reader)));
-        bool_decoder = pbi->mbc;
-        partition += 3 * (num_part - 1);
+        vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
+                           "Truncated packet or corrupt partition "
+                           "%d length", 1);
     }
 
-    for (i = 0; i < num_part; i++)
-    {
-        const unsigned char *partition_size_ptr = cx_data + i * 3;
-        ptrdiff_t            partition_size, bytes_left;
-
-        bytes_left = user_data_end - partition;
-
-        /* Calculate the length of this partition. The last partition
-         * size is implicit. If the partition size can't be read, then
-         * either use the remaining data in the buffer (for EC mode)
-         * or throw an error.
-         */
-        if (i < num_part - 1)
-        {
-            if (read_is_valid(partition_size_ptr, 3, user_data_end))
-                partition_size = read_partition_size(partition_size_ptr);
-            else
-                vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                                   "Truncated partition size data");
-        }
-        else
-            partition_size = bytes_left;
-
-        /* Validate the calculated partition length. If the buffer
-         * described by the partition can't be fully read, then restrict
-         * it to the portion that can be (for EC mode) or throw an error.
-         */
-        if (!read_is_valid(partition, partition_size, user_data_end))
-        {
-            vpx_internal_error(&pc->error, VPX_CODEC_CORRUPT_FRAME,
-                               "Truncated packet or corrupt partition "
-                               "%d length", i + 1);
-        }
-
-        if (vp8dx_start_decode(bool_decoder, partition, partition_size))
-            vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
-                               "Failed to allocate bool decoder %d", i + 1);
-
-        /* Advance to the next partition */
-        partition += partition_size;
-        bool_decoder++;
-    }
-}
-
-
-static void stop_token_decoder(VP8D_COMP *pbi)
-{
-    VP8_COMMON *pc = &pbi->common;
-
-    if (pc->multi_token_partition != ONE_PARTITION)
-    {
-        vpx_free(pbi->mbc);
-        pbi->mbc = NULL;
-    }
+    if (vp8dx_start_decode(bool_decoder, partition, partition_size))
+        vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
+                           "Failed to allocate bool decoder %d", 1);
 }
 
 static void init_frame(VP8D_COMP *pbi)
@@ -924,12 +836,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     int i, j, k, l;
     int corrupt_tokens = 0;
     int prev_independent_partitions = pbi->independent_partitions;
-
-    if (pbi->input_partition)
-    {
-        data = pbi->partitions[0];
-        data_end =  data + pbi->partition_sizes[0];
-    }
 
     /* start with no corruption of current frame */
     xd->corrupted = 0;
@@ -1218,14 +1124,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         }
     }
 
-    if (pbi->input_partition)
-    {
-        setup_token_decoder_partition_input(pbi);
-    }
-    else
-    {
-        setup_token_decoder(pbi, data + first_partition_length_in_bytes);
-    }
+    setup_token_decoder(pbi, data + first_partition_length_in_bytes);
+
     xd->current_bc = &pbi->bc2;
 
     /* Read the default quantizers. */
@@ -1390,47 +1290,22 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     // Resset the macroblock mode info context to the start of the list
     xd->mode_info_context = pc->mi;
 
-    {
-        int ibc = 0;
-        int num_part = 1 << pc->multi_token_partition;
-        pbi->frame_corrupt_residual = 0;
+    pbi->frame_corrupt_residual = 0;
 
 #if CONFIG_SUPERBLOCKS
-        /* Decode a row of super-blocks */
-        for (mb_row = 0; mb_row < pc->mb_rows; mb_row+=2)
-        {
-            if (num_part > 1)
-            {
-                xd->current_bc = & pbi->mbc[ibc];
-                ibc++;
-
-                if (ibc == num_part)
-                    ibc = 0;
-            }
-
-            decode_sb_row(pbi, pc, mb_row, xd);
-        }
-#else
-        /* Decode a row of macro blocks */
-        for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
-        {
-
-            if (num_part > 1)
-            {
-                xd->current_bc = & pbi->mbc[ibc];
-                ibc++;
-
-                if (ibc == num_part)
-                    ibc = 0;
-            }
-
-            decode_mb_row(pbi, pc, mb_row, xd);
-        }
-#endif /* CONFIG_SUPERBLOCKS */
-        corrupt_tokens |= xd->corrupted;
+    /* Decode a row of super-blocks */
+    for (mb_row = 0; mb_row < pc->mb_rows; mb_row+=2)
+    {
+        decode_sb_row(pbi, pc, mb_row, xd);
     }
-
-    stop_token_decoder(pbi);
+#else
+    /* Decode a row of macro blocks */
+    for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
+    {
+        decode_mb_row(pbi, pc, mb_row, xd);
+    }
+#endif /* CONFIG_SUPERBLOCKS */
+    corrupt_tokens |= xd->corrupted;
 
     /* Collect information about decoder corruption. */
     /* 1. Check first boolean decoder for errors. */

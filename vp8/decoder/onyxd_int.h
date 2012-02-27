@@ -100,7 +100,6 @@ typedef struct VP8Decompressor
 
     vp8_prob prob_skip_false;
 
-    int input_partition;
     int decoded_key_frame;
     int independent_partitions;
     int frame_corrupt_residual;
