@@ -252,7 +252,8 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
 void vp8_setup_inter_frame(VP8_COMP *cpi)
 {
 #if CONFIG_T8X8
-    if(cpi->common.Width * cpi->common.Height > 640*360)
+    if(cpi->common.Width * cpi->common.Height > 640*360
+        ||cpi->this_frame_target < 7 * cpi->common.MBs)
         cpi->common.txfm_mode = ALLOW_8X8;
     else
         cpi->common.txfm_mode = ONLY_4X4;
