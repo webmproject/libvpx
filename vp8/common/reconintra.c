@@ -136,21 +136,21 @@ void vp8_build_intra_predictors_mby_c(MACROBLOCKD *x)
     }
 }
 
-void vp8_build_intra_predictors_mby_s_c(MACROBLOCKD *x)
+void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x,
+                                          unsigned char * yabove_row,
+                                          unsigned char * yleft,
+                                          int left_stride,
+                                          unsigned char * ypred_ptr)
 {
-
-    unsigned char *yabove_row = x->dst.y_buffer - x->dst.y_stride;
     unsigned char yleft_col[16];
     unsigned char ytop_left = yabove_row[-1];
-    unsigned char *ypred_ptr = x->predictor;
     int r, c, i;
 
     int y_stride = x->dst.y_stride;
-    ypred_ptr = x->dst.y_buffer; /*x->predictor;*/
 
     for (i = 0; i < 16; i++)
     {
-        yleft_col[i] = x->dst.y_buffer [i* x->dst.y_stride -1];
+        yleft_col[i] = yleft[i* left_stride];
     }
 
     /* for Y */
@@ -400,24 +400,27 @@ void vp8_build_intra_predictors_mbuv_c(MACROBLOCKD *x)
     }
 }
 
-void vp8_build_intra_predictors_mbuv_s_c(MACROBLOCKD *x)
+void vp8_build_intra_predictors_mbuv_s_c(MACROBLOCKD *x,
+                                         unsigned char * uabove_row,
+                                         unsigned char * vabove_row,
+                                         unsigned char * uleft,
+                                         unsigned char * vleft,
+                                         int left_stride,
+                                         unsigned char * upred_ptr,
+                                         unsigned char * vpred_ptr)
 {
-    unsigned char *uabove_row = x->dst.u_buffer - x->dst.uv_stride;
-    unsigned char uleft_col[16];
+    unsigned char uleft_col[8];
     unsigned char utop_left = uabove_row[-1];
-    unsigned char *vabove_row = x->dst.v_buffer - x->dst.uv_stride;
-    unsigned char vleft_col[20];
+    unsigned char vleft_col[8];
     unsigned char vtop_left = vabove_row[-1];
-    unsigned char *upred_ptr = x->dst.u_buffer; /*&x->predictor[256];*/
-    unsigned char *vpred_ptr = x->dst.v_buffer; /*&x->predictor[320];*/
     int uv_stride = x->dst.uv_stride;
 
     int i, j;
 
     for (i = 0; i < 8; i++)
     {
-        uleft_col[i] = x->dst.u_buffer [i* x->dst.uv_stride -1];
-        vleft_col[i] = x->dst.v_buffer [i* x->dst.uv_stride -1];
+        uleft_col[i] = uleft [i* left_stride];
+        vleft_col[i] = vleft [i* left_stride];
     }
 
     switch (x->mode_info_context->mbmi.uv_mode)

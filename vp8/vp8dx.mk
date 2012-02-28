@@ -60,7 +60,5 @@ VP8_DX_SRCS-yes += decoder/onyxd_int.h
 VP8_DX_SRCS-yes += decoder/treereader.h
 VP8_DX_SRCS-yes += decoder/onyxd_if.c
 VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/threading.c
-VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/reconintra_mt.h
-VP8_DX_SRCS-$(CONFIG_MULTITHREAD) += decoder/reconintra_mt.c
 
 VP8_DX_SRCS-yes := $(filter-out $(VP8_DX_SRCS_REMOVE-yes),$(VP8_DX_SRCS-yes))

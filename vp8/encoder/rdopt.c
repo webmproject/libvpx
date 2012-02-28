@@ -701,7 +701,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-    vp8_intra_prediction_down_copy(xd);
+    intra_prediction_down_copy(xd, xd->dst.y_buffer - xd->dst.y_stride + 16);
 
     bmode_costs = mb->inter_bmode_costs;
 

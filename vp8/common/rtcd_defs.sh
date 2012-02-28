@@ -125,14 +125,14 @@ vp8_copy_mem8x4_media=vp8_copy_mem8x4_v6
 prototype void vp8_build_intra_predictors_mby "struct macroblockd *x"
 specialize vp8_build_intra_predictors_mby sse2 ssse3 neon
 
-prototype void vp8_build_intra_predictors_mby_s "struct macroblockd *x"
-specialize vp8_build_intra_predictors_mby_s sse2 ssse3 neon
+prototype void vp8_build_intra_predictors_mby_s "struct macroblockd *x, unsigned char * yabove_row, unsigned char * yleft, int left_stride, unsigned char * ypred_ptr"
+#TODO: fix assembly --- specialize vp8_build_intra_predictors_mby_s sse2 ssse3 neon
 
 prototype void vp8_build_intra_predictors_mbuv "struct macroblockd *x"
 specialize vp8_build_intra_predictors_mbuv sse2 ssse3
 
-prototype void vp8_build_intra_predictors_mbuv_s "struct macroblockd *x"
-specialize vp8_build_intra_predictors_mbuv_s sse2 ssse3
+prototype void vp8_build_intra_predictors_mbuv_s "struct macroblockd *x, unsigned char * uabove_row, unsigned char * vabove_row,  unsigned char *uleft, unsigned char *vleft, int left_stride, unsigned char * upred_ptr, unsigned char * vpred_ptr"
+#TODO: fix assembly --- specialize vp8_build_intra_predictors_mbuv_s sse2 ssse3
 
 prototype void vp8_intra4x4_predict "unsigned char *src, int src_stride, int b_mode, unsigned char *dst, int dst_stride"
 specialize vp8_intra4x4_predict media
