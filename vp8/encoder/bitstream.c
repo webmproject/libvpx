@@ -2257,8 +2257,8 @@ static void update_coef_probs(VP8_COMP *cpi)
     /* do not do this if not evena allowed */
     if(cpi->common.txfm_mode == ALLOW_8X8)
     {
-        update = 1;
         /* dry run to see if update is necessary */
+        update = 0;
         i = 0;
         do
         {
