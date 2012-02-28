@@ -213,16 +213,11 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    extend_qrange
-    segmentation
-    segfeatures
     t8x8
     csm
     qimode
     uvintra
-    newnear
     compred
-    newlpf
     enhanced_interp
     superblocks
     featureupdates
