@@ -160,7 +160,6 @@ void vp8_loop_filter_vertical_edge_c
     }
     while (++i < count * 8);
 }
-#if CONFIG_NEWLPF
 static __inline signed char vp8_flatmask(uc thresh,
                                          uc p4, uc p3, uc p2, uc p1, uc p0,
                                          uc q0, uc q1, uc q2, uc q3, uc q4)
@@ -250,63 +249,6 @@ static __inline void vp8_mbfilter(signed char mask, uc hev, uc flat,
         *op1 = u ^ 0x80;
     }
 }
-#else
-static __inline void vp8_mbfilter(signed char mask, uc hev,
-                                  uc *op2, uc *op1, uc *op0,
-                                  uc *oq0, uc *oq1, uc *oq2)
-{
-    signed char s, u;
-    signed char vp8_filter, Filter1, Filter2;
-    signed char ps2 = (signed char) * op2 ^ 0x80;
-    signed char ps1 = (signed char) * op1 ^ 0x80;
-    signed char ps0 = (signed char) * op0 ^ 0x80;
-    signed char qs0 = (signed char) * oq0 ^ 0x80;
-    signed char qs1 = (signed char) * oq1 ^ 0x80;
-    signed char qs2 = (signed char) * oq2 ^ 0x80;
-
-    /* add outer taps if we have high edge variance */
-    vp8_filter = vp8_signed_char_clamp(ps1 - qs1);
-    vp8_filter = vp8_signed_char_clamp(vp8_filter + 3 * (qs0 - ps0));
-    vp8_filter &= mask;
-
-    Filter2 = vp8_filter;
-    Filter2 &= hev;
-
-    /* save bottom 3 bits so that we round one side +4 and the other +3 */
-    Filter1 = vp8_signed_char_clamp(Filter2 + 4);
-    Filter2 = vp8_signed_char_clamp(Filter2 + 3);
-    Filter1 >>= 3;
-    Filter2 >>= 3;
-    qs0 = vp8_signed_char_clamp(qs0 - Filter1);
-    ps0 = vp8_signed_char_clamp(ps0 + Filter2);
-
-
-    /* only apply wider filter if not high edge variance */
-    vp8_filter &= ~hev;
-    Filter2 = vp8_filter;
-
-    /* roughly 3/7th difference across boundary */
-    u = vp8_signed_char_clamp((63 + Filter2 * 27) >> 7);
-    s = vp8_signed_char_clamp(qs0 - u);
-    *oq0 = s ^ 0x80;
-    s = vp8_signed_char_clamp(ps0 + u);
-    *op0 = s ^ 0x80;
-
-    /* roughly 2/7th difference across boundary */
-    u = vp8_signed_char_clamp((63 + Filter2 * 18) >> 7);
-    s = vp8_signed_char_clamp(qs1 - u);
-    *oq1 = s ^ 0x80;
-    s = vp8_signed_char_clamp(ps1 + u);
-    *op1 = s ^ 0x80;
-
-    /* roughly 1/7th difference across boundary */
-    u = vp8_signed_char_clamp((63 + Filter2 * 9) >> 7);
-    s = vp8_signed_char_clamp(qs2 - u);
-    *oq2 = s ^ 0x80;
-    s = vp8_signed_char_clamp(ps2 + u);
-    *op2 = s ^ 0x80;
-}
-#endif
 void vp8_mbloop_filter_horizontal_edge_c
 (
     unsigned char *s,
@@ -319,9 +261,7 @@ void vp8_mbloop_filter_horizontal_edge_c
 {
     signed char hev = 0; /* high edge variance */
     signed char mask = 0;
-#if CONFIG_NEWLPF
     signed char flat = 0;
-#endif
     int i = 0;
 
     /* loop filter designed to work using chars so that we can make maximum use
@@ -335,18 +275,14 @@ void vp8_mbloop_filter_horizontal_edge_c
                                s[ 0*p], s[ 1*p], s[ 2*p], s[ 3*p]);
 
         hev = vp8_hevmask(thresh[0], s[-2*p], s[-1*p], s[0*p], s[1*p]);
-#if CONFIG_NEWLPF
+
         flat = vp8_flatmask(thresh[0],
                             s[-5*p], s[-4*p], s[-3*p], s[-2*p], s[-1*p],
                             s[ 0*p], s[ 1*p], s[ 2*p], s[ 3*p], s[ 4*p]);
         vp8_mbfilter(mask, hev, flat,
                      s - 5*p, s - 4*p, s- 3*p, s - 2*p, s - 1*p,
                      s,       s + 1*p, s+ 2*p, s + 3*p, s + 4*p );
-#else
-        vp8_mbfilter(mask, hev,
-            s - 3*p, s - 2*p, s - 1*p,
-            s,       s + 1*p, s + 2*p);
-#endif
+
         ++s;
     }
     while (++i < count * 8);
@@ -366,9 +302,7 @@ void vp8_mbloop_filter_vertical_edge_c
 {
     signed char hev = 0; /* high edge variance */
     signed char mask = 0;
-#if CONFIG_NEWLPF
     signed char flat = 0;
-#endif
     int i = 0;
 
     do
@@ -379,18 +313,12 @@ void vp8_mbloop_filter_vertical_edge_c
                                s[0], s[1], s[2], s[3]);
 
         hev = vp8_hevmask(thresh[0], s[-2], s[-1], s[0], s[1]);
-#if CONFIG_NEWLPF
         flat = vp8_flatmask(thresh[0],
                             s[-5],s[-4],s[-3],s[-2],s[-1],
                             s[ 0],s[ 1],s[ 2],s[ 3],s[ 4]);
         vp8_mbfilter(mask, hev, flat,
                             s - 5, s - 4, s - 3, s - 2, s - 1,
                             s,     s + 1, s + 2, s + 3, s + 4);
-#else
-        vp8_mbfilter(mask, hev,
-                     s - 3, s - 2, s - 1,
-                     s,     s + 1, s + 2);
-#endif
         s += p;
     }
     while (++i < count * 8);
