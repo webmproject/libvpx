@@ -136,21 +136,21 @@ void vp8_build_intra_predictors_mby_c(MACROBLOCKD *x)
     }
 }
 
-void vp8_build_intra_predictors_mby_s_c(MACROBLOCKD *x)
+void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x,
+                                          unsigned char * yabove_row,
+                                          unsigned char * yleft,
+                                          int left_stride,
+                                          unsigned char * ypred_ptr)
 {
-
-    unsigned char *yabove_row = x->dst.y_buffer - x->dst.y_stride;
     unsigned char yleft_col[16];
     unsigned char ytop_left = yabove_row[-1];
-    unsigned char *ypred_ptr = x->predictor;
     int r, c, i;
 
     int y_stride = x->dst.y_stride;
-    ypred_ptr = x->dst.y_buffer; /*x->predictor;*/
 
     for (i = 0; i < 16; i++)
     {
-        yleft_col[i] = x->dst.y_buffer [i* x->dst.y_stride -1];
+        yleft_col[i] = yleft[i* left_stride];
     }
 
     /* for Y */

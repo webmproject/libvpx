@@ -184,7 +184,7 @@ static int pick_intra4x4mby_modes
     int distortion = 0;
     unsigned int *bmode_costs;
 
-    vp8_intra_prediction_down_copy(xd);
+    intra_prediction_down_copy(xd, xd->dst.y_buffer - xd->dst.y_stride + 16);
 
     bmode_costs = mb->inter_bmode_costs;
 

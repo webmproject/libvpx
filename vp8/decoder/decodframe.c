@@ -166,7 +166,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
         if (mode != B_PRED)
         {
-            vp8_build_intra_predictors_mby_s(xd);
+            vp8_build_intra_predictors_mby_s(xd,
+                                                 xd->dst.y_buffer - xd->dst.y_stride,
+                                                 xd->dst.y_buffer - 1,
+                                                 xd->dst.y_stride,
+                                                 xd->dst.y_buffer);
         }
         else
         {
@@ -178,16 +182,28 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             if(xd->mode_info_context->mbmi.mb_skip_coeff)
                 vpx_memset(xd->eobs, 0, 25);
 
-            vp8_intra_prediction_down_copy(xd);
+            intra_prediction_down_copy(xd, xd->dst.y_buffer - dst_stride + 16);
 
             for (i = 0; i < 16; i++)
             {
                 BLOCKD *b = &xd->block[i];
                 int b_mode = xd->mode_info_context->bmi[i].as_mode;
+                unsigned char *yabove;
+                unsigned char *yleft;
+                int left_stride;
+                unsigned char top_left;
 
+                yabove = base_dst + b->offset - dst_stride;
+                yleft = base_dst + b->offset - 1;
+                left_stride = dst_stride;
+                top_left = yabove[-1];
 
-                vp8_intra4x4_predict (base_dst + b->offset, dst_stride, b_mode,
-                                      base_dst + b->offset, dst_stride );
+                //                vp8_intra4x4_predict (base_dst + b->offset, dst_stride, b_mode,
+                  //                                    base_dst + b->offset, dst_stride );
+                vp8_intra4x4_predict_d_c(yabove, yleft, left_stride,
+                                       b_mode,
+                                       base_dst + b->offset, dst_stride,
+                                       top_left);
 
                 if (xd->eobs[i])
                 {

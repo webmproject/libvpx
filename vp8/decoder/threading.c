@@ -22,8 +22,8 @@
 #include "vp8/common/extend.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"
+#include "vp8/common/reconintra4x4.h"
 #include "vp8/common/reconinter.h"
-#include "reconintra_mt.h"
 #if CONFIG_ERROR_CONCEALMENT
 #include "error_concealment.h"
 #endif
@@ -85,7 +85,6 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
 
 static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int mb_col)
 {
-    int eobtotal = 0;
     int throw_residual = 0;
     int i;
 
@@ -124,6 +123,21 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
                                             vleft_col,
                                             1,
                                             xd->dst.u_buffer, xd->dst.v_buffer);
+
+            if (xd->mode_info_context->mbmi.mode != B_PRED)
+            {
+                unsigned char *yabove_row;
+                unsigned char *yleft_col;
+
+                yabove_row = pbi->mt_yabove_row[mb_row] + mb_col*16 +32;
+                yleft_col = pbi->mt_yleft_col[mb_row];
+
+                vp8_build_intra_predictors_mby_s(xd,
+                                                     yabove_row,
+                                                     yleft_col,
+                                                     1,
+                                                     xd->dst.y_buffer);
+            }
         }
         else
         {
@@ -134,14 +148,17 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
                                         xd->dst.v_buffer - 1,
                                         xd->dst.uv_stride,
                                         xd->dst.u_buffer, xd->dst.v_buffer);
+
+            if (xd->mode_info_context->mbmi.mode != B_PRED)
+            {
+                vp8_build_intra_predictors_mby_s(xd,
+                                                     xd->dst.y_buffer - xd->dst.y_stride,
+                                                     xd->dst.y_buffer - 1,
+                                                     xd->dst.y_stride,
+                                                     xd->dst.y_buffer);
+            }
         }
 
-        if (xd->mode_info_context->mbmi.mode != B_PRED)
-        {
-            vp8mt_build_intra_predictors_mby_s(pbi, xd, mb_row, mb_col);
-        } else {
-            vp8mt_intra_prediction_down_copy(pbi, xd, mb_row, mb_col);
-        }
     }
     else
     {
@@ -176,14 +193,51 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
         short *DQC = xd->dequant_y1;
         int dst_stride = xd->dst.y_stride;
         unsigned char *base_dst = xd->dst.y_buffer;
+        unsigned char *above_right_src;
+
+        if (pbi->common.filter_level)
+            above_right_src = pbi->mt_yabove_row[mb_row] + mb_col*16 + 32 +16;
+        else
+            above_right_src = xd->dst.y_buffer - dst_stride + 16;
+
+        intra_prediction_down_copy(xd, above_right_src);
+
 
         for (i = 0; i < 16; i++)
         {
             BLOCKD *b = &xd->block[i];
             int b_mode = xd->mode_info_context->bmi[i].as_mode;
+            unsigned char *yabove;
+            unsigned char *yleft;
+            int left_stride;
+            unsigned char top_left;
 
-            vp8mt_predict_intra4x4(pbi, xd, b_mode, base_dst + b->offset,
-                                   dst_stride, mb_row, mb_col, i);
+            /*Caution: For some b_mode, it needs 8 pixels (4 above + 4 above-right).*/
+            if (i < 4 && pbi->common.filter_level)
+                yabove = pbi->mt_yabove_row[mb_row] + mb_col*16 + i*4 + 32;
+            else
+                yabove = base_dst + b->offset - dst_stride;
+
+            if (i%4==0 && pbi->common.filter_level)
+            {
+                yleft = pbi->mt_yleft_col[mb_row] + i;
+                left_stride = 1;
+            }
+            else
+            {
+                yleft = base_dst + b->offset - 1;
+                left_stride = dst_stride;
+            }
+
+            if ((i==4 || i==8 || i==12) && pbi->common.filter_level)
+                top_left = pbi->mt_yleft_col[mb_row][i-1];
+            else
+                top_left = yabove[-1];
+
+            vp8_intra4x4_predict_d_c(yabove, yleft, left_stride,
+                                   b_mode,
+                                   base_dst + b->offset, dst_stride,
+                                   top_left);
 
             if (xd->eobs[i] )
             {
