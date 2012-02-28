@@ -245,6 +245,271 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd, int mb_row, int m
                      xd->dst.uv_stride, xd->eobs+16);
 }
 
+typedef void (*init_current_bc_fn_t)(VP8D_COMP *pbi, MACROBLOCKD *xd,
+    int start_mb_row, int mb_row, int num_part);
+
+static void init_current_bc(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row,
+                     int mb_row, int num_part)
+{
+    (void) start_mb_row;
+
+    xd->current_bc = &pbi->mbc[mb_row%num_part];
+}
+
+static void init_current_bc_threads(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                     int start_mb_row, int mb_row, int num_part)
+{
+    (void) xd;
+    pbi->mb_row_di[start_mb_row - 1].mb_row = mb_row;
+    pbi->mb_row_di[start_mb_row - 1].mbd.current_bc =  &pbi->mbc[mb_row%num_part];
+}
+
+
+static void decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row,
+                           init_current_bc_fn_t init_current_bc_fn)
+{
+    volatile int *last_row_current_mb_col = NULL;
+    int mb_row;
+    VP8_COMMON *pc = &pbi->common;
+    int nsync = pbi->sync_range;
+    int num_part = 1 << pbi->common.multi_token_partition;
+
+
+    for (mb_row = start_mb_row; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
+    {
+       int i;
+       int recon_yoffset, recon_uvoffset;
+       int mb_col;
+       int ref_fb_idx = pc->lst_fb_idx;
+       int dst_fb_idx = pc->new_fb_idx;
+       int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
+       int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
+
+       int filter_level;
+       loop_filter_info_n *lfi_n = &pc->lf_info;
+
+       init_current_bc_fn(pbi, xd, start_mb_row, mb_row, num_part);
+
+       if (mb_row > 0)
+           last_row_current_mb_col = &pbi->mt_current_mb_col[mb_row -1];
+
+       recon_yoffset = mb_row * recon_y_stride * 16;
+       recon_uvoffset = mb_row * recon_uv_stride * 8;
+       /* reset above block coeffs */
+
+       xd->above_context = pc->above_context;
+       vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+       xd->up_available = (mb_row != 0);
+
+       xd->mb_to_top_edge = -((mb_row * 16)) << 3;
+       xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+
+       for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
+       {
+           if ( mb_row > 0 && (mb_col & (nsync-1)) == 0)
+           {
+               while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != pc->mb_cols - 1)
+               {
+                   x86_pause_hint();
+                   thread_sleep(0);
+               }
+           }
+
+           /* Distance of MB to the various image edges.
+            * These are specified to 8th pel as they are always
+            * compared to values that are in 1/8th pel units.
+            */
+           xd->mb_to_left_edge = -((mb_col * 16) << 3);
+           xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+
+    #if CONFIG_ERROR_CONCEALMENT
+           {
+               int corrupt_residual =
+                           (!pbi->independent_partitions &&
+                           pbi->frame_corrupt_residual) ||
+                           vp8dx_bool_error(xd->current_bc);
+               if (pbi->ec_active &&
+                   (xd->mode_info_context->mbmi.ref_frame ==
+                                                    INTRA_FRAME) &&
+                   corrupt_residual)
+               {
+                   /* We have an intra block with corrupt
+                    * coefficients, better to conceal with an inter
+                    * block.
+                    * Interpolate MVs from neighboring MBs
+                    *
+                    * Note that for the first mb with corrupt
+                    * residual in a frame, we might not discover
+                    * that before decoding the residual. That
+                    * happens after this check, and therefore no
+                    * inter concealment will be done.
+                    */
+                   vp8_interpolate_motion(xd,
+                                          mb_row, mb_col,
+                                          pc->mb_rows, pc->mb_cols,
+                                          pc->mode_info_stride);
+               }
+           }
+    #endif
+
+
+           xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+           xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+           xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
+
+           xd->left_available = (mb_col != 0);
+
+           /* Select the appropriate reference frame for this MB */
+           if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
+               ref_fb_idx = pc->lst_fb_idx;
+           else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
+               ref_fb_idx = pc->gld_fb_idx;
+           else
+               ref_fb_idx = pc->alt_fb_idx;
+
+           xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
+           xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
+           xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
+
+           if (xd->mode_info_context->mbmi.ref_frame !=
+                   INTRA_FRAME)
+           {
+               /* propagate errors from reference frames */
+               xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
+           }
+
+           decode_macroblock(pbi, xd, mb_row, mb_col);
+
+           /* check if the boolean decoder has suffered an error */
+           xd->corrupted |= vp8dx_bool_error(xd->current_bc);
+
+           if (pbi->common.filter_level)
+           {
+               int skip_lf = (xd->mode_info_context->mbmi.mode != B_PRED &&
+                               xd->mode_info_context->mbmi.mode != SPLITMV &&
+                               xd->mode_info_context->mbmi.mb_skip_coeff);
+
+               const int mode_index = lfi_n->mode_lf_lut[xd->mode_info_context->mbmi.mode];
+               const int seg = xd->mode_info_context->mbmi.segment_id;
+               const int ref_frame = xd->mode_info_context->mbmi.ref_frame;
+
+               filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+
+               if( mb_row != pc->mb_rows-1 )
+               {
+                   /* Save decoded MB last row data for next-row decoding */
+                   vpx_memcpy((pbi->mt_yabove_row[mb_row + 1] + 32 + mb_col*16), (xd->dst.y_buffer + 15 * recon_y_stride), 16);
+                   vpx_memcpy((pbi->mt_uabove_row[mb_row + 1] + 16 + mb_col*8), (xd->dst.u_buffer + 7 * recon_uv_stride), 8);
+                   vpx_memcpy((pbi->mt_vabove_row[mb_row + 1] + 16 + mb_col*8), (xd->dst.v_buffer + 7 * recon_uv_stride), 8);
+               }
+
+               /* save left_col for next MB decoding */
+               if(mb_col != pc->mb_cols-1)
+               {
+                   MODE_INFO *next = xd->mode_info_context +1;
+
+                   if (next->mbmi.ref_frame == INTRA_FRAME)
+                   {
+                       for (i = 0; i < 16; i++)
+                           pbi->mt_yleft_col[mb_row][i] = xd->dst.y_buffer [i* recon_y_stride + 15];
+                       for (i = 0; i < 8; i++)
+                       {
+                           pbi->mt_uleft_col[mb_row][i] = xd->dst.u_buffer [i* recon_uv_stride + 7];
+                           pbi->mt_vleft_col[mb_row][i] = xd->dst.v_buffer [i* recon_uv_stride + 7];
+                       }
+                   }
+               }
+
+               /* loopfilter on this macroblock. */
+               if (filter_level)
+               {
+                   if(pc->filter_type == NORMAL_LOOPFILTER)
+                   {
+                       loop_filter_info lfi;
+                       FRAME_TYPE frame_type = pc->frame_type;
+                       const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
+                       lfi.mblim = lfi_n->mblim[filter_level];
+                       lfi.blim = lfi_n->blim[filter_level];
+                       lfi.lim = lfi_n->lim[filter_level];
+                       lfi.hev_thr = lfi_n->hev_thr[hev_index];
+
+                       if (mb_col > 0)
+                           vp8_loop_filter_mbv
+                           (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
+
+                       if (!skip_lf)
+                           vp8_loop_filter_bv
+                           (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
+
+                       /* don't apply across umv border */
+                       if (mb_row > 0)
+                           vp8_loop_filter_mbh
+                           (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
+
+                       if (!skip_lf)
+                           vp8_loop_filter_bh
+                           (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer,  recon_y_stride, recon_uv_stride, &lfi);
+                   }
+                   else
+                   {
+                       if (mb_col > 0)
+                           vp8_loop_filter_simple_mbv
+                           (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
+
+                       if (!skip_lf)
+                           vp8_loop_filter_simple_bv
+                           (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
+
+                       /* don't apply across umv border */
+                       if (mb_row > 0)
+                           vp8_loop_filter_simple_mbh
+                           (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
+
+                       if (!skip_lf)
+                           vp8_loop_filter_simple_bh
+                           (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
+                   }
+               }
+
+           }
+
+           recon_yoffset += 16;
+           recon_uvoffset += 8;
+
+           ++xd->mode_info_context;  /* next mb */
+
+           xd->above_context++;
+
+           /*pbi->mb_row_di[ithread].current_mb_col = mb_col;*/
+           pbi->mt_current_mb_col[mb_row] = mb_col;
+       }
+
+       /* adjust to the next row of mbs */
+       if (pbi->common.filter_level)
+       {
+           if(mb_row != pc->mb_rows-1)
+           {
+               int lasty = pc->yv12_fb[ref_fb_idx].y_width + VP8BORDERINPIXELS;
+               int lastuv = (pc->yv12_fb[ref_fb_idx].y_width>>1) + (VP8BORDERINPIXELS>>1);
+
+               for (i = 0; i < 4; i++)
+               {
+                   pbi->mt_yabove_row[mb_row +1][lasty + i] = pbi->mt_yabove_row[mb_row +1][lasty -1];
+                   pbi->mt_uabove_row[mb_row +1][lastuv + i] = pbi->mt_uabove_row[mb_row +1][lastuv -1];
+                   pbi->mt_vabove_row[mb_row +1][lastuv + i] = pbi->mt_vabove_row[mb_row +1][lastuv -1];
+               }
+           }
+       } else
+           vp8_extend_mb_row(&pc->yv12_fb[dst_fb_idx], xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
+
+       ++xd->mode_info_context;      /* skip prediction column */
+
+       /* since we have multithread */
+       xd->mode_info_context += xd->mode_info_stride * pbi->decoding_thread_count;
+    }
+}
+
+
 static THREAD_FUNCTION thread_decoding_proc(void *p_data)
 {
     int ithread = ((DECODETHREAD_DATA *)p_data)->ithread;
@@ -264,251 +529,18 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
                 break;
             else
             {
-                VP8_COMMON *pc = &pbi->common;
                 MACROBLOCKD *xd = &mbrd->mbd;
 
-                int mb_row;
-                int num_part = 1 << pbi->common.multi_token_partition;
-                volatile int *last_row_current_mb_col;
-                int nsync = pbi->sync_range;
+                xd->left_context = &mb_row_left_context;
 
-                for (mb_row = ithread+1; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
-                {
-                    int i;
-                    int recon_yoffset, recon_uvoffset;
-                    int mb_col;
-                    int ref_fb_idx = pc->lst_fb_idx;
-                    int dst_fb_idx = pc->new_fb_idx;
-                    int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
-                    int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
-
-                    int filter_level;
-                    loop_filter_info_n *lfi_n = &pc->lf_info;
-
-                    pbi->mb_row_di[ithread].mb_row = mb_row;
-                    pbi->mb_row_di[ithread].mbd.current_bc =  &pbi->mbc[mb_row%num_part];
-
-                    last_row_current_mb_col = &pbi->mt_current_mb_col[mb_row -1];
-
-                    recon_yoffset = mb_row * recon_y_stride * 16;
-                    recon_uvoffset = mb_row * recon_uv_stride * 8;
-                    /* reset above block coeffs */
-
-                    xd->above_context = pc->above_context;
-                    xd->left_context = &mb_row_left_context;
-                    vpx_memset(&mb_row_left_context, 0, sizeof(mb_row_left_context));
-                    xd->up_available = (mb_row != 0);
-
-                    xd->mb_to_top_edge = -((mb_row * 16)) << 3;
-                    xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
-
-                    for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
-                    {
-                        if ((mb_col & (nsync-1)) == 0)
-                        {
-                            while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != pc->mb_cols - 1)
-                            {
-                                x86_pause_hint();
-                                thread_sleep(0);
-                            }
-                        }
-
-                        /* Distance of MB to the various image edges.
-                         * These are specified to 8th pel as they are always
-                         * compared to values that are in 1/8th pel units.
-                         */
-                        xd->mb_to_left_edge = -((mb_col * 16) << 3);
-                        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
-
-#if CONFIG_ERROR_CONCEALMENT
-                        {
-                            int corrupt_residual =
-                                        (!pbi->independent_partitions &&
-                                        pbi->frame_corrupt_residual) ||
-                                        vp8dx_bool_error(xd->current_bc);
-                            if (pbi->ec_active &&
-                                (xd->mode_info_context->mbmi.ref_frame ==
-                                                                 INTRA_FRAME) &&
-                                corrupt_residual)
-                            {
-                                /* We have an intra block with corrupt
-                                 * coefficients, better to conceal with an inter
-                                 * block.
-                                 * Interpolate MVs from neighboring MBs
-                                 *
-                                 * Note that for the first mb with corrupt
-                                 * residual in a frame, we might not discover
-                                 * that before decoding the residual. That
-                                 * happens after this check, and therefore no
-                                 * inter concealment will be done.
-                                 */
-                                vp8_interpolate_motion(xd,
-                                                       mb_row, mb_col,
-                                                       pc->mb_rows, pc->mb_cols,
-                                                       pc->mode_info_stride);
-                            }
-                        }
-#endif
-
-
-                        xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
-                        xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
-                        xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
-
-                        xd->left_available = (mb_col != 0);
-
-                        /* Select the appropriate reference frame for this MB */
-                        if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-                            ref_fb_idx = pc->lst_fb_idx;
-                        else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-                            ref_fb_idx = pc->gld_fb_idx;
-                        else
-                            ref_fb_idx = pc->alt_fb_idx;
-
-                        xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-                        xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-                        xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
-
-                        if (xd->mode_info_context->mbmi.ref_frame !=
-                                INTRA_FRAME)
-                        {
-                            /* propagate errors from reference frames */
-                            xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
-                        }
-
-                        decode_macroblock(pbi, xd, mb_row, mb_col);
-
-                        /* check if the boolean decoder has suffered an error */
-                        xd->corrupted |= vp8dx_bool_error(xd->current_bc);
-
-                        if (pbi->common.filter_level)
-                        {
-                            int skip_lf = (xd->mode_info_context->mbmi.mode != B_PRED &&
-                                            xd->mode_info_context->mbmi.mode != SPLITMV &&
-                                            xd->mode_info_context->mbmi.mb_skip_coeff);
-
-                            const int mode_index = lfi_n->mode_lf_lut[xd->mode_info_context->mbmi.mode];
-                            const int seg = xd->mode_info_context->mbmi.segment_id;
-                            const int ref_frame = xd->mode_info_context->mbmi.ref_frame;
-
-                            filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
-
-                            if( mb_row != pc->mb_rows-1 )
-                            {
-                                /* Save decoded MB last row data for next-row decoding */
-                                vpx_memcpy((pbi->mt_yabove_row[mb_row + 1] + 32 + mb_col*16), (xd->dst.y_buffer + 15 * recon_y_stride), 16);
-                                vpx_memcpy((pbi->mt_uabove_row[mb_row + 1] + 16 + mb_col*8), (xd->dst.u_buffer + 7 * recon_uv_stride), 8);
-                                vpx_memcpy((pbi->mt_vabove_row[mb_row + 1] + 16 + mb_col*8), (xd->dst.v_buffer + 7 * recon_uv_stride), 8);
-                            }
-
-                            /* save left_col for next MB decoding */
-                            if(mb_col != pc->mb_cols-1)
-                            {
-                                MODE_INFO *next = xd->mode_info_context +1;
-
-                                if (next->mbmi.ref_frame == INTRA_FRAME)
-                                {
-                                    for (i = 0; i < 16; i++)
-                                        pbi->mt_yleft_col[mb_row][i] = xd->dst.y_buffer [i* recon_y_stride + 15];
-                                    for (i = 0; i < 8; i++)
-                                    {
-                                        pbi->mt_uleft_col[mb_row][i] = xd->dst.u_buffer [i* recon_uv_stride + 7];
-                                        pbi->mt_vleft_col[mb_row][i] = xd->dst.v_buffer [i* recon_uv_stride + 7];
-                                    }
-                                }
-                            }
-
-                            /* loopfilter on this macroblock. */
-                            if (filter_level)
-                            {
-                                if(pc->filter_type == NORMAL_LOOPFILTER)
-                                {
-                                    loop_filter_info lfi;
-                                    FRAME_TYPE frame_type = pc->frame_type;
-                                    const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
-                                    lfi.mblim = lfi_n->mblim[filter_level];
-                                    lfi.blim = lfi_n->blim[filter_level];
-                                    lfi.lim = lfi_n->lim[filter_level];
-                                    lfi.hev_thr = lfi_n->hev_thr[hev_index];
-
-                                    if (mb_col > 0)
-                                        vp8_loop_filter_mbv
-                                        (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
-
-                                    if (!skip_lf)
-                                        vp8_loop_filter_bv
-                                        (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
-
-                                    /* don't apply across umv border */
-                                    if (mb_row > 0)
-                                        vp8_loop_filter_mbh
-                                        (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
-
-                                    if (!skip_lf)
-                                        vp8_loop_filter_bh
-                                        (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer,  recon_y_stride, recon_uv_stride, &lfi);
-                                }
-                                else
-                                {
-                                    if (mb_col > 0)
-                                        vp8_loop_filter_simple_mbv
-                                        (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
-
-                                    if (!skip_lf)
-                                        vp8_loop_filter_simple_bv
-                                        (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
-
-                                    /* don't apply across umv border */
-                                    if (mb_row > 0)
-                                        vp8_loop_filter_simple_mbh
-                                        (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
-
-                                    if (!skip_lf)
-                                        vp8_loop_filter_simple_bh
-                                        (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
-                                }
-                            }
-
-                        }
-
-                        recon_yoffset += 16;
-                        recon_uvoffset += 8;
-
-                        ++xd->mode_info_context;  /* next mb */
-
-                        xd->above_context++;
-
-                        /*pbi->mb_row_di[ithread].current_mb_col = mb_col;*/
-                        pbi->mt_current_mb_col[mb_row] = mb_col;
-                    }
-
-                    /* adjust to the next row of mbs */
-                    if (pbi->common.filter_level)
-                    {
-                        if(mb_row != pc->mb_rows-1)
-                        {
-                            int lasty = pc->yv12_fb[ref_fb_idx].y_width + VP8BORDERINPIXELS;
-                            int lastuv = (pc->yv12_fb[ref_fb_idx].y_width>>1) + (VP8BORDERINPIXELS>>1);
-
-                            for (i = 0; i < 4; i++)
-                            {
-                                pbi->mt_yabove_row[mb_row +1][lasty + i] = pbi->mt_yabove_row[mb_row +1][lasty -1];
-                                pbi->mt_uabove_row[mb_row +1][lastuv + i] = pbi->mt_uabove_row[mb_row +1][lastuv -1];
-                                pbi->mt_vabove_row[mb_row +1][lastuv + i] = pbi->mt_vabove_row[mb_row +1][lastuv -1];
-                            }
-                        }
-                    } else
-                        vp8_extend_mb_row(&pc->yv12_fb[dst_fb_idx], xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
-
-                    ++xd->mode_info_context;      /* skip prediction column */
-
-                    /* since we have multithread */
-                    xd->mode_info_context += xd->mode_info_stride * pbi->decoding_thread_count;
-                }
+                decode_mb_rows(pbi, xd, ithread+1, init_current_bc_threads);
             }
         }
+
         /*  add this to each frame */
-        if ((mbrd->mb_row == pbi->common.mb_rows-1) || ((mbrd->mb_row == pbi->common.mb_rows-2) && (pbi->common.mb_rows % (pbi->decoding_thread_count+1))==1))
+        if ((mbrd->mb_row == pbi->common.mb_rows-1) ||
+            ((mbrd->mb_row == pbi->common.mb_rows-2) &&
+                (pbi->common.mb_rows % (pbi->decoding_thread_count+1))==1))
         {
             /*SetEvent(pbi->h_event_end_decoding);*/
             sem_post(&pbi->h_event_end_decoding);
@@ -735,16 +767,10 @@ void vp8_decoder_remove_threads(VP8D_COMP *pbi)
 
 void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
-    int mb_row;
     VP8_COMMON *pc = &pbi->common;
-
-    int num_part = 1 << pbi->common.multi_token_partition;
     int i;
-    volatile int *last_row_current_mb_col = NULL;
-    int nsync = pbi->sync_range;
 
     int filter_level = pc->filter_level;
-    loop_filter_info_n *lfi_n = &pc->lf_info;
 
     if (filter_level)
     {
@@ -777,229 +803,7 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
     for (i = 0; i < pbi->decoding_thread_count; i++)
         sem_post(&pbi->h_event_start_decoding[i]);
 
-    for (mb_row = 0; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
-    {
-        xd->current_bc = &pbi->mbc[mb_row%num_part];
-
-        /* vp8_decode_mb_row(pbi, pc, mb_row, xd); */
-        {
-            int i;
-            int recon_yoffset, recon_uvoffset;
-            int mb_col;
-            int ref_fb_idx = pc->lst_fb_idx;
-            int dst_fb_idx = pc->new_fb_idx;
-            int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
-            int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
-
-           /* volatile int *last_row_current_mb_col = NULL; */
-            if (mb_row > 0)
-                last_row_current_mb_col = &pbi->mt_current_mb_col[mb_row -1];
-
-            vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
-            recon_yoffset = mb_row * recon_y_stride * 16;
-            recon_uvoffset = mb_row * recon_uv_stride * 8;
-            /* reset above block coeffs */
-
-            xd->above_context = pc->above_context;
-            xd->up_available = (mb_row != 0);
-
-            xd->mb_to_top_edge = -((mb_row * 16)) << 3;
-            xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
-
-            for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
-            {
-                if ( mb_row > 0 && (mb_col & (nsync-1)) == 0){
-                    while (mb_col > (*last_row_current_mb_col - nsync) && *last_row_current_mb_col != pc->mb_cols - 1)
-                    {
-                        x86_pause_hint();
-                        thread_sleep(0);
-                    }
-                }
-
-                /* Distance of MB to the various image edges.
-                 * These are specified to 8th pel as they are always compared to
-                 * values that are in 1/8th pel units.
-                 */
-                xd->mb_to_left_edge = -((mb_col * 16) << 3);
-                xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
-
-#if CONFIG_ERROR_CONCEALMENT
-                {
-                    int corrupt_residual = (!pbi->independent_partitions &&
-                                            pbi->frame_corrupt_residual) ||
-                                            vp8dx_bool_error(xd->current_bc);
-                    if (pbi->ec_active &&
-                        (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) &&
-                        corrupt_residual)
-                    {
-                        /* We have an intra block with corrupt coefficients,
-                         * better to conceal with an inter block. Interpolate
-                         * MVs from neighboring MBs
-                         *
-                         * Note that for the first mb with corrupt residual in a
-                         * frame, we might not discover that before decoding the
-                         * residual. That happens after this check, and
-                         * therefore no inter concealment will be done.
-                         */
-                        vp8_interpolate_motion(xd,
-                                               mb_row, mb_col,
-                                               pc->mb_rows, pc->mb_cols,
-                                               pc->mode_info_stride);
-                    }
-                }
-#endif
-
-
-                xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
-                xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
-                xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
-
-                xd->left_available = (mb_col != 0);
-
-                /* Select the appropriate reference frame for this MB */
-                if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-                    ref_fb_idx = pc->lst_fb_idx;
-                else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-                    ref_fb_idx = pc->gld_fb_idx;
-                else
-                    ref_fb_idx = pc->alt_fb_idx;
-
-                xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-                xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-                xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
-
-                if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME)
-                {
-                    /* propagate errors from reference frames */
-                    xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
-                }
-
-                decode_macroblock(pbi, xd, mb_row, mb_col);
-
-                /* check if the boolean decoder has suffered an error */
-                xd->corrupted |= vp8dx_bool_error(xd->current_bc);
-
-                if (pbi->common.filter_level)
-                {
-                    int skip_lf = (xd->mode_info_context->mbmi.mode != B_PRED &&
-                                    xd->mode_info_context->mbmi.mode != SPLITMV &&
-                                    xd->mode_info_context->mbmi.mb_skip_coeff);
-
-                    const int mode_index = lfi_n->mode_lf_lut[xd->mode_info_context->mbmi.mode];
-                    const int seg = xd->mode_info_context->mbmi.segment_id;
-                    const int ref_frame = xd->mode_info_context->mbmi.ref_frame;
-
-                    filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
-
-                    /* Save decoded MB last row data for next-row decoding */
-                    if(mb_row != pc->mb_rows-1)
-                    {
-                        vpx_memcpy((pbi->mt_yabove_row[mb_row +1] + 32 + mb_col*16), (xd->dst.y_buffer + 15 * recon_y_stride), 16);
-                        vpx_memcpy((pbi->mt_uabove_row[mb_row +1] + 16 + mb_col*8), (xd->dst.u_buffer + 7 * recon_uv_stride), 8);
-                        vpx_memcpy((pbi->mt_vabove_row[mb_row +1] + 16 + mb_col*8), (xd->dst.v_buffer + 7 * recon_uv_stride), 8);
-                    }
-
-                    /* save left_col for next MB decoding */
-                    if(mb_col != pc->mb_cols-1)
-                    {
-                        MODE_INFO *next = xd->mode_info_context +1;
-
-                        if (next->mbmi.ref_frame == INTRA_FRAME)
-                        {
-                            for (i = 0; i < 16; i++)
-                                pbi->mt_yleft_col[mb_row][i] = xd->dst.y_buffer [i* recon_y_stride + 15];
-                            for (i = 0; i < 8; i++)
-                            {
-                                pbi->mt_uleft_col[mb_row][i] = xd->dst.u_buffer [i* recon_uv_stride + 7];
-                                pbi->mt_vleft_col[mb_row][i] = xd->dst.v_buffer [i* recon_uv_stride + 7];
-                            }
-                        }
-                    }
-
-                    /* loopfilter on this macroblock. */
-                    if (filter_level)
-                    {
-                        if(pc->filter_type == NORMAL_LOOPFILTER)
-                        {
-                            loop_filter_info lfi;
-                            FRAME_TYPE frame_type = pc->frame_type;
-                            const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
-                            lfi.mblim = lfi_n->mblim[filter_level];
-                            lfi.blim = lfi_n->blim[filter_level];
-                            lfi.lim = lfi_n->lim[filter_level];
-                            lfi.hev_thr = lfi_n->hev_thr[hev_index];
-
-                            if (mb_col > 0)
-                                vp8_loop_filter_mbv
-                                (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
-
-                            if (!skip_lf)
-                                vp8_loop_filter_bv
-                                (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
-
-                            /* don't apply across umv border */
-                            if (mb_row > 0)
-                                vp8_loop_filter_mbh
-                                (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer, recon_y_stride, recon_uv_stride, &lfi);
-
-                            if (!skip_lf)
-                                vp8_loop_filter_bh
-                                (xd->dst.y_buffer, xd->dst.u_buffer, xd->dst.v_buffer,  recon_y_stride, recon_uv_stride, &lfi);
-                        }
-                        else
-                        {
-                            if (mb_col > 0)
-                                vp8_loop_filter_simple_mbv
-                                (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
-
-                            if (!skip_lf)
-                                vp8_loop_filter_simple_bv
-                                (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
-
-                            /* don't apply across umv border */
-                            if (mb_row > 0)
-                                vp8_loop_filter_simple_mbh
-                                (xd->dst.y_buffer, recon_y_stride, lfi_n->mblim[filter_level]);
-
-                            if (!skip_lf)
-                                vp8_loop_filter_simple_bh
-                                (xd->dst.y_buffer, recon_y_stride, lfi_n->blim[filter_level]);
-                        }
-                    }
-
-                }
-                recon_yoffset += 16;
-                recon_uvoffset += 8;
-
-                ++xd->mode_info_context;  /* next mb */
-
-                xd->above_context++;
-
-                pbi->mt_current_mb_col[mb_row] = mb_col;
-            }
-
-            /* adjust to the next row of mbs */
-            if (pbi->common.filter_level)
-            {
-                if(mb_row != pc->mb_rows-1)
-                {
-                    int lasty = pc->yv12_fb[ref_fb_idx].y_width + VP8BORDERINPIXELS;
-                    int lastuv = (pc->yv12_fb[ref_fb_idx].y_width>>1) + (VP8BORDERINPIXELS>>1);
-
-                    for (i = 0; i < 4; i++)
-                    {
-                        pbi->mt_yabove_row[mb_row +1][lasty + i] = pbi->mt_yabove_row[mb_row +1][lasty -1];
-                        pbi->mt_uabove_row[mb_row +1][lastuv + i] = pbi->mt_uabove_row[mb_row +1][lastuv -1];
-                        pbi->mt_vabove_row[mb_row +1][lastuv + i] = pbi->mt_vabove_row[mb_row +1][lastuv -1];
-                    }
-                }
-            }else
-                vp8_extend_mb_row(&pc->yv12_fb[dst_fb_idx], xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
-
-            ++xd->mode_info_context;      /* skip prediction column */
-        }
-        xd->mode_info_context += xd->mode_info_stride * pbi->decoding_thread_count;
-    }
+    decode_mb_rows(pbi, xd, 0, init_current_bc);
 
     sem_wait(&pbi->h_event_end_decoding);   /* add back for each frame */
 }
