@@ -609,8 +609,10 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
 
     //zbin = (zbin_ptr[rc!=0] + *zbin_boost_ptr + zbin_oq_value)/q1st;
     zbin = (zbin_ptr[rc!=0] + *zbin_boost_ptr + zbin_oq_value);
+    //TODO: 8x8 zbin boost needs be done properly
+    if(zbin_boost_ptr < &b->zrun_zbin_boost[15])
+        zbin_boost_ptr ++;
 
-    zbin_boost_ptr ++;
     sz = (z >> 31);                                 // sign of z
     x  = (z ^ sz) - sz;                             // x = abs(z)
 
@@ -693,7 +695,6 @@ void vp8_strict_quantize_b_2x2(BLOCK *b, BLOCKD *d)
         eob = i;
     }
   }
-
   d->eob = eob + 1;
 }
 
