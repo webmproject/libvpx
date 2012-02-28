@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//j/A\u003d",
+        "filename": "vp8/common/reconintra4x4.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-02-28T18:49:10Z",
+      "side": 1,
+      "message": "can vp8_intra4x4_predict_c call this function to remove all this duplicate code?",
+      "revId": "41a8b8a4058f9a3954e22b5dc745b758fcd8042a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
