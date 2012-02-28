@@ -32,8 +32,6 @@ typedef struct
 {
     MACROBLOCKD  mbd;
     int mb_row;
-    int current_mb_col;
-    short *coef_ptr;
 } MB_ROW_DEC;
 
 typedef struct
