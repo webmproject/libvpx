@@ -2468,7 +2468,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     }
 
     *size = VP8_HEADER_SIZE + extra_bytes_packed + cpi->bc.pos;
-    cpi->partition_sz[0] = *size;
 
     vp8_start_encode(&cpi->bc2, cx_data + bc->pos);
 
@@ -2477,7 +2476,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     vp8_stop_encode(&cpi->bc2);
 
     *size += cpi->bc2.pos;
-    cpi->partition_sz[1] = cpi->bc2.pos;
 }
 
 #ifdef ENTROPY_STATS

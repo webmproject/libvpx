@@ -40,8 +40,6 @@ void vp8_initialize_common(void);
 
 #define NUM_YV12_BUFFERS 4
 
-#define MAX_PARTITIONS 9
-
 #define DUAL_PRED_CONTEXTS   2
 
 typedef struct frame_contexts

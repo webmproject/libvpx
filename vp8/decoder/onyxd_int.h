@@ -82,9 +82,6 @@ typedef struct VP8Decompressor
 
     const unsigned char *Source;
     unsigned int   source_sz;
-    const unsigned char *partitions[MAX_PARTITIONS];
-    unsigned int   partition_sizes[MAX_PARTITIONS];
-    unsigned int   num_partitions;
 
     vp8_reader *mbc;
     int64_t last_time_stamp;
@@ -101,8 +98,6 @@ typedef struct VP8Decompressor
     vp8_prob prob_skip_false;
 
     int decoded_key_frame;
-    int independent_partitions;
-    int frame_corrupt_residual;
 
 } VP8D_COMP;
 

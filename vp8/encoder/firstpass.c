@@ -870,13 +870,13 @@ static long long estimate_modemvcost(VP8_COMP *cpi,
 }
 
 static double calc_correction_factor( double err_per_mb,
-                                      double err_devisor,
+                                      double err_divisor,
                                       double pt_low,
                                       double pt_high,
                                       int Q )
 {
     double power_term;
-    double error_term = err_per_mb / err_devisor;
+    double error_term = err_per_mb / err_divisor;
     double correction_factor;
 
     // Adjustment based on actual quantizer to power term.
@@ -926,7 +926,7 @@ static double adjust_maxq_qrange(VP8_COMP *cpi)
             break;
     }
 }
-#define ERR_DEVISOR   150.0
+#define ERR_DIVISOR   150.0
 static int estimate_max_q(VP8_COMP *cpi,
                           FIRSTPASS_STATS * fpstats,
                           int section_target_bandwitdh,
@@ -1000,7 +1000,7 @@ static int estimate_max_q(VP8_COMP *cpi,
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, ERR_DEVISOR, 0.36, 0.90, Q);
+            calc_correction_factor(err_per_mb, ERR_DIVISOR, 0.36, 0.90, Q);
 
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
@@ -1163,7 +1163,7 @@ static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_band
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, ERR_DEVISOR, 0.36, 0.90, Q);
+            calc_correction_factor(err_per_mb, ERR_DIVISOR, 0.36, 0.90, Q);
 
         bits_per_mb_at_this_q =
             (int)( .5 + ( err_correction_factor *
@@ -1237,7 +1237,7 @@ static int estimate_kf_group_q(VP8_COMP *cpi, double section_err, int section_ta
     {
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(err_per_mb, ERR_DEVISOR, pow_lowq, pow_highq, Q);
+            calc_correction_factor(err_per_mb, ERR_DIVISOR, pow_lowq, pow_highq, Q);
 
         bits_per_mb_at_this_q =
             (int)(.5 + ( err_correction_factor *

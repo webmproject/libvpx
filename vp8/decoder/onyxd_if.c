@@ -161,13 +161,6 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 
     pbi->decoded_key_frame = 0;
 
-
-    /* Independent partitions is activated when a frame updates the
-     * token probability table to have equal probabilities over the
-     * PREV_COEF context.
-     */
-    pbi->independent_partitions = 0;
-
     return (VP8D_PTR) pbi;
 }
 

@@ -525,9 +525,6 @@ typedef struct VP8_COMP
     unsigned int active_map_enabled;
 
     TOKENLIST *tplist;
-    unsigned int partition_sz[MAX_PARTITIONS];
-    // end of multithread data
-
 
     fractional_mv_step_fp *find_fractional_mv_step;
     vp8_full_search_fn_t full_search_sad;

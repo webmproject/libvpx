@@ -155,7 +155,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                               unsigned int mb_idx)
 {
     int eobtotal = 0;
-    int throw_residual = 0;
     MB_PREDICTION_MODE mode;
     int i;
 
@@ -263,12 +262,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     {
         vp8_build_inter_predictors_mb(xd);
     }
-    /* When we have independent partitions we can apply residual even
-     * though other partitions within the frame are corrupt.
-     */
-    throw_residual = (!pbi->independent_partitions &&
-                      pbi->frame_corrupt_residual);
-    throw_residual = (throw_residual || vp8dx_bool_error(xd->current_bc));
 
     /* dequantization and idct */
     if (mode == I8X8_PRED)
@@ -835,7 +828,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     int mb_row;
     int i, j, k, l;
     int corrupt_tokens = 0;
-    int prev_independent_partitions = pbi->independent_partitions;
 
     /* start with no corruption of current frame */
     xd->corrupted = 0;
@@ -1215,8 +1207,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
     {
-        pbi->independent_partitions = 1;
-
         if(vp8_read_bit(bc))
         {
         /* read coef probability tree */
@@ -1232,8 +1222,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                             *p = (vp8_prob)vp8_read_literal(bc, 8);
 
                         }
-                        if (k > 0 && *p != pc->fc.coef_probs[i][j][k-1][l])
-                            pbi->independent_partitions = 0;
                     }
         }
     }
@@ -1289,8 +1277,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
     // Resset the macroblock mode info context to the start of the list
     xd->mode_info_context = pc->mi;
-
-    pbi->frame_corrupt_residual = 0;
 
 #if CONFIG_SUPERBLOCKS
     /* Decode a row of super-blocks */
