@@ -223,7 +223,6 @@ static const unsigned int default_coef_counts[BLOCK_TYPES]
 };
 
 
-#if CONFIG_T8X8
 const unsigned int vp8_default_coef_counts_8x8[BLOCK_TYPES]
                                               [COEF_BANDS]
                                               [PREV_COEF_CONTEXTS]
@@ -399,4 +398,4 @@ const unsigned int vp8_default_coef_counts_8x8[BLOCK_TYPES]
       }
     }
   };
-#endif
+

@@ -22,7 +22,7 @@
 #include "arm/dct_arm.h"
 #endif
 
-#if CONFIG_T8X8
+
 
 #ifndef vp8_fdct_short8x8
 #define vp8_fdct_short8x8  vp8_short_fdct8x8_c
@@ -34,7 +34,6 @@ extern prototype_fdct(vp8_fdct_short8x8);
 #endif
 extern prototype_fdct(vp8_fhaar_short2x2);
 
-#endif
 
 #ifndef vp8_fdct_short4x4
 #define vp8_fdct_short4x4  vp8_short_fdct4x4_c
@@ -63,10 +62,8 @@ extern prototype_fdct(vp8_fdct_walsh_short4x4);
 typedef prototype_fdct(*vp8_fdct_fn_t);
 typedef struct
 {
-#if CONFIG_T8X8
     vp8_fdct_fn_t    short8x8;
     vp8_fdct_fn_t    haar_short2x2;
-#endif
     vp8_fdct_fn_t    short4x4;
     vp8_fdct_fn_t    short8x4;
     vp8_fdct_fn_t    fast4x4;

@@ -353,12 +353,10 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
         (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs
     );
 
-#if CONFIG_T8X8
     fill_token_costs(
         cpi->mb.token_costs_8x8,
         (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs_8x8
     );
-#endif
 #if CONFIG_QIMODE
     //rough estimate for costing
     cpi->common.kf_ymode_probs_index = cpi->common.base_qindex>>4;
@@ -664,7 +662,6 @@ static void macro_block_yrd( MACROBLOCK *mb,
     *Rate = vp8_rdcost_mby(mb);
 }
 
-#if CONFIG_T8X8
 
 static int cost_coeffs_2x2(MACROBLOCK *mb,
                            BLOCKD *b, int type,
@@ -794,7 +791,6 @@ static void macro_block_yrd_8x8( MACROBLOCK *mb,
     // rate
     *Rate = vp8_rdcost_mby_8x8(mb);
 }
-#endif
 
 static void copy_predictor(unsigned char *dst, const unsigned char *predictor)
 {
@@ -1311,7 +1307,7 @@ static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
     return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
-#if CONFIG_T8X8
+
 static int rd_cost_mbuv_8x8(MACROBLOCK *mb)
 {
     int b;
@@ -1351,7 +1347,7 @@ static int rd_inter16x16_uv_8x8(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
 
     return RDCOST(x->rdmult, x->rddiv, *rate, *distortion);
 }
-#endif
+
 
 static int rd_inter4x4_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                           int *distortion, int fullpixel)
@@ -2470,10 +2466,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int uv_intra_tteob = 0;
-#if CONFIG_T8X8
     int uv_intra_rate_8x8, uv_intra_distortion_8x8, uv_intra_rate_tokenonly_8x8;
     int uv_intra_tteob_8x8=0;
-#endif
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
     int best_yrd = INT_MAX;
@@ -2564,9 +2558,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     for(i=16; i<24; i++)
         uv_intra_tteob += x->e_mbd.block[i].eob;
 
-#if CONFIG_T8X8
         uv_intra_tteob_8x8 = uv_intra_tteob;
-#endif
 
     // Get estimates of reference frame costs for each reference frame
     // that depend on the current prediction etc.
@@ -2770,12 +2762,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             // FIXME compound intra prediction
             RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
                 (&x->e_mbd);
-#if CONFIG_T8X8
             if(cpi->common.txfm_mode == ALLOW_8X8)
                 macro_block_yrd_8x8(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd)) ;
             else
-#endif
                 macro_block_yrd(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd.encodemb)) ;
             rate2 += rate_y;
@@ -3014,12 +3004,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             rate2 += vp8_cost_mv_ref(&cpi->common, this_mode, mdcounts);
 
             // Y cost and distortion
-#if CONFIG_T8X8
             if(cpi->common.txfm_mode == ALLOW_8X8)
                 macro_block_yrd_8x8(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd));
             else
-#endif
                 macro_block_yrd(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd.encodemb));
 
@@ -3029,13 +3017,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             // UV cost and distortion
             vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
 
-#if CONFIG_T8X8
             if(cpi->common.txfm_mode == ALLOW_8X8)
                 rd_inter16x16_uv_8x8(cpi, x, &rate_uv,
                                     &distortion_uv,
                                     cpi->common.full_pixel);
             else
-#endif
                 rd_inter16x16_uv(cpi, x, &rate_uv,
                                     &distortion_uv,
                                     cpi->common.full_pixel);
@@ -3126,12 +3112,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                                    &x->e_mbd.predictor[320], 16, 8);
 
             /* Y cost and distortion */
-#if CONFIG_T8X8
              if(cpi->common.txfm_mode == ALLOW_8X8)
                 macro_block_yrd_8x8(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd));
             else
-#endif
                 macro_block_yrd(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd.encodemb));
 
@@ -3139,13 +3123,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             distortion2 += distortion;
 
             /* UV cost and distortion */
-#if CONFIG_T8X8
             if(cpi->common.txfm_mode == ALLOW_8X8)
                 rd_inter16x16_uv_8x8(cpi, x, &rate_uv,
                                     &distortion_uv,
                                     cpi->common.full_pixel);
             else
-#endif
                 rd_inter16x16_uv(cpi, x, &rate_uv,
                                     &distortion_uv,
                                     cpi->common.full_pixel);
@@ -3195,7 +3177,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 if(has_y2_block)
                     tteob += x->e_mbd.block[24].eob;
 
-#if CONFIG_T8X8
                 if(cpi->common.txfm_mode ==ALLOW_8X8 && has_y2_block)
                 {
                     for (i = 0; i < 16; i+=4)
@@ -3211,7 +3192,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                     }
                 }
                 else
-#endif
                 {
                     for (i = 0; i < 16; i++)
                         tteob += (x->e_mbd.block[i].eob > has_y2_block);
@@ -3467,9 +3447,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {
-#if CONFIG_T8X8
     MACROBLOCKD *xd = &x->e_mbd;
-#endif
     int error4x4, error16x16;
     int rate4x4, rate16x16 = 0, rateuv;
     int dist4x4, dist16x16, distuv;

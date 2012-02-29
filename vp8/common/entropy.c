@@ -60,7 +60,6 @@ DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]) =
     9, 12, 13, 10,
     7, 11, 14, 15,
 };
-#if CONFIG_T8X8
 DECLARE_ALIGNED(64, cuchar, vp8_coef_bands_8x8[64]) = { 0, 1, 2, 3, 5, 4, 4, 5,
                                                         5, 3, 6, 3, 5, 4, 6, 6,
                                                         6, 5, 5, 6, 6, 6, 6, 6,
@@ -77,7 +76,6 @@ DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]) =
     35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51,
     58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
 };
-#endif
 
 DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) =
 {
@@ -88,9 +86,7 @@ DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) =
 };
 
 DECLARE_ALIGNED(16, short, vp8_default_zig_zag_mask[16]);
-#if CONFIG_T8X8
 DECLARE_ALIGNED(64, short, vp8_default_zig_zag_mask_8x8[64]);//int64_t
-#endif
 
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
 
@@ -132,12 +128,10 @@ void vp8_init_scan_order_mask()
     {
         vp8_default_zig_zag_mask[vp8_default_zig_zag1d[i]] = 1 << i;
     }
-#if CONFIG_T8X8
     for (i = 0; i < 64; i++)
     {
         vp8_default_zig_zag_mask_8x8[vp8_default_zig_zag1d_8x8[i]] = 1 << i;
     }
-#endif
 }
 
 static void init_bit_tree(vp8_tree_index *p, int n)
@@ -184,12 +178,9 @@ vp8_extra_bit_struct vp8_extra_bits[12] =
 
 void vp8_default_coef_probs(VP8_COMMON *pc)
 {
-#if CONFIG_T8X8
     int h;
-#endif
     vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
                    sizeof(default_coef_probs));
-#if CONFIG_T8X8
     h = 0;
     do
     {
@@ -213,7 +204,7 @@ void vp8_default_coef_probs(VP8_COMMON *pc)
         while (++i < COEF_BANDS);
     }
     while (++h < BLOCK_TYPES);
-#endif
+
 }
 
 void vp8_coef_tree_initialize()

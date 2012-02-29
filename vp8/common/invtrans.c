@@ -24,7 +24,6 @@ static void recon_dcblock(MACROBLOCKD *x)
     }
 
 }
-#if CONFIG_T8X8
 static void recon_dcblock_8x8(MACROBLOCKD *x)
 {
     BLOCKD *b = &x->block[24]; //for coeff 0, 2, 8, 10
@@ -34,7 +33,7 @@ static void recon_dcblock_8x8(MACROBLOCKD *x)
     x->block[12].dqcoeff[0] = b->diff[8];
 
 }
-#endif
+
 
 void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch)
 {
@@ -99,7 +98,7 @@ void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x
 
 }
 
-#if CONFIG_T8X8
+
 void vp8_inverse_transform_b_8x8(const vp8_idct_rtcd_vtable_t *rtcd, short *input_dqcoeff, short *output_coeff, int pitch)//pay attention to use when 8x8
 {
     // int b,i;
@@ -171,4 +170,4 @@ void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCK
     }
 
 }
-#endif
+

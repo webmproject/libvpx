@@ -17,10 +17,8 @@
 
 extern void vp8_short_idct4x4llm_c(short *input, short *output, int pitch) ;
 extern void vp8_short_idct4x4llm_1_c(short *input, short *output, int pitch);
-#if CONFIG_T8X8
 extern void vp8_short_idct8x8_c(short *input, short *output, int pitch);
 extern void vp8_short_idct8x8_1_c(short *input, short *output, int pitch);
-#endif
 
 #ifdef DEC_DEBUG
 extern int dec_debug;
@@ -121,7 +119,6 @@ void vp8_dequant_dc_idct_add_c(short *input, short *dq, unsigned char *pred,
     }
 }
 
-#if CONFIG_T8X8
 void vp8_dequantize_b_2x2_c(BLOCKD *d)
 {
     int i;
@@ -330,4 +327,3 @@ void vp8_dequant_dc_idct_add_8x8_c(short *input, short *dq, unsigned char *pred,
 #endif
 }
 
-#endif

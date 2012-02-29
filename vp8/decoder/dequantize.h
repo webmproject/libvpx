@@ -42,7 +42,6 @@
              unsigned char *pre, unsigned char *dst_u, \
              unsigned char *dst_v, int stride, char *eobs)
 
-#if CONFIG_T8X8
 #define prototype_dequant_dc_idct_add_y_block_8x8(sym) \
     void sym(short *q, short *dq, \
              unsigned char *pre, unsigned char *dst, \
@@ -58,8 +57,6 @@
              unsigned char *pre, unsigned char *dst_u, \
              unsigned char *dst_v, int stride, char *eobs, \
              MACROBLOCKD *xd)
-
-#endif
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/dequantize_x86.h"
@@ -99,7 +96,7 @@ extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block);
 #endif
 extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block);
 
-#if CONFIG_T8X8
+
 #ifndef vp8_dequant_block_2x2
 #define vp8_dequant_block_2x2 vp8_dequantize_b_2x2_c
 #endif
@@ -130,7 +127,7 @@ extern prototype_dequant_idct_add_y_block_8x8(vp8_dequant_idct_add_y_block_8x8);
 #endif
 extern prototype_dequant_idct_add_uv_block_8x8(vp8_dequant_idct_add_uv_block_8x8);
 
-#endif
+
 
 typedef prototype_dequant_block((*vp8_dequant_block_fn_t));
 
@@ -144,13 +141,12 @@ typedef prototype_dequant_idct_add_y_block((*vp8_dequant_idct_add_y_block_fn_t))
 
 typedef prototype_dequant_idct_add_uv_block((*vp8_dequant_idct_add_uv_block_fn_t));
 
-#if CONFIG_T8X8
 typedef prototype_dequant_dc_idct_add_y_block_8x8((*vp8_dequant_dc_idct_add_y_block_fn_t_8x8));
 
 typedef prototype_dequant_idct_add_y_block_8x8((*vp8_dequant_idct_add_y_block_fn_t_8x8));
 
 typedef prototype_dequant_idct_add_uv_block_8x8((*vp8_dequant_idct_add_uv_block_fn_t_8x8));
-#endif
+
 typedef struct
 {
     vp8_dequant_block_fn_t               block;
@@ -159,14 +155,12 @@ typedef struct
     vp8_dequant_dc_idct_add_y_block_fn_t dc_idct_add_y_block;
     vp8_dequant_idct_add_y_block_fn_t    idct_add_y_block;
     vp8_dequant_idct_add_uv_block_fn_t   idct_add_uv_block;
-#if CONFIG_T8X8
     vp8_dequant_block_fn_t               block_2x2;
     vp8_dequant_idct_add_fn_t            idct_add_8x8;
     vp8_dequant_dc_idct_add_fn_t         dc_idct_add_8x8;
     vp8_dequant_dc_idct_add_y_block_fn_t_8x8 dc_idct_add_y_block_8x8;
     vp8_dequant_idct_add_y_block_fn_t_8x8    idct_add_y_block_8x8;
     vp8_dequant_idct_add_uv_block_fn_t_8x8   idct_add_uv_block_8x8;
-#endif
 } vp8_dequant_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

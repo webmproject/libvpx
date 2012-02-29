@@ -28,7 +28,6 @@ DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
     6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
     6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X
 };
-#if CONFIG_T8X8
 DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) = {
   0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X,
   5 * OCB_X, 3 * OCB_X, 6 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 6 * OCB_X, 6 * OCB_X,
@@ -39,7 +38,7 @@ DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) = {
   7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
   7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X,
 };
-#endif
+
 #define EOB_CONTEXT_NODE            0
 #define ZERO_CONTEXT_NODE           1
 #define ONE_CONTEXT_NODE            2
@@ -166,7 +165,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         range = range - split; \
         NORMALIZE \
     }
-#if CONFIG_T8X8
+
 #define DECODE_AND_LOOP_IF_ZERO_8x8_2(probability,branch) \
     { \
         split = 1 + ((( probability*(range-1) ) ) >> 8); \
@@ -207,7 +206,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         range = range - split; \
         NORMALIZE \
     }
-#endif
+
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val) \
     DECODE_AND_APPLYSIGN(val) \
     Prob = coef_probs + (ENTROPY_NODES*2); \
@@ -218,7 +217,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     qcoeff_ptr [ 15 ] = (INT16) v; \
     goto BLOCK_FINISHED;
 
-#if CONFIG_T8X8
+
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val) \
     DECODE_AND_APPLYSIGN(val) \
     Prob = coef_probs + (ENTROPY_NODES*2); \
@@ -237,7 +236,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         goto DO_WHILE_8x8; }\
     qcoeff_ptr [ scan[63] ] = (INT16) v; \
     goto BLOCK_FINISHED_8x8;
-#endif
+
 
 #define DECODE_EXTRABIT_AND_ADJUST_VAL(prob, bits_count)\
     split = 1 +  (((range-1) * prob) >> 8); \
@@ -255,7 +254,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     }\
     NORMALIZE
 
-#if CONFIG_T8X8
+
 int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
 {
     ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
@@ -580,7 +579,7 @@ BLOCK_FINISHED_8x8:
     return eobtotal;
 
 }
-#endif
+
 int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
 {
     ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;

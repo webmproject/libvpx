@@ -158,7 +158,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     MB_PREDICTION_MODE mode;
     int i;
 
-#if CONFIG_T8X8
     int tx_type;
     if( pbi->common.txfm_mode==ONLY_4X4 )
     {
@@ -175,7 +174,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
 
     tx_type = xd->mode_info_context->mbmi.txfm_size;
-#endif
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
     {
@@ -183,19 +181,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
     else if (!vp8dx_bool_error(xd->current_bc))
     {
-
-#if CONFIG_T8X8
         for(i = 0; i < 25; i++)
         {
             xd->block[i].eob = 0;
             xd->eobs[i] = 0;
         }
         if ( tx_type == TX_8X8 )
-        {
             eobtotal = vp8_decode_mb_tokens_8x8(pbi, xd);
-        }
         else
-#endif
             eobtotal = vp8_decode_mb_tokens(pbi, xd);
 #ifdef DEC_DEBUG
         if (dec_debug) {
@@ -360,7 +353,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     {
         BLOCKD *b = &xd->block[24];
 
-#if CONFIG_T8X8
+
         if( tx_type == TX_8X8 )
         {
             DEQUANT_INVOKE(&pbi->dequant, block_2x2)(b);
@@ -388,11 +381,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 (xd->qcoeff, xd->block[0].dequant,
                 xd->predictor, xd->dst.y_buffer,
                 xd->dst.y_stride, xd->eobs, xd->block[24].diff, xd);
-
         }
-
         else
-#endif
         {
             DEQUANT_INVOKE(&pbi->dequant, block)(b);
             if (xd->eobs[24] > 1)
@@ -419,18 +409,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 xd->dst.y_stride, xd->eobs, xd->block[24].diff);
         }
     }
-#if CONFIG_T8X8
+
     if( tx_type == TX_8X8 )
-    {
         DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block_8x8)//
             (xd->qcoeff+16*16, xd->block[16].dequant,
             xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
             xd->dst.uv_stride, xd->eobs+16, xd);//
-
-    }
-    else
-#endif
-    if(xd->mode_info_context->mbmi.mode!=I8X8_PRED)
+    else if(xd->mode_info_context->mbmi.mode!=I8X8_PRED)
         DEQUANT_INVOKE (&pbi->dequant, idct_add_uv_block)
                 (xd->qcoeff+16*16, xd->block[16].dequant,
                 xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
@@ -1086,9 +1071,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
     /* Read the loop filter level and type */
-#if CONFIG_T8X8
     pc->txfm_mode = (TXFM_MODE) vp8_read_bit(bc);
-#endif
 
     pc->filter_type = (LOOPFILTERTYPE) vp8_read_bit(bc);
     pc->filter_level = vp8_read_literal(bc, 6);
@@ -1242,7 +1225,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     }
         }
     }
-#if CONFIG_T8X8
+
     if(pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc))
     {
         // read coef probability tree
@@ -1261,7 +1244,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                         }
                     }
     }
-#endif
+
 
     vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));

@@ -200,7 +200,7 @@ void vp8_short_inv_walsh4x4_1_c(short *input, short *output)
     }
 }
 
-#if CONFIG_T8X8
+
 void vp8_dc_only_idct_add_8x8_c(short input_dc,
                                 unsigned char *pred_ptr,
                                 unsigned char *dst_ptr,
@@ -408,4 +408,3 @@ void vp8_short_ihaar2x2_c(short *input, short *output, int pitch)
    op[8] = (ip[0] - ip[1] - ip[4] + ip[8])>>1;
 }
 
-#endif

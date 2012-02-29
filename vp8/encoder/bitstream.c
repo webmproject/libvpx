@@ -35,9 +35,7 @@ unsigned __int64 Sectionbits[500];
 #ifdef ENTROPY_STATS
 int intra_mode_stats[10][10][10];
 static unsigned int tree_update_hist [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] [2];
-#if CONFIG_T8X8
 static unsigned int tree_update_hist_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] [2];
-#endif
 
 extern unsigned int active_section;
 #endif
@@ -1685,9 +1683,7 @@ static int default_coef_context_savings(VP8_COMP *cpi)
 int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 {
     int savings = 0;
-#if CONFIG_T8X8
     int i=0;
-#endif
     VP8_COMMON *const cm = & cpi->common;
     const int *const rfct = cpi->count_mb_ref_frame_usage;
     const int rf_intra = rfct[INTRA_FRAME];
@@ -1761,7 +1757,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
     savings += default_coef_context_savings(cpi);
 
-#if CONFIG_T8X8
+
     /* do not do this if not evena allowed */
     if(cpi->common.txfm_mode == ALLOW_8X8)
     {
@@ -1820,8 +1816,6 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
 
         savings += savings8x8 >> 8;
     }
-#endif
-
 
     return savings;
 }
@@ -1955,7 +1949,6 @@ static void update_coef_probs(VP8_COMP *cpi)
     }
 
 
-#if CONFIG_T8X8
     /* do not do this if not evena allowed */
     if(cpi->common.txfm_mode == ALLOW_8X8)
     {
@@ -2090,8 +2083,6 @@ static void update_coef_probs(VP8_COMP *cpi)
             while (++i < BLOCK_TYPES);
         }
     }
-
-#endif
 }
 #ifdef PACKET_TESTING
 FILE *vpxlogc = 0;
@@ -2400,9 +2391,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         }
     }
 
-#if CONFIG_T8X8
     vp8_write_bit(bc, pc->txfm_mode);
-#endif
 
     // Encode the loop filter level and type
     vp8_write_bit(bc, pc->filter_type);
@@ -2636,7 +2625,6 @@ void print_tree_update_probs()
 
     fprintf(f, "};\n");
 
-#if CONFIG_T8X8
     fprintf(f, "const vp8_prob tree_update_probs_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {\n");
 
     for (i = 0; i < BLOCK_TYPES; i++)
@@ -2674,7 +2662,6 @@ void print_tree_update_probs()
 
         fprintf(f, "  },\n");
     }
-#endif
     fclose(f);
 }
 #endif

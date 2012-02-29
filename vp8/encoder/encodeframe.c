@@ -102,187 +102,6 @@ static const unsigned char VP8_VAR_OFFS[16]=
 };
 
 
-
-#if CONFIG_T8X8
-
-//INTRA mode transform size
-//When all three criteria are off the default is 4x4
-//#define INTRA_VARIANCE_ENTROPY_CRITERIA
-#define INTRA_WTD_SSE_ENTROPY_CRITERIA
-//#define INTRA_TEST_8X8_ONLY
-//
-//INTER mode transform size
-//When all three criteria are off the default is 4x4
-//#define INTER_VARIANCE_ENTROPY_CRITERIA
-#define INTER_WTD_SSE_ENTROPY_CRITERIA
-//#define INTER_TEST_8X8_ONLY
-
-double variance_Block(short *b1, int pitch, int dimension)
-{
-    short ip[8][8]={{0}};
-    short *b = b1;
-    int i, j = 0;
-    double mean = 0.0, variance = 0.0;
-    for (i = 0; i < dimension; i++)
-    {
-        for (j = 0; j < dimension; j++)
-        {
-            ip[i][j] = b[j];
-            mean += ip[i][j];
-        }
-        b += pitch;
-    }
-    mean /= (dimension*dimension);
-
-    for (i = 0; i < dimension; i++)
-    {
-        for (j = 0; j < dimension; j++)
-        {
-            variance += (ip[i][j]-mean)*(ip[i][j]-mean);
-        }
-    }
-    variance /= (dimension*dimension);
-    return variance;
-}
-
-double mean_Block(short *b, int pitch, int dimension)
-{
-    short ip[8][8]={{0}};
-    int i, j = 0;
-    double mean = 0;
-    for (i = 0; i < dimension; i++)
-    {
-        for (j = 0; j < dimension; j++)
-        {
-            ip[i][j] = b[j];
-            mean += ip[i][j];
-        }
-        b += pitch;
-    }
-    mean /= (dimension*dimension);
-
-    return mean;
-}
-
-int SSE_Block(short *b, int pitch, int dimension)
-{
-    int i, j, sse_block = 0;
-    for (i = 0; i < dimension; i++)
-    {
-        for (j = 0; j < dimension; j++)
-        {
-            sse_block += b[j]*b[j];
-        }
-        b += pitch;
-    }
-   return sse_block;
-}
-
-double Compute_Variance_Entropy(MACROBLOCK *x)
-{
-    double variance_8[4] = {0.0, 0.0, 0.0, 0.0}, sum_var = 0.0, all_entropy = 0.0;
-    variance_8[0] = variance_Block(x->block[0].src_diff, 16, 8);
-    variance_8[1] = variance_Block(x->block[2].src_diff, 16, 8);
-    variance_8[2] = variance_Block(x->block[8].src_diff, 16, 8);
-    variance_8[3] = variance_Block(x->block[10].src_diff, 16, 8);
-    sum_var = variance_8[0] + variance_8[1] + variance_8[2] + variance_8[3];
-    if(sum_var)
-    {
-      int i;
-      for(i = 0; i <4; i++)
-      {
-        if(variance_8[i])
-        {
-          variance_8[i] /= sum_var;
-          all_entropy -= variance_8[i]*log(variance_8[i]);
-        }
-      }
-    }
-    return (all_entropy /log(2));
-}
-
-double Compute_Wtd_SSE_SubEntropy(MACROBLOCK *x)
-{
-    double variance_8[4] = {0.0, 0.0, 0.0, 0.0};
-    double entropy_8[4] = {0.0, 0.0, 0.0, 0.0};
-    double sse_1, sse_2, sse_3, sse_4, sse_0;
-    int i;
-    for (i=0;i<3;i+=2)
-    {
-      sse_0 = SSE_Block(x->block[i].src_diff, 16, 8);
-      if(sse_0)
-      {
-        sse_1 = SSE_Block(x->block[i].src_diff, 16, 4)/sse_0;
-        sse_2 = SSE_Block(x->block[i+1].src_diff, 16, 4)/sse_0;
-        sse_3 = SSE_Block(x->block[i+4].src_diff, 16, 4)/sse_0;
-        sse_4 = SSE_Block(x->block[i+5].src_diff, 16, 4)/sse_0;
-        variance_8[i]= variance_Block(x->block[i].src_diff, 16, 8);
-        if(sse_1 && sse_2 && sse_3 && sse_4)
-        entropy_8[i]= (-sse_1*log(sse_1)
-                       -sse_2*log(sse_2)
-                       -sse_3*log(sse_3)
-                       -sse_4*log(sse_4))/log(2);
-      }
-    }
-    for (i=8;i<11;i+=2)
-    {
-      if(sse_0)
-      {
-        sse_0 = SSE_Block(x->block[i].src_diff, 16, 8);
-        sse_1 = SSE_Block(x->block[i].src_diff, 16, 4)/sse_0;
-        sse_2 = SSE_Block(x->block[i+1].src_diff, 16, 4)/sse_0;
-        sse_3 = SSE_Block(x->block[i+4].src_diff, 16, 4)/sse_0;
-        sse_4 = SSE_Block(x->block[i+5].src_diff, 16, 4)/sse_0;
-        variance_8[i-7]= variance_Block(x->block[i].src_diff, 16, 8);
-        if(sse_1 && sse_2 && sse_3 && sse_4)
-        entropy_8[i-7]= (-sse_1*log(sse_1)
-                         -sse_2*log(sse_2)
-                         -sse_3*log(sse_3)
-                         -sse_4*log(sse_4))/log(2);
-      }
-    }
-
-    if(variance_8[0]+variance_8[1]+variance_8[2]+variance_8[3])
-      return (entropy_8[0]*variance_8[0]+
-              entropy_8[1]*variance_8[1]+
-              entropy_8[2]*variance_8[2]+
-              entropy_8[3]*variance_8[3])/
-             (variance_8[0]+
-              variance_8[1]+
-              variance_8[2]+
-              variance_8[3]);
-    else
-      return 0;
-}
-
-int vp8_8x8_selection_intra(MACROBLOCK *x)
-{
-#ifdef INTRA_VARIANCE_ENTROPY_CRITERIA
-    return (Compute_Variance_Entropy(x) > 1.2);
-#elif defined(INTRA_WTD_SSE_ENTROPY_CRITERIA)
-    return (Compute_Wtd_SSE_SubEntropy(x) > 1.2);
-#elif defined(INTRA_TEST_8X8_ONLY)
-    return 1;
-#else
-    return 0; //when all criteria are off use the default 4x4 only
-#endif
-}
-
-int vp8_8x8_selection_inter(MACROBLOCK *x)
-{
-#ifdef INTER_VARIANCE_ENTROPY_CRITERIA
-    return (Compute_Variance_Entropy(x) > 1.5);
-#elif defined(INTER_WTD_SSE_ENTROPY_CRITERIA)
-    return (Compute_Wtd_SSE_SubEntropy(x) > 1.5);
-#elif defined(INTER_TEST_8X8_ONLY)
-    return 1;
-#else
-    return 0; //when all criteria are off use the default 4x4 only
-#endif
-}
-
-#endif
-
 // Original activity measure from Tim T's code.
 static unsigned int tt_activity_measure( VP8_COMP *cpi, MACROBLOCK *x )
 {
@@ -876,10 +695,8 @@ void encode_mb_row(VP8_COMP *cpi,
 
         x->active_ptr = cpi->active_map + map_index + mb_col;
 
-#if CONFIG_T8X8
         /* force 4x4 transform for mode selection */
         xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-#endif
 
         if (cm->frame_type == KEY_FRAME)
         {
@@ -1485,7 +1302,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         vp8_update_zbin_extra(cpi, x);
     }
 
-#if CONFIG_T8X8
     /* test code: set transform size based on mode selection */
     if(cpi->common.txfm_mode == ALLOW_8X8
         && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
@@ -1499,7 +1315,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
         cpi->t4x4_count ++;
     }
-#endif
 
     if(x->e_mbd.mode_info_context->mbmi.mode == I8X8_PRED)
     {
@@ -1583,7 +1398,7 @@ int vp8cx_encode_inter_macroblock
                 cpi->comp_pred_count[pred_context]++;
         }
 
-#if CONFIG_T8X8
+
         /* test code: set transform size based on mode selection */
         if( cpi->common.txfm_mode == ALLOW_8X8
             && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
@@ -1598,7 +1413,7 @@ int vp8cx_encode_inter_macroblock
             x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
             cpi->t4x4_count++;
         }
-#endif
+
         /* switch back to the regular quantizer for the encode */
         if (cpi->sf.improved_quant)
         {

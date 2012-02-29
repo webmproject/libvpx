@@ -142,7 +142,6 @@ static void build_dcblock(MACROBLOCK *x)
         src_diff_ptr[i] = x->coeff[i * 16];
     }
 }
-#if CONFIG_T8X8
 void vp8_build_dcblock_8x8(MACROBLOCK *x)
 {
     short *src_diff_ptr = &x->src_diff[384];
@@ -156,7 +155,7 @@ void vp8_build_dcblock_8x8(MACROBLOCK *x)
     src_diff_ptr[4] = x->coeff[8 * 16];
     src_diff_ptr[8] = x->coeff[12 * 16];
 }
-#endif
+
 void vp8_transform_mbuv(MACROBLOCK *x)
 {
     int i;
@@ -235,8 +234,6 @@ static void transform_mby(MACROBLOCK *x)
             &x->block[24].coeff[0], 8);
     }
 }
-
-#if CONFIG_T8X8
 
 void vp8_transform_mbuv_8x8(MACROBLOCK *x)
 {
@@ -338,7 +335,6 @@ void vp8_transform_mby_8x8(MACROBLOCK *x)
     }
 }
 
-#endif
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 #define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
@@ -798,7 +794,6 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     }
 }
 
-#if CONFIG_T8X8
 void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
                     ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                     const VP8_ENCODER_RTCD *rtcd)
@@ -1150,50 +1145,37 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
     }
 
 }
-#endif
 
 void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
-#if CONFIG_T8X8
     int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
-#endif
-
     vp8_build_inter_predictors_mb(&x->e_mbd);
 
     vp8_subtract_mb(rtcd, x);
 
-#if  CONFIG_T8X8
     if( tx_type == TX_8X8 )
          vp8_transform_mb_8x8(x);
     else
-#endif
          transform_mb(x);
 
-#if  CONFIG_T8X8
     if( tx_type == TX_8X8 )
         vp8_quantize_mb_8x8(x);
     else
-#endif
         vp8_quantize_mb(x);
 
     if (x->optimize)
     {
-#if CONFIG_T8X8
       if( tx_type == TX_8X8 )
         optimize_mb_8x8(x, rtcd);
       else
-#endif
         optimize_mb(x, rtcd);
     }
 
-#if CONFIG_T8X8
     if( tx_type == TX_8X8 )
         vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     else
-#endif
         vp8_inverse_transform_mb(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
-#if CONFIG_T8X8
     if( tx_type == TX_8X8 )
     {
 #ifdef ENC_DEBUG
@@ -1225,7 +1207,6 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
         }
 #endif
     }
-#endif
 
     RECON_INVOKE(&rtcd->common->recon, recon_mb)
         (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
@@ -1251,9 +1232,7 @@ void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 /* this function is used by first pass only */
 void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 {
-#if CONFIG_T8X8
     int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
-#endif
 
     BLOCK *b = &x->block[0];
 
@@ -1261,19 +1240,16 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
 
-#if CONFIG_T8X8
     if( tx_type == TX_8X8 )
           vp8_transform_mby_8x8(x);
     else
-#endif
           transform_mby(x);
 
     vp8_quantize_mby(x);
-#if CONFIG_T8X8
+
     if( tx_type == TX_8X8 )
           vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     else
-#endif
           vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
     RECON_INVOKE(&rtcd->common->recon, recon_mby)

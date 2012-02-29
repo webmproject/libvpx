@@ -104,7 +104,6 @@ void vp8_optimize_mby(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 void vp8_optimize_mbuv(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 void vp8_encode_inter16x16y(const struct VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
 
-#if CONFIG_T8X8
 void vp8_transform_mb_8x8(MACROBLOCK *mb);
 void vp8_transform_mby_8x8(MACROBLOCK *x);
 void vp8_transform_mbuv_8x8(MACROBLOCK *x);
@@ -112,7 +111,6 @@ void vp8_transform_intra_mby_8x8(MACROBLOCK *x);
 void vp8_build_dcblock_8x8(MACROBLOCK *b);
 void vp8_optimize_mby_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
 void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const struct VP8_ENCODER_RTCD *rtcd);
-#endif
 
 void vp8_subtract_4b_c(BLOCK *be, BLOCKD *bd, int pitch);
 

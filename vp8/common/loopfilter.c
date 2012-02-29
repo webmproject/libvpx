@@ -72,7 +72,6 @@ void vp8_loop_filter_bh_c(unsigned char *y_ptr, unsigned char *u_ptr,
         vp8_loop_filter_horizontal_edge_c(v_ptr + 4 * uv_stride, uv_stride, lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
-#if CONFIG_T8X8
 void vp8_loop_filter_bh8x8_c(unsigned char *y_ptr, unsigned char *u_ptr,
                           unsigned char *v_ptr, int y_stride, int uv_stride,
                           loop_filter_info *lfi)
@@ -80,7 +79,6 @@ void vp8_loop_filter_bh8x8_c(unsigned char *y_ptr, unsigned char *u_ptr,
     vp8_mbloop_filter_horizontal_edge_c(
         y_ptr + 8 * y_stride, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
 }
-#endif
 
 void vp8_loop_filter_bhs_c(unsigned char *y_ptr, int y_stride,
                            const unsigned char *blimit)
@@ -106,7 +104,6 @@ void vp8_loop_filter_bv_c(unsigned char *y_ptr, unsigned char *u_ptr,
         vp8_loop_filter_vertical_edge_c(v_ptr + 4, uv_stride, lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
-#if CONFIG_T8X8
 void vp8_loop_filter_bv8x8_c(unsigned char *y_ptr, unsigned char *u_ptr,
                           unsigned char *v_ptr, int y_stride, int uv_stride,
                           loop_filter_info *lfi)
@@ -114,8 +111,6 @@ void vp8_loop_filter_bv8x8_c(unsigned char *y_ptr, unsigned char *u_ptr,
     vp8_mbloop_filter_vertical_edge_c(
         y_ptr + 8, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
 }
-
-#endif
 
 void vp8_loop_filter_bvs_c(unsigned char *y_ptr, int y_stride,
                            const unsigned char *blimit)
@@ -348,9 +343,7 @@ void vp8_loop_filter_frame
             const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
             const int seg = mode_info_context->mbmi.segment_id;
             const int ref_frame = mode_info_context->mbmi.ref_frame;
-#if CONFIG_T8X8
             int tx_type = mode_info_context->mbmi.txfm_size;
-#endif
             filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
 
             if (filter_level)
@@ -369,12 +362,10 @@ void vp8_loop_filter_frame
 
                     if (!skip_lf)
                     {
-#if CONFIG_T8X8
                         if(tx_type == TX_8X8)
                             vp8_loop_filter_bv8x8_c
                             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
                         else
-#endif
                             LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
                             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
@@ -387,12 +378,10 @@ void vp8_loop_filter_frame
 
                     if (!skip_lf)
                     {
-#if CONFIG_T8X8
                         if(tx_type == TX_8X8)
                             vp8_loop_filter_bh8x8_c
                             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
                         else
-#endif
                             LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
                             (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
                     }
@@ -479,9 +468,7 @@ void vp8_loop_filter_frame_yonly
             const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
             const int seg = mode_info_context->mbmi.segment_id;
             const int ref_frame = mode_info_context->mbmi.ref_frame;
-#if CONFIG_T8X8
             int tx_type = mode_info_context->mbmi.txfm_size;
-#endif
 
             filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
 
@@ -501,12 +488,10 @@ void vp8_loop_filter_frame_yonly
 
                     if (!skip_lf)
                     {
-#if CONFIG_T8X8
                         if(tx_type == TX_8X8)
                             vp8_loop_filter_bv8x8_c
                             (y_ptr, 0, 0, post->y_stride, 0, &lfi);
                         else
-#endif
                             LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
                             (y_ptr, 0, 0, post->y_stride, 0, &lfi);
                     }
@@ -518,12 +503,10 @@ void vp8_loop_filter_frame_yonly
 
                     if (!skip_lf)
                     {
-#if CONFIG_T8X8
                         if(tx_type == TX_8X8)
                             vp8_loop_filter_bh8x8_c
                             (y_ptr, 0, 0, post->y_stride, 0, &lfi);
                         else
-#endif
                             LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
                             (y_ptr, 0, 0, post->y_stride, 0, &lfi);
                     }

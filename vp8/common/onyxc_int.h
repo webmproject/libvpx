@@ -53,9 +53,7 @@ typedef struct frame_contexts
 #endif
     vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#if CONFIG_T8X8
     vp8_prob coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-#endif
     MV_CONTEXT mvc[2];
     MV_CONTEXT pre_mvc[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
 #if CONFIG_HIGH_PRECISION_MV
@@ -84,14 +82,12 @@ typedef enum
     NB_PREDICTION_TYPES    = 3,
 } COMPPREDMODE_TYPE;
 
-#if CONFIG_T8X8
 /* TODO: allows larger transform */
 typedef enum
 {
     ONLY_4X4            = 0,
     ALLOW_8X8           = 1
 } TXFM_MODE;
-#endif /* CONFIG_T8X8 */
 
 typedef struct VP8_COMMON_RTCD
 {
@@ -150,9 +146,7 @@ typedef struct VP8Common
     /* profile settings */
     int experimental;
     int mb_no_coeff_skip;
-#if CONFIG_T8X8
     TXFM_MODE txfm_mode;
-#endif
     COMPPREDMODE_TYPE comp_pred_mode;
     int no_lpf;
     int use_bilinear_mc_filter;

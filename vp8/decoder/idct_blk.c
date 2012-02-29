@@ -123,7 +123,7 @@ void vp8_dequant_idct_add_uv_block_c
     }
 }
 
-#if CONFIG_T8X8
+
 void vp8_dequant_dc_idct_add_y_block_8x8_c
             (short *q, short *dq, unsigned char *pre,
              unsigned char *dst, int stride, char *eobs, short *dc, MACROBLOCKD *xd)
@@ -163,4 +163,4 @@ void vp8_dequant_idct_add_uv_block_8x8_c
 
   vp8_dequant_idct_add_8x8_c (q, dq, pre, dstv, 8, stride);
 }
-#endif
+

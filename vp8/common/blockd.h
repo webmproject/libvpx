@@ -183,9 +183,7 @@ typedef struct
     MB_PREDICTION_MODE second_mode, second_uv_mode;
 #endif
     MV_REFERENCE_FRAME ref_frame, second_ref_frame;
-#if CONFIG_T8X8
     TX_SIZE txfm_size;
-#endif
     int_mv mv, second_mv;
     unsigned char partitioning;
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */

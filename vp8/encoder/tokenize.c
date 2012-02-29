@@ -24,14 +24,10 @@
 
 #ifdef ENTROPY_STATS
 _int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#if CONFIG_T8X8
 _int64 context_counters_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #endif
-#endif
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
-#if CONFIG_T8X8
 void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
-#endif
 void vp8_fix_contexts(MACROBLOCKD *x);
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE*2];
@@ -104,7 +100,6 @@ static void fill_value_tokens()
     vp8_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
 
-#if CONFIG_T8X8
 static void tokenize2nd_order_b_8x8
 (
      MACROBLOCKD *xd,
@@ -176,7 +171,6 @@ static void tokenize2nd_order_b_8x8
     *a = *l = pt;
 
 }
-#endif
 
 static void tokenize2nd_order_b
 (
@@ -247,7 +241,7 @@ static void tokenize2nd_order_b
     *a = *l = pt;
 
 }
-#if CONFIG_T8X8
+
 static void tokenize1st_order_b_8x8
 (
      MACROBLOCKD *xd,
@@ -313,7 +307,7 @@ static void tokenize1st_order_b_8x8
     *a = *l = pt;
 }
 
-#endif
+
 
 
 static void tokenize1st_order_b
@@ -465,7 +459,7 @@ static int mb_is_skippable(MACROBLOCKD *x, int has_y2_block)
     return skip;
 }
 
-#if CONFIG_T8X8
+
 static int mb_is_skippable_8x8(MACROBLOCKD *x)
 {
     int has_y2_block;
@@ -485,17 +479,14 @@ static int mb_is_skippable_8x8(MACROBLOCKD *x)
 
     return skip;
 }
-#endif
+
 
 void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 {
     int plane_type;
     int has_y2_block;
     int b;
-
-#if CONFIG_T8X8
     int tx_type = x->mode_info_context->mbmi.txfm_size;
-#endif
 
     // If the MB is going to be skipped because of a segment level flag
     // exclude this from the skip count stats used to calculate the
@@ -516,13 +507,9 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
                     && x->mode_info_context->mbmi.mode != SPLITMV);
 
     x->mode_info_context->mbmi.mb_skip_coeff =
-#if CONFIG_T8X8
         (( tx_type == TX_8X8 ) ?
          mb_is_skippable_8x8(x) :
          mb_is_skippable(x, has_y2_block));
-#else
-         mb_is_skippable(x, has_y2_block);
-#endif
 
     if (x->mode_info_context->mbmi.mb_skip_coeff)
     {
@@ -530,11 +517,9 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
         if (!cpi->common.mb_no_coeff_skip)
         {
-#if CONFIG_T8X8
             if ( tx_type == TX_8X8 )
                 vp8_stuff_mb_8x8(cpi, x, t) ;
             else
-#endif
                 vp8_stuff_mb(cpi, x, t) ;
         }
         else
@@ -550,7 +535,6 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
     plane_type = 3;
     if(has_y2_block)
     {
-#if CONFIG_T8X8
         if ( tx_type == TX_8X8 )
         {
             ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
@@ -561,13 +545,12 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
                         L + vp8_block2left_8x8[24], cpi);
         }
         else
-#endif
             tokenize2nd_order_b(x, t, cpi);
 
             plane_type = 0;
 
     }
-#if CONFIG_T8X8
+
     if ( tx_type == TX_8X8 )
     {
         ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
@@ -594,7 +577,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
         }
     }
     else
-#endif
+
         tokenize1st_order_b(x, t, plane_type, cpi);
 }
 
@@ -604,9 +587,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 void init_context_counters(void)
 {
     vpx_memset(context_counters, 0, sizeof(context_counters));
-#if CONFIG_T8X8
     vpx_memset(context_counters_8x8, 0, sizeof(context_counters_8x8));
-#endif
 }
 
 void print_context_counters()
@@ -670,7 +651,6 @@ void print_context_counters()
     }
     while (++type < BLOCK_TYPES);
 
-#if CONFIG_T8X8
     fprintf(f, "int Contexts_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];\n\n");
 
     fprintf(f, "const int default_contexts_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
@@ -718,7 +698,6 @@ void print_context_counters()
         fprintf(f, "\n  }");
     }
     while (++type < BLOCK_TYPES);
-#endif
 
     fprintf(f, "\n};\n");
     fclose(f);
@@ -731,7 +710,7 @@ void vp8_tokenize_initialize()
     fill_value_tokens();
 }
 
-#if CONFIG_T8X8
+
 static __inline void stuff2nd_order_b_8x8
 (
     const BLOCKD *const b,
@@ -857,7 +836,7 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
         *(L + vp8_block2left_8x8[b]+1 ) = *(L + vp8_block2left_8x8[b]);
     }
 }
-#endif
+
 
 static __inline void stuff2nd_order_b
 (

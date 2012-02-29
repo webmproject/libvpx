@@ -964,25 +964,19 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     if (cpi->sf.improved_dct)
     {
-#if CONFIG_T8X8
         cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
-#endif
         cpi->mb.vp8_short_fdct8x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x4);
         cpi->mb.vp8_short_fdct4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, short4x4);
     }
     else
     {
-#if CONFIG_T8X8
         cpi->mb.vp8_short_fdct8x8 = FDCT_INVOKE(&cpi->rtcd.fdct, short8x8);
-#endif
         cpi->mb.vp8_short_fdct8x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast8x4);
         cpi->mb.vp8_short_fdct4x4   = FDCT_INVOKE(&cpi->rtcd.fdct, fast4x4);
     }
 
     cpi->mb.short_walsh4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, walsh_short4x4);
-#if CONFIG_T8X8
     cpi->mb.short_fhaar2x2 = FDCT_INVOKE(&cpi->rtcd.fdct, haar_short2x2);
-#endif
 
     if (cpi->sf.improved_quant)
     {
@@ -990,10 +984,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                                                   quantb);
         cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
                                                   quantb_pair);
-#if CONFIG_T8X8
         cpi->mb.quantize_b_8x8  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb_8x8);
         cpi->mb.quantize_b_2x2  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb_2x2);
-#endif
     }
     else
     {
@@ -1001,10 +993,8 @@ void vp8_set_speed_features(VP8_COMP *cpi)
                                                   fastquantb);
         cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
                                                   fastquantb_pair);
-#if CONFIG_T8X8
         cpi->mb.quantize_b_8x8  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb_8x8);
         cpi->mb.quantize_b_2x2  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb_2x2);
-#endif
     }
     if (cpi->sf.improved_quant != last_improved_quant)
         vp8cx_init_quantizer(cpi);
@@ -1863,9 +1853,8 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 #if CONFIG_INTERNAL_STATS
 
         vp8_clear_system_state();
-#if CONFIG_T8X8
+
         printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
-#endif
         if (cpi->pass != 1)
         {
             FILE *f = fopen("opsnr.stt", "a");

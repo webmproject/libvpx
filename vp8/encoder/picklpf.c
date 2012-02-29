@@ -354,11 +354,9 @@ void vp8cx_pick_filter_level_sg(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi, int segme
         if (cpi->twopass.section_intra_rating < 20)
             Bias = Bias * cpi->twopass.section_intra_rating / 20;
 
-#if CONFIG_T8X8
         // yx, bias less for large block size
         if(cpi->common.txfm_mode == ALLOW_8X8)
             Bias >>= 1;
-#endif
 
         filt_high = ((filt_mid + filter_step) > max_filter_level) ? max_filter_level : (filt_mid + filter_step);
         filt_low = ((filt_mid - filter_step) < min_filter_level) ? min_filter_level : (filt_mid - filter_step);
@@ -578,11 +576,9 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         if (cpi->twopass.section_intra_rating < 20)
             Bias = Bias * cpi->twopass.section_intra_rating / 20;
 
-#if CONFIG_T8X8
         // yx, bias less for large block size
         if(cpi->common.txfm_mode == ALLOW_8X8)
             Bias >>= 1;
-#endif
 
         filt_high = ((filt_mid + filter_step) > max_filter_level) ? max_filter_level : (filt_mid + filter_step);
         filt_low = ((filt_mid - filter_step) < min_filter_level) ? min_filter_level : (filt_mid - filter_step);

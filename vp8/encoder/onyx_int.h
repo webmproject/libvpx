@@ -453,11 +453,9 @@ typedef struct VP8_COMP
     //save vp8_tree_probs_from_distribution result for each frame to avoid repeat calculation
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-#if CONFIG_T8X8
     unsigned int coef_counts_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
     vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     unsigned int frame_branch_ct_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-#endif
 
     int gfu_boost;
     int kf_boost;
@@ -514,10 +512,8 @@ typedef struct VP8_COMP
     int gf_update_recommended;
     int skip_true_count;
     int skip_false_count;
-#if CONFIG_T8X8
     int t4x4_count;
     int t8x8_count;
-#endif
 
 #if CONFIG_UVINTRA
     int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];

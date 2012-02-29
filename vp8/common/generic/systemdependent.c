@@ -30,11 +30,9 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->idct.idct1_scalar_add = vp8_dc_only_idct_add_c;
     rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_c;
     rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_c;
-#if CONFIG_T8X8
     rtcd->idct.idct8        = vp8_short_idct8x8_c;
     rtcd->idct.idct1_scalar_add_8x8 = vp8_dc_only_idct_add_8x8_c;
     rtcd->idct.ihaar2       = vp8_short_ihaar2x2_c;
-#endif
     rtcd->recon.copy16x16   = vp8_copy_mem16x16_c;
     rtcd->recon.copy8x8     = vp8_copy_mem8x8_c;
     rtcd->recon.avg16x16    = vp8_avg_mem16x16_c;

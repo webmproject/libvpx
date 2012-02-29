@@ -47,9 +47,7 @@ typedef struct
     int src_stride;
 
     int eob_max_offset;
-#if CONFIG_T8X8
     int eob_max_offset_8x8;
-#endif
 
 } BLOCK;
 
@@ -131,11 +129,8 @@ typedef struct
 
     unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS]
                             [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-
-#if CONFIG_T8X8
     unsigned int token_costs_8x8[BLOCK_TYPES] [COEF_BANDS]
                             [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-#endif
 
     int optimize;
     int q_index;
@@ -145,12 +140,10 @@ typedef struct
     void (*short_walsh4x4)(short *input, short *output, int pitch);
     void (*quantize_b)(BLOCK *b, BLOCKD *d);
     void (*quantize_b_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
- #if CONFIG_T8X8
     void (*vp8_short_fdct8x8)(short *input, short *output, int pitch);
     void (*short_fhaar2x2)(short *input, short *output, int pitch);
     void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
     void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);
-#endif
 
 } MACROBLOCK;
 

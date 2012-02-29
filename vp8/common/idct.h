@@ -31,7 +31,7 @@
 #include "arm/idct_arm.h"
 #endif
 
-#if CONFIG_T8X8
+
 #ifndef vp8_idct_idct8
 #define vp8_idct_idct8 vp8_short_idct8x8_c
 #endif
@@ -57,7 +57,7 @@ extern prototype_idct(vp8_idct_ihaar2_1);
 #endif
 extern prototype_idct_scalar_add(vp8_idct_idct1_scalar_add_8x8);
 
-#endif
+
 
 #ifndef vp8_idct_idct1
 #define vp8_idct_idct1 vp8_short_idct4x4llm_1_c
@@ -98,13 +98,11 @@ typedef struct
     vp8_second_order_fn_t iwalsh1;
     vp8_second_order_fn_t iwalsh16;
 
-#if CONFIG_T8X8
     vp8_idct_fn_t            idct8;
     vp8_idct_fn_t            idct8_1;
     vp8_idct_scalar_add_fn_t idct1_scalar_add_8x8;
     vp8_idct_fn_t ihaar2;
     vp8_idct_fn_t ihaar2_1;
-#endif
 } vp8_idct_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT
