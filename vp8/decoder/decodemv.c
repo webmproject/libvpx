@@ -125,6 +125,9 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
     y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(
                                       bc, pbi->common.kf_ymode_prob);
 #endif
+#if CONFIG_COMP_INTRA_PRED
+    m->mbmi.second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
+#endif
 
     m->mbmi.ref_frame = INTRA_FRAME;
 
@@ -135,10 +138,25 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
         {
             const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
             const B_PREDICTION_MODE L = left_block_mode(m, i);
+#if CONFIG_COMP_INTRA_PRED
+            int use_comp_pred = vp8_read(bc, 128);
+#endif
 
-            m->bmi[i].as_mode =
+            m->bmi[i].as_mode.first =
                 (B_PREDICTION_MODE) vp8_read_bmode(
                                         bc, pbi->common.kf_bmode_prob [A] [L]);
+#if CONFIG_COMP_INTRA_PRED
+            if (use_comp_pred)
+            {
+                m->bmi[i].as_mode.second =
+                    (B_PREDICTION_MODE) vp8_read_bmode(
+                                                   bc, pbi->common.kf_bmode_prob [A] [L]);
+            }
+            else
+            {
+                m->bmi[i].as_mode.second = (B_PREDICTION_MODE) (B_DC_PRED - 1);
+            }
+#endif
         }
         while (++i < 16);
     }
@@ -150,10 +168,16 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
          {
              int ib = vp8_i8x8_block[i];
              mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
-             m->bmi[ib+0].as_mode= mode8x8;
-             m->bmi[ib+1].as_mode= mode8x8;
-             m->bmi[ib+4].as_mode= mode8x8;
-             m->bmi[ib+5].as_mode= mode8x8;
+             m->bmi[ib+0].as_mode.first= mode8x8;
+             m->bmi[ib+1].as_mode.first= mode8x8;
+             m->bmi[ib+4].as_mode.first= mode8x8;
+             m->bmi[ib+5].as_mode.first= mode8x8;
+#if CONFIG_COMP_INTRA_PRED
+             m->bmi[ib+0].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+             m->bmi[ib+1].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+             m->bmi[ib+4].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+             m->bmi[ib+5].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+#endif
          }
    }
     else
@@ -163,6 +187,9 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
 #else
         m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
             pbi->common.kf_uv_mode_prob);
+#endif
+#if CONFIG_COMP_INTRA_PRED
+    m->mbmi.second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
 }
 
@@ -899,6 +926,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             mbmi->mode = (MB_PREDICTION_MODE)
                          vp8_read_ymode(bc, pbi->common.fc.ymode_prob);
         }
+#if CONFIG_COMP_INTRA_PRED
+        mbmi->second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
+#endif
 
         // If MB mode is BPRED read the block modes
         if (mbmi->mode == B_PRED)
@@ -906,7 +936,20 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             int j = 0;
             do
             {
-                mi->bmi[j].as_mode = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
+#if CONFIG_COMP_INTRA_PRED
+                int use_comp_pred = vp8_read(bc, 128);
+#endif
+                mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
+#if CONFIG_COMP_INTRA_PRED
+                if (use_comp_pred)
+                {
+                    mi->bmi[j].as_mode.second = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
+                }
+                else
+                {
+                    mi->bmi[j].as_mode.second = (B_PREDICTION_MODE) (B_DC_PRED - 1);
+                }
+#endif
             }
             while (++j < 16);
         }
@@ -919,10 +962,16 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             {
                 int ib = vp8_i8x8_block[i];
                 mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
-                mi->bmi[ib+0].as_mode= mode8x8;
-                mi->bmi[ib+1].as_mode= mode8x8;
-                mi->bmi[ib+4].as_mode= mode8x8;
-                mi->bmi[ib+5].as_mode= mode8x8;
+                mi->bmi[ib+0].as_mode.first= mode8x8;
+                mi->bmi[ib+1].as_mode.first= mode8x8;
+                mi->bmi[ib+4].as_mode.first= mode8x8;
+                mi->bmi[ib+5].as_mode.first= mode8x8;
+#if CONFIG_COMP_INTRA_PRED
+                mi->bmi[ib+0].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+                mi->bmi[ib+1].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+                mi->bmi[ib+4].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+                mi->bmi[ib+5].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
+#endif
             }
         }
         else
@@ -933,6 +982,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
                                     pbi->common.fc.uv_mode_prob);
 #endif /*CONFIG_UVINTRA*/
+#if CONFIG_COMP_INTRA_PRED
+        mbmi->second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
+#endif
     }
 
 }

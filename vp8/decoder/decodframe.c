@@ -275,7 +275,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             BLOCKD *b;
 
             b = &xd->block[ib];
-            i8x8mode= b->bmi.as_mode;
+            i8x8mode= b->bmi.as_mode.first;
             RECON_INVOKE(RTCD_VTABLE(recon), intra8x8_predict)
                           (b, i8x8mode, b->predictor);
 
@@ -316,10 +316,23 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         for (i = 0; i < 16; i++)
         {
             BLOCKD *b = &xd->block[i];
-            int b_mode = xd->mode_info_context->bmi[i].as_mode;
+            int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+#if CONFIG_COMP_INTRA_PRED
+            int b_mode2 = xd->mode_info_context->bmi[i].as_mode.second;
 
+            if (b_mode2 == (B_PREDICTION_MODE) (B_DC_PRED - 1))
+            {
+#endif
             RECON_INVOKE(RTCD_VTABLE(recon), intra4x4_predict)
                           (b, b_mode, b->predictor);
+#if CONFIG_COMP_INTRA_PRED
+            }
+            else
+            {
+                RECON_INVOKE(RTCD_VTABLE(recon), comp_intra4x4_predict)
+                    (b, b_mode, b_mode2, b->predictor);
+            }
+#endif
 
             if (xd->eobs[i] > 1)
             {

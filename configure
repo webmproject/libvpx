@@ -223,6 +223,7 @@ EXPERIMENT_LIST="
     featureupdates
     high_precision_mv
     sixteenth_subpel_uv
+    comp_intra_pred
 "
 CONFIG_LIST="
     external_build

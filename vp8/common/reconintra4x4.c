@@ -295,6 +295,28 @@ void vp8_intra4x4_predict(BLOCKD *x,
 
     }
 }
+
+#if CONFIG_COMP_INTRA_PRED
+void vp8_comp_intra4x4_predict(BLOCKD *x,
+                               int b_mode, int b_mode2,
+                               unsigned char *out_predictor)
+{
+    unsigned char predictor[2][4*16];
+    int i, j;
+
+    vp8_intra4x4_predict(x, b_mode, predictor[0]);
+    vp8_intra4x4_predict(x, b_mode2, predictor[1]);
+
+    for (i = 0; i < 16*4; i += 16)
+    {
+        for (j = i; j < i + 4; j++)
+        {
+            out_predictor[j] = (predictor[0][j] + predictor[1][j] + 1) >> 1;
+        }
+    }
+}
+#endif
+
 /* copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
  * to the right prediction have filled in pixels to use.
  */

@@ -137,12 +137,12 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
                 return B_TM_PRED;
             case I8X8_PRED:
             case B_PRED:
-              return (cur_mb->bmi + b + 3)->as_mode;
+              return (cur_mb->bmi + b + 3)->as_mode.first;
             default:
                 return B_DC_PRED;
         }
     }
-    return (cur_mb->bmi + b - 1)->as_mode;
+    return (cur_mb->bmi + b - 1)->as_mode.first;
 }
 
 static B_PREDICTION_MODE above_block_mode(const MODE_INFO
@@ -165,13 +165,13 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO
                 return B_TM_PRED;
             case I8X8_PRED:
             case B_PRED:
-              return (cur_mb->bmi + b + 12)->as_mode;
+              return (cur_mb->bmi + b + 12)->as_mode.first;
             default:
                 return B_DC_PRED;
         }
     }
 
-    return (cur_mb->bmi + b - 4)->as_mode;
+    return (cur_mb->bmi + b - 4)->as_mode.first;
 }
 
 #endif

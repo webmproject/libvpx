@@ -158,7 +158,12 @@ typedef enum
 
 union b_mode_info
 {
-    B_PREDICTION_MODE as_mode;
+    struct {
+        B_PREDICTION_MODE first;
+#if CONFIG_COMP_INTRA_PRED
+        B_PREDICTION_MODE second;
+#endif
+    } as_mode;
     int_mv mv;
 };
 
@@ -174,6 +179,9 @@ typedef enum
 typedef struct
 {
     MB_PREDICTION_MODE mode, uv_mode;
+#if CONFIG_COMP_INTRA_PRED
+    MB_PREDICTION_MODE second_mode, second_uv_mode;
+#endif
     MV_REFERENCE_FRAME ref_frame, second_ref_frame;
 #if CONFIG_T8X8
     TX_SIZE txfm_size;

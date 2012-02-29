@@ -1024,9 +1024,9 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
                             if ((ppflags->display_b_modes_flag & (1<<mi->mbmi.mode))
                                 || (ppflags->display_mb_modes_flag & B_PRED))
                             {
-                                Y = B_PREDICTION_MODE_colors[bmi->as_mode][0];
-                                U = B_PREDICTION_MODE_colors[bmi->as_mode][1];
-                                V = B_PREDICTION_MODE_colors[bmi->as_mode][2];
+                                Y = B_PREDICTION_MODE_colors[bmi->as_mode.first][0];
+                                U = B_PREDICTION_MODE_colors[bmi->as_mode.first][1];
+                                V = B_PREDICTION_MODE_colors[bmi->as_mode.first][2];
 
                                 POSTPROC_INVOKE(RTCD_VTABLE(oci), blend_b)
                                     (yl+bx, ul+(bx>>1), vl+(bx>>1), Y, U, V, 0xc000, y_stride);

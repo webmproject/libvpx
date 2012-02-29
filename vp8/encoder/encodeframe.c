@@ -1425,17 +1425,17 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 
         do
         {
-            ++ bct[xd->block[b].bmi.as_mode];
+            ++ bct[xd->block[b].bmi.as_mode.first];
         }
         while (++b < 16);
     }
 
     if(m==I8X8_PRED)
     {
-        i8x8_modes[xd->block[0].bmi.as_mode]++;
-        i8x8_modes[xd->block[2].bmi.as_mode]++;
-        i8x8_modes[xd->block[8].bmi.as_mode]++;
-        i8x8_modes[xd->block[10].bmi.as_mode]++;
+        i8x8_modes[xd->block[0].bmi.as_mode.first]++;
+        i8x8_modes[xd->block[2].bmi.as_mode.first]++;
+        i8x8_modes[xd->block[8].bmi.as_mode.first]++;
+        i8x8_modes[xd->block[10].bmi.as_mode.first]++;
     }
 #endif
 

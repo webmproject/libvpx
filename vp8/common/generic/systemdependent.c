@@ -48,18 +48,38 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->recon.recon_mby   = vp8_recon_mby_c;
     rtcd->recon.build_intra_predictors_mby =
         vp8_build_intra_predictors_mby;
+#if CONFIG_COMP_INTRA_PRED
+    rtcd->recon.build_comp_intra_predictors_mby =
+        vp8_build_comp_intra_predictors_mby;
+#endif
     rtcd->recon.build_intra_predictors_mby_s =
         vp8_build_intra_predictors_mby_s;
     rtcd->recon.build_intra_predictors_mbuv =
         vp8_build_intra_predictors_mbuv;
     rtcd->recon.build_intra_predictors_mbuv_s =
         vp8_build_intra_predictors_mbuv_s;
+#if CONFIG_COMP_INTRA_PRED
+    rtcd->recon.build_comp_intra_predictors_mbuv =
+        vp8_build_comp_intra_predictors_mbuv;
+#endif
     rtcd->recon.intra4x4_predict =
         vp8_intra4x4_predict;
+#if CONFIG_COMP_INTRA_PRED
+    rtcd->recon.comp_intra4x4_predict =
+        vp8_comp_intra4x4_predict;
+#endif
     rtcd->recon.intra8x8_predict =
         vp8_intra8x8_predict;
+#if CONFIG_COMP_INTRA_PRED
+    rtcd->recon.comp_intra8x8_predict =
+        vp8_comp_intra8x8_predict;
+#endif
     rtcd->recon.intra_uv4x4_predict =
         vp8_intra_uv4x4_predict;
+#if CONFIG_COMP_INTRA_PRED
+    rtcd->recon.comp_intra_uv4x4_predict =
+        vp8_comp_intra_uv4x4_predict;
+#endif
 
     rtcd->subpix.sixtap16x16       = vp8_sixtap_predict16x16_c;
     rtcd->subpix.sixtap8x8         = vp8_sixtap_predict8x8_c;

@@ -759,17 +759,27 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     {
                         int j = 0;
 
-                        do
-                            write_bmode(w, m->bmi[j].as_mode, pc->fc.bmode_prob);
-                        while (++j < 16);
+                        do {
+#if CONFIG_COMP_INTRA_PRED
+                            int mode2 = m->bmi[j].as_mode.second;
+                            vp8_encode_bool(w, mode2 != (B_PREDICTION_MODE) (B_DC_PRED - 1), 128);
+#endif
+                            write_bmode(w, m->bmi[j].as_mode.first, pc->fc.bmode_prob);
+#if CONFIG_COMP_INTRA_PRED
+                            if (mode2 != (B_PREDICTION_MODE) (B_DC_PRED - 1))
+                            {
+                                write_bmode(w, mode2, pc->fc.bmode_prob);
+                            }
+#endif
+                        } while (++j < 16);
                     }
 
                     if(mode == I8X8_PRED)
                     {
-                        write_i8x8_mode(w, m->bmi[0].as_mode, pc->i8x8_mode_prob);
-                        write_i8x8_mode(w, m->bmi[2].as_mode, pc->i8x8_mode_prob);
-                        write_i8x8_mode(w, m->bmi[8].as_mode, pc->i8x8_mode_prob);
-                        write_i8x8_mode(w, m->bmi[10].as_mode, pc->i8x8_mode_prob);
+                        write_i8x8_mode(w, m->bmi[0].as_mode.first, pc->i8x8_mode_prob);
+                        write_i8x8_mode(w, m->bmi[2].as_mode.first, pc->i8x8_mode_prob);
+                        write_i8x8_mode(w, m->bmi[8].as_mode.first, pc->i8x8_mode_prob);
+                        write_i8x8_mode(w, m->bmi[10].as_mode.first, pc->i8x8_mode_prob);
                     }
                     else
                     {
@@ -1118,16 +1128,26 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 {
                     int j = 0;
 
-                    do
-                        write_bmode(w, m->bmi[j].as_mode, pc->fc.bmode_prob);
-                    while (++j < 16);
+                    do {
+#if CONFIG_COMP_INTRA_PRED
+                        B_PREDICTION_MODE mode2 = m->bmi[j].as_mode.second;
+                        vp8_write(w, mode2 != (B_PREDICTION_MODE) (B_DC_PRED - 1), 128);
+#endif
+                        write_bmode(w, m->bmi[j].as_mode.first, pc->fc.bmode_prob);
+#if CONFIG_COMP_INTRA_PRED
+                        if (mode2 != (B_PREDICTION_MODE) (B_DC_PRED - 1))
+                        {
+                            write_bmode(w, mode2, pc->fc.bmode_prob);
+                        }
+#endif
+                    } while (++j < 16);
                 }
                 if(mode == I8X8_PRED)
                 {
-                    write_i8x8_mode(w, m->bmi[0].as_mode, pc->i8x8_mode_prob);
-                    write_i8x8_mode(w, m->bmi[2].as_mode, pc->i8x8_mode_prob);
-                    write_i8x8_mode(w, m->bmi[8].as_mode, pc->i8x8_mode_prob);
-                    write_i8x8_mode(w, m->bmi[10].as_mode, pc->i8x8_mode_prob);
+                    write_i8x8_mode(w, m->bmi[0].as_mode.first, pc->i8x8_mode_prob);
+                    write_i8x8_mode(w, m->bmi[2].as_mode.first, pc->i8x8_mode_prob);
+                    write_i8x8_mode(w, m->bmi[8].as_mode.first, pc->i8x8_mode_prob);
+                    write_i8x8_mode(w, m->bmi[10].as_mode.first, pc->i8x8_mode_prob);
                 }
                 else
                 {
@@ -1385,23 +1405,35 @@ static void write_kfmodes(VP8_COMP *cpi)
                     {
                         const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
                         const B_PREDICTION_MODE L = left_block_mode(m, i);
-                        const int bm = m->bmi[i].as_mode;
+                        const int bm = m->bmi[i].as_mode.first;
+#if CONFIG_COMP_INTRA_PRED
+                        const int bm2 = m->bmi[i].as_mode.second;
+#endif
 
 #ifdef ENTROPY_STATS
                         ++intra_mode_stats [A] [L] [bm];
 #endif
 
+#if CONFIG_COMP_INTRA_PRED
+                        vp8_write(bc, bm2 != (B_PREDICTION_MODE) (B_DC_PRED - 1), 128);
+#endif
                         write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
+#if CONFIG_COMP_INTRA_PRED
+                        if (bm2 != (B_PREDICTION_MODE) (B_DC_PRED - 1))
+                        {
+                            write_bmode(bc, bm2, c->kf_bmode_prob [A] [L]);
+                        }
+#endif
                     }
                     while (++i < 16);
                 }
 
                 if(ym == I8X8_PRED)
                 {
-                    write_i8x8_mode(bc, m->bmi[0].as_mode, c->i8x8_mode_prob);
-                    write_i8x8_mode(bc, m->bmi[2].as_mode, c->i8x8_mode_prob);
-                    write_i8x8_mode(bc, m->bmi[8].as_mode, c->i8x8_mode_prob);
-                    write_i8x8_mode(bc, m->bmi[10].as_mode, c->i8x8_mode_prob);
+                    write_i8x8_mode(bc, m->bmi[0].as_mode.first, c->i8x8_mode_prob);
+                    write_i8x8_mode(bc, m->bmi[2].as_mode.first, c->i8x8_mode_prob);
+                    write_i8x8_mode(bc, m->bmi[8].as_mode.first, c->i8x8_mode_prob);
+                    write_i8x8_mode(bc, m->bmi[10].as_mode.first, c->i8x8_mode_prob);
                 }
                 else
 #if CONFIG_UVINTRA
@@ -1493,22 +1525,34 @@ static void write_kfmodes(VP8_COMP *cpi)
                 {
                     const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
                     const B_PREDICTION_MODE L = left_block_mode(m, i);
-                    const int bm = m->bmi[i].as_mode;
+                    const int bm = m->bmi[i].as_mode.first;
+#if CONFIG_COMP_INTRA_PRED
+                    const int bm2 = m->bmi[i].as_mode.second;
+#endif
 
 #ifdef ENTROPY_STATS
                     ++intra_mode_stats [A] [L] [bm];
 #endif
 
+#if CONFIG_COMP_INTRA_PRED
+                    vp8_write(bc, bm2 != (B_PREDICTION_MODE) (B_DC_PRED - 1), 128);
+#endif
                     write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
+#if CONFIG_COMP_INTRA_PRED
+                    if (bm2 != (B_PREDICTION_MODE) (B_DC_PRED - 1))
+                    {
+                        write_bmode(bc, bm2, c->kf_bmode_prob [A] [L]);
+                    }
+#endif
                 }
                 while (++i < 16);
             }
             if(ym == I8X8_PRED)
             {
-                write_i8x8_mode(bc, m->bmi[0].as_mode, c->i8x8_mode_prob);
-                write_i8x8_mode(bc, m->bmi[2].as_mode, c->i8x8_mode_prob);
-                write_i8x8_mode(bc, m->bmi[8].as_mode, c->i8x8_mode_prob);
-                write_i8x8_mode(bc, m->bmi[10].as_mode, c->i8x8_mode_prob);
+                write_i8x8_mode(bc, m->bmi[0].as_mode.first, c->i8x8_mode_prob);
+                write_i8x8_mode(bc, m->bmi[2].as_mode.first, c->i8x8_mode_prob);
+                write_i8x8_mode(bc, m->bmi[8].as_mode.first, c->i8x8_mode_prob);
+                write_i8x8_mode(bc, m->bmi[10].as_mode.first, c->i8x8_mode_prob);
                 m++;
             }
             else
