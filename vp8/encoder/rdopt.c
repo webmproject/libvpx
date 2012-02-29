@@ -16,7 +16,6 @@
 #include "vpx_config.h"
 #include "vpx_rtcd.h"
 #include "vp8/common/pragmas.h"
-
 #include "tokenize.h"
 #include "treewriter.h"
 #include "onyx_int.h"
@@ -26,6 +25,7 @@
 #include "vp8/common/reconinter.h"
 #include "vp8/common/reconintra4x4.h"
 #include "vp8/common/findnearmv.h"
+#include "vp8/common/quant_common.h"
 #include "encodemb.h"
 #include "quantize.h"
 #include "variance.h"
@@ -1753,6 +1753,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int ref_frame_map[4];
     int sign_bias = 0;
 
+    int intra_rd_penalty =  10* vp8_dc_quant(cpi->common.base_qindex,
+                                             cpi->common.y1dc_delta_q);
+
     mode_mv = mode_mv_sb[sign_bias];
     best_ref_mv.as_int = 0;
     vpx_memset(mode_mv_sb, 0, sizeof(mode_mv_sb));
@@ -2258,6 +2261,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             }
             // Calculate the final RD estimate for this mode
             this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
+            if (this_rd < INT_MAX && x->e_mbd.mode_info_context->mbmi.ref_frame
+                                     == INTRA_FRAME)
+                this_rd += intra_rd_penalty;
         }
 
         // Keep record of best intra distortion
