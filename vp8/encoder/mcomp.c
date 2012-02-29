@@ -251,6 +251,27 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     int y_stride;
     int offset;
 
+#if ARCH_X86 || ARCH_X86_64
+    unsigned char *y0 = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
+    unsigned char *y;
+    int buf_r1, buf_r2, buf_c1, buf_c2;
+
+    // Clamping to avoid out-of-range data access
+    buf_r1 = ((bestmv->as_mv.row - INTERP_EXTEND) < x->mv_row_min)?(bestmv->as_mv.row - x->mv_row_min):INTERP_EXTEND;
+    buf_r2 = ((bestmv->as_mv.row + INTERP_EXTEND) > x->mv_row_max)?(x->mv_row_max - bestmv->as_mv.row):INTERP_EXTEND;
+    buf_c1 = ((bestmv->as_mv.col - INTERP_EXTEND) < x->mv_col_min)?(bestmv->as_mv.col - x->mv_col_min):INTERP_EXTEND;
+    buf_c2 = ((bestmv->as_mv.col + INTERP_EXTEND) > x->mv_col_max)?(x->mv_col_max - bestmv->as_mv.col):INTERP_EXTEND;
+    y_stride = 32;
+
+    /* Copy to intermediate buffer before searching. */
+    vfp->copymem(y0 - buf_c1 - d->pre_stride*buf_r1, d->pre_stride, xd->y_buf, y_stride, 16+buf_r1+buf_r2);
+    y = xd->y_buf + y_stride*buf_r1 +buf_c1;
+#else
+    unsigned char *y = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
+    y_stride = d->pre_stride;
+#endif
+
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -277,25 +298,6 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     tr = br;
     tc = bc;
 
-#if ARCH_X86 || ARCH_X86_64
-    unsigned char *y0 = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
-    unsigned char *y;
-    int buf_r1, buf_r2, buf_c1, buf_c2;
-
-    // Clamping to avoid out-of-range data access
-    buf_r1 = ((bestmv->as_mv.row - INTERP_EXTEND) < x->mv_row_min)?(bestmv->as_mv.row - x->mv_row_min):INTERP_EXTEND;
-    buf_r2 = ((bestmv->as_mv.row + INTERP_EXTEND) > x->mv_row_max)?(x->mv_row_max - bestmv->as_mv.row):INTERP_EXTEND;
-    buf_c1 = ((bestmv->as_mv.col - INTERP_EXTEND) < x->mv_col_min)?(bestmv->as_mv.col - x->mv_col_min):INTERP_EXTEND;
-    buf_c2 = ((bestmv->as_mv.col + INTERP_EXTEND) > x->mv_col_max)?(x->mv_col_max - bestmv->as_mv.col):INTERP_EXTEND;
-    y_stride = 32;
-
-    /* Copy to intermediate buffer before searching. */
-    vfp->copymem(y0 - buf_c1 - d->pre_stride*buf_r1, d->pre_stride, xd->y_buf, y_stride, 16+buf_r1+buf_r2);
-    y = xd->y_buf + y_stride*buf_r1 +buf_c1;
-#else
-    unsigned char *y = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
-    y_stride = d->pre_stride;
-#endif
 
     offset = (bestmv->as_mv.row) * y_stride + bestmv->as_mv.col;
 
@@ -1439,6 +1441,8 @@ int vp8_diamond_search_sad
     MACROBLOCKD *xd = &x->e_mbd;
 
     int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    int_mv fcenter_mv;
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -1446,7 +1450,6 @@ int vp8_diamond_search_sad
         mvsadcost[1] = x->mvsadcost_hp[1];
     }
 #endif
-    int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1572,6 +1575,8 @@ int vp8_diamond_search_sadx4
     MACROBLOCKD *xd = &x->e_mbd;
 
     int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    int_mv fcenter_mv;
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -1579,7 +1584,6 @@ int vp8_diamond_search_sadx4
         mvsadcost[1] = x->mvsadcost_hp[1];
     }
 #endif
-    int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1734,6 +1738,8 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     int col_max = ref_col + distance;
 
     int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    int_mv fcenter_mv;
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -1741,7 +1747,6 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         mvsadcost[1] = x->mvsadcost_hp[1];
     }
 #endif
-    int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1840,6 +1845,8 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     unsigned int sad_array[3];
 
     int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    int_mv fcenter_mv;
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -1847,7 +1854,6 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         mvsadcost[1] = x->mvsadcost_hp[1];
     }
 #endif
-    int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1983,6 +1989,8 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     unsigned int sad_array[3];
 
     int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    int_mv fcenter_mv;
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -1990,7 +1998,6 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         mvsadcost[1] = x->mvsadcost_hp[1];
     }
 #endif
-    int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -2144,6 +2151,8 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     MACROBLOCKD *xd = &x->e_mbd;
 
     int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    int_mv fcenter_mv;
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -2151,7 +2160,6 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
         mvsadcost[1] = x->mvsadcost_hp[1];
     }
 #endif
-    int_mv fcenter_mv;
 
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
@@ -2233,6 +2241,8 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     MACROBLOCKD *xd = &x->e_mbd;
 
     int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
+    int_mv fcenter_mv;
+
 #if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
     {
@@ -2240,7 +2250,6 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         mvsadcost[1] = x->mvsadcost_hp[1];
     }
 #endif
-    int_mv fcenter_mv;
 
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
     fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
