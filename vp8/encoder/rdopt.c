@@ -105,7 +105,7 @@ const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES] =
     B_PRED,
     I8X8_PRED,
 
-    /* dual prediction modes */
+    /* compound prediction modes */
     ZEROMV,
     NEARESTMV,
     NEARMV,
@@ -155,7 +155,7 @@ const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
     INTRA_FRAME,
     INTRA_FRAME,
 
-    /* dual prediction modes */
+    /* compound prediction modes */
     LAST_FRAME,
     LAST_FRAME,
     LAST_FRAME,
@@ -179,7 +179,7 @@ const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0,
 
-    /* dual prediction modes */
+    /* compound prediction modes */
     GOLDEN_FRAME,
     GOLDEN_FRAME,
     GOLDEN_FRAME,
@@ -2446,7 +2446,7 @@ void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
 
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
                             int *returnrate, int *returndistortion, int *returnintra,
-                            int *best_single_rd_diff, int *best_dual_rd_diff,
+                            int *best_single_rd_diff, int *best_comp_rd_diff,
                             int *best_hybrid_rd_diff)
 {
     VP8_COMMON *cm = &cpi->common;
@@ -2471,7 +2471,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int distortion;
     int best_rd = INT_MAX;
     int best_intra_rd = INT_MAX;
-    int best_dual_rd = INT_MAX;
+    int best_comp_rd = INT_MAX;
     int best_single_rd = INT_MAX;
     int best_hybrid_rd = INT_MAX;
     int rate2, distortion2;
@@ -2584,7 +2584,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         int this_rd = INT_MAX;
         int disable_skip = 0;
         int other_cost = 0;
-        int dualmode_cost = 0;
+        int compmode_cost = 0;
         int mode_excluded = 0;
 
         // Test best rd so far against threshold for trying this mode.
@@ -2980,8 +2980,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
             vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
-            dualmode_cost =
-                vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 0 );
+            compmode_cost =
+                vp8_cost_bit( get_pred_prob( cm, xd, PRED_COMP ), 0 );
 
             if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
                 x->skip = 1;
@@ -3061,7 +3061,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                     cpi->common.full_pixel);
             rate2 += rate_uv;
             distortion2 += distortion_uv;
-            mode_excluded = cpi->common.dual_pred_mode == DUAL_PREDICTION_ONLY;
+            mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
             break;
 
         default:
@@ -3072,7 +3072,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             int ref1 = x->e_mbd.mode_info_context->mbmi.ref_frame;
             int ref2 = x->e_mbd.mode_info_context->mbmi.second_ref_frame;
 
-            mode_excluded = cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY;
+            mode_excluded = cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY;
             switch (this_mode)
             {
             case NEWMV:
@@ -3165,8 +3165,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             /* We don't include the cost of the second reference here, because there are only
              * three options: Last/Golden, ARF/Last or Golden/ARF, or in other words if you
              * present them in that order, the second one is always known if the first is known */
-            dualmode_cost =
-                vp8_cost_bit( get_pred_prob( cm, xd, PRED_DUAL ), 1 );
+            compmode_cost =
+                vp8_cost_bit( get_pred_prob( cm, xd, PRED_COMP ), 1 );
         }
 
         // Where skip is allowable add in the default per mb cost for the no skip case.
@@ -3179,9 +3179,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             rate2 += prob_skip_cost;
         }
 
-        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+        if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
         {
-            rate2 += dualmode_cost;
+            rate2 += compmode_cost;
         }
 
 
@@ -3272,8 +3272,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         if (!disable_skip &&
             (this_mode == SPLITMV || x->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME))
         {
-            if (this_rd < best_dual_rd)
-                best_dual_rd = this_rd;
+            if (this_rd < best_comp_rd)
+                best_comp_rd = this_rd;
             if (this_rd < best_single_rd)
                 best_single_rd = this_rd;
             if (this_rd < best_hybrid_rd)
@@ -3332,22 +3332,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
         }
 
-        /* keep record of best dual/single-only prediction */
+        /* keep record of best compound/single-only prediction */
         if (!disable_skip &&
             x->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME &&
             this_mode != SPLITMV)
         {
             int single_rd, hybrid_rd, single_rate, hybrid_rate;
 
-            if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+            if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
             {
-                single_rate = rate2 - dualmode_cost;
+                single_rate = rate2 - compmode_cost;
                 hybrid_rate = rate2;
             }
             else
             {
                 single_rate = rate2;
-                hybrid_rate = rate2 + dualmode_cost;
+                hybrid_rate = rate2 + compmode_cost;
             }
 
             single_rd = RDCOST(x->rdmult, x->rddiv, single_rate, distortion2);
@@ -3357,18 +3357,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 single_rd < best_single_rd)
             {
                 best_single_rd = single_rd;
-                if (0) printf("single rd [DMC: %d]: %d\n", dualmode_cost, single_rd);
             }
             else if (x->e_mbd.mode_info_context->mbmi.second_ref_frame != INTRA_FRAME &&
-                     single_rd < best_dual_rd)
+                     single_rd < best_comp_rd)
             {
-                best_dual_rd = single_rd;
-                if (0) printf("dual rd [DMC: %d]: %d\n", dualmode_cost, single_rd);
+                best_comp_rd = single_rd;
             }
             if (hybrid_rd < best_hybrid_rd)
             {
                 best_hybrid_rd = hybrid_rd;
-                if (0) printf("hybrid rd [DMC: %d]: %d\n", best_hybrid_rd, hybrid_rd);
             }
         }
 
@@ -3424,7 +3421,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                         (cpi->common.mb_no_coeff_skip) ? 1 : 0;
         x->e_mbd.mode_info_context->mbmi.partitioning = 0;
 
-        *best_single_rd_diff = *best_dual_rd_diff = *best_hybrid_rd_diff = 0;
+        *best_single_rd_diff = *best_comp_rd_diff = *best_hybrid_rd_diff = 0;
 
         return;
     }
@@ -3465,10 +3462,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         *best_single_rd_diff = INT_MIN;
     else
         *best_single_rd_diff = best_rd - best_single_rd;
-    if (best_dual_rd == INT_MAX)
-        *best_dual_rd_diff = INT_MIN;
+    if (best_comp_rd == INT_MAX)
+        *best_comp_rd_diff = INT_MIN;
     else
-        *best_dual_rd_diff   = best_rd - best_dual_rd;
+        *best_comp_rd_diff   = best_rd - best_comp_rd;
     if (best_hybrid_rd == INT_MAX)
         *best_hybrid_rd_diff = INT_MIN;
     else

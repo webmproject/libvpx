@@ -21,7 +21,7 @@ typedef enum
 {
     PRED_SEG_ID = 0,               // Segment identifier
     PRED_REF = 1,
-    PRED_DUAL = 2
+    PRED_COMP = 2
 
 } PRED_ID;
 

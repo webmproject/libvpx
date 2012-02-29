@@ -627,31 +627,31 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     vp8_write_literal(w, pc->prob_last_coded, 8);
     vp8_write_literal(w, pc->prob_gf_coded, 8);
 
-    if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+    if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
     {
         vp8_write(w, 1, 128);
         vp8_write(w, 1, 128);
-        for (i = 0; i < DUAL_PRED_CONTEXTS; i++)
+        for (i = 0; i < COMP_PRED_CONTEXTS; i++)
         {
-            if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
+            if (cpi->single_pred_count[i] + cpi->comp_pred_count[i])
             {
-                pc->prob_dualpred[i] = cpi->single_pred_count[i] * 255 /
-                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
-                if (pc->prob_dualpred[i] < 1)
-                    pc->prob_dualpred[i] = 1;
+                pc->prob_comppred[i] = cpi->single_pred_count[i] * 255 /
+                    (cpi->single_pred_count[i] + cpi->comp_pred_count[i]);
+                if (pc->prob_comppred[i] < 1)
+                    pc->prob_comppred[i] = 1;
             }
             else
             {
-                pc->prob_dualpred[i] = 128;
+                pc->prob_comppred[i] = 128;
             }
-            vp8_write_literal(w, pc->prob_dualpred[i], 8);
+            vp8_write_literal(w, pc->prob_comppred[i], 8);
         }
     }
-    else if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY)
+    else if (cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY)
     {
         vp8_write(w, 0, 128);
     }
-    else /* dual prediction only */
+    else /* compound prediction only */
     {
         vp8_write(w, 1, 128);
         vp8_write(w, 0, 128);
@@ -844,11 +844,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
                             write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
 
-                            if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+                            if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
                             {
                                 vp8_write(w,
                                           mi->second_ref_frame != INTRA_FRAME,
-                                          get_pred_prob( pc, xd, PRED_DUAL ) );
+                                          get_pred_prob( pc, xd, PRED_COMP ) );
                             }
                             if (mi->second_ref_frame)
                             {
@@ -925,11 +925,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         }
                         break;
                         default:
-                            if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+                            if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
                             {
                                 vp8_write(w,
                                           mi->second_ref_frame != INTRA_FRAME,
-                                          get_pred_prob( pc, xd, PRED_DUAL ) );
+                                          get_pred_prob( pc, xd, PRED_COMP ) );
                             }
                             break;
                         }
@@ -1014,31 +1014,31 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     vp8_write_literal(w, pc->prob_last_coded, 8);
     vp8_write_literal(w, pc->prob_gf_coded, 8);
 
-    if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+    if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
     {
         vp8_write(w, 1, 128);
         vp8_write(w, 1, 128);
-        for (i = 0; i < DUAL_PRED_CONTEXTS; i++)
+        for (i = 0; i < COMP_PRED_CONTEXTS; i++)
         {
-            if (cpi->single_pred_count[i] + cpi->dual_pred_count[i])
+            if (cpi->single_pred_count[i] + cpi->comp_pred_count[i])
             {
-                pc->prob_dualpred[i] = cpi->single_pred_count[i] * 255 /
-                    (cpi->single_pred_count[i] + cpi->dual_pred_count[i]);
-                if (pc->prob_dualpred[i] < 1)
-                    pc->prob_dualpred[i] = 1;
+                pc->prob_comppred[i] = cpi->single_pred_count[i] * 255 /
+                    (cpi->single_pred_count[i] + cpi->comp_pred_count[i]);
+                if (pc->prob_comppred[i] < 1)
+                    pc->prob_comppred[i] = 1;
             }
             else
             {
-                pc->prob_dualpred[i] = 128;
+                pc->prob_comppred[i] = 128;
             }
-            vp8_write_literal(w, pc->prob_dualpred[i], 8);
+            vp8_write_literal(w, pc->prob_comppred[i], 8);
         }
     }
-    else if (cpi->common.dual_pred_mode == SINGLE_PREDICTION_ONLY)
+    else if (cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY)
     {
         vp8_write(w, 0, 128);
     }
-    else /* dual prediction only */
+    else /* compound prediction only */
     {
         vp8_write(w, 1, 128);
         vp8_write(w, 0, 128);
@@ -1211,11 +1211,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
                         write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
 
-
-                        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+                        if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
                         {
                             vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                      get_pred_prob( pc, xd, PRED_DUAL ) );
+                                      get_pred_prob( pc, xd, PRED_COMP ) );
                         }
                         if (mi->second_ref_frame)
                         {
@@ -1286,10 +1285,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     }
                     break;
                     default:
-                        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+                        if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
                         {
                             vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                      get_pred_prob( pc, xd, PRED_DUAL ) );
+                                      get_pred_prob( pc, xd, PRED_COMP ) );
                         }
                         break;
                     }

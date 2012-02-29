@@ -191,21 +191,21 @@ typedef enum
     THR_B_PRED         = 19,
     THR_I8X8_PRED      = 20,
 
-    THR_DUAL_ZEROLG    = 21,
-    THR_DUAL_NEARESTLG = 22,
-    THR_DUAL_NEARLG    = 23,
+    THR_COMP_ZEROLG    = 21,
+    THR_COMP_NEARESTLG = 22,
+    THR_COMP_NEARLG    = 23,
 
-    THR_DUAL_ZEROLA    = 24,
-    THR_DUAL_NEARESTLA = 25,
-    THR_DUAL_NEARLA    = 26,
+    THR_COMP_ZEROLA    = 24,
+    THR_COMP_NEARESTLA = 25,
+    THR_COMP_NEARLA    = 26,
 
-    THR_DUAL_ZEROGA    = 27,
-    THR_DUAL_NEARESTGA = 28,
-    THR_DUAL_NEARGA    = 29,
+    THR_COMP_ZEROGA    = 27,
+    THR_COMP_NEARESTGA = 28,
+    THR_COMP_NEARGA    = 29,
 
-    THR_DUAL_NEWLG     = 30,
-    THR_DUAL_NEWLA     = 31,
-    THR_DUAL_NEWGA     = 32,
+    THR_COMP_NEWLG     = 30,
+    THR_COMP_NEWLA     = 31,
+    THR_COMP_NEWGA     = 32,
 }
 THR_MODES;
 
@@ -357,10 +357,10 @@ typedef struct VP8_COMP
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
     int rd_threshes[MAX_MODES];
-    int64_t rd_single_diff, rd_dual_diff, rd_hybrid_diff;
+    int64_t rd_single_diff, rd_comp_diff, rd_hybrid_diff;
     int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
-    int dual_pred_count[DUAL_PRED_CONTEXTS];
-    int single_pred_count[DUAL_PRED_CONTEXTS];
+    int comp_pred_count[COMP_PRED_CONTEXTS];
+    int single_pred_count[COMP_PRED_CONTEXTS];
 
     int RDMULT;
     int RDDIV ;

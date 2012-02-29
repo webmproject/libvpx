@@ -213,7 +213,7 @@ void vp8_create_common(VP8_COMMON *oci)
     oci->txfm_mode = ONLY_4X4;
 #endif
     oci->mb_no_coeff_skip = 1;
-    oci->dual_pred_mode = HYBRID_PREDICTION;
+    oci->comp_pred_mode = HYBRID_PREDICTION;
     oci->no_lpf = 0;
     oci->filter_type = NORMAL_LOOPFILTER;
     oci->use_bilinear_mc_filter = 0;

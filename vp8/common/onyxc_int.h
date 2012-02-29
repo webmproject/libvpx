@@ -40,7 +40,7 @@ void vp8_initialize_common(void);
 
 #define NUM_YV12_BUFFERS 4
 
-#define DUAL_PRED_CONTEXTS   2
+#define COMP_PRED_CONTEXTS   2
 
 typedef struct frame_contexts
 {
@@ -79,10 +79,10 @@ typedef enum
 typedef enum
 {
     SINGLE_PREDICTION_ONLY = 0,
-    DUAL_PREDICTION_ONLY   = 1,
+    COMP_PREDICTION_ONLY   = 1,
     HYBRID_PREDICTION      = 2,
     NB_PREDICTION_TYPES    = 3,
-} DUALPREDMODE_TYPE;
+} COMPPREDMODE_TYPE;
 
 #if CONFIG_T8X8
 /* TODO: allows larger transform */
@@ -153,7 +153,7 @@ typedef struct VP8Common
 #if CONFIG_T8X8
     TXFM_MODE txfm_mode;
 #endif
-    DUALPREDMODE_TYPE dual_pred_mode;
+    COMPPREDMODE_TYPE comp_pred_mode;
     int no_lpf;
     int use_bilinear_mc_filter;
     int full_pixel;
@@ -237,7 +237,7 @@ typedef struct VP8Common
     vp8_prob ref_pred_probs[PREDICTION_PROBS];
     vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
 
-    vp8_prob prob_dualpred[DUAL_PRED_CONTEXTS];
+    vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
 
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */

@@ -37,8 +37,8 @@ unsigned char get_pred_context( VP8_COMMON *const cm,
                        (m - cm->mode_info_stride)->mbmi.ref_predicted;
         break;
 
-    case PRED_DUAL:
-        // Context based on use of dual pred flag by neighbours
+    case PRED_COMP:
+        // Context based on use of comp pred flag by neighbours
         //pred_context =
         //   ((m - 1)->mbmi.second_ref_frame != INTRA_FRAME) +
         //    ((m - cm->mode_info_stride)->mbmi.second_ref_frame != INTRA_FRAME);
@@ -89,11 +89,11 @@ vp8_prob get_pred_prob( VP8_COMMON *const cm,
         pred_probability = cm->ref_pred_probs[pred_context];
         break;
 
-    case PRED_DUAL:
+    case PRED_COMP:
         // In keeping with convention elsewhre the probability returned is
         // the probability of a "0" outcome which in this case means the
-        // probability of dual pred off.
-        pred_probability = cm->prob_dualpred[pred_context];
+        // probability of comp pred off.
+        pred_probability = cm->prob_comppred[pred_context];
         break;
 
     default:

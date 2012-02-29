@@ -526,14 +526,14 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
         // frame prediction fails.
         compute_mod_refprobs( cm );
 
-        pbi->common.dual_pred_mode = vp8_read(bc, 128);
-        if (cm->dual_pred_mode)
-            cm->dual_pred_mode += vp8_read(bc, 128);
-        if (cm->dual_pred_mode == HYBRID_PREDICTION)
+        pbi->common.comp_pred_mode = vp8_read(bc, 128);
+        if (cm->comp_pred_mode)
+            cm->comp_pred_mode += vp8_read(bc, 128);
+        if (cm->comp_pred_mode == HYBRID_PREDICTION)
         {
             int i;
-            for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
-                cm->prob_dualpred[i] = (vp8_prob)vp8_read_literal(bc, 8);
+            for ( i = 0; i < COMP_PRED_CONTEXTS; i++ )
+                cm->prob_comppred[i] = (vp8_prob)vp8_read_literal(bc, 8);
         }
 
         if (vp8_read_bit(bc))
@@ -856,9 +856,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
         propagate_mv:  /* same MV throughout */
 
-            if ( cm->dual_pred_mode == DUAL_PREDICTION_ONLY ||
-                 (cm->dual_pred_mode == HYBRID_PREDICTION &&
-                     vp8_read(bc, get_pred_prob( cm, xd, PRED_DUAL ))) )
+            if ( cm->comp_pred_mode == COMP_PREDICTION_ONLY ||
+                 (cm->comp_pred_mode == HYBRID_PREDICTION &&
+                     vp8_read(bc, get_pred_prob( cm, xd, PRED_COMP ))) )
             {
                 mbmi->second_ref_frame = mbmi->ref_frame + 1;
                 if (mbmi->second_ref_frame == 4)

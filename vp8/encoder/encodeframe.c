@@ -1130,9 +1130,9 @@ static void encode_frame_internal(VP8_COMP *cpi)
     // re-initencode frame context.
     init_encode_frame_mb_context(cpi);
 
-    cpi->rd_single_diff = cpi->rd_dual_diff = cpi->rd_hybrid_diff = 0;
+    cpi->rd_single_diff = cpi->rd_comp_diff = cpi->rd_hybrid_diff = 0;
     vpx_memset(cpi->single_pred_count, 0, sizeof(cpi->single_pred_count));
-    vpx_memset(cpi->dual_pred_count, 0, sizeof(cpi->dual_pred_count));
+    vpx_memset(cpi->comp_pred_count, 0, sizeof(cpi->comp_pred_count));
 
     {
         struct vpx_usec_timer  emr_timer;
@@ -1239,11 +1239,11 @@ void vp8_encode_frame(VP8_COMP *cpi)
     {
         int frame_type, pred_type;
         int redo = 0;
-        int single_diff, dual_diff, hybrid_diff;
+        int single_diff, comp_diff, hybrid_diff;
 
         /*
          * This code does a single RD pass over the whole frame assuming
-         * either dual, single or hybrid prediction as per whatever has
+         * either compound, single or hybrid prediction as per whatever has
          * worked best for that type of frame in the past.
          * It also predicts whether another coding mode would have worked
          * better that this coding mode. If that is the case, it remembers
@@ -1264,7 +1264,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 cpi->rd_prediction_type_threshes[frame_type][0] &&
             cpi->rd_prediction_type_threshes[frame_type][1] >
                 cpi->rd_prediction_type_threshes[frame_type][2])
-            pred_type = DUAL_PREDICTION_ONLY;
+            pred_type = COMP_PREDICTION_ONLY;
         else if (cpi->rd_prediction_type_threshes[frame_type][0] >
                     cpi->rd_prediction_type_threshes[frame_type][1] &&
                  cpi->rd_prediction_type_threshes[frame_type][0] >
@@ -1273,38 +1273,38 @@ void vp8_encode_frame(VP8_COMP *cpi)
         else
             pred_type = HYBRID_PREDICTION;
 
-        cpi->common.dual_pred_mode = pred_type;
+        cpi->common.comp_pred_mode = pred_type;
         encode_frame_internal(cpi);
 
         single_diff = cpi->rd_single_diff / cpi->common.MBs;
         cpi->rd_prediction_type_threshes[frame_type][0] += single_diff;
         cpi->rd_prediction_type_threshes[frame_type][0] >>= 1;
-        dual_diff   = cpi->rd_dual_diff   / cpi->common.MBs;
-        cpi->rd_prediction_type_threshes[frame_type][1] += dual_diff;
+        comp_diff   = cpi->rd_comp_diff   / cpi->common.MBs;
+        cpi->rd_prediction_type_threshes[frame_type][1] += comp_diff;
         cpi->rd_prediction_type_threshes[frame_type][1] >>= 1;
         hybrid_diff = cpi->rd_hybrid_diff / cpi->common.MBs;
         cpi->rd_prediction_type_threshes[frame_type][2] += hybrid_diff;
         cpi->rd_prediction_type_threshes[frame_type][2] >>= 1;
 
-        if (cpi->common.dual_pred_mode == HYBRID_PREDICTION)
+        if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
         {
             int single_count_zero = 0;
-            int dual_count_zero = 0;
+            int comp_count_zero = 0;
             int i;
 
-            for ( i = 0; i < DUAL_PRED_CONTEXTS; i++ )
+            for ( i = 0; i < COMP_PRED_CONTEXTS; i++ )
             {
                 single_count_zero += cpi->single_pred_count[i];
-                dual_count_zero += cpi->dual_pred_count[i];
+                comp_count_zero += cpi->comp_pred_count[i];
             }
 
-            if (dual_count_zero == 0)
+            if (comp_count_zero == 0)
             {
-                cpi->common.dual_pred_mode = SINGLE_PREDICTION_ONLY;
+                cpi->common.comp_pred_mode = SINGLE_PREDICTION_ONLY;
             }
             else if (single_count_zero == 0)
             {
-                cpi->common.dual_pred_mode = DUAL_PREDICTION_ONLY;
+                cpi->common.comp_pred_mode = COMP_PREDICTION_ONLY;
             }
         }
     }
@@ -1547,7 +1547,7 @@ int vp8cx_encode_inter_macroblock
     // For now this codebase is limited to a single rd encode path
     {
         int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
-        int single, dual, hybrid;
+        int single, compound, hybrid;
 
         /* Are we using the fast quantizer for the mode selection? */
         if(cpi->sf.use_fastquant_for_pick)
@@ -1562,22 +1562,22 @@ int vp8cx_encode_inter_macroblock
             cpi->zbin_mode_boost_enabled = 0;
         }
         vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
-                               &distortion, &intra_error, &single, &dual, &hybrid);
+                               &distortion, &intra_error, &single, &compound, &hybrid);
 
         cpi->rd_single_diff += single;
-        cpi->rd_dual_diff   += dual;
+        cpi->rd_comp_diff   += compound;
         cpi->rd_hybrid_diff += hybrid;
         if (x->e_mbd.mode_info_context->mbmi.ref_frame &&
             x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
         {
             unsigned char pred_context;
 
-            pred_context = get_pred_context( cm, xd, PRED_DUAL );
+            pred_context = get_pred_context( cm, xd, PRED_COMP );
 
             if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
                 cpi->single_pred_count[pred_context]++;
             else
-                cpi->dual_pred_count[pred_context]++;
+                cpi->comp_pred_count[pred_context]++;
         }
 
 #if CONFIG_T8X8
