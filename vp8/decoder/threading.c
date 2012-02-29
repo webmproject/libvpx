@@ -334,6 +334,33 @@ static void decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row,
     int nsync = pbi->sync_range;
     int num_part = 1 << pbi->common.multi_token_partition;
 
+    int dst_fb_idx = pc->new_fb_idx;
+    unsigned char *ref_buffer[MAX_REF_FRAMES][3];
+    unsigned char *dst_buffer[3];
+    int i;
+    int ref_fb_index[MAX_REF_FRAMES];
+    int ref_fb_corrupted[MAX_REF_FRAMES];
+
+    ref_fb_corrupted[INTRA_FRAME] = 0;
+
+    ref_fb_index[LAST_FRAME]    = pc->lst_fb_idx;
+    ref_fb_index[GOLDEN_FRAME]  = pc->gld_fb_idx;
+    ref_fb_index[ALTREF_FRAME]  = pc->alt_fb_idx;
+
+    for(i = 1; i < MAX_REF_FRAMES; i++)
+    {
+        ref_buffer[i][0] = pc->yv12_fb[ref_fb_index[i]].y_buffer;
+        ref_buffer[i][1] = pc->yv12_fb[ref_fb_index[i]].u_buffer;
+        ref_buffer[i][2] = pc->yv12_fb[ref_fb_index[i]].v_buffer;
+
+        ref_fb_corrupted[i] = pc->yv12_fb[ref_fb_index[i]].corrupted;
+    }
+
+    dst_buffer[0] = pc->yv12_fb[dst_fb_idx].y_buffer;
+    dst_buffer[1] = pc->yv12_fb[dst_fb_idx].u_buffer;
+    dst_buffer[2] = pc->yv12_fb[dst_fb_idx].v_buffer;
+
+    xd->up_available = (start_mb_row != 0);
 
     for (mb_row = start_mb_row; mb_row < pc->mb_rows; mb_row += (pbi->decoding_thread_count + 1))
     {
@@ -355,11 +382,12 @@ static void decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row,
 
        recon_yoffset = mb_row * recon_y_stride * 16;
        recon_uvoffset = mb_row * recon_uv_stride * 8;
-       /* reset above block coeffs */
 
+       /* reset contexts */
        xd->above_context = pc->above_context;
        vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-       xd->up_available = (mb_row != 0);
+
+       xd->left_available = 0;
 
        xd->mb_to_top_edge = -((mb_row * 16)) << 3;
        xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
@@ -413,32 +441,20 @@ static void decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row,
     #endif
 
 
-           xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
-           xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
-           xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
+           xd->dst.y_buffer = dst_buffer[0] + recon_yoffset;
+           xd->dst.u_buffer = dst_buffer[1] + recon_uvoffset;
+           xd->dst.v_buffer = dst_buffer[2] + recon_uvoffset;
 
-           xd->left_available = (mb_col != 0);
+           xd->pre.y_buffer = ref_buffer[xd->mode_info_context->mbmi.ref_frame][0] + recon_yoffset;
+           xd->pre.u_buffer = ref_buffer[xd->mode_info_context->mbmi.ref_frame][1] + recon_uvoffset;
+           xd->pre.v_buffer = ref_buffer[xd->mode_info_context->mbmi.ref_frame][2] + recon_uvoffset;
 
-           /* Select the appropriate reference frame for this MB */
-           if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-               ref_fb_idx = pc->lst_fb_idx;
-           else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-               ref_fb_idx = pc->gld_fb_idx;
-           else
-               ref_fb_idx = pc->alt_fb_idx;
-
-           xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-           xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-           xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
-
-           if (xd->mode_info_context->mbmi.ref_frame !=
-                   INTRA_FRAME)
-           {
-               /* propagate errors from reference frames */
-               xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
-           }
+           /* propagate errors from reference frames */
+           xd->corrupted |= ref_fb_corrupted[xd->mode_info_context->mbmi.ref_frame];
 
            decode_macroblock(pbi, xd, mb_row, mb_col);
+
+           xd->left_available = 1;
 
            /* check if the boolean decoder has suffered an error */
            xd->corrupted |= vp8dx_bool_error(xd->current_bc);
@@ -563,6 +579,7 @@ static void decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row,
            vp8_extend_mb_row(&pc->yv12_fb[dst_fb_idx], xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
 
        ++xd->mode_info_context;      /* skip prediction column */
+       xd->up_available = 1;
 
        /* since we have multithread */
        xd->mode_info_context += xd->mode_info_stride * pbi->decoding_thread_count;
