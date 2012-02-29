@@ -2071,6 +2071,9 @@ static void setup_pass(struct stream_state  *stream,
         : VPX_RC_ONE_PASS;
     if (pass)
         stream->config.cfg.rc_twopass_stats_in = stats_get(&stream->stats);
+
+    stream->cx_time = 0;
+    stream->nbytes = 0;
 }
 
 
@@ -2378,7 +2381,7 @@ int main(int argc, const char **argv_)
                     fprintf(stderr,
                             "\rPass %d/%d frame %4d/%-4d %7"PRId64"B \033[K",
                             pass + 1, global.passes, frames_in,
-                            streams->frames_out, streams->nbytes);
+                            streams->frames_out, (int64_t)streams->nbytes);
                 else
                     fprintf(stderr,
                             "\rPass %d/%d frame %4d %7lu %s (%.2f fps)\033[K",
@@ -2412,10 +2415,10 @@ int main(int argc, const char **argv_)
         FOREACH_STREAM(fprintf(
             stderr,
             "\rPass %d/%d frame %4d/%-4d %7"PRId64"B %7lub/f %7"PRId64"b/s"
-            " %7lu %s (%.2f fps)\033[K\n", pass + 1,
-            global.passes, frames_in, stream->frames_out, stream->nbytes,
+            " %7"PRId64" %s (%.2f fps)\033[K\n", pass + 1,
+            global.passes, frames_in, stream->frames_out, (int64_t)stream->nbytes,
             frames_in ? (unsigned long)(stream->nbytes * 8 / frames_in) : 0,
-            frames_in ? stream->nbytes * 8
+            frames_in ? (int64_t)stream->nbytes * 8
                         * (int64_t)global.framerate.num / global.framerate.den
                         / frames_in
                       : 0,
