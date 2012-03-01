@@ -1021,6 +1021,9 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     vp8_zero(cpi->uv_mode_count)
 
     x->mvc = cm->fc.mvc;
+#if CONFIG_HIGH_PRECISION_MV
+    x->mvc_hp = cm->fc.mvc_hp;
+#endif
 
     vpx_memset(cm->above_context, 0,
                sizeof(ENTROPY_CONTEXT_PLANES) * cm->mb_cols);

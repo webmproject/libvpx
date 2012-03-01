@@ -22,6 +22,16 @@ static int mv_ref_ct [31] [4] [2];
 static int mv_mode_cts [4] [2];
 #endif
 
+#if CONFIG_HIGH_PRECISION_MV
+int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight, int ishp)
+{
+    // MV costing is based on the distribution of vectors in the previous frame and as such will tend to
+    // over state the cost of vectors. In addition coding a new vector can have a knock on effect on the
+    // cost of subsequent vectors and the quality of prediction from NEAR and NEAREST for subsequent blocks.
+    // The "Weight" parameter allows, to a limited extent, for some account to be taken of these factors.
+    return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> (ishp==0)] + mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> (ishp==0)]) * Weight) >> 7;
+}
+#else
 int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight)
 {
     // MV costing is based on the distribution of vectors in the previous frame and as such will tend to
@@ -29,15 +39,6 @@ int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight)
     // cost of subsequent vectors and the quality of prediction from NEAR and NEAREST for subsequent blocks.
     // The "Weight" parameter allows, to a limited extent, for some account to be taken of these factors.
     return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] + mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1]) * Weight) >> 7;
-}
-#if CONFIG_HIGH_PRECISION_MV
-int vp8_mv_bit_cost_hp(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight)
-{
-    // MV costing is based on the distribution of vectors in the previous frame and as such will tend to
-    // over state the cost of vectors. In addition coding a new vector can have a knock on effect on the
-    // cost of subsequent vectors and the quality of prediction from NEAR and NEAREST for subsequent blocks.
-    // The "Weight" parameter allows, to a limited extent, for some account to be taken of these factors.
-    return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row)] + mvcost[1][(mv->as_mv.col - ref->as_mv.col)]) * Weight) >> 7;
 }
 #endif
 
@@ -278,10 +279,10 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
         rr = ref_mv->as_mv.row; rc = ref_mv->as_mv.col;
         br = bestmv->as_mv.row << 3; bc = bestmv->as_mv.col << 3;
         hstep = 4;
-        minc = MAX(x->mv_col_min << 3, (ref_mv->as_mv.col) - ((1 << mvlong_width) - 1));
-        maxc = MIN(x->mv_col_max << 3, (ref_mv->as_mv.col) + ((1 << mvlong_width) - 1));
-        minr = MAX(x->mv_row_min << 3, (ref_mv->as_mv.row) - ((1 << mvlong_width) - 1));
-        maxr = MIN(x->mv_row_max << 3, (ref_mv->as_mv.row) + ((1 << mvlong_width) - 1));
+        minc = MAX(x->mv_col_min << 3, (ref_mv->as_mv.col) - ((1 << mvlong_width_hp) - 1));
+        maxc = MIN(x->mv_col_max << 3, (ref_mv->as_mv.col) + ((1 << mvlong_width_hp) - 1));
+        minr = MAX(x->mv_row_min << 3, (ref_mv->as_mv.row) - ((1 << mvlong_width_hp) - 1));
+        maxr = MIN(x->mv_row_max << 3, (ref_mv->as_mv.row) + ((1 << mvlong_width_hp) - 1));
     }
     else
 #endif

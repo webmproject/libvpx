@@ -37,8 +37,8 @@ static unsigned int do_16x16_motion_iteration
     int *mvsadcost[2] = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
 #if CONFIG_HIGH_PRECISION_MV
     static int dummy_cost_hp[2*mv_max_hp+1];
-    int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost[mv_max_hp+1] };
-    int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost[mv_max_hp+1] };
+    int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost_hp[mv_max_hp+1] };
+    int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost_hp[mv_max_hp+1] };
 #endif
     int col_min = (ref_mv->as_mv.col>>3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.col & 7)?1:0);
     int row_min = (ref_mv->as_mv.row>>3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.row & 7)?1:0);

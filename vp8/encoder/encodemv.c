@@ -643,7 +643,7 @@ static void write_component_probs_hp(
 
     //j=0
     {
-        const int c = events [mv_max];
+        const int c = events [mv_max_hp];
 
         is_short_ct [0] += c;    // Short vector
         short_ct [0] += c;       // Magnitude distribution

@@ -38,6 +38,12 @@
 #define IF_RTCD(x) NULL
 #endif
 
+#if CONFIG_HIGH_PRECISION_MV
+#define XMVCOST (x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost)
+#else
+#define XMVCOST (x->mvcost)
+#endif
+
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
@@ -420,12 +426,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
     ref_mv_full.as_mv.row = ref_mv->as_mv.row>>3;
     tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv, step_param,
                                       x->sadperbit16, &num00, &v_fn_ptr,
-#if CONFIG_HIGH_PRECISION_MV
-                                      x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
-#else
-                                      x->mvcost,
-#endif
-                                      ref_mv);
+                                      XMVCOST, ref_mv);
     if ( tmp_err < INT_MAX-new_mv_mode_penalty )
         tmp_err += new_mv_mode_penalty;
 
@@ -451,12 +452,7 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
             tmp_err = cpi->diamond_search_sad(x, b, d, &ref_mv_full, &tmp_mv,
                                               step_param + n, x->sadperbit16,
                                               &num00, &v_fn_ptr,
-#if CONFIG_HIGH_PRECISION_MV
-                                              x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost,
-#else
-                                              x->mvcost,
-#endif
-                                              ref_mv);
+                                              XMVCOST, ref_mv);
             if ( tmp_err < INT_MAX-new_mv_mode_penalty )
                 tmp_err += new_mv_mode_penalty;
 

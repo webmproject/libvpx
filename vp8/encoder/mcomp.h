@@ -25,7 +25,11 @@ extern void accum_mv_refs(MB_PREDICTION_MODE, const int near_mv_ref_cts[4]);
 #define MAX_FULL_PEL_VAL ((1 << (MAX_MVSEARCH_STEPS)) - 1)      // Max full pel mv specified in 1 pel units
 #define MAX_FIRST_STEP (1 << (MAX_MVSEARCH_STEPS-1))            // Maximum size of the first step in full pel units
 
+#if CONFIG_HIGH_PRECISION_MV
+extern int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight, int ishp);
+#else
 extern int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight);
+#endif
 extern void vp8_init_dsmotion_compensation(MACROBLOCK *x, int stride);
 extern void vp8_init3smotion_compensation(MACROBLOCK *x,  int stride);
 
