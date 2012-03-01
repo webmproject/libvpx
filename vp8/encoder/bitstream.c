@@ -1765,6 +1765,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
     /* do not do this if not evena allowed */
     if(cpi->common.txfm_mode == ALLOW_8X8)
     {
+        int savings8x8 = 0;
         do
         {
             int j = 0;
@@ -1803,7 +1804,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
                         const int s = old_b - new_b - update_b;
 
                         if (s > 0)
-                            savings += s;
+                            savings8x8 += s;
 
 
                     }
@@ -1816,6 +1817,8 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
             while (++j < COEF_BANDS);
         }
         while (++i < BLOCK_TYPES);
+
+        savings += savings8x8 >> 8;
     }
 #endif
 
