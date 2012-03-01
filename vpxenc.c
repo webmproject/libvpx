@@ -39,6 +39,7 @@
 #include "y4minput.h"
 #include "libmkv/EbmlWriter.h"
 #include "libmkv/EbmlIDs.h"
+#include "third_party/libyuv/include/libyuv/scale.h"
 
 /* Need special handling of these functions on Windows */
 #if defined(_MSC_VER)
@@ -1530,6 +1531,7 @@ struct stream_state
     uint64_t                  cx_time;
     size_t                    nbytes;
     stats_io_t                stats;
+    struct vpx_image         *img;
 };
 
 
@@ -1943,11 +1945,17 @@ static void set_stream_dimensions(struct stream_state *stream,
                                   unsigned int w,
                                   unsigned int h)
 {
-    if ((stream->config.cfg.g_w && stream->config.cfg.g_w != w)
-        ||(stream->config.cfg.g_h && stream->config.cfg.g_h != h))
-        fatal("Stream %d: Resizing not yet supported", stream->index);
-    stream->config.cfg.g_w = w;
-    stream->config.cfg.g_h = h;
+    if(!stream->config.cfg.g_w)
+    {
+        if(!stream->config.cfg.g_h)
+            stream->config.cfg.g_w = w;
+        else
+            stream->config.cfg.g_w = w * stream->config.cfg.g_h / h;
+    }
+    if(!stream->config.cfg.g_h)
+    {
+        stream->config.cfg.g_h = h * stream->config.cfg.g_w / w;
+    }
 }
 
 
@@ -2117,6 +2125,26 @@ static void encode_frame(struct stream_state  *stream,
     next_frame_start = (cfg->g_timebase.den * (int64_t)(frames_in)
                         * global->framerate.den)
                         / cfg->g_timebase.num / global->framerate.num;
+
+    /* Scale if necessary */
+    if(img && (img->d_w != cfg->g_w || img->d_h != cfg->g_h))
+    {
+        if(!stream->img)
+            stream->img = vpx_img_alloc(NULL, VPX_IMG_FMT_I420,
+                                        cfg->g_w, cfg->g_h, 16);
+        I420Scale(img->planes[PLANE_Y], img->stride[PLANE_Y],
+                  img->planes[PLANE_U], img->stride[PLANE_U],
+                  img->planes[PLANE_V], img->stride[PLANE_V],
+                  img->d_w, img->d_h,
+                  stream->img->planes[PLANE_Y], stream->img->stride[PLANE_Y],
+                  stream->img->planes[PLANE_U], stream->img->stride[PLANE_U],
+                  stream->img->planes[PLANE_V], stream->img->stride[PLANE_V],
+                  stream->img->d_w, stream->img->d_h,
+                  kFilterBox);
+
+        img = stream->img;
+    }
+
     vpx_usec_timer_start(&timer);
     vpx_codec_encode(&stream->encoder, img, frame_start,
                      next_frame_start - frame_start,
@@ -2315,6 +2343,9 @@ int main(int argc, const char **argv_)
             });
 
         /* Update stream configurations from the input file's parameters */
+        if(!input.w || !input.h)
+            fatal("Specify stream dimensions with --width (-w) "
+                  " and --height (-h)");
         FOREACH_STREAM(set_stream_dimensions(stream, input.w, input.h));
         FOREACH_STREAM(validate_stream_config(stream));
 
