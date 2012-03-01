@@ -28,6 +28,9 @@
 #include <limits.h>
 #include "vp8/common/invtrans.h"
 #include "vpx_ports/vpx_timer.h"
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+#include "bitstream.h"
+#endif
 
 extern void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 extern void vp8_calc_ref_frame_costs(int *ref_frame_cost,
@@ -373,15 +376,29 @@ void encode_mb_row(VP8_COMP *cpi,
     int recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
     int map_index = (mb_row * cpi->common.mb_cols);
 
+#if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
+    const int num_part = (1 << cm->multi_token_partition);
+    TOKENEXTRA * tp_start = cpi->tok;
+    vp8_writer *w;
+#endif
+
 #if CONFIG_MULTITHREAD
     const int nsync = cpi->mt_sync_range;
-    const int rightmost_col = cm->mb_cols - 1;
+    const int rightmost_col = cm->mb_cols + nsync;
     volatile const int *last_row_current_mb_col;
+    volatile int *current_mb_col = &cpi->mt_current_mb_col[mb_row];
 
     if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
         last_row_current_mb_col = &cpi->mt_current_mb_col[mb_row - 1];
     else
         last_row_current_mb_col = &rightmost_col;
+#endif
+
+#if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
+    if(num_part > 1)
+        w= &cpi->bc[1 + (mb_row % num_part)];
+    else
+        w = &cpi->bc[1];
 #endif
 
     // reset above block coeffs
@@ -411,6 +428,10 @@ void encode_mb_row(VP8_COMP *cpi,
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {
+
+#if  (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
+        *tp = cpi->tok;
+#endif
         // Distance of Mb to the left & right edges, specified in
         // 1/8th pel units as they are always compared to values
         // that are in 1/8th pel units
@@ -435,12 +456,13 @@ void encode_mb_row(VP8_COMP *cpi,
         vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
 #if CONFIG_MULTITHREAD
-        if ((cpi->b_multi_threaded != 0) && (mb_row != 0))
+        if (cpi->b_multi_threaded != 0)
         {
+            *current_mb_col = mb_col - 1; // set previous MB done
+
             if ((mb_col & (nsync - 1)) == 0)
             {
-                while (mb_col > (*last_row_current_mb_col - nsync)
-                        && (*last_row_current_mb_col) != (cm->mb_cols - 1))
+                while (mb_col > (*last_row_current_mb_col - nsync))
                 {
                     x86_pause_hint();
                     thread_sleep(0);
@@ -495,13 +517,13 @@ void encode_mb_row(VP8_COMP *cpi,
 
 #endif
 
-            // Count of last ref frame 0,0 useage
+            // Count of last ref frame 0,0 usage
             if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                 cpi->inter_zz_count ++;
 
             // Special case code for cyclic refresh
             // If cyclic update enabled then copy xd->mbmi.segment_id; (which may have been updated based on mode
-            // during vp8cx_encode_inter_macroblock()) back into the global sgmentation map
+            // during vp8cx_encode_inter_macroblock()) back into the global segmentation map
             if ((cpi->current_layer == 0) &&
                 (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled))
             {
@@ -525,7 +547,14 @@ void encode_mb_row(VP8_COMP *cpi,
 
         cpi->tplist[mb_row].stop = *tp;
 
-        // Increment pointer into gf useage flags structure.
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+        /* pack tokens for this MB */
+        {
+            int tok_count = *tp - tp_start;
+            pack_tokens(w, tp_start, tok_count);
+        }
+#endif
+        // Increment pointer into gf usage flags structure.
         x->gf_active_ptr++;
 
         // Increment the activity mask pointers.
@@ -539,39 +568,29 @@ void encode_mb_row(VP8_COMP *cpi,
         recon_yoffset += 16;
         recon_uvoffset += 8;
 
-        // Keep track of segment useage
+        // Keep track of segment usage
         segment_counts[xd->mode_info_context->mbmi.segment_id] ++;
 
         // skip to next mb
         xd->mode_info_context++;
         x->partition_info++;
-
         xd->above_context++;
-#if CONFIG_MULTITHREAD
-        if (cpi->b_multi_threaded != 0)
-        {
-            cpi->mt_current_mb_col[mb_row] = mb_col;
-        }
-#endif
     }
 
     //extend the recon for intra prediction
-    vp8_extend_mb_row(
-        &cm->yv12_fb[dst_fb_idx],
-        xd->dst.y_buffer + 16,
-        xd->dst.u_buffer + 8,
-        xd->dst.v_buffer + 8);
+    vp8_extend_mb_row( &cm->yv12_fb[dst_fb_idx],
+                        xd->dst.y_buffer + 16,
+                        xd->dst.u_buffer + 8,
+                        xd->dst.v_buffer + 8);
+
+#if CONFIG_MULTITHREAD
+    if (cpi->b_multi_threaded != 0)
+        *current_mb_col = rightmost_col;
+#endif
 
     // this is to account for the border
     xd->mode_info_context++;
     x->partition_info++;
-
-#if CONFIG_MULTITHREAD
-    if ((cpi->b_multi_threaded != 0) && (mb_row == cm->mb_rows - 1))
-    {
-        sem_post(&cpi->h_event_end_encoding); /* signal frame encoding end */
-    }
-#endif
 }
 
 void init_encode_frame_mb_context(VP8_COMP *cpi)
@@ -599,7 +618,7 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     if (cm->frame_type == KEY_FRAME)
         vp8_init_mbmode_probs(cm);
 
-    // Copy data over into macro block data sturctures.
+    // Copy data over into macro block data structures.
     x->src = * cpi->Source;
     xd->pre = cm->yv12_fb[cm->lst_fb_idx];
     xd->dst = cm->yv12_fb[cm->new_fb_idx];
@@ -656,10 +675,13 @@ void vp8_encode_frame(VP8_COMP *cpi)
     MACROBLOCK *const x = & cpi->mb;
     VP8_COMMON *const cm = & cpi->common;
     MACROBLOCKD *const xd = & x->e_mbd;
-
     TOKENEXTRA *tp = cpi->tok;
     int segment_counts[MAX_MB_SEGMENTS];
     int totalrate;
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+    BOOL_CODER * bc = &cpi->bc[1]; // bc[0] is for control partition
+    const int num_part = (1 << cm->multi_token_partition);
+#endif
 
     vpx_memset(segment_counts, 0, sizeof(segment_counts));
     totalrate = 0;
@@ -694,6 +716,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     cpi->prediction_error = 0;
     cpi->intra_error = 0;
     cpi->skip_true_count = 0;
+    cpi->tok_count = 0;
 
 #if 0
     // Experimental code
@@ -704,6 +727,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     xd->mode_info_context = cm->mi;
 
     vp8_zero(cpi->MVcount);
+
     vp8_zero(cpi->coef_counts);
 
     vp8cx_frame_init_quantizer(cpi);
@@ -722,8 +746,21 @@ void vp8_encode_frame(VP8_COMP *cpi)
         build_activity_map(cpi);
     }
 
-    // re-initencode frame context.
+    // re-init encode frame context.
     init_encode_frame_mb_context(cpi);
+
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+    {
+        int i;
+        for(i = 0; i < num_part; i++)
+        {
+            vp8_start_encode(&bc[i], cpi->partition_d[i + 1],
+                    cpi->partition_d_end[i + 1]);
+            bc[i].error = &cm->error;
+        }
+    }
+
+#endif
 
     {
         struct vpx_usec_timer  emr_timer;
@@ -748,7 +785,11 @@ void vp8_encode_frame(VP8_COMP *cpi)
             {
                 vp8_zero(cm->left_context)
 
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+                tp = cpi->tok;
+#else
                 tp = cpi->tok + mb_row * (cm->mb_cols * 16 * 24);
+#endif
 
                 encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
 
@@ -761,11 +802,13 @@ void vp8_encode_frame(VP8_COMP *cpi)
                 x->partition_info  += xd->mode_info_stride * cpi->encoding_thread_count;
                 x->gf_active_ptr   += cm->mb_cols * cpi->encoding_thread_count;
 
+                if(mb_row == cm->mb_rows - 1)
+                {
+                    sem_post(&cpi->h_event_end_encoding); /* signal frame encoding end */
+                }
             }
 
             sem_wait(&cpi->h_event_end_encoding); /* wait for other threads to finish */
-
-            cpi->tok_count = 0;
 
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row ++)
             {
@@ -799,8 +842,11 @@ void vp8_encode_frame(VP8_COMP *cpi)
             // for each macroblock row in image
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
             {
-
                 vp8_zero(cm->left_context)
+
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+                tp = cpi->tok;
+#endif
 
                 encode_mb_row(cpi, cm, mb_row, x, xd, &tp, segment_counts, &totalrate);
 
@@ -811,16 +857,25 @@ void vp8_encode_frame(VP8_COMP *cpi)
             }
 
             cpi->tok_count = tp - cpi->tok;
-
         }
+
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+        {
+            int i;
+            for(i = 0; i < num_part; i++)
+            {
+                vp8_stop_encode(&bc[i]);
+                cpi->partition_sz[i+1] = bc[i].pos;
+            }
+        }
+#endif
 
         vpx_usec_timer_mark(&emr_timer);
         cpi->time_encode_mb_row += vpx_usec_timer_elapsed(&emr_timer);
-
     }
 
 
-    // Work out the segment probabilites if segmentation is enabled
+    // Work out the segment probabilities if segmentation is enabled
     if (xd->segmentation_enabled)
     {
         int tot_count;
@@ -908,20 +963,16 @@ void vp8_encode_frame(VP8_COMP *cpi)
     }
 #endif
 
-    // Adjust the projected reference frame useage probability numbers to reflect
-    // what we have just seen. This may be usefull when we make multiple itterations
+#if ! CONFIG_REALTIME_ONLY
+    // Adjust the projected reference frame usage probability numbers to reflect
+    // what we have just seen. This may be useful when we make multiple iterations
     // of the recode loop rather than continuing to use values from the previous frame.
     if ((cm->frame_type != KEY_FRAME) && ((cpi->oxcf.number_of_layers > 1) ||
         (!cm->refresh_alt_ref_frame && !cm->refresh_golden_frame)))
     {
       vp8_convert_rfct_to_prob(cpi);
     }
-
-#if 0
-    // Keep record of the total distortion this time around for future use
-    cpi->last_frame_distortion = cpi->frame_distortion;
 #endif
-
 }
 void vp8_setup_block_ptrs(MACROBLOCK *x)
 {

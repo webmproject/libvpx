@@ -39,6 +39,7 @@ Advanced options:
   ${toggle_multithread}           multithreaded encoding and decoding
   ${toggle_spatial_resampling}    spatial sampling (scaling) support
   ${toggle_realtime_only}         enable this option while building for real-time encoding
+  ${toggle_onthefly_bitpacking}   enable on-the-fly bitpacking in real-time encoding
   ${toggle_error_concealment}     enable this option to get a decoder which is able to conceal losses
   ${toggle_runtime_cpu_detect}    runtime cpu detection
   ${toggle_shared}                shared library support
@@ -253,6 +254,7 @@ CONFIG_LIST="
     static_msvcrt
     spatial_resampling
     realtime_only
+    onthefly_bitpacking
     error_concealment
     shared
     static
@@ -297,6 +299,7 @@ CMDLINE_SELECT="
     mem_tracker
     spatial_resampling
     realtime_only
+    onthefly_bitpacking
     error_concealment
     shared
     static

@@ -42,6 +42,11 @@
 #include <stdio.h>
 #include <limits.h>
 
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+extern int vp8_update_coef_context(VP8_COMP *cpi);
+extern void vp8_update_coef_probs(VP8_COMP *cpi);
+#endif
+
 extern void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
 extern void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val);
 extern void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi);
@@ -1106,8 +1111,11 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         vpx_free(cpi->tok);
 
     {
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+        unsigned int tokens = 8 * 24 * 16; /* one MB for each thread */
+#else
         unsigned int tokens = cm->mb_rows * cm->mb_cols * 24 * 16;
-
+#endif
         CHECK_MEM_ERROR(cpi->tok, vpx_calloc(tokens, sizeof(*cpi->tok)));
     }
 
@@ -1513,6 +1521,10 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     cm->refresh_golden_frame = 0;
     cm->refresh_last_frame = 1;
     cm->refresh_entropy_probs = 1;
+
+#if (CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
+    cpi->oxcf.token_partitions = 3;
+#endif
 
     if (cpi->oxcf.token_partitions >= 0 && cpi->oxcf.token_partitions <= 3)
         cm->multi_token_partition =
@@ -3725,12 +3737,40 @@ static void encode_frame_to_data_rate
         }
 #endif
 
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+        {
+            if(cpi->oxcf.error_resilient_mode)
+                cm->refresh_entropy_probs = 0;
+
+            if (cpi->oxcf.error_resilient_mode & VPX_ERROR_RESILIENT_PARTITIONS)
+            {
+                if (cm->frame_type == KEY_FRAME)
+                    cm->refresh_entropy_probs = 1;
+            }
+
+            if (cm->refresh_entropy_probs == 0)
+            {
+                // save a copy for later refresh
+                vpx_memcpy(&cm->lfc, &cm->fc, sizeof(cm->fc));
+            }
+
+            vp8_update_coef_context(cpi);
+
+            vp8_update_coef_probs(cpi);
+
+            // transform / motion compensation build reconstruction frame
+            // +pack coef partitions
+            vp8_encode_frame(cpi);
+
+            /* cpi->projected_frame_size is not needed for RT mode */
+        }
+#else
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);
 
         cpi->projected_frame_size -= vp8_estimate_entropy_savings(cpi);
         cpi->projected_frame_size = (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;
-
+#endif
         vp8_clear_system_state();  //__asm emms;
 
         // Test to see if the stats generated for this frame indicate that we should have coded a key frame
@@ -4093,10 +4133,12 @@ static void encode_frame_to_data_rate
 
     update_reference_frames(cm);
 
+#if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
     if (cpi->oxcf.error_resilient_mode)
     {
         cm->refresh_entropy_probs = 0;
     }
+#endif
 
 #if CONFIG_MULTITHREAD
     /* wait that filter_level is picked so that we can continue with stream packing */
@@ -4818,6 +4860,29 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
         vpx_usec_timer_start(&tsctimer);
         vpx_usec_timer_start(&ticktimer);
     }
+
+#if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
+    {
+        int i;
+        const int num_part = (1 << cm->multi_token_partition);
+        /* the available bytes in dest */
+        const unsigned long dest_size = dest_end - dest;
+        const int tok_part_buff_size = (dest_size * 9) / (10 * num_part);
+
+        unsigned char *dp = dest;
+
+        cpi->partition_d[0] = dp;
+        dp += dest_size/10;         /* reserve 1/10 for control partition */
+        cpi->partition_d_end[0] = dp;
+
+        for(i = 0; i < num_part; i++)
+        {
+            cpi->partition_d[i + 1] = dp;
+            dp += tok_part_buff_size;
+            cpi->partition_d_end[i + 1] = dp;
+        }
+    }
+#endif
 
     // start with a 0 size frame
     *size = 0;
