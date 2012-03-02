@@ -1286,7 +1286,12 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     FIRSTPASS_STATS this_frame;
     FIRSTPASS_STATS *start_pos;
 
-    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
+    double lower_bounds_min_rate = FRAME_OVERHEAD_BITS*cpi->oxcf.frame_rate;
+    double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
+                               * cpi->oxcf.two_pass_vbrmin_section / 100);
+
+    if (two_pass_min_rate < lower_bounds_min_rate)
+        two_pass_min_rate = lower_bounds_min_rate;
 
     zero_stats(cpi->twopass.total_stats);
     zero_stats(cpi->twopass.total_left_stats);

@@ -1187,6 +1187,9 @@ void vp8_new_frame_rate(VP8_COMP *cpi, double framerate)
     cpi->av_per_frame_bandwidth        = (int)(cpi->oxcf.target_bandwidth / cpi->output_frame_rate);
     cpi->min_frame_bandwidth          = (int)(cpi->av_per_frame_bandwidth * cpi->oxcf.two_pass_vbrmin_section / 100);
 
+    if (cpi->min_frame_bandwidth < FRAME_OVERHEAD_BITS )
+        cpi->min_frame_bandwidth = FRAME_OVERHEAD_BITS;
+
     // Set Maximum gf/arf interval
     cpi->max_gf_interval = ((int)(cpi->output_frame_rate / 2.0) + 2);
 
@@ -3868,8 +3871,13 @@ static void Pass2Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
 
     if (!cpi->common.refresh_alt_ref_frame)
     {
+        double lower_bounds_min_rate = FRAME_OVERHEAD_BITS*cpi->oxcf.frame_rate;
         double two_pass_min_rate = (double)(cpi->oxcf.target_bandwidth
             *cpi->oxcf.two_pass_vbrmin_section / 100);
+
+        if (two_pass_min_rate < lower_bounds_min_rate)
+           two_pass_min_rate = lower_bounds_min_rate;
+
         cpi->twopass.bits_left += (int64_t)(two_pass_min_rate / cpi->oxcf.frame_rate);
     }
 }

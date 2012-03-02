@@ -13,6 +13,8 @@
 
 #include "onyx_int.h"
 
+#define FRAME_OVERHEAD_BITS 200
+
 extern void vp8_save_coding_context(VP8_COMP *cpi);
 extern void vp8_restore_coding_context(VP8_COMP *cpi);
 
