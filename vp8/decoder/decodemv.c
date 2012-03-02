@@ -134,13 +134,13 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
     if ((m->mbmi.mode = y_mode) == B_PRED)
     {
         int i = 0;
+#if CONFIG_COMP_INTRA_PRED
+        int use_comp_pred = vp8_read(bc, 128);
+#endif
         do
         {
             const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
             const B_PREDICTION_MODE L = left_block_mode(m, i);
-#if CONFIG_COMP_INTRA_PRED
-            int use_comp_pred = vp8_read(bc, 128);
-#endif
 
             m->bmi[i].as_mode.first =
                 (B_PREDICTION_MODE) vp8_read_bmode(
@@ -933,11 +933,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         if (mbmi->mode == B_PRED)
         {
             int j = 0;
+#if CONFIG_COMP_INTRA_PRED
+            int use_comp_pred = vp8_read(bc, 128);
+#endif
             do
             {
-#if CONFIG_COMP_INTRA_PRED
-                int use_comp_pred = vp8_read(bc, 128);
-#endif
                 mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
 #if CONFIG_COMP_INTRA_PRED
                 if (use_comp_pred)

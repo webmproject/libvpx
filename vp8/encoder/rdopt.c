@@ -837,7 +837,8 @@ static int rd_pick_intra4x4block(
 
     int *bestrate,
     int *bestratey,
-    int *bestdistortion)
+    int *bestdistortion,
+    int allow_comp)
 {
     B_PREDICTION_MODE mode;
 #if CONFIG_COMP_INTRA_PRED
@@ -860,7 +861,7 @@ static int rd_pick_intra4x4block(
     for (mode = B_DC_PRED; mode <= B_HU_PRED; mode++)
     {
 #if CONFIG_COMP_INTRA_PRED
-        for (mode2 = B_DC_PRED - 1; mode2 != B_HU_PRED + 1; mode2++)
+        for (mode2 = (allow_comp ? 0 : (B_DC_PRED - 1)); mode2 != (allow_comp ? (mode + 1) : 0); mode2++)
         {
 #endif
         int this_rd;
@@ -880,13 +881,11 @@ static int rd_pick_intra4x4block(
         RECON_INVOKE(&cpi->rtcd.common->recon, intra4x4_predict)
                      (b, mode, b->predictor);
 #if CONFIG_COMP_INTRA_PRED
-                rate += vp8_cost_bit(128, 0);
             }
             else
             {
                 RECON_INVOKE(&cpi->rtcd.common->recon, comp_intra4x4_predict)
                     (b, mode, mode2, b->predictor);
-                rate += vp8_cost_bit(128, 1);
                 rate += bmode_costs[mode2];
             }
 #endif
@@ -934,7 +933,8 @@ static int rd_pick_intra4x4block(
 }
 
 static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
-                                     int *rate_y, int *Distortion, int best_rd)
+                                     int *rate_y, int *Distortion, int best_rd,
+                                     int allow_comp)
 {
     MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
@@ -983,7 +983,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
             &best_second_mode,
 #endif
             bmode_costs, ta + vp8_block2above[i],
-            tl + vp8_block2left[i], &r, &ry, &d);
+            tl + vp8_block2left[i], &r, &ry, &d, allow_comp);
 
         cost += r;
         distortion += d;
@@ -1001,7 +1001,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     if(total_rd >= (int64_t)best_rd)
         return INT_MAX;
 
-    *Rate = cost;
+    *Rate = cost + vp8_cost_bit(128, allow_comp);
     *rate_y += tot_rate_y;
     *Distortion = distortion;
 
@@ -2736,7 +2736,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             int tmp_rd;
 
             // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
-            tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd);
+            tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd, 0);
             rate2 += rate;
             distortion2 += distortion;
 
@@ -3478,7 +3478,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     if (best_mbmode.mode == I8X8_PRED)
     {
-        //printf("inter\n");
         set_i8x8_block_modes(x, mode8x8);
     }
 
@@ -3512,9 +3511,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 {
     MACROBLOCKD *xd = &x->e_mbd;
-    int error4x4, error16x16;
-    int rate4x4, rate16x16 = 0, rateuv;
-    int dist4x4, dist16x16, distuv;
+    int error4x4, error16x16, error4x4d;
+    int rate4x4, rate16x16 = 0, rateuv, rate4x4d;
+    int dist4x4, dist16x16, distuv, dist4x4d;
     int rate;
     int rate4x4_tokenonly = 0;
     int rate16x16_tokenonly = 0;
@@ -3550,14 +3549,21 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
 
     error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                          &rate4x4, &rate4x4_tokenonly,
-                                         &dist4x4, error16x16);
+                                         &dist4x4, error16x16, 0);
+    error4x4d = rd_pick_intra4x4mby_modes(cpi, x,
+                                         &rate4x4d, &rate4x4_tokenonly,
+                                         &dist4x4d, error16x16, 1);
 
     if(error8x8> error16x16)
     {
         if (error4x4 < error16x16)
         {
+            rate += (error4x4d < error4x4) ? rate4x4d : rate4x4;
+            if (error4x4d >= error4x4) // FIXME save original modes etc.
+                error4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4,
+                                                     &rate4x4_tokenonly,
+                                                     &dist4x4, error16x16, 0);
             x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
-            rate += rate4x4;
         }
         else
         {
@@ -3570,14 +3576,17 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     {
         if (error4x4 < error8x8)
         {
+            rate += (error4x4d < error4x4) ? rate4x4d : rate4x4;
+            if (error4x4d >= error4x4) // FIXME save original modes etc.
+                error4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4,
+                                                     &rate4x4_tokenonly,
+                                                     &dist4x4, error16x16, 0);
             x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
-            rate += rate4x4;
         }
         else
         {
 
             x->e_mbd.mode_info_context->mbmi.mode = I8X8_PRED;
-            //printf("intra\n");
             set_i8x8_block_modes(x, mode8x8);
             rate += rate8x8;
         }
