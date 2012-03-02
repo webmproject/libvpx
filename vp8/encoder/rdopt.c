@@ -2552,6 +2552,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     vpx_memset(mode_mv, 0, sizeof(mode_mv));
 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+
+    /* Initialize zbin mode boost for uv costing */
+    cpi->zbin_mode_boost = 0;
+    vp8_update_zbin_extra(cpi, x);
     rd_pick_intra_mbuv_mode(cpi, x, &uv_intra_rate, &uv_intra_rate_tokenonly, &uv_intra_distortion);
     uv_intra_mode = x->e_mbd.mode_info_context->mbmi.uv_mode;
 
