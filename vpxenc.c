@@ -1740,6 +1740,9 @@ static struct stream_state *new_stream(struct global_config *global,
         stream->config.stereo_fmt = STEREO_FORMAT_MONO;
         stream->config.write_webm = 1;
         stream->ebml.last_pts_ms = -1;
+
+        /* Allows removal of the application version from the EBML tags */
+        stream->ebml.debug = global->debug;
     }
 
     /* Output files must be specified for each stream */
