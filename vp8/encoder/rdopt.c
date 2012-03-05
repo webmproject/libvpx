@@ -137,9 +137,11 @@ static void fill_token_costs(
     for (i = 0; i < BLOCK_TYPES; i++)
         for (j = 0; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
-
-                vp8_cost_tokens((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
-
+                // check for pt=0 and band > 1 if block type 0 and 0 if blocktype 1
+                if(k==0 && j>(i==0) )
+                    vp8_cost_tokens2((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree,2);
+                else
+                    vp8_cost_tokens((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
 }
 
 static int rd_iifactor [ 32 ] =  {    4,   4,   3,   2,   1,   0,   0,   0,
@@ -199,7 +201,7 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue)
     int q;
     int i;
     double capped_q = (Qvalue < 160) ? (double)Qvalue : 160.0;
-    double rdconst = 2.70;
+    double rdconst = 2.60;
 
     vp8_clear_system_state();  //__asm emms;
 
