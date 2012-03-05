@@ -16,6 +16,24 @@
       "revId": "67a5d23155d33a6ad58138e8b92290d8ff8572bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//ez0\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-05T16:09:37Z",
+      "side": 1,
+      "message": "In the situation where the previous token is 0 we skip the first branch of the coefficient tree unless we are on the dc which is the intent of the check on band.",
+      "parentUuid": "AAAAHn//e0c\u003d",
+      "revId": "67a5d23155d33a6ad58138e8b92290d8ff8572bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
