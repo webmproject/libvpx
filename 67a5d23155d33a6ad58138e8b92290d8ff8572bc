@@ -34,6 +34,24 @@
       "revId": "67a5d23155d33a6ad58138e8b92290d8ff8572bc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//eyU\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-05T16:46:55Z",
+      "side": 1,
+      "message": "I know the branch you\u0027re trying to account for, but it\u0027s dependent on skip_eob_node not pt (k here) (in detokenize we call skip_eob_node pt and pt v, I\u0027m using the notation from tokenize here).\n\nThis short-circuit-after-zero happens in k\u003d0,1,2. ie we still do this short circuit even when the above/left *blocks* had non-zero dc coeffs. We don\u0027t have skip_eob_node here as far as I can see, I think you\u0027d have to add it as an additional dimension to the token costs array.",
+      "parentUuid": "AAAAHn//ez0\u003d",
+      "revId": "67a5d23155d33a6ad58138e8b92290d8ff8572bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
