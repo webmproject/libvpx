@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//e0c\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-05T15:58:04Z",
+      "side": 1,
+      "message": "This context is a block level context wrt the above/left blocks having non-zero DCs. This doesn\u0027t look to me like it captures the intent of the patch.\n\nAlso, useless ?1:0",
+      "revId": "67a5d23155d33a6ad58138e8b92290d8ff8572bc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
