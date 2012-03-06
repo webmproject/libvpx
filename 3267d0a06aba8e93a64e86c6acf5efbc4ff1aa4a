@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//dh0\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:48:38Z",
+      "side": 1,
+      "message": "per pixel look up is never simd able.    much better if at all possible to convert to a function.   if something like divide is necessary convert to multiply and shift.",
+      "parentUuid": "AAAAHn//djM\u003d",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//djo\u003d",
         "filename": "vp8/encoder/denoising.c",
         "patchSetId": 2
