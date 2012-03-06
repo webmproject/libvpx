@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//dh8\u003d",
+        "filename": "vp8/common/alloccommon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Good point, will make sure to do that. Actually, right now I think these frames are allocated for the decoder as well, which doesn\u0027t make much sense.",
+      "parentUuid": "AAAAHn//djs\u003d",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//djg\u003d",
         "filename": "vp8/encoder/denoising.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-03-06T14:18:19Z",
       "side": 1,
       "message": "this lookup is really slow.   Any chance we can use a 3 operation function to do this?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//djM\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Can you clarify what you mean with 3 operation function? This table is based on the function 255/(1 + absdiff/8), which could be written as:\n(255\u003c\u003c8)/(256 + (absdiff\u003c\u003c5)). But it\u0027s still has a division, so I assumed the table would be faster.",
+      "parentUuid": "AAAAHn//djg\u003d",
       "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//djY\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Good point, will fix.",
+      "parentUuid": "AAAAHn//djo\u003d",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//djk\u003d",
         "filename": "vp8/encoder/denoising.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2012-03-06T14:18:19Z",
       "side": 1,
       "message": "Integer divide is really really slow can we do something better than / 10 ?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//djI\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "I don\u0027t think the 10 is that sensitive, probably works well to replace it with 8 and shift with 3 instead.",
+      "parentUuid": "AAAAHn//djk\u003d",
       "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//diY\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 952,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Yes, will fix.",
+      "parentUuid": "AAAAHn//dkY\u003d",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//dkU\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2012-03-06T14:18:19Z",
       "side": 1,
       "message": "Shouldn\u0027t this be inside the if statement for temporal denoising?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//diU\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1034,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "AAAAHn//dkU\u003d",
       "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//dis\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1047,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Split is never checked in pickinter.c. It could be worth checking new mv but it would require much more computation. I assumed that we would gain the most by checking for blocks which should\u0027ve been zeromv without noise, but instead happened to be coded as intra.\n\nSo, it\u0027s a matter of the amount of computations it\u0027s worth.",
+      "parentUuid": "AAAAHn//dkQ\u003d",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//dkI\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 2
@@ -132,6 +258,24 @@
       "writtenOn": "2012-03-06T14:18:19Z",
       "side": 1,
       "message": "Is this entire section duplicate?   Should it be moved to a function?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dig\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1061,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Yes, it probably should. I was considering it but there was so many local variables that had to be updated. I will make another attempt to get it nicer.",
+      "parentUuid": "AAAAHn//dkI\u003d",
       "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//dic\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1063,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Good point, will fix.",
+      "parentUuid": "AAAAHn//dkM\u003d",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//dkE\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 2
@@ -166,6 +328,24 @@
       "writtenOn": "2012-03-06T14:18:19Z",
       "side": 1,
       "message": "if temporal denoiser?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//diM\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2248,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "AAAAHn//dkE\u003d",
       "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -189,6 +369,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//diI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2342,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Yes, will fix.",
+      "parentUuid": "AAAAHn//dkA\u003d",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//dj8\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 2
@@ -200,6 +398,24 @@
       "writtenOn": "2012-03-06T14:18:19Z",
       "side": 1,
       "message": "can\u0027t you just copy this from pickinter?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//diA\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2353,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-03-06T14:43:28Z",
+      "side": 1,
+      "message": "Yes, but it\u0027s not clear to me if that is what is expected since this file does rd optimization and pickinter doesn\u0027t. But it would work I think, but maybe not be optimal from an rd perspective?",
+      "parentUuid": "AAAAHn//dj8\u003d",
       "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
