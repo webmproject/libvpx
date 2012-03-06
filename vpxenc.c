@@ -40,6 +40,9 @@
 #include "libmkv/EbmlWriter.h"
 #include "libmkv/EbmlIDs.h"
 #include "third_party/libyuv/include/libyuv/scale.h"
+#include "nestegg/include/nestegg/nestegg.h"
+#include "vpx/vpx_decoder.h"
+#include "vpx/vp8dx.h"
 
 /* Need special handling of these functions on Windows */
 #if defined(_MSC_VER)
@@ -290,7 +293,8 @@ enum video_file_type
 {
     FILE_TYPE_RAW,
     FILE_TYPE_IVF,
-    FILE_TYPE_Y4M
+    FILE_TYPE_Y4M,
+    FILE_TYPE_WEBM
 };
 
 struct detect_buffer {
@@ -298,6 +302,151 @@ struct detect_buffer {
     size_t buf_read;
     size_t position;
 };
+
+
+struct webm_ctx
+{
+    FILE           *infile;
+    nestegg        *nestegg_ctx;
+    nestegg_packet *pkt;
+    unsigned int    chunk;
+    unsigned int    chunks;
+    unsigned int    video_track;
+    vpx_codec_ctx_t decoder;
+    unsigned char  *buf;
+    size_t          buf_sz;
+};
+
+static int
+nestegg_read_cb(void *buffer, size_t length, void *userdata)
+{
+    FILE *f = userdata;
+
+    if(fread(buffer, 1, length, f) < length)
+    {
+        if (ferror(f))
+            return -1;
+        if (feof(f))
+            return 0;
+    }
+    return 1;
+}
+
+
+static int
+nestegg_seek_cb(int64_t offset, int whence, void * userdata)
+{
+    switch(whence) {
+        case NESTEGG_SEEK_SET: whence = SEEK_SET; break;
+        case NESTEGG_SEEK_CUR: whence = SEEK_CUR; break;
+        case NESTEGG_SEEK_END: whence = SEEK_END; break;
+    };
+    return fseek(userdata, offset, whence)? -1 : 0;
+}
+
+
+static int64_t
+nestegg_tell_cb(void * userdata)
+{
+    return ftell(userdata);
+}
+
+
+static int
+webm_guess_framerate(struct webm_ctx  *input,
+                     unsigned int     *fps_den,
+                     unsigned int     *fps_num)
+{
+    unsigned int i;
+    uint64_t     tstamp=0;
+
+    /* Guess the framerate. Read up to 1 second, or 50 video packets,
+     * whichever comes first.
+     */
+    for(i=0; tstamp < 1000000000 && i < 50;)
+    {
+        nestegg_packet * pkt;
+        unsigned int track;
+
+        if(nestegg_read_packet(input->nestegg_ctx, &pkt) <= 0)
+            break;
+
+        nestegg_packet_track(pkt, &track);
+        if(track == input->video_track)
+        {
+            nestegg_packet_tstamp(pkt, &tstamp);
+            i++;
+        }
+
+        nestegg_free_packet(pkt);
+    }
+
+    if(nestegg_track_seek(input->nestegg_ctx, input->video_track, 0))
+        goto fail;
+
+    *fps_num = (i - 1) * 1000000;
+    *fps_den = tstamp / 1000;
+    return 0;
+fail:
+    nestegg_destroy(input->nestegg_ctx);
+    input->nestegg_ctx = NULL;
+    rewind(input->infile);
+    return 1;
+}
+
+
+static int
+file_is_webm(struct webm_ctx  *input,
+             unsigned int     *width,
+             unsigned int     *height,
+             unsigned int     *fps_den,
+             unsigned int     *fps_num)
+{
+    unsigned int i, n;
+    int          track_type = -1;
+
+    nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb,
+                     input->infile};
+    nestegg_video_params params;
+
+    if(nestegg_init(&input->nestegg_ctx, io, NULL))
+        goto fail;
+
+    if(nestegg_track_count(input->nestegg_ctx, &n))
+        goto fail;
+
+    for(i=0; i<n; i++)
+    {
+        track_type = nestegg_track_type(input->nestegg_ctx, i);
+
+        if(track_type == NESTEGG_TRACK_VIDEO)
+            break;
+        else if(track_type < 0)
+            goto fail;
+    }
+
+    if(nestegg_track_codec_id(input->nestegg_ctx, i) != NESTEGG_CODEC_VP8)
+    {
+        fprintf(stderr, "Not VP8 video, quitting.\n");
+        exit(1);
+    }
+
+    input->video_track = i;
+
+    if(nestegg_track_video_params(input->nestegg_ctx, i, &params))
+        goto fail;
+
+    if(webm_guess_framerate(input, fps_den, fps_num))
+        goto fail;
+
+    *width = params.width;
+    *height = params.height;
+    return 1;
+fail:
+    input->nestegg_ctx = NULL;
+    rewind(input->infile);
+    return 0;
+}
 
 
 struct input_state
@@ -311,6 +460,7 @@ struct input_state
     unsigned int          h;
     struct vpx_rational   framerate;
     int                   use_i420;
+    struct webm_ctx       webm;
 };
 
 
@@ -324,6 +474,53 @@ static int read_frame(struct input_state *input, vpx_image_t *img)
     int plane = 0;
     int shortread = 0;
 
+    if (file_type == FILE_TYPE_WEBM)
+    {
+        struct webm_ctx *webm = &input->webm;
+        unsigned int p,r;
+        vpx_image_t *src;
+        vpx_codec_iter_t iter = NULL;
+
+        if(webm->chunk >= webm->chunks)
+        {
+            unsigned int track;
+
+            do
+            {
+                /* End of this packet, get another. */
+                if(webm->pkt)
+                    nestegg_free_packet(webm->pkt);
+
+                if(nestegg_read_packet(webm->nestegg_ctx, &webm->pkt) <= 0
+                   || nestegg_packet_track(webm->pkt, &track))
+                    return 0;
+
+            } while(track != webm->video_track);
+
+            if(nestegg_packet_count(webm->pkt, &webm->chunks))
+                return 0;
+            webm->chunk = 0;
+        }
+
+        if(nestegg_packet_data(webm->pkt, webm->chunk,
+                               &webm->buf, &webm->buf_sz))
+            return 0;
+
+        webm->chunk++;
+
+        if (vpx_codec_decode(&webm->decoder, webm->buf, webm->buf_sz, NULL, 0))
+            fatal("decode failed");
+
+        if ((src = vpx_codec_get_frame(&webm->decoder, &iter)))
+            for(p=0; p<3; p++)
+                for(r=0; r<img->d_h >> (p>0); r++)
+                    memcpy(img->planes[p] + r * img->stride[p],
+                           src->planes[p] + r * src->stride[p],
+                           img->d_w >> (p>0));
+
+        return !!src;
+    }
+    else
     if (file_type == FILE_TYPE_Y4M)
     {
         if (y4m_input_fetch_frame(y4m, f, img) < 1)
@@ -1640,6 +1837,21 @@ void open_input_file(struct input_state *input)
 
     if (!input->file)
         fatal("Failed to open input file");
+
+    if(strstr(input->fn, ".webm"))
+    {
+        input->webm.infile = input->file;
+        input->file_type = FILE_TYPE_WEBM;
+        if(!file_is_webm(&input->webm,
+                         &input->w, &input->h,
+                         &input->framerate.den,
+                         &input->framerate.num))
+            fatal("Couldn't open webm file");
+        if (vpx_codec_dec_init(&input->webm.decoder,
+                               &vpx_codec_vp8_dx_algo, NULL, 0))
+            fatal("Couldn't init decoder");
+        return;
+    }
 
     /* For RAW input sources, these bytes will applied on the first frame
      *  in read_frame().

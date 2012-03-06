@@ -15,6 +15,14 @@ LIBYUV_SRCS +=  third_party/libyuv/include/libyuv/basic_types.h  \
                 third_party/libyuv/source/scale.c  \
                 third_party/libyuv/source/cpu_id.c
 
+NESTEGG_SRCS += nestegg/halloc/halloc.h \
+                nestegg/halloc/src/align.h \
+                nestegg/halloc/src/halloc.c \
+                nestegg/halloc/src/hlist.h \
+                nestegg/halloc/src/macros.h \
+                nestegg/include/nestegg/nestegg.h \
+                nestegg/src/nestegg.c
+
 # List of examples to build. UTILS are files that are taken from the source
 # tree directly, and GEN_EXAMPLES are files that are created from the
 # examples folder.
@@ -24,13 +32,7 @@ vpxdec.SRCS                 += vpx_ports/vpx_timer.h
 vpxdec.SRCS                 += vpx/vpx_integer.h
 vpxdec.SRCS                 += args.c args.h
 vpxdec.SRCS                 += tools_common.c tools_common.h
-vpxdec.SRCS                 += nestegg/halloc/halloc.h
-vpxdec.SRCS                 += nestegg/halloc/src/align.h
-vpxdec.SRCS                 += nestegg/halloc/src/halloc.c
-vpxdec.SRCS                 += nestegg/halloc/src/hlist.h
-vpxdec.SRCS                 += nestegg/halloc/src/macros.h
-vpxdec.SRCS                 += nestegg/include/nestegg/nestegg.h
-vpxdec.SRCS                 += nestegg/src/nestegg.c
+vpxdec.SRCS                 += $(NESTEGG_SRCS)
 vpxdec.GUID                  = BA5FE66F-38DD-E034-F542-B1578C5FB950
 vpxdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += vpxenc.c
@@ -42,6 +44,7 @@ vpxenc.SRCS                 += libmkv/EbmlIDs.h
 vpxenc.SRCS                 += libmkv/EbmlWriter.c
 vpxenc.SRCS                 += libmkv/EbmlWriter.h
 vpxenc.SRCS                 += $(LIBYUV_SRCS)
+vpxenc.SRCS                 += $(NESTEGG_SRCS)
 vpxenc.GUID                  = 548DEC74-7A15-4B2B-AFC3-AA102E7C25C1
 vpxenc.DESCRIPTION           = Full featured encoder
 UTILS-$(CONFIG_ENCODERS)    += vp8_scalable_patterns.c
