@@ -219,7 +219,6 @@ EXPERIMENT_LIST="
     uvintra
     compred
     enhanced_interp
-    superblocks
     featureupdates
     high_precision_mv
     sixteenth_subpel_uv

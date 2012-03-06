@@ -874,11 +874,6 @@ static int rd_pick_intra4x4block(
         int this_rd;
         int ratey;
 
-#if CONFIG_SUPERBLOCKS
-        // Ignore modes thact need the above-right data
-        if (mode==B_LD_PRED || mode==B_VL_PRED)
-            continue;
-#endif
         rate = bmode_costs[mode];
 
 #if CONFIG_COMP_INTRA_PRED
@@ -960,9 +955,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     ta = (ENTROPY_CONTEXT *)&t_above;
     tl = (ENTROPY_CONTEXT *)&t_left;
 
-#if !CONFIG_SUPERBLOCKS
     vp8_intra_prediction_down_copy(xd);
-#endif
 
     bmode_costs = mb->inter_bmode_costs;
 
