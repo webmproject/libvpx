@@ -77,6 +77,18 @@ static const struct extraconfig_map extracfg_map[] =
     }
 };
 
+
+struct cx_data_iter
+{
+    struct vpx_codec_cx_pkt  pkt;
+    int                      frame_out;
+    int                      pkt_list_done;
+    vpx_codec_iter_t         pkt_list_iter;
+    int                      mode_info_done;
+    int                      mode_info_row;
+};
+
+
 struct vpx_codec_alg_priv
 {
     vpx_codec_priv_t        base;
@@ -92,6 +104,7 @@ struct vpx_codec_alg_priv
     vpx_codec_pkt_list_decl(64) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
     int                         deprecated_mode;
     unsigned int                fixed_kf_cntr;
+    struct cx_data_iter         cx_data_iter;
 };
 
 
@@ -952,7 +965,44 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 static const vpx_codec_cx_pkt_t *vp8e_get_cxdata(vpx_codec_alg_priv_t  *ctx,
         vpx_codec_iter_t      *iter)
 {
-    return vpx_codec_pkt_list_get(&ctx->pkt_list.head, iter);
+    if(!*iter)
+    {
+        memset(&ctx->cx_data_iter, 0, sizeof(ctx->cx_data_iter));
+        *iter = &ctx->cx_data_iter;
+    }
+    if(!ctx->cx_data_iter.pkt_list_done)
+    {
+        const vpx_codec_cx_pkt_t *pkt;
+
+        pkt = vpx_codec_pkt_list_get(&ctx->pkt_list.head,
+                                     &ctx->cx_data_iter.pkt_list_iter);
+        if(pkt)
+        {
+            ctx->cx_data_iter.frame_out = 1;
+            return pkt;
+        }
+        ctx->cx_data_iter.pkt_list_done = 1;
+    }
+    if(!ctx->cx_data_iter.frame_out)
+        return NULL;
+    if(!ctx->cx_data_iter.mode_info_done)
+    {
+        vpx_codec_cx_pkt_t *pkt = &ctx->cx_data_iter.pkt;
+
+        if(ctx->cx_data_iter.mode_info_row < ctx->cpi->common.mb_rows)
+        {
+            pkt->kind = VPX_CODEC_CUSTOM_PKT;
+            pkt->data.raw.buf = ctx->cpi->common.mi
+                                + ctx->cpi->common.mode_info_stride
+                                * ctx->cx_data_iter.mode_info_row;
+            pkt->data.raw.sz = sizeof(MODE_INFO) * ctx->cpi->common.mb_cols;
+            ctx->cx_data_iter.mode_info_row++;
+            return pkt;
+        }
+        else
+            ctx->cx_data_iter.mode_info_done = 1;
+    }
+    return NULL;
 }
 
 static vpx_codec_err_t vp8e_set_reference(vpx_codec_alg_priv_t *ctx,

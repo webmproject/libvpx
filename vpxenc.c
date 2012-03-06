@@ -2239,6 +2239,124 @@ static void get_cx_data(struct stream_state  *stream,
 }
 
 
+struct link_record
+{
+    uint32_t sz;
+    uint16_t w;
+    uint16_t h;
+};
+
+static void
+write_multistream_file(struct stream_state  *streams,
+                       struct global_config *global,
+                       int                  *got_data)
+{
+    const vpx_codec_cx_pkt_t *pkt;
+    vpx_codec_cx_pkt_t outpkt = {0};
+    int newsz;
+
+    FOREACH_STREAM({
+    vpx_codec_iter_t iter = NULL;
+    const struct vpx_codec_enc_cfg *cfg = &stream->config.cfg;
+    struct link_record link = {0};
+
+    while ((pkt = vpx_codec_get_cx_data(&stream->encoder, &iter)))
+    {
+        *got_data = 1;
+
+        switch (pkt->kind)
+        {
+        case VPX_CODEC_CX_FRAME_PKT:
+            stream->frames_out++;
+            fprintf(stderr, " %6luF",
+                    (unsigned long)pkt->data.frame.sz);
+
+            update_rate_histogram(&stream->rate_hist, cfg, pkt);
+            stream->nbytes += pkt->data.raw.sz;
+
+            if(stream == streams)
+            {
+                outpkt = *pkt;
+                outpkt.data.raw.buf = malloc(outpkt.data.raw.sz);
+                memcpy(outpkt.data.raw.buf, pkt->data.raw.buf, pkt->data.raw.sz);
+            }
+            break;
+        case VPX_CODEC_STATS_PKT:
+            stream->frames_out++;
+            fprintf(stderr, " %6luS",
+                   (unsigned long)pkt->data.twopass_stats.sz);
+            stats_write(&stream->stats,
+                        pkt->data.twopass_stats.buf,
+                        pkt->data.twopass_stats.sz);
+            stream->nbytes += pkt->data.raw.sz;
+            break;
+        case VPX_CODEC_PSNR_PKT:
+
+            if (global->show_psnr)
+            {
+                int i;
+
+                stream->psnr_sse_total += pkt->data.psnr.sse[0];
+                stream->psnr_samples_total += pkt->data.psnr.samples[0];
+                for (i = 0; i < 4; i++)
+                {
+                    fprintf(stderr, "%.3lf ", pkt->data.psnr.psnr[i]);
+                    stream->psnr_totals[i] += pkt->data.psnr.psnr[i];
+                }
+                stream->psnr_count++;
+            }
+
+            break;
+        default:
+            /* Append other data packets to outpkt */
+            newsz = outpkt.data.raw.sz + pkt->data.raw.sz;
+            outpkt.data.raw.buf = realloc(outpkt.data.raw.buf, newsz);
+            memcpy((char*)outpkt.data.raw.buf + outpkt.data.raw.sz,
+                   pkt->data.raw.buf, pkt->data.raw.sz);
+            outpkt.data.raw.sz = newsz;
+            link.sz += pkt->data.raw.sz;
+            break;
+        }
+    }
+
+    if(link.sz)
+    {
+        link.w = cfg->g_w;
+        link.h = cfg->g_h;
+        link.sz |= (stream == streams)?0:(1<<31);
+        newsz = outpkt.data.raw.sz + sizeof(link);
+        outpkt.data.raw.buf = realloc(outpkt.data.raw.buf, newsz);
+        memcpy((char*)outpkt.data.raw.buf + outpkt.data.raw.sz,
+               &link, sizeof(link));
+        outpkt.data.raw.sz = newsz;
+    }
+
+    });
+    if(outpkt.data.raw.sz)
+    {
+        const struct vpx_codec_enc_cfg *cfg = &streams->config.cfg;
+        struct stream_state  *stream = streams;
+        const vpx_codec_cx_pkt_t *pkt = &outpkt;
+
+        if(stream->config.write_webm)
+        {
+            /* Update the hash */
+            if(!stream->ebml.debug)
+                stream->hash = murmur(pkt->data.frame.buf,
+                                      pkt->data.frame.sz, stream->hash);
+
+            write_webm_block(&streams->ebml, cfg, pkt);
+        }
+        else
+        {
+            write_ivf_frame_header(stream->file, pkt);
+            if(fwrite(pkt->data.frame.buf, 1,
+                      pkt->data.frame.sz, stream->file));
+        }
+        free(outpkt.data.raw.buf);
+    }
+}
+
 static void show_psnr(struct stream_state  *stream)
 {
     int i;
@@ -2432,7 +2550,10 @@ int main(int argc, const char **argv_)
             FOREACH_STREAM(update_quantizer_histogram(stream));
 
             got_data = 0;
-            FOREACH_STREAM(get_cx_data(stream, &global, &got_data));
+            if(1)
+                write_multistream_file(streams, &global, &got_data);
+            else
+                FOREACH_STREAM(get_cx_data(stream, &global, &got_data));
 
             fflush(stdout);
         }
