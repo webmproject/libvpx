@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//djs\u003d",
+        "filename": "vp8/common/alloccommon.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "Hmm -  I think we should only do this if preproc is turned on or when it gets turned on.   This will be 2 extra frames of data for chromoting that won\u0027t use it.",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//djg\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "this lookup is really slow.   Any chance we can use a 3 operation function to do this?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//djo\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "This if doesn\u0027t need to be in the r,c loop.\n\nin fact if motion_magnitude2 \u003e NOISE_MOTION threshold we shouldn\u0027t do any of this just copy the block.",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//djk\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "Integer divide is really really slow can we do something better than / 10 ?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dkY\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 952,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "Do you really need the whole mode structure and not say just the mv.  Alsoshouldn\u0027t all of this be protected by a check on temporal denoising?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dkU\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1034,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be inside the if statement for temporal denoising?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dkQ\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1047,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "We only reevaluate an intra frame decision after denoising,  maybe we should check split / or new mv as well?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dkI\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1061,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "Is this entire section duplicate?   Should it be moved to a function?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dkM\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1063,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "just above you set this_mode to zeromv .   Seems this if is unnecessary.",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dkE\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2248,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "if temporal denoiser?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dkA\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2342,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "move inside the if ?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//dj8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2353,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-06T14:18:19Z",
+      "side": 1,
+      "message": "can\u0027t you just copy this from pickinter?",
+      "revId": "3267d0a06aba8e93a64e86c6acf5efbc4ff1aa4a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
