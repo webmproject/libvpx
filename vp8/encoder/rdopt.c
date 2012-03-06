@@ -214,7 +214,14 @@ static void fill_token_costs(
     for (i = 0; i < BLOCK_TYPES; i++)
         for (j = 0; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
-                vp8_cost_tokens((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
+            {
+
+                if(k == 0 && ((j > 0 && i > 0) || (j > 1 && i == 0)))
+                    vp8_cost_tokens_skip((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
+                else
+
+                    vp8_cost_tokens((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
+            }
 
 }
 
@@ -250,7 +257,7 @@ int compute_rd_mult( int qindex )
     int q;
 
     q = vp8_dc_quant(qindex,0);
-    return (3 * q * q) >> 4;
+    return (11 * q * q) >> 6;
 }
 
 void vp8cx_initialize_me_consts(VP8_COMP *cpi, int QIndex)
