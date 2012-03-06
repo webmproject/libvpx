@@ -18,7 +18,7 @@
 #include "treewriter.h"
 #include "tokenize.h"
 #include "vp8/common/onyxc_int.h"
-#include "variance.h"
+#include "vp8/common/variance.h"
 #include "encodemb.h"
 #include "quantize.h"
 #include "vp8/common/entropy.h"
