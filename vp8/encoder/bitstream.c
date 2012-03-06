@@ -1124,9 +1124,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                 if (mode == B_PRED)
                 {
-                    int j = 0, uses_second = m->bmi[0].as_mode.second != (B_PREDICTION_MODE) (B_DC_PRED - 1);
-
+                    int j = 0;
+#if CONFIG_COMP_INTRA_PRED
+                    int uses_second = m->bmi[0].as_mode.second != (B_PREDICTION_MODE) (B_DC_PRED - 1);
                     vp8_write(w, uses_second, 128);
+#endif
                     do {
 #if CONFIG_COMP_INTRA_PRED
                         B_PREDICTION_MODE mode2 = m->bmi[j].as_mode.second;
@@ -1514,9 +1516,11 @@ static void write_kfmodes(VP8_COMP *cpi)
             if (ym == B_PRED)
             {
                 const int mis = c->mode_info_stride;
-                int i = 0, uses_second = m->bmi[0].as_mode.second != (B_PREDICTION_MODE) (B_DC_PRED - 1);
-
+                int i = 0;
+#if CONFIG_COMP_INTRA_PRED
+                int uses_second = m->bmi[0].as_mode.second != (B_PREDICTION_MODE) (B_DC_PRED - 1);
                 vp8_write(bc, uses_second, 128);
+#endif
                 do
                 {
                     const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
