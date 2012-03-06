@@ -17,6 +17,7 @@ else
   ASM:=.asm
 endif
 
+CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
