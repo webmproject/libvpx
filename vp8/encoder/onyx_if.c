@@ -1680,6 +1680,17 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     cpi->alt_ref_source = NULL;
     cpi->is_src_frame_alt_ref = 0;
 
+#if CONFIG_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity)
+    {
+      if (!cpi->denoiser.yv12_mc_running_avg.buffer_alloc)
+      {
+        int width = (cpi->oxcf.Width + 15) & ~15;
+        int height = (cpi->oxcf.Height + 15) & ~15;
+        vp8_denoiser_allocate(&cpi->denoiser, width, height);
+      }
+    }
+#endif
 
 #if 0
     // Experimental RD Code
@@ -2314,6 +2325,9 @@ void vp8_remove_compressor(VP8_COMP **ptr)
     vp8cx_remove_encoder_threads(cpi);
 #endif
 
+#if CONFIG_TEMPORAL_DENOISING
+    vp8_denoiser_free(&cpi->denoiser);
+#endif
     dealloc_compressor_data(cpi);
     vpx_free(cpi->mb.ss);
     vpx_free(cpi->tok);
@@ -3133,7 +3147,12 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
     }
 
     vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
-
+#if CONFIG_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity)
+    {
+      vp8_yv12_extend_frame_borders(&cpi->denoiser.yv12_running_avg);
+    }
+#endif
 }
 
 static void encode_frame_to_data_rate
@@ -3589,7 +3608,7 @@ static void encode_frame_to_data_rate
 
 
     scale_and_extend_source(cpi->un_scaled_source, cpi);
-#if !(CONFIG_REALTIME_ONLY) && CONFIG_POSTPROC
+#if !(CONFIG_REALTIME_ONLY) && CONFIG_POSTPROC && !(CONFIG_TEMPORAL_DENOISING)
 
     if (cpi->oxcf.noise_sensitivity > 0)
     {

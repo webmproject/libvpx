@@ -362,6 +362,7 @@ void vp8_deblock(YV12_BUFFER_CONFIG         *source,
     vp8_post_proc_down_and_across(source->v_buffer, post->v_buffer, source->uv_stride, post->uv_stride, source->uv_height, source->uv_width, ppl);
 }
 
+#if !(CONFIG_TEMPORAL_DENOISING)
 void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
                   YV12_BUFFER_CONFIG         *post,
                   int                         q,
@@ -398,6 +399,7 @@ void vp8_de_noise(YV12_BUFFER_CONFIG         *source,
         source->uv_width - 4, ppl);
 
 }
+#endif
 
 double vp8_gaussian(double sigma, double mu, double x)
 {

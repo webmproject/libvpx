@@ -33,10 +33,32 @@
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/systemdependent.h"
+#if CONFIG_TEMPORAL_DENOISING
+#include "denoising.h"
+#endif
 
 extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
+
+typedef struct rate_distortion_struct
+{
+    int rate2;
+    int rate_y;
+    int rate_uv;
+    int distortion2;
+    int distortion_uv;
+} RATE_DISTORTION;
+
+typedef struct best_mode_struct
+{
+  int yrd;
+  int rd;
+  int intra_rd;
+  MB_MODE_INFO mbmode;
+  union b_mode_info bmodes[16];
+  PARTITION_INFO partition;
+} BEST_MODE;
 
 static const int auto_speed_thresh[17] =
 {
@@ -1711,6 +1733,181 @@ static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
     }
 }
 
+static int evaluate_inter_mode_rd(int mdcounts[4],
+                                  RATE_DISTORTION* rd,
+                                  int* disable_skip,
+                                  VP8_COMP *cpi, MACROBLOCK *x)
+{
+    MB_PREDICTION_MODE this_mode = x->e_mbd.mode_info_context->mbmi.mode;
+    BLOCK *b = &x->block[0];
+    MACROBLOCKD *xd = &x->e_mbd;
+    int distortion;
+    vp8_build_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor, 16);
+
+    if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
+        x->skip = 1;
+    }
+    else if (x->encode_breakout)
+    {
+        unsigned int sse;
+        unsigned int var;
+        int threshold = (xd->block[0].dequant[1]
+                    * xd->block[0].dequant[1] >>4);
+
+        if(threshold < x->encode_breakout)
+            threshold = x->encode_breakout;
+
+        var = vp8_variance16x16
+                (*(b->base_src), b->src_stride,
+                x->e_mbd.predictor, 16, &sse);
+
+        if (sse < threshold)
+        {
+             unsigned int q2dc = xd->block[24].dequant[0];
+            /* If theres is no codeable 2nd order dc
+               or a very small uniform pixel change change */
+            if ((sse - var < q2dc * q2dc >>4) ||
+                (sse /2 > var && sse-var < 64))
+            {
+                // Check u and v to make sure skip is ok
+                int sse2=  VP8_UVSSE(x);
+                if (sse2 * 2 < threshold)
+                {
+                    x->skip = 1;
+                    rd->distortion2 = sse + sse2;
+                    rd->rate2 = 500;
+
+                    /* for best_yrd calculation */
+                    rd->rate_uv = 0;
+                    rd->distortion_uv = sse2;
+
+                    *disable_skip = 1;
+                    return RDCOST(x->rdmult, x->rddiv, rd->rate2,
+                                  rd->distortion2);
+                }
+            }
+        }
+    }
+
+
+    //intermodecost[mode_index] = vp8_cost_mv_ref(this_mode, mdcounts);   // Experimental debug code
+
+    // Add in the Mv/mode cost
+    rd->rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
+
+    // Y cost and distortion
+    macro_block_yrd(x, &rd->rate_y, &distortion);
+    rd->rate2 += rd->rate_y;
+    rd->distortion2 += distortion;
+
+    // UV cost and distortion
+    rd_inter16x16_uv(cpi, x, &rd->rate_uv, &rd->distortion_uv,
+                     cpi->common.full_pixel);
+    rd->rate2 += rd->rate_uv;
+    rd->distortion2 += rd->distortion_uv;
+    return INT_MAX;
+}
+
+static int calculate_final_rd_costs(int this_rd,
+                                    RATE_DISTORTION* rd,
+                                    int* other_cost,
+                                    int disable_skip,
+                                    int uv_intra_tteob,
+                                    int intra_rd_penalty,
+                                    VP8_COMP *cpi, MACROBLOCK *x)
+{
+    MB_PREDICTION_MODE this_mode = x->e_mbd.mode_info_context->mbmi.mode;
+    // Where skip is allowable add in the default per mb cost for the no skip case.
+    // where we then decide to skip we have to delete this and replace it with the
+    // cost of signallying a skip
+    if (cpi->common.mb_no_coeff_skip)
+    {
+        *other_cost += vp8_cost_bit(cpi->prob_skip_false, 0);
+        rd->rate2 += *other_cost;
+    }
+
+    /* Estimate the reference frame signaling cost and add it
+     * to the rolling cost variable.
+     */
+    rd->rate2 +=
+        x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+
+    if (!disable_skip)
+    {
+        // Test for the condition where skip block will be activated because there are no non zero coefficients and make any necessary adjustment for rate
+        if (cpi->common.mb_no_coeff_skip)
+        {
+            int i;
+            int tteob;
+            int has_y2_block = (this_mode!=SPLITMV && this_mode!=B_PRED);
+
+            tteob = 0;
+            if(has_y2_block)
+                tteob += x->e_mbd.eobs[24];
+
+            for (i = 0; i < 16; i++)
+                tteob += (x->e_mbd.eobs[i] > has_y2_block);
+
+            if (x->e_mbd.mode_info_context->mbmi.ref_frame)
+            {
+                for (i = 16; i < 24; i++)
+                    tteob += x->e_mbd.eobs[i];
+            }
+            else
+                tteob += uv_intra_tteob;
+
+            if (tteob == 0)
+            {
+                rd->rate2 -= (rd->rate_y + rd->rate_uv);
+                //for best_yrd calculation
+                rd->rate_uv = 0;
+
+                // Back out no skip flag costing and add in skip flag costing
+                if (cpi->prob_skip_false)
+                {
+                    int prob_skip_cost;
+
+                    prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 1);
+                    prob_skip_cost -= vp8_cost_bit(cpi->prob_skip_false, 0);
+                    rd->rate2 += prob_skip_cost;
+                    *other_cost += prob_skip_cost;
+                }
+            }
+        }
+        // Calculate the final RD estimate for this mode
+        this_rd = RDCOST(x->rdmult, x->rddiv, rd->rate2, rd->distortion2);
+        if (this_rd < INT_MAX && x->e_mbd.mode_info_context->mbmi.ref_frame
+                                 == INTRA_FRAME)
+            this_rd += intra_rd_penalty;
+    }
+    return this_rd;
+}
+
+static void update_best_mode(BEST_MODE* best_mode, int this_rd,
+                             RATE_DISTORTION* rd, int other_cost, MACROBLOCK *x)
+{
+    MB_PREDICTION_MODE this_mode = x->e_mbd.mode_info_context->mbmi.mode;
+
+    other_cost +=
+    x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
+
+    /* Calculate the final y RD estimate for this mode */
+    best_mode->yrd = RDCOST(x->rdmult, x->rddiv, (rd->rate2-rd->rate_uv-other_cost),
+                      (rd->distortion2-rd->distortion_uv));
+
+    best_mode->rd = this_rd;
+    vpx_memcpy(&best_mode->mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
+    vpx_memcpy(&best_mode->partition, x->partition_info, sizeof(PARTITION_INFO));
+
+    if ((this_mode == B_PRED) || (this_mode == SPLITMV))
+    {
+        int i;
+        for (i = 0; i < 16; i++)
+        {
+            best_mode->bmodes[i] = x->e_mbd.block[i].bmi;
+        }
+    }
+}
 
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                             int recon_uvoffset, int *returnrate,
@@ -1719,9 +1916,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     BLOCK *b = &x->block[0];
     BLOCKD *d = &x->e_mbd.block[0];
     MACROBLOCKD *xd = &x->e_mbd;
-    union b_mode_info best_bmodes[16];
-    MB_MODE_INFO best_mbmode;
-    PARTITION_INFO best_partition;
     int_mv best_ref_mv_sb[2];
     int_mv mode_mv_sb[2][MB_MODE_COUNT];
     int_mv best_ref_mv;
@@ -1729,21 +1923,16 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     MB_PREDICTION_MODE this_mode;
     int num00;
     int best_mode_index = 0;
+    BEST_MODE best_mode;
 
     int i;
     int mode_index;
     int mdcounts[4];
     int rate;
-    int distortion;
-    int best_rd = INT_MAX;
-    int best_intra_rd = INT_MAX;
-    int rate2, distortion2;
+    RATE_DISTORTION rd;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int uv_intra_tteob = 0;
     int uv_intra_done = 0;
-    int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
-    int distortion_uv;
-    int best_yrd = INT_MAX;
 
     MB_PREDICTION_MODE uv_intra_mode = 0;
     int_mv mvp;
@@ -1760,9 +1949,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     mode_mv = mode_mv_sb[sign_bias];
     best_ref_mv.as_int = 0;
+    best_mode.rd = INT_MAX;
+    best_mode.yrd = INT_MAX;
+    best_mode.intra_rd = INT_MAX;
     vpx_memset(mode_mv_sb, 0, sizeof(mode_mv_sb));
-    vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
-    vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
+    vpx_memset(&best_mode.mbmode, 0, sizeof(best_mode.mbmode));
+    vpx_memset(&best_mode.bmodes, 0, sizeof(best_mode.bmodes));
 
     /* Setup search priorities */
     get_reference_search_order(cpi, ref_frame_map);
@@ -1799,15 +1991,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         int this_ref_frame = ref_frame_map[vp8_ref_frame_order[mode_index]];
 
         // Test best rd so far against threshold for trying this mode.
-        if (best_rd <= cpi->rd_threshes[mode_index])
+        if (best_mode.rd <= cpi->rd_threshes[mode_index])
             continue;
 
         if (this_ref_frame < 0)
             continue;
 
         // These variables hold are rolling total cost and distortion for this mode
-        rate2 = 0;
-        distortion2 = 0;
+        rd.rate2 = 0;
+        rd.distortion2 = 0;
 
         this_mode = vp8_mode_order[mode_index];
 
@@ -1907,16 +2099,17 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             int tmp_rd;
 
             // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
-            tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd);
-            rate2 += rate;
-            distortion2 += distortion;
+            int distortion;
+            tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rd.rate_y, &distortion, best_mode.yrd);
+            rd.rate2 += rate;
+            rd.distortion2 += distortion;
 
-            if(tmp_rd < best_yrd)
+            if(tmp_rd < best_mode.yrd)
             {
-                rate2 += uv_intra_rate;
-                rate_uv = uv_intra_rate_tokenonly;
-                distortion2 += uv_intra_distortion;
-                distortion_uv = uv_intra_distortion;
+                rd.rate2 += uv_intra_rate;
+                rd.rate_uv = uv_intra_rate_tokenonly;
+                rd.distortion2 += uv_intra_distortion;
+                rd.distortion_uv = uv_intra_distortion;
             }
             else
             {
@@ -1930,24 +2123,25 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         {
             int tmp_rd;
             int this_rd_thresh;
+            int distortion;
 
             this_rd_thresh = (vp8_ref_frame_order[mode_index] == 1) ? cpi->rd_threshes[THR_NEW1] : cpi->rd_threshes[THR_NEW3];
             this_rd_thresh = (vp8_ref_frame_order[mode_index] == 2) ? cpi->rd_threshes[THR_NEW2] : this_rd_thresh;
 
             tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
-                                                     best_yrd, mdcounts,
-                                                     &rate, &rate_y, &distortion, this_rd_thresh) ;
+                                                     best_mode.yrd, mdcounts,
+                                                     &rate, &rd.rate_y, &distortion, this_rd_thresh) ;
 
-            rate2 += rate;
-            distortion2 += distortion;
+            rd.rate2 += rate;
+            rd.distortion2 += distortion;
 
             // If even the 'Y' rd value of split is higher than best so far then dont bother looking at UV
-            if (tmp_rd < best_yrd)
+            if (tmp_rd < best_mode.yrd)
             {
                 // Now work out UV cost and add it in
-                rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
-                rate2 += rate_uv;
-                distortion2 += distortion_uv;
+                rd_inter4x4_uv(cpi, x, &rd.rate_uv, &rd.distortion_uv, cpi->common.full_pixel);
+                rd.rate2 += rd.rate_uv;
+                rd.distortion2 += rd.distortion_uv;
             }
             else
             {
@@ -1960,18 +2154,21 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         case V_PRED:
         case H_PRED:
         case TM_PRED:
+        {
+            int distortion;
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
             vp8_build_intra_predictors_mby
                 (&x->e_mbd);
-            macro_block_yrd(x, &rate_y, &distortion) ;
-            rate2 += rate_y;
-            distortion2 += distortion;
-            rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
-            rate2 += uv_intra_rate;
-            rate_uv = uv_intra_rate_tokenonly;
-            distortion2 += uv_intra_distortion;
-            distortion_uv = uv_intra_distortion;
-            break;
+            macro_block_yrd(x, &rd.rate_y, &distortion) ;
+            rd.rate2 += rd.rate_y;
+            rd.distortion2 += distortion;
+            rd.rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
+            rd.rate2 += uv_intra_rate;
+            rd.rate_uv = uv_intra_rate_tokenonly;
+            rd.distortion2 += uv_intra_distortion;
+            rd.distortion_uv = uv_intra_distortion;
+        }
+        break;
 
         case NEWMV:
         {
@@ -2114,7 +2311,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
             // Add the new motion vector cost to our rolling cost variable
-            rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, x->mvcost, 96);
+            rd.rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv, x->mvcost, 96);
         }
 
         case NEARESTMV:
@@ -2136,177 +2333,57 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 continue;
 
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
-            vp8_build_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor, 16);
-
-            if (cpi->active_map_enabled && x->active_ptr[0] == 0) {
-                x->skip = 1;
-            }
-            else if (x->encode_breakout)
-            {
-                unsigned int sse;
-                unsigned int var;
-                int threshold = (xd->block[0].dequant[1]
-                            * xd->block[0].dequant[1] >>4);
-
-                if(threshold < x->encode_breakout)
-                    threshold = x->encode_breakout;
-
-                var = vp8_variance16x16
-                        (*(b->base_src), b->src_stride,
-                        x->e_mbd.predictor, 16, &sse);
-
-                if (sse < threshold)
-                {
-                     unsigned int q2dc = xd->block[24].dequant[0];
-                    /* If theres is no codeable 2nd order dc
-                       or a very small uniform pixel change change */
-                    if ((sse - var < q2dc * q2dc >>4) ||
-                        (sse /2 > var && sse-var < 64))
-                    {
-                        // Check u and v to make sure skip is ok
-                        int sse2=  VP8_UVSSE(x);
-                        if (sse2 * 2 < threshold)
-                        {
-                            x->skip = 1;
-                            distortion2 = sse + sse2;
-                            rate2 = 500;
-
-                            /* for best_yrd calculation */
-                            rate_uv = 0;
-                            distortion_uv = sse2;
-
-                            disable_skip = 1;
-                            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-
-                            break;
-                        }
-                    }
-                }
-            }
-
-
-            //intermodecost[mode_index] = vp8_cost_mv_ref(this_mode, mdcounts);   // Experimental debug code
-
-            // Add in the Mv/mode cost
-            rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
-
-            // Y cost and distortion
-            macro_block_yrd(x, &rate_y, &distortion);
-            rate2 += rate_y;
-            distortion2 += distortion;
-
-            // UV cost and distortion
-            rd_inter16x16_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
-            rate2 += rate_uv;
-            distortion2 += distortion_uv;
+            this_rd = evaluate_inter_mode_rd(mdcounts, &rd,
+                                             &disable_skip, cpi, x);
             break;
 
         default:
             break;
         }
 
-        // Where skip is allowable add in the default per mb cost for the no skip case.
-        // where we then decide to skip we have to delete this and replace it with the
-        // cost of signallying a skip
-        if (cpi->common.mb_no_coeff_skip)
-        {
-            other_cost += vp8_cost_bit(cpi->prob_skip_false, 0);
-            rate2 += other_cost;
-        }
-
-        /* Estimate the reference frame signaling cost and add it
-         * to the rolling cost variable.
-         */
-        rate2 +=
-            x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
-
-        if (!disable_skip)
-        {
-            // Test for the condition where skip block will be activated because there are no non zero coefficients and make any necessary adjustment for rate
-            if (cpi->common.mb_no_coeff_skip)
-            {
-                int tteob;
-                int has_y2_block = (this_mode!=SPLITMV && this_mode!=B_PRED);
-
-                tteob = 0;
-                if(has_y2_block)
-                    tteob += x->e_mbd.eobs[24];
-
-                for (i = 0; i < 16; i++)
-                    tteob += (x->e_mbd.eobs[i] > has_y2_block);
-
-                if (x->e_mbd.mode_info_context->mbmi.ref_frame)
-                {
-                    for (i = 16; i < 24; i++)
-                        tteob += x->e_mbd.eobs[i];
-                }
-                else
-                    tteob += uv_intra_tteob;
-
-                if (tteob == 0)
-                {
-                    rate2 -= (rate_y + rate_uv);
-                    //for best_yrd calculation
-                    rate_uv = 0;
-
-                    // Back out no skip flag costing and add in skip flag costing
-                    if (cpi->prob_skip_false)
-                    {
-                        int prob_skip_cost;
-
-                        prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 1);
-                        prob_skip_cost -= vp8_cost_bit(cpi->prob_skip_false, 0);
-                        rate2 += prob_skip_cost;
-                        other_cost += prob_skip_cost;
-                    }
-                }
-            }
-            // Calculate the final RD estimate for this mode
-            this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
-            if (this_rd < INT_MAX && x->e_mbd.mode_info_context->mbmi.ref_frame
-                                     == INTRA_FRAME)
-                this_rd += intra_rd_penalty;
-        }
+        this_rd = calculate_final_rd_costs(this_rd, &rd, &other_cost,
+                                           disable_skip, uv_intra_tteob,
+                                           intra_rd_penalty, cpi, x);
 
         // Keep record of best intra distortion
         if ((x->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME) &&
-            (this_rd < best_intra_rd) )
+            (this_rd < best_mode.intra_rd) )
         {
-            best_intra_rd = this_rd;
-            *returnintra = distortion2 ;
+          best_mode.intra_rd = this_rd;
+            *returnintra = rd.distortion2 ;
         }
 
+#if CONFIG_TEMPORAL_DENOISING
+        if (cpi->oxcf.noise_sensitivity)
+        {
+          // Store the best NEWMV in x for later use in the denoiser.
+          // We are restricted to the LAST_FRAME since the denoiser only keeps
+          // one filter state.
+          if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
+              x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME)
+          {
+            x->e_mbd.best_sse_inter_mode = NEWMV;
+            x->e_mbd.best_sse_mv = x->e_mbd.mode_info_context->mbmi.mv;
+            x->e_mbd.need_to_clamp_best_mvs =
+                x->e_mbd.mode_info_context->mbmi.need_to_clamp_mvs;
+          }
+        }
+#endif
+
         // Did this mode help.. i.i is it the new best mode
-        if (this_rd < best_rd || x->skip)
+        if (this_rd < best_mode.rd || x->skip)
         {
             // Note index of best mode so far
             best_mode_index = mode_index;
-
+            *returnrate = rd.rate2;
+            *returndistortion = rd.distortion2;
             if (this_mode <= B_PRED)
             {
                 x->e_mbd.mode_info_context->mbmi.uv_mode = uv_intra_mode;
                 /* required for left and above block mv */
                 x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
             }
-
-            other_cost +=
-            x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
-
-            /* Calculate the final y RD estimate for this mode */
-            best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
-                              (distortion2-distortion_uv));
-
-            *returnrate = rate2;
-            *returndistortion = distortion2;
-            best_rd = this_rd;
-            vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi, sizeof(MB_MODE_INFO));
-            vpx_memcpy(&best_partition, x->partition_info, sizeof(PARTITION_INFO));
-
-            if ((this_mode == B_PRED) || (this_mode == SPLITMV))
-                for (i = 0; i < 16; i++)
-                {
-                    best_bmodes[i] = x->e_mbd.block[i].bmi;
-                }
+            update_best_mode(&best_mode, this_rd, &rd, other_cost, x);
 
 
             // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
@@ -2359,9 +2436,50 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     // Note how often each mode chosen as best
     cpi->mode_chosen_counts[best_mode_index] ++;
 
+#if CONFIG_TEMPORAL_DENOISING
+    if (cpi->oxcf.noise_sensitivity)
+    {
+      if (x->e_mbd.best_sse_inter_mode == DC_PRED) {
+        // No best MV found.
+        x->e_mbd.best_sse_inter_mode = best_mode.mbmode.mode;
+        x->e_mbd.best_sse_mv = best_mode.mbmode.mv;
+        x->e_mbd.need_to_clamp_best_mvs = best_mode.mbmode.need_to_clamp_mvs;
+      }
+
+      // TODO(holmer): No SSEs are calculated in rdopt.c. What else can be used?
+      vp8_denoiser_denoise_mb(&cpi->denoiser, x, 0, 0,
+                              recon_yoffset, recon_uvoffset);
+      // Reevalute ZEROMV if the current mode is INTRA.
+      if (best_mode.mbmode.ref_frame == INTRA_FRAME)
+      {
+        int this_rd = INT_MAX;
+        int disable_skip = 0;
+        int other_cost = 0;
+        vpx_memset(&rd, 0, sizeof(rd));
+        x->e_mbd.mode_info_context->mbmi.ref_frame = LAST_FRAME;
+        rd.rate2 += x->ref_frame_cost[LAST_FRAME];
+        rd.rate2 += vp8_cost_mv_ref(ZEROMV, mdcounts);
+        x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
+        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+        x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
+        this_rd = evaluate_inter_mode_rd(mdcounts, &rd, &disable_skip, cpi, x);
+        this_rd = calculate_final_rd_costs(this_rd, &rd, &other_cost,
+                                           disable_skip, uv_intra_tteob,
+                                           intra_rd_penalty, cpi, x);
+        if (this_rd < best_mode.rd || x->skip)
+        {
+            // Note index of best mode so far
+            best_mode_index = mode_index;
+            *returnrate = rd.rate2;
+            *returndistortion = rd.distortion2;
+            update_best_mode(&best_mode, this_rd, &rd, other_cost, x);
+        }
+      }
+    }
+#endif
 
     if (cpi->is_src_frame_alt_ref &&
-        (best_mbmode.mode != ZEROMV || best_mbmode.ref_frame != ALTREF_FRAME))
+        (best_mode.mbmode.mode != ZEROMV || best_mode.mbmode.ref_frame != ALTREF_FRAME))
     {
         x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
         x->e_mbd.mode_info_context->mbmi.ref_frame = ALTREF_FRAME;
@@ -2370,26 +2488,25 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         x->e_mbd.mode_info_context->mbmi.mb_skip_coeff =
                                         (cpi->common.mb_no_coeff_skip);
         x->e_mbd.mode_info_context->mbmi.partitioning = 0;
-
         return;
     }
 
 
     // macroblock modes
-    vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
+    vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mode.mbmode, sizeof(MB_MODE_INFO));
 
-    if (best_mbmode.mode == B_PRED)
+    if (best_mode.mbmode.mode == B_PRED)
     {
         for (i = 0; i < 16; i++)
-            xd->mode_info_context->bmi[i].as_mode = best_bmodes[i].as_mode;
+            xd->mode_info_context->bmi[i].as_mode = best_mode.bmodes[i].as_mode;
     }
 
-    if (best_mbmode.mode == SPLITMV)
+    if (best_mode.mbmode.mode == SPLITMV)
     {
         for (i = 0; i < 16; i++)
-            xd->mode_info_context->bmi[i].mv.as_int = best_bmodes[i].mv.as_int;
+            xd->mode_info_context->bmi[i].mv.as_int = best_mode.bmodes[i].mv.as_int;
 
-        vpx_memcpy(x->partition_info, &best_partition, sizeof(PARTITION_INFO));
+        vpx_memcpy(x->partition_info, &best_mode.partition, sizeof(PARTITION_INFO));
 
         x->e_mbd.mode_info_context->mbmi.mv.as_int =
                                       x->partition_info->bmi[15].mv.as_int;
