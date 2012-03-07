@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//csw\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 6
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-07T00:39:24Z",
+      "side": 1,
+      "message": "Check $? and default to /Developer if it fails",
+      "revId": "2af48f5db9a1248ebaa6087466ed9843d3835ae4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
