@@ -35,6 +35,8 @@
 #include "vpx_config.h"
 #include "vpx_version.h"
 #include "vpx/vp8cx.h"
+#include "vpx/vp8dx.h"
+#include "vpx/vpx_decoder.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
 #include "tools_common.h"
@@ -84,6 +86,21 @@ static const struct codec_item
     {"vp8",  &vpx_codec_vp8_cx_algo, 0x30385056},
 #endif
 };
+
+#define VP8_FOURCC (0x00385056)
+static const struct
+{
+    char const *name;
+    const vpx_codec_iface_t *iface;
+    unsigned int             fourcc;
+    unsigned int             fourcc_mask;
+} ifaces[] =
+{
+#if CONFIG_VP8_DECODER
+    {"vp8",  &vpx_codec_vp8_dx_algo,   VP8_FOURCC, 0x00FFFFFF},
+#endif
+};
+
 
 static void usage_exit();
 
@@ -939,6 +956,8 @@ static const arg_def_t verbosearg       = ARG_DEF("v", "verbose", 0,
         "Show encoder parameters");
 static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
         "Show PSNR in status line");
+static const arg_def_t recontest        = ARG_DEF(NULL, "test-decode", 0,
+        "Test enocde/decode have machted recon buffer");
 static const arg_def_t framerate        = ARG_DEF(NULL, "fps", 1,
         "Stream frame rate (rate/scale)");
 static const arg_def_t use_ivf          = ARG_DEF(NULL, "ivf", 0,
@@ -1437,6 +1456,35 @@ static void show_rate_histogram(struct rate_hist          *hist,
     show_histogram(hist->bucket, buckets, hist->total, scale);
 }
 
+
+static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
+{
+    int match = 1;
+    int i, j;
+
+    match &= (img1->fmt == img2->fmt);
+    match &= (img1->w == img2->w);
+    match &= (img1->h == img2->h);
+
+    for (i = 0; i < img1->d_h; i++)
+        match &= ( memcmp(img1->planes[VPX_PLANE_Y]+i*img1->stride[VPX_PLANE_Y],
+                          img2->planes[VPX_PLANE_Y]+i*img2->stride[VPX_PLANE_Y],
+                          img1->d_w)==0);
+
+    for (i = 0; i < img1->d_h/2; i++)
+        match &= ( memcmp(img1->planes[VPX_PLANE_U]+i*img1->stride[VPX_PLANE_U],
+                          img2->planes[VPX_PLANE_U]+i*img2->stride[VPX_PLANE_U],
+                          img1->d_w/2)==0);
+
+    for (i = 0; i < img1->d_h/2; i++)
+        match &= ( memcmp(img1->planes[VPX_PLANE_V]+i*img1->stride[VPX_PLANE_U],
+                          img2->planes[VPX_PLANE_V]+i*img2->stride[VPX_PLANE_U],
+                          img1->d_w/2)==0);
+
+    return match;
+}
+
+
 #define ARG_CTRL_CNT_MAX 10
 
 int main(int argc, const char **argv_)
@@ -1461,7 +1509,7 @@ int main(int argc, const char **argv_)
     int                      arg_skip  = 0;
     static const arg_def_t **ctrl_args = no_args;
     static const int        *ctrl_args_map = NULL;
-    int                      verbose = 0, show_psnr = 0;
+    int                      verbose = 0, show_psnr = 0, test_decode = 0;
     int                      arg_use_i420 = 1;
     unsigned long            cx_time = 0;
     unsigned int             file_type, fourcc;
@@ -1480,6 +1528,14 @@ int main(int argc, const char **argv_)
     int                      show_q_hist_buckets=0;
     int                      show_rate_hist_buckets=0;
     struct rate_hist         rate_hist={0};
+
+    vpx_codec_ctx_t          decoder;
+    vpx_ref_frame_t          ref_enc;
+    vpx_ref_frame_t          ref_dec;
+    vpx_codec_dec_cfg_t      dec_cfg = {0};
+    int                      enc_dec_match = 1;
+    int                      first_bad_frame = -1;
+    int                      test_decode_frame = 0;
 
     exec_name = argv_[0];
     ebml.last_pts_ms = -1;
@@ -1554,6 +1610,8 @@ int main(int argc, const char **argv_)
             arg_skip = arg_parse_uint(&arg);
         else if (arg_match(&arg, &psnrarg, argi))
             show_psnr = 1;
+        else if (arg_match(&arg, &recontest, argi))
+            test_decode = 1;
         else if (arg_match(&arg, &framerate, argi))
         {
             arg_framerate = arg_parse_rational(&arg);
@@ -1882,7 +1940,21 @@ int main(int argc, const char **argv_)
                 vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
                               cfg.g_w, cfg.g_h, 1);
 
+
             init_rate_histogram(&rate_hist, &cfg, &arg_framerate);
+        }
+
+        if(test_decode)
+        {
+            int width = cfg.g_w;
+            int height = cfg.g_h;
+            width = (width + 15)& ~15;
+            height = (height + 15) & ~15;
+
+            vpx_img_alloc(&ref_enc.img, VPX_IMG_FMT_I420,
+                              width, height, 1);
+            vpx_img_alloc(&ref_dec.img, VPX_IMG_FMT_I420,
+                              width, height, 1);
         }
 
         outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb")
@@ -1943,6 +2015,14 @@ int main(int argc, const char **argv_)
                            show_psnr ? VPX_CODEC_USE_PSNR : 0);
         ctx_exit_on_error(&encoder, "Failed to initialize encoder");
 
+        if( test_decode &&
+            vpx_codec_dec_init(&decoder, ifaces[0].iface, &dec_cfg,0))
+        {
+            fprintf(stderr,
+                "Failed to initialize decoder: %s\n",
+                vpx_codec_error(&decoder));
+            return EXIT_FAILURE;
+        }
         /* Note that we bypass the vpx_codec_control wrapper macro because
          * we're being clever to store the control IDs in an array. Real
          * applications will want to make use of the enumerations directly
@@ -1973,6 +2053,7 @@ int main(int argc, const char **argv_)
         while (frame_avail || got_data)
         {
             vpx_codec_iter_t iter = NULL;
+            vpx_codec_iter_t dec_iter = NULL;
             const vpx_codec_cx_pkt_t *pkt;
             struct vpx_usec_timer timer;
             int64_t frame_start, next_frame_start;
@@ -1981,13 +2062,8 @@ int main(int argc, const char **argv_)
             {
                 frame_avail = read_frame(infile, &raw, file_type, &y4m,
                                          &detect);
-
                 if (frame_avail)
                     frames_in++;
-
-                fprintf(stderr,
-                        "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
-                        arg_passes, frames_in, frames_out, nbytes);
             }
             else
                 frame_avail = 0;
@@ -2016,7 +2092,7 @@ int main(int argc, const char **argv_)
             }
 
             got_data = 0;
-
+            test_decode_frame = 0;
             while ((pkt = vpx_codec_get_cx_data(&encoder, &iter)))
             {
                 got_data = 1;
@@ -2024,9 +2100,34 @@ int main(int argc, const char **argv_)
                 switch (pkt->kind)
                 {
                 case VPX_CODEC_CX_FRAME_PKT:
+                    fprintf(stderr,
+                        "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
+                        arg_passes, frames_in, frames_out, nbytes);
                     frames_out++;
                     fprintf(stderr, " %6luF",
-                            (unsigned long)pkt->data.frame.sz);
+                                (unsigned long)pkt->data.frame.sz);
+
+                    if(test_decode)
+                    {
+                        if(!vpx_codec_decode(&decoder,
+                            pkt->data.frame.buf,
+                            pkt->data.frame.sz,
+                            NULL, 0))
+                        {
+                            vpx_codec_get_frame(&decoder, &dec_iter);
+                            test_decode_frame = 1;
+                        }
+                        else
+                        {
+                            const char *detail = vpx_codec_error_detail(&decoder);
+                            fprintf(stderr, "Failed to decode frame: %s\n",
+                                vpx_codec_error(&decoder));
+                            if (detail)
+                                fprintf(stderr,
+                                "  Additional information: %s\n",
+                                detail);
+                        }
+                    }
 
                     update_rate_histogram(&rate_hist, &cfg, pkt);
                     if(write_webm)
@@ -2047,6 +2148,9 @@ int main(int argc, const char **argv_)
                     nbytes += pkt->data.raw.sz;
                     break;
                 case VPX_CODEC_STATS_PKT:
+                    fprintf(stderr,
+                        "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
+                        arg_passes, frames_in, frames_out, nbytes);
                     frames_out++;
                     fprintf(stderr, " %6luS",
                            (unsigned long)pkt->data.twopass_stats.sz);
@@ -2074,6 +2178,25 @@ int main(int argc, const char **argv_)
                     break;
                 default:
                     break;
+                }
+            }
+            if(test_decode && test_decode_frame)
+            {
+                ref_enc.frame_type = VP8_LAST_FRAME;
+                ref_dec.frame_type = VP8_LAST_FRAME;
+
+                vpx_codec_control(  &encoder,
+                    VP8_COPY_REFERENCE,
+                    &ref_enc);
+                vpx_codec_control( &decoder,
+                    VP8_COPY_REFERENCE,
+                    &ref_dec);
+
+                enc_dec_match &= compare_img( &ref_enc.img,
+                    &ref_dec.img);
+                if(!enc_dec_match && first_bad_frame < 0)
+                {
+                    first_bad_frame = frames_out - 1;
                 }
             }
 
@@ -2106,6 +2229,9 @@ int main(int argc, const char **argv_)
 
         vpx_codec_destroy(&encoder);
 
+        if(test_decode)
+            vpx_codec_destroy(&decoder);
+
         fclose(infile);
         if (file_type == FILE_TYPE_Y4M)
             y4m_input_close(&y4m);
@@ -2130,6 +2256,16 @@ int main(int argc, const char **argv_)
             break;
     }
 
+    if( test_decode)
+    {
+        fprintf(stderr, "\n");
+        if(enc_dec_match)
+            fprintf(stderr, "No mismatch detected in recon buffers\n");
+        else
+            fprintf(stderr, "First mismatch occurred in frame %d\n",
+            first_bad_frame);
+    }
+
     if (show_q_hist_buckets)
         show_q_histogram(counts, show_q_hist_buckets);
 
@@ -2138,6 +2274,11 @@ int main(int argc, const char **argv_)
     destroy_rate_histogram(&rate_hist);
 
     vpx_img_free(&raw);
+    if(test_decode)
+    {
+        vpx_img_free(&ref_enc.img);
+        vpx_img_free(&ref_dec.img);
+    }
     free(argv);
     return EXIT_SUCCESS;
 }
