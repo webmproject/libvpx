@@ -888,7 +888,7 @@ static unsigned int murmur ( const void * key, int len, unsigned int seed )
 }
 
 #include "math.h"
-
+#define MAX_PSNR 100
 static double vp8_mse2psnr(double Samples, double Peak, double Mse)
 {
     double psnr;
@@ -896,10 +896,10 @@ static double vp8_mse2psnr(double Samples, double Peak, double Mse)
     if ((double)Mse > 0.0)
         psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
     else
-        psnr = 60;      // Limit to prevent / 0
+        psnr = MAX_PSNR;      // Limit to prevent / 0
 
-    if (psnr > 60)
-        psnr = 60;
+    if (psnr > MAX_PSNR)
+        psnr = MAX_PSNR;
 
     return psnr;
 }
