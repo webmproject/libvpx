@@ -205,6 +205,11 @@ typedef struct macroblockd
     DECLARE_ALIGNED(16, short,  dequant_y2[16]);
     DECLARE_ALIGNED(16, short,  dequant_uv[16]);
 
+    /* position of this macroblock */
+    int mbr;
+    int mbc;
+    int mbrc;
+
     /* 16 Y blocks, 4 U, 4 V, 1 DC 2nd order block, each with 16 entries. */
     BLOCKD block[25];
     int fullpixel_mask;

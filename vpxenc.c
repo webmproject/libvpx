@@ -1182,12 +1182,17 @@ static const arg_def_t q_hist_n         = ARG_DEF(NULL, "q-hist", 1,
         "Show quantizer histogram (n-buckets)");
 static const arg_def_t rate_hist_n         = ARG_DEF(NULL, "rate-hist", 1,
         "Show rate histogram (n-buckets)");
+static const arg_def_t read_modemv_arg  = ARG_DEF(NULL, "read-modemv", 0,
+        "Read modes/mvs");
+static const arg_def_t write_modemv_arg  = ARG_DEF(NULL, "write-modemv", 0,
+        "Write modes/mvs");
 static const arg_def_t *main_args[] =
 {
     &debugmode,
     &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline,
     &best_dl, &good_dl, &rt_dl,
     &verbosearg, &psnrarg, &use_ivf, &q_hist_n, &rate_hist_n,
+    &read_modemv_arg, &write_modemv_arg,
     NULL
 };
 
@@ -1693,6 +1698,8 @@ struct global_config
     int                       debug;
     int                       show_q_hist_buckets;
     int                       show_rate_hist_buckets;
+    int                       read_modemv;
+    int                       write_modemv;
 };
 
 
@@ -1808,6 +1815,10 @@ static void parse_global_config(struct global_config *global, char **argv)
             global->show_q_hist_buckets = arg_parse_uint(&arg);
         else if (arg_match(&arg, &rate_hist_n, argi))
             global->show_rate_hist_buckets = arg_parse_uint(&arg);
+        else if (arg_match(&arg, &read_modemv_arg, argi))
+            global->read_modemv = 1;
+        else if (arg_match(&arg, &write_modemv_arg, argi))
+            global->write_modemv = 1;
         else
             argj++;
     }
@@ -2456,6 +2467,7 @@ struct link_record
     uint32_t sz;
     uint16_t w;
     uint16_t h;
+    int      refs_updated;
 };
 
 static void
@@ -2471,6 +2483,9 @@ write_multistream_file(struct stream_state  *streams,
     vpx_codec_iter_t iter = NULL;
     const struct vpx_codec_enc_cfg *cfg = &stream->config.cfg;
     struct link_record link = {0};
+
+    vpx_codec_control(&stream->encoder, VP8E_GET_LAST_REF_UPDATES, &link.refs_updated);
+    ctx_exit_on_error(&stream->encoder, "Failed to get refs");
 
     while ((pkt = vpx_codec_get_cx_data(&stream->encoder, &iter)))
     {
@@ -2595,6 +2610,38 @@ float usec_to_fps(uint64_t usec, unsigned int frames)
     return usec > 0 ? (float)frames * 1000000.0 / (float)usec : 0;
 }
 
+
+static void set_modeinfo(struct stream_state *stream,
+                         struct webm_ctx     *webm)
+{
+    unsigned char *ptr;
+    struct link_record link;
+    int again;
+    int refs=0;
+
+    vpx_codec_control(&stream->encoder, VP8E_SET_MODEINFO, NULL);
+    ptr = webm->buf + webm->buf_sz;
+    do
+    {
+        ptr -= sizeof(link);
+        memcpy(&link, ptr, sizeof(link));
+        again = link.sz >> 31;
+        link.sz &= ~(1<<31);
+        ptr -= link.sz;
+        if(link.w == stream->config.cfg.g_w
+           && link.h == stream->config.cfg.g_h)
+        {
+            vpx_fixed_buf_t modeinfo;
+
+            modeinfo.buf = ptr;
+            modeinfo.sz = link.sz;
+            vpx_codec_control(&stream->encoder, VP8E_SET_MODEINFO, &modeinfo);
+            vpx_codec_control(&stream->encoder, VP8E_UPD_REFERENCE, link.refs_updated);
+            ctx_exit_on_error(&stream->encoder, "Failed to set refs");
+            break;
+        }
+    } while(again);
+}
 
 int main(int argc, const char **argv_)
 {
@@ -2752,6 +2799,10 @@ int main(int argc, const char **argv_)
             else
                 frame_avail = 0;
 
+            /* Update mode/mv info if available */
+            if(input.file_type == FILE_TYPE_WEBM && global.read_modemv)
+                FOREACH_STREAM(set_modeinfo(stream, &input.webm));
+
             vpx_usec_timer_start(&timer);
             FOREACH_STREAM(encode_frame(stream, &global,
                                         frame_avail ? &raw : NULL,
@@ -2762,7 +2813,7 @@ int main(int argc, const char **argv_)
             FOREACH_STREAM(update_quantizer_histogram(stream));
 
             got_data = 0;
-            if(1)
+            if(global.write_modemv)
                 write_multistream_file(streams, &global, &got_data);
             else
                 FOREACH_STREAM(get_cx_data(stream, &global, &got_data));

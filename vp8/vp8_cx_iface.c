@@ -996,6 +996,7 @@ static const vpx_codec_cx_pkt_t *vp8e_get_cxdata(vpx_codec_alg_priv_t  *ctx,
                                 + ctx->cpi->common.mode_info_stride
                                 * ctx->cx_data_iter.mode_info_row;
             pkt->data.raw.sz = sizeof(MODE_INFO) * ctx->cpi->common.mb_cols;
+
             ctx->cx_data_iter.mode_info_row++;
             return pkt;
         }
@@ -1218,6 +1219,38 @@ static vpx_codec_err_t vp8e_set_scalemode(vpx_codec_alg_priv_t *ctx,
 }
 
 
+static vpx_codec_err_t set_modeinfo(vpx_codec_alg_priv_t *ctx,
+        int ctr_id,
+        va_list args)
+{
+    vpx_fixed_buf_t *data =  va_arg(args, vpx_fixed_buf_t *);
+
+    ctx->cpi->external_modeinfo = data ? data->buf : NULL;
+    return VPX_CODEC_OK;
+}
+
+
+static vpx_codec_err_t vp8_get_last_ref_updates(vpx_codec_alg_priv_t *ctx,
+                                                int ctrl_id,
+                                                va_list args)
+{
+    int *update_info = va_arg(args, int *);
+    VP8_COMP *pbi = ctx->cpi;
+
+    if (update_info)
+    {
+        *update_info = pbi->common.refresh_alt_ref_frame * (int) VP8_ALTR_FRAME
+            + pbi->common.refresh_golden_frame * (int) VP8_GOLD_FRAME
+            + pbi->common.refresh_last_frame * (int) VP8_LAST_FRAME
+            + (pbi->common.copy_buffer_to_gf << 3)
+            + (pbi->common.copy_buffer_to_arf << 5);
+
+        return VPX_CODEC_OK;
+    }
+    else
+        return VPX_CODEC_INVALID_PARAM;
+}
+
 static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
 {
     {VP8_SET_REFERENCE,                 vp8e_set_reference},
@@ -1244,6 +1277,8 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
     {VP8E_SET_TUNING,                   set_param},
     {VP8E_SET_CQ_LEVEL,                 set_param},
     {VP8E_SET_MAX_INTRA_BITRATE_PCT,    set_param},
+    {VP8E_SET_MODEINFO,                 set_modeinfo},
+    {VP8E_GET_LAST_REF_UPDATES,         vp8_get_last_ref_updates},
     { -1, NULL},
 };
 

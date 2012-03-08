@@ -678,7 +678,7 @@ typedef struct VP8_COMP
     /* Number of MBs per row at lower-resolution level */
     int    mr_low_res_mb_cols;
 #endif
-
+    MODE_INFO *external_modeinfo;
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);

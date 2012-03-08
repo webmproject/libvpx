@@ -411,6 +411,10 @@ void encode_mb_row(VP8_COMP *cpi,
     // for each macroblock col in image
     for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
     {
+        xd->mbr = mb_row;
+        xd->mbc = mb_col;
+        xd->mbrc = mb_row * cm->mb_cols + mb_col;
+
         // Distance of Mb to the left & right edges, specified in
         // 1/8th pel units as they are always compared to values
         // that are in 1/8th pel units
@@ -1111,6 +1115,8 @@ extern int cnt_pm;
 
 extern void vp8_fix_contexts(MACROBLOCKD *x);
 
+#include "valgrind/memcheck.h"
+
 int vp8cx_encode_inter_macroblock
 (
     VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
@@ -1130,6 +1136,15 @@ int vp8cx_encode_inter_macroblock
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
+    if (cpi->external_modeinfo)
+    {
+        vp8_rd_use_external_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
+                                 &distortion, &intra_error);
+        VALGRIND_CHECK_VALUE_IS_DEFINED(rate);
+        VALGRIND_CHECK_VALUE_IS_DEFINED(distortion);
+        VALGRIND_CHECK_VALUE_IS_DEFINED(intra_error);
+    }
+    else
     if (cpi->sf.RD)
     {
         int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;

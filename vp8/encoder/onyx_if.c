@@ -859,7 +859,7 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         {
             sf->auto_filter = 0;                     // Faster selection of loop filter
             sf->search_method = HEX;
-            sf->iterative_sub_pixel = 0;
+            //sf->iterative_sub_pixel = 0;
         }
 
         if (Speed > 6)
@@ -2449,7 +2449,7 @@ int vp8_use_as_reference(VP8_COMP *cpi, int ref_frame_flags)
 }
 int vp8_update_reference(VP8_COMP *cpi, int ref_frame_flags)
 {
-    if (ref_frame_flags > 7)
+    if (ref_frame_flags > 127)
         return -1 ;
 
     cpi->common.refresh_golden_frame = 0;
@@ -2465,6 +2465,8 @@ int vp8_update_reference(VP8_COMP *cpi, int ref_frame_flags)
     if (ref_frame_flags & VP8_ALT_FLAG)
         cpi->common.refresh_alt_ref_frame = 1;
 
+    cpi->common.copy_buffer_to_gf = (ref_frame_flags >> 3) & 3;
+    cpi->common.copy_buffer_to_arf = (ref_frame_flags >> 5) & 3;
     return 0;
 }
 
@@ -3187,8 +3189,11 @@ static void encode_frame_to_data_rate
         cpi->per_frame_bandwidth  = (int)(cpi->target_bandwidth / cpi->output_frame_rate);
 
     // Default turn off buffer to buffer copying
+    if(!cpi->external_modeinfo)
+    {
     cm->copy_buffer_to_gf = 0;
     cm->copy_buffer_to_arf = 0;
+    }
 
     // Clear zbin over-quant value and mode boost values.
     cpi->zbin_over_quant = 0;
@@ -4063,10 +4068,14 @@ static void encode_frame_to_data_rate
     // For inter frames the current default behavior is that when
     // cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
     // This is purely an encoder decision at present.
-    if (!cpi->oxcf.error_resilient_mode && cm->refresh_golden_frame)
+    if(!cpi->external_modeinfo)
+    {
+    if (!cpi->oxcf.error_resilient_mode && cm->refresh_golden_frame
+        && !cm->refresh_alt_ref_frame)
         cm->copy_buffer_to_arf  = 2;
     else
         cm->copy_buffer_to_arf  = 0;
+    }
 
     cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 

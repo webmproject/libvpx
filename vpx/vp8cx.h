@@ -178,6 +178,10 @@ enum vp8e_enc_control_id
      *
      */
     VP8E_SET_MAX_INTRA_BITRATE_PCT,
+
+    /*!\brief Mode/mv data */
+    VP8E_SET_MODEINFO,
+    VP8E_GET_LAST_REF_UPDATES
 };
 
 /*!\brief vpx 1-D scaling mode
@@ -311,6 +315,8 @@ VPX_CTRL_USE_TYPE(VP8E_GET_LAST_QUANTIZER_64,  int *)
 
 VPX_CTRL_USE_TYPE(VP8E_SET_MAX_INTRA_BITRATE_PCT, unsigned int)
 
+VPX_CTRL_USE_TYPE(VP8E_SET_MODEINFO, vpx_fixed_buf_t *)
+VPX_CTRL_USE_TYPE(VP8E_GET_LAST_REF_UPDATES, int *)
 
 /*! @} - end defgroup vp8_encoder */
 #include "vpx_codec_impl_bottom.h"
