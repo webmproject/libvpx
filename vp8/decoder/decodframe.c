@@ -153,24 +153,23 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
 #endif
 
-
     /* do prediction */
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     {
         vp8_build_intra_predictors_mbuv_s(xd,
-                                          xd->dst.u_buffer - xd->dst.uv_stride,
-                                          xd->dst.v_buffer - xd->dst.uv_stride,
-                                          xd->dst.u_buffer - 1,
-                                          xd->dst.v_buffer - 1,
-                                          xd->dst.uv_stride,
+                                          xd->recon_above[1],
+                                          xd->recon_above[2],
+                                          xd->recon_left[1],
+                                          xd->recon_left[2],
+                                          xd->recon_left_stride[1],
                                           xd->dst.u_buffer, xd->dst.v_buffer);
 
         if (mode != B_PRED)
         {
             vp8_build_intra_predictors_mby_s(xd,
-                                                 xd->dst.y_buffer - xd->dst.y_stride,
-                                                 xd->dst.y_buffer - 1,
-                                                 xd->dst.y_stride,
+                                                 xd->recon_above[0],
+                                                 xd->recon_left[0],
+                                                 xd->recon_left_stride[0],
                                                  xd->dst.y_buffer);
         }
         else
@@ -183,7 +182,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             if(xd->mode_info_context->mbmi.mb_skip_coeff)
                 vpx_memset(xd->eobs, 0, 25);
 
-            intra_prediction_down_copy(xd, xd->dst.y_buffer - dst_stride + 16);
+            intra_prediction_down_copy(xd, xd->recon_above[0] + 16);
 
             for (i = 0; i < 16; i++)
             {
@@ -383,6 +382,22 @@ static void decode_mb_rows(VP8D_COMP *pbi)
         xd->mb_to_top_edge = -((mb_row * 16)) << 3;
         xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
 
+        xd->recon_above[0] = dst_buffer[0] + recon_yoffset;
+        xd->recon_above[1] = dst_buffer[1] + recon_uvoffset;
+        xd->recon_above[2] = dst_buffer[2] + recon_uvoffset;
+
+        xd->recon_left[0] = xd->recon_above[0] - 1;
+        xd->recon_left[1] = xd->recon_above[1] - 1;
+        xd->recon_left[2] = xd->recon_above[2] - 1;
+
+        xd->recon_above[0] -= xd->dst.y_stride;
+        xd->recon_above[1] -= xd->dst.uv_stride;
+        xd->recon_above[2] -= xd->dst.uv_stride;
+
+        //TODO: move to outside row loop
+        xd->recon_left_stride[0] = xd->dst.y_stride;
+        xd->recon_left_stride[1] = xd->dst.uv_stride;
+
         for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
         {
             /* Distance of Mb to the various image edges.
@@ -436,6 +451,14 @@ static void decode_mb_rows(VP8D_COMP *pbi)
 
             /* check if the boolean decoder has suffered an error */
             xd->corrupted |= vp8dx_bool_error(xd->current_bc);
+
+            xd->recon_above[0] += 16;
+            xd->recon_above[1] += 8;
+            xd->recon_above[2] += 8;
+            xd->recon_left[0] += 16;
+            xd->recon_left[1] += 8;
+            xd->recon_left[2] += 8;
+
 
             recon_yoffset += 16;
             recon_uvoffset += 8;
