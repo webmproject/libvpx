@@ -220,6 +220,10 @@ typedef struct macroblockd
     int up_available;
     int left_available;
 
+    unsigned char *recon_above[3];
+    unsigned char *recon_left[3];
+    int recon_left_stride[2];
+
     /* Y,U,V,Y2 */
     ENTROPY_CONTEXT_PLANES *above_context;
     ENTROPY_CONTEXT_PLANES *left_context;
