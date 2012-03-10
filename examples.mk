@@ -16,7 +16,7 @@ UTILS-$(CONFIG_DECODERS)    += vpxdec.c
 vpxdec.SRCS                 += md5_utils.c md5_utils.h
 vpxdec.SRCS                 += vpx_ports/vpx_timer.h
 vpxdec.SRCS                 += vpx/vpx_integer.h
-vpxdec.SRCS                 += args.c args.h
+vpxdec.SRCS                 += args.c args.h vpx_ports/config.h
 vpxdec.SRCS                 += tools_common.c tools_common.h
 vpxdec.SRCS                 += nestegg/halloc/halloc.h
 vpxdec.SRCS                 += nestegg/halloc/src/align.h
@@ -30,7 +30,7 @@ vpxdec.DESCRIPTION           = Full featured decoder
 UTILS-$(CONFIG_ENCODERS)    += vpxenc.c
 vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h
 vpxenc.SRCS                 += tools_common.c tools_common.h
-vpxenc.SRCS                 += vpx_ports/mem_ops.h
+vpxenc.SRCS                 += vpx_ports/config.h vpx_ports/mem_ops.h
 vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
 vpxenc.SRCS                 += libmkv/EbmlIDs.h
 vpxenc.SRCS                 += libmkv/EbmlWriter.c
@@ -77,11 +77,6 @@ GEN_EXAMPLES-$(CONFIG_ENCODERS) += decode_with_drops.c
 endif
 decode_with_drops.GUID           = CE5C53C4-8DDA-438A-86ED-0DDD3CDB8D26
 decode_with_drops.DESCRIPTION    = Drops frames while decoding
-ifeq ($(CONFIG_DECODERS),yes)
-GEN_EXAMPLES-$(CONFIG_ERROR_CONCEALMENT) += decode_with_partial_drops.c
-endif
-decode_with_partial_drops.GUID           = 61C2D026-5754-46AC-916F-1343ECC5537E
-decode_with_partial_drops.DESCRIPTION    = Drops parts of frames while decoding
 GEN_EXAMPLES-$(CONFIG_ENCODERS) += error_resilient.c
 error_resilient.GUID             = DF5837B9-4145-4F92-A031-44E4F832E00C
 error_resilient.DESCRIPTION      = Error Resiliency Feature

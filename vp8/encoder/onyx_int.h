@@ -13,7 +13,7 @@
 #define __INC_VP8_INT_H
 
 #include <stdio.h>
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vp8/common/onyx.h"
 #include "treewriter.h"
 #include "tokenize.h"
@@ -23,7 +23,6 @@
 #include "encodemb.h"
 #include "quantize.h"
 #include "vp8/common/entropy.h"
-#include "vp8/common/threading.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
@@ -37,12 +36,12 @@
 
 #define KEY_FRAME_CONTEXT 5
 
-#define MAX_LAG_BUFFERS (CONFIG_REALTIME_ONLY? 1 : 25)
+#define MAX_LAG_BUFFERS 25
 
 #define AF_THRESH   25
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
-#define MAX_MODES 20
+#define MAX_MODES 33
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -52,9 +51,7 @@
 #define MV_ZBIN_BOOST        4
 #define ZBIN_OQ_MAX 192
 
-#if !(CONFIG_REALTIME_ONLY)
 #define VP8_TEMPORAL_ALT_REF 1
-#endif
 
 typedef struct
 {
@@ -67,21 +64,39 @@ typedef struct
 
     MV_CONTEXT mvc[2];
     int mvcosts[2][MVvals+1];
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP mvc_hp[2];
+    int mvcosts_hp[2][MVvals_hp+1];
+#endif
 
 #ifdef MODE_STATS
     // Stats
-    int y_modes[5];
-    int uv_modes[4];
-    int b_modes[10];
-    int inter_y_modes[10];
-    int inter_uv_modes[4];
-    int inter_b_modes[10];
+    int y_modes[VP8_YMODES];
+    int uv_modes[VP8_UV_MODES];
+    int i8x8_modes[VP8_I8X8_MODES];
+    int b_modes[B_MODE_COUNT];
+    int inter_y_modes[MB_MODE_COUNT];
+    int inter_uv_modes[VP8_UV_MODES];
+    int inter_b_modes[B_MODE_COUNT];
+#endif
+    /* interframe intra mode probs */
+    vp8_prob ymode_prob[VP8_YMODES-1];
+    /* keyframe intra mode probs */
+#if CONFIG_QIMODE
+    vp8_prob kf_ymode_prob[8][VP8_YMODES-1];
+#else
+    vp8_prob kf_ymode_prob[VP8_YMODES-1];
 #endif
 
-    vp8_prob ymode_prob[4], uv_mode_prob[3];   /* interframe intra mode probs */
-    vp8_prob kf_ymode_prob[4], kf_uv_mode_prob[3];   /* keyframe "" */
-
-    int ymode_count[5], uv_mode_count[4];  /* intra MB type cts this frame */
+#if CONFIG_UVINTRA
+    vp8_prob kf_uv_mode_prob[VP8_YMODES][VP8_UV_MODES-1];
+    vp8_prob uv_mode_prob[VP8_YMODES][VP8_UV_MODES-1];
+#else
+    vp8_prob kf_uv_mode_prob[VP8_UV_MODES-1];
+    vp8_prob uv_mode_prob[VP8_UV_MODES-1];
+#endif
+    /* intra MB type cts this frame */
+    int ymode_count[VP8_YMODES], uv_mode_count[VP8_UV_MODES];
 
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
 
@@ -108,6 +123,7 @@ typedef struct
     double MVrv;
     double MVcv;
     double mv_in_out_count;
+    double new_mv_count;
     double duration;
     double count;
 }
@@ -127,6 +143,21 @@ typedef struct
 
 } ONEPASS_FRAMESTATS;
 
+typedef struct
+{
+    struct {
+        int err;
+        union {
+            int_mv mv;
+            MB_PREDICTION_MODE mode;
+        } m;
+    } ref[MAX_REF_FRAMES];
+} MBGRAPH_MB_STATS;
+
+typedef struct
+{
+    MBGRAPH_MB_STATS *mb_stats;
+} MBGRAPH_FRAME_STATS;
 
 typedef enum
 {
@@ -158,6 +189,23 @@ typedef enum
     THR_SPLITA         = 18,
 
     THR_B_PRED         = 19,
+    THR_I8X8_PRED      = 20,
+
+    THR_COMP_ZEROLG    = 21,
+    THR_COMP_NEARESTLG = 22,
+    THR_COMP_NEARLG    = 23,
+
+    THR_COMP_ZEROLA    = 24,
+    THR_COMP_NEARESTLA = 25,
+    THR_COMP_NEARLA    = 26,
+
+    THR_COMP_ZEROGA    = 27,
+    THR_COMP_NEARESTGA = 28,
+    THR_COMP_NEARGA    = 29,
+
+    THR_COMP_NEWLG     = 30,
+    THR_COMP_NEWLA     = 31,
+    THR_COMP_NEWGA     = 32,
 }
 THR_MODES;
 
@@ -193,7 +241,6 @@ typedef struct
 typedef struct
 {
     MACROBLOCK  mb;
-    int segment_counts[MAX_MB_SEGMENTS];
     int totalrate;
 } MB_ROW_COMP;
 
@@ -310,6 +357,10 @@ typedef struct VP8_COMP
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
     int rd_threshes[MAX_MODES];
+    int64_t rd_single_diff, rd_comp_diff, rd_hybrid_diff;
+    int rd_prediction_type_threshes[4][NB_PREDICTION_TYPES];
+    int comp_pred_count[COMP_PRED_CONTEXTS];
+    int single_pred_count[COMP_PRED_CONTEXTS];
 
     int RDMULT;
     int RDDIV ;
@@ -325,6 +376,7 @@ typedef struct VP8_COMP
     int this_frame_target;
     int projected_frame_size;
     int last_q[2];                   // Separate values for Intra/Inter
+    int last_boosted_qindex;         // Last boosted GF/KF/ARF q
 
     double rate_correction_factor;
     double key_frame_rate_correction_factor;
@@ -358,6 +410,8 @@ typedef struct VP8_COMP
     int ni_tot_qi;
     int ni_frames;
     int avg_frame_qindex;
+    double tot_q;
+    double avg_q;
 
     int zbin_over_quant;
     int zbin_mode_boost;
@@ -386,23 +440,22 @@ typedef struct VP8_COMP
 
     int cq_target_quality;
 
-    int drop_frames_allowed;          // Are we permitted to drop frames?
-    int drop_frame;                  // Drop this frame?
-    int drop_count;                  // How many frames have we dropped?
-    int max_drop_count;               // How many frames should we drop?
-    int max_consec_dropped_frames;     // Limit number of consecutive frames that can be dropped.
-
-
     int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
     int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
 
     unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
+#if CONFIG_HIGH_PRECISION_MV
+    unsigned int MVcount_hp [2] [MVvals_hp];  /* (row,col) MV cts this frame */
+#endif
 
     unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
     //DECLARE_ALIGNED(16, int, coef_counts_backup [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS]);   //not used any more
     //save vp8_tree_probs_from_distribution result for each frame to avoid repeat calculation
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+    unsigned int coef_counts_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
+    vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    unsigned int frame_branch_ct_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
     int gfu_boost;
     int kf_boost;
@@ -416,6 +469,9 @@ typedef struct VP8_COMP
     ONEPASS_FRAMESTATS one_pass_frame_stats[MAX_LAG_BUFFERS];
     int one_pass_frame_index;
 #endif
+    MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
+    int mbgraph_n_frames;             // number of frames filled in the above
+    int static_mb_pct;                // % forced skip mbs by segmentation
 
     int decimation_factor;
     int decimation_count;
@@ -428,8 +484,6 @@ typedef struct VP8_COMP
     int compressor_speed;
 
     int interquantizer;
-    int auto_gold;
-    int auto_adjust_gold_quantizer;
     int goldfreq;
     int auto_worst_q;
     int cpu_used;
@@ -437,20 +491,17 @@ typedef struct VP8_COMP
     int vert_scale;
     int pass;
 
-
-    int prob_intra_coded;
-    int prob_last_coded;
-    int prob_gf_coded;
     int prob_skip_false;
     int last_skip_false_probs[3];
     int last_skip_probs_q[3];
-    int recent_ref_frame_usage[MAX_REF_FRAMES];
 
+    int recent_ref_frame_usage[MAX_REF_FRAMES];
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
     int this_frame_percent_intra;
     int last_frame_percent_intra;
-
     int ref_frame_flags;
+
+    unsigned char ref_pred_probs_update[PREDICTION_PROBS];
 
     SPEED_FEATURES sf;
     int error_bins[1024];
@@ -461,46 +512,22 @@ typedef struct VP8_COMP
     int gf_update_recommended;
     int skip_true_count;
     int skip_false_count;
+    int t4x4_count;
+    int t8x8_count;
+
+#if CONFIG_UVINTRA
+    int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
+#endif
 
     unsigned char *segmentation_map;
-    signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            // Segment data (can be deltas or absolute values)
-    int  segment_encode_breakout[MAX_MB_SEGMENTS];                    // segment threashold for encode breakout
+
+    // segment threashold for encode breakout
+    int  segment_encode_breakout[MAX_MB_SEGMENTS];
 
     unsigned char *active_map;
     unsigned int active_map_enabled;
-    // Video conferencing cyclic refresh mode flags etc
-    // This is a mode designed to clean up the background over time in live encoding scenarious. It uses segmentation
-    int cyclic_refresh_mode_enabled;
-    int cyclic_refresh_mode_max_mbs_perframe;
-    int cyclic_refresh_mode_index;
-    int cyclic_refresh_q;
-    signed char *cyclic_refresh_map;
-
-#if CONFIG_MULTITHREAD
-    // multithread data
-    int * mt_current_mb_col;
-    int mt_sync_range;
-    int b_multi_threaded;
-    int encoding_thread_count;
-
-    pthread_t *h_encoding_thread;
-    pthread_t h_filter_thread;
-
-    MB_ROW_COMP *mb_row_ei;
-    ENCODETHREAD_DATA *en_thread_data;
-    LPFTHREAD_DATA lpf_thread_data;
-
-    //events
-    sem_t *h_event_start_encoding;
-    sem_t h_event_end_encoding;
-    sem_t h_event_start_lpf;
-    sem_t h_event_end_lpf;
-#endif
 
     TOKENLIST *tplist;
-    unsigned int partition_sz[MAX_PARTITIONS];
-    // end of multithread data
-
 
     fractional_mv_step_fp *find_fractional_mv_step;
     vp8_full_search_fn_t full_search_sad;
@@ -512,7 +539,7 @@ typedef struct VP8_COMP
     unsigned int time_pick_lpf;
     unsigned int time_encode_mb_row;
 
-    int base_skip_false_prob[128];
+    int base_skip_false_prob[QINDEX_RANGE];
 
     struct twopass_rc
     {
@@ -523,6 +550,7 @@ typedef struct VP8_COMP
         FIRSTPASS_STATS *total_stats;
         FIRSTPASS_STATS *this_frame_stats;
         FIRSTPASS_STATS *stats_in, *stats_in_end, *stats_in_start;
+        FIRSTPASS_STATS *total_left_stats;
         int first_pass_done;
         int64_t bits_left;
         int64_t clip_bits_total;
@@ -530,10 +558,6 @@ typedef struct VP8_COMP
         double modified_error_total;
         double modified_error_used;
         double modified_error_left;
-        double total_error_left;
-        double total_intra_error_left;
-        double total_coded_error_left;
-        double start_tot_err_left;
         double kf_intra_err_min;
         double gf_intra_err_min;
         int frames_to_key;

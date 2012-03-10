@@ -42,6 +42,22 @@
              unsigned char *pre, unsigned char *dst_u, \
              unsigned char *dst_v, int stride, char *eobs)
 
+#define prototype_dequant_dc_idct_add_y_block_8x8(sym) \
+    void sym(short *q, short *dq, \
+             unsigned char *pre, unsigned char *dst, \
+             int stride, char *eobs, short *dc, MACROBLOCKD *xd)
+
+#define prototype_dequant_idct_add_y_block_8x8(sym) \
+    void sym(short *q, short *dq, \
+             unsigned char *pre, unsigned char *dst, \
+             int stride, char *eobs, MACROBLOCKD *xd)
+
+#define prototype_dequant_idct_add_uv_block_8x8(sym) \
+    void sym(short *q, short *dq, \
+             unsigned char *pre, unsigned char *dst_u, \
+             unsigned char *dst_v, int stride, char *eobs, \
+             MACROBLOCKD *xd)
+
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/dequantize_x86.h"
 #endif
@@ -81,6 +97,38 @@ extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block);
 extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block);
 
 
+#ifndef vp8_dequant_block_2x2
+#define vp8_dequant_block_2x2 vp8_dequantize_b_2x2_c
+#endif
+extern prototype_dequant_block(vp8_dequant_block_2x2);
+
+#ifndef vp8_dequant_idct_add_8x8
+#define vp8_dequant_idct_add_8x8 vp8_dequant_idct_add_8x8_c
+#endif
+extern prototype_dequant_idct_add(vp8_dequant_idct_add_8x8);
+
+#ifndef vp8_dequant_dc_idct_add_8x8
+#define vp8_dequant_dc_idct_add_8x8 vp8_dequant_dc_idct_add_8x8_c
+#endif
+extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_8x8);
+
+#ifndef vp8_dequant_dc_idct_add_y_block_8x8
+#define vp8_dequant_dc_idct_add_y_block_8x8 vp8_dequant_dc_idct_add_y_block_8x8_c
+#endif
+extern prototype_dequant_dc_idct_add_y_block_8x8(vp8_dequant_dc_idct_add_y_block_8x8);
+
+#ifndef vp8_dequant_idct_add_y_block_8x8
+#define vp8_dequant_idct_add_y_block_8x8 vp8_dequant_idct_add_y_block_8x8_c
+#endif
+extern prototype_dequant_idct_add_y_block_8x8(vp8_dequant_idct_add_y_block_8x8);
+
+#ifndef vp8_dequant_idct_add_uv_block_8x8
+#define vp8_dequant_idct_add_uv_block_8x8 vp8_dequant_idct_add_uv_block_8x8_c
+#endif
+extern prototype_dequant_idct_add_uv_block_8x8(vp8_dequant_idct_add_uv_block_8x8);
+
+
+
 typedef prototype_dequant_block((*vp8_dequant_block_fn_t));
 
 typedef prototype_dequant_idct_add((*vp8_dequant_idct_add_fn_t));
@@ -93,6 +141,12 @@ typedef prototype_dequant_idct_add_y_block((*vp8_dequant_idct_add_y_block_fn_t))
 
 typedef prototype_dequant_idct_add_uv_block((*vp8_dequant_idct_add_uv_block_fn_t));
 
+typedef prototype_dequant_dc_idct_add_y_block_8x8((*vp8_dequant_dc_idct_add_y_block_fn_t_8x8));
+
+typedef prototype_dequant_idct_add_y_block_8x8((*vp8_dequant_idct_add_y_block_fn_t_8x8));
+
+typedef prototype_dequant_idct_add_uv_block_8x8((*vp8_dequant_idct_add_uv_block_fn_t_8x8));
+
 typedef struct
 {
     vp8_dequant_block_fn_t               block;
@@ -101,6 +155,12 @@ typedef struct
     vp8_dequant_dc_idct_add_y_block_fn_t dc_idct_add_y_block;
     vp8_dequant_idct_add_y_block_fn_t    idct_add_y_block;
     vp8_dequant_idct_add_uv_block_fn_t   idct_add_uv_block;
+    vp8_dequant_block_fn_t               block_2x2;
+    vp8_dequant_idct_add_fn_t            idct_add_8x8;
+    vp8_dequant_dc_idct_add_fn_t         dc_idct_add_8x8;
+    vp8_dequant_dc_idct_add_y_block_fn_t_8x8 dc_idct_add_y_block_8x8;
+    vp8_dequant_idct_add_y_block_fn_t_8x8    idct_add_y_block_8x8;
+    vp8_dequant_idct_add_uv_block_fn_t_8x8   idct_add_uv_block_8x8;
 } vp8_dequant_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

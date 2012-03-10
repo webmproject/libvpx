@@ -13,6 +13,12 @@
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+#define HALFNDX 8
+#else
+#define HALFNDX 4
+#endif
+
 extern void filter_block1d_h6_mmx(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
 extern void filter_block1d_v6_mmx(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
 extern void filter_block1d8_h6_sse2(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
@@ -135,7 +141,11 @@ void vp8_half_vert_variance16x_h_sse2
     unsigned int *sumsquared
 );
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[16][8]);
+#else
 DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[8][8]);
+#endif
 
 unsigned int vp8_variance4x4_wmt(
     const unsigned char *src_ptr,
@@ -284,21 +294,21 @@ unsigned int vp8_sub_pixel_variance8x8_wmt
     int xsum;
     unsigned int xxsum;
 
-    if (xoffset == 4 && yoffset == 0)
+    if (xoffset == HALFNDX && yoffset == 0)
     {
         vp8_half_horiz_variance8x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 8,
             &xsum, &xxsum);
     }
-    else if (xoffset == 0 && yoffset == 4)
+    else if (xoffset == 0 && yoffset == HALFNDX)
     {
         vp8_half_vert_variance8x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 8,
             &xsum, &xxsum);
     }
-    else if (xoffset == 4 && yoffset == 4)
+    else if (xoffset == HALFNDX && yoffset == HALFNDX)
     {
         vp8_half_horiz_vert_variance8x_h_sse2(
             src_ptr, src_pixels_per_line,
@@ -335,21 +345,21 @@ unsigned int vp8_sub_pixel_variance16x16_wmt
 
     // note we could avoid these if statements if the calling function
     // just called the appropriate functions inside.
-    if (xoffset == 4 && yoffset == 0)
+    if (xoffset == HALFNDX && yoffset == 0)
     {
         vp8_half_horiz_variance16x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
             &xsum0, &xxsum0);
     }
-    else if (xoffset == 0 && yoffset == 4)
+    else if (xoffset == 0 && yoffset == HALFNDX)
     {
         vp8_half_vert_variance16x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
             &xsum0, &xxsum0);
     }
-    else if (xoffset == 4 && yoffset == 4)
+    else if (xoffset == HALFNDX && yoffset == HALFNDX)
     {
         vp8_half_horiz_vert_variance16x_h_sse2(
             src_ptr, src_pixels_per_line,
@@ -408,21 +418,21 @@ unsigned int vp8_sub_pixel_variance16x8_wmt
     int xsum0, xsum1;
     unsigned int xxsum0, xxsum1;
 
-    if (xoffset == 4 && yoffset == 0)
+    if (xoffset == HALFNDX && yoffset == 0)
     {
         vp8_half_horiz_variance16x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 8,
             &xsum0, &xxsum0);
     }
-    else if (xoffset == 0 && yoffset == 4)
+    else if (xoffset == 0 && yoffset == HALFNDX)
     {
         vp8_half_vert_variance16x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 8,
             &xsum0, &xxsum0);
     }
-    else if (xoffset == 4 && yoffset == 4)
+    else if (xoffset == HALFNDX && yoffset == HALFNDX)
     {
         vp8_half_horiz_vert_variance16x_h_sse2(
             src_ptr, src_pixels_per_line,
@@ -464,21 +474,21 @@ unsigned int vp8_sub_pixel_variance8x16_wmt
     int xsum;
     unsigned int xxsum;
 
-    if (xoffset == 4 && yoffset == 0)
+    if (xoffset == HALFNDX && yoffset == 0)
     {
         vp8_half_horiz_variance8x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
             &xsum, &xxsum);
     }
-    else if (xoffset == 0 && yoffset == 4)
+    else if (xoffset == 0 && yoffset == HALFNDX)
     {
         vp8_half_vert_variance8x_h_sse2(
             src_ptr, src_pixels_per_line,
             dst_ptr, dst_pixels_per_line, 16,
             &xsum, &xxsum);
     }
-    else if (xoffset == 4 && yoffset == 4)
+    else if (xoffset == HALFNDX && yoffset == HALFNDX)
     {
         vp8_half_horiz_vert_variance8x_h_sse2(
             src_ptr, src_pixels_per_line,

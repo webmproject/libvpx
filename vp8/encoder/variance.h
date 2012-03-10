@@ -315,11 +315,6 @@ extern prototype_getmbss(vp8_variance_getmbss);
 #endif
 extern prototype_variance(vp8_variance_mse16x16);
 
-#ifndef vp8_variance_get4x4sse_cs
-#define vp8_variance_get4x4sse_cs vp8_get4x4sse_cs_c
-#endif
-extern prototype_get16x16prederror(vp8_variance_get4x4sse_cs);
-
 #ifndef vp8_ssimpf_8x8
 #define vp8_ssimpf_8x8 vp8_ssim_parms_8x8_c
 #endif
@@ -329,6 +324,11 @@ extern prototype_ssimpf(vp8_ssimpf_8x8)
 #define vp8_ssimpf_16x16 vp8_ssim_parms_16x16_c
 #endif
 extern prototype_ssimpf(vp8_ssimpf_16x16)
+
+#ifndef vp8_variance_satd16x16
+#define vp8_variance_satd16x16 vp8_satd16x16_c
+#endif
+extern prototype_variance(vp8_variance_satd16x16);
 
 typedef prototype_sad(*vp8_sad_fn_t);
 typedef prototype_sad_multi_same_address(*vp8_sad_multi_fn_t);
@@ -368,8 +368,6 @@ typedef struct
     vp8_getmbss_fn_t         getmbss;
     vp8_variance_fn_t        mse16x16;
 
-    vp8_get16x16prederror_fn_t get4x4sse_cs;
-
     vp8_sad_multi_fn_t       sad16x16x3;
     vp8_sad_multi_fn_t       sad16x8x3;
     vp8_sad_multi_fn_t       sad8x16x3;
@@ -397,6 +395,7 @@ typedef struct
     vp8_ssimpf_fn_t          ssimpf_16x16;
 #endif
 
+    vp8_variance_fn_t        satd16x16;
 } vp8_variance_rtcd_vtable_t;
 
 typedef struct

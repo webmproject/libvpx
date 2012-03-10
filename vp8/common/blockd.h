@@ -14,21 +14,26 @@
 
 void vpx_log(const char *format, ...);
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vpx_scale/yv12config.h"
 #include "mv.h"
 #include "treecoder.h"
 #include "subpixel.h"
 #include "vpx_ports/mem.h"
+#include "common.h"
 
 #define TRUE    1
 #define FALSE   0
+
+//#define MODE_STATS
 
 /*#define DCPRED 1*/
 #define DCPREDSIMTHRESH 0
 #define DCPREDCNTTHRESH 3
 
 #define MB_FEATURE_TREE_PROBS   3
+#define PREDICTION_PROBS 3
+
 #define MAX_MB_SEGMENTS         4
 
 #define MAX_REF_LF_DELTAS       4
@@ -60,10 +65,12 @@ typedef struct
 
 extern const unsigned char vp8_block2left[25];
 extern const unsigned char vp8_block2above[25];
+extern const unsigned char vp8_block2left_8x8[25];
+extern const unsigned char vp8_block2above_8x8[25];
+
 
 #define VP8_COMBINEENTROPYCONTEXTS( Dest, A, B) \
     Dest = ((A)!=0) + ((B)!=0);
-
 
 typedef enum
 {
@@ -77,6 +84,7 @@ typedef enum
     V_PRED,             /* vertical prediction */
     H_PRED,             /* horizontal prediction */
     TM_PRED,            /* Truemotion prediction */
+    I8X8_PRED,           /* 8x8 based prediction, each 8x8 has its own prediction mode */
     B_PRED,             /* block based prediction, each block has its own prediction mode */
 
     NEARESTMV,
@@ -88,21 +96,32 @@ typedef enum
     MB_MODE_COUNT
 } MB_PREDICTION_MODE;
 
-/* Macroblock level features */
+// Segment level features.
 typedef enum
 {
-    MB_LVL_ALT_Q = 0,               /* Use alternate Quantizer .... */
-    MB_LVL_ALT_LF = 1,              /* Use alternate loop filter value... */
-    MB_LVL_MAX = 2                  /* Number of MB level features supported */
+    SEG_LVL_ALT_Q = 0,               // Use alternate Quantizer ....
+    SEG_LVL_ALT_LF = 1,              // Use alternate loop filter value...
+    SEG_LVL_REF_FRAME = 2,           // Optional Segment reference frame
+    SEG_LVL_MODE = 3,                // Optional Segment mode
+    SEG_LVL_EOB = 4,                 // EOB end stop marker.
+    SEG_LVL_TRANSFORM = 5,           // Block transform size.
+    SEG_LVL_MAX = 6                  // Number of MB level features supported
 
-} MB_LVL_FEATURES;
+} SEG_LVL_FEATURES;
 
-/* Segment Feature Masks */
-#define SEGMENT_ALTQ    0x01
-#define SEGMENT_ALT_LF  0x02
+// Segment level features.
+typedef enum
+{
+    TX_4X4 = 0,                      // 4x4 dct transform
+    TX_8X8 = 1,                      // 8x8 dct transform
+
+    TX_SIZE_MAX = 2                  // Number of differnt transforms avaialble
+
+} TX_SIZE;
 
 #define VP8_YMODES  (B_PRED + 1)
 #define VP8_UV_MODES (TM_PRED + 1)
+#define VP8_I8X8_MODES (TM_PRED + 1)
 
 #define VP8_MVREFS (1 + SPLITMV - NEARESTMV)
 
@@ -139,7 +158,12 @@ typedef enum
 
 union b_mode_info
 {
-    B_PREDICTION_MODE as_mode;
+    struct {
+        B_PREDICTION_MODE first;
+#if CONFIG_COMP_INTRA_PRED
+        B_PREDICTION_MODE second;
+#endif
+    } as_mode;
     int_mv mv;
 };
 
@@ -155,13 +179,26 @@ typedef enum
 typedef struct
 {
     MB_PREDICTION_MODE mode, uv_mode;
-    MV_REFERENCE_FRAME ref_frame;
-    int_mv mv;
-
+#if CONFIG_COMP_INTRA_PRED
+    MB_PREDICTION_MODE second_mode, second_uv_mode;
+#endif
+    MV_REFERENCE_FRAME ref_frame, second_ref_frame;
+    TX_SIZE txfm_size;
+    int_mv mv, second_mv;
     unsigned char partitioning;
     unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
     unsigned char need_to_clamp_mvs;
     unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
+
+    // Flags used for prediction status of various bistream signals
+    unsigned char seg_id_predicted;
+    unsigned char ref_predicted;
+
+    // Indicates if the mb is part of the image (1) vs border (0)
+    // This can be useful in determining whether the MB provides
+    // a valid predictor
+    unsigned char mb_in_image;
+
 } MB_MODE_INFO;
 
 typedef struct
@@ -205,8 +242,12 @@ typedef struct MacroBlockD
     int fullpixel_mask;
 
     YV12_BUFFER_CONFIG pre; /* Filtered copy of previous frame reconstruction */
+    struct {
+        uint8_t *y_buffer, *u_buffer, *v_buffer;
+    } second_pre;
     YV12_BUFFER_CONFIG dst;
 
+    MODE_INFO *prev_mode_info_context;
     MODE_INFO *mode_info_context;
     int mode_info_stride;
 
@@ -229,13 +270,24 @@ typedef struct MacroBlockD
     unsigned char update_mb_segmentation_data;
 
     /* 0 (do not update) 1 (update) the macroblock segmentation feature data. */
-    unsigned char mb_segement_abs_delta;
+    unsigned char mb_segment_abs_delta;
 
     /* Per frame flags that define which MB level features (such as quantizer or loop filter level) */
     /* are enabled and when enabled the proabilities used to decode the per MB flags in MB_MODE_INFO */
-    vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];         /* Probability Tree used to code Segment number */
 
-    signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            /* Segment parameters */
+    // Probability Tree used to code Segment number
+    vp8_prob mb_segment_tree_probs[MB_FEATURE_TREE_PROBS];
+
+
+    // Segment features
+    signed char segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
+    unsigned int segment_feature_mask[MAX_MB_SEGMENTS];
+
+#if CONFIG_FEATUREUPDATES
+    // keep around the last set so we can figure out what updates...
+    unsigned int old_segment_feature_mask[MAX_MB_SEGMENTS];
+    signed char old_segment_feature_data[MAX_MB_SEGMENTS][SEG_LVL_MAX];
+#endif
 
     /* mode_based Loop filter adjustment */
     unsigned char mode_ref_lf_delta_enabled;
@@ -244,8 +296,8 @@ typedef struct MacroBlockD
     /* Delta values have the range +/- MAX_LOOP_FILTER */
     signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];                /* 0 = Intra, Last, GF, ARF */
     signed char ref_lf_deltas[MAX_REF_LF_DELTAS];                     /* 0 = Intra, Last, GF, ARF */
-    signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];                      /* 0 = BPRED, ZERO_MV, MV, SPLIT */
-    signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];                           /* 0 = BPRED, ZERO_MV, MV, SPLIT */
+    signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];              /* 0 = BPRED, ZERO_MV, MV, SPLIT */
+    signed char mode_lf_deltas[MAX_MODE_LF_DELTAS];                   /* 0 = BPRED, ZERO_MV, MV, SPLIT */
 
     /* Distance of MB away from frame edges */
     int mb_to_left_edge;
@@ -253,15 +305,17 @@ typedef struct MacroBlockD
     int mb_to_top_edge;
     int mb_to_bottom_edge;
 
-    int ref_frame_cost[MAX_REF_FRAMES];
-
-
     unsigned int frames_since_golden;
     unsigned int frames_till_alt_ref_frame;
     vp8_subpix_fn_t  subpixel_predict;
     vp8_subpix_fn_t  subpixel_predict8x4;
     vp8_subpix_fn_t  subpixel_predict8x8;
     vp8_subpix_fn_t  subpixel_predict16x16;
+    vp8_subpix_fn_t  subpixel_predict_avg8x8;
+    vp8_subpix_fn_t  subpixel_predict_avg16x16;
+#if CONFIG_HIGH_PRECISION_MV
+    int allow_high_precision_mv;
+#endif /* CONFIG_HIGH_PRECISION_MV */
 
     void *current_bc;
 
@@ -284,4 +338,20 @@ typedef struct MacroBlockD
 extern void vp8_build_block_doffsets(MACROBLOCKD *x);
 extern void vp8_setup_block_dptrs(MACROBLOCKD *x);
 
+static void update_blockd_bmi(MACROBLOCKD *xd)
+{
+    int i;
+    int is_4x4;
+    is_4x4 = (xd->mode_info_context->mbmi.mode == SPLITMV) ||
+             (xd->mode_info_context->mbmi.mode == I8X8_PRED) ||
+             (xd->mode_info_context->mbmi.mode == B_PRED);
+
+    if (is_4x4)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            xd->block[i].bmi = xd->mode_info_context->bmi[i];
+        }
+    }
+}
 #endif  /* __INC_BLOCKD_H */

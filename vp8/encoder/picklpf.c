@@ -36,6 +36,15 @@ extern void
 (*vp8_yv12_copy_partial_frame_ptr)(YV12_BUFFER_CONFIG *src_ybc,
                                    YV12_BUFFER_CONFIG *dst_ybc,
                                    int Fraction);
+
+extern void vp8_loop_filter_frame_segment
+(
+    VP8_COMMON *cm,
+    MACROBLOCKD *xd,
+    int default_filt_lvl,
+    int segment
+);
+
 void
 vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc, int Fraction)
 {
@@ -63,7 +72,6 @@ vp8_yv12_copy_partial_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst
 
     vpx_memcpy(dst_y, src_y, ystride *(linestocopy + 16));
 }
-
 static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, int Fraction, const vp8_variance_rtcd_vtable_t *rtcd)
 {
     int i, j;
@@ -107,18 +115,21 @@ static int vp8_calc_partial_ssl_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONF
 static int get_min_filter_level(VP8_COMP *cpi, int base_qindex)
 {
     int min_filter_level;
+    /*int q = (int) vp8_convert_qindex_to_q(base_qindex);
 
     if (cpi->source_alt_ref_active && cpi->common.refresh_golden_frame && !cpi->common.refresh_alt_ref_frame)
         min_filter_level = 0;
     else
     {
-        if (base_qindex <= 6)
+        if (q <= 10)
             min_filter_level = 0;
-        else if (base_qindex <= 16)
+        else if (q <= 64)
             min_filter_level = 1;
         else
-            min_filter_level = (base_qindex / 8);
+            min_filter_level = (q >> 6);
     }
+    */
+    min_filter_level = 0;
 
     return min_filter_level;
 }
@@ -256,15 +267,230 @@ void vp8cx_pick_filter_level_fast(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 // Stub function for now Alt LF not used
 void vp8cx_set_alt_lf_level(VP8_COMP *cpi, int filt_val)
 {
-    MACROBLOCKD *mbd = &cpi->mb.e_mbd;
-    (void) filt_val;
+}
+#if CONFIG_FEATUREUPDATES
+void vp8cx_pick_filter_level_sg(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi, int segment)
+{
+    VP8_COMMON *cm = &cpi->common;
 
-    mbd->segment_feature_data[MB_LVL_ALT_LF][0] = cpi->segment_feature_data[MB_LVL_ALT_LF][0];
-    mbd->segment_feature_data[MB_LVL_ALT_LF][1] = cpi->segment_feature_data[MB_LVL_ALT_LF][1];
-    mbd->segment_feature_data[MB_LVL_ALT_LF][2] = cpi->segment_feature_data[MB_LVL_ALT_LF][2];
-    mbd->segment_feature_data[MB_LVL_ALT_LF][3] = cpi->segment_feature_data[MB_LVL_ALT_LF][3];
+    int best_err = 0;
+    int filt_err = 0;
+    int min_filter_level = get_min_filter_level(cpi, cm->base_qindex);
+    int max_filter_level = get_max_filter_level(cpi, cm->base_qindex);
+
+    int filter_step;
+    int filt_high = 0;
+    int filt_mid = cm->filter_level;      // Start search at previous frame filter level
+    int filt_low = 0;
+    int filt_best;
+    int filt_direction = 0;
+
+    int Bias = 0;                       // Bias against raising loop filter and in favour of lowering it
+
+    //  Make a copy of the unfiltered / processed recon buffer
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(cm->frame_to_show, &cpi->last_frame_uf);
+    }
+#if CONFIG_RUNTIME_CPU_DETECT
+    else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+    {
+        vp8_yv12_copy_frame_ptr(cm->frame_to_show, &cpi->last_frame_uf);
+    }
+#endif
+
+    if (cm->frame_type == KEY_FRAME)
+        cm->sharpness_level = 0;
+    else
+        cm->sharpness_level = cpi->oxcf.Sharpness;
+
+    // Start the search at the previous frame filter level unless it is now out of range.
+    filt_mid = cm->filter_level;
+
+    if (filt_mid < min_filter_level)
+        filt_mid = min_filter_level;
+    else if (filt_mid > max_filter_level)
+        filt_mid = max_filter_level;
+
+    // Define the initial step size
+    filter_step = (filt_mid < 16) ? 4 : filt_mid / 4;
+
+    // Get baseline error score
+    vp8cx_set_alt_lf_level(cpi, filt_mid);
+    vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_mid,segment);
+
+    best_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+    filt_best = filt_mid;
+
+    //  Re-instate the unfiltered frame
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
+    {
+        vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
+    }
+#if CONFIG_RUNTIME_CPU_DETECT
+    else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+    {
+        vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+    }
+#endif
+
+    while (filter_step > 0)
+    {
+        Bias = (best_err >> (15 - (filt_mid / 8))) * filter_step; //PGW change 12/12/06 for small images
+
+        // jbb chg: 20100118 - in sections with lots of new material coming in don't bias as much to a low filter value
+        if (cpi->twopass.section_intra_rating < 20)
+            Bias = Bias * cpi->twopass.section_intra_rating / 20;
+
+        // yx, bias less for large block size
+        if(cpi->common.txfm_mode == ALLOW_8X8)
+            Bias >>= 1;
+
+        filt_high = ((filt_mid + filter_step) > max_filter_level) ? max_filter_level : (filt_mid + filter_step);
+        filt_low = ((filt_mid - filter_step) < min_filter_level) ? min_filter_level : (filt_mid - filter_step);
+
+        if ((filt_direction <= 0) && (filt_low != filt_mid))
+        {
+            // Get Low filter error score
+            vp8cx_set_alt_lf_level(cpi, filt_low);
+            vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_low, segment);
+
+            filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+
+            //  Re-instate the unfiltered frame
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+            if (cm->rtcd.flags & HAS_NEON)
+#endif
+            {
+                vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
+            }
+#if CONFIG_RUNTIME_CPU_DETECT
+            else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+            {
+                vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+            }
+#endif
+
+            // If value is close to the best so far then bias towards a lower loop filter value.
+            if ((filt_err - Bias) < best_err)
+            {
+                // Was it actually better than the previous best?
+                if (filt_err < best_err)
+                    best_err = filt_err;
+
+                filt_best = filt_low;
+            }
+        }
+
+        // Now look at filt_high
+        if ((filt_direction >= 0) && (filt_high != filt_mid))
+        {
+            vp8cx_set_alt_lf_level(cpi, filt_high);
+            vp8_loop_filter_frame_segment(cm, &cpi->mb.e_mbd, filt_high, segment);
+
+            filt_err = vp8_calc_ss_err(sd, cm->frame_to_show, IF_RTCD(&cpi->rtcd.variance));
+
+            //  Re-instate the unfiltered frame
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+            if (cm->rtcd.flags & HAS_NEON)
+#endif
+            {
+                vp8_yv12_copy_frame_yonly_no_extend_frame_borders_neon(&cpi->last_frame_uf, cm->frame_to_show);
+            }
+#if CONFIG_RUNTIME_CPU_DETECT
+            else
+#endif
+#endif
+#if !HAVE_ARMV7 || CONFIG_RUNTIME_CPU_DETECT
+            {
+                vp8_yv12_copy_frame_yonly_ptr(&cpi->last_frame_uf, cm->frame_to_show);
+            }
+#endif
+
+            // Was it better than the previous best?
+            if (filt_err < (best_err - Bias))
+            {
+                best_err = filt_err;
+                filt_best = filt_high;
+            }
+        }
+
+        // Half the step distance if the best filter value was the same as last time
+        if (filt_best == filt_mid)
+        {
+            filter_step = filter_step / 2;
+            filt_direction = 0;
+        }
+        else
+        {
+            filt_direction = (filt_best < filt_mid) ? -1 : 1;
+            filt_mid = filt_best;
+        }
+    }
+
+    cm->filter_level = filt_best;
 }
 
+void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
+{
+    VP8_COMMON *oci = &cpi->common;
+    MODE_INFO *mi = oci->mi;
+    int filt_lev[2];
+    int i, j;
+    MACROBLOCKD * const xd = &cpi->mb.e_mbd;
+    int max_seg;
+    int mb_index = 0;
+
+    // pick the loop filter for each segment after segment 0
+    for (i = 1; i < MAX_MB_SEGMENTS; i++)
+    {
+        // if the segment loop filter is active
+        if (segfeature_active(xd, i, SEG_LVL_ALT_LF))
+        {
+            set_segdata(xd, i, SEG_LVL_ALT_LF, 0);
+            vp8cx_pick_filter_level_sg(sd, cpi, i);
+            filt_lev[i] = oci->filter_level;
+        }
+    }
+
+    // do the 0 segment ( this filter also picks the filter value for all
+    // the not enabled features )
+
+    // TODO : Fix the code if segment 0 is the one with seg_lvl_alt_lf on
+    // right now assumes segment 0 gets base loop filter and the rest are
+    // deltas off of segment 0.
+    set_segdata(xd, 0, SEG_LVL_ALT_LF, 0);
+    vp8cx_pick_filter_level_sg(sd, cpi, 0);
+    filt_lev[0] = oci->filter_level;
+
+    // convert the best filter level for the mbs of the segment to
+    // a delta from 0
+    for (i = 1; i < MAX_MB_SEGMENTS; i++)
+        if (segfeature_active(xd, i, SEG_LVL_ALT_LF))
+        {
+            set_segdata(xd, i, SEG_LVL_ALT_LF, filt_lev[i] - filt_lev[0]);
+            xd->update_mb_segmentation_data !=
+                                    segfeature_changed( xd,i,SEG_LVL_ALT_LF);
+        }
+}
+#else
 void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 {
     VP8_COMMON *cm = &cpi->common;
@@ -349,6 +575,10 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
         // jbb chg: 20100118 - in sections with lots of new material coming in don't bias as much to a low filter value
         if (cpi->twopass.section_intra_rating < 20)
             Bias = Bias * cpi->twopass.section_intra_rating / 20;
+
+        // yx, bias less for large block size
+        if(cpi->common.txfm_mode == ALLOW_8X8)
+            Bias >>= 1;
 
         filt_high = ((filt_mid + filter_step) > max_filter_level) ? max_filter_level : (filt_mid + filter_step);
         filt_low = ((filt_mid - filter_step) < min_filter_level) ? min_filter_level : (filt_mid - filter_step);
@@ -439,3 +669,5 @@ void vp8cx_pick_filter_level(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 
     cm->filter_level = filt_best;
 }
+#endif
+

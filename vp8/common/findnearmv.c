@@ -21,10 +21,12 @@ const unsigned char vp8_mbsplit_offset[4][16] = {
 /* Predict motion vectors using those from already-decoded nearby blocks.
    Note that we only consider one 4x4 subblock from each candidate 16x16
    macroblock.   */
+
 void vp8_find_near_mvs
 (
     MACROBLOCKD *xd,
     const MODE_INFO *here,
+    const MODE_INFO *lf_here,
     int_mv *nearest,
     int_mv *nearby,
     int_mv *best_mv,
@@ -36,6 +38,7 @@ void vp8_find_near_mvs
     const MODE_INFO *above = here - xd->mode_info_stride;
     const MODE_INFO *left = here - 1;
     const MODE_INFO *aboveleft = above - 1;
+    const MODE_INFO *third = NULL;
     int_mv            near_mvs[4];
     int_mv           *mv = near_mvs;
     int             *cntx = cnt;
@@ -51,10 +54,10 @@ void vp8_find_near_mvs
         if (above->mbmi.mv.as_int)
         {
             (++mv)->as_int = above->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame], refframe, mv, ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame],
+                refframe, mv, ref_frame_sign_bias);
             ++cntx;
         }
-
         *cntx += 2;
     }
 
@@ -64,38 +67,44 @@ void vp8_find_near_mvs
         if (left->mbmi.mv.as_int)
         {
             int_mv this_mv;
-
             this_mv.as_int = left->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame], refframe, &this_mv, ref_frame_sign_bias);
+            mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame],
+                refframe, &this_mv, ref_frame_sign_bias);
 
             if (this_mv.as_int != mv->as_int)
             {
                 (++mv)->as_int = this_mv.as_int;
                 ++cntx;
             }
-
             *cntx += 2;
         }
         else
             cnt[CNT_INTRA] += 2;
     }
-
-    /* Process above left */
-    if (aboveleft->mbmi.ref_frame != INTRA_FRAME)
+    /* Process above left or the one frome last frame */
+    if ( aboveleft->mbmi.ref_frame != INTRA_FRAME||
+         (lf_here->mbmi.ref_frame==LAST_FRAME && refframe == LAST_FRAME))
     {
         if (aboveleft->mbmi.mv.as_int)
         {
+            third = aboveleft;
+        }
+        else if(lf_here->mbmi.mv.as_int)
+        {
+            third = lf_here;
+        }
+        if(third)
+        {
             int_mv this_mv;
-
-            this_mv.as_int = aboveleft->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame], refframe, &this_mv, ref_frame_sign_bias);
+            this_mv.as_int = third->mbmi.mv.as_int;
+            mv_bias(ref_frame_sign_bias[third->mbmi.ref_frame],
+                refframe, &this_mv, ref_frame_sign_bias);
 
             if (this_mv.as_int != mv->as_int)
             {
                 (++mv)->as_int = this_mv.as_int;
                 ++cntx;
             }
-
             *cntx += 1;
         }
         else
@@ -105,14 +114,16 @@ void vp8_find_near_mvs
     /* If we have three distinct MV's ... */
     if (cnt[CNT_SPLITMV])
     {
-        /* See if above-left MV can be merged with NEAREST */
+        /* See if the third MV can be merged with NEAREST */
         if (mv->as_int == near_mvs[CNT_NEAREST].as_int)
             cnt[CNT_NEAREST] += 1;
     }
 
     cnt[CNT_SPLITMV] = ((above->mbmi.mode == SPLITMV)
                         + (left->mbmi.mode == SPLITMV)) * 2
-                       + (aboveleft->mbmi.mode == SPLITMV);
+                        + (
+                        lf_here->mbmi.mode == SPLITMV ||
+                       aboveleft->mbmi.mode == SPLITMV);
 
     /* Swap near and nearest if necessary */
     if (cnt[CNT_NEAR] > cnt[CNT_NEAREST])
@@ -135,21 +146,40 @@ void vp8_find_near_mvs
     nearest->as_int = near_mvs[CNT_NEAREST].as_int;
     nearby->as_int = near_mvs[CNT_NEAR].as_int;
 
+    /* Make sure that the 1/8th bits of the Mvs are zero if high_precision
+     * is not being used, by truncating the last bit towards 0
+     */
+#if CONFIG_HIGH_PRECISION_MV
+    if (!xd->allow_high_precision_mv)
+    {
+        if (best_mv->as_mv.row & 1)
+            best_mv->as_mv.row += (best_mv->as_mv.row > 0 ? -1 : 1);
+        if (best_mv->as_mv.col & 1)
+            best_mv->as_mv.col += (best_mv->as_mv.col > 0 ? -1 : 1);
+        if (nearest->as_mv.row & 1)
+            nearest->as_mv.row += (nearest->as_mv.row > 0 ? -1 : 1);
+        if (nearest->as_mv.col & 1)
+            nearest->as_mv.col += (nearest->as_mv.col > 0 ? -1 : 1);
+        if (nearby->as_mv.row & 1)
+            nearby->as_mv.row += (nearby->as_mv.row > 0 ? -1 : 1);
+        if (nearby->as_mv.col & 1)
+            nearby->as_mv.col += (nearby->as_mv.col > 0 ? -1 : 1);
+    }
+#endif
+
     //TODO: move clamp outside findnearmv
     vp8_clamp_mv2(nearest, xd);
     vp8_clamp_mv2(nearby, xd);
     vp8_clamp_mv2(best_mv, xd);
 }
 
-vp8_prob *vp8_mv_ref_probs(
+vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
     vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
 )
 {
-    p[0] = vp8_mode_contexts [near_mv_ref_ct[0]] [0];
-    p[1] = vp8_mode_contexts [near_mv_ref_ct[1]] [1];
-    p[2] = vp8_mode_contexts [near_mv_ref_ct[2]] [2];
-    p[3] = vp8_mode_contexts [near_mv_ref_ct[3]] [3];
-    /*p[3] = vp8_mode_contexts [near_mv_ref_ct[1] + near_mv_ref_ct[2] + near_mv_ref_ct[3]] [3];*/
+    p[0] = pc->vp8_mode_contexts [near_mv_ref_ct[0]] [0];
+    p[1] = pc->vp8_mode_contexts [near_mv_ref_ct[1]] [1];
+    p[2] = pc->vp8_mode_contexts [near_mv_ref_ct[2]] [2];
+    p[3] = pc->vp8_mode_contexts [near_mv_ref_ct[3]] [3];
     return p;
 }
-

@@ -46,8 +46,8 @@ typedef struct
     int src;
     int src_stride;
 
-//  MV  enc_mv;
-    int force_empty;
+    int eob_max_offset;
+    int eob_max_offset_8x8;
 
 } BLOCK;
 
@@ -95,9 +95,16 @@ typedef struct
     int *mvcost[2];
     int mvsadcosts[2][MVfpvals+1];
     int *mvsadcost[2];
+#if CONFIG_HIGH_PRECISION_MV
+    int mvcosts_hp[2][MVvals_hp+1];
+    int *mvcost_hp[2];
+    int mvsadcosts_hp[2][MVfpvals_hp+1];
+    int *mvsadcost_hp[2];
+#endif
     int mbmode_cost[2][MB_MODE_COUNT];
     int intra_uv_mode_cost[2][MB_MODE_COUNT];
     unsigned int bmode_costs[10][10][10];
+    unsigned int i8x8_mode_costs[MB_MODE_COUNT];
     unsigned int inter_bmode_costs[B_MODE_COUNT];
 
     // These define limits to motion vector components to prevent them from extending outside the UMV borders
@@ -116,8 +123,15 @@ typedef struct
 
     unsigned char *active_ptr;
     MV_CONTEXT *mvc;
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP *mvc_hp;
+#endif
 
-    unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+    unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS]
+                            [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
+    unsigned int token_costs_8x8[BLOCK_TYPES] [COEF_BANDS]
+                            [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+
     int optimize;
     int q_index;
 
@@ -126,6 +140,10 @@ typedef struct
     void (*short_walsh4x4)(short *input, short *output, int pitch);
     void (*quantize_b)(BLOCK *b, BLOCKD *d);
     void (*quantize_b_pair)(BLOCK *b1, BLOCK *b2, BLOCKD *d0, BLOCKD *d1);
+    void (*vp8_short_fdct8x8)(short *input, short *output, int pitch);
+    void (*short_fhaar2x2)(short *input, short *output, int pitch);
+    void (*quantize_b_8x8)(BLOCK *b, BLOCKD *d);
+    void (*quantize_b_2x2)(BLOCK *b, BLOCKD *d);
 
 } MACROBLOCK;
 

@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vp8/common/idct.h"
 #include "dequantize.h"
 
@@ -122,3 +122,45 @@ void vp8_dequant_idct_add_uv_block_c
         dstv += 4*stride - 8;
     }
 }
+
+
+void vp8_dequant_dc_idct_add_y_block_8x8_c
+            (short *q, short *dq, unsigned char *pre,
+             unsigned char *dst, int stride, char *eobs, short *dc, MACROBLOCKD *xd)
+{
+
+     vp8_dequant_dc_idct_add_8x8_c (q, dq, pre, dst, 16, stride, dc[0]);
+     vp8_dequant_dc_idct_add_8x8_c (&q[64], dq, pre+8, dst+8, 16, stride, dc[1]);
+     vp8_dequant_dc_idct_add_8x8_c (&q[128], dq, pre+8*16, dst+8*stride, 16, stride, dc[4]);
+     vp8_dequant_dc_idct_add_8x8_c (&q[192], dq, pre+8*16+8, dst+8*stride+8, 16, stride, dc[8]);
+
+}
+
+void vp8_dequant_idct_add_y_block_8x8_c
+            (short *q, short *dq, unsigned char *pre,
+             unsigned char *dst, int stride, char *eobs, MACROBLOCKD *xd)
+{
+
+
+  unsigned char *origdest = dst;
+  unsigned char *origpred = pre;
+
+  vp8_dequant_idct_add_8x8_c (q, dq, pre, dst, 16, stride);
+  vp8_dequant_idct_add_8x8_c (&q[64], dq, origpred+8, origdest+8, 16, stride);
+  vp8_dequant_idct_add_8x8_c (&q[128], dq, origpred+8*16, origdest+8*stride, 16, stride);
+  vp8_dequant_idct_add_8x8_c (&q[192], dq, origpred+8*16+8, origdest+8*stride+8, 16, stride);
+
+}
+
+void vp8_dequant_idct_add_uv_block_8x8_c
+            (short *q, short *dq, unsigned char *pre,
+             unsigned char *dstu, unsigned char *dstv, int stride, char *eobs, MACROBLOCKD *xd)
+{
+  vp8_dequant_idct_add_8x8_c (q, dq, pre, dstu, 8, stride);
+
+  q    += 64;
+  pre  += 64;
+
+  vp8_dequant_idct_add_8x8_c (q, dq, pre, dstv, 8, stride);
+}
+

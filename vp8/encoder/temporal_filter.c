@@ -26,7 +26,6 @@
 #include "vpx_scale/yv12extend.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/swapyv12buffer.h"
-#include "vp8/common/threading.h"
 #include "vpx_ports/vpx_timer.h"
 
 #include <math.h>
@@ -36,6 +35,7 @@
 #define ALT_REF_SUBPEL_ENABLED 1 // dis/enable subpel in MC AltRef filtering
 
 #if VP8_TEMPORAL_ALT_REF
+
 
 static void vp8_temporal_filter_predictors_mb_c
 (
@@ -51,14 +51,20 @@ static void vp8_temporal_filter_predictors_mb_c
 {
     int offset;
     unsigned char *yptr, *uptr, *vptr;
+    int omv_row, omv_col;
 
     // Y
     yptr = y_mb_ptr + (mv_row >> 3) * stride + (mv_col >> 3);
 
     if ((mv_row | mv_col) & 7)
     {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
         x->subpixel_predict16x16(yptr, stride,
-                                    mv_col & 7, mv_row & 7, &pred[0], 16);
+                                 (mv_col & 7)<<1, (mv_row & 7)<<1, &pred[0], 16);
+#else
+        x->subpixel_predict16x16(yptr, stride,
+                                 mv_col & 7, mv_row & 7, &pred[0], 16);
+#endif
     }
     else
     {
@@ -66,6 +72,8 @@ static void vp8_temporal_filter_predictors_mb_c
     }
 
     // U & V
+    omv_row = mv_row;
+    omv_col = mv_col;
     mv_row >>= 1;
     mv_col >>= 1;
     stride = (stride + 1) >> 1;
@@ -73,6 +81,15 @@ static void vp8_temporal_filter_predictors_mb_c
     uptr = u_mb_ptr + offset;
     vptr = v_mb_ptr + offset;
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    if ((omv_row | omv_col) & 15)
+    {
+        x->subpixel_predict8x8(uptr, stride,
+                            (omv_col & 15), (omv_row & 15), &pred[256], 8);
+        x->subpixel_predict8x8(vptr, stride,
+                            (omv_col & 15), (omv_row & 15), &pred[320], 8);
+    }
+#else
     if ((mv_row | mv_col) & 7)
     {
         x->subpixel_predict8x8(uptr, stride,
@@ -80,6 +97,7 @@ static void vp8_temporal_filter_predictors_mb_c
         x->subpixel_predict8x8(vptr, stride,
                             mv_col & 7, mv_row & 7, &pred[320], 8);
     }
+#endif
     else
     {
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, stride, &pred[256], 8);
@@ -98,7 +116,7 @@ void vp8_temporal_filter_apply_c
     unsigned short *count
 )
 {
-    int i, j, k;
+    unsigned int i, j, k;
     int modifier;
     int byte = 0;
 
@@ -137,6 +155,9 @@ void vp8_temporal_filter_apply_c
 
 #if ALT_REF_MC_ENABLED
 static int dummy_cost[2*mv_max+1];
+#if CONFIG_HIGH_PRECISION_MV
+static int dummy_cost_hp[2*mv_max_hp+1];
+#endif
 
 static int vp8_temporal_filter_find_matching_mb_c
 (
@@ -160,6 +181,10 @@ static int vp8_temporal_filter_find_matching_mb_c
 
     int *mvcost[2]    = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
     int *mvsadcost[2] = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
+#if CONFIG_HIGH_PRECISION_MV
+    int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost_hp[mv_max_hp+1] };
+    int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost_hp[mv_max_hp+1] };
+#endif
 
     // Save input state
     unsigned char **base_src = b->base_src;
@@ -203,7 +228,13 @@ static int vp8_temporal_filter_find_matching_mb_c
         step_param,
         sadpb,
         &cpi->fn_ptr[BLOCK_16X16],
-        mvsadcost, mvcost, &best_ref_mv1);
+#if CONFIG_HIGH_PRECISION_MV
+        x->e_mbd.allow_high_precision_mv?mvsadcost_hp:mvsadcost,
+        x->e_mbd.allow_high_precision_mv?mvcost_hp:mvcost,
+#else
+        mvsadcost, mvcost,
+#endif
+        &best_ref_mv1);
 
 #if ALT_REF_SUBPEL_ENABLED
     // Try sub-pixel MC?
@@ -214,7 +245,12 @@ static int vp8_temporal_filter_find_matching_mb_c
         bestsme = cpi->find_fractional_mv_step(x, b, d,
                     &d->bmi.mv, &best_ref_mv1,
                     x->errorperbit, &cpi->fn_ptr[BLOCK_16X16],
-                    mvcost, &distortion, &sse);
+#if CONFIG_HIGH_PRECISION_MV
+                    x->e_mbd.allow_high_precision_mv?mvcost_hp:mvcost,
+#else
+                    mvcost,
+#endif
+                    &distortion, &sse);
     }
 #endif
 
@@ -263,17 +299,17 @@ static void vp8_temporal_filter_iterate_c
 #if ALT_REF_MC_ENABLED
         // Source frames are extended to 16 pixels.  This is different than
         //  L/A/G reference frames that have a border of 32 (VP8BORDERINPIXELS)
-        // A 6 tap filter is used for motion search.  This requires 2 pixels
+        // A 6/8 tap filter is used for motion search.  This requires 2 pixels
         //  before and 3 pixels after.  So the largest Y mv on a border would
-        //  then be 16 - 3.  The UV blocks are half the size of the Y and
+        //  then be 16 - INTERP_EXTEND. The UV blocks are half the size of the Y and
         //  therefore only extended by 8.  The largest mv that a UV block
-        //  can support is 8 - 3.  A UV mv is half of a Y mv.
-        //  (16 - 3) >> 1 == 6 which is greater than 8 - 3.
+        //  can support is 8 - INTERP_EXTEND.  A UV mv is half of a Y mv.
+        //  (16 - INTERP_EXTEND) >> 1 which is greater than 8 - INTERP_EXTEND.
         // To keep the mv in play for both Y and UV planes the max that it
-        //  can be on a border is therefore 16 - 5.
-        cpi->mb.mv_row_min = -((mb_row * 16) + (16 - 5));
+        //  can be on a border is therefore 16 - (2*INTERP_EXTEND+1).
+        cpi->mb.mv_row_min = -((mb_row * 16) + (17 - 2*INTERP_EXTEND));
         cpi->mb.mv_row_max = ((cpi->common.mb_rows - 1 - mb_row) * 16)
-                                + (16 - 5);
+                                + (17 - 2*INTERP_EXTEND);
 #endif
 
         for (mb_col = 0; mb_col < mb_cols; mb_col++)
@@ -285,9 +321,9 @@ static void vp8_temporal_filter_iterate_c
             vpx_memset(count, 0, 384*sizeof(unsigned short));
 
 #if ALT_REF_MC_ENABLED
-            cpi->mb.mv_col_min = -((mb_col * 16) + (16 - 5));
+            cpi->mb.mv_col_min = -((mb_col * 16) + (17 - 2*INTERP_EXTEND));
             cpi->mb.mv_col_max = ((cpi->common.mb_cols - 1 - mb_col) * 16)
-                                    + (16 - 5);
+                                    + (17 - 2*INTERP_EXTEND);
 #endif
 
             for (frame = 0; frame < frame_count; frame++)

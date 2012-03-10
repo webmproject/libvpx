@@ -60,6 +60,22 @@ DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]) =
     9, 12, 13, 10,
     7, 11, 14, 15,
 };
+DECLARE_ALIGNED(64, cuchar, vp8_coef_bands_8x8[64]) = { 0, 1, 2, 3, 5, 4, 4, 5,
+                                                        5, 3, 6, 3, 5, 4, 6, 6,
+                                                        6, 5, 5, 6, 6, 6, 6, 6,
+                                                        6, 6, 6, 6, 6, 6, 6, 6,
+                                                        6, 6, 6, 6, 7, 7, 7, 7,
+                                                        7, 7, 7, 7, 7, 7, 7, 7,
+                                                        7, 7, 7, 7, 7, 7, 7, 7,
+                                                        7, 7, 7, 7, 7, 7, 7, 7
+};
+DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]) =
+{
+    0,  1,  8, 16,  9,  2,  3, 10, 17, 24, 32, 25, 18, 11,  4,  5,
+    12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13,  6,  7, 14, 21, 28,
+    35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51,
+    58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
+};
 
 DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) =
 {
@@ -70,8 +86,7 @@ DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) =
 };
 
 DECLARE_ALIGNED(16, short, vp8_default_zig_zag_mask[16]);
-
-const int vp8_mb_feature_data_bits[MB_LVL_MAX] = {7, 6};
+DECLARE_ALIGNED(64, short, vp8_default_zig_zag_mask_8x8[64]);//int64_t
 
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
 
@@ -113,7 +128,10 @@ void vp8_init_scan_order_mask()
     {
         vp8_default_zig_zag_mask[vp8_default_zig_zag1d[i]] = 1 << i;
     }
-
+    for (i = 0; i < 64; i++)
+    {
+        vp8_default_zig_zag_mask_8x8[vp8_default_zig_zag1d_8x8[i]] = 1 << i;
+    }
 }
 
 static void init_bit_tree(vp8_tree_index *p, int n)
@@ -156,11 +174,37 @@ vp8_extra_bit_struct vp8_extra_bits[12] =
 };
 
 #include "default_coef_probs.h"
+#include "defaultcoefcounts.h"
 
 void vp8_default_coef_probs(VP8_COMMON *pc)
 {
+    int h;
     vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
                    sizeof(default_coef_probs));
+    h = 0;
+    do
+    {
+        int i = 0;
+
+        do
+        {
+            int k = 0;
+
+            do
+            {
+                unsigned int branch_ct [ENTROPY_NODES] [2];
+                vp8_tree_probs_from_distribution(
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                    pc->fc.coef_probs_8x8 [h][i][k], branch_ct, vp8_default_coef_counts_8x8 [h][i][k],
+                    256, 1);
+
+            }
+            while (++k < PREV_COEF_CONTEXTS);
+        }
+        while (++i < COEF_BANDS);
+    }
+    while (++h < BLOCK_TYPES);
+
 }
 
 void vp8_coef_tree_initialize()

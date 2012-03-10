@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "recon.h"
 #include "blockd.h"
 
@@ -44,6 +44,36 @@ void vp8_recon_b_c
     }
 }
 
+void vp8_recon_uv_b_c
+(
+    unsigned char *pred_ptr,
+    short *diff_ptr,
+    unsigned char *dst_ptr,
+    int stride
+)
+{
+    int r, c;
+
+    for (r = 0; r < 4; r++)
+    {
+        for (c = 0; c < 4; c++)
+        {
+            int a = diff_ptr[c] + pred_ptr[c] ;
+
+            if (a < 0)
+                a = 0;
+
+            if (a > 255)
+                a = 255;
+
+            dst_ptr[c] = (unsigned char) a ;
+        }
+
+        dst_ptr += stride;
+        diff_ptr += 8;
+        pred_ptr += 8;
+    }
+}
 void vp8_recon4b_c
 (
     unsigned char *pred_ptr,

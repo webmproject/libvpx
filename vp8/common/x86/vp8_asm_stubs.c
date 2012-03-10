@@ -9,12 +9,19 @@
  */
 
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vpx_ports/mem.h"
 #include "vp8/common/subpixel.h"
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+extern const short vp8_six_tap_mmx[16][6*8];
+extern const short vp8_bilinear_filters_mmx[16][2*8];
+#else
 extern const short vp8_six_tap_mmx[8][6*8];
 extern const short vp8_bilinear_filters_mmx[8][2*8];
+#endif
+
+//#define ANNOUNCE_FUNCTION
 
 extern void vp8_filter_block1d_h6_mmx
 (
@@ -128,6 +135,9 @@ void vp8_sixtap_predict4x4_mmx
     int dst_pitch
 )
 {
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict4x4_mmx\n");
+#endif
     DECLARE_ALIGNED_ARRAY(16, unsigned short, FData2, 16*16);  /* Temp data bufffer used in filtering */
     const short *HFilter, *VFilter;
     HFilter = vp8_six_tap_mmx[xoffset];
@@ -149,6 +159,9 @@ void vp8_sixtap_predict16x16_mmx
 )
 {
 
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict16x16_mmx\n");
+#endif
     DECLARE_ALIGNED_ARRAY(16, unsigned short, FData2, 24*24);  /* Temp data bufffer used in filtering */
 
     const short *HFilter, *VFilter;
@@ -181,6 +194,9 @@ void vp8_sixtap_predict8x8_mmx
 )
 {
 
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict8x8_mmx\n");
+#endif
     DECLARE_ALIGNED_ARRAY(16, unsigned short, FData2, 256);    /* Temp data bufffer used in filtering */
 
     const short *HFilter, *VFilter;
@@ -206,7 +222,9 @@ void vp8_sixtap_predict8x4_mmx
     int dst_pitch
 )
 {
-
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict8x4_mmx\n");
+#endif
     DECLARE_ALIGNED_ARRAY(16, unsigned short, FData2, 256);    /* Temp data bufffer used in filtering */
 
     const short *HFilter, *VFilter;
@@ -256,6 +274,9 @@ void vp8_sixtap_predict16x16_sse2
     DECLARE_ALIGNED_ARRAY(16, unsigned short, FData2, 24*24);    /* Temp data bufffer used in filtering */
 
     const short *HFilter, *VFilter;
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict16x16_sse2\n");
+#endif
 
     if (xoffset)
     {
@@ -295,6 +316,9 @@ void vp8_sixtap_predict8x8_sse2
 {
     DECLARE_ALIGNED_ARRAY(16, unsigned short, FData2, 256);  /* Temp data bufffer used in filtering */
     const short *HFilter, *VFilter;
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict8x8_sse2\n");
+#endif
 
     if (xoffset)
     {
@@ -333,6 +357,9 @@ void vp8_sixtap_predict8x4_sse2
 {
     DECLARE_ALIGNED_ARRAY(16, unsigned short, FData2, 256);  /* Temp data bufffer used in filtering */
     const short *HFilter, *VFilter;
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict8x4_sse2\n");
+#endif
 
     if (xoffset)
     {
@@ -434,6 +461,9 @@ void vp8_sixtap_predict16x16_ssse3
 )
 {
     DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 24*24);
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict16x16_ssse3\n");
+#endif
 
     if (xoffset)
     {
@@ -466,6 +496,9 @@ void vp8_sixtap_predict8x8_ssse3
 )
 {
     DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 256);
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict8x8_ssse3\n");
+#endif
 
     if (xoffset)
     {
@@ -498,6 +531,9 @@ void vp8_sixtap_predict8x4_ssse3
 )
 {
     DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 256);
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict8x4_ssse3\n");
+#endif
 
     if (xoffset)
     {
@@ -530,6 +566,9 @@ void vp8_sixtap_predict4x4_ssse3
 )
 {
   DECLARE_ALIGNED_ARRAY(16, unsigned char, FData2, 4*9);
+#ifdef ANNOUNCE_FUNCTION
+    printf("vp8_sixtap_predict4x4_ssse3\n");
+#endif
 
   if (xoffset)
   {

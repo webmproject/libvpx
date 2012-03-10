@@ -56,13 +56,8 @@ static const struct extraconfig_map extracfg_map[] =
         0,
         {
             NULL,
-#if !(CONFIG_REALTIME_ONLY)
             VP8_BEST_QUALITY_ENCODING,  /* Encoding Mode */
             0,                          /* cpu_used      */
-#else
-            VP8_REAL_TIME_ENCODING,     /* Encoding Mode */
-            4,                          /* cpu_used      */
-#endif
             0,                          /* enable_auto_alt_ref */
             0,                          /* noise_sensitivity */
             0,                          /* Sharpness */
@@ -149,11 +144,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
     RANGE_CHECK_HI(cfg, rc_min_quantizer,   cfg->rc_max_quantizer);
     RANGE_CHECK_HI(cfg, g_threads,          64);
-#if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
-#else
-    RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
-#endif
     RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
     RANGE_CHECK_HI(cfg, rc_undershoot_pct,  1000);
     RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
@@ -164,11 +155,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
-#if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
-#else
-    RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_ONE_PASS);
-#endif
 
     /* VP8 does not support a lower bound on the keyframe interval in
      * automatic keyframe placement mode.
@@ -181,13 +168,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_BOOL(vp8_cfg,               enable_auto_alt_ref);
     RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
 
-#if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_BEST_QUALITY_ENCODING, VP8_REAL_TIME_ENCODING);
     RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
-#else
-    RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_REAL_TIME_ENCODING, VP8_REAL_TIME_ENCODING);
-    RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 0);
-#endif
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
     RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
@@ -196,7 +178,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK(vp8_cfg, arnr_type,       1, 3);
     RANGE_CHECK(vp8_cfg, cq_level, 0, 63);
 
-#if !(CONFIG_REALTIME_ONLY)
     if (cfg->g_pass == VPX_RC_LAST_PASS)
     {
         size_t           packet_sz = sizeof(FIRSTPASS_STATS);
@@ -218,7 +199,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
         if ((int)(stats->count + 0.5) != n_packets - 1)
             ERROR("rc_twopass_stats_in missing EOS stats packet");
     }
-#endif
 
     return VPX_CODEC_OK;
 }
@@ -249,7 +229,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
                                        vpx_codec_enc_cfg_t cfg,
                                        struct vp8_extracfg vp8_cfg)
 {
-    oxcf->multi_threaded         = cfg.g_threads;
     oxcf->Version               = cfg.g_profile;    
     oxcf->Version              |= vp8_cfg.experimental? 0x4 : 0;
 
@@ -262,8 +241,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     {
         oxcf->frame_rate = 30;
     }
-
-    oxcf->error_resilient_mode    = cfg.g_error_resilient;
 
     switch (cfg.g_pass)
     {
@@ -289,25 +266,14 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         oxcf->lag_in_frames           = cfg.g_lag_in_frames;
     }
 
-    oxcf->allow_df               = (cfg.rc_dropframe_thresh > 0);
-    oxcf->drop_frames_water_mark   = cfg.rc_dropframe_thresh;
-
-    oxcf->allow_spatial_resampling = cfg.rc_resize_allowed;
-    oxcf->resample_up_water_mark   = cfg.rc_resize_up_thresh;
-    oxcf->resample_down_water_mark = cfg.rc_resize_down_thresh;
-
-    if (cfg.rc_end_usage == VPX_VBR)
-    {
-        oxcf->end_usage          = USAGE_LOCAL_FILE_PLAYBACK;
-    }
-    else if (cfg.rc_end_usage == VPX_CBR)
-    {
-        oxcf->end_usage          = USAGE_STREAM_FROM_SERVER;
-    }
-    else if (cfg.rc_end_usage == VPX_CQ)
-    {
-        oxcf->end_usage          = USAGE_CONSTRAINED_QUALITY;
-    }
+    // VBR only supported for now.
+    // CBR code has been deprectated for experimental phase.
+    // CQ mode not yet tested
+    oxcf->end_usage          = USAGE_LOCAL_FILE_PLAYBACK;
+    /*if (cfg.rc_end_usage == VPX_CQ)
+        oxcf->end_usage      = USAGE_CONSTRAINED_QUALITY;
+    else
+        oxcf->end_usage      = USAGE_LOCAL_FILE_PLAYBACK;*/
 
     oxcf->target_bandwidth       = cfg.rc_target_bitrate;
     oxcf->rc_max_intra_bitrate_pct = vp8_cfg.rc_max_intra_bitrate_pct;
@@ -341,7 +307,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->play_alternate         =  vp8_cfg.enable_auto_alt_ref;
     oxcf->noise_sensitivity      =  vp8_cfg.noise_sensitivity;
     oxcf->Sharpness             =  vp8_cfg.Sharpness;
-    oxcf->token_partitions       =  vp8_cfg.token_partitions;
 
     oxcf->two_pass_stats_in        =  cfg.rc_twopass_stats_in;
     oxcf->output_pkt_list         =  vp8_cfg.pkt_list;
@@ -371,11 +336,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         printf("fixed_q: %d\n",  oxcf->fixed_q);
         printf("worst_allowed_q: %d\n", oxcf->worst_allowed_q);
         printf("best_allowed_q: %d\n", oxcf->best_allowed_q);
-        printf("allow_spatial_resampling: %d\n",  oxcf->allow_spatial_resampling);
-        printf("resample_down_water_mark: %d\n", oxcf->resample_down_water_mark);
-        printf("resample_up_water_mark: %d\n", oxcf->resample_up_water_mark);
-        printf("allow_df: %d\n", oxcf->allow_df);
-        printf("drop_frames_water_mark: %d\n", oxcf->drop_frames_water_mark);
         printf("two_pass_vbrbias: %d\n",  oxcf->two_pass_vbrbias);
         printf("two_pass_vbrmin_section: %d\n", oxcf->two_pass_vbrmin_section);
         printf("two_pass_vbrmax_section: %d\n", oxcf->two_pass_vbrmax_section);
@@ -383,7 +343,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         printf("lag_in_frames: %d\n", oxcf->lag_in_frames);
         printf("play_alternate: %d\n", oxcf->play_alternate);
         printf("Version: %d\n", oxcf->Version);
-        printf("multi_threaded: %d\n",   oxcf->multi_threaded);
         printf("encode_breakout: %d\n", oxcf->encode_breakout);
     */
     return VPX_CODEC_OK;
@@ -618,41 +577,11 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 {
     unsigned int new_qc;
 
-#if !(CONFIG_REALTIME_ONLY)
     /* Use best quality mode if no deadline is given. */
-    new_qc = MODE_BESTQUALITY;
-
     if (deadline)
-    {
-        uint64_t     duration_us;
-
-        /* Convert duration parameter from stream timebase to microseconds */
-        duration_us = (uint64_t)duration * 1000000
-                      * (uint64_t)ctx->cfg.g_timebase.num
-                      / (uint64_t)ctx->cfg.g_timebase.den;
-
-        /* If the deadline is more that the duration this frame is to be shown,
-         * use good quality mode. Otherwise use realtime mode.
-         */
-        new_qc = (deadline > duration_us) ? MODE_GOODQUALITY : MODE_REALTIME;
-    }
-
-#else
-    new_qc = MODE_REALTIME;
-#endif
-
-    switch (ctx->deprecated_mode)
-    {
-    case VP8_BEST_QUALITY_ENCODING:
-        new_qc = MODE_BESTQUALITY;
-        break;
-    case VP8_GOOD_QUALITY_ENCODING:
         new_qc = MODE_GOODQUALITY;
-        break;
-    case VP8_REAL_TIME_ENCODING:
-        new_qc = MODE_REALTIME;
-        break;
-    }
+    else
+        new_qc = MODE_BESTQUALITY;
 
     if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
         new_qc = MODE_FIRSTPASS;
@@ -756,8 +685,8 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         if (ctx->base.init_flags & VPX_CODEC_USE_PSNR)
             ((VP8_COMP *)ctx->cpi)->b_calculate_psnr = 1;
 
-        if (ctx->base.init_flags & VPX_CODEC_USE_OUTPUT_PARTITION)
-            ((VP8_COMP *)ctx->cpi)->output_partition = 1;
+        //if (ctx->base.init_flags & VPX_CODEC_USE_OUTPUT_PARTITION)
+        //    ((VP8_COMP *)ctx->cpi)->output_partition = 1;
 
         /* Convert API flags to internal codec lib flags */
         lib_flags = (flags & VPX_EFLAG_FORCE_KF) ? FRAMEFLAGS_KEY : 0;
@@ -826,11 +755,10 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                 if (cpi->droppable)
                     pkt.data.frame.flags |= VPX_FRAME_IS_DROPPABLE;
 
-                if (cpi->output_partition)
+                /*if (cpi->output_partition)
                 {
                     int i;
-                    const int num_partitions =
-                            (1 << cpi->common.multi_token_partition) + 1;
+                    const int num_partitions = 1;
 
                     pkt.data.frame.flags |= VPX_FRAME_IS_FRAGMENT;
 
@@ -839,7 +767,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                         pkt.data.frame.buf = cx_data;
                         pkt.data.frame.sz = cpi->partition_sz[i];
                         pkt.data.frame.partition_id = i;
-                        /* don't set the fragment bit for the last partition */
+                        // don't set the fragment bit for the last partition
                         if (i == (num_partitions - 1))
                             pkt.data.frame.flags &= ~VPX_FRAME_IS_FRAGMENT;
                         vpx_codec_pkt_list_add(&ctx->pkt_list.head, &pkt);
@@ -847,7 +775,7 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                         cx_data_sz -= cpi->partition_sz[i];
                     }
                 }
-                else
+                else*/
                 {
                     pkt.data.frame.buf = cx_data;
                     pkt.data.frame.sz  = size;

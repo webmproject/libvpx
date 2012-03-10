@@ -13,6 +13,12 @@
 #include "vp8/common/filter.h"
 #include "vp8/common/arm/bilinearfilter_arm.h"
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+#define HALFNDX 8
+#else
+#define HALFNDX 4
+#endif
+
 #if HAVE_ARMV6
 
 unsigned int vp8_sub_pixel_variance8x8_armv6
@@ -59,17 +65,17 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
     const short *HFilter, *VFilter;
     unsigned int var;
 
-    if (xoffset == 4 && yoffset == 0)
+    if (xoffset == HALFNDX && yoffset == 0)
     {
         var = vp8_variance_halfpixvar16x16_h_armv6(src_ptr, src_pixels_per_line,
                                                    dst_ptr, dst_pixels_per_line, sse);
     }
-    else if (xoffset == 0 && yoffset == 4)
+    else if (xoffset == 0 && yoffset == HALFNDX)
     {
         var = vp8_variance_halfpixvar16x16_v_armv6(src_ptr, src_pixels_per_line,
                                                    dst_ptr, dst_pixels_per_line, sse);
     }
-    else if (xoffset == 4 && yoffset == 4)
+    else if (xoffset == HALFNDX && yoffset == HALFNDX)
     {
         var = vp8_variance_halfpixvar16x16_hv_armv6(src_ptr, src_pixels_per_line,
                                                    dst_ptr, dst_pixels_per_line, sse);
@@ -107,11 +113,11 @@ unsigned int vp8_sub_pixel_variance16x16_neon
     unsigned int *sse
 )
 {
-  if (xoffset == 4 && yoffset == 0)
+  if (xoffset == HALFNDX && yoffset == 0)
     return vp8_variance_halfpixvar16x16_h_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
-  else if (xoffset == 0 && yoffset == 4)
+  else if (xoffset == 0 && yoffset == HALFNDX)
     return vp8_variance_halfpixvar16x16_v_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
-  else if (xoffset == 4 && yoffset == 4)
+  else if (xoffset == HALFNDX && yoffset == HALFNDX)
     return vp8_variance_halfpixvar16x16_hv_neon(src_ptr, src_pixels_per_line, dst_ptr, dst_pixels_per_line, sse);
   else
     return vp8_sub_pixel_variance16x16_neon_func(src_ptr, src_pixels_per_line, xoffset, yoffset, dst_ptr, dst_pixels_per_line, sse);

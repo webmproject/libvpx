@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vpx_ports/x86.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/encoder/onyx_int.h"
@@ -152,8 +152,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.mse16x16              = vp8_mse16x16_mmx;
         cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_mmx;
 
-        cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_mmx;
-
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_mmx;
         cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_mmx;
         cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_mmx;
@@ -201,8 +199,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.mse16x16              = vp8_mse16x16_wmt;
         cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_sse2;
 
-        /* cpi->rtcd.variance.get4x4sse_cs  not implemented for wmt */;
-
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_sse2;
         cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_sse2;
         cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_sse2;
@@ -217,12 +213,8 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.encodemb.submby                = vp8_subtract_mby_sse2;
         cpi->rtcd.encodemb.submbuv               = vp8_subtract_mbuv_sse2;
 
-        cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse2;
         cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_sse2;
-
-#if !(CONFIG_REALTIME_ONLY)
         cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_sse2;
-#endif
 
 #if CONFIG_INTERNAL_STATS
 #if ARCH_X86_64
@@ -278,8 +270,6 @@ void vp8_arch_x86_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.sad8x8x8              = vp8_sad8x8x8_sse4;
         cpi->rtcd.variance.sad4x4x8              = vp8_sad4x4x8_sse4;
         cpi->rtcd.search.full_search             = vp8_full_search_sadx8;
-
-        cpi->rtcd.quantize.quantb                = vp8_regular_quantize_b_sse4;
     }
 #endif
 

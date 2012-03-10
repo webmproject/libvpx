@@ -14,10 +14,14 @@
 #include "onyxc_int.h"
 #include "vpx_mem/vpx_mem.h"
 
+#include "vp8/common/seg_common.h"
+
 typedef unsigned char uc;
 
 prototype_loopfilter(vp8_loop_filter_horizontal_edge_c);
 prototype_loopfilter(vp8_loop_filter_vertical_edge_c);
+
+
 prototype_loopfilter(vp8_mbloop_filter_horizontal_edge_c);
 prototype_loopfilter(vp8_mbloop_filter_vertical_edge_c);
 
@@ -68,6 +72,14 @@ void vp8_loop_filter_bh_c(unsigned char *y_ptr, unsigned char *u_ptr,
         vp8_loop_filter_horizontal_edge_c(v_ptr + 4 * uv_stride, uv_stride, lfi->blim, lfi->lim, lfi->hev_thr, 1);
 }
 
+void vp8_loop_filter_bh8x8_c(unsigned char *y_ptr, unsigned char *u_ptr,
+                          unsigned char *v_ptr, int y_stride, int uv_stride,
+                          loop_filter_info *lfi)
+{
+    vp8_mbloop_filter_horizontal_edge_c(
+        y_ptr + 8 * y_stride, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
+}
+
 void vp8_loop_filter_bhs_c(unsigned char *y_ptr, int y_stride,
                            const unsigned char *blimit)
 {
@@ -90,6 +102,14 @@ void vp8_loop_filter_bv_c(unsigned char *y_ptr, unsigned char *u_ptr,
 
     if (v_ptr)
         vp8_loop_filter_vertical_edge_c(v_ptr + 4, uv_stride, lfi->blim, lfi->lim, lfi->hev_thr, 1);
+}
+
+void vp8_loop_filter_bv8x8_c(unsigned char *y_ptr, unsigned char *u_ptr,
+                          unsigned char *v_ptr, int y_stride, int uv_stride,
+                          loop_filter_info *lfi)
+{
+    vp8_mbloop_filter_vertical_edge_c(
+        y_ptr + 8, y_stride, lfi->blim, lfi->lim, lfi->hev_thr, 2);
 }
 
 void vp8_loop_filter_bvs_c(unsigned char *y_ptr, int y_stride,
@@ -133,7 +153,7 @@ static void lf_init_lut(loop_filter_info_n *lfi)
     lfi->mode_lf_lut[H_PRED] = 1;
     lfi->mode_lf_lut[TM_PRED] = 1;
     lfi->mode_lf_lut[B_PRED]  = 0;
-
+    lfi->mode_lf_lut[I8X8_PRED]=0;
     lfi->mode_lf_lut[ZEROMV]  = 1;
     lfi->mode_lf_lut[NEARESTMV] = 2;
     lfi->mode_lf_lut[NEARMV] = 2;
@@ -194,7 +214,7 @@ void vp8_loop_filter_init(VP8_COMMON *cm)
 }
 
 void vp8_loop_filter_frame_init(VP8_COMMON *cm,
-                                MACROBLOCKD *mbd,
+                                MACROBLOCKD *xd,
                                 int default_filt_lvl)
 {
     int seg,  /* segment number */
@@ -215,22 +235,23 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
         int lvl_seg = default_filt_lvl;
         int lvl_ref, lvl_mode;
 
-        /* Note the baseline filter values for each segment */
-        if (mbd->segmentation_enabled)
+
+        // Set the baseline filter values for each segment
+        if ( segfeature_active( xd, seg, SEG_LVL_ALT_LF ) )
         {
             /* Abs value */
-            if (mbd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+            if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
             {
-                lvl_seg = mbd->segment_feature_data[MB_LVL_ALT_LF][seg];
+                lvl_seg = get_segdata( xd, seg, SEG_LVL_ALT_LF );
             }
             else  /* Delta Value */
             {
-                lvl_seg += mbd->segment_feature_data[MB_LVL_ALT_LF][seg];
+                lvl_seg += get_segdata( xd, seg, SEG_LVL_ALT_LF );;
                 lvl_seg = (lvl_seg > 0) ? ((lvl_seg > 63) ? 63: lvl_seg) : 0;
             }
         }
 
-        if (!mbd->mode_ref_lf_delta_enabled)
+        if (!xd->mode_ref_lf_delta_enabled)
         {
             /* we could get rid of this if we assume that deltas are set to
              * zero when not in use; encoder always uses deltas
@@ -245,12 +266,12 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
         ref = INTRA_FRAME;
 
         /* Apply delta for reference frame */
-        lvl_ref += mbd->ref_lf_deltas[ref];
+        lvl_ref += xd->ref_lf_deltas[ref];
 
         /* Apply delta for Intra modes */
         mode = 0; /* B_PRED */
         /* Only the split mode BPRED has a further special case */
-        lvl_mode = lvl_ref +  mbd->mode_lf_deltas[mode];
+        lvl_mode = lvl_ref +  xd->mode_lf_deltas[mode];
         lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
 
         lfi->lvl[seg][ref][mode] = lvl_mode;
@@ -265,12 +286,12 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
             int lvl_ref = lvl_seg;
 
             /* Apply delta for reference frame */
-            lvl_ref += mbd->ref_lf_deltas[ref];
+            lvl_ref += xd->ref_lf_deltas[ref];
 
             /* Apply delta for Inter modes */
             for (mode = 1; mode < 4; mode++)
             {
-                lvl_mode = lvl_ref + mbd->mode_lf_deltas[mode];
+                lvl_mode = lvl_ref + xd->mode_lf_deltas[mode];
                 lvl_mode = (lvl_mode > 0) ? (lvl_mode > 63 ? 63 : lvl_mode) : 0; /* clamp */
 
                 lfi->lvl[seg][ref][mode] = lvl_mode;
@@ -282,7 +303,7 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
 void vp8_loop_filter_frame
 (
     VP8_COMMON *cm,
-    MACROBLOCKD *mbd
+    MACROBLOCKD *xd
 )
 {
     YV12_BUFFER_CONFIG *post = cm->frame_to_show;
@@ -302,7 +323,7 @@ void vp8_loop_filter_frame
     const MODE_INFO *mode_info_context = cm->mi;
 
     /* Initialize the loop filter for this frame. */
-    vp8_loop_filter_frame_init(cm, mbd, cm->filter_level);
+    vp8_loop_filter_frame_init(cm, xd, cm->filter_level);
 
     /* Set up the buffer pointers */
     y_ptr = post->y_buffer;
@@ -315,13 +336,14 @@ void vp8_loop_filter_frame
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+                            mode_info_context->mbmi.mode != I8X8_PRED &&
                             mode_info_context->mbmi.mode != SPLITMV &&
                             mode_info_context->mbmi.mb_skip_coeff);
 
             const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
             const int seg = mode_info_context->mbmi.segment_id;
             const int ref_frame = mode_info_context->mbmi.ref_frame;
-
+            int tx_type = mode_info_context->mbmi.txfm_size;
             filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
 
             if (filter_level)
@@ -335,21 +357,34 @@ void vp8_loop_filter_frame
                     lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
                     if (mb_col > 0)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_v)
+                        vp8_loop_filter_mbv_c
                         (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
                     if (!skip_lf)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
-                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                    {
+                        if(tx_type == TX_8X8)
+                            vp8_loop_filter_bv8x8_c
+                            (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                        else
+                            LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
+                            (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+
+                    }
 
                     /* don't apply across umv border */
                     if (mb_row > 0)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_h)
+                        vp8_loop_filter_mbh_c
                         (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
 
                     if (!skip_lf)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
-                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                    {
+                        if(tx_type == TX_8X8)
+                            vp8_loop_filter_bh8x8_c
+                            (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                        else
+                            LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
+                            (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                    }
                 }
                 else
                 {
@@ -390,7 +425,7 @@ void vp8_loop_filter_frame
 void vp8_loop_filter_frame_yonly
 (
     VP8_COMMON *cm,
-    MACROBLOCKD *mbd,
+    MACROBLOCKD *xd,
     int default_filt_lvl
 )
 {
@@ -415,7 +450,7 @@ void vp8_loop_filter_frame_yonly
 #endif
 
     /* Initialize the loop filter for this frame. */
-    vp8_loop_filter_frame_init( cm, mbd, default_filt_lvl);
+    vp8_loop_filter_frame_init( cm, xd, default_filt_lvl);
 
     /* Set up the buffer pointers */
     y_ptr = post->y_buffer;
@@ -426,12 +461,14 @@ void vp8_loop_filter_frame_yonly
         for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
         {
             int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+                            mode_info_context->mbmi.mode != I8X8_PRED &&
                             mode_info_context->mbmi.mode != SPLITMV &&
                             mode_info_context->mbmi.mb_skip_coeff);
 
             const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
             const int seg = mode_info_context->mbmi.segment_id;
             const int ref_frame = mode_info_context->mbmi.ref_frame;
+            int tx_type = mode_info_context->mbmi.txfm_size;
 
             filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
 
@@ -446,21 +483,33 @@ void vp8_loop_filter_frame_yonly
                     lfi.hev_thr = lfi_n->hev_thr[hev_index];
 
                     if (mb_col > 0)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_v)
+                        vp8_loop_filter_mbv_c
                         (y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
                     if (!skip_lf)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
-                        (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                    {
+                        if(tx_type == TX_8X8)
+                            vp8_loop_filter_bv8x8_c
+                            (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                        else
+                            LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)
+                            (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                    }
 
                     /* don't apply across umv border */
                     if (mb_row > 0)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_mb_h)
+                        vp8_loop_filter_mbh_c
                         (y_ptr, 0, 0, post->y_stride, 0, &lfi);
 
                     if (!skip_lf)
-                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
-                        (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                    {
+                        if(tx_type == TX_8X8)
+                            vp8_loop_filter_bh8x8_c
+                            (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                        else
+                            LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)
+                            (y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                    }
                 }
                 else
                 {
@@ -493,11 +542,134 @@ void vp8_loop_filter_frame_yonly
     }
 
 }
+#if CONFIG_FEATUREUPDATES
+// TODO: Multiple copies of loop filtering code should be pruned and
+// cut down.   This just adds yet another so that I can do an if
+// on segment.
+void vp8_loop_filter_frame_segment(VP8_COMMON *cm, MACROBLOCKD *xd,
+                                   int default_filt_lvl, int segment)
+{
+    YV12_BUFFER_CONFIG *post = cm->frame_to_show;
+
+    unsigned char *y_ptr;
+    int mb_row;
+    int mb_col;
+
+    loop_filter_info_n *lfi_n = &cm->lf_info;
+    loop_filter_info lfi;
+
+    int filter_level;
+    FRAME_TYPE frame_type = cm->frame_type;
+
+    /* Point at base of Mb MODE_INFO list */
+    const MODE_INFO *mode_info_context = cm->mi;
+
+#if 0
+    if(default_filt_lvl == 0) /* no filter applied */
+    return;
+#endif
+
+    /* Initialize the loop filter for this frame. */
+    vp8_loop_filter_frame_init(cm, xd, default_filt_lvl);
+
+    /* Set up the buffer pointers */
+    y_ptr = post->y_buffer;
+
+    /* vp8_filter each macro block */
+    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+    {
+        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+        {
+            int skip_lf = (mode_info_context->mbmi.mode != B_PRED
+                           && mode_info_context->mbmi.mode != I8X8_PRED
+                           && mode_info_context->mbmi.mode != SPLITMV
+                           && mode_info_context->mbmi.mb_skip_coeff);
+
+            const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi
+                    .mode];
+            const int seg = mode_info_context->mbmi.segment_id;
+            const int ref_frame = mode_info_context->mbmi.ref_frame;
+
+            filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+
+            // check if this mb has filtering applied
+            //    and then whether it is the right segment or
+            //    if not whether the passed in segment is 0 and this
+            //    segment has no alt lf
+
+            // TODO: Make this work for when segment 0 has the alt lv enabled
+            if (filter_level
+                && (seg == segment
+                    || (!segfeature_active(xd, seg, SEG_LVL_ALT_LF)
+                        && segment == 0)))
+            {
+                if (cm->filter_type == NORMAL_LOOPFILTER)
+                {
+                    const int hev_index =
+                            lfi_n->hev_thr_lut[frame_type][filter_level];
+                    lfi.mblim = lfi_n->mblim[filter_level];
+                    lfi.blim = lfi_n->blim[filter_level];
+                    lfi.lim = lfi_n->lim[filter_level];
+                    lfi.hev_thr = lfi_n->hev_thr[hev_index];
+
+                    if (mb_col > 0)
+                        vp8_loop_filter_mbv_c(y_ptr, 0, 0, post->y_stride, 0,
+                                              &lfi);
+
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_v)(
+                                y_ptr, 0, 0, post->y_stride, 0, &lfi);
+
+                    /* don't apply across umv border */
+                    if (mb_row > 0)
+                        vp8_loop_filter_mbh_c(y_ptr, 0, 0, post->y_stride, 0,
+                                              &lfi);
+
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, normal_b_h)(
+                                y_ptr, 0, 0, post->y_stride, 0, &lfi);
+                }
+                else
+                {
+                    if (mb_col > 0)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_mb_v)(
+                                y_ptr, post->y_stride,
+                                lfi_n->mblim[filter_level]);
+
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_b_v)(
+                                y_ptr, post->y_stride,
+                                lfi_n->blim[filter_level]);
+
+                    /* don't apply across umv border */
+                    if (mb_row > 0)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_mb_h)(
+                                y_ptr, post->y_stride,
+                                lfi_n->mblim[filter_level]);
+
+                    if (!skip_lf)
+                        LF_INVOKE(&cm->rtcd.loopfilter, simple_b_h)(
+                                y_ptr, post->y_stride,
+                                lfi_n->blim[filter_level]);
+                }
+            }
+
+            y_ptr += 16;
+            mode_info_context++; /* step to next MB */
+
+        }
+
+        y_ptr += post->y_stride * 16 - post->y_width;
+        mode_info_context++; /* Skip border mb */
+    }
+
+}
+#endif
 
 void vp8_loop_filter_partial_frame
 (
     VP8_COMMON *cm,
-    MACROBLOCKD *mbd,
+    MACROBLOCKD *xd,
     int default_filt_lvl
 )
 {
@@ -514,7 +686,7 @@ void vp8_loop_filter_partial_frame
     loop_filter_info lfi;
 
     int filter_level;
-    int alt_flt_enabled = mbd->segmentation_enabled;
+    int alt_flt_enabled = xd->segmentation_enabled;
     FRAME_TYPE frame_type = cm->frame_type;
 
     const MODE_INFO *mode_info_context;
@@ -539,15 +711,15 @@ void vp8_loop_filter_partial_frame
     {
         for (i = 0; i < MAX_MB_SEGMENTS; i++)
         {    /* Abs value */
-            if (mbd->mb_segement_abs_delta == SEGMENT_ABSDATA)
+            if (xd->mb_segment_abs_delta == SEGMENT_ABSDATA)
             {
-                lvl_seg[i] = mbd->segment_feature_data[MB_LVL_ALT_LF][i];
+                lvl_seg[i] = get_segdata( xd, i, SEG_LVL_ALT_LF );
             }
             /* Delta Value */
             else
             {
-                lvl_seg[i] = default_filt_lvl
-                        + mbd->segment_feature_data[MB_LVL_ALT_LF][i];
+                lvl_seg[i] = default_filt_lvl +
+                             get_segdata( xd, i, SEG_LVL_ALT_LF );
                 lvl_seg[i] = (lvl_seg[i] > 0) ?
                         ((lvl_seg[i] > 63) ? 63: lvl_seg[i]) : 0;
             }
@@ -563,6 +735,7 @@ void vp8_loop_filter_partial_frame
         for (mb_col = 0; mb_col < mb_cols; mb_col++)
         {
             int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+                           mode_info_context->mbmi.mode != I8X8_PRED &&
                            mode_info_context->mbmi.mode != SPLITMV &&
                            mode_info_context->mbmi.mb_skip_coeff);
 

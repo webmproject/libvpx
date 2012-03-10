@@ -33,13 +33,20 @@ typedef struct
 
 int rd_cost_mby(MACROBLOCKD *);
 
+extern int mby_is_skippable(MACROBLOCKD *x,int has_y2_block);
+extern int mbuv_is_skippable(MACROBLOCKD *x);
+extern int mb_is_skippable(MACROBLOCKD *x,int has_y2_block);
+extern int mby_is_skippable_8x8(MACROBLOCKD *x);
+extern int mbuv_is_skippable_8x8(MACROBLOCKD *x);
+extern int mb_is_skippable_8x8(MACROBLOCKD *x);
+
 #ifdef ENTROPY_STATS
 void init_context_counters();
 void print_context_counters();
 
 extern _int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+extern _int64 context_counters_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #endif
-
 extern const int *vp8_dct_value_cost_ptr;
 /* TODO: The Token field should be broken out into a separate char array to
  *  improve cache locality, since it's needed for costing when the rest of the

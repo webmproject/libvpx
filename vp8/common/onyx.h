@@ -53,7 +53,6 @@ extern "C"
 
     typedef enum
     {
-        MODE_REALTIME       = 0x0,
         MODE_GOODQUALITY    = 0x1,
         MODE_BESTQUALITY    = 0x2,
         MODE_FIRSTPASS      = 0x3,
@@ -155,15 +154,6 @@ extern "C"
         int best_allowed_q;
         int cq_level;
 
-        // allow internal resizing ( currently disabled in the build !!!!!)
-        int allow_spatial_resampling;
-        int resample_down_water_mark;
-        int resample_up_water_mark;
-
-        // allow internal frame rate alterations
-        int allow_df;
-        int drop_frames_water_mark;
-
         // two pass datarate control
         int two_pass_vbrbias;        // two pass datarate control tweaks
         int two_pass_vbrmin_section;
@@ -175,20 +165,8 @@ extern "C"
         // these parameters aren't to be used in final build don't use!!!
         int play_alternate;
         int alt_freq;
-        int alt_q;
-        int key_q;
-        int gold_q;
 
-
-        int multi_threaded;   // how many threads to run the encoder on
-        int token_partitions; // how many token partitions to create for multi core decoding
         int encode_breakout;  // early breakout encode threshold : for video conf recommend 800
-
-        unsigned int error_resilient_mode; // Bitfield defining the error
-                                   // resiliency features to enable. Can provide
-                                   // decodable frames after losses in previous
-                                   // frames and decodable partitions after
-                                   // losses in the same frame.
 
         int arnr_max_frames;
         int arnr_strength ;

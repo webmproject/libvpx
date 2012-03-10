@@ -13,7 +13,7 @@
 #define common_h 1
 
 #include <assert.h>
-
+#include "vpx_config.h"
 /* Interface header for common constant data structures and lookup tables */
 
 #include "vpx_mem/vpx_mem.h"
@@ -37,6 +37,5 @@
 #define vp8_zero( Dest)  vpx_memset( &Dest, 0, sizeof( Dest));
 
 #define vp8_zero_array( Dest, N)  vpx_memset( Dest, 0, N * sizeof( *Dest));
-
 
 #endif  /* common_h */

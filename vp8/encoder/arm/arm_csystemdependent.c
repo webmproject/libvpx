@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vpx_ports/arm.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/encoder/onyx_int.h"
@@ -56,8 +56,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
         cpi->rtcd.variance.mse16x16              = vp8_mse16x16_armv6;
         /*cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;*/
 
-        /*cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_c;*/
-
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_armv6;
         cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_armv6;
         cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_armv6;
@@ -102,8 +100,6 @@ void vp8_arch_arm_encoder_init(VP8_COMP *cpi)
 
         cpi->rtcd.variance.mse16x16              = vp8_mse16x16_neon;
         /*cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;*/
-
-        cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_neon;
 
         cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_neon;
         cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_neon;

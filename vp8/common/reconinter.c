@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vpx/vpx_integer.h"
 #include "recon.h"
 #include "subpixel.h"
@@ -62,6 +62,28 @@ void vp8_copy_mem16x16_c(
 
 }
 
+void vp8_avg_mem16x16_c(
+    unsigned char *src,
+    int src_stride,
+    unsigned char *dst,
+    int dst_stride)
+{
+    int r;
+
+    for (r = 0; r < 16; r++)
+    {
+        int n;
+
+        for (n = 0; n < 16; n++)
+        {
+            dst[n] = (dst[n] + src[n] + 1) >> 1;
+        }
+
+        src += src_stride;
+        dst += dst_stride;
+    }
+}
+
 void vp8_copy_mem8x8_c(
     unsigned char *src,
     int src_stride,
@@ -90,6 +112,28 @@ void vp8_copy_mem8x8_c(
 
     }
 
+}
+
+void vp8_avg_mem8x8_c(
+    unsigned char *src,
+    int src_stride,
+    unsigned char *dst,
+    int dst_stride)
+{
+    int r;
+
+    for (r = 0; r < 8; r++)
+    {
+        int n;
+
+        for (n = 0; n < 8; n++)
+        {
+            dst[n] = (dst[n] + src[n] + 1) >> 1;
+        }
+
+        src += src_stride;
+        dst += dst_stride;
+    }
 }
 
 void vp8_copy_mem8x4_c(
@@ -136,7 +180,11 @@ void vp8_build_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf)
     if (d->bmi.mv.as_mv.row & 7 || d->bmi.mv.as_mv.col & 7)
     {
         ptr = ptr_base + d->pre + (d->bmi.mv.as_mv.row >> 3) * d->pre_stride + (d->bmi.mv.as_mv.col >> 3);
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+        sppf(ptr, d->pre_stride, (d->bmi.mv.as_mv.col & 7)<<1, (d->bmi.mv.as_mv.row & 7)<<1, pred_ptr, pitch);
+#else
         sppf(ptr, d->pre_stride, d->bmi.mv.as_mv.col & 7, d->bmi.mv.as_mv.row & 7, pred_ptr, pitch);
+#endif
     }
     else
     {
@@ -170,7 +218,11 @@ static void build_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch)
 
     if (d->bmi.mv.as_mv.row & 7 || d->bmi.mv.as_mv.col & 7)
     {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+        x->subpixel_predict8x8(ptr, d->pre_stride, (d->bmi.mv.as_mv.col & 7)<<1, (d->bmi.mv.as_mv.row & 7)<<1, pred_ptr, pitch);
+#else
         x->subpixel_predict8x8(ptr, d->pre_stride, d->bmi.mv.as_mv.col & 7, d->bmi.mv.as_mv.row & 7, pred_ptr, pitch);
+#endif
     }
     else
     {
@@ -189,7 +241,11 @@ static void build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch)
 
     if (d->bmi.mv.as_mv.row & 7 || d->bmi.mv.as_mv.col & 7)
     {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+        x->subpixel_predict8x4(ptr, d->pre_stride, (d->bmi.mv.as_mv.col & 7)<<1, (d->bmi.mv.as_mv.row & 7)<<1, pred_ptr, pitch);
+#else
         x->subpixel_predict8x4(ptr, d->pre_stride, d->bmi.mv.as_mv.col & 7, d->bmi.mv.as_mv.row & 7, pred_ptr, pitch);
+#endif
     }
     else
     {
@@ -205,8 +261,10 @@ void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x)
     unsigned char *upred_ptr = &x->predictor[256];
     unsigned char *vpred_ptr = &x->predictor[320];
 
-    int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
-    int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
+    int omv_row = x->mode_info_context->mbmi.mv.as_mv.row;
+    int omv_col = x->mode_info_context->mbmi.mv.as_mv.col;
+    int mv_row  = omv_row;
+    int mv_col  = omv_col;
     int offset;
     int pre_stride = x->block[16].pre_stride;
 
@@ -231,11 +289,19 @@ void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x)
     uptr = x->pre.u_buffer + offset;
     vptr = x->pre.v_buffer + offset;
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    if ((omv_row | omv_col) & 15)
+    {
+        x->subpixel_predict8x8(uptr, pre_stride, omv_col & 15, omv_row & 15, upred_ptr, 8);
+        x->subpixel_predict8x8(vptr, pre_stride, omv_col & 15, omv_row & 15, vpred_ptr, 8);
+    }
+#else   /* CONFIG_SIXTEENTH_SUBPEL_UV */
     if ((mv_row | mv_col) & 7)
     {
         x->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, upred_ptr, 8);
         x->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, vpred_ptr, 8);
     }
+#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
     else
     {
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, upred_ptr, 8);
@@ -317,7 +383,11 @@ void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *x)
 
     if ((mv_row | mv_col) & 7)
     {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+        x->subpixel_predict16x16(ptr, pre_stride, (mv_col & 7)<<1, (mv_row & 7)<<1, pred_ptr, 16);
+#else
         x->subpixel_predict16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, pred_ptr, 16);
+#endif
     }
     else
     {
@@ -336,30 +406,32 @@ static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
      * filtering. The bottom and right edges use 16 pixels plus 2 pixels
      * left of the central pixel when filtering.
      */
-    if (mv->col < (xd->mb_to_left_edge - (19 << 3)))
+    if (mv->col < (xd->mb_to_left_edge - ((16+INTERP_EXTEND) << 3)))
         mv->col = xd->mb_to_left_edge - (16 << 3);
-    else if (mv->col > xd->mb_to_right_edge + (18 << 3))
+    else if (mv->col > xd->mb_to_right_edge + ((15+INTERP_EXTEND) << 3))
         mv->col = xd->mb_to_right_edge + (16 << 3);
 
-    if (mv->row < (xd->mb_to_top_edge - (19 << 3)))
+    if (mv->row < (xd->mb_to_top_edge - ((16+INTERP_EXTEND) << 3)))
         mv->row = xd->mb_to_top_edge - (16 << 3);
-    else if (mv->row > xd->mb_to_bottom_edge + (18 << 3))
+    else if (mv->row > xd->mb_to_bottom_edge + ((15+INTERP_EXTEND) << 3))
         mv->row = xd->mb_to_bottom_edge + (16 << 3);
 }
 
 /* A version of the above function for chroma block MVs.*/
 static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd)
 {
-    mv->col = (2*mv->col < (xd->mb_to_left_edge - (19 << 3))) ?
+    mv->col = (2*mv->col < (xd->mb_to_left_edge - ((16+INTERP_EXTEND) << 3))) ?
         (xd->mb_to_left_edge - (16 << 3)) >> 1 : mv->col;
-    mv->col = (2*mv->col > xd->mb_to_right_edge + (18 << 3)) ?
+    mv->col = (2*mv->col > xd->mb_to_right_edge + ((15+INTERP_EXTEND) << 3)) ?
         (xd->mb_to_right_edge + (16 << 3)) >> 1 : mv->col;
 
-    mv->row = (2*mv->row < (xd->mb_to_top_edge - (19 << 3))) ?
+    mv->row = (2*mv->row < (xd->mb_to_top_edge - ((16+INTERP_EXTEND) << 3))) ?
         (xd->mb_to_top_edge - (16 << 3)) >> 1 : mv->row;
-    mv->row = (2*mv->row > xd->mb_to_bottom_edge + (18 << 3)) ?
+    mv->row = (2*mv->row > xd->mb_to_bottom_edge + ((15+INTERP_EXTEND) << 3)) ?
         (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
+
+
 
 void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
                                         unsigned char *dst_y,
@@ -372,6 +444,7 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
     unsigned char *ptr;
     unsigned char *uptr, *vptr;
 
+    int_mv _o16x16mv;
     int_mv _16x16mv;
 
     unsigned char *ptr_base = x->pre.y_buffer;
@@ -388,13 +461,18 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
 
     if ( _16x16mv.as_int & 0x00070007)
     {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+        x->subpixel_predict16x16(ptr, pre_stride, (_16x16mv.as_mv.col & 7)<<1, (_16x16mv.as_mv.row & 7)<<1, dst_y, dst_ystride);
+#else
         x->subpixel_predict16x16(ptr, pre_stride, _16x16mv.as_mv.col & 7,  _16x16mv.as_mv.row & 7, dst_y, dst_ystride);
+#endif
     }
     else
     {
         RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, dst_y, dst_ystride);
     }
 
+    _o16x16mv = _16x16mv;
     /* calc uv motion vectors */
     if ( _16x16mv.as_mv.row < 0)
       _16x16mv.as_mv.row -= 1;
@@ -417,15 +495,105 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
     uptr = x->pre.u_buffer + offset;
     vptr = x->pre.v_buffer + offset;
 
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    if ( _o16x16mv.as_int & 0x000f000f)
+    {
+        x->subpixel_predict8x8(uptr, pre_stride, _o16x16mv.as_mv.col & 15,  _o16x16mv.as_mv.row & 15, dst_u, dst_uvstride);
+        x->subpixel_predict8x8(vptr, pre_stride, _o16x16mv.as_mv.col & 15,  _o16x16mv.as_mv.row & 15, dst_v, dst_uvstride);
+    }
+#else  /* CONFIG_SIXTEENTH_SUBPEL_UV */
     if ( _16x16mv.as_int & 0x00070007)
     {
         x->subpixel_predict8x8(uptr, pre_stride, _16x16mv.as_mv.col & 7,  _16x16mv.as_mv.row & 7, dst_u, dst_uvstride);
         x->subpixel_predict8x8(vptr, pre_stride, _16x16mv.as_mv.col & 7,  _16x16mv.as_mv.row & 7, dst_v, dst_uvstride);
     }
+#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
     else
     {
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, dst_u, dst_uvstride);
         RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, dst_v, dst_uvstride);
+    }
+
+}
+
+/*
+ * This function should be called after an initial call to
+ * vp8_build_inter16x16_predictors_mb() or _mby()/_mbuv().
+ * It will run a second sixtap filter on a (different) ref
+ * frame and average the result with the output of the
+ * first sixtap filter. The second reference frame is stored
+ * in x->second_pre (the reference frame index is in
+ * x->mode_info_context->mbmi.second_ref_frame). The second
+ * motion vector is x->mode_info_context->mbmi.second_mv.
+ *
+ * This allows blending prediction from two reference frames
+ * which sometimes leads to better prediction than from a
+ * single reference framer.
+ */
+void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
+                                            unsigned char *dst_y,
+                                            unsigned char *dst_u,
+                                            unsigned char *dst_v,
+                                            int dst_ystride,
+                                            int dst_uvstride)
+{
+    int offset;
+    unsigned char *ptr;
+    unsigned char *uptr, *vptr;
+
+    int mv_row = x->mode_info_context->mbmi.second_mv.as_mv.row;
+    int mv_col = x->mode_info_context->mbmi.second_mv.as_mv.col;
+    int omv_row, omv_col;
+
+    unsigned char *ptr_base = x->second_pre.y_buffer;
+    int pre_stride = x->block[0].pre_stride;
+
+    ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
+
+    if ((mv_row | mv_col) & 7)
+    {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+        x->subpixel_predict_avg16x16(ptr, pre_stride, (mv_col & 7)<<1, (mv_row & 7)<<1, dst_y, dst_ystride);
+#else
+        x->subpixel_predict_avg16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, dst_y, dst_ystride);
+#endif
+    }
+    else
+    {
+        RECON_INVOKE(&x->rtcd->recon, avg16x16)(ptr, pre_stride, dst_y, dst_ystride);
+    }
+
+    /* calc uv motion vectors */
+    omv_row = mv_row;
+    omv_col = mv_col;
+    mv_row = (mv_row + (mv_row > 0)) >> 1;
+    mv_col = (mv_col + (mv_col > 0)) >> 1;
+
+    mv_row &= x->fullpixel_mask;
+    mv_col &= x->fullpixel_mask;
+
+    pre_stride >>= 1;
+    offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
+    uptr = x->second_pre.u_buffer + offset;
+    vptr = x->second_pre.v_buffer + offset;
+
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    if ((omv_row | omv_col) & 15)
+    {
+        x->subpixel_predict_avg8x8(uptr, pre_stride, omv_col & 15, omv_row & 15, dst_u, dst_uvstride);
+        x->subpixel_predict_avg8x8(vptr, pre_stride, omv_col & 15, omv_row & 15, dst_v, dst_uvstride);
+    }
+#else  /* CONFIG_SIXTEENTH_SUBPEL_UV */
+    if ((mv_row | mv_col) & 7)
+    {
+        x->subpixel_predict_avg8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, dst_u, dst_uvstride);
+        x->subpixel_predict_avg8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, dst_v, dst_uvstride);
+    }
+#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
+    else
+    {
+        RECON_INVOKE(&x->rtcd->recon, avg8x8)(uptr, pre_stride, dst_u, dst_uvstride);
+        RECON_INVOKE(&x->rtcd->recon, avg8x8)(vptr, pre_stride, dst_v, dst_uvstride);
     }
 }
 
@@ -439,6 +607,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
         x->block[ 2].bmi = x->mode_info_context->bmi[ 2];
         x->block[ 8].bmi = x->mode_info_context->bmi[ 8];
         x->block[10].bmi = x->mode_info_context->bmi[10];
+
         if (x->mode_info_context->mbmi.need_to_clamp_mvs)
         {
             clamp_mv_to_umv_border(&x->block[ 0].bmi.mv.as_mv, x);
@@ -446,6 +615,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
             clamp_mv_to_umv_border(&x->block[ 8].bmi.mv.as_mv, x);
             clamp_mv_to_umv_border(&x->block[10].bmi.mv.as_mv, x);
         }
+
 
         build_inter_predictors4b(x, &x->block[ 0], 16);
         build_inter_predictors4b(x, &x->block[ 2], 16);
@@ -461,6 +631,7 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
 
             x->block[i+0].bmi = x->mode_info_context->bmi[i+0];
             x->block[i+1].bmi = x->mode_info_context->bmi[i+1];
+
             if (x->mode_info_context->mbmi.need_to_clamp_mvs)
             {
                 clamp_mv_to_umv_border(&x->block[i+0].bmi.mv.as_mv, x);
@@ -483,8 +654,6 @@ static void build_inter4x4_predictors_mb(MACROBLOCKD *x)
     {
         BLOCKD *d0 = &x->block[i];
         BLOCKD *d1 = &x->block[i+1];
-
-        /* Note: uv mvs already clamped in build_4x4uvmvs() */
 
         if (d0->bmi.mv.as_int == d1->bmi.mv.as_int)
             build_inter_predictors2b(x, d0, 8);
@@ -534,6 +703,9 @@ void build_4x4uvmvs(MACROBLOCKD *x)
             if (x->mode_info_context->mbmi.need_to_clamp_mvs)
                 clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.mv.as_mv, x);
 
+            if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+                clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.mv.as_mv, x);
+
             x->block[voffset].bmi.mv.as_mv.row =
                 x->block[uoffset].bmi.mv.as_mv.row ;
             x->block[voffset].bmi.mv.as_mv.col =
@@ -548,6 +720,16 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
     {
         vp8_build_inter16x16_predictors_mb(x, x->predictor, &x->predictor[256],
                                            &x->predictor[320], 16, 8);
+
+        if (x->mode_info_context->mbmi.second_ref_frame)
+        {
+            /* 256 = offset of U plane in Y+U+V buffer;
+             * 320 = offset of V plane in Y+U+V buffer.
+             * (256=16x16, 320=16x16+8x8). */
+            vp8_build_2nd_inter16x16_predictors_mb(x, x->predictor,
+                                                   &x->predictor[256],
+                                                   &x->predictor[320], 16, 8);
+        }
     }
     else
     {
@@ -555,4 +737,3 @@ void vp8_build_inter_predictors_mb(MACROBLOCKD *x)
         build_inter4x4_predictors_mb(x);
     }
 }
-

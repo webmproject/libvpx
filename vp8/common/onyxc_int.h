@@ -32,31 +32,35 @@
 void vp8_initialize_common(void);
 
 #define MINQ 0
-#define MAXQ 127
+
+#define MAXQ 255
+#define QINDEX_BITS 8
+
 #define QINDEX_RANGE (MAXQ + 1)
 
 #define NUM_YV12_BUFFERS 4
 
-#define MAX_PARTITIONS 9
+#define COMP_PRED_CONTEXTS   2
 
 typedef struct frame_contexts
 {
     vp8_prob bmode_prob [VP8_BINTRAMODES-1];
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
+#if CONFIG_UVINTRA
+    vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+#else
     vp8_prob uv_mode_prob [VP8_UV_MODES-1];
+#endif
     vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    vp8_prob coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     MV_CONTEXT mvc[2];
     MV_CONTEXT pre_mvc[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP mvc_hp[2];
+    MV_CONTEXT_HP pre_mvc_hp[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
+#endif
 } FRAME_CONTEXT;
-
-typedef enum
-{
-    ONE_PARTITION  = 0,
-    TWO_PARTITION  = 1,
-    FOUR_PARTITION = 2,
-    EIGHT_PARTITION = 3
-} TOKEN_PARTITION;
 
 typedef enum
 {
@@ -69,6 +73,21 @@ typedef enum
     SIXTAP   = 0,
     BILINEAR = 1
 } INTERPOLATIONFILTERTYPE;
+
+typedef enum
+{
+    SINGLE_PREDICTION_ONLY = 0,
+    COMP_PREDICTION_ONLY   = 1,
+    HYBRID_PREDICTION      = 2,
+    NB_PREDICTION_TYPES    = 3,
+} COMPPREDMODE_TYPE;
+
+/* TODO: allows larger transform */
+typedef enum
+{
+    ONLY_4X4            = 0,
+    ALLOW_8X8           = 1
+} TXFM_MODE;
 
 typedef struct VP8_COMMON_RTCD
 {
@@ -127,6 +146,8 @@ typedef struct VP8Common
     /* profile settings */
     int experimental;
     int mb_no_coeff_skip;
+    TXFM_MODE txfm_mode;
+    COMPPREDMODE_TYPE comp_pred_mode;
     int no_lpf;
     int use_bilinear_mc_filter;
     int full_pixel;
@@ -152,6 +173,9 @@ typedef struct VP8Common
     MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 
 
+    // Persistent mb segment id map used in prediction.
+    unsigned char * last_frame_seg_map;
+
     INTERPOLATIONFILTERTYPE mcomp_filter_type;
     LOOPFILTERTYPE filter_type;
 
@@ -176,23 +200,52 @@ typedef struct VP8Common
     ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
     ENTROPY_CONTEXT_PLANES left_context;  /* (up to) 4 contexts "" */
 
-
     /* keyframe block modes are predicted by their above, left neighbors */
 
     vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
+#if CONFIG_QIMODE
+    vp8_prob kf_ymode_prob[8][VP8_YMODES-1];  /* keyframe "" */
+    int kf_ymode_probs_index;
+    int kf_ymode_probs_update;
+#else
     vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
+#endif
+#if CONFIG_UVINTRA
+    vp8_prob kf_uv_mode_prob[VP8_YMODES] [VP8_UV_MODES-1];
+#else
     vp8_prob kf_uv_mode_prob [VP8_UV_MODES-1];
+#endif
 
+    vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
 
+    vp8_prob prob_intra_coded;
+    vp8_prob prob_last_coded;
+    vp8_prob prob_gf_coded;
+
+    // Context probabilities when using predictive coding of segment id
+    vp8_prob segment_pred_probs[PREDICTION_PROBS];
+    unsigned char temporal_update;
+
+    // Context probabilities for reference frame prediction
+    unsigned char ref_scores[MAX_REF_FRAMES];
+    vp8_prob ref_pred_probs[PREDICTION_PROBS];
+    vp8_prob mod_refprobs[MAX_REF_FRAMES][PREDICTION_PROBS];
+
+    vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
+
+    FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */
 
-    unsigned int current_video_frame;
+    int mv_ref_ct[6][4][2];
+    int mode_context[6][4];
+    int mv_ref_ct_a[6][4][2];
+    int mode_context_a[6][4];
+    int vp8_mode_contexts[6][4];
 
+    unsigned int current_video_frame;
     int near_boffset[3];
     int version;
-
-    TOKEN_PARTITION multi_token_partition;
 
 #ifdef PACKET_TESTING
     VP8_HEADER oh;
@@ -203,9 +256,7 @@ typedef struct VP8Common
 #if CONFIG_RUNTIME_CPU_DETECT
     VP8_COMMON_RTCD rtcd;
 #endif
-#if CONFIG_MULTITHREAD
-    int processor_core_count;
-#endif
+
 #if CONFIG_POSTPROC
     struct postproc_state  postproc_state;
 #endif

@@ -19,7 +19,6 @@ VP8_COMMON_SRCS-yes += common/asm_com_offsets.c
 VP8_COMMON_SRCS-yes += common/blockd.c
 VP8_COMMON_SRCS-yes += common/coefupdateprobs.h
 VP8_COMMON_SRCS-yes += common/debugmodes.c
-VP8_COMMON_SRCS-yes += common/default_coef_probs.h
 VP8_COMMON_SRCS-yes += common/entropy.c
 VP8_COMMON_SRCS-yes += common/entropymode.c
 VP8_COMMON_SRCS-yes += common/entropymv.c
@@ -33,6 +32,7 @@ VP8_COMMON_SRCS-yes += common/alloccommon.h
 VP8_COMMON_SRCS-yes += common/blockd.h
 VP8_COMMON_SRCS-yes += common/common.h
 VP8_COMMON_SRCS-yes += common/common_types.h
+VP8_COMMON_SRCS-yes += common/defaultcoefcounts.h
 VP8_COMMON_SRCS-yes += common/entropy.h
 VP8_COMMON_SRCS-yes += common/entropymode.h
 VP8_COMMON_SRCS-yes += common/entropymv.h
@@ -46,16 +46,19 @@ VP8_COMMON_SRCS-yes += common/loopfilter.h
 VP8_COMMON_SRCS-yes += common/modecont.h
 VP8_COMMON_SRCS-yes += common/mv.h
 VP8_COMMON_SRCS-yes += common/onyxc_int.h
+VP8_COMMON_SRCS-yes += common/pred_common.h
+VP8_COMMON_SRCS-yes += common/pred_common.c
 VP8_COMMON_SRCS-yes += common/quant_common.h
 VP8_COMMON_SRCS-yes += common/recon.h
 VP8_COMMON_SRCS-yes += common/reconinter.h
 VP8_COMMON_SRCS-yes += common/reconintra.h
 VP8_COMMON_SRCS-yes += common/reconintra4x4.h
+VP8_COMMON_SRCS-yes += common/seg_common.h
+VP8_COMMON_SRCS-yes += common/seg_common.c
 VP8_COMMON_SRCS-yes += common/setupintrarecon.h
 VP8_COMMON_SRCS-yes += common/subpixel.h
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.h
 VP8_COMMON_SRCS-yes += common/systemdependent.h
-VP8_COMMON_SRCS-yes += common/threading.h
 VP8_COMMON_SRCS-yes += common/treecoder.h
 VP8_COMMON_SRCS-yes += common/invtrans.c
 VP8_COMMON_SRCS-yes += common/loopfilter.c
@@ -72,6 +75,10 @@ VP8_COMMON_SRCS-yes += common/setupintrarecon.c
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.c
 VP8_COMMON_SRCS-$(CONFIG_POSTPROC_VISUALIZER) += common/textblit.c
 VP8_COMMON_SRCS-yes += common/treecoder.c
+VP8_COMMON_SRCS-yes += common/implicit_segmentation.c
+VP8_COMMON_SRCS-yes += common/predict_rotated.c
+VP8_COMMON_SRCS-yes += common/rotate.h
+VP8_COMMON_SRCS-yes += common/rotate2.h
 
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/idct_x86.h
 VP8_COMMON_SRCS-$(ARCH_X86)$(ARCH_X86_64) += common/x86/subpixel_x86.h
@@ -101,6 +108,11 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/postproc_sse2.asm
 endif
 
 # common (c)
+ifeq ($(CONFIG_CSM),yes)
+VP8_COMMON_SRCS-yes += common/maskingmv.c
+VP8_COMMON_SRCS-$(HAVE_SSE3) += common/x86/mask_sse3.asm
+endif
+
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.h

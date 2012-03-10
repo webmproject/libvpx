@@ -34,7 +34,6 @@ VP8_CX_SRCS-yes += vp8_cx_iface.c
 #INCLUDES += encoder
 
 VP8_CX_SRCS-yes += encoder/asm_enc_offsets.c
-VP8_CX_SRCS-yes += encoder/defaultcoefcounts.h
 VP8_CX_SRCS-yes += encoder/bitstream.c
 VP8_CX_SRCS-yes += encoder/boolhuff.c
 VP8_CX_SRCS-yes += encoder/dct.c
@@ -42,7 +41,6 @@ VP8_CX_SRCS-yes += encoder/encodeframe.c
 VP8_CX_SRCS-yes += encoder/encodeintra.c
 VP8_CX_SRCS-yes += encoder/encodemb.c
 VP8_CX_SRCS-yes += encoder/encodemv.c
-VP8_CX_SRCS-$(CONFIG_MULTITHREAD) += encoder/ethreading.c
 VP8_CX_SRCS-yes += encoder/firstpass.c
 VP8_CX_SRCS-yes += encoder/generic/csystemdependent.c
 VP8_CX_SRCS-yes += encoder/block.h
@@ -58,7 +56,6 @@ VP8_CX_SRCS-yes += encoder/lookahead.h
 VP8_CX_SRCS-yes += encoder/mcomp.h
 VP8_CX_SRCS-yes += encoder/modecosts.h
 VP8_CX_SRCS-yes += encoder/onyx_int.h
-VP8_CX_SRCS-yes += encoder/pickinter.h
 VP8_CX_SRCS-yes += encoder/psnr.h
 VP8_CX_SRCS-yes += encoder/quantize.h
 VP8_CX_SRCS-yes += encoder/ratectrl.h
@@ -69,13 +66,13 @@ VP8_CX_SRCS-yes += encoder/variance.h
 VP8_CX_SRCS-yes += encoder/mcomp.c
 VP8_CX_SRCS-yes += encoder/modecosts.c
 VP8_CX_SRCS-yes += encoder/onyx_if.c
-VP8_CX_SRCS-yes += encoder/pickinter.c
 VP8_CX_SRCS-yes += encoder/picklpf.c
 VP8_CX_SRCS-yes += encoder/psnr.c
 VP8_CX_SRCS-yes += encoder/quantize.c
 VP8_CX_SRCS-yes += encoder/ratectrl.c
 VP8_CX_SRCS-yes += encoder/rdopt.c
 VP8_CX_SRCS-yes += encoder/sad_c.c
+VP8_CX_SRCS-yes += encoder/satd_c.c
 VP8_CX_SRCS-yes += encoder/segmentation.c
 VP8_CX_SRCS-yes += encoder/segmentation.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += encoder/ssim.c
@@ -86,11 +83,10 @@ VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.h
 VP8_CX_SRCS-$(CONFIG_INTERNAL_STATS) += common/postproc.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.c
 VP8_CX_SRCS-yes += encoder/temporal_filter.h
+VP8_CX_SRCS-yes += encoder/find_rotation.c
+VP8_CX_SRCS-yes += encoder/mbgraph.c
+VP8_CX_SRCS-yes += encoder/mbgraph.h
 
-ifeq ($(CONFIG_REALTIME_ONLY),yes)
-VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
-VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.c
-endif
 
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodemb_x86.h
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/dct_x86.h
@@ -122,10 +118,6 @@ VP8_CX_SRCS-$(HAVE_SSE4_1) += encoder/x86/quantize_sse4.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/quantize_mmx.asm
 VP8_CX_SRCS-$(ARCH_X86)$(ARCH_X86_64) += encoder/x86/encodeopt.asm
 VP8_CX_SRCS-$(ARCH_X86_64) += encoder/x86/ssim_opt.asm
-
-ifeq ($(CONFIG_REALTIME_ONLY),yes)
-VP8_CX_SRCS_REMOVE-$(HAVE_SSE2) += encoder/x86/temporal_filter_apply_sse2.asm
-endif
 
 
 VP8_CX_SRCS-yes := $(filter-out $(VP8_CX_SRCS_REMOVE-yes),$(VP8_CX_SRCS-yes))

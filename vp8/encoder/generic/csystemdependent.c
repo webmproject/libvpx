@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vp8/encoder/variance.h"
 #include "vp8/encoder/onyx_int.h"
 
@@ -69,8 +69,8 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.variance.mse16x16              = vp8_mse16x16_c;
     cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;
 
-    cpi->rtcd.variance.get4x4sse_cs          = vp8_get4x4sse_cs_c;
-
+    cpi->rtcd.fdct.short8x8                  = vp8_short_fdct8x8_c;
+    cpi->rtcd.fdct.haar_short2x2             = vp8_short_fhaar2x2_c;
     cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
     cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
     cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
@@ -88,19 +88,21 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     cpi->rtcd.quantize.quantb_pair           = vp8_regular_quantize_b_pair;
     cpi->rtcd.quantize.fastquantb            = vp8_fast_quantize_b_c;
     cpi->rtcd.quantize.fastquantb_pair       = vp8_fast_quantize_b_pair_c;
+    cpi->rtcd.quantize.quantb_8x8            = vp8_regular_quantize_b_8x8;
+    cpi->rtcd.quantize.fastquantb_8x8        = vp8_fast_quantize_b_8x8_c;
+    cpi->rtcd.quantize.quantb_2x2            = vp8_regular_quantize_b_2x2;
+    cpi->rtcd.quantize.fastquantb_2x2        = vp8_fast_quantize_b_2x2_c;
     cpi->rtcd.search.full_search             = vp8_full_search_sad;
     cpi->rtcd.search.refining_search         = vp8_refining_search_sad;
     cpi->rtcd.search.diamond_search          = vp8_diamond_search_sad;
-#if !(CONFIG_REALTIME_ONLY)
     cpi->rtcd.temporal.apply                 = vp8_temporal_filter_apply_c;
-#endif
 #if CONFIG_INTERNAL_STATS
     cpi->rtcd.variance.ssimpf_8x8            = vp8_ssim_parms_8x8_c;
     cpi->rtcd.variance.ssimpf_16x16          = vp8_ssim_parms_16x16_c;
 #endif
 #endif
 
-    // Pure C:
+    cpi->rtcd.variance.satd16x16             = vp8_satd16x16_c;
     vp8_yv12_copy_partial_frame_ptr = vp8_yv12_copy_partial_frame;
 
 #if ARCH_X86 || ARCH_X86_64
@@ -111,12 +113,10 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi)
     vp8_arch_arm_encoder_init(cpi);
 #endif
 
-#if CONFIG_EXTEND_QRANGE
     cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
     cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;
     cpi->rtcd.fdct.fast4x4                   = vp8_short_fdct4x4_c;
     cpi->rtcd.fdct.fast8x4                   = vp8_short_fdct8x4_c;
     cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_c;
-#endif
 
 }

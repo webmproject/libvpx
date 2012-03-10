@@ -31,6 +31,34 @@
 #include "arm/idct_arm.h"
 #endif
 
+
+#ifndef vp8_idct_idct8
+#define vp8_idct_idct8 vp8_short_idct8x8_c
+#endif
+extern prototype_idct(vp8_idct_idct8);
+
+#ifndef vp8_idct_idct8_1
+#define vp8_idct_idct8_1 vp8_short_idct8x8_1_c
+#endif
+extern prototype_idct(vp8_idct_idct8_1);
+
+#ifndef vp8_idct_ihaar2
+#define vp8_idct_ihaar2 vp8_short_ihaar2x2_c
+#endif
+extern prototype_idct(vp8_idct_ihaar2);
+
+#ifndef vp8_idct_ihaar2_1
+#define vp8_idct_ihaar2_1 vp8_short_ihaar2x2_1_c
+#endif
+extern prototype_idct(vp8_idct_ihaar2_1);
+
+#ifndef vp8_idct_idct1_scalar_add_8x8
+#define vp8_idct_idct1_scalar_add_8x8 vp8_dc_only_idct_add_8x8_c
+#endif
+extern prototype_idct_scalar_add(vp8_idct_idct1_scalar_add_8x8);
+
+
+
 #ifndef vp8_idct_idct1
 #define vp8_idct_idct1 vp8_short_idct4x4llm_1_c
 #endif
@@ -69,6 +97,12 @@ typedef struct
 
     vp8_second_order_fn_t iwalsh1;
     vp8_second_order_fn_t iwalsh16;
+
+    vp8_idct_fn_t            idct8;
+    vp8_idct_fn_t            idct8_1;
+    vp8_idct_scalar_add_fn_t idct1_scalar_add_8x8;
+    vp8_idct_fn_t ihaar2;
+    vp8_idct_fn_t ihaar2_1;
 } vp8_idct_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

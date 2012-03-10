@@ -21,8 +21,6 @@
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/g_common.h"
-#include "vp8/common/threading.h"
-#include "decoderthreading.h"
 #include <stdio.h>
 #include <assert.h>
 
@@ -31,9 +29,6 @@
 #include "vp8/common/systemdependent.h"
 #include "vpx_ports/vpx_timer.h"
 #include "detokenize.h"
-#if CONFIG_ERROR_CONCEALMENT
-#include "error_concealment.h"
-#endif
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
 #endif
@@ -43,6 +38,79 @@ extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 static int get_free_fb (VP8_COMMON *cm);
 static void ref_cnt_fb (int *buf, int *idx, int new_idx);
 
+#if CONFIG_DEBUG
+void vp8_recon_write_yuv_frame(char *name, YV12_BUFFER_CONFIG *s)
+{
+    FILE *yuv_file = fopen((char *)name, "ab");
+    unsigned char *src = s->y_buffer;
+    int h = s->y_height;
+
+    do
+    {
+        fwrite(src, s->y_width, 1,  yuv_file);
+        src += s->y_stride;
+    }
+    while (--h);
+
+    src = s->u_buffer;
+    h = s->uv_height;
+
+    do
+    {
+        fwrite(src, s->uv_width, 1,  yuv_file);
+        src += s->uv_stride;
+    }
+    while (--h);
+
+    src = s->v_buffer;
+    h = s->uv_height;
+
+    do
+    {
+        fwrite(src, s->uv_width, 1, yuv_file);
+        src += s->uv_stride;
+    }
+    while (--h);
+
+    fclose(yuv_file);
+}
+#endif
+//#define WRITE_RECON_BUFFER 1
+#if WRITE_RECON_BUFFER
+void write_dx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
+{
+
+    // write the frame
+    FILE *yframe;
+    int i;
+    char filename[255];
+
+    sprintf(filename, "dx\\y%04d.raw", this_frame);
+    yframe = fopen(filename, "wb");
+
+    for (i = 0; i < frame->y_height; i++)
+        fwrite(frame->y_buffer + i * frame->y_stride,
+            frame->y_width, 1, yframe);
+
+    fclose(yframe);
+    sprintf(filename, "dx\\u%04d.raw", this_frame);
+    yframe = fopen(filename, "wb");
+
+    for (i = 0; i < frame->uv_height; i++)
+        fwrite(frame->u_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, yframe);
+
+    fclose(yframe);
+    sprintf(filename, "dx\\v%04d.raw", this_frame);
+    yframe = fopen(filename, "wb");
+
+    for (i = 0; i < frame->uv_height; i++)
+        fwrite(frame->v_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, yframe);
+
+    fclose(yframe);
+}
+#endif
 
 void vp8dx_initialize()
 {
@@ -51,11 +119,11 @@ void vp8dx_initialize()
     if (!init_done)
     {
         vp8_initialize_common();
+        vp8_init_quant_tables();
         vp8_scale_machine_specific_config();
         init_done = 1;
     }
 }
-
 
 VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 {
@@ -82,11 +150,6 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     pbi->common.current_video_frame = 0;
     pbi->ready_for_new_data = 1;
 
-#if CONFIG_MULTITHREAD
-    pbi->max_threads = oxcf->max_threads;
-    vp8_decoder_create_threads(pbi);
-#endif
-
     /* vp8cx_init_de_quantizer() is first called here. Add check in frame_init_dequantizer() to avoid
      *  unnecessary calling of vp8cx_init_de_quantizer() for every frame.
      */
@@ -96,29 +159,10 @@ VP8D_PTR vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 
     pbi->common.error.setjmp = 0;
 
-#if CONFIG_ERROR_CONCEALMENT
-    pbi->ec_enabled = oxcf->error_concealment;
-#else
-    pbi->ec_enabled = 0;
-#endif
-    /* Error concealment is activated after a key frame has been
-     * decoded without errors when error concealment is enabled.
-     */
-    pbi->ec_active = 0;
-
     pbi->decoded_key_frame = 0;
-
-    pbi->input_partition = oxcf->input_partition;
-
-    /* Independent partitions is activated when a frame updates the
-     * token probability table to have equal probabilities over the
-     * PREV_COEF context.
-     */
-    pbi->independent_partitions = 0;
 
     return (VP8D_PTR) pbi;
 }
-
 
 void vp8dx_remove_decompressor(VP8D_PTR ptr)
 {
@@ -127,14 +171,10 @@ void vp8dx_remove_decompressor(VP8D_PTR ptr)
     if (!pbi)
         return;
 
-#if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd)
-        vp8mt_de_alloc_temp_buffers(pbi, pbi->common.mb_rows);
-    vp8_decoder_remove_threads(pbi);
-#endif
-#if CONFIG_ERROR_CONCEALMENT
-    vp8_de_alloc_overlap_lists(pbi);
-#endif
+    // Delete sementation map
+    if (pbi->common.last_frame_seg_map != 0)
+        vpx_free(pbi->common.last_frame_seg_map);
+
     vp8_remove_common(&pbi->common);
     vpx_free(pbi->mbc);
     vpx_free(pbi);
@@ -300,6 +340,22 @@ static int swap_frame_buffers (VP8_COMMON *cm)
     return err;
 }
 
+/*
+static void vp8_print_yuv_rec_mb(VP8_COMMON *cm, int mb_row, int mb_col)
+{
+  YV12_BUFFER_CONFIG *s = cm->frame_to_show;
+  unsigned char *src = s->y_buffer;
+  int i, j;
+
+  printf("After loop filter\n");
+  for (i=0;i<16;i++) {
+    for (j=0;j<16;j++)
+      printf("%3d ", src[(mb_row*16+i)*s->y_stride + mb_col*16+j]);
+    printf("\n");
+  }
+}
+*/
+
 int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsigned char *source, int64_t time_stamp)
 {
 #if HAVE_ARMV7
@@ -319,114 +375,54 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->common.error.error_code = VPX_CODEC_OK;
 
-    if (pbi->input_partition && !(source == NULL && size == 0))
+    pbi->Source = source;
+    pbi->source_sz = size;
+
+    if (pbi->source_sz == 0)
     {
-        /* Store a pointer to this partition and return. We haven't
-         * received the complete frame yet, so we will wait with decoding.
-         */
-        assert(pbi->num_partitions < MAX_PARTITIONS);
-        pbi->partitions[pbi->num_partitions] = source;
-        pbi->partition_sizes[pbi->num_partitions] = size;
-        pbi->source_sz += size;
-        pbi->num_partitions++;
-        if (pbi->num_partitions > (1 << EIGHT_PARTITION) + 1)
-        {
-            pbi->common.error.error_code = VPX_CODEC_UNSUP_BITSTREAM;
-            pbi->common.error.setjmp = 0;
-            pbi->num_partitions = 0;
-            return -1;
-        }
-        return 0;
+       /* This is used to signal that we are missing frames.
+        * We do not know if the missing frame(s) was supposed to update
+        * any of the reference buffers, but we act conservative and
+        * mark only the last buffer as corrupted.
+        */
+        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
     }
-    else
+
+#if HAVE_ARMV7
+#if CONFIG_RUNTIME_CPU_DETECT
+    if (cm->rtcd.flags & HAS_NEON)
+#endif
     {
-        if (!pbi->input_partition)
-        {
-            pbi->Source = source;
-            pbi->source_sz = size;
-        }
-        else
-        {
-            assert(pbi->common.multi_token_partition <= EIGHT_PARTITION);
-            if (pbi->num_partitions == 0)
-            {
-                pbi->num_partitions = 1;
-                pbi->partitions[0] = NULL;
-                pbi->partition_sizes[0] = 0;
-            }
-            while (pbi->num_partitions < (1 << pbi->common.multi_token_partition) + 1)
-            {
-                // Reset all missing partitions
-                pbi->partitions[pbi->num_partitions] =
-                    pbi->partitions[pbi->num_partitions - 1] +
-                    pbi->partition_sizes[pbi->num_partitions - 1];
-                pbi->partition_sizes[pbi->num_partitions] = 0;
-                pbi->num_partitions++;
-            }
-        }
+        vp8_push_neon(dx_store_reg);
+    }
+#endif
 
-        if (pbi->source_sz == 0)
-        {
-           /* This is used to signal that we are missing frames.
-            * We do not know if the missing frame(s) was supposed to update
-            * any of the reference buffers, but we act conservative and
-            * mark only the last buffer as corrupted.
-            */
-            cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
+    cm->new_fb_idx = get_free_fb (cm);
 
-            /* If error concealment is disabled we won't signal missing frames to
-             * the decoder.
-             */
-            if (!pbi->ec_active)
-            {
-                /* Signal that we have no frame to show. */
-                cm->show_frame = 0;
-
-                pbi->num_partitions = 0;
-
-                /* Nothing more to do. */
-                return 0;
-            }
-        }
-
+    if (setjmp(pbi->common.error.jmp))
+    {
 #if HAVE_ARMV7
 #if CONFIG_RUNTIME_CPU_DETECT
         if (cm->rtcd.flags & HAS_NEON)
 #endif
         {
-            vp8_push_neon(dx_store_reg);
+            vp8_pop_neon(dx_store_reg);
         }
 #endif
+        pbi->common.error.setjmp = 0;
 
-        cm->new_fb_idx = get_free_fb (cm);
+       /* We do not know if the missing frame(s) was supposed to update
+        * any of the reference buffers, but we act conservative and
+        * mark only the last buffer as corrupted.
+        */
+        cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
 
-        if (setjmp(pbi->common.error.jmp))
-        {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
-#endif
-            {
-                vp8_pop_neon(dx_store_reg);
-            }
-#endif
-            pbi->common.error.setjmp = 0;
-
-            pbi->num_partitions = 0;
-
-           /* We do not know if the missing frame(s) was supposed to update
-            * any of the reference buffers, but we act conservative and
-            * mark only the last buffer as corrupted.
-            */
-            cm->yv12_fb[cm->lst_fb_idx].corrupted = 1;
-
-            if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
-              cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
-            return -1;
-        }
-
-        pbi->common.error.setjmp = 1;
+        if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
+          cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
+        return -1;
     }
+
+    pbi->common.error.setjmp = 1;
 
     retcode = vp8_decode_frame(pbi);
 
@@ -442,14 +438,11 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #endif
         pbi->common.error.error_code = VPX_CODEC_ERROR;
         pbi->common.error.setjmp = 0;
-        pbi->num_partitions = 0;
         if (cm->fb_idx_ref_cnt[cm->new_fb_idx] > 0)
           cm->fb_idx_ref_cnt[cm->new_fb_idx]--;
         return retcode;
     }
 
-#if CONFIG_MULTITHREAD
-    if (pbi->b_multithreaded_rd && cm->multi_token_partition != ONE_PARTITION)
     {
         if (swap_frame_buffers (cm))
         {
@@ -463,27 +456,17 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 #endif
             pbi->common.error.error_code = VPX_CODEC_ERROR;
             pbi->common.error.setjmp = 0;
-            pbi->num_partitions = 0;
             return -1;
         }
-    } else
+
+#if WRITE_RECON_BUFFER
+        if(cm->show_frame)
+            write_dx_frame_to_file(cm->frame_to_show,
+                cm->current_video_frame);
+        else
+            write_dx_frame_to_file(cm->frame_to_show,
+                cm->current_video_frame+1000);
 #endif
-    {
-        if (swap_frame_buffers (cm))
-        {
-#if HAVE_ARMV7
-#if CONFIG_RUNTIME_CPU_DETECT
-            if (cm->rtcd.flags & HAS_NEON)
-#endif
-            {
-                vp8_pop_neon(dx_store_reg);
-            }
-#endif
-            pbi->common.error.error_code = VPX_CODEC_ERROR;
-            pbi->common.error.setjmp = 0;
-            pbi->num_partitions = 0;
-            return -1;
-        }
 
         if(cm->filter_level)
         {
@@ -493,30 +476,22 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
         vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
     }
 
+#if CONFIG_DEBUG
+    vp8_recon_write_yuv_frame("recon.yuv", cm->frame_to_show);
+#endif
 
     vp8_clear_system_state();
 
-#if CONFIG_ERROR_CONCEALMENT
-    /* swap the mode infos to storage for future error concealment */
-    if (pbi->ec_enabled && pbi->common.prev_mi)
+    if(cm->show_frame)
     {
-        const MODE_INFO* tmp = pbi->common.prev_mi;
-        int row, col;
-        pbi->common.prev_mi = pbi->common.mi;
-        pbi->common.mi = tmp;
-
-        /* Propagate the segment_ids to the next frame */
-        for (row = 0; row < pbi->common.mb_rows; ++row)
-        {
-            for (col = 0; col < pbi->common.mb_cols; ++col)
-            {
-                const int i = row*pbi->common.mode_info_stride + col;
-                pbi->common.mi[i].mbmi.segment_id =
-                        pbi->common.prev_mi[i].mbmi.segment_id;
-            }
-        }
+        vpx_memcpy(cm->prev_mip, cm->mip,
+            (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
     }
-#endif
+    else
+    {
+        vpx_memset(cm->prev_mip, 0,
+            (cm->mb_cols + 1) * (cm->mb_rows + 1)* sizeof(MODE_INFO));
+    }
 
     /*vp8_print_modes_and_motion_vectors( cm->mi, cm->mb_rows,cm->mb_cols, cm->current_video_frame);*/
 
@@ -525,7 +500,6 @@ int vp8dx_receive_compressed_data(VP8D_PTR ptr, unsigned long size, const unsign
 
     pbi->ready_for_new_data = 0;
     pbi->last_time_stamp = time_stamp;
-    pbi->num_partitions = 0;
     pbi->source_sz = 0;
 
 #if 0

@@ -363,8 +363,13 @@ unsigned int vp8_variance_halfpixvar16x16_h_c(
     int  recon_stride,
     unsigned int *sse)
 {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 0,
+                                         ref_ptr, recon_stride, sse);
+#else
     return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 4, 0,
                                          ref_ptr, recon_stride, sse);
+#endif
 }
 
 
@@ -375,8 +380,13 @@ unsigned int vp8_variance_halfpixvar16x16_v_c(
     int  recon_stride,
     unsigned int *sse)
 {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 0, 8,
+                                         ref_ptr, recon_stride, sse);
+#else
     return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 0, 4,
                                          ref_ptr, recon_stride, sse);
+#endif
 }
 
 
@@ -387,8 +397,13 @@ unsigned int vp8_variance_halfpixvar16x16_hv_c(
     int  recon_stride,
     unsigned int *sse)
 {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+    return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 8, 8,
+                                         ref_ptr, recon_stride, sse);
+#else
     return vp8_sub_pixel_variance16x16_c(src_ptr, source_stride, 4, 4,
                                          ref_ptr, recon_stride, sse);
+#endif
 }
 
 

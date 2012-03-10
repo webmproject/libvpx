@@ -32,6 +32,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+#include "vpx_config.h"
+#include "vpx_version.h"
 #include "vpx/vp8cx.h"
 #include "vpx_ports/mem_ops.h"
 #include "vpx_ports/vpx_timer.h"
@@ -75,6 +77,9 @@ static const struct codec_item
     unsigned int             fourcc;
 } codecs[] =
 {
+#if CONFIG_EXPERIMENTAL && CONFIG_VP8_ENCODER
+    {"vp8x",  &vpx_codec_vp8x_cx_algo, 0x78385056},
+#endif
 #if CONFIG_VP8_ENCODER
     {"vp8",  &vpx_codec_vp8_cx_algo, 0x30385056},
 #endif
@@ -623,18 +628,6 @@ write_webm_seek_info(EbmlGlobal *ebml)
         //segment info
         EbmlLoc startInfo;
         uint64_t frame_time;
-        char version_string[64];
-
-        /* Assemble version string */
-        if(ebml->debug)
-            strcpy(version_string, "vpxenc");
-        else
-        {
-            strcpy(version_string, "vpxenc ");
-            strncat(version_string,
-                    vpx_codec_version_str(),
-                    sizeof(version_string) - 1 - strlen(version_string));
-        }
 
         frame_time = (uint64_t)1000 * ebml->framerate.den
                      / ebml->framerate.num;
@@ -643,8 +636,10 @@ write_webm_seek_info(EbmlGlobal *ebml)
         Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
         Ebml_SerializeFloat(ebml, Segment_Duration,
                             ebml->last_pts_ms + frame_time);
-        Ebml_SerializeString(ebml, 0x4D80, version_string);
-        Ebml_SerializeString(ebml, 0x5741, version_string);
+        Ebml_SerializeString(ebml, 0x4D80,
+            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
+        Ebml_SerializeString(ebml, 0x5741,
+            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
         Ebml_EndSubElement(ebml, &startInfo);
     }
 }
@@ -893,7 +888,7 @@ static unsigned int murmur ( const void * key, int len, unsigned int seed )
 }
 
 #include "math.h"
-
+#define MAX_PSNR 100
 static double vp8_mse2psnr(double Samples, double Peak, double Mse)
 {
     double psnr;
@@ -901,10 +896,10 @@ static double vp8_mse2psnr(double Samples, double Peak, double Mse)
     if ((double)Mse > 0.0)
         psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
     else
-        psnr = 60;      // Limit to prevent / 0
+        psnr = MAX_PSNR;      // Limit to prevent / 0
 
-    if (psnr > 60)
-        psnr = 60;
+    if (psnr > MAX_PSNR)
+        psnr = MAX_PSNR;
 
     return psnr;
 }
@@ -1701,7 +1696,11 @@ int main(int argc, const char **argv_)
     /* Handle codec specific options */
 #if CONFIG_VP8_ENCODER
 
-    if (codec->iface == &vpx_codec_vp8_cx_algo)
+    if (codec->iface == &vpx_codec_vp8_cx_algo
+#if CONFIG_EXPERIMENTAL
+        || codec->iface == &vpx_codec_vp8x_cx_algo
+#endif
+        )
     {
         ctrl_args = vp8_args;
         ctrl_args_map = vp8_arg_ctrl_map;

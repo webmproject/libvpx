@@ -16,6 +16,7 @@
 #include "blockd.h"
 #include "modecont.h"
 #include "treecoder.h"
+#include "onyxc_int.h"
 
 
 static void mv_bias(int refmb_ref_frame_sign_bias, int refframe, int_mv *mvp, const int *ref_frame_sign_bias)
@@ -75,13 +76,14 @@ void vp8_find_near_mvs
 (
     MACROBLOCKD *xd,
     const MODE_INFO *here,
+    const MODE_INFO *lfhere,
     int_mv *nearest, int_mv *nearby, int_mv *best,
     int near_mv_ref_cts[4],
     int refframe,
     int *ref_frame_sign_bias
 );
 
-vp8_prob *vp8_mv_ref_probs(
+vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
     vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
 );
 
@@ -125,8 +127,6 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
         --cur_mb;
         switch (cur_mb->mbmi.mode)
         {
-            case B_PRED:
-              return (cur_mb->bmi + b + 3)->as_mode;
             case DC_PRED:
                 return B_DC_PRED;
             case V_PRED:
@@ -135,15 +135,18 @@ static B_PREDICTION_MODE left_block_mode(const MODE_INFO *cur_mb, int b)
                 return B_HE_PRED;
             case TM_PRED:
                 return B_TM_PRED;
+            case I8X8_PRED:
+            case B_PRED:
+              return (cur_mb->bmi + b + 3)->as_mode.first;
             default:
                 return B_DC_PRED;
         }
     }
-
-    return (cur_mb->bmi + b - 1)->as_mode;
+    return (cur_mb->bmi + b - 1)->as_mode.first;
 }
 
-static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi_stride)
+static B_PREDICTION_MODE above_block_mode(const MODE_INFO
+                                          *cur_mb, int b, int mi_stride)
 {
     if (!(b >> 2))
     {
@@ -152,8 +155,6 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi
 
         switch (cur_mb->mbmi.mode)
         {
-            case B_PRED:
-              return (cur_mb->bmi + b + 12)->as_mode;
             case DC_PRED:
                 return B_DC_PRED;
             case V_PRED:
@@ -162,12 +163,15 @@ static B_PREDICTION_MODE above_block_mode(const MODE_INFO *cur_mb, int b, int mi
                 return B_HE_PRED;
             case TM_PRED:
                 return B_TM_PRED;
+            case I8X8_PRED:
+            case B_PRED:
+              return (cur_mb->bmi + b + 12)->as_mode.first;
             default:
                 return B_DC_PRED;
         }
     }
 
-    return (cur_mb->bmi + b - 4)->as_mode;
+    return (cur_mb->bmi + b - 4)->as_mode.first;
 }
 
 #endif

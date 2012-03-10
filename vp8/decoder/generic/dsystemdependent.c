@@ -9,7 +9,7 @@
  */
 
 
-#include "vpx_config.h"
+#include "vpx_ports/config.h"
 #include "vp8/decoder/dequantize.h"
 #include "vp8/decoder/onyxd_int.h"
 
@@ -21,6 +21,12 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     /* Pure C: */
 #if CONFIG_RUNTIME_CPU_DETECT
     pbi->mb.rtcd                     = &pbi->common.rtcd;
+    pbi->dequant.block_2x2           = vp8_dequantize_b_2x2_c;
+    pbi->dequant.idct_add_8x8        = vp8_dequant_idct_add_8x8_c;
+    pbi->dequant.dc_idct_add_8x8     = vp8_dequant_dc_idct_add_8x8_c;
+    pbi->dequant.dc_idct_add_y_block_8x8 = vp8_dequant_dc_idct_add_y_block_8x8_c;
+    pbi->dequant.idct_add_y_block_8x8 = vp8_dequant_idct_add_y_block_8x8_c;
+    pbi->dequant.idct_add_uv_block_8x8 = vp8_dequant_idct_add_uv_block_8x8_c;
     pbi->dequant.block               = vp8_dequantize_b_c;
     pbi->dequant.idct_add            = vp8_dequant_idct_add_c;
     pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_c;
@@ -38,11 +44,9 @@ void vp8_dmachine_specific_config(VP8D_COMP *pbi)
     vp8_arch_arm_decode_init(pbi);
 #endif
 
-#if CONFIG_EXTEND_QRANGE
     pbi->dequant.idct_add            = vp8_dequant_idct_add_c;
     pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_c;
     pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_c;
     pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_c;
     pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_c;
-#endif
 }
