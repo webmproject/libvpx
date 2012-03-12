@@ -32,6 +32,7 @@ VP8_COMMON_SRCS-yes += common/alloccommon.h
 VP8_COMMON_SRCS-yes += common/blockd.h
 VP8_COMMON_SRCS-yes += common/common.h
 VP8_COMMON_SRCS-yes += common/common_types.h
+VP8_COMMON_SRCS-yes += common/defaultcoefcounts.h
 VP8_COMMON_SRCS-yes += common/entropy.h
 VP8_COMMON_SRCS-yes += common/entropymode.h
 VP8_COMMON_SRCS-yes += common/entropymv.h
