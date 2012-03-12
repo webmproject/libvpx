@@ -12,7 +12,7 @@
 #include "limits.h"
 #include "block.h"
 #include "onyx_int.h"
-#include "variance.h"
+#include "vp8/common/variance.h"
 #include "encodeintra.h"
 #include "vp8/common/setupintrarecon.h"
 #include "mcomp.h"

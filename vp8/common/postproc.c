@@ -17,7 +17,7 @@
 #include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
 #include "systemdependent.h"
-#include "../encoder/variance.h"
+#include "variance.h"
 
 #include <limits.h>
 #include <math.h>

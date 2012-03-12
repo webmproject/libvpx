@@ -10,7 +10,7 @@
 
 
 #include "variance.h"
-#include "vp8/common/filter.h"
+#include "filter.h"
 
 
 unsigned int vp8_get_mb_ss_c

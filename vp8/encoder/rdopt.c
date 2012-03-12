@@ -28,7 +28,7 @@
 #include "vp8/common/quant_common.h"
 #include "encodemb.h"
 #include "quantize.h"
-#include "variance.h"
+#include "vp8/common/variance.h"
 #include "mcomp.h"
 #include "rdopt.h"
 #include "vpx_mem/vpx_mem.h"
