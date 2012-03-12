@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//YDI\u003d",
+        "filename": "vp8/encoder/ratectrl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-12T22:11:07Z",
+      "side": 1,
+      "message": "why add .5?  Rounding should be 1 \u003c\u003c (BPER_MB_NORMBITS -1 )",
+      "revId": "e92471947aa83277bf024ea1cd4cf51b48affb98",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
