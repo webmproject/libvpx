@@ -541,12 +541,24 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
     unsigned char *ptr;
     unsigned char *uptr, *vptr;
 
-    int mv_row = x->mode_info_context->mbmi.second_mv.as_mv.row;
-    int mv_col = x->mode_info_context->mbmi.second_mv.as_mv.col;
+    int_mv _16x16mv;
+    int mv_row;
+    int mv_col;
+
     int omv_row, omv_col;
 
     unsigned char *ptr_base = x->second_pre.y_buffer;
     int pre_stride = x->block[0].pre_stride;
+
+    _16x16mv.as_int = x->mode_info_context->mbmi.second_mv.as_int;
+
+    if (x->mode_info_context->mbmi.need_to_clamp_secondmv)
+    {
+        clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
+    }
+
+    mv_row = _16x16mv.as_mv.row;
+    mv_col = _16x16mv.as_mv.col;
 
     ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
 
