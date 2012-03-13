@@ -656,6 +656,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     mb_to_top_edge -= LEFT_TOP_MARGIN;
     mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
     mbmi->need_to_clamp_mvs = 0;
+    mbmi->need_to_clamp_secondmv = 0;
     mbmi->second_ref_frame = 0;
     /* Distance of Mb to the various image edges.
      * These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
@@ -894,7 +895,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
                     mbmi->second_mv.as_mv.row += best_mv.as_mv.row;
                     mbmi->second_mv.as_mv.col += best_mv.as_mv.col;
-                    mbmi->need_to_clamp_mvs |= vp8_check_mv_bounds(&mbmi->second_mv,
+                    mbmi->need_to_clamp_secondmv = vp8_check_mv_bounds(&mbmi->second_mv,
                                                                    mb_to_left_edge,
                                                                    mb_to_right_edge,
                                                                    mb_to_top_edge,
