@@ -1179,6 +1179,13 @@ int vp8cx_encode_inter_macroblock
     else
         x->encode_breakout = cpi->oxcf.encode_breakout;
 
+#if CONFIG_TEMPORAL_DENOISING
+    // Reset the best sse mode/mv for each macroblock.
+    x->e_mbd.best_sse_inter_mode = 0;
+    x->e_mbd.best_sse_mv.as_int = 0;
+    x->e_mbd.need_to_clamp_best_mvs = 0;
+#endif
+
     if (cpi->sf.RD)
     {
         int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;

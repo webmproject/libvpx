@@ -47,6 +47,7 @@ Advanced options:
   ${toggle_small}                 favor smaller size over speed
   ${toggle_postproc_visualizer}   macro block / block level visualizers
   ${toggle_multi_res_encoding}    enable multiple-resolution encoding
+  ${toggle_temporal_denoising}    enable temporal denoising and disable the spatial denoiser
 
 Codecs:
   Codecs can be selectively enabled or disabled individually, or by family:
@@ -165,6 +166,7 @@ enable md5
 enable spatial_resampling
 enable multithread
 enable os_support
+enable temporal_denoising
 
 [ -d ${source_path}/../include ] && enable alt_tree_layout
 for d in vp8; do
@@ -263,6 +265,7 @@ CONFIG_LIST="
     os_support
     unit_tests
     multi_res_encoding
+    temporal_denoising
 "
 CMDLINE_SELECT="
     extra_warnings
@@ -307,6 +310,7 @@ CMDLINE_SELECT="
     postproc_visualizer
     unit_tests
     multi_res_encoding
+    temporal_denoising
 "
 
 process_cmdline() {

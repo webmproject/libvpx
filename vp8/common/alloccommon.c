@@ -37,7 +37,6 @@ static void update_mode_info_border(MODE_INFO *mi, int rows, int cols)
 void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
 {
     int i;
-
     for (i = 0; i < NUM_YV12_BUFFERS; i++)
         vp8_yv12_de_alloc_frame_buffer(&oci->yv12_fb[i]);
 
