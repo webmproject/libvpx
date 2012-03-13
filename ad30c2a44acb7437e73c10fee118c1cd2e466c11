@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//W18\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000883
+      },
+      "writtenOn": "2012-03-13T21:22:33Z",
+      "side": 1,
+      "message": "inline will cause build problems for vs9 may want to use __inline",
+      "revId": "ad30c2a44acb7437e73c10fee118c1cd2e466c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
