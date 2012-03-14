@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//VOA\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-14T23:04:27Z",
+      "side": 1,
+      "message": "Still might want to check the return and skip the block if the command fails.",
+      "revId": "bfa94102a0d21b162e9233d07529cd9f11ba55a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//VOI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-14T23:04:27Z",
+      "side": 1,
+      "message": "long line",
+      "revId": "bfa94102a0d21b162e9233d07529cd9f11ba55a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//VOE\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 646,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-14T23:04:27Z",
+      "side": 1,
+      "message": "long line",
+      "revId": "bfa94102a0d21b162e9233d07529cd9f11ba55a7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
