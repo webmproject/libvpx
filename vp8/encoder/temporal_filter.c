@@ -525,7 +525,8 @@ void vp8_temporal_filter_prepare_c
     {
         int which_buffer =  start_frame - frame;
         struct lookahead_entry* buf = vp8_lookahead_peek(cpi->lookahead,
-                                                         which_buffer);
+                                                         which_buffer,
+                                                         PEEK_FORWARD);
         cpi->frames[frames_to_blur-1-frame] = &buf->img;
     }
 

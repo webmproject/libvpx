@@ -73,6 +73,9 @@ vp8_lookahead_init(unsigned int width,
     else if(depth > MAX_LAG_BUFFERS)
         depth = MAX_LAG_BUFFERS;
 
+    /* Keep last frame in lookahead buffer by increasing depth by 1.*/
+    depth += 1;
+
     /* Align the buffer dimensions */
     width = (width + 15) & ~15;
     height = (height + 15) & ~15;
@@ -110,7 +113,7 @@ vp8_lookahead_push(struct lookahead_ctx *ctx,
     int mb_rows = (src->y_height + 15) >> 4;
     int mb_cols = (src->y_width + 15) >> 4;
 
-    if(ctx->sz + 1 > ctx->max_sz)
+    if(ctx->sz + 2 > ctx->max_sz)
         return 1;
     ctx->sz++;
     buf = pop(ctx, &ctx->write_idx);
@@ -177,7 +180,7 @@ vp8_lookahead_pop(struct lookahead_ctx *ctx,
 {
     struct lookahead_entry* buf = NULL;
 
-    if(ctx->sz && (drain || ctx->sz == ctx->max_sz))
+    if(ctx->sz && (drain || ctx->sz == ctx->max_sz - 1))
     {
         buf = pop(ctx, &ctx->read_idx);
         ctx->sz--;
@@ -188,18 +191,33 @@ vp8_lookahead_pop(struct lookahead_ctx *ctx,
 
 struct lookahead_entry*
 vp8_lookahead_peek(struct lookahead_ctx *ctx,
-                   unsigned int          index)
+                   unsigned int          index,
+                   int                   direction)
 {
     struct lookahead_entry* buf = NULL;
 
-    assert(index < ctx->max_sz);
-    if(index < ctx->sz)
+    if (direction == PEEK_FORWARD)
     {
-        index += ctx->read_idx;
-        if(index >= ctx->max_sz)
-            index -= ctx->max_sz;
+        assert(index < ctx->max_sz - 1);
+        if(index < ctx->sz)
+        {
+            index += ctx->read_idx;
+            if(index >= ctx->max_sz)
+                index -= ctx->max_sz;
+            buf = ctx->buf + index;
+        }
+    }
+    else if (direction == PEEK_BACKWARD)
+    {
+        assert(index == 1);
+
+        if(ctx->read_idx == 0)
+            index = ctx->max_sz - 1;
+        else
+            index = ctx->read_idx - index;
         buf = ctx->buf + index;
     }
+
     return buf;
 }
 
