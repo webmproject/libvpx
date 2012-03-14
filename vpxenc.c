@@ -925,6 +925,8 @@ static const arg_def_t fpf_name         = ARG_DEF(NULL, "fpf", 1,
         "First pass statistics file name");
 static const arg_def_t limit = ARG_DEF(NULL, "limit", 1,
                                        "Stop encoding after n input frames");
+static const arg_def_t skip = ARG_DEF(NULL, "skip", 1,
+                                       "Skip the first n input frames");
 static const arg_def_t deadline         = ARG_DEF("d", "deadline", 1,
         "Deadline per frame (usec)");
 static const arg_def_t best_dl          = ARG_DEF(NULL, "best", 0,
@@ -1456,6 +1458,7 @@ int main(int argc, const char **argv_)
     int                      arg_usage = 0, arg_passes = 1, arg_deadline = 0;
     int                      arg_ctrls[ARG_CTRL_CNT_MAX][2], arg_ctrl_cnt = 0;
     int                      arg_limit = 0;
+    int                      arg_skip  = 0;
     static const arg_def_t **ctrl_args = no_args;
     static const int        *ctrl_args_map = NULL;
     int                      verbose = 0, show_psnr = 0;
@@ -1547,6 +1550,8 @@ int main(int argc, const char **argv_)
             verbose = 1;
         else if (arg_match(&arg, &limit, argi))
             arg_limit = arg_parse_uint(&arg);
+        else if (arg_match(&arg, &skip, argi))
+            arg_skip = arg_parse_uint(&arg);
         else if (arg_match(&arg, &psnrarg, argi))
             show_psnr = 1;
         else if (arg_match(&arg, &framerate, argi))
@@ -1753,6 +1758,7 @@ int main(int argc, const char **argv_)
     {
         int frames_in = 0, frames_out = 0;
         unsigned long nbytes = 0;
+        int skip_frames = 0;
         struct detect_buffer detect;
 
         /* Parse certain options from the input file, if possible */
@@ -1946,12 +1952,23 @@ int main(int argc, const char **argv_)
             if (vpx_codec_control_(&encoder, arg_ctrls[i][0], arg_ctrls[i][1]))
                 fprintf(stderr, "Error: Tried to set control %d = %d\n",
                         arg_ctrls[i][0], arg_ctrls[i][1]);
-
             ctx_exit_on_error(&encoder, "Failed to control codec");
         }
 
         frame_avail = 1;
         got_data = 0;
+
+        skip_frames = arg_skip;
+        while(skip_frames)
+        {
+            frame_avail = read_frame(infile, &raw, file_type, &y4m, &detect);
+            if (!frame_avail)
+                break;
+            skip_frames--;
+            fprintf(stderr,
+                "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
+                arg_passes, skip_frames, frames_out, nbytes);
+        }
 
         while (frame_avail || got_data)
         {
