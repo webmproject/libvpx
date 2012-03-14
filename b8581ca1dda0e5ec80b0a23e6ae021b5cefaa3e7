@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//V9Q\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-14T14:25:34Z",
+      "side": 1,
+      "message": "You shouldn\u0027t need a new buffer from this here.   If we want to last frame raw we should just keep it around for longer.    \n\nCheckout frame buffer logic in vp8_receive_raw_frame",
+      "revId": "b8581ca1dda0e5ec80b0a23e6ae021b5cefaa3e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//V9c\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-03-14T14:25:34Z",
+      "side": 1,
+      "message": "hmm -\u003e You shouldn\u0027t need this copy we should just keep the raw buffer around for longer",
+      "revId": "b8581ca1dda0e5ec80b0a23e6ae021b5cefaa3e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
