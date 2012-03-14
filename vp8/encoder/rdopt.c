@@ -741,7 +741,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
         return INT_MAX;
 
     *Rate = cost;
-    *rate_y += tot_rate_y;
+    *rate_y = tot_rate_y;
     *Distortion = distortion;
 
     return RDCOST(mb->rdmult, mb->rddiv, cost, distortion);
