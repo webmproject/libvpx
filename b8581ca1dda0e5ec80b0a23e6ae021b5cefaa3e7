@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAHn//V9Y\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-14T14:31:42Z",
+      "side": 1,
+      "message": "either\n\n  width \u003d (cm-\u003eWidth + 15) \u0026 ~15\n\nor\n\n  width \u003d cm-\u003emb_cols * 16",
+      "revId": "b8581ca1dda0e5ec80b0a23e6ae021b5cefaa3e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//V9Q\u003d",
         "filename": "vp8/encoder/firstpass.c",
         "patchSetId": 1
@@ -13,6 +30,23 @@
       "writtenOn": "2012-03-14T14:25:34Z",
       "side": 1,
       "message": "You shouldn\u0027t need a new buffer from this here.   If we want to last frame raw we should just keep it around for longer.    \n\nCheckout frame buffer logic in vp8_receive_raw_frame",
+      "revId": "b8581ca1dda0e5ec80b0a23e6ae021b5cefaa3e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//V9M\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-14T14:31:42Z",
+      "side": 1,
+      "message": "if we need to keep around an extra frame of the source, it should come from the lookahead buffer stage, as that\u0027s what receives the raw frame buffers. There may be other cases where we could use this buffer too, I remember thinking about adding this for the analysis pass stuff I worked on.",
       "revId": "b8581ca1dda0e5ec80b0a23e6ae021b5cefaa3e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
