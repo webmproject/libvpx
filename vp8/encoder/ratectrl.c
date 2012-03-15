@@ -222,9 +222,9 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
 void vp8_setup_key_frame(VP8_COMP *cpi)
 {
     // Setup for Key frame:
-
     vp8_default_coef_probs(& cpi->common);
     vp8_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
+    vp8_init_mbmode_probs(& cpi->common);
 
     vpx_memcpy(cpi->common.fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
     {
@@ -263,6 +263,18 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     vpx_memcpy( cpi->common.vp8_mode_contexts,
                 default_vp8_mode_contexts,
                 sizeof(default_vp8_mode_contexts));
+
+    /* make sure coding_context is correct in key frame recode */
+    {
+        CODING_CONTEXT *const cc = & cpi->coding_context;
+
+        vp8_copy(cc->mvc,      cpi->common.fc.mvc);
+#if CONFIG_HIGH_PRECISION_MV
+        vp8_copy(cc->mvc_hp,      cpi->common.fc.mvc_hp);
+#endif
+        vp8_copy(cc->ymode_prob,   cpi->common.fc.ymode_prob);
+        vp8_copy(cc->uv_mode_prob,  cpi->common.fc.uv_mode_prob);
+    }
 }
 void vp8_setup_inter_frame(VP8_COMP *cpi)
 {
