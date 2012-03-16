@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//TRA\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 1114,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-16T19:21:21Z",
+      "side": 1,
+      "message": "I can\u0027t find where is this buffer used?",
+      "revId": "cfdab7a23dda7ae0c22f0b9c14e3f7aa101695a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//TQk\u003d",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-16T19:21:21Z",
+      "side": 1,
+      "message": "having LastSource and last_source is too confusing (I know, source vs Source is bad too, should fix that at some point) Suggest using last_source_buf or even eliminating this variable and just using last_source-\u003ebuf.",
+      "revId": "cfdab7a23dda7ae0c22f0b9c14e3f7aa101695a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//TQg\u003d",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 325,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-16T19:21:21Z",
+      "side": 1,
+      "message": "what\u0027s the difference between last_frame_unscaled_source and LastSource? if we\u0027re still using the last_frame_scaled_source, then can we use this field instead of LastSource?",
+      "revId": "cfdab7a23dda7ae0c22f0b9c14e3f7aa101695a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//TQY\u003d",
+        "filename": "vp8/encoder/onyx_int.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-16T19:21:21Z",
+      "side": 1,
+      "message": "is this still used?",
+      "revId": "cfdab7a23dda7ae0c22f0b9c14e3f7aa101695a8",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
