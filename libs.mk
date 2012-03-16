@@ -329,8 +329,8 @@ CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
 #
 # Rule to generate runtime cpu detection files
 #
-$(OBJS-yes:.o=.d): vpx_rtcd.h
-vpx_rtcd.h: $(SRC_PATH_BARE)/$(sort $(filter %rtcd_defs.sh,$(CODEC_SRCS)))
+$(OBJS-yes:.o=.d): $(BUILD_PFX)vpx_rtcd.h
+$(BUILD_PFX)vpx_rtcd.h: $(SRC_PATH_BARE)/$(sort $(filter %rtcd_defs.sh,$(CODEC_SRCS)))
 	@echo "    [CREATE] $@"
 	$(qexec)$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$(TGT_ISA) \
           --sym=vpx_rtcd \
