@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//TYo\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 9
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-16T18:21:34Z",
+      "side": 1,
+      "message": "suggestion",
+      "revId": "ffb1df2b62bc696f4bc4462d5465fd8210658d66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//TYs\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 9
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-16T18:21:34Z",
+      "side": 1,
+      "message": "quote this",
+      "revId": "ffb1df2b62bc696f4bc4462d5465fd8210658d66",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
