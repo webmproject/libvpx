@@ -40,4 +40,8 @@ void vp8_deblock(YV12_BUFFER_CONFIG         *source,
                  int                         q,
                  int                         low_var_thresh,
                  int                         flag);
+
+#define MFQE_PRECISION 4
+
+void vp8_multiframe_quality_enhance(struct VP8Common *cm);
 #endif

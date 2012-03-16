@@ -166,6 +166,15 @@ if [ "$CONFIG_POSTPROC" = "yes" ]; then
 
     prototype void vp8_blend_b "unsigned char *y, unsigned char *u, unsigned char *v, int y1, int u1, int v1, int alpha, int stride"
     # no asm yet
+
+    prototype void vp8_filter_by_weight16x16 "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight"
+    specialize vp8_filter_by_weight16x16 sse2
+
+    prototype void vp8_filter_by_weight8x8 "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight"
+    specialize vp8_filter_by_weight8x8 sse2
+
+    prototype void vp8_filter_by_weight4x4 "unsigned char *src, int src_stride, unsigned char *dst, int dst_stride, int src_weight"
+    # no asm yet
 fi
 
 #
