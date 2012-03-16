@@ -1106,10 +1106,6 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
                                     width, height, VP8BORDERINPIXELS))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate scaled source buffer");
-
-
-        vpx_free(cpi->tok);
-
     {
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
         unsigned int tokens = 8 * 24 * 16; /* one MB for each thread */
@@ -2934,7 +2930,6 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     (void) frame_flags;
     vp8_set_quantizer(cpi, 26);
 
-    scale_and_extend_source(cpi->un_scaled_source, cpi);
     vp8_first_pass(cpi);
 }
 #endif
@@ -4721,7 +4716,8 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
         cpi->source_alt_ref_pending)
     {
         if ((cpi->source = vp8_lookahead_peek(cpi->lookahead,
-                                              cpi->frames_till_gf_update_due)))
+                                              cpi->frames_till_gf_update_due,
+                                              PEEK_FORWARD)))
         {
             cpi->alt_ref_source = cpi->source;
             if (cpi->oxcf.arnr_max_frames > 0)
@@ -4743,6 +4739,15 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
     if (!cpi->source)
     {
+        /* Read last frame source if we are encoding first pass. */
+        if (cpi->pass == 1 && cm->current_video_frame > 0)
+        {
+            if((cpi->last_source = vp8_lookahead_peek(cpi->lookahead, 1,
+                                                      PEEK_BACKWARD)) == NULL)
+              return -1;
+        }
+
+
         if ((cpi->source = vp8_lookahead_pop(cpi->lookahead, flush)))
         {
             cm->show_frame = 1;
@@ -4762,6 +4767,11 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
         *time_stamp = cpi->source->ts_start;
         *time_end = cpi->source->ts_end;
         *frame_flags = cpi->source->flags;
+
+        if (cpi->pass == 1 && cm->current_video_frame > 0)
+        {
+            cpi->last_frame_unscaled_source = &cpi->last_source->img;
+        }
     }
     else
     {

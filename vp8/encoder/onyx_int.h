@@ -316,10 +316,12 @@ typedef struct VP8_COMP
     struct lookahead_ctx    *lookahead;
     struct lookahead_entry  *source;
     struct lookahead_entry  *alt_ref_source;
+    struct lookahead_entry  *last_source;
 
     YV12_BUFFER_CONFIG *Source;
     YV12_BUFFER_CONFIG *un_scaled_source;
     YV12_BUFFER_CONFIG scaled_source;
+    YV12_BUFFER_CONFIG *last_frame_unscaled_source;
 
     int source_alt_ref_pending; // frame in src_buffers has been identified to be encoded as an alt ref
     int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
