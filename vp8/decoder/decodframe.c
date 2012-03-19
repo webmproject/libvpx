@@ -157,22 +157,33 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     int eobtotal = 0;
     MB_PREDICTION_MODE mode;
     int i;
-
     int tx_type;
-    if( pbi->common.txfm_mode==ONLY_4X4 )
-    {
-        xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-    }
-    else if( pbi->common.txfm_mode == ALLOW_8X8 )
-    {
-        if( xd->mode_info_context->mbmi.mode ==B_PRED
-            ||xd->mode_info_context->mbmi.mode ==I8X8_PRED
-            ||xd->mode_info_context->mbmi.mode ==SPLITMV)
-            xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-        else
-            xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-    }
 
+    if(pbi->common.frame_type == KEY_FRAME)
+    {
+        if( pbi->common.txfm_mode==ALLOW_8X8 &&
+             (xd->mode_info_context->mbmi.mode == DC_PRED
+            ||xd->mode_info_context->mbmi.mode == TM_PRED))
+            xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+        else
+            xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+    }
+    else
+    {
+        if( pbi->common.txfm_mode==ONLY_4X4 )
+        {
+            xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+        }
+        else if( pbi->common.txfm_mode == ALLOW_8X8 )
+        {
+            if( xd->mode_info_context->mbmi.mode ==B_PRED
+                ||xd->mode_info_context->mbmi.mode ==I8X8_PRED
+                ||xd->mode_info_context->mbmi.mode ==SPLITMV)
+                xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+            else
+                xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+        }
+    }
     tx_type = xd->mode_info_context->mbmi.txfm_size;
 
     if (xd->mode_info_context->mbmi.mb_skip_coeff)
