@@ -693,8 +693,13 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
     cpi->prediction_error = 0;
     cpi->intra_error = 0;
+#if CONFIG_NEWENTROPY
+    cpi->skip_true_count[0] = cpi->skip_true_count[1] = cpi->skip_true_count[2] = 0;
+    cpi->skip_false_count[0] = cpi->skip_false_count[1] = cpi->skip_false_count[2] = 0;
+#else
     cpi->skip_true_count = 0;
     cpi->skip_false_count = 0;
+#endif
 
 #if 0
     // Experimental code
@@ -1052,7 +1057,8 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x )
 
 int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
-    int rate;
+    int rate, i;
+    int mb_skip_context;
 
     // Non rd path deprecated in test code base
     //if (cpi->sf.RD && cpi->compressor_speed != 2)
@@ -1094,7 +1100,6 @@ int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
         vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t);
-
     return rate;
 }
 #ifdef SPEEDSTATS
@@ -1116,7 +1121,7 @@ int vp8cx_encode_inter_macroblock
     int distortion;
     unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
     int seg_ref_active;
-     unsigned char ref_pred_flag;
+    unsigned char ref_pred_flag;
 
     x->skip = 0;
 
@@ -1363,17 +1368,32 @@ int vp8cx_encode_inter_macroblock
     }
     else
     {
+#if CONFIG_NEWENTROPY
+        int mb_skip_context =
+            cpi->common.mb_no_coeff_skip ?
+            (x->e_mbd.mode_info_context-1)->mbmi.mb_skip_coeff +
+            (x->e_mbd.mode_info_context-cpi->common.mode_info_stride)->mbmi.mb_skip_coeff :
+            0;
+#endif
         if (cpi->common.mb_no_coeff_skip)
         {
             xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+#if CONFIG_NEWENTROPY
+            cpi->skip_true_count[mb_skip_context] ++;
+#else
             cpi->skip_true_count ++;
+#endif
             vp8_fix_contexts(xd);
         }
         else
         {
             vp8_stuff_mb(cpi, xd, t);
             xd->mode_info_context->mbmi.mb_skip_coeff = 0;
+#if CONFIG_NEWENTROPY
+            cpi->skip_false_count[mb_skip_context] ++;
+#else
             cpi->skip_false_count ++;
+#endif
         }
     }
     return rate;

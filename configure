@@ -223,6 +223,7 @@ EXPERIMENT_LIST="
     high_precision_mv
     sixteenth_subpel_uv
     comp_intra_pred
+    newentropy
 "
 CONFIG_LIST="
     external_build

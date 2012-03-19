@@ -17,6 +17,7 @@
 
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
+#include "vp8/common/entropy.h"
 
 #if CONFIG_DEBUG
 #include <assert.h>
@@ -77,12 +78,14 @@ static void vp8_read_mb_segid(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x)
             mi->segment_id = (unsigned char)(vp8_read(r, x->mb_segment_tree_probs[1]));
     }
 }
+
 extern const int vp8_i8x8_block[4];
 static void vp8_kfread_modes(VP8D_COMP *pbi,
                              MODE_INFO *m,
                              int mb_row,
                              int mb_col)
 {
+    VP8_COMMON *const cm = & pbi->common;
     vp8_reader *const bc = & pbi->bc;
     const int mis = pbi->common.mode_info_stride;
     int map_index = mb_row * pbi->common.mb_cols + mb_col;
@@ -97,13 +100,20 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
         pbi->common.last_frame_seg_map[map_index] = m->mbmi.segment_id;
     }
 
+    m->mbmi.mb_skip_coeff = 0;
     if ( pbi->common.mb_no_coeff_skip &&
          ( !segfeature_active( &pbi->mb,
                                m->mbmi.segment_id, SEG_LVL_EOB ) ||
            ( get_segdata( &pbi->mb,
                           m->mbmi.segment_id, SEG_LVL_EOB ) != 0 ) ) )
     {
+#if CONFIG_NEWENTROPY
+        MACROBLOCKD *const xd  = & pbi->mb;
+        xd->mode_info_context = m;
+        m->mbmi.mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
+#else
         m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
+#endif
     }
     else
     {
@@ -511,9 +521,21 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     MACROBLOCKD *const xd  = & pbi->mb;
 #endif
 
+#if CONFIG_NEWENTROPY
+    vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
+#else
     pbi->prob_skip_false = 0;
+#endif
     if (pbi->common.mb_no_coeff_skip)
+    {
+#if CONFIG_NEWENTROPY
+        int k;
+        for (k=0; k<MBSKIP_CONTEXTS; ++k)
+            cm->mbskip_pred_probs[k] = (vp8_prob)vp8_read_literal(bc, 8);
+#else
         pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
+#endif
+    }
 
     if(pbi->common.frame_type != KEY_FRAME)
     {
@@ -683,7 +705,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     {
         // Read the macroblock coeff skip flag if this feature is in use,
         // else default to 0
+#if CONFIG_NEWENTROPY
+        mbmi->mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
+#else
         mbmi->mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
+#endif
     }
     else
     {
@@ -1034,11 +1060,16 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
         {
             /*read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
             if(pbi->common.frame_type == KEY_FRAME)
+            {
+                //printf("<%d %d> \n", mb_row, mb_col);
                 vp8_kfread_modes(pbi, mi, mb_row, mb_col);
+            }
             else
+            {
                 read_mb_modes_mv(pbi, mi, &mi->mbmi,
                 prev_mi,
                 mb_row, mb_col);
+            }
 
             //printf("%3d", mi->mbmi.mode);
 

@@ -40,6 +40,7 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_armv6;
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_armv6;
         rtcd->subpix.sixtap4x4     = vp8_sixtap_predict_armv6;
+
         rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_armv6;
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_armv6;
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_armv6;
@@ -77,6 +78,7 @@ void vp8_arch_arm_common_init(VP8_COMMON *ctx)
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_neon;
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_neon;
         rtcd->subpix.sixtap4x4     = vp8_sixtap_predict_neon;
+
         rtcd->subpix.bilinear16x16 = vp8_bilinear_predict16x16_neon;
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_neon;
         rtcd->subpix.bilinear8x4   = vp8_bilinear_predict8x4_neon;

@@ -151,6 +151,18 @@ static void write_split(vp8_writer *bc, int x)
     );
 }
 
+static int prob_update_savings(const unsigned int *ct,
+                               const vp8_prob oldp, const vp8_prob newp,
+                               const vp8_prob upd)
+{
+    const int old_b = vp8_cost_branch(ct, oldp);
+    const int new_b = vp8_cost_branch(ct, newp);
+    const int update_b = 8 +
+                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+
+    return old_b - new_b - update_b;
+}
+
 static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 {
     const TOKENEXTRA *const stop = p + xcount;
@@ -170,10 +182,11 @@ static void pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
         int v = a->value;
         int n = a->Len;
 
+        /* skip one or two nodes */
         if (p->skip_eob_node)
         {
-            n--;
-            i = 2;
+            n-=p->skip_eob_node;
+            i = 2*p->skip_eob_node;
         }
 
         do
@@ -581,7 +594,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const int mis = pc->mode_info_stride;
     int mb_row = -1;
 
+#if CONFIG_NEWENTROPY
+    int prob_skip_false[3] = {0, 0, 0};
+#else
     int prob_skip_false = 0;
+#endif
 
     // Values used in prediction model coding
     vp8_prob pred_prob;
@@ -599,6 +616,28 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     if (pc->mb_no_coeff_skip)
     {
         // Divide by 0 check. 0 case possible with segment features
+#if CONFIG_NEWENTROPY
+        int k;
+        for (k=0;k<MBSKIP_CONTEXTS;++k)
+        {
+            if ( (cpi->skip_false_count[k] + cpi->skip_true_count[k]) )
+            {
+                prob_skip_false[k] = cpi->skip_false_count[k] * 256 /
+                                  (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
+
+                if (prob_skip_false[k] <= 1)
+                    prob_skip_false[k] = 1;
+
+                if (prob_skip_false[k] > 255)
+                    prob_skip_false[k] = 255;
+            }
+            else
+                prob_skip_false[k] = 255;
+
+            pc->mbskip_pred_probs[k] = prob_skip_false[k];
+            vp8_write_literal(w, prob_skip_false[k], 8);
+        }
+#else
         if ( (cpi->skip_false_count + cpi->skip_true_count) )
         {
             prob_skip_false = cpi->skip_false_count * 256 /
@@ -615,6 +654,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
         cpi->prob_skip_false = prob_skip_false;
         vp8_write_literal(w, prob_skip_false, 8);
+#endif
     }
 
     vp8_write_literal(w, pc->prob_intra_coded, 8);
@@ -715,7 +755,12 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                    ( get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0 ) ) )
             {
+#if CONFIG_NEWENTROPY
+                vp8_encode_bool(w, mi->mb_skip_coeff,
+                                get_pred_prob(pc, xd, PRED_MBSKIP));
+#else
                 vp8_encode_bool(w, mi->mb_skip_coeff, prob_skip_false);
+#endif
             }
 
             // Encode the reference frame.
@@ -920,17 +965,44 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 static void write_kfmodes(VP8_COMP *cpi)
 {
     vp8_writer *const bc = & cpi->bc;
-    const VP8_COMMON *const c = & cpi->common;
+    VP8_COMMON *const c = & cpi->common;
+    const int mis = c->mode_info_stride;
     /* const */
     MODE_INFO *m = c->mi;
     int mb_row = -1;
+#if CONFIG_NEWENTROPY
+    int prob_skip_false[3] = {0, 0, 0};
+#else
     int prob_skip_false = 0;
+#endif
 
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     if (c->mb_no_coeff_skip)
     {
         // Divide by 0 check. 0 case possible with segment features
+#if CONFIG_NEWENTROPY
+        int k;
+        for (k=0;k<MBSKIP_CONTEXTS;++k)
+        {
+            if ( (cpi->skip_false_count[k] + cpi->skip_true_count[k]) )
+            {
+                prob_skip_false[k] = cpi->skip_false_count[k] * 256 /
+                                  (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
+
+                if (prob_skip_false[k] <= 1)
+                    prob_skip_false[k] = 1;
+
+                if (prob_skip_false[k] > 255)
+                    prob_skip_false[k] = 255;
+            }
+            else
+                prob_skip_false[k] = 255;
+
+            c->mbskip_pred_probs[k] = prob_skip_false[k];
+            vp8_write_literal(bc, prob_skip_false[k], 8);
+        }
+#else
         if ( (cpi->skip_false_count + cpi->skip_true_count) )
         {
             prob_skip_false = cpi->skip_false_count * 256 /
@@ -947,6 +1019,7 @@ static void write_kfmodes(VP8_COMP *cpi)
 
         cpi->prob_skip_false = prob_skip_false;
         vp8_write_literal(bc, prob_skip_false, 8);
+#endif
     }
 
 #if CONFIG_QIMODE
@@ -965,6 +1038,8 @@ static void write_kfmodes(VP8_COMP *cpi)
             const int ym = m->mbmi.mode;
             int segment_id = m->mbmi.segment_id;
 
+            xd->mode_info_context = m;
+
             if (cpi->mb.e_mbd.update_mb_segmentation_map)
             {
                 write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
@@ -974,7 +1049,12 @@ static void write_kfmodes(VP8_COMP *cpi)
                  ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                    (get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0) ) )
             {
+#if CONFIG_NEWENTROPY
+                vp8_encode_bool(bc, m->mbmi.mb_skip_coeff,
+                                get_pred_prob(c, xd, PRED_MBSKIP));
+#else
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
+#endif
             }
 #if CONFIG_QIMODE
             kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->kf_ymode_probs_index]);
@@ -1018,14 +1098,15 @@ static void write_kfmodes(VP8_COMP *cpi)
                 write_i8x8_mode(bc, m->bmi[2].as_mode.first, c->i8x8_mode_prob);
                 write_i8x8_mode(bc, m->bmi[8].as_mode.first, c->i8x8_mode_prob);
                 write_i8x8_mode(bc, m->bmi[10].as_mode.first, c->i8x8_mode_prob);
-                m++;
             }
             else
 #if CONFIG_UVINTRA
-                write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
+                write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
 #else
-                write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob);
+                write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob);
 #endif
+
+            m++;
         }
         //printf("\n");
         m++;    // skip L prediction border
@@ -1081,18 +1162,6 @@ static void sum_probs_over_prev_coef_context(
                 out[i] = UINT_MAX;
         }
     }
-}
-
-static int prob_update_savings(const unsigned int *ct,
-                                   const vp8_prob oldp, const vp8_prob newp,
-                                   const vp8_prob upd)
-{
-    const int old_b = vp8_cost_branch(ct, oldp);
-    const int new_b = vp8_cost_branch(ct, newp);
-    const int update_b = 8 +
-                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
-
-    return old_b - new_b - update_b;
 }
 
 static int default_coef_context_savings(VP8_COMP *cpi)
@@ -1599,7 +1668,7 @@ static void decide_kf_ymode_entropy(VP8_COMP *cpi)
 
 }
 #endif
-static segment_reference_frames(VP8_COMP *cpi)
+static void segment_reference_frames(VP8_COMP *cpi)
 {
     VP8_COMMON *oci = &cpi->common;
     MODE_INFO *mi = oci->mi;
@@ -1624,6 +1693,7 @@ static segment_reference_frames(VP8_COMP *cpi)
 
 
 }
+
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 {
     int i, j;

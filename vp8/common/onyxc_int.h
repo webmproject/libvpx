@@ -233,6 +233,10 @@ typedef struct VP8Common
 
     vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
 
+#if CONFIG_NEWENTROPY
+    vp8_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
+#endif
+
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */

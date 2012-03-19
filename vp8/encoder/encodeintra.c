@@ -144,9 +144,9 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     }
 
     if(tx_type == TX_8X8)
-      vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+        vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     else
-      vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+        vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
 #ifdef ENC_DEBUG
     if (enc_debug) {

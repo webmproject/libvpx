@@ -25,7 +25,7 @@ extern int enc_debug;
 #define EXACT_QUANT
 void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
 {
-    int i, rc, eob, nonzeros;
+    int i, rc, eob;
     int x, y, z, sz;
     short *coeff_ptr   = b->coeff;
     short *round_ptr   = b->round;
@@ -33,7 +33,6 @@ void vp8_fast_quantize_b_c(BLOCK *b, BLOCKD *d)
     short *qcoeff_ptr  = d->qcoeff;
     short *dqcoeff_ptr = d->dqcoeff;
     short *dequant_ptr = d->dequant;
-
     vpx_memset(qcoeff_ptr, 0, 32);
     vpx_memset(dqcoeff_ptr, 0, 32);
 
@@ -165,7 +164,9 @@ void vp8_strict_quantize_b(BLOCK *b, BLOCKD *d)
             dqcoeff_ptr[rc] = x * dq;
             /* Remember the last non-zero coefficient. */
             if (y)
+            {
                 eob = i;
+            }
         }
     }
 
@@ -264,9 +265,6 @@ void vp8_quantize_mbuv_c(MACROBLOCK *x)
         x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
 }
 
-
-
-
 void vp8_fast_quantize_b_2x2_c(BLOCK *b, BLOCKD *d)
 {
   int i, rc, eob;
@@ -312,7 +310,6 @@ void vp8_fast_quantize_b_2x2_c(BLOCK *b, BLOCKD *d)
     }
   }
   d->eob = eob + 1;
-  //if (d->eob > 4) printf("Flag Fast 2 (%d)\n", d->eob);
 }
 
 void vp8_fast_quantize_b_8x8_c(BLOCK *b, BLOCKD *d)
@@ -537,7 +534,9 @@ void vp8_strict_quantize_b_2x2(BLOCK *b, BLOCKD *d)
       dqcoeff_ptr[rc] = x * dq;
       /* Remember the last non-zero coefficient. */
       if (y)
+      {
         eob = i;
+      }
     }
   }
   d->eob = eob + 1;
@@ -596,13 +595,13 @@ void vp8_strict_quantize_b_8x8(BLOCK *b, BLOCKD *d)
       dqcoeff_ptr[rc] = x * dq;
       /* Remember the last non-zero coefficient. */
       if (y)
+      {
         eob = i;
+      }
     }
   }
   d->eob = eob + 1;
 }
-
-
 
 void vp8_quantize_mby_8x8(MACROBLOCK *x)
 {

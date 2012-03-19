@@ -166,7 +166,11 @@ extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
 
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
 
+#if CONFIG_NEWENTROPY
+int vp8cx_base_skip_false_prob[QINDEX_RANGE][3];
+#else
 int vp8cx_base_skip_false_prob[QINDEX_RANGE];
+#endif
 
 // Tables relating active max Q to active min Q
 static int kf_low_motion_minq[QINDEX_RANGE];
@@ -253,7 +257,7 @@ void init_base_skip_probs()
 {
     int i;
     double q;
-    int skip_prob;
+    int skip_prob, t;
 
     for ( i = 0; i < QINDEX_RANGE; i++ )
     {
@@ -261,13 +265,32 @@ void init_base_skip_probs()
 
         // Exponential decay caluclation of baseline skip prob with clamping
         // Based on crude best fit of old table.
-        skip_prob = (int)( 564.25 * pow( 2.71828, (-0.012*q) ) );
+        t = (int)( 564.25 * pow( 2.71828, (-0.012*q) ) );
+
+        skip_prob = t;
         if ( skip_prob < 1 )
             skip_prob = 1;
         else if ( skip_prob > 255 )
             skip_prob = 255;
+#if CONFIG_NEWENTROPY
+        vp8cx_base_skip_false_prob[i][1] = skip_prob;
 
+        skip_prob = t * 0.75;
+        if ( skip_prob < 1 )
+            skip_prob = 1;
+        else if ( skip_prob > 255 )
+            skip_prob = 255;
+        vp8cx_base_skip_false_prob[i][2] = skip_prob;
+
+        skip_prob = t * 1.25;
+        if ( skip_prob < 1 )
+            skip_prob = 1;
+        else if ( skip_prob > 255 )
+            skip_prob = 255;
+        vp8cx_base_skip_false_prob[i][0] = skip_prob;
+#else
         vp8cx_base_skip_false_prob[i] = skip_prob;
+#endif
     }
 }
 
@@ -1826,11 +1849,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     vp8_zero(cpi->y_uv_mode_count)
 #endif
 
-
     return (VP8_PTR) cpi;
 
 }
-
 
 void vp8_remove_compressor(VP8_PTR *ptr)
 {
@@ -1857,7 +1878,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
         vp8_clear_system_state();
 
-        printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
+        //printf("\n8x8-4x4:%d-%d\n", cpi->t8x8_count, cpi->t4x4_count);
         if (cpi->pass != 1)
         {
             FILE *f = fopen("opsnr.stt", "a");
@@ -3120,14 +3141,28 @@ static void encode_frame_to_data_rate
         // setup skip prob for costing in mode/mv decision
         if (cpi->common.mb_no_coeff_skip)
         {
+#if CONFIG_NEWENTROPY
+            int k;
+            for (k=0; k<MBSKIP_CONTEXTS; k++)
+                cm->mbskip_pred_probs[k] = cpi->base_skip_false_prob[Q][k];
+#else
             cpi->prob_skip_false = cpi->base_skip_false_prob[Q];
+#endif
 
             if (cm->frame_type != KEY_FRAME)
             {
                 if (cpi->common.refresh_alt_ref_frame)
                 {
+#if CONFIG_NEWENTROPY
+                    for (k=0; k<MBSKIP_CONTEXTS; k++)
+                    {
+                        if (cpi->last_skip_false_probs[2][k] != 0)
+                            cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[2][k];
+                    }
+#else
                     if (cpi->last_skip_false_probs[2] != 0)
                         cpi->prob_skip_false = cpi->last_skip_false_probs[2];
+#endif
 
                     /*
                                         if(cpi->last_skip_false_probs[2]!=0 && abs(Q- cpi->last_skip_probs_q[2])<=16 )
@@ -3138,8 +3173,16 @@ static void encode_frame_to_data_rate
                 }
                 else if (cpi->common.refresh_golden_frame)
                 {
+#if CONFIG_NEWENTROPY
+                    for (k=0; k<MBSKIP_CONTEXTS; k++)
+                    {
+                        if (cpi->last_skip_false_probs[1][k] != 0)
+                            cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[1][k];
+                    }
+#else
                     if (cpi->last_skip_false_probs[1] != 0)
                         cpi->prob_skip_false = cpi->last_skip_false_probs[1];
+#endif
 
                     /*
                                         if(cpi->last_skip_false_probs[1]!=0 && abs(Q- cpi->last_skip_probs_q[1])<=16 )
@@ -3150,8 +3193,17 @@ static void encode_frame_to_data_rate
                 }
                 else
                 {
+#if CONFIG_NEWENTROPY
+                    int k;
+                    for (k=0; k<MBSKIP_CONTEXTS; k++)
+                    {
+                        if (cpi->last_skip_false_probs[0][k] != 0)
+                            cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[0][k];
+                    }
+#else
                     if (cpi->last_skip_false_probs[0] != 0)
                         cpi->prob_skip_false = cpi->last_skip_false_probs[0];
+#endif
 
                     /*
                     if(cpi->last_skip_false_probs[0]!=0 && abs(Q- cpi->last_skip_probs_q[0])<=16 )
@@ -3163,6 +3215,22 @@ static void encode_frame_to_data_rate
 
                 // as this is for cost estimate, let's make sure it does not
                 // get extreme either way
+#if CONFIG_NEWENTROPY
+                {
+                    int k;
+                    for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                    {
+                    if (cm->mbskip_pred_probs[k] < 5)
+                        cm->mbskip_pred_probs[k] = 5;
+
+                    if (cm->mbskip_pred_probs[k] > 250)
+                        cm->mbskip_pred_probs[k] = 250;
+
+                    if (cpi->is_src_frame_alt_ref)
+                        cm->mbskip_pred_probs[k] = 1;
+                    }
+                }
+#else
                 if (cpi->prob_skip_false < 5)
                     cpi->prob_skip_false = 5;
 
@@ -3171,6 +3239,7 @@ static void encode_frame_to_data_rate
 
                 if (cpi->is_src_frame_alt_ref)
                     cpi->prob_skip_false = 1;
+#endif
 
 
             }
@@ -3588,21 +3657,44 @@ static void encode_frame_to_data_rate
     {
         if (cpi->common.refresh_alt_ref_frame)
         {
+#if CONFIG_NEWENTROPY
+            int k;
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->last_skip_false_probs[2][k] = cm->mbskip_pred_probs[k];
+#else
             cpi->last_skip_false_probs[2] = cpi->prob_skip_false;
+#endif
             cpi->last_skip_probs_q[2] = cm->base_qindex;
         }
         else if (cpi->common.refresh_golden_frame)
         {
+#if CONFIG_NEWENTROPY
+            int k;
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->last_skip_false_probs[1][k] = cm->mbskip_pred_probs[k];
+#else
             cpi->last_skip_false_probs[1] = cpi->prob_skip_false;
+#endif
             cpi->last_skip_probs_q[1] = cm->base_qindex;
         }
         else
         {
+#if CONFIG_NEWENTROPY
+            int k;
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->last_skip_false_probs[0][k] = cm->mbskip_pred_probs[k];
+#else
             cpi->last_skip_false_probs[0] = cpi->prob_skip_false;
+#endif
             cpi->last_skip_probs_q[0] = cm->base_qindex;
 
             //update the baseline
+#if CONFIG_NEWENTROPY
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->base_skip_false_prob[cm->base_qindex][k] = cm->mbskip_pred_probs[k];
+#else
             cpi->base_skip_false_prob[cm->base_qindex] = cpi->prob_skip_false;
+#endif
 
         }
     }

@@ -34,6 +34,10 @@ void vpx_log(const char *format, ...);
 #define MB_FEATURE_TREE_PROBS   3
 #define PREDICTION_PROBS 3
 
+#if CONFIG_NEWENTROPY
+#define MBSKIP_CONTEXTS 3
+#endif
+
 #define MAX_MB_SEGMENTS         4
 
 #define MAX_REF_LF_DELTAS       4

@@ -3225,7 +3225,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         // cost of signallying a skip
         if (cpi->common.mb_no_coeff_skip)
         {
+#if CONFIG_NEWENTROPY
+            int prob_skip_cost = vp8_cost_bit(
+                get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
+#else
             int prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 0);
+#endif
             other_cost += prob_skip_cost;
             rate2 += prob_skip_cost;
         }
@@ -3268,20 +3273,32 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
                 if (mb_skippable)
                 {
+#if CONFIG_NEWENTROPY
+                    vp8_prob skip_prob = get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
+#endif
+                    int prob_skip_cost;
                     rate2 -= (rate_y + rate_uv);
                     //for best_yrd calculation
                     rate_uv = 0;
 
+#if CONFIG_NEWENTROPY
+                    if (skip_prob)
+                    {
+                        prob_skip_cost = vp8_cost_bit(skip_prob, 1);
+                        prob_skip_cost -= vp8_cost_bit(skip_prob, 0);
+                        rate2 += prob_skip_cost;
+                        other_cost += prob_skip_cost;
+                    }
+#else
                     // Back out no skip flag costing and add in skip flag costing
                     if (cpi->prob_skip_false)
                     {
-                        int prob_skip_cost;
-
                         prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 1);
                         prob_skip_cost -= vp8_cost_bit(cpi->prob_skip_false, 0);
                         rate2 += prob_skip_cost;
                         other_cost += prob_skip_cost;
                     }
+#endif
                 }
             }
             // Calculate the final RD estimate for this mode

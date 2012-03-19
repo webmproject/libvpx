@@ -97,6 +97,7 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 }
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
+
 #define FILL \
     if(count < 0) \
         VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
@@ -289,7 +290,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
     INT16 val, bits_count;
     INT16 c;
     INT16 v;
-    const vp8_prob *Prob;//
+    const vp8_prob *Prob;
 
     int seg_eob;
     int segment_id = x->mode_info_context->mbmi.segment_id;
@@ -322,6 +323,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
 BLOCK_LOOP_8x8:
     a = A + vp8_block2above_8x8[i];
     l = L + vp8_block2left_8x8[i];
+
 
     c = (INT16)(!type);
 
@@ -363,11 +365,11 @@ DO_WHILE_8x8:
 CHECK_0_8x8_:
     if (i==24)
     {
-      DECODE_AND_LOOP_IF_ZERO_8x8_2(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
+        DECODE_AND_LOOP_IF_ZERO_8x8_2(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
     }
     else
     {
-      DECODE_AND_LOOP_IF_ZERO_8X8(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
+        DECODE_AND_LOOP_IF_ZERO_8X8(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
     }
     DECODE_AND_BRANCH_IF_ZERO(Prob[ONE_CONTEXT_NODE], ONE_CONTEXT_NODE_0_8x8_);
     DECODE_AND_BRANCH_IF_ZERO(Prob[LOW_VAL_CONTEXT_NODE],
@@ -516,6 +518,7 @@ ONE_CONTEXT_NODE_0_8x8_:
       {
         qcoeff_ptr [ scan[c] ] = (INT16) v;
         ++c;
+
         goto DO_WHILE_8x8;
       }
     }
@@ -539,7 +542,7 @@ BLOCK_FINISHED_8x8:
     *a = *l = ((eobs[i] = c) != !type);   // any nonzero data?
     if (i!=24)
     {
-        *(a + 1)    =  *a;
+        *(a + 1)    = *a;
         *(l + 1)    = *l;
     }
 
@@ -757,6 +760,7 @@ ONE_CONTEXT_NODE_0_:
     qcoeff_ptr [ 15 ] = (INT16) v;
 BLOCK_FINISHED:
     *a = *l = ((eobs[i] = c) != !type);   /* any nonzero data? */
+
     eobtotal += c;
     qcoeff_ptr += 16;
 

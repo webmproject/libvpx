@@ -491,8 +491,12 @@ typedef struct VP8_COMP
     int vert_scale;
     int pass;
 
+#if CONFIG_NEWENTROPY
+    int last_skip_false_probs[3][MBSKIP_CONTEXTS];
+#else
     int prob_skip_false;
     int last_skip_false_probs[3];
+#endif
     int last_skip_probs_q[3];
 
     int recent_ref_frame_usage[MAX_REF_FRAMES];
@@ -510,8 +514,13 @@ typedef struct VP8_COMP
     int inter_zz_count;
     int gf_bad_count;
     int gf_update_recommended;
+#if CONFIG_NEWENTROPY
+    int skip_true_count[3];
+    int skip_false_count[3];
+#else
     int skip_true_count;
     int skip_false_count;
+#endif
     int t4x4_count;
     int t8x8_count;
 
@@ -539,7 +548,11 @@ typedef struct VP8_COMP
     unsigned int time_pick_lpf;
     unsigned int time_encode_mb_row;
 
+#if CONFIG_NEWENTROPY
+    int base_skip_false_prob[QINDEX_RANGE][3];
+#else
     int base_skip_false_prob[QINDEX_RANGE];
+#endif
 
     struct twopass_rc
     {
