@@ -71,7 +71,11 @@ typedef enum
 typedef enum
 {
     SIXTAP   = 0,
-    BILINEAR = 1
+    BILINEAR = 1,
+#if CONFIG_ENHANCED_INTERP
+    EIGHTTAP = 2,
+    EIGHTTAP_SHARP = 3,
+#endif
 } INTERPOLATIONFILTERTYPE;
 
 typedef enum

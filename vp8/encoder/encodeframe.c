@@ -672,6 +672,38 @@ static void encode_frame_internal(VP8_COMP *cpi)
         xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, sixtap_avg16x16);
     }
+#if CONFIG_ENHANCED_INTERP
+    else if (cm->mcomp_filter_type == EIGHTTAP)
+    {
+        xd->subpixel_predict        = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap4x4);
+        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap8x4);
+        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap8x8);
+        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap16x16);
+        xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap_avg8x8);
+        xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap_avg16x16);
+    }
+    else if (cm->mcomp_filter_type == EIGHTTAP_SHARP)
+    {
+        xd->subpixel_predict        = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap4x4_sharp);
+        xd->subpixel_predict8x4     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap8x4_sharp);
+        xd->subpixel_predict8x8     = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap8x8_sharp);
+        xd->subpixel_predict16x16   = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap16x16_sharp);
+        xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap_avg8x8_sharp);
+        xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap_avg16x16_sharp);
+    }
+#endif
     else
     {
         xd->subpixel_predict        = SUBPIX_INVOKE(

@@ -2039,6 +2039,10 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         // Signal whether to allow high MV precision
         vp8_write_bit(bc, (xd->allow_high_precision_mv) ? 1 : 0);
 #endif
+#if CONFIG_ENHANCED_INTERP
+        // Signal the type of subpel filter to use
+        vp8_write_literal(bc, (pc->mcomp_filter_type), 2);
+#endif
     }
 
     vp8_write_bit(bc, pc->refresh_entropy_probs);
