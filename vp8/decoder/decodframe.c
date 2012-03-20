@@ -162,7 +162,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                           xd->recon_left[1],
                                           xd->recon_left[2],
                                           xd->recon_left_stride[1],
-                                          xd->dst.u_buffer, xd->dst.v_buffer);
+                                          xd->dst.u_buffer, xd->dst.v_buffer,
+                                          xd->dst.uv_stride);
 
         if (mode != B_PRED)
         {
@@ -170,7 +171,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                                                  xd->recon_above[0],
                                                  xd->recon_left[0],
                                                  xd->recon_left_stride[0],
-                                                 xd->dst.y_buffer);
+                                                 xd->dst.y_buffer,
+                                                 xd->dst.y_stride);
         }
         else
         {

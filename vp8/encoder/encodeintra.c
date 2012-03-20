@@ -99,7 +99,8 @@ void vp8_encode_intra16x16mby(MACROBLOCK *x)
                                          xd->dst.y_buffer - xd->dst.y_stride,
                                          xd->dst.y_buffer - 1,
                                          xd->dst.y_stride,
-                                         xd->dst.y_buffer);
+                                         xd->dst.y_buffer,
+                                         xd->dst.y_stride);
 
     vp8_subtract_mby(x->src_diff, *(b->base_src),
         b->src_stride, xd->dst.y_buffer, xd->dst.y_stride);
@@ -121,7 +122,8 @@ void vp8_encode_intra16x16mbuv(MACROBLOCK *x)
                                       xd->dst.u_buffer - 1,
                                       xd->dst.v_buffer - 1,
                                       xd->dst.uv_stride,
-                                      xd->dst.u_buffer, xd->dst.v_buffer);
+                                      xd->dst.u_buffer, xd->dst.v_buffer,
+                                      xd->dst.uv_stride);
 
     vp8_subtract_mbuv(x->src_diff, x->src.u_buffer,
         x->src.v_buffer, x->src.uv_stride, xd->dst.u_buffer,

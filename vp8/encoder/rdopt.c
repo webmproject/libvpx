@@ -782,18 +782,23 @@ static int rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
     int distortion;
     int best_rd = INT_MAX;
     int this_rd;
+    MACROBLOCKD *xd = &x->e_mbd;
 
     //Y Search for 16x16 intra prediction mode
     for (mode = DC_PRED; mode <= TM_PRED; mode++)
     {
-        x->e_mbd.mode_info_context->mbmi.mode = mode;
+        xd->mode_info_context->mbmi.mode = mode;
 
-        vp8_build_intra_predictors_mby
-            (&x->e_mbd);
+        vp8_build_intra_predictors_mby_s(xd,
+                                         xd->dst.y_buffer - xd->dst.y_stride,
+                                         xd->dst.y_buffer - 1,
+                                         xd->dst.y_stride,
+                                         xd->predictor,
+                                         16);
 
         macro_block_yrd(x, &ratey, &distortion);
-        rate = ratey + x->mbmode_cost[x->e_mbd.frame_type]
-                                     [x->e_mbd.mode_info_context->mbmi.mode];
+        rate = ratey + x->mbmode_cost[xd->frame_type]
+                                     [xd->mode_info_context->mbmi.mode];
 
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
@@ -807,7 +812,7 @@ static int rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
         }
     }
 
-    x->e_mbd.mode_info_context->mbmi.mode = mode_selected;
+    xd->mode_info_context->mbmi.mode = mode_selected;
     return best_rd;
 }
 
@@ -875,6 +880,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int
     int best_rd = INT_MAX;
     int UNINITIALIZED_IS_SAFE(d), UNINITIALIZED_IS_SAFE(r);
     int rate_to;
+    MACROBLOCKD *xd = &x->e_mbd;
 
     for (mode = DC_PRED; mode <= TM_PRED; mode++)
     {
@@ -882,17 +888,26 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int
         int distortion;
         int this_rd;
 
-        x->e_mbd.mode_info_context->mbmi.uv_mode = mode;
-        vp8_build_intra_predictors_mbuv
-                     (&x->e_mbd);
+        xd->mode_info_context->mbmi.uv_mode = mode;
+
+        vp8_build_intra_predictors_mbuv_s(xd,
+                                          xd->dst.u_buffer - xd->dst.uv_stride,
+                                          xd->dst.v_buffer - xd->dst.uv_stride,
+                                          xd->dst.u_buffer - 1,
+                                          xd->dst.v_buffer - 1,
+                                          xd->dst.uv_stride,
+                                          &xd->predictor[256], &xd->predictor[320],
+                                          8);
+
+
         vp8_subtract_mbuv(x->src_diff,
                       x->src.u_buffer, x->src.v_buffer, x->src.uv_stride,
-                      &x->e_mbd.predictor[256], &x->e_mbd.predictor[320], 8);
+                      &xd->predictor[256], &xd->predictor[320], 8);
         vp8_transform_mbuv(x);
         vp8_quantize_mbuv(x);
 
         rate_to = rd_cost_mbuv(x);
-        rate = rate_to + x->intra_uv_mode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.uv_mode];
+        rate = rate_to + x->intra_uv_mode_cost[xd->frame_type][xd->mode_info_context->mbmi.uv_mode];
 
         distortion = vp8_mbuverror(x) / 4;
 
@@ -911,7 +926,7 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate, int
     *rate = r;
     *distortion = d;
 
-    x->e_mbd.mode_info_context->mbmi.uv_mode = mode_selected;
+    xd->mode_info_context->mbmi.uv_mode = mode_selected;
 }
 
 int vp8_cost_mv_ref(MB_PREDICTION_MODE m, const int near_mv_ref_ct[4])
@@ -2157,8 +2172,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         {
             int distortion;
             x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-            vp8_build_intra_predictors_mby
-                (&x->e_mbd);
+
+            vp8_build_intra_predictors_mby_s(xd,
+                                             xd->dst.y_buffer - xd->dst.y_stride,
+                                             xd->dst.y_buffer - 1,
+                                             xd->dst.y_stride,
+                                             xd->predictor,
+                                             16);
             macro_block_yrd(x, &rd.rate_y, &distortion) ;
             rd.rate2 += rd.rate_y;
             rd.distortion2 += distortion;
