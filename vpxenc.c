@@ -2612,12 +2612,14 @@ float usec_to_fps(uint64_t usec, unsigned int frames)
 
 
 static void set_modeinfo(struct stream_state *stream,
-                         struct webm_ctx     *webm)
+                         struct input_state  *input)
 {
+    struct webm_ctx     *webm = &input->webm;
     unsigned char *ptr;
     struct link_record link;
     int again;
     int refs=0;
+    int mi_set = 0;
 
     vpx_codec_control(&stream->encoder, VP8E_SET_MODEINFO, NULL);
     ptr = webm->buf + webm->buf_sz;
@@ -2638,9 +2640,32 @@ static void set_modeinfo(struct stream_state *stream,
             vpx_codec_control(&stream->encoder, VP8E_SET_MODEINFO, &modeinfo);
             vpx_codec_control(&stream->encoder, VP8E_UPD_REFERENCE, link.refs_updated);
             ctx_exit_on_error(&stream->encoder, "Failed to set refs");
+            mi_set = 1;
             break;
         }
+        if((link.w|link.sz)&0xF)
+            break;
+        if(link.w > 16383 || link.h > 16383)
+            break;
     } while(again);
+
+    if(!mi_set
+       && stream->config.cfg.g_w == input->w
+       && stream->config.cfg.g_h == input->h)
+    {
+        vpx_fixed_buf_t *modeinfo;
+        int refs_updated;
+
+        vpx_codec_control(&webm->decoder, VP8D_GET_MODE_INFO, &modeinfo);
+        ctx_exit_on_error(&webm->decoder, "Failed to get mode info");
+        vpx_codec_control(&stream->encoder, VP8E_SET_MODEINFO, modeinfo);
+        ctx_exit_on_error(&webm->decoder, "Failed to set mode info");
+
+        vpx_codec_control(&webm->decoder, VP8D_GET_LAST_REF_UPDATES, &refs_updated);
+        ctx_exit_on_error(&webm->decoder, "Failed to get ref updates");
+        vpx_codec_control(&stream->encoder, VP8E_UPD_REFERENCE, refs_updated);
+        ctx_exit_on_error(&stream->encoder, "Failed to set ref updates");
+    }
 }
 
 int main(int argc, const char **argv_)
@@ -2801,7 +2826,7 @@ int main(int argc, const char **argv_)
 
             /* Update mode/mv info if available */
             if(input.file_type == FILE_TYPE_WEBM && global.read_modemv)
-                FOREACH_STREAM(set_modeinfo(stream, &input.webm));
+                FOREACH_STREAM(set_modeinfo(stream, &input));
 
             vpx_usec_timer_start(&timer);
             FOREACH_STREAM(encode_frame(stream, &global,

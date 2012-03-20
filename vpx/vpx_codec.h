@@ -134,6 +134,17 @@ extern "C" {
     vpx_codec_err_t;
 
 
+    /*!\brief Generic fixed size buffer structure
+     *
+     * This structure is able to hold a reference to any fixed size buffer.
+     */
+    typedef struct vpx_fixed_buf
+    {
+        void          *buf; /**< Pointer to the data */
+        size_t         sz;  /**< Length of the buffer, in chars */
+    } vpx_fixed_buf_t; /**< alias for struct vpx_fixed_buf */
+
+
     /*! \brief Codec capabilities bitfield
      *
      *  Each codec advertises the capabilities it supports as part of its

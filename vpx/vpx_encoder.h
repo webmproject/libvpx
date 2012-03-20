@@ -77,17 +77,6 @@ extern "C" {
                                                      partition at a time. */
 
 
-    /*!\brief Generic fixed size buffer structure
-     *
-     * This structure is able to hold a reference to any fixed size buffer.
-     */
-    typedef struct vpx_fixed_buf
-    {
-        void          *buf; /**< Pointer to the data */
-        size_t         sz;  /**< Length of the buffer, in chars */
-    } vpx_fixed_buf_t; /**< alias for struct vpx_fixed_buf */
-
-
     /*!\brief Time Stamp Type
      *
      * An integer, which when multiplied by the stream's time base, provides

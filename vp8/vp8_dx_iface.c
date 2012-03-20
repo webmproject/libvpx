@@ -70,6 +70,7 @@ struct vpx_codec_alg_priv
     vpx_image_t             img;
     int                     img_setup;
     int                     img_avail;
+    vpx_fixed_buf_t         mode_info;
 };
 
 static unsigned long vp8_priv_sz(const vpx_codec_dec_cfg_t *si, vpx_codec_flags_t flags)
@@ -743,6 +744,43 @@ static vpx_codec_err_t vp8_get_frame_corrupted(vpx_codec_alg_priv_t *ctx,
 
 }
 
+static vpx_codec_err_t get_mode_info(vpx_codec_alg_priv_t *ctx,
+                                     int ctrl_id,
+                                     va_list args)
+{
+    vpx_fixed_buf_t **data =  va_arg(args, vpx_fixed_buf_t **);
+    VP8D_COMP *pbi = (VP8D_COMP *)ctx->pbi;
+    size_t mi_sz = sizeof(MODE_INFO)*pbi->common.mb_rows * pbi->common.mb_cols;
+    char *buf;
+    size_t buf_stride;
+    int i;
+    MODE_INFO *mi;
+
+    if(data)
+    {
+        if(ctx->mode_info.sz != mi_sz)
+        {
+            free(ctx->mode_info.buf);
+            ctx->mode_info.buf = malloc(mi_sz);
+            ctx->mode_info.sz = mi_sz;
+        }
+
+        mi = pbi->common.mi;
+        buf = ctx->mode_info.buf;
+        buf_stride = pbi->common.mb_cols * sizeof(MODE_INFO);
+        for(i=0; i<pbi->common.mb_rows; i++)
+        {
+            memcpy(buf, mi, buf_stride);
+            buf += buf_stride;
+            mi += pbi->common.mode_info_stride;
+        }
+        *data = &ctx->mode_info;
+        return VPX_CODEC_OK;
+    }
+    else
+        return VPX_CODEC_INVALID_PARAM;
+}
+
 vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
 {
     {VP8_SET_REFERENCE,             vp8_set_reference},
@@ -755,6 +793,7 @@ vpx_codec_ctrl_fn_map_t vp8_ctf_maps[] =
     {VP8D_GET_LAST_REF_UPDATES,     vp8_get_last_ref_updates},
     {VP8D_GET_FRAME_CORRUPTED,      vp8_get_frame_corrupted},
     {VP8D_GET_LAST_REF_USED,        vp8_get_last_ref_frame},
+    {VP8D_GET_MODE_INFO,            get_mode_info},
     { -1, NULL},
 };
 
