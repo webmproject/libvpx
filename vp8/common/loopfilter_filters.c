@@ -15,7 +15,7 @@
 
 typedef unsigned char uc;
 
-static __inline signed char vp8_signed_char_clamp(int t)
+static signed char vp8_signed_char_clamp(int t)
 {
     t = (t < -128 ? -128 : t);
     t = (t > 127 ? 127 : t);
@@ -24,9 +24,9 @@ static __inline signed char vp8_signed_char_clamp(int t)
 
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline signed char vp8_filter_mask(uc limit, uc blimit,
-                                     uc p3, uc p2, uc p1, uc p0,
-                                     uc q0, uc q1, uc q2, uc q3)
+static signed char vp8_filter_mask(uc limit, uc blimit,
+                            uc p3, uc p2, uc p1, uc p0,
+                            uc q0, uc q1, uc q2, uc q3)
 {
     signed char mask = 0;
     mask |= (abs(p3 - p2) > limit);
@@ -40,7 +40,7 @@ static __inline signed char vp8_filter_mask(uc limit, uc blimit,
 }
 
 /* is there high variance internal edge ( 11111111 yes, 00000000 no) */
-static __inline signed char vp8_hevmask(uc thresh, uc p1, uc p0, uc q0, uc q1)
+static signed char vp8_hevmask(uc thresh, uc p1, uc p0, uc q0, uc q1)
 {
     signed char hev = 0;
     hev  |= (abs(p1 - p0) > thresh) * -1;
@@ -48,7 +48,7 @@ static __inline signed char vp8_hevmask(uc thresh, uc p1, uc p0, uc q0, uc q1)
     return hev;
 }
 
-static __inline void vp8_filter(signed char mask, uc hev, uc *op1,
+static void vp8_filter(signed char mask, uc hev, uc *op1,
         uc *op0, uc *oq0, uc *oq1)
 
 {
@@ -158,7 +158,7 @@ void vp8_loop_filter_vertical_edge_c
     while (++i < count * 8);
 }
 
-static __inline void vp8_mbfilter(signed char mask, uc hev,
+static void vp8_mbfilter(signed char mask, uc hev,
                            uc *op2, uc *op1, uc *op0, uc *oq0, uc *oq1, uc *oq2)
 {
     signed char s, u;
@@ -279,7 +279,7 @@ void vp8_mbloop_filter_vertical_edge_c
 }
 
 /* should we apply any filter at all ( 11111111 yes, 00000000 no) */
-static __inline signed char vp8_simple_filter_mask(uc blimit, uc p1, uc p0, uc q0, uc q1)
+static signed char vp8_simple_filter_mask(uc blimit, uc p1, uc p0, uc q0, uc q1)
 {
 /* Why does this cause problems for win32?
  * error C2143: syntax error : missing ';' before 'type'
@@ -289,7 +289,7 @@ static __inline signed char vp8_simple_filter_mask(uc blimit, uc p1, uc p0, uc q
     return mask;
 }
 
-static __inline void vp8_simple_filter(signed char mask, uc *op1, uc *op0, uc *oq0, uc *oq1)
+static void vp8_simple_filter(signed char mask, uc *op1, uc *op0, uc *oq0, uc *oq1)
 {
     signed char vp8_filter, Filter1, Filter2;
     signed char p1 = (signed char) * op1 ^ 0x80;

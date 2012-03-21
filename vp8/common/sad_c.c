@@ -13,7 +13,7 @@
 #include "vpx_config.h"
 #include "vpx/vpx_integer.h"
 
-static __inline
+static
 unsigned int sad_mx_n_c(
     const unsigned char *src_ptr,
     int  src_stride,
