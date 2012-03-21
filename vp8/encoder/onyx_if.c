@@ -1106,6 +1106,9 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
                                     width, height, VP8BORDERINPIXELS))
         vpx_internal_error(&cpi->common.error, VPX_CODEC_MEM_ERROR,
                            "Failed to allocate scaled source buffer");
+
+    vpx_free(cpi->tok);
+
     {
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
         unsigned int tokens = 8 * 24 * 16; /* one MB for each thread */
