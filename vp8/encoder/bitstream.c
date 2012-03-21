@@ -1424,6 +1424,10 @@ static int default_coef_context_savings(VP8_COMP *cpi)
                 //unsigned int branch_ct   [ENTROPY_NODES] [2];
 
                 int t = 0;      /* token/prob index */
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 
                 vp8_tree_probs_from_distribution(
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
@@ -1473,6 +1477,10 @@ void build_coeff_contexts(VP8_COMP *cpi)
             do
             {
                 int t;
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                    continue;
+#endif
                 vp8_tree_probs_from_distribution(
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     cpi->frame_coef_probs [i][j][k],
@@ -1512,6 +1520,10 @@ void build_coeff_contexts(VP8_COMP *cpi)
                     //vp8_prob new_p           [ENTROPY_NODES];
                     //unsigned int branch_ct   [ENTROPY_NODES] [2];
                     int t = 0;      /* token/prob index */
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
                     vp8_tree_probs_from_distribution(
                         MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                         cpi->frame_coef_probs_8x8 [i][j][k],
@@ -1569,6 +1581,10 @@ static void update_coef_probs3(VP8_COMP *cpi)
                     const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
                     int s;
                     int u = 0;
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 
 #if defined(SEARCH_NEWP)
                     s = prob_update_savings_search(
@@ -1605,6 +1621,10 @@ static void update_coef_probs3(VP8_COMP *cpi)
                     int s;
                     int u = 0;
 
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 #if defined(SEARCH_NEWP)
                     s = prob_update_savings_search(
                         cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
@@ -1650,6 +1670,10 @@ static void update_coef_probs3(VP8_COMP *cpi)
                     int s;
                     int u = 0;
 
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 #if defined(SEARCH_NEWP)
                     s = prob_update_savings_search(
                             cpi->frame_branch_ct_8x8 [i][j][k][t],
@@ -1688,6 +1712,10 @@ static void update_coef_probs3(VP8_COMP *cpi)
                     int s;
                     int u = 0;
 
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 #if defined(SEARCH_NEWP)
                     s = prob_update_savings_search(
                         cpi->frame_branch_ct_8x8 [i][j][k][t],
@@ -1742,6 +1770,10 @@ static void update_coef_probs2(VP8_COMP *cpi)
             {
                 for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
                 {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
                     vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
                     const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
@@ -1785,7 +1817,10 @@ static void update_coef_probs2(VP8_COMP *cpi)
                     const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
                     int s;
                     int u = 0;
-
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 #if defined(SEARCH_NEWP)
                     s = prob_update_savings_search(
                         cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
@@ -1829,7 +1864,10 @@ static void update_coef_probs2(VP8_COMP *cpi)
                     const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
                     int s;
                     int u = 0;
-
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 #if defined(SEARCH_NEWP)
                     s = prob_update_savings_search(
                             cpi->frame_branch_ct_8x8 [i][j][k][t],
@@ -1870,7 +1908,10 @@ static void update_coef_probs2(VP8_COMP *cpi)
                     const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
                     int s;
                     int u = 0;
-
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 #if defined(SEARCH_NEWP)
                         s = prob_update_savings_search(
                             cpi->frame_branch_ct_8x8 [i][j][k][t],
@@ -1939,7 +1980,10 @@ static void update_coef_probs(VP8_COMP *cpi)
                     const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
                     int s = prev_coef_savings[t];
                     int u = 0;
-
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
                     s = prob_update_savings_search(
                             cpi->frame_branch_ct [i][j][k][t],
@@ -2007,6 +2051,10 @@ static void update_coef_probs(VP8_COMP *cpi)
                         const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
                         int s = prev_coef_savings[t];
                         int u = 0;
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                        if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                            continue;
+#endif
 
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
                         s = prob_update_savings_search(
@@ -2088,6 +2136,10 @@ static void update_coef_probs(VP8_COMP *cpi)
                         vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
                         const vp8_prob oldp = *Pold;
                         const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                        if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                            continue;
+#endif
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
                         const int s = prob_update_savings_search(ct, oldp, &newp, upd);
                         const int u = s > 0 && newp != oldp ? 1 : 0;
@@ -2165,6 +2217,11 @@ static void update_coef_probs(VP8_COMP *cpi)
 #else
                             const int s = prob_update_savings(ct, oldp, newp, upd);
                             const int u = s > 0 ? 1 : 0;
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                            if (k >=3 && ((i == 0 && j == 1) ||
+                                          (i > 0 && j == 0)))
+                                continue;
+#endif
 #endif
                             vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS

@@ -629,9 +629,7 @@ void print_context_counters()
 
     fprintf(f, "\n/* *** GENERATED FILE: DO NOT EDIT *** */\n\n");
 
-    fprintf(f, "int Contexts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];\n\n");
-
-    fprintf(f, "const int default_contexts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
+    fprintf(f, "static const unsigned int\nvp8_default_coef_counts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
 
 # define Comma( X) (X? ",":"")
 
@@ -678,10 +676,11 @@ void print_context_counters()
         fprintf(f, "\n  }");
     }
     while (++type < BLOCK_TYPES);
+    fprintf(f, "\n};\n");
 
-    fprintf(f, "int Contexts_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];\n\n");
-
-    fprintf(f, "const int default_contexts_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
+    fprintf(f, "static const unsigned int\nvp8_default_coef_counts_8x8"
+            "[BLOCK_TYPES] [COEF_BANDS]"
+            "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
 
     type = 0;
 
@@ -705,7 +704,7 @@ void print_context_counters()
 
                 do
                 {
-                    const INT64 x = context_counters [type] [band] [pt] [t];
+                    const INT64 x = context_counters_8x8 [type] [band] [pt] [t];
                     const int y = (int) x;
 
                     assert(x == (INT64) y);  /* no overflow handling yet */
@@ -728,6 +727,113 @@ void print_context_counters()
     while (++type < BLOCK_TYPES);
 
     fprintf(f, "\n};\n");
+
+    fprintf(f, "static const vp8_prob\n"
+            "vp8_default_coef_probs[BLOCK_TYPES] [COEF_BANDS] \n"
+            "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {");
+    type = 0;
+
+    do
+    {
+        fprintf(f, "%s\n  { /* block Type %d */", Comma(type), type);
+
+        band = 0;
+
+        do
+        {
+            fprintf(f, "%s\n    { /* Coeff Band %d */", Comma(band), band);
+
+            pt = 0;
+
+            do
+            {
+                fprintf(f, "%s\n      {", Comma(pt));
+
+                unsigned int branch_ct [ENTROPY_NODES] [2];
+                unsigned int coef_counts[MAX_ENTROPY_TOKENS];
+                vp8_prob coef_probs[ENTROPY_NODES];
+                for (t=0; t<MAX_ENTROPY_TOKENS; ++t)
+                    coef_counts[t]=context_counters [type] [band] [pt] [t];
+                vp8_tree_probs_from_distribution(
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                    coef_probs, branch_ct, coef_counts, 256, 1);
+
+                t = 0;
+
+                do
+                {
+                    fprintf(f, "%s %d", Comma(t), coef_probs[t]);
+
+                }
+                while (++t < ENTROPY_NODES);
+
+                fprintf(f, "}");
+            }
+            while (++pt < PREV_COEF_CONTEXTS);
+
+            fprintf(f, "\n    }");
+
+        }
+        while (++band < COEF_BANDS);
+
+        fprintf(f, "\n  }");
+    }
+    while (++type < BLOCK_TYPES);
+    fprintf(f, "\n};\n");
+
+    fprintf(f, "static const vp8_prob\n"
+            "vp8_default_coef_probs_8x8[BLOCK_TYPES] [COEF_BANDS]\n"
+            "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {");
+    type = 0;
+
+    do
+    {
+        fprintf(f, "%s\n  { /* block Type %d */", Comma(type), type);
+
+        band = 0;
+
+        do
+        {
+            fprintf(f, "%s\n    { /* Coeff Band %d */", Comma(band), band);
+
+            pt = 0;
+
+            do
+            {
+                fprintf(f, "%s\n      {", Comma(pt));
+
+                unsigned int branch_ct [ENTROPY_NODES] [2];
+                unsigned int coef_counts[MAX_ENTROPY_TOKENS];
+                vp8_prob coef_probs[ENTROPY_NODES];
+                for (t=0; t<MAX_ENTROPY_TOKENS; ++t)
+                    coef_counts[t]=context_counters_8x8[type] [band] [pt] [t];
+                vp8_tree_probs_from_distribution(
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                    coef_probs, branch_ct, coef_counts, 256, 1);
+
+                t = 0;
+
+                do
+                {
+                    fprintf(f, "%s %d", Comma(t), coef_probs[t]);
+
+                }
+                while (++t < ENTROPY_NODES);
+
+                fprintf(f, "}");
+            }
+            while (++pt < PREV_COEF_CONTEXTS);
+
+            fprintf(f, "\n    }");
+
+        }
+        while (++band < COEF_BANDS);
+
+        fprintf(f, "\n  }");
+    }
+    while (++type < BLOCK_TYPES);
+    fprintf(f, "\n};\n");
+
     fclose(f);
 }
 

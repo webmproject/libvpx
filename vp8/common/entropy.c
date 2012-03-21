@@ -51,7 +51,11 @@ DECLARE_ALIGNED(16, cuchar, vp8_coef_bands[16]) =
 { 0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7};
 
 DECLARE_ALIGNED(16, cuchar, vp8_prev_token_class[MAX_ENTROPY_TOKENS]) =
+#if CONFIG_EXPANDED_COEF_CONTEXT
+{ 0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0};
+#else
 { 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0};
+#endif
 
 DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]) =
 {

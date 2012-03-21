@@ -21,14 +21,24 @@
 #define BOOL_DATA UINT8
 
 #define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
+
+#if CONFIG_EXPANDED_COEF_CONTEXT
+DECLARE_ALIGNED(16, static const unsigned short, coef_bands_x[16]) =
+#else
 DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
+#endif
 {
     0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X,
     6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X,
     6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
     6 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X
 };
-DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) = {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+DECLARE_ALIGNED(16, static const unsigned short, coef_bands_x_8x8[64]) =
+#else
+DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) =
+#endif
+{
   0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X,
   5 * OCB_X, 3 * OCB_X, 6 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 6 * OCB_X, 6 * OCB_X,
   6 * OCB_X, 5 * OCB_X, 5 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
@@ -208,9 +218,17 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         NORMALIZE \
     }
 
+//#define PREV_CONTEXT_INC(val) (2+((val)>2))
+//#define PREV_CONTEXT_INC(val) (vp8_prev_token_class[(val)])
+#if CONFIG_EXPANDED_COEF_CONTEXT
+#define PREV_CONTEXT_INC(val) (vp8_prev_token_class[(val)>10?10:(val)])
+#else
+#define PREV_CONTEXT_INC(val) (2)
+#endif
+
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT(val) \
     DECODE_AND_APPLYSIGN(val) \
-    Prob = coef_probs + (ENTROPY_NODES*2); \
+    Prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val)); \
     if(c < 15){\
         qcoeff_ptr [ scan[c] ] = (INT16) v; \
         ++c; \
@@ -221,7 +239,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val) \
     DECODE_AND_APPLYSIGN(val) \
-    Prob = coef_probs + (ENTROPY_NODES*2); \
+    Prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val)); \
     if(c < 3){\
         qcoeff_ptr [ scan[c] ] = (INT16) v; \
         ++c; \
@@ -230,7 +248,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     goto BLOCK_FINISHED_8x8;
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val) \
     DECODE_AND_APPLYSIGN(val) \
-    Prob = coef_probs + (ENTROPY_NODES*2); \
+    Prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val)); \
     if(c < 63){\
         qcoeff_ptr [ scan[c] ] = (INT16) v; \
         ++c; \

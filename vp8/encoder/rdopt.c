@@ -229,7 +229,6 @@ static void fill_token_costs(
         for (j = 0; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
             {
-
                 if(k == 0 && ((j > 0 && i > 0) || (j > 1 && i == 0)))
                     vp8_cost_tokens_skip((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
                 else
@@ -371,12 +370,12 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 
     fill_token_costs(
         cpi->mb.token_costs,
-        (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs
+        (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs
     );
 
     fill_token_costs(
         cpi->mb.token_costs_8x8,
-        (const vp8_prob( *)[8][3][11]) cpi->common.fc.coef_probs_8x8
+        (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8
     );
     /*rough estimate for costing*/
     cpi->common.kf_ymode_probs_index = cpi->common.base_qindex>>4;

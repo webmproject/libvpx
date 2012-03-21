@@ -803,12 +803,19 @@ static void read_coef_probs3(VP8D_COMP *pbi)
                 for (j = !i; j < COEF_BANDS; j++)
                     for (k = 0; k < PREV_COEF_CONTEXTS; k++)
                     {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                        if (k >= 3 && ((i == 0 && j == 1) ||
+                                       (i > 0 && j == 0)))
+                            continue;
+#endif
+                        {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
                         int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
                         if (u)
                         {
                             int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
                             *p = (vp8_prob)inv_remap_prob(delp, *p);
+                        }
                         }
                     }
             }
@@ -824,12 +831,19 @@ static void read_coef_probs3(VP8D_COMP *pbi)
                     for (j = !i; j < COEF_BANDS; j++)
                         for (k = 0; k < PREV_COEF_CONTEXTS; k++)
                         {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                            if (k >= 3 && ((i == 0 && j == 1) ||
+                                           (i > 0 && j == 0)))
+                                continue;
+#endif
+                            {
                             vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
                             int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
                             if (u)
                             {
                                 int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
                                 *p = (vp8_prob)inv_remap_prob(delp, *p);
+                            }
                             }
                         }
                 }
@@ -852,12 +866,19 @@ static void read_coef_probs2(VP8D_COMP *pbi)
                 for (j = !i; j < COEF_BANDS; j++)
                     for (k = 0; k < PREV_COEF_CONTEXTS; k++)
                     {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                        if (k >= 3 && ((i == 0 && j == 1) ||
+                                       (i > 0 && j == 0)))
+                            continue;
+#endif
+                        {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
                         int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
                         if (u)
                         {
                             int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
                             *p = (vp8_prob)inv_remap_prob(delp, *p);
+                        }
                         }
                     }
         }
@@ -872,6 +893,12 @@ static void read_coef_probs2(VP8D_COMP *pbi)
                     for (j = !i; j < COEF_BANDS; j++)
                         for (k = 0; k < PREV_COEF_CONTEXTS; k++)
                         {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                            if (k >= 3 && ((i == 0 && j == 1) ||
+                                           (i > 0 && j == 0)))
+                                continue;
+#endif
+                            {
                             vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
 
                             int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
@@ -879,6 +906,7 @@ static void read_coef_probs2(VP8D_COMP *pbi)
                             {
                                 int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
                                 *p = (vp8_prob)inv_remap_prob(delp, *p);
+                            }
                             }
                         }
             }
@@ -904,6 +932,12 @@ static void read_coef_probs(VP8D_COMP *pbi)
             for (j = 0; j < COEF_BANDS; j++)
 #endif
                 for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >= 3 && ((i == 0 && j == 1) ||
+                                   (i > 0 && j == 0)))
+                        continue;
+#endif
                     for (l = 0; l < ENTROPY_NODES; l++)
                     {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
@@ -920,6 +954,7 @@ static void read_coef_probs(VP8D_COMP *pbi)
 #endif
                         }
                     }
+                }
         }
     }
 
@@ -933,6 +968,12 @@ static void read_coef_probs(VP8D_COMP *pbi)
             for (j = 0; j < COEF_BANDS; j++)
 #endif
                 for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >= 3 && ((i == 0 && j == 1) ||
+                                   (i > 0 && j == 0)))
+                        continue;
+#endif
                     for (l = 0; l < ENTROPY_NODES; l++)
                     {
 
@@ -948,6 +989,7 @@ static void read_coef_probs(VP8D_COMP *pbi)
 #endif
                         }
                     }
+                }
     }
 }
 
@@ -1389,7 +1431,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #else
     read_coef_probs(pbi);
 #endif
-
 
     vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));

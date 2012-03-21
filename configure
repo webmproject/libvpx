@@ -226,6 +226,7 @@ EXPERIMENT_LIST="
     newentropy
     newupdate
     superblocks
+    expanded_coef_context
 "
 CONFIG_LIST="
     external_build
