@@ -186,7 +186,7 @@ void vp8_build_component_cost_table(int *mvcost[2], const MV_CONTEXT *mvc, int m
 #define MV_PROB_UPDATE_CORRECTION   -1
 
 
-__inline static void calc_prob(vp8_prob *p, const unsigned int ct[2])
+static void calc_prob(vp8_prob *p, const unsigned int ct[2])
 {
     const unsigned int tot = ct[0] + ct[1];
 

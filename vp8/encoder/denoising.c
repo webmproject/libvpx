@@ -21,7 +21,7 @@ const unsigned int NOISE_DIFF2_THRESHOLD = 75;
 const unsigned int SSE_DIFF_THRESHOLD = 16*16*20;
 const unsigned int SSE_THRESHOLD = 16*16*40;
 
-static __inline uint8_t blend(uint8_t state, uint8_t sample, uint8_t factor_q8)
+static uint8_t blend(uint8_t state, uint8_t sample, uint8_t factor_q8)
 {
   return (uint8_t)(
       (((uint16_t)factor_q8 * ((uint16_t)state) +  // Q8

@@ -482,7 +482,7 @@ void vp8_tokenize_initialize()
 }
 
 
-static __inline void stuff2nd_order_b
+static void stuff2nd_order_b
 (
     TOKENEXTRA **tp,
     ENTROPY_CONTEXT *a,
@@ -506,7 +506,7 @@ static __inline void stuff2nd_order_b
 
 }
 
-static __inline void stuff1st_order_b
+static void stuff1st_order_b
 (
     TOKENEXTRA **tp,
     ENTROPY_CONTEXT *a,
@@ -530,7 +530,7 @@ static __inline void stuff1st_order_b
     *a = *l = pt;
 
 }
-static __inline
+static
 void stuff1st_order_buv
 (
     TOKENEXTRA **tp,

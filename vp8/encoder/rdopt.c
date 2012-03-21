@@ -1349,7 +1349,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
     }
 }
 
-static __inline
+static
 void vp8_cal_step_param(int sr, int *sp)
 {
     int step = 0;

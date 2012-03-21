@@ -72,7 +72,7 @@ extern "C"
 
 
 #include <assert.h>
-    static __inline void Scale2Ratio(int mode, int *hr, int *hs)
+    static void Scale2Ratio(int mode, int *hr, int *hs)
     {
         switch (mode)
         {
