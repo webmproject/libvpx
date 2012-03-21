@@ -27,9 +27,9 @@
 #include <stdlib.h>
 
 
-static inline void filter_by_weight(unsigned char *src, int src_stride,
-                                    unsigned char *dst, int dst_stride,
-                                    int block_size, int src_weight)
+static void filter_by_weight(unsigned char *src, int src_stride,
+                             unsigned char *dst, int dst_stride,
+                             int block_size, int src_weight)
 {
     int dst_weight = (1 << MFQE_PRECISION) - src_weight;
     int rounding_bit = 1 << (MFQE_PRECISION - 1);
@@ -69,18 +69,18 @@ void vp8_filter_by_weight4x4_c(unsigned char *src, int src_stride,
     filter_by_weight(src, src_stride, dst, dst_stride, 4, src_weight);
 }
 
-static inline void apply_ifactor(unsigned char *y_src,
-                                 int y_src_stride,
-                                 unsigned char *y_dst,
-                                 int y_dst_stride,
-                                 unsigned char *u_src,
-                                 unsigned char *v_src,
-                                 int uv_src_stride,
-                                 unsigned char *u_dst,
-                                 unsigned char *v_dst,
-                                 int uv_dst_stride,
-                                 int block_size,
-                                 int src_weight)
+static void apply_ifactor(unsigned char *y_src,
+                          int y_src_stride,
+                          unsigned char *y_dst,
+                          int y_dst_stride,
+                          unsigned char *u_src,
+                          unsigned char *v_src,
+                          int uv_src_stride,
+                          unsigned char *u_dst,
+                          unsigned char *v_dst,
+                          int uv_dst_stride,
+                          int block_size,
+                          int src_weight)
 {
     if (block_size == 16)
     {
