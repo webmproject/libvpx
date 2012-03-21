@@ -24,32 +24,13 @@
 
 #if HAVE_SSE2
 extern prototype_quantize_block(vp8_regular_quantize_b_sse2);
-extern prototype_quantize_block(vp8_fast_quantize_b_sse2);
-
 #if !CONFIG_RUNTIME_CPU_DETECT
 
 #undef vp8_quantize_quantb
 #define vp8_quantize_quantb vp8_regular_quantize_b_sse2
-
-#undef vp8_quantize_fastquantb
-#define vp8_quantize_fastquantb vp8_fast_quantize_b_sse2
-
 #endif /* !CONFIG_RUNTIME_CPU_DETECT */
 
 #endif /* HAVE_SSE2 */
-
-
-#if HAVE_SSSE3
-extern prototype_quantize_block(vp8_fast_quantize_b_ssse3);
-
-#if !CONFIG_RUNTIME_CPU_DETECT
-
-#undef vp8_quantize_fastquantb
-#define vp8_quantize_fastquantb vp8_fast_quantize_b_ssse3
-
-#endif /* !CONFIG_RUNTIME_CPU_DETECT */
-
-#endif /* HAVE_SSSE3 */
 
 
 #if HAVE_SSE4_1

@@ -1168,18 +1168,6 @@ int vp8cx_encode_inter_macroblock
         int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
         int single, compound, hybrid;
 
-        /* Are we using the fast quantizer for the mode selection? */
-        if(cpi->sf.use_fastquant_for_pick)
-        {
-            cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                      fastquantb);
-            cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                      fastquantb_pair);
-
-            /* the fast quantizer does not use zbin_extra, so
-             * do not recalculate */
-            cpi->zbin_mode_boost_enabled = 0;
-        }
         vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
                                &distortion, &intra_error, &single, &compound, &hybrid);
 
@@ -1215,14 +1203,6 @@ int vp8cx_encode_inter_macroblock
             cpi->t4x4_count++;
         }
 
-        /* switch back to the regular quantizer for the encode */
-        if (cpi->sf.improved_quant)
-        {
-            cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                      quantb);
-            cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                      quantb_pair);
-        }
         /* restore cpi->zbin_mode_boost_enabled */
         cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
 
@@ -1263,10 +1243,7 @@ int vp8cx_encode_inter_macroblock
             }
         }
 
-        /* The fast quantizer doesn't use zbin_extra, only do so with
-         * the regular quantizer. */
-        if (cpi->sf.improved_quant)
-            vp8_update_zbin_extra(cpi, x);
+        vp8_update_zbin_extra(cpi, x);
     }
 
     seg_ref_active = segfeature_active( xd, *segment_id, SEG_LVL_REF_FRAME );

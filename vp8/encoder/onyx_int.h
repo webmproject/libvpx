@@ -220,7 +220,6 @@ typedef struct
 {
     int RD;
     SEARCH_METHODS search_method;
-    int improved_quant;
     int improved_dct;
     int auto_filter;
     int recode_loop;
@@ -231,8 +230,6 @@ typedef struct
     int max_step_search_steps;
     int first_step;
     int optimize_coefficients;
-
-    int use_fastquant_for_pick;
     int no_skip_block4x4_search;
     int improved_mv_pred;
 
@@ -269,7 +266,6 @@ typedef struct VP8_ENCODER_RTCD
     vp8_variance_rtcd_vtable_t  variance;
     vp8_fdct_rtcd_vtable_t      fdct;
     vp8_encodemb_rtcd_vtable_t  encodemb;
-    vp8_quantize_rtcd_vtable_t  quantize;
     vp8_search_rtcd_vtable_t    search;
     vp8_temporal_rtcd_vtable_t  temporal;
 } VP8_ENCODER_RTCD;

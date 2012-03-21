@@ -652,7 +652,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     int Speed = cpi->Speed;
     int i;
     VP8_COMMON *cm = &cpi->common;
-    int last_improved_quant = sf->improved_quant;
 
     // Only modes 0 and 1 supported for now in experimental code basae
     if ( Mode > 1 )
@@ -671,7 +670,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     // best quality defaults
     sf->RD = 1;
     sf->search_method = NSTEP;
-    sf->improved_quant = 1;
     sf->improved_dct = 1;
     sf->auto_filter = 1;
     sf->recode_loop = 1;
@@ -679,7 +677,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->half_pixel_search = 1;
     sf->iterative_sub_pixel = 1;
     sf->optimize_coefficients = 1;
-    sf->use_fastquant_for_pick = 0;
     sf->no_skip_block4x4_search = 1;
 
     sf->first_step = 0;
@@ -791,7 +788,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         {
             /* Disable coefficient optimization above speed 0 */
             sf->optimize_coefficients = 0;
-            sf->use_fastquant_for_pick = 1;
             sf->no_skip_block4x4_search = 0;
 
             sf->first_step = 1;
@@ -902,7 +898,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_COMP_NEWLA    ] = 2500;
             sf->thresh_mult[THR_COMP_NEWGA    ] = 2500;
 
-            sf->improved_quant = 0;
             sf->improved_dct = 0;
 
             // Only do recode loop on key frames, golden frames and
@@ -971,7 +966,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     // so make sure they are always turned off.
     if ( cpi->pass == 1 )
     {
-        sf->improved_quant = 0;
         sf->optimize_coefficients = 0;
         sf->improved_dct = 0;
     }
@@ -1001,26 +995,13 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     cpi->mb.short_walsh4x4 = FDCT_INVOKE(&cpi->rtcd.fdct, walsh_short4x4);
     cpi->mb.short_fhaar2x2 = FDCT_INVOKE(&cpi->rtcd.fdct, haar_short2x2);
 
-    if (cpi->sf.improved_quant)
-    {
-        cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                  quantb);
-        cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                  quantb_pair);
-        cpi->mb.quantize_b_8x8  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb_8x8);
-        cpi->mb.quantize_b_2x2  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, quantb_2x2);
-    }
-    else
-    {
-        cpi->mb.quantize_b      = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                  fastquantb);
-        cpi->mb.quantize_b_pair = QUANTIZE_INVOKE(&cpi->rtcd.quantize,
-                                                  fastquantb_pair);
-        cpi->mb.quantize_b_8x8  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb_8x8);
-        cpi->mb.quantize_b_2x2  = QUANTIZE_INVOKE(&cpi->rtcd.quantize, fastquantb_2x2);
-    }
-    if (cpi->sf.improved_quant != last_improved_quant)
-        vp8cx_init_quantizer(cpi);
+
+    cpi->mb.quantize_b      = vp8_regular_quantize_b;
+    cpi->mb.quantize_b_pair = vp8_regular_quantize_b_pair;
+    cpi->mb.quantize_b_8x8  = vp8_regular_quantize_b_8x8;
+    cpi->mb.quantize_b_2x2  = vp8_regular_quantize_b_2x2;
+
+    vp8cx_init_quantizer(cpi);
 
 #if CONFIG_RUNTIME_CPU_DETECT
     cpi->mb.e_mbd.rtcd = &cpi->common.rtcd;
