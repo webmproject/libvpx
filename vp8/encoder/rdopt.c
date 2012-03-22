@@ -1479,6 +1479,246 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
     return bsi.segment_rd;
 }
 
+
+static void rd_reuse_segment(VP8_COMP *cpi, MACROBLOCK *x,
+                             BEST_SEG_INFO *bsi, unsigned int segmentation)
+{
+    int i;
+    int const *labels;
+    int br = 0;
+    int bd = 0;
+    B_PREDICTION_MODE this_mode;
+    int_mv reused_mv[16];
+
+
+    int label_count;
+    int this_segment_rd = 0;
+    int label_mv_thresh;
+    int rate = 0;
+    int sbr = 0;
+    int sbd = 0;
+    int segmentyrate = 0;
+
+    vp8_variance_fn_ptr_t *v_fn_ptr;
+
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta;
+    ENTROPY_CONTEXT *tl;
+    ENTROPY_CONTEXT_PLANES t_above_b, t_left_b;
+    ENTROPY_CONTEXT *ta_b;
+    ENTROPY_CONTEXT *tl_b;
+
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+    ta_b = (ENTROPY_CONTEXT *)&t_above_b;
+    tl_b = (ENTROPY_CONTEXT *)&t_left_b;
+
+    br = 0;
+    bd = 0;
+
+    v_fn_ptr = &cpi->fn_ptr[segmentation];
+    labels = vp8_mbsplits[segmentation];
+    label_count = vp8_mbsplit_count[segmentation];
+
+    // 64 makes this threshold really big effectively
+    // making it so that we very rarely check mvs on
+    // segments.   setting this to 1 would make mv thresh
+    // roughly equal to what it is for macroblocks
+    label_mv_thresh = 1 * bsi->mvthresh / label_count ;
+
+    // Segmentation method overheads
+    rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + segmentation);
+    rate += vp8_cost_mv_ref(SPLITMV, bsi->mdcounts);
+    this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
+    br += rate;
+
+    for (i = 0; i < 16; i++)
+        reused_mv[i].as_int = x->e_mbd.block[i].bmi.mv.as_int;
+
+    for (i = 0; i < label_count; i++)
+    {
+        int_mv mode_mv[B_MODE_COUNT];
+        int best_label_rd = INT_MAX;
+        B_PREDICTION_MODE mode_selected = ZERO4X4;
+        int bestlabelyrate = 0;
+
+        // search for the best motion vector on this segment
+        for (this_mode = LEFT4X4; this_mode <= NEW4X4 ; this_mode ++)
+        {
+            int this_rd;
+            int distortion;
+            int labelyrate;
+            ENTROPY_CONTEXT_PLANES t_above_s, t_left_s;
+            ENTROPY_CONTEXT *ta_s;
+            ENTROPY_CONTEXT *tl_s;
+
+            vpx_memcpy(&t_above_s, &t_above, sizeof(ENTROPY_CONTEXT_PLANES));
+            vpx_memcpy(&t_left_s, &t_left, sizeof(ENTROPY_CONTEXT_PLANES));
+
+            ta_s = (ENTROPY_CONTEXT *)&t_above_s;
+            tl_s = (ENTROPY_CONTEXT *)&t_left_s;
+
+            /* find the first block for this label */
+            if (this_mode == NEW4X4)
+            {
+                int b;
+                for(b=0; b<16; b++)
+                    if(labels[b] == i) break;
+                mode_mv[NEW4X4].as_int = reused_mv[b].as_int;
+            }
+
+
+            rate = labels2mode(x, labels, i, this_mode, &mode_mv[this_mode],
+                               bsi->ref_mv, x->mvcost);
+
+            // Trap vectors that reach beyond the UMV borders
+            if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
+                ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max))
+            {
+                continue;
+            }
+
+            distortion = vp8_encode_inter_mb_segment(x, labels, i) / 4;
+
+            labelyrate = rdcost_mbsegment_y(x, labels, i, ta_s, tl_s);
+            rate += labelyrate;
+
+            this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
+
+            if (this_rd < best_label_rd)
+            {
+                sbr = rate;
+                sbd = distortion;
+                bestlabelyrate = labelyrate;
+                mode_selected = this_mode;
+                best_label_rd = this_rd;
+
+                vpx_memcpy(ta_b, ta_s, sizeof(ENTROPY_CONTEXT_PLANES));
+                vpx_memcpy(tl_b, tl_s, sizeof(ENTROPY_CONTEXT_PLANES));
+
+            }
+        } /*for each 4x4 mode*/
+
+        vpx_memcpy(ta, ta_b, sizeof(ENTROPY_CONTEXT_PLANES));
+        vpx_memcpy(tl, tl_b, sizeof(ENTROPY_CONTEXT_PLANES));
+
+        labels2mode(x, labels, i, mode_selected, &mode_mv[mode_selected],
+                    bsi->ref_mv, x->mvcost);
+
+        br += sbr;
+        bd += sbd;
+        segmentyrate += bestlabelyrate;
+        this_segment_rd += best_label_rd;
+
+        if (this_segment_rd >= bsi->segment_rd)
+            break;
+
+    } /* for each label */
+
+    if (this_segment_rd < bsi->segment_rd)
+    {
+        bsi->r = br;
+        bsi->d = bd;
+        bsi->segment_yrate = segmentyrate;
+        bsi->segment_rd = this_segment_rd;
+        bsi->segment_num = segmentation;
+
+        // store everything needed to come back to this!!
+        for (i = 0; i < 16; i++)
+        {
+            bsi->mvs[i].as_mv = x->partition_info->bmi[i].mv.as_mv;
+            bsi->modes[i] = x->partition_info->bmi[i].mode;
+            bsi->eobs[i] = x->e_mbd.eobs[i];
+        }
+    }
+}
+
+
+static int vp8_rd_reuse_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
+                                           int_mv *best_ref_mv, int best_rd,
+                                           int *mdcounts, int *returntotrate,
+                                           int *returnyrate, int *returndistortion,
+                                           int mvthresh)
+{
+    int i;
+    BEST_SEG_INFO bsi;
+
+    vpx_memset(&bsi, 0, sizeof(bsi));
+
+    bsi.segment_rd = best_rd;
+    bsi.ref_mv = best_ref_mv;
+    bsi.mvp.as_int = best_ref_mv->as_int;
+    bsi.mvthresh = mvthresh;
+    bsi.mdcounts = mdcounts;
+
+    for(i = 0; i < 16; i++)
+    {
+        bsi.modes[i] = ZERO4X4;
+    }
+
+    {
+        int s;
+
+        for(s = 0; s < BLOCK_4X4; s++)
+        {
+            char set[16] = {0};
+            int smv[16];
+
+            for (i=0; i<16; i++)
+            {
+                int p = vp8_mbsplits[s][i];
+
+                if(!set[p])
+                {
+                    set[p] = 1;
+                    smv[p] = x->e_mbd.block[i].bmi.mv.as_int;
+                }
+                if(smv[p] != x->e_mbd.block[i].bmi.mv.as_int)
+                    break;
+            }
+            if(i==16)
+                break;
+        }
+        rd_reuse_segment(cpi, x, &bsi, s);
+    }
+
+    /* set it to the best */
+    for (i = 0; i < 16; i++)
+    {
+        BLOCKD *bd = &x->e_mbd.block[i];
+
+        bd->bmi.mv.as_int = bsi.mvs[i].as_int;
+        *bd->eob = bsi.eobs[i];
+    }
+
+    *returntotrate = bsi.r;
+    *returndistortion = bsi.d;
+    *returnyrate = bsi.segment_yrate;
+
+    /* save partitions */
+    x->e_mbd.mode_info_context->mbmi.partitioning = bsi.segment_num;
+    x->partition_info->count = vp8_mbsplit_count[bsi.segment_num];
+
+    for (i = 0; i < x->partition_info->count; i++)
+    {
+        int j;
+
+        j = vp8_mbsplit_offset[bsi.segment_num][i];
+
+        x->partition_info->bmi[i].mode = bsi.modes[j];
+        x->partition_info->bmi[i].mv.as_mv = bsi.mvs[j].as_mv;
+    }
+    /*
+     * used to set x->e_mbd.mode_info_context->mbmi.mv.as_int
+     */
+    x->partition_info->bmi[15].mv.as_int = bsi.mvs[15].as_int;
+
+    return bsi.segment_rd;
+}
+
 //The improved MV prediction
 void vp8_mv_pred
 (
@@ -1905,10 +2145,14 @@ void vp8_rd_use_external_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         this_mode = mi->mbmi.mode; //JRK
         this_ref_frame = mi->mbmi.ref_frame;
 
+#if 1
+        memcpy(x->e_mbd.mode_info_context, mi, sizeof(*mi));
+#else
         x->e_mbd.mode_info_context->mbmi.mode = this_mode;
         x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
         x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
-
+#endif
+//if(this_mode == SPLITMV) this_mode=NEWMV;
         /* everything but intra */
         if (x->e_mbd.mode_info_context->mbmi.ref_frame)
         {
@@ -1979,6 +2223,7 @@ void vp8_rd_use_external_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         case SPLITMV:
         {
+#if 1
             int tmp_rd;
             int this_rd_thresh;
 
@@ -1986,9 +2231,15 @@ void vp8_rd_use_external_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             //this_rd_thresh = (this_ref_frame == 2) ? cpi->rd_threshes[THR_NEW2] : this_rd_thresh;
             this_rd_thresh = 0;
 
+#if 1
             tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
                                                      best_yrd, mdcounts,
                                                      &rate, &rate_y, &distortion, this_rd_thresh) ;
+#else
+            tmp_rd = vp8_rd_reuse_mbsegmentation(cpi, x, &best_ref_mv,
+                                                 best_yrd, mdcounts,
+                                                 &rate, &rate_y, &distortion, this_rd_thresh) ;
+#endif
 
             VALGRIND_CHECK_VALUE_IS_DEFINED(rate);
             VALGRIND_CHECK_VALUE_IS_DEFINED(distortion);
@@ -2008,6 +2259,31 @@ void vp8_rd_use_external_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                 this_rd = INT_MAX;
                 disable_skip = 1;
             }
+#else
+            int i;
+
+            for (i = 0; i < 16; i++)
+            {
+                x->e_mbd.block[i].bmi = mi->bmi[i];
+                x->e_mbd.block[i].eob = 15;
+            }
+            x->e_mbd.mode_info_context->mbmi.partitioning = mi->mbmi.partitioning;
+            x->partition_info->count = vp8_mbsplit_count[mi->mbmi.partitioning];
+            for (i = 0; i < x->partition_info->count; i++)
+            {
+                int j;
+
+                j = vp8_mbsplit_offset[mi->mbmi.partitioning][i];
+
+                x->partition_info->bmi[i].mode =
+                    mi->bmi[j].mv.as_int ? NEW4X4 : ZERO4X4;
+                x->partition_info->bmi[i].mv.as_mv = mi->bmi[j].mv.as_mv;
+                distortion2 = vp8_encode_inter_mb_segment(x, vp8_mbsplits[segmentation], i);
+                rate2 = 0;
+            }
+            // rate = labels2mode(x, labels, i, this_mode, &mode_mv[this_mode], bsi->ref_mv, x->mvcost);
+
+#endif
         }
         VALGRIND_CHECK_VALUE_IS_DEFINED(rate_y);
         break;
