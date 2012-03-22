@@ -92,11 +92,13 @@ typedef struct VP8Common
     int fb_idx_ref_cnt[NUM_YV12_BUFFERS];
     int new_fb_idx, lst_fb_idx, gld_fb_idx, alt_fb_idx;
 
-    YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG temp_scale_frame;
 
+#if CONFIG_POSTPROC
+    YV12_BUFFER_CONFIG post_proc_buffer;
     YV12_BUFFER_CONFIG post_proc_buffer_int;
     int post_proc_buffer_int_used;
+#endif
 
     FRAME_TYPE last_frame_type;  /* Save last frame's frame type for motion search. */
     FRAME_TYPE frame_type;

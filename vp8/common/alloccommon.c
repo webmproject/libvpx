@@ -41,9 +41,11 @@ void vp8_de_alloc_frame_buffers(VP8_COMMON *oci)
         vp8_yv12_de_alloc_frame_buffer(&oci->yv12_fb[i]);
 
     vp8_yv12_de_alloc_frame_buffer(&oci->temp_scale_frame);
+#if CONFIG_POSTPROC
     vp8_yv12_de_alloc_frame_buffer(&oci->post_proc_buffer);
     if (oci->post_proc_buffer_int_used)
         vp8_yv12_de_alloc_frame_buffer(&oci->post_proc_buffer_int);
+#endif
 
     vpx_free(oci->above_context);
     vpx_free(oci->mip);
@@ -96,6 +98,7 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
         return 1;
     }
 
+#if CONFIG_POSTPROC
     if (vp8_yv12_alloc_frame_buffer(&oci->post_proc_buffer, width, height, VP8BORDERINPIXELS) < 0)
     {
         vp8_de_alloc_frame_buffers(oci);
@@ -103,6 +106,9 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     }
 
     oci->post_proc_buffer_int_used = 0;
+
+    vpx_memset(&oci->postproc_state, 0, sizeof(oci->postproc_state));
+#endif
 
     oci->mb_rows = height >> 4;
     oci->mb_cols = width >> 4;

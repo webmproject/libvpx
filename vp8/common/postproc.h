@@ -19,6 +19,7 @@ struct postproc_state
     int           last_noise;
     char          noise[3072];
     int           last_base_qindex;
+    int           last_frame_valid;
     DECLARE_ALIGNED(16, char, blackclamp[16]);
     DECLARE_ALIGNED(16, char, whiteclamp[16]);
     DECLARE_ALIGNED(16, char, bothclamp[16]);

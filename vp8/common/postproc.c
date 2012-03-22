@@ -693,7 +693,7 @@ static void constrain_line (int x0, int *x1, int y0, int *y1, int width, int hei
     }
 }
 
-
+#if CONFIG_POSTPROC
 int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t *ppflags)
 {
     int q = oci->filter_level * 10 / 6;
@@ -716,6 +716,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         dest->y_height = oci->Height;
         dest->uv_height = dest->y_height / 2;
         oci->postproc_state.last_base_qindex = oci->base_qindex;
+        oci->postproc_state.last_frame_valid = 1;
         return 0;
     }
 
@@ -746,6 +747,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 #endif
 
     if ((flags & VP8D_MFQE) &&
+         oci->postproc_state.last_frame_valid &&
          oci->current_video_frame >= 2 &&
          oci->base_qindex - oci->postproc_state.last_base_qindex >= 10)
     {
@@ -785,6 +787,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         vp8_yv12_copy_frame_ptr(oci->frame_to_show, &oci->post_proc_buffer);
         oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
+    oci->postproc_state.last_frame_valid = 1;
 
     if (flags & VP8D_ADDNOISE)
     {
@@ -1171,3 +1174,4 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     dest->uv_height = dest->y_height / 2;
     return 0;
 }
+#endif

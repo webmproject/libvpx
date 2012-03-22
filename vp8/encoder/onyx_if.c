@@ -5058,7 +5058,6 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 double frame_psnr;
                 YV12_BUFFER_CONFIG      *orig = cpi->Source;
                 YV12_BUFFER_CONFIG      *recon = cpi->common.frame_to_show;
-                YV12_BUFFER_CONFIG      *pp = &cm->post_proc_buffer;
                 int y_samples = orig->y_height * orig->y_width ;
                 int uv_samples = orig->uv_height * orig->uv_width ;
                 int t_samples = y_samples + 2 * uv_samples;
@@ -5082,7 +5081,9 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                 cpi->total_v += vp8_mse2psnr(uv_samples, 255.0, ve);
                 cpi->total_sq_error += sq_error;
                 cpi->total  += frame_psnr;
+#if CONFIG_POSTPROC
                 {
+                    YV12_BUFFER_CONFIG      *pp = &cm->post_proc_buffer;
                     double frame_psnr2, frame_ssim2 = 0;
                     double weight = 0;
 
@@ -5133,6 +5134,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
                          }
                     }
                 }
+#endif
             }
 
             if (cpi->b_calculate_ssimg)
