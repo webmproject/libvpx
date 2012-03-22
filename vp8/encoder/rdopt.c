@@ -1682,7 +1682,7 @@ static int vp8_rd_reuse_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
             if(i==16)
                 break;
         }
-        rd_reuse_segment(cpi, x, &bsi, s);
+        rd_check_segment(cpi, x, &bsi, s);
     }
 
     /* set it to the best */
@@ -2231,7 +2231,7 @@ void vp8_rd_use_external_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             //this_rd_thresh = (this_ref_frame == 2) ? cpi->rd_threshes[THR_NEW2] : this_rd_thresh;
             this_rd_thresh = 0;
 
-#if 1
+#if 0
             tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
                                                      best_yrd, mdcounts,
                                                      &rate, &rate_y, &distortion, this_rd_thresh) ;
