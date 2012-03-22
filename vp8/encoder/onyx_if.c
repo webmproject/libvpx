@@ -4629,7 +4629,12 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
         return -1;
 
     cm = &cpi->common;
-
+if(cm->refresh_last_frame && cm->refresh_golden_frame && cm->refresh_alt_ref_frame)
+{
+    cm->refresh_golden_frame = 0;
+    cm->refresh_alt_ref_frame = 0;
+    *frame_flags |= 1;
+}
     if (setjmp(cpi->common.error.jmp))
     {
         cpi->common.error.setjmp = 0;
