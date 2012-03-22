@@ -854,6 +854,32 @@ static void encode_frame_internal(VP8_COMP *cpi)
 
 }
 
+static int check_dual_ref_flags(VP8_COMP *cpi)
+{
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+    int ref_flags = cpi->ref_frame_flags;
+
+    if (segfeature_active(xd, 1, SEG_LVL_REF_FRAME))
+    {
+        if ((ref_flags & (VP8_LAST_FLAG | VP8_GOLD_FLAG)) == (VP8_LAST_FLAG | VP8_GOLD_FLAG) &&
+            check_segref(xd, 1, LAST_FRAME))
+            return 1;
+        if ((ref_flags & (VP8_GOLD_FLAG | VP8_ALT_FLAG )) == (VP8_GOLD_FLAG | VP8_ALT_FLAG ) &&
+            check_segref(xd, 1, GOLDEN_FRAME))
+            return 1;
+        if ((ref_flags & (VP8_ALT_FLAG  | VP8_LAST_FLAG)) == (VP8_ALT_FLAG  | VP8_LAST_FLAG) &&
+            check_segref(xd, 1, ALTREF_FRAME))
+            return 1;
+        return 0;
+    }
+    else
+    {
+        return (!!(ref_flags & VP8_GOLD_FLAG) +
+                !!(ref_flags & VP8_LAST_FLAG) +
+                !!(ref_flags & VP8_ALT_FLAG)    ) >= 2;
+    }
+}
+
 void vp8_encode_frame(VP8_COMP *cpi)
 {
     if (cpi->sf.RD)
@@ -884,7 +910,8 @@ void vp8_encode_frame(VP8_COMP *cpi)
         if (cpi->rd_prediction_type_threshes[frame_type][1] >
                 cpi->rd_prediction_type_threshes[frame_type][0] &&
             cpi->rd_prediction_type_threshes[frame_type][1] >
-                cpi->rd_prediction_type_threshes[frame_type][2])
+                cpi->rd_prediction_type_threshes[frame_type][2] &&
+            check_dual_ref_flags(cpi))
             pred_type = COMP_PREDICTION_ONLY;
         else if (cpi->rd_prediction_type_threshes[frame_type][0] >
                     cpi->rd_prediction_type_threshes[frame_type][1] &&
