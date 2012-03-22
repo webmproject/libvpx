@@ -1182,7 +1182,7 @@ static const arg_def_t q_hist_n         = ARG_DEF(NULL, "q-hist", 1,
         "Show quantizer histogram (n-buckets)");
 static const arg_def_t rate_hist_n         = ARG_DEF(NULL, "rate-hist", 1,
         "Show rate histogram (n-buckets)");
-static const arg_def_t read_modemv_arg  = ARG_DEF(NULL, "read-modemv", 0,
+static const arg_def_t read_modemv_arg  = ARG_DEF(NULL, "read-modemv", 1,
         "Read modes/mvs");
 static const arg_def_t write_modemv_arg  = ARG_DEF(NULL, "write-modemv", 0,
         "Write modes/mvs");
@@ -1700,6 +1700,7 @@ struct global_config
     int                       show_rate_hist_buckets;
     int                       read_modemv;
     int                       write_modemv;
+    const char               *modemv_file;
 };
 
 
@@ -1816,7 +1817,10 @@ static void parse_global_config(struct global_config *global, char **argv)
         else if (arg_match(&arg, &rate_hist_n, argi))
             global->show_rate_hist_buckets = arg_parse_uint(&arg);
         else if (arg_match(&arg, &read_modemv_arg, argi))
+        {
             global->read_modemv = 1;
+            global->modemv_file = arg.val;
+        }
         else if (arg_match(&arg, &write_modemv_arg, argi))
             global->write_modemv = 1;
         else
@@ -2671,10 +2675,11 @@ static void set_modeinfo(struct stream_state *stream,
 int main(int argc, const char **argv_)
 {
     int                    pass;
-    vpx_image_t            raw;
+    vpx_image_t            raw, junk;
     int                    frame_avail, got_data;
 
     struct input_state       input = {0};
+    struct input_state       modemv_input = {0};
     struct global_config     global;
     struct stream_state     *streams = NULL;
     char                   **argv, **argi;
@@ -2730,6 +2735,12 @@ int main(int argc, const char **argv_)
         int frames_in = 0;
 
         open_input_file(&input);
+        if(global.read_modemv)
+        {
+            modemv_input = input;
+            modemv_input.fn = global.modemv_file;
+            open_input_file(&modemv_input);
+        }
 
         /* If the input file doesn't specify its w/h (raw files), try to get
          * the data from the first stream's configuration.
@@ -2789,6 +2800,11 @@ int main(int argc, const char **argv_)
                                                &global.framerate));
         }
 
+        if(global.read_modemv)
+            vpx_img_alloc(&junk,
+                          input.use_i420 ? VPX_IMG_FMT_I420
+                                         : VPX_IMG_FMT_YV12,
+                          input.w, input.h, 1);
         FOREACH_STREAM(open_output_file(stream, &global));
         FOREACH_STREAM(setup_pass(stream, &global, pass));
         FOREACH_STREAM(initialize_encoder(stream, &global));
@@ -2803,6 +2819,8 @@ int main(int argc, const char **argv_)
             if (!global.limit || frames_in < global.limit)
             {
                 frame_avail = read_frame(&input, &raw);
+                if(global.read_modemv)
+                    read_frame(&modemv_input, &junk);
 
                 if (frame_avail)
                     frames_in++;
@@ -2825,8 +2843,8 @@ int main(int argc, const char **argv_)
                 frame_avail = 0;
 
             /* Update mode/mv info if available */
-            if(input.file_type == FILE_TYPE_WEBM && global.read_modemv)
-                FOREACH_STREAM(set_modeinfo(stream, &input));
+            if(modemv_input.file_type == FILE_TYPE_WEBM && global.read_modemv)
+                FOREACH_STREAM(set_modeinfo(stream, &modemv_input));
 
             vpx_usec_timer_start(&timer);
             FOREACH_STREAM(encode_frame(stream, &global,
