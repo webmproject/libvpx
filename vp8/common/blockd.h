@@ -150,14 +150,15 @@ typedef enum
 
 typedef struct
 {
-    MB_PREDICTION_MODE mode, uv_mode;
-    MV_REFERENCE_FRAME ref_frame;
+    uint8_t mode, uv_mode;
+    uint8_t ref_frame;
+    uint8_t is_4x4;
     int_mv mv;
 
-    unsigned char partitioning;
-    unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
-    unsigned char need_to_clamp_mvs;
-    unsigned char segment_id;                  /* Which set of segmentation parameters should be used for this MB */
+    uint8_t partitioning;
+    uint8_t mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
+    uint8_t need_to_clamp_mvs;
+    uint8_t segment_id;                  /* Which set of segmentation parameters should be used for this MB */
 } MB_MODE_INFO;
 
 typedef struct

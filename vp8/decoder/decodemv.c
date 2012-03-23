@@ -57,6 +57,7 @@ static void read_kf_modes(VP8D_COMP *pbi, MODE_INFO *mi)
     if (mi->mbmi.mode == B_PRED)
     {
         int i = 0;
+        mi->mbmi.is_4x4 = 1;
 
         do
         {
@@ -485,6 +486,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi)
                                                     mb_to_bottom_edge);
                         mbmi->mv.as_int = mi->bmi[15].mv.as_int;
                         mbmi->mode =  SPLITMV;
+                        mbmi->is_4x4 = 1;
                     }
                     else
                     {
@@ -557,6 +559,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi)
         if ((mbmi->mode = read_ymode(bc, pbi->common.fc.ymode_prob)) == B_PRED)
         {
             int j = 0;
+            mbmi->is_4x4 = 1;
             do
             {
                 mi->bmi[j].as_mode = read_bmode(bc, pbi->common.fc.bmode_prob);
@@ -603,6 +606,7 @@ static void decode_mb_mode_mvs(VP8D_COMP *pbi, MODE_INFO *mi,
     else
         mi->mbmi.mb_skip_coeff = 0;
 
+    mi->mbmi.is_4x4 = 0;
     if(pbi->common.frame_type == KEY_FRAME)
         read_kf_modes(pbi, mi);
     else
