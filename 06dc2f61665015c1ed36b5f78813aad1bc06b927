@@ -16,6 +16,24 @@
       "revId": "06dc2f61665015c1ed36b5f78813aad1bc06b927",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//NaY\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-03-23T01:01:35Z",
+      "side": 1,
+      "message": "It is pure mid-tone gray. In this case, it does not really matter what the initialization is. Valgrind will be happy with any initialization.",
+      "parentUuid": "AAAAHn//Nao\u003d",
+      "revId": "06dc2f61665015c1ed36b5f78813aad1bc06b927",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
