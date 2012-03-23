@@ -737,7 +737,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
             // insure that postproc is set to all 0's so that post proc
             // doesn't pull random data in from edge
-            vpx_memset((&oci->post_proc_buffer_int)->buffer_alloc,126,(&oci->post_proc_buffer)->frame_size);
+            vpx_memset((&oci->post_proc_buffer_int)->buffer_alloc,128,(&oci->post_proc_buffer)->frame_size);
 
         }
     }

@@ -106,8 +106,8 @@ int vp8_alloc_frame_buffers(VP8_COMMON *oci, int width, int height)
     }
 
     oci->post_proc_buffer_int_used = 0;
-
     vpx_memset(&oci->postproc_state, 0, sizeof(oci->postproc_state));
+    vpx_memset((&oci->post_proc_buffer)->buffer_alloc,128,(&oci->post_proc_buffer)->frame_size);
 #endif
 
     oci->mb_rows = height >> 4;
