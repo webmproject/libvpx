@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//Nao\u003d",
+        "filename": "vp8/common/postproc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 740,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-03-23T00:59:18Z",
+      "side": 1,
+      "message": "Is 128 any kind of special constant?",
+      "revId": "06dc2f61665015c1ed36b5f78813aad1bc06b927",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
