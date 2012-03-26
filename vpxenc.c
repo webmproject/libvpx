@@ -2496,5 +2496,6 @@ int main(int argc, const char **argv_)
 
     vpx_img_free(&raw);
     free(argv);
+    free(streams);
     return EXIT_SUCCESS;
 }
