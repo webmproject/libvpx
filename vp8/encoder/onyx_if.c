@@ -2890,6 +2890,8 @@ static void encode_frame_to_data_rate
     int overshoot_seen = FALSE;
     int undershoot_seen = FALSE;
 
+    int loop_size_estimate = 0;
+
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
 
@@ -3320,9 +3322,12 @@ static void encode_frame_to_data_rate
             // Prevent possible divide by zero error below for perfect KF
             kf_err += (!kf_err);
 
-            // The key frame is not good enough
-            if ( (kf_err > high_err_target) &&
-                 (cpi->projected_frame_size <= frame_over_shoot_limit) )
+            // The key frame is not good enough or we can afford
+            // to make it better without undue risk of popping.
+            if ( ( (kf_err > high_err_target) &&
+                   (cpi->projected_frame_size <= frame_over_shoot_limit) ) ||
+                 ( (kf_err > low_err_target) &&
+                   (cpi->projected_frame_size <= frame_under_shoot_limit) ) )
             {
                 // Lower q_high
                 q_high = (Q > q_low) ? (Q - 1) : q_low;
@@ -3612,6 +3617,9 @@ static void encode_frame_to_data_rate
      * needed in motion search besides loopfilter */
     cm->last_frame_type = cm->frame_type;
 
+    // Keep a copy of the size estimate used in the loop
+    loop_size_estimate = cpi->projected_frame_size;
+
     // Update rate control heuristics
     cpi->total_byte_count += (*size);
     cpi->projected_frame_size = (*size) << 3;
@@ -3747,16 +3755,21 @@ static void encode_frame_to_data_rate
 #if 0 && CONFIG_INTERNAL_STATS
     {
         FILE *f = fopen("tmp.stt", "a");
+        int recon_err;
 
         vp8_clear_system_state();  //__asm emms;
 
+        recon_err = vp8_calc_ss_err(cpi->Source,
+                                    &cm->yv12_fb[cm->new_fb_idx],
+                                    IF_RTCD(&cpi->rtcd.variance));
+
         if (cpi->twopass.total_left_stats->coded_error != 0.0)
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d"
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
                        "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
-                       "%10.3f %8d\n",
+                       "%10.3f %8d %10d\n",
                        cpi->common.current_video_frame, cpi->this_frame_target,
-                       cpi->projected_frame_size,
+                       cpi->projected_frame_size, loop_size_estimate,
                        (cpi->projected_frame_size - cpi->this_frame_target),
                        (int)cpi->total_target_vs_actual,
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
@@ -3777,14 +3790,15 @@ static void encode_frame_to_data_rate
                        cpi->twopass.total_left_stats->coded_error,
                        (double)cpi->twopass.bits_left /
                            cpi->twopass.total_left_stats->coded_error,
-                       cpi->tot_recode_hits);
+                       cpi->tot_recode_hits, recon_err);
         else
-            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d"
+            fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
                        "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
-                       "%8d\n",
+                       "%8d %10d\n",
                        cpi->common.current_video_frame,
                        cpi->this_frame_target, cpi->projected_frame_size,
+                       loop_size_estimate,
                        (cpi->projected_frame_size - cpi->this_frame_target),
                        (int)cpi->total_target_vs_actual,
                        (cpi->oxcf.starting_buffer_level-cpi->bits_off_target),
@@ -3803,7 +3817,7 @@ static void encode_frame_to_data_rate
                        cpi->twopass.est_max_qcorrection_factor,
                        (int)cpi->twopass.bits_left,
                        cpi->twopass.total_left_stats->coded_error,
-                       cpi->tot_recode_hits);
+                       cpi->tot_recode_hits, recon_err);
 
         fclose(f);
 

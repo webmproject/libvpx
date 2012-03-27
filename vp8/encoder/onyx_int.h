@@ -301,10 +301,13 @@ typedef struct VP8_COMP
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, Y1quant_fast[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, Y2quant_fast[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, UVquant_fast[QINDEX_RANGE][16]);
 
+    DECLARE_ALIGNED(64, short, Y1zbin_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, Y2zbin_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, UVzbin_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, zrun_zbin_boost_y1_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, zrun_zbin_boost_y2_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, zrun_zbin_boost_uv_8x8[QINDEX_RANGE][64]);
 
     MACROBLOCK mb;
     VP8_COMMON common;

@@ -33,10 +33,12 @@ typedef struct
 
     // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
     short *quant;
-    short *quant_fast;
+    short *quant_fast;      // fast quant deprecated for now
     unsigned char *quant_shift;
     short *zbin;
+    short *zbin_8x8;
     short *zrun_zbin_boost;
+    short *zrun_zbin_boost_8x8;
     short *round;
 
     // Zbin Over Quant value

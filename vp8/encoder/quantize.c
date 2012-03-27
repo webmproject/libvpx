@@ -49,8 +49,8 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d)
         z    = coeff_ptr[rc];
 
         zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
-
         zbin_boost_ptr ++;
+
         sz = (z >> 31);                                 // sign of z
         x  = (z ^ sz) - sz;                             // x = abs(z)
 
@@ -117,6 +117,7 @@ void vp8_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d)
   int zbin;
   int x, y, z, sz;
   short *zbin_boost_ptr = b->zrun_zbin_boost;
+  int zbin_zrun_index = 0;
   short *coeff_ptr  = b->coeff;
   short *zbin_ptr   = b->zbin;
   short *round_ptr  = b->round;
@@ -137,29 +138,26 @@ void vp8_regular_quantize_b_2x2(BLOCK *b, BLOCKD *d)
     rc   = vp8_default_zig_zag1d[i];
     z    = coeff_ptr[rc];
 
-    //zbin = (zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value)/q2nd;
+    zbin_boost_ptr = &b->zrun_zbin_boost[zbin_zrun_index];
+    zbin_zrun_index += 4;
     zbin = (zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value);
 
-    zbin_boost_ptr ++;
-    sz = (z >> 31);                                 // sign of z
-    x  = (z ^ sz) - sz;                             // x = abs(z)
+    sz = (z >> 31);                               // sign of z
+    x  = (z ^ sz) - sz;                           // x = abs(z)
 
     if (x >= zbin)
     {
-      //x += (round_ptr[rc]/q2nd);
       x += (round_ptr[rc]);
       y  = ((int)((int)(x * quant_ptr[rc]) >> 16) + x)
            >> quant_shift_ptr[rc];                // quantize (x)
       x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                         // write to destination
-      //dqcoeff_ptr[rc] = x * dequant_ptr[rc]/q2nd;        // dequantized value
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc];        // dequantized value
-
+      qcoeff_ptr[rc]  = x;                        // write to destination
+      dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
 
       if (y)
       {
-        eob = i;                                // last nonzero coeffs
-        zbin_boost_ptr = &b->zrun_zbin_boost[0];    // reset zero runlength
+        eob = i;                                  // last nonzero coeffs
+        zbin_zrun_index = 0;
       }
     }
   }
@@ -172,9 +170,9 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
   int i, rc, eob;
   int zbin;
   int x, y, z, sz;
-  short *zbin_boost_ptr = b->zrun_zbin_boost;
+  short *zbin_boost_ptr = b->zrun_zbin_boost_8x8;
   short *coeff_ptr  = b->coeff;
-  short *zbin_ptr   = b->zbin;
+  short *zbin_ptr   = b->zbin_8x8;
   short *round_ptr  = b->round;
   short *quant_ptr  = b->quant;
   unsigned char *quant_shift_ptr = b->quant_shift;
@@ -182,7 +180,6 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
   short *dqcoeff_ptr = d->dqcoeff;
   short *dequant_ptr = d->dequant;
   short zbin_oq_value = b->zbin_extra;
-  //double q1st = 2;
 
   vpx_memset(qcoeff_ptr, 0, 64*sizeof(short));
   vpx_memset(dqcoeff_ptr, 0, 64*sizeof(short));
@@ -191,36 +188,28 @@ void vp8_regular_quantize_b_8x8(BLOCK *b, BLOCKD *d)
 
   for (i = 0; i < b->eob_max_offset_8x8; i++)
   {
-
     rc   = vp8_default_zig_zag1d_8x8[i];
     z    = coeff_ptr[rc];
 
-    //zbin = (zbin_ptr[rc!=0] + *zbin_boost_ptr + zbin_oq_value)/q1st;
     zbin = (zbin_ptr[rc!=0] + *zbin_boost_ptr + zbin_oq_value);
-    //TODO: 8x8 zbin boost needs be done properly
-    if(zbin_boost_ptr < &b->zrun_zbin_boost[15])
-        zbin_boost_ptr ++;
+    zbin_boost_ptr ++;
 
-    sz = (z >> 31);                                 // sign of z
-    x  = (z ^ sz) - sz;                             // x = abs(z)
+    sz = (z >> 31);                               // sign of z
+    x  = (z ^ sz) - sz;                           // x = abs(z)
 
     if (x >= zbin)
     {
-      //x += (round_ptr[rc!=0]/q1st);
-      //y  = ((int)(((int)(x * quant_ptr[rc!=0] * q1st) >> 16) + x))
-      //    >> quant_shift_ptr[rc!=0];                // quantize (x)
       x += (round_ptr[rc!=0]);
       y  = ((int)(((int)(x * quant_ptr[rc!=0]) >> 16) + x))
-          >> quant_shift_ptr[rc!=0];                // quantize (x)
+          >> quant_shift_ptr[rc!=0];              // quantize (x)
       x  = (y ^ sz) - sz;                         // get the sign back
-      qcoeff_ptr[rc]  = x;                         // write to destination
-      //dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0] / q1st;        // dequantized value
-      dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];        // dequantized value
+      qcoeff_ptr[rc]  = x;                        // write to destination
+      dqcoeff_ptr[rc] = x * dequant_ptr[rc!=0];   // dequantized value
 
       if (y)
       {
-        eob = i;                                // last nonzero coeffs
-        zbin_boost_ptr = &b->zrun_zbin_boost[0];    // reset zero runlength
+        eob = i;                                  // last nonzero coeffs
+        zbin_boost_ptr = b->zrun_zbin_boost_8x8;
       }
     }
   }
@@ -307,6 +296,16 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
     int Q;
     int zbin_boost[16] = { 0,  0,  8, 10, 12, 14, 16, 20,
                           24, 28, 32, 36, 40, 44, 44, 44};
+
+    int zbin_boost_8x8[64] = {  0,  0,  8, 10, 12, 14, 16, 20,
+                               24, 28, 32, 36, 40, 44, 48, 52,
+                               56, 60, 64, 68, 72, 76, 80, 80,
+                               80, 80, 80, 80, 80, 80, 80, 80,
+                               80, 80, 80, 80, 80, 80, 80, 80,
+                               80, 80, 80, 80, 80, 80, 80, 80,
+                               80, 80, 80, 80, 80, 80, 80, 80,
+                               80, 80, 80, 80, 80, 80, 80, 80 };
+
     int qrounding_factor = 48;
 
     for (Q = 0; Q < QINDEX_RANGE; Q++)
@@ -315,63 +314,92 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
 
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
-        cpi->Y1quant_fast[Q][0] = (1 << 16) / quant_val;
         invert_quant(cpi->Y1quant[Q] + 0,
                      cpi->Y1quant_shift[Q] + 0, quant_val);
         cpi->Y1zbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
+        cpi->Y1zbin_8x8[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
         cpi->Y1round[Q][0] = (qrounding_factor * quant_val) >> 7;
         cpi->common.Y1dequant[Q][0] = quant_val;
         cpi->zrun_zbin_boost_y1[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+        cpi->zrun_zbin_boost_y1_8x8[Q][0] =
+            ((quant_val * zbin_boost_8x8[0]) + 64) >> 7;
 
         quant_val = vp8_dc2quant(Q, cpi->common.y2dc_delta_q);
-        cpi->Y2quant_fast[Q][0] = (1 << 16) / quant_val;
         invert_quant(cpi->Y2quant[Q] + 0,
                      cpi->Y2quant_shift[Q] + 0, quant_val);
         cpi->Y2zbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
+        cpi->Y2zbin_8x8[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;
         cpi->Y2round[Q][0] = (qrounding_factor * quant_val) >> 7;
         cpi->common.Y2dequant[Q][0] = quant_val;
         cpi->zrun_zbin_boost_y2[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+        cpi->zrun_zbin_boost_y2_8x8[Q][0] =
+            ((quant_val * zbin_boost_8x8[0]) + 64) >> 7;
 
         quant_val = vp8_dc_uv_quant(Q, cpi->common.uvdc_delta_q);
-        cpi->UVquant_fast[Q][0] = (1 << 16) / quant_val;
         invert_quant(cpi->UVquant[Q] + 0,
                      cpi->UVquant_shift[Q] + 0, quant_val);
         cpi->UVzbin[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;;
+        cpi->UVzbin_8x8[Q][0] = ((qzbin_factor * quant_val) + 64) >> 7;;
         cpi->UVround[Q][0] = (qrounding_factor * quant_val) >> 7;
         cpi->common.UVdequant[Q][0] = quant_val;
         cpi->zrun_zbin_boost_uv[Q][0] = (quant_val * zbin_boost[0]) >> 7;
+        cpi->zrun_zbin_boost_uv_8x8[Q][0] =
+            ((quant_val * zbin_boost_8x8[0]) + 64) >> 7;
 
-        // all the ac values = ;
+        // all the 4x4 ac values = ;
         for (i = 1; i < 16; i++)
         {
             int rc = vp8_default_zig_zag1d[i];
 
             quant_val = vp8_ac_yquant(Q);
-            cpi->Y1quant_fast[Q][rc] = (1 << 16) / quant_val;
             invert_quant(cpi->Y1quant[Q] + rc,
                          cpi->Y1quant_shift[Q] + rc, quant_val);
             cpi->Y1zbin[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
             cpi->Y1round[Q][rc] = (qrounding_factor * quant_val) >> 7;
             cpi->common.Y1dequant[Q][rc] = quant_val;
-            cpi->zrun_zbin_boost_y1[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+            cpi->zrun_zbin_boost_y1[Q][i] =
+                ((quant_val * zbin_boost[i]) + 64) >> 7;
 
             quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
-            cpi->Y2quant_fast[Q][rc] = (1 << 16) / quant_val;
             invert_quant(cpi->Y2quant[Q] + rc,
                          cpi->Y2quant_shift[Q] + rc, quant_val);
             cpi->Y2zbin[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
             cpi->Y2round[Q][rc] = (qrounding_factor * quant_val) >> 7;
             cpi->common.Y2dequant[Q][rc] = quant_val;
-            cpi->zrun_zbin_boost_y2[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+            cpi->zrun_zbin_boost_y2[Q][i] =
+                ((quant_val * zbin_boost[i]) + 64) >> 7;
 
             quant_val = vp8_ac_uv_quant(Q, cpi->common.uvac_delta_q);
-            cpi->UVquant_fast[Q][rc] = (1 << 16) / quant_val;
             invert_quant(cpi->UVquant[Q] + rc,
                          cpi->UVquant_shift[Q] + rc, quant_val);
             cpi->UVzbin[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
             cpi->UVround[Q][rc] = (qrounding_factor * quant_val) >> 7;
             cpi->common.UVdequant[Q][rc] = quant_val;
-            cpi->zrun_zbin_boost_uv[Q][i] = (quant_val * zbin_boost[i]) >> 7;
+            cpi->zrun_zbin_boost_uv[Q][i] =
+                ((quant_val * zbin_boost[i]) + 64) >> 7;
+        }
+
+        // 8x8 structures... only zbin seperated out for now
+        // This needs cleaning up for 8x8 especially if we are to add
+        // support for non flat Q matices
+        for (i = 1; i < 64; i++)
+        {
+            int rc = vp8_default_zig_zag1d_8x8[i];
+
+            quant_val = vp8_ac_yquant(Q);
+            cpi->Y1zbin_8x8[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
+            cpi->zrun_zbin_boost_y1_8x8[Q][i] =
+                ((quant_val * zbin_boost_8x8[i]) + 64) >> 7;
+
+            quant_val = vp8_ac2quant(Q, cpi->common.y2ac_delta_q);
+            cpi->Y2zbin_8x8[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
+            cpi->zrun_zbin_boost_y2_8x8[Q][i] =
+                ((quant_val * zbin_boost_8x8[i]) + 64) >> 7;
+
+            quant_val = vp8_ac_uv_quant(Q, cpi->common.uvac_delta_q);
+            cpi->UVzbin_8x8[Q][rc] = ((qzbin_factor * quant_val) + 64) >> 7;
+            cpi->zrun_zbin_boost_uv_8x8[Q][i] =
+                ((quant_val * zbin_boost_8x8[i]) + 64) >> 7;
         }
     }
 }
@@ -413,12 +441,13 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     for (i = 0; i < 16; i++)
     {
         x->block[i].quant = cpi->Y1quant[QIndex];
-        x->block[i].quant_fast = cpi->Y1quant_fast[QIndex];
         x->block[i].quant_shift = cpi->Y1quant_shift[QIndex];
         x->block[i].zbin = cpi->Y1zbin[QIndex];
+        x->block[i].zbin_8x8 = cpi->Y1zbin_8x8[QIndex];
         x->block[i].round = cpi->Y1round[QIndex];
         x->e_mbd.block[i].dequant = cpi->common.Y1dequant[QIndex];
         x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_y1[QIndex];
+        x->block[i].zrun_zbin_boost_8x8 = cpi->zrun_zbin_boost_y1_8x8[QIndex];
         x->block[i].zbin_extra = (short)zbin_extra;
 
         // Segment max eob offset feature.
@@ -445,12 +474,14 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
     for (i = 16; i < 24; i++)
     {
         x->block[i].quant = cpi->UVquant[QIndex];
-        x->block[i].quant_fast = cpi->UVquant_fast[QIndex];
         x->block[i].quant_shift = cpi->UVquant_shift[QIndex];
         x->block[i].zbin = cpi->UVzbin[QIndex];
+        x->block[i].zbin_8x8 = cpi->UVzbin_8x8[QIndex];
         x->block[i].round = cpi->UVround[QIndex];
         x->e_mbd.block[i].dequant = cpi->common.UVdequant[QIndex];
         x->block[i].zrun_zbin_boost = cpi->zrun_zbin_boost_uv[QIndex];
+        x->block[i].zrun_zbin_boost_8x8 = cpi->zrun_zbin_boost_uv_8x8[QIndex];
+
         x->block[i].zbin_extra = (short)zbin_extra;
 
         // Segment max eob offset feature.
@@ -474,13 +505,14 @@ void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x)
                      cpi->zbin_mode_boost +
                      x->act_zbin_adj ) ) >> 7;
 
-    x->block[24].quant_fast = cpi->Y2quant_fast[QIndex];
     x->block[24].quant = cpi->Y2quant[QIndex];
     x->block[24].quant_shift = cpi->Y2quant_shift[QIndex];
     x->block[24].zbin = cpi->Y2zbin[QIndex];
+    x->block[24].zbin_8x8 = cpi->Y2zbin_8x8[QIndex];
     x->block[24].round = cpi->Y2round[QIndex];
     x->e_mbd.block[24].dequant = cpi->common.Y2dequant[QIndex];
     x->block[24].zrun_zbin_boost = cpi->zrun_zbin_boost_y2[QIndex];
+    x->block[24].zrun_zbin_boost_8x8 = cpi->zrun_zbin_boost_y2_8x8[QIndex];
     x->block[24].zbin_extra = (short)zbin_extra;
 
     // TBD perhaps not use for Y2

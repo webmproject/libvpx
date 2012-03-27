@@ -1510,10 +1510,12 @@ static void rd_pick_intra_mbuv_mode_8x8(VP8_COMP *cpi,
     x->e_mbd.mode_info_context->mbmi.uv_mode = mode_selected;
 }
 
-int vp8_cost_mv_ref(VP8_COMMON *pc,
+int vp8_cost_mv_ref(VP8_COMP *cpi,
                     MB_PREDICTION_MODE m,
                     const int near_mv_ref_ct[4])
 {
+    VP8_COMMON *pc = &cpi->common;
+
     vp8_prob p [VP8_MVREFS-1];
     assert(NEARESTMV <= m  &&  m <= SPLITMV);
     vp8_mv_ref_probs(pc, p, near_mv_ref_ct);
@@ -1737,7 +1739,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
     // Segmentation method overheads
     rate = vp8_cost_token(vp8_mbsplit_tree, vp8_mbsplit_probs, vp8_mbsplit_encodings + segmentation);
-    rate += vp8_cost_mv_ref(&cpi->common, SPLITMV, bsi->mdcounts);
+    rate += vp8_cost_mv_ref(cpi, SPLITMV, bsi->mdcounts);
     this_segment_rd += RDCOST(x->rdmult, x->rddiv, rate, 0);
     br += rate;
 
@@ -3093,10 +3095,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                     }
                 }
             }
-            //intermodecost[mode_index] = vp8_cost_mv_ref(this_mode, mdcounts);   // Experimental debug code
+            //intermodecost[mode_index] = vp8_cost_mv_ref(cpi, this_mode, mdcounts);   // Experimental debug code
 
             // Add in the Mv/mode cost
-            rate2 += vp8_cost_mv_ref(&cpi->common, this_mode, mdcounts);
+            rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
             // Y cost and distortion
             if(cpi->common.txfm_mode == ALLOW_8X8)
@@ -3181,7 +3183,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
 
             /* Add in the Mv/mode cost */
-            rate2 += vp8_cost_mv_ref(&cpi->common,this_mode, mdcounts);
+            rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
             vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.mv, xd);
             vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.second_mv, xd);
@@ -3368,7 +3370,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                     x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
                 }
 
-                other_cost += ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
+                other_cost +=
+                    ref_costs[x->e_mbd.mode_info_context->mbmi.ref_frame];
 
                 /* Calculate the final y RD estimate for this mode */
                 best_yrd = RDCOST(x->rdmult, x->rddiv, (rate2-rate_uv-other_cost),
