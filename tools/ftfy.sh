@@ -1,5 +1,6 @@
 #!/bin/sh
 self="$0"
+dirname_self=$(dirname "$self")
 
 usage() {
   cat <<EOF >&2
@@ -9,9 +10,13 @@ This script applies a whitespace transformation to the commit at HEAD. If no
 options are given, then the modified files are left in the working tree.
 
 Options:
+  -h, --help     Shows this message
   -n, --dry-run  Shows a diff of the changes to be made.
   --amend        Squashes the changes into the commit at HEAD
+                     This option will also reformat the commit message.
   --commit       Creates a new commit containing only the whitespace changes
+  --msg-only     Reformat the commit message only, ignore the patch itself.
+
 EOF
   rm -f ${CLEAN_FILES}
   exit 1
@@ -34,7 +39,7 @@ vpx_style() {
 
 
 apply() {
-  patch -p1 < "$1"
+  [ $INTERSECT_RESULT -ne 0 ] && patch -p1 < "$1"
 }
 
 
@@ -59,8 +64,28 @@ EOF
 }
 
 
+show_commit_msg_diff() {
+  if [ $DIFF_MSG_RESULT -ne 0 ]; then
+    log "Modified commit message:"
+    diff -u "$ORIG_COMMIT_MSG" "$NEW_COMMIT_MSG" | tail -n +3
+  fi
+}
+
+
 amend() {
-  git commit -a --amend -C HEAD
+  show_commit_msg_diff
+  if [ $DIFF_MSG_RESULT -ne 0 ] || [ $INTERSECT_RESULT -ne 0 ]; then
+    git commit -a --amend -F "$NEW_COMMIT_MSG"
+  fi
+}
+
+
+diff_msg() {
+  git log -1 --format=%B > "$ORIG_COMMIT_MSG"
+  "${dirname_self}"/wrap-commit-msg.py \
+      < "$ORIG_COMMIT_MSG" > "$NEW_COMMIT_MSG"
+  cmp -s "$ORIG_COMMIT_MSG" "$NEW_COMMIT_MSG"
+  DIFF_MSG_RESULT=$?
 }
 
 
@@ -68,7 +93,10 @@ amend() {
 ORIG_DIFF=orig.diff.$$
 MODIFIED_DIFF=modified.diff.$$
 FINAL_DIFF=final.diff.$$
+ORIG_COMMIT_MSG=orig.commit-msg.$$
+NEW_COMMIT_MSG=new.commit-msg.$$
 CLEAN_FILES="${ORIG_DIFF} ${MODIFIED_DIFF} ${FINAL_DIFF}"
+CLEAN_FILES="${CLEAN_FILES} ${ORIG_COMMIT_MSG} ${NEW_COMMIT_MSG}"
 
 # Preconditions
 [ $# -lt 2 ] || usage
@@ -95,28 +123,30 @@ done
 git diff --no-color --no-ext-diff > "${MODIFIED_DIFF}"
 
 # Intersect the two diffs
-$(dirname ${self})/intersect-diffs.py \
+"${dirname_self}"/intersect-diffs.py \
     "${ORIG_DIFF}" "${MODIFIED_DIFF}" > "${FINAL_DIFF}"
 INTERSECT_RESULT=$?
 git reset --hard >/dev/null
 
-if [ $INTERSECT_RESULT -eq 0 ]; then
-  # Handle options
-  if [ -n "$1" ]; then
-    case "$1" in
-      -h|--help) usage;;
-      -n|--dry-run) cat "${FINAL_DIFF}";;
-      --commit) apply "${FINAL_DIFF}"; commit;;
-      --amend) apply "${FINAL_DIFF}"; amend;;
-      *) usage;;
-    esac
-  else
-    apply "${FINAL_DIFF}"
-    if ! git diff --quiet; then
-      log "Formatting changes applied, verify and commit."
-      log "See also: http://www.webmproject.org/code/contribute/conventions/"
-      git diff --stat
-    fi
+# Fixup the commit message
+diff_msg
+
+# Handle options
+if [ -n "$1" ]; then
+  case "$1" in
+    -h|--help) usage;;
+    -n|--dry-run) cat "${FINAL_DIFF}"; show_commit_msg_diff;;
+    --commit) apply "${FINAL_DIFF}"; commit;;
+    --amend) apply "${FINAL_DIFF}"; amend;;
+    --msg-only) amend;;
+    *) usage;;
+  esac
+else
+  apply "${FINAL_DIFF}"
+  if ! git diff --quiet; then
+    log "Formatting changes applied, verify and commit."
+    log "See also: http://www.webmproject.org/code/contribute/conventions/"
+    git diff --stat
   fi
 fi
 

@@ -182,7 +182,6 @@ def main():
 
     if out_hunks:
         print FormatDiffHunks(out_hunks)
-    else:
         sys.exit(1)
 
 if __name__ == "__main__":
