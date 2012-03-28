@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//JeQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jio\u003d",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jgc\u003d",
         "filename": "tools/ftfy.sh",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-03-28T18:17:54Z",
       "side": 1,
       "message": "I didn\u0027t see an option for astyle to change something like \u0027{ 1   , 2}\u0027 worth a quick sed, s/\\s+,/,/g?",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JeM\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jgc\u003d",
       "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//Jds\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jg8\u003d",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jgw\u003d",
         "filename": "tools/ftfy.sh",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2012-03-28T18:17:54Z",
       "side": 1,
       "message": "I\u0027m of the opinion that any instance of the above two should override the rest, but I won\u0027t block on that.",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jdg\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "added a check to squawk if more than one option is present, can revisit this when multiple options are useful (-v?)",
+      "parentUuid": "AAAAHn//Jgw\u003d",
       "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//Jc8\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "added a link to\nhttp://www.webmproject.org/code/contribute/conventions/",
+      "parentUuid": "AAAAHn//Jgo\u003d",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jgg\u003d",
         "filename": "tools/ftfy.sh",
         "patchSetId": 2
@@ -98,6 +188,24 @@
       "writtenOn": "2012-03-28T18:17:54Z",
       "side": 1,
       "message": "else echo \"no changes applied\"?",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JcQ\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "Maybe with a -v? See anything else here that would be useful to show under more verbosity? Intent was silence by convention.",
+      "parentUuid": "AAAAHn//Jgg\u003d",
       "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//JcM\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//JfQ\u003d",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//JfU\u003d",
         "filename": "tools/intersect-diffs.py",
         "patchSetId": 2
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//JcA\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//JfU\u003d",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jfw\u003d",
         "filename": "tools/intersect-diffs.py",
         "patchSetId": 2
@@ -149,6 +293,24 @@
       "writtenOn": "2012-03-28T18:17:54Z",
       "side": 1,
       "message": "these could be named old_/new_hunks given their use below",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jbk\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T19:32:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jfw\u003d",
       "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
