@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//Jio\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "s/ammend/amend/",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jgc\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "I didn\u0027t see an option for astyle to change something like \u0027{ 1   , 2}\u0027 worth a quick sed, s/\\s+,/,/g?",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jg8\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "\u003e\u003e --no-ext-diff? maybe others to avoid exotic configs.\n\n\u003e Probably a good idea. Not sure if --name-only implies this or not, but can\u0027t hurt. Done.\n\nYou were right on this one, --stat/--name-only/--quiet don\u0027t invoke the external driver. This one does though.",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jgw\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "I\u0027m of the opinion that any instance of the above two should override the rest, but I won\u0027t block on that.",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jgo\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "Wasn\u0027t there a style guide doc? If so maybe add \u0027for further information see...\u0027",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jgg\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "else echo \"no changes applied\"?",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JfQ\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "spaces around %",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JfU\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "I don\u0027t think these cause a problem, but you might want to use raw strings just to be safe, r\"...\"",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jfw\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T18:17:54Z",
+      "side": 1,
+      "message": "these could be named old_/new_hunks given their use below",
+      "revId": "7782769a8b8d292f92621594c8dd6ce085bc14fa",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
