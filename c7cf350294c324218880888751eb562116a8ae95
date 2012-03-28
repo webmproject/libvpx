@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//JWU\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T20:28:47Z",
+      "side": 1,
+      "message": "sorry tricked by gsed...won\u0027t work on OSX/BSD. [[:space:]]\\{1,\\} should or you could supply -E and drop the \\ (or just use * I suppose)",
+      "revId": "c7cf350294c324218880888751eb562116a8ae95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
