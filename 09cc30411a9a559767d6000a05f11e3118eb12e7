@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//Jxs\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "you\u0027re inconsistent on spacing b/w functions, choose 1 or 2.",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jxo\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "same line as ()",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jxk\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "--convert-tabs?",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jxg\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "combine this to awk \u0027/Change-Id:/ ...",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JxQ\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "what if I have something staged?",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JxM\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "--no-ext-diff? maybe others to avoid exotic configs.",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jw8\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "if hunk is None:",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jw4\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "assert hunk is None",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jw0\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-28T02:21:04Z",
+      "side": 1,
+      "message": "I think this has the potential for picking up new hunks that are unrelated to the original change.",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
