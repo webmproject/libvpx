@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//JwY\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jxs\u003d",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jxo\u003d",
         "filename": "tools/ftfy.sh",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-03-28T02:21:04Z",
       "side": 1,
       "message": "same line as ()",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JwU\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jxo\u003d",
       "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//JwA\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Done. Not sure exactly what effect this will have, this applies to non-indent tabs. It\u0027s recommended with --indent-preprocessor, so applied on that basis.",
+      "parentUuid": "AAAAHn//Jxk\u003d",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jxg\u003d",
         "filename": "tools/ftfy.sh",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-03-28T02:21:04Z",
       "side": 1,
       "message": "combine this to awk \u0027/Change-Id:/ ...",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Jv8\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jxg\u003d",
       "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//Jv4\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "good catch, was explicitly diffing against HEAD before but dropped it somewhere.. Longer term, it\u0027d be nice to support this case, ie stage your changes and then run this script to get the whitespace changes in an unstaged state, then review, add -p, etc.",
+      "parentUuid": "AAAAHn//JxQ\u003d",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//JxM\u003d",
         "filename": "tools/ftfy.sh",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2012-03-28T02:21:04Z",
       "side": 1,
       "message": "--no-ext-diff? maybe others to avoid exotic configs.",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JvY\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Probably a good idea. Not sure if --name-only implies this or not, but can\u0027t hurt. Done.",
+      "parentUuid": "AAAAHn//JxM\u003d",
       "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//JvU\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jw8\u003d",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jw4\u003d",
         "filename": "tools/intersect-diffs.py",
         "patchSetId": 1
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//JvA\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Jw4\u003d",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//Jw0\u003d",
         "filename": "tools/intersect-diffs.py",
         "patchSetId": 1
@@ -149,6 +293,24 @@
       "writtenOn": "2012-03-28T02:21:04Z",
       "side": 1,
       "message": "I think this has the potential for picking up new hunks that are unrelated to the original change.",
+      "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//JvI\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-28T04:38:20Z",
+      "side": 1,
+      "message": "Could you elaborate?\n\nThe confusing thing about this code is the old/new/left/right distinction, but I think this is sound. The \"old lines\" are the \"right hand side\" of the already committed change, ie they\u0027re the result of the functional change. The \"new lines\" are the \"left hand side\" of the cosmetic change we\u0027re making here. They\u0027re the preimage of the cosmetic change, so they should refer to the same lines by number as the postimage of the functional change.\n\nIt does have the potential for making the change bigger, if that\u0027s what you mean. The cosmetic hunk could be bigger than the functional hunk. It\u0027s probably also possible that you could get two cosmetic hunks that both overlap the functional hunk. Still seems \"related\" to me. Might be able to tune this to some degree by reducing the amount of context in the diff.",
+      "parentUuid": "AAAAHn//Jw0\u003d",
       "revId": "09cc30411a9a559767d6000a05f11e3118eb12e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
