@@ -44,6 +44,8 @@ extern unsigned int active_section;
 int count_mb_seg[4] = { 0, 0, 0, 0 };
 #endif
 
+#define vp8_cost_upd  ((int)(vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8)
+
 static void update_mode(
     vp8_writer *const w,
     int n,
@@ -157,8 +159,7 @@ static int prob_update_savings(const unsigned int *ct,
 {
     const int old_b = vp8_cost_branch(ct, oldp);
     const int new_b = vp8_cost_branch(ct, newp);
-    const int update_b = 8 +
-                         ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+    const int update_b = 8 + vp8_cost_upd;
 
     return old_b - new_b - update_b;
 }
@@ -1330,8 +1331,7 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
                         const int old_b = vp8_cost_branch(ct, old);
                         const int new_b = vp8_cost_branch(ct, newp);
 
-                        const int update_b = 8 +
-                            ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+                        const int update_b = 8 + vp8_cost_upd;
 
                         const int s = old_b - new_b - update_b;
 
@@ -1519,8 +1519,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                         const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
                         const int old_b = vp8_cost_branch(ct, old);
                         const int new_b = vp8_cost_branch(ct, newp);
-                        const int update_b = 8 +
-                            ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+                        const int update_b = 8 + vp8_cost_upd;
                         const int s = old_b - new_b - update_b;
                         const int u = s > 0 ? 1 : 0;
 
@@ -1586,8 +1585,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                             const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
                             const int old_b = vp8_cost_branch(ct, old);
                             const int new_b = vp8_cost_branch(ct, newp);
-                            const int update_b = 8 +
-                                ((vp8_cost_one(upd) - vp8_cost_zero(upd)) >> 8);
+                            const int update_b = 8 + vp8_cost_upd;
                             const int s = old_b - new_b - update_b;
                             const int u = s > 0 ? 1 : 0;
                             vp8_write(w, u, upd);
