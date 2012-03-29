@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAHn//I8M\u003d",
+        "filename": "tools/wrap-commit-msg.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-29T13:47:35Z",
+      "side": 1,
+      "message": "Added a comment describing the rationale. break_long_words\u003dfalse was a good suggestion, I\u0027d thought that was the default.",
+      "parentUuid": "AAAAHn//JB8\u003d",
+      "revId": "42aae3420bdf4bb02919379df671db4a625be32c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAHn//JB4\u003d",
         "filename": "tools/wrap-commit-msg.py",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-03-29T06:31:07Z",
       "side": 1,
       "message": "this syntax came after 2.4 if you want to have a bit of compatibility...\n\n70 should be a flag or at least a constant.",
+      "revId": "42aae3420bdf4bb02919379df671db4a625be32c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//I8I\u003d",
+        "filename": "tools/wrap-commit-msg.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-29T13:47:35Z",
+      "side": 1,
+      "message": "good point. will simplify.\n\n70 turns out to be the default, so removed.",
+      "parentUuid": "AAAAHn//JB4\u003d",
       "revId": "42aae3420bdf4bb02919379df671db4a625be32c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
