@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//IlU\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-29T21:22:12Z",
+      "side": 1,
+      "message": "maybe roll is_4x4, mb_skip_coeff, and need_to_clamp_mvs into a single flags byte?",
+      "revId": "31322c5faac5e8ad9e73fe705b863ec5f8c28323",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
