@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//I7s\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-29T14:05:42Z",
+      "side": 1,
+      "message": "Can you make this summary a little more specific? Something like \"make vp8_intra4x4_predict_d an RTCD candidate\"",
+      "revId": "76ac5d9a9c0c130fb789944800a0324aca5995d7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
