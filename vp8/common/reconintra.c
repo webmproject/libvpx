@@ -14,7 +14,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "blockd.h"
 
-void vp8_build_intra_predictors_mby_s(MACROBLOCKD *x,
+void vp8_build_intra_predictors_mby_s_c(MACROBLOCKD *x,
                                           unsigned char * yabove_row,
                                           unsigned char * yleft,
                                           int left_stride,
