@@ -16,6 +16,24 @@
       "revId": "d41354c5b22640b786e96737979b7ad831115bae",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAHn//Im8\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-03-29T21:02:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAHn//Inw\u003d",
+      "revId": "d41354c5b22640b786e96737979b7ad831115bae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
