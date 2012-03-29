@@ -735,8 +735,12 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         case V_PRED:
         case H_PRED:
         case TM_PRED:
-            vp8_build_intra_predictors_mby
-                (&x->e_mbd);
+            vp8_build_intra_predictors_mby_s(xd,
+                                             xd->dst.y_buffer - xd->dst.y_stride,
+                                             xd->dst.y_buffer - 1,
+                                             xd->dst.y_stride,
+                                             xd->predictor,
+                                             16);
             distortion2 = vp8_variance16x16
                                           (*(b->base_src), b->src_stride,
                                           x->e_mbd.predictor, 16, &sse);
@@ -1130,19 +1134,24 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     int this_rd;
     unsigned int sse;
     BLOCK *b = &x->block[0];
+    MACROBLOCKD *xd = &x->e_mbd;
 
-    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+    xd->mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
     pick_intra_mbuv_mode(x);
 
     for (mode = DC_PRED; mode <= TM_PRED; mode ++)
     {
-        x->e_mbd.mode_info_context->mbmi.mode = mode;
-        vp8_build_intra_predictors_mby
-            (&x->e_mbd);
+        xd->mode_info_context->mbmi.mode = mode;
+        vp8_build_intra_predictors_mby_s(xd,
+                                         xd->dst.y_buffer - xd->dst.y_stride,
+                                         xd->dst.y_buffer - 1,
+                                         xd->dst.y_stride,
+                                         xd->predictor,
+                                         16);
         distortion = vp8_variance16x16
-            (*(b->base_src), b->src_stride, x->e_mbd.predictor, 16, &sse);
-        rate = x->mbmode_cost[x->e_mbd.frame_type][mode];
+            (*(b->base_src), b->src_stride, xd->predictor, 16, &sse);
+        rate = x->mbmode_cost[xd->frame_type][mode];
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
         if (error16x16 > this_rd)
@@ -1153,13 +1162,13 @@ void vp8_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
             best_rate = rate;
         }
     }
-    x->e_mbd.mode_info_context->mbmi.mode = best_mode;
+    xd->mode_info_context->mbmi.mode = best_mode;
 
     error4x4 = pick_intra4x4mby_modes(x, &rate,
                                       &best_sse);
     if (error4x4 < error16x16)
     {
-        x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+        xd->mode_info_context->mbmi.mode = B_PRED;
         best_rate = rate;
     }
 
