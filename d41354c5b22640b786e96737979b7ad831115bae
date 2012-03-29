@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAHn//Inw\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-03-29T20:52:14Z",
+      "side": 1,
+      "message": "you\u0027ve stored dirname_self",
+      "revId": "d41354c5b22640b786e96737979b7ad831115bae",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
