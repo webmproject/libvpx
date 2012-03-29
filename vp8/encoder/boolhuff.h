@@ -26,7 +26,6 @@ typedef struct
 {
     unsigned int lowvalue;
     unsigned int range;
-    unsigned int value;
     int count;
     unsigned int pos;
     unsigned char *buffer;

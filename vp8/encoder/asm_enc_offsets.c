@@ -45,7 +45,6 @@ DEFINE(vp8_blockd_predictor,                    offsetof(BLOCKD, predictor));
 /* pack tokens */
 DEFINE(vp8_writer_lowvalue,                     offsetof(vp8_writer, lowvalue));
 DEFINE(vp8_writer_range,                        offsetof(vp8_writer, range));
-DEFINE(vp8_writer_value,                        offsetof(vp8_writer, value));
 DEFINE(vp8_writer_count,                        offsetof(vp8_writer, count));
 DEFINE(vp8_writer_pos,                          offsetof(vp8_writer, pos));
 DEFINE(vp8_writer_buffer,                       offsetof(vp8_writer, buffer));
