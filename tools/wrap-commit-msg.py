@@ -59,6 +59,7 @@ def main(fileobj):
     if fileobj == sys.stdin:
         fileobj = sys.stdout
     else:
+        fileobj.seek(0)
         fileobj.truncate(0)
     fileobj.write(output)
 
