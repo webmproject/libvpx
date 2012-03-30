@@ -98,7 +98,7 @@ static void apply_ifactor(unsigned char *y_src,
 
 static void multiframe_quality_enhance_block
 (
-    int blksize, /* Currently only values supported are 16 and 8 */
+    int blksize, /* Currently only values supported are 16, 8, 4 */
     int qcurr,
     int qprev,
     unsigned char *y,
@@ -115,49 +115,164 @@ static void multiframe_quality_enhance_block
 {
     static const unsigned char VP8_ZEROS[16]=
     {
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     };
-
-    int uvblksize = blksize >> 1;
+    int blksizeby2 = blksize >> 1;
     int qdiff = qcurr - qprev;
 
-    int i;
+    int i, j;
+    unsigned char *yp;
+    unsigned char *ydp;
     unsigned char *up;
     unsigned char *udp;
     unsigned char *vp;
     unsigned char *vdp;
 
-    unsigned int act, sad, thr, sse;
+    unsigned int act_sum = 0, sse, sad_sum = 0, thr, uvsad = UINT_MAX;
+    unsigned int act[4], sad[4];
 
     if (blksize == 16)
     {
-        act = (vp8_variance16x16(yd, yd_stride, VP8_ZEROS, 0, &sse)+128)>>8;
-        sad = (vp8_sad16x16(y, y_stride, yd, yd_stride, INT_MAX)+128)>>8;
+        act[0] = (vp8_variance8x8(yd, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 32) >> 6;
+        act_sum = act[0];
+        sad[0] = (vp8_sad8x8(y, y_stride,
+                             yd, yd_stride, INT_MAX) + 32) >> 6;
+        sad_sum = sad[0];
+
+        act[1] = (vp8_variance8x8(yd + 8, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 32) >> 6;
+        act_sum += act[1];
+        sad[1] = (vp8_sad8x8(y + 8, y_stride,
+                             yd + 8, yd_stride, INT_MAX) + 32) >> 6;
+        sad_sum = sad[1];
+
+        act[2] = (vp8_variance8x8(yd + 8 * yd_stride, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 32) >> 6;
+        act_sum += act[2];
+        sad[2] = (vp8_sad8x8(y + 8 * y_stride, y_stride,
+                             yd + 8 * yd_stride, yd_stride, INT_MAX) + 32) >> 6;
+        sad_sum = sad[2];
+
+        act[3] = (vp8_variance8x8(yd + 8 * yd_stride + 8, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 32) >> 6;
+        act_sum += act[3];
+        sad[3] = (vp8_sad8x8(y + 8 * y_stride + 8, y_stride,
+                             yd + 8 * y_stride + 8, yd_stride, INT_MAX)
+                  + 32) >> 6;
+        sad_sum = sad[3];
     }
-    else /* if (blksize == 8) */
+    else if (blksize == 8)
     {
-        act = (vp8_variance8x8(yd, yd_stride, VP8_ZEROS, 0, &sse)+32)>>6;
-        sad = (vp8_sad8x8(y, y_stride, yd, yd_stride, INT_MAX)+32)>>6;
+        act[0] = (vp8_variance4x4(yd, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 4) >> 4;
+        act_sum = act[0];
+        sad[0] = (vp8_sad4x4(y, y_stride,
+                             yd, yd_stride, INT_MAX) + 4) >> 4;
+        sad_sum = sad[0];
+
+        act[1] = (vp8_variance4x4(yd + 4, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 4) >> 4;
+        act_sum += act[1];
+        sad[1] = (vp8_sad4x4(y + 4, y_stride,
+                             yd + 4, yd_stride, INT_MAX) + 4) >> 4;
+        sad_sum = sad[1];
+
+        act[2] = (vp8_variance4x4(yd + 4 * yd_stride, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 4) >> 4;
+        act_sum += act[2];
+        sad[2] = (vp8_sad4x4(y + 4 * y_stride, y_stride,
+                             yd + 4 * yd_stride, yd_stride, INT_MAX) + 4) >> 4;
+        sad_sum = sad[2];
+
+        act[3] = (vp8_variance4x4(yd + 4 * yd_stride + 4, yd_stride,
+                                  VP8_ZEROS, 0, &sse) + 4) >> 4;
+        act_sum += act[3];
+        sad[3] = (vp8_sad4x4(y + 4 * y_stride + 4, y_stride,
+                             yd + 4 * y_stride + 4, yd_stride, INT_MAX)
+                  + 4) >> 4;
+        sad_sum = sad[3];
+    }
+    else
+    {
+        act_sum = (vp8_variance4x4(yd, yd_stride, VP8_ZEROS, 0, &sse) + 8) >> 4;
+        sad_sum = (vp8_sad4x4(y, y_stride, yd, yd_stride, INT_MAX) + 8) >> 4;
     }
 
     /* thr = qdiff/8 + log2(act) + log4(qprev) */
-    thr = (qdiff>>3);
-    while (act>>=1) thr++;
-    while (qprev>>=2) thr++;
+    thr = (qdiff >> 3);
 
-    if (sad < thr)
+    while (qprev >>= 2) thr++;
+
+    if (blksize > 4)
     {
-        int ifactor = (sad << MFQE_PRECISION) / thr;
-        ifactor >>= (qdiff >> 5);
+        unsigned int base_thr = thr, this_thr, this_act;
+        int i;
 
+        for (i = 0; i < 4; i++)
+        {
+            this_thr = base_thr;
+            this_act = act[i];
+
+            while (this_act >>= 1) this_thr++;
+
+            if (sad[i] >= this_thr || act[i] < 16)
+            {
+                sad_sum = UINT_MAX;
+                break;
+            }
+        }
+    }
+
+    while (act_sum >>= 1) thr++;
+
+    if (sad_sum < thr)
+    {
+        if (blksize == 16)
+        {
+            uvsad = (vp8_sad8x8(u, uv_stride, ud, uvd_stride, INT_MAX) + 32)
+                    >> 6;
+
+            if (uvsad < thr)
+                uvsad = (vp8_sad8x8(v, uv_stride, vd, uvd_stride, INT_MAX) + 32)
+                        >> 6;
+        }
+        else
+        {
+            uvsad = (vp8_sad4x4(u, uv_stride, ud, uvd_stride, INT_MAX) + 8)
+                    >> 4;
+
+            if (uvsad < thr)
+                uvsad = (vp8_sad4x4(v, uv_stride, vd, uvd_stride, INT_MAX) + 8)
+                        >> 4;
+        }
+    }
+
+    if (uvsad < thr)
+    {
+        static const int roundoff = (1 << (MFQE_PRECISION - 1));
+        int ifactor = (sad_sum << MFQE_PRECISION) / thr;
+        ifactor >>= (qdiff >> 5);
+        // TODO: SIMD optimize this section
         if (ifactor)
         {
-            apply_ifactor(y, y_stride, yd, yd_stride,
-                          u, v, uv_stride,
-                          ud, vd, uvd_stride,
-                          blksize, ifactor);
+            int icfactor = (1 << MFQE_PRECISION) - ifactor;
+            for (yp = y, ydp = yd, i = 0; i < blksize; ++i, yp += y_stride, ydp += yd_stride)
+            {
+                for (j = 0; j < blksize; ++j)
+                    ydp[j] = (int)((yp[j] * ifactor + ydp[j] * icfactor + roundoff) >> MFQE_PRECISION);
+            }
+            for (up = u, udp = ud, i = 0; i < blksizeby2; ++i, up += uv_stride, udp += uvd_stride)
+            {
+                for (j = 0; j < blksizeby2; ++j)
+                    udp[j] = (int)((up[j] * ifactor + udp[j] * icfactor + roundoff) >> MFQE_PRECISION);
+            }
+            for (vp = v, vdp = vd, i = 0; i < blksizeby2; ++i, vp += uv_stride, vdp += uvd_stride)
+            {
+                for (j = 0; j < blksizeby2; ++j)
+                    vdp[j] = (int)((vp[j] * ifactor + vdp[j] * icfactor + roundoff) >> MFQE_PRECISION);
+            }
         }
-        /* else implicitly copy from previous frame */
     }
     else
     {
@@ -167,13 +282,22 @@ static void multiframe_quality_enhance_block
             vp8_copy_mem8x8(u, uv_stride, ud, uvd_stride);
             vp8_copy_mem8x8(v, uv_stride, vd, uvd_stride);
         }
-        else /* if (blksize == 8) */
+        else if (blksize == 8)
         {
             vp8_copy_mem8x8(y, y_stride, yd, yd_stride);
-            for (up = u, udp = ud, i = 0; i < uvblksize; ++i, up += uv_stride, udp += uvd_stride)
-                vpx_memcpy(udp, up, uvblksize);
-            for (vp = v, vdp = vd, i = 0; i < uvblksize; ++i, vp += uv_stride, vdp += uvd_stride)
-                vpx_memcpy(vdp, vp, uvblksize);
+            for (up = u, udp = ud, i = 0; i < blksizeby2; ++i, up += uv_stride, udp += uvd_stride)
+                vpx_memcpy(udp, up, blksizeby2);
+            for (vp = v, vdp = vd, i = 0; i < blksizeby2; ++i, vp += uv_stride, vdp += uvd_stride)
+                vpx_memcpy(vdp, vp, blksizeby2);
+        }
+        else
+        {
+            for (yp = y, ydp = yd, i = 0; i < blksize; ++i, yp += y_stride, ydp += yd_stride)
+                vpx_memcpy(ydp, yp, blksize);
+            for (up = u, udp = ud, i = 0; i < blksizeby2; ++i, up += uv_stride, udp += uvd_stride)
+                vpx_memcpy(udp, up, blksizeby2);
+            for (vp = v, vdp = vd, i = 0; i < blksizeby2; ++i, vp += uv_stride, vdp += uvd_stride)
+                vpx_memcpy(vdp, vp, blksizeby2);
         }
     }
 }
