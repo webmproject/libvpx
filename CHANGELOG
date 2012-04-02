@@ -1,3 +1,6 @@
+NOTE FOR NEXT RELEASE:   PLEASE DOCUMENT API CHANGE TO NOISE SENSITIVITY FEATURE
+AND WARN PEOPLE THAT FOR NOW IT'S EITHER ON OR OFF
+
 2012-01-27 v1.0.0 "Duclair"
   Our fourth named release, focused on performance and features related to
   real-time encoding. It also fixes a decoder crash bug introduced in
