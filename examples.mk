@@ -32,6 +32,7 @@ vpxenc.SRCS                 += args.c args.h y4minput.c y4minput.h
 vpxenc.SRCS                 += tools_common.c tools_common.h
 vpxenc.SRCS                 += vpx_ports/mem_ops.h
 vpxenc.SRCS                 += vpx_ports/mem_ops_aligned.h
+vpxenc.SRCS                 += vpx_ports/vpx_timer.h
 vpxenc.SRCS                 += libmkv/EbmlIDs.h
 vpxenc.SRCS                 += libmkv/EbmlWriter.c
 vpxenc.SRCS                 += libmkv/EbmlWriter.h

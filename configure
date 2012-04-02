@@ -180,6 +180,8 @@ else
 # customer environment
 [ -f ${source_path}/../include/vpx/vp8cx.h ] && CODECS="${CODECS} vp8_encoder"
 [ -f ${source_path}/../include/vpx/vp8dx.h ] && CODECS="${CODECS} vp8_decoder"
+[ -f ${source_path}/../include/vpx/vp8cx.h ] || disable vp8_encoder
+[ -f ${source_path}/../include/vpx/vp8dx.h ] || disable vp8_decoder
 
 [ -f ${source_path}/../lib/*/*mt.lib ] && soft_enable static_msvcrt
 fi

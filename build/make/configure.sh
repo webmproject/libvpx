@@ -458,9 +458,12 @@ process_common_cmdline() {
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
         if echo "${ARCH_EXT_LIST}" | grep "^ *$option\$" >/dev/null; then
             [ $action = "disable" ] && RTCD_OPTIONS="${RTCD_OPTIONS}${opt} "
-        else
-            echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
-                die_unknown $opt
+        elif [ $action = "disable" ] && ! disabled $option ; then
+          echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
+            die_unknown $opt
+        elif [ $action = "enable" ] && ! enabled $option ; then
+          echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
+            die_unknown $opt
         fi
         $action $option
         ;;
