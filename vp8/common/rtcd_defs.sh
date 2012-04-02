@@ -208,11 +208,6 @@ specialize vp8_bilinear_predict4x4 mmx media neon
 vp8_bilinear_predict4x4_media=vp8_bilinear_predict4x4_armv6
 
 #
-# Encoder functions below this point.
-#
-if [ "$CONFIG_VP8_ENCODER" = "yes" ]; then
-
-#
 # Whole-pixel Variance
 #
 prototype unsigned int vp8_variance4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse"
@@ -276,27 +271,6 @@ prototype unsigned int vp8_variance_halfpixvar16x16_hv "const unsigned char *src
 specialize vp8_variance_halfpixvar16x16_hv mmx sse2 media neon
 vp8_variance_halfpixvar16x16_hv_sse2=vp8_variance_halfpixvar16x16_hv_wmt
 vp8_variance_halfpixvar16x16_hv_media=vp8_variance_halfpixvar16x16_hv_armv6
-
-#
-# Sum of squares (vector)
-#
-prototype unsigned int vp8_get_mb_ss "const short *"
-specialize vp8_get_mb_ss mmx sse2
-
-#
-# SSE (Sum Squared Error)
-#
-prototype unsigned int vp8_sub_pixel_mse16x16 "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
-specialize vp8_sub_pixel_mse16x16 mmx sse2
-vp8_sub_pixel_mse16x16_sse2=vp8_sub_pixel_mse16x16_wmt
-
-prototype unsigned int vp8_mse16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse"
-specialize vp8_mse16x16 mmx sse2 media neon
-vp8_mse16x16_sse2=vp8_mse16x16_wmt
-vp8_mse16x16_media=vp8_mse16x16_armv6
-
-prototype unsigned int vp8_get4x4sse_cs "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride"
-specialize vp8_get4x4sse_cs mmx neon
 
 #
 # Single block SAD
@@ -379,6 +353,32 @@ specialize vp8_sad16x8x4d sse3
 
 prototype void vp8_sad16x16x4d "const unsigned char *src_ptr, int source_stride, unsigned char *ref_ptr[4], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad16x16x4d sse3
+
+#
+# Encoder functions below this point.
+#
+if [ "$CONFIG_VP8_ENCODER" = "yes" ]; then
+
+#
+# Sum of squares (vector)
+#
+prototype unsigned int vp8_get_mb_ss "const short *"
+specialize vp8_get_mb_ss mmx sse2
+
+#
+# SSE (Sum Squared Error)
+#
+prototype unsigned int vp8_sub_pixel_mse16x16 "const unsigned char  *src_ptr, int  source_stride, int  xoffset, int  yoffset, const unsigned char *ref_ptr, int Refstride, unsigned int *sse"
+specialize vp8_sub_pixel_mse16x16 mmx sse2
+vp8_sub_pixel_mse16x16_sse2=vp8_sub_pixel_mse16x16_wmt
+
+prototype unsigned int vp8_mse16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sse"
+specialize vp8_mse16x16 mmx sse2 media neon
+vp8_mse16x16_sse2=vp8_mse16x16_wmt
+vp8_mse16x16_media=vp8_mse16x16_armv6
+
+prototype unsigned int vp8_get4x4sse_cs "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride"
+specialize vp8_get4x4sse_cs mmx neon
 
 #
 # Block copy
