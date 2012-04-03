@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAH3//99o\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-04-03T23:32:46Z",
+      "side": 1,
+      "message": "--diff-filter?",
+      "revId": "eb915c556f0540233285c31a04701511e522fbab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
