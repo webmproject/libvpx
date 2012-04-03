@@ -626,7 +626,7 @@ static int vp8_rdcost_mby(MACROBLOCK *mb)
 static void macro_block_yrd( MACROBLOCK *mb,
                              int *Rate,
                              int *Distortion,
-                             const vp8_encodemb_rtcd_vtable_t *rtcd)
+                             const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
     MACROBLOCKD *const x = &mb->e_mbd;
@@ -636,8 +636,11 @@ static void macro_block_yrd( MACROBLOCK *mb,
     BLOCK *beptr;
     int d;
 
-    ENCODEMB_INVOKE(rtcd, submby)( mb->src_diff, *(mb->block[0].base_src),
-                                   mb->e_mbd.predictor, mb->block[0].src_stride );
+    ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
+        mb->src_diff,
+        *(mb->block[0].base_src),
+        mb->e_mbd.predictor,
+        mb->block[0].src_stride );
 
     // Fdct and building the 2nd order block
     for (beptr = mb->block; beptr < mb->block + 16; beptr += 2)
@@ -660,11 +663,11 @@ static void macro_block_yrd( MACROBLOCK *mb,
     mb->quantize_b(mb_y2, x_y2);
 
     // Distortion
-    d = ENCODEMB_INVOKE(rtcd, mberr)(mb, 1) << 2;
+    d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 1);
 
-    d += ENCODEMB_INVOKE(rtcd, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
+    d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff);
 
-    *Distortion = (d >> 4);
+    *Distortion = (d >> 2);
     // rate
     *Rate = vp8_rdcost_mby(mb);
 }
@@ -772,9 +775,11 @@ static void macro_block_yrd_8x8( MACROBLOCK *mb,
     short *Y2DCPtr = mb_y2->src_diff;
     int d;
 
-    ENCODEMB_INVOKE(&rtcd->encodemb, submby)
-        ( mb->src_diff, *(mb->block[0].base_src),
-        mb->e_mbd.predictor, mb->block[0].src_stride );
+    ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
+        mb->src_diff,
+        *(mb->block[0].base_src),
+        mb->e_mbd.predictor,
+        mb->block[0].src_stride );
 
     vp8_transform_mby_8x8(mb);
     vp8_quantize_mby_8x8(mb);
@@ -788,11 +793,11 @@ static void macro_block_yrd_8x8( MACROBLOCK *mb,
     mb->e_mbd.dqcoeff[64] = 0;
     mb->e_mbd.dqcoeff[128] = 0;
     mb->e_mbd.dqcoeff[192] = 0;
-    d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0) << 2;
 
-    d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff)<<2;
+    d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0);
+    d += ENCODEMB_INVOKE(&rtcd->encodemb, berr)(mb_y2->coeff, x_y2->dqcoeff);
 
-    *Distortion = (d >> 4);
+    *Distortion = (d >> 2);
     // rate
     *Rate = vp8_rdcost_mby_8x8(mb);
 }
@@ -1066,7 +1071,7 @@ static int rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
             }
 #endif
 
-        macro_block_yrd(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd.encodemb));
+        macro_block_yrd(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd));
             // FIXME add compoundmode cost
             // FIXME add rate for mode2
         rate = ratey + x->mbmode_cost[x->e_mbd.frame_type]
@@ -2867,7 +2872,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                 IF_RTCD(&cpi->rtcd)) ;
             else
                 macro_block_yrd(x, &rate_y, &distortion,
-                                IF_RTCD(&cpi->rtcd.encodemb)) ;
+                                IF_RTCD(&cpi->rtcd)) ;
             rate2 += rate_y;
             distortion2 += distortion;
             rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
@@ -3119,7 +3124,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                 IF_RTCD(&cpi->rtcd));
             else
                 macro_block_yrd(x, &rate_y, &distortion,
-                                IF_RTCD(&cpi->rtcd.encodemb));
+                                IF_RTCD(&cpi->rtcd));
 
             rate2 += rate_y;
             distortion2 += distortion;
@@ -3227,7 +3232,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                 IF_RTCD(&cpi->rtcd));
             else
                 macro_block_yrd(x, &rate_y, &distortion,
-                                IF_RTCD(&cpi->rtcd.encodemb));
+                                IF_RTCD(&cpi->rtcd));
 
             rate2 += rate_y;
             distortion2 += distortion;
