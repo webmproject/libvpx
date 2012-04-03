@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAH3//+G4\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-03T22:37:17Z",
+      "side": 1,
+      "message": "would it be possible to use (sad \u003c thr*thr) to avoid the sqrt? or only calculate the sqrt on the luma when you need it for the ifactor.",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAH3//+F0\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-03T22:37:17Z",
+      "side": 1,
+      "message": "should happen in a separate loop, or if(i\u003d\u003d0)",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAH3//+E8\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-03T22:37:17Z",
+      "side": 1,
+      "message": "ZERO4X4 blocks have their mvs set, so you should be able to simplify this just to row\u003c\u003d1\u0026\u0026col\u003c\u003d1",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAH3//+Dk\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-03T22:37:17Z",
+      "side": 1,
+      "message": "similarly, I think this can simplify to mode \u003e BPRED \u0026\u0026 row \u003c\u003d 1 \u0026\u0026 col \u003c\u003d 1?",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
