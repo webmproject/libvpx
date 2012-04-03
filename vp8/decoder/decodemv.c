@@ -660,4 +660,3 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
         mi++;           /* skip left predictor each row */
     }
 }
-
