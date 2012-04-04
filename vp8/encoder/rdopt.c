@@ -911,7 +911,8 @@ static int rd_pick_intra4x4block(
 
         ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ);
         rate += ratey;
-        distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(be->coeff, b->dqcoeff) >> 2;
+        distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(
+            be->coeff, b->dqcoeff) >> 2;
 
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
@@ -1437,7 +1438,9 @@ static void rd_pick_intra_mbuv_mode(VP8_COMP *cpi,
         vp8_quantize_mbuv(x);
 
         rate_to = rd_cost_mbuv(x);
-        rate = rate_to + x->intra_uv_mode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.uv_mode];
+        rate = rate_to
+             + x->intra_uv_mode_cost[x->e_mbd.frame_type]
+                                    [x->e_mbd.mode_info_context->mbmi.uv_mode];
 
         distortion = ENCODEMB_INVOKE(&cpi->rtcd.encodemb, mbuverr)(x) / 4;
 
@@ -1652,7 +1655,11 @@ static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
     return cost;
 
 }
-static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels, int which_label, const vp8_encodemb_rtcd_vtable_t *rtcd)
+static unsigned int vp8_encode_inter_mb_segment(
+    MACROBLOCK *x,
+    int const *labels,
+    int which_label,
+    const VP8_ENCODER_RTCD *rtcd)
 {
     int i;
     unsigned int distortion = 0;
@@ -1663,20 +1670,21 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x, int const *labels
         {
             BLOCKD *bd = &x->e_mbd.block[i];
             BLOCK *be = &x->block[i];
-
+            int thisdistortion;
 
             vp8_build_inter_predictors_b(bd, 16, x->e_mbd.subpixel_predict);
-            ENCODEMB_INVOKE(rtcd, subb)(be, bd, 16);
+            ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, bd, 16);
             x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
 
             // set to 0 no way to account for 2nd order DC so discount
             //be->coeff[0] = 0;
             x->quantize_b(be, bd);
-
-            distortion += ENCODEMB_INVOKE(rtcd, berr)(be->coeff, bd->dqcoeff);
+            thisdistortion = ENCODEMB_INVOKE(&rtcd->encodemb,berr)(
+                be->coeff,
+                bd->dqcoeff)/4;
+            distortion += thisdistortion;
         }
     }
-
     return distortion;
 }
 
@@ -1916,7 +1924,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                 continue;
             }
 
-            distortion = vp8_encode_inter_mb_segment(x, labels, i, IF_RTCD(&cpi->rtcd.encodemb)) / 4;
+            distortion = vp8_encode_inter_mb_segment(
+                x, labels, i,
+                IF_RTCD(&cpi->rtcd));
 
             labelyrate = rdcost_mbsegment_y(x, labels, i, ta_s, tl_s);
             rate += labelyrate;
