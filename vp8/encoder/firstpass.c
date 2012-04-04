@@ -2648,8 +2648,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             && lookup_next_frame_stats(cpi, &next_frame) != EOF)
         {
             // Normal scene cut check
-            if ( ( i >= MIN_GF_INTERVAL ) &&
-                 test_candidate_kf(cpi, &last_frame, this_frame, &next_frame) )
+            if ( test_candidate_kf(cpi, &last_frame, this_frame, &next_frame) )
             {
                 break;
             }
