@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAH3//9+M\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-04-04T00:05:03Z",
+      "side": 1,
+      "message": "I wanted to keep both the sad version and the ssd version and reuse the same code below. Adding a todo to optimize this later. Moving the sq root to the luma part only for now.",
+      "parentUuid": "AAAAH3//+G4\u003d",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAH3//+F0\u003d",
         "filename": "vp8/common/mfqe.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-04-03T22:37:17Z",
       "side": 1,
       "message": "should happen in a separate loop, or if(i\u003d\u003d0)",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAH3//9+Y\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 249,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-04-04T00:05:03Z",
+      "side": 1,
+      "message": "The loop was fixed in a subsequent patch.",
+      "parentUuid": "AAAAH3//+F0\u003d",
       "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAH3//9+c\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-04-04T00:05:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAH3//+E8\u003d",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAH3//+Dk\u003d",
         "filename": "vp8/common/mfqe.c",
         "patchSetId": 2
@@ -64,6 +118,24 @@
       "writtenOn": "2012-04-03T22:37:17Z",
       "side": 1,
       "message": "similarly, I think this can simplify to mode \u003e BPRED \u0026\u0026 row \u003c\u003d 1 \u0026\u0026 col \u003c\u003d 1?",
+      "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAH3//9+g\u003d",
+        "filename": "vp8/common/mfqe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-04-04T00:05:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAH3//+Dk\u003d",
       "revId": "0e78ee11c10a4b8c771dc03a8a034277d6184297",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
