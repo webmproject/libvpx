@@ -666,7 +666,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     const int mis = pbi->common.mode_info_stride;
     MACROBLOCKD *const xd  = & pbi->mb;
 
-    int index = mb_row * pbi->common.mb_cols + mb_col;
     int_mv *const mv = & mbmi->mv;
     int mb_to_left_edge;
     int mb_to_right_edge;
@@ -1017,91 +1016,75 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
 void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 {
-    MODE_INFO *mi = pbi->common.mi;
+    int i;
+    VP8_COMMON *cm = &pbi->common;
+    MODE_INFO *mi = cm->mi;
+    int sb_row, sb_col;
+    int sb_rows = (cm->mb_rows + 1)>>1;
+    int sb_cols = (cm->mb_cols + 1)>>1;
+    int row_delta[4] = { 0, +1,  0, -1};
+    int col_delta[4] = {+1, -1, +1, +1};
 
-    MODE_INFO *prev_mi = pbi->common.prev_mi;
-
-    int mb_row = -1;
-
-#if 0
-    FILE *statsfile;
-    statsfile = fopen("decsegmap.stt", "a");
-    fprintf(statsfile, "\n" );
-#endif
+    MODE_INFO *prev_mi = cm->prev_mi;
 
     mb_mode_mv_init(pbi);
 
 #if CONFIG_QIMODE
-    if(pbi->common.frame_type==KEY_FRAME && !pbi->common.kf_ymode_probs_update)
+    if(cm->frame_type==KEY_FRAME && !cm->kf_ymode_probs_update)
     {
-        pbi->common.kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
+        cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
     }
 #endif
 
-    while (++mb_row < pbi->common.mb_rows)
+    for (sb_row=0; sb_row<sb_rows; sb_row++)
     {
-        int mb_col = -1;
-        int mb_to_top_edge;
-        int mb_to_bottom_edge;
+        int mb_col = 0;
+        int mb_row = (sb_row <<1);
 
-        pbi->mb.mb_to_top_edge =
-        mb_to_top_edge = -((mb_row * 16)) << 3;
-        mb_to_top_edge -= LEFT_TOP_MARGIN;
-
-        pbi->mb.mb_to_bottom_edge =
-        mb_to_bottom_edge = ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
-        mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
-
-#if 0
-        fprintf(statsfile, "\n" );
-#endif
-
-        while (++mb_col < pbi->common.mb_cols)
+        for (sb_col=0; sb_col<sb_cols; sb_col++)
         {
-            /*read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
-            if(pbi->common.frame_type == KEY_FRAME)
+            for ( i=0; i<4; i++ )
             {
-                //printf("<%d %d> \n", mb_row, mb_col);
-                vp8_kfread_modes(pbi, mi, mb_row, mb_col);
-            }
-            else
-            {
-                read_mb_modes_mv(pbi, mi, &mi->mbmi,
-                prev_mi,
-                mb_row, mb_col);
-            }
+                int mb_to_top_edge;
+                int mb_to_bottom_edge;
 
-            //printf("%3d", mi->mbmi.mode);
+                int dy = row_delta[i];
+                int dx = col_delta[i];
+                int offset_extended = dy * cm->mode_info_stride + dx;
 
-            /*
-            if(pbi->common.current_video_frame==7)
-            {
-                FILE *fmode=fopen("kfmode.txt", "a");
-                fprintf(fmode, "%3d:%3d:%d\n",mb_row, mb_col, mi->mbmi.mode);
-                fclose(fmode);
+                if ((mb_row >= cm->mb_rows) || (mb_col >= cm->mb_cols))
+                {
+                    /* next macroblock */
+                    mb_row += dy;
+                    mb_col += dx;
+                    mi += offset_extended;
+                    prev_mi += offset_extended;
+                    continue;
+                }
 
-            }*/
-            /*
-            if(mi->mbmi.mode==I8X8_PRED)
-            {
-                printf("F%3d:%d:%d\n", pbi->common.current_video_frame, mb_row, mb_col);
+                pbi->mb.mb_to_top_edge = mb_to_top_edge = -((mb_row * 16)) << 3;
+                                         mb_to_top_edge -= LEFT_TOP_MARGIN;
+
+                pbi->mb.mb_to_bottom_edge =
+                mb_to_bottom_edge =
+                        ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
+                mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
+
+                if(cm->frame_type == KEY_FRAME)
+                    vp8_kfread_modes(pbi, mi, mb_row, mb_col);
+                else
+                    read_mb_modes_mv(pbi, mi, &mi->mbmi, prev_mi, mb_row,
+                                     mb_col);
+
+                /* next macroblock */
+                mb_row += dy;
+                mb_col += dx;
+                mi += offset_extended;
+                prev_mi += offset_extended;
             }
-            */
-#if 0
-            fprintf(statsfile, "%2d%2d%2d   ",
-                mi->mbmi.segment_id, mi->mbmi.ref_frame, mi->mbmi.mode );
-#endif
-            prev_mi++;
-            mi++;       /* next macroblock */
         }
-       // printf("\n");
-        prev_mi++;
-        mi++;           /* skip left predictor each row */
+
+        mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
+        prev_mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
     }
-
-#if 0
-    fclose(statsfile);
-#endif
-
-
 }

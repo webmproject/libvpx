@@ -348,7 +348,6 @@ typedef struct VP8_COMP
     unsigned int mode_check_freq[MAX_MODES];
     unsigned int mode_test_hit_counts[MAX_MODES];
     unsigned int mode_chosen_counts[MAX_MODES];
-    unsigned int mbs_tested_so_far;
 
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
@@ -642,9 +641,17 @@ typedef struct VP8_COMP
     int *lf_ref_frame_sign_bias;
     int *lf_ref_frame;
 
-    int force_next_frame_intra; /* force next frame to intra when kf_auto says so */
+    /* force next frame to intra when kf_auto says so */
+    int force_next_frame_intra;
 
     int droppable;
+
+    // Global store for SB left contexts, one for each MB row in the SB
+    ENTROPY_CONTEXT_PLANES left_context[2];
+
+    // TODO Do we still need this??
+    int update_context;
+
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);

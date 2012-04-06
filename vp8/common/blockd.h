@@ -337,6 +337,9 @@ typedef struct MacroBlockD
 #if CONFIG_RUNTIME_CPU_DETECT
     struct VP8_COMMON_RTCD  *rtcd;
 #endif
+
+    int mb_index;   // Index of the MB in the SB (0..3)
+
 } MACROBLOCKD;
 
 

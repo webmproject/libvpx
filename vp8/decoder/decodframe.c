@@ -240,8 +240,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         }
 #endif
 
-
-
     if (xd->segmentation_enabled)
         mb_init_dequantizer(pbi, xd);
 
@@ -256,10 +254,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 RECON_INVOKE(&pbi->common.rtcd.recon,
                     build_intra_predictors_mby)(xd);
             }
+#if 0
+            // Intra-modes requiring recon data from top-right
+            // MB have been temporarily disabled.
             else
             {
                 vp8_intra_prediction_down_copy(xd);
             }
+#endif
         }
     }
     else
@@ -431,7 +433,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 (xd->qcoeff+16*16, xd->block[16].dequant,
                 xd->predictor+16*16, xd->dst.u_buffer, xd->dst.v_buffer,
                 xd->dst.uv_stride, xd->eobs+16);
-
 }
 
 
@@ -459,102 +460,139 @@ static int get_delta_q(vp8_reader *bc, int prev, int *q_update)
 FILE *vpxlog = 0;
 #endif
 
+/* Decode a row of Superblocks (2x2 region of MBs) */
 static void
-decode_mb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mb_row, MACROBLOCKD *xd)
+decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd)
 {
+    int i;
+    int sb_col;
+    int mb_row, mb_col;
     int recon_yoffset, recon_uvoffset;
-    int mb_col;
     int ref_fb_idx = pc->lst_fb_idx;
     int dst_fb_idx = pc->new_fb_idx;
     int recon_y_stride = pc->yv12_fb[ref_fb_idx].y_stride;
     int recon_uv_stride = pc->yv12_fb[ref_fb_idx].uv_stride;
+    int row_delta[4] = { 0, +1,  0, -1};
+    int col_delta[4] = {+1, -1, +1, +1};
+    int sb_cols = (pc->mb_cols + 1)>>1;
+    ENTROPY_CONTEXT_PLANES left_context[2];
 
-    vpx_memset(&pc->left_context, 0, sizeof(pc->left_context));
-    recon_yoffset = mb_row * recon_y_stride * 16;
-    recon_uvoffset = mb_row * recon_uv_stride * 8;
-    /* reset above block coeffs */
+    // For a SB there are 2 left contexts, each pertaining to a MB row within
+    vpx_memset(left_context, 0, sizeof(left_context));
 
-    xd->above_context = pc->above_context;
-    xd->up_available = (mb_row != 0);
+    mb_row = mbrow;
+    mb_col = 0;
 
-    xd->mb_to_top_edge = -((mb_row * 16)) << 3;
-    xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
-
-    for (mb_col = 0; mb_col < pc->mb_cols; mb_col++)
+    for (sb_col=0; sb_col<sb_cols; sb_col++)
     {
-        /* Distance of Mb to the various image edges.
-         * These are specified to 8th pel as they are always compared to values
-         * that are in 1/8th pel units
-         */
-        xd->mb_to_left_edge = -((mb_col * 16) << 3);
-        xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
-
-        update_blockd_bmi(xd);
-
-        xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
-        xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
-        xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
-
-        xd->left_available = (mb_col != 0);
-
-        /* Select the appropriate reference frame for this MB */
-        if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
-            ref_fb_idx = pc->lst_fb_idx;
-        else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
-            ref_fb_idx = pc->gld_fb_idx;
-        else
-            ref_fb_idx = pc->alt_fb_idx;
-
-        xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
-        xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
-        xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
-
-        if (xd->mode_info_context->mbmi.second_ref_frame)
+        // Process the 4 MBs within the SB in the order:
+        // top-left, top-right, bottom-left, bottom-right
+        for ( i=0; i<4; i++ )
         {
-            int second_ref_fb_idx;
+            int dy = row_delta[i];
+            int dx = col_delta[i];
+            int offset_extended = dy * xd->mode_info_stride + dx;
 
-            /* Select the appropriate reference frame for this MB */
-            if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
-                second_ref_fb_idx = pc->lst_fb_idx;
-            else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
-                second_ref_fb_idx = pc->gld_fb_idx;
-            else
-                second_ref_fb_idx = pc->alt_fb_idx;
-
-            xd->second_pre.y_buffer = pc->yv12_fb[second_ref_fb_idx].y_buffer + recon_yoffset;
-            xd->second_pre.u_buffer = pc->yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
-            xd->second_pre.v_buffer = pc->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
-        }
-
-        if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME)
-        {
-            /* propagate errors from reference frames */
-            xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
-        }
+            if ((mb_row >= pc->mb_rows) || (mb_col >= pc->mb_cols))
+            {
+                // MB lies outside frame, skip on to next
+                mb_row += dy;
+                mb_col += dx;
+                xd->mode_info_context += offset_extended;
+                continue;
+            }
 
 #ifdef DEC_DEBUG
-        dec_debug = (pc->current_video_frame==1 && mb_row==4 && mb_col==0);
+            dec_debug = (pc->current_video_frame==0 && mb_row==0 && mb_col==0);
 #endif
-        decode_macroblock(pbi, xd, mb_row * pc->mb_cols  + mb_col);
+            // Copy in the appropriate left context for this MB row
+            vpx_memcpy (&pc->left_context,
+                        &left_context[i>>1],
+                        sizeof(ENTROPY_CONTEXT_PLANES));
 
-        /* check if the boolean decoder has suffered an error */
-        xd->corrupted |= vp8dx_bool_error(xd->current_bc);
-        recon_yoffset += 16;
-        recon_uvoffset += 8;
+            // Set above context pointer
+            xd->above_context = pc->above_context + mb_col;
 
-        ++xd->mode_info_context;  /* next mb */
+            /* Distance of Mb to the various image edges.
+             * These are specified to 8th pel as they are always compared to
+             * values that are in 1/8th pel units
+             */
+            xd->mb_to_top_edge = -((mb_row * 16)) << 3;
+            xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
 
-        xd->above_context++;
+            xd->mb_to_left_edge = -((mb_col * 16) << 3);
+            xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
 
+            xd->up_available = (mb_row != 0);
+            xd->left_available = (mb_col != 0);
+
+            update_blockd_bmi(xd);
+
+            recon_yoffset = (mb_row * recon_y_stride * 16) + (mb_col * 16);
+            recon_uvoffset = (mb_row * recon_uv_stride * 8) + (mb_col * 8);
+
+            xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
+            xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
+            xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
+
+            /* Select the appropriate reference frame for this MB */
+            if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
+                ref_fb_idx = pc->lst_fb_idx;
+            else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
+                ref_fb_idx = pc->gld_fb_idx;
+            else
+                ref_fb_idx = pc->alt_fb_idx;
+
+            xd->pre.y_buffer = pc->yv12_fb[ref_fb_idx].y_buffer +recon_yoffset;
+            xd->pre.u_buffer = pc->yv12_fb[ref_fb_idx].u_buffer +recon_uvoffset;
+            xd->pre.v_buffer = pc->yv12_fb[ref_fb_idx].v_buffer +recon_uvoffset;
+
+            if (xd->mode_info_context->mbmi.second_ref_frame)
+            {
+                int second_ref_fb_idx;
+
+                /* Select the appropriate reference frame for this MB */
+                if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
+                    second_ref_fb_idx = pc->lst_fb_idx;
+                else if (xd->mode_info_context->mbmi.second_ref_frame ==
+                                                                   GOLDEN_FRAME)
+                    second_ref_fb_idx = pc->gld_fb_idx;
+                else
+                    second_ref_fb_idx = pc->alt_fb_idx;
+
+                xd->second_pre.y_buffer =
+                       pc->yv12_fb[second_ref_fb_idx].y_buffer + recon_yoffset;
+                xd->second_pre.u_buffer =
+                       pc->yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
+                xd->second_pre.v_buffer =
+                       pc->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
+            }
+
+            if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME)
+            {
+                /* propagate errors from reference frames */
+                xd->corrupted |= pc->yv12_fb[ref_fb_idx].corrupted;
+            }
+
+            decode_macroblock(pbi, xd, mb_row * pc->mb_cols + mb_col);
+
+            /* check if the boolean decoder has suffered an error */
+            xd->corrupted |= vp8dx_bool_error(xd->current_bc);
+
+            // Store the modified left context for the MB row locally
+            vpx_memcpy (&left_context[i>>1],
+                        &pc->left_context,
+                        sizeof(ENTROPY_CONTEXT_PLANES));
+
+            // skip to next MB
+            xd->mode_info_context += offset_extended;
+            mb_row += dy;
+            mb_col += dx;
+        }
     }
 
-    /* adjust to the next row of mbs */
-    vp8_extend_mb_row(
-        &pc->yv12_fb[dst_fb_idx],
-        xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8
-    );
-
-    ++xd->mode_info_context;      /* skip prediction column */
+    /* skip prediction column */
+    xd->mode_info_context += 1 - (pc->mb_cols & 0x1) + xd->mode_info_stride;
 }
 
 static unsigned int read_partition_size(const unsigned char *cx_size)
@@ -797,8 +835,6 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 
             if (Width != pc->Width  ||  Height != pc->Height)
             {
-                int prev_mb_rows = pc->mb_rows;
-
                 if (pc->Width <= 0)
                 {
                     pc->Width = Width;
@@ -1228,10 +1264,10 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     // Resset the macroblock mode info context to the start of the list
     xd->mode_info_context = pc->mi;
 
-    /* Decode a row of macro blocks */
-    for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
+    /* Decode a row of superblocks */
+    for (mb_row = 0; mb_row < pc->mb_rows; mb_row+=2)
     {
-        decode_mb_row(pbi, pc, mb_row, xd);
+        decode_sb_row(pbi, pc, mb_row, xd);
     }
     corrupt_tokens |= xd->corrupted;
 

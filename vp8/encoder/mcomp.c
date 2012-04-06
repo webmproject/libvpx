@@ -1257,7 +1257,6 @@ int vp8_hex_search
     int k = -1;
     int all_in;
     int best_site = -1;
-    MACROBLOCKD *xd = &x->e_mbd;
 
     int_mv fcenter_mv;
     fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;

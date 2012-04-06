@@ -1460,7 +1460,7 @@ static void show_rate_histogram(struct rate_hist          *hist,
 static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
 {
     int match = 1;
-    int i, j;
+    int i;
 
     match &= (img1->fmt == img2->fmt);
     match &= (img1->w == img2->w);

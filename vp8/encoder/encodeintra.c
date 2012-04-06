@@ -101,7 +101,10 @@ void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb)
     int i;
 
     MACROBLOCKD *x = &mb->e_mbd;
+#if 0
+    // Intra modes requiring top-right MB reconstructed data have been disabled
     vp8_intra_prediction_down_copy(x);
+#endif
 
     for (i = 0; i < 16; i++)
         vp8_encode_intra4x4block(rtcd, mb, i);

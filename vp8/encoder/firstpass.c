@@ -911,7 +911,7 @@ static double calc_correction_factor( double err_per_mb,
 // PGW TODO..
 // This code removes direct dependency on QIndex to determin the range
 // (now uses the actual quantizer) but has not been tuned.
-static double adjust_maxq_qrange(VP8_COMP *cpi)
+static void adjust_maxq_qrange(VP8_COMP *cpi)
 {
     int i;
     double q;

@@ -874,6 +874,12 @@ static int rd_pick_intra4x4block(
         int this_rd;
         int ratey;
 
+        // TODO Temporarily ignore modes that need the above-right data. SB
+        // encoding means this data is not available for the bottom right MB
+        // Do we need to do this for mode2 also?
+        if (mode==B_LD_PRED || mode==B_VL_PRED)
+            continue;
+
         rate = bmode_costs[mode];
 
 #if CONFIG_COMP_INTRA_PRED
@@ -936,10 +942,10 @@ static int rd_pick_intra4x4block(
 
 static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
                                      int *rate_y, int *Distortion, int best_rd,
-                                     int allow_comp)
+                                     int allow_comp, int update_contexts)
 {
-    MACROBLOCKD *const xd = &mb->e_mbd;
     int i;
+    MACROBLOCKD *const xd = &mb->e_mbd;
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int distortion = 0;
     int tot_rate_y = 0;
@@ -949,13 +955,25 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     ENTROPY_CONTEXT *tl;
     unsigned int *bmode_costs;
 
-    vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    if (update_contexts)
+    {
+        ta = (ENTROPY_CONTEXT *)mb->e_mbd.above_context;
+        tl = (ENTROPY_CONTEXT *)mb->e_mbd.left_context;
+    }
+    else
+    {
+        vpx_memcpy(&t_above, mb->e_mbd.above_context,
+                   sizeof(ENTROPY_CONTEXT_PLANES));
+        vpx_memcpy(&t_left, mb->e_mbd.left_context,
+                   sizeof(ENTROPY_CONTEXT_PLANES));
 
-    ta = (ENTROPY_CONTEXT *)&t_above;
-    tl = (ENTROPY_CONTEXT *)&t_left;
+        ta = (ENTROPY_CONTEXT *)&t_above;
+        tl = (ENTROPY_CONTEXT *)&t_left;
+    }
 
+#if 0
     vp8_intra_prediction_down_copy(xd);
+#endif
 
     bmode_costs = mb->inter_bmode_costs;
 
@@ -2348,7 +2366,7 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
-static void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
+/*static */void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
 {
     if (x->e_mbd.mode_info_context->mbmi.mode == SPLITMV)
     {
@@ -2445,7 +2463,7 @@ void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
     // Get the context probability for the prediction flag
     pred_prob = get_pred_prob( cm, xd, PRED_REF );
 
-    // Get the set of probailities to use if prediction fails
+    // Get the set of probabilities to use if prediction fails
     mod_refprobs = cm->mod_refprobs[pred_ref];
 
     // For each possible selected reference frame work out a cost.
@@ -2459,7 +2477,7 @@ void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
         // Get the prediction for the current mb
         cost = vp8_cost_bit( pred_prob, pred_flag );
 
-        // for incorectly predicted cases
+        // for incorrectly predicted cases
         if ( ! pred_flag )
         {
             if ( mod_refprobs[0] )
@@ -2503,6 +2521,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int best_mode_index = 0;
     int mode8x8[2][4];
     unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
+    int mb_index = xd->mb_index;
 
     int i;
     int mode_index;
@@ -2549,6 +2568,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
     vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));
+    vpx_memset(&x->mb_context[mb_index], 0, sizeof(PICK_MODE_CONTEXT));
 
     for (i = 0; i < 4; i++)
     {
@@ -2599,7 +2619,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     }
 
     *returnintra = INT_MAX;
-    cpi->mbs_tested_so_far++;          // Count of the number of MBs tested so far this frame
 
     x->skip = 0;
 
@@ -2647,8 +2666,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         distortion2 = 0;
 
         this_mode = vp8_mode_order[mode_index];
-
         x->e_mbd.mode_info_context->mbmi.mode = this_mode;
+
 #if CONFIG_COMP_INTRA_PRED
         x->e_mbd.mode_info_context->mbmi.second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
         x->e_mbd.mode_info_context->mbmi.second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
@@ -2736,7 +2755,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             int tmp_rd;
 
             // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
-            tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd, 0);
+            tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd, 0, 0);
             rate2 += rate;
             distortion2 += distortion;
 
@@ -3049,7 +3068,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 if (sse < threshold)
                 {
                      unsigned int q2dc = xd->block[24].dequant[0];
-                    /* If theres is no codeable 2nd order dc
+                    /* If there is no codeable 2nd order dc
                        or a very small uniform pixel change change */
                     if ((sse - var < q2dc * q2dc >>4) ||
                         (sse /2 > var && sse-var < 64))
@@ -3222,7 +3241,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         // Where skip is allowable add in the default per mb cost for the no skip case.
         // where we then decide to skip we have to delete this and replace it with the
-        // cost of signallying a skip
+        // cost of signaling a skip
         if (cpi->common.mb_no_coeff_skip)
         {
 #if CONFIG_NEWENTROPY
@@ -3329,7 +3348,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 best_hybrid_rd = this_rd;
         }
 
-        // Did this mode help.. i.i is it the new best mode
+        // Did this mode help.. i.e. is it the new best mode
         if (this_rd < best_rd || x->skip)
         {
             if (!mode_excluded)
@@ -3454,9 +3473,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     }
 
-    // Note how often each mode chosen as best
-    cpi->mode_chosen_counts[best_mode_index] ++;
-
     // This code force Altref,0,0 and skip for the frame that overlays a
     // an alrtef unless Altref is filtered. However, this is unsafe if
     // segment level coding of ref frame or mode is enabled for this
@@ -3479,7 +3495,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         return;
     }
-
 
     // macroblock modes
     vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
@@ -3509,8 +3524,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                       x->partition_info->bmi[15].mv.as_int;
     }
 
-    rd_update_mvcount(cpi, x, &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame]);
-
     if (best_single_rd == INT_MAX)
         *best_single_rd_diff = INT_MIN;
     else
@@ -3523,9 +3536,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         *best_hybrid_rd_diff = INT_MIN;
     else
         *best_hybrid_rd_diff = best_rd - best_hybrid_rd;
+
+    // Take a snapshot of the coding context so it can be
+    // restored if we decide to encode this way
+    x->mb_context[mb_index].best_mode_index = best_mode_index;
+    vpx_memcpy(&x->mb_context[mb_index].mic, x->e_mbd.mode_info_context,
+               sizeof(MODE_INFO));
+    vpx_memcpy(&x->mb_context[mb_index].partition_info, &best_partition,
+               sizeof(PARTITION_INFO));
+    vpx_memcpy(&x->mb_context[mb_index].best_ref_mv,
+               &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
+               sizeof(int_mv));
+    //x->mb_context[mb_index].rddiv = x->rddiv;
+    //x->mb_context[mb_index].rdmult = x->rdmult;
 }
 
-void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
+int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x)
 {
     MACROBLOCKD *xd = &x->e_mbd;
     int error4x4, error16x16, error4x4d;
@@ -3540,7 +3566,7 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     int mode16x16;
     int mode8x8[2][4];
 
-    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+    xd->mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
     rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
     rate = rateuv;
@@ -3548,28 +3574,28 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
     error16x16 = rd_pick_intra16x16mby_mode(cpi, x,
                                             &rate16x16, &rate16x16_tokenonly,
                                             &dist16x16);
-    mode16x16 = x->e_mbd.mode_info_context->mbmi.mode;
+    mode16x16 = xd->mode_info_context->mbmi.mode;
 
     error8x8 = rd_pick_intra8x8mby_modes(cpi, x,
                 &rate8x8, &rate8x8_tokenonly,
                 &dist8x8, error16x16);
-    mode8x8[0][0]= x->e_mbd.mode_info_context->bmi[0].as_mode.first;
-    mode8x8[0][1]= x->e_mbd.mode_info_context->bmi[2].as_mode.first;
-    mode8x8[0][2]= x->e_mbd.mode_info_context->bmi[8].as_mode.first;
-    mode8x8[0][3]= x->e_mbd.mode_info_context->bmi[10].as_mode.first;
+    mode8x8[0][0]= xd->mode_info_context->bmi[0].as_mode.first;
+    mode8x8[0][1]= xd->mode_info_context->bmi[2].as_mode.first;
+    mode8x8[0][2]= xd->mode_info_context->bmi[8].as_mode.first;
+    mode8x8[0][3]= xd->mode_info_context->bmi[10].as_mode.first;
 #if CONFIG_COMP_INTRA_PRED
-    mode8x8[1][0]= x->e_mbd.mode_info_context->bmi[0].as_mode.second;
-    mode8x8[1][1]= x->e_mbd.mode_info_context->bmi[2].as_mode.second;
-    mode8x8[1][2]= x->e_mbd.mode_info_context->bmi[8].as_mode.second;
-    mode8x8[1][3]= x->e_mbd.mode_info_context->bmi[10].as_mode.second;
+    mode8x8[1][0]= xd->mode_info_context->bmi[0].as_mode.second;
+    mode8x8[1][1]= xd->mode_info_context->bmi[2].as_mode.second;
+    mode8x8[1][2]= xd->mode_info_context->bmi[8].as_mode.second;
+    mode8x8[1][3]= xd->mode_info_context->bmi[10].as_mode.second;
 #endif
 
     error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
                                          &rate4x4, &rate4x4_tokenonly,
-                                         &dist4x4, error16x16, 0);
+                                         &dist4x4, error16x16, 0, 0);
     error4x4d = rd_pick_intra4x4mby_modes(cpi, x,
                                          &rate4x4d, &rate4x4_tokenonly,
-                                         &dist4x4d, error16x16, 1);
+                                         &dist4x4d, error16x16, 1, 0);
 
     if(error8x8> error16x16)
     {
@@ -3579,12 +3605,13 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
             if (error4x4d >= error4x4) // FIXME save original modes etc.
                 error4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4,
                                                      &rate4x4_tokenonly,
-                                                     &dist4x4, error16x16, 0);
-            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+                                                     &dist4x4, error16x16, 0,
+                                                     cpi->update_context);
+            xd->mode_info_context->mbmi.mode = B_PRED;
         }
         else
         {
-            x->e_mbd.mode_info_context->mbmi.mode = mode16x16;
+            xd->mode_info_context->mbmi.mode = mode16x16;
             rate += rate16x16;
 
         }
@@ -3597,16 +3624,95 @@ void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate_)
             if (error4x4d >= error4x4) // FIXME save original modes etc.
                 error4x4 = rd_pick_intra4x4mby_modes(cpi, x, &rate4x4,
                                                      &rate4x4_tokenonly,
-                                                     &dist4x4, error16x16, 0);
-            x->e_mbd.mode_info_context->mbmi.mode = B_PRED;
+                                                     &dist4x4, error16x16, 0,
+                                                     cpi->update_context);
+            xd->mode_info_context->mbmi.mode = B_PRED;
         }
         else
         {
 
-            x->e_mbd.mode_info_context->mbmi.mode = I8X8_PRED;
+            xd->mode_info_context->mbmi.mode = I8X8_PRED;
             set_i8x8_block_modes(x, mode8x8);
             rate += rate8x8;
         }
     }
-    *rate_ = rate;
+    return rate;
+}
+
+int vp8cx_pick_mode_inter_macroblock
+(
+    VP8_COMP *cpi, MACROBLOCK *x,
+    int recon_yoffset, int recon_uvoffset
+)
+{
+    VP8_COMMON *cm = &cpi->common;
+    MACROBLOCKD *const xd = &x->e_mbd;
+    int rate;
+    int distortion;
+    int intra_error = 0;
+    unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
+#if CONFIG_COMPRED
+     unsigned char ref_pred_flag;
+#endif
+
+    if (xd->segmentation_enabled)
+        x->encode_breakout = cpi->segment_encode_breakout[*segment_id];
+    else
+        x->encode_breakout = cpi->oxcf.encode_breakout;
+
+    //if (cpi->sf.RD)
+    // For now this codebase is limited to a single rd encode path
+    {
+        int zbin_mode_boost_enabled = cpi->zbin_mode_boost_enabled;
+        int single, compound, hybrid;
+
+        vp8_rd_pick_inter_mode(cpi, x, recon_yoffset, recon_uvoffset, &rate,
+                               &distortion, &intra_error, &single, &compound,
+                               &hybrid);
+
+        // TODO Save these to add in only if MB coding mode is selected?
+        cpi->rd_single_diff += single;
+        cpi->rd_comp_diff   += compound;
+        cpi->rd_hybrid_diff += hybrid;
+        if (xd->mode_info_context->mbmi.ref_frame &&
+            xd->mode_info_context->mbmi.mode != SPLITMV)
+        {
+            unsigned char pred_context;
+
+            pred_context = get_pred_context( cm, xd, PRED_COMP );
+
+            if (xd->mode_info_context->mbmi.second_ref_frame == INTRA_FRAME)
+                cpi->single_pred_count[pred_context]++;
+            else
+                cpi->comp_pred_count[pred_context]++;
+        }
+
+        /* test code: set transform size based on mode selection */
+        if( cpi->common.txfm_mode == ALLOW_8X8
+            && xd->mode_info_context->mbmi.mode != I8X8_PRED
+            && xd->mode_info_context->mbmi.mode != B_PRED
+            && xd->mode_info_context->mbmi.mode != SPLITMV)
+        {
+            xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+            cpi->t8x8_count ++;
+        }
+        else
+        {
+            xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+            cpi->t4x4_count++;
+        }
+
+        /* restore cpi->zbin_mode_boost_enabled */
+        cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
+    }
+    //else
+    // The non rd encode path has been deleted from this code base
+    // to simplify development
+    //    vp8_pick_inter_mode
+
+    // Store metrics so they can be added in to totals if this mode is picked
+    x->mb_context[xd->mb_index].distortion  = distortion;
+    x->mb_context[xd->mb_index].intra_error = intra_error;
+
+    return rate;
 }

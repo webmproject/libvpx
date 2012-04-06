@@ -205,8 +205,7 @@ int calculate_minq_index( double maxq,
         if ( minqtarget <= vp8_convert_qindex_to_q(i) )
             return i;
     }
-    if ( i == QINDEX_RANGE )
-        return QINDEX_RANGE-1;
+    return QINDEX_RANGE-1;
 }
 void init_minq_luts()
 {
@@ -408,7 +407,6 @@ static int compute_qdelta( VP8_COMP *cpi, double qstart, double qtarget )
     int i;
     int start_index = cpi->worst_quality;
     int target_index = cpi->worst_quality;
-    int retval = 0;
 
     // Convert the average q value to an index.
     for ( i = cpi->best_quality; i < cpi->worst_quality; i++ )
@@ -590,7 +588,7 @@ static void init_seg_features(VP8_COMP *cpi)
         // All other frames.
         else
         {
-            // No updeates.. leave things as they are.
+            // No updates.. leave things as they are.
             xd->update_mb_segmentation_map = 0;
             xd->update_mb_segmentation_data = 0;
         }
@@ -664,8 +662,6 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         cpi->mode_test_hit_counts[i] = 0;
         cpi->mode_chosen_counts[i] = 0;
     }
-
-    cpi->mbs_tested_so_far = 0;
 
     // best quality defaults
     sf->RD = 1;
@@ -2500,6 +2496,30 @@ static void Pass1Encode(VP8_COMP *cpi, unsigned long *size, unsigned char *dest,
     vp8_set_quantizer(cpi, find_fp_qindex());
     vp8_first_pass(cpi);
 }
+
+#if 1
+void write_yuv_frame_to_file(YV12_BUFFER_CONFIG *frame)
+{
+
+    // write the frame
+    int i;
+    char filename[255];
+    FILE *fp = fopen("encode_recon.yuv", "a");
+
+    for (i = 0; i < frame->y_height; i++)
+        fwrite(frame->y_buffer + i * frame->y_stride,
+            frame->y_width, 1, fp);
+    for (i = 0; i < frame->uv_height; i++)
+        fwrite(frame->u_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, fp);
+    for (i = 0; i < frame->uv_height; i++)
+        fwrite(frame->v_buffer + i * frame->uv_stride,
+            frame->uv_width, 1, fp);
+
+    fclose(fp);
+}
+#endif
+
 //#define WRITE_RECON_BUFFER 1
 #if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame)
@@ -2567,7 +2587,7 @@ static double compute_edge_pixel_proportion(YV12_BUFFER_CONFIG *frame)
     return (double)num_edge_pels/(double)num_pels;
 }
 
-// Function to test for conditions that indeicate we should loop
+// Function to test for conditions that indicate we should loop
 // back and recode a frame.
 static BOOL recode_loop_test( VP8_COMP *cpi,
                               int high_limit, int low_limit,
@@ -3563,9 +3583,12 @@ static void encode_frame_to_data_rate
         loopfilter_frame(cpi, cm);
     }
 
+    if(cm->show_frame)
+        write_yuv_frame_to_file(cm->frame_to_show);
+
     update_reference_frames(cm);
 
-    // Work out the segment probabilites if segmentation is enabled and
+    // Work out the segment probabilities if segmentation is enabled and
     // the map is due to be updated
     if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
     {
@@ -3935,22 +3958,25 @@ static void check_gf_quality(VP8_COMP *cpi)
             // Low use of gf
             if ((gf_active_pct < 10) || ((gf_active_pct + gf_ref_usage_pct) < 15))
             {
-                // ...but last frame zero zero usage is reasonbable so a new gf might be appropriate
+                // ...but last frame zero zero usage is reasonable
+                // so a new gf might be appropriate
                 if (last_ref_zz_useage >= 25)
                 {
                     cpi->gf_bad_count ++;
 
-                    if (cpi->gf_bad_count >= 8)   // Check that the condition is stable
+                    // Check that the condition is stable
+                    if (cpi->gf_bad_count >= 8)
                     {
                         cpi->gf_update_recommended = 1;
                         cpi->gf_bad_count = 0;
                     }
                 }
                 else
-                    cpi->gf_bad_count = 0;        // Restart count as the background is not stable enough
+                    cpi->gf_bad_count = 0;  // Restart count as the background
+                                            // is not stable enough
             }
             else
-                cpi->gf_bad_count = 0;            // Gf useage has picked up so reset count
+                cpi->gf_bad_count = 0;  // Gf usage has picked up so reset count
         }
     }
     // If the signal is set but has not been read should we cancel it.

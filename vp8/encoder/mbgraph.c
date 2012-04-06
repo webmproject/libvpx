@@ -109,7 +109,7 @@ static unsigned int do_16x16_motion_iteration
     //VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
     best_err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (xd->dst.y_buffer, xd->dst.y_stride,
-                     xd->predictor, 16, &best_err);
+                     xd->predictor, 16, best_err);
 
     /* restore UMV window */
     x->mv_col_min = tmp_col_min;
@@ -158,7 +158,7 @@ static int do_16x16_motion_search
     err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (ref->y_buffer + mb_y_offset,
                      ref->y_stride, xd->dst.y_buffer,
-                     xd->dst.y_stride, &err);
+                     xd->dst.y_stride, INT_MAX);
     dst_mv->as_int = 0;
 
     // Test last reference frame using the previous best mv as the
@@ -224,7 +224,7 @@ static int do_16x16_zerozero_search
     err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (ref->y_buffer + mb_y_offset,
                      ref->y_stride, xd->dst.y_buffer,
-                     xd->dst.y_stride, &err);
+                     xd->dst.y_stride, INT_MAX);
 
     dst_mv->as_int = 0;
 
@@ -255,7 +255,7 @@ static int find_best_16x16_intra
         err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                         (xd->predictor, 16,
                          buf->y_buffer + mb_y_offset,
-                         buf->y_stride, &err);
+                         buf->y_stride, err);
         // find best
         if (err < best_err)
         {

@@ -81,7 +81,7 @@ void vp8_find_near_mvs
         else
             cnt[CNT_INTRA] += 2;
     }
-    /* Process above left or the one frome last frame */
+    /* Process above left or the one from last frame */
     if ( aboveleft->mbmi.ref_frame != INTRA_FRAME||
          (lf_here->mbmi.ref_frame==LAST_FRAME && refframe == LAST_FRAME))
     {

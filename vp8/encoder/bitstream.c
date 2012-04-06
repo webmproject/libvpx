@@ -577,6 +577,7 @@ static void update_ref_probs( VP8_COMP *const cpi )
 
 static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 {
+    int i;
     VP8_COMMON *const pc = & cpi->common;
     vp8_writer *const w = & cpi->bc;
     const MV_CONTEXT *mvc = pc->fc.mvc;
@@ -584,16 +585,12 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const MV_CONTEXT_HP *mvc_hp = pc->fc.mvc_hp;
 #endif
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
-
-    int i;
-    int pred_context;
-
-
-    MODE_INFO *m = pc->mi;
-    MODE_INFO *prev_m = pc->prev_mi;
+    MODE_INFO *m;
+    MODE_INFO *prev_m;
 
     const int mis = pc->mode_info_stride;
-    int mb_row = -1;
+    int mb_row, mb_col;
+    int row, col;
 
 #if CONFIG_NEWENTROPY
     int prob_skip_false[3] = {0, 0, 0};
@@ -604,6 +601,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     // Values used in prediction model coding
     vp8_prob pred_prob;
     unsigned char prediction_flag;
+
+    int row_delta[4] = { 0, +1,  0, -1};
+    int col_delta[4] = {+1, -1, +1, +1};
 
     cpi->mb.partition_info = cpi->mb.pi;
 
@@ -624,7 +624,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             if ( (cpi->skip_false_count[k] + cpi->skip_true_count[k]) )
             {
                 prob_skip_false[k] = cpi->skip_false_count[k] * 256 /
-                                  (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
+                (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
 
                 if (prob_skip_false[k] <= 1)
                     prob_skip_false[k] = 1;
@@ -701,265 +701,310 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
     vp8_write_mvprobs(cpi);
 
-    while (++mb_row < pc->mb_rows)
+    mb_row = 0;
+    for (row=0; row < pc->mb_rows; row += 2)
     {
-        int mb_col = -1;
+        m = pc->mi + row * mis;
+        prev_m = pc->prev_mi + row * mis;
 
-        while (++mb_col < pc->mb_cols)
+        mb_col = 0;
+        for (col=0; col < pc->mb_cols; col += 2)
         {
-            const MB_MODE_INFO *const mi = & m->mbmi;
-            const MV_REFERENCE_FRAME rf = mi->ref_frame;
-            const MB_PREDICTION_MODE mode = mi->mode;
-            const int segment_id = mi->segment_id;
+            int i;
 
-            // Distance of Mb to the various image edges.
-            // These specified to 8th pel as they are always compared to MV values that are in 1/8th pel units
-            xd->mb_to_left_edge = -((mb_col * 16) << 3);
-            xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
-            xd->mb_to_top_edge = -((mb_row * 16)) << 3;
-            xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+            // Process the 4 MBs in the order:
+            // top-left, top-right, bottom-left, bottom-right
+            for (i=0; i<4; i++)
+            {
+                const MB_MODE_INFO *const mi = & m->mbmi;
+                const MV_REFERENCE_FRAME rf = mi->ref_frame;
+                const MB_PREDICTION_MODE mode = mi->mode;
+                const int segment_id = mi->segment_id;
 
-            // Make sure the MacroBlockD mode info pointer is set correctly
-            xd->mode_info_context = m;
+                int dy = row_delta[i];
+                int dx = col_delta[i];
+                int offset_extended = dy * mis + dx;
 
-            xd->prev_mode_info_context = prev_m;
+                if ((mb_row >= pc->mb_rows) || (mb_col >= pc->mb_cols))
+                {
+                    // MB lies outside frame, move on
+                    mb_row += dy;
+                    mb_col += dx;
+                    m += offset_extended;
+                    prev_m += offset_extended;
+                    cpi->mb.partition_info += offset_extended;
+                    continue;
+                }
+
+                // Distance of Mb to the various image edges.
+                // These specified to 8th pel as they are always compared to MV
+                // values that are in 1/8th pel units
+                xd->mb_to_left_edge = -((mb_col * 16) << 3);
+                xd->mb_to_right_edge = ((pc->mb_cols - 1 - mb_col) * 16) << 3;
+                xd->mb_to_top_edge = -((mb_row * 16)) << 3;
+                xd->mb_to_bottom_edge = ((pc->mb_rows - 1 - mb_row) * 16) << 3;
+
+                // Make sure the MacroBlockD mode info pointer is set correctly
+                xd->mode_info_context = m;
+
+                xd->prev_mode_info_context = prev_m;
 
 #ifdef ENTROPY_STATS
-            active_section = 9;
+                active_section = 9;
 #endif
 
-            if (cpi->mb.e_mbd.update_mb_segmentation_map)
-            {
-                // Is temporal coding of the segment map enabled
-                if (pc->temporal_update)
+                if (cpi->mb.e_mbd.update_mb_segmentation_map)
                 {
-                    prediction_flag =
-                        get_pred_flag( xd, PRED_SEG_ID );
-                    pred_prob =
-                        get_pred_prob( pc, xd, PRED_SEG_ID);
+                    // Is temporal coding of the segment map enabled
+                    if (pc->temporal_update)
+                    {
+                        prediction_flag = get_pred_flag( xd, PRED_SEG_ID );
+                        pred_prob = get_pred_prob( pc, xd, PRED_SEG_ID);
 
-                    // Code the segment id prediction flag for this mb
-                    vp8_write( w, prediction_flag, pred_prob );
+                        // Code the segment id prediction flag for this mb
+                        vp8_write( w, prediction_flag, pred_prob );
 
-                    // If the mbs segment id was not predicted code explicitly
-                    if (!prediction_flag)
+                        // If the mb segment id wasn't predicted code explicitly
+                        if (!prediction_flag)
+                            write_mb_segid(w, mi, &cpi->mb.e_mbd);
+                    }
+                    else
+                    {
+                        // Normal unpredicted coding
                         write_mb_segid(w, mi, &cpi->mb.e_mbd);
+                    }
                 }
-                else
-                {
-                    // Normal undpredicted coding
-                    write_mb_segid(w, mi, &cpi->mb.e_mbd);
-                }
-            }
 
-            if ( pc->mb_no_coeff_skip &&
-                 ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
-                   ( get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0 ) ) )
-            {
+                if ( pc->mb_no_coeff_skip &&
+                     ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
+                       ( get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0 ) ) )
+                {
 #if CONFIG_NEWENTROPY
-                vp8_encode_bool(w, mi->mb_skip_coeff,
-                                get_pred_prob(pc, xd, PRED_MBSKIP));
+                    vp8_encode_bool(w, mi->mb_skip_coeff,
+                                    get_pred_prob(pc, xd, PRED_MBSKIP));
 #else
-                vp8_encode_bool(w, mi->mb_skip_coeff, prob_skip_false);
+                    vp8_encode_bool(w, mi->mb_skip_coeff, prob_skip_false);
 #endif
-            }
+                }
 
-            // Encode the reference frame.
-            encode_ref_frame( w, pc, xd,
-                              segment_id, rf );
+                // Encode the reference frame.
+                encode_ref_frame( w, pc, xd, segment_id, rf );
 
-            if (rf == INTRA_FRAME)
-            {
+                if (rf == INTRA_FRAME)
+                {
 #ifdef ENTROPY_STATS
-                active_section = 6;
+                    active_section = 6;
 #endif
 
-                if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
-                    write_ymode(w, mode, pc->fc.ymode_prob);
+                    if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
+                        write_ymode(w, mode, pc->fc.ymode_prob);
 
-                if (mode == B_PRED)
-                {
-                    int j = 0;
+                    if (mode == B_PRED)
+                    {
+                        int j = 0;
 #if CONFIG_COMP_INTRA_PRED
-                    int uses_second = m->bmi[0].as_mode.second != (B_PREDICTION_MODE) (B_DC_PRED - 1);
-                    vp8_write(w, uses_second, 128);
+                        int uses_second =
+                                m->bmi[0].as_mode.second !=
+                                        (B_PREDICTION_MODE) (B_DC_PRED - 1);
+                        vp8_write(w, uses_second, 128);
 #endif
-                    do {
+                        do {
 #if CONFIG_COMP_INTRA_PRED
-                        B_PREDICTION_MODE mode2 = m->bmi[j].as_mode.second;
+                            B_PREDICTION_MODE mode2 = m->bmi[j].as_mode.second;
 #endif
-                        write_bmode(w, m->bmi[j].as_mode.first, pc->fc.bmode_prob);
+                            write_bmode(w, m->bmi[j].as_mode.first,
+                                        pc->fc.bmode_prob);
 #if CONFIG_COMP_INTRA_PRED
-                        if (uses_second)
-                        {
-                            write_bmode(w, mode2, pc->fc.bmode_prob);
-                        }
+                            if (uses_second)
+                            {
+                                write_bmode(w, mode2, pc->fc.bmode_prob);
+                            }
 #endif
-                    } while (++j < 16);
-                }
-                if(mode == I8X8_PRED)
-                {
-                    write_i8x8_mode(w, m->bmi[0].as_mode.first, pc->i8x8_mode_prob);
-                    write_i8x8_mode(w, m->bmi[2].as_mode.first, pc->i8x8_mode_prob);
-                    write_i8x8_mode(w, m->bmi[8].as_mode.first, pc->i8x8_mode_prob);
-                    write_i8x8_mode(w, m->bmi[10].as_mode.first, pc->i8x8_mode_prob);
-                }
-                else
-                {
+                        } while (++j < 16);
+                    }
+                    if(mode == I8X8_PRED)
+                    {
+                        write_i8x8_mode(w, m->bmi[0].as_mode.first,
+                                        pc->i8x8_mode_prob);
+                        write_i8x8_mode(w, m->bmi[2].as_mode.first,
+                                        pc->i8x8_mode_prob);
+                        write_i8x8_mode(w, m->bmi[8].as_mode.first,
+                                        pc->i8x8_mode_prob);
+                        write_i8x8_mode(w, m->bmi[10].as_mode.first,
+                                        pc->i8x8_mode_prob);
+                    }
+                    else
+                    {
 #if CONFIG_UVINTRA
-                    write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob[mode]);
+                        write_uv_mode(w, mi->uv_mode,
+                                      pc->fc.uv_mode_prob[mode]);
 #ifdef MODE_STATS
-                    if(mode!=B_PRED)
-                        ++cpi->y_uv_mode_count[mode][mi->uv_mode];
+                        if(mode!=B_PRED)
+                            ++cpi->y_uv_mode_count[mode][mi->uv_mode];
 #endif
 
 #else
-                    write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
+                        write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
 #endif /*CONFIG_UVINTRA*/
 
+                    }
                 }
-            }
-            else
-            {
-                int_mv best_mv;
-                int ct[4];
-
-                vp8_prob mv_ref_p [VP8_MVREFS-1];
-
+                else
                 {
-                    int_mv n1, n2;
+                    int_mv best_mv;
+                    int ct[4];
 
-                    vp8_find_near_mvs(xd, m,
-                        prev_m,
-                        &n1, &n2, &best_mv, ct, rf, cpi->common.ref_frame_sign_bias);
-                    vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
+                    vp8_prob mv_ref_p [VP8_MVREFS-1];
 
-
-#ifdef ENTROPY_STATS
-                    accum_mv_refs(mode, ct);
-#endif
-                }
-
-#ifdef ENTROPY_STATS
-                active_section = 3;
-#endif
-
-                // Is the segment coding of mode enabled
-                if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
-                {
-                    write_mv_ref(w, mode, mv_ref_p);
-                    vp8_accum_mv_refs(&cpi->common, mode, ct);
-                }
-
-                {
-                    switch (mode)   /* new, split require MVs */
                     {
-                    case NEWMV:
+                        int_mv n1, n2;
+
+                        vp8_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
+                                          rf, cpi->common.ref_frame_sign_bias);
+                        vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
+
+
 #ifdef ENTROPY_STATS
-                        active_section = 5;
+                        accum_mv_refs(mode, ct);
+#endif
+                    }
+
+#ifdef ENTROPY_STATS
+                    active_section = 3;
+#endif
+
+                    // Is the segment coding of mode enabled
+                    if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
+                    {
+                        write_mv_ref(w, mode, mv_ref_p);
+                        vp8_accum_mv_refs(&cpi->common, mode, ct);
+                    }
+
+                    {
+                        switch (mode)   /* new, split require MVs */
+                        {
+                        case NEWMV:
+#ifdef ENTROPY_STATS
+                            active_section = 5;
 #endif
 
 #if CONFIG_HIGH_PRECISION_MV
-                        if (xd->allow_high_precision_mv)
-                            write_mv_hp(w, &mi->mv.as_mv, &best_mv, mvc_hp);
-                        else
+                            if (xd->allow_high_precision_mv)
+                                write_mv_hp(w, &mi->mv.as_mv, &best_mv, mvc_hp);
+                            else
 #endif
-                        write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
+                            write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
 
-                        if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
-                        {
-                            vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                      get_pred_prob( pc, xd, PRED_COMP ) );
-                        }
-                        if (mi->second_ref_frame)
-                        {
-                            const int second_rf = mi->second_ref_frame;
-                            int_mv n1, n2;
-                            int ct[4];
-                            vp8_find_near_mvs(xd, m,
+                            if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
+                            {
+                                vp8_write(w,
+                                          mi->second_ref_frame != INTRA_FRAME,
+                                          get_pred_prob( pc, xd, PRED_COMP ) );
+                            }
+                            if (mi->second_ref_frame)
+                            {
+                                const int second_rf = mi->second_ref_frame;
+                                int_mv n1, n2;
+                                int ct[4];
+                                vp8_find_near_mvs(xd, m,
                                               prev_m,
                                               &n1, &n2, &best_mv,
                                               ct, second_rf,
                                               cpi->common.ref_frame_sign_bias);
 #if CONFIG_HIGH_PRECISION_MV
-                            if (xd->allow_high_precision_mv)
-                                write_mv_hp(w, &mi->second_mv.as_mv, &best_mv, mvc_hp);
-                            else
-#endif
-                            write_mv(w, &mi->second_mv.as_mv, &best_mv, mvc);
-                        }
-                        break;
-                    case SPLITMV:
-                    {
-                        int j = 0;
-
-#ifdef MODE_STATS
-                        ++count_mb_seg [mi->partitioning];
-#endif
-
-                        write_split(w, mi->partitioning);
-
-                        do
-                        {
-                            B_PREDICTION_MODE blockmode;
-                            int_mv blockmv;
-                            const int *const  L = vp8_mbsplits [mi->partitioning];
-                            int k = -1;  /* first block in subset j */
-                            int mv_contz;
-                            int_mv leftmv, abovemv;
-
-                            blockmode =  cpi->mb.partition_info->bmi[j].mode;
-                            blockmv =  cpi->mb.partition_info->bmi[j].mv;
-#if CONFIG_DEBUG
-                            while (j != L[++k])
-                                if (k >= 16)
-                                    assert(0);
-#else
-                            while (j != L[++k]);
-#endif
-                            leftmv.as_int = left_block_mv(m, k);
-                            abovemv.as_int = above_block_mv(m, k, mis);
-                            mv_contz = vp8_mv_cont(&leftmv, &abovemv);
-
-                            write_sub_mv_ref(w, blockmode, vp8_sub_mv_ref_prob2 [mv_contz]);
-
-                            if (blockmode == NEW4X4)
-                            {
-#ifdef ENTROPY_STATS
-                                active_section = 11;
-#endif
-#if CONFIG_HIGH_PRECISION_MV
                                 if (xd->allow_high_precision_mv)
-                                    write_mv_hp(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT_HP *) mvc_hp);
+                                    write_mv_hp(w, &mi->second_mv.as_mv,
+                                                &best_mv, mvc_hp);
                                 else
 #endif
-                                write_mv(w, &blockmv.as_mv, &best_mv, (const MV_CONTEXT *) mvc);
+                                write_mv(w, &mi->second_mv.as_mv, &best_mv,
+                                         mvc);
                             }
-                        }
-                        while (++j < cpi->mb.partition_info->count);
-                    }
-                    break;
-                    default:
-                        if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
+                            break;
+                        case SPLITMV:
                         {
-                            vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
-                                      get_pred_prob( pc, xd, PRED_COMP ) );
+                            int j = 0;
+
+#ifdef MODE_STATS
+                            ++count_mb_seg [mi->partitioning];
+#endif
+
+                            write_split(w, mi->partitioning);
+
+                            do
+                            {
+                                B_PREDICTION_MODE blockmode;
+                                int_mv blockmv;
+                                const int *const  L =
+                                        vp8_mbsplits [mi->partitioning];
+                                int k = -1;  /* first block in subset j */
+                                int mv_contz;
+                                int_mv leftmv, abovemv;
+
+                                blockmode = cpi->mb.partition_info->bmi[j].mode;
+                                blockmv = cpi->mb.partition_info->bmi[j].mv;
+#if CONFIG_DEBUG
+                                while (j != L[++k])
+                                    if (k >= 16)
+                                        assert(0);
+#else
+                                while (j != L[++k]);
+#endif
+                                leftmv.as_int = left_block_mv(m, k);
+                                abovemv.as_int = above_block_mv(m, k, mis);
+                                mv_contz = vp8_mv_cont(&leftmv, &abovemv);
+
+                                write_sub_mv_ref(w, blockmode,
+                                               vp8_sub_mv_ref_prob2 [mv_contz]);
+
+                                if (blockmode == NEW4X4)
+                                {
+#ifdef ENTROPY_STATS
+                                    active_section = 11;
+#endif
+#if CONFIG_HIGH_PRECISION_MV
+                                    if (xd->allow_high_precision_mv)
+                                        write_mv_hp(w, &blockmv.as_mv, &best_mv,
+                                                (const MV_CONTEXT_HP *) mvc_hp);
+                                    else
+#endif
+                                    write_mv(w, &blockmv.as_mv, &best_mv,
+                                             (const MV_CONTEXT *) mvc);
+                                }
+                            }
+                            while (++j < cpi->mb.partition_info->count);
                         }
                         break;
+                        default:
+                            if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
+                            {
+                                vp8_write(w,
+                                          mi->second_ref_frame != INTRA_FRAME,
+                                          get_pred_prob( pc, xd, PRED_COMP ) );
+                            }
+                            break;
+                        }
                     }
                 }
-            }
 
-            ++m;
-            ++prev_m;
-            assert((prev_m-cpi->common.prev_mip)==(m-cpi->common.mip));
-            assert((prev_m-cpi->common.prev_mi)==(m-cpi->common.mi));
-            cpi->mb.partition_info++;
+                // Next MB
+                mb_row += dy;
+                mb_col += dx;
+                m += offset_extended;
+                prev_m += offset_extended;
+                cpi->mb.partition_info += offset_extended;
+#if CONFIG_DEBUG
+                assert((prev_m-cpi->common.prev_mip)==(m-cpi->common.mip));
+                assert((prev_m-cpi->common.prev_mi)==(m-cpi->common.mi));
+#endif
+            }
         }
 
-        ++m;  /* skip L prediction border */
-        ++prev_m;
-        cpi->mb.partition_info++;
+        // Next SB
+        mb_row += 2;
+        m += mis + (1 - (pc->mb_cols & 0x1));
+        prev_m += mis + (1 - (pc->mb_cols & 0x1));
+        cpi->mb.partition_info += mis + (1 - (pc->mb_cols & 0x1));
     }
 }
 
@@ -968,14 +1013,17 @@ static void write_kfmodes(VP8_COMP *cpi)
     vp8_writer *const bc = & cpi->bc;
     VP8_COMMON *const c = & cpi->common;
     const int mis = c->mode_info_stride;
-    /* const */
-    MODE_INFO *m = c->mi;
-    int mb_row = -1;
+    MODE_INFO *m;
+    int i;
+    int row, col;
+    int mb_row, mb_col;
 #if CONFIG_NEWENTROPY
     int prob_skip_false[3] = {0, 0, 0};
 #else
     int prob_skip_false = 0;
 #endif
+    int row_delta[4] = { 0, +1,  0, -1};
+    int col_delta[4] = {+1, -1, +1, +1};
 
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
@@ -1030,87 +1078,115 @@ static void write_kfmodes(VP8_COMP *cpi)
     }
 #endif
 
-    while (++mb_row < c->mb_rows)
+    mb_row = 0;
+    for (row=0; row < c->mb_rows; row += 2)
     {
-        int mb_col = -1;
+        m = c->mi + row * mis;
 
-        while (++mb_col < c->mb_cols)
+        mb_col = 0;
+        for (col=0; col < c->mb_cols; col += 2)
         {
-            const int ym = m->mbmi.mode;
-            int segment_id = m->mbmi.segment_id;
-
-            xd->mode_info_context = m;
-
-            if (cpi->mb.e_mbd.update_mb_segmentation_map)
+            // Process the 4 MBs in the order:
+            // top-left, top-right, bottom-left, bottom-right
+            for (i=0; i<4; i++)
             {
-                write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
-            }
+                int ym;
+                int segment_id;
+                int dy = row_delta[i];
+                int dx = col_delta[i];
+                int offset_extended = dy * mis + dx;
 
-            if ( c->mb_no_coeff_skip &&
-                 ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
-                   (get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0) ) )
-            {
-#if CONFIG_NEWENTROPY
-                vp8_encode_bool(bc, m->mbmi.mb_skip_coeff,
-                                get_pred_prob(c, xd, PRED_MBSKIP));
-#else
-                vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
-#endif
-            }
-#if CONFIG_QIMODE
-            kfwrite_ymode(bc, ym, c->kf_ymode_prob[c->kf_ymode_probs_index]);
-#else
-            kfwrite_ymode(bc, ym, c->kf_ymode_prob);
-#endif
-            if (ym == B_PRED)
-            {
-                const int mis = c->mode_info_stride;
-                int i = 0;
-#if CONFIG_COMP_INTRA_PRED
-                int uses_second = m->bmi[0].as_mode.second != (B_PREDICTION_MODE) (B_DC_PRED - 1);
-                vp8_write(bc, uses_second, 128);
-#endif
-                do
+                if ((mb_row >= c->mb_rows) || (mb_col >= c->mb_cols))
                 {
-                    const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
-                    const B_PREDICTION_MODE L = left_block_mode(m, i);
-                    const int bm = m->bmi[i].as_mode.first;
-#if CONFIG_COMP_INTRA_PRED
-                    const int bm2 = m->bmi[i].as_mode.second;
-#endif
-
-#ifdef ENTROPY_STATS
-                    ++intra_mode_stats [A] [L] [bm];
-#endif
-
-                    write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
-#if CONFIG_COMP_INTRA_PRED
-                    if (uses_second)
-                    {
-                        write_bmode(bc, bm2, c->kf_bmode_prob [A] [L]);
-                    }
-#endif
+                    // MB lies outside frame, move on
+                    mb_row += dy;
+                    mb_col += dx;
+                    m += offset_extended;
+                    continue;
                 }
-                while (++i < 16);
-            }
-            if(ym == I8X8_PRED)
-            {
-                write_i8x8_mode(bc, m->bmi[0].as_mode.first, c->i8x8_mode_prob);
-                write_i8x8_mode(bc, m->bmi[2].as_mode.first, c->i8x8_mode_prob);
-                write_i8x8_mode(bc, m->bmi[8].as_mode.first, c->i8x8_mode_prob);
-                write_i8x8_mode(bc, m->bmi[10].as_mode.first, c->i8x8_mode_prob);
-            }
-            else
-#if CONFIG_UVINTRA
-                write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
-#else
-                write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob);
-#endif
 
-            m++;
+                ym = m->mbmi.mode;
+                segment_id = m->mbmi.segment_id;
+
+                if (cpi->mb.e_mbd.update_mb_segmentation_map)
+                {
+                    write_mb_segid(bc, &m->mbmi, &cpi->mb.e_mbd);
+                }
+
+                if ( c->mb_no_coeff_skip &&
+                     ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
+                       (get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0) ) )
+                {
+    #if CONFIG_NEWENTROPY
+                    vp8_encode_bool(bc, m->mbmi.mb_skip_coeff,
+                                    get_pred_prob(c, xd, PRED_MBSKIP));
+    #else
+                    vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
+    #endif
+                }
+    #if CONFIG_QIMODE
+                kfwrite_ymode(bc, ym,
+                              c->kf_ymode_prob[c->kf_ymode_probs_index]);
+    #else
+                kfwrite_ymode(bc, ym, c->kf_ymode_prob);
+    #endif
+                if (ym == B_PRED)
+                {
+                    const int mis = c->mode_info_stride;
+                    int i = 0;
+    #if CONFIG_COMP_INTRA_PRED
+                    int uses_second =
+                            m->bmi[0].as_mode.second !=
+                                    (B_PREDICTION_MODE) (B_DC_PRED - 1);
+                    vp8_write(bc, uses_second, 128);
+    #endif
+                    do
+                    {
+                        const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
+                        const B_PREDICTION_MODE L = left_block_mode(m, i);
+                        const int bm = m->bmi[i].as_mode.first;
+    #if CONFIG_COMP_INTRA_PRED
+                        const int bm2 = m->bmi[i].as_mode.second;
+    #endif
+
+    #ifdef ENTROPY_STATS
+                        ++intra_mode_stats [A] [L] [bm];
+    #endif
+
+                        write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
+    #if CONFIG_COMP_INTRA_PRED
+                        if (uses_second)
+                        {
+                            write_bmode(bc, bm2, c->kf_bmode_prob [A] [L]);
+                        }
+    #endif
+                    }
+                    while (++i < 16);
+                }
+                if(ym == I8X8_PRED)
+                {
+                    write_i8x8_mode(bc, m->bmi[0].as_mode.first,
+                                    c->i8x8_mode_prob);
+                    write_i8x8_mode(bc, m->bmi[2].as_mode.first,
+                                    c->i8x8_mode_prob);
+                    write_i8x8_mode(bc, m->bmi[8].as_mode.first,
+                                    c->i8x8_mode_prob);
+                    write_i8x8_mode(bc, m->bmi[10].as_mode.first,
+                                    c->i8x8_mode_prob);
+                }
+                else
+#if CONFIG_UVINTRA
+                    write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
+#else
+                    write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob);
+#endif
+                // Next MB
+                mb_row += dy;
+                mb_col += dx;
+                m += offset_extended;
+            }
         }
-        //printf("\n");
-        m++;    // skip L prediction border
+        mb_row += 2;
     }
 }
 
