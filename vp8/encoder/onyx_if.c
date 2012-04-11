@@ -292,6 +292,59 @@ void init_base_skip_probs()
 #endif
     }
 }
+void update_base_skip_probs(VP8_COMP *cpi)
+{
+    VP8_COMMON *cm = &cpi->common;
+
+    if (cm->frame_type != KEY_FRAME)
+    {
+        update_skip_probs(cpi);
+
+        if (cm->refresh_alt_ref_frame)
+        {
+#if CONFIG_NEWENTROPY
+            int k;
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->last_skip_false_probs[2][k] = cm->mbskip_pred_probs[k];
+#else
+            cpi->last_skip_false_probs[2] = cpi->prob_skip_false;
+#endif
+            cpi->last_skip_probs_q[2] = cm->base_qindex;
+        }
+        else if (cpi->common.refresh_golden_frame)
+        {
+#if CONFIG_NEWENTROPY
+            int k;
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->last_skip_false_probs[1][k] = cm->mbskip_pred_probs[k];
+#else
+            cpi->last_skip_false_probs[1] = cpi->prob_skip_false;
+#endif
+            cpi->last_skip_probs_q[1] = cm->base_qindex;
+        }
+        else
+        {
+#if CONFIG_NEWENTROPY
+            int k;
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->last_skip_false_probs[0][k] = cm->mbskip_pred_probs[k];
+#else
+            cpi->last_skip_false_probs[0] = cpi->prob_skip_false;
+#endif
+            cpi->last_skip_probs_q[0] = cm->base_qindex;
+
+            // update the baseline table for the current q
+#if CONFIG_NEWENTROPY
+            for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                cpi->base_skip_false_prob[cm->base_qindex][k] =
+                    cm->mbskip_pred_probs[k];
+#else
+            cpi->base_skip_false_prob[cm->base_qindex] = cpi->prob_skip_false;
+#endif
+        }
+    }
+
+}
 
 void vp8_initialize()
 {
@@ -3207,13 +3260,6 @@ static void encode_frame_to_data_rate
                     if (cpi->last_skip_false_probs[2] != 0)
                         cpi->prob_skip_false = cpi->last_skip_false_probs[2];
 #endif
-
-                    /*
-                                        if(cpi->last_skip_false_probs[2]!=0 && abs(Q- cpi->last_skip_probs_q[2])<=16 )
-                       cpi->prob_skip_false = cpi->last_skip_false_probs[2];
-                                        else if (cpi->last_skip_false_probs[2]!=0)
-                       cpi->prob_skip_false = (cpi->last_skip_false_probs[2]  + cpi->prob_skip_false ) / 2;
-                       */
                 }
                 else if (cpi->common.refresh_golden_frame)
                 {
@@ -3227,13 +3273,6 @@ static void encode_frame_to_data_rate
                     if (cpi->last_skip_false_probs[1] != 0)
                         cpi->prob_skip_false = cpi->last_skip_false_probs[1];
 #endif
-
-                    /*
-                                        if(cpi->last_skip_false_probs[1]!=0 && abs(Q- cpi->last_skip_probs_q[1])<=16 )
-                       cpi->prob_skip_false = cpi->last_skip_false_probs[1];
-                                        else if (cpi->last_skip_false_probs[1]!=0)
-                       cpi->prob_skip_false = (cpi->last_skip_false_probs[1]  + cpi->prob_skip_false ) / 2;
-                       */
                 }
                 else
                 {
@@ -3248,13 +3287,6 @@ static void encode_frame_to_data_rate
                     if (cpi->last_skip_false_probs[0] != 0)
                         cpi->prob_skip_false = cpi->last_skip_false_probs[0];
 #endif
-
-                    /*
-                    if(cpi->last_skip_false_probs[0]!=0 && abs(Q- cpi->last_skip_probs_q[0])<=16 )
-                        cpi->prob_skip_false = cpi->last_skip_false_probs[0];
-                    else if(cpi->last_skip_false_probs[0]!=0)
-                        cpi->prob_skip_false = (cpi->last_skip_false_probs[0]  + cpi->prob_skip_false ) / 2;
-                        */
                 }
 
                 // as this is for cost estimate, let's make sure it does not
@@ -3297,6 +3329,10 @@ static void encode_frame_to_data_rate
 
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);
+
+        // Update the skip mb flag probabilities based on the distribution
+        // seen in the last encoder iteration.
+        update_base_skip_probs( cpi );
 
         cpi->projected_frame_size -= vp8_estimate_entropy_savings(cpi);
         cpi->projected_frame_size = (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;
@@ -3706,6 +3742,10 @@ static void encode_frame_to_data_rate
             cpi->twopass.gf_group_bits = 0 ;
     }
 
+    // Update the skip mb flag probabilities based on the distribution seen
+    // in this frame.
+    update_base_skip_probs( cpi );
+/*
     if (cm->frame_type != KEY_FRAME)
     {
         if (cpi->common.refresh_alt_ref_frame)
@@ -3751,7 +3791,7 @@ static void encode_frame_to_data_rate
 
         }
     }
-
+*/
 #if 0 && CONFIG_INTERNAL_STATS
     {
         FILE *f = fopen("tmp.stt", "a");

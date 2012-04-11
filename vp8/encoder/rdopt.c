@@ -1514,13 +1514,26 @@ int vp8_cost_mv_ref(VP8_COMP *cpi,
                     MB_PREDICTION_MODE m,
                     const int near_mv_ref_ct[4])
 {
-    VP8_COMMON *pc = &cpi->common;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
+    int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-    vp8_prob p [VP8_MVREFS-1];
-    assert(NEARESTMV <= m  &&  m <= SPLITMV);
-    vp8_mv_ref_probs(pc, p, near_mv_ref_ct);
-    return vp8_cost_token(vp8_mv_ref_tree, p,
-                          vp8_mv_ref_encoding_array - NEARESTMV + m);
+    // If the mode coding is done entirely at the segment level
+    // we should not account for it at the per mb level in rd code.
+    // Note that if the segment level coding is expanded from single mode
+    // to multiple mode masks as per reference frame coding we will need
+    // to do something different here.
+    if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE) )
+    {
+        VP8_COMMON *pc = &cpi->common;
+
+        vp8_prob p [VP8_MVREFS-1];
+        assert(NEARESTMV <= m  &&  m <= SPLITMV);
+        vp8_mv_ref_probs(pc, p, near_mv_ref_ct);
+        return vp8_cost_token(vp8_mv_ref_tree, p,
+                              vp8_mv_ref_encoding_array - NEARESTMV + m);
+    }
+    else
+        return 0;
 }
 
 void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv)
@@ -3241,21 +3254,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 vp8_cost_bit( get_pred_prob( cm, xd, PRED_COMP ), 1 );
         }
 
-        // Where skip is allowable add in the default per mb cost for the no skip case.
-        // where we then decide to skip we have to delete this and replace it with the
-        // cost of signaling a skip
-        if (cpi->common.mb_no_coeff_skip)
-        {
-#if CONFIG_NEWENTROPY
-            int prob_skip_cost = vp8_cost_bit(
-                get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
-#else
-            int prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 0);
-#endif
-            other_cost += prob_skip_cost;
-            rate2 += prob_skip_cost;
-        }
-
         if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
         {
             rate2 += compmode_cost;
@@ -3268,13 +3266,18 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         if (!disable_skip)
         {
-            // Test for the condition where skip block will be activated because there are no non zero coefficients and make any necessary adjustment for rate
-            if (cpi->common.mb_no_coeff_skip)
+            // Test for the condition where skip block will be activated
+            // because there are no non zero coefficients and make any
+            // necessary adjustment for rate. Ignore if skip is coded at
+            // segment level as the cost wont have been added in.
+            if ( cpi->common.mb_no_coeff_skip )
             {
                 int mb_skippable;
+                int mb_skip_allowed;
                 int has_y2 = ( this_mode!=SPLITMV
                                     &&this_mode!=B_PRED
                                     &&this_mode!=I8X8_PRED);
+
                 if((cpi->common.txfm_mode == ALLOW_8X8) && has_y2)
                 {
                     if(x->e_mbd.mode_info_context->mbmi.ref_frame!=INTRA_FRAME)
@@ -3292,37 +3295,59 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                      & mby_is_skippable(&x->e_mbd, has_y2);
                 }
 
+                // Is Mb level skip allowed for this mb.
+                mb_skip_allowed =
+                    !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
+                    get_segdata( xd, segment_id, SEG_LVL_EOB );
+
                 if (mb_skippable)
                 {
-#if CONFIG_NEWENTROPY
-                    vp8_prob skip_prob = get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
-#endif
-                    int prob_skip_cost;
+                    // Back out the coefficient coding costs
                     rate2 -= (rate_y + rate_uv);
                     //for best_yrd calculation
                     rate_uv = 0;
 
+                    if ( mb_skip_allowed )
+                    {
+                        int prob_skip_cost;
+
+                        // Cost the skip mb case
 #if CONFIG_NEWENTROPY
-                    if (skip_prob)
-                    {
-                        prob_skip_cost = vp8_cost_bit(skip_prob, 1);
-                        prob_skip_cost -= vp8_cost_bit(skip_prob, 0);
-                        rate2 += prob_skip_cost;
-                        other_cost += prob_skip_cost;
-                    }
+                        vp8_prob skip_prob =
+                            get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
+
+                        if (skip_prob)
+                        {
+                            prob_skip_cost = vp8_cost_bit(skip_prob, 1);
+                            rate2 += prob_skip_cost;
+                            other_cost += prob_skip_cost;
+                        }
 #else
-                    // Back out no skip flag costing and add in skip flag costing
-                    if (cpi->prob_skip_false)
-                    {
-                        prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 1);
-                        prob_skip_cost -= vp8_cost_bit(cpi->prob_skip_false, 0);
-                        rate2 += prob_skip_cost;
-                        other_cost += prob_skip_cost;
-                    }
+                        if (cpi->prob_skip_false)
+                        {
+                            prob_skip_cost =
+                                vp8_cost_bit(cpi->prob_skip_false, 1);
+                            rate2 += prob_skip_cost;
+                            other_cost += prob_skip_cost;
+                        }
 #endif
+                    }
+                }
+                // Add in the cost of the no skip flag.
+                else if ( mb_skip_allowed )
+                {
+        #if CONFIG_NEWENTROPY
+                    int prob_skip_cost = vp8_cost_bit(
+                        get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
+        #else
+                    int prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 0);
+        #endif
+                    rate2 += prob_skip_cost;
+                    other_cost += prob_skip_cost;
                 }
             }
-            // Calculate the final RD estimate for this mode
+
+            // Calculate the final RD estimate for this mode.
             this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
         }
 

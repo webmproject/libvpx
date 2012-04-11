@@ -120,6 +120,56 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi)
     }
 }
 
+void update_skip_probs(VP8_COMP *cpi)
+{
+#if CONFIG_NEWENTROPY
+    VP8_COMMON *const pc = & cpi->common;
+    int prob_skip_false[3] = {0, 0, 0};
+    int k;
+
+    for (k=0;k<MBSKIP_CONTEXTS;++k)
+    {
+        if ( (cpi->skip_false_count[k] + cpi->skip_true_count[k]) )
+        {
+            prob_skip_false[k] =
+                cpi->skip_false_count[k] * 256 /
+                (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
+
+            if (prob_skip_false[k] <= 1)
+                prob_skip_false[k] = 1;
+
+            if (prob_skip_false[k] > 255)
+                prob_skip_false[k] = 255;
+        }
+        else
+            prob_skip_false[k] = 128;
+
+        pc->mbskip_pred_probs[k] = prob_skip_false[k];
+        vp8_write_literal(w, prob_skip_false[k], 8);
+    }
+
+#else
+    int prob_skip_false = 0;
+
+    if ( (cpi->skip_false_count + cpi->skip_true_count) )
+    {
+        prob_skip_false = cpi->skip_false_count * 256 /
+                          (cpi->skip_false_count + cpi->skip_true_count);
+
+        if (prob_skip_false <= 1)
+            prob_skip_false = 1;
+
+        if (prob_skip_false > 255)
+            prob_skip_false = 255;
+    }
+    else
+        prob_skip_false = 128;
+
+    cpi->prob_skip_false = prob_skip_false;
+
+#endif
+}
+
 static void write_ymode(vp8_writer *bc, int m, const vp8_prob *p)
 {
     vp8_write_token(bc, vp8_ymode_tree, p, vp8_ymode_encodings + m);
@@ -592,12 +642,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     int mb_row, mb_col;
     int row, col;
 
-#if CONFIG_NEWENTROPY
-    int prob_skip_false[3] = {0, 0, 0};
-#else
-    int prob_skip_false = 0;
-#endif
-
     // Values used in prediction model coding
     vp8_prob pred_prob;
     unsigned char prediction_flag;
@@ -616,45 +660,15 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
     if (pc->mb_no_coeff_skip)
     {
-        // Divide by 0 check. 0 case possible with segment features
 #if CONFIG_NEWENTROPY
         int k;
+
+        update_skip_probs( cpi );
         for (k=0;k<MBSKIP_CONTEXTS;++k)
-        {
-            if ( (cpi->skip_false_count[k] + cpi->skip_true_count[k]) )
-            {
-                prob_skip_false[k] = cpi->skip_false_count[k] * 256 /
-                (cpi->skip_false_count[k] + cpi->skip_true_count[k]);
-
-                if (prob_skip_false[k] <= 1)
-                    prob_skip_false[k] = 1;
-
-                if (prob_skip_false[k] > 255)
-                    prob_skip_false[k] = 255;
-            }
-            else
-                prob_skip_false[k] = 255;
-
-            pc->mbskip_pred_probs[k] = prob_skip_false[k];
-            vp8_write_literal(w, prob_skip_false[k], 8);
-        }
+            vp8_write_literal(w, cpi->prob_skip_false[k], 8);
 #else
-        if ( (cpi->skip_false_count + cpi->skip_true_count) )
-        {
-            prob_skip_false = cpi->skip_false_count * 256 /
-                              (cpi->skip_false_count + cpi->skip_true_count);
-
-            if (prob_skip_false <= 1)
-                prob_skip_false = 1;
-
-            if (prob_skip_false > 255)
-                prob_skip_false = 255;
-        }
-        else
-            prob_skip_false = 255;
-
-        cpi->prob_skip_false = prob_skip_false;
-        vp8_write_literal(w, prob_skip_false, 8);
+        update_skip_probs( cpi );
+        vp8_write_literal(w, cpi->prob_skip_false, 8);
 #endif
     }
 
@@ -783,7 +797,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     vp8_encode_bool(w, mi->mb_skip_coeff,
                                     get_pred_prob(pc, xd, PRED_MBSKIP));
 #else
-                    vp8_encode_bool(w, mi->mb_skip_coeff, prob_skip_false);
+                vp8_encode_bool(w, mi->mb_skip_coeff, cpi->prob_skip_false);
 #endif
                 }
 
