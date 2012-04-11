@@ -3022,7 +3022,7 @@ static void encode_frame_to_data_rate
 #if CONFIG_HIGH_PRECISION_MV || CONFIG_ENHANCED_INTERP
     if (cm->frame_type != KEY_FRAME)
     {
-        double e = compute_edge_pixel_proportion(cpi->Source);
+        double e = 0; //compute_edge_pixel_proportion(cpi->Source);
 #if CONFIG_HIGH_PRECISION_MV
         /* TODO: Decide this more intelligently */
         xd->allow_high_precision_mv = (Q < HIGH_PRECISION_MV_QTHRESH);
