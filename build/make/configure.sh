@@ -943,13 +943,16 @@ process_common_toolchain() {
         esac
     ;;
     mips*)
-        CROSS=${CROSS:-mipsel-linux-uclibc-}
         link_with_cc=gcc
         setup_gnu_toolchain
         tune_cflags="-mtune="
+        if enabled dspr2; then
+            check_add_cflags -mips32r2 -mdspr2
+            disable fast_unaligned
+        fi
         check_add_cflags -march=${tgt_isa}
-    check_add_asflags -march=${tgt_isa}
-    check_add_asflags -KPIC
+        check_add_asflags -march=${tgt_isa}
+        check_add_asflags -KPIC
     ;;
     ppc*)
         enable ppc
