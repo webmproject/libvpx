@@ -55,10 +55,8 @@ typedef struct frame_contexts
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     vp8_prob coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     MV_CONTEXT mvc[2];
-    MV_CONTEXT pre_mvc[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
 #if CONFIG_HIGH_PRECISION_MV
     MV_CONTEXT_HP mvc_hp[2];
-    MV_CONTEXT_HP pre_mvc_hp[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
 #endif
 } FRAME_CONTEXT;
 

@@ -170,6 +170,106 @@ void update_skip_probs(VP8_COMP *cpi)
 #endif
 }
 
+// This function updates the reference frame prediction stats
+static void update_refpred_stats( VP8_COMP *cpi )
+{
+    VP8_COMMON *const cm = & cpi->common;
+    MACROBLOCKD *const xd = & cpi->mb.e_mbd;
+
+    int mb_row, mb_col;
+    int i;
+    int tot_count;
+    int ref_pred_count[PREDICTION_PROBS][2];
+    vp8_prob new_pred_probs[PREDICTION_PROBS];
+    unsigned char pred_context;
+    unsigned char pred_flag;
+
+    int old_cost, new_cost;
+
+    // Clear the prediction hit counters
+    vpx_memset(ref_pred_count, 0, sizeof(ref_pred_count));
+
+    // Set the prediction probability structures to defaults
+    if ( cm->frame_type == KEY_FRAME )
+    {
+        // Set the prediction probabilities to defaults
+        cm->ref_pred_probs[0] = 120;
+        cm->ref_pred_probs[1] = 80;
+        cm->ref_pred_probs[2] = 40;
+
+        vpx_memset(cpi->ref_pred_probs_update, 0,
+                   sizeof(cpi->ref_pred_probs_update) );
+    }
+    else
+    {
+        // For non-key frames.......
+
+        // Scan through the macroblocks and collate prediction counts.
+        xd->mode_info_context = cm->mi;
+        for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+        {
+            for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+            {
+                // Get the prediction context and status
+                pred_flag = get_pred_flag( xd, PRED_REF );
+                pred_context = get_pred_context( cm, xd, PRED_REF );
+
+                // Count prediction success
+                ref_pred_count[pred_context][pred_flag]++;
+
+                // Step on to the next mb
+                xd->mode_info_context++;
+            }
+
+            // this is to account for the border in mode_info_context
+            xd->mode_info_context++;
+        }
+
+        // From the prediction counts set the probabilities for each context
+        for ( i = 0; i < PREDICTION_PROBS; i++ )
+        {
+            // MB reference frame not relevent to key frame encoding
+            if ( cm->frame_type != KEY_FRAME )
+            {
+                // Work out the probabilities for the reference frame predictor
+                tot_count = ref_pred_count[i][0] + ref_pred_count[i][1];
+                if ( tot_count )
+                {
+                    new_pred_probs[i] =
+                        ( ref_pred_count[i][0] * 255 ) / tot_count;
+
+                    // Clamp to minimum allowed value
+                    new_pred_probs[i] += !new_pred_probs[i];
+                }
+                else
+                    new_pred_probs[i] = 128;
+            }
+            else
+                new_pred_probs[i] = 128;
+
+            // Decide whether or not to update the reference frame probs.
+            // Returned costs are in 1/256 bit units.
+            old_cost =
+                (ref_pred_count[i][0] * vp8_cost_zero(cm->ref_pred_probs[i])) +
+                (ref_pred_count[i][1] * vp8_cost_one(cm->ref_pred_probs[i]));
+
+            new_cost =
+                (ref_pred_count[i][0] * vp8_cost_zero(new_pred_probs[i])) +
+                (ref_pred_count[i][1] * vp8_cost_one(new_pred_probs[i]));
+
+            // Cost saving must be >= 8 bits (2048 in these units)
+            if ( (old_cost - new_cost) >= 2048 )
+            {
+                cpi->ref_pred_probs_update[i] = 1;
+                cm->ref_pred_probs[i] = new_pred_probs[i];
+            }
+            else
+                cpi->ref_pred_probs_update[i] = 0;
+
+        }
+    }
+}
+
 static void write_ymode(vp8_writer *bc, int m, const vp8_prob *p)
 {
     vp8_write_token(bc, vp8_ymode_tree, p, vp8_ymode_encodings + m);
@@ -1307,88 +1407,35 @@ static int default_coef_context_savings(VP8_COMP *cpi)
     return savings;
 }
 
-int vp8_estimate_entropy_savings(VP8_COMP *cpi)
+void build_coeff_contexts(VP8_COMP *cpi)
 {
-    int savings = 0;
-    int i=0;
-    VP8_COMMON *const cm = & cpi->common;
-    const int *const rfct = cpi->count_mb_ref_frame_usage;
-    const int rf_intra = rfct[INTRA_FRAME];
-    const int rf_inter = rfct[LAST_FRAME] + rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME];
-    int new_intra, new_last, new_gf_alt, oldtotal, newtotal;
-    int ref_frame_cost[MAX_REF_FRAMES];
-
-    vp8_clear_system_state(); //__asm emms;
-
-    // Estimate reference frame cost savings.
-    // For now this is just based on projected overall frequency of
-    // each reference frame coded using an unpredicted coding tree.
-    if (cpi->common.frame_type != KEY_FRAME)
+    int i = 0;
+    do
     {
-        new_intra = (rf_intra + rf_inter)
-                    ? rf_intra * 255 / (rf_intra + rf_inter) : 1;
-        new_intra += !new_intra;
-
-        new_last = rf_inter ? (rfct[LAST_FRAME] * 255) / rf_inter : 128;
-        new_last += !new_last;
-
-        new_gf_alt = (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME])
-            ? (rfct[GOLDEN_FRAME] * 255) /
-              (rfct[GOLDEN_FRAME] + rfct[ALTREF_FRAME]) : 128;
-        new_gf_alt += !new_gf_alt;
-
-        // new costs
-        ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(new_intra);
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(new_intra)
-                                        + vp8_cost_zero(new_last);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(new_intra)
-                                        + vp8_cost_one(new_last)
-                                        + vp8_cost_zero(new_gf_alt);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(new_intra)
-                                        + vp8_cost_one(new_last)
-                                        + vp8_cost_one(new_gf_alt);
-
-        newtotal =
-            rfct[INTRA_FRAME] * ref_frame_cost[INTRA_FRAME] +
-            rfct[LAST_FRAME] * ref_frame_cost[LAST_FRAME] +
-            rfct[GOLDEN_FRAME] * ref_frame_cost[GOLDEN_FRAME] +
-            rfct[ALTREF_FRAME] * ref_frame_cost[ALTREF_FRAME];
-
-        // old costs
-        ref_frame_cost[INTRA_FRAME]   = vp8_cost_zero(cm->prob_intra_coded);
-        ref_frame_cost[LAST_FRAME]    = vp8_cost_one(cm->prob_intra_coded)
-                                        + vp8_cost_zero(cm->prob_last_coded);
-        ref_frame_cost[GOLDEN_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
-                                        + vp8_cost_one(cm->prob_last_coded)
-                                        + vp8_cost_zero(cm->prob_gf_coded);
-        ref_frame_cost[ALTREF_FRAME]  = vp8_cost_one(cm->prob_intra_coded)
-                                        + vp8_cost_one(cm->prob_last_coded)
-                                        + vp8_cost_one(cm->prob_gf_coded);
-
-        oldtotal =
-            rfct[INTRA_FRAME] * ref_frame_cost[INTRA_FRAME] +
-            rfct[LAST_FRAME] * ref_frame_cost[LAST_FRAME] +
-            rfct[GOLDEN_FRAME] * ref_frame_cost[GOLDEN_FRAME] +
-            rfct[ALTREF_FRAME] * ref_frame_cost[ALTREF_FRAME];
-
-        savings += (oldtotal - newtotal) / 256;
-
-        // Update the reference frame probability numbers to reflect
-        // the observed counts in this frame. Doing this here insures
-        // that if there are multiple recode iterations the baseline
-        // probabilities used are updated in each iteration.
-        cm->prob_intra_coded = new_intra;
-        cm->prob_last_coded = new_last;
-        cm->prob_gf_coded = new_gf_alt;
+        int j = 0;
+        do
+        {
+            int k = 0;
+            do
+            {
+                vp8_tree_probs_from_distribution(
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                    cpi->frame_coef_probs [i][j][k],
+                    cpi->frame_branch_ct [i][j][k],
+                    cpi->coef_counts [i][j][k],
+                    256, 1
+                );
+            }
+            while (++k < PREV_COEF_CONTEXTS);
+        }
+        while (++j < COEF_BANDS);
     }
+    while (++i < BLOCK_TYPES);
 
-    savings += default_coef_context_savings(cpi);
 
-
-    /* do not do this if not evena allowed */
+    i= 0;
     if(cpi->common.txfm_mode == ALLOW_8X8)
     {
-        int savings8x8 = 0;
         do
         {
             int j = 0;
@@ -1410,40 +1457,14 @@ int vp8_estimate_entropy_savings(VP8_COMP *cpi)
                         256, 1
                         );
 
-                    do
-                    {
-                        const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
-                        const vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
-
-                        const vp8_prob old = cpi->common.fc.coef_probs_8x8 [i][j][k][t];
-                        const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
-
-                        const int old_b = vp8_cost_branch(ct, old);
-                        const int new_b = vp8_cost_branch(ct, newp);
-
-                        const int update_b = 8 + vp8_cost_upd;
-
-                        const int s = old_b - new_b - update_b;
-
-                        if (s > 0)
-                            savings8x8 += s;
-
-
-                    }
-                    while (++t < MAX_ENTROPY_TOKENS - 1);
-
-
                 }
                 while (++k < PREV_COEF_CONTEXTS);
             }
             while (++j < COEF_BANDS);
         }
         while (++i < BLOCK_TYPES);
-
-        savings += savings8x8 >> 8;
     }
 
-    return savings;
 }
 
 static void update_coef_probs(VP8_COMP *cpi)
@@ -1453,6 +1474,10 @@ static void update_coef_probs(VP8_COMP *cpi)
     int update = 0;
 
     vp8_clear_system_state(); //__asm emms;
+
+    // Build the cofficient contexts based on counts collected in encode loop
+    build_coeff_contexts(cpi);
+
     /* dry run to see if there is any udpate at all needed */
     do
     {
@@ -1463,17 +1488,7 @@ static void update_coef_probs(VP8_COMP *cpi)
             int prev_coef_savings[ENTROPY_NODES] = {0};
             do
             {
-                //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
-                /* at every context */
-                /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [ENTROPY_NODES];
-                //unsigned int branch_ct   [ENTROPY_NODES] [2];
                 int t = 0;      /* token/prob index */
-                //vp8_tree_probs_from_distribution(
-                //    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                //    new_p, branch_ct, (unsigned int *)cpi->coef_counts [i][j][k],
-                //    256, 1
-                //    );
                 do
                 {
                     const vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
@@ -1492,7 +1507,6 @@ static void update_coef_probs(VP8_COMP *cpi)
                     update += u;
                 }
                 while (++t < ENTROPY_NODES);
-                /* Accum token counts for generation of default statistics */
             }
             while (++k < PREV_COEF_CONTEXTS);
         }
@@ -1518,18 +1532,8 @@ static void update_coef_probs(VP8_COMP *cpi)
 
                 do
                 {
-                    //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
-                    /* at every context */
-
-                    /* calc probs and branch cts for this frame only */
-                    //vp8_prob new_p           [ENTROPY_NODES];
-                    //unsigned int branch_ct   [ENTROPY_NODES] [2];
+                    // calc probs and branch cts for this frame only
                     int t = 0;      /* token/prob index */
-                    //vp8_tree_probs_from_distribution(
-                    //    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                    //    new_p, branch_ct, (unsigned int *)cpi->coef_counts [i][j][k],
-                    //    256, 1
-                    //    );
                     do
                     {
                         const vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
@@ -1557,7 +1561,8 @@ static void update_coef_probs(VP8_COMP *cpi)
                         }
                     }
                     while (++t < ENTROPY_NODES);
-                    /* Accum token counts for generation of default statistics */
+
+                    // Accum token counts for generation of default statistics
 #ifdef ENTROPY_STATS
                     t = 0;
                     do
@@ -1589,17 +1594,8 @@ static void update_coef_probs(VP8_COMP *cpi)
                 int k = 0;
                 do
                 {
-                    //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
-                    /* at every context */
-                    /* calc probs and branch cts for this frame only */
-                    //vp8_prob new_p           [ENTROPY_NODES];
-                    //unsigned int branch_ct   [ENTROPY_NODES] [2];
+                    // calc probs and branch cts for this frame only
                     int t = 0;      /* token/prob index */
-                    //vp8_tree_probs_from_distribution(
-                    //    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                    //    new_p, branch_ct, (unsigned int *)cpi->coef_counts [i][j][k],
-                    //    256, 1
-                    //    );
                     do
                     {
                         const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
@@ -1620,7 +1616,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                     }
                     while (++t < MAX_ENTROPY_TOKENS - 1);
 
-                    /* Accum token counts for generation of default statistics */
+                    // Accum token counts for generation of default statistics
 #ifdef ENTROPY_STATS
                     t = 0;
 
@@ -1655,17 +1651,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                     int k = 0;
                     do
                     {
-                        //note: use result from vp8_estimate_entropy_savings, so no need to call vp8_tree_probs_from_distribution here.
-                        /* at every context */
-                        /* calc probs and branch cts for this frame only */
-                        //vp8_prob new_p           [ENTROPY_NODES];
-                        //unsigned int branch_ct   [ENTROPY_NODES] [2];
                         int t = 0;      /* token/prob index */
-                        //vp8_tree_probs_from_distribution(
-                        //    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                        //    new_p, branch_ct, (unsigned int *)cpi->coef_counts [i][j][k],
-                        //    256, 1
-                        //    );
                         do
                         {
                             const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
@@ -1690,7 +1676,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                             }
                         }
                         while (++t < MAX_ENTROPY_TOKENS - 1);
-                        /* Accum token counts for generation of default statistics */
+                        // Accum token counts for generation of default statistics
 #ifdef ENTROPY_STATS
                         t = 0;
                         do
@@ -1851,7 +1837,18 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
         // If it is, then indicate the method that will be used.
         if ( xd->update_mb_segmentation_map )
+        {
+            // Select the coding strategy (temporal or spatial)
+            choose_segmap_coding_method( cpi );
+
+            // Take a copy of the segment map if it changed for
+            // future comparison
+            vpx_memcpy( pc->last_frame_seg_map,
+                        cpi->segmentation_map, pc->MBs );
+
+            // Write out the chosen coding method.
             vp8_write_bit(bc, (pc->temporal_update) ? 1:0);
+        }
 
         vp8_write_bit(bc, (xd->update_mb_segmentation_data) ? 1 : 0);
 
@@ -2002,6 +1999,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     // Encode the common prediction model status flag probability updates for
     // the reference frame
+    update_refpred_stats( cpi );
     if ( pc->frame_type != KEY_FRAME )
     {
         for (i = 0; i < PREDICTION_PROBS; i++)
@@ -2111,6 +2109,12 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
         // Should the GF or ARF be updated using the transmitted frame or buffer
         vp8_write_bit(bc, pc->refresh_golden_frame);
         vp8_write_bit(bc, pc->refresh_alt_ref_frame);
+
+        // For inter frames the current default behavior is that when
+        // cm->refresh_golden_frame is set we copy the old GF over to
+        // the ARF buffer. This is purely an encoder decision at present.
+        if (pc->refresh_golden_frame)
+            pc->copy_buffer_to_arf  = 2;
 
         // If not being updated from current frame should either GF or ARF be updated from another buffer
         if (!pc->refresh_golden_frame)

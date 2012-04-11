@@ -135,32 +135,25 @@ int vp8_bits_per_mb( FRAME_TYPE frame_type, int qindex  )
 void vp8_save_coding_context(VP8_COMP *cpi)
 {
     CODING_CONTEXT *const cc = & cpi->coding_context;
+    VP8_COMMON *cm = &cpi->common;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     // Stores a snapshot of key state variables which can subsequently be
     // restored with a call to vp8_restore_coding_context. These functions are
     // intended for use in a re-code loop in vp8_compress_frame where the
     // quantizer value is adjusted between loop iterations.
 
-    cc->frames_since_key          = cpi->frames_since_key;
-    cc->filter_level             = cpi->common.filter_level;
-    cc->frames_till_gf_update_due   = cpi->frames_till_gf_update_due;
-    cc->frames_since_golden       = cpi->common.frames_since_golden;
-
-    vp8_copy(cc->mvc,      cpi->common.fc.mvc);
+    vp8_copy(cc->mvc,      cm->fc.mvc);
     vp8_copy(cc->mvcosts,  cpi->mb.mvcosts);
 #if CONFIG_HIGH_PRECISION_MV
-    vp8_copy(cc->mvc_hp,      cpi->common.fc.mvc_hp);
+    vp8_copy(cc->mvc_hp,     cm->fc.mvc_hp);
     vp8_copy(cc->mvcosts_hp,  cpi->mb.mvcosts_hp);
 #endif
 
-    vp8_copy(cc->kf_ymode_prob,   cpi->common.kf_ymode_prob);
-    vp8_copy(cc->ymode_prob,   cpi->common.fc.ymode_prob);
-    vp8_copy(cc->kf_uv_mode_prob,  cpi->common.kf_uv_mode_prob);
-    vp8_copy(cc->uv_mode_prob,  cpi->common.fc.uv_mode_prob);
-
-    vp8_copy(cc->ymode_count, cpi->ymode_count);
-    vp8_copy(cc->uv_mode_count, cpi->uv_mode_count);
-
+    vp8_copy( cc->mv_ref_ct, cm->mv_ref_ct );
+    vp8_copy( cc->mode_context, cm->mode_context );
+    vp8_copy( cc->mv_ref_ct_a, cm->mv_ref_ct_a );
+    vp8_copy( cc->mode_context_a, cm->mode_context_a );
 
     // Stats
 #ifdef MODE_STATS
@@ -172,37 +165,41 @@ void vp8_save_coding_context(VP8_COMP *cpi)
     vp8_copy(cc->inter_b_modes,  inter_b_modes);
 #endif
 
-    cc->this_frame_percent_intra = cpi->this_frame_percent_intra;
-}
+    vp8_copy( cc->segment_pred_probs, cm->segment_pred_probs );
+    vp8_copy( cc->ref_pred_probs_update, cpi->ref_pred_probs_update );
+    vp8_copy( cc->ref_pred_probs, cm->ref_pred_probs );
+    vp8_copy( cc->prob_comppred, cm->prob_comppred );
 
+    vpx_memcpy( cpi->coding_context.last_frame_seg_map_copy,
+                cm->last_frame_seg_map, (cm->mb_rows * cm->mb_cols) );
+
+    vp8_copy( cc->last_ref_lf_deltas, xd->last_ref_lf_deltas );
+    vp8_copy( cc->last_mode_lf_deltas, xd->last_mode_lf_deltas );
+
+    vp8_copy( cc->coef_probs, cm->fc.coef_probs );
+    vp8_copy( cc->coef_probs_8x8, cm->fc.coef_probs_8x8 );
+}
 
 void vp8_restore_coding_context(VP8_COMP *cpi)
 {
     CODING_CONTEXT *const cc = & cpi->coding_context;
+    VP8_COMMON *cm = &cpi->common;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     // Restore key state variables to the snapshot state stored in the
     // previous call to vp8_save_coding_context.
 
-    cpi->frames_since_key         =   cc->frames_since_key;
-    cpi->common.filter_level     =   cc->filter_level;
-    cpi->frames_till_gf_update_due  =   cc->frames_till_gf_update_due;
-    cpi->common.frames_since_golden       =   cc->frames_since_golden;
-
-    vp8_copy(cpi->common.fc.mvc, cc->mvc);
-
+    vp8_copy(cm->fc.mvc, cc->mvc);
     vp8_copy(cpi->mb.mvcosts, cc->mvcosts);
 #if CONFIG_HIGH_PRECISION_MV
-    vp8_copy(cpi->common.fc.mvc_hp, cc->mvc_hp);
-
+    vp8_copy(cm->fc.mvc_hp, cc->mvc_hp);
     vp8_copy(cpi->mb.mvcosts_hp, cc->mvcosts_hp);
 #endif
-    vp8_copy(cpi->common.kf_ymode_prob,   cc->kf_ymode_prob);
-    vp8_copy(cpi->common.fc.ymode_prob,   cc->ymode_prob);
-    vp8_copy(cpi->common.kf_uv_mode_prob,  cc->kf_uv_mode_prob);
-    vp8_copy(cpi->common.fc.uv_mode_prob,  cc->uv_mode_prob);
 
-    vp8_copy(cpi->ymode_count, cc->ymode_count);
-    vp8_copy(cpi->uv_mode_count, cc->uv_mode_count);
+    vp8_copy( cm->mv_ref_ct, cc->mv_ref_ct );
+    vp8_copy( cm->mode_context, cc->mode_context );
+    vp8_copy( cm->mv_ref_ct_a, cc->mv_ref_ct_a );
+    vp8_copy( cm->mode_context_a, cc->mode_context_a );
 
     // Stats
 #ifdef MODE_STATS
@@ -214,8 +211,20 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
     vp8_copy(inter_b_modes, cc->inter_b_modes);
 #endif
 
+    vp8_copy( cm->segment_pred_probs, cc->segment_pred_probs );
+    vp8_copy( cpi->ref_pred_probs_update, cc->ref_pred_probs_update );
+    vp8_copy( cm->ref_pred_probs, cc->ref_pred_probs );
+    vp8_copy( cm->prob_comppred, cc->prob_comppred );
 
-    cpi->this_frame_percent_intra = cc->this_frame_percent_intra;
+    vpx_memcpy( cm->last_frame_seg_map,
+                cpi->coding_context.last_frame_seg_map_copy,
+                (cm->mb_rows * cm->mb_cols) );
+
+    vp8_copy( xd->last_ref_lf_deltas, cc->last_ref_lf_deltas );
+    vp8_copy( xd->last_mode_lf_deltas, cc->last_mode_lf_deltas );
+
+    vp8_copy( cm->fc.coef_probs, cc->coef_probs );
+    vp8_copy( cm->fc.coef_probs_8x8, cc->coef_probs_8x8 );
 }
 
 
@@ -231,14 +240,12 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
         int flag[2] = {1, 1};
         vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flag);
     }
-    vpx_memset(cpi->common.fc.pre_mvc, 0, sizeof(cpi->common.fc.pre_mvc));  //initialize pre_mvc to all zero.
 #if CONFIG_HIGH_PRECISION_MV
     vpx_memcpy(cpi->common.fc.mvc_hp, vp8_default_mv_context_hp, sizeof(vp8_default_mv_context_hp));
     {
         int flag[2] = {1, 1};
         vp8_build_component_cost_table_hp(cpi->mb.mvcost_hp, (const MV_CONTEXT_HP *) cpi->common.fc.mvc_hp, flag);
     }
-    vpx_memset(cpi->common.fc.pre_mvc_hp, 0, sizeof(cpi->common.fc.pre_mvc_hp));  //initialize pre_mvc to all zero.
 #endif
 
     cpi->common.txfm_mode = ONLY_4X4;
@@ -270,17 +277,6 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
                 default_vp8_mode_contexts,
                 sizeof(default_vp8_mode_contexts));
 
-    /* make sure coding_context is correct in key frame recode */
-    {
-        CODING_CONTEXT *const cc = & cpi->coding_context;
-
-        vp8_copy(cc->mvc,      cpi->common.fc.mvc);
-#if CONFIG_HIGH_PRECISION_MV
-        vp8_copy(cc->mvc_hp,      cpi->common.fc.mvc_hp);
-#endif
-        vp8_copy(cc->ymode_prob,   cpi->common.fc.ymode_prob);
-        vp8_copy(cc->uv_mode_prob,  cpi->common.fc.uv_mode_prob);
-    }
 }
 void vp8_setup_inter_frame(VP8_COMP *cpi)
 {

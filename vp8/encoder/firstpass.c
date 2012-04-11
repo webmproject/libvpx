@@ -1845,6 +1845,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     // Should we use the alternate refernce frame
     if (allow_alt_ref &&
+        (i < cpi->oxcf.lag_in_frames ) &&
         (i >= MIN_GF_INTERVAL) &&
         // dont use ARF very near next kf
         (i <= (cpi->twopass.frames_to_key - MIN_GF_INTERVAL)) &&

@@ -70,7 +70,6 @@ extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFF
 extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
 #endif
 
-int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 int vp8_calc_ss_err(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *dest, const vp8_variance_rtcd_vtable_t *rtcd);
 
 extern void vp8_temporal_filter_prepare_c(VP8_COMP *cpi, int distance);
@@ -413,6 +412,8 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
     cpi->segmentation_map = 0;
     vpx_free(cpi->common.last_frame_seg_map);
     cpi->common.last_frame_seg_map = 0;
+    vpx_free(cpi->coding_context.last_frame_seg_map_copy);
+    cpi->coding_context.last_frame_seg_map_copy = 0;
 
     vpx_free(cpi->active_map);
     cpi->active_map = 0;
@@ -1660,6 +1661,11 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     CHECK_MEM_ERROR(cm->last_frame_seg_map,
         vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
 
+    // And a place holder structure is the coding context
+    // for use if we want to save and restore it
+    CHECK_MEM_ERROR(cpi->coding_context.last_frame_seg_map_copy,
+        vpx_calloc((cpi->common.mb_rows * cpi->common.mb_cols), 1));
+
     CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
     vpx_memset(cpi->active_map , 1, (cpi->common.mb_rows * cpi->common.mb_cols));
     cpi->active_map_enabled = 0;
@@ -2480,47 +2486,6 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
     }
 }
 
-// 1 = key, 0 = inter
-static int decide_key_frame(VP8_COMP *cpi)
-{
-    VP8_COMMON *cm = &cpi->common;
-
-    int code_key_frame = FALSE;
-
-    cpi->kf_boost = 0;
-
-    if (cpi->Speed > 11)
-        return FALSE;
-
-    // Clear down mmx registers
-    vp8_clear_system_state();  //__asm emms;
-
-    // If the following are true we might as well code a key frame
-    if (((cpi->this_frame_percent_intra == 100) &&
-         (cpi->this_frame_percent_intra > (cpi->last_frame_percent_intra + 2))) ||
-        ((cpi->this_frame_percent_intra > 95) &&
-         (cpi->this_frame_percent_intra >= (cpi->last_frame_percent_intra + 5))))
-    {
-        code_key_frame = TRUE;
-    }
-    // in addition if the following are true and this is not a golden frame then code a key frame
-    // Note that on golden frames there often seems to be a pop in intra useage anyway hence this
-    // restriction is designed to prevent spurious key frames. The Intra pop needs to be investigated.
-    else if (((cpi->this_frame_percent_intra > 60) &&
-              (cpi->this_frame_percent_intra > (cpi->last_frame_percent_intra * 2))) ||
-             ((cpi->this_frame_percent_intra > 75) &&
-              (cpi->this_frame_percent_intra > (cpi->last_frame_percent_intra * 3 / 2))) ||
-             ((cpi->this_frame_percent_intra > 90) &&
-              (cpi->this_frame_percent_intra > (cpi->last_frame_percent_intra + 10))))
-    {
-        if (!cm->refresh_golden_frame)
-            code_key_frame = TRUE;
-    }
-
-    return code_key_frame;
-
-}
-
 int find_fp_qindex()
 {
     int i;
@@ -2812,106 +2777,6 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
 }
 
-// This function updates the reference frame prediction stats
-static void update_refpred_stats( VP8_COMP *cpi )
-{
-    VP8_COMMON *const cm = & cpi->common;
-    MACROBLOCKD *const xd = & cpi->mb.e_mbd;
-
-    int mb_row, mb_col;
-    int i;
-    int tot_count;
-    int ref_pred_count[PREDICTION_PROBS][2];
-    vp8_prob new_pred_probs[PREDICTION_PROBS];
-    unsigned char pred_context;
-    unsigned char pred_flag;
-
-    int old_cost, new_cost;
-
-    // Clear the prediction hit counters
-    vpx_memset(ref_pred_count, 0, sizeof(ref_pred_count));
-
-    // Set the prediction probability structures to defaults
-    if ( cm->frame_type == KEY_FRAME )
-    {
-        // Set the prediction probabilities to defaults
-        cm->ref_pred_probs[0] = 120;
-        cm->ref_pred_probs[1] = 80;
-        cm->ref_pred_probs[2] = 40;
-
-        vpx_memset(cpi->ref_pred_probs_update, 0,
-                   sizeof(cpi->ref_pred_probs_update) );
-    }
-    else
-    {
-        // For non-key frames.......
-
-        // Scan through the macroblocks and collate prediction counts.
-        xd->mode_info_context = cm->mi;
-        for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
-        {
-            for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
-            {
-                // Get the prediction context and status
-                pred_flag = get_pred_flag( xd, PRED_REF );
-                pred_context = get_pred_context( cm, xd, PRED_REF );
-
-                // Count prediction success
-                ref_pred_count[pred_context][pred_flag]++;
-
-                // Step on to the next mb
-                xd->mode_info_context++;
-            }
-
-            // this is to account for the border in mode_info_context
-            xd->mode_info_context++;
-        }
-
-        // From the prediction counts set the probabilities for each context
-        for ( i = 0; i < PREDICTION_PROBS; i++ )
-        {
-            // MB reference frame not relevent to key frame encoding
-            if ( cm->frame_type != KEY_FRAME )
-            {
-                // Work out the probabilities for the reference frame predictor
-                tot_count = ref_pred_count[i][0] + ref_pred_count[i][1];
-                if ( tot_count )
-                {
-                    new_pred_probs[i] =
-                        ( ref_pred_count[i][0] * 255 ) / tot_count;
-
-                    // Clamp to minimum allowed value
-                    new_pred_probs[i] += !new_pred_probs[i];
-                }
-                else
-                    new_pred_probs[i] = 128;
-            }
-            else
-                new_pred_probs[i] = 128;
-
-            // Decide whether or not to update the reference frame probs.
-            // Returned costs are in 1/256 bit units.
-            old_cost =
-                (ref_pred_count[i][0] * vp8_cost_zero(cm->ref_pred_probs[i])) +
-                (ref_pred_count[i][1] * vp8_cost_one(cm->ref_pred_probs[i]));
-
-            new_cost =
-                (ref_pred_count[i][0] * vp8_cost_zero(new_pred_probs[i])) +
-                (ref_pred_count[i][1] * vp8_cost_one(new_pred_probs[i]));
-
-            // Cost saving must be >= 8 bits (2048 in these units)
-            if ( (old_cost - new_cost) >= 2048 )
-            {
-                cpi->ref_pred_probs_update[i] = 1;
-                cm->ref_pred_probs[i] = new_pred_probs[i];
-            }
-            else
-                cpi->ref_pred_probs_update[i] = 0;
-
-        }
-    }
-}
-
 static void encode_frame_to_data_rate
 (
     VP8_COMP *cpi,
@@ -3028,12 +2893,7 @@ static void encode_frame_to_data_rate
     init_seg_features( cpi );
 
     // Decide how big to make the frame
-    if (!vp8_pick_frame_size(cpi))
-    {
-        cm->current_video_frame++;
-        cpi->frames_since_key++;
-        return;
-    }
+    vp8_pick_frame_size(cpi);
 
     vp8_clear_system_state();
 
@@ -3156,7 +3016,6 @@ static void encode_frame_to_data_rate
     q_low  = cpi->active_best_quality;
     q_high = cpi->active_worst_quality;
 
-    vp8_save_coding_context(cpi);
 
     loop_count = 0;
 
@@ -3235,97 +3094,100 @@ static void encode_frame_to_data_rate
         vp8_set_quantizer(cpi, Q);
         this_q = Q;
 
-        // setup skip prob for costing in mode/mv decision
-        if (cpi->common.mb_no_coeff_skip)
+        if ( loop_count == 0 )
         {
-#if CONFIG_NEWENTROPY
-            int k;
-            for (k=0; k<MBSKIP_CONTEXTS; k++)
-                cm->mbskip_pred_probs[k] = cpi->base_skip_false_prob[Q][k];
-#else
-            cpi->prob_skip_false = cpi->base_skip_false_prob[Q];
-#endif
-
-            if (cm->frame_type != KEY_FRAME)
+            // setup skip prob for costing in mode/mv decision
+            if (cpi->common.mb_no_coeff_skip)
             {
-                if (cpi->common.refresh_alt_ref_frame)
-                {
 #if CONFIG_NEWENTROPY
-                    for (k=0; k<MBSKIP_CONTEXTS; k++)
-                    {
-                        if (cpi->last_skip_false_probs[2][k] != 0)
-                            cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[2][k];
-                    }
+                int k;
+                for (k=0; k<MBSKIP_CONTEXTS; k++)
+                    cm->mbskip_pred_probs[k] = cpi->base_skip_false_prob[Q][k];
 #else
-                    if (cpi->last_skip_false_probs[2] != 0)
-                        cpi->prob_skip_false = cpi->last_skip_false_probs[2];
+                cpi->prob_skip_false = cpi->base_skip_false_prob[Q];
 #endif
-                }
-                else if (cpi->common.refresh_golden_frame)
-                {
-#if CONFIG_NEWENTROPY
-                    for (k=0; k<MBSKIP_CONTEXTS; k++)
-                    {
-                        if (cpi->last_skip_false_probs[1][k] != 0)
-                            cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[1][k];
-                    }
-#else
-                    if (cpi->last_skip_false_probs[1] != 0)
-                        cpi->prob_skip_false = cpi->last_skip_false_probs[1];
-#endif
-                }
-                else
-                {
-#if CONFIG_NEWENTROPY
-                    int k;
-                    for (k=0; k<MBSKIP_CONTEXTS; k++)
-                    {
-                        if (cpi->last_skip_false_probs[0][k] != 0)
-                            cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[0][k];
-                    }
-#else
-                    if (cpi->last_skip_false_probs[0] != 0)
-                        cpi->prob_skip_false = cpi->last_skip_false_probs[0];
-#endif
-                }
 
-                // as this is for cost estimate, let's make sure it does not
-                // get extreme either way
-#if CONFIG_NEWENTROPY
+                if (cm->frame_type != KEY_FRAME)
                 {
-                    int k;
-                    for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                    if (cpi->common.refresh_alt_ref_frame)
                     {
-                    if (cm->mbskip_pred_probs[k] < 5)
-                        cm->mbskip_pred_probs[k] = 5;
+#if CONFIG_NEWENTROPY
+                        for (k=0; k<MBSKIP_CONTEXTS; k++)
+                        {
+                            if (cpi->last_skip_false_probs[2][k] != 0)
+                                cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[2][k];
+                        }
+#else
+                        if (cpi->last_skip_false_probs[2] != 0)
+                            cpi->prob_skip_false = cpi->last_skip_false_probs[2];
+#endif
+                    }
+                    else if (cpi->common.refresh_golden_frame)
+                    {
+#if CONFIG_NEWENTROPY
+                        for (k=0; k<MBSKIP_CONTEXTS; k++)
+                        {
+                            if (cpi->last_skip_false_probs[1][k] != 0)
+                                cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[1][k];
+                        }
+#else
+                        if (cpi->last_skip_false_probs[1] != 0)
+                            cpi->prob_skip_false = cpi->last_skip_false_probs[1];
+#endif
+                    }
+                    else
+                    {
+#if CONFIG_NEWENTROPY
+                        int k;
+                        for (k=0; k<MBSKIP_CONTEXTS; k++)
+                        {
+                            if (cpi->last_skip_false_probs[0][k] != 0)
+                                cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[0][k];
+                        }
+#else
+                        if (cpi->last_skip_false_probs[0] != 0)
+                            cpi->prob_skip_false = cpi->last_skip_false_probs[0];
+#endif
+                    }
 
-                    if (cm->mbskip_pred_probs[k] > 250)
-                        cm->mbskip_pred_probs[k] = 250;
+                    // as this is for cost estimate, let's make sure it does not
+                    // get extreme either way
+#if CONFIG_NEWENTROPY
+                    {
+                        int k;
+                        for (k=0; k<MBSKIP_CONTEXTS; ++k)
+                        {
+                        if (cm->mbskip_pred_probs[k] < 5)
+                            cm->mbskip_pred_probs[k] = 5;
+
+                        if (cm->mbskip_pred_probs[k] > 250)
+                            cm->mbskip_pred_probs[k] = 250;
+
+                        if (cpi->is_src_frame_alt_ref)
+                            cm->mbskip_pred_probs[k] = 1;
+                        }
+                    }
+#else
+                    if (cpi->prob_skip_false < 5)
+                        cpi->prob_skip_false = 5;
+
+                    if (cpi->prob_skip_false > 250)
+                        cpi->prob_skip_false = 250;
 
                     if (cpi->is_src_frame_alt_ref)
-                        cm->mbskip_pred_probs[k] = 1;
-                    }
-                }
-#else
-                if (cpi->prob_skip_false < 5)
-                    cpi->prob_skip_false = 5;
-
-                if (cpi->prob_skip_false > 250)
-                    cpi->prob_skip_false = 250;
-
-                if (cpi->is_src_frame_alt_ref)
-                    cpi->prob_skip_false = 1;
+                        cpi->prob_skip_false = 1;
 #endif
 
 
+                }
             }
-        }
 
-        // Set up entropy depending on frame type.
-        if (cm->frame_type == KEY_FRAME)
-            vp8_setup_key_frame(cpi);
-        else
-            vp8_setup_inter_frame(cpi);
+            // Set up entropy depending on frame type.
+            if (cm->frame_type == KEY_FRAME)
+                vp8_setup_key_frame(cpi);
+            else
+                vp8_setup_inter_frame(cpi);
+        }
 
         // transform / motion compensation build reconstruction frame
         vp8_encode_frame(cpi);
@@ -3334,15 +3196,20 @@ static void encode_frame_to_data_rate
         // seen in the last encoder iteration.
         update_base_skip_probs( cpi );
 
-        cpi->projected_frame_size -= vp8_estimate_entropy_savings(cpi);
-        cpi->projected_frame_size = (cpi->projected_frame_size > 0) ? cpi->projected_frame_size : 0;
-
         vp8_clear_system_state();  //__asm emms;
 
         if (frame_over_shoot_limit == 0)
             frame_over_shoot_limit = 1;
 
         active_worst_qchanged = FALSE;
+
+        // Dummy pack of the bitstream using up to date stats to get an
+        // accurate estimate of output frame size to determine if we need
+        // to recode.
+        vp8_save_coding_context(cpi);
+        vp8_pack_bitstream(cpi, dest, size);
+        cpi->projected_frame_size = (*size) << 3;
+        vp8_restore_coding_context(cpi);
 
         // Special case handling for forced key frames
         if ( (cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced )
@@ -3353,7 +3220,7 @@ static void encode_frame_to_data_rate
                                          IF_RTCD(&cpi->rtcd.variance));
 
             int high_err_target = cpi->ambient_err;
-            int low_err_target = ((cpi->ambient_err * 3) >> 2);
+            int low_err_target = (cpi->ambient_err >> 1);
 
             // Prevent possible divide by zero error below for perfect KF
             kf_err += (!kf_err);
@@ -3521,7 +3388,6 @@ static void encode_frame_to_data_rate
 
         if (Loop == TRUE)
         {
-            vp8_restore_coding_context(cpi);
             loop_count++;
 #if CONFIG_INTERNAL_STATS
             cpi->tot_recode_hits++;
@@ -3529,28 +3395,6 @@ static void encode_frame_to_data_rate
         }
     }
     while (Loop == TRUE);
-
-#if 0
-    // Experimental code for lagged and one pass
-    // Update stats used for one pass GF selection
-    {
-        /*
-            int frames_so_far;
-            double frame_intra_error;
-            double frame_coded_error;
-            double frame_pcnt_inter;
-            double frame_pcnt_motion;
-            double frame_mvr;
-            double frame_mvr_abs;
-            double frame_mvc;
-            double frame_mvc_abs;
-        */
-
-        cpi->one_pass_frame_stats[cpi->one_pass_frame_index].frame_coded_error = (double)cpi->prediction_error;
-        cpi->one_pass_frame_stats[cpi->one_pass_frame_index].frame_intra_error = (double)cpi->intra_error;
-        cpi->one_pass_frame_stats[cpi->one_pass_frame_index].frame_pcnt_inter = (double)(100 - cpi->this_frame_percent_intra) / 100.0;
-    }
-#endif
 
     // Special case code to reduce pulsing when key frames are forced at a
     // fixed interval. Note the reconstruction error if it is the frame before
@@ -3562,13 +3406,15 @@ static void encode_frame_to_data_rate
                                            IF_RTCD(&cpi->rtcd.variance));
     }
 
-    // This frame's MVs are saved and will be used in next frame's MV prediction.
-    // Last frame has one more line(add to bottom) and one more column(add to right) than cm->mip. The edge elements are initialized to 0.
+    // This frame's MVs are saved and will be used in next frame's MV
+    // prediction. Last frame has one more line(add to bottom) and one
+    // more column(add to right) than cm->mip. The edge elements are
+    // initialized to 0.
     if(cm->show_frame)   //do not save for altref frame
     {
         int mb_row;
         int mb_col;
-        MODE_INFO *tmp = cm->mip; //point to beginning of allocated MODE_INFO arrays.
+        MODE_INFO *tmp = cm->mip;
 
         if(cm->frame_type != KEY_FRAME)
         {
@@ -3588,8 +3434,8 @@ static void encode_frame_to_data_rate
     }
 
     // Update the GF useage maps.
-    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
-    // This is done after completing the compression of a frame when all modes etc. are finalized but before loop filter
+    // This is done after completing the compression of a frame when all modes
+    // etc. are finalized but before loop filter
     vp8_update_gf_useage_maps(cpi, cm, &cpi->mb);
 
     if (cm->frame_type == KEY_FRAME)
@@ -3603,12 +3449,6 @@ static void encode_frame_to_data_rate
     }
 #endif
 
-    // For inter frames the current default behavior is that when
-    // cm->refresh_golden_frame is set we copy the old GF over to the ARF buffer
-    // This is purely an encoder decision at present.
-    if (cm->refresh_golden_frame)
-        cm->copy_buffer_to_arf  = 2;
-
     cm->frame_to_show = &cm->yv12_fb[cm->new_fb_idx];
 
 #if WRITE_RECON_BUFFER
@@ -3620,34 +3460,13 @@ static void encode_frame_to_data_rate
             cm->current_video_frame+1000);
 #endif
 
-    {
-        loopfilter_frame(cpi, cm);
-    }
-
-    if(cm->show_frame)
-        write_yuv_frame_to_file(cm->frame_to_show);
-
-    update_reference_frames(cm);
-
-    // Work out the segment probabilities if segmentation is enabled and
-    // the map is due to be updated
-    if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
-    {
-        // Select the coding strategy for the segment map (temporal or spatial)
-        choose_segmap_coding_method( cpi );
-
-        // Take a copy of the segment map if it changed for future comparison
-        vpx_memcpy( cm->last_frame_seg_map,
-                    cpi->segmentation_map, cm->MBs );
-    }
-
-    // Update the common prediction model probabilities to reflect
-    // the what was seen in the current frame.
-    update_refpred_stats( cpi );
+    // Pick the loop filter level for the frame.
+    loopfilter_frame(cpi, cm);
 
     // build the bitstream
     vp8_pack_bitstream(cpi, dest, size);
 
+    update_reference_frames(cm);
 
     /* Move storing frame_type out of the above loop since it is also
      * needed in motion search besides loopfilter */
@@ -3745,53 +3564,7 @@ static void encode_frame_to_data_rate
     // Update the skip mb flag probabilities based on the distribution seen
     // in this frame.
     update_base_skip_probs( cpi );
-/*
-    if (cm->frame_type != KEY_FRAME)
-    {
-        if (cpi->common.refresh_alt_ref_frame)
-        {
-#if CONFIG_NEWENTROPY
-            int k;
-            for (k=0; k<MBSKIP_CONTEXTS; ++k)
-                cpi->last_skip_false_probs[2][k] = cm->mbskip_pred_probs[k];
-#else
-            cpi->last_skip_false_probs[2] = cpi->prob_skip_false;
-#endif
-            cpi->last_skip_probs_q[2] = cm->base_qindex;
-        }
-        else if (cpi->common.refresh_golden_frame)
-        {
-#if CONFIG_NEWENTROPY
-            int k;
-            for (k=0; k<MBSKIP_CONTEXTS; ++k)
-                cpi->last_skip_false_probs[1][k] = cm->mbskip_pred_probs[k];
-#else
-            cpi->last_skip_false_probs[1] = cpi->prob_skip_false;
-#endif
-            cpi->last_skip_probs_q[1] = cm->base_qindex;
-        }
-        else
-        {
-#if CONFIG_NEWENTROPY
-            int k;
-            for (k=0; k<MBSKIP_CONTEXTS; ++k)
-                cpi->last_skip_false_probs[0][k] = cm->mbskip_pred_probs[k];
-#else
-            cpi->last_skip_false_probs[0] = cpi->prob_skip_false;
-#endif
-            cpi->last_skip_probs_q[0] = cm->base_qindex;
 
-            //update the baseline
-#if CONFIG_NEWENTROPY
-            for (k=0; k<MBSKIP_CONTEXTS; ++k)
-                cpi->base_skip_false_prob[cm->base_qindex][k] = cm->mbskip_pred_probs[k];
-#else
-            cpi->base_skip_false_prob[cm->base_qindex] = cpi->prob_skip_false;
-#endif
-
-        }
-    }
-*/
 #if 0 && CONFIG_INTERNAL_STATS
     {
         FILE *f = fopen("tmp.stt", "a");
@@ -3942,14 +3715,10 @@ static void encode_frame_to_data_rate
 
         // As this frame is a key frame  the next defaults to an inter frame.
         cm->frame_type = INTER_FRAME;
-
-        cpi->last_frame_percent_intra = 100;
     }
     else
     {
         *frame_flags = cm->frame_flags&~FRAMEFLAGS_KEY;
-
-        cpi->last_frame_percent_intra = cpi->this_frame_percent_intra;
     }
 
     // Clear the one shot update flags for segmentation map and mode/ref loop filter deltas.

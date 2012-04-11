@@ -1217,55 +1217,6 @@ static void encode_frame_internal(VP8_COMP *cpi)
     // projected_frame_size in units of BYTES
     cpi->projected_frame_size = totalrate >> 8;
 
-    // Make a note of the percentage MBs coded Intra.
-    if (cm->frame_type == KEY_FRAME)
-    {
-        cpi->this_frame_percent_intra = 100;
-    }
-    else
-    {
-        int tot_modes;
-
-        tot_modes = cpi->count_mb_ref_frame_usage[INTRA_FRAME]
-                    + cpi->count_mb_ref_frame_usage[LAST_FRAME]
-                    + cpi->count_mb_ref_frame_usage[GOLDEN_FRAME]
-                    + cpi->count_mb_ref_frame_usage[ALTREF_FRAME];
-
-        if (tot_modes)
-            cpi->this_frame_percent_intra =
-                   cpi->count_mb_ref_frame_usage[INTRA_FRAME] * 100 / tot_modes;
-
-    }
-
-#if 0
-    {
-        int cnt = 0;
-        int flag[2] = {0, 0};
-
-        for (cnt = 0; cnt < MVPcount; cnt++)
-        {
-            if (cm->fc.pre_mvc[0][cnt] != cm->fc.mvc[0][cnt])
-            {
-                flag[0] = 1;
-                vpx_memcpy(cm->fc.pre_mvc[0], cm->fc.mvc[0], MVPcount);
-                break;
-            }
-        }
-
-        for (cnt = 0; cnt < MVPcount; cnt++)
-        {
-            if (cm->fc.pre_mvc[1][cnt] != cm->fc.mvc[1][cnt])
-            {
-                flag[1] = 1;
-                vpx_memcpy(cm->fc.pre_mvc[1], cm->fc.mvc[1], MVPcount);
-                break;
-            }
-        }
-
-        if (flag[0] || flag[1])
-            vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
-    }
-#endif
 
 #if 0
     // Keep record of the total distortion this time around for future use

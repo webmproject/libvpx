@@ -55,13 +55,6 @@
 
 typedef struct
 {
-    int kf_indicated;
-    unsigned int frames_since_key;
-    unsigned int frames_since_golden;
-    int filter_level;
-    int frames_till_gf_update_due;
-    int recent_ref_frame_usage[MAX_REF_FRAMES];
-
     MV_CONTEXT mvc[2];
     int mvcosts[2][MVvals+1];
 #if CONFIG_HIGH_PRECISION_MV
@@ -79,30 +72,28 @@ typedef struct
     int inter_uv_modes[VP8_UV_MODES];
     int inter_b_modes[B_MODE_COUNT];
 #endif
-    /* interframe intra mode probs */
-    vp8_prob ymode_prob[VP8_YMODES-1];
-    /* keyframe intra mode probs */
-#if CONFIG_QIMODE
-    vp8_prob kf_ymode_prob[8][VP8_YMODES-1];
-#else
-    vp8_prob kf_ymode_prob[VP8_YMODES-1];
-#endif
 
-#if CONFIG_UVINTRA
-    vp8_prob kf_uv_mode_prob[VP8_YMODES][VP8_UV_MODES-1];
-    vp8_prob uv_mode_prob[VP8_YMODES][VP8_UV_MODES-1];
-#else
-    vp8_prob kf_uv_mode_prob[VP8_UV_MODES-1];
-    vp8_prob uv_mode_prob[VP8_UV_MODES-1];
-#endif
-    /* intra MB type cts this frame */
-    int ymode_count[VP8_YMODES], uv_mode_count[VP8_UV_MODES];
+    vp8_prob segment_pred_probs[PREDICTION_PROBS];
+    unsigned char ref_pred_probs_update[PREDICTION_PROBS];
+    vp8_prob ref_pred_probs[PREDICTION_PROBS];
+    vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
 
-    int count_mb_ref_frame_usage[MAX_REF_FRAMES];
+    unsigned char * last_frame_seg_map_copy;
 
-    int this_frame_percent_intra;
-    int last_frame_percent_intra;
+    // 0 = Intra, Last, GF, ARF
+    signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
+    // 0 = BPRED, ZERO_MV, MV, SPLIT
+    signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
+    vp8_prob coef_probs[BLOCK_TYPES]
+                       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+    vp8_prob coef_probs_8x8[BLOCK_TYPES]
+                           [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+
+    int mv_ref_ct[6][4][2];
+    int mode_context[6][4];
+    int mv_ref_ct_a[6][4][2];
+    int mode_context_a[6][4];
 
 } CODING_CONTEXT;
 
@@ -490,17 +481,15 @@ typedef struct VP8_COMP
     int pass;
 
 #if CONFIG_NEWENTROPY
-    int last_skip_false_probs[3][MBSKIP_CONTEXTS];
+    vp8_prob last_skip_false_probs[3][MBSKIP_CONTEXTS];
 #else
-    int prob_skip_false;
-    int last_skip_false_probs[3];
+    vp8_prob prob_skip_false;
+    vp8_prob last_skip_false_probs[3];
 #endif
     int last_skip_probs_q[3];
 
     int recent_ref_frame_usage[MAX_REF_FRAMES];
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
-    int this_frame_percent_intra;
-    int last_frame_percent_intra;
     int ref_frame_flags;
 
     unsigned char ref_pred_probs_update[PREDICTION_PROBS];
