@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAIH//9hw\u003d",
+        "filename": "vp8/common/loopfilter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-11T22:47:06Z",
+      "side": 0,
+      "message": "looks like the main reason for this is to avoid populating the lfi struct if it\u0027s not used (also hev_index)?",
+      "revId": "d9ca52452bff9481ec1ed4684985a86fb7fc3c3e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
