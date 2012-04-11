@@ -121,7 +121,6 @@ $(ASM_CNV_PATH)/libvpx/%.asm.s: $(LIBVPX_PATH)/%.asm $(ASM_CNV_OFFSETS_DEPEND)
 # For building vpx_rtcd.h, which has a rule in libs.mk
 TGT_ISA:=$(word 1, $(subst -, ,$(TOOLCHAIN)))
 target := libs
-$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_rtcd.h
 
 LOCAL_SRC_FILES += vpx_config.c
 
@@ -168,6 +167,8 @@ LOCAL_MODULE := libvpx
 LOCAL_LDLIBS := -llog
 
 LOCAL_STATIC_LIBRARIES := cpufeatures
+
+$(foreach file, $(LOCAL_SRC_FILES), $(LOCAL_PATH)/$(file)): vpx_rtcd.h
 
 .PHONY: clean
 clean:
