@@ -2,6 +2,210 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAIH//9Xs\u003d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "use the mips32-linux-gcc target and add --enable-dspr2 (as mentioned earlier)",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9Xg\u003d",
+        "filename": "README",
+        "patchSetId": 1
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "This is just an example to show cross compiling. It shouldn\u0027t be changed",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9XI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 893,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "if enabled dspr2\n\nwe\u0027ll need to decide whether to try to auto-detect dspr2 but for this initial change requiring --enable-dspr2 will be enough",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9XY\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 898,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "only 4 spaces indentation for the last ;;",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9VY\u003d",
+        "filename": "build/make/rtcd.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 343,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "you can combine these two into one and always include dspr2.",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9VU\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9Wg\u003d",
+        "filename": "configure",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "dspr2",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9VM\u003d",
+        "filename": "vp8/common/mips/dequantize_mips_dspr2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "2012",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9VQ\u003d",
+        "filename": "vp8/common/mips/dequantize_mips_dspr2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "align \u0027unsigned\u0027 under \u0027short\u0027",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9Us\u003d",
+        "filename": "vp8/common/mips/filter_mips_dspr2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "This looks odd",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9Ug\u003d",
+        "filename": "vp8/common/mips/filter_mips_dspr2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "tools/ftfy.sh should give you consistent (for libvpx) whitespace. let me know if you have any trouble running it.",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9SQ\u003d",
+        "filename": "vp8/common/mips/filter_mips_dspr2.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 334,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "don\u0027t",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAIH//99o\u003d",
         "filename": "vp8/common/rtcd_defs.sh",
         "patchSetId": 1
@@ -13,6 +217,23 @@
       "writtenOn": "2012-04-11T17:23:10Z",
       "side": 1,
       "message": "these are only for when the extension does not match the optimization. for example, the media -\u003e v6 case.",
+      "revId": "98a880573be077541252c1709611dd5c026d0a58",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAIH//9R4\u003d",
+        "filename": "vp8/vp8_common.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-12T01:26:11Z",
+      "side": 1,
+      "message": "These should be ARCH_MIPS or HAVE_DSPR2, as appropriate",
       "revId": "98a880573be077541252c1709611dd5c026d0a58",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
