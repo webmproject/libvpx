@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAIH//8RQ\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-12T23:27:41Z",
+      "side": 1,
+      "message": "should indicate what version they need (1.24+). maybe \"install v1.24 or later from http://...\"",
+      "revId": "2d3b2096b917be141fdbb7410ab30d1c746c4b16",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
