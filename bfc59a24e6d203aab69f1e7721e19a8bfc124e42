@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAIH//8+A\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 815,
+      "author": {
+        "id": 1000886
+      },
+      "writtenOn": "2012-04-12T15:38:54Z",
+      "side": 1,
+      "message": "block this with an if enabled runtime_cpu_detect",
+      "revId": "bfc59a24e6d203aab69f1e7721e19a8bfc124e42",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
