@@ -210,6 +210,8 @@ void vp8_loop_filter_frame
 
     int mb_row;
     int mb_col;
+    int mb_rows = cm->mb_rows;
+    int mb_cols = cm->mb_cols;
 
     int filter_level;
 
@@ -217,6 +219,8 @@ void vp8_loop_filter_frame
 
     /* Point at base of Mb MODE_INFO list */
     const MODE_INFO *mode_info_context = cm->mi;
+    int post_y_stride = post->y_stride;
+    int post_uv_stride = post->uv_stride;
 
     /* Initialize the loop filter for this frame. */
     vp8_loop_filter_frame_init(cm, mbd, cm->filter_level);
@@ -227,23 +231,23 @@ void vp8_loop_filter_frame
     v_ptr = post->v_buffer;
 
     /* vp8_filter each macro block */
-    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
+    if (cm->filter_type == NORMAL_LOOPFILTER)
     {
-        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
+        for (mb_row = 0; mb_row < mb_rows; mb_row++)
         {
-            int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
-                            mode_info_context->mbmi.mode != SPLITMV &&
-                            mode_info_context->mbmi.mb_skip_coeff);
-
-            const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
-            const int seg = mode_info_context->mbmi.segment_id;
-            const int ref_frame = mode_info_context->mbmi.ref_frame;
-
-            filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
-
-            if (filter_level)
+            for (mb_col = 0; mb_col < mb_cols; mb_col++)
             {
-                if (cm->filter_type == NORMAL_LOOPFILTER)
+                int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+                                mode_info_context->mbmi.mode != SPLITMV &&
+                                mode_info_context->mbmi.mb_skip_coeff);
+
+                const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
+                const int seg = mode_info_context->mbmi.segment_id;
+                const int ref_frame = mode_info_context->mbmi.ref_frame;
+
+                filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+
+                if (filter_level)
                 {
                     const int hev_index = lfi_n->hev_thr_lut[frame_type][filter_level];
                     lfi.mblim = lfi_n->mblim[filter_level];
@@ -253,54 +257,87 @@ void vp8_loop_filter_frame
 
                     if (mb_col > 0)
                         vp8_loop_filter_mbv
-                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                        (y_ptr, u_ptr, v_ptr, post_y_stride, post_uv_stride, &lfi);
 
                     if (!skip_lf)
                         vp8_loop_filter_bv
-                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                        (y_ptr, u_ptr, v_ptr, post_y_stride, post_uv_stride, &lfi);
 
                     /* don't apply across umv border */
                     if (mb_row > 0)
                         vp8_loop_filter_mbh
-                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                        (y_ptr, u_ptr, v_ptr, post_y_stride, post_uv_stride, &lfi);
 
                     if (!skip_lf)
                         vp8_loop_filter_bh
-                        (y_ptr, u_ptr, v_ptr, post->y_stride, post->uv_stride, &lfi);
+                        (y_ptr, u_ptr, v_ptr, post_y_stride, post_uv_stride, &lfi);
                 }
-                else
+
+                y_ptr += 16;
+                u_ptr += 8;
+                v_ptr += 8;
+
+                mode_info_context++;     /* step to next MB */
+            }
+            y_ptr += post_y_stride  * 16 - post->y_width;
+            u_ptr += post_uv_stride *  8 - post->uv_width;
+            v_ptr += post_uv_stride *  8 - post->uv_width;
+
+            mode_info_context++;         /* Skip border mb */
+
+        }
+    }
+    else /* SIMPLE_LOOPFILTER */
+    {
+        for (mb_row = 0; mb_row < mb_rows; mb_row++)
+        {
+            for (mb_col = 0; mb_col < mb_cols; mb_col++)
+            {
+                int skip_lf = (mode_info_context->mbmi.mode != B_PRED &&
+                                mode_info_context->mbmi.mode != SPLITMV &&
+                                mode_info_context->mbmi.mb_skip_coeff);
+
+                const int mode_index = lfi_n->mode_lf_lut[mode_info_context->mbmi.mode];
+                const int seg = mode_info_context->mbmi.segment_id;
+                const int ref_frame = mode_info_context->mbmi.ref_frame;
+
+                filter_level = lfi_n->lvl[seg][ref_frame][mode_index];
+                if (filter_level)
                 {
+                    const unsigned char * mblim = lfi_n->mblim[filter_level];
+                    const unsigned char * blim = lfi_n->blim[filter_level];
+
                     if (mb_col > 0)
                         vp8_loop_filter_simple_mbv
-                        (y_ptr, post->y_stride, lfi_n->mblim[filter_level]);
+                        (y_ptr, post_y_stride, mblim);
 
                     if (!skip_lf)
                         vp8_loop_filter_simple_bv
-                        (y_ptr, post->y_stride, lfi_n->blim[filter_level]);
+                        (y_ptr, post_y_stride, blim);
 
                     /* don't apply across umv border */
                     if (mb_row > 0)
                         vp8_loop_filter_simple_mbh
-                        (y_ptr, post->y_stride, lfi_n->mblim[filter_level]);
+                        (y_ptr, post_y_stride, mblim);
 
                     if (!skip_lf)
                         vp8_loop_filter_simple_bh
-                        (y_ptr, post->y_stride, lfi_n->blim[filter_level]);
+                        (y_ptr, post_y_stride, blim);
                 }
+
+                y_ptr += 16;
+                u_ptr += 8;
+                v_ptr += 8;
+
+                mode_info_context++;     /* step to next MB */
             }
+            y_ptr += post_y_stride  * 16 - post->y_width;
+            u_ptr += post_uv_stride *  8 - post->uv_width;
+            v_ptr += post_uv_stride *  8 - post->uv_width;
 
-            y_ptr += 16;
-            u_ptr += 8;
-            v_ptr += 8;
+            mode_info_context++;         /* Skip border mb */
 
-            mode_info_context++;     /* step to next MB */
         }
-
-        y_ptr += post->y_stride  * 16 - post->y_width;
-        u_ptr += post->uv_stride *  8 - post->uv_width;
-        v_ptr += post->uv_stride *  8 - post->uv_width;
-
-        mode_info_context++;         /* Skip border mb */
     }
 }
 
