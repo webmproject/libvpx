@@ -99,7 +99,7 @@ $$(eval $$(call ev-build-file))
 
 $(1) : $$(_OBJ) $(2)
 	@mkdir -p $$(dir $$@)
-	@grep -w EQU $$< | tr -d '\#' | $(CONFIG_DIR)/$(ASM_CONVERSION) > $$@
+	@grep $(OFFSET_PATTERN) $$< | tr -d '\#' | $(CONFIG_DIR)/$(ASM_CONVERSION) > $$@
 endef
 
 # Use ads2gas script to convert from RVCT format to GAS format.  This passes
