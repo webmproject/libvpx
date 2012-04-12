@@ -17,17 +17,16 @@
 
 void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
+    ENTROPY_CONTEXT *a_ctx = ((ENTROPY_CONTEXT *)x->above_context);
+    ENTROPY_CONTEXT *l_ctx = ((ENTROPY_CONTEXT *)x->left_context);
+
+    vpx_memset(a_ctx, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
+    vpx_memset(l_ctx, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
+
     /* Clear entropy contexts for Y2 blocks */
-    if (x->mode_info_context->mbmi.mode != B_PRED &&
-        x->mode_info_context->mbmi.mode != SPLITMV)
+    if (!x->mode_info_context->mbmi.is_4x4)
     {
-        vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-        vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-    }
-    else
-    {
-        vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
-        vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES)-1);
+        a_ctx[8] = l_ctx[8] = 0;
     }
 }
 
@@ -187,8 +186,7 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *x)
 
     qcoeff_ptr = &x->qcoeff[0];
 
-    if (x->mode_info_context->mbmi.mode != B_PRED &&
-        x->mode_info_context->mbmi.mode != SPLITMV)
+    if (!x->mode_info_context->mbmi.is_4x4)
     {
         a = a_ctx + 8;
         l = l_ctx + 8;
