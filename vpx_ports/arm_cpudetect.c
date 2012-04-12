@@ -32,8 +32,30 @@ static int arm_cpu_env_mask(void)
     return env && *env ? (int)strtol(env, NULL, 0) : ~0;
 }
 
+#if !CONFIG_RUNTIME_CPU_DETECT
 
-#if defined(_MSC_VER)
+int arm_cpu_caps(void)
+{
+    int flags;
+    int mask;
+    if (!arm_cpu_env_flags(&flags))
+    {
+        return flags;
+    }
+    mask = arm_cpu_env_mask();
+#if defined(HAVE_EDSP)
+    flags |= HAS_EDSP;
+#endif
+#if defined(HAVE_MEDIA)
+    flags |= HAS_MEDIA;
+#endif
+#if defined(HAVE_NEON)
+    flags |= HAS_NEON;
+#endif
+    return flags & mask;
+}
+
+#elif defined(_MSC_VER)
 /*For GetExceptionCode() and EXCEPTION_ILLEGAL_INSTRUCTION.*/
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
@@ -189,30 +211,7 @@ int arm_cpu_caps(void)
     return flags & mask;
 }
 #endif // defined(__linux__)
-#elif !CONFIG_RUNTIME_CPU_DETECT
-
-int arm_cpu_caps(void)
-{
-    int flags;
-    int mask;
-    if (!arm_cpu_env_flags(&flags))
-    {
-        return flags;
-    }
-    mask = arm_cpu_env_mask();
-#if defined(HAVE_EDSP)
-    flags |= HAS_EDSP;
-#endif
-#if defined(HAVE_MEDIA)
-    flags |= HAS_MEDIA;
-#endif
-#if defined(HAVE_NEON)
-    flags |= HAS_NEON;
-#endif
-    return flags & mask;
-}
-
 #else
 #error "--enable-runtime-cpu-detect selected, but no CPU detection method " \
- "available for your platform. Reconfigure without --enable-runtime-cpu-detect."
+ "available for your platform. Reconfigure with --disable-runtime-cpu-detect."
 #endif

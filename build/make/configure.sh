@@ -773,17 +773,23 @@ process_common_toolchain() {
             check_add_asflags --defsym ARCHITECTURE=${arch_int}
             tune_cflags="-mtune="
             if [ ${tgt_isa} == "armv7" ]; then
+                check_add_cflags  -march=armv7-a -mfloat-abi=softfp
+                check_add_asflags -march=armv7-a -mfloat-abi=softfp
+
                 if enabled neon
                 then
                     check_add_cflags -mfpu=neon #-ftree-vectorize
                     check_add_asflags -mfpu=neon
                 fi
-                check_add_cflags -march=armv7-a -mcpu=cortex-a8 -mfloat-abi=softfp
-                check_add_asflags -mcpu=cortex-a8 -mfloat-abi=softfp  #-march=armv7-a
+
+                if [ -z "${tune_cpu}" ]; then
+                    tune_cpu=cortex-a8
+                fi
             else
                 check_add_cflags -march=${tgt_isa}
                 check_add_asflags -march=${tgt_isa}
             fi
+
             enabled debug && add_asflags -g
             asm_conversion_cmd="${source_path}/build/make/ads2gas.pl"
             ;;
@@ -851,12 +857,17 @@ process_common_toolchain() {
             add_cflags "--sysroot=${alt_libc}"
             add_ldflags "--sysroot=${alt_libc}"
 
-            add_cflags "-I${SDK_PATH}/sources/android/cpufeatures/"
+            # linker flag that routes around a CPU bug in some
+            # Cortex-A8 implementations (NDK Dev Guide)
+            add_ldflags "-Wl,--fix-cortex-a8"
 
             enable pic
             soft_enable realtime_only
             if [ ${tgt_isa} == "armv7" ]; then
-                enable runtime_cpu_detect
+                soft_enable runtime_cpu_detect
+            fi
+            if enabled runtime_cpu_detect; then
+                add_cflags "-I${SDK_PATH}/sources/android/cpufeatures"
             fi
           ;;
 
