@@ -224,6 +224,7 @@ EXPERIMENT_LIST="
     sixteenth_subpel_uv
     comp_intra_pred
     newentropy
+    newupdate
     superblocks
 "
 CONFIG_LIST="
