@@ -113,7 +113,7 @@ cd "$(git rev-parse --show-toplevel)"
 git show > "${ORIG_DIFF}"
 
 # Apply the style guide on new and modified files and collect its diff
-for f in $(git diff HEAD^ --name-only -M90 --diff-filter=AM
+for f in $(git diff HEAD^ --name-only -M90 --diff-filter=AM \
            | grep '\.[ch]$'); do
   case "$f" in
     third_party/*) continue;;
