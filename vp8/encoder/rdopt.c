@@ -2532,6 +2532,26 @@ void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
     }
 }
 
+static void store_coding_context (MACROBLOCK *x, int mb_index,
+                                  int mode_index,
+                                  PARTITION_INFO *partition,
+                                  int_mv *ref_mv)
+{
+    MACROBLOCKD *xd = &x->e_mbd;
+
+    // Take a snapshot of the coding context so it can be
+    // restored if we decide to encode this way
+    x->mb_context[mb_index].best_mode_index = mode_index;
+    vpx_memcpy(&x->mb_context[mb_index].mic, xd->mode_info_context,
+               sizeof(MODE_INFO));
+    vpx_memcpy(&x->mb_context[mb_index].partition_info, partition,
+               sizeof(PARTITION_INFO));
+    x->mb_context[mb_index].best_ref_mv.as_int = ref_mv->as_int;
+
+    //x->mb_context[mb_index].rddiv = x->rddiv;
+    //x->mb_context[mb_index].rdmult = x->rdmult;
+}
+
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
                             int *returnrate, int *returndistortion, int *returnintra,
                             int *best_single_rd_diff, int *best_comp_rd_diff,
@@ -3536,6 +3556,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
         *best_single_rd_diff = *best_comp_rd_diff = *best_hybrid_rd_diff = 0;
 
+        store_coding_context (x, mb_index, best_mode_index, &best_partition,
+                    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame] );
         return;
     }
 
@@ -3580,18 +3602,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     else
         *best_hybrid_rd_diff = best_rd - best_hybrid_rd;
 
-    // Take a snapshot of the coding context so it can be
-    // restored if we decide to encode this way
-    x->mb_context[mb_index].best_mode_index = best_mode_index;
-    vpx_memcpy(&x->mb_context[mb_index].mic, x->e_mbd.mode_info_context,
-               sizeof(MODE_INFO));
-    vpx_memcpy(&x->mb_context[mb_index].partition_info, &best_partition,
-               sizeof(PARTITION_INFO));
-    vpx_memcpy(&x->mb_context[mb_index].best_ref_mv,
-               &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
-               sizeof(int_mv));
-    //x->mb_context[mb_index].rddiv = x->rddiv;
-    //x->mb_context[mb_index].rdmult = x->rdmult;
+    store_coding_context (x, mb_index, best_mode_index, &best_partition,
+                    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame] );
 }
 
 int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x)
