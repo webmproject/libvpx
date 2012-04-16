@@ -36,6 +36,7 @@
 #include "vp8/common/seg_common.h"
 #include "mbgraph.h"
 #include "vp8/common/pred_common.h"
+#include "vp8/encoder/rdopt.h"
 
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -78,6 +79,11 @@ static void set_default_lf_deltas(VP8_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
+#if CONFIG_ENHANCED_INTERP
+#define SEARCH_BEST_FILTER 1            /* to search exhaustively for best filter */
+#define RESET_FOREACH_FILTER 0          /* whether to reset the encoder state
+                                           before trying each new filter */
+#endif
 #if CONFIG_HIGH_PRECISION_MV
 #define ALTREF_HIGH_PRECISION_MV 1      /* whether to use high precision mv for altref computation */
 #define HIGH_PRECISION_MV_QTHRESH 200   /* Q threshold for use of high precision mv */
@@ -786,6 +792,9 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         sf->first_step = 0;
         sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
+#if CONFIG_ENHANCED_INTERP
+        sf->search_best_filter = SEARCH_BEST_FILTER;
+#endif
         break;
     case 1:
         sf->thresh_mult[THR_NEARESTMV] = 0;
@@ -2825,6 +2834,7 @@ static void encode_frame_to_data_rate
     int q_high;
     int zbin_oq_high;
     int zbin_oq_low = 0;
+
     int top_index;
     int bottom_index;
     int active_worst_qchanged = FALSE;
@@ -2833,6 +2843,28 @@ static void encode_frame_to_data_rate
     int undershoot_seen = FALSE;
 
     int loop_size_estimate = 0;
+
+#if CONFIG_ENHANCED_INTERP
+    SPEED_FEATURES *sf = &cpi->sf;
+#if RESET_FOREACH_FILTER
+    int q_low0;
+    int q_high0;
+    int zbin_oq_high0;
+    int zbin_oq_low0 = 0;
+    int Q0;
+    int last_zbin_oq0;
+    int active_best_quality0;
+    int active_worst_quality0;
+    double rate_correction_factor0;
+    double gf_rate_correction_factor0;
+#endif
+
+    /* list of filters to search over */
+    int mcomp_filters_to_search[] = {EIGHTTAP, EIGHTTAP_SHARP, SIXTAP};
+    int mcomp_filters = sizeof(mcomp_filters_to_search)/sizeof(*mcomp_filters_to_search);
+    int mcomp_filter_index = 0;
+    INT64 mcomp_filter_cost[4];
+#endif
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
@@ -3040,20 +3072,25 @@ static void encode_frame_to_data_rate
     q_low  = cpi->active_best_quality;
     q_high = cpi->active_worst_quality;
 
-
     loop_count = 0;
 
 #if CONFIG_HIGH_PRECISION_MV || CONFIG_ENHANCED_INTERP
     if (cm->frame_type != KEY_FRAME)
     {
+#if CONFIG_ENHANCED_INTERP
         double e = 0; //compute_edge_pixel_proportion(cpi->Source);
+        /* TODO: Decide this more intelligently */
+        if (sf->search_best_filter)
+        {
+            cm->mcomp_filter_type = mcomp_filters_to_search[0];
+            mcomp_filter_index = 0;
+        }
+        else
+            cm->mcomp_filter_type = EIGHTTAP;
+#endif
 #if CONFIG_HIGH_PRECISION_MV
         /* TODO: Decide this more intelligently */
         xd->allow_high_precision_mv = (Q < HIGH_PRECISION_MV_QTHRESH);
-#endif
-#if CONFIG_ENHANCED_INTERP
-        /* TODO: Decide this more intelligently */
-        cm->mcomp_filter_type = (e > 0.1 ? EIGHTTAP_SHARP : EIGHTTAP);
 #endif
     }
 #endif
@@ -3077,8 +3114,7 @@ static void encode_frame_to_data_rate
             l = 60;
             break;
         case 4:
-            l = 80;
-            break;
+
         case 5:
             l = 100;
             break;
@@ -3111,6 +3147,21 @@ static void encode_frame_to_data_rate
     vp8_write_yuv_frame(cpi->Source);
 #endif
 
+#if CONFIG_ENHANCED_INTERP && RESET_FOREACH_FILTER
+    if (sf->search_best_filter)
+    {
+        q_low0 = q_low;
+        q_high0 = q_high;
+        Q0 = Q;
+        zbin_oq_low0 = zbin_oq_low;
+        zbin_oq_high0 = zbin_oq_high;
+        last_zbin_oq0 = last_zbin_oq;
+        rate_correction_factor0 = cpi->rate_correction_factor;
+        gf_rate_correction_factor0 = cpi->gf_rate_correction_factor;
+        active_best_quality0 = cpi->active_best_quality;
+        active_worst_quality0 = cpi->active_worst_quality;
+    }
+#endif
     do
     {
         vp8_clear_system_state();  //__asm emms;
@@ -3120,6 +3171,7 @@ static void encode_frame_to_data_rate
 
         if ( loop_count == 0 )
         {
+
             // setup skip prob for costing in mode/mv decision
             if (cpi->common.mb_no_coeff_skip)
             {
@@ -3214,6 +3266,7 @@ static void encode_frame_to_data_rate
         }
 
         // transform / motion compensation build reconstruction frame
+
         vp8_encode_frame(cpi);
 
         // Update the skip mb flag probabilities based on the distribution
@@ -3222,11 +3275,6 @@ static void encode_frame_to_data_rate
 
         vp8_clear_system_state();  //__asm emms;
 
-        if (frame_over_shoot_limit == 0)
-            frame_over_shoot_limit = 1;
-
-        active_worst_qchanged = FALSE;
-
         // Dummy pack of the bitstream using up to date stats to get an
         // accurate estimate of output frame size to determine if we need
         // to recode.
@@ -3234,6 +3282,10 @@ static void encode_frame_to_data_rate
         vp8_pack_bitstream(cpi, dest, size);
         cpi->projected_frame_size = (*size) << 3;
         vp8_restore_coding_context(cpi);
+
+        if (frame_over_shoot_limit == 0)
+          frame_over_shoot_limit = 1;
+        active_worst_qchanged = FALSE;
 
         // Special case handling for forced key frames
         if ( (cm->frame_type == KEY_FRAME) && cpi->this_key_frame_forced )
@@ -3409,6 +3461,70 @@ static void encode_frame_to_data_rate
 
         if (cpi->is_src_frame_alt_ref)
             Loop = FALSE;
+
+#if CONFIG_ENHANCED_INTERP
+        if (Loop == FALSE && cm->frame_type != KEY_FRAME && sf->search_best_filter)
+        {
+            if (mcomp_filter_index < mcomp_filters)
+            {
+                INT64 err = vp8_calc_ss_err(cpi->Source,
+                                            &cm->yv12_fb[cm->new_fb_idx],
+                                            IF_RTCD(&cpi->rtcd.variance));
+                INT64 rate = cpi->projected_frame_size << 8;
+                mcomp_filter_cost[mcomp_filter_index] =
+                    (RDCOST(cpi->RDMULT, cpi->RDDIV, rate, err));
+                mcomp_filter_index++;
+                if (mcomp_filter_index < mcomp_filters)
+                {
+                    cm->mcomp_filter_type = mcomp_filters_to_search[mcomp_filter_index];
+                    loop_count = -1;
+                    Loop = TRUE;
+                }
+                else
+                {
+                    int f;
+                    INT64 best_cost = mcomp_filter_cost[0];
+                    int mcomp_best_filter = mcomp_filters_to_search[0];
+                    for (f = 1; f < mcomp_filters; f++)
+                    {
+                        if (mcomp_filter_cost[f] < best_cost)
+                        {
+                            mcomp_best_filter = mcomp_filters_to_search[f];
+                            best_cost = mcomp_filter_cost[f];
+                        }
+                    }
+                    if (mcomp_best_filter != mcomp_filters_to_search[mcomp_filters-1])
+                    {
+                        loop_count = -1;
+                        Loop = TRUE;
+                        cm->mcomp_filter_type = mcomp_best_filter;
+                    }
+                    /*
+                    printf("  best filter = %d, ( ", mcomp_best_filter);
+                    for (f=0;f<mcomp_filters; f++) printf("%d ",  mcomp_filter_cost[f]);
+                    printf(")\n");
+                    */
+                }
+#if RESET_FOREACH_FILTER
+                if (Loop == TRUE)
+                {
+                    overshoot_seen = FALSE;
+                    undershoot_seen = FALSE;
+                    zbin_oq_low = zbin_oq_low0;
+                    zbin_oq_high = zbin_oq_high0;
+                    q_low = q_low0;
+                    q_high = q_high0;
+                    Q = Q0;
+                    cpi->zbin_over_quant = last_zbin_oq = last_zbin_oq0;
+                    cpi->rate_correction_factor = rate_correction_factor0;
+                    cpi->gf_rate_correction_factor = gf_rate_correction_factor0;
+                    cpi->active_best_quality = active_best_quality0;
+                    cpi->active_worst_quality = active_worst_quality0;
+                }
+#endif
+            }
+        }
+#endif
 
         if (Loop == TRUE)
         {
