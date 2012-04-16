@@ -23,11 +23,11 @@ void vp8_short_fdct8x4_mmx(short *input, short *output, int pitch)
 
 int vp8_fast_quantize_b_impl_mmx(short *coeff_ptr, short *zbin_ptr,
                                  short *qcoeff_ptr, short *dequant_ptr,
-                                 short *scan_mask, short *round_ptr,
+                                 const short *scan_mask, short *round_ptr,
                                  short *quant_ptr, short *dqcoeff_ptr);
 void vp8_fast_quantize_b_mmx(BLOCK *b, BLOCKD *d)
 {
-    short *scan_mask   = vp8_default_zig_zag_mask;//d->scan_order_mask_ptr;
+    const short *scan_mask   = vp8_default_zig_zag_mask;
     short *coeff_ptr   = b->coeff;
     short *zbin_ptr    = b->zbin;
     short *round_ptr   = b->round;

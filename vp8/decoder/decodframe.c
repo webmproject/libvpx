@@ -21,7 +21,6 @@
 #include "vp8/common/entropymode.h"
 #include "vp8/common/quant_common.h"
 #include "vpx_scale/vpxscale.h"
-#include "vpx_scale/yv12extend.h"
 #include "vp8/common/setupintrarecon.h"
 
 #include "decodemv.h"
@@ -1135,7 +1134,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         int i;
         vp8mt_decode_mb_rows(pbi, xd);
-        vp8_yv12_extend_frame_borders_ptr(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
+        vp8_yv12_extend_frame_borders(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
         for (i = 0; i < pbi->decoding_thread_count; ++i)
             corrupt_tokens |= pbi->mb_row_di[i].mbd.corrupted;
     }

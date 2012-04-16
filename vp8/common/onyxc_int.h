@@ -26,10 +26,6 @@
 #include "header.h"
 /*#endif*/
 
-/* Create/destroy static data structures. */
-
-void vp8_initialize_common(void);
-
 #define MINQ 0
 #define MAXQ 127
 #define QINDEX_RANGE (MAXQ + 1)

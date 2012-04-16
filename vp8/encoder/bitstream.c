@@ -162,7 +162,7 @@ static void write_split(vp8_writer *bc, int x)
 
 void vp8_pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
 {
-    const TOKENEXTRA *const stop = p + xcount;
+    const TOKENEXTRA *stop = p + xcount;
     unsigned int split;
     unsigned int shift;
     int count = w->count;
@@ -172,8 +172,8 @@ void vp8_pack_tokens_c(vp8_writer *w, const TOKENEXTRA *p, int xcount)
     while (p < stop)
     {
         const int t = p->Token;
-        vp8_token *const a = vp8_coef_encodings + t;
-        const vp8_extra_bit_struct *const b = vp8_extra_bits + t;
+        const vp8_token *a = vp8_coef_encodings + t;
+        const vp8_extra_bit_struct *b = vp8_extra_bits + t;
         int i = 0;
         const unsigned char *pp = p->context_tree;
         int v = a->value;

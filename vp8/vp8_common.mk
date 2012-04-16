@@ -59,7 +59,6 @@ VP8_COMMON_SRCS-yes += common/loopfilter.c
 VP8_COMMON_SRCS-yes += common/loopfilter_filters.c
 VP8_COMMON_SRCS-yes += common/mbpitch.c
 VP8_COMMON_SRCS-yes += common/modecont.c
-VP8_COMMON_SRCS-yes += common/modecontext.c
 VP8_COMMON_SRCS-yes += common/quant_common.c
 VP8_COMMON_SRCS-yes += common/reconinter.c
 VP8_COMMON_SRCS-yes += common/reconintra.c
@@ -69,6 +68,7 @@ VP8_COMMON_SRCS-yes += common/setupintrarecon.c
 VP8_COMMON_SRCS-yes += common/swapyv12buffer.c
 VP8_COMMON_SRCS-yes += common/variance_c.c
 VP8_COMMON_SRCS-yes += common/variance.h
+VP8_COMMON_SRCS-yes += common/vp8_entropymodedata.h
 
 
 

@@ -17,7 +17,6 @@
 #include "onyxd_int.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/alloccommon.h"
-#include "vpx_scale/yv12extend.h"
 #include "vp8/common/loopfilter.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"
@@ -42,20 +41,6 @@ extern void vp8cx_init_de_quantizer(VP8D_COMP *pbi);
 static int get_free_fb (VP8_COMMON *cm);
 static void ref_cnt_fb (int *buf, int *idx, int new_idx);
 
-
-void vp8dx_initialize()
-{
-    static int init_done = 0;
-
-    if (!init_done)
-    {
-        vp8_initialize_common();
-        vp8_scale_machine_specific_config();
-        init_done = 1;
-    }
-}
-
-
 struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 {
     VP8D_COMP *pbi = vpx_memalign(32, sizeof(VP8D_COMP));
@@ -73,7 +58,6 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
     }
 
     pbi->common.error.setjmp = 1;
-    vp8dx_initialize();
 
     vp8_create_common(&pbi->common);
 
@@ -163,7 +147,7 @@ vpx_codec_err_t vp8dx_get_reference(VP8D_COMP *pbi, VP8_REFFRAME ref_frame_flag,
             "Incorrect buffer dimensions");
     }
     else
-        vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
+        vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
 
     return pbi->common.error.error_code;
 }
@@ -203,7 +187,7 @@ vpx_codec_err_t vp8dx_set_reference(VP8D_COMP *pbi, VP8_REFFRAME ref_frame_flag,
 
         /* Manage the reference counters and copy image. */
         ref_cnt_fb (cm->fb_idx_ref_cnt, ref_fb_ptr, free_fb);
-        vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[*ref_fb_ptr]);
+        vp8_yv12_copy_frame(sd, &cm->yv12_fb[*ref_fb_ptr]);
     }
 
    return pbi->common.error.error_code;
@@ -367,7 +351,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
             const int prev_idx = cm->lst_fb_idx;
             cm->fb_idx_ref_cnt[prev_idx]--;
             cm->lst_fb_idx = get_free_fb(cm);
-            vp8_yv12_copy_frame_ptr(&cm->yv12_fb[prev_idx],
+            vp8_yv12_copy_frame(&cm->yv12_fb[prev_idx],
                                     &cm->yv12_fb[cm->lst_fb_idx]);
         }
         /* This is used to signal that we are missing frames.
@@ -486,7 +470,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
             /* Apply the loop filter if appropriate. */
             vp8_loop_filter_frame(cm, &pbi->mb);
         }
-        vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
+        vp8_yv12_extend_frame_borders(cm->frame_to_show);
     }
 
 
