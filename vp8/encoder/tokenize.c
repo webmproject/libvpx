@@ -37,8 +37,8 @@ int skip_false_count = 0;
 static void fill_value_tokens()
 {
 
-    TOKENVALUE *const t = dct_value_tokens + DCT_MAX_VALUE;
-    vp8_extra_bit_struct *const e = vp8_extra_bits;
+    TOKENVALUE *t = dct_value_tokens + DCT_MAX_VALUE;
+    const vp8_extra_bit_struct *e = vp8_extra_bits;
 
     int i = -DCT_MAX_VALUE;
     int sign = 1;
@@ -70,7 +70,7 @@ static void fill_value_tokens()
         // initialize the cost for extra bits for all possible coefficient value.
         {
             int cost = 0;
-            vp8_extra_bit_struct *p = vp8_extra_bits + t[i].Token;
+            const vp8_extra_bit_struct *p = vp8_extra_bits + t[i].Token;
 
             if (p->base_val)
             {

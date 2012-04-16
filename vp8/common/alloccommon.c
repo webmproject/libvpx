@@ -208,7 +208,7 @@ void vp8_create_common(VP8_COMMON *oci)
     oci->clr_type = REG_YUV;
     oci->clamp_type = RECON_CLAMP_REQUIRED;
 
-    /* Initialise reference frame sign bias structure to defaults */
+    /* Initialize reference frame sign bias structure to defaults */
     vpx_memset(oci->ref_frame_sign_bias, 0, sizeof(oci->ref_frame_sign_bias));
 
     /* Default disable buffer to buffer copying */
@@ -223,10 +223,5 @@ void vp8_remove_common(VP8_COMMON *oci)
 
 void vp8_initialize_common()
 {
-    vp8_coef_tree_initialize();
-
     vp8_entropy_mode_init();
-
-    vp8_init_scan_order_mask();
-
 }
