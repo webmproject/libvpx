@@ -26,14 +26,20 @@ _int64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTR
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 void vp8_fix_contexts(MACROBLOCKD *x);
 
-static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE*2];
-const TOKENVALUE *vp8_dct_value_tokens_ptr;
-static int dct_value_cost[DCT_MAX_VALUE*2];
-const int *vp8_dct_value_cost_ptr;
+#include "dct_value_tokens.h"
+#include "dct_value_cost.h"
+
+const TOKENVALUE *const vp8_dct_value_tokens_ptr = dct_value_tokens +
+        DCT_MAX_VALUE;
+const short *const vp8_dct_value_cost_ptr = dct_value_cost + DCT_MAX_VALUE;
+
 #if 0
 int skip_true_count = 0;
 int skip_false_count = 0;
 #endif
+
+/* function used to generate dct_value_tokens and dct_value_cost tables */
+/*
 static void fill_value_tokens()
 {
 
@@ -80,7 +86,7 @@ static void fill_value_tokens()
                 if (Length)
                     cost += vp8_treed_cost(p->tree, p->prob, extra >> 1, Length);
 
-                cost += vp8_cost_bit(vp8_prob_half, extra & 1); /* sign */
+                cost += vp8_cost_bit(vp8_prob_half, extra & 1); // sign
                 dct_value_cost[i + DCT_MAX_VALUE] = cost;
             }
 
@@ -92,6 +98,7 @@ static void fill_value_tokens()
     vp8_dct_value_tokens_ptr = dct_value_tokens + DCT_MAX_VALUE;
     vp8_dct_value_cost_ptr   = dct_value_cost + DCT_MAX_VALUE;
 }
+*/
 
 static void tokenize2nd_order_b
 (
@@ -474,12 +481,6 @@ void print_context_counters()
     fclose(f);
 }
 #endif
-
-
-void vp8_tokenize_initialize()
-{
-    fill_value_tokens();
-}
 
 
 static void stuff2nd_order_b
