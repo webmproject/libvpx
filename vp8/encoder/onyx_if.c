@@ -4807,7 +4807,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
     }
 
     // adjust frame rates based on timestamps given
-    if (!cm->refresh_alt_ref_frame || (cpi->oxcf.number_of_layers > 1))
+    if (cm->show_frame)
     {
         int64_t this_duration;
         int step = 0;
