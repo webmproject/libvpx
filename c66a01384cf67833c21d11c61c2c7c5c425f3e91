@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn///lM\u003d",
+        "filename": "vp8/common/entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-16T16:36:37Z",
+      "side": 1,
+      "message": "I think it\u0027s valuable to keep these definitions because they are difficult to describe in english concisely and unambiguously. However, instead of #if 0\u0027ing them I would prefer if each was a comment in the vicinity of the structure they describe. You mentioned this is the first in a series of patches, so making the change in a follow up would be fine.",
+      "revId": "c66a01384cf67833c21d11c61c2c7c5c425f3e91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn///k8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-16T16:36:37Z",
+      "side": 1,
+      "message": "can you run this through tools/ftfy.sh? the * should be with stop",
+      "revId": "c66a01384cf67833c21d11c61c2c7c5c425f3e91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn///ko\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-16T16:36:37Z",
+      "side": 1,
+      "message": "no longer const?",
+      "revId": "c66a01384cf67833c21d11c61c2c7c5c425f3e91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
