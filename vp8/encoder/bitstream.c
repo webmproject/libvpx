@@ -145,7 +145,6 @@ void update_skip_probs(VP8_COMP *cpi)
             prob_skip_false[k] = 128;
 
         pc->mbskip_pred_probs[k] = prob_skip_false[k];
-        vp8_write_literal(w, prob_skip_false[k], 8);
     }
 
 #else
@@ -765,7 +764,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
         update_skip_probs( cpi );
         for (k=0;k<MBSKIP_CONTEXTS;++k)
-            vp8_write_literal(w, cpi->prob_skip_false[k], 8);
+            vp8_write_literal(w, pc->mbskip_pred_probs[k], 8);
 #else
         update_skip_probs( cpi );
         vp8_write_literal(w, cpi->prob_skip_false, 8);
