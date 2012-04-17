@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn///Fo\u003d",
+        "filename": "vp8/common/entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-04-17T07:37:37Z",
+      "side": 1,
+      "message": "yes, good idea",
+      "parentUuid": "AAAAKn///lM\u003d",
+      "revId": "c66a01384cf67833c21d11c61c2c7c5c425f3e91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn///k8\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn///FQ\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-04-17T07:37:37Z",
+      "side": 1,
+      "message": "does it really need astyle 1.24? we have 1.23 ... officially",
+      "parentUuid": "AAAAKn///k8\u003d",
+      "revId": "c66a01384cf67833c21d11c61c2c7c5c425f3e91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn///ko\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2012-04-16T16:36:37Z",
       "side": 1,
       "message": "no longer const?",
+      "revId": "c66a01384cf67833c21d11c61c2c7c5c425f3e91",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn///EI\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-04-17T07:37:37Z",
+      "side": 1,
+      "message": "it is, will fix!",
+      "parentUuid": "AAAAKn///ko\u003d",
       "revId": "c66a01384cf67833c21d11c61c2c7c5c425f3e91",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
