@@ -2813,6 +2813,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         // These variables hold are rolling total cost and distortion for this mode
         rate2 = 0;
         distortion2 = 0;
+        rate_y = 0;
+        rate_uv =0;
 
         this_mode = vp8_mode_order[mode_index];
         x->e_mbd.mode_info_context->mbmi.mode = this_mode;
@@ -3466,8 +3468,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 int mb_skippable;
                 int mb_skip_allowed;
                 int has_y2 = ( this_mode!=SPLITMV
-                                    &&this_mode!=B_PRED
-                                    &&this_mode!=I8X8_PRED);
+                                &&this_mode!=B_PRED
+                    &&this_mode!=I8X8_PRED);
 
                 if((cpi->common.txfm_mode == ALLOW_8X8) && has_y2)
                 {
@@ -3611,7 +3613,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             cpi->rd_thresh_mult[mode_index] = (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ? cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
             cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
         }
-
         // If the mode did not help improve the best error case then raise the threshold for testing that mode next time around.
         else
         {
