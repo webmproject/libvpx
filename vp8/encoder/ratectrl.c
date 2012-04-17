@@ -155,6 +155,9 @@ void vp8_save_coding_context(VP8_COMP *cpi)
     vp8_copy( cc->mv_ref_ct_a, cm->mv_ref_ct_a );
     vp8_copy( cc->mode_context_a, cm->mode_context_a );
 
+    vp8_copy( cc->ymode_prob, cm->fc.ymode_prob );
+    vp8_copy( cc->uv_mode_prob, cm->fc.uv_mode_prob );
+
     // Stats
 #ifdef MODE_STATS
     vp8_copy(cc->y_modes,       y_modes);
@@ -200,6 +203,9 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
     vp8_copy( cm->mode_context, cc->mode_context );
     vp8_copy( cm->mv_ref_ct_a, cc->mv_ref_ct_a );
     vp8_copy( cm->mode_context_a, cc->mode_context_a );
+
+    vp8_copy( cm->fc.ymode_prob, cc->ymode_prob);
+    vp8_copy( cm->fc.uv_mode_prob, cc->uv_mode_prob);
 
     // Stats
 #ifdef MODE_STATS

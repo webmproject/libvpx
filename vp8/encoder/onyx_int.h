@@ -90,6 +90,13 @@ typedef struct
     vp8_prob coef_probs_8x8[BLOCK_TYPES]
                            [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
+    vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
+#if CONFIG_UVINTRA
+    vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+#else
+    vp8_prob uv_mode_prob [VP8_UV_MODES-1];
+#endif
+
     int mv_ref_ct[6][4][2];
     int mode_context[6][4];
     int mv_ref_ct_a[6][4][2];
