@@ -149,8 +149,8 @@ const int vp8_ref_frame_order[MAX_MODES] =
 };
 
 static void fill_token_costs(
-    unsigned int c      [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS],
-    const vp8_prob p    [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES]
+    int c[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS],
+    const vp8_prob p[BLOCK_TYPES][COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES]
 )
 {
     int i, j, k;
@@ -159,21 +159,24 @@ static void fill_token_costs(
     for (i = 0; i < BLOCK_TYPES; i++)
         for (j = 0; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+
                 // check for pt=0 and band > 1 if block type 0 and 0 if blocktype 1
-                if(k==0 && j>(i==0) )
-                    vp8_cost_tokens2((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree,2);
+                if (k == 0 && j > (i == 0))
+                    vp8_cost_tokens2(c[i][j][k], p [i][j][k], vp8_coef_tree, 2);
                 else
-                    vp8_cost_tokens((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
+                    vp8_cost_tokens(c[i][j][k], p [i][j][k], vp8_coef_tree);
 }
 
-static int rd_iifactor [ 32 ] =  {    4,   4,   3,   2,   1,   0,   0,   0,
-                                      0,   0,   0,   0,   0,   0,   0,   0,
-                                      0,   0,   0,   0,   0,   0,   0,   0,
-                                      0,   0,   0,   0,   0,   0,   0,   0,
-                                 };
+static const int rd_iifactor[32] =
+{
+    4, 4, 3, 2, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0
+};
 
 /* values are now correlated to quantizer */
-static int sad_per_bit16lut[QINDEX_RANGE] =
+static const int sad_per_bit16lut[QINDEX_RANGE] =
 {
     2,  2,  2,  2,  2,  2,  2,  2,
     2,  2,  2,  2,  2,  2,  2,  2,
@@ -192,7 +195,7 @@ static int sad_per_bit16lut[QINDEX_RANGE] =
     11, 11, 11, 11, 12, 12, 12, 12,
     12, 12, 13, 13, 13, 13, 14, 14
 };
-static int sad_per_bit4lut[QINDEX_RANGE] =
+static const int sad_per_bit4lut[QINDEX_RANGE] =
 {
     2,  2,  2,  2,  2,  2,  3,  3,
     3,  3,  3,  3,  3,  3,  3,  3,
@@ -637,7 +640,7 @@ static int rd_pick_intra4x4block(
     BLOCK *be,
     BLOCKD *b,
     B_PREDICTION_MODE *best_mode,
-    unsigned int *bmode_costs,
+    const int *bmode_costs,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
 
@@ -717,7 +720,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
-    unsigned int *bmode_costs;
+    const int *bmode_costs;
 
     vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
     vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));

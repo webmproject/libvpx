@@ -90,16 +90,17 @@ typedef struct macroblock
     signed int act_zbin_adj;
     signed int last_act_zbin_adj;
 
-    int mvcosts[2][MVvals+1];
     int *mvcost[2];
-    int mvsadcosts[2][MVfpvals+1];
     int *mvsadcost[2];
-    int mbmode_cost[2][MB_MODE_COUNT];
-    int intra_uv_mode_cost[2][MB_MODE_COUNT];
-    unsigned int bmode_costs[10][10][10];
-    unsigned int inter_bmode_costs[B_MODE_COUNT];
+    int (*mbmode_cost)[MB_MODE_COUNT];
+    int (*intra_uv_mode_cost)[MB_MODE_COUNT];
+    int (*bmode_costs)[10][10];
+    int *inter_bmode_costs;
+    int (*token_costs)[COEF_BANDS][PREV_COEF_CONTEXTS]
+    [MAX_ENTROPY_TOKENS];
 
-    // These define limits to motion vector components to prevent them from extending outside the UMV borders
+    // These define limits to motion vector components to prevent
+    // them from extending outside the UMV borders
     int mv_col_min;
     int mv_col_max;
     int mv_row_min;
@@ -115,7 +116,6 @@ typedef struct macroblock
     unsigned char *active_ptr;
     MV_CONTEXT *mvc;
 
-    unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
     int optimize;
     int q_index;
 

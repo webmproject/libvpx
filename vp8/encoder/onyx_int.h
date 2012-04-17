@@ -693,6 +693,17 @@ typedef struct VP8_COMP
     int    mr_low_res_mb_cols;
 #endif
 
+    struct rd_costs_struct
+    {
+        int mvcosts[2][MVvals+1];
+        int mvsadcosts[2][MVfpvals+1];
+        int mbmode_cost[2][MB_MODE_COUNT];
+        int intra_uv_mode_cost[2][MB_MODE_COUNT];
+        int bmode_costs[10][10][10];
+        int inter_bmode_costs[B_MODE_COUNT];
+        int token_costs[BLOCK_TYPES][COEF_BANDS]
+        [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
+    } rd_costs;
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);

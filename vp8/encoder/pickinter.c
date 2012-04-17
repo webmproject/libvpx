@@ -132,7 +132,7 @@ static int pick_intra4x4block(
     MACROBLOCK *x,
     int ib,
     B_PREDICTION_MODE *best_mode,
-    unsigned int *mode_costs,
+    const int *mode_costs,
 
     int *bestrate,
     int *bestdistortion)
@@ -185,7 +185,7 @@ static int pick_intra4x4mby_modes
     int cost = mb->mbmode_cost [xd->frame_type] [B_PRED];
     int error;
     int distortion = 0;
-    unsigned int *bmode_costs;
+    const int *bmode_costs;
 
     intra_prediction_down_copy(xd, xd->dst.y_buffer - xd->dst.y_stride + 16);
 

@@ -1883,13 +1883,6 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->gf_rate_correction_factor  = 1.0;
     cpi->twopass.est_max_qcorrection_factor  = 1.0;
 
-    cpi->mb.mvcost[0] = &cpi->mb.mvcosts[0][mv_max+1];
-    cpi->mb.mvcost[1] = &cpi->mb.mvcosts[1][mv_max+1];
-    cpi->mb.mvsadcost[0] = &cpi->mb.mvsadcosts[0][mvfp_max+1];
-    cpi->mb.mvsadcost[1] = &cpi->mb.mvsadcosts[1][mvfp_max+1];
-
-    cal_mvsadcosts(cpi->mb.mvsadcost);
-
     for (i = 0; i < KEY_FRAME_CONTEXT; i++)
     {
         cpi->prior_key_frame_distance[i] = (int)cpi->output_frame_rate;
@@ -2023,13 +2016,29 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->common.error.setjmp = 0;
 
 #if CONFIG_MULTI_RES_ENCODING
+
     /* Calculate # of MBs in a row in lower-resolution level image. */
     if (cpi->oxcf.mr_encoder_id > 0)
         vp8_cal_low_res_mb_cols(cpi);
+
 #endif
 
-    return  cpi;
+    /* setup RD costs to MACROBLOCK struct */
 
+    cpi->mb.mvcost[0] = &cpi->rd_costs.mvcosts[0][mv_max+1];
+    cpi->mb.mvcost[1] = &cpi->rd_costs.mvcosts[1][mv_max+1];
+    cpi->mb.mvsadcost[0] = &cpi->rd_costs.mvsadcosts[0][mvfp_max+1];
+    cpi->mb.mvsadcost[1] = &cpi->rd_costs.mvsadcosts[1][mvfp_max+1];
+
+    cal_mvsadcosts(cpi->mb.mvsadcost);
+
+    cpi->mb.mbmode_cost = cpi->rd_costs.mbmode_cost;
+    cpi->mb.intra_uv_mode_cost = cpi->rd_costs.intra_uv_mode_cost;
+    cpi->mb.bmode_costs = cpi->rd_costs.bmode_costs;
+    cpi->mb.inter_bmode_costs = cpi->rd_costs.inter_bmode_costs;
+    cpi->mb.token_costs = cpi->rd_costs.token_costs;
+
+    return  cpi;
 }
 
 

@@ -337,21 +337,16 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
     z->src.v_buffer      = x->src.v_buffer;
     */
 
+    z->mvcost[0] =  x->mvcost[0];
+    z->mvcost[1] =  x->mvcost[1];
+    z->mvsadcost[0] =  x->mvsadcost[0];
+    z->mvsadcost[1] =  x->mvsadcost[1];
 
-    vpx_memcpy(z->mvcosts,          x->mvcosts,         sizeof(x->mvcosts));
-    z->mvcost[0] = &z->mvcosts[0][mv_max+1];
-    z->mvcost[1] = &z->mvcosts[1][mv_max+1];
-    z->mvsadcost[0] = &z->mvsadcosts[0][mvfp_max+1];
-    z->mvsadcost[1] = &z->mvsadcosts[1][mvfp_max+1];
-
-
-    vpx_memcpy(z->token_costs,       x->token_costs,      sizeof(x->token_costs));
-    vpx_memcpy(z->inter_bmode_costs,  x->inter_bmode_costs, sizeof(x->inter_bmode_costs));
-    //memcpy(z->mvcosts,            x->mvcosts,         sizeof(x->mvcosts));
-    //memcpy(z->mvcost,         x->mvcost,          sizeof(x->mvcost));
-    vpx_memcpy(z->mbmode_cost,       x->mbmode_cost,      sizeof(x->mbmode_cost));
-    vpx_memcpy(z->intra_uv_mode_cost,  x->intra_uv_mode_cost, sizeof(x->intra_uv_mode_cost));
-    vpx_memcpy(z->bmode_costs,       x->bmode_costs,      sizeof(x->bmode_costs));
+    z->token_costs = x->token_costs;
+    z->inter_bmode_costs = x->inter_bmode_costs;
+    z->mbmode_cost = x->mbmode_cost;
+    z->intra_uv_mode_cost = x->intra_uv_mode_cost;
+    z->bmode_costs = x->bmode_costs;
 
     for (i = 0; i < 25; i++)
     {
@@ -359,16 +354,14 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         z->block[i].quant_fast      = x->block[i].quant_fast;
         z->block[i].quant_shift     = x->block[i].quant_shift;
         z->block[i].zbin            = x->block[i].zbin;
-        z->block[i].zrun_zbin_boost   = x->block[i].zrun_zbin_boost;
+        z->block[i].zrun_zbin_boost = x->block[i].zrun_zbin_boost;
         z->block[i].round           = x->block[i].round;
-        z->q_index                  = x->q_index;
-        z->act_zbin_adj             = x->act_zbin_adj;
-        z->last_act_zbin_adj        = x->last_act_zbin_adj;
-        /*
-        z->block[i].src             = x->block[i].src;
-        */
-        z->block[i].src_stride       = x->block[i].src_stride;
+        z->block[i].src_stride      = x->block[i].src_stride;
     }
+
+    z->q_index           = x->q_index;
+    z->act_zbin_adj      = x->act_zbin_adj;
+    z->last_act_zbin_adj = x->last_act_zbin_adj;
 
     {
         MACROBLOCKD *xd = &x->e_mbd;
@@ -401,9 +394,11 @@ static void setup_mbby_copy(MACROBLOCK *mbdst, MACROBLOCK *mbsrc)
         zd->subpixel_predict16x16    = xd->subpixel_predict16x16;
         zd->segmentation_enabled     = xd->segmentation_enabled;
         zd->mb_segement_abs_delta      = xd->mb_segement_abs_delta;
-        vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
+        vpx_memcpy(zd->segment_feature_data, xd->segment_feature_data,
+                   sizeof(xd->segment_feature_data));
 
-        vpx_memcpy(zd->dequant_y1_dc, xd->dequant_y1_dc, sizeof(xd->dequant_y1_dc));
+        vpx_memcpy(zd->dequant_y1_dc, xd->dequant_y1_dc,
+                   sizeof(xd->dequant_y1_dc));
         vpx_memcpy(zd->dequant_y1, xd->dequant_y1, sizeof(xd->dequant_y1));
         vpx_memcpy(zd->dequant_y2, xd->dequant_y2, sizeof(xd->dequant_y2));
         vpx_memcpy(zd->dequant_uv, xd->dequant_uv, sizeof(xd->dequant_uv));

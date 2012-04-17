@@ -235,7 +235,7 @@ void vp8_save_coding_context(VP8_COMP *cpi)
     cc->frames_since_golden       = cpi->common.frames_since_golden;
 
     vp8_copy(cc->mvc,      cpi->common.fc.mvc);
-    vp8_copy(cc->mvcosts,  cpi->mb.mvcosts);
+    vp8_copy(cc->mvcosts,  cpi->rd_costs.mvcosts);
 
     vp8_copy(cc->ymode_prob,   cpi->common.fc.ymode_prob);
     vp8_copy(cc->uv_mode_prob,  cpi->common.fc.uv_mode_prob);
@@ -272,7 +272,7 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
 
     vp8_copy(cpi->common.fc.mvc, cc->mvc);
 
-    vp8_copy(cpi->mb.mvcosts, cc->mvcosts);
+    vp8_copy(cpi->rd_costs.mvcosts, cc->mvcosts);
 
     vp8_copy(cpi->common.fc.ymode_prob,   cc->ymode_prob);
     vp8_copy(cpi->common.fc.uv_mode_prob,  cc->uv_mode_prob);
