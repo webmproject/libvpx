@@ -16,6 +16,24 @@
       "revId": "bbee23a550d2a6dbc1ddd76940df4cd50cf9780e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//+FM\u003d",
+        "filename": "vp8/encoder/ethreading.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-04-18T09:40:23Z",
+      "side": 1,
+      "message": "yes, should have removed it",
+      "parentUuid": "AAAAKn//+xk\u003d",
+      "revId": "bbee23a550d2a6dbc1ddd76940df4cd50cf9780e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
