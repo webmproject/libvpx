@@ -16,6 +16,23 @@
       "revId": "b35a0db0e76806554c8e22c48d358d4c33563b37",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//+GI\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-04-18T06:54:53Z",
+      "side": 1,
+      "message": "yes, it seems these tables are only used  by the tokenizer and the rd optimization",
+      "revId": "b35a0db0e76806554c8e22c48d358d4c33563b37",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
