@@ -559,12 +559,12 @@ static void pick_mb_modes (VP8_COMP *cpi,
 
         // Set up limit values for MV components to prevent them from
         // extending beyond the UMV borders assuming 16x16 block size
-        x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
-                            + (VP8BORDERINPIXELS - 16);
-        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16)
-                            + (VP8BORDERINPIXELS - 16);
+        x->mv_row_min = -((mb_row * 16) + VP8BORDERINPIXELS - INTERP_EXTEND);
+        x->mv_col_min = -((mb_col * 16) + VP8BORDERINPIXELS - INTERP_EXTEND);
+        x->mv_row_max = ((cm->mb_rows - mb_row) * 16 +
+                         (VP8BORDERINPIXELS - 16 - INTERP_EXTEND));
+        x->mv_col_max = ((cm->mb_cols - mb_col) * 16 +
+                         (VP8BORDERINPIXELS - 16 - INTERP_EXTEND));
 
         xd->up_available   = (mb_row != 0);
         xd->left_available = (mb_col != 0);
@@ -756,22 +756,22 @@ static void encode_sb ( VP8_COMP *cpi,
 
         // Set up limit values for MV components to prevent them from
         // extending beyond the UMV borders assuming 16x16 block size
-        x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_row_max = ((cm->mb_rows - 1 - mb_row) * 16)
-                            + (VP8BORDERINPIXELS - 16);
-        x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16)
-                            + (VP8BORDERINPIXELS - 16);
+        x->mv_row_min = -((mb_row * 16) + VP8BORDERINPIXELS - INTERP_EXTEND);
+        x->mv_col_min = -((mb_col * 16) + VP8BORDERINPIXELS - INTERP_EXTEND);
+        x->mv_row_max = ((cm->mb_rows - mb_row) * 16 +
+                         (VP8BORDERINPIXELS - 16 - INTERP_EXTEND));
+        x->mv_col_max = ((cm->mb_cols - mb_col) * 16 +
+                         (VP8BORDERINPIXELS - 16 - INTERP_EXTEND));
 
 #if CONFIG_SUPERBLOCKS
         // Set up limit values for MV components to prevent them from
         // extending beyond the UMV borders assuming 32x32 block size
-        x->mv_row_min_sb = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_row_max_sb = ((cm->mb_rows - 1 - mb_row) * 16)
-                            + (VP8BORDERINPIXELS - 32);
-        x->mv_col_min_sb = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
-        x->mv_col_max_sb = ((cm->mb_cols - 1 - mb_col) * 16)
-                            + (VP8BORDERINPIXELS - 32);
+        x->mv_row_min_sb = -((mb_row * 16) + VP8BORDERINPIXELS - INTERP_EXTEND);
+        x->mv_col_min_sb = -((mb_col * 16) + VP8BORDERINPIXELS - INTERP_EXTEND);
+        x->mv_row_max_sb = ((cm->mb_rows - mb_row) * 16 +
+                         (VP8BORDERINPIXELS - 32 - INTERP_EXTEND));
+        x->mv_col_max_sb = ((cm->mb_cols - mb_col) * 16 +
+                         (VP8BORDERINPIXELS - 32 - INTERP_EXTEND));
 #endif
 
         xd->up_available = (mb_row != 0);
