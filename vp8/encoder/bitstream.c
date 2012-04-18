@@ -859,7 +859,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 
                 // Make sure the MacroBlockD mode info pointer is set correctly
                 xd->mode_info_context = m;
-
                 xd->prev_mode_info_context = prev_m;
 
 #ifdef ENTROPY_STATS
@@ -1126,6 +1125,7 @@ static void write_kfmodes(VP8_COMP *cpi)
     vp8_writer *const bc = & cpi->bc;
     VP8_COMMON *const c = & cpi->common;
     const int mis = c->mode_info_stride;
+    MACROBLOCKD *xd = &cpi->mb.e_mbd;
     MODE_INFO *m;
     int i;
     int row, col;
@@ -1137,8 +1137,6 @@ static void write_kfmodes(VP8_COMP *cpi)
 #endif
     int row_delta[4] = { 0, +1,  0, -1};
     int col_delta[4] = {+1, -1, +1, +1};
-
-    MACROBLOCKD *xd = &cpi->mb.e_mbd;
 
     if (c->mb_no_coeff_skip)
     {
@@ -1218,6 +1216,9 @@ static void write_kfmodes(VP8_COMP *cpi)
                     continue;
                 }
 
+                // Make sure the MacroBlockD mode info pointer is set correctly
+                xd->mode_info_context = m;
+
                 ym = m->mbmi.mode;
                 segment_id = m->mbmi.segment_id;
 
@@ -1230,49 +1231,50 @@ static void write_kfmodes(VP8_COMP *cpi)
                      ( !segfeature_active( xd, segment_id, SEG_LVL_EOB ) ||
                        (get_segdata( xd, segment_id, SEG_LVL_EOB ) != 0) ) )
                 {
-    #if CONFIG_NEWENTROPY
+#if CONFIG_NEWENTROPY
                     vp8_encode_bool(bc, m->mbmi.mb_skip_coeff,
                                     get_pred_prob(c, xd, PRED_MBSKIP));
-    #else
+#else
                     vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
-    #endif
+#endif
                 }
-    #if CONFIG_QIMODE
+#if CONFIG_QIMODE
                 kfwrite_ymode(bc, ym,
                               c->kf_ymode_prob[c->kf_ymode_probs_index]);
-    #else
+#else
                 kfwrite_ymode(bc, ym, c->kf_ymode_prob);
-    #endif
+#endif
+
                 if (ym == B_PRED)
                 {
                     const int mis = c->mode_info_stride;
                     int i = 0;
-    #if CONFIG_COMP_INTRA_PRED
+#if CONFIG_COMP_INTRA_PRED
                     int uses_second =
                             m->bmi[0].as_mode.second !=
                                     (B_PREDICTION_MODE) (B_DC_PRED - 1);
                     vp8_write(bc, uses_second, 128);
-    #endif
+#endif
                     do
                     {
                         const B_PREDICTION_MODE A = above_block_mode(m, i, mis);
                         const B_PREDICTION_MODE L = left_block_mode(m, i);
                         const int bm = m->bmi[i].as_mode.first;
-    #if CONFIG_COMP_INTRA_PRED
+#if CONFIG_COMP_INTRA_PRED
                         const int bm2 = m->bmi[i].as_mode.second;
-    #endif
+#endif
 
-    #ifdef ENTROPY_STATS
+#ifdef ENTROPY_STATS
                         ++intra_mode_stats [A] [L] [bm];
-    #endif
+#endif
 
                         write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
-    #if CONFIG_COMP_INTRA_PRED
+#if CONFIG_COMP_INTRA_PRED
                         if (uses_second)
                         {
                             write_bmode(bc, bm2, c->kf_bmode_prob [A] [L]);
                         }
-    #endif
+#endif
                     }
                     while (++i < 16);
                 }
@@ -1293,6 +1295,7 @@ static void write_kfmodes(VP8_COMP *cpi)
 #else
                     write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob);
 #endif
+
                 // Next MB
                 mb_row += dy;
                 mb_col += dx;

@@ -109,7 +109,6 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
     {
 #if CONFIG_NEWENTROPY
         MACROBLOCKD *const xd  = & pbi->mb;
-        xd->mode_info_context = m;
         m->mbmi.mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
 #else
         m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
@@ -201,6 +200,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
 #if CONFIG_COMP_INTRA_PRED
     m->mbmi.second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
+
 }
 
 static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
@@ -1019,6 +1019,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
     int i;
     VP8_COMMON *cm = &pbi->common;
     MODE_INFO *mi = cm->mi;
+    MACROBLOCKD *const xd  = &pbi->mb;
     int sb_row, sb_col;
     int sb_rows = (cm->mb_rows + 1)>>1;
     int sb_cols = (cm->mb_cols + 1)>>1;
@@ -1061,6 +1062,10 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
                     prev_mi += offset_extended;
                     continue;
                 }
+
+                // Make sure the MacroBlockD mode info pointer is set correctly
+                xd->mode_info_context = mi;
+                xd->prev_mode_info_context = prev_mi;
 
                 pbi->mb.mb_to_top_edge = mb_to_top_edge = -((mb_row * 16)) << 3;
                                          mb_to_top_edge -= LEFT_TOP_MARGIN;
