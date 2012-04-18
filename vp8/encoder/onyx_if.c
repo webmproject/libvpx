@@ -219,7 +219,6 @@ void vp8_initialize()
     {
         vp8_scale_machine_specific_config();
         vp8_initialize_common();
-        vp8_tokenize_initialize();
 
         init_done = 1;
     }
