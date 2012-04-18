@@ -45,6 +45,7 @@ typedef struct
     short zbin_extra;
 
     unsigned char **base_src;
+    unsigned char **base_second_src;
     int src;
     int src_stride;
 
@@ -60,6 +61,7 @@ typedef struct
     {
         B_PREDICTION_MODE mode;
         int_mv mv;
+        int_mv second_mv;
     } bmi[16];
 } PARTITION_INFO;
 

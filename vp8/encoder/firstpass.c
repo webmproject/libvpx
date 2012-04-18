@@ -583,56 +583,43 @@ void vp8_first_pass(VP8_COMP *cpi)
             // Other than for the first frame do a motion search
             if (cm->current_video_frame > 0)
             {
-                BLOCKD *d = &x->e_mbd.block[0];
-                MV tmp_mv = {0, 0};
                 int tmp_err;
                 int motion_error = INT_MAX;
+                int_mv mv, tmp_mv;
 
                 // Simple 0,0 motion with no mv overhead
                 zz_motion_search( cpi, x, lst_yv12, &motion_error, recon_yoffset );
-                d->bmi.mv.as_mv.row = 0;
-                d->bmi.mv.as_mv.col = 0;
+                mv.as_int = tmp_mv.as_int = 0;
 
                 // Test last reference frame using the previous best mv as the
                 // starting point (best reference) for the search
                 first_pass_motion_search(cpi, x, &best_ref_mv,
-                                        &d->bmi.mv.as_mv, lst_yv12,
+                                        &mv.as_mv, lst_yv12,
                                         &motion_error, recon_yoffset);
 
                 // If the current best reference mv is not centred on 0,0 then do a 0,0 based search as well
                 if (best_ref_mv.as_int)
                 {
                    tmp_err = INT_MAX;
-                   first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv,
+                   first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv.as_mv,
                                      lst_yv12, &tmp_err, recon_yoffset);
 
                    if ( tmp_err < motion_error )
                    {
                         motion_error = tmp_err;
-                        d->bmi.mv.as_mv.row = tmp_mv.row;
-                        d->bmi.mv.as_mv.col = tmp_mv.col;
+                        mv.as_int = tmp_mv.as_int;
                    }
                 }
 
                 // Experimental search in a second reference frame ((0,0) based only)
                 if (cm->current_video_frame > 1)
                 {
-                    first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv, gld_yv12, &gf_motion_error, recon_yoffset);
+                    first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv.as_mv, gld_yv12, &gf_motion_error, recon_yoffset);
 
                     if ((gf_motion_error < motion_error) && (gf_motion_error < this_error))
                     {
                         second_ref_count++;
-                        //motion_error = gf_motion_error;
-                        //d->bmi.mv.as_mv.row = tmp_mv.row;
-                        //d->bmi.mv.as_mv.col = tmp_mv.col;
                     }
-                    /*else
-                    {
-                        xd->pre.y_buffer = cm->last_frame.y_buffer + recon_yoffset;
-                        xd->pre.u_buffer = cm->last_frame.u_buffer + recon_uvoffset;
-                        xd->pre.v_buffer = cm->last_frame.v_buffer + recon_uvoffset;
-                    }*/
-
 
                     // Reset to last frame as reference buffer
                     xd->pre.y_buffer = lst_yv12->y_buffer + recon_yoffset;
@@ -656,60 +643,60 @@ void vp8_first_pass(VP8_COMP *cpi)
                         neutral_count++;
                     }
 
-                    d->bmi.mv.as_mv.row <<= 3;
-                    d->bmi.mv.as_mv.col <<= 3;
+                    mv.as_mv.row <<= 3;
+                    mv.as_mv.col <<= 3;
                     this_error = motion_error;
-                    vp8_set_mbmode_and_mvs(x, NEWMV, &d->bmi.mv);
+                    vp8_set_mbmode_and_mvs(x, NEWMV, &mv);
                     vp8_encode_inter16x16y(IF_RTCD(&cpi->rtcd), x);
-                    sum_mvr += d->bmi.mv.as_mv.row;
-                    sum_mvr_abs += abs(d->bmi.mv.as_mv.row);
-                    sum_mvc += d->bmi.mv.as_mv.col;
-                    sum_mvc_abs += abs(d->bmi.mv.as_mv.col);
-                    sum_mvrs += d->bmi.mv.as_mv.row * d->bmi.mv.as_mv.row;
-                    sum_mvcs += d->bmi.mv.as_mv.col * d->bmi.mv.as_mv.col;
+                    sum_mvr += mv.as_mv.row;
+                    sum_mvr_abs += abs(mv.as_mv.row);
+                    sum_mvc += mv.as_mv.col;
+                    sum_mvc_abs += abs(mv.as_mv.col);
+                    sum_mvrs += mv.as_mv.row * mv.as_mv.row;
+                    sum_mvcs += mv.as_mv.col * mv.as_mv.col;
                     intercount++;
 
-                    best_ref_mv.as_int = d->bmi.mv.as_int;
+                    best_ref_mv.as_int = mv.as_int;
 
                     // Was the vector non-zero
-                    if (d->bmi.mv.as_int)
+                    if (mv.as_int)
                     {
                         mvcount++;
 
                         // Was it different from the last non zero vector
-                        if ( d->bmi.mv.as_int != lastmv_as_int )
+                        if ( mv.as_int != lastmv_as_int )
                             new_mv_count++;
-                        lastmv_as_int = d->bmi.mv.as_int;
+                        lastmv_as_int = mv.as_int;
 
                         // Does the Row vector point inwards or outwards
                         if (mb_row < cm->mb_rows / 2)
                         {
-                            if (d->bmi.mv.as_mv.row > 0)
+                            if (mv.as_mv.row > 0)
                                 sum_in_vectors--;
-                            else if (d->bmi.mv.as_mv.row < 0)
+                            else if (mv.as_mv.row < 0)
                                 sum_in_vectors++;
                         }
                         else if (mb_row > cm->mb_rows / 2)
                         {
-                            if (d->bmi.mv.as_mv.row > 0)
+                            if (mv.as_mv.row > 0)
                                 sum_in_vectors++;
-                            else if (d->bmi.mv.as_mv.row < 0)
+                            else if (mv.as_mv.row < 0)
                                 sum_in_vectors--;
                         }
 
                         // Does the Row vector point inwards or outwards
                         if (mb_col < cm->mb_cols / 2)
                         {
-                            if (d->bmi.mv.as_mv.col > 0)
+                            if (mv.as_mv.col > 0)
                                 sum_in_vectors--;
-                            else if (d->bmi.mv.as_mv.col < 0)
+                            else if (mv.as_mv.col < 0)
                                 sum_in_vectors++;
                         }
                         else if (mb_col > cm->mb_cols / 2)
                         {
-                            if (d->bmi.mv.as_mv.col > 0)
+                            if (mv.as_mv.col > 0)
                                 sum_in_vectors++;
-                            else if (d->bmi.mv.as_mv.col < 0)
+                            else if (mv.as_mv.col < 0)
                                 sum_in_vectors--;
                         }
                     }

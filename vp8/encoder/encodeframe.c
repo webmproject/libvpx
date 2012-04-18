@@ -428,6 +428,8 @@ static void update_state (VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx)
 
         xd->mode_info_context->mbmi.mv.as_int =
                                       x->partition_info->bmi[15].mv.as_int;
+        xd->mode_info_context->mbmi.second_mv.as_int =
+                                        x->partition_info->bmi[15].second_mv.as_int;
     }
 
     if (cpi->common.frame_type == KEY_FRAME)
@@ -1085,6 +1087,8 @@ static void encode_frame_internal(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, sixtap8x8);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, sixtap16x16);
+        xd->subpixel_predict_avg    = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, sixtap_avg4x4);
         xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, sixtap_avg8x8);
         xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
@@ -1132,6 +1136,8 @@ static void encode_frame_internal(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, bilinear8x8);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                       &cpi->common.rtcd.subpix, bilinear16x16);
+        xd->subpixel_predict_avg    = SUBPIX_INVOKE(
+                                      &cpi->common.rtcd.subpix, bilinear_avg4x4);
         xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
                                       &cpi->common.rtcd.subpix, bilinear_avg8x8);
         xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(

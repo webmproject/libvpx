@@ -53,6 +53,11 @@ extern prototype_subpixel_predict(vp8_subpix_sixtap8x4);
 #endif
 extern prototype_subpixel_predict(vp8_subpix_sixtap4x4);
 
+#ifndef vp8_subpix_sixtap_avg4x4
+#define vp8_subpix_sixtap_avg4x4 vp8_sixtap_predict_avg_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_sixtap_avg4x4);
+
 #if CONFIG_ENHANCED_INTERP
 #ifndef vp8_subpix_eighttap16x16
 #define vp8_subpix_eighttap16x16 vp8_eighttap_predict16x16_c
@@ -145,6 +150,11 @@ extern prototype_subpixel_predict(vp8_subpix_bilinear8x4);
 #endif
 extern prototype_subpixel_predict(vp8_subpix_bilinear4x4);
 
+#ifndef vp8_subpix_bilinear_avg4x4
+#define vp8_subpix_bilinear_avg4x4 vp8_bilinear_predict_avg4x4_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_bilinear_avg4x4);
+
 typedef prototype_subpixel_predict((*vp8_subpix_fn_t));
 typedef struct
 {
@@ -168,12 +178,14 @@ typedef struct
     vp8_subpix_fn_t  sixtap_avg8x8;
     vp8_subpix_fn_t  sixtap8x4;
     vp8_subpix_fn_t  sixtap4x4;
+    vp8_subpix_fn_t  sixtap_avg4x4;
     vp8_subpix_fn_t  bilinear16x16;
     vp8_subpix_fn_t  bilinear8x8;
     vp8_subpix_fn_t  bilinear_avg16x16;
     vp8_subpix_fn_t  bilinear_avg8x8;
     vp8_subpix_fn_t  bilinear8x4;
     vp8_subpix_fn_t  bilinear4x4;
+    vp8_subpix_fn_t  bilinear_avg4x4;
 } vp8_subpix_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

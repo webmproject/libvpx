@@ -714,6 +714,7 @@ static void init_frame(VP8D_COMP *pbi)
             xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x4);
             xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x8);
             xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap16x16);
+            xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg4x4);
             xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg8x8);
             xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg16x16);
         }
@@ -747,6 +748,7 @@ static void init_frame(VP8D_COMP *pbi)
             xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x4);
             xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x8);
             xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear16x16);
+            xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg4x4);
             xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg8x8);
             xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg16x16);
         }
@@ -1138,6 +1140,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x4);
             xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x8);
             xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap16x16);
+            xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg4x4);
             xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg8x8);
             xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg16x16);
         }
@@ -1165,6 +1168,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x4);
             xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x8);
             xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear16x16);
+            xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg4x4);
             xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg8x8);
             xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg16x16);
         }

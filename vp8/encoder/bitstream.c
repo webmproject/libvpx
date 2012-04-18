@@ -963,7 +963,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                 }
                 else
                 {
-                    int_mv best_mv;
+                    int_mv best_mv, best_second_mv;
                     int ct[4];
 
                     vp8_prob mv_ref_p [VP8_MVREFS-1];
@@ -974,7 +974,6 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         vp8_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
                                           rf, cpi->common.ref_frame_sign_bias);
                         vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
-
 
 #ifdef ENTROPY_STATS
                         accum_mv_refs(mode, ct);
@@ -992,6 +991,25 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         vp8_accum_mv_refs(&cpi->common, mode, ct);
                     }
 
+                    if (mi->second_ref_frame &&
+                        (mode == NEWMV || mode == SPLITMV))
+                    {
+                        int_mv n1, n2;
+
+                        vp8_find_near_mvs(xd, m,
+                                          prev_m,
+                                          &n1, &n2, &best_second_mv, ct,
+                                          mi->second_ref_frame, cpi->common.ref_frame_sign_bias);
+                    }
+
+                    // does the feature use compound prediction or not
+                    // (if not specified at the frame/segment level)
+                    if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
+                    {
+                        vp8_write(w, mi->second_ref_frame != INTRA_FRAME,
+                                  get_pred_prob( pc, xd, PRED_COMP ) );
+                    }
+
                     {
                         switch (mode)   /* new, split require MVs */
                         {
@@ -1007,30 +1025,16 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
                             write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
 
-                            if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
-                            {
-                                vp8_write(w,
-                                          mi->second_ref_frame != INTRA_FRAME,
-                                          get_pred_prob( pc, xd, PRED_COMP ) );
-                            }
                             if (mi->second_ref_frame)
                             {
-                                const int second_rf = mi->second_ref_frame;
-                                int_mv n1, n2;
-                                int ct[4];
-                                vp8_find_near_mvs(xd, m,
-                                              prev_m,
-                                              &n1, &n2, &best_mv,
-                                              ct, second_rf,
-                                              cpi->common.ref_frame_sign_bias);
 #if CONFIG_HIGH_PRECISION_MV
                                 if (xd->allow_high_precision_mv)
                                     write_mv_hp(w, &mi->second_mv.as_mv,
-                                                &best_mv, mvc_hp);
+                                                &best_second_mv, mvc_hp);
                                 else
 #endif
-                                write_mv(w, &mi->second_mv.as_mv, &best_mv,
-                                         mvc);
+                                write_mv(w, &mi->second_mv.as_mv,
+                                         &best_second_mv, mvc);
                             }
                             break;
                         case SPLITMV:
@@ -1082,18 +1086,24 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
                                     write_mv(w, &blockmv.as_mv, &best_mv,
                                              (const MV_CONTEXT *) mvc);
+
+                                    if (mi->second_ref_frame)
+                                    {
+#if CONFIG_HIGH_PRECISION_MV
+                                        if (xd->allow_high_precision_mv)
+                                            write_mv_hp(w, &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                                                        &best_second_mv, (const MV_CONTEXT_HP *) mvc_hp);
+                                        else
+#endif
+                                            write_mv(w, &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
+                                                     &best_second_mv, (const MV_CONTEXT *) mvc);
+                                    }
                                 }
                             }
                             while (++j < cpi->mb.partition_info->count);
                         }
                         break;
                         default:
-                            if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
-                            {
-                                vp8_write(w,
-                                          mi->second_ref_frame != INTRA_FRAME,
-                                          get_pred_prob( pc, xd, PRED_COMP ) );
-                            }
                             break;
                         }
                     }

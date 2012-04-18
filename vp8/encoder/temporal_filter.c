@@ -224,7 +224,7 @@ static int vp8_temporal_filter_find_matching_mb_c
     /*cpi->sf.search_method == HEX*/
     // TODO Check that the 16x16 vf & sdf are selected here
     bestsme = vp8_hex_search(x, b, d,
-        &best_ref_mv1_full, &d->bmi.mv,
+        &best_ref_mv1_full, &d->bmi.as_mv.first,
         step_param,
         sadpb,
         &cpi->fn_ptr[BLOCK_16X16],
@@ -243,7 +243,7 @@ static int vp8_temporal_filter_find_matching_mb_c
         int distortion;
         unsigned int sse;
         bestsme = cpi->find_fractional_mv_step(x, b, d,
-                    &d->bmi.mv, &best_ref_mv1,
+                    &d->bmi.as_mv.first, &best_ref_mv1,
                     x->errorperbit, &cpi->fn_ptr[BLOCK_16X16],
 #if CONFIG_HIGH_PRECISION_MV
                     x->e_mbd.allow_high_precision_mv?mvcost_hp:mvcost,
@@ -333,8 +333,8 @@ static void vp8_temporal_filter_iterate_c
                 if (cpi->frames[frame] == NULL)
                     continue;
 
-                mbd->block[0].bmi.mv.as_mv.row = 0;
-                mbd->block[0].bmi.mv.as_mv.col = 0;
+                mbd->block[0].bmi.as_mv.first.as_mv.row = 0;
+                mbd->block[0].bmi.as_mv.first.as_mv.col = 0;
 
 #if ALT_REF_MC_ENABLED
 #define THRESH_LOW   10000
@@ -364,8 +364,8 @@ static void vp8_temporal_filter_iterate_c
                          cpi->frames[frame]->u_buffer + mb_uv_offset,
                          cpi->frames[frame]->v_buffer + mb_uv_offset,
                          cpi->frames[frame]->y_stride,
-                         mbd->block[0].bmi.mv.as_mv.row,
-                         mbd->block[0].bmi.mv.as_mv.col,
+                         mbd->block[0].bmi.as_mv.first.as_mv.row,
+                         mbd->block[0].bmi.as_mv.first.as_mv.col,
                          predictor);
 
                     // Apply the filter (YUV)

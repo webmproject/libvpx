@@ -1720,7 +1720,7 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     int in_what_stride = d->pre_stride;
     int mv_stride = d->pre_stride;
     unsigned char *bestaddress;
-    int_mv *best_mv = &d->bmi.mv;
+    int_mv *best_mv = &d->bmi.as_mv.first;
     int_mv this_mv;
     int bestsad = INT_MAX;
     int r, c;
@@ -1825,7 +1825,7 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     int in_what_stride = d->pre_stride;
     int mv_stride = d->pre_stride;
     unsigned char *bestaddress;
-    int_mv *best_mv = &d->bmi.mv;
+    int_mv *best_mv = &d->bmi.as_mv.first;
     int_mv this_mv;
     int bestsad = INT_MAX;
     int r, c;
@@ -1968,7 +1968,7 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
     int in_what_stride = d->pre_stride;
     int mv_stride = d->pre_stride;
     unsigned char *bestaddress;
-    int_mv *best_mv = &d->bmi.mv;
+    int_mv *best_mv = &d->bmi.as_mv.first;
     int_mv this_mv;
     int bestsad = INT_MAX;
     int r, c;

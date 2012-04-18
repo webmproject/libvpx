@@ -168,7 +168,10 @@ union b_mode_info
         B_PREDICTION_MODE second;
 #endif
     } as_mode;
-    int_mv mv;
+    struct {
+        int_mv first;
+        int_mv second;
+    } as_mv;
 };
 
 typedef enum
@@ -222,6 +225,7 @@ typedef struct
 
     /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
     unsigned char **base_pre;
+    unsigned char **base_second_pre;
     int pre;
     int pre_stride;
 
@@ -316,6 +320,8 @@ typedef struct MacroBlockD
     vp8_subpix_fn_t  subpixel_predict8x4;
     vp8_subpix_fn_t  subpixel_predict8x8;
     vp8_subpix_fn_t  subpixel_predict16x16;
+    vp8_subpix_fn_t  subpixel_predict_avg;
+    vp8_subpix_fn_t  subpixel_predict_avg8x4;
     vp8_subpix_fn_t  subpixel_predict_avg8x8;
     vp8_subpix_fn_t  subpixel_predict_avg16x16;
 #if CONFIG_HIGH_PRECISION_MV

@@ -99,12 +99,14 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->subpix.sixtap_avg8x8     = vp8_sixtap_predict_avg8x8_c;
     rtcd->subpix.sixtap8x4         = vp8_sixtap_predict8x4_c;
     rtcd->subpix.sixtap4x4         = vp8_sixtap_predict_c;
+    rtcd->subpix.sixtap_avg4x4     = vp8_sixtap_predict_avg_c;
     rtcd->subpix.bilinear16x16     = vp8_bilinear_predict16x16_c;
     rtcd->subpix.bilinear8x8       = vp8_bilinear_predict8x8_c;
     rtcd->subpix.bilinear_avg16x16 = vp8_bilinear_predict_avg16x16_c;
     rtcd->subpix.bilinear_avg8x8   = vp8_bilinear_predict_avg8x8_c;
     rtcd->subpix.bilinear8x4       = vp8_bilinear_predict8x4_c;
     rtcd->subpix.bilinear4x4       = vp8_bilinear_predict4x4_c;
+    rtcd->subpix.bilinear_avg4x4   = vp8_bilinear_predict_avg4x4_c;
 
     rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_c;
     rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_c;
