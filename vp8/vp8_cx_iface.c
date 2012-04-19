@@ -755,6 +755,9 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
 {
     vpx_codec_err_t res = VPX_CODEC_OK;
 
+    if (!ctx->cfg.rc_target_bitrate)
+        return res;
+
     if (img)
         res = validate_img(ctx, img);
 

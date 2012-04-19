@@ -69,7 +69,6 @@ vpx_codec_err_t vpx_codec_enc_init_ver(vpx_codec_ctx_t      *ctx,
 vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
                                              vpx_codec_iface_t    *iface,
                                              vpx_codec_enc_cfg_t  *cfg,
-                                             int                   s_lvl,
                                              int                   num_enc,
                                              vpx_codec_flags_t     flags,
                                              vpx_rational_t       *dsf,
@@ -100,7 +99,7 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
 
         if(!(res = iface->enc.mr_get_mem_loc(cfg, &mem_loc)))
         {
-            for (i = s_lvl; i < num_enc; i++)
+            for (i = 0; i < num_enc; i++)
             {
                 vpx_codec_priv_enc_mr_cfg_t mr_cfg;
 
@@ -113,7 +112,7 @@ vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
                 }
 
                 mr_cfg.mr_low_res_mode_info = mem_loc;
-                mr_cfg.mr_total_resolutions = num_enc - s_lvl;
+                mr_cfg.mr_total_resolutions = num_enc;
                 mr_cfg.mr_encoder_id = num_enc-1-i;
                 mr_cfg.mr_down_sampling_factor.num = dsf->num;
                 mr_cfg.mr_down_sampling_factor.den = dsf->den;
