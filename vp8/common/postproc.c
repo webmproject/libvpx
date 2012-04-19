@@ -14,7 +14,6 @@
 #include "vpx_scale/yv12config.h"
 #include "postproc.h"
 #include "common.h"
-#include "vpx_scale/yv12extend.h"
 #include "vpx_scale/vpxscale.h"
 #include "systemdependent.h"
 
@@ -405,9 +404,6 @@ double vp8_gaussian(double sigma, double mu, double x)
            (exp(-(x - mu) * (x - mu) / (2 * sigma * sigma)));
 }
 
-extern void (*vp8_clear_system_state)(void);
-
-
 static void fillrd(struct postproc_state *state, int q, int a)
 {
     char char_dist[300];
@@ -755,7 +751,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
         if (((flags & VP8D_DEBLOCK) || (flags & VP8D_DEMACROBLOCK)) &&
             oci->post_proc_buffer_int_used)
         {
-            vp8_yv12_copy_frame_ptr(&oci->post_proc_buffer, &oci->post_proc_buffer_int);
+            vp8_yv12_copy_frame(&oci->post_proc_buffer, &oci->post_proc_buffer_int);
             if (flags & VP8D_DEMACROBLOCK)
             {
                 vp8_deblock_and_de_macro_block(&oci->post_proc_buffer_int, &oci->post_proc_buffer,
@@ -784,7 +780,7 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
     }
     else
     {
-        vp8_yv12_copy_frame_ptr(oci->frame_to_show, &oci->post_proc_buffer);
+        vp8_yv12_copy_frame(oci->frame_to_show, &oci->post_proc_buffer);
         oci->postproc_state.last_base_qindex = oci->base_qindex;
     }
     oci->postproc_state.last_frame_valid = 1;

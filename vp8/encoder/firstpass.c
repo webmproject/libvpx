@@ -8,23 +8,23 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-#include "math.h"
-#include "limits.h"
+#include <math.h>
+#include <limits.h>
+#include <stdio.h>
+
 #include "block.h"
 #include "onyx_int.h"
 #include "vp8/common/variance.h"
 #include "encodeintra.h"
 #include "vp8/common/setupintrarecon.h"
+#include "vp8/common/systemdependent.h"
 #include "mcomp.h"
 #include "firstpass.h"
 #include "vpx_scale/vpxscale.h"
 #include "encodemb.h"
 #include "vp8/common/extend.h"
-#include "vp8/common/systemdependent.h"
-#include "vpx_scale/yv12extend.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/swapyv12buffer.h"
-#include <stdio.h>
 #include "rdopt.h"
 #include "vp8/common/quant_common.h"
 #include "encodemv.h"
@@ -828,7 +828,7 @@ skip_motion_search:
         (cpi->twopass.this_frame_stats.pcnt_inter > 0.20) &&
         ((cpi->twopass.this_frame_stats.intra_error / cpi->twopass.this_frame_stats.coded_error) > 2.0))
     {
-        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
+        vp8_yv12_copy_frame(lst_yv12, gld_yv12);
     }
 
     // swap frame pointers so last frame refers to the frame we just compressed
@@ -838,7 +838,7 @@ skip_motion_search:
     // Special case for the first frame. Copy into the GF buffer as a second reference.
     if (cm->current_video_frame == 0)
     {
-        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
+        vp8_yv12_copy_frame(lst_yv12, gld_yv12);
     }
 
 

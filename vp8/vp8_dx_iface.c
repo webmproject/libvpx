@@ -391,8 +391,6 @@ static vpx_codec_err_t vp8_decode(vpx_codec_alg_priv_t  *ctx,
             VP8D_CONFIG oxcf;
             struct VP8D_COMP* optr;
 
-            vp8dx_initialize();
-
             oxcf.Width = ctx->si.w;
             oxcf.Height = ctx->si.h;
             oxcf.Version = 9;

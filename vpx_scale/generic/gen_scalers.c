@@ -17,7 +17,7 @@
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_4_5_scale_c
+ *  ROUTINE       : vp8_horizontal_line_4_5_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -34,7 +34,7 @@
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_4_5_scale_c
+void vp8_horizontal_line_4_5_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -80,7 +80,7 @@ void vp8cx_horizontal_line_4_5_scale_c
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_vertical_band_4_5_scale_c
+ *  ROUTINE       : vp8_vertical_band_4_5_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -97,7 +97,7 @@ void vp8cx_horizontal_line_4_5_scale_c
  *                  the current band.
  *
  ****************************************************************************/
-void vp8cx_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c, d;
@@ -126,7 +126,7 @@ void vp8cx_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest_pitc
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_last_vertical_band_4_5_scale_c
+ *  ROUTINE       : vp8_last_vertical_band_4_5_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -144,7 +144,7 @@ void vp8cx_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest_pitc
  *                  last band.
  *
  ****************************************************************************/
-void vp8cx_last_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_last_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c, d;
@@ -172,7 +172,7 @@ void vp8cx_last_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_2_3_scale_c
+ *  ROUTINE       : vp8_horizontal_line_2_3_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -190,7 +190,7 @@ void vp8cx_last_vertical_band_4_5_scale_c(unsigned char *dest, unsigned int dest
  *
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_2_3_scale_c
+void vp8_horizontal_line_2_3_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -229,7 +229,7 @@ void vp8cx_horizontal_line_2_3_scale_c
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_vertical_band_2_3_scale_c
+ *  ROUTINE       : vp8_vertical_band_2_3_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -246,7 +246,7 @@ void vp8cx_horizontal_line_2_3_scale_c
  *                  the current band.
  *
  ****************************************************************************/
-void vp8cx_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c;
@@ -266,7 +266,7 @@ void vp8cx_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest_pitc
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_last_vertical_band_2_3_scale_c
+ *  ROUTINE       : vp8_last_vertical_band_2_3_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -284,7 +284,7 @@ void vp8cx_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest_pitc
  *                  last band.
  *
  ****************************************************************************/
-void vp8cx_last_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_last_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b;
@@ -303,7 +303,7 @@ void vp8cx_last_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_3_5_scale_c
+ *  ROUTINE       : vp8_horizontal_line_3_5_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -321,7 +321,7 @@ void vp8cx_last_vertical_band_2_3_scale_c(unsigned char *dest, unsigned int dest
  *
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_3_5_scale_c
+void vp8_horizontal_line_3_5_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -368,7 +368,7 @@ void vp8cx_horizontal_line_3_5_scale_c
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_vertical_band_3_5_scale_c
+ *  ROUTINE       : vp8_vertical_band_3_5_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -385,7 +385,7 @@ void vp8cx_horizontal_line_3_5_scale_c
  *                  the current band.
  *
  ****************************************************************************/
-void vp8cx_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c;
@@ -411,7 +411,7 @@ void vp8cx_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest_pitc
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_last_vertical_band_3_5_scale_c
+ *  ROUTINE       : vp8_last_vertical_band_3_5_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -429,7 +429,7 @@ void vp8cx_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest_pitc
  *                  last band.
  *
  ****************************************************************************/
-void vp8cx_last_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_last_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c;
@@ -455,7 +455,7 @@ void vp8cx_last_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_3_4_scale_c
+ *  ROUTINE       : vp8_horizontal_line_3_4_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -473,7 +473,7 @@ void vp8cx_last_vertical_band_3_5_scale_c(unsigned char *dest, unsigned int dest
  *
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_3_4_scale_c
+void vp8_horizontal_line_3_4_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -517,7 +517,7 @@ void vp8cx_horizontal_line_3_4_scale_c
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_vertical_band_3_4_scale_c
+ *  ROUTINE       : vp8_vertical_band_3_4_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -534,7 +534,7 @@ void vp8cx_horizontal_line_3_4_scale_c
  *                  the current band.
  *
  ****************************************************************************/
-void vp8cx_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c;
@@ -559,7 +559,7 @@ void vp8cx_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest_pitc
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_last_vertical_band_3_4_scale_c
+ *  ROUTINE       : vp8_last_vertical_band_3_4_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -577,7 +577,7 @@ void vp8cx_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest_pitc
  *                  last band.
  *
  ****************************************************************************/
-void vp8cx_last_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_last_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c;
@@ -602,7 +602,7 @@ void vp8cx_last_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_1_2_scale_c
+ *  ROUTINE       : vp8_horizontal_line_1_2_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -619,7 +619,7 @@ void vp8cx_last_vertical_band_3_4_scale_c(unsigned char *dest, unsigned int dest
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_1_2_scale_c
+void vp8_horizontal_line_1_2_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -651,7 +651,7 @@ void vp8cx_horizontal_line_1_2_scale_c
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_vertical_band_1_2_scale_c
+ *  ROUTINE       : vp8_vertical_band_1_2_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -668,7 +668,7 @@ void vp8cx_horizontal_line_1_2_scale_c
  *                  the current band.
  *
  ****************************************************************************/
-void vp8cx_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b;
@@ -687,7 +687,7 @@ void vp8cx_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest_pitc
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_last_vertical_band_1_2_scale_c
+ *  ROUTINE       : vp8_last_vertical_band_1_2_scale_c
  *
  *  INPUTS        : unsigned char *dest    : Pointer to destination data.
  *                  unsigned int dest_pitch : Stride of destination data.
@@ -705,7 +705,7 @@ void vp8cx_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest_pitc
  *                  last band.
  *
  ****************************************************************************/
-void vp8cx_last_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_last_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned char *des = dest;
@@ -723,7 +723,7 @@ void vp8cx_last_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_4_5_scale_c
+ *  ROUTINE       : vp8_horizontal_line_4_5_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -740,7 +740,7 @@ void vp8cx_last_vertical_band_1_2_scale_c(unsigned char *dest, unsigned int dest
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_5_4_scale_c
+void vp8_horizontal_line_5_4_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -776,7 +776,7 @@ void vp8cx_horizontal_line_5_4_scale_c
 
 
 
-void vp8cx_vertical_band_5_4_scale_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_5_4_scale_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c, d, e;
@@ -806,7 +806,7 @@ void vp8cx_vertical_band_5_4_scale_c(unsigned char *source, unsigned int src_pit
 
 /*7***************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_3_5_scale_c
+ *  ROUTINE       : vp8_horizontal_line_3_5_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -824,7 +824,7 @@ void vp8cx_vertical_band_5_4_scale_c(unsigned char *source, unsigned int src_pit
  *
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_5_3_scale_c
+void vp8_horizontal_line_5_3_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -857,7 +857,7 @@ void vp8cx_horizontal_line_5_3_scale_c
 
 }
 
-void vp8cx_vertical_band_5_3_scale_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_5_3_scale_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     unsigned int i;
     unsigned int a, b, c, d, e;
@@ -885,7 +885,7 @@ void vp8cx_vertical_band_5_3_scale_c(unsigned char *source, unsigned int src_pit
 
 /****************************************************************************
  *
- *  ROUTINE       : vp8cx_horizontal_line_1_2_scale_c
+ *  ROUTINE       : vp8_horizontal_line_1_2_scale_c
  *
  *  INPUTS        : const unsigned char *source : Pointer to source data.
  *                  unsigned int source_width    : Stride of source.
@@ -902,7 +902,7 @@ void vp8cx_vertical_band_5_3_scale_c(unsigned char *source, unsigned int src_pit
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8cx_horizontal_line_2_1_scale_c
+void vp8_horizontal_line_2_1_scale_c
 (
     const unsigned char *source,
     unsigned int source_width,
@@ -928,14 +928,14 @@ void vp8cx_horizontal_line_2_1_scale_c
 
 
 }
-void vp8cx_vertical_band_2_1_scale_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_2_1_scale_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     (void) dest_pitch;
     (void) src_pitch;
     vpx_memcpy(dest, source, dest_width);
 }
 
-void vp8cx_vertical_band_2_1_scale_i_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
+void vp8_vertical_band_2_1_scale_i_c(unsigned char *source, unsigned int src_pitch, unsigned char *dest, unsigned int dest_pitch, unsigned int dest_width)
 {
     int i;
     int temp;

@@ -23,7 +23,6 @@
 #include "ratectrl.h"
 #include "vp8/common/quant_common.h"
 #include "segmentation.h"
-#include "vpx_scale/yv12extend.h"
 #if CONFIG_POSTPROC
 #include "vp8/common/postproc.h"
 #endif
@@ -211,17 +210,6 @@ static const unsigned char inter_minq[QINDEX_RANGE] =
     86,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100
 };
 
-void vp8_initialize()
-{
-    static int init_done = 0;
-
-    if (!init_done)
-    {
-        vp8_scale_machine_specific_config();
-
-        init_done = 1;
-    }
-}
 #ifdef PACKET_TESTING
 extern FILE *vpxlogc;
 #endif
@@ -589,7 +577,7 @@ static void set_default_lf_deltas(VP8_COMP *cpi)
 #define GOOD(x) (x+1)
 #define RT(x) (x+7)
 
-static int speed_map(int speed, int *map)
+static int speed_map(int speed, const int *map)
 {
     int res;
 
@@ -600,73 +588,73 @@ static int speed_map(int speed, int *map)
     return res;
 }
 
-static int thresh_mult_map_znn[] = {
+static const int thresh_mult_map_znn[] = {
     /* map common to zero, nearest, and near */
     0, GOOD(2), 1500, GOOD(3), 2000, RT(0), 1000, RT(2), 2000, INT_MAX
 };
 
-static int thresh_mult_map_vhpred[] = {
+static const int thresh_mult_map_vhpred[] = {
     1000, GOOD(2), 1500, GOOD(3), 2000, RT(0), 1000, RT(1), 2000,
     RT(7), INT_MAX, INT_MAX
 };
 
-static int thresh_mult_map_bpred[] = {
+static const int thresh_mult_map_bpred[] = {
     2000, GOOD(0), 2500, GOOD(2), 5000, GOOD(3), 7500, RT(0), 2500, RT(1), 5000,
     RT(6), INT_MAX, INT_MAX
 };
 
-static int thresh_mult_map_tm[] = {
+static const int thresh_mult_map_tm[] = {
     1000, GOOD(2), 1500, GOOD(3), 2000, RT(0), 0, RT(1), 1000, RT(2), 2000,
     RT(7), INT_MAX, INT_MAX
 };
 
-static int thresh_mult_map_new1[] = {
+static const int thresh_mult_map_new1[] = {
     1000, GOOD(2), 2000, RT(0), 2000, INT_MAX
 };
 
-static int thresh_mult_map_new2[] = {
+static const int thresh_mult_map_new2[] = {
     1000, GOOD(2), 2000, GOOD(3), 2500, GOOD(5), 4000, RT(0), 2000, RT(2), 2500,
     RT(5), 4000, INT_MAX
 };
 
-static int thresh_mult_map_split1[] = {
+static const int thresh_mult_map_split1[] = {
     2500, GOOD(0), 1700, GOOD(2), 10000, GOOD(3), 25000, GOOD(4), INT_MAX,
     RT(0), 5000, RT(1), 10000, RT(2), 25000, RT(3), INT_MAX, INT_MAX
 };
 
-static int thresh_mult_map_split2[] = {
+static const int thresh_mult_map_split2[] = {
     5000, GOOD(0), 4500, GOOD(2), 20000, GOOD(3), 50000, GOOD(4), INT_MAX,
     RT(0), 10000, RT(1), 20000, RT(2), 50000, RT(3), INT_MAX, INT_MAX
 };
 
-static int mode_check_freq_map_zn2[] = {
+static const int mode_check_freq_map_zn2[] = {
     /* {zero,nearest}{2,3} */
     0, RT(10), 1<<1, RT(11), 1<<2, RT(12), 1<<3, INT_MAX
 };
 
-static int mode_check_freq_map_vhbpred[] = {
+static const int mode_check_freq_map_vhbpred[] = {
     0, GOOD(5), 2, RT(0), 0, RT(3), 2, RT(5), 4, INT_MAX
 };
 
-static int mode_check_freq_map_near2[] = {
+static const int mode_check_freq_map_near2[] = {
     0, GOOD(5), 2, RT(0), 0, RT(3), 2, RT(10), 1<<2, RT(11), 1<<3, RT(12), 1<<4,
     INT_MAX
 };
 
-static int mode_check_freq_map_new1[] = {
+static const int mode_check_freq_map_new1[] = {
     0, RT(10), 1<<1, RT(11), 1<<2, RT(12), 1<<3, INT_MAX
 };
 
-static int mode_check_freq_map_new2[] = {
+static const int mode_check_freq_map_new2[] = {
     0, GOOD(5), 4, RT(0), 0, RT(3), 4, RT(10), 1<<3, RT(11), 1<<4, RT(12), 1<<5,
     INT_MAX
 };
 
-static int mode_check_freq_map_split1[] = {
+static const int mode_check_freq_map_split1[] = {
     0, GOOD(2), 2, GOOD(3), 7, RT(1), 2, RT(2), 7, INT_MAX
 };
 
-static int mode_check_freq_map_split2[] = {
+static const int mode_check_freq_map_split2[] = {
     0, GOOD(1), 2, GOOD(2), 4, GOOD(3), 15, RT(1), 4, RT(2), 15, INT_MAX
 };
 
@@ -2505,7 +2493,7 @@ int vp8_get_reference(VP8_COMP *cpi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CO
     else
         return -1;
 
-    vp8_yv12_copy_frame_ptr(&cm->yv12_fb[ref_fb_idx], sd);
+    vp8_yv12_copy_frame(&cm->yv12_fb[ref_fb_idx], sd);
 
     return 0;
 }
@@ -2524,7 +2512,7 @@ int vp8_set_reference(VP8_COMP *cpi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CO
     else
         return -1;
 
-    vp8_yv12_copy_frame_ptr(sd, &cm->yv12_fb[ref_fb_idx]);
+    vp8_yv12_copy_frame(sd, &cm->yv12_fb[ref_fb_idx]);
 
     return 0;
 }
@@ -3142,7 +3130,7 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
         vp8_loop_filter_frame(cm, &cpi->mb.e_mbd);
     }
 
-    vp8_yv12_extend_frame_borders_ptr(cm->frame_to_show);
+    vp8_yv12_extend_frame_borders(cm->frame_to_show);
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {

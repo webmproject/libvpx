@@ -22,7 +22,6 @@
 #include "ratectrl.h"
 #include "vp8/common/quant_common.h"
 #include "segmentation.h"
-#include "vpx_scale/yv12extend.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/swapyv12buffer.h"
 #include "vp8/common/threading.h"

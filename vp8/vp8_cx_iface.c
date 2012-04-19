@@ -628,8 +628,6 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
 
         priv->deprecated_mode = NO_MODE_SET;
 
-        vp8_initialize();
-
         res = validate_config(priv, &priv->cfg, &priv->vp8_cfg, 0);
 
         if (!res)
