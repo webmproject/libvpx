@@ -59,7 +59,7 @@ const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS-1] =
 
 
 
-vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS] =
+const vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS] =
 {
     {
         0,  0,  0,  0,
@@ -84,7 +84,7 @@ vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS] =
         4,  5,  6,  7,
         8,  9,  10, 11,
         12, 13, 14, 15,
-    },
+    }
 };
 
 const int vp8_mbsplit_count [VP8_NUMMBSPLITS] = { 2, 2, 4, 16};
@@ -155,17 +155,6 @@ const vp8_tree_index vp8_sub_mv_ref_tree[6] =
     -ZERO4X4, -NEW4X4
 };
 
-
-struct vp8_token_struct vp8_bmode_encodings   [VP8_BINTRAMODES];
-struct vp8_token_struct vp8_ymode_encodings   [VP8_YMODES];
-struct vp8_token_struct vp8_kf_ymode_encodings [VP8_YMODES];
-struct vp8_token_struct vp8_uv_mode_encodings  [VP8_UV_MODES];
-struct vp8_token_struct vp8_mbsplit_encodings [VP8_NUMMBSPLITS];
-
-struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
-struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
-
-
 const vp8_tree_index vp8_small_mvtree [14] =
 {
     2, 8,
@@ -177,7 +166,101 @@ const vp8_tree_index vp8_small_mvtree [14] =
     -6, -7
 };
 
-struct vp8_token_struct vp8_small_mvencodings [8];
+/* Function used to generate the token tables below */
+/*
+void vp8_entropy_mode_init()
+{
+    vp8_tokens_from_tree(vp8_bmode_encodings,   vp8_bmode_tree);
+    vp8_tokens_from_tree(vp8_ymode_encodings,   vp8_ymode_tree);
+    vp8_tokens_from_tree(vp8_kf_ymode_encodings, vp8_kf_ymode_tree);
+    vp8_tokens_from_tree(vp8_uv_mode_encodings,  vp8_uv_mode_tree);
+    vp8_tokens_from_tree(vp8_mbsplit_encodings, vp8_mbsplit_tree);
+
+    vp8_tokens_from_tree_offset(vp8_mv_ref_encoding_array,
+                                vp8_mv_ref_tree, NEARESTMV);
+    vp8_tokens_from_tree_offset(vp8_sub_mv_ref_encoding_array,
+                                vp8_sub_mv_ref_tree, LEFT4X4);
+
+    vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
+}
+*/
+
+const struct vp8_token_struct vp8_bmode_encodings[VP8_BINTRAMODES] =
+{
+    {0, 1},
+    {2, 2},
+    {6, 3},
+    {28, 5},
+    {30, 5},
+    {58, 6},
+    {59, 6},
+    {62, 6},
+    {126, 7},
+    {127, 7}
+};
+
+const struct vp8_token_struct vp8_ymode_encodings[VP8_YMODES] =
+{
+    {0, 1},
+    {4, 3},
+    {5, 3},
+    {6, 3},
+    {7, 3}
+};
+
+const struct vp8_token_struct vp8_kf_ymode_encodings[VP8_YMODES] =
+{
+    {4, 3},
+    {5, 3},
+    {6, 3},
+    {7, 3},
+    {0, 1}
+};
+
+const struct vp8_token_struct vp8_uv_mode_encodings[VP8_UV_MODES] =
+{
+    {0, 1},
+    {2, 2},
+    {6, 3},
+    {7, 3}
+};
+
+const struct vp8_token_struct vp8_mbsplit_encodings[VP8_NUMMBSPLITS] =
+{
+    {6, 3},
+    {7, 3},
+    {2, 2},
+    {0, 1}
+};
+
+const struct vp8_token_struct vp8_mv_ref_encoding_array[VP8_MVREFS] =
+{
+    {2, 2},
+    {6, 3},
+    {0, 1},
+    {14, 4},
+    {15, 4}
+};
+
+const struct vp8_token_struct vp8_sub_mv_ref_encoding_array[VP8_SUBMVREFS] =
+{
+    {0, 1},
+    {2, 2},
+    {6, 3},
+    {7, 3}
+};
+
+const struct vp8_token_struct vp8_small_mvencodings[8] =
+{
+    {0, 3},
+    {1, 3},
+    {2, 3},
+    {3, 3},
+    {4, 3},
+    {5, 3},
+    {6, 3},
+    {7, 3}
+};
 
 void vp8_init_mbmode_probs(VP8_COMMON *x)
 {
@@ -245,21 +328,4 @@ void vp8_kf_default_bmode_probs(vp8_prob p [VP8_BINTRAMODES] [VP8_BINTRAMODES] [
         while (++j < VP8_BINTRAMODES);
     }
     while (++i < VP8_BINTRAMODES);
-}
-
-
-void vp8_entropy_mode_init()
-{
-    vp8_tokens_from_tree(vp8_bmode_encodings,   vp8_bmode_tree);
-    vp8_tokens_from_tree(vp8_ymode_encodings,   vp8_ymode_tree);
-    vp8_tokens_from_tree(vp8_kf_ymode_encodings, vp8_kf_ymode_tree);
-    vp8_tokens_from_tree(vp8_uv_mode_encodings,  vp8_uv_mode_tree);
-    vp8_tokens_from_tree(vp8_mbsplit_encodings, vp8_mbsplit_tree);
-
-    vp8_tokens_from_tree_offset(vp8_mv_ref_encoding_array,
-                                vp8_mv_ref_tree, NEARESTMV);
-    vp8_tokens_from_tree_offset(vp8_sub_mv_ref_encoding_array,
-                                vp8_sub_mv_ref_tree, LEFT4X4);
-
-    vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
 }

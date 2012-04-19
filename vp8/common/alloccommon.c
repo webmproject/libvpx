@@ -220,8 +220,3 @@ void vp8_remove_common(VP8_COMMON *oci)
 {
     vp8_de_alloc_frame_buffers(oci);
 }
-
-void vp8_initialize_common()
-{
-    vp8_entropy_mode_init();
-}
