@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//8WU\u003d",
+        "filename": "vp8/common/generic/systemdependent.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-04-19T17:51:29Z",
+      "side": 1,
+      "message": "Discussed offline; InterlockedCompareExchange could probably be used to a similar effect as pthread_once, but there are concerns about compatibility on upcoming ARM platforms. Another option would be InitOnceExecuteOnce, but that brings the minimum requirements up to Vista.\n\nAt least document the why for this initialization over InitializeCriticalSection.\n\nAlso weird spacing on the (void *) cast, at least bring the unary operator together with the value.",
+      "revId": "34e59fdab0c27ceb34b77361926d1257d4570e37",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
