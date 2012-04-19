@@ -8,22 +8,13 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#define USE_PREBUILT_TABLES
 
 #include "entropymode.h"
 #include "entropy.h"
 #include "vpx_mem/vpx_mem.h"
 
-static const unsigned int kf_y_mode_cts[VP8_YMODES] = { 1607, 915, 812, 811, 5455};
-static const unsigned int y_mode_cts  [VP8_YMODES] = { 8080, 1908, 1582, 1007, 5874};
-
-static const unsigned int uv_mode_cts  [VP8_UV_MODES] = { 59483, 13605, 16492, 4230};
-static const unsigned int kf_uv_mode_cts[VP8_UV_MODES] = { 5319, 1904, 1703, 674};
-
-static const unsigned int bmode_cts[VP8_BINTRAMODES] =
-{
-    43891, 17694, 10036, 3920, 3363, 2546, 5119, 3221, 2471, 1723
-};
-
+#include "vp8_entropymodedata.h"
 
 int vp8_mv_cont(const int_mv *l, const int_mv *a)
 {
@@ -166,166 +157,21 @@ const vp8_tree_index vp8_small_mvtree [14] =
     -6, -7
 };
 
-/* Function used to generate the token tables below */
-/*
-void vp8_entropy_mode_init()
-{
-    vp8_tokens_from_tree(vp8_bmode_encodings,   vp8_bmode_tree);
-    vp8_tokens_from_tree(vp8_ymode_encodings,   vp8_ymode_tree);
-    vp8_tokens_from_tree(vp8_kf_ymode_encodings, vp8_kf_ymode_tree);
-    vp8_tokens_from_tree(vp8_uv_mode_encodings,  vp8_uv_mode_tree);
-    vp8_tokens_from_tree(vp8_mbsplit_encodings, vp8_mbsplit_tree);
-
-    vp8_tokens_from_tree_offset(vp8_mv_ref_encoding_array,
-                                vp8_mv_ref_tree, NEARESTMV);
-    vp8_tokens_from_tree_offset(vp8_sub_mv_ref_encoding_array,
-                                vp8_sub_mv_ref_tree, LEFT4X4);
-
-    vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
-}
-*/
-
-const struct vp8_token_struct vp8_bmode_encodings[VP8_BINTRAMODES] =
-{
-    {0, 1},
-    {2, 2},
-    {6, 3},
-    {28, 5},
-    {30, 5},
-    {58, 6},
-    {59, 6},
-    {62, 6},
-    {126, 7},
-    {127, 7}
-};
-
-const struct vp8_token_struct vp8_ymode_encodings[VP8_YMODES] =
-{
-    {0, 1},
-    {4, 3},
-    {5, 3},
-    {6, 3},
-    {7, 3}
-};
-
-const struct vp8_token_struct vp8_kf_ymode_encodings[VP8_YMODES] =
-{
-    {4, 3},
-    {5, 3},
-    {6, 3},
-    {7, 3},
-    {0, 1}
-};
-
-const struct vp8_token_struct vp8_uv_mode_encodings[VP8_UV_MODES] =
-{
-    {0, 1},
-    {2, 2},
-    {6, 3},
-    {7, 3}
-};
-
-const struct vp8_token_struct vp8_mbsplit_encodings[VP8_NUMMBSPLITS] =
-{
-    {6, 3},
-    {7, 3},
-    {2, 2},
-    {0, 1}
-};
-
-const struct vp8_token_struct vp8_mv_ref_encoding_array[VP8_MVREFS] =
-{
-    {2, 2},
-    {6, 3},
-    {0, 1},
-    {14, 4},
-    {15, 4}
-};
-
-const struct vp8_token_struct vp8_sub_mv_ref_encoding_array[VP8_SUBMVREFS] =
-{
-    {0, 1},
-    {2, 2},
-    {6, 3},
-    {7, 3}
-};
-
-const struct vp8_token_struct vp8_small_mvencodings[8] =
-{
-    {0, 3},
-    {1, 3},
-    {2, 3},
-    {3, 3},
-    {4, 3},
-    {5, 3},
-    {6, 3},
-    {7, 3}
-};
-
 void vp8_init_mbmode_probs(VP8_COMMON *x)
 {
-    unsigned int bct [VP8_YMODES] [2];      /* num Ymodes > num UV modes */
-
-    vp8_tree_probs_from_distribution(
-        VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
-        x->fc.ymode_prob, bct, y_mode_cts,
-        256, 1
-    );
-    vp8_tree_probs_from_distribution(
-        VP8_YMODES, vp8_kf_ymode_encodings, vp8_kf_ymode_tree,
-        x->kf_ymode_prob, bct, kf_y_mode_cts,
-        256, 1
-    );
-    vp8_tree_probs_from_distribution(
-        VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
-        x->fc.uv_mode_prob, bct, uv_mode_cts,
-        256, 1
-    );
-    vp8_tree_probs_from_distribution(
-        VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
-        x->kf_uv_mode_prob, bct, kf_uv_mode_cts,
-        256, 1
-    );
+    vpx_memcpy(x->fc.ymode_prob, vp8_ymode_prob, sizeof(vp8_ymode_prob));
+    vpx_memcpy(x->kf_ymode_prob, kf_ymode_prob, sizeof(kf_ymode_prob));
+    vpx_memcpy(x->fc.uv_mode_prob, vp8_uv_mode_prob, sizeof(vp8_uv_mode_prob));
+    vpx_memcpy(x->kf_uv_mode_prob, vp8_kf_uv_mode_prob, sizeof(vp8_kf_uv_mode_prob));
     vpx_memcpy(x->fc.sub_mv_ref_prob, sub_mv_ref_prob, sizeof(sub_mv_ref_prob));
-}
-
-
-static void intra_bmode_probs_from_distribution(
-    vp8_prob p [VP8_BINTRAMODES-1],
-    unsigned int branch_ct [VP8_BINTRAMODES-1] [2],
-    const unsigned int events [VP8_BINTRAMODES]
-)
-{
-    vp8_tree_probs_from_distribution(
-        VP8_BINTRAMODES, vp8_bmode_encodings, vp8_bmode_tree,
-        p, branch_ct, events,
-        256, 1
-    );
 }
 
 void vp8_default_bmode_probs(vp8_prob p [VP8_BINTRAMODES-1])
 {
-    unsigned int branch_ct [VP8_BINTRAMODES-1] [2];
-    intra_bmode_probs_from_distribution(p, branch_ct, bmode_cts);
+    vpx_memcpy(p, vp8_bmode_prob, sizeof(vp8_bmode_prob));
 }
 
 void vp8_kf_default_bmode_probs(vp8_prob p [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1])
 {
-    unsigned int branch_ct [VP8_BINTRAMODES-1] [2];
-
-    int i = 0;
-
-    do
-    {
-        int j = 0;
-
-        do
-        {
-            intra_bmode_probs_from_distribution(
-                p[i][j], branch_ct, vp8_kf_default_bmode_counts[i][j]);
-
-        }
-        while (++j < VP8_BINTRAMODES);
-    }
-    while (++i < VP8_BINTRAMODES);
+    vpx_memcpy(p, vp8_kf_bmode_prob, sizeof(vp8_kf_bmode_prob));
 }
