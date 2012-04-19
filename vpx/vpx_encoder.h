@@ -688,7 +688,6 @@ extern "C" {
      * \param[in]    ctx     Pointer to this instance's context.
      * \param[in]    iface   Pointer to the algorithm interface to use.
      * \param[in]    cfg     Configuration to use, if known. May be NULL.
-     * \param[in]    s_lvl   Starting encoder id. Normally it is 0.
      * \param[in]    num_enc Total number of encoders.
      * \param[in]    flags   Bitfield of VPX_CODEC_USE_* flags
      * \param[in]    dsf     Pointer to down-sampling factors.
@@ -702,7 +701,6 @@ extern "C" {
     vpx_codec_err_t vpx_codec_enc_init_multi_ver(vpx_codec_ctx_t      *ctx,
                                                  vpx_codec_iface_t    *iface,
                                                  vpx_codec_enc_cfg_t  *cfg,
-                                                 int                   s_lvl,
                                                  int                   num_enc,
                                                  vpx_codec_flags_t     flags,
                                                  vpx_rational_t       *dsf,
@@ -713,8 +711,8 @@ extern "C" {
      *
      * Ensures the ABI version parameter is properly set.
      */
-#define vpx_codec_enc_init_multi(ctx, iface, cfg, s_lvl, num_enc, flags, dsf) \
-    vpx_codec_enc_init_multi_ver(ctx, iface, cfg, s_lvl, num_enc, flags, dsf, \
+#define vpx_codec_enc_init_multi(ctx, iface, cfg, num_enc, flags, dsf) \
+    vpx_codec_enc_init_multi_ver(ctx, iface, cfg, num_enc, flags, dsf, \
                                  VPX_ENCODER_ABI_VERSION)
 
 
