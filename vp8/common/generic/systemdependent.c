@@ -84,12 +84,14 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
     rtcd->subpix.eighttap8x8         = vp8_eighttap_predict8x8_c;
     rtcd->subpix.eighttap_avg16x16   = vp8_eighttap_predict_avg16x16_c;
     rtcd->subpix.eighttap_avg8x8     = vp8_eighttap_predict_avg8x8_c;
+    rtcd->subpix.eighttap_avg4x4     = vp8_eighttap_predict_avg4x4_c;
     rtcd->subpix.eighttap8x4         = vp8_eighttap_predict8x4_c;
     rtcd->subpix.eighttap4x4         = vp8_eighttap_predict_c;
     rtcd->subpix.eighttap16x16_sharp       = vp8_eighttap_predict16x16_sharp_c;
     rtcd->subpix.eighttap8x8_sharp         = vp8_eighttap_predict8x8_sharp_c;
     rtcd->subpix.eighttap_avg16x16_sharp   = vp8_eighttap_predict_avg16x16_sharp_c;
     rtcd->subpix.eighttap_avg8x8_sharp     = vp8_eighttap_predict_avg8x8_sharp_c;
+    rtcd->subpix.eighttap_avg4x4_sharp     = vp8_eighttap_predict_avg4x4_sharp_c;
     rtcd->subpix.eighttap8x4_sharp         = vp8_eighttap_predict8x4_sharp_c;
     rtcd->subpix.eighttap4x4_sharp         = vp8_eighttap_predict_sharp_c;
 #endif

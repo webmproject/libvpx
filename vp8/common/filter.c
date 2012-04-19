@@ -860,6 +860,26 @@ static void filter_block2d_8
     filter_block2d_second_pass_8(FData + 4*(Interp_Extend-1), output_ptr, output_pitch, 4, 4, 4, 4, VFilter);
 }
 
+static void filter_block2d_avg_8
+(
+    unsigned char  *src_ptr,
+    unsigned char  *output_ptr,
+    unsigned int src_pixels_per_line,
+    int output_pitch,
+    const short  *HFilter,
+    const short  *VFilter
+)
+{
+    int FData[(3+Interp_Extend*2)*4]; /* Temp data buffer used in filtering */
+
+    /* First filter 1-D horizontally... */
+    filter_block2d_first_pass_8(src_ptr - ((Interp_Extend-1) * src_pixels_per_line), FData, src_pixels_per_line, 1,
+                                3+Interp_Extend*2, 4, HFilter);
+
+    /* then filter verticaly... */
+    filter_block2d_second_pass_avg_8(FData + 4*(Interp_Extend-1), output_ptr, output_pitch, 4, 4, 4, 4, VFilter);
+}
+
 void vp8_eighttap_predict_c
 (
     unsigned char  *src_ptr,
@@ -879,6 +899,25 @@ void vp8_eighttap_predict_c
     filter_block2d_8(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter);
 }
 
+void vp8_eighttap_predict_avg4x4_c
+(
+    unsigned char  *src_ptr,
+    int   src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int dst_pitch
+)
+{
+    const short  *HFilter;
+    const short  *VFilter;
+
+    HFilter = vp8_sub_pel_filters_8[xoffset];   /* 8 tap */
+    VFilter = vp8_sub_pel_filters_8[yoffset];   /* 8 tap */
+
+    filter_block2d_avg_8(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter);
+}
+
 void vp8_eighttap_predict_sharp_c
 (
     unsigned char  *src_ptr,
@@ -896,6 +935,25 @@ void vp8_eighttap_predict_sharp_c
     VFilter = vp8_sub_pel_filters_8s[yoffset];   /* 8 tap */
 
     filter_block2d_8(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter);
+}
+
+void vp8_eighttap_predict_avg4x4_sharp_c
+(
+    unsigned char  *src_ptr,
+    int   src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    unsigned char *dst_ptr,
+    int dst_pitch
+)
+{
+    const short  *HFilter;
+    const short  *VFilter;
+
+    HFilter = vp8_sub_pel_filters_8s[xoffset];   /* 8 tap */
+    VFilter = vp8_sub_pel_filters_8s[yoffset];   /* 8 tap */
+
+    filter_block2d_avg_8(src_ptr, dst_ptr, src_pixels_per_line, dst_pitch, HFilter, VFilter);
 }
 
 void vp8_eighttap_predict8x8_c

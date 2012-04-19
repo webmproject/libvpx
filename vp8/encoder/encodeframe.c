@@ -1105,6 +1105,8 @@ static void encode_frame_internal(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, eighttap8x8);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, eighttap16x16);
+        xd->subpixel_predict_avg    = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap_avg4x4);
         xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, eighttap_avg8x8);
         xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
@@ -1120,6 +1122,8 @@ static void encode_frame_internal(VP8_COMP *cpi)
                                         &cpi->common.rtcd.subpix, eighttap8x8_sharp);
         xd->subpixel_predict16x16   = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, eighttap16x16_sharp);
+        xd->subpixel_predict_avg    = SUBPIX_INVOKE(
+                                        &cpi->common.rtcd.subpix, eighttap_avg4x4_sharp);
         xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
                                         &cpi->common.rtcd.subpix, eighttap_avg8x8_sharp);
         xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
