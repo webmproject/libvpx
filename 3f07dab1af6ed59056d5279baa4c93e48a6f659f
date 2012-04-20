@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//7Vc\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-04-20T17:27:00Z",
+      "side": 1,
+      "message": "The size of output file for skipped resolutions is not zero. I think we need to know s_lvl value in API.",
+      "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//7Vo\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-04-20T17:27:00Z",
+      "side": 1,
+      "message": "Since codec[0] is passed to vpx_codec_encode(), you probably have to modify vpx_codec_encode() in order to encode the correct resolutions.",
+      "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//7VQ\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-04-20T17:27:00Z",
+      "side": 1,
+      "message": "Should we only do output for non-skipped resolutions?",
+      "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//7VA\u003d",
+        "filename": "vpx/src/vpx_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-04-20T17:27:00Z",
+      "side": 1,
+      "message": "Should i start from s_lvl instead of 0?",
+      "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
