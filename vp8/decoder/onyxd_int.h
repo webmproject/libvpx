@@ -31,7 +31,6 @@ typedef struct
 typedef struct
 {
     MACROBLOCKD  mbd;
-    int mb_row;
 } MB_ROW_DEC;
 
 typedef struct
