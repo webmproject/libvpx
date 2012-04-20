@@ -1418,6 +1418,9 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         vp8_setup_version(cm);
     }
 
+    last_w = cpi->oxcf.Width;
+    last_h = cpi->oxcf.Height;
+
     cpi->oxcf = *oxcf;
 
     switch (cpi->oxcf.Mode)
@@ -1617,14 +1620,14 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
 
-    last_w = cm->Width;
-    last_h = cm->Height;
-
     cm->Width       = cpi->oxcf.Width;
     cm->Height      = cpi->oxcf.Height;
 
-    cm->horiz_scale  = cpi->horiz_scale;
-    cm->vert_scale   = cpi->vert_scale;
+    /* TODO(jkoleszar): if an internal spatial resampling is active,
+     * and we downsize the input image, maybe we should clear the
+     * internal scale immediately rather than waiting for it to
+     * correct.
+     */
 
     // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
     if (cpi->oxcf.Sharpness > 7)
@@ -1645,7 +1648,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
 
-    if (last_w != cm->Width || last_h != cm->Height)
+    if (last_w != cpi->oxcf.Width || last_h != cpi->oxcf.Height)
         cpi->force_next_frame_intra = 1;
 
     if (((cm->Width + 15) & 0xfffffff0) !=

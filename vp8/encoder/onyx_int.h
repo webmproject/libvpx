@@ -485,8 +485,6 @@ typedef struct VP8_COMP
     int goldfreq;
     int auto_worst_q;
     int cpu_used;
-    int horiz_scale;
-    int vert_scale;
     int pass;
 
 
