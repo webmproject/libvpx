@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//6yc\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-04-20T23:16:18Z",
+      "side": 1,
+      "message": "Autoconf style:\n\nprefix\u003d@prefix@\n\nexec_prefix\u003d@exec_prefix@\n                                                                                                                                                                      \nlibdir\u003d@libdir@\n\nincludedir\u003d@includedir@\n\nSo is exec_prefix right? also no analog for include/ correct?",
+      "revId": "a7eea3e26729831b6daa5521c29717f59d0af3bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
