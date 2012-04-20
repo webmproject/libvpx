@@ -254,14 +254,9 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     }
 #endif
 
-    cpi->common.txfm_mode = ONLY_4X4;
 
-    if( cpi->common.Width * cpi->common.Height > 640*360
-        && vp8_ac_yquant(cpi->common.base_qindex) > 171)
-        cpi->common.txfm_mode = ALLOW_8X8;
-    else
-        cpi->common.txfm_mode = ONLY_4X4;
 
+    cpi->common.txfm_mode = ALLOW_8X8;
 
     //cpi->common.filter_level = 0;      // Reset every key frame.
     cpi->common.filter_level = cpi->common.base_qindex * 3 / 8 ;
@@ -287,10 +282,7 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
 void vp8_setup_inter_frame(VP8_COMP *cpi)
 {
 
-    if(cpi->common.Width * cpi->common.Height > 640*360)
-        cpi->common.txfm_mode = ALLOW_8X8;
-    else
-        cpi->common.txfm_mode = ONLY_4X4;
+    cpi->common.txfm_mode = ALLOW_8X8;
 
     if(cpi->common.refresh_alt_ref_frame)
     {
