@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//7Js\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-20T18:39:24Z",
+      "side": 1,
+      "message": "Took a different approach in the next patch set, let me know what you think. No files are created if the encode is disabled.",
+      "parentUuid": "AAAAKn//7Vc\u003d",
+      "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//7Vo\u003d",
         "filename": "vp8_multi_resolution_encoder.c",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//7Jk\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-20T18:39:24Z",
+      "side": 1,
+      "message": "Took a different approach in the next patch set, moved the check deeper into the codec.",
+      "parentUuid": "AAAAKn//7Vo\u003d",
+      "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//7VQ\u003d",
         "filename": "vp8_multi_resolution_encoder.c",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2012-04-20T17:27:00Z",
       "side": 1,
       "message": "Should we only do output for non-skipped resolutions?",
+      "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//7Jo\u003d",
+        "filename": "vp8_multi_resolution_encoder.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-20T18:39:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//7VQ\u003d",
       "revId": "3f07dab1af6ed59056d5279baa4c93e48a6f659f",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
