@@ -755,7 +755,7 @@ static void write_kfmodes(VP8_COMP *cpi)
             if (c->mb_no_coeff_skip)
                 vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
 
-            kfwrite_ymode(bc, ym, c->kf_ymode_prob);
+            kfwrite_ymode(bc, ym, vp8_kf_ymode_prob);
 
             if (ym == B_PRED)
             {
@@ -772,12 +772,12 @@ static void write_kfmodes(VP8_COMP *cpi)
                     ++intra_mode_stats [A] [L] [bm];
 #endif
 
-                    write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
+                    write_bmode(bc, bm, vp8_kf_bmode_prob [A] [L]);
                 }
                 while (++i < 16);
             }
 
-            write_uv_mode(bc, (m++)->mbmi.uv_mode, c->kf_uv_mode_prob);
+            write_uv_mode(bc, (m++)->mbmi.uv_mode, vp8_kf_uv_mode_prob);
         }
 
         m++;    // skip L prediction border
@@ -1295,11 +1295,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char * dest
 #if defined(SECTIONBITS_OUTPUT)
     Sectionbits[active_section = 1] += sizeof(VP8_HEADER) * 8 * 256;
 #endif
-
-    //vp8_kf_default_bmode_probs() is called in vp8_setup_key_frame() once for each
-    //K frame before encode frame. pc->kf_bmode_prob doesn't get changed anywhere
-    //else. No need to call it again here. --yw
-    //vp8_kf_default_bmode_probs( pc->kf_bmode_prob);
 
     // every keyframe send startcode, width, height, scale factor, clamp and color type
     if (oh.type == KEY_FRAME)

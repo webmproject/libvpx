@@ -94,7 +94,7 @@ const vp8_prob vp8_ymode_prob[VP8_YMODES-1] =
     112, 86, 140, 37
 };
 
-const vp8_prob kf_ymode_prob[VP8_YMODES-1] =
+const vp8_prob vp8_kf_ymode_prob[VP8_YMODES-1] =
 {
     145, 156, 163, 128
 };
