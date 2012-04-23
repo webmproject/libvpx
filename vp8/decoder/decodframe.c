@@ -684,13 +684,8 @@ static void init_frame(VP8D_COMP *pbi)
     }
     else
     {
-        if (!pc->use_bilinear_mc_filter)
-            pc->mcomp_filter_type = SIXTAP;
-        else
-            pc->mcomp_filter_type = BILINEAR;
-
         /* To enable choice of different interploation filters */
-        if (pc->mcomp_filter_type == SIXTAP)
+        if (!pc->use_bilinear_mc_filter)
         {
             xd->subpixel_predict        = vp8_sixtap_predict4x4;
             xd->subpixel_predict8x4     = vp8_sixtap_predict8x4;

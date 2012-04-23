@@ -59,12 +59,6 @@ typedef enum
     RECON_CLAMP_NOTREQUIRED     = 1
 } CLAMP_TYPE;
 
-typedef enum
-{
-    SIXTAP   = 0,
-    BILINEAR = 1
-} INTERPOLATIONFILTERTYPE;
-
 typedef struct VP8Common
 
 {
@@ -134,7 +128,6 @@ typedef struct VP8Common
     MODE_INFO *prev_mi;  /* 'mi' from last frame (points into prev_mip) */
 
 
-    INTERPOLATIONFILTERTYPE mcomp_filter_type;
     LOOPFILTERTYPE filter_type;
 
     loop_filter_info_n lf_info;

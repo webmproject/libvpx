@@ -695,7 +695,7 @@ void vp8_encode_frame(VP8_COMP *cpi)
     }
 
     // Functions setup for all frame types so we can use MC in AltRef
-    if (cm->mcomp_filter_type == SIXTAP)
+    if(!cm->use_bilinear_mc_filter)
     {
         xd->subpixel_predict        = vp8_sixtap_predict4x4;
         xd->subpixel_predict8x4     = vp8_sixtap_predict8x4;
