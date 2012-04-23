@@ -737,6 +737,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     int corrupt_tokens = 0;
     int prev_independent_partitions = pbi->independent_partitions;
 
+    int frame_size_change = 0;
+
     /* start with no corruption of current frame */
     xd->corrupted = 0;
     pc->yv12_fb[pc->new_fb_idx].corrupted = 0;
@@ -840,6 +842,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                 if (pbi->b_multithreaded_rd)
                     vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
 #endif
+                frame_size_change = 1;
             }
         }
     }
@@ -1103,9 +1106,17 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #endif
         vp8_setup_intra_recon(&pc->yv12_fb[pc->new_fb_idx]);
 
-    vp8_setup_block_dptrs(xd);
-
-    vp8_build_block_doffsets(xd);
+    if(frame_size_change)
+    {
+#if CONFIG_MULTITHREAD
+        for (i = 0; i < pbi->allocated_decoding_thread_count; i++)
+        {
+            pbi->mb_row_di[i].mbd.dst = pc->yv12_fb[pc->new_fb_idx];
+            vp8_build_block_doffsets(&pbi->mb_row_di[i].mbd);
+        }
+#endif
+        vp8_build_block_doffsets(&pbi->mb);
+    }
 
     /* clear out the coeff buffer */
     vpx_memset(xd->qcoeff, 0, sizeof(xd->qcoeff));

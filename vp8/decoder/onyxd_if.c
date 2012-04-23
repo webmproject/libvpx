@@ -99,6 +99,8 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
      */
     pbi->independent_partitions = 0;
 
+    vp8_setup_block_dptrs(&pbi->mb);
+
     return pbi;
 }
 

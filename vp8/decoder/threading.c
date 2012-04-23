@@ -50,8 +50,6 @@ static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_D
         mbd->pre = pc->yv12_fb[pc->lst_fb_idx];
         mbd->dst = pc->yv12_fb[pc->new_fb_idx];
 
-        vp8_setup_block_dptrs(mbd);
-        vp8_build_block_doffsets(mbd);
         mbd->segmentation_enabled    = xd->segmentation_enabled;
         mbd->mb_segement_abs_delta     = xd->mb_segement_abs_delta;
         vpx_memcpy(mbd->segment_feature_data, xd->segment_feature_data, sizeof(xd->segment_feature_data));
@@ -693,6 +691,8 @@ void vp8_decoder_create_threads(VP8D_COMP *pbi)
         for (ithread = 0; ithread < pbi->decoding_thread_count; ithread++)
         {
             sem_init(&pbi->h_event_start_decoding[ithread], 0, 0);
+
+            vp8_setup_block_dptrs(&pbi->mb_row_di[ithread].mbd);
 
             pbi->de_thread_data[ithread].ithread  = ithread;
             pbi->de_thread_data[ithread].ptr1     = (void *)pbi;
