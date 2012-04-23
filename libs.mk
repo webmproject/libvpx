@@ -234,7 +234,7 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo '# pkg-config file from libvpx $(VERSION_STRING)' > $@
 	$(qexec)echo 'prefix=$(PREFIX)' >> $@
 	$(qexec)echo 'exec_prefix=$${prefix}' >> $@
-	$(qexec)echo 'libdir=$${prefix}/lib' >> $@
+	$(qexec)echo 'libdir=$${prefix}/$(LIBSUBDIR)' >> $@
 	$(qexec)echo 'includedir=$${prefix}/include' >> $@
 	$(qexec)echo '' >> $@
 	$(qexec)echo 'Name: vpx' >> $@
