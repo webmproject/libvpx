@@ -16,6 +16,24 @@
       "revId": "a7eea3e26729831b6daa5521c29717f59d0af3bd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//6AA\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-23T19:11:07Z",
+      "side": 1,
+      "message": "Nothing exposed through configure for varying includedir or exec_prefix at this time.",
+      "parentUuid": "AAAAKn//6yc\u003d",
+      "revId": "a7eea3e26729831b6daa5521c29717f59d0af3bd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
