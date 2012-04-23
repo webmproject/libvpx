@@ -237,9 +237,7 @@ void vp8_save_coding_context(VP8_COMP *cpi)
     vp8_copy(cc->mvc,      cpi->common.fc.mvc);
     vp8_copy(cc->mvcosts,  cpi->mb.mvcosts);
 
-    vp8_copy(cc->kf_ymode_prob,   cpi->common.kf_ymode_prob);
     vp8_copy(cc->ymode_prob,   cpi->common.fc.ymode_prob);
-    vp8_copy(cc->kf_uv_mode_prob,  cpi->common.kf_uv_mode_prob);
     vp8_copy(cc->uv_mode_prob,  cpi->common.fc.uv_mode_prob);
 
     vp8_copy(cc->ymode_count, cpi->ymode_count);
@@ -276,9 +274,7 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
 
     vp8_copy(cpi->mb.mvcosts, cc->mvcosts);
 
-    vp8_copy(cpi->common.kf_ymode_prob,   cc->kf_ymode_prob);
     vp8_copy(cpi->common.fc.ymode_prob,   cc->ymode_prob);
-    vp8_copy(cpi->common.kf_uv_mode_prob,  cc->kf_uv_mode_prob);
     vp8_copy(cpi->common.fc.uv_mode_prob,  cc->uv_mode_prob);
 
     vp8_copy(cpi->ymode_count, cc->ymode_count);
@@ -304,9 +300,6 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     // Setup for Key frame:
 
     vp8_default_coef_probs(& cpi->common);
-
-
-    vp8_kf_default_bmode_probs(cpi->common.kf_bmode_prob);
 
     vpx_memcpy(cpi->common.fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
     {

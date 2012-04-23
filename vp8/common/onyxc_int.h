@@ -158,14 +158,6 @@ typedef struct VP8Common
     ENTROPY_CONTEXT_PLANES *above_context;   /* row of context for each plane */
     ENTROPY_CONTEXT_PLANES left_context;  /* (up to) 4 contexts "" */
 
-
-    /* keyframe block modes are predicted by their above, left neighbors */
-
-    vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
-    vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
-    vp8_prob kf_uv_mode_prob [VP8_UV_MODES-1];
-
-
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */
 

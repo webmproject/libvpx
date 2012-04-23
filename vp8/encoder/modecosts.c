@@ -29,7 +29,7 @@ void vp8_init_mode_costs(VP8_COMP *c)
 
             do
             {
-                vp8_cost_tokens((int *)c->mb.bmode_costs[i][j], x->kf_bmode_prob[i][j], T);
+                vp8_cost_tokens((int *)c->mb.bmode_costs[i][j], vp8_kf_bmode_prob[i][j], T);
             }
             while (++j < VP8_BINTRAMODES);
         }
@@ -40,8 +40,8 @@ void vp8_init_mode_costs(VP8_COMP *c)
     vp8_cost_tokens((int *)c->mb.inter_bmode_costs, x->fc.sub_mv_ref_prob, vp8_sub_mv_ref_tree);
 
     vp8_cost_tokens(c->mb.mbmode_cost[1], x->fc.ymode_prob, vp8_ymode_tree);
-    vp8_cost_tokens(c->mb.mbmode_cost[0], x->kf_ymode_prob, vp8_kf_ymode_tree);
+    vp8_cost_tokens(c->mb.mbmode_cost[0], vp8_kf_ymode_prob, vp8_kf_ymode_tree);
 
     vp8_cost_tokens(c->mb.intra_uv_mode_cost[1], x->fc.uv_mode_prob, vp8_uv_mode_tree);
-    vp8_cost_tokens(c->mb.intra_uv_mode_cost[0], x->kf_uv_mode_prob, vp8_uv_mode_tree);
+    vp8_cost_tokens(c->mb.intra_uv_mode_cost[0], vp8_kf_uv_mode_prob, vp8_uv_mode_tree);
 }

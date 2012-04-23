@@ -52,7 +52,7 @@ static void read_kf_modes(VP8D_COMP *pbi, MODE_INFO *mi)
     const int mis = pbi->common.mode_info_stride;
 
     mi->mbmi.ref_frame = INTRA_FRAME;
-    mi->mbmi.mode = read_kf_ymode(bc, pbi->common.kf_ymode_prob);
+    mi->mbmi.mode = read_kf_ymode(bc, vp8_kf_ymode_prob);
 
     if (mi->mbmi.mode == B_PRED)
     {
@@ -65,12 +65,12 @@ static void read_kf_modes(VP8D_COMP *pbi, MODE_INFO *mi)
             const B_PREDICTION_MODE L = left_block_mode(mi, i);
 
             mi->bmi[i].as_mode =
-                read_bmode(bc, pbi->common.kf_bmode_prob [A] [L]);
+                read_bmode(bc, vp8_kf_bmode_prob [A] [L]);
         }
         while (++i < 16);
     }
 
-    mi->mbmi.uv_mode = read_uv_mode(bc, pbi->common.kf_uv_mode_prob);
+    mi->mbmi.uv_mode = read_uv_mode(bc, vp8_kf_uv_mode_prob);
 }
 
 static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)

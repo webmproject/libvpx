@@ -661,7 +661,6 @@ static void init_frame(VP8D_COMP *pbi)
         vp8_init_mbmode_probs(pc);
 
         vp8_default_coef_probs(pc);
-        vp8_kf_default_bmode_probs(pc->kf_bmode_prob);
 
         /* reset the segment feature data to 0 with delta coding (Default state). */
         vpx_memset(xd->segment_feature_data, 0, sizeof(xd->segment_feature_data));
