@@ -82,7 +82,11 @@ extern DECLARE_ALIGNED(64, const unsigned char, vp8_coef_bands_8x8[64]);
    distinct bands). */
 
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
-#   define PREV_COEF_CONTEXTS       3
+#define PREV_COEF_CONTEXTS          3
+#if CONFIG_NEWUPDATE
+#define SUBEXP_PARAM                1  /* Subexponential code parameter */
+#define COEFUPDATETYPE              2  /* coef update type to use (1/2/3) */
+#endif
 
 extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY_TOKENS]);
 

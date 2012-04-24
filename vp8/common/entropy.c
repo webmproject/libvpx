@@ -173,6 +173,10 @@ vp8_extra_bit_struct vp8_extra_bits[12] =
     { 0, 0, 0, 0}
 };
 
+#if CONFIG_NEWUPDATE
+const vp8_prob updprobs[4] = {128, 136, 120, 112};
+#endif
+
 #include "default_coef_probs.h"
 #include "defaultcoefcounts.h"
 

@@ -34,6 +34,7 @@
 #include "dboolhuff.h"
 
 #include "vp8/common/seg_common.h"
+#include "vp8/common/entropy.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -41,6 +42,23 @@
 
 #ifdef DEC_DEBUG
 int dec_debug = 0;
+#endif
+
+#if CONFIG_NEWUPDATE
+static int inv_remap_prob(int v, int m)
+{
+    const int n = 256;
+    int i;
+    //if (v <= n - 2 - s) v += s; else v =  n - 2 - v;
+    //v = ((v&240)>>4) | ((v&15)<<4);
+    v = (v%15)*17 + (v/15);
+    if ((m<<1)<=n) {
+        i = inv_recenter_nonneg(v+1, m);
+    } else {
+        i = n-1-inv_recenter_nonneg(v+1, n-1-m);
+    }
+    return i;
+}
 #endif
 
 void vp8cx_init_de_quantizer(VP8D_COMP *pbi)
@@ -769,6 +787,170 @@ static void init_frame(VP8D_COMP *pbi)
 
 }
 
+#if CONFIG_NEWUPDATE
+static void read_coef_probs3(VP8D_COMP *pbi)
+{
+    const vp8_prob grpupd = 216;
+    int i, j, k, l;
+    vp8_reader *const bc = & pbi->bc;
+    VP8_COMMON *const pc = & pbi->common;
+    for (i = 0; i < BLOCK_TYPES; i++)
+        for (l = 0; l < ENTROPY_NODES; l++)
+        {
+            if(vp8_read(bc, grpupd))
+            {
+                //printf("Decoding %d\n", l);
+                for (j = !i; j < COEF_BANDS; j++)
+                    for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                    {
+                        vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
+                        int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
+                        if (u)
+                        {
+                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+                            *p = (vp8_prob)inv_remap_prob(delp, *p);
+                        }
+                    }
+            }
+        }
+
+    if(pbi->common.txfm_mode == ALLOW_8X8)
+    {
+        for (i = 0; i < BLOCK_TYPES; i++)
+            for (l = 0; l < ENTROPY_NODES; l++)
+            {
+                if(vp8_read(bc, grpupd))
+                {
+                    for (j = !i; j < COEF_BANDS; j++)
+                        for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                        {
+                            vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
+                            int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
+                            if (u)
+                            {
+                                int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+                                *p = (vp8_prob)inv_remap_prob(delp, *p);
+                            }
+                        }
+                }
+            }
+    }
+}
+
+static void read_coef_probs2(VP8D_COMP *pbi)
+{
+    const vp8_prob grpupd = 192;
+    int i, j, k, l;
+    vp8_reader *const bc = & pbi->bc;
+    VP8_COMMON *const pc = & pbi->common;
+    for (l = 0; l < ENTROPY_NODES; l++)
+    {
+        if(vp8_read(bc, grpupd))
+        {
+            //printf("Decoding %d\n", l);
+            for (i = 0; i < BLOCK_TYPES; i++)
+                for (j = !i; j < COEF_BANDS; j++)
+                    for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                    {
+                        vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
+                        int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
+                        if (u)
+                        {
+                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+                            *p = (vp8_prob)inv_remap_prob(delp, *p);
+                        }
+                    }
+        }
+    }
+    if(pbi->common.txfm_mode == ALLOW_8X8)
+    {
+        for (l = 0; l < ENTROPY_NODES; l++)
+        {
+            if(vp8_read(bc, grpupd))
+            {
+                for (i = 0; i < BLOCK_TYPES; i++)
+                    for (j = !i; j < COEF_BANDS; j++)
+                        for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                        {
+                            vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
+
+                            int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
+                            if (u)
+                            {
+                                int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+                                *p = (vp8_prob)inv_remap_prob(delp, *p);
+                            }
+                        }
+            }
+        }
+    }
+}
+#endif
+
+static void read_coef_probs(VP8D_COMP *pbi)
+{
+    int i, j, k, l;
+    vp8_reader *const bc = & pbi->bc;
+    VP8_COMMON *const pc = & pbi->common;
+
+    {
+        if(vp8_read_bit(bc))
+        {
+        /* read coef probability tree */
+        for (i = 0; i < BLOCK_TYPES; i++)
+#if CONFIG_NEWUPDATE
+            for (j = !i; j < COEF_BANDS; j++)
+#else
+            for (j = 0; j < COEF_BANDS; j++)
+#endif
+                for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                    for (l = 0; l < ENTROPY_NODES; l++)
+                    {
+                        vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
+
+                        if (vp8_read(bc, vp8_coef_update_probs [i][j][k][l]))
+                        {
+#if CONFIG_NEWUPDATE
+                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+                            //printf("delp = %d/%d", *p, delp);
+                            *p = (vp8_prob)inv_remap_prob(delp, *p);
+                            //printf("/%d\n", *p);
+#else
+                            *p = (vp8_prob)vp8_read_literal(bc, 8);
+#endif
+                        }
+                    }
+        }
+    }
+
+    if(pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc))
+    {
+        // read coef probability tree
+        for (i = 0; i < BLOCK_TYPES; i++)
+#if CONFIG_NEWUPDATE
+            for (j = !i; j < COEF_BANDS; j++)
+#else
+            for (j = 0; j < COEF_BANDS; j++)
+#endif
+                for (k = 0; k < PREV_COEF_CONTEXTS; k++)
+                    for (l = 0; l < ENTROPY_NODES; l++)
+                    {
+
+                        vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
+
+                        if (vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]))
+                        {
+#if CONFIG_NEWUPDATE
+                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+                            *p = (vp8_prob)inv_remap_prob(delp, *p);
+#else
+                            *p = (vp8_prob)vp8_read_literal(bc, 8);
+#endif
+                        }
+                    }
+    }
+}
+
 int vp8_decode_frame(VP8D_COMP *pbi)
 {
     vp8_reader *const bc = & pbi->bc;
@@ -1198,44 +1380,13 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         fclose(z);
     }
 
-    {
-        if(vp8_read_bit(bc))
-        {
-        /* read coef probability tree */
-        for (i = 0; i < BLOCK_TYPES; i++)
-            for (j = 0; j < COEF_BANDS; j++)
-                for (k = 0; k < PREV_COEF_CONTEXTS; k++)
-                    for (l = 0; l < ENTROPY_NODES; l++)
-                    {
-                        vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
-
-                        if (vp8_read(bc, vp8_coef_update_probs [i][j][k][l]))
-                        {
-                            *p = (vp8_prob)vp8_read_literal(bc, 8);
-
-                        }
-                    }
-        }
-    }
-
-    if(pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc))
-    {
-        // read coef probability tree
-        for (i = 0; i < BLOCK_TYPES; i++)
-            for (j = 0; j < COEF_BANDS; j++)
-                for (k = 0; k < PREV_COEF_CONTEXTS; k++)
-                    for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++)
-                    {
-
-                        vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
-
-                        if (vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]))
-                        {
-                            *p = (vp8_prob)vp8_read_literal(bc, 8);
-
-                        }
-                    }
-    }
+#if COEFUPDATETYPE == 2
+    read_coef_probs2(pbi);
+#elif COEFUPDATETYPE == 3
+    read_coef_probs3(pbi);
+#else
+    read_coef_probs(pbi);
+#endif
 
 
     vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));

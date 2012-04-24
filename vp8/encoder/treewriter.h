@@ -50,6 +50,14 @@ static __inline unsigned int vp8_cost_branch(const unsigned int ct[2], vp8_prob 
             + (ct[1] * vp8_cost_one(p))) >> 8;
 }
 
+static __inline unsigned int vp8_cost_branch256(const unsigned int ct[2], vp8_prob p)
+{
+    /* Imitate existing calculation */
+
+    return ((ct[0] * vp8_cost_zero(p))
+            + (ct[1] * vp8_cost_one(p)));
+}
+
 /* Small functions to write explicit values and tokens, as well as
    estimate their lengths. */
 

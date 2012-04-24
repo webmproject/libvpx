@@ -42,6 +42,12 @@ int vp8dx_start_decode(BOOL_DECODER *br,
 
 void vp8dx_bool_decoder_fill(BOOL_DECODER *br);
 
+#if CONFIG_NEWUPDATE
+int vp8_decode_uniform(BOOL_DECODER *br, int n);
+int vp8_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms);
+int inv_recenter_nonneg(int v, int m);
+#endif
+
 /*The refill loop is used in several places, so define it in a macro to make
    sure they're all consistent.
   An inline function would be cleaner, but has a significant penalty, because
@@ -151,4 +157,5 @@ static int vp8dx_bool_error(BOOL_DECODER *br)
     /* No error. */
     return 0;
 }
+
 #endif
