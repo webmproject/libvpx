@@ -474,10 +474,6 @@ void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
 
         vp8_build_block_offsets(mb);
 
-        vp8_setup_block_dptrs(mbd);
-
-        vp8_setup_block_ptrs(mb);
-
         mbd->left_context = &cm->left_context;
         mb->mvc = cm->fc.mvc;
 
@@ -522,8 +518,6 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
         vpx_memset(cpi->mb_row_ei, 0, sizeof(MB_ROW_COMP) * th_count);
         CHECK_MEM_ERROR(cpi->en_thread_data,
                         vpx_malloc(sizeof(ENCODETHREAD_DATA) * th_count));
-        CHECK_MEM_ERROR(cpi->mt_current_mb_col,
-                        vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
 
         sem_init(&cpi->h_event_end_encoding, 0, 0);
 
@@ -537,9 +531,14 @@ void vp8cx_create_encoder_threads(VP8_COMP *cpi)
 
         for (ithread = 0; ithread < th_count; ithread++)
         {
-            ENCODETHREAD_DATA * ethd = &cpi->en_thread_data[ithread];
+            ENCODETHREAD_DATA *ethd = &cpi->en_thread_data[ithread];
+
+            /* Setup block ptrs and offsets */
+            vp8_setup_block_ptrs(&cpi->mb_row_ei[ithread].mb);
+            vp8_setup_block_dptrs(&cpi->mb_row_ei[ithread].mb.e_mbd);
 
             sem_init(&cpi->h_event_start_encoding[ithread], 0, 0);
+
             ethd->ithread = ithread;
             ethd->ptr1 = (void *)cpi;
             ethd->ptr2 = (void *)&cpi->mb_row_ei[ithread];
@@ -590,7 +589,6 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
         vpx_free(cpi->h_encoding_thread);
         vpx_free(cpi->mb_row_ei);
         vpx_free(cpi->en_thread_data);
-        vpx_free(cpi->mt_current_mb_col);
     }
 }
 #endif

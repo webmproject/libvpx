@@ -11,6 +11,7 @@
 
 #include "vpx_config.h"
 #include "vp8/common/onyxc_int.h"
+#include "vp8/common/blockd.h"
 #include "onyx_int.h"
 #include "vp8/common/systemdependent.h"
 #include "quantize.h"
@@ -359,6 +360,11 @@ static void dealloc_compressor_data(VP8_COMP *cpi)
 
     vpx_free(cpi->mb.pip);
     cpi->mb.pip = 0;
+
+#if CONFIG_MULTITHREAD
+    vpx_free(cpi->mt_current_mb_col);
+    cpi->mt_current_mb_col = NULL;
+#endif
 }
 
 static void enable_segmentation(VP8_COMP *cpi)
@@ -1122,11 +1128,19 @@ void vp8_alloc_compressor_data(VP8_COMP *cpi)
         cpi->mt_sync_range = 8;
     else
         cpi->mt_sync_range = 16;
+
+    if (cpi->oxcf.multi_threaded > 1)
+    {
+        vpx_free(cpi->mt_current_mb_col);
+        CHECK_MEM_ERROR(cpi->mt_current_mb_col,
+                        vpx_malloc(sizeof(*cpi->mt_current_mb_col) * cm->mb_rows));
+    }
+
 #endif
 
     vpx_free(cpi->tplist);
-
-    CHECK_MEM_ERROR(cpi->tplist, vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
+    CHECK_MEM_ERROR(cpi->tplist,
+                    vpx_malloc(sizeof(TOKENLIST) * cpi->common.mb_rows));
 }
 
 
@@ -2031,6 +2045,10 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->mb.bmode_costs = cpi->rd_costs.bmode_costs;
     cpi->mb.inter_bmode_costs = cpi->rd_costs.inter_bmode_costs;
     cpi->mb.token_costs = cpi->rd_costs.token_costs;
+
+    /* setup block ptrs & offsets */
+    vp8_setup_block_ptrs(&cpi->mb);
+    vp8_setup_block_dptrs(&cpi->mb.e_mbd);
 
     return  cpi;
 }

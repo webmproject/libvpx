@@ -641,10 +641,6 @@ static void init_encode_frame_mb_context(VP8_COMP *cpi)
 
     vp8_build_block_offsets(x);
 
-    vp8_setup_block_dptrs(&x->e_mbd);
-
-    vp8_setup_block_ptrs(x);
-
     xd->mode_info_context->mbmi.mode = DC_PRED;
     xd->mode_info_context->mbmi.uv_mode = DC_PRED;
 

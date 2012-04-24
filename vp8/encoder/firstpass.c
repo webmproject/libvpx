@@ -562,10 +562,6 @@ void vp8_first_pass(VP8_COMP *cpi)
 
     vp8_build_block_offsets(x);
 
-    vp8_setup_block_dptrs(&x->e_mbd);
-
-    vp8_setup_block_ptrs(x);
-
     /* set up frame new frame for intra coded blocks */
     vp8_setup_intra_recon(new_yv12);
     vp8cx_frame_init_quantizer(cpi);
