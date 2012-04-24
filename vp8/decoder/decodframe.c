@@ -821,20 +821,40 @@ int vp8_decode_frame(VP8D_COMP *pbi)
                     vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                        "Failed to allocate frame buffers");
 
+                /* allocate memory for last frame MODE_INFO array */
 #if CONFIG_ERROR_CONCEALMENT
-                pbi->overlaps = NULL;
+
                 if (pbi->ec_enabled)
                 {
+                    /* old prev_mip was released by vp8_de_alloc_frame_buffers()
+                     * called in vp8_alloc_frame_buffers() */
+                    pc->prev_mip = vpx_calloc(
+                                       (pc->mb_cols + 1) * (pc->mb_rows + 1),
+                                       sizeof(MODE_INFO));
+
+                    if (!pc->prev_mip)
+                    {
+                        vp8_de_alloc_frame_buffers(pc);
+                        vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
+                                           "Failed to allocate"
+                                           "last frame MODE_INFO array");
+                    }
+
+                    pc->prev_mi = pc->prev_mip + pc->mode_info_stride + 1;
+
                     if (vp8_alloc_overlap_lists(pbi))
                         vpx_internal_error(&pc->error, VPX_CODEC_MEM_ERROR,
                                            "Failed to allocate overlap lists "
                                            "for error concealment");
                 }
+
 #endif
 
 #if CONFIG_MULTITHREAD
+
                 if (pbi->b_multithreaded_rd)
                     vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
+
 #endif
                 frame_size_change = 1;
             }

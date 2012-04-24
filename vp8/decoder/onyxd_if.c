@@ -80,6 +80,7 @@ struct VP8D_COMP * vp8dx_create_decompressor(VP8D_CONFIG *oxcf)
 
 #if CONFIG_ERROR_CONCEALMENT
     pbi->ec_enabled = oxcf->error_concealment;
+    pbi->overlaps = NULL;
 #else
     pbi->ec_enabled = 0;
 #endif
