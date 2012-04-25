@@ -35,7 +35,6 @@ static const unsigned int kf_y_mode_cts[VP8_YMODES] = {
 static const unsigned int y_mode_cts  [VP8_YMODES] = {
     106,  25, 21, 13, 16, 74};
 
-#if CONFIG_UVINTRA
 static const unsigned int uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
     { 210, 20, 20,  6},
     { 180, 60, 10,  6},
@@ -44,13 +43,9 @@ static const unsigned int uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
     { 142, 51, 45, 18}, /* never used */
     { 160, 40, 46, 10},
 };
-#else
-static const unsigned int uv_mode_cts  [VP8_UV_MODES] = { 59483, 13605, 16492, 4230};
-#endif
 
 static const unsigned int i8x8_mode_cts  [VP8_UV_MODES] = {93, 69, 81, 13};
 
-#if CONFIG_UVINTRA
 static const unsigned int kf_uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
     { 180, 34, 34,  8},
     { 132, 74, 40, 10},
@@ -59,9 +54,6 @@ static const unsigned int kf_uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
     { 142, 51, 45, 18}, /* never used */
     { 142, 51, 45, 18},
 };
-#else
-static const unsigned int kf_uv_mode_cts[VP8_UV_MODES] = { 5319, 1904, 1703, 674};
-#endif
 
 static const unsigned int bmode_cts[VP8_BINTRAMODES] =
 {
@@ -287,7 +279,6 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
         256, 1
     );
 #endif
-#if CONFIG_UVINTRA
     {
         int i;
         for (i=0;i<VP8_YMODES;i++)
@@ -302,17 +293,7 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
                 256, 1);
         }
     }
-#else
-    vp8_tree_probs_from_distribution(
-        VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
-        x->fc.uv_mode_prob, bct, uv_mode_cts,
-        256, 1);
 
-    vp8_tree_probs_from_distribution(
-        VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
-        x->kf_uv_mode_prob, bct, kf_uv_mode_cts,
-        256, 1);
-#endif
     vp8_tree_probs_from_distribution(
         VP8_UV_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
         x->i8x8_mode_prob, bct, i8x8_mode_cts,

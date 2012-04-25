@@ -91,11 +91,7 @@ typedef struct
                            [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
-#if CONFIG_UVINTRA
     vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
-#else
-    vp8_prob uv_mode_prob [VP8_UV_MODES-1];
-#endif
 
     int mv_ref_ct[6][4][2];
     int mode_context[6][4];
@@ -522,10 +518,7 @@ typedef struct VP8_COMP
     int t4x4_count;
     int t8x8_count;
 
-#if CONFIG_UVINTRA
     int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
-#endif
-
     unsigned char *segmentation_map;
 
     // segment threashold for encode breakout

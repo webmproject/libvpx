@@ -190,13 +190,8 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
          }
    }
     else
-#if CONFIG_UVINTRA
         m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
             pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
-#else
-        m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-            pbi->common.kf_uv_mode_prob);
-#endif
 #if CONFIG_COMP_INTRA_PRED
     m->mbmi.second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
@@ -568,20 +563,6 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             }
             while (++i < VP8_YMODES-1);
         }
-#if CONFIG_UVINTRA
-        //vp8_read_bit(bc);
-#else
-        if (vp8_read_bit(bc))
-        {
-            int i = 0;
-
-            do
-            {
-                cm->fc.uv_mode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
-            }
-            while (++i < VP8_UV_MODES-1);
-        }
-#endif /* CONFIG_UVINTRA */
 #if CONFIG_HIGH_PRECISION_MV
         if (xd->allow_high_precision_mv)
             read_mvcontexts_hp(bc, mvc_hp);
@@ -1041,13 +1022,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             }
         }
         else
-#if CONFIG_UVINTRA
             mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
                                     pbi->common.fc.uv_mode_prob[mbmi->mode]);
-#else
-            mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-                                    pbi->common.fc.uv_mode_prob);
-#endif /*CONFIG_UVINTRA*/
+
 #if CONFIG_COMP_INTRA_PRED
         mbmi->second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif

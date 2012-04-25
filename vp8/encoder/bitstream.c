@@ -134,18 +134,6 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi)
             Pnew, x->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
         );
     }
-    {
-#if CONFIG_UVINTRA
-        //vp8_write_bit(w, 0);
-#else
-        vp8_prob Pnew   [VP8_UV_MODES-1];
-        unsigned int bct [VP8_UV_MODES-1] [2];
-        update_mode(
-            w, VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
-            Pnew, x->fc.uv_mode_prob, bct, (unsigned int *)cpi->uv_mode_count
-        );
-#endif
-    }
 }
 
 void update_skip_probs(VP8_COMP *cpi)
@@ -1009,18 +997,12 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     }
                     else
                     {
-#if CONFIG_UVINTRA
                         write_uv_mode(w, mi->uv_mode,
                                       pc->fc.uv_mode_prob[mode]);
 #ifdef MODE_STATS
                         if(mode!=B_PRED)
                             ++cpi->y_uv_mode_count[mode][mi->uv_mode];
 #endif
-
-#else
-                        write_uv_mode(w, mi->uv_mode, pc->fc.uv_mode_prob);
-#endif /*CONFIG_UVINTRA*/
-
                     }
                 }
                 else
@@ -1362,11 +1344,7 @@ static void write_kfmodes(VP8_COMP *cpi)
                                     c->i8x8_mode_prob);
                 }
                 else
-#if CONFIG_UVINTRA
                     write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);
-#else
-                    write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob);
-#endif
 
                 // Next MB
                 mb_row += dy;

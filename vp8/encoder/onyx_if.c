@@ -1914,12 +1914,9 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 
     cpi->common.error.setjmp = 0;
 
-#if CONFIG_UVINTRA
     vp8_zero(cpi->y_uv_mode_count)
-#endif
 
     return (VP8_PTR) cpi;
-
 }
 
 void vp8_remove_compressor(VP8_PTR *ptr)
@@ -2013,7 +2010,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                         uv_modes_y[i][1], uv_modes_y[i][2], uv_modes_y[i][3]);
                 }
             }
-#if CONFIG_UVINTRA
             fprintf(f, "Inter Y-UV:\n");
             {
                 int i;
@@ -2023,7 +2019,6 @@ void vp8_remove_compressor(VP8_PTR *ptr)
                         cpi->y_uv_mode_count[i][1], cpi->y_uv_mode_count[i][2], cpi->y_uv_mode_count[i][3]);
                 }
             }
-#endif
             fprintf(f, "B: ");
             {
                 int i;
