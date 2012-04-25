@@ -1236,12 +1236,10 @@ static void write_kfmodes(VP8_COMP *cpi)
 #endif
     }
 
-#if CONFIG_QIMODE
     if(!c->kf_ymode_probs_update)
     {
         vp8_write_literal(bc, c->kf_ymode_probs_index, 3);
     }
-#endif
 
     mb_row = 0;
     for (row=0; row < c->mb_rows; row += 2)
@@ -1292,12 +1290,8 @@ static void write_kfmodes(VP8_COMP *cpi)
                     vp8_encode_bool(bc, m->mbmi.mb_skip_coeff, prob_skip_false);
 #endif
                 }
-#if CONFIG_QIMODE
                 kfwrite_ymode(bc, ym,
                               c->kf_ymode_prob[c->kf_ymode_probs_index]);
-#else
-                kfwrite_ymode(bc, ym, c->kf_ymode_prob);
-#endif
 
                 if (ym == B_PRED)
                 {
@@ -2227,7 +2221,6 @@ static void put_delta_q(vp8_writer *bc, int delta_q)
     else
         vp8_write_bit(bc, 0);
 }
-#if CONFIG_QIMODE
 extern const unsigned int kf_y_mode_cts[8][VP8_YMODES];
 static void decide_kf_ymode_entropy(VP8_COMP *cpi)
 {
@@ -2255,7 +2248,6 @@ static void decide_kf_ymode_entropy(VP8_COMP *cpi)
     cpi->common.kf_ymode_probs_index = bestindex;
 
 }
-#endif
 static void segment_reference_frames(VP8_COMP *cpi)
 {
     VP8_COMMON *oci = &cpi->common;
@@ -2688,9 +2680,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     if (pc->frame_type == KEY_FRAME)
     {
-#if CONFIG_QIMODE
         decide_kf_ymode_entropy(cpi);
-#endif
         write_kfmodes(cpi);
 
 #ifdef ENTROPY_STATS

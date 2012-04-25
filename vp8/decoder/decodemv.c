@@ -127,13 +127,8 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
             m->mbmi.mb_skip_coeff = 0;
     }
 
-#if CONFIG_QIMODE
     y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc,
         pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
-#else
-    y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(
-                                      bc, pbi->common.kf_ymode_prob);
-#endif
 #if CONFIG_COMP_INTRA_PRED
     m->mbmi.second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
@@ -1048,12 +1043,10 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 
     mb_mode_mv_init(pbi);
 
-#if CONFIG_QIMODE
     if(cm->frame_type==KEY_FRAME && !cm->kf_ymode_probs_update)
     {
         cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
     }
-#endif
 
     for (sb_row=0; sb_row<sb_rows; sb_row++)
     {

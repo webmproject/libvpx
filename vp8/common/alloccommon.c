@@ -225,9 +225,7 @@ void vp8_create_common(VP8_COMMON *oci)
     /* Default disable buffer to buffer copying */
     oci->copy_buffer_to_gf = 0;
     oci->copy_buffer_to_arf = 0;
-#if CONFIG_QIMODE
     oci->kf_ymode_probs_update = 0;
-#endif
 }
 
 void vp8_remove_common(VP8_COMMON *oci)

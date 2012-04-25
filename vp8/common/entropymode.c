@@ -15,7 +15,6 @@
 #include "vpx_mem/vpx_mem.h"
 
 
-#if CONFIG_QIMODE
 const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
 {
     {17,  6,  5,  2, 22, 203},
@@ -27,10 +26,6 @@ const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
     {88, 38, 39, 19, 16,  57},
     {99, 42, 43, 21, 12,  39},
 };
-#else
-static const unsigned int kf_y_mode_cts[VP8_YMODES] = {
-    49, 22, 23, 11, 23, 128};
-#endif
 
 static const unsigned int y_mode_cts  [VP8_YMODES] = {
     106,  25, 21, 13, 16, 74};
@@ -262,7 +257,6 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
         x->fc.ymode_prob, bct, y_mode_cts,
         256, 1
     );
-#if CONFIG_QIMODE
     {
         int i;
         for (i=0;i<8;i++)
@@ -272,13 +266,6 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
             256, 1
             );
     }
-#else
-    vp8_tree_probs_from_distribution(
-        VP8_YMODES, vp8_kf_ymode_encodings, vp8_kf_ymode_tree,
-        x->kf_ymode_prob, bct, kf_y_mode_cts,
-        256, 1
-    );
-#endif
     {
         int i;
         for (i=0;i<VP8_YMODES;i++)
