@@ -1542,6 +1542,23 @@ struct stream_state
 };
 
 
+void validate_positive_rational(const char          *msg,
+                                struct vpx_rational *rat)
+{
+    if (rat->den < 0)
+    {
+        rat->num *= -1;
+        rat->den *= -1;
+    }
+
+    if (rat->num < 0)
+        die("Error: %s must be positive\n", msg);
+
+    if (!rat->den)
+        die("Error: %s has zero denominator\n", msg);
+}
+
+
 static void parse_global_config(struct global_config *global, char **argv)
 {
     char       **argi, **argj;
@@ -1610,6 +1627,7 @@ static void parse_global_config(struct global_config *global, char **argv)
         else if (arg_match(&arg, &framerate, argi))
         {
             global->framerate = arg_parse_rational(&arg);
+            validate_positive_rational(arg.name, &global->framerate);
             global->have_framerate = 1;
         }
         else if (arg_match(&arg,&out_part, argi))
@@ -1807,7 +1825,10 @@ static int parse_stream_params(struct global_config *global,
         else if (arg_match(&arg, &stereo_mode, argi))
             config->stereo_fmt = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &timebase, argi))
+        {
             config->cfg.g_timebase = arg_parse_rational(&arg);
+            validate_positive_rational(arg.name, &config->cfg.g_timebase);
+        }
         else if (arg_match(&arg, &error_resilient, argi))
             config->cfg.g_error_resilient = arg_parse_uint(&arg);
         else if (arg_match(&arg, &lag_in_frames, argi))
