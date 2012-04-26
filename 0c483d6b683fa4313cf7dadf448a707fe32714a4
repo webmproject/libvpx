@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//2xw\u003d",
+        "filename": "vp8/decoder/error_concealment.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-04-26T09:26:43Z",
+      "side": 0,
+      "message": "I think removing this will cause problems in assign_overlap() which uses overlaps[i].bmi \u003d\u003d NULL as an indicator of a free overlap.",
+      "revId": "0c483d6b683fa4313cf7dadf448a707fe32714a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
