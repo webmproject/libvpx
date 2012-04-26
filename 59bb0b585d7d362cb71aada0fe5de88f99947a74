@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//17I\u003d",
+        "filename": "vp8/encoder/temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-26T23:53:43Z",
+      "side": 1,
+      "message": "this change to force 0,0 for frame \u003d\u003d alt_ref_index is unrelated to the rest of the commit that eliminates the dummy tables. Can you separate this into a separate commit?",
+      "revId": "59bb0b585d7d362cb71aada0fe5de88f99947a74",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
