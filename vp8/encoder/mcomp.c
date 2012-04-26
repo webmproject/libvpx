@@ -45,26 +45,35 @@ int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight)
 #if CONFIG_HIGH_PRECISION_MV
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int error_per_bit, int ishp)
 {
-    return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> (ishp==0)] +
-        mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> (ishp==0)])
-        * error_per_bit + 128) >> 8;
+    // Ignore costing if mvcost is NULL
+    if (mvcost)
+        return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> (ishp==0)] +
+                 mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> (ishp==0)])
+                 * error_per_bit + 128) >> 8;
+    return 0;
 }
 #else
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int error_per_bit)
 {
-    return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
-        mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1])
-        * error_per_bit + 128) >> 8;
+    // Ignore costing if mvcost is NULL
+    if (mvcost)
+        return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
+                 mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1])
+                 * error_per_bit + 128) >> 8;
+    return 0;
 }
 #endif
 
 
 static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvsadcost[2], int error_per_bit)
 {
-    /* Calculate sad error cost on full pixel basis. */
-    return ((mvsadcost[0][(mv->as_mv.row - ref->as_mv.row)] +
-        mvsadcost[1][(mv->as_mv.col - ref->as_mv.col)])
-        * error_per_bit + 128) >> 8;
+    // Calculate sad error cost on full pixel basis.
+    // Ignore costing if mvcost is NULL
+    if (mvsadcost)
+        return ((mvsadcost[0][(mv->as_mv.row - ref->as_mv.row)] +
+                 mvsadcost[1][(mv->as_mv.col - ref->as_mv.col)])
+                 * error_per_bit + 128) >> 8;
+    return 0;
 }
 
 
@@ -204,7 +213,7 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride)
 #else
 #define SP(x) (((x)&3)<<1) // convert motion vector component to offset for svf calc
 #endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
-#define MVC(r,c) (((mvcost[0][(r)-rr] + mvcost[1][(c)-rc]) * error_per_bit + 128 )>>8 ) // estimated cost of a motion vector (r,c)
+#define MVC(r,c) (mvcost ? ((mvcost[0][(r)-rr] + mvcost[1][(c)-rc]) * error_per_bit + 128 )>>8 : 0) // estimated cost of a motion vector (r,c)
 #define DIST(r,c) vfp->svf( PRE(r,c), y_stride, SP(c),SP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
 #define ERR(r,c) (MVC(r,c)+DIST(r,c)) // returns distortion + motion vector cost
 #define IFMVCV(r,c,s,e) if ( c >= minc && c <= maxc && r >= minr && r <= maxr) s else e;
