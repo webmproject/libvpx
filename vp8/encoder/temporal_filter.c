@@ -134,7 +134,6 @@ void vp8_temporal_filter_apply_c
 }
 
 #if ALT_REF_MC_ENABLED
-static int dummy_cost[2*mv_max+1];
 
 static int vp8_temporal_filter_find_matching_mb_c
 (
@@ -155,9 +154,6 @@ static int vp8_temporal_filter_find_matching_mb_c
     BLOCKD *d = &x->e_mbd.block[0];
     int_mv best_ref_mv1;
     int_mv best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
-
-    int *mvcost[2]    = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
-    int *mvsadcost[2] = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
 
     // Save input state
     unsigned char **base_src = b->base_src;
@@ -196,12 +192,11 @@ static int vp8_temporal_filter_find_matching_mb_c
 
     /*cpi->sf.search_method == HEX*/
     // TODO Check that the 16x16 vf & sdf are selected here
-    bestsme = vp8_hex_search(x, b, d,
-        &best_ref_mv1_full, &d->bmi.mv,
-        step_param,
-        sadpb,
-        &cpi->fn_ptr[BLOCK_16X16],
-        mvsadcost, mvcost, &best_ref_mv1);
+    // Ignore mv costing by sending NULL cost arrays
+    bestsme = vp8_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.mv,
+                             step_param, sadpb,
+                             &cpi->fn_ptr[BLOCK_16X16],
+                             NULL, NULL, &best_ref_mv1);
 
 #if ALT_REF_SUBPEL_ENABLED
     // Try sub-pixel MC?
@@ -209,10 +204,13 @@ static int vp8_temporal_filter_find_matching_mb_c
     {
         int distortion;
         unsigned int sse;
+        // Ignore mv costing by sending NULL cost array
         bestsme = cpi->find_fractional_mv_step(x, b, d,
-                    &d->bmi.mv, &best_ref_mv1,
-                    x->errorperbit, &cpi->fn_ptr[BLOCK_16X16],
-                    mvcost, &distortion, &sse);
+                                               &d->bmi.mv,
+                                               &best_ref_mv1,
+                                               x->errorperbit,
+                                               &cpi->fn_ptr[BLOCK_16X16],
+                                               NULL, &distortion, &sse);
     }
 #endif
 
@@ -304,12 +302,11 @@ static void vp8_temporal_filter_iterate_c
 
                 // Find best match in this frame by MC
                 err = vp8_temporal_filter_find_matching_mb_c
-                      (cpi,
-                       cpi->frames[alt_ref_index],
-                       cpi->frames[frame],
-                       mb_y_offset,
-                       THRESH_LOW);
-
+                          (cpi,
+                           cpi->frames[alt_ref_index],
+                           cpi->frames[frame],
+                           mb_y_offset,
+                           THRESH_LOW);
 #endif
                 // Assign higher weight to matching MB if it's error
                 // score is lower. If not applying MC default behavior

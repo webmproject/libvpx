@@ -34,17 +34,23 @@ int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight)
 
 static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int error_per_bit)
 {
-    return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
-        mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1])
-        * error_per_bit + 128) >> 8;
+    // Ignore mv costing if mvcost is NULL
+    if (mvcost)
+        return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
+                 mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1])
+                 * error_per_bit + 128) >> 8;
+    return 0;
 }
 
 static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvsadcost[2], int error_per_bit)
 {
-    /* Calculate sad error cost on full pixel basis. */
-    return ((mvsadcost[0][(mv->as_mv.row - ref->as_mv.row)] +
-        mvsadcost[1][(mv->as_mv.col - ref->as_mv.col)])
-        * error_per_bit + 128) >> 8;
+    // Calculate sad error cost on full pixel basis.
+    // Ignore mv costing if mvsadcost is NULL
+    if (mvsadcost)
+        return ((mvsadcost[0][(mv->as_mv.row - ref->as_mv.row)] +
+                 mvsadcost[1][(mv->as_mv.col - ref->as_mv.col)])
+                * error_per_bit + 128) >> 8;
+    return 0;
 }
 
 void vp8_init_dsmotion_compensation(MACROBLOCK *x, int stride)
@@ -176,7 +182,7 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride)
  * 32 cols area that is enough for 16x16 macroblock. Later, for SPLITMV, we
  * could reduce the area.
  */
-#define MVC(r,c) (((mvcost[0][(r)-rr] + mvcost[1][(c) - rc]) * error_per_bit + 128 )>>8 ) // estimated cost of a motion vector (r,c)
+#define MVC(r,c) (mvcost ? ((mvcost[0][(r)-rr] + mvcost[1][(c) - rc]) * error_per_bit + 128 )>>8 : 0) // estimated cost of a motion vector (r,c)
 #define PRE(r,c) (y + (((r)>>2) * y_stride + ((c)>>2) -(offset))) // pointer to predictor base of a motionvector
 #define SP(x) (((x)&3)<<1) // convert motion vector component to offset for svf calc
 #define DIST(r,c) vfp->svf( PRE(r,c), y_stride, SP(c),SP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
