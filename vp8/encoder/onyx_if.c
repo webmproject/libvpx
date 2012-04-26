@@ -1412,6 +1412,15 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     if (!oxcf)
         return;
 
+#if CONFIG_MULTITHREAD
+    /*  wait for the last picture loopfilter thread done */
+    if (cpi->b_lpf_running)
+    {
+        sem_wait(&cpi->h_event_end_lpf);
+        cpi->b_lpf_running = 0;
+    }
+#endif
+
     if (cm->version != oxcf->Version)
     {
         cm->version = oxcf->Version;
@@ -3194,6 +3203,15 @@ static void encode_frame_to_data_rate
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
 
+#if CONFIG_MULTITHREAD
+    /*  wait for the last picture loopfilter thread done */
+    if (cpi->b_lpf_running)
+    {
+        sem_wait(&cpi->h_event_end_lpf);
+        cpi->b_lpf_running = 0;
+    }
+#endif
+
     // Test code for segmentation of gf/arf (0,0)
     //segmentation_test_function( cpi);
 
@@ -3748,14 +3766,7 @@ static void encode_frame_to_data_rate
             vp8_setup_key_frame(cpi);
         }
 
-#if CONFIG_MULTITHREAD
-        /*  wait for the last picture loopfilter thread done */
-        if (cpi->b_lpf_running)
-        {
-            sem_wait(&cpi->h_event_end_lpf);
-            cpi->b_lpf_running = 0;
-        }
-#endif
+
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
         {
