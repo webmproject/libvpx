@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//1QQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "can you add these to the configure script too?",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1Q8\u003d",
+        "filename": "vp8/common/mbpitch.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "just remove this. looks like we can get rid of the bs parameter and only call this function once too?",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1Qs\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3190,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1Qw\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3610,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1Qo\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4045,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1Qk\u003d",
+        "filename": "vp8/encoder/temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1Qg\u003d",
+        "filename": "vp8/encoder/temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1Qc\u003d",
+        "filename": "vp8/encoder/temporal_filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//1QU\u003d",
+        "filename": "vpx/vpx_encoder.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T16:43:05Z",
+      "side": 1,
+      "message": "wrap long lines (may need to do the doc before the #define)",
+      "revId": "f578bcbd5ef8cd7ef6e89f0138134d924cc57a4e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
