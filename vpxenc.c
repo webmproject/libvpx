@@ -2088,6 +2088,7 @@ static void setup_pass(struct stream_state  *stream,
 
     stream->cx_time = 0;
     stream->nbytes = 0;
+    stream->frames_out = 0;
 }
 
 
