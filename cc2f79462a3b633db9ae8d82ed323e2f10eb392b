@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//1JM\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2411,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-04-27T18:11:35Z",
+      "side": 1,
+      "message": "tabs. Also, this needs to happen for all streams, so it should be inside a FOREACH_STREAM loop somewhere. suggest putting it in setup_pass() since that\u0027s where nbytes and cx_time are reset to 0.",
+      "revId": "cc2f79462a3b633db9ae8d82ed323e2f10eb392b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
