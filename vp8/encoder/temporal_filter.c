@@ -154,10 +154,6 @@ void vp8_temporal_filter_apply_c
 }
 
 #if ALT_REF_MC_ENABLED
-static int dummy_cost[2*mv_max+1];
-#if CONFIG_HIGH_PRECISION_MV
-static int dummy_cost_hp[2*mv_max_hp+1];
-#endif
 
 static int vp8_temporal_filter_find_matching_mb_c
 (
@@ -178,13 +174,6 @@ static int vp8_temporal_filter_find_matching_mb_c
     BLOCKD *d = &x->e_mbd.block[0];
     int_mv best_ref_mv1;
     int_mv best_ref_mv1_full; /* full-pixel value of best_ref_mv1 */
-
-    int *mvcost[2]    = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
-    int *mvsadcost[2] = { &dummy_cost[mv_max+1], &dummy_cost[mv_max+1] };
-#if CONFIG_HIGH_PRECISION_MV
-    int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost_hp[mv_max_hp+1] };
-    int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp+1], &dummy_cost_hp[mv_max_hp+1] };
-#endif
 
     // Save input state
     unsigned char **base_src = b->base_src;
@@ -223,18 +212,10 @@ static int vp8_temporal_filter_find_matching_mb_c
 
     /*cpi->sf.search_method == HEX*/
     // TODO Check that the 16x16 vf & sdf are selected here
-    bestsme = vp8_hex_search(x, b, d,
-        &best_ref_mv1_full, &d->bmi.as_mv.first,
-        step_param,
-        sadpb,
-        &cpi->fn_ptr[BLOCK_16X16],
-#if CONFIG_HIGH_PRECISION_MV
-        x->e_mbd.allow_high_precision_mv?mvsadcost_hp:mvsadcost,
-        x->e_mbd.allow_high_precision_mv?mvcost_hp:mvcost,
-#else
-        mvsadcost, mvcost,
-#endif
-        &best_ref_mv1);
+    // Ignore mv costing by sending NULL pointer instead of cost arrays
+    bestsme = vp8_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv.first,
+                             step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
+                             NULL, NULL, &best_ref_mv1);
 
 #if ALT_REF_SUBPEL_ENABLED
     // Try sub-pixel MC?
@@ -242,15 +223,12 @@ static int vp8_temporal_filter_find_matching_mb_c
     {
         int distortion;
         unsigned int sse;
-        bestsme = cpi->find_fractional_mv_step(x, b, d,
-                    &d->bmi.as_mv.first, &best_ref_mv1,
-                    x->errorperbit, &cpi->fn_ptr[BLOCK_16X16],
-#if CONFIG_HIGH_PRECISION_MV
-                    x->e_mbd.allow_high_precision_mv?mvcost_hp:mvcost,
-#else
-                    mvcost,
-#endif
-                    &distortion, &sse);
+        // Ignore mv costing by sending NULL pointer instead of cost array
+        bestsme = cpi->find_fractional_mv_step(x, b, d, &d->bmi.as_mv.first,
+                                               &best_ref_mv1,
+                                               x->errorperbit,
+                                               &cpi->fn_ptr[BLOCK_16X16],
+                                               NULL, &distortion, &sse);
     }
 #endif
 
@@ -328,32 +306,37 @@ static void vp8_temporal_filter_iterate_c
 
             for (frame = 0; frame < frame_count; frame++)
             {
-                int err = 0;
-
                 if (cpi->frames[frame] == NULL)
                     continue;
 
                 mbd->block[0].bmi.as_mv.first.as_mv.row = 0;
                 mbd->block[0].bmi.as_mv.first.as_mv.col = 0;
 
+                if (frame == alt_ref_index)
+                {
+                    filter_weight = 2;
+                }
+                else
+                {
+                    int err = 0;
 #if ALT_REF_MC_ENABLED
 #define THRESH_LOW   10000
 #define THRESH_HIGH  20000
 
-                // Find best match in this frame by MC
-                err = vp8_temporal_filter_find_matching_mb_c
-                      (cpi,
-                       cpi->frames[alt_ref_index],
-                       cpi->frames[frame],
-                       mb_y_offset,
-                       THRESH_LOW);
-
+                    // Find best match in this frame by MC
+                    err = vp8_temporal_filter_find_matching_mb_c
+                          (cpi,
+                           cpi->frames[alt_ref_index],
+                           cpi->frames[frame],
+                           mb_y_offset,
+                           THRESH_LOW);
 #endif
-                // Assign higher weight to matching MB if it's error
-                // score is lower. If not applying MC default behavior
-                // is to weight all MBs equal.
-                filter_weight = err<THRESH_LOW
-                                  ? 2 : err<THRESH_HIGH ? 1 : 0;
+                    // Assign higher weight to matching MB if it's error
+                    // score is lower. If not applying MC default behavior
+                    // is to weight all MBs equal.
+                    filter_weight = err<THRESH_LOW
+                                      ? 2 : err<THRESH_HIGH ? 1 : 0;
+                }
 
                 if (filter_weight != 0)
                 {
