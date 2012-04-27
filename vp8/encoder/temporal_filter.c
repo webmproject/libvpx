@@ -288,31 +288,36 @@ static void vp8_temporal_filter_iterate_c
 
             for (frame = 0; frame < frame_count; frame++)
             {
-                int err = 0;
-
                 if (cpi->frames[frame] == NULL)
                     continue;
 
                 mbd->block[0].bmi.mv.as_mv.row = 0;
                 mbd->block[0].bmi.mv.as_mv.col = 0;
 
+                if (frame == alt_ref_index)
+                {
+                    filter_weight = 2;
+                }
+                else
+                {
+                    int err = 0;
 #if ALT_REF_MC_ENABLED
 #define THRESH_LOW   10000
 #define THRESH_HIGH  20000
-
-                // Find best match in this frame by MC
-                err = vp8_temporal_filter_find_matching_mb_c
-                          (cpi,
-                           cpi->frames[alt_ref_index],
-                           cpi->frames[frame],
-                           mb_y_offset,
-                           THRESH_LOW);
+                    // Find best match in this frame by MC
+                    err = vp8_temporal_filter_find_matching_mb_c
+                              (cpi,
+                               cpi->frames[alt_ref_index],
+                               cpi->frames[frame],
+                               mb_y_offset,
+                               THRESH_LOW);
 #endif
-                // Assign higher weight to matching MB if it's error
-                // score is lower. If not applying MC default behavior
-                // is to weight all MBs equal.
-                filter_weight = err<THRESH_LOW
-                                  ? 2 : err<THRESH_HIGH ? 1 : 0;
+                    // Assign higher weight to matching MB if it's error
+                    // score is lower. If not applying MC default behavior
+                    // is to weight all MBs equal.
+                    filter_weight = err<THRESH_LOW
+                                       ? 2 : err<THRESH_HIGH ? 1 : 0;
+                }
 
                 if (filter_weight != 0)
                 {
