@@ -129,6 +129,7 @@ specialize vp8_build_intra_predictors_mby_s sse2 ssse3
 prototype void vp8_build_intra_predictors_mbuv_s "struct macroblockd *x, unsigned char * uabove_row, unsigned char * vabove_row,  unsigned char *uleft, unsigned char *vleft, int left_stride, unsigned char * upred_ptr, unsigned char * vpred_ptr, int pred_stride"
 specialize vp8_build_intra_predictors_mbuv_s sse2 ssse3
 
+prototype void vp8_intra4x4_predict_d "unsigned char *above, unsigned char *left, int left_stride, int b_mode, unsigned char *dst, int dst_stride, unsigned char top_left"
 prototype void vp8_intra4x4_predict "unsigned char *src, int src_stride, int b_mode, unsigned char *dst, int dst_stride"
 specialize vp8_intra4x4_predict media
 vp8_intra4x4_predict_media=vp8_intra4x4_predict_armv6

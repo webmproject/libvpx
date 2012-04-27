@@ -528,6 +528,10 @@ process_toolchain() {
         check_add_cflags -Wpointer-arith
         check_add_cflags -Wtype-limits
         check_add_cflags -Wcast-qual
+        check_add_cflags -Wimplicit-function-declaration
+        check_add_cflags -Wuninitialized
+        check_add_cflags -Wunused-variable
+        check_add_cflags -Wunused-but-set-variable        
         enabled extra_warnings || check_add_cflags -Wno-unused-function
     fi
 

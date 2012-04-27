@@ -508,7 +508,7 @@ static unsigned int read_available_partition_size(
 {
     VP8_COMMON* pc = &pbi->common;
     const unsigned char *partition_size_ptr = token_part_sizes + i * 3;
-    unsigned int partition_size;
+    unsigned int partition_size = 0;
     ptrdiff_t bytes_left = fragment_end - fragment_start;
     /* Calculate the length of this partition. The last partition
      * size is implicit. If the partition size can't be read, then

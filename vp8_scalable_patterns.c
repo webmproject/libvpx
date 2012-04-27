@@ -438,6 +438,7 @@ int main(int argc, char **argv) {
     }
 
     case 8:
+    default:
     {
         // 3-layers
         int ids[4] = {0,2,1,2};
@@ -469,8 +470,6 @@ int main(int argc, char **argv) {
                          VP8_EFLAG_NO_UPD_ENTROPY;
         break;
     }
-    default:
-        break;
     }
 
     // Open input file

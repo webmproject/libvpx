@@ -32,7 +32,12 @@ extern "C" {
 #define VPX_ENCODER_H
 #include "vpx_codec.h"
 
+/*! Temporal Scalability: Maximum length of the sequence defining frame
+ * layer membership
+ */
 #define MAX_PERIODICITY 16
+
+/*! Temporal Scalability: Maximum number of coding layers */
 #define MAX_LAYERS       5
 
     /*!\brief Current ABI version number
