@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//06I\u003d",
+        "filename": "configure",
+        "patchSetId": 3
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-04-27T19:45:06Z",
+      "side": 0,
+      "message": "Would be more readable as ge (fixed)",
+      "revId": "60b36abf854f906577ed500e9895b4a239f56794",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
