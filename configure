@@ -109,6 +109,8 @@ all_platforms="${all_platforms} x86-darwin8-icc"
 all_platforms="${all_platforms} x86-darwin9-gcc"
 all_platforms="${all_platforms} x86-darwin9-icc"
 all_platforms="${all_platforms} x86-darwin10-gcc"
+all_platforms="${all_platforms} x86-darwin11-gcc"
+all_platforms="${all_platforms} x86-darwin12-gcc"
 all_platforms="${all_platforms} x86-linux-gcc"
 all_platforms="${all_platforms} x86-linux-icc"
 all_platforms="${all_platforms} x86-os2-gcc"
@@ -120,6 +122,7 @@ all_platforms="${all_platforms} x86-win32-vs9"
 all_platforms="${all_platforms} x86_64-darwin9-gcc"
 all_platforms="${all_platforms} x86_64-darwin10-gcc"
 all_platforms="${all_platforms} x86_64-darwin11-gcc"
+all_platforms="${all_platforms} x86_64-darwin12-gcc"
 all_platforms="${all_platforms} x86_64-linux-gcc"
 all_platforms="${all_platforms} x86_64-linux-icc"
 all_platforms="${all_platforms} x86_64-solaris-gcc"
@@ -128,6 +131,9 @@ all_platforms="${all_platforms} x86_64-win64-vs8"
 all_platforms="${all_platforms} x86_64-win64-vs9"
 all_platforms="${all_platforms} universal-darwin8-gcc"
 all_platforms="${all_platforms} universal-darwin9-gcc"
+all_platforms="${all_platforms} universal-darwin10-gcc"
+all_platforms="${all_platforms} universal-darwin11-gcc"
+all_platforms="${all_platforms} universal-darwin12-gcc"
 all_platforms="${all_platforms} generic-gnu"
 
 # all_targets is a list of all targets that can be configured
@@ -493,11 +499,20 @@ process_toolchain() {
     case $toolchain in
         universal-darwin*)
             local darwin_ver=${tgt_os##darwin}
-            fat_bin_archs="$fat_bin_archs ppc32-${tgt_os}-gcc"
 
-            # Intel
-            fat_bin_archs="$fat_bin_archs x86-${tgt_os}-${tgt_cc}"
-            if [ $darwin_ver -gt 8 ]; then
+            # Snow Leopard (10.6/darwin10) dropped support for PPC
+            # Include PPC support for all prior versions
+            if [ $darwin_ver -lt 10 ]; then
+                fat_bin_archs="$fat_bin_archs ppc32-${tgt_os}-gcc"
+            fi
+
+            # Tiger (10.4/darwin8) brought support for x86
+            if [ $darwin_ver -ge 8 ]; then
+                fat_bin_archs="$fat_bin_archs x86-${tgt_os}-${tgt_cc}"
+            fi
+
+            # Leopard (10.5/darwin9) brought 64 bit support
+            if [ $darwin_ver -ge 9 ]; then
                 fat_bin_archs="$fat_bin_archs x86_64-${tgt_os}-${tgt_cc}"
             fi
             ;;
