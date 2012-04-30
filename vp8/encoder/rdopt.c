@@ -2597,19 +2597,19 @@ void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
         if ( ! pred_flag )
         {
             if ( mod_refprobs[0] )
-                cost += vp8_cost_bit( (i != INTRA_FRAME), mod_refprobs[0] );
+                cost += vp8_cost_bit( mod_refprobs[0], (i != INTRA_FRAME) );
 
             // Inter coded
             if (i != INTRA_FRAME)
             {
                 if ( mod_refprobs[1] )
-                    cost += vp8_cost_bit( (i != LAST_FRAME), mod_refprobs[1] );
+                    cost += vp8_cost_bit( mod_refprobs[1], (i != LAST_FRAME) );
 
                 if (i != LAST_FRAME)
                 {
                     if ( mod_refprobs[2] )
-                        cost += vp8_cost_bit( (i != GOLDEN_FRAME),
-                                              mod_refprobs[2] );
+                        cost += vp8_cost_bit( mod_refprobs[2],
+                                             (i != GOLDEN_FRAME));
                 }
             }
         }
