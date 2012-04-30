@@ -80,7 +80,7 @@ static void set_default_lf_deltas(VP8_COMP *cpi);
 extern const int vp8_gf_interval_table[101];
 
 #if CONFIG_ENHANCED_INTERP
-#define SEARCH_BEST_FILTER 1            /* to search exhaustively for best filter */
+#define SEARCH_BEST_FILTER 0            /* to search exhaustively for best filter */
 #define RESET_FOREACH_FILTER 0          /* whether to reset the encoder state
                                            before trying each new filter */
 #endif
