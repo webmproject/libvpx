@@ -813,7 +813,8 @@ process_common_toolchain() {
 
         darwin*)
             if [ -z "${sdk_path}" ]; then
-                SDK_PATH=/Developer/Platforms/iPhoneOS.platform/Developer
+                SDK_PATH=`xcode-select -print-path 2> /dev/null`
+                SDK_PATH=${SDK_PATH}/Platforms/iPhoneOS.platform/Developer
             else
                 SDK_PATH=${sdk_path}
             fi
@@ -835,7 +836,7 @@ process_common_toolchain() {
             add_ldflags -arch_only ${tgt_isa}
 
             if [ -z "${alt_libc}" ]; then
-                alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.0.sdk
+                alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.1.sdk
             fi
 
             add_cflags  "-isysroot ${alt_libc}"
