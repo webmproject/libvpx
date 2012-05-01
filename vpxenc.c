@@ -969,9 +969,10 @@ static const arg_def_t rate_hist_n         = ARG_DEF(NULL, "rate-hist", 1,
 static const arg_def_t *main_args[] =
 {
     &debugmode,
-    &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &deadline,
+    &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &skip,
+    &deadline,
     &best_dl, &good_dl, &rt_dl,
-    &verbosearg, &psnrarg, &use_ivf, &q_hist_n, &rate_hist_n,
+    &verbosearg, &psnrarg, &recontest, &use_ivf, &q_hist_n, &rate_hist_n,
     NULL
 };
 
