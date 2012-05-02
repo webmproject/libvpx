@@ -85,7 +85,7 @@ static void write_ivf_file_header(FILE *outfile,
     mem_put_le32(header+24, frame_cnt);           /* length */
     mem_put_le32(header+28, 0);                   /* unused */
 
-    if(fwrite(header, 1, 32, outfile));
+    (void) fwrite(header, 1, 32, outfile);
 }
 
 
@@ -103,7 +103,7 @@ static void write_ivf_frame_header(FILE *outfile,
     mem_put_le32(header+4, pts&0xFFFFFFFF);
     mem_put_le32(header+8, pts >> 32);
 
-    if(fwrite(header, 1, 12, outfile));
+    (void) fwrite(header, 1, 12, outfile);
 }
 
 int main(int argc, char **argv) {

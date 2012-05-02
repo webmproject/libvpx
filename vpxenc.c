@@ -245,7 +245,7 @@ void stats_write(stats_io_t *stats, const void *pkt, size_t len)
 {
     if (stats->file)
     {
-        if(fwrite(pkt, 1, len, stats->file));
+        (void) fwrite(pkt, 1, len, stats->file);
     }
     else
     {
@@ -338,7 +338,7 @@ static int read_frame(struct input_state *input, vpx_image_t *img)
              * write_ivf_frame_header() for documentation on the frame header
              * layout.
              */
-            if(fread(junk, 1, IVF_FRAME_HDR_SZ, f));
+            (void) fread(junk, 1, IVF_FRAME_HDR_SZ, f);
         }
 
         for (plane = 0; plane < 3; plane++)
@@ -468,7 +468,7 @@ static void write_ivf_file_header(FILE *outfile,
     mem_put_le32(header + 24, frame_cnt);         /* length */
     mem_put_le32(header + 28, 0);                 /* unused */
 
-    if(fwrite(header, 1, 32, outfile));
+    (void) fwrite(header, 1, 32, outfile);
 }
 
 
@@ -486,14 +486,14 @@ static void write_ivf_frame_header(FILE *outfile,
     mem_put_le32(header + 4, pts & 0xFFFFFFFF);
     mem_put_le32(header + 8, pts >> 32);
 
-    if(fwrite(header, 1, 12, outfile));
+    (void) fwrite(header, 1, 12, outfile);
 }
 
 static void write_ivf_frame_size(FILE *outfile, size_t size)
 {
     char             header[4];
     mem_put_le32(header, size);
-    fwrite(header, 1, 4, outfile);
+    (void) fwrite(header, 1, 4, outfile);
 }
 
 
@@ -541,7 +541,7 @@ struct EbmlGlobal
 
 void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
 {
-    if(fwrite(buffer_in, 1, len, glob->stream));
+    (void) fwrite(buffer_in, 1, len, glob->stream);
 }
 
 #define WRITE_BUFFER(s) \
@@ -2259,8 +2259,8 @@ static void get_cx_data(struct stream_state  *stream,
                     }
                 }
 
-                fwrite(pkt->data.frame.buf, 1,
-                       pkt->data.frame.sz, stream->file);
+                (void) fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
+                              stream->file);
             }
             stream->nbytes += pkt->data.raw.sz;
             break;

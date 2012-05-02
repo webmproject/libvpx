@@ -93,7 +93,7 @@ static void write_ivf_file_header(FILE *outfile,
     mem_put_le32(header+24, frame_cnt);           /* length */
     mem_put_le32(header+28, 0);                   /* unused */
 
-    if(fwrite(header, 1, 32, outfile));
+    (void) fwrite(header, 1, 32, outfile);
 }
 
 
@@ -111,7 +111,7 @@ static void write_ivf_frame_header(FILE *outfile,
     mem_put_le32(header+4, pts&0xFFFFFFFF);
     mem_put_le32(header+8, pts >> 32);
 
-    if(fwrite(header, 1, 12, outfile));
+    (void) fwrite(header, 1, 12, outfile);
 }
 
 static int mode_to_num_layers[9] = {2, 2, 3, 3, 3, 3, 5, 2, 3};
@@ -530,8 +530,8 @@ int main(int argc, char **argv) {
                                               i<cfg.ts_number_layers; i++)
                 {
                     write_ivf_frame_header(outfile[i], pkt);
-                    if (fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
-                              outfile[i]));
+                    (void) fwrite(pkt->data.frame.buf, 1, pkt->data.frame.sz,
+                                  outfile[i]);
                     frames_in_layer[i]++;
                 }
                 break;
@@ -562,4 +562,3 @@ int main(int argc, char **argv) {
 
     return EXIT_SUCCESS;
 }
-

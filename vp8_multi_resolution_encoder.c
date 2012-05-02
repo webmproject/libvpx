@@ -164,7 +164,7 @@ static void write_ivf_file_header(FILE *outfile,
     mem_put_le32(header+24, frame_cnt);           /* length */
     mem_put_le32(header+28, 0);                   /* unused */
 
-    if(fwrite(header, 1, 32, outfile));
+    (void) fwrite(header, 1, 32, outfile);
 }
 
 static void write_ivf_frame_header(FILE *outfile,
@@ -181,7 +181,7 @@ static void write_ivf_frame_header(FILE *outfile,
     mem_put_le32(header+4, pts&0xFFFFFFFF);
     mem_put_le32(header+8, pts >> 32);
 
-    if(fwrite(header, 1, 12, outfile));
+    (void) fwrite(header, 1, 12, outfile);
 }
 
 int main(int argc, char **argv)
@@ -410,8 +410,8 @@ int main(int argc, char **argv)
                 switch(pkt[i]->kind) {
                     case VPX_CODEC_CX_FRAME_PKT:
                         write_ivf_frame_header(outfile[i], pkt[i]);
-                        if(fwrite(pkt[i]->data.frame.buf, 1, pkt[i]->data.frame.sz,
-                                  outfile[i]));
+                        (void) fwrite(pkt[i]->data.frame.buf, 1,
+                                      pkt[i]->data.frame.sz, outfile[i]);
                     break;
                     case VPX_CODEC_PSNR_PKT:
                         if (show_psnr)

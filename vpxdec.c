@@ -356,7 +356,7 @@ void out_put(void *out, const uint8_t *buf, unsigned int len, int do_md5)
     }
     else
     {
-        if(fwrite(buf, 1, len, out));
+        (void) fwrite(buf, 1, len, out);
     }
 }
 
