@@ -87,7 +87,7 @@ typedef struct
 
     vp8_prob coef_probs[BLOCK_TYPES]
                        [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
-    vp8_prob coef_probs_8x8[BLOCK_TYPES]
+    vp8_prob coef_probs_8x8[BLOCK_TYPES_8X8]
                            [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
 
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
@@ -452,9 +452,9 @@ typedef struct VP8_COMP
     //save vp8_tree_probs_from_distribution result for each frame to avoid repeat calculation
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-    unsigned int coef_counts_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-    vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-    unsigned int frame_branch_ct_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+    unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
+    vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    unsigned int frame_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
     int gfu_boost;
     int kf_boost;
@@ -650,6 +650,8 @@ typedef struct VP8_COMP
 
     // TODO Do we still need this??
     int update_context;
+
+    int dummy_packing;    /* flag to indicate if packing is dummy */
 
 } VP8_COMP;
 

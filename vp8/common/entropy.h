@@ -58,6 +58,8 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 
 #define BLOCK_TYPES 4
 
+#define BLOCK_TYPES_8X8 3
+
 /* Middle dimension is a coarsening of the coefficient's
    position within the 4x4 DCT. */
 
@@ -97,7 +99,7 @@ extern DECLARE_ALIGNED(64, const unsigned char, vp8_coef_bands_8x8[64]);
 extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY_TOKENS]);
 
 extern const vp8_prob vp8_coef_update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-extern const vp8_prob vp8_coef_update_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+extern const vp8_prob vp8_coef_update_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 
 struct VP8Common;
 void vp8_default_coef_probs(struct VP8Common *);

@@ -3279,6 +3279,7 @@ static void encode_frame_to_data_rate
         // accurate estimate of output frame size to determine if we need
         // to recode.
         vp8_save_coding_context(cpi);
+        cpi->dummy_packing = 1;
         vp8_pack_bitstream(cpi, dest, size);
         cpi->projected_frame_size = (*size) << 3;
         vp8_restore_coding_context(cpi);
@@ -3604,6 +3605,7 @@ static void encode_frame_to_data_rate
     loopfilter_frame(cpi, cm);
 
     // build the bitstream
+    cpi->dummy_packing = 0;
     vp8_pack_bitstream(cpi, dest, size);
 
     update_reference_frames(cm);

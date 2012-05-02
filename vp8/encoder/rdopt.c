@@ -218,25 +218,27 @@ const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES] =
 };
 
 static void fill_token_costs(
-    unsigned int c      [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS],
-    const vp8_prob p    [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES]
-)
+    unsigned int (*c)[COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS],
+    const vp8_prob (*p)[COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES],
+    int block_type_counts)
 {
     int i, j, k;
 
-
-    for (i = 0; i < BLOCK_TYPES; i++)
+    for (i = 0; i < block_type_counts; i++)
         for (j = 0; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++)
             {
                 if(k == 0 && ((j > 0 && i > 0) || (j > 1 && i == 0)))
-                    vp8_cost_tokens_skip((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
+                    vp8_cost_tokens_skip((int *)( c [i][j][k]),
+                                                  p [i][j][k],
+                                                  vp8_coef_tree);
                 else
-
-                    vp8_cost_tokens((int *)(c [i][j][k]), p [i][j][k], vp8_coef_tree);
+                    vp8_cost_tokens((int *)(c [i][j][k]),
+                                            p [i][j][k],
+                                            vp8_coef_tree);
             }
-
 }
+
 
 static int rd_iifactor [ 32 ] =  {    4,   4,   3,   2,   1,   0,   0,   0,
                                       0,   0,   0,   0,   0,   0,   0,   0,
@@ -370,13 +372,14 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex)
 
     fill_token_costs(
         cpi->mb.token_costs,
-        (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs
-    );
+        (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs,
+        BLOCK_TYPES);
 
     fill_token_costs(
         cpi->mb.token_costs_8x8,
-        (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8
-    );
+        (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8,
+        BLOCK_TYPES_8X8);
+
     /*rough estimate for costing*/
     cpi->common.kf_ymode_probs_index = cpi->common.base_qindex>>4;
     vp8_init_mode_costs(cpi);

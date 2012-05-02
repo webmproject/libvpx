@@ -25,7 +25,7 @@
 
 #ifdef ENTROPY_STATS
 INT64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-INT64 context_counters_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+INT64 context_counters_8x8[BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #endif
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
@@ -634,74 +634,56 @@ void print_context_counters()
 # define Comma( X) (X? ",":"")
 
     type = 0;
-
     do
     {
         fprintf(f, "%s\n  { /* block Type %d */", Comma(type), type);
-
         band = 0;
-
         do
         {
             fprintf(f, "%s\n    { /* Coeff Band %d */", Comma(band), band);
 
             pt = 0;
-
             do
             {
                 fprintf(f, "%s\n      {", Comma(pt));
 
                 t = 0;
-
                 do
                 {
                     const INT64 x = context_counters [type] [band] [pt] [t];
                     const int y = (int) x;
-
                     assert(x == (INT64) y);  /* no overflow handling yet */
                     fprintf(f, "%s %d", Comma(t), y);
-
                 }
                 while (++t < MAX_ENTROPY_TOKENS);
-
                 fprintf(f, "}");
             }
             while (++pt < PREV_COEF_CONTEXTS);
-
             fprintf(f, "\n    }");
-
         }
         while (++band < COEF_BANDS);
-
         fprintf(f, "\n  }");
     }
     while (++type < BLOCK_TYPES);
     fprintf(f, "\n};\n");
 
     fprintf(f, "static const unsigned int\nvp8_default_coef_counts_8x8"
-            "[BLOCK_TYPES] [COEF_BANDS]"
+            "[BLOCK_TYPES_8X8] [COEF_BANDS]"
             "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
 
     type = 0;
-
     do
     {
         fprintf(f, "%s\n  { /* block Type %d */", Comma(type), type);
-
         band = 0;
-
         do
         {
             fprintf(f, "%s\n    { /* Coeff Band %d */", Comma(band), band);
-
             pt = 0;
-
             do
             {
                 fprintf(f, "%s\n      {", Comma(pt));
-
                 t = 0;
-
                 do
                 {
                     const INT64 x = context_counters_8x8 [type] [band] [pt] [t];
@@ -724,7 +706,7 @@ void print_context_counters()
 
         fprintf(f, "\n  }");
     }
-    while (++type < BLOCK_TYPES);
+    while (++type < BLOCK_TYPES_8X8);
 
     fprintf(f, "\n};\n");
 
@@ -747,7 +729,6 @@ void print_context_counters()
 
             do
             {
-                fprintf(f, "%s\n      {", Comma(pt));
 
                 unsigned int branch_ct [ENTROPY_NODES] [2];
                 unsigned int coef_counts[MAX_ENTROPY_TOKENS];
@@ -757,6 +738,7 @@ void print_context_counters()
                 vp8_tree_probs_from_distribution(
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     coef_probs, branch_ct, coef_counts, 256, 1);
+                fprintf(f, "%s\n      {", Comma(pt));
 
                 t = 0;
 
@@ -782,7 +764,7 @@ void print_context_counters()
     fprintf(f, "\n};\n");
 
     fprintf(f, "static const vp8_prob\n"
-            "vp8_default_coef_probs_8x8[BLOCK_TYPES] [COEF_BANDS]\n"
+            "vp8_default_coef_probs_8x8[BLOCK_TYPES_8X8] [COEF_BANDS]\n"
             "[PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {");
     type = 0;
 
@@ -800,7 +782,6 @@ void print_context_counters()
 
             do
             {
-                fprintf(f, "%s\n      {", Comma(pt));
 
                 unsigned int branch_ct [ENTROPY_NODES] [2];
                 unsigned int coef_counts[MAX_ENTROPY_TOKENS];
@@ -811,6 +792,7 @@ void print_context_counters()
                     MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
                     coef_probs, branch_ct, coef_counts, 256, 1);
 
+                fprintf(f, "%s\n      {", Comma(pt));
                 t = 0;
 
                 do
@@ -831,7 +813,7 @@ void print_context_counters()
 
         fprintf(f, "\n  }");
     }
-    while (++type < BLOCK_TYPES);
+    while (++type < BLOCK_TYPES_8X8);
     fprintf(f, "\n};\n");
 
     fclose(f);

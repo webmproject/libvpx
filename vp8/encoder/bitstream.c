@@ -35,9 +35,14 @@ unsigned __int64 Sectionbits[500];
 
 #ifdef ENTROPY_STATS
 int intra_mode_stats[10][10][10];
-static unsigned int tree_update_hist [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] [2];
-static unsigned int tree_update_hist_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] [2];
-
+static unsigned int tree_update_hist [BLOCK_TYPES]
+                                     [COEF_BANDS]
+                                     [PREV_COEF_CONTEXTS]
+                                     [ENTROPY_NODES][2]={0};
+static unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
+                                         [COEF_BANDS]
+                                         [PREV_COEF_CONTEXTS]
+                                         [ENTROPY_NODES] [2]={0};
 extern unsigned int active_section;
 #endif
 
@@ -1383,87 +1388,6 @@ static void print_prob_tree(vp8_prob
     fclose(f);
 }
 
-static void sum_probs_over_prev_coef_context(
-        const unsigned int probs[PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS],
-        unsigned int* out)
-{
-    int i, j;
-    for (i=0; i < MAX_ENTROPY_TOKENS; ++i)
-    {
-        for (j=0; j < PREV_COEF_CONTEXTS; ++j)
-        {
-            const int tmp = out[i];
-            out[i] += probs[j][i];
-            /* check for wrap */
-            if (out[i] < tmp)
-                out[i] = UINT_MAX;
-        }
-    }
-}
-
-static int default_coef_context_savings(VP8_COMP *cpi)
-{
-    int savings = 0;
-    int i = 0;
-    do
-    {
-#if CONFIG_NEWUPDATE
-        int j = !i;
-#else
-        int j = 0;      /* token/prob index */
-#endif
-        do
-        {
-            int k = 0;
-            do
-            {
-                /* at every context */
-
-                /* calc probs and branch cts for this frame only */
-                //vp8_prob new_p           [ENTROPY_NODES];
-                //unsigned int branch_ct   [ENTROPY_NODES] [2];
-
-                int t = 0;      /* token/prob index */
-#if CONFIG_EXPANDED_COEF_CONTEXT
-                if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-                        continue;
-#endif
-
-                vp8_tree_probs_from_distribution(
-                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                    cpi->frame_coef_probs [i][j][k],
-                    cpi->frame_branch_ct [i][j][k],
-                    cpi->coef_counts [i][j][k],
-                    256, 1
-                );
-
-                do
-                {
-                    const unsigned int *ct  = cpi->frame_branch_ct [i][j][k][t];
-                    vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
-                    const vp8_prob oldp = cpi->common.fc.coef_probs [i][j][k][t];
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
-
-#if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
-                    const int s = prob_update_savings_search(ct, oldp, &newp, upd);
-#else
-                    const int s = prob_update_savings(ct, oldp, newp, upd);
-#endif
-
-                    if (s > 0)
-                    {
-                        savings += s;
-                    }
-                }
-                while (++t < ENTROPY_NODES);
-            }
-            while (++k < PREV_COEF_CONTEXTS);
-        }
-        while (++j < COEF_BANDS);
-    }
-    while (++i < BLOCK_TYPES);
-    return savings;
-}
 
 void build_coeff_contexts(VP8_COMP *cpi)
 {
@@ -1489,12 +1413,16 @@ void build_coeff_contexts(VP8_COMP *cpi)
                     256, 1
                 );
 #ifdef ENTROPY_STATS
-                t = 0;
-                do
+                if(!cpi->dummy_packing)
                 {
-                    context_counters [i][j][k][t] += cpi->coef_counts [i][j][k][t];
+                    t = 0;
+                    do
+                    {
+                        context_counters [i][j][k][t] +=
+                            cpi->coef_counts [i][j][k][t];
+                    }
+                    while (++t < MAX_ENTROPY_TOKENS);
                 }
-                while (++t < MAX_ENTROPY_TOKENS);
 #endif
             }
             while (++k < PREV_COEF_CONTEXTS);
@@ -1532,12 +1460,16 @@ void build_coeff_contexts(VP8_COMP *cpi)
                         256, 1
                         );
 #ifdef ENTROPY_STATS
-                    t = 0;
-                    do
+                    if(!cpi->dummy_packing)
                     {
-                        context_counters [i][j][k][t] += cpi->coef_counts [i][j][k][t];
+                        t = 0;
+                        do
+                        {
+                            context_counters_8x8 [i][j][k][t] +=
+                                cpi->coef_counts_8x8 [i][j][k][t];
+                        }
+                        while (++t < MAX_ENTROPY_TOKENS);
                     }
-                    while (++t < MAX_ENTROPY_TOKENS);
 #endif
 
                 }
@@ -1545,7 +1477,7 @@ void build_coeff_contexts(VP8_COMP *cpi)
             }
             while (++j < COEF_BANDS);
         }
-        while (++i < BLOCK_TYPES);
+        while (++i < BLOCK_TYPES_8X8);
     }
 
 }
@@ -1637,7 +1569,8 @@ static void update_coef_probs3(VP8_COMP *cpi)
                     //printf("  %d %d %d: %d (%d)\n", i, j, k, u, upd);
                     vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
-                    ++ tree_update_hist [i][j][k][t] [u];
+                    if(!cpi->dummy_packing)
+                        ++ tree_update_hist [i][j][k][t] [u];
 #endif
                     if (u)
                     { /* send/use new probability */
@@ -1653,7 +1586,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
 
     if(cpi->common.txfm_mode != ALLOW_8X8) return;
 
-    for (i = 0; i < BLOCK_TYPES; ++i)
+    for (i = 0; i < BLOCK_TYPES_8X8; ++i)
     {
         for (t = 0; t < ENTROPY_NODES; ++t)
         {
@@ -1731,7 +1664,8 @@ static void update_coef_probs3(VP8_COMP *cpi)
 #endif
                     vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
-                    ++ tree_update_hist_8x8 [i][j][k][t] [u];
+                    if(!cpi->dummy_packing)
+                        ++ tree_update_hist_8x8 [i][j][k][t] [u];
 #endif
                     if (u)
                     {
@@ -1853,7 +1787,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
         /* dry run to see if there is any udpate at all needed */
         savings = 0;
         update[0] = update[1] = 0;
-        for (i = 0; i < BLOCK_TYPES; ++i)
+        for (i = 0; i < BLOCK_TYPES_8X8; ++i)
         {
             for (j = !i; j < COEF_BANDS; ++j)
             {
@@ -1897,7 +1831,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
             continue;
         }
         vp8_write(w, 1, grpupd);
-        for (i = 0; i < BLOCK_TYPES; ++i)
+        for (i = 0; i < BLOCK_TYPES_8X8; ++i)
         {
             for (j = !i; j < COEF_BANDS; ++j)
             {
@@ -1927,7 +1861,8 @@ static void update_coef_probs2(VP8_COMP *cpi)
 #endif
                         vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
-                        ++ tree_update_hist_8x8 [i][j][k][t] [u];
+                        if(!cpi->dummy_packing)
+                            ++ tree_update_hist_8x8 [i][j][k][t] [u];
 #endif
                         if (u)
                         {
@@ -2073,7 +2008,8 @@ static void update_coef_probs(VP8_COMP *cpi)
 
                         vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
-                        ++ tree_update_hist [i][j][k][t] [u];
+                        if(!cpi->dummy_packing)
+                            ++ tree_update_hist [i][j][k][t] [u];
 #endif
                         if (u)
                         {
@@ -2090,15 +2026,6 @@ static void update_coef_probs(VP8_COMP *cpi)
                     }
                     while (++t < ENTROPY_NODES);
 
-                    // Accum token counts for generation of default statistics
-#if 0//def ENTROPY_STATS
-                    t = 0;
-                    do
-                    {
-                        context_counters [i][j][k][t] += cpi->coef_counts [i][j][k][t];
-                    }
-                    while (++t < MAX_ENTROPY_TOKENS);
-#endif
                 }
                 while (++k < PREV_COEF_CONTEXTS);
             }
@@ -2154,30 +2081,15 @@ static void update_coef_probs(VP8_COMP *cpi)
                             savings += s;
 #endif
 
-#ifdef ENTROPY_STATS
-                        ++ tree_update_hist_8x8 [i][j][k][t] [u];
-#endif
                         update[u]++;
                     }
                     while (++t < MAX_ENTROPY_TOKENS - 1);
-
-                    // Accum token counts for generation of default statistics
-#if 0//def ENTROPY_STATS
-                    t = 0;
-
-                    do
-                    {
-                        context_counters_8x8 [i][j][k][t] += cpi->coef_counts_8x8 [i][j][k][t];
-                    }
-                    while (++t < MAX_ENTROPY_TOKENS - 1);
-
-#endif
                 }
                 while (++k < PREV_COEF_CONTEXTS);
             }
             while (++j < COEF_BANDS);
         }
-        while (++i < BLOCK_TYPES);
+        while (++i < BLOCK_TYPES_8X8);
 
 #if CONFIG_NEWUPDATE
         if (update[1] == 0 || savings < 0)
@@ -2225,7 +2137,8 @@ static void update_coef_probs(VP8_COMP *cpi)
 #endif
                             vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
-                            ++ tree_update_hist_8x8 [i][j][k][t] [u];
+                            if(!cpi->dummy_packing)
+                                ++ tree_update_hist_8x8 [i][j][k][t] [u];
 #endif
                             if (u)
                             {
@@ -2240,21 +2153,12 @@ static void update_coef_probs(VP8_COMP *cpi)
                             }
                         }
                         while (++t < MAX_ENTROPY_TOKENS - 1);
-                        // Accum token counts for generation of default statistics
-#if 0//def ENTROPY_STATS
-                        t = 0;
-                        do
-                        {
-                            context_counters_8x8 [i][j][k][t] += cpi->coef_counts_8x8 [i][j][k][t];
-                        }
-                        while (++t < MAX_ENTROPY_TOKENS);
-#endif
                     }
                     while (++k < PREV_COEF_CONTEXTS);
                 }
                 while (++j < COEF_BANDS);
             }
-            while (++i < BLOCK_TYPES);
+            while (++i < BLOCK_TYPES_8X8);
         }
     }
 }
@@ -2786,7 +2690,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 void print_tree_update_probs()
 {
     int i, j, k, l;
-    FILE *f = fopen("context.c", "a");
+    FILE *f = fopen("coefupdprob.h", "w");
     int Sum;
     fprintf(f, "\n/* Update probabilities for token entropy tree. */\n\n");
     fprintf(f, "const vp8_prob tree_update_probs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {\n");
@@ -2831,7 +2735,7 @@ void print_tree_update_probs()
 
     fprintf(f, "const vp8_prob tree_update_probs_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {\n");
 
-    for (i = 0; i < BLOCK_TYPES; i++)
+    for (i = 0; i < BLOCK_TYPES_8X8; i++)
     {
         fprintf(f, "  { \n");
 

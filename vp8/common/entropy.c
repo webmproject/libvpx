@@ -204,7 +204,7 @@ void vp8_default_coef_probs(VP8_COMMON *pc)
         }
         while (++i < COEF_BANDS);
     }
-    while (++h < BLOCK_TYPES);
+    while (++h < BLOCK_TYPES_8X8);
 
 }
 

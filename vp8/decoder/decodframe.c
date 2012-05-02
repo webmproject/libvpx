@@ -823,7 +823,7 @@ static void read_coef_probs3(VP8D_COMP *pbi)
 
     if(pbi->common.txfm_mode == ALLOW_8X8)
     {
-        for (i = 0; i < BLOCK_TYPES; i++)
+        for (i = 0; i < BLOCK_TYPES_8X8; i++)
             for (l = 0; l < ENTROPY_NODES; l++)
             {
                 if(vp8_read(bc, grpupd))
@@ -889,7 +889,7 @@ static void read_coef_probs2(VP8D_COMP *pbi)
         {
             if(vp8_read(bc, grpupd))
             {
-                for (i = 0; i < BLOCK_TYPES; i++)
+                for (i = 0; i < BLOCK_TYPES_8X8; i++)
                     for (j = !i; j < COEF_BANDS; j++)
                         for (k = 0; k < PREV_COEF_CONTEXTS; k++)
                         {
@@ -961,7 +961,7 @@ static void read_coef_probs(VP8D_COMP *pbi)
     if(pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc))
     {
         // read coef probability tree
-        for (i = 0; i < BLOCK_TYPES; i++)
+        for (i = 0; i < BLOCK_TYPES_8X8; i++)
 #if CONFIG_NEWUPDATE
             for (j = !i; j < COEF_BANDS; j++)
 #else

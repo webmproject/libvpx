@@ -49,7 +49,7 @@ typedef struct frame_contexts
     vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
     vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-    vp8_prob coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    vp8_prob coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     MV_CONTEXT mvc[2];
 #if CONFIG_HIGH_PRECISION_MV
     MV_CONTEXT_HP mvc_hp[2];

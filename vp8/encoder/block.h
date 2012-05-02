@@ -149,7 +149,7 @@ typedef struct
 
     unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS]
                             [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-    unsigned int token_costs_8x8[BLOCK_TYPES] [COEF_BANDS]
+    unsigned int token_costs_8x8[BLOCK_TYPES_8X8] [COEF_BANDS]
                             [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 
     int optimize;
