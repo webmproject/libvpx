@@ -26,7 +26,7 @@ DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
     0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X,
     6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X,
     6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
-    6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 7 * OCB_X
+    6 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X
 };
 DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) = {
   0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X,
