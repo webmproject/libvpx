@@ -13,16 +13,11 @@
 #include "vpx/internal/vpx_codec_internal.h"
 #include "vpx_version.h"
 #include "vp8/encoder/onyx_int.h"
-#include "vpx/vp8e.h"
+#include "vpx/vp8cx.h"
 #include "vp8/encoder/firstpass.h"
 #include "vp8/common/onyx.h"
 #include <stdlib.h>
 #include <string.h>
-
-/* This value is a sentinel for determining whether the user has set a mode
- * directly through the deprecated VP8E_SET_ENCODING_MODE control.
- */
-#define NO_MODE_SET 255
 
 struct vp8_extracfg
 {
@@ -94,7 +89,6 @@ struct vpx_codec_alg_priv
     unsigned int            next_frame_flag;
     vp8_postproc_cfg_t      preview_ppcfg;
     vpx_codec_pkt_list_decl(64) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
-    int                         deprecated_mode;
     unsigned int                fixed_kf_cntr;
 };
 
@@ -516,7 +510,6 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
 
     switch (ctrl_id)
     {
-        MAP(VP8E_SET_ENCODING_MODE,         ctx->deprecated_mode);
         MAP(VP8E_SET_CPUUSED,               xcfg.cpu_used);
         MAP(VP8E_SET_ENABLEAUTOALTREF,      xcfg.enable_auto_alt_ref);
         MAP(VP8E_SET_NOISE_SENSITIVITY,     xcfg.noise_sensitivity);
@@ -571,7 +564,7 @@ static vpx_codec_err_t vp8e_mr_alloc_mem(const vpx_codec_enc_cfg_t *cfg,
 static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
                                  vpx_codec_priv_enc_mr_cfg_t *mr_cfg)
 {
-    vpx_codec_err_t        res = VPX_DEC_OK;
+    vpx_codec_err_t        res = VPX_CODEC_OK;
     struct vpx_codec_alg_priv *priv;
     vpx_codec_enc_cfg_t       *cfg;
     unsigned int               i;
@@ -625,8 +618,6 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
         {
             return VPX_CODEC_MEM_ERROR;
         }
-
-        priv->deprecated_mode = NO_MODE_SET;
 
         res = validate_config(priv, &priv->cfg, &priv->vp8_cfg, 0);
 
@@ -717,19 +708,6 @@ static void pick_quickcompress_mode(vpx_codec_alg_priv_t  *ctx,
 #else
     new_qc = MODE_REALTIME;
 #endif
-
-    switch (ctx->deprecated_mode)
-    {
-    case VP8_BEST_QUALITY_ENCODING:
-        new_qc = MODE_BESTQUALITY;
-        break;
-    case VP8_GOOD_QUALITY_ENCODING:
-        new_qc = MODE_GOODQUALITY;
-        break;
-    case VP8_REAL_TIME_ENCODING:
-        new_qc = MODE_REALTIME;
-        break;
-    }
 
     if (ctx->cfg.g_pass == VPX_RC_FIRST_PASS)
         new_qc = MODE_FIRSTPASS;
@@ -1207,7 +1185,6 @@ static vpx_codec_ctrl_fn_map_t vp8e_ctf_maps[] =
     {VP8E_SET_ROI_MAP,                  vp8e_set_roi_map},
     {VP8E_SET_ACTIVEMAP,                vp8e_set_activemap},
     {VP8E_SET_SCALEMODE,                vp8e_set_scalemode},
-    {VP8E_SET_ENCODING_MODE,            set_param},
     {VP8E_SET_CPUUSED,                  set_param},
     {VP8E_SET_NOISE_SENSITIVITY,        set_param},
     {VP8E_SET_ENABLEAUTOALTREF,         set_param},
@@ -1311,91 +1288,6 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) =
     {
         vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
         vp8e_encode,        /* vpx_codec_encode_fn_t      encode; */
-        vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
-        vp8e_set_config,
-        NOT_IMPLEMENTED,
-        vp8e_get_preview,
-        vp8e_mr_alloc_mem,
-    } /* encoder functions */
-};
-
-
-/*
- * BEGIN BACKWARDS COMPATIBILITY SHIM.
- */
-#define FORCE_KEY   2
-static vpx_codec_err_t api1_control(vpx_codec_alg_priv_t *ctx,
-                                    int                   ctrl_id,
-                                    va_list               args)
-{
-    vpx_codec_ctrl_fn_map_t *entry;
-
-    switch (ctrl_id)
-    {
-    case VP8E_SET_FLUSHFLAG:
-        /* VP8 sample code did VP8E_SET_FLUSHFLAG followed by
-         * vpx_codec_get_cx_data() rather than vpx_codec_encode().
-         */
-        return vp8e_encode(ctx, NULL, 0, 0, 0, 0);
-    case VP8E_SET_FRAMETYPE:
-        ctx->base.enc.tbd |= FORCE_KEY;
-        return VPX_CODEC_OK;
-    }
-
-    for (entry = vp8e_ctf_maps; entry && entry->fn; entry++)
-    {
-        if (!entry->ctrl_id || entry->ctrl_id == ctrl_id)
-        {
-            return entry->fn(ctx, ctrl_id, args);
-        }
-    }
-
-    return VPX_CODEC_ERROR;
-}
-
-
-static vpx_codec_ctrl_fn_map_t api1_ctrl_maps[] =
-{
-    {0, api1_control},
-    { -1, NULL}
-};
-
-
-static vpx_codec_err_t api1_encode(vpx_codec_alg_priv_t  *ctx,
-                                   const vpx_image_t     *img,
-                                   vpx_codec_pts_t        pts,
-                                   unsigned long          duration,
-                                   vpx_enc_frame_flags_t  flags,
-                                   unsigned long          deadline)
-{
-    int force = ctx->base.enc.tbd;
-
-    ctx->base.enc.tbd = 0;
-    return vp8e_encode
-           (ctx,
-            img,
-            pts,
-            duration,
-            flags | ((force & FORCE_KEY) ? VPX_EFLAG_FORCE_KF : 0),
-            deadline);
-}
-
-
-vpx_codec_iface_t vpx_enc_vp8_algo =
-{
-    "WebM Project VP8 Encoder (Deprecated API)" VERSION_STRING,
-    VPX_CODEC_INTERNAL_ABI_VERSION,
-    VPX_CODEC_CAP_ENCODER,
-    /* vpx_codec_caps_t          caps; */
-    vp8e_init,          /* vpx_codec_init_fn_t       init; */
-    vp8e_destroy,       /* vpx_codec_destroy_fn_t    destroy; */
-    api1_ctrl_maps,     /* vpx_codec_ctrl_fn_map_t  *ctrl_maps; */
-    NOT_IMPLEMENTED,    /* vpx_codec_get_mmap_fn_t   get_mmap; */
-    NOT_IMPLEMENTED,    /* vpx_codec_set_mmap_fn_t   set_mmap; */
-    {NOT_IMPLEMENTED},  /* decoder functions */
-    {
-        vp8e_usage_cfg_map, /* vpx_codec_enc_cfg_map_t    peek_si; */
-        api1_encode,        /* vpx_codec_encode_fn_t      encode; */
         vp8e_get_cxdata,    /* vpx_codec_get_cx_data_fn_t   frame_get; */
         vp8e_set_config,
         NOT_IMPLEMENTED,
