@@ -118,7 +118,7 @@ static unsigned int int_sqrt(unsigned int x)
 #define USE_SSD
 static void multiframe_quality_enhance_block
 (
-    int blksize, /* Currently only values supported are 16, 8, 4 */
+    int blksize, /* Currently only values supported are 16, 8 */
     int qcurr,
     int qprev,
     unsigned char *y,
@@ -140,9 +140,7 @@ static void multiframe_quality_enhance_block
     int uvblksize = blksize >> 1;
     int qdiff = qcurr - qprev;
 
-    int i, j;
-    unsigned char *yp;
-    unsigned char *ydp;
+    int i;
     unsigned char *up;
     unsigned char *udp;
     unsigned char *vp;
@@ -167,7 +165,7 @@ static void multiframe_quality_enhance_block
         vsad = (vp8_sad8x8(v, uv_stride, vd, uvd_stride, INT_MAX)+32)>>6;
 #endif
     }
-    else if (blksize == 8)
+    else /* if (blksize == 8) */
     {
         actd = (vp8_variance8x8(yd, yd_stride, VP8_ZEROS, 0, &sse)+32)>>6;
         act = (vp8_variance8x8(y, y_stride, VP8_ZEROS, 0, &sse)+32)>>6;

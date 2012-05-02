@@ -2313,11 +2313,8 @@ void vp8_second_pass(VP8_COMP *cpi)
     FIRSTPASS_STATS this_frame = {0};
     FIRSTPASS_STATS this_frame_copy;
 
-    double this_frame_error;
     double this_frame_intra_error;
     double this_frame_coded_error;
-
-    FIRSTPASS_STATS *start_pos;
 
     int overhead_bits;
 
@@ -2331,11 +2328,8 @@ void vp8_second_pass(VP8_COMP *cpi)
     if (EOF == input_stats(cpi, &this_frame))
         return;
 
-    this_frame_error = this_frame.ssim_weighted_pred_err;
     this_frame_intra_error = this_frame.intra_error;
     this_frame_coded_error = this_frame.coded_error;
-
-    start_pos = cpi->twopass.stats_in;
 
     // keyframe and section processing !
     if (cpi->twopass.frames_to_key == 0)
