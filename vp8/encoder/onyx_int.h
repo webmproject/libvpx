@@ -164,7 +164,7 @@ typedef enum
     THR_SPLIT2         = 17,
     THR_SPLIT3         = 18,
 
-    THR_B_PRED         = 19,
+    THR_B_PRED         = 19
 }
 THR_MODES;
 
