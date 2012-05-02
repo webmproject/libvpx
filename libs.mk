@@ -66,6 +66,7 @@ endif
 
 ifeq ($(CONFIG_MSVS),yes)
 CODEC_LIB=$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd)
+GTEST_LIB=$(if $(CONFIG_STATIC_MSVCRT),gtestmt,gtestmd)
 # This variable uses deferred expansion intentionally, since the results of
 # $(wildcard) may change during the course of the Make.
 VS_PLATFORMS = $(foreach d,$(wildcard */Release/$(CODEC_LIB).lib),$(word 1,$(subst /, ,$(d))))
@@ -380,7 +381,7 @@ $(notdir $(1:.cc=.vcproj)): $(SRC_PATH_BARE)/$(1)
             $$(if $$(CONFIG_STATIC_MSVCRT),--static-crt) \
             --out=$$@ $$(INTERNAL_CFLAGS) $$(CFLAGS) \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
-            -L. -lvpxmt -lwinmm -lgtestmt $$^
+            -L. -l$(CODEC_LIB) -lwinmm -l$(GTEST_LIB) $$^
 endef
 
 $(foreach proj,$(LIBVPX_TEST_BINS),\
