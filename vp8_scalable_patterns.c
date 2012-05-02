@@ -117,7 +117,7 @@ static void write_ivf_frame_header(FILE *outfile,
 static int mode_to_num_layers[9] = {2, 2, 3, 3, 3, 3, 5, 2, 3};
 
 int main(int argc, char **argv) {
-    FILE                *infile, *outfile[MAX_LAYERS];
+    FILE                *infile, *outfile[VPX_TS_MAX_LAYERS];
     vpx_codec_ctx_t      codec;
     vpx_codec_enc_cfg_t  cfg;
     int                  frame_cnt = 0;
@@ -133,8 +133,8 @@ int main(int argc, char **argv) {
     int                  frame_duration = 1;   // 1 timebase tick per frame
 
     int                  layering_mode = 0;
-    int                  frames_in_layer[MAX_LAYERS] = {0};
-    int                  layer_flags[MAX_PERIODICITY] = {0};
+    int                  frames_in_layer[VPX_TS_MAX_LAYERS] = {0};
+    int                  layer_flags[VPX_TS_MAX_PERIODICITY] = {0};
     int                  flag_periodicity;
     int                  max_intra_size_pct;
 

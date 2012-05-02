@@ -207,10 +207,10 @@ extern "C"
 
         // Temporal scaling parameters
         unsigned int number_of_layers;
-        unsigned int target_bitrate[MAX_PERIODICITY];
-        unsigned int rate_decimator[MAX_PERIODICITY];
+        unsigned int target_bitrate[VPX_TS_MAX_PERIODICITY];
+        unsigned int rate_decimator[VPX_TS_MAX_PERIODICITY];
         unsigned int periodicity;
-        unsigned int layer_id[MAX_PERIODICITY];
+        unsigned int layer_id[VPX_TS_MAX_PERIODICITY];
 
 #if CONFIG_MULTI_RES_ENCODING
         /* Number of total resolutions encoded */
