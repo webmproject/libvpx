@@ -48,7 +48,7 @@ DECLARE_ALIGNED(16, const unsigned char, vp8_norm[256]) =
 };
 
 DECLARE_ALIGNED(16, cuchar, vp8_coef_bands[16]) =
-{ 0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7};
+{ 0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7};
 
 DECLARE_ALIGNED(16, cuchar, vp8_prev_token_class[MAX_ENTROPY_TOKENS]) =
 { 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0};
@@ -77,13 +77,6 @@ DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]) =
     58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
 };
 
-DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]) =
-{
-    1,  2,  6,  7,
-    3,  5,  8, 13,
-    4,  9, 12, 14,
-   10, 11, 15, 16
-};
 
 DECLARE_ALIGNED(16, short, vp8_default_zig_zag_mask[16]);
 DECLARE_ALIGNED(64, short, vp8_default_zig_zag_mask_8x8[64]);//int64_t
