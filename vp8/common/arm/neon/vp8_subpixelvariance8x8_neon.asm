@@ -27,7 +27,7 @@
 |vp8_sub_pixel_variance8x8_neon| PROC
     push            {r4-r5, lr}
 
-    ldr             r12, _BilinearTaps_coeff_
+    adr             r12, bilinear_taps_coeff
     ldr             r4, [sp, #12]           ;load *dst_ptr from stack
     ldr             r5, [sp, #16]           ;load dst_pixels_per_line from stack
     ldr             lr, [sp, #20]           ;load *sse from stack
@@ -216,8 +216,6 @@ sub_pixel_variance8x8_neon_loop
 
 ;-----------------
 
-_BilinearTaps_coeff_
-    DCD     bilinear_taps_coeff
 bilinear_taps_coeff
     DCD     128, 0, 112, 16, 96, 32, 80, 48, 64, 64, 48, 80, 32, 96, 16, 112
 
