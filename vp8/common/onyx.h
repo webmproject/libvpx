@@ -60,14 +60,14 @@ extern "C"
         MODE_BESTQUALITY    = 0x2,
         MODE_FIRSTPASS      = 0x3,
         MODE_SECONDPASS     = 0x4,
-        MODE_SECONDPASS_BEST = 0x5,
+        MODE_SECONDPASS_BEST = 0x5
     } MODE;
 
     typedef enum
     {
         FRAMEFLAGS_KEY    = 1,
         FRAMEFLAGS_GOLDEN = 2,
-        FRAMEFLAGS_ALTREF = 4,
+        FRAMEFLAGS_ALTREF = 4
     } FRAMETYPE_FLAGS;
 
 

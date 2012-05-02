@@ -46,7 +46,7 @@ enum vp8_com_control_id
     VP8_SET_DBG_COLOR_B_MODES   = 6,    /**< set which blocks modes to color */
     VP8_SET_DBG_DISPLAY_MV      = 7,    /**< set which motion vector modes to draw */
     VP8_COMMON_CTRL_ID_MAX,
-    VP8_DECODER_CTRL_ID_START   = 256,
+    VP8_DECODER_CTRL_ID_START   = 256
 };
 
 /*!\brief post process flags
@@ -63,7 +63,7 @@ enum vp8_postproc_level
     VP8_DEBUG_TXT_MBLK_MODES    = 1<<4, /**< print macro block modes over each macro block */
     VP8_DEBUG_TXT_DC_DIFF       = 1<<5, /**< print dc diff for each macro block */
     VP8_DEBUG_TXT_RATE_INFO     = 1<<6, /**< print video rate info (encoder only) */
-    VP8_MFQE                    = 1<<10,
+    VP8_MFQE                    = 1<<10
 };
 
 /*!\brief post process flags
