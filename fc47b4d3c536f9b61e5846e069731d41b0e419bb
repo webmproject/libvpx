@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//vfk\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-03T22:33:28Z",
+      "side": 1,
+      "message": "order is C/C++/third_party, move this up",
+      "revId": "fc47b4d3c536f9b61e5846e069731d41b0e419bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//vYs\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-03T22:33:28Z",
+      "side": 1,
+      "message": "shouldn\u0027t you be setting this to some default with GTEST_FLAG?",
+      "revId": "fc47b4d3c536f9b61e5846e069731d41b0e419bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//vYg\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-03T22:33:28Z",
+      "side": 1,
+      "message": "spacing in inconsistent here and with %, add some whitespace.",
+      "revId": "fc47b4d3c536f9b61e5846e069731d41b0e419bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
