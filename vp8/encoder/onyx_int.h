@@ -57,8 +57,6 @@
 #define VP8_TEMPORAL_ALT_REF 1
 #endif
 
-#define MAX_PERIODICITY 16
-
 #define MAX(x,y) (((x)>(y))?(x):(y))
 #define MIN(x,y) (((x)<(y))?(x):(y))
 
@@ -670,21 +668,21 @@ typedef struct VP8_COMP
 
     // Coding layer state variables
     unsigned int current_layer;
-    LAYER_CONTEXT layer_context[MAX_LAYERS];
+    LAYER_CONTEXT layer_context[VPX_TS_MAX_LAYERS];
 
-    int64_t frames_in_layer[MAX_LAYERS];
-    int64_t bytes_in_layer[MAX_LAYERS];
-    double sum_psnr[MAX_LAYERS];
-    double sum_psnr_p[MAX_LAYERS];
-    double total_error2[MAX_LAYERS];
-    double total_error2_p[MAX_LAYERS];
-    double sum_ssim[MAX_LAYERS];
-    double sum_weights[MAX_LAYERS];
+    int64_t frames_in_layer[VPX_TS_MAX_LAYERS];
+    int64_t bytes_in_layer[VPX_TS_MAX_LAYERS];
+    double sum_psnr[VPX_TS_MAX_LAYERS];
+    double sum_psnr_p[VPX_TS_MAX_LAYERS];
+    double total_error2[VPX_TS_MAX_LAYERS];
+    double total_error2_p[VPX_TS_MAX_LAYERS];
+    double sum_ssim[VPX_TS_MAX_LAYERS];
+    double sum_weights[VPX_TS_MAX_LAYERS];
 
-    double total_ssimg_y_in_layer[MAX_LAYERS];
-    double total_ssimg_u_in_layer[MAX_LAYERS];
-    double total_ssimg_v_in_layer[MAX_LAYERS];
-    double total_ssimg_all_in_layer[MAX_LAYERS];
+    double total_ssimg_y_in_layer[VPX_TS_MAX_LAYERS];
+    double total_ssimg_u_in_layer[VPX_TS_MAX_LAYERS];
+    double total_ssimg_v_in_layer[VPX_TS_MAX_LAYERS];
+    double total_ssimg_all_in_layer[VPX_TS_MAX_LAYERS];
 
 #if CONFIG_MULTI_RES_ENCODING
     /* Number of MBs per row at lower-resolution level */
