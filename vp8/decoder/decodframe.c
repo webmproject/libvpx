@@ -45,19 +45,41 @@ int dec_debug = 0;
 #endif
 
 #if CONFIG_NEWUPDATE
+
+static int merge_index(int v, int n, int modulus)
+{
+    int max1 = (n-1 - modulus/2)/modulus + 1;
+    if (v < max1) v = v * modulus + modulus/2;
+    else
+    {
+        int w;
+        v -= max1;
+        w = v;
+        v += (v + modulus-modulus/2)/modulus;
+        while (v%modulus == modulus/2 ||
+               w != v - (v + modulus-modulus/2)/modulus) v++;
+    }
+    return v;
+}
+
 static int inv_remap_prob(int v, int m)
 {
     const int n = 256;
-    int i;
-    //if (v <= n - 2 - s) v += s; else v =  n - 2 - v;
-    //v = ((v&240)>>4) | ((v&15)<<4);
-    v = (v%15)*17 + (v/15);
+    const int modulus = MODULUS_PARAM;
+    int i, w;
+    v = merge_index(v, n-1, modulus);
     if ((m<<1)<=n) {
         i = inv_recenter_nonneg(v+1, m);
     } else {
         i = n-1-inv_recenter_nonneg(v+1, n-1-m);
     }
     return i;
+}
+
+static vp8_prob read_prob_diff_update(vp8_reader *const bc, int oldp)
+{
+    int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
+    return (vp8_prob)inv_remap_prob(delp, oldp);
 }
 #endif
 
@@ -811,11 +833,7 @@ static void read_coef_probs3(VP8D_COMP *pbi)
                         {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
                         int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
-                        if (u)
-                        {
-                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
-                            *p = (vp8_prob)inv_remap_prob(delp, *p);
-                        }
+                        if (u) *p = read_prob_diff_update(bc, *p);
                         }
                     }
             }
@@ -839,11 +857,7 @@ static void read_coef_probs3(VP8D_COMP *pbi)
                             {
                             vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
                             int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
-                            if (u)
-                            {
-                                int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
-                                *p = (vp8_prob)inv_remap_prob(delp, *p);
-                            }
+                            if (u) *p = read_prob_diff_update(bc, *p);
                             }
                         }
                 }
@@ -874,11 +888,7 @@ static void read_coef_probs2(VP8D_COMP *pbi)
                         {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
                         int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
-                        if (u)
-                        {
-                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
-                            *p = (vp8_prob)inv_remap_prob(delp, *p);
-                        }
+                        if (u) *p = read_prob_diff_update(bc, *p);
                         }
                     }
         }
@@ -902,11 +912,7 @@ static void read_coef_probs2(VP8D_COMP *pbi)
                             vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
 
                             int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
-                            if (u)
-                            {
-                                int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
-                                *p = (vp8_prob)inv_remap_prob(delp, *p);
-                            }
+                            if (u) *p = read_prob_diff_update(bc, *p);
                             }
                         }
             }
@@ -945,10 +951,7 @@ static void read_coef_probs(VP8D_COMP *pbi)
                         if (vp8_read(bc, vp8_coef_update_probs [i][j][k][l]))
                         {
 #if CONFIG_NEWUPDATE
-                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
-                            //printf("delp = %d/%d", *p, delp);
-                            *p = (vp8_prob)inv_remap_prob(delp, *p);
-                            //printf("/%d\n", *p);
+                            *p = read_prob_diff_update(bc, *p);
 #else
                             *p = (vp8_prob)vp8_read_literal(bc, 8);
 #endif
@@ -982,8 +985,7 @@ static void read_coef_probs(VP8D_COMP *pbi)
                         if (vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]))
                         {
 #if CONFIG_NEWUPDATE
-                            int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
-                            *p = (vp8_prob)inv_remap_prob(delp, *p);
+                            *p = read_prob_diff_update(bc, *p);
 #else
                             *p = (vp8_prob)vp8_read_literal(bc, 8);
 #endif
