@@ -18,10 +18,11 @@
 #if CONFIG_MULTITHREAD
 
 extern int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
-                                         TOKENEXTRA **t, int recon_yoffset,
-                                         int recon_uvoffset);
-extern int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x,
-                                          TOKENEXTRA **t);
+                                         TOKENEXTRA **t,
+                                         int recon_yoffset, int recon_uvoffset,
+                                         int mb_row, int mb_col);
+extern int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+                                         TOKENEXTRA **t);
 extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip);
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
@@ -186,14 +187,14 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                     if (cm->frame_type == KEY_FRAME)
                     {
-                        *totalrate += vp8cx_encode_intra_macro_block(cpi, x, &tp);
+                        *totalrate += vp8cx_encode_intra_macroblock(cpi, x, &tp);
 #ifdef MODE_STATS
                         y_modes[xd->mbmi.mode] ++;
 #endif
                     }
                     else
                     {
-                        *totalrate += vp8cx_encode_inter_macroblock(cpi, x, &tp, recon_yoffset, recon_uvoffset);
+                        *totalrate += vp8cx_encode_inter_macroblock(cpi, x, &tp, recon_yoffset, recon_uvoffset, mb_row, mb_col);
 
 #ifdef MODE_STATS
                         inter_y_modes[xd->mbmi.mode] ++;
