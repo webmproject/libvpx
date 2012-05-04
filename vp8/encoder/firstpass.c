@@ -868,7 +868,7 @@ extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 //
 
 
-double bitcost( double prob )
+static double bitcost( double prob )
 {
     return -(log( prob ) / log( 2.0 ));
 }

@@ -160,7 +160,7 @@ const vp8_tree_index vp8_small_mvtree [14] =
 void vp8_init_mbmode_probs(VP8_COMMON *x)
 {
     vpx_memcpy(x->fc.ymode_prob, vp8_ymode_prob, sizeof(vp8_ymode_prob));
-    vpx_memcpy(x->kf_ymode_prob, kf_ymode_prob, sizeof(kf_ymode_prob));
+    vpx_memcpy(x->kf_ymode_prob, vp8_kf_ymode_prob, sizeof(vp8_kf_ymode_prob));
     vpx_memcpy(x->fc.uv_mode_prob, vp8_uv_mode_prob, sizeof(vp8_uv_mode_prob));
     vpx_memcpy(x->kf_uv_mode_prob, vp8_kf_uv_mode_prob, sizeof(vp8_kf_uv_mode_prob));
     vpx_memcpy(x->fc.sub_mv_ref_prob, sub_mv_ref_prob, sizeof(sub_mv_ref_prob));

@@ -1339,7 +1339,7 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 #endif
 }
 
-void update_layer_contexts (VP8_COMP *cpi)
+static void update_layer_contexts (VP8_COMP *cpi)
 {
     VP8_CONFIG *oxcf = &cpi->oxcf;
 
@@ -3020,7 +3020,7 @@ static int recode_loop_test( VP8_COMP *cpi,
     return force_recode;
 }
 
-void update_reference_frames(VP8_COMMON *cm)
+static void update_reference_frames(VP8_COMMON *cm)
 {
     YV12_BUFFER_CONFIG *yv12_fb = cm->yv12_fb;
 
