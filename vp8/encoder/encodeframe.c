@@ -48,8 +48,11 @@ extern void vp8cx_init_mbrthread_data(VP8_COMP *cpi,
                                       int count);
 void vp8_build_block_offsets(MACROBLOCK *x);
 void vp8_setup_block_ptrs(MACROBLOCK *x);
-int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t, int recon_yoffset, int recon_uvoffset, int mb_row, int mb_col);
-int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t, int mb_row, int mb_col);
+int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
+                                  int recon_yoffset, int recon_uvoffset,
+                                  int mb_row, int mb_col);
+int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
+                                   TOKENEXTRA **t);
 static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x );
 
 #ifdef MODE_STATS
@@ -493,7 +496,7 @@ void encode_mb_row(VP8_COMP *cpi,
 
         if (cm->frame_type == KEY_FRAME)
         {
-            *totalrate += vp8cx_encode_intra_macro_block(cpi, x, tp, mb_row, mb_col);
+            *totalrate += vp8cx_encode_intra_macroblock(cpi, x, tp);
 #ifdef MODE_STATS
             y_modes[xd->mbmi.mode] ++;
 #endif
@@ -1117,8 +1120,7 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x )
 #endif
 }
 
-int vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t,
-                                   int mb_row, int mb_col)
+int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x, TOKENEXTRA **t)
 {
     MACROBLOCKD *xd = &x->e_mbd;
     int rate;
