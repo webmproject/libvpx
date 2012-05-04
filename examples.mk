@@ -98,7 +98,7 @@ vp8cx_set_ref.GUID                  = C5E31F7F-96F6-48BD-BD3E-10EBF6E8057A
 vp8cx_set_ref.DESCRIPTION           = VP8 set encoder reference frame
 
 # C file is provided, not generated automatically.
-GEN_EXAMPLES-$(CONFIG_MULTI_RES_ENCODING) += vp8_multi_resolution_encoder.c
+UTILS-$(CONFIG_MULTI_RES_ENCODING) += vp8_multi_resolution_encoder.c
 vp8_multi_resolution_encoder.SRCS  \
                          += third_party/libyuv/include/libyuv/basic_types.h  \
                             third_party/libyuv/include/libyuv/cpu_id.h  \
