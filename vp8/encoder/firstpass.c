@@ -28,11 +28,10 @@
 #include "rdopt.h"
 #include "vp8/common/quant_common.h"
 #include "encodemv.h"
+#include "encodeframe.h"
 
 //#define OUTPUT_FPF 1
 
-extern void vp8_build_block_offsets(MACROBLOCK *x);
-extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 extern void vp8_alloc_compressor_data(VP8_COMP *cpi);

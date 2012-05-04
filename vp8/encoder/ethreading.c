@@ -12,8 +12,8 @@
 #include "vp8/common/threading.h"
 #include "vp8/common/common.h"
 #include "vp8/common/extend.h"
-
 #include "bitstream.h"
+#include "encodeframe.h"
 
 #if CONFIG_MULTITHREAD
 
@@ -24,8 +24,6 @@ extern int vp8cx_encode_inter_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
 extern int vp8cx_encode_intra_macroblock(VP8_COMP *cpi, MACROBLOCK *x,
                                          TOKENEXTRA **t);
 extern void vp8cx_mb_init_quantizer(VP8_COMP *cpi, MACROBLOCK *x, int ok_to_skip);
-extern void vp8_build_block_offsets(MACROBLOCK *x);
-extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 
 extern void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm);
 

@@ -39,6 +39,7 @@ VP8_CX_SRCS-yes += encoder/bitstream.c
 VP8_CX_SRCS-yes += encoder/boolhuff.c
 VP8_CX_SRCS-yes += encoder/dct.c
 VP8_CX_SRCS-yes += encoder/encodeframe.c
+VP8_CX_SRCS-yes += encoder/encodeframe.h
 VP8_CX_SRCS-yes += encoder/encodeintra.c
 VP8_CX_SRCS-yes += encoder/encodemb.c
 VP8_CX_SRCS-yes += encoder/encodemv.c

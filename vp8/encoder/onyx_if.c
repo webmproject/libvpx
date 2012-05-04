@@ -36,6 +36,7 @@
 #if CONFIG_MULTI_RES_ENCODING
 #include "mr_dissim.h"
 #endif
+#include "encodeframe.h"
 
 #include <math.h>
 #include <stdio.h>
