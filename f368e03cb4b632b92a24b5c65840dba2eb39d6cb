@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//tyo\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-05T00:35:56Z",
+      "side": 1,
+      "message": "don\u0027t join these, otherwise you\u0027ll end up with a backup file ending in \u0027e\u0027.",
+      "revId": "f368e03cb4b632b92a24b5c65840dba2eb39d6cb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
