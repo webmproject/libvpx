@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//slY\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-07T22:04:14Z",
+      "side": 1,
+      "message": "when did these get up here? they go under third_party...\nonly something like boolcoder_test.h would go here\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Names_and_Order_of_Includes",
+      "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//slQ\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-07T22:04:14Z",
+      "side": 1,
+      "message": "add some whitespace between function definitions. The short ones could be one line",
+      "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//slk\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-07T22:04:14Z",
+      "side": 1,
+      "message": "const; and you\u0027re going to have a problem with log2 on msvc...needs to be wrapped\n\nsee, e.g.:\n\nhttps://gerrit.chromium.org/gerrit/gitweb?p\u003dwebm/libwebp.git;a\u003dblob;f\u003dsrc/utils/tcoder.c;h\u003d035fa1f9e67190b8d476db8d49fe34625a6746a7;hb\u003dmaster",
+      "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//slg\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-07T22:04:14Z",
+      "side": 1,
+      "message": "weird indent",
+      "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
