@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//swg\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-07T20:59:21Z",
+      "side": 1,
+      "message": "Forgot to mention these comments; not too useful outside of gerrit actually...",
+      "revId": "a9634251d386e3040ff37cfbd354ef1a2c3f4fe1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
