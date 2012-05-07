@@ -67,6 +67,57 @@
       "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//slE\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-05-07T22:07:45Z",
+      "side": 1,
+      "message": "i\u0027d use rand()\u003e\u003e8 here too, but i means some restriction on \u0027range\u0027. Like: \u0027range \u003c (1 \u003c\u003c 23)\u0027. I guess it\u0027s ok here...",
+      "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//sk8\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-05-07T22:07:45Z",
+      "side": 1,
+      "message": "i tend to remember that 0 is the only seed value that should be used by srand() (because of the multiplicative nature of the rand() algo).\n\nWhat about \u00270xbaba\u0027 or anything non-zero instead?",
+      "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//sk0\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-05-07T22:07:45Z",
+      "side": 1,
+      "message": "suggestion: looking at the number of time (i\u00261) is used, you might want to introduce a local variable:\n\u0027const int parity \u003d i \u0026 1;\"\n\nhere",
+      "revId": "5fb5aa0e476b9666f03f125260098d508816ed46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
