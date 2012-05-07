@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAKn//szw\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-07T20:34:18Z",
+      "side": 1,
+      "message": "ok now sort the C-includes.",
+      "revId": "504e1d3d8b4c06a0a28adb981356f6949b9f0c1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//sz0\u003d",
         "filename": "vp8/encoder/boolcoder_test.cc",
         "patchSetId": 4
@@ -30,6 +47,23 @@
       "writtenOn": "2012-05-07T20:22:02Z",
       "side": 1,
       "message": "ahem... it\u0027s not uniform. Only if range is a power of 2.\nNormally, you\u0027d use:\n\nint upper_bound_mask \u003d (1 \u003c\u003c log2(range)) - 1;\nint val;\ndo {\n  val \u003d rand() \u0026 upper_bound_mask;\n} while (val \u003e\u003d range);\nreturn val;",
+      "revId": "504e1d3d8b4c06a0a28adb981356f6949b9f0c1d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//sy8\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-07T20:34:18Z",
+      "side": 1,
+      "message": "delete this line",
       "revId": "504e1d3d8b4c06a0a28adb981356f6949b9f0c1d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
