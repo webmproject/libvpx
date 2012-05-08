@@ -177,19 +177,16 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
     RANGE_CHECK_BOOL(vp8_cfg,               enable_auto_alt_ref);
     RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
-#if CONFIG_TEMPORAL_DENOISING
-    RANGE_CHECK(vp8_cfg, noise_sensitivity, 0, 1);
-#endif
 #if !(CONFIG_REALTIME_ONLY)
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_BEST_QUALITY_ENCODING, VP8_REAL_TIME_ENCODING);
-#if !(CONFIG_TEMPORAL_DENOISING)
-    RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
-#endif
 #else
     RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_REAL_TIME_ENCODING, VP8_REAL_TIME_ENCODING);
-#if !(CONFIG_TEMPORAL_DENOISING)
-    RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 0);
 #endif
+
+#if CONFIG_REALTIME_ONLY && !CONFIG_TEMPORAL_DENOISING
+    RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 0);
+#else
+    RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
 #endif
 
     RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
