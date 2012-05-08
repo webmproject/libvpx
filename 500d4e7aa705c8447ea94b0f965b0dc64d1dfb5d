@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//sb4\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-08T00:16:58Z",
+      "side": 1,
+      "message": "this could be in an anonymous namespace to avoid unintended collisions.",
+      "revId": "500d4e7aa705c8447ea94b0f965b0dc64d1dfb5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//scQ\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-08T00:16:58Z",
+      "side": 1,
+      "message": "no space before ()",
+      "revId": "500d4e7aa705c8447ea94b0f965b0dc64d1dfb5d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
