@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//sWw\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-08T01:02:46Z",
+      "side": 1,
+      "message": "for reference this could have gone with the anonymous namespace, the static would be obviated.",
+      "revId": "5502ee3fb4e6948d45b4d7112219bc54aa03ca01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//sWg\u003d",
+        "filename": "vp8/encoder/boolcoder_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-08T01:02:46Z",
+      "side": 1,
+      "message": "usually this is marked \u0027// namespace\u0027 for readability.",
+      "revId": "5502ee3fb4e6948d45b4d7112219bc54aa03ca01",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
