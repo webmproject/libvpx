@@ -4866,7 +4866,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
 
             if (cpi->oxcf.number_of_layers > 1)
             {
-                int i;
+                unsigned int i;
 
                 // Update frame rates for each layer
                 for (i=0; i<cpi->oxcf.number_of_layers; i++)

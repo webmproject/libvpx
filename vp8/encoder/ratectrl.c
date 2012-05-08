@@ -350,7 +350,7 @@ static void calc_iframe_target_size(VP8_COMP *cpi)
 {
     // boost defaults to half second
     int kf_boost;
-    int target;
+    unsigned int target;
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();  //__asm emms;

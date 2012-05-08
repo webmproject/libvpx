@@ -61,7 +61,7 @@ typedef struct VP8D_COMP
     volatile int b_multithreaded_rd;
     int max_threads;
     int current_mb_col_main;
-    int decoding_thread_count;
+    unsigned int decoding_thread_count;
     int allocated_decoding_thread_count;
 
     int mt_baseline_filter_level[MAX_MB_SEGMENTS];
