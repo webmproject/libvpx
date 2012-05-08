@@ -26,6 +26,14 @@
 #ifdef ENTROPY_STATS
 INT64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 INT64 context_counters_8x8[BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+extern unsigned int tree_update_hist [BLOCK_TYPES]
+                                     [COEF_BANDS]
+                                     [PREV_COEF_CONTEXTS]
+                                     [ENTROPY_NODES][2];
+extern unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
+                                         [COEF_BANDS]
+                                         [PREV_COEF_CONTEXTS]
+                                         [ENTROPY_NODES] [2];
 #endif
 void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
 void vp8_stuff_mb_8x8(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) ;
@@ -614,25 +622,48 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t)
 
 void init_context_counters(void)
 {
-    vpx_memset(context_counters, 0, sizeof(context_counters));
-    vpx_memset(context_counters_8x8, 0, sizeof(context_counters_8x8));
+    FILE *f = fopen("context.bin", "rb");
+    if(!f)
+    {
+        vpx_memset(context_counters, 0, sizeof(context_counters));
+        vpx_memset(context_counters_8x8, 0, sizeof(context_counters_8x8));
+    }
+    else
+    {
+        fread(context_counters, sizeof(context_counters), 1, f);
+        fread(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
+        fclose(f);
+    }
+
+    f = fopen("treeupdate.bin", "rb");
+    if(!f)
+    {
+        vpx_memset(tree_update_hist, 0, sizeof(tree_update_hist));
+        vpx_memset(tree_update_hist_8x8, 0, sizeof(tree_update_hist_8x8));
+    }
+    else
+    {
+        fread(tree_update_hist, sizeof(tree_update_hist), 1, f);
+        fread(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
+        fclose(f);
+    }
 }
 
 void print_context_counters()
 {
 
     int type, band, pt, t;
-
-    FILE *const f = fopen("context.c", "w");
+    FILE *f = fopen("context.c", "w");
 
     fprintf(f, "#include \"entropy.h\"\n");
-
     fprintf(f, "\n/* *** GENERATED FILE: DO NOT EDIT *** */\n\n");
-
-    fprintf(f, "static const unsigned int\nvp8_default_coef_counts[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {");
+    fprintf(f, "static const unsigned int\n"
+               "vp8_default_coef_counts[BLOCK_TYPES]\n"
+               "                      [COEF_BANDS]\n"
+               "                      [PREV_COEF_CONTEXTS]\n"
+               "                      [MAX_ENTROPY_TOKENS]={\n");
 
 # define Comma( X) (X? ",":"")
-
     type = 0;
     do
     {
@@ -641,7 +672,6 @@ void print_context_counters()
         do
         {
             fprintf(f, "%s\n    { /* Coeff Band %d */", Comma(band), band);
-
             pt = 0;
             do
             {
@@ -816,6 +846,11 @@ void print_context_counters()
     while (++type < BLOCK_TYPES_8X8);
     fprintf(f, "\n};\n");
 
+    fclose(f);
+
+    f = fopen("context.bin", "wb");
+    fwrite(context_counters, sizeof(context_counters), 1, f);
+    fwrite(context_counters_8x8, sizeof(context_counters_8x8), 1, f);
     fclose(f);
 }
 

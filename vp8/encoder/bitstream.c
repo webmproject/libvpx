@@ -35,14 +35,14 @@ unsigned __int64 Sectionbits[500];
 int intra_mode_stats[VP8_BINTRAMODES]
                     [VP8_BINTRAMODES]
                     [VP8_BINTRAMODES];
-static unsigned int tree_update_hist [BLOCK_TYPES]
-                                     [COEF_BANDS]
-                                     [PREV_COEF_CONTEXTS]
-                                     [ENTROPY_NODES] [2]={0};
-static unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
-                                         [COEF_BANDS]
-                                         [PREV_COEF_CONTEXTS]
-                                         [ENTROPY_NODES] [2]={0};
+unsigned int tree_update_hist [BLOCK_TYPES]
+                              [COEF_BANDS]
+                              [PREV_COEF_CONTEXTS]
+                              [ENTROPY_NODES][2];
+unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
+                                  [COEF_BANDS]
+                                  [PREV_COEF_CONTEXTS]
+                                  [ENTROPY_NODES] [2];
 
 extern unsigned int active_section;
 #endif
@@ -2686,7 +2686,11 @@ void print_tree_update_probs()
     FILE *f = fopen("coefupdprob.h", "w");
     int Sum;
     fprintf(f, "\n/* Update probabilities for token entropy tree. */\n\n");
-    fprintf(f, "const vp8_prob tree_update_probs[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {\n");
+    fprintf(f, "const vp8_prob\n"
+               "vp8_coef_update_probs[BLOCK_TYPES]\n"
+               "                     [COEF_BANDS]\n"
+               "                     [PREV_COEF_CONTEXTS]\n"
+               "                     [ENTROPY_NODES] = {\n");
 
     for (i = 0; i < BLOCK_TYPES; i++)
     {
@@ -2726,7 +2730,12 @@ void print_tree_update_probs()
 
     fprintf(f, "};\n");
 
-    fprintf(f, "const vp8_prob tree_update_probs_8x8[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES] = {\n");
+    fprintf(f, "const vp8_prob\n"
+               "vp8_coef_update_probs_8x8[BLOCK_TYPES_8X8]\n"
+               "                         [COEF_BANDS]\n"
+               "                         [PREV_COEF_CONTEXTS]\n"
+               "                         [ENTROPY_NODES] = {\n");
+
 
     for (i = 0; i < BLOCK_TYPES_8X8; i++)
     {
@@ -2764,5 +2773,10 @@ void print_tree_update_probs()
         fprintf(f, "  },\n");
     }
     fclose(f);
+    f = fopen("treeupdate.bin", "wb");
+    fwrite(tree_update_hist, sizeof(tree_update_hist), 1, f);
+    fwrite(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
+    fclose(f);
+
 }
 #endif

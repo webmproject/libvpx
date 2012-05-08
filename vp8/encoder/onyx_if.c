@@ -1742,7 +1742,8 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     }
 
 #ifdef ENTROPY_STATS
-    init_context_counters();
+    if(cpi->pass != 1)
+        init_context_counters();
 #endif
 #ifdef MODE_STATS
     vp8_zero(y_modes);
@@ -1978,9 +1979,12 @@ void vp8_remove_compressor(VP8_PTR *ptr)
         }
 
 #ifdef ENTROPY_STATS
+    if(cpi->pass != 1)
+    {
         print_context_counters();
         print_tree_update_probs();
         print_mode_context();
+    }
 #endif
 
 #if CONFIG_INTERNAL_STATS
