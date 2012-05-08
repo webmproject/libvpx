@@ -549,8 +549,8 @@ static void setup_token_decoder(VP8D_COMP *pbi,
 {
     vp8_reader *bool_decoder = &pbi->bc2;
     unsigned int partition_idx;
-    int fragment_idx;
-    int num_token_partitions;
+    unsigned int fragment_idx;
+    unsigned int num_token_partitions;
     const unsigned char *first_fragment_end = pbi->fragments[0] +
                                           pbi->fragment_sizes[0];
 
@@ -1132,7 +1132,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #if CONFIG_MULTITHREAD
     if (pbi->b_multithreaded_rd && pc->multi_token_partition != ONE_PARTITION)
     {
-        int i;
+        unsigned int i;
         vp8mt_decode_mb_rows(pbi, xd);
         vp8_yv12_extend_frame_borders(&pc->yv12_fb[pc->new_fb_idx]);    /*cm->frame_to_show);*/
         for (i = 0; i < pbi->decoding_thread_count; ++i)

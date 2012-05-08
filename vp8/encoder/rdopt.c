@@ -1766,7 +1766,7 @@ static int evaluate_inter_mode_rd(int mdcounts[4],
     {
         unsigned int sse;
         unsigned int var;
-        int threshold = (xd->block[0].dequant[1]
+        unsigned int threshold = (xd->block[0].dequant[1]
                     * xd->block[0].dequant[1] >>4);
 
         if(threshold < x->encode_breakout)
@@ -1785,7 +1785,7 @@ static int evaluate_inter_mode_rd(int mdcounts[4],
                 (sse /2 > var && sse-var < 64))
             {
                 // Check u and v to make sure skip is ok
-                int sse2=  VP8_UVSSE(x);
+                unsigned int sse2 = VP8_UVSSE(x);
                 if (sse2 * 2 < threshold)
                 {
                     x->skip = 1;

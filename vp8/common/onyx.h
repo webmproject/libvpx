@@ -106,7 +106,7 @@ extern "C"
         int Width;              // width of data passed to the compressor
         int Height;             // height of data passed to the compressor
         struct vpx_rational  timebase;
-        int target_bandwidth;    // bandwidth to be used in kilobits per second
+        unsigned int target_bandwidth;    // bandwidth to be used in kilobits per second
 
         int noise_sensitivity;   // parameter used for applying pre processing blur: recommendation 0
         int Sharpness;          // parameter used for sharpening output: recommendation 0:

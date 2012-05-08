@@ -458,7 +458,7 @@ static void check_for_encode_breakout(unsigned int sse, MACROBLOCK* x)
     if (sse < x->encode_breakout)
     {
         // Check u and v to make sure skip is ok
-        int sse2 = 0;
+        unsigned int sse2 = 0;
 
         sse2 = VP8_UVSSE(x);
 
