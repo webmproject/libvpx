@@ -228,6 +228,7 @@ EXPERIMENT_LIST="
     newupdate
     superblocks
     expanded_coef_context
+    int_8x8fdct
 "
 CONFIG_LIST="
     external_build
