@@ -441,7 +441,7 @@ static void fillrd(struct postproc_state *state, int q, int a)
 
         }
 
-        for (next = next; next < 256; next++)
+        for (; next < 256; next++)
             char_dist[next] = 0;
 
     }
