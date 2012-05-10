@@ -13,10 +13,6 @@
 #include "vpx_ports/config.h"
 
 
-
-
-
-
 void vp8_short_fdct8x8_c(short *block, short *coefs, int pitch)
 {
   int j1, i, j, k;
@@ -181,52 +177,41 @@ void vp8_short_walsh4x4_c(short *input, short *output, int pitch)
 {
     int i;
     int a1, b1, c1, d1;
-    int a2, b2, c2, d2;
     short *ip = input;
     short *op = output;
-
+    int pitch_short = pitch >>1;
 
     for (i = 0; i < 4; i++)
     {
-        a1 = ((ip[0] + ip[2]));
-        d1 = ((ip[1] + ip[3]));
-        c1 = ((ip[1] - ip[3]));
-        b1 = ((ip[0] - ip[2]));
+        a1 = ip[0 * pitch_short] + ip[3 * pitch_short];
+        b1 = ip[1 * pitch_short] + ip[2 * pitch_short];
+        c1 = ip[1 * pitch_short] - ip[2 * pitch_short];
+        d1 = ip[0 * pitch_short] - ip[3 * pitch_short];
 
-        op[0] = a1 + d1;
-        op[1] = b1 + c1;
-        op[2] = b1 - c1;
-        op[3] = a1 - d1;
-        ip += pitch / 2;
-        op += 4;
+        op[0] = (a1 + b1 + 1)>>1;
+        op[4] = (c1 + d1)>>1;
+        op[8] = (a1 - b1)>>1;
+        op[12]= (d1 - c1)>>1;
+
+        ip++;
+        op++;
     }
-
     ip = output;
     op = output;
 
     for (i = 0; i < 4; i++)
     {
-        a1 = ip[0] + ip[8];
-        d1 = ip[4] + ip[12];
-        c1 = ip[4] - ip[12];
-        b1 = ip[0] - ip[8];
+        a1 = ip[0] + ip[3];
+        b1 = ip[1] + ip[2];
+        c1 = ip[1] - ip[2];
+        d1 = ip[0] - ip[3];
 
-        a2 = a1 + d1;
-        b2 = b1 + c1;
-        c2 = b1 - c1;
-        d2 = a1 - d1;
+        op[0] = (a1 + b1 + 1)>>1;
+        op[1] = (c1 + d1)>>1;
+        op[2] = (a1 - b1)>>1;
+        op[3] = (d1 - c1)>>1;
 
-        a2 += a2<0;
-        b2 += b2<0;
-        c2 += c2<0;
-        d2 += d2<0;
-
-        op[0] = (a2+1) >> 2;
-        op[4] = (b2+1) >> 2;
-        op[8] = (c2+1) >> 2;
-        op[12]= (d2+1) >> 2;
-
-        ip++;
-        op++;
+        ip += 4;
+        op += 4;
     }
 }
