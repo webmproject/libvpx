@@ -16,6 +16,24 @@
       "revId": "e564028c3eccf4a39966c364d98eba1f5cd937e7",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//nj0\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4161,
+      "author": {
+        "id": 1000895
+      },
+      "writtenOn": "2012-05-11T17:22:41Z",
+      "side": 1,
+      "message": "this now forces the synch to be always done at this point. b_lpf_running is used to signal if lpf thread is active.",
+      "parentUuid": "AAAAKn//nko\u003d",
+      "revId": "e564028c3eccf4a39966c364d98eba1f5cd937e7",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
