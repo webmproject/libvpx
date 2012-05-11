@@ -64,18 +64,40 @@ static void compute_update_table()
         update_bits[i] = vp8_count_term_subexp(i, SUBEXP_PARAM, 255);
 }
 
+static int split_index(int i, int n, int modulus)
+{
+    int max1 = (n-1 - modulus/2)/modulus + 1;
+    if (i%modulus == modulus/2) i = i/modulus;
+    else i = max1 + i - (i + modulus-modulus/2)/modulus;
+    return i;
+}
+
 static int remap_prob(int v, int m)
 {
     const int n = 256;
+    const int modulus = MODULUS_PARAM;
+    const int max1 = (n-2-modulus/2+modulus-1)/modulus;
     int i;
     if ((m<<1)<=n)
         i = recenter_nonneg(v, m) - 1;
     else
         i = recenter_nonneg(n-1-v, n-1-m) - 1;
-    //if (i >= s) i -= s; else i = n - 2 - i;
-    //i = ((i>>4)&15) | ((i((i>>4)&15) | ((i&15)<<4);&15)<<4);
-    i = (i%17)*15 + (i/17);
+
+    i = split_index(i, n-1, modulus);
     return i;
+}
+
+static void write_prob_diff_update(vp8_writer *const w,
+                                   vp8_prob newp, vp8_prob oldp)
+{
+    int delp = remap_prob(newp, oldp);
+    vp8_encode_term_subexp(w, delp, SUBEXP_PARAM, 255);
+}
+
+static int prob_diff_update_cost(vp8_prob newp, vp8_prob oldp)
+{
+    int delp = remap_prob(newp, oldp);
+    return update_bits[delp]*256;
 }
 #endif
 
@@ -329,22 +351,28 @@ static int prob_update_savings(const unsigned int *ct,
 {
     const int old_b = vp8_cost_branch256(ct, oldp);
     const int new_b = vp8_cost_branch256(ct, newp);
-#if CONFIG_NEWUPDATE
-    const int delp = remap_prob(newp, oldp);
-    const int update_b = update_bits[delp]*256 + vp8_cost_upd256;
-#else
     const int update_b = 2048 + vp8_cost_upd256;
-#endif
     return (old_b - new_b - update_b);
 }
 
 #if CONFIG_NEWUPDATE
-static int prob_update_savings_search(const unsigned int *ct,
+static int prob_diff_update_savings(const unsigned int *ct,
+                               const vp8_prob oldp, const vp8_prob newp,
+                               const vp8_prob upd)
+{
+    const int old_b = vp8_cost_branch256(ct, oldp);
+    const int new_b = vp8_cost_branch256(ct, newp);
+    const int update_b = (newp == oldp ? 0 :
+        prob_diff_update_cost(newp, oldp) + vp8_cost_upd256);
+    return (old_b - new_b - update_b);
+}
+
+static int prob_diff_update_savings_search(const unsigned int *ct,
                                       const vp8_prob oldp, vp8_prob *bestp,
                                       const vp8_prob upd)
 {
     const int old_b = vp8_cost_branch256(ct, oldp);
-    int new_b, delp, update_b, savings, bestsavings, step;
+    int new_b, update_b, savings, bestsavings, step;
     vp8_prob newp, bestnewp;
 
     bestsavings = 0;
@@ -354,8 +382,7 @@ static int prob_update_savings_search(const unsigned int *ct,
     for (newp = *bestp; newp != oldp; newp+=step)
     {
         new_b = vp8_cost_branch256(ct, newp);
-        delp = remap_prob(newp, oldp);
-        update_b = update_bits[delp]*256 + vp8_cost_upd256;
+        update_b = prob_diff_update_cost(newp, oldp) + vp8_cost_upd256;
         savings = old_b - new_b - update_b;
         if (savings > bestsavings)
         {
@@ -1519,7 +1546,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
 #endif
 
 #if defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                             cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold) u = 1;
                     if (u)
@@ -1558,7 +1585,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                         continue;
 #endif
 #if defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                         cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold) u = 1;
 #else
@@ -1574,8 +1601,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
 #endif
                     if (u)
                     { /* send/use new probability */
-                        int delp = remap_prob(newp, *Pold);
-                        vp8_encode_term_subexp(w, delp, SUBEXP_PARAM, 255);
+                        write_prob_diff_update(w, newp, *Pold);
                         *Pold = newp;
                     }
 
@@ -1608,7 +1634,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                         continue;
 #endif
 #if defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                             cpi->frame_branch_ct_8x8 [i][j][k][t],
                             *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold)
@@ -1650,7 +1676,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                         continue;
 #endif
 #if defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                         cpi->frame_branch_ct_8x8 [i][j][k][t],
                         *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold)
@@ -1670,8 +1696,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                     if (u)
                     {
                         /* send/use new probability */
-                        int delp = remap_prob(newp, *Pold);
-                        vp8_encode_term_subexp( w, delp, SUBEXP_PARAM, 255);
+                        write_prob_diff_update(w, newp, *Pold);
                         *Pold = newp;
                     }
                 }
@@ -1704,18 +1729,18 @@ static void update_coef_probs2(VP8_COMP *cpi)
             {
                 for (k = 0; k < PREV_COEF_CONTEXTS; ++k)
                 {
-#if CONFIG_EXPANDED_COEF_CONTEXT
-                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-                        continue;
-#endif
                     vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
                     const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
                     int s;
                     int u = 0;
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                    if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                        continue;
+#endif
 
 #if defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                             cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold) u = 1;
                     if (u)
@@ -1756,7 +1781,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                         continue;
 #endif
 #if defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                         cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold) u = 1;
 #else
@@ -1771,8 +1796,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
 #endif
                     if (u)
                     { /* send/use new probability */
-                        int delp = remap_prob(newp, *Pold);
-                        vp8_encode_term_subexp(w, delp, SUBEXP_PARAM, 255);
+                        write_prob_diff_update(w, newp, *Pold);
                         *Pold = newp;
                     }
                 }
@@ -1803,7 +1827,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                         continue;
 #endif
 #if defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                             cpi->frame_branch_ct_8x8 [i][j][k][t],
                             *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold)
@@ -1847,7 +1871,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                         continue;
 #endif
 #if defined(SEARCH_NEWP)
-                        s = prob_update_savings_search(
+                        s = prob_diff_update_savings_search(
                             cpi->frame_branch_ct_8x8 [i][j][k][t],
                             *Pold, &newp, upd);
                         if (s > 0 && newp != *Pold)
@@ -1867,8 +1891,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                         if (u)
                         {
                             /* send/use new probability */
-                            int delp = remap_prob(newp, *Pold);
-                            vp8_encode_term_subexp( w, delp, SUBEXP_PARAM, 255);
+                            write_prob_diff_update(w, newp, *Pold);
                             *Pold = newp;
                         }
                 }
@@ -1920,7 +1943,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                         continue;
 #endif
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
-                    s = prob_update_savings_search(
+                    s = prob_diff_update_savings_search(
                             cpi->frame_branch_ct [i][j][k][t],
                             *Pold, &newp, upd);
                     if (s > 0 && newp != *Pold)
@@ -1992,7 +2015,7 @@ static void update_coef_probs(VP8_COMP *cpi)
 #endif
 
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
-                        s = prob_update_savings_search(
+                        s = prob_diff_update_savings_search(
                             cpi->frame_branch_ct [i][j][k][t],
                             *Pold, &newp, upd);
                         if (s > 0 && newp != *Pold)
@@ -2015,9 +2038,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                         {
                             /* send/use new probability */
 #if CONFIG_NEWUPDATE
-                            vp8_encode_term_subexp(
-                                w, remap_prob(newp, *Pold), SUBEXP_PARAM, 255);
-                            //printf("delp = %d/%d/%d\n", *Pold, remap_prob(newp, *Pold, 256), newp);
+                            write_prob_diff_update(w, newp, *Pold);
 #else
                             vp8_write_literal(w, newp, 8);
 #endif
@@ -2068,7 +2089,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                             continue;
 #endif
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
-                        const int s = prob_update_savings_search(ct, oldp, &newp, upd);
+                        const int s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
                         const int u = s > 0 && newp != oldp ? 1 : 0;
                         if (u)
                             savings += s - (int)(vp8_cost_zero(upd));
@@ -2124,7 +2145,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                             const vp8_prob oldp = *Pold;
                             const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
-                            const int s = prob_update_savings_search(ct, oldp, &newp, upd);
+                            const int s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
                             const int u = s > 0 && newp != oldp ? 1 : 0;
 #else
                             const int s = prob_update_savings(ct, oldp, newp, upd);
@@ -2144,8 +2165,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                             {
                                 /* send/use new probability */
 #if CONFIG_NEWUPDATE
-                                vp8_encode_term_subexp(
-                                    w, remap_prob(newp, oldp), SUBEXP_PARAM, 255);
+                                write_prob_diff_update(w, newp, oldp);
 #else
                                 vp8_write_literal(w, newp, 8);
 #endif

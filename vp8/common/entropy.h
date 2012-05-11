@@ -91,8 +91,9 @@ extern DECLARE_ALIGNED(64, const unsigned char, vp8_coef_bands_8x8[64]);
 #endif
 
 #if CONFIG_NEWUPDATE
-#define SUBEXP_PARAM             1  /* Subexponential code parameter */
-#define COEFUPDATETYPE           2  /* coef update type to use (1/2/3) */
+#define SUBEXP_PARAM                2   /* Subexponential code parameter */
+#define MODULUS_PARAM               21  /* Modulus parameter */
+#define COEFUPDATETYPE              2   /* coef update type to use (1/2/3) */
 #endif
 
 
