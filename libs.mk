@@ -35,9 +35,9 @@ ifeq ($(CONFIG_VP8_ENCODER),yes)
   include $(SRC_PATH_BARE)/$(VP8_PREFIX)vp8cx.mk
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_CX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_CX_EXPORTS))
-  CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk vpx/vp8.h vpx/vp8cx.h vpx/vp8e.h
+  CODEC_SRCS-yes += $(VP8_PREFIX)vp8cx.mk vpx/vp8.h vpx/vp8cx.h
   CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp8cx_arm.mk
-  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8e.h include/vpx/vp8cx.h
+  INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8cx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8cx.h
   CODEC_DOC_SECTIONS += vp8 vp8_encoder
@@ -116,7 +116,6 @@ INSTALL-LIBS-yes += include/vpx/vpx_integer.h
 INSTALL-LIBS-yes += include/vpx/vpx_codec_impl_top.h
 INSTALL-LIBS-yes += include/vpx/vpx_codec_impl_bottom.h
 INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx/vpx_decoder.h
-INSTALL-LIBS-$(CONFIG_DECODERS) += include/vpx/vpx_decoder_compat.h
 INSTALL-LIBS-$(CONFIG_ENCODERS) += include/vpx/vpx_encoder.h
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
@@ -235,7 +234,7 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo '# pkg-config file from libvpx $(VERSION_STRING)' > $@
 	$(qexec)echo 'prefix=$(PREFIX)' >> $@
 	$(qexec)echo 'exec_prefix=$${prefix}' >> $@
-	$(qexec)echo 'libdir=$${prefix}/lib' >> $@
+	$(qexec)echo 'libdir=$${prefix}/$(LIBSUBDIR)' >> $@
 	$(qexec)echo 'includedir=$${prefix}/include' >> $@
 	$(qexec)echo '' >> $@
 	$(qexec)echo 'Name: vpx' >> $@

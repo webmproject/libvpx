@@ -36,6 +36,7 @@
 #if CONFIG_MULTI_RES_ENCODING
 #include "mr_dissim.h"
 #endif
+#include "encodeframe.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -1016,8 +1017,10 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
 static void alloc_raw_frame_buffers(VP8_COMP *cpi)
 {
+#if VP8_TEMPORAL_ALT_REF
     int width = (cpi->oxcf.Width + 15) & ~15;
     int height = (cpi->oxcf.Height + 15) & ~15;
+#endif
 
     cpi->lookahead = vp8_lookahead_init(cpi->oxcf.Width, cpi->oxcf.Height,
                                         cpi->oxcf.lag_in_frames);
@@ -1336,7 +1339,7 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 #endif
 }
 
-void update_layer_contexts (VP8_COMP *cpi)
+static void update_layer_contexts (VP8_COMP *cpi)
 {
     VP8_CONFIG *oxcf = &cpi->oxcf;
 
@@ -1398,11 +1401,23 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     if (!oxcf)
         return;
 
+#if CONFIG_MULTITHREAD
+    /*  wait for the last picture loopfilter thread done */
+    if (cpi->b_lpf_running)
+    {
+        sem_wait(&cpi->h_event_end_lpf);
+        cpi->b_lpf_running = 0;
+    }
+#endif
+
     if (cm->version != oxcf->Version)
     {
         cm->version = oxcf->Version;
         vp8_setup_version(cm);
     }
+
+    last_w = cpi->oxcf.Width;
+    last_h = cpi->oxcf.Height;
 
     cpi->oxcf = *oxcf;
 
@@ -1598,14 +1613,14 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     cpi->target_bandwidth = cpi->oxcf.target_bandwidth;
 
 
-    last_w = cm->Width;
-    last_h = cm->Height;
-
     cm->Width       = cpi->oxcf.Width;
     cm->Height      = cpi->oxcf.Height;
 
-    cm->horiz_scale  = cpi->horiz_scale;
-    cm->vert_scale   = cpi->vert_scale;
+    /* TODO(jkoleszar): if an internal spatial resampling is active,
+     * and we downsize the input image, maybe we should clear the
+     * internal scale immediately rather than waiting for it to
+     * correct.
+     */
 
     // VP8 sharpness level mapping 0-7 (vs 0-10 in general VPx dialogs)
     if (cpi->oxcf.Sharpness > 7)
@@ -1626,7 +1641,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
         cm->Height = (vs - 1 + cpi->oxcf.Height * vr) / vs;
     }
 
-    if (last_w != cm->Width || last_h != cm->Height)
+    if (last_w != cpi->oxcf.Width || last_h != cpi->oxcf.Height)
         cpi->force_next_frame_intra = 1;
 
     if (((cm->Width + 15) & 0xfffffff0) !=
@@ -3009,7 +3024,7 @@ static int recode_loop_test( VP8_COMP *cpi,
     return force_recode;
 }
 
-void update_reference_frames(VP8_COMMON *cm)
+static void update_reference_frames(VP8_COMMON *cm)
 {
     YV12_BUFFER_CONFIG *yv12_fb = cm->yv12_fb;
 
@@ -3158,20 +3173,21 @@ static void encode_frame_to_data_rate
 
     int Loop = 0;
     int loop_count;
-    int this_q;
-    int last_zbin_oq;
 
+    VP8_COMMON *cm = &cpi->common;
+    int active_worst_qchanged = 0;
+
+#if !(CONFIG_REALTIME_ONLY)
     int q_low;
     int q_high;
     int zbin_oq_high;
     int zbin_oq_low = 0;
     int top_index;
     int bottom_index;
-    VP8_COMMON *cm = &cpi->common;
-    int active_worst_qchanged = 0;
-
     int overshoot_seen = 0;
     int undershoot_seen = 0;
+#endif
+
     int drop_mark = cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100;
     int drop_mark75 = drop_mark * 2 / 3;
     int drop_mark50 = drop_mark / 4;
@@ -3180,6 +3196,15 @@ static void encode_frame_to_data_rate
 
     // Clear down mmx registers to allow floating point in what follows
     vp8_clear_system_state();
+
+#if CONFIG_MULTITHREAD
+    /*  wait for the last picture loopfilter thread done */
+    if (cpi->b_lpf_running)
+    {
+        sem_wait(&cpi->h_event_end_lpf);
+        cpi->b_lpf_running = 0;
+    }
+#endif
 
     // Test code for segmentation of gf/arf (0,0)
     //segmentation_test_function( cpi);
@@ -3322,7 +3347,6 @@ static void encode_frame_to_data_rate
         {
             cpi->decimation_factor = 1;
         }
-
         //vpx_log("Encoder: Decimation Factor: %d \n",cpi->decimation_factor);
     }
 
@@ -3564,7 +3588,8 @@ static void encode_frame_to_data_rate
 
     // Determine initial Q to try
     Q = vp8_regulate_q(cpi, cpi->this_frame_target);
-    last_zbin_oq = cpi->zbin_over_quant;
+
+#if !(CONFIG_REALTIME_ONLY)
 
     // Set highest allowed value for Zbin over quant
     if (cm->frame_type == KEY_FRAME)
@@ -3576,6 +3601,7 @@ static void encode_frame_to_data_rate
     }
     else
         zbin_oq_high = ZBIN_OQ_MAX;
+#endif
 
     // Setup background Q adjustment for error resilient mode.
     // For multi-layer encodes only enable this for the base layer.
@@ -3584,18 +3610,20 @@ static void encode_frame_to_data_rate
 
     vp8_compute_frame_size_bounds(cpi, &frame_under_shoot_limit, &frame_over_shoot_limit);
 
+#if !(CONFIG_REALTIME_ONLY)
     // Limit Q range for the adaptive loop.
     bottom_index = cpi->active_best_quality;
     top_index    = cpi->active_worst_quality;
     q_low  = cpi->active_best_quality;
     q_high = cpi->active_worst_quality;
+#endif
 
     vp8_save_coding_context(cpi);
 
     loop_count = 0;
 
-
     scale_and_extend_source(cpi->un_scaled_source, cpi);
+
 #if !(CONFIG_REALTIME_ONLY) && CONFIG_POSTPROC && !(CONFIG_TEMPORAL_DENOISING)
 
     if (cpi->oxcf.noise_sensitivity > 0)
@@ -3659,7 +3687,6 @@ static void encode_frame_to_data_rate
             */
 
         vp8_set_quantizer(cpi, Q);
-        this_q = Q;
 
         // setup skip prob for costing in mode/mv decision
         if (cpi->common.mb_no_coeff_skip)
@@ -3735,14 +3762,7 @@ static void encode_frame_to_data_rate
             vp8_setup_key_frame(cpi);
         }
 
-#if CONFIG_MULTITHREAD
-        /*  wait for the last picture loopfilter thread done */
-        if (cpi->b_lpf_running)
-        {
-            sem_wait(&cpi->h_event_end_lpf);
-            cpi->b_lpf_running = 0;
-        }
-#endif
+
 
 #if CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING
         {
@@ -3789,9 +3809,10 @@ static void encode_frame_to_data_rate
             if (cpi->compressor_speed == 2)
             {
                 /* we don't do re-encoding in realtime mode
-                 * if key frame is decided than we force it on next frame */
+                 * if key frame is decided then we force it on next frame */
                 cpi->force_next_frame_intra = key_frame_decision;
             }
+#if !(CONFIG_REALTIME_ONLY)
             else if (key_frame_decision)
             {
                 // Reset all our sizing numbers and recode
@@ -3829,6 +3850,7 @@ static void encode_frame_to_data_rate
 
                 continue;
             }
+#endif
         }
 
         vp8_clear_system_state();
@@ -3848,10 +3870,12 @@ static void encode_frame_to_data_rate
             while ((cpi->active_worst_quality < cpi->worst_quality) && (over_size_percent > 0))
             {
                 cpi->active_worst_quality++;
-                top_index = cpi->active_worst_quality;
+
                 over_size_percent = (int)(over_size_percent * 0.96);        // Assume 1 qstep = about 4% on frame size.
             }
-
+#if !(CONFIG_REALTIME_ONLY)
+            top_index = cpi->active_worst_quality;
+#endif
             // If we have updated the active max Q do not call vp8_update_rate_correction_factors() this loop.
             active_worst_qchanged = 1;
         }
@@ -4010,9 +4034,7 @@ static void encode_frame_to_data_rate
             // Clamp cpi->zbin_over_quant
             cpi->zbin_over_quant = (cpi->zbin_over_quant < zbin_oq_low) ? zbin_oq_low : (cpi->zbin_over_quant > zbin_oq_high) ? zbin_oq_high : cpi->zbin_over_quant;
 
-            //Loop = (Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant);
             Loop = Q != last_q;
-            last_zbin_oq = cpi->zbin_over_quant;
         }
         else
 #endif
@@ -4797,7 +4819,7 @@ int vp8_get_compressed_data(VP8_COMP *cpi, unsigned int *frame_flags, unsigned l
     }
 
     // adjust frame rates based on timestamps given
-    if (!cm->refresh_alt_ref_frame || (cpi->oxcf.number_of_layers > 1))
+    if (cm->show_frame)
     {
         int64_t this_duration;
         int step = 0;

@@ -28,11 +28,10 @@
 #include "rdopt.h"
 #include "vp8/common/quant_common.h"
 #include "encodemv.h"
+#include "encodeframe.h"
 
 //#define OUTPUT_FPF 1
 
-extern void vp8_build_block_offsets(MACROBLOCK *x);
-extern void vp8_setup_block_ptrs(MACROBLOCK *x);
 extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
@@ -869,7 +868,7 @@ extern const int vp8_bits_per_mb[2][QINDEX_RANGE];
 //
 
 
-double bitcost( double prob )
+static double bitcost( double prob )
 {
     return -(log( prob ) / log( 2.0 ));
 }
@@ -2313,11 +2312,8 @@ void vp8_second_pass(VP8_COMP *cpi)
     FIRSTPASS_STATS this_frame = {0};
     FIRSTPASS_STATS this_frame_copy;
 
-    double this_frame_error;
     double this_frame_intra_error;
     double this_frame_coded_error;
-
-    FIRSTPASS_STATS *start_pos;
 
     int overhead_bits;
 
@@ -2331,11 +2327,8 @@ void vp8_second_pass(VP8_COMP *cpi)
     if (EOF == input_stats(cpi, &this_frame))
         return;
 
-    this_frame_error = this_frame.ssim_weighted_pred_err;
     this_frame_intra_error = this_frame.intra_error;
     this_frame_coded_error = this_frame.coded_error;
-
-    start_pos = cpi->twopass.stats_in;
 
     // keyframe and section processing !
     if (cpi->twopass.frames_to_key == 0)

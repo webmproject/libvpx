@@ -97,6 +97,17 @@ unsigned int vp8_sub_pixel_variance16x16_armv6
 
 #if HAVE_NEON
 
+extern unsigned int vp8_sub_pixel_variance16x16_neon_func
+(
+    const unsigned char  *src_ptr,
+    int  src_pixels_per_line,
+    int  xoffset,
+    int  yoffset,
+    const unsigned char *dst_ptr,
+    int dst_pixels_per_line,
+    unsigned int *sse
+);
+
 unsigned int vp8_sub_pixel_variance16x16_neon
 (
     const unsigned char  *src_ptr,

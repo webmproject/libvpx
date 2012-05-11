@@ -521,12 +521,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
     const MV_CONTEXT *mvc = pc->fc.mvc;
 
 
-    MODE_INFO *m = pc->mi, *ms;
+    MODE_INFO *m = pc->mi;
     const int mis = pc->mode_info_stride;
     int mb_row = -1;
 
     int prob_skip_false = 0;
-    ms = pc->mi - 1;
 
     cpi->mb.partition_info = cpi->mb.pi;
 

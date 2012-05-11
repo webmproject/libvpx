@@ -15,11 +15,11 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_rtcd.h"
 
-const unsigned int NOISE_MOTION_THRESHOLD = 20*20;
-const unsigned int NOISE_DIFF2_THRESHOLD = 75;
+static const unsigned int NOISE_MOTION_THRESHOLD = 20*20;
+static const unsigned int NOISE_DIFF2_THRESHOLD = 75;
 // SSE_DIFF_THRESHOLD is selected as ~95% confidence assuming var(noise) ~= 100.
-const unsigned int SSE_DIFF_THRESHOLD = 16*16*20;
-const unsigned int SSE_THRESHOLD = 16*16*40;
+static const unsigned int SSE_DIFF_THRESHOLD = 16*16*20;
+static const unsigned int SSE_THRESHOLD = 16*16*40;
 
 static uint8_t blend(uint8_t state, uint8_t sample, uint8_t factor_q8)
 {

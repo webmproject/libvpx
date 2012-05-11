@@ -53,7 +53,7 @@ void vp8cx_init_de_quantizer(VP8D_COMP *pbi)
     }
 }
 
-void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
+void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     int i;
     int QIndex;
@@ -117,7 +117,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     mode = xd->mode_info_context->mbmi.mode;
 
     if (xd->segmentation_enabled)
-        mb_init_dequantizer(pbi, xd);
+        vp8_mb_init_dequantizer(pbi, xd);
 
 
 #if CONFIG_ERROR_CONCEALMENT
@@ -507,7 +507,7 @@ static unsigned int read_available_partition_size(
 {
     VP8_COMMON* pc = &pbi->common;
     const unsigned char *partition_size_ptr = token_part_sizes + i * 3;
-    unsigned int partition_size;
+    unsigned int partition_size = 0;
     ptrdiff_t bytes_left = fragment_end - fragment_start;
     /* Calculate the length of this partition. The last partition
      * size is implicit. If the partition size can't be read, then
@@ -997,7 +997,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
             vp8cx_init_de_quantizer(pbi);
 
         /* MB level dequantizer setup */
-        mb_init_dequantizer(pbi, &pbi->mb);
+        vp8_mb_init_dequantizer(pbi, &pbi->mb);
     }
 
     /* Determine if the golden frame or ARF buffer should be updated and how.

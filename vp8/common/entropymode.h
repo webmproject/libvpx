@@ -73,7 +73,6 @@ extern const vp8_prob vp8_kf_bmode_prob[VP8_BINTRAMODES][VP8_BINTRAMODES]
 extern const vp8_prob vp8_kf_uv_mode_prob[VP8_UV_MODES-1];
 extern const vp8_prob vp8_kf_ymode_prob[VP8_YMODES-1];
 
-
 void vp8_init_mbmode_probs(VP8_COMMON *x);
 void vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES-1]);
 void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1]);

@@ -169,4 +169,3 @@ void vp8_default_bmode_probs(vp8_prob p [VP8_BINTRAMODES-1])
     vpx_memcpy(p, vp8_bmode_prob, sizeof(vp8_bmode_prob));
 }
 
-

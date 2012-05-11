@@ -28,7 +28,7 @@
 #include "error_concealment.h"
 #endif
 
-extern void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
+extern void vp8_mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd);
 
 static void setup_decoding_thread_data(VP8D_COMP *pbi, MACROBLOCKD *xd, MB_ROW_DEC *mbrd, int count)
 {
@@ -106,7 +106,7 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     mode = xd->mode_info_context->mbmi.mode;
 
     if (xd->segmentation_enabled)
-        mb_init_dequantizer(pbi, xd);
+        vp8_mb_init_dequantizer(pbi, xd);
 
 
 #if CONFIG_ERROR_CONCEALMENT

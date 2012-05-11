@@ -588,6 +588,10 @@ process_common_toolchain() {
                 tgt_isa=x86_64
                 tgt_os=darwin11
                 ;;
+            *darwin12*)
+                tgt_isa=x86_64
+                tgt_os=darwin12
+                ;;
             *mingw32*|*cygwin*)
                 [ -z "$tgt_isa" ] && tgt_isa=x86
                 tgt_os=win32
@@ -678,6 +682,10 @@ process_common_toolchain() {
         *-darwin11-*)
             add_cflags  "-mmacosx-version-min=10.7"
             add_ldflags "-mmacosx-version-min=10.7"
+            ;;
+        *-darwin12-*)
+            add_cflags  "-mmacosx-version-min=10.8"
+            add_ldflags "-mmacosx-version-min=10.8"
             ;;
     esac
 
@@ -813,7 +821,8 @@ process_common_toolchain() {
 
         darwin*)
             if [ -z "${sdk_path}" ]; then
-                SDK_PATH=/Developer/Platforms/iPhoneOS.platform/Developer
+                SDK_PATH=`xcode-select -print-path 2> /dev/null`
+                SDK_PATH=${SDK_PATH}/Platforms/iPhoneOS.platform/Developer
             else
                 SDK_PATH=${sdk_path}
             fi
@@ -835,7 +844,7 @@ process_common_toolchain() {
             add_ldflags -arch_only ${tgt_isa}
 
             if [ -z "${alt_libc}" ]; then
-                alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.0.sdk
+                alt_libc=${SDK_PATH}/SDKs/iPhoneOS5.1.sdk
             fi
 
             add_cflags  "-isysroot ${alt_libc}"

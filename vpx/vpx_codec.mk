@@ -12,9 +12,7 @@
 API_EXPORTS += exports
 
 API_SRCS-yes                += src/vpx_decoder.c
-API_SRCS-yes                += src/vpx_decoder_compat.c
 API_SRCS-yes                += vpx_decoder.h
-API_SRCS-yes                += vpx_decoder_compat.h
 API_SRCS-yes                += src/vpx_encoder.c
 API_SRCS-yes                += vpx_encoder.h
 API_SRCS-yes                += internal/vpx_codec_internal.h

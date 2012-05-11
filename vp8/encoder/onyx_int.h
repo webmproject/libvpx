@@ -57,8 +57,6 @@
 #define VP8_TEMPORAL_ALT_REF 1
 #endif
 
-#define MAX_PERIODICITY 16
-
 #define MAX(x,y) (((x)>(y))?(x):(y))
 #define MIN(x,y) (((x)<(y))?(x):(y))
 
@@ -485,8 +483,6 @@ typedef struct VP8_COMP
     int goldfreq;
     int auto_worst_q;
     int cpu_used;
-    int horiz_scale;
-    int vert_scale;
     int pass;
 
 
@@ -672,21 +668,21 @@ typedef struct VP8_COMP
 
     // Coding layer state variables
     unsigned int current_layer;
-    LAYER_CONTEXT layer_context[MAX_LAYERS];
+    LAYER_CONTEXT layer_context[VPX_TS_MAX_LAYERS];
 
-    int64_t frames_in_layer[MAX_LAYERS];
-    int64_t bytes_in_layer[MAX_LAYERS];
-    double sum_psnr[MAX_LAYERS];
-    double sum_psnr_p[MAX_LAYERS];
-    double total_error2[MAX_LAYERS];
-    double total_error2_p[MAX_LAYERS];
-    double sum_ssim[MAX_LAYERS];
-    double sum_weights[MAX_LAYERS];
+    int64_t frames_in_layer[VPX_TS_MAX_LAYERS];
+    int64_t bytes_in_layer[VPX_TS_MAX_LAYERS];
+    double sum_psnr[VPX_TS_MAX_LAYERS];
+    double sum_psnr_p[VPX_TS_MAX_LAYERS];
+    double total_error2[VPX_TS_MAX_LAYERS];
+    double total_error2_p[VPX_TS_MAX_LAYERS];
+    double sum_ssim[VPX_TS_MAX_LAYERS];
+    double sum_weights[VPX_TS_MAX_LAYERS];
 
-    double total_ssimg_y_in_layer[MAX_LAYERS];
-    double total_ssimg_u_in_layer[MAX_LAYERS];
-    double total_ssimg_v_in_layer[MAX_LAYERS];
-    double total_ssimg_all_in_layer[MAX_LAYERS];
+    double total_ssimg_y_in_layer[VPX_TS_MAX_LAYERS];
+    double total_ssimg_u_in_layer[VPX_TS_MAX_LAYERS];
+    double total_ssimg_v_in_layer[VPX_TS_MAX_LAYERS];
+    double total_ssimg_all_in_layer[VPX_TS_MAX_LAYERS];
 
 #if CONFIG_MULTI_RES_ENCODING
     /* Number of MBs per row at lower-resolution level */
@@ -708,11 +704,7 @@ typedef struct VP8_COMP
 
 void control_data_rate(VP8_COMP *cpi);
 
-void vp8_encode_frame(VP8_COMP *cpi);
-
 void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned char *dest_end, unsigned long *size);
-
-void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
 
 int rd_cost_intra_mb(MACROBLOCKD *x);
 

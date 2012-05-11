@@ -9,6 +9,11 @@
 ;
 
 
+bilinear_taps_coeff
+    DCD     128, 0, 112, 16, 96, 32, 80, 48, 64, 64, 48, 80, 32, 96, 16, 112
+
+;-----------------
+
     EXPORT  |vp8_sub_pixel_variance16x16_neon_func|
     ARM
     REQUIRE8
@@ -27,7 +32,7 @@
 |vp8_sub_pixel_variance16x16_neon_func| PROC
     push            {r4-r6, lr}
 
-    ldr             r12, _BilinearTaps_coeff_
+    adr             r12, bilinear_taps_coeff
     ldr             r4, [sp, #16]           ;load *dst_ptr from stack
     ldr             r5, [sp, #20]           ;load dst_pixels_per_line from stack
     ldr             r6, [sp, #24]           ;load *sse from stack
@@ -414,12 +419,5 @@ sub_pixel_variance16x16_neon_loop
     pop             {r4-r6,pc}
 
     ENDP
-
-;-----------------
-
-_BilinearTaps_coeff_
-    DCD     bilinear_taps_coeff
-bilinear_taps_coeff
-    DCD     128, 0, 112, 16, 96, 32, 80, 48, 64, 64, 48, 80, 32, 96, 16, 112
 
     END

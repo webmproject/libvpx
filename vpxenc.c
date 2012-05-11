@@ -1517,6 +1517,7 @@ struct stream_config
     int                       arg_ctrls[ARG_CTRL_CNT_MAX][2];
     int                       arg_ctrl_cnt;
     int                       write_webm;
+    int                       have_kf_max_dist;
 };
 
 
@@ -1540,6 +1541,23 @@ struct stream_state
     size_t                    nbytes;
     stats_io_t                stats;
 };
+
+
+void validate_positive_rational(const char          *msg,
+                                struct vpx_rational *rat)
+{
+    if (rat->den < 0)
+    {
+        rat->num *= -1;
+        rat->den *= -1;
+    }
+
+    if (rat->num < 0)
+        die("Error: %s must be positive\n", msg);
+
+    if (!rat->den)
+        die("Error: %s has zero denominator\n", msg);
+}
 
 
 static void parse_global_config(struct global_config *global, char **argv)
@@ -1610,6 +1628,7 @@ static void parse_global_config(struct global_config *global, char **argv)
         else if (arg_match(&arg, &framerate, argi))
         {
             global->framerate = arg_parse_rational(&arg);
+            validate_positive_rational(arg.name, &global->framerate);
             global->have_framerate = 1;
         }
         else if (arg_match(&arg,&out_part, argi))
@@ -1807,7 +1826,10 @@ static int parse_stream_params(struct global_config *global,
         else if (arg_match(&arg, &stereo_mode, argi))
             config->stereo_fmt = arg_parse_enum_or_int(&arg);
         else if (arg_match(&arg, &timebase, argi))
+        {
             config->cfg.g_timebase = arg_parse_rational(&arg);
+            validate_positive_rational(arg.name, &config->cfg.g_timebase);
+        }
         else if (arg_match(&arg, &error_resilient, argi))
             config->cfg.g_error_resilient = arg_parse_uint(&arg);
         else if (arg_match(&arg, &lag_in_frames, argi))
@@ -1862,7 +1884,10 @@ static int parse_stream_params(struct global_config *global,
         else if (arg_match(&arg, &kf_min_dist, argi))
             config->cfg.kf_min_dist = arg_parse_uint(&arg);
         else if (arg_match(&arg, &kf_max_dist, argi))
+        {
             config->cfg.kf_max_dist = arg_parse_uint(&arg);
+            config->have_kf_max_dist = 1;
+        }
         else if (arg_match(&arg, &kf_disabled, argi))
             config->cfg.kf_mode = VPX_KF_DISABLED;
         else
@@ -1962,6 +1987,21 @@ static void set_stream_dimensions(struct stream_state *stream,
         fatal("Stream %d: Resizing not yet supported", stream->index);
     stream->config.cfg.g_w = w;
     stream->config.cfg.g_h = h;
+}
+
+
+static void set_default_kf_interval(struct stream_state  *stream,
+                                    struct global_config *global)
+{
+    /* Use a max keyframe interval of 5 seconds, if none was
+     * specified on the command line.
+     */
+    if (!stream->config.have_kf_max_dist)
+    {
+        double framerate = (double)global->framerate.num/global->framerate.den;
+        if (framerate > 0.0)
+            stream->config.cfg.kf_max_dist = 5.0*framerate;
+    }
 }
 
 
@@ -2380,6 +2420,8 @@ int main(int argc, const char **argv_)
          */
         if (!global.have_framerate)
             global.framerate = input.framerate;
+
+        FOREACH_STREAM(set_default_kf_interval(stream, &global));
 
         /* Show configuration */
         if (global.verbose && pass == 0)

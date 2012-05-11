@@ -98,7 +98,7 @@
     vmul.s16        q2, q6, q4          ; x * Dequant
     vmul.s16        q3, q7, q5
 
-    ldr             r0, _inv_zig_zag_   ; load ptr of inverse zigzag table
+    adr             r0, inv_zig_zag     ; load ptr of inverse zigzag table
 
     vceq.s16        q8, q8              ; set q8 to all 1
 
@@ -181,7 +181,7 @@
     vadd.s16        q12, q14            ; x + Round
     vadd.s16        q13, q15
 
-    ldr             r0, _inv_zig_zag_   ; load ptr of inverse zigzag table
+    adr             r0, inv_zig_zag     ; load ptr of inverse zigzag table
 
     vqdmulh.s16     q12, q8             ; y = ((Round+abs(z)) * Quant) >> 16
     vqdmulh.s16     q13, q9
@@ -247,9 +247,6 @@ zero_output
     ENDP
 
 ; default inverse zigzag table is defined in vp8/common/entropy.c
-_inv_zig_zag_
-    DCD inv_zig_zag
-
     ALIGN 16    ; enable use of @128 bit aligned loads
 inv_zig_zag
     DCW 0x0001, 0x0002, 0x0006, 0x0007
