@@ -310,6 +310,7 @@ CMDLINE_SELECT="
     small
     postproc_visualizer
     unit_tests
+    experimental
 "
 
 process_cmdline() {
