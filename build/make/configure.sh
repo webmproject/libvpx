@@ -549,7 +549,7 @@ setup_gnu_toolchain() {
 
 process_common_toolchain() {
     if [ -z "$toolchain" ]; then
-        gcctarget="$(gcc -dumpmachine 2> /dev/null)"
+        gcctarget="${CHOST:-$(gcc -dumpmachine 2> /dev/null)}"
 
         # detect tgt_isa
         case "$gcctarget" in
