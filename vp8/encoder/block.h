@@ -108,7 +108,7 @@ typedef struct macroblock
 
     int skip;
 
-    int encode_breakout;
+    unsigned int encode_breakout;
 
     //char * gf_active_ptr;
     signed char *gf_active_ptr;

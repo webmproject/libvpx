@@ -303,7 +303,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
     if (pbi->num_fragments == 0)
     {
         /* New frame, reset fragment pointers and sizes */
-        vpx_memset(pbi->fragments, 0, sizeof(pbi->fragments));
+        vpx_memset((void*)pbi->fragments, 0, sizeof(pbi->fragments));
         vpx_memset(pbi->fragment_sizes, 0, sizeof(pbi->fragment_sizes));
     }
     if (pbi->input_fragments && !(source == NULL && size == 0))

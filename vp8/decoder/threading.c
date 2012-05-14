@@ -654,7 +654,7 @@ static THREAD_FUNCTION thread_decoding_proc(void *p_data)
 void vp8_decoder_create_threads(VP8D_COMP *pbi)
 {
     int core_count = 0;
-    int ithread;
+    unsigned int ithread;
 
     pbi->b_multithreaded_rd = 0;
     pbi->allocated_decoding_thread_count = 0;
@@ -870,7 +870,8 @@ void vp8_decoder_remove_threads(VP8D_COMP *pbi)
 void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
 {
     VP8_COMMON *pc = &pbi->common;
-    int i;
+    unsigned int i;
+    int j;
 
     int filter_level = pc->filter_level;
 
@@ -881,19 +882,19 @@ void vp8mt_decode_mb_rows( VP8D_COMP *pbi, MACROBLOCKD *xd)
         vpx_memset(pbi->mt_uabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->lst_fb_idx].y_width>>1) +5);
         vpx_memset(pbi->mt_vabove_row[0] + (VP8BORDERINPIXELS>>1)-1, 127, (pc->yv12_fb[pc->lst_fb_idx].y_width>>1) +5);
 
-        for (i=1; i<pc->mb_rows; i++)
+        for (j=1; j<pc->mb_rows; j++)
         {
-            vpx_memset(pbi->mt_yabove_row[i] + VP8BORDERINPIXELS-1, (unsigned char)129, 1);
-            vpx_memset(pbi->mt_uabove_row[i] + (VP8BORDERINPIXELS>>1)-1, (unsigned char)129, 1);
-            vpx_memset(pbi->mt_vabove_row[i] + (VP8BORDERINPIXELS>>1)-1, (unsigned char)129, 1);
+            vpx_memset(pbi->mt_yabove_row[j] + VP8BORDERINPIXELS-1, (unsigned char)129, 1);
+            vpx_memset(pbi->mt_uabove_row[j] + (VP8BORDERINPIXELS>>1)-1, (unsigned char)129, 1);
+            vpx_memset(pbi->mt_vabove_row[j] + (VP8BORDERINPIXELS>>1)-1, (unsigned char)129, 1);
         }
 
         /* Set left_col to 129 initially */
-        for (i=0; i<pc->mb_rows; i++)
+        for (j=0; j<pc->mb_rows; j++)
         {
-            vpx_memset(pbi->mt_yleft_col[i], (unsigned char)129, 16);
-            vpx_memset(pbi->mt_uleft_col[i], (unsigned char)129, 8);
-            vpx_memset(pbi->mt_vleft_col[i], (unsigned char)129, 8);
+            vpx_memset(pbi->mt_yleft_col[j], (unsigned char)129, 16);
+            vpx_memset(pbi->mt_uleft_col[j], (unsigned char)129, 8);
+            vpx_memset(pbi->mt_vleft_col[j], (unsigned char)129, 8);
         }
 
         /* Initialize the loop filter for this frame. */

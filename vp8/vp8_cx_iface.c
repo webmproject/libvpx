@@ -227,7 +227,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
     if (cfg->ts_number_layers > 1)
     {
-        int i;
+        unsigned int i;
         RANGE_CHECK_HI(cfg, ts_periodicity, 16);
 
         for (i=1; i<cfg->ts_number_layers; i++)
