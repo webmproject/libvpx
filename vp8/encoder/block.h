@@ -124,7 +124,7 @@ typedef struct
 #endif
     int mbmode_cost[2][MB_MODE_COUNT];
     int intra_uv_mode_cost[2][MB_MODE_COUNT];
-    unsigned int bmode_costs[10][10][10];
+    unsigned int bmode_costs[VP8_BINTRAMODES][VP8_BINTRAMODES][VP8_BINTRAMODES];
     unsigned int i8x8_mode_costs[MB_MODE_COUNT];
     unsigned int inter_bmode_costs[B_MODE_COUNT];
 

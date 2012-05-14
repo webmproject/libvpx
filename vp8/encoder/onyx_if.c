@@ -140,7 +140,7 @@ extern int skip_false_count;
 
 
 #ifdef ENTROPY_STATS
-extern int intra_mode_stats[10][10][10];
+extern int intra_mode_stats[VP8_BINTRAMODES][VP8_BINTRAMODES][VP8_BINTRAMODES];
 #endif
 
 #ifdef SPEEDSTATS
@@ -156,13 +156,13 @@ extern unsigned __int64 Sectionbits[500];
 #endif
 #ifdef MODE_STATS
 extern INT64 Sectionbits[500];
-extern int y_modes[VP8_YMODES]  ;
-extern int i8x8_modes[VP8_I8X8_MODES];
-extern int uv_modes[VP8_UV_MODES] ;
-extern int uv_modes_y[VP8_YMODES][VP8_UV_MODES];
-extern int b_modes[B_MODE_COUNT];
-extern int inter_y_modes[MB_MODE_COUNT] ;
-extern int inter_uv_modes[VP8_UV_MODES] ;
+extern unsigned int y_modes[VP8_YMODES]  ;
+extern unsigned int i8x8_modes[VP8_I8X8_MODES];
+extern unsigned int uv_modes[VP8_UV_MODES] ;
+extern unsigned int uv_modes_y[VP8_YMODES][VP8_UV_MODES];
+extern unsigned int b_modes[B_MODE_COUNT];
+extern unsigned int inter_y_modes[MB_MODE_COUNT] ;
+extern unsigned int inter_uv_modes[VP8_UV_MODES] ;
 extern unsigned int inter_b_modes[B_MODE_COUNT];
 #endif
 
@@ -760,6 +760,14 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
         sf->thresh_mult[THR_V_PRED   ] = 1000;
         sf->thresh_mult[THR_H_PRED   ] = 1000;
+#if CONFIG_NEWINTRAMODES
+        sf->thresh_mult[THR_D45_PRED ] = 1000;
+        sf->thresh_mult[THR_D135_PRED] = 1000;
+        sf->thresh_mult[THR_D117_PRED] = 1000;
+        sf->thresh_mult[THR_D153_PRED] = 1000;
+        sf->thresh_mult[THR_D27_PRED ] = 1000;
+        sf->thresh_mult[THR_D63_PRED ] = 1000;
+#endif
         sf->thresh_mult[THR_B_PRED   ] = 2000;
         sf->thresh_mult[THR_I8X8_PRED] = 2000;
         sf->thresh_mult[THR_TM       ] = 1000;
@@ -803,6 +811,14 @@ void vp8_set_speed_features(VP8_COMP *cpi)
         sf->thresh_mult[THR_NEARMV   ] = 0;
         sf->thresh_mult[THR_V_PRED   ] = 1000;
         sf->thresh_mult[THR_H_PRED   ] = 1000;
+#if CONFIG_NEWINTRAMODES
+        sf->thresh_mult[THR_D45_PRED ] = 1000;
+        sf->thresh_mult[THR_D135_PRED] = 1000;
+        sf->thresh_mult[THR_D117_PRED] = 1000;
+        sf->thresh_mult[THR_D153_PRED] = 1000;
+        sf->thresh_mult[THR_D27_PRED ] = 1000;
+        sf->thresh_mult[THR_D63_PRED ] = 1000;
+#endif
         sf->thresh_mult[THR_B_PRED   ] = 2500;
         sf->thresh_mult[THR_I8X8_PRED] = 2500;
         sf->thresh_mult[THR_TM       ] = 1000;
@@ -881,6 +897,14 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_TM       ] = 1500;
             sf->thresh_mult[THR_V_PRED   ] = 1500;
             sf->thresh_mult[THR_H_PRED   ] = 1500;
+#if CONFIG_NEWINTRAMODES
+            sf->thresh_mult[THR_D45_PRED ] = 1500;
+            sf->thresh_mult[THR_D135_PRED] = 1500;
+            sf->thresh_mult[THR_D117_PRED] = 1500;
+            sf->thresh_mult[THR_D153_PRED] = 1500;
+            sf->thresh_mult[THR_D27_PRED ] = 1500;
+            sf->thresh_mult[THR_D63_PRED ] = 1500;
+#endif
             sf->thresh_mult[THR_B_PRED   ] = 5000;
             sf->thresh_mult[THR_I8X8_PRED] = 5000;
 
@@ -939,6 +963,14 @@ void vp8_set_speed_features(VP8_COMP *cpi)
             sf->thresh_mult[THR_TM       ] = 2000;
             sf->thresh_mult[THR_V_PRED   ] = 2000;
             sf->thresh_mult[THR_H_PRED   ] = 2000;
+#if CONFIG_NEWINTRAMODES
+            sf->thresh_mult[THR_D45_PRED ] = 2000;
+            sf->thresh_mult[THR_D135_PRED] = 2000;
+            sf->thresh_mult[THR_D117_PRED] = 2000;
+            sf->thresh_mult[THR_D153_PRED] = 2000;
+            sf->thresh_mult[THR_D27_PRED ] = 2000;
+            sf->thresh_mult[THR_D63_PRED ] = 2000;
+#endif
             sf->thresh_mult[THR_B_PRED   ] = 7500;
             sf->thresh_mult[THR_I8X8_PRED] = 7500;
 
@@ -1719,6 +1751,16 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
 #ifdef ENTROPY_STATS
     init_context_counters();
 #endif
+#ifdef MODE_STATS
+    vp8_zero(y_modes);
+    vp8_zero(i8x8_modes);
+    vp8_zero(uv_modes);
+    vp8_zero(uv_modes_y);
+    vp8_zero(b_modes);
+    vp8_zero(inter_y_modes);
+    vp8_zero(inter_uv_modes);
+    vp8_zero(inter_b_modes);
+#endif
 
     /*Initialize the feed-forward activity masking.*/
     cpi->activity_avg = 90<<12;
@@ -2006,32 +2048,49 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             sprintf(modes_stats_file, "modes_q%03d.stt",cpi->common.base_qindex);
             f = fopen(modes_stats_file, "w");
             fprintf(f, "intra_mode in Intra Frames:\n");
-            fprintf(f, "Y: %8d, %8d, %8d, %8d, %8d, %8d\n", y_modes[0], y_modes[1], y_modes[2], y_modes[3], y_modes[4], y_modes[5]);
-            fprintf(f, "I8:%8d, %8d, %8d, %8d\n", i8x8_modes[0], i8x8_modes[1], i8x8_modes[2], i8x8_modes[3]);
-            fprintf(f, "UV:%8d, %8d, %8d, %8d\n", uv_modes[0], uv_modes[1], uv_modes[2], uv_modes[3]);
-            fprintf(f, "KeyFrame Y-UV:\n");
             {
                 int i;
-                for(i=0;i<VP8_YMODES;i++)
-                {
-                    fprintf(f, "%2d:%8d, %8d, %8d, %8d\n",i,uv_modes_y[i][0],
-                        uv_modes_y[i][1], uv_modes_y[i][2], uv_modes_y[i][3]);
-                }
+                fprintf(f, "Y: ");
+                for (i=0;i<VP8_YMODES;i++) fprintf(f, " %8d,", y_modes[i]);
+                fprintf(f, "\n");
             }
-            fprintf(f, "Inter Y-UV:\n");
             {
                 int i;
+                fprintf(f, "I8: ");
+                for (i=0;i<VP8_I8X8_MODES;i++) fprintf(f, " %8d,", i8x8_modes[i]);
+                fprintf(f, "\n");
+            }
+            {
+                int i;
+                fprintf(f, "UV: ");
+                for (i=0;i<VP8_UV_MODES;i++) fprintf(f, " %8d,", uv_modes[i]);
+                fprintf(f, "\n");
+            }
+            {
+                int i, j;
+                fprintf(f, "KeyFrame Y-UV:\n");
                 for(i=0;i<VP8_YMODES;i++)
                 {
-                    fprintf(f, "%2d:%8d, %8d, %8d, %8d\n",i,cpi->y_uv_mode_count[i][0],
-                        cpi->y_uv_mode_count[i][1], cpi->y_uv_mode_count[i][2], cpi->y_uv_mode_count[i][3]);
+                    fprintf(f, "%2d:", i);
+                    for (j=0; j<VP8_UV_MODES;j++) fprintf(f, "%8d, ",uv_modes_y[i][j]);
+                    fprintf(f, "\n");
                 }
             }
-            fprintf(f, "B: ");
+            {
+                int i, j;
+                fprintf(f, "Inter Y-UV:\n");
+                for(i=0;i<VP8_YMODES;i++)
+                {
+                    fprintf(f, "%2d:", i);
+                    for (j=0; j<VP8_UV_MODES;j++) fprintf(f, "%8d, ",cpi->y_uv_mode_count[i][j]);
+                    fprintf(f, "\n");
+                }
+            }
             {
                 int i;
 
-                for (i = 0; i < 10; i++)
+                fprintf(f, "B: ");
+                for (i = 0; i < VP8_BINTRAMODES; i++)
                     fprintf(f, "%8d, ", b_modes[i]);
 
                 fprintf(f, "\n");
@@ -2039,23 +2098,23 @@ void vp8_remove_compressor(VP8_PTR *ptr)
             }
 
             fprintf(f, "Modes in Inter Frames:\n");
-            fprintf(f,
-                "Y: %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d, %8d\n",
-                    inter_y_modes[0], inter_y_modes[1], inter_y_modes[2],
-                    inter_y_modes[3], inter_y_modes[4], inter_y_modes[5],
-                    inter_y_modes[6], inter_y_modes[7], inter_y_modes[8],
-                    inter_y_modes[9], inter_y_modes[10]);
-            fprintf(f, "UV:%8d, %8d, %8d, %8d\n", inter_uv_modes[0],
-                    inter_uv_modes[1], inter_uv_modes[2], inter_uv_modes[3]);
-            fprintf(f, "B: ");
             {
                 int i;
-
-                for (i = 0; i < 15; i++)
-                    fprintf(f, "%8d, ", inter_b_modes[i]);
-
+                fprintf(f, "Y: ");
+                for (i=0;i<MB_MODE_COUNT;i++) fprintf(f, " %8d,", inter_y_modes[i]);
                 fprintf(f, "\n");
-
+            }
+            {
+                int i;
+                fprintf(f, "UV: ");
+                for (i=0;i<VP8_UV_MODES;i++) fprintf(f, " %8d,", inter_uv_modes[i]);
+                fprintf(f, "\n");
+            }
+            {
+                int i;
+                fprintf(f, "B: ");
+                for (i = 0; i < B_MODE_COUNT; i++) fprintf(f, "%8d, ", inter_b_modes[i]);
+                fprintf(f, "\n");
             }
             fprintf(f, "P:%8d, %8d, %8d, %8d\n", count_mb_seg[0], count_mb_seg[1], count_mb_seg[2], count_mb_seg[3]);
             fprintf(f, "PB:%8d, %8d, %8d, %8d\n", inter_b_modes[LEFT4X4], inter_b_modes[ABOVE4X4], inter_b_modes[ZERO4X4], inter_b_modes[NEW4X4]);
@@ -2082,7 +2141,7 @@ void vp8_remove_compressor(VP8_PTR *ptr)
 
                     fprintf(fmode, "        {");
 
-                    for (k = 0; k < 10; k++)
+                    for (k = 0; k < VP8_BINTRAMODES; k++)
                     {
                         if (!intra_mode_stats[i][j][k])
                             fprintf(fmode, " %5d, ", 1);

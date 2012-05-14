@@ -17,6 +17,16 @@
 
 const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
 {
+#if CONFIG_NEWINTRAMODES
+    {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 22, 200},
+    {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 27, 160},
+    {31, 17, 18,  8,  8,  8,  8,  8,  8,  9, 26, 139},
+    {40, 22, 23,  8,  8,  8,  8,  8,  8, 12, 27, 116},
+    {53, 26, 28,  8,  8,  8,  8,  8,  8, 13, 26,  94},
+    {68, 33, 35,  8,  8,  8,  8,  8,  8, 17, 20,  68},
+    {78, 38, 38,  8,  8,  8,  8,  8,  8, 19, 16,  52},
+    {89, 42, 42,  8,  8,  8,  8,  8,  8, 21, 12,  34},
+#else
     {17,  6,  5,  2, 22, 203},
     {27, 13, 13,  6, 27, 170},
     {35, 17, 18,  9, 26, 152},
@@ -25,29 +35,69 @@ const unsigned int kf_y_mode_cts[8][VP8_YMODES] =
     {73, 33, 36, 17, 20,  78},
     {88, 38, 39, 19, 16,  57},
     {99, 42, 43, 21, 12,  39},
+#endif
 };
 
-static const unsigned int y_mode_cts  [VP8_YMODES] = {
-    106,  25, 21, 13, 16, 74};
+static const unsigned int y_mode_cts  [VP8_YMODES] =
+#if CONFIG_NEWINTRAMODES
+    {98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 16, 70};
+#else
+    {106, 25, 21, 13, 16, 74};
+#endif
 
 static const unsigned int uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
+#if CONFIG_NEWINTRAMODES
+    { 200, 15, 15, 10, 10, 10, 10, 10, 10,  6},
+    { 130, 75, 10, 10, 10, 10, 10, 10, 10,  6},
+    { 130, 10, 75, 10, 10, 10, 10, 10, 10,  6},
+    { 130, 15, 10, 75, 10, 10, 10, 10, 10,  6},
+    { 150, 15, 10, 10, 75, 10, 10, 10, 10,  6},
+    { 150, 15, 10, 10, 10, 75, 10, 10, 10,  6},
+    { 150, 15, 10, 10, 10, 10, 75, 10, 10,  6},
+    { 150, 15, 10, 10, 10, 10, 10, 75, 10,  6},
+    { 150, 15, 10, 10, 10, 10, 10, 10, 75,  6},
+    { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16},
+    { 132, 46, 40, 10, 10, 10, 10, 10, 10, 18}, /* never used */
+    { 150, 35, 41, 10, 10, 10, 10, 10, 10, 10},
+#else
     { 210, 20, 20,  6},
     { 180, 60, 10,  6},
     { 150, 20, 80,  6},
     { 170, 35, 35, 16},
     { 142, 51, 45, 18}, /* never used */
     { 160, 40, 46, 10},
+#endif
 };
 
-static const unsigned int i8x8_mode_cts  [VP8_UV_MODES] = {93, 69, 81, 13};
+static const unsigned int i8x8_mode_cts  [VP8_I8X8_MODES] =
+#if CONFIG_NEWINTRAMODES
+    {73, 49, 61, 30, 30, 30, 30, 30, 30, 13};
+#else
+    {93, 69, 81, 13};
+#endif
 
 static const unsigned int kf_uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] ={
+#if CONFIG_NEWINTRAMODES
+    { 160, 24, 24, 20, 20, 20, 20, 20, 20,  8},
+    { 102, 64, 30, 20, 20, 20, 20, 20, 20, 10},
+    { 102, 30, 64, 20, 20, 20, 20, 20, 20, 10},
+    { 102, 33, 20, 64, 20, 20, 20, 20, 20, 14},
+    { 102, 33, 20, 20, 64, 20, 20, 20, 20, 14},
+    { 122, 33, 20, 20, 20, 64, 20, 20, 20, 14},
+    { 102, 33, 20, 20, 20, 20, 64, 20, 20, 14},
+    { 102, 33, 20, 20, 20, 20, 20, 64, 20, 14},
+    { 102, 33, 20, 20, 20, 20, 20, 20, 64, 14},
+    { 132, 36, 30, 20, 20, 20, 20, 20, 20, 18},
+    { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* never used */
+    { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18},
+#else
     { 180, 34, 34,  8},
     { 132, 74, 40, 10},
     { 132, 40, 74, 10},
     { 152, 46, 40, 18},
     { 142, 51, 45, 18}, /* never used */
     { 142, 51, 45, 18},
+#endif
 };
 
 static const unsigned int bmode_cts[VP8_BINTRAMODES] =
@@ -133,7 +183,7 @@ const vp8_prob vp8_mbsplit_probs [VP8_NUMMBSPLITS-1] = { 110, 111, 150};
 
 /* Array indices are identical to previously-existing INTRAMODECONTEXTNODES. */
 
-const vp8_tree_index vp8_bmode_tree[18] =     /* INTRAMODECONTEXTNODE value */
+const vp8_tree_index vp8_bmode_tree[VP8_BINTRAMODES*2-2] =     /* INTRAMODECONTEXTNODE value */
 {
     -B_DC_PRED, 2,                             /* 0 = DC_NODE */
     -B_TM_PRED, 4,                            /* 1 = TM_NODE */
@@ -145,6 +195,67 @@ const vp8_tree_index vp8_bmode_tree[18] =     /* INTRAMODECONTEXTNODE value */
     -B_VL_PRED, 16,                      /* 7 = VL_NODE */
     -B_HD_PRED, -B_HU_PRED             /* 8 = HD_NODE */
 };
+
+#if CONFIG_NEWINTRAMODES
+/* Again, these trees use the same probability indices as their
+   explicitly-programmed predecessors. */
+const vp8_tree_index vp8_ymode_tree[VP8_YMODES*2-2] =
+{
+    2, 14,
+    -DC_PRED, 4,
+    6, 8,
+    -D45_PRED, -D135_PRED,
+    10, 12,
+    -D117_PRED, -D153_PRED,
+    -D27_PRED, -D63_PRED,
+    16, 18,
+    -V_PRED, -H_PRED,
+    -TM_PRED, 20,
+    -B_PRED, -I8X8_PRED
+};
+
+const vp8_tree_index vp8_kf_ymode_tree[VP8_YMODES*2-2] =
+{
+    2, 14,
+    -DC_PRED, 4,
+    6, 8,
+    -D45_PRED, -D135_PRED,
+    10, 12,
+    -D117_PRED, -D153_PRED,
+    -D27_PRED, -D63_PRED,
+    16, 18,
+    -V_PRED, -H_PRED,
+    -TM_PRED, 20,
+    -B_PRED, -I8X8_PRED
+};
+
+const vp8_tree_index vp8_i8x8_mode_tree[VP8_I8X8_MODES*2-2] =
+{
+    2, 14,
+    -DC_PRED, 4,
+    6, 8,
+    -D45_PRED, -D135_PRED,
+    10, 12,
+    -D117_PRED, -D153_PRED,
+    -D27_PRED, -D63_PRED,
+    -V_PRED, 16,
+    -H_PRED, -TM_PRED
+};
+
+const vp8_tree_index vp8_uv_mode_tree[VP8_UV_MODES*2-2] =
+{
+    2, 14,
+    -DC_PRED, 4,
+    6, 8,
+    -D45_PRED, -D135_PRED,
+    10, 12,
+    -D117_PRED, -D153_PRED,
+    -D27_PRED, -D63_PRED,
+    -V_PRED, 16,
+    -H_PRED, -TM_PRED
+};
+
+#else  /* CONFIG_NEWINTRAMODES */
 
 /* Again, these trees use the same probability indices as their
    explicitly-programmed predecessors. */
@@ -178,6 +289,8 @@ const vp8_tree_index vp8_uv_mode_tree[6] =
     -V_PRED, 4,
     -H_PRED, -TM_PRED
 };
+
+#endif  /* CONFIG_NEWINTRAMODES */
 
 const vp8_tree_index vp8_mbsplit_tree[6] =
 {
@@ -282,10 +395,10 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
     }
 
     vp8_tree_probs_from_distribution(
-        VP8_UV_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
+        VP8_I8X8_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
         x->i8x8_mode_prob, bct, i8x8_mode_cts,
-        256, 1
-        );
+        256, 1);
+
     vpx_memcpy(x->fc.sub_mv_ref_prob, sub_mv_ref_prob, sizeof(sub_mv_ref_prob));
 
 }
@@ -448,7 +561,7 @@ void vp8_update_mode_context(VP8_COMMON *pc)
 void print_mode_contexts(VP8_COMMON *pc)
 {
     int j, i;
-    printf("====================\n");
+    printf("\n====================\n");
     for(j=0; j<6; j++)
     {
         for (i = 0; i < 4; i++)

@@ -100,6 +100,14 @@ const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES] =
 
     V_PRED,
     H_PRED,
+#if CONFIG_NEWINTRAMODES
+    D45_PRED,
+    D135_PRED,
+    D117_PRED,
+    D153_PRED,
+    D27_PRED,
+    D63_PRED,
+#endif
     TM_PRED,
 
     NEWMV,
@@ -154,6 +162,14 @@ const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
 
     INTRA_FRAME,
     INTRA_FRAME,
+#if CONFIG_NEWINTRAMODES
+    INTRA_FRAME,
+    INTRA_FRAME,
+    INTRA_FRAME,
+    INTRA_FRAME,
+    INTRA_FRAME,
+    INTRA_FRAME,
+#endif
     INTRA_FRAME,
 
     LAST_FRAME,
@@ -191,9 +207,13 @@ const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
 
 const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES] =
 {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+#if CONFIG_NEWINTRAMODES
+    0, 0,
+    0, 0,
+    0, 0,
+#endif
+    0, 0, 0, 0, 0, 0, 0, 0, 0,
 
     /* compound prediction modes */
     GOLDEN_FRAME,
@@ -898,7 +918,6 @@ static int rd_pick_intra4x4block(
         // Do we need to do this for mode2 also?
         if (mode==B_LD_PRED || mode==B_VL_PRED)
             continue;
-
         rate = bmode_costs[mode];
 
 #if CONFIG_COMP_INTRA_PRED
@@ -3017,6 +3036,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 vp8_cost_bit( get_pred_prob( cm, xd, PRED_COMP ), 0 );
         }
         break;
+#if CONFIG_NEWINTRAMODES
+        case D45_PRED:
+        case D135_PRED:
+        case D117_PRED:
+        case D153_PRED:
+        case D27_PRED:
+        case D63_PRED:
+#endif
         case DC_PRED:
         case V_PRED:
         case H_PRED:

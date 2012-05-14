@@ -8,7 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
-
+#include <stdio.h>
 #include "vpx_ports/config.h"
 #include "recon.h"
 #include "reconintra.h"
@@ -17,6 +17,217 @@
 /* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *x) and
  * vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
  */
+
+#if CONFIG_NEWINTRAMODES
+void d27_predictor(unsigned char *ypred_ptr, int y_stride, int n,
+                   unsigned char *yabove_row, unsigned char *yleft_col)
+{
+    int r, c, h, w, v;
+    int a, b;
+    r = 0;
+    for (c = 0; c < n-2; c++)
+    {
+        if (c&1)
+            a = yleft_col[r + 1];
+        else
+            a = (yleft_col[r] + yleft_col[r + 1] + 1) >> 1;
+        b = yabove_row[c + 2];
+        ypred_ptr[c] = (2 * a + (c + 1) * b + (c + 3)/2) / (c + 3);
+    }
+    for (r = 1; r < n/2 - 1; r++)
+    {
+        for (c = 0; c < n - 2 - 2 * r; c++)
+        {
+            if (c&1)
+                a = yleft_col[r + 1];
+            else
+                a = (yleft_col[r] + yleft_col[r + 1] + 1) >> 1;
+            b = ypred_ptr[(r - 1) * y_stride + c + 2];
+            ypred_ptr[r * y_stride + c] = (2 * a + (c + 1) * b + (c + 3)/2) / (c + 3);
+        }
+    }
+    for (; r < n - 1; ++r)
+    {
+        for (c = 0; c < n; c++)
+        {
+            v = (c & 1 ? yleft_col[r + 1] : (yleft_col[r] + yleft_col[r + 1] + 1) >> 1);
+            h = r - c/2;
+            ypred_ptr[h * y_stride + c] = v;
+        }
+    }
+    c = 0;
+    r = n - 1;
+    ypred_ptr[r * y_stride] = (ypred_ptr[(r - 1) * y_stride] +
+                               yleft_col[r] + 1) >> 1;
+    for (r = n - 2; r >= n/2; --r)
+    {
+        w = c + (n - 1 - r) * 2;
+        ypred_ptr[r * y_stride + w] = (ypred_ptr[(r - 1) * y_stride + w] +
+                                       ypred_ptr[r * y_stride + w - 1] + 1) >> 1;
+    }
+    for (c = 1; c < n; c++)
+    {
+        for (r = n - 1; r >= n/2 + c/2; --r)
+        {
+            w = c + (n - 1 - r) * 2;
+            ypred_ptr[r * y_stride + w] = (ypred_ptr[(r - 1) * y_stride + w] +
+                                           ypred_ptr[r * y_stride + w - 1] + 1) >> 1;
+        }
+    }
+}
+
+void d63_predictor(unsigned char *ypred_ptr, int y_stride, int n,
+                   unsigned char *yabove_row, unsigned char *yleft_col)
+{
+    int r, c, h, w, v;
+    int a, b;
+    c = 0;
+    for (r = 0; r < n-2; r++)
+    {
+        if (r&1)
+            a = yabove_row[c + 1];
+        else
+            a = (yabove_row[c] + yabove_row[c + 1] + 1) >> 1;
+        b = yleft_col[r + 2];
+        ypred_ptr[r * y_stride] = (2 * a + (r + 1) * b + (r + 3)/2) / (r + 3);
+    }
+    for (c = 1; c < n/2 - 1; c++)
+    {
+        for (r = 0; r < n - 2 - 2 * c; r++)
+        {
+            if (r&1)
+                a = yabove_row[c + 1];
+            else
+                a = (yabove_row[c] + yabove_row[c + 1] + 1) >> 1;
+            b = ypred_ptr[(r + 2) * y_stride + c - 1];
+            ypred_ptr[r * y_stride + c] = (2 * a + (c + 1) * b + (c + 3)/2) / (c + 3);
+        }
+    }
+    for (; c < n - 1; ++c)
+    {
+        for (r = 0; r < n; r++)
+        {
+            v = (r & 1 ? yabove_row[c + 1] : (yabove_row[c] + yabove_row[c + 1] + 1) >> 1);
+            w = c - r/2;
+            ypred_ptr[r * y_stride + w] = v;
+        }
+    }
+    r = 0;
+    c = n - 1;
+    ypred_ptr[c] = (ypred_ptr[(c - 1)] + yabove_row[c] + 1) >> 1;
+    for (c = n - 2; c >= n/2; --c)
+    {
+        h = r + (n - 1 - c) * 2;
+        ypred_ptr[h * y_stride + c] = (ypred_ptr[h * y_stride + c - 1] +
+                                       ypred_ptr[(h - 1) * y_stride + c] + 1) >> 1;
+    }
+    for (r = 1; r < n; r++)
+    {
+        for (c = n - 1; c >= n/2 + r/2; --c)
+        {
+            h = r + (n - 1 - c) * 2;
+            ypred_ptr[h * y_stride + c] = (ypred_ptr[h * y_stride + c - 1] +
+                                           ypred_ptr[(h - 1) * y_stride + c] + 1) >> 1;
+        }
+    }
+}
+
+void d45_predictor(unsigned char *ypred_ptr, int y_stride, int n,
+                   unsigned char *yabove_row, unsigned char *yleft_col)
+{
+    int r, c;
+    for (r = 0; r < n - 1; ++r)
+    {
+        for (c = 0; c <= r; ++c)
+        {
+            ypred_ptr[(r - c) * y_stride + c] =
+                (yabove_row[r+1] * (c + 1) +
+                 yleft_col[r+1] * (r - c + 1) + r/2 + 1) / (r + 2);
+        }
+    }
+    for (c = 0; c <= r; ++c)
+    {
+        int yabove_ext = yabove_row[r]; //2*yabove_row[r] - yabove_row[r-1];
+        int yleft_ext = yleft_col[r]; //2*yleft_col[r] - yleft_col[r-1];
+        yabove_ext = (yabove_ext > 255 ? 255 : (yabove_ext < 0 ? 0 : yabove_ext));
+        yleft_ext = (yleft_ext > 255 ? 255 : (yleft_ext < 0 ? 0 : yleft_ext));
+        ypred_ptr[(r - c) * y_stride + c] =
+            (yabove_ext * (c + 1) +
+             yleft_ext * (r - c + 1) + r/2 + 1) / (r + 2);
+    }
+    for (r = 1; r < n; ++r)
+    {
+        for (c = n - r; c < n; ++c)
+            ypred_ptr[r * y_stride + c] = (ypred_ptr[(r - 1) * y_stride + c] +
+                                           ypred_ptr[r * y_stride + c - 1] + 1) >> 1;
+    }
+}
+
+void d117_predictor(unsigned char *ypred_ptr, int y_stride, int n,
+                    unsigned char *yabove_row, unsigned char *yleft_col)
+{
+    int r, c;
+    for (c = 0; c < n; c++)
+        ypred_ptr[c] = (yabove_row[c-1] + yabove_row[c] + 1) >> 1;
+    ypred_ptr += y_stride;
+    for (c = 0; c < n; c++)
+        ypred_ptr[c] = yabove_row[c-1];
+    ypred_ptr += y_stride;
+    for (r = 2; r < n; ++r)
+    {
+        ypred_ptr[0] = yleft_col[r - 2];
+        for (c = 1; c < n; c++)
+            ypred_ptr[c] = ypred_ptr[-2*y_stride+c-1];
+        ypred_ptr += y_stride;
+    }
+}
+
+void d135_predictor(unsigned char *ypred_ptr, int y_stride, int n,
+                    unsigned char *yabove_row, unsigned char *yleft_col)
+{
+    int r, c;
+    ypred_ptr[0] = yabove_row[-1];
+    for (c = 1; c < n; c++)
+        ypred_ptr[c] = yabove_row[c - 1];
+    for (r = 1; r < n; ++r)
+        ypred_ptr[r * y_stride] = yleft_col[r - 1];
+
+    ypred_ptr += y_stride;
+    for (r = 1; r < n; ++r)
+    {
+        for (c = 1; c < n; c++)
+        {
+            ypred_ptr[c] = ypred_ptr[-y_stride + c - 1];
+        }
+        ypred_ptr += y_stride;
+    }
+}
+
+void d153_predictor(unsigned char *ypred_ptr, int y_stride, int n,
+                    unsigned char *yabove_row, unsigned char *yleft_col)
+{
+    int r, c;
+    ypred_ptr[0] = (yabove_row[-1] + yleft_col[0] + 1) >> 1;
+    for (r = 1; r < n; r++)
+        ypred_ptr[r * y_stride] = (yleft_col[r-1] + yleft_col[r] + 1) >> 1;
+    ypred_ptr++;
+    ypred_ptr[0] = yabove_row[-1];
+    for (r = 1; r < n; r++)
+        ypred_ptr[r * y_stride] = yleft_col[r-1];
+    ypred_ptr++;
+
+    for (c = 0; c < n - 2; c++)
+        ypred_ptr[c] = yabove_row[c];
+    ypred_ptr += y_stride;
+    for (r = 1; r < n; ++r)
+    {
+        for (c = 0; c < n - 2; c++)
+            ypred_ptr[c] = ypred_ptr[-y_stride+c-2];
+        ypred_ptr += y_stride;
+    }
+}
+#endif  /* CONFIG_NEWINTRAMODES */
+
 void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x)
 {
     int i;
@@ -64,7 +275,6 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *x, unsigned char *ypre
 
             if (x->left_available)
             {
-
                 for (i = 0; i < 16; i++)
                 {
                     average += yleft_col[i];
@@ -134,6 +344,38 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *x, unsigned char *ypre
 
     }
     break;
+#if CONFIG_NEWINTRAMODES
+    case D45_PRED:
+    {
+        d45_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+    }
+    break;
+    case D135_PRED:
+    {
+        d135_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+    }
+    break;
+    case D117_PRED:
+    {
+        d117_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+    }
+    break;
+    case D153_PRED:
+    {
+        d153_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+    }
+    break;
+    case D27_PRED:
+    {
+        d27_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+    }
+    break;
+    case D63_PRED:
+    {
+        d63_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
+    }
+    break;
+#endif
 #if CONIFG_I8X8
     case I8X8_PRED:
 #endif
@@ -313,6 +555,44 @@ void vp8_build_intra_predictors_mbuv_internal(MACROBLOCKD *x,
 
     }
     break;
+#if CONFIG_NEWINTRAMODES
+    case D45_PRED:
+    {
+        d45_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
+        d45_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
+    }
+    break;
+    case D135_PRED:
+    {
+        d135_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
+        d135_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
+    }
+    break;
+    case D117_PRED:
+    {
+        d117_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
+        d117_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
+    }
+    break;
+    case D153_PRED:
+    {
+        d153_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
+        d153_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
+    }
+    break;
+    case D27_PRED:
+    {
+        d27_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
+        d27_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
+    }
+    break;
+    case D63_PRED:
+    {
+        d63_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
+        d63_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
+    }
+    break;
+#endif
     case B_PRED:
     case NEARESTMV:
     case NEARMV:
@@ -403,7 +683,6 @@ void vp8_intra8x8_predict(BLOCKD *x,
             {
                 for (c = 0; c < 8; c++)
                 {
-
                     predictor[c] = yabove_row[c];
                 }
                 predictor += 16;
@@ -444,6 +723,38 @@ void vp8_intra8x8_predict(BLOCKD *x,
             }
         }
         break;
+#if CONFIG_NEWINTRAMODES
+    case D45_PRED:
+        {
+            d45_predictor(predictor, 16, 8,  yabove_row, yleft_col);
+        }
+        break;
+    case D135_PRED:
+        {
+            d135_predictor(predictor, 16, 8,  yabove_row, yleft_col);
+        }
+        break;
+    case D117_PRED:
+        {
+            d117_predictor(predictor, 16, 8,  yabove_row, yleft_col);
+        }
+        break;
+    case D153_PRED:
+        {
+            d153_predictor(predictor, 16, 8,  yabove_row, yleft_col);
+        }
+        break;
+    case D27_PRED:
+        {
+            d27_predictor(predictor, 16, 8,  yabove_row, yleft_col);
+        }
+        break;
+    case D63_PRED:
+        {
+            d63_predictor(predictor, 16, 8,  yabove_row, yleft_col);
+        }
+        break;
+#endif
     }
 }
 
@@ -452,7 +763,6 @@ void vp8_comp_intra8x8_predict(BLOCKD *x,
                                int mode, int second_mode,
                                unsigned char *out_predictor)
 {
-    
     unsigned char predictor[2][8*16];
     int i, j;
 
@@ -553,6 +863,38 @@ void vp8_intra_uv4x4_predict(BLOCKD *x,
             }
         }
         break;
+#if CONFIG_NEWINTRAMODES
+    case D45_PRED:
+        {
+            d45_predictor(predictor, 8, 4,  above_row, left_col);
+        }
+        break;
+    case D135_PRED:
+        {
+            d135_predictor(predictor, 8, 4,  above_row, left_col);
+        }
+        break;
+    case D117_PRED:
+        {
+            d117_predictor(predictor, 8, 4,  above_row, left_col);
+        }
+        break;
+    case D153_PRED:
+        {
+            d153_predictor(predictor, 8, 4,  above_row, left_col);
+        }
+        break;
+    case D27_PRED:
+        {
+            d27_predictor(predictor, 8, 4,  above_row, left_col);
+        }
+        break;
+    case D63_PRED:
+        {
+            d63_predictor(predictor, 8, 4,  above_row, left_col);
+        }
+        break;
+#endif
     }
 }
 

@@ -86,8 +86,16 @@ typedef enum
     DC_PRED,            /* average of above and left pixels */
     V_PRED,             /* vertical prediction */
     H_PRED,             /* horizontal prediction */
+#if CONFIG_NEWINTRAMODES
+    D45_PRED,           /* Directional 45 deg prediction  [anti-clockwise from 0 deg hor] */
+    D135_PRED,          /* Directional 135 deg prediction [anti-clockwise from 0 deg hor] */
+    D117_PRED,          /* Directional 112 deg prediction [anti-clockwise from 0 deg hor] */
+    D153_PRED,          /* Directional 157 deg prediction [anti-clockwise from 0 deg hor] */
+    D27_PRED,           /* Directional 22 deg prediction  [anti-clockwise from 0 deg hor] */
+    D63_PRED,           /* Directional 67 deg prediction  [anti-clockwise from 0 deg hor] */
+#endif
     TM_PRED,            /* Truemotion prediction */
-    I8X8_PRED,           /* 8x8 based prediction, each 8x8 has its own prediction mode */
+    I8X8_PRED,          /* 8x8 based prediction, each 8x8 has its own prediction mode */
     B_PRED,             /* block based prediction, each block has its own prediction mode */
 
     NEARESTMV,

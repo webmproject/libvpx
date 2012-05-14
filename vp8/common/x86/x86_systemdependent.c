@@ -84,10 +84,12 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->recon.recon2      = vp8_recon2b_sse2;
         rtcd->recon.recon4      = vp8_recon4b_sse2;
         rtcd->recon.copy16x16   = vp8_copy_mem16x16_sse2;
+#if CONFIG_NEWINTRAMODES == 0
         rtcd->recon.build_intra_predictors_mbuv =
             vp8_build_intra_predictors_mbuv_sse2;
         rtcd->recon.build_intra_predictors_mbuv_s =
             vp8_build_intra_predictors_mbuv_s_sse2;
+#endif
 
         rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_sse2;
 
@@ -122,7 +124,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
     if (flags & HAS_SSSE3)
     {
-#if CONFIG_ENHANCED_INTERP == 0 && CONFIG_HIGH_PRECISION_MV == 0
+#if CONFIG_ENHANCED_INTERP == 0 && CONFIG_HIGH_PRECISION_MV == 0 && CONFIG_SIXTEENTH_SUBPEL_UV == 0
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_ssse3;
         rtcd->subpix.sixtap8x8     = vp8_sixtap_predict8x8_ssse3;
         rtcd->subpix.sixtap8x4     = vp8_sixtap_predict8x4_ssse3;
@@ -131,10 +133,12 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
         rtcd->subpix.bilinear8x8   = vp8_bilinear_predict8x8_ssse3;
 #endif
 
+#if CONFIG_NEWINTRAMODES == 0
         rtcd->recon.build_intra_predictors_mbuv =
             vp8_build_intra_predictors_mbuv_ssse3;
         rtcd->recon.build_intra_predictors_mbuv_s =
             vp8_build_intra_predictors_mbuv_s_ssse3;
+#endif
     }
 #endif
 

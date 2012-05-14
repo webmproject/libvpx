@@ -34,15 +34,18 @@ unsigned __int64 Sectionbits[500];
 #endif
 
 #ifdef ENTROPY_STATS
-int intra_mode_stats[10][10][10];
+int intra_mode_stats[VP8_BINTRAMODES]
+                    [VP8_BINTRAMODES]
+                    [VP8_BINTRAMODES];
 static unsigned int tree_update_hist [BLOCK_TYPES]
                                      [COEF_BANDS]
                                      [PREV_COEF_CONTEXTS]
-                                     [ENTROPY_NODES][2]={0};
+                                     [ENTROPY_NODES] [2]={0};
 static unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
                                          [COEF_BANDS]
                                          [PREV_COEF_CONTEXTS]
                                          [ENTROPY_NODES] [2]={0};
+
 extern unsigned int active_section;
 #endif
 
@@ -1224,6 +1227,7 @@ static void write_kfmodes(VP8_COMP *cpi)
     int row_delta[4] = { 0, +1,  0, -1};
     int col_delta[4] = {+1, -1, +1, +1};
 
+    //printf("write_kfmodes\n");
     if (c->mb_no_coeff_skip)
     {
         // Divide by 0 check. 0 case possible with segment features
@@ -1349,6 +1353,7 @@ static void write_kfmodes(VP8_COMP *cpi)
 #endif
 
                         write_bmode(bc, bm, c->kf_bmode_prob [A] [L]);
+                        //printf("    mode: %d\n", bm);
 #if CONFIG_COMP_INTRA_PRED
                         if (uses_second)
                         {
@@ -1362,12 +1367,16 @@ static void write_kfmodes(VP8_COMP *cpi)
                 {
                     write_i8x8_mode(bc, m->bmi[0].as_mode.first,
                                     c->i8x8_mode_prob);
+                    //printf("    mode: %d\n", m->bmi[0].as_mode.first); fflush(stdout);
                     write_i8x8_mode(bc, m->bmi[2].as_mode.first,
                                     c->i8x8_mode_prob);
+                    //printf("    mode: %d\n", m->bmi[2].as_mode.first); fflush(stdout);
                     write_i8x8_mode(bc, m->bmi[8].as_mode.first,
                                     c->i8x8_mode_prob);
+                    //printf("    mode: %d\n", m->bmi[8].as_mode.first); fflush(stdout);
                     write_i8x8_mode(bc, m->bmi[10].as_mode.first,
                                     c->i8x8_mode_prob);
+                    //printf("    mode: %d\n", m->bmi[10].as_mode.first); fflush(stdout);
                 }
                 else
                     write_uv_mode(bc, m->mbmi.uv_mode, c->kf_uv_mode_prob[ym]);

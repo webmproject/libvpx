@@ -71,22 +71,14 @@ static void adjust_act_zbin( VP8_COMP *cpi, MACROBLOCK *x );
 
 
 #ifdef MODE_STATS
-unsigned int inter_y_modes[MB_MODE_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-unsigned int inter_uv_modes[VP8_UV_MODES] = {0, 0, 0, 0};
-unsigned int inter_b_modes[B_MODE_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-unsigned int y_modes[VP8_YMODES] = {0, 0, 0, 0, 0, 0};
-unsigned int i8x8_modes[VP8_I8X8_MODES]={0  };
-unsigned int uv_modes[VP8_UV_MODES] = {0, 0, 0, 0};
-unsigned int uv_modes_y[VP8_YMODES][VP8_UV_MODES]=
-{
-{0, 0, 0, 0},
-{0, 0, 0, 0},
-{0, 0, 0, 0},
-{0, 0, 0, 0},
-{0, 0, 0, 0},
-{0, 0, 0, 0}
-};
-unsigned int b_modes[B_MODE_COUNT] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+unsigned int inter_y_modes[MB_MODE_COUNT];
+unsigned int inter_uv_modes[VP8_UV_MODES];
+unsigned int inter_b_modes[B_MODE_COUNT];
+unsigned int y_modes[VP8_YMODES];
+unsigned int i8x8_modes[VP8_I8X8_MODES];
+unsigned int uv_modes[VP8_UV_MODES];
+unsigned int uv_modes_y[VP8_YMODES][VP8_UV_MODES];
+unsigned int b_modes[B_MODE_COUNT];
 #endif
 
 
