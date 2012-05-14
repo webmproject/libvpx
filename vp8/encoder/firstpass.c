@@ -807,6 +807,9 @@ void vp8_first_pass(VP8_COMP *cpi)
     {
         vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
     }
+    {
+        vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
+    }
 
     // swap frame pointers so last frame refers to the frame we just compressed
     vp8_swap_yv12_buffer(lst_yv12, new_yv12);
@@ -1144,50 +1147,6 @@ static int estimate_cq( VP8_COMP *cpi,
         Q = cpi->worst_quality - 1;
     if ( Q < cpi->best_quality )
         Q = cpi->best_quality;
-
-    return Q;
-}
-
-static int estimate_q(VP8_COMP *cpi, double section_err, int section_target_bandwitdh)
-{
-    int Q;
-    int num_mbs = cpi->common.MBs;
-    int target_norm_bits_per_mb;
-
-    double err_per_mb = section_err / num_mbs;
-    double err_correction_factor;
-    double corr_high;
-    double speed_correction = 1.0;
-
-    target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20)) ? (512 * section_target_bandwitdh) / num_mbs : 512 * (section_target_bandwitdh / num_mbs);
-
-    // Corrections for higher compression speed settings (reduced compression expected)
-    if (cpi->compressor_speed == 1)
-    {
-        if (cpi->oxcf.cpu_used <= 5)
-            speed_correction = 1.04 + (cpi->oxcf.cpu_used * 0.04);
-        else
-            speed_correction = 1.25;
-    }
-
-    // Try and pick a Q that can encode the content at the given rate.
-    for (Q = 0; Q < MAXQ; Q++)
-    {
-        int bits_per_mb_at_this_q;
-
-        // Error per MB based correction factor
-        err_correction_factor =
-            calc_correction_factor(err_per_mb, ERR_DIVISOR, 0.36, 0.90, Q);
-
-        bits_per_mb_at_this_q =
-            (int)( .5 + ( err_correction_factor *
-                          speed_correction *
-                          cpi->twopass.est_max_qcorrection_factor *
-                          (double)vp8_bits_per_mb(INTER_FRAME, Q) / 1.0 ) );
-
-        if (bits_per_mb_at_this_q <= target_norm_bits_per_mb)
-            break;
-    }
 
     return Q;
 }
@@ -1677,6 +1636,59 @@ static int calc_arf_boost(
     return (*f_boost + *b_boost);
 }
 
+static void configure_arnr_filter( VP8_COMP *cpi, FIRSTPASS_STATS *this_frame )
+{
+    int half_gf_int;
+    int frames_after_arf;
+    int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
+    int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
+
+    // Define the arnr filter width for this group of frames:
+    // We only filter frames that lie within a distance of half
+    // the GF interval from the ARF frame. We also have to trap
+    // cases where the filter extends beyond the end of clip.
+    // Note: this_frame->frame has been updated in the loop
+    // so it now points at the ARF frame.
+    half_gf_int = cpi->baseline_gf_interval >> 1;
+    frames_after_arf = cpi->twopass.total_stats->count -
+                       this_frame->frame - 1;
+
+    switch (cpi->oxcf.arnr_type)
+    {
+    case 1: // Backward filter
+        frames_fwd = 0;
+        if (frames_bwd > half_gf_int)
+            frames_bwd = half_gf_int;
+        break;
+
+    case 2: // Forward filter
+        if (frames_fwd > half_gf_int)
+            frames_fwd = half_gf_int;
+        if (frames_fwd > frames_after_arf)
+            frames_fwd = frames_after_arf;
+        frames_bwd = 0;
+        break;
+
+    case 3: // Centered filter
+    default:
+        frames_fwd >>= 1;
+        if (frames_fwd > frames_after_arf)
+            frames_fwd = frames_after_arf;
+        if (frames_fwd > half_gf_int)
+            frames_fwd = half_gf_int;
+
+        frames_bwd = frames_fwd;
+
+        // For even length filter there is one more frame backward
+        // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
+        if (frames_bwd < half_gf_int)
+            frames_bwd += (cpi->oxcf.arnr_max_frames+1) & 0x1;
+        break;
+    }
+
+    cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
+}
+
 // Analyse and define a gf/arf group .
 static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 {
@@ -1834,6 +1846,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     // Alterrnative boost calculation for alt ref
     alt_boost = calc_arf_boost( cpi, 0, (i-1), (i-1), &f_boost, &b_boost );
 
+    // Set the interval till the next gf or arf.
+    cpi->baseline_gf_interval = i;
+
     // Should we use the alternate refernce frame
     if (allow_alt_ref &&
         (i < cpi->oxcf.lag_in_frames ) &&
@@ -1846,139 +1861,16 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
          (mv_in_out_accumulator > -2.0)) &&
         (b_boost > 100) &&
         (f_boost > 100) )
+
     {
-        int Boost;
-        int allocation_chunks;
-        int Q = (cpi->oxcf.fixed_q < 0)
-                ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
-        int tmp_q;
-        int arf_frame_bits = 0;
-        int group_bits;
-
         cpi->gfu_boost = alt_boost;
+        cpi->source_alt_ref_pending = TRUE;
 
-        // Estimate the bits to be allocated to the group as a whole
-        if ((cpi->twopass.kf_group_bits > 0) &&
-            (cpi->twopass.kf_group_error_left > 0))
-        {
-            group_bits = (int)((double)cpi->twopass.kf_group_bits *
-                (gf_group_err / (double)cpi->twopass.kf_group_error_left));
-        }
-        else
-            group_bits = 0;
-
-        // Boost for arf frame
-        Boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
-        Boost += (i * 50);
-
-        // Set max and minimum boost and hence minimum allocation
-        if (Boost > ((cpi->baseline_gf_interval + 1) * 200))
-            Boost = ((cpi->baseline_gf_interval + 1) * 200);
-        else if (Boost < 125)
-            Boost = 125;
-
-        allocation_chunks = (i * 100) + Boost;
-
-        // Prevent overflow
-        if ( Boost > 1028 )
-        {
-            int divisor = Boost >> 10;
-            Boost /= divisor;
-            allocation_chunks /= divisor;
-        }
-
-        // Calculate the number of bits to be spent on the arf based on the
-        // boost number
-        arf_frame_bits = (int)((double)Boost * (group_bits /
-                               (double)allocation_chunks));
-
-        // Estimate if there are enough bits available to make worthwhile use
-        // of an arf.
-        tmp_q = estimate_q(cpi, mod_frame_err, (int)arf_frame_bits);
-
-        // Only use an arf if it is likely we will be able to code
-        // it at a lower Q than the surrounding frames.
-        if (tmp_q < cpi->worst_quality)
-        {
-            int half_gf_int;
-            int frames_after_arf;
-            int frames_bwd = cpi->oxcf.arnr_max_frames - 1;
-            int frames_fwd = cpi->oxcf.arnr_max_frames - 1;
-
-            cpi->source_alt_ref_pending = TRUE;
-
-            // For alt ref frames the error score for the end frame of the
-            // group (the alt ref frame) should not contribute to the group
-            // total and hence the number of bit allocated to the group.
-            // Rather it forms part of the next group (it is the GF at the
-            // start of the next group)
-            // gf_group_err -= mod_frame_err;
-
-            // For alt ref frames alt ref frame is technically part of the
-            // GF frame for the next group but we always base the error
-            // calculation and bit allocation on the current group of frames.
-
-            // Set the interval till the next gf or arf.
-            // For ARFs this is the number of frames to be coded before the
-            // future frame that is coded as an ARF.
-            // The future frame itself is part of the next group
-            cpi->baseline_gf_interval = i;
-
-            // Define the arnr filter width for this group of frames:
-            // We only filter frames that lie within a distance of half
-            // the GF interval from the ARF frame. We also have to trap
-            // cases where the filter extends beyond the end of clip.
-            // Note: this_frame->frame has been updated in the loop
-            // so it now points at the ARF frame.
-            half_gf_int = cpi->baseline_gf_interval >> 1;
-            frames_after_arf = cpi->twopass.total_stats->count -
-                               this_frame->frame - 1;
-
-            switch (cpi->oxcf.arnr_type)
-            {
-            case 1: // Backward filter
-                frames_fwd = 0;
-                if (frames_bwd > half_gf_int)
-                    frames_bwd = half_gf_int;
-                break;
-
-            case 2: // Forward filter
-                if (frames_fwd > half_gf_int)
-                    frames_fwd = half_gf_int;
-                if (frames_fwd > frames_after_arf)
-                    frames_fwd = frames_after_arf;
-                frames_bwd = 0;
-                break;
-
-            case 3: // Centered filter
-            default:
-                frames_fwd >>= 1;
-                if (frames_fwd > frames_after_arf)
-                    frames_fwd = frames_after_arf;
-                if (frames_fwd > half_gf_int)
-                    frames_fwd = half_gf_int;
-
-                frames_bwd = frames_fwd;
-
-                // For even length filter there is one more frame backward
-                // than forward: e.g. len=6 ==> bbbAff, len=7 ==> bbbAfff.
-                if (frames_bwd < half_gf_int)
-                    frames_bwd += (cpi->oxcf.arnr_max_frames+1) & 0x1;
-                break;
-            }
-
-            cpi->active_arnr_frames = frames_bwd + 1 + frames_fwd;
-        }
-        else
-        {
-            cpi->source_alt_ref_pending = FALSE;
-            cpi->baseline_gf_interval = i;
-        }
+        configure_arnr_filter( cpi, this_frame );
     }
     else
     {
         cpi->source_alt_ref_pending = FALSE;
-        cpi->baseline_gf_interval = i;
     }
 
     // Now decide how many bits should be allocated to the GF group as  a
