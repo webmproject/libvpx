@@ -31,6 +31,7 @@
 #include "encodemv.h"
 
 //#define OUTPUT_FPF 1
+#define NEW_BOOST
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -50,11 +51,12 @@ extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 
-#define IIFACTOR   1.5
-#define IIKFACTOR1 1.40
-#define IIKFACTOR2 1.5
-#define RMAX       14.0
-#define GF_RMAX    48.0
+#define IIFACTOR   9.375
+#define IIKFACTOR1 8.75
+#define IIKFACTOR2 9.375
+#define RMAX       87.5
+#define GF_RMAX    300.0
+#define ERR_DIVISOR   150.0
 
 #define KF_MB_INTRA_MIN 300
 #define GF_MB_INTRA_MIN 200
@@ -800,7 +802,8 @@ void vp8_first_pass(VP8_COMP *cpi)
     // Copy the previous Last Frame into the GF buffer if specific conditions for doing so are met
     if ((cm->current_video_frame > 0) &&
         (cpi->twopass.this_frame_stats->pcnt_inter > 0.20) &&
-        ((cpi->twopass.this_frame_stats->intra_error / cpi->twopass.this_frame_stats->coded_error) > 2.0))
+        ((cpi->twopass.this_frame_stats->intra_error /
+            cpi->twopass.this_frame_stats->coded_error) > 2.0))
     {
         vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
     }
@@ -937,7 +940,7 @@ static void adjust_maxq_qrange(VP8_COMP *cpi)
             break;
     }
 }
-#define ERR_DIVISOR   150.0
+
 static int estimate_max_q(VP8_COMP *cpi,
                           FIRSTPASS_STATS * fpstats,
                           int section_target_bandwitdh,
@@ -1580,7 +1583,6 @@ static int calc_arf_boost(
     double this_frame_mv_in_out = 0.0;
     double mv_in_out_accumulator = 0.0;
     double abs_mv_in_out_accumulator = 0.0;
-    double r;
     BOOL flash_detected = FALSE;
 
     // Search forward from the proposed arf/next gf position
@@ -1594,9 +1596,6 @@ static int calc_arf_boost(
             &this_frame_mv_in_out, &mv_in_out_accumulator,
             &abs_mv_in_out_accumulator, &mv_ratio_accumulator );
 
-        // Calculate the baseline boost number for this frame
-        r = calc_frame_boost( cpi, &this_frame, this_frame_mv_in_out );
-
         // We want to discount the the flash frame itself and the recovery
         // frame that follows as both will have poor scores.
         flash_detected = detect_flash(cpi, (i+offset)) ||
@@ -1611,7 +1610,9 @@ static int calc_arf_boost(
             decay_accumulator =
                 decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
         }
-        boost_score += (decay_accumulator * r);
+
+        boost_score += (decay_accumulator *
+            calc_frame_boost( cpi, &this_frame, this_frame_mv_in_out ));
 
         // Break out conditions.
         if  ( (!flash_detected) &&
@@ -1623,7 +1624,7 @@ static int calc_arf_boost(
         }
     }
 
-    *f_boost = (int)(boost_score * 100.0) >> 4;
+    *f_boost = boost_score;
 
     // Reset for backward looking loop
     boost_score = 0.0;
@@ -1633,7 +1634,7 @@ static int calc_arf_boost(
     mv_in_out_accumulator = 0.0;
     abs_mv_in_out_accumulator = 0.0;
 
-    // Search forward from the proposed arf/next gf position
+    // Search backward towards last gf position
     for ( i = -1; i >= -b_frames; i-- )
     {
         if ( read_frame_stats(cpi, &this_frame, (i+offset)) == EOF )
@@ -1644,9 +1645,6 @@ static int calc_arf_boost(
             &this_frame_mv_in_out, &mv_in_out_accumulator,
             &abs_mv_in_out_accumulator, &mv_ratio_accumulator );
 
-        // Calculate the baseline boost number for this frame
-        r = calc_frame_boost( cpi, &this_frame, this_frame_mv_in_out );
-
         // We want to discount the the flash frame itself and the recovery
         // frame that follows as both will have poor scores.
         flash_detected = detect_flash(cpi, (i+offset)) ||
@@ -1662,7 +1660,8 @@ static int calc_arf_boost(
                 decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
         }
 
-        boost_score += (decay_accumulator * r);
+        boost_score += (decay_accumulator *
+            calc_frame_boost( cpi, &this_frame, this_frame_mv_in_out ));
 
         // Break out conditions.
         if  ( (!flash_detected) &&
@@ -1673,7 +1672,7 @@ static int calc_arf_boost(
             break;
         }
     }
-    *b_boost = (int)(boost_score * 100.0) >> 4;
+    *b_boost = boost_score;
 
     return (*f_boost + *b_boost);
 }
@@ -1763,9 +1762,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             &this_frame_mv_in_out, &mv_in_out_accumulator,
             &abs_mv_in_out_accumulator, &mv_ratio_accumulator );
 
-        // Calculate a baseline boost number for this frame
-        r = calc_frame_boost( cpi, &next_frame, this_frame_mv_in_out );
-
         // Cumulative effect of prediction quality decay
         if ( !flash_detected )
         {
@@ -1774,7 +1770,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             decay_accumulator =
                 decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
         }
-        boost_score += (decay_accumulator * r);
+        boost_score += decay_accumulator *
+                       calc_frame_boost( cpi, &next_frame,
+                                         this_frame_mv_in_out );
 
         // Break clause to detect very still sections after motion
         // For example a staic image after a fade or other transition.
@@ -1796,12 +1794,12 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 (i > MIN_GF_INTERVAL) &&
                 // Dont break out very close to a key frame
                 ((cpi->twopass.frames_to_key - i) >= MIN_GF_INTERVAL) &&
-                ((boost_score > 20.0) || (next_frame.pcnt_inter < 0.75)) &&
+                ((boost_score > 125.0) || (next_frame.pcnt_inter < 0.75)) &&
                 (!flash_detected) &&
                 ((mv_ratio_accumulator > 100.0) ||
                  (abs_mv_in_out_accumulator > 3.0) ||
                  (mv_in_out_accumulator < -2.0) ||
-                 ((boost_score - old_boost_score) < 2.0))
+                 ((boost_score - old_boost_score) < 12.5))
             ) )
         {
             boost_score = old_boost_score;
@@ -1831,7 +1829,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
     }
 
-    cpi->gfu_boost = (int)(boost_score * 100.0) >> 4;
+    cpi->gfu_boost = boost_score;
 
     // Alterrnative boost calculation for alt ref
     alt_boost = calc_arf_boost( cpi, 0, (i-1), (i-1), &f_boost, &b_boost );
@@ -1881,11 +1879,12 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         allocation_chunks = (i * 100) + Boost;
 
-        // Normalize Altboost and allocations chunck down to prevent overflow
-        while (Boost > 1000)
+        // Prevent overflow
+        if ( Boost > 1028 )
         {
-            Boost /= 2;
-            allocation_chunks /= 2;
+            int divisor = Boost >> 10;
+            Boost /= divisor;
+            allocation_chunks /= divisor;
         }
 
         // Calculate the number of bits to be spent on the arf based on the
@@ -2025,7 +2024,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     // Assign  bits to the arf or gf.
     for (i = 0; i <= (cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME); i++) {
-        int Boost;
+        int boost;
         int allocation_chunks;
         int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
         int gf_bits;
@@ -2033,44 +2032,45 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // For ARF frames
         if (cpi->source_alt_ref_pending && i == 0)
         {
-            Boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
-            Boost += (cpi->baseline_gf_interval * 50);
+            boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
+            boost += (cpi->baseline_gf_interval * 50);
 
             // Set max and minimum boost and hence minimum allocation
-            if (Boost > ((cpi->baseline_gf_interval + 1) * 200))
-                Boost = ((cpi->baseline_gf_interval + 1) * 200);
-            else if (Boost < 125)
-                Boost = 125;
+            if (boost > ((cpi->baseline_gf_interval + 1) * 200))
+                boost = ((cpi->baseline_gf_interval + 1) * 200);
+            else if (boost < 125)
+                boost = 125;
 
             allocation_chunks =
-                ((cpi->baseline_gf_interval + 1) * 100) + Boost;
+                ((cpi->baseline_gf_interval + 1) * 100) + boost;
         }
         // Else for standard golden frames
         else
         {
             // boost based on inter / intra ratio of subsequent frames
-            Boost = (cpi->gfu_boost * vp8_gfboost_qadjust(Q)) / 100;
+            boost = (cpi->gfu_boost * vp8_gfboost_qadjust(Q)) / 100;
 
             // Set max and minimum boost and hence minimum allocation
-            if (Boost > (cpi->baseline_gf_interval * 150))
-                Boost = (cpi->baseline_gf_interval * 150);
-            else if (Boost < 125)
-                Boost = 125;
+            if (boost > (cpi->baseline_gf_interval * 150))
+                boost = (cpi->baseline_gf_interval * 150);
+            else if (boost < 125)
+                boost = 125;
 
             allocation_chunks =
-                (cpi->baseline_gf_interval * 100) + (Boost - 100);
+                (cpi->baseline_gf_interval * 100) + (boost - 100);
         }
 
-        // Normalize Altboost and allocations chunck down to prevent overflow
-        while (Boost > 1000)
+        // Prevent overflow
+        if ( boost > 1028 )
         {
-            Boost /= 2;
-            allocation_chunks /= 2;
+            int divisor = boost >> 10;
+            boost/= divisor;
+            allocation_chunks /= divisor;
         }
 
         // Calculate the number of bits to be spent on the gf or arf based on
         // the boost number
-        gf_bits = (int)((double)Boost *
+        gf_bits = (int)((double)boost *
                         (cpi->twopass.gf_group_bits /
                          (double)allocation_chunks));
 
@@ -2087,7 +2087,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 (mod_frame_err * (double)cpi->baseline_gf_interval) /
                 DOUBLE_DIVIDE_CHECK((double)cpi->twopass.kf_group_error_left);
 
-            alt_gf_bits = (int)((double)Boost * (alt_gf_grp_bits /
+            alt_gf_bits = (int)((double)boost * (alt_gf_grp_bits /
                                                  (double)allocation_chunks));
 
             if (gf_bits > alt_gf_bits)
@@ -2136,7 +2136,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             cpi->twopass.kf_group_bits = 0;
 
         // Note the error score left in the remaining frames of the group.
-        // For normal GFs we want to remove the error score for the first frame of the group (except in Key frame case where this has already happened)
+        // For normal GFs we want to remove the error score for the first frame
+        // of the group (except in Key frame case where this has already
+        // happened)
         if (!cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME)
             cpi->twopass.gf_group_error_left = gf_group_err - gf_first_frame_err;
         else
@@ -2197,16 +2199,10 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
 
         Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
-        //if( (Ratio > 11) ) //&& (sectionstats.pcnt_second_ref < .20) )
-        //{
         cpi->twopass.section_max_qfactor = 1.0 - ((Ratio - 10.0) * 0.025);
 
         if (cpi->twopass.section_max_qfactor < 0.80)
             cpi->twopass.section_max_qfactor = 0.80;
-
-        //}
-        //else
-        //    cpi->twopass.section_max_qfactor = 1.0;
 
         reset_fpf_position(cpi, start_pos);
     }
@@ -2525,7 +2521,7 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
                 (((local_next_frame.pcnt_inter -
                    local_next_frame.pcnt_neutral) < 0.20) &&
                  (next_iiratio < 3.0)) ||
-                ((boost_score - old_boost_score) < 0.5) ||
+                ((boost_score - old_boost_score) < 3.0) ||
                 (local_next_frame.intra_error < 200)
                )
             {
@@ -2540,7 +2536,7 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
         }
 
         // If there is tolerable prediction for at least the next 3 frames then break out else discard this pottential key frame and move on
-        if (boost_score > 5.0 && (i > 3))
+        if (boost_score > 30.0 && (i > 3))
             is_viable_kf = TRUE;
         else
         {
@@ -2772,7 +2768,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         boost_score += (decay_accumulator * r);
 
         if ((i > MIN_GF_INTERVAL) &&
-            ((boost_score - old_boost_score) < 1.0))
+            ((boost_score - old_boost_score) < 6.25))
         {
             break;
         }
@@ -2801,16 +2797,10 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
 
         Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
-        // if( (Ratio > 11) ) //&& (sectionstats.pcnt_second_ref < .20) )
-        //{
         cpi->twopass.section_max_qfactor = 1.0 - ((Ratio - 10.0) * 0.025);
 
         if (cpi->twopass.section_max_qfactor < 0.80)
             cpi->twopass.section_max_qfactor = 0.80;
-
-        //}
-        //else
-        //    cpi->twopass.section_max_qfactor = 1.0;
     }
 
     // Reset the first pass file position
@@ -2824,31 +2814,19 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         int Counter = cpi->twopass.frames_to_key;
         int alt_kf_bits;
         YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
-        // Min boost based on kf interval
-#if 0
 
-        while ((kf_boost < 48) && (Counter > 0))
+        if ( kf_boost < 300 )
         {
-            Counter -= 2;
-            kf_boost ++;
-        }
-
-#endif
-
-        if (kf_boost < 48)
-        {
-            kf_boost += ((Counter + 1) >> 1);
-
-            if (kf_boost > 48) kf_boost = 48;
+            kf_boost += (cpi->twopass.frames_to_key * 3);
+            if ( kf_boost > 300 )
+                kf_boost = 300;
         }
 
         // bigger frame sizes need larger kf boosts, smaller frames smaller boosts...
         if ((lst_yv12->y_width * lst_yv12->y_height) > (320 * 240))
-            kf_boost += 2 * (lst_yv12->y_width * lst_yv12->y_height) / (320 * 240);
+            kf_boost += 12 * (lst_yv12->y_width * lst_yv12->y_height) / (320 * 240);
         else if ((lst_yv12->y_width * lst_yv12->y_height) < (320 * 240))
-            kf_boost -= 4 * (320 * 240) / (lst_yv12->y_width * lst_yv12->y_height);
-
-        kf_boost = (int)((double)kf_boost * 100.0) >> 4;                          // Scale 16 to 100
+            kf_boost -= 25 * (320 * 240) / (lst_yv12->y_width * lst_yv12->y_height);
 
         if (kf_boost < 250)                                                      // Min KF boost
             kf_boost = 250;
@@ -2876,11 +2854,12 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 ((cpi->twopass.frames_to_key - 1) * 100) + kf_boost;
         }
 
-        // Normalize Altboost and allocations chunck down to prevent overflow
-        while (kf_boost > 1000)
+        // Prevent overflow
+        if ( kf_boost > 1028 )
         {
-            kf_boost /= 2;
-            allocation_chunks /= 2;
+            int divisor = kf_boost >> 10;
+            kf_boost /= divisor;
+            allocation_chunks /= divisor;
         }
 
         cpi->twopass.kf_group_bits = (cpi->twopass.kf_group_bits < 0) ? 0 : cpi->twopass.kf_group_bits;
