@@ -1297,7 +1297,7 @@ static int detect_transition_to_still(
     int frame_interval,
     int still_interval,
     double loop_decay_rate,
-    double decay_accumulator )
+    double last_decay_rate )
 {
     BOOL trans_to_still = FALSE;
 
@@ -1306,12 +1306,12 @@ static int detect_transition_to_still(
     // instead of a clean scene cut.
     if ( (frame_interval > MIN_GF_INTERVAL) &&
          (loop_decay_rate >= 0.999) &&
-         (decay_accumulator < 0.9) )
+         (last_decay_rate < 0.9) )
     {
         int j;
         FIRSTPASS_STATS * position = cpi->twopass.stats_in;
         FIRSTPASS_STATS tmp_next_frame;
-        double decay_rate;
+        double zz_inter;
 
         // Look ahead a few frames to see if static condition
         // persists...
@@ -1320,8 +1320,9 @@ static int detect_transition_to_still(
             if (EOF == input_stats(cpi, &tmp_next_frame))
                 break;
 
-            decay_rate = get_prediction_decay_rate(cpi, &tmp_next_frame);
-            if ( decay_rate < 0.999 )
+            zz_inter =
+                (tmp_next_frame.pcnt_inter - tmp_next_frame.pcnt_motion);
+            if ( zz_inter < 0.999 )
                 break;
         }
         // Reset file position
@@ -1562,9 +1563,8 @@ static int calc_arf_boost(
     *b_boost = boost_score;
 
     arf_boost = (*f_boost + *b_boost);
-    arf_boost += ((b_frames + f_frames) * 25);
-    //if ( arf_boost < ((b_frames + f_frames) * 10) )
-    //     arf_boost = ((b_frames + f_frames) * 10);
+    if ( arf_boost < ((b_frames + f_frames) * 20) )
+         arf_boost = ((b_frames + f_frames) * 20);
 
     return arf_boost;
 }
@@ -1637,13 +1637,14 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     double mv_ratio_accumulator = 0.0;
     double decay_accumulator = 1.0;
+    double zero_motion_accumulator = 1.0;
 
     double loop_decay_rate = 1.00;          // Starting decay rate
+    double last_loop_decay_rate = 1.00;
 
     double this_frame_mv_in_out = 0.0;
     double mv_in_out_accumulator = 0.0;
     double abs_mv_in_out_accumulator = 0.0;
-    double mod_err_per_mb_accumulator = 0.0;
 
     int max_bits = frame_max_bits(cpi);     // Max for a single frame
 
@@ -1692,9 +1693,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         gf_group_err += mod_frame_err;
 
-        mod_err_per_mb_accumulator +=
-            mod_frame_err / DOUBLE_DIVIDE_CHECK((double)cpi->common.MBs);
-
         if (EOF == input_stats(cpi, &next_frame))
             break;
 
@@ -1710,30 +1708,33 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // Cumulative effect of prediction quality decay
         if ( !flash_detected )
         {
+            last_loop_decay_rate = loop_decay_rate;
             loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
             decay_accumulator = decay_accumulator * loop_decay_rate;
-            decay_accumulator =
-                decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
-        }
-        boost_score += decay_accumulator *
-                       calc_frame_boost( cpi, &next_frame,
-                                         this_frame_mv_in_out );
 
-        // Break clause to detect very still sections after motion
-        // For example a staic image after a fade or other transition.
-        if ( detect_transition_to_still( cpi, i, 5,
-                                         loop_decay_rate,
-                                         decay_accumulator ) )
-        {
-            allow_alt_ref = FALSE;
-            boost_score = old_boost_score;
-            break;
+            // Monitor for static sections.
+            zero_motion_accumulator *=
+                (next_frame.pcnt_inter - next_frame.pcnt_motion);
+
+            // Break clause to detect very still sections after motion
+            // (for example a staic image after a fade or other transition).
+            if ( detect_transition_to_still( cpi, i, 5, loop_decay_rate,
+                                             last_loop_decay_rate ) )
+            {
+                allow_alt_ref = FALSE;
+                break;
+            }
         }
+
+        // Calculate a boost number for this frame
+        boost_score +=
+            ( decay_accumulator *
+              calc_frame_boost( cpi, &next_frame, this_frame_mv_in_out ) );
 
         // Break out conditions.
         if  (
             // Break at cpi->max_gf_interval unless almost totally static
-            (i >= cpi->max_gf_interval && (decay_accumulator < 0.995)) ||
+            (i >= cpi->max_gf_interval && (zero_motion_accumulator < 0.995)) ||
             (
                 // Dont break out with a very short interval
                 (i > MIN_GF_INTERVAL) &&
@@ -1848,7 +1849,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     cpi->twopass.modified_error_used += gf_group_err;
 
     // Assign  bits to the arf or gf.
-    for (i = 0; i <= (cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME); i++) {
+    for (i = 0; i <= (cpi->source_alt_ref_pending && cpi->common.frame_type != KEY_FRAME); i++)
+    {
         int boost;
         int allocation_chunks;
         int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
@@ -2367,6 +2369,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     FIRSTPASS_STATS *start_position;
 
     double decay_accumulator = 1.0;
+    double zero_motion_accumulator = 1.0;
     double boost_score = 0;
     double old_boost_score = 0.0;
     double loop_decay_rate;
@@ -2568,6 +2571,10 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (r > RMAX)
             r = RMAX;
 
+        // Monitor for static sections.
+        zero_motion_accumulator *=
+            (next_frame.pcnt_inter - next_frame.pcnt_motion);
+
         // How fast is prediction quality decaying
         loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
 
@@ -2652,7 +2659,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // spend almost all of the bits on the key frame.
         // cpi->twopass.frames_to_key-1 because key frame itself is taken
         // care of by kf_boost.
-        if ( decay_accumulator >= 0.99 )
+        if ( zero_motion_accumulator >= 0.99 )
         {
             allocation_chunks =
                 ((cpi->twopass.frames_to_key - 1) * 10) + kf_boost;
