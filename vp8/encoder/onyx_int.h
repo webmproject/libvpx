@@ -485,6 +485,8 @@ typedef struct VP8_COMP
     MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
     int mbgraph_n_frames;             // number of frames filled in the above
     int static_mb_pct;                // % forced skip mbs by segmentation
+    int seg0_progress, seg0_idx, seg0_cnt;
+    int ref_pred_count[3][2];
 
     int decimation_factor;
     int decimation_count;

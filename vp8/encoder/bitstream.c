@@ -219,20 +219,10 @@ void update_skip_probs(VP8_COMP *cpi)
 static void update_refpred_stats( VP8_COMP *cpi )
 {
     VP8_COMMON *const cm = & cpi->common;
-    MACROBLOCKD *const xd = & cpi->mb.e_mbd;
-
-    int mb_row, mb_col;
     int i;
     int tot_count;
-    int ref_pred_count[PREDICTION_PROBS][2];
     vp8_prob new_pred_probs[PREDICTION_PROBS];
-    unsigned char pred_context;
-    unsigned char pred_flag;
-
     int old_cost, new_cost;
-
-    // Clear the prediction hit counters
-    vpx_memset(ref_pred_count, 0, sizeof(ref_pred_count));
 
     // Set the prediction probability structures to defaults
     if ( cm->frame_type == KEY_FRAME )
@@ -247,47 +237,17 @@ static void update_refpred_stats( VP8_COMP *cpi )
     }
     else
     {
-        // For non-key frames.......
-
-        // Scan through the macroblocks and collate prediction counts.
-        xd->mode_info_context = cm->mi;
-        for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
-        {
-            for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
-            {
-                // Get the prediction context and status
-                pred_flag = get_pred_flag( xd, PRED_REF );
-                pred_context = get_pred_context( cm, xd, PRED_REF );
-
-                // Count prediction success
-                ref_pred_count[pred_context][pred_flag]++;
-
-                // Step on to the next mb
-                xd->mode_info_context++;
-            }
-
-            // this is to account for the border in mode_info_context
-            xd->mode_info_context++;
-        }
-
         // From the prediction counts set the probabilities for each context
         for ( i = 0; i < PREDICTION_PROBS; i++ )
         {
-            // MB reference frame not relevent to key frame encoding
-            if ( cm->frame_type != KEY_FRAME )
+            tot_count = cpi->ref_pred_count[i][0] + cpi->ref_pred_count[i][1];
+            if ( tot_count )
             {
-                // Work out the probabilities for the reference frame predictor
-                tot_count = ref_pred_count[i][0] + ref_pred_count[i][1];
-                if ( tot_count )
-                {
-                    new_pred_probs[i] =
-                        ( ref_pred_count[i][0] * 255 ) / tot_count;
+                new_pred_probs[i] =
+                    ( cpi->ref_pred_count[i][0] * 255 + (tot_count >> 1)) / tot_count;
 
-                    // Clamp to minimum allowed value
-                    new_pred_probs[i] += !new_pred_probs[i];
-                }
-                else
-                    new_pred_probs[i] = 128;
+                // Clamp to minimum allowed value
+                new_pred_probs[i] += !new_pred_probs[i];
             }
             else
                 new_pred_probs[i] = 128;
@@ -295,12 +255,12 @@ static void update_refpred_stats( VP8_COMP *cpi )
             // Decide whether or not to update the reference frame probs.
             // Returned costs are in 1/256 bit units.
             old_cost =
-                (ref_pred_count[i][0] * vp8_cost_zero(cm->ref_pred_probs[i])) +
-                (ref_pred_count[i][1] * vp8_cost_one(cm->ref_pred_probs[i]));
+                (cpi->ref_pred_count[i][0] * vp8_cost_zero(cm->ref_pred_probs[i])) +
+                (cpi->ref_pred_count[i][1] * vp8_cost_one(cm->ref_pred_probs[i]));
 
             new_cost =
-                (ref_pred_count[i][0] * vp8_cost_zero(new_pred_probs[i])) +
-                (ref_pred_count[i][1] * vp8_cost_one(new_pred_probs[i]));
+                (cpi->ref_pred_count[i][0] * vp8_cost_zero(new_pred_probs[i])) +
+                (cpi->ref_pred_count[i][1] * vp8_cost_one(new_pred_probs[i]));
 
             // Cost saving must be >= 8 bits (2048 in these units)
             if ( (old_cost - new_cost) >= 2048 )

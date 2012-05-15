@@ -620,6 +620,23 @@ static void pick_mb_modes (VP8_COMP *cpi,
         }
         else
         {
+            int seg_id;
+
+            if (xd->segmentation_enabled && cpi->seg0_cnt > 0 &&
+                !segfeature_active( xd, 0, SEG_LVL_REF_FRAME ) &&
+                segfeature_active( xd, 1, SEG_LVL_REF_FRAME ) &&
+                check_segref(xd, 1, INTRA_FRAME)  +
+                check_segref(xd, 1, LAST_FRAME)   +
+                check_segref(xd, 1, GOLDEN_FRAME) +
+                check_segref(xd, 1, ALTREF_FRAME) == 1)
+            {
+                cpi->seg0_progress = (cpi->seg0_idx << 16) / cpi->seg0_cnt;
+            }
+            else
+            {
+                cpi->seg0_progress = (((mb_col & ~1) * 2 + (mb_row & ~1) * cm->mb_cols + i) << 16) / cm->MBs;
+            }
+
             *totalrate += vp8cx_pick_mode_inter_macroblock(cpi, x,
                                                            recon_yoffset,
                                                            recon_uvoffset);
@@ -627,6 +644,26 @@ static void pick_mb_modes (VP8_COMP *cpi,
             // Dummy encode, do not do the tokenization
             vp8cx_encode_inter_macroblock(cpi, x, tp,
                                          recon_yoffset, recon_uvoffset, 0);
+
+            seg_id = xd->mode_info_context->mbmi.segment_id;
+            if (cpi->mb.e_mbd.segmentation_enabled && seg_id == 0)
+            {
+                cpi->seg0_idx++;
+            }
+            if (!xd->segmentation_enabled ||
+                !segfeature_active( xd, seg_id, SEG_LVL_REF_FRAME ) ||
+                check_segref(xd, seg_id, INTRA_FRAME)  +
+                check_segref(xd, seg_id, LAST_FRAME)   +
+                check_segref(xd, seg_id, GOLDEN_FRAME) +
+                check_segref(xd, seg_id, ALTREF_FRAME) > 1)
+            {
+                // Get the prediction context and status
+                int pred_flag = get_pred_flag( xd, PRED_REF );
+                int pred_context = get_pred_context( cm, xd, PRED_REF );
+
+                // Count prediction success
+                cpi->ref_pred_count[pred_context][pred_flag]++;
+            }
         }
 
         // Keep a copy of the updated left context
@@ -989,6 +1026,8 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     x->mb_activity_ptr = cpi->mb_activity_map;
 
     x->act_zbin_adj = 0;
+    cpi->seg0_idx = 0;
+    vpx_memset(cpi->ref_pred_count, 0, sizeof(cpi->ref_pred_count));
 
     x->partition_info = x->pi;
 

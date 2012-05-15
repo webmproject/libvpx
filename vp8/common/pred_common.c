@@ -277,7 +277,7 @@ void calc_ref_probs( int * count, vp8_prob * probs )
     tot_count = count[0] + count[1] + count[2] + count[3];
     if ( tot_count )
     {
-        probs[0] = (vp8_prob)((count[0] * 255) / tot_count);
+        probs[0] = (vp8_prob)((count[0] * 255 + (tot_count >> 1)) / tot_count);
         probs[0] += !probs[0];
     }
     else
@@ -286,7 +286,7 @@ void calc_ref_probs( int * count, vp8_prob * probs )
     tot_count -= count[0];
     if ( tot_count )
     {
-        probs[1] = (vp8_prob)((count[1] * 255) / tot_count);
+        probs[1] = (vp8_prob)((count[1] * 255 + (tot_count >> 1)) / tot_count);
         probs[1] += !probs[1];
     }
     else
@@ -295,7 +295,7 @@ void calc_ref_probs( int * count, vp8_prob * probs )
     tot_count -= count[1];
     if ( tot_count )
     {
-        probs[2] = (vp8_prob)((count[2] * 255) / tot_count);
+        probs[2] = (vp8_prob)((count[2] * 255 + (tot_count >> 1)) / tot_count);
         probs[2] += !probs[2];
     }
     else

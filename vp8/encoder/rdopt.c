@@ -2581,7 +2581,66 @@ static void set_i8x8_block_modes(MACROBLOCK *x, int modes[2][4])
     }
 }
 
-void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
+extern void calc_ref_probs( int * count, vp8_prob * probs );
+static void estimate_curframe_refprobs(VP8_COMP *cpi, vp8_prob mod_refprobs[3], int pred_ref)
+{
+    int norm_cnt[MAX_REF_FRAMES];
+    const int *const rfct = cpi->count_mb_ref_frame_usage;
+    int intra_count = rfct[INTRA_FRAME];
+    int last_count  = rfct[LAST_FRAME];
+    int gf_count    = rfct[GOLDEN_FRAME];
+    int arf_count   = rfct[ALTREF_FRAME];
+
+    // Work out modified reference frame probabilities to use where prediction
+    // of the reference frame fails
+    if (pred_ref == INTRA_FRAME)
+    {
+        norm_cnt[0] = 0;
+        norm_cnt[1] = last_count;
+        norm_cnt[2] = gf_count;
+        norm_cnt[3] = arf_count;
+        calc_ref_probs( norm_cnt, mod_refprobs );
+        mod_refprobs[0] = 0;    // This branch implicit
+    }
+    else if (pred_ref == LAST_FRAME)
+    {
+        norm_cnt[0] = intra_count;
+        norm_cnt[1] = 0;
+        norm_cnt[2] = gf_count;
+        norm_cnt[3] = arf_count;
+        calc_ref_probs( norm_cnt, mod_refprobs);
+        mod_refprobs[1] = 0;    // This branch implicit
+    }
+    else if (pred_ref == GOLDEN_FRAME)
+    {
+        norm_cnt[0] = intra_count;
+        norm_cnt[1] = last_count;
+        norm_cnt[2] = 0;
+        norm_cnt[3] = arf_count;
+        calc_ref_probs( norm_cnt, mod_refprobs );
+        mod_refprobs[2] = 0;  // This branch implicit
+    }
+    else
+    {
+        norm_cnt[0] = intra_count;
+        norm_cnt[1] = last_count;
+        norm_cnt[2] = gf_count;
+        norm_cnt[3] = 0;
+        calc_ref_probs( norm_cnt, mod_refprobs );
+        mod_refprobs[2] = 0;  // This branch implicit
+    }
+}
+
+static __inline unsigned weighted_cost(vp8_prob *tab0, vp8_prob *tab1, int idx, int val, int weight)
+{
+    unsigned cost0 = tab0[idx] ? vp8_cost_bit(tab0[idx], val) : 0;
+    unsigned cost1 = tab1[idx] ? vp8_cost_bit(tab1[idx], val) : 0;
+    // weight is 16-bit fixed point, so this basically calculates:
+    // 0.5 + weight * cost1 + (1.0 - weight) * cost0
+    return (0x8000 + weight * cost1 + (0x10000 - weight) * cost0) >> 16;
+}
+
+static void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, int segment_id, unsigned int * ref_costs )
 {
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *xd = &cpi->mb.e_mbd;
@@ -2590,47 +2649,87 @@ void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, unsigned int * ref_costs )
     unsigned int cost;
     int pred_ref ;
     int pred_flag;
+    int pred_ctx ;
     int i;
+    int tot_count;
 
-    vp8_prob pred_prob;
+    vp8_prob pred_prob, new_pred_prob;
+    int seg_ref_active;
+    int seg_ref_count = 0;
+    seg_ref_active = segfeature_active( xd,
+                                       segment_id,
+                                       SEG_LVL_REF_FRAME );
+
+    if ( seg_ref_active )
+    {
+        seg_ref_count = check_segref( xd, segment_id, INTRA_FRAME )  +
+                        check_segref( xd, segment_id, LAST_FRAME )   +
+                        check_segref( xd, segment_id, GOLDEN_FRAME ) +
+                        check_segref( xd, segment_id, ALTREF_FRAME );
+    }
 
     // Get the predicted reference for this mb
     pred_ref = get_pred_ref( cm, xd );
 
-    // Get the context probability for the prediction flag
+    // Get the context probability for the prediction flag (based on last frame)
     pred_prob = get_pred_prob( cm, xd, PRED_REF );
+
+    // Predict probability for current frame based on stats so far
+    pred_ctx = get_pred_context(cm, xd, PRED_REF);
+    tot_count = cpi->ref_pred_count[pred_ctx][0] + cpi->ref_pred_count[pred_ctx][1];
+    if ( tot_count )
+    {
+        new_pred_prob =
+            ( cpi->ref_pred_count[pred_ctx][0] * 255 + (tot_count >> 1)) / tot_count;
+        new_pred_prob += !new_pred_prob;
+    }
+    else
+        new_pred_prob = 128;
 
     // Get the set of probabilities to use if prediction fails
     mod_refprobs = cm->mod_refprobs[pred_ref];
 
     // For each possible selected reference frame work out a cost.
-    // TODO: correct handling of costs if segment indicates only a subset of
-    // reference frames are allowed... though mostly this should come out
-    // in the wash.
     for ( i = 0; i < MAX_REF_FRAMES; i++ )
     {
-        pred_flag = (i == pred_ref);
-
-        // Get the prediction for the current mb
-        cost = vp8_cost_bit( pred_prob, pred_flag );
-
-        // for incorrectly predicted cases
-        if ( ! pred_flag )
+        if (seg_ref_active && seg_ref_count == 1)
         {
-            if ( mod_refprobs[0] )
-                cost += vp8_cost_bit( mod_refprobs[0], (i != INTRA_FRAME) );
+            cost = 0;
+        }
+        else
+        {
+            pred_flag = (i == pred_ref);
 
-            // Inter coded
-            if (i != INTRA_FRAME)
+            // Get the prediction for the current mb
+            cost = weighted_cost(&pred_prob, &new_pred_prob, 0,
+                                 pred_flag, cpi->seg0_progress);
+            if (cost > 1024) cost = 768; // i.e. account for 4 bits max.
+
+            // for incorrectly predicted cases
+            if ( ! pred_flag )
             {
-                if ( mod_refprobs[1] )
-                    cost += vp8_cost_bit( mod_refprobs[1], (i != LAST_FRAME) );
+                vp8_prob curframe_mod_refprobs[3];
 
-                if (i != LAST_FRAME)
+                if (cpi->seg0_progress)
                 {
-                    if ( mod_refprobs[2] )
-                        cost += vp8_cost_bit( mod_refprobs[2],
-                                             (i != GOLDEN_FRAME));
+                    estimate_curframe_refprobs(cpi, curframe_mod_refprobs, pred_ref);
+                }
+                else
+                {
+                    vpx_memset(curframe_mod_refprobs, 0, sizeof(curframe_mod_refprobs));
+                }
+
+                cost += weighted_cost(mod_refprobs, curframe_mod_refprobs, 0,
+                                      (i != INTRA_FRAME), cpi->seg0_progress);
+                if (i != INTRA_FRAME)
+                {
+                    cost += weighted_cost(mod_refprobs, curframe_mod_refprobs, 1,
+                                          (i != LAST_FRAME), cpi->seg0_progress);
+                    if (i != LAST_FRAME)
+                    {
+                        cost += weighted_cost(mod_refprobs, curframe_mod_refprobs, 2,
+                                              (i != GOLDEN_FRAME), cpi->seg0_progress);
+                    }
                 }
             }
         }
@@ -2819,7 +2918,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     // Get estimates of reference frame costs for each reference frame
     // that depend on the current prediction etc.
-    vp8_estimate_ref_frame_costs( cpi, ref_costs );
+    vp8_estimate_ref_frame_costs( cpi, segment_id, ref_costs );
 
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {

@@ -502,6 +502,7 @@ void separate_arf_mbs
         else
             cpi->static_mb_pct = 0;
 
+        cpi->seg0_cnt = ncnt[0];
         vp8_enable_segmentation((VP8_PTR) cpi);
     }
     else
