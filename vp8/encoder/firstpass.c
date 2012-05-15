@@ -64,8 +64,6 @@ extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
 #define POW2 (double)cpi->oxcf.two_pass_vbrbias/100.0
 
-#define NEW_BOOST 1
-
 static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
 static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
 
@@ -157,12 +155,13 @@ static void output_stats(const VP8_COMP            *cpi,
         FILE *fpfile;
         fpfile = fopen("firstpass.stt", "a");
 
-        fprintf(fpfile, "%12.0f %12.0f %12.0f %12.4f %12.4f %12.4f %12.4f"
-                " %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
-                " %12.0f %12.0f %12.4f\n",
+        fprintf(fpfile, "%12.0f %12.0f %12.0f %12.0f %12.0f %12.4f %12.4f"
+                        "%12.4f %12.4f %12.4f %12.4f %12.4f %12.4f %12.4f"
+                        "%12.0f %12.0f %12.4f %12.0f %12.0f %12.4f\n",
                 stats->frame,
                 stats->intra_error,
                 stats->coded_error,
+                stats->sr_coded_error,
                 stats->ssim_weighted_pred_err,
                 stats->pcnt_inter,
                 stats->pcnt_motion,
@@ -188,6 +187,7 @@ static void zero_stats(FIRSTPASS_STATS *section)
     section->frame      = 0.0;
     section->intra_error = 0.0;
     section->coded_error = 0.0;
+    section->sr_coded_error = 0.0;
     section->ssim_weighted_pred_err = 0.0;
     section->pcnt_inter  = 0.0;
     section->pcnt_motion  = 0.0;
@@ -210,6 +210,7 @@ static void accumulate_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
     section->frame += frame->frame;
     section->intra_error += frame->intra_error;
     section->coded_error += frame->coded_error;
+    section->sr_coded_error += frame->sr_coded_error;
     section->ssim_weighted_pred_err += frame->ssim_weighted_pred_err;
     section->pcnt_inter  += frame->pcnt_inter;
     section->pcnt_motion += frame->pcnt_motion;
@@ -232,6 +233,7 @@ static void subtract_stats(FIRSTPASS_STATS *section, FIRSTPASS_STATS *frame)
     section->frame -= frame->frame;
     section->intra_error -= frame->intra_error;
     section->coded_error -= frame->coded_error;
+    section->sr_coded_error -= frame->sr_coded_error;
     section->ssim_weighted_pred_err -= frame->ssim_weighted_pred_err;
     section->pcnt_inter  -= frame->pcnt_inter;
     section->pcnt_motion -= frame->pcnt_motion;
@@ -256,6 +258,7 @@ static void avg_stats(FIRSTPASS_STATS *section)
 
     section->intra_error /= section->count;
     section->coded_error /= section->count;
+    section->sr_coded_error /= section->count;
     section->ssim_weighted_pred_err /= section->count;
     section->pcnt_inter  /= section->count;
     section->pcnt_second_ref /= section->count;
@@ -481,6 +484,7 @@ void vp8_first_pass(VP8_COMP *cpi)
     int recon_uv_stride = lst_yv12->uv_stride;
     int64_t intra_error = 0;
     int64_t coded_error = 0;
+    int64_t sr_coded_error = 0;
 
     int sum_mvr = 0, sum_mvc = 0;
     int sum_mvr_abs = 0, sum_mvc_abs = 0;
@@ -614,9 +618,12 @@ void vp8_first_pass(VP8_COMP *cpi)
                 // Experimental search in a second reference frame ((0,0) based only)
                 if (cm->current_video_frame > 1)
                 {
-                    first_pass_motion_search(cpi, x, &zero_ref_mv, &tmp_mv.as_mv, gld_yv12, &gf_motion_error, recon_yoffset);
+                    first_pass_motion_search(cpi, x, &zero_ref_mv,
+                                             &tmp_mv.as_mv, gld_yv12,
+                                             &gf_motion_error, recon_yoffset);
 
-                    if ((gf_motion_error < motion_error) && (gf_motion_error < this_error))
+                    if ( (gf_motion_error < motion_error) &&
+                         (gf_motion_error < this_error))
                     {
                         second_ref_count++;
                     }
@@ -625,7 +632,11 @@ void vp8_first_pass(VP8_COMP *cpi)
                     xd->pre.y_buffer = lst_yv12->y_buffer + recon_yoffset;
                     xd->pre.u_buffer = lst_yv12->u_buffer + recon_uvoffset;
                     xd->pre.v_buffer = lst_yv12->v_buffer + recon_uvoffset;
+
+                    sr_coded_error += gf_motion_error;
                 }
+                else
+                    sr_coded_error += motion_error;
 
                 /* Intra assumed best */
                 best_ref_mv.as_int = 0;
@@ -702,6 +713,8 @@ void vp8_first_pass(VP8_COMP *cpi)
                     }
                 }
             }
+            else
+                sr_coded_error += (int64_t)this_error;
 
             coded_error += (int64_t)this_error;
 
@@ -733,6 +746,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         fps.frame      = cm->current_video_frame ;
         fps.intra_error = intra_error >> 8;
         fps.coded_error = coded_error >> 8;
+        fps.sr_coded_error = sr_coded_error >> 8;
         weight = simple_weight(cpi->Source);
 
 
@@ -1549,7 +1563,6 @@ static double calc_frame_boost(
     return frame_boost;
 }
 
-#if NEW_BOOST
 static int calc_arf_boost(
     VP8_COMP *cpi,
     int offset,
@@ -1664,7 +1677,6 @@ static int calc_arf_boost(
 
     return (*f_boost + *b_boost);
 }
-#endif
 
 // Analyse and define a gf/arf group .
 static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
@@ -1700,7 +1712,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     BOOL flash_detected;
 
     cpi->twopass.gf_group_bits = 0;
-    cpi->twopass.gf_decay_rate = 0;
 
     vp8_clear_system_state();  //__asm emms;
 
@@ -1802,9 +1813,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         old_boost_score = boost_score;
     }
 
-    cpi->twopass.gf_decay_rate =
-        (i > 0) ? (int)(100.0 * (1.0 - decay_accumulator)) / i : 0;
-
     // Dont allow conventional gf too near the next kf
     if ((cpi->twopass.frames_to_key - i) < MIN_GF_INTERVAL)
     {
@@ -1825,10 +1833,8 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     cpi->gfu_boost = (int)(boost_score * 100.0) >> 4;
 
-#if NEW_BOOST
     // Alterrnative boost calculation for alt ref
     alt_boost = calc_arf_boost( cpi, 0, (i-1), (i-1), &f_boost, &b_boost );
-#endif
 
     // Should we use the alternate refernce frame
     if (allow_alt_ref &&
@@ -1836,21 +1842,12 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         (i >= MIN_GF_INTERVAL) &&
         // dont use ARF very near next kf
         (i <= (cpi->twopass.frames_to_key - MIN_GF_INTERVAL)) &&
-#if NEW_BOOST
         ((next_frame.pcnt_inter > 0.75) ||
          (next_frame.pcnt_second_ref > 0.5)) &&
         ((mv_in_out_accumulator / (double)i > -0.2) ||
          (mv_in_out_accumulator > -2.0)) &&
         (b_boost > 100) &&
         (f_boost > 100) )
-#else
-        (next_frame.pcnt_inter > 0.75) &&
-        ((mv_in_out_accumulator / (double)i > -0.2) ||
-         (mv_in_out_accumulator > -2.0)) &&
-        (cpi->gfu_boost > 100) &&
-        (cpi->twopass.gf_decay_rate <=
-            (ARF_DECAY_THRESH + (cpi->gfu_boost / 200))) )
-#endif
     {
         int Boost;
         int allocation_chunks;
@@ -1860,9 +1857,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         int arf_frame_bits = 0;
         int group_bits;
 
-#if NEW_BOOST
         cpi->gfu_boost = alt_boost;
-#endif
 
         // Estimate the bits to be allocated to the group as a whole
         if ((cpi->twopass.kf_group_bits > 0) &&
@@ -1875,11 +1870,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             group_bits = 0;
 
         // Boost for arf frame
-#if NEW_BOOST
         Boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
-#else
-        Boost = (cpi->gfu_boost * 3 * vp8_gfboost_qadjust(Q)) / (2 * 100);
-#endif
         Boost += (i * 50);
 
         // Set max and minimum boost and hence minimum allocation
@@ -2042,11 +2033,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // For ARF frames
         if (cpi->source_alt_ref_pending && i == 0)
         {
-#if NEW_BOOST
             Boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
-#else
-            Boost = (cpi->gfu_boost * 3 * vp8_gfboost_qadjust(Q)) / (2 * 100);
-#endif
             Boost += (cpi->baseline_gf_interval * 50);
 
             // Set max and minimum boost and hence minimum allocation
@@ -2165,12 +2152,9 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // calculation of cpi->twopass.alt_extra_bits.
         if ( cpi->baseline_gf_interval >= 3 )
         {
-#if NEW_BOOST
             int boost = (cpi->source_alt_ref_pending)
                         ? b_boost : cpi->gfu_boost;
-#else
-            int boost = cpi->gfu_boost;
-#endif
+
             if ( boost >= 150 )
             {
                 int pct_extra;

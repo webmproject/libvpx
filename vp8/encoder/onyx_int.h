@@ -105,6 +105,7 @@ typedef struct
     double frame;
     double intra_error;
     double coded_error;
+    double sr_coded_error;
     double ssim_weighted_pred_err;
     double pcnt_inter;
     double pcnt_motion;
@@ -570,7 +571,6 @@ typedef struct VP8_COMP
         int frames_to_key;
         int maxq_max_limit;
         int maxq_min_limit;
-        int gf_decay_rate;
         int static_scene_max_gf_interval;
         int kf_bits;
         int gf_group_error_left;           // Remaining error from uncoded frames in a gf group. Two pass use only

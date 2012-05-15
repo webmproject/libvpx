@@ -1680,7 +1680,6 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf)
     // Set reference frame sign bias for ALTREF frame to 1 (for now)
     cpi->common.ref_frame_sign_bias[ALTREF_FRAME] = 1;
 
-    cpi->twopass.gf_decay_rate = 0;
     cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
     cpi->gold_is_last = 0 ;
