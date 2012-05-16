@@ -23,8 +23,6 @@
 #include "vpx_mem/vpx_mem.h"
 #include "bitstream.h"
 
-#include "vp8/common/defaultcoefcounts.h"
-
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
 #include "vp8/common/entropy.h"

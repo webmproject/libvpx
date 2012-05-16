@@ -175,36 +175,15 @@ const vp8_prob updprobs[4] = {128, 136, 120, 112};
 #endif
 
 #include "default_coef_probs.h"
-#include "defaultcoefcounts.h"
 
 void vp8_default_coef_probs(VP8_COMMON *pc)
 {
     int h;
     vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
                    sizeof(default_coef_probs));
-    h = 0;
-    do
-    {
-        int i = 0;
 
-        do
-        {
-            int k = 0;
-
-            do
-            {
-                unsigned int branch_ct [ENTROPY_NODES] [2];
-                vp8_tree_probs_from_distribution(
-                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
-                    pc->fc.coef_probs_8x8 [h][i][k], branch_ct, vp8_default_coef_counts_8x8 [h][i][k],
-                    256, 1);
-
-            }
-            while (++k < PREV_COEF_CONTEXTS);
-        }
-        while (++i < COEF_BANDS);
-    }
-    while (++h < BLOCK_TYPES_8X8);
+    vpx_memcpy(pc->fc.coef_probs_8x8, vp8_default_coef_probs_8x8,
+                   sizeof(vp8_default_coef_probs_8x8));
 
 }
 
