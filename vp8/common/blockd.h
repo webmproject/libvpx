@@ -168,7 +168,7 @@ typedef struct
 } MODE_INFO;
 
 #if CONFIG_MULTI_RES_ENCODING
-/* The information needed to be stored for higher-resolution encoder */
+/* The mb-level information needed to be stored for higher-resolution encoder */
 typedef struct
 {
     MB_PREDICTION_MODE mode;
@@ -176,7 +176,15 @@ typedef struct
     int_mv mv;
     //union b_mode_info bmi[16];
     int dissim;    // dissimilarity level of the macroblock
-} LOWER_RES_INFO;
+} LOWER_RES_MB_INFO;
+
+/* The frame-level information needed to be stored for higher-resolution
+ *  encoder */
+typedef struct
+{
+    FRAME_TYPE frame_type;
+    LOWER_RES_MB_INFO *mb_info;
+} LOWER_RES_FRAME_INFO;
 #endif
 
 typedef struct blockd

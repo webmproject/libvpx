@@ -405,8 +405,8 @@ void get_lower_res_motion_info(VP8_COMP *cpi, MACROBLOCKD *xd, int *dissim,
                                MB_PREDICTION_MODE *parent_mode,
                                int_mv *parent_ref_mv, int mb_row, int mb_col)
 {
-    LOWER_RES_INFO* store_mode_info
-                          = (LOWER_RES_INFO*)cpi->oxcf.mr_low_res_mode_info;
+    LOWER_RES_MB_INFO* store_mode_info
+                          = ((LOWER_RES_FRAME_INFO*)cpi->oxcf.mr_low_res_mode_info)->mb_info;
     unsigned int parent_mb_index;
     //unsigned int parent_mb_index = map_640x480_to_320x240[mb_row][mb_col];
 

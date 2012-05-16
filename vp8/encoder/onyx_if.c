@@ -3241,6 +3241,17 @@ static void encode_frame_to_data_rate
         cm->frame_type = KEY_FRAME;
     }
 
+#if CONFIG_MULTI_RES_ENCODING
+    /* In multi-resolution encoding, frame_type is decided by lowest-resolution
+     * encoder. Same frame_type is adopted while encoding at other resolution.
+     */
+    if (cpi->oxcf.mr_encoder_id)
+    {
+        cm->frame_type =
+            ((LOWER_RES_FRAME_INFO*)cpi->oxcf.mr_low_res_mode_info)->frame_type;
+    }
+#endif
+
     // Set default state for segment and mode based loop filter update flags
     cpi->mb.e_mbd.update_mb_segmentation_map = 0;
     cpi->mb.e_mbd.update_mb_segmentation_data = 0;

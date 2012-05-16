@@ -288,8 +288,13 @@ int main(int argc, char **argv)
     cfg[0].g_lag_in_frames   = 0;
 
     /* Disable automatic keyframe placement */
+    /* Note: These 3 settings are copied to all levels. But, except the lowest
+     * resolution level, all other levels are set to VPX_KF_DISABLED internally.
+     */
     //cfg[0].kf_mode           = VPX_KF_DISABLED;
-    cfg[0].kf_min_dist = cfg[0].kf_max_dist = 1000;
+    cfg[0].kf_mode           = VPX_KF_AUTO;
+    cfg[0].kf_min_dist = 0;
+    cfg[0].kf_max_dist = 150;
 
     cfg[0].rc_target_bitrate = target_bitrate[0];       /* Set target bitrate */
     cfg[0].g_timebase.num = 1;                          /* Set fps */
