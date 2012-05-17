@@ -31,7 +31,6 @@
 #include "encodemv.h"
 
 //#define OUTPUT_FPF 1
-#define NEW_BOOST
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)
@@ -1470,6 +1469,7 @@ static int calc_arf_boost(
     double this_frame_mv_in_out = 0.0;
     double mv_in_out_accumulator = 0.0;
     double abs_mv_in_out_accumulator = 0.0;
+    int arf_boost;
     BOOL flash_detected = FALSE;
 
     // Search forward from the proposed arf/next gf position
@@ -1561,7 +1561,12 @@ static int calc_arf_boost(
     }
     *b_boost = boost_score;
 
-    return (*f_boost + *b_boost);
+    arf_boost = (*f_boost + *b_boost);
+    arf_boost += ((b_frames + f_frames) * 25);
+    //if ( arf_boost < ((b_frames + f_frames) * 10) )
+    //     arf_boost = ((b_frames + f_frames) * 10);
+
+    return arf_boost;
 }
 
 static void configure_arnr_filter( VP8_COMP *cpi, FIRSTPASS_STATS *this_frame )
@@ -1849,36 +1854,20 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         int Q = (cpi->oxcf.fixed_q < 0) ? cpi->last_q[INTER_FRAME] : cpi->oxcf.fixed_q;
         int gf_bits;
 
-        // For ARF frames
-        if (cpi->source_alt_ref_pending && i == 0)
-        {
-            boost = (alt_boost * vp8_gfboost_qadjust(Q)) / 100;
-            boost += (cpi->baseline_gf_interval * 50);
+        boost = (cpi->gfu_boost * vp8_gfboost_qadjust(Q)) / 100;
 
-            // Set max and minimum boost and hence minimum allocation
-            if (boost > ((cpi->baseline_gf_interval + 1) * 200))
-                boost = ((cpi->baseline_gf_interval + 1) * 200);
-            else if (boost < 125)
-                boost = 125;
+        // Set max and minimum boost and hence minimum allocation
+        if (boost > ((cpi->baseline_gf_interval + 1) * 200))
+            boost = ((cpi->baseline_gf_interval + 1) * 200);
+        else if (boost < 125)
+            boost = 125;
 
+        if ( cpi->source_alt_ref_pending && i == 0 )
             allocation_chunks =
                 ((cpi->baseline_gf_interval + 1) * 100) + boost;
-        }
-        // Else for standard golden frames
         else
-        {
-            // boost based on inter / intra ratio of subsequent frames
-            boost = (cpi->gfu_boost * vp8_gfboost_qadjust(Q)) / 100;
-
-            // Set max and minimum boost and hence minimum allocation
-            if (boost > (cpi->baseline_gf_interval * 150))
-                boost = (cpi->baseline_gf_interval * 150);
-            else if (boost < 125)
-                boost = 125;
-
             allocation_chunks =
                 (cpi->baseline_gf_interval * 100) + (boost - 100);
-        }
 
         // Prevent overflow
         if ( boost > 1028 )
