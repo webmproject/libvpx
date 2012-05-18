@@ -567,7 +567,6 @@ typedef struct VP8_COMP
     struct twopass_rc
     {
         unsigned int section_intra_rating;
-        double section_max_qfactor;
         unsigned int next_iiratio;
         unsigned int this_iiratio;
         FIRSTPASS_STATS *total_stats;

@@ -921,11 +921,6 @@ static double calc_correction_factor( VP8_COMP *cpi,
     correction_factor = correction_factor * sr_correction;
 #endif
 
-    // Clip final factor range
-    correction_factor =
-        (correction_factor < 0.05)
-            ? 0.05 : (correction_factor > 5.0) ? 5.0 : correction_factor;
-
     return correction_factor;
 }
 
@@ -1035,8 +1030,12 @@ static int estimate_max_q(VP8_COMP *cpi,
             calc_correction_factor(cpi, fpstats, err_per_mb,
                                    ERR_DIVISOR, 0.40, 0.90, Q) *
             speed_correction *
-            cpi->twopass.est_max_qcorrection_factor *
-            cpi->twopass.section_max_qfactor;
+            cpi->twopass.est_max_qcorrection_factor;
+
+        if ( err_correction_factor < 0.05 )
+            err_correction_factor = 0.05;
+        else if ( err_correction_factor > 5.0 )
+            err_correction_factor = 5.0;
 
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
@@ -1140,6 +1139,10 @@ static int estimate_cq( VP8_COMP *cpi,
                                    100.0, 0.40, 0.90, Q) *
             speed_correction * clip_iifactor;
 
+        if ( err_correction_factor < 0.05 )
+            err_correction_factor = 0.05;
+        else if ( err_correction_factor > 5.0 )
+            err_correction_factor = 5.0;
 
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
@@ -1498,15 +1501,6 @@ static int calc_arf_boost(
 
         boost_score += (decay_accumulator *
             calc_frame_boost( cpi, &this_frame, this_frame_mv_in_out ));
-
-        // Break out conditions.
-        if  ( (!flash_detected) &&
-              ((mv_ratio_accumulator > 100.0) ||
-               (abs_mv_in_out_accumulator > 3.0) ||
-               (mv_in_out_accumulator < -2.0) ) )
-        {
-            break;
-        }
     }
 
     *f_boost = boost_score;
@@ -1548,14 +1542,6 @@ static int calc_arf_boost(
         boost_score += (decay_accumulator *
             calc_frame_boost( cpi, &this_frame, this_frame_mv_in_out ));
 
-        // Break out conditions.
-        if  ( (!flash_detected) &&
-              ((mv_ratio_accumulator > 100.0) ||
-               (abs_mv_in_out_accumulator > 3.0) ||
-               (mv_in_out_accumulator < -2.0) ) )
-        {
-            break;
-        }
     }
     *b_boost = boost_score;
 
@@ -1754,7 +1740,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         old_boost_score = boost_score;
     }
 
-    // Dont allow conventional gf too near the next kf
+    // Dont allow a gf too near the next kf
     if ((cpi->twopass.frames_to_key - i) < MIN_GF_INTERVAL)
     {
         while (i < cpi->twopass.frames_to_key)
@@ -1790,9 +1776,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
          (next_frame.pcnt_second_ref > 0.5)) &&
         ((mv_in_out_accumulator / (double)i > -0.2) ||
          (mv_in_out_accumulator > -2.0)) &&
-        (b_boost > 100) &&
-        (f_boost > 100) )
-
+        ((b_boost + f_boost) > 100) )
     {
         cpi->gfu_boost = alt_boost;
         cpi->source_alt_ref_pending = TRUE;
@@ -1983,36 +1967,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
         else
             cpi->twopass.alt_extra_bits = 0;
-    }
-
-    // Adjustment to estimate_max_q based on a measure of complexity of the section
-    if (cpi->common.frame_type != KEY_FRAME)
-    {
-        FIRSTPASS_STATS sectionstats;
-        double Ratio;
-
-        zero_stats(&sectionstats);
-        reset_fpf_position(cpi, start_pos);
-
-        for (i = 0 ; i < cpi->baseline_gf_interval ; i++)
-        {
-            input_stats(cpi, &next_frame);
-            accumulate_stats(&sectionstats, &next_frame);
-        }
-
-        avg_stats(&sectionstats);
-
-        cpi->twopass.section_intra_rating =
-            sectionstats.intra_error /
-            DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
-
-        Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
-        cpi->twopass.section_max_qfactor = 1.0 - ((Ratio - 10.0) * 0.025);
-
-        if (cpi->twopass.section_max_qfactor < 0.80)
-            cpi->twopass.section_max_qfactor = 0.80;
-
-        reset_fpf_position(cpi, start_pos);
     }
 }
 
@@ -2587,33 +2541,6 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
 
         old_boost_score = boost_score;
-    }
-
-    if (1)
-    {
-        FIRSTPASS_STATS sectionstats;
-        double Ratio;
-
-        zero_stats(&sectionstats);
-        reset_fpf_position(cpi, start_position);
-
-        for (i = 0 ; i < cpi->twopass.frames_to_key ; i++)
-        {
-            input_stats(cpi, &next_frame);
-            accumulate_stats(&sectionstats, &next_frame);
-        }
-
-        avg_stats(&sectionstats);
-
-        cpi->twopass.section_intra_rating =
-            sectionstats.intra_error
-            / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
-
-        Ratio = sectionstats.intra_error / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
-        cpi->twopass.section_max_qfactor = 1.0 - ((Ratio - 10.0) * 0.025);
-
-        if (cpi->twopass.section_max_qfactor < 0.80)
-            cpi->twopass.section_max_qfactor = 0.80;
     }
 
     // Reset the first pass file position
