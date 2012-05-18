@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//hl0\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-18T14:43:59Z",
+      "side": 1,
+      "message": "code style { mismatch, 4 space indent \n\nhttp://www.webmproject.org/code/contribute/conventions/\n\nwe may switch some day but for now the code needs to follow what the surrounding code does.",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
