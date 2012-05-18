@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h64\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "working on a way to get astyle to stop mangling this.",
+      "parentUuid": "AAAAKn//iIo\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iLQ\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -53,6 +71,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h4g\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "going to punt on this, can\u0027t get astyle to leave it alone.",
+      "parentUuid": "AAAAKn//iLQ\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iLA\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -64,6 +100,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "could be done in the initializer list",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h4Q\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iLA\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -104,6 +158,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//g6s\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iK8\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iII\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -115,6 +187,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "4 space indent",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h4M\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "going to punt on this for now, can\u0027t get astyle to leave it alone.",
+      "parentUuid": "AAAAKn//iII\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h4A\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iKo\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iKg\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -149,6 +257,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "const",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h4E\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iKg\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -172,6 +298,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h34\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iH8\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iKc\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -183,6 +327,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "remove this line",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h30\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iKc\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -206,6 +368,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h3w\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iKY\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iH4\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -217,6 +397,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "make one line with 205",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h3s\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iH4\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -240,6 +438,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h3o\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iH0\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iJo\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -251,6 +467,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "some of this might warrant its own .cc file or if you really wanted them inline, a -inl.h",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//g60\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iJo\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -274,6 +508,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h3k\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iHw\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iJk\u003d",
         "filename": "test/encoder_test.h",
         "patchSetId": 2
@@ -285,6 +537,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "const member function",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h3g\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iJk\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -308,6 +578,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h3c\u003d",
+        "filename": "test/encoder_test.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iKU\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iHs\u003d",
         "filename": "test/keyframe_test.cc",
         "patchSetId": 2
@@ -319,6 +607,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "continued line should probably be 4 space indent",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h7o\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iHs\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -342,6 +648,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h7k\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iBQ\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iBI\u003d",
         "filename": "test/keyframe_test.cc",
         "patchSetId": 2
@@ -353,6 +677,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "preincrement is preferred for iterators",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h7Y\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iBI\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -376,6 +718,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h7U\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iKI\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iJ8\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 2
@@ -387,6 +747,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "variables in the initializer list",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h78\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iJ8\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -410,6 +788,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h70\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iJ4\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iJ0\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 2
@@ -427,6 +823,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//h7w\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iJ0\u003d",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//iJs\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 2
@@ -438,6 +852,24 @@
       "writtenOn": "2012-05-17T22:54:08Z",
       "side": 1,
       "message": "2 spaces before \u0027//\u0027 1 after",
+      "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//h7s\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T23:08:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//iJs\u003d",
       "revId": "373c2b672a7aefef8a21dae6ca2e36c7b4f40e13",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
