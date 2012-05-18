@@ -2,6 +2,91 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAKn//hEE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T21:20:30Z",
+      "side": 1,
+      "message": "Use subject, blank line, body format. As is, this gets parsed into one long line and is suboptimal for tools assuming short summaries.",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//hEk\u003d",
+        "filename": "vp8/common/rtcd_defs.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T21:20:30Z",
+      "side": 1,
+      "message": "need vp8_ prefix",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//hFQ\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T21:20:30Z",
+      "side": 1,
+      "message": "Use c-style comments /**/, Mozilla in particular is picky about this.",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//hE8\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T21:20:30Z",
+      "side": 1,
+      "message": "static or vp8_ prefix",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//hEw\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T21:20:30Z",
+      "side": 1,
+      "message": "static or vp8_ prefix",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//hl0\u003d",
         "filename": "vp8/encoder/denoising.c",
         "patchSetId": 5
@@ -13,6 +98,40 @@
       "writtenOn": "2012-05-18T14:43:59Z",
       "side": 1,
       "message": "code style { mismatch, 4 space indent \n\nhttp://www.webmproject.org/code/contribute/conventions/\n\nwe may switch some day but for now the code needs to follow what the surrounding code does.",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//hEs\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T21:20:30Z",
+      "side": 1,
+      "message": "static or vp8_ prefix",
+      "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//hEo\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-18T21:20:30Z",
+      "side": 1,
+      "message": "don\u0027t need this block, rtcd takes care of this for you.",
       "revId": "dc1a84e9188e74cbd67674df8d63caaac331fcbd",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
