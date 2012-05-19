@@ -2437,7 +2437,7 @@ int main(int argc, const char **argv_)
                 vpx_img_alloc(&raw,
                               input.use_i420 ? VPX_IMG_FMT_I420
                                              : VPX_IMG_FMT_YV12,
-                              input.w, input.h, 1);
+                              input.w, input.h, 32);
 
             FOREACH_STREAM(init_rate_histogram(&stream->rate_hist,
                                                &stream->config.cfg,
