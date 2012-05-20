@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//gmE\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 14
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "vp8d prefix generally unnecessary now that there\u0027s only the one codec in the tree. if you want to use it, should be vp8e or vp8cx for this commit.",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//gmI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 14
+      },
+      "lineNbr": 970,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "this needs to be added only to the cflags for the one file that needs it, otherwise the compiler may generate incorrect code for platforms that don\u0027t have sse2. see my comment in vp8cx.mk",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glI\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "the comments I made in other files regarding /**/ don\u0027t apply to this file, Should still clean it up, but suggest doing it in a second commit because I can\u0027t tell what\u0027s new an what\u0027s existing.",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glw\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "wrap long lines",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glU\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "suggest passing the LUT instead of motion_magnitude. this would allow the 2M LUT to be allocated on the heap, maybe even conditionally. Chrome has bugged us about big tables in BSS before.",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//gls\u003d",
+        "filename": "vp8/encoder/denoising.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "don\u0027t define static data in a header that\u0027s included in multiple files. These should be enum (preferred) or #defined if you\u0027re just using them as a constant (if you never take their address)",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glo\u003d",
+        "filename": "vp8/encoder/denoising.h",
+        "patchSetId": 14
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "/**/ preferred.",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glk\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "This #if not necessary, this file\u0027s only built on x86.",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glg\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "Use the existing DECLARE_ALIGNED macro in vpx_ports/mem.h",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glc\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 14
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "/**/ preferred by our friends at Mozilla.",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glM\u003d",
+        "filename": "vp8/vp8cx.mk",
+        "patchSetId": 14
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "to add the sse2 cflags to this file:\n\nvp8/encoder/x86/denoising_sse2.c.o: CFLAGS +\u003d -msse2\n\n(might need the same rule for the -d file, not sure)",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//glQ\u003d",
+        "filename": "vp8/vp8cx.mk",
+        "patchSetId": 14
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-20T16:06:18Z",
+      "side": 1,
+      "message": "trailing whitespce",
+      "revId": "9c8980513f88067f5ff9fbcdb0cca6635148511c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
