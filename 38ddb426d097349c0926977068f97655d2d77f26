@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//gNY\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 16
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-05-21T18:29:05Z",
+      "side": 1,
+      "message": "Can we calculate the filter_coefficient instead of using LUTs?",
+      "revId": "38ddb426d097349c0926977068f97655d2d77f26",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
