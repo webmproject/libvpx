@@ -19,7 +19,7 @@
 enum vp8_denoiser_decision
 {
   COPY_BLOCK,
-  FILTER_BLOCK,
+  FILTER_BLOCK
 };
 
 typedef struct vp8_denoiser
@@ -47,4 +47,4 @@ union coeff_pair
 
 union coeff_pair *vp8_get_filter_coeff_LUT(unsigned int motion_magnitude);
 
-#endif  // VP8_ENCODER_DENOISING_H_
+#endif  /* VP8_ENCODER_DENOISING_H_ */

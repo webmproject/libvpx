@@ -73,7 +73,7 @@ static const char *exec_name;
 static const struct codec_item
 {
     char const              *name;
-    const vpx_codec_iface_t *iface;
+    vpx_codec_iface_t       *iface;
     unsigned int             fourcc;
 } codecs[] =
 {
@@ -597,9 +597,9 @@ static void
 Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
                           unsigned long class_id)
 {
-    //todo this is always taking 8 bytes, this may need later optimization
-    //this is a key that says length unknown
-    uint64_t unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
+    /* todo this is always taking 8 bytes, this may need later optimization */
+    /* this is a key that says length unknown */
+    uint64_t unknownLen = 0x01FFFFFFFFFFFFFF;
 
     Ebml_WriteID(glob, class_id);
     *ebmlLoc = ftello(glob->stream);
@@ -617,7 +617,7 @@ Ebml_EndSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc)
 
     /* Calculate the size of this element */
     size = pos - *ebmlLoc - 8;
-    size |=  LITERALU64(0x0100000000000000);
+    size |= 0x0100000000000000;
 
     /* Seek back to the beginning of the element and write the new size */
     fseeko(glob->stream, *ebmlLoc, SEEK_SET);
@@ -664,7 +664,7 @@ write_webm_seek_info(EbmlGlobal *ebml)
         Ebml_EndSubElement(ebml, &start);
     }
     {
-        //segment info
+        /* segment info */
         EbmlLoc startInfo;
         uint64_t frame_time;
         char version_string[64];
@@ -704,16 +704,16 @@ write_webm_file_header(EbmlGlobal                *glob,
         EbmlLoc start;
         Ebml_StartSubElement(glob, &start, EBML);
         Ebml_SerializeUnsigned(glob, EBMLVersion, 1);
-        Ebml_SerializeUnsigned(glob, EBMLReadVersion, 1); //EBML Read Version
-        Ebml_SerializeUnsigned(glob, EBMLMaxIDLength, 4); //EBML Max ID Length
-        Ebml_SerializeUnsigned(glob, EBMLMaxSizeLength, 8); //EBML Max Size Length
-        Ebml_SerializeString(glob, DocType, "webm"); //Doc Type
-        Ebml_SerializeUnsigned(glob, DocTypeVersion, 2); //Doc Type Version
-        Ebml_SerializeUnsigned(glob, DocTypeReadVersion, 2); //Doc Type Read Version
+        Ebml_SerializeUnsigned(glob, EBMLReadVersion, 1);
+        Ebml_SerializeUnsigned(glob, EBMLMaxIDLength, 4);
+        Ebml_SerializeUnsigned(glob, EBMLMaxSizeLength, 8);
+        Ebml_SerializeString(glob, DocType, "webm");
+        Ebml_SerializeUnsigned(glob, DocTypeVersion, 2);
+        Ebml_SerializeUnsigned(glob, DocTypeReadVersion, 2);
         Ebml_EndSubElement(glob, &start);
     }
     {
-        Ebml_StartSubElement(glob, &glob->startSegment, Segment); //segment
+        Ebml_StartSubElement(glob, &glob->startSegment, Segment);
         glob->position_reference = ftello(glob->stream);
         glob->framerate = *fps;
         write_webm_seek_info(glob);
@@ -731,7 +731,7 @@ write_webm_file_header(EbmlGlobal                *glob,
                 Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
                 glob->track_id_pos = ftello(glob->stream);
                 Ebml_SerializeUnsigned32(glob, TrackUID, trackID);
-                Ebml_SerializeUnsigned(glob, TrackType, 1); //video is always 1
+                Ebml_SerializeUnsigned(glob, TrackType, 1);
                 Ebml_SerializeString(glob, CodecID, "V_VP8");
                 {
                     unsigned int pixelWidth = cfg->g_w;
@@ -744,13 +744,13 @@ write_webm_file_header(EbmlGlobal                *glob,
                     Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
                     Ebml_SerializeUnsigned(glob, StereoMode, stereo_fmt);
                     Ebml_SerializeFloat(glob, FrameRate, frameRate);
-                    Ebml_EndSubElement(glob, &videoStart); //Video
+                    Ebml_EndSubElement(glob, &videoStart);
                 }
-                Ebml_EndSubElement(glob, &start); //Track Entry
+                Ebml_EndSubElement(glob, &start); /* Track Entry */
             }
             Ebml_EndSubElement(glob, &trackStart);
         }
-        // segment element is open
+        /* segment element is open */
     }
 }
 
@@ -791,7 +791,7 @@ write_webm_block(EbmlGlobal                *glob,
         glob->cluster_open = 1;
         glob->cluster_timecode = pts_ms;
         glob->cluster_pos = ftello(glob->stream);
-        Ebml_StartSubElement(glob, &glob->startCluster, Cluster); //cluster
+        Ebml_StartSubElement(glob, &glob->startCluster, Cluster); /* cluster */
         Ebml_SerializeUnsigned(glob, Timecode, glob->cluster_timecode);
 
         /* Save a cue point if this is a keyframe. */
@@ -865,7 +865,6 @@ write_webm_file_footer(EbmlGlobal *glob, long hash)
                 Ebml_SerializeUnsigned(glob, CueTrack, 1);
                 Ebml_SerializeUnsigned64(glob, CueClusterPosition,
                                          cue->loc - glob->position_reference);
-                //Ebml_SerializeUnsigned(glob, CueBlockNumber, cue->blockNumber);
                 Ebml_EndSubElement(glob, &start);
             }
             Ebml_EndSubElement(glob, &start);
@@ -942,7 +941,7 @@ static double vp8_mse2psnr(double Samples, double Peak, double Mse)
     if ((double)Mse > 0.0)
         psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
     else
-        psnr = 60;      // Limit to prevent / 0
+        psnr = 60;      /* Limit to prevent / 0 */
 
     if (psnr > 60)
         psnr = 60;
@@ -1225,7 +1224,7 @@ static int merge_hist_buckets(struct hist_bucket *bucket,
     {
         int last_bucket = buckets - 1;
 
-        // merge the small bucket with an adjacent one.
+        /* merge the small bucket with an adjacent one. */
         if(small_bucket == 0)
             merge_bucket = 1;
         else if(small_bucket == last_bucket)
@@ -1393,7 +1392,7 @@ static void init_rate_histogram(struct rate_hist          *hist,
      */
     hist->samples = cfg->rc_buf_sz * 5 / 4 * fps->num / fps->den / 1000;
 
-    // prevent division by zero
+    /* prevent division by zero */
     if (hist->samples == 0)
       hist->samples=1;
 
@@ -2283,7 +2282,7 @@ static void get_cx_data(struct stream_state  *stream,
                 stream->psnr_samples_total += pkt->data.psnr.samples[0];
                 for (i = 0; i < 4; i++)
                 {
-                    fprintf(stderr, "%.3lf ", pkt->data.psnr.psnr[i]);
+                    fprintf(stderr, "%.3f ", pkt->data.psnr.psnr[i]);
                     stream->psnr_totals[i] += pkt->data.psnr.psnr[i];
                 }
                 stream->psnr_count++;
@@ -2308,11 +2307,11 @@ static void show_psnr(struct stream_state  *stream)
     fprintf(stderr, "Stream %d PSNR (Overall/Avg/Y/U/V)", stream->index);
     ovpsnr = vp8_mse2psnr(stream->psnr_samples_total, 255.0,
                           stream->psnr_sse_total);
-    fprintf(stderr, " %.3lf", ovpsnr);
+    fprintf(stderr, " %.3f", ovpsnr);
 
     for (i = 0; i < 4; i++)
     {
-        fprintf(stderr, " %.3lf", stream->psnr_totals[i]/stream->psnr_count);
+        fprintf(stderr, " %.3f", stream->psnr_totals[i]/stream->psnr_count);
     }
     fprintf(stderr, "\n");
 }

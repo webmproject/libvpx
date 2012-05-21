@@ -1,12 +1,12 @@
-// Copyright (c) 2010 The WebM project authors. All Rights Reserved.
-//
-// Use of this source code is governed by a BSD-style license
-// that can be found in the LICENSE file in the root of the source
-// tree. An additional intellectual property rights grant can be found
-// in the file PATENTS.  All contributing project authors may
-// be found in the AUTHORS file in the root of the source tree.
-
-
+/*
+ *  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree. An additional intellectual property rights grant can be found
+ *  in the file PATENTS.  All contributing project authors may
+ *  be found in the AUTHORS file in the root of the source tree.
+ */
 #include "EbmlWriter.h"
 #include <stdlib.h>
 #include <wchar.h>
@@ -18,11 +18,13 @@
 #define LITERALU64(n) n##LLU
 #endif
 
-void Ebml_WriteLen(EbmlGlobal *glob, long long val)
+void Ebml_WriteLen(EbmlGlobal *glob, int64_t val)
 {
-    //TODO check and make sure we are not > than 0x0100000000000000LLU
-    unsigned char size = 8; //size in bytes to output
-    unsigned long long minVal = LITERALU64(0x00000000000000ff); //mask to compare for byte size
+    /* TODO check and make sure we are not > than 0x0100000000000000LLU */
+    unsigned char size = 8; /* size in bytes to output */
+
+    /* mask to compare for byte size */
+    uint64_t minVal = 0xff;
 
     for (size = 1; size < 8; size ++)
     {
@@ -32,7 +34,7 @@ void Ebml_WriteLen(EbmlGlobal *glob, long long val)
         minVal = (minVal << 7);
     }
 
-    val |= (LITERALU64(0x000000000000080) << ((size - 1) * 7));
+    val |= (((uint64_t)0x80) << ((size - 1) * 7));
 
     Ebml_Serialize(glob, (void *) &val, sizeof(val), size);
 }
@@ -40,10 +42,11 @@ void Ebml_WriteLen(EbmlGlobal *glob, long long val)
 void Ebml_WriteString(EbmlGlobal *glob, const char *str)
 {
     const size_t size_ = strlen(str);
-    const unsigned long long  size = size_;
+    const uint64_t  size = size_;
     Ebml_WriteLen(glob, size);
-    //TODO: it's not clear from the spec whether the nul terminator
-    //should be serialized too.  For now we omit the null terminator.
+    /* TODO: it's not clear from the spec whether the nul terminator
+     * should be serialized too.  For now we omit the null terminator.
+     */
     Ebml_Write(glob, str, size);
 }
 
@@ -51,9 +54,10 @@ void Ebml_WriteUTF8(EbmlGlobal *glob, const wchar_t *wstr)
 {
     const size_t strlen = wcslen(wstr);
 
-    //TODO: it's not clear from the spec whether the nul terminator
-    //should be serialized too.  For now we include it.
-    const unsigned long long  size = strlen;
+    /* TODO: it's not clear from the spec whether the nul terminator
+     * should be serialized too.  For now we include it.
+     */
+    const uint64_t  size = strlen;
 
     Ebml_WriteLen(glob, size);
     Ebml_Write(glob, wstr, size);
@@ -85,12 +89,12 @@ void Ebml_SerializeUnsigned64(EbmlGlobal *glob, unsigned long class_id, uint64_t
 
 void Ebml_SerializeUnsigned(EbmlGlobal *glob, unsigned long class_id, unsigned long ui)
 {
-    unsigned char size = 8; //size in bytes to output
+    unsigned char size = 8; /* size in bytes to output */
     unsigned char sizeSerialized = 0;
     unsigned long minVal;
 
     Ebml_WriteID(glob, class_id);
-    minVal = 0x7fLU; //mask to compare for byte size
+    minVal = 0x7fLU; /* mask to compare for byte size */
 
     for (size = 1; size < 4; size ++)
     {
@@ -106,7 +110,7 @@ void Ebml_SerializeUnsigned(EbmlGlobal *glob, unsigned long class_id, unsigned l
     Ebml_Serialize(glob, &sizeSerialized, sizeof(sizeSerialized), 1);
     Ebml_Serialize(glob, &ui, sizeof(ui), size);
 }
-//TODO: perhaps this is a poor name for this id serializer helper function
+/* TODO: perhaps this is a poor name for this id serializer helper function */
 void Ebml_SerializeBinary(EbmlGlobal *glob, unsigned long class_id, unsigned long bin)
 {
     int size;
@@ -168,4 +172,4 @@ void Ebml_WriteVoid(EbmlGlobal *glob, unsigned long vSize)
     }
 }
 
-//TODO Serialize Date
+/* TODO Serialize Date */

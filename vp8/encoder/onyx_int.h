@@ -33,7 +33,6 @@
 #include "vp8/encoder/denoising.h"
 #endif
 
-//#define SPEEDSTATS 1
 #define MIN_GF_INTERVAL             4
 #define DEFAULT_GF_INTERVAL         7
 
@@ -74,7 +73,6 @@ typedef struct
     int mvcosts[2][MVvals+1];
 
 #ifdef MODE_STATS
-    // Stats
     int y_modes[5];
     int uv_modes[4];
     int b_modes[10];
@@ -233,11 +231,11 @@ enum
 
 typedef struct
 {
-    // Layer configuration
+    /* Layer configuration */
     double frame_rate;
     int target_bandwidth;
 
-    // Layer specific coding parameters
+    /* Layer specific coding parameters */
     int starting_buffer_level;
     int optimal_buffer_level;
     int maximum_buffer_size;
@@ -308,7 +306,7 @@ typedef struct VP8_COMP
 
     MACROBLOCK mb;
     VP8_COMMON common;
-    vp8_writer bc[9]; // one boolcoder for each partition
+    vp8_writer bc[9]; /* one boolcoder for each partition */
 
     VP8_CONFIG oxcf;
 
@@ -322,16 +320,20 @@ typedef struct VP8_COMP
     YV12_BUFFER_CONFIG scaled_source;
     YV12_BUFFER_CONFIG *last_frame_unscaled_source;
 
-    int source_alt_ref_pending; // frame in src_buffers has been identified to be encoded as an alt ref
-    int source_alt_ref_active;  // an alt ref frame has been encoded and is usable
+    /* frame in src_buffers has been identified to be encoded as an alt ref */
+    int source_alt_ref_pending;
+    /* an alt ref frame has been encoded and is usable */
+    int source_alt_ref_active;
+    /* source of frame to encode is an exact copy of an alt ref frame */
+    int is_src_frame_alt_ref;
 
-    int is_src_frame_alt_ref;   // source of frame to encode is an exact copy of an alt ref frame
+    /* golden frame same as last frame ( short circuit gold searches) */
+    int gold_is_last;
+    /* Alt reference frame same as last ( short circuit altref search) */
+    int alt_is_last;
+    /* don't do both alt and gold search ( just do gold). */
+    int gold_is_alt;
 
-    int gold_is_last; // golden frame same as last frame ( short circuit gold searches)
-    int alt_is_last;  // Alt reference frame same as last ( short circuit altref search)
-    int gold_is_alt;  // don't do both alt and gold search ( just do gold).
-
-    //int refresh_alt_ref_frame;
     YV12_BUFFER_CONFIG pick_lf_lvl_frame;
 
     TOKENEXTRA *tok;
@@ -343,7 +345,7 @@ typedef struct VP8_COMP
     unsigned int this_key_frame_forced;
     unsigned int next_key_frame_forced;
 
-    // Ambient reconstruction err target for force key frames
+    /* Ambient reconstruction err target for force key frames */
     int ambient_err;
 
     unsigned int mode_check_freq[MAX_MODES];
@@ -360,7 +362,7 @@ typedef struct VP8_COMP
 
     CODING_CONTEXT coding_context;
 
-    // Rate targetting variables
+    /* Rate targetting variables */
     int64_t prediction_error;
     int64_t last_prediction_error;
     int64_t intra_error;
@@ -368,30 +370,43 @@ typedef struct VP8_COMP
 
     int this_frame_target;
     int projected_frame_size;
-    int last_q[2];                   // Separate values for Intra/Inter
+    int last_q[2];                   /* Separate values for Intra/Inter */
 
     double rate_correction_factor;
     double key_frame_rate_correction_factor;
     double gf_rate_correction_factor;
 
-    int frames_till_gf_update_due;      // Count down till next GF
-    int current_gf_interval;          // GF interval chosen when we coded the last GF
+    /* Count down till next GF */
+    int frames_till_gf_update_due;
 
-    int gf_overspend_bits;            // Total bits overspent becasue of GF boost (cumulative)
+    /* GF interval chosen when we coded the last GF */
+    int current_gf_interval;
 
-    int non_gf_bitrate_adjustment;     // Used in the few frames following a GF to recover the extra bits spent in that GF
+    /* Total bits overspent becasue of GF boost (cumulative) */
+    int gf_overspend_bits;
 
-    int kf_overspend_bits;            // Extra bits spent on key frames that need to be recovered on inter frames
-    int kf_bitrate_adjustment;        // Current number of bit s to try and recover on each inter frame.
+    /* Used in the few frames following a GF to recover the extra bits
+     * spent in that GF
+     */
+    int non_gf_bitrate_adjustment;
+
+    /* Extra bits spent on key frames that need to be recovered */
+    int kf_overspend_bits;
+
+    /* Current number of bit s to try and recover on each inter frame. */
+    int kf_bitrate_adjustment;
     int max_gf_interval;
     int baseline_gf_interval;
-    int active_arnr_frames;           // <= cpi->oxcf.arnr_max_frames
+    int active_arnr_frames;
 
     int64_t key_frame_count;
     int prior_key_frame_distance[KEY_FRAME_CONTEXT];
-    int per_frame_bandwidth;          // Current section per frame bandwidth target
-    int av_per_frame_bandwidth;        // Average frame size target for clip
-    int min_frame_bandwidth;          // Minimum allocation that should be used for any frame
+    /* Current section per frame bandwidth target */
+    int per_frame_bandwidth;
+    /* Average frame size target for clip */
+    int av_per_frame_bandwidth;
+    /* Minimum allocation that should be used for any frame */
+    int min_frame_bandwidth;
     int inter_frame_target;
     double output_frame_rate;
     int64_t last_time_stamp_seen;
@@ -425,7 +440,7 @@ typedef struct VP8_COMP
     int long_rolling_actual_bits;
 
     int64_t total_actual_bits;
-    int total_target_vs_actual;        // debug stats
+    int total_target_vs_actual; /* debug stats */
 
     int worst_quality;
     int active_worst_quality;
@@ -434,18 +449,16 @@ typedef struct VP8_COMP
 
     int cq_target_quality;
 
-    int drop_frames_allowed;          // Are we permitted to drop frames?
-    int drop_frame;                  // Drop this frame?
+    int drop_frames_allowed; /* Are we permitted to drop frames? */
+    int drop_frame;          /* Drop this frame? */
 
     int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
-    int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
+    int uv_mode_count[VP8_UV_MODES];     /* intra MB type cts this frame */
 
     unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
 
     unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
 
-    //DECLARE_ALIGNED(16, int, coef_counts_backup [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS]);   //not used any more
-    //save vp8_tree_probs_from_distribution result for each frame to avoid repeat calculation
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     char update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 
@@ -459,7 +472,7 @@ typedef struct VP8_COMP
     struct vpx_codec_pkt_list  *output_pkt_list;
 
 #if 0
-    // Experimental code for lagged and one pass
+    /* Experimental code for lagged and one pass */
     ONEPASS_FRAMESTATS one_pass_frame_stats[MAX_LAG_BUFFERS];
     int one_pass_frame_index;
 #endif
@@ -467,11 +480,10 @@ typedef struct VP8_COMP
     int decimation_factor;
     int decimation_count;
 
-    // for real time encoding
-    int avg_encode_time;              //microsecond
-    int avg_pick_mode_time;            //microsecond
+    /* for real time encoding */
+    int avg_encode_time;     /* microsecond */
+    int avg_pick_mode_time;  /* microsecond */
     int Speed;
-    unsigned int cpu_freq;           //Mhz
     int compressor_speed;
 
     int interquantizer;
@@ -500,20 +512,25 @@ typedef struct VP8_COMP
     SPEED_FEATURES sf;
     int error_bins[1024];
 
-    // Data used for real time conferencing mode to help determine if it would be good to update the gf
+    /* Data used for real time conferencing mode to help determine if it
+     * would be good to update the gf
+     */
     int inter_zz_count;
     int gf_bad_count;
     int gf_update_recommended;
     int skip_true_count;
 
     unsigned char *segmentation_map;
-    signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];            // Segment data (can be deltas or absolute values)
-    int  segment_encode_breakout[MAX_MB_SEGMENTS];                    // segment threashold for encode breakout
+    signed char segment_feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
+    int  segment_encode_breakout[MAX_MB_SEGMENTS];
 
     unsigned char *active_map;
     unsigned int active_map_enabled;
-    // Video conferencing cyclic refresh mode flags etc
-    // This is a mode designed to clean up the background over time in live encoding scenarious. It uses segmentation
+
+    /* Video conferencing cyclic refresh mode flags. This is a mode
+     * designed to clean up the background over time in live encoding
+     * scenarious. It uses segmentation.
+     */
     int cyclic_refresh_mode_enabled;
     int cyclic_refresh_mode_max_mbs_perframe;
     int cyclic_refresh_mode_index;
@@ -521,7 +538,7 @@ typedef struct VP8_COMP
     signed char *cyclic_refresh_map;
 
 #if CONFIG_MULTITHREAD
-    // multithread data
+    /* multithread data */
     int * mt_current_mb_col;
     int mt_sync_range;
     int b_multi_threaded;
@@ -535,7 +552,7 @@ typedef struct VP8_COMP
     ENCODETHREAD_DATA *en_thread_data;
     LPFTHREAD_DATA lpf_thread_data;
 
-    //events
+    /* events */
     sem_t *h_event_start_encoding;
     sem_t h_event_end_encoding;
     sem_t h_event_start_lpf;
@@ -546,7 +563,6 @@ typedef struct VP8_COMP
     unsigned int partition_sz[MAX_PARTITIONS];
     unsigned char *partition_d[MAX_PARTITIONS];
     unsigned char *partition_d_end[MAX_PARTITIONS];
-    // end of multithread data
 
 
     fractional_mv_step_fp *find_fractional_mv_step;
@@ -591,16 +607,16 @@ typedef struct VP8_COMP
         int gf_decay_rate;
         int static_scene_max_gf_interval;
         int kf_bits;
-        int gf_group_error_left;           // Remaining error from uncoded frames in a gf group. Two pass use only
-
-        // Projected total bits available for a key frame group of frames
+        /* Remaining error from uncoded frames in a gf group. */
+        int gf_group_error_left;
+        /* Projected total bits available for a key frame group of frames */
         int64_t kf_group_bits;
-
-        // Error score of frames still to be coded in kf group
+        /* Error score of frames still to be coded in kf group */
         int64_t kf_group_error_left;
-
-        int gf_group_bits;                // Projected Bits available for a group of frames including 1 GF or ARF
-        int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
+        /* Projected Bits available for a group including 1 GF or ARF */
+        int gf_group_bits;
+        /* Bits for the golden frame or ARF */
+        int gf_bits;
         int alt_extra_bits;
         double est_max_qcorrection_factor;
     } twopass;
@@ -638,24 +654,26 @@ typedef struct VP8_COMP
 #endif
     int b_calculate_psnr;
 
-    // Per MB activity measurement
+    /* Per MB activity measurement */
     unsigned int activity_avg;
     unsigned int * mb_activity_map;
     int * mb_norm_activity_map;
 
-    // Record of which MBs still refer to last golden frame either
-    // directly or through 0,0
+    /* Record of which MBs still refer to last golden frame either
+     * directly or through 0,0
+     */
     unsigned char *gf_active_flags;
     int gf_active_count;
 
     int output_partition;
 
-    //Store last frame's MV info for next frame MV prediction
+    /* Store last frame's MV info for next frame MV prediction */
     int_mv *lfmv;
     int *lf_ref_frame_sign_bias;
     int *lf_ref_frame;
 
-    int force_next_frame_intra; /* force next frame to intra when kf_auto says so */
+    /* force next frame to intra when kf_auto says so */
+    int force_next_frame_intra;
 
     int droppable;
 
@@ -663,7 +681,7 @@ typedef struct VP8_COMP
     VP8_DENOISER denoiser;
 #endif
 
-    // Coding layer state variables
+    /* Coding layer state variables */
     unsigned int current_layer;
     LAYER_CONTEXT layer_context[VPX_TS_MAX_LAYERS];
 

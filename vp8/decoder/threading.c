@@ -185,7 +185,7 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
                 /*Caution: For some b_mode, it needs 8 pixels (4 above + 4 above-right).*/
                 if (i < 4 && pbi->common.filter_level)
-                    yabove = xd->recon_above[0] + b->offset; //i*4;
+                    yabove = xd->recon_above[0] + b->offset;
                 else
                     yabove = (base_dst - dst_stride) + b->offset;
 
@@ -383,7 +383,7 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
           xd->recon_left[1] = pbi->mt_uleft_col[mb_row];
           xd->recon_left[2] = pbi->mt_vleft_col[mb_row];
 
-          //TODO: move to outside row loop
+          /* TODO: move to outside row loop */
           xd->recon_left_stride[0] = 1;
           xd->recon_left_stride[1] = 1;
        }
@@ -401,7 +401,7 @@ static void mt_decode_mb_rows(VP8D_COMP *pbi, MACROBLOCKD *xd, int start_mb_row)
           xd->recon_above[1] -= xd->dst.uv_stride;
           xd->recon_above[2] -= xd->dst.uv_stride;
 
-          //TODO: move to outside row loop
+          /* TODO: move to outside row loop */
           xd->recon_left_stride[0] = xd->dst.y_stride;
           xd->recon_left_stride[1] = xd->dst.uv_stride;
        }

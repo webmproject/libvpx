@@ -143,7 +143,7 @@ static int pick_intra4x4block(
     int dst_stride = x->e_mbd.dst.y_stride;
     unsigned char *base_dst = x->e_mbd.dst.y_buffer;
     B_PREDICTION_MODE mode;
-    int best_rd = INT_MAX;       // 1<<30
+    int best_rd = INT_MAX;
     int rate;
     int distortion;
 
@@ -214,8 +214,9 @@ static int pick_intra4x4mby_modes
         distortion += d;
         mic->bmi[i].as_mode = best_mode;
 
-        // Break out case where we have already exceeded best so far value
-        // that was passed in
+        /* Break out case where we have already exceeded best so far value
+         * that was passed in
+         */
         if (distortion > *best_dist)
             break;
     }
@@ -408,7 +409,6 @@ void get_lower_res_motion_info(VP8_COMP *cpi, MACROBLOCKD *xd, int *dissim,
     LOWER_RES_MB_INFO* store_mode_info
                           = ((LOWER_RES_FRAME_INFO*)cpi->oxcf.mr_low_res_mode_info)->mb_info;
     unsigned int parent_mb_index;
-    //unsigned int parent_mb_index = map_640x480_to_320x240[mb_row][mb_col];
 
     /* Consider different down_sampling_factor.  */
     {
@@ -440,7 +440,6 @@ void get_lower_res_motion_info(VP8_COMP *cpi, MACROBLOCKD *xd, int *dissim,
         /* Consider different down_sampling_factor.
          * The result can be rounded to be more precise, but it takes more time.
          */
-        //int round = cpi->oxcf.mr_down_sampling_factor.den/2;
         (*parent_ref_mv).as_mv.row = store_mode_info[parent_mb_index].mv.as_mv.row
                                   *cpi->oxcf.mr_down_sampling_factor.num
                                   /cpi->oxcf.mr_down_sampling_factor.den;
@@ -457,7 +456,7 @@ static void check_for_encode_breakout(unsigned int sse, MACROBLOCK* x)
 {
     if (sse < x->encode_breakout)
     {
-        // Check u and v to make sure skip is ok
+        /* Check u and v to make sure skip is ok */
         unsigned int sse2 = 0;
 
         sse2 = VP8_UVSSE(x);
@@ -513,7 +512,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     MB_PREDICTION_MODE this_mode;
     int num00;
     int mdcounts[4];
-    int best_rd = INT_MAX; // 1 << 30;
+    int best_rd = INT_MAX;
     int best_intra_rd = INT_MAX;
     int mode_index;
     int rate;
@@ -530,7 +529,8 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};
     int saddone=0;
-    int sr=0;    //search range got from mv_pred(). It uses step_param levels. (0-7)
+    /* search range got from mv_pred(). It uses step_param levels. (0-7) */
+    int sr=0;
 
     unsigned char *plane[4][3];
     int ref_frame_map[4];
@@ -574,15 +574,17 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
     get_predictor_pointers(cpi, plane, recon_yoffset, recon_uvoffset);
 
-    cpi->mbs_tested_so_far++; // Count of the number of MBs tested so far this frame
+    /* Count of the number of MBs tested so far this frame */
+    cpi->mbs_tested_so_far++;
 
     *returnintra = INT_MAX;
     x->skip = 0;
 
     x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
 
-    // if we encode a new mv this is important
-    // find the best new motion vector
+    /* if we encode a new mv this is important
+     * find the best new motion vector
+     */
     for (mode_index = 0; mode_index < MAX_MODES; mode_index++)
     {
         int frame_cost;
@@ -613,7 +615,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         }
 #endif
 
-        // everything but intra
+        /* everything but intra */
         if (x->e_mbd.mode_info_context->mbmi.ref_frame)
         {
             x->e_mbd.pre.y_buffer = plane[this_ref_frame][0];
@@ -638,7 +640,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                     continue;
 
                 if (vp8_mode_order[mode_index] == NEWMV && parent_mode == ZEROMV
-                    && best_ref_mv.as_int==0) //&& dissim==0
+                    && best_ref_mv.as_int==0)
                     continue;
                 else if(vp8_mode_order[mode_index] == NEWMV && dissim==0
                     && best_ref_mv.as_int==parent_ref_mv.as_int)
@@ -728,7 +730,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         case SPLITMV:
 
-            // Split MV modes currently not supported when RD is nopt enabled.
+            /* Split MV modes currently not supported when RD is not enabled. */
             break;
 
         case DC_PRED:
@@ -777,13 +779,15 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             int speed_adjust = (cpi->Speed > 5) ? ((cpi->Speed >= 8)? 3 : 2) : 1;
 
-            // Further step/diamond searches as necessary
+            /* Further step/diamond searches as necessary */
             step_param = cpi->sf.first_step + speed_adjust;
 
 #if CONFIG_MULTI_RES_ENCODING
             if (cpi->oxcf.mr_encoder_id)
             {
-                // Use parent MV as predictor. Adjust search range accordingly.
+                /* Use parent MV as predictor. Adjust search range
+                 * accordingly.
+                 */
                 mvp.as_int = parent_ref_mv.as_int;
                 mvp_full.as_mv.col = parent_ref_mv.as_mv.col>>3;
                 mvp_full.as_mv.row = parent_ref_mv.as_mv.row>>3;
@@ -808,7 +812,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                                 &near_sadidx[0]);
 
                     sr += speed_adjust;
-                    //adjust search range according to sr from mv prediction
+                    /* adjust search range according to sr from mv prediction */
                     if(sr > step_param)
                         step_param = sr;
 
@@ -877,10 +881,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                                           x->mvcost, &best_ref_mv);
                     mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
-                    // Further step/diamond searches as necessary
-                    n = 0;
-                    //further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
-
+                    /* Further step/diamond searches as necessary */
                     n = num00;
                     num00 = 0;
 
@@ -927,7 +928,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
             mode_mv[NEWMV].as_int = d->bmi.mv.as_int;
 
-            // mv cost;
+            /* mv cost; */
             rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv,
                                      cpi->mb.mvcost, 128);
         }
@@ -965,7 +966,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
         if (cpi->oxcf.noise_sensitivity)
         {
 
-            // Store for later use by denoiser.
+            /* Store for later use by denoiser. */
             if (this_mode == ZEROMV && sse < zero_mv_sse )
             {
                 zero_mv_sse = sse;
@@ -973,7 +974,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                         x->e_mbd.mode_info_context->mbmi.ref_frame;
             }
 
-            // Store the best NEWMV in x for later use in the denoiser.
+            /* Store the best NEWMV in x for later use in the denoiser. */
             if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
                     sse < best_sse)
             {
@@ -990,7 +991,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 
         if (this_rd < best_rd || x->skip)
         {
-            // Note index of best mode
+            /* Note index of best mode */
             best_mode_index = mode_index;
 
             *returnrate = rate2;
@@ -1030,7 +1031,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             break;
     }
 
-    // Reduce the activation RD thresholds for the best choice mode
+    /* Reduce the activation RD thresholds for the best choice mode */
     if ((cpi->rd_baseline_thresh[best_mode_index] > 0) && (cpi->rd_baseline_thresh[best_mode_index] < (INT_MAX >> 2)))
     {
         int best_adjustment = (cpi->rd_thresh_mult[best_mode_index] >> 3);
@@ -1062,7 +1063,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     {
         if (x->best_sse_inter_mode == DC_PRED)
         {
-            // No best MV found.
+            /* No best MV found. */
             x->best_sse_inter_mode = best_mbmode.mode;
             x->best_sse_mv = best_mbmode.mv;
             x->need_to_clamp_best_mvs = best_mbmode.need_to_clamp_mvs;
@@ -1073,7 +1074,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                                 recon_yoffset, recon_uvoffset);
 
 
-        // Reevaluate ZEROMV after denoising.
+        /* Reevaluate ZEROMV after denoising. */
         if (best_mbmode.ref_frame == INTRA_FRAME &&
             x->best_zeromv_reference_frame != INTRA_FRAME)
         {
@@ -1083,7 +1084,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
                     vp8_cost_mv_ref(ZEROMV, mdcounts);
             distortion2 = 0;
 
-            // set up the proper prediction buffers for the frame
+            /* set up the proper prediction buffers for the frame */
             x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
             x->e_mbd.pre.y_buffer = plane[this_ref_frame][0];
             x->e_mbd.pre.u_buffer = plane[this_ref_frame][1];

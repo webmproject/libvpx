@@ -332,8 +332,9 @@ unsigned int vp8_sub_pixel_variance16x16_wmt
     unsigned int xxsum0, xxsum1;
 
 
-    // note we could avoid these if statements if the calling function
-    // just called the appropriate functions inside.
+    /* note we could avoid these if statements if the calling function
+     * just called the appropriate functions inside.
+     */
     if (xoffset == 4 && yoffset == 0)
     {
         vp8_half_horiz_variance16x_h_sse2(

@@ -52,7 +52,7 @@ static const char *exec_name;
 static const struct
 {
     char const *name;
-    const vpx_codec_iface_t *iface;
+    vpx_codec_iface_t *iface;
     unsigned int             fourcc;
     unsigned int             fourcc_mask;
 } ifaces[] =
@@ -152,7 +152,8 @@ static void usage_exit()
             "write to. If the\n  argument does not include any escape "
             "characters, the output will be\n  written to a single file. "
             "Otherwise, the filename will be calculated by\n  expanding "
-            "the following escape characters:\n"
+            "the following escape characters:\n");
+    fprintf(stderr,
             "\n\t%%w   - Frame width"
             "\n\t%%h   - Frame height"
             "\n\t%%<n> - Frame number, zero padded to <n> places (1..9)"
@@ -580,10 +581,10 @@ file_is_webm(struct input_ctx *input,
     unsigned int i, n;
     int          track_type = -1;
 
-    nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb,
-                     input->infile};
+    nestegg_io io = {nestegg_read_cb, nestegg_seek_cb, nestegg_tell_cb, 0};
     nestegg_video_params params;
 
+    io.userdata = input->infile;
     if(nestegg_init(&input->nestegg_ctx, io, NULL))
         goto fail;
 
@@ -647,7 +648,7 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
         {
             size_t pat_len;
 
-            // parse the pattern
+            /* parse the pattern */
             q[q_len - 1] = '\0';
             switch(p[1])
             {
@@ -677,7 +678,7 @@ void generate_filename(const char *pattern, char *out, size_t q_len,
         {
             size_t copy_len;
 
-            // copy the next segment
+            /* copy the next segment */
             if(!next_pat)
                 copy_len = strlen(p);
             else
@@ -922,7 +923,7 @@ int main(int argc, const char **argv_)
             p = strchr(p, '%');
             if(p && p[1] >= '1' && p[1] <= '9')
             {
-                // pattern contains sequence number, so it's not unique.
+                /* pattern contains sequence number, so it's not unique. */
                 single_file = 0;
                 break;
             }

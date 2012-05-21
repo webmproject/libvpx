@@ -18,7 +18,7 @@
 #include "vp8/common/entropy.h"
 #include "vpx_ports/mem.h"
 
-// motion search site
+/* motion search site */
 typedef struct
 {
     MV mv;
@@ -27,11 +27,11 @@ typedef struct
 
 typedef struct block
 {
-    // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
+    /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
     short *src_diff;
     short *coeff;
 
-    // 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries
+    /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
     short *quant;
     short *quant_fast;
     unsigned char *quant_shift;
@@ -39,7 +39,7 @@ typedef struct block
     short *zrun_zbin_boost;
     short *round;
 
-    // Zbin Over Quant value
+    /* Zbin Over Quant value */
     short zbin_extra;
 
     unsigned char **base_src;
@@ -59,12 +59,12 @@ typedef struct
 
 typedef struct macroblock
 {
-    DECLARE_ALIGNED(16, short, src_diff[400]);       // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
-    DECLARE_ALIGNED(16, short, coeff[400]);     // 16x16 Y 8x8 U 8x8 V 4x4 2nd Y
+    DECLARE_ALIGNED(16, short, src_diff[400]); /* 25 blocks Y,U,V,Y2 */
+    DECLARE_ALIGNED(16, short, coeff[400]); /* 25 blocks Y,U,V,Y2 */
     DECLARE_ALIGNED(16, unsigned char, thismb[256]);
 
     unsigned char *thismb_ptr;
-    // 16 Y blocks, 4 U blocks, 4 V blocks, 1 DC 2nd order block each with 16 entries
+    /* 16 Y, 4 U, 4 V, 1 DC 2nd order block */
     BLOCK block[25];
 
     YV12_BUFFER_CONFIG src;
@@ -99,8 +99,9 @@ typedef struct macroblock
     int (*token_costs)[COEF_BANDS][PREV_COEF_CONTEXTS]
     [MAX_ENTROPY_TOKENS];
 
-    // These define limits to motion vector components to prevent
-    // them from extending outside the UMV borders
+    /* These define limits to motion vector components to prevent
+     * them from extending outside the UMV borders.
+     */
     int mv_col_min;
     int mv_col_max;
     int mv_row_min;
@@ -110,7 +111,6 @@ typedef struct macroblock
 
     unsigned int encode_breakout;
 
-    //char * gf_active_ptr;
     signed char *gf_active_ptr;
 
     unsigned char *active_ptr;

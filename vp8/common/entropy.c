@@ -101,7 +101,7 @@ const vp8_tree_index vp8_coef_tree[ 22] =     /* corresponding _CONTEXT_NODEs */
 /* vp8_coef_encodings generated with:
     vp8_tokens_from_tree(vp8_coef_encodings, vp8_coef_tree);
 */
-const vp8_token vp8_coef_encodings[MAX_ENTROPY_TOKENS] =
+vp8_token vp8_coef_encodings[MAX_ENTROPY_TOKENS] =
 {
     {2, 2},
     {6, 3},

@@ -145,27 +145,27 @@ static unsigned MEM_VALUE_T mem_get_le32(const void *vmem)
 
 #undef  mem_get_sbe16
 #define mem_get_sbe16 mem_ops_wrap_symbol(mem_get_sbe16)
-mem_get_s_generic(be, 16);
+mem_get_s_generic(be, 16)
 
 #undef  mem_get_sbe24
 #define mem_get_sbe24 mem_ops_wrap_symbol(mem_get_sbe24)
-mem_get_s_generic(be, 24);
+mem_get_s_generic(be, 24)
 
 #undef  mem_get_sbe32
 #define mem_get_sbe32 mem_ops_wrap_symbol(mem_get_sbe32)
-mem_get_s_generic(be, 32);
+mem_get_s_generic(be, 32)
 
 #undef  mem_get_sle16
 #define mem_get_sle16 mem_ops_wrap_symbol(mem_get_sle16)
-mem_get_s_generic(le, 16);
+mem_get_s_generic(le, 16)
 
 #undef  mem_get_sle24
 #define mem_get_sle24 mem_ops_wrap_symbol(mem_get_sle24)
-mem_get_s_generic(le, 24);
+mem_get_s_generic(le, 24)
 
 #undef  mem_get_sle32
 #define mem_get_sle32 mem_ops_wrap_symbol(mem_get_sle32)
-mem_get_s_generic(le, 32);
+mem_get_s_generic(le, 32)
 
 #undef  mem_put_be16
 #define mem_put_be16 mem_ops_wrap_symbol(mem_put_be16)

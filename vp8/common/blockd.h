@@ -174,8 +174,7 @@ typedef struct
     MB_PREDICTION_MODE mode;
     MV_REFERENCE_FRAME ref_frame;
     int_mv mv;
-    //union b_mode_info bmi[16];
-    int dissim;    // dissimilarity level of the macroblock
+    int dissim;    /* dissimilarity level of the macroblock */
 } LOWER_RES_MB_INFO;
 
 /* The frame-level information needed to be stored for higher-resolution

@@ -99,51 +99,51 @@
 
 #undef  mem_get_be16_aligned
 #define mem_get_be16_aligned mem_ops_wrap_symbol(mem_get_be16_aligned)
-mem_get_be_aligned_generic(16);
+mem_get_be_aligned_generic(16)
 
 #undef  mem_get_be32_aligned
 #define mem_get_be32_aligned mem_ops_wrap_symbol(mem_get_be32_aligned)
-mem_get_be_aligned_generic(32);
+mem_get_be_aligned_generic(32)
 
 #undef  mem_get_le16_aligned
 #define mem_get_le16_aligned mem_ops_wrap_symbol(mem_get_le16_aligned)
-mem_get_le_aligned_generic(16);
+mem_get_le_aligned_generic(16)
 
 #undef  mem_get_le32_aligned
 #define mem_get_le32_aligned mem_ops_wrap_symbol(mem_get_le32_aligned)
-mem_get_le_aligned_generic(32);
+mem_get_le_aligned_generic(32)
 
 #undef  mem_get_sbe16_aligned
 #define mem_get_sbe16_aligned mem_ops_wrap_symbol(mem_get_sbe16_aligned)
-mem_get_sbe_aligned_generic(16);
+mem_get_sbe_aligned_generic(16)
 
 #undef  mem_get_sbe32_aligned
 #define mem_get_sbe32_aligned mem_ops_wrap_symbol(mem_get_sbe32_aligned)
-mem_get_sbe_aligned_generic(32);
+mem_get_sbe_aligned_generic(32)
 
 #undef  mem_get_sle16_aligned
 #define mem_get_sle16_aligned mem_ops_wrap_symbol(mem_get_sle16_aligned)
-mem_get_sle_aligned_generic(16);
+mem_get_sle_aligned_generic(16)
 
 #undef  mem_get_sle32_aligned
 #define mem_get_sle32_aligned mem_ops_wrap_symbol(mem_get_sle32_aligned)
-mem_get_sle_aligned_generic(32);
+mem_get_sle_aligned_generic(32)
 
 #undef  mem_put_be16_aligned
 #define mem_put_be16_aligned mem_ops_wrap_symbol(mem_put_be16_aligned)
-mem_put_be_aligned_generic(16);
+mem_put_be_aligned_generic(16)
 
 #undef  mem_put_be32_aligned
 #define mem_put_be32_aligned mem_ops_wrap_symbol(mem_put_be32_aligned)
-mem_put_be_aligned_generic(32);
+mem_put_be_aligned_generic(32)
 
 #undef  mem_put_le16_aligned
 #define mem_put_le16_aligned mem_ops_wrap_symbol(mem_put_le16_aligned)
-mem_put_le_aligned_generic(16);
+mem_put_le_aligned_generic(16)
 
 #undef  mem_put_le32_aligned
 #define mem_put_le32_aligned mem_ops_wrap_symbol(mem_put_le32_aligned)
-mem_put_le_aligned_generic(32);
+mem_put_le_aligned_generic(32)
 
 #undef mem_get_ne_aligned_generic
 #undef mem_get_se_aligned_generic

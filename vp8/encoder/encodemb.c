@@ -137,10 +137,10 @@ void vp8_transform_intra_mby(MACROBLOCK *x)
             &x->block[i].coeff[0], 32);
     }
 
-    // build dc block from 16 y dc values
+    /* build dc block from 16 y dc values */
     build_dcblock(x);
 
-    // do 2nd order transform on the dc block
+    /* do 2nd order transform on the dc block */
     x->short_walsh4x4(&x->block[24].src_diff[0],
         &x->block[24].coeff[0], 8);
 
@@ -157,7 +157,7 @@ static void transform_mb(MACROBLOCK *x)
             &x->block[i].coeff[0], 32);
     }
 
-    // build dc block from 16 y dc values
+    /* build dc block from 16 y dc values */
     if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
         build_dcblock(x);
 
@@ -167,7 +167,7 @@ static void transform_mb(MACROBLOCK *x)
             &x->block[i].coeff[0], 16);
     }
 
-    // do 2nd order transform on the dc block
+    /* do 2nd order transform on the dc block */
     if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
         x->short_walsh4x4(&x->block[24].src_diff[0],
         &x->block[24].coeff[0], 8);
@@ -185,7 +185,7 @@ static void transform_mby(MACROBLOCK *x)
             &x->block[i].coeff[0], 32);
     }
 
-    // build dc block from 16 y dc values
+    /* build dc block from 16 y dc values */
     if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
     {
         build_dcblock(x);
@@ -208,7 +208,7 @@ struct vp8_token_state{
   short         qc;
 };
 
-// TODO: experiments to find optimal multiple numbers
+/* TODO: experiments to find optimal multiple numbers */
 #define Y1_RD_MULT 4
 #define UV_RD_MULT 2
 #define Y2_RD_MULT 16

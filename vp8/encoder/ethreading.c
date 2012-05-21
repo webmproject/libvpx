@@ -39,7 +39,7 @@ static THREAD_FUNCTION thread_loopfilter(void *p_data)
 
         if (sem_wait(&cpi->h_event_start_lpf) == 0)
         {
-            if (cpi->b_multi_threaded == 0) // we're shutting down
+            if (cpi->b_multi_threaded == 0) /* we're shutting down */
                 break;
 
             vp8_loopfilter_frame(cpi, cm);
@@ -60,14 +60,12 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
     ENTROPY_CONTEXT_PLANES mb_row_left_context;
 
     const int nsync = cpi->mt_sync_range;
-    //printf("Started thread %d\n", ithread);
 
     while (1)
     {
         if (cpi->b_multi_threaded == 0)
             break;
 
-        //if(WaitForSingleObject(cpi->h_event_mbrencoding[ithread], INFINITE) == WAIT_OBJECT_0)
         if (sem_wait(&cpi->h_event_start_encoding[ithread]) == 0)
         {
             VP8_COMMON *cm = &cpi->common;
@@ -83,7 +81,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
             int *segment_counts = mbri->segment_counts;
             int *totalrate = &mbri->totalrate;
 
-            if (cpi->b_multi_threaded == 0) // we're shutting down
+            if (cpi->b_multi_threaded == 0) /* we're shutting down */
                 break;
 
             for (mb_row = ithread + 1; mb_row < cm->mb_rows; mb_row += (cpi->encoding_thread_count + 1))
@@ -108,7 +106,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                 last_row_current_mb_col = &cpi->mt_current_mb_col[mb_row - 1];
 
-                // reset above block coeffs
+                /* reset above block coeffs */
                 xd->above_context = cm->above_context;
                 xd->left_context = &mb_row_left_context;
 
@@ -118,10 +116,10 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                 recon_yoffset = (mb_row * recon_y_stride * 16);
                 recon_uvoffset = (mb_row * recon_uv_stride * 8);
 
-                // Set the mb activity pointer to the start of the row.
+                /* Set the mb activity pointer to the start of the row. */
                 x->mb_activity_ptr = &cpi->mb_activity_map[map_index];
 
-                // for each macroblock col in image
+                /* for each macroblock col in image */
                 for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
                 {
                     *current_mb_col = mb_col - 1;
@@ -139,14 +137,18 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     tp = tp_start;
 #endif
 
-                    // Distance of Mb to the various image edges.
-                    // These specified to 8th pel as they are always compared to values that are in 1/8th pel units
+                    /* Distance of Mb to the various image edges.
+                     * These specified to 8th pel as they are always compared
+                     * to values that are in 1/8th pel units
+                     */
                     xd->mb_to_left_edge = -((mb_col * 16) << 3);
                     xd->mb_to_right_edge = ((cm->mb_cols - 1 - mb_col) * 16) << 3;
                     xd->mb_to_top_edge = -((mb_row * 16) << 3);
                     xd->mb_to_bottom_edge = ((cm->mb_rows - 1 - mb_row) * 16) << 3;
 
-                    // Set up limit values for motion vectors used to prevent them extending outside the UMV borders
+                    /* Set up limit values for motion vectors used to prevent
+                     * them extending outside the UMV borders
+                     */
                     x->mv_col_min = -((mb_col * 16) + (VP8BORDERINPIXELS - 16));
                     x->mv_col_max = ((cm->mb_cols - 1 - mb_col) * 16) + (VP8BORDERINPIXELS - 16);
                     x->mv_row_min = -((mb_row * 16) + (VP8BORDERINPIXELS - 16));
@@ -160,17 +162,19 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     x->rddiv = cpi->RDDIV;
                     x->rdmult = cpi->RDMULT;
 
-                    //Copy current mb to a buffer
+                    /* Copy current mb to a buffer */
                     vp8_copy_mem16x16(x->src.y_buffer, x->src.y_stride, x->thismb, 16);
 
                     if (cpi->oxcf.tuning == VP8_TUNE_SSIM)
                         vp8_activity_masking(cpi, x);
 
-                    // Is segmentation enabled
-                    // MB level adjustment to quantizer
+                    /* Is segmentation enabled */
+                    /* MB level adjustment to quantizer */
                     if (xd->segmentation_enabled)
                     {
-                        // Code to set segment id in xd->mbmi.segment_id for current MB (with range checking)
+                        /* Code to set segment id in xd->mbmi.segment_id for
+                         * current MB (with range checking)
+                         */
                         if (cpi->segmentation_map[map_index + mb_col] <= 3)
                             xd->mode_info_context->mbmi.segment_id = cpi->segmentation_map[map_index + mb_col];
                         else
@@ -179,7 +183,8 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                         vp8cx_mb_init_quantizer(cpi, x, 1);
                     }
                     else
-                        xd->mode_info_context->mbmi.segment_id = 0; // Set to Segment 0 by default
+                        /* Set to Segment 0 by default */
+                        xd->mode_info_context->mbmi.segment_id = 0;
 
                     x->active_ptr = cpi->active_map + map_index + mb_col;
 
@@ -209,21 +214,30 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
 #endif
 
-                        // Count of last ref frame 0,0 usage
+                        /* Count of last ref frame 0,0 usage */
                         if ((xd->mode_info_context->mbmi.mode == ZEROMV) && (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
                             cpi->inter_zz_count++;
 
-                        // Special case code for cyclic refresh
-                        // If cyclic update enabled then copy xd->mbmi.segment_id; (which may have been updated based on mode
-                        // during vp8cx_encode_inter_macroblock()) back into the global segmentation map
+                        /* Special case code for cyclic refresh
+                         * If cyclic update enabled then copy
+                         * xd->mbmi.segment_id; (which may have been updated
+                         * based on mode during
+                         * vp8cx_encode_inter_macroblock()) back into the
+                         * global segmentation map
+                         */
                         if (cpi->cyclic_refresh_mode_enabled && xd->segmentation_enabled)
                         {
                             const MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
                             cpi->segmentation_map[map_index + mb_col] = mbmi->segment_id;
 
-                            // If the block has been refreshed mark it as clean (the magnitude of the -ve influences how long it will be before we consider another refresh):
-                            // Else if it was coded (last frame 0,0) and has not already been refreshed then mark it as a candidate for cleanup next time (marked 0)
-                            // else mark it as dirty (1).
+                            /* If the block has been refreshed mark it as clean
+                             * (the magnitude of the -ve influences how long it
+                             * will be before we consider another refresh):
+                             * Else if it was coded (last frame 0,0) and has
+                             * not already been refreshed then mark it as a
+                             * candidate for cleanup next time (marked 0) else
+                             * mark it as dirty (1).
+                             */
                             if (mbmi->segment_id)
                                 cpi->cyclic_refresh_map[map_index + mb_col] = -1;
                             else if ((mbmi->mode == ZEROMV) && (mbmi->ref_frame == LAST_FRAME))
@@ -246,13 +260,13 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 #else
                     cpi->tplist[mb_row].stop = tp;
 #endif
-                    // Increment pointer into gf usage flags structure.
+                    /* Increment pointer into gf usage flags structure. */
                     x->gf_active_ptr++;
 
-                    // Increment the activity mask pointers.
+                    /* Increment the activity mask pointers. */
                     x->mb_activity_ptr++;
 
-                    // adjust to the next column of macroblocks
+                    /* adjust to the next column of macroblocks */
                     x->src.y_buffer += 16;
                     x->src.u_buffer += 8;
                     x->src.v_buffer += 8;
@@ -260,10 +274,10 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
                     recon_yoffset += 16;
                     recon_uvoffset += 8;
 
-                    // Keep track of segment usage
+                    /* Keep track of segment usage */
                     segment_counts[xd->mode_info_context->mbmi.segment_id]++;
 
-                    // skip to next mb
+                    /* skip to next mb */
                     xd->mode_info_context++;
                     x->partition_info++;
                     xd->above_context++;
@@ -276,7 +290,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
                 *current_mb_col = mb_col + nsync;
 
-                // this is to account for the border
+                /* this is to account for the border */
                 xd->mode_info_context++;
                 x->partition_info++;
 
@@ -296,7 +310,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
         }
     }
 
-    //printf("exit thread %d\n", ithread);
+    /* printf("exit thread %d\n", ithread); */
     return 0;
 }
 
@@ -550,14 +564,13 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
 {
     if (cpi->b_multi_threaded)
     {
-        //shutdown other threads
+        /* shutdown other threads */
         cpi->b_multi_threaded = 0;
         {
             int i;
 
             for (i = 0; i < cpi->encoding_thread_count; i++)
             {
-                //SetEvent(cpi->h_event_mbrencoding[i]);
                 sem_post(&cpi->h_event_start_encoding[i]);
                 pthread_join(cpi->h_encoding_thread[i], 0);
 
@@ -572,7 +585,7 @@ void vp8cx_remove_encoder_threads(VP8_COMP *cpi)
         sem_destroy(&cpi->h_event_end_lpf);
         sem_destroy(&cpi->h_event_start_lpf);
 
-        //free thread related resources
+        /* free thread related resources */
         vpx_free(cpi->h_event_start_encoding);
         vpx_free(cpi->h_encoding_thread);
         vpx_free(cpi->mb_row_ei);

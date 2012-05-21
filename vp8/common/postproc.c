@@ -240,8 +240,9 @@ void vp8_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int co
         for (i = -8; i<0; i++)
           s[i]=s[0];
 
-        // 17 avoids valgrind warning - we buffer values in c in d
-        // and only write them when we've read 8 ahead...
+        /* 17 avoids valgrind warning - we buffer values in c in d
+         * and only write them when we've read 8 ahead...
+         */
         for (i = cols; i<cols+17; i++)
           s[i]=s[cols-1];
 
@@ -275,9 +276,6 @@ void vp8_mbpost_proc_across_ip_c(unsigned char *src, int pitch, int rows, int co
 }
 
 
-
-
-
 void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, int flimit)
 {
     int r, c, i;
@@ -294,8 +292,9 @@ void vp8_mbpost_proc_down_c(unsigned char *dst, int pitch, int rows, int cols, i
         for (i = -8; i < 0; i++)
           s[i*pitch]=s[0];
 
-        // 17 avoids valgrind warning - we buffer values in c in d
-        // and only write them when we've read 8 ahead...
+        /* 17 avoids valgrind warning - we buffer values in c in d
+         * and only write them when we've read 8 ahead...
+         */
         for (i = rows; i < rows+17; i++)
           s[i*pitch]=s[(rows-1)*pitch];
 
@@ -731,8 +730,9 @@ int vp8_post_proc_frame(VP8_COMMON *oci, YV12_BUFFER_CONFIG *dest, vp8_ppflags_t
 
             oci->post_proc_buffer_int_used = 1;
 
-            // insure that postproc is set to all 0's so that post proc
-            // doesn't pull random data in from edge
+            /* insure that postproc is set to all 0's so that post proc
+             * doesn't pull random data in from edge
+             */
             vpx_memset((&oci->post_proc_buffer_int)->buffer_alloc,128,(&oci->post_proc_buffer)->frame_size);
 
         }

@@ -88,7 +88,8 @@ struct vpx_codec_alg_priv
     vpx_image_t             preview_img;
     unsigned int            next_frame_flag;
     vp8_postproc_cfg_t      preview_ppcfg;
-    vpx_codec_pkt_list_decl(64) pkt_list;              // changed to accomendate the maximum number of lagged frames allowed
+    /* pkt_list size depends on the maximum number of lagged frames allowed. */
+    vpx_codec_pkt_list_decl(64) pkt_list;
     unsigned int                fixed_kf_cntr;
 };
 
@@ -156,7 +157,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
     RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
     RANGE_CHECK(cfg, kf_mode,               VPX_KF_DISABLED, VPX_KF_AUTO);
-    //RANGE_CHECK_BOOL(cfg,                 g_delete_firstpassfile);
     RANGE_CHECK_BOOL(cfg,                   rc_resize_allowed);
     RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
@@ -355,7 +355,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
 
     oxcf->auto_key                 = cfg.kf_mode == VPX_KF_AUTO
                                        && cfg.kf_min_dist != cfg.kf_max_dist;
-    //oxcf->kf_min_dist            = cfg.kf_min_dis;
     oxcf->key_freq                 = cfg.kf_max_dist;
 
     oxcf->number_of_layers         = cfg.ts_number_layers;
@@ -384,9 +383,6 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         oxcf->mr_low_res_mode_info        = mr_cfg->mr_low_res_mode_info;
     }
 #endif
-
-    //oxcf->delete_first_pass_file = cfg.g_delete_firstpassfile;
-    //strcpy(oxcf->first_pass_file, cfg.g_firstpass_file);
 
     oxcf->cpu_used               = vp8_cfg.cpu_used;
     oxcf->encode_breakout        = vp8_cfg.static_thresh;
@@ -685,7 +681,7 @@ static vpx_codec_err_t image2yuvconfig(const vpx_image_t   *img,
     yv12->uv_stride = img->stride[VPX_PLANE_U];
 
     yv12->border  = (img->stride[VPX_PLANE_Y] - img->w) / 2;
-    yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12); //REG_YUV = 0
+    yv12->clrtype = (img->fmt == VPX_IMG_FMT_VPXI420 || img->fmt == VPX_IMG_FMT_VPXYV12);
     return res;
 }
 
@@ -902,10 +898,11 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                 {
                     pkt.data.frame.flags |= VPX_FRAME_IS_INVISIBLE;
 
-                    // This timestamp should be as close as possible to the
-                    // prior PTS so that if a decoder uses pts to schedule when
-                    // to do this, we start right after last frame was decoded.
-                    // Invisible frames have no duration.
+                    /* This timestamp should be as close as possible to the
+                     * prior PTS so that if a decoder uses pts to schedule when
+                     * to do this, we start right after last frame was decoded.
+                     * Invisible frames have no duration.
+                     */
                     pkt.data.frame.pts = ((cpi->last_time_stamp_seen
                         * ctx->cfg.g_timebase.den + round)
                         / ctx->cfg.g_timebase.num / 10000000) + 1;
@@ -957,8 +954,6 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
                     cx_data += size;
                     cx_data_sz -= size;
                 }
-
-                //printf("timestamp: %lld, duration: %d\n", pkt->data.frame.pts, pkt->data.frame.duration);
             }
         }
     }

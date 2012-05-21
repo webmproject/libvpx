@@ -24,11 +24,11 @@ typedef enum
     SUBMVREF_LEFT_ABOVE_ZED
 } sumvfref_t;
 
-typedef const int vp8_mbsplit[16];
+typedef int vp8_mbsplit[16];
 
 #define VP8_NUMMBSPLITS 4
 
-extern vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS];
+extern const vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS];
 
 extern const int vp8_mbsplit_count [VP8_NUMMBSPLITS];    /* # of subsets */
 

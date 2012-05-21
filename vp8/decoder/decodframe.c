@@ -199,8 +199,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 left_stride = dst_stride;
                 top_left = yabove[-1];
 
-                //                vp8_intra4x4_predict (base_dst + b->offset, dst_stride, b_mode,
-                  //                                    base_dst + b->offset, dst_stride );
                 vp8_intra4x4_predict_d_c(yabove, yleft, left_stride,
                                        b_mode,
                                        base_dst + b->offset, dst_stride,
@@ -395,7 +393,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
         xd->recon_above[1] -= xd->dst.uv_stride;
         xd->recon_above[2] -= xd->dst.uv_stride;
 
-        //TODO: move to outside row loop
+        /* TODO: move to outside row loop */
         xd->recon_left_stride[0] = xd->dst.y_stride;
         xd->recon_left_stride[1] = xd->dst.uv_stride;
 

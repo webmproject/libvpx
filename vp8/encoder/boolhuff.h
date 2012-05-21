@@ -32,7 +32,7 @@ typedef struct
     unsigned char *buffer_end;
     struct vpx_internal_error_info *error;
 
-    // Variables used to track bit costs without outputing to the bitstream
+    /* Variables used to track bit costs without outputing to the bitstream */
     unsigned int  measure_cost;
     unsigned long bit_counter;
 } BOOL_CODER;

@@ -118,10 +118,11 @@ vp8_lookahead_push(struct lookahead_ctx *ctx,
     ctx->sz++;
     buf = pop(ctx, &ctx->write_idx);
 
-    // Only do this partial copy if the following conditions are all met:
-    // 1. Lookahead queue has has size of 1.
-    // 2. Active map is provided.
-    // 3. This is not a key frame, golden nor altref frame.
+    /* Only do this partial copy if the following conditions are all met:
+     * 1. Lookahead queue has has size of 1.
+     * 2. Active map is provided.
+     * 3. This is not a key frame, golden nor altref frame.
+     */
     if (ctx->max_sz == 1 && active_map && !flags)
     {
         for (row = 0; row < mb_rows; ++row)
@@ -130,18 +131,18 @@ vp8_lookahead_push(struct lookahead_ctx *ctx,
 
             while (1)
             {
-                // Find the first active macroblock in this row.
+                /* Find the first active macroblock in this row. */
                 for (; col < mb_cols; ++col)
                 {
                     if (active_map[col])
                         break;
                 }
 
-                // No more active macroblock in this row.
+                /* No more active macroblock in this row. */
                 if (col == mb_cols)
                     break;
 
-                // Find the end of active region in this row.
+                /* Find the end of active region in this row. */
                 active_end = col;
 
                 for (; active_end < mb_cols; ++active_end)
@@ -150,13 +151,13 @@ vp8_lookahead_push(struct lookahead_ctx *ctx,
                         break;
                 }
 
-                // Only copy this active region.
+                /* Only copy this active region. */
                 vp8_copy_and_extend_frame_with_rect(src, &buf->img,
                                                     row << 4,
                                                     col << 4, 16,
                                                     (active_end - col) << 4);
 
-                // Start again from the end of this active region.
+                /* Start again from the end of this active region. */
                 col = active_end;
             }
 
