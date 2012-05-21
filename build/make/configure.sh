@@ -967,7 +967,7 @@ process_common_toolchain() {
                 esac
                 ;;
             gcc*)
-                add_cflags  -m${bits}
+                add_cflags -m${bits}
                 add_ldflags -m${bits}
                 link_with_cc=gcc
                 tune_cflags="-march="

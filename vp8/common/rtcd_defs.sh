@@ -501,6 +501,12 @@ fi
 prototype void vp8_yv12_copy_partial_frame "struct yv12_buffer_config *src_ybc, struct yv12_buffer_config *dst_ybc"
 specialize vp8_yv12_copy_partial_frame neon
 
+#
+# Denoiser filter
+#
+prototype void vp8_denoiser_filter "struct yv12_buffer_config* mc_running_avg, struct yv12_buffer_config* running_avg, struct macroblock* signal, unsigned int motion_magnitude2, int y_offset, int uv_offset"
+specialize vp8_denoiser_filter sse2
+
 # End of encoder only functions
 fi
 
