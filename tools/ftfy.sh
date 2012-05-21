@@ -34,7 +34,7 @@ vpx_style() {
          --align-pointer=name \
          --indent-preprocessor --convert-tabs --indent-labels \
          --suffix=none --quiet "$@"
-  sed -i 's/[[:space:]]\{1,\},/,/g' "$@"
+  sed -i "" 's/[[:space:]]\{1,\},/,/g' "$@"
 }
 
 
