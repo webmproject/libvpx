@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//e0g\u003d",
+        "filename": "configure",
+        "patchSetId": 2
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T21:39:34Z",
+      "side": 1,
+      "message": "next patch set has \u0027enable unit_tests\u0027 here in the vs case",
+      "revId": "7484dd71ffebd5cf9113e1034259d85b337628ad",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
