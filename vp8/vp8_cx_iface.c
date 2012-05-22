@@ -539,23 +539,28 @@ static vpx_codec_err_t set_param(vpx_codec_alg_priv_t *ctx,
 static vpx_codec_err_t vp8e_mr_alloc_mem(const vpx_codec_enc_cfg_t *cfg,
                                         void **mem_loc)
 {
-    vpx_codec_err_t res = 0;
-
 #if CONFIG_MULTI_RES_ENCODING
+    LOWER_RES_FRAME_INFO *shared_mem_loc;
     int mb_rows = ((cfg->g_w + 15) >>4);
     int mb_cols = ((cfg->g_h + 15) >>4);
 
-    *mem_loc = calloc(mb_rows*mb_cols, sizeof(LOWER_RES_INFO));
-    if(!(*mem_loc))
+    shared_mem_loc = calloc(1, sizeof(LOWER_RES_FRAME_INFO));
+    if(!shared_mem_loc)
     {
-        free(*mem_loc);
-        res = VPX_CODEC_MEM_ERROR;
+        return VPX_CODEC_MEM_ERROR;
+    }
+
+    shared_mem_loc->mb_info = calloc(mb_rows*mb_cols, sizeof(LOWER_RES_MB_INFO));
+    if(!(shared_mem_loc->mb_info))
+    {
+        return VPX_CODEC_MEM_ERROR;
     }
     else
-        res = VPX_CODEC_OK;
+    {
+        *mem_loc = (void *)shared_mem_loc;
+        return VPX_CODEC_OK;
+    }
 #endif
-
-    return res;
 }
 
 static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
@@ -647,7 +652,11 @@ static vpx_codec_err_t vp8e_destroy(vpx_codec_alg_priv_t *ctx)
 #if CONFIG_MULTI_RES_ENCODING
     /* Free multi-encoder shared memory */
     if (ctx->oxcf.mr_total_resolutions > 0 && (ctx->oxcf.mr_encoder_id == ctx->oxcf.mr_total_resolutions-1))
+    {
+        LOWER_RES_FRAME_INFO *shared_mem_loc = (LOWER_RES_FRAME_INFO *)ctx->oxcf.mr_low_res_mode_info;
+        free(shared_mem_loc->mb_info);
         free(ctx->oxcf.mr_low_res_mode_info);
+    }
 #endif
 
     free(ctx->cx_data);

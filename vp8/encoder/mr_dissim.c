@@ -65,14 +65,18 @@ void vp8_cal_dissimilarity(VP8_COMP *cpi)
         /* Store info for show/no-show frames for supporting alt_ref.
          * If parent frame is alt_ref, child has one too.
          */
+        LOWER_RES_FRAME_INFO* store_info
+                      = (LOWER_RES_FRAME_INFO*)cpi->oxcf.mr_low_res_mode_info;
+
+        store_info->frame_type = cm->frame_type;
+
         if(cm->frame_type != KEY_FRAME)
         {
             int mb_row;
             int mb_col;
             /* Point to beginning of allocated MODE_INFO arrays. */
             MODE_INFO *tmp = cm->mip + cm->mode_info_stride;
-            LOWER_RES_INFO* store_mode_info
-                            = (LOWER_RES_INFO*)cpi->oxcf.mr_low_res_mode_info;
+            LOWER_RES_MB_INFO* store_mode_info = store_info->mb_info;
 
             for (mb_row = 0; mb_row < cm->mb_rows; mb_row ++)
             {
