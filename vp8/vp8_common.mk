@@ -30,7 +30,6 @@ VP8_COMMON_SRCS-yes += common/findnearmv.c
 VP8_COMMON_SRCS-yes += common/generic/systemdependent.c
 VP8_COMMON_SRCS-yes += common/idct_blk.c
 VP8_COMMON_SRCS-yes += common/idctllm.c
-LIBVPX_TEST_SRCS-yes += ../vp8/common/idctllm_test.cc
 VP8_COMMON_SRCS-yes += common/alloccommon.h
 VP8_COMMON_SRCS-yes += common/blockd.h
 VP8_COMMON_SRCS-yes += common/common.h

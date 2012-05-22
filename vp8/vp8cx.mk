@@ -88,8 +88,6 @@ VP8_CX_SRCS-yes += encoder/temporal_filter.c
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.c
 VP8_CX_SRCS-$(CONFIG_MULTI_RES_ENCODING) += encoder/mr_dissim.h
 
-LIBVPX_TEST_SRCS-yes += ../vp8/encoder/boolcoder_test.cc
-
 ifeq ($(CONFIG_REALTIME_ONLY),yes)
 VP8_CX_SRCS_REMOVE-yes += encoder/firstpass.c
 VP8_CX_SRCS_REMOVE-yes += encoder/temporal_filter.c
