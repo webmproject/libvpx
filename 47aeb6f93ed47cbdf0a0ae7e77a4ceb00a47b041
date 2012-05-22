@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAKn//e3g\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-22T21:26:15Z",
+      "side": 1,
+      "message": "not sure whether this and InitializeConfig could be combined to an Init(mode) function.",
+      "revId": "47aeb6f93ed47cbdf0a0ae7e77a4ceb00a47b041",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
