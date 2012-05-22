@@ -468,7 +468,7 @@ int vp8dx_receive_compressed_data(VP8D_COMP *pbi, unsigned long size, const unsi
         if(cm->filter_level)
         {
             /* Apply the loop filter if appropriate. */
-            vp8_loop_filter_frame(cm, &pbi->mb);
+            vp8_loop_filter_frame(cm, &pbi->mb, cm->frame_type);
         }
         vp8_yv12_extend_frame_borders(cm->frame_to_show);
     }

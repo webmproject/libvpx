@@ -3114,6 +3114,8 @@ static void update_reference_frames(VP8_COMMON *cm)
 
 void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 {
+    const FRAME_TYPE frame_type = cm->frame_type;
+
     if (cm->no_lpf)
     {
         cm->filter_level = 0;
@@ -3131,6 +3133,11 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
         else
             vp8cx_pick_filter_level(cpi->Source, cpi);
 
+        if (cm->filter_level > 0)
+        {
+            vp8cx_set_alt_lf_level(cpi, cm->filter_level);
+        }
+
         vpx_usec_timer_mark(&timer);
         cpi->time_pick_lpf += vpx_usec_timer_elapsed(&timer);
     }
@@ -3142,8 +3149,7 @@ void vp8_loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
 
     if (cm->filter_level > 0)
     {
-        vp8cx_set_alt_lf_level(cpi, cm->filter_level);
-        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd);
+        vp8_loop_filter_frame(cm, &cpi->mb.e_mbd, frame_type);
     }
 
     vp8_yv12_extend_frame_borders(cm->frame_to_show);
