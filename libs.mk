@@ -397,8 +397,8 @@ else
 include $(SRC_PATH_BARE)/third_party/googletest/gtest.mk
 GTEST_SRCS := $(addprefix third_party/googletest/src/,$(call enabled,GTEST_SRCS))
 GTEST_OBJS=$(call objs,$(GTEST_SRCS))
-$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
-$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
+$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
+$(GTEST_OBJS) $(GTEST_OBJS:.o=.d): CXXFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
 OBJS-$(BUILD_LIBVPX) += $(GTEST_OBJS)
 LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libgtest.a $(BUILD_PFX)libgtest_g.a
 $(BUILD_PFX)libgtest_g.a: $(GTEST_OBJS)
