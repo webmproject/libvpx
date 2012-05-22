@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fKU\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "I was reading gtest as \"other libraries\u0027 .h files\" despite carrying it in-tree. No strong opinion though, will fix.",
+      "parentUuid": "AAAAKn//gtQ\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//gs8\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2012-05-19T01:58:45Z",
       "side": 1,
       "message": "I think one blank line is enough (to match keyframe_test.cc)",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fKE\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gs8\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fJ4\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gs4\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//gtA\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2012-05-19T01:58:45Z",
       "side": 1,
       "message": "test/encode_test_driver.cc:100:  Blank line at the start of a code block.  Is this needed?  [whitespace/blank_line] [2]",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fJU\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gtA\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fJQ\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//fd4\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//gtI\u003d",
         "filename": "test/encode_test_driver.h",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2012-05-19T01:58:45Z",
       "side": 1,
       "message": "all this could be namespaced\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Namespaces\n\nmaybe namespace libvpx_test?",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fJM\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gtI\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fJI\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gs0\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//gsw\u003d",
         "filename": "test/encode_test_driver.h",
         "patchSetId": 4
@@ -132,6 +258,24 @@
       "writtenOn": "2012-05-19T01:58:45Z",
       "side": 1,
       "message": "cast to void* shouldn\u0027t be necessary, also \u0026buffer_[0] would remove the const_cast.",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fEU\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gsw\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fEs\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//fc0\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//gss\u003d",
         "filename": "test/encode_test_driver.h",
         "patchSetId": 4
@@ -172,6 +334,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fEM\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gss\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//fe4\u003d",
         "filename": "test/encode_test_driver.h",
         "patchSetId": 4
@@ -183,6 +363,24 @@
       "writtenOn": "2012-05-22T17:03:57Z",
       "side": 1,
       "message": "Does this need to be unsigned long? (ditto for remaining instances; there\u0027s much lint anger resulting from the longs)\n\nhttp://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Integer_Types",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fD8\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "These are long because the corresponding parameters in the libvpx API are long. If I promote them to a fixed width type, will probably get compiler warnings elsewhere.",
+      "parentUuid": "AAAAKn//fe4\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -224,6 +422,42 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fD4\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gsc\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fDw\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//fd0\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//gsk\u003d",
         "filename": "test/encode_test_driver.h",
         "patchSetId": 4
@@ -235,6 +469,24 @@
       "writtenOn": "2012-05-19T01:58:45Z",
       "side": 1,
       "message": "could be 1 line",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fDg\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//gsk\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -258,6 +510,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//e+E\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done. This is another case that may be hard to get astyle to apply automatically.",
+      "parentUuid": "AAAAKn//gsg\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//fdQ\u003d",
         "filename": "test/encode_test_driver.h",
         "patchSetId": 4
@@ -269,6 +539,24 @@
       "writtenOn": "2012-05-22T17:03:57Z",
       "side": 1,
       "message": "could be one line (I think it\u0027ll fit...)",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//e90\u003d",
+        "filename": "test/encode_test_driver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//fdQ\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -292,6 +580,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fHw\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//feA\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//fcY\u003d",
         "filename": "test/keyframe_test.cc",
         "patchSetId": 4
@@ -303,6 +609,24 @@
       "writtenOn": "2012-05-22T17:03:57Z",
       "side": 1,
       "message": "include \u003cvector\u003e",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fHs\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//fcY\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -326,6 +650,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAKn//fGM\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//fcE\u003d",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAKn//fcI\u003d",
         "filename": "test/video_source.h",
         "patchSetId": 4
@@ -337,6 +679,24 @@
       "writtenOn": "2012-05-22T17:03:57Z",
       "side": 1,
       "message": "parentheses around condition",
+      "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAKn//fGQ\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-22T20:48:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAKn//fcI\u003d",
       "revId": "dafe7bbb33adcc8f476ae3a76ccd69e4d2edb929",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
