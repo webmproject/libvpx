@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAK3///dw\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T23:06:05Z",
+      "side": 1,
+      "message": "you can one line most of these if you wanted...\n\nthis should be explicit too.",
+      "revId": "a1187c511cf51fe542f8120a3682d8bc53881f30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///d4\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T23:06:05Z",
+      "side": 1,
+      "message": "// namespace",
+      "revId": "a1187c511cf51fe542f8120a3682d8bc53881f30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///do\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T23:06:05Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "a1187c511cf51fe542f8120a3682d8bc53881f30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///dA\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T23:06:05Z",
+      "side": 1,
+      "message": "static_cast\u003cint\u003e()",
+      "revId": "a1187c511cf51fe542f8120a3682d8bc53881f30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///dM\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T23:06:05Z",
+      "side": 1,
+      "message": "bring \u0027\u003c\u003c.*$\u0027 down and join it with the other lines",
+      "revId": "a1187c511cf51fe542f8120a3682d8bc53881f30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///dc\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T23:06:05Z",
+      "side": 1,
+      "message": "indent 4",
+      "revId": "a1187c511cf51fe542f8120a3682d8bc53881f30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///dk\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T23:06:05Z",
+      "side": 1,
+      "message": "drop this line",
+      "revId": "a1187c511cf51fe542f8120a3682d8bc53881f30",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
