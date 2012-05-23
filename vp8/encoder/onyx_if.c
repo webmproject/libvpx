@@ -1655,6 +1655,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
           cm->yv12_fb[cm->lst_fb_idx].y_height ||
         cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
+        dealloc_raw_frame_buffers(cpi);
         alloc_raw_frame_buffers(cpi);
         vp8_alloc_compressor_data(cpi);
     }
