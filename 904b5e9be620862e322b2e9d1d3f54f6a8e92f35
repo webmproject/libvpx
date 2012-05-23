@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAK3///fE\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T22:54:53Z",
+      "side": 1,
+      "message": "static is redundant within the namespace.",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///fA\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T22:54:53Z",
+      "side": 1,
+      "message": "limit_ could be in the initializer list",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///e0\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T22:54:53Z",
+      "side": 1,
+      "message": "extra line can go",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///eM\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-05-23T22:54:53Z",
+      "side": 1,
+      "message": "one list with a FrameInfo struct local to this class?",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
