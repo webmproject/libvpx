@@ -586,6 +586,16 @@ process_toolchain() {
     if enabled postproc_visualizer; then
         enabled postproc || die "postproc_visualizer requires postproc to be enabled"
     fi
+
+    # Enable unit tests if we have a working C++ compiler
+    case "$tgt_cc" in
+        vs*)
+            soft_enable unit_tests;;
+        *)
+            check_cxx "$@" <<EOF && soft_enable unit_tests
+int z;
+EOF
+    esac
 }
 
 
