@@ -32,6 +32,10 @@ enum TestMode {
                                          ::libvpx_test::kTwoPassGood, \
                                          ::libvpx_test::kTwoPassBest)
 
+#define ONE_PASS_TEST_MODES ::testing::Values(::libvpx_test::kRealTime, \
+                                              ::libvpx_test::kOnePassGood, \
+                                              ::libvpx_test::kOnePassBest)
+
 
 // Provides an object to handle the libvpx get_cx_data() iteration pattern
 class CxDataIterator {

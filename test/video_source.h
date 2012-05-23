@@ -44,8 +44,9 @@ class VideoSource {
 
 class DummyVideoSource : public VideoSource {
  public:
-  DummyVideoSource()
-    : img_(NULL), limit_(100) { SetSize(80, 64); }
+  DummyVideoSource() : img_(NULL), limit_(100), width_(0), height_(0) {
+    SetSize(80, 64);
+  }
 
   virtual ~DummyVideoSource() { vpx_img_free(img_); }
 
@@ -76,9 +77,13 @@ class DummyVideoSource : public VideoSource {
   virtual unsigned int frame() const { return frame_; }
 
   void SetSize(unsigned int width, unsigned int height) {
-    vpx_img_free(img_);
-    raw_sz_ = ((width + 31)&~31) * height * 3 / 2;
-    img_ = vpx_img_alloc(NULL, VPX_IMG_FMT_VPXI420, width, height, 32);
+    if (width != width_ || height != height_) {
+      vpx_img_free(img_);
+      raw_sz_ = ((width + 31)&~31) * height * 3 / 2;
+      img_ = vpx_img_alloc(NULL, VPX_IMG_FMT_VPXI420, width, height, 32);
+      width_ = width;
+      height_ = height;
+    }
   }
 
  protected:
@@ -88,6 +93,8 @@ class DummyVideoSource : public VideoSource {
   size_t       raw_sz_;
   unsigned int limit_;
   unsigned int frame_;
+  unsigned int width_;
+  unsigned int height_;
 };
 
 
