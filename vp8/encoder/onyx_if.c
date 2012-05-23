@@ -703,11 +703,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
 
     /* Count enabled references */
     ref_frames = 1;
-    if (cpi->ref_frame_flags & VP8_LAST_FLAG)
+    if (cpi->ref_frame_flags & VP8_LAST_FRAME)
         ref_frames++;
-    if (cpi->ref_frame_flags & VP8_GOLD_FLAG)
+    if (cpi->ref_frame_flags & VP8_GOLD_FRAME)
         ref_frames++;
-    if (cpi->ref_frame_flags & VP8_ALT_FLAG)
+    if (cpi->ref_frame_flags & VP8_ALTR_FRAME)
         ref_frames++;
 
     /* Convert speed to continuous range, with clamping */
@@ -1514,7 +1514,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
     cpi->baseline_gf_interval =
         cpi->oxcf.alt_freq ? cpi->oxcf.alt_freq : DEFAULT_GF_INTERVAL;
 
-    cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
+    cpi->ref_frame_flags = VP8_ALTR_FRAME | VP8_GOLD_FRAME | VP8_LAST_FRAME;
 
     //cpi->use_golden_frame_only = 0;
     //cpi->use_last_frame_only = 0;
@@ -2486,28 +2486,28 @@ int vp8_update_reference(VP8_COMP *cpi, int ref_frame_flags)
     cpi->common.refresh_alt_ref_frame = 0;
     cpi->common.refresh_last_frame   = 0;
 
-    if (ref_frame_flags & VP8_LAST_FLAG)
+    if (ref_frame_flags & VP8_LAST_FRAME)
         cpi->common.refresh_last_frame = 1;
 
-    if (ref_frame_flags & VP8_GOLD_FLAG)
+    if (ref_frame_flags & VP8_GOLD_FRAME)
         cpi->common.refresh_golden_frame = 1;
 
-    if (ref_frame_flags & VP8_ALT_FLAG)
+    if (ref_frame_flags & VP8_ALTR_FRAME)
         cpi->common.refresh_alt_ref_frame = 1;
 
     return 0;
 }
 
-int vp8_get_reference(VP8_COMP *cpi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+int vp8_get_reference(VP8_COMP *cpi, enum vpx_ref_frame_type ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8_COMMON *cm = &cpi->common;
     int ref_fb_idx;
 
-    if (ref_frame_flag == VP8_LAST_FLAG)
+    if (ref_frame_flag == VP8_LAST_FRAME)
         ref_fb_idx = cm->lst_fb_idx;
-    else if (ref_frame_flag == VP8_GOLD_FLAG)
+    else if (ref_frame_flag == VP8_GOLD_FRAME)
         ref_fb_idx = cm->gld_fb_idx;
-    else if (ref_frame_flag == VP8_ALT_FLAG)
+    else if (ref_frame_flag == VP8_ALTR_FRAME)
         ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
@@ -2516,17 +2516,17 @@ int vp8_get_reference(VP8_COMP *cpi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CO
 
     return 0;
 }
-int vp8_set_reference(VP8_COMP *cpi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+int vp8_set_reference(VP8_COMP *cpi, enum vpx_ref_frame_type ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8_COMMON *cm = &cpi->common;
 
     int ref_fb_idx;
 
-    if (ref_frame_flag == VP8_LAST_FLAG)
+    if (ref_frame_flag == VP8_LAST_FRAME)
         ref_fb_idx = cm->lst_fb_idx;
-    else if (ref_frame_flag == VP8_GOLD_FLAG)
+    else if (ref_frame_flag == VP8_GOLD_FRAME)
         ref_fb_idx = cm->gld_fb_idx;
-    else if (ref_frame_flag == VP8_ALT_FLAG)
+    else if (ref_frame_flag == VP8_ALTR_FRAME)
         ref_fb_idx = cm->alt_fb_idx;
     else
         return -1;
@@ -3033,10 +3033,10 @@ static void update_reference_frames(VP8_COMMON *cm)
 
     if (cm->frame_type == KEY_FRAME)
     {
-        yv12_fb[cm->new_fb_idx].flags |= VP8_GOLD_FLAG | VP8_ALT_FLAG ;
+        yv12_fb[cm->new_fb_idx].flags |= VP8_GOLD_FRAME | VP8_ALTR_FRAME ;
 
-        yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
-        yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+        yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
+        yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
 
         cm->alt_fb_idx = cm->gld_fb_idx = cm->new_fb_idx;
     }
@@ -3046,8 +3046,8 @@ static void update_reference_frames(VP8_COMMON *cm)
         {
             assert(!cm->copy_buffer_to_arf);
 
-            cm->yv12_fb[cm->new_fb_idx].flags |= VP8_ALT_FLAG;
-            cm->yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+            cm->yv12_fb[cm->new_fb_idx].flags |= VP8_ALTR_FRAME;
+            cm->yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
             cm->alt_fb_idx = cm->new_fb_idx;
         }
         else if (cm->copy_buffer_to_arf)
@@ -3058,8 +3058,8 @@ static void update_reference_frames(VP8_COMMON *cm)
             {
                 if(cm->alt_fb_idx != cm->lst_fb_idx)
                 {
-                    yv12_fb[cm->lst_fb_idx].flags |= VP8_ALT_FLAG;
-                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                    yv12_fb[cm->lst_fb_idx].flags |= VP8_ALTR_FRAME;
+                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
                     cm->alt_fb_idx = cm->lst_fb_idx;
                 }
             }
@@ -3067,8 +3067,8 @@ static void update_reference_frames(VP8_COMMON *cm)
             {
                 if(cm->alt_fb_idx != cm->gld_fb_idx)
                 {
-                    yv12_fb[cm->gld_fb_idx].flags |= VP8_ALT_FLAG;
-                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALT_FLAG;
+                    yv12_fb[cm->gld_fb_idx].flags |= VP8_ALTR_FRAME;
+                    yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
                     cm->alt_fb_idx = cm->gld_fb_idx;
                 }
             }
@@ -3078,8 +3078,8 @@ static void update_reference_frames(VP8_COMMON *cm)
         {
             assert(!cm->copy_buffer_to_gf);
 
-            cm->yv12_fb[cm->new_fb_idx].flags |= VP8_GOLD_FLAG;
-            cm->yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+            cm->yv12_fb[cm->new_fb_idx].flags |= VP8_GOLD_FRAME;
+            cm->yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
             cm->gld_fb_idx = cm->new_fb_idx;
         }
         else if (cm->copy_buffer_to_gf)
@@ -3090,8 +3090,8 @@ static void update_reference_frames(VP8_COMMON *cm)
             {
                 if(cm->gld_fb_idx != cm->lst_fb_idx)
                 {
-                    yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FLAG;
-                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                    yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FRAME;
+                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
                     cm->gld_fb_idx = cm->lst_fb_idx;
                 }
             }
@@ -3099,8 +3099,8 @@ static void update_reference_frames(VP8_COMMON *cm)
             {
                 if(cm->alt_fb_idx != cm->gld_fb_idx)
                 {
-                    yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FLAG;
-                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FLAG;
+                    yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FRAME;
+                    yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
                     cm->gld_fb_idx = cm->alt_fb_idx;
                 }
             }
@@ -3109,8 +3109,8 @@ static void update_reference_frames(VP8_COMMON *cm)
 
     if (cm->refresh_last_frame)
     {
-        cm->yv12_fb[cm->new_fb_idx].flags |= VP8_LAST_FLAG;
-        cm->yv12_fb[cm->lst_fb_idx].flags &= ~VP8_LAST_FLAG;
+        cm->yv12_fb[cm->new_fb_idx].flags |= VP8_LAST_FRAME;
+        cm->yv12_fb[cm->lst_fb_idx].flags &= ~VP8_LAST_FRAME;
         cm->lst_fb_idx = cm->new_fb_idx;
     }
 }
@@ -4527,16 +4527,16 @@ static void encode_frame_to_data_rate
     else if (cm->refresh_alt_ref_frame ^ cm->refresh_golden_frame) // 1 refreshed but not the other
         cpi->gold_is_alt = 0;
 
-    cpi->ref_frame_flags = VP8_ALT_FLAG | VP8_GOLD_FLAG | VP8_LAST_FLAG;
+    cpi->ref_frame_flags = VP8_ALTR_FRAME | VP8_GOLD_FRAME | VP8_LAST_FRAME;
 
     if (cpi->gold_is_last)
-        cpi->ref_frame_flags &= ~VP8_GOLD_FLAG;
+        cpi->ref_frame_flags &= ~VP8_GOLD_FRAME;
 
     if (cpi->alt_is_last)
-        cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
+        cpi->ref_frame_flags &= ~VP8_ALTR_FRAME;
 
     if (cpi->gold_is_alt)
-        cpi->ref_frame_flags &= ~VP8_ALT_FLAG;
+        cpi->ref_frame_flags &= ~VP8_ALTR_FRAME;
 
 
     if (!cpi->oxcf.error_resilient_mode)

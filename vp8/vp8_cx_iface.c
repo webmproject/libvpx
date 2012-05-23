@@ -771,13 +771,13 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         int ref = 7;
 
         if (flags & VP8_EFLAG_NO_REF_LAST)
-            ref ^= VP8_LAST_FLAG;
+            ref ^= VP8_LAST_FRAME;
 
         if (flags & VP8_EFLAG_NO_REF_GF)
-            ref ^= VP8_GOLD_FLAG;
+            ref ^= VP8_GOLD_FRAME;
 
         if (flags & VP8_EFLAG_NO_REF_ARF)
-            ref ^= VP8_ALT_FLAG;
+            ref ^= VP8_ALTR_FRAME;
 
         vp8_use_as_reference(ctx->cpi, ref);
     }
@@ -789,13 +789,13 @@ static vpx_codec_err_t vp8e_encode(vpx_codec_alg_priv_t  *ctx,
         int upd = 7;
 
         if (flags & VP8_EFLAG_NO_UPD_LAST)
-            upd ^= VP8_LAST_FLAG;
+            upd ^= VP8_LAST_FRAME;
 
         if (flags & VP8_EFLAG_NO_UPD_GF)
-            upd ^= VP8_GOLD_FLAG;
+            upd ^= VP8_GOLD_FRAME;
 
         if (flags & VP8_EFLAG_NO_UPD_ARF)
-            upd ^= VP8_ALT_FLAG;
+            upd ^= VP8_ALTR_FRAME;
 
         vp8_update_reference(ctx->cpi, upd);
     }

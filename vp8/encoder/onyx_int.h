@@ -25,6 +25,7 @@
 #include "vp8/common/threading.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
+#include "vpx/vp8.h"
 #include "mcomp.h"
 #include "vp8/common/findnearmv.h"
 #include "lookahead.h"

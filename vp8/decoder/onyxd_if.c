@@ -125,16 +125,16 @@ void vp8dx_remove_decompressor(VP8D_COMP *pbi)
 }
 
 
-vpx_codec_err_t vp8dx_get_reference(VP8D_COMP *pbi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+vpx_codec_err_t vp8dx_get_reference(VP8D_COMP *pbi, enum vpx_ref_frame_type ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8_COMMON *cm = &pbi->common;
     int ref_fb_idx;
 
-    if (ref_frame_flag == VP8_LAST_FLAG)
+    if (ref_frame_flag == VP8_LAST_FRAME)
         ref_fb_idx = cm->lst_fb_idx;
-    else if (ref_frame_flag == VP8_GOLD_FLAG)
+    else if (ref_frame_flag == VP8_GOLD_FRAME)
         ref_fb_idx = cm->gld_fb_idx;
-    else if (ref_frame_flag == VP8_ALT_FLAG)
+    else if (ref_frame_flag == VP8_ALTR_FRAME)
         ref_fb_idx = cm->alt_fb_idx;
     else{
         vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
@@ -156,17 +156,17 @@ vpx_codec_err_t vp8dx_get_reference(VP8D_COMP *pbi, VP8_REFFRAME ref_frame_flag,
 }
 
 
-vpx_codec_err_t vp8dx_set_reference(VP8D_COMP *pbi, VP8_REFFRAME ref_frame_flag, YV12_BUFFER_CONFIG *sd)
+vpx_codec_err_t vp8dx_set_reference(VP8D_COMP *pbi, enum vpx_ref_frame_type ref_frame_flag, YV12_BUFFER_CONFIG *sd)
 {
     VP8_COMMON *cm = &pbi->common;
     int *ref_fb_ptr = NULL;
     int free_fb;
 
-    if (ref_frame_flag == VP8_LAST_FLAG)
+    if (ref_frame_flag == VP8_LAST_FRAME)
         ref_fb_ptr = &cm->lst_fb_idx;
-    else if (ref_frame_flag == VP8_GOLD_FLAG)
+    else if (ref_frame_flag == VP8_GOLD_FRAME)
         ref_fb_ptr = &cm->gld_fb_idx;
-    else if (ref_frame_flag == VP8_ALT_FLAG)
+    else if (ref_frame_flag == VP8_ALTR_FRAME)
         ref_fb_ptr = &cm->alt_fb_idx;
     else{
         vpx_internal_error(&pbi->common.error, VPX_CODEC_ERROR,
