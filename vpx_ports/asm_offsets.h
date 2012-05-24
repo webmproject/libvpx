@@ -23,7 +23,7 @@
 #define BEGIN int main(void) {
 #define END return 0; }
 #else
-#define DEFINE(sym, val) int sym = val;
+#define DEFINE(sym, val) const int sym = val;
 #define BEGIN
 #define END
 #endif
