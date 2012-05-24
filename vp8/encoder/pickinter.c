@@ -61,7 +61,7 @@ int vp8_skip_fractional_mv_step(MACROBLOCK *mb, BLOCK *b, BLOCKD *d,
 }
 
 
-static int get_inter_mbpred_error(MACROBLOCK *mb,
+int vp8_get_inter_mbpred_error(MACROBLOCK *mb,
                                   const vp8_variance_fn_ptr_t *vfp,
                                   unsigned int *sse,
                                   int_mv this_mv)
@@ -486,7 +486,7 @@ static int evaluate_inter_mode(unsigned int* sse, int rate2, int* distortion2, V
 
     if((this_mode != NEWMV) ||
         !(cpi->sf.half_pixel_search) || cpi->common.full_pixel==1)
-        *distortion2 = get_inter_mbpred_error(x,
+        *distortion2 = vp8_get_inter_mbpred_error(x,
                                               &cpi->fn_ptr[BLOCK_16X16],
                                               sse, mv);
 
@@ -523,7 +523,7 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int best_mode_index = 0;
     unsigned int sse = INT_MAX, best_rd_sse = INT_MAX;
 #if CONFIG_TEMPORAL_DENOISING
-    unsigned int zero_mv_sse = 0, best_sse = INT_MAX;
+    unsigned int zero_mv_sse = INT_MAX, best_sse = INT_MAX;
 #endif
 
     int_mv mvp;
@@ -964,25 +964,27 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_TEMPORAL_DENOISING
         if (cpi->oxcf.noise_sensitivity)
         {
-          // Store for later use by denoiser.
-          if (this_mode == ZEROMV &&
-              x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME)
-          {
-            zero_mv_sse = sse;
-          }
 
-          // Store the best NEWMV in x for later use in the denoiser.
-          // We are restricted to the LAST_FRAME since the denoiser only keeps
-          // one filter state.
-          if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
-              x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME)
-          {
-            best_sse = sse;
-            x->e_mbd.best_sse_inter_mode = NEWMV;
-            x->e_mbd.best_sse_mv = x->e_mbd.mode_info_context->mbmi.mv;
-            x->e_mbd.need_to_clamp_best_mvs =
-                x->e_mbd.mode_info_context->mbmi.need_to_clamp_mvs;
-          }
+            // Store for later use by denoiser.
+            if (this_mode == ZEROMV && sse < zero_mv_sse )
+            {
+                zero_mv_sse = sse;
+                x->best_zeromv_reference_frame =
+                        x->e_mbd.mode_info_context->mbmi.ref_frame;
+            }
+
+            // Store the best NEWMV in x for later use in the denoiser.
+            if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
+                    sse < best_sse)
+            {
+                best_sse = sse;
+                x->best_sse_inter_mode = NEWMV;
+                x->best_sse_mv = x->e_mbd.mode_info_context->mbmi.mv;
+                x->need_to_clamp_best_mvs =
+                    x->e_mbd.mode_info_context->mbmi.need_to_clamp_mvs;
+                x->best_reference_frame =
+                    x->e_mbd.mode_info_context->mbmi.ref_frame;
+            }
         }
 #endif
 
@@ -1058,37 +1060,47 @@ void vp8_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {
-      if (x->e_mbd.best_sse_inter_mode == DC_PRED) {
-        // No best MV found.
-        x->e_mbd.best_sse_inter_mode = best_mbmode.mode;
-        x->e_mbd.best_sse_mv = best_mbmode.mv;
-        x->e_mbd.need_to_clamp_best_mvs = best_mbmode.need_to_clamp_mvs;
-        best_sse = best_rd_sse;
-      }
-      vp8_denoiser_denoise_mb(&cpi->denoiser, x, best_sse, zero_mv_sse,
-                              recon_yoffset, recon_uvoffset);
-
-      // Reevaluate ZEROMV after denoising.
-      if (best_mbmode.ref_frame == INTRA_FRAME)
-      {
-        int this_rd = 0;
-        rate2 = 0;
-        distortion2 = 0;
-        x->e_mbd.mode_info_context->mbmi.ref_frame = LAST_FRAME;
-        rate2 += x->ref_frame_cost[x->e_mbd.mode_info_context->mbmi.ref_frame];
-        this_mode = ZEROMV;
-        rate2 += vp8_cost_mv_ref(this_mode, mdcounts);
-        x->e_mbd.mode_info_context->mbmi.mode = this_mode;
-        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
-        x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
-        this_rd = evaluate_inter_mode(&sse, rate2, &distortion2, cpi, x);
-
-        if (this_rd < best_rd || x->skip)
+        if (x->best_sse_inter_mode == DC_PRED)
         {
-            vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi,
-                       sizeof(MB_MODE_INFO));
+            // No best MV found.
+            x->best_sse_inter_mode = best_mbmode.mode;
+            x->best_sse_mv = best_mbmode.mv;
+            x->need_to_clamp_best_mvs = best_mbmode.need_to_clamp_mvs;
+            x->best_reference_frame = best_mbmode.ref_frame;
+            best_sse = best_rd_sse;
         }
-      }
+        vp8_denoiser_denoise_mb(&cpi->denoiser, x, best_sse, zero_mv_sse,
+                                recon_yoffset, recon_uvoffset);
+
+
+        // Reevaluate ZEROMV after denoising.
+        if (best_mbmode.ref_frame == INTRA_FRAME &&
+            x->best_zeromv_reference_frame != INTRA_FRAME)
+        {
+            int this_rd = 0;
+            int this_ref_frame = x->best_zeromv_reference_frame;
+            rate2 = x->ref_frame_cost[this_ref_frame] +
+                    vp8_cost_mv_ref(ZEROMV, mdcounts);
+            distortion2 = 0;
+
+            // set up the proper prediction buffers for the frame
+            x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
+            x->e_mbd.pre.y_buffer = plane[this_ref_frame][0];
+            x->e_mbd.pre.u_buffer = plane[this_ref_frame][1];
+            x->e_mbd.pre.v_buffer = plane[this_ref_frame][2];
+
+            x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
+            x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+            x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
+            this_rd = evaluate_inter_mode(&sse, rate2, &distortion2, cpi, x);
+
+            if (this_rd < best_rd)
+            {
+                vpx_memcpy(&best_mbmode, &x->e_mbd.mode_info_context->mbmi,
+                           sizeof(MB_MODE_INFO));
+            }
+        }
+
     }
 #endif
 

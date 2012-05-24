@@ -119,6 +119,16 @@ typedef struct macroblock
     int optimize;
     int q_index;
 
+#if CONFIG_TEMPORAL_DENOISING
+    MB_PREDICTION_MODE best_sse_inter_mode;
+    int_mv best_sse_mv;
+    MV_REFERENCE_FRAME best_reference_frame;
+    MV_REFERENCE_FRAME best_zeromv_reference_frame;
+    unsigned char need_to_clamp_best_mvs;
+#endif
+
+
+
     void (*short_fdct4x4)(short *input, short *output, int pitch);
     void (*short_fdct8x4)(short *input, short *output, int pitch);
     void (*short_walsh4x4)(short *input, short *output, int pitch);
