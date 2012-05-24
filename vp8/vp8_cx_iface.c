@@ -447,7 +447,7 @@ static vpx_codec_err_t vp8e_set_config(vpx_codec_alg_priv_t       *ctx,
     vpx_codec_err_t res;
 
     if (((cfg->g_w != ctx->cfg.g_w) || (cfg->g_h != ctx->cfg.g_h))
-        && cfg->g_lag_in_frames > 1)
+        && (cfg->g_lag_in_frames > 1 || cfg->g_pass != VPX_RC_ONE_PASS))
         ERROR("Cannot change width or height after initialization");
 
     /* Prevent increasing lag_in_frames. This check is stricter than it needs
