@@ -17,7 +17,7 @@
 ;    unsigned char *dst,
 ;    int dst_stride
 ;    )
-global sym(vp8_copy_mem16x16_sse2)
+global sym(vp8_copy_mem16x16_sse2) PRIVATE
 sym(vp8_copy_mem16x16_sse2):
     push        rbp
     mov         rbp, rsp
@@ -123,7 +123,7 @@ sym(vp8_copy_mem16x16_sse2):
 ;    unsigned char *left,
 ;    int left_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dc_mmx2)
+global sym(vp8_intra_pred_uv_dc_mmx2) PRIVATE
 sym(vp8_intra_pred_uv_dc_mmx2):
     push        rbp
     mov         rbp, rsp
@@ -196,7 +196,7 @@ sym(vp8_intra_pred_uv_dc_mmx2):
 ;    unsigned char *left,
 ;    int left_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dctop_mmx2)
+global sym(vp8_intra_pred_uv_dctop_mmx2) PRIVATE
 sym(vp8_intra_pred_uv_dctop_mmx2):
     push        rbp
     mov         rbp, rsp
@@ -250,7 +250,7 @@ sym(vp8_intra_pred_uv_dctop_mmx2):
 ;    unsigned char *left,
 ;    int left_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dcleft_mmx2)
+global sym(vp8_intra_pred_uv_dcleft_mmx2) PRIVATE
 sym(vp8_intra_pred_uv_dcleft_mmx2):
     push        rbp
     mov         rbp, rsp
@@ -317,7 +317,7 @@ sym(vp8_intra_pred_uv_dcleft_mmx2):
 ;    unsigned char *left,
 ;    int left_stride,
 ;    )
-global sym(vp8_intra_pred_uv_dc128_mmx)
+global sym(vp8_intra_pred_uv_dc128_mmx) PRIVATE
 sym(vp8_intra_pred_uv_dc128_mmx):
     push        rbp
     mov         rbp, rsp
@@ -357,7 +357,7 @@ sym(vp8_intra_pred_uv_dc128_mmx):
 ;    int left_stride,
 ;    )
 %macro vp8_intra_pred_uv_tm 1
-global sym(vp8_intra_pred_uv_tm_%1)
+global sym(vp8_intra_pred_uv_tm_%1) PRIVATE
 sym(vp8_intra_pred_uv_tm_%1):
     push        rbp
     mov         rbp, rsp
@@ -437,7 +437,7 @@ vp8_intra_pred_uv_tm ssse3
 ;    unsigned char *left,
 ;    int left_stride,
 ;    )
-global sym(vp8_intra_pred_uv_ve_mmx)
+global sym(vp8_intra_pred_uv_ve_mmx) PRIVATE
 sym(vp8_intra_pred_uv_ve_mmx):
     push        rbp
     mov         rbp, rsp
@@ -479,7 +479,7 @@ sym(vp8_intra_pred_uv_ve_mmx):
 ;    int left_stride
 ;    )
 %macro vp8_intra_pred_uv_ho 1
-global sym(vp8_intra_pred_uv_ho_%1)
+global sym(vp8_intra_pred_uv_ho_%1) PRIVATE
 sym(vp8_intra_pred_uv_ho_%1):
     push        rbp
     mov         rbp, rsp
@@ -577,7 +577,7 @@ vp8_intra_pred_uv_ho ssse3
 ;    unsigned char *left,
 ;    int left_stride
 ;    )
-global sym(vp8_intra_pred_y_dc_sse2)
+global sym(vp8_intra_pred_y_dc_sse2) PRIVATE
 sym(vp8_intra_pred_y_dc_sse2):
     push        rbp
     mov         rbp, rsp
@@ -683,7 +683,7 @@ sym(vp8_intra_pred_y_dc_sse2):
 ;    unsigned char *left,
 ;    int left_stride
 ;    )
-global sym(vp8_intra_pred_y_dctop_sse2)
+global sym(vp8_intra_pred_y_dctop_sse2) PRIVATE
 sym(vp8_intra_pred_y_dctop_sse2):
     push        rbp
     mov         rbp, rsp
@@ -745,7 +745,7 @@ sym(vp8_intra_pred_y_dctop_sse2):
 ;    unsigned char *left,
 ;    int left_stride
 ;    )
-global sym(vp8_intra_pred_y_dcleft_sse2)
+global sym(vp8_intra_pred_y_dcleft_sse2) PRIVATE
 sym(vp8_intra_pred_y_dcleft_sse2):
     push        rbp
     mov         rbp, rsp
@@ -838,7 +838,7 @@ sym(vp8_intra_pred_y_dcleft_sse2):
 ;    unsigned char *left,
 ;    int left_stride
 ;    )
-global sym(vp8_intra_pred_y_dc128_sse2)
+global sym(vp8_intra_pred_y_dc128_sse2) PRIVATE
 sym(vp8_intra_pred_y_dc128_sse2):
     push        rbp
     mov         rbp, rsp
@@ -885,7 +885,7 @@ sym(vp8_intra_pred_y_dc128_sse2):
 ;    int left_stride
 ;    )
 %macro vp8_intra_pred_y_tm 1
-global sym(vp8_intra_pred_y_tm_%1)
+global sym(vp8_intra_pred_y_tm_%1) PRIVATE
 sym(vp8_intra_pred_y_tm_%1):
     push        rbp
     mov         rbp, rsp
@@ -972,7 +972,7 @@ vp8_intra_pred_y_tm ssse3
 ;    unsigned char *left,
 ;    int left_stride
 ;    )
-global sym(vp8_intra_pred_y_ve_sse2)
+global sym(vp8_intra_pred_y_ve_sse2) PRIVATE
 sym(vp8_intra_pred_y_ve_sse2):
     push        rbp
     mov         rbp, rsp
@@ -1020,7 +1020,7 @@ sym(vp8_intra_pred_y_ve_sse2):
 ;    unsigned char *left,
 ;    int left_stride,
 ;    )
-global sym(vp8_intra_pred_y_ho_sse2)
+global sym(vp8_intra_pred_y_ho_sse2) PRIVATE
 sym(vp8_intra_pred_y_ho_sse2):
     push        rbp
     mov         rbp, rsp

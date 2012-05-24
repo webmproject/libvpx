@@ -380,7 +380,7 @@
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x16x3_sse3)
+global sym(vp8_sad16x16x3_sse3) PRIVATE
 sym(vp8_sad16x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
@@ -422,7 +422,7 @@ sym(vp8_sad16x16x3_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x8x3_sse3)
+global sym(vp8_sad16x8x3_sse3) PRIVATE
 sym(vp8_sad16x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
@@ -460,7 +460,7 @@ sym(vp8_sad16x8x3_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x16x3_sse3)
+global sym(vp8_sad8x16x3_sse3) PRIVATE
 sym(vp8_sad8x16x3_sse3):
 
     STACK_FRAME_CREATE_X3
@@ -489,7 +489,7 @@ sym(vp8_sad8x16x3_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x8x3_sse3)
+global sym(vp8_sad8x8x3_sse3) PRIVATE
 sym(vp8_sad8x8x3_sse3):
 
     STACK_FRAME_CREATE_X3
@@ -514,7 +514,7 @@ sym(vp8_sad8x8x3_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad4x4x3_sse3)
+global sym(vp8_sad4x4x3_sse3) PRIVATE
 sym(vp8_sad4x4x3_sse3):
 
     STACK_FRAME_CREATE_X3
@@ -589,7 +589,7 @@ sym(vp8_sad4x4x3_sse3):
 ;    int  ref_stride,
 ;    int  max_sad)
 ;%define lddqu movdqu
-global sym(vp8_sad16x16_sse3)
+global sym(vp8_sad16x16_sse3) PRIVATE
 sym(vp8_sad16x16_sse3):
 
     STACK_FRAME_CREATE_X3
@@ -642,7 +642,7 @@ sym(vp8_sad16x16_sse3):
 ;    unsigned char *dst_ptr,
 ;    int  dst_stride,
 ;    int height);
-global sym(vp8_copy32xn_sse3)
+global sym(vp8_copy32xn_sse3) PRIVATE
 sym(vp8_copy32xn_sse3):
 
     STACK_FRAME_CREATE_X3
@@ -703,7 +703,7 @@ sym(vp8_copy32xn_sse3):
 ;    unsigned char *ref_ptr_base,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x16x4d_sse3)
+global sym(vp8_sad16x16x4d_sse3) PRIVATE
 sym(vp8_sad16x16x4d_sse3):
 
     STACK_FRAME_CREATE_X4
@@ -754,7 +754,7 @@ sym(vp8_sad16x16x4d_sse3):
 ;    unsigned char *ref_ptr_base,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad16x8x4d_sse3)
+global sym(vp8_sad16x8x4d_sse3) PRIVATE
 sym(vp8_sad16x8x4d_sse3):
 
     STACK_FRAME_CREATE_X4
@@ -801,7 +801,7 @@ sym(vp8_sad16x8x4d_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x16x4d_sse3)
+global sym(vp8_sad8x16x4d_sse3) PRIVATE
 sym(vp8_sad8x16x4d_sse3):
 
     STACK_FRAME_CREATE_X4
@@ -834,7 +834,7 @@ sym(vp8_sad8x16x4d_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad8x8x4d_sse3)
+global sym(vp8_sad8x8x4d_sse3) PRIVATE
 sym(vp8_sad8x8x4d_sse3):
 
     STACK_FRAME_CREATE_X4
@@ -863,7 +863,7 @@ sym(vp8_sad8x8x4d_sse3):
 ;    unsigned char *ref_ptr,
 ;    int  ref_stride,
 ;    int  *results)
-global sym(vp8_sad4x4x4d_sse3)
+global sym(vp8_sad4x4x4d_sse3) PRIVATE
 sym(vp8_sad4x4x4d_sse3):
 
     STACK_FRAME_CREATE_X4
