@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//+2Y\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-24T13:43:58Z",
+      "side": 1,
+      "message": "Mbmi is a very big structure with lots of sub parts pointing to arrays in memory.   So #1 would be very costly and slow.  \n\nI think #2 is done now - just outside this code and for a good reason,  the meaningful values are already stored in a separate local variable ( for pick_inter its best_mbmode).   \n\nWe could alternatively,  save a copy of the offending mbmi values and restore them in the denoiser.   \n\nMy problem with that is just that it means that what\u0027s sitting in the xd structure has all the effects of mbmi applied but not the actual mbmi structure.   \n\nAs such, I thought what\u0027s there now was the best of a couple of bad options.     \n\nHowever if you prefer I could without cost make a copy of the full MB_MODE_INFO at the beginning of the function and restore it at the end of the function.   \n\nWhile this is definitely extra work - its not a huge amount, and we could leave it to later optimizers to remove.   :)",
+      "parentUuid": "AAAAK3//++w\u003d",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3///Es\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2012-05-24T08:50:55Z",
       "side": 1,
       "message": "We could consider running the spatial denoiser on key frames. That might help getting rid of some of the static noise you may get with the current version.",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//+2U\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3162,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-24T13:43:58Z",
+      "side": 1,
+      "message": "I like the idea - but how about we keep that for another patch?",
+      "parentUuid": "AAAAK3///Es\u003d",
       "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//+2Q\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3167,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-24T13:43:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAK3///E4\u003d",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3//+/U\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2012-05-24T08:50:55Z",
       "side": 1,
       "message": "I don\u0027t think this is needed. The denoiser operates on its own copy of x-\u003ee_mbd, and therefore its changes to pre doesn\u0027t affect the rest of the encoder.",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//+2I\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-24T13:43:58Z",
+      "side": 1,
+      "message": "This was one of the bugs in the original code. Evaluate Inter mode needs to have the prediction buffers set for the frame they are using or they are evaluating the wrong thing.   Since the loop above goes through a zeromv that can potentially be last golden or altref buffer there is no guarantee you get the write frame evaluated.     \n\nYour original code had this problem ( ie the plane could be set to alt ref and you were re evaluating zero mv for what you hoped was last ref frame.",
+      "parentUuid": "AAAAK3//+/U\u003d",
       "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//+2E\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1097,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-24T13:43:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAK3///EU\u003d",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3//+/E\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 4
@@ -98,6 +188,24 @@
       "writtenOn": "2012-05-24T08:50:55Z",
       "side": 1,
       "message": "Good catch. We actually don\u0027t operate on a copy of mbmi in the denoiser, I missed that. I think we might want to make a copy of mbmi inside the denoiser rather than resetting things after denoising. It feels safer to be able to assume that the denoiser doesn\u0027t affect things that the encoder relies on.\n\nWhat do you think?",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//+18\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1105,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-24T13:43:58Z",
+      "side": 1,
+      "message": "yes it does feel safer still as described in the comment it would mean a bit of extra work ( for non skips).    I can do it if you prefer.",
+      "parentUuid": "AAAAK3//+/E\u003d",
       "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
