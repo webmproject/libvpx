@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3///bs\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-24T00:00:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAK3///fE\u003d",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3///fA\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-05-23T22:54:53Z",
       "side": 1,
       "message": "limit_ could be in the initializer list",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///bo\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-24T00:00:48Z",
+      "side": 1,
+      "message": "This doesn\u0027t seem to be the case, since limit_ is inherited rather than defined in this class directly.",
+      "parentUuid": "AAAAK3///fA\u003d",
       "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3///bk\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-24T00:00:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAK3///e0\u003d",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3///eM\u003d",
         "filename": "test/resize_test.cc",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-05-23T22:54:53Z",
       "side": 1,
       "message": "one list with a FrameInfo struct local to this class?",
+      "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///Yo\u003d",
+        "filename": "test/resize_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-05-24T00:00:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAK3///eM\u003d",
       "revId": "904b5e9be620862e322b2e9d1d3f54f6a8e92f35",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
