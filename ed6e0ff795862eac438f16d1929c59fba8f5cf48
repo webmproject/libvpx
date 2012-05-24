@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//+0M\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T13:57:45Z",
+      "side": 1,
+      "message": "Let\u0027s do #2 instead then.",
+      "parentUuid": "AAAAK3//+2Y\u003d",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3///Es\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 4
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "I like the idea - but how about we keep that for another patch?",
       "parentUuid": "AAAAK3///Es\u003d",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//+0w\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3162,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T13:57:45Z",
+      "side": 1,
+      "message": "Definitely.",
+      "parentUuid": "AAAAK3//+2U\u003d",
       "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -142,6 +178,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//+0o\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T13:57:45Z",
+      "side": 1,
+      "message": "Good point! Didn\u0027t catch that one even with the fix infront of me. :)",
+      "parentUuid": "AAAAK3//+2I\u003d",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3///EU\u003d",
         "filename": "vp8/encoder/pickinter.c",
         "patchSetId": 4
@@ -206,6 +260,24 @@
       "side": 1,
       "message": "yes it does feel safer still as described in the comment it would mean a bit of extra work ( for non skips).    I can do it if you prefer.",
       "parentUuid": "AAAAK3//+/E\u003d",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//+0c\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1105,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T13:57:45Z",
+      "side": 1,
+      "message": "Agree that we can leave it as is.",
+      "parentUuid": "AAAAK3//+18\u003d",
       "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
