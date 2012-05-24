@@ -1509,7 +1509,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB;
                     int s;
                     int u = 0;
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -1548,7 +1548,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB;
                     int s;
                     int u = 0;
 
@@ -1597,7 +1597,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB_8X8;
                     int s;
                     int u = 0;
 
@@ -1639,7 +1639,7 @@ static void update_coef_probs3(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB_8X8;
                     int s;
                     int u = 0;
 
@@ -1703,7 +1703,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB;
                     int s;
                     int u = 0;
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -1745,7 +1745,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB;
                     int s;
                     int u = 0;
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -1791,7 +1791,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB_8X8;
                     int s;
                     int u = 0;
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -1835,7 +1835,7 @@ static void update_coef_probs2(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB_8X8;
                     int s;
                     int u = 0;
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -1907,7 +1907,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                 {
                     vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                     vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-                    const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                    const vp8_prob upd = COEF_UPDATE_PROB;
                     int s = prev_coef_savings[t];
                     int u = 0;
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -1978,7 +1978,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                     {
                         vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
                         vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-                        const vp8_prob upd = vp8_coef_update_probs [i][j][k][t];
+                        const vp8_prob upd = COEF_UPDATE_PROB;
                         int s = prev_coef_savings[t];
                         int u = 0;
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -2055,8 +2055,8 @@ static void update_coef_probs(VP8_COMP *cpi)
                         vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
                         vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
                         const vp8_prob oldp = *Pold;
-                        const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
                         int s,u;
+                        const vp8_prob upd = COEF_UPDATE_PROB_8X8;
 #if CONFIG_EXPANDED_COEF_CONTEXT
                         if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
                             continue;
@@ -2116,7 +2116,7 @@ static void update_coef_probs(VP8_COMP *cpi)
                             vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
                             vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
                             const vp8_prob oldp = *Pold;
-                            const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                            const vp8_prob upd = COEF_UPDATE_PROB_8X8;
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
                             const int s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
                             const int u = s > 0 && newp != oldp ? 1 : 0;

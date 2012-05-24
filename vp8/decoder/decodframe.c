@@ -832,7 +832,7 @@ static void read_coef_probs3(VP8D_COMP *pbi)
 #endif
                         {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
-                        int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
+                        int u = vp8_read(bc, COEF_UPDATE_PROB);
                         if (u) *p = read_prob_diff_update(bc, *p);
                         }
                     }
@@ -856,7 +856,7 @@ static void read_coef_probs3(VP8D_COMP *pbi)
 #endif
                             {
                             vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
-                            int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
+                            int u = vp8_read(bc, COEF_UPDATE_PROB_8X8);
                             if (u) *p = read_prob_diff_update(bc, *p);
                             }
                         }
@@ -887,7 +887,7 @@ static void read_coef_probs2(VP8D_COMP *pbi)
 #endif
                         {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
-                        int u = vp8_read(bc, vp8_coef_update_probs [i][j][k][l]);
+                        int u = vp8_read(bc, COEF_UPDATE_PROB);
                         if (u) *p = read_prob_diff_update(bc, *p);
                         }
                     }
@@ -911,7 +911,7 @@ static void read_coef_probs2(VP8D_COMP *pbi)
                             {
                             vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
 
-                            int u = vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]);
+                            int u = vp8_read(bc, COEF_UPDATE_PROB_8X8);
                             if (u) *p = read_prob_diff_update(bc, *p);
                             }
                         }
@@ -948,7 +948,7 @@ static void read_coef_probs(VP8D_COMP *pbi)
                     {
                         vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
 
-                        if (vp8_read(bc, vp8_coef_update_probs [i][j][k][l]))
+                        if (vp8_read(bc, COEF_UPDATE_PROB))
                         {
 #if CONFIG_NEWUPDATE
                             *p = read_prob_diff_update(bc, *p);
@@ -982,7 +982,7 @@ static void read_coef_probs(VP8D_COMP *pbi)
 
                         vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
 
-                        if (vp8_read(bc, vp8_coef_update_probs_8x8 [i][j][k][l]))
+                        if (vp8_read(bc, COEF_UPDATE_PROB_8X8))
                         {
 #if CONFIG_NEWUPDATE
                             *p = read_prob_diff_update(bc, *p);
