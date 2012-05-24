@@ -76,7 +76,8 @@ void vp8_loop_filter_frame_init(struct VP8Common *cm,
                                 struct macroblockd *mbd,
                                 int default_filt_lvl);
 
-void vp8_loop_filter_frame(struct VP8Common *cm, struct macroblockd *mbd);
+void vp8_loop_filter_frame(struct VP8Common *cm, struct macroblockd *mbd,
+                           int frame_type);
 
 void vp8_loop_filter_partial_frame(struct VP8Common *cm,
                                    struct macroblockd *mbd,

@@ -196,17 +196,13 @@ void vp8_loop_filter_frame_init(VP8_COMMON *cm,
     }
 }
 
-void vp8_loop_filter_frame
-(
-    VP8_COMMON *cm,
-    MACROBLOCKD *mbd
-)
+void vp8_loop_filter_frame(VP8_COMMON *cm,
+                           MACROBLOCKD *mbd,
+                           int frame_type)
 {
     YV12_BUFFER_CONFIG *post = cm->frame_to_show;
     loop_filter_info_n *lfi_n = &cm->lf_info;
     loop_filter_info lfi;
-
-    FRAME_TYPE frame_type = cm->frame_type;
 
     int mb_row;
     int mb_col;
