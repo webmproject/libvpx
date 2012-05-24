@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAK3//++w\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T08:50:55Z",
+      "side": 1,
+      "message": "I think we have to do one of two things here:\n\n1. Make a copy of mbmi and operate on that instead, not changing the original.\n\n2. Leave this line as is, but change the line above so that we don\u0027t make a copy of x-\u003ee_mbd, and instead require that the these are reset to their original values after denoising.\n\nI think I prefer 1 since that would mean the denoiser doesn\u0027t interfere with the rest of the encoder...",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///Es\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3162,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T08:50:55Z",
+      "side": 1,
+      "message": "We could consider running the spatial denoiser on key frames. That might help getting rid of some of the static noise you may get with the current version.",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///E4\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 3167,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T08:50:55Z",
+      "side": 1,
+      "message": "Remove space after LAST_FRAME",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//+/U\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1088,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T08:50:55Z",
+      "side": 1,
+      "message": "I don\u0027t think this is needed. The denoiser operates on its own copy of x-\u003ee_mbd, and therefore its changes to pre doesn\u0027t affect the rest of the encoder.",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3///EU\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1097,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T08:50:55Z",
+      "side": 1,
+      "message": "Remove space after best_rd",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//+/E\u003d",
+        "filename": "vp8/encoder/pickinter.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1105,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-05-24T08:50:55Z",
+      "side": 1,
+      "message": "Good catch. We actually don\u0027t operate on a copy of mbmi in the denoiser, I missed that. I think we might want to make a copy of mbmi inside the denoiser rather than resetting things after denoising. It feels safer to be able to assume that the denoiser doesn\u0027t affect things that the encoder relies on.\n\nWhat do you think?",
+      "revId": "ed6e0ff795862eac438f16d1929c59fba8f5cf48",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
