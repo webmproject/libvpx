@@ -2051,13 +2051,14 @@ static void update_coef_probs(VP8_COMP *cpi)
                         vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
                         const vp8_prob oldp = *Pold;
                         const vp8_prob upd = vp8_coef_update_probs_8x8 [i][j][k][t];
+                        int s,u;
 #if CONFIG_EXPANDED_COEF_CONTEXT
                         if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
                             continue;
 #endif
 #if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
-                        const int s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
-                        const int u = s > 0 && newp != oldp ? 1 : 0;
+                        s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
+                        u = s > 0 && newp != oldp ? 1 : 0;
                         if (u)
                             savings += s - (int)(vp8_cost_zero(upd));
                         else

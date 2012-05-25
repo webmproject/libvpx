@@ -92,8 +92,9 @@ static int get_unsigned_bits(unsigned num_values)
 void vp8_encode_uniform(BOOL_CODER *br, int v, int n)
 {
     int l = get_unsigned_bits(n);
+    int m;
     if (l == 0) return;
-    int m = (1<<l)-n;
+    m = (1<<l)-n;
     if (v<m)
         vp8_encode_value(br, v, l-1);
     else
@@ -106,8 +107,9 @@ void vp8_encode_uniform(BOOL_CODER *br, int v, int n)
 int vp8_count_uniform(int v, int n)
 {
     int l = get_unsigned_bits(n);
+    int m;
     if (l == 0) return 0;
-    int m = (1<<l)-n;
+    m = (1<<l)-n;
     if (v<m)
         return l-1;
     else
