@@ -50,11 +50,11 @@ extern void vp8cx_frame_init_quantizer(VP8_COMP *cpi);
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
 extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 
-#define IIFACTOR   9.375
-#define IIKFACTOR1 8.75
-#define IIKFACTOR2 9.375
-#define RMAX       87.5
-#define GF_RMAX    300.0
+#define IIFACTOR   12.5
+#define IIKFACTOR1 12.5
+#define IIKFACTOR2 12.5
+#define RMAX       96.0
+#define GF_RMAX    96.0
 #define ERR_DIVISOR   150.0
 
 #define KF_MB_INTRA_MIN 300
@@ -1033,7 +1033,7 @@ static int estimate_max_q(VP8_COMP *cpi,
         // Error per MB based correction factor
         err_correction_factor =
             calc_correction_factor(cpi, fpstats, err_per_mb,
-                                   ERR_DIVISOR, 0.36, 0.90, Q) *
+                                   ERR_DIVISOR, 0.40, 0.90, Q) *
             speed_correction *
             cpi->twopass.est_max_qcorrection_factor *
             cpi->twopass.section_max_qfactor;
@@ -1137,14 +1137,15 @@ static int estimate_cq( VP8_COMP *cpi,
         // Error per MB based correction factor
         err_correction_factor =
             calc_correction_factor(cpi, fpstats, err_per_mb,
-                                   100.0, 0.36, 0.90, Q);
+                                   100.0, 0.40, 0.90, Q) *
+            speed_correction * clip_iifactor;
+
+
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
 
         bits_per_mb_at_this_q =
             (int)( .5 + err_correction_factor *
-                        speed_correction *
-                        clip_iifactor *
                         (double)bits_per_mb_at_this_q);
 
         // Mode and motion overhead
@@ -1258,33 +1259,29 @@ void vp8_end_second_pass(VP8_COMP *cpi)
 static double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
 {
     double prediction_decay_rate;
+    double second_ref_decay;
     double motion_decay;
     double motion_pct = next_frame->pcnt_motion;
+    double mb_sr_err_diff;
 
     // Initial basis is the % mbs inter coded
-    prediction_decay_rate = next_frame->pcnt_inter;
+    prediction_decay_rate = pow(next_frame->pcnt_inter, 0.5);
 
-    // High % motion -> somewhat higher decay rate
-    motion_decay = (1.0 - (motion_pct / 20.0));
-    if (motion_decay < prediction_decay_rate)
-        prediction_decay_rate = motion_decay;
+    // Look at the observed drop in prediction quality between the last frame
+    // and the GF buffer (which contains an older frame).
+    mb_sr_err_diff =
+            (next_frame->sr_coded_error - next_frame->coded_error) /
+            (cpi->common.MBs);
+    second_ref_decay = 1.0 - (mb_sr_err_diff / 512.0);
+    second_ref_decay = pow( second_ref_decay, 0.5 );
 
-    // Adjustment to decay rate based on speed of motion
-    {
-        double this_mv_rabs;
-        double this_mv_cabs;
-        double distance_factor;
+    if ( second_ref_decay < prediction_decay_rate )
+        prediction_decay_rate = second_ref_decay;
 
-        this_mv_rabs = fabs(next_frame->mvr_abs * motion_pct);
-        this_mv_cabs = fabs(next_frame->mvc_abs * motion_pct);
-
-        distance_factor = sqrt((this_mv_rabs * this_mv_rabs) +
-                               (this_mv_cabs * this_mv_cabs)) / 250.0;
-        distance_factor = ((distance_factor > 1.0)
-                                ? 0.0 : (1.0 - distance_factor));
-        if (distance_factor < prediction_decay_rate)
-            prediction_decay_rate = distance_factor;
-    }
+    if ( prediction_decay_rate < 0.85 )
+        prediction_decay_rate = 0.85;
+    else if ( prediction_decay_rate > 1.0 )
+        prediction_decay_rate = 1.0;
 
     return prediction_decay_rate;
 }
