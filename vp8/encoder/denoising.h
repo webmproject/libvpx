@@ -17,8 +17,8 @@
 
 typedef struct vp8_denoiser
 {
-  YV12_BUFFER_CONFIG yv12_running_avg;
-  YV12_BUFFER_CONFIG yv12_mc_running_avg;
+    YV12_BUFFER_CONFIG yv12_running_avg[MAX_REF_FRAMES];
+    YV12_BUFFER_CONFIG yv12_mc_running_avg;
 } VP8_DENOISER;
 
 int vp8_denoiser_allocate(VP8_DENOISER *denoiser, int width, int height);

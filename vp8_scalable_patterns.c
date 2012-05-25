@@ -493,6 +493,7 @@ int main(int argc, char **argv) {
     // Cap CPU & first I-frame size
     vpx_codec_control (&codec, VP8E_SET_CPUUSED,                -6);
     vpx_codec_control (&codec, VP8E_SET_STATIC_THRESHOLD,      800);
+    vpx_codec_control (&codec, VP8E_SET_NOISE_SENSITIVITY,       1);
 
     max_intra_size_pct = (int) (((double)cfg.rc_buf_optimal_sz * 0.5)
                          * ((double) cfg.g_timebase.den / cfg.g_timebase.num)

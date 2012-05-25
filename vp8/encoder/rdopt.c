@@ -21,6 +21,7 @@
 #include "onyx_int.h"
 #include "modecosts.h"
 #include "encodeintra.h"
+#include "pickinter.h"
 #include "vp8/common/entropymode.h"
 #include "vp8/common/reconinter.h"
 #include "vp8/common/reconintra4x4.h"
@@ -36,7 +37,6 @@
 #if CONFIG_TEMPORAL_DENOISING
 #include "denoising.h"
 #endif
-
 extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
@@ -1965,6 +1965,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
     int intra_rd_penalty =  10* vp8_dc_quant(cpi->common.base_qindex,
                                              cpi->common.y1dc_delta_q);
 
+#if CONFIG_TEMPORAL_DENOISING
+    unsigned int zero_mv_sse = INT_MAX, best_sse = INT_MAX,
+            best_rd_sse = INT_MAX;
+#endif
+
     mode_mv = mode_mv_sb[sign_bias];
     best_ref_mv.as_int = 0;
     best_mode.rd = INT_MAX;
@@ -2375,21 +2380,38 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
           best_mode.intra_rd = this_rd;
             *returnintra = rd.distortion2 ;
         }
-
 #if CONFIG_TEMPORAL_DENOISING
         if (cpi->oxcf.noise_sensitivity)
         {
-          // Store the best NEWMV in x for later use in the denoiser.
-          // We are restricted to the LAST_FRAME since the denoiser only keeps
-          // one filter state.
-          if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
-              x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME)
-          {
-            x->e_mbd.best_sse_inter_mode = NEWMV;
-            x->e_mbd.best_sse_mv = x->e_mbd.mode_info_context->mbmi.mv;
-            x->e_mbd.need_to_clamp_best_mvs =
-                x->e_mbd.mode_info_context->mbmi.need_to_clamp_mvs;
-          }
+            unsigned int sse;
+            vp8_get_inter_mbpred_error(x,&cpi->fn_ptr[BLOCK_16X16],&sse,
+                                   mode_mv[this_mode]);
+
+            if (sse < best_rd_sse)
+                best_rd_sse = sse;
+
+            // Store for later use by denoiser.
+            if (this_mode == ZEROMV && sse < zero_mv_sse )
+            {
+                zero_mv_sse = sse;
+                x->best_zeromv_reference_frame =
+                        x->e_mbd.mode_info_context->mbmi.ref_frame;
+            }
+
+            // Store the best NEWMV in x for later use in the denoiser.
+            if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV &&
+                    sse < best_sse)
+            {
+                best_sse = sse;
+                vp8_get_inter_mbpred_error(x,&cpi->fn_ptr[BLOCK_16X16],&best_sse,
+                                       mode_mv[this_mode]);
+                x->best_sse_inter_mode = NEWMV;
+                x->best_sse_mv = x->e_mbd.mode_info_context->mbmi.mv;
+                x->need_to_clamp_best_mvs =
+                    x->e_mbd.mode_info_context->mbmi.need_to_clamp_mvs;
+                x->best_reference_frame =
+                    x->e_mbd.mode_info_context->mbmi.ref_frame;
+            }
         }
 #endif
 
@@ -2462,42 +2484,55 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
 #if CONFIG_TEMPORAL_DENOISING
     if (cpi->oxcf.noise_sensitivity)
     {
-      if (x->e_mbd.best_sse_inter_mode == DC_PRED) {
-        // No best MV found.
-        x->e_mbd.best_sse_inter_mode = best_mode.mbmode.mode;
-        x->e_mbd.best_sse_mv = best_mode.mbmode.mv;
-        x->e_mbd.need_to_clamp_best_mvs = best_mode.mbmode.need_to_clamp_mvs;
-      }
-
-      // TODO(holmer): No SSEs are calculated in rdopt.c. What else can be used?
-      vp8_denoiser_denoise_mb(&cpi->denoiser, x, 0, 0,
-                              recon_yoffset, recon_uvoffset);
-      // Reevalute ZEROMV if the current mode is INTRA.
-      if (best_mode.mbmode.ref_frame == INTRA_FRAME)
-      {
-        int this_rd = INT_MAX;
-        int disable_skip = 0;
-        int other_cost = 0;
-        vpx_memset(&rd, 0, sizeof(rd));
-        x->e_mbd.mode_info_context->mbmi.ref_frame = LAST_FRAME;
-        rd.rate2 += x->ref_frame_cost[LAST_FRAME];
-        rd.rate2 += vp8_cost_mv_ref(ZEROMV, mdcounts);
-        x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
-        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
-        x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
-        this_rd = evaluate_inter_mode_rd(mdcounts, &rd, &disable_skip, cpi, x);
-        this_rd = calculate_final_rd_costs(this_rd, &rd, &other_cost,
-                                           disable_skip, uv_intra_tteob,
-                                           intra_rd_penalty, cpi, x);
-        if (this_rd < best_mode.rd || x->skip)
+        if (x->best_sse_inter_mode == DC_PRED)
         {
-            // Note index of best mode so far
-            best_mode_index = mode_index;
-            *returnrate = rd.rate2;
-            *returndistortion = rd.distortion2;
-            update_best_mode(&best_mode, this_rd, &rd, other_cost, x);
+            // No best MV found.
+            x->best_sse_inter_mode = best_mode.mbmode.mode;
+            x->best_sse_mv = best_mode.mbmode.mv;
+            x->need_to_clamp_best_mvs = best_mode.mbmode.need_to_clamp_mvs;
+            x->best_reference_frame = best_mode.mbmode.ref_frame;
+            best_sse = best_rd_sse;
         }
-      }
+        vp8_denoiser_denoise_mb(&cpi->denoiser, x, best_sse, zero_mv_sse,
+                                recon_yoffset, recon_uvoffset);
+
+
+        // Reevaluate ZEROMV after denoising.
+        if (best_mode.mbmode.ref_frame == INTRA_FRAME &&
+            x->best_zeromv_reference_frame != INTRA_FRAME)
+        {
+            int this_rd = INT_MAX;
+            int disable_skip = 0;
+            int other_cost = 0;
+            int this_ref_frame = x->best_zeromv_reference_frame;
+            rd.rate2 = x->ref_frame_cost[this_ref_frame] +
+                    vp8_cost_mv_ref(ZEROMV, mdcounts);
+            rd.distortion2 = 0;
+
+            // set up the proper prediction buffers for the frame
+            x->e_mbd.mode_info_context->mbmi.ref_frame = this_ref_frame;
+            x->e_mbd.pre.y_buffer = plane[this_ref_frame][0];
+            x->e_mbd.pre.u_buffer = plane[this_ref_frame][1];
+            x->e_mbd.pre.v_buffer = plane[this_ref_frame][2];
+
+            x->e_mbd.mode_info_context->mbmi.mode = ZEROMV;
+            x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
+            x->e_mbd.mode_info_context->mbmi.mv.as_int = 0;
+
+            this_rd = evaluate_inter_mode_rd(mdcounts, &rd, &disable_skip, cpi, x);
+            this_rd = calculate_final_rd_costs(this_rd, &rd, &other_cost,
+                                               disable_skip, uv_intra_tteob,
+                                               intra_rd_penalty, cpi, x);
+            if (this_rd < best_mode.rd || x->skip)
+            {
+                // Note index of best mode so far
+                best_mode_index = mode_index;
+                *returnrate = rd.rate2;
+                *returndistortion = rd.distortion2;
+                update_best_mode(&best_mode, this_rd, &rd, other_cost, x);
+            }
+        }
+
     }
 #endif
 
