@@ -2064,8 +2064,8 @@ static void update_coef_probs(VP8_COMP *cpi)
                         else
                             savings -= (int)(vp8_cost_zero(upd));
 #else
-                        const int s = prob_update_savings(ct, oldp, newp, upd);
-                        const int u = s > 0 ? 1 : 0;
+                        s = prob_update_savings(ct, oldp, newp, upd);
+                        u = s > 0 ? 1 : 0;
                         if (u)
                             savings += s;
 #endif
