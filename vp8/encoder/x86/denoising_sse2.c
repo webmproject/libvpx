@@ -17,11 +17,25 @@
 
 #include <emmintrin.h>
 
-void vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
-                              YV12_BUFFER_CONFIG *running_avg,
-                              MACROBLOCK *signal, unsigned int motion_magnitude,
-                              int y_offset, int uv_offset)
+union sum_union {
+    __m128i v;
+    short e[8];
+};
+
+inline int sum_vec_128i(__m128i vec)
 {
+    union sum_union s = { .v = vec };
+    return s.e[0] + s.e[1] + s.e[2] + s.e[3] +
+        s.e[4] + s.e[5] + s.e[6] + s.e[7];
+}
+
+int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
+                             YV12_BUFFER_CONFIG *running_avg,
+                             MACROBLOCK *signal, unsigned int motion_magnitude,
+                             int y_offset, int uv_offset)
+{
+    unsigned char filtered_buf[16*16];
+    unsigned char *filtered = filtered_buf;
     unsigned char *sig = signal->thismb;
     int sig_stride = 16;
     unsigned char *mc_running_avg_y = mc_running_avg->y_buffer + y_offset;
@@ -30,6 +44,7 @@ void vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
     int avg_y_stride = running_avg->y_stride;
     const union coeff_pair *LUT = vp8_get_filter_coeff_LUT(motion_magnitude);
     int r, c;
+    __m128i sum_diff = { 0 };
 
     for (r = 0; r < 16; ++r)
     {
@@ -110,6 +125,8 @@ void vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
         // isn't classified as noise.
         diff0 = _mm_sub_epi16(v_sig0, res0);
         diff1 = _mm_sub_epi16(v_sig1, res2);
+        sum_diff = _mm_add_epi16(sum_diff, _mm_add_epi16(diff0, diff1));
+
         diff0sq = _mm_mullo_epi16(diff0, diff0);
         diff1sq = _mm_mullo_epi16(diff1, diff1);
         diff_sq = _mm_packus_epi16(diff0sq, diff1sq);
@@ -118,11 +135,18 @@ void vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
         p1 = _mm_andnot_si128(take_running, v_sig);
         p2 = _mm_or_si128(p0, p1);
         _mm_storeu_si128((__m128i *)(&running_avg_y[0]), p2);
-        _mm_storeu_si128((__m128i *)(&sig[0]), p2);
+        _mm_storeu_si128((__m128i *)(&filtered[0]), p2);
 
         // Update pointers for next iteration.
         sig += sig_stride;
+        filtered += 16;
         mc_running_avg_y += mc_avg_y_stride;
         running_avg_y += avg_y_stride;
     }
+    if (abs(sum_vec_128i(sum_diff)) > SUM_DIFF_THRESHOLD)
+    {
+        return COPY_BLOCK;
+    }
+    vp8_copy_mem16x16(filtered_buf, 16, signal->thismb, sig_stride);
+    return FILTER_BLOCK;
 }
