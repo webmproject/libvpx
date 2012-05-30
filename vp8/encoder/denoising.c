@@ -15,13 +15,10 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_rtcd.h"
 
-
-static const unsigned int NOISE_MOTION_THRESHOLD = 20 * 20;
+static const unsigned int NOISE_MOTION_THRESHOLD = 25 * 25;
 // SSE_DIFF_THRESHOLD is selected as ~95% confidence assuming var(noise) ~= 100.
 static const unsigned int SSE_DIFF_THRESHOLD = 16 * 16 * 20;
 static const unsigned int SSE_THRESHOLD = 16 * 16 * 40;
-
-
 
 // The filtering coefficients used for denoizing are adjusted for static
 // blocks, or blocks with very small motion vectors. This is done through
@@ -82,11 +79,15 @@ union coeff_pair *vp8_get_filter_coeff_LUT(unsigned int motion_magnitude)
 
 
 
-void vp8_denoiser_filter_c(YV12_BUFFER_CONFIG *mc_running_avg,
-                           YV12_BUFFER_CONFIG *running_avg, MACROBLOCK *signal,
-                           unsigned int motion_magnitude, int y_offset,
-                           int uv_offset)
+int vp8_denoiser_filter_c(YV12_BUFFER_CONFIG *mc_running_avg,
+                          YV12_BUFFER_CONFIG *running_avg,
+                          MACROBLOCK *signal,
+                          unsigned int motion_magnitude,
+                          int y_offset,
+                          int uv_offset)
 {
+    unsigned char filtered_buf[16*16];
+    unsigned char *filtered = filtered_buf;
     unsigned char *sig = signal->thismb;
     int sig_stride = 16;
     unsigned char *mc_running_avg_y = mc_running_avg->y_buffer + y_offset;
@@ -95,6 +96,7 @@ void vp8_denoiser_filter_c(YV12_BUFFER_CONFIG *mc_running_avg,
     int avg_y_stride = running_avg->y_stride;
     const union coeff_pair *LUT = vp8_get_filter_coeff_LUT(motion_magnitude);
     int r, c;
+    int sum_diff = 0;
 
     for (r = 0; r < 16; ++r)
     {
@@ -133,22 +135,31 @@ void vp8_denoiser_filter_c(YV12_BUFFER_CONFIG *mc_running_avg,
         for (c = 0; c < 16; ++c)
         {
             const int diff = sig[c] - running_avg_y[c];
+            sum_diff += diff;
 
             if (diff * diff < NOISE_DIFF2_THRESHOLD)
             {
-                sig[c] = running_avg_y[c];
+                filtered[c] = running_avg_y[c];
             }
             else
             {
+                filtered[c] = sig[c];
                 running_avg_y[c] = sig[c];
             }
         }
 
         // Update pointers for next iteration.
         sig += sig_stride;
+        filtered += 16;
         mc_running_avg_y += mc_avg_y_stride;
         running_avg_y += avg_y_stride;
     }
+    if (abs(sum_diff) > SUM_DIFF_THRESHOLD)
+    {
+        return COPY_BLOCK;
+    }
+    vp8_copy_mem16x16(filtered_buf, 16, signal->thismb, sig_stride);
+    return FILTER_BLOCK;
 }
 
 
@@ -215,8 +226,10 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
     MV_REFERENCE_FRAME frame = x->best_reference_frame;
     MV_REFERENCE_FRAME zero_frame = x->best_zeromv_reference_frame;
 
+    enum vp8_denoiser_decision decision = FILTER_BLOCK;
+
     // Motion compensate the running average.
-    if(zero_frame)
+    if (zero_frame)
     {
         YV12_BUFFER_CONFIG *src = &denoiser->yv12_running_avg[frame];
         YV12_BUFFER_CONFIG *dst = &denoiser->yv12_mc_running_avg;
@@ -238,7 +251,7 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
         mv_col = x->best_sse_mv.as_mv.col;
         mv_row = x->best_sse_mv.as_mv.row;
 
-        if(frame == INTRA_FRAME ||
+        if (frame == INTRA_FRAME ||
             (mv_row *mv_row + mv_col *mv_col <= NOISE_MOTION_THRESHOLD &&
              sse_diff < SSE_DIFF_THRESHOLD))
         {
@@ -296,18 +309,25 @@ void vp8_denoiser_denoise_mb(VP8_DENOISER *denoiser,
     if (best_sse > SSE_THRESHOLD || motion_magnitude2
            > 8 * NOISE_MOTION_THRESHOLD)
     {
+        decision = COPY_BLOCK;
+    }
+
+    if (decision == FILTER_BLOCK)
+    {
+        // Filter.
+        decision = vp8_denoiser_filter(&denoiser->yv12_mc_running_avg,
+                                       &denoiser->yv12_running_avg[LAST_FRAME],
+                                       x,
+                                       motion_magnitude2,
+                                       recon_yoffset, recon_uvoffset);
+    }
+    if (decision == COPY_BLOCK)
+    {
         // No filtering of this block; it differs too much from the predictor,
         // or the motion vector magnitude is considered too big.
         vp8_copy_mem16x16(
                 x->thismb, 16,
                 denoiser->yv12_running_avg[LAST_FRAME].y_buffer + recon_yoffset,
                 denoiser->yv12_running_avg[LAST_FRAME].y_stride);
-        return;
     }
-
-    // Filter.
-    vp8_denoiser_filter(&denoiser->yv12_mc_running_avg,
-                        &denoiser->yv12_running_avg[LAST_FRAME], x,
-                        motion_magnitude2,
-                        recon_yoffset, recon_uvoffset);
 }

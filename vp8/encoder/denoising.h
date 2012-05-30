@@ -14,6 +14,13 @@
 #include "block.h"
 
 #define NOISE_DIFF2_THRESHOLD (75)
+#define SUM_DIFF_THRESHOLD (16 * 16 * 2)
+
+enum vp8_denoiser_decision
+{
+  COPY_BLOCK,
+  FILTER_BLOCK,
+};
 
 typedef struct vp8_denoiser
 {
