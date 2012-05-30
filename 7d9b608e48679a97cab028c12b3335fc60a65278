@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAK3//6QY\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-30T13:42:00Z",
+      "side": 1,
+      "message": "we have a separate function that calculates sse and sum difference at the same time ( variance),   perhaps rather than getting into this function at all we should just use the other function outside.",
+      "revId": "7d9b608e48679a97cab028c12b3335fc60a65278",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//6Qs\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-30T13:42:00Z",
+      "side": 1,
+      "message": "__m128i sum_diff \u003d { 0 };",
+      "revId": "7d9b608e48679a97cab028c12b3335fc60a65278",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//6Qo\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-30T13:42:00Z",
+      "side": 1,
+      "message": "sum_diff \u003d __mm_add_epi16(sum_diff, __mm_add_epi16(diff0,diff1))",
+      "revId": "7d9b608e48679a97cab028c12b3335fc60a65278",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//6Qk\u003d",
+        "filename": "vp8/encoder/x86/denoising_sse2.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-05-30T13:42:00Z",
+      "side": 1,
+      "message": "if (abs(sum_vec_128i(sum_diff) )",
+      "revId": "7d9b608e48679a97cab028c12b3335fc60a65278",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
