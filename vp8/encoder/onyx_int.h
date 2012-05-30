@@ -598,6 +598,8 @@ typedef struct VP8_COMP
         int gf_group_bits;                // Projected Bits available for a group of frames including 1 GF or ARF
         int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
         int alt_extra_bits;
+
+        int sr_update_lag;
         double est_max_qcorrection_factor;
     } twopass;
 

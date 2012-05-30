@@ -634,7 +634,14 @@ void vp8_first_pass(VP8_COMP *cpi)
                     xd->pre.u_buffer = lst_yv12->u_buffer + recon_uvoffset;
                     xd->pre.v_buffer = lst_yv12->v_buffer + recon_uvoffset;
 
-                    sr_coded_error += gf_motion_error;
+                    // In accumulating a score for the older reference frame
+                    // take the best of the motion predicted score and
+                    // the intra coded error (just as will be done for)
+                    // accumulation of "coded_error" for the last frame.
+                    if ( gf_motion_error < this_error )
+                        sr_coded_error += gf_motion_error;
+                    else
+                        sr_coded_error += this_error;
                 }
                 else
                     sr_coded_error += motion_error;
@@ -799,12 +806,18 @@ void vp8_first_pass(VP8_COMP *cpi)
     }
 
     // Copy the previous Last Frame back into gf and and arf buffers if
-    // the prediction is good enough.
-    if ((cm->current_video_frame > 0) &&
-        (cpi->twopass.this_frame_stats->pcnt_inter > 0.20))
+    // the prediction is good enough... but also dont allow it to lag too far
+    if ((cpi->twopass.sr_update_lag > 3) ||
+        ((cm->current_video_frame > 0) &&
+         (cpi->twopass.this_frame_stats->pcnt_inter > 0.20) &&
+         ((cpi->twopass.this_frame_stats->intra_error /
+           cpi->twopass.this_frame_stats->coded_error) > 2.0)))
     {
         vp8_yv12_copy_frame_ptr(lst_yv12, gld_yv12);
+        cpi->twopass.sr_update_lag = 1;
     }
+    else
+        cpi->twopass.sr_update_lag ++;
 
     // swap frame pointers so last frame refers to the frame we just compressed
     vp8_swap_yv12_buffer(lst_yv12, new_yv12);
@@ -920,6 +933,11 @@ static double calc_correction_factor( VP8_COMP *cpi,
 
     correction_factor = correction_factor * sr_correction;
 #endif
+
+    // Clip range
+    correction_factor =
+        (correction_factor < 0.05)
+            ? 0.05 : (correction_factor > 2.0) ? 2.0 : correction_factor;
 
     return correction_factor;
 }
@@ -1214,6 +1232,9 @@ void vp8_init_second_pass(VP8_COMP *cpi)
     cpi->twopass.kf_intra_err_min = KF_MB_INTRA_MIN * cpi->common.MBs;
     cpi->twopass.gf_intra_err_min = GF_MB_INTRA_MIN * cpi->common.MBs;
 
+    // This variable monitors how far behind the second ref update is lagging
+    cpi->twopass.sr_update_lag = 1;
+
     // Scan the first pass file and calculate an average Intra / Inter error score ratio for the sequence
     {
         double sum_iiratio = 0.0;
@@ -1277,14 +1298,13 @@ static double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_fra
             (cpi->common.MBs);
     second_ref_decay = 1.0 - (mb_sr_err_diff / 512.0);
     second_ref_decay = pow( second_ref_decay, 0.5 );
+    if ( second_ref_decay < 0.85 )
+        second_ref_decay = 0.85;
+    else if ( second_ref_decay > 1.0 )
+        second_ref_decay = 1.0;
 
     if ( second_ref_decay < prediction_decay_rate )
         prediction_decay_rate = second_ref_decay;
-
-    if ( prediction_decay_rate < 0.85 )
-        prediction_decay_rate = 0.85;
-    else if ( prediction_decay_rate > 1.0 )
-        prediction_decay_rate = 1.0;
 
     return prediction_decay_rate;
 }
