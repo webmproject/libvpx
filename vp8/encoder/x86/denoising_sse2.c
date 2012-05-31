@@ -22,7 +22,7 @@ union sum_union {
     short e[8];
 };
 
-inline int sum_vec_128i(__m128i vec)
+static inline int sum_vec_128i(__m128i vec)
 {
     union sum_union s = { .v = vec };
     return s.e[0] + s.e[1] + s.e[2] + s.e[3] +
