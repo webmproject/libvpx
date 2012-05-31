@@ -22,13 +22,6 @@ union sum_union {
     short e[8];
 };
 
-static inline int sum_vec_128i(__m128i vec)
-{
-    union sum_union s = { .v = vec };
-    return s.e[0] + s.e[1] + s.e[2] + s.e[3] +
-        s.e[4] + s.e[5] + s.e[6] + s.e[7];
-}
-
 int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
                              YV12_BUFFER_CONFIG *running_avg,
                              MACROBLOCK *signal, unsigned int motion_magnitude,
@@ -44,7 +37,7 @@ int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
     int avg_y_stride = running_avg->y_stride;
     const union coeff_pair *LUT = vp8_get_filter_coeff_LUT(motion_magnitude);
     int r, c;
-    __m128i sum_diff = { 0 };
+    __m128i acc_diff = { 0 };
 
     for (r = 0; r < 16; ++r)
     {
@@ -125,7 +118,7 @@ int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
         // isn't classified as noise.
         diff0 = _mm_sub_epi16(v_sig0, res0);
         diff1 = _mm_sub_epi16(v_sig1, res2);
-        sum_diff = _mm_add_epi16(sum_diff, _mm_add_epi16(diff0, diff1));
+        acc_diff = _mm_add_epi16(acc_diff, _mm_add_epi16(diff0, diff1));
 
         diff0sq = _mm_mullo_epi16(diff0, diff0);
         diff1sq = _mm_mullo_epi16(diff1, diff1);
@@ -143,9 +136,17 @@ int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
         mc_running_avg_y += mc_avg_y_stride;
         running_avg_y += avg_y_stride;
     }
-    if (abs(sum_vec_128i(sum_diff)) > SUM_DIFF_THRESHOLD)
     {
-        return COPY_BLOCK;
+        // Compute the sum of all pixel differences of this MB.
+        union sum_union s;
+        int sum_diff;
+        s.v = acc_diff;
+        sum_diff = s.e[0] + s.e[1] + s.e[2] + s.e[3] +
+          s.e[4] + s.e[5] + s.e[6] + s.e[7];
+        if (abs(sum_diff) > SUM_DIFF_THRESHOLD)
+        {
+            return COPY_BLOCK;
+        }
     }
     vp8_copy_mem16x16(filtered_buf, 16, signal->thismb, sig_stride);
     return FILTER_BLOCK;
