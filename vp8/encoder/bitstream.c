@@ -872,10 +872,10 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
             // top-left, top-right, bottom-left, bottom-right
             for (i=0; i<4; i++)
             {
-                const MB_MODE_INFO *const mi = & m->mbmi;
-                const MV_REFERENCE_FRAME rf = mi->ref_frame;
-                const MB_PREDICTION_MODE mode = mi->mode;
-                const int segment_id = mi->segment_id;
+                MB_MODE_INFO *mi;
+                MV_REFERENCE_FRAME rf;
+                MB_PREDICTION_MODE mode;
+                int segment_id;
 
                 int dy = row_delta[i];
                 int dx = col_delta[i];
@@ -891,6 +891,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     cpi->mb.partition_info += offset_extended;
                     continue;
                 }
+
+                mi = & m->mbmi;
+                rf = mi->ref_frame;
+                mode = mi->mode;
+                segment_id = mi->segment_id;
 
                 // Distance of Mb to the various image edges.
                 // These specified to 8th pel as they are always compared to MV
