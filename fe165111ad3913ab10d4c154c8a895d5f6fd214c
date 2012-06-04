@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAK3//3kk\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-04T06:50:47Z",
+      "side": 1,
+      "message": "not sure what this is yet.. dec_ prefix is probably redundant.",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3PM\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-04T06:50:47Z",
+      "side": 1,
+      "message": "I don\u0027t think you want to treat these frame buffers differently than the other references. Can you allocate all 11-12 buffers in the same spot, and treat them as part of the same buffer pool?\n\nThis isn\u0027t referenced, can\u0027t tell if this is left over or part of a future design.",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3lA\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-04T06:50:47Z",
+      "side": 1,
+      "message": "what are you trying to achieve here? Is this temporary?",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3k8\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-04T06:50:47Z",
+      "side": 1,
+      "message": "How about something like:\n\n  vpx_codec_stream_info_t new_si;\n\n  peek_si(data, data_sz, \u0026new_si);\n  if(ctx-\u003esi.is_kf)\n  {\n      resolution_change \u003d (ctx-\u003esi.h !\u003d new_si.h) || ...\n      ctx-\u003esi \u003d new_si;\n  }\n  else if(!ctx-\u003edecoder_init)\n      res \u003d VPX_CODEC_UNSUP_BITSTREAM;",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3k4\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-04T06:50:47Z",
+      "side": 1,
+      "message": "not sure why these are two different calls.",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3ks\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 479,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-04T06:50:47Z",
+      "side": 1,
+      "message": "ok for now. you\u0027ll want to remove the w/h from common and make it per-frame I think.",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3ko\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-04T06:50:47Z",
+      "side": 1,
+      "message": "this isn\u0027t in the right spot. You don\u0027t want to mess with the ref counts on resizes, for example.",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
