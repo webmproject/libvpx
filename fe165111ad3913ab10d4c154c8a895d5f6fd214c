@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//3Hs\u003d",
+        "filename": "vp8/decoder/onyxd_int.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-04T15:40:06Z",
+      "side": 1,
+      "message": "Each decoder instance will have 4 reference buffers.  These reference buffers will eventually be allocated near the API layer or could be passed in by the application.  I kept the dec in there for now to make refactoring easier.  Will take out later.",
+      "parentUuid": "AAAAK3//3kk\u003d",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3//3PM\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-04T06:50:47Z",
       "side": 1,
       "message": "I don\u0027t think you want to treat these frame buffers differently than the other references. Can you allocate all 11-12 buffers in the same spot, and treat them as part of the same buffer pool?\n\nThis isn\u0027t referenced, can\u0027t tell if this is left over or part of a future design.",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3HY\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-04T15:40:06Z",
+      "side": 1,
+      "message": "Yes, part of a future design.  We should be able to allocate a pool of buffers in this layer, and tell each decoder instance where the buffers are located.",
+      "parentUuid": "AAAAK3//3PM\u003d",
       "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//3HQ\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-04T15:40:06Z",
+      "side": 1,
+      "message": "I want to be able to peek every frame.  It would return an error if not a keyframe.",
+      "parentUuid": "AAAAK3//3lA\u003d",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3//3k8\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-06-04T06:50:47Z",
       "side": 1,
       "message": "How about something like:\n\n  vpx_codec_stream_info_t new_si;\n\n  peek_si(data, data_sz, \u0026new_si);\n  if(ctx-\u003esi.is_kf)\n  {\n      resolution_change \u003d (ctx-\u003esi.h !\u003d new_si.h) || ...\n      ctx-\u003esi \u003d new_si;\n  }\n  else if(!ctx-\u003edecoder_init)\n      res \u003d VPX_CODEC_UNSUP_BITSTREAM;",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3HE\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-04T15:40:06Z",
+      "side": 1,
+      "message": "Ok.  Will take a look.",
+      "parentUuid": "AAAAK3//3k8\u003d",
       "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//3Gw\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 474,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-04T15:40:06Z",
+      "side": 1,
+      "message": "WIP.  Thinking each thread will have its own \"decoder frame\".   Eventually the reference frame will be passed in from a pool of bufferes.  Havent worked out the details yet.  The main goal of this patch is to move the buffer allocations out of vp8_decode_frame() and to stop using the common structure.",
+      "parentUuid": "AAAAK3//3k4\u003d",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3//3ks\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 1
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAK3//3Gs\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 479,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-04T15:40:06Z",
+      "side": 1,
+      "message": "Yep.",
+      "parentUuid": "AAAAK3//3ks\u003d",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAK3//3ko\u003d",
         "filename": "vp8/vp8_dx_iface.c",
         "patchSetId": 1
@@ -115,6 +223,24 @@
       "writtenOn": "2012-06-04T06:50:47Z",
       "side": 1,
       "message": "this isn\u0027t in the right spot. You don\u0027t want to mess with the ref counts on resizes, for example.",
+      "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAK3//3Go\u003d",
+        "filename": "vp8/vp8_dx_iface.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-04T15:40:06Z",
+      "side": 1,
+      "message": "Hmmm.... will look at this some more.  It passes the decoder test vectors.",
+      "parentUuid": "AAAAK3//3ko\u003d",
       "revId": "fe165111ad3913ab10d4c154c8a895d5f6fd214c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
