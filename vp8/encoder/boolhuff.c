@@ -149,7 +149,7 @@ int vp8_count_term_subexp(int word, int k, int num_syms)
         int b = (i?k+i-1:k);
         int a = (1<<b);
         if (num_syms<=mk+3*a) {
-            count += vp8_count_uniform(num_syms-mk, word-mk);
+            count += vp8_count_uniform(word-mk, num_syms-mk);
             break;
         } else {
             int t = (word>=mk+a);

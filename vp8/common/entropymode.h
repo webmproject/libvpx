@@ -55,13 +55,6 @@ extern struct vp8_token_struct vp8_mbsplit_encodings  [VP8_NUMMBSPLITS];
 extern struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
 extern struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
-extern const vp8_tree_index vp8_small_mvtree[];
-extern struct vp8_token_struct vp8_small_mvencodings [8];
-#if CONFIG_HIGH_PRECISION_MV
-extern const vp8_tree_index vp8_small_mvtree_hp[];
-extern struct vp8_token_struct vp8_small_mvencodings_hp [16];
-#endif
-
 void vp8_entropy_mode_init(void);
 
 void vp8_init_mbmode_probs(VP8_COMMON *x);
@@ -71,7 +64,10 @@ extern void vp8_accum_mv_refs(VP8_COMMON *pc,
                                MB_PREDICTION_MODE m,
                                const int ct[4]);
 
-void   vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES-1]);
+void vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES-1]);
 void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1]);
 
+#if CONFIG_ADAPTIVE_ENTROPY
+void vp8_adapt_mode_probs(struct VP8Common *);
+#endif
 #endif

@@ -97,6 +97,8 @@ typedef struct
 
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
     vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+    vp8_prob bmode_prob [VP8_BINTRAMODES-1];
+    vp8_prob i8x8_mode_prob [VP8_I8X8_MODES-1];
 
     int mv_ref_ct[6][4][2];
     int mode_context[6][4];
@@ -454,7 +456,9 @@ typedef struct VP8_COMP
     int cq_target_quality;
 
     int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
-    int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
+    int bmode_count [VP8_BINTRAMODES];
+    int i8x8_mode_count [VP8_I8X8_MODES];
+    //int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
 
     unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
 #if CONFIG_HIGH_PRECISION_MV

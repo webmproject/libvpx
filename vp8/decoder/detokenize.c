@@ -234,6 +234,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         ++c; \
         goto DO_WHILE; }\
     qcoeff_ptr [ 15 ] = (INT16) v; \
+    c++; \
     goto BLOCK_FINISHED;
 
 
@@ -245,6 +246,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         ++c; \
         goto DO_WHILE_8x8; }\
     qcoeff_ptr [ scan[3] ] = (INT16) v; \
+    c++; \
     goto BLOCK_FINISHED_8x8;
 #define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val) \
     DECODE_AND_APPLYSIGN(val) \
@@ -254,6 +256,7 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
         ++c; \
         goto DO_WHILE_8x8; }\
     qcoeff_ptr [ scan[63] ] = (INT16) v; \
+    c++; \
     goto BLOCK_FINISHED_8x8;
 
 
@@ -273,6 +276,68 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
     }\
     NORMALIZE
 
+
+#if CONFIG_ADAPTIVE_ENTROPY
+int get_token(int v)
+{
+    if (v < 0) v = -v;
+    if (v == 0) return ZERO_TOKEN;
+    else if (v == 1) return ONE_TOKEN;
+    else if (v == 2) return TWO_TOKEN;
+    else if (v == 3) return THREE_TOKEN;
+    else if (v == 4) return FOUR_TOKEN;
+    else if (v <= 6) return DCT_VAL_CATEGORY1;
+    else if (v <= 10) return DCT_VAL_CATEGORY2;
+    else if (v <= 18) return DCT_VAL_CATEGORY3;
+    else if (v <= 34) return DCT_VAL_CATEGORY4;
+    else if (v <= 66) return DCT_VAL_CATEGORY5;
+    else return DCT_VAL_CATEGORY6;
+}
+
+void static count_tokens(INT16 *qcoeff_ptr, int block, int type,
+                         ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                         int eob, int seg_eob, FRAME_CONTEXT *fc)
+{
+    int c, pt, token, band;
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+    for (c = !type; c < eob; ++c)
+    {
+        int rc = vp8_default_zig_zag1d[c];
+        int v = qcoeff_ptr[rc];
+        band = vp8_coef_bands[c];
+        token = get_token(v);
+        fc->coef_counts[type][band][pt][token]++;
+        pt = vp8_prev_token_class[token];
+    }
+    if (eob < seg_eob)
+    {
+        band = vp8_coef_bands[c];
+        fc->coef_counts[type][band][pt][DCT_EOB_TOKEN]++;
+    }
+}
+
+void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, int type,
+                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                             int eob, int seg_eob, FRAME_CONTEXT *fc)
+{
+    int c, pt, token, band;
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+    for (c = !type; c < eob; ++c)
+    {
+        int rc = (type == 1 ? vp8_default_zig_zag1d[c] : vp8_default_zig_zag1d_8x8[c]);
+        int v = qcoeff_ptr[rc];
+        band = (type == 1 ? vp8_coef_bands[c] : vp8_coef_bands_8x8[c]);
+        token = get_token(v);
+        fc->coef_counts_8x8[type][band][pt][token]++;
+        pt = vp8_prev_token_class[token];
+    }
+    if (eob < seg_eob)
+    {
+        band = (type == 1 ? vp8_coef_bands[c] : vp8_coef_bands_8x8[c]);
+        fc->coef_counts_8x8[type][band][pt][DCT_EOB_TOKEN]++;
+    }
+}
+#endif
 
 int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
 {
@@ -554,9 +619,13 @@ ONE_CONTEXT_NODE_0_8x8_:
        qcoeff_ptr [ scan[3] ] = (INT16) v;//15
    else
        qcoeff_ptr [ scan[63] ] = (INT16) v;
+   c++;
 
 
 BLOCK_FINISHED_8x8:
+#if CONFIG_ADAPTIVE_ENTROPY
+    count_tokens_8x8(qcoeff_ptr, i, type, a, l, c, seg_eob, &dx->common.fc);
+#endif
     *a = *l = ((eobs[i] = c) != !type);   // any nonzero data?
     if (i!=24)
     {
@@ -776,7 +845,11 @@ ONE_CONTEXT_NODE_0_:
     }
 
     qcoeff_ptr [ 15 ] = (INT16) v;
+    ++c;
 BLOCK_FINISHED:
+#if CONFIG_ADAPTIVE_ENTROPY
+    count_tokens(qcoeff_ptr, i, type, a, l, c, seg_eob, &dx->common.fc);
+#endif
     *a = *l = ((eobs[i] = c) != !type);   /* any nonzero data? */
 
     eobtotal += c;

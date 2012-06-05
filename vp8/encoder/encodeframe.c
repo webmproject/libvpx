@@ -1064,8 +1064,11 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     xd->left_context = &cm->left_context;
 
     vp8_zero(cpi->count_mb_ref_frame_usage)
+    vp8_zero(cpi->bmode_count)
     vp8_zero(cpi->ymode_count)
-    vp8_zero(cpi->uv_mode_count)
+    vp8_zero(cpi->i8x8_mode_count)
+    vp8_zero(cpi->y_uv_mode_count)
+    //vp8_zero(cpi->uv_mode_count)
 
     x->mvc = cm->fc.mvc;
 #if CONFIG_HIGH_PRECISION_MV
@@ -1206,6 +1209,7 @@ static void encode_frame_internal(VP8_COMP *cpi)
     vp8_zero(cpi->MVcount_hp);
 #endif
     vp8_zero(cpi->coef_counts);
+    vp8_zero(cpi->coef_counts_8x8);
 
     vp8cx_frame_init_quantizer(cpi);
 
@@ -1502,8 +1506,24 @@ static void sum_intra_stats(VP8_COMP *cpi, MACROBLOCK *x)
 #endif
 
     ++cpi->ymode_count[m];
-    ++cpi->uv_mode_count[uvm];
-
+    if (m!=I8X8_PRED)
+        ++cpi->y_uv_mode_count[m][uvm];
+    else
+    {
+        cpi->i8x8_mode_count[xd->block[0].bmi.as_mode.first]++;
+        cpi->i8x8_mode_count[xd->block[2].bmi.as_mode.first]++;
+        cpi->i8x8_mode_count[xd->block[8].bmi.as_mode.first]++;
+        cpi->i8x8_mode_count[xd->block[10].bmi.as_mode.first]++;
+    }
+    if (m == B_PRED)
+    {
+        int b = 0;
+        do
+        {
+            ++ cpi->bmode_count[xd->block[b].bmi.as_mode.first];
+        }
+        while (++b < 16);
+    }
 }
 
 // Experimental stub function to create a per MB zbin adjustment based on

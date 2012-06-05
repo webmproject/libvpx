@@ -230,6 +230,7 @@ EXPERIMENT_LIST="
     expanded_coef_context
     int_8x8fdct
     newintramodes
+    adaptive_entropy
 "
 CONFIG_LIST="
     external_build

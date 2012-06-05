@@ -92,9 +92,9 @@ extern DECLARE_ALIGNED(64, const unsigned char, vp8_coef_bands_8x8[64]);
 #endif
 
 #if CONFIG_NEWUPDATE
-#define SUBEXP_PARAM                2   /* Subexponential code parameter */
-#define MODULUS_PARAM               21  /* Modulus parameter */
-#define COEFUPDATETYPE              2   /* coef update type to use (1/2/3) */
+#define SUBEXP_PARAM                4   /* Subexponential code parameter */
+#define MODULUS_PARAM               13  /* Modulus parameter */
+#define COEFUPDATETYPE              1   /* coef update type to use (1/2/3) */
 #endif
 
 
@@ -107,4 +107,8 @@ extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
 extern short vp8_default_zig_zag_mask_8x8[64];//int64_t
 void vp8_coef_tree_initialize(void);
+
+#if CONFIG_ADAPTIVE_ENTROPY
+void vp8_adapt_coef_probs(struct VP8Common *);
+#endif
 #endif

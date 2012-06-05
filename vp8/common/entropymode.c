@@ -11,6 +11,7 @@
 
 #include "modecont.h"
 #include "entropymode.h"
+#include "entropymv.h"
 #include "entropy.h"
 #include "vpx_mem/vpx_mem.h"
 
@@ -325,40 +326,6 @@ struct vp8_token_struct vp8_mbsplit_encodings [VP8_NUMMBSPLITS];
 struct vp8_token_struct vp8_mv_ref_encoding_array    [VP8_MVREFS];
 struct vp8_token_struct vp8_sub_mv_ref_encoding_array [VP8_SUBMVREFS];
 
-#if CONFIG_HIGH_PRECISION_MV
-const vp8_tree_index vp8_small_mvtree_hp [30] =
-{
-     2,  16,
-     4,  10,
-     6,   8,
-    -0,  -1,
-    -2,  -3,
-    12,  14,
-    -4,  -5,
-    -6,  -7,
-    18,  24,
-    20,  22,
-    -8,  -9,
-   -10, -11,
-    26,  28,
-   -12, -13,
-   -14, -15
-};
-struct vp8_token_struct vp8_small_mvencodings_hp [16];
-#endif  /* CONFIG_HIGH_PRECISION_MV */
-
-const vp8_tree_index vp8_small_mvtree [14] =
-{
-    2, 8,
-    4, 6,
-    -0, -1,
-    -2, -3,
-    10, 12,
-    -4, -5,
-    -6, -7
-};
-struct vp8_token_struct vp8_small_mvencodings [8];
-
 
 
 void vp8_init_mbmode_probs(VP8_COMMON *x)
@@ -396,7 +363,7 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
 
     vp8_tree_probs_from_distribution(
         VP8_I8X8_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
-        x->i8x8_mode_prob, bct, i8x8_mode_cts,
+        x->fc.i8x8_mode_prob, bct, i8x8_mode_cts,
         256, 1);
 
     vpx_memcpy(x->fc.sub_mv_ref_prob, sub_mv_ref_prob, sizeof(sub_mv_ref_prob));
@@ -458,11 +425,6 @@ void vp8_entropy_mode_init()
                                 vp8_mv_ref_tree, NEARESTMV);
     vp8_tokens_from_tree_offset(vp8_sub_mv_ref_encoding_array,
                                 vp8_sub_mv_ref_tree, LEFT4X4);
-
-    vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
-#if CONFIG_HIGH_PRECISION_MV
-    vp8_tokens_from_tree(vp8_small_mvencodings_hp, vp8_small_mvtree_hp);
-#endif
 }
 
 void vp8_init_mode_contexts(VP8_COMMON *pc)
@@ -595,3 +557,110 @@ void print_mv_ref_cts(VP8_COMMON *pc)
         printf("\n");
     }
 }
+
+#if CONFIG_ADAPTIVE_ENTROPY
+//#define MODE_COUNT_TESTING
+#define MODE_COUNT_SAT 16
+#define MODE_MAX_UPDATE_FACTOR 96
+void vp8_adapt_mode_probs(VP8_COMMON *cm)
+{
+    int i, t, count, factor;
+    unsigned int branch_ct[32][2];
+    int update_factor = MODE_MAX_UPDATE_FACTOR; /* denominator 256 */
+    int count_sat = MODE_COUNT_SAT;
+    vp8_prob ymode_probs[VP8_YMODES-1];
+    vp8_prob uvmode_probs[VP8_UV_MODES-1];
+    vp8_prob bmode_probs[VP8_BINTRAMODES-1];
+    vp8_prob i8x8_mode_probs[VP8_I8X8_MODES-1];
+#ifdef MODE_COUNT_TESTING
+    printf("static const unsigned int\nymode_counts"
+           "[VP8_YMODES] = {\n");
+    for (t = 0; t<VP8_YMODES; ++t) printf("%d, ", cm->fc.ymode_counts[t]);
+    printf("};\n");
+    printf("static const unsigned int\nuv_mode_counts"
+           "[VP8_YMODES] [VP8_UV_MODES] = {\n");
+    for (i = 0; i < VP8_YMODES; ++i)
+    {
+        printf("  {");
+        for (t = 0; t < VP8_UV_MODES; ++t) printf("%d, ", cm->fc.uv_mode_counts[i][t]);
+        printf("},\n");
+    }
+    printf("};\n");
+    printf("static const unsigned int\nbmode_counts"
+           "[VP8_BINTRAMODES] = {\n");
+    for (t = 0; t<VP8_BINTRAMODES; ++t) printf("%d, ", cm->fc.bmode_counts[t]);
+    printf("};\n");
+    printf("static const unsigned int\ni8x8_mode_counts"
+           "[VP8_I8X8_MODES] = {\n");
+    for (t = 0; t<VP8_I8X8_MODES; ++t) printf("%d, ", cm->fc.i8x8_mode_counts[t]);
+    printf("};\n");
+#endif
+    vp8_tree_probs_from_distribution(
+        VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
+        ymode_probs, branch_ct, cm->fc.ymode_counts,
+        256, 1);
+    for (t=0; t<VP8_YMODES-1; ++t)
+    {
+        int prob;
+        count = branch_ct[t][0] + branch_ct[t][1];
+        count = count > count_sat ? count_sat : count;
+        factor = (update_factor * count / count_sat);
+        prob = ((int)cm->fc.pre_ymode_prob[t] * (256-factor) +
+                (int)ymode_probs[t] * factor + 128) >> 8;
+        if (prob <= 0) cm->fc.ymode_prob[t] = 1;
+        else if (prob > 255) cm->fc.ymode_prob[t] = 255;
+        else cm->fc.ymode_prob[t] = prob;
+    }
+    for (i = 0; i < VP8_YMODES; ++i)
+    {
+        vp8_tree_probs_from_distribution(
+            VP8_UV_MODES, vp8_uv_mode_encodings, vp8_uv_mode_tree,
+            uvmode_probs, branch_ct, cm->fc.uv_mode_counts[i],
+            256, 1);
+        for (t = 0; t < VP8_UV_MODES-1; ++t)
+        {
+            int prob;
+            count = branch_ct[t][0] + branch_ct[t][1];
+            count = count > count_sat ? count_sat : count;
+            factor = (update_factor * count / count_sat);
+            prob = ((int)cm->fc.pre_uv_mode_prob[i][t] * (256-factor) +
+                    (int)uvmode_probs[t] * factor + 128) >> 8;
+            if (prob <= 0) cm->fc.uv_mode_prob[i][t] = 1;
+            else if (prob > 255) cm->fc.uv_mode_prob[i][t] = 255;
+            else cm->fc.uv_mode_prob[i][t] = prob;
+        }
+    }
+    vp8_tree_probs_from_distribution(
+        VP8_BINTRAMODES, vp8_bmode_encodings, vp8_bmode_tree,
+        bmode_probs, branch_ct, cm->fc.bmode_counts,
+        256, 1);
+    for (t=0; t<VP8_BINTRAMODES-1; ++t)
+    {
+        int prob;
+        count = branch_ct[t][0] + branch_ct[t][1];
+        count = count > count_sat ? count_sat : count;
+        factor = (update_factor * count / count_sat);
+        prob = ((int)cm->fc.pre_bmode_prob[t] * (256-factor) +
+                (int)bmode_probs[t] * factor + 128) >> 8;
+        if (prob <= 0) cm->fc.bmode_prob[t] = 1;
+        else if (prob > 255) cm->fc.bmode_prob[t] = 255;
+        else cm->fc.bmode_prob[t] = prob;
+    }
+    vp8_tree_probs_from_distribution(
+        VP8_I8X8_MODES, vp8_i8x8_mode_encodings, vp8_i8x8_mode_tree,
+        i8x8_mode_probs, branch_ct, cm->fc.i8x8_mode_counts,
+        256, 1);
+    for (t=0; t<VP8_I8X8_MODES-1; ++t)
+    {
+        int prob;
+        count = branch_ct[t][0] + branch_ct[t][1];
+        count = count > count_sat ? count_sat : count;
+        factor = (update_factor * count / count_sat);
+        prob = ((int)cm->fc.pre_i8x8_mode_prob[t] * (256-factor) +
+                (int)i8x8_mode_probs[t] * factor + 128) >> 8;
+        if (prob <= 0) cm->fc.i8x8_mode_prob[t] = 1;
+        else if (prob > 255) cm->fc.i8x8_mode_prob[t] = 255;
+        else cm->fc.i8x8_mode_prob[t] = prob;
+    }
+}
+#endif

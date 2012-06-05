@@ -15,6 +15,7 @@
 #include "onyxc_int.h"
 #include "findnearmv.h"
 #include "entropymode.h"
+#include "entropymv.h"
 #include "systemdependent.h"
 
 
@@ -238,6 +239,8 @@ void vp8_initialize_common()
     vp8_coef_tree_initialize();
 
     vp8_entropy_mode_init();
+
+    vp8_entropy_mv_init();
 
     vp8_init_scan_order_mask();
 

@@ -44,6 +44,8 @@
 int dec_debug = 0;
 #endif
 
+#define COEFCOUNT_TESTING
+
 #if CONFIG_NEWUPDATE
 
 static int merge_index(int v, int n, int modulus)
@@ -1019,6 +1021,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
     else
     {
+        pc->last_frame_type = pc->frame_type;
         pc->frame_type = (FRAME_TYPE)(data[0] & 1);
         pc->version = (data[0] >> 1) & 7;
         pc->show_frame = (data[0] >> 4) & 1;
@@ -1426,6 +1429,28 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         fclose(z);
     }
 
+#if CONFIG_ADAPTIVE_ENTROPY
+    vp8_copy(pbi->common.fc.pre_coef_probs, pbi->common.fc.coef_probs);
+    vp8_copy(pbi->common.fc.pre_coef_probs_8x8, pbi->common.fc.coef_probs_8x8);
+    vp8_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
+    vp8_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
+    vp8_copy(pbi->common.fc.pre_bmode_prob, pbi->common.fc.bmode_prob);
+    vp8_copy(pbi->common.fc.pre_i8x8_mode_prob, pbi->common.fc.i8x8_mode_prob);
+    vp8_copy(pbi->common.fc.pre_mvc, pbi->common.fc.mvc);
+#if CONFIG_HIGH_PRECISION_MV
+    vp8_copy(pbi->common.fc.pre_mvc_hp, pbi->common.fc.mvc_hp);
+#endif
+    vp8_zero(pbi->common.fc.coef_counts);
+    vp8_zero(pbi->common.fc.coef_counts_8x8);
+    vp8_zero(pbi->common.fc.ymode_counts);
+    vp8_zero(pbi->common.fc.uv_mode_counts);
+    vp8_zero(pbi->common.fc.bmode_counts);
+    vp8_zero(pbi->common.fc.i8x8_mode_counts);
+    vp8_zero(pbi->common.fc.MVcount);
+#if CONFIG_HIGH_PRECISION_MV
+    vp8_zero(pbi->common.fc.MVcount_hp);
+#endif
+#endif
 #if COEFUPDATETYPE == 2
     read_coef_probs2(pbi);
 #elif COEFUPDATETYPE == 3
@@ -1437,8 +1462,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vpx_memcpy(&xd->pre, &pc->yv12_fb[pc->lst_fb_idx], sizeof(YV12_BUFFER_CONFIG));
     vpx_memcpy(&xd->dst, &pc->yv12_fb[pc->new_fb_idx], sizeof(YV12_BUFFER_CONFIG));
 
-     // Create the segmentation map structure and set to 0
-     if (!pc->last_frame_seg_map)
+    // Create the segmentation map structure and set to 0
+    if (!pc->last_frame_seg_map)
        CHECK_MEM_ERROR(pc->last_frame_seg_map,
                        vpx_calloc((pc->mb_rows * pc->mb_cols), 1));
 
@@ -1490,6 +1515,14 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     }
 
     /* vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes  \n",bc->pos+pbi->bc2.pos); */
+#if CONFIG_ADAPTIVE_ENTROPY
+    vp8_adapt_coef_probs(pc);
+    if (pc->frame_type != KEY_FRAME)
+    {
+        vp8_adapt_mode_probs(pc);
+        vp8_adapt_mv_probs(pc);
+    }
+#endif
 
     /* If this was a kf or Gf note the Q used */
     if ((pc->frame_type == KEY_FRAME) ||

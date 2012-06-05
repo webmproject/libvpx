@@ -957,7 +957,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
 
                     if ( !segfeature_active( xd, segment_id, SEG_LVL_MODE ) )
+                    {
                         write_ymode(w, mode, pc->fc.ymode_prob);
+                    }
 
                     if (mode == B_PRED)
                     {
@@ -985,22 +987,18 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                     if(mode == I8X8_PRED)
                     {
                         write_i8x8_mode(w, m->bmi[0].as_mode.first,
-                                        pc->i8x8_mode_prob);
+                                        pc->fc.i8x8_mode_prob);
                         write_i8x8_mode(w, m->bmi[2].as_mode.first,
-                                        pc->i8x8_mode_prob);
+                                        pc->fc.i8x8_mode_prob);
                         write_i8x8_mode(w, m->bmi[8].as_mode.first,
-                                        pc->i8x8_mode_prob);
+                                        pc->fc.i8x8_mode_prob);
                         write_i8x8_mode(w, m->bmi[10].as_mode.first,
-                                        pc->i8x8_mode_prob);
+                                        pc->fc.i8x8_mode_prob);
                     }
                     else
                     {
                         write_uv_mode(w, mi->uv_mode,
                                       pc->fc.uv_mode_prob[mode]);
-#ifdef MODE_STATS
-                        if(mode!=B_PRED)
-                            ++cpi->y_uv_mode_count[mode][mi->uv_mode];
-#endif
                     }
                 }
                 else
@@ -1329,16 +1327,16 @@ static void write_kfmodes(VP8_COMP *cpi)
                 if(ym == I8X8_PRED)
                 {
                     write_i8x8_mode(bc, m->bmi[0].as_mode.first,
-                                    c->i8x8_mode_prob);
+                                    c->fc.i8x8_mode_prob);
                     //printf("    mode: %d\n", m->bmi[0].as_mode.first); fflush(stdout);
                     write_i8x8_mode(bc, m->bmi[2].as_mode.first,
-                                    c->i8x8_mode_prob);
+                                    c->fc.i8x8_mode_prob);
                     //printf("    mode: %d\n", m->bmi[2].as_mode.first); fflush(stdout);
                     write_i8x8_mode(bc, m->bmi[8].as_mode.first,
-                                    c->i8x8_mode_prob);
+                                    c->fc.i8x8_mode_prob);
                     //printf("    mode: %d\n", m->bmi[8].as_mode.first); fflush(stdout);
                     write_i8x8_mode(bc, m->bmi[10].as_mode.first,
-                                    c->i8x8_mode_prob);
+                                    c->fc.i8x8_mode_prob);
                     //printf("    mode: %d\n", m->bmi[10].as_mode.first); fflush(stdout);
                 }
                 else
@@ -1883,6 +1881,7 @@ static void update_coef_probs(VP8_COMP *cpi)
     vp8_clear_system_state(); //__asm emms;
 
     // Build the cofficient contexts based on counts collected in encode loop
+
     build_coeff_contexts(cpi);
 
     //vp8_prob bestupd = find_coef_update_prob(cpi);
@@ -2117,17 +2116,18 @@ static void update_coef_probs(VP8_COMP *cpi)
                             vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
                             const vp8_prob oldp = *Pold;
                             const vp8_prob upd = COEF_UPDATE_PROB_8X8;
-#if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
-                            const int s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
-                            const int u = s > 0 && newp != oldp ? 1 : 0;
-#else
-                            const int s = prob_update_savings(ct, oldp, newp, upd);
-                            const int u = s > 0 ? 1 : 0;
+                            int s, u;
 #if CONFIG_EXPANDED_COEF_CONTEXT
                             if (k >=3 && ((i == 0 && j == 1) ||
                                           (i > 0 && j == 0)))
                                 continue;
 #endif
+#if CONFIG_NEWUPDATE && defined(SEARCH_NEWP)
+                            s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
+                            u = s > 0 && newp != oldp ? 1 : 0;
+#else
+                            s = prob_update_savings(ct, oldp, newp, upd);
+                            u = s > 0 ? 1 : 0;
 #endif
                             vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
@@ -2617,6 +2617,18 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
 
     vp8_clear_system_state();  //__asm emms;
 
+#if CONFIG_ADAPTIVE_ENTROPY
+    vp8_copy(cpi->common.fc.pre_coef_probs, cpi->common.fc.coef_probs);
+    vp8_copy(cpi->common.fc.pre_coef_probs_8x8, cpi->common.fc.coef_probs_8x8);
+    vp8_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
+    vp8_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
+    vp8_copy(cpi->common.fc.pre_bmode_prob, cpi->common.fc.bmode_prob);
+    vp8_copy(cpi->common.fc.pre_i8x8_mode_prob, cpi->common.fc.i8x8_mode_prob);
+    vp8_copy(cpi->common.fc.pre_mvc, cpi->common.fc.mvc);
+#if CONFIG_HIGH_PRECISION_MV
+    vp8_copy(cpi->common.fc.pre_mvc_hp, cpi->common.fc.mvc_hp);
+#endif
+#endif
 #if COEFUPDATETYPE == 2
     update_coef_probs2(cpi);
 #elif COEFUPDATETYPE == 3
@@ -2677,6 +2689,7 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     vp8_stop_encode(&cpi->bc2);
 
     *size += cpi->bc2.pos;
+
 }
 
 #ifdef ENTROPY_STATS

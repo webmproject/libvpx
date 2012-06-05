@@ -47,6 +47,7 @@ typedef struct frame_contexts
     vp8_prob bmode_prob [VP8_BINTRAMODES-1];
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
     vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+    vp8_prob i8x8_mode_prob [VP8_I8X8_MODES-1];
     vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     vp8_prob coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
@@ -54,6 +55,31 @@ typedef struct frame_contexts
 #if CONFIG_HIGH_PRECISION_MV
     MV_CONTEXT_HP mvc_hp[2];
 #endif
+#if CONFIG_ADAPTIVE_ENTROPY
+    MV_CONTEXT pre_mvc[2];
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP pre_mvc_hp[2];
+#endif
+    vp8_prob pre_bmode_prob [VP8_BINTRAMODES-1];
+    vp8_prob pre_ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
+    vp8_prob pre_uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+    vp8_prob pre_i8x8_mode_prob [VP8_I8X8_MODES-1];
+    unsigned int bmode_counts [VP8_BINTRAMODES];
+    unsigned int ymode_counts [VP8_YMODES];   /* interframe intra mode probs */
+    unsigned int uv_mode_counts [VP8_YMODES][VP8_UV_MODES];
+    unsigned int i8x8_mode_counts [VP8_I8X8_MODES];   /* interframe intra mode probs */
+
+    vp8_prob pre_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    vp8_prob pre_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS]
+                             [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+    unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
+                                 [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+    unsigned int MVcount [2] [MVvals];
+#if CONFIG_HIGH_PRECISION_MV
+    unsigned int MVcount_hp [2] [MVvals_hp];
+#endif
+#endif  /* CONFIG_ADAPTIVE_ENTROPY */
 } FRAME_CONTEXT;
 
 typedef enum
@@ -104,7 +130,6 @@ typedef struct VP8_COMMON_RTCD
 } VP8_COMMON_RTCD;
 
 typedef struct VP8Common
-
 {
     struct vpx_internal_error_info  error;
 
@@ -205,7 +230,6 @@ typedef struct VP8Common
     int kf_ymode_probs_index;
     int kf_ymode_probs_update;
     vp8_prob kf_uv_mode_prob[VP8_YMODES] [VP8_UV_MODES-1];
-    vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
 
     vp8_prob prob_intra_coded;
     vp8_prob prob_last_coded;

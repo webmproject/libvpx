@@ -3692,6 +3692,25 @@ static void encode_frame_to_data_rate
     vp8_pack_bitstream(cpi, dest, size);
 
     update_reference_frames(cm);
+#if CONFIG_ADAPTIVE_ENTROPY
+    vp8_copy(cpi->common.fc.coef_counts, cpi->coef_counts);
+    vp8_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
+    vp8_adapt_coef_probs(&cpi->common);
+    if (cpi->common.frame_type != KEY_FRAME)
+    {
+        vp8_copy(cpi->common.fc.ymode_counts, cpi->ymode_count);
+        vp8_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
+        vp8_copy(cpi->common.fc.bmode_counts, cpi->bmode_count);
+        vp8_copy(cpi->common.fc.i8x8_mode_counts, cpi->i8x8_mode_count);
+        vp8_adapt_mode_probs(&cpi->common);
+
+        vp8_copy(cpi->common.fc.MVcount, cpi->MVcount);
+#if CONFIG_HIGH_PRECISION_MV
+        vp8_copy(cpi->common.fc.MVcount_hp, cpi->MVcount_hp);
+#endif
+        vp8_adapt_mv_probs(&cpi->common);
+    }
+#endif  /* CONFIG_ADAPTIVE_ENTROPY */
 
     /* Move storing frame_type out of the above loop since it is also
      * needed in motion search besides loopfilter */

@@ -171,7 +171,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
         for(i=0;i<4;i++)
          {
              int ib = vp8_i8x8_block[i];
-             mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
+             mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.fc.i8x8_mode_prob);
              m->bmi[ib+0].as_mode.first= mode8x8;
              m->bmi[ib+1].as_mode.first= mode8x8;
              m->bmi[ib+4].as_mode.first= mode8x8;
@@ -789,10 +789,22 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                 case NEW4X4:
 #if CONFIG_HIGH_PRECISION_MV
                     if (xd->allow_high_precision_mv)
+                    {
                         read_mv_hp(bc, &blockmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount_hp[0][mv_max_hp+(blockmv.as_mv.row)]++;
+                        cm->fc.MVcount_hp[1][mv_max_hp+(blockmv.as_mv.col)]++;
+#endif
+                    }
                     else
 #endif
-                    read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
+                    {
+                        read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount[0][mv_max+(blockmv.as_mv.row>>1)]++;
+                        cm->fc.MVcount[1][mv_max+(blockmv.as_mv.col>>1)]++;
+#endif
+                    }
                     blockmv.as_mv.row += best_mv.as_mv.row;
                     blockmv.as_mv.col += best_mv.as_mv.col;
 
@@ -807,25 +819,25 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                         secondmv.as_mv.row += best_mv_second.as_mv.row;
                         secondmv.as_mv.col += best_mv_second.as_mv.col;
                     }
-  #ifdef VPX_MODE_COUNT
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][3]++;
-  #endif
+#endif
                     break;
                 case LEFT4X4:
                     blockmv.as_int = leftmv.as_int;
                     if (mbmi->second_ref_frame)
                         secondmv.as_int = second_leftmv.as_int;
-  #ifdef VPX_MODE_COUNT
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][0]++;
-  #endif
+#endif
                     break;
                 case ABOVE4X4:
                     blockmv.as_int = abovemv.as_int;
                     if (mbmi->second_ref_frame)
                         secondmv.as_int = second_abovemv.as_int;
-  #ifdef VPX_MODE_COUNT
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][1]++;
-  #endif
+#endif
                     break;
                 case ZERO4X4:
                     blockmv.as_int = 0;
@@ -914,10 +926,22 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         case NEWMV:
 #if CONFIG_HIGH_PRECISION_MV
             if (xd->allow_high_precision_mv)
+            {
                 read_mv_hp(bc, &mv->as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                cm->fc.MVcount_hp[0][mv_max_hp+(mv->as_mv.row)]++;
+                cm->fc.MVcount_hp[1][mv_max_hp+(mv->as_mv.col)]++;
+#endif
+            }
             else
 #endif
-            read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
+            {
+                read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                cm->fc.MVcount[0][mv_max+(mv->as_mv.row>>1)]++;
+                cm->fc.MVcount[1][mv_max+(mv->as_mv.col>>1)]++;
+#endif
+            }
             mv->as_mv.row += best_mv.as_mv.row;
             mv->as_mv.col += best_mv.as_mv.col;
 
@@ -967,6 +991,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         {
             mbmi->mode = (MB_PREDICTION_MODE)
                          vp8_read_ymode(bc, pbi->common.fc.ymode_prob);
+#if CONFIG_ADAPTIVE_ENTROPY
+            pbi->common.fc.ymode_counts[mbmi->mode]++;
+#endif
         }
 #if CONFIG_COMP_INTRA_PRED
         mbmi->second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
@@ -982,6 +1009,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             do
             {
                 mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
+#if CONFIG_ADAPTIVE_ENTROPY
+                pbi->common.fc.bmode_counts[mi->bmi[j].as_mode.first]++;
+#endif
 #if CONFIG_COMP_INTRA_PRED
                 if (use_comp_pred)
                 {
@@ -1003,11 +1033,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             for(i=0;i<4;i++)
             {
                 int ib = vp8_i8x8_block[i];
-                mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
+                mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.fc.i8x8_mode_prob);
                 mi->bmi[ib+0].as_mode.first= mode8x8;
                 mi->bmi[ib+1].as_mode.first= mode8x8;
                 mi->bmi[ib+4].as_mode.first= mode8x8;
                 mi->bmi[ib+5].as_mode.first= mode8x8;
+#if CONFIG_ADAPTIVE_ENTROPY
+                pbi->common.fc.i8x8_mode_counts[mode8x8]++;
+#endif
 #if CONFIG_COMP_INTRA_PRED
                 mi->bmi[ib+0].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
                 mi->bmi[ib+1].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
@@ -1017,8 +1050,13 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             }
         }
         else
+        {
             mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
                                     pbi->common.fc.uv_mode_prob[mbmi->mode]);
+#if CONFIG_ADAPTIVE_ENTROPY
+            pbi->common.fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
+#endif
+        }
 
 #if CONFIG_COMP_INTRA_PRED
         mbmi->second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);

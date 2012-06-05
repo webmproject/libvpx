@@ -15,6 +15,7 @@
 #include "string.h"
 #include "blockd.h"
 #include "onyxc_int.h"
+#include "entropymode.h"
 #include "vpx_mem/vpx_mem.h"
 
 #define uchar unsigned char     /* typedefs can clash */
@@ -192,3 +193,139 @@ void vp8_coef_tree_initialize()
     init_bit_trees();
     vp8_tokens_from_tree(vp8_coef_encodings, vp8_coef_tree);
 }
+
+#if CONFIG_ADAPTIVE_ENTROPY
+
+//#define COEF_COUNT_TESTING
+
+#define COEF_COUNT_SAT 24
+#define COEF_MAX_UPDATE_FACTOR 112
+#define COEF_COUNT_SAT_KEY 24
+#define COEF_MAX_UPDATE_FACTOR_KEY 112
+#define COEF_COUNT_SAT_AFTER_KEY 24
+#define COEF_MAX_UPDATE_FACTOR_AFTER_KEY 128
+
+void vp8_adapt_coef_probs(VP8_COMMON *cm)
+{
+    int t, i, j, k, count;
+    unsigned int branch_ct[ENTROPY_NODES][2];
+    vp8_prob coef_probs[ENTROPY_NODES];
+    int update_factor; /* denominator 256 */
+    int factor;
+    int count_sat;
+
+    //printf("Frame type: %d\n", cm->frame_type);
+    if (cm->frame_type == KEY_FRAME)
+    {
+        update_factor = COEF_MAX_UPDATE_FACTOR_KEY;
+        count_sat = COEF_COUNT_SAT_KEY;
+    }
+    else if (cm->last_frame_type == KEY_FRAME)
+    {
+        update_factor = COEF_MAX_UPDATE_FACTOR_AFTER_KEY;  /* adapt quickly */
+        count_sat = COEF_COUNT_SAT_AFTER_KEY;
+    }
+    else
+    {
+        update_factor = COEF_MAX_UPDATE_FACTOR;
+        count_sat = COEF_COUNT_SAT;
+    }
+
+#ifdef COEF_COUNT_TESTING
+    {
+      printf("static const unsigned int\ncoef_counts"
+               "[BLOCK_TYPES] [COEF_BANDS]"
+               "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {\n");
+      for (i = 0; i<BLOCK_TYPES; ++i)
+      {
+        printf("  {\n");
+        for (j = 0; j<COEF_BANDS; ++j)
+        {
+          printf("    {\n");
+          for (k = 0; k<PREV_COEF_CONTEXTS; ++k)
+          {
+            printf("      {");
+            for (t = 0; t<MAX_ENTROPY_TOKENS; ++t) printf("%d, ", cm->fc.coef_counts[i][j][k][t]);
+            printf("},\n");
+          }
+          printf("    },\n");
+        }
+        printf("  },\n");
+      }
+      printf("};\n");
+      printf("static const unsigned int\ncoef_counts_8x8"
+             "[BLOCK_TYPES_8X8] [COEF_BANDS]"
+             "[PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS] = {\n");
+      for (i = 0; i<BLOCK_TYPES_8X8; ++i)
+      {
+        printf("  {\n");
+        for (j = 0; j<COEF_BANDS; ++j)
+        {
+          printf("    {\n");
+          for (k = 0; k<PREV_COEF_CONTEXTS; ++k)
+          {
+            printf("      {");
+            for (t = 0; t<MAX_ENTROPY_TOKENS; ++t) printf("%d, ", cm->fc.coef_counts_8x8[i][j][k][t]);
+            printf("},\n");
+          }
+          printf("    },\n");
+        }
+        printf("  },\n");
+      }
+      printf("};\n");
+    }
+#endif
+
+    for (i = 0; i<BLOCK_TYPES; ++i)
+        for (j = 0; j<COEF_BANDS; ++j)
+            for (k = 0; k<PREV_COEF_CONTEXTS; ++k)
+            {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                    continue;
+#endif
+                vp8_tree_probs_from_distribution(
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                    coef_probs, branch_ct, cm->fc.coef_counts [i][j][k],
+                    256, 1);
+                for (t=0; t<ENTROPY_NODES; ++t)
+                {
+                    int prob;
+                    count = branch_ct[t][0] + branch_ct[t][1];
+                    count = count > count_sat ? count_sat : count;
+                    factor = (update_factor * count / count_sat);
+                    prob = ((int)cm->fc.pre_coef_probs[i][j][k][t] * (256-factor) +
+                            (int)coef_probs[t] * factor + 128) >> 8;
+                    if (prob <= 0) cm->fc.coef_probs[i][j][k][t] = 1;
+                    else if (prob > 255) cm->fc.coef_probs[i][j][k][t] = 255;
+                    else cm->fc.coef_probs[i][j][k][t] = prob;
+                }
+            }
+
+    for (i = 0; i<BLOCK_TYPES_8X8; ++i)
+        for (j = 0; j<COEF_BANDS; ++j)
+            for (k = 0; k<PREV_COEF_CONTEXTS; ++k)
+            {
+#if CONFIG_EXPANDED_COEF_CONTEXT
+                if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+                    continue;
+#endif
+                vp8_tree_probs_from_distribution(
+                    MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+                    coef_probs, branch_ct, cm->fc.coef_counts_8x8 [i][j][k],
+                    256, 1);
+                for (t=0; t<ENTROPY_NODES; ++t)
+                {
+                    int prob;
+                    count = branch_ct[t][0] + branch_ct[t][1];
+                    count = count > count_sat ? count_sat : count;
+                    factor = (update_factor * count / count_sat);
+                    prob = ((int)cm->fc.pre_coef_probs_8x8[i][j][k][t] * (256-factor) +
+                            (int)coef_probs[t] * factor + 128) >> 8;
+                    if (prob <= 0) cm->fc.coef_probs_8x8[i][j][k][t] = 1;
+                    else if (prob > 255) cm->fc.coef_probs_8x8[i][j][k][t] = 255;
+                    else cm->fc.coef_probs_8x8[i][j][k][t] = prob;
+                }
+            }
+}
+#endif
