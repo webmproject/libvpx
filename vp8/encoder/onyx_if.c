@@ -3466,6 +3466,8 @@ static void encode_frame_to_data_rate
         else
             cpi->decimation_count = cpi->decimation_factor;
     }
+    else
+        cpi->decimation_count = 0;
 
     // Decide how big to make the frame
     if (!vp8_pick_frame_size(cpi))
