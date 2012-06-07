@@ -181,7 +181,6 @@ int vp8cx_base_skip_false_prob[QINDEX_RANGE];
 static int kf_low_motion_minq[QINDEX_RANGE];
 static int kf_high_motion_minq[QINDEX_RANGE];
 static int gf_low_motion_minq[QINDEX_RANGE];
-static int gf_mid_motion_minq[QINDEX_RANGE];
 static int gf_high_motion_minq[QINDEX_RANGE];
 static int inter_minq[QINDEX_RANGE];
 
@@ -227,26 +226,20 @@ void init_minq_luts()
                                                       -0.000015,
                                                       0.074,
                                                       0.0 );
-
         kf_high_motion_minq[i] = calculate_minq_index( maxq,
-                                                       0.00000034,
+                                                       0.0000004,
                                                        -0.000125,
-                                                       0.13,
+                                                       0.14,
                                                        0.0 );
         gf_low_motion_minq[i] = calculate_minq_index( maxq,
-                                                      0.0000016,
-                                                      -0.00078,
-                                                      0.315,
-                                                      0.0 );
-        gf_mid_motion_minq[i] = calculate_minq_index( maxq,
-                                                      0.00000415,
-                                                      -0.0017,
-                                                      0.425,
+                                                      0.0000015,
+                                                      -0.0009,
+                                                      0.33,
                                                       0.0 );
         gf_high_motion_minq[i] = calculate_minq_index( maxq,
-                                                       0.00000725,
-                                                       -0.00235,
-                                                       0.47,
+                                                       0.0000021,
+                                                       -0.00125,
+                                                       0.45,
                                                        0.0  );
         inter_minq[i] = calculate_minq_index( maxq,
                                               0.00000271,
@@ -3016,10 +3009,28 @@ static void encode_frame_to_data_rate
 
     if ( cm->frame_type == KEY_FRAME )
     {
-        if (cpi->gfu_boost > 600)
-           cpi->active_best_quality = kf_low_motion_minq[Q];
+        int high = 2000;
+        int low = 400;
+
+        if ( cpi->kf_boost > high )
+            cpi->active_best_quality = kf_low_motion_minq[Q];
+        else if ( cpi->kf_boost < low )
+            cpi->active_best_quality = kf_high_motion_minq[Q];
         else
-           cpi->active_best_quality = kf_high_motion_minq[Q];
+        {
+            int gap = high - low;
+            int offset = high - cpi->kf_boost;
+            int qdiff = kf_high_motion_minq[Q] - kf_low_motion_minq[Q];
+            int adjustment = ((offset * qdiff) + (gap>>1)) / gap;
+
+            cpi->active_best_quality = kf_low_motion_minq[Q] + adjustment;
+        }
+
+        // Make an adjustment based on the %s static
+        // The main impact of this is at lower Q to prevent overly large key
+        // frames unless a lot of the image is static.
+        if (cpi->kf_zeromotion_pct < 64 )
+            cpi->active_best_quality += 4 - (cpi->kf_zeromotion_pct >> 4);
 
         // Special case for key frames forced because we have reached
         // the maximum key frame interval. Here force the Q to a range
@@ -3040,6 +3051,9 @@ static void encode_frame_to_data_rate
 
     else if (cm->refresh_golden_frame || cpi->common.refresh_alt_ref_frame)
     {
+        int high = 2000;
+        int low = 400;
+
         // Use the lower of cpi->active_worst_quality and recent
         // average Q as basis for GF/ARF Q limit unless last frame was
         // a key frame.
@@ -3056,12 +3070,19 @@ static void encode_frame_to_data_rate
             Q = cpi->cq_target_quality;
         }
 
-        if ( cpi->gfu_boost > 1000 )
+        if ( cpi->gfu_boost > high )
             cpi->active_best_quality = gf_low_motion_minq[Q];
-        else if ( cpi->gfu_boost < 400 )
+        else if ( cpi->gfu_boost < low )
             cpi->active_best_quality = gf_high_motion_minq[Q];
         else
-            cpi->active_best_quality = gf_mid_motion_minq[Q];
+        {
+            int gap = high - low;
+            int offset = high - cpi->gfu_boost;
+            int qdiff = gf_high_motion_minq[Q] - gf_low_motion_minq[Q];
+            int adjustment = ((offset * qdiff) + (gap>>1)) / gap;
+
+            cpi->active_best_quality = gf_low_motion_minq[Q] + adjustment;
+        }
 
         // Constrained quality use slightly lower active best.
         if ( cpi->oxcf.end_usage == USAGE_CONSTRAINED_QUALITY )
@@ -3765,7 +3786,7 @@ static void encode_frame_to_data_rate
     // in this frame.
     update_base_skip_probs( cpi );
 
-#if 0 && CONFIG_INTERNAL_STATS
+#if 1 && CONFIG_INTERNAL_STATS
     {
         FILE *f = fopen("tmp.stt", "a");
         int recon_err;
@@ -3780,7 +3801,7 @@ static void encode_frame_to_data_rate
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
                        "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
-                       "%10.3f %8d %10d\n",
+                       "%10.3f %8d %10d %10d %10d\n",
                        cpi->common.current_video_frame, cpi->this_frame_target,
                        cpi->projected_frame_size, loop_size_estimate,
                        (cpi->projected_frame_size - cpi->this_frame_target),
@@ -3803,12 +3824,13 @@ static void encode_frame_to_data_rate
                        cpi->twopass.total_left_stats->coded_error,
                        (double)cpi->twopass.bits_left /
                            cpi->twopass.total_left_stats->coded_error,
-                       cpi->tot_recode_hits, recon_err);
+                       cpi->tot_recode_hits, recon_err, cpi->kf_boost,
+                       cpi->kf_zeromotion_pct);
         else
             fprintf(f, "%10d %10d %10d %10d %10d %10d %10d %10d"
                        "%7.2f %7.2f %7.2f %7.2f %7.2f %7.2f %7.2f"
                        "%6d %5d %5d %5d %8d %8.2f %10d %10.3f"
-                       "%8d %10d\n",
+                       "%8d %10d %10d %10d\n",
                        cpi->common.current_video_frame,
                        cpi->this_frame_target, cpi->projected_frame_size,
                        loop_size_estimate,
@@ -3830,7 +3852,8 @@ static void encode_frame_to_data_rate
                        cpi->twopass.est_max_qcorrection_factor,
                        (int)cpi->twopass.bits_left,
                        cpi->twopass.total_left_stats->coded_error,
-                       cpi->tot_recode_hits, recon_err);
+                       cpi->tot_recode_hits, recon_err, cpi->kf_boost,
+                       cpi->kf_zeromotion_pct);
 
         fclose(f);
 

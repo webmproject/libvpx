@@ -52,8 +52,8 @@ extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 
 #define IIFACTOR   12.5
 #define IIKFACTOR1 12.5
-#define IIKFACTOR2 12.5
-#define RMAX       96.0
+#define IIKFACTOR2 15.0
+#define RMAX       128.0
 #define GF_RMAX    96.0
 #define ERR_DIVISOR   150.0
 
@@ -1716,8 +1716,12 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             decay_accumulator = decay_accumulator * loop_decay_rate;
 
             // Monitor for static sections.
-            zero_motion_accumulator *=
-                (next_frame.pcnt_inter - next_frame.pcnt_motion);
+            if ( (next_frame.pcnt_inter - next_frame.pcnt_motion) <
+                 zero_motion_accumulator )
+            {
+                zero_motion_accumulator =
+                    (next_frame.pcnt_inter - next_frame.pcnt_motion);
+            }
 
             // Break clause to detect very still sections after motion
             // (for example a staic image after a fade or other transition).
@@ -2525,7 +2529,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     boost_score = 0.0;
     loop_decay_rate = 1.00;       // Starting decay rate
 
-    for (i = 0 ; i < cpi->twopass.frames_to_key ; i++)
+    for (i = 0; i < cpi->twopass.frames_to_key; i++)
     {
         double r;
 
@@ -2543,8 +2547,12 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
             r = RMAX;
 
         // Monitor for static sections.
-        zero_motion_accumulator *=
-            (next_frame.pcnt_inter - next_frame.pcnt_motion);
+        if ( (next_frame.pcnt_inter - next_frame.pcnt_motion) <
+             zero_motion_accumulator )
+        {
+            zero_motion_accumulator =
+                (next_frame.pcnt_inter - next_frame.pcnt_motion);
+        }
 
         // How fast is prediction quality decaying
         loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
@@ -2582,14 +2590,13 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
                 kf_boost = 300;
         }
 
-        // bigger frame sizes need larger kf boosts, smaller frames smaller boosts...
-        if ((lst_yv12->y_width * lst_yv12->y_height) > (320 * 240))
-            kf_boost += 12 * (lst_yv12->y_width * lst_yv12->y_height) / (320 * 240);
-        else if ((lst_yv12->y_width * lst_yv12->y_height) < (320 * 240))
-            kf_boost -= 25 * (320 * 240) / (lst_yv12->y_width * lst_yv12->y_height);
-
         if (kf_boost < 250)                                                      // Min KF boost
             kf_boost = 250;
+
+        // Make a not of baseline boost and the zero motion
+        // accumulator value for use elsewhere.
+        cpi->kf_boost = kf_boost;
+        cpi->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
 
         // We do three calculations for kf size.
         // The first is based on the error score for the whole kf group.
