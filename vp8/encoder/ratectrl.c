@@ -966,7 +966,7 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
     // In unbufferd mode (eg vide conferencing) the descision to
     // code or drop a frame is made outside the codec in response to real
     // world comms or buffer considerations.
-    if (cpi->drop_frames_allowed && cpi->buffered_mode &&
+    if (cpi->drop_frames_allowed &&
         (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
         ((cpi->common.frame_type != KEY_FRAME))) //|| !cpi->oxcf.allow_spatial_resampling) )
     {
@@ -984,28 +984,13 @@ static void calc_pframe_target_size(VP8_COMP *cpi)
             //vpx_log("Decoder: Drop frame due to bandwidth: %d \n",cpi->buffer_level, cpi->av_per_frame_bandwidth);
 
             cpi->drop_frame = 1;
-        }
 
-#if 0
-        // Check for other drop frame crtieria (Note 2 pass cbr uses decimation on whole KF sections)
-        else if ((cpi->buffer_level < cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100) &&
-                 (cpi->drop_count < cpi->max_drop_count) && (cpi->pass == 0))
-        {
-            cpi->drop_frame = 1;
-        }
-
-#endif
-
-        if (cpi->drop_frame)
-        {
             // Update the buffer level variable.
             cpi->bits_off_target += cpi->av_per_frame_bandwidth;
             if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
               cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
             cpi->buffer_level = cpi->bits_off_target;
         }
-        else
-            cpi->drop_count = 0;
     }
 
     // Adjust target frame size for Golden Frames:
@@ -1554,7 +1539,6 @@ int vp8_pick_frame_size(VP8_COMP *cpi)
         if (cpi->drop_frame)
         {
             cpi->drop_frame = 0;
-            cpi->drop_count++;
             return 0;
         }
     }

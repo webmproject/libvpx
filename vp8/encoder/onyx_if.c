@@ -1889,9 +1889,6 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
     cpi->total_byte_count             = 0;
 
     cpi->drop_frame                  = 0;
-    cpi->drop_count                  = 0;
-    cpi->max_drop_count               = 0;
-    cpi->max_consec_dropped_frames     = 4;
 
     cpi->rate_correction_factor         = 1.0;
     cpi->key_frame_rate_correction_factor = 1.0;
@@ -4311,30 +4308,6 @@ static void encode_frame_to_data_rate
             if (Q > cpi->ni_av_qi)
                 cpi->ni_av_qi = Q - 1;
         }
-    }
-
-#if 0
-
-    // If the frame was massively oversize and we are below optimal buffer level drop next frame
-    if ((cpi->drop_frames_allowed) &&
-        (cpi->oxcf.end_usage == USAGE_STREAM_FROM_SERVER) &&
-        (cpi->buffer_level < cpi->oxcf.drop_frames_water_mark * cpi->oxcf.optimal_buffer_level / 100) &&
-        (cpi->projected_frame_size > (4 * cpi->this_frame_target)))
-    {
-        cpi->drop_frame = 1;
-    }
-
-#endif
-
-    // Set the count for maximum consecutive dropped frames based upon the ratio of
-    // this frame size to the target average per frame bandwidth.
-    // (cpi->av_per_frame_bandwidth > 0) is just a sanity check to prevent / 0.
-    if (cpi->drop_frames_allowed && (cpi->av_per_frame_bandwidth > 0))
-    {
-        cpi->max_drop_count = cpi->projected_frame_size / cpi->av_per_frame_bandwidth;
-
-        if (cpi->max_drop_count > cpi->max_consec_dropped_frames)
-            cpi->max_drop_count = cpi->max_consec_dropped_frames;
     }
 
     // Update the buffer level variable.
