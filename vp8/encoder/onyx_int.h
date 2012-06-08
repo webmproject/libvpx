@@ -701,6 +701,10 @@ typedef struct VP8_COMP
 #if CONFIG_MULTI_RES_ENCODING
     /* Number of MBs per row at lower-resolution level */
     int    mr_low_res_mb_cols;
+    /* Indicate if lower-res mv info is available */
+    unsigned char  mr_low_res_mv_avail;
+    /* The frame number of each reference frames */
+    unsigned int current_ref_frames[MAX_REF_FRAMES];
 #endif
 
     struct rd_costs_struct

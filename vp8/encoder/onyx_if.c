@@ -3014,8 +3014,9 @@ static int recode_loop_test( VP8_COMP *cpi,
     return force_recode;
 }
 
-static void update_reference_frames(VP8_COMMON *cm)
+static void update_reference_frames(VP8_COMP *cpi)
 {
+    VP8_COMMON *cm = &cpi->common;
     YV12_BUFFER_CONFIG *yv12_fb = cm->yv12_fb;
 
     /* At this point the new frame has been encoded.
@@ -3030,6 +3031,11 @@ static void update_reference_frames(VP8_COMMON *cm)
         yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
 
         cm->alt_fb_idx = cm->gld_fb_idx = cm->new_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+        cpi->current_ref_frames[GOLDEN_FRAME] = cm->current_video_frame;
+        cpi->current_ref_frames[ALTREF_FRAME] = cm->current_video_frame;
+#endif
     }
     else    /* For non key frames */
     {
@@ -3040,6 +3046,10 @@ static void update_reference_frames(VP8_COMMON *cm)
             cm->yv12_fb[cm->new_fb_idx].flags |= VP8_ALTR_FRAME;
             cm->yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
             cm->alt_fb_idx = cm->new_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+            cpi->current_ref_frames[ALTREF_FRAME] = cm->current_video_frame;
+#endif
         }
         else if (cm->copy_buffer_to_arf)
         {
@@ -3052,6 +3062,11 @@ static void update_reference_frames(VP8_COMMON *cm)
                     yv12_fb[cm->lst_fb_idx].flags |= VP8_ALTR_FRAME;
                     yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
                     cm->alt_fb_idx = cm->lst_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+                    cpi->current_ref_frames[ALTREF_FRAME] =
+                        cpi->current_ref_frames[LAST_FRAME];
+#endif
                 }
             }
             else /* if (cm->copy_buffer_to_arf == 2) */
@@ -3061,6 +3076,11 @@ static void update_reference_frames(VP8_COMMON *cm)
                     yv12_fb[cm->gld_fb_idx].flags |= VP8_ALTR_FRAME;
                     yv12_fb[cm->alt_fb_idx].flags &= ~VP8_ALTR_FRAME;
                     cm->alt_fb_idx = cm->gld_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+                    cpi->current_ref_frames[ALTREF_FRAME] =
+                        cpi->current_ref_frames[GOLDEN_FRAME];
+#endif
                 }
             }
         }
@@ -3072,6 +3092,10 @@ static void update_reference_frames(VP8_COMMON *cm)
             cm->yv12_fb[cm->new_fb_idx].flags |= VP8_GOLD_FRAME;
             cm->yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
             cm->gld_fb_idx = cm->new_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+            cpi->current_ref_frames[GOLDEN_FRAME] = cm->current_video_frame;
+#endif
         }
         else if (cm->copy_buffer_to_gf)
         {
@@ -3084,6 +3108,11 @@ static void update_reference_frames(VP8_COMMON *cm)
                     yv12_fb[cm->lst_fb_idx].flags |= VP8_GOLD_FRAME;
                     yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
                     cm->gld_fb_idx = cm->lst_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+                    cpi->current_ref_frames[GOLDEN_FRAME] =
+                        cpi->current_ref_frames[LAST_FRAME];
+#endif
                 }
             }
             else /* if (cm->copy_buffer_to_gf == 2) */
@@ -3093,6 +3122,11 @@ static void update_reference_frames(VP8_COMMON *cm)
                     yv12_fb[cm->alt_fb_idx].flags |= VP8_GOLD_FRAME;
                     yv12_fb[cm->gld_fb_idx].flags &= ~VP8_GOLD_FRAME;
                     cm->gld_fb_idx = cm->alt_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+                    cpi->current_ref_frames[GOLDEN_FRAME] =
+                        cpi->current_ref_frames[ALTREF_FRAME];
+#endif
                 }
             }
         }
@@ -3103,6 +3137,10 @@ static void update_reference_frames(VP8_COMMON *cm)
         cm->yv12_fb[cm->new_fb_idx].flags |= VP8_LAST_FRAME;
         cm->yv12_fb[cm->lst_fb_idx].flags &= ~VP8_LAST_FRAME;
         cm->lst_fb_idx = cm->new_fb_idx;
+
+#if CONFIG_MULTI_RES_ENCODING
+        cpi->current_ref_frames[LAST_FRAME] = cm->current_video_frame;
+#endif
     }
 }
 
@@ -3313,8 +3351,28 @@ static void encode_frame_to_data_rate
      */
     if (cpi->oxcf.mr_encoder_id)
     {
-        cm->frame_type =
-            ((LOWER_RES_FRAME_INFO*)cpi->oxcf.mr_low_res_mode_info)->frame_type;
+        LOWER_RES_FRAME_INFO* low_res_frame_info
+                        = (LOWER_RES_FRAME_INFO*)cpi->oxcf.mr_low_res_mode_info;
+
+        cm->frame_type = low_res_frame_info->frame_type;
+
+        if(cm->frame_type != KEY_FRAME)
+        {
+            cpi->mr_low_res_mv_avail = 1;
+            cpi->mr_low_res_mv_avail &= !(low_res_frame_info->is_frame_dropped);
+
+            if (cpi->ref_frame_flags & VP8_LAST_FRAME)
+                cpi->mr_low_res_mv_avail &= (cpi->current_ref_frames[LAST_FRAME]
+                         == low_res_frame_info->low_res_ref_frames[LAST_FRAME]);
+
+            if (cpi->ref_frame_flags & VP8_GOLD_FRAME)
+                cpi->mr_low_res_mv_avail &= (cpi->current_ref_frames[GOLDEN_FRAME]
+                         == low_res_frame_info->low_res_ref_frames[GOLDEN_FRAME]);
+
+            if (cpi->ref_frame_flags & VP8_ALTR_FRAME)
+                cpi->mr_low_res_mv_avail &= (cpi->current_ref_frames[ALTREF_FRAME]
+                         == low_res_frame_info->low_res_ref_frames[ALTREF_FRAME]);
+        }
     }
 #endif
 
@@ -3422,6 +3480,10 @@ static void encode_frame_to_data_rate
             if (cpi->bits_off_target > cpi->oxcf.maximum_buffer_size)
                 cpi->bits_off_target = cpi->oxcf.maximum_buffer_size;
 
+#if CONFIG_MULTI_RES_ENCODING
+            vp8_store_drop_frame_info(cpi);
+#endif
+
             cm->current_video_frame++;
             cpi->frames_since_key++;
 
@@ -3459,6 +3521,10 @@ static void encode_frame_to_data_rate
     /* Decide how big to make the frame */
     if (!vp8_pick_frame_size(cpi))
     {
+        /*TODO: 2 drop_frame and return code could be put together. */
+#if CONFIG_MULTI_RES_ENCODING
+        vp8_store_drop_frame_info(cpi);
+#endif
         cm->current_video_frame++;
         cpi->frames_since_key++;
         return;
@@ -4231,7 +4297,7 @@ static void encode_frame_to_data_rate
         vp8_loopfilter_frame(cpi, cm);
     }
 
-    update_reference_frames(cm);
+    update_reference_frames(cpi);
 
 #if !(CONFIG_REALTIME_ONLY & CONFIG_ONTHEFLY_BITPACKING)
     if (cpi->oxcf.error_resilient_mode)
