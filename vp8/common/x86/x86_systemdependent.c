@@ -34,14 +34,14 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
 
     /* Override default functions with fastest ones for this CPU. */
 #if HAVE_MMX
-
+// The commented functions need to be re-written for vpx.
     if (flags & HAS_MMX)
     {
-        rtcd->idct.idct1        = vp8_short_idct4x4llm_1_mmx;
-        rtcd->idct.idct16       = vp8_short_idct4x4llm_mmx;
-        rtcd->idct.idct1_scalar_add = vp8_dc_only_idct_add_mmx;
-        rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_mmx;
-        rtcd->idct.iwalsh1     = vp8_short_inv_walsh4x4_1_mmx;
+        rtcd->idct.idct1        = vpx_short_idct4x4llm_1_mmx;
+        rtcd->idct.idct16       = vpx_short_idct4x4llm_mmx;
+        rtcd->idct.idct1_scalar_add = vpx_dc_only_idct_add_mmx;
+        //rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_mmx;
+        //rtcd->idct.iwalsh1     = vp8_short_inv_walsh4x4_1_mmx;
 
         rtcd->recon.recon       = vp8_recon_b_mmx;
         rtcd->recon.copy8x8     = vp8_copy_mem8x8_mmx;
@@ -91,7 +91,7 @@ void vp8_arch_x86_common_init(VP8_COMMON *ctx)
             vp8_build_intra_predictors_mbuv_s_sse2;
 #endif
 
-        rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_sse2;
+        //rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_sse2;
 
 #if CONFIG_ENHANCED_INTERP == 0 && CONFIG_HIGH_PRECISION_MV == 0 && CONFIG_SIXTEENTH_SUBPEL_UV == 0
         rtcd->subpix.sixtap16x16   = vp8_sixtap_predict16x16_sse2;

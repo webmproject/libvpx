@@ -1,5 +1,5 @@
 ;
-;  Copyright (c) 2010 The WebM project authors. All Rights Reserved.
+;  Copyright (c) 2012 The WebM project authors. All Rights Reserved.
 ;
 ;  Use of this source code is governed by a BSD-style license
 ;  that can be found in the LICENSE file in the root of the source
@@ -8,454 +8,380 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-
-%include "vpx_ports/x86_abi_support.asm"
-
-
-;void vp8_dequantize_b_impl_mmx(short *sq, short *dq, short *q)
-global sym(vp8_dequantize_b_impl_mmx)
-sym(vp8_dequantize_b_impl_mmx):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 3
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov       rsi, arg(0) ;sq
-        mov       rdi, arg(1) ;dq
-        mov       rax, arg(2) ;q
-
-        movq      mm1, [rsi]
-        pmullw    mm1, [rax+0]            ; mm4 *= kernel 0 modifiers.
-        movq      [rdi], mm1
-
-        movq      mm1, [rsi+8]
-        pmullw    mm1, [rax+8]            ; mm4 *= kernel 0 modifiers.
-        movq      [rdi+8], mm1
-
-        movq      mm1, [rsi+16]
-        pmullw    mm1, [rax+16]            ; mm4 *= kernel 0 modifiers.
-        movq      [rdi+16], mm1
-
-        movq      mm1, [rsi+24]
-        pmullw    mm1, [rax+24]            ; mm4 *= kernel 0 modifiers.
-        movq      [rdi+24], mm1
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-
-;void dequant_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride)
-global sym(vp8_dequant_idct_add_mmx)
-sym(vp8_dequant_idct_add_mmx):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 6
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov         rax,    arg(0) ;input
-        mov         rdx,    arg(1) ;dq
-
-
-        movq        mm0,    [rax   ]
-        pmullw      mm0,    [rdx]
-
-        movq        mm1,    [rax +8]
-        pmullw      mm1,    [rdx +8]
-
-        movq        mm2,    [rax+16]
-        pmullw      mm2,    [rdx+16]
-
-        movq        mm3,    [rax+24]
-        pmullw      mm3,    [rdx+24]
-
-        mov         rdx,    arg(3) ;dest
-        mov         rsi,    arg(2) ;pred
-        pxor        mm7,    mm7
-
-
-        movq        [rax],   mm7
-        movq        [rax+8], mm7
-
-        movq        [rax+16],mm7
-        movq        [rax+24],mm7
-
-
-        movsxd      rax,            dword ptr arg(4) ;pitch
-        movsxd      rdi,            dword ptr arg(5) ;stride
-
-        psubw       mm0,            mm2             ; b1= 0-2
-        paddw       mm2,            mm2             ;
-
-        movq        mm5,            mm1
-        paddw       mm2,            mm0             ; a1 =0+2
-
-        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
-        paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
-
-        movq        mm7,            mm3             ;
-        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
-
-        paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
-        psubw       mm7,            mm5             ; c1
-
-        movq        mm5,            mm1
-        movq        mm4,            mm3
-
-        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
-        paddw       mm5,            mm1
-
-        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
-        paddw       mm3,            mm4
-
-        paddw       mm3,            mm5             ; d1
-        movq        mm6,            mm2             ; a1
-
-        movq        mm4,            mm0             ; b1
-        paddw       mm2,            mm3             ;0
-
-        paddw       mm4,            mm7             ;1
-        psubw       mm0,            mm7             ;2
-
-        psubw       mm6,            mm3             ;3
-
-        movq        mm1,            mm2             ; 03 02 01 00
-        movq        mm3,            mm4             ; 23 22 21 20
-
-        punpcklwd   mm1,            mm0             ; 11 01 10 00
-        punpckhwd   mm2,            mm0             ; 13 03 12 02
-
-        punpcklwd   mm3,            mm6             ; 31 21 30 20
-        punpckhwd   mm4,            mm6             ; 33 23 32 22
-
-        movq        mm0,            mm1             ; 11 01 10 00
-        movq        mm5,            mm2             ; 13 03 12 02
-
-        punpckldq   mm0,            mm3             ; 30 20 10 00
-        punpckhdq   mm1,            mm3             ; 31 21 11 01
-
-        punpckldq   mm2,            mm4             ; 32 22 12 02
-        punpckhdq   mm5,            mm4             ; 33 23 13 03
-
-        movq        mm3,            mm5             ; 33 23 13 03
-
-        psubw       mm0,            mm2             ; b1= 0-2
-        paddw       mm2,            mm2             ;
-
-        movq        mm5,            mm1
-        paddw       mm2,            mm0             ; a1 =0+2
-
-        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
-        paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
-
-        movq        mm7,            mm3             ;
-        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
-
-        paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
-        psubw       mm7,            mm5             ; c1
-
-        movq        mm5,            mm1
-        movq        mm4,            mm3
-
-        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
-        paddw       mm5,            mm1
-
-        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
-        paddw       mm3,            mm4
-
-        paddw       mm3,            mm5             ; d1
-        paddw       mm0,            [GLOBAL(fours)]
-
-        paddw       mm2,            [GLOBAL(fours)]
-        movq        mm6,            mm2             ; a1
-
-        movq        mm4,            mm0             ; b1
-        paddw       mm2,            mm3             ;0
-
-        paddw       mm4,            mm7             ;1
-        psubw       mm0,            mm7             ;2
-
-        psubw       mm6,            mm3             ;3
-        psraw       mm2,            3
-
-        psraw       mm0,            3
-        psraw       mm4,            3
-
-        psraw       mm6,            3
-
-        movq        mm1,            mm2             ; 03 02 01 00
-        movq        mm3,            mm4             ; 23 22 21 20
-
-        punpcklwd   mm1,            mm0             ; 11 01 10 00
-        punpckhwd   mm2,            mm0             ; 13 03 12 02
-
-        punpcklwd   mm3,            mm6             ; 31 21 30 20
-        punpckhwd   mm4,            mm6             ; 33 23 32 22
-
-        movq        mm0,            mm1             ; 11 01 10 00
-        movq        mm5,            mm2             ; 13 03 12 02
-
-        punpckldq   mm0,            mm3             ; 30 20 10 00
-        punpckhdq   mm1,            mm3             ; 31 21 11 01
-
-        punpckldq   mm2,            mm4             ; 32 22 12 02
-        punpckhdq   mm5,            mm4             ; 33 23 13 03
-
-        pxor        mm7,            mm7
-
-        movd        mm4,            [rsi]
-        punpcklbw   mm4,            mm7
-        paddsw      mm0,            mm4
-        packuswb    mm0,            mm7
-        movd        [rdx],          mm0
-
-        movd        mm4,            [rsi+rax]
-        punpcklbw   mm4,            mm7
-        paddsw      mm1,            mm4
-        packuswb    mm1,            mm7
-        movd        [rdx+rdi],      mm1
-
-        movd        mm4,            [rsi+2*rax]
-        punpcklbw   mm4,            mm7
-        paddsw      mm2,            mm4
-        packuswb    mm2,            mm7
-        movd        [rdx+rdi*2],    mm2
-
-        add         rdx,            rdi
-        add         rsi,            rax
-
-        movd        mm4,            [rsi+2*rax]
-        punpcklbw   mm4,            mm7
-        paddsw      mm5,            mm4
-        packuswb    mm5,            mm7
-        movd        [rdx+rdi*2],    mm5
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
-
-;void dequant_dc_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc)
-global sym(vp8_dequant_dc_idct_add_mmx)
-sym(vp8_dequant_dc_idct_add_mmx):
-    push        rbp
-    mov         rbp, rsp
-    SHADOW_ARGS_TO_STACK 7
-    GET_GOT     rbx
-    push        rsi
-    push        rdi
-    ; end prolog
-
-        mov         rax,    arg(0) ;input
-        mov         rdx,    arg(1) ;dq
-
-        movq        mm0,    [rax   ]
-        pmullw      mm0,    [rdx]
-
-        movq        mm1,    [rax +8]
-        pmullw      mm1,    [rdx +8]
-
-        movq        mm2,    [rax+16]
-        pmullw      mm2,    [rdx+16]
-
-        movq        mm3,    [rax+24]
-        pmullw      mm3,    [rdx+24]
-
-        mov         rdx,    arg(3) ;dest
-        mov         rsi,    arg(2) ;pred
-        pxor        mm7,    mm7
-
-
-        movq        [rax],   mm7
-        movq        [rax+8], mm7
-
-        movq        [rax+16],mm7
-        movq        [rax+24],mm7
-
-        ; move lower word of Dc to lower word of mm0
-        psrlq       mm0,    16
-        movzx       rcx,    word ptr arg(6) ;Dc
-        psllq       mm0,    16
-        movq        mm7,    rcx
-        por         mm0,    mm7
-
-        movsxd      rax,            dword ptr arg(4) ;pitch
-        movsxd      rdi,            dword ptr arg(5) ;stride
-
-        psubw       mm0,            mm2             ; b1= 0-2
-        paddw       mm2,            mm2             ;
-
-        movq        mm5,            mm1
-        paddw       mm2,            mm0             ; a1 =0+2
-
-        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
-        paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
-
-        movq        mm7,            mm3             ;
-        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
-
-        paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
-        psubw       mm7,            mm5             ; c1
-
-        movq        mm5,            mm1
-        movq        mm4,            mm3
-
-        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
-        paddw       mm5,            mm1
-
-        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
-        paddw       mm3,            mm4
-
-        paddw       mm3,            mm5             ; d1
-        movq        mm6,            mm2             ; a1
-
-        movq        mm4,            mm0             ; b1
-        paddw       mm2,            mm3             ;0
-
-        paddw       mm4,            mm7             ;1
-        psubw       mm0,            mm7             ;2
-
-        psubw       mm6,            mm3             ;3
-
-        movq        mm1,            mm2             ; 03 02 01 00
-        movq        mm3,            mm4             ; 23 22 21 20
-
-        punpcklwd   mm1,            mm0             ; 11 01 10 00
-        punpckhwd   mm2,            mm0             ; 13 03 12 02
-
-        punpcklwd   mm3,            mm6             ; 31 21 30 20
-        punpckhwd   mm4,            mm6             ; 33 23 32 22
-
-        movq        mm0,            mm1             ; 11 01 10 00
-        movq        mm5,            mm2             ; 13 03 12 02
-
-        punpckldq   mm0,            mm3             ; 30 20 10 00
-        punpckhdq   mm1,            mm3             ; 31 21 11 01
-
-        punpckldq   mm2,            mm4             ; 32 22 12 02
-        punpckhdq   mm5,            mm4             ; 33 23 13 03
-
-        movq        mm3,            mm5             ; 33 23 13 03
-
-        psubw       mm0,            mm2             ; b1= 0-2
-        paddw       mm2,            mm2             ;
-
-        movq        mm5,            mm1
-        paddw       mm2,            mm0             ; a1 =0+2
-
-        pmulhw      mm5,            [GLOBAL(x_s1sqr2)];
-        paddw       mm5,            mm1             ; ip1 * sin(pi/8) * sqrt(2)
-
-        movq        mm7,            mm3             ;
-        pmulhw      mm7,            [GLOBAL(x_c1sqr2less1)];
-
-        paddw       mm7,            mm3             ; ip3 * cos(pi/8) * sqrt(2)
-        psubw       mm7,            mm5             ; c1
-
-        movq        mm5,            mm1
-        movq        mm4,            mm3
-
-        pmulhw      mm5,            [GLOBAL(x_c1sqr2less1)]
-        paddw       mm5,            mm1
-
-        pmulhw      mm3,            [GLOBAL(x_s1sqr2)]
-        paddw       mm3,            mm4
-
-        paddw       mm3,            mm5             ; d1
-        paddw       mm0,            [GLOBAL(fours)]
-
-        paddw       mm2,            [GLOBAL(fours)]
-        movq        mm6,            mm2             ; a1
-
-        movq        mm4,            mm0             ; b1
-        paddw       mm2,            mm3             ;0
-
-        paddw       mm4,            mm7             ;1
-        psubw       mm0,            mm7             ;2
-
-        psubw       mm6,            mm3             ;3
-        psraw       mm2,            3
-
-        psraw       mm0,            3
-        psraw       mm4,            3
-
-        psraw       mm6,            3
-
-        movq        mm1,            mm2             ; 03 02 01 00
-        movq        mm3,            mm4             ; 23 22 21 20
-
-        punpcklwd   mm1,            mm0             ; 11 01 10 00
-        punpckhwd   mm2,            mm0             ; 13 03 12 02
-
-        punpcklwd   mm3,            mm6             ; 31 21 30 20
-        punpckhwd   mm4,            mm6             ; 33 23 32 22
-
-        movq        mm0,            mm1             ; 11 01 10 00
-        movq        mm5,            mm2             ; 13 03 12 02
-
-        punpckldq   mm0,            mm3             ; 30 20 10 00
-        punpckhdq   mm1,            mm3             ; 31 21 11 01
-
-        punpckldq   mm2,            mm4             ; 32 22 12 02
-        punpckhdq   mm5,            mm4             ; 33 23 13 03
-
-        pxor        mm7,            mm7
-
-        movd        mm4,            [rsi]
-        punpcklbw   mm4,            mm7
-        paddsw      mm0,            mm4
-        packuswb    mm0,            mm7
-        movd        [rdx],          mm0
-
-        movd        mm4,            [rsi+rax]
-        punpcklbw   mm4,            mm7
-        paddsw      mm1,            mm4
-        packuswb    mm1,            mm7
-        movd        [rdx+rdi],      mm1
-
-        movd        mm4,            [rsi+2*rax]
-        punpcklbw   mm4,            mm7
-        paddsw      mm2,            mm4
-        packuswb    mm2,            mm7
-        movd        [rdx+rdi*2],    mm2
-
-        add         rdx,            rdi
-        add         rsi,            rax
-
-        movd        mm4,            [rsi+2*rax]
-        punpcklbw   mm4,            mm7
-        paddsw      mm5,            mm4
-        packuswb    mm5,            mm7
-        movd        [rdx+rdi*2],    mm5
-
-    ; begin epilog
-    pop rdi
-    pop rsi
-    RESTORE_GOT
-    UNSHADOW_ARGS
-    pop         rbp
-    ret
-
+%include "vpx_ports/x86inc.asm"
 
 SECTION_RODATA
 align 16
-x_s1sqr2:
-    times 4 dw 0x8A8C
+x_s1sqr2:      times 4 dw 0x8A8C
 align 16
-x_c1sqr2less1:
-    times 4 dw 0x4E7B
+x_c1sqr2less1: times 4 dw 0x4E7B
 align 16
-fours:
-    times 4 dw 0x0004
+pw_16:         times 4 dw 16
+
+SECTION .text
+
+INIT_MMX
+
+
+;void dequantize_b_impl_mmx(short *sq, short *dq, short *q)
+cglobal dequantize_b_impl_mmx, 3,3,0,sq,dq,arg3
+    mova       m1, [sqq]
+    pmullw     m1, [arg3q+0]            ; mm4 *= kernel 0 modifiers.
+    mova [dqq+ 0], m1
+
+    mova       m1, [sqq+8]
+    pmullw     m1, [arg3q+8]            ; mm4 *= kernel 0 modifiers.
+    mova [dqq+ 8], m1
+
+    mova       m1, [sqq+16]
+    pmullw     m1, [arg3q+16]            ; mm4 *= kernel 0 modifiers.
+    mova [dqq+16], m1
+
+    mova       m1, [sqq+24]
+    pmullw     m1, [arg3q+24]            ; mm4 *= kernel 0 modifiers.
+    mova [dqq+24], m1
+    RET
+
+
+;void dequant_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride)
+cglobal dequant_idct_add_mmx, 6,6,0,inp,dq,pred,dest,pit,stride
+    mova                m0,       [inpq+ 0]
+    pmullw              m0,       [dqq]
+
+    mova                m1,       [inpq+ 8]
+    pmullw              m1,       [dqq+ 8]
+
+    mova                m2,       [inpq+16]
+    pmullw              m2,       [dqq+16]
+
+    mova                m3,       [inpq+24]
+    pmullw              m3,       [dqq+24]
+
+    pxor                m7,        m7
+    mova            [inpq],        m7
+    mova          [inpq+8],        m7
+    mova         [inpq+16],        m7
+    mova         [inpq+24],        m7
+
+
+    psubw               m0,        m2             ; b1= 0-2
+    paddw               m2,        m2             ;
+
+    mova                m5,        m1
+    paddw               m2,        m0             ; a1 =0+2
+
+    pmulhw              m5,       [x_s1sqr2];
+    paddw               m5,        m1             ; ip1 * sin(pi/8) * sqrt(2)
+
+    mova                m7,        m3             ;
+    pmulhw              m7,       [x_c1sqr2less1];
+
+    paddw               m7,        m3             ; ip3 * cos(pi/8) * sqrt(2)
+    psubw               m7,        m5             ; c1
+
+    mova                m5,        m1
+    mova                m4,        m3
+
+    pmulhw              m5,       [x_c1sqr2less1]
+    paddw               m5,        m1
+
+    pmulhw              m3,       [x_s1sqr2]
+    paddw               m3,        m4
+
+    paddw               m3,        m5             ; d1
+    mova                m6,        m2             ; a1
+
+    mova                m4,        m0             ; b1
+    paddw               m2,        m3             ;0
+
+    paddw               m4,        m7             ;1
+    psubw               m0,        m7             ;2
+
+    psubw               m6,        m3             ;3
+
+    mova                m1,        m2             ; 03 02 01 00
+    mova                m3,        m4             ; 23 22 21 20
+
+    punpcklwd           m1,        m0             ; 11 01 10 00
+    punpckhwd           m2,        m0             ; 13 03 12 02
+
+    punpcklwd           m3,        m6             ; 31 21 30 20
+    punpckhwd           m4,        m6             ; 33 23 32 22
+
+    mova                m0,        m1             ; 11 01 10 00
+    mova                m5,        m2             ; 13 03 12 02
+
+    punpckldq           m0,        m3             ; 30 20 10 00
+    punpckhdq           m1,        m3             ; 31 21 11 01
+
+    punpckldq           m2,        m4             ; 32 22 12 02
+    punpckhdq           m5,        m4             ; 33 23 13 03
+
+    mova                m3,        m5             ; 33 23 13 03
+
+    psubw               m0,        m2             ; b1= 0-2
+    paddw               m2,        m2             ;
+
+    mova                m5,        m1
+    paddw               m2,        m0             ; a1 =0+2
+
+    pmulhw              m5,       [x_s1sqr2];
+    paddw               m5,        m1             ; ip1 * sin(pi/8) * sqrt(2)
+
+    mova                m7,        m3             ;
+    pmulhw              m7,       [x_c1sqr2less1];
+
+    paddw               m7,        m3             ; ip3 * cos(pi/8) * sqrt(2)
+    psubw               m7,        m5             ; c1
+
+    mova                m5,        m1
+    mova                m4,        m3
+
+    pmulhw              m5,       [x_c1sqr2less1]
+    paddw               m5,        m1
+
+    pmulhw              m3,       [x_s1sqr2]
+    paddw               m3,        m4
+
+    paddw               m3,        m5             ; d1
+    paddw               m0,       [pw_16]
+
+    paddw               m2,       [pw_16]
+    mova                m6,        m2             ; a1
+
+    mova                m4,        m0             ; b1
+    paddw               m2,        m3             ;0
+
+    paddw               m4,        m7             ;1
+    psubw               m0,        m7             ;2
+
+    psubw               m6,        m3             ;3
+    psraw               m2,        5
+
+    psraw               m0,        5
+    psraw               m4,        5
+
+    psraw               m6,        5
+
+    mova                m1,        m2             ; 03 02 01 00
+    mova                m3,        m4             ; 23 22 21 20
+
+    punpcklwd           m1,        m0             ; 11 01 10 00
+    punpckhwd           m2,        m0             ; 13 03 12 02
+
+    punpcklwd           m3,        m6             ; 31 21 30 20
+    punpckhwd           m4,        m6             ; 33 23 32 22
+
+    mova                m0,        m1             ; 11 01 10 00
+    mova                m5,        m2             ; 13 03 12 02
+
+    punpckldq           m0,        m3             ; 30 20 10 00
+    punpckhdq           m1,        m3             ; 31 21 11 01
+
+    punpckldq           m2,        m4             ; 32 22 12 02
+    punpckhdq           m5,        m4             ; 33 23 13 03
+
+    pxor                m7,        m7
+
+    movh                m4,       [predq]
+    punpcklbw           m4,        m7
+    paddsw              m0,        m4
+    packuswb            m0,        m7
+    movh           [destq],      m0
+
+    movh                m4,       [predq+pitq]
+    punpcklbw           m4,        m7
+    paddsw              m1,        m4
+    packuswb            m1,        m7
+    movh   [destq+strideq],        m1
+
+    movh                m4,       [predq+2*pitq]
+    punpcklbw           m4,        m7
+    paddsw              m2,        m4
+    packuswb            m2,        m7
+    movh [destq+strideq*2],        m2
+
+    add              destq,        strideq
+    add              predq,        pitq
+
+    movh                m4,       [predq+2*pitq]
+    punpcklbw           m4,        m7
+    paddsw              m5,        m4
+    packuswb            m5,        m7
+    movh [destq+strideq*2],        m5
+    RET
+
+
+;void dequant_dc_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc)
+cglobal dequant_dc_idct_add_mmx, 7,7,0,inp,dq,pred,dest,pit,stride,Dc
+    mova                m0,       [inpq+ 0]
+    pmullw              m0,       [dqq+ 0]
+
+    mova                m1,       [inpq+ 8]
+    pmullw              m1,       [dqq+ 8]
+
+    mova                m2,       [inpq+16]
+    pmullw              m2,       [dqq+16]
+
+    mova                m3,       [inpq+24]
+    pmullw              m3,       [dqq+24]
+
+    pxor                m7,        m7
+    mova         [inpq+ 0],        m7
+    mova         [inpq+ 8],        m7
+    mova         [inpq+16],        m7
+    mova         [inpq+24],        m7
+
+    ; move lower word of Dc to lower word of m0
+    psrlq               m0,        16
+    psllq               m0,        16
+    and                Dcq,        0xFFFF         ; If Dc < 0, we don't want the full dword precision.
+    movh                m7,        Dcq
+    por                 m0,        m7
+    psubw               m0,        m2             ; b1= 0-2
+    paddw               m2,        m2             ;
+
+    mova                m5,        m1
+    paddw               m2,        m0             ; a1 =0+2
+
+    pmulhw              m5,       [x_s1sqr2];
+    paddw               m5,        m1             ; ip1 * sin(pi/8) * sqrt(2)
+
+    mova                m7,        m3             ;
+    pmulhw              m7,       [x_c1sqr2less1];
+
+    paddw               m7,        m3             ; ip3 * cos(pi/8) * sqrt(2)
+    psubw               m7,        m5             ; c1
+
+    mova                m5,        m1
+    mova                m4,        m3
+
+    pmulhw              m5,       [x_c1sqr2less1]
+    paddw               m5,        m1
+
+    pmulhw              m3,       [x_s1sqr2]
+    paddw               m3,        m4
+
+    paddw               m3,        m5             ; d1
+    mova                m6,        m2             ; a1
+
+    mova                m4,        m0             ; b1
+    paddw               m2,        m3             ;0
+
+    paddw               m4,        m7             ;1
+    psubw               m0,        m7             ;2
+
+    psubw               m6,        m3             ;3
+
+    mova                m1,        m2             ; 03 02 01 00
+    mova                m3,        m4             ; 23 22 21 20
+
+    punpcklwd           m1,        m0             ; 11 01 10 00
+    punpckhwd           m2,        m0             ; 13 03 12 02
+
+    punpcklwd           m3,        m6             ; 31 21 30 20
+    punpckhwd           m4,        m6             ; 33 23 32 22
+
+    mova                m0,        m1             ; 11 01 10 00
+    mova                m5,        m2             ; 13 03 12 02
+
+    punpckldq           m0,        m3             ; 30 20 10 00
+    punpckhdq           m1,        m3             ; 31 21 11 01
+
+    punpckldq           m2,        m4             ; 32 22 12 02
+    punpckhdq           m5,        m4             ; 33 23 13 03
+
+    mova                m3,        m5             ; 33 23 13 03
+
+    psubw               m0,        m2             ; b1= 0-2
+    paddw               m2,        m2             ;
+
+    mova                m5,        m1
+    paddw               m2,        m0             ; a1 =0+2
+
+    pmulhw              m5,       [x_s1sqr2];
+    paddw               m5,        m1             ; ip1 * sin(pi/8) * sqrt(2)
+
+    mova                m7,        m3             ;
+    pmulhw              m7,       [x_c1sqr2less1];
+
+    paddw               m7,        m3             ; ip3 * cos(pi/8) * sqrt(2)
+    psubw               m7,        m5             ; c1
+
+    mova                m5,        m1
+    mova                m4,        m3
+
+    pmulhw              m5,       [x_c1sqr2less1]
+    paddw               m5,        m1
+
+    pmulhw              m3,       [x_s1sqr2]
+    paddw               m3,        m4
+
+    paddw               m3,        m5             ; d1
+    paddw               m0,       [pw_16]
+
+    paddw               m2,       [pw_16]
+    mova                m6,        m2             ; a1
+
+    mova                m4,        m0             ; b1
+    paddw               m2,        m3             ;0
+
+    paddw               m4,        m7             ;1
+    psubw               m0,        m7             ;2
+
+    psubw               m6,        m3             ;3
+    psraw               m2,        5
+
+    psraw               m0,        5
+    psraw               m4,        5
+
+    psraw               m6,        5
+
+    mova                m1,        m2             ; 03 02 01 00
+    mova                m3,        m4             ; 23 22 21 20
+
+    punpcklwd           m1,        m0             ; 11 01 10 00
+    punpckhwd           m2,        m0             ; 13 03 12 02
+
+    punpcklwd           m3,        m6             ; 31 21 30 20
+    punpckhwd           m4,        m6             ; 33 23 32 22
+
+    mova                m0,        m1             ; 11 01 10 00
+    mova                m5,        m2             ; 13 03 12 02
+
+    punpckldq           m0,        m3             ; 30 20 10 00
+    punpckhdq           m1,        m3             ; 31 21 11 01
+
+    punpckldq           m2,        m4             ; 32 22 12 02
+    punpckhdq           m5,        m4             ; 33 23 13 03
+
+    pxor                m7,        m7
+
+    movh                m4,       [predq]
+    punpcklbw           m4,        m7
+    paddsw              m0,        m4
+    packuswb            m0,        m7
+    movh           [destq],        m0
+
+    movh                m4,       [predq+pitq]
+    punpcklbw           m4,        m7
+    paddsw              m1,        m4
+    packuswb            m1,        m7
+    movh   [destq+strideq],        m1
+
+    movh                m4,       [predq+2*pitq]
+    punpcklbw           m4,        m7
+    paddsw              m2,        m4
+    packuswb            m2,        m7
+    movh [destq+strideq*2],        m2
+
+    add              destq,        strideq
+    add              predq,        pitq
+
+    movh                m4,       [predq+2*pitq]
+    punpcklbw           m4,        m7
+    paddsw              m5,        m4
+    packuswb            m5,        m7
+    movh [destq+strideq*2],        m5
+    RET
+

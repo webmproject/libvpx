@@ -27,15 +27,16 @@ void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
     }
 #endif
 
+//The commented functions need to be re-written for vpx.
 #if HAVE_ARMV6
     if (flags & HAS_MEDIA)
     {
         pbi->dequant.block               = vp8_dequantize_b_v6;
-        pbi->dequant.idct_add            = vp8_dequant_idct_add_v6;
+        /*pbi->dequant.idct_add            = vp8_dequant_idct_add_v6;
         pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_v6;
         pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_v6;
         pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_v6;
-        pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_v6;
+        pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_v6;*/
     }
 #endif
 
@@ -43,12 +44,12 @@ void vp8_arch_arm_decode_init(VP8D_COMP *pbi)
     if (flags & HAS_NEON)
     {
         pbi->dequant.block               = vp8_dequantize_b_neon;
-        pbi->dequant.idct_add            = vp8_dequant_idct_add_neon;
+        //pbi->dequant.idct_add            = vp8_dequant_idct_add_neon;
         /*This is not used: NEON always dequants two blocks at once.
         pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_neon;*/
-        pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_neon;
+        /*pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_neon;
         pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_neon;
-        pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_neon;
+        pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_neon;*/
     }
 #endif
 #endif
