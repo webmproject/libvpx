@@ -285,38 +285,44 @@ OFFSET_PATTERN:='^[a-zA-Z0-9_]* EQU'
 
 ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
     $(BUILD_PFX)asm_com_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
-	LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
     $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S: $(VP8_PREFIX)common/asm_com_offsets.c
     CLEAN-OBJS += $(BUILD_PFX)asm_com_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
 
     $(BUILD_PFX)asm_enc_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
-	LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
     $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S: $(VP8_PREFIX)encoder/asm_enc_offsets.c
     CLEAN-OBJS += $(BUILD_PFX)asm_enc_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
 
     $(BUILD_PFX)asm_dec_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
-	LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
     $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S: $(VP8_PREFIX)decoder/asm_dec_offsets.c
     CLEAN-OBJS += $(BUILD_PFX)asm_dec_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
 else
   ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
     asm_com_offsets.asm: obj_int_extract
     asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
     CLEAN-OBJS += asm_com_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
 
     asm_enc_offsets.asm: obj_int_extract
     asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
     CLEAN-OBJS += asm_enc_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
 
     asm_dec_offsets.asm: obj_int_extract
     asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
     CLEAN-OBJS += asm_dec_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
