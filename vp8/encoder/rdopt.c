@@ -1970,11 +1970,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset,
             best_rd_sse = INT_MAX;
 #endif
 
-#if CONFIG_TEMPORAL_DENOISING
-    unsigned int zero_mv_sse = INT_MAX, best_sse = INT_MAX,
-            best_rd_sse = INT_MAX;
-#endif
-
     mode_mv = mode_mv_sb[sign_bias];
     best_ref_mv.as_int = 0;
     best_mode.rd = INT_MAX;
