@@ -1008,7 +1008,7 @@ process_common_toolchain() {
                         tune_cflags="-march="
                     ;;
                 esac
-                ;;
+            ;;
             gcc*)
                 add_cflags -m${bits}
                 add_ldflags -m${bits}
@@ -1017,7 +1017,13 @@ process_common_toolchain() {
             setup_gnu_toolchain
                 #for 32 bit x86 builds, -O3 did not turn on this flag
                 enabled optimizations && check_add_cflags -fomit-frame-pointer
-                ;;
+            ;;
+            vs*)
+                # When building with Microsoft Visual Studio the assembler is
+                # invoked directly. Checking at configure time is unnecessary.
+                # Skip the check by setting AS arbitrarily
+                AS=msvs
+            ;;
         esac
 
         case "${AS}" in
@@ -1026,7 +1032,7 @@ process_common_toolchain() {
                 which yasm >/dev/null 2>&1 && AS=yasm
                 [ "${AS}" = auto -o -z "${AS}" ] \
                     && die "Neither yasm nor nasm have been found"
-                ;;
+            ;;
         esac
         log_echo "  using $AS"
         [ "${AS##*/}" = nasm ] && add_asflags -Ox
