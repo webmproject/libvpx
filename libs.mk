@@ -375,25 +375,20 @@ gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
 
 PROJECTS-$(CONFIG_MSVS) += gtest.vcproj
 
-define unit_test_vcproj_template
-$(notdir $(1:.cc=.vcproj)): $(SRC_PATH_BARE)/$(1)
-	@echo "    [vcproj] $$@"
-	$$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh\
-            --exe\
-            --target=$$(TOOLCHAIN)\
-            --name=$(notdir $(1:.cc=))\
-            --ver=$$(CONFIG_VS_VERSION)\
-            $$(if $$(CONFIG_STATIC_MSVCRT),--static-crt) \
-            --out=$$@ $$(INTERNAL_CFLAGS) $$(CFLAGS) \
+test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
+	@echo "    [CREATE] $@"
+	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+            --exe \
+            --target=$(TOOLCHAIN) \
+            --name=test_libvpx \
+            --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
+            --ver=$(CONFIG_VS_VERSION) \
+            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
             -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
-            -L. -l$(CODEC_LIB) -lwinmm -l$(GTEST_LIB) $$^
-endef
+            -L. -l$(CODEC_LIB) -lwinmm -l$(GTEST_LIB) $^
 
-$(foreach proj,$(LIBVPX_TEST_BINS),\
-    $(eval $(call unit_test_vcproj_template,$(proj))))
-
-PROJECTS-$(CONFIG_MSVS) += $(foreach proj,$(LIBVPX_TEST_BINS),\
-     $(notdir $(proj:.cc=.vcproj)))
+PROJECTS-$(CONFIG_MSVS) += test_libvpx.vcproj
 
 test::
 	@set -e; for t in $(addprefix Win32/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
