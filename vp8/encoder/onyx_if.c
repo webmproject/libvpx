@@ -1650,6 +1650,7 @@ void vp8_change_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
           cm->yv12_fb[cm->lst_fb_idx].y_height ||
         cm->yv12_fb[cm->lst_fb_idx].y_width == 0)
     {
+        dealloc_raw_frame_buffers(cpi);
         alloc_raw_frame_buffers(cpi);
         vp8_alloc_compressor_data(cpi);
     }
@@ -2612,7 +2613,7 @@ static void scale_and_extend_source(YV12_BUFFER_CONFIG *sd, VP8_COMP *cpi)
 }
 
 
-static void resize_key_frame(VP8_COMP *cpi)
+static int resize_key_frame(VP8_COMP *cpi)
 {
 #if CONFIG_SPATIAL_RESAMPLING
     VP8_COMMON *cm = &cpi->common;
@@ -2653,10 +2654,12 @@ static void resize_key_frame(VP8_COMP *cpi)
             cm->Height = new_height;
             vp8_alloc_compressor_data(cpi);
             scale_and_extend_source(cpi->un_scaled_source, cpi);
+            return 1;
         }
     }
 
 #endif
+    return 0;
 }
 
 
@@ -3812,7 +3815,17 @@ static void encode_frame_to_data_rate
 
         if (cm->frame_type == KEY_FRAME)
         {
-            resize_key_frame(cpi);
+            if(resize_key_frame(cpi))
+            {
+              /* If the frame size has changed, need to reset Q, quantizer,
+               * and background refresh.
+               */
+              Q = vp8_regulate_q(cpi, cpi->this_frame_target);
+              if (cpi->cyclic_refresh_mode_enabled && (cpi->current_layer==0))
+                cyclic_background_refresh(cpi, Q, 0);
+              vp8_set_quantizer(cpi, Q);
+            }
+
             vp8_setup_key_frame(cpi);
         }
 
