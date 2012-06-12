@@ -471,8 +471,9 @@ typedef struct VP8_COMP
     unsigned int frame_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
     int gfu_boost;
-    int kf_boost;
     int last_boost;
+    int kf_boost;
+    int kf_zeromotion_pct;
 
     int target_bandwidth;
     struct vpx_codec_pkt_list  *output_pkt_list;
