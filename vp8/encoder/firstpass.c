@@ -412,8 +412,8 @@ static void first_pass_motion_search(VP8_COMP *cpi, MACROBLOCK *x,
     int_mv ref_mv_full;
 
     int tmp_err;
-    int step_param = 3;                                       //3;          // Dont search over full range for first pass
-    int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param; //3;
+    int step_param = 3;
+    int further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
     int n;
     vp8_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
     int new_mv_mode_penalty = 256;
@@ -619,6 +619,10 @@ void vp8_first_pass(VP8_COMP *cpi)
                 // Experimental search in an older reference frame
                 if (cm->current_video_frame > 1)
                 {
+                    // Simple 0,0 motion with no mv overhead
+                    zz_motion_search( cpi, x, gld_yv12,
+                                      &gf_motion_error, recon_yoffset );
+
                     first_pass_motion_search(cpi, x, &zero_ref_mv,
                                              &tmp_mv.as_mv, gld_yv12,
                                              &gf_motion_error, recon_yoffset);
@@ -772,6 +776,7 @@ void vp8_first_pass(VP8_COMP *cpi)
         fps.MVrv       = 0.0;
         fps.MVcv       = 0.0;
         fps.mv_in_out_count  = 0.0;
+        fps.new_mv_count = 0.0;
         fps.count      = 1.0;
 
         fps.pcnt_inter   = 1.0 * (double)intercount / cm->MBs;
@@ -894,9 +899,7 @@ static long long estimate_modemvcost(VP8_COMP *cpi,
     return 0;
 }
 
-static double calc_correction_factor( VP8_COMP *cpi,
-                                      FIRSTPASS_STATS * fpstats,
-                                      double err_per_mb,
+static double calc_correction_factor( double err_per_mb,
                                       double err_divisor,
                                       double pt_low,
                                       double pt_high,
@@ -905,9 +908,6 @@ static double calc_correction_factor( VP8_COMP *cpi,
     double power_term;
     double error_term = err_per_mb / err_divisor;
     double correction_factor;
-    double sr_err_diff;
-    double sr_correction;
-
 
     // Adjustment based on actual quantizer to power term.
     power_term = (vp8_convert_qindex_to_q(Q) * 0.01) + pt_low;
@@ -916,23 +916,8 @@ static double calc_correction_factor( VP8_COMP *cpi,
     // Adjustments to error term
     // TBD
 
-    // Calculate a correction factor based on error per mb
+    // Calculate correction factor
     correction_factor = pow(error_term, power_term);
-
-#if 0
-    // Look at the drop in prediction quality between the last frame
-    // and the GF buffer (which contained an older frame).
-    sr_err_diff =
-            (fpstats->sr_coded_error - fpstats->coded_error) /
-            (fpstats->count * cpi->common.MBs * 32);
-    sr_correction = pow( sr_err_diff, 0.5 );
-    if ( sr_correction < 0.5 )
-        sr_correction = 0.5;
-    else if ( sr_correction > 1.25 )
-        sr_correction = 1.25;
-
-    correction_factor = correction_factor * sr_correction;
-#endif
 
     // Clip range
     correction_factor =
@@ -982,6 +967,8 @@ static int estimate_max_q(VP8_COMP *cpi,
     int target_norm_bits_per_mb;
 
     double section_err = (fpstats->coded_error / fpstats->count);
+    double sr_err_diff;
+    double sr_correction;
     double err_per_mb = section_err / num_mbs;
     double err_correction_factor;
     double corr_high;
@@ -997,6 +984,18 @@ static int estimate_max_q(VP8_COMP *cpi,
         (section_target_bandwitdh < (1 << 20))
             ? (512 * section_target_bandwitdh) / num_mbs
             : 512 * (section_target_bandwitdh / num_mbs);
+
+    // Look at the drop in prediction quality between the last frame
+    // and the GF buffer (which contained an older frame).
+    sr_err_diff =
+            (fpstats->sr_coded_error - fpstats->coded_error) /
+            (fpstats->count * cpi->common.MBs);
+    sr_correction = (sr_err_diff / 32.0);
+    sr_correction = pow( sr_correction, 0.25 );
+    if ( sr_correction < 0.75 )
+        sr_correction = 0.75;
+    else if ( sr_correction > 1.25 )
+        sr_correction = 1.25;
 
     // Calculate a corrective factor based on a rolling ratio of bits spent
     // vs target bits
@@ -1043,11 +1042,9 @@ static int estimate_max_q(VP8_COMP *cpi,
     {
         int bits_per_mb_at_this_q;
 
-        // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(cpi, fpstats, err_per_mb,
-                                   ERR_DIVISOR, 0.40, 0.90, Q) *
-            speed_correction *
+            calc_correction_factor(err_per_mb, ERR_DIVISOR, 0.4, 0.90, Q) *
+            sr_correction * speed_correction *
             cpi->twopass.est_max_qcorrection_factor;
 
         if ( err_correction_factor < 0.05 )
@@ -1107,6 +1104,8 @@ static int estimate_cq( VP8_COMP *cpi,
     double section_err = (fpstats->coded_error / fpstats->count);
     double err_per_mb = section_err / num_mbs;
     double err_correction_factor;
+    double sr_err_diff;
+    double sr_correction;
     double corr_high;
     double speed_correction = 1.0;
     double clip_iiratio;
@@ -1115,12 +1114,6 @@ static int estimate_cq( VP8_COMP *cpi,
     double intra_pct = 1.0 - inter_pct;
     int overhead_bits_per_mb;
 
-    if (0)
-    {
-        FILE *f = fopen("epmp.stt", "a");
-        fprintf(f, "%10.2f\n", err_per_mb );
-        fclose(f);
-    }
 
     target_norm_bits_per_mb = (section_target_bandwitdh < (1 << 20))
                               ? (512 * section_target_bandwitdh) / num_mbs
@@ -1139,6 +1132,18 @@ static int estimate_cq( VP8_COMP *cpi,
             speed_correction = 1.25;
     }
 
+    // Look at the drop in prediction quality between the last frame
+    // and the GF buffer (which contained an older frame).
+    sr_err_diff =
+            (fpstats->sr_coded_error - fpstats->coded_error) /
+            (fpstats->count * cpi->common.MBs);
+    sr_correction = (sr_err_diff / 32.0);
+    sr_correction = pow( sr_correction, 0.25 );
+    if ( sr_correction < 0.75 )
+        sr_correction = 0.75;
+    else if ( sr_correction > 1.25 )
+        sr_correction = 1.25;
+
     // II ratio correction factor for clip as a whole
     clip_iiratio = cpi->twopass.total_stats->intra_error /
                    DOUBLE_DIVIDE_CHECK(cpi->twopass.total_stats->coded_error);
@@ -1153,9 +1158,8 @@ static int estimate_cq( VP8_COMP *cpi,
 
         // Error per MB based correction factor
         err_correction_factor =
-            calc_correction_factor(cpi, fpstats, err_per_mb,
-                                   100.0, 0.40, 0.90, Q) *
-            speed_correction * clip_iifactor;
+            calc_correction_factor(err_per_mb, 100.0, 0.4, 0.90, Q) *
+            sr_correction * speed_correction * clip_iifactor;
 
         if ( err_correction_factor < 0.05 )
             err_correction_factor = 0.05;
@@ -1165,9 +1169,8 @@ static int estimate_cq( VP8_COMP *cpi,
         bits_per_mb_at_this_q =
             vp8_bits_per_mb(INTER_FRAME, Q) + overhead_bits_per_mb;
 
-        bits_per_mb_at_this_q =
-            (int)( .5 + err_correction_factor *
-                        (double)bits_per_mb_at_this_q);
+        bits_per_mb_at_this_q = (int)(.5 + err_correction_factor *
+                                      (double)bits_per_mb_at_this_q);
 
         // Mode and motion overhead
         // As Q rises in real encode loop rd code will force overhead down
@@ -1280,7 +1283,8 @@ void vp8_end_second_pass(VP8_COMP *cpi)
 
 // This function gives and estimate of how badly we believe
 // the prediction quality is decaying from frame to frame.
-static double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_frame)
+static double get_prediction_decay_rate( VP8_COMP *cpi,
+                                         FIRSTPASS_STATS *next_frame)
 {
     double prediction_decay_rate;
     double second_ref_decay;
@@ -1289,7 +1293,7 @@ static double get_prediction_decay_rate(VP8_COMP *cpi, FIRSTPASS_STATS *next_fra
     double mb_sr_err_diff;
 
     // Initial basis is the % mbs inter coded
-    prediction_decay_rate = pow(next_frame->pcnt_inter, 0.5);
+    prediction_decay_rate = next_frame->pcnt_inter;
 
     // Look at the observed drop in prediction quality between the last frame
     // and the GF buffer (which contains an older frame).
@@ -1378,16 +1382,6 @@ static BOOL detect_flash( VP8_COMP *cpi, int offset )
              (next_frame.pcnt_second_ref >= 0.5 ) )
         {
             flash_detected = TRUE;
-
-            /*if (1)
-            {
-                FILE *f = fopen("flash.stt", "a");
-                fprintf(f, "%8.0f %6.2f %6.2f\n",
-                    next_frame.frame,
-                    next_frame.pcnt_inter,
-                    next_frame.pcnt_second_ref);
-                fclose(f);
-            }*/
         }
     }
 
@@ -1654,7 +1648,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     unsigned int allow_alt_ref =
                     cpi->oxcf.play_alternate && cpi->oxcf.lag_in_frames;
 
-    int alt_boost = 0;
     int f_boost = 0;
     int b_boost = 0;
     BOOL flash_detected;
@@ -1693,7 +1686,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
         // Accumulate error score of frames in this gf group
         mod_frame_err = calculate_modified_err(cpi, this_frame);
-
         gf_group_err += mod_frame_err;
 
         if (EOF == input_stats(cpi, &next_frame))
@@ -1782,12 +1774,7 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
     }
 
-    cpi->gfu_boost = boost_score;
-
-    // Alterrnative boost calculation for alt ref
-    alt_boost = calc_arf_boost( cpi, 0, (i-1), (i-1), &f_boost, &b_boost );
-
-    // Set the interval till the next gf or arf.
+     // Set the interval till the next gf or arf.
     cpi->baseline_gf_interval = i;
 
     // Should we use the alternate refernce frame
@@ -1800,15 +1787,17 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
          (next_frame.pcnt_second_ref > 0.5)) &&
         ((mv_in_out_accumulator / (double)i > -0.2) ||
          (mv_in_out_accumulator > -2.0)) &&
-        ((b_boost + f_boost) > 100) )
+        (boost_score > 100))
     {
-        cpi->gfu_boost = alt_boost;
+        // Alterrnative boost calculation for alt ref
+        cpi->gfu_boost = calc_arf_boost( cpi, 0, (i-1), (i-1), &f_boost, &b_boost );
         cpi->source_alt_ref_pending = TRUE;
 
         configure_arnr_filter( cpi, this_frame );
     }
     else
     {
+        cpi->gfu_boost = (int)boost_score;
         cpi->source_alt_ref_pending = FALSE;
     }
 
@@ -1992,6 +1981,28 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         else
             cpi->twopass.alt_extra_bits = 0;
     }
+
+    if (cpi->common.frame_type != KEY_FRAME)
+    {
+        FIRSTPASS_STATS sectionstats;
+
+        zero_stats(&sectionstats);
+        reset_fpf_position(cpi, start_pos);
+
+        for (i = 0 ; i < cpi->baseline_gf_interval ; i++)
+        {
+            input_stats(cpi, &next_frame);
+            accumulate_stats(&sectionstats, &next_frame);
+        }
+
+        avg_stats(&sectionstats);
+
+        cpi->twopass.section_intra_rating =
+            sectionstats.intra_error /
+            DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
+
+        reset_fpf_position(cpi, start_pos);
+    }
 }
 
 // Allocate bits to a normal frame that is neither a gf an arf or a key frame.
@@ -2034,12 +2045,6 @@ static void assign_std_frame_bits(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
 
     target_frame_size += cpi->min_frame_bandwidth;                                          // Add in the minimum number of bits that is set aside for every frame.
 
-    // Every other frame gets a few extra bits
-    if ( (cpi->common.frames_since_golden & 0x01) &&
-         (cpi->frames_till_gf_update_due > 0) )
-    {
-        target_frame_size += cpi->twopass.alt_extra_bits;
-    }
 
     cpi->per_frame_bandwidth = target_frame_size;                                           // Per frame bit target for this frame
 }
@@ -2257,7 +2262,7 @@ static BOOL test_candidate_kf(VP8_COMP *cpi,  FIRSTPASS_STATS *last_frame, FIRST
         (next_frame->pcnt_second_ref < 0.10) &&
         ((this_frame->pcnt_inter < 0.05) ||
          (
-             ((this_frame->pcnt_inter - this_frame->pcnt_neutral) < .25) &&
+             ((this_frame->pcnt_inter - this_frame->pcnt_neutral) < .35) &&
              ((this_frame->intra_error / DOUBLE_DIVIDE_CHECK(this_frame->coded_error)) < 2.5) &&
              ((fabs(last_frame->coded_error - this_frame->coded_error) / DOUBLE_DIVIDE_CHECK(this_frame->coded_error) > .40) ||
               (fabs(last_frame->intra_error - this_frame->intra_error) / DOUBLE_DIVIDE_CHECK(this_frame->intra_error) > .40) ||
@@ -2529,7 +2534,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     boost_score = 0.0;
     loop_decay_rate = 1.00;       // Starting decay rate
 
-    for (i = 0; i < cpi->twopass.frames_to_key; i++)
+    for (i = 0 ; i < cpi->twopass.frames_to_key ; i++)
     {
         double r;
 
@@ -2555,10 +2560,12 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
 
         // How fast is prediction quality decaying
-        loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
-
-        decay_accumulator = decay_accumulator * loop_decay_rate;
-        decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
+        if ( !detect_flash(cpi, 0) )
+        {
+            loop_decay_rate = get_prediction_decay_rate(cpi, &next_frame);
+            decay_accumulator = decay_accumulator * loop_decay_rate;
+            decay_accumulator = decay_accumulator < 0.1 ? 0.1 : decay_accumulator;
+        }
 
         boost_score += (decay_accumulator * r);
 
@@ -2569,6 +2576,25 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         }
 
         old_boost_score = boost_score;
+    }
+
+    {
+        FIRSTPASS_STATS sectionstats;
+
+        zero_stats(&sectionstats);
+        reset_fpf_position(cpi, start_position);
+
+        for (i = 0 ; i < cpi->twopass.frames_to_key ; i++)
+        {
+            input_stats(cpi, &next_frame);
+            accumulate_stats(&sectionstats, &next_frame);
+        }
+
+        avg_stats(&sectionstats);
+
+        cpi->twopass.section_intra_rating =
+            sectionstats.intra_error
+            / DOUBLE_DIVIDE_CHECK(sectionstats.coded_error);
     }
 
     // Reset the first pass file position
@@ -2593,7 +2619,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         if (kf_boost < 250)                                                      // Min KF boost
             kf_boost = 250;
 
-        // Make a not of baseline boost and the zero motion
+        // Make a note of baseline boost and the zero motion
         // accumulator value for use elsewhere.
         cpi->kf_boost = kf_boost;
         cpi->kf_zeromotion_pct = (int)(zero_motion_accumulator * 100.0);
@@ -2606,8 +2632,8 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
         // allocation it would have received based on its own error score vs
         // the error score remaining
         // Special case if the sequence appears almost totaly static
-        // as measured by the decay accumulator. In this case we want to
-        // spend almost all of the bits on the key frame.
+        // In this case we want to spend almost all of the bits on the
+        // key frame.
         // cpi->twopass.frames_to_key-1 because key frame itself is taken
         // care of by kf_boost.
         if ( zero_motion_accumulator >= 0.99 )
