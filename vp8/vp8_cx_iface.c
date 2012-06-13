@@ -299,7 +299,7 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
         break;
     }
 
-    if (cfg.g_pass == VPX_RC_FIRST_PASS)
+    if (cfg.g_pass == VPX_RC_FIRST_PASS || cfg.g_pass == VPX_RC_ONE_PASS)
     {
         oxcf->allow_lag     = 0;
         oxcf->lag_in_frames = 0;
