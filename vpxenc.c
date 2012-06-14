@@ -966,6 +966,10 @@ static const arg_def_t q_hist_n         = ARG_DEF(NULL, "q-hist", 1,
         "Show quantizer histogram (n-buckets)");
 static const arg_def_t rate_hist_n         = ARG_DEF(NULL, "rate-hist", 1,
         "Show rate histogram (n-buckets)");
+#if CONFIG_LOSSLESS
+static const arg_def_t lossless_enabled = ARG_DEF(NULL, "lossless", 0,
+                                   "Enable lossless compression");
+#endif
 static const arg_def_t *main_args[] =
 {
     &debugmode,
@@ -973,6 +977,9 @@ static const arg_def_t *main_args[] =
     &deadline,
     &best_dl, &good_dl, &rt_dl,
     &verbosearg, &psnrarg, &recontest, &use_ivf, &q_hist_n, &rate_hist_n,
+#if CONFIG_LOSSLESS
+    &lossless_enabled,
+#endif
     NULL
 };
 
@@ -1670,6 +1677,10 @@ int main(int argc, const char **argv_)
     cfg.g_w = 0;
     cfg.g_h = 0;
 
+#if CONFIG_LOSSLESS
+    cfg.lossless = 0;
+#endif
+
     /* Now parse the remainder of the parameters. */
     for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
     {
@@ -1753,9 +1764,21 @@ int main(int argc, const char **argv_)
             cfg.kf_max_dist = arg_parse_uint(&arg);
         else if (arg_match(&arg, &kf_disabled, argi))
             cfg.kf_mode = VPX_KF_DISABLED;
+#if CONFIG_LOSSLESS
+        else if (arg_match(&arg, &lossless_enabled, argi))
+            cfg.lossless = 1;
+#endif
         else
             argj++;
     }
+
+#if CONFIG_LOSSLESS
+        if (cfg.lossless)
+        {
+            cfg.rc_min_quantizer = 0;
+            cfg.rc_max_quantizer = 0;
+        }
+#endif
 
     /* Handle codec specific options */
 #if CONFIG_VP8_ENCODER
@@ -1929,6 +1952,9 @@ int main(int argc, const char **argv_)
             SHOW(kf_mode);
             SHOW(kf_min_dist);
             SHOW(kf_max_dist);
+#if CONFIG_LOSSLESS
+            SHOW(lossless);
+#endif
         }
 
         if(pass == (one_pass_only ? one_pass_only - 1 : 0)) {

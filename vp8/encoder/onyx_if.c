@@ -727,7 +727,11 @@ void vp8_set_speed_features(VP8_COMP *cpi)
     sf->quarter_pixel_search = 1;
     sf->half_pixel_search = 1;
     sf->iterative_sub_pixel = 1;
+#if CONFIG_LOSSLESS
+    sf->optimize_coefficients = 0;
+#else
     sf->optimize_coefficients = 1;
+#endif
     sf->no_skip_block4x4_search = 1;
 
     sf->first_step = 0;
@@ -1586,6 +1590,23 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf)
     cpi->oxcf.worst_allowed_q = q_trans[oxcf->worst_allowed_q];
     cpi->oxcf.best_allowed_q = q_trans[oxcf->best_allowed_q];
     cpi->oxcf.cq_level = q_trans[cpi->oxcf.cq_level];
+
+#if CONFIG_LOSSLESS
+    cpi->oxcf.lossless = oxcf->lossless;
+    if(cpi->oxcf.lossless)
+    {
+      cpi->rtcd.fdct.short4x4                  = vp8_short_walsh4x4_x8_c;
+      cpi->rtcd.fdct.fast4x4                   = vp8_short_walsh4x4_x8_c;
+      cpi->rtcd.fdct.short8x4                  = vp8_short_walsh8x4_x8_c;
+      cpi->rtcd.fdct.fast8x4                   = vp8_short_walsh8x4_x8_c;
+      cpi->rtcd.fdct.walsh_short4x4            = vp8_short_walsh4x4_lossless_c;
+      cpi->common.rtcd.idct.idct1        = vp8_short_inv_walsh4x4_1_x8_c;
+      cpi->common.rtcd.idct.idct16       = vp8_short_inv_walsh4x4_x8_c;
+      cpi->common.rtcd.idct.idct1_scalar_add  = vp8_dc_only_inv_walsh_add_c;
+      cpi->common.rtcd.idct.iwalsh1      = vp8_short_inv_walsh4x4_1_c;
+      cpi->common.rtcd.idct.iwalsh16     = vp8_short_inv_walsh4x4_lossless_c;
+    }
+#endif
 
     cpi->baseline_gf_interval = DEFAULT_GF_INTERVAL;
 
@@ -2984,6 +3005,12 @@ void loopfilter_frame(VP8_COMP *cpi, VP8_COMMON *cm)
     {
         cm->filter_level = 0;
     }
+#if CONFIG_LOSSLESS
+    else if(cpi->oxcf.lossless)
+    {
+        cm->filter_level = 0;
+    }
+#endif
     else
     {
         struct vpx_usec_timer timer;
@@ -3139,7 +3166,11 @@ static void encode_frame_to_data_rate
     // For 2 Pass Only used where GF/ARF prediction quality
     // is above a threshold
     cpi->zbin_mode_boost = 0;
+#if CONFIG_LOSSLESS
+    cpi->zbin_mode_boost_enabled = FALSE;
+#else
     cpi->zbin_mode_boost_enabled = TRUE;
+#endif
     if ( cpi->gfu_boost <= 400 )
     {
         cpi->zbin_mode_boost_enabled = FALSE;

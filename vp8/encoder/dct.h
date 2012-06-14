@@ -59,6 +59,12 @@ extern prototype_fdct(vp8_fdct_short8x4);
 #endif
 extern prototype_fdct(vp8_fdct_walsh_short4x4);
 
+#if CONFIG_LOSSLESS
+extern prototype_fdct(vp8_short_walsh4x4_x8_c);
+extern prototype_fdct(vp8_short_walsh8x4_x8_c);
+extern prototype_fdct(vp8_short_walsh4x4_lossless_c);
+#endif
+
 typedef prototype_fdct(*vp8_fdct_fn_t);
 typedef struct
 {

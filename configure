@@ -232,6 +232,7 @@ EXPERIMENT_LIST="
     newintramodes
     adaptive_entropy
     pred_filter
+    lossless
 "
 CONFIG_LIST="
     external_build

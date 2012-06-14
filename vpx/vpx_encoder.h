@@ -592,6 +592,12 @@ extern "C" {
          */
         unsigned int           kf_max_dist;
 
+
+        /*!\brief Enable lossless compression mode
+         *
+         * If this flag is set, the decoder will be in lossless compression mode.
+         */
+        unsigned int           lossless;
     } vpx_codec_enc_cfg_t; /**< alias for struct vpx_codec_enc_cfg */
 
 

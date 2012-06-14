@@ -140,6 +140,35 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd)
         xd->block[i].dequant = pc->Y1dequant[QIndex];
     }
 
+#if CONFIG_LOSSLESS
+    if(!QIndex)
+    {
+      pbi->common.rtcd.idct.idct1        = vp8_short_inv_walsh4x4_1_x8_c;
+      pbi->common.rtcd.idct.idct16       = vp8_short_inv_walsh4x4_x8_c;
+      pbi->common.rtcd.idct.idct1_scalar_add  = vp8_dc_only_inv_walsh_add_c;
+      pbi->common.rtcd.idct.iwalsh1      = vp8_short_inv_walsh4x4_1_lossless_c;
+      pbi->common.rtcd.idct.iwalsh16     = vp8_short_inv_walsh4x4_lossless_c;
+      pbi->dequant.idct_add            = vp8_dequant_idct_add_lossless_c;
+      pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_lossless_c;
+      pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_lossless_c;
+      pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_lossless_c;
+      pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_lossless_c;
+    }
+    else
+    {
+      pbi->common.rtcd.idct.idct1        = vp8_short_idct4x4llm_1_c;
+      pbi->common.rtcd.idct.idct16       = vp8_short_idct4x4llm_c;
+      pbi->common.rtcd.idct.idct1_scalar_add  = vp8_dc_only_idct_add_c;
+      pbi->common.rtcd.idct.iwalsh1      = vp8_short_inv_walsh4x4_1_c;
+      pbi->common.rtcd.idct.iwalsh16     = vp8_short_inv_walsh4x4_c;
+      pbi->dequant.idct_add            = vp8_dequant_idct_add_c;
+      pbi->dequant.dc_idct_add         = vp8_dequant_dc_idct_add_c;
+      pbi->dequant.dc_idct_add_y_block = vp8_dequant_dc_idct_add_y_block_c;
+      pbi->dequant.idct_add_y_block    = vp8_dequant_idct_add_y_block_c;
+      pbi->dequant.idct_add_uv_block   = vp8_dequant_idct_add_uv_block_c;
+    }
+#endif
+
     for (i = 16; i < 24; i++)
     {
         xd->block[i].dequant = pc->UVdequant[QIndex];

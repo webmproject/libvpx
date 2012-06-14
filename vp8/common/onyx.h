@@ -153,6 +153,7 @@ extern "C"
         int worst_allowed_q;
         int best_allowed_q;
         int cq_level;
+        int lossless;
 
         // two pass datarate control
         int two_pass_vbrbias;        // two pass datarate control tweaks

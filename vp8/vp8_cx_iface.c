@@ -317,6 +317,10 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
 
     oxcf->tuning = vp8_cfg.tuning;
 
+#if CONFIG_LOSSLESS
+    oxcf->lossless = cfg.lossless;
+#endif
+
     /*
         printf("Current VP8 Settings: \n");
         printf("target_bandwidth: %d\n", oxcf->target_bandwidth);

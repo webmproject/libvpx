@@ -313,6 +313,17 @@ void vp8cx_init_quantizer(VP8_COMP *cpi)
     {
         int qzbin_factor = (vp8_dc_quant(Q,0) < 148) ? 84 : 80;
 
+#if CONFIG_LOSSLESS
+        if(cpi->oxcf.lossless)
+        {
+            if (Q==0)
+            {
+                qzbin_factor = 64;
+                qrounding_factor = 64;
+            }
+        }
+#endif
+
         // dc values
         quant_val = vp8_dc_quant(Q, cpi->common.y1dc_delta_q);
         invert_quant(cpi->Y1quant[Q] + 0,
