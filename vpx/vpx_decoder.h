@@ -113,6 +113,10 @@ extern "C" {
      * function directly, to ensure that the ABI version number parameter
      * is properly initialized.
      *
+     * If the library was configured with --disable-multithread, this call
+     * is not thread safe and should be guarded with a lock if being used
+     * in a multithreaded context.
+     *
      * In XMA mode (activated by setting VPX_CODEC_USE_XMA in the flags
      * parameter), the storage pointed to by the cfg parameter must be
      * kept readable and stable until all memory maps have been set.

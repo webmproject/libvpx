@@ -211,6 +211,8 @@ common_top() {
 $(process_forward_decls)
 
 $(declare_function_pointers c $ALL_ARCHS)
+
+void ${symbol:-rtcd}(void);
 EOF
 }
 
@@ -231,11 +233,10 @@ x86() {
 
   cat <<EOF
 $(common_top)
-void ${symbol:-rtcd}(void);
 
 #ifdef RTCD_C
 #include "vpx_ports/x86.h"
-void ${symbol:-rtcd}(void)
+static void setup_rtcd_internal(void)
 {
     int flags = x86_simd_caps();
 
@@ -261,11 +262,9 @@ arm() {
 $(common_top)
 #include "vpx_config.h"
 
-void ${symbol:-rtcd}(void);
-
 #ifdef RTCD_C
 #include "vpx_ports/arm.h"
-void ${symbol:-rtcd}(void)
+static void setup_rtcd_internal(void)
 {
     int flags = arm_cpu_caps();
 
@@ -285,10 +284,8 @@ unoptimized() {
 $(common_top)
 #include "vpx_config.h"
 
-void ${symbol:-rtcd}(void);
-
 #ifdef RTCD_C
-void ${symbol:-rtcd}(void)
+static void setup_rtcd_internal(void)
 {
 $(set_function_pointers c)
 }
