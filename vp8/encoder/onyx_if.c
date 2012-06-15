@@ -37,6 +37,8 @@
 #include "mbgraph.h"
 #include "vp8/common/pred_common.h"
 #include "vp8/encoder/rdopt.h"
+#include "bitstream.h"
+#include "ratectrl.h"
 
 #if ARCH_ARM
 #include "vpx_ports/arm.h"
@@ -2609,7 +2611,6 @@ void write_yuv_frame_to_file(YV12_BUFFER_CONFIG *frame)
 
     // write the frame
     int i;
-    char filename[255];
     FILE *fp = fopen("encode_recon.yuv", "a");
 
     for (i = 0; i < frame->y_height; i++)
@@ -3161,7 +3162,6 @@ static void encode_frame_to_data_rate
     if (cm->frame_type != KEY_FRAME)
     {
 #if CONFIG_ENHANCED_INTERP
-        double e = 0; //compute_edge_pixel_proportion(cpi->Source);
         /* TODO: Decide this more intelligently */
         if (sf->search_best_filter)
         {
@@ -4101,8 +4101,6 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 #endif
     VP8_COMP *cpi = (VP8_COMP *) ptr;
     VP8_COMMON *cm = &cpi->common;
-    struct vpx_usec_timer  tsctimer;
-    struct vpx_usec_timer  ticktimer;
     struct vpx_usec_timer  cmptimer;
     YV12_BUFFER_CONFIG    *force_src_buffer = NULL;
 

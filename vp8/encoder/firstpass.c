@@ -65,9 +65,6 @@ extern void vp8_alloc_compressor_data(VP8_COMP *cpi);
 #define POW1 (double)cpi->oxcf.two_pass_vbrbias/100.0
 #define POW2 (double)cpi->oxcf.two_pass_vbrbias/100.0
 
-static int vscale_lookup[7] = {0, 1, 1, 2, 2, 3, 3};
-static int hscale_lookup[7] = {0, 0, 1, 1, 2, 2, 3};
-
 static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame);
 
 static int select_cq_level( int qindex )
@@ -971,10 +968,7 @@ static int estimate_max_q(VP8_COMP *cpi,
     double sr_correction;
     double err_per_mb = section_err / num_mbs;
     double err_correction_factor;
-    double corr_high;
     double speed_correction = 1.0;
-    double inter_pct = (fpstats->pcnt_inter / fpstats->count);
-    double intra_pct = 1.0 - inter_pct;
     int overhead_bits_per_mb;
 
     if (section_target_bandwitdh <= 0)
@@ -1106,12 +1100,9 @@ static int estimate_cq( VP8_COMP *cpi,
     double err_correction_factor;
     double sr_err_diff;
     double sr_correction;
-    double corr_high;
     double speed_correction = 1.0;
     double clip_iiratio;
     double clip_iifactor;
-    double inter_pct = (fpstats->pcnt_inter / fpstats->count);
-    double intra_pct = 1.0 - inter_pct;
     int overhead_bits_per_mb;
 
 
@@ -1288,8 +1279,6 @@ static double get_prediction_decay_rate( VP8_COMP *cpi,
 {
     double prediction_decay_rate;
     double second_ref_decay;
-    double motion_decay;
-    double motion_pct = next_frame->pcnt_motion;
     double mb_sr_err_diff;
 
     // Initial basis is the % mbs inter coded
@@ -1625,7 +1614,6 @@ static void define_gf_group(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     FIRSTPASS_STATS next_frame;
     FIRSTPASS_STATS *start_pos;
     int i;
-    double r;
     double boost_score = 0.0;
     double old_boost_score = 0.0;
     double gf_group_err = 0.0;
@@ -2605,9 +2593,7 @@ static void find_next_key_frame(VP8_COMP *cpi, FIRSTPASS_STATS *this_frame)
     {
         int kf_boost = boost_score;
         int allocation_chunks;
-        int Counter = cpi->twopass.frames_to_key;
         int alt_kf_bits;
-        YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
 
         if ( kf_boost < 300 )
         {

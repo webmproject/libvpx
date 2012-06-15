@@ -11,7 +11,9 @@
 #include "vp8/common/onyxc_int.h"
 
 #define MAX_REGIONS 24000
+#ifndef NULL
 #define NULL 0
+#endif
 
 #define min_mbs_in_region 3
 

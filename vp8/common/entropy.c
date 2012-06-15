@@ -179,7 +179,6 @@ const vp8_prob updprobs[4] = {128, 136, 120, 112};
 
 void vp8_default_coef_probs(VP8_COMMON *pc)
 {
-    int h;
     vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
                    sizeof(default_coef_probs));
 

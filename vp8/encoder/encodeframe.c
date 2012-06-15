@@ -707,7 +707,7 @@ static void encode_sb ( VP8_COMP *cpi,
                         MACROBLOCKD *xd,
                         TOKENEXTRA **tp )
 {
-    int i, j;
+    int i;
     int map_index;
     int mb_row, mb_col;
     int recon_yoffset, recon_uvoffset;
@@ -1301,7 +1301,6 @@ void vp8_encode_frame(VP8_COMP *cpi)
     if (cpi->sf.RD)
     {
         int frame_type, pred_type;
-        int redo = 0;
         int single_diff, comp_diff, hybrid_diff;
 
         /*
@@ -1608,9 +1607,6 @@ void vp8cx_encode_inter_macroblock
 {
     VP8_COMMON *cm = &cpi->common;
     MACROBLOCKD *const xd = &x->e_mbd;
-    int intra_error = 0;
-    int rate;
-    int distortion;
     unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
     int seg_ref_active;
     unsigned char ref_pred_flag;

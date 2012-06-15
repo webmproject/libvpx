@@ -37,9 +37,6 @@ static void update_mode_info_border( VP8_COMMON *cpi, MODE_INFO *mi_base )
 }
 static void update_mode_info_in_image( VP8_COMMON *cpi, MODE_INFO *mi )
 {
-    int stride = cpi->mode_info_stride;
-    int rows = cpi->mb_rows;
-    int cols = cpi->mb_cols;
     int i, j;
 
     // For each in image mode_info element set the in image flag to 1

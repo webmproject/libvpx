@@ -1004,10 +1004,10 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     MACROBLOCKD *const xd  = & pbi->mb;
     const unsigned char *data = (const unsigned char *)pbi->Source;
     const unsigned char *data_end = data + pbi->source_sz;
-    ptrdiff_t first_partition_length_in_bytes;
+    ptrdiff_t first_partition_length_in_bytes = 0;
 
     int mb_row;
-    int i, j, k, l;
+    int i, j;
     int corrupt_tokens = 0;
 
     /* start with no corruption of current frame */

@@ -22,6 +22,7 @@
 #include "vpx/vpx_encoder.h"
 #include "vpx_mem/vpx_mem.h"
 #include "bitstream.h"
+#include "segmentation.h"
 
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
@@ -1397,7 +1398,9 @@ void build_coeff_contexts(VP8_COMP *cpi)
             int k = 0;
             do
             {
+#ifdef ENTROPY_STATS
                 int t;
+#endif
 #if CONFIG_EXPANDED_COEF_CONTEXT
                 if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
                     continue;
@@ -1444,7 +1447,9 @@ void build_coeff_contexts(VP8_COMP *cpi)
                     /* calc probs and branch cts for this frame only */
                     //vp8_prob new_p           [ENTROPY_NODES];
                     //unsigned int branch_ct   [ENTROPY_NODES] [2];
+#ifdef ENTROPY_STATS
                     int t = 0;      /* token/prob index */
+#endif
 #if CONFIG_EXPANDED_COEF_CONTEXT
                     if (k >=3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
                         continue;

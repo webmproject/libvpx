@@ -806,7 +806,6 @@ static void macro_block_yrd_8x8( MACROBLOCK *mb,
     MACROBLOCKD *const x = &mb->e_mbd;
     BLOCK   *const mb_y2 = mb->block + 24;
     BLOCKD *const x_y2  = x->block + 24;
-    short *Y2DCPtr = mb_y2->src_diff;
     int d;
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
@@ -1166,8 +1165,8 @@ static int rd_pick_intra8x8block(
     int distortion;
     BLOCK  *be=x->block + ib;
     BLOCKD *b=x->e_mbd.block + ib;
-    ENTROPY_CONTEXT ta0, ta1, besta0, besta1;
-    ENTROPY_CONTEXT tl0, tl1, bestl0, bestl1;
+    ENTROPY_CONTEXT ta0, ta1, besta0 = 0, besta1 = 0;
+    ENTROPY_CONTEXT tl0, tl1, bestl0 = 0, bestl1 = 0;
 
 
     /*
@@ -2503,7 +2502,7 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
-/*static */void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
+void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
 {
     if (x->e_mbd.mode_info_context->mbmi.mode == SPLITMV)
     {
@@ -2792,7 +2791,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int uv_intra_skippable = 0;
-    int uv_intra_rate_8x8, uv_intra_distortion_8x8, uv_intra_rate_tokenonly_8x8;
+    int uv_intra_rate_8x8 = 0, uv_intra_distortion_8x8 = 0, uv_intra_rate_tokenonly_8x8 = 0;
     int uv_intra_skippable_8x8=0;
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
@@ -2804,7 +2803,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     //int intermodecost[MAX_MODES];
 
     MB_PREDICTION_MODE uv_intra_mode;
-    MB_PREDICTION_MODE uv_intra_mode_8x8;
+    MB_PREDICTION_MODE uv_intra_mode_8x8 = 0;
 
     int_mv mvp;
     int near_sadidx[8] = {0, 1, 2, 3, 4, 5, 6, 7};

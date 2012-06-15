@@ -9,6 +9,7 @@
  */
 
 #include "vp8/common/pred_common.h"
+#include "vp8/common/seg_common.h"
 
 // TBD prediction functions for various bitstream signals
 

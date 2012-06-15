@@ -22,7 +22,7 @@
 #include "vpx_mem/vpx_mem.h"
 #include "vp8/common/systemdependent.h"
 #include "encodemv.h"
-
+#include "vp8/common/quant_common.h"
 
 #define MIN_BPB_FACTOR          0.005
 #define MAX_BPB_FACTOR          50
@@ -96,7 +96,7 @@ static const unsigned int prior_key_frame_weight[KEY_FRAME_CONTEXT] = { 1, 2, 3,
 double vp8_convert_qindex_to_q( int qindex )
 {
     // Convert the index to a real Q value (scaled down to match old Q values)
-    return (double)vp8_ac_yquant( qindex, 0 ) / 4.0;
+    return (double)vp8_ac_yquant( qindex ) / 4.0;
 }
 
 int vp8_gfboost_qadjust( int qindex )
@@ -328,7 +328,6 @@ static int estimate_bits_at_q(int frame_kind, int Q, int MBs,
 static void calc_iframe_target_size(VP8_COMP *cpi)
 {
     // boost defaults to half second
-    int kf_boost;
     int target;
 
     // Clear down mmx registers to allow floating point in what follows
@@ -366,7 +365,6 @@ static void calc_gf_params(VP8_COMP *cpi)
 static void calc_pframe_target_size(VP8_COMP *cpi)
 {
     int min_frame_target;
-    int Adjustment;
 
     min_frame_target = 0;
 

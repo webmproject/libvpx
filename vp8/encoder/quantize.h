@@ -55,6 +55,7 @@ extern prototype_quantize_block(vp8_quantize_quantb_2x2);
 #define vp8_quantize_mb vp8_quantize_mb_c
 #endif
 extern prototype_quantize_mb(vp8_quantize_mb);
+void vp8_quantize_mb_8x8(MACROBLOCK *x);
 
 #ifndef vp8_quantize_mbuv
 #define vp8_quantize_mbuv vp8_quantize_mbuv_c

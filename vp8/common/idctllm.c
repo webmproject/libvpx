@@ -389,7 +389,7 @@ void vp8_short_idct8x8_c(short *coefs, short *block, int pitch)
 
 void vp8_short_ihaar2x2_c(short *input, short *output, int pitch)
 {
-   int i, x;
+   int i;
    short *ip = input; //0,1, 4, 8
    short *op = output;
    for (i = 0; i < 16; i++)
