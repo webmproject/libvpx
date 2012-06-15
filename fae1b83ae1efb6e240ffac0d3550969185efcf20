@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH///kQ\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-15T17:32:54Z",
+      "side": 1,
+      "message": "Can you make the subject something along the lines of \u0027fix segmentation updates with vp8_set_roimap()\u0027? I use the one-line log when preparing the CHANGELOG, and would prefer not to have to cross reference against the issue tracker. Good idea to mention the bug number in the body of the commit message though.",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH///kI\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-15T17:32:54Z",
+      "side": 1,
+      "message": "Won\u0027t this resend the segmentation map on every frame, even when it doesn\u0027t change? I don\u0027t see anywhere where this is turned off. Will fix the bug, but seems heavy handed considering the cost of these updates.",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH///kE\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5344,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-15T17:32:54Z",
+      "side": 1,
+      "message": "This doesn\u0027t make sense to me. The user has no way to tell the codec to use this setting, so I think this function should *set* that setting, rather than checking that it is set. The user wants to use this ROI map, if that means that the segment data needs to be transmitted as deltas, then make it so.",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH///j4\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5360,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-15T17:32:54Z",
+      "side": 1,
+      "message": "else and {} not needed here, since you return in the body of the other case.",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH///jU\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5364,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-15T17:32:54Z",
+      "side": 1,
+      "message": "just for consistency, you could move this to after all the parameter validation is done.",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH///jY\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5377,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-15T17:32:54Z",
+      "side": 1,
+      "message": "trailing whitespace",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
