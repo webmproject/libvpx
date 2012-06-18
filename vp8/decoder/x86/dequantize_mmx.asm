@@ -8,7 +8,7 @@
 ;  be found in the AUTHORS file in the root of the source tree.
 ;
 
-%include "vpx_ports/x86inc.asm"
+%include "third_party/x86inc/x86inc.asm"
 
 SECTION_RODATA
 align 16
