@@ -46,15 +46,21 @@
         %define WIN64  1
     %elifidn __OUTPUT_FORMAT__,win64
         %define WIN64  1
+    %elifidn __OUTPUT_FORMAT__,x64
+        %define WIN64  1
     %else
         %define UNIX64 1
     %endif
 %endif
 
-%ifdef PREFIX
-    %define mangle(x) _ %+ x
-%else
+%ifidn   __OUTPUT_FORMAT__,elf32
     %define mangle(x) x
+%elifidn __OUTPUT_FORMAT__,elf64
+    %define mangle(x) x
+%elifidn __OUTPUT_FORMAT__,x64
+    %define mangle(x) x
+%else
+    %define mangle(x) _ %+ x
 %endif
 
 ; FIXME: All of the 64bit asm functions that take a stride as an argument
@@ -89,11 +95,15 @@
 
 %if WIN64
     %define PIC
+%elifidn __OUTPUT_FORMAT__,macho64
+    %define PIC
 %elif ARCH_X86_64 == 0
 ; x86_32 doesn't require PIC.
 ; Some distros prefer shared objects to be PIC, but nothing breaks if
 ; the code contains a few textrels, so we'll skip that complexity.
     %undef PIC
+%elif CONFIG_PIC
+    %define PIC
 %endif
 %ifdef PIC
     default rel
