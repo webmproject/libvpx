@@ -339,6 +339,23 @@
       "revId": "28130627e283429fd7bb000c644ef17a1eb29acc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//9ts\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-18T22:35:21Z",
+      "side": 1,
+      "message": "Could you make this test parameterized and test the mmx and sse2 functions too? See idctllm_test.cc for an example.\n\nAlso, maybe test the 8x4 versions match the two corresponding 4x4 calls.",
+      "revId": "28130627e283429fd7bb000c644ef17a1eb29acc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
