@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//8pw\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "move declarations as close as possible to first use",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8pk\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "prefer int over unsigned int unless you\u0027re masking or really need that last bit",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8qM\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "declare and initialize within for statements",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8qI\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "const int mbs \u003d",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8pQ\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "use C++ style casting or skip the casting if vpx_calloc returns a void *",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8pM\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "needs a period at the end",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8pI\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "declare and initialize all in one - use const",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8o8\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "declare i here.\nno inner space with parens.\nuse preincrement.",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8o0\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T22:10:45Z",
+      "side": 1,
+      "message": "const int",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
