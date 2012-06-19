@@ -143,9 +143,7 @@ void vp8_post_proc_down_and_across_c
     int col;
     int i;
     int v;
-    int pitch = src_pixels_per_line;
     unsigned char d[8];
-    (void)dst_pixels_per_line;
 
     for (row = 0; row < rows; row++)
     {
@@ -161,10 +159,10 @@ void vp8_post_proc_down_and_across_c
 
             for (i = -2; i <= 2; i++)
             {
-                if (abs(v - p_src[col+i*pitch]) > flimit)
+                if (abs(v - p_src[col+i*src_pixels_per_line]) > flimit)
                     goto down_skip_convolve;
 
-                kernel += kernel5[2+i] * p_src[col+i*pitch];
+                kernel += kernel5[2+i] * p_src[col+i*src_pixels_per_line];
             }
 
             v = (kernel >> 3);
@@ -211,10 +209,9 @@ void vp8_post_proc_down_and_across_c
         p_dst[col-2] = d[(col-2)&7];
         p_dst[col-1] = d[(col-1)&7];
 
-
         /* next row */
-        src_ptr += pitch;
-        dst_ptr += pitch;
+        src_ptr += src_pixels_per_line;
+        dst_ptr += dst_pixels_per_line;
     }
 }
 
