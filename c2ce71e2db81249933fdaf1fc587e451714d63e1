@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//850\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T18:51:58Z",
+      "side": 1,
+      "message": "Starting a namespace does not increase indent level within. Just add a blank line after the namespace line.",
+      "revId": "c2ce71e2db81249933fdaf1fc587e451714d63e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//86I\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T18:51:58Z",
+      "side": 1,
+      "message": "declare these where initialized and use const",
+      "revId": "c2ce71e2db81249933fdaf1fc587e451714d63e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//86M\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T18:51:58Z",
+      "side": 1,
+      "message": "should declare and initialize iteration variables in the loop:\nfor (int i \u003d ....",
+      "revId": "c2ce71e2db81249933fdaf1fc587e451714d63e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//85s\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T18:51:58Z",
+      "side": 1,
+      "message": "Don\u0027t reuse these temp vars. Just declare new ones:\nconst int some_var \u003d x;",
+      "revId": "c2ce71e2db81249933fdaf1fc587e451714d63e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//86E\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T18:51:58Z",
+      "side": 1,
+      "message": "declare within for statements",
+      "revId": "c2ce71e2db81249933fdaf1fc587e451714d63e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//858\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-19T18:51:58Z",
+      "side": 1,
+      "message": "declare in each loop",
+      "revId": "c2ce71e2db81249933fdaf1fc587e451714d63e1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
