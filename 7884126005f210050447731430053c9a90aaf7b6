@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//840\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-19T18:54:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//89s\u003d",
+      "revId": "7884126005f210050447731430053c9a90aaf7b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//89U\u003d",
         "filename": "test/subtract_test.cc",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//87Q\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-19T18:54:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//89U\u003d",
+      "revId": "7884126005f210050447731430053c9a90aaf7b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//89M\u003d",
         "filename": "test/subtract_test.cc",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2012-06-19T17:59:25Z",
       "side": 1,
       "message": "not necessary to guard vpx_free()",
+      "revId": "7884126005f210050447731430053c9a90aaf7b6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//85w\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-19T18:54:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//89M\u003d",
       "revId": "7884126005f210050447731430053c9a90aaf7b6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
