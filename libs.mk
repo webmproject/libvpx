@@ -100,6 +100,7 @@ ifeq ($(ARCH_X86)$(ARCH_X86_64),yes)
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/emms.asm
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_abi_support.asm
+CODEC_SRCS-$(BUILD_LIBVPX) += third_party/x86inc/x86inc.asm
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/x86_cpuid.c
 endif
 CODEC_SRCS-$(ARCH_ARM) += vpx_ports/arm_cpudetect.c
