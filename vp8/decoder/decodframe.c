@@ -849,10 +849,10 @@ int vp8_decode_frame(VP8D_COMP *pbi)
 #endif
 
 #if CONFIG_MULTITHREAD
-
                 if (pbi->b_multithreaded_rd)
                     vp8mt_alloc_temp_buffers(pbi, pc->Width, prev_mb_rows);
-
+#else
+                (void)prev_mb_rows;
 #endif
                 frame_size_change = 1;
             }

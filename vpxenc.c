@@ -54,11 +54,7 @@ typedef __int64 off_t;
 #define off_t off64_t
 #endif
 
-#if defined(_MSC_VER)
-#define LITERALU64(n) n
-#else
-#define LITERALU64(n) n##LLU
-#endif
+#define LITERALU64(hi,lo) ((((uint64_t)hi)<<32)|lo)
 
 /* We should use 32-bit file operations in WebM file format
  * when building ARM executable file (.axf) with RVCT */
@@ -67,6 +63,22 @@ typedef long off_t;
 #define fseeko fseek
 #define ftello ftell
 #endif
+
+/* Swallow warnings about unused results of fread/fwrite */
+static size_t wrap_fread(void *ptr, size_t size, size_t nmemb,
+                         FILE *stream)
+{
+    return fread(ptr, size, nmemb, stream);
+}
+#define fread wrap_fread
+
+static size_t wrap_fwrite(const void *ptr, size_t size, size_t nmemb,
+                          FILE *stream)
+{
+    return fwrite(ptr, size, nmemb, stream);
+}
+#define fwrite wrap_fwrite
+
 
 static const char *exec_name;
 
@@ -599,7 +611,7 @@ Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
 {
     /* todo this is always taking 8 bytes, this may need later optimization */
     /* this is a key that says length unknown */
-    uint64_t unknownLen = 0x01FFFFFFFFFFFFFF;
+    uint64_t unknownLen = LITERALU64(0x01FFFFFF, 0xFFFFFFFF);
 
     Ebml_WriteID(glob, class_id);
     *ebmlLoc = ftello(glob->stream);
@@ -617,7 +629,7 @@ Ebml_EndSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc)
 
     /* Calculate the size of this element */
     size = pos - *ebmlLoc - 8;
-    size |= 0x0100000000000000;
+    size |= LITERALU64(0x01000000,0x00000000);
 
     /* Seek back to the beginning of the element and write the new size */
     fseeko(glob->stream, *ebmlLoc, SEEK_SET);

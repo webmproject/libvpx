@@ -57,10 +57,6 @@ extern unsigned int vp8_get_processor_freq();
 extern void print_tree_update_probs();
 extern void vp8cx_create_encoder_threads(VP8_COMP *cpi);
 extern void vp8cx_remove_encoder_threads(VP8_COMP *cpi);
-#if HAVE_NEON
-extern void vp8_yv12_copy_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-extern void vp8_yv12_copy_src_frame_func_neon(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG *dst_ybc);
-#endif
 
 int vp8_estimate_entropy_savings(VP8_COMP *cpi);
 
