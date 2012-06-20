@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//8SU\u003d",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-06-20T00:45:20Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAALH//8Ts\u003d",
+      "revId": "6ca297f75f567032636a94fb2f67db30f7fd8cb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//8Tg\u003d",
         "filename": "test/test.mk",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//8SM\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-06-20T00:45:20Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAALH//8Tg\u003d",
+      "revId": "6ca297f75f567032636a94fb2f67db30f7fd8cb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//8To\u003d",
         "filename": "test/test.mk",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2012-06-20T00:37:46Z",
       "side": 1,
       "message": "drop this line",
+      "revId": "6ca297f75f567032636a94fb2f67db30f7fd8cb3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//8SI\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-06-20T00:45:20Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "AAAALH//8To\u003d",
       "revId": "6ca297f75f567032636a94fb2f67db30f7fd8cb3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
