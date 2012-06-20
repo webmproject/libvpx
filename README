@@ -1,5 +1,5 @@
 vpx Multi-Format Codec SDK
-README - 19 May 2010
+README - 21 June 2012
 
 Welcome to the WebM VP8 Codec SDK!
 
@@ -15,11 +15,19 @@ COMPILING THE APPLICATIONS/LIBRARIES:
     * Building the documentation requires PHP[3] and Doxygen[4]. If you do not
       have these packages, you must pass --disable-install-docs to the
       configure script.
+    * Downloading the data for the unit tests requires curl[5] and sha1sum.
+      sha1sum is provided via the GNU coreutils, installed by default on
+      many *nix platforms, as well as MinGW and Cygwin. If coreutils is not
+      available, a compatible version of sha1sum can be built from
+      source[6]. These requirements are optional if not running the unit
+      tests.
 
     [1]: http://www.tortall.net/projects/yasm
     [2]: http://www.cygwin.com
     [3]: http://php.net
     [4]: http://www.doxygen.org
+    [5]: http://curl.haxx.se
+    [6]: http://www.microbrew.org/tools/md5sha1sum/
 
   2. Out-of-tree builds
   Out of tree builds are a supported method of building the application. For
@@ -94,5 +102,5 @@ COMPILING THE APPLICATIONS/LIBRARIES:
 
 SUPPORT
   This library is an open source project supported by its community. Please
-  please email webm-users@webmproject.org for help.
+  please email webm-discuss@webmproject.org for help.
 

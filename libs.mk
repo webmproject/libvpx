@@ -352,10 +352,28 @@ CODEC_DOC_SRCS += vpx/vpx_codec.h \
 ## libvpx test directives
 ##
 ifeq ($(CONFIG_UNIT_TESTS),yes)
+LIBVPX_TEST_DATA_PATH ?= .
 
 include $(SRC_PATH_BARE)/test/test.mk
 LIBVPX_TEST_SRCS=$(addprefix test/,$(call enabled,LIBVPX_TEST_SRCS))
 LIBVPX_TEST_BINS=./test_libvpx
+LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
+                     $(call enabled,LIBVPX_TEST_DATA))
+libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
+
+$(LIBVPX_TEST_DATA):
+	@echo "    [DOWNLOAD] $@"
+	$(qexec)trap 'rm -f $@' INT TERM &&\
+            curl -L -o $@ $(call libvpx_test_data_url,$(@F))
+
+testdata:: $(LIBVPX_TEST_DATA)
+	$(qexec)if [ -x "$$(which sha1sum)" ]; then\
+            echo "Checking test data:";\
+            (cd $(LIBVPX_TEST_DATA_PATH); sha1sum -c)\
+                < $(SRC_PATH_BARE)/test/test-data.sha1; \
+        else\
+            echo "Skipping test data integrity check, sha1sum not found.";\
+        fi
 
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
@@ -390,7 +408,7 @@ test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
 
 PROJECTS-$(CONFIG_MSVS) += test_libvpx.vcproj
 
-test::
+test:: testdata
 	@set -e; for t in $(addprefix Win32/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
 endif
 else
@@ -422,7 +440,7 @@ $(foreach bin,$(LIBVPX_TEST_BINS),\
         )))\
     $(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(bin))))\
 
-test:: $(LIBVPX_TEST_BINS)
+test:: $(LIBVPX_TEST_BINS) testdata
 	@set -e; for t in $(LIBVPX_TEST_BINS); do $$t; done
 
 endif
