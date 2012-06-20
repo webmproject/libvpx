@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//75o\u003d",
+        "filename": "vpx_scale/arm/neon/yv12extend_arm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-06-20T15:49:18Z",
+      "side": 0,
+      "message": "YV12_BUFFER_CONFIG seems to be preferred throughout the codebase",
+      "revId": "b178fe7bfb96379d6dda6351b5739378d5c9f4d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//75w\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-06-20T15:49:18Z",
+      "side": 0,
+      "message": "Personally I prefer the old 0x1F... for readability/comprehension. Could it be suffixed with LL?",
+      "revId": "b178fe7bfb96379d6dda6351b5739378d5c9f4d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
