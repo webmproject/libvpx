@@ -204,8 +204,8 @@ typedef struct vpx_roi_map
     unsigned char *roi_map;      /**< specify an id between 0 and 3 for each 16x16 region within a frame */
     unsigned int   rows;         /**< number of rows */
     unsigned int   cols;         /**< number of cols */
-    int     delta_q[4];          /**< quantizer delta [-64, 64] off baseline for regions with id between 0 and 3*/
-    int     delta_lf[4];         /**< loop filter strength delta [-32, 32] for regions with id between 0 and 3 */
+    int     delta_q[4];          /**< quantizer delta [-63, 63] off baseline for regions with id between 0 and 3*/
+    int     delta_lf[4];         /**< loop filter strength delta [-63, 63] for regions with id between 0 and 3 */
     unsigned int   static_threshold[4];/**< threshold for region to be treated as static */
 } vpx_roi_map_t;
 
