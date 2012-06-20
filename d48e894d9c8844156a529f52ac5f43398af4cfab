@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//7+w\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//8pw\u003d",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//8pk\u003d",
         "filename": "test/set_roi.cc",
         "patchSetId": 6
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-19T22:10:45Z",
       "side": 1,
       "message": "prefer int over unsigned int unless you\u0027re masking or really need that last bit",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7/w\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "The reason for unsigned int here is that the \"thresholds\" argument for vp8_set_roimap() is unsigned int.",
+      "parentUuid": "AAAALH//8pk\u003d",
       "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//7/Q\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//8qM\u003d",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//8qI\u003d",
         "filename": "test/set_roi.cc",
         "patchSetId": 6
@@ -64,6 +118,24 @@
       "writtenOn": "2012-06-19T22:10:45Z",
       "side": 1,
       "message": "const int mbs \u003d",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7/s\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//8qI\u003d",
       "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//7/o\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done\nvpx_calloc does return void * but Visual studio throws an error if you skip the cast.",
+      "parentUuid": "AAAALH//8pQ\u003d",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//8pM\u003d",
         "filename": "test/set_roi.cc",
         "patchSetId": 6
@@ -98,6 +188,24 @@
       "writtenOn": "2012-06-19T22:10:45Z",
       "side": 1,
       "message": "needs a period at the end",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7/k\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//8pM\u003d",
       "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//7/g\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//8pI\u003d",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//8o8\u003d",
         "filename": "test/set_roi.cc",
         "patchSetId": 6
@@ -138,6 +264,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//7/U\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//8o8\u003d",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//8o0\u003d",
         "filename": "test/set_roi.cc",
         "patchSetId": 6
@@ -149,6 +293,24 @@
       "writtenOn": "2012-06-19T22:10:45Z",
       "side": 1,
       "message": "const int",
+      "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7/c\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:17:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//8o0\u003d",
       "revId": "d48e894d9c8844156a529f52ac5f43398af4cfab",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
