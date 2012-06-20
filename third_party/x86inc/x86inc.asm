@@ -57,6 +57,8 @@
     %define mangle(x) x
 %elifidn __OUTPUT_FORMAT__,elf64
     %define mangle(x) x
+%elifidn __OUTPUT_FORMAT__,elf
+    %define mangle(x) x
 %elifidn __OUTPUT_FORMAT__,x64
     %define mangle(x) x
 %else
@@ -515,6 +517,10 @@ DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
     %xdefine current_function %1
     %ifidn __OUTPUT_FORMAT__,elf
         global %1:function hidden
+    %elifidn __OUTPUT_FORMAT__,elf32
+        global %1:function hidden
+    %elifidn __OUTPUT_FORMAT__,elf64
+        global %1:function hidden
     %else
         global %1
     %endif
@@ -549,6 +555,10 @@ DECLARE_ARG 7, 8, 9, 10, 11, 12, 13, 14
 ; This is needed for ELF, otherwise the GNU linker assumes the stack is
 ; executable by default.
 %ifidn __OUTPUT_FORMAT__,elf
+SECTION .note.GNU-stack noalloc noexec nowrite progbits
+%elifidn __OUTPUT_FORMAT__,elf32
+SECTION .note.GNU-stack noalloc noexec nowrite progbits
+%elifidn __OUTPUT_FORMAT__,elf64
 SECTION .note.GNU-stack noalloc noexec nowrite progbits
 %endif
 
