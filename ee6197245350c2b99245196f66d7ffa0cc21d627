@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//74o\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-20T16:24:50Z",
+      "side": 1,
+      "message": "consider setting up random blocks instead of a test with one specific non random set of values.",
+      "revId": "ee6197245350c2b99245196f66d7ffa0cc21d627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//75E\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-20T16:24:50Z",
+      "side": 1,
+      "message": "I think you are testing that all of the lines equal the first line and then all of the columns in the first line equal the first column and then that the first column \u003d 0x70.   \n\nhow about a comment to that effect.  or maybe something like check that every single value in the blocksize is set to 0x70.",
+      "revId": "ee6197245350c2b99245196f66d7ffa0cc21d627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//748\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-20T16:24:50Z",
+      "side": 1,
+      "message": "Same as above / maybe consider a separate function rather than the 4 lines below repeated 6 times.",
+      "revId": "ee6197245350c2b99245196f66d7ffa0cc21d627",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
