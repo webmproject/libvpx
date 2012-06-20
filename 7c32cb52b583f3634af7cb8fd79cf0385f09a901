@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//790\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-20T13:46:01Z",
+      "side": 1,
+      "message": "Won\u0027t this resend the segmentation map on every frame, even when it doesn\u0027t change? I don\u0027t see anywhere where this is turned off. Will fix the bug, but seems heavy handed considering the cost of these updates.",
+      "revId": "7c32cb52b583f3634af7cb8fd79cf0385f09a901",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//79w\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5340,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-20T13:46:01Z",
+      "side": 1,
+      "message": "regarding the comment you made in the bugtracker about the range in the docs being wrong, you can update vpx/vp8cx.h with the correct range as part of this commit to fix.",
+      "revId": "7c32cb52b583f3634af7cb8fd79cf0385f09a901",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
