@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//71A\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T17:33:52Z",
+      "side": 1,
+      "message": "No... see comments in patch one that I forgot to submit.",
+      "parentUuid": "AAAALH//790\u003d",
+      "revId": "7c32cb52b583f3634af7cb8fd79cf0385f09a901",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//79w\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-20T13:46:01Z",
       "side": 1,
       "message": "regarding the comment you made in the bugtracker about the range in the docs being wrong, you can update vpx/vp8cx.h with the correct range as part of this commit to fix.",
+      "revId": "7c32cb52b583f3634af7cb8fd79cf0385f09a901",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//708\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 5340,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T17:33:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//79w\u003d",
       "revId": "7c32cb52b583f3634af7cb8fd79cf0385f09a901",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
