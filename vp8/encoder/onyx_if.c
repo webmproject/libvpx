@@ -289,12 +289,17 @@ static void restore_layer_context(VP8_COMP *cpi, const int layer)
 
 static void setup_features(VP8_COMP *cpi)
 {
-    /* Set up default state for MB feature flags */
-    cpi->mb.e_mbd.segmentation_enabled = 0;
-    cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 0;
-    vpx_memset(cpi->mb.e_mbd.mb_segment_tree_probs, 255, sizeof(cpi->mb.e_mbd.mb_segment_tree_probs));
-    vpx_memset(cpi->mb.e_mbd.segment_feature_data, 0, sizeof(cpi->mb.e_mbd.segment_feature_data));
+    // If segmentation enabled set the update flags
+    if ( cpi->mb.e_mbd.segmentation_enabled )
+    {
+        cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+        cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+    }
+    else
+    {
+        cpi->mb.e_mbd.update_mb_segmentation_map = 0;
+        cpi->mb.e_mbd.update_mb_segmentation_data = 0;
+    }
 
     cpi->mb.e_mbd.mode_ref_lf_delta_enabled = 0;
     cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
@@ -406,35 +411,34 @@ static void segmentation_test_function(VP8_COMP *cpi)
     unsigned char *seg_map;
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
 
-    /* Create a temporary map for segmentation data. */
+    // Create a temporary map for segmentation data.
     CHECK_MEM_ERROR(seg_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
 
-    /* Set the segmentation Map */
+    // Set the segmentation Map
     set_segmentation_map(cpi, seg_map);
 
-    /* Activate segmentation. */
+    // Activate segmentation.
     enable_segmentation(cpi);
 
-    /* Set up the quant segment data */
+    // Set up the quant segment data
     feature_data[MB_LVL_ALT_Q][0] = 0;
     feature_data[MB_LVL_ALT_Q][1] = 4;
     feature_data[MB_LVL_ALT_Q][2] = 0;
     feature_data[MB_LVL_ALT_Q][3] = 0;
-
-    /* Set up the loop segment data */
+    // Set up the loop segment data
     feature_data[MB_LVL_ALT_LF][0] = 0;
     feature_data[MB_LVL_ALT_LF][1] = 0;
     feature_data[MB_LVL_ALT_LF][2] = 0;
     feature_data[MB_LVL_ALT_LF][3] = 0;
 
-    /* Initialise the feature data structure */
+    // Initialise the feature data structure
+    // SEGMENT_DELTADATA    0, SEGMENT_ABSDATA      1
     set_segment_data(cpi, &feature_data[0][0], SEGMENT_DELTADATA);
 
-    /* Delete sementation map */
+    // Delete sementation map
     vpx_free(seg_map);
 
     seg_map = 0;
-
 }
 
 /* A simple function to cyclically refresh the background at a lower Q */
@@ -1761,6 +1765,7 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 
     /* Create the encoder segmentation map and set all entries to 0 */
     CHECK_MEM_ERROR(cpi->segmentation_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
+
     CHECK_MEM_ERROR(cpi->active_map, vpx_calloc(cpi->common.mb_rows * cpi->common.mb_cols, 1));
     vpx_memset(cpi->active_map , 1, (cpi->common.mb_rows * cpi->common.mb_cols));
     cpi->active_map_enabled = 0;
@@ -3314,25 +3319,13 @@ static void encode_frame_to_data_rate
     }
 #endif
 
-    /* Set default state for segment and mode based loop filter update flags */
-    cpi->mb.e_mbd.update_mb_segmentation_map = 0;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 0;
-    cpi->mb.e_mbd.mode_ref_lf_delta_update = 0;
-
     /* Set various flags etc to special state if it is a key frame */
     if (cm->frame_type == KEY_FRAME)
     {
         int i;
 
-        /* Reset the loop filter deltas and segmentation map */
+        // Set the loop filter deltas and segmentation map update
         setup_features(cpi);
-
-        /* If segmentation is enabled force a map update for key frames */
-        if (cpi->mb.e_mbd.segmentation_enabled)
-        {
-            cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-            cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-        }
 
         /* The alternate reference frame cannot be active for a key frame */
         cpi->source_alt_ref_active = 0;
@@ -3894,17 +3887,8 @@ static void encode_frame_to_data_rate
                  */
                 cpi->source_alt_ref_active = 0;
 
-                /* Reset the loop filter deltas and segmentation map */
+                // Set the loop filter deltas and segmentation map update
                 setup_features(cpi);
-
-                /* If segmentation is enabled force a map update for key
-                 * frames
-                 */
-                if (cpi->mb.e_mbd.segmentation_enabled)
-                {
-                    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-                    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
-                }
 
                 vp8_restore_coding_context(cpi);
 
@@ -5348,8 +5332,27 @@ int vp8_get_preview_raw_frame(VP8_COMP *cpi, YV12_BUFFER_CONFIG *dest, vp8_ppfla
 int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigned int cols, int delta_q[4], int delta_lf[4], unsigned int threshold[4])
 {
     signed char feature_data[MB_LVL_MAX][MAX_MB_SEGMENTS];
+    int internal_delta_q[MAX_MB_SEGMENTS];
+    const unsigned int range = 63;
+    int i;
 
+    // This method is currently incompatible with the cyclic refresh method
+    if ( cpi->cyclic_refresh_mode_enabled )
+        return -1;
+
+    // Check number of rows and columns match
     if (cpi->common.mb_rows != rows || cpi->common.mb_cols != cols)
+        return -1;
+
+    // Range check the delta Q values and convert the external Q range values
+    // to internal ones.
+    if ( (abs(delta_q[0]) > range) || (abs(delta_q[1]) > range) ||
+         (abs(delta_q[2]) > range) || (abs(delta_q[3]) > range) )
+        return -1;
+
+    // Range check the delta lf values
+    if ( (abs(delta_lf[0]) > range) || (abs(delta_lf[1]) > range) ||
+         (abs(delta_lf[2]) > range) || (abs(delta_lf[3]) > range) )
         return -1;
 
     if (!map)
@@ -5358,6 +5361,11 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigne
         return 0;
     }
 
+    // Translate the external delta q values to internal values.
+    for ( i = 0; i < MAX_MB_SEGMENTS; i++ )
+        internal_delta_q[i] =
+            ( delta_q[i] >= 0 ) ? q_trans[delta_q[i]] : -q_trans[-delta_q[i]];
+
     /* Set the segmentation Map */
     set_segmentation_map(cpi, map);
 
@@ -5365,10 +5373,10 @@ int vp8_set_roimap(VP8_COMP *cpi, unsigned char *map, unsigned int rows, unsigne
     enable_segmentation(cpi);
 
     /* Set up the quant segment data */
-    feature_data[MB_LVL_ALT_Q][0] = delta_q[0];
-    feature_data[MB_LVL_ALT_Q][1] = delta_q[1];
-    feature_data[MB_LVL_ALT_Q][2] = delta_q[2];
-    feature_data[MB_LVL_ALT_Q][3] = delta_q[3];
+    feature_data[MB_LVL_ALT_Q][0] = internal_delta_q[0];
+    feature_data[MB_LVL_ALT_Q][1] = internal_delta_q[1];
+    feature_data[MB_LVL_ALT_Q][2] = internal_delta_q[2];
+    feature_data[MB_LVL_ALT_Q][3] = internal_delta_q[3];
 
     /* Set up the loop segment data s */
     feature_data[MB_LVL_ALT_LF][0] = delta_lf[0];

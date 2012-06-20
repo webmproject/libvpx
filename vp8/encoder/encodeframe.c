@@ -890,8 +890,9 @@ void vp8_encode_frame(VP8_COMP *cpi)
     }
 
 
-    /* Work out the segment probabilities if segmentation is enabled */
-    if (xd->segmentation_enabled)
+    // Work out the segment probabilities if segmentation is enabled
+    // and needs to be updated
+    if (xd->segmentation_enabled && xd->update_mb_segmentation_map)
     {
         int tot_count;
         int i;
