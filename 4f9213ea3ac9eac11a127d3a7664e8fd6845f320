@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//72Y\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-20T17:05:03Z",
+      "side": 1,
+      "message": "To me this is an example of a low value - unit test that I hope we don\u0027t get in practice of writing.   \n\nI say this, because I think this is just testing that the parameters passed through the function actually get to the codec.   \n\nIts not testing that they are used to make the codec run a whole lot faster for all but the difficult clips or produce better quality on the right parts of the video frame etc.   \n\nI think a more valuable test would test this kind of thing.   \n\nI think this code serves the purpose I asked for ( a learning experience) and should ask as a good discussion point for the kind of unit tests we choose to write or not write.",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
