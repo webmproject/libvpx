@@ -759,9 +759,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         case SPLITMV:
         {
             const int s = mbmi->partitioning =
-                      vp8_treed_read(bc, vp8_mbsplit_tree, vp8_mbsplit_probs);
+                      vp8_treed_read(bc, vp8_mbsplit_tree, cm->fc.mbsplit_prob);
             const int num_p = vp8_mbsplit_count [s];
             int j = 0;
+#if CONFIG_ADAPTIVE_ENTROPY
+            cm->fc.mbsplit_counts[s]++;
+#endif
 
             mbmi->need_to_clamp_mvs = 0;
             do  /* for each subset j */
@@ -782,7 +785,10 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     second_abovemv.as_int = above_block_second_mv(mi, k, mis);
                 }
                 mv_contz = vp8_mv_cont(&leftmv, &abovemv);
-                blockmode = sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz]);
+                blockmode = sub_mv_ref(bc, cm->fc.sub_mv_ref_prob [mv_contz]);
+#if CONFIG_ADAPTIVE_ENTROPY
+                cm->fc.sub_mv_ref_counts[mv_contz][blockmode-LEFT4X4]++;
+#endif
 
                 switch (blockmode)
                 {
@@ -812,10 +818,22 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     {
 #if CONFIG_HIGH_PRECISION_MV
                         if (xd->allow_high_precision_mv)
+                        {
                             read_mv_hp(bc, &secondmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                            cm->fc.MVcount_hp[0][mv_max_hp+(secondmv.as_mv.row)]++;
+                            cm->fc.MVcount_hp[1][mv_max_hp+(secondmv.as_mv.col)]++;
+#endif
+                        }
                         else
 #endif
+                        {
                             read_mv(bc, &secondmv.as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                            cm->fc.MVcount[0][mv_max+(secondmv.as_mv.row>>1)]++;
+                            cm->fc.MVcount[1][mv_max+(secondmv.as_mv.col>>1)]++;
+#endif
+                        }
                         secondmv.as_mv.row += best_mv_second.as_mv.row;
                         secondmv.as_mv.col += best_mv_second.as_mv.col;
                     }
@@ -843,9 +861,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     blockmv.as_int = 0;
                     if (mbmi->second_ref_frame)
                         secondmv.as_int = 0;
-  #ifdef VPX_MODE_COUNT
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][2]++;
-  #endif
+#endif
                     break;
                 default:
                     break;
@@ -959,11 +977,23 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             {
 #if CONFIG_HIGH_PRECISION_MV
                     if (xd->allow_high_precision_mv)
+                    {
                         read_mv_hp(bc, &mbmi->second_mv.as_mv,
                                    (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount_hp[0][mv_max_hp+(mbmi->second_mv.as_mv.row)]++;
+                        cm->fc.MVcount_hp[1][mv_max_hp+(mbmi->second_mv.as_mv.col)]++;
+#endif
+                    }
                     else
 #endif
-                    read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
+                    {
+                        read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount[0][mv_max+(mbmi->second_mv.as_mv.row>>1)]++;
+                        cm->fc.MVcount[1][mv_max+(mbmi->second_mv.as_mv.col>>1)]++;
+#endif
+                    }
                     mbmi->second_mv.as_mv.row += best_mv_second.as_mv.row;
                     mbmi->second_mv.as_mv.col += best_mv_second.as_mv.col;
                     mbmi->need_to_clamp_secondmv |= vp8_check_mv_bounds(&mbmi->second_mv,

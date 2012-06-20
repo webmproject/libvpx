@@ -142,7 +142,7 @@ int vp8_mv_cont(const int_mv *l, const int_mv *a)
     return SUBMVREF_NORMAL;
 }
 
-static const vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1] = { 180, 162, 25};
+const vp8_prob vp8_sub_mv_ref_prob [VP8_SUBMVREFS-1] = { 180, 162, 25};
 
 const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS-1] =
 {
@@ -372,7 +372,8 @@ void vp8_init_mbmode_probs(VP8_COMMON *x)
         x->fc.i8x8_mode_prob, bct, i8x8_mode_cts,
         256, 1);
 
-    vpx_memcpy(x->fc.sub_mv_ref_prob, sub_mv_ref_prob, sizeof(sub_mv_ref_prob));
+    vpx_memcpy(x->fc.sub_mv_ref_prob, vp8_sub_mv_ref_prob2, sizeof(vp8_sub_mv_ref_prob2));
+    vpx_memcpy(x->fc.mbsplit_prob, vp8_mbsplit_probs, sizeof(vp8_mbsplit_probs));
 
 }
 
@@ -435,15 +436,15 @@ void vp8_entropy_mode_init()
 
 void vp8_init_mode_contexts(VP8_COMMON *pc)
 {
-    vpx_memset(pc->mv_ref_ct, 0, sizeof(pc->mv_ref_ct));
-    vpx_memset(pc->mv_ref_ct_a, 0, sizeof(pc->mv_ref_ct_a));
+    vpx_memset(pc->fc.mv_ref_ct, 0, sizeof(pc->fc.mv_ref_ct));
+    vpx_memset(pc->fc.mv_ref_ct_a, 0, sizeof(pc->fc.mv_ref_ct_a));
 
-    vpx_memcpy( pc->mode_context,
+    vpx_memcpy( pc->fc.mode_context,
                 default_vp8_mode_contexts,
-                sizeof (pc->mode_context));
-    vpx_memcpy( pc->mode_context_a,
+                sizeof (pc->fc.mode_context));
+    vpx_memcpy( pc->fc.mode_context_a,
                 default_vp8_mode_contexts,
-                sizeof (pc->mode_context_a));
+                sizeof (pc->fc.mode_context_a));
 
 }
 
@@ -454,9 +455,9 @@ void vp8_accum_mv_refs(VP8_COMMON *pc,
     int (*mv_ref_ct)[4][2];
 
     if(pc->refresh_alt_ref_frame)
-        mv_ref_ct = pc->mv_ref_ct_a;
+        mv_ref_ct = pc->fc.mv_ref_ct_a;
     else
-        mv_ref_ct = pc->mv_ref_ct;
+        mv_ref_ct = pc->fc.mv_ref_ct;
 
     if (m == ZEROMV)
     {
@@ -492,6 +493,8 @@ void vp8_accum_mv_refs(VP8_COMMON *pc,
     }
 }
 
+#define MVREF_COUNT_SAT 20
+#define MVREF_MAX_UPDATE_FACTOR 128
 void vp8_update_mode_context(VP8_COMMON *pc)
 {
     int i, j;
@@ -500,13 +503,13 @@ void vp8_update_mode_context(VP8_COMMON *pc)
 
     if(pc->refresh_alt_ref_frame)
     {
-        mv_ref_ct = pc->mv_ref_ct_a;
-        mode_context = pc->mode_context_a;
+        mv_ref_ct = pc->fc.mv_ref_ct_a;
+        mode_context = pc->fc.mode_context_a;
     }
     else
     {
-        mv_ref_ct = pc->mv_ref_ct;
-        mode_context = pc->mode_context;
+        mv_ref_ct = pc->fc.mv_ref_ct;
+        mode_context = pc->fc.mode_context;
     }
 
     for (j = 0; j < 6; j++)
@@ -515,6 +518,18 @@ void vp8_update_mode_context(VP8_COMMON *pc)
         {
             int this_prob;
             int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
+#if CONFIG_ADAPTIVE_ENTROPY
+            int factor;
+            {
+                this_prob = count > 0 ? 256 * mv_ref_ct[j][i][0] / count : 128;
+                count = count > MVREF_COUNT_SAT ? MVREF_COUNT_SAT : count;
+                factor = (MVREF_MAX_UPDATE_FACTOR * count / MVREF_COUNT_SAT);
+                this_prob = (pc->fc.vp8_mode_contexts[j][i] * (256 - factor) +
+                             this_prob * factor + 128) >> 8;
+                this_prob = this_prob? (this_prob<255?this_prob:255):1;
+                mode_context[j][i] = this_prob;
+            }
+#else
             /* preventing rare occurances from skewing the probs */
             if (count>=4)
             {
@@ -522,9 +537,11 @@ void vp8_update_mode_context(VP8_COMMON *pc)
                 this_prob = this_prob? (this_prob<255?this_prob:255):1;
                 mode_context[j][i] = this_prob;
             }
+#endif
         }
     }
 }
+
 #include "vp8/common/modecont.h"
 void print_mode_contexts(VP8_COMMON *pc)
 {
@@ -534,7 +551,7 @@ void print_mode_contexts(VP8_COMMON *pc)
     {
         for (i = 0; i < 4; i++)
         {
-            printf( "%4d ", pc->mode_context[j][i]);
+            printf( "%4d ", pc->fc.mode_context[j][i]);
         }
         printf("\n");
     }
@@ -543,7 +560,7 @@ void print_mode_contexts(VP8_COMMON *pc)
     {
         for (i = 0; i < 4; i++)
         {
-            printf( "%4d ", pc->mode_context_a[j][i]);
+            printf( "%4d ", pc->fc.mode_context_a[j][i]);
         }
         printf("\n");
     }
@@ -557,8 +574,8 @@ void print_mv_ref_cts(VP8_COMMON *pc)
         for (i = 0; i < 4; i++)
         {
             printf("(%4d:%4d) ",
-                    pc->mv_ref_ct[j][i][0],
-                    pc->mv_ref_ct[j][i][1]);
+                    pc->fc.mv_ref_ct[j][i][0],
+                    pc->fc.mv_ref_ct[j][i][1]);
         }
         printf("\n");
     }
@@ -567,17 +584,17 @@ void print_mv_ref_cts(VP8_COMMON *pc)
 #if CONFIG_ADAPTIVE_ENTROPY
 //#define MODE_COUNT_TESTING
 #define MODE_COUNT_SAT 16
-#define MODE_MAX_UPDATE_FACTOR 96
+#define MODE_MAX_UPDATE_FACTOR 128
 void vp8_adapt_mode_probs(VP8_COMMON *cm)
 {
     int i, t, count, factor;
     unsigned int branch_ct[32][2];
-    int update_factor = MODE_MAX_UPDATE_FACTOR; /* denominator 256 */
-    int count_sat = MODE_COUNT_SAT;
     vp8_prob ymode_probs[VP8_YMODES-1];
     vp8_prob uvmode_probs[VP8_UV_MODES-1];
     vp8_prob bmode_probs[VP8_BINTRAMODES-1];
     vp8_prob i8x8_mode_probs[VP8_I8X8_MODES-1];
+    vp8_prob sub_mv_ref_probs[VP8_SUBMVREFS-1];
+    vp8_prob mbsplit_probs[VP8_NUMMBSPLITS-1];
 #ifdef MODE_COUNT_TESTING
     printf("static const unsigned int\nymode_counts"
            "[VP8_YMODES] = {\n");
@@ -600,6 +617,19 @@ void vp8_adapt_mode_probs(VP8_COMMON *cm)
            "[VP8_I8X8_MODES] = {\n");
     for (t = 0; t<VP8_I8X8_MODES; ++t) printf("%d, ", cm->fc.i8x8_mode_counts[t]);
     printf("};\n");
+    printf("static const unsigned int\nsub_mv_ref_counts"
+           "[SUBMVREF_COUNT] [VP8_SUBMVREFS] = {\n");
+    for (i = 0; i < SUBMVREF_COUNT; ++i)
+    {
+        printf("  {");
+        for (t = 0; t < VP8_SUBMVREFS; ++t) printf("%d, ", cm->fc.sub_mv_ref_counts[i][t]);
+        printf("},\n");
+    }
+    printf("};\n");
+    printf("static const unsigned int\nmbsplit_counts"
+           "[VP8_NUMMBSPLITS] = {\n");
+    for (t = 0; t<VP8_NUMMBSPLITS; ++t) printf("%d, ", cm->fc.mbsplit_counts[t]);
+    printf("};\n");
 #endif
     vp8_tree_probs_from_distribution(
         VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
@@ -609,8 +639,8 @@ void vp8_adapt_mode_probs(VP8_COMMON *cm)
     {
         int prob;
         count = branch_ct[t][0] + branch_ct[t][1];
-        count = count > count_sat ? count_sat : count;
-        factor = (update_factor * count / count_sat);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
         prob = ((int)cm->fc.pre_ymode_prob[t] * (256-factor) +
                 (int)ymode_probs[t] * factor + 128) >> 8;
         if (prob <= 0) cm->fc.ymode_prob[t] = 1;
@@ -627,8 +657,8 @@ void vp8_adapt_mode_probs(VP8_COMMON *cm)
         {
             int prob;
             count = branch_ct[t][0] + branch_ct[t][1];
-            count = count > count_sat ? count_sat : count;
-            factor = (update_factor * count / count_sat);
+            count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+            factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
             prob = ((int)cm->fc.pre_uv_mode_prob[i][t] * (256-factor) +
                     (int)uvmode_probs[t] * factor + 128) >> 8;
             if (prob <= 0) cm->fc.uv_mode_prob[i][t] = 1;
@@ -644,8 +674,8 @@ void vp8_adapt_mode_probs(VP8_COMMON *cm)
     {
         int prob;
         count = branch_ct[t][0] + branch_ct[t][1];
-        count = count > count_sat ? count_sat : count;
-        factor = (update_factor * count / count_sat);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
         prob = ((int)cm->fc.pre_bmode_prob[t] * (256-factor) +
                 (int)bmode_probs[t] * factor + 128) >> 8;
         if (prob <= 0) cm->fc.bmode_prob[t] = 1;
@@ -660,13 +690,48 @@ void vp8_adapt_mode_probs(VP8_COMMON *cm)
     {
         int prob;
         count = branch_ct[t][0] + branch_ct[t][1];
-        count = count > count_sat ? count_sat : count;
-        factor = (update_factor * count / count_sat);
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
         prob = ((int)cm->fc.pre_i8x8_mode_prob[t] * (256-factor) +
                 (int)i8x8_mode_probs[t] * factor + 128) >> 8;
         if (prob <= 0) cm->fc.i8x8_mode_prob[t] = 1;
         else if (prob > 255) cm->fc.i8x8_mode_prob[t] = 255;
         else cm->fc.i8x8_mode_prob[t] = prob;
+    }
+    for (i = 0; i < SUBMVREF_COUNT; ++i)
+    {
+        vp8_tree_probs_from_distribution(
+            VP8_SUBMVREFS, vp8_sub_mv_ref_encoding_array, vp8_sub_mv_ref_tree,
+            sub_mv_ref_probs, branch_ct, cm->fc.sub_mv_ref_counts[i],
+            256, 1);
+        for (t = 0; t < VP8_SUBMVREFS-1; ++t)
+        {
+            int prob;
+            count = branch_ct[t][0] + branch_ct[t][1];
+            count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+            factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+            prob = ((int)cm->fc.pre_sub_mv_ref_prob[i][t] * (256-factor) +
+                    (int)sub_mv_ref_probs[t] * factor + 128) >> 8;
+            if (prob <= 0) cm->fc.sub_mv_ref_prob[i][t] = 1;
+            else if (prob > 255) cm->fc.sub_mv_ref_prob[i][t] = 255;
+            else cm->fc.sub_mv_ref_prob[i][t] = prob;
+        }
+    }
+    vp8_tree_probs_from_distribution(
+        VP8_NUMMBSPLITS, vp8_mbsplit_encodings, vp8_mbsplit_tree,
+        mbsplit_probs, branch_ct, cm->fc.mbsplit_counts,
+        256, 1);
+    for (t = 0; t < VP8_NUMMBSPLITS-1; ++t)
+    {
+        int prob;
+        count = branch_ct[t][0] + branch_ct[t][1];
+        count = count > MODE_COUNT_SAT ? MODE_COUNT_SAT : count;
+        factor = (MODE_MAX_UPDATE_FACTOR * count / MODE_COUNT_SAT);
+        prob = ((int)cm->fc.pre_mbsplit_prob[t] * (256 - factor) +
+                (int)mbsplit_probs[t] * factor + 128) >> 8;
+        if (prob <= 0) cm->fc.mbsplit_prob[t] = 1;
+        else if (prob > 255) cm->fc.mbsplit_prob[t] = 255;
+        else cm->fc.mbsplit_prob[t] = prob;
     }
 }
 #endif

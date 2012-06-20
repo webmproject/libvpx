@@ -72,6 +72,7 @@ typedef struct
     MODE_INFO mic;
     PARTITION_INFO partition_info;
     int_mv best_ref_mv;
+    int_mv second_best_ref_mv;
     int rate;
     int distortion;
     int intra_error;

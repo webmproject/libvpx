@@ -23,6 +23,7 @@
 #include "encodemb.h"
 #include "quantize.h"
 #include "vp8/common/entropy.h"
+#include "vp8/common/entropymode.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
@@ -99,6 +100,8 @@ typedef struct
     vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
     vp8_prob bmode_prob [VP8_BINTRAMODES-1];
     vp8_prob i8x8_mode_prob [VP8_I8X8_MODES-1];
+    vp8_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
+    vp8_prob mbsplit_prob [VP8_NUMMBSPLITS-1];
 
     int mv_ref_ct[6][4][2];
     int mode_context[6][4];
@@ -458,7 +461,10 @@ typedef struct VP8_COMP
     int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
     int bmode_count [VP8_BINTRAMODES];
     int i8x8_mode_count [VP8_I8X8_MODES];
+    int sub_mv_ref_count [SUBMVREF_COUNT][VP8_SUBMVREFS];
+    int mbsplit_count [VP8_NUMMBSPLITS];
     //int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
+    int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
 
     unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
 #if CONFIG_HIGH_PRECISION_MV
@@ -542,7 +548,6 @@ typedef struct VP8_COMP
     int t4x4_count;
     int t8x8_count;
 
-    int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
     unsigned char *segmentation_map;
 
     // segment threashold for encode breakout

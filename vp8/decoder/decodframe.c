@@ -729,13 +729,13 @@ static void init_frame(VP8D_COMP *pbi)
         pc->ref_frame_sign_bias[GOLDEN_FRAME] = 0;
         pc->ref_frame_sign_bias[ALTREF_FRAME] = 0;
 
+        vp8_init_mode_contexts(&pbi->common);
         vpx_memcpy(&pc->lfc, &pc->fc, sizeof(pc->fc));
         vpx_memcpy(&pc->lfc_a, &pc->fc, sizeof(pc->fc));
 
-        vp8_init_mode_contexts(&pbi->common);
-        vpx_memcpy( pbi->common.vp8_mode_contexts,
-                    pbi->common.mode_context,
-                    sizeof(pbi->common.mode_context));
+        vpx_memcpy( pbi->common.fc.vp8_mode_contexts,
+                    pbi->common.fc.mode_context,
+                    sizeof(pbi->common.fc.mode_context));
     }
     else
     {
@@ -1331,16 +1331,16 @@ int vp8_decode_frame(VP8D_COMP *pbi)
         if(pc->refresh_alt_ref_frame)
         {
             vpx_memcpy(&pc->fc, &pc->lfc_a, sizeof(pc->fc));
-            vpx_memcpy( pc->vp8_mode_contexts,
-                        pc->mode_context_a,
-                        sizeof(pc->vp8_mode_contexts));
+            vpx_memcpy( pc->fc.vp8_mode_contexts,
+                        pc->fc.mode_context_a,
+                        sizeof(pc->fc.vp8_mode_contexts));
         }
         else
         {
             vpx_memcpy(&pc->fc, &pc->lfc, sizeof(pc->fc));
-            vpx_memcpy( pc->vp8_mode_contexts,
-                        pc->mode_context,
-                        sizeof(pc->vp8_mode_contexts));
+            vpx_memcpy( pc->fc.vp8_mode_contexts,
+                        pc->fc.mode_context,
+                        sizeof(pc->fc.vp8_mode_contexts));
         }
 
         /* Buffer to buffer copy flags. */
@@ -1436,6 +1436,8 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vp8_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
     vp8_copy(pbi->common.fc.pre_bmode_prob, pbi->common.fc.bmode_prob);
     vp8_copy(pbi->common.fc.pre_i8x8_mode_prob, pbi->common.fc.i8x8_mode_prob);
+    vp8_copy(pbi->common.fc.pre_sub_mv_ref_prob, pbi->common.fc.sub_mv_ref_prob);
+    vp8_copy(pbi->common.fc.pre_mbsplit_prob, pbi->common.fc.mbsplit_prob);
     vp8_copy(pbi->common.fc.pre_mvc, pbi->common.fc.mvc);
 #if CONFIG_HIGH_PRECISION_MV
     vp8_copy(pbi->common.fc.pre_mvc_hp, pbi->common.fc.mvc_hp);
@@ -1446,14 +1448,18 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     vp8_zero(pbi->common.fc.uv_mode_counts);
     vp8_zero(pbi->common.fc.bmode_counts);
     vp8_zero(pbi->common.fc.i8x8_mode_counts);
+    vp8_zero(pbi->common.fc.sub_mv_ref_counts);
+    vp8_zero(pbi->common.fc.mbsplit_counts);
     vp8_zero(pbi->common.fc.MVcount);
 #if CONFIG_HIGH_PRECISION_MV
     vp8_zero(pbi->common.fc.MVcount_hp);
 #endif
-#endif
-#if COEFUPDATETYPE == 2
+    vp8_zero(pbi->common.fc.mv_ref_ct);
+    vp8_zero(pbi->common.fc.mv_ref_ct_a);
+#endif  /* CONFIG_ADAPTIVE_ENTROPY */
+#if CONFIG_NEWUPDATE && COEFUPDATETYPE == 2
     read_coef_probs2(pbi);
-#elif COEFUPDATETYPE == 3
+#elif CONFIG_NEWUPDATE && COEFUPDATETYPE == 3
     read_coef_probs3(pbi);
 #else
     read_coef_probs(pbi);
@@ -1481,10 +1487,12 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
     vp8_decode_mode_mvs(pbi);
-    if(pbi->common.frame_type != KEY_FRAME)
+#if CONFIG_ADAPTIVE_ENTROPY == 0
+    if (pc->frame_type != KEY_FRAME)
     {
         vp8_update_mode_context(&pbi->common);
     }
+#endif
 
     vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 
@@ -1521,6 +1529,7 @@ int vp8_decode_frame(VP8D_COMP *pbi)
     {
         vp8_adapt_mode_probs(pc);
         vp8_adapt_mv_probs(pc);
+        vp8_update_mode_context(&pbi->common);
     }
 #endif
 

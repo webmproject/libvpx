@@ -177,9 +177,9 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
     vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
 )
 {
-    p[0] = pc->vp8_mode_contexts [near_mv_ref_ct[0]] [0];
-    p[1] = pc->vp8_mode_contexts [near_mv_ref_ct[1]] [1];
-    p[2] = pc->vp8_mode_contexts [near_mv_ref_ct[2]] [2];
-    p[3] = pc->vp8_mode_contexts [near_mv_ref_ct[3]] [3];
+    p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];
+    p[1] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[1]] [1];
+    p[2] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[2]] [2];
+    p[3] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[3]] [3];
     return p;
 }

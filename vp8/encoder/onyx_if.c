@@ -3702,6 +3702,8 @@ static void encode_frame_to_data_rate
         vp8_copy(cpi->common.fc.uv_mode_counts, cpi->y_uv_mode_count);
         vp8_copy(cpi->common.fc.bmode_counts, cpi->bmode_count);
         vp8_copy(cpi->common.fc.i8x8_mode_counts, cpi->i8x8_mode_count);
+        vp8_copy(cpi->common.fc.sub_mv_ref_counts, cpi->sub_mv_ref_count);
+        vp8_copy(cpi->common.fc.mbsplit_counts, cpi->mbsplit_count);
         vp8_adapt_mode_probs(&cpi->common);
 
         vp8_copy(cpi->common.fc.MVcount, cpi->MVcount);
@@ -3709,6 +3711,7 @@ static void encode_frame_to_data_rate
         vp8_copy(cpi->common.fc.MVcount_hp, cpi->MVcount_hp);
 #endif
         vp8_adapt_mv_probs(&cpi->common);
+        vp8_update_mode_context(&cpi->common);
     }
 #endif  /* CONFIG_ADAPTIVE_ENTROPY */
 
@@ -3809,7 +3812,7 @@ static void encode_frame_to_data_rate
     // in this frame.
     update_base_skip_probs( cpi );
 
-#if 1 && CONFIG_INTERNAL_STATS
+#if 0//1 && CONFIG_INTERNAL_STATS
     {
         FILE *f = fopen("tmp.stt", "a");
         int recon_err;

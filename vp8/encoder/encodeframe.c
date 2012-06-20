@@ -458,7 +458,7 @@ static void update_state (VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx)
         // Note how often each mode chosen as best
         cpi->mode_chosen_counts[mb_mode_index]++;
 
-        rd_update_mvcount(cpi, x, &ctx->best_ref_mv);
+        rd_update_mvcount(cpi, x, &ctx->best_ref_mv, &ctx->second_best_ref_mv);
 
         cpi->prediction_error += ctx->distortion;
         cpi->intra_error += ctx->intra_error;
@@ -1068,6 +1068,12 @@ void init_encode_frame_mb_context(VP8_COMP *cpi)
     vp8_zero(cpi->ymode_count)
     vp8_zero(cpi->i8x8_mode_count)
     vp8_zero(cpi->y_uv_mode_count)
+    vp8_zero(cpi->sub_mv_ref_count)
+    vp8_zero(cpi->mbsplit_count)
+#if CONFIG_ADAPTIVE_ENTROPY
+    vp8_zero(cpi->common.fc.mv_ref_ct)
+    vp8_zero(cpi->common.fc.mv_ref_ct_a)
+#endif
     //vp8_zero(cpi->uv_mode_count)
 
     x->mvc = cm->fc.mvc;

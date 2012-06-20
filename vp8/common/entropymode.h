@@ -17,8 +17,6 @@
 
 typedef const int vp8_mbsplit[16];
 
-#define VP8_NUMMBSPLITS 4
-
 extern vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS];
 
 extern const int vp8_mbsplit_count [VP8_NUMMBSPLITS];    /* # of subsets */
@@ -26,7 +24,8 @@ extern const int vp8_mbsplit_count [VP8_NUMMBSPLITS];    /* # of subsets */
 extern const vp8_prob vp8_mbsplit_probs [VP8_NUMMBSPLITS-1];
 
 extern int vp8_mv_cont(const int_mv *l, const int_mv *a);
-#define SUBMVREF_COUNT 5
+
+extern const vp8_prob vp8_sub_mv_ref_prob [VP8_SUBMVREFS-1];
 extern const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
 
 

@@ -2502,7 +2502,8 @@ void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffse
     }
 }
 
-void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
+void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
+                       int_mv *best_ref_mv, int_mv *second_best_ref_mv)
 {
     if (x->e_mbd.mode_info_context->mbmi.mode == SPLITMV)
     {
@@ -2519,6 +2520,15 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
                                               - best_ref_mv->as_mv.row)]++;
                     cpi->MVcount_hp[1][mv_max_hp+(x->partition_info->bmi[i].mv.as_mv.col
                                               - best_ref_mv->as_mv.col)]++;
+#if CONFIG_ADAPTIVE_ENTROPY
+                    if (x->e_mbd.mode_info_context->mbmi.second_ref_frame)
+                    {
+                        cpi->MVcount_hp[0][mv_max_hp+(x->partition_info->bmi[i].second_mv.as_mv.row
+                                              - second_best_ref_mv->as_mv.row)]++;
+                        cpi->MVcount_hp[1][mv_max_hp+(x->partition_info->bmi[i].second_mv.as_mv.col
+                                              - second_best_ref_mv->as_mv.col)]++;
+                    }
+#endif
                 }
                 else
 #endif
@@ -2527,6 +2537,15 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
                                               - best_ref_mv->as_mv.row) >> 1)]++;
                     cpi->MVcount[1][mv_max+((x->partition_info->bmi[i].mv.as_mv.col
                                               - best_ref_mv->as_mv.col) >> 1)]++;
+#if CONFIG_ADAPTIVE_ENTROPY
+                    if (x->e_mbd.mode_info_context->mbmi.second_ref_frame)
+                    {
+                        cpi->MVcount[0][mv_max+((x->partition_info->bmi[i].second_mv.as_mv.row
+                                              - second_best_ref_mv->as_mv.row) >> 1)]++;
+                        cpi->MVcount[1][mv_max+((x->partition_info->bmi[i].second_mv.as_mv.col
+                                              - second_best_ref_mv->as_mv.col) >> 1)]++;
+                    }
+#endif
                 }
             }
         }
@@ -2540,6 +2559,15 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
                                               - best_ref_mv->as_mv.row)]++;
             cpi->MVcount_hp[1][mv_max_hp+(x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
                                               - best_ref_mv->as_mv.col)]++;
+#if CONFIG_ADAPTIVE_ENTROPY
+            if (x->e_mbd.mode_info_context->mbmi.second_ref_frame)
+            {
+                cpi->MVcount_hp[0][mv_max_hp+(x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.row
+                                              - second_best_ref_mv->as_mv.row)]++;
+                cpi->MVcount_hp[1][mv_max_hp+(x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.col
+                                              - second_best_ref_mv->as_mv.col)]++;
+            }
+#endif
         }
         else
 #endif
@@ -2548,6 +2576,15 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x, int_mv *best_ref_mv)
                                               - best_ref_mv->as_mv.row) >> 1)]++;
             cpi->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
                                               - best_ref_mv->as_mv.col) >> 1)]++;
+#if CONFIG_ADAPTIVE_ENTROPY
+            if (x->e_mbd.mode_info_context->mbmi.second_ref_frame)
+            {
+                cpi->MVcount[0][mv_max+((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.row
+                                              - second_best_ref_mv->as_mv.row) >> 1)]++;
+                cpi->MVcount[1][mv_max+((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.col
+                                              - second_best_ref_mv->as_mv.col) >> 1)]++;
+            }
+#endif
         }
     }
 }
@@ -2740,7 +2777,8 @@ static void vp8_estimate_ref_frame_costs(VP8_COMP *cpi, int segment_id, unsigned
 static void store_coding_context (MACROBLOCK *x, int mb_index,
                                   int mode_index,
                                   PARTITION_INFO *partition,
-                                  int_mv *ref_mv)
+                                  int_mv *ref_mv,
+                                  int_mv *second_ref_mv)
 {
     MACROBLOCKD *xd = &x->e_mbd;
 
@@ -2752,6 +2790,7 @@ static void store_coding_context (MACROBLOCK *x, int mb_index,
     vpx_memcpy(&x->mb_context[mb_index].partition_info, partition,
                sizeof(PARTITION_INFO));
     x->mb_context[mb_index].best_ref_mv.as_int = ref_mv->as_int;
+    x->mb_context[mb_index].second_best_ref_mv.as_int = second_ref_mv->as_int;
 
     //x->mb_context[mb_index].rddiv = x->rddiv;
     //x->mb_context[mb_index].rdmult = x->rdmult;
@@ -3847,7 +3886,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         *best_single_rd_diff = *best_comp_rd_diff = *best_hybrid_rd_diff = 0;
 
         store_coding_context (x, mb_index, best_mode_index, &best_partition,
-                    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame] );
+                    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
+                    &frame_best_ref_mv[xd->mode_info_context->mbmi.second_ref_frame]);
         return;
     }
 
@@ -3898,7 +3938,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         *best_hybrid_rd_diff = best_rd - best_hybrid_rd;
 
     store_coding_context (x, mb_index, best_mode_index, &best_partition,
-                    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame] );
+                    &frame_best_ref_mv[xd->mode_info_context->mbmi.ref_frame],
+                    &frame_best_ref_mv[xd->mode_info_context->mbmi.second_ref_frame]);
 }
 
 int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x)

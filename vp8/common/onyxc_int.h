@@ -48,7 +48,8 @@ typedef struct frame_contexts
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
     vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
     vp8_prob i8x8_mode_prob [VP8_I8X8_MODES-1];
-    vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
+    vp8_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
+    vp8_prob mbsplit_prob [VP8_NUMMBSPLITS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     vp8_prob coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     MV_CONTEXT mvc[2];
@@ -64,10 +65,14 @@ typedef struct frame_contexts
     vp8_prob pre_ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
     vp8_prob pre_uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
     vp8_prob pre_i8x8_mode_prob [VP8_I8X8_MODES-1];
+    vp8_prob pre_sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
+    vp8_prob pre_mbsplit_prob [VP8_NUMMBSPLITS-1];
     unsigned int bmode_counts [VP8_BINTRAMODES];
     unsigned int ymode_counts [VP8_YMODES];   /* interframe intra mode probs */
     unsigned int uv_mode_counts [VP8_YMODES][VP8_UV_MODES];
     unsigned int i8x8_mode_counts [VP8_I8X8_MODES];   /* interframe intra mode probs */
+    unsigned int sub_mv_ref_counts [SUBMVREF_COUNT][VP8_SUBMVREFS];
+    unsigned int mbsplit_counts [VP8_NUMMBSPLITS];
 
     vp8_prob pre_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     vp8_prob pre_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
@@ -80,6 +85,11 @@ typedef struct frame_contexts
     unsigned int MVcount_hp [2] [MVvals_hp];
 #endif
 #endif  /* CONFIG_ADAPTIVE_ENTROPY */
+    int mode_context[6][4];
+    int mode_context_a[6][4];
+    int vp8_mode_contexts[6][4];
+    int mv_ref_ct[6][4][2];
+    int mv_ref_ct_a[6][4][2];
 } FRAME_CONTEXT;
 
 typedef enum
@@ -254,11 +264,11 @@ typedef struct VP8Common
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */
 
-    int mv_ref_ct[6][4][2];
-    int mode_context[6][4];
-    int mv_ref_ct_a[6][4][2];
-    int mode_context_a[6][4];
-    int vp8_mode_contexts[6][4];
+    //int mv_ref_ct[6][4][2];
+    //int mv_ref_ct_a[6][4][2];
+    //int mode_context[6][4];
+    //int mode_context_a[6][4];
+    //int vp8_mode_contexts[6][4];
 
     unsigned int current_video_frame;
     int near_boffset[3];

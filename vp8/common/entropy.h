@@ -16,6 +16,11 @@
 #include "blockd.h"
 #include "common.h"
 #include "coefupdateprobs.h"
+
+
+#define SUBMVREF_COUNT 5
+#define VP8_NUMMBSPLITS 4
+
 /* Coefficient token alphabet */
 
 #define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */

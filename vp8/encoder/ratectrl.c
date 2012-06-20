@@ -150,15 +150,17 @@ void vp8_save_coding_context(VP8_COMP *cpi)
     vp8_copy(cc->mvcosts_hp,  cpi->mb.mvcosts_hp);
 #endif
 
-    vp8_copy( cc->mv_ref_ct, cm->mv_ref_ct );
-    vp8_copy( cc->mode_context, cm->mode_context );
-    vp8_copy( cc->mv_ref_ct_a, cm->mv_ref_ct_a );
-    vp8_copy( cc->mode_context_a, cm->mode_context_a );
+    vp8_copy( cc->mv_ref_ct, cm->fc.mv_ref_ct );
+    vp8_copy( cc->mode_context, cm->fc.mode_context );
+    vp8_copy( cc->mv_ref_ct_a, cm->fc.mv_ref_ct_a );
+    vp8_copy( cc->mode_context_a, cm->fc.mode_context_a );
 
     vp8_copy( cc->ymode_prob, cm->fc.ymode_prob );
     vp8_copy( cc->bmode_prob, cm->fc.bmode_prob );
     vp8_copy( cc->uv_mode_prob, cm->fc.uv_mode_prob );
     vp8_copy( cc->i8x8_mode_prob, cm->fc.i8x8_mode_prob );
+    vp8_copy( cc->sub_mv_ref_prob, cm->fc.sub_mv_ref_prob );
+    vp8_copy( cc->mbsplit_prob, cm->fc.mbsplit_prob );
 
     // Stats
 #ifdef MODE_STATS
@@ -201,15 +203,17 @@ void vp8_restore_coding_context(VP8_COMP *cpi)
     vp8_copy(cpi->mb.mvcosts_hp, cc->mvcosts_hp);
 #endif
 
-    vp8_copy( cm->mv_ref_ct, cc->mv_ref_ct );
-    vp8_copy( cm->mode_context, cc->mode_context );
-    vp8_copy( cm->mv_ref_ct_a, cc->mv_ref_ct_a );
-    vp8_copy( cm->mode_context_a, cc->mode_context_a );
+    vp8_copy( cm->fc.mv_ref_ct, cc->mv_ref_ct );
+    vp8_copy( cm->fc.mode_context, cc->mode_context );
+    vp8_copy( cm->fc.mv_ref_ct_a, cc->mv_ref_ct_a );
+    vp8_copy( cm->fc.mode_context_a, cc->mode_context_a );
 
     vp8_copy( cm->fc.ymode_prob, cc->ymode_prob);
     vp8_copy( cm->fc.bmode_prob, cc->bmode_prob);
     vp8_copy( cm->fc.i8x8_mode_prob, cc->i8x8_mode_prob);
     vp8_copy( cm->fc.uv_mode_prob, cc->uv_mode_prob);
+    vp8_copy( cm->fc.sub_mv_ref_prob, cc->sub_mv_ref_prob);
+    vp8_copy( cm->fc.mbsplit_prob, cc->mbsplit_prob );
 
     // Stats
 #ifdef MODE_STATS
@@ -271,14 +275,16 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     cpi->common.refresh_golden_frame = TRUE;
     cpi->common.refresh_alt_ref_frame = TRUE;
 
+    vp8_init_mode_contexts(&cpi->common);
     vpx_memcpy(&cpi->common.lfc, &cpi->common.fc, sizeof(cpi->common.fc));
     vpx_memcpy(&cpi->common.lfc_a, &cpi->common.fc, sizeof(cpi->common.fc));
 
-    vp8_init_mode_contexts(&cpi->common);
-    vpx_memcpy( cpi->common.vp8_mode_contexts,
-                cpi->common.mode_context,
-                sizeof(cpi->common.mode_context));
-    vpx_memcpy( cpi->common.vp8_mode_contexts,
+    /*
+    vpx_memcpy( cpi->common.fc.vp8_mode_contexts,
+                cpi->common.fc.mode_context,
+                sizeof(cpi->common.fc.mode_context));
+                */
+    vpx_memcpy( cpi->common.fc.vp8_mode_contexts,
                 default_vp8_mode_contexts,
                 sizeof(default_vp8_mode_contexts));
 
@@ -293,18 +299,18 @@ void vp8_setup_inter_frame(VP8_COMP *cpi)
         vpx_memcpy( &cpi->common.fc,
                     &cpi->common.lfc_a,
                     sizeof(cpi->common.fc));
-        vpx_memcpy( cpi->common.vp8_mode_contexts,
-                    cpi->common.mode_context_a,
-                    sizeof(cpi->common.vp8_mode_contexts));
+        vpx_memcpy( cpi->common.fc.vp8_mode_contexts,
+                    cpi->common.fc.mode_context_a,
+                    sizeof(cpi->common.fc.vp8_mode_contexts));
     }
     else
     {
         vpx_memcpy( &cpi->common.fc,
                     &cpi->common.lfc,
                     sizeof(cpi->common.fc));
-        vpx_memcpy( cpi->common.vp8_mode_contexts,
-                    cpi->common.mode_context,
-                    sizeof(cpi->common.vp8_mode_contexts));
+        vpx_memcpy( cpi->common.fc.vp8_mode_contexts,
+                    cpi->common.fc.mode_context,
+                    sizeof(cpi->common.fc.vp8_mode_contexts));
     }
 }
 
