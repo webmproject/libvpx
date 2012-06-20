@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//+VU\u003d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:13:50Z",
+      "side": 1,
+      "message": "OK",
+      "parentUuid": "AAAALH///kQ\u003d",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH///kI\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-15T17:32:54Z",
       "side": 1,
       "message": "Won\u0027t this resend the segmentation map on every frame, even when it doesn\u0027t change? I don\u0027t see anywhere where this is turned off. Will fix the bug, but seems heavy handed considering the cost of these updates.",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//+VI\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:13:50Z",
+      "side": 1,
+      "message": "No. This function is only called when there is a key frame or when the configuration is changed. On key frames we MUST resend the map. The only case where there would be an overhead is if the user kept changing the configuration every frame but wasn\u0027t changing the map.\n\nThese update flags are one shot flags that are always cleared at the end of each frame. (See line 4579 in this file).",
+      "parentUuid": "AAAALH///kI\u003d",
       "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//+Vk\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5344,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:13:50Z",
+      "side": 1,
+      "message": "In fact the code does force this value in the call to  set_segment_data() below. The only reason for putting this check was to raise a flag if it has been set elsewhere to the ABS value as this could imply the use of methods that are currently incompatible. I am happy to remove it though.",
+      "parentUuid": "AAAALH///kE\u003d",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH///j4\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-06-15T17:32:54Z",
       "side": 1,
       "message": "else and {} not needed here, since you return in the body of the other case.",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//+VY\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5360,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:13:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH///j4\u003d",
       "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//+Vc\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5364,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:13:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH///jU\u003d",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH///jY\u003d",
         "filename": "vp8/encoder/onyx_if.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2012-06-15T17:32:54Z",
       "side": 1,
       "message": "trailing whitespace",
+      "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//+Vg\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5377,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T14:13:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH///jY\u003d",
       "revId": "fae1b83ae1efb6e240ffac0d3550969185efcf20",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
