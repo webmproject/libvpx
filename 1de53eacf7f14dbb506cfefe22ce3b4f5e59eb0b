@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//71U\u003d",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-20T17:25:35Z",
+      "side": 1,
+      "message": "need to include \"vpx_config.h\", the mmx and sse2 tests aren\u0027t being run",
+      "revId": "1de53eacf7f14dbb506cfefe22ce3b4f5e59eb0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//71I\u003d",
+        "filename": "test/pp_filter_test.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-20T17:25:35Z",
+      "side": 1,
+      "message": "s/XMM/SSE2/, trying to evict XMM and WMT from the code base. Will rename the functions someday :)",
+      "revId": "1de53eacf7f14dbb506cfefe22ce3b4f5e59eb0b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
