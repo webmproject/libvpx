@@ -16,6 +16,24 @@
       "revId": "1c1a536afbbc2074c8567413c28ade5697709432",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//744\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-20T16:24:55Z",
+      "side": 1,
+      "message": "Yeah, this was a strange issue. With -Werror, I was getting an ignored return error on the first call to (void)fread(...), but no warning without it. Could be a compiler bug, I just hit it with this sledge hammer given all the problems we\u0027ve been having killing this warning.\n\n6/half-dozen as to killing the other voids, I figured it was more cosmetic and could be done separately. I\u0027ll do it in this patch if you prefer.",
+      "parentUuid": "AAAALH//750\u003d",
+      "revId": "1c1a536afbbc2074c8567413c28ade5697709432",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }

@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//75A\u003d",
+        "filename": "vpx_scale/arm/neon/yv12extend_arm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-20T16:24:55Z",
+      "side": 0,
+      "message": "This just avoids pulling in more than vpx_rtcd.h. Needed to include vpx_rtcd.h to get around a implicit function prototype, and this is the type used in that file. Since we never rely on the concrete definition of the struct in this file, we can do away with all the includes.",
+      "parentUuid": "AAAALH//75o\u003d",
+      "revId": "b178fe7bfb96379d6dda6351b5739378d5c9f4d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//75w\u003d",
         "filename": "vpxenc.c",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-20T15:49:18Z",
       "side": 0,
       "message": "Personally I prefer the old 0x1F... for readability/comprehension. Could it be suffixed with LL?",
+      "revId": "b178fe7bfb96379d6dda6351b5739378d5c9f4d2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//74Y\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-20T16:24:55Z",
+      "side": 0,
+      "message": "Agree 100% that it\u0027s more readable, I can\u0027t find a good way to write this portably. The LL suffix isn\u0027t accepted by MSVS. Macro to the rescue I guess:\n\n  #define LITERALU64(x) (x##ULL)\n\nWill fix.",
+      "parentUuid": "AAAALH//75w\u003d",
       "revId": "b178fe7bfb96379d6dda6351b5739378d5c9f4d2",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
