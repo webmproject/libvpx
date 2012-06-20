@@ -16,6 +16,24 @@
       "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//70Q\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-06-20T17:41:58Z",
+      "side": 1,
+      "message": "Agreed, though it does actually explicitly trap some things we had missed before....like the fact that some settings are incompatible (e.g.using roi maps and cyclic refresh at the same time). Also if this example was anything to go by there may be other cases where we do not properly check that passed in parameters are valid / correctly passed through.",
+      "parentUuid": "AAAALH//72Y\u003d",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
