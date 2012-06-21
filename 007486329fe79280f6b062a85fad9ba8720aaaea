@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//7BQ\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-21T18:40:19Z",
+      "side": 1,
+      "message": "minor nit, could be 2 space indent",
+      "revId": "007486329fe79280f6b062a85fad9ba8720aaaea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
