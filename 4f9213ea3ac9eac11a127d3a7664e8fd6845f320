@@ -34,6 +34,108 @@
       "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7C4\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-21T18:49:23Z",
+      "side": 1,
+      "message": "no blank line at beginning of functions",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Cg\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-21T18:49:23Z",
+      "side": 1,
+      "message": "space after commas",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7CU\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-21T18:49:23Z",
+      "side": 1,
+      "message": "I\u0027m not sure if it\u0027s a style rule but I think braces get spaces inside. Either way, pick one or the other. The code I\u0027ve seen in google3 has spaces inside when condensed to a single line.",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7B4\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-21T18:49:23Z",
+      "side": 1,
+      "message": "no inner spaces within if parens. it\u0027s actually allowed because of some legacy code in google3, but isn\u0027t usually done unless the whole group is doing it (I guess).",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Bk\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-21T18:49:23Z",
+      "side": 1,
+      "message": "remove inner spaces",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7A8\u003d",
+        "filename": "test/set_roi.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-21T18:49:23Z",
+      "side": 1,
+      "message": "glint complains that there is no newline at the end of this file. I forgot or never knew that was a style rule.",
+      "revId": "4f9213ea3ac9eac11a127d3a7664e8fd6845f320",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
