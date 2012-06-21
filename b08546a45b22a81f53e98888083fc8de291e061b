@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//7NU\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-21T16:07:52Z",
+      "side": 1,
+      "message": "considered enum but some sources might have different return types and C++ doesn\u0027t have a great way of inheriting enums.  for instance a file video source might have a file not found,  a webm file video source might have a malformed webm,  a capture video source might have a \"camera already in use\" ...   Wasn\u0027t sure the best way to deal with it.   Maybe better to have separate begin functions for each source that needs it and then those guys would have their own return enums.  ?",
+      "revId": "b08546a45b22a81f53e98888083fc8de291e061b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
