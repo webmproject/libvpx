@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//7I8\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T17:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//7Y4\u003d",
+      "revId": "91d0579dbad6380a5ef5ca066cb2c2006dcfd93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//7Yo\u003d",
         "filename": "libs.mk",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//7I4\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T17:53:06Z",
+      "side": 1,
+      "message": "Given the size of these files, I think progress info is helpful in this case.",
+      "parentUuid": "AAAALH//7Yo\u003d",
+      "revId": "91d0579dbad6380a5ef5ca066cb2c2006dcfd93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//7YY\u003d",
         "filename": "libs.mk",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2012-06-21T06:42:40Z",
       "side": 1,
       "message": "you could just (cd ...; sha1sum -c) \u003c ...test-data.sha1",
+      "revId": "91d0579dbad6380a5ef5ca066cb2c2006dcfd93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7I0\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T17:53:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//7YY\u003d",
       "revId": "91d0579dbad6380a5ef5ca066cb2c2006dcfd93a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
