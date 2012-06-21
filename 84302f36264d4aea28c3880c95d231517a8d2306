@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//604\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 6
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T21:18:14Z",
+      "side": 1,
+      "message": "sort",
+      "revId": "84302f36264d4aea28c3880c95d231517a8d2306",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
