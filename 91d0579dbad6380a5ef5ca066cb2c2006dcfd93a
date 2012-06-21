@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//7Y4\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 362,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-21T06:42:40Z",
+      "side": 1,
+      "message": "$1 might be better written as $(1) in the context of make also the notdir could be moved to the call site, i.e., $(@F)",
+      "revId": "91d0579dbad6380a5ef5ca066cb2c2006dcfd93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Yo\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-21T06:42:40Z",
+      "side": 1,
+      "message": "not sure how noisy you want curl to be; -s will silence it if you want\n\nthere is a hidden requirement of curl with this rule, might be ok.",
+      "revId": "91d0579dbad6380a5ef5ca066cb2c2006dcfd93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7YY\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-21T06:42:40Z",
+      "side": 1,
+      "message": "you could just (cd ...; sha1sum -c) \u003c ...test-data.sha1",
+      "revId": "91d0579dbad6380a5ef5ca066cb2c2006dcfd93a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
