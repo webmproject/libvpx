@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//7D8\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "ASSERT_EQ(0, video-\u003eBegin());\n\nMaybe we should add an error function to the video source, so you could do\n\nASSERT_EQ(0, video-\u003eBegin()) \u003c\u003c video-\u003eError();\n\nto get the reason the source failed to open",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Do\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "this getenv and path mangling should happen in the video source class. LIBVPX_TEST_DATA_PATH may not have a trailing path separator, need to handle adding one (adding one unconditionally should work)",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Dk\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "EXPECT_EQ here and below in this function",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7C0\u003d",
+        "filename": "test/test.mk",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "remove this blank line",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Cs\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "unnecessary blank line",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Bo\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "YV12VideoSource only handles I420 files. Can you change all references to yv12 to i420? If we need to support YV12 later we can make YV12VideoSource and I420VideoSource subclasses of a common RawVideoSource or something.",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Bc\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "blank line",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7BU\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "if(input_file_) fclose(...)",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7BE\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "The only thing missing for this support is the fseeko #defines (copy from vpxenc.c) and calling fseeko instead of fseek.",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7A4\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "this will only support files that have a width multiple of 32. better to not round here so that raw_sz_ will be w*h*3/2 for fseek().",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7Aw\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "Alignment should be 1 if you want to fread the whole image in one call. If you want the strides aligned instead this is ok.",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//7As\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T18:46:48Z",
+      "side": 1,
+      "message": "See comments above. If you want aligned strides, then read one line at a time.",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
