@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6z0\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T21:18:01Z",
+      "side": 1,
+      "message": "ok to punt on the error reporting, but you probably want to ASSERT now. That will at least make the error log show that it was this call that failed, and keep the test from trying to check number of keyframes etc. ie if you don\u0027t assert here, then the ASSERT_NO_FATAL_FAILURE() in the test won\u0027t, and you\u0027ll have to dig in to the test to figure out that it couldn\u0027t open the file vs something being really broken.",
+      "parentUuid": "AAAALH//66A\u003d",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//7Do\u003d",
         "filename": "test/keyframe_test.cc",
         "patchSetId": 4
@@ -66,6 +84,24 @@
       "side": 1,
       "message": "Interesting - not sure seems wasteful to have it at the videosource class since many of the sources don\u0027t need it. but honestly don\u0027t care.   \n\nWhat if this test is run on windows ?   Do I need special mangling code for windows / vs linux to deal with forward vs back slash?   I hope not...  wouldn\u0027t it better to handle this outside?  :(",
       "parentUuid": "AAAALH//7Do\u003d",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//608\u003d",
+        "filename": "test/keyframe_test.cc",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T21:18:01Z",
+      "side": 1,
+      "message": "Not sure what you mean.. Every test that uses a file will have to handle this environment variable, so I was suggesting moving it to where the file is opened rather than having to do it for every single test. I was meaning the YV12VideoSource class, not the VideoSource base class, if that was the confusion.\n\nWindows should accept both slashes, I think, so you probably can get away with only one case.\n\nIt would be unconventional to force the user to include a trailing slash on the env var. no tool I can think of requires that when specifying a directory, except to differentiate between a file and a directory of the same name.",
+      "parentUuid": "AAAALH//6/k\u003d",
       "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -311,6 +347,24 @@
       "side": 1,
       "message": "Agreed but I think this can be done in a separate commit.  Its not clear to me that adding all of these #defines in yet another file is the right thing to do.   probably a separate IO lib is a good way to go.",
       "parentUuid": "AAAALH//7BE\u003d",
+      "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//60k\u003d",
+        "filename": "test/yv12_video_source.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-21T21:18:01Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "AAAALH//65M\u003d",
       "revId": "f0b0bac7a6c044048f8c2aad0e088fc9d4aac31a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
