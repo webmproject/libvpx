@@ -244,6 +244,40 @@
       "revId": "037a9162a9343fa2cd58af70b03202ef45943f3c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//5oU\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-22T19:22:59Z",
+      "side": 1,
+      "message": "if you move to many small tests like I suggest below, you might ASSERT here, if the code is borked this is going to spew a lot of output. or ASSERT_NO_FATAL_FAILURE after every row or something. Evaluate the other Check*Predictions for this concern too.",
+      "revId": "037a9162a9343fa2cd58af70b03202ef45943f3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//5pg\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-22T19:22:59Z",
+      "side": 1,
+      "message": "Better to make these into separate tests like you had before, IMO. not sure why you moved away from this. eg:\n\n  TEST_P(IntraPredYTest, DC) {\n      Predict(DC_PRED);\n      CheckDCPrediction();\n  }\n\n  TEST_P(IntraPredYTest, DCLeftUnavailable) {\n      SetLeftUnavailable();\n      Predict(DC_PRED);\n      CheckDCPrediction();\n  }\n\nAnd put FillRandom() into your SetUp() function.\n\nIf you want to stick with all these tests in one function, move it to inside your TEST_P, I can\u0027t think of any reason for a separate RunTest(). Or am I missing something?",
+      "revId": "037a9162a9343fa2cd58af70b03202ef45943f3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
