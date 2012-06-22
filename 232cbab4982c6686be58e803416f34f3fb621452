@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6kA\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6rs\u003d",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//6rg\u003d",
         "filename": "test/encode_test_driver.cc",
         "patchSetId": 7
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-21T23:23:31Z",
       "side": 1,
       "message": "(expected, actual)",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//6j8\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6rg\u003d",
       "revId": "232cbab4982c6686be58e803416f34f3fb621452",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6j4\u003d",
+        "filename": "test/encode_test_driver.cc",
+        "patchSetId": 7
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6ro\u003d",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//6o8\u003d",
         "filename": "test/i420_video_source.h",
         "patchSetId": 7
@@ -64,6 +118,24 @@
       "writtenOn": "2012-06-21T23:23:31Z",
       "side": 1,
       "message": "you should #include stdlib.h for getenv; also these go above test/video_source.h",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//6js\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6o8\u003d",
       "revId": "232cbab4982c6686be58e803416f34f3fb621452",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6jk\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6rY\u003d",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//6pI\u003d",
         "filename": "test/i420_video_source.h",
         "patchSetId": 7
@@ -98,6 +188,24 @@
       "writtenOn": "2012-06-21T23:23:31Z",
       "side": 1,
       "message": "http://google-styleguide.googlecode.com/svn/trunk/cppguide.xml#Default_Arguments",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//6jo\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6pI\u003d",
       "revId": "232cbab4982c6686be58e803416f34f3fb621452",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6fk\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "the other members are set by SetSize..",
+      "parentUuid": "AAAALH//6o0\u003d",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//6pc\u003d",
         "filename": "test/i420_video_source.h",
         "patchSetId": 7
@@ -132,6 +258,24 @@
       "writtenOn": "2012-06-21T23:23:31Z",
       "side": 1,
       "message": "newline",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//6jY\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6pc\u003d",
       "revId": "232cbab4982c6686be58e803416f34f3fb621452",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +299,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6jU\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6os\u003d",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//6po\u003d",
         "filename": "test/i420_video_source.h",
         "patchSetId": 7
@@ -166,6 +328,24 @@
       "writtenOn": "2012-06-21T23:23:31Z",
       "side": 1,
       "message": "excessive whitespace",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//6jQ\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6po\u003d",
       "revId": "232cbab4982c6686be58e803416f34f3fb621452",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -206,6 +386,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6io\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "this inherits from VideoSource not dummy video source.   its an abstract base class with no members. .",
+      "parentUuid": "AAAALH//6oM\u003d",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//6oI\u003d",
         "filename": "test/i420_video_source.h",
         "patchSetId": 7
@@ -217,6 +415,24 @@
       "writtenOn": "2012-06-21T23:23:31Z",
       "side": 1,
       "message": "newline",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//6iw\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6oI\u003d",
       "revId": "232cbab4982c6686be58e803416f34f3fb621452",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -240,6 +456,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//6i4\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6oE\u003d",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//6oA\u003d",
         "filename": "test/i420_video_source.h",
         "patchSetId": 7
@@ -251,6 +485,24 @@
       "writtenOn": "2012-06-21T23:23:31Z",
       "side": 1,
       "message": "no newline",
+      "revId": "232cbab4982c6686be58e803416f34f3fb621452",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//6i8\u003d",
+        "filename": "test/i420_video_source.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-06-22T00:13:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//6oA\u003d",
       "revId": "232cbab4982c6686be58e803416f34f3fb621452",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
