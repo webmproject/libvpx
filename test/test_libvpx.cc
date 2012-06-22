@@ -14,8 +14,7 @@
 #endif
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
-static void append_gtest_filter(const char *str)
-{
+static void append_gtest_filter(const char *str) {
   std::string filter = ::testing::FLAGS_gtest_filter;
   filter += str;
   ::testing::FLAGS_gtest_filter = filter;
@@ -25,7 +24,7 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
 #if ARCH_X86 || ARCH_X86_64
-  int simd_caps = x86_simd_caps();
+  const int simd_caps = x86_simd_caps();
   if(!(simd_caps & HAS_MMX))
     append_gtest_filter(":-MMX/*");
   if(!(simd_caps & HAS_SSE))
