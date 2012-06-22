@@ -588,13 +588,18 @@ process_toolchain() {
     fi
 
     # Enable unit tests if we have a working C++ compiler
-    case "$tgt_cc" in
-        vs*)
-            soft_enable unit_tests;;
+    case "$toolchain" in
+        *-vs*)
+            soft_enable unit_tests
+        ;;
+        *-android-*)
+            # GTestLog must be modified to use Android logging utilities.
+        ;;
         *)
             check_cxx "$@" <<EOF && soft_enable unit_tests
 int z;
 EOF
+        ;;
     esac
 }
 
