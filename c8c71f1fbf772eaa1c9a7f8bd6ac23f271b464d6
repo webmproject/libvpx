@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//5sQ\u003d",
+        "filename": "test/test_libvpx.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-22T18:54:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//5sg\u003d",
+      "revId": "c8c71f1fbf772eaa1c9a7f8bd6ac23f271b464d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//5sc\u003d",
         "filename": "test/test_libvpx.cc",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-22T18:50:36Z",
       "side": 1,
       "message": "const",
+      "revId": "c8c71f1fbf772eaa1c9a7f8bd6ac23f271b464d6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//5sM\u003d",
+        "filename": "test/test_libvpx.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-22T18:54:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//5sc\u003d",
       "revId": "c8c71f1fbf772eaa1c9a7f8bd6ac23f271b464d6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
