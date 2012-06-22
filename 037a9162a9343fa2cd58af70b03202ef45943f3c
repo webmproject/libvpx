@@ -296,6 +296,24 @@
       "revId": "037a9162a9343fa2cd58af70b03202ef45943f3c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//5U0\u003d",
+        "filename": "test/intrapred_test.cc",
+        "patchSetId": 12
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-22T21:59:20Z",
+      "side": 1,
+      "message": "I see. My concern is that if the test fails, this approach gives you no information about which test failed. For example, throw this in before one of the CheckDCPredictions():\n\n    dataPtr_[0][0] \u003d 0xff;\n\nYou\u0027ll get a lot of failures in CheckDCPrediction() but no indication of where it was called from.\n\nInstead of breaking the function up, use the SCOPED_TRACE macro instead of your comment:\n\n    {\n      SCOPED_TRACE(\"DC from a left edge\");\n      FillRandom();\n      SetLeftUnavailable();\n      Predict(DC_PRED);\n      CheckDCPrediction();\n    }\n\nAs much as I hate code duplication, there are real benefits with this framework to keeping the tests small.",
+      "parentUuid": "AAAALH//5nY\u003d",
+      "revId": "037a9162a9343fa2cd58af70b03202ef45943f3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
