@@ -10,13 +10,13 @@
 #include <climits>
 #include <vector>
 #include "test/encode_test_driver.h"
-#include "test/video_source.h"
+#include "test/i420_video_source.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
 namespace {
 
 class KeyframeTest : public ::libvpx_test::EncoderTest,
-  public ::testing::TestWithParam<enum libvpx_test::TestMode> {
+    public ::testing::TestWithParam<enum libvpx_test::TestMode> {
  protected:
   virtual void SetUp() {
     InitializeConfig();
@@ -46,7 +46,7 @@ class KeyframeTest : public ::libvpx_test::EncoderTest,
   bool kf_do_force_kf_;
   int kf_count_;
   int kf_count_max_;
-  std::vector< vpx_codec_pts_t > kf_pts_list_;
+  std::vector<vpx_codec_pts_t> kf_pts_list_;
 };
 
 TEST_P(KeyframeTest, TestRandomVideoSource) {
@@ -78,9 +78,8 @@ TEST_P(KeyframeTest, TestForceKeyframe) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   // verify that every third frame is a keyframe.
-  for (std::vector<vpx_codec_pts_t>::iterator iter = kf_pts_list_.begin();
-       iter != kf_pts_list_.end();
-       ++iter) {
+  for (std::vector<vpx_codec_pts_t>::const_iterator iter = kf_pts_list_.begin();
+       iter != kf_pts_list_.end(); ++iter) {
     ASSERT_EQ(0, *iter % 3) << "Unexpected keyframe at frame " << *iter;
   }
 }
@@ -92,10 +91,35 @@ TEST_P(KeyframeTest, TestKeyframeMaxDistance) {
   ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
 
   // verify that keyframe interval matches kf_max_dist
-  for (std::vector<vpx_codec_pts_t>::iterator iter = kf_pts_list_.begin();
-       iter != kf_pts_list_.end();
-       iter++) {
+  for (std::vector<vpx_codec_pts_t>::const_iterator iter = kf_pts_list_.begin();
+       iter != kf_pts_list_.end(); ++iter) {
     ASSERT_EQ(0, *iter % 25) << "Unexpected keyframe at frame " << *iter;
+  }
+}
+
+TEST_P(KeyframeTest, TestAutoKeyframe) {
+  cfg_.kf_mode = VPX_KF_AUTO;
+  kf_do_force_kf_ = false;
+
+  // This clip has a cut scene every 30 frames -> Frame 0, 30, 60, 90, 120.
+  // I check only the first 40 frames to make sure there's a keyframe at frame
+  // 0 and 30.
+  ::libvpx_test::I420VideoSource video("hantro_collage_w352h288.yuv", 352, 288,
+                                       30, 1, 0, 40);
+
+  ASSERT_NO_FATAL_FAILURE(RunLoop(&video));
+
+  EXPECT_EQ(2u, kf_pts_list_.size()) << " Not the right number of keyframes ";
+
+  // Verify that keyframes match the file keyframes in the file.
+  for (std::vector<vpx_codec_pts_t>::const_iterator iter = kf_pts_list_.begin();
+       iter != kf_pts_list_.end(); ++iter) {
+
+    if (deadline_ == VPX_DL_REALTIME && *iter > 0)
+      EXPECT_EQ(0, (*iter - 1) % 30) << "Unexpected keyframe at frame "
+        << *iter;
+    else
+      EXPECT_EQ(0, *iter % 30) << "Unexpected keyframe at frame " << *iter;
   }
 }
 

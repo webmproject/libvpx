@@ -105,8 +105,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
     Encoder encoder(cfg_, deadline_, &stats_);
 
     bool again;
-
-    for (video->Begin(), again = true; again; video->Next()) {
+    for (again = true, video->Begin(); again; video->Next()) {
       again = video->img() != NULL;
 
       PreEncodeFrameHook(video);
