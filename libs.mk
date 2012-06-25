@@ -17,6 +17,7 @@ else
   ASM:=.asm
 endif
 
+CODEC_SRCS-yes += CHANGELOG
 CODEC_SRCS-yes += libs.mk
 
 include $(SRC_PATH_BARE)/vpx/vpx_codec.mk
@@ -48,7 +49,6 @@ ifeq ($(CONFIG_VP8_DECODER),yes)
   CODEC_SRCS-yes += $(addprefix $(VP8_PREFIX),$(call enabled,VP8_DX_SRCS))
   CODEC_EXPORTS-yes += $(addprefix $(VP8_PREFIX),$(VP8_DX_EXPORTS))
   CODEC_SRCS-yes += $(VP8_PREFIX)vp8dx.mk vpx/vp8.h vpx/vp8dx.h
-  CODEC_SRCS-$(ARCH_ARM) += $(VP8_PREFIX)vp8dx_arm.mk
   INSTALL-LIBS-yes += include/vpx/vp8.h include/vpx/vp8dx.h
   INSTALL_MAPS += include/vpx/% $(SRC_PATH_BARE)/$(VP8_PREFIX)/%
   CODEC_DOC_SRCS += vpx/vp8.h vpx/vp8dx.h
@@ -66,6 +66,7 @@ endif
 
 ifeq ($(CONFIG_MSVS),yes)
 CODEC_LIB=$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd)
+GTEST_LIB=$(if $(CONFIG_STATIC_MSVCRT),gtestmt,gtestmd)
 # This variable uses deferred expansion intentionally, since the results of
 # $(wildcard) may change during the course of the Make.
 VS_PLATFORMS = $(foreach d,$(wildcard */Release/$(CODEC_LIB).lib),$(word 1,$(subst /, ,$(d))))
@@ -233,7 +234,7 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo '# pkg-config file from libvpx $(VERSION_STRING)' > $@
 	$(qexec)echo 'prefix=$(PREFIX)' >> $@
 	$(qexec)echo 'exec_prefix=$${prefix}' >> $@
-	$(qexec)echo 'libdir=$${prefix}/lib' >> $@
+	$(qexec)echo 'libdir=$${prefix}/$(LIBSUBDIR)' >> $@
 	$(qexec)echo 'includedir=$${prefix}/include' >> $@
 	$(qexec)echo '' >> $@
 	$(qexec)echo 'Name: vpx' >> $@
@@ -241,7 +242,7 @@ vpx.pc: config.mk libs.mk
 	$(qexec)echo 'Version: $(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)' >> $@
 	$(qexec)echo 'Requires:' >> $@
 	$(qexec)echo 'Conflicts:' >> $@
-	$(qexec)echo 'Libs: -L$${libdir} -lvpx' >> $@
+	$(qexec)echo 'Libs: -L$${libdir} -lvpx -lm' >> $@
 	$(qexec)echo 'Cflags: -I$${includedir}' >> $@
 INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
 INSTALL_MAPS += $(LIBSUBDIR)/pkgconfig/%.pc %.pc
@@ -280,40 +281,48 @@ $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)vpx_config.asm
 # Calculate platform- and compiler-specific offsets for hand coded assembly
 #
 
+OFFSET_PATTERN:='^[a-zA-Z0-9_]* EQU'
+
 ifeq ($(filter icc gcc,$(TGT_CC)), $(TGT_CC))
     $(BUILD_PFX)asm_com_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
-	grep -w EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
     $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S: $(VP8_PREFIX)common/asm_com_offsets.c
     CLEAN-OBJS += $(BUILD_PFX)asm_com_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)common/asm_com_offsets.c.S
 
     $(BUILD_PFX)asm_enc_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
-	grep -w EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
     $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S: $(VP8_PREFIX)encoder/asm_enc_offsets.c
     CLEAN-OBJS += $(BUILD_PFX)asm_enc_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)encoder/asm_enc_offsets.c.S
 
     $(BUILD_PFX)asm_dec_offsets.asm: $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
-	grep -w EQU $< | tr -d '$$\#' $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)LC_ALL=C grep $(OFFSET_PATTERN) $< | tr -d '$$\#' $(ADS2GAS) > $@
     $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S: $(VP8_PREFIX)decoder/asm_dec_offsets.c
     CLEAN-OBJS += $(BUILD_PFX)asm_dec_offsets.asm $(BUILD_PFX)$(VP8_PREFIX)decoder/asm_dec_offsets.c.S
 else
   ifeq ($(filter rvct,$(TGT_CC)), $(TGT_CC))
     asm_com_offsets.asm: obj_int_extract
     asm_com_offsets.asm: $(VP8_PREFIX)common/asm_com_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)common/asm_com_offsets.c.o
     CLEAN-OBJS += asm_com_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_com_offsets.asm
 
     asm_enc_offsets.asm: obj_int_extract
     asm_enc_offsets.asm: $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)encoder/asm_enc_offsets.c.o
     CLEAN-OBJS += asm_enc_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_enc_offsets.asm
 
     asm_dec_offsets.asm: obj_int_extract
     asm_dec_offsets.asm: $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
-	./obj_int_extract rvds $< $(ADS2GAS) > $@
+	@echo "    [CREATE] $@"
+	$(qexec)./obj_int_extract rvds $< $(ADS2GAS) > $@
     OBJS-yes += $(VP8_PREFIX)decoder/asm_dec_offsets.c.o
     CLEAN-OBJS += asm_dec_offsets.asm
     $(filter %$(ASM).o,$(OBJS-yes)): $(BUILD_PFX)asm_dec_offsets.asm
@@ -333,11 +342,31 @@ CODEC_DOC_SRCS += vpx/vpx_codec.h \
 ##
 
 ifeq ($(CONFIG_UNIT_TESTS),yes)
+LIBVPX_TEST_DATA_PATH ?= .
+
+include $(SRC_PATH_BARE)/test/test.mk
+LIBVPX_TEST_SRCS=$(addprefix test/,$(call enabled,LIBVPX_TEST_SRCS))
+LIBVPX_TEST_BINS=./test_libvpx
+LIBVPX_TEST_DATA=$(addprefix $(LIBVPX_TEST_DATA_PATH)/,\
+                     $(call enabled,LIBVPX_TEST_DATA))
+libvpx_test_data_url=http://downloads.webmproject.org/test_data/libvpx/$(1)
+
+$(LIBVPX_TEST_DATA):
+	@echo "    [DOWNLOAD] $@"
+	$(qexec)trap 'rm -f $@' INT TERM &&\
+            curl -L -o $@ $(call libvpx_test_data_url,$(@F))
+
+testdata:: $(LIBVPX_TEST_DATA)
+	$(qexec)if [ -x "$$(which sha1sum)" ]; then\
+            echo "Checking test data:";\
+            (cd $(LIBVPX_TEST_DATA_PATH); sha1sum -c)\
+                < $(SRC_PATH_BARE)/test/test-data.sha1; \
+        else\
+            echo "Skipping test data integrity check, sha1sum not found.";\
+        fi
+
 ifeq ($(CONFIG_EXTERNAL_BUILD),yes)
 ifeq ($(CONFIG_MSVS),yes)
-
-LIBVPX_TEST_SRCS=$(filter %_test.cc,$(call enabled,CODEC_SRCS))
-LIBVPX_TEST_BINS=$(sort $(LIBVPX_TEST_SRCS:.cc.o=))
 
 gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
 	@echo "    [CREATE] $@"
@@ -354,6 +383,18 @@ gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
 
 PROJECTS-$(CONFIG_MSVS) += gtest.vcproj
 
+test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
+	@echo "    [CREATE] $@"
+	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+            --exe \
+            --target=$(TOOLCHAIN) \
+            --name=test_libvpx \
+            --proj-guid=CD837F5F-52D8-4314-A370-895D614166A7 \
+            --ver=$(CONFIG_VS_VERSION) \
+            $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
+            --out=$@ $(INTERNAL_CFLAGS) $(CFLAGS) \
+            -I. -I"$(SRC_PATH_BARE)/third_party/googletest/src/include" \
+            -L. -l$(CODEC_LIB) -lwinmm -l$(GTEST_LIB) $^
 ifeq ($(CONFIG_STATIC_MSVCRT),--static-crt)
 lib_sfx=mt
 else
@@ -377,10 +418,9 @@ endef
 $(foreach proj,$(LIBVPX_TEST_BINS),\
     $(eval $(call unit_test_vcproj_template,$(proj))))
 
-PROJECTS-$(CONFIG_MSVS) += $(foreach proj,$(LIBVPX_TEST_BINS),\
-     $(notdir $(proj:.cc=.vcproj)))
+PROJECTS-$(CONFIG_MSVS) += test_libvpx.vcproj
 
-test::
+test:: testdata
 	@set -e; for t in $(addprefix Win32/Release/,$(notdir $(LIBVPX_TEST_BINS:.cc=.exe))); do $$t; done
 endif
 else
@@ -394,22 +434,25 @@ OBJS-$(BUILD_LIBVPX) += $(GTEST_OBJS)
 LIBS-$(BUILD_LIBVPX) += $(BUILD_PFX)libgtest.a $(BUILD_PFX)libgtest_g.a
 $(BUILD_PFX)libgtest_g.a: $(GTEST_OBJS)
 
-LIBVPX_TEST_SRCS=$(filter %_test.cc,$(call enabled,CODEC_SRCS))
-LIBVPX_TEST_OBJS=$(call objs,$(LIBVPX_TEST_SRCS))
+LIBVPX_TEST_OBJS=$(sort $(call objs,$(LIBVPX_TEST_SRCS)))
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src
 $(LIBVPX_TEST_OBJS) $(LIBVPX_TEST_OBJS:.o=.d): CFLAGS += -I$(SRC_PATH_BARE)/third_party/googletest/src/include
-LIBVPX_TEST_BINS=$(sort $(LIBVPX_TEST_OBJS:.cc.o=))
 OBJS-$(BUILD_LIBVPX) += $(LIBVPX_TEST_OBJS)
+
+# Install test sources only if codec source is included
+INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(patsubst $(SRC_PATH_BARE)/%,%,\
+    $(shell find $(SRC_PATH_BARE)/third_party/googletest -type f))
+INSTALL-SRCS-$(CONFIG_CODEC_SRCS) += $(LIBVPX_TEST_SRCS)
 
 $(foreach bin,$(LIBVPX_TEST_BINS),\
     $(if $(BUILD_LIBVPX),$(eval $(bin): libvpx.a libgtest.a ))\
     $(if $(BUILD_LIBVPX),$(eval $(call linkerxx_template,$(bin),\
-        $(bin).cc.o \
+        $(LIBVPX_TEST_OBJS) \
         -L. -lvpx -lgtest -lpthread -lm)\
         )))\
     $(if $(LIPO_LIBS),$(eval $(call lipo_bin_template,$(bin))))\
 
-test:: $(LIBVPX_TEST_BINS)
+test:: $(LIBVPX_TEST_BINS) testdata
 	@set -e; for t in $(LIBVPX_TEST_BINS); do $$t; done
 
 endif
