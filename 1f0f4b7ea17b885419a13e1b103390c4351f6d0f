@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//4I0\u003d",
+        "filename": "test/fdct4x4_test.cc",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1001239
+      },
+      "writtenOn": "2012-06-25T23:56:44Z",
+      "side": 1,
+      "message": "blank line after namespace",
+      "revId": "1f0f4b7ea17b885419a13e1b103390c4351f6d0f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
