@@ -44,7 +44,16 @@ cglobal dequantize_b_impl_mmx, 3,3,0,sq,dq,arg3
 
 
 ;void dequant_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride)
-cglobal dequant_idct_add_mmx, 6,6,0,inp,dq,pred,dest,pit,stride
+cglobal dequant_idct_add_mmx, 4,6,0,inp,dq,pred,dest,pit,stride
+
+%if ARCH_X86_64
+    movsxd              strideq,  dword stridem
+    movsxd              pitq,     dword pitm
+%else
+    mov                 strideq,  stridem
+    mov                 pitq,     pitm
+%endif
+
     mova                m0,       [inpq+ 0]
     pmullw              m0,       [dqq]
 
@@ -213,7 +222,17 @@ cglobal dequant_idct_add_mmx, 6,6,0,inp,dq,pred,dest,pit,stride
 
 
 ;void dequant_dc_idct_add_mmx(short *input, short *dq, unsigned char *pred, unsigned char *dest, int pitch, int stride, int Dc)
-cglobal dequant_dc_idct_add_mmx, 7,7,0,inp,dq,pred,dest,pit,stride,Dc
+cglobal dequant_dc_idct_add_mmx, 4,7,0,inp,dq,pred,dest,pit,stride,Dc
+
+%if ARCH_X86_64
+    movsxd              strideq,   dword stridem
+    movsxd              pitq,      dword pitm
+%else
+    mov                 strideq,   stridem
+    mov                 pitq,      pitm
+%endif
+
+    mov                 Dcq, Dcm
     mova                m0,       [inpq+ 0]
     pmullw              m0,       [dqq+ 0]
 

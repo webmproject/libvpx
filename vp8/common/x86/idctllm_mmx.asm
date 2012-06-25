@@ -196,7 +196,12 @@ cglobal short_idct4x4llm_1_mmx,3,3,0,inp,out,pit
 
 
 ;void dc_only_idct_add_mmx(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride)
-cglobal dc_only_idct_add_mmx, 5,5,0,in_dc,pred,dst,pit,stride
+cglobal dc_only_idct_add_mmx, 4,5,0,in_dc,pred,dst,pit,stride
+%if ARCH_X86_64
+    movsxd         strideq,      dword stridem
+%else
+    mov            strideq,      stridem
+%endif
     pxor                m0,      m0
 
     movh                m5,      in_dcq ; dc
