@@ -815,6 +815,18 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
 #endif
     }
 
+#if CONFIG_PRED_FILTER
+    // Write the prediction filter mode used for this frame
+    vp8_write_literal(w, pc->pred_filter_mode, 2);
+
+    // Write prediction filter on/off probability if signaling at MB level
+    if (pc->pred_filter_mode == 2)
+        vp8_write_literal(w, pc->prob_pred_filter_off, 8);
+
+    //printf("pred_filter_mode:%d  prob_pred_filter_off:%d\n",
+    //       pc->pred_filter_mode, pc->prob_pred_filter_off);
+#endif
+
     vp8_write_literal(w, pc->prob_intra_coded, 8);
     vp8_write_literal(w, pc->prob_last_coded, 8);
     vp8_write_literal(w, pc->prob_gf_coded, 8);
@@ -1032,6 +1044,18 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi)
                         vp8_accum_mv_refs(&cpi->common, mode, ct);
                     }
 
+#if CONFIG_PRED_FILTER
+                    // Is the prediction filter enabled
+                    if (mode >= NEARESTMV && mode < SPLITMV)
+                    {
+                        if (cpi->common.pred_filter_mode == 2 )
+                            vp8_write(w, mi->pred_filter_enabled,
+                                      pc->prob_pred_filter_off);
+                        else
+                            assert (mi->pred_filter_enabled ==
+                                    cpi->common.pred_filter_mode);
+                    }
+#endif
                     if (mi->second_ref_frame &&
                         (mode == NEWMV || mode == SPLITMV))
                     {

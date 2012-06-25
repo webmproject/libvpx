@@ -214,6 +214,11 @@ typedef struct
     // a valid predictor
     unsigned char mb_in_image;
 
+#if CONFIG_PRED_FILTER
+    // Flag to turn prediction signal filter on(1)/off(0 ) at the MB level
+    unsigned int pred_filter_enabled;
+#endif
+
 } MB_MODE_INFO;
 
 typedef struct

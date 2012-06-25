@@ -287,6 +287,15 @@ typedef struct VP8Common
 #if CONFIG_POSTPROC
     struct postproc_state  postproc_state;
 #endif
+
+#if CONFIG_PRED_FILTER
+    /* Prediction filter variables */
+    int pred_filter_mode;   // 0=disabled at the frame level (no MB filtered)
+                            // 1=enabled at the frame level (all MB filtered)
+                            // 2=specified per MB (1=filtered, 0=non-filtered)
+    vp8_prob prob_pred_filter_off;
+#endif
+
 } VP8_COMMON;
 
 #endif

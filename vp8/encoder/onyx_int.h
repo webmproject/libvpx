@@ -43,11 +43,19 @@
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
 
+#if CONFIG_PRED_FILTER
+#if CONFIG_NEWINTRAMODES
+#define MAX_MODES 54
+#else
+#define MAX_MODES 48
+#endif
+#else  // CONFIG_PRED_FILTER
 #if CONFIG_NEWINTRAMODES
 #define MAX_MODES 42
 #else
 #define MAX_MODES 36
 #endif
+#endif  // CONFIG_PRED_FILTER
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -164,25 +172,100 @@ typedef struct
     MBGRAPH_MB_STATS *mb_stats;
 } MBGRAPH_FRAME_STATS;
 
+#if CONFIG_PRED_FILTER
 typedef enum
 {
-    THR_ZEROMV         = 0,
-    THR_DC             = 1,
+    THR_ZEROMV,
+    THR_ZEROMV_FILT,
+    THR_DC,
 
-    THR_NEARESTMV      = 2,
-    THR_NEARMV         = 3,
+    THR_NEARESTMV,
+    THR_NEARESTMV_FILT,
+    THR_NEARMV,
+    THR_NEARMV_FILT,
 
-    THR_ZEROG          = 4,
-    THR_NEARESTG       = 5,
+    THR_ZEROG,
+    THR_ZEROG_FILT,
+    THR_NEARESTG,
+    THR_NEARESTG_FILT,
 
-    THR_ZEROA          = 6,
-    THR_NEARESTA       = 7,
+    THR_ZEROA,
+    THR_ZEROA_FILT,
+    THR_NEARESTA,
+    THR_NEARESTA_FILT,
 
-    THR_NEARG          = 8,
-    THR_NEARA          = 9,
+    THR_NEARG,
+    THR_NEARG_FILT,
+    THR_NEARA,
+    THR_NEARA_FILT,
 
-    THR_V_PRED         = 10,
-    THR_H_PRED         = 11,
+    THR_V_PRED,
+    THR_H_PRED,
+#if CONFIG_NEWINTRAMODES
+    THR_D45_PRED,
+    THR_D135_PRED,
+    THR_D117_PRED,
+    THR_D153_PRED,
+    THR_D27_PRED,
+    THR_D63_PRED,
+#endif
+    THR_TM,
+
+    THR_NEWMV,
+    THR_NEWMV_FILT,
+    THR_NEWG,
+    THR_NEWG_FILT,
+    THR_NEWA,
+    THR_NEWA_FILT,
+
+    THR_SPLITMV,
+    THR_SPLITG,
+    THR_SPLITA,
+
+    THR_B_PRED,
+    THR_I8X8_PRED,
+
+    THR_COMP_ZEROLG,
+    THR_COMP_NEARESTLG,
+    THR_COMP_NEARLG,
+
+    THR_COMP_ZEROLA,
+    THR_COMP_NEARESTLA,
+    THR_COMP_NEARLA,
+
+    THR_COMP_ZEROGA,
+    THR_COMP_NEARESTGA,
+    THR_COMP_NEARGA,
+
+    THR_COMP_NEWLG,
+    THR_COMP_NEWLA,
+    THR_COMP_NEWGA,
+
+    THR_COMP_SPLITLG,
+    THR_COMP_SPLITLA,
+    THR_COMP_SPLITGA,
+}
+THR_MODES;
+#else
+typedef enum
+{
+    THR_ZEROMV,
+    THR_DC,
+
+    THR_NEARESTMV,
+    THR_NEARMV,
+
+    THR_ZEROG,
+    THR_NEARESTG,
+
+    THR_ZEROA,
+    THR_NEARESTA,
+
+    THR_NEARG,
+    THR_NEARA,
+
+    THR_V_PRED,
+    THR_H_PRED,
 #if CONFIG_NEWINTRAMODES
     THR_D45_PRED,
     THR_D135_PRED,
@@ -222,9 +305,10 @@ typedef enum
 
     THR_COMP_SPLITLG,
     THR_COMP_SPLITLA,
-    THR_COMP_SPLITGA,
+    THR_COMP_SPLITGA
 }
 THR_MODES;
+#endif
 
 typedef enum
 {
@@ -678,6 +762,11 @@ typedef struct VP8_COMP
     int update_context;
 
     int dummy_packing;    /* flag to indicate if packing is dummy */
+
+#if CONFIG_PRED_FILTER
+    int pred_filter_on_count;
+    int pred_filter_off_count;
+#endif
 
 } VP8_COMP;
 

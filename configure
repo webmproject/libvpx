@@ -231,6 +231,7 @@ EXPERIMENT_LIST="
     int_8x8fdct
     newintramodes
     adaptive_entropy
+    pred_filter
 "
 CONFIG_LIST="
     external_build
