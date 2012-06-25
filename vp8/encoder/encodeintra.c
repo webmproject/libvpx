@@ -32,8 +32,11 @@ extern int enc_debug;
 #define IF_RTCD(x) NULL
 #endif
 
-int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
+#if CONFIG_HYBRIDTRANSFORM
+extern void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d);
+#endif
 
+int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   int i;
   int intra_pred_var = 0;
   (void) cpi;
@@ -64,6 +67,12 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
   BLOCKD *b = &x->e_mbd.block[ib];
   BLOCK *be = &x->block[ib];
 
+#if CONFIG_HYBRIDTRANSFORM
+    int QIndex = x->q_index;
+    int active_ht = (QIndex < ACTIVE_HT);
+#endif
+
+
 #if CONFIG_COMP_INTRA_PRED
   if (b->bmi.as_mode.second == (B_PREDICTION_MODE)(B_DC_PRED - 1)) {
 #endif
@@ -78,11 +87,45 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 
   ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, b, 16);
 
-  x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+#if CONFIG_HYBRIDTRANSFORM
+    if(active_ht) {
+      b->bmi.as_mode.test = b->bmi.as_mode.first;
+      switch(b->bmi.as_mode.first) {
+        // case B_DC_PRED :
+        case B_TM_PRED :
+        case B_RD_PRED :
+          b->bmi.as_mode.tx_type = ADST_ADST;
+          break;
 
-  x->quantize_b(be, b);
+        case B_VE_PRED :
+        case B_VR_PRED :
+          b->bmi.as_mode.tx_type = ADST_DCT;
+          break;
 
-  vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
+        case B_HE_PRED :
+        case B_HD_PRED :
+        case B_HU_PRED :
+          b->bmi.as_mode.tx_type = DCT_ADST;
+          break;
+
+        default :
+          b->bmi.as_mode.tx_type = DCT_DCT;
+          break;
+      }
+
+      vp8_fht4x4_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type);
+      vp8_ht_quantize_b(be, b);
+      vp8_inverse_htransform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
+    } else {
+      x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32) ;
+      x->quantize_b(be, b) ;
+      vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
+    }
+#else
+    x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
+    x->quantize_b(be, b);
+    vp8_inverse_transform_b(IF_RTCD(&rtcd->common->idct), b, 32);
+#endif
 
   RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor, b->diff, *(b->base_dst) + b->dst, b->dst_stride);
 }
@@ -273,7 +316,6 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     RECON_INVOKE(&rtcd->common->recon, recon)(b->predictor,
                                               b->diff, *(b->base_dst) + b->dst, b->dst_stride);
   }
-
 }
 
 extern const int vp8_i8x8_block[4];

@@ -119,6 +119,53 @@ int get_token(int v) {
   else return DCT_VAL_CATEGORY6;
 }
 
+#if CONFIG_HYBRIDTRANSFORM
+void static count_tokens_adaptive_scan(const MACROBLOCKD *xd, INT16 *qcoeff_ptr,
+                                       int block, int type, ENTROPY_CONTEXT *a,
+                                       ENTROPY_CONTEXT *l, int eob, int seg_eob,
+                                       FRAME_CONTEXT *fc) {
+  int c, pt, token, band;
+  const int *scan;
+
+  int QIndex = xd->q_index;
+  int active_ht = (QIndex < ACTIVE_HT) &&
+                  (xd->mode_info_context->mbmi.mode == B_PRED);
+
+  if(active_ht) {
+    switch(xd->block[block].bmi.as_mode.tx_type) {
+      case ADST_DCT :
+        scan = vp8_row_scan;
+        break;
+
+      case DCT_ADST :
+        scan = vp8_col_scan;
+        break;
+
+      default :
+        scan = vp8_default_zig_zag1d;
+        break;
+    }
+  } else {
+    scan = vp8_default_zig_zag1d;
+  }
+
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  for (c = !type; c < eob; ++c) {
+    int rc = scan[c];
+    int v = qcoeff_ptr[rc];
+    band = vp8_coef_bands[c];
+    token = get_token(v);
+    fc->coef_counts[type][band][pt][token]++;
+    pt = vp8_prev_token_class[token];
+  }
+
+  if (eob < seg_eob) {
+    band = vp8_coef_bands[c];
+    fc->coef_counts[type][band][pt][DCT_EOB_TOKEN]++;
+  }
+}
+#endif
+
 void static count_tokens(INT16 *qcoeff_ptr, int block, int type,
                          ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                          int eob, int seg_eob, FRAME_CONTEXT *const fc) {
@@ -289,8 +336,14 @@ static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
     WRITE_COEF_CONTINUE(val);
   }
 #if CONFIG_ADAPTIVE_ENTROPY
+
   if (block_type == TX_4X4)
+#if CONFIG_HYBRIDTRANSFORM
+    count_tokens_adaptive_scan(xd, qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
+#else
     count_tokens(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
+#endif
+
   else
     count_tokens_8x8(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
 #endif
@@ -351,12 +404,21 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   return eobtotal;
 }
 
+
 int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd) {
   ENTROPY_CONTEXT *const A = (ENTROPY_CONTEXT *)xd->above_context;
   ENTROPY_CONTEXT *const L = (ENTROPY_CONTEXT *)xd->left_context;
 
   char *const eobs = xd->eobs;
+#if CONFIG_HYBRIDTRANSFORM
+  const int *scan = vp8_default_zig_zag1d;
+  int QIndex = xd->q_index;
+  int active_ht = (QIndex < ACTIVE_HT) &&
+                  (xd->mode_info_context->mbmi.mode == B_PRED);
+#else
   const int *const scan = vp8_default_zig_zag1d;
+#endif
+
   int c, i, type, eobtotal = 0, seg_eob = 16;
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
 
@@ -388,6 +450,41 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd) {
     if (i == 16)
       type = PLANE_TYPE_UV;
 
+#if CONFIG_HYBRIDTRANSFORM
+    if (type == PLANE_TYPE_Y_WITH_DC &&
+        xd->mode_info_context->mbmi.mode == B_PRED &&
+        active_ht) {
+      BLOCKD *b = &xd->block[i];
+      switch(b->bmi.as_mode.first) {
+        case B_TM_PRED :
+        case B_RD_PRED :
+          b->bmi.as_mode.tx_type = ADST_ADST;
+          scan = vp8_default_zig_zag1d;
+          break;
+
+        case B_VE_PRED :
+        case B_VR_PRED :
+          b->bmi.as_mode.tx_type = ADST_DCT;
+          scan = vp8_row_scan;
+          break ;
+
+        case B_HE_PRED :
+        case B_HD_PRED :
+        case B_HU_PRED :
+          b->bmi.as_mode.tx_type = DCT_ADST;
+          scan = vp8_col_scan;
+          break;
+
+        default :
+          b->bmi.as_mode.tx_type = DCT_DCT;
+          scan = vp8_default_zig_zag1d;
+          break;
+      }
+    }
+    if (type == PLANE_TYPE_UV) {
+      scan = vp8_default_zig_zag1d;
+    }
+#endif
     c = vp8_decode_coefs(dx, xd, a, l, type, seg_eob, qcoeff_ptr,
                          i, scan, TX_4X4, coef_bands_x);
     a[0] = l[0] = ((eobs[i] = c) != !type);

@@ -124,11 +124,24 @@ typedef enum {
 
 } TX_SIZE;
 
+#if CONFIG_HYBRIDTRANSFORM
+typedef enum {
+  DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
+  ADST_DCT  = 1,                      // ADST in horizontal, DCT in vertical
+  DCT_ADST  = 2,                      // DCT  in horizontal, ADST in vertical
+  ADST_ADST = 3                       // ADST in both directions
+} TX_TYPE;
+#endif
+
 #define VP8_YMODES  (B_PRED + 1)
 #define VP8_UV_MODES (TM_PRED + 1)
 #define VP8_I8X8_MODES (TM_PRED + 1)
 
 #define VP8_MVREFS (1 + SPLITMV - NEARESTMV)
+
+#if CONFIG_HYBRIDTRANSFORM
+#define ACTIVE_HT 110                // quantization stepsize threshold
+#endif
 
 typedef enum {
   B_DC_PRED,          /* average of above and left pixels */
@@ -163,6 +176,11 @@ typedef enum {
 union b_mode_info {
   struct {
     B_PREDICTION_MODE first;
+#if CONFIG_HYBRIDTRANSFORM
+    B_PREDICTION_MODE test;
+    TX_TYPE           tx_type;
+#endif
+
 #if CONFIG_COMP_INTRA_PRED
     B_PREDICTION_MODE second;
 #endif
@@ -183,6 +201,10 @@ typedef enum {
 
 typedef struct {
   MB_PREDICTION_MODE mode, uv_mode;
+#if CONFIG_HYBRIDTRANSFORM
+  MB_PREDICTION_MODE mode_rdopt;
+#endif
+
 #if CONFIG_COMP_INTRA_PRED
   MB_PREDICTION_MODE second_mode, second_uv_mode;
 #endif
@@ -344,6 +366,10 @@ typedef struct MacroBlockD {
 #endif
 
   int mb_index;   // Index of the MB in the SB (0..3)
+
+#if CONFIG_HYBRIDTRANSFORM
+  int q_index;
+#endif
 
 } MACROBLOCKD;
 

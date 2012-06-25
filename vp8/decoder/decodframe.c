@@ -128,6 +128,11 @@ void mb_init_dequantizer(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     xd->block[i].dequant = pc->Y1dequant[QIndex];
   }
 
+#if CONFIG_HYBRIDTRANSFORM
+  xd->q_index = QIndex;
+#endif
+
+
 #if CONFIG_LOSSLESS
   if (!QIndex) {
     pbi->common.rtcd.idct.idct1        = vp8_short_inv_walsh4x4_1_x8_c;
@@ -208,6 +213,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   int i;
   int tx_type;
 
+#if CONFIG_HYBRIDTRANSFORM
+  int QIndex = xd->q_index;
+  int active_ht = (QIndex < ACTIVE_HT);
+#endif
+
   if (pbi->common.frame_type == KEY_FRAME) {
     if (pbi->common.txfm_mode == ALLOW_8X8 &&
         xd->mode_info_context->mbmi.mode != I8X8_PRED &&
@@ -280,6 +290,39 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 
   if (xd->segmentation_enabled)
     mb_init_dequantizer(pbi, xd);
+
+#if CONFIG_HYBRIDTRANSFORM
+  // parse transform types for intra 4x4 mode
+  if (mode == B_PRED) {
+    for (i = 0; i < 16; i++) {
+      BLOCKD *b = &xd->block[i];
+      int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
+      if(active_ht) {
+        switch(b_mode) {
+          case B_TM_PRED :
+          case B_RD_PRED :
+            b->bmi.as_mode.tx_type = ADST_ADST;
+            break;
+
+          case B_VE_PRED :
+          case B_VR_PRED :
+            b->bmi.as_mode.tx_type = ADST_DCT;
+            break ;
+
+          case B_HE_PRED :
+          case B_HD_PRED :
+          case B_HU_PRED :
+            b->bmi.as_mode.tx_type = DCT_ADST;
+            break;
+
+          default :
+            b->bmi.as_mode.tx_type = DCT_DCT;
+            break;
+        }
+      }
+    } // loop over 4x4 blocks
+  }
+#endif
 
   /* do prediction */
   if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
@@ -360,16 +403,29 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       }
 #endif
 
-      if (xd->eobs[i] > 1) {
-        DEQUANT_INVOKE(&pbi->dequant, idct_add)
-        (b->qcoeff, b->dequant,  b->predictor,
-         *(b->base_dst) + b->dst, 16, b->dst_stride);
-      } else {
-        IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
-        (b->qcoeff[0] * b->dequant[0], b->predictor,
-         *(b->base_dst) + b->dst, 16, b->dst_stride);
-        ((int *)b->qcoeff)[0] = 0;
+#if CONFIG_HYBRIDTRANSFORM
+      if(active_ht)
+        vp8_ht_dequant_idct_add_c( (TX_TYPE)b->bmi.as_mode.tx_type, b->qcoeff,
+                                   b->dequant, b->predictor,
+                                   *(b->base_dst) + b->dst, 16, b->dst_stride);
+      else
+        vp8_dequant_idct_add_c(b->qcoeff, b->dequant, b->predictor,
+                               *(b->base_dst) + b->dst, 16, b->dst_stride);
+#else
+      if (xd->eobs[i] > 1)
+      {
+          DEQUANT_INVOKE(&pbi->dequant, idct_add)
+              (b->qcoeff, b->dequant,  b->predictor,
+              *(b->base_dst) + b->dst, 16, b->dst_stride);
       }
+      else
+      {
+          IDCT_INVOKE(RTCD_VTABLE(idct), idct1_scalar_add)
+              (b->qcoeff[0] * b->dequant[0], b->predictor,
+              *(b->base_dst) + b->dst, 16, b->dst_stride);
+          ((int *)b->qcoeff)[0] = 0;
+      }
+#endif
     }
   } else if (mode == SPLITMV) {
     DEQUANT_INVOKE(&pbi->dequant, idct_add_y_block)
@@ -378,8 +434,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
      xd->dst.y_stride, xd->eobs);
   } else {
     BLOCKD *b = &xd->block[24];
-
-
     if (tx_type == TX_8X8) {
       DEQUANT_INVOKE(&pbi->dequant, block_2x2)(b);
 #ifdef DEC_DEBUG

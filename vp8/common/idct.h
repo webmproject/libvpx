@@ -97,6 +97,12 @@ extern prototype_second_order(vp8_short_inv_walsh4x4_lossless_c);
 extern prototype_second_order(vp8_short_inv_walsh4x4_1_lossless_c);
 #endif
 
+#if CONFIG_HYBRIDTRANSFORM
+#include "vp8/common/blockd.h"
+void vp8_iht4x4llm_c(short *input, short *output, int pitch, TX_TYPE tx_type);
+#endif
+
+
 typedef prototype_idct((*vp8_idct_fn_t));
 typedef prototype_idct_scalar_add((*vp8_idct_scalar_add_fn_t));
 typedef prototype_second_order((*vp8_second_order_fn_t));

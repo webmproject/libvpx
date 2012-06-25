@@ -31,6 +31,11 @@ static void recon_dcblock_8x8(MACROBLOCKD *x) {
 
 }
 
+#if CONFIG_HYBRIDTRANSFORM
+void vp8_inverse_htransform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch) {
+  vp8_iht4x4llm_c(b->dqcoeff, b->diff, pitch, b->bmi.as_mode.tx_type);
+}
+#endif
 
 void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int pitch) {
   if (b->eob <= 1)

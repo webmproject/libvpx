@@ -23,6 +23,10 @@
 #endif
 
 
+#if CONFIG_HYBRIDTRANSFORM
+void vp8_fht4x4_c(short *input, short *output, int pitch, TX_TYPE tx_type);
+void vp8_fht8x4_c(short *input, short *output, int pitch, TX_TYPE tx_type);
+#endif
 
 #ifndef vp8_fdct_short8x8
 #define vp8_fdct_short8x8  vp8_short_fdct8x8_c

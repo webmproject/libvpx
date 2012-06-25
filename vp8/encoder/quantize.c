@@ -22,6 +22,72 @@
 extern int enc_debug;
 #endif
 
+#if CONFIG_HYBRIDTRANSFORM
+void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d) {
+  int i, rc, eob;
+  int zbin;
+  int x, y, z, sz;
+  short *zbin_boost_ptr  = b->zrun_zbin_boost;
+  short *coeff_ptr       = b->coeff;
+  short *zbin_ptr        = b->zbin;
+  short *round_ptr       = b->round;
+  short *quant_ptr       = b->quant;
+  unsigned char *quant_shift_ptr = b->quant_shift;
+  short *qcoeff_ptr      = d->qcoeff;
+  short *dqcoeff_ptr     = d->dqcoeff;
+  short *dequant_ptr     = d->dequant;
+  short zbin_oq_value    = b->zbin_extra;
+
+  int const *pt_scan ;
+
+  switch(d->bmi.as_mode.tx_type) {
+    case ADST_DCT :
+      pt_scan = vp8_row_scan;
+      break;
+
+    case DCT_ADST :
+      pt_scan = vp8_col_scan;
+      break;
+
+    default :
+      pt_scan = vp8_default_zig_zag1d;
+      break;
+  }
+
+  vpx_memset(qcoeff_ptr, 0, 32);
+  vpx_memset(dqcoeff_ptr, 0, 32);
+
+  eob = -1;
+
+  for (i = 0; i < b->eob_max_offset; i++) {
+    rc   = pt_scan[i];
+    z    = coeff_ptr[rc];
+
+    zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
+    zbin_boost_ptr ++;
+
+    sz = (z >> 31);                                 // sign of z
+    x  = (z ^ sz) - sz;                             // x = abs(z)
+
+    if (x >= zbin) {
+      x += round_ptr[rc];
+      y  = (((x * quant_ptr[rc]) >> 16) + x)
+           >> quant_shift_ptr[rc];                // quantize (x)
+      x  = (y ^ sz) - sz;                         // get the sign back
+      qcoeff_ptr[rc]  = x;                        // write to destination
+      dqcoeff_ptr[rc] = x * dequant_ptr[rc];      // dequantized value
+
+      if (y) {
+        eob = i;                                // last nonzero coeffs
+        zbin_boost_ptr = b->zrun_zbin_boost;    // reset zero runlength
+      }
+    }
+  }
+
+  d->eob = eob + 1;
+}
+#endif
+
 void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d) {
   int i, rc, eob;
   int zbin;
@@ -47,13 +113,14 @@ void vp8_regular_quantize_b(BLOCK *b, BLOCKD *d) {
     z    = coeff_ptr[rc];
 
     zbin = zbin_ptr[rc] + *zbin_boost_ptr + zbin_oq_value;
-    zbin_boost_ptr++;
+    zbin_boost_ptr ++;
 
     sz = (z >> 31);                                 // sign of z
     x  = (z ^ sz) - sz;                             // x = abs(z)
 
     if (x >= zbin) {
       x += round_ptr[rc];
+
       y  = (((x * quant_ptr[rc]) >> 16) + x)
            >> quant_shift_ptr[rc];                // quantize (x)
       x  = (y ^ sz) - sz;                         // get the sign back

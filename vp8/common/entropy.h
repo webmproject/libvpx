@@ -107,6 +107,12 @@ extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY
 struct VP8Common;
 void vp8_default_coef_probs(struct VP8Common *);
 extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]);
+
+#if CONFIG_HYBRIDTRANSFORM
+extern DECLARE_ALIGNED(16, const int, vp8_col_scan[16]);
+extern DECLARE_ALIGNED(16, const int, vp8_row_scan[16]);
+#endif
+
 extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
 extern short vp8_default_zig_zag_mask_8x8[64];// int64_t

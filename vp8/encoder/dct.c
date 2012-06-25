@@ -13,6 +13,28 @@
 #include "vpx_ports/config.h"
 #include "vp8/common/idct.h"
 
+#if CONFIG_HYBRIDTRANSFORM
+
+#include "vp8/common/blockd.h"
+
+float dct_4[16] = {
+  0.500000000000000,  0.500000000000000,  0.500000000000000,  0.500000000000000,
+  0.653281482438188,  0.270598050073099, -0.270598050073099, -0.653281482438188,
+  0.500000000000000, -0.500000000000000, -0.500000000000000,  0.500000000000000,
+  0.270598050073099, -0.653281482438188,  0.653281482438188, -0.270598050073099
+};
+
+float adst_4[16] = {
+  0.228013428883779,  0.428525073124360,  0.577350269189626,  0.656538502008139,
+  0.577350269189626,  0.577350269189626,  0.000000000000000, -0.577350269189626,
+  0.656538502008139, -0.228013428883779, -0.577350269189626,  0.428525073124359,
+  0.428525073124360, -0.656538502008139,  0.577350269189626, -0.228013428883779
+};
+#endif
+
+
+#if CONFIG_INT_8X8FDCT
+
 static const int xC1S7 = 16069;
 static const int xC2S6 = 15137;
 static const int xC3S5 = 13623;
@@ -268,6 +290,112 @@ void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
 
 }
 
+#if CONFIG_HYBRIDTRANSFORM
+void vp8_fht4x4_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
+  int i, j, k;
+  float bufa[16], bufb[16]; // buffers are for floating-point test purpose
+                             // the implementation could be simplified in
+                             // conjunction with integer transform
+  short *ip = input;
+  short *op = output;
+
+  float *pfa = &bufa[0];
+  float *pfb = &bufb[0];
+
+  // pointers to vertical and horizontal transforms
+  float *ptv, *pth;
+
+  // load and convert residual array into floating-point
+  for(j = 0; j < 4; j++) {
+    for(i = 0; i < 4; i++) {
+      pfa[i] = (float)ip[i];
+    }
+    pfa += 4;
+    ip  += pitch / 2;
+  }
+
+  // vertical transformation
+  pfa = &bufa[0];
+  pfb = &bufb[0];
+
+  switch(tx_type) {
+    case ADST_ADST :
+    case ADST_DCT  :
+      ptv = &adst_4[0];
+      break;
+
+    default :
+      ptv = &dct_4[0];
+      break;
+  }
+
+  for(j = 0; j < 4; j++) {
+    for(i = 0; i < 4; i++) {
+      pfb[i] = 0;
+      for(k = 0; k < 4; k++) {
+        pfb[i] += ptv[k] * pfa[(k<<2)];
+      }
+      pfa += 1;
+    }
+    pfb += 4;
+    ptv += 4;
+    pfa = &bufa[0];
+  }
+
+  // horizontal transformation
+  pfa = &bufa[0];
+  pfb = &bufb[0];
+
+  switch(tx_type) {
+    case ADST_ADST :
+    case  DCT_ADST :
+      pth = &adst_4[0];
+      break;
+
+    default :
+      pth = &dct_4[0];
+      break;
+  }
+
+  for(j = 0; j < 4; j++) {
+    for(i = 0; i < 4; i++) {
+      pfa[i] = 0;
+      for(k = 0; k < 4; k++) {
+        pfa[i] += pfb[k] * pth[k];
+      }
+      pth += 4;
+     }
+
+    pfa += 4;
+    pfb += 4;
+
+    switch(tx_type) {
+      case ADST_ADST :
+      case  DCT_ADST :
+        pth = &adst_4[0];
+        break;
+
+      default :
+        pth = &dct_4[0];
+        break;
+    }
+  }
+
+  // convert to short integer format and load BLOCKD buffer
+  op  = output ;
+  pfa = &bufa[0] ;
+
+  for(j = 0; j < 4; j++) {
+    for(i = 0; i < 4; i++) {
+      op[i] = (pfa[i] > 0 ) ? (short)( 8 * pfa[i] + 0.49) :
+                                   -(short)(- 8 * pfa[i] + 0.49);
+    }
+    op  += 4;
+    pfa += 4;
+  }
+}
+#endif
+
 void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
   int i;
   int a1, b1, c1, d1;
@@ -309,9 +437,18 @@ void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
   }
 }
 
-void vp8_short_fdct8x4_c(short *input, short *output, int pitch) {
-  vp8_short_fdct4x4_c(input,   output,    pitch);
-  vp8_short_fdct4x4_c(input + 4, output + 16, pitch);
+#if CONFIG_HYBRIDTRANSFORM
+void vp8_fht8x4_c(short *input, short *output, int pitch,
+                  TX_TYPE tx_type) {
+  vp8_fht4x4_c(input,     output,      pitch, tx_type);
+  vp8_fht4x4_c(input + 4, output + 16, pitch, tx_type);
+}
+#endif
+
+void vp8_short_fdct8x4_c(short *input, short *output, int pitch)
+{
+    vp8_short_fdct4x4_c(input,   output,    pitch);
+    vp8_short_fdct4x4_c(input + 4, output + 16, pitch);
 }
 
 void vp8_short_walsh4x4_c(short *input, short *output, int pitch) {

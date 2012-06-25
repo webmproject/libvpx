@@ -41,6 +41,44 @@ void vp8_dequantize_b_c(BLOCKD *d) {
   }
 }
 
+
+#if CONFIG_HYBRIDTRANSFORM
+void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
+                               unsigned char *pred, unsigned char *dest,
+                               int pitch, int stride) {
+  short output[16];
+  short *diff_ptr = output;
+  int r, c;
+  int i;
+
+  for (i = 0; i < 16; i++) {
+    input[i] = dq[i] * input[i];
+  }
+
+  vp8_iht4x4llm_c( input, output, 4 << 1, tx_type );
+
+  vpx_memset(input, 0, 32);
+
+  for (r = 0; r < 4; r++) {
+      for (c = 0; c < 4; c++) {
+        int a = diff_ptr[c] + pred[c];
+
+        if (a < 0)
+            a = 0;
+
+        if (a > 255)
+            a = 255;
+
+        dest[c] = (unsigned char) a;
+    }
+
+      dest += stride;
+      diff_ptr += 4;
+      pred += pitch;
+  }
+}
+#endif
+
 void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
                             unsigned char *dest, int pitch, int stride) {
   short output[16];

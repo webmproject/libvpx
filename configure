@@ -228,6 +228,7 @@ EXPERIMENT_LIST="
     adaptive_entropy
     pred_filter
     lossless
+    hybridtransform
 "
 CONFIG_LIST="
     external_build
