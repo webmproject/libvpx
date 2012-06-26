@@ -295,23 +295,23 @@ vp8_variance_halfpixvar16x16_hv_media=vp8_variance_halfpixvar16x16_hv_armv6
 #
 # Single block SAD
 #
-prototype unsigned int vp8_sad4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
+prototype unsigned int vp8_sad4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad4x4 mmx sse2 neon
 vp8_sad4x4_sse2=vp8_sad4x4_wmt
 
-prototype unsigned int vp8_sad8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
+prototype unsigned int vp8_sad8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad8x8 mmx sse2 neon
 vp8_sad8x8_sse2=vp8_sad8x8_wmt
 
-prototype unsigned int vp8_sad8x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
+prototype unsigned int vp8_sad8x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad8x16 mmx sse2 neon
 vp8_sad8x16_sse2=vp8_sad8x16_wmt
 
-prototype unsigned int vp8_sad16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
+prototype unsigned int vp8_sad16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad16x8 mmx sse2 neon
 vp8_sad16x8_sse2=vp8_sad16x8_wmt
 
-prototype unsigned int vp8_sad16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, int max_sad"
+prototype unsigned int vp8_sad16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad16x16 mmx sse2 sse3 media neon
 vp8_sad16x16_sse2=vp8_sad16x16_wmt
 vp8_sad16x16_media=vp8_sad16x16_armv6

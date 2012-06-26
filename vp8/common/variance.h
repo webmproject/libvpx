@@ -12,14 +12,12 @@
 #ifndef VARIANCE_H
 #define VARIANCE_H
 
-typedef unsigned int(*vp8_sad_fn_t)
-    (
+typedef unsigned int(*vp8_sad_fn_t)(
     const unsigned char *src_ptr,
     int source_stride,
     const unsigned char *ref_ptr,
     int ref_stride,
-    int max_sad
-    );
+    unsigned int max_sad);
 
 typedef void (*vp8_copy32xn_fn_t)(
     const unsigned char *src_ptr,

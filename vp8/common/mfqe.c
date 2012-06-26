@@ -160,9 +160,9 @@ static void multiframe_quality_enhance_block
         vsad = (vp8_variance8x8(v, uv_stride, vd, uvd_stride, &sse));
         vsad = (sse + 32)>>6;
 #else
-        sad = (vp8_sad16x16(y, y_stride, yd, yd_stride, INT_MAX)+128)>>8;
-        usad = (vp8_sad8x8(u, uv_stride, ud, uvd_stride, INT_MAX)+32)>>6;
-        vsad = (vp8_sad8x8(v, uv_stride, vd, uvd_stride, INT_MAX)+32)>>6;
+        sad = (vp8_sad16x16(y, y_stride, yd, yd_stride, UINT_MAX) + 128) >> 8;
+        usad = (vp8_sad8x8(u, uv_stride, ud, uvd_stride, UINT_MAX) + 32) >> 6;
+        vsad = (vp8_sad8x8(v, uv_stride, vd, uvd_stride, UINT_MAX)+ 32) >> 6;
 #endif
     }
     else /* if (blksize == 8) */
@@ -177,9 +177,9 @@ static void multiframe_quality_enhance_block
         vsad = (vp8_variance4x4(v, uv_stride, vd, uvd_stride, &sse));
         vsad = (sse + 8)>>4;
 #else
-        sad = (vp8_sad8x8(y, y_stride, yd, yd_stride, INT_MAX)+32)>>6;
-        usad = (vp8_sad4x4(u, uv_stride, ud, uvd_stride, INT_MAX)+8)>>4;
-        vsad = (vp8_sad4x4(v, uv_stride, vd, uvd_stride, INT_MAX)+8)>>4;
+        sad = (vp8_sad8x8(y, y_stride, yd, yd_stride, UINT_MAX) + 32) >> 6;
+        usad = (vp8_sad4x4(u, uv_stride, ud, uvd_stride, UINT_MAX) + 8) >> 4;
+        vsad = (vp8_sad4x4(v, uv_stride, vd, uvd_stride, UINT_MAX) + 8) >> 4;
 #endif
     }
 
