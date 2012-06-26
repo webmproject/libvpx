@@ -10,7 +10,9 @@
 #include <string>
 #include "vpx_config.h"
 #if ARCH_X86 || ARCH_X86_64
+extern "C" {
 #include "vpx_ports/x86.h"
+}
 #endif
 #include "third_party/googletest/src/include/gtest/gtest.h"
 
