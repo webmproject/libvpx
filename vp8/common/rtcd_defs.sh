@@ -359,19 +359,19 @@ vp8_sad16x16x8_sse4_1=vp8_sad16x16x8_sse4
 #
 # Multi-block SAD, comparing a reference to N independent blocks
 #
-prototype void vp8_sad4x4x4d "const unsigned char *src_ptr, int source_stride, unsigned char *ref_ptr[4], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad4x4x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad4x4x4d sse3
 
-prototype void vp8_sad8x8x4d "const unsigned char *src_ptr, int source_stride, unsigned char *ref_ptr[4], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad8x8x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad8x8x4d sse3
 
-prototype void vp8_sad8x16x4d "const unsigned char *src_ptr, int source_stride, unsigned char *ref_ptr[4], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad8x16x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad8x16x4d sse3
 
-prototype void vp8_sad16x8x4d "const unsigned char *src_ptr, int source_stride, unsigned char *ref_ptr[4], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad16x8x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad16x8x4d sse3
 
-prototype void vp8_sad16x16x4d "const unsigned char *src_ptr, int source_stride, unsigned char *ref_ptr[4], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad16x16x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad16x16x4d sse3
 
 #
