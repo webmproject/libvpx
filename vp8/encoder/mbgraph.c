@@ -104,6 +104,11 @@ static unsigned int do_16x16_motion_iteration
                                                &distortion, &sse);
     }
 
+#if CONFIG_PRED_FILTER
+    // Disable the prediction filter
+    xd->mode_info_context->mbmi.pred_filter_enabled = 0;
+#endif
+
     vp8_set_mbmode_and_mvs(x, NEWMV, dst_mv);
     vp8_build_inter16x16_predictors_mby(xd);
     //VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)

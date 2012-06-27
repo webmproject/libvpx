@@ -335,18 +335,153 @@ static void build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch)
 
 
 /*encoder only*/
-void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x)
+#if CONFIG_PRED_FILTER
+
+// Select the thresholded or non-thresholded filter
+#define USE_THRESH_FILTER 0
+
+#define PRED_FILT_LEN 5
+
+static const int filt_shift = 4;
+static const int pred_filter[PRED_FILT_LEN] = {1, 2, 10, 2, 1};
+// Alternative filter {1, 1, 4, 1, 1}
+
+#if !USE_THRESH_FILTER
+void filter_mb(unsigned char *src, int src_stride,
+               unsigned char *dst, int dst_stride,
+               int width, int height)
+{
+    int i, j, k;
+    unsigned int Temp[32*32];
+    unsigned int  *pTmp = Temp;
+    unsigned char *pSrc = src - (1 + src_stride) * (PRED_FILT_LEN/2);
+
+    // Horizontal
+    for (i=0; i<height+PRED_FILT_LEN-1; i++)
+    {
+       for (j=0; j<width; j++)
+       {
+           int sum=0;
+           for (k=0; k<PRED_FILT_LEN; k++)
+               sum += pSrc[j+k] * pred_filter[k];
+           pTmp[j] = sum;
+       }
+
+       pSrc += src_stride;
+       pTmp += width;
+    }
+
+    // Vertical
+    pTmp = Temp;
+    for (i=0; i<width; i++)
+    {
+        unsigned char *pDst = dst + i;
+        for (j=0; j<height; j++)
+        {
+            int sum=0;
+            for (k=0; k<PRED_FILT_LEN; k++)
+                sum += pTmp[(j+k)*width] * pred_filter[k];
+            // Round
+            sum = (sum + ((1 << (filt_shift<<1))>>1)) >> (filt_shift << 1);
+            pDst[j*dst_stride] = (sum < 0 ? 0 : sum > 255 ? 255 : sum);
+        }
+        ++pTmp;
+    }
+}
+#else
+// Based on vp8_post_proc_down_and_across_c (postproc.c)
+void filter_mb(unsigned char *src, int src_stride,
+               unsigned char *dst, int dst_stride,
+               int width, int height)
+{
+    unsigned char *pSrc, *pDst;
+    int row;
+    int col;
+    int i;
+    int v;
+    unsigned char d[8];
+
+    /* TODO flimit should be linked to the quantizer value */
+    int flimit = 7;
+
+    for (row = 0; row < height; row++)
+    {
+        /* post_proc_down for one row */
+        pSrc = src;
+        pDst = dst;
+
+        for (col = 0; col < width; col++)
+        {
+            int kernel = (1 << (filt_shift-1));
+            int v = pSrc[col];
+
+            for (i = -2; i <= 2; i++)
+            {
+                if (abs(v - pSrc[col+i*src_stride]) > flimit)
+                    goto down_skip_convolve;
+
+                kernel += pred_filter[2+i] * pSrc[col+i*src_stride];
+            }
+
+            v = (kernel >> filt_shift);
+        down_skip_convolve:
+            pDst[col] = v;
+        }
+
+        /* now post_proc_across */
+        pSrc = dst;
+        pDst = dst;
+
+        for (i = 0; i < 8; i++)
+            d[i] = pSrc[i];
+
+        for (col = 0; col < width; col++)
+        {
+            int kernel = (1 << (filt_shift-1));
+            v = pSrc[col];
+
+            d[col&7] = v;
+
+            for (i = -2; i <= 2; i++)
+            {
+                if (abs(v - pSrc[col+i]) > flimit)
+                    goto across_skip_convolve;
+
+                kernel += pred_filter[2+i] * pSrc[col+i];
+            }
+
+            d[col&7] = (kernel >> filt_shift);
+        across_skip_convolve:
+
+            if (col >= 2)
+                pDst[col-2] = d[(col-2)&7];
+        }
+
+        /* handle the last two pixels */
+        pDst[col-2] = d[(col-2)&7];
+        pDst[col-1] = d[(col-1)&7];
+
+        /* next row */
+        src += src_stride;
+        dst += dst_stride;
+    }
+}
+#endif  // !USE_THRESH_FILTER
+
+#endif  // CONFIG_PRED_FILTER
+
+void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd)
 {
     unsigned char *uptr, *vptr;
-    unsigned char *upred_ptr = &x->predictor[256];
-    unsigned char *vpred_ptr = &x->predictor[320];
+    unsigned char *upred_ptr = &xd->predictor[256];
+    unsigned char *vpred_ptr = &xd->predictor[320];
 
-    int omv_row = x->mode_info_context->mbmi.mv.as_mv.row;
-    int omv_col = x->mode_info_context->mbmi.mv.as_mv.col;
+    int omv_row = xd->mode_info_context->mbmi.mv.as_mv.row;
+    int omv_col = xd->mode_info_context->mbmi.mv.as_mv.col;
     int mv_row  = omv_row;
     int mv_col  = omv_col;
     int offset;
-    int pre_stride = x->block[16].pre_stride;
+    int pre_stride = xd->block[16].pre_stride;
 
     /* calc uv motion vectors */
     if (mv_row < 0)
@@ -362,30 +497,84 @@ void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x)
     mv_row /= 2;
     mv_col /= 2;
 
-    mv_row &= x->fullpixel_mask;
-    mv_col &= x->fullpixel_mask;
+    mv_row &= xd->fullpixel_mask;
+    mv_col &= xd->fullpixel_mask;
 
     offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
-    uptr = x->pre.u_buffer + offset;
-    vptr = x->pre.v_buffer + offset;
+    uptr = xd->pre.u_buffer + offset;
+    vptr = xd->pre.v_buffer + offset;
 
+#if CONFIG_PRED_FILTER
+    if (xd->mode_info_context->mbmi.pred_filter_enabled)
+    {
+        int i;
+#if CONFIG_ENHANCED_INTERP
+        int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
+#else
+        int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
+#endif
+        int len = 7 + (Interp_Extend << 1);
+        unsigned char Temp[32*32];  // Input data required by sub-pel filter
+        unsigned char *pTemp = Temp + (Interp_Extend-1)*(len+1);
+        unsigned char *pSrc = uptr;
+        unsigned char *pDst = upred_ptr;
+
+        // U & V
+        for (i=0; i<2 ; i++)
+        {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+            if ((omv_row | omv_col) & 15)
+            {
+                // Copy extended MB into Temp array, applying the spatial filter
+                filter_mb(pSrc-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                          Temp, len, len, len);
+
+                // Sub-pel interpolation
+                xd->subpixel_predict8x8(pTemp, len, omv_col & 15,
+                                        omv_row & 15, pDst, 8);
+            }
+#else   /* CONFIG_SIXTEENTH_SUBPEL_UV */
+            if ((mv_row | mv_col) & 7)
+            {
+                // Copy extended MB into Temp array, applying the spatial filter
+                filter_mb(pSrc-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                          Temp, len, len, len);
+
+                // Sub-pel interpolation
+                xd->subpixel_predict8x8(pTemp, len, mv_col & 7,
+                                        mv_row & 7, pDst, 8);
+            }
+#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
+            else
+            {
+                // Apply prediction filter as we copy from source to destination
+                filter_mb(pSrc, pre_stride, pDst, 8, 8, 8);
+            }
+
+            // V
+            pSrc = vptr;
+            pDst = vpred_ptr;
+        }
+    }
+    else
+#endif
 #if CONFIG_SIXTEENTH_SUBPEL_UV
     if ((omv_row | omv_col) & 15)
     {
-        x->subpixel_predict8x8(uptr, pre_stride, omv_col & 15, omv_row & 15, upred_ptr, 8);
-        x->subpixel_predict8x8(vptr, pre_stride, omv_col & 15, omv_row & 15, vpred_ptr, 8);
+        xd->subpixel_predict8x8(uptr, pre_stride, omv_col & 15, omv_row & 15, upred_ptr, 8);
+        xd->subpixel_predict8x8(vptr, pre_stride, omv_col & 15, omv_row & 15, vpred_ptr, 8);
     }
 #else   /* CONFIG_SIXTEENTH_SUBPEL_UV */
     if ((mv_row | mv_col) & 7)
     {
-        x->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, upred_ptr, 8);
-        x->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, vpred_ptr, 8);
+        xd->subpixel_predict8x8(uptr, pre_stride, mv_col & 7, mv_row & 7, upred_ptr, 8);
+        xd->subpixel_predict8x8(vptr, pre_stride, mv_col & 7, mv_row & 7, vpred_ptr, 8);
     }
 #endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
     else
     {
-        RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, upred_ptr, 8);
-        RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, vpred_ptr, 8);
+        RECON_INVOKE(&xd->rtcd->recon, copy8x8)(uptr, pre_stride, upred_ptr, 8);
+        RECON_INVOKE(&xd->rtcd->recon, copy8x8)(vptr, pre_stride, vpred_ptr, 8);
     }
 }
 
@@ -494,29 +683,68 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x)
 
 
 /*encoder only*/
-void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *x)
+void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *xd)
 {
     unsigned char *ptr_base;
     unsigned char *ptr;
-    unsigned char *pred_ptr = x->predictor;
-    int mv_row = x->mode_info_context->mbmi.mv.as_mv.row;
-    int mv_col = x->mode_info_context->mbmi.mv.as_mv.col;
-    int pre_stride = x->block[0].pre_stride;
+    unsigned char *pred_ptr = xd->predictor;
+    int mv_row = xd->mode_info_context->mbmi.mv.as_mv.row;
+    int mv_col = xd->mode_info_context->mbmi.mv.as_mv.col;
+    int pre_stride = xd->block[0].pre_stride;
 
-    ptr_base = x->pre.y_buffer;
+    ptr_base = xd->pre.y_buffer;
     ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
 
+#if CONFIG_PRED_FILTER
+    if (xd->mode_info_context->mbmi.pred_filter_enabled)
+    {
+        // Produce predictor from the filtered source
+        if ((mv_row | mv_col) & 7)
+        {
+            // Sub-pel filter needs extended input
+#if CONFIG_ENHANCED_INTERP
+            int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
+#else
+            int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
+#endif
+            int len = 15 + (Interp_Extend << 1);
+            unsigned char Temp[32*32];  // Data required by sub-pel filter
+            unsigned char *pTemp = Temp + (Interp_Extend-1)*(len+1);
+
+            // Copy extended MB into Temp array, applying the spatial filter
+            filter_mb(ptr-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                      Temp, len, len, len);
+
+            // Sub-pel interpolation
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+            xd->subpixel_predict16x16(pTemp, len, (mv_col & 7)<<1,
+                                      (mv_row & 7)<<1, pred_ptr, 16);
+#else
+            xd->subpixel_predict16x16(pTemp, len, mv_col & 7,
+                                      mv_row & 7, pred_ptr, 16);
+#endif
+        }
+        else
+        {
+            // Apply spatial filter to create the prediction directly
+            filter_mb(ptr, pre_stride, pred_ptr, 16, 16, 16);
+        }
+    }
+    else
+#endif
     if ((mv_row | mv_col) & 7)
     {
 #if CONFIG_SIXTEENTH_SUBPEL_UV
-        x->subpixel_predict16x16(ptr, pre_stride, (mv_col & 7)<<1, (mv_row & 7)<<1, pred_ptr, 16);
+        xd->subpixel_predict16x16(ptr, pre_stride, (mv_col & 7)<<1,
+                                  (mv_row & 7)<<1, pred_ptr, 16);
 #else
-        x->subpixel_predict16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, pred_ptr, 16);
+        xd->subpixel_predict16x16(ptr, pre_stride, mv_col & 7,
+                                  mv_row & 7, pred_ptr, 16);
 #endif
     }
     else
     {
-        RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, pred_ptr, 16);
+        RECON_INVOKE(&xd->rtcd->recon, copy16x16)(ptr, pre_stride, pred_ptr, 16);
     }
 }
 
@@ -582,19 +810,64 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
         clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
     }
 
-    ptr = ptr_base + ( _16x16mv.as_mv.row >> 3) * pre_stride + (_16x16mv.as_mv.col >> 3);
+    ptr = ptr_base + (_16x16mv.as_mv.row >> 3) * pre_stride +
+                     (_16x16mv.as_mv.col >> 3);
 
+#if CONFIG_PRED_FILTER
+    if (x->mode_info_context->mbmi.pred_filter_enabled)
+    {
+        if ( _16x16mv.as_int & 0x00070007)
+        {
+            // Sub-pel filter needs extended input
+#if CONFIG_ENHANCED_INTERP
+            int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
+#else
+            int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
+#endif
+            int len = 15 + (Interp_Extend << 1);
+            unsigned char Temp[32*32];  // Data required by the sub-pel filter
+            unsigned char *pTemp = Temp + (Interp_Extend-1)*(len+1);
+
+            // Copy extended MB into Temp array, applying the spatial filter
+            filter_mb(ptr-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                      Temp, len, len, len);
+
+            // Sub-pel filter
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+            x->subpixel_predict16x16(pTemp, len,
+                                     (_16x16mv.as_mv.col & 7)<<1,
+                                     (_16x16mv.as_mv.row & 7)<<1,
+                                     dst_y, dst_ystride);
+#else
+            x->subpixel_predict16x16(pTemp, len,
+                                     _16x16mv.as_mv.col & 7,
+                                     _16x16mv.as_mv.row & 7,
+                                     dst_y, dst_ystride);
+#endif
+        }
+        else
+        {
+            // Apply spatial filter to create the prediction directly
+            filter_mb(ptr, pre_stride, dst_y, dst_ystride, 16, 16);
+        }
+    }
+    else
+#endif
     if ( _16x16mv.as_int & 0x00070007)
     {
 #if CONFIG_SIXTEENTH_SUBPEL_UV
-        x->subpixel_predict16x16(ptr, pre_stride, (_16x16mv.as_mv.col & 7)<<1, (_16x16mv.as_mv.row & 7)<<1, dst_y, dst_ystride);
+        x->subpixel_predict16x16(ptr, pre_stride, (_16x16mv.as_mv.col & 7)<<1,
+                                 (_16x16mv.as_mv.row & 7)<<1,
+                                 dst_y, dst_ystride);
 #else
-        x->subpixel_predict16x16(ptr, pre_stride, _16x16mv.as_mv.col & 7,  _16x16mv.as_mv.row & 7, dst_y, dst_ystride);
+        x->subpixel_predict16x16(ptr, pre_stride, _16x16mv.as_mv.col & 7,
+                                 _16x16mv.as_mv.row & 7, dst_y, dst_ystride);
 #endif
     }
     else
     {
-        RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, dst_y, dst_ystride);
+        RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, dst_y,
+                     dst_ystride);
     }
 
     _o16x16mv = _16x16mv;
@@ -620,6 +893,63 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
     uptr = x->pre.u_buffer + offset;
     vptr = x->pre.v_buffer + offset;
 
+#if CONFIG_PRED_FILTER
+    if (x->mode_info_context->mbmi.pred_filter_enabled)
+    {
+        int i;
+        unsigned char *pSrc = uptr;
+        unsigned char *pDst = dst_u;
+#if CONFIG_ENHANCED_INTERP
+        int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
+#else
+        int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
+#endif
+        int len = 7 + (Interp_Extend << 1);
+        unsigned char Temp[32*32];  // Data required by the sub-pel filter
+        unsigned char *pTemp = Temp + (Interp_Extend-1)*(len+1);
+
+        // U & V
+        for (i=0; i<2; i++)
+        {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+            if ( _o16x16mv.as_int & 0x000f000f)
+            {
+                // Copy extended MB into Temp array, applying the spatial filter
+                filter_mb(pSrc-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                          Temp, len, len, len);
+
+                // Sub-pel filter
+                x->subpixel_predict8x8(pTemp, len,
+                                       _o16x16mv.as_mv.col & 15,
+                                       _o16x16mv.as_mv.row & 15,
+                                       pDst, dst_uvstride);
+            }
+#else  /* CONFIG_SIXTEENTH_SUBPEL_UV */
+            if ( _16x16mv.as_int & 0x00070007)
+            {
+                // Copy extended MB into Temp array, applying the spatial filter
+                filter_mb(pSrc-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                          Temp, len, len, len);
+
+                // Sub-pel filter
+                x->subpixel_predict8x8(pTemp, len,
+                                       _16x16mv.as_mv.col & 7,
+                                       _16x16mv.as_mv.row & 7,
+                                       pDst, dst_uvstride);
+            }
+#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
+            else
+            {
+                filter_mb(pSrc, pre_stride, pDst, dst_uvstride, 8, 8);
+            }
+
+            // V
+            pSrc = vptr;
+            pDst = dst_v;
+        }
+    }
+    else
+#endif
 #if CONFIG_SIXTEENTH_SUBPEL_UV
     if ( _o16x16mv.as_int & 0x000f000f)
     {
@@ -687,17 +1017,60 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
 
     ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
 
-    if ((mv_row | mv_col) & 7)
+#if CONFIG_PRED_FILTER
+    if (x->mode_info_context->mbmi.pred_filter_enabled)
     {
-#if CONFIG_SIXTEENTH_SUBPEL_UV
-        x->subpixel_predict_avg16x16(ptr, pre_stride, (mv_col & 7)<<1, (mv_row & 7)<<1, dst_y, dst_ystride);
+        if ((mv_row | mv_col) & 7)
+        {
+            // Sub-pel filter needs extended input
+#if CONFIG_ENHANCED_INTERP
+            int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
 #else
-        x->subpixel_predict_avg16x16(ptr, pre_stride, mv_col & 7, mv_row & 7, dst_y, dst_ystride);
+            int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
 #endif
+            int len = 15 + (Interp_Extend << 1);
+            unsigned char Temp[32*32];  // Data required by sub-pel filter
+            unsigned char *pTemp = Temp + (Interp_Extend-1)*(len+1);
+
+            // Copy extended MB into Temp array, applying the spatial filter
+            filter_mb(ptr-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                      Temp, len, len, len);
+
+            // Sub-pel filter
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+            x->subpixel_predict_avg16x16(pTemp, len, (mv_col & 7)<<1,
+                                         (mv_row & 7)<<1, dst_y, dst_ystride);
+#else
+            x->subpixel_predict_avg16x16(pTemp, len, mv_col & 7,
+                                         mv_row & 7, dst_y, dst_ystride);
+#endif
+        }
+        else
+        {
+            // TODO Needs to AVERAGE with the dst_y
+            // For now, do not apply the prediction filter in these cases!
+            RECON_INVOKE(&x->rtcd->recon, avg16x16)(ptr, pre_stride, dst_y,
+                         dst_ystride);
+        }
     }
     else
+#endif  // CONFIG_PRED_FILTER
     {
-        RECON_INVOKE(&x->rtcd->recon, avg16x16)(ptr, pre_stride, dst_y, dst_ystride);
+        if ((mv_row | mv_col) & 7)
+        {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+            x->subpixel_predict_avg16x16(ptr, pre_stride, (mv_col & 7)<<1,
+                                         (mv_row & 7)<<1, dst_y, dst_ystride);
+#else
+            x->subpixel_predict_avg16x16(ptr, pre_stride, mv_col & 7,
+                                         mv_row & 7, dst_y, dst_ystride);
+#endif
+        }
+        else
+        {
+            RECON_INVOKE(&x->rtcd->recon, avg16x16)(ptr, pre_stride, dst_y,
+                         dst_ystride);
+        }
     }
 
     /* calc uv motion vectors */
@@ -714,6 +1087,62 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
     uptr = x->second_pre.u_buffer + offset;
     vptr = x->second_pre.v_buffer + offset;
 
+#if CONFIG_PRED_FILTER
+    if (x->mode_info_context->mbmi.pred_filter_enabled)
+    {
+        int i;
+#if CONFIG_ENHANCED_INTERP
+        int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
+#else
+        int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
+#endif
+        int len = 7 + (Interp_Extend << 1);
+        unsigned char Temp[32*32];  // Data required by sub-pel filter
+        unsigned char *pTemp = Temp + (Interp_Extend-1)*(len+1);
+        unsigned char *pSrc = uptr;
+        unsigned char *pDst = dst_u;
+
+        // U & V
+        for (i=0; i<2; i++)
+        {
+#if CONFIG_SIXTEENTH_SUBPEL_UV
+            if ((omv_row | omv_col) & 15)
+            {
+                // Copy extended MB into Temp array, applying the spatial filter
+                filter_mb(pSrc-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                          Temp, len, len, len);
+
+                // Sub-pel filter
+                x->subpixel_predict_avg8x8(pTemp, len, omv_col & 15,
+                                           omv_row & 15, pDst, dst_uvstride);
+            }
+#else  /* CONFIG_SIXTEENTH_SUBPEL_UV */
+            if ((mv_row | mv_col) & 7)
+            {
+                // Copy extended MB into Temp array, applying the spatial filter
+                filter_mb(pSrc-(Interp_Extend-1)*(pre_stride+1), pre_stride,
+                          Temp, len, len, len);
+
+                // Sub-pel filter
+                x->subpixel_predict_avg8x8(pTemp, len, mv_col & 7, mv_row & 7,
+                                           pDst, dst_uvstride);
+            }
+#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
+            else
+            {
+                // TODO Needs to AVERAGE with the dst_[u|v]
+                // For now, do not apply the prediction filter here!
+                RECON_INVOKE(&x->rtcd->recon, avg8x8)(pSrc, pre_stride, pDst,
+                                                      dst_uvstride);
+            }
+
+            // V
+            pSrc = vptr;
+            pDst = dst_v;
+        }
+    }
+    else
+#endif  // CONFIG_PRED_FILTER
 #if CONFIG_SIXTEENTH_SUBPEL_UV
     if ((omv_row | omv_col) & 15)
     {

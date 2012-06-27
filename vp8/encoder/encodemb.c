@@ -1223,6 +1223,11 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
 
     BLOCK *b = &x->block[0];
 
+#if CONFIG_PRED_FILTER
+    // Disable the prediction filter for firstpass
+    x->e_mbd.mode_info_context->mbmi.pred_filter_enabled = 0;
+#endif
+
     vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
     ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);

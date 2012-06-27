@@ -27,9 +27,7 @@
 #define MIN_BPB_FACTOR          0.005
 #define MAX_BPB_FACTOR          50
 
-extern const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES];
-extern const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES];
-
+extern const MODE_DEFINITION vp8_mode_order[MAX_MODES];
 
 
 #ifdef MODE_STATS

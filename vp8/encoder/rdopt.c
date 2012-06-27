@@ -81,161 +81,145 @@ static const int auto_speed_thresh[17] =
     105
 };
 
-const MB_PREDICTION_MODE vp8_mode_order[MAX_MODES] =
+#if CONFIG_PRED_FILTER
+const MODE_DEFINITION vp8_mode_order[MAX_MODES] =
 {
-    ZEROMV,
-    DC_PRED,
+    {ZEROMV,    LAST_FRAME,   0,  0},
+    {ZEROMV,    LAST_FRAME,   0,  1},
+    {DC_PRED,   INTRA_FRAME,  0,  0},
 
-    NEARESTMV,
-    NEARMV,
+    {NEARESTMV, LAST_FRAME,   0,  0},
+    {NEARESTMV, LAST_FRAME,   0,  1},
+    {NEARMV,    LAST_FRAME,   0,  0},
+    {NEARMV,    LAST_FRAME,   0,  1},
 
-    ZEROMV,
-    NEARESTMV,
+    {ZEROMV,    GOLDEN_FRAME, 0,  0},
+    {ZEROMV,    GOLDEN_FRAME, 0,  1},
+    {NEARESTMV, GOLDEN_FRAME, 0,  0},
+    {NEARESTMV, GOLDEN_FRAME, 0,  1},
 
-    ZEROMV,
-    NEARESTMV,
+    {ZEROMV,    ALTREF_FRAME, 0,  0},
+    {ZEROMV,    ALTREF_FRAME, 0,  1},
+    {NEARESTMV, ALTREF_FRAME, 0,  0},
+    {NEARESTMV, ALTREF_FRAME, 0,  1},
 
-    NEARMV,
-    NEARMV,
+    {NEARMV,    GOLDEN_FRAME, 0,  0},
+    {NEARMV,    GOLDEN_FRAME, 0,  1},
+    {NEARMV,    ALTREF_FRAME, 0,  0},
+    {NEARMV,    ALTREF_FRAME, 0,  1},
 
-    V_PRED,
-    H_PRED,
+    {V_PRED,    INTRA_FRAME,  0,  0},
+    {H_PRED,    INTRA_FRAME,  0,  0},
 #if CONFIG_NEWINTRAMODES
-    D45_PRED,
-    D135_PRED,
-    D117_PRED,
-    D153_PRED,
-    D27_PRED,
-    D63_PRED,
+    {D45_PRED,	INTRA_FRAME,  0,  0},
+    {D135_PRED,	INTRA_FRAME,  0,  0},
+    {D117_PRED,	INTRA_FRAME,  0,  0},
+    {D153_PRED,	INTRA_FRAME,  0,  0},
+    {D27_PRED,	INTRA_FRAME,  0,  0},
+    {D63_PRED,	INTRA_FRAME,  0,  0},
 #endif
-    TM_PRED,
 
-    NEWMV,
-    NEWMV,
-    NEWMV,
+    {TM_PRED,   INTRA_FRAME,  0,  0},
 
-    SPLITMV,
-    SPLITMV,
-    SPLITMV,
+    {NEWMV,     LAST_FRAME,   0,  0},
+    {NEWMV,     LAST_FRAME,   0,  1},
+    {NEWMV,     GOLDEN_FRAME, 0,  0},
+    {NEWMV,     GOLDEN_FRAME, 0,  1},
+    {NEWMV,     ALTREF_FRAME, 0,  0},
+    {NEWMV,     ALTREF_FRAME, 0,  1},
 
-    B_PRED,
-    I8X8_PRED,
+    {SPLITMV,   LAST_FRAME,   0,  0},
+    {SPLITMV,   GOLDEN_FRAME, 0,  0},
+    {SPLITMV,   ALTREF_FRAME, 0,  0},
+
+    {B_PRED,    INTRA_FRAME,  0,  0},
+    {I8X8_PRED, INTRA_FRAME,  0,  0},
 
     /* compound prediction modes */
-    ZEROMV,
-    NEARESTMV,
-    NEARMV,
+    {ZEROMV,    LAST_FRAME,   GOLDEN_FRAME, 0},
+    {NEARESTMV, LAST_FRAME,   GOLDEN_FRAME, 0},
+    {NEARMV,    LAST_FRAME,   GOLDEN_FRAME, 0},
 
-    ZEROMV,
-    NEARESTMV,
-    NEARMV,
+    {ZEROMV,    ALTREF_FRAME, LAST_FRAME,   0},
+    {NEARESTMV, ALTREF_FRAME, LAST_FRAME,   0},
+    {NEARMV,    ALTREF_FRAME, LAST_FRAME,   0},
 
-    ZEROMV,
-    NEARESTMV,
-    NEARMV,
+    {ZEROMV,    GOLDEN_FRAME, ALTREF_FRAME, 0},
+    {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME, 0},
+    {NEARMV,    GOLDEN_FRAME, ALTREF_FRAME, 0},
 
-    NEWMV,
-    NEWMV,
-    NEWMV,
+    {NEWMV,     LAST_FRAME,   GOLDEN_FRAME, 0},
+    {NEWMV,     ALTREF_FRAME, LAST_FRAME,   0},
+    {NEWMV,     GOLDEN_FRAME, ALTREF_FRAME, 0},
 
-    SPLITMV,
-    SPLITMV,
-    SPLITMV,
+    {SPLITMV,   LAST_FRAME,   GOLDEN_FRAME, 0},
+    {SPLITMV,   ALTREF_FRAME, LAST_FRAME,   0},
+    {SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME, 0}
 };
-
-const MV_REFERENCE_FRAME vp8_ref_frame_order[MAX_MODES] =
+#else
+const MODE_DEFINITION vp8_mode_order[MAX_MODES] =
 {
-    LAST_FRAME,
-    INTRA_FRAME,
+    {ZEROMV,    LAST_FRAME,   0},
+    {DC_PRED,   INTRA_FRAME,  0},
 
-    LAST_FRAME,
-    LAST_FRAME,
+    {NEARESTMV, LAST_FRAME,   0},
+    {NEARMV,    LAST_FRAME,   0},
 
-    GOLDEN_FRAME,
-    GOLDEN_FRAME,
+    {ZEROMV,    GOLDEN_FRAME, 0},
+    {NEARESTMV, GOLDEN_FRAME, 0},
 
-    ALTREF_FRAME,
-    ALTREF_FRAME,
+    {ZEROMV,    ALTREF_FRAME, 0},
+    {NEARESTMV, ALTREF_FRAME, 0},
 
-    GOLDEN_FRAME,
-    ALTREF_FRAME,
+    {NEARMV,    GOLDEN_FRAME, 0},
+    {NEARMV,    ALTREF_FRAME, 0},
 
-    INTRA_FRAME,
-    INTRA_FRAME,
+    {V_PRED,    INTRA_FRAME,  0},
+    {H_PRED,    INTRA_FRAME,  0},
 #if CONFIG_NEWINTRAMODES
-    INTRA_FRAME,
-    INTRA_FRAME,
-    INTRA_FRAME,
-    INTRA_FRAME,
-    INTRA_FRAME,
-    INTRA_FRAME,
+    {D45_PRED,  INTRA_FRAME,  0},
+    {D135_PRED, INTRA_FRAME,  0},
+    {D117_PRED, INTRA_FRAME,  0},
+    {D153_PRED, INTRA_FRAME,  0},
+    {D27_PRED,  INTRA_FRAME,  0},
+    {D63_PRED,  INTRA_FRAME,  0},
 #endif
-    INTRA_FRAME,
 
-    LAST_FRAME,
-    GOLDEN_FRAME,
-    ALTREF_FRAME,
+    {TM_PRED,   INTRA_FRAME,  0},
 
-    LAST_FRAME,
-    GOLDEN_FRAME,
-    ALTREF_FRAME,
+    {NEWMV,     LAST_FRAME,   0},
+    {NEWMV,     GOLDEN_FRAME, 0},
+    {NEWMV,     ALTREF_FRAME, 0},
 
-    INTRA_FRAME,
-    INTRA_FRAME,
+    {SPLITMV,   LAST_FRAME,   0},
+    {SPLITMV,   GOLDEN_FRAME, 0},
+    {SPLITMV,   ALTREF_FRAME, 0},
+
+    {B_PRED,    INTRA_FRAME,  0},
+    {I8X8_PRED, INTRA_FRAME,  0},
 
     /* compound prediction modes */
-    LAST_FRAME,
-    LAST_FRAME,
-    LAST_FRAME,
+    {ZEROMV,    LAST_FRAME,   GOLDEN_FRAME},
+    {NEARESTMV, LAST_FRAME,   GOLDEN_FRAME},
+    {NEARMV,    LAST_FRAME,   GOLDEN_FRAME},
 
-    ALTREF_FRAME,
-    ALTREF_FRAME,
-    ALTREF_FRAME,
+    {ZEROMV,    ALTREF_FRAME, LAST_FRAME},
+    {NEARESTMV, ALTREF_FRAME, LAST_FRAME},
+    {NEARMV,    ALTREF_FRAME, LAST_FRAME},
 
-    GOLDEN_FRAME,
-    GOLDEN_FRAME,
-    GOLDEN_FRAME,
+    {ZEROMV,    GOLDEN_FRAME, ALTREF_FRAME},
+    {NEARESTMV, GOLDEN_FRAME, ALTREF_FRAME},
+    {NEARMV,    GOLDEN_FRAME, ALTREF_FRAME},
 
-    LAST_FRAME,
-    ALTREF_FRAME,
-    GOLDEN_FRAME,
+    {NEWMV,     LAST_FRAME,   GOLDEN_FRAME},
+    {NEWMV,     ALTREF_FRAME, LAST_FRAME  },
+    {NEWMV,     GOLDEN_FRAME, ALTREF_FRAME},
 
-    LAST_FRAME,
-    ALTREF_FRAME,
-    GOLDEN_FRAME,
+    {SPLITMV,   LAST_FRAME,   GOLDEN_FRAME},
+    {SPLITMV,   ALTREF_FRAME, LAST_FRAME  },
+    {SPLITMV,   GOLDEN_FRAME, ALTREF_FRAME}
 };
-
-const MV_REFERENCE_FRAME vp8_second_ref_frame_order[MAX_MODES] =
-{
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-#if CONFIG_NEWINTRAMODES
-    0, 0,
-    0, 0,
-    0, 0,
 #endif
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-
-    /* compound prediction modes */
-    GOLDEN_FRAME,
-    GOLDEN_FRAME,
-    GOLDEN_FRAME,
-
-    LAST_FRAME,
-    LAST_FRAME,
-    LAST_FRAME,
-
-    ALTREF_FRAME,
-    ALTREF_FRAME,
-    ALTREF_FRAME,
-
-    GOLDEN_FRAME,
-    LAST_FRAME,
-    ALTREF_FRAME,
-
-    GOLDEN_FRAME,
-    LAST_FRAME,
-    ALTREF_FRAME,
-};
 
 static void fill_token_costs(
     unsigned int (*c)[COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS],
@@ -2827,6 +2811,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int best_comp_rd = INT_MAX;
     int best_single_rd = INT_MAX;
     int best_hybrid_rd = INT_MAX;
+    int best_overall_rd = INT_MAX;
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int uv_intra_skippable = 0;
@@ -2835,6 +2820,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
     int best_yrd = INT_MAX;
+    int best_filter_state;
 
     //int all_rds[MAX_MODES];        // Experimental debug code.
     //int all_rates[MAX_MODES];
@@ -2978,16 +2964,21 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         rate_y = 0;
         rate_uv =0;
 
-        this_mode = vp8_mode_order[mode_index];
-        x->e_mbd.mode_info_context->mbmi.mode = this_mode;
+        this_mode = vp8_mode_order[mode_index].mode;
+        xd->mode_info_context->mbmi.mode = this_mode;
+        xd->mode_info_context->mbmi.uv_mode = DC_PRED;
+        xd->mode_info_context->mbmi.ref_frame =
+                                vp8_mode_order[mode_index].ref_frame;
+        xd->mode_info_context->mbmi.second_ref_frame =
+                                vp8_mode_order[mode_index].second_ref_frame;
+#if CONFIG_PRED_FILTER
+        xd->mode_info_context->mbmi.pred_filter_enabled = 0;
+#endif
 
 #if CONFIG_COMP_INTRA_PRED
-        x->e_mbd.mode_info_context->mbmi.second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
-        x->e_mbd.mode_info_context->mbmi.second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
+        xd->mode_info_context->mbmi.second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
+        xd->mode_info_context->mbmi.second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
-        x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
-        x->e_mbd.mode_info_context->mbmi.ref_frame = vp8_ref_frame_order[mode_index];
-        x->e_mbd.mode_info_context->mbmi.second_ref_frame = vp8_second_ref_frame_order[mode_index];
 
         // If the segment reference frame feature is enabled....
         // then do nothing if the current ref frame is not allowed..
@@ -3053,18 +3044,18 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         // Increase zbin size to suppress noise
         if (cpi->zbin_mode_boost_enabled)
         {
-            if ( vp8_ref_frame_order[mode_index] == INTRA_FRAME )
+            if ( vp8_mode_order[mode_index].ref_frame == INTRA_FRAME )
                 cpi->zbin_mode_boost = 0;
             else
             {
-                if (vp8_mode_order[mode_index] == ZEROMV)
+                if (vp8_mode_order[mode_index].mode == ZEROMV)
                 {
-                    if (vp8_ref_frame_order[mode_index] != LAST_FRAME)
+                    if (vp8_mode_order[mode_index].ref_frame != LAST_FRAME)
                         cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
                     else
                         cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
                 }
-                else if (vp8_mode_order[mode_index] == SPLITMV)
+                else if (vp8_mode_order[mode_index].mode == SPLITMV)
                     cpi->zbin_mode_boost = 0;
                 else
                     cpi->zbin_mode_boost = MV_ZBIN_BOOST;
@@ -3389,6 +3380,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
 
             vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
+
+#if CONFIG_PRED_FILTER
+            // Filtered prediction:
+            xd->mode_info_context->mbmi.pred_filter_enabled =
+                          vp8_mode_order[mode_index].pred_filter_flag;
+            rate2 += vp8_cost_bit( cpi->common.prob_pred_filter_off,
+                          xd->mode_info_context->mbmi.pred_filter_enabled);
+#endif
+
             vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 
             compmode_cost =
@@ -3741,6 +3741,21 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 best_hybrid_rd = this_rd;
         }
 
+#if CONFIG_PRED_FILTER
+        // Keep track of the best mode irrespective of prediction filter state
+        if (this_rd < best_overall_rd)
+        {
+            best_overall_rd = this_rd;
+            best_filter_state = xd->mode_info_context->mbmi.pred_filter_enabled;
+        }
+
+        // Ignore modes where the prediction filter state doesn't
+        // match the state signaled at the frame level
+        if ((cm->pred_filter_mode == 2) ||
+            (cm->pred_filter_mode ==
+                xd->mode_info_context->mbmi.pred_filter_enabled))
+        {
+#endif
         // Did this mode help.. i.e. is it the new best mode
         if (this_rd < best_rd || x->skip)
         {
@@ -3833,11 +3848,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 best_hybrid_rd = hybrid_rd;
             }
         }
+#if CONFIG_PRED_FILTER
+        }
+#endif
 
         if (x->skip)
             break;
 
     }
+
+#if CONFIG_PRED_FILTER
+    // Update counts for prediction filter usage
+    if (best_filter_state != 0)
+        ++cpi->pred_filter_on_count;
+    else
+        ++cpi->pred_filter_off_count;
+#endif
 
     // Reduce the activation RD thresholds for the best choice mode
     if ((cpi->rd_baseline_thresh[best_mode_index] > 0) && (cpi->rd_baseline_thresh[best_mode_index] < (INT_MAX >> 2)))
@@ -3848,7 +3874,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         cpi->rd_threshes[best_mode_index] = (cpi->rd_baseline_thresh[best_mode_index] >> 7) * cpi->rd_thresh_mult[best_mode_index];
 
         // If we chose a split mode then reset the new MV thresholds as well
-        /*if ( vp8_mode_order[best_mode_index] == SPLITMV )
+        /*if ( vp8_mode_order[best_mode_index].mode == SPLITMV )
         {
             best_adjustment = 4; //(cpi->rd_thresh_mult[THR_NEWMV] >> 4);
             cpi->rd_thresh_mult[THR_NEWMV] = (cpi->rd_thresh_mult[THR_NEWMV] >= (MIN_THRESHMULT+best_adjustment)) ? cpi->rd_thresh_mult[THR_NEWMV]-best_adjustment: MIN_THRESHMULT;

@@ -1201,6 +1201,19 @@ static void encode_frame_internal(VP8_COMP *cpi)
     cpi->skip_false_count = 0;
 #endif
 
+#if CONFIG_PRED_FILTER
+    if (cm->current_video_frame == 0)
+    {
+        // Initially assume that we'll signal the prediction filter
+        // state at the frame level and that it is off.
+        cpi->common.pred_filter_mode = 0;
+        cpi->common.prob_pred_filter_off = 128;
+    }
+    cpi->pred_filter_on_count = 0;
+    cpi->pred_filter_off_count = 0;
+
+#endif
+
 #if 0
     // Experimental code
     cpi->frame_distortion = 0;

@@ -527,8 +527,14 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
 #endif
     }
 
-    if(pbi->common.frame_type != KEY_FRAME)
+    if(cm->frame_type != KEY_FRAME)
     {
+#if CONFIG_PRED_FILTER
+        cm->pred_filter_mode = (vp8_prob)vp8_read_literal(bc, 2);
+
+        if (cm->pred_filter_mode == 2)
+            cm->prob_pred_filter_off = (vp8_prob)vp8_read_literal(bc, 8);
+#endif
         // Decode the baseline probabilities for decoding reference frame
         cm->prob_intra_coded = (vp8_prob)vp8_read_literal(bc, 8);
         cm->prob_last_coded  = (vp8_prob)vp8_read_literal(bc, 8);
@@ -727,6 +733,18 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
             vp8_accum_mv_refs(&pbi->common, mbmi->mode, rct);
         }
+
+#if CONFIG_PRED_FILTER
+        if (mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV)
+        {
+            // Is the prediction filter enabled
+            if (cm->pred_filter_mode == 2)
+                mbmi->pred_filter_enabled =
+                    vp8_read(bc, cm->prob_pred_filter_off);
+            else
+                mbmi->pred_filter_enabled = cm->pred_filter_mode;
+        }
+#endif
 
         if ( cm->comp_pred_mode == COMP_PREDICTION_ONLY ||
             (cm->comp_pred_mode == HYBRID_PREDICTION &&

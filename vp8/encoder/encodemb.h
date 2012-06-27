@@ -83,6 +83,17 @@ typedef struct
     prototype_submbuv(*submbuv);
 } vp8_encodemb_rtcd_vtable_t;
 
+typedef struct
+{
+    MB_PREDICTION_MODE mode;
+    MV_REFERENCE_FRAME ref_frame;
+    MV_REFERENCE_FRAME second_ref_frame;
+#if CONFIG_PRED_FILTER
+    int pred_filter_flag;
+#endif
+} MODE_DEFINITION;
+
+
 #if CONFIG_RUNTIME_CPU_DETECT
 #define ENCODEMB_INVOKE(ctx,fn) (ctx)->fn
 #else
