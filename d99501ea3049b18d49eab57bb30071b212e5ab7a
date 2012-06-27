@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//2K8\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-27T22:27:30Z",
+      "side": 1,
+      "message": "Noted.",
+      "parentUuid": "AAAALH//2/o\u003d",
+      "revId": "d99501ea3049b18d49eab57bb30071b212e5ab7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//29g\u003d",
         "filename": "test/subtract_test.cc",
         "patchSetId": 5
@@ -30,6 +48,24 @@
       "writtenOn": "2012-06-27T00:33:02Z",
       "side": 1,
       "message": "any point in trying different pitches?",
+      "revId": "d99501ea3049b18d49eab57bb30071b212e5ab7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//2K4\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-27T22:27:30Z",
+      "side": 1,
+      "message": "Probably not for this test.",
+      "parentUuid": "AAAALH//29g\u003d",
       "revId": "d99501ea3049b18d49eab57bb30071b212e5ab7a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//2LI\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-27T22:27:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//2/k\u003d",
+      "revId": "d99501ea3049b18d49eab57bb30071b212e5ab7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//2+w\u003d",
         "filename": "test/subtract_test.cc",
         "patchSetId": 5
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//2LE\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-27T22:27:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//2+w\u003d",
+      "revId": "d99501ea3049b18d49eab57bb30071b212e5ab7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//2+U\u003d",
         "filename": "test/subtract_test.cc",
         "patchSetId": 5
@@ -81,6 +153,24 @@
       "writtenOn": "2012-06-27T00:33:02Z",
       "side": 1,
       "message": "\u003d pitch ?",
+      "revId": "d99501ea3049b18d49eab57bb30071b212e5ab7a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//2LA\u003d",
+        "filename": "test/subtract_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-27T22:27:30Z",
+      "side": 1,
+      "message": "Actually the src_stride can be different that the pitch used for the diff and predictor buffers.  Will fix.",
+      "parentUuid": "AAAALH//2+U\u003d",
       "revId": "d99501ea3049b18d49eab57bb30071b212e5ab7a",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
