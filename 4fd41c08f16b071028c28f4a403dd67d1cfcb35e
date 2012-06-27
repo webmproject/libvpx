@@ -34,6 +34,41 @@
       "revId": "4fd41c08f16b071028c28f4a403dd67d1cfcb35e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//2io\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-06-27T16:34:05Z",
+      "side": 1,
+      "message": "Yeah that\u0027s more typical, sorry for the nitpicking, just looked weird. :-).",
+      "parentUuid": "AAAALH//2ms\u003d",
+      "revId": "4fd41c08f16b071028c28f4a403dd67d1cfcb35e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//2ik\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-06-27T16:34:05Z",
+      "side": 1,
+      "message": "FFmpeg only prefetches 4 lines here, btw, did you experiment with prefetching less lines?",
+      "revId": "4fd41c08f16b071028c28f4a403dd67d1cfcb35e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
