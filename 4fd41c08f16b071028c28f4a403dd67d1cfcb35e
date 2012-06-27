@@ -16,6 +16,24 @@
       "revId": "4fd41c08f16b071028c28f4a403dd67d1cfcb35e",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//2ms\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1000882
+      },
+      "writtenOn": "2012-06-27T16:16:54Z",
+      "side": 1,
+      "message": "~31\u003d-32\nI can use ~31 if less confusing",
+      "parentUuid": "AAAALH//3MM\u003d",
+      "revId": "4fd41c08f16b071028c28f4a403dd67d1cfcb35e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
