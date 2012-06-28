@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//0hE\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-28T22:54:48Z",
+      "side": 1,
+      "message": "a local const for this and dst derived from their sizes would be better. const size_t src_size \u003d sizeof(...) / sizeof(...)",
+      "revId": "ac9fef5c341f677fe2eebbf04d4c86530cafafcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
