@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALH//05g\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-28T19:11:17Z",
+      "side": 1,
+      "message": "pass the pointer and stride in instead, otherwise every function has to duplicate this if block. It doesn\u0027t dirty up the call site imo, \n\n  FillRandom(SOURCE);\n  FillRandom(REFERENCE);\n\nvs\n\n  FillRandom(source_data_, source_stride_);\n  FillRandom(reference_data_, reference_stride_);",
+      "revId": "1589afe37783af7a5c70f6fa7a5d27dff22c237e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//04A\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-28T19:11:17Z",
+      "side": 1,
+      "message": "These can be individual TEST_P()",
+      "revId": "1589afe37783af7a5c70f6fa7a5d27dff22c237e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//04I\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-28T19:11:17Z",
+      "side": 1,
+      "message": "all sads have the same prototype, so you don\u0027t need to break this up the same way the intra pred was. Make this just one SadTest class.\n\nclass FooTest : public PARAMS(int, int, sad_m_by_n_fn_t)",
+      "revId": "1589afe37783af7a5c70f6fa7a5d27dff22c237e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//05U\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-28T19:11:17Z",
+      "side": 1,
+      "message": "need to test source_stride !\u003d reference_stride.",
+      "revId": "1589afe37783af7a5c70f6fa7a5d27dff22c237e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//02w\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-28T19:11:17Z",
+      "side": 1,
+      "message": "Haven\u0027t defined this macro yet, but we should be able to do something like:\n\n  #define SAD_TEST_PARAMS(a,b,c) std::tr1::tuple\u003cint, int, sad_fn_t\u003e(a,b,c)\n\n  INSTANTIATE_TEST_CASE_P(C, Sad16x16Test,::testing::Values(\n      SAD_TEST_PARAMS(16, 16,vp8_sad16x16_c),\n      SAD_TEST_PARAMS(4, 4, vp8_sad4x4_c));",
+      "revId": "1589afe37783af7a5c70f6fa7a5d27dff22c237e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
