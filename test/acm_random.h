@@ -19,6 +19,10 @@ namespace libvpx_test {
 
 class ACMRandom {
  public:
+  ACMRandom() {
+    Reset(DeterministicSeed());
+  }
+
   explicit ACMRandom(int seed) {
     Reset(seed);
   }
