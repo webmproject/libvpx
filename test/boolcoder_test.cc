@@ -8,38 +8,24 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "third_party/googletest/src/include/gtest/gtest.h"
+
 extern "C" {
 #include "vp8/encoder/boolhuff.h"
 #include "vp8/decoder/dboolhuff.h"
 }
 
-#include <math.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-
-#include "third_party/googletest/src/include/gtest/gtest.h"
+#include "acm_random.h"
 #include "vpx/vpx_integer.h"
+
+using libvpx_test::ACMRandom;
 
 namespace {
 const int num_tests = 10;
-
-class ACMRandom {
- public:
-  explicit ACMRandom(int seed) { Reset(seed); }
-
-  void Reset(int seed) { srand(seed); }
-
-  uint8_t Rand8(void) { return (rand() >> 8) & 0xff; }
-
-  int PseudoUniform(int range) { return (rand() >> 8) % range; }
-
-  int operator()(int n) { return PseudoUniform(n); }
-
-  static int DeterministicSeed(void) { return 0xbaba; }
-};
 }  // namespace
 
 TEST(VP8, TestBitIO) {
