@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//0f0\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-28T23:07:33Z",
+      "side": 1,
+      "message": "technically yes; there\u0027s a mix in other codebases, though so it\u0027s not so strictly enforced. I\u0027d be fine with either, really there aren\u0027t too many cases where the type checks are important.",
+      "parentUuid": "AAAALH//0g8\u003d",
+      "revId": "ac9fef5c341f677fe2eebbf04d4c86530cafafcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//0hE\u003d",
         "filename": "test/sixtap_predict_test.cc",
         "patchSetId": 3
