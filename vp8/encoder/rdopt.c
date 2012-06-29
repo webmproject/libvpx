@@ -861,7 +861,7 @@ static int rd_pick_intra4x4block(
     B_PREDICTION_MODE *best_second_mode,
     int allow_comp,
 #endif
-    unsigned int *bmode_costs,
+    int *bmode_costs,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
 
@@ -978,7 +978,7 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
-    unsigned int *bmode_costs;
+    int *bmode_costs;
 
     if (update_contexts)
     {
@@ -996,9 +996,8 @@ static int rd_pick_intra4x4mby_modes(VP8_COMP *cpi, MACROBLOCK *mb, int *Rate,
         tl = (ENTROPY_CONTEXT *)&t_left;
     }
 
-#if 0
-    vp8_intra_prediction_down_copy(xd);
-#endif
+    // TODO(agrange)
+    //vp8_intra_prediction_down_copy(xd);
 
     bmode_costs = mb->inter_bmode_costs;
 
@@ -1132,7 +1131,7 @@ static int rd_pick_intra8x8block(
 #if CONFIG_COMP_INTRA_PRED
     B_PREDICTION_MODE *best_second_mode,
 #endif
-    unsigned int *mode_costs,
+    int *mode_costs,
     ENTROPY_CONTEXT *a,
     ENTROPY_CONTEXT *l,
     int *bestrate,
@@ -1274,7 +1273,7 @@ int rd_pick_intra8x8mby_modes(VP8_COMP *cpi,
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
     ENTROPY_CONTEXT *tl;
-    unsigned int *i8x8mode_costs;
+    int *i8x8mode_costs;
 
     vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
     vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));

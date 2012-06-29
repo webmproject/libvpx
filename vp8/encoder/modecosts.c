@@ -40,9 +40,8 @@ void vp8_init_mode_costs(VP8_COMP *c)
 #if CONFIG_ADAPTIVE_ENTROPY
     vp8_cost_tokens((int *)c->mb.inter_bmode_costs,
         vp8_sub_mv_ref_prob, vp8_sub_mv_ref_tree);
-        //x->fc.sub_mv_ref_prob[1], vp8_sub_mv_ref_tree);
 #else
-    vp8_cost_tokens((int *)c->mb.inter_bmode_costs,
+    vp8_cost_tokens(c->mb.inter_bmode_costs,
         vp8_sub_mv_ref_prob, vp8_sub_mv_ref_tree);
 #endif
 
@@ -54,7 +53,7 @@ void vp8_init_mode_costs(VP8_COMP *c)
                     x->fc.uv_mode_prob[VP8_YMODES-1], vp8_uv_mode_tree);
     vp8_cost_tokens(c->mb.intra_uv_mode_cost[0],
                     x->kf_uv_mode_prob[VP8_YMODES-1], vp8_uv_mode_tree);
-    vp8_cost_tokens((int *)c->mb.i8x8_mode_costs,
+    vp8_cost_tokens(c->mb.i8x8_mode_costs,
                     x->fc.i8x8_mode_prob,vp8_i8x8_mode_tree);
 
 }
