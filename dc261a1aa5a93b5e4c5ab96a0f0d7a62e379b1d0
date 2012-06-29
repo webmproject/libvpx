@@ -34,6 +34,24 @@
       "revId": "dc261a1aa5a93b5e4c5ab96a0f0d7a62e379b1d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//zco\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-29T22:40:16Z",
+      "side": 1,
+      "message": "ok, I guess I was thinking of tying certain files to certain tests and then avoiding the large download.",
+      "parentUuid": "AAAALH//zk8\u003d",
+      "revId": "dc261a1aa5a93b5e4c5ab96a0f0d7a62e379b1d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
