@@ -52,6 +52,24 @@
       "revId": "dc261a1aa5a93b5e4c5ab96a0f0d7a62e379b1d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//zbU\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-29T22:49:44Z",
+      "side": 1,
+      "message": "I\u0027m not sure I\u0027m following you. Were you meaning we should break up the sha1 file?\n\nThe intent of adding this for/grep combo here is to only checksum the files that are required for the tests being built, rather than failing the check because you didn\u0027t download files that aren\u0027t required.\n\nMake takes care of downloading only the files you\u0027re missing via the above curl rule, and LIBVPX_TEST_DATA contains only those files required for the current tests, which is a subset of all possible files. So we\u0027re already avoiding downloading everything we can, unless we get fancy and do some automagic test filtering or something.",
+      "parentUuid": "AAAALH//zco\u003d",
+      "revId": "dc261a1aa5a93b5e4c5ab96a0f0d7a62e379b1d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
