@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//z1o\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-06-29T18:00:45Z",
+      "side": 1,
+      "message": "I can remember cases where we baked the assumption that stride\u003d16 into the asm. If you test that the output is still correct with stride\u003d32, then you can prove that the asm is actually using the stride parameter.",
+      "parentUuid": "AAAALH//z4Y\u003d",
+      "revId": "75dffecb903af0e6b3250edfbdf9e5e0946822fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//z7Y\u003d",
         "filename": "test/sixtap_predict_test.cc",
         "patchSetId": 5
