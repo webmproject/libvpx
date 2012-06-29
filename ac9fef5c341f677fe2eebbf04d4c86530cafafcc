@@ -54,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//z90\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-06-29T16:34:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALH//0hE\u003d",
+      "revId": "ac9fef5c341f677fe2eebbf04d4c86530cafafcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//0g4\u003d",
         "filename": "test/sixtap_predict_test.cc",
         "patchSetId": 3
@@ -65,6 +83,24 @@
       "writtenOn": "2012-06-28T23:00:04Z",
       "side": 1,
       "message": "I think these functions should still be valid for offset\u003d0. In fact, you could even have another test that checks that the output matches the input when offset\u003d0.",
+      "revId": "ac9fef5c341f677fe2eebbf04d4c86530cafafcc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//z9s\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 3
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-06-29T16:34:14Z",
+      "side": 1,
+      "message": "Currently, the optimized function(sse2 \u0026 ssse3) don\u0027t do copy when both offsets are 0. That has to be added in x86 functions first. I can do it later.",
+      "parentUuid": "AAAALH//0g4\u003d",
       "revId": "ac9fef5c341f677fe2eebbf04d4c86530cafafcc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
