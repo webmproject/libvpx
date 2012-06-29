@@ -2811,7 +2811,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int best_comp_rd = INT_MAX;
     int best_single_rd = INT_MAX;
     int best_hybrid_rd = INT_MAX;
+#if CONFIG_PRED_FILTER
     int best_overall_rd = INT_MAX;
+#endif
     int rate2, distortion2;
     int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
     int uv_intra_skippable = 0;
@@ -2820,8 +2822,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
     int distortion_uv;
     int best_yrd = INT_MAX;
+#if CONFIG_PRED_FILTER
     int best_filter_state;
-
+#endif
     //int all_rds[MAX_MODES];        // Experimental debug code.
     //int all_rates[MAX_MODES];
     //int all_dist[MAX_MODES];
