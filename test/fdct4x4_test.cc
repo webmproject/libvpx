@@ -23,8 +23,6 @@ extern "C" {
 
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_integer.h"
-#include "vpx_mem/vpx_mem.h"
-#include "vp8/encoder/onyx_int.h"
 
 
 namespace {
