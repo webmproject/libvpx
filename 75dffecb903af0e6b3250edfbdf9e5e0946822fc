@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//z4Y\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-06-29T17:53:59Z",
+      "side": 1,
+      "message": "dst is 16-byte aligned and dst_stride is multiples of 16. Here dst_stride is only used to tell where to store the result. I think making dst 16x16 shouldn\u0027t have too much difference than making it (multiples of 16)x16. Right? Thanks.",
+      "parentUuid": "AAAALH//z8Q\u003d",
+      "revId": "75dffecb903af0e6b3250edfbdf9e5e0946822fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//z7Y\u003d",
         "filename": "test/sixtap_predict_test.cc",
         "patchSetId": 5
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALH//z3s\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-06-29T17:53:59Z",
+      "side": 1,
+      "message": "Right. I added one more bytes in src to test unaligned reading in TestWithRandomData test. Thanks.",
+      "parentUuid": "AAAALH//z7Y\u003d",
+      "revId": "75dffecb903af0e6b3250edfbdf9e5e0946822fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALH//z7I\u003d",
         "filename": "test/sixtap_predict_test.cc",
         "patchSetId": 5
@@ -47,6 +83,24 @@
       "writtenOn": "2012-06-29T17:01:31Z",
       "side": 1,
       "message": "might ASSERT_EQ here, this will spam your terminal if all 256 values are wrong.",
+      "revId": "75dffecb903af0e6b3250edfbdf9e5e0946822fc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//z2o\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 5
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-06-29T17:53:59Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "AAAALH//z7I\u003d",
       "revId": "75dffecb903af0e6b3250edfbdf9e5e0946822fc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
