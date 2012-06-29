@@ -70,6 +70,24 @@
       "revId": "dc261a1aa5a93b5e4c5ab96a0f0d7a62e379b1d0",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALH//zaA\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-06-29T22:53:59Z",
+      "side": 1,
+      "message": "\u003e I\u0027m not sure I\u0027m following you. Were you meaning we should break up the sha1 file?\n\n\u003e The intent of adding this for/grep combo here is to only checksum the files that are required for the tests being built, rather than failing the check because you didn\u0027t download files that aren\u0027t required.\n\nNo, sorry, my comment was misplaced here. I was more thinking of an offline / slow connection test case scenario that wouldn\u0027t fail at this step. I haven\u0027t tried removing the file and using make -k, so maybe that\u0027s enough.",
+      "parentUuid": "AAAALH//zbU\u003d",
+      "revId": "dc261a1aa5a93b5e4c5ab96a0f0d7a62e379b1d0",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
