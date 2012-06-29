@@ -1296,10 +1296,10 @@ void build_4x4uvmvs(MACROBLOCKD *x)
 
             x->block[uoffset].bmi.as_mv.first.as_mv.col = (temp / 8) & x->fullpixel_mask;
 
-            if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+            //if (x->mode_info_context->mbmi.need_to_clamp_mvs)
                 clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.as_mv.first.as_mv, x);
 
-            if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+            //if (x->mode_info_context->mbmi.need_to_clamp_mvs)
                 clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.as_mv.first.as_mv, x);
 
             x->block[voffset].bmi.as_mv.first.as_mv.row =
@@ -1341,11 +1341,11 @@ void build_4x4uvmvs(MACROBLOCKD *x)
 
                 x->block[uoffset].bmi.as_mv.second.as_mv.col = (temp / 8) & x->fullpixel_mask;
 
-                if (x->mode_info_context->mbmi.need_to_clamp_mvs)
-                    clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.as_mv.second.as_mv, x);
+                //if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+                clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.as_mv.second.as_mv, x);
 
-                if (x->mode_info_context->mbmi.need_to_clamp_mvs)
-                    clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.as_mv.second.as_mv, x);
+                //if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+                clamp_uvmv_to_umv_border(&x->block[uoffset].bmi.as_mv.second.as_mv, x);
 
                 x->block[voffset].bmi.as_mv.second.as_mv.row =
                     x->block[uoffset].bmi.as_mv.second.as_mv.row ;
