@@ -545,6 +545,21 @@ void vp8_first_pass(VP8_COMP *cpi)
 
     xd->mode_info_context = cm->mi;
 
+    if(!cm->use_bilinear_mc_filter)
+    {
+         xd->subpixel_predict        = vp8_sixtap_predict4x4;
+         xd->subpixel_predict8x4     = vp8_sixtap_predict8x4;
+         xd->subpixel_predict8x8     = vp8_sixtap_predict8x8;
+         xd->subpixel_predict16x16   = vp8_sixtap_predict16x16;
+     }
+     else
+     {
+         xd->subpixel_predict        = vp8_bilinear_predict4x4;
+         xd->subpixel_predict8x4     = vp8_bilinear_predict8x4;
+         xd->subpixel_predict8x8     = vp8_bilinear_predict8x8;
+         xd->subpixel_predict16x16   = vp8_bilinear_predict16x16;
+     }
+
     vp8_build_block_offsets(x);
 
     vp8_setup_block_dptrs(&x->e_mbd);
