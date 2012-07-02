@@ -233,8 +233,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     if(pbi->common.frame_type == KEY_FRAME)
     {
         if( pbi->common.txfm_mode==ALLOW_8X8 &&
-             (xd->mode_info_context->mbmi.mode == DC_PRED
-            ||xd->mode_info_context->mbmi.mode == TM_PRED))
+            xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+            xd->mode_info_context->mbmi.mode != B_PRED)
             xd->mode_info_context->mbmi.txfm_size = TX_8X8;
         else
             xd->mode_info_context->mbmi.txfm_size = TX_4X4;

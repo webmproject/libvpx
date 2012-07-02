@@ -1093,7 +1093,7 @@ static int rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
             }
 #endif
 
-        macro_block_yrd(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd));
+        macro_block_yrd_8x8(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd));
             // FIXME add compoundmode cost
             // FIXME add rate for mode2
         rate = ratey + x->mbmode_cost[x->e_mbd.frame_type]

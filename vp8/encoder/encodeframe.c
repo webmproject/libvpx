@@ -1598,8 +1598,8 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
 
     /* test code: set transform size based on mode selection */
     if(cpi->common.txfm_mode == ALLOW_8X8
-        && ( x->e_mbd.mode_info_context->mbmi.mode == DC_PRED
-           || x->e_mbd.mode_info_context->mbmi.mode == TM_PRED))
+        && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
+        && x->e_mbd.mode_info_context->mbmi.mode != B_PRED)
     {
         x->e_mbd.mode_info_context->mbmi.txfm_size = TX_8X8;
         cpi->t8x8_count++;
