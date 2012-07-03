@@ -434,6 +434,25 @@ static void update_state (VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx)
         //                          xd->mode_info_context->bmi[i].as_mode;
         //        assert(xd->mode_info_context->bmi[i].as_mode < MB_MODE_COUNT);
         //    }
+#if CONFIG_INTERNAL_STATS
+        static const int kf_mode_index[] = {
+            THR_DC /*DC_PRED*/,
+            THR_V_PRED /*V_PRED*/,
+            THR_H_PRED /*H_PRED*/,
+#if CONFIG_NEWINTRAMODES
+            THR_D45_PRED /*D45_PRED*/,
+            THR_D135_PRED /*D135_PRED*/,
+            THR_D117_PRED /*D117_PRED*/,
+            THR_D153_PRED /*D153_PRED*/,
+            THR_D27_PRED /*D27_PRED*/,
+            THR_D63_PRED /*D63_PRED*/,
+#endif
+            THR_TM /*TM_PRED*/,
+            THR_I8X8_PRED /*I8X8_PRED*/,
+            THR_B_PRED /*B_PRED*/,
+        };
+        cpi->mode_chosen_counts[kf_mode_index[mb_mode]]++;
+#endif
     }
     else
     {
