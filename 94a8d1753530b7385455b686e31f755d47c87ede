@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALn//97g\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-03T23:10:46Z",
+      "side": 1,
+      "message": "You can use a constant src_stride for all tests that matches the dimensions of your 16x16 test_data below, and then you only need one table  of expected output values. The 4x4 output should match the top left of the 8x8 and the 16x16, for example, and it should get rid of all your special casing on the dimensions of the predictor for expected_dst.",
+      "revId": "94a8d1753530b7385455b686e31f755d47c87ede",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//97U\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-03T23:10:46Z",
+      "side": 1,
+      "message": "you can get rid of this if block by calling the 16x16 function always",
+      "revId": "94a8d1753530b7385455b686e31f755d47c87ede",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
