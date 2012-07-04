@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//91w\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-07-04T00:00:23Z",
+      "side": 1,
+      "message": "Yes, that is better. Thanks.",
+      "parentUuid": "AAAALn//97g\u003d",
+      "revId": "94a8d1753530b7385455b686e31f755d47c87ede",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//97U\u003d",
         "filename": "test/sixtap_predict_test.cc",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2012-07-03T23:10:46Z",
       "side": 1,
       "message": "you can get rid of this if block by calling the 16x16 function always",
+      "revId": "94a8d1753530b7385455b686e31f755d47c87ede",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//91s\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 8
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-07-04T00:00:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAALn//97U\u003d",
       "revId": "94a8d1753530b7385455b686e31f755d47c87ede",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
