@@ -326,7 +326,7 @@ void vp8_setup_key_frame(VP8_COMP *cpi)
     if (cpi->auto_gold)
         cpi->frames_till_gf_update_due = cpi->baseline_gf_interval;
     else
-        cpi->frames_till_gf_update_due = cpi->goldfreq;
+        cpi->frames_till_gf_update_due = DEFAULT_GF_INTERVAL;
 
     cpi->common.refresh_golden_frame = 1;
     cpi->common.refresh_alt_ref_frame = 1;

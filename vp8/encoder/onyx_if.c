@@ -1209,7 +1209,6 @@ static void init_config(VP8_COMP *cpi, VP8_CONFIG *oxcf)
 
     cpi->auto_gold = 1;
     cpi->auto_adjust_gold_quantizer = 1;
-    cpi->goldfreq = 7;
 
     cm->version = oxcf->Version;
     vp8_setup_version(cm);
@@ -2654,7 +2653,7 @@ static void update_alt_ref_frame_stats(VP8_COMP *cpi)
 
     /* Select an interval before next GF or altref */
     if (!cpi->auto_gold)
-        cpi->frames_till_gf_update_due = cpi->goldfreq;
+        cpi->frames_till_gf_update_due = DEFAULT_GF_INTERVAL;
 
     if ((cpi->pass != 2) && cpi->frames_till_gf_update_due)
     {
@@ -2694,7 +2693,7 @@ static void update_golden_frame_stats(VP8_COMP *cpi)
     {
         /* Select an interval before next GF */
         if (!cpi->auto_gold)
-            cpi->frames_till_gf_update_due = cpi->goldfreq;
+            cpi->frames_till_gf_update_due = DEFAULT_GF_INTERVAL;
 
         if ((cpi->pass != 2) && (cpi->frames_till_gf_update_due > 0))
         {

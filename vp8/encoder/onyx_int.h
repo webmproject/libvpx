@@ -489,7 +489,6 @@ typedef struct VP8_COMP
     int interquantizer;
     int auto_gold;
     int auto_adjust_gold_quantizer;
-    int goldfreq;
     int auto_worst_q;
     int cpu_used;
     int pass;
