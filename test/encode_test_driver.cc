@@ -109,6 +109,7 @@ void EncoderTest::RunLoop(VideoSource *video) {
       again = video->img() != NULL;
 
       PreEncodeFrameHook(video);
+      PreEncodeFrameHook(video, &encoder);
       encoder.EncodeFrame(video, flags_);
 
       CxDataIterator iter = encoder.GetCxData();
