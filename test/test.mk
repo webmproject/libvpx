@@ -1,5 +1,6 @@
 LIBVPX_TEST_SRCS-yes += test.mk
 LIBVPX_TEST_SRCS-yes += test_libvpx.cc
+LIBVPX_TEST_SRCS-yes += util.h
 
 ##
 ## BLACK BOX TESTS
@@ -31,6 +32,7 @@ LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += fdct4x4_test.cc
 LIBVPX_TEST_SRCS-yes                   += idctllm_test.cc
 LIBVPX_TEST_SRCS-yes                   += intrapred_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_POSTPROC)    += pp_filter_test.cc
+LIBVPX_TEST_SRCS-yes                   += sixtap_predict_test.cc
 
 endif
 
