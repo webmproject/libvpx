@@ -28,6 +28,9 @@ class I420VideoSource : public VideoSource {
         img_(NULL),
         start_(start),
         limit_(limit),
+        frame_(0),
+        width_(0),
+        height_(0),
         framerate_numerator_(rate_numerator),
         framerate_denominator_(rate_denominator) {
 
