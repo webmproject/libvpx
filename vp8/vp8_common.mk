@@ -120,6 +120,14 @@ VP8_COMMON_SRCS-$(HAVE_SSE2) += common/x86/loopfilter_block_sse2.asm
 endif
 
 # common (c)
+VP8_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/idctllm_dspr2.c
+VP8_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/filter_dspr2.c
+VP8_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/loopfilter_filters_dspr2.c
+VP8_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/reconinter_dspr2.c
+VP8_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/idct_blk_dspr2.c
+VP8_COMMON_SRCS-$(HAVE_DSPR2)  += common/mips/dspr2/dequantize_dspr2.c
+
+# common (c)
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/filter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/loopfilter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/reconintra_arm.c

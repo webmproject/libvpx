@@ -22,35 +22,42 @@ specialize vp8_dequantize_b mmx media neon
 vp8_dequantize_b_media=vp8_dequantize_b_v6
 
 prototype void vp8_dequant_idct_add "short *input, short *dq, unsigned char *output, int stride"
-specialize vp8_dequant_idct_add mmx media neon
+specialize vp8_dequant_idct_add mmx media neon dspr2
 vp8_dequant_idct_add_media=vp8_dequant_idct_add_v6
+vp8_dequant_idct_add_dspr2=vp8_dequant_idct_add_dspr2
 
 prototype void vp8_dequant_idct_add_y_block "short *q, short *dq, unsigned char *dst, int stride, char *eobs"
-specialize vp8_dequant_idct_add_y_block mmx sse2 media neon
+specialize vp8_dequant_idct_add_y_block mmx sse2 media neon dspr2
 vp8_dequant_idct_add_y_block_media=vp8_dequant_idct_add_y_block_v6
+vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2
 
 prototype void vp8_dequant_idct_add_uv_block "short *q, short *dq, unsigned char *dst_u, unsigned char *dst_v, int stride, char *eobs"
-specialize vp8_dequant_idct_add_uv_block mmx sse2 media neon
+specialize vp8_dequant_idct_add_uv_block mmx sse2 media neon dspr2
 vp8_dequant_idct_add_uv_block_media=vp8_dequant_idct_add_uv_block_v6
+vp8_dequant_idct_add_y_block_dspr2=vp8_dequant_idct_add_y_block_dspr2
 
 #
 # Loopfilter
 #
 prototype void vp8_loop_filter_mbv "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_mbv mmx sse2 media neon
+specialize vp8_loop_filter_mbv mmx sse2 media neon dspr2
 vp8_loop_filter_mbv_media=vp8_loop_filter_mbv_armv6
+vp8_loop_filter_mbv_dspr2=vp8_loop_filter_mbv_dspr2
 
 prototype void vp8_loop_filter_bv "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_bv mmx sse2 media neon
+specialize vp8_loop_filter_bv mmx sse2 media neon dspr2
 vp8_loop_filter_bv_media=vp8_loop_filter_bv_armv6
+vp8_loop_filter_bv_dspr2=vp8_loop_filter_bv_dspr2
 
 prototype void vp8_loop_filter_mbh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_mbh mmx sse2 media neon
+specialize vp8_loop_filter_mbh mmx sse2 media neon dspr2
 vp8_loop_filter_mbh_media=vp8_loop_filter_mbh_armv6
+vp8_loop_filter_mbh_dspr2=vp8_loop_filter_mbh_dspr2
 
 prototype void vp8_loop_filter_bh "unsigned char *y, unsigned char *u, unsigned char *v, int ystride, int uv_stride, struct loop_filter_info *lfi"
-specialize vp8_loop_filter_bh mmx sse2 media neon
+specialize vp8_loop_filter_bh mmx sse2 media neon dspr2
 vp8_loop_filter_bh_media=vp8_loop_filter_bh_armv6
+vp8_loop_filter_bh_dspr2=vp8_loop_filter_bh_dspr2
 
 
 prototype void vp8_loop_filter_simple_mbv "unsigned char *y, int ystride, const unsigned char *blimit"
@@ -90,37 +97,45 @@ vp8_loop_filter_simple_bh_neon=vp8_loop_filter_bhs_neon
 #
 #idct16
 prototype void vp8_short_idct4x4llm "short *input, unsigned char *pred, int pitch, unsigned char *dst, int dst_stride"
-specialize vp8_short_idct4x4llm mmx media neon
+specialize vp8_short_idct4x4llm mmx media neon dspr2
 vp8_short_idct4x4llm_media=vp8_short_idct4x4llm_v6_dual
+vp8_short_idct4x4llm_dspr2=vp8_short_idct4x4llm_dspr2
 
 #iwalsh1
 prototype void vp8_short_inv_walsh4x4_1 "short *input, short *output"
+specialize vp8_short_inv_walsh4x4_1 dspr2
+vp8_short_inv_walsh4x4_1_dspr2=vp8_short_inv_walsh4x4_1_dspr2
 # no asm yet
 
 #iwalsh16
 prototype void vp8_short_inv_walsh4x4 "short *input, short *output"
-specialize vp8_short_inv_walsh4x4 mmx sse2 media neon
+specialize vp8_short_inv_walsh4x4 mmx sse2 media neon dspr2
 vp8_short_inv_walsh4x4_media=vp8_short_inv_walsh4x4_v6
+vp8_short_inv_walsh4x4_dspr2=vp8_short_inv_walsh4x4_dspr2
 
 #idct1_scalar_add
 prototype void vp8_dc_only_idct_add "short input, unsigned char *pred, int pred_stride, unsigned char *dst, int dst_stride"
-specialize vp8_dc_only_idct_add	mmx media neon
+specialize vp8_dc_only_idct_add	mmx media neon dspr2
 vp8_dc_only_idct_add_media=vp8_dc_only_idct_add_v6
+vp8_dc_only_idct_add_dspr2=vp8_dc_only_idct_add_dspr2
 
 #
 # RECON
 #
 prototype void vp8_copy_mem16x16 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
-specialize vp8_copy_mem16x16 mmx sse2 media neon
+specialize vp8_copy_mem16x16 mmx sse2 media neon dspr2
 vp8_copy_mem16x16_media=vp8_copy_mem16x16_v6
+vp8_copy_mem16x16_dspr2=vp8_copy_mem16x16_dspr2
 
 prototype void vp8_copy_mem8x8 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
-specialize vp8_copy_mem8x8 mmx media neon
+specialize vp8_copy_mem8x8 mmx media neon dspr2
 vp8_copy_mem8x8_media=vp8_copy_mem8x8_v6
+vp8_copy_mem8x8_dspr2=vp8_copy_mem8x8_dspr2
 
 prototype void vp8_copy_mem8x4 "unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch"
-specialize vp8_copy_mem8x4 mmx media neon
+specialize vp8_copy_mem8x4 mmx media neon dspr2
 vp8_copy_mem8x4_media=vp8_copy_mem8x4_v6
+vp8_copy_mem8x4_dspr2=vp8_copy_mem8x4_dspr2
 
 prototype void vp8_build_intra_predictors_mby_s "struct macroblockd *x, unsigned char * yabove_row, unsigned char * yleft, int left_stride, unsigned char * ypred_ptr, int y_stride"
 specialize vp8_build_intra_predictors_mby_s sse2 ssse3
@@ -177,20 +192,24 @@ fi
 # Subpixel
 #
 prototype void vp8_sixtap_predict16x16 "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch"
-specialize vp8_sixtap_predict16x16 mmx sse2 ssse3 media neon
+specialize vp8_sixtap_predict16x16 mmx sse2 ssse3 media neon dspr2
 vp8_sixtap_predict16x16_media=vp8_sixtap_predict16x16_armv6
+vp8_sixtap_predict16x16_dspr2=vp8_sixtap_predict16x16_dspr2
 
 prototype void vp8_sixtap_predict8x8 "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch"
-specialize vp8_sixtap_predict8x8 mmx sse2 ssse3 media neon
+specialize vp8_sixtap_predict8x8 mmx sse2 ssse3 media neon dspr2
 vp8_sixtap_predict8x8_media=vp8_sixtap_predict8x8_armv6
+vp8_sixtap_predict8x8_dspr2=vp8_sixtap_predict8x8_dspr2
 
 prototype void vp8_sixtap_predict8x4 "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch"
-specialize vp8_sixtap_predict8x4 mmx sse2 ssse3 media neon
+specialize vp8_sixtap_predict8x4 mmx sse2 ssse3 media neon dspr2
 vp8_sixtap_predict8x4_media=vp8_sixtap_predict8x4_armv6
+vp8_sixtap_predict8x4_dspr2=vp8_sixtap_predict8x4_dspr2
 
 prototype void vp8_sixtap_predict4x4 "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch"
-specialize vp8_sixtap_predict4x4 mmx ssse3 media neon
+specialize vp8_sixtap_predict4x4 mmx ssse3 media neon dspr2
 vp8_sixtap_predict4x4_media=vp8_sixtap_predict4x4_armv6
+vp8_sixtap_predict4x4_dspr2=vp8_sixtap_predict4x4_dspr2
 
 prototype void vp8_bilinear_predict16x16 "unsigned char *src, int src_pitch, int xofst, int yofst, unsigned char *dst, int dst_pitch"
 specialize vp8_bilinear_predict16x16 mmx sse2 ssse3 media neon
