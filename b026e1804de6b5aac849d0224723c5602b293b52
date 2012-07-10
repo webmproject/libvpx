@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALn//7Cg\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 11
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-10T16:39:31Z",
+      "side": 1,
+      "message": "This is the line that\u0027s making your test fail. You don\u0027t want to depend on this, this test should work on both encoder and decoder builds. Move the macros you depend on out of that file and into this one, or start a new util.h file (we need to do that soon for the ACMRandom class everyone keeps duplicating anyway).",
+      "revId": "b026e1804de6b5aac849d0224723c5602b293b52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
