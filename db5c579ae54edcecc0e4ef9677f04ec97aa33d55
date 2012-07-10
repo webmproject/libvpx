@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//7EE\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-07-10T16:10:19Z",
+      "side": 1,
+      "message": "For different sized blocks, the test uses same 16x16 buffer. But the valid width is width_ instead of kDstStride.",
+      "parentUuid": "AAAALn//7h4\u003d",
+      "revId": "db5c579ae54edcecc0e4ef9677f04ec97aa33d55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//7iA\u003d",
         "filename": "test/sixtap_predict_test.cc",
         "patchSetId": 10
@@ -30,6 +48,24 @@
       "writtenOn": "2012-07-10T01:24:49Z",
       "side": 1,
       "message": "shouldn\u0027t this be i * kDstStride + j?",
+      "revId": "db5c579ae54edcecc0e4ef9677f04ec97aa33d55",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//7EA\u003d",
+        "filename": "test/sixtap_predict_test.cc",
+        "patchSetId": 10
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-07-10T16:10:19Z",
+      "side": 1,
+      "message": "same as above.",
+      "parentUuid": "AAAALn//7iA\u003d",
       "revId": "db5c579ae54edcecc0e4ef9677f04ec97aa33d55",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
