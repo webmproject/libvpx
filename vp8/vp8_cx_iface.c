@@ -145,24 +145,42 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
     RANGE_CHECK_HI(cfg, rc_min_quantizer,   cfg->rc_max_quantizer);
     RANGE_CHECK_HI(cfg, g_threads,          64);
-#if !(CONFIG_REALTIME_ONLY)
-    RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
-#else
+#if CONFIG_REALTIME_ONLY
     RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
+#elif CONFIG_MULTI_RES_ENCODING
+    if (ctx->base.enc.total_encoders > 1)
+        RANGE_CHECK_HI(cfg, g_lag_in_frames,    0);
+#else
+    RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
 #endif
     RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
     RANGE_CHECK_HI(cfg, rc_undershoot_pct,  1000);
     RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
     RANGE_CHECK_HI(cfg, rc_2pass_vbr_bias_pct, 100);
     RANGE_CHECK(cfg, kf_mode,               VPX_KF_DISABLED, VPX_KF_AUTO);
-    RANGE_CHECK_BOOL(cfg,                   rc_resize_allowed);
-    RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   100);
+
+/* TODO: add spatial re-sampling support and frame dropping in
+ * multi-res-encoder.*/
+#if CONFIG_MULTI_RES_ENCODING
+    if (ctx->base.enc.total_encoders > 1)
+    {
+        RANGE_CHECK_HI(cfg, rc_resize_allowed,     0);
+        RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   0);
+    }
+#else
+    RANGE_CHECK_BOOL(cfg, rc_resize_allowed);
+    RANGE_CHECK_HI(cfg,   rc_dropframe_thresh,   100);
+#endif
     RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
-#if !(CONFIG_REALTIME_ONLY)
-    RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
-#else
+
+#if CONFIG_REALTIME_ONLY
     RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_ONE_PASS);
+#elif CONFIG_MULTI_RES_ENCODING
+    if (ctx->base.enc.total_encoders > 1)
+        RANGE_CHECK(cfg,    g_pass,         VPX_RC_ONE_PASS, VPX_RC_ONE_PASS);
+#else
+    RANGE_CHECK(cfg,        g_pass,         VPX_RC_ONE_PASS, VPX_RC_LAST_PASS);
 #endif
 
     /* VP8 does not support a lower bound on the keyframe interval in
@@ -182,7 +200,8 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(vp8_cfg, noise_sensitivity,  6);
 #endif
 
-    RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION, VP8_EIGHT_TOKENPARTITION);
+    RANGE_CHECK(vp8_cfg, token_partitions,   VP8_ONE_TOKENPARTITION,
+                VP8_EIGHT_TOKENPARTITION);
     RANGE_CHECK_HI(vp8_cfg, Sharpness,       7);
     RANGE_CHECK(vp8_cfg, arnr_max_frames, 0, 15);
     RANGE_CHECK_HI(vp8_cfg, arnr_strength,   6);
@@ -615,15 +634,15 @@ static vpx_codec_err_t vp8e_init(vpx_codec_ctx_t *ctx,
             return VPX_CODEC_MEM_ERROR;
         }
 
+        if(mr_cfg)
+            ctx->priv->enc.total_encoders   = mr_cfg->mr_total_resolutions;
+        else
+            ctx->priv->enc.total_encoders   = 1;
+
         res = validate_config(priv, &priv->cfg, &priv->vp8_cfg, 0);
 
         if (!res)
         {
-            if(mr_cfg)
-                ctx->priv->enc.total_encoders   = mr_cfg->mr_total_resolutions;
-            else
-                ctx->priv->enc.total_encoders   = 1;
-
             set_vp8e_config(&ctx->priv->alg_priv->oxcf,
                              ctx->priv->alg_priv->cfg,
                              ctx->priv->alg_priv->vp8_cfg,
