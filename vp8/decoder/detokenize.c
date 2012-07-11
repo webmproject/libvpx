@@ -22,22 +22,14 @@
 
 #define OCB_X PREV_COEF_CONTEXTS * ENTROPY_NODES
 
-#if CONFIG_EXPANDED_COEF_CONTEXT
-DECLARE_ALIGNED(16, static const unsigned short, coef_bands_x[16]) =
-#else
-DECLARE_ALIGNED(16, static const unsigned char, coef_bands_x[16]) =
-#endif
+DECLARE_ALIGNED(16, int, coef_bands_x[16]) =
 {
     0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X,
     6 * OCB_X, 4 * OCB_X, 5 * OCB_X, 6 * OCB_X,
     6 * OCB_X, 6 * OCB_X, 6 * OCB_X, 6 * OCB_X,
     6 * OCB_X, 7 * OCB_X, 7 * OCB_X, 7 * OCB_X
 };
-#if CONFIG_EXPANDED_COEF_CONTEXT
-DECLARE_ALIGNED(16, static const unsigned short, coef_bands_x_8x8[64]) =
-#else
-DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) =
-#endif
+DECLARE_ALIGNED(16, int, coef_bands_x_8x8[64]) =
 {
   0 * OCB_X, 1 * OCB_X, 2 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 4 * OCB_X, 5 * OCB_X,
   5 * OCB_X, 3 * OCB_X, 6 * OCB_X, 3 * OCB_X, 5 * OCB_X, 4 * OCB_X, 6 * OCB_X, 6 * OCB_X,
@@ -87,7 +79,7 @@ DECLARE_ALIGNED(64, static const unsigned char, coef_bands_x_8x8[64]) =
 #define CAT5_PROB4 180
 
 static const unsigned char cat6_prob[14] =
-{ 129, 130, 133, 140, 153, 177, 196, 230, 243, 249, 252, 254, 254, 0 };
+{ 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0 };
 
 void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 {
@@ -108,95 +100,6 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *x)
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 
-#define FILL \
-    if(count < 0) \
-        VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
-
-#define NORMALIZE \
-    /*if(range < 0x80)*/                            \
-    { \
-        shift = vp8_norm[range]; \
-        range <<= shift; \
-        value <<= shift; \
-        count -= shift; \
-    }
-
-#define DECODE_AND_APPLYSIGN(value_to_sign) \
-    split = (range + 1) >> 1; \
-    bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
-    FILL \
-    if ( value < bigsplit ) \
-    { \
-        range = split; \
-        v= value_to_sign; \
-    } \
-    else \
-    { \
-        range = range-split; \
-        value = value-bigsplit; \
-        v = -value_to_sign; \
-    } \
-    range +=range;                   \
-    value +=value;                   \
-    count--;
-
-#define DECODE_AND_BRANCH_IF_ZERO(probability,branch) \
-    { \
-        split = 1 +  ((( probability*(range-1) ) )>> 8); \
-        bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
-        FILL \
-        if ( value < bigsplit ) \
-        { \
-            range = split; \
-            NORMALIZE \
-            goto branch; \
-        } \
-        value -= bigsplit; \
-        range = range - split; \
-        NORMALIZE \
-    }
-
-#define DECODE_AND_LOOP_IF_ZERO_8x8_2(probability,branch) \
-    { \
-        split = 1 + ((( probability*(range-1) ) ) >> 8); \
-        bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
-        FILL \
-        if ( value < bigsplit ) \
-        { \
-            range = split; \
-            NORMALIZE \
-            Prob = coef_probs; \
-            if(c<3) {\
-            ++c; \
-            Prob += coef_bands_x[c]; \
-            goto branch; \
-            } goto BLOCK_FINISHED_8x8; /*for malformed input */\
-        } \
-        value -= bigsplit; \
-        range = range - split; \
-        NORMALIZE \
-    }
-#define DECODE_AND_LOOP_IF_ZERO_8X8(probability,branch) \
-    { \
-        split = 1 + ((( probability*(range-1) ) ) >> 8); \
-        bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
-        FILL \
-        if ( value < bigsplit ) \
-        { \
-            range = split; \
-            NORMALIZE \
-            Prob = coef_probs; \
-            if(c<63) {\
-            ++c; \
-            Prob += coef_bands_x_8x8[c]; \
-            goto branch; \
-            } goto BLOCK_FINISHED_8x8; /*for malformed input */\
-        } \
-        value -= bigsplit; \
-        range = range - split; \
-        NORMALIZE \
-    }
-
 //#define PREV_CONTEXT_INC(val) (2+((val)>2))
 //#define PREV_CONTEXT_INC(val) (vp8_prev_token_class[(val)])
 #if CONFIG_EXPANDED_COEF_CONTEXT
@@ -204,44 +107,6 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 #else
 #define PREV_CONTEXT_INC(val) (2)
 #endif
-
-#define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val) \
-    DECODE_AND_APPLYSIGN(val) \
-    Prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val)); \
-    if(c < 3){\
-        qcoeff_ptr [ scan[c] ] = (INT16) v; \
-        ++c; \
-        goto DO_WHILE_8x8; }\
-    qcoeff_ptr [ scan[3] ] = (INT16) v; \
-    c++; \
-    goto BLOCK_FINISHED_8x8;
-#define DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val) \
-    DECODE_AND_APPLYSIGN(val) \
-    Prob = coef_probs + (ENTROPY_NODES*PREV_CONTEXT_INC(val)); \
-    if(c < 63){\
-        qcoeff_ptr [ scan[c] ] = (INT16) v; \
-        ++c; \
-        goto DO_WHILE_8x8; }\
-    qcoeff_ptr [ scan[63] ] = (INT16) v; \
-    c++; \
-    goto BLOCK_FINISHED_8x8;
-
-
-#define DECODE_EXTRABIT_AND_ADJUST_VAL(prob, bits_count)\
-    split = 1 +  (((range-1) * prob) >> 8); \
-    bigsplit = (VP8_BD_VALUE)split << (VP8_BD_VALUE_SIZE - 8); \
-    FILL \
-    if(value >= bigsplit)\
-    {\
-        range = range-split;\
-        value = value-bigsplit;\
-        val += ((UINT16)1<<bits_count);\
-    }\
-    else\
-    {\
-        range = split;\
-    }\
-    NORMALIZE
 
 
 #if CONFIG_ADAPTIVE_ENTROPY
@@ -306,336 +171,6 @@ void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, int type,
 }
 #endif
 
-int vp8_decode_mb_tokens_8x8(VP8D_COMP *dx, MACROBLOCKD *x)
-{
-    ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
-    ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
-    const VP8_COMMON *const oc = & dx->common;
-
-    BOOL_DECODER *bc = x->current_bc;
-
-    char *eobs = x->eobs;
-
-    ENTROPY_CONTEXT *a;
-    ENTROPY_CONTEXT *l;
-    int i;
-
-    int eobtotal = 0;
-
-    register int count;
-
-    const BOOL_DATA *bufptr;
-    const BOOL_DATA *bufend;
-    register unsigned int range;
-    VP8_BD_VALUE value;
-    const int *scan;//
-    register unsigned int shift;
-    UINT32 split;
-    VP8_BD_VALUE bigsplit;
-    INT16 *qcoeff_ptr;
-
-    const vp8_prob *coef_probs;//
-    int type;
-    int stop;
-    INT16 val, bits_count;
-    INT16 c;
-    INT16 v;
-    const vp8_prob *Prob;
-
-    int seg_eob;
-    int segment_id = x->mode_info_context->mbmi.segment_id;
-
-    type = 3;
-    i = 0;
-    stop = 16;
-
-    scan = vp8_default_zig_zag1d_8x8;
-    qcoeff_ptr = &x->qcoeff[0];
-
-    if (x->mode_info_context->mbmi.mode != B_PRED && x->mode_info_context->mbmi.mode != SPLITMV)
-    {
-        i = 24;
-        stop = 24;
-        type = 1;
-        qcoeff_ptr += 24*16;
-        eobtotal -= 4;
-        scan = vp8_default_zig_zag1d;
-    }
-
-    bufend  = bc->user_buffer_end;
-    bufptr  = bc->user_buffer;
-    value   = bc->value;
-    count   = bc->count;
-    range   = bc->range;
-
-    coef_probs = oc->fc.coef_probs_8x8 [type] [ 0 ] [0];
-
-BLOCK_LOOP_8x8:
-    a = A + vp8_block2above_8x8[i];
-    l = L + vp8_block2left_8x8[i];
-
-
-    c = (INT16)(!type);
-
-//    Dest = ((A)!=0) + ((B)!=0);
-    if(i==24)
-    {
-      VP8_COMBINEENTROPYCONTEXTS(v, *a, *l);
-      if ( segfeature_active( x, segment_id, SEG_LVL_EOB ) )
-      {
-          seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
-      }
-      else
-          seg_eob = 4;
-    }
-    else
-    {
-      VP8_COMBINEENTROPYCONTEXTS(v, *a, *l);
-      if ( segfeature_active( x, segment_id, SEG_LVL_EOB ) )
-      {
-          seg_eob = get_segdata( x, segment_id, SEG_LVL_EOB );
-      }
-      else
-          seg_eob = 64;
-    }
-
-    Prob = coef_probs;
-    Prob += v * ENTROPY_NODES;
-
-DO_WHILE_8x8:
-    if ( c == seg_eob )
-        goto BLOCK_FINISHED_8x8;
-
-    if(i==24)
-      Prob += coef_bands_x[c];
-    else
-      Prob += coef_bands_x_8x8[c];
-    DECODE_AND_BRANCH_IF_ZERO(Prob[EOB_CONTEXT_NODE], BLOCK_FINISHED_8x8);
-
-CHECK_0_8x8_:
-    if (i==24)
-    {
-        DECODE_AND_LOOP_IF_ZERO_8x8_2(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
-    }
-    else
-    {
-        DECODE_AND_LOOP_IF_ZERO_8X8(Prob[ZERO_CONTEXT_NODE], CHECK_0_8x8_);
-    }
-    DECODE_AND_BRANCH_IF_ZERO(Prob[ONE_CONTEXT_NODE], ONE_CONTEXT_NODE_0_8x8_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[LOW_VAL_CONTEXT_NODE],
-                                LOW_VAL_CONTEXT_NODE_0_8x8_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[HIGH_LOW_CONTEXT_NODE],
-                                HIGH_LOW_CONTEXT_NODE_0_8x8_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREEFOUR_CONTEXT_NODE],
-                                CAT_THREEFOUR_CONTEXT_NODE_0_8x8_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_FIVE_CONTEXT_NODE],
-                                CAT_FIVE_CONTEXT_NODE_0_8x8_);
-    val = CAT6_MIN_VAL;
-    bits_count = 12;
-    do
-    {
-        DECODE_EXTRABIT_AND_ADJUST_VAL(cat6_prob[bits_count], bits_count);
-        bits_count -- ;
-    }
-    while (bits_count >= 0);
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
-    }
-
-CAT_FIVE_CONTEXT_NODE_0_8x8_:
-    val = CAT5_MIN_VAL;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB4, 4);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB3, 3);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB2, 2);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB1, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT5_PROB0, 0);
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
-    }
-
-CAT_THREEFOUR_CONTEXT_NODE_0_8x8_:
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_THREE_CONTEXT_NODE],
-                            CAT_THREE_CONTEXT_NODE_0_8x8_);
-    val = CAT4_MIN_VAL;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB3, 3);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB2, 2);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB1, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT4_PROB0, 0);
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
-    }
-
-CAT_THREE_CONTEXT_NODE_0_8x8_:
-    val = CAT3_MIN_VAL;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT3_PROB2, 2);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT3_PROB1, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT3_PROB0, 0);
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
-    }
-
-HIGH_LOW_CONTEXT_NODE_0_8x8_:
-    DECODE_AND_BRANCH_IF_ZERO(Prob[CAT_ONE_CONTEXT_NODE],
-                            CAT_ONE_CONTEXT_NODE_0_8x8_);
-    val = CAT2_MIN_VAL;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT2_PROB1, 1);
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT2_PROB0, 0);
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
-    }
-
-CAT_ONE_CONTEXT_NODE_0_8x8_:
-    val = CAT1_MIN_VAL;
-    DECODE_EXTRABIT_AND_ADJUST_VAL(CAT1_PROB0, 0);
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(val);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(val);
-    }
-
-LOW_VAL_CONTEXT_NODE_0_8x8_:
-    DECODE_AND_BRANCH_IF_ZERO(Prob[TWO_CONTEXT_NODE],
-                                TWO_CONTEXT_NODE_0_8x8_);
-    DECODE_AND_BRANCH_IF_ZERO(Prob[THREE_CONTEXT_NODE],
-                                THREE_CONTEXT_NODE_0_8x8_);
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(4);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(4);
-    }
-
-
-THREE_CONTEXT_NODE_0_8x8_:
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(3);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(3);
-    }
-
-
-TWO_CONTEXT_NODE_0_8x8_:
-    if(i==24)
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8_2(2);
-    }
-    else
-    {
-        DECODE_SIGN_WRITE_COEFF_AND_CHECK_EXIT_8x8(2);
-    }
-
-
-ONE_CONTEXT_NODE_0_8x8_:
-    DECODE_AND_APPLYSIGN(1);
-    Prob = coef_probs + ENTROPY_NODES;
-
-    if (i==24)
-    {
-      if (c < 3)//15
-      {
-        qcoeff_ptr [ scan[c] ] = (INT16) v;
-        ++c;
-
-        goto DO_WHILE_8x8;
-      }
-    }
-    else
-    {
-      if (c < 63)
-      {
-        qcoeff_ptr [ scan[c] ] = (INT16) v;
-        ++c;
-        goto DO_WHILE_8x8;
-      }
-    }
-
-   if(i==24)
-       qcoeff_ptr [ scan[3] ] = (INT16) v;//15
-   else
-       qcoeff_ptr [ scan[63] ] = (INT16) v;
-   c++;
-
-
-BLOCK_FINISHED_8x8:
-#if CONFIG_ADAPTIVE_ENTROPY
-    count_tokens_8x8(qcoeff_ptr, i, type, a, l, c, seg_eob, &dx->common.fc);
-#endif
-    *a = *l = ((eobs[i] = c) != !type);   // any nonzero data?
-    if (i!=24)
-    {
-        *(a + 1)    = *a;
-        *(l + 1)    = *l;
-    }
-
-    eobtotal += c;
-    qcoeff_ptr += (i==24 ? 16 : 64);
-
-    i+=4;
-
-    if (i < stop)
-        goto BLOCK_LOOP_8x8;
-
-    if (i > 24)
-    {
-        type = 0;
-        i = 0;
-        stop = 16;
-        coef_probs = oc->fc.coef_probs_8x8 [type] [ 0 ] [0];
-        qcoeff_ptr -= (24*16 + 16);
-        scan = vp8_default_zig_zag1d_8x8;
-        goto BLOCK_LOOP_8x8;
-    }
-
-    if (i == 16)
-    {
-        type = 2;
-        coef_probs = oc->fc.coef_probs_8x8 [type] [ 0 ] [0];
-        stop = 24;
-        goto BLOCK_LOOP_8x8;
-    }
-
-    FILL
-    bc->user_buffer = bufptr;
-    bc->value = value;
-    bc->count = count;
-    bc->range = range;
-
-    return eobtotal;
-
-}
 
 static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign)
 {
@@ -678,29 +213,33 @@ static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign)
 
 static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l, int type,
-                            int seg_eob, INT16 *qcoeff_ptr, int i)
+                            int seg_eob, INT16 *qcoeff_ptr, int i,
+                            const int* const scan, int block_type,
+                            const int* coef_bands)
 {
     FRAME_CONTEXT* const fc = &dx->common.fc;
     BOOL_DECODER *br = xd->current_bc;
     int tmp, c = (type == 0);
     const vp8_prob *Prob;
-    const int* const scan = vp8_default_zig_zag1d;
-    const vp8_prob *coef_probs = fc->coef_probs[type][0][0];
+    const vp8_prob *coef_probs =
+        (block_type == TX_4X4) ? fc->coef_probs[type][0][0]
+                               : fc->coef_probs_8x8[type][0][0];
 
     VP8_COMBINEENTROPYCONTEXTS(tmp, *a, *l);
     Prob = coef_probs + tmp * ENTROPY_NODES;
 
     while (1) {
-        int val, bits_count;
+        int val;
+        const uint8_t* cat6 = cat6_prob;
         if (c == seg_eob) break;
-        Prob += coef_bands_x[c];
+        Prob += coef_bands[c];
         if (!vp8_read(br, Prob[EOB_CONTEXT_NODE]))
             break;
 SKIP_START:
         if (c == seg_eob) break;
         if (!vp8_read(br, Prob[ZERO_CONTEXT_NODE])) {
             ++c;
-            Prob = coef_probs + coef_bands_x[c];
+            Prob = coef_probs + coef_bands[c];
             goto SKIP_START;
         }
         // ONE_CONTEXT_NODE_0_
@@ -758,18 +297,78 @@ SKIP_START:
             ADJUST_COEF(CAT5_PROB0, 0);
             WRITE_COEF_CONTINUE(val);
         }
-        val = CAT6_MIN_VAL;
-        bits_count = 12;
-        do {
-            ADJUST_COEF(cat6_prob[bits_count], bits_count);
-            --bits_count;
-        } while (bits_count >= 0);
+        val = 0;
+        while (*cat6) {
+            val = (val << 1) | vp8_read(br, *cat6++);
+        }
+        val += CAT6_MIN_VAL;
         WRITE_COEF_CONTINUE(val);
     }
 #if CONFIG_ADAPTIVE_ENTROPY
-    count_tokens(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
+    if (block_type == TX_4X4)
+        count_tokens(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
+    else
+        count_tokens_8x8(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
 #endif
     return c;
+}
+
+int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd)
+{
+    ENTROPY_CONTEXT* const A = (ENTROPY_CONTEXT *)xd->above_context;
+    ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
+
+    char* const eobs = xd->eobs;
+    int c, i, type, eobtotal = 0, seg_eob;
+    const int segment_id = xd->mode_info_context->mbmi.segment_id;
+    const int seg_active = segfeature_active(xd, segment_id, SEG_LVL_EOB);
+    INT16 *qcoeff_ptr = &xd->qcoeff[0];
+    if (xd->mode_info_context->mbmi.mode != B_PRED &&
+        xd->mode_info_context->mbmi.mode != SPLITMV)
+    {
+        ENTROPY_CONTEXT* const a = A + vp8_block2above_8x8[24];
+        ENTROPY_CONTEXT* const l = L + vp8_block2left_8x8[24];
+        const int* const scan = vp8_default_zig_zag1d;
+        type = PLANE_TYPE_Y2;
+
+        if (seg_active)
+            seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+        else
+            seg_eob = 4;
+        c = vp8_decode_coefs(pbi, xd, a, l, type, seg_eob, qcoeff_ptr + 24*16,
+                             24, scan, TX_8X8, coef_bands_x);
+        a[0] = l[0] = ((eobs[24] = c) != !type);
+
+        eobtotal += c - 4;
+
+        type = PLANE_TYPE_Y_NO_DC;
+    }
+    else
+        type = PLANE_TYPE_Y_WITH_DC;
+
+    if (seg_active)
+        seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+    else
+        seg_eob = 64;
+    for (i = 0; i < 24; i += 4)
+    {
+        ENTROPY_CONTEXT* const a = A + vp8_block2above_8x8[i];
+        ENTROPY_CONTEXT* const l = L + vp8_block2left_8x8[i];
+        const int* const scan = vp8_default_zig_zag1d_8x8;
+        if (i == 16)
+            type = PLANE_TYPE_UV;
+
+        c = vp8_decode_coefs(pbi, xd, a, l, type, seg_eob, qcoeff_ptr,
+                             i, scan, TX_8X8, coef_bands_x_8x8);
+        a[0] = l[0] = ((eobs[i] = c) != !type);
+        a[1] = a[0];
+        l[1] = l[0];
+
+        eobtotal += c;
+        qcoeff_ptr += 64;
+    }
+
+    return eobtotal;
 }
 
 int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
@@ -778,14 +377,14 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
     ENTROPY_CONTEXT* const L = (ENTROPY_CONTEXT *)xd->left_context;
 
     char* const eobs = xd->eobs;
+    const int* const scan = vp8_default_zig_zag1d;
     int c, i, type, eobtotal = 0, seg_eob = 16;
-    INT16 *qcoeff_ptr;
+    INT16 *qcoeff_ptr = &xd->qcoeff[0];
 
     int segment_id = xd->mode_info_context->mbmi.segment_id;
     if (segfeature_active(xd, segment_id, SEG_LVL_EOB))
         seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
 
-    qcoeff_ptr = &xd->qcoeff[0];
     if (xd->mode_info_context->mbmi.mode != B_PRED &&
         xd->mode_info_context->mbmi.mode != I8X8_PRED &&
         xd->mode_info_context->mbmi.mode != SPLITMV) {
@@ -793,8 +392,9 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
         ENTROPY_CONTEXT* const l = L + vp8_block2left[24];
         type = PLANE_TYPE_Y2;
 
-        c = vp8_decode_coefs(dx, xd, a, l, type, seg_eob, qcoeff_ptr + 24*16, 24);
-        *a = *l = ((eobs[24] = c) != !type);
+        c = vp8_decode_coefs(dx, xd, a, l, type, seg_eob, qcoeff_ptr + 24*16, 24,
+                             scan, TX_4X4, coef_bands_x);
+        a[0] = l[0] = ((eobs[24] = c) != !type);
 
         eobtotal += c - 16;
 
@@ -810,8 +410,9 @@ int vp8_decode_mb_tokens(VP8D_COMP *dx, MACROBLOCKD *xd)
         if (i == 16)
             type = PLANE_TYPE_UV;
 
-        c = vp8_decode_coefs(dx, xd, a, l, type, seg_eob, qcoeff_ptr, i);
-        *a = *l = ((eobs[i] = c) != !type);
+        c = vp8_decode_coefs(dx, xd, a, l, type, seg_eob, qcoeff_ptr,
+                             i, scan, TX_4X4, coef_bands_x);
+        a[0] = l[0] = ((eobs[i] = c) != !type);
 
         eobtotal += c;
         qcoeff_ptr += 16;
