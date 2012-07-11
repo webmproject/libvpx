@@ -284,12 +284,10 @@ mips() {
 $(common_top)
 #include "vpx_config.h"
 
-void ${symbol:-rtcd}(void);
-
 #ifdef RTCD_C
-void ${symbol:-rtcd}(void)
+static void setup_rtcd_internal(void)
 {
-$(set_function_pointers c)
+$(set_function_pointers c $ALL_ARCHS)
 #if HAVE_DSPR2
 void dsputil_static_init();
 dsputil_static_init();
@@ -298,7 +296,6 @@ dsputil_static_init();
 #endif
 $(common_bottom)
 EOF
-
 }
 
 unoptimized() {
