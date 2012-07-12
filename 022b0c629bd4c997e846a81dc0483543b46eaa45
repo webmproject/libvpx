@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALn//4EU\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 950,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-12T22:06:40Z",
+      "side": 1,
+      "message": "Do the unit tests fail for little endian?",
+      "revId": "022b0c629bd4c997e846a81dc0483543b46eaa45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//4EQ\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 953,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-12T22:06:40Z",
+      "side": 1,
+      "message": "From the description of the flag, it\u0027s to select big endian for compilation. Does it fail if the compiler can not do big endian? Would it pass if the compiler could do both?\n\nIt would be better to check \u0027if enabled big_endian\u0027",
+      "revId": "022b0c629bd4c997e846a81dc0483543b46eaa45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
