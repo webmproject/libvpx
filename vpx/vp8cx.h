@@ -234,18 +234,6 @@ typedef struct vpx_scaling_mode
     VPX_SCALING_MODE    v_scaling_mode;  /**< vertical scaling mode   */
 } vpx_scaling_mode_t;
 
-/*!\brief VP8 encoding mode
- *
- * This defines VP8 encoding mode
- *
- */
-typedef enum
-{
-    VP8_BEST_QUALITY_ENCODING,
-    VP8_GOOD_QUALITY_ENCODING,
-    VP8_REAL_TIME_ENCODING
-} vp8e_encoding_mode;
-
 /*!\brief VP8 token partition mode
  *
  * This defines VP8 partitioning mode for compressed data, i.e., the number of

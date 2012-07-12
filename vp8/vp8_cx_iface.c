@@ -23,7 +23,6 @@
 struct vp8_extracfg
 {
     struct vpx_codec_pkt_list *pkt_list;
-    vp8e_encoding_mode      encoding_mode;               /** best, good, realtime            */
     int                         cpu_used;                    /** available cpu percentage in 1/16*/
     unsigned int                enable_auto_alt_ref;           /** if encoder decides to uses alternate reference frame */
     unsigned int                noise_sensitivity;
@@ -52,10 +51,8 @@ static const struct extraconfig_map extracfg_map[] =
         {
             NULL,
 #if !(CONFIG_REALTIME_ONLY)
-            VP8_BEST_QUALITY_ENCODING,  /* Encoding Mode */
             0,                          /* cpu_used      */
 #else
-            VP8_REAL_TIME_ENCODING,     /* Encoding Mode */
             4,                          /* cpu_used      */
 #endif
             0,                          /* enable_auto_alt_ref */
@@ -178,11 +175,6 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
 
     RANGE_CHECK_BOOL(vp8_cfg,               enable_auto_alt_ref);
     RANGE_CHECK(vp8_cfg, cpu_used,           -16, 16);
-#if !(CONFIG_REALTIME_ONLY)
-    RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_BEST_QUALITY_ENCODING, VP8_REAL_TIME_ENCODING);
-#else
-    RANGE_CHECK(vp8_cfg, encoding_mode,      VP8_REAL_TIME_ENCODING, VP8_REAL_TIME_ENCODING);
-#endif
 
 #if CONFIG_REALTIME_ONLY && !CONFIG_TEMPORAL_DENOISING
     RANGE_CHECK(vp8_cfg, noise_sensitivity,  0, 0);
