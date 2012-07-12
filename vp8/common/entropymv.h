@@ -71,6 +71,16 @@ typedef struct mv_context_hp
 } MV_CONTEXT_HP;
 
 extern const MV_CONTEXT_HP vp8_mv_update_probs_hp[2], vp8_default_mv_context_hp[2];
+
 #endif /* CONFIG_HIGH_PRECISION_MV */
+
+extern const vp8_tree_index vp8_small_mvtree[];
+extern struct vp8_token_struct vp8_small_mvencodings [8];
+#if CONFIG_HIGH_PRECISION_MV
+extern const vp8_tree_index vp8_small_mvtree_hp[];
+extern struct vp8_token_struct vp8_small_mvencodings_hp [16];
+#endif
+
+void vp8_entropy_mv_init();
 
 #endif

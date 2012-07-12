@@ -22,6 +22,7 @@ static void setup_block
     BLOCKD *b,
     int mv_stride,
     unsigned char **base,
+    unsigned char **base2,
     int Stride,
     int offset,
     BLOCKSET bs
@@ -39,6 +40,7 @@ static void setup_block
         b->pre_stride = Stride;
         b->pre = offset;
         b->base_pre = base;
+        b->base_second_pre = base2;
     }
 
 }
@@ -49,6 +51,7 @@ static void setup_macroblock(MACROBLOCKD *x, BLOCKSET bs)
     int block;
 
     unsigned char **y, **u, **v;
+    unsigned char **y2, **u2, **v2;
 
     if (bs == DEST)
     {
@@ -61,20 +64,24 @@ static void setup_macroblock(MACROBLOCKD *x, BLOCKSET bs)
         y = &x->pre.y_buffer;
         u = &x->pre.u_buffer;
         v = &x->pre.v_buffer;
+
+        y2 = &x->second_pre.y_buffer;
+        u2 = &x->second_pre.u_buffer;
+        v2 = &x->second_pre.v_buffer;
     }
 
     for (block = 0; block < 16; block++) /* y blocks */
     {
-        setup_block(&x->block[block], x->dst.y_stride, y, x->dst.y_stride,
+        setup_block(&x->block[block], x->dst.y_stride, y, y2, x->dst.y_stride,
                         (block >> 2) * 4 * x->dst.y_stride + (block & 3) * 4, bs);
     }
 
     for (block = 16; block < 20; block++) /* U and V blocks */
     {
-        setup_block(&x->block[block], x->dst.uv_stride, u, x->dst.uv_stride,
+        setup_block(&x->block[block], x->dst.uv_stride, u, u2, x->dst.uv_stride,
                         ((block - 16) >> 1) * 4 * x->dst.uv_stride + (block & 1) * 4, bs);
 
-        setup_block(&x->block[block+4], x->dst.uv_stride, v, x->dst.uv_stride,
+        setup_block(&x->block[block+4], x->dst.uv_stride, v, v2, x->dst.uv_stride,
                         ((block - 16) >> 1) * 4 * x->dst.uv_stride + (block & 1) * 4, bs);
     }
 }

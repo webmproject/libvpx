@@ -23,6 +23,7 @@
 #include "encodemb.h"
 #include "quantize.h"
 #include "vp8/common/entropy.h"
+#include "vp8/common/entropymode.h"
 #include "vpx_ports/mem.h"
 #include "vpx/internal/vpx_codec_internal.h"
 #include "mcomp.h"
@@ -41,7 +42,20 @@
 #define AF_THRESH   25
 #define AF_THRESH2  100
 #define ARF_DECAY_THRESH 12
-#define MAX_MODES 33
+
+#if CONFIG_PRED_FILTER
+#if CONFIG_NEWINTRAMODES
+#define MAX_MODES 54
+#else
+#define MAX_MODES 48
+#endif
+#else  // CONFIG_PRED_FILTER
+#if CONFIG_NEWINTRAMODES
+#define MAX_MODES 42
+#else
+#define MAX_MODES 36
+#endif
+#endif  // CONFIG_PRED_FILTER
 
 #define MIN_THRESHMULT  32
 #define MAX_THRESHMULT  512
@@ -55,13 +69,6 @@
 
 typedef struct
 {
-    int kf_indicated;
-    unsigned int frames_since_key;
-    unsigned int frames_since_golden;
-    int filter_level;
-    int frames_till_gf_update_due;
-    int recent_ref_frame_usage[MAX_REF_FRAMES];
-
     MV_CONTEXT mvc[2];
     int mvcosts[2][MVvals+1];
 #if CONFIG_HIGH_PRECISION_MV
@@ -79,30 +86,35 @@ typedef struct
     int inter_uv_modes[VP8_UV_MODES];
     int inter_b_modes[B_MODE_COUNT];
 #endif
-    /* interframe intra mode probs */
-    vp8_prob ymode_prob[VP8_YMODES-1];
-    /* keyframe intra mode probs */
-#if CONFIG_QIMODE
-    vp8_prob kf_ymode_prob[8][VP8_YMODES-1];
-#else
-    vp8_prob kf_ymode_prob[VP8_YMODES-1];
-#endif
 
-#if CONFIG_UVINTRA
-    vp8_prob kf_uv_mode_prob[VP8_YMODES][VP8_UV_MODES-1];
-    vp8_prob uv_mode_prob[VP8_YMODES][VP8_UV_MODES-1];
-#else
-    vp8_prob kf_uv_mode_prob[VP8_UV_MODES-1];
-    vp8_prob uv_mode_prob[VP8_UV_MODES-1];
-#endif
-    /* intra MB type cts this frame */
-    int ymode_count[VP8_YMODES], uv_mode_count[VP8_UV_MODES];
+    vp8_prob segment_pred_probs[PREDICTION_PROBS];
+    unsigned char ref_pred_probs_update[PREDICTION_PROBS];
+    vp8_prob ref_pred_probs[PREDICTION_PROBS];
+    vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
 
-    int count_mb_ref_frame_usage[MAX_REF_FRAMES];
+    unsigned char * last_frame_seg_map_copy;
 
-    int this_frame_percent_intra;
-    int last_frame_percent_intra;
+    // 0 = Intra, Last, GF, ARF
+    signed char last_ref_lf_deltas[MAX_REF_LF_DELTAS];
+    // 0 = BPRED, ZERO_MV, MV, SPLIT
+    signed char last_mode_lf_deltas[MAX_MODE_LF_DELTAS];
 
+    vp8_prob coef_probs[BLOCK_TYPES]
+                       [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+    vp8_prob coef_probs_8x8[BLOCK_TYPES_8X8]
+                           [COEF_BANDS][PREV_COEF_CONTEXTS][ENTROPY_NODES];
+
+    vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
+    vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+    vp8_prob bmode_prob [VP8_BINTRAMODES-1];
+    vp8_prob i8x8_mode_prob [VP8_I8X8_MODES-1];
+    vp8_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
+    vp8_prob mbsplit_prob [VP8_NUMMBSPLITS-1];
+
+    int mv_ref_ct[6][4][2];
+    int mode_context[6][4];
+    int mv_ref_ct_a[6][4][2];
+    int mode_context_a[6][4];
 
 } CODING_CONTEXT;
 
@@ -111,6 +123,7 @@ typedef struct
     double frame;
     double intra_error;
     double coded_error;
+    double sr_coded_error;
     double ssim_weighted_pred_err;
     double pcnt_inter;
     double pcnt_motion;
@@ -159,55 +172,143 @@ typedef struct
     MBGRAPH_MB_STATS *mb_stats;
 } MBGRAPH_FRAME_STATS;
 
+#if CONFIG_PRED_FILTER
 typedef enum
 {
-    THR_ZEROMV         = 0,
-    THR_DC             = 1,
+    THR_ZEROMV,
+    THR_ZEROMV_FILT,
+    THR_DC,
 
-    THR_NEARESTMV      = 2,
-    THR_NEARMV         = 3,
+    THR_NEARESTMV,
+    THR_NEARESTMV_FILT,
+    THR_NEARMV,
+    THR_NEARMV_FILT,
 
-    THR_ZEROG          = 4,
-    THR_NEARESTG       = 5,
+    THR_ZEROG,
+    THR_ZEROG_FILT,
+    THR_NEARESTG,
+    THR_NEARESTG_FILT,
 
-    THR_ZEROA          = 6,
-    THR_NEARESTA       = 7,
+    THR_ZEROA,
+    THR_ZEROA_FILT,
+    THR_NEARESTA,
+    THR_NEARESTA_FILT,
 
-    THR_NEARG          = 8,
-    THR_NEARA          = 9,
+    THR_NEARG,
+    THR_NEARG_FILT,
+    THR_NEARA,
+    THR_NEARA_FILT,
 
-    THR_V_PRED         = 10,
-    THR_H_PRED         = 11,
-    THR_TM             = 12,
+    THR_V_PRED,
+    THR_H_PRED,
+#if CONFIG_NEWINTRAMODES
+    THR_D45_PRED,
+    THR_D135_PRED,
+    THR_D117_PRED,
+    THR_D153_PRED,
+    THR_D27_PRED,
+    THR_D63_PRED,
+#endif
+    THR_TM,
 
-    THR_NEWMV          = 13,
-    THR_NEWG           = 14,
-    THR_NEWA           = 15,
+    THR_NEWMV,
+    THR_NEWMV_FILT,
+    THR_NEWG,
+    THR_NEWG_FILT,
+    THR_NEWA,
+    THR_NEWA_FILT,
 
-    THR_SPLITMV        = 16,
-    THR_SPLITG         = 17,
-    THR_SPLITA         = 18,
+    THR_SPLITMV,
+    THR_SPLITG,
+    THR_SPLITA,
 
-    THR_B_PRED         = 19,
-    THR_I8X8_PRED      = 20,
+    THR_B_PRED,
+    THR_I8X8_PRED,
 
-    THR_COMP_ZEROLG    = 21,
-    THR_COMP_NEARESTLG = 22,
-    THR_COMP_NEARLG    = 23,
+    THR_COMP_ZEROLG,
+    THR_COMP_NEARESTLG,
+    THR_COMP_NEARLG,
 
-    THR_COMP_ZEROLA    = 24,
-    THR_COMP_NEARESTLA = 25,
-    THR_COMP_NEARLA    = 26,
+    THR_COMP_ZEROLA,
+    THR_COMP_NEARESTLA,
+    THR_COMP_NEARLA,
 
-    THR_COMP_ZEROGA    = 27,
-    THR_COMP_NEARESTGA = 28,
-    THR_COMP_NEARGA    = 29,
+    THR_COMP_ZEROGA,
+    THR_COMP_NEARESTGA,
+    THR_COMP_NEARGA,
 
-    THR_COMP_NEWLG     = 30,
-    THR_COMP_NEWLA     = 31,
-    THR_COMP_NEWGA     = 32,
+    THR_COMP_NEWLG,
+    THR_COMP_NEWLA,
+    THR_COMP_NEWGA,
+
+    THR_COMP_SPLITLG,
+    THR_COMP_SPLITLA,
+    THR_COMP_SPLITGA,
 }
 THR_MODES;
+#else
+typedef enum
+{
+    THR_ZEROMV,
+    THR_DC,
+
+    THR_NEARESTMV,
+    THR_NEARMV,
+
+    THR_ZEROG,
+    THR_NEARESTG,
+
+    THR_ZEROA,
+    THR_NEARESTA,
+
+    THR_NEARG,
+    THR_NEARA,
+
+    THR_V_PRED,
+    THR_H_PRED,
+#if CONFIG_NEWINTRAMODES
+    THR_D45_PRED,
+    THR_D135_PRED,
+    THR_D117_PRED,
+    THR_D153_PRED,
+    THR_D27_PRED,
+    THR_D63_PRED,
+#endif
+    THR_TM,
+
+    THR_NEWMV,
+    THR_NEWG,
+    THR_NEWA,
+
+    THR_SPLITMV,
+    THR_SPLITG,
+    THR_SPLITA,
+
+    THR_B_PRED,
+    THR_I8X8_PRED,
+
+    THR_COMP_ZEROLG,
+    THR_COMP_NEARESTLG,
+    THR_COMP_NEARLG,
+
+    THR_COMP_ZEROLA,
+    THR_COMP_NEARESTLA,
+    THR_COMP_NEARLA,
+
+    THR_COMP_ZEROGA,
+    THR_COMP_NEARESTGA,
+    THR_COMP_NEARGA,
+
+    THR_COMP_NEWLG,
+    THR_COMP_NEWLA,
+    THR_COMP_NEWGA,
+
+    THR_COMP_SPLITLG,
+    THR_COMP_SPLITLA,
+    THR_COMP_SPLITGA
+}
+THR_MODES;
+#endif
 
 typedef enum
 {
@@ -220,7 +321,6 @@ typedef struct
 {
     int RD;
     SEARCH_METHODS search_method;
-    int improved_quant;
     int improved_dct;
     int auto_filter;
     int recode_loop;
@@ -231,10 +331,11 @@ typedef struct
     int max_step_search_steps;
     int first_step;
     int optimize_coefficients;
-
-    int use_fastquant_for_pick;
     int no_skip_block4x4_search;
     int improved_mv_pred;
+#if CONFIG_ENHANCED_INTERP
+    int search_best_filter;
+#endif
 
 } SPEED_FEATURES;
 
@@ -269,7 +370,6 @@ typedef struct VP8_ENCODER_RTCD
     vp8_variance_rtcd_vtable_t  variance;
     vp8_fdct_rtcd_vtable_t      fdct;
     vp8_encodemb_rtcd_vtable_t  encodemb;
-    vp8_quantize_rtcd_vtable_t  quantize;
     vp8_search_rtcd_vtable_t    search;
     vp8_temporal_rtcd_vtable_t  temporal;
 } VP8_ENCODER_RTCD;
@@ -305,10 +405,13 @@ typedef struct VP8_COMP
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y1[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_y2[QINDEX_RANGE][16]);
     DECLARE_ALIGNED(16, short, zrun_zbin_boost_uv[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, Y1quant_fast[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, Y2quant_fast[QINDEX_RANGE][16]);
-    DECLARE_ALIGNED(16, short, UVquant_fast[QINDEX_RANGE][16]);
 
+    DECLARE_ALIGNED(64, short, Y1zbin_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, Y2zbin_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, UVzbin_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, zrun_zbin_boost_y1_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, zrun_zbin_boost_y2_8x8[QINDEX_RANGE][64]);
+    DECLARE_ALIGNED(64, short, zrun_zbin_boost_uv_8x8[QINDEX_RANGE][64]);
 
     MACROBLOCK mb;
     VP8_COMMON common;
@@ -352,7 +455,6 @@ typedef struct VP8_COMP
     unsigned int mode_check_freq[MAX_MODES];
     unsigned int mode_test_hit_counts[MAX_MODES];
     unsigned int mode_chosen_counts[MAX_MODES];
-    unsigned int mbs_tested_so_far;
 
     int rd_thresh_mult[MAX_MODES];
     int rd_baseline_thresh[MAX_MODES];
@@ -441,7 +543,12 @@ typedef struct VP8_COMP
     int cq_target_quality;
 
     int ymode_count [VP8_YMODES];        /* intra MB type cts this frame */
-    int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
+    int bmode_count [VP8_BINTRAMODES];
+    int i8x8_mode_count [VP8_I8X8_MODES];
+    int sub_mv_ref_count [SUBMVREF_COUNT][VP8_SUBMVREFS];
+    int mbsplit_count [VP8_NUMMBSPLITS];
+    //int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
+    int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
 
     unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
 #if CONFIG_HIGH_PRECISION_MV
@@ -453,13 +560,14 @@ typedef struct VP8_COMP
     //save vp8_tree_probs_from_distribution result for each frame to avoid repeat calculation
     vp8_prob frame_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     unsigned int frame_branch_ct [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
-    unsigned int coef_counts_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
-    vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-    unsigned int frame_branch_ct_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
+    unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
+    vp8_prob frame_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    unsigned int frame_branch_ct_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES][2];
 
     int gfu_boost;
-    int kf_boost;
     int last_boost;
+    int kf_boost;
+    int kf_zeromotion_pct;
 
     int target_bandwidth;
     struct vpx_codec_pkt_list  *output_pkt_list;
@@ -472,6 +580,8 @@ typedef struct VP8_COMP
     MBGRAPH_FRAME_STATS mbgraph_stats[MAX_LAG_BUFFERS];
     int mbgraph_n_frames;             // number of frames filled in the above
     int static_mb_pct;                // % forced skip mbs by segmentation
+    int seg0_progress, seg0_idx, seg0_cnt;
+    int ref_pred_count[3][2];
 
     int decimation_factor;
     int decimation_count;
@@ -491,14 +601,16 @@ typedef struct VP8_COMP
     int vert_scale;
     int pass;
 
-    int prob_skip_false;
-    int last_skip_false_probs[3];
+#if CONFIG_NEWENTROPY
+    vp8_prob last_skip_false_probs[3][MBSKIP_CONTEXTS];
+#else
+    vp8_prob prob_skip_false;
+    vp8_prob last_skip_false_probs[3];
+#endif
     int last_skip_probs_q[3];
 
     int recent_ref_frame_usage[MAX_REF_FRAMES];
     int count_mb_ref_frame_usage[MAX_REF_FRAMES];
-    int this_frame_percent_intra;
-    int last_frame_percent_intra;
     int ref_frame_flags;
 
     unsigned char ref_pred_probs_update[PREDICTION_PROBS];
@@ -510,14 +622,15 @@ typedef struct VP8_COMP
     int inter_zz_count;
     int gf_bad_count;
     int gf_update_recommended;
+#if CONFIG_NEWENTROPY
+    int skip_true_count[3];
+    int skip_false_count[3];
+#else
     int skip_true_count;
     int skip_false_count;
+#endif
     int t4x4_count;
     int t8x8_count;
-
-#if CONFIG_UVINTRA
-    int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
-#endif
 
     unsigned char *segmentation_map;
 
@@ -539,12 +652,15 @@ typedef struct VP8_COMP
     unsigned int time_pick_lpf;
     unsigned int time_encode_mb_row;
 
+#if CONFIG_NEWENTROPY
+    int base_skip_false_prob[QINDEX_RANGE][3];
+#else
     int base_skip_false_prob[QINDEX_RANGE];
+#endif
 
     struct twopass_rc
     {
         unsigned int section_intra_rating;
-        double section_max_qfactor;
         unsigned int next_iiratio;
         unsigned int this_iiratio;
         FIRSTPASS_STATS *total_stats;
@@ -563,7 +679,6 @@ typedef struct VP8_COMP
         int frames_to_key;
         int maxq_max_limit;
         int maxq_min_limit;
-        int gf_decay_rate;
         int static_scene_max_gf_interval;
         int kf_bits;
         int gf_group_error_left;           // Remaining error from uncoded frames in a gf group. Two pass use only
@@ -577,6 +692,8 @@ typedef struct VP8_COMP
         int gf_group_bits;                // Projected Bits available for a group of frames including 1 GF or ARF
         int gf_bits;                     // Bits for the golden frame or ARF - 2 pass only
         int alt_extra_bits;
+
+        int sr_update_lag;
         double est_max_qcorrection_factor;
     } twopass;
 
@@ -633,9 +750,24 @@ typedef struct VP8_COMP
     int *lf_ref_frame_sign_bias;
     int *lf_ref_frame;
 
-    int force_next_frame_intra; /* force next frame to intra when kf_auto says so */
+    /* force next frame to intra when kf_auto says so */
+    int force_next_frame_intra;
 
     int droppable;
+
+    // Global store for SB left contexts, one for each MB row in the SB
+    ENTROPY_CONTEXT_PLANES left_context[2];
+
+    // TODO Do we still need this??
+    int update_context;
+
+    int dummy_packing;    /* flag to indicate if packing is dummy */
+
+#if CONFIG_PRED_FILTER
+    int pred_filter_on_count;
+    int pred_filter_off_count;
+#endif
+
 } VP8_COMP;
 
 void control_data_rate(VP8_COMP *cpi);

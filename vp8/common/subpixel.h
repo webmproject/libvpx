@@ -53,6 +53,83 @@ extern prototype_subpixel_predict(vp8_subpix_sixtap8x4);
 #endif
 extern prototype_subpixel_predict(vp8_subpix_sixtap4x4);
 
+#ifndef vp8_subpix_sixtap_avg4x4
+#define vp8_subpix_sixtap_avg4x4 vp8_sixtap_predict_avg_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_sixtap_avg4x4);
+
+#if CONFIG_ENHANCED_INTERP
+#ifndef vp8_subpix_eighttap16x16
+#define vp8_subpix_eighttap16x16 vp8_eighttap_predict16x16_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap16x16);
+
+#ifndef vp8_subpix_eighttap8x8
+#define vp8_subpix_eighttap8x8 vp8_eighttap_predict8x8_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap8x8);
+
+#ifndef vp8_subpix_eighttap_avg16x16
+#define vp8_subpix_eighttap_avg16x16 vp8_eighttap_predict_avg16x16_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap_avg16x16);
+
+#ifndef vp8_subpix_eighttap_avg8x8
+#define vp8_subpix_eighttap_avg8x8 vp8_eighttap_predict_avg8x8_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap_avg8x8);
+
+#ifndef vp8_subpix_eighttap8x4
+#define vp8_subpix_eighttap8x4 vp8_eighttap_predict8x4_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap8x4);
+
+#ifndef vp8_subpix_eighttap4x4
+#define vp8_subpix_eighttap4x4 vp8_eighttap_predict_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap4x4);
+
+#ifndef vp8_subpix_eighttap_avg4x4
+#define vp8_subpix_eighttap_avg4x4 vp8_eighttap_predict_avg4x4_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap_avg4x4);
+
+#ifndef vp8_subpix_eighttap16x16_sharp
+#define vp8_subpix_eighttap16x16_sharp vp8_eighttap_predict16x16_sharp_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap16x16_sharp);
+
+#ifndef vp8_subpix_eighttap8x8_sharp
+#define vp8_subpix_eighttap8x8_sharp vp8_eighttap_predict8x8_sharp_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap8x8_sharp);
+
+#ifndef vp8_subpix_eighttap_avg16x16_sharp
+#define vp8_subpix_eighttap_avg16x16_sharp vp8_eighttap_predict_avg16x16_sharp_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap_avg16x16_sharp);
+
+#ifndef vp8_subpix_eighttap_avg8x8_sharp
+#define vp8_subpix_eighttap_avg8x8_sharp vp8_eighttap_predict_avg8x8_sharp_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap_avg8x8_sharp);
+
+#ifndef vp8_subpix_eighttap8x4_sharp
+#define vp8_subpix_eighttap8x4_sharp vp8_eighttap_predict8x4_sharp_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap8x4_sharp);
+
+#ifndef vp8_subpix_eighttap4x4_sharp
+#define vp8_subpix_eighttap4x4_sharp vp8_eighttap_predict_sharp_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap4x4_sharp);
+
+#ifndef vp8_subpix_eighttap_avg4x4_sharp
+#define vp8_subpix_eighttap_avg4x4_sharp vp8_eighttap_predict_avg4x4_sharp_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_eighttap_avg4x4_sharp);
+#endif  /* CONFIG_ENAHNCED_INTERP */
+
 #ifndef vp8_subpix_bilinear16x16
 #define vp8_subpix_bilinear16x16 vp8_bilinear_predict16x16_c
 #endif
@@ -83,21 +160,44 @@ extern prototype_subpixel_predict(vp8_subpix_bilinear8x4);
 #endif
 extern prototype_subpixel_predict(vp8_subpix_bilinear4x4);
 
+#ifndef vp8_subpix_bilinear_avg4x4
+#define vp8_subpix_bilinear_avg4x4 vp8_bilinear_predict_avg4x4_c
+#endif
+extern prototype_subpixel_predict(vp8_subpix_bilinear_avg4x4);
+
 typedef prototype_subpixel_predict((*vp8_subpix_fn_t));
 typedef struct
 {
+#if CONFIG_ENHANCED_INTERP
+    vp8_subpix_fn_t  eighttap16x16;
+    vp8_subpix_fn_t  eighttap8x8;
+    vp8_subpix_fn_t  eighttap_avg16x16;
+    vp8_subpix_fn_t  eighttap_avg8x8;
+    vp8_subpix_fn_t  eighttap_avg4x4;
+    vp8_subpix_fn_t  eighttap8x4;
+    vp8_subpix_fn_t  eighttap4x4;
+    vp8_subpix_fn_t  eighttap16x16_sharp;
+    vp8_subpix_fn_t  eighttap8x8_sharp;
+    vp8_subpix_fn_t  eighttap_avg16x16_sharp;
+    vp8_subpix_fn_t  eighttap_avg8x8_sharp;
+    vp8_subpix_fn_t  eighttap_avg4x4_sharp;
+    vp8_subpix_fn_t  eighttap8x4_sharp;
+    vp8_subpix_fn_t  eighttap4x4_sharp;
+#endif
     vp8_subpix_fn_t  sixtap16x16;
     vp8_subpix_fn_t  sixtap8x8;
     vp8_subpix_fn_t  sixtap_avg16x16;
     vp8_subpix_fn_t  sixtap_avg8x8;
     vp8_subpix_fn_t  sixtap8x4;
     vp8_subpix_fn_t  sixtap4x4;
+    vp8_subpix_fn_t  sixtap_avg4x4;
     vp8_subpix_fn_t  bilinear16x16;
     vp8_subpix_fn_t  bilinear8x8;
     vp8_subpix_fn_t  bilinear_avg16x16;
     vp8_subpix_fn_t  bilinear_avg8x8;
     vp8_subpix_fn_t  bilinear8x4;
     vp8_subpix_fn_t  bilinear4x4;
+    vp8_subpix_fn_t  bilinear_avg4x4;
 } vp8_subpix_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

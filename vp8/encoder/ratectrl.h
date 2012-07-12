@@ -30,5 +30,6 @@ extern int vp8_pick_frame_size(VP8_COMP *cpi);
 extern double vp8_convert_qindex_to_q( int qindex );
 extern int vp8_gfboost_qadjust( int qindex );
 extern int vp8_bits_per_mb( FRAME_TYPE frame_type, int qindex  );
+void vp8_setup_inter_frame(VP8_COMP *cpi);
 
 #endif

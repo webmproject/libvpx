@@ -22,6 +22,7 @@ show_help(){
 Advanced options:
   ${toggle_libs}                  don't build libraries
   ${toggle_examples}              don't build examples
+  ${toggle_unit_tests}            build unit tests
   --libc=PATH                     path to alternate libc
   --as={yasm|nasm|auto}           use specified assembler [auto, yasm preferred]
   ${toggle_fast_unaligned}        don't use unaligned accesses, even when
@@ -223,6 +224,15 @@ EXPERIMENT_LIST="
     high_precision_mv
     sixteenth_subpel_uv
     comp_intra_pred
+    newentropy
+    newupdate
+    superblocks
+    expanded_coef_context
+    int_8x8fdct
+    newintramodes
+    adaptive_entropy
+    pred_filter
+    lossless
 "
 CONFIG_LIST="
     external_build
@@ -263,7 +273,7 @@ CONFIG_LIST="
     small
     postproc_visualizer
     os_support
-
+    unit_tests
     experimental
     ${EXPERIMENT_LIST}
 "
@@ -304,6 +314,7 @@ CMDLINE_SELECT="
     static
     small
     postproc_visualizer
+    unit_tests
     experimental
 "
 
@@ -324,7 +335,7 @@ process_cmdline() {
             process_common_cmdline $opt
         fi
         ;;
-        *) process_common_cmdline $opt
+        *) process_common_cmdline "$opt"
         ;;
         esac
     done

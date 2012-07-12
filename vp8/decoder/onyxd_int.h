@@ -56,8 +56,8 @@ typedef struct
     INT16 *qcoeff_start_ptr;
     BOOL_DECODER *current_bc;
 
-    vp8_prob const *coef_probs[4];
-    vp8_prob const *coef_probs_8x8[4];
+    vp8_prob const *coef_probs[BLOCK_TYPES];
+    vp8_prob const *coef_probs_8x8[BLOCK_TYPES_8X8];
 
     UINT8 eob[25];
 

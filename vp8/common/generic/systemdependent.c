@@ -79,18 +79,36 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
         vp8_comp_intra_uv4x4_predict;
 #endif
 
+#if CONFIG_ENHANCED_INTERP
+    rtcd->subpix.eighttap16x16       = vp8_eighttap_predict16x16_c;
+    rtcd->subpix.eighttap8x8         = vp8_eighttap_predict8x8_c;
+    rtcd->subpix.eighttap_avg16x16   = vp8_eighttap_predict_avg16x16_c;
+    rtcd->subpix.eighttap_avg8x8     = vp8_eighttap_predict_avg8x8_c;
+    rtcd->subpix.eighttap_avg4x4     = vp8_eighttap_predict_avg4x4_c;
+    rtcd->subpix.eighttap8x4         = vp8_eighttap_predict8x4_c;
+    rtcd->subpix.eighttap4x4         = vp8_eighttap_predict_c;
+    rtcd->subpix.eighttap16x16_sharp       = vp8_eighttap_predict16x16_sharp_c;
+    rtcd->subpix.eighttap8x8_sharp         = vp8_eighttap_predict8x8_sharp_c;
+    rtcd->subpix.eighttap_avg16x16_sharp   = vp8_eighttap_predict_avg16x16_sharp_c;
+    rtcd->subpix.eighttap_avg8x8_sharp     = vp8_eighttap_predict_avg8x8_sharp_c;
+    rtcd->subpix.eighttap_avg4x4_sharp     = vp8_eighttap_predict_avg4x4_sharp_c;
+    rtcd->subpix.eighttap8x4_sharp         = vp8_eighttap_predict8x4_sharp_c;
+    rtcd->subpix.eighttap4x4_sharp         = vp8_eighttap_predict_sharp_c;
+#endif
     rtcd->subpix.sixtap16x16       = vp8_sixtap_predict16x16_c;
     rtcd->subpix.sixtap8x8         = vp8_sixtap_predict8x8_c;
     rtcd->subpix.sixtap_avg16x16   = vp8_sixtap_predict_avg16x16_c;
     rtcd->subpix.sixtap_avg8x8     = vp8_sixtap_predict_avg8x8_c;
     rtcd->subpix.sixtap8x4         = vp8_sixtap_predict8x4_c;
     rtcd->subpix.sixtap4x4         = vp8_sixtap_predict_c;
+    rtcd->subpix.sixtap_avg4x4     = vp8_sixtap_predict_avg_c;
     rtcd->subpix.bilinear16x16     = vp8_bilinear_predict16x16_c;
     rtcd->subpix.bilinear8x8       = vp8_bilinear_predict8x8_c;
     rtcd->subpix.bilinear_avg16x16 = vp8_bilinear_predict_avg16x16_c;
     rtcd->subpix.bilinear_avg8x8   = vp8_bilinear_predict_avg8x8_c;
     rtcd->subpix.bilinear8x4       = vp8_bilinear_predict8x4_c;
     rtcd->subpix.bilinear4x4       = vp8_bilinear_predict4x4_c;
+    rtcd->subpix.bilinear_avg4x4   = vp8_bilinear_predict_avg4x4_c;
 
     rtcd->loopfilter.normal_mb_v = vp8_loop_filter_mbv_c;
     rtcd->loopfilter.normal_b_v  = vp8_loop_filter_bv_c;
@@ -121,10 +139,4 @@ void vp8_machine_specific_config(VP8_COMMON *ctx)
 #if ARCH_ARM
     vp8_arch_arm_common_init(ctx);
 #endif
-    rtcd->idct.idct1        = vp8_short_idct4x4llm_1_c;
-    rtcd->idct.idct16       = vp8_short_idct4x4llm_c;
-    rtcd->idct.idct1_scalar_add = vp8_dc_only_idct_add_c;
-    rtcd->idct.iwalsh1      = vp8_short_inv_walsh4x4_1_c;
-    rtcd->idct.iwalsh16     = vp8_short_inv_walsh4x4_c;
-
 }

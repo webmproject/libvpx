@@ -19,7 +19,7 @@ extern void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue);
 extern void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
                                    int *returnrate, int *returndistortion, int *returnintra,
                                    int *best_single_rd_diff, int *best_comp_rd_diff, int *best_hybrid_rd_diff);
-extern void vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x, int *rate);
+extern int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x);
 
 extern void vp8_mv_pred
 (
@@ -35,5 +35,9 @@ extern void vp8_mv_pred
 extern void vp8_cal_sad(VP8_COMP *cpi, MACROBLOCKD *xd, MACROBLOCK *x, int recon_yoffset, int near_sadidx[]);
 extern void vp8_init_me_luts();
 extern void vp8_set_mbmode_and_mvs(MACROBLOCK *x, MB_PREDICTION_MODE mb, int_mv *mv);
+extern void rd_update_mvcount(VP8_COMP *cpi,
+                              MACROBLOCK *x,
+                              int_mv *best_ref_mv,
+                              int_mv *second_best_ref_mv);
 
 #endif

@@ -100,8 +100,11 @@ void vp8_encode_intra4x4mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *mb)
 {
     int i;
 
+#if 0
     MACROBLOCKD *x = &mb->e_mbd;
+    // Intra modes requiring top-right MB reconstructed data have been disabled
     vp8_intra_prediction_down_copy(x);
+#endif
 
     for (i = 0; i < 16; i++)
         vp8_encode_intra4x4block(rtcd, mb, i);
@@ -144,9 +147,9 @@ void vp8_encode_intra16x16mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     }
 
     if(tx_type == TX_8X8)
-      vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+        vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
     else
-      vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+        vp8_inverse_transform_mby(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
 
 #ifdef ENC_DEBUG
     if (enc_debug) {

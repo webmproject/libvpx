@@ -96,6 +96,13 @@ extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block);
 #endif
 extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block);
 
+#if CONFIG_LOSSLESS
+extern prototype_dequant_idct_add(vp8_dequant_idct_add_lossless_c);
+extern prototype_dequant_dc_idct_add(vp8_dequant_dc_idct_add_lossless_c);
+extern prototype_dequant_dc_idct_add_y_block(vp8_dequant_dc_idct_add_y_block_lossless_c);
+extern prototype_dequant_idct_add_y_block(vp8_dequant_idct_add_y_block_lossless_c);
+extern prototype_dequant_idct_add_uv_block(vp8_dequant_idct_add_uv_block_lossless_c);
+#endif
 
 #ifndef vp8_dequant_block_2x2
 #define vp8_dequant_block_2x2 vp8_dequantize_b_2x2_c

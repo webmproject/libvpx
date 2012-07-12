@@ -46,20 +46,50 @@ typedef struct frame_contexts
 {
     vp8_prob bmode_prob [VP8_BINTRAMODES-1];
     vp8_prob ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
-#if CONFIG_UVINTRA
     vp8_prob uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
-#else
-    vp8_prob uv_mode_prob [VP8_UV_MODES-1];
-#endif
-    vp8_prob sub_mv_ref_prob [VP8_SUBMVREFS-1];
+    vp8_prob i8x8_mode_prob [VP8_I8X8_MODES-1];
+    vp8_prob sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
+    vp8_prob mbsplit_prob [VP8_NUMMBSPLITS-1];
     vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-    vp8_prob coef_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    vp8_prob coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
     MV_CONTEXT mvc[2];
-    MV_CONTEXT pre_mvc[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
 #if CONFIG_HIGH_PRECISION_MV
     MV_CONTEXT_HP mvc_hp[2];
-    MV_CONTEXT_HP pre_mvc_hp[2];  /* not to caculate the mvcost for the frame if mvc doesn't change. */
 #endif
+#if CONFIG_ADAPTIVE_ENTROPY
+    MV_CONTEXT pre_mvc[2];
+#if CONFIG_HIGH_PRECISION_MV
+    MV_CONTEXT_HP pre_mvc_hp[2];
+#endif
+    vp8_prob pre_bmode_prob [VP8_BINTRAMODES-1];
+    vp8_prob pre_ymode_prob [VP8_YMODES-1];   /* interframe intra mode probs */
+    vp8_prob pre_uv_mode_prob [VP8_YMODES][VP8_UV_MODES-1];
+    vp8_prob pre_i8x8_mode_prob [VP8_I8X8_MODES-1];
+    vp8_prob pre_sub_mv_ref_prob [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
+    vp8_prob pre_mbsplit_prob [VP8_NUMMBSPLITS-1];
+    unsigned int bmode_counts [VP8_BINTRAMODES];
+    unsigned int ymode_counts [VP8_YMODES];   /* interframe intra mode probs */
+    unsigned int uv_mode_counts [VP8_YMODES][VP8_UV_MODES];
+    unsigned int i8x8_mode_counts [VP8_I8X8_MODES];   /* interframe intra mode probs */
+    unsigned int sub_mv_ref_counts [SUBMVREF_COUNT][VP8_SUBMVREFS];
+    unsigned int mbsplit_counts [VP8_NUMMBSPLITS];
+
+    vp8_prob pre_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    vp8_prob pre_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+    unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS]
+                             [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+    unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
+                                 [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+    unsigned int MVcount [2] [MVvals];
+#if CONFIG_HIGH_PRECISION_MV
+    unsigned int MVcount_hp [2] [MVvals_hp];
+#endif
+#endif  /* CONFIG_ADAPTIVE_ENTROPY */
+    int mode_context[6][4];
+    int mode_context_a[6][4];
+    int vp8_mode_contexts[6][4];
+    int mv_ref_ct[6][4][2];
+    int mv_ref_ct_a[6][4][2];
 } FRAME_CONTEXT;
 
 typedef enum
@@ -71,7 +101,11 @@ typedef enum
 typedef enum
 {
     SIXTAP   = 0,
-    BILINEAR = 1
+    BILINEAR = 1,
+#if CONFIG_ENHANCED_INTERP
+    EIGHTTAP = 2,
+    EIGHTTAP_SHARP = 3,
+#endif
 } INTERPOLATIONFILTERTYPE;
 
 typedef enum
@@ -106,7 +140,6 @@ typedef struct VP8_COMMON_RTCD
 } VP8_COMMON_RTCD;
 
 typedef struct VP8Common
-
 {
     struct vpx_internal_error_info  error;
 
@@ -203,20 +236,10 @@ typedef struct VP8Common
     /* keyframe block modes are predicted by their above, left neighbors */
 
     vp8_prob kf_bmode_prob [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1];
-#if CONFIG_QIMODE
     vp8_prob kf_ymode_prob[8][VP8_YMODES-1];  /* keyframe "" */
     int kf_ymode_probs_index;
     int kf_ymode_probs_update;
-#else
-    vp8_prob kf_ymode_prob [VP8_YMODES-1];  /* keyframe "" */
-#endif
-#if CONFIG_UVINTRA
     vp8_prob kf_uv_mode_prob[VP8_YMODES] [VP8_UV_MODES-1];
-#else
-    vp8_prob kf_uv_mode_prob [VP8_UV_MODES-1];
-#endif
-
-    vp8_prob i8x8_mode_prob [VP8_UV_MODES-1];
 
     vp8_prob prob_intra_coded;
     vp8_prob prob_last_coded;
@@ -233,15 +256,19 @@ typedef struct VP8Common
 
     vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
 
+#if CONFIG_NEWENTROPY
+    vp8_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
+#endif
+
     FRAME_CONTEXT lfc_a; /* last alt ref entropy */
     FRAME_CONTEXT lfc; /* last frame entropy */
     FRAME_CONTEXT fc;  /* this frame entropy */
 
-    int mv_ref_ct[6][4][2];
-    int mode_context[6][4];
-    int mv_ref_ct_a[6][4][2];
-    int mode_context_a[6][4];
-    int vp8_mode_contexts[6][4];
+    //int mv_ref_ct[6][4][2];
+    //int mv_ref_ct_a[6][4][2];
+    //int mode_context[6][4];
+    //int mode_context_a[6][4];
+    //int vp8_mode_contexts[6][4];
 
     unsigned int current_video_frame;
     int near_boffset[3];
@@ -260,6 +287,15 @@ typedef struct VP8Common
 #if CONFIG_POSTPROC
     struct postproc_state  postproc_state;
 #endif
+
+#if CONFIG_PRED_FILTER
+    /* Prediction filter variables */
+    int pred_filter_mode;   // 0=disabled at the frame level (no MB filtered)
+                            // 1=enabled at the frame level (all MB filtered)
+                            // 2=specified per MB (1=filtered, 0=non-filtered)
+    vp8_prob prob_pred_filter_off;
+#endif
+
 } VP8_COMMON;
 
 #endif

@@ -15,6 +15,7 @@
 #include "onyxc_int.h"
 #include "findnearmv.h"
 #include "entropymode.h"
+#include "entropymv.h"
 #include "systemdependent.h"
 
 
@@ -36,9 +37,6 @@ static void update_mode_info_border( VP8_COMMON *cpi, MODE_INFO *mi_base )
 }
 static void update_mode_info_in_image( VP8_COMMON *cpi, MODE_INFO *mi )
 {
-    int stride = cpi->mode_info_stride;
-    int rows = cpi->mb_rows;
-    int cols = cpi->mb_cols;
     int i, j;
 
     // For each in image mode_info element set the in image flag to 1
@@ -225,9 +223,7 @@ void vp8_create_common(VP8_COMMON *oci)
     /* Default disable buffer to buffer copying */
     oci->copy_buffer_to_gf = 0;
     oci->copy_buffer_to_arf = 0;
-#if CONFIG_QIMODE
     oci->kf_ymode_probs_update = 0;
-#endif
 }
 
 void vp8_remove_common(VP8_COMMON *oci)
@@ -240,6 +236,8 @@ void vp8_initialize_common()
     vp8_coef_tree_initialize();
 
     vp8_entropy_mode_init();
+
+    vp8_entropy_mv_init();
 
     vp8_init_scan_order_mask();
 

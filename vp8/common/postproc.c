@@ -32,6 +32,14 @@ static const unsigned char MB_PREDICTION_MODE_colors[MB_MODE_COUNT][3] =
     { RGB_TO_YUV(0x98FB98) },   /* PaleGreen */
     { RGB_TO_YUV(0x00FF00) },   /* Green */
     { RGB_TO_YUV(0xADFF2F) },   /* GreenYellow */
+#if CONFIG_NEWINTRAMODES
+    { RGB_TO_YUV(0x8F0000) },   /* Dark Red */
+    { RGB_TO_YUV(0x008F8F) },   /* Dark Cyan */
+    { RGB_TO_YUV(0x008F8F) },   /* Dark Cyan */
+    { RGB_TO_YUV(0x008F8F) },   /* Dark Cyan */
+    { RGB_TO_YUV(0x8F0000) },   /* Dark Red */
+    { RGB_TO_YUV(0x8F0000) },   /* Dark Red */
+#endif
     { RGB_TO_YUV(0x228B22) },   /* ForestGreen */
     { RGB_TO_YUV(0x006400) },   /* DarkGreen */
     { RGB_TO_YUV(0x98F5FF) },   /* Cadet Blue */
@@ -39,6 +47,7 @@ static const unsigned char MB_PREDICTION_MODE_colors[MB_MODE_COUNT][3] =
     { RGB_TO_YUV(0x00008B) },   /* Dark blue */
     { RGB_TO_YUV(0x551A8B) },   /* Purple */
     { RGB_TO_YUV(0xFF0000) }    /* Red */
+    { RGB_TO_YUV(0xCC33FF) },   /* Magenta */
 };
 
 static const unsigned char B_PREDICTION_MODE_colors[B_MODE_COUNT][3] =

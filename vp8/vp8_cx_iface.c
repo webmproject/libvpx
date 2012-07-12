@@ -144,7 +144,7 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
     RANGE_CHECK_HI(cfg, rc_max_quantizer,   63);
     RANGE_CHECK_HI(cfg, rc_min_quantizer,   cfg->rc_max_quantizer);
     RANGE_CHECK_HI(cfg, g_threads,          64);
-    RANGE_CHECK_HI(cfg, g_lag_in_frames,    25);
+    RANGE_CHECK_HI(cfg, g_lag_in_frames,    MAX_LAG_BUFFERS);
     RANGE_CHECK(cfg, rc_end_usage,          VPX_VBR, VPX_CQ);
     RANGE_CHECK_HI(cfg, rc_undershoot_pct,  1000);
     RANGE_CHECK_HI(cfg, rc_overshoot_pct,   1000);
@@ -316,6 +316,10 @@ static vpx_codec_err_t set_vp8e_config(VP8_CONFIG *oxcf,
     oxcf->arnr_type =      vp8_cfg.arnr_type;
 
     oxcf->tuning = vp8_cfg.tuning;
+
+#if CONFIG_LOSSLESS
+    oxcf->lossless = cfg.lossless;
+#endif
 
     /*
         printf("Current VP8 Settings: \n");

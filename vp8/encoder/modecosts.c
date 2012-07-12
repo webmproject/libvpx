@@ -37,30 +37,23 @@ void vp8_init_mode_costs(VP8_COMP *c)
 
         vp8_cost_tokens((int *)c->mb.inter_bmode_costs, x->fc.bmode_prob, T);
     }
+#if CONFIG_ADAPTIVE_ENTROPY
     vp8_cost_tokens((int *)c->mb.inter_bmode_costs,
-        x->fc.sub_mv_ref_prob, vp8_sub_mv_ref_tree);
+        vp8_sub_mv_ref_prob, vp8_sub_mv_ref_tree);
+#else
+    vp8_cost_tokens(c->mb.inter_bmode_costs,
+        vp8_sub_mv_ref_prob, vp8_sub_mv_ref_tree);
+#endif
 
     vp8_cost_tokens(c->mb.mbmode_cost[1], x->fc.ymode_prob, vp8_ymode_tree);
-#if CONFIG_QIMODE
     vp8_cost_tokens(c->mb.mbmode_cost[0],
                     x->kf_ymode_prob[c->common.kf_ymode_probs_index],
                     vp8_kf_ymode_tree);
-#else
-    vp8_cost_tokens(c->mb.mbmode_cost[0],
-                    x->kf_ymode_prob, vp8_kf_ymode_tree);
-#endif
-#if CONFIG_UVINTRA
     vp8_cost_tokens(c->mb.intra_uv_mode_cost[1],
                     x->fc.uv_mode_prob[VP8_YMODES-1], vp8_uv_mode_tree);
     vp8_cost_tokens(c->mb.intra_uv_mode_cost[0],
                     x->kf_uv_mode_prob[VP8_YMODES-1], vp8_uv_mode_tree);
-#else
-    vp8_cost_tokens(c->mb.intra_uv_mode_cost[1],
-                    x->fc.uv_mode_prob, vp8_uv_mode_tree);
-    vp8_cost_tokens(c->mb.intra_uv_mode_cost[0],
-                    x->kf_uv_mode_prob, vp8_uv_mode_tree);
-#endif
     vp8_cost_tokens(c->mb.i8x8_mode_costs,
-                    x->i8x8_mode_prob,vp8_i8x8_mode_tree);
+                    x->fc.i8x8_mode_prob,vp8_i8x8_mode_tree);
 
 }

@@ -104,12 +104,17 @@ static unsigned int do_16x16_motion_iteration
                                                &distortion, &sse);
     }
 
+#if CONFIG_PRED_FILTER
+    // Disable the prediction filter
+    xd->mode_info_context->mbmi.pred_filter_enabled = 0;
+#endif
+
     vp8_set_mbmode_and_mvs(x, NEWMV, dst_mv);
     vp8_build_inter16x16_predictors_mby(xd);
     //VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
     best_err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (xd->dst.y_buffer, xd->dst.y_stride,
-                     xd->predictor, 16, &best_err);
+                     xd->predictor, 16, INT_MAX);
 
     /* restore UMV window */
     x->mv_col_min = tmp_col_min;
@@ -158,7 +163,7 @@ static int do_16x16_motion_search
     err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (ref->y_buffer + mb_y_offset,
                      ref->y_stride, xd->dst.y_buffer,
-                     xd->dst.y_stride, &err);
+                     xd->dst.y_stride, INT_MAX);
     dst_mv->as_int = 0;
 
     // Test last reference frame using the previous best mv as the
@@ -224,7 +229,7 @@ static int do_16x16_zerozero_search
     err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                     (ref->y_buffer + mb_y_offset,
                      ref->y_stride, xd->dst.y_buffer,
-                     xd->dst.y_stride, &err);
+                     xd->dst.y_stride, INT_MAX);
 
     dst_mv->as_int = 0;
 
@@ -255,7 +260,7 @@ static int find_best_16x16_intra
         err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
                         (xd->predictor, 16,
                          buf->y_buffer + mb_y_offset,
-                         buf->y_stride, &err);
+                         buf->y_stride, best_err);
         // find best
         if (err < best_err)
         {
@@ -454,12 +459,8 @@ void separate_arf_mbs
                     &frame_stats->mb_stats[offset + mb_col];
 
                 int altref_err = mb_stats->ref[ALTREF_FRAME].err;
-
-                int intra_err  =
-                    mb_stats->ref[INTRA_FRAME ].err + 250;
-
-                int golden_err =
-                    mb_stats->ref[GOLDEN_FRAME].err + 250;
+                int intra_err  = mb_stats->ref[INTRA_FRAME ].err;
+                int golden_err = mb_stats->ref[GOLDEN_FRAME].err;
 
                 // Test for altref vs intra and gf and that its mv was 0,0.
                 if ( (altref_err > 1000) ||
@@ -506,6 +507,7 @@ void separate_arf_mbs
         else
             cpi->static_mb_pct = 0;
 
+        cpi->seg0_cnt = ncnt[0];
         vp8_enable_segmentation((VP8_PTR) cpi);
     }
     else
@@ -531,6 +533,8 @@ void vp8_update_mbgraph_stats
     // being a GF - so exit if we don't look ahead beyond that
     if (n_frames <= cpi->frames_till_gf_update_due)
         return;
+    if( n_frames > cpi->common.frames_till_alt_ref_frame)
+        n_frames = cpi->common.frames_till_alt_ref_frame;
     if (n_frames > MAX_LAG_BUFFERS)
         n_frames = MAX_LAG_BUFFERS;
 

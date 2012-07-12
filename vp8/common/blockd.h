@@ -34,6 +34,10 @@ void vpx_log(const char *format, ...);
 #define MB_FEATURE_TREE_PROBS   3
 #define PREDICTION_PROBS 3
 
+#if CONFIG_NEWENTROPY
+#define MBSKIP_CONTEXTS 3
+#endif
+
 #define MAX_MB_SEGMENTS         4
 
 #define MAX_REF_LF_DELTAS       4
@@ -68,7 +72,6 @@ extern const unsigned char vp8_block2above[25];
 extern const unsigned char vp8_block2left_8x8[25];
 extern const unsigned char vp8_block2above_8x8[25];
 
-
 #define VP8_COMBINEENTROPYCONTEXTS( Dest, A, B) \
     Dest = ((A)!=0) + ((B)!=0);
 
@@ -83,8 +86,16 @@ typedef enum
     DC_PRED,            /* average of above and left pixels */
     V_PRED,             /* vertical prediction */
     H_PRED,             /* horizontal prediction */
+#if CONFIG_NEWINTRAMODES
+    D45_PRED,           /* Directional 45 deg prediction  [anti-clockwise from 0 deg hor] */
+    D135_PRED,          /* Directional 135 deg prediction [anti-clockwise from 0 deg hor] */
+    D117_PRED,          /* Directional 112 deg prediction [anti-clockwise from 0 deg hor] */
+    D153_PRED,          /* Directional 157 deg prediction [anti-clockwise from 0 deg hor] */
+    D27_PRED,           /* Directional 22 deg prediction  [anti-clockwise from 0 deg hor] */
+    D63_PRED,           /* Directional 67 deg prediction  [anti-clockwise from 0 deg hor] */
+#endif
     TM_PRED,            /* Truemotion prediction */
-    I8X8_PRED,           /* 8x8 based prediction, each 8x8 has its own prediction mode */
+    I8X8_PRED,          /* 8x8 based prediction, each 8x8 has its own prediction mode */
     B_PRED,             /* block based prediction, each block has its own prediction mode */
 
     NEARESTMV,
@@ -164,7 +175,10 @@ union b_mode_info
         B_PREDICTION_MODE second;
 #endif
     } as_mode;
-    int_mv mv;
+    struct {
+        int_mv first;
+        int_mv second;
+    } as_mv;
 };
 
 typedef enum
@@ -200,6 +214,11 @@ typedef struct
     // a valid predictor
     unsigned char mb_in_image;
 
+#if CONFIG_PRED_FILTER
+    // Flag to turn prediction signal filter on(1)/off(0 ) at the MB level
+    unsigned int pred_filter_enabled;
+#endif
+
 } MB_MODE_INFO;
 
 typedef struct
@@ -218,6 +237,7 @@ typedef struct
 
     /* 16 Y blocks, 4 U blocks, 4 V blocks each with 16 entries */
     unsigned char **base_pre;
+    unsigned char **base_second_pre;
     int pre;
     int pre_stride;
 
@@ -312,6 +332,8 @@ typedef struct MacroBlockD
     vp8_subpix_fn_t  subpixel_predict8x4;
     vp8_subpix_fn_t  subpixel_predict8x8;
     vp8_subpix_fn_t  subpixel_predict16x16;
+    vp8_subpix_fn_t  subpixel_predict_avg;
+    vp8_subpix_fn_t  subpixel_predict_avg8x4;
     vp8_subpix_fn_t  subpixel_predict_avg8x8;
     vp8_subpix_fn_t  subpixel_predict_avg16x16;
 #if CONFIG_HIGH_PRECISION_MV
@@ -333,6 +355,9 @@ typedef struct MacroBlockD
 #if CONFIG_RUNTIME_CPU_DETECT
     struct VP8_COMMON_RTCD  *rtcd;
 #endif
+
+    int mb_index;   // Index of the MB in the SB (0..3)
+
 } MACROBLOCKD;
 
 

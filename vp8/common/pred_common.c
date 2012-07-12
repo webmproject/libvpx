@@ -9,6 +9,7 @@
  */
 
 #include "vp8/common/pred_common.h"
+#include "vp8/common/seg_common.h"
 
 // TBD prediction functions for various bitstream signals
 
@@ -58,6 +59,13 @@ unsigned char get_pred_context( VP8_COMMON *const cm,
 
         break;
 
+#if CONFIG_NEWENTROPY
+    case PRED_MBSKIP:
+        pred_context = (m - 1)->mbmi.mb_skip_coeff +
+                       (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
+        break;
+#endif
+
     default:
         // TODO *** add error trap code.
         pred_context = 0;
@@ -96,6 +104,12 @@ vp8_prob get_pred_prob( VP8_COMMON *const cm,
         pred_probability = cm->prob_comppred[pred_context];
         break;
 
+#if CONFIG_NEWENTROPY
+    case PRED_MBSKIP:
+        pred_probability = cm->mbskip_pred_probs[pred_context];
+        break;
+#endif
+
     default:
         // TODO *** add error trap code.
         pred_probability = 128;
@@ -122,11 +136,17 @@ unsigned char get_pred_flag( MACROBLOCKD *const xd,
         pred_flag = xd->mode_info_context->mbmi.ref_predicted;
         break;
 
+#if CONFIG_NEWENTROPY
+    case PRED_MBSKIP:
+        pred_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
+        break;
+#endif
+
     default:
         // TODO *** add error trap code.
         pred_flag = 0;
         break;
-}
+    }
 
     return pred_flag;
 }
@@ -146,6 +166,12 @@ void set_pred_flag( MACROBLOCKD *const xd,
     case PRED_REF:
         xd->mode_info_context->mbmi.ref_predicted = pred_flag;
         break;
+
+#if CONFIG_NEWENTROPY
+    case PRED_MBSKIP:
+        xd->mode_info_context->mbmi.mb_skip_coeff = pred_flag;
+        break;
+#endif
 
     default:
         // TODO *** add error trap code.
@@ -252,7 +278,7 @@ void calc_ref_probs( int * count, vp8_prob * probs )
     tot_count = count[0] + count[1] + count[2] + count[3];
     if ( tot_count )
     {
-        probs[0] = (vp8_prob)((count[0] * 255) / tot_count);
+        probs[0] = (vp8_prob)((count[0] * 255 + (tot_count >> 1)) / tot_count);
         probs[0] += !probs[0];
     }
     else
@@ -261,7 +287,7 @@ void calc_ref_probs( int * count, vp8_prob * probs )
     tot_count -= count[0];
     if ( tot_count )
     {
-        probs[1] = (vp8_prob)((count[1] * 255) / tot_count);
+        probs[1] = (vp8_prob)((count[1] * 255 + (tot_count >> 1)) / tot_count);
         probs[1] += !probs[1];
     }
     else
@@ -270,7 +296,7 @@ void calc_ref_probs( int * count, vp8_prob * probs )
     tot_count -= count[1];
     if ( tot_count )
     {
-        probs[2] = (vp8_prob)((count[2] * 255) / tot_count);
+        probs[2] = (vp8_prob)((count[2] * 255 + (tot_count >> 1)) / tot_count);
         probs[2] += !probs[2];
     }
     else

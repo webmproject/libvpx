@@ -81,7 +81,7 @@ void vp8_find_near_mvs
         else
             cnt[CNT_INTRA] += 2;
     }
-    /* Process above left or the one frome last frame */
+    /* Process above left or the one from last frame */
     if ( aboveleft->mbmi.ref_frame != INTRA_FRAME||
          (lf_here->mbmi.ref_frame==LAST_FRAME && refframe == LAST_FRAME))
     {
@@ -177,9 +177,9 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
     vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
 )
 {
-    p[0] = pc->vp8_mode_contexts [near_mv_ref_ct[0]] [0];
-    p[1] = pc->vp8_mode_contexts [near_mv_ref_ct[1]] [1];
-    p[2] = pc->vp8_mode_contexts [near_mv_ref_ct[2]] [2];
-    p[3] = pc->vp8_mode_contexts [near_mv_ref_ct[3]] [3];
+    p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];
+    p[1] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[1]] [1];
+    p[2] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[2]] [2];
+    p[3] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[3]] [3];
     return p;
 }

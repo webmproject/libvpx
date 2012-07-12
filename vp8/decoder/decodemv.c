@@ -17,6 +17,7 @@
 
 #include "vp8/common/seg_common.h"
 #include "vp8/common/pred_common.h"
+#include "vp8/common/entropy.h"
 
 #if CONFIG_DEBUG
 #include <assert.h>
@@ -77,12 +78,14 @@ static void vp8_read_mb_segid(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x)
             mi->segment_id = (unsigned char)(vp8_read(r, x->mb_segment_tree_probs[1]));
     }
 }
+
 extern const int vp8_i8x8_block[4];
 static void vp8_kfread_modes(VP8D_COMP *pbi,
                              MODE_INFO *m,
                              int mb_row,
                              int mb_col)
 {
+    VP8_COMMON *const cm = & pbi->common;
     vp8_reader *const bc = & pbi->bc;
     const int mis = pbi->common.mode_info_stride;
     int map_index = mb_row * pbi->common.mb_cols + mb_col;
@@ -97,13 +100,19 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
         pbi->common.last_frame_seg_map[map_index] = m->mbmi.segment_id;
     }
 
+    m->mbmi.mb_skip_coeff = 0;
     if ( pbi->common.mb_no_coeff_skip &&
          ( !segfeature_active( &pbi->mb,
                                m->mbmi.segment_id, SEG_LVL_EOB ) ||
            ( get_segdata( &pbi->mb,
                           m->mbmi.segment_id, SEG_LVL_EOB ) != 0 ) ) )
     {
+#if CONFIG_NEWENTROPY
+        MACROBLOCKD *const xd  = & pbi->mb;
+        m->mbmi.mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
+#else
         m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
+#endif
     }
     else
     {
@@ -118,13 +127,8 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
             m->mbmi.mb_skip_coeff = 0;
     }
 
-#if CONFIG_QIMODE
     y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(bc,
         pbi->common.kf_ymode_prob[pbi->common.kf_ymode_probs_index]);
-#else
-    y_mode = (MB_PREDICTION_MODE) vp8_kfread_ymode(
-                                      bc, pbi->common.kf_ymode_prob);
-#endif
 #if CONFIG_COMP_INTRA_PRED
     m->mbmi.second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
@@ -167,7 +171,7 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
         for(i=0;i<4;i++)
          {
              int ib = vp8_i8x8_block[i];
-             mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
+             mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.fc.i8x8_mode_prob);
              m->bmi[ib+0].as_mode.first= mode8x8;
              m->bmi[ib+1].as_mode.first= mode8x8;
              m->bmi[ib+4].as_mode.first= mode8x8;
@@ -181,16 +185,12 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
          }
    }
     else
-#if CONFIG_UVINTRA
         m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
             pbi->common.kf_uv_mode_prob[m->mbmi.mode]);
-#else
-        m->mbmi.uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-            pbi->common.kf_uv_mode_prob);
-#endif
 #if CONFIG_COMP_INTRA_PRED
     m->mbmi.second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
+
 }
 
 static int read_mvcomponent(vp8_reader *r, const MV_CONTEXT *mvc)
@@ -511,12 +511,30 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
     MACROBLOCKD *const xd  = & pbi->mb;
 #endif
 
+#if CONFIG_NEWENTROPY
+    vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
+#else
     pbi->prob_skip_false = 0;
+#endif
     if (pbi->common.mb_no_coeff_skip)
-        pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
-
-    if(pbi->common.frame_type != KEY_FRAME)
     {
+#if CONFIG_NEWENTROPY
+        int k;
+        for (k=0; k<MBSKIP_CONTEXTS; ++k)
+            cm->mbskip_pred_probs[k] = (vp8_prob)vp8_read_literal(bc, 8);
+#else
+        pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
+#endif
+    }
+
+    if(cm->frame_type != KEY_FRAME)
+    {
+#if CONFIG_PRED_FILTER
+        cm->pred_filter_mode = (vp8_prob)vp8_read_literal(bc, 2);
+
+        if (cm->pred_filter_mode == 2)
+            cm->prob_pred_filter_off = (vp8_prob)vp8_read_literal(bc, 8);
+#endif
         // Decode the baseline probabilities for decoding reference frame
         cm->prob_intra_coded = (vp8_prob)vp8_read_literal(bc, 8);
         cm->prob_last_coded  = (vp8_prob)vp8_read_literal(bc, 8);
@@ -546,20 +564,6 @@ static void mb_mode_mv_init(VP8D_COMP *pbi)
             }
             while (++i < VP8_YMODES-1);
         }
-#if CONFIG_UVINTRA
-        //vp8_read_bit(bc);
-#else
-        if (vp8_read_bit(bc))
-        {
-            int i = 0;
-
-            do
-            {
-                cm->fc.uv_mode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
-            }
-            while (++i < VP8_UV_MODES-1);
-        }
-#endif /* CONFIG_UVINTRA */
 #if CONFIG_HIGH_PRECISION_MV
         if (xd->allow_high_precision_mv)
             read_mvcontexts_hp(bc, mvc_hp);
@@ -644,7 +648,6 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     const int mis = pbi->common.mode_info_stride;
     MACROBLOCKD *const xd  = & pbi->mb;
 
-    int index = mb_row * pbi->common.mb_cols + mb_col;
     int_mv *const mv = & mbmi->mv;
     int mb_to_left_edge;
     int mb_to_right_edge;
@@ -683,7 +686,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     {
         // Read the macroblock coeff skip flag if this feature is in use,
         // else default to 0
+#if CONFIG_NEWENTROPY
+        mbmi->mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
+#else
         mbmi->mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
+#endif
     }
     else
     {
@@ -705,6 +712,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     {
         int rct[4];
         int_mv nearest, nearby, best_mv;
+        int_mv nearest_second, nearby_second, best_mv_second;
         vp8_prob mv_ref_p [VP8_MVREFS-1];
 
         vp8_find_near_mvs(xd, mi,
@@ -726,61 +734,154 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             vp8_accum_mv_refs(&pbi->common, mbmi->mode, rct);
         }
 
+#if CONFIG_PRED_FILTER
+        if (mbmi->mode >= NEARESTMV && mbmi->mode < SPLITMV)
+        {
+            // Is the prediction filter enabled
+            if (cm->pred_filter_mode == 2)
+                mbmi->pred_filter_enabled =
+                    vp8_read(bc, cm->prob_pred_filter_off);
+            else
+                mbmi->pred_filter_enabled = cm->pred_filter_mode;
+        }
+#endif
+
+        if ( cm->comp_pred_mode == COMP_PREDICTION_ONLY ||
+            (cm->comp_pred_mode == HYBRID_PREDICTION &&
+             vp8_read(bc, get_pred_prob( cm, xd, PRED_COMP ))) )
+        {
+            /* Since we have 3 reference frames, we can only have 3 unique
+             * combinations of combinations of 2 different reference frames
+             * (A-G, G-L or A-L). In the bitstream, we use this to simply
+             * derive the second reference frame from the first reference
+             * frame, by saying it's the next one in the enumerator, and
+             * if that's > n_refs, then the second reference frame is the
+             * first one in the enumerator. */
+            mbmi->second_ref_frame = mbmi->ref_frame + 1;
+            if (mbmi->second_ref_frame == 4)
+                mbmi->second_ref_frame = 1;
+
+            vp8_find_near_mvs(xd, mi,
+                              prev_mi,
+                              &nearest_second, &nearby_second, &best_mv_second, rct,
+                              mbmi->second_ref_frame, pbi->common.ref_frame_sign_bias);
+        }
+        else
+        {
+            mbmi->second_ref_frame = 0;
+        }
+
         mbmi->uv_mode = DC_PRED;
         switch (mbmi->mode)
         {
         case SPLITMV:
         {
             const int s = mbmi->partitioning =
-                      vp8_treed_read(bc, vp8_mbsplit_tree, vp8_mbsplit_probs);
+                      vp8_treed_read(bc, vp8_mbsplit_tree, cm->fc.mbsplit_prob);
             const int num_p = vp8_mbsplit_count [s];
             int j = 0;
+#if CONFIG_ADAPTIVE_ENTROPY
+            cm->fc.mbsplit_counts[s]++;
+#endif
 
             mbmi->need_to_clamp_mvs = 0;
             do  /* for each subset j */
             {
-                int_mv leftmv, abovemv;
-                int_mv blockmv;
+                int_mv leftmv, abovemv, second_leftmv, second_abovemv;
+                int_mv blockmv, secondmv;
                 int k;  /* first block in subset j */
                 int mv_contz;
+                int blockmode;
+
                 k = vp8_mbsplit_offset[s][j];
 
                 leftmv.as_int = left_block_mv(mi, k);
                 abovemv.as_int = above_block_mv(mi, k, mis);
+                if (mbmi->second_ref_frame)
+                {
+                    second_leftmv.as_int = left_block_second_mv(mi, k);
+                    second_abovemv.as_int = above_block_second_mv(mi, k, mis);
+                }
                 mv_contz = vp8_mv_cont(&leftmv, &abovemv);
+                blockmode = sub_mv_ref(bc, cm->fc.sub_mv_ref_prob [mv_contz]);
+#if CONFIG_ADAPTIVE_ENTROPY
+                cm->fc.sub_mv_ref_counts[mv_contz][blockmode-LEFT4X4]++;
+#endif
 
-                switch (sub_mv_ref(bc, vp8_sub_mv_ref_prob2 [mv_contz])) /*pc->fc.sub_mv_ref_prob))*/
+                switch (blockmode)
                 {
                 case NEW4X4:
 #if CONFIG_HIGH_PRECISION_MV
                     if (xd->allow_high_precision_mv)
+                    {
                         read_mv_hp(bc, &blockmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount_hp[0][mv_max_hp+(blockmv.as_mv.row)]++;
+                        cm->fc.MVcount_hp[1][mv_max_hp+(blockmv.as_mv.col)]++;
+#endif
+                    }
                     else
 #endif
-                    read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
+                    {
+                        read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount[0][mv_max+(blockmv.as_mv.row>>1)]++;
+                        cm->fc.MVcount[1][mv_max+(blockmv.as_mv.col>>1)]++;
+#endif
+                    }
                     blockmv.as_mv.row += best_mv.as_mv.row;
                     blockmv.as_mv.col += best_mv.as_mv.col;
-  #ifdef VPX_MODE_COUNT
+
+                    if (mbmi->second_ref_frame)
+                    {
+#if CONFIG_HIGH_PRECISION_MV
+                        if (xd->allow_high_precision_mv)
+                        {
+                            read_mv_hp(bc, &secondmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                            cm->fc.MVcount_hp[0][mv_max_hp+(secondmv.as_mv.row)]++;
+                            cm->fc.MVcount_hp[1][mv_max_hp+(secondmv.as_mv.col)]++;
+#endif
+                        }
+                        else
+#endif
+                        {
+                            read_mv(bc, &secondmv.as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                            cm->fc.MVcount[0][mv_max+(secondmv.as_mv.row>>1)]++;
+                            cm->fc.MVcount[1][mv_max+(secondmv.as_mv.col>>1)]++;
+#endif
+                        }
+                        secondmv.as_mv.row += best_mv_second.as_mv.row;
+                        secondmv.as_mv.col += best_mv_second.as_mv.col;
+                    }
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][3]++;
-  #endif
+#endif
                     break;
                 case LEFT4X4:
                     blockmv.as_int = leftmv.as_int;
-  #ifdef VPX_MODE_COUNT
+                    if (mbmi->second_ref_frame)
+                        secondmv.as_int = second_leftmv.as_int;
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][0]++;
-  #endif
+#endif
                     break;
                 case ABOVE4X4:
                     blockmv.as_int = abovemv.as_int;
-  #ifdef VPX_MODE_COUNT
+                    if (mbmi->second_ref_frame)
+                        secondmv.as_int = second_abovemv.as_int;
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][1]++;
-  #endif
+#endif
                     break;
                 case ZERO4X4:
                     blockmv.as_int = 0;
-  #ifdef VPX_MODE_COUNT
+                    if (mbmi->second_ref_frame)
+                        secondmv.as_int = 0;
+#ifdef VPX_MODE_COUNT
                     vp8_mv_cont_count[mv_contz][2]++;
-  #endif
+#endif
                     break;
                 default:
                     break;
@@ -791,6 +892,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                           mb_to_right_edge,
                                                           mb_to_top_edge,
                                                           mb_to_bottom_edge);
+                if (mbmi->second_ref_frame)
+                {
+                    mbmi->need_to_clamp_mvs |= vp8_check_mv_bounds(&secondmv,
+                                                                   mb_to_left_edge,
+                                                                   mb_to_right_edge,
+                                                                   mb_to_top_edge,
+                                                                   mb_to_bottom_edge);
+                }
 
                 {
                     /* Fill (uniform) modes, mvs of jth subset.
@@ -802,7 +911,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                     fill_offset = &mbsplit_fill_offset[s][(unsigned char)j * mbsplit_fill_count[s]];
 
                     do {
-                        mi->bmi[ *fill_offset].mv.as_int = blockmv.as_int;
+                        mi->bmi[ *fill_offset].as_mv.first.as_int = blockmv.as_int;
+                        if (mbmi->second_ref_frame)
+                            mi->bmi[ *fill_offset].as_mv.second.as_int = secondmv.as_int;
                         fill_offset++;
                     }while (--fill_count);
                 }
@@ -811,7 +922,8 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             while (++j < num_p);
         }
 
-        mv->as_int = mi->bmi[15].mv.as_int;
+        mv->as_int = mi->bmi[15].as_mv.first.as_int;
+        mbmi->second_mv.as_int = mi->bmi[15].as_mv.second.as_int;
 
         break;  /* done with SPLITMV */
 
@@ -820,26 +932,52 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             /* Clip "next_nearest" so that it does not extend to far out of image */
             vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
                          mb_to_top_edge, mb_to_bottom_edge);
-            goto propagate_mv;
+            if (mbmi->second_ref_frame)
+            {
+                mbmi->second_mv.as_int = nearby_second.as_int;
+                vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
+                             mb_to_top_edge, mb_to_bottom_edge);
+            }
+            break;
 
         case NEARESTMV:
             mv->as_int = nearest.as_int;
             /* Clip "next_nearest" so that it does not extend to far out of image */
             vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
                          mb_to_top_edge, mb_to_bottom_edge);
-            goto propagate_mv;
+            if (mbmi->second_ref_frame)
+            {
+                mbmi->second_mv.as_int = nearest_second.as_int;
+                vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
+                             mb_to_top_edge, mb_to_bottom_edge);
+            }
+            break;
 
         case ZEROMV:
             mv->as_int = 0;
-            goto propagate_mv;
+            if (mbmi->second_ref_frame)
+                mbmi->second_mv.as_int = 0;
+            break;
 
         case NEWMV:
 #if CONFIG_HIGH_PRECISION_MV
             if (xd->allow_high_precision_mv)
+            {
                 read_mv_hp(bc, &mv->as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                cm->fc.MVcount_hp[0][mv_max_hp+(mv->as_mv.row)]++;
+                cm->fc.MVcount_hp[1][mv_max_hp+(mv->as_mv.col)]++;
+#endif
+            }
             else
 #endif
-            read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
+            {
+                read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                cm->fc.MVcount[0][mv_max+(mv->as_mv.row>>1)]++;
+                cm->fc.MVcount[1][mv_max+(mv->as_mv.col>>1)]++;
+#endif
+            }
             mv->as_mv.row += best_mv.as_mv.row;
             mv->as_mv.col += best_mv.as_mv.col;
 
@@ -853,59 +991,35 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                       mb_to_right_edge,
                                                       mb_to_top_edge,
                                                       mb_to_bottom_edge);
-
-        propagate_mv:  /* same MV throughout */
-
-            if ( cm->comp_pred_mode == COMP_PREDICTION_ONLY ||
-                 (cm->comp_pred_mode == HYBRID_PREDICTION &&
-                     vp8_read(bc, get_pred_prob( cm, xd, PRED_COMP ))) )
-            {
-                mbmi->second_ref_frame = mbmi->ref_frame + 1;
-                if (mbmi->second_ref_frame == 4)
-                    mbmi->second_ref_frame = 1;
-            }
             if (mbmi->second_ref_frame)
             {
-                vp8_find_near_mvs(xd, mi,
-                                  prev_mi,
-                                  &nearest, &nearby, &best_mv, rct,
-                                  (int)mbmi->second_ref_frame,
-                                  pbi->common.ref_frame_sign_bias);
-                switch (mbmi->mode) {
-                case ZEROMV:
-                    mbmi->second_mv.as_int = 0;
-                    break;
-                case NEARMV:
-                    mbmi->second_mv.as_int = nearby.as_int;
-                    vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
-                                 mb_to_top_edge, mb_to_bottom_edge);
-                    break;
-                case NEARESTMV:
-                    mbmi->second_mv.as_int = nearest.as_int;
-                    vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
-                                 mb_to_top_edge, mb_to_bottom_edge);
-                    break;
-                case NEWMV:
 #if CONFIG_HIGH_PRECISION_MV
                     if (xd->allow_high_precision_mv)
+                    {
                         read_mv_hp(bc, &mbmi->second_mv.as_mv,
                                    (const MV_CONTEXT_HP *) mvc_hp);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount_hp[0][mv_max_hp+(mbmi->second_mv.as_mv.row)]++;
+                        cm->fc.MVcount_hp[1][mv_max_hp+(mbmi->second_mv.as_mv.col)]++;
+#endif
+                    }
                     else
 #endif
-                    read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
-                    mbmi->second_mv.as_mv.row += best_mv.as_mv.row;
-                    mbmi->second_mv.as_mv.col += best_mv.as_mv.col;
-                    mbmi->need_to_clamp_secondmv = vp8_check_mv_bounds(&mbmi->second_mv,
+                    {
+                        read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
+#if CONFIG_ADAPTIVE_ENTROPY
+                        cm->fc.MVcount[0][mv_max+(mbmi->second_mv.as_mv.row>>1)]++;
+                        cm->fc.MVcount[1][mv_max+(mbmi->second_mv.as_mv.col>>1)]++;
+#endif
+                    }
+                    mbmi->second_mv.as_mv.row += best_mv_second.as_mv.row;
+                    mbmi->second_mv.as_mv.col += best_mv_second.as_mv.col;
+                    mbmi->need_to_clamp_secondmv |= vp8_check_mv_bounds(&mbmi->second_mv,
                                                                    mb_to_left_edge,
                                                                    mb_to_right_edge,
                                                                    mb_to_top_edge,
                                                                    mb_to_bottom_edge);
-                    break;
-                default:
-                    break;
-                }
             }
-
             break;
         default:;
   #if CONFIG_DEBUG
@@ -925,6 +1039,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         {
             mbmi->mode = (MB_PREDICTION_MODE)
                          vp8_read_ymode(bc, pbi->common.fc.ymode_prob);
+#if CONFIG_ADAPTIVE_ENTROPY
+            pbi->common.fc.ymode_counts[mbmi->mode]++;
+#endif
         }
 #if CONFIG_COMP_INTRA_PRED
         mbmi->second_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
@@ -940,6 +1057,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             do
             {
                 mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
+#if CONFIG_ADAPTIVE_ENTROPY
+                pbi->common.fc.bmode_counts[mi->bmi[j].as_mode.first]++;
+#endif
 #if CONFIG_COMP_INTRA_PRED
                 if (use_comp_pred)
                 {
@@ -961,11 +1081,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             for(i=0;i<4;i++)
             {
                 int ib = vp8_i8x8_block[i];
-                mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.i8x8_mode_prob);
+                mode8x8 = vp8_read_i8x8_mode(bc, pbi->common.fc.i8x8_mode_prob);
                 mi->bmi[ib+0].as_mode.first= mode8x8;
                 mi->bmi[ib+1].as_mode.first= mode8x8;
                 mi->bmi[ib+4].as_mode.first= mode8x8;
                 mi->bmi[ib+5].as_mode.first= mode8x8;
+#if CONFIG_ADAPTIVE_ENTROPY
+                pbi->common.fc.i8x8_mode_counts[mode8x8]++;
+#endif
 #if CONFIG_COMP_INTRA_PRED
                 mi->bmi[ib+0].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
                 mi->bmi[ib+1].as_mode.second= (MB_PREDICTION_MODE) (DC_PRED - 1);
@@ -975,13 +1098,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
             }
         }
         else
-#if CONFIG_UVINTRA
+        {
             mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
                                     pbi->common.fc.uv_mode_prob[mbmi->mode]);
-#else
-            mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
-                                    pbi->common.fc.uv_mode_prob);
-#endif /*CONFIG_UVINTRA*/
+#if CONFIG_ADAPTIVE_ENTROPY
+            pbi->common.fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
+#endif
+        }
+
 #if CONFIG_COMP_INTRA_PRED
         mbmi->second_uv_mode = (MB_PREDICTION_MODE) (DC_PRED - 1);
 #endif
@@ -991,86 +1115,78 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
 void vp8_decode_mode_mvs(VP8D_COMP *pbi)
 {
-    MODE_INFO *mi = pbi->common.mi;
+    int i;
+    VP8_COMMON *cm = &pbi->common;
+    MODE_INFO *mi = cm->mi;
+    MACROBLOCKD *const xd  = &pbi->mb;
+    int sb_row, sb_col;
+    int sb_rows = (cm->mb_rows + 1)>>1;
+    int sb_cols = (cm->mb_cols + 1)>>1;
+    int row_delta[4] = { 0, +1,  0, -1};
+    int col_delta[4] = {+1, -1, +1, +1};
 
-    MODE_INFO *prev_mi = pbi->common.prev_mi;
-
-    int mb_row = -1;
-
-#if 0
-    FILE *statsfile;
-    statsfile = fopen("decsegmap.stt", "a");
-    fprintf(statsfile, "\n" );
-#endif
+    MODE_INFO *prev_mi = cm->prev_mi;
 
     mb_mode_mv_init(pbi);
 
-#if CONFIG_QIMODE
-    if(pbi->common.frame_type==KEY_FRAME && !pbi->common.kf_ymode_probs_update)
+    if(cm->frame_type==KEY_FRAME && !cm->kf_ymode_probs_update)
     {
-        pbi->common.kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
+        cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
     }
-#endif
 
-    while (++mb_row < pbi->common.mb_rows)
+    for (sb_row=0; sb_row<sb_rows; sb_row++)
     {
-        int mb_col = -1;
-        int mb_to_top_edge;
-        int mb_to_bottom_edge;
+        int mb_col = 0;
+        int mb_row = (sb_row <<1);
 
-        pbi->mb.mb_to_top_edge =
-        mb_to_top_edge = -((mb_row * 16)) << 3;
-        mb_to_top_edge -= LEFT_TOP_MARGIN;
-
-        pbi->mb.mb_to_bottom_edge =
-        mb_to_bottom_edge = ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
-        mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
-
-#if 0
-        fprintf(statsfile, "\n" );
-#endif
-
-        while (++mb_col < pbi->common.mb_cols)
+        for (sb_col=0; sb_col<sb_cols; sb_col++)
         {
-            /*read_mb_modes_mv(pbi, xd->mode_info_context, &xd->mode_info_context->mbmi, mb_row, mb_col);*/
-            if(pbi->common.frame_type == KEY_FRAME)
-                vp8_kfread_modes(pbi, mi, mb_row, mb_col);
-            else
-                read_mb_modes_mv(pbi, mi, &mi->mbmi,
-                prev_mi,
-                mb_row, mb_col);
-
-            //printf("%3d", mi->mbmi.mode);
-
-            /*
-            if(pbi->common.current_video_frame==7)
+            for ( i=0; i<4; i++ )
             {
-                FILE *fmode=fopen("kfmode.txt", "a");
-                fprintf(fmode, "%3d:%3d:%d\n",mb_row, mb_col, mi->mbmi.mode);
-                fclose(fmode);
+                int mb_to_top_edge;
+                int mb_to_bottom_edge;
 
-            }*/
-            /*
-            if(mi->mbmi.mode==I8X8_PRED)
-            {
-                printf("F%3d:%d:%d\n", pbi->common.current_video_frame, mb_row, mb_col);
+                int dy = row_delta[i];
+                int dx = col_delta[i];
+                int offset_extended = dy * cm->mode_info_stride + dx;
+
+                if ((mb_row >= cm->mb_rows) || (mb_col >= cm->mb_cols))
+                {
+                    /* next macroblock */
+                    mb_row += dy;
+                    mb_col += dx;
+                    mi += offset_extended;
+                    prev_mi += offset_extended;
+                    continue;
+                }
+
+                // Make sure the MacroBlockD mode info pointer is set correctly
+                xd->mode_info_context = mi;
+                xd->prev_mode_info_context = prev_mi;
+
+                pbi->mb.mb_to_top_edge = mb_to_top_edge = -((mb_row * 16)) << 3;
+                                         mb_to_top_edge -= LEFT_TOP_MARGIN;
+
+                pbi->mb.mb_to_bottom_edge =
+                mb_to_bottom_edge =
+                        ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
+                mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
+
+                if(cm->frame_type == KEY_FRAME)
+                    vp8_kfread_modes(pbi, mi, mb_row, mb_col);
+                else
+                    read_mb_modes_mv(pbi, mi, &mi->mbmi, prev_mi, mb_row,
+                                     mb_col);
+
+                /* next macroblock */
+                mb_row += dy;
+                mb_col += dx;
+                mi += offset_extended;
+                prev_mi += offset_extended;
             }
-            */
-#if 0
-            fprintf(statsfile, "%2d%2d%2d   ",
-                mi->mbmi.segment_id, mi->mbmi.ref_frame, mi->mbmi.mode );
-#endif
-            prev_mi++;
-            mi++;       /* next macroblock */
         }
-       // printf("\n");
-        prev_mi++;
-        mi++;           /* skip left predictor each row */
+
+        mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
+        prev_mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
     }
-
-#if 0
-    fclose(statsfile);
-#endif
-
-
 }

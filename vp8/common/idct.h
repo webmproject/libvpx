@@ -31,6 +31,10 @@
 #include "arm/idct_arm.h"
 #endif
 
+#if CONFIG_LOSSLESS
+#define WHT_UPSCALE_FACTOR 3
+#define Y2_WHT_UPSCALE_FACTOR 2
+#endif
 
 #ifndef vp8_idct_idct8
 #define vp8_idct_idct8 vp8_short_idct8x8_c
@@ -84,6 +88,14 @@ extern prototype_second_order(vp8_idct_iwalsh1);
 #define vp8_idct_iwalsh16 vp8_short_inv_walsh4x4_c
 #endif
 extern prototype_second_order(vp8_idct_iwalsh16);
+
+#if CONFIG_LOSSLESS
+extern prototype_idct(vp8_short_inv_walsh4x4_x8_c);
+extern prototype_idct(vp8_short_inv_walsh4x4_1_x8_c);
+extern prototype_idct_scalar_add(vp8_dc_only_inv_walsh_add_c);
+extern prototype_second_order(vp8_short_inv_walsh4x4_lossless_c);
+extern prototype_second_order(vp8_short_inv_walsh4x4_1_lossless_c);
+#endif
 
 typedef prototype_idct((*vp8_idct_fn_t));
 typedef prototype_idct_scalar_add((*vp8_idct_scalar_add_fn_t));

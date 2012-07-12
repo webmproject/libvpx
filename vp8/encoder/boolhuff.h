@@ -41,6 +41,13 @@ extern void vp8_encode_value(BOOL_CODER *br, int data, int bits);
 extern void vp8_stop_encode(BOOL_CODER *bc);
 extern const unsigned int vp8_prob_cost[256];
 
+#if CONFIG_NEWENTROPY
+extern void vp8_encode_uniform(BOOL_CODER *bc, int v, int n);
+extern void vp8_encode_term_subexp(BOOL_CODER *bc, int v, int k, int n);
+extern int vp8_count_uniform(int v, int n);
+extern int vp8_count_term_subexp(int v, int k, int n);
+extern int recenter_nonneg(int v, int m);
+#endif
 
 DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 

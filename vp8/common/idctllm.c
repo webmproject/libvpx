@@ -23,6 +23,7 @@
  *         x * sqrt(2) * cos (pi/8) = x + x * (sqrt(2) *cos(pi/8)-1).
  **************************************************************************/
 #include "vpx_ports/config.h"
+#include "vp8/common/idct.h"
 
 
 #include <math.h>
@@ -138,10 +139,89 @@ void vp8_short_inv_walsh4x4_c(short *input, short *output)
 {
     int i;
     int a1, b1, c1, d1;
-    int a2, b2, c2, d2;
     short *ip = input;
     short *op = output;
 
+    for (i = 0; i < 4; i++)
+    {
+        a1 = ((ip[0] + ip[3]));
+        b1 = ((ip[1] + ip[2]));
+        c1 = ((ip[1] - ip[2]));
+        d1 = ((ip[0] - ip[3]));
+
+        op[0] = (a1 + b1 + 1)>>1;
+        op[1] = (c1 + d1)>>1;
+        op[2] = (a1 - b1)>>1;
+        op[3] = (d1 - c1)>>1;
+
+        ip += 4;
+        op += 4;
+    }
+
+    ip = output;
+    op = output;
+    for (i = 0; i < 4; i++)
+    {
+        a1 = ip[0] + ip[12];
+        b1 = ip[4] + ip[8];
+        c1 = ip[4] - ip[8];
+        d1 = ip[0] - ip[12];
+        op[0] = (a1 + b1 + 1)>>1;
+        op[4] = (c1 + d1)>>1;
+        op[8] = (a1 - b1)>>1;
+        op[12]= (d1 - c1)>>1;
+        ip++;
+        op++;
+    }
+}
+
+void vp8_short_inv_walsh4x4_1_c(short *in, short *out)
+{
+    int i;
+    short tmp[4];
+    short *ip = in;
+    short *op = tmp;
+
+    op[0] =(ip[0]+ 1)>>1;
+    op[1] = op[2] = op[3] = (ip[0]>>1);
+
+    ip = tmp;
+    op = out;
+    for(i = 0; i<4; i++)
+    {
+        op[0] =(ip[0]+ 1)>>1;
+        op[4] = op[8] = op[12] = (ip[0]>>1);
+        ip ++;
+        op ++;
+    }
+}
+
+#if CONFIG_LOSSLESS
+void vp8_short_inv_walsh4x4_lossless_c(short *input, short *output)
+{
+    int i;
+    int a1, b1, c1, d1;
+    short *ip = input;
+    short *op = output;
+
+    for (i = 0; i < 4; i++)
+    {
+        a1 = ((ip[0] + ip[3]))>>Y2_WHT_UPSCALE_FACTOR;
+        b1 = ((ip[1] + ip[2]))>>Y2_WHT_UPSCALE_FACTOR;
+        c1 = ((ip[1] - ip[2]))>>Y2_WHT_UPSCALE_FACTOR;
+        d1 = ((ip[0] - ip[3]))>>Y2_WHT_UPSCALE_FACTOR;
+
+        op[0] = (a1 + b1 + 1)>>1;
+        op[1] = (c1 + d1)>>1;
+        op[2] = (a1 - b1)>>1;
+        op[3] = (d1 - c1)>>1;
+
+        ip += 4;
+        op += 4;
+    }
+
+    ip = output;
+    op = output;
     for (i = 0; i < 4; i++)
     {
         a1 = ip[0] + ip[12];
@@ -149,57 +229,130 @@ void vp8_short_inv_walsh4x4_c(short *input, short *output)
         c1 = ip[4] - ip[8];
         d1 = ip[0] - ip[12];
 
-        op[0] = a1 + b1;
-        op[4] = c1 + d1;
-        op[8] = a1 - b1;
-        op[12] = d1 - c1;
+
+        op[0] = ((a1 + b1 + 1)>>1)<<Y2_WHT_UPSCALE_FACTOR;
+        op[4] = ((c1 + d1)>>1)<<Y2_WHT_UPSCALE_FACTOR;
+        op[8] = ((a1 - b1)>>1)<<Y2_WHT_UPSCALE_FACTOR;
+        op[12]= ((d1 - c1)>>1)<<Y2_WHT_UPSCALE_FACTOR;
+
         ip++;
         op++;
+    }
+}
+
+void vp8_short_inv_walsh4x4_1_lossless_c(short *in, short *out)
+{
+    int i;
+    short tmp[4];
+    short *ip = in;
+    short *op = tmp;
+
+    op[0] =((ip[0]>>Y2_WHT_UPSCALE_FACTOR)+ 1)>>1;
+    op[1] = op[2] = op[3] = ((ip[0]>>Y2_WHT_UPSCALE_FACTOR)>>1);
+
+    ip = tmp;
+    op = out;
+    for(i = 0; i<4; i++)
+    {
+        op[0] =((ip[0]+ 1)>>1)<<Y2_WHT_UPSCALE_FACTOR;
+        op[4] = op[8] = op[12] = ((ip[0]>>1))<<Y2_WHT_UPSCALE_FACTOR;
+        ip ++;
+        op ++;
+    }
+}
+
+void vp8_short_inv_walsh4x4_x8_c(short *input, short *output, int pitch)
+{
+    int i;
+    int a1, b1, c1, d1;
+    short *ip = input;
+    short *op = output;
+    int shortpitch = pitch >> 1;
+
+    for (i = 0; i < 4; i++)
+    {
+        a1 = ((ip[0] + ip[3]))>>WHT_UPSCALE_FACTOR;
+        b1 = ((ip[1] + ip[2]))>>WHT_UPSCALE_FACTOR;
+        c1 = ((ip[1] - ip[2]))>>WHT_UPSCALE_FACTOR;
+        d1 = ((ip[0] - ip[3]))>>WHT_UPSCALE_FACTOR;
+
+        op[0] = (a1 + b1 + 1)>>1;
+        op[1] = (c1 + d1)>>1;
+        op[2] = (a1 - b1)>>1;
+        op[3] = (d1 - c1)>>1;
+
+        ip += 4;
+        op += shortpitch;
     }
 
     ip = output;
     op = output;
-
     for (i = 0; i < 4; i++)
     {
-        a1 = ip[0] + ip[3];
-        b1 = ip[1] + ip[2];
-        c1 = ip[1] - ip[2];
-        d1 = ip[0] - ip[3];
+        a1 = ip[shortpitch*0] + ip[shortpitch*3];
+        b1 = ip[shortpitch*1] + ip[shortpitch*2];
+        c1 = ip[shortpitch*1] - ip[shortpitch*2];
+        d1 = ip[shortpitch*0] - ip[shortpitch*3];
 
-        a2 = a1 + b1;
-        b2 = c1 + d1;
-        c2 = a1 - b1;
-        d2 = d1 - c1;
 
-        op[0] = (a2 + 1) >> 2;
-        op[1] = (b2 + 1) >> 2;
-        op[2] = (c2 + 1) >> 2;
-        op[3] = (d2 + 1) >> 2;
+        op[shortpitch*0] = (a1 + b1 + 1)>>1;
+        op[shortpitch*1] = (c1 + d1)>>1;
+        op[shortpitch*2] = (a1 - b1)>>1;
+        op[shortpitch*3] = (d1 - c1)>>1;
 
-        ip += 4;
-        op += 4;
+        ip++;
+        op++;
     }
 }
 
-void vp8_short_inv_walsh4x4_1_c(short *input, short *output)
+void vp8_short_inv_walsh4x4_1_x8_c(short *in, short *out, int pitch)
 {
     int i;
-    int a1;
-    short *op = output;
+    short tmp[4];
+    short *ip = in;
+    short *op = tmp;
+    int shortpitch = pitch >> 1;
 
-    a1 = (input[0] + 1 )>> 2;
+    op[0] =((ip[0]>>WHT_UPSCALE_FACTOR) + 1)>>1;
+    op[1] = op[2] = op[3] = ((ip[0]>>WHT_UPSCALE_FACTOR)>>1);
 
-    for (i = 0; i < 4; i++)
+
+    ip = tmp;
+    op = out;
+    for(i = 0; i<4; i++)
     {
-        op[0] = a1;
-        op[1] = a1;
-        op[2] = a1;
-        op[3] = a1;
-        op += 4;
+        op[shortpitch*0] =(ip[0]+ 1)>>1;
+        op[shortpitch*1] = op[shortpitch*2] = op[shortpitch*3] = ip[0]>>1;
+        ip ++;
+        op ++;
     }
 }
 
+void vp8_dc_only_inv_walsh_add_c(short input_dc, unsigned char *pred_ptr, unsigned char *dst_ptr, int pitch, int stride)
+{
+    int r, c;
+    short tmp[16];
+    vp8_short_inv_walsh4x4_1_x8_c( &input_dc, tmp, 4<<1);
+
+    for (r = 0; r < 4; r++)
+        {
+          for (c = 0; c < 4; c++)
+            {
+                int a = tmp[r*4 + c] + pred_ptr[c] ;
+                if (a < 0)
+                    a = 0;
+
+                if (a > 255)
+                    a = 255;
+
+                dst_ptr[c] = (unsigned char) a ;
+            }
+
+            dst_ptr += stride;
+            pred_ptr += pitch;
+        }
+}
+#endif
 
 void vp8_dc_only_idct_add_8x8_c(short input_dc,
                                 unsigned char *pred_ptr,
@@ -394,7 +547,7 @@ void vp8_short_idct8x8_c(short *coefs, short *block, int pitch)
 
 void vp8_short_ihaar2x2_c(short *input, short *output, int pitch)
 {
-   int i, x;
+   int i;
    short *ip = input; //0,1, 4, 8
    short *op = output;
    for (i = 0; i < 16; i++)

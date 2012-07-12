@@ -25,6 +25,8 @@
 #endif
 
 extern const short vp8_bilinear_filters[SUBPEL_SHIFTS][2];
-extern const short vp8_sub_pel_filters[SUBPEL_SHIFTS][INTERP_EXTEND*2];
+extern const short vp8_sub_pel_filters_6[SUBPEL_SHIFTS][6];
+extern const short vp8_sub_pel_filters_8[SUBPEL_SHIFTS][8];
+extern const short vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][8];
 
 #endif //FILTER_H

@@ -239,7 +239,9 @@ void vp8_transform_mbuv_8x8(MACROBLOCK *x)
 {
     int i;
 
+#if !CONFIG_INT_8X8FDCT
     vp8_clear_system_state();
+#endif
 
     for (i = 16; i < 24; i += 4)
     {
@@ -252,9 +254,9 @@ void vp8_transform_mbuv_8x8(MACROBLOCK *x)
 void vp8_transform_intra_mby_8x8(MACROBLOCK *x)//changed
 {
     int i;
-
+#if !CONFIG_INT_8X8FDCT
     vp8_clear_system_state();
-
+#endif
     for (i = 0; i < 9; i += 8)
     {
         x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
@@ -279,9 +281,9 @@ void vp8_transform_intra_mby_8x8(MACROBLOCK *x)//changed
 void vp8_transform_mb_8x8(MACROBLOCK *x)
 {
     int i;
-
+#if !CONFIG_INT_8X8FDCT
     vp8_clear_system_state();
-
+#endif
     for (i = 0; i < 9; i += 8)
     {
         x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
@@ -312,9 +314,9 @@ void vp8_transform_mb_8x8(MACROBLOCK *x)
 void vp8_transform_mby_8x8(MACROBLOCK *x)
 {
     int i;
-
+#if !CONFIG_INT_8X8FDCT
     vp8_clear_system_state();
-
+#endif
     for (i = 0; i < 9; i += 8)
     {
         x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
@@ -398,13 +400,6 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
 
     b = &mb->block[ib];
     d = &mb->e_mbd.block[ib];
-
-    /* Enable this to test the effect of RDO as a replacement for the dynamic
-     *  zero bin instead of an augmentation of it.
-     */
-#if 0
-    vp8_strict_quantize_b(b, d);
-#endif
 
     dequant_ptr = d->dequant;
     coeff_ptr = b->coeff;
@@ -831,13 +826,6 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
     b = &mb->block[i];
     d = &mb->e_mbd.block[i];
 
-    /* Enable this to test the effect of RDO as a replacement for the dynamic
-     *  zero bin instead of an augmentation of it.
-     */
-#if 0
-    vp8_strict_quantize_b(b, d);
-#endif
-
     dequant_ptr = d->dequant;
     coeff_ptr = b->coeff;
     qcoeff_ptr = d->qcoeff;
@@ -1083,7 +1071,6 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd)
 {
     int b;
     int type;
-    int has_2nd_order;
 
     ENTROPY_CONTEXT_PLANES t_above, t_left;
     ENTROPY_CONTEXT *ta;
@@ -1235,6 +1222,11 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x)
     int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
 
     BLOCK *b = &x->block[0];
+
+#if CONFIG_PRED_FILTER
+    // Disable the prediction filter for firstpass
+    x->e_mbd.mode_info_context->mbmi.pred_filter_enabled = 0;
+#endif
 
     vp8_build_inter16x16_predictors_mby(&x->e_mbd);
 

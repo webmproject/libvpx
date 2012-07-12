@@ -13,11 +13,13 @@ vpx.sln: $(wildcard *.vcproj)
 	@echo "    [CREATE] $@"
 	$(SRC_PATH_BARE)/build/make/gen_msvs_sln.sh \
             $(if $(filter %vpx.vcproj,$^),\
-                $(foreach vcp,$(filter-out %vpx.vcproj %obj_int_extract.vcproj,$^),\
-                  --dep=$(vcp:.vcproj=):vpx)) \
-            --dep=vpx:obj_int_extract \
-            --ver=$(CONFIG_VS_VERSION)\
-            --out=$@ $^
+                $(foreach vcp,$(filter-out %vpx.vcproj %gtest.vcproj %obj_int_extract.vcproj,$^),\
+                  --dep=$(vcp:.vcproj=):vpx) \
+                $(foreach vcp,$(filter %_test.vcproj,$^),\
+                  --dep=$(vcp:.vcproj=):gtest)) \
+                  --dep=vpx:obj_int_extract \
+                  --ver=$(CONFIG_VS_VERSION)\
+                  --out=$@ $^
 vpx.sln.mk: vpx.sln
 	@true
 

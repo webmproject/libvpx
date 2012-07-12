@@ -15,6 +15,12 @@
 #include "treecoder.h"
 #include "blockd.h"
 #include "common.h"
+#include "coefupdateprobs.h"
+
+
+#define SUBMVREF_COUNT 5
+#define VP8_NUMMBSPLITS 4
+
 /* Coefficient token alphabet */
 
 #define ZERO_TOKEN              0       /* 0         Extra Bits 0+0 */
@@ -58,6 +64,8 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 
 #define BLOCK_TYPES 4
 
+#define BLOCK_TYPES_8X8 3
+
 /* Middle dimension is a coarsening of the coefficient's
    position within the 4x4 DCT. */
 
@@ -82,19 +90,30 @@ extern DECLARE_ALIGNED(64, const unsigned char, vp8_coef_bands_8x8[64]);
    distinct bands). */
 
 /*# define DC_TOKEN_CONTEXTS        3*/ /* 00, 0!0, !0!0 */
-#   define PREV_COEF_CONTEXTS       3
+#if CONFIG_EXPANDED_COEF_CONTEXT
+#define PREV_COEF_CONTEXTS       4
+#else
+#define PREV_COEF_CONTEXTS       3
+#endif
+
+#if CONFIG_NEWUPDATE
+#define SUBEXP_PARAM                4   /* Subexponential code parameter */
+#define MODULUS_PARAM               13  /* Modulus parameter */
+#define COEFUPDATETYPE              1   /* coef update type to use (1/2/3) */
+#endif
+
 
 extern DECLARE_ALIGNED(16, const unsigned char, vp8_prev_token_class[MAX_ENTROPY_TOKENS]);
-
-extern const vp8_prob vp8_coef_update_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-extern const vp8_prob vp8_coef_update_probs_8x8 [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 
 struct VP8Common;
 void vp8_default_coef_probs(struct VP8Common *);
 extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]);
-extern DECLARE_ALIGNED(16, const short, vp8_default_inv_zig_zag[16]);
 extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
 extern short vp8_default_zig_zag_mask_8x8[64];//int64_t
 void vp8_coef_tree_initialize(void);
+
+#if CONFIG_ADAPTIVE_ENTROPY
+void vp8_adapt_coef_probs(struct VP8Common *);
+#endif
 #endif

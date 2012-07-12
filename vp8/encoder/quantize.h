@@ -41,53 +41,21 @@ extern prototype_quantize_block(vp8_quantize_quantb);
 #endif
 extern prototype_quantize_block_pair(vp8_quantize_quantb_pair);
 
-#ifndef vp8_quantize_fastquantb
-#define vp8_quantize_fastquantb vp8_fast_quantize_b_c
-#endif
-extern prototype_quantize_block(vp8_quantize_fastquantb);
-
 #ifndef vp8_quantize_quantb_8x8
 #define vp8_quantize_quantb_8x8 vp8_regular_quantize_b_8x8
 #endif
 extern prototype_quantize_block(vp8_quantize_quantb_8x8);
-
-#ifndef vp8_quantize_fastquantb_8x8
-#define vp8_quantize_fastquantb_8x8 vp8_fast_quantize_b_8x8_c
-#endif
-extern prototype_quantize_block(vp8_quantize_fastquantb_8x8);
 
 #ifndef vp8_quantize_quantb_2x2
 #define vp8_quantize_quantb_2x2 vp8_regular_quantize_b_2x2
 #endif
 extern prototype_quantize_block(vp8_quantize_quantb_2x2);
 
-#ifndef vp8_quantize_fastquantb_2x2
-#define vp8_quantize_fastquantb_2x2 vp8_fast_quantize_b_2x2_c
-#endif
-extern prototype_quantize_block(vp8_quantize_fastquantb_2x2);
-
-
-#ifndef vp8_quantize_fastquantb_pair
-#define vp8_quantize_fastquantb_pair vp8_fast_quantize_b_pair_c
-#endif
-extern prototype_quantize_block_pair(vp8_quantize_fastquantb_pair);
-
-typedef struct
-{
-    prototype_quantize_block(*quantb);
-    prototype_quantize_block_pair(*quantb_pair);
-    prototype_quantize_block(*fastquantb);
-    prototype_quantize_block(*quantb_8x8);
-    prototype_quantize_block(*fastquantb_8x8);
-    prototype_quantize_block(*quantb_2x2);
-    prototype_quantize_block(*fastquantb_2x2);
-    prototype_quantize_block_pair(*fastquantb_pair);
-} vp8_quantize_rtcd_vtable_t;
-
 #ifndef vp8_quantize_mb
 #define vp8_quantize_mb vp8_quantize_mb_c
 #endif
 extern prototype_quantize_mb(vp8_quantize_mb);
+void vp8_quantize_mb_8x8(MACROBLOCK *x);
 
 #ifndef vp8_quantize_mbuv
 #define vp8_quantize_mbuv vp8_quantize_mbuv_c
@@ -99,15 +67,6 @@ extern prototype_quantize_mb(vp8_quantize_mbuv);
 #endif
 extern prototype_quantize_mb(vp8_quantize_mby);
 
-#if CONFIG_RUNTIME_CPU_DETECT
-#define QUANTIZE_INVOKE(ctx,fn) (ctx)->fn
-#else
-#define QUANTIZE_INVOKE(ctx,fn) vp8_quantize_##fn
-#endif
-
-extern void vp8_strict_quantize_b(BLOCK *b,BLOCKD *d);
-extern void vp8_strict_quantize_b_8x8(BLOCK *b,BLOCKD *d);
-extern void vp8_strict_quantize_b_2x2(BLOCK *b,BLOCKD *d);
 extern prototype_quantize_mb(vp8_quantize_mby_8x8);
 extern prototype_quantize_mb(vp8_quantize_mbuv_8x8);
 
