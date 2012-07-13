@@ -21,42 +21,39 @@
 /* vp8_quantize_mbX functions here differs from corresponding ones in
  * quantize.c only by using quantize_b_pair function pointer instead of
  * the regular quantize_b function pointer */
-void vp8_quantize_mby_neon(MACROBLOCK *x)
-{
-    int i;
-    int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+void vp8_quantize_mby_neon(MACROBLOCK *x) {
+  int i;
+  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
-    for (i = 0; i < 16; i+=2)
-        x->quantize_b_pair(&x->block[i], &x->block[i+1],
-                           &x->e_mbd.block[i], &x->e_mbd.block[i+1]);
+  for (i = 0; i < 16; i += 2)
+    x->quantize_b_pair(&x->block[i], &x->block[i + 1],
+                       &x->e_mbd.block[i], &x->e_mbd.block[i + 1]);
 
-    if(has_2nd_order)
-        x->quantize_b(&x->block[24], &x->e_mbd.block[24]);
+  if (has_2nd_order)
+    x->quantize_b(&x->block[24], &x->e_mbd.block[24]);
 }
 
-void vp8_quantize_mb_neon(MACROBLOCK *x)
-{
-    int i;
-    int has_2nd_order=(x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-        && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+void vp8_quantize_mb_neon(MACROBLOCK *x) {
+  int i;
+  int has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
+                       && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
 
-    for (i = 0; i < 24; i+=2)
-        x->quantize_b_pair(&x->block[i], &x->block[i+1],
-                           &x->e_mbd.block[i], &x->e_mbd.block[i+1]);
+  for (i = 0; i < 24; i += 2)
+    x->quantize_b_pair(&x->block[i], &x->block[i + 1],
+                       &x->e_mbd.block[i], &x->e_mbd.block[i + 1]);
 
-    if (has_2nd_order)
-        x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
+  if (has_2nd_order)
+    x->quantize_b(&x->block[i], &x->e_mbd.block[i]);
 }
 
 
-void vp8_quantize_mbuv_neon(MACROBLOCK *x)
-{
-    int i;
+void vp8_quantize_mbuv_neon(MACROBLOCK *x) {
+  int i;
 
-    for (i = 16; i < 24; i+=2)
-        x->quantize_b_pair(&x->block[i], &x->block[i+1],
-                           &x->e_mbd.block[i], &x->e_mbd.block[i+1]);
+  for (i = 16; i < 24; i += 2)
+    x->quantize_b_pair(&x->block[i], &x->block[i + 1],
+                       &x->e_mbd.block[i], &x->e_mbd.block[i + 1]);
 }
 
 #endif /* HAVE_ARMV7 */

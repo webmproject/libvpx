@@ -75,27 +75,27 @@ void vertical_band_1_2_scale_armv4(unsigned char *dest, unsigned int dest_pitch,
 extern void  dmachine_specific_config(int mmx_enabled, int xmm_enabled, int wmt_enabled);
 extern void vp8_yv12_scale_or_center
 (
-    YV12_BUFFER_CONFIG *src_yuv_config,
-    YV12_BUFFER_CONFIG *dst_yuv_config,
-    int expanded_frame_width,
-    int expanded_frame_height,
-    int scaling_mode,
-    int HScale,
-    int HRatio,
-    int VScale,
-    int VRatio
+  YV12_BUFFER_CONFIG *src_yuv_config,
+  YV12_BUFFER_CONFIG *dst_yuv_config,
+  int expanded_frame_width,
+  int expanded_frame_height,
+  int scaling_mode,
+  int HScale,
+  int HRatio,
+  int VScale,
+  int VRatio
 );
 extern void vp8_scale_frame
 (
-    YV12_BUFFER_CONFIG *src,
-    YV12_BUFFER_CONFIG *dst,
-    unsigned char *temp_area,
-    unsigned char temp_height,
-    unsigned int hscale,
-    unsigned int hratio,
-    unsigned int vscale,
-    unsigned int vratio,
-    unsigned int interlaced
+  YV12_BUFFER_CONFIG *src,
+  YV12_BUFFER_CONFIG *dst,
+  unsigned char *temp_area,
+  unsigned char temp_height,
+  unsigned int hscale,
+  unsigned int hratio,
+  unsigned int vscale,
+  unsigned int vratio,
+  unsigned int interlaced
 );
 extern void vp8_scale_machine_specific_config(void);
 

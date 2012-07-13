@@ -15,17 +15,16 @@
 
 #define MAX_PSNR 100
 
-double vp8_mse2psnr(double Samples, double Peak, double Mse)
-{
-    double psnr;
+double vp8_mse2psnr(double Samples, double Peak, double Mse) {
+  double psnr;
 
-    if ((double)Mse > 0.0)
-        psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
-    else
-        psnr = MAX_PSNR;      // Limit to prevent / 0
+  if ((double)Mse > 0.0)
+    psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
+  else
+    psnr = MAX_PSNR;      // Limit to prevent / 0
 
-    if (psnr > MAX_PSNR)
-        psnr = MAX_PSNR;
+  if (psnr > MAX_PSNR)
+    psnr = MAX_PSNR;
 
-    return psnr;
+  return psnr;
 }

@@ -13,15 +13,15 @@
 #define __INC_IDCT_H
 
 #define prototype_second_order(sym) \
-    void sym(short *input, short *output)
+  void sym(short *input, short *output)
 
 #define prototype_idct(sym) \
-    void sym(short *input, short *output, int pitch)
+  void sym(short *input, short *output, int pitch)
 
 #define prototype_idct_scalar_add(sym) \
-    void sym(short input, \
-             unsigned char *pred, unsigned char *output, \
-             int pitch, int stride)
+  void sym(short input, \
+           unsigned char *pred, unsigned char *output, \
+           int pitch, int stride)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/idct_x86.h"
@@ -101,20 +101,19 @@ typedef prototype_idct((*vp8_idct_fn_t));
 typedef prototype_idct_scalar_add((*vp8_idct_scalar_add_fn_t));
 typedef prototype_second_order((*vp8_second_order_fn_t));
 
-typedef struct
-{
-    vp8_idct_fn_t            idct1;
-    vp8_idct_fn_t            idct16;
-    vp8_idct_scalar_add_fn_t idct1_scalar_add;
+typedef struct {
+  vp8_idct_fn_t            idct1;
+  vp8_idct_fn_t            idct16;
+  vp8_idct_scalar_add_fn_t idct1_scalar_add;
 
-    vp8_second_order_fn_t iwalsh1;
-    vp8_second_order_fn_t iwalsh16;
+  vp8_second_order_fn_t iwalsh1;
+  vp8_second_order_fn_t iwalsh16;
 
-    vp8_idct_fn_t            idct8;
-    vp8_idct_fn_t            idct8_1;
-    vp8_idct_scalar_add_fn_t idct1_scalar_add_8x8;
-    vp8_idct_fn_t ihaar2;
-    vp8_idct_fn_t ihaar2_1;
+  vp8_idct_fn_t            idct8;
+  vp8_idct_fn_t            idct8_1;
+  vp8_idct_scalar_add_fn_t idct1_scalar_add_8x8;
+  vp8_idct_fn_t ihaar2;
+  vp8_idct_fn_t ihaar2_1;
 } vp8_idct_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

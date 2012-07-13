@@ -9,8 +9,8 @@
 // in the file PATENTS.  All contributing project authors may
 // be found in the AUTHORS file in the root of the source tree.
 
-//note: you must define write and serialize functions as well as your own EBML_GLOBAL
-//These functions MUST be implemented
+// note: you must define write and serialize functions as well as your own EBML_GLOBAL
+// These functions MUST be implemented
 #include <stddef.h>
 #include "vpx/vpx_integer.h"
 
@@ -28,11 +28,11 @@ void Ebml_SerializeUnsigned64(EbmlGlobal *glob, unsigned long class_id, uint64_t
 void Ebml_SerializeUnsigned(EbmlGlobal *glob, unsigned long class_id, unsigned long ui);
 void Ebml_SerializeBinary(EbmlGlobal *glob, unsigned long class_id, unsigned long ui);
 void Ebml_SerializeFloat(EbmlGlobal *glob, unsigned long class_id, double d);
-//TODO make this more generic to signed
+// TODO make this more generic to signed
 void Ebml_WriteSigned16(EbmlGlobal *glob, short val);
 void Ebml_SerializeString(EbmlGlobal *glob, unsigned long class_id, const char *s);
 void Ebml_SerializeUTF8(EbmlGlobal *glob, unsigned long class_id, wchar_t *s);
 void Ebml_SerializeData(EbmlGlobal *glob, unsigned long class_id, unsigned char *data, unsigned long data_length);
 void Ebml_WriteVoid(EbmlGlobal *glob, unsigned long vSize);
-//TODO need date function
+// TODO need date function
 #endif

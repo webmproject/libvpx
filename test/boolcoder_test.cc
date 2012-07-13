@@ -38,15 +38,15 @@ TEST(VP8, TestBitIO) {
       for (int i = 0; i < bits_to_test; ++i) {
         const int parity = i & 1;
         probas[i] =
-            (method == 0) ? 0 : (method == 1) ? 255 :
-            (method == 2) ? 128 :
-            (method == 3) ? rnd.Rand8() :
-            (method == 4) ? (parity ? 0 : 255) :
+          (method == 0) ? 0 : (method == 1) ? 255 :
+          (method == 2) ? 128 :
+          (method == 3) ? rnd.Rand8() :
+          (method == 4) ? (parity ? 0 : 255) :
             // alternate between low and high proba:
             (method == 5) ? (parity ? rnd(128) : 255 - rnd(128)) :
             (method == 6) ?
-                (parity ? rnd(64) : 255 - rnd(64)) :
-                (parity ? rnd(32) : 255 - rnd(32));
+            (parity ? rnd(64) : 255 - rnd(64)) :
+            (parity ? rnd(32) : 255 - rnd(32));
       }
       for (int bit_method = 0; bit_method <= 3; ++bit_method) {
         const int random_seed = 6432;
@@ -78,7 +78,7 @@ TEST(VP8, TestBitIO) {
             bit = bit_rnd(2);
           }
           GTEST_ASSERT_EQ(vp8dx_decode_bool(&br, probas[i]), bit)
-              << "pos: "<< i << " / " << bits_to_test
+              << "pos: " << i << " / " << bits_to_test
               << " bit_method: " << bit_method
               << " method: " << method;
         }

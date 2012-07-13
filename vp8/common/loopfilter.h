@@ -18,10 +18,9 @@
 
 #define MAX_LOOP_FILTER 63
 
-typedef enum
-{
-    NORMAL_LOOPFILTER = 0,
-    SIMPLE_LOOPFILTER = 1
+typedef enum {
+  NORMAL_LOOPFILTER = 0,
+  SIMPLE_LOOPFILTER = 1
 } LOOPFILTERTYPE;
 
 #if ARCH_ARM
@@ -33,36 +32,34 @@ typedef enum
 /* Need to align this structure so when it is declared and
  * passed it can be loaded into vector registers.
  */
-typedef struct
-{
-    DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-    DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, blim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-    DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
-    DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, hev_thr[4][SIMD_WIDTH]);
-    unsigned char lvl[4][4][4];
-    unsigned char hev_thr_lut[2][MAX_LOOP_FILTER + 1];
-    unsigned char mode_lf_lut[MB_MODE_COUNT];
+typedef struct {
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, mblim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, blim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, lim[MAX_LOOP_FILTER + 1][SIMD_WIDTH]);
+  DECLARE_ALIGNED(SIMD_WIDTH, unsigned char, hev_thr[4][SIMD_WIDTH]);
+  unsigned char lvl[4][4][4];
+  unsigned char hev_thr_lut[2][MAX_LOOP_FILTER + 1];
+  unsigned char mode_lf_lut[MB_MODE_COUNT];
 } loop_filter_info_n;
 
-typedef struct
-{
-    const unsigned char * mblim;
-    const unsigned char * blim;
-    const unsigned char * lim;
-    const unsigned char * hev_thr;
+typedef struct {
+  const unsigned char *mblim;
+  const unsigned char *blim;
+  const unsigned char *lim;
+  const unsigned char *hev_thr;
 } loop_filter_info;
 
 
 #define prototype_loopfilter(sym) \
-    void sym(unsigned char *src, int pitch, const unsigned char *blimit,\
-             const unsigned char *limit, const unsigned char *thresh, int count)
+  void sym(unsigned char *src, int pitch, const unsigned char *blimit,\
+           const unsigned char *limit, const unsigned char *thresh, int count)
 
 #define prototype_loopfilter_block(sym) \
-    void sym(unsigned char *y, unsigned char *u, unsigned char *v, \
-             int ystride, int uv_stride, loop_filter_info *lfi)
+  void sym(unsigned char *y, unsigned char *u, unsigned char *v, \
+           int ystride, int uv_stride, loop_filter_info *lfi)
 
 #define prototype_simple_loopfilter(sym) \
-    void sym(unsigned char *y, int ystride, const unsigned char *blimit)
+  void sym(unsigned char *y, int ystride, const unsigned char *blimit)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/loopfilter_x86.h"
@@ -115,16 +112,15 @@ extern prototype_simple_loopfilter(vp8_lf_simple_b_h);
 typedef prototype_loopfilter_block((*vp8_lf_block_fn_t));
 typedef prototype_simple_loopfilter((*vp8_slf_block_fn_t));
 
-typedef struct
-{
-    vp8_lf_block_fn_t  normal_mb_v;
-    vp8_lf_block_fn_t  normal_b_v;
-    vp8_lf_block_fn_t  normal_mb_h;
-    vp8_lf_block_fn_t  normal_b_h;
-    vp8_slf_block_fn_t  simple_mb_v;
-    vp8_slf_block_fn_t  simple_b_v;
-    vp8_slf_block_fn_t  simple_mb_h;
-    vp8_slf_block_fn_t  simple_b_h;
+typedef struct {
+  vp8_lf_block_fn_t  normal_mb_v;
+  vp8_lf_block_fn_t  normal_b_v;
+  vp8_lf_block_fn_t  normal_mb_h;
+  vp8_lf_block_fn_t  normal_b_h;
+  vp8_slf_block_fn_t  simple_mb_v;
+  vp8_slf_block_fn_t  simple_b_v;
+  vp8_slf_block_fn_t  simple_mb_h;
+  vp8_slf_block_fn_t  simple_b_h;
 } vp8_loopfilter_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -135,12 +131,12 @@ typedef struct
 
 typedef void loop_filter_uvfunction
 (
-    unsigned char *u,   /* source pointer */
-    int p,              /* pitch */
-    const unsigned char *blimit,
-    const unsigned char *limit,
-    const unsigned char *thresh,
-    unsigned char *v
+  unsigned char *u,   /* source pointer */
+  int p,              /* pitch */
+  const unsigned char *blimit,
+  const unsigned char *limit,
+  const unsigned char *thresh,
+  unsigned char *v
 );
 
 /* assorted loopfilter functions which get used elsewhere */

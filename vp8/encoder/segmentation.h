@@ -28,9 +28,9 @@ extern void vp8_set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_ma
 // The values given for each segment can be either deltas (from the default
 // value chosen for the frame) or absolute values.
 //
-// Valid range for abs values is (0-127 for MB_LVL_ALT_Q) , (0-63 for
+// Valid range for abs values is (0-127 for MB_LVL_ALT_Q), (0-63 for
 // SEGMENT_ALT_LF)
-// Valid range for delta values are (+/-127 for MB_LVL_ALT_Q) , (+/-63 for
+// Valid range for delta values are (+/-127 for MB_LVL_ALT_Q), (+/-63 for
 // SEGMENT_ALT_LF)
 //
 // abs_delta = SEGMENT_DELTADATA (deltas) abs_delta = SEGMENT_ABSDATA (use
@@ -38,6 +38,6 @@ extern void vp8_set_segmentation_map(VP8_PTR ptr, unsigned char *segmentation_ma
 //
 extern void vp8_set_segment_data(VP8_PTR ptr, signed char *feature_data, unsigned char abs_delta);
 
-extern void choose_segmap_coding_method( VP8_COMP *cpi );
+extern void choose_segmap_coding_method(VP8_COMP *cpi);
 
 #endif /* __INC_SEGMENTATION_H__ */

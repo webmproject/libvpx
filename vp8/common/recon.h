@@ -15,23 +15,23 @@
 #include "blockd.h"
 
 #define prototype_copy_block(sym) \
-    void sym(unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch)
+  void sym(unsigned char *src, int src_pitch, unsigned char *dst, int dst_pitch)
 
 #define prototype_recon_block(sym) \
-    void sym(unsigned char *pred, short *diff, unsigned char *dst, int pitch)
+  void sym(unsigned char *pred, short *diff, unsigned char *dst, int pitch)
 
 #define prototype_recon_macroblock(sym) \
-    void sym(const struct vp8_recon_rtcd_vtable *rtcd, MACROBLOCKD *x)
+  void sym(const struct vp8_recon_rtcd_vtable *rtcd, MACROBLOCKD *x)
 
 #define prototype_build_intra_predictors(sym) \
-    void sym(MACROBLOCKD *x)
+  void sym(MACROBLOCKD *x)
 
 #define prototype_intra4x4_predict(sym) \
-    void sym(BLOCKD *x, int b_mode, unsigned char *predictor)
+  void sym(BLOCKD *x, int b_mode, unsigned char *predictor)
 
 #if CONFIG_COMP_INTRA_PRED
 #define prototype_comp_intra4x4_predict(sym) \
-    void sym(BLOCKD *x, int b_mode, int mode2, unsigned char *predictor)
+  void sym(BLOCKD *x, int b_mode, int mode2, unsigned char *predictor)
 #endif
 
 struct vp8_recon_rtcd_vtable;
@@ -104,94 +104,94 @@ extern prototype_recon_macroblock(vp8_recon_recon_mby);
 #define vp8_recon_build_intra_predictors_mby vp8_build_intra_predictors_mby
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_intra_predictors_mby);
+(vp8_recon_build_intra_predictors_mby);
 
 #if CONFIG_COMP_INTRA_PRED
 #ifndef vp8_recon_build_comp_intra_predictors_mby
 #define vp8_recon_build_comp_intra_predictors_mby vp8_build_comp_intra_predictors_mby
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_comp_intra_predictors_mby);
+(vp8_recon_build_comp_intra_predictors_mby);
 #endif
 
 #ifndef vp8_recon_build_intra8x8_predictors_mby
 #define vp8_recon_build_intra8x8_predictors_mby vp8_build_intra8x8_predictors_mby
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_intra8x8_predictors_mby);
+(vp8_recon_build_intra8x8_predictors_mby);
 
 #ifndef vp8_recon_build_intra_predictors_mby_s
 #define vp8_recon_build_intra_predictors_mby_s vp8_build_intra_predictors_mby_s
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_intra_predictors_mby_s);
+(vp8_recon_build_intra_predictors_mby_s);
 
 #ifndef vp8_recon_build_intra_predictors_mbuv
 #define vp8_recon_build_intra_predictors_mbuv vp8_build_intra_predictors_mbuv
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_intra_predictors_mbuv);
+(vp8_recon_build_intra_predictors_mbuv);
 
 #ifndef vp8_recon_build_intra8x8_predictors_mbuv
 #define vp8_recon_build_intra8x8_predictors_mbuv vp8_build_intra8x8_predictors_mbuv
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_intra8x8_predictors_mbuv);
+(vp8_recon_build_intra8x8_predictors_mbuv);
 
 #ifndef vp8_recon_build_intra_predictors_mbuv_s
 #define vp8_recon_build_intra_predictors_mbuv_s vp8_build_intra_predictors_mbuv_s
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_intra_predictors_mbuv_s);
+(vp8_recon_build_intra_predictors_mbuv_s);
 
 #if CONFIG_COMP_INTRA_PRED
 #ifndef vp8_recon_build_comp_intra_predictors_mbuv
 #define vp8_recon_build_comp_intra_predictors_mbuv vp8_build_comp_intra_predictors_mbuv
 #endif
 extern prototype_build_intra_predictors\
-    (vp8_recon_build_comp_intra_predictors_mbuv);
+(vp8_recon_build_comp_intra_predictors_mbuv);
 #endif
 
 #ifndef vp8_recon_intra4x4_predict
 #define vp8_recon_intra4x4_predict vp8_intra4x4_predict
 #endif
 extern prototype_intra4x4_predict\
-    (vp8_recon_intra4x4_predict);
+(vp8_recon_intra4x4_predict);
 
 #if CONFIG_COMP_INTRA_PRED
 #ifndef vp8_recon_comp_intra4x4_predict
 #define vp8_recon_comp_intra4x4_predict vp8_comp_intra4x4_predict
 #endif
 extern prototype_comp_intra4x4_predict\
-    (vp8_recon_comp_intra4x4_predict);
+(vp8_recon_comp_intra4x4_predict);
 #endif
 
 #ifndef vp8_recon_intra8x8_predict
 #define vp8_recon_intra8x8_predict vp8_intra8x8_predict
 #endif
 extern prototype_intra4x4_predict\
-    (vp8_recon_intra8x8_predict);
+(vp8_recon_intra8x8_predict);
 
 #if CONFIG_COMP_INTRA_PRED
 #ifndef vp8_recon_comp_intra8x8_predict
 #define vp8_recon_comp_intra8x8_predict vp8_comp_intra8x8_predict
 #endif
 extern prototype_comp_intra4x4_predict\
-    (vp8_recon_comp_intra8x8_predict);
+(vp8_recon_comp_intra8x8_predict);
 #endif
 
 #ifndef vp8_recon_intra_uv4x4_predict
 #define vp8_recon_intra_uv4x4_predict vp8_intra_uv4x4_predict
 #endif
 extern prototype_intra4x4_predict\
-    (vp8_recon_intra_uv4x4_predict);
+(vp8_recon_intra_uv4x4_predict);
 
 #if CONFIG_COMP_INTRA_PRED
 #ifndef vp8_recon_comp_intra_uv4x4_predict
 #define vp8_recon_comp_intra_uv4x4_predict vp8_comp_intra_uv4x4_predict
 #endif
 extern prototype_comp_intra4x4_predict\
-    (vp8_recon_comp_intra_uv4x4_predict);
+(vp8_recon_comp_intra_uv4x4_predict);
 #endif
 
 typedef prototype_copy_block((*vp8_copy_block_fn_t));
@@ -202,40 +202,39 @@ typedef prototype_intra4x4_predict((*vp8_intra4x4_pred_fn_t));
 #if CONFIG_COMP_INTRA_PRED
 typedef prototype_comp_intra4x4_predict((*vp8_comp_intra4x4_pred_fn_t));
 #endif
-typedef struct vp8_recon_rtcd_vtable
-{
-    vp8_copy_block_fn_t  copy16x16;
-    vp8_copy_block_fn_t  copy8x8;
-    vp8_copy_block_fn_t  avg16x16;
-    vp8_copy_block_fn_t  avg8x8;
-    vp8_copy_block_fn_t  copy8x4;
-    vp8_recon_fn_t       recon;
-    vp8_recon_fn_t       recon_uv;
-    vp8_recon_fn_t       recon2;
-    vp8_recon_fn_t       recon4;
-    vp8_recon_mb_fn_t    recon_mb;
-    vp8_recon_mb_fn_t    recon_mby;
-    vp8_build_intra_pred_fn_t  build_intra_predictors_mby_s;
-    vp8_build_intra_pred_fn_t  build_intra_predictors_mby;
+typedef struct vp8_recon_rtcd_vtable {
+  vp8_copy_block_fn_t  copy16x16;
+  vp8_copy_block_fn_t  copy8x8;
+  vp8_copy_block_fn_t  avg16x16;
+  vp8_copy_block_fn_t  avg8x8;
+  vp8_copy_block_fn_t  copy8x4;
+  vp8_recon_fn_t       recon;
+  vp8_recon_fn_t       recon_uv;
+  vp8_recon_fn_t       recon2;
+  vp8_recon_fn_t       recon4;
+  vp8_recon_mb_fn_t    recon_mb;
+  vp8_recon_mb_fn_t    recon_mby;
+  vp8_build_intra_pred_fn_t  build_intra_predictors_mby_s;
+  vp8_build_intra_pred_fn_t  build_intra_predictors_mby;
 #if CONFIG_COMP_INTRA_PRED
-    vp8_build_intra_pred_fn_t  build_comp_intra_predictors_mby;
+  vp8_build_intra_pred_fn_t  build_comp_intra_predictors_mby;
 #endif
-    vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv_s;
-    vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv;
+  vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv_s;
+  vp8_build_intra_pred_fn_t  build_intra_predictors_mbuv;
 #if CONFIG_COMP_INTRA_PRED
-    vp8_build_intra_pred_fn_t  build_comp_intra_predictors_mbuv;
+  vp8_build_intra_pred_fn_t  build_comp_intra_predictors_mbuv;
 #endif
-    vp8_intra4x4_pred_fn_t intra4x4_predict;
+  vp8_intra4x4_pred_fn_t intra4x4_predict;
 #if CONFIG_COMP_INTRA_PRED
-    vp8_comp_intra4x4_pred_fn_t comp_intra4x4_predict;
+  vp8_comp_intra4x4_pred_fn_t comp_intra4x4_predict;
 #endif
-    vp8_intra4x4_pred_fn_t intra8x8_predict;
+  vp8_intra4x4_pred_fn_t intra8x8_predict;
 #if CONFIG_COMP_INTRA_PRED
-    vp8_comp_intra4x4_pred_fn_t comp_intra8x8_predict;
+  vp8_comp_intra4x4_pred_fn_t comp_intra8x8_predict;
 #endif
-    vp8_intra4x4_pred_fn_t intra_uv4x4_predict;
+  vp8_intra4x4_pred_fn_t intra_uv4x4_predict;
 #if CONFIG_COMP_INTRA_PRED
-    vp8_comp_intra4x4_pred_fn_t comp_intra_uv4x4_predict;
+  vp8_comp_intra4x4_pred_fn_t comp_intra_uv4x4_predict;
 #endif
 } vp8_recon_rtcd_vtable_t;
 

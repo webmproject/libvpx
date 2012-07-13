@@ -66,15 +66,14 @@ extern prototype_fdct(vp8_short_walsh4x4_lossless_c);
 #endif
 
 typedef prototype_fdct(*vp8_fdct_fn_t);
-typedef struct
-{
-    vp8_fdct_fn_t    short8x8;
-    vp8_fdct_fn_t    haar_short2x2;
-    vp8_fdct_fn_t    short4x4;
-    vp8_fdct_fn_t    short8x4;
-    vp8_fdct_fn_t    fast4x4;
-    vp8_fdct_fn_t    fast8x4;
-    vp8_fdct_fn_t    walsh_short4x4;
+typedef struct {
+  vp8_fdct_fn_t    short8x8;
+  vp8_fdct_fn_t    haar_short2x2;
+  vp8_fdct_fn_t    short4x4;
+  vp8_fdct_fn_t    short8x4;
+  vp8_fdct_fn_t    fast4x4;
+  vp8_fdct_fn_t    fast8x4;
+  vp8_fdct_fn_t    walsh_short4x4;
 } vp8_fdct_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

@@ -21,12 +21,12 @@ extern vp8_mbsplit vp8_mbsplits [VP8_NUMMBSPLITS];
 
 extern const int vp8_mbsplit_count [VP8_NUMMBSPLITS];    /* # of subsets */
 
-extern const vp8_prob vp8_mbsplit_probs [VP8_NUMMBSPLITS-1];
+extern const vp8_prob vp8_mbsplit_probs [VP8_NUMMBSPLITS - 1];
 
 extern int vp8_mv_cont(const int_mv *l, const int_mv *a);
 
-extern const vp8_prob vp8_sub_mv_ref_prob [VP8_SUBMVREFS-1];
-extern const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS-1];
+extern const vp8_prob vp8_sub_mv_ref_prob [VP8_SUBMVREFS - 1];
+extern const vp8_prob vp8_sub_mv_ref_prob2 [SUBMVREF_COUNT][VP8_SUBMVREFS - 1];
 
 
 extern const unsigned int vp8_kf_default_bmode_counts [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES];
@@ -60,11 +60,11 @@ void vp8_init_mbmode_probs(VP8_COMMON *x);
 extern void vp8_init_mode_contexts(VP8_COMMON *pc);
 extern void vp8_update_mode_context(VP8_COMMON *pc);;
 extern void vp8_accum_mv_refs(VP8_COMMON *pc,
-                               MB_PREDICTION_MODE m,
-                               const int ct[4]);
+                              MB_PREDICTION_MODE m,
+                              const int ct[4]);
 
-void vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES-1]);
-void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES-1]);
+void vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES - 1]);
+void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES - 1]);
 
 #if CONFIG_ADAPTIVE_ENTROPY
 void vp8_adapt_mode_probs(struct VP8Common *);

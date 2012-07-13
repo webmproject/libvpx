@@ -72,320 +72,276 @@ typedef long off_t;
 
 static const char *exec_name;
 
-static const struct codec_item
-{
-    char const              *name;
-    const vpx_codec_iface_t *iface;
-    unsigned int             fourcc;
-} codecs[] =
-{
+static const struct codec_item {
+  char const              *name;
+  const vpx_codec_iface_t *iface;
+  unsigned int             fourcc;
+} codecs[] = {
 #if CONFIG_EXPERIMENTAL && CONFIG_VP8_ENCODER
-    {"vp8x",  &vpx_codec_vp8x_cx_algo, 0x78385056},
+  {"vp8x",  &vpx_codec_vp8x_cx_algo, 0x78385056},
 #endif
 #if CONFIG_VP8_ENCODER
-    {"vp8",  &vpx_codec_vp8_cx_algo, 0x30385056},
+  {"vp8",  &vpx_codec_vp8_cx_algo, 0x30385056},
 #endif
 };
 
 #define VP8_FOURCC (0x00385056)
-static const struct
-{
-    char const *name;
-    const vpx_codec_iface_t *iface;
-    unsigned int             fourcc;
-    unsigned int             fourcc_mask;
-} ifaces[] =
-{
+static const struct {
+  char const *name;
+  const vpx_codec_iface_t *iface;
+  unsigned int             fourcc;
+  unsigned int             fourcc_mask;
+} ifaces[] = {
 #if CONFIG_VP8_DECODER
-    {"vp8",  &vpx_codec_vp8_dx_algo,   VP8_FOURCC, 0x00FFFFFF},
+  {"vp8",  &vpx_codec_vp8_dx_algo,   VP8_FOURCC, 0x00FFFFFF},
 #endif
 };
 
 
 static void usage_exit();
 
-void die(const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
-    usage_exit();
+void die(const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  usage_exit();
 }
 
-static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s)
-{
-    if (ctx->err)
-    {
-        const char *detail = vpx_codec_error_detail(ctx);
+static void ctx_exit_on_error(vpx_codec_ctx_t *ctx, const char *s) {
+  if (ctx->err) {
+    const char *detail = vpx_codec_error_detail(ctx);
 
-        fprintf(stderr, "%s: %s\n", s, vpx_codec_error(ctx));
+    fprintf(stderr, "%s: %s\n", s, vpx_codec_error(ctx));
 
-        if (detail)
-            fprintf(stderr, "    %s\n", detail);
+    if (detail)
+      fprintf(stderr, "    %s\n", detail);
 
-        exit(EXIT_FAILURE);
-    }
+    exit(EXIT_FAILURE);
+  }
 }
 
 /* This structure is used to abstract the different ways of handling
  * first pass statistics.
  */
-typedef struct
-{
-    vpx_fixed_buf_t buf;
-    int             pass;
-    FILE           *file;
-    char           *buf_ptr;
-    size_t          buf_alloc_sz;
+typedef struct {
+  vpx_fixed_buf_t buf;
+  int             pass;
+  FILE           *file;
+  char           *buf_ptr;
+  size_t          buf_alloc_sz;
 } stats_io_t;
 
-int stats_open_file(stats_io_t *stats, const char *fpf, int pass)
-{
-    int res;
+int stats_open_file(stats_io_t *stats, const char *fpf, int pass) {
+  int res;
 
-    stats->pass = pass;
+  stats->pass = pass;
 
-    if (pass == 0)
-    {
-        stats->file = fopen(fpf, "wb");
-        stats->buf.sz = 0;
-        stats->buf.buf = NULL,
-                   res = (stats->file != NULL);
-    }
-    else
-    {
+  if (pass == 0) {
+    stats->file = fopen(fpf, "wb");
+    stats->buf.sz = 0;
+    stats->buf.buf = NULL,
+               res = (stats->file != NULL);
+  } else {
 #if 0
 #elif USE_POSIX_MMAP
-        struct stat stat_buf;
-        int fd;
+    struct stat stat_buf;
+    int fd;
 
-        fd = open(fpf, O_RDONLY);
-        stats->file = fdopen(fd, "rb");
-        fstat(fd, &stat_buf);
-        stats->buf.sz = stat_buf.st_size;
-        stats->buf.buf = mmap(NULL, stats->buf.sz, PROT_READ, MAP_PRIVATE,
-                              fd, 0);
-        res = (stats->buf.buf != NULL);
-#else
-        size_t nbytes;
-
-        stats->file = fopen(fpf, "rb");
-
-        if (fseek(stats->file, 0, SEEK_END))
-        {
-            fprintf(stderr, "First-pass stats file must be seekable!\n");
-            exit(EXIT_FAILURE);
-        }
-
-        stats->buf.sz = stats->buf_alloc_sz = ftell(stats->file);
-        rewind(stats->file);
-
-        stats->buf.buf = malloc(stats->buf_alloc_sz);
-
-        if (!stats->buf.buf)
-        {
-            fprintf(stderr, "Failed to allocate first-pass stats buffer (%lu bytes)\n",
-                    (unsigned long)stats->buf_alloc_sz);
-            exit(EXIT_FAILURE);
-        }
-
-        nbytes = fread(stats->buf.buf, 1, stats->buf.sz, stats->file);
-        res = (nbytes == stats->buf.sz);
-#endif
-    }
-
-    return res;
-}
-
-int stats_open_mem(stats_io_t *stats, int pass)
-{
-    int res;
-    stats->pass = pass;
-
-    if (!pass)
-    {
-        stats->buf.sz = 0;
-        stats->buf_alloc_sz = 64 * 1024;
-        stats->buf.buf = malloc(stats->buf_alloc_sz);
-    }
-
-    stats->buf_ptr = stats->buf.buf;
+    fd = open(fpf, O_RDONLY);
+    stats->file = fdopen(fd, "rb");
+    fstat(fd, &stat_buf);
+    stats->buf.sz = stat_buf.st_size;
+    stats->buf.buf = mmap(NULL, stats->buf.sz, PROT_READ, MAP_PRIVATE,
+                          fd, 0);
     res = (stats->buf.buf != NULL);
-    return res;
+#else
+    size_t nbytes;
+
+    stats->file = fopen(fpf, "rb");
+
+    if (fseek(stats->file, 0, SEEK_END)) {
+      fprintf(stderr, "First-pass stats file must be seekable!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    stats->buf.sz = stats->buf_alloc_sz = ftell(stats->file);
+    rewind(stats->file);
+
+    stats->buf.buf = malloc(stats->buf_alloc_sz);
+
+    if (!stats->buf.buf) {
+      fprintf(stderr, "Failed to allocate first-pass stats buffer (%lu bytes)\n",
+              (unsigned long)stats->buf_alloc_sz);
+      exit(EXIT_FAILURE);
+    }
+
+    nbytes = fread(stats->buf.buf, 1, stats->buf.sz, stats->file);
+    res = (nbytes == stats->buf.sz);
+#endif
+  }
+
+  return res;
+}
+
+int stats_open_mem(stats_io_t *stats, int pass) {
+  int res;
+  stats->pass = pass;
+
+  if (!pass) {
+    stats->buf.sz = 0;
+    stats->buf_alloc_sz = 64 * 1024;
+    stats->buf.buf = malloc(stats->buf_alloc_sz);
+  }
+
+  stats->buf_ptr = stats->buf.buf;
+  res = (stats->buf.buf != NULL);
+  return res;
 }
 
 
-void stats_close(stats_io_t *stats, int last_pass)
-{
-    if (stats->file)
-    {
-        if (stats->pass == last_pass)
-        {
+void stats_close(stats_io_t *stats, int last_pass) {
+  if (stats->file) {
+    if (stats->pass == last_pass) {
 #if 0
 #elif USE_POSIX_MMAP
-            munmap(stats->buf.buf, stats->buf.sz);
+      munmap(stats->buf.buf, stats->buf.sz);
 #else
-            free(stats->buf.buf);
+      free(stats->buf.buf);
 #endif
-        }
+    }
 
-        fclose(stats->file);
-        stats->file = NULL;
-    }
-    else
-    {
-        if (stats->pass == last_pass)
-            free(stats->buf.buf);
-    }
+    fclose(stats->file);
+    stats->file = NULL;
+  } else {
+    if (stats->pass == last_pass)
+      free(stats->buf.buf);
+  }
 }
 
-void stats_write(stats_io_t *stats, const void *pkt, size_t len)
-{
-    if (stats->file)
-    {
-        if(fwrite(pkt, 1, len, stats->file));
-    }
-    else
-    {
-        if (stats->buf.sz + len > stats->buf_alloc_sz)
-        {
-            size_t  new_sz = stats->buf_alloc_sz + 64 * 1024;
-            char   *new_ptr = realloc(stats->buf.buf, new_sz);
+void stats_write(stats_io_t *stats, const void *pkt, size_t len) {
+  if (stats->file) {
+    if (fwrite(pkt, 1, len, stats->file));
+  } else {
+    if (stats->buf.sz + len > stats->buf_alloc_sz) {
+      size_t  new_sz = stats->buf_alloc_sz + 64 * 1024;
+      char   *new_ptr = realloc(stats->buf.buf, new_sz);
 
-            if (new_ptr)
-            {
-                stats->buf_ptr = new_ptr + (stats->buf_ptr - (char *)stats->buf.buf);
-                stats->buf.buf = new_ptr;
-                stats->buf_alloc_sz = new_sz;
-            }
-            else
-            {
-                fprintf(stderr,
-                        "\nFailed to realloc firstpass stats buffer.\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        memcpy(stats->buf_ptr, pkt, len);
-        stats->buf.sz += len;
-        stats->buf_ptr += len;
+      if (new_ptr) {
+        stats->buf_ptr = new_ptr + (stats->buf_ptr - (char *)stats->buf.buf);
+        stats->buf.buf = new_ptr;
+        stats->buf_alloc_sz = new_sz;
+      } else {
+        fprintf(stderr,
+                "\nFailed to realloc firstpass stats buffer.\n");
+        exit(EXIT_FAILURE);
+      }
     }
+
+    memcpy(stats->buf_ptr, pkt, len);
+    stats->buf.sz += len;
+    stats->buf_ptr += len;
+  }
 }
 
-vpx_fixed_buf_t stats_get(stats_io_t *stats)
-{
-    return stats->buf;
+vpx_fixed_buf_t stats_get(stats_io_t *stats) {
+  return stats->buf;
 }
 
 /* Stereo 3D packed frame format */
-typedef enum stereo_format
-{
-    STEREO_FORMAT_MONO       = 0,
-    STEREO_FORMAT_LEFT_RIGHT = 1,
-    STEREO_FORMAT_BOTTOM_TOP = 2,
-    STEREO_FORMAT_TOP_BOTTOM = 3,
-    STEREO_FORMAT_RIGHT_LEFT = 11
+typedef enum stereo_format {
+  STEREO_FORMAT_MONO       = 0,
+  STEREO_FORMAT_LEFT_RIGHT = 1,
+  STEREO_FORMAT_BOTTOM_TOP = 2,
+  STEREO_FORMAT_TOP_BOTTOM = 3,
+  STEREO_FORMAT_RIGHT_LEFT = 11
 } stereo_format_t;
 
-enum video_file_type
-{
-    FILE_TYPE_RAW,
-    FILE_TYPE_IVF,
-    FILE_TYPE_Y4M
+enum video_file_type {
+  FILE_TYPE_RAW,
+  FILE_TYPE_IVF,
+  FILE_TYPE_Y4M
 };
 
 struct detect_buffer {
-    char buf[4];
-    size_t buf_read;
-    size_t position;
+  char buf[4];
+  size_t buf_read;
+  size_t position;
 };
 
 
 #define IVF_FRAME_HDR_SZ (4+8) /* 4 byte size + 8 byte timestamp */
 static int read_frame(FILE *f, vpx_image_t *img, unsigned int file_type,
-                      y4m_input *y4m, struct detect_buffer *detect)
-{
-    int plane = 0;
-    int shortread = 0;
+                      y4m_input *y4m, struct detect_buffer *detect) {
+  int plane = 0;
+  int shortread = 0;
 
-    if (file_type == FILE_TYPE_Y4M)
-    {
-        if (y4m_input_fetch_frame(y4m, f, img) < 1)
-           return 0;
-    }
-    else
-    {
-        if (file_type == FILE_TYPE_IVF)
-        {
-            char junk[IVF_FRAME_HDR_SZ];
+  if (file_type == FILE_TYPE_Y4M) {
+    if (y4m_input_fetch_frame(y4m, f, img) < 1)
+      return 0;
+  } else {
+    if (file_type == FILE_TYPE_IVF) {
+      char junk[IVF_FRAME_HDR_SZ];
 
-            /* Skip the frame header. We know how big the frame should be. See
-             * write_ivf_frame_header() for documentation on the frame header
-             * layout.
-             */
-            if(fread(junk, 1, IVF_FRAME_HDR_SZ, f));
-        }
-
-        for (plane = 0; plane < 3; plane++)
-        {
-            unsigned char *ptr;
-            int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
-            int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
-            int r;
-
-            /* Determine the correct plane based on the image format. The for-loop
-             * always counts in Y,U,V order, but this may not match the order of
-             * the data on disk.
-             */
-            switch (plane)
-            {
-            case 1:
-                ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12? VPX_PLANE_V : VPX_PLANE_U];
-                break;
-            case 2:
-                ptr = img->planes[img->fmt==VPX_IMG_FMT_YV12?VPX_PLANE_U : VPX_PLANE_V];
-                break;
-            default:
-                ptr = img->planes[plane];
-            }
-
-            for (r = 0; r < h; r++)
-            {
-                size_t needed = w;
-                size_t buf_position = 0;
-                const size_t left = detect->buf_read - detect->position;
-                if (left > 0)
-                {
-                    const size_t more = (left < needed) ? left : needed;
-                    memcpy(ptr, detect->buf + detect->position, more);
-                    buf_position = more;
-                    needed -= more;
-                    detect->position += more;
-                }
-                if (needed > 0)
-                {
-                    shortread |= (fread(ptr + buf_position, 1, needed, f) < needed);
-                }
-
-                ptr += img->stride[plane];
-            }
-        }
+      /* Skip the frame header. We know how big the frame should be. See
+       * write_ivf_frame_header() for documentation on the frame header
+       * layout.
+       */
+      if (fread(junk, 1, IVF_FRAME_HDR_SZ, f));
     }
 
-    return !shortread;
+    for (plane = 0; plane < 3; plane++) {
+      unsigned char *ptr;
+      int w = (plane ? (1 + img->d_w) / 2 : img->d_w);
+      int h = (plane ? (1 + img->d_h) / 2 : img->d_h);
+      int r;
+
+      /* Determine the correct plane based on the image format. The for-loop
+       * always counts in Y,U,V order, but this may not match the order of
+       * the data on disk.
+       */
+      switch (plane) {
+        case 1:
+          ptr = img->planes[img->fmt == VPX_IMG_FMT_YV12 ? VPX_PLANE_V : VPX_PLANE_U];
+          break;
+        case 2:
+          ptr = img->planes[img->fmt == VPX_IMG_FMT_YV12 ? VPX_PLANE_U : VPX_PLANE_V];
+          break;
+        default:
+          ptr = img->planes[plane];
+      }
+
+      for (r = 0; r < h; r++) {
+        size_t needed = w;
+        size_t buf_position = 0;
+        const size_t left = detect->buf_read - detect->position;
+        if (left > 0) {
+          const size_t more = (left < needed) ? left : needed;
+          memcpy(ptr, detect->buf + detect->position, more);
+          buf_position = more;
+          needed -= more;
+          detect->position += more;
+        }
+        if (needed > 0) {
+          shortread |= (fread(ptr + buf_position, 1, needed, f) < needed);
+        }
+
+        ptr += img->stride[plane];
+      }
+    }
+  }
+
+  return !shortread;
 }
 
 
 unsigned int file_is_y4m(FILE      *infile,
                          y4m_input *y4m,
-                         char       detect[4])
-{
-    if(memcmp(detect, "YUV4", 4) == 0)
-    {
-        return 1;
-    }
-    return 0;
+                         char       detect[4]) {
+  if (memcmp(detect, "YUV4", 4) == 0) {
+    return 1;
+  }
+  return 0;
 }
 
 #define IVF_FILE_HDR_SZ (32)
@@ -393,272 +349,257 @@ unsigned int file_is_ivf(FILE *infile,
                          unsigned int *fourcc,
                          unsigned int *width,
                          unsigned int *height,
-                         struct detect_buffer *detect)
-{
-    char raw_hdr[IVF_FILE_HDR_SZ];
-    int is_ivf = 0;
+                         struct detect_buffer *detect) {
+  char raw_hdr[IVF_FILE_HDR_SZ];
+  int is_ivf = 0;
 
-    if(memcmp(detect->buf, "DKIF", 4) != 0)
-        return 0;
+  if (memcmp(detect->buf, "DKIF", 4) != 0)
+    return 0;
 
-    /* See write_ivf_file_header() for more documentation on the file header
-     * layout.
-     */
-    if (fread(raw_hdr + 4, 1, IVF_FILE_HDR_SZ - 4, infile)
-        == IVF_FILE_HDR_SZ - 4)
+  /* See write_ivf_file_header() for more documentation on the file header
+   * layout.
+   */
+  if (fread(raw_hdr + 4, 1, IVF_FILE_HDR_SZ - 4, infile)
+      == IVF_FILE_HDR_SZ - 4) {
     {
-        {
-            is_ivf = 1;
+      is_ivf = 1;
 
-            if (mem_get_le16(raw_hdr + 4) != 0)
-                fprintf(stderr, "Error: Unrecognized IVF version! This file may not"
-                        " decode properly.");
+      if (mem_get_le16(raw_hdr + 4) != 0)
+        fprintf(stderr, "Error: Unrecognized IVF version! This file may not"
+                " decode properly.");
 
-            *fourcc = mem_get_le32(raw_hdr + 8);
-        }
+      *fourcc = mem_get_le32(raw_hdr + 8);
     }
+  }
 
-    if (is_ivf)
-    {
-        *width = mem_get_le16(raw_hdr + 12);
-        *height = mem_get_le16(raw_hdr + 14);
-        detect->position = 4;
-    }
+  if (is_ivf) {
+    *width = mem_get_le16(raw_hdr + 12);
+    *height = mem_get_le16(raw_hdr + 14);
+    detect->position = 4;
+  }
 
-    return is_ivf;
+  return is_ivf;
 }
 
 
 static void write_ivf_file_header(FILE *outfile,
                                   const vpx_codec_enc_cfg_t *cfg,
                                   unsigned int fourcc,
-                                  int frame_cnt)
-{
-    char header[32];
+                                  int frame_cnt) {
+  char header[32];
 
-    if (cfg->g_pass != VPX_RC_ONE_PASS && cfg->g_pass != VPX_RC_LAST_PASS)
-        return;
+  if (cfg->g_pass != VPX_RC_ONE_PASS && cfg->g_pass != VPX_RC_LAST_PASS)
+    return;
 
-    header[0] = 'D';
-    header[1] = 'K';
-    header[2] = 'I';
-    header[3] = 'F';
-    mem_put_le16(header + 4,  0);                 /* version */
-    mem_put_le16(header + 6,  32);                /* headersize */
-    mem_put_le32(header + 8,  fourcc);            /* headersize */
-    mem_put_le16(header + 12, cfg->g_w);          /* width */
-    mem_put_le16(header + 14, cfg->g_h);          /* height */
-    mem_put_le32(header + 16, cfg->g_timebase.den); /* rate */
-    mem_put_le32(header + 20, cfg->g_timebase.num); /* scale */
-    mem_put_le32(header + 24, frame_cnt);         /* length */
-    mem_put_le32(header + 28, 0);                 /* unused */
+  header[0] = 'D';
+  header[1] = 'K';
+  header[2] = 'I';
+  header[3] = 'F';
+  mem_put_le16(header + 4,  0);                 /* version */
+  mem_put_le16(header + 6,  32);                /* headersize */
+  mem_put_le32(header + 8,  fourcc);            /* headersize */
+  mem_put_le16(header + 12, cfg->g_w);          /* width */
+  mem_put_le16(header + 14, cfg->g_h);          /* height */
+  mem_put_le32(header + 16, cfg->g_timebase.den); /* rate */
+  mem_put_le32(header + 20, cfg->g_timebase.num); /* scale */
+  mem_put_le32(header + 24, frame_cnt);         /* length */
+  mem_put_le32(header + 28, 0);                 /* unused */
 
-    if(fwrite(header, 1, 32, outfile));
+  if (fwrite(header, 1, 32, outfile));
 }
 
 
 static void write_ivf_frame_header(FILE *outfile,
-                                   const vpx_codec_cx_pkt_t *pkt)
-{
-    char             header[12];
-    vpx_codec_pts_t  pts;
+                                   const vpx_codec_cx_pkt_t *pkt) {
+  char             header[12];
+  vpx_codec_pts_t  pts;
 
-    if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
-        return;
+  if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
+    return;
 
-    pts = pkt->data.frame.pts;
-    mem_put_le32(header, pkt->data.frame.sz);
-    mem_put_le32(header + 4, pts & 0xFFFFFFFF);
-    mem_put_le32(header + 8, pts >> 32);
+  pts = pkt->data.frame.pts;
+  mem_put_le32(header, pkt->data.frame.sz);
+  mem_put_le32(header + 4, pts & 0xFFFFFFFF);
+  mem_put_le32(header + 8, pts >> 32);
 
-    if(fwrite(header, 1, 12, outfile));
+  if (fwrite(header, 1, 12, outfile));
 }
 
 
 typedef off_t EbmlLoc;
 
 
-struct cue_entry
-{
-    unsigned int time;
-    uint64_t     loc;
+struct cue_entry {
+  unsigned int time;
+  uint64_t     loc;
 };
 
 
-struct EbmlGlobal
-{
-    int debug;
+struct EbmlGlobal {
+  int debug;
 
-    FILE    *stream;
-    int64_t last_pts_ms;
-    vpx_rational_t  framerate;
+  FILE    *stream;
+  int64_t last_pts_ms;
+  vpx_rational_t  framerate;
 
-    /* These pointers are to the start of an element */
-    off_t    position_reference;
-    off_t    seek_info_pos;
-    off_t    segment_info_pos;
-    off_t    track_pos;
-    off_t    cue_pos;
-    off_t    cluster_pos;
+  /* These pointers are to the start of an element */
+  off_t    position_reference;
+  off_t    seek_info_pos;
+  off_t    segment_info_pos;
+  off_t    track_pos;
+  off_t    cue_pos;
+  off_t    cluster_pos;
 
-    /* This pointer is to a specific element to be serialized */
-    off_t    track_id_pos;
+  /* This pointer is to a specific element to be serialized */
+  off_t    track_id_pos;
 
-    /* These pointers are to the size field of the element */
-    EbmlLoc  startSegment;
-    EbmlLoc  startCluster;
+  /* These pointers are to the size field of the element */
+  EbmlLoc  startSegment;
+  EbmlLoc  startCluster;
 
-    uint32_t cluster_timecode;
-    int      cluster_open;
+  uint32_t cluster_timecode;
+  int      cluster_open;
 
-    struct cue_entry *cue_list;
-    unsigned int      cues;
+  struct cue_entry *cue_list;
+  unsigned int      cues;
 
 };
 
 
-void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len)
-{
-    if(fwrite(buffer_in, 1, len, glob->stream));
+void Ebml_Write(EbmlGlobal *glob, const void *buffer_in, unsigned long len) {
+  if (fwrite(buffer_in, 1, len, glob->stream));
 }
 
 #define WRITE_BUFFER(s) \
-for(i = len-1; i>=0; i--)\
-{ \
+  for(i = len-1; i>=0; i--)\
+  { \
     x = *(const s *)buffer_in >> (i * CHAR_BIT); \
     Ebml_Write(glob, &x, 1); \
-}
-void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, int buffer_size, unsigned long len)
-{
-    char x;
-    int i;
+  }
+void Ebml_Serialize(EbmlGlobal *glob, const void *buffer_in, int buffer_size, unsigned long len) {
+  char x;
+  int i;
 
-    /* buffer_size:
-     * 1 - int8_t;
-     * 2 - int16_t;
-     * 3 - int32_t;
-     * 4 - int64_t;
-     */
-    switch (buffer_size)
-    {
-        case 1:
-            WRITE_BUFFER(int8_t)
-            break;
-        case 2:
-            WRITE_BUFFER(int16_t)
-            break;
-        case 4:
-            WRITE_BUFFER(int32_t)
-            break;
-        case 8:
-            WRITE_BUFFER(int64_t)
-            break;
-        default:
-            break;
-    }
+  /* buffer_size:
+   * 1 - int8_t;
+   * 2 - int16_t;
+   * 3 - int32_t;
+   * 4 - int64_t;
+   */
+  switch (buffer_size) {
+    case 1:
+      WRITE_BUFFER(int8_t)
+      break;
+    case 2:
+      WRITE_BUFFER(int16_t)
+      break;
+    case 4:
+      WRITE_BUFFER(int32_t)
+      break;
+    case 8:
+      WRITE_BUFFER(int64_t)
+      break;
+    default:
+      break;
+  }
 }
 #undef WRITE_BUFFER
 
 /* Need a fixed size serializer for the track ID. libmkv provides a 64 bit
  * one, but not a 32 bit one.
  */
-static void Ebml_SerializeUnsigned32(EbmlGlobal *glob, unsigned long class_id, uint64_t ui)
-{
-    unsigned char sizeSerialized = 4 | 0x80;
-    Ebml_WriteID(glob, class_id);
-    Ebml_Serialize(glob, &sizeSerialized, sizeof(sizeSerialized), 1);
-    Ebml_Serialize(glob, &ui, sizeof(ui), 4);
+static void Ebml_SerializeUnsigned32(EbmlGlobal *glob, unsigned long class_id, uint64_t ui) {
+  unsigned char sizeSerialized = 4 | 0x80;
+  Ebml_WriteID(glob, class_id);
+  Ebml_Serialize(glob, &sizeSerialized, sizeof(sizeSerialized), 1);
+  Ebml_Serialize(glob, &ui, sizeof(ui), 4);
 }
 
 
 static void
 Ebml_StartSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc,
-                          unsigned long class_id)
-{
-    //todo this is always taking 8 bytes, this may need later optimization
-    //this is a key that says length unknown
-    uint64_t unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
+                     unsigned long class_id) {
+  // todo this is always taking 8 bytes, this may need later optimization
+  // this is a key that says length unknown
+  uint64_t unknownLen =  LITERALU64(0x01FFFFFFFFFFFFFF);
 
-    Ebml_WriteID(glob, class_id);
-    *ebmlLoc = ftello(glob->stream);
-    Ebml_Serialize(glob, &unknownLen, sizeof(unknownLen), 8);
+  Ebml_WriteID(glob, class_id);
+  *ebmlLoc = ftello(glob->stream);
+  Ebml_Serialize(glob, &unknownLen, sizeof(unknownLen), 8);
 }
 
 static void
-Ebml_EndSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc)
-{
-    off_t pos;
-    uint64_t size;
+Ebml_EndSubElement(EbmlGlobal *glob, EbmlLoc *ebmlLoc) {
+  off_t pos;
+  uint64_t size;
 
-    /* Save the current stream pointer */
-    pos = ftello(glob->stream);
+  /* Save the current stream pointer */
+  pos = ftello(glob->stream);
 
-    /* Calculate the size of this element */
-    size = pos - *ebmlLoc - 8;
-    size |=  LITERALU64(0x0100000000000000);
+  /* Calculate the size of this element */
+  size = pos - *ebmlLoc - 8;
+  size |=  LITERALU64(0x0100000000000000);
 
-    /* Seek back to the beginning of the element and write the new size */
-    fseeko(glob->stream, *ebmlLoc, SEEK_SET);
-    Ebml_Serialize(glob, &size, sizeof(size), 8);
+  /* Seek back to the beginning of the element and write the new size */
+  fseeko(glob->stream, *ebmlLoc, SEEK_SET);
+  Ebml_Serialize(glob, &size, sizeof(size), 8);
 
-    /* Reset the stream pointer */
-    fseeko(glob->stream, pos, SEEK_SET);
+  /* Reset the stream pointer */
+  fseeko(glob->stream, pos, SEEK_SET);
 }
 
 
 static void
-write_webm_seek_element(EbmlGlobal *ebml, unsigned long id, off_t pos)
-{
-    uint64_t offset = pos - ebml->position_reference;
+write_webm_seek_element(EbmlGlobal *ebml, unsigned long id, off_t pos) {
+  uint64_t offset = pos - ebml->position_reference;
+  EbmlLoc start;
+  Ebml_StartSubElement(ebml, &start, Seek);
+  Ebml_SerializeBinary(ebml, SeekID, id);
+  Ebml_SerializeUnsigned64(ebml, SeekPosition, offset);
+  Ebml_EndSubElement(ebml, &start);
+}
+
+
+static void
+write_webm_seek_info(EbmlGlobal *ebml) {
+
+  off_t pos;
+
+  /* Save the current stream pointer */
+  pos = ftello(ebml->stream);
+
+  if (ebml->seek_info_pos)
+    fseeko(ebml->stream, ebml->seek_info_pos, SEEK_SET);
+  else
+    ebml->seek_info_pos = pos;
+
+  {
     EbmlLoc start;
-    Ebml_StartSubElement(ebml, &start, Seek);
-    Ebml_SerializeBinary(ebml, SeekID, id);
-    Ebml_SerializeUnsigned64(ebml, SeekPosition, offset);
+
+    Ebml_StartSubElement(ebml, &start, SeekHead);
+    write_webm_seek_element(ebml, Tracks, ebml->track_pos);
+    write_webm_seek_element(ebml, Cues,   ebml->cue_pos);
+    write_webm_seek_element(ebml, Info,   ebml->segment_info_pos);
     Ebml_EndSubElement(ebml, &start);
-}
+  }
+  {
+    // segment info
+    EbmlLoc startInfo;
+    uint64_t frame_time;
 
-
-static void
-write_webm_seek_info(EbmlGlobal *ebml)
-{
-
-    off_t pos;
-
-    /* Save the current stream pointer */
-    pos = ftello(ebml->stream);
-
-    if(ebml->seek_info_pos)
-        fseeko(ebml->stream, ebml->seek_info_pos, SEEK_SET);
-    else
-        ebml->seek_info_pos = pos;
-
-    {
-        EbmlLoc start;
-
-        Ebml_StartSubElement(ebml, &start, SeekHead);
-        write_webm_seek_element(ebml, Tracks, ebml->track_pos);
-        write_webm_seek_element(ebml, Cues,   ebml->cue_pos);
-        write_webm_seek_element(ebml, Info,   ebml->segment_info_pos);
-        Ebml_EndSubElement(ebml, &start);
-    }
-    {
-        //segment info
-        EbmlLoc startInfo;
-        uint64_t frame_time;
-
-        frame_time = (uint64_t)1000 * ebml->framerate.den
-                     / ebml->framerate.num;
-        ebml->segment_info_pos = ftello(ebml->stream);
-        Ebml_StartSubElement(ebml, &startInfo, Info);
-        Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
-        Ebml_SerializeFloat(ebml, Segment_Duration,
-                            ebml->last_pts_ms + frame_time);
-        Ebml_SerializeString(ebml, 0x4D80,
-            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
-        Ebml_SerializeString(ebml, 0x5741,
-            ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
-        Ebml_EndSubElement(ebml, &startInfo);
-    }
+    frame_time = (uint64_t)1000 * ebml->framerate.den
+                 / ebml->framerate.num;
+    ebml->segment_info_pos = ftello(ebml->stream);
+    Ebml_StartSubElement(ebml, &startInfo, Info);
+    Ebml_SerializeUnsigned(ebml, TimecodeScale, 1000000);
+    Ebml_SerializeFloat(ebml, Segment_Duration,
+                        ebml->last_pts_ms + frame_time);
+    Ebml_SerializeString(ebml, 0x4D80,
+                         ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
+    Ebml_SerializeString(ebml, 0x5741,
+                         ebml->debug ? "vpxenc" : "vpxenc" VERSION_STRING);
+    Ebml_EndSubElement(ebml, &startInfo);
+  }
 }
 
 
@@ -666,1646 +607,1525 @@ static void
 write_webm_file_header(EbmlGlobal                *glob,
                        const vpx_codec_enc_cfg_t *cfg,
                        const struct vpx_rational *fps,
-                       stereo_format_t            stereo_fmt)
-{
+                       stereo_format_t            stereo_fmt) {
+  {
+    EbmlLoc start;
+    Ebml_StartSubElement(glob, &start, EBML);
+    Ebml_SerializeUnsigned(glob, EBMLVersion, 1);
+    Ebml_SerializeUnsigned(glob, EBMLReadVersion, 1); // EBML Read Version
+    Ebml_SerializeUnsigned(glob, EBMLMaxIDLength, 4); // EBML Max ID Length
+    Ebml_SerializeUnsigned(glob, EBMLMaxSizeLength, 8); // EBML Max Size Length
+    Ebml_SerializeString(glob, DocType, "webm"); // Doc Type
+    Ebml_SerializeUnsigned(glob, DocTypeVersion, 2); // Doc Type Version
+    Ebml_SerializeUnsigned(glob, DocTypeReadVersion, 2); // Doc Type Read Version
+    Ebml_EndSubElement(glob, &start);
+  }
+  {
+    Ebml_StartSubElement(glob, &glob->startSegment, Segment); // segment
+    glob->position_reference = ftello(glob->stream);
+    glob->framerate = *fps;
+    write_webm_seek_info(glob);
+
     {
+      EbmlLoc trackStart;
+      glob->track_pos = ftello(glob->stream);
+      Ebml_StartSubElement(glob, &trackStart, Tracks);
+      {
+        unsigned int trackNumber = 1;
+        uint64_t     trackID = 0;
+
         EbmlLoc start;
-        Ebml_StartSubElement(glob, &start, EBML);
-        Ebml_SerializeUnsigned(glob, EBMLVersion, 1);
-        Ebml_SerializeUnsigned(glob, EBMLReadVersion, 1); //EBML Read Version
-        Ebml_SerializeUnsigned(glob, EBMLMaxIDLength, 4); //EBML Max ID Length
-        Ebml_SerializeUnsigned(glob, EBMLMaxSizeLength, 8); //EBML Max Size Length
-        Ebml_SerializeString(glob, DocType, "webm"); //Doc Type
-        Ebml_SerializeUnsigned(glob, DocTypeVersion, 2); //Doc Type Version
-        Ebml_SerializeUnsigned(glob, DocTypeReadVersion, 2); //Doc Type Read Version
-        Ebml_EndSubElement(glob, &start);
-    }
-    {
-        Ebml_StartSubElement(glob, &glob->startSegment, Segment); //segment
-        glob->position_reference = ftello(glob->stream);
-        glob->framerate = *fps;
-        write_webm_seek_info(glob);
-
+        Ebml_StartSubElement(glob, &start, TrackEntry);
+        Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
+        glob->track_id_pos = ftello(glob->stream);
+        Ebml_SerializeUnsigned32(glob, TrackUID, trackID);
+        Ebml_SerializeUnsigned(glob, TrackType, 1); // video is always 1
+        Ebml_SerializeString(glob, CodecID, "V_VP8");
         {
-            EbmlLoc trackStart;
-            glob->track_pos = ftello(glob->stream);
-            Ebml_StartSubElement(glob, &trackStart, Tracks);
-            {
-                unsigned int trackNumber = 1;
-                uint64_t     trackID = 0;
+          unsigned int pixelWidth = cfg->g_w;
+          unsigned int pixelHeight = cfg->g_h;
+          float        frameRate   = (float)fps->num / (float)fps->den;
 
-                EbmlLoc start;
-                Ebml_StartSubElement(glob, &start, TrackEntry);
-                Ebml_SerializeUnsigned(glob, TrackNumber, trackNumber);
-                glob->track_id_pos = ftello(glob->stream);
-                Ebml_SerializeUnsigned32(glob, TrackUID, trackID);
-                Ebml_SerializeUnsigned(glob, TrackType, 1); //video is always 1
-                Ebml_SerializeString(glob, CodecID, "V_VP8");
-                {
-                    unsigned int pixelWidth = cfg->g_w;
-                    unsigned int pixelHeight = cfg->g_h;
-                    float        frameRate   = (float)fps->num/(float)fps->den;
-
-                    EbmlLoc videoStart;
-                    Ebml_StartSubElement(glob, &videoStart, Video);
-                    Ebml_SerializeUnsigned(glob, PixelWidth, pixelWidth);
-                    Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
-                    Ebml_SerializeUnsigned(glob, StereoMode, stereo_fmt);
-                    Ebml_SerializeFloat(glob, FrameRate, frameRate);
-                    Ebml_EndSubElement(glob, &videoStart); //Video
-                }
-                Ebml_EndSubElement(glob, &start); //Track Entry
-            }
-            Ebml_EndSubElement(glob, &trackStart);
+          EbmlLoc videoStart;
+          Ebml_StartSubElement(glob, &videoStart, Video);
+          Ebml_SerializeUnsigned(glob, PixelWidth, pixelWidth);
+          Ebml_SerializeUnsigned(glob, PixelHeight, pixelHeight);
+          Ebml_SerializeUnsigned(glob, StereoMode, stereo_fmt);
+          Ebml_SerializeFloat(glob, FrameRate, frameRate);
+          Ebml_EndSubElement(glob, &videoStart); // Video
         }
-        // segment element is open
+        Ebml_EndSubElement(glob, &start); // Track Entry
+      }
+      Ebml_EndSubElement(glob, &trackStart);
     }
+    // segment element is open
+  }
 }
 
 
 static void
 write_webm_block(EbmlGlobal                *glob,
                  const vpx_codec_enc_cfg_t *cfg,
-                 const vpx_codec_cx_pkt_t  *pkt)
-{
-    unsigned long  block_length;
-    unsigned char  track_number;
-    unsigned short block_timecode = 0;
-    unsigned char  flags;
-    int64_t        pts_ms;
-    int            start_cluster = 0, is_keyframe;
+                 const vpx_codec_cx_pkt_t  *pkt) {
+  unsigned long  block_length;
+  unsigned char  track_number;
+  unsigned short block_timecode = 0;
+  unsigned char  flags;
+  int64_t        pts_ms;
+  int            start_cluster = 0, is_keyframe;
 
-    /* Calculate the PTS of this frame in milliseconds */
-    pts_ms = pkt->data.frame.pts * 1000
-             * (uint64_t)cfg->g_timebase.num / (uint64_t)cfg->g_timebase.den;
-    if(pts_ms <= glob->last_pts_ms)
-        pts_ms = glob->last_pts_ms + 1;
-    glob->last_pts_ms = pts_ms;
+  /* Calculate the PTS of this frame in milliseconds */
+  pts_ms = pkt->data.frame.pts * 1000
+           * (uint64_t)cfg->g_timebase.num / (uint64_t)cfg->g_timebase.den;
+  if (pts_ms <= glob->last_pts_ms)
+    pts_ms = glob->last_pts_ms + 1;
+  glob->last_pts_ms = pts_ms;
 
-    /* Calculate the relative time of this block */
-    if(pts_ms - glob->cluster_timecode > SHRT_MAX)
-        start_cluster = 1;
-    else
-        block_timecode = pts_ms - glob->cluster_timecode;
+  /* Calculate the relative time of this block */
+  if (pts_ms - glob->cluster_timecode > SHRT_MAX)
+    start_cluster = 1;
+  else
+    block_timecode = pts_ms - glob->cluster_timecode;
 
-    is_keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY);
-    if(start_cluster || is_keyframe)
-    {
-        if(glob->cluster_open)
-            Ebml_EndSubElement(glob, &glob->startCluster);
+  is_keyframe = (pkt->data.frame.flags & VPX_FRAME_IS_KEY);
+  if (start_cluster || is_keyframe) {
+    if (glob->cluster_open)
+      Ebml_EndSubElement(glob, &glob->startCluster);
 
-        /* Open the new cluster */
-        block_timecode = 0;
-        glob->cluster_open = 1;
-        glob->cluster_timecode = pts_ms;
-        glob->cluster_pos = ftello(glob->stream);
-        Ebml_StartSubElement(glob, &glob->startCluster, Cluster); //cluster
-        Ebml_SerializeUnsigned(glob, Timecode, glob->cluster_timecode);
+    /* Open the new cluster */
+    block_timecode = 0;
+    glob->cluster_open = 1;
+    glob->cluster_timecode = pts_ms;
+    glob->cluster_pos = ftello(glob->stream);
+    Ebml_StartSubElement(glob, &glob->startCluster, Cluster); // cluster
+    Ebml_SerializeUnsigned(glob, Timecode, glob->cluster_timecode);
 
-        /* Save a cue point if this is a keyframe. */
-        if(is_keyframe)
-        {
-            struct cue_entry *cue, *new_cue_list;
+    /* Save a cue point if this is a keyframe. */
+    if (is_keyframe) {
+      struct cue_entry *cue, *new_cue_list;
 
-            new_cue_list = realloc(glob->cue_list,
-                                   (glob->cues+1) * sizeof(struct cue_entry));
-            if(new_cue_list)
-                glob->cue_list = new_cue_list;
-            else
-            {
-                fprintf(stderr, "\nFailed to realloc cue list.\n");
-                exit(EXIT_FAILURE);
-            }
+      new_cue_list = realloc(glob->cue_list,
+                             (glob->cues + 1) * sizeof(struct cue_entry));
+      if (new_cue_list)
+        glob->cue_list = new_cue_list;
+      else {
+        fprintf(stderr, "\nFailed to realloc cue list.\n");
+        exit(EXIT_FAILURE);
+      }
 
-            cue = &glob->cue_list[glob->cues];
-            cue->time = glob->cluster_timecode;
-            cue->loc = glob->cluster_pos;
-            glob->cues++;
-        }
+      cue = &glob->cue_list[glob->cues];
+      cue->time = glob->cluster_timecode;
+      cue->loc = glob->cluster_pos;
+      glob->cues++;
     }
+  }
 
-    /* Write the Simple Block */
-    Ebml_WriteID(glob, SimpleBlock);
+  /* Write the Simple Block */
+  Ebml_WriteID(glob, SimpleBlock);
 
-    block_length = pkt->data.frame.sz + 4;
-    block_length |= 0x10000000;
-    Ebml_Serialize(glob, &block_length, sizeof(block_length), 4);
+  block_length = pkt->data.frame.sz + 4;
+  block_length |= 0x10000000;
+  Ebml_Serialize(glob, &block_length, sizeof(block_length), 4);
 
-    track_number = 1;
-    track_number |= 0x80;
-    Ebml_Write(glob, &track_number, 1);
+  track_number = 1;
+  track_number |= 0x80;
+  Ebml_Write(glob, &track_number, 1);
 
-    Ebml_Serialize(glob, &block_timecode, sizeof(block_timecode), 2);
+  Ebml_Serialize(glob, &block_timecode, sizeof(block_timecode), 2);
 
-    flags = 0;
-    if(is_keyframe)
-        flags |= 0x80;
-    if(pkt->data.frame.flags & VPX_FRAME_IS_INVISIBLE)
-        flags |= 0x08;
-    Ebml_Write(glob, &flags, 1);
+  flags = 0;
+  if (is_keyframe)
+    flags |= 0x80;
+  if (pkt->data.frame.flags & VPX_FRAME_IS_INVISIBLE)
+    flags |= 0x08;
+  Ebml_Write(glob, &flags, 1);
 
-    Ebml_Write(glob, pkt->data.frame.buf, pkt->data.frame.sz);
+  Ebml_Write(glob, pkt->data.frame.buf, pkt->data.frame.sz);
 }
 
 
 static void
-write_webm_file_footer(EbmlGlobal *glob, long hash)
-{
+write_webm_file_footer(EbmlGlobal *glob, long hash) {
 
-    if(glob->cluster_open)
-        Ebml_EndSubElement(glob, &glob->startCluster);
+  if (glob->cluster_open)
+    Ebml_EndSubElement(glob, &glob->startCluster);
 
-    {
+  {
+    EbmlLoc start;
+    int i;
+
+    glob->cue_pos = ftello(glob->stream);
+    Ebml_StartSubElement(glob, &start, Cues);
+    for (i = 0; i < glob->cues; i++) {
+      struct cue_entry *cue = &glob->cue_list[i];
+      EbmlLoc start;
+
+      Ebml_StartSubElement(glob, &start, CuePoint);
+      {
         EbmlLoc start;
-        int i;
 
-        glob->cue_pos = ftello(glob->stream);
-        Ebml_StartSubElement(glob, &start, Cues);
-        for(i=0; i<glob->cues; i++)
-        {
-            struct cue_entry *cue = &glob->cue_list[i];
-            EbmlLoc start;
+        Ebml_SerializeUnsigned(glob, CueTime, cue->time);
 
-            Ebml_StartSubElement(glob, &start, CuePoint);
-            {
-                EbmlLoc start;
-
-                Ebml_SerializeUnsigned(glob, CueTime, cue->time);
-
-                Ebml_StartSubElement(glob, &start, CueTrackPositions);
-                Ebml_SerializeUnsigned(glob, CueTrack, 1);
-                Ebml_SerializeUnsigned64(glob, CueClusterPosition,
-                                         cue->loc - glob->position_reference);
-                //Ebml_SerializeUnsigned(glob, CueBlockNumber, cue->blockNumber);
-                Ebml_EndSubElement(glob, &start);
-            }
-            Ebml_EndSubElement(glob, &start);
-        }
+        Ebml_StartSubElement(glob, &start, CueTrackPositions);
+        Ebml_SerializeUnsigned(glob, CueTrack, 1);
+        Ebml_SerializeUnsigned64(glob, CueClusterPosition,
+                                 cue->loc - glob->position_reference);
+        // Ebml_SerializeUnsigned(glob, CueBlockNumber, cue->blockNumber);
         Ebml_EndSubElement(glob, &start);
+      }
+      Ebml_EndSubElement(glob, &start);
     }
+    Ebml_EndSubElement(glob, &start);
+  }
 
-    Ebml_EndSubElement(glob, &glob->startSegment);
+  Ebml_EndSubElement(glob, &glob->startSegment);
 
-    /* Patch up the seek info block */
-    write_webm_seek_info(glob);
+  /* Patch up the seek info block */
+  write_webm_seek_info(glob);
 
-    /* Patch up the track id */
-    fseeko(glob->stream, glob->track_id_pos, SEEK_SET);
-    Ebml_SerializeUnsigned32(glob, TrackUID, glob->debug ? 0xDEADBEEF : hash);
+  /* Patch up the track id */
+  fseeko(glob->stream, glob->track_id_pos, SEEK_SET);
+  Ebml_SerializeUnsigned32(glob, TrackUID, glob->debug ? 0xDEADBEEF : hash);
 
-    fseeko(glob->stream, 0, SEEK_END);
+  fseeko(glob->stream, 0, SEEK_END);
 }
 
 
 /* Murmur hash derived from public domain reference implementation at
- *   http://sites.google.com/site/murmurhash/
+ *   http:// sites.google.com/site/murmurhash/
  */
-static unsigned int murmur ( const void * key, int len, unsigned int seed )
-{
-    const unsigned int m = 0x5bd1e995;
-    const int r = 24;
+static unsigned int murmur(const void *key, int len, unsigned int seed) {
+  const unsigned int m = 0x5bd1e995;
+  const int r = 24;
 
-    unsigned int h = seed ^ len;
+  unsigned int h = seed ^ len;
 
-    const unsigned char * data = (const unsigned char *)key;
+  const unsigned char *data = (const unsigned char *)key;
 
-    while(len >= 4)
-    {
-        unsigned int k;
+  while (len >= 4) {
+    unsigned int k;
 
-        k  = data[0];
-        k |= data[1] << 8;
-        k |= data[2] << 16;
-        k |= data[3] << 24;
+    k  = data[0];
+    k |= data[1] << 8;
+    k |= data[2] << 16;
+    k |= data[3] << 24;
 
-        k *= m;
-        k ^= k >> r;
-        k *= m;
+    k *= m;
+    k ^= k >> r;
+    k *= m;
 
-        h *= m;
-        h ^= k;
-
-        data += 4;
-        len -= 4;
-    }
-
-    switch(len)
-    {
-    case 3: h ^= data[2] << 16;
-    case 2: h ^= data[1] << 8;
-    case 1: h ^= data[0];
-            h *= m;
-    };
-
-    h ^= h >> 13;
     h *= m;
-    h ^= h >> 15;
+    h ^= k;
 
-    return h;
+    data += 4;
+    len -= 4;
+  }
+
+  switch (len) {
+    case 3:
+      h ^= data[2] << 16;
+    case 2:
+      h ^= data[1] << 8;
+    case 1:
+      h ^= data[0];
+      h *= m;
+  };
+
+  h ^= h >> 13;
+  h *= m;
+  h ^= h >> 15;
+
+  return h;
 }
 
 #include "math.h"
 #define MAX_PSNR 100
-static double vp8_mse2psnr(double Samples, double Peak, double Mse)
-{
-    double psnr;
+static double vp8_mse2psnr(double Samples, double Peak, double Mse) {
+  double psnr;
 
-    if ((double)Mse > 0.0)
-        psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
-    else
-        psnr = MAX_PSNR;      // Limit to prevent / 0
+  if ((double)Mse > 0.0)
+    psnr = 10.0 * log10(Peak * Peak * Samples / Mse);
+  else
+    psnr = MAX_PSNR;      // Limit to prevent / 0
 
-    if (psnr > MAX_PSNR)
-        psnr = MAX_PSNR;
+  if (psnr > MAX_PSNR)
+    psnr = MAX_PSNR;
 
-    return psnr;
+  return psnr;
 }
 
 
 #include "args.h"
 
 static const arg_def_t debugmode = ARG_DEF("D", "debug", 0,
-        "Debug mode (makes output deterministic)");
+                                           "Debug mode (makes output deterministic)");
 static const arg_def_t outputfile = ARG_DEF("o", "output", 1,
-        "Output filename");
+                                            "Output filename");
 static const arg_def_t use_yv12 = ARG_DEF(NULL, "yv12", 0,
-                                  "Input file is YV12 ");
+                                          "Input file is YV12 ");
 static const arg_def_t use_i420 = ARG_DEF(NULL, "i420", 0,
-                                  "Input file is I420 (default)");
+                                          "Input file is I420 (default)");
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
-                                  "Codec to use");
+                                          "Codec to use");
 static const arg_def_t passes           = ARG_DEF("p", "passes", 1,
-        "Number of passes (1/2)");
+                                                  "Number of passes (1/2)");
 static const arg_def_t pass_arg         = ARG_DEF(NULL, "pass", 1,
-        "Pass to execute (1/2)");
+                                                  "Pass to execute (1/2)");
 static const arg_def_t fpf_name         = ARG_DEF(NULL, "fpf", 1,
-        "First pass statistics file name");
+                                                  "First pass statistics file name");
 static const arg_def_t limit = ARG_DEF(NULL, "limit", 1,
                                        "Stop encoding after n input frames");
 static const arg_def_t skip = ARG_DEF(NULL, "skip", 1,
-                                       "Skip the first n input frames");
+                                      "Skip the first n input frames");
 static const arg_def_t deadline         = ARG_DEF("d", "deadline", 1,
-        "Deadline per frame (usec)");
+                                                  "Deadline per frame (usec)");
 static const arg_def_t best_dl          = ARG_DEF(NULL, "best", 0,
-        "Use Best Quality Deadline");
+                                                  "Use Best Quality Deadline");
 static const arg_def_t good_dl          = ARG_DEF(NULL, "good", 0,
-        "Use Good Quality Deadline");
+                                                  "Use Good Quality Deadline");
 static const arg_def_t rt_dl            = ARG_DEF(NULL, "rt", 0,
-        "Use Realtime Quality Deadline");
+                                                  "Use Realtime Quality Deadline");
 static const arg_def_t verbosearg       = ARG_DEF("v", "verbose", 0,
-        "Show encoder parameters");
+                                                  "Show encoder parameters");
 static const arg_def_t psnrarg          = ARG_DEF(NULL, "psnr", 0,
-        "Show PSNR in status line");
+                                                  "Show PSNR in status line");
 static const arg_def_t recontest        = ARG_DEF(NULL, "test-decode", 0,
-        "Test enocde/decode have machted recon buffer");
+                                                  "Test enocde/decode have machted recon buffer");
 static const arg_def_t framerate        = ARG_DEF(NULL, "fps", 1,
-        "Stream frame rate (rate/scale)");
+                                                  "Stream frame rate (rate/scale)");
 static const arg_def_t use_ivf          = ARG_DEF(NULL, "ivf", 0,
-        "Output IVF (default is WebM)");
+                                                  "Output IVF (default is WebM)");
 static const arg_def_t q_hist_n         = ARG_DEF(NULL, "q-hist", 1,
-        "Show quantizer histogram (n-buckets)");
+                                                  "Show quantizer histogram (n-buckets)");
 static const arg_def_t rate_hist_n         = ARG_DEF(NULL, "rate-hist", 1,
-        "Show rate histogram (n-buckets)");
+                                                     "Show rate histogram (n-buckets)");
 #if CONFIG_LOSSLESS
 static const arg_def_t lossless_enabled = ARG_DEF(NULL, "lossless", 0,
-                                   "Enable lossless compression");
+                                                  "Enable lossless compression");
 #endif
-static const arg_def_t *main_args[] =
-{
-    &debugmode,
-    &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &skip,
-    &deadline,
-    &best_dl, &good_dl, &rt_dl,
-    &verbosearg, &psnrarg, &recontest, &use_ivf, &q_hist_n, &rate_hist_n,
+static const arg_def_t *main_args[] = {
+  &debugmode,
+  &outputfile, &codecarg, &passes, &pass_arg, &fpf_name, &limit, &skip,
+  &deadline,
+  &best_dl, &good_dl, &rt_dl,
+  &verbosearg, &psnrarg, &recontest, &use_ivf, &q_hist_n, &rate_hist_n,
 #if CONFIG_LOSSLESS
-    &lossless_enabled,
+  &lossless_enabled,
 #endif
-    NULL
+  NULL
 };
 
 static const arg_def_t usage            = ARG_DEF("u", "usage", 1,
-        "Usage profile number to use");
+                                                  "Usage profile number to use");
 static const arg_def_t threads          = ARG_DEF("t", "threads", 1,
-        "Max number of threads to use");
+                                                  "Max number of threads to use");
 static const arg_def_t profile          = ARG_DEF(NULL, "profile", 1,
-        "Bitstream profile number to use");
+                                                  "Bitstream profile number to use");
 static const arg_def_t width            = ARG_DEF("w", "width", 1,
-        "Frame width");
+                                                  "Frame width");
 static const arg_def_t height           = ARG_DEF("h", "height", 1,
-        "Frame height");
+                                                  "Frame height");
 static const struct arg_enum_list stereo_mode_enum[] = {
-    {"mono"      , STEREO_FORMAT_MONO},
-    {"left-right", STEREO_FORMAT_LEFT_RIGHT},
-    {"bottom-top", STEREO_FORMAT_BOTTOM_TOP},
-    {"top-bottom", STEREO_FORMAT_TOP_BOTTOM},
-    {"right-left", STEREO_FORMAT_RIGHT_LEFT},
-    {NULL, 0}
+  {"mono", STEREO_FORMAT_MONO},
+  {"left-right", STEREO_FORMAT_LEFT_RIGHT},
+  {"bottom-top", STEREO_FORMAT_BOTTOM_TOP},
+  {"top-bottom", STEREO_FORMAT_TOP_BOTTOM},
+  {"right-left", STEREO_FORMAT_RIGHT_LEFT},
+  {NULL, 0}
 };
 static const arg_def_t stereo_mode      = ARG_DEF_ENUM(NULL, "stereo-mode", 1,
-        "Stereo 3D video format", stereo_mode_enum);
+                                                       "Stereo 3D video format", stereo_mode_enum);
 static const arg_def_t timebase         = ARG_DEF(NULL, "timebase", 1,
-        "Output timestamp precision (fractional seconds)");
+                                                  "Output timestamp precision (fractional seconds)");
 static const arg_def_t error_resilient  = ARG_DEF(NULL, "error-resilient", 1,
-        "Enable error resiliency features");
+                                                  "Enable error resiliency features");
 static const arg_def_t lag_in_frames    = ARG_DEF(NULL, "lag-in-frames", 1,
-        "Max number of frames to lag");
+                                                  "Max number of frames to lag");
 
-static const arg_def_t *global_args[] =
-{
-    &use_yv12, &use_i420, &usage, &threads, &profile,
-    &width, &height, &stereo_mode, &timebase, &framerate, &error_resilient,
-    &lag_in_frames, NULL
+static const arg_def_t *global_args[] = {
+  &use_yv12, &use_i420, &usage, &threads, &profile,
+  &width, &height, &stereo_mode, &timebase, &framerate, &error_resilient,
+  &lag_in_frames, NULL
 };
 
 static const arg_def_t dropframe_thresh   = ARG_DEF(NULL, "drop-frame", 1,
-        "Temporal resampling threshold (buf %)");
+                                                    "Temporal resampling threshold (buf %)");
 static const arg_def_t resize_allowed     = ARG_DEF(NULL, "resize-allowed", 1,
-        "Spatial resampling enabled (bool)");
+                                                    "Spatial resampling enabled (bool)");
 static const arg_def_t resize_up_thresh   = ARG_DEF(NULL, "resize-up", 1,
-        "Upscale threshold (buf %)");
+                                                    "Upscale threshold (buf %)");
 static const arg_def_t resize_down_thresh = ARG_DEF(NULL, "resize-down", 1,
-        "Downscale threshold (buf %)");
+                                                    "Downscale threshold (buf %)");
 static const struct arg_enum_list end_usage_enum[] = {
-    {"vbr", VPX_VBR},
-    {"cbr", VPX_CBR},
-    {"cq",  VPX_CQ},
-    {NULL, 0}
+  {"vbr", VPX_VBR},
+  {"cbr", VPX_CBR},
+  {"cq",  VPX_CQ},
+  {NULL, 0}
 };
 static const arg_def_t end_usage          = ARG_DEF_ENUM(NULL, "end-usage", 1,
-        "Rate control mode", end_usage_enum);
+                                                         "Rate control mode", end_usage_enum);
 static const arg_def_t target_bitrate     = ARG_DEF(NULL, "target-bitrate", 1,
-        "Bitrate (kbps)");
+                                                    "Bitrate (kbps)");
 static const arg_def_t min_quantizer      = ARG_DEF(NULL, "min-q", 1,
-        "Minimum (best) quantizer");
+                                                    "Minimum (best) quantizer");
 static const arg_def_t max_quantizer      = ARG_DEF(NULL, "max-q", 1,
-        "Maximum (worst) quantizer");
+                                                    "Maximum (worst) quantizer");
 static const arg_def_t undershoot_pct     = ARG_DEF(NULL, "undershoot-pct", 1,
-        "Datarate undershoot (min) target (%)");
+                                                    "Datarate undershoot (min) target (%)");
 static const arg_def_t overshoot_pct      = ARG_DEF(NULL, "overshoot-pct", 1,
-        "Datarate overshoot (max) target (%)");
+                                                    "Datarate overshoot (max) target (%)");
 static const arg_def_t buf_sz             = ARG_DEF(NULL, "buf-sz", 1,
-        "Client buffer size (ms)");
+                                                    "Client buffer size (ms)");
 static const arg_def_t buf_initial_sz     = ARG_DEF(NULL, "buf-initial-sz", 1,
-        "Client initial buffer size (ms)");
+                                                    "Client initial buffer size (ms)");
 static const arg_def_t buf_optimal_sz     = ARG_DEF(NULL, "buf-optimal-sz", 1,
-        "Client optimal buffer size (ms)");
-static const arg_def_t *rc_args[] =
-{
-    &dropframe_thresh, &resize_allowed, &resize_up_thresh, &resize_down_thresh,
-    &end_usage, &target_bitrate, &min_quantizer, &max_quantizer,
-    &undershoot_pct, &overshoot_pct, &buf_sz, &buf_initial_sz, &buf_optimal_sz,
-    NULL
+                                                    "Client optimal buffer size (ms)");
+static const arg_def_t *rc_args[] = {
+  &dropframe_thresh, &resize_allowed, &resize_up_thresh, &resize_down_thresh,
+  &end_usage, &target_bitrate, &min_quantizer, &max_quantizer,
+  &undershoot_pct, &overshoot_pct, &buf_sz, &buf_initial_sz, &buf_optimal_sz,
+  NULL
 };
 
 
 static const arg_def_t bias_pct = ARG_DEF(NULL, "bias-pct", 1,
-                                  "CBR/VBR bias (0=CBR, 100=VBR)");
+                                          "CBR/VBR bias (0=CBR, 100=VBR)");
 static const arg_def_t minsection_pct = ARG_DEF(NULL, "minsection-pct", 1,
-                                        "GOP min bitrate (% of target)");
+                                                "GOP min bitrate (% of target)");
 static const arg_def_t maxsection_pct = ARG_DEF(NULL, "maxsection-pct", 1,
-                                        "GOP max bitrate (% of target)");
-static const arg_def_t *rc_twopass_args[] =
-{
-    &bias_pct, &minsection_pct, &maxsection_pct, NULL
+                                                "GOP max bitrate (% of target)");
+static const arg_def_t *rc_twopass_args[] = {
+  &bias_pct, &minsection_pct, &maxsection_pct, NULL
 };
 
 
 static const arg_def_t kf_min_dist = ARG_DEF(NULL, "kf-min-dist", 1,
-                                     "Minimum keyframe interval (frames)");
+                                             "Minimum keyframe interval (frames)");
 static const arg_def_t kf_max_dist = ARG_DEF(NULL, "kf-max-dist", 1,
-                                     "Maximum keyframe interval (frames)");
+                                             "Maximum keyframe interval (frames)");
 static const arg_def_t kf_disabled = ARG_DEF(NULL, "disable-kf", 0,
-                                     "Disable keyframe placement");
-static const arg_def_t *kf_args[] =
-{
-    &kf_min_dist, &kf_max_dist, &kf_disabled, NULL
+                                             "Disable keyframe placement");
+static const arg_def_t *kf_args[] = {
+  &kf_min_dist, &kf_max_dist, &kf_disabled, NULL
 };
 
 
 #if CONFIG_VP8_ENCODER
 static const arg_def_t noise_sens = ARG_DEF(NULL, "noise-sensitivity", 1,
-                                    "Noise sensitivity (frames to blur)");
+                                            "Noise sensitivity (frames to blur)");
 static const arg_def_t sharpness = ARG_DEF(NULL, "sharpness", 1,
-                                   "Filter sharpness (0-7)");
+                                           "Filter sharpness (0-7)");
 static const arg_def_t static_thresh = ARG_DEF(NULL, "static-thresh", 1,
-                                       "Motion detection threshold");
+                                               "Motion detection threshold");
 #endif
 
 #if CONFIG_VP8_ENCODER
 static const arg_def_t cpu_used = ARG_DEF(NULL, "cpu-used", 1,
-                                  "CPU Used (-16..16)");
+                                          "CPU Used (-16..16)");
 #endif
 
 
 #if CONFIG_VP8_ENCODER
 static const arg_def_t token_parts = ARG_DEF(NULL, "token-parts", 1,
-                                     "Number of token partitions to use, log2");
+                                             "Number of token partitions to use, log2");
 static const arg_def_t auto_altref = ARG_DEF(NULL, "auto-alt-ref", 1,
-                                     "Enable automatic alt reference frames");
+                                             "Enable automatic alt reference frames");
 static const arg_def_t arnr_maxframes = ARG_DEF(NULL, "arnr-maxframes", 1,
-                                        "AltRef Max Frames");
+                                                "AltRef Max Frames");
 static const arg_def_t arnr_strength = ARG_DEF(NULL, "arnr-strength", 1,
-                                       "AltRef Strength");
+                                               "AltRef Strength");
 static const arg_def_t arnr_type = ARG_DEF(NULL, "arnr-type", 1,
-                                   "AltRef Type");
+                                           "AltRef Type");
 static const struct arg_enum_list tuning_enum[] = {
-    {"psnr", VP8_TUNE_PSNR},
-    {"ssim", VP8_TUNE_SSIM},
-    {NULL, 0}
+  {"psnr", VP8_TUNE_PSNR},
+  {"ssim", VP8_TUNE_SSIM},
+  {NULL, 0}
 };
 static const arg_def_t tune_ssim = ARG_DEF_ENUM(NULL, "tune", 1,
-                                   "Material to favor", tuning_enum);
+                                                "Material to favor", tuning_enum);
 static const arg_def_t cq_level = ARG_DEF(NULL, "cq-level", 1,
-                                   "Constrained Quality Level");
+                                          "Constrained Quality Level");
 static const arg_def_t max_intra_rate_pct = ARG_DEF(NULL, "max-intra-rate", 1,
-        "Max I-frame bitrate (pct)");
+                                                    "Max I-frame bitrate (pct)");
 
-static const arg_def_t *vp8_args[] =
-{
-    &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
-    &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
-    &tune_ssim, &cq_level, &max_intra_rate_pct, NULL
+static const arg_def_t *vp8_args[] = {
+  &cpu_used, &auto_altref, &noise_sens, &sharpness, &static_thresh,
+  &token_parts, &arnr_maxframes, &arnr_strength, &arnr_type,
+  &tune_ssim, &cq_level, &max_intra_rate_pct, NULL
 };
-static const int vp8_arg_ctrl_map[] =
-{
-    VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
-    VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
-    VP8E_SET_TOKEN_PARTITIONS,
-    VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH , VP8E_SET_ARNR_TYPE,
-    VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT, 0
+static const int vp8_arg_ctrl_map[] = {
+  VP8E_SET_CPUUSED, VP8E_SET_ENABLEAUTOALTREF,
+  VP8E_SET_NOISE_SENSITIVITY, VP8E_SET_SHARPNESS, VP8E_SET_STATIC_THRESHOLD,
+  VP8E_SET_TOKEN_PARTITIONS,
+  VP8E_SET_ARNR_MAXFRAMES, VP8E_SET_ARNR_STRENGTH, VP8E_SET_ARNR_TYPE,
+  VP8E_SET_TUNING, VP8E_SET_CQ_LEVEL, VP8E_SET_MAX_INTRA_BITRATE_PCT, 0
 };
 #endif
 
 static const arg_def_t *no_args[] = { NULL };
 
-static void usage_exit()
-{
-    int i;
+static void usage_exit() {
+  int i;
 
-    fprintf(stderr, "Usage: %s <options> -o dst_filename src_filename \n",
-            exec_name);
+  fprintf(stderr, "Usage: %s <options> -o dst_filename src_filename \n",
+          exec_name);
 
-    fprintf(stderr, "\nOptions:\n");
-    arg_show_usage(stdout, main_args);
-    fprintf(stderr, "\nEncoder Global Options:\n");
-    arg_show_usage(stdout, global_args);
-    fprintf(stderr, "\nRate Control Options:\n");
-    arg_show_usage(stdout, rc_args);
-    fprintf(stderr, "\nTwopass Rate Control Options:\n");
-    arg_show_usage(stdout, rc_twopass_args);
-    fprintf(stderr, "\nKeyframe Placement Options:\n");
-    arg_show_usage(stdout, kf_args);
+  fprintf(stderr, "\nOptions:\n");
+  arg_show_usage(stdout, main_args);
+  fprintf(stderr, "\nEncoder Global Options:\n");
+  arg_show_usage(stdout, global_args);
+  fprintf(stderr, "\nRate Control Options:\n");
+  arg_show_usage(stdout, rc_args);
+  fprintf(stderr, "\nTwopass Rate Control Options:\n");
+  arg_show_usage(stdout, rc_twopass_args);
+  fprintf(stderr, "\nKeyframe Placement Options:\n");
+  arg_show_usage(stdout, kf_args);
 #if CONFIG_VP8_ENCODER
-    fprintf(stderr, "\nVP8 Specific Options:\n");
-    arg_show_usage(stdout, vp8_args);
+  fprintf(stderr, "\nVP8 Specific Options:\n");
+  arg_show_usage(stdout, vp8_args);
 #endif
-    fprintf(stderr, "\nStream timebase (--timebase):\n"
-            "  The desired precision of timestamps in the output, expressed\n"
-            "  in fractional seconds. Default is 1/1000.\n");
-    fprintf(stderr, "\n"
-           "Included encoders:\n"
-           "\n");
+  fprintf(stderr, "\nStream timebase (--timebase):\n"
+          "  The desired precision of timestamps in the output, expressed\n"
+          "  in fractional seconds. Default is 1/1000.\n");
+  fprintf(stderr, "\n"
+          "Included encoders:\n"
+          "\n");
 
-    for (i = 0; i < sizeof(codecs) / sizeof(codecs[0]); i++)
-        fprintf(stderr, "    %-6s - %s\n",
-               codecs[i].name,
-               vpx_codec_iface_name(codecs[i].iface));
+  for (i = 0; i < sizeof(codecs) / sizeof(codecs[0]); i++)
+    fprintf(stderr, "    %-6s - %s\n",
+            codecs[i].name,
+            vpx_codec_iface_name(codecs[i].iface));
 
-    exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE);
 }
 
 
 #define HIST_BAR_MAX 40
-struct hist_bucket
-{
-    int low, high, count;
+struct hist_bucket {
+  int low, high, count;
 };
 
 
 static int merge_hist_buckets(struct hist_bucket *bucket,
                               int *buckets_,
-                              int max_buckets)
-{
-    int small_bucket = 0, merge_bucket = INT_MAX, big_bucket=0;
-    int buckets = *buckets_;
-    int i;
+                              int max_buckets) {
+  int small_bucket = 0, merge_bucket = INT_MAX, big_bucket = 0;
+  int buckets = *buckets_;
+  int i;
 
-    /* Find the extrema for this list of buckets */
-    big_bucket = small_bucket = 0;
-    for(i=0; i < buckets; i++)
-    {
-        if(bucket[i].count < bucket[small_bucket].count)
-            small_bucket = i;
-        if(bucket[i].count > bucket[big_bucket].count)
-            big_bucket = i;
+  /* Find the extrema for this list of buckets */
+  big_bucket = small_bucket = 0;
+  for (i = 0; i < buckets; i++) {
+    if (bucket[i].count < bucket[small_bucket].count)
+      small_bucket = i;
+    if (bucket[i].count > bucket[big_bucket].count)
+      big_bucket = i;
+  }
+
+  /* If we have too many buckets, merge the smallest with an adjacent
+   * bucket.
+   */
+  while (buckets > max_buckets) {
+    int last_bucket = buckets - 1;
+
+    // merge the small bucket with an adjacent one.
+    if (small_bucket == 0)
+      merge_bucket = 1;
+    else if (small_bucket == last_bucket)
+      merge_bucket = last_bucket - 1;
+    else if (bucket[small_bucket - 1].count < bucket[small_bucket + 1].count)
+      merge_bucket = small_bucket - 1;
+    else
+      merge_bucket = small_bucket + 1;
+
+    assert(abs(merge_bucket - small_bucket) <= 1);
+    assert(small_bucket < buckets);
+    assert(big_bucket < buckets);
+    assert(merge_bucket < buckets);
+
+    if (merge_bucket < small_bucket) {
+      bucket[merge_bucket].high = bucket[small_bucket].high;
+      bucket[merge_bucket].count += bucket[small_bucket].count;
+    } else {
+      bucket[small_bucket].high = bucket[merge_bucket].high;
+      bucket[small_bucket].count += bucket[merge_bucket].count;
+      merge_bucket = small_bucket;
     }
 
-    /* If we have too many buckets, merge the smallest with an adjacent
-     * bucket.
+    assert(bucket[merge_bucket].low != bucket[merge_bucket].high);
+
+    buckets--;
+
+    /* Remove the merge_bucket from the list, and find the new small
+     * and big buckets while we're at it
      */
-    while(buckets > max_buckets)
-    {
-        int last_bucket = buckets - 1;
+    big_bucket = small_bucket = 0;
+    for (i = 0; i < buckets; i++) {
+      if (i > merge_bucket)
+        bucket[i] = bucket[i + 1];
 
-        // merge the small bucket with an adjacent one.
-        if(small_bucket == 0)
-            merge_bucket = 1;
-        else if(small_bucket == last_bucket)
-            merge_bucket = last_bucket - 1;
-        else if(bucket[small_bucket - 1].count < bucket[small_bucket + 1].count)
-            merge_bucket = small_bucket - 1;
-        else
-            merge_bucket = small_bucket + 1;
-
-        assert(abs(merge_bucket - small_bucket) <= 1);
-        assert(small_bucket < buckets);
-        assert(big_bucket < buckets);
-        assert(merge_bucket < buckets);
-
-        if(merge_bucket < small_bucket)
-        {
-            bucket[merge_bucket].high = bucket[small_bucket].high;
-            bucket[merge_bucket].count += bucket[small_bucket].count;
-        }
-        else
-        {
-            bucket[small_bucket].high = bucket[merge_bucket].high;
-            bucket[small_bucket].count += bucket[merge_bucket].count;
-            merge_bucket = small_bucket;
-        }
-
-        assert(bucket[merge_bucket].low != bucket[merge_bucket].high);
-
-        buckets--;
-
-        /* Remove the merge_bucket from the list, and find the new small
-         * and big buckets while we're at it
-         */
-        big_bucket = small_bucket = 0;
-        for(i=0; i < buckets; i++)
-        {
-            if(i > merge_bucket)
-                bucket[i] = bucket[i+1];
-
-            if(bucket[i].count < bucket[small_bucket].count)
-                small_bucket = i;
-            if(bucket[i].count > bucket[big_bucket].count)
-                big_bucket = i;
-        }
-
+      if (bucket[i].count < bucket[small_bucket].count)
+        small_bucket = i;
+      if (bucket[i].count > bucket[big_bucket].count)
+        big_bucket = i;
     }
 
-    *buckets_ = buckets;
-    return bucket[big_bucket].count;
+  }
+
+  *buckets_ = buckets;
+  return bucket[big_bucket].count;
 }
 
 
 static void show_histogram(const struct hist_bucket *bucket,
                            int                       buckets,
                            int                       total,
-                           int                       scale)
-{
-    const char *pat1, *pat2;
-    int i;
+                           int                       scale) {
+  const char *pat1, *pat2;
+  int i;
 
-    switch((int)(log(bucket[buckets-1].high)/log(10))+1)
-    {
-        case 1:
-        case 2:
-            pat1 = "%4d %2s: ";
-            pat2 = "%4d-%2d: ";
-            break;
-        case 3:
-            pat1 = "%5d %3s: ";
-            pat2 = "%5d-%3d: ";
-            break;
-        case 4:
-            pat1 = "%6d %4s: ";
-            pat2 = "%6d-%4d: ";
-            break;
-        case 5:
-            pat1 = "%7d %5s: ";
-            pat2 = "%7d-%5d: ";
-            break;
-        case 6:
-            pat1 = "%8d %6s: ";
-            pat2 = "%8d-%6d: ";
-            break;
-        case 7:
-            pat1 = "%9d %7s: ";
-            pat2 = "%9d-%7d: ";
-            break;
-        default:
-            pat1 = "%12d %10s: ";
-            pat2 = "%12d-%10d: ";
-            break;
-    }
+  switch ((int)(log(bucket[buckets - 1].high) / log(10)) + 1) {
+    case 1:
+    case 2:
+      pat1 = "%4d %2s: ";
+      pat2 = "%4d-%2d: ";
+      break;
+    case 3:
+      pat1 = "%5d %3s: ";
+      pat2 = "%5d-%3d: ";
+      break;
+    case 4:
+      pat1 = "%6d %4s: ";
+      pat2 = "%6d-%4d: ";
+      break;
+    case 5:
+      pat1 = "%7d %5s: ";
+      pat2 = "%7d-%5d: ";
+      break;
+    case 6:
+      pat1 = "%8d %6s: ";
+      pat2 = "%8d-%6d: ";
+      break;
+    case 7:
+      pat1 = "%9d %7s: ";
+      pat2 = "%9d-%7d: ";
+      break;
+    default:
+      pat1 = "%12d %10s: ";
+      pat2 = "%12d-%10d: ";
+      break;
+  }
 
-    for(i=0; i<buckets; i++)
-    {
-        int len;
-        int j;
-        float pct;
+  for (i = 0; i < buckets; i++) {
+    int len;
+    int j;
+    float pct;
 
-        pct = 100.0 * (float)bucket[i].count / (float)total;
-        len = HIST_BAR_MAX * bucket[i].count / scale;
-        if(len < 1)
-            len = 1;
-        assert(len <= HIST_BAR_MAX);
+    pct = 100.0 * (float)bucket[i].count / (float)total;
+    len = HIST_BAR_MAX * bucket[i].count / scale;
+    if (len < 1)
+      len = 1;
+    assert(len <= HIST_BAR_MAX);
 
-        if(bucket[i].low == bucket[i].high)
-            fprintf(stderr, pat1, bucket[i].low, "");
-        else
-            fprintf(stderr, pat2, bucket[i].low, bucket[i].high);
+    if (bucket[i].low == bucket[i].high)
+      fprintf(stderr, pat1, bucket[i].low, "");
+    else
+      fprintf(stderr, pat2, bucket[i].low, bucket[i].high);
 
-        for(j=0; j<HIST_BAR_MAX; j++)
-            fprintf(stderr, j<len?"=":" ");
-        fprintf(stderr, "\t%5d (%6.2f%%)\n",bucket[i].count,pct);
-    }
+    for (j = 0; j < HIST_BAR_MAX; j++)
+      fprintf(stderr, j < len ? "=" : " ");
+    fprintf(stderr, "\t%5d (%6.2f%%)\n", bucket[i].count, pct);
+  }
 }
 
 
-static void show_q_histogram(const int counts[64], int max_buckets)
-{
-    struct hist_bucket bucket[64];
-    int buckets = 0;
-    int total = 0;
-    int scale;
-    int i;
+static void show_q_histogram(const int counts[64], int max_buckets) {
+  struct hist_bucket bucket[64];
+  int buckets = 0;
+  int total = 0;
+  int scale;
+  int i;
 
 
-    for(i=0; i<64; i++)
-    {
-        if(counts[i])
-        {
-            bucket[buckets].low = bucket[buckets].high = i;
-            bucket[buckets].count = counts[i];
-            buckets++;
-            total += counts[i];
-        }
+  for (i = 0; i < 64; i++) {
+    if (counts[i]) {
+      bucket[buckets].low = bucket[buckets].high = i;
+      bucket[buckets].count = counts[i];
+      buckets++;
+      total += counts[i];
     }
+  }
 
-    fprintf(stderr, "\nQuantizer Selection:\n");
-    scale = merge_hist_buckets(bucket, &buckets, max_buckets);
-    show_histogram(bucket, buckets, total, scale);
+  fprintf(stderr, "\nQuantizer Selection:\n");
+  scale = merge_hist_buckets(bucket, &buckets, max_buckets);
+  show_histogram(bucket, buckets, total, scale);
 }
 
 
 #define RATE_BINS (100)
-struct rate_hist
-{
-    int64_t            *pts;
-    int                *sz;
-    int                 samples;
-    int                 frames;
-    struct hist_bucket  bucket[RATE_BINS];
-    int                 total;
+struct rate_hist {
+  int64_t            *pts;
+  int                *sz;
+  int                 samples;
+  int                 frames;
+  struct hist_bucket  bucket[RATE_BINS];
+  int                 total;
 };
 
 
 static void init_rate_histogram(struct rate_hist          *hist,
                                 const vpx_codec_enc_cfg_t *cfg,
-                                const vpx_rational_t      *fps)
-{
-    int i;
+                                const vpx_rational_t      *fps) {
+  int i;
 
-    /* Determine the number of samples in the buffer. Use the file's framerate
-     * to determine the number of frames in rc_buf_sz milliseconds, with an
-     * adjustment (5/4) to account for alt-refs
-     */
-    hist->samples = cfg->rc_buf_sz * 5 / 4 * fps->num / fps->den / 1000;
+  /* Determine the number of samples in the buffer. Use the file's framerate
+   * to determine the number of frames in rc_buf_sz milliseconds, with an
+   * adjustment (5/4) to account for alt-refs
+   */
+  hist->samples = cfg->rc_buf_sz * 5 / 4 * fps->num / fps->den / 1000;
 
-    // prevent division by zero
-    if (hist->samples == 0)
-      hist->samples=1;
+  // prevent division by zero
+  if (hist->samples == 0)
+    hist->samples = 1;
 
-    hist->pts = calloc(hist->samples, sizeof(*hist->pts));
-    hist->sz = calloc(hist->samples, sizeof(*hist->sz));
-    for(i=0; i<RATE_BINS; i++)
-    {
-        hist->bucket[i].low = INT_MAX;
-        hist->bucket[i].high = 0;
-        hist->bucket[i].count = 0;
-    }
+  hist->pts = calloc(hist->samples, sizeof(*hist->pts));
+  hist->sz = calloc(hist->samples, sizeof(*hist->sz));
+  for (i = 0; i < RATE_BINS; i++) {
+    hist->bucket[i].low = INT_MAX;
+    hist->bucket[i].high = 0;
+    hist->bucket[i].count = 0;
+  }
 }
 
 
-static void destroy_rate_histogram(struct rate_hist *hist)
-{
-    free(hist->pts);
-    free(hist->sz);
+static void destroy_rate_histogram(struct rate_hist *hist) {
+  free(hist->pts);
+  free(hist->sz);
 }
 
 
 static void update_rate_histogram(struct rate_hist          *hist,
                                   const vpx_codec_enc_cfg_t *cfg,
-                                  const vpx_codec_cx_pkt_t  *pkt)
-{
-    int i, idx;
-    int64_t now, then, sum_sz = 0, avg_bitrate;
+                                  const vpx_codec_cx_pkt_t  *pkt) {
+  int i, idx;
+  int64_t now, then, sum_sz = 0, avg_bitrate;
 
-    now = pkt->data.frame.pts * 1000
-          * (uint64_t)cfg->g_timebase.num / (uint64_t)cfg->g_timebase.den;
+  now = pkt->data.frame.pts * 1000
+        * (uint64_t)cfg->g_timebase.num / (uint64_t)cfg->g_timebase.den;
 
-    idx = hist->frames++ % hist->samples;
-    hist->pts[idx] = now;
-    hist->sz[idx] = pkt->data.frame.sz;
+  idx = hist->frames++ % hist->samples;
+  hist->pts[idx] = now;
+  hist->sz[idx] = pkt->data.frame.sz;
 
-    if(now < cfg->rc_buf_initial_sz)
-        return;
+  if (now < cfg->rc_buf_initial_sz)
+    return;
 
-    then = now;
+  then = now;
 
-    /* Sum the size over the past rc_buf_sz ms */
-    for(i = hist->frames; i > 0 && hist->frames - i < hist->samples; i--)
-    {
-        int i_idx = (i-1) % hist->samples;
+  /* Sum the size over the past rc_buf_sz ms */
+  for (i = hist->frames; i > 0 && hist->frames - i < hist->samples; i--) {
+    int i_idx = (i - 1) % hist->samples;
 
-        then = hist->pts[i_idx];
-        if(now - then > cfg->rc_buf_sz)
-            break;
-        sum_sz += hist->sz[i_idx];
-    }
+    then = hist->pts[i_idx];
+    if (now - then > cfg->rc_buf_sz)
+      break;
+    sum_sz += hist->sz[i_idx];
+  }
 
-    if (now == then)
-        return;
+  if (now == then)
+    return;
 
-    avg_bitrate = sum_sz * 8 * 1000 / (now - then);
-    idx = avg_bitrate * (RATE_BINS/2) / (cfg->rc_target_bitrate * 1000);
-    if(idx < 0)
-        idx = 0;
-    if(idx > RATE_BINS-1)
-        idx = RATE_BINS-1;
-    if(hist->bucket[idx].low > avg_bitrate)
-        hist->bucket[idx].low = avg_bitrate;
-    if(hist->bucket[idx].high < avg_bitrate)
-        hist->bucket[idx].high = avg_bitrate;
-    hist->bucket[idx].count++;
-    hist->total++;
+  avg_bitrate = sum_sz * 8 * 1000 / (now - then);
+  idx = avg_bitrate * (RATE_BINS / 2) / (cfg->rc_target_bitrate * 1000);
+  if (idx < 0)
+    idx = 0;
+  if (idx > RATE_BINS - 1)
+    idx = RATE_BINS - 1;
+  if (hist->bucket[idx].low > avg_bitrate)
+    hist->bucket[idx].low = avg_bitrate;
+  if (hist->bucket[idx].high < avg_bitrate)
+    hist->bucket[idx].high = avg_bitrate;
+  hist->bucket[idx].count++;
+  hist->total++;
 }
 
 
 static void show_rate_histogram(struct rate_hist          *hist,
                                 const vpx_codec_enc_cfg_t *cfg,
-                                int                        max_buckets)
-{
-    int i, scale;
-    int buckets = 0;
+                                int                        max_buckets) {
+  int i, scale;
+  int buckets = 0;
 
-    for(i = 0; i < RATE_BINS; i++)
-    {
-        if(hist->bucket[i].low == INT_MAX)
-            continue;
-        hist->bucket[buckets++] = hist->bucket[i];
-    }
+  for (i = 0; i < RATE_BINS; i++) {
+    if (hist->bucket[i].low == INT_MAX)
+      continue;
+    hist->bucket[buckets++] = hist->bucket[i];
+  }
 
-    fprintf(stderr, "\nRate (over %dms window):\n", cfg->rc_buf_sz);
-    scale = merge_hist_buckets(hist->bucket, &buckets, max_buckets);
-    show_histogram(hist->bucket, buckets, hist->total, scale);
+  fprintf(stderr, "\nRate (over %dms window):\n", cfg->rc_buf_sz);
+  scale = merge_hist_buckets(hist->bucket, &buckets, max_buckets);
+  show_histogram(hist->bucket, buckets, hist->total, scale);
 }
 
 
-static int compare_img(vpx_image_t *img1, vpx_image_t *img2)
-{
-    int match = 1;
-    int i;
+static int compare_img(vpx_image_t *img1, vpx_image_t *img2) {
+  int match = 1;
+  int i;
 
-    match &= (img1->fmt == img2->fmt);
-    match &= (img1->w == img2->w);
-    match &= (img1->h == img2->h);
+  match &= (img1->fmt == img2->fmt);
+  match &= (img1->w == img2->w);
+  match &= (img1->h == img2->h);
 
-    for (i = 0; i < img1->d_h; i++)
-        match &= ( memcmp(img1->planes[VPX_PLANE_Y]+i*img1->stride[VPX_PLANE_Y],
-                          img2->planes[VPX_PLANE_Y]+i*img2->stride[VPX_PLANE_Y],
-                          img1->d_w)==0);
+  for (i = 0; i < img1->d_h; i++)
+    match &= (memcmp(img1->planes[VPX_PLANE_Y] + i * img1->stride[VPX_PLANE_Y],
+                     img2->planes[VPX_PLANE_Y] + i * img2->stride[VPX_PLANE_Y],
+                     img1->d_w) == 0);
 
-    for (i = 0; i < img1->d_h/2; i++)
-        match &= ( memcmp(img1->planes[VPX_PLANE_U]+i*img1->stride[VPX_PLANE_U],
-                          img2->planes[VPX_PLANE_U]+i*img2->stride[VPX_PLANE_U],
-                          img1->d_w/2)==0);
+  for (i = 0; i < img1->d_h / 2; i++)
+    match &= (memcmp(img1->planes[VPX_PLANE_U] + i * img1->stride[VPX_PLANE_U],
+                     img2->planes[VPX_PLANE_U] + i * img2->stride[VPX_PLANE_U],
+                     img1->d_w / 2) == 0);
 
-    for (i = 0; i < img1->d_h/2; i++)
-        match &= ( memcmp(img1->planes[VPX_PLANE_V]+i*img1->stride[VPX_PLANE_U],
-                          img2->planes[VPX_PLANE_V]+i*img2->stride[VPX_PLANE_U],
-                          img1->d_w/2)==0);
+  for (i = 0; i < img1->d_h / 2; i++)
+    match &= (memcmp(img1->planes[VPX_PLANE_V] + i * img1->stride[VPX_PLANE_U],
+                     img2->planes[VPX_PLANE_V] + i * img2->stride[VPX_PLANE_U],
+                     img1->d_w / 2) == 0);
 
-    return match;
+  return match;
 }
 
 
 #define ARG_CTRL_CNT_MAX 10
 
-int main(int argc, const char **argv_)
-{
-    vpx_codec_ctx_t        encoder;
-    const char                  *in_fn = NULL, *out_fn = NULL, *stats_fn = NULL;
-    int                    i;
-    FILE                  *infile, *outfile;
-    vpx_codec_enc_cfg_t    cfg;
-    vpx_codec_err_t        res;
-    int                    pass, one_pass_only = 0;
-    stats_io_t             stats;
-    vpx_image_t            raw;
-    const struct codec_item  *codec = codecs;
-    int                    frame_avail, got_data;
+int main(int argc, const char **argv_) {
+  vpx_codec_ctx_t        encoder;
+  const char                  *in_fn = NULL, *out_fn = NULL, *stats_fn = NULL;
+  int                    i;
+  FILE                  *infile, *outfile;
+  vpx_codec_enc_cfg_t    cfg;
+  vpx_codec_err_t        res;
+  int                    pass, one_pass_only = 0;
+  stats_io_t             stats;
+  vpx_image_t            raw;
+  const struct codec_item  *codec = codecs;
+  int                    frame_avail, got_data;
 
-    struct arg               arg;
-    char                   **argv, **argi, **argj;
-    int                      arg_usage = 0, arg_passes = 1, arg_deadline = 0;
-    int                      arg_ctrls[ARG_CTRL_CNT_MAX][2], arg_ctrl_cnt = 0;
-    int                      arg_limit = 0;
-    int                      arg_skip  = 0;
-    static const arg_def_t **ctrl_args = no_args;
-    static const int        *ctrl_args_map = NULL;
-    int                      verbose = 0, show_psnr = 0, test_decode = 0;
-    int                      arg_use_i420 = 1;
-    unsigned long            cx_time = 0;
-    unsigned int             file_type, fourcc;
-    y4m_input                y4m;
-    struct vpx_rational      arg_framerate = {30, 1};
-    int                      arg_have_framerate = 0;
-    int                      write_webm = 1;
-    EbmlGlobal               ebml = {0};
-    uint32_t                 hash = 0;
-    uint64_t                 psnr_sse_total = 0;
-    uint64_t                 psnr_samples_total = 0;
-    double                   psnr_totals[4] = {0, 0, 0, 0};
-    int                      psnr_count = 0;
-    stereo_format_t          stereo_fmt = STEREO_FORMAT_MONO;
-    int                      counts[64]={0};
-    int                      show_q_hist_buckets=0;
-    int                      show_rate_hist_buckets=0;
-    struct rate_hist         rate_hist={0};
+  struct arg               arg;
+  char                   **argv, **argi, **argj;
+  int                      arg_usage = 0, arg_passes = 1, arg_deadline = 0;
+  int                      arg_ctrls[ARG_CTRL_CNT_MAX][2], arg_ctrl_cnt = 0;
+  int                      arg_limit = 0;
+  int                      arg_skip  = 0;
+  static const arg_def_t **ctrl_args = no_args;
+  static const int        *ctrl_args_map = NULL;
+  int                      verbose = 0, show_psnr = 0, test_decode = 0;
+  int                      arg_use_i420 = 1;
+  unsigned long            cx_time = 0;
+  unsigned int             file_type, fourcc;
+  y4m_input                y4m;
+  struct vpx_rational      arg_framerate = {30, 1};
+  int                      arg_have_framerate = 0;
+  int                      write_webm = 1;
+  EbmlGlobal               ebml = {0};
+  uint32_t                 hash = 0;
+  uint64_t                 psnr_sse_total = 0;
+  uint64_t                 psnr_samples_total = 0;
+  double                   psnr_totals[4] = {0, 0, 0, 0};
+  int                      psnr_count = 0;
+  stereo_format_t          stereo_fmt = STEREO_FORMAT_MONO;
+  int                      counts[64] = {0};
+  int                      show_q_hist_buckets = 0;
+  int                      show_rate_hist_buckets = 0;
+  struct rate_hist         rate_hist = {0};
 
-    vpx_codec_ctx_t          decoder;
-    vpx_ref_frame_t          ref_enc;
-    vpx_ref_frame_t          ref_dec;
-    vpx_codec_dec_cfg_t      dec_cfg = {0};
-    int                      enc_dec_match = 1;
-    int                      first_bad_frame = -1;
-    int                      test_decode_frame = 0;
+  vpx_codec_ctx_t          decoder;
+  vpx_ref_frame_t          ref_enc;
+  vpx_ref_frame_t          ref_dec;
+  vpx_codec_dec_cfg_t      dec_cfg = {0};
+  int                      enc_dec_match = 1;
+  int                      first_bad_frame = -1;
+  int                      test_decode_frame = 0;
 
-    exec_name = argv_[0];
-    ebml.last_pts_ms = -1;
+  exec_name = argv_[0];
+  ebml.last_pts_ms = -1;
 
-    if (argc < 3)
-        usage_exit();
+  if (argc < 3)
+    usage_exit();
 
 
-    /* First parse the codec and usage values, because we want to apply other
-     * parameters on top of the default configuration provided by the codec.
-     */
-    argv = argv_dup(argc - 1, argv_ + 1);
+  /* First parse the codec and usage values, because we want to apply other
+   * parameters on top of the default configuration provided by the codec.
+   */
+  argv = argv_dup(argc - 1, argv_ + 1);
 
-    for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
-    {
-        arg.argv_step = 1;
+  for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
+    arg.argv_step = 1;
 
-        if (arg_match(&arg, &codecarg, argi))
-        {
-            int j, k = -1;
+    if (arg_match(&arg, &codecarg, argi)) {
+      int j, k = -1;
 
-            for (j = 0; j < sizeof(codecs) / sizeof(codecs[0]); j++)
-                if (!strcmp(codecs[j].name, arg.val))
-                    k = j;
+      for (j = 0; j < sizeof(codecs) / sizeof(codecs[0]); j++)
+        if (!strcmp(codecs[j].name, arg.val))
+          k = j;
 
-            if (k >= 0)
-                codec = codecs + k;
-            else
-                die("Error: Unrecognized argument (%s) to --codec\n",
-                    arg.val);
+      if (k >= 0)
+        codec = codecs + k;
+      else
+        die("Error: Unrecognized argument (%s) to --codec\n",
+            arg.val);
 
-        }
-        else if (arg_match(&arg, &passes, argi))
-        {
-            arg_passes = arg_parse_uint(&arg);
+    } else if (arg_match(&arg, &passes, argi)) {
+      arg_passes = arg_parse_uint(&arg);
 
-            if (arg_passes < 1 || arg_passes > 2)
-                die("Error: Invalid number of passes (%d)\n", arg_passes);
-        }
-        else if (arg_match(&arg, &pass_arg, argi))
-        {
-            one_pass_only = arg_parse_uint(&arg);
+      if (arg_passes < 1 || arg_passes > 2)
+        die("Error: Invalid number of passes (%d)\n", arg_passes);
+    } else if (arg_match(&arg, &pass_arg, argi)) {
+      one_pass_only = arg_parse_uint(&arg);
 
-            if (one_pass_only < 1 || one_pass_only > 2)
-                die("Error: Invalid pass selected (%d)\n", one_pass_only);
-        }
-        else if (arg_match(&arg, &fpf_name, argi))
-            stats_fn = arg.val;
-        else if (arg_match(&arg, &usage, argi))
-            arg_usage = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &deadline, argi))
-            arg_deadline = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &best_dl, argi))
-            arg_deadline = VPX_DL_BEST_QUALITY;
-        else if (arg_match(&arg, &good_dl, argi))
-            arg_deadline = VPX_DL_GOOD_QUALITY;
-        else if (arg_match(&arg, &rt_dl, argi))
-            arg_deadline = VPX_DL_REALTIME;
-        else if (arg_match(&arg, &use_yv12, argi))
-        {
-            arg_use_i420 = 0;
-        }
-        else if (arg_match(&arg, &use_i420, argi))
-        {
-            arg_use_i420 = 1;
-        }
-        else if (arg_match(&arg, &verbosearg, argi))
-            verbose = 1;
-        else if (arg_match(&arg, &limit, argi))
-            arg_limit = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &skip, argi))
-            arg_skip = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &psnrarg, argi))
-            show_psnr = 1;
-        else if (arg_match(&arg, &recontest, argi))
-            test_decode = 1;
-        else if (arg_match(&arg, &framerate, argi))
-        {
-            arg_framerate = arg_parse_rational(&arg);
-            arg_have_framerate = 1;
-        }
-        else if (arg_match(&arg, &use_ivf, argi))
-            write_webm = 0;
-        else if (arg_match(&arg, &outputfile, argi))
-            out_fn = arg.val;
-        else if (arg_match(&arg, &debugmode, argi))
-            ebml.debug = 1;
-        else if (arg_match(&arg, &q_hist_n, argi))
-            show_q_hist_buckets = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &rate_hist_n, argi))
-            show_rate_hist_buckets = arg_parse_uint(&arg);
-        else
-            argj++;
+      if (one_pass_only < 1 || one_pass_only > 2)
+        die("Error: Invalid pass selected (%d)\n", one_pass_only);
+    } else if (arg_match(&arg, &fpf_name, argi))
+      stats_fn = arg.val;
+    else if (arg_match(&arg, &usage, argi))
+      arg_usage = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &deadline, argi))
+      arg_deadline = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &best_dl, argi))
+      arg_deadline = VPX_DL_BEST_QUALITY;
+    else if (arg_match(&arg, &good_dl, argi))
+      arg_deadline = VPX_DL_GOOD_QUALITY;
+    else if (arg_match(&arg, &rt_dl, argi))
+      arg_deadline = VPX_DL_REALTIME;
+    else if (arg_match(&arg, &use_yv12, argi)) {
+      arg_use_i420 = 0;
+    } else if (arg_match(&arg, &use_i420, argi)) {
+      arg_use_i420 = 1;
+    } else if (arg_match(&arg, &verbosearg, argi))
+      verbose = 1;
+    else if (arg_match(&arg, &limit, argi))
+      arg_limit = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &skip, argi))
+      arg_skip = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &psnrarg, argi))
+      show_psnr = 1;
+    else if (arg_match(&arg, &recontest, argi))
+      test_decode = 1;
+    else if (arg_match(&arg, &framerate, argi)) {
+      arg_framerate = arg_parse_rational(&arg);
+      arg_have_framerate = 1;
+    } else if (arg_match(&arg, &use_ivf, argi))
+      write_webm = 0;
+    else if (arg_match(&arg, &outputfile, argi))
+      out_fn = arg.val;
+    else if (arg_match(&arg, &debugmode, argi))
+      ebml.debug = 1;
+    else if (arg_match(&arg, &q_hist_n, argi))
+      show_q_hist_buckets = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &rate_hist_n, argi))
+      show_rate_hist_buckets = arg_parse_uint(&arg);
+    else
+      argj++;
+  }
+
+  /* Ensure that --passes and --pass are consistent. If --pass is set and --passes=2,
+   * ensure --fpf was set.
+   */
+  if (one_pass_only) {
+    /* DWIM: Assume the user meant passes=2 if pass=2 is specified */
+    if (one_pass_only > arg_passes) {
+      fprintf(stderr, "Warning: Assuming --pass=%d implies --passes=%d\n",
+              one_pass_only, one_pass_only);
+      arg_passes = one_pass_only;
     }
 
-    /* Ensure that --passes and --pass are consistent. If --pass is set and --passes=2,
-     * ensure --fpf was set.
-     */
-    if (one_pass_only)
-    {
-        /* DWIM: Assume the user meant passes=2 if pass=2 is specified */
-        if (one_pass_only > arg_passes)
-        {
-            fprintf(stderr, "Warning: Assuming --pass=%d implies --passes=%d\n",
-                   one_pass_only, one_pass_only);
-            arg_passes = one_pass_only;
-        }
+    if (arg_passes == 2 && !stats_fn)
+      die("Must specify --fpf when --pass=%d and --passes=2\n", one_pass_only);
+  }
 
-        if (arg_passes == 2 && !stats_fn)
-            die("Must specify --fpf when --pass=%d and --passes=2\n", one_pass_only);
-    }
+  /* Populate encoder configuration */
+  res = vpx_codec_enc_config_default(codec->iface, &cfg, arg_usage);
 
-    /* Populate encoder configuration */
-    res = vpx_codec_enc_config_default(codec->iface, &cfg, arg_usage);
+  if (res) {
+    fprintf(stderr, "Failed to get config: %s\n",
+            vpx_codec_err_to_string(res));
+    return EXIT_FAILURE;
+  }
 
-    if (res)
-    {
-        fprintf(stderr, "Failed to get config: %s\n",
-                vpx_codec_err_to_string(res));
-        return EXIT_FAILURE;
-    }
+  /* Change the default timebase to a high enough value so that the encoder
+   * will always create strictly increasing timestamps.
+   */
+  cfg.g_timebase.den = 1000;
 
-    /* Change the default timebase to a high enough value so that the encoder
-     * will always create strictly increasing timestamps.
-     */
-    cfg.g_timebase.den = 1000;
-
-    /* Never use the library's default resolution, require it be parsed
-     * from the file or set on the command line.
-     */
-    cfg.g_w = 0;
-    cfg.g_h = 0;
+  /* Never use the library's default resolution, require it be parsed
+   * from the file or set on the command line.
+   */
+  cfg.g_w = 0;
+  cfg.g_h = 0;
 
 #if CONFIG_LOSSLESS
-    cfg.lossless = 0;
+  cfg.lossless = 0;
 #endif
 
-    /* Now parse the remainder of the parameters. */
-    for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
-    {
-        arg.argv_step = 1;
+  /* Now parse the remainder of the parameters. */
+  for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
+    arg.argv_step = 1;
 
-        if (0);
-        else if (arg_match(&arg, &threads, argi))
-            cfg.g_threads = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &profile, argi))
-            cfg.g_profile = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &width, argi))
-            cfg.g_w = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &height, argi))
-            cfg.g_h = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &stereo_mode, argi))
-            stereo_fmt = arg_parse_enum_or_int(&arg);
-        else if (arg_match(&arg, &timebase, argi))
-            cfg.g_timebase = arg_parse_rational(&arg);
-        else if (arg_match(&arg, &error_resilient, argi))
-            cfg.g_error_resilient = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &lag_in_frames, argi))
-            cfg.g_lag_in_frames = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &dropframe_thresh, argi))
-            cfg.rc_dropframe_thresh = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &resize_allowed, argi))
-            cfg.rc_resize_allowed = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &resize_up_thresh, argi))
-            cfg.rc_resize_up_thresh = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &resize_down_thresh, argi))
-            cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &resize_down_thresh, argi))
-            cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &end_usage, argi))
-            cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
-        else if (arg_match(&arg, &target_bitrate, argi))
-            cfg.rc_target_bitrate = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &min_quantizer, argi))
-            cfg.rc_min_quantizer = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &max_quantizer, argi))
-            cfg.rc_max_quantizer = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &undershoot_pct, argi))
-            cfg.rc_undershoot_pct = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &overshoot_pct, argi))
-            cfg.rc_overshoot_pct = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &buf_sz, argi))
-            cfg.rc_buf_sz = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &buf_initial_sz, argi))
-            cfg.rc_buf_initial_sz = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &buf_optimal_sz, argi))
-            cfg.rc_buf_optimal_sz = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &bias_pct, argi))
-        {
-            cfg.rc_2pass_vbr_bias_pct = arg_parse_uint(&arg);
+    if (0);
+    else if (arg_match(&arg, &threads, argi))
+      cfg.g_threads = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &profile, argi))
+      cfg.g_profile = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &width, argi))
+      cfg.g_w = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &height, argi))
+      cfg.g_h = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &stereo_mode, argi))
+      stereo_fmt = arg_parse_enum_or_int(&arg);
+    else if (arg_match(&arg, &timebase, argi))
+      cfg.g_timebase = arg_parse_rational(&arg);
+    else if (arg_match(&arg, &error_resilient, argi))
+      cfg.g_error_resilient = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &lag_in_frames, argi))
+      cfg.g_lag_in_frames = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &dropframe_thresh, argi))
+      cfg.rc_dropframe_thresh = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &resize_allowed, argi))
+      cfg.rc_resize_allowed = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &resize_up_thresh, argi))
+      cfg.rc_resize_up_thresh = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &resize_down_thresh, argi))
+      cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &resize_down_thresh, argi))
+      cfg.rc_resize_down_thresh = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &end_usage, argi))
+      cfg.rc_end_usage = arg_parse_enum_or_int(&arg);
+    else if (arg_match(&arg, &target_bitrate, argi))
+      cfg.rc_target_bitrate = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &min_quantizer, argi))
+      cfg.rc_min_quantizer = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &max_quantizer, argi))
+      cfg.rc_max_quantizer = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &undershoot_pct, argi))
+      cfg.rc_undershoot_pct = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &overshoot_pct, argi))
+      cfg.rc_overshoot_pct = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &buf_sz, argi))
+      cfg.rc_buf_sz = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &buf_initial_sz, argi))
+      cfg.rc_buf_initial_sz = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &buf_optimal_sz, argi))
+      cfg.rc_buf_optimal_sz = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &bias_pct, argi)) {
+      cfg.rc_2pass_vbr_bias_pct = arg_parse_uint(&arg);
 
-            if (arg_passes < 2)
-                fprintf(stderr,
-                        "Warning: option %s ignored in one-pass mode.\n",
-                        arg.name);
-        }
-        else if (arg_match(&arg, &minsection_pct, argi))
-        {
-            cfg.rc_2pass_vbr_minsection_pct = arg_parse_uint(&arg);
+      if (arg_passes < 2)
+        fprintf(stderr,
+                "Warning: option %s ignored in one-pass mode.\n",
+                arg.name);
+    } else if (arg_match(&arg, &minsection_pct, argi)) {
+      cfg.rc_2pass_vbr_minsection_pct = arg_parse_uint(&arg);
 
-            if (arg_passes < 2)
-                fprintf(stderr,
-                        "Warning: option %s ignored in one-pass mode.\n",
-                        arg.name);
-        }
-        else if (arg_match(&arg, &maxsection_pct, argi))
-        {
-            cfg.rc_2pass_vbr_maxsection_pct = arg_parse_uint(&arg);
+      if (arg_passes < 2)
+        fprintf(stderr,
+                "Warning: option %s ignored in one-pass mode.\n",
+                arg.name);
+    } else if (arg_match(&arg, &maxsection_pct, argi)) {
+      cfg.rc_2pass_vbr_maxsection_pct = arg_parse_uint(&arg);
 
-            if (arg_passes < 2)
-                fprintf(stderr,
-                        "Warning: option %s ignored in one-pass mode.\n",
-                        arg.name);
-        }
-        else if (arg_match(&arg, &kf_min_dist, argi))
-            cfg.kf_min_dist = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &kf_max_dist, argi))
-            cfg.kf_max_dist = arg_parse_uint(&arg);
-        else if (arg_match(&arg, &kf_disabled, argi))
-            cfg.kf_mode = VPX_KF_DISABLED;
+      if (arg_passes < 2)
+        fprintf(stderr,
+                "Warning: option %s ignored in one-pass mode.\n",
+                arg.name);
+    } else if (arg_match(&arg, &kf_min_dist, argi))
+      cfg.kf_min_dist = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &kf_max_dist, argi))
+      cfg.kf_max_dist = arg_parse_uint(&arg);
+    else if (arg_match(&arg, &kf_disabled, argi))
+      cfg.kf_mode = VPX_KF_DISABLED;
 #if CONFIG_LOSSLESS
-        else if (arg_match(&arg, &lossless_enabled, argi))
-            cfg.lossless = 1;
+    else if (arg_match(&arg, &lossless_enabled, argi))
+      cfg.lossless = 1;
 #endif
-        else
-            argj++;
-    }
+    else
+      argj++;
+  }
 
 #if CONFIG_LOSSLESS
-        if (cfg.lossless)
-        {
-            cfg.rc_min_quantizer = 0;
-            cfg.rc_max_quantizer = 0;
-        }
+  if (cfg.lossless) {
+    cfg.rc_min_quantizer = 0;
+    cfg.rc_max_quantizer = 0;
+  }
 #endif
 
-    /* Handle codec specific options */
+  /* Handle codec specific options */
 #if CONFIG_VP8_ENCODER
 
-    if (codec->iface == &vpx_codec_vp8_cx_algo
+  if (codec->iface == &vpx_codec_vp8_cx_algo
 #if CONFIG_EXPERIMENTAL
-        || codec->iface == &vpx_codec_vp8x_cx_algo
+      || codec->iface == &vpx_codec_vp8x_cx_algo
 #endif
-        )
-    {
-        ctrl_args = vp8_args;
-        ctrl_args_map = vp8_arg_ctrl_map;
+     ) {
+    ctrl_args = vp8_args;
+    ctrl_args_map = vp8_arg_ctrl_map;
+  }
+
+#endif
+
+  for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step) {
+    int match = 0;
+
+    arg.argv_step = 1;
+
+    for (i = 0; ctrl_args[i]; i++) {
+      if (arg_match(&arg, ctrl_args[i], argi)) {
+        match = 1;
+
+        if (arg_ctrl_cnt < ARG_CTRL_CNT_MAX) {
+          arg_ctrls[arg_ctrl_cnt][0] = ctrl_args_map[i];
+          arg_ctrls[arg_ctrl_cnt][1] = arg_parse_enum_or_int(&arg);
+          arg_ctrl_cnt++;
+        }
+      }
     }
 
-#endif
+    if (!match)
+      argj++;
+  }
 
-    for (argi = argj = argv; (*argj = *argi); argi += arg.argv_step)
-    {
-        int match = 0;
+  /* Check for unrecognized options */
+  for (argi = argv; *argi; argi++)
+    if (argi[0][0] == '-' && argi[0][1])
+      die("Error: Unrecognized option %s\n", *argi);
 
-        arg.argv_step = 1;
+  /* Handle non-option arguments */
+  in_fn = argv[0];
 
-        for (i = 0; ctrl_args[i]; i++)
-        {
-            if (arg_match(&arg, ctrl_args[i], argi))
-            {
-                match = 1;
+  if (!in_fn)
+    usage_exit();
 
-                if (arg_ctrl_cnt < ARG_CTRL_CNT_MAX)
-                {
-                    arg_ctrls[arg_ctrl_cnt][0] = ctrl_args_map[i];
-                    arg_ctrls[arg_ctrl_cnt][1] = arg_parse_enum_or_int(&arg);
-                    arg_ctrl_cnt++;
-                }
-            }
-        }
+  if (!out_fn)
+    die("Error: Output file is required (specify with -o)\n");
 
-        if (!match)
-            argj++;
+  memset(&stats, 0, sizeof(stats));
+
+  for (pass = one_pass_only ? one_pass_only - 1 : 0; pass < arg_passes; pass++) {
+    int frames_in = 0, frames_out = 0;
+    unsigned long nbytes = 0;
+    int skip_frames = 0;
+    struct detect_buffer detect;
+
+    /* Parse certain options from the input file, if possible */
+    infile = strcmp(in_fn, "-") ? fopen(in_fn, "rb")
+             : set_binary_mode(stdin);
+
+    if (!infile) {
+      fprintf(stderr, "Failed to open input file\n");
+      return EXIT_FAILURE;
     }
 
-    /* Check for unrecognized options */
-    for (argi = argv; *argi; argi++)
-        if (argi[0][0] == '-' && argi[0][1])
-            die("Error: Unrecognized option %s\n", *argi);
+    /* For RAW input sources, these bytes will applied on the first frame
+     *  in read_frame().
+     */
+    detect.buf_read = fread(detect.buf, 1, 4, infile);
+    detect.position = 0;
 
-    /* Handle non-option arguments */
-    in_fn = argv[0];
+    if (detect.buf_read == 4 && file_is_y4m(infile, &y4m, detect.buf)) {
+      if (y4m_input_open(&y4m, infile, detect.buf, 4) >= 0) {
+        file_type = FILE_TYPE_Y4M;
+        cfg.g_w = y4m.pic_w;
+        cfg.g_h = y4m.pic_h;
 
-    if (!in_fn)
-        usage_exit();
-
-    if(!out_fn)
-        die("Error: Output file is required (specify with -o)\n");
-
-    memset(&stats, 0, sizeof(stats));
-
-    for (pass = one_pass_only ? one_pass_only - 1 : 0; pass < arg_passes; pass++)
-    {
-        int frames_in = 0, frames_out = 0;
-        unsigned long nbytes = 0;
-        int skip_frames = 0;
-        struct detect_buffer detect;
-
-        /* Parse certain options from the input file, if possible */
-        infile = strcmp(in_fn, "-") ? fopen(in_fn, "rb")
-                                    : set_binary_mode(stdin);
-
-        if (!infile)
-        {
-            fprintf(stderr, "Failed to open input file\n");
-            return EXIT_FAILURE;
-        }
-
-        /* For RAW input sources, these bytes will applied on the first frame
-         *  in read_frame().
+        /* Use the frame rate from the file only if none was specified
+         * on the command-line.
          */
-        detect.buf_read = fread(detect.buf, 1, 4, infile);
-        detect.position = 0;
-
-        if (detect.buf_read == 4 && file_is_y4m(infile, &y4m, detect.buf))
-        {
-            if (y4m_input_open(&y4m, infile, detect.buf, 4) >= 0)
-            {
-                file_type = FILE_TYPE_Y4M;
-                cfg.g_w = y4m.pic_w;
-                cfg.g_h = y4m.pic_h;
-
-                /* Use the frame rate from the file only if none was specified
-                 * on the command-line.
-                 */
-                if (!arg_have_framerate)
-                {
-                    arg_framerate.num = y4m.fps_n;
-                    arg_framerate.den = y4m.fps_d;
-                }
-
-                arg_use_i420 = 0;
-            }
-            else
-            {
-                fprintf(stderr, "Unsupported Y4M stream.\n");
-                return EXIT_FAILURE;
-            }
-        }
-        else if (detect.buf_read == 4 &&
-                 file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, &detect))
-        {
-            file_type = FILE_TYPE_IVF;
-            switch (fourcc)
-            {
-            case 0x32315659:
-                arg_use_i420 = 0;
-                break;
-            case 0x30323449:
-                arg_use_i420 = 1;
-                break;
-            default:
-                fprintf(stderr, "Unsupported fourcc (%08x) in IVF\n", fourcc);
-                return EXIT_FAILURE;
-            }
-        }
-        else
-        {
-            file_type = FILE_TYPE_RAW;
+        if (!arg_have_framerate) {
+          arg_framerate.num = y4m.fps_n;
+          arg_framerate.den = y4m.fps_d;
         }
 
-        if(!cfg.g_w || !cfg.g_h)
-        {
-            fprintf(stderr, "Specify stream dimensions with --width (-w) "
-                            " and --height (-h).\n");
-            return EXIT_FAILURE;
-        }
+        arg_use_i420 = 0;
+      } else {
+        fprintf(stderr, "Unsupported Y4M stream.\n");
+        return EXIT_FAILURE;
+      }
+    } else if (detect.buf_read == 4 &&
+               file_is_ivf(infile, &fourcc, &cfg.g_w, &cfg.g_h, &detect)) {
+      file_type = FILE_TYPE_IVF;
+      switch (fourcc) {
+        case 0x32315659:
+          arg_use_i420 = 0;
+          break;
+        case 0x30323449:
+          arg_use_i420 = 1;
+          break;
+        default:
+          fprintf(stderr, "Unsupported fourcc (%08x) in IVF\n", fourcc);
+          return EXIT_FAILURE;
+      }
+    } else {
+      file_type = FILE_TYPE_RAW;
+    }
+
+    if (!cfg.g_w || !cfg.g_h) {
+      fprintf(stderr, "Specify stream dimensions with --width (-w) "
+              " and --height (-h).\n");
+      return EXIT_FAILURE;
+    }
 
 #define SHOW(field) fprintf(stderr, "    %-28s = %d\n", #field, cfg.field)
 
-        if (verbose && pass == 0)
-        {
-            fprintf(stderr, "Codec: %s\n", vpx_codec_iface_name(codec->iface));
-            fprintf(stderr, "Source file: %s Format: %s\n", in_fn,
-                    arg_use_i420 ? "I420" : "YV12");
-            fprintf(stderr, "Destination file: %s\n", out_fn);
-            fprintf(stderr, "Encoder parameters:\n");
+    if (verbose && pass == 0) {
+      fprintf(stderr, "Codec: %s\n", vpx_codec_iface_name(codec->iface));
+      fprintf(stderr, "Source file: %s Format: %s\n", in_fn,
+              arg_use_i420 ? "I420" : "YV12");
+      fprintf(stderr, "Destination file: %s\n", out_fn);
+      fprintf(stderr, "Encoder parameters:\n");
 
-            SHOW(g_usage);
-            SHOW(g_threads);
-            SHOW(g_profile);
-            SHOW(g_w);
-            SHOW(g_h);
-            SHOW(g_timebase.num);
-            SHOW(g_timebase.den);
-            SHOW(g_error_resilient);
-            SHOW(g_pass);
-            SHOW(g_lag_in_frames);
-            SHOW(rc_dropframe_thresh);
-            SHOW(rc_resize_allowed);
-            SHOW(rc_resize_up_thresh);
-            SHOW(rc_resize_down_thresh);
-            SHOW(rc_end_usage);
-            SHOW(rc_target_bitrate);
-            SHOW(rc_min_quantizer);
-            SHOW(rc_max_quantizer);
-            SHOW(rc_undershoot_pct);
-            SHOW(rc_overshoot_pct);
-            SHOW(rc_buf_sz);
-            SHOW(rc_buf_initial_sz);
-            SHOW(rc_buf_optimal_sz);
-            SHOW(rc_2pass_vbr_bias_pct);
-            SHOW(rc_2pass_vbr_minsection_pct);
-            SHOW(rc_2pass_vbr_maxsection_pct);
-            SHOW(kf_mode);
-            SHOW(kf_min_dist);
-            SHOW(kf_max_dist);
+      SHOW(g_usage);
+      SHOW(g_threads);
+      SHOW(g_profile);
+      SHOW(g_w);
+      SHOW(g_h);
+      SHOW(g_timebase.num);
+      SHOW(g_timebase.den);
+      SHOW(g_error_resilient);
+      SHOW(g_pass);
+      SHOW(g_lag_in_frames);
+      SHOW(rc_dropframe_thresh);
+      SHOW(rc_resize_allowed);
+      SHOW(rc_resize_up_thresh);
+      SHOW(rc_resize_down_thresh);
+      SHOW(rc_end_usage);
+      SHOW(rc_target_bitrate);
+      SHOW(rc_min_quantizer);
+      SHOW(rc_max_quantizer);
+      SHOW(rc_undershoot_pct);
+      SHOW(rc_overshoot_pct);
+      SHOW(rc_buf_sz);
+      SHOW(rc_buf_initial_sz);
+      SHOW(rc_buf_optimal_sz);
+      SHOW(rc_2pass_vbr_bias_pct);
+      SHOW(rc_2pass_vbr_minsection_pct);
+      SHOW(rc_2pass_vbr_maxsection_pct);
+      SHOW(kf_mode);
+      SHOW(kf_min_dist);
+      SHOW(kf_max_dist);
 #if CONFIG_LOSSLESS
-            SHOW(lossless);
+      SHOW(lossless);
 #endif
-        }
+    }
 
-        if(pass == (one_pass_only ? one_pass_only - 1 : 0)) {
-            if (file_type == FILE_TYPE_Y4M)
-                /*The Y4M reader does its own allocation.
-                  Just initialize this here to avoid problems if we never read any
-                   frames.*/
-                memset(&raw, 0, sizeof(raw));
-            else
-                vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
-                              cfg.g_w, cfg.g_h, 1);
+    if (pass == (one_pass_only ? one_pass_only - 1 : 0)) {
+      if (file_type == FILE_TYPE_Y4M)
+        /*The Y4M reader does its own allocation.
+          Just initialize this here to avoid problems if we never read any
+           frames.*/
+        memset(&raw, 0, sizeof(raw));
+      else
+        vpx_img_alloc(&raw, arg_use_i420 ? VPX_IMG_FMT_I420 : VPX_IMG_FMT_YV12,
+                      cfg.g_w, cfg.g_h, 1);
 
 
-            init_rate_histogram(&rate_hist, &cfg, &arg_framerate);
-        }
+      init_rate_histogram(&rate_hist, &cfg, &arg_framerate);
+    }
 
-        if(test_decode)
-        {
-            int width = cfg.g_w;
-            int height = cfg.g_h;
-            width = (width + 15)& ~15;
-            height = (height + 15) & ~15;
+    if (test_decode) {
+      int width = cfg.g_w;
+      int height = cfg.g_h;
+      width = (width + 15)& ~15;
+      height = (height + 15) & ~15;
 
-            vpx_img_alloc(&ref_enc.img, VPX_IMG_FMT_I420,
-                              width, height, 1);
-            vpx_img_alloc(&ref_dec.img, VPX_IMG_FMT_I420,
-                              width, height, 1);
-        }
+      vpx_img_alloc(&ref_enc.img, VPX_IMG_FMT_I420,
+                    width, height, 1);
+      vpx_img_alloc(&ref_dec.img, VPX_IMG_FMT_I420,
+                    width, height, 1);
+    }
 
-        outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb")
-                                      : set_binary_mode(stdout);
+    outfile = strcmp(out_fn, "-") ? fopen(out_fn, "wb")
+              : set_binary_mode(stdout);
 
-        if (!outfile)
-        {
-            fprintf(stderr, "Failed to open output file\n");
-            return EXIT_FAILURE;
-        }
+    if (!outfile) {
+      fprintf(stderr, "Failed to open output file\n");
+      return EXIT_FAILURE;
+    }
 
-        if(write_webm && fseek(outfile, 0, SEEK_CUR))
-        {
-            fprintf(stderr, "WebM output to pipes not supported.\n");
-            return EXIT_FAILURE;
-        }
+    if (write_webm && fseek(outfile, 0, SEEK_CUR)) {
+      fprintf(stderr, "WebM output to pipes not supported.\n");
+      return EXIT_FAILURE;
+    }
 
-        if (stats_fn)
-        {
-            if (!stats_open_file(&stats, stats_fn, pass))
-            {
-                fprintf(stderr, "Failed to open statistics store\n");
-                return EXIT_FAILURE;
-            }
-        }
-        else
-        {
-            if (!stats_open_mem(&stats, pass))
-            {
-                fprintf(stderr, "Failed to open statistics store\n");
-                return EXIT_FAILURE;
-            }
-        }
+    if (stats_fn) {
+      if (!stats_open_file(&stats, stats_fn, pass)) {
+        fprintf(stderr, "Failed to open statistics store\n");
+        return EXIT_FAILURE;
+      }
+    } else {
+      if (!stats_open_mem(&stats, pass)) {
+        fprintf(stderr, "Failed to open statistics store\n");
+        return EXIT_FAILURE;
+      }
+    }
 
-        cfg.g_pass = arg_passes == 2
-                     ? pass ? VPX_RC_LAST_PASS : VPX_RC_FIRST_PASS
-                 : VPX_RC_ONE_PASS;
+    cfg.g_pass = arg_passes == 2
+                 ? pass ? VPX_RC_LAST_PASS : VPX_RC_FIRST_PASS
+               : VPX_RC_ONE_PASS;
 #if VPX_ENCODER_ABI_VERSION > (1 + VPX_CODEC_ABI_VERSION)
 
-        if (pass)
-        {
-            cfg.rc_twopass_stats_in = stats_get(&stats);
-        }
+    if (pass) {
+      cfg.rc_twopass_stats_in = stats_get(&stats);
+    }
 
 #endif
 
-        if(write_webm)
-        {
-            ebml.stream = outfile;
-            write_webm_file_header(&ebml, &cfg, &arg_framerate, stereo_fmt);
-        }
-        else
-            write_ivf_file_header(outfile, &cfg, codec->fourcc, 0);
+    if (write_webm) {
+      ebml.stream = outfile;
+      write_webm_file_header(&ebml, &cfg, &arg_framerate, stereo_fmt);
+    } else
+      write_ivf_file_header(outfile, &cfg, codec->fourcc, 0);
 
 
-        /* Construct Encoder Context */
-        vpx_codec_enc_init(&encoder, codec->iface, &cfg,
-                           show_psnr ? VPX_CODEC_USE_PSNR : 0);
-        ctx_exit_on_error(&encoder, "Failed to initialize encoder");
+    /* Construct Encoder Context */
+    vpx_codec_enc_init(&encoder, codec->iface, &cfg,
+                       show_psnr ? VPX_CODEC_USE_PSNR : 0);
+    ctx_exit_on_error(&encoder, "Failed to initialize encoder");
 
-        if( test_decode &&
-            vpx_codec_dec_init(&decoder, ifaces[0].iface, &dec_cfg,0))
-        {
+    if (test_decode &&
+        vpx_codec_dec_init(&decoder, ifaces[0].iface, &dec_cfg, 0)) {
+      fprintf(stderr,
+              "Failed to initialize decoder: %s\n",
+              vpx_codec_error(&decoder));
+      return EXIT_FAILURE;
+    }
+    /* Note that we bypass the vpx_codec_control wrapper macro because
+     * we're being clever to store the control IDs in an array. Real
+     * applications will want to make use of the enumerations directly
+     */
+    for (i = 0; i < arg_ctrl_cnt; i++) {
+      if (vpx_codec_control_(&encoder, arg_ctrls[i][0], arg_ctrls[i][1]))
+        fprintf(stderr, "Error: Tried to set control %d = %d\n",
+                arg_ctrls[i][0], arg_ctrls[i][1]);
+      ctx_exit_on_error(&encoder, "Failed to control codec");
+    }
+
+    frame_avail = 1;
+    got_data = 0;
+
+    skip_frames = arg_skip;
+    while (skip_frames) {
+      frame_avail = read_frame(infile, &raw, file_type, &y4m, &detect);
+      if (!frame_avail)
+        break;
+      skip_frames--;
+      fprintf(stderr,
+              "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
+              arg_passes, skip_frames, frames_out, nbytes);
+    }
+
+    while (frame_avail || got_data) {
+      vpx_codec_iter_t iter = NULL;
+      vpx_codec_iter_t dec_iter = NULL;
+      const vpx_codec_cx_pkt_t *pkt;
+      struct vpx_usec_timer timer;
+      int64_t frame_start, next_frame_start;
+
+      if (!arg_limit || frames_in < arg_limit) {
+        frame_avail = read_frame(infile, &raw, file_type, &y4m,
+                                 &detect);
+        if (frame_avail)
+          frames_in++;
+      } else
+        frame_avail = 0;
+
+      vpx_usec_timer_start(&timer);
+
+      frame_start = (cfg.g_timebase.den * (int64_t)(frames_in - 1)
+                     * arg_framerate.den) / cfg.g_timebase.num / arg_framerate.num;
+      next_frame_start = (cfg.g_timebase.den * (int64_t)(frames_in)
+                          * arg_framerate.den)
+                         / cfg.g_timebase.num / arg_framerate.num;
+      vpx_codec_encode(&encoder, frame_avail ? &raw : NULL, frame_start,
+                       next_frame_start - frame_start,
+                       0, arg_deadline);
+      vpx_usec_timer_mark(&timer);
+      cx_time += vpx_usec_timer_elapsed(&timer);
+      ctx_exit_on_error(&encoder, "Failed to encode frame");
+
+      if (cfg.g_pass != VPX_RC_FIRST_PASS) {
+        int q;
+
+        vpx_codec_control(&encoder, VP8E_GET_LAST_QUANTIZER_64, &q);
+        ctx_exit_on_error(&encoder, "Failed to read quantizer");
+        counts[q]++;
+      }
+
+      got_data = 0;
+      test_decode_frame = 0;
+      while ((pkt = vpx_codec_get_cx_data(&encoder, &iter))) {
+        got_data = 1;
+
+        switch (pkt->kind) {
+          case VPX_CODEC_CX_FRAME_PKT:
             fprintf(stderr,
-                "Failed to initialize decoder: %s\n",
-                vpx_codec_error(&decoder));
-            return EXIT_FAILURE;
-        }
-        /* Note that we bypass the vpx_codec_control wrapper macro because
-         * we're being clever to store the control IDs in an array. Real
-         * applications will want to make use of the enumerations directly
-         */
-        for (i = 0; i < arg_ctrl_cnt; i++)
-        {
-            if (vpx_codec_control_(&encoder, arg_ctrls[i][0], arg_ctrls[i][1]))
-                fprintf(stderr, "Error: Tried to set control %d = %d\n",
-                        arg_ctrls[i][0], arg_ctrls[i][1]);
-            ctx_exit_on_error(&encoder, "Failed to control codec");
-        }
+                    "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
+                    arg_passes, frames_in, frames_out, nbytes);
+            frames_out++;
+            fprintf(stderr, " %6luF",
+                    (unsigned long)pkt->data.frame.sz);
 
-        frame_avail = 1;
-        got_data = 0;
-
-        skip_frames = arg_skip;
-        while(skip_frames)
-        {
-            frame_avail = read_frame(infile, &raw, file_type, &y4m, &detect);
-            if (!frame_avail)
-                break;
-            skip_frames--;
-            fprintf(stderr,
-                "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
-                arg_passes, skip_frames, frames_out, nbytes);
-        }
-
-        while (frame_avail || got_data)
-        {
-            vpx_codec_iter_t iter = NULL;
-            vpx_codec_iter_t dec_iter = NULL;
-            const vpx_codec_cx_pkt_t *pkt;
-            struct vpx_usec_timer timer;
-            int64_t frame_start, next_frame_start;
-
-            if (!arg_limit || frames_in < arg_limit)
-            {
-                frame_avail = read_frame(infile, &raw, file_type, &y4m,
-                                         &detect);
-                if (frame_avail)
-                    frames_in++;
-            }
-            else
-                frame_avail = 0;
-
-            vpx_usec_timer_start(&timer);
-
-            frame_start = (cfg.g_timebase.den * (int64_t)(frames_in - 1)
-                          * arg_framerate.den) / cfg.g_timebase.num / arg_framerate.num;
-            next_frame_start = (cfg.g_timebase.den * (int64_t)(frames_in)
-                                * arg_framerate.den)
-                                / cfg.g_timebase.num / arg_framerate.num;
-            vpx_codec_encode(&encoder, frame_avail ? &raw : NULL, frame_start,
-                             next_frame_start - frame_start,
-                             0, arg_deadline);
-            vpx_usec_timer_mark(&timer);
-            cx_time += vpx_usec_timer_elapsed(&timer);
-            ctx_exit_on_error(&encoder, "Failed to encode frame");
-
-            if(cfg.g_pass != VPX_RC_FIRST_PASS)
-            {
-                int q;
-
-                vpx_codec_control(&encoder, VP8E_GET_LAST_QUANTIZER_64, &q);
-                ctx_exit_on_error(&encoder, "Failed to read quantizer");
-                counts[q]++;
+            if (test_decode) {
+              if (!vpx_codec_decode(&decoder,
+                                    pkt->data.frame.buf,
+                                    pkt->data.frame.sz,
+                                    NULL, 0)) {
+                vpx_codec_get_frame(&decoder, &dec_iter);
+                test_decode_frame = 1;
+              } else {
+                const char *detail = vpx_codec_error_detail(&decoder);
+                fprintf(stderr, "Failed to decode frame: %s\n",
+                        vpx_codec_error(&decoder));
+                if (detail)
+                  fprintf(stderr,
+                          "  Additional information: %s\n",
+                          detail);
+              }
             }
 
-            got_data = 0;
-            test_decode_frame = 0;
-            while ((pkt = vpx_codec_get_cx_data(&encoder, &iter)))
-            {
-                got_data = 1;
+            update_rate_histogram(&rate_hist, &cfg, pkt);
+            if (write_webm) {
+              /* Update the hash */
+              if (!ebml.debug)
+                hash = murmur(pkt->data.frame.buf,
+                              pkt->data.frame.sz, hash);
 
-                switch (pkt->kind)
-                {
-                case VPX_CODEC_CX_FRAME_PKT:
-                    fprintf(stderr,
-                        "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
-                        arg_passes, frames_in, frames_out, nbytes);
-                    frames_out++;
-                    fprintf(stderr, " %6luF",
-                                (unsigned long)pkt->data.frame.sz);
-
-                    if(test_decode)
-                    {
-                        if(!vpx_codec_decode(&decoder,
-                            pkt->data.frame.buf,
-                            pkt->data.frame.sz,
-                            NULL, 0))
-                        {
-                            vpx_codec_get_frame(&decoder, &dec_iter);
-                            test_decode_frame = 1;
-                        }
-                        else
-                        {
-                            const char *detail = vpx_codec_error_detail(&decoder);
-                            fprintf(stderr, "Failed to decode frame: %s\n",
-                                vpx_codec_error(&decoder));
-                            if (detail)
-                                fprintf(stderr,
-                                "  Additional information: %s\n",
-                                detail);
-                        }
-                    }
-
-                    update_rate_histogram(&rate_hist, &cfg, pkt);
-                    if(write_webm)
-                    {
-                        /* Update the hash */
-                        if(!ebml.debug)
-                            hash = murmur(pkt->data.frame.buf,
-                                          pkt->data.frame.sz, hash);
-
-                        write_webm_block(&ebml, &cfg, pkt);
-                    }
-                    else
-                    {
-                        write_ivf_frame_header(outfile, pkt);
-                        if(fwrite(pkt->data.frame.buf, 1,
-                                  pkt->data.frame.sz, outfile));
-                    }
-                    nbytes += pkt->data.raw.sz;
-                    break;
-                case VPX_CODEC_STATS_PKT:
-                    fprintf(stderr,
-                        "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
-                        arg_passes, frames_in, frames_out, nbytes);
-                    frames_out++;
-                    fprintf(stderr, " %6luS",
-                           (unsigned long)pkt->data.twopass_stats.sz);
-                    stats_write(&stats,
-                                pkt->data.twopass_stats.buf,
-                                pkt->data.twopass_stats.sz);
-                    nbytes += pkt->data.raw.sz;
-                    break;
-                case VPX_CODEC_PSNR_PKT:
-
-                    if (show_psnr)
-                    {
-                        int i;
-
-                        psnr_sse_total += pkt->data.psnr.sse[0];
-                        psnr_samples_total += pkt->data.psnr.samples[0];
-                        for (i = 0; i < 4; i++)
-                        {
-                            fprintf(stderr, "%.3lf ", pkt->data.psnr.psnr[i]);
-                            psnr_totals[i] += pkt->data.psnr.psnr[i];
-                        }
-                        psnr_count++;
-                    }
-
-                    break;
-                default:
-                    break;
-                }
+              write_webm_block(&ebml, &cfg, pkt);
+            } else {
+              write_ivf_frame_header(outfile, pkt);
+              if (fwrite(pkt->data.frame.buf, 1,
+                         pkt->data.frame.sz, outfile));
             }
-            if(test_decode && test_decode_frame)
-            {
-                ref_enc.frame_type = VP8_LAST_FRAME;
-                ref_dec.frame_type = VP8_LAST_FRAME;
-
-                vpx_codec_control(  &encoder,
-                    VP8_COPY_REFERENCE,
-                    &ref_enc);
-                vpx_codec_control( &decoder,
-                    VP8_COPY_REFERENCE,
-                    &ref_dec);
-
-                enc_dec_match &= compare_img( &ref_enc.img,
-                    &ref_dec.img);
-                if(!enc_dec_match && first_bad_frame < 0)
-                {
-                    first_bad_frame = frames_out - 1;
-                }
-            }
-
-            fflush(stdout);
-        }
-
-        fprintf(stderr,
-               "\rPass %d/%d frame %4d/%-4d %7ldB %7ldb/f %7"PRId64"b/s"
-               " %7lu %s (%.2f fps)\033[K", pass + 1,
-               arg_passes, frames_in, frames_out, nbytes, nbytes * 8 / frames_in,
-               nbytes * 8 *(int64_t)arg_framerate.num / arg_framerate.den / frames_in,
-               cx_time > 9999999 ? cx_time / 1000 : cx_time,
-               cx_time > 9999999 ? "ms" : "us",
-               (float)frames_in * 1000000.0 / (float)cx_time);
-
-        if ( (show_psnr) && (psnr_count>0) )
-        {
-            int i;
-            double ovpsnr = vp8_mse2psnr(psnr_samples_total, 255.0,
-                                         psnr_sse_total);
-
-            fprintf(stderr, "\nPSNR (Overall/Avg/Y/U/V)");
-
-            fprintf(stderr, " %.3lf", ovpsnr);
-            for (i = 0; i < 4; i++)
-            {
-                fprintf(stderr, " %.3lf", psnr_totals[i]/psnr_count);
-            }
-        }
-
-        vpx_codec_destroy(&encoder);
-
-        if(test_decode)
-            vpx_codec_destroy(&decoder);
-
-        fclose(infile);
-        if (file_type == FILE_TYPE_Y4M)
-            y4m_input_close(&y4m);
-
-        if(write_webm)
-        {
-            write_webm_file_footer(&ebml, hash);
-            free(ebml.cue_list);
-            ebml.cue_list = NULL;
-        }
-        else
-        {
-            if (!fseek(outfile, 0, SEEK_SET))
-                write_ivf_file_header(outfile, &cfg, codec->fourcc, frames_out);
-        }
-
-        fclose(outfile);
-        stats_close(&stats, arg_passes-1);
-        fprintf(stderr, "\n");
-
-        if (one_pass_only)
+            nbytes += pkt->data.raw.sz;
             break;
+          case VPX_CODEC_STATS_PKT:
+            fprintf(stderr,
+                    "\rPass %d/%d frame %4d/%-4d %7ldB \033[K", pass + 1,
+                    arg_passes, frames_in, frames_out, nbytes);
+            frames_out++;
+            fprintf(stderr, " %6luS",
+                    (unsigned long)pkt->data.twopass_stats.sz);
+            stats_write(&stats,
+                        pkt->data.twopass_stats.buf,
+                        pkt->data.twopass_stats.sz);
+            nbytes += pkt->data.raw.sz;
+            break;
+          case VPX_CODEC_PSNR_PKT:
+
+            if (show_psnr) {
+              int i;
+
+              psnr_sse_total += pkt->data.psnr.sse[0];
+              psnr_samples_total += pkt->data.psnr.samples[0];
+              for (i = 0; i < 4; i++) {
+                fprintf(stderr, "%.3lf ", pkt->data.psnr.psnr[i]);
+                psnr_totals[i] += pkt->data.psnr.psnr[i];
+              }
+              psnr_count++;
+            }
+
+            break;
+          default:
+            break;
+        }
+      }
+      if (test_decode && test_decode_frame) {
+        ref_enc.frame_type = VP8_LAST_FRAME;
+        ref_dec.frame_type = VP8_LAST_FRAME;
+
+        vpx_codec_control(&encoder,
+                          VP8_COPY_REFERENCE,
+                          &ref_enc);
+        vpx_codec_control(&decoder,
+                          VP8_COPY_REFERENCE,
+                          &ref_dec);
+
+        enc_dec_match &= compare_img(&ref_enc.img,
+                                     &ref_dec.img);
+        if (!enc_dec_match && first_bad_frame < 0) {
+          first_bad_frame = frames_out - 1;
+        }
+      }
+
+      fflush(stdout);
     }
 
-    if( test_decode)
-    {
-        fprintf(stderr, "\n");
-        if(enc_dec_match)
-            fprintf(stderr, "No mismatch detected in recon buffers\n");
-        else
-            fprintf(stderr, "First mismatch occurred in frame %d\n",
-            first_bad_frame);
+    fprintf(stderr,
+            "\rPass %d/%d frame %4d/%-4d %7ldB %7ldb/f %7"PRId64"b/s"
+            " %7lu %s (%.2f fps)\033[K", pass + 1,
+            arg_passes, frames_in, frames_out, nbytes, nbytes * 8 / frames_in,
+            nbytes * 8 * (int64_t)arg_framerate.num / arg_framerate.den / frames_in,
+            cx_time > 9999999 ? cx_time / 1000 : cx_time,
+            cx_time > 9999999 ? "ms" : "us",
+            (float)frames_in * 1000000.0 / (float)cx_time);
+
+    if ((show_psnr) && (psnr_count > 0)) {
+      int i;
+      double ovpsnr = vp8_mse2psnr(psnr_samples_total, 255.0,
+                                   psnr_sse_total);
+
+      fprintf(stderr, "\nPSNR (Overall/Avg/Y/U/V)");
+
+      fprintf(stderr, " %.3lf", ovpsnr);
+      for (i = 0; i < 4; i++) {
+        fprintf(stderr, " %.3lf", psnr_totals[i] / psnr_count);
+      }
     }
 
-    if (show_q_hist_buckets)
-        show_q_histogram(counts, show_q_hist_buckets);
+    vpx_codec_destroy(&encoder);
 
-    if (show_rate_hist_buckets)
-        show_rate_histogram(&rate_hist, &cfg, show_rate_hist_buckets);
-    destroy_rate_histogram(&rate_hist);
+    if (test_decode)
+      vpx_codec_destroy(&decoder);
 
-    vpx_img_free(&raw);
-    if(test_decode)
-    {
-        vpx_img_free(&ref_enc.img);
-        vpx_img_free(&ref_dec.img);
+    fclose(infile);
+    if (file_type == FILE_TYPE_Y4M)
+      y4m_input_close(&y4m);
+
+    if (write_webm) {
+      write_webm_file_footer(&ebml, hash);
+      free(ebml.cue_list);
+      ebml.cue_list = NULL;
+    } else {
+      if (!fseek(outfile, 0, SEEK_SET))
+        write_ivf_file_header(outfile, &cfg, codec->fourcc, frames_out);
     }
-    free(argv);
-    return EXIT_SUCCESS;
+
+    fclose(outfile);
+    stats_close(&stats, arg_passes - 1);
+    fprintf(stderr, "\n");
+
+    if (one_pass_only)
+      break;
+  }
+
+  if (test_decode) {
+    fprintf(stderr, "\n");
+    if (enc_dec_match)
+      fprintf(stderr, "No mismatch detected in recon buffers\n");
+    else
+      fprintf(stderr, "First mismatch occurred in frame %d\n",
+              first_bad_frame);
+  }
+
+  if (show_q_hist_buckets)
+    show_q_histogram(counts, show_q_hist_buckets);
+
+  if (show_rate_hist_buckets)
+    show_rate_histogram(&rate_hist, &cfg, show_rate_hist_buckets);
+  destroy_rate_histogram(&rate_hist);
+
+  vpx_img_free(&raw);
+  if (test_decode) {
+    vpx_img_free(&ref_enc.img);
+    vpx_img_free(&ref_dec.img);
+  }
+  free(argv);
+  return EXIT_SUCCESS;
 }

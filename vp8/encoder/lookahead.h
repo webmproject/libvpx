@@ -12,12 +12,11 @@
 #include "vpx_scale/yv12config.h"
 #include "vpx/vpx_integer.h"
 
-struct lookahead_entry
-{
-    YV12_BUFFER_CONFIG  img;
-    int64_t             ts_start;
-    int64_t             ts_end;
-    unsigned int        flags;
+struct lookahead_entry {
+  YV12_BUFFER_CONFIG  img;
+  int64_t             ts_start;
+  int64_t             ts_end;
+  unsigned int        flags;
 };
 
 
@@ -30,10 +29,10 @@ struct lookahead_ctx;
  *
  *
  */
-struct lookahead_ctx* vp8_lookahead_init(unsigned int width,
+struct lookahead_ctx *vp8_lookahead_init(unsigned int width,
                                          unsigned int height,
                                          unsigned int depth
-                                         );
+                                        );
 
 
 /**\brief Destroys the lookahead stage
@@ -77,7 +76,7 @@ vp8_lookahead_push(struct lookahead_ctx *ctx,
  * \retval NULL, if drain not set and queue not of the configured depth
  *
  */
-struct lookahead_entry*
+struct lookahead_entry *
 vp8_lookahead_pop(struct lookahead_ctx *ctx,
                   int                   drain);
 
@@ -90,7 +89,7 @@ vp8_lookahead_pop(struct lookahead_ctx *ctx,
  * \retval NULL, if no buffer exists at the specified index
  *
  */
-struct lookahead_entry*
+struct lookahead_entry *
 vp8_lookahead_peek(struct lookahead_ctx *ctx,
                    int                   index);
 

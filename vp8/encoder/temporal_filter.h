@@ -13,17 +13,17 @@
 #define __INC_VP8_TEMPORAL_FILTER_H
 
 #define prototype_apply(sym)\
-    void (sym) \
-    ( \
-     unsigned char *frame1, \
-     unsigned int stride, \
-     unsigned char *frame2, \
-     unsigned int block_size, \
-     int strength, \
-     int filter_weight, \
-     unsigned int *accumulator, \
-     unsigned short *count \
-    )
+  void (sym) \
+  ( \
+    unsigned char *frame1, \
+    unsigned int stride, \
+    unsigned char *frame2, \
+    unsigned int block_size, \
+    int strength, \
+    int filter_weight, \
+    unsigned int *accumulator, \
+    unsigned short *count \
+  )
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/temporal_filter_x86.h"
@@ -34,9 +34,8 @@
 #endif
 extern prototype_apply(vp8_temporal_filter_apply);
 
-typedef struct
-{
-    prototype_apply(*apply);
+typedef struct {
+  prototype_apply(*apply);
 } vp8_temporal_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

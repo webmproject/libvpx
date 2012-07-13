@@ -12,10 +12,10 @@
 #include "findnearmv.h"
 
 const unsigned char vp8_mbsplit_offset[4][16] = {
-    { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
-    { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
+  { 0,  8,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+  { 0,  2,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+  { 0,  2,  8, 10,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0,  0,  0},
+  { 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15}
 };
 
 /* Predict motion vectors using those from already-decoded nearby blocks.
@@ -24,162 +24,144 @@ const unsigned char vp8_mbsplit_offset[4][16] = {
 
 void vp8_find_near_mvs
 (
-    MACROBLOCKD *xd,
-    const MODE_INFO *here,
-    const MODE_INFO *lf_here,
-    int_mv *nearest,
-    int_mv *nearby,
-    int_mv *best_mv,
-    int cnt[4],
-    int refframe,
-    int *ref_frame_sign_bias
-)
-{
-    const MODE_INFO *above = here - xd->mode_info_stride;
-    const MODE_INFO *left = here - 1;
-    const MODE_INFO *aboveleft = above - 1;
-    const MODE_INFO *third = NULL;
-    int_mv            near_mvs[4];
-    int_mv           *mv = near_mvs;
-    int             *cntx = cnt;
-    enum {CNT_INTRA, CNT_NEAREST, CNT_NEAR, CNT_SPLITMV};
+  MACROBLOCKD *xd,
+  const MODE_INFO *here,
+  const MODE_INFO *lf_here,
+  int_mv *nearest,
+  int_mv *nearby,
+  int_mv *best_mv,
+  int cnt[4],
+  int refframe,
+  int *ref_frame_sign_bias
+) {
+  const MODE_INFO *above = here - xd->mode_info_stride;
+  const MODE_INFO *left = here - 1;
+  const MODE_INFO *aboveleft = above - 1;
+  const MODE_INFO *third = NULL;
+  int_mv            near_mvs[4];
+  int_mv           *mv = near_mvs;
+  int             *cntx = cnt;
+  enum {CNT_INTRA, CNT_NEAREST, CNT_NEAR, CNT_SPLITMV};
 
-    /* Zero accumulators */
-    mv[0].as_int = mv[1].as_int = mv[2].as_int = 0;
-    cnt[0] = cnt[1] = cnt[2] = cnt[3] = 0;
+  /* Zero accumulators */
+  mv[0].as_int = mv[1].as_int = mv[2].as_int = 0;
+  cnt[0] = cnt[1] = cnt[2] = cnt[3] = 0;
 
-    /* Process above */
-    if (above->mbmi.ref_frame != INTRA_FRAME)
-    {
-        if (above->mbmi.mv.as_int)
-        {
-            (++mv)->as_int = above->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame],
-                refframe, mv, ref_frame_sign_bias);
-            ++cntx;
-        }
-        *cntx += 2;
+  /* Process above */
+  if (above->mbmi.ref_frame != INTRA_FRAME) {
+    if (above->mbmi.mv.as_int) {
+      (++mv)->as_int = above->mbmi.mv.as_int;
+      mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame],
+              refframe, mv, ref_frame_sign_bias);
+      ++cntx;
     }
+    *cntx += 2;
+  }
 
-    /* Process left */
-    if (left->mbmi.ref_frame != INTRA_FRAME)
-    {
-        if (left->mbmi.mv.as_int)
-        {
-            int_mv this_mv;
-            this_mv.as_int = left->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame],
-                refframe, &this_mv, ref_frame_sign_bias);
+  /* Process left */
+  if (left->mbmi.ref_frame != INTRA_FRAME) {
+    if (left->mbmi.mv.as_int) {
+      int_mv this_mv;
+      this_mv.as_int = left->mbmi.mv.as_int;
+      mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame],
+              refframe, &this_mv, ref_frame_sign_bias);
 
-            if (this_mv.as_int != mv->as_int)
-            {
-                (++mv)->as_int = this_mv.as_int;
-                ++cntx;
-            }
-            *cntx += 2;
-        }
-        else
-            cnt[CNT_INTRA] += 2;
+      if (this_mv.as_int != mv->as_int) {
+        (++mv)->as_int = this_mv.as_int;
+        ++cntx;
+      }
+      *cntx += 2;
+    } else
+      cnt[CNT_INTRA] += 2;
+  }
+  /* Process above left or the one from last frame */
+  if (aboveleft->mbmi.ref_frame != INTRA_FRAME ||
+      (lf_here->mbmi.ref_frame == LAST_FRAME && refframe == LAST_FRAME)) {
+    if (aboveleft->mbmi.mv.as_int) {
+      third = aboveleft;
+    } else if (lf_here->mbmi.mv.as_int) {
+      third = lf_here;
     }
-    /* Process above left or the one from last frame */
-    if ( aboveleft->mbmi.ref_frame != INTRA_FRAME||
-         (lf_here->mbmi.ref_frame==LAST_FRAME && refframe == LAST_FRAME))
-    {
-        if (aboveleft->mbmi.mv.as_int)
-        {
-            third = aboveleft;
-        }
-        else if(lf_here->mbmi.mv.as_int)
-        {
-            third = lf_here;
-        }
-        if(third)
-        {
-            int_mv this_mv;
-            this_mv.as_int = third->mbmi.mv.as_int;
-            mv_bias(ref_frame_sign_bias[third->mbmi.ref_frame],
-                refframe, &this_mv, ref_frame_sign_bias);
+    if (third) {
+      int_mv this_mv;
+      this_mv.as_int = third->mbmi.mv.as_int;
+      mv_bias(ref_frame_sign_bias[third->mbmi.ref_frame],
+              refframe, &this_mv, ref_frame_sign_bias);
 
-            if (this_mv.as_int != mv->as_int)
-            {
-                (++mv)->as_int = this_mv.as_int;
-                ++cntx;
-            }
-            *cntx += 1;
-        }
-        else
-            cnt[CNT_INTRA] += 1;
-    }
+      if (this_mv.as_int != mv->as_int) {
+        (++mv)->as_int = this_mv.as_int;
+        ++cntx;
+      }
+      *cntx += 1;
+    } else
+      cnt[CNT_INTRA] += 1;
+  }
 
-    /* If we have three distinct MV's ... */
-    if (cnt[CNT_SPLITMV])
-    {
-        /* See if the third MV can be merged with NEAREST */
-        if (mv->as_int == near_mvs[CNT_NEAREST].as_int)
-            cnt[CNT_NEAREST] += 1;
-    }
+  /* If we have three distinct MV's ... */
+  if (cnt[CNT_SPLITMV]) {
+    /* See if the third MV can be merged with NEAREST */
+    if (mv->as_int == near_mvs[CNT_NEAREST].as_int)
+      cnt[CNT_NEAREST] += 1;
+  }
 
-    cnt[CNT_SPLITMV] = ((above->mbmi.mode == SPLITMV)
-                        + (left->mbmi.mode == SPLITMV)) * 2
-                        + (
-                        lf_here->mbmi.mode == SPLITMV ||
+  cnt[CNT_SPLITMV] = ((above->mbmi.mode == SPLITMV)
+                      + (left->mbmi.mode == SPLITMV)) * 2
+                     + (
+                       lf_here->mbmi.mode == SPLITMV ||
                        aboveleft->mbmi.mode == SPLITMV);
 
-    /* Swap near and nearest if necessary */
-    if (cnt[CNT_NEAR] > cnt[CNT_NEAREST])
-    {
-        int tmp;
-        tmp = cnt[CNT_NEAREST];
-        cnt[CNT_NEAREST] = cnt[CNT_NEAR];
-        cnt[CNT_NEAR] = tmp;
-        tmp = near_mvs[CNT_NEAREST].as_int;
-        near_mvs[CNT_NEAREST].as_int = near_mvs[CNT_NEAR].as_int;
-        near_mvs[CNT_NEAR].as_int = tmp;
-    }
+  /* Swap near and nearest if necessary */
+  if (cnt[CNT_NEAR] > cnt[CNT_NEAREST]) {
+    int tmp;
+    tmp = cnt[CNT_NEAREST];
+    cnt[CNT_NEAREST] = cnt[CNT_NEAR];
+    cnt[CNT_NEAR] = tmp;
+    tmp = near_mvs[CNT_NEAREST].as_int;
+    near_mvs[CNT_NEAREST].as_int = near_mvs[CNT_NEAR].as_int;
+    near_mvs[CNT_NEAR].as_int = tmp;
+  }
 
-    /* Use near_mvs[0] to store the "best" MV */
-    if (cnt[CNT_NEAREST] >= cnt[CNT_INTRA])
-        near_mvs[CNT_INTRA] = near_mvs[CNT_NEAREST];
+  /* Use near_mvs[0] to store the "best" MV */
+  if (cnt[CNT_NEAREST] >= cnt[CNT_INTRA])
+    near_mvs[CNT_INTRA] = near_mvs[CNT_NEAREST];
 
-    /* Set up return values */
-    best_mv->as_int = near_mvs[0].as_int;
-    nearest->as_int = near_mvs[CNT_NEAREST].as_int;
-    nearby->as_int = near_mvs[CNT_NEAR].as_int;
+  /* Set up return values */
+  best_mv->as_int = near_mvs[0].as_int;
+  nearest->as_int = near_mvs[CNT_NEAREST].as_int;
+  nearby->as_int = near_mvs[CNT_NEAR].as_int;
 
-    /* Make sure that the 1/8th bits of the Mvs are zero if high_precision
-     * is not being used, by truncating the last bit towards 0
-     */
+  /* Make sure that the 1/8th bits of the Mvs are zero if high_precision
+   * is not being used, by truncating the last bit towards 0
+   */
 #if CONFIG_HIGH_PRECISION_MV
-    if (!xd->allow_high_precision_mv)
-    {
-        if (best_mv->as_mv.row & 1)
-            best_mv->as_mv.row += (best_mv->as_mv.row > 0 ? -1 : 1);
-        if (best_mv->as_mv.col & 1)
-            best_mv->as_mv.col += (best_mv->as_mv.col > 0 ? -1 : 1);
-        if (nearest->as_mv.row & 1)
-            nearest->as_mv.row += (nearest->as_mv.row > 0 ? -1 : 1);
-        if (nearest->as_mv.col & 1)
-            nearest->as_mv.col += (nearest->as_mv.col > 0 ? -1 : 1);
-        if (nearby->as_mv.row & 1)
-            nearby->as_mv.row += (nearby->as_mv.row > 0 ? -1 : 1);
-        if (nearby->as_mv.col & 1)
-            nearby->as_mv.col += (nearby->as_mv.col > 0 ? -1 : 1);
-    }
+  if (!xd->allow_high_precision_mv) {
+    if (best_mv->as_mv.row & 1)
+      best_mv->as_mv.row += (best_mv->as_mv.row > 0 ? -1 : 1);
+    if (best_mv->as_mv.col & 1)
+      best_mv->as_mv.col += (best_mv->as_mv.col > 0 ? -1 : 1);
+    if (nearest->as_mv.row & 1)
+      nearest->as_mv.row += (nearest->as_mv.row > 0 ? -1 : 1);
+    if (nearest->as_mv.col & 1)
+      nearest->as_mv.col += (nearest->as_mv.col > 0 ? -1 : 1);
+    if (nearby->as_mv.row & 1)
+      nearby->as_mv.row += (nearby->as_mv.row > 0 ? -1 : 1);
+    if (nearby->as_mv.col & 1)
+      nearby->as_mv.col += (nearby->as_mv.col > 0 ? -1 : 1);
+  }
 #endif
 
-    //TODO: move clamp outside findnearmv
-    vp8_clamp_mv2(nearest, xd);
-    vp8_clamp_mv2(nearby, xd);
-    vp8_clamp_mv2(best_mv, xd);
+  // TODO: move clamp outside findnearmv
+  vp8_clamp_mv2(nearest, xd);
+  vp8_clamp_mv2(nearby, xd);
+  vp8_clamp_mv2(best_mv, xd);
 }
 
 vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
-    vp8_prob p[VP8_MVREFS-1], const int near_mv_ref_ct[4]
-)
-{
-    p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];
-    p[1] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[1]] [1];
-    p[2] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[2]] [2];
-    p[3] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[3]] [3];
-    return p;
+                           vp8_prob p[VP8_MVREFS - 1], const int near_mv_ref_ct[4]
+                          ) {
+  p[0] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[0]] [0];
+  p[1] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[1]] [1];
+  p[2] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[2]] [2];
+  p[3] = pc->fc.vp8_mode_contexts [near_mv_ref_ct[3]] [3];
+  return p;
 }

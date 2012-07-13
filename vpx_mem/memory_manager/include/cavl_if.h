@@ -32,13 +32,12 @@
 #ifndef AVL_SEARCH_TYPE_DEFINED_
 #define AVL_SEARCH_TYPE_DEFINED_
 
-typedef enum
-{
-    AVL_EQUAL = 1,
-    AVL_LESS = 2,
-    AVL_GREATER = 4,
-    AVL_LESS_EQUAL = AVL_EQUAL | AVL_LESS,
-    AVL_GREATER_EQUAL = AVL_EQUAL | AVL_GREATER
+typedef enum {
+  AVL_EQUAL = 1,
+  AVL_LESS = 2,
+  AVL_GREATER = 4,
+  AVL_LESS_EQUAL = AVL_EQUAL | AVL_LESS,
+  AVL_GREATER_EQUAL = AVL_EQUAL | AVL_GREATER
 }
 avl_search_type;
 
@@ -75,15 +74,14 @@ avl_search_type;
 
 #endif
 
-typedef struct
-{
+typedef struct {
 #ifdef AVL_INSIDE_STRUCT
 
-    AVL_INSIDE_STRUCT
+  AVL_INSIDE_STRUCT
 
 #endif
 
-    AVL_HANDLE root;
+  AVL_HANDLE root;
 }
 L_(avl);
 
@@ -108,7 +106,7 @@ L_SC AVL_HANDLE L_(subst)(L_(avl) *tree, AVL_HANDLE new_node);
 #ifdef AVL_BUILD_ITER_TYPE
 
 L_SC int L_(build)(
-    L_(avl) *tree, AVL_BUILD_ITER_TYPE p, L_SIZE num_nodes);
+  L_(avl) *tree, AVL_BUILD_ITER_TYPE p, L_SIZE num_nodes);
 
 #endif
 
@@ -153,7 +151,7 @@ L_SC int L_(build)(
 /* Maximum depth may be more than number of bits in a long. */
 
 #define L_BIT_ARR_DEFN(NAME) \
-    unsigned long NAME[((AVL_MAX_DEPTH) + L_LONG_BIT - 1) / L_LONG_BIT];
+  unsigned long NAME[((AVL_MAX_DEPTH) + L_LONG_BIT - 1) / L_LONG_BIT];
 
 #else
 
@@ -164,29 +162,28 @@ L_SC int L_(build)(
 #endif
 
 /* Iterator structure. */
-typedef struct
-{
-    /* Tree being iterated over. */
-    L_(avl) *tree_;
+typedef struct {
+  /* Tree being iterated over. */
+  L_(avl) *tree_;
 
-    /* Records a path into the tree.  If bit n is true, indicates
-    ** take greater branch from the nth node in the path, otherwise
-    ** take the less branch.  bit 0 gives branch from root, and
-    ** so on. */
-    L_BIT_ARR_DEFN(branch)
+  /* Records a path into the tree.  If bit n is true, indicates
+  ** take greater branch from the nth node in the path, otherwise
+  ** take the less branch.  bit 0 gives branch from root, and
+  ** so on. */
+  L_BIT_ARR_DEFN(branch)
 
-    /* Zero-based depth of path into tree. */
-    unsigned depth;
+  /* Zero-based depth of path into tree. */
+  unsigned depth;
 
-    /* Handles of nodes in path from root to current node (returned by *). */
-    AVL_HANDLE path_h[(AVL_MAX_DEPTH) - 1];
+  /* Handles of nodes in path from root to current node (returned by *). */
+  AVL_HANDLE path_h[(AVL_MAX_DEPTH) - 1];
 }
 L_(iter);
 
 /* Iterator function prototypes. */
 
 L_SC void L_(start_iter)(
-    L_(avl) *tree, L_(iter) *iter, AVL_KEY k, avl_search_type st);
+  L_(avl) *tree, L_(iter) *iter, AVL_KEY k, avl_search_type st);
 
 L_SC void L_(start_iter_least)(L_(avl) *tree, L_(iter) *iter);
 

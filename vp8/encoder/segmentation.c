@@ -14,304 +14,276 @@
 #include "segmentation.h"
 #include "vp8/common/pred_common.h"
 
-void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x)
-{
-    int mb_row, mb_col;
+void vp8_update_gf_useage_maps(VP8_COMP *cpi, VP8_COMMON *cm, MACROBLOCK *x) {
+  int mb_row, mb_col;
 
-    MODE_INFO *this_mb_mode_info = cm->mi;
+  MODE_INFO *this_mb_mode_info = cm->mi;
 
-    x->gf_active_ptr = (signed char *)cpi->gf_active_flags;
+  x->gf_active_ptr = (signed char *)cpi->gf_active_flags;
 
-    if ((cm->frame_type == KEY_FRAME) || (cm->refresh_golden_frame))
-    {
-        // Reset Gf useage monitors
-        vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
-        cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
-    }
-    else
-    {
-        // for each macroblock row in image
-        for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
-        {
-            // for each macroblock col in image
-            for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
-            {
+  if ((cm->frame_type == KEY_FRAME) || (cm->refresh_golden_frame)) {
+    // Reset Gf useage monitors
+    vpx_memset(cpi->gf_active_flags, 1, (cm->mb_rows * cm->mb_cols));
+    cpi->gf_active_count = cm->mb_rows * cm->mb_cols;
+  } else {
+    // for each macroblock row in image
+    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+      // for each macroblock col in image
+      for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
 
-                // If using golden then set GF active flag if not already set.
-                // If using last frame 0,0 mode then leave flag as it is
-                // else if using non 0,0 motion or intra modes then clear
-                // flag if it is currently set
-                if ((this_mb_mode_info->mbmi.ref_frame == GOLDEN_FRAME) ||
-                    (this_mb_mode_info->mbmi.ref_frame == ALTREF_FRAME))
-                {
-                    if (*(x->gf_active_ptr) == 0)
-                    {
-                        *(x->gf_active_ptr) = 1;
-                        cpi->gf_active_count ++;
-                    }
-                }
-                else if ((this_mb_mode_info->mbmi.mode != ZEROMV) &&
-                         *(x->gf_active_ptr))
-                {
-                    *(x->gf_active_ptr) = 0;
-                    cpi->gf_active_count--;
-                }
-
-                x->gf_active_ptr++;          // Step onto next entry
-                this_mb_mode_info++;         // skip to next mb
-
-            }
-
-            // this is to account for the border
-            this_mb_mode_info++;
+        // If using golden then set GF active flag if not already set.
+        // If using last frame 0,0 mode then leave flag as it is
+        // else if using non 0,0 motion or intra modes then clear
+        // flag if it is currently set
+        if ((this_mb_mode_info->mbmi.ref_frame == GOLDEN_FRAME) ||
+            (this_mb_mode_info->mbmi.ref_frame == ALTREF_FRAME)) {
+          if (*(x->gf_active_ptr) == 0) {
+            *(x->gf_active_ptr) = 1;
+            cpi->gf_active_count++;
+          }
+        } else if ((this_mb_mode_info->mbmi.mode != ZEROMV) &&
+                   *(x->gf_active_ptr)) {
+          *(x->gf_active_ptr) = 0;
+          cpi->gf_active_count--;
         }
+
+        x->gf_active_ptr++;          // Step onto next entry
+        this_mb_mode_info++;         // skip to next mb
+
+      }
+
+      // this is to account for the border
+      this_mb_mode_info++;
     }
+  }
 }
 
-void vp8_enable_segmentation(VP8_PTR ptr)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+void vp8_enable_segmentation(VP8_PTR ptr) {
+  VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
-    // Set the appropriate feature bit
-    cpi->mb.e_mbd.segmentation_enabled = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+  // Set the appropriate feature bit
+  cpi->mb.e_mbd.segmentation_enabled = 1;
+  cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+  cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
-void vp8_disable_segmentation(VP8_PTR ptr)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+void vp8_disable_segmentation(VP8_PTR ptr) {
+  VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
-    // Clear the appropriate feature bit
-    cpi->mb.e_mbd.segmentation_enabled = 0;
+  // Clear the appropriate feature bit
+  cpi->mb.e_mbd.segmentation_enabled = 0;
 }
 
 void vp8_set_segmentation_map(VP8_PTR ptr,
-                              unsigned char *segmentation_map)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+                              unsigned char *segmentation_map) {
+  VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
-    // Copy in the new segmentation map
-    vpx_memcpy( cpi->segmentation_map, segmentation_map,
-                (cpi->common.mb_rows * cpi->common.mb_cols) );
+  // Copy in the new segmentation map
+  vpx_memcpy(cpi->segmentation_map, segmentation_map,
+             (cpi->common.mb_rows * cpi->common.mb_cols));
 
-    // Signal that the map should be updated.
-    cpi->mb.e_mbd.update_mb_segmentation_map = 1;
-    cpi->mb.e_mbd.update_mb_segmentation_data = 1;
+  // Signal that the map should be updated.
+  cpi->mb.e_mbd.update_mb_segmentation_map = 1;
+  cpi->mb.e_mbd.update_mb_segmentation_data = 1;
 }
 
 void vp8_set_segment_data(VP8_PTR ptr,
                           signed char *feature_data,
-                          unsigned char abs_delta)
-{
-    VP8_COMP *cpi = (VP8_COMP *)(ptr);
+                          unsigned char abs_delta) {
+  VP8_COMP *cpi = (VP8_COMP *)(ptr);
 
-    cpi->mb.e_mbd.mb_segment_abs_delta = abs_delta;
+  cpi->mb.e_mbd.mb_segment_abs_delta = abs_delta;
 
-    vpx_memcpy(cpi->mb.e_mbd.segment_feature_data, feature_data,
-               sizeof(cpi->mb.e_mbd.segment_feature_data));
+  vpx_memcpy(cpi->mb.e_mbd.segment_feature_data, feature_data,
+             sizeof(cpi->mb.e_mbd.segment_feature_data));
 
-    // TBD ?? Set the feature mask
-    // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
-    //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
+  // TBD ?? Set the feature mask
+  // vpx_memcpy(cpi->mb.e_mbd.segment_feature_mask, 0,
+  //            sizeof(cpi->mb.e_mbd.segment_feature_mask));
 }
 
 // Based on set of segment counts calculate a probability tree
-static void calc_segtree_probs( MACROBLOCKD * xd,
-                                int * segcounts,
-                                vp8_prob * segment_tree_probs )
-{
-    int count1,count2;
-    int tot_count;
-    int i;
+static void calc_segtree_probs(MACROBLOCKD *xd,
+                               int *segcounts,
+                               vp8_prob *segment_tree_probs) {
+  int count1, count2;
+  int tot_count;
+  int i;
 
-    // Blank the strtucture to start with
-    vpx_memset(segment_tree_probs, 0, sizeof(segment_tree_probs));
+  // Blank the strtucture to start with
+  vpx_memset(segment_tree_probs, 0, sizeof(segment_tree_probs));
 
-    // Total count for all segments
-    count1 = segcounts[0] + segcounts[1];
-    count2 = segcounts[2] + segcounts[3];
-    tot_count = count1 + count2;
+  // Total count for all segments
+  count1 = segcounts[0] + segcounts[1];
+  count2 = segcounts[2] + segcounts[3];
+  tot_count = count1 + count2;
 
-    // Work out probabilities of each segment
-    if (tot_count)
-        segment_tree_probs[0] = (count1 * 255) / tot_count;
-    if (count1 > 0)
-        segment_tree_probs[1] = (segcounts[0] * 255) / count1;
-    if (count2 > 0)
-        segment_tree_probs[2] = (segcounts[2] * 255) / count2;
+  // Work out probabilities of each segment
+  if (tot_count)
+    segment_tree_probs[0] = (count1 * 255) / tot_count;
+  if (count1 > 0)
+    segment_tree_probs[1] = (segcounts[0] * 255) / count1;
+  if (count2 > 0)
+    segment_tree_probs[2] = (segcounts[2] * 255) / count2;
 
-    // Clamp probabilities to minimum allowed value
-    for (i = 0; i < MB_FEATURE_TREE_PROBS; i++)
-    {
-        if (segment_tree_probs[i] == 0)
-            segment_tree_probs[i] = 1;
-    }
+  // Clamp probabilities to minimum allowed value
+  for (i = 0; i < MB_FEATURE_TREE_PROBS; i++) {
+    if (segment_tree_probs[i] == 0)
+      segment_tree_probs[i] = 1;
+  }
 }
 
 // Based on set of segment counts and probabilities calculate a cost estimate
-static int cost_segmap( MACROBLOCKD * xd,
-                        int * segcounts,
-                        vp8_prob * probs )
-{
-    int cost;
-    int count1,count2;
+static int cost_segmap(MACROBLOCKD *xd,
+                       int *segcounts,
+                       vp8_prob *probs) {
+  int cost;
+  int count1, count2;
 
-    // Cost the top node of the tree
-    count1 = segcounts[0] + segcounts[1];
-    count2 = segcounts[2] + segcounts[3];
-    cost = count1 * vp8_cost_zero(probs[0]) +
-           count2 * vp8_cost_one(probs[0]);
+  // Cost the top node of the tree
+  count1 = segcounts[0] + segcounts[1];
+  count2 = segcounts[2] + segcounts[3];
+  cost = count1 * vp8_cost_zero(probs[0]) +
+         count2 * vp8_cost_one(probs[0]);
 
-    // Now add the cost of each individual segment branch
-    if (count1 > 0)
-        cost += segcounts[0] * vp8_cost_zero(probs[1]) +
-                segcounts[1] * vp8_cost_one(probs[1]);
+  // Now add the cost of each individual segment branch
+  if (count1 > 0)
+    cost += segcounts[0] * vp8_cost_zero(probs[1]) +
+            segcounts[1] * vp8_cost_one(probs[1]);
 
-    if (count2 > 0)
-        cost += segcounts[2] * vp8_cost_zero(probs[2]) +
-                segcounts[3] * vp8_cost_one(probs[2]) ;
+  if (count2 > 0)
+    cost += segcounts[2] * vp8_cost_zero(probs[2]) +
+            segcounts[3] * vp8_cost_one(probs[2]);
 
-    return cost;
+  return cost;
 
 }
 
-void choose_segmap_coding_method( VP8_COMP *cpi )
-{
-    VP8_COMMON *const cm = & cpi->common;
-    MACROBLOCKD *const xd = & cpi->mb.e_mbd;
+void choose_segmap_coding_method(VP8_COMP *cpi) {
+  VP8_COMMON *const cm = & cpi->common;
+  MACROBLOCKD *const xd = & cpi->mb.e_mbd;
 
-    int i;
-    int tot_count;
-    int no_pred_cost;
-    int t_pred_cost = INT_MAX;
-    int pred_context;
+  int i;
+  int tot_count;
+  int no_pred_cost;
+  int t_pred_cost = INT_MAX;
+  int pred_context;
 
-    int mb_row, mb_col;
-    int segmap_index = 0;
-    unsigned char segment_id;
+  int mb_row, mb_col;
+  int segmap_index = 0;
+  unsigned char segment_id;
 
-    int temporal_predictor_count[PREDICTION_PROBS][2];
-    int no_pred_segcounts[MAX_MB_SEGMENTS];
-    int t_unpred_seg_counts[MAX_MB_SEGMENTS];
+  int temporal_predictor_count[PREDICTION_PROBS][2];
+  int no_pred_segcounts[MAX_MB_SEGMENTS];
+  int t_unpred_seg_counts[MAX_MB_SEGMENTS];
 
-    vp8_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
-    vp8_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
-    vp8_prob t_nopred_prob[PREDICTION_PROBS];
+  vp8_prob no_pred_tree[MB_FEATURE_TREE_PROBS];
+  vp8_prob t_pred_tree[MB_FEATURE_TREE_PROBS];
+  vp8_prob t_nopred_prob[PREDICTION_PROBS];
 
-    // Set default state for the segment tree probabilities and the
-    // temporal coding probabilities
-    vpx_memset(xd->mb_segment_tree_probs, 255,
-               sizeof(xd->mb_segment_tree_probs));
-    vpx_memset(cm->segment_pred_probs, 255,
-               sizeof(cm->segment_pred_probs));
+  // Set default state for the segment tree probabilities and the
+  // temporal coding probabilities
+  vpx_memset(xd->mb_segment_tree_probs, 255,
+             sizeof(xd->mb_segment_tree_probs));
+  vpx_memset(cm->segment_pred_probs, 255,
+             sizeof(cm->segment_pred_probs));
 
-    vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
-    vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
-    vpx_memset(temporal_predictor_count, 0, sizeof(temporal_predictor_count));
+  vpx_memset(no_pred_segcounts, 0, sizeof(no_pred_segcounts));
+  vpx_memset(t_unpred_seg_counts, 0, sizeof(t_unpred_seg_counts));
+  vpx_memset(temporal_predictor_count, 0, sizeof(temporal_predictor_count));
 
-    // First of all generate stats regarding how well the last segment map
-    // predicts this one
+  // First of all generate stats regarding how well the last segment map
+  // predicts this one
 
-    // Initialize macroblock decoder mode info context for the first mb
-    // in the frame
-    xd->mode_info_context = cm->mi;
+  // Initialize macroblock decoder mode info context for the first mb
+  // in the frame
+  xd->mode_info_context = cm->mi;
 
-    for (mb_row = 0; mb_row < cm->mb_rows; mb_row++)
-    {
-        for (mb_col = 0; mb_col < cm->mb_cols; mb_col++)
-        {
-            segment_id = xd->mode_info_context->mbmi.segment_id;
+  for (mb_row = 0; mb_row < cm->mb_rows; mb_row++) {
+    for (mb_col = 0; mb_col < cm->mb_cols; mb_col++) {
+      segment_id = xd->mode_info_context->mbmi.segment_id;
 
-            // Count the number of hits on each segment with no prediction
-            no_pred_segcounts[segment_id]++;
+      // Count the number of hits on each segment with no prediction
+      no_pred_segcounts[segment_id]++;
 
-            // Temporal prediction not allowed on key frames
-            if (cm->frame_type != KEY_FRAME)
-            {
-                // Test to see if the segment id matches the predicted value.
-                int seg_predicted =
-                    (segment_id == get_pred_mb_segid( cm, segmap_index ));
+      // Temporal prediction not allowed on key frames
+      if (cm->frame_type != KEY_FRAME) {
+        // Test to see if the segment id matches the predicted value.
+        int seg_predicted =
+          (segment_id == get_pred_mb_segid(cm, segmap_index));
 
-                // Get the segment id prediction context
-                pred_context =
-                    get_pred_context( cm, xd, PRED_SEG_ID );
+        // Get the segment id prediction context
+        pred_context =
+          get_pred_context(cm, xd, PRED_SEG_ID);
 
-                // Store the prediction status for this mb and update counts
-                // as appropriate
-                set_pred_flag( xd, PRED_SEG_ID, seg_predicted );
-                temporal_predictor_count[pred_context][seg_predicted]++;
+        // Store the prediction status for this mb and update counts
+        // as appropriate
+        set_pred_flag(xd, PRED_SEG_ID, seg_predicted);
+        temporal_predictor_count[pred_context][seg_predicted]++;
 
-                if ( !seg_predicted )
-                    // Update the "unpredicted" segment count
-                    t_unpred_seg_counts[segment_id]++;
-            }
+        if (!seg_predicted)
+          // Update the "unpredicted" segment count
+          t_unpred_seg_counts[segment_id]++;
+      }
 
-            // Step on to the next mb
-            xd->mode_info_context++;
+      // Step on to the next mb
+      xd->mode_info_context++;
 
-            // Step on to the next entry in the segment maps
-            segmap_index++;
-        }
-
-        // this is to account for the border in mode_info_context
-        xd->mode_info_context++;
+      // Step on to the next entry in the segment maps
+      segmap_index++;
     }
 
-    // Work out probability tree for coding segments without prediction
-    // and the cost.
-    calc_segtree_probs( xd, no_pred_segcounts, no_pred_tree );
-    no_pred_cost = cost_segmap( xd, no_pred_segcounts, no_pred_tree );
+    // this is to account for the border in mode_info_context
+    xd->mode_info_context++;
+  }
 
-    // Key frames cannot use temporal prediction
-    if (cm->frame_type != KEY_FRAME)
-    {
-        // Work out probability tree for coding those segments not
-        // predicted using the temporal method and the cost.
-        calc_segtree_probs( xd, t_unpred_seg_counts, t_pred_tree );
-        t_pred_cost = cost_segmap( xd, t_unpred_seg_counts, t_pred_tree );
+  // Work out probability tree for coding segments without prediction
+  // and the cost.
+  calc_segtree_probs(xd, no_pred_segcounts, no_pred_tree);
+  no_pred_cost = cost_segmap(xd, no_pred_segcounts, no_pred_tree);
 
-        // Add in the cost of the signalling for each prediction context
-        for ( i = 0; i < PREDICTION_PROBS; i++ )
-        {
-            tot_count = temporal_predictor_count[i][0] +
-                        temporal_predictor_count[i][1];
+  // Key frames cannot use temporal prediction
+  if (cm->frame_type != KEY_FRAME) {
+    // Work out probability tree for coding those segments not
+    // predicted using the temporal method and the cost.
+    calc_segtree_probs(xd, t_unpred_seg_counts, t_pred_tree);
+    t_pred_cost = cost_segmap(xd, t_unpred_seg_counts, t_pred_tree);
 
-            // Work out the context probabilities for the segment
-            // prediction flag
-            if ( tot_count )
-            {
-                t_nopred_prob[i] = ( temporal_predictor_count[i][0] * 255 ) /
-                                   tot_count;
+    // Add in the cost of the signalling for each prediction context
+    for (i = 0; i < PREDICTION_PROBS; i++) {
+      tot_count = temporal_predictor_count[i][0] +
+                  temporal_predictor_count[i][1];
 
-                // Clamp to minimum allowed value
-                if ( t_nopred_prob[i] < 1 )
-                    t_nopred_prob[i] = 1;
-            }
-            else
-                t_nopred_prob[i] = 1;
+      // Work out the context probabilities for the segment
+      // prediction flag
+      if (tot_count) {
+        t_nopred_prob[i] = (temporal_predictor_count[i][0] * 255) /
+                           tot_count;
 
-            // Add in the predictor signaling cost
-            t_pred_cost += ( temporal_predictor_count[i][0] *
-                               vp8_cost_zero(t_nopred_prob[i]) ) +
-                           ( temporal_predictor_count[i][1] *
-                               vp8_cost_one(t_nopred_prob[i]) );
-        }
+        // Clamp to minimum allowed value
+        if (t_nopred_prob[i] < 1)
+          t_nopred_prob[i] = 1;
+      } else
+        t_nopred_prob[i] = 1;
+
+      // Add in the predictor signaling cost
+      t_pred_cost += (temporal_predictor_count[i][0] *
+                      vp8_cost_zero(t_nopred_prob[i])) +
+                     (temporal_predictor_count[i][1] *
+                      vp8_cost_one(t_nopred_prob[i]));
     }
+  }
 
-    // Now choose which coding method to use.
-    if ( t_pred_cost < no_pred_cost )
-    {
-         cm->temporal_update = 1;
-         vpx_memcpy( xd->mb_segment_tree_probs,
-                     t_pred_tree, sizeof(t_pred_tree) );
-         vpx_memcpy( &cm->segment_pred_probs,
-                     t_nopred_prob, sizeof(t_nopred_prob) );
-    }
-    else
-    {
-         cm->temporal_update = 0;
-         vpx_memcpy( xd->mb_segment_tree_probs,
-                     no_pred_tree, sizeof(no_pred_tree) );
-    }
+  // Now choose which coding method to use.
+  if (t_pred_cost < no_pred_cost) {
+    cm->temporal_update = 1;
+    vpx_memcpy(xd->mb_segment_tree_probs,
+               t_pred_tree, sizeof(t_pred_tree));
+    vpx_memcpy(&cm->segment_pred_probs,
+               t_nopred_prob, sizeof(t_nopred_prob));
+  } else {
+    cm->temporal_update = 0;
+    vpx_memcpy(xd->mb_segment_tree_probs,
+               no_pred_tree, sizeof(no_pred_tree));
+  }
 }

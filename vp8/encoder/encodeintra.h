@@ -22,6 +22,6 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
 void vp8_encode_intra8x8mby(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
 void vp8_encode_intra8x8mbuv(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x);
 void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
-                              MACROBLOCK *x, int ib);
+                         MACROBLOCK *x, int ib);
 
 #endif

@@ -19,17 +19,29 @@ namespace libvpx_test {
 
 class ACMRandom {
  public:
-  explicit ACMRandom(int seed) { Reset(seed); }
+  explicit ACMRandom(int seed) {
+    Reset(seed);
+  }
 
-  void Reset(int seed) { srand(seed); }
+  void Reset(int seed) {
+    srand(seed);
+  }
 
-  uint8_t Rand8(void) { return (rand() >> 8) & 0xff; }
+  uint8_t Rand8(void) {
+    return (rand() >> 8) & 0xff;
+  }
 
-  int PseudoUniform(int range) { return (rand() >> 8) % range; }
+  int PseudoUniform(int range) {
+    return (rand() >> 8) % range;
+  }
 
-  int operator()(int n) { return PseudoUniform(n); }
+  int operator()(int n) {
+    return PseudoUniform(n);
+  }
 
-  static int DeterministicSeed(void) { return 0xbaba; }
+  static int DeterministicSeed(void) {
+    return 0xbaba;
+  }
 };
 
 }  // namespace libvpx_test

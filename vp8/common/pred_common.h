@@ -17,38 +17,37 @@
 
 
 // Predicted items
-typedef enum
-{
-    PRED_SEG_ID = 0,               // Segment identifier
-    PRED_REF = 1,
-    PRED_COMP = 2,
+typedef enum {
+  PRED_SEG_ID = 0,               // Segment identifier
+  PRED_REF = 1,
+  PRED_COMP = 2,
 #if CONFIG_NEWENTROPY
-    PRED_MBSKIP = 3,
+  PRED_MBSKIP = 3,
 #endif
 
 } PRED_ID;
 
 
-extern unsigned char get_pred_context( VP8_COMMON *const cm,
-                                       MACROBLOCKD *const xd,
-                                       PRED_ID pred_id );
+extern unsigned char get_pred_context(VP8_COMMON *const cm,
+                                      MACROBLOCKD *const xd,
+                                      PRED_ID pred_id);
 
-extern vp8_prob get_pred_prob( VP8_COMMON *const cm,
-                               MACROBLOCKD *const xd,
-                               PRED_ID pred_id );
+extern vp8_prob get_pred_prob(VP8_COMMON *const cm,
+                              MACROBLOCKD *const xd,
+                              PRED_ID pred_id);
 
-extern unsigned char get_pred_flag( MACROBLOCKD *const xd,
-                                    PRED_ID pred_id );
+extern unsigned char get_pred_flag(MACROBLOCKD *const xd,
+                                   PRED_ID pred_id);
 
-extern void set_pred_flag( MACROBLOCKD *const xd,
-                           PRED_ID pred_id,
-                           unsigned char pred_flag);
+extern void set_pred_flag(MACROBLOCKD *const xd,
+                          PRED_ID pred_id,
+                          unsigned char pred_flag);
 
 
-extern unsigned char get_pred_mb_segid( VP8_COMMON *const cm, int MbIndex );
+extern unsigned char get_pred_mb_segid(VP8_COMMON *const cm, int MbIndex);
 
-extern MV_REFERENCE_FRAME get_pred_ref( VP8_COMMON *const cm,
-                                        MACROBLOCKD *const xd );
-extern void compute_mod_refprobs( VP8_COMMON *const cm );
+extern MV_REFERENCE_FRAME get_pred_ref(VP8_COMMON *const cm,
+                                       MACROBLOCKD *const xd);
+extern void compute_mod_refprobs(VP8_COMMON *const cm);
 
 #endif /* __INC_PRED_COMMON_H__ */

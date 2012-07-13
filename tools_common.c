@@ -14,11 +14,10 @@
 #include <fcntl.h>
 #endif
 
-FILE* set_binary_mode(FILE *stream)
-{
-    (void)stream;
+FILE *set_binary_mode(FILE *stream) {
+  (void)stream;
 #ifdef _WIN32
-    _setmode(_fileno(stream), _O_BINARY);
+  _setmode(_fileno(stream), _O_BINARY);
 #endif
-    return stream;
+  return stream;
 }

@@ -115,42 +115,41 @@ extern sub_pixel_variance_function vp8_sub_pixel_variance16x16_ppc;
 extern unsigned int vp8_get8x8var_ppc(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride, unsigned int *SSE, int *Sum);
 extern unsigned int vp8_get16x16var_ppc(unsigned char *src_ptr, int  source_stride, unsigned char *ref_ptr, int  recon_stride, unsigned int *SSE, int *Sum);
 
-void vp8_cmachine_specific_config(void)
-{
-    // Pure C:
-    vp8_mbuverror               = vp8_mbuverror_c;
-    vp8_fast_quantize_b           = vp8_fast_quantize_b_c;
-    vp8_short_fdct4x4            = vp8_short_fdct4x4_ppc;
-    vp8_short_fdct8x4            = vp8_short_fdct8x4_ppc;
-    vp8_fast_fdct4x4             = vp8_short_fdct4x4_ppc;
-    vp8_fast_fdct8x4             = vp8_short_fdct8x4_ppc;
-    short_walsh4x4               = vp8_short_walsh4x4_c;
+void vp8_cmachine_specific_config(void) {
+  // Pure C:
+  vp8_mbuverror               = vp8_mbuverror_c;
+  vp8_fast_quantize_b           = vp8_fast_quantize_b_c;
+  vp8_short_fdct4x4            = vp8_short_fdct4x4_ppc;
+  vp8_short_fdct8x4            = vp8_short_fdct8x4_ppc;
+  vp8_fast_fdct4x4             = vp8_short_fdct4x4_ppc;
+  vp8_fast_fdct8x4             = vp8_short_fdct8x4_ppc;
+  short_walsh4x4               = vp8_short_walsh4x4_c;
 
-    vp8_variance4x4             = vp8_variance4x4_ppc;
-    vp8_variance8x8             = vp8_variance8x8_ppc;
-    vp8_variance8x16            = vp8_variance8x16_ppc;
-    vp8_variance16x8            = vp8_variance16x8_ppc;
-    vp8_variance16x16           = vp8_variance16x16_ppc;
-    vp8_mse16x16                = vp8_mse16x16_ppc;
+  vp8_variance4x4             = vp8_variance4x4_ppc;
+  vp8_variance8x8             = vp8_variance8x8_ppc;
+  vp8_variance8x16            = vp8_variance8x16_ppc;
+  vp8_variance16x8            = vp8_variance16x8_ppc;
+  vp8_variance16x16           = vp8_variance16x16_ppc;
+  vp8_mse16x16                = vp8_mse16x16_ppc;
 
-    vp8_sub_pixel_variance4x4     = vp8_sub_pixel_variance4x4_ppc;
-    vp8_sub_pixel_variance8x8     = vp8_sub_pixel_variance8x8_ppc;
-    vp8_sub_pixel_variance8x16    = vp8_sub_pixel_variance8x16_ppc;
-    vp8_sub_pixel_variance16x8    = vp8_sub_pixel_variance16x8_ppc;
-    vp8_sub_pixel_variance16x16   = vp8_sub_pixel_variance16x16_ppc;
+  vp8_sub_pixel_variance4x4     = vp8_sub_pixel_variance4x4_ppc;
+  vp8_sub_pixel_variance8x8     = vp8_sub_pixel_variance8x8_ppc;
+  vp8_sub_pixel_variance8x16    = vp8_sub_pixel_variance8x16_ppc;
+  vp8_sub_pixel_variance16x8    = vp8_sub_pixel_variance16x8_ppc;
+  vp8_sub_pixel_variance16x16   = vp8_sub_pixel_variance16x16_ppc;
 
-    vp8_get_mb_ss                 = vp8_get_mb_ss_c;
+  vp8_get_mb_ss                 = vp8_get_mb_ss_c;
 
-    vp8_sad16x16                = vp8_sad16x16_ppc;
-    vp8_sad16x8                 = vp8_sad16x8_ppc;
-    vp8_sad8x16                 = vp8_sad8x16_ppc;
-    vp8_sad8x8                  = vp8_sad8x8_ppc;
-    vp8_sad4x4                  = vp8_sad4x4_ppc;
+  vp8_sad16x16                = vp8_sad16x16_ppc;
+  vp8_sad16x8                 = vp8_sad16x8_ppc;
+  vp8_sad8x16                 = vp8_sad8x16_ppc;
+  vp8_sad8x8                  = vp8_sad8x8_ppc;
+  vp8_sad4x4                  = vp8_sad4x4_ppc;
 
-    vp8_block_error              = vp8_block_error_ppc;
-    vp8_mbblock_error            = vp8_mbblock_error_c;
+  vp8_block_error              = vp8_block_error_ppc;
+  vp8_mbblock_error            = vp8_mbblock_error_c;
 
-    vp8_subtract_b               = vp8_subtract_b_c;
-    vp8_subtract_mby             = vp8_subtract_mby_ppc;
-    vp8_subtract_mbuv            = vp8_subtract_mbuv_ppc;
+  vp8_subtract_b               = vp8_subtract_b_c;
+  vp8_subtract_mby             = vp8_subtract_mby_ppc;
+  vp8_subtract_mbuv            = vp8_subtract_mbuv_ppc;
 }

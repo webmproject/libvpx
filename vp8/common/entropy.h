@@ -43,12 +43,11 @@ extern const vp8_tree_index vp8_coef_tree[];
 
 extern struct vp8_token_struct vp8_coef_encodings[MAX_ENTROPY_TOKENS];
 
-typedef struct
-{
-    vp8_tree_p tree;
-    const vp8_prob *prob;
-    int Len;
-    int base_val;
+typedef struct {
+  vp8_tree_p tree;
+  const vp8_prob *prob;
+  int Len;
+  int base_val;
 } vp8_extra_bit_struct;
 
 extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
@@ -110,7 +109,7 @@ void vp8_default_coef_probs(struct VP8Common *);
 extern DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]);
 extern short vp8_default_zig_zag_mask[16];
 extern DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]);
-extern short vp8_default_zig_zag_mask_8x8[64];//int64_t
+extern short vp8_default_zig_zag_mask_8x8[64];// int64_t
 void vp8_coef_tree_initialize(void);
 
 #if CONFIG_ADAPTIVE_ENTROPY

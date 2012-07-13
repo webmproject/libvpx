@@ -42,10 +42,9 @@ extern void vp8_yv12_copy_frame(YV12_BUFFER_CONFIG *src_ybc, YV12_BUFFER_CONFIG 
  *  SPECIAL NOTES : None.
  *
  ****************************************************************************/
-void vp8_scale_machine_specific_config()
-{
-    vp8_yv12_extend_frame_borders_ptr      = vp8_yv12_extend_frame_borders;
-    vp8_yv12_copy_frame_yonly_ptr          = vp8_yv12_copy_frame_yonly;
-    vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame;
+void vp8_scale_machine_specific_config() {
+  vp8_yv12_extend_frame_borders_ptr      = vp8_yv12_extend_frame_borders;
+  vp8_yv12_copy_frame_yonly_ptr          = vp8_yv12_copy_frame_yonly;
+  vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame;
 
 }

@@ -15,102 +15,88 @@
 
 int vp8dx_start_decode(BOOL_DECODER *br,
                        const unsigned char *source,
-                       unsigned int source_sz)
-{
-    br->user_buffer_end = source+source_sz;
-    br->user_buffer     = source;
-    br->value    = 0;
-    br->count    = -8;
-    br->range    = 255;
+                       unsigned int source_sz) {
+  br->user_buffer_end = source + source_sz;
+  br->user_buffer     = source;
+  br->value    = 0;
+  br->count    = -8;
+  br->range    = 255;
 
-    if (source_sz && !source)
-        return 1;
+  if (source_sz && !source)
+    return 1;
 
-    /* Populate the buffer */
-    vp8dx_bool_decoder_fill(br);
+  /* Populate the buffer */
+  vp8dx_bool_decoder_fill(br);
 
-    return 0;
+  return 0;
 }
 
 
-void vp8dx_bool_decoder_fill(BOOL_DECODER *br)
-{
-    const unsigned char *bufptr;
-    const unsigned char *bufend;
-    VP8_BD_VALUE         value;
-    int                  count;
-    bufend = br->user_buffer_end;
-    bufptr = br->user_buffer;
-    value = br->value;
-    count = br->count;
+void vp8dx_bool_decoder_fill(BOOL_DECODER *br) {
+  const unsigned char *bufptr;
+  const unsigned char *bufend;
+  VP8_BD_VALUE         value;
+  int                  count;
+  bufend = br->user_buffer_end;
+  bufptr = br->user_buffer;
+  value = br->value;
+  count = br->count;
 
-    VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
+  VP8DX_BOOL_DECODER_FILL(count, value, bufptr, bufend);
 
-    br->user_buffer = bufptr;
-    br->value = value;
-    br->count = count;
+  br->user_buffer = bufptr;
+  br->value = value;
+  br->count = count;
 }
 
 
 #if CONFIG_NEWUPDATE
-static int get_unsigned_bits(unsigned num_values)
-{
-    int cat=0;
-    if ((num_values--)<=1) return 0;
-    while (num_values>0)
-    {
-        cat++;
-        num_values>>=1;
+static int get_unsigned_bits(unsigned num_values) {
+  int cat = 0;
+  if ((num_values--) <= 1) return 0;
+  while (num_values > 0) {
+    cat++;
+    num_values >>= 1;
+  }
+  return cat;
+}
+
+int inv_recenter_nonneg(int v, int m) {
+  if (v > (m << 1)) return v;
+  else if ((v & 1) == 0) return (v >> 1) + m;
+  else return m - ((v + 1) >> 1);
+}
+
+int vp8_decode_uniform(BOOL_DECODER *br, int n) {
+  int v;
+  int l = get_unsigned_bits(n);
+  int m = (1 << l) - n;
+  if (!l) return 0;
+  v = vp8_decode_value(br, l - 1);
+  if (v < m)
+    return v;
+  else
+    return (v << 1) - m + vp8_decode_value(br, 1);
+}
+
+int vp8_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
+  int i = 0, mk = 0, word;
+  while (1) {
+    int b = (i ? k + i - 1 : k);
+    int a = (1 << b);
+    if (num_syms <= mk + 3 * a) {
+      word = vp8_decode_uniform(br, num_syms - mk) + mk;
+      break;
+    } else {
+      if (vp8_decode_value(br, 1)) {
+        i++;
+        mk += a;
+      } else {
+        word = vp8_decode_value(br, b) + mk;
+        break;
+      }
     }
-    return cat;
-}
-
-int inv_recenter_nonneg(int v, int m)
-{
-    if (v>(m<<1)) return v;
-    else if ((v&1)==0) return (v>>1)+m;
-    else return m-((v+1)>>1);
-}
-
-int vp8_decode_uniform(BOOL_DECODER *br, int n)
-{
-    int v;
-    int l=get_unsigned_bits(n);
-    int m=(1<<l)-n;
-    if (!l) return 0;
-    v = vp8_decode_value(br, l-1);
-    if (v < m)
-        return v;
-    else
-        return (v<<1)-m+vp8_decode_value(br, 1);
-}
-
-int vp8_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms)
-{
-    int i=0, mk=0, word;
-    while (1)
-    {
-        int b = (i?k+i-1:k);
-        int a = (1<<b);
-        if (num_syms<=mk+3*a)
-        {
-            word = vp8_decode_uniform(br, num_syms-mk) + mk;
-            break;
-        }
-        else
-        {
-            if (vp8_decode_value(br, 1))
-            {
-                i++;
-                mk += a;
-            }
-            else
-            {
-                word = vp8_decode_value(br, b) + mk;
-                break;
-            }
-        }
-    }
-    return word;
+  }
+  return word;
 }
 #endif

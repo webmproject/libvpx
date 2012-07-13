@@ -15,13 +15,13 @@
 #include "block.h"
 
 #define prototype_quantize_block(sym) \
-    void (sym)(BLOCK *b,BLOCKD *d)
+  void (sym)(BLOCK *b,BLOCKD *d)
 
 #define prototype_quantize_block_pair(sym) \
-    void (sym)(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2)
+  void (sym)(BLOCK *b1, BLOCK *b2, BLOCKD *d1, BLOCKD *d2)
 
 #define prototype_quantize_mb(sym) \
-    void (sym)(MACROBLOCK *x)
+  void (sym)(MACROBLOCK *x)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/quantize_x86.h"

@@ -11,6 +11,6 @@
 #define TOOLS_COMMON_H
 
 /* Sets a stdio stream into binary mode */
-FILE* set_binary_mode(FILE *stream);
+FILE *set_binary_mode(FILE *stream);
 
 #endif

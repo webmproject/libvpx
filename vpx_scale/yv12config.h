@@ -26,51 +26,50 @@ extern "C"
 #define INTERP_EXTEND            3
 #endif
 
-    /*************************************
-     For INT_YUV:
+  /*************************************
+   For INT_YUV:
 
-     Y = (R+G*2+B)/4;
-     U = (R-B)/2;
-     V =  (G*2 - R - B)/4;
-    And
-     R = Y+U-V;
-     G = Y+V;
-     B = Y-U-V;
-    ************************************/
-    typedef enum
-    {
-        REG_YUV = 0,    /* Regular yuv */
-        INT_YUV = 1     /* The type of yuv that can be tranfer to and from RGB through integer transform */
-              }
-              YUV_TYPE;
+   Y = (R+G*2+B)/4;
+   U = (R-B)/2;
+   V =  (G*2 - R - B)/4;
+  And
+   R = Y+U-V;
+   G = Y+V;
+   B = Y-U-V;
+  ************************************/
+  typedef enum
+  {
+    REG_YUV = 0,    /* Regular yuv */
+    INT_YUV = 1     /* The type of yuv that can be tranfer to and from RGB through integer transform */
+  }
+            YUV_TYPE;
 
-    typedef struct
-    {
-        int   y_width;
-        int   y_height;
-        int   y_stride;
-/*    int   yinternal_width; */
+  typedef struct {
+    int   y_width;
+    int   y_height;
+    int   y_stride;
+    /*    int   yinternal_width; */
 
-        int   uv_width;
-        int   uv_height;
-        int   uv_stride;
-/*    int   uvinternal_width; */
+    int   uv_width;
+    int   uv_height;
+    int   uv_stride;
+    /*    int   uvinternal_width; */
 
-        unsigned char *y_buffer;
-        unsigned char *u_buffer;
-        unsigned char *v_buffer;
+    unsigned char *y_buffer;
+    unsigned char *u_buffer;
+    unsigned char *v_buffer;
 
-        unsigned char *buffer_alloc;
-        int border;
-        int frame_size;
-        YUV_TYPE clrtype;
+    unsigned char *buffer_alloc;
+    int border;
+    int frame_size;
+    YUV_TYPE clrtype;
 
-        int corrupted;
-        int flags;
-    } YV12_BUFFER_CONFIG;
+    int corrupted;
+    int flags;
+  } YV12_BUFFER_CONFIG;
 
-    int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height, int border);
-    int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
+  int vp8_yv12_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf, int width, int height, int border);
+  int vp8_yv12_de_alloc_frame_buffer(YV12_BUFFER_CONFIG *ybf);
 
 #ifdef __cplusplus
 }

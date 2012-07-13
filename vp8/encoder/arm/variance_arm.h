@@ -65,23 +65,23 @@ extern prototype_sad(vp8_sad8x16_neon);
 extern prototype_sad(vp8_sad16x8_neon);
 extern prototype_sad(vp8_sad16x16_neon);
 
-//extern prototype_variance(vp8_variance4x4_c);
+// extern prototype_variance(vp8_variance4x4_c);
 extern prototype_variance(vp8_variance8x8_neon);
 extern prototype_variance(vp8_variance8x16_neon);
 extern prototype_variance(vp8_variance16x8_neon);
 extern prototype_variance(vp8_variance16x16_neon);
 
-//extern prototype_subpixvariance(vp8_sub_pixel_variance4x4_c);
+// extern prototype_subpixvariance(vp8_sub_pixel_variance4x4_c);
 extern prototype_subpixvariance(vp8_sub_pixel_variance8x8_neon);
-//extern prototype_subpixvariance(vp8_sub_pixel_variance8x16_c);
-//extern prototype_subpixvariance(vp8_sub_pixel_variance16x8_c);
+// extern prototype_subpixvariance(vp8_sub_pixel_variance8x16_c);
+// extern prototype_subpixvariance(vp8_sub_pixel_variance16x8_c);
 extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon);
 extern prototype_subpixvariance(vp8_sub_pixel_variance16x16_neon_func);
 extern prototype_variance(vp8_variance_halfpixvar16x16_h_neon);
 extern prototype_variance(vp8_variance_halfpixvar16x16_v_neon);
 extern prototype_variance(vp8_variance_halfpixvar16x16_hv_neon);
 
-//extern prototype_getmbss(vp8_get_mb_ss_c);
+// extern prototype_getmbss(vp8_get_mb_ss_c);
 extern prototype_variance(vp8_mse16x16_neon);
 
 #if !CONFIG_RUNTIME_CPU_DETECT
@@ -100,8 +100,8 @@ extern prototype_variance(vp8_mse16x16_neon);
 #undef  vp8_variance_sad16x16
 #define vp8_variance_sad16x16 vp8_sad16x16_neon
 
-//#undef  vp8_variance_var4x4
-//#define vp8_variance_var4x4 vp8_variance4x4_c
+// #undef  vp8_variance_var4x4
+// #define vp8_variance_var4x4 vp8_variance4x4_c
 
 #undef  vp8_variance_var8x8
 #define vp8_variance_var8x8 vp8_variance8x8_neon
@@ -115,17 +115,17 @@ extern prototype_variance(vp8_mse16x16_neon);
 #undef  vp8_variance_var16x16
 #define vp8_variance_var16x16 vp8_variance16x16_neon
 
-//#undef  vp8_variance_subpixvar4x4
-//#define vp8_variance_subpixvar4x4 vp8_sub_pixel_variance4x4_c
+// #undef  vp8_variance_subpixvar4x4
+// #define vp8_variance_subpixvar4x4 vp8_sub_pixel_variance4x4_c
 
 #undef  vp8_variance_subpixvar8x8
 #define vp8_variance_subpixvar8x8 vp8_sub_pixel_variance8x8_neon
 
-//#undef  vp8_variance_subpixvar8x16
-//#define vp8_variance_subpixvar8x16 vp8_sub_pixel_variance8x16_c
+// #undef  vp8_variance_subpixvar8x16
+// #define vp8_variance_subpixvar8x16 vp8_sub_pixel_variance8x16_c
 
-//#undef  vp8_variance_subpixvar16x8
-//#define vp8_variance_subpixvar16x8 vp8_sub_pixel_variance16x8_c
+// #undef  vp8_variance_subpixvar16x8
+// #define vp8_variance_subpixvar16x8 vp8_sub_pixel_variance16x8_c
 
 #undef  vp8_variance_subpixvar16x16
 #define vp8_variance_subpixvar16x16 vp8_sub_pixel_variance16x16_neon
@@ -139,8 +139,8 @@ extern prototype_variance(vp8_mse16x16_neon);
 #undef  vp8_variance_halfpixvar16x16_hv
 #define vp8_variance_halfpixvar16x16_hv vp8_variance_halfpixvar16x16_hv_neon
 
-//#undef  vp8_variance_getmbss
-//#define vp8_variance_getmbss vp8_get_mb_ss_c
+// #undef  vp8_variance_getmbss
+// #define vp8_variance_getmbss vp8_get_mb_ss_c
 
 #undef  vp8_variance_mse16x16
 #define vp8_variance_mse16x16 vp8_mse16x16_neon

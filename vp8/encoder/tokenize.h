@@ -17,25 +17,23 @@
 
 void vp8_tokenize_initialize();
 
-typedef struct
-{
-    short Token;
-    short Extra;
+typedef struct {
+  short Token;
+  short Extra;
 } TOKENVALUE;
 
-typedef struct
-{
-    const vp8_prob *context_tree;
-    short           Extra;
-    unsigned char   Token;
-    unsigned char   skip_eob_node;
+typedef struct {
+  const vp8_prob *context_tree;
+  short           Extra;
+  unsigned char   Token;
+  unsigned char   skip_eob_node;
 } TOKENEXTRA;
 
 int rd_cost_mby(MACROBLOCKD *);
 
-extern int mby_is_skippable(MACROBLOCKD *x,int has_y2_block);
+extern int mby_is_skippable(MACROBLOCKD *x, int has_y2_block);
 extern int mbuv_is_skippable(MACROBLOCKD *x);
-extern int mb_is_skippable(MACROBLOCKD *x,int has_y2_block);
+extern int mb_is_skippable(MACROBLOCKD *x, int has_y2_block);
 extern int mby_is_skippable_8x8(MACROBLOCKD *x);
 extern int mbuv_is_skippable_8x8(MACROBLOCKD *x);
 extern int mb_is_skippable_8x8(MACROBLOCKD *x);

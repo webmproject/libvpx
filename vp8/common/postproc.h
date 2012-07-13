@@ -13,28 +13,28 @@
 #define POSTPROC_H
 
 #define prototype_postproc_inplace(sym)\
-    void sym (unsigned char *dst, int pitch, int rows, int cols,int flimit)
+  void sym (unsigned char *dst, int pitch, int rows, int cols,int flimit)
 
 #define prototype_postproc(sym)\
-    void sym (unsigned char *src, unsigned char *dst, int src_pitch,\
-              int dst_pitch, int rows, int cols, int flimit)
+  void sym (unsigned char *src, unsigned char *dst, int src_pitch,\
+            int dst_pitch, int rows, int cols, int flimit)
 
 #define prototype_postproc_addnoise(sym) \
-    void sym (unsigned char *s, char *noise, char blackclamp[16],\
-              char whiteclamp[16], char bothclamp[16],\
-              unsigned int w, unsigned int h, int pitch)
+  void sym (unsigned char *s, char *noise, char blackclamp[16],\
+            char whiteclamp[16], char bothclamp[16],\
+            unsigned int w, unsigned int h, int pitch)
 
 #define prototype_postproc_blend_mb_inner(sym)\
-    void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
-              int y1, int u1, int v1, int alpha, int stride)
+  void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
+            int y1, int u1, int v1, int alpha, int stride)
 
 #define prototype_postproc_blend_mb_outer(sym)\
-    void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
-              int y1, int u1, int v1, int alpha, int stride)
+  void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
+            int y1, int u1, int v1, int alpha, int stride)
 
 #define prototype_postproc_blend_b(sym)\
-    void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
-              int y1, int u1, int v1, int alpha, int stride)
+  void sym (unsigned char *y, unsigned char *u, unsigned char *v,\
+            int y1, int u1, int v1, int alpha, int stride)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/postproc_x86.h"
@@ -81,15 +81,14 @@ typedef prototype_postproc_addnoise((*vp8_postproc_addnoise_fn_t));
 typedef prototype_postproc_blend_mb_inner((*vp8_postproc_blend_mb_inner_fn_t));
 typedef prototype_postproc_blend_mb_outer((*vp8_postproc_blend_mb_outer_fn_t));
 typedef prototype_postproc_blend_b((*vp8_postproc_blend_b_fn_t));
-typedef struct
-{
-    vp8_postproc_inplace_fn_t           down;
-    vp8_postproc_inplace_fn_t           across;
-    vp8_postproc_fn_t                   downacross;
-    vp8_postproc_addnoise_fn_t          addnoise;
-    vp8_postproc_blend_mb_inner_fn_t    blend_mb_inner;
-    vp8_postproc_blend_mb_outer_fn_t    blend_mb_outer;
-    vp8_postproc_blend_b_fn_t           blend_b;
+typedef struct {
+  vp8_postproc_inplace_fn_t           down;
+  vp8_postproc_inplace_fn_t           across;
+  vp8_postproc_fn_t                   downacross;
+  vp8_postproc_addnoise_fn_t          addnoise;
+  vp8_postproc_blend_mb_inner_fn_t    blend_mb_inner;
+  vp8_postproc_blend_mb_outer_fn_t    blend_mb_outer;
+  vp8_postproc_blend_b_fn_t           blend_b;
 } vp8_postproc_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT
@@ -99,14 +98,13 @@ typedef struct
 #endif
 
 #include "vpx_ports/mem.h"
-struct postproc_state
-{
-    int           last_q;
-    int           last_noise;
-    char          noise[3072];
-    DECLARE_ALIGNED(16, char, blackclamp[16]);
-    DECLARE_ALIGNED(16, char, whiteclamp[16]);
-    DECLARE_ALIGNED(16, char, bothclamp[16]);
+struct postproc_state {
+  int           last_q;
+  int           last_noise;
+  char          noise[3072];
+  DECLARE_ALIGNED(16, char, blackclamp[16]);
+  DECLARE_ALIGNED(16, char, whiteclamp[16]);
+  DECLARE_ALIGNED(16, char, bothclamp[16]);
 };
 #include "onyxc_int.h"
 #include "ppflags.h"

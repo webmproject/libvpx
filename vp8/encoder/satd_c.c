@@ -16,38 +16,33 @@ unsigned int vp8_satd16x16_c(const unsigned char *src_ptr,
                              int  src_stride,
                              const unsigned char *ref_ptr,
                              int  ref_stride,
-                             unsigned int *psatd)
-{
-    int r, c, i;
-    unsigned int satd = 0;
-    DECLARE_ALIGNED(16, short, diff_in[256]);
-    DECLARE_ALIGNED(16, short, diff_out[16]);
-    short *in;
+                             unsigned int *psatd) {
+  int r, c, i;
+  unsigned int satd = 0;
+  DECLARE_ALIGNED(16, short, diff_in[256]);
+  DECLARE_ALIGNED(16, short, diff_out[16]);
+  short *in;
 
-    for (r = 0; r < 16; r++)
-    {
-        for (c = 0; c < 16; c++)
-        {
-            diff_in[r * 16 + c] = src_ptr[c] - ref_ptr[c];
-        }
-        src_ptr += src_stride;
-        ref_ptr += ref_stride;
+  for (r = 0; r < 16; r++) {
+    for (c = 0; c < 16; c++) {
+      diff_in[r * 16 + c] = src_ptr[c] - ref_ptr[c];
     }
+    src_ptr += src_stride;
+    ref_ptr += ref_stride;
+  }
 
-    in = diff_in;
-    for (r = 0; r < 16; r += 4)
-    {
-        for (c = 0; c < 16; c+=4)
-        {
-            vp8_short_walsh4x4_c(in + c, diff_out, 32);
-            for(i = 0; i < 16; i++)
-                satd += abs(diff_out[i]);
-        }
-        in += 64;
+  in = diff_in;
+  for (r = 0; r < 16; r += 4) {
+    for (c = 0; c < 16; c += 4) {
+      vp8_short_walsh4x4_c(in + c, diff_out, 32);
+      for (i = 0; i < 16; i++)
+        satd += abs(diff_out[i]);
     }
+    in += 64;
+  }
 
-    if (psatd)
-        *psatd = satd;
+  if (psatd)
+    *psatd = satd;
 
-    return satd;
+  return satd;
 }

@@ -16,23 +16,23 @@
 #include "block.h"
 
 #define prototype_mberr(sym) \
-    int (sym)(MACROBLOCK *mb, int dc)
+  int (sym)(MACROBLOCK *mb, int dc)
 
 #define prototype_berr(sym) \
-    int (sym)(short *coeff, short *dqcoeff)
+  int (sym)(short *coeff, short *dqcoeff)
 
 #define prototype_mbuverr(sym) \
-    int (sym)(MACROBLOCK *mb)
+  int (sym)(MACROBLOCK *mb)
 
 #define prototype_subb(sym) \
-    void (sym)(BLOCK *be,BLOCKD *bd, int pitch)
+  void (sym)(BLOCK *be,BLOCKD *bd, int pitch)
 
 #define prototype_submby(sym) \
-    void (sym)(short *diff, unsigned char *src, unsigned char *pred, int stride)
+  void (sym)(short *diff, unsigned char *src, unsigned char *pred, int stride)
 
 #define prototype_submbuv(sym) \
-    void (sym)(short *diff, unsigned char *usrc, unsigned char *vsrc,\
-               unsigned char *pred, int stride)
+  void (sym)(short *diff, unsigned char *usrc, unsigned char *vsrc,\
+             unsigned char *pred, int stride)
 
 #if ARCH_X86 || ARCH_X86_64
 #include "x86/encodemb_x86.h"
@@ -73,23 +73,21 @@ extern prototype_submby(vp8_encodemb_submby);
 extern prototype_submbuv(vp8_encodemb_submbuv);
 
 
-typedef struct
-{
-    prototype_berr(*berr);
-    prototype_mberr(*mberr);
-    prototype_mbuverr(*mbuverr);
-    prototype_subb(*subb);
-    prototype_submby(*submby);
-    prototype_submbuv(*submbuv);
+typedef struct {
+  prototype_berr(*berr);
+  prototype_mberr(*mberr);
+  prototype_mbuverr(*mbuverr);
+  prototype_subb(*subb);
+  prototype_submby(*submby);
+  prototype_submbuv(*submbuv);
 } vp8_encodemb_rtcd_vtable_t;
 
-typedef struct
-{
-    MB_PREDICTION_MODE mode;
-    MV_REFERENCE_FRAME ref_frame;
-    MV_REFERENCE_FRAME second_ref_frame;
+typedef struct {
+  MB_PREDICTION_MODE mode;
+  MV_REFERENCE_FRAME ref_frame;
+  MV_REFERENCE_FRAME second_ref_frame;
 #if CONFIG_PRED_FILTER
-    int pred_filter_flag;
+  int pred_filter_flag;
 #endif
 } MODE_DEFINITION;
 
