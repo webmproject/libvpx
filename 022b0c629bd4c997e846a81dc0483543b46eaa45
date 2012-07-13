@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//3n8\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 950,
+      "author": {
+        "id": 1001531
+      },
+      "writtenOn": "2012-07-13T14:49:38Z",
+      "side": 1,
+      "message": "No. Sorry, this is our mistake left from our test version.\nWe will change that in the next patch.",
+      "parentUuid": "AAAALn//4EU\u003d",
+      "revId": "022b0c629bd4c997e846a81dc0483543b46eaa45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//4EQ\u003d",
         "filename": "build/make/configure.sh",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-07-12T22:06:40Z",
       "side": 1,
       "message": "From the description of the flag, it\u0027s to select big endian for compilation. Does it fail if the compiler can not do big endian? Would it pass if the compiler could do both?\n\nIt would be better to check \u0027if enabled big_endian\u0027",
+      "revId": "022b0c629bd4c997e846a81dc0483543b46eaa45",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3n4\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 953,
+      "author": {
+        "id": 1001531
+      },
+      "writtenOn": "2012-07-13T14:49:38Z",
+      "side": 1,
+      "message": "MIPS compiler automatically set -EL or -EB flag, depend on the compiler configuration.\nOur optimizations work only for little endian platforms, they can compile for big endian, \nbut they won\u0027t work properly in this case.\nFor that reason we want to be sure that user can\u0027t compile our optimizations with big endian flag.\nAlso, I tried \u0027if enabled big_endian\u0027 but it didn\u0027t work.\nDo you have any sugestions?",
+      "parentUuid": "AAAALn//4EQ\u003d",
       "revId": "022b0c629bd4c997e846a81dc0483543b46eaa45",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
