@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALn//3cI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 950,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-13T19:17:54Z",
+      "side": 1,
+      "message": "Hmm this still seems as though, if the compiler even supports big endian, it will fail. What you want is a check if it is currently building with big endian, which \u0027enabled big_endian\u0027 should provide. In build/make/configure.sh you can see the logic we use to determine if the compiler is currently set to build for big endian:\nhttp://git.chromium.org/gitweb/?p\u003dwebm/libvpx.git;a\u003dblob;f\u003dbuild/make/configure.sh;h\u003d3c73f598873fcec4896728f0761ba3acc397eaa6;hb\u003dHEAD#l1136",
+      "revId": "623aa1502139dc122d966e0a14f9d3f457761bd9",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
