@@ -1,0 +1,208 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALn//3C0\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "not so beautiful - but not a disaster either:)",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3Cw\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "maybe we should make it one space after each operator?   is it possible?  astyle didn\u0027t help here",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3Cs\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "not so beautiful",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3Co\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "I wonder if we should convert 2 spaces in between things like this. .",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3Ck\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1384,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "another example - maybe all instances of multiple spaces in between letters or operators etc should be converted to one space",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3Cg\u003d",
+        "filename": "vp8/common/rotate.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "not so beautiful",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3Cc\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "shame that it doesn\u0027t reformat commented out code.   :(",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3CY\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 416,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "not super beautiful ( the comments )?",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3CQ\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 669,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "this was pretty wierd in the original code - but even less pretty here.",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3CM\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 702,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "pretty ugly thing to do... but the original wasn\u0027t so nice either.",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3CI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 834,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "wierd place for extra space isnt it?",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//3CE\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 852,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-14T03:36:23Z",
+      "side": 1,
+      "message": "this didn\u0027t work so well?",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
