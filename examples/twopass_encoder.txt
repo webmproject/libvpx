@@ -71,5 +71,17 @@ Pass Progress Reporting
 It's sometimes helpful to see when each pass completes.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TWOPASS_LOOP_END
     printf("Pass %d complete.\n", pass+1);
+    if(vpx_codec_destroy(&codec))
+        die_codec(&codec, "Failed to destroy codec");
 }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TWOPASS_LOOP_END
+
+
+Clean-up
+-----------------------------
+Destruction of the encoder instance must be done on each pass. The
+raw image should be destroyed at the end as usual.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DESTROY
+vpx_img_free(&raw);
+free(stats.buf);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DESTROY
