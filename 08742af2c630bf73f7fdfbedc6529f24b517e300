@@ -172,6 +172,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//2n8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 702,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-07-16T12:32:05Z",
+      "side": 1,
+      "message": "I agree .. tho regarding the original what would you have it do?... given the 80 char limit almost all outcomes are a bit messy.",
+      "parentUuid": "AAAALn//3CM\u003d",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//3CI\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 1
@@ -200,6 +218,23 @@
       "writtenOn": "2012-07-14T03:36:23Z",
       "side": 1,
       "message": "this didn\u0027t work so well?",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//2oA\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1437,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-07-16T12:32:05Z",
+      "side": 1,
+      "message": "This also particularly messy... especially when all the other lines are aligned and it now breaks 80 chars.",
       "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
