@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//2gA\u003d",
+        "filename": "vp8/common/entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "yes, I believe so.",
+      "parentUuid": "AAAALn//2mo\u003d",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//2ms\u003d",
         "filename": "vp8/common/entropy.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-07-16T14:23:19Z",
       "side": 1,
       "message": "should be two lines?",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//2ec\u003d",
+        "filename": "vp8/common/entropy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 258,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "will need to do this manually. This would have been broken if it had braces. Not sure if an if() without braces would break.",
+      "parentUuid": "AAAALn//2ms\u003d",
       "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//2eE\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "can add support for doing a /*astyle-off*/ /*astyle-on*/ pragma system without too much work, but can\u0027t do any better than this as a first pass without manually finding all tables that don\u0027t format well first and wrapping them.",
+      "parentUuid": "AAAALn//3C0\u003d",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//3Cw\u003d",
         "filename": "vp8/common/filter.c",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-07-14T03:36:23Z",
       "side": 1,
       "message": "maybe we should make it one space after each operator?   is it possible?  astyle didn\u0027t help here",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//2d0\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "you mean one space before? Don\u0027t think there\u0027s any unambiguous way to fix that, consider the case where the operator is the first symbol on the line. Whether it\u0027s before or after, is it desirable to be able to do manual vertical alignment? That astyle doesn\u0027t get in the way of this sort of thing is one of the reasons I picked it originally over more intensive formatters.",
+      "parentUuid": "AAAALn//3Cw\u003d",
       "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//2dw\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "see above. will need to handle things cases like this manually.",
+      "parentUuid": "AAAALn//3Cs\u003d",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//3Co\u003d",
         "filename": "vp8/common/filter.c",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2012-07-14T03:36:23Z",
       "side": 1,
       "message": "I wonder if we should convert 2 spaces in between things like this. .",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//2dc\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 974,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "No option to do this automatically afaik. I don\u0027t see specific guidance in the style guide, will just need to have a convention whether we try to align names or not.",
+      "parentUuid": "AAAALn//3Co\u003d",
       "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -183,6 +291,24 @@
       "writtenOn": "2012-07-14T03:36:23Z",
       "side": 1,
       "message": "shame that it doesn\u0027t reformat commented out code.   :(",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//2RI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "shame that we have commented out code.\n\nIt\u0027ll reformat in a #if 0 block though.",
+      "parentUuid": "AAAALn//3Cc\u003d",
       "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -287,6 +413,24 @@
       "writtenOn": "2012-07-14T03:36:23Z",
       "side": 1,
       "message": "wierd place for extra space isnt it?",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//2Qk\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 834,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-16T19:06:07Z",
+      "side": 1,
+      "message": "This is http://astyle.sourceforge.net/astyle.html#_break-blocks I\u0027ll try removing it to see if adversely affects anything else.",
+      "parentUuid": "AAAALn//3CI\u003d",
       "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
