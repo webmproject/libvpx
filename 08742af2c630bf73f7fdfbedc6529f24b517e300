@@ -190,6 +190,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//2nI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 702,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-16T14:11:53Z",
+      "side": 1,
+      "message": "in this case the spacing saved enough to join this line with the one prior :)",
+      "parentUuid": "AAAALn//2n8\u003d",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//3CI\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 1
