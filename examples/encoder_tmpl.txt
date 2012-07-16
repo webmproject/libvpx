@@ -68,6 +68,7 @@ case VPX_CODEC_CX_FRAME_PKT:
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DESTROY
+vpx_img_free(&raw);
 if(vpx_codec_destroy(&codec))
     die_codec(&codec, "Failed to destroy codec");
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DESTROY
