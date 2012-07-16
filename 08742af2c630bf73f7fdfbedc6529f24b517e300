@@ -142,6 +142,24 @@
     },
     {
       "key": {
+        "uuid": "AAAALn//2OI\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-16T19:19:47Z",
+      "side": 1,
+      "message": "I was thinking of something more like \n\ns/([a-zA-Z0-9\\*\\+\\-\\/\\^\\\u003d]*) +([a-zA-Z0-9\\*\\+\\-\\/\\^\\\u003d]*)/\\1 \\2/g\n\n( etc )   anytime there is more than 1 space between two usable characters we  convert it to 1.   Probably unsafe as it would do this in print statements and literals as written.",
+      "parentUuid": "AAAALn//2d0\u003d",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAALn//3Cs\u003d",
         "filename": "vp8/common/filter.c",
         "patchSetId": 1
@@ -257,6 +275,23 @@
       "writtenOn": "2012-07-16T14:23:19Z",
       "side": 1,
       "message": "missing \";\"?",
+      "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//2mw\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-16T19:19:47Z",
+      "side": 1,
+      "message": "missing semicolon !   This problem is pervasive.    Do not submit!",
       "revId": "08742af2c630bf73f7fdfbedc6529f24b517e300",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
