@@ -873,6 +873,9 @@ static void encode_sb ( VP8_COMP *cpi,
         }
         else
         {
+            unsigned char *segment_id;
+            int seg_ref_active;
+
             vp8cx_encode_inter_macroblock(cpi, x, tp,
                                          recon_yoffset, recon_uvoffset, 1);
             //Note the encoder may have changed the segment_id
@@ -891,6 +894,32 @@ static void encode_sb ( VP8_COMP *cpi,
             }
 
 #endif
+
+            // If we have just a single reference frame coded for a segment then
+            // exclude from the reference frame counts used to work out
+            // probabilities. NOTE: At the moment we dont support custom trees
+            // for the reference frame coding for each segment but this is a
+            // possible future action.
+            segment_id = &xd->mode_info_context->mbmi.segment_id;
+            seg_ref_active = segfeature_active( xd, *segment_id, SEG_LVL_REF_FRAME );
+            if ( !seg_ref_active ||
+                ( ( check_segref( xd, *segment_id, INTRA_FRAME ) +
+                    check_segref( xd, *segment_id, LAST_FRAME ) +
+                    check_segref( xd, *segment_id, GOLDEN_FRAME ) +
+                    check_segref( xd, *segment_id, ALTREF_FRAME ) ) > 1 ) )
+            {
+// TODO this may not be a good idea as it makes sample size small and means
+// the predictor functions cannot use data about most likely value only most
+// likely unpredicted value.
+//#if CONFIG_COMPRED
+//        // Only update count for incorrectly predicted cases
+//        if ( !ref_pred_flag )
+//#endif
+                {
+                    cpi->count_mb_ref_frame_usage
+                        [xd->mode_info_context->mbmi.ref_frame]++;
+                }
+            }
 
             // Count of last ref frame 0,0 usage
             if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
@@ -1704,30 +1733,6 @@ void vp8cx_encode_inter_macroblock
     {
         x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
         cpi->t4x4_count++;
-    }
-
-    // If we have just a single reference frame coded for a segment then
-    // exclude from the reference frame counts used to work out
-    // probabilities. NOTE: At the moment we dont support custom trees
-    // for the reference frame coding for each segment but this is a
-    // possible future action.
-    if ( !seg_ref_active ||
-         ( ( check_segref( xd, *segment_id, INTRA_FRAME ) +
-             check_segref( xd, *segment_id, LAST_FRAME ) +
-             check_segref( xd, *segment_id, GOLDEN_FRAME ) +
-             check_segref( xd, *segment_id, ALTREF_FRAME ) ) > 1 ) )
-    {
-// TODO this may not be a good idea as it makes sample size small and means
-// the predictor functions cannot use data about most likely value only most
-// likely unpredicted value.
-//#if CONFIG_COMPRED
-//        // Only update count for incorrectly predicted cases
-//        if ( !ref_pred_flag )
-//#endif
-        {
-            cpi->count_mb_ref_frame_usage
-                [xd->mode_info_context->mbmi.ref_frame]++;
-        }
     }
 
     if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME)
