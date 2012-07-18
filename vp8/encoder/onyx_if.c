@@ -82,16 +82,16 @@ static void set_default_lf_deltas(VP8_COMP *cpi);
 extern const int vp8_gf_interval_table[101];
 
 #if CONFIG_ENHANCED_INTERP
-#define SEARCH_BEST_FILTER 0            /* to search exhaustively for best filter */
+#define SEARCH_BEST_FILTER 0            /* to search for best filter */
 #define RESET_FOREACH_FILTER 0          /* whether to reset the encoder state
-before trying each new filter */
+                                         * before trying each new filter */
+#define SHARP_FILTER_QTHRESH 0         /* Q threshold for 8-tap sharp filter */
 #endif
 #if CONFIG_HIGH_PRECISION_MV
 #define ALTREF_HIGH_PRECISION_MV 1      /* whether to use high precision mv for altref computation */
-#define HIGH_PRECISION_MV_QTHRESH 200   /* Q threshold for use of high precision mv */
-/* Choose a very high value for now so
- * that HIGH_PRECISION is always chosen
- */
+#define HIGH_PRECISION_MV_QTHRESH 200   /* Q threshold for use of high precision mv
+                                         * Choose a very high value for now so
+                                         * that HIGH_PRECISION is always chosen */
 #endif
 
 #if CONFIG_INTERNAL_STATS
@@ -207,6 +207,7 @@ int calculate_minq_index(double maxq,
   }
   return QINDEX_RANGE - 1;
 }
+
 void init_minq_luts() {
   int i;
   double maxq;
@@ -706,6 +707,14 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
 
       sf->thresh_mult[THR_V_PRED   ] = 1000;
       sf->thresh_mult[THR_H_PRED   ] = 1000;
+#if CONFIG_NEWINTRAMODES
+      sf->thresh_mult[THR_D45_PRED ] = 1000;
+      sf->thresh_mult[THR_D135_PRED] = 1000;
+      sf->thresh_mult[THR_D117_PRED] = 1000;
+      sf->thresh_mult[THR_D153_PRED] = 1000;
+      sf->thresh_mult[THR_D27_PRED ] = 1000;
+      sf->thresh_mult[THR_D63_PRED ] = 1000;
+#endif
       sf->thresh_mult[THR_B_PRED   ] = 2000;
       sf->thresh_mult[THR_I8X8_PRED] = 2000;
       sf->thresh_mult[THR_TM       ] = 1000;
@@ -2902,7 +2911,13 @@ static void encode_frame_to_data_rate
 #endif
 
   /* list of filters to search over */
-  int mcomp_filters_to_search[] = {EIGHTTAP, EIGHTTAP_SHARP, SIXTAP};
+  int mcomp_filters_to_search[] = {
+#if CONFIG_SWITCHABLE_INTERP
+    EIGHTTAP, EIGHTTAP_SHARP, SIXTAP, SWITCHABLE
+#else
+    EIGHTTAP, EIGHTTAP_SHARP, SIXTAP,
+#endif
+  };
   int mcomp_filters = sizeof(mcomp_filters_to_search) / sizeof(*mcomp_filters_to_search);
   int mcomp_filter_index = 0;
   INT64 mcomp_filter_cost[4];
@@ -3129,8 +3144,14 @@ static void encode_frame_to_data_rate
     if (sf->search_best_filter) {
       cm->mcomp_filter_type = mcomp_filters_to_search[0];
       mcomp_filter_index = 0;
-    } else
-      cm->mcomp_filter_type = EIGHTTAP;
+    } else {
+#if CONFIG_SWITCHABLE_INTERP
+      cm->mcomp_filter_type = SWITCHABLE;
+#else
+      cm->mcomp_filter_type =
+          (Q < SHARP_FILTER_QTHRESH ? EIGHTTAP_SHARP : EIGHTTAP);
+#endif
+    }
 #endif
 #if CONFIG_HIGH_PRECISION_MV
     /* TODO: Decide this more intelligently */
@@ -3434,7 +3455,9 @@ static void encode_frame_to_data_rate
         Q = q_low;
 
       // Clamp cpi->zbin_over_quant
-      cpi->zbin_over_quant = (cpi->zbin_over_quant < zbin_oq_low) ? zbin_oq_low : (cpi->zbin_over_quant > zbin_oq_high) ? zbin_oq_high : cpi->zbin_over_quant;
+      cpi->zbin_over_quant = (cpi->zbin_over_quant < zbin_oq_low) ?
+          zbin_oq_low : (cpi->zbin_over_quant > zbin_oq_high) ?
+          zbin_oq_high : cpi->zbin_over_quant;
 
       // Loop = ((Q != last_q) || (last_zbin_oq != cpi->zbin_over_quant)) ? TRUE : FALSE;
       Loop = ((Q != last_q)) ? TRUE : FALSE;
@@ -3444,6 +3467,40 @@ static void encode_frame_to_data_rate
 
     if (cpi->is_src_frame_alt_ref)
       Loop = FALSE;
+
+#if CONFIG_ENHANCED_INTERP && CONFIG_SWITCHABLE_INTERP
+    if (cm->frame_type != KEY_FRAME &&
+        !sf->search_best_filter &&
+        cm->mcomp_filter_type == SWITCHABLE) {
+      int interp_factor = Q / 3;  /* denominator is 256 */
+      int count[VP8_SWITCHABLE_FILTERS];
+      int tot_count = 0, c = 0, thr;
+      int i, j;
+      for (i = 0; i < VP8_SWITCHABLE_FILTERS; ++i) {
+        count[i] = 0;
+        for (j = 0; j <= VP8_SWITCHABLE_FILTERS; ++j) {
+          count[i] += cpi->switchable_interp_count[j][i];
+        }
+        tot_count += count[i];
+      }
+
+      thr = ((tot_count * interp_factor + 128) >> 8);
+      for (i = 0; i < VP8_SWITCHABLE_FILTERS; ++i) {
+        c += (count[i] >= thr);
+      }
+      if (c == 1) {
+        /* Mostly one filter is used. So set the filter at frame level */
+        for (i = 0; i < VP8_SWITCHABLE_FILTERS; ++i) {
+          if (count[i]) {
+            cm->mcomp_filter_type = vp8_switchable_interp[i];
+            Loop = TRUE;  /* Make sure to loop since the filter changed */
+            //loop_count = -1;
+            break;
+          }
+        }
+      }
+    }
+#endif
 
 #if CONFIG_ENHANCED_INTERP
     if (Loop == FALSE && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
@@ -3498,7 +3555,7 @@ static void encode_frame_to_data_rate
 #endif
       }
     }
-#endif
+#endif  /* CONFIG_ENHANCED_INTERP */
 
     if (Loop == TRUE) {
       loop_count++;

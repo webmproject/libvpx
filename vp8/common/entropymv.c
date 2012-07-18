@@ -116,7 +116,6 @@ const vp8_tree_index vp8_small_mvtree [14] = {
 };
 struct vp8_token_struct vp8_small_mvencodings [8];
 
-
 __inline static void calc_prob(vp8_prob *p, const unsigned int ct[2], int pbits) {
   const unsigned int tot = ct[0] + ct[1];
   if (tot) {

@@ -76,7 +76,25 @@ typedef enum {
   INTER_FRAME = 1
 } FRAME_TYPE;
 
-typedef enum {
+typedef enum
+{
+  SIXTAP   = 0,
+  BILINEAR = 1,
+#if CONFIG_ENHANCED_INTERP
+  EIGHTTAP = 2,
+  EIGHTTAP_SHARP = 3,
+#if CONFIG_SWITCHABLE_INTERP
+  SWITCHABLE  /* should be the last one */
+#endif
+#endif
+} INTERPOLATIONFILTERTYPE;
+
+#if 0//CONFIG_SWITCHABLE_INTERP
+#define VP8_SWITCHABLE_FILTERS 2 /* number of switchable filters */
+#endif
+
+typedef enum
+{
   DC_PRED,            /* average of above and left pixels */
   V_PRED,             /* vertical prediction */
   H_PRED,             /* horizontal prediction */
@@ -225,6 +243,9 @@ typedef struct {
 #if CONFIG_PRED_FILTER
   // Flag to turn prediction signal filter on(1)/off(0 ) at the MB level
   unsigned int pred_filter_enabled;
+#endif
+#if CONFIG_SWITCHABLE_INTERP
+    INTERPOLATIONFILTERTYPE interp_filter;
 #endif
 
 } MB_MODE_INFO;

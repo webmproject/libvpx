@@ -261,6 +261,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 
   mode = xd->mode_info_context->mbmi.mode;
+#if CONFIG_SWITCHABLE_INTERP
+  if (pbi->common.frame_type != KEY_FRAME)
+    vp8_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter,
+                             &pbi->common);
+#endif
 
   if (eobtotal == 0 && mode != B_PRED && mode != SPLITMV
       && mode != I8X8_PRED
@@ -750,47 +755,7 @@ static void init_frame(VP8D_COMP *pbi) {
       pc->mcomp_filter_type = BILINEAR;
 
     /* To enable choice of different interploation filters */
-    if (pc->mcomp_filter_type == SIXTAP) {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap4x4);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x4);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x8);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap16x16);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg4x4);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg8x8);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg16x16);
-    }
-#if CONFIG_ENHANCED_INTERP
-    else if (pc->mcomp_filter_type == EIGHTTAP) {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap4x4);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x4);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x8);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap16x16);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-                                      RTCD_VTABLE(subpix), eighttap_avg8x8);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-                                        RTCD_VTABLE(subpix), eighttap_avg16x16);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg4x4);
-    } else if (pc->mcomp_filter_type == EIGHTTAP_SHARP) {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap4x4_sharp);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x4_sharp);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x8_sharp);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap16x16_sharp);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg4x4_sharp);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-                                      RTCD_VTABLE(subpix), eighttap_avg8x8_sharp);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-                                        RTCD_VTABLE(subpix), eighttap_avg16x16_sharp);
-    }
-#endif
-    else {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear4x4);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x4);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x8);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear16x16);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg4x4);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg8x8);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg16x16);
-    }
+    vp8_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
   xd->left_context = &pc->left_context;
@@ -1263,41 +1228,16 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 #endif
 #if CONFIG_ENHANCED_INTERP
     // Read the type of subpel filter to use
-    pc->mcomp_filter_type = vp8_read_literal(bc, 2);
-    /* To enable choice of different interploation filters */
-    if (pc->mcomp_filter_type == SIXTAP) {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap4x4);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x4);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap8x8);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap16x16);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg4x4);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg8x8);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), sixtap_avg16x16);
-    } else if (pc->mcomp_filter_type == EIGHTTAP) {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap4x4);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x4);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x8);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap16x16);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg4x4);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg8x8);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg16x16);
-    } else if (pc->mcomp_filter_type == EIGHTTAP_SHARP) {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap4x4_sharp);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x4_sharp);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap8x8_sharp);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap16x16_sharp);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg4x4_sharp);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg8x8_sharp);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), eighttap_avg16x16_sharp);
-    } else {
-      xd->subpixel_predict      = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear4x4);
-      xd->subpixel_predict8x4   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x4);
-      xd->subpixel_predict8x8   = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear8x8);
-      xd->subpixel_predict16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear16x16);
-      xd->subpixel_predict_avg  = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg4x4);
-      xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg8x8);
-      xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(RTCD_VTABLE(subpix), bilinear_avg16x16);
+#if CONFIG_SWITCHABLE_INTERP
+    if (vp8_read_bit(bc)) {
+      pc->mcomp_filter_type = SWITCHABLE;
+    } else
+#endif
+    {
+      pc->mcomp_filter_type = vp8_read_literal(bc, 2);
     }
+    /* To enable choice of different interploation filters */
+    vp8_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
 #endif
   }
 

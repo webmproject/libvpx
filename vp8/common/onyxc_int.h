@@ -17,6 +17,7 @@
 #include "loopfilter.h"
 #include "entropymv.h"
 #include "entropy.h"
+#include "entropymode.h"
 #include "idct.h"
 #include "recon.h"
 #if CONFIG_POSTPROC
@@ -82,6 +83,11 @@ typedef struct frame_contexts {
 #if CONFIG_HIGH_PRECISION_MV
   unsigned int MVcount_hp [2] [MVvals_hp];
 #endif
+#if CONFIG_SWITCHABLE_INTERP
+  vp8_prob switchable_interp_prob[VP8_SWITCHABLE_FILTERS+1]
+                                 [VP8_SWITCHABLE_FILTERS-1];
+#endif
+
   int mode_context[6][4];
   int mode_context_a[6][4];
   int vp8_mode_contexts[6][4];
@@ -93,15 +99,6 @@ typedef enum {
   RECON_CLAMP_REQUIRED        = 0,
   RECON_CLAMP_NOTREQUIRED     = 1
 } CLAMP_TYPE;
-
-typedef enum {
-  SIXTAP   = 0,
-  BILINEAR = 1,
-#if CONFIG_ENHANCED_INTERP
-  EIGHTTAP = 2,
-  EIGHTTAP_SHARP = 3,
-#endif
-} INTERPOLATIONFILTERTYPE;
 
 typedef enum {
   SINGLE_PREDICTION_ONLY = 0,

@@ -12,6 +12,10 @@
 #ifndef __INC_RECONINTER_H
 #define __INC_RECONINTER_H
 
+#if CONFIG_RUNTIME_CPU_DETECT
+#include "onyxc_int.h"
+#endif
+
 extern void vp8_build_inter_predictors_mb(MACROBLOCKD *x);
 extern void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
                                                unsigned char *dst_y,
@@ -33,5 +37,6 @@ extern void vp8_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn
 
 extern void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *x);
 extern void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x);
+extern void vp8_setup_interp_filters(MACROBLOCKD *x, INTERPOLATIONFILTERTYPE filter, VP8_COMMON *cm);
 
 #endif

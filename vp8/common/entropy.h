@@ -18,8 +18,8 @@
 #include "coefupdateprobs.h"
 
 
-#define SUBMVREF_COUNT 5
-#define VP8_NUMMBSPLITS 4
+//#define SUBMVREF_COUNT 5
+//#define VP8_NUMMBSPLITS 4
 
 /* Coefficient token alphabet */
 

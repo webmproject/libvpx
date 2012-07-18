@@ -62,6 +62,38 @@ unsigned char get_pred_context(VP8_COMMON *const cm,
                      (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
       break;
 
+#if CONFIG_SWITCHABLE_INTERP
+    case PRED_SWITCHABLE_INTERP:
+      {
+        int left_in_image = (m - 1)->mbmi.mb_in_image;
+        int above_in_image = (m - cm->mode_info_stride)->mbmi.mb_in_image;
+        int left_mode = (m - 1)->mbmi.mode;
+        int above_mode = (m - cm->mode_info_stride)->mbmi.mode;
+        int left_interp, above_interp;
+        if (left_in_image && left_mode >= NEARESTMV && left_mode <= SPLITMV)
+          left_interp = vp8_switchable_interp_map[(m - 1)->mbmi.interp_filter];
+        else
+          left_interp = VP8_SWITCHABLE_FILTERS;
+        if (above_in_image && above_mode >= NEARESTMV && above_mode <= SPLITMV)
+          above_interp = vp8_switchable_interp_map[
+              (m - cm->mode_info_stride)->mbmi.interp_filter];
+        else
+          above_interp = VP8_SWITCHABLE_FILTERS;
+
+        if (left_interp == above_interp)
+          pred_context = left_interp;
+        else if (left_interp == VP8_SWITCHABLE_FILTERS &&
+                 above_interp != VP8_SWITCHABLE_FILTERS)
+          pred_context = above_interp;
+        else if (left_interp != VP8_SWITCHABLE_FILTERS &&
+                 above_interp == VP8_SWITCHABLE_FILTERS)
+          pred_context = left_interp;
+        else
+          pred_context = VP8_SWITCHABLE_FILTERS;
+      }
+      break;
+#endif
+
     default:
       // TODO *** add error trap code.
       pred_context = 0;
@@ -105,6 +137,53 @@ vp8_prob get_pred_prob(VP8_COMMON *const cm,
     default:
       // TODO *** add error trap code.
       pred_probability = 128;
+      break;
+  }
+
+  return pred_probability;
+}
+
+// This function returns a context probability ptr for coding a given
+// prediction signal
+vp8_prob *get_pred_probs(VP8_COMMON *const cm,
+                         MACROBLOCKD *const xd,
+                         PRED_ID pred_id) {
+  vp8_prob *pred_probability;
+  int pred_context;
+
+  // Get the appropriate prediction context
+  pred_context = get_pred_context(cm, xd, pred_id);
+
+  switch (pred_id) {
+    case PRED_SEG_ID:
+      pred_probability = &cm->segment_pred_probs[pred_context];
+      break;
+
+    case PRED_REF:
+      pred_probability = &cm->ref_pred_probs[pred_context];
+      break;
+
+    case PRED_COMP:
+      // In keeping with convention elsewhre the probability returned is
+      // the probability of a "0" outcome which in this case means the
+      // probability of comp pred off.
+      pred_probability = &cm->prob_comppred[pred_context];
+      break;
+
+#if CONFIG_NEWENTROPY
+    case PRED_MBSKIP:
+      pred_probability = &cm->mbskip_pred_probs[pred_context];
+      break;
+#endif
+
+#if CONFIG_SWITCHABLE_INTERP
+    case PRED_SWITCHABLE_INTERP:
+      pred_probability = &cm->fc.switchable_interp_prob[pred_context][0];
+      break;
+#endif
+    default:
+      // TODO *** add error trap code.
+      pred_probability = NULL;
       break;
   }
 

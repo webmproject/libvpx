@@ -64,6 +64,11 @@ extern void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d);
 
 #define INVALID_MV 0x80008000
 
+#if CONFIG_SWITCHABLE_INTERP
+/* Factor to weigh the rate for switchable interp filters */
+#define SWITCHABLE_INTERP_RATE_FACTOR 1
+#endif
+
 static const int auto_speed_thresh[17] = {
   1000,
   200,
@@ -2682,6 +2687,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   // int all_rates[MAX_MODES];
   // int all_dist[MAX_MODES];
   // int intermodecost[MAX_MODES];
+#if CONFIG_SWITCHABLE_INTERP
+  int switchable_filter_index = 0;
+#endif
 
   MB_PREDICTION_MODE uv_intra_mode;
   MB_PREDICTION_MODE uv_intra_mode_8x8 = 0;
@@ -2792,17 +2800,17 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   // that depend on the current prediction etc.
   vp8_estimate_ref_frame_costs(cpi, segment_id, ref_costs);
 
-  for (mode_index = 0; mode_index < MAX_MODES; mode_index++) {
+#if CONFIG_SWITCHABLE_INTERP
+  for (mode_index = 0; mode_index < MAX_MODES;
+       mode_index += (!switchable_filter_index)) {
+#else
+  for (mode_index = 0; mode_index < MAX_MODES; ++mode_index) {
+#endif
     int this_rd = INT_MAX;
     int disable_skip = 0;
     int other_cost = 0;
     int compmode_cost = 0;
     int mode_excluded = 0;
-
-    // Test best rd so far against threshold for trying this mode.
-    if (best_rd <= cpi->rd_threshes[mode_index]) {
-      continue;
-    }
 
     // These variables hold are rolling total cost and distortion for this mode
     rate2 = 0;
@@ -2820,6 +2828,25 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 #if CONFIG_PRED_FILTER
     xd->mode_info_context->mbmi.pred_filter_enabled = 0;
 #endif
+#if CONFIG_SWITCHABLE_INTERP
+    if (cpi->common.mcomp_filter_type == SWITCHABLE &&
+        this_mode >= NEARESTMV && this_mode <= SPLITMV) {
+      xd->mode_info_context->mbmi.interp_filter =
+          vp8_switchable_interp[switchable_filter_index++];
+      if (switchable_filter_index == VP8_SWITCHABLE_FILTERS)
+        switchable_filter_index = 0;
+        //printf("Searching %d (%d)\n", this_mode, switchable_filter_index);
+    } else {
+      xd->mode_info_context->mbmi.interp_filter = cpi->common.mcomp_filter_type;
+    }
+    vp8_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter,
+                             &cpi->common);
+#endif
+
+    // Test best rd so far against threshold for trying this mode.
+    if (best_rd <= cpi->rd_threshes[mode_index]) {
+      continue;
+    }
 
     // current coding mode under rate-distortion optimization test loop
 #if CONFIG_HYBRIDTRANSFORM
@@ -2906,7 +2933,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     }
 
 
-    if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame)
+    if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
       switch (this_mode) {
         case B_PRED: {
           int tmp_rd;
@@ -2934,7 +2961,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         case I8X8_PRED: {
           int tmp_rd;
           tmp_rd = rd_pick_intra8x8mby_modes(cpi,
-                                             x, &rate, &rate_y, &distortion, best_yrd);
+                                             x, &rate, &rate_y, &distortion,
+                                             best_yrd);
           rate2 += rate;
           distortion2 += distortion;
 
@@ -2967,17 +2995,30 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           int tmp_rd;
           int this_rd_thresh;
 
-          this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ? cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
-          this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ? cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
+          this_rd_thresh =
+              (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ?
+              cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
+          this_rd_thresh =
+              (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ?
+              cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
 
           tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv, NULL,
                                                    best_yrd, mdcounts,
-                                                   &rate, &rate_y, &distortion, this_rd_thresh, seg_mvs);
+                                                   &rate, &rate_y, &distortion,
+                                                   this_rd_thresh, seg_mvs);
 
           rate2 += rate;
           distortion2 += distortion;
 
-          // If even the 'Y' rd value of split is higher than best so far then dont bother looking at UV
+#if CONFIG_SWITCHABLE_INTERP
+          if (cpi->common.mcomp_filter_type == SWITCHABLE)
+            rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
+                [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+                [vp8_switchable_interp_map[
+                x->e_mbd.mode_info_context->mbmi.interp_filter]];
+#endif
+          // If even the 'Y' rd value of split is higher than best so far
+          // then dont bother looking at UV
           if (tmp_rd < best_yrd) {
             // Now work out UV cost and add it in
             rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
@@ -3174,7 +3215,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           vp8_clamp_mv2(&mode_mv[this_mode], xd);
 
           // Do not bother proceeding if the vector (from newmv,nearest or near) is 0,0 as this should then be coded using the zeromv mode.
-          if (((this_mode == NEARMV) || (this_mode == NEARESTMV)) && (mode_mv[this_mode].as_int == 0)) {
+          if (((this_mode == NEARMV) || (this_mode == NEARESTMV)) &&
+              (mode_mv[this_mode].as_int == 0)) {
             continue;
           }
 
@@ -3183,8 +3225,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           // Trap vectors that reach beyond the UMV borders
           // Note that ALL New MV, Nearest MV Near MV and Zero MV code drops through to this point
           // because of the lack of break statements in the previous two cases.
-          if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) || ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
-              ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
+          if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
+              ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
+              ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) ||
+              ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
             continue;
           }
 
@@ -3196,6 +3240,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_mode_order[mode_index].pred_filter_flag;
           rate2 += vp8_cost_bit(cpi->common.prob_pred_filter_off,
                                 xd->mode_info_context->mbmi.pred_filter_enabled);
+#endif
+#if CONFIG_SWITCHABLE_INTERP
+          if (cpi->common.mcomp_filter_type == SWITCHABLE)
+            rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
+                [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+                [vp8_switchable_interp_map[
+                x->e_mbd.mode_info_context->mbmi.interp_filter]];
 #endif
 
           vp8_build_inter16x16_predictors_mby(&x->e_mbd);
@@ -3278,7 +3329,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         default:
           break;
       }
-    else { /* x->e_mbd.mode_info_context->mbmi.second_ref_frame != 0 */
+    } else { /* x->e_mbd.mode_info_context->mbmi.second_ref_frame != 0 */
       int ref1 = x->e_mbd.mode_info_context->mbmi.ref_frame;
       int ref2 = x->e_mbd.mode_info_context->mbmi.second_ref_frame;
 
@@ -3330,12 +3381,18 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           int tmp_rd;
           int this_rd_thresh;
 
-          this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ? cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
-          this_rd_thresh = (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ? cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
+          this_rd_thresh =
+              (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ?
+              cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
+          this_rd_thresh =
+              (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ?
+              cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
 
-          tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv, &second_best_ref_mv,
+          tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
+                                                   &second_best_ref_mv,
                                                    best_yrd, mdcounts,
-                                                   &rate, &rate_y, &distortion, this_rd_thresh, seg_mvs);
+                                                   &rate, &rate_y, &distortion,
+                                                   this_rd_thresh, seg_mvs);
 
           rate2 += rate;
           distortion2 += distortion;
@@ -3488,6 +3545,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       this_rd = RDCOST(x->rdmult, x->rddiv, rate2, distortion2);
     }
 
+#if 0//CONFIG_SWITCHABLE_INTERP
+    if (this_mode >= NEARESTMV && this_mode <= SPLITMV &&
+        cm->mcomp_filter_type == SWITCHABLE)
+      printf("mode %d (%d): %d\n", this_mode, switchable_filter_index, this_rd);
+#endif
+
     // Experimental debug code.
     // all_rds[mode_index] = this_rd;
     // all_rates[mode_index] = rate2;
@@ -3560,11 +3623,17 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
         }
 
-        // Testing this mode gave rise to an improvement in best error score. Lower threshold a bit for next time
-        cpi->rd_thresh_mult[mode_index] = (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ? cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
-        cpi->rd_threshes[mode_index] = (cpi->rd_baseline_thresh[mode_index] >> 7) * cpi->rd_thresh_mult[mode_index];
+        // Testing this mode gave rise to an improvement in best error score.
+        // Lower threshold a bit for next time
+        cpi->rd_thresh_mult[mode_index] =
+            (cpi->rd_thresh_mult[mode_index] >= (MIN_THRESHMULT + 2)) ?
+            cpi->rd_thresh_mult[mode_index] - 2 : MIN_THRESHMULT;
+        cpi->rd_threshes[mode_index] =
+            (cpi->rd_baseline_thresh[mode_index] >> 7) *
+            cpi->rd_thresh_mult[mode_index];
       }
-      // If the mode did not help improve the best error case then raise the threshold for testing that mode next time around.
+      // If the mode did not help improve the best error case then raise the
+      // threshold for testing that mode next time around.
       else {
         cpi->rd_thresh_mult[mode_index] += 4;
 
@@ -3617,13 +3686,29 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   else
     ++cpi->pred_filter_off_count;
 #endif
+#if CONFIG_SWITCHABLE_INTERP
+  //printf("Bestmode %d (%d): %d\n", best_mbmode.mode, best_mbmode.interp_filter, best_rd);
+  if (cpi->common.mcomp_filter_type == SWITCHABLE &&
+      best_mbmode.mode >= NEARESTMV &&
+      best_mbmode.mode <= SPLITMV) {
+    ++cpi->switchable_interp_count
+        [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+        [vp8_switchable_interp_map[best_mbmode.interp_filter]];
+  }
+#endif
 
   // Reduce the activation RD thresholds for the best choice mode
-  if ((cpi->rd_baseline_thresh[best_mode_index] > 0) && (cpi->rd_baseline_thresh[best_mode_index] < (INT_MAX >> 2))) {
+  if ((cpi->rd_baseline_thresh[best_mode_index] > 0) &&
+      (cpi->rd_baseline_thresh[best_mode_index] < (INT_MAX >> 2))) {
     int best_adjustment = (cpi->rd_thresh_mult[best_mode_index] >> 2);
 
-    cpi->rd_thresh_mult[best_mode_index] = (cpi->rd_thresh_mult[best_mode_index] >= (MIN_THRESHMULT + best_adjustment)) ? cpi->rd_thresh_mult[best_mode_index] - best_adjustment : MIN_THRESHMULT;
-    cpi->rd_threshes[best_mode_index] = (cpi->rd_baseline_thresh[best_mode_index] >> 7) * cpi->rd_thresh_mult[best_mode_index];
+    cpi->rd_thresh_mult[best_mode_index] =
+        (cpi->rd_thresh_mult[best_mode_index] >=
+         (MIN_THRESHMULT + best_adjustment)) ?
+        cpi->rd_thresh_mult[best_mode_index] - best_adjustment : MIN_THRESHMULT;
+    cpi->rd_threshes[best_mode_index] =
+        (cpi->rd_baseline_thresh[best_mode_index] >> 7) *
+        cpi->rd_thresh_mult[best_mode_index];
 
     // If we chose a split mode then reset the new MV thresholds as well
     /*if ( vp8_mode_order[best_mode_index].mode == SPLITMV )

@@ -69,7 +69,6 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi, MACROBLOCK *x,
 static void adjust_act_zbin(VP8_COMP *cpi, MACROBLOCK *x);
 
 
-
 #ifdef MODE_STATS
 unsigned int inter_y_modes[MB_MODE_COUNT];
 unsigned int inter_uv_modes[VP8_UV_MODES];
@@ -1094,71 +1093,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   totalrate = 0;
 
   // Functions setup for all frame types so we can use MC in AltRef
-  if (cm->mcomp_filter_type == SIXTAP) {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, sixtap4x4);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, sixtap8x4);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, sixtap8x8);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, sixtap16x16);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, sixtap_avg4x4);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, sixtap_avg8x8);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-                                      &cpi->common.rtcd.subpix, sixtap_avg16x16);
-  }
-#if CONFIG_ENHANCED_INTERP
-  else if (cm->mcomp_filter_type == EIGHTTAP) {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap4x4);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap8x4);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap8x8);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap16x16);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap_avg4x4);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap_avg8x8);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-                                      &cpi->common.rtcd.subpix, eighttap_avg16x16);
-  } else if (cm->mcomp_filter_type == EIGHTTAP_SHARP) {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap4x4_sharp);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap8x4_sharp);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap8x8_sharp);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap16x16_sharp);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap_avg4x4_sharp);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, eighttap_avg8x8_sharp);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-                                      &cpi->common.rtcd.subpix, eighttap_avg16x16_sharp);
-  }
-#endif
-  else {
-    xd->subpixel_predict        = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, bilinear4x4);
-    xd->subpixel_predict8x4     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, bilinear8x4);
-    xd->subpixel_predict8x8     = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, bilinear8x8);
-    xd->subpixel_predict16x16   = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, bilinear16x16);
-    xd->subpixel_predict_avg    = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, bilinear_avg4x4);
-    xd->subpixel_predict_avg8x8 = SUBPIX_INVOKE(
-                                    &cpi->common.rtcd.subpix, bilinear_avg8x8);
-    xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
-                                      &cpi->common.rtcd.subpix, bilinear_avg16x16);
-  }
+  vp8_setup_interp_filters(xd, cm->mcomp_filter_type, cm);
 
   // Reset frame count of inter 0,0 motion vector usage.
   cpi->inter_zz_count = 0;
@@ -1177,7 +1112,9 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   }
   cpi->pred_filter_on_count = 0;
   cpi->pred_filter_off_count = 0;
-
+#endif
+#if CONFIG_SWITCHABLE_INTERP
+  vp8_zero(cpi->switchable_interp_count);
 #endif
 
 #if 0
@@ -1547,6 +1484,9 @@ void vp8cx_encode_inter_macroblock
 
   x->skip = 0;
 
+#if CONFIG_SWITCHABLE_INTERP
+  vp8_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, cm);
+#endif
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Adjust the zbin based on this MB rate.
     adjust_act_zbin(cpi, x);

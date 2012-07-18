@@ -225,6 +225,7 @@ EXPERIMENT_LIST="
     pred_filter
     lossless
     hybridtransform
+    switchable_interp
 "
 CONFIG_LIST="
     external_build

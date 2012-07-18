@@ -174,6 +174,9 @@ void vp8_save_coding_context(VP8_COMP *cpi) {
 
   vp8_copy(cc->coef_probs, cm->fc.coef_probs);
   vp8_copy(cc->coef_probs_8x8, cm->fc.coef_probs_8x8);
+#if CONFIG_SWITCHABLE_INTERP
+  vp8_copy(cc->switchable_interp_prob, cm->fc.switchable_interp_prob);
+#endif
 }
 
 void vp8_restore_coding_context(VP8_COMP *cpi) {
@@ -227,6 +230,9 @@ void vp8_restore_coding_context(VP8_COMP *cpi) {
 
   vp8_copy(cm->fc.coef_probs, cc->coef_probs);
   vp8_copy(cm->fc.coef_probs_8x8, cc->coef_probs_8x8);
+#if CONFIG_SWITCHABLE_INTERP
+  vp8_copy(cm->fc.switchable_interp_prob, cc->switchable_interp_prob);
+#endif
 }
 
 

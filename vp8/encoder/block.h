@@ -13,10 +13,10 @@
 #define __INC_BLOCK_H
 
 #include "vp8/common/onyx.h"
-#include "vp8/common/blockd.h"
 #include "vp8/common/entropymv.h"
 #include "vp8/common/entropy.h"
 #include "vpx_ports/mem.h"
+#include "vp8/common/onyxc_int.h"
 
 // motion search site
 typedef struct {
@@ -122,6 +122,10 @@ typedef struct {
   int bmode_costs[VP8_BINTRAMODES][VP8_BINTRAMODES][VP8_BINTRAMODES];
   int i8x8_mode_costs[MB_MODE_COUNT];
   int inter_bmode_costs[B_MODE_COUNT];
+#if CONFIG_SWITCHABLE_INTERP
+  int switchable_interp_costs[VP8_SWITCHABLE_FILTERS+1]
+                             [VP8_SWITCHABLE_FILTERS];
+#endif
 
   // These define limits to motion vector components to prevent them from extending outside the UMV borders
   int mv_col_min;
