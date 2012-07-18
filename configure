@@ -224,7 +224,6 @@ EXPERIMENT_LIST="
     newupdate
     superblocks
     expanded_coef_context
-    int_8x8fdct
     newintramodes
     adaptive_entropy
     pred_filter

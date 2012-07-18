@@ -209,10 +209,6 @@ static void transform_mby(MACROBLOCK *x) {
 void vp8_transform_mbuv_8x8(MACROBLOCK *x) {
   int i;
 
-#if !CONFIG_INT_8X8FDCT
-  vp8_clear_system_state();
-#endif
-
   for (i = 16; i < 24; i += 4) {
     x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 16);
@@ -222,9 +218,6 @@ void vp8_transform_mbuv_8x8(MACROBLOCK *x) {
 
 void vp8_transform_intra_mby_8x8(MACROBLOCK *x) { // changed
   int i;
-#if !CONFIG_INT_8X8FDCT
-  vp8_clear_system_state();
-#endif
   for (i = 0; i < 9; i += 8) {
     x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 32);
@@ -246,9 +239,6 @@ void vp8_transform_intra_mby_8x8(MACROBLOCK *x) { // changed
 
 void vp8_transform_mb_8x8(MACROBLOCK *x) {
   int i;
-#if !CONFIG_INT_8X8FDCT
-  vp8_clear_system_state();
-#endif
   for (i = 0; i < 9; i += 8) {
     x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 32);
@@ -275,9 +265,6 @@ void vp8_transform_mb_8x8(MACROBLOCK *x) {
 
 void vp8_transform_mby_8x8(MACROBLOCK *x) {
   int i;
-#if !CONFIG_INT_8X8FDCT
-  vp8_clear_system_state();
-#endif
   for (i = 0; i < 9; i += 8) {
     x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 32);

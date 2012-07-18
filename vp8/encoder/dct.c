@@ -13,8 +13,6 @@
 #include "vpx_ports/config.h"
 #include "vp8/common/idct.h"
 
-#if CONFIG_INT_8X8FDCT
-
 static const int xC1S7 = 16069;
 static const int xC2S6 = 15137;
 static const int xC3S5 = 13623;
@@ -252,90 +250,6 @@ void vp8_short_fdct8x8_c(short *InputData, short *OutputData, int pitch) {
     op++;
   }
 }
-#else
-
-void vp8_short_fdct8x8_c(short *block, short *coefs, int pitch) {
-  int j1, i, j, k;
-  float b[8];
-  float b1[8];
-  float d[8][8];
-  float f0 = (float) .7071068;
-  float f1 = (float) .4903926;
-  float f2 = (float) .4619398;
-  float f3 = (float) .4157348;
-  float f4 = (float) .3535534;
-  float f5 = (float) .2777851;
-  float f6 = (float) .1913417;
-  float f7 = (float) .0975452;
-  pitch = pitch / 2;
-  for (i = 0, k = 0; i < 8; i++, k += pitch) {
-    for (j = 0; j < 8; j++) {
-      b[j] = (float)(block[k + j] << 3);
-    }
-    /* Horizontal transform */
-    for (j = 0; j < 4; j++) {
-      j1 = 7 - j;
-      b1[j] = b[j] + b[j1];
-      b1[j1] = b[j] - b[j1];
-    }
-    b[0] = b1[0] + b1[3];
-    b[1] = b1[1] + b1[2];
-    b[2] = b1[1] - b1[2];
-    b[3] = b1[0] - b1[3];
-    b[4] = b1[4];
-    b[5] = (b1[6] - b1[5]) * f0;
-    b[6] = (b1[6] + b1[5]) * f0;
-    b[7] = b1[7];
-    d[i][0] = (b[0] + b[1]) * f4;
-    d[i][4] = (b[0] - b[1]) * f4;
-    d[i][2] = b[2] * f6 + b[3] * f2;
-    d[i][6] = b[3] * f6 - b[2] * f2;
-    b1[4] = b[4] + b[5];
-    b1[7] = b[7] + b[6];
-    b1[5] = b[4] - b[5];
-    b1[6] = b[7] - b[6];
-    d[i][1] = b1[4] * f7 + b1[7] * f1;
-    d[i][5] = b1[5] * f3 + b1[6] * f5;
-    d[i][7] = b1[7] * f7 - b1[4] * f1;
-    d[i][3] = b1[6] * f3 - b1[5] * f5;
-  }
-  /* Vertical transform */
-  for (i = 0; i < 8; i++) {
-    for (j = 0; j < 4; j++) {
-      j1 = 7 - j;
-      b1[j] = d[j][i] + d[j1][i];
-      b1[j1] = d[j][i] - d[j1][i];
-    }
-    b[0] = b1[0] + b1[3];
-    b[1] = b1[1] + b1[2];
-    b[2] = b1[1] - b1[2];
-    b[3] = b1[0] - b1[3];
-    b[4] = b1[4];
-    b[5] = (b1[6] - b1[5]) * f0;
-    b[6] = (b1[6] + b1[5]) * f0;
-    b[7] = b1[7];
-    d[0][i] = (b[0] + b[1]) * f4;
-    d[4][i] = (b[0] - b[1]) * f4;
-    d[2][i] = b[2] * f6 + b[3] * f2;
-    d[6][i] = b[3] * f6 - b[2] * f2;
-    b1[4] = b[4] + b[5];
-    b1[7] = b[7] + b[6];
-    b1[5] = b[4] - b[5];
-    b1[6] = b[7] - b[6];
-    d[1][i] = b1[4] * f7 + b1[7] * f1;
-    d[5][i] = b1[5] * f3 + b1[6] * f5;
-    d[7][i] = b1[7] * f7 - b1[4] * f1;
-    d[3][i] = b1[6] * f3 - b1[5] * f5;
-  }
-  for (i = 0; i < 8; i++) {
-    for (j = 0; j < 8; j++) {
-      *(coefs + j + i * 8) = (short) floor(d[i][j] + 0.5);
-    }
-  }
-  return;
-}
-
-#endif
 
 void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
   /* [1 1; 1 -1] orthogonal transform */
