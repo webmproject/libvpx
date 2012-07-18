@@ -3748,9 +3748,6 @@ int vp8cx_pick_mode_inter_macroblock
   int distortion;
   int intra_error = 0;
   unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
-#if CONFIG_COMPRED
-  unsigned char ref_pred_flag;
-#endif
 
   if (xd->segmentation_enabled)
     x->encode_breakout = cpi->segment_encode_breakout[*segment_id];

@@ -854,13 +854,6 @@ static void encode_sb(VP8_COMP *cpi,
             check_segref(xd, *segment_id, LAST_FRAME) +
             check_segref(xd, *segment_id, GOLDEN_FRAME) +
             check_segref(xd, *segment_id, ALTREF_FRAME)) > 1)) {
-// TODO this may not be a good idea as it makes sample size small and means
-// the predictor functions cannot use data about most likely value only most
-// likely unpredicted value.
-// #if CONFIG_COMPRED
-//        // Only update count for incorrectly predicted cases
-//        if ( !ref_pred_flag )
-// #endif
         {
           cpi->count_mb_ref_frame_usage
           [xd->mode_info_context->mbmi.ref_frame]++;

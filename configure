@@ -214,11 +214,7 @@ HAVE_LIST="
     unistd_h
 "
 EXPERIMENT_LIST="
-    t8x8
     csm
-    qimode
-    uvintra
-    compred
     enhanced_interp
     featureupdates
     high_precision_mv
