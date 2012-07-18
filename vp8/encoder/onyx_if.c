@@ -3013,12 +3013,6 @@ static void encode_frame_to_data_rate
     }
   }
 
-// #if !CONFIG_COMPRED
-  // This function has been deprecated for now but we may want to do
-  // something here at a late date
-  // update_rd_ref_frame_probs(cpi);
-// #endif
-
   // Test code for new segment features
   init_seg_features(cpi);
 
