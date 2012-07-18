@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAALn//z+c\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-07-18T12:02:39Z",
+      "side": 1,
+      "message": "Minor nit - space before ; ?",
+      "revId": "aab7c010befcbc3d616cb820d65f379fe6129f52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//z+U\u003d",
+        "filename": "vp8/common/entropy.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-07-18T12:02:39Z",
+      "side": 1,
+      "message": "Can we confirm the preferred / Google style for braces in this case. It is clearly not consistent in the code just now but if we are moving towards the Google style we can at least on a case by case basis and with new code make it conform.",
+      "revId": "aab7c010befcbc3d616cb820d65f379fe6129f52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//z+Q\u003d",
+        "filename": "vp8/common/idctllm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-07-18T12:02:39Z",
+      "side": 1,
+      "message": "space before ; and in other places.",
+      "revId": "aab7c010befcbc3d616cb820d65f379fe6129f52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAALn//z+M\u003d",
+        "filename": "vp8/common/idctllm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000899
+      },
+      "writtenOn": "2012-07-18T12:02:39Z",
+      "side": 1,
+      "message": "space before terminating ;",
+      "revId": "aab7c010befcbc3d616cb820d65f379fe6129f52",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
