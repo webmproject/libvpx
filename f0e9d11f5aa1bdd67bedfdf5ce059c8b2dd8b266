@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAL3///UI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 1157,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-19T19:20:56Z",
+      "side": 1,
+      "message": "wrap line or change to just \"dspr2 optimizations are available only for little endian platforms\"\n\nI know we\u0027re pretty bad about line lengths in this file, but we should be keeping them under 80",
+      "revId": "f0e9d11f5aa1bdd67bedfdf5ce059c8b2dd8b266",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
