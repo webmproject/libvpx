@@ -2,6 +2,74 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAL3///jw\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "align",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///js\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "align",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///jk\u003d",
+        "filename": "vp8/common/entropy.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "align to 2 spaces indent.",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///jY\u003d",
+        "filename": "vp8/common/idctllm.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "align to 2 spaces indent",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAL3///ms\u003d",
         "filename": "vp8/decoder/decodframe.c",
         "patchSetId": 5
@@ -13,6 +81,57 @@
       "writtenOn": "2012-07-19T16:43:19Z",
       "side": 1,
       "message": "trailing spaces on for lines here.. minor nit.",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///jM\u003d",
+        "filename": "vp8/decoder/detokenize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "break up params into lines",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///jI\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "2 spaces indent",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///jE\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "function proto { on the line above.",
       "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +189,57 @@
     },
     {
       "key": {
+        "uuid": "AAAAL3///ik\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 580,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "move the #defines to the beginning of the line",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///ig\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "indentation",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///ic\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 870,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "although this is not your code, perhaps you could break up the long line into multiple lines.",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAL3///lQ\u003d",
         "filename": "vp8/encoder/rdopt.c",
         "patchSetId": 5
@@ -81,6 +251,23 @@
       "writtenOn": "2012-07-19T16:43:19Z",
       "side": 1,
       "message": "Braces style :(  It is taking me a while to get used to the change too.",
+      "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3///jQ\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-19T17:02:09Z",
+      "side": 1,
+      "message": "function prototype style",
       "revId": "92aadeb113667d01cbf7a08febdd56e44fcd7ac1",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
