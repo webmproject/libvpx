@@ -33,8 +33,6 @@ float adst_4[16] = {
 #endif
 
 
-#if CONFIG_INT_8X8FDCT
-
 static const int xC1S7 = 16069;
 static const int xC2S6 = 15137;
 static const int xC3S5 = 13623;
