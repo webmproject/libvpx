@@ -1150,7 +1150,7 @@ EOF
     fi
 
     # only for MIPS platforms
-    case $(toolchain) in
+    case ${toolchain} in
         mips*)
             if enabled dspr2; then
                 if enabled big_endian; then
