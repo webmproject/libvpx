@@ -175,8 +175,4 @@ class EncoderTest {
 
 }  // namespace libvpx_test
 
-// Macros to be used with ::testing::Combine
-#define PARAMS(...) ::testing::TestWithParam< std::tr1::tuple< __VA_ARGS__ > >
-#define GET_PARAM(k) std::tr1::get< k >(GetParam())
-
 #endif  // TEST_ENCODE_TEST_DRIVER_H_
