@@ -21,6 +21,7 @@ extern "C" {
 #include "vpx_rtcd.h"
 }
 
+#include "test/acm_random.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_integer.h"
 
@@ -70,22 +71,7 @@ void reference_idct4x4(const int16_t *input, int16_t *output) {
   }
 }
 
-// This is a class that generate random numbers for test input.
-class ACMRandom {
-public:
-  explicit ACMRandom(int seed) { Reset(seed); }
-
-  void Reset(int seed) { srand(seed); }
-
-  uint8_t Rand8(void) { return (rand() >> 8) & 0xff; }
-
-  int PseudoUniform(int range) { return (rand() >> 8) % range; }
-
-  int operator()(int n) { return PseudoUniform(n); }
-
-  static int DeterministicSeed(void) { return 0xbaba; }
-};
-
+using libvpx_test::ACMRandom;
 
 TEST(Vp8FdctTest, SignBiasCheck) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());

@@ -20,27 +20,15 @@ extern "C" {
 #include <string.h>
 #include <sys/types.h>
 
+#include "test/acm_random.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 #include "vpx/vpx_integer.h"
 
 namespace {
 const int num_tests = 10;
-
-class ACMRandom {
- public:
-  explicit ACMRandom(int seed) { Reset(seed); }
-
-  void Reset(int seed) { srand(seed); }
-
-  uint8_t Rand8(void) { return (rand() >> 8) & 0xff; }
-
-  int PseudoUniform(int range) { return (rand() >> 8) % range; }
-
-  int operator()(int n) { return PseudoUniform(n); }
-
-  static int DeterministicSeed(void) { return 0xbaba; }
-};
 }  // namespace
+
+using libvpx_test::ACMRandom;
 
 TEST(VP8, TestBitIO) {
   ACMRandom rnd(ACMRandom::DeterministicSeed());

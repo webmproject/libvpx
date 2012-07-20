@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "test/acm_random.h"
 #include "test/util.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
@@ -21,21 +22,6 @@ extern "C" {
 }
 
 namespace {
-
-class ACMRandom {
- public:
-  explicit ACMRandom(int seed) { Reset(seed); }
-
-  void Reset(int seed) { srand(seed); }
-
-  uint8_t Rand8(void) { return (rand() >> 8) & 0xff; }
-
-  int PseudoUniform(int range) { return (rand() >> 8) % range; }
-
-  int operator()(int n) { return PseudoUniform(n); }
-
-  static int DeterministicSeed(void) { return 0xbaba; }
-};
 
 typedef void (*sixtap_predict_fn_t)(uint8_t *src_ptr,
                                     int  src_pixels_per_line,
@@ -138,6 +124,8 @@ TEST_P(SixtapPredictTest, TestWithPresetData) {
       ASSERT_EQ(expected_dst[i * kDstStride + j], dst_[i * kDstStride + j])
           << "i==" << (i * width_ + j);
 }
+
+using libvpx_test::ACMRandom;
 
 TEST_P(SixtapPredictTest, TestWithRandomData) {
   const size_t src_size = sizeof(src_) / sizeof(uint8_t);

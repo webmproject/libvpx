@@ -1,3 +1,4 @@
+LIBVPX_TEST_SRCS-yes += acm_random.h
 LIBVPX_TEST_SRCS-yes += test.mk
 LIBVPX_TEST_SRCS-yes += test_libvpx.cc
 LIBVPX_TEST_SRCS-yes += util.h
