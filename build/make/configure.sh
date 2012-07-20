@@ -1149,6 +1149,18 @@ EOF
         esac
     fi
 
+    # only for MIPS platforms
+    case $(toolchain) in
+        mips*)
+            if enabled dspr2; then
+                if enabled big_endian; then
+                    echo "dspr2 optimizations are available only for little endian platforms"
+                    disable dspr2
+                fi
+            fi
+        ;;
+    esac
+
     # for sysconf(3) and friends.
     check_header unistd.h
 
