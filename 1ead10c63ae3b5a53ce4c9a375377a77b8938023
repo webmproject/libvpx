@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAL3//+Ek\u003d",
+        "filename": "test/acm_random.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-07-20T20:02:41Z",
+      "side": 1,
+      "message": "should have an include \u003cstdlib.h\u003e for [s]rand. stdint.h might be another issue for msvc builds, though I believe there are mixed uses already and I don\u0027t think anyone has tried the tests in that environment",
+      "revId": "1ead10c63ae3b5a53ce4c9a375377a77b8938023",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3//+Eg\u003d",
+        "filename": "test/boolcoder_test.cc",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-07-20T20:02:41Z",
+      "side": 1,
+      "message": "should be test/acm_random.h",
+      "revId": "1ead10c63ae3b5a53ce4c9a375377a77b8938023",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
