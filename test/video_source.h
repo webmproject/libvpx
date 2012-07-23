@@ -9,6 +9,8 @@
  */
 #ifndef TEST_VIDEO_SOURCE_H_
 #define TEST_VIDEO_SOURCE_H_
+
+#include "test/acm_random.h"
 #include "vpx/vpx_encoder.h"
 
 namespace libvpx_test {
@@ -99,16 +101,28 @@ class DummyVideoSource : public VideoSource {
 
 
 class RandomVideoSource : public DummyVideoSource {
+ public:
+  RandomVideoSource() : rnd_(ACMRandom::DeterministicSeed()) {}
+
  protected:
+  // Reset the RNG to get a matching stream for the second pass
+  virtual void Begin() {
+    frame_ = 0;
+    rnd_.Reset(ACMRandom::DeterministicSeed());
+    FillFrame();
+  }
+
   // 15 frames of noise, followed by 15 static frames. Reset to 0 rather
   // than holding previous frames to encourage keyframes to be thrown.
   virtual void FillFrame() {
     if (frame_ % 30 < 15)
       for (size_t i = 0; i < raw_sz_; ++i)
-        img_->img_data[i] = rand();
+        img_->img_data[i] = rnd_.Rand8();
     else
       memset(img_->img_data, 0, raw_sz_);
   }
+
+  ACMRandom rnd_;
 };
 
 }  // namespace libvpx_test
