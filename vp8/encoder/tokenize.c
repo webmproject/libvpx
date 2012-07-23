@@ -250,48 +250,47 @@ static void tokenize1st_order_b_8x8
 ) {
   int pt; /* near block/prev token context index */
   int c = type ? 0 : 1;       /* start at DC unless type 0 */
-  const int eob = b->eob;     /* one beyond last nonzero coeff */
   TOKENEXTRA *t = *tp;        /* store tokens starting here */
-  int x;
   const short *qcoeff_ptr = b->qcoeff;
 
   int seg_eob = 64;
   int segment_id = xd->mode_info_context->mbmi.segment_id;
 
-  if (segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
+  if (segfeature_active(xd, segment_id, SEG_LVL_EOB))
     seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
-  }
 
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
-  do {
+  for (; c < b->eob; ++c) {
     const int band = vp8_coef_bands_8x8[c];
-    int v;
+    int rc = vp8_default_zig_zag1d_8x8[c];
+    int v = qcoeff_ptr[rc], x;
 
-    x = DCT_EOB_TOKEN;
+    assert(-DCT_MAX_VALUE <= v  &&  v < (DCT_MAX_VALUE));
 
-    if (c < eob) {
-      int rc = vp8_default_zig_zag1d_8x8[c];
-      v = qcoeff_ptr[rc];
-
-      assert(-DCT_MAX_VALUE <= v  &&  v < (DCT_MAX_VALUE));
-
-      t->Extra = vp8_dct_value_tokens_ptr[v].Extra;
-      x        = vp8_dct_value_tokens_ptr[v].Token;
-    }
+    t->Extra = vp8_dct_value_tokens_ptr[v].Extra;
+    x        = vp8_dct_value_tokens_ptr[v].Token;
 
     t->Token = x;
-    t->context_tree = cpi->common.fc.coef_probs_8x8 [type] [band] [pt];
+    t->context_tree = cpi->common.fc.coef_probs_8x8[type][band][pt];
 
     t->skip_eob_node = pt == 0 && ((band > 0 && type > 0) || (band > 1 && type == 0));
+    ++cpi->coef_counts_8x8[type][band][pt][x];
 
-#ifdef ENC_DEBUG
-    if (t->skip_eob_node && vp8_coef_encodings[x].Len == 1)
-      printf("Trouble 1 x=%d Len=%d skip=%d eob=%d c=%d band=%d type=%d: [%d %d %d]\n", x, vp8_coef_encodings[x].Len, t->skip_eob_node, eob, c, band, type, cpi->count, mb_row_debug, mb_col_debug);
-#endif
+    pt = vp8_prev_token_class[x];
+    ++t;
+  }
 
-    ++cpi->coef_counts_8x8       [type] [band] [pt] [x];
-  } while (pt = vp8_prev_token_class[x], ++t, c < eob  &&  ++c < seg_eob);
+  if (c < seg_eob) {
+    const int band = vp8_coef_bands_8x8[c];
+    t->Token = DCT_EOB_TOKEN;
+
+    t->context_tree = cpi->common.fc.coef_probs_8x8 [type] [band] [pt];
+    t->skip_eob_node = pt == 0 && ((band > 0 && type > 0) || (band > 1 && type == 0));
+
+    ++cpi->coef_counts_8x8[type][band][pt][DCT_EOB_TOKEN];
+    ++t;
+  }
 
   *tp = t;
   pt = (c != !type); /* 0 <-> all coeff data is zero */
