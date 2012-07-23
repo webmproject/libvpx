@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "AAAAL3//8OY\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-23T21:36:38Z",
+      "side": 1,
+      "message": "copy the indent from line 177",
+      "revId": "eea1fa6f6ee3768dc32016afbdb086b8d2690c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAL3//8NY\u003d",
         "filename": "vpxenc.c",
         "patchSetId": 1
@@ -13,6 +30,41 @@
       "writtenOn": "2012-07-23T21:18:39Z",
       "side": 1,
       "message": "OOPS CONFIG_VP8_ENCODER.   Do we need the decoder?",
+      "revId": "eea1fa6f6ee3768dc32016afbdb086b8d2690c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3//8Mc\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-23T21:36:38Z",
+      "side": 1,
+      "message": "Decoder is required for encode/decode mismatch test.",
+      "parentUuid": "AAAAL3//8NY\u003d",
+      "revId": "eea1fa6f6ee3768dc32016afbdb086b8d2690c11",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAL3//8MU\u003d",
+        "filename": "vpxenc.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1878,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-23T21:36:38Z",
+      "side": 1,
+      "message": "codecs[] holds the encoder interface, not the decoder.",
       "revId": "eea1fa6f6ee3768dc32016afbdb086b8d2690c11",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
