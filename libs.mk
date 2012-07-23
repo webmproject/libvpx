@@ -172,8 +172,8 @@ CLEAN-OBJS += vpx.def
 vpx.vcproj: $(CODEC_SRCS) vpx.def
 	@echo "    [CREATE] $@"
 	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
-			--lib \
-			--target=$(TOOLCHAIN) \
+            $(if $(CONFIG_SHARED),--dll,--lib) \
+            --target=$(TOOLCHAIN) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
             --name=vpx \
             --proj-guid=DCE19DAF-69AC-46DB-B14A-39F0FAA5DB74 \

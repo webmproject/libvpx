@@ -42,6 +42,7 @@ extern vpx_codec_iface_t *vpx_codec_vp8_cx(void);
  * VP8 variant, which is bitstream incompatible with the default VP8 encoder.
  */
 extern vpx_codec_iface_t vpx_codec_vp8x_cx_algo;
+extern vpx_codec_iface_t *vpx_codec_vp8x_cx(void);
 #endif
 
 

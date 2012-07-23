@@ -72,28 +72,28 @@ typedef long off_t;
 
 static const char *exec_name;
 
-static const struct codec_item {
-  char const              *name;
-  const vpx_codec_iface_t *iface;
-  unsigned int             fourcc;
-} codecs[] = {
-#if CONFIG_EXPERIMENTAL && CONFIG_VP8_ENCODER
-  {"vp8x",  &vpx_codec_vp8x_cx_algo, 0x78385056},
-#endif
-#if CONFIG_VP8_ENCODER
-  {"vp8",  &vpx_codec_vp8_cx_algo, 0x30385056},
-#endif
-};
 
-#define VP8_FOURCC (0x00385056)
+
+#define VP8_FOURCC (0x78385056)
 static const struct {
   char const *name;
-  const vpx_codec_iface_t *iface;
+  const vpx_codec_iface_t *(*iface)(void);
   unsigned int             fourcc;
   unsigned int             fourcc_mask;
 } ifaces[] = {
 #if CONFIG_VP8_DECODER
-  {"vp8",  &vpx_codec_vp8_dx_algo,   VP8_FOURCC, 0x00FFFFFF},
+  {"vp8",  &vpx_codec_vp8_dx,   VP8_FOURCC, 0x00FFFFFF},
+#endif
+};
+
+static const struct codec_item {
+  char const *name;
+  const vpx_codec_iface_t *(*iface)(void);
+  unsigned int             fourcc;
+  unsigned int             fourcc_mask;
+} codecs[] = {
+#if CONFIG_VP8_ENCODER
+  {"vp8",  vpx_codec_vp8x_cx,   VP8_FOURCC, 0x00FFFFFF},
 #endif
 };
 
@@ -1094,7 +1094,7 @@ static void usage_exit() {
   for (i = 0; i < sizeof(codecs) / sizeof(codecs[0]); i++)
     fprintf(stderr, "    %-6s - %s\n",
             codecs[i].name,
-            vpx_codec_iface_name(codecs[i].iface));
+            vpx_codec_iface_name(codecs[i].iface()));
 
   exit(EXIT_FAILURE);
 }
@@ -1407,7 +1407,7 @@ int main(int argc, const char **argv_) {
   int                    pass, one_pass_only = 0;
   stats_io_t             stats;
   vpx_image_t            raw;
-  const struct codec_item  *codec = codecs;
+  struct codec_item  *codec = codecs;
   int                    frame_avail, got_data;
 
   struct arg               arg;
@@ -1543,7 +1543,7 @@ int main(int argc, const char **argv_) {
   }
 
   /* Populate encoder configuration */
-  res = vpx_codec_enc_config_default(codec->iface, &cfg, arg_usage);
+  res = vpx_codec_enc_config_default(codec->iface(), &cfg, arg_usage);
 
   if (res) {
     fprintf(stderr, "Failed to get config: %s\n",
@@ -1660,11 +1660,7 @@ int main(int argc, const char **argv_) {
   /* Handle codec specific options */
 #if CONFIG_VP8_ENCODER
 
-  if (codec->iface == &vpx_codec_vp8_cx_algo
-#if CONFIG_EXPERIMENTAL
-      || codec->iface == &vpx_codec_vp8x_cx_algo
-#endif
-     ) {
+  if (codec->fourcc == VP8_FOURCC) {
     ctrl_args = vp8_args;
     ctrl_args_map = vp8_arg_ctrl_map;
   }
@@ -1775,7 +1771,7 @@ int main(int argc, const char **argv_) {
 #define SHOW(field) fprintf(stderr, "    %-28s = %d\n", #field, cfg.field)
 
     if (verbose && pass == 0) {
-      fprintf(stderr, "Codec: %s\n", vpx_codec_iface_name(codec->iface));
+      fprintf(stderr, "Codec: %s\n", vpx_codec_iface_name(codec->iface()));
       fprintf(stderr, "Source file: %s Format: %s\n", in_fn,
               arg_use_i420 ? "I420" : "YV12");
       fprintf(stderr, "Destination file: %s\n", out_fn);
@@ -1885,12 +1881,12 @@ int main(int argc, const char **argv_) {
 
 
     /* Construct Encoder Context */
-    vpx_codec_enc_init(&encoder, codec->iface, &cfg,
+    vpx_codec_enc_init(&encoder, codec->iface(), &cfg,
                        show_psnr ? VPX_CODEC_USE_PSNR : 0);
     ctx_exit_on_error(&encoder, "Failed to initialize encoder");
 
     if (test_decode &&
-        vpx_codec_dec_init(&decoder, ifaces[0].iface, &dec_cfg, 0)) {
+        vpx_codec_dec_init(&decoder, ifaces[0].iface(), &dec_cfg, 0)) {
       fprintf(stderr,
               "Failed to initialize decoder: %s\n",
               vpx_codec_error(&decoder));

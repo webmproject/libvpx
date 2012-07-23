@@ -1,2 +1,5 @@
 data vpx_codec_vp8_cx_algo
 text vpx_codec_vp8_cx
+data vpx_codec_vp8x_cx_algo
+text vpx_codec_vp8x_cx
+

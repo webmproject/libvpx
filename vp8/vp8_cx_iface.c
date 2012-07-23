@@ -1058,7 +1058,8 @@ CODEC_INTERFACE(vpx_codec_vp8_cx) = {
 
 
 #if CONFIG_EXPERIMENTAL
-vpx_codec_iface_t vpx_codec_vp8x_cx_algo = {
+
+CODEC_INTERFACE(vpx_codec_vp8x_cx) = {
   "VP8 Experimental Encoder" VERSION_STRING,
   VPX_CODEC_INTERNAL_ABI_VERSION,
   VPX_CODEC_CAP_ENCODER | VPX_CODEC_CAP_PSNR,

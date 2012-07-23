@@ -49,16 +49,18 @@
 static const char *exec_name;
 
 #define VP8_FOURCC (0x00385056)
+
 static const struct {
-  char const *name;
-  const vpx_codec_iface_t *iface;
-  unsigned int             fourcc;
-  unsigned int             fourcc_mask;
+   char const *name;
+   const vpx_codec_iface_t *(*iface)(void);
+   unsigned int             fourcc;
+   unsigned int             fourcc_mask;
 } ifaces[] = {
 #if CONFIG_VP8_DECODER
-  {"vp8",  &vpx_codec_vp8_dx_algo,   VP8_FOURCC, 0x00FFFFFF},
+  {"vp8",  vpx_codec_vp8_dx,   VP8_FOURCC, 0x00FFFFFF},
 #endif
 };
+
 
 #include "args.h"
 static const arg_def_t codecarg = ARG_DEF(NULL, "codec", 1,
@@ -154,7 +156,7 @@ static void usage_exit() {
   for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
     fprintf(stderr, "    %-6s - %s\n",
             ifaces[i].name,
-            vpx_codec_iface_name(ifaces[i].iface));
+            vpx_codec_iface_name(ifaces[i].iface()));
 
   exit(EXIT_FAILURE);
 }
@@ -409,7 +411,7 @@ unsigned int file_is_raw(FILE *infile,
 
     if (mem_get_le32(buf) < 256 * 1024 * 1024)
       for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
-        if (!vpx_codec_peek_stream_info(ifaces[i].iface,
+        if (!vpx_codec_peek_stream_info(ifaces[i].iface(),
                                         buf + 4, 32 - 4, &si)) {
           is_raw = 1;
           *fourcc = ifaces[i].fourcc;
@@ -706,7 +708,7 @@ int main(int argc, const char **argv_) {
           k = j;
 
       if (k >= 0)
-        iface = ifaces[k].iface;
+        iface = ifaces[k].iface();
       else
         die("Error: Unrecognized argument (%s) to --codec\n",
             arg.val);
@@ -881,7 +883,7 @@ int main(int argc, const char **argv_) {
   /* Try to determine the codec from the fourcc. */
   for (i = 0; i < sizeof(ifaces) / sizeof(ifaces[0]); i++)
     if ((fourcc & ifaces[i].fourcc_mask) == ifaces[i].fourcc) {
-      vpx_codec_iface_t  *ivf_iface = ifaces[i].iface;
+      vpx_codec_iface_t  *ivf_iface = ifaces[i].iface();
 
       if (iface && iface != ivf_iface)
         fprintf(stderr, "Notice -- IVF header indicates codec: %s\n",
@@ -893,7 +895,7 @@ int main(int argc, const char **argv_) {
     }
 
   dec_flags = (postproc ? VPX_CODEC_USE_POSTPROC : 0);
-  if (vpx_codec_dec_init(&decoder, iface ? iface :  ifaces[0].iface, &cfg,
+  if (vpx_codec_dec_init(&decoder, iface ? iface :  ifaces[0].iface(), &cfg,
                          dec_flags)) {
     fprintf(stderr, "Failed to initialize decoder: %s\n", vpx_codec_error(&decoder));
     return EXIT_FAILURE;

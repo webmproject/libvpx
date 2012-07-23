@@ -26,6 +26,7 @@ Options:
     --help                      Print this message
     --exe                       Generate a project for building an Application
     --lib                       Generate a project for creating a static library
+    --dll                       Generate a project for creating a dll
     --static-crt                Use the static C runtime (/MT)
     --target=isa-os-cc          Target specifier (required)
     --out=filename              Write output to a file [stdout]
@@ -190,6 +191,8 @@ for opt in "$@"; do
         ;;
         --exe) proj_kind="exe"
         ;;
+        --dll) proj_kind="dll"
+        ;;
         --lib) proj_kind="lib"
         ;;
         --src-path-bare=*) src_path_bare="$optval"
@@ -298,6 +301,8 @@ esac
 generate_vcproj() {
     case "$proj_kind" in
         exe) vs_ConfigurationType=1
+        ;;
+        dll) vs_ConfigurationType=2
         ;;
         *)   vs_ConfigurationType=4
         ;;

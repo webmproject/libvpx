@@ -192,7 +192,7 @@ INSTALL_MAPS += %         %
 
 # Set up additional MSVS environment
 ifeq ($(CONFIG_MSVS),yes)
-CODEC_LIB=$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd)
+CODEC_LIB=$(if $(CONFIG_SHARED),vpx,$(if $(CONFIG_STATIC_MSVCRT),vpxmt,vpxmd))
 # This variable uses deferred expansion intentionally, since the results of
 # $(wildcard) may change during the course of the Make.
 VS_PLATFORMS = $(foreach d,$(wildcard */Release/$(CODEC_LIB).lib),$(word 1,$(subst /, ,$(d))))
