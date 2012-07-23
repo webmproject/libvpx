@@ -102,13 +102,15 @@ class DummyVideoSource : public VideoSource {
 
 class RandomVideoSource : public DummyVideoSource {
  public:
-  RandomVideoSource() : rnd_(ACMRandom::DeterministicSeed()) {}
+  RandomVideoSource(int seed = ACMRandom::DeterministicSeed())
+      : rnd_(seed),
+        seed_(seed) { }
 
  protected:
   // Reset the RNG to get a matching stream for the second pass
   virtual void Begin() {
     frame_ = 0;
-    rnd_.Reset(ACMRandom::DeterministicSeed());
+    rnd_.Reset(seed_);
     FillFrame();
   }
 
@@ -123,6 +125,7 @@ class RandomVideoSource : public DummyVideoSource {
   }
 
   ACMRandom rnd_;
+  int seed_;
 };
 
 }  // namespace libvpx_test
