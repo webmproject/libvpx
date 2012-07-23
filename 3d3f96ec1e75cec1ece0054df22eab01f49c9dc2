@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAMH///7w\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-23T23:12:28Z",
+      "side": 1,
+      "message": "does this have to be done in the body, or will seed_(seed) work?",
+      "revId": "3d3f96ec1e75cec1ece0054df22eab01f49c9dc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAMH///70\u003d",
+        "filename": "test/video_source.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-23T23:12:28Z",
+      "side": 1,
+      "message": "The semantics of this are kind of weird, I would have guessed this would call Reset() if you call it in the middle of a video stream, for example.. is it sufficient to be able to set this only from the constructor?",
+      "revId": "3d3f96ec1e75cec1ece0054df22eab01f49c9dc2",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
