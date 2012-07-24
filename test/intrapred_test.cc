@@ -10,6 +10,7 @@
 
 
 #include <string.h>
+#include "test/acm_random.h"
 #include "third_party/googletest/src/include/gtest/gtest.h"
 extern "C" {
 #include "vpx_config.h"
@@ -18,6 +19,8 @@ extern "C" {
 }
 
 namespace {
+
+using libvpx_test::ACMRandom;
 
 class IntraPredBase {
  protected:
@@ -38,11 +41,12 @@ class IntraPredBase {
 
   void FillRandom() {
     // Fill edges with random data
+    ACMRandom rnd(ACMRandom::DeterministicSeed());
     for (int p = 0; p < num_planes_; p++) {
       for (int x = -1 ; x <= block_size_; x++)
-        data_ptr_[p][x - stride_] = rand();
+        data_ptr_[p][x - stride_] = rnd.Rand8();
       for (int y = 0; y < block_size_; y++)
-        data_ptr_[p][y * stride_ - 1] = rand();
+        data_ptr_[p][y * stride_ - 1] = rnd.Rand8();
     }
   }
 
