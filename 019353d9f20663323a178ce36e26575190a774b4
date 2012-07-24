@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAMX///5Y\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-24T23:47:44Z",
+      "side": 1,
+      "message": "That\u0027s .... obnoxious. Stupid cpplint.",
+      "parentUuid": "AAAAMX///+U\u003d",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAMX///+4\u003d",
         "filename": "test/sad_test.cc",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-07-24T23:15:45Z",
       "side": 1,
       "message": "eventually going to make this unsigned int max_sad. wanted to put the test in place first, in case i mess up the switch in the library. it already catches one signed/unsigned in the ASM when i try to switch to unsigned",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAMX///5Q\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-24T23:47:44Z",
+      "side": 1,
+      "message": "ok",
+      "parentUuid": "AAAAMX///+4\u003d",
       "revId": "019353d9f20663323a178ce36e26575190a774b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAMX///5M\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-24T23:47:44Z",
+      "side": 1,
+      "message": "It\u0027s ok to put it here, you want it done before each test case. But can you do it without \u0027new\u0027?",
+      "parentUuid": "AAAAMX///+I\u003d",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAMX///+E\u003d",
         "filename": "test/sad_test.cc",
         "patchSetId": 2
@@ -64,6 +118,41 @@
       "writtenOn": "2012-07-24T23:15:45Z",
       "side": 1,
       "message": "Not actually sure if aligned buffers are guaranteed. But if they are, I should fix the assembly for the reference case so it\u0027s using aligned instructions.",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAMX///5I\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-24T23:47:44Z",
+      "side": 1,
+      "message": "one of the two may be unaligned, I\u0027m confused off hand which is which source vs reference. The one that points into the reference frame may be unaligned, eg when we\u0027re doing a motion search it could be at any pixel offset. I think the other can be assumed to be aligned, so you probably just want to kill this test.",
+      "parentUuid": "AAAAMX///+E\u003d",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAMX///4Y\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-07-24T23:47:44Z",
+      "side": 1,
+      "message": "don\u0027t need SCOPED_TRACE",
       "revId": "019353d9f20663323a178ce36e26575190a774b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
