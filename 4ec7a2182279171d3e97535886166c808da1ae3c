@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAMH//+0w\u003d",
+        "filename": "vp8/common/quant_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-24T22:41:11Z",
+      "side": 1,
+      "message": "libvpx targets C89 which requires /* */ comments\n\nWould you copy the entire comment? It\u0027s clear and concise.",
+      "revId": "4ec7a2182279171d3e97535886166c808da1ae3c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
