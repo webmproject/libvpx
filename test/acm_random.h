@@ -11,8 +11,9 @@
 #ifndef LIBVPX_TEST_ACM_RANDOM_H_
 #define LIBVPX_TEST_ACM_RANDOM_H_
 
-#include <stdint.h>
 #include <stdlib.h>
+
+#include "vpx/vpx_integer.h"
 
 namespace libvpx_test {
 
