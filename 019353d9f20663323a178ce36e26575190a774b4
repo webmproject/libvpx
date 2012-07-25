@@ -107,6 +107,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAMX//+gA\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-25T23:33:03Z",
+      "side": 1,
+      "message": "Nope:\nerror: cannot convert ‘libvpx_test::ACMRandom’ to ‘libvpx_test::ACMRandom*’ in assignment",
+      "parentUuid": "AAAAMX///5M\u003d",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAMX///+E\u003d",
         "filename": "test/sad_test.cc",
         "patchSetId": 2
@@ -142,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAMX//+f4\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-25T23:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAMX///5I\u003d",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAMX///4Y\u003d",
         "filename": "test/sad_test.cc",
         "patchSetId": 2
@@ -153,6 +189,24 @@
       "writtenOn": "2012-07-24T23:47:44Z",
       "side": 1,
       "message": "don\u0027t need SCOPED_TRACE",
+      "revId": "019353d9f20663323a178ce36e26575190a774b4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAMX//+f8\u003d",
+        "filename": "test/sad_test.cc",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-25T23:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAMX///4Y\u003d",
       "revId": "019353d9f20663323a178ce36e26575190a774b4",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
