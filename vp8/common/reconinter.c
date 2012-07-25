@@ -461,14 +461,9 @@ void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd) {
 #if CONFIG_PRED_FILTER
   if (xd->mode_info_context->mbmi.pred_filter_enabled) {
     int i;
-#if CONFIG_ENHANCED_INTERP
-    int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
-#else
-    int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
-#endif
-    int len = 7 + (Interp_Extend << 1);
+    int len = 7 + (INTERP_EXTEND << 1);
     unsigned char Temp[32 * 32]; // Input data required by sub-pel filter
-    unsigned char *pTemp = Temp + (Interp_Extend - 1) * (len + 1);
+    unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
     unsigned char *pSrc = uptr;
     unsigned char *pDst = upred_ptr;
 
@@ -477,7 +472,7 @@ void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd) {
 #if CONFIG_SIXTEENTH_SUBPEL_UV
       if ((omv_row | omv_col) & 15) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel interpolation
@@ -487,7 +482,7 @@ void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd) {
 #else   /* CONFIG_SIXTEENTH_SUBPEL_UV */
       if ((mv_row | mv_col) & 7) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel interpolation
@@ -631,17 +626,12 @@ void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *xd) {
     // Produce predictor from the filtered source
     if ((mv_row | mv_col) & 7) {
       // Sub-pel filter needs extended input
-#if CONFIG_ENHANCED_INTERP
-      int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
-#else
-      int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
-#endif
-      int len = 15 + (Interp_Extend << 1);
+      int len = 15 + (INTERP_EXTEND << 1);
       unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-      unsigned char *pTemp = Temp + (Interp_Extend - 1) * (len + 1);
+      unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+      filter_mb(ptr - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                 Temp, len, len, len);
 
       // Sub-pel interpolation
@@ -736,17 +726,12 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
   if (x->mode_info_context->mbmi.pred_filter_enabled) {
     if (_16x16mv.as_int & 0x00070007) {
       // Sub-pel filter needs extended input
-#if CONFIG_ENHANCED_INTERP
-      int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
-#else
-      int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
-#endif
-      int len = 15 + (Interp_Extend << 1);
+      int len = 15 + (INTERP_EXTEND << 1);
       unsigned char Temp[32 * 32]; // Data required by the sub-pel filter
-      unsigned char *pTemp = Temp + (Interp_Extend - 1) * (len + 1);
+      unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+      filter_mb(ptr - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                 Temp, len, len, len);
 
       // Sub-pel filter
@@ -809,21 +794,16 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
     int i;
     unsigned char *pSrc = uptr;
     unsigned char *pDst = dst_u;
-#if CONFIG_ENHANCED_INTERP
-    int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
-#else
-    int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
-#endif
-    int len = 7 + (Interp_Extend << 1);
+    int len = 7 + (INTERP_EXTEND << 1);
     unsigned char Temp[32 * 32]; // Data required by the sub-pel filter
-    unsigned char *pTemp = Temp + (Interp_Extend - 1) * (len + 1);
+    unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
 
     // U & V
     for (i = 0; i < 2; i++) {
 #if CONFIG_SIXTEENTH_SUBPEL_UV
       if (_o16x16mv.as_int & 0x000f000f) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel filter
@@ -835,7 +815,7 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
 #else  /* CONFIG_SIXTEENTH_SUBPEL_UV */
       if (_16x16mv.as_int & 0x00070007) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel filter
@@ -921,17 +901,12 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
   if (x->mode_info_context->mbmi.pred_filter_enabled) {
     if ((mv_row | mv_col) & 7) {
       // Sub-pel filter needs extended input
-#if CONFIG_ENHANCED_INTERP
-      int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
-#else
-      int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
-#endif
-      int len = 15 + (Interp_Extend << 1);
+      int len = 15 + (INTERP_EXTEND << 1);
       unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-      unsigned char *pTemp = Temp + (Interp_Extend - 1) * (len + 1);
+      unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+      filter_mb(ptr - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                 Temp, len, len, len);
 
       // Sub-pel filter
@@ -982,14 +957,9 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
 #if CONFIG_PRED_FILTER
   if (x->mode_info_context->mbmi.pred_filter_enabled) {
     int i;
-#if CONFIG_ENHANCED_INTERP
-    int Interp_Extend = 4;  // 8-tap filter needs 3+4 pels extension
-#else
-    int Interp_Extend = 3;  // 6-tap filter needs 2+3 pels extension
-#endif
-    int len = 7 + (Interp_Extend << 1);
+    int len = 7 + (INTERP_EXTEND << 1);
     unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-    unsigned char *pTemp = Temp + (Interp_Extend - 1) * (len + 1);
+    unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
     unsigned char *pSrc = uptr;
     unsigned char *pDst = dst_u;
 
@@ -998,7 +968,7 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
 #if CONFIG_SIXTEENTH_SUBPEL_UV
       if ((omv_row | omv_col) & 15) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel filter
@@ -1008,7 +978,7 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
 #else  /* CONFIG_SIXTEENTH_SUBPEL_UV */
       if ((mv_row | mv_col) & 7) {
         // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (Interp_Extend - 1) * (pre_stride + 1), pre_stride,
+        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                   Temp, len, len, len);
 
         // Sub-pel filter
