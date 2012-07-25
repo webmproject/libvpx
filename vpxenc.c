@@ -1399,7 +1399,7 @@ static int compare_img(vpx_image_t *img1, vpx_image_t *img2) {
 
 int main(int argc, const char **argv_) {
   vpx_codec_ctx_t        encoder;
-  const char                  *in_fn = NULL, *out_fn = NULL, *stats_fn = NULL;
+  const char            *in_fn = NULL, *out_fn = NULL, *stats_fn = NULL;
   int                    i;
   FILE                  *infile, *outfile;
   vpx_codec_enc_cfg_t    cfg;
@@ -1407,7 +1407,7 @@ int main(int argc, const char **argv_) {
   int                    pass, one_pass_only = 0;
   stats_io_t             stats;
   vpx_image_t            raw;
-  struct codec_item  *codec = codecs;
+  const struct codec_item  *codec = codecs;
   int                    frame_avail, got_data;
 
   struct arg               arg;
