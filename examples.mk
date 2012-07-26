@@ -162,7 +162,8 @@ BINS-$(NOT_MSVS)           += $(addprefix $(BUILD_PFX),$(ALL_EXAMPLES:.c=))
 
 # Instantiate linker template for all examples.
 CODEC_LIB=$(if $(CONFIG_DEBUG_LIBS),vpx_g,vpx)
-CODEC_LIB_SUF=$(if $(CONFIG_SHARED),.so,.a)
+SHARED_LIB_SUF=$(if $(filter darwin%,$(TGT_OS)),.dylib,.so)
+CODEC_LIB_SUF=$(if $(CONFIG_SHARED),$(SHARED_LIB_SUF),.a)
 $(foreach bin,$(BINS-yes),\
     $(if $(BUILD_OBJS),$(eval $(bin):\
         $(LIB_PATH)/lib$(CODEC_LIB)$(CODEC_LIB_SUF)))\
