@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAMX//96Q\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1386,
+      "author": {
+        "id": 1000963
+      },
+      "writtenOn": "2012-07-26T14:30:53Z",
+      "side": 0,
+      "message": "it looks to me like update_layer_contexts is intended to be called when we change parameters that we send to the codec but it seems to me that its called every new frame, which renders thes save_layer_context calls to set up avg_frame_qindex completely moot.      \n\nI suspect that this is in response to the fact that the frame rate can change on a per frame basis.   \n\nI agree that this change resolves that issue - but I think the two variables set above should also be removed.    Also its not clear to me that all of this",
+      "revId": "cab6ac16e0cc5fd149720165d351c8c8c9997dea",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
