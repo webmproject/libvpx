@@ -149,6 +149,13 @@ extern int skip_false_count;
 extern int intra_mode_stats[VP8_BINTRAMODES][VP8_BINTRAMODES][VP8_BINTRAMODES];
 #endif
 
+#if CONFIG_NEWMVENTROPY
+#ifdef NMV_STATS
+extern void init_nmvstats();
+extern void print_nmvstats();
+#endif
+#endif
+
 #ifdef SPEEDSTATS
 unsigned int frames_at_speed[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 unsigned int tot_pm = 0;
@@ -1697,6 +1704,48 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
 
 #define M_LOG2_E 0.693147180559945309417
 #define log2f(x) (log (x) / (float) M_LOG2_E)
+
+#if CONFIG_NEWMVENTROPY
+
+static void cal_nmvjointsadcost(int *mvjointsadcost) {
+  mvjointsadcost[0] = 600;
+  mvjointsadcost[1] = 300;
+  mvjointsadcost[2] = 300;
+  mvjointsadcost[0] = 300;
+}
+
+static void cal_nmvsadcosts(int *mvsadcost[2]) {
+  int i = 1;
+
+  mvsadcost [0] [0] = 0;
+  mvsadcost [1] [0] = 0;
+
+  do {
+    double z = 256 * (2 * (log2f(8 * i) + .6));
+    mvsadcost [0][i] = (int) z;
+    mvsadcost [1][i] = (int) z;
+    mvsadcost [0][-i] = (int) z;
+    mvsadcost [1][-i] = (int) z;
+  } while (++i <= MV_MAX);
+}
+
+static void cal_nmvsadcosts_hp(int *mvsadcost[2]) {
+  int i = 1;
+
+  mvsadcost [0] [0] = 0;
+  mvsadcost [1] [0] = 0;
+
+  do {
+    double z = 256 * (2 * (log2f(8 * i) + .6));
+    mvsadcost [0][i] = (int) z;
+    mvsadcost [1][i] = (int) z;
+    mvsadcost [0][-i] = (int) z;
+    mvsadcost [1][-i] = (int) z;
+  } while (++i <= MV_MAX);
+}
+
+#else
+
 static void cal_mvsadcosts(int *mvsadcost[2]) {
   int i = 1;
 
@@ -1726,6 +1775,8 @@ static void cal_mvsadcosts_hp(int *mvsadcost[2]) {
     mvsadcost [1][-i] = (int) z;
   } while (++i <= mvfp_max_hp);
 }
+
+#endif  /* CONFIG_NEWMVENTROPY */
 
 VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   int i;
@@ -1838,6 +1889,11 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   vp8_zero(inter_uv_modes);
   vp8_zero(inter_b_modes);
 #endif
+#if CONFIG_NEWMVENTROPY
+#ifdef NMV_STATS
+  init_nmvstats();
+#endif
+#endif
 
   /*Initialize the feed-forward activity masking.*/
   cpi->activity_avg = 90 << 12;
@@ -1903,19 +1959,32 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   cpi->gf_rate_correction_factor  = 1.0;
   cpi->twopass.est_max_qcorrection_factor  = 1.0;
 
+#if CONFIG_NEWMVENTROPY
+  cal_nmvjointsadcost(cpi->mb.nmvjointsadcost);
+  cpi->mb.nmvcost[0] = &cpi->mb.nmvcosts[0][MV_MAX];
+  cpi->mb.nmvcost[1] = &cpi->mb.nmvcosts[1][MV_MAX];
+  cpi->mb.nmvsadcost[0] = &cpi->mb.nmvsadcosts[0][MV_MAX];
+  cpi->mb.nmvsadcost[1] = &cpi->mb.nmvsadcosts[1][MV_MAX];
+  cal_nmvsadcosts(cpi->mb.nmvsadcost);
+
+  cpi->mb.nmvcost_hp[0] = &cpi->mb.nmvcosts_hp[0][MV_MAX];
+  cpi->mb.nmvcost_hp[1] = &cpi->mb.nmvcosts_hp[1][MV_MAX];
+  cpi->mb.nmvsadcost_hp[0] = &cpi->mb.nmvsadcosts_hp[0][MV_MAX];
+  cpi->mb.nmvsadcost_hp[1] = &cpi->mb.nmvsadcosts_hp[1][MV_MAX];
+  cal_nmvsadcosts_hp(cpi->mb.nmvsadcost_hp);
+#else
   cpi->mb.mvcost[0] = &cpi->mb.mvcosts[0][mv_max + 1];
   cpi->mb.mvcost[1] = &cpi->mb.mvcosts[1][mv_max + 1];
   cpi->mb.mvsadcost[0] = &cpi->mb.mvsadcosts[0][mvfp_max + 1];
   cpi->mb.mvsadcost[1] = &cpi->mb.mvsadcosts[1][mvfp_max + 1];
-
   cal_mvsadcosts(cpi->mb.mvsadcost);
 
   cpi->mb.mvcost_hp[0] = &cpi->mb.mvcosts_hp[0][mv_max_hp + 1];
   cpi->mb.mvcost_hp[1] = &cpi->mb.mvcosts_hp[1][mv_max_hp + 1];
   cpi->mb.mvsadcost_hp[0] = &cpi->mb.mvsadcosts_hp[0][mvfp_max_hp + 1];
   cpi->mb.mvsadcost_hp[1] = &cpi->mb.mvsadcosts_hp[1][mvfp_max_hp + 1];
-
   cal_mvsadcosts_hp(cpi->mb.mvsadcost_hp);
+#endif  /* CONFIG_NEWMVENTROPY */
 
   for (i = 0; i < KEY_FRAME_CONTEXT; i++) {
     cpi->prior_key_frame_distance[i] = (int)cpi->output_frame_rate;
@@ -2067,6 +2136,12 @@ void vp8_remove_compressor(VP8_PTR *ptr) {
       print_tree_update_probs();
       print_mode_context();
     }
+#endif
+#if CONFIG_NEWMVENTROPY
+#ifdef NMV_STATS
+    if (cpi->pass != 1)
+      print_nmvstats();
+#endif
 #endif
 
 #if CONFIG_INTERNAL_STATS
@@ -3697,9 +3772,14 @@ static void encode_frame_to_data_rate
     vp8_copy(cpi->common.fc.mbsplit_counts, cpi->mbsplit_count);
     vp8_adapt_mode_probs(&cpi->common);
 
+#if CONFIG_NEWMVENTROPY
+    cpi->common.fc.NMVcount = cpi->NMVcount;
+    vp8_adapt_nmv_probs(&cpi->common, cpi->mb.e_mbd.allow_high_precision_mv);
+#else
     vp8_copy(cpi->common.fc.MVcount, cpi->MVcount);
     vp8_copy(cpi->common.fc.MVcount_hp, cpi->MVcount_hp);
     vp8_adapt_mv_probs(&cpi->common);
+#endif  /* CONFIG_NEWMVENTROPY */
     vp8_update_mode_context(&cpi->common);
   }
 

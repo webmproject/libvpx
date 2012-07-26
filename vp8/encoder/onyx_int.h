@@ -67,10 +67,17 @@
 #endif
 
 typedef struct {
+#if CONFIG_NEWMVENTROPY
+  nmv_context nmvc;
+  int nmvjointcost[MV_JOINTS];
+  int nmvcosts[2][MV_VALS];
+  int nmvcosts_hp[2][MV_VALS];
+#else
   MV_CONTEXT mvc[2];
   int mvcosts[2][MVvals + 1];
   MV_CONTEXT_HP mvc_hp[2];
   int mvcosts_hp[2][MVvals_hp + 1];
+#endif
 
 #ifdef MODE_STATS
   // Stats
@@ -549,8 +556,12 @@ typedef struct VP8_COMP {
   // int uv_mode_count[VP8_UV_MODES];       /* intra MB type cts this frame */
   int y_uv_mode_count[VP8_YMODES][VP8_UV_MODES];
 
+#if CONFIG_NEWMVENTROPY
+  nmv_context_counts NMVcount;
+#else
   unsigned int MVcount [2] [MVvals];  /* (row,col) MV cts this frame */
   unsigned int MVcount_hp [2] [MVvals_hp];  /* (row,col) MV cts this frame */
+#endif
 
   unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];  /* for this frame */
   // DECLARE_ALIGNED(16, int, coef_counts_backup [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS]);   //not used any more

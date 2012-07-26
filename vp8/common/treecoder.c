@@ -124,3 +124,15 @@ void vp8_tree_probs_from_distribution(
       probs[t] = vp8_prob_half;
   } while (++t < tree_len);
 }
+
+vp8_prob vp8_bin_prob_from_distribution(const unsigned int counts[2]) {
+  int tot_count = counts[0] + counts[1];
+  vp8_prob prob;
+  if (tot_count) {
+    prob = (counts[0] * 255 + (tot_count >> 1)) / tot_count;
+    prob += !prob;
+  } else {
+    prob = 128;
+  }
+  return prob;
+}

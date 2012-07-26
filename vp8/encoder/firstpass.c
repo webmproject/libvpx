@@ -28,6 +28,7 @@
 #include "rdopt.h"
 #include "ratectrl.h"
 #include "vp8/common/quant_common.h"
+#include "vp8/common/entropymv.h"
 #include "encodemv.h"
 
 #define OUTPUT_FPF 0
@@ -37,8 +38,6 @@
 #else
 #define IF_RTCD(x) NULL
 #endif
-
-#define XMVCOST (x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost)
 
 extern void vp8_build_block_offsets(MACROBLOCK *x);
 extern void vp8_setup_block_ptrs(MACROBLOCK *x);
@@ -492,11 +491,13 @@ void vp8_first_pass(VP8_COMP *cpi) {
   // if ( 0 )
   {
     int flag[2] = {1, 1};
+    vp8_init_mv_probs(cm);
+#if CONFIG_NEWMVENTROPY
     vp8_initialize_rd_consts(cpi, cm->base_qindex + cm->y1dc_delta_q);
-    vpx_memcpy(cm->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
+#else
     vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cm->fc.mvc, flag);
-    vpx_memcpy(cm->fc.mvc_hp, vp8_default_mv_context_hp, sizeof(vp8_default_mv_context_hp));
     vp8_build_component_cost_table_hp(cpi->mb.mvcost_hp, (const MV_CONTEXT_HP *) cm->fc.mvc_hp, flag);
+#endif
   }
 
   // for each macroblock row in image

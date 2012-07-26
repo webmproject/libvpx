@@ -923,9 +923,7 @@ static void init_frame(VP8D_COMP *pbi) {
 
   if (pc->frame_type == KEY_FRAME) {
     /* Various keyframe initializations */
-    vpx_memcpy(pc->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
-    vpx_memcpy(pc->fc.mvc_hp, vp8_default_mv_context_hp,
-               sizeof(vp8_default_mv_context_hp));
+    vp8_init_mv_probs(pc);
 
     vp8_init_mbmode_probs(pc);
 
@@ -1464,8 +1462,12 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   vp8_copy(pbi->common.fc.pre_i8x8_mode_prob, pbi->common.fc.i8x8_mode_prob);
   vp8_copy(pbi->common.fc.pre_sub_mv_ref_prob, pbi->common.fc.sub_mv_ref_prob);
   vp8_copy(pbi->common.fc.pre_mbsplit_prob, pbi->common.fc.mbsplit_prob);
+#if CONFIG_NEWMVENTROPY
+  pbi->common.fc.pre_nmvc = pbi->common.fc.nmvc;
+#else
   vp8_copy(pbi->common.fc.pre_mvc, pbi->common.fc.mvc);
   vp8_copy(pbi->common.fc.pre_mvc_hp, pbi->common.fc.mvc_hp);
+#endif
   vp8_zero(pbi->common.fc.coef_counts);
   vp8_zero(pbi->common.fc.coef_counts_8x8);
 #if CONFIG_TX16X16 || CONFIG_HYBRIDTRANSFORM16X16
@@ -1477,8 +1479,12 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   vp8_zero(pbi->common.fc.i8x8_mode_counts);
   vp8_zero(pbi->common.fc.sub_mv_ref_counts);
   vp8_zero(pbi->common.fc.mbsplit_counts);
+#if CONFIG_NEWMVENTROPY
+  vp8_zero(pbi->common.fc.NMVcount);
+#else
   vp8_zero(pbi->common.fc.MVcount);
   vp8_zero(pbi->common.fc.MVcount_hp);
+#endif
   vp8_zero(pbi->common.fc.mv_ref_ct);
   vp8_zero(pbi->common.fc.mv_ref_ct_a);
 #if COEFUPDATETYPE == 2
@@ -1544,7 +1550,11 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   vp8_adapt_coef_probs(pc);
   if (pc->frame_type != KEY_FRAME) {
     vp8_adapt_mode_probs(pc);
+#if CONFIG_NEWMVENTROPY
+    vp8_adapt_nmv_probs(pc, xd->allow_high_precision_mv);
+#else
     vp8_adapt_mv_probs(pc);
+#endif
     vp8_update_mode_context(&pbi->common);
   }
 

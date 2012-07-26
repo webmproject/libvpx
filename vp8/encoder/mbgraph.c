@@ -31,12 +31,6 @@ static unsigned int do_16x16_motion_iteration
   vp8_variance_fn_ptr_t v_fn_ptr = cpi->fn_ptr[BLOCK_16X16];
   unsigned int best_err;
   int step_param, further_steps;
-  static int dummy_cost[2 * mv_max + 1];
-  int *mvcost[2]    = { &dummy_cost[mv_max + 1], &dummy_cost[mv_max + 1] };
-  int *mvsadcost[2] = { &dummy_cost[mv_max + 1], &dummy_cost[mv_max + 1] };
-  static int dummy_cost_hp[2 * mv_max_hp + 1];
-  int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp + 1], &dummy_cost_hp[mv_max_hp + 1] };
-  int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp + 1], &dummy_cost_hp[mv_max_hp + 1] };
 
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
@@ -65,8 +59,8 @@ static unsigned int do_16x16_motion_iteration
       step_param,
       x->errorperbit,
       &v_fn_ptr,
-      xd->allow_high_precision_mv ? mvsadcost_hp : mvsadcost,
-      xd->allow_high_precision_mv ? mvcost_hp : mvcost,
+      NULLMVCOST,
+      NULLMVCOST,
       ref_mv);
 
   // Try sub-pixel MC
@@ -78,7 +72,7 @@ static unsigned int do_16x16_motion_iteration
         x, b, d,
         dst_mv, ref_mv,
         x->errorperbit, &v_fn_ptr,
-        xd->allow_high_precision_mv ? mvcost_hp : mvcost,
+        NULLMVCOST,
         & distortion, &sse);
   }
 

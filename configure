@@ -228,6 +228,7 @@ EXPERIMENT_LIST="
     newbestrefmv
     new_mvref
     hybridtransform16x16
+    newmventropy
 "
 CONFIG_LIST="
     external_build

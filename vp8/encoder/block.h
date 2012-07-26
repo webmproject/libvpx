@@ -117,6 +117,19 @@ typedef struct {
   int *mb_norm_activity_ptr;
   signed int act_zbin_adj;
 
+#if CONFIG_NEWMVENTROPY
+  int nmvjointcost[MV_JOINTS];
+  int nmvcosts[2][MV_VALS];
+  int *nmvcost[2];
+  int nmvcosts_hp[2][MV_VALS];
+  int *nmvcost_hp[2];
+
+  int nmvjointsadcost[MV_JOINTS];
+  int nmvsadcosts[2][MV_VALS];
+  int *nmvsadcost[2];
+  int nmvsadcosts_hp[2][MV_VALS];
+  int *nmvsadcost_hp[2];
+#else
   int mvcosts[2][MVvals + 1];
   int *mvcost[2];
   int mvsadcosts[2][MVfpvals + 1];
@@ -125,6 +138,7 @@ typedef struct {
   int *mvcost_hp[2];
   int mvsadcosts_hp[2][MVfpvals_hp + 1];
   int *mvsadcost_hp[2];
+#endif  /* CONFIG_NEWMVENTROPY */
 
   int mbmode_cost[2][MB_MODE_COUNT];
   int intra_uv_mode_cost[2][MB_MODE_COUNT];
@@ -150,8 +164,6 @@ typedef struct {
   signed char *gf_active_ptr;
 
   unsigned char *active_ptr;
-  MV_CONTEXT *mvc;
-  MV_CONTEXT_HP *mvc_hp;
 
   unsigned int token_costs[TX_SIZE_MAX][BLOCK_TYPES][COEF_BANDS]
     [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];

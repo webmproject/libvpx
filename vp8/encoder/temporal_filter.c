@@ -187,7 +187,8 @@ static int vp8_temporal_filter_find_matching_mb_c
   // Ignore mv costing by sending NULL pointer instead of cost arrays
   bestsme = vp8_hex_search(x, b, d, &best_ref_mv1_full, &d->bmi.as_mv.first,
                            step_param, sadpb, &cpi->fn_ptr[BLOCK_16X16],
-                           NULL, NULL, &best_ref_mv1);
+                           NULLMVCOST, NULLMVCOST,
+                           &best_ref_mv1);
 
 #if ALT_REF_SUBPEL_ENABLED
   // Try sub-pixel MC?
@@ -200,7 +201,8 @@ static int vp8_temporal_filter_find_matching_mb_c
                                            &best_ref_mv1,
                                            x->errorperbit,
                                            &cpi->fn_ptr[BLOCK_16X16],
-                                           NULL, &distortion, &sse);
+                                           NULLMVCOST,
+                                           &distortion, &sse);
   }
 #endif
 

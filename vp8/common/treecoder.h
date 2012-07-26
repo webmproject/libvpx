@@ -85,5 +85,6 @@ void vp8bc_tree_probs_from_distribution(
   c_bool_coder_spec *s
 );
 
+vp8_prob vp8_bin_prob_from_distribution(const unsigned int counts[2]);
 
 #endif
