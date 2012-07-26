@@ -273,7 +273,7 @@ int main(int argc, char **argv)
     cfg[0].g_w = width;
     cfg[0].g_h = height;
     cfg[0].g_threads = 1;                           /* number of threads used */
-    cfg[0].rc_dropframe_thresh = 0;
+    cfg[0].rc_dropframe_thresh = 30;
     cfg[0].rc_end_usage = VPX_CBR;
     cfg[0].rc_resize_allowed = 0;
     cfg[0].rc_min_quantizer = 4;
@@ -283,7 +283,6 @@ int main(int argc, char **argv)
     cfg[0].rc_buf_initial_sz = 500;
     cfg[0].rc_buf_optimal_sz = 600;
     cfg[0].rc_buf_sz = 1000;
-    //cfg[0].rc_dropframe_thresh = 10;
     cfg[0].g_error_resilient = 1;              /* Enable error resilient mode */
     cfg[0].g_lag_in_frames   = 0;
 
@@ -293,8 +292,8 @@ int main(int argc, char **argv)
      */
     //cfg[0].kf_mode           = VPX_KF_DISABLED;
     cfg[0].kf_mode           = VPX_KF_AUTO;
-    cfg[0].kf_min_dist = 0;
-    cfg[0].kf_max_dist = 150;
+    cfg[0].kf_min_dist = 3000;
+    cfg[0].kf_max_dist = 3000;
 
     cfg[0].rc_target_bitrate = target_bitrate[0];       /* Set target bitrate */
     cfg[0].g_timebase.num = 1;                          /* Set fps */
@@ -365,6 +364,12 @@ int main(int argc, char **argv)
         unsigned int static_thresh = 0;
         if(vpx_codec_control(&codec[i], VP8E_SET_STATIC_THRESHOLD, static_thresh))
             die_codec(&codec[i], "Failed to set static threshold");
+    }
+    /* Set NOISE_SENSITIVITY to do TEMPORAL_DENOISING */
+    for ( i=0; i< NUM_ENCODERS; i++)
+    {
+        if(vpx_codec_control(&codec[i], VP8E_SET_NOISE_SENSITIVITY, 0))
+            die_codec(&codec[i], "Failed to set noise_sensitivity");
     }
 
     frame_avail = 1;

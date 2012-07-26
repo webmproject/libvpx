@@ -163,14 +163,11 @@ static vpx_codec_err_t validate_config(vpx_codec_alg_priv_t      *ctx,
  * multi-res-encoder.*/
 #if CONFIG_MULTI_RES_ENCODING
     if (ctx->base.enc.total_encoders > 1)
-    {
         RANGE_CHECK_HI(cfg, rc_resize_allowed,     0);
-        RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   0);
-    }
 #else
     RANGE_CHECK_BOOL(cfg, rc_resize_allowed);
-    RANGE_CHECK_HI(cfg,   rc_dropframe_thresh,   100);
 #endif
+    RANGE_CHECK_HI(cfg, rc_dropframe_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_up_thresh,   100);
     RANGE_CHECK_HI(cfg, rc_resize_down_thresh, 100);
 
