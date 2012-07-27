@@ -220,12 +220,8 @@ EXPERIMENT_LIST="
     high_precision_mv
     sixteenth_subpel_uv
     comp_intra_pred
-    newentropy
-    newupdate
     superblocks
-    expanded_coef_context
     newintramodes
-    adaptive_entropy
     pred_filter
     lossless
     hybridtransform

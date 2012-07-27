@@ -630,9 +630,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) {
   int has_y2_block;
   int b;
   int tx_type = x->mode_info_context->mbmi.txfm_size;
-#if CONFIG_NEWENTROPY
   int mb_skip_context = get_pred_context(&cpi->common, x, PRED_MBSKIP);
-#endif
 
   // If the MB is going to be skipped because of a segment level flag
   // exclude this from the skip count stats used to calculate the
@@ -661,11 +659,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) {
      mb_is_skippable(x, has_y2_block));
 
   if (x->mode_info_context->mbmi.mb_skip_coeff) {
-#if CONFIG_NEWENTROPY
     cpi->skip_true_count[mb_skip_context] += skip_inc;
-#else
-    cpi->skip_true_count += skip_inc;
-#endif
 
     if (!cpi->common.mb_no_coeff_skip) {
       if (tx_type == TX_8X8)
@@ -679,11 +673,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) {
     return;
   }
 
-#if CONFIG_NEWENTROPY
   cpi->skip_false_count[mb_skip_context] += skip_inc;
-#else
-  cpi->skip_false_count += skip_inc;
-#endif
 
   plane_type = 3;
   if (has_y2_block) {

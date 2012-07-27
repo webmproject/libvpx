@@ -97,12 +97,8 @@ static void vp8_kfread_modes(VP8D_COMP *pbi,
                           m->mbmi.segment_id, SEG_LVL_EOB) ||
        (get_segdata(&pbi->mb,
                     m->mbmi.segment_id, SEG_LVL_EOB) != 0))) {
-#if CONFIG_NEWENTROPY
     MACROBLOCKD *const xd  = & pbi->mb;
     m->mbmi.mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
-#else
-    m->mbmi.mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
-#endif
   } else {
     if (segfeature_active(&pbi->mb,
                           m->mbmi.segment_id, SEG_LVL_EOB) &&
@@ -442,19 +438,11 @@ static void mb_mode_mv_init(VP8D_COMP *pbi) {
   MACROBLOCKD *const xd  = & pbi->mb;
 #endif
 
-#if CONFIG_NEWENTROPY
   vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
-#else
-  pbi->prob_skip_false = 0;
-#endif
   if (pbi->common.mb_no_coeff_skip) {
-#if CONFIG_NEWENTROPY
     int k;
     for (k = 0; k < MBSKIP_CONTEXTS; ++k)
       cm->mbskip_pred_probs[k] = (vp8_prob)vp8_read_literal(bc, 8);
-#else
-    pbi->prob_skip_false = (vp8_prob)vp8_read_literal(bc, 8);
-#endif
   }
 
   if (cm->frame_type != KEY_FRAME) {
@@ -600,11 +588,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
        (get_segdata(xd, mbmi->segment_id, SEG_LVL_EOB) != 0))) {
     // Read the macroblock coeff skip flag if this feature is in use,
     // else default to 0
-#if CONFIG_NEWENTROPY
     mbmi->mb_skip_coeff = vp8_read(bc, get_pred_prob(cm, xd, PRED_MBSKIP));
-#else
-    mbmi->mb_skip_coeff = vp8_read(bc, pbi->prob_skip_false);
-#endif
   } else {
     if (segfeature_active(xd,
                           mbmi->segment_id, SEG_LVL_EOB) &&
@@ -680,9 +664,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                         vp8_treed_read(bc, vp8_mbsplit_tree, cm->fc.mbsplit_prob);
         const int num_p = vp8_mbsplit_count [s];
         int j = 0;
-#if CONFIG_ADAPTIVE_ENTROPY
         cm->fc.mbsplit_counts[s]++;
-#endif
 
         mbmi->need_to_clamp_mvs = 0;
         do { /* for each subset j */
@@ -702,27 +684,21 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           }
           mv_contz = vp8_mv_cont(&leftmv, &abovemv);
           blockmode = sub_mv_ref(bc, cm->fc.sub_mv_ref_prob [mv_contz]);
-#if CONFIG_ADAPTIVE_ENTROPY
           cm->fc.sub_mv_ref_counts[mv_contz][blockmode - LEFT4X4]++;
-#endif
 
           switch (blockmode) {
             case NEW4X4:
 #if CONFIG_HIGH_PRECISION_MV
               if (xd->allow_high_precision_mv) {
                 read_mv_hp(bc, &blockmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
-#if CONFIG_ADAPTIVE_ENTROPY
                 cm->fc.MVcount_hp[0][mv_max_hp + (blockmv.as_mv.row)]++;
                 cm->fc.MVcount_hp[1][mv_max_hp + (blockmv.as_mv.col)]++;
-#endif
               } else
 #endif
               {
                 read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
-#if CONFIG_ADAPTIVE_ENTROPY
                 cm->fc.MVcount[0][mv_max + (blockmv.as_mv.row >> 1)]++;
                 cm->fc.MVcount[1][mv_max + (blockmv.as_mv.col >> 1)]++;
-#endif
               }
               blockmv.as_mv.row += best_mv.as_mv.row;
               blockmv.as_mv.col += best_mv.as_mv.col;
@@ -731,18 +707,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_HIGH_PRECISION_MV
                 if (xd->allow_high_precision_mv) {
                   read_mv_hp(bc, &secondmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
-#if CONFIG_ADAPTIVE_ENTROPY
                   cm->fc.MVcount_hp[0][mv_max_hp + (secondmv.as_mv.row)]++;
                   cm->fc.MVcount_hp[1][mv_max_hp + (secondmv.as_mv.col)]++;
-#endif
                 } else
 #endif
                 {
                   read_mv(bc, &secondmv.as_mv, (const MV_CONTEXT *) mvc);
-#if CONFIG_ADAPTIVE_ENTROPY
                   cm->fc.MVcount[0][mv_max + (secondmv.as_mv.row >> 1)]++;
                   cm->fc.MVcount[1][mv_max + (secondmv.as_mv.col >> 1)]++;
-#endif
                 }
                 secondmv.as_mv.row += best_mv_second.as_mv.row;
                 secondmv.as_mv.col += best_mv_second.as_mv.col;
@@ -851,18 +823,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #if CONFIG_HIGH_PRECISION_MV
         if (xd->allow_high_precision_mv) {
           read_mv_hp(bc, &mv->as_mv, (const MV_CONTEXT_HP *) mvc_hp);
-#if CONFIG_ADAPTIVE_ENTROPY
           cm->fc.MVcount_hp[0][mv_max_hp + (mv->as_mv.row)]++;
           cm->fc.MVcount_hp[1][mv_max_hp + (mv->as_mv.col)]++;
-#endif
         } else
 #endif
         {
           read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
-#if CONFIG_ADAPTIVE_ENTROPY
           cm->fc.MVcount[0][mv_max + (mv->as_mv.row >> 1)]++;
           cm->fc.MVcount[1][mv_max + (mv->as_mv.col >> 1)]++;
-#endif
         }
         mv->as_mv.row += best_mv.as_mv.row;
         mv->as_mv.col += best_mv.as_mv.col;
@@ -882,18 +850,14 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           if (xd->allow_high_precision_mv) {
             read_mv_hp(bc, &mbmi->second_mv.as_mv,
                        (const MV_CONTEXT_HP *) mvc_hp);
-#if CONFIG_ADAPTIVE_ENTROPY
             cm->fc.MVcount_hp[0][mv_max_hp + (mbmi->second_mv.as_mv.row)]++;
             cm->fc.MVcount_hp[1][mv_max_hp + (mbmi->second_mv.as_mv.col)]++;
-#endif
           } else
 #endif
           {
             read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
-#if CONFIG_ADAPTIVE_ENTROPY
             cm->fc.MVcount[0][mv_max + (mbmi->second_mv.as_mv.row >> 1)]++;
             cm->fc.MVcount[1][mv_max + (mbmi->second_mv.as_mv.col >> 1)]++;
-#endif
           }
           mbmi->second_mv.as_mv.row += best_mv_second.as_mv.row;
           mbmi->second_mv.as_mv.col += best_mv_second.as_mv.col;
@@ -920,9 +884,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     else {
       mbmi->mode = (MB_PREDICTION_MODE)
                    vp8_read_ymode(bc, pbi->common.fc.ymode_prob);
-#if CONFIG_ADAPTIVE_ENTROPY
       pbi->common.fc.ymode_counts[mbmi->mode]++;
-#endif
     }
 #if CONFIG_COMP_INTRA_PRED
     mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
@@ -936,9 +898,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 #endif
       do {
         mi->bmi[j].as_mode.first = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
-#if CONFIG_ADAPTIVE_ENTROPY
         pbi->common.fc.bmode_counts[mi->bmi[j].as_mode.first]++;
-#endif
 #if CONFIG_COMP_INTRA_PRED
         if (use_comp_pred) {
           mi->bmi[j].as_mode.second = (B_PREDICTION_MODE)vp8_read_bmode(bc, pbi->common.fc.bmode_prob);
@@ -959,9 +919,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         mi->bmi[ib + 1].as_mode.first = mode8x8;
         mi->bmi[ib + 4].as_mode.first = mode8x8;
         mi->bmi[ib + 5].as_mode.first = mode8x8;
-#if CONFIG_ADAPTIVE_ENTROPY
         pbi->common.fc.i8x8_mode_counts[mode8x8]++;
-#endif
 #if CONFIG_COMP_INTRA_PRED
         mi->bmi[ib + 0].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
         mi->bmi[ib + 1].as_mode.second = (MB_PREDICTION_MODE)(DC_PRED - 1);
@@ -972,9 +930,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     } else {
       mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(bc,
                                                            pbi->common.fc.uv_mode_prob[mbmi->mode]);
-#if CONFIG_ADAPTIVE_ENTROPY
       pbi->common.fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
-#endif
     }
 
 #if CONFIG_COMP_INTRA_PRED

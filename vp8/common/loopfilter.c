@@ -132,14 +132,12 @@ static void lf_init_lut(loop_filter_info_n *lfi) {
   }
 
   lfi->mode_lf_lut[DC_PRED] = 1;
-#if CONFIG_NEWINTRAMODES
   lfi->mode_lf_lut[D45_PRED] = 1;
   lfi->mode_lf_lut[D135_PRED] = 1;
   lfi->mode_lf_lut[D117_PRED] = 1;
   lfi->mode_lf_lut[D153_PRED] = 1;
   lfi->mode_lf_lut[D27_PRED] = 1;
   lfi->mode_lf_lut[D63_PRED] = 1;
-#endif
   lfi->mode_lf_lut[V_PRED] = 1;
   lfi->mode_lf_lut[H_PRED] = 1;
   lfi->mode_lf_lut[TM_PRED] = 1;

@@ -55,7 +55,6 @@ typedef struct frame_contexts {
 #if CONFIG_HIGH_PRECISION_MV
   MV_CONTEXT_HP mvc_hp[2];
 #endif
-#if CONFIG_ADAPTIVE_ENTROPY
   MV_CONTEXT pre_mvc[2];
 #if CONFIG_HIGH_PRECISION_MV
   MV_CONTEXT_HP pre_mvc_hp[2];
@@ -83,7 +82,6 @@ typedef struct frame_contexts {
 #if CONFIG_HIGH_PRECISION_MV
   unsigned int MVcount_hp [2] [MVvals_hp];
 #endif
-#endif  /* CONFIG_ADAPTIVE_ENTROPY */
   int mode_context[6][4];
   int mode_context_a[6][4];
   int vp8_mode_contexts[6][4];
@@ -249,9 +247,7 @@ typedef struct VP8Common {
 
   vp8_prob prob_comppred[COMP_PRED_CONTEXTS];
 
-#if CONFIG_NEWENTROPY
   vp8_prob mbskip_pred_probs[MBSKIP_CONTEXTS];
-#endif
 
   FRAME_CONTEXT lfc_a; /* last alt ref entropy */
   FRAME_CONTEXT lfc; /* last frame entropy */

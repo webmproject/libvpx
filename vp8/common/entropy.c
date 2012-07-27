@@ -47,17 +47,13 @@ DECLARE_ALIGNED(16, const unsigned char, vp8_norm[256]) = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-DECLARE_ALIGNED(16, cuchar, vp8_coef_bands[16]) =
-{ 0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7};
+DECLARE_ALIGNED(16, cuchar, vp8_coef_bands[16]) = {
+  0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7
+};
 
-DECLARE_ALIGNED(16, cuchar, vp8_prev_token_class[MAX_ENTROPY_TOKENS]) =
-#if CONFIG_EXPANDED_COEF_CONTEXT
-{ 0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0};
-#else
-  {
-    0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0
-  };
-#endif
+DECLARE_ALIGNED(16, cuchar, vp8_prev_token_class[MAX_ENTROPY_TOKENS]) = {
+  0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 0
+};
 
 DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d[16]) = {
   0,  1,  4,  8,
@@ -181,10 +177,6 @@ vp8_extra_bit_struct vp8_extra_bits[12] = {
   { 0, 0, 0, 0}
 };
 
-#if CONFIG_NEWUPDATE
-const vp8_prob updprobs[4] = {128, 136, 120, 112};
-#endif
-
 #include "default_coef_probs.h"
 
 void vp8_default_coef_probs(VP8_COMMON *pc) {
@@ -200,8 +192,6 @@ void vp8_coef_tree_initialize() {
   init_bit_trees();
   vp8_tokens_from_tree(vp8_coef_encodings, vp8_coef_tree);
 }
-
-#if CONFIG_ADAPTIVE_ENTROPY
 
 // #define COEF_COUNT_TESTING
 
@@ -274,10 +264,8 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
   for (i = 0; i < BLOCK_TYPES; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-#endif
         vp8_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.coef_counts [i][j][k],
@@ -298,10 +286,8 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
   for (i = 0; i < BLOCK_TYPES_8X8; ++i)
     for (j = 0; j < COEF_BANDS; ++j)
       for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
-#endif
         vp8_tree_probs_from_distribution(
           MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
           coef_probs, branch_ct, cm->fc.coef_counts_8x8 [i][j][k],
@@ -319,4 +305,3 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
         }
       }
 }
-#endif

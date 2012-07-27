@@ -278,7 +278,6 @@ void vp8_entropy_mv_init() {
 #endif
 }
 
-#if CONFIG_ADAPTIVE_ENTROPY
 // #define MV_COUNT_TESTING
 #define MV_COUNT_SAT 16
 #define MV_MAX_UPDATE_FACTOR 128
@@ -412,4 +411,3 @@ void vp8_adapt_mv_probs(VP8_COMMON *cm) {
   }
 #endif
 }
-#endif  /* CONFIG_ADAPTIVE_ENTROPY */

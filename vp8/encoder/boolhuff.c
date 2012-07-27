@@ -65,7 +65,6 @@ void vp8_encode_value(BOOL_CODER *br, int data, int bits) {
 
 }
 
-#if CONFIG_NEWUPDATE
 int recenter_nonneg(int v, int m) {
   if (v > (m << 1)) return v;
   else if (v >= m) return ((v - m) << 1);
@@ -153,4 +152,3 @@ int vp8_count_term_subexp(int word, int k, int num_syms) {
   }
   return count;
 }
-#endif

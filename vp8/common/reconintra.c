@@ -18,7 +18,6 @@
  * vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
  */
 
-#if CONFIG_NEWINTRAMODES
 void d27_predictor(unsigned char *ypred_ptr, int y_stride, int n,
                    unsigned char *yabove_row, unsigned char *yleft_col) {
   int r, c, h, w, v;
@@ -196,7 +195,6 @@ void d153_predictor(unsigned char *ypred_ptr, int y_stride, int n,
     ypred_ptr += y_stride;
   }
 }
-#endif  /* CONFIG_NEWINTRAMODES */
 
 void vp8_recon_intra_mbuv(const vp8_recon_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
   int i;
@@ -293,7 +291,6 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *x, unsigned char *ypre
 
     }
     break;
-#if CONFIG_NEWINTRAMODES
     case D45_PRED: {
       d45_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
     }
@@ -318,7 +315,6 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *x, unsigned char *ypre
       d63_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
     }
     break;
-#endif
 #if CONIFG_I8X8
     case I8X8_PRED:
 #endif
@@ -475,7 +471,6 @@ void vp8_build_intra_predictors_mbuv_internal(MACROBLOCKD *x,
 
     }
     break;
-#if CONFIG_NEWINTRAMODES
     case D45_PRED: {
       d45_predictor(upred_ptr, uv_stride, 8,  uabove_row, uleft_col);
       d45_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
@@ -506,7 +501,6 @@ void vp8_build_intra_predictors_mbuv_internal(MACROBLOCKD *x,
       d63_predictor(vpred_ptr, uv_stride, 8,  vabove_row, vleft_col);
     }
     break;
-#endif
     case B_PRED:
     case NEARESTMV:
     case NEARMV:
@@ -617,7 +611,6 @@ void vp8_intra8x8_predict(BLOCKD *x,
       }
     }
     break;
-#if CONFIG_NEWINTRAMODES
     case D45_PRED: {
       d45_predictor(predictor, 16, 8,  yabove_row, yleft_col);
     }
@@ -642,7 +635,6 @@ void vp8_intra8x8_predict(BLOCKD *x,
       d63_predictor(predictor, 16, 8,  yabove_row, yleft_col);
     }
     break;
-#endif
   }
 }
 
@@ -732,7 +724,6 @@ void vp8_intra_uv4x4_predict(BLOCKD *x,
       }
     }
     break;
-#if CONFIG_NEWINTRAMODES
     case D45_PRED: {
       d45_predictor(predictor, 8, 4,  above_row, left_col);
     }
@@ -757,7 +748,6 @@ void vp8_intra_uv4x4_predict(BLOCKD *x,
       d63_predictor(predictor, 8, 4,  above_row, left_col);
     }
     break;
-#endif
   }
 }
 
