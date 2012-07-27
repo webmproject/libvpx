@@ -48,7 +48,7 @@ typedef void (*vp8_sad_multi_d_fn_t)
     (
      const unsigned char *src_ptr,
      int source_stride,
-     unsigned char *ref_ptr[4],
+     const unsigned char * const ref_ptr[],
      int  ref_stride,
      unsigned int *sad_array
     );
