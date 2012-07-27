@@ -36,6 +36,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAMX//8Cw\u003d",
+        "filename": "vp8/common/sad_c.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-27T23:05:03Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "AAAAMX//8cM\u003d",
+      "revId": "dd0100ddb1d900bd8596b6f9e3c5f9c128a14e67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAMX//8cE\u003d",
         "filename": "vp8/common/sad_c.c",
         "patchSetId": 2
@@ -47,6 +65,24 @@
       "writtenOn": "2012-07-27T18:52:33Z",
       "side": 1,
       "message": "ditto",
+      "revId": "dd0100ddb1d900bd8596b6f9e3c5f9c128a14e67",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAMX//8Co\u003d",
+        "filename": "vp8/common/sad_c.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-07-27T23:05:03Z",
+      "side": 1,
+      "message": "all fixed in the follow up patch",
+      "parentUuid": "AAAAMX//8cE\u003d",
       "revId": "dd0100ddb1d900bd8596b6f9e3c5f9c128a14e67",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
