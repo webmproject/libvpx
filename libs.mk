@@ -193,17 +193,29 @@ OBJS-$(BUILD_LIBVPX) += $(LIBVPX_OBJS)
 LIBS-$(if $(BUILD_LIBVPX),$(CONFIG_STATIC)) += $(BUILD_PFX)libvpx.a $(BUILD_PFX)libvpx_g.a
 $(BUILD_PFX)libvpx_g.a: $(LIBVPX_OBJS)
 
+
 BUILD_LIBVPX_SO         := $(if $(BUILD_LIBVPX),$(CONFIG_SHARED))
+
+ifeq ($(filter darwin%,$(TGT_OS)),$(TGT_OS))
+LIBVPX_SO               := libvpx.$(VERSION_MAJOR).dylib
+EXPORT_FILE             := libvpx.syms
+LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
+                             libvpx.dylib  )
+else
 LIBVPX_SO               := libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR).$(VERSION_PATCH)
-LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
-                           $(notdir $(LIBVPX_SO_SYMLINKS))
-$(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) libvpx.ver
-$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
-$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
-$(BUILD_PFX)$(LIBVPX_SO): SO_VERSION_SCRIPT = libvpx.ver
+EXPORT_FILE             := libvpx.ver
+SYM_LINK                := libvpx.so
 LIBVPX_SO_SYMLINKS      := $(addprefix $(LIBSUBDIR)/, \
                              libvpx.so libvpx.so.$(VERSION_MAJOR) \
                              libvpx.so.$(VERSION_MAJOR).$(VERSION_MINOR))
+endif
+
+LIBS-$(BUILD_LIBVPX_SO) += $(BUILD_PFX)$(LIBVPX_SO)\
+                           $(notdir $(LIBVPX_SO_SYMLINKS))
+$(BUILD_PFX)$(LIBVPX_SO): $(LIBVPX_OBJS) $(EXPORT_FILE)
+$(BUILD_PFX)$(LIBVPX_SO): extralibs += -lm
+$(BUILD_PFX)$(LIBVPX_SO): SONAME = libvpx.so.$(VERSION_MAJOR)
+$(BUILD_PFX)$(LIBVPX_SO): EXPORTS_FILE = $(EXPORT_FILE)
 
 libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
@@ -212,10 +224,15 @@ libvpx.ver: $(call enabled,CODEC_EXPORTS)
 	$(qexec)echo "local: *; };" >> $@
 CLEAN-OBJS += libvpx.ver
 
+libvpx.syms: $(call enabled,CODEC_EXPORTS)
+	@echo "    [CREATE] $@"
+	$(qexec)awk '{print "_"$$2}' $^ >$@
+CLEAN-OBJS += libvpx.syms
+
 define libvpx_symlink_template
 $(1): $(2)
-	@echo "    [LN]      $$@"
-	$(qexec)ln -sf $(LIBVPX_SO) $$@
+	@echo "    [LN]     $(2) $$@"
+	$(qexec)ln -sf $(2) $$@
 endef
 
 $(eval $(call libvpx_symlink_template,\
@@ -225,8 +242,10 @@ $(eval $(call libvpx_symlink_template,\
     $(addprefix $(DIST_DIR)/,$(LIBVPX_SO_SYMLINKS)),\
     $(DIST_DIR)/$(LIBSUBDIR)/$(LIBVPX_SO)))
 
-INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBVPX_SO_SYMLINKS)
-INSTALL-LIBS-$(CONFIG_SHARED) += $(LIBSUBDIR)/$(LIBVPX_SO)
+
+INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBVPX_SO_SYMLINKS)
+INSTALL-LIBS-$(BUILD_LIBVPX_SO) += $(LIBSUBDIR)/$(LIBVPX_SO)
+
 
 LIBS-$(BUILD_LIBVPX) += vpx.pc
 vpx.pc: config.mk libs.mk
