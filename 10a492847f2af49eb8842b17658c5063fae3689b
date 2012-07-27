@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAMX//8Ys\u003d",
+        "filename": "vp8/common/x86/x86_systemdependent.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-07-27T19:07:05Z",
+      "side": 0,
+      "message": "Please leave this in under #if 0 and a comment why they are disabled (missing diagonal prediction modes implementations).",
+      "revId": "10a492847f2af49eb8842b17658c5063fae3689b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
