@@ -66,7 +66,5 @@ extern void vp8_accum_mv_refs(VP8_COMMON *pc,
 void vp8_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES - 1]);
 void vp8_kf_default_bmode_probs(vp8_prob dest [VP8_BINTRAMODES] [VP8_BINTRAMODES] [VP8_BINTRAMODES - 1]);
 
-#if CONFIG_ADAPTIVE_ENTROPY
 void vp8_adapt_mode_probs(struct VP8Common *);
-#endif
 #endif

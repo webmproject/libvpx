@@ -57,12 +57,10 @@ unsigned char get_pred_context(VP8_COMMON *const cm,
 
       break;
 
-#if CONFIG_NEWENTROPY
     case PRED_MBSKIP:
       pred_context = (m - 1)->mbmi.mb_skip_coeff +
                      (m - cm->mode_info_stride)->mbmi.mb_skip_coeff;
       break;
-#endif
 
     default:
       // TODO *** add error trap code.
@@ -100,11 +98,9 @@ vp8_prob get_pred_prob(VP8_COMMON *const cm,
       pred_probability = cm->prob_comppred[pred_context];
       break;
 
-#if CONFIG_NEWENTROPY
     case PRED_MBSKIP:
       pred_probability = cm->mbskip_pred_probs[pred_context];
       break;
-#endif
 
     default:
       // TODO *** add error trap code.
@@ -130,11 +126,9 @@ unsigned char get_pred_flag(MACROBLOCKD *const xd,
       pred_flag = xd->mode_info_context->mbmi.ref_predicted;
       break;
 
-#if CONFIG_NEWENTROPY
     case PRED_MBSKIP:
       pred_flag = xd->mode_info_context->mbmi.mb_skip_coeff;
       break;
-#endif
 
     default:
       // TODO *** add error trap code.
@@ -159,11 +153,9 @@ void set_pred_flag(MACROBLOCKD *const xd,
       xd->mode_info_context->mbmi.ref_predicted = pred_flag;
       break;
 
-#if CONFIG_NEWENTROPY
     case PRED_MBSKIP:
       xd->mode_info_context->mbmi.mb_skip_coeff = pred_flag;
       break;
-#endif
 
     default:
       // TODO *** add error trap code.

@@ -44,17 +44,9 @@
 #define ARF_DECAY_THRESH 12
 
 #if CONFIG_PRED_FILTER
-#if CONFIG_NEWINTRAMODES
 #define MAX_MODES 54
-#else
-#define MAX_MODES 48
-#endif
 #else  // CONFIG_PRED_FILTER
-#if CONFIG_NEWINTRAMODES
 #define MAX_MODES 42
-#else
-#define MAX_MODES 36
-#endif
 #endif  // CONFIG_PRED_FILTER
 
 #define MIN_THRESHMULT  32
@@ -195,14 +187,12 @@ typedef enum {
 
   THR_V_PRED,
   THR_H_PRED,
-#if CONFIG_NEWINTRAMODES
   THR_D45_PRED,
   THR_D135_PRED,
   THR_D117_PRED,
   THR_D153_PRED,
   THR_D27_PRED,
   THR_D63_PRED,
-#endif
   THR_TM,
 
   THR_NEWMV,
@@ -259,14 +249,12 @@ typedef enum {
 
   THR_V_PRED,
   THR_H_PRED,
-#if CONFIG_NEWINTRAMODES
   THR_D45_PRED,
   THR_D135_PRED,
   THR_D117_PRED,
   THR_D153_PRED,
   THR_D27_PRED,
   THR_D63_PRED,
-#endif
   THR_TM,
 
   THR_NEWMV,
@@ -585,12 +573,7 @@ typedef struct VP8_COMP {
   int vert_scale;
   int pass;
 
-#if CONFIG_NEWENTROPY
   vp8_prob last_skip_false_probs[3][MBSKIP_CONTEXTS];
-#else
-  vp8_prob prob_skip_false;
-  vp8_prob last_skip_false_probs[3];
-#endif
   int last_skip_probs_q[3];
 
   int recent_ref_frame_usage[MAX_REF_FRAMES];
@@ -606,13 +589,8 @@ typedef struct VP8_COMP {
   int inter_zz_count;
   int gf_bad_count;
   int gf_update_recommended;
-#if CONFIG_NEWENTROPY
   int skip_true_count[3];
   int skip_false_count[3];
-#else
-  int skip_true_count;
-  int skip_false_count;
-#endif
   int t4x4_count;
   int t8x8_count;
 
@@ -636,11 +614,7 @@ typedef struct VP8_COMP {
   unsigned int time_pick_lpf;
   unsigned int time_encode_mb_row;
 
-#if CONFIG_NEWENTROPY
   int base_skip_false_prob[QINDEX_RANGE][3];
-#else
-  int base_skip_false_prob[QINDEX_RANGE];
-#endif
 
   struct twopass_rc {
     unsigned int section_intra_rating;

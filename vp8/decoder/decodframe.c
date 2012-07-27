@@ -46,7 +46,6 @@ int dec_debug = 0;
 
 #define COEFCOUNT_TESTING
 
-#if CONFIG_NEWUPDATE
 
 static int merge_index(int v, int n, int modulus) {
   int max1 = (n - 1 - modulus / 2) / modulus + 1;
@@ -79,7 +78,6 @@ static vp8_prob read_prob_diff_update(vp8_reader *const bc, int oldp) {
   int delp = vp8_decode_term_subexp(bc, SUBEXP_PARAM, 255);
   return (vp8_prob)inv_remap_prob(delp, oldp);
 }
-#endif
 
 void vp8cx_init_de_quantizer(VP8D_COMP *pbi) {
   int i;
@@ -808,7 +806,6 @@ static void init_frame(VP8D_COMP *pbi) {
 
 }
 
-#if CONFIG_NEWUPDATE
 static void read_coef_probs3(VP8D_COMP *pbi) {
   const vp8_prob grpupd = 216;
   int i, j, k, l;
@@ -820,11 +817,9 @@ static void read_coef_probs3(VP8D_COMP *pbi) {
         // printf("Decoding %d\n", l);
         for (j = !i; j < COEF_BANDS; j++)
           for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
             if (k >= 3 && ((i == 0 && j == 1) ||
                            (i > 0 && j == 0)))
               continue;
-#endif
             {
               vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
               int u = vp8_read(bc, COEF_UPDATE_PROB);
@@ -840,11 +835,9 @@ static void read_coef_probs3(VP8D_COMP *pbi) {
         if (vp8_read(bc, grpupd)) {
           for (j = !i; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
               if (k >= 3 && ((i == 0 && j == 1) ||
                              (i > 0 && j == 0)))
                 continue;
-#endif
               {
                 vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
                 int u = vp8_read(bc, COEF_UPDATE_PROB_8X8);
@@ -867,11 +860,9 @@ static void read_coef_probs2(VP8D_COMP *pbi) {
       for (i = 0; i < BLOCK_TYPES; i++)
         for (j = !i; j < COEF_BANDS; j++)
           for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
             if (k >= 3 && ((i == 0 && j == 1) ||
                            (i > 0 && j == 0)))
               continue;
-#endif
             {
               vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
               int u = vp8_read(bc, COEF_UPDATE_PROB);
@@ -886,11 +877,9 @@ static void read_coef_probs2(VP8D_COMP *pbi) {
         for (i = 0; i < BLOCK_TYPES_8X8; i++)
           for (j = !i; j < COEF_BANDS; j++)
             for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
               if (k >= 3 && ((i == 0 && j == 1) ||
                              (i > 0 && j == 0)))
                 continue;
-#endif
               {
                 vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
 
@@ -902,7 +891,6 @@ static void read_coef_probs2(VP8D_COMP *pbi) {
     }
   }
 }
-#endif
 
 static void read_coef_probs(VP8D_COMP *pbi) {
   int i, j, k, l;
@@ -913,26 +901,16 @@ static void read_coef_probs(VP8D_COMP *pbi) {
     if (vp8_read_bit(bc)) {
       /* read coef probability tree */
       for (i = 0; i < BLOCK_TYPES; i++)
-#if CONFIG_NEWUPDATE
         for (j = !i; j < COEF_BANDS; j++)
-#else
-        for (j = 0; j < COEF_BANDS; j++)
-#endif
           for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
             if (k >= 3 && ((i == 0 && j == 1) ||
                            (i > 0 && j == 0)))
               continue;
-#endif
             for (l = 0; l < ENTROPY_NODES; l++) {
               vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
 
               if (vp8_read(bc, COEF_UPDATE_PROB)) {
-#if CONFIG_NEWUPDATE
                 *p = read_prob_diff_update(bc, *p);
-#else
-                *p = (vp8_prob)vp8_read_literal(bc, 8);
-#endif
               }
             }
           }
@@ -942,27 +920,17 @@ static void read_coef_probs(VP8D_COMP *pbi) {
   if (pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc)) {
     // read coef probability tree
     for (i = 0; i < BLOCK_TYPES_8X8; i++)
-#if CONFIG_NEWUPDATE
       for (j = !i; j < COEF_BANDS; j++)
-#else
-      for (j = 0; j < COEF_BANDS; j++)
-#endif
         for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-#if CONFIG_EXPANDED_COEF_CONTEXT
           if (k >= 3 && ((i == 0 && j == 1) ||
                          (i > 0 && j == 0)))
             continue;
-#endif
           for (l = 0; l < ENTROPY_NODES; l++) {
 
             vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
 
             if (vp8_read(bc, COEF_UPDATE_PROB_8X8)) {
-#if CONFIG_NEWUPDATE
               *p = read_prob_diff_update(bc, *p);
-#else
-              *p = (vp8_prob)vp8_read_literal(bc, 8);
-#endif
             }
           }
         }
@@ -1352,7 +1320,6 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     fclose(z);
   }
 
-#if CONFIG_ADAPTIVE_ENTROPY
   vp8_copy(pbi->common.fc.pre_coef_probs, pbi->common.fc.coef_probs);
   vp8_copy(pbi->common.fc.pre_coef_probs_8x8, pbi->common.fc.coef_probs_8x8);
   vp8_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
@@ -1379,10 +1346,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 #endif
   vp8_zero(pbi->common.fc.mv_ref_ct);
   vp8_zero(pbi->common.fc.mv_ref_ct_a);
-#endif  /* CONFIG_ADAPTIVE_ENTROPY */
-#if CONFIG_NEWUPDATE && COEFUPDATETYPE == 2
+#if COEFUPDATETYPE == 2
   read_coef_probs2(pbi);
-#elif CONFIG_NEWUPDATE && COEFUPDATETYPE == 3
+#elif COEFUPDATETYPE == 3
   read_coef_probs3(pbi);
 #else
   read_coef_probs(pbi);
@@ -1410,11 +1376,6 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
   vp8_decode_mode_mvs(pbi);
-#if CONFIG_ADAPTIVE_ENTROPY == 0
-  if (pc->frame_type != KEY_FRAME) {
-    vp8_update_mode_context(&pbi->common);
-  }
-#endif
 
   vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 
@@ -1443,14 +1404,12 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   }
 
   /* vpx_log("Decoder: Frame Decoded, Size Roughly:%d bytes  \n",bc->pos+pbi->bc2.pos); */
-#if CONFIG_ADAPTIVE_ENTROPY
   vp8_adapt_coef_probs(pc);
   if (pc->frame_type != KEY_FRAME) {
     vp8_adapt_mode_probs(pc);
     vp8_adapt_mv_probs(pc);
     vp8_update_mode_context(&pbi->common);
   }
-#endif
 
   /* If this was a kf or Gf note the Q used */
   if ((pc->frame_type == KEY_FRAME) ||

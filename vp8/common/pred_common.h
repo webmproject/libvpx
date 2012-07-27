@@ -21,10 +21,7 @@ typedef enum {
   PRED_SEG_ID = 0,               // Segment identifier
   PRED_REF = 1,
   PRED_COMP = 2,
-#if CONFIG_NEWENTROPY
   PRED_MBSKIP = 3,
-#endif
-
 } PRED_ID;
 
 

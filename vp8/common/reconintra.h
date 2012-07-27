@@ -13,7 +13,6 @@
 #define __INC_RECONINTRA_H
 
 #include "blockd.h"
-#if CONFIG_NEWINTRAMODES
 void d45_predictor(unsigned char *ypred_ptr, int y_stride, int n,
                    unsigned char *yabove_row, unsigned char *yleft_col);
 void d135_predictor(unsigned char *ypred_ptr, int y_stride, int n,
@@ -26,7 +25,6 @@ void d27_predictor(unsigned char *ypred_ptr, int y_stride, int n,
                    unsigned char *yabove_row, unsigned char *yleft_col);
 void d64_predictor(unsigned char *ypred_ptr, int y_stride, int n,
                    unsigned char *yabove_row, unsigned char *yleft_col);
-#endif  /* CONFIG_NEWINTRAMODES */
 
 extern void init_intra_left_above_pixels(MACROBLOCKD *x);
 

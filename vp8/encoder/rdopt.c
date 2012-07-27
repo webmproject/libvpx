@@ -112,14 +112,12 @@ const MODE_DEFINITION vp8_mode_order[MAX_MODES] = {
 
   {V_PRED,    INTRA_FRAME,  0,  0},
   {H_PRED,    INTRA_FRAME,  0,  0},
-#if CONFIG_NEWINTRAMODES
   {D45_PRED,  INTRA_FRAME,  0,  0},
   {D135_PRED, INTRA_FRAME,  0,  0},
   {D117_PRED, INTRA_FRAME,  0,  0},
   {D153_PRED, INTRA_FRAME,  0,  0},
   {D27_PRED,  INTRA_FRAME,  0,  0},
   {D63_PRED,  INTRA_FRAME,  0,  0},
-#endif
 
   {TM_PRED,   INTRA_FRAME,  0,  0},
 
@@ -177,14 +175,12 @@ const MODE_DEFINITION vp8_mode_order[MAX_MODES] = {
 
   {V_PRED,    INTRA_FRAME,  0},
   {H_PRED,    INTRA_FRAME,  0},
-#if CONFIG_NEWINTRAMODES
   {D45_PRED,  INTRA_FRAME,  0},
   {D135_PRED, INTRA_FRAME,  0},
   {D117_PRED, INTRA_FRAME,  0},
   {D153_PRED, INTRA_FRAME,  0},
   {D27_PRED,  INTRA_FRAME,  0},
   {D63_PRED,  INTRA_FRAME,  0},
-#endif
 
   {TM_PRED,   INTRA_FRAME,  0},
 
@@ -2406,14 +2402,12 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                                           - best_ref_mv->as_mv.row)]++;
           cpi->MVcount_hp[1][mv_max_hp + (x->partition_info->bmi[i].mv.as_mv.col
                                           - best_ref_mv->as_mv.col)]++;
-#if CONFIG_ADAPTIVE_ENTROPY
           if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
             cpi->MVcount_hp[0][mv_max_hp + (x->partition_info->bmi[i].second_mv.as_mv.row
                                             - second_best_ref_mv->as_mv.row)]++;
             cpi->MVcount_hp[1][mv_max_hp + (x->partition_info->bmi[i].second_mv.as_mv.col
                                             - second_best_ref_mv->as_mv.col)]++;
           }
-#endif
         } else
 #endif
         {
@@ -2421,14 +2415,12 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                                      - best_ref_mv->as_mv.row) >> 1)]++;
           cpi->MVcount[1][mv_max + ((x->partition_info->bmi[i].mv.as_mv.col
                                      - best_ref_mv->as_mv.col) >> 1)]++;
-#if CONFIG_ADAPTIVE_ENTROPY
           if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
             cpi->MVcount[0][mv_max + ((x->partition_info->bmi[i].second_mv.as_mv.row
                                        - second_best_ref_mv->as_mv.row) >> 1)]++;
             cpi->MVcount[1][mv_max + ((x->partition_info->bmi[i].second_mv.as_mv.col
                                        - second_best_ref_mv->as_mv.col) >> 1)]++;
           }
-#endif
         }
       }
     }
@@ -2439,14 +2431,12 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                                       - best_ref_mv->as_mv.row)]++;
       cpi->MVcount_hp[1][mv_max_hp + (x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
                                       - best_ref_mv->as_mv.col)]++;
-#if CONFIG_ADAPTIVE_ENTROPY
       if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
         cpi->MVcount_hp[0][mv_max_hp + (x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.row
                                         - second_best_ref_mv->as_mv.row)]++;
         cpi->MVcount_hp[1][mv_max_hp + (x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.col
                                         - second_best_ref_mv->as_mv.col)]++;
       }
-#endif
     } else
 #endif
     {
@@ -2454,14 +2444,12 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                                  - best_ref_mv->as_mv.row) >> 1)]++;
       cpi->MVcount[1][mv_max + ((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col
                                  - best_ref_mv->as_mv.col) >> 1)]++;
-#if CONFIG_ADAPTIVE_ENTROPY
       if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
         cpi->MVcount[0][mv_max + ((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.row
                                    - second_best_ref_mv->as_mv.row) >> 1)]++;
         cpi->MVcount[1][mv_max + ((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.col
                                    - second_best_ref_mv->as_mv.col) >> 1)]++;
       }
-#endif
     }
   }
 }
@@ -3004,14 +2992,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 0);
         }
         break;
-#if CONFIG_NEWINTRAMODES
         case D45_PRED:
         case D135_PRED:
         case D117_PRED:
         case D153_PRED:
         case D27_PRED:
         case D63_PRED:
-#endif
         case DC_PRED:
         case V_PRED:
         case H_PRED:
@@ -3479,7 +3465,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             int prob_skip_cost;
 
             // Cost the skip mb case
-#if CONFIG_NEWENTROPY
             vp8_prob skip_prob =
               get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP);
 
@@ -3488,24 +3473,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
               rate2 += prob_skip_cost;
               other_cost += prob_skip_cost;
             }
-#else
-            if (cpi->prob_skip_false) {
-              prob_skip_cost =
-                vp8_cost_bit(cpi->prob_skip_false, 1);
-              rate2 += prob_skip_cost;
-              other_cost += prob_skip_cost;
-            }
-#endif
           }
         }
         // Add in the cost of the no skip flag.
         else if (mb_skip_allowed) {
-#if CONFIG_NEWENTROPY
           int prob_skip_cost = vp8_cost_bit(
                                  get_pred_prob(cm, &x->e_mbd, PRED_MBSKIP), 0);
-#else
-          int prob_skip_cost = vp8_cost_bit(cpi->prob_skip_false, 0);
-#endif
           rate2 += prob_skip_cost;
           other_cost += prob_skip_cost;
         }

@@ -50,7 +50,6 @@ void vp8dx_bool_decoder_fill(BOOL_DECODER *br) {
 }
 
 
-#if CONFIG_NEWUPDATE
 static int get_unsigned_bits(unsigned num_values) {
   int cat = 0;
   if ((num_values--) <= 1) return 0;
@@ -99,4 +98,3 @@ int vp8_decode_term_subexp(BOOL_DECODER *br, int k, int num_syms) {
   }
   return word;
 }
-#endif

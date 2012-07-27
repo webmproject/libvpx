@@ -17,7 +17,6 @@
 
 
 const unsigned int kf_y_mode_cts[8][VP8_YMODES] = {
-#if CONFIG_NEWINTRAMODES
   /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
   {12,  6,  5,  5,  5,  5,  5,  5,  5,  2, 22, 200},
   {25, 13, 13,  7,  7,  7,  7,  7,  7,  6, 27, 160},
@@ -27,30 +26,14 @@ const unsigned int kf_y_mode_cts[8][VP8_YMODES] = {
   {68, 33, 35,  8,  8,  8,  8,  8,  8, 17, 20,  68},
   {78, 38, 38,  8,  8,  8,  8,  8,  8, 19, 16,  52},
   {89, 42, 42,  8,  8,  8,  8,  8,  8, 21, 12,  34},
-#else
-  {17,  6,  5,  2, 22, 203},
-  {27, 13, 13,  6, 27, 170},
-  {35, 17, 18,  9, 26, 152},
-  {45, 22, 24, 12, 27, 126},
-  {58, 26, 29, 13, 26, 104},
-  {73, 33, 36, 17, 20,  78},
-  {88, 38, 39, 19, 16,  57},
-  {99, 42, 43, 21, 12,  39},
-#endif
 };
 
-static const unsigned int y_mode_cts  [VP8_YMODES] =
-#if CONFIG_NEWINTRAMODES
+static const unsigned int y_mode_cts  [VP8_YMODES] = {
   /* DC V   H  D45 135 117 153 D27 D63 TM i8x8 BPRED */
-{98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 16, 70};
-#else
-  {
-    106, 25, 21, 13, 16, 74
-  };
-#endif
+  98, 19, 15, 14, 14, 14, 14, 12, 12, 13, 16, 70
+};
 
 static const unsigned int uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] = {
-#if CONFIG_NEWINTRAMODES
   /* DC   V   H  D45 135 117 153 D27 D63 TM */
   { 200, 15, 15, 10, 10, 10, 10, 10, 10,  6}, /* DC */
   { 130, 75, 10, 10, 10, 10, 10, 10, 10,  6}, /* V */
@@ -64,28 +47,14 @@ static const unsigned int uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] = {
   { 160, 30, 30, 10, 10, 10, 10, 10, 10, 16}, /* TM */
   { 132, 46, 40, 10, 10, 10, 10, 10, 10, 18}, /* i8x8 - never used */
   { 150, 35, 41, 10, 10, 10, 10, 10, 10, 10}, /* BPRED */
-#else
-  { 210, 20, 20,  6},
-  { 180, 60, 10,  6},
-  { 150, 20, 80,  6},
-  { 170, 35, 35, 16},
-  { 142, 51, 45, 18}, /* never used */
-  { 160, 40, 46, 10},
-#endif
 };
 
-static const unsigned int i8x8_mode_cts  [VP8_I8X8_MODES] =
-#if CONFIG_NEWINTRAMODES
+static const unsigned int i8x8_mode_cts  [VP8_I8X8_MODES] = {
   /* DC V   H D45 135 117 153 D27 D63  TM */
-{73, 49, 61, 30, 30, 30, 30, 30, 30, 13};
-#else
-  {
-    93, 69, 81, 13
-  };
-#endif
+  73, 49, 61, 30, 30, 30, 30, 30, 30, 13
+};
 
 static const unsigned int kf_uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] = {
-#if CONFIG_NEWINTRAMODES
   // DC   V   H  D45 135 117 153 D27 D63 TM
   { 160, 24, 24, 20, 20, 20, 20, 20, 20,  8}, /* DC */
   { 102, 64, 30, 20, 20, 20, 20, 20, 20, 10}, /* V */
@@ -99,14 +68,6 @@ static const unsigned int kf_uv_mode_cts [VP8_YMODES] [VP8_UV_MODES] = {
   { 132, 36, 30, 20, 20, 20, 20, 20, 20, 18}, /* TM */
   { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* i8x8 - never used */
   { 122, 41, 35, 20, 20, 20, 20, 20, 20, 18}, /* BPRED */
-#else
-  { 180, 34, 34,  8},
-  { 132, 74, 40, 10},
-  { 132, 40, 74, 10},
-  { 152, 46, 40, 18},
-  { 142, 51, 45, 18}, /* never used */
-  { 142, 51, 45, 18},
-#endif
 };
 
 static const unsigned int bmode_cts[VP8_BINTRAMODES] = {
@@ -201,7 +162,6 @@ const vp8_tree_index vp8_bmode_tree[VP8_BINTRAMODES * 2 - 2] = /* INTRAMODECONTE
   -B_HD_PRED, -B_HU_PRED             /* 8 = HD_NODE */
 };
 
-#if CONFIG_NEWINTRAMODES
 /* Again, these trees use the same probability indices as their
    explicitly-programmed predecessors. */
 const vp8_tree_index vp8_ymode_tree[VP8_YMODES * 2 - 2] = {
@@ -255,39 +215,6 @@ const vp8_tree_index vp8_uv_mode_tree[VP8_UV_MODES * 2 - 2] = {
   -V_PRED, 16,
   -H_PRED, -TM_PRED
 };
-
-#else  /* CONFIG_NEWINTRAMODES */
-
-/* Again, these trees use the same probability indices as their
-   explicitly-programmed predecessors. */
-const vp8_tree_index vp8_ymode_tree[10] = {
-  -DC_PRED, 2,
-  4, 6,
-  -V_PRED, -H_PRED,
-  -TM_PRED, 8,
-  -B_PRED, -I8X8_PRED
-};
-
-const vp8_tree_index vp8_kf_ymode_tree[10] = {
-  -B_PRED, 2,
-  4, 6,
-  -DC_PRED, -V_PRED,
-  -H_PRED, 8,
-  -TM_PRED, -I8X8_PRED
-};
-
-const vp8_tree_index vp8_i8x8_mode_tree[6] = {
-  -DC_PRED, 2,
-  -V_PRED, 4,
-  -H_PRED, -TM_PRED
-};
-const vp8_tree_index vp8_uv_mode_tree[6] = {
-  -DC_PRED, 2,
-  -V_PRED, 4,
-  -H_PRED, -TM_PRED
-};
-
-#endif  /* CONFIG_NEWINTRAMODES */
 
 const vp8_tree_index vp8_mbsplit_tree[6] = {
   -3, 2,
@@ -457,7 +384,7 @@ void vp8_accum_mv_refs(VP8_COMMON *pc,
 }
 
 #define MVREF_COUNT_SAT 20
-#define MVREF_MAX_UPDATE_FACTOR 128
+#define MVREF_MAX_UPDATE_FACTOR 144
 void vp8_update_mode_context(VP8_COMMON *pc) {
   int i, j;
   int (*mv_ref_ct)[4][2];
@@ -475,7 +402,6 @@ void vp8_update_mode_context(VP8_COMMON *pc) {
     for (i = 0; i < 4; i++) {
       int this_prob;
       int count = mv_ref_ct[j][i][0] + mv_ref_ct[j][i][1];
-#if CONFIG_ADAPTIVE_ENTROPY
       int factor;
       {
         this_prob = count > 0 ? 256 * mv_ref_ct[j][i][0] / count : 128;
@@ -486,14 +412,6 @@ void vp8_update_mode_context(VP8_COMMON *pc) {
         this_prob = this_prob ? (this_prob < 255 ? this_prob : 255) : 1;
         mode_context[j][i] = this_prob;
       }
-#else
-      /* preventing rare occurances from skewing the probs */
-      if (count >= 4) {
-        this_prob = 256 * mv_ref_ct[j][i][0] / count;
-        this_prob = this_prob ? (this_prob < 255 ? this_prob : 255) : 1;
-        mode_context[j][i] = this_prob;
-      }
-#endif
     }
   }
 }
@@ -529,10 +447,9 @@ void print_mv_ref_cts(VP8_COMMON *pc) {
   }
 }
 
-#if CONFIG_ADAPTIVE_ENTROPY
 // #define MODE_COUNT_TESTING
-#define MODE_COUNT_SAT 16
-#define MODE_MAX_UPDATE_FACTOR 128
+#define MODE_COUNT_SAT 20
+#define MODE_MAX_UPDATE_FACTOR 144
 void vp8_adapt_mode_probs(VP8_COMMON *cm) {
   int i, t, count, factor;
   unsigned int branch_ct[32][2];
@@ -671,4 +588,3 @@ void vp8_adapt_mode_probs(VP8_COMMON *cm) {
     else cm->fc.mbsplit_prob[t] = prob;
   }
 }
-#endif

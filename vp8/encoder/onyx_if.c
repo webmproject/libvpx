@@ -173,11 +173,7 @@ extern void (*vp8_short_fdct8x4)(short *input, short *output, int pitch);
 
 extern void vp8cx_init_quantizer(VP8_COMP *cpi);
 
-#if CONFIG_NEWENTROPY
 int vp8cx_base_skip_false_prob[QINDEX_RANGE][3];
-#else
-int vp8cx_base_skip_false_prob[QINDEX_RANGE];
-#endif
 
 // Tables relating active max Q to active min Q
 static int kf_low_motion_minq[QINDEX_RANGE];
@@ -265,7 +261,6 @@ void init_base_skip_probs() {
       skip_prob = 1;
     else if (skip_prob > 255)
       skip_prob = 255;
-#if CONFIG_NEWENTROPY
     vp8cx_base_skip_false_prob[i][1] = skip_prob;
 
     skip_prob = t * 0.75;
@@ -281,9 +276,6 @@ void init_base_skip_probs() {
     else if (skip_prob > 255)
       skip_prob = 255;
     vp8cx_base_skip_false_prob[i][0] = skip_prob;
-#else
-    vp8cx_base_skip_false_prob[i] = skip_prob;
-#endif
   }
 }
 void update_base_skip_probs(VP8_COMP *cpi) {
@@ -293,41 +285,25 @@ void update_base_skip_probs(VP8_COMP *cpi) {
     update_skip_probs(cpi);
 
     if (cm->refresh_alt_ref_frame) {
-#if CONFIG_NEWENTROPY
       int k;
       for (k = 0; k < MBSKIP_CONTEXTS; ++k)
         cpi->last_skip_false_probs[2][k] = cm->mbskip_pred_probs[k];
-#else
-      cpi->last_skip_false_probs[2] = cpi->prob_skip_false;
-#endif
       cpi->last_skip_probs_q[2] = cm->base_qindex;
     } else if (cpi->common.refresh_golden_frame) {
-#if CONFIG_NEWENTROPY
       int k;
       for (k = 0; k < MBSKIP_CONTEXTS; ++k)
         cpi->last_skip_false_probs[1][k] = cm->mbskip_pred_probs[k];
-#else
-      cpi->last_skip_false_probs[1] = cpi->prob_skip_false;
-#endif
       cpi->last_skip_probs_q[1] = cm->base_qindex;
     } else {
-#if CONFIG_NEWENTROPY
       int k;
       for (k = 0; k < MBSKIP_CONTEXTS; ++k)
         cpi->last_skip_false_probs[0][k] = cm->mbskip_pred_probs[k];
-#else
-      cpi->last_skip_false_probs[0] = cpi->prob_skip_false;
-#endif
       cpi->last_skip_probs_q[0] = cm->base_qindex;
 
       // update the baseline table for the current q
-#if CONFIG_NEWENTROPY
       for (k = 0; k < MBSKIP_CONTEXTS; ++k)
         cpi->base_skip_false_prob[cm->base_qindex][k] =
           cm->mbskip_pred_probs[k];
-#else
-      cpi->base_skip_false_prob[cm->base_qindex] = cpi->prob_skip_false;
-#endif
     }
   }
 
@@ -755,14 +731,12 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
 
       sf->thresh_mult[THR_V_PRED   ] = 1000;
       sf->thresh_mult[THR_H_PRED   ] = 1000;
-#if CONFIG_NEWINTRAMODES
       sf->thresh_mult[THR_D45_PRED ] = 1000;
       sf->thresh_mult[THR_D135_PRED] = 1000;
       sf->thresh_mult[THR_D117_PRED] = 1000;
       sf->thresh_mult[THR_D153_PRED] = 1000;
       sf->thresh_mult[THR_D27_PRED ] = 1000;
       sf->thresh_mult[THR_D63_PRED ] = 1000;
-#endif
       sf->thresh_mult[THR_B_PRED   ] = 2000;
       sf->thresh_mult[THR_I8X8_PRED] = 2000;
       sf->thresh_mult[THR_TM       ] = 1000;
@@ -810,14 +784,12 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
       sf->thresh_mult[THR_NEARMV_FILT   ] = 0;
       sf->thresh_mult[THR_V_PRED   ] = 1000;
       sf->thresh_mult[THR_H_PRED   ] = 1000;
-#if CONFIG_NEWINTRAMODES
       sf->thresh_mult[THR_D45_PRED ] = 1000;
       sf->thresh_mult[THR_D135_PRED] = 1000;
       sf->thresh_mult[THR_D117_PRED] = 1000;
       sf->thresh_mult[THR_D153_PRED] = 1000;
       sf->thresh_mult[THR_D27_PRED ] = 1000;
       sf->thresh_mult[THR_D63_PRED ] = 1000;
-#endif
       sf->thresh_mult[THR_B_PRED   ] = 2500;
       sf->thresh_mult[THR_I8X8_PRED] = 2500;
       sf->thresh_mult[THR_TM       ] = 1000;
@@ -868,14 +840,12 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
       sf->thresh_mult[THR_NEARMV   ] = 0;
       sf->thresh_mult[THR_V_PRED   ] = 1000;
       sf->thresh_mult[THR_H_PRED   ] = 1000;
-#if CONFIG_NEWINTRAMODES
       sf->thresh_mult[THR_D45_PRED ] = 1000;
       sf->thresh_mult[THR_D135_PRED] = 1000;
       sf->thresh_mult[THR_D117_PRED] = 1000;
       sf->thresh_mult[THR_D153_PRED] = 1000;
       sf->thresh_mult[THR_D27_PRED ] = 1000;
       sf->thresh_mult[THR_D63_PRED ] = 1000;
-#endif
       sf->thresh_mult[THR_B_PRED   ] = 2500;
       sf->thresh_mult[THR_I8X8_PRED] = 2500;
       sf->thresh_mult[THR_TM       ] = 1000;
@@ -952,14 +922,12 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
         sf->thresh_mult[THR_TM       ] = 1500;
         sf->thresh_mult[THR_V_PRED   ] = 1500;
         sf->thresh_mult[THR_H_PRED   ] = 1500;
-#if CONFIG_NEWINTRAMODES
         sf->thresh_mult[THR_D45_PRED ] = 1500;
         sf->thresh_mult[THR_D135_PRED] = 1500;
         sf->thresh_mult[THR_D117_PRED] = 1500;
         sf->thresh_mult[THR_D153_PRED] = 1500;
         sf->thresh_mult[THR_D27_PRED ] = 1500;
         sf->thresh_mult[THR_D63_PRED ] = 1500;
-#endif
         sf->thresh_mult[THR_B_PRED   ] = 5000;
         sf->thresh_mult[THR_I8X8_PRED] = 5000;
 
@@ -1029,14 +997,12 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
         sf->thresh_mult[THR_TM       ] = 2000;
         sf->thresh_mult[THR_V_PRED   ] = 2000;
         sf->thresh_mult[THR_H_PRED   ] = 2000;
-#if CONFIG_NEWINTRAMODES
         sf->thresh_mult[THR_D45_PRED ] = 2000;
         sf->thresh_mult[THR_D135_PRED] = 2000;
         sf->thresh_mult[THR_D117_PRED] = 2000;
         sf->thresh_mult[THR_D153_PRED] = 2000;
         sf->thresh_mult[THR_D27_PRED ] = 2000;
         sf->thresh_mult[THR_D63_PRED ] = 2000;
-#endif
         sf->thresh_mult[THR_B_PRED   ] = 7500;
         sf->thresh_mult[THR_I8X8_PRED] = 7500;
 
@@ -3243,51 +3209,31 @@ static void encode_frame_to_data_rate
 
       // setup skip prob for costing in mode/mv decision
       if (cpi->common.mb_no_coeff_skip) {
-#if CONFIG_NEWENTROPY
         int k;
         for (k = 0; k < MBSKIP_CONTEXTS; k++)
           cm->mbskip_pred_probs[k] = cpi->base_skip_false_prob[Q][k];
-#else
-        cpi->prob_skip_false = cpi->base_skip_false_prob[Q];
-#endif
 
         if (cm->frame_type != KEY_FRAME) {
           if (cpi->common.refresh_alt_ref_frame) {
-#if CONFIG_NEWENTROPY
             for (k = 0; k < MBSKIP_CONTEXTS; k++) {
               if (cpi->last_skip_false_probs[2][k] != 0)
                 cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[2][k];
             }
-#else
-            if (cpi->last_skip_false_probs[2] != 0)
-              cpi->prob_skip_false = cpi->last_skip_false_probs[2];
-#endif
           } else if (cpi->common.refresh_golden_frame) {
-#if CONFIG_NEWENTROPY
             for (k = 0; k < MBSKIP_CONTEXTS; k++) {
               if (cpi->last_skip_false_probs[1][k] != 0)
                 cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[1][k];
             }
-#else
-            if (cpi->last_skip_false_probs[1] != 0)
-              cpi->prob_skip_false = cpi->last_skip_false_probs[1];
-#endif
           } else {
-#if CONFIG_NEWENTROPY
             int k;
             for (k = 0; k < MBSKIP_CONTEXTS; k++) {
               if (cpi->last_skip_false_probs[0][k] != 0)
                 cm->mbskip_pred_probs[k] = cpi->last_skip_false_probs[0][k];
             }
-#else
-            if (cpi->last_skip_false_probs[0] != 0)
-              cpi->prob_skip_false = cpi->last_skip_false_probs[0];
-#endif
           }
 
           // as this is for cost estimate, let's make sure it does not
           // get extreme either way
-#if CONFIG_NEWENTROPY
           {
             int k;
             for (k = 0; k < MBSKIP_CONTEXTS; ++k) {
@@ -3301,18 +3247,6 @@ static void encode_frame_to_data_rate
                 cm->mbskip_pred_probs[k] = 1;
             }
           }
-#else
-          if (cpi->prob_skip_false < 5)
-            cpi->prob_skip_false = 5;
-
-          if (cpi->prob_skip_false > 250)
-            cpi->prob_skip_false = 250;
-
-          if (cpi->is_src_frame_alt_ref)
-            cpi->prob_skip_false = 1;
-#endif
-
-
         }
       }
 
@@ -3648,7 +3582,6 @@ static void encode_frame_to_data_rate
 #endif
 
   update_reference_frames(cm);
-#if CONFIG_ADAPTIVE_ENTROPY
   vp8_copy(cpi->common.fc.coef_counts, cpi->coef_counts);
   vp8_copy(cpi->common.fc.coef_counts_8x8, cpi->coef_counts_8x8);
   vp8_adapt_coef_probs(&cpi->common);
@@ -3668,7 +3601,6 @@ static void encode_frame_to_data_rate
     vp8_adapt_mv_probs(&cpi->common);
     vp8_update_mode_context(&cpi->common);
   }
-#endif  /* CONFIG_ADAPTIVE_ENTROPY */
 
   /* Move storing frame_type out of the above loop since it is also
    * needed in motion search besides loopfilter */

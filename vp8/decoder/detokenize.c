@@ -96,14 +96,9 @@ DECLARE_ALIGNED(16, extern const unsigned char, vp8_norm[256]);
 
 // #define PREV_CONTEXT_INC(val) (2+((val)>2))
 // #define PREV_CONTEXT_INC(val) (vp8_prev_token_class[(val)])
-#if CONFIG_EXPANDED_COEF_CONTEXT
 #define PREV_CONTEXT_INC(val) (vp8_prev_token_class[(val)>10?10:(val)])
-#else
-#define PREV_CONTEXT_INC(val) (2)
-#endif
 
 
-#if CONFIG_ADAPTIVE_ENTROPY
 int get_token(int v) {
   if (v < 0) v = -v;
   if (v == 0) return ZERO_TOKEN;
@@ -203,7 +198,6 @@ void static count_tokens_8x8(INT16 *qcoeff_ptr, int block, int type,
     fc->coef_counts_8x8[type][band][pt][DCT_EOB_TOKEN]++;
   }
 }
-#endif
 
 
 static int vp8_get_signed(BOOL_DECODER *br, int value_to_sign) {
@@ -335,7 +329,6 @@ static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
     val += CAT6_MIN_VAL;
     WRITE_COEF_CONTINUE(val);
   }
-#if CONFIG_ADAPTIVE_ENTROPY
 
   if (block_type == TX_4X4)
 #if CONFIG_HYBRIDTRANSFORM
@@ -346,7 +339,6 @@ static int vp8_decode_coefs(VP8D_COMP *dx, const MACROBLOCKD *xd,
 
   else
     count_tokens_8x8(qcoeff_ptr, i, type, a, l, c, seg_eob, fc);
-#endif
   return c;
 }
 

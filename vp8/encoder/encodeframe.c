@@ -411,14 +411,12 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
       THR_DC /*DC_PRED*/,
       THR_V_PRED /*V_PRED*/,
       THR_H_PRED /*H_PRED*/,
-#if CONFIG_NEWINTRAMODES
       THR_D45_PRED /*D45_PRED*/,
       THR_D135_PRED /*D135_PRED*/,
       THR_D117_PRED /*D117_PRED*/,
       THR_D153_PRED /*D153_PRED*/,
       THR_D27_PRED /*D27_PRED*/,
       THR_D63_PRED /*D63_PRED*/,
-#endif
       THR_TM /*TM_PRED*/,
       THR_I8X8_PRED /*I8X8_PRED*/,
       THR_B_PRED /*B_PRED*/,
@@ -1052,10 +1050,8 @@ void init_encode_frame_mb_context(VP8_COMP *cpi) {
   vp8_zero(cpi->y_uv_mode_count)
   vp8_zero(cpi->sub_mv_ref_count)
   vp8_zero(cpi->mbsplit_count)
-#if CONFIG_ADAPTIVE_ENTROPY
   vp8_zero(cpi->common.fc.mv_ref_ct)
   vp8_zero(cpi->common.fc.mv_ref_ct_a)
-#endif
   // vp8_zero(cpi->uv_mode_count)
 
   x->mvc = cm->fc.mvc;
@@ -1169,13 +1165,8 @@ static void encode_frame_internal(VP8_COMP *cpi) {
 
   cpi->prediction_error = 0;
   cpi->intra_error = 0;
-#if CONFIG_NEWENTROPY
   cpi->skip_true_count[0] = cpi->skip_true_count[1] = cpi->skip_true_count[2] = 0;
   cpi->skip_false_count[0] = cpi->skip_false_count[1] = cpi->skip_false_count[2] = 0;
-#else
-  cpi->skip_true_count = 0;
-  cpi->skip_false_count = 0;
-#endif
 
 #if CONFIG_PRED_FILTER
   if (cm->current_video_frame == 0) {
@@ -1689,29 +1680,19 @@ void vp8cx_encode_inter_macroblock
     }
 #endif
   } else {
-#if CONFIG_NEWENTROPY
     int mb_skip_context =
       cpi->common.mb_no_coeff_skip ?
       (x->e_mbd.mode_info_context - 1)->mbmi.mb_skip_coeff +
       (x->e_mbd.mode_info_context - cpi->common.mode_info_stride)->mbmi.mb_skip_coeff :
       0;
-#endif
     if (cpi->common.mb_no_coeff_skip) {
       xd->mode_info_context->mbmi.mb_skip_coeff = 1;
-#if CONFIG_NEWENTROPY
       cpi->skip_true_count[mb_skip_context]++;
-#else
-      cpi->skip_true_count++;
-#endif
       vp8_fix_contexts(xd);
     } else {
       vp8_stuff_mb(cpi, xd, t);
       xd->mode_info_context->mbmi.mb_skip_coeff = 0;
-#if CONFIG_NEWENTROPY
       cpi->skip_false_count[mb_skip_context]++;
-#else
-      cpi->skip_false_count++;
-#endif
     }
   }
 }
