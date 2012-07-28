@@ -1378,10 +1378,6 @@ static void update_layer_contexts (VP8_COMP *cpi)
                     oxcf->target_bitrate[i-1]) * 1000 /
                     (lc->frame_rate - prev_layer_frame_rate);
 
-            lc->active_worst_quality         = oxcf->worst_allowed_q;
-            lc->active_best_quality          = oxcf->best_allowed_q;
-            lc->avg_frame_qindex             = oxcf->worst_allowed_q;
-
             prev_layer_frame_rate = lc->frame_rate;
         }
     }
