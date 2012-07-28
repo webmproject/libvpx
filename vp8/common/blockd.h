@@ -80,12 +80,10 @@ typedef enum
 {
   SIXTAP   = 0,
   BILINEAR = 1,
-#if CONFIG_ENHANCED_INTERP
   EIGHTTAP = 2,
   EIGHTTAP_SHARP = 3,
 #if CONFIG_SWITCHABLE_INTERP
   SWITCHABLE  /* should be the last one */
-#endif
 #endif
 } INTERPOLATIONFILTERTYPE;
 

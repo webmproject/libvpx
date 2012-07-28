@@ -38,7 +38,6 @@ void vp8_setup_interp_filters(MACROBLOCKD *xd,
     xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
         &cm->rtcd.subpix, sixtap_avg16x16);
   }
-#if CONFIG_ENHANCED_INTERP
   else if (mcomp_filter_type == EIGHTTAP
 #if CONFIG_SWITCHABLE_INTERP
            ||
@@ -75,7 +74,6 @@ void vp8_setup_interp_filters(MACROBLOCKD *xd,
     xd->subpixel_predict_avg16x16 = SUBPIX_INVOKE(
         &cm->rtcd.subpix, eighttap_avg16x16_sharp);
   }
-#endif
   else {
     xd->subpixel_predict        = SUBPIX_INVOKE(
         &cm->rtcd.subpix, bilinear4x4);

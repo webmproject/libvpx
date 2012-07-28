@@ -2273,7 +2273,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     // Signal whether to allow high MV precision
     vp8_write_bit(bc, (xd->allow_high_precision_mv) ? 1 : 0);
 #endif
-#if CONFIG_ENHANCED_INTERP
 #if CONFIG_SWITCHABLE_INTERP
     if (pc->mcomp_filter_type == SWITCHABLE) {
       /* Check to see if only one of the filters is actually used */
@@ -2301,7 +2300,6 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     if (pc->mcomp_filter_type != SWITCHABLE)
 #endif  /* CONFIG_SWITCHABLE_INTERP */
       vp8_write_literal(bc, (pc->mcomp_filter_type), 2);
-#endif  /* CONFIG_ENHANCED_INTERP */
   }
 
   vp8_write_bit(bc, pc->refresh_entropy_probs);

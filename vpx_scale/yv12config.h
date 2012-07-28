@@ -11,6 +11,9 @@
 
 #ifndef YV12_CONFIG_H
 #define YV12_CONFIG_H
+
+#include "vpx_config.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -18,13 +21,8 @@ extern "C"
 
 #define VP7BORDERINPIXELS       48
 
-#if CONFIG_ENHANCED_INTERP
 #define VP8BORDERINPIXELS       64
 #define INTERP_EXTEND            4
-#else
-#define VP8BORDERINPIXELS       32
-#define INTERP_EXTEND            3
-#endif
 
   /*************************************
    For INT_YUV:

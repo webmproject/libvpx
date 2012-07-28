@@ -81,17 +81,19 @@ static void set_default_lf_deltas(VP8_COMP *cpi);
 
 extern const int vp8_gf_interval_table[101];
 
-#if CONFIG_ENHANCED_INTERP
-#define SEARCH_BEST_FILTER 0            /* to search for best filter */
+#define SEARCH_BEST_FILTER 0            /* to search exhaustively for
+                                           best filter */
 #define RESET_FOREACH_FILTER 0          /* whether to reset the encoder state
-                                         * before trying each new filter */
-#define SHARP_FILTER_QTHRESH 0         /* Q threshold for 8-tap sharp filter */
-#endif
+                                           before trying each new filter */
+#define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
+
 #if CONFIG_HIGH_PRECISION_MV
-#define ALTREF_HIGH_PRECISION_MV 1      /* whether to use high precision mv for altref computation */
-#define HIGH_PRECISION_MV_QTHRESH 200   /* Q threshold for use of high precision mv
-                                         * Choose a very high value for now so
-                                         * that HIGH_PRECISION is always chosen */
+#define ALTREF_HIGH_PRECISION_MV 1      /* whether to use high precision mv
+                                           for altref computation */
+#define HIGH_PRECISION_MV_QTHRESH 200   /* Q threshold for use of high precision
+                                           mv. Choose a very high value for
+                                           now so that HIGH_PRECISION is always
+                                           chosen */
 #endif
 
 #if CONFIG_INTERNAL_STATS
@@ -778,9 +780,7 @@ void vp8_set_speed_features(VP8_COMP *cpi) {
 
       sf->first_step = 0;
       sf->max_step_search_steps = MAX_MVSEARCH_STEPS;
-#if CONFIG_ENHANCED_INTERP
       sf->search_best_filter = SEARCH_BEST_FILTER;
-#endif
       break;
     case 1:
 #if CONFIG_PRED_FILTER
@@ -1586,11 +1586,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
   cpi->cq_target_quality = cpi->oxcf.cq_level;
 
   if (!cm->use_bilinear_mc_filter)
-#if CONFIG_ENHANCED_INTERP
     cm->mcomp_filter_type = EIGHTTAP;
-#else
-    cm->mcomp_filter_type = SIXTAP;
-#endif
   else
     cm->mcomp_filter_type = BILINEAR;
 
@@ -2895,7 +2891,6 @@ static void encode_frame_to_data_rate
 
   int loop_size_estimate = 0;
 
-#if CONFIG_ENHANCED_INTERP
   SPEED_FEATURES *sf = &cpi->sf;
 #if RESET_FOREACH_FILTER
   int q_low0;
@@ -2921,7 +2916,6 @@ static void encode_frame_to_data_rate
   int mcomp_filters = sizeof(mcomp_filters_to_search) / sizeof(*mcomp_filters_to_search);
   int mcomp_filter_index = 0;
   INT64 mcomp_filter_cost[4];
-#endif
 
   // Clear down mmx registers to allow floating point in what follows
   vp8_clear_system_state();
@@ -3137,9 +3131,7 @@ static void encode_frame_to_data_rate
 
   loop_count = 0;
 
-#if CONFIG_HIGH_PRECISION_MV || CONFIG_ENHANCED_INTERP
   if (cm->frame_type != KEY_FRAME) {
-#if CONFIG_ENHANCED_INTERP
     /* TODO: Decide this more intelligently */
     if (sf->search_best_filter) {
       cm->mcomp_filter_type = mcomp_filters_to_search[0];
@@ -3152,13 +3144,11 @@ static void encode_frame_to_data_rate
           (Q < SHARP_FILTER_QTHRESH ? EIGHTTAP_SHARP : EIGHTTAP);
 #endif
     }
-#endif
 #if CONFIG_HIGH_PRECISION_MV
     /* TODO: Decide this more intelligently */
     xd->allow_high_precision_mv = (Q < HIGH_PRECISION_MV_QTHRESH);
 #endif
   }
-#endif
 
 #if CONFIG_POSTPROC
 
@@ -3206,7 +3196,7 @@ static void encode_frame_to_data_rate
   vp8_write_yuv_frame(cpi->Source);
 #endif
 
-#if CONFIG_ENHANCED_INTERP && RESET_FOREACH_FILTER
+#if RESET_FOREACH_FILTER
   if (sf->search_best_filter) {
     q_low0 = q_low;
     q_high0 = q_high;
@@ -3468,7 +3458,7 @@ static void encode_frame_to_data_rate
     if (cpi->is_src_frame_alt_ref)
       Loop = FALSE;
 
-#if CONFIG_ENHANCED_INTERP && CONFIG_SWITCHABLE_INTERP
+#if CONFIG_SWITCHABLE_INTERP
     if (cm->frame_type != KEY_FRAME &&
         !sf->search_best_filter &&
         cm->mcomp_filter_type == SWITCHABLE) {
@@ -3502,7 +3492,6 @@ static void encode_frame_to_data_rate
     }
 #endif
 
-#if CONFIG_ENHANCED_INTERP
     if (Loop == FALSE && cm->frame_type != KEY_FRAME && sf->search_best_filter) {
       if (mcomp_filter_index < mcomp_filters) {
         INT64 err = vp8_calc_ss_err(cpi->Source,
@@ -3555,7 +3544,6 @@ static void encode_frame_to_data_rate
 #endif
       }
     }
-#endif  /* CONFIG_ENHANCED_INTERP */
 
     if (Loop == TRUE) {
       loop_count++;

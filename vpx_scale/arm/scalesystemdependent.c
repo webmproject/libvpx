@@ -87,9 +87,11 @@ void vp8_scale_machine_specific_config() {
   if (flags & HAS_NEON)
 #endif
   {
+#if VP8BORDERINPIXELS == 32
     vp8_yv12_extend_frame_borders_ptr = vp8_yv12_extend_frame_borders_neon;
     vp8_yv12_copy_frame_yonly_ptr     = vp8_yv12_copy_frame_yonly_neon;
     vp8_yv12_copy_frame_ptr           = vp8_yv12_copy_frame_neon;
+#endif
   }
 #endif
 }

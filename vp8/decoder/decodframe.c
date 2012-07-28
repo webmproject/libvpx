@@ -746,15 +746,11 @@ static void init_frame(VP8D_COMP *pbi) {
   } else {
 
     if (!pc->use_bilinear_mc_filter)
-#if CONFIG_ENHANCED_INTERP
       pc->mcomp_filter_type = EIGHTTAP;
-#else
-      pc->mcomp_filter_type = SIXTAP;
-#endif
     else
       pc->mcomp_filter_type = BILINEAR;
 
-    /* To enable choice of different interploation filters */
+    /* To enable choice of different interpolation filters */
     vp8_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
   }
 
@@ -1226,7 +1222,6 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     /* Is high precision mv allowed */
     xd->allow_high_precision_mv = (unsigned char)vp8_read_bit(bc);
 #endif
-#if CONFIG_ENHANCED_INTERP
     // Read the type of subpel filter to use
 #if CONFIG_SWITCHABLE_INTERP
     if (vp8_read_bit(bc)) {
@@ -1238,7 +1233,6 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     }
     /* To enable choice of different interploation filters */
     vp8_setup_interp_filters(xd, pc->mcomp_filter_type, pc);
-#endif
   }
 
   pc->refresh_entropy_probs = vp8_read_bit(bc);
