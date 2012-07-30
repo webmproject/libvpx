@@ -16,6 +16,24 @@
       "revId": "9a647d85287bbc31614f526bae6c6bc34b3f0c73",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAOn///lQ\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 735,
+      "author": {
+        "id": 1001184
+      },
+      "writtenOn": "2012-07-30T18:34:59Z",
+      "side": 1,
+      "message": "These were missing from the PRED_FILTER patch.",
+      "parentUuid": "AAAAOn///zs\u003d",
+      "revId": "9a647d85287bbc31614f526bae6c6bc34b3f0c73",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
