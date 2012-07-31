@@ -79,9 +79,7 @@ extern struct vp8_token_struct vp8_small_mvencodings_hp [16];
 #endif
 
 void vp8_entropy_mv_init();
-#if CONFIG_ADAPTIVE_ENTROPY
 struct VP8Common;
 void vp8_adapt_mv_probs(struct VP8Common *cm);
-#endif
 
 #endif

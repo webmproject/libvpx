@@ -170,11 +170,9 @@ vp8_prob *get_pred_probs(VP8_COMMON *const cm,
       pred_probability = &cm->prob_comppred[pred_context];
       break;
 
-#if CONFIG_NEWENTROPY
     case PRED_MBSKIP:
       pred_probability = &cm->mbskip_pred_probs[pred_context];
       break;
-#endif
 
 #if CONFIG_SWITCHABLE_INTERP
     case PRED_SWITCHABLE_INTERP:
