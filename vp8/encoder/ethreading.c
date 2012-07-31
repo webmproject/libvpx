@@ -59,8 +59,6 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
     MB_ROW_COMP *mbri = (MB_ROW_COMP *)(((ENCODETHREAD_DATA *)p_data)->ptr2);
     ENTROPY_CONTEXT_PLANES mb_row_left_context;
 
-    const int nsync = cpi->mt_sync_range;
-
     while (1)
     {
         if (cpi->b_multi_threaded == 0)
@@ -68,6 +66,7 @@ THREAD_FUNCTION thread_encoding_proc(void *p_data)
 
         if (sem_wait(&cpi->h_event_start_encoding[ithread]) == 0)
         {
+            const int nsync = cpi->mt_sync_range;
             VP8_COMMON *cm = &cpi->common;
             int mb_row;
             MACROBLOCK *x = &mbri->mb;
