@@ -653,7 +653,11 @@ static int rd_pick_intra4x4block(
     DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16*4);
     DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16);
     int dst_stride = x->e_mbd.dst.y_stride;
-    unsigned char *base_dst = x->e_mbd.dst.y_buffer;
+    unsigned char *dst = x->e_mbd.dst.y_buffer + b->offset;
+
+    unsigned char *Above = dst - dst_stride;
+    unsigned char *yleft = dst - 1;
+    unsigned char top_left = Above[-1];
 
     for (mode = B_DC_PRED; mode <= B_HU_PRED; mode++)
     {
@@ -662,8 +666,8 @@ static int rd_pick_intra4x4block(
 
         rate = bmode_costs[mode];
 
-        vp8_intra4x4_predict(base_dst + b->offset, dst_stride, mode,
-                             b->predictor, 16);
+        vp8_intra4x4_predict_d(Above, yleft, dst_stride, mode,
+                               b->predictor, 16, top_left);
         vp8_subtract_b(be, b, 16);
         x->short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b(be, b);
@@ -692,8 +696,7 @@ static int rd_pick_intra4x4block(
     }
     b->bmi.as_mode = (B_PREDICTION_MODE)(*best_mode);
 
-    vp8_short_idct4x4llm(best_dqcoeff, best_predictor, 16, base_dst + b->offset,
-                         dst_stride);
+    vp8_short_idct4x4llm(best_dqcoeff, best_predictor, 16, dst, dst_stride);
 
     return best_rd;
 }

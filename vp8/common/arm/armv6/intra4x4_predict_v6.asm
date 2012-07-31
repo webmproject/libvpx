@@ -18,8 +18,8 @@
     AREA ||.text||, CODE, READONLY, ALIGN=2
 
 
-;void vp8_intra4x4_predict(unsigned char *src, int src_stride, int b_mode,
-;                          unsigned char *dst, int dst_stride)
+;void vp8_intra4x4_predict_armv6(unsigned char *src, int src_stride, int b_mode,
+;                                unsigned char *dst, int dst_stride)
 
 |vp8_intra4x4_predict_armv6| PROC
     push        {r4-r12, lr}

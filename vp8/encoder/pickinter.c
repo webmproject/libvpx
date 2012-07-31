@@ -141,20 +141,24 @@ static int pick_intra4x4block(
     BLOCKD *b = &x->e_mbd.block[ib];
     BLOCK *be = &x->block[ib];
     int dst_stride = x->e_mbd.dst.y_stride;
-    unsigned char *base_dst = x->e_mbd.dst.y_buffer;
+    unsigned char *dst = x->e_mbd.dst.y_buffer + b->offset;
     B_PREDICTION_MODE mode;
     int best_rd = INT_MAX;
     int rate;
     int distortion;
+
+    unsigned char *Above = dst - dst_stride;
+    unsigned char *yleft = dst - 1;
+    unsigned char top_left = Above[-1];
 
     for (mode = B_DC_PRED; mode <= B_HE_PRED /*B_HU_PRED*/; mode++)
     {
         int this_rd;
 
         rate = mode_costs[mode];
-        vp8_intra4x4_predict
-                     (base_dst + b->offset, dst_stride,
-                      mode, b->predictor, 16);
+
+        vp8_intra4x4_predict_d(Above, yleft, dst_stride, mode,
+                               b->predictor,16, top_left);
         distortion = get_prediction_error(be, b);
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
