@@ -300,9 +300,9 @@ void vp8_intra4x4_predict_c(unsigned char *src, int src_stride,
 {
     unsigned char *Above = src - src_stride;
 
-    vp8_intra4x4_predict_d_c(Above,
-                             src - 1, src_stride,
-                             b_mode,
-                             dst, dst_stride,
-                             Above[-1]);
+    vp8_intra4x4_predict_d(Above,
+                           src - 1, src_stride,
+                           b_mode,
+                           dst, dst_stride,
+                           Above[-1]);
 }

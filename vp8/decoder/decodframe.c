@@ -199,7 +199,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 left_stride = dst_stride;
                 top_left = yabove[-1];
 
-                vp8_intra4x4_predict_d_c(yabove, yleft, left_stride,
+                vp8_intra4x4_predict_d(yabove, yleft, left_stride,
                                        b_mode,
                                        base_dst + b->offset, dst_stride,
                                        top_left);
