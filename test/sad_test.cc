@@ -28,7 +28,7 @@ typedef unsigned int (*sad_m_by_n_fn_t)(const unsigned char *source_ptr,
                                         int source_stride,
                                         const unsigned char *reference_ptr,
                                         int reference_stride,
-                                        int max_sad);
+                                        unsigned int max_sad);
 
 using libvpx_test::ACMRandom;
 
@@ -45,7 +45,7 @@ class SADTest : public PARAMS(int, int, sad_m_by_n_fn_t) {
   }
 
   sad_m_by_n_fn_t sad_fn_;
-  virtual unsigned int SAD(int max_sad) {
+  virtual unsigned int SAD(unsigned int max_sad) {
     return sad_fn_(source_data_, source_stride_,
                    reference_data_, reference_stride_,
                    max_sad);
@@ -111,13 +111,13 @@ class SADTest : public PARAMS(int, int, sad_m_by_n_fn_t) {
 TEST_P(SADTest, MaxRef) {
   FillConstant(source_data_, source_stride_, 0);
   FillConstant(reference_data_, reference_stride_, 255);
-  CheckSad(INT_MAX);
+  CheckSad(UINT_MAX);
 }
 
 TEST_P(SADTest, MaxSrc) {
   FillConstant(source_data_, source_stride_, 255);
   FillConstant(reference_data_, reference_stride_, 0);
-  CheckSad(INT_MAX);
+  CheckSad(UINT_MAX);
 }
 
 TEST_P(SADTest, ShortRef) {
@@ -125,7 +125,7 @@ TEST_P(SADTest, ShortRef) {
   reference_stride_ >>= 1;
   FillRandom(source_data_, source_stride_);
   FillRandom(reference_data_, reference_stride_);
-  CheckSad(INT_MAX);
+  CheckSad(UINT_MAX);
   reference_stride_ = tmp_stride;
 }
 
@@ -136,7 +136,7 @@ TEST_P(SADTest, UnalignedRef) {
   reference_stride_ -= 1;
   FillRandom(source_data_, source_stride_);
   FillRandom(reference_data_, reference_stride_);
-  CheckSad(INT_MAX);
+  CheckSad(UINT_MAX);
   reference_stride_ = tmp_stride;
 }
 
@@ -145,7 +145,7 @@ TEST_P(SADTest, ShortSrc) {
   source_stride_ >>= 1;
   FillRandom(source_data_, source_stride_);
   FillRandom(reference_data_, reference_stride_);
-  CheckSad(INT_MAX);
+  CheckSad(UINT_MAX);
   source_stride_ = tmp_stride;
 }
 
