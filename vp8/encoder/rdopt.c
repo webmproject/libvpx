@@ -666,8 +666,8 @@ static int rd_pick_intra4x4block(
 
         rate = bmode_costs[mode];
 
-        vp8_intra4x4_predict_d(Above, yleft, dst_stride, mode,
-                               b->predictor, 16, top_left);
+        vp8_intra4x4_predict(Above, yleft, dst_stride, mode,
+                             b->predictor, 16, top_left);
         vp8_subtract_b(be, b, 16);
         x->short_fdct4x4(be->src_diff, be->coeff, 32);
         x->quantize_b(be, b);

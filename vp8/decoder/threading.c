@@ -205,8 +205,8 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 else
                     top_left = Above[-1];
 
-                vp8_intra4x4_predict_d(Above, yleft, left_stride,
-                                       b_mode, dst, dst_stride, top_left);
+                vp8_intra4x4_predict(Above, yleft, left_stride,
+                                     b_mode, dst, dst_stride, top_left);
 
                 if (xd->eobs[i] )
                 {

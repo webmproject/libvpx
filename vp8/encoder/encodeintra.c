@@ -59,8 +59,8 @@ void vp8_encode_intra4x4block(MACROBLOCK *x, int ib)
     unsigned char *yleft = dst - 1;
     unsigned char top_left = Above[-1];
 
-    vp8_intra4x4_predict_d(Above, yleft, dst_stride, b->bmi.as_mode,
-                           b->predictor, 16, top_left);
+    vp8_intra4x4_predict(Above, yleft, dst_stride, b->bmi.as_mode,
+                         b->predictor, 16, top_left);
 
     vp8_subtract_b(be, b, 16);
 

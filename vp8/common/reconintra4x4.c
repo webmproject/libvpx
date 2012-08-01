@@ -13,11 +13,11 @@
 #include "vpx_rtcd.h"
 #include "blockd.h"
 
-void vp8_intra4x4_predict_d_c(unsigned char *Above,
-                              unsigned char *yleft, int left_stride,
-                              int b_mode,
-                              unsigned char *dst, int dst_stride,
-                              unsigned char top_left)
+void vp8_intra4x4_predict_c(unsigned char *Above,
+                            unsigned char *yleft, int left_stride,
+                            int b_mode,
+                            unsigned char *dst, int dst_stride,
+                            unsigned char top_left)
 {
     int i, r, c;
 
@@ -292,17 +292,4 @@ void vp8_intra4x4_predict_d_c(unsigned char *Above,
 
 
     }
-}
-
-void vp8_intra4x4_predict_c(unsigned char *src, int src_stride,
-                            int b_mode,
-                            unsigned char *dst, int dst_stride)
-{
-    unsigned char *Above = src - src_stride;
-
-    vp8_intra4x4_predict_d(Above,
-                           src - 1, src_stride,
-                           b_mode,
-                           dst, dst_stride,
-                           Above[-1]);
 }
