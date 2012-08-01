@@ -124,7 +124,8 @@ void static count_tokens_adaptive_scan(const MACROBLOCKD *xd, INT16 *qcoeff_ptr,
 
   int QIndex = xd->q_index;
   int active_ht = (QIndex < ACTIVE_HT) &&
-                  (xd->mode_info_context->mbmi.mode == B_PRED);
+                  (xd->mode_info_context->mbmi.mode == B_PRED) &&
+                  (type == PLANE_TYPE_Y_WITH_DC);
 
   if(active_ht) {
     switch(xd->block[block].bmi.as_mode.tx_type) {
@@ -351,8 +352,16 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   const int segment_id = xd->mode_info_context->mbmi.segment_id;
   const int seg_active = segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
+
+#if CONFIG_HTRANS8X8
+  int bufthred = (xd->mode_info_context->mbmi.mode == I8X8_PRED) ? 16 : 24;
+  if (xd->mode_info_context->mbmi.mode != B_PRED &&
+      xd->mode_info_context->mbmi.mode != SPLITMV &&
+      xd->mode_info_context->mbmi.mode != I8X8_PRED) {
+#else
   if (xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV) {
+#endif
     ENTROPY_CONTEXT *const a = A + vp8_block2above_8x8[24];
     ENTROPY_CONTEXT *const l = L + vp8_block2left_8x8[24];
     const int *const scan = vp8_default_zig_zag1d;
@@ -376,10 +385,16 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
   else
     seg_eob = 64;
+
+#if CONFIG_HTRANS8X8
+  for (i = 0; i < bufthred ; i += 4) {
+#else
   for (i = 0; i < 24; i += 4) {
+#endif
     ENTROPY_CONTEXT *const a = A + vp8_block2above_8x8[i];
     ENTROPY_CONTEXT *const l = L + vp8_block2left_8x8[i];
     const int *const scan = vp8_default_zig_zag1d_8x8;
+
     if (i == 16)
       type = PLANE_TYPE_UV;
 
@@ -392,6 +407,27 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     eobtotal += c;
     qcoeff_ptr += 64;
   }
+
+#if CONFIG_HTRANS8X8
+  if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+    type = PLANE_TYPE_UV;
+    seg_eob = 16;
+
+    // use 4x4 transform for U, V components in I8X8 prediction mode
+    for (i = 16; i < 24; i++) {
+      ENTROPY_CONTEXT *const a = A + vp8_block2above[i];
+      ENTROPY_CONTEXT *const l = L + vp8_block2left[i];
+      const int *scan = vp8_default_zig_zag1d;
+
+      c = vp8_decode_coefs(pbi, xd, a, l, type, seg_eob, qcoeff_ptr,
+                           i, scan, TX_4X4, coef_bands_x);
+      a[0] = l[0] = ((eobs[i] = c) != !type);
+
+      eobtotal += c;
+      qcoeff_ptr += 16;
+    }
+  }
+#endif
 
   return eobtotal;
 }

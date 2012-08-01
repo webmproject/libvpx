@@ -447,6 +447,20 @@ int vp8_block_error_c(short *coeff, short *dqcoeff) {
   return error;
 }
 
+#if CONFIG_HTRANS8X8
+int vp8_submb_error_c(short *coeff, short *dqcoeff) {
+  int i;
+  int error = 0;
+
+  for (i = 0; i < 64; i++) {
+    int this_diff = coeff[i] - dqcoeff[i];
+    error += this_diff * this_diff;
+  }
+
+  return error;
+}
+#endif
+
 int vp8_mbblock_error_c(MACROBLOCK *mb, int dc) {
   BLOCK  *be;
   BLOCKD *bd;
@@ -1175,6 +1189,12 @@ static int rd_pick_intra8x8block(
   DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16 * 8);
   DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16 * 4);
 
+#if CONFIG_HTRANS8X8
+  // perform transformation of dimension 8x8
+  // note the input and output index mapping
+  int idx = (ib & 0x02) ? (ib + 2) : ib;
+#endif
+
   for (mode = DC_PRED; mode <= TM_PRED; mode++) {
 #if CONFIG_COMP_INTRA_PRED
     for (mode2 = DC_PRED - 1; mode2 != TM_PRED + 1; mode2++) {
@@ -1200,6 +1220,24 @@ static int rd_pick_intra8x8block(
 
       vp8_subtract_4b_c(be, b, 16);
 
+#if CONFIG_HTRANS8X8
+      x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+      x->quantize_b_8x8(x->block + idx, xd->block + idx);
+
+      // compute quantization mse of 8x8 block
+      distortion = vp8_submb_error_c((x->block + idx)->coeff,
+                                     (xd->block + idx)->dqcoeff)>>2;
+
+      ta0 = *(a + vp8_block2above_8x8[idx]);
+      tl0 = *(l + vp8_block2left_8x8 [idx]);
+
+      rate_t = cost_coeffs_8x8(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
+                               &ta0,
+                               &tl0);
+      rate += rate_t;
+      ta1 = ta0;
+      tl1 = tl0;
+#else
       x->vp8_short_fdct8x4(be->src_diff, be->coeff, 32);
       x->vp8_short_fdct8x4(be->src_diff + 64, be->coeff + 64, 32);
 
@@ -1230,6 +1268,8 @@ static int rd_pick_intra8x8block(
       rate_t += cost_coeffs(x, xd->block + ib + 5, PLANE_TYPE_Y_WITH_DC,
                             &ta1, &tl1);
       rate += rate_t;
+#endif
+
       this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
       if (this_rd < best_rd) {
         *bestrate = rate;
@@ -1257,10 +1297,18 @@ static int rd_pick_intra8x8block(
   b->bmi.as_mode.second = (*best_second_mode);
 #endif
   vp8_encode_intra8x8(IF_RTCD(&cpi->rtcd), x, ib);
+
+#if CONFIG_HTRANS8X8
+  *(a + vp8_block2above_8x8[idx])     = besta0;
+  *(a + vp8_block2above_8x8[idx] + 1) = besta1;
+  *(l + vp8_block2left_8x8 [idx])     = bestl0;
+  *(l + vp8_block2left_8x8 [idx] + 1) = bestl1;
+#else
   *(a + vp8_block2above[ib])   = besta0;
   *(a + vp8_block2above[ib + 1]) = besta1;
   *(l + vp8_block2above[ib])   = bestl0;
   *(l + vp8_block2above[ib + 4]) = bestl1;
+#endif
   return best_rd;
 }
 

@@ -226,6 +226,7 @@ EXPERIMENT_LIST="
     lossless
     hybridtransform
     switchable_interp
+    htrans8x8
 "
 CONFIG_LIST="
     external_build

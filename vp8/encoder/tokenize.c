@@ -334,9 +334,8 @@ static void tokenize1st_order_ht(   MACROBLOCKD *xd,
     }
 
     // assign scanning order for luma components coded in intra4x4 mode
-    if( ( ( xd->mode_info_context->mbmi.mode == B_PRED ) ||
-          ( xd->mode_info_context->mbmi.mode == I8X8_PRED ) ) &&
-        ( type == PLANE_TYPE_Y_WITH_DC) ) {
+    if( (xd->mode_info_context->mbmi.mode == B_PRED) &&
+        (type == PLANE_TYPE_Y_WITH_DC) ) {
       switch(b_mode) {
         case B_VE_PRED :
         case B_VR_PRED :
@@ -448,6 +447,84 @@ static void tokenize1st_order_ht(   MACROBLOCKD *xd,
       t++;
     }
 
+    *tp = t;
+    pt = (c != 0); /* 0 <-> all coeff data is zero */
+    *a = *l = pt;
+  }
+}
+#endif
+
+
+#if CONFIG_HTRANS8X8
+static void tokenize1st_order_chroma
+(
+  MACROBLOCKD *xd,
+  TOKENEXTRA **tp,
+  int type,           /* which plane: 0=Y no DC, 1=Y2, 2=UV, 3=Y with DC */
+  VP8_COMP *cpi
+) {
+  unsigned int block;
+  const BLOCKD *b;
+  int pt;             /* near block/prev token context index */
+  int c;
+  int token;
+  TOKENEXTRA *t = *tp;/* store tokens starting here */
+  const short *qcoeff_ptr;
+  ENTROPY_CONTEXT *a;
+  ENTROPY_CONTEXT *l;
+  int band, rc, v;
+  int tmp1, tmp2;
+
+  int seg_eob = 16;
+  int segment_id = xd->mode_info_context->mbmi.segment_id;
+
+  if (segfeature_active(xd, segment_id, SEG_LVL_EOB)) {
+    seg_eob = get_segdata(xd, segment_id, SEG_LVL_EOB);
+  }
+
+  b = xd->block;
+  b += 16;
+
+  /* Chroma */
+  for (block = 16; block < 24; block++, b++) {
+    tmp1 = vp8_block2above[block];
+    tmp2 = vp8_block2left[block];
+    qcoeff_ptr = b->qcoeff;
+    a = (ENTROPY_CONTEXT *)xd->above_context + tmp1;
+    l = (ENTROPY_CONTEXT *)xd->left_context + tmp2;
+
+    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+
+    for (c = 0; c < b->eob; c++) {
+      rc = vp8_default_zig_zag1d[c];
+      band = vp8_coef_bands[c];
+      v = qcoeff_ptr[rc];
+
+      t->Extra = vp8_dct_value_tokens_ptr[v].Extra;
+      token    = vp8_dct_value_tokens_ptr[v].Token;
+
+      t->Token = token;
+      t->context_tree = cpi->common.fc.coef_probs [2] [band] [pt];
+
+      t->skip_eob_node = ((pt == 0) && (band > 0));
+
+      ++cpi->coef_counts       [2] [band] [pt] [token];
+
+      pt = vp8_prev_token_class[token];
+      t++;
+    }
+
+    if (c < seg_eob) {
+      band = vp8_coef_bands[c];
+      t->Token = DCT_EOB_TOKEN;
+      t->context_tree = cpi->common.fc.coef_probs [2] [band] [pt];
+
+      t->skip_eob_node = ((pt == 0) && (band > 0));
+
+      ++cpi->coef_counts       [2] [band] [pt] [DCT_EOB_TOKEN];
+
+      t++;
+    }
     *tp = t;
     pt = (c != 0); /* 0 <-> all coeff data is zero */
     *a = *l = pt;
@@ -640,7 +717,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) {
 
 #if CONFIG_HYBRIDTRANSFORM
     int QIndex = cpi->mb.q_index;
-    int active_ht = (QIndex < ACTIVE_HT);
+    int active_ht = (QIndex < ACTIVE_HT) &&
+                    (x->mode_info_context->mbmi.mode == B_PRED);
 #endif
 
   if (!segfeature_active(x, segment_id, SEG_LVL_EOB) ||
@@ -717,7 +795,29 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) {
     if(active_ht) {
       tokenize1st_order_ht(x, t, plane_type, cpi);
     } else {
+
+#if CONFIG_HTRANS8X8
+      if (x->mode_info_context->mbmi.mode == I8X8_PRED) {
+        ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
+        ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
+        for (b = 0; b < 16; b += 4) {
+          tokenize1st_order_b_8x8(x,
+                                  x->block + b, t, PLANE_TYPE_Y_WITH_DC,
+                                  x->frame_type,
+                                  A + vp8_block2above_8x8[b],
+                                  L + vp8_block2left_8x8[b],
+                                  cpi);
+          *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
+          *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
+        }
+        tokenize1st_order_chroma(x, t, PLANE_TYPE_UV, cpi);
+      } else {
+        tokenize1st_order_b(x, t, plane_type, cpi);
+      }
+#else
       tokenize1st_order_b(x, t, plane_type, cpi);
+#endif
+
     }
 #else
     tokenize1st_order_b(x, t, plane_type, cpi);

@@ -63,7 +63,11 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 
 #define BLOCK_TYPES 4
 
+#if CONFIG_HTRANS8X8
+#define BLOCK_TYPES_8X8 4
+#else
 #define BLOCK_TYPES_8X8 3
+#endif
 
 /* Middle dimension is a coarsening of the coefficient's
    position within the 4x4 DCT. */

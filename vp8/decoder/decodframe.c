@@ -235,6 +235,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         xd->mode_info_context->mbmi.txfm_size = TX_8X8;
     }
   }
+
+#if CONFIG_HTRANS8X8
+  if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+    xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+  }
+#endif
+
   tx_type = xd->mode_info_context->mbmi.txfm_size;
 
   if (xd->mode_info_context->mbmi.mb_skip_coeff) {
@@ -356,11 +363,28 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       int i8x8mode;
       BLOCKD *b;
 
+#if CONFIG_HTRANS8X8
+      int idx = (ib & 0x02) ? (ib + 2) : ib;
+
+      short *q  = xd->block[idx].qcoeff;
+      short *dq = xd->block[0].dequant;
+      unsigned char *pre = xd->block[ib].predictor;
+      unsigned char *dst = *(xd->block[ib].base_dst) + xd->block[ib].dst;
+      int stride = xd->dst.y_stride;
+
+      tx_type = TX_4X4;
+      xd->mode_info_context->mbmi.txfm_size = TX_4X4;
+#endif
+
       b = &xd->block[ib];
       i8x8mode = b->bmi.as_mode.first;
       RECON_INVOKE(RTCD_VTABLE(recon), intra8x8_predict)
       (b, i8x8mode, b->predictor);
 
+#if CONFIG_HTRANS8X8
+      vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
+      q += 64;
+#else
       for (j = 0; j < 4; j++) {
         b = &xd->block[ib + iblock[j]];
         if (xd->eobs[ib + iblock[j]] > 1) {
@@ -374,6 +398,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
           ((int *)b->qcoeff)[0] = 0;
         }
       }
+#endif
 
       b = &xd->block[16 + i];
       RECON_INVOKE(RTCD_VTABLE(recon), intra_uv4x4_predict)
