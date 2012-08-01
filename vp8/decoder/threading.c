@@ -166,7 +166,6 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         {
             short *DQC = xd->dequant_y1;
             int dst_stride = xd->dst.y_stride;
-            unsigned char *base_dst = xd->dst.y_buffer;
 
             /* clear out residual eob info */
             if(xd->mode_info_context->mbmi.mb_skip_coeff)
@@ -177,17 +176,18 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             for (i = 0; i < 16; i++)
             {
                 BLOCKD *b = &xd->block[i];
+                unsigned char *dst = xd->dst.y_buffer + b->offset;
                 int b_mode = xd->mode_info_context->bmi[i].as_mode;
-                unsigned char *yabove;
+                unsigned char *Above;
                 unsigned char *yleft;
                 int left_stride;
                 unsigned char top_left;
 
                 /*Caution: For some b_mode, it needs 8 pixels (4 above + 4 above-right).*/
                 if (i < 4 && pbi->common.filter_level)
-                    yabove = xd->recon_above[0] + b->offset;
+                    Above = xd->recon_above[0] + b->offset;
                 else
-                    yabove = (base_dst - dst_stride) + b->offset;
+                    Above = dst - dst_stride;
 
                 if (i%4==0 && pbi->common.filter_level)
                 {
@@ -196,34 +196,28 @@ static void mt_decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
                 }
                 else
                 {
-                    yleft = (base_dst  - 1) + b->offset;
+                    yleft = dst - 1;
                     left_stride = dst_stride;
                 }
 
                 if ((i==4 || i==8 || i==12) && pbi->common.filter_level)
                     top_left = *(xd->recon_left[0] + i - 1);
                 else
-                    top_left = yabove[-1];
+                    top_left = Above[-1];
 
-                vp8_intra4x4_predict_d(yabove, yleft, left_stride,
-                                       b_mode,
-                                       base_dst + b->offset, dst_stride,
-                                       top_left);
+                vp8_intra4x4_predict_d(Above, yleft, left_stride,
+                                       b_mode, dst, dst_stride, top_left);
 
                 if (xd->eobs[i] )
                 {
                     if (xd->eobs[i] > 1)
                     {
-                        vp8_dequant_idct_add
-                            (b->qcoeff, DQC,
-                            base_dst + b->offset, dst_stride);
+                        vp8_dequant_idct_add(b->qcoeff, DQC, dst, dst_stride);
                     }
                     else
                     {
-                        vp8_dc_only_idct_add
-                            (b->qcoeff[0] * DQC[0],
-                            base_dst + b->offset, dst_stride,
-                            base_dst + b->offset, dst_stride);
+                        vp8_dc_only_idct_add(b->qcoeff[0] * DQC[0],
+                                             dst, dst_stride, dst, dst_stride);
                         ((int *)b->qcoeff)[0] = 0;
                     }
                 }

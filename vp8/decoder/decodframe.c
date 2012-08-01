@@ -177,7 +177,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
         {
             short *DQC = xd->dequant_y1;
             int dst_stride = xd->dst.y_stride;
-            unsigned char *base_dst = xd->dst.y_buffer;
 
             /* clear out residual eob info */
             if(xd->mode_info_context->mbmi.mb_skip_coeff)
@@ -188,36 +187,28 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             for (i = 0; i < 16; i++)
             {
                 BLOCKD *b = &xd->block[i];
+                unsigned char *dst = xd->dst.y_buffer + b->offset;
                 int b_mode = xd->mode_info_context->bmi[i].as_mode;
-                unsigned char *yabove;
-                unsigned char *yleft;
-                int left_stride;
-                unsigned char top_left;
+                unsigned char *Above = dst - dst_stride;
+                unsigned char *yleft = dst - 1;
+                int left_stride = dst_stride;
+                unsigned char top_left = Above[-1];
 
-                yabove = base_dst + b->offset - dst_stride;
-                yleft = base_dst + b->offset - 1;
-                left_stride = dst_stride;
-                top_left = yabove[-1];
-
-                vp8_intra4x4_predict_d(yabove, yleft, left_stride,
-                                       b_mode,
-                                       base_dst + b->offset, dst_stride,
-                                       top_left);
+                vp8_intra4x4_predict_d(Above, yleft, left_stride, b_mode,
+                                       dst, dst_stride, top_left);
 
                 if (xd->eobs[i])
                 {
                     if (xd->eobs[i] > 1)
                     {
-                    vp8_dequant_idct_add
-                            (b->qcoeff, DQC,
-                                base_dst + b->offset, dst_stride);
+                    vp8_dequant_idct_add(b->qcoeff, DQC, dst, dst_stride);
                     }
                     else
                     {
                         vp8_dc_only_idct_add
                             (b->qcoeff[0] * DQC[0],
-                                base_dst + b->offset, dst_stride,
-                                base_dst + b->offset, dst_stride);
+                                dst, dst_stride,
+                                dst, dst_stride);
                         ((int *)b->qcoeff)[0] = 0;
                     }
                 }

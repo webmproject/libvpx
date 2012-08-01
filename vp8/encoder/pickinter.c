@@ -158,7 +158,7 @@ static int pick_intra4x4block(
         rate = mode_costs[mode];
 
         vp8_intra4x4_predict_d(Above, yleft, dst_stride, mode,
-                               b->predictor,16, top_left);
+                               b->predictor, 16, top_left);
         distortion = get_prediction_error(be, b);
         this_rd = RDCOST(x->rdmult, x->rddiv, rate, distortion);
 
