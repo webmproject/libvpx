@@ -311,6 +311,8 @@ static void decode_mb_rows(VP8D_COMP *pbi)
     VP8_COMMON *const pc = & pbi->common;
     MACROBLOCKD *const xd  = & pbi->mb;
 
+    MODE_INFO *lf_mic = xd->mode_info_context;
+
     int ibc = 0;
     int num_part = 1 << pc->multi_token_partition;
 
@@ -323,6 +325,7 @@ static void decode_mb_rows(VP8D_COMP *pbi)
 
     unsigned char *ref_buffer[MAX_REF_FRAMES][3];
     unsigned char *dst_buffer[3];
+    unsigned char *lf_dst[3];
     int i;
     int ref_fb_index[MAX_REF_FRAMES];
     int ref_fb_corrupted[MAX_REF_FRAMES];
@@ -342,11 +345,16 @@ static void decode_mb_rows(VP8D_COMP *pbi)
         ref_fb_corrupted[i] = pc->yv12_fb[ref_fb_index[i]].corrupted;
     }
 
-    dst_buffer[0] = pc->yv12_fb[dst_fb_idx].y_buffer;
-    dst_buffer[1] = pc->yv12_fb[dst_fb_idx].u_buffer;
-    dst_buffer[2] = pc->yv12_fb[dst_fb_idx].v_buffer;
+    /* Set up the buffer pointers */
+    lf_dst[0] = dst_buffer[0] = pc->yv12_fb[dst_fb_idx].y_buffer;
+    lf_dst[1] = dst_buffer[1] = pc->yv12_fb[dst_fb_idx].u_buffer;
+    lf_dst[2] = dst_buffer[2] = pc->yv12_fb[dst_fb_idx].v_buffer;
 
     xd->up_available = 0;
+
+    /* Initialize the loop filter for this frame. */
+    if(pc->filter_level)
+        vp8_loop_filter_frame_init(pc, xd, pc->filter_level);
 
     /* Decode the individual macro block */
     for (mb_row = 0; mb_row < pc->mb_rows; mb_row++)
@@ -449,26 +457,55 @@ static void decode_mb_rows(VP8D_COMP *pbi)
             xd->recon_left[1] += 8;
             xd->recon_left[2] += 8;
 
-
             recon_yoffset += 16;
             recon_uvoffset += 8;
 
             ++xd->mode_info_context;  /* next mb */
 
             xd->above_context++;
-
         }
 
         /* adjust to the next row of mbs */
-        vp8_extend_mb_row(
-            &pc->yv12_fb[dst_fb_idx],
-            xd->dst.y_buffer + 16, xd->dst.u_buffer + 8, xd->dst.v_buffer + 8
-        );
+        vp8_extend_mb_row(&pc->yv12_fb[dst_fb_idx], xd->dst.y_buffer + 16,
+                          xd->dst.u_buffer + 8, xd->dst.v_buffer + 8);
 
         ++xd->mode_info_context;      /* skip prediction column */
         xd->up_available = 1;
 
+        if(pc->filter_level)
+        {
+            if(mb_row > 0)
+            {
+                if (pc->filter_type == NORMAL_LOOPFILTER)
+                    vp8_loop_filter_row_normal(pc, lf_mic, mb_row-1,
+                                               recon_y_stride, recon_uv_stride,
+                                               lf_dst[0], lf_dst[1], lf_dst[2]);
+                else
+                    vp8_loop_filter_row_simple(pc, lf_mic, mb_row-1,
+                                               recon_y_stride, recon_uv_stride,
+                                               lf_dst[0], lf_dst[1], lf_dst[2]);
+                lf_dst[0] += recon_y_stride  * 16;
+                lf_dst[1] += recon_uv_stride *  8;
+                lf_dst[2] += recon_uv_stride *  8;
+                lf_mic += pc->mb_cols;
+                lf_mic++;         /* Skip border mb */
+            }
+        }
     }
+
+    if(pc->filter_level)
+    {
+        if (pc->filter_type == NORMAL_LOOPFILTER)
+            vp8_loop_filter_row_normal(pc, lf_mic, mb_row-1, recon_y_stride,
+                                       recon_uv_stride, lf_dst[0], lf_dst[1],
+                                       lf_dst[2]);
+        else
+            vp8_loop_filter_row_simple(pc, lf_mic, mb_row-1, recon_y_stride,
+                                       recon_uv_stride, lf_dst[0], lf_dst[1],
+                                       lf_dst[2]);
+    }
+
+    vp8_yv12_extend_frame_borders(&pc->yv12_fb[dst_fb_idx]);
 }
 
 static unsigned int read_partition_size(const unsigned char *cx_size)
