@@ -15,7 +15,7 @@
 
 void vp8_intra4x4_predict_c(unsigned char *Above,
                             unsigned char *yleft, int left_stride,
-                            int b_mode,
+                            B_PREDICTION_MODE b_mode,
                             unsigned char *dst, int dst_stride,
                             unsigned char top_left)
 {
@@ -290,6 +290,8 @@ void vp8_intra4x4_predict_c(unsigned char *Above,
     }
     break;
 
+    default:
+    break;
 
     }
 }

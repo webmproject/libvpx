@@ -694,7 +694,7 @@ static int rd_pick_intra4x4block(
             vpx_memcpy(best_dqcoeff, b->dqcoeff, 32);
         }
     }
-    b->bmi.as_mode = (B_PREDICTION_MODE)(*best_mode);
+    b->bmi.as_mode = *best_mode;
 
     vp8_short_idct4x4llm(best_dqcoeff, best_predictor, 16, dst, dst_stride);
 

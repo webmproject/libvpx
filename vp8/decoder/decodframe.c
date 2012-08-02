@@ -188,7 +188,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
             {
                 BLOCKD *b = &xd->block[i];
                 unsigned char *dst = xd->dst.y_buffer + b->offset;
-                int b_mode = xd->mode_info_context->bmi[i].as_mode;
+                B_PREDICTION_MODE b_mode =
+                    xd->mode_info_context->bmi[i].as_mode;
                 unsigned char *Above = dst - dst_stride;
                 unsigned char *yleft = dst - 1;
                 int left_stride = dst_stride;

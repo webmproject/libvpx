@@ -151,7 +151,7 @@ static int pick_intra4x4block(
     unsigned char *yleft = dst - 1;
     unsigned char top_left = Above[-1];
 
-    for (mode = B_DC_PRED; mode <= B_HE_PRED /*B_HU_PRED*/; mode++)
+    for (mode = B_DC_PRED; mode <= B_HE_PRED; mode++)
     {
         int this_rd;
 
@@ -171,7 +171,7 @@ static int pick_intra4x4block(
         }
     }
 
-    b->bmi.as_mode = (B_PREDICTION_MODE)(*best_mode);
+    b->bmi.as_mode = *best_mode;
     vp8_encode_intra4x4block(x, ib);
     return best_rd;
 }
