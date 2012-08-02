@@ -327,8 +327,8 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
   int rdmult;
   int rddiv;
   int final_eob;
-  int rd_cost0;
-  int rd_cost1;
+  int64_t rd_cost0;
+  int64_t rd_cost1;
   int rate0;
   int rate1;
   int error0;
@@ -719,8 +719,8 @@ void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
   int rdmult;
   int rddiv;
   int final_eob;
-  int rd_cost0;
-  int rd_cost1;
+  int64_t rd_cost0;
+  int64_t rd_cost1;
   int rate0;
   int rate1;
   int error0;
