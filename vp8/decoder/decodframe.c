@@ -46,7 +46,6 @@ int dec_debug = 0;
 
 #define COEFCOUNT_TESTING
 
-
 static int merge_index(int v, int n, int modulus) {
   int max1 = (n - 1 - modulus / 2) / modulus + 1;
   if (v < max1) v = v * modulus + modulus / 2;
@@ -260,7 +259,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
   }
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
     xd->mode_info_context->mbmi.txfm_size = TX_8X8;
   }
@@ -336,29 +335,8 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     for (i = 0; i < 16; i++) {
       BLOCKD *b = &xd->block[i];
       int b_mode = xd->mode_info_context->bmi[i].as_mode.first;
-      if(active_ht) {
-        switch(b_mode) {
-          case B_TM_PRED :
-          case B_RD_PRED :
-            b->bmi.as_mode.tx_type = ADST_ADST;
-            break;
-
-          case B_VE_PRED :
-          case B_VR_PRED :
-            b->bmi.as_mode.tx_type = ADST_DCT;
-            break ;
-
-          case B_HE_PRED :
-          case B_HD_PRED :
-          case B_HU_PRED :
-            b->bmi.as_mode.tx_type = DCT_ADST;
-            break;
-
-          default :
-            b->bmi.as_mode.tx_type = DCT_DCT;
-            break;
-        }
-      }
+      if(active_ht)
+        txfm_map(b, b_mode);
     } // loop over 4x4 blocks
   }
 #endif
@@ -392,7 +370,7 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       int i8x8mode;
       BLOCKD *b;
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
       int idx = (ib & 0x02) ? (ib + 2) : ib;
 
       short *q  = xd->block[idx].qcoeff;
@@ -410,8 +388,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       RECON_INVOKE(RTCD_VTABLE(recon), intra8x8_predict)
       (b, i8x8mode, b->predictor);
 
-#if CONFIG_HTRANS8X8
-      vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
+#if CONFIG_HYBRIDTRANSFORM8X8
+      txfm_map(b, pred_mode_conv(i8x8mode));
+      vp8_ht_dequant_idct_add_8x8_c(b->bmi.as_mode.tx_type,
+                                    q, dq, pre, dst, 16, stride);
+      // vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
       q += 64;
 #else
       for (j = 0; j < 4; j++) {

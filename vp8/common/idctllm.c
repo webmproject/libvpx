@@ -35,6 +35,8 @@ static const int cospi8sqrt2minus1 = 20091;
 static const int sinpi8sqrt2      = 35468;
 static const int rounding = 0;
 
+// TODO: these transforms can be further converted into integer forms
+//       for complexity optimization
 #if CONFIG_HYBRIDTRANSFORM
 float idct_4[16] = {
   0.500000000000000,   0.653281482438188,   0.500000000000000,   0.270598050073099,
@@ -51,11 +53,52 @@ float iadst_4[16] = {
 };
 #endif
 
+#if CONFIG_HYBRIDTRANSFORM8X8
+float idct_8[64] = {
+  0.353553390593274,   0.490392640201615,   0.461939766255643,   0.415734806151273,
+  0.353553390593274,   0.277785116509801,   0.191341716182545,   0.097545161008064,
+  0.353553390593274,   0.415734806151273,   0.191341716182545,  -0.097545161008064,
+ -0.353553390593274,  -0.490392640201615,  -0.461939766255643,  -0.277785116509801,
+  0.353553390593274,   0.277785116509801,  -0.191341716182545,  -0.490392640201615,
+ -0.353553390593274,   0.097545161008064,   0.461939766255643,   0.415734806151273,
+  0.353553390593274,   0.097545161008064,  -0.461939766255643,  -0.277785116509801,
+  0.353553390593274,   0.415734806151273,  -0.191341716182545,  -0.490392640201615,
+  0.353553390593274,  -0.097545161008064,  -0.461939766255643,   0.277785116509801,
+  0.353553390593274,  -0.415734806151273,  -0.191341716182545,   0.490392640201615,
+  0.353553390593274,  -0.277785116509801,  -0.191341716182545,   0.490392640201615,
+ -0.353553390593274,  -0.097545161008064,   0.461939766255643,  -0.415734806151273,
+  0.353553390593274,  -0.415734806151273,   0.191341716182545,   0.097545161008064,
+ -0.353553390593274,   0.490392640201615,  -0.461939766255643,   0.277785116509801,
+  0.353553390593274,  -0.490392640201615,   0.461939766255643,  -0.415734806151273,
+  0.353553390593274,  -0.277785116509801,   0.191341716182545,  -0.097545161008064
+};
+
+float iadst_8[64] = {
+  0.089131608307533,   0.255357107325376,   0.387095214016349,   0.466553967085785,
+  0.483002021635509,   0.434217976756762,   0.326790388032145,   0.175227946595735,
+  0.175227946595735,   0.434217976756762,   0.466553967085785,   0.255357107325376,
+ -0.089131608307533,  -0.387095214016348,  -0.483002021635509,  -0.326790388032145,
+  0.255357107325376,   0.483002021635509,   0.175227946595735,  -0.326790388032145,
+ -0.466553967085785,  -0.089131608307533,   0.387095214016349,   0.434217976756762,
+  0.326790388032145,   0.387095214016349,  -0.255357107325376,  -0.434217976756762,
+  0.175227946595735,   0.466553967085786,  -0.089131608307534,  -0.483002021635509,
+  0.387095214016349,   0.175227946595735,  -0.483002021635509,   0.089131608307533,
+  0.434217976756762,  -0.326790388032145,  -0.255357107325377,   0.466553967085785,
+  0.434217976756762,  -0.089131608307533,  -0.326790388032145,   0.483002021635509,
+ -0.255357107325376,  -0.175227946595735,   0.466553967085785,  -0.387095214016348,
+  0.466553967085785,  -0.326790388032145,   0.089131608307533,   0.175227946595735,
+ -0.387095214016348,   0.483002021635509,  -0.434217976756762,   0.255357107325376,
+  0.483002021635509,  -0.466553967085785,   0.434217976756762,  -0.387095214016348,
+  0.326790388032145,  -0.255357107325375,   0.175227946595736,  -0.089131608307532
+};
+#endif
+
 #if CONFIG_HYBRIDTRANSFORM
 void vp8_iht4x4llm_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
   int i, j, k;
   float bufa[16], bufb[16]; // buffers are for floating-point test purpose
-                            // the implementation could be simplified in conjunction with integer transform
+                            // the implementation could be simplified in
+                            // conjunction with integer transform
   short *ip = input;
   short *op = output;
   int shortpitch = pitch >> 1;
@@ -158,6 +201,113 @@ void vp8_iht4x4llm_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
 }
 #endif
 
+#if CONFIG_HYBRIDTRANSFORM8X8
+void vp8_iht8x8llm_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
+  int i, j, k;
+  float bufa[64], bufb[64]; // buffers are for floating-point test purpose
+                            // the implementation could be simplified in
+                            // conjunction with integer transform
+  short *ip = input;
+  short *op = output;
+  int shortpitch = pitch >> 1;
+
+  float *pfa = &bufa[0];
+  float *pfb = &bufb[0];
+
+  // pointers to vertical and horizontal transforms
+  float *ptv, *pth;
+
+  // load and convert residual array into floating-point
+  for(j = 0; j < 8; j++) {
+    for(i = 0; i < 8; i++) {
+      pfa[i] = (float)ip[i];
+    }
+    pfa += 8;
+    ip  += 8;
+  }
+
+  // vertical transformation
+  pfa = &bufa[0];
+  pfb = &bufb[0];
+
+  switch(tx_type) {
+    case ADST_ADST :
+    case ADST_DCT  :
+      ptv = &iadst_8[0];
+      break;
+
+    default :
+      ptv = &idct_8[0];
+      break;
+  }
+
+  for(j = 0; j < 8; j++) {
+    for(i = 0; i < 8; i++) {
+      pfb[i] = 0 ;
+      for(k = 0; k < 8; k++) {
+        pfb[i] += ptv[k] * pfa[(k<<3)];
+      }
+      pfa += 1;
+    }
+
+    pfb += 8;
+    ptv += 8;
+    pfa = &bufa[0];
+  }
+
+  // horizontal transformation
+  pfa = &bufa[0];
+  pfb = &bufb[0];
+
+  switch(tx_type) {
+    case ADST_ADST :
+    case  DCT_ADST :
+      pth = &iadst_8[0];
+      break;
+
+    default :
+      pth = &idct_8[0];
+      break;
+  }
+
+  for(j = 0; j < 8; j++) {
+    for(i = 0; i < 8; i++) {
+      pfa[i] = 0;
+      for(k = 0; k < 8; k++) {
+        pfa[i] += pfb[k] * pth[k];
+      }
+      pth += 8;
+     }
+
+    pfa += 8;
+    pfb += 8;
+
+    switch(tx_type) {
+      case ADST_ADST :
+      case  DCT_ADST :
+        pth = &iadst_8[0];
+        break;
+
+      default :
+        pth = &idct_8[0];
+        break;
+    }
+  }
+
+  // convert to short integer format and load BLOCKD buffer
+  op  = output;
+  pfa = &bufa[0];
+
+  for(j = 0; j < 8; j++) {
+    for(i = 0; i < 8; i++) {
+      op[i] = (pfa[i] > 0 ) ? (short)( pfa[i] / 8 + 0.49) :
+                             -(short)( - pfa[i] / 8 + 0.49);
+    }
+    op  += shortpitch;
+    pfa += 8;
+  }
+}
+#endif
 
 void vp8_short_idct4x4llm_c(short *input, short *output, int pitch) {
   int i;

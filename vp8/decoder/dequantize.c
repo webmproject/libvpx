@@ -79,6 +79,51 @@ void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
 }
 #endif
 
+#if CONFIG_HYBRIDTRANSFORM8X8
+void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
+                                   unsigned char *pred, unsigned char *dest,
+                                   int pitch, int stride) {
+  short output[64];
+  short *diff_ptr = output;
+  int b, r, c;
+  int i;
+  unsigned char *origdest = dest;
+  unsigned char *origpred = pred;
+
+  input[0] = dq[0] * input[0];
+  for (i = 1; i < 64; i++) {
+    input[i] = dq[1] * input[i];
+  }
+
+  vp8_iht8x8llm_c(input, output, 16, tx_type);
+
+  vpx_memset(input, 0, 128);
+
+  for (b = 0; b < 4; b++) {
+    for (r = 0; r < 4; r++) {
+      for (c = 0; c < 4; c++) {
+        int a = diff_ptr[c] + pred[c];
+
+        if (a < 0)
+          a = 0;
+
+        if (a > 255)
+          a = 255;
+
+        dest[c] = (unsigned char) a;
+      }
+
+      dest += stride;
+      diff_ptr += 8;
+      pred += pitch;
+    }
+    diff_ptr = output + (b + 1) / 2 * 4 * 8 + (b + 1) % 2 * 4;
+    dest = origdest + (b + 1) / 2 * 4 * stride + (b + 1) % 2 * 4;
+    pred = origpred + (b + 1) / 2 * 4 * pitch + (b + 1) % 2 * 4;
+  }
+}
+#endif
+
 void vp8_dequant_idct_add_c(short *input, short *dq, unsigned char *pred,
                             unsigned char *dest, int pitch, int stride) {
   short output[16];

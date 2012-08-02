@@ -60,9 +60,9 @@ extern vp8_extra_bit_struct vp8_extra_bits[12];    /* indexed by token value */
 /* Coefficients are predicted via a 3-dimensional probability table. */
 
 /* Outside dimension.  0 = Y no DC, 1 = Y2, 2 = UV, 3 = Y with DC */
-
 #define BLOCK_TYPES 4
-#if CONFIG_HTRANS8X8
+
+#if CONFIG_HYBRIDTRANSFORM8X8
 #define BLOCK_TYPES_8X8 4
 #else
 #define BLOCK_TYPES_8X8 3

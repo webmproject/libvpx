@@ -454,7 +454,7 @@ int vp8_block_error_c(short *coeff, short *dqcoeff) {
   return error;
 }
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
 int vp8_submb_error_c(short *coeff, short *dqcoeff) {
   int i;
   int error = 0;
@@ -985,28 +985,7 @@ static int64_t rd_pick_intra4x4block(
 #if CONFIG_HYBRIDTRANSFORM
       if(active_ht) {
         b->bmi.as_mode.test = mode;
-        switch(mode) {
-          // case B_DC_PRED :
-          case B_TM_PRED :
-          case B_RD_PRED :
-            b->bmi.as_mode.tx_type = ADST_ADST;
-            break;
-
-          case B_VE_PRED :
-          case B_VR_PRED :
-            b->bmi.as_mode.tx_type = ADST_DCT;
-            break;
-
-          case B_HE_PRED :
-          case B_HD_PRED :
-          case B_HU_PRED :
-            b->bmi.as_mode.tx_type = DCT_ADST;
-            break;
-
-          default :
-            b->bmi.as_mode.tx_type = DCT_DCT;
-            break;
-        }
+        txfm_map(b, mode);
 
         vp8_fht4x4_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type);
         vp8_ht_quantize_b(be, b);
@@ -1267,7 +1246,7 @@ static int64_t rd_pick_intra8x8block(
   DECLARE_ALIGNED_ARRAY(16, unsigned char,  best_predictor, 16 * 8);
   DECLARE_ALIGNED_ARRAY(16, short, best_dqcoeff, 16 * 4);
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
   // perform transformation of dimension 8x8
   // note the input and output index mapping
   int idx = (ib & 0x02) ? (ib + 2) : ib;
@@ -1298,8 +1277,10 @@ static int64_t rd_pick_intra8x8block(
 
       vp8_subtract_4b_c(be, b, 16);
 
-#if CONFIG_HTRANS8X8
-      x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+#if CONFIG_HYBRIDTRANSFORM8X8
+      txfm_map(b, pred_mode_conv(mode));
+      vp8_fht8x8_c(be->src_diff, (x->block + idx)->coeff, 32, b->bmi.as_mode.tx_type);
+//    x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
 
       // compute quantization mse of 8x8 block
@@ -1376,7 +1357,7 @@ static int64_t rd_pick_intra8x8block(
 #endif
   vp8_encode_intra8x8(IF_RTCD(&cpi->rtcd), x, ib);
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
   *(a + vp8_block2above_8x8[idx])     = besta0;
   *(a + vp8_block2above_8x8[idx] + 1) = besta1;
   *(l + vp8_block2left_8x8 [idx])     = bestl0;

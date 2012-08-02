@@ -473,7 +473,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   const int seg_active = segfeature_active(xd, segment_id, SEG_LVL_EOB);
   INT16 *qcoeff_ptr = &xd->qcoeff[0];
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
   int bufthred = (xd->mode_info_context->mbmi.mode == I8X8_PRED) ? 16 : 24;
   if (xd->mode_info_context->mbmi.mode != B_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV &&
@@ -506,7 +506,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
   else
     seg_eob = 64;
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
   for (i = 0; i < bufthred ; i += 4) {
 #else
   for (i = 0; i < 24; i += 4) {
@@ -528,7 +528,7 @@ int vp8_decode_mb_tokens_8x8(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     qcoeff_ptr += 64;
   }
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
   if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
     type = PLANE_TYPE_UV;
     seg_eob = 16;

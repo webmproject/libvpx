@@ -504,7 +504,7 @@ static void tokenize1st_order_ht(   MACROBLOCKD *xd,
 #endif
 
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
 static void tokenize1st_order_chroma
 (
   MACROBLOCKD *xd,
@@ -886,7 +886,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t) {
       tokenize1st_order_ht(x, t, plane_type, cpi);
     } else {
 
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
       if (x->mode_info_context->mbmi.mode == I8X8_PRED) {
         ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
         ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;

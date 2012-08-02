@@ -434,7 +434,7 @@ vp8_default_coef_probs_8x8[BLOCK_TYPES_8X8]
       { 6, 117, 180, 254, 199, 216, 255, 251, 128, 128, 128}
     }
   }
-#if CONFIG_HTRANS8X8
+#if CONFIG_HYBRIDTRANSFORM8X8
   ,
   { /* block Type 3 */
     { /* Coeff Band 0 */
