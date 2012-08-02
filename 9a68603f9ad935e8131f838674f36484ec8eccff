@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//9QI\u003d",
+        "filename": "vp8/common/blockd.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-02T23:59:04Z",
+      "side": 1,
+      "message": "should be an assert. Otherwise an uninitialized \u0027b_mode\u0027 value will be returned...",
+      "revId": "9a68603f9ad935e8131f838674f36484ec8eccff",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
