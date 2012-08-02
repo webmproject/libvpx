@@ -144,7 +144,7 @@ specialize vp8_build_intra_predictors_mby_s sse2 ssse3
 prototype void vp8_build_intra_predictors_mbuv_s "struct macroblockd *x, unsigned char * uabove_row, unsigned char * vabove_row,  unsigned char *uleft, unsigned char *vleft, int left_stride, unsigned char * upred_ptr, unsigned char * vpred_ptr, int pred_stride"
 specialize vp8_build_intra_predictors_mbuv_s sse2 ssse3
 
-prototype void vp8_intra4x4_predict "unsigned char *above, unsigned char *left, int left_stride, int b_mode, unsigned char *dst, int dst_stride, unsigned char top_left"
+prototype void vp8_intra4x4_predict "unsigned char *Above, unsigned char *yleft, int left_stride, int b_mode, unsigned char *dst, int dst_stride, unsigned char top_left"
 # No existing specializations
 
 #
@@ -293,23 +293,23 @@ vp8_variance_halfpixvar16x16_hv_media=vp8_variance_halfpixvar16x16_hv_armv6
 #
 # Single block SAD
 #
-prototype unsigned int vp8_sad4x4 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
+prototype unsigned int vp8_sad4x4 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad4x4 mmx sse2 neon
 vp8_sad4x4_sse2=vp8_sad4x4_wmt
 
-prototype unsigned int vp8_sad8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
+prototype unsigned int vp8_sad8x8 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad8x8 mmx sse2 neon
 vp8_sad8x8_sse2=vp8_sad8x8_wmt
 
-prototype unsigned int vp8_sad8x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
+prototype unsigned int vp8_sad8x16 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad8x16 mmx sse2 neon
 vp8_sad8x16_sse2=vp8_sad8x16_wmt
 
-prototype unsigned int vp8_sad16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
+prototype unsigned int vp8_sad16x8 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad16x8 mmx sse2 neon
 vp8_sad16x8_sse2=vp8_sad16x8_wmt
 
-prototype unsigned int vp8_sad16x16 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
+prototype unsigned int vp8_sad16x16 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int ref_stride, unsigned int max_sad"
 specialize vp8_sad16x16 mmx sse2 sse3 media neon
 vp8_sad16x16_sse2=vp8_sad16x16_wmt
 vp8_sad16x16_media=vp8_sad16x16_armv6
@@ -317,59 +317,59 @@ vp8_sad16x16_media=vp8_sad16x16_armv6
 #
 # Multi-block SAD, comparing a reference to N blocks 1 pixel apart horizontally
 #
-prototype void vp8_sad4x4x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad4x4x3 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad4x4x3 sse3
 
-prototype void vp8_sad8x8x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad8x8x3 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad8x8x3 sse3
 
-prototype void vp8_sad8x16x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad8x16x3 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad8x16x3 sse3
 
-prototype void vp8_sad16x8x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad16x8x3 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad16x8x3 sse3 ssse3
 
-prototype void vp8_sad16x16x3 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad16x16x3 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad16x16x3 sse3 ssse3
 
 # Note the only difference in the following prototypes is that they return into
 # an array of short
-prototype void vp8_sad4x4x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+prototype void vp8_sad4x4x8 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp8_sad4x4x8 sse4_1
 vp8_sad4x4x8_sse4_1=vp8_sad4x4x8_sse4
 
-prototype void vp8_sad8x8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+prototype void vp8_sad8x8x8 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp8_sad8x8x8 sse4_1
 vp8_sad8x8x8_sse4_1=vp8_sad8x8x8_sse4
 
-prototype void vp8_sad8x16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+prototype void vp8_sad8x16x8 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp8_sad8x16x8 sse4_1
 vp8_sad8x16x8_sse4_1=vp8_sad8x16x8_sse4
 
-prototype void vp8_sad16x8x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+prototype void vp8_sad16x8x8 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp8_sad16x8x8 sse4_1
 vp8_sad16x8x8_sse4_1=vp8_sad16x8x8_sse4
 
-prototype void vp8_sad16x16x8 "const unsigned char *src_ptr, int source_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
+prototype void vp8_sad16x16x8 "const unsigned char *src_ptr, int src_stride, const unsigned char *ref_ptr, int  ref_stride, unsigned short *sad_array"
 specialize vp8_sad16x16x8 sse4_1
 vp8_sad16x16x8_sse4_1=vp8_sad16x16x8_sse4
 
 #
 # Multi-block SAD, comparing a reference to N independent blocks
 #
-prototype void vp8_sad4x4x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad4x4x4d "const unsigned char *src_ptr, int src_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad4x4x4d sse3
 
-prototype void vp8_sad8x8x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad8x8x4d "const unsigned char *src_ptr, int src_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad8x8x4d sse3
 
-prototype void vp8_sad8x16x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad8x16x4d "const unsigned char *src_ptr, int src_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad8x16x4d sse3
 
-prototype void vp8_sad16x8x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad16x8x4d "const unsigned char *src_ptr, int src_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad16x8x4d sse3
 
-prototype void vp8_sad16x16x4d "const unsigned char *src_ptr, int source_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
+prototype void vp8_sad16x16x4d "const unsigned char *src_ptr, int src_stride, const unsigned char * const ref_ptr[], int  ref_stride, unsigned int *sad_array"
 specialize vp8_sad16x16x4d sse3
 
 #
