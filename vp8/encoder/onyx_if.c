@@ -4575,10 +4575,6 @@ static void encode_frame_to_data_rate
 
 #endif
 
-    /* If this was a kf or Gf note the Q */
-    if ((cm->frame_type == KEY_FRAME) || cm->refresh_golden_frame || cm->refresh_alt_ref_frame)
-        cm->last_kf_gf_q = cm->base_qindex;
-
     if (cm->refresh_golden_frame == 1)
         cm->frame_flags = cm->frame_flags | FRAMEFLAGS_GOLDEN;
     else
