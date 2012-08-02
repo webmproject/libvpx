@@ -1389,7 +1389,7 @@ static int rd_cost_mbuv(MACROBLOCK *mb) {
 }
 
 
-static int rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
+static int64_t rd_inter16x16_uv(VP8_COMP *cpi, MACROBLOCK *x, int *rate,
                             int *distortion, int fullpixel) {
   ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), submbuv)(x->src_diff,
                                                          x->src.u_buffer, x->src.v_buffer, x->e_mbd.predictor, x->src.uv_stride);
@@ -2688,7 +2688,7 @@ static void store_coding_context(MACROBLOCK *x, int mb_index,
 }
 
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
-                            int *returnrate, int *returndistortion, int *returnintra,
+                            int *returnrate, int *returndistortion, int64_t *returnintra,
                             int64_t *best_single_rd_diff, int64_t *best_comp_rd_diff,
                             int64_t *best_hybrid_rd_diff) {
   VP8_COMMON *cm = &cpi->common;
@@ -2718,7 +2718,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   int64_t best_single_rd = INT64_MAX;
   int64_t best_hybrid_rd = INT64_MAX;
 #if CONFIG_PRED_FILTER
-  int64_t best_overall_rd = INT_MAX;
+  int64_t best_overall_rd = INT64_MAX;
 #endif
   int rate2, distortion2;
   int uv_intra_rate, uv_intra_distortion, uv_intra_rate_tokenonly;
@@ -2727,7 +2727,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   int uv_intra_skippable_8x8 = 0;
   int rate_y, UNINITIALIZED_IS_SAFE(rate_uv);
   int distortion_uv;
-  int best_yrd = INT_MAX;
+  int64_t best_yrd = INT64_MAX;
 #if CONFIG_PRED_FILTER
   int best_filter_state;
 #endif
@@ -2818,7 +2818,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
   }
 
-  *returnintra = INT_MAX;
+  *returnintra = INT64_MAX;
 
   x->skip = 0;
 
@@ -3831,15 +3831,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       x->partition_info->bmi[15].second_mv.as_int;
   }
 
-  if (best_single_rd == INT_MAX)
+  if (best_single_rd == INT64_MAX)
     *best_single_rd_diff = INT_MIN;
   else
     *best_single_rd_diff = best_rd - best_single_rd;
-  if (best_comp_rd == INT_MAX)
+  if (best_comp_rd == INT64_MAX)
     *best_comp_rd_diff = INT_MIN;
   else
     *best_comp_rd_diff   = best_rd - best_comp_rd;
-  if (best_hybrid_rd == INT_MAX)
+  if (best_hybrid_rd == INT64_MAX)
     *best_hybrid_rd_diff = INT_MIN;
   else
     *best_hybrid_rd_diff = best_rd - best_hybrid_rd;
@@ -3968,7 +3968,7 @@ int vp8cx_pick_mode_inter_macroblock
   MACROBLOCKD *const xd = &x->e_mbd;
   int rate;
   int distortion;
-  int intra_error = 0;
+  int64_t intra_error = 0;
   unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
 
   if (xd->segmentation_enabled)

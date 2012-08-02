@@ -70,7 +70,7 @@ typedef struct {
   int_mv second_best_ref_mv;
   int rate;
   int distortion;
-  int intra_error;
+  int64_t intra_error;
   int best_mode_index;
   int rddiv;
   int rdmult;
