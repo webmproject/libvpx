@@ -752,10 +752,8 @@ static void init_frame(VP8D_COMP *pbi) {
   if (pc->frame_type == KEY_FRAME) {
     /* Various keyframe initializations */
     vpx_memcpy(pc->fc.mvc, vp8_default_mv_context, sizeof(vp8_default_mv_context));
-#if CONFIG_HIGH_PRECISION_MV
     vpx_memcpy(pc->fc.mvc_hp, vp8_default_mv_context_hp,
                sizeof(vp8_default_mv_context_hp));
-#endif
 
     vp8_init_mbmode_probs(pc);
 
@@ -813,49 +811,6 @@ static void init_frame(VP8D_COMP *pbi) {
   if (pc->full_pixel)
     xd->fullpixel_mask = 0xfffffff8;
 
-}
-
-static void read_coef_probs3(VP8D_COMP *pbi) {
-  const vp8_prob grpupd = 216;
-  int i, j, k, l;
-  vp8_reader *const bc = & pbi->bc;
-  VP8_COMMON *const pc = & pbi->common;
-  for (i = 0; i < BLOCK_TYPES; i++)
-    for (l = 0; l < ENTROPY_NODES; l++) {
-      if (vp8_read(bc, grpupd)) {
-        // printf("Decoding %d\n", l);
-        for (j = !i; j < COEF_BANDS; j++)
-          for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-            if (k >= 3 && ((i == 0 && j == 1) ||
-                           (i > 0 && j == 0)))
-              continue;
-            {
-              vp8_prob *const p = pc->fc.coef_probs [i][j][k] + l;
-              int u = vp8_read(bc, COEF_UPDATE_PROB);
-              if (u) *p = read_prob_diff_update(bc, *p);
-            }
-          }
-      }
-    }
-
-  if (pbi->common.txfm_mode == ALLOW_8X8) {
-    for (i = 0; i < BLOCK_TYPES_8X8; i++)
-      for (l = 0; l < ENTROPY_NODES; l++) {
-        if (vp8_read(bc, grpupd)) {
-          for (j = !i; j < COEF_BANDS; j++)
-            for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
-              if (k >= 3 && ((i == 0 && j == 1) ||
-                             (i > 0 && j == 0)))
-                continue;
-              {
-                vp8_prob *const p = pc->fc.coef_probs_8x8 [i][j][k] + l;
-                int u = vp8_read(bc, COEF_UPDATE_PROB_8X8);
-                if (u) *p = read_prob_diff_update(bc, *p);
-              }
-            }
-        }
-      }
-  }
 }
 
 static void read_coef_probs2(VP8D_COMP *pbi) {
@@ -1288,10 +1243,8 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
     pc->ref_frame_sign_bias[GOLDEN_FRAME] = vp8_read_bit(bc);
     pc->ref_frame_sign_bias[ALTREF_FRAME] = vp8_read_bit(bc);
 
-#if CONFIG_HIGH_PRECISION_MV
     /* Is high precision mv allowed */
     xd->allow_high_precision_mv = (unsigned char)vp8_read_bit(bc);
-#endif
     // Read the type of subpel filter to use
 #if CONFIG_SWITCHABLE_INTERP
     if (vp8_read_bit(bc)) {
@@ -1336,9 +1289,7 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   vp8_copy(pbi->common.fc.pre_sub_mv_ref_prob, pbi->common.fc.sub_mv_ref_prob);
   vp8_copy(pbi->common.fc.pre_mbsplit_prob, pbi->common.fc.mbsplit_prob);
   vp8_copy(pbi->common.fc.pre_mvc, pbi->common.fc.mvc);
-#if CONFIG_HIGH_PRECISION_MV
   vp8_copy(pbi->common.fc.pre_mvc_hp, pbi->common.fc.mvc_hp);
-#endif
   vp8_zero(pbi->common.fc.coef_counts);
   vp8_zero(pbi->common.fc.coef_counts_8x8);
 #if CONFIG_TX16X16
@@ -1351,15 +1302,11 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   vp8_zero(pbi->common.fc.sub_mv_ref_counts);
   vp8_zero(pbi->common.fc.mbsplit_counts);
   vp8_zero(pbi->common.fc.MVcount);
-#if CONFIG_HIGH_PRECISION_MV
   vp8_zero(pbi->common.fc.MVcount_hp);
-#endif
   vp8_zero(pbi->common.fc.mv_ref_ct);
   vp8_zero(pbi->common.fc.mv_ref_ct_a);
 #if COEFUPDATETYPE == 2
   read_coef_probs2(pbi);
-#elif COEFUPDATETYPE == 3
-  read_coef_probs3(pbi);
 #else
   read_coef_probs(pbi);
 #endif

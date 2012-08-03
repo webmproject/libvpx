@@ -216,7 +216,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     featureupdates
-    high_precision_mv
     sixteenth_subpel_uv
     comp_intra_pred
     superblocks

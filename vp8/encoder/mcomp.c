@@ -22,26 +22,21 @@ static int mv_ref_ct [31] [4] [2];
 static int mv_mode_cts [4] [2];
 #endif
 
-#if CONFIG_HIGH_PRECISION_MV
-int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight, int ishp) {
-  // MV costing is based on the distribution of vectors in the previous frame and as such will tend to
-  // over state the cost of vectors. In addition coding a new vector can have a knock on effect on the
-  // cost of subsequent vectors and the quality of prediction from NEAR and NEAREST for subsequent blocks.
-  // The "Weight" parameter allows, to a limited extent, for some account to be taken of these factors.
-  return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> (ishp == 0)] + mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> (ishp == 0)]) * Weight) >> 7;
+int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2],
+                    int Weight, int ishp) {
+  // MV costing is based on the distribution of vectors in the previous frame
+  // and as such will tend to over state the cost of vectors. In addition
+  // coding a new vector can have a knock on effect on the cost of subsequent
+  // vectors and the quality of prediction from NEAR and NEAREST for subsequent
+  // blocks. The "Weight" parameter allows, to a limited extent, for some
+  // account to be taken of these factors.
+  return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> (ishp == 0)] +
+           mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> (ishp == 0)])
+          * Weight) >> 7;
 }
-#else
-int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int Weight) {
-  // MV costing is based on the distribution of vectors in the previous frame and as such will tend to
-  // over state the cost of vectors. In addition coding a new vector can have a knock on effect on the
-  // cost of subsequent vectors and the quality of prediction from NEAR and NEAREST for subsequent blocks.
-  // The "Weight" parameter allows, to a limited extent, for some account to be taken of these factors.
-  return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] + mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1]) * Weight) >> 7;
-}
-#endif
 
-#if CONFIG_HIGH_PRECISION_MV
-static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int error_per_bit, int ishp) {
+static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2],
+                       int error_per_bit, int ishp) {
   // Ignore costing if mvcost is NULL
   if (mvcost)
     return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> (ishp == 0)] +
@@ -49,19 +44,10 @@ static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int error_per_bi
             * error_per_bit + 128) >> 8;
   return 0;
 }
-#else
-static int mv_err_cost(int_mv *mv, int_mv *ref, int *mvcost[2], int error_per_bit) {
-  // Ignore costing if mvcost is NULL
-  if (mvcost)
-    return ((mvcost[0][(mv->as_mv.row - ref->as_mv.row) >> 1] +
-             mvcost[1][(mv->as_mv.col - ref->as_mv.col) >> 1])
-            * error_per_bit + 128) >> 8;
-  return 0;
-}
-#endif
 
 
-static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvsadcost[2], int error_per_bit) {
+static int mvsad_err_cost(int_mv *mv, int_mv *ref, int *mvsadcost[2],
+                          int error_per_bit) {
   // Calculate sad error cost on full pixel basis.
   // Ignore costing if mvcost is NULL
   if (mvsadcost)
@@ -209,7 +195,6 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride) {
 #define ERR(r,c) (MVC(r,c)+DIST(r,c)) // returns distortion + motion vector cost
 #define IFMVCV(r,c,s,e) if ( c >= minc && c <= maxc && r >= minr && r <= maxr) s else e;
 
-#if CONFIG_HIGH_PRECISION_MV
 #define PREHP(r,c) (y + (((r)>>3) * y_stride + ((c)>>3) -(offset))) // pointer to predictor base of a motionvector
 #if CONFIG_SIXTEENTH_SUBPEL_UV
 #define SPHP(x) (((x)&7)<<1) // convert motion vector component to offset for svf calc
@@ -219,9 +204,6 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride) {
 #define DISTHP(r,c) vfp->svf( PREHP(r,c), y_stride, SPHP(c),SPHP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
 #define ERRHP(r,c) (MVC(r,c)+DISTHP(r,c)) // returns distortion + motion vector cost
 #define CHECK_BETTER(v,r,c) IFMVCV(r,c,{thismse = ((xd->allow_high_precision_mv)?DISTHP(r,c):DIST(r,c)); if((v = (MVC(r,c)+thismse)) < besterr) { besterr = v; br=r; bc=c; *distortion = thismse; *sse1 = sse; }}, v=INT_MAX;)// checks if (r,c) has better score than previous best
-#else
-#define CHECK_BETTER(v,r,c) IFMVCV(r,c,{thismse = DIST(r,c); if((v = (MVC(r,c)+thismse)) < besterr) { besterr = v; br=r; bc=c; *distortion = thismse; *sse1 = sse; }}, v=INT_MAX;)// checks if (r,c) has better score than previous best
-#endif /* CONFIG_HIGH_PRECISION_MV */
 
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
@@ -243,9 +225,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   unsigned int whichdir;
   unsigned int halfiters = 4;
   unsigned int quarteriters = 4;
-#if CONFIG_HIGH_PRECISION_MV
   unsigned int eighthiters = 4;
-#endif
   int thismse;
   int maxc, minc, maxr, minr;
   int y_stride;
@@ -276,7 +256,6 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #endif
 
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     rr = ref_mv->as_mv.row;
     rc = ref_mv->as_mv.col;
@@ -287,9 +266,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     maxc = MIN(x->mv_col_max << 3, (ref_mv->as_mv.col) + ((1 << mvlong_width_hp) - 1));
     minr = MAX(x->mv_row_min << 3, (ref_mv->as_mv.row) - ((1 << mvlong_width_hp) - 1));
     maxr = MIN(x->mv_row_max << 3, (ref_mv->as_mv.row) + ((1 << mvlong_width_hp) - 1));
-  } else
-#endif
-  {
+  } else {
     rr = ref_mv->as_mv.row >> 1;
     rc = ref_mv->as_mv.col >> 1;
     br = bestmv->as_mv.row << 2;
@@ -314,13 +291,11 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   // calculate central point error
   besterr = vfp->vf(y, y_stride, z, b->src_stride, sse1);
   *distortion = besterr;
-#if CONFIG_HIGH_PRECISION_MV
-  besterr += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  besterr += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit);
-#endif
+  besterr += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit,
+                         xd->allow_high_precision_mv);
 
-  // TODO: Each subsequent iteration checks at least one point in common with the last iteration could be 2 ( if diag selected)
+  // TODO: Each subsequent iteration checks at least one point in
+  // common with the last iteration could be 2 ( if diag selected)
   while (--halfiters) {
     // 1/2 pel
     CHECK_BETTER(left, tr, tc - hstep);
@@ -353,8 +328,8 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     tc = bc;
   }
 
-  // TODO: Each subsequent iteration checks at least one point in common with the last iteration could be 2 ( if diag selected)
-  // 1/4 pel
+  // TODO: Each subsequent iteration checks at least one point in common with
+  // the last iteration could be 2 ( if diag selected) 1/4 pel
   hstep >>= 1;
   while (--quarteriters) {
     CHECK_BETTER(left, tr, tc - hstep);
@@ -387,7 +362,6 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     tc = bc;
   }
 
-#if CONFIG_HIGH_PRECISION_MV
   if (x->e_mbd.allow_high_precision_mv) {
     hstep >>= 1;
     while (--eighthiters) {
@@ -421,14 +395,10 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
       tc = bc;
     }
   }
-#endif
-#if CONFIG_HIGH_PRECISION_MV
   if (x->e_mbd.allow_high_precision_mv) {
     bestmv->as_mv.row = br;
     bestmv->as_mv.col = bc;
-  } else
-#endif  /* CONFIG_HIGH_PRECISION_MV */
-  {
+  } else {
     bestmv->as_mv.row = br << 1;
     bestmv->as_mv.col = bc << 1;
   }
@@ -449,12 +419,10 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #undef MIN
 #undef MAX
 
-#if CONFIG_HIGH_PRECISION_MV
 #undef PREHP
 #undef DPHP
 #undef DISTHP
 #undef ERRHP
-#endif
 
 #if CONFIG_SIXTEENTH_SUBPEL_UV
 #define SP(x) (((x)&7)<<1) // convert motion vector component to offset for svf calc
@@ -470,10 +438,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int bestmse = INT_MAX;
   int_mv startmv;
   int_mv this_mv;
-#if CONFIG_HIGH_PRECISION_MV
   int_mv orig_mv;
   int yrow_movedback = 0, ycol_movedback = 0;
-#endif
   unsigned char *z = (*(b->base_src) + b->src);
   int left, right, up, down, diag;
   unsigned int sse;
@@ -499,28 +465,20 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   bestmv->as_mv.row <<= 3;
   bestmv->as_mv.col <<= 3;
   startmv = *bestmv;
-#if CONFIG_HIGH_PRECISION_MV
   orig_mv = *bestmv;
-#endif
 
   // calculate central point error
   bestmse = vfp->vf(y, y_stride, z, b->src_stride, sse1);
   *distortion = bestmse;
-#if CONFIG_HIGH_PRECISION_MV
-  bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit);
-#endif
+  bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit,
+                         xd->allow_high_precision_mv);
 
   // go left then right and check error
   this_mv.as_mv.row = startmv.as_mv.row;
   this_mv.as_mv.col = ((startmv.as_mv.col - 8) | 4);
   thismse = vfp->svf_halfpix_h(y - 1, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (left < bestmse) {
     *bestmv = this_mv;
@@ -531,11 +489,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   this_mv.as_mv.col += 8;
   thismse = vfp->svf_halfpix_h(y, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                                xd->allow_high_precision_mv);
 
   if (right < bestmse) {
     *bestmv = this_mv;
@@ -548,11 +503,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   this_mv.as_mv.col = startmv.as_mv.col;
   this_mv.as_mv.row = ((startmv.as_mv.row - 8) | 4);
   thismse =  vfp->svf_halfpix_v(y - y_stride, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                             xd->allow_high_precision_mv);
 
   if (up < bestmse) {
     *bestmv = this_mv;
@@ -563,11 +515,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   this_mv.as_mv.row += 8;
   thismse = vfp->svf_halfpix_v(y, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (down < bestmse) {
     *bestmv = this_mv;
@@ -607,11 +556,8 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
       break;
   }
 
-#if CONFIG_HIGH_PRECISION_MV
-  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (diag < bestmse) {
     *bestmv = this_mv;
@@ -626,16 +572,12 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   // time to check quarter pels.
   if (bestmv->as_mv.row < startmv.as_mv.row) {
     y -= y_stride;
-#if CONFIG_HIGH_PRECISION_MV
     yrow_movedback = 1;
-#endif
   }
 
   if (bestmv->as_mv.col < startmv.as_mv.col) {
     y--;
-#if CONFIG_HIGH_PRECISION_MV
     ycol_movedback = 1;
-#endif
   }
 
   startmv = *bestmv;
@@ -647,17 +589,17 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   if (startmv.as_mv.col & 7) {
     this_mv.as_mv.col = startmv.as_mv.col - 2;
-    thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+    thismse = vfp->svf(y, y_stride,
+                       SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                       z, b->src_stride, &sse);
   } else {
     this_mv.as_mv.col = (startmv.as_mv.col - 8) | 6;
-    thismse = vfp->svf(y - 1, y_stride, SP(6), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+    thismse = vfp->svf(y - 1, y_stride, SP(6), SP(this_mv.as_mv.row), z,
+                       b->src_stride, &sse);
   }
 
-#if CONFIG_HIGH_PRECISION_MV
-  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (left < bestmse) {
     *bestmv = this_mv;
@@ -667,12 +609,11 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   this_mv.as_mv.col += 4;
-  thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  thismse = vfp->svf(y, y_stride,
+                     SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                     z, b->src_stride, &sse);
+  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                                xd->allow_high_precision_mv);
 
   if (right < bestmse) {
     *bestmv = this_mv;
@@ -686,17 +627,17 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   if (startmv.as_mv.row & 7) {
     this_mv.as_mv.row = startmv.as_mv.row - 2;
-    thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+    thismse = vfp->svf(y, y_stride,
+                       SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                       z, b->src_stride, &sse);
   } else {
     this_mv.as_mv.row = (startmv.as_mv.row - 8) | 6;
-    thismse = vfp->svf(y - y_stride, y_stride, SP(this_mv.as_mv.col), SP(6), z, b->src_stride, &sse);
+    thismse = vfp->svf(y - y_stride, y_stride, SP(this_mv.as_mv.col), SP(6),
+                       z, b->src_stride, &sse);
   }
 
-#if CONFIG_HIGH_PRECISION_MV
-  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                             xd->allow_high_precision_mv);
 
   if (up < bestmse) {
     *bestmv = this_mv;
@@ -706,12 +647,10 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   }
 
   this_mv.as_mv.row += 4;
-  thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                     z, b->src_stride, &sse);
+  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (down < bestmse) {
     *bestmv = this_mv;
@@ -771,25 +710,26 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
       if (startmv.as_mv.col & 7) {
         this_mv.as_mv.col -= 2;
-        thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+        thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                           z, b->src_stride, &sse);
       } else {
         this_mv.as_mv.col = (startmv.as_mv.col - 8) | 6;
-        thismse = vfp->svf(y - 1, y_stride, SP(6), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+        thismse = vfp->svf(y - 1, y_stride, SP(6), SP(this_mv.as_mv.row), z,
+                           b->src_stride, &sse);
       }
 
       break;
     case 3:
       this_mv.as_mv.col += 2;
       this_mv.as_mv.row += 2;
-      thismse = vfp->svf(y, y_stride,  SP(this_mv.as_mv.col), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+      thismse = vfp->svf(y, y_stride,
+                         SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                         z, b->src_stride, &sse);
       break;
   }
 
-#if CONFIG_HIGH_PRECISION_MV
-  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (diag < bestmse) {
     *bestmv = this_mv;
@@ -798,7 +738,6 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     *sse1 = sse;
   }
 
-#if CONFIG_HIGH_PRECISION_MV
   if (!x->e_mbd.allow_high_precision_mv)
     return bestmse;
 
@@ -820,13 +759,17 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   if (startmv.as_mv.col & 7) {
     this_mv.as_mv.col = startmv.as_mv.col - 1;
-    thismse = vfp->svf(y, y_stride, SP(this_mv.as_mv.col), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+    thismse = vfp->svf(y, y_stride,
+                       SP(this_mv.as_mv.col), SP(this_mv.as_mv.row),
+                       z, b->src_stride, &sse);
   } else {
     this_mv.as_mv.col = (startmv.as_mv.col - 8) | 7;
-    thismse = vfp->svf(y - 1, y_stride, SP(7), SP(this_mv.as_mv.row), z, b->src_stride, &sse);
+    thismse = vfp->svf(y - 1, y_stride, SP(7), SP(this_mv.as_mv.row),
+                       z, b->src_stride, &sse);
   }
 
-  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
+  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (left < bestmse) {
     *bestmv = this_mv;
@@ -876,7 +819,6 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     *distortion = thismse;
     *sse1 = sse;
   }
-
 
   // now check 1 more diagonal
   whichdir = (left < right ? 0 : 1) + (up < down ? 0 : 2);
@@ -951,8 +893,6 @@ int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
     *sse1 = sse;
   }
 
-#endif  /* CONFIG_HIGH_PRECISION_MV */
-
   return bestmse;
 }
 
@@ -976,7 +916,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   MACROBLOCKD *xd = &x->e_mbd;
 
 #if ARCH_X86 || ARCH_X86_64
-  unsigned char *y0 = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
+  unsigned char *y0 = *(d->base_pre) + d->pre +
+      (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
   unsigned char *y;
 
   y_stride = 32;
@@ -984,7 +925,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   vfp->copymem(y0 - 1 - d->pre_stride, d->pre_stride, xd->y_buf, y_stride, 18);
   y = xd->y_buf + y_stride + 1;
 #else
-  unsigned char *y = *(d->base_pre) + d->pre + (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
+  unsigned char *y = *(d->base_pre) + d->pre +
+      (bestmv->as_mv.row) * d->pre_stride + bestmv->as_mv.col;
   y_stride = d->pre_stride;
 #endif
 
@@ -996,21 +938,15 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   // calculate central point error
   bestmse = vfp->vf(y, y_stride, z, b->src_stride, sse1);
   *distortion = bestmse;
-#if CONFIG_HIGH_PRECISION_MV
-  bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit);
-#endif
+  bestmse += mv_err_cost(bestmv, ref_mv, mvcost, error_per_bit,
+                         xd->allow_high_precision_mv);
 
   // go left then right and check error
   this_mv.as_mv.row = startmv.as_mv.row;
   this_mv.as_mv.col = ((startmv.as_mv.col - 8) | 4);
   thismse = vfp->svf_halfpix_h(y - 1, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  left = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (left < bestmse) {
     *bestmv = this_mv;
@@ -1021,11 +957,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   this_mv.as_mv.col += 8;
   thismse = vfp->svf_halfpix_h(y, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  right = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                                xd->allow_high_precision_mv);
 
   if (right < bestmse) {
     *bestmv = this_mv;
@@ -1038,11 +971,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   this_mv.as_mv.col = startmv.as_mv.col;
   this_mv.as_mv.row = ((startmv.as_mv.row - 8) | 4);
   thismse = vfp->svf_halfpix_v(y - y_stride, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  up = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                             xd->allow_high_precision_mv);
 
   if (up < bestmse) {
     *bestmv = this_mv;
@@ -1053,11 +983,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 
   this_mv.as_mv.row += 8;
   thismse = vfp->svf_halfpix_v(y, y_stride, z, b->src_stride, &sse);
-#if CONFIG_HIGH_PRECISION_MV
-  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  down = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (down < bestmse) {
     *bestmv = this_mv;
@@ -1094,11 +1021,8 @@ int vp8_find_best_half_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
       break;
   }
 
-#if CONFIG_HIGH_PRECISION_MV
-  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit, xd->allow_high_precision_mv);
-#else
-  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit);
-#endif
+  diag = thismse + mv_err_cost(&this_mv, ref_mv, mvcost, error_per_bit,
+                               xd->allow_high_precision_mv);
 
   if (diag < bestmse) {
     *bestmv = this_mv;
@@ -1347,12 +1271,10 @@ int vp8_diamond_search_sad
   int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
   int_mv fcenter_mv;
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     mvsadcost[0] = x->mvsadcost_hp[0];
     mvsadcost[1] = x->mvsadcost_hp[1];
   }
-#endif
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1423,12 +1345,11 @@ int vp8_diamond_search_sad
   if (bestsad == INT_MAX)
     return INT_MAX;
 
-  return fn_ptr->vf(what, what_stride, best_address, in_what_stride, (unsigned int *)(&thissad))
-#if CONFIG_HIGH_PRECISION_MV
-         + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit, xd->allow_high_precision_mv);
-#else
-         + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
-#endif
+  return
+      fn_ptr->vf(what, what_stride, best_address, in_what_stride,
+                 (unsigned int *)(&thissad)) +
+      mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
+                  xd->allow_high_precision_mv);
 }
 
 int vp8_diamond_search_sadx4
@@ -1473,12 +1394,10 @@ int vp8_diamond_search_sadx4
   int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
   int_mv fcenter_mv;
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     mvsadcost[0] = x->mvsadcost_hp[0];
     mvsadcost[1] = x->mvsadcost_hp[1];
   }
-#endif
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1582,12 +1501,11 @@ int vp8_diamond_search_sadx4
   if (bestsad == INT_MAX)
     return INT_MAX;
 
-  return fn_ptr->vf(what, what_stride, best_address, in_what_stride, (unsigned int *)(&thissad))
-#if CONFIG_HIGH_PRECISION_MV
-         + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit, xd->allow_high_precision_mv);
-#else
-         + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
-#endif
+  return
+      fn_ptr->vf(what, what_stride, best_address, in_what_stride,
+                 (unsigned int *)(&thissad)) +
+      mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
+                  xd->allow_high_precision_mv);
 }
 
 int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
@@ -1620,12 +1538,10 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
   int_mv fcenter_mv;
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     mvsadcost[0] = x->mvsadcost_hp[0];
     mvsadcost[1] = x->mvsadcost_hp[1];
   }
-#endif
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1680,12 +1596,11 @@ int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   this_mv.as_mv.col = best_mv->as_mv.col << 3;
 
   if (bestsad < INT_MAX)
-    return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride, (unsigned int *)(&thissad))
-#if CONFIG_HIGH_PRECISION_MV
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit, xd->allow_high_precision_mv);
-#else
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
-#endif
+    return
+        fn_ptr->vf(what, what_stride, bestaddress, in_what_stride,
+                   (unsigned int *)(&thissad)) +
+        mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
+                    xd->allow_high_precision_mv);
   else
     return INT_MAX;
 }
@@ -1722,12 +1637,10 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
   int_mv fcenter_mv;
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     mvsadcost[0] = x->mvsadcost_hp[0];
     mvsadcost[1] = x->mvsadcost_hp[1];
   }
-#endif
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1813,12 +1726,11 @@ int vp8_full_search_sadx3(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   this_mv.as_mv.col = best_mv->as_mv.col << 3;
 
   if (bestsad < INT_MAX)
-    return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride, (unsigned int *)(&thissad))
-#if CONFIG_HIGH_PRECISION_MV
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit, xd->allow_high_precision_mv);
-#else
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
-#endif
+    return
+        fn_ptr->vf(what, what_stride, bestaddress, in_what_stride,
+                   (unsigned int *)(&thissad)) +
+        mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
+                    xd->allow_high_precision_mv);
   else
     return INT_MAX;
 }
@@ -1856,12 +1768,10 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
   int_mv fcenter_mv;
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     mvsadcost[0] = x->mvsadcost_hp[0];
     mvsadcost[1] = x->mvsadcost_hp[1];
   }
-#endif
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
 
@@ -1972,12 +1882,11 @@ int vp8_full_search_sadx8(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   this_mv.as_mv.col = best_mv->as_mv.col << 3;
 
   if (bestsad < INT_MAX)
-    return fn_ptr->vf(what, what_stride, bestaddress, in_what_stride, (unsigned int *)(&thissad))
-#if CONFIG_HIGH_PRECISION_MV
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit, xd->allow_high_precision_mv);
-#else
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
-#endif
+    return
+        fn_ptr->vf(what, what_stride, bestaddress, in_what_stride,
+                   (unsigned int *)(&thissad)) +
+        mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
+                    xd->allow_high_precision_mv);
   else
     return INT_MAX;
 }
@@ -2004,12 +1913,10 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
   int_mv fcenter_mv;
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     mvsadcost[0] = x->mvsadcost_hp[0];
     mvsadcost[1] = x->mvsadcost_hp[1];
   }
-#endif
 
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
@@ -2054,12 +1961,11 @@ int vp8_refining_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,
   this_mv.as_mv.col = ref_mv->as_mv.col << 3;
 
   if (bestsad < INT_MAX)
-    return fn_ptr->vf(what, what_stride, best_address, in_what_stride, (unsigned int *)(&thissad))
-#if CONFIG_HIGH_PRECISION_MV
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit, xd->allow_high_precision_mv);
-#else
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
-#endif
+    return
+        fn_ptr->vf(what, what_stride, best_address, in_what_stride,
+                   (unsigned int *)(&thissad)) +
+        mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
+                    xd->allow_high_precision_mv);
   else
     return INT_MAX;
 }
@@ -2086,12 +1992,10 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   int *mvsadcost[2] = {x->mvsadcost[0], x->mvsadcost[1]};
   int_mv fcenter_mv;
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv) {
     mvsadcost[0] = x->mvsadcost_hp[0];
     mvsadcost[1] = x->mvsadcost_hp[1];
   }
-#endif
 
   fcenter_mv.as_mv.row = center_mv->as_mv.row >> 3;
   fcenter_mv.as_mv.col = center_mv->as_mv.col >> 3;
@@ -2166,12 +2070,11 @@ int vp8_refining_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
   this_mv.as_mv.col = ref_mv->as_mv.col << 3;
 
   if (bestsad < INT_MAX)
-    return fn_ptr->vf(what, what_stride, best_address, in_what_stride, (unsigned int *)(&thissad))
-#if CONFIG_HIGH_PRECISION_MV
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit, xd->allow_high_precision_mv);
-#else
-           + mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit);
-#endif
+    return
+        fn_ptr->vf(what, what_stride, best_address, in_what_stride,
+                   (unsigned int *)(&thissad)) +
+        mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
+                    xd->allow_high_precision_mv);
   else
     return INT_MAX;
 }

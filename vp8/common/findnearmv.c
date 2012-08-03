@@ -133,7 +133,6 @@ void vp8_find_near_mvs
   /* Make sure that the 1/8th bits of the Mvs are zero if high_precision
    * is not being used, by truncating the last bit towards 0
    */
-#if CONFIG_HIGH_PRECISION_MV
   if (!xd->allow_high_precision_mv) {
     if (best_mv->as_mv.row & 1)
       best_mv->as_mv.row += (best_mv->as_mv.row > 0 ? -1 : 1);
@@ -148,7 +147,6 @@ void vp8_find_near_mvs
     if (nearby->as_mv.col & 1)
       nearby->as_mv.col += (nearby->as_mv.col > 0 ? -1 : 1);
   }
-#endif
 
   // TODO: move clamp outside findnearmv
   vp8_clamp_mv2(nearest, xd);

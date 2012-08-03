@@ -12,7 +12,6 @@
 #include "onyxc_int.h"
 #include "entropymv.h"
 
-#if CONFIG_HIGH_PRECISION_MV
 const MV_CONTEXT_HP vp8_mv_update_probs_hp[2] = {
   {{
       237,
@@ -47,7 +46,6 @@ const MV_CONTEXT_HP vp8_default_mv_context_hp[2] = {
     }
   }
 };
-#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 const MV_CONTEXT vp8_mv_update_probs[2] = {
   {{
@@ -84,7 +82,6 @@ const MV_CONTEXT vp8_default_mv_context[2] = {
   }
 };
 
-#if CONFIG_HIGH_PRECISION_MV
 const vp8_tree_index vp8_small_mvtree_hp [30] = {
   2,  16,
   4,  10,
@@ -103,7 +100,6 @@ const vp8_tree_index vp8_small_mvtree_hp [30] = {
   -14, -15
 };
 struct vp8_token_struct vp8_small_mvencodings_hp [16];
-#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 const vp8_tree_index vp8_small_mvtree [14] = {
   2, 8,
@@ -196,7 +192,6 @@ static void compute_component_probs(
   }
 }
 
-#if CONFIG_HIGH_PRECISION_MV
 static void compute_component_probs_hp(
   const unsigned int events [MVvals_hp],
   vp8_prob Pnew [MVPcount_hp],
@@ -268,13 +263,10 @@ static void compute_component_probs_hp(
     while (++j < mvlong_width_hp);
   }
 }
-#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 void vp8_entropy_mv_init() {
   vp8_tokens_from_tree(vp8_small_mvencodings, vp8_small_mvtree);
-#if CONFIG_HIGH_PRECISION_MV
   vp8_tokens_from_tree(vp8_small_mvencodings_hp, vp8_small_mvtree_hp);
-#endif
 }
 
 // #define MV_COUNT_TESTING
@@ -293,7 +285,6 @@ void vp8_adapt_mv_probs(VP8_COMMON *cm) {
     printf("},\n");
   }
   printf("};\n");
-#if CONFIG_HIGH_PRECISION_MV
   printf("static const unsigned int\nMVcount_hp[2][MVvals_hp]={\n");
   for (i = 0; i < 2; ++i) {
     printf("  { ");
@@ -304,7 +295,6 @@ void vp8_adapt_mv_probs(VP8_COMMON *cm) {
     printf("},\n");
   }
   printf("};\n");
-#endif
 #endif  /* MV_COUNT_TESTING */
 
   for (i = 0; i < 2; ++i) {
@@ -357,7 +347,6 @@ void vp8_adapt_mv_probs(VP8_COMMON *cm) {
       else cm->fc.mvc[i].prob[MVPbits + t] = prob;
     }
   }
-#if CONFIG_HIGH_PRECISION_MV
   for (i = 0; i < 2; ++i) {
     int prob;
     unsigned int is_short_ct[2];
@@ -408,5 +397,4 @@ void vp8_adapt_mv_probs(VP8_COMMON *cm) {
       else cm->fc.mvc_hp[i].prob[MVPbits_hp + t] = prob;
     }
   }
-#endif
 }

@@ -556,7 +556,6 @@ static void write_mv
   vp8_encode_motion_vector(w, &e, mvc);
 }
 
-#if CONFIG_HIGH_PRECISION_MV
 static void write_mv_hp
 (
   vp8_writer *w, const MV *mv, const int_mv *ref, const MV_CONTEXT_HP *mvc
@@ -567,7 +566,6 @@ static void write_mv_hp
 
   vp8_encode_motion_vector_hp(w, &e, mvc);
 }
-#endif
 
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
@@ -721,9 +719,7 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
   VP8_COMMON *const pc = & cpi->common;
   vp8_writer *const w = & cpi->bc;
   const MV_CONTEXT *mvc = pc->fc.mvc;
-#if CONFIG_HIGH_PRECISION_MV
   const MV_CONTEXT_HP *mvc_hp = pc->fc.mvc_hp;
-#endif
   MACROBLOCKD *xd = &cpi->mb.e_mbd;
   MODE_INFO *m;
   MODE_INFO *prev_m;
@@ -799,11 +795,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 
   update_mbintra_mode_probs(cpi);
 
-#if CONFIG_HIGH_PRECISION_MV
   if (xd->allow_high_precision_mv)
     vp8_write_mvprobs_hp(cpi);
   else
-#endif
     vp8_write_mvprobs(cpi);
 
   mb_row = 0;
@@ -1007,23 +1001,17 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                 active_section = 5;
 #endif
 
-#if CONFIG_HIGH_PRECISION_MV
                 if (xd->allow_high_precision_mv) {
                   write_mv_hp(w, &mi->mv.as_mv, &best_mv, mvc_hp);
-                } else
-#endif
-                {
+                } else {
                   write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
                 }
 
                 if (mi->second_ref_frame) {
-#if CONFIG_HIGH_PRECISION_MV
                   if (xd->allow_high_precision_mv) {
                     write_mv_hp(w, &mi->second_mv.as_mv,
                                 &best_second_mv, mvc_hp);
-                  } else
-#endif
-                  {
+                  } else {
                     write_mv(w, &mi->second_mv.as_mv,
                              &best_second_mv, mvc);
                   }
@@ -1068,25 +1056,19 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 #ifdef ENTROPY_STATS
                     active_section = 11;
 #endif
-#if CONFIG_HIGH_PRECISION_MV
                     if (xd->allow_high_precision_mv) {
                       write_mv_hp(w, &blockmv.as_mv, &best_mv,
                                   (const MV_CONTEXT_HP *) mvc_hp);
-                    } else
-#endif
-                    {
+                    } else {
                       write_mv(w, &blockmv.as_mv, &best_mv,
                                (const MV_CONTEXT *) mvc);
                     }
 
                     if (mi->second_ref_frame) {
-#if CONFIG_HIGH_PRECISION_MV
                       if (xd->allow_high_precision_mv) {
                         write_mv_hp(w, &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
                                     &best_second_mv, (const MV_CONTEXT_HP *) mvc_hp);
-                      } else
-#endif
-                      {
+                      } else {
                         write_mv(w, &cpi->mb.partition_info->bmi[j].second_mv.as_mv,
                                  &best_second_mv, (const MV_CONTEXT *) mvc);
                       }
@@ -1363,177 +1345,6 @@ void build_coeff_contexts(VP8_COMP *cpi) {
     }
   }
 #endif
-}
-
-static void update_coef_probs3(VP8_COMP *cpi) {
-  const vp8_prob grpupd = 216;
-  int i, j, k, t;
-  vp8_writer *const w = & cpi->bc;
-  int update[2];
-  int savings;
-  int bestupdndx[2 * ENTROPY_NODES];
-
-  vp8_clear_system_state(); // __asm emms;
-  // Build the cofficient contexts based on counts collected in encode loop
-  build_coeff_contexts(cpi);
-
-  i = 0;
-  for (i = 0; i < BLOCK_TYPES; ++i) {
-    for (t = 0; t < ENTROPY_NODES; ++t) {
-      /* dry run to see if there is any udpate at all needed */
-      savings = 0;
-      update[0] = update[1] = 0;
-      for (j = !i; j < COEF_BANDS; ++j) {
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
-          vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-          const vp8_prob upd = COEF_UPDATE_PROB;
-          int s;
-          int u = 0;
-          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-            continue;
-
-#if defined(SEARCH_NEWP)
-          s = prob_diff_update_savings_search(
-                cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
-          if (s > 0 && newp != *Pold) u = 1;
-          if (u)
-            savings += s - (int)(vp8_cost_zero(upd));
-          else
-            savings -= (int)(vp8_cost_zero(upd));
-#else
-          s = prob_update_savings(
-                cpi->frame_branch_ct [i][j][k][t], *Pold, newp, upd);
-          if (s > 0) u = 1;
-          if (u)
-            savings += s;
-#endif
-          // printf("    %d %d %d: %d\n", i, j, k, u);
-          update[u]++;
-        }
-      }
-      if (update[1] == 0 || savings < 0) {
-        vp8_write(w, 0, grpupd);
-        continue;
-      }
-      vp8_write(w, 1, grpupd);
-      for (j = !i; j < COEF_BANDS; ++j) {
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
-          vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
-          const vp8_prob upd = COEF_UPDATE_PROB;
-          int s;
-          int u = 0;
-
-          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-            continue;
-#if defined(SEARCH_NEWP)
-          s = prob_diff_update_savings_search(
-                cpi->frame_branch_ct [i][j][k][t], *Pold, &newp, upd);
-          if (s > 0 && newp != *Pold) u = 1;
-#else
-          s = prob_update_savings(
-                cpi->frame_branch_ct [i][j][k][t], *Pold, newp, upd);
-          if (s > 0) u = 1;
-#endif
-          // printf("  %d %d %d: %d (%d)\n", i, j, k, u, upd);
-          vp8_write(w, u, upd);
-#ifdef ENTROPY_STATS
-          if (!cpi->dummy_packing)
-            ++ tree_update_hist [i][j][k][t] [u];
-#endif
-          if (u) {
-            /* send/use new probability */
-            write_prob_diff_update(w, newp, *Pold);
-            *Pold = newp;
-          }
-
-        }
-      }
-    }
-  }
-
-  if (cpi->common.txfm_mode != ALLOW_8X8) return;
-
-  for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
-    for (t = 0; t < ENTROPY_NODES; ++t) {
-      /* dry run to see if there is any udpate at all needed */
-      savings = 0;
-      update[0] = update[1] = 0;
-      for (j = !i; j < COEF_BANDS; ++j) {
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
-          vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
-          const vp8_prob upd = COEF_UPDATE_PROB_8X8;
-          int s;
-          int u = 0;
-
-          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-            continue;
-#if defined(SEARCH_NEWP)
-          s = prob_diff_update_savings_search(
-                cpi->frame_branch_ct_8x8 [i][j][k][t],
-                *Pold, &newp, upd);
-          if (s > 0 && newp != *Pold)
-            u = 1;
-          if (u)
-            savings += s - (int)(vp8_cost_zero(upd));
-          else
-            savings -= (int)(vp8_cost_zero(upd));
-#else
-          s = prob_update_savings(
-                cpi->frame_branch_ct_8x8 [i][j][k][t],
-                *Pold, newp, upd);
-          if (s > 0)
-            u = 1;
-          if (u)
-            savings += s;
-#endif
-          update[u]++;
-        }
-      }
-      if (update[1] == 0 || savings < 0) {
-        vp8_write(w, 0, grpupd);
-        continue;
-      }
-      vp8_write(w, 1, grpupd);
-      for (j = !i; j < COEF_BANDS; ++j) {
-        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
-          vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
-          vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
-          const vp8_prob upd = COEF_UPDATE_PROB_8X8;
-          int s;
-          int u = 0;
-
-          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
-            continue;
-#if defined(SEARCH_NEWP)
-          s = prob_diff_update_savings_search(
-                cpi->frame_branch_ct_8x8 [i][j][k][t],
-                *Pold, &newp, upd);
-          if (s > 0 && newp != *Pold)
-            u = 1;
-#else
-          s = prob_update_savings(
-                cpi->frame_branch_ct_8x8 [i][j][k][t],
-                *Pold, newp, upd);
-          if (s > 0)
-            u = 1;
-#endif
-          vp8_write(w, u, upd);
-#ifdef ENTROPY_STATS
-          if (!cpi->dummy_packing)
-            ++ tree_update_hist_8x8 [i][j][k][t] [u];
-#endif
-          if (u) {
-            /* send/use new probability */
-            write_prob_diff_update(w, newp, *Pold);
-            *Pold = newp;
-          }
-        }
-      }
-    }
-  }
 }
 
 static void update_coef_probs2(VP8_COMP *cpi) {
@@ -2334,10 +2145,8 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     vp8_write_bit(bc, pc->ref_frame_sign_bias[GOLDEN_FRAME]);
     vp8_write_bit(bc, pc->ref_frame_sign_bias[ALTREF_FRAME]);
 
-#if CONFIG_HIGH_PRECISION_MV
     // Signal whether to allow high MV precision
     vp8_write_bit(bc, (xd->allow_high_precision_mv) ? 1 : 0);
-#endif
 #if CONFIG_SWITCHABLE_INTERP
     if (pc->mcomp_filter_type == SWITCHABLE) {
       /* Check to see if only one of the filters is actually used */
@@ -2393,17 +2202,13 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
   vp8_copy(cpi->common.fc.pre_mbsplit_prob, cpi->common.fc.mbsplit_prob);
   vp8_copy(cpi->common.fc.pre_i8x8_mode_prob, cpi->common.fc.i8x8_mode_prob);
   vp8_copy(cpi->common.fc.pre_mvc, cpi->common.fc.mvc);
-#if CONFIG_HIGH_PRECISION_MV
   vp8_copy(cpi->common.fc.pre_mvc_hp, cpi->common.fc.mvc_hp);
-#endif
   vp8_zero(cpi->sub_mv_ref_count);
   vp8_zero(cpi->mbsplit_count);
   vp8_zero(cpi->common.fc.mv_ref_ct)
   vp8_zero(cpi->common.fc.mv_ref_ct_a)
 #if COEFUPDATETYPE == 2
   update_coef_probs2(cpi);
-#elif COEFUPDATETYPE == 3
-  update_coef_probs3(cpi);
 #else
   update_coef_probs(cpi);
 #endif

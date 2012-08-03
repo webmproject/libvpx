@@ -20,11 +20,6 @@
 extern unsigned int active_section;
 #endif
 
-// #define DEBUG_ENC_MV
-#ifdef DEBUG_ENC_MV
-int enc_mvcount = 0;
-#endif
-
 static void encode_mvcomponent(
   vp8_writer *const w,
   const int v,
@@ -61,47 +56,10 @@ static void encode_mvcomponent(
 
   vp8_write(w, v < 0, p [MVPsign]);
 }
-#if 0
-static int max_mv_r = 0;
-static int max_mv_c = 0;
-#endif
+
 void vp8_encode_motion_vector(vp8_writer *w, const MV *mv, const MV_CONTEXT *mvc) {
-
-#if 0
-  {
-    if (abs(mv->row >> 1) > max_mv_r) {
-      FILE *f = fopen("maxmv.stt", "a");
-      max_mv_r = abs(mv->row >> 1);
-      fprintf(f, "New Mv Row Max %6d\n", (mv->row >> 1));
-
-      if ((abs(mv->row) / 2) != max_mv_r)
-        fprintf(f, "MV Row conversion error %6d\n", abs(mv->row) / 2);
-
-      fclose(f);
-    }
-
-    if (abs(mv->col >> 1) > max_mv_c) {
-      FILE *f = fopen("maxmv.stt", "a");
-      fprintf(f, "New Mv Col Max %6d\n", (mv->col >> 1));
-      max_mv_c = abs(mv->col >> 1);
-      fclose(f);
-    }
-  }
-#endif
   encode_mvcomponent(w, mv->row >> 1, &mvc[0]);
   encode_mvcomponent(w, mv->col >> 1, &mvc[1]);
-#ifdef DEBUG_ENC_MV
-  {
-    int i;
-    printf("%d (np): %d %d\n", enc_mvcount++,
-           (mv->row >> 1) << 1, (mv->col >> 1) << 1);
-    // for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[0])->prob[i]);
-    // printf("\n");
-    // for (i=0; i<MVPcount;++i) printf("  %d", (&mvc[1])->prob[i]);
-    // printf("\n");
-    fflush(stdout);
-  }
-#endif
 }
 
 
@@ -282,43 +240,6 @@ static void write_component_probs(
     } while (++j <= mv_max);
   }
 
-  /*
-  {
-      int j = -mv_max;
-      do
-      {
-
-          const int c = events [mv_max + j];
-          int a = j;
-
-          if( j < 0)
-          {
-              sign_ct [1] += c;
-              a = -j;
-          }
-          else if( j)
-              sign_ct [0] += c;
-
-          if( a < mvnum_short)
-          {
-              is_short_ct [0] += c;     // Short vector
-              short_ct [a] += c;       // Magnitude distribution
-          }
-          else
-          {
-              int k = mvlong_width - 1;
-              is_short_ct [1] += c;     // Long vector
-
-              //  bit 3 not always encoded.
-
-              do
-                  bit_ct [k] [(a >> k) & 1] += c;
-              while( --k >= 0);
-          }
-      } while( ++j <= mv_max);
-  }
-  */
-
   calc_prob(Pnew + mvpis_short, is_short_ct);
 
   calc_prob(Pnew + MVPsign, sign_ct);
@@ -401,7 +322,6 @@ void vp8_write_mvprobs(VP8_COMP *cpi) {
 #endif
 }
 
-#if CONFIG_HIGH_PRECISION_MV
 
 static void encode_mvcomponent_hp(
   vp8_writer *const w,
@@ -441,47 +361,12 @@ static void encode_mvcomponent_hp(
 
   vp8_write(w, v < 0, p [MVPsign_hp]);
 }
-#if 0
-static int max_mv_r = 0;
-static int max_mv_c = 0;
-#endif
+
 void vp8_encode_motion_vector_hp(vp8_writer *w, const MV *mv,
                                  const MV_CONTEXT_HP *mvc) {
 
-#if 0
-  {
-    if (abs(mv->row >> 1) > max_mv_r) {
-      FILE *f = fopen("maxmv.stt", "a");
-      max_mv_r = abs(mv->row >> 1);
-      fprintf(f, "New Mv Row Max %6d\n", (mv->row >> 1));
-
-      if ((abs(mv->row) / 2) != max_mv_r)
-        fprintf(f, "MV Row conversion error %6d\n", abs(mv->row) / 2);
-
-      fclose(f);
-    }
-
-    if (abs(mv->col >> 1) > max_mv_c) {
-      FILE *f = fopen("maxmv.stt", "a");
-      fprintf(f, "New Mv Col Max %6d\n", (mv->col >> 1));
-      max_mv_c = abs(mv->col >> 1);
-      fclose(f);
-    }
-  }
-#endif
   encode_mvcomponent_hp(w, mv->row, &mvc[0]);
   encode_mvcomponent_hp(w, mv->col, &mvc[1]);
-#ifdef DEBUG_ENC_MV
-  {
-    int i;
-    printf("%d (hp): %d %d\n", enc_mvcount++, mv->row, mv->col);
-    // for (i=0; i<MVPcount_hp;++i) printf("  %d", (&mvc[0])->prob[i]);
-    // printf("\n");
-    // for (i=0; i<MVPcount_hp;++i) printf("  %d", (&mvc[1])->prob[i]);
-    // printf("\n");
-    fflush(stdout);
-  }
-#endif
 }
 
 
@@ -716,4 +601,3 @@ void vp8_write_mvprobs_hp(VP8_COMP *cpi) {
   active_section = 5;
 #endif
 }
-#endif  /* CONFIG_HIGH_PRECISION_MV */

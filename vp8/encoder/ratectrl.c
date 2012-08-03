@@ -134,10 +134,8 @@ void vp8_save_coding_context(VP8_COMP *cpi) {
 
   vp8_copy(cc->mvc,      cm->fc.mvc);
   vp8_copy(cc->mvcosts,  cpi->mb.mvcosts);
-#if CONFIG_HIGH_PRECISION_MV
   vp8_copy(cc->mvc_hp,     cm->fc.mvc_hp);
   vp8_copy(cc->mvcosts_hp,  cpi->mb.mvcosts_hp);
-#endif
 
   vp8_copy(cc->mv_ref_ct, cm->fc.mv_ref_ct);
   vp8_copy(cc->mode_context, cm->fc.mode_context);
@@ -192,10 +190,8 @@ void vp8_restore_coding_context(VP8_COMP *cpi) {
 
   vp8_copy(cm->fc.mvc, cc->mvc);
   vp8_copy(cpi->mb.mvcosts, cc->mvcosts);
-#if CONFIG_HIGH_PRECISION_MV
   vp8_copy(cm->fc.mvc_hp, cc->mvc_hp);
   vp8_copy(cpi->mb.mvcosts_hp, cc->mvcosts_hp);
-#endif
 
   vp8_copy(cm->fc.mv_ref_ct, cc->mv_ref_ct);
   vp8_copy(cm->fc.mode_context, cc->mode_context);
@@ -253,14 +249,11 @@ void vp8_setup_key_frame(VP8_COMP *cpi) {
     int flag[2] = {1, 1};
     vp8_build_component_cost_table(cpi->mb.mvcost, (const MV_CONTEXT *) cpi->common.fc.mvc, flag);
   }
-#if CONFIG_HIGH_PRECISION_MV
   vpx_memcpy(cpi->common.fc.mvc_hp, vp8_default_mv_context_hp, sizeof(vp8_default_mv_context_hp));
   {
     int flag[2] = {1, 1};
     vp8_build_component_cost_table_hp(cpi->mb.mvcost_hp, (const MV_CONTEXT_HP *) cpi->common.fc.mvc_hp, flag);
   }
-#endif
-
 
 
   cpi->common.txfm_mode = ALLOW_8X8;

@@ -404,9 +404,7 @@ typedef struct MacroBlockD {
   vp8_subpix_fn_t  subpixel_predict_avg8x4;
   vp8_subpix_fn_t  subpixel_predict_avg8x8;
   vp8_subpix_fn_t  subpixel_predict_avg16x16;
-#if CONFIG_HIGH_PRECISION_MV
   int allow_high_precision_mv;
-#endif /* CONFIG_HIGH_PRECISION_MV */
 
   void *current_bc;
 

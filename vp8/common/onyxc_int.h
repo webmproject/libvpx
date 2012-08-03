@@ -56,13 +56,9 @@ typedef struct frame_contexts {
   vp8_prob coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
 #endif
   MV_CONTEXT mvc[2];
-#if CONFIG_HIGH_PRECISION_MV
   MV_CONTEXT_HP mvc_hp[2];
-#endif
   MV_CONTEXT pre_mvc[2];
-#if CONFIG_HIGH_PRECISION_MV
   MV_CONTEXT_HP pre_mvc_hp[2];
-#endif
   vp8_prob pre_bmode_prob [VP8_BINTRAMODES - 1];
   vp8_prob pre_ymode_prob [VP8_YMODES - 1]; /* interframe intra mode probs */
   vp8_prob pre_uv_mode_prob [VP8_YMODES][VP8_UV_MODES - 1];
@@ -93,9 +89,7 @@ typedef struct frame_contexts {
       [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
 #endif
   unsigned int MVcount [2] [MVvals];
-#if CONFIG_HIGH_PRECISION_MV
   unsigned int MVcount_hp [2] [MVvals_hp];
-#endif
 #if CONFIG_SWITCHABLE_INTERP
   vp8_prob switchable_interp_prob[VP8_SWITCHABLE_FILTERS+1]
                                  [VP8_SWITCHABLE_FILTERS-1];

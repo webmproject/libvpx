@@ -87,14 +87,12 @@ extern const int vp8_gf_interval_table[101];
                                            before trying each new filter */
 #define SHARP_FILTER_QTHRESH 0          /* Q threshold for 8-tap sharp filter */
 
-#if CONFIG_HIGH_PRECISION_MV
 #define ALTREF_HIGH_PRECISION_MV 1      /* whether to use high precision mv
                                            for altref computation */
 #define HIGH_PRECISION_MV_QTHRESH 200   /* Q threshold for use of high precision
                                            mv. Choose a very high value for
                                            now so that HIGH_PRECISION is always
                                            chosen */
-#endif
 
 #if CONFIG_INTERNAL_STATS
 #include "math.h"
@@ -1523,9 +1521,7 @@ void vp8_change_config(VP8_PTR ptr, VP8_CONFIG *oxcf) {
   cm->refresh_entropy_probs = 1;
 
   setup_features(cpi);
-#if CONFIG_HIGH_PRECISION_MV
   cpi->mb.e_mbd.allow_high_precision_mv = 0;   // Default mv precision adaptation
-#endif
 
   {
     int i;
@@ -1679,7 +1675,6 @@ static void cal_mvsadcosts(int *mvsadcost[2]) {
   } while (++i <= mvfp_max);
 }
 
-#if CONFIG_HIGH_PRECISION_MV
 static void cal_mvsadcosts_hp(int *mvsadcost[2]) {
   int i = 1;
 
@@ -1694,7 +1689,6 @@ static void cal_mvsadcosts_hp(int *mvsadcost[2]) {
     mvsadcost [1][-i] = (int) z;
   } while (++i <= mvfp_max_hp);
 }
-#endif
 
 VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
   int i;
@@ -1876,14 +1870,12 @@ VP8_PTR vp8_create_compressor(VP8_CONFIG *oxcf) {
 
   cal_mvsadcosts(cpi->mb.mvsadcost);
 
-#if CONFIG_HIGH_PRECISION_MV
   cpi->mb.mvcost_hp[0] = &cpi->mb.mvcosts_hp[0][mv_max_hp + 1];
   cpi->mb.mvcost_hp[1] = &cpi->mb.mvcosts_hp[1][mv_max_hp + 1];
   cpi->mb.mvsadcost_hp[0] = &cpi->mb.mvsadcosts_hp[0][mvfp_max_hp + 1];
   cpi->mb.mvsadcost_hp[1] = &cpi->mb.mvsadcosts_hp[1][mvfp_max_hp + 1];
 
   cal_mvsadcosts_hp(cpi->mb.mvsadcost_hp);
-#endif
 
   for (i = 0; i < KEY_FRAME_CONTEXT; i++) {
     cpi->prior_key_frame_distance[i] = (int)cpi->output_frame_rate;
@@ -3153,10 +3145,8 @@ static void encode_frame_to_data_rate
           (Q < SHARP_FILTER_QTHRESH ? EIGHTTAP_SHARP : EIGHTTAP);
 #endif
     }
-#if CONFIG_HIGH_PRECISION_MV
     /* TODO: Decide this more intelligently */
     xd->allow_high_precision_mv = (Q < HIGH_PRECISION_MV_QTHRESH);
-#endif
   }
 
 #if CONFIG_POSTPROC
@@ -3652,9 +3642,7 @@ static void encode_frame_to_data_rate
     vp8_adapt_mode_probs(&cpi->common);
 
     vp8_copy(cpi->common.fc.MVcount, cpi->MVcount);
-#if CONFIG_HIGH_PRECISION_MV
     vp8_copy(cpi->common.fc.MVcount_hp, cpi->MVcount_hp);
-#endif
     vp8_adapt_mv_probs(&cpi->common);
     vp8_update_mode_context(&cpi->common);
   }
@@ -4048,9 +4036,7 @@ int vp8_get_compressed_data(VP8_PTR ptr, unsigned int *frame_flags, unsigned lon
 
   cpi->source = NULL;
 
-#if CONFIG_HIGH_PRECISION_MV
   cpi->mb.e_mbd.allow_high_precision_mv = ALTREF_HIGH_PRECISION_MV;
-#endif
   // Should we code an alternate reference frame
   if (cpi->oxcf.play_alternate &&
       cpi->source_alt_ref_pending) {

@@ -224,7 +224,6 @@ static void read_mvcontexts(vp8_reader *bc, MV_CONTEXT *mvc) {
   } while (++i < 2);
 }
 
-#if CONFIG_HIGH_PRECISION_MV
 static int read_mvcomponent_hp(vp8_reader *r, const MV_CONTEXT_HP *mvc) {
   const vp8_prob *const p = (const vp8_prob *) mvc;
   int x = 0;
@@ -281,7 +280,6 @@ static void read_mvcontexts_hp(vp8_reader *bc, MV_CONTEXT_HP *mvc) {
     } while (++p < pstop);
   } while (++i < 2);
 }
-#endif  /* CONFIG_HIGH_PRECISION_MV */
 
 // Read the referncence frame
 static MV_REFERENCE_FRAME read_ref_frame(VP8D_COMP *pbi,
@@ -447,10 +445,8 @@ static void mb_mode_mv_init(VP8D_COMP *pbi) {
   VP8_COMMON *const cm = & pbi->common;
   vp8_reader *const bc = & pbi->bc;
   MV_CONTEXT *const mvc = pbi->common.fc.mvc;
-#if CONFIG_HIGH_PRECISION_MV
   MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
   MACROBLOCKD *const xd  = & pbi->mb;
-#endif
 
   vpx_memset(cm->mbskip_pred_probs, 0, sizeof(cm->mbskip_pred_probs));
   if (pbi->common.mb_no_coeff_skip) {
@@ -495,11 +491,9 @@ static void mb_mode_mv_init(VP8D_COMP *pbi) {
         cm->fc.ymode_prob[i] = (vp8_prob) vp8_read_literal(bc, 8);
       } while (++i < VP8_YMODES - 1);
     }
-#if CONFIG_HIGH_PRECISION_MV
     if (xd->allow_high_precision_mv)
       read_mvcontexts_hp(bc, mvc_hp);
     else
-#endif
       read_mvcontexts(bc, mvc);
   }
 }
@@ -563,9 +557,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   VP8_COMMON *const cm = & pbi->common;
   vp8_reader *const bc = & pbi->bc;
   MV_CONTEXT *const mvc = pbi->common.fc.mvc;
-#if CONFIG_HIGH_PRECISION_MV
   MV_CONTEXT_HP *const mvc_hp = pbi->common.fc.mvc_hp;
-#endif
   const int mis = pbi->common.mode_info_stride;
   MACROBLOCKD *const xd  = & pbi->mb;
 
@@ -719,14 +711,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
 
           switch (blockmode) {
             case NEW4X4:
-#if CONFIG_HIGH_PRECISION_MV
               if (xd->allow_high_precision_mv) {
                 read_mv_hp(bc, &blockmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
                 cm->fc.MVcount_hp[0][mv_max_hp + (blockmv.as_mv.row)]++;
                 cm->fc.MVcount_hp[1][mv_max_hp + (blockmv.as_mv.col)]++;
-              } else
-#endif
-              {
+              } else {
                 read_mv(bc, &blockmv.as_mv, (const MV_CONTEXT *) mvc);
                 cm->fc.MVcount[0][mv_max + (blockmv.as_mv.row >> 1)]++;
                 cm->fc.MVcount[1][mv_max + (blockmv.as_mv.col >> 1)]++;
@@ -735,14 +724,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
               blockmv.as_mv.col += best_mv.as_mv.col;
 
               if (mbmi->second_ref_frame) {
-#if CONFIG_HIGH_PRECISION_MV
                 if (xd->allow_high_precision_mv) {
                   read_mv_hp(bc, &secondmv.as_mv, (const MV_CONTEXT_HP *) mvc_hp);
                   cm->fc.MVcount_hp[0][mv_max_hp + (secondmv.as_mv.row)]++;
                   cm->fc.MVcount_hp[1][mv_max_hp + (secondmv.as_mv.col)]++;
-                } else
-#endif
-                {
+                } else {
                   read_mv(bc, &secondmv.as_mv, (const MV_CONTEXT *) mvc);
                   cm->fc.MVcount[0][mv_max + (secondmv.as_mv.row >> 1)]++;
                   cm->fc.MVcount[1][mv_max + (secondmv.as_mv.col >> 1)]++;
@@ -851,14 +837,11 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         break;
 
       case NEWMV:
-#if CONFIG_HIGH_PRECISION_MV
         if (xd->allow_high_precision_mv) {
           read_mv_hp(bc, &mv->as_mv, (const MV_CONTEXT_HP *) mvc_hp);
           cm->fc.MVcount_hp[0][mv_max_hp + (mv->as_mv.row)]++;
           cm->fc.MVcount_hp[1][mv_max_hp + (mv->as_mv.col)]++;
-        } else
-#endif
-        {
+        } else {
           read_mv(bc, &mv->as_mv, (const MV_CONTEXT *) mvc);
           cm->fc.MVcount[0][mv_max + (mv->as_mv.row >> 1)]++;
           cm->fc.MVcount[1][mv_max + (mv->as_mv.col >> 1)]++;
@@ -877,15 +860,12 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                       mb_to_top_edge,
                                                       mb_to_bottom_edge);
         if (mbmi->second_ref_frame) {
-#if CONFIG_HIGH_PRECISION_MV
           if (xd->allow_high_precision_mv) {
             read_mv_hp(bc, &mbmi->second_mv.as_mv,
                        (const MV_CONTEXT_HP *) mvc_hp);
             cm->fc.MVcount_hp[0][mv_max_hp + (mbmi->second_mv.as_mv.row)]++;
             cm->fc.MVcount_hp[1][mv_max_hp + (mbmi->second_mv.as_mv.col)]++;
-          } else
-#endif
-          {
+          } else {
             read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
             cm->fc.MVcount[0][mv_max + (mbmi->second_mv.as_mv.row >> 1)]++;
             cm->fc.MVcount[1][mv_max + (mbmi->second_mv.as_mv.col >> 1)]++;

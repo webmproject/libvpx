@@ -34,11 +34,10 @@ static unsigned int do_16x16_motion_iteration
   static int dummy_cost[2 * mv_max + 1];
   int *mvcost[2]    = { &dummy_cost[mv_max + 1], &dummy_cost[mv_max + 1] };
   int *mvsadcost[2] = { &dummy_cost[mv_max + 1], &dummy_cost[mv_max + 1] };
-#if CONFIG_HIGH_PRECISION_MV
   static int dummy_cost_hp[2 * mv_max_hp + 1];
   int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp + 1], &dummy_cost_hp[mv_max_hp + 1] };
   int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp + 1], &dummy_cost_hp[mv_max_hp + 1] };
-#endif
+
   int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.col & 7) ? 1 : 0);
   int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.row & 7) ? 1 : 0);
   int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
@@ -72,32 +71,27 @@ static unsigned int do_16x16_motion_iteration
   ref_full.as_mv.row = ref_mv->as_mv.row >> 3;
 
   /*cpi->sf.search_method == HEX*/
-  best_err = vp8_hex_search(x, b, d,
-                            &ref_full, dst_mv,
-                            step_param,
-                            x->errorperbit,
-                            &v_fn_ptr,
-#if CONFIG_HIGH_PRECISION_MV
-                            xd->allow_high_precision_mv ? mvsadcost_hp : mvsadcost, xd->allow_high_precision_mv ? mvcost_hp : mvcost,
-#else
-                            mvsadcost, mvcost,
-#endif
-                            ref_mv);
+  best_err = vp8_hex_search(
+      x, b, d,
+      &ref_full, dst_mv,
+      step_param,
+      x->errorperbit,
+      &v_fn_ptr,
+      xd->allow_high_precision_mv ? mvsadcost_hp : mvsadcost,
+      xd->allow_high_precision_mv ? mvcost_hp : mvcost,
+      ref_mv);
 
   // Try sub-pixel MC
   // if (bestsme > error_thresh && bestsme < INT_MAX)
   {
     int distortion;
     unsigned int sse;
-    best_err = cpi->find_fractional_mv_step(x, b, d,
-                                            dst_mv, ref_mv,
-                                            x->errorperbit, &v_fn_ptr,
-#if CONFIG_HIGH_PRECISION_MV
-                                            xd->allow_high_precision_mv ? mvcost_hp : mvcost,
-#else
-                                            mvcost,
-#endif
-                                            & distortion, &sse);
+    best_err = cpi->find_fractional_mv_step(
+        x, b, d,
+        dst_mv, ref_mv,
+        x->errorperbit, &v_fn_ptr,
+        xd->allow_high_precision_mv ? mvcost_hp : mvcost,
+        & distortion, &sse);
   }
 
 #if CONFIG_PRED_FILTER

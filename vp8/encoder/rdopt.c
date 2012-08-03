@@ -54,11 +54,7 @@ extern void vp8_update_zbin_extra(VP8_COMP *cpi, MACROBLOCK *x);
 extern void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d);
 #endif
 
-#if CONFIG_HIGH_PRECISION_MV
 #define XMVCOST (x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost)
-#else
-#define XMVCOST (x->mvcost)
-#endif
 
 #define MAXF(a,b)            (((a) > (b)) ? (a) : (b))
 
@@ -1711,19 +1707,13 @@ static int labels2mode(
             this_second_mv->as_int = seg_mvs[xd->mode_info_context->mbmi.second_ref_frame - 1].as_int;
           }
 
-#if CONFIG_HIGH_PRECISION_MV
           thismvcost  = vp8_mv_bit_cost(this_mv, best_ref_mv, mvcost,
                                         102, xd->allow_high_precision_mv);
           if (xd->mode_info_context->mbmi.second_ref_frame) {
-            thismvcost += vp8_mv_bit_cost(this_second_mv, second_best_ref_mv, mvcost,
-                                          102, xd->allow_high_precision_mv);
+            thismvcost += vp8_mv_bit_cost(this_second_mv, second_best_ref_mv,
+                                          mvcost, 102,
+                                          xd->allow_high_precision_mv);
           }
-#else
-          thismvcost  = vp8_mv_bit_cost(this_mv, best_ref_mv, mvcost, 102);
-          if (xd->mode_info_context->mbmi.second_ref_frame) {
-            thismvcost += vp8_mv_bit_cost(this_second_mv, second_best_ref_mv, mvcost, 102);
-          }
-#endif
           break;
         case LEFT4X4:
           this_mv->as_int = col ? d[-1].bmi.as_mv.first.as_int : left_block_mv(mic, i);
@@ -2508,7 +2498,6 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
 
     for (i = 0; i < x->partition_info->count; i++) {
       if (x->partition_info->bmi[i].mode == NEW4X4) {
-#if CONFIG_HIGH_PRECISION_MV
         if (x->e_mbd.allow_high_precision_mv) {
           cpi->MVcount_hp[0][mv_max_hp + (x->partition_info->bmi[i].mv.as_mv.row
                                           - best_ref_mv->as_mv.row)]++;
@@ -2521,7 +2510,6 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                                             - second_best_ref_mv->as_mv.col)]++;
           }
         } else
-#endif
         {
           cpi->MVcount[0][mv_max + ((x->partition_info->bmi[i].mv.as_mv.row
                                      - best_ref_mv->as_mv.row) >> 1)]++;
@@ -2537,7 +2525,6 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
       }
     }
   } else if (x->e_mbd.mode_info_context->mbmi.mode == NEWMV) {
-#if CONFIG_HIGH_PRECISION_MV
     if (x->e_mbd.allow_high_precision_mv) {
       cpi->MVcount_hp[0][mv_max_hp + (x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
                                       - best_ref_mv->as_mv.row)]++;
@@ -2550,7 +2537,6 @@ void rd_update_mvcount(VP8_COMP *cpi, MACROBLOCK *x,
                                         - second_best_ref_mv->as_mv.col)]++;
       }
     } else
-#endif
     {
       cpi->MVcount[0][mv_max + ((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row
                                  - best_ref_mv->as_mv.row) >> 1)]++;
@@ -3324,14 +3310,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           mode_mv[NEWMV].as_int = d->bmi.as_mv.first.as_int;
 
           // Add the new motion vector cost to our rolling cost variable
-#if CONFIG_HIGH_PRECISION_MV
           rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv,
                                    XMVCOST, 96,
                                    x->e_mbd.allow_high_precision_mv);
-#else
-          rate2 += vp8_mv_bit_cost(&mode_mv[NEWMV], &best_ref_mv,
-                                   XMVCOST, 96);
-#endif
         }
 
         case NEARESTMV:
@@ -3483,7 +3464,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             continue;
           x->e_mbd.mode_info_context->mbmi.mv.as_int        = mc_search_result[ref1].as_int;
           x->e_mbd.mode_info_context->mbmi.second_mv.as_int = mc_search_result[ref2].as_int;
-#if CONFIG_HIGH_PRECISION_MV
           rate2 += vp8_mv_bit_cost(&mc_search_result[ref1],
                                    &frame_best_ref_mv[ref1],
                                    XMVCOST, 96,
@@ -3492,14 +3472,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                    &frame_best_ref_mv[ref2],
                                    XMVCOST, 96,
                                    x->e_mbd.allow_high_precision_mv);
-#else
-          rate2 += vp8_mv_bit_cost(&mc_search_result[ref1],
-                                   &frame_best_ref_mv[ref1],
-                                   XMVCOST, 96);
-          rate2 += vp8_mv_bit_cost(&mc_search_result[ref2],
-                                   &frame_best_ref_mv[ref2],
-                                   XMVCOST, 96);
-#endif
           break;
         case ZEROMV:
           x->e_mbd.mode_info_context->mbmi.mv.as_int        = 0;
