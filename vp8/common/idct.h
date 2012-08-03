@@ -36,6 +36,13 @@
 #define Y2_WHT_UPSCALE_FACTOR 2
 #endif
 
+#if CONFIG_TX16X16
+#ifndef vp8_idct_idct16x16
+#define vp8_idct_idct16x16 vp8_short_idct16x16_c
+#endif
+extern prototype_idct(vp8_idct_idct16x16);
+#endif
+
 #ifndef vp8_idct_idct8
 #define vp8_idct_idct8 vp8_short_idct8x8_c
 #endif
@@ -120,6 +127,10 @@ typedef struct {
   vp8_idct_scalar_add_fn_t idct1_scalar_add_8x8;
   vp8_idct_fn_t ihaar2;
   vp8_idct_fn_t ihaar2_1;
+
+#if CONFIG_TX16X16
+  vp8_idct_fn_t            idct16x16;
+#endif
 } vp8_idct_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

@@ -282,6 +282,42 @@ void vp8_transform_mby_8x8(MACROBLOCK *x) {
   }
 }
 
+#if CONFIG_TX16X16
+void vp8_transform_mbuv_16x16(MACROBLOCK *x) {
+  int i;
+
+  vp8_clear_system_state();
+  // Default to the 8x8
+  for (i = 16; i < 24; i += 4)
+    x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+        &x->block[i].coeff[0], 16);
+}
+
+
+void vp8_transform_intra_mby_16x16(MACROBLOCK *x) {
+  vp8_clear_system_state();
+  x->vp8_short_fdct16x16(&x->block[0].src_diff[0],
+      &x->block[0].coeff[0], 32);
+}
+
+
+void vp8_transform_mb_16x16(MACROBLOCK *x) {
+  int i;
+  vp8_clear_system_state();
+  x->vp8_short_fdct16x16(&x->block[0].src_diff[0],
+      &x->block[0].coeff[0], 32);
+
+  for (i = 16; i < 24; i += 4) {
+      x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
+          &x->block[i].coeff[0], 16);
+  }
+}
+
+void vp8_transform_mby_16x16(MACROBLOCK *x) {
+  vp8_clear_system_state();
+  x->vp8_short_fdct16x16(&x->block[0].src_diff[0], &x->block[0].coeff[0], 32);
+}
+#endif
 
 #define RDTRUNC(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
 #define RDTRUNC_8x8(RM,DM,R,D) ( (128+(R)*(RM)) & 0xFF )
@@ -290,7 +326,7 @@ typedef struct vp8_token_state vp8_token_state;
 struct vp8_token_state {
   int           rate;
   int           error;
-  signed char   next;
+  int           next;
   signed char   token;
   short         qc;
 };
@@ -1017,29 +1053,280 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
 }
 
+
+
+#if CONFIG_TX16X16
+#define UPDATE_RD_COST()\
+{\
+    rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);\
+    rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
+    if (rd_cost0 == rd_cost1) {\
+        rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);\
+        rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);\
+    }\
+}
+
+void optimize_b_16x16(MACROBLOCK *mb, int i, int type,
+                      ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                      const VP8_ENCODER_RTCD *rtcd) {
+  BLOCK *b = &mb->block[i];
+  BLOCKD *d = &mb->e_mbd.block[i];
+  vp8_token_state tokens[257][2];
+  unsigned best_index[257][2];
+  const short *dequant_ptr = d->dequant, *coeff_ptr = b->coeff;
+  short *qcoeff_ptr = qcoeff_ptr = d->qcoeff;
+  short *dqcoeff_ptr = dqcoeff_ptr = d->dqcoeff;
+  int eob = d->eob, final_eob, sz = 0;
+  int rc, x, next;
+  int64_t rdmult, rddiv, rd_cost0, rd_cost1;
+  int rate0, rate1, error0, error1, t0, t1;
+  int best, band, pt;
+  int err_mult = plane_rd_mult[type];
+
+  /* Now set up a Viterbi trellis to evaluate alternative roundings. */
+  rdmult = mb->rdmult * err_mult;
+  if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
+      rdmult = (rdmult * 9)>>4;
+  rddiv = mb->rddiv;
+  memset(best_index, 0, sizeof(best_index));
+  /* Initialize the sentinel node of the trellis. */
+  tokens[eob][0].rate = 0;
+  tokens[eob][0].error = 0;
+  tokens[eob][0].next = 256;
+  tokens[eob][0].token = DCT_EOB_TOKEN;
+  tokens[eob][0].qc = 0;
+  *(tokens[eob] + 1) = *(tokens[eob] + 0);
+  next = eob;
+  for (i = eob; i-- > 0;) {
+    int base_bits, d2, dx;
+
+    rc = vp8_default_zig_zag1d_16x16[i];
+    x = qcoeff_ptr[rc];
+    /* Only add a trellis state for non-zero coefficients. */
+    if (x) {
+      int shortcut = 0;
+      error0 = tokens[next][0].error;
+      error1 = tokens[next][1].error;
+      /* Evaluate the first possibility for this state. */
+      rate0 = tokens[next][0].rate;
+      rate1 = tokens[next][1].rate;
+      t0 = (vp8_dct_value_tokens_ptr + x)->Token;
+      /* Consider both possible successor states. */
+      if (next < 256) {
+        band = vp8_coef_bands_16x16[i + 1];
+        pt = vp8_prev_token_class[t0];
+        rate0 += mb->token_costs_16x16[type][band][pt][tokens[next][0].token];
+        rate1 += mb->token_costs_16x16[type][band][pt][tokens[next][1].token];
+      }
+      UPDATE_RD_COST();
+      /* And pick the best. */
+      best = rd_cost1 < rd_cost0;
+      base_bits = *(vp8_dct_value_cost_ptr + x);
+      dx = dqcoeff_ptr[rc] - coeff_ptr[rc];
+      d2 = dx*dx;
+      tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
+      tokens[i][0].error = d2 + (best ? error1 : error0);
+      tokens[i][0].next = next;
+      tokens[i][0].token = t0;
+      tokens[i][0].qc = x;
+      best_index[i][0] = best;
+      /* Evaluate the second possibility for this state. */
+      rate0 = tokens[next][0].rate;
+      rate1 = tokens[next][1].rate;
+
+      if((abs(x)*dequant_ptr[rc!=0]>abs(coeff_ptr[rc])) &&
+         (abs(x)*dequant_ptr[rc!=0]<abs(coeff_ptr[rc])+dequant_ptr[rc!=0]))
+        shortcut = 1;
+      else
+        shortcut = 0;
+
+      if (shortcut) {
+        sz = -(x < 0);
+        x -= 2*sz + 1;
+      }
+
+      /* Consider both possible successor states. */
+      if (!x) {
+        /* If we reduced this coefficient to zero, check to see if
+         *  we need to move the EOB back here.
+         */
+        t0 = tokens[next][0].token == DCT_EOB_TOKEN ?
+             DCT_EOB_TOKEN : ZERO_TOKEN;
+        t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
+             DCT_EOB_TOKEN : ZERO_TOKEN;
+      }
+      else
+        t0=t1 = (vp8_dct_value_tokens_ptr + x)->Token;
+      if (next < 256) {
+        band = vp8_coef_bands_16x16[i + 1];
+        if (t0 != DCT_EOB_TOKEN) {
+            pt = vp8_prev_token_class[t0];
+            rate0 += mb->token_costs_16x16[type][band][pt]
+                [tokens[next][0].token];
+        }
+        if (t1!=DCT_EOB_TOKEN) {
+            pt = vp8_prev_token_class[t1];
+            rate1 += mb->token_costs_16x16[type][band][pt]
+                [tokens[next][1].token];
+        }
+      }
+      UPDATE_RD_COST();
+      /* And pick the best. */
+      best = rd_cost1 < rd_cost0;
+      base_bits = *(vp8_dct_value_cost_ptr + x);
+
+      if(shortcut) {
+        dx -= (dequant_ptr[rc!=0] + sz) ^ sz;
+        d2 = dx*dx;
+      }
+      tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
+      tokens[i][1].error = d2 + (best ? error1 : error0);
+      tokens[i][1].next = next;
+      tokens[i][1].token = best ? t1 : t0;
+      tokens[i][1].qc = x;
+      best_index[i][1] = best;
+      /* Finally, make this the new head of the trellis. */
+      next = i;
+    }
+    /* There's no choice to make for a zero coefficient, so we don't
+     *  add a new trellis node, but we do need to update the costs.
+     */
+    else {
+      band = vp8_coef_bands_16x16[i + 1];
+      t0 = tokens[next][0].token;
+      t1 = tokens[next][1].token;
+      /* Update the cost of each path if we're past the EOB token. */
+      if (t0 != DCT_EOB_TOKEN) {
+        tokens[next][0].rate += mb->token_costs_16x16[type][band][0][t0];
+        tokens[next][0].token = ZERO_TOKEN;
+      }
+      if (t1 != DCT_EOB_TOKEN) {
+        tokens[next][1].rate += mb->token_costs_16x16[type][band][0][t1];
+        tokens[next][1].token = ZERO_TOKEN;
+      }
+      /* Don't update next, because we didn't add a new node. */
+    }
+  }
+
+  /* Now pick the best path through the whole trellis. */
+  band = vp8_coef_bands_16x16[i + 1];
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  rate0 = tokens[next][0].rate;
+  rate1 = tokens[next][1].rate;
+  error0 = tokens[next][0].error;
+  error1 = tokens[next][1].error;
+  t0 = tokens[next][0].token;
+  t1 = tokens[next][1].token;
+  rate0 += mb->token_costs_16x16[type][band][pt][t0];
+  rate1 += mb->token_costs_16x16[type][band][pt][t1];
+  UPDATE_RD_COST();
+  best = rd_cost1 < rd_cost0;
+  final_eob = -1;
+
+  for (i = next; i < eob; i = next) {
+    x = tokens[i][best].qc;
+    if (x)
+      final_eob = i;
+    rc = vp8_default_zig_zag1d_16x16[i];
+    qcoeff_ptr[rc] = x;
+    dqcoeff_ptr[rc] = (x * dequant_ptr[rc!=0]);
+
+    next = tokens[i][best].next;
+    best = best_index[i][best];
+  }
+  final_eob++;
+
+  d->eob = final_eob;
+  *a = *l = (d->eob != !type);
+}
+
+void vp8_optimize_mby_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+    ENTROPY_CONTEXT_PLANES t_above, t_left;
+    ENTROPY_CONTEXT *ta, *tl;
+
+    if (!x->e_mbd.above_context)
+        return;
+    if (!x->e_mbd.left_context)
+        return;
+
+    vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+    ta = (ENTROPY_CONTEXT *)&t_above;
+    tl = (ENTROPY_CONTEXT *)&t_left;
+    optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, rtcd);
+    *(ta + 1) = *ta;
+    *(tl + 1) = *tl;
+}
+
+void optimize_mb_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
+  int b;
+  ENTROPY_CONTEXT_PLANES t_above, t_left;
+  ENTROPY_CONTEXT *ta, *tl;
+
+  vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+  ta = (ENTROPY_CONTEXT *)&t_above;
+  tl = (ENTROPY_CONTEXT *)&t_left;
+
+  optimize_b_16x16(x, 0, PLANE_TYPE_Y_WITH_DC, ta, tl, rtcd);
+  *(ta + 1) = *ta;
+  *(tl + 1) = *tl;
+
+  for (b = 16; b < 24; b += 4) {
+    optimize_b_8x8(x, b, PLANE_TYPE_UV,
+                   ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
+                   rtcd);
+    *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
+    *(tl + vp8_block2left_8x8[b] + 1) = *(tl + vp8_block2left_8x8[b]);
+  }
+}
+#endif
+
 void vp8_encode_inter16x16(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   int tx_type = x->e_mbd.mode_info_context->mbmi.txfm_size;
   vp8_build_inter_predictors_mb(&x->e_mbd);
 
   vp8_subtract_mb(rtcd, x);
 
+#if CONFIG_TX16X16
+  if (tx_type == TX_16X16)
+    vp8_transform_mb_16x16(x);
+  else
+#endif
   if (tx_type == TX_8X8)
     vp8_transform_mb_8x8(x);
   else
     transform_mb(x);
 
+#if CONFIG_TX16X16
+  if (tx_type == TX_16X16)
+    vp8_quantize_mb_16x16(x);
+  else
+#endif
   if (tx_type == TX_8X8)
     vp8_quantize_mb_8x8(x);
   else
     vp8_quantize_mb(x);
 
   if (x->optimize) {
+#if CONFIG_TX16X16
+    if (tx_type == TX_16X16)
+      optimize_mb_16x16(x, rtcd);
+    else
+#endif
     if (tx_type == TX_8X8)
       optimize_mb_8x8(x, rtcd);
     else
       optimize_mb(x, rtcd);
   }
 
+#if CONFIG_TX16X16
+  if (tx_type == TX_16X16)
+    vp8_inverse_transform_mb_16x16(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+  else
+#endif
   if (tx_type == TX_8X8)
     vp8_inverse_transform_mb_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
   else
@@ -1111,6 +1398,11 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
 
+#if CONFIG_TX16X16
+  if (tx_type == TX_16X16)
+    vp8_transform_mby_16x16(x);
+  else
+#endif
   if (tx_type == TX_8X8)
     vp8_transform_mby_8x8(x);
   else
@@ -1118,6 +1410,11 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
 
   vp8_quantize_mby(x);
 
+#if CONFIG_TX16X16
+  if (tx_type == TX_16X16)
+    vp8_inverse_transform_mby_16x16(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
+  else
+#endif
   if (tx_type == TX_8X8)
     vp8_inverse_transform_mby_8x8(IF_RTCD(&rtcd->common->idct), &x->e_mbd);
   else
@@ -1126,3 +1423,4 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   RECON_INVOKE(&rtcd->common->recon, recon_mby)
   (IF_RTCD(&rtcd->common->recon), &x->e_mbd);
 }
+

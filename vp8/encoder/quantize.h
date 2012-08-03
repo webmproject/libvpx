@@ -46,6 +46,13 @@ extern prototype_quantize_block_pair(vp8_quantize_quantb_pair);
 #endif
 extern prototype_quantize_block(vp8_quantize_quantb_8x8);
 
+#if CONFIG_TX16X16
+#ifndef vp8_quantize_quantb_16x16
+#define vp8_quantize_quantb_16x16 vp8_regular_quantize_b_16x16
+#endif
+extern prototype_quantize_block(vp8_quantize_quantb_16x16);
+#endif
+
 #ifndef vp8_quantize_quantb_2x2
 #define vp8_quantize_quantb_2x2 vp8_regular_quantize_b_2x2
 #endif
@@ -69,6 +76,13 @@ extern prototype_quantize_mb(vp8_quantize_mby);
 
 extern prototype_quantize_mb(vp8_quantize_mby_8x8);
 extern prototype_quantize_mb(vp8_quantize_mbuv_8x8);
+
+#if CONFIG_TX16X16
+void vp8_quantize_mb_16x16(MACROBLOCK *x);
+extern prototype_quantize_block(vp8_quantize_quantb_16x16);
+extern prototype_quantize_mb(vp8_quantize_mby_16x16);
+extern prototype_quantize_mb(vp8_quantize_mbuv_16x16);
+#endif
 
 struct VP8_COMP;
 extern void vp8_set_quantizer(struct VP8_COMP *cpi, int Q);

@@ -227,6 +227,7 @@ EXPERIMENT_LIST="
     hybridtransform
     switchable_interp
     htrans8x8
+    tx16x16
 "
 CONFIG_LIST="
     external_build

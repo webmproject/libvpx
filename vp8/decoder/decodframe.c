@@ -217,22 +217,46 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
 #endif
 
   if (pbi->common.frame_type == KEY_FRAME) {
-    if (pbi->common.txfm_mode == ALLOW_8X8 &&
+#if CONFIG_TX16X16
+    if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
+        xd->mode_info_context->mbmi.mode == NEWMV ||
+        xd->mode_info_context->mbmi.mode == ZEROMV ||
+        xd->mode_info_context->mbmi.mode == NEARMV ||
+        xd->mode_info_context->mbmi.mode == NEARESTMV)
+      xd->mode_info_context->mbmi.txfm_size = TX_16X16;
+    else if (pbi->common.txfm_mode == ALLOW_8X8 &&
         xd->mode_info_context->mbmi.mode != I8X8_PRED &&
         xd->mode_info_context->mbmi.mode != B_PRED)
+#else
+      if (pbi->common.txfm_mode == ALLOW_8X8 &&
+          xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+          xd->mode_info_context->mbmi.mode != B_PRED)
+#endif
       xd->mode_info_context->mbmi.txfm_size = TX_8X8;
     else
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
   } else {
-    if (pbi->common.txfm_mode == ONLY_4X4) {
+#if CONFIG_TX16X16
+    if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
+        xd->mode_info_context->mbmi.mode == NEWMV ||
+        xd->mode_info_context->mbmi.mode == ZEROMV ||
+        xd->mode_info_context->mbmi.mode == NEARMV ||
+        xd->mode_info_context->mbmi.mode == NEARESTMV) {
+      xd->mode_info_context->mbmi.txfm_size = TX_16X16;
+    } else if (pbi->common.txfm_mode == ALLOW_8X8 &&
+        xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+        xd->mode_info_context->mbmi.mode != B_PRED &&
+        xd->mode_info_context->mbmi.mode != SPLITMV) {
+#else
+    if (pbi->common.txfm_mode == ALLOW_8X8 &&
+        xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+        xd->mode_info_context->mbmi.mode != B_PRED &&
+        xd->mode_info_context->mbmi.mode != SPLITMV) {
+#endif
+      xd->mode_info_context->mbmi.txfm_size = TX_8X8;
+    }
+    else {
       xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-    } else if (pbi->common.txfm_mode == ALLOW_8X8) {
-      if (xd->mode_info_context->mbmi.mode == B_PRED
-          || xd->mode_info_context->mbmi.mode == I8X8_PRED
-          || xd->mode_info_context->mbmi.mode == SPLITMV)
-        xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-      else
-        xd->mode_info_context->mbmi.txfm_size = TX_8X8;
     }
   }
 
@@ -251,6 +275,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       xd->block[i].eob = 0;
       xd->eobs[i] = 0;
     }
+#if CONFIG_TX16X16
+    if (tx_type == TX_16X16)
+      eobtotal = vp8_decode_mb_tokens_16x16(pbi, xd);
+    else
+#endif
     if (tx_type == TX_8X8)
       eobtotal = vp8_decode_mb_tokens_8x8(pbi, xd);
     else
@@ -462,6 +491,15 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
      xd->dst.y_stride, xd->eobs);
   } else {
     BLOCKD *b = &xd->block[24];
+
+#if CONFIG_TX16X16
+    if (tx_type == TX_16X16) {
+      vp8_dequant_idct_add_16x16_c(xd->qcoeff, xd->block[0].dequant,
+                                   xd->predictor, xd->dst.y_buffer,
+                                   16, xd->dst.y_stride);
+    }
+    else
+#endif
     if (tx_type == TX_8X8) {
       DEQUANT_INVOKE(&pbi->dequant, block_2x2)(b);
 #ifdef DEC_DEBUG
@@ -511,7 +549,11 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
     }
   }
 
-  if (tx_type == TX_8X8)
+  if (tx_type == TX_8X8
+#if CONFIG_TX16X16
+      || tx_type == TX_16X16
+#endif
+      )
     DEQUANT_INVOKE(&pbi->dequant, idct_add_uv_block_8x8) //
     (xd->qcoeff + 16 * 16, xd->block[16].dequant,
      xd->predictor + 16 * 16, xd->dst.u_buffer, xd->dst.v_buffer,
@@ -904,7 +946,7 @@ static void read_coef_probs(VP8D_COMP *pbi) {
               }
             }
           }
-    }
+        }
   }
 
   if (pbi->common.txfm_mode == ALLOW_8X8 && vp8_read_bit(bc)) {
@@ -925,6 +967,28 @@ static void read_coef_probs(VP8D_COMP *pbi) {
           }
         }
   }
+
+#if CONFIG_TX16X16
+  // 16x16
+  if (vp8_read_bit(bc)) {
+    // read coef probability tree
+    for (i = 0; i < BLOCK_TYPES_16X16; ++i)
+      for (j = !i; j < COEF_BANDS; ++j)
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+          if (k >= 3 && ((i == 0 && j == 1) ||
+                         (i > 0 && j == 0)))
+            continue;
+          for (l = 0; l < ENTROPY_NODES; ++l) {
+
+            vp8_prob *const p = pc->fc.coef_probs_16x16[i][j][k] + l;
+
+            if (vp8_read(bc, COEF_UPDATE_PROB_16X16)) {
+              *p = read_prob_diff_update(bc, *p);
+            }
+          }
+        }
+  }
+#endif
 }
 
 int vp8_decode_frame(VP8D_COMP *pbi) {
@@ -1287,6 +1351,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 
   vp8_copy(pbi->common.fc.pre_coef_probs, pbi->common.fc.coef_probs);
   vp8_copy(pbi->common.fc.pre_coef_probs_8x8, pbi->common.fc.coef_probs_8x8);
+#if CONFIG_TX16X16
+  vp8_copy(pbi->common.fc.pre_coef_probs_16x16, pbi->common.fc.coef_probs_16x16);
+#endif
   vp8_copy(pbi->common.fc.pre_ymode_prob, pbi->common.fc.ymode_prob);
   vp8_copy(pbi->common.fc.pre_uv_mode_prob, pbi->common.fc.uv_mode_prob);
   vp8_copy(pbi->common.fc.pre_bmode_prob, pbi->common.fc.bmode_prob);
@@ -1299,6 +1366,9 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
 #endif
   vp8_zero(pbi->common.fc.coef_counts);
   vp8_zero(pbi->common.fc.coef_counts_8x8);
+#if CONFIG_TX16X16
+  vp8_zero(pbi->common.fc.coef_counts_16x16);
+#endif
   vp8_zero(pbi->common.fc.ymode_counts);
   vp8_zero(pbi->common.fc.uv_mode_counts);
   vp8_zero(pbi->common.fc.bmode_counts);

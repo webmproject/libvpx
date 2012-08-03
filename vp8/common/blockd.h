@@ -131,11 +131,12 @@ typedef enum {
 
 // Segment level features.
 typedef enum {
-  TX_4X4 = 0,                      // 4x4 dct transform
-  TX_8X8 = 1,                      // 8x8 dct transform
-
-  TX_SIZE_MAX = 2                  // Number of differnt transforms avaialble
-
+  TX_4X4,                      // 4x4 dct transform
+  TX_8X8,                      // 8x8 dct transform
+#if CONFIG_TX16X16
+  TX_16X16,                    // 16x16 dct transform
+#endif
+  TX_SIZE_MAX                  // Number of different transforms available
 } TX_SIZE;
 
 #if CONFIG_HYBRIDTRANSFORM
