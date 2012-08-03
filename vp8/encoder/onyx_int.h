@@ -317,9 +317,7 @@ typedef struct {
   int optimize_coefficients;
   int no_skip_block4x4_search;
   int improved_mv_pred;
-#if CONFIG_ENHANCED_INTERP
   int search_best_filter;
-#endif
 
 } SPEED_FEATURES;
 

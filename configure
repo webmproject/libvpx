@@ -215,13 +215,11 @@ HAVE_LIST="
 "
 EXPERIMENT_LIST="
     csm
-    enhanced_interp
     featureupdates
     high_precision_mv
     sixteenth_subpel_uv
     comp_intra_pred
     superblocks
-    newintramodes
     pred_filter
     lossless
     hybridtransform

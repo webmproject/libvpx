@@ -43,11 +43,10 @@ DECLARE_ALIGNED(16, const short, vp8_bilinear_filters[SUBPEL_SHIFTS][2]) = {
 #endif  /* SUBPEL_SHIFTS==16 */
 };
 
-#if CONFIG_ENHANCED_INTERP
-
 #define FILTER_ALPHA       0
 #define FILTER_ALPHA_SHARP 1
-DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8[SUBPEL_SHIFTS][2 * INTERP_EXTEND]) = {
+DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8[SUBPEL_SHIFTS][8]) = {
+
 #if SUBPEL_SHIFTS==16
 #if FILTER_ALPHA == 0
   /* Lagrangian interpolation filter */
@@ -116,7 +115,7 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8[SUBPEL_SHIFTS][2 * INTERP
 #endif  /* SUBPEL_SHIFTS==16 */
 };
 
-DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][2 * INTERP_EXTEND]) = {
+DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][8]) = {
 #if SUBPEL_SHIFTS==16
 #if FILTER_ALPHA_SHARP == 1
   /* dct based filter */
@@ -137,6 +136,7 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][2 * INTER
   {-1,   3,  -6,  17, 125, -13,   5, -2},
   {0,   1,  -3,   8, 127,  -7,   3, -1}
 #elif FILTER_ALPHA_SHARP == 75
+  /* alpha = 0.75 */
   {0,   0,   0, 128,   0,   0,   0, 0},
   {-1,   2,  -6, 126,   9,  -3,   2, -1},
   {-1,   4, -11, 123,  18,  -7,   3, -1},
@@ -174,6 +174,7 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][2 * INTER
 #endif  /* FILTER_ALPHA_SHARP */
 #else   /* SUBPEL_SHIFTS==16 */
 #if FILTER_ALPHA_SHARP == 1
+  /* dct based filter */
   {0,   0,   0, 128,   0,   0,   0, 0},
   {-2,   5, -13, 125,  17,  -6,   3, -1},
   {-4,   9, -20, 115,  37, -13,   6, -2},
@@ -183,6 +184,7 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][2 * INTER
   {-2,   6, -13,  37, 115, -20,   9, -4},
   {-1,   3,  -6,  17, 125, -13,   5, -2}
 #elif FILTER_ALPHA_SHARP == 75
+  /* alpha = 0.75 */
   {0,   0,   0, 128,   0,   0,   0, 0},
   {-1,   4, -11, 123,  18,  -7,   3, -1},
   {-2,   7, -19, 113,  38, -13,   6, -2},
@@ -204,8 +206,6 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][2 * INTER
 #endif  /* FILTER_ALPHA_SHARP */
 #endif  /* SUBPEL_SHIFTS==16 */
 };
-
-#endif  // CONFIG_ENHANCED_INTERP
 
 DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_6[SUBPEL_SHIFTS][6]) = {
 #if SUBPEL_SHIFTS==16
@@ -589,8 +589,6 @@ void vp8_sixtap_predict_avg16x16_c
   filter_block2d_second_pass_avg_6(FData + 16 * (Interp_Extend - 1), dst_ptr, dst_pitch,
                                    16, 16, 16, 16, VFilter);
 }
-
-#if CONFIG_ENHANCED_INTERP
 
 #undef Interp_Extend
 #define Interp_Extend 4
@@ -1147,8 +1145,6 @@ void vp8_eighttap_predict_avg16x16_sharp_c
   filter_block2d_second_pass_avg_8(FData + 16 * (Interp_Extend - 1), dst_ptr, dst_pitch,
                                    16, 16, 16, 16, VFilter);
 }
-
-#endif  /* CONFIG_ENHANCED_INTERP */
 
 /****************************************************************************
  *
