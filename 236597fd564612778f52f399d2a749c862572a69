@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//8es\u003d",
+        "filename": "vp8/common/idct.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-03T19:03:44Z",
+      "side": 1,
+      "message": "I did this locally. But as we should remove all these after integer implementation, I figured it is better to keep them together.",
+      "parentUuid": "AAAAPH//8fY\u003d",
+      "revId": "236597fd564612778f52f399d2a749c862572a69",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//8fU\u003d",
         "filename": "vp8/common/idct.h",
         "patchSetId": 1
