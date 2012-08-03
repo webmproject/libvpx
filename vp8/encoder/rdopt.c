@@ -366,6 +366,13 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8,
     BLOCK_TYPES_8X8);
 
+#if CONFIG_TX16X16
+  fill_token_costs(
+    cpi->mb.token_costs_16x16,
+    (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_16x16,
+    BLOCK_TYPES_16X16);
+#endif
+
   /*rough estimate for costing*/
   cpi->common.kf_ymode_probs_index = cpi->common.base_qindex >> 4;
   vp8_init_mode_costs(cpi);
@@ -809,6 +816,72 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
   *Rate = vp8_rdcost_mby_8x8(mb);
 }
 
+#if CONFIG_TX16X16
+static int cost_coeffs_16x16(MACROBLOCK *mb, BLOCKD *b, int type,
+                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
+  const int eob = b->eob;
+  int c = !type;              /* start at coef 0, unless Y with Y2 */
+  int cost = 0, pt;    /* surrounding block/prev coef predictor */
+  short *qcoeff_ptr = b->qcoeff;
+
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+
+# define QC16X16(I)  ( qcoeff_ptr [vp8_default_zig_zag1d_16x16[I]] )
+
+  for (; c < eob; c++) {
+    int v = QC16X16(c);
+    int t = vp8_dct_value_tokens_ptr[v].Token;
+    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]][pt][t];
+    cost += vp8_dct_value_cost_ptr[v];
+    pt = vp8_prev_token_class[t];
+  }
+
+# undef QC16X16
+  if (c < 256)
+    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]]
+            [pt][DCT_EOB_TOKEN];
+
+  pt = (c != !type); // is eob first coefficient;
+  *a = *l = pt;
+  return cost;
+}
+
+static int vp8_rdcost_mby_16x16(MACROBLOCK *mb) {
+  int cost;
+  MACROBLOCKD *x = &mb->e_mbd;
+  ENTROPY_CONTEXT_PLANES t_above, t_left;
+  ENTROPY_CONTEXT *ta, *tl;
+
+  vpx_memcpy(&t_above, mb->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
+  vpx_memcpy(&t_left, mb->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
+
+  ta = (ENTROPY_CONTEXT *)&t_above;
+  tl = (ENTROPY_CONTEXT *)&t_left;
+
+  cost = cost_coeffs_16x16(mb, x->block, PLANE_TYPE_Y_WITH_DC, ta, tl);
+  return cost;
+}
+
+static void macro_block_yrd_16x16(MACROBLOCK *mb, int *Rate, int *Distortion,
+                                  const VP8_ENCODER_RTCD *rtcd) {
+  int d;
+
+  ENCODEMB_INVOKE(&rtcd->encodemb, submby)(
+    mb->src_diff,
+    *(mb->block[0].base_src),
+    mb->e_mbd.predictor,
+    mb->block[0].src_stride);
+
+  vp8_transform_mby_16x16(mb);
+  vp8_quantize_mby_16x16(mb);
+  d = ENCODEMB_INVOKE(&rtcd->encodemb, mberr)(mb, 0);
+
+  *Distortion = (d >> 2);
+  // rate
+  *Rate = vp8_rdcost_mby_16x16(mb);
+}
+#endif
+
 static void copy_predictor(unsigned char *dst, const unsigned char *predictor) {
   const unsigned int *p = (const unsigned int *)predictor;
   unsigned int *d = (unsigned int *)dst;
@@ -1121,7 +1194,12 @@ static int64_t rd_pick_intra16x16mby_mode(VP8_COMP *cpi,
       }
 #endif
 
-      macro_block_yrd_8x8(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd));
+#if CONFIG_TX16X16
+      if (mode <= TM_PRED)
+        macro_block_yrd_16x16(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd));
+      else
+#endif
+        macro_block_yrd_8x8(x, &ratey, &distortion, IF_RTCD(&cpi->rtcd));
       // FIXME add compoundmode cost
       // FIXME add rate for mode2
       rate = ratey + x->mbmode_cost[x->e_mbd.frame_type]
@@ -3081,16 +3159,33 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 0);
         }
         break;
+        case DC_PRED:
+        case V_PRED:
+        case H_PRED:
+        case TM_PRED:
         case D45_PRED:
         case D135_PRED:
         case D117_PRED:
         case D153_PRED:
         case D27_PRED:
         case D63_PRED:
-        case DC_PRED:
-        case V_PRED:
-        case H_PRED:
-        case TM_PRED:
+#if CONFIG_TX16X16
+          // FIXME: breaks lossless since 4x4 isn't allowed
+          x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+          // FIXME compound intra prediction
+          RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+              (&x->e_mbd);
+          macro_block_yrd_16x16(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd));
+          rate2 += rate_y;
+          distortion2 += distortion;
+          rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
+          rate2 += uv_intra_rate_8x8;
+          rate_uv = uv_intra_rate_tokenonly_8x8;
+          distortion2 += uv_intra_distortion_8x8;
+          distortion_uv = uv_intra_distortion_8x8;
+          break;
+#else
           x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
           // FIXME compound intra prediction
           RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
@@ -3116,6 +3211,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             distortion_uv = uv_intra_distortion;
           }
           break;
+#endif
 
         case NEWMV: {
           int thissme;
@@ -3269,7 +3365,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           }
 
         case ZEROMV:
-
           // Trap vectors that reach beyond the UMV borders
           // Note that ALL New MV, Nearest MV Near MV and Zero MV code drops through to this point
           // because of the lack of break statements in the previous two cases.
@@ -3348,12 +3443,23 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
           // Y cost and distortion
-          if (cpi->common.txfm_mode == ALLOW_8X8)
-            macro_block_yrd_8x8(x, &rate_y, &distortion,
-                                IF_RTCD(&cpi->rtcd));
-          else
-            macro_block_yrd(x, &rate_y, &distortion,
-                            IF_RTCD(&cpi->rtcd));
+#if CONFIG_TX16X16
+          if (this_mode == ZEROMV ||
+              this_mode == NEARESTMV ||
+              this_mode == NEARMV ||
+              this_mode == NEWMV)
+            macro_block_yrd_16x16(x, &rate_y, &distortion, IF_RTCD(&cpi->rtcd));
+          else {
+#endif
+            if (cpi->common.txfm_mode == ALLOW_8X8)
+              macro_block_yrd_8x8(x, &rate_y, &distortion,
+                                  IF_RTCD(&cpi->rtcd));
+            else
+              macro_block_yrd(x, &rate_y, &distortion,
+                              IF_RTCD(&cpi->rtcd));
+#if CONFIG_TX16X16
+          }
+#endif
 
           rate2 += rate_y;
           distortion2 += distortion;
@@ -3361,7 +3467,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           // UV cost and distortion
           vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
 
-          if (cpi->common.txfm_mode == ALLOW_8X8)
+          if (cpi->common.txfm_mode == ALLOW_8X8
+#if CONFIG_TX16X16
+              || this_mode == ZEROMV ||
+              this_mode == NEARESTMV ||
+              this_mode == NEARMV ||
+              this_mode == NEWMV
+#endif
+              )
             rd_inter16x16_uv_8x8(cpi, x, &rate_uv,
                                  &distortion_uv,
                                  cpi->common.full_pixel);
@@ -3487,9 +3600,21 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                                                &x->e_mbd.predictor[320], 16, 8);
 
         /* Y cost and distortion */
-        if (cpi->common.txfm_mode == ALLOW_8X8)
+        if (cpi->common.txfm_mode == ALLOW_8X8
+#if CONFIG_TX16X16
+            || this_mode == ZEROMV ||
+            this_mode == NEARESTMV ||
+            this_mode == NEARMV ||
+            this_mode == NEWMV
+#endif
+            )
+#if CONFIG_TX16X16
+          macro_block_yrd_16x16(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd));
+#else
           macro_block_yrd_8x8(x, &rate_y, &distortion,
                               IF_RTCD(&cpi->rtcd));
+#endif
         else
           macro_block_yrd(x, &rate_y, &distortion,
                           IF_RTCD(&cpi->rtcd));
@@ -3498,7 +3623,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         distortion2 += distortion;
 
         /* UV cost and distortion */
-        if (cpi->common.txfm_mode == ALLOW_8X8)
+        if (cpi->common.txfm_mode == ALLOW_8X8
+#if CONFIG_TX16X16
+            || this_mode == ZEROMV ||
+            this_mode == NEARESTMV ||
+            this_mode == NEARMV ||
+            this_mode == NEWMV
+#endif
+            )
           rd_inter16x16_uv_8x8(cpi, x, &rate_uv,
                                &distortion_uv,
                                cpi->common.full_pixel);
@@ -3541,6 +3673,15 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                       && this_mode != B_PRED
                       && this_mode != I8X8_PRED);
 
+#if CONFIGURE_TX16X16
+        if (this_mode <= TM_PRED ||
+            this_mode == NEWMV ||
+            this_mode == ZEROMV ||
+            this_mode == NEARESTMV ||
+            this_mode == NEARMV)
+          mb_skippable = mb_is_skippable_16x16(&x->e_mbd);
+        else
+#endif
         if ((cpi->common.txfm_mode == ALLOW_8X8) && has_y2) {
           if (x->e_mbd.mode_info_context->mbmi.ref_frame != INTRA_FRAME)
             mb_skippable = mb_is_skippable_8x8(&x->e_mbd);
@@ -4002,10 +4143,25 @@ int vp8cx_pick_mode_inter_macroblock
     }
 
     /* test code: set transform size based on mode selection */
+#if CONFIG_TX16X16
+    if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
+        xd->mode_info_context->mbmi.mode == NEWMV ||
+        xd->mode_info_context->mbmi.mode == ZEROMV ||
+        xd->mode_info_context->mbmi.mode == NEARMV ||
+        xd->mode_info_context->mbmi.mode == NEARESTMV) {
+      xd->mode_info_context->mbmi.txfm_size = TX_16X16;
+      cpi->t16x16_count++;
+    }
+    else if (cpi->common.txfm_mode == ALLOW_8X8
+        && xd->mode_info_context->mbmi.mode != I8X8_PRED
+        && xd->mode_info_context->mbmi.mode != B_PRED
+        && xd->mode_info_context->mbmi.mode != SPLITMV) {
+#else
     if (cpi->common.txfm_mode == ALLOW_8X8
         && xd->mode_info_context->mbmi.mode != I8X8_PRED
         && xd->mode_info_context->mbmi.mode != B_PRED
         && xd->mode_info_context->mbmi.mode != SPLITMV) {
+#endif
       xd->mode_info_context->mbmi.txfm_size = TX_8X8;
       cpi->t8x8_count++;
     } else {

@@ -145,6 +145,12 @@ extern prototype_dequant_idct_add_y_block_8x8(vp8_dequant_idct_add_y_block_8x8);
 #endif
 extern prototype_dequant_idct_add_uv_block_8x8(vp8_dequant_idct_add_uv_block_8x8);
 
+#if CONFIG_TX16X16
+#ifndef vp8_dequant_idct_add_16x16
+#define vp8_dequant_idct_add_16x16 vp8_dequant_idct_add_16x16_c
+#endif
+extern prototype_dequant_idct_add(vp8_dequant_idct_add_16x16);
+#endif
 
 
 typedef prototype_dequant_block((*vp8_dequant_block_fn_t));
@@ -178,6 +184,9 @@ typedef struct {
   vp8_dequant_dc_idct_add_y_block_fn_t_8x8 dc_idct_add_y_block_8x8;
   vp8_dequant_idct_add_y_block_fn_t_8x8    idct_add_y_block_8x8;
   vp8_dequant_idct_add_uv_block_fn_t_8x8   idct_add_uv_block_8x8;
+#if CONFIG_TX16X16
+  vp8_dequant_idct_add_fn_t            idct_add_16x16;
+#endif
 } vp8_dequant_rtcd_vtable_t;
 
 #if CONFIG_RUNTIME_CPU_DETECT

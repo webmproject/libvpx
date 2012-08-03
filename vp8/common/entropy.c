@@ -47,7 +47,7 @@ DECLARE_ALIGNED(16, const unsigned char, vp8_norm[256]) = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-DECLARE_ALIGNED(16, cuchar, vp8_coef_bands[16]) = {
+DECLARE_ALIGNED(16, const int, vp8_coef_bands[16]) = {
   0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7
 };
 
@@ -79,15 +79,15 @@ DECLARE_ALIGNED(16, const int, vp8_row_scan[16]) = {
 #endif
 
 
-DECLARE_ALIGNED(64, cuchar, vp8_coef_bands_8x8[64]) = { 0, 1, 2, 3, 5, 4, 4, 5,
-                                                        5, 3, 6, 3, 5, 4, 6, 6,
-                                                        6, 5, 5, 6, 6, 6, 6, 6,
-                                                        6, 6, 6, 6, 6, 6, 6, 6,
-                                                        6, 6, 6, 6, 7, 7, 7, 7,
-                                                        7, 7, 7, 7, 7, 7, 7, 7,
-                                                        7, 7, 7, 7, 7, 7, 7, 7,
-                                                        7, 7, 7, 7, 7, 7, 7, 7
-                                                      };
+DECLARE_ALIGNED(64, const int, vp8_coef_bands_8x8[64]) = { 0, 1, 2, 3, 5, 4, 4, 5,
+                                                           5, 3, 6, 3, 5, 4, 6, 6,
+                                                           6, 5, 5, 6, 6, 6, 6, 6,
+                                                           6, 6, 6, 6, 6, 6, 6, 6,
+                                                           6, 6, 6, 6, 7, 7, 7, 7,
+                                                           7, 7, 7, 7, 7, 7, 7, 7,
+                                                           7, 7, 7, 7, 7, 7, 7, 7,
+                                                           7, 7, 7, 7, 7, 7, 7, 7
+                                                         };
 DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]) = {
   0,  1,  8, 16,  9,  2,  3, 10, 17, 24, 32, 25, 18, 11,  4,  5,
   12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13,  6,  7, 14, 21, 28,
@@ -95,9 +95,46 @@ DECLARE_ALIGNED(64, const int, vp8_default_zig_zag1d_8x8[64]) = {
   58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63,
 };
 
+#if CONFIG_TX16X16
+// Table can be optimized.
+DECLARE_ALIGNED(16, const int, vp8_coef_bands_16x16[256]) = {
+    0, 1, 2, 3, 5, 4, 4, 5, 5, 3, 6, 3, 5, 4, 6, 6,
+    6, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+    6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+    7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+};
+DECLARE_ALIGNED(16, const int, vp8_default_zig_zag1d_16x16[256]) = {
+      0,   1,  16,  32,  17,   2,   3,  18,  33,  48,  64,  49,  34,  19,   4,   5,
+     20,  35,  50,  65,  80,  96,  81,  66,  51,  36,  21,   6,   7,  22,  37,  52,
+     67,  82,  97, 112, 128, 113,  98,  83,  68,  53,  38,  23,   8,   9,  24,  39,
+     54,  69,  84,  99, 114, 129, 144, 160, 145, 130, 115, 100,  85,  70,  55,  40,
+     25,  10,  11,  26,  41,  56,  71,  86, 101, 116, 131, 146, 161, 176, 192, 177,
+    162, 147, 132, 117, 102,  87,  72,  57,  42,  27,  12,  13,  28,  43,  58,  73,
+     88, 103, 118, 133, 148, 163, 178, 193, 208, 224, 209, 194, 179, 164, 149, 134,
+    119, 104,  89,  74,  59,  44,  29,  14,  15,  30,  45,  60,  75,  90, 105, 120,
+    135, 150, 165, 180, 195, 210, 225, 240, 241, 226, 211, 196, 181, 166, 151, 136,
+    121, 106,  91,  76,  61,  46,  31,  47,  62,  77,  92, 107, 122, 137, 152, 167,
+    182, 197, 212, 227, 242, 243, 228, 213, 198, 183, 168, 153, 138, 123, 108,  93,
+     78,  63,  79,  94, 109, 124, 139, 154, 169, 184, 199, 214, 229, 244, 245, 230,
+    215, 200, 185, 170, 155, 140, 125, 110,  95, 111, 126, 141, 156, 171, 186, 201,
+    216, 231, 246, 247, 232, 217, 202, 187, 172, 157, 142, 127, 143, 158, 173, 188,
+    203, 218, 233, 248, 249, 234, 219, 204, 189, 174, 159, 175, 190, 205, 220, 235,
+    250, 251, 236, 221, 206, 191, 207, 222, 237, 252, 253, 238, 223, 239, 254, 255,
+};
+#endif
 
-DECLARE_ALIGNED(16, short, vp8_default_zig_zag_mask[16]);
-DECLARE_ALIGNED(64, short, vp8_default_zig_zag_mask_8x8[64]);// int64_t
 
 /* Array indices are identical to previously-existing CONTEXT_NODE indices */
 
@@ -130,17 +167,6 @@ static const Prob Pcat6[] =
 { 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129};
 
 static vp8_tree_index cat1[2], cat2[4], cat3[6], cat4[8], cat5[10], cat6[26];
-
-void vp8_init_scan_order_mask() {
-  int i;
-
-  for (i = 0; i < 16; i++) {
-    vp8_default_zig_zag_mask[vp8_default_zig_zag1d[i]] = 1 << i;
-  }
-  for (i = 0; i < 64; i++) {
-    vp8_default_zig_zag_mask_8x8[vp8_default_zig_zag1d_8x8[i]] = 1 << i;
-  }
-}
 
 static void init_bit_tree(vp8_tree_index *p, int n) {
   int i = 0;
@@ -181,11 +207,15 @@ vp8_extra_bit_struct vp8_extra_bits[12] = {
 
 void vp8_default_coef_probs(VP8_COMMON *pc) {
   vpx_memcpy(pc->fc.coef_probs, default_coef_probs,
-             sizeof(default_coef_probs));
+             sizeof(pc->fc.coef_probs));
 
   vpx_memcpy(pc->fc.coef_probs_8x8, vp8_default_coef_probs_8x8,
-             sizeof(vp8_default_coef_probs_8x8));
+             sizeof(pc->fc.coef_probs_8x8));
 
+#if CONFIG_TX16X16
+  vpx_memcpy(pc->fc.coef_probs_16x16, vp8_default_coef_probs_16x16,
+             sizeof(pc->fc.coef_probs_16x16));
+#endif
 }
 
 void vp8_coef_tree_initialize() {
@@ -304,4 +334,27 @@ void vp8_adapt_coef_probs(VP8_COMMON *cm) {
           else cm->fc.coef_probs_8x8[i][j][k][t] = prob;
         }
       }
+
+#if CONFIG_TX16X16
+  for (i = 0; i < BLOCK_TYPES_16X16; ++i)
+    for (j = 0; j < COEF_BANDS; ++j)
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+          continue;
+        vp8_tree_probs_from_distribution(
+          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          coef_probs, branch_ct, cm->fc.coef_counts_16x16[i][j][k], 256, 1);
+        for (t = 0; t < ENTROPY_NODES; ++t) {
+          int prob;
+          count = branch_ct[t][0] + branch_ct[t][1];
+          count = count > count_sat ? count_sat : count;
+          factor = (update_factor * count / count_sat);
+          prob = ((int)cm->fc.pre_coef_probs_16x16[i][j][k][t] * (256 - factor) +
+                  (int)coef_probs[t] * factor + 128) >> 8;
+          if (prob <= 0) cm->fc.coef_probs_16x16[i][j][k][t] = 1;
+          else if (prob > 255) cm->fc.coef_probs_16x16[i][j][k][t] = 255;
+          else cm->fc.coef_probs_16x16[i][j][k][t] = prob;
+        }
+      }
+#endif
 }

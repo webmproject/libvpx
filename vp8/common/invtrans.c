@@ -153,3 +153,33 @@ void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCK
 
 }
 
+#if CONFIG_TX16X16
+void vp8_inverse_transform_b_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
+                                   short *input_dqcoeff,
+                                   short *output_coeff, int pitch) {
+  IDCT_INVOKE(rtcd, idct16x16)(input_dqcoeff, output_coeff, pitch);
+}
+
+void vp8_inverse_transform_mby_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+    vp8_inverse_transform_b_16x16(rtcd, &x->block[0].dqcoeff[0], &x->block[0].diff[0], 32);
+}
+
+// U,V blocks are 8x8 per macroblock, so just run 8x8
+void vp8_inverse_transform_mbuv_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+  int i;
+  for (i = 16; i < 24; i += 4)
+    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+}
+
+void vp8_inverse_transform_mb_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+  int i;
+
+  // Luma
+  vp8_inverse_transform_b_16x16(rtcd, &x->block[0].dqcoeff[0], &x->block[0].diff[0], 32);
+
+  // U, V
+  // Chroma blocks are downscaled, so run an 8x8 on them.
+  for (i = 16; i < 24; i+= 4)
+    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+}
+#endif

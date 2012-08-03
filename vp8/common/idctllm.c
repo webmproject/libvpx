@@ -647,3 +647,275 @@ void vp8_short_ihaar2x2_c(short *input, short *output, int pitch) {
   op[8] = (ip[0] - ip[1] - ip[4] + ip[8]) >> 1;
 }
 
+
+#if CONFIG_TX16X16
+#if 0
+// Keep a really bad float version as reference for now.
+void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
+  double x;
+  const int short_pitch = pitch >> 1;
+  int i, j, k, l;
+  for (l = 0; l < 16; ++l) {
+    for (k = 0; k < 16; ++k) {
+      double s = 0;
+      for (i = 0; i < 16; ++i) {
+        for (j = 0; j < 16; ++j) {
+          x=cos(PI*j*(l+0.5)/16.0)*cos(PI*i*(k+0.5)/16.0)*input[i*16+j]/32;
+          if (i != 0)
+            x *= sqrt(2.0);
+          if (j != 0)
+            x *= sqrt(2.0);
+          s += x;
+        }
+      }
+      output[k*short_pitch+l] = (short)round(s);
+    }
+  }
+}
+#endif
+
+static void butterfly_16x16_idct_1d(double input[16], double output[16]) {
+  double step[16];
+  double intermediate[16];
+  double temp1, temp2;
+
+  const double PI = M_PI;
+  const double C1 = cos(1*PI/(double)32);
+  const double C2 = cos(2*PI/(double)32);
+  const double C3 = cos(3*PI/(double)32);
+  const double C4 = cos(4*PI/(double)32);
+  const double C5 = cos(5*PI/(double)32);
+  const double C6 = cos(6*PI/(double)32);
+  const double C7 = cos(7*PI/(double)32);
+  const double C8 = cos(8*PI/(double)32);
+  const double C9 = cos(9*PI/(double)32);
+  const double C10 = cos(10*PI/(double)32);
+  const double C11 = cos(11*PI/(double)32);
+  const double C12 = cos(12*PI/(double)32);
+  const double C13 = cos(13*PI/(double)32);
+  const double C14 = cos(14*PI/(double)32);
+  const double C15 = cos(15*PI/(double)32);
+
+  // step 1 and 2
+  step[ 0] = input[0] + input[8];
+  step[ 1] = input[0] - input[8];
+
+  temp1 = input[4]*C12;
+  temp2 = input[12]*C4;
+
+  temp1 -= temp2;
+  temp1 *= C8;
+
+  step[ 2] = 2*(temp1);
+
+  temp1 = input[4]*C4;
+  temp2 = input[12]*C12;
+  temp1 += temp2;
+  temp1 = (temp1);
+  temp1 *= C8;
+  step[ 3] = 2*(temp1);
+
+  temp1 = input[2]*C8;
+  temp1 = 2*(temp1);
+  temp2 = input[6] + input[10];
+
+  step[ 4] = temp1 + temp2;
+  step[ 5] = temp1 - temp2;
+
+  temp1 = input[14]*C8;
+  temp1 = 2*(temp1);
+  temp2 = input[6] - input[10];
+
+  step[ 6] = temp2 - temp1;
+  step[ 7] = temp2 + temp1;
+
+  // for odd input
+  temp1 = input[3]*C12;
+  temp2 = input[13]*C4;
+  temp1 += temp2;
+  temp1 = (temp1);
+  temp1 *= C8;
+  intermediate[ 8] = 2*(temp1);
+
+  temp1 = input[3]*C4;
+  temp2 = input[13]*C12;
+  temp2 -= temp1;
+  temp2 = (temp2);
+  temp2 *= C8;
+  intermediate[ 9] = 2*(temp2);
+
+  intermediate[10] = 2*(input[9]*C8);
+  intermediate[11] = input[15] - input[1];
+  intermediate[12] = input[15] + input[1];
+  intermediate[13] = 2*((input[7]*C8));
+
+  temp1 = input[11]*C12;
+  temp2 = input[5]*C4;
+  temp2 -= temp1;
+  temp2 = (temp2);
+  temp2 *= C8;
+  intermediate[14] = 2*(temp2);
+
+  temp1 = input[11]*C4;
+  temp2 = input[5]*C12;
+  temp1 += temp2;
+  temp1 = (temp1);
+  temp1 *= C8;
+  intermediate[15] = 2*(temp1);
+
+  step[ 8] = intermediate[ 8] + intermediate[14];
+  step[ 9] = intermediate[ 9] + intermediate[15];
+  step[10] = intermediate[10] + intermediate[11];
+  step[11] = intermediate[10] - intermediate[11];
+  step[12] = intermediate[12] + intermediate[13];
+  step[13] = intermediate[12] - intermediate[13];
+  step[14] = intermediate[ 8] - intermediate[14];
+  step[15] = intermediate[ 9] - intermediate[15];
+
+  // step 3
+  output[0] = step[ 0] + step[ 3];
+  output[1] = step[ 1] + step[ 2];
+  output[2] = step[ 1] - step[ 2];
+  output[3] = step[ 0] - step[ 3];
+
+  temp1 = step[ 4]*C14;
+  temp2 = step[ 7]*C2;
+  temp1 -= temp2;
+  output[4] =  (temp1);
+
+  temp1 = step[ 4]*C2;
+  temp2 = step[ 7]*C14;
+  temp1 += temp2;
+  output[7] =  (temp1);
+
+  temp1 = step[ 5]*C10;
+  temp2 = step[ 6]*C6;
+  temp1 -= temp2;
+  output[5] =  (temp1);
+
+  temp1 = step[ 5]*C6;
+  temp2 = step[ 6]*C10;
+  temp1 += temp2;
+  output[6] =  (temp1);
+
+  output[8] = step[ 8] + step[11];
+  output[9] = step[ 9] + step[10];
+  output[10] = step[ 9] - step[10];
+  output[11] = step[ 8] - step[11];
+  output[12] = step[12] + step[15];
+  output[13] = step[13] + step[14];
+  output[14] = step[13] - step[14];
+  output[15] = step[12] - step[15];
+
+  // output 4
+  step[ 0] = output[0] + output[7];
+  step[ 1] = output[1] + output[6];
+  step[ 2] = output[2] + output[5];
+  step[ 3] = output[3] + output[4];
+  step[ 4] = output[3] - output[4];
+  step[ 5] = output[2] - output[5];
+  step[ 6] = output[1] - output[6];
+  step[ 7] = output[0] - output[7];
+
+  temp1 = output[8]*C7;
+  temp2 = output[15]*C9;
+  temp1 -= temp2;
+  step[ 8] = (temp1);
+
+  temp1 = output[9]*C11;
+  temp2 = output[14]*C5;
+  temp1 += temp2;
+  step[ 9] = (temp1);
+
+  temp1 = output[10]*C3;
+  temp2 = output[13]*C13;
+  temp1 -= temp2;
+  step[10] = (temp1);
+
+  temp1 = output[11]*C15;
+  temp2 = output[12]*C1;
+  temp1 += temp2;
+  step[11] = (temp1);
+
+  temp1 = output[11]*C1;
+  temp2 = output[12]*C15;
+  temp2 -= temp1;
+  step[12] = (temp2);
+
+  temp1 = output[10]*C13;
+  temp2 = output[13]*C3;
+  temp1 += temp2;
+  step[13] = (temp1);
+
+  temp1 = output[9]*C5;
+  temp2 = output[14]*C11;
+  temp2 -= temp1;
+  step[14] = (temp2);
+
+  temp1 = output[8]*C9;
+  temp2 = output[15]*C7;
+  temp1 += temp2;
+  step[15] = (temp1);
+
+  // step 5
+  output[0] = (step[0] + step[15]);
+  output[1] = (step[1] + step[14]);
+  output[2] = (step[2] + step[13]);
+  output[3] = (step[3] + step[12]);
+  output[4] = (step[4] + step[11]);
+  output[5] = (step[5] + step[10]);
+  output[6] = (step[6] + step[ 9]);
+  output[7] = (step[7] + step[ 8]);
+
+  output[15] = (step[0] - step[15]);
+  output[14] = (step[1] - step[14]);
+  output[13] = (step[2] - step[13]);
+  output[12] = (step[3] - step[12]);
+  output[11] = (step[4] - step[11]);
+  output[10] = (step[5] - step[10]);
+  output[9] = (step[6] - step[ 9]);
+  output[8] = (step[7] - step[ 8]);
+}
+
+// Remove once an int version of iDCT is written
+#if 0
+void reference_16x16_idct_1d(double input[16], double output[16]) {
+  const double kPi = 3.141592653589793238462643383279502884;
+  const double kSqrt2 = 1.414213562373095048801688724209698;
+  for (int k = 0; k < 16; k++) {
+    output[k] = 0.0;
+    for (int n = 0; n < 16; n++) {
+      output[k] += input[n]*cos(kPi*(2*k+1)*n/32.0);
+      if (n == 0)
+        output[k] = output[k]/kSqrt2;
+    }
+  }
+}
+#endif
+
+void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
+  double out[16*16], out2[16*16];
+  const int short_pitch = pitch >> 1;
+  int i, j;
+    // First transform rows
+  for (i = 0; i < 16; ++i) {
+    double temp_in[16], temp_out[16];
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = input[j + i*short_pitch];
+    butterfly_16x16_idct_1d(temp_in, temp_out);
+    for (j = 0; j < 16; ++j)
+      out[j + i*16] = temp_out[j];
+  }
+  // Then transform columns
+  for (i = 0; i < 16; ++i) {
+    double temp_in[16], temp_out[16];
+    for (j = 0; j < 16; ++j)
+      temp_in[j] = out[j*16 + i];
+    butterfly_16x16_idct_1d(temp_in, temp_out);
+    for (j = 0; j < 16; ++j)
+      out2[j*16 + i] = temp_out[j];
+  }
+  for (i = 0; i < 16*16; ++i)
+    output[i] = round(out2[i]/128);
+}
+#endif

@@ -69,6 +69,9 @@ void vp8_cmachine_specific_config(VP8_COMP *cpi) {
   cpi->rtcd.variance.getmbss               = vp8_get_mb_ss_c;
 
   cpi->rtcd.fdct.short8x8                  = vp8_short_fdct8x8_c;
+#if CONFIG_TX16X16
+  cpi->rtcd.fdct.short16x16                = vp8_short_fdct16x16_c;
+#endif
   cpi->rtcd.fdct.haar_short2x2             = vp8_short_fhaar2x2_c;
   cpi->rtcd.fdct.short4x4                  = vp8_short_fdct4x4_c;
   cpi->rtcd.fdct.short8x4                  = vp8_short_fdct8x4_c;

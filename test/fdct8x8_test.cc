@@ -115,8 +115,8 @@ TEST(VP8Fdct8x8Test, RoundTripErrorCheck) {
   EXPECT_GE(1, max_error)
       << "Error: 8x8 FDCT/IDCT has an individual roundtrip error > 1";
 
-  EXPECT_GE(count_test_block, total_error)
-      << "Error: 8x8 FDCT/IDCT has average roundtrip error > 1 per block";
+  EXPECT_GE(count_test_block/5, total_error)
+      << "Error: 8x8 FDCT/IDCT has average roundtrip error > 1/5 per block";
 };
 
 TEST(VP8Fdct8x8Test, ExtremalCheck) {
@@ -149,9 +149,9 @@ TEST(VP8Fdct8x8Test, ExtremalCheck) {
         << "Error: Extremal 8x8 FDCT/IDCT has an"
         << " individual roundtrip error > 1";
 
-    EXPECT_GE(count_test_block, total_error)
+    EXPECT_GE(count_test_block/5, total_error)
         << "Error: Extremal 8x8 FDCT/IDCT has average"
-        << " roundtrip error > 1 per block";
+        << " roundtrip error > 1/5 per block";
   }
 };
 

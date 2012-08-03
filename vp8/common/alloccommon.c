@@ -218,7 +218,4 @@ void vp8_initialize_common() {
   vp8_entropy_mode_init();
 
   vp8_entropy_mv_init();
-
-  vp8_init_scan_order_mask();
-
 }

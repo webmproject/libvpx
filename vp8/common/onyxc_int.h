@@ -52,6 +52,9 @@ typedef struct frame_contexts {
   vp8_prob mbsplit_prob [VP8_NUMMBSPLITS - 1];
   vp8_prob coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
   vp8_prob coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+#if CONFIG_TX16X16
+  vp8_prob coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+#endif
   MV_CONTEXT mvc[2];
 #if CONFIG_HIGH_PRECISION_MV
   MV_CONTEXT_HP mvc_hp[2];
@@ -73,12 +76,22 @@ typedef struct frame_contexts {
   unsigned int sub_mv_ref_counts [SUBMVREF_COUNT][VP8_SUBMVREFS];
   unsigned int mbsplit_counts [VP8_NUMMBSPLITS];
 
-  vp8_prob pre_coef_probs [BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
-  vp8_prob pre_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp8_prob pre_coef_probs [BLOCK_TYPES] [COEF_BANDS]
+      [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+  vp8_prob pre_coef_probs_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
+      [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+#if CONFIG_TX16X16
+  vp8_prob pre_coef_probs_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
+      [PREV_COEF_CONTEXTS] [ENTROPY_NODES];
+#endif
   unsigned int coef_counts [BLOCK_TYPES] [COEF_BANDS]
-  [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+      [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
   unsigned int coef_counts_8x8 [BLOCK_TYPES_8X8] [COEF_BANDS]
-  [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+      [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+#if CONFIG_TX16X16
+  unsigned int coef_counts_16x16 [BLOCK_TYPES_16X16] [COEF_BANDS]
+      [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+#endif
   unsigned int MVcount [2] [MVvals];
 #if CONFIG_HIGH_PRECISION_MV
   unsigned int MVcount_hp [2] [MVvals_hp];

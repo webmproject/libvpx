@@ -42,6 +42,12 @@ unsigned int tree_update_hist_8x8 [BLOCK_TYPES_8X8]
                                   [COEF_BANDS]
                                   [PREV_COEF_CONTEXTS]
                                   [ENTROPY_NODES] [2];
+#if CONFIG_TX16X16
+unsigned int tree_update_hist_16x16 [BLOCK_TYPES_16X16]
+                                    [COEF_BANDS]
+                                    [PREV_COEF_CONTEXTS]
+                                    [ENTROPY_NODES] [2];
+#endif
 
 extern unsigned int active_section;
 #endif
@@ -1283,15 +1289,13 @@ static void print_prob_tree(vp8_prob
 
 
 void build_coeff_contexts(VP8_COMP *cpi) {
-  int i = 0;
-  do {
-    int j = 0;
-    do {
-      int k = 0;
-      do {
+  int i = 0, j, k;
 #ifdef ENTROPY_STATS
-        int t;
+  int t = 0;
 #endif
+  for (i = 0; i < BLOCK_TYPES; ++i) {
+    for (j = 0; j < COEF_BANDS; ++j) {
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
         if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
           continue;
         vp8_tree_probs_from_distribution(
@@ -1302,33 +1306,23 @@ void build_coeff_contexts(VP8_COMP *cpi) {
           256, 1
         );
 #ifdef ENTROPY_STATS
-        if (!cpi->dummy_packing) {
-          t = 0;
-          do {
-            context_counters [i][j][k][t] +=
-              cpi->coef_counts [i][j][k][t];
-          } while (++t < MAX_ENTROPY_TOKENS);
-        }
+        if (!cpi->dummy_packing)
+          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+            context_counters[i][j][k][t] += cpi->coef_counts[i][j][k][t];
 #endif
-      } while (++k < PREV_COEF_CONTEXTS);
-    } while (++j < COEF_BANDS);
-  } while (++i < BLOCK_TYPES);
+      }
+    }
+  }
 
 
-  i = 0;
   if (cpi->common.txfm_mode == ALLOW_8X8) {
-    do {
-      int j = 0;      /* token/prob index */
-      do {
-        int k = 0;
-        do {
+    for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
+      for (j = 0; j < COEF_BANDS; ++j) {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
           /* at every context */
           /* calc probs and branch cts for this frame only */
           // vp8_prob new_p           [ENTROPY_NODES];
           // unsigned int branch_ct   [ENTROPY_NODES] [2];
-#ifdef ENTROPY_STATS
-          int t = 0;      /* token/prob index */
-#endif
           if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
             continue;
           vp8_tree_probs_from_distribution(
@@ -1339,20 +1333,36 @@ void build_coeff_contexts(VP8_COMP *cpi) {
             256, 1
           );
 #ifdef ENTROPY_STATS
-          if (!cpi->dummy_packing) {
-            t = 0;
-            do {
-              context_counters_8x8 [i][j][k][t] +=
-                cpi->coef_counts_8x8 [i][j][k][t];
-            } while (++t < MAX_ENTROPY_TOKENS);
-          }
+          if (!cpi->dummy_packing)
+            for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+              context_counters_8x8[i][j][k][t] += cpi->coef_counts_8x8[i][j][k][t];
 #endif
-
-        } while (++k < PREV_COEF_CONTEXTS);
-      } while (++j < COEF_BANDS);
-    } while (++i < BLOCK_TYPES_8X8);
+        }
+      }
+    }
   }
 
+#if CONFIG_TX16X16
+  //16x16
+  for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
+    for (j = 0; j < COEF_BANDS; ++j) {
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+          continue;
+        vp8_tree_probs_from_distribution(
+          MAX_ENTROPY_TOKENS, vp8_coef_encodings, vp8_coef_tree,
+          cpi->frame_coef_probs_16x16[i][j][k],
+          cpi->frame_branch_ct_16x16[i][j][k],
+          cpi->coef_counts_16x16[i][j][k], 256, 1);
+#ifdef ENTROPY_STATS
+        if (!cpi->dummy_packing)
+          for (t = 0; t < MAX_ENTROPY_TOKENS; ++t)
+            context_counters_16x16[i][j][k][t] += cpi->coef_counts_16x16[i][j][k][t];
+#endif
+      }
+    }
+  }
+#endif
 }
 
 static void update_coef_probs3(VP8_COMP *cpi) {
@@ -1696,7 +1706,7 @@ static void update_coef_probs2(VP8_COMP *cpi) {
 }
 
 static void update_coef_probs(VP8_COMP *cpi) {
-  int i = 0;
+  int i, j, k, t;
   vp8_writer *const w = & cpi->bc;
   int update[2] = {0, 0};
   int savings;
@@ -1704,21 +1714,17 @@ static void update_coef_probs(VP8_COMP *cpi) {
   vp8_clear_system_state(); // __asm emms;
 
   // Build the cofficient contexts based on counts collected in encode loop
-
   build_coeff_contexts(cpi);
 
   // vp8_prob bestupd = find_coef_update_prob(cpi);
 
   /* dry run to see if there is any udpate at all needed */
   savings = 0;
-  do {
-    int j = !i;
-    do {
-      int k = 0;
+  for (i = 0; i < BLOCK_TYPES; ++i) {
+    for (j = !i; j < COEF_BANDS; ++j) {
       int prev_coef_savings[ENTROPY_NODES] = {0};
-      do {
-        int t = 0;      /* token/prob index */
-        do {
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        for (t = 0; t < ENTROPY_NODES; ++t) {
           vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
           vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
           const vp8_prob upd = COEF_UPDATE_PROB;
@@ -1747,29 +1753,23 @@ static void update_coef_probs(VP8_COMP *cpi) {
 #endif
 
           update[u]++;
-        } while (++t < ENTROPY_NODES);
-      } while (++k < PREV_COEF_CONTEXTS);
-    } while (++j < COEF_BANDS);
-  } while (++i < BLOCK_TYPES);
+        }
+      }
+    }
+  }
 
   // printf("Update %d %d, savings %d\n", update[0], update[1], savings);
   /* Is coef updated at all */
   if (update[1] == 0 || savings < 0)
-  {
     vp8_write_bit(w, 0);
-  } else {
+  else {
     vp8_write_bit(w, 1);
-    i = 0;
-    do {
-      int j = !i;
-      do {
-        int k = 0;
+    for (i = 0; i < BLOCK_TYPES; ++i) {
+      for (j = !i; j < COEF_BANDS; ++j) {
         int prev_coef_savings[ENTROPY_NODES] = {0};
-
-        do {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
           // calc probs and branch cts for this frame only
-          int t = 0;      /* token/prob index */
-          do {
+          for (t = 0; t < ENTROPY_NODES; ++t) {
             vp8_prob newp = cpi->frame_coef_probs [i][j][k][t];
             vp8_prob *Pold = cpi->common.fc.coef_probs [i][j][k] + t;
             const vp8_prob upd = COEF_UPDATE_PROB;
@@ -1791,8 +1791,6 @@ static void update_coef_probs(VP8_COMP *cpi) {
             if (s > 0)
               u = 1;
 #endif
-
-
             vp8_write(w, u, upd);
 #ifdef ENTROPY_STATS
             if (!cpi->dummy_packing)
@@ -1803,28 +1801,23 @@ static void update_coef_probs(VP8_COMP *cpi) {
               write_prob_diff_update(w, newp, *Pold);
               *Pold = newp;
             }
-          } while (++t < ENTROPY_NODES);
-
-        } while (++k < PREV_COEF_CONTEXTS);
-      } while (++j < COEF_BANDS);
-    } while (++i < BLOCK_TYPES);
+          }
+        }
+      }
+    }
   }
 
 
-  /* do not do this if not evena allowed */
+  /* do not do this if not even allowed */
   if (cpi->common.txfm_mode == ALLOW_8X8) {
     /* dry run to see if update is necessary */
     update[0] = update[1] = 0;
     savings = 0;
-    i = 0;
-    do {
-      int j = !i;
-      do {
-        int k = 0;
-        do {
+    for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
+      for (j = !i; j < COEF_BANDS; ++j) {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
           // calc probs and branch cts for this frame only
-          int t = 0;      /* token/prob index */
-          do {
+          for (t = 0; t < ENTROPY_NODES; ++t) {
             const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
             vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
             vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
@@ -1846,26 +1839,20 @@ static void update_coef_probs(VP8_COMP *cpi) {
             if (u)
               savings += s;
 #endif
-
             update[u]++;
-          } while (++t < MAX_ENTROPY_TOKENS - 1);
-        } while (++k < PREV_COEF_CONTEXTS);
-      } while (++j < COEF_BANDS);
-    } while (++i < BLOCK_TYPES_8X8);
+          }
+        }
+      }
+    }
 
     if (update[1] == 0 || savings < 0)
-    {
       vp8_write_bit(w, 0);
-    } else {
+    else {
       vp8_write_bit(w, 1);
-      i = 0;
-      do {
-        int j = !i;
-        do {
-          int k = 0;
-          do {
-            int t = 0;      /* token/prob index */
-            do {
+      for (i = 0; i < BLOCK_TYPES_8X8; ++i) {
+        for (j = !i; j < COEF_BANDS; ++j) {
+          for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+            for (t = 0; t < ENTROPY_NODES; ++t) {
               const unsigned int *ct  = cpi->frame_branch_ct_8x8 [i][j][k][t];
               vp8_prob newp = cpi->frame_coef_probs_8x8 [i][j][k][t];
               vp8_prob *Pold = cpi->common.fc.coef_probs_8x8 [i][j][k] + t;
@@ -1892,12 +1879,90 @@ static void update_coef_probs(VP8_COMP *cpi) {
                 write_prob_diff_update(w, newp, oldp);
                 *Pold = newp;
               }
-            } while (++t < MAX_ENTROPY_TOKENS - 1);
-          } while (++k < PREV_COEF_CONTEXTS);
-        } while (++j < COEF_BANDS);
-      } while (++i < BLOCK_TYPES_8X8);
+            }
+          }
+        }
+      }
     }
   }
+
+#if CONFIG_TX16X16
+  // 16x16
+  /* dry run to see if update is necessary */
+  update[0] = update[1] = 0;
+  savings = 0;
+  for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
+    for (j = !i; j < COEF_BANDS; ++j) {
+      for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+        // calc probs and branch cts for this frame only
+        for (t = 0; t < ENTROPY_NODES; ++t) {
+          const unsigned int *ct  = cpi->frame_branch_ct_16x16[i][j][k][t];
+          vp8_prob newp = cpi->frame_coef_probs_16x16[i][j][k][t];
+          vp8_prob *Pold = cpi->common.fc.coef_probs_16x16[i][j][k] + t;
+          const vp8_prob oldp = *Pold;
+          int s, u;
+          const vp8_prob upd = COEF_UPDATE_PROB_16X16;
+          if (k >= 3 && ((i == 0 && j == 1) || (i > 0 && j == 0)))
+            continue;
+#if defined(SEARCH_NEWP)
+          s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
+          u = s > 0 && newp != oldp ? 1 : 0;
+          if (u)
+            savings += s - (int)(vp8_cost_zero(upd));
+          else
+            savings -= (int)(vp8_cost_zero(upd));
+#else
+          s = prob_update_savings(ct, oldp, newp, upd);
+          u = s > 0 ? 1 : 0;
+          if (u)
+            savings += s;
+#endif
+          update[u]++;
+        }
+      }
+    }
+  }
+
+  if (update[1] == 0 || savings < 0)
+    vp8_write_bit(w, 0);
+  else {
+    vp8_write_bit(w, 1);
+    for (i = 0; i < BLOCK_TYPES_16X16; ++i) {
+      for (j = !i; j < COEF_BANDS; ++j) {
+        for (k = 0; k < PREV_COEF_CONTEXTS; ++k) {
+          for (t = 0; t < ENTROPY_NODES; ++t) {
+            const unsigned int *ct  = cpi->frame_branch_ct_16x16[i][j][k][t];
+            vp8_prob newp = cpi->frame_coef_probs_16x16[i][j][k][t];
+            vp8_prob *Pold = cpi->common.fc.coef_probs_16x16[i][j][k] + t;
+            const vp8_prob oldp = *Pold;
+            const vp8_prob upd = COEF_UPDATE_PROB_16X16;
+            int s, u;
+            if (k >= 3 && ((i == 0 && j == 1) ||
+                           (i > 0 && j == 0)))
+              continue;
+#if defined(SEARCH_NEWP)
+            s = prob_diff_update_savings_search(ct, oldp, &newp, upd);
+            u = s > 0 && newp != oldp ? 1 : 0;
+#else
+            s = prob_update_savings(ct, oldp, newp, upd);
+            u = s > 0 ? 1 : 0;
+#endif
+            vp8_write(w, u, upd);
+#ifdef ENTROPY_STATS
+            if (!cpi->dummy_packing)
+              ++tree_update_hist_16x16[i][j][k][t][u];
+#endif
+            if (u) {
+              /* send/use new probability */
+              write_prob_diff_update(w, newp, oldp);
+              *Pold = newp;
+            }
+          }
+        }
+      }
+    }
+  }
+#endif
 }
 
 #ifdef PACKET_TESTING
@@ -2308,18 +2373,19 @@ void vp8_pack_bitstream(VP8_COMP *cpi, unsigned char *dest, unsigned long *size)
     vp8_write_bit(bc, pc->refresh_last_frame);
 
 #ifdef ENTROPY_STATS
-
   if (pc->frame_type == INTER_FRAME)
     active_section = 0;
   else
     active_section = 7;
-
 #endif
 
   vp8_clear_system_state();  // __asm emms;
 
   vp8_copy(cpi->common.fc.pre_coef_probs, cpi->common.fc.coef_probs);
   vp8_copy(cpi->common.fc.pre_coef_probs_8x8, cpi->common.fc.coef_probs_8x8);
+#if CONFIG_TX16X16
+  vp8_copy(cpi->common.fc.pre_coef_probs_16x16, cpi->common.fc.coef_probs_16x16);
+#endif
   vp8_copy(cpi->common.fc.pre_ymode_prob, cpi->common.fc.ymode_prob);
   vp8_copy(cpi->common.fc.pre_uv_mode_prob, cpi->common.fc.uv_mode_prob);
   vp8_copy(cpi->common.fc.pre_bmode_prob, cpi->common.fc.bmode_prob);
@@ -2399,24 +2465,20 @@ void print_tree_update_probs() {
   FILE *f = fopen("coefupdprob.h", "w");
   int Sum;
   fprintf(f, "\n/* Update probabilities for token entropy tree. */\n\n");
+
   fprintf(f, "const vp8_prob\n"
           "vp8_coef_update_probs[BLOCK_TYPES]\n"
           "                     [COEF_BANDS]\n"
           "                     [PREV_COEF_CONTEXTS]\n"
           "                     [ENTROPY_NODES] = {\n");
-
   for (i = 0; i < BLOCK_TYPES; i++) {
     fprintf(f, "  { \n");
-
     for (j = 0; j < COEF_BANDS; j++) {
       fprintf(f, "    {\n");
-
       for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
         fprintf(f, "      {");
-
         for (l = 0; l < ENTROPY_NODES; l++) {
           Sum = tree_update_hist[i][j][k][l][0] + tree_update_hist[i][j][k][l][1];
-
           if (Sum > 0) {
             if (((tree_update_hist[i][j][k][l][0] * 255) / Sum) > 0)
               fprintf(f, "%3ld, ", (tree_update_hist[i][j][k][l][0] * 255) / Sum);
@@ -2425,16 +2487,12 @@ void print_tree_update_probs() {
           } else
             fprintf(f, "%3ld, ", 128);
         }
-
         fprintf(f, "},\n");
       }
-
       fprintf(f, "    },\n");
     }
-
     fprintf(f, "  },\n");
   }
-
   fprintf(f, "};\n");
 
   fprintf(f, "const vp8_prob\n"
@@ -2442,20 +2500,14 @@ void print_tree_update_probs() {
           "                         [COEF_BANDS]\n"
           "                         [PREV_COEF_CONTEXTS]\n"
           "                         [ENTROPY_NODES] = {\n");
-
-
   for (i = 0; i < BLOCK_TYPES_8X8; i++) {
     fprintf(f, "  { \n");
-
     for (j = 0; j < COEF_BANDS; j++) {
       fprintf(f, "    {\n");
-
       for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
         fprintf(f, "      {");
-
         for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++) {
           Sum = tree_update_hist_8x8[i][j][k][l][0] + tree_update_hist_8x8[i][j][k][l][1];
-
           if (Sum > 0) {
             if (((tree_update_hist_8x8[i][j][k][l][0] * 255) / Sum) > 0)
               fprintf(f, "%3ld, ", (tree_update_hist_8x8[i][j][k][l][0] * 255) / Sum);
@@ -2464,20 +2516,50 @@ void print_tree_update_probs() {
           } else
             fprintf(f, "%3ld, ", 128);
         }
-
         fprintf(f, "},\n");
       }
-
       fprintf(f, "    },\n");
     }
-
     fprintf(f, "  },\n");
   }
+
+#if CONFIG_TX16X16
+  fprintf(f, "const vp8_prob\n"
+          "vp8_coef_update_probs_16x16[BLOCK_TYPES_16X16]\n"
+          "                           [COEF_BANDS]\n"
+          "                           [PREV_COEF_CONTEXTS]\n"
+          "                           [ENTROPY_NODES] = {\n");
+  for (i = 0; i < BLOCK_TYPES_16X16; i++) {
+    fprintf(f, "  { \n");
+    for (j = 0; j < COEF_BANDS; j++) {
+      fprintf(f, "    {\n");
+      for (k = 0; k < PREV_COEF_CONTEXTS; k++) {
+        fprintf(f, "      {");
+        for (l = 0; l < MAX_ENTROPY_TOKENS - 1; l++) {
+          Sum = tree_update_hist_16x16[i][j][k][l][0] + tree_update_hist_16x16[i][j][k][l][1];
+          if (Sum > 0) {
+            if (((tree_update_hist_16x16[i][j][k][l][0] * 255) / Sum) > 0)
+              fprintf(f, "%3ld, ", (tree_update_hist_16x16[i][j][k][l][0] * 255) / Sum);
+            else
+              fprintf(f, "%3ld, ", 1);
+          } else
+            fprintf(f, "%3ld, ", 128);
+        }
+        fprintf(f, "},\n");
+      }
+      fprintf(f, "    },\n");
+    }
+    fprintf(f, "  },\n");
+  }
+#endif
+
   fclose(f);
   f = fopen("treeupdate.bin", "wb");
   fwrite(tree_update_hist, sizeof(tree_update_hist), 1, f);
   fwrite(tree_update_hist_8x8, sizeof(tree_update_hist_8x8), 1, f);
+#if CONFIG_TX16X16
+  fwrite(tree_update_hist_16x16, sizeof(tree_update_hist_16x16), 1, f);
+#endif
   fclose(f);
-
 }
 #endif
