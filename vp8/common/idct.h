@@ -27,6 +27,13 @@
 #include "x86/idct_x86.h"
 #endif
 
+#ifdef _MSC_VER
+/* TODO: remove these after integer implmementations are done */
+#define M_PI       3.14159265358979323846
+#define round(x) (((x)>0)? floor((x)+0.5): ceil((x)-0.5))
+#endif
+
+
 #if ARCH_ARM
 #include "arm/idct_arm.h"
 #endif
