@@ -1,0 +1,157 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//7vg\u003d",
+        "filename": "vp8/common/idctllm.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "this is pretty much a copy-paste-change of vp8_iht4x4llm_c.\n\nAny chance of having a common code or macro, instead of 100 lines of almost similar code?",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7vc\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "just remove the commented line if it\u0027s not used",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7vY\u003d",
+        "filename": "vp8/decoder/dequantize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "vpx_memset(input, 0, 64 * sizeof(*input))",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7vU\u003d",
+        "filename": "vp8/decoder/dequantize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "else if",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7vQ\u003d",
+        "filename": "vp8/decoder/dequantize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "and even:\n\ndest[c] \u003d (a \u003c 0) ? 0 : (a \u003e 255) ? 255u : (unsigned char)a;\n\nAnd further: considering how often this clipping is used, an inline clip8b() function would come handy.",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7vM\u003d",
+        "filename": "vp8/decoder/dequantize.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "suggest ()\u0027s around ((b+1)%2).\n\nAnd overall, these 3 lines are hard to parse. A comment would help",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7vI\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "same comment than before",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7vE\u003d",
+        "filename": "vp8/encoder/dct.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 439,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "and here too.",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7u8\u003d",
+        "filename": "vp8/encoder/encodeintra.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T15:16:17Z",
+      "side": 1,
+      "message": "should be fonction-pointer entries in \u0027x\u0027 too, instead of hard-coding the call to the c-implementation",
+      "revId": "fcbff9ee04f5b67ce79fd329333c8b1970d9318d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
