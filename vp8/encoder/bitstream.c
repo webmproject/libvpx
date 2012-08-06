@@ -78,7 +78,6 @@ static int split_index(int i, int n, int modulus) {
 static int remap_prob(int v, int m) {
   const int n = 256;
   const int modulus = MODULUS_PARAM;
-  const int max1 = (n - 2 - modulus / 2 + modulus - 1) / modulus;
   int i;
   if ((m << 1) <= n)
     i = recenter_nonneg(v, m) - 1;
@@ -1353,7 +1352,6 @@ static void update_coef_probs2(VP8_COMP *cpi) {
   vp8_writer *const w = & cpi->bc;
   int update[2];
   int savings;
-  int bestupdndx[2 * ENTROPY_NODES];
 
   vp8_clear_system_state(); // __asm emms;
   // Build the cofficient contexts based on counts collected in encode loop

@@ -623,6 +623,12 @@ process_common_toolchain() {
             add_ldflags "-isysroot /Developer/SDKs/MacOSX10.6.sdk"
             add_ldflags "-mmacosx-version-min=10.6"
             ;;
+        *-darwin11-*)
+            add_cflags  "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk"
+            add_cflags  "-mmacosx-version-min=10.7"
+            add_ldflags "-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk"
+            add_ldflags "-mmacosx-version-min=10.7"
+            ;;
     esac
 
     # Handle Solaris variants. Solaris 10 needs -lposix4

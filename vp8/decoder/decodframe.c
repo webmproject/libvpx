@@ -63,7 +63,7 @@ static int merge_index(int v, int n, int modulus) {
 static int inv_remap_prob(int v, int m) {
   const int n = 256;
   const int modulus = MODULUS_PARAM;
-  int i, w;
+  int i;
   v = merge_index(v, n - 1, modulus);
   if ((m << 1) <= n) {
     i = inv_recenter_nonneg(v + 1, m);
