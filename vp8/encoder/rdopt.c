@@ -560,6 +560,35 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd) {
 
 }
 
+static int cost_coeffs_2x2(MACROBLOCK *mb,
+                           BLOCKD *b, int type,
+                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
+  int c = !type;              /* start at coef 0, unless Y with Y2 */
+  int eob = b->eob;
+  int pt;    /* surrounding block/prev coef predictor */
+  int cost = 0;
+  short *qcoeff_ptr = b->qcoeff;
+
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  assert(eob <= 4);
+
+  for (; c < eob; c++) {
+    int v = qcoeff_ptr[vp8_default_zig_zag1d[c]];
+    int t = vp8_dct_value_tokens_ptr[v].Token;
+    cost += mb->token_costs_8x8[type] [vp8_coef_bands[c]] [pt] [t];
+    cost += vp8_dct_value_cost_ptr[v];
+    pt = vp8_prev_token_class[t];
+  }
+
+  if (c < 4)
+    cost += mb->token_costs_8x8 [type][vp8_coef_bands[c]]
+            [pt] [DCT_EOB_TOKEN];
+
+  pt = (c != !type); // is eob first coefficient;
+  *a = *l = pt;
+  return cost;
+}
+
 static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
   int c = !type;              /* start at coef 0, unless Y with Y2 */
   int eob = b->eob;
@@ -616,6 +645,63 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, 
 
   return cost;
 }
+
+static int cost_coeffs_8x8(MACROBLOCK *mb,
+                           BLOCKD *b, int type,
+                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
+  int c = !type;              /* start at coef 0, unless Y with Y2 */
+  int eob = b->eob;
+  int pt;    /* surrounding block/prev coef predictor */
+  int cost = 0;
+  short *qcoeff_ptr = b->qcoeff;
+
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+
+  for (; c < eob; c++) {
+    int v = qcoeff_ptr[vp8_default_zig_zag1d_8x8[c]];
+    int t = vp8_dct_value_tokens_ptr[v].Token;
+    cost += mb->token_costs_8x8[type] [vp8_coef_bands_8x8[c]] [pt] [t];
+    cost += vp8_dct_value_cost_ptr[v];
+    pt = vp8_prev_token_class[t];
+  }
+
+  if (c < 64)
+    cost += mb->token_costs_8x8 [type][vp8_coef_bands_8x8[c]]
+            [pt] [DCT_EOB_TOKEN];
+
+  pt = (c != !type); // is eob first coefficient;
+  *a = *l = pt;
+  return cost;
+}
+
+#if CONFIG_TX16X16
+static int cost_coeffs_16x16(MACROBLOCK *mb, BLOCKD *b, int type,
+                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
+  const int eob = b->eob;
+  int c = !type;              /* start at coef 0, unless Y with Y2 */
+  int cost = 0;
+  int pt;                     /* surrounding block/prev coef predictor */
+  short *qcoeff_ptr = b->qcoeff;
+
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+
+  for (; c < eob; c++) {
+    int v = qcoeff_ptr[vp8_default_zig_zag1d_16x16[c]];
+    int t = vp8_dct_value_tokens_ptr[v].Token;
+    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]][pt][t];
+    cost += vp8_dct_value_cost_ptr[v];
+    pt = vp8_prev_token_class[t];
+  }
+
+  if (c < 256)
+    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]]
+            [pt][DCT_EOB_TOKEN];
+
+  pt = (c != !type); // is eob first coefficient;
+  *a = *l = pt;
+  return cost;
+}
+#endif
 
 static int vp8_rdcost_mby(MACROBLOCK *mb) {
   int cost = 0;
@@ -687,68 +773,6 @@ static void macro_block_yrd(MACROBLOCK *mb,
   *Rate = vp8_rdcost_mby(mb);
 }
 
-
-static int cost_coeffs_2x2(MACROBLOCK *mb,
-                           BLOCKD *b, int type,
-                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int c = !type;              /* start at coef 0, unless Y with Y2 */
-  int eob = b->eob;
-  int pt;    /* surrounding block/prev coef predictor */
-  int cost = 0;
-  short *qcoeff_ptr = b->qcoeff;
-
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  assert(eob <= 4);
-
-#define QC2X2(I)  ( qcoeff_ptr [vp8_default_zig_zag1d[I]] )
-  for (; c < eob; c++) {
-    int v = QC2X2(c);
-    int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs_8x8[type] [vp8_coef_bands[c]] [pt] [t];
-    cost += vp8_dct_value_cost_ptr[v];
-    pt = vp8_prev_token_class[t];
-  }
-#undef QC2X2
-
-  if (c < 4)
-    cost += mb->token_costs_8x8 [type][vp8_coef_bands[c]]
-            [pt] [DCT_EOB_TOKEN];
-
-  pt = (c != !type); // is eob first coefficient;
-  *a = *l = pt;
-  return cost;
-}
-
-
-static int cost_coeffs_8x8(MACROBLOCK *mb,
-                           BLOCKD *b, int type,
-                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int c = !type;              /* start at coef 0, unless Y with Y2 */
-  int eob = b->eob;
-  int pt;    /* surrounding block/prev coef predictor */
-  int cost = 0;
-  short *qcoeff_ptr = b->qcoeff;
-
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-
-#define QC8X8(I)  ( qcoeff_ptr [vp8_default_zig_zag1d_8x8[I]] )
-  for (; c < eob; c++) {
-    int v = QC8X8(c);
-    int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs_8x8[type] [vp8_coef_bands_8x8[c]] [pt] [t];
-    cost += vp8_dct_value_cost_ptr[v];
-    pt = vp8_prev_token_class[t];
-  }
-#undef QC8X8
-
-  if (c < 64)
-    cost += mb->token_costs_8x8 [type][vp8_coef_bands_8x8[c]]
-            [pt] [DCT_EOB_TOKEN];
-
-  pt = (c != !type); // is eob first coefficient;
-  *a = *l = pt;
-  return cost;
-}
 static int vp8_rdcost_mby_8x8(MACROBLOCK *mb) {
   int cost = 0;
   int b;
@@ -809,34 +833,6 @@ static void macro_block_yrd_8x8(MACROBLOCK *mb,
 }
 
 #if CONFIG_TX16X16
-static int cost_coeffs_16x16(MACROBLOCK *mb, BLOCKD *b, int type,
-                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  const int eob = b->eob;
-  int c = !type;              /* start at coef 0, unless Y with Y2 */
-  int cost = 0, pt;    /* surrounding block/prev coef predictor */
-  short *qcoeff_ptr = b->qcoeff;
-
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-
-# define QC16X16(I)  ( qcoeff_ptr [vp8_default_zig_zag1d_16x16[I]] )
-  for (; c < eob; c++) {
-    int v = QC16X16(c);
-    int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]][pt][t];
-    cost += vp8_dct_value_cost_ptr[v];
-    pt = vp8_prev_token_class[t];
-  }
-# undef QC16X16
-
-  if (c < 256)
-    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]]
-            [pt][DCT_EOB_TOKEN];
-
-  pt = (c != !type); // is eob first coefficient;
-  *a = *l = pt;
-  return cost;
-}
-
 static int vp8_rdcost_mby_16x16(MACROBLOCK *mb) {
   int cost;
   MACROBLOCKD *x = &mb->e_mbd;
