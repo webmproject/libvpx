@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//7Bw\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-06T23:12:06Z",
+      "side": 1,
+      "message": "Don\u0027t use default here - explicitely use case TX_16X16 and put that under the CONFIG_ ifdef also.",
+      "revId": "a67af9d3f136317c260a84a542737af3eda3d9dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7Bs\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-06T23:12:06Z",
+      "side": 1,
+      "message": "break goes under #ifdef also.",
+      "revId": "a67af9d3f136317c260a84a542737af3eda3d9dd",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
