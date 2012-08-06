@@ -589,120 +589,80 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
   return cost;
 }
 
-static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int c = !type;              /* start at coef 0, unless Y with Y2 */
-  int eob = b->eob;
-  int pt;    /* surrounding block/prev coef predictor */
-  int cost = 0;
-  short *qcoeff_ptr = b->qcoeff;
-
-#if CONFIG_HYBRIDTRANSFORM
-  int QIndex = mb->q_index;
-  int active_ht = (QIndex < ACTIVE_HT) &&
-                (mb->e_mbd.mode_info_context->mbmi.mode_rdopt == B_PRED);
-
-  int const *pt_scan;
-
-  if((type == PLANE_TYPE_Y_WITH_DC) && active_ht) {
-    switch (b->bmi.as_mode.tx_type) {
-      case ADST_DCT:
-        pt_scan = vp8_row_scan;
-        break;
-
-      case DCT_ADST:
-        pt_scan = vp8_col_scan;
-        break;
-
-      default:
-        pt_scan = vp8_default_zig_zag1d;
-        break;
-    }
-
-  } else {
-    pt_scan = vp8_default_zig_zag1d;
-  }
-#define  QC(I)  ( qcoeff_ptr [pt_scan[I]] )
-#else
-#define QC(I)  ( qcoeff_ptr [vp8_default_zig_zag1d[I]] )
-#endif
-
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-
-  for (; c < eob; c++) {
-    int v = QC(c);
-    int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs[TX_4X4][type][vp8_coef_bands[c]][pt][t];
-    cost += vp8_dct_value_cost_ptr[v];
-    pt = vp8_prev_token_class[t];
-  }
-# undef QC
-
-  if (c < 16)
-    cost += mb->token_costs[TX_4X4][type][vp8_coef_bands[c]]
-        [pt][DCT_EOB_TOKEN];
-
-  pt = (c != !type); // is eob first coefficient;
-  *a = *l = pt;
-
-  return cost;
-}
-
-static int cost_coeffs_8x8(MACROBLOCK *mb,
-                           BLOCKD *b, int type,
-                           ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
-  int c = !type;              /* start at coef 0, unless Y with Y2 */
-  int eob = b->eob;
-  int pt;    /* surrounding block/prev coef predictor */
-  int cost = 0;
-  short *qcoeff_ptr = b->qcoeff;
-
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-
-  for (; c < eob; c++) {
-    int v = qcoeff_ptr[vp8_default_zig_zag1d_8x8[c]];
-    int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands_8x8[c]][pt][t];
-    cost += vp8_dct_value_cost_ptr[v];
-    pt = vp8_prev_token_class[t];
-  }
-
-  if (c < 64)
-    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands_8x8[c]]
-            [pt][DCT_EOB_TOKEN];
-
-  pt = (c != !type); // is eob first coefficient;
-  *a = *l = pt;
-  return cost;
-}
-
-#if CONFIG_TX16X16
-static int cost_coeffs_16x16(MACROBLOCK *mb, BLOCKD *b, int type,
-                             ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
+static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
+                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                       int tx_type) {
   const int eob = b->eob;
   int c = !type;              /* start at coef 0, unless Y with Y2 */
-  int cost = 0;
+  int cost = 0, default_eob;
   int pt;                     /* surrounding block/prev coef predictor */
+  int const *scan, *band;
   short *qcoeff_ptr = b->qcoeff;
+
+  switch (tx_type) {
+    case TX_4X4:
+      scan = vp8_default_zig_zag1d;
+      band = vp8_coef_bands;
+      default_eob = 16;
+#if CONFIG_HYBRIDTRANSFORM
+      {
+        int active_ht = (mb->q_index < ACTIVE_HT) &&
+                      (mb->e_mbd.mode_info_context->mbmi.mode_rdopt == B_PRED);
+
+        if((type == PLANE_TYPE_Y_WITH_DC) && active_ht) {
+          switch (b->bmi.as_mode.tx_type) {
+            case ADST_DCT:
+              pt_scan = vp8_row_scan;
+              break;
+
+            case DCT_ADST:
+              pt_scan = vp8_col_scan;
+              break;
+
+            default:
+              pt_scan = vp8_default_zig_zag1d;
+              break;
+          }
+
+        } else
+          pt_scan = vp8_default_zig_zag1d;
+      }
+#endif
+      break;
+    case TX_8X8:
+      scan = vp8_default_zig_zag1d_8x8;
+      band = vp8_coef_bands_8x8;
+      default_eob = 64;
+      break;
+#if CONFIG_TX16X16
+    case TX_16X16:
+      scan = vp8_default_zig_zag1d_16x16;
+      band = vp8_coef_bands_16x16;
+      default_eob = 256;
+      break;
+#endif
+    default:
+      break;
+  }
 
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
   for (; c < eob; c++) {
-    int v = qcoeff_ptr[vp8_default_zig_zag1d_16x16[c]];
+    int v = qcoeff_ptr[scan[c]];
     int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs[TX_16X16][type][vp8_coef_bands_16x16[c]][pt][t];
+    cost += mb->token_costs[tx_type][type][band[c]][pt][t];
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
 
-  if (c < 256)
-    cost += mb->token_costs[TX_16X16][type][vp8_coef_bands_16x16[c]]
+  if (c < default_eob)
+    cost += mb->token_costs[tx_type][type][band[c]]
             [pt][DCT_EOB_TOKEN];
 
   pt = (c != !type); // is eob first coefficient;
   *a = *l = pt;
   return cost;
 }
-#endif
 
 static int vp8_rdcost_mby(MACROBLOCK *mb) {
   int cost = 0;
@@ -720,10 +680,12 @@ static int vp8_rdcost_mby(MACROBLOCK *mb) {
 
   for (b = 0; b < 16; b++)
     cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
-                        ta + vp8_block2above[b], tl + vp8_block2left[b]);
+                        ta + vp8_block2above[b], tl + vp8_block2left[b],
+                        TX_4X4);
 
   cost += cost_coeffs(mb, x->block + 24, PLANE_TYPE_Y2,
-                      ta + vp8_block2above[24], tl + vp8_block2left[24]);
+                      ta + vp8_block2above[24], tl + vp8_block2left[24],
+                      TX_4X4);
 
   return cost;
 }
@@ -789,8 +751,9 @@ static int vp8_rdcost_mby_8x8(MACROBLOCK *mb) {
   tl = (ENTROPY_CONTEXT *)&t_left;
 
   for (b = 0; b < 16; b += 4)
-    cost += cost_coeffs_8x8(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
-                            ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b]);
+    cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_NO_DC,
+                        ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
+                        TX_8X8);
 
   cost += cost_coeffs_2x2(mb, x->block + 24, PLANE_TYPE_Y2,
                           ta + vp8_block2above[24], tl + vp8_block2left[24]);
@@ -846,7 +809,7 @@ static int vp8_rdcost_mby_16x16(MACROBLOCK *mb) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  cost = cost_coeffs_16x16(mb, x->block, PLANE_TYPE_Y_WITH_DC, ta, tl);
+  cost = cost_coeffs(mb, x->block, PLANE_TYPE_Y_WITH_DC, ta, tl, TX_16X16);
   return cost;
 }
 
@@ -989,7 +952,7 @@ static int64_t rd_pick_intra4x4block(
         tempa = ta;
         templ = tl;
 
-        ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ);
+        ratey = cost_coeffs(x, b, PLANE_TYPE_Y_WITH_DC, &tempa, &templ, TX_4X4);
         rate += ratey;
         distortion = ENCODEMB_INVOKE(IF_RTCD(&cpi->rtcd.encodemb), berr)(
             be->coeff, b->dqcoeff) >> 2;
@@ -1278,9 +1241,8 @@ static int64_t rd_pick_intra8x8block(
       ta0 = *(a + vp8_block2above_8x8[idx]);
       tl0 = *(l + vp8_block2left_8x8 [idx]);
 
-      rate_t = cost_coeffs_8x8(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
-                               &ta0,
-                               &tl0);
+      rate_t = cost_coeffs(x, xd->block + idx, PLANE_TYPE_Y_WITH_DC,
+                           &ta0, &tl0, TX_8X8);
       rate += rate_t;
       ta1 = ta0;
       tl1 = tl0;
@@ -1307,13 +1269,13 @@ static int64_t rd_pick_intra8x8block(
       tl0 = *(l + vp8_block2above[ib]);
       tl1 = *(l + vp8_block2above[ib + 4]);
       rate_t = cost_coeffs(x, xd->block + ib, PLANE_TYPE_Y_WITH_DC,
-                           &ta0, &tl0);
+                           &ta0, &tl0, TX_4X4);
       rate_t += cost_coeffs(x, xd->block + ib + 1, PLANE_TYPE_Y_WITH_DC,
-                            &ta1, &tl0);
+                            &ta1, &tl0, TX_4X4);
       rate_t += cost_coeffs(x, xd->block + ib + 4, PLANE_TYPE_Y_WITH_DC,
-                            &ta0, &tl1);
+                            &ta0, &tl1, TX_4X4);
       rate_t += cost_coeffs(x, xd->block + ib + 5, PLANE_TYPE_Y_WITH_DC,
-                            &ta1, &tl1);
+                            &ta1, &tl1, TX_4X4);
       rate += rate_t;
 #endif
 
@@ -1430,7 +1392,8 @@ static int rd_cost_mbuv(MACROBLOCK *mb) {
 
   for (b = 16; b < 24; b++)
     cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_UV,
-                        ta + vp8_block2above[b], tl + vp8_block2left[b]);
+                        ta + vp8_block2above[b], tl + vp8_block2left[b],
+                        TX_4X4);
 
   return cost;
 }
@@ -1465,9 +1428,9 @@ static int rd_cost_mbuv_8x8(MACROBLOCK *mb) {
   tl = (ENTROPY_CONTEXT *)&t_left;
 
   for (b = 16; b < 24; b += 4)
-    cost += cost_coeffs_8x8(mb, x->block + b, PLANE_TYPE_UV,
-                            ta + vp8_block2above_8x8[b],
-                            tl + vp8_block2left_8x8[b]);
+    cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_UV,
+                        ta + vp8_block2above_8x8[b],
+                        tl + vp8_block2left_8x8[b], TX_8X8);
 
   return cost;
 }
@@ -1769,7 +1732,7 @@ static int rdcost_mbsegment_y(MACROBLOCK *mb, const int *labels,
     if (labels[ b] == which_label)
       cost += cost_coeffs(mb, x->block + b, PLANE_TYPE_Y_WITH_DC,
                           ta + vp8_block2above[b],
-                          tl + vp8_block2left[b]);
+                          tl + vp8_block2left[b], TX_4X4);
 
   return cost;
 
