@@ -19,7 +19,7 @@
   int (sym)(MACROBLOCK *mb, int dc)
 
 #define prototype_berr(sym) \
-  int (sym)(short *coeff, short *dqcoeff)
+  int (sym)(short *coeff, short *dqcoeff, int block_size)
 
 #define prototype_mbuverr(sym) \
   int (sym)(MACROBLOCK *mb)
