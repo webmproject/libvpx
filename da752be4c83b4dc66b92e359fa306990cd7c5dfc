@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//7JU\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7RQ\u003d",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7RM\u003d",
         "filename": "vp8/common/findnearmv.c",
         "patchSetId": 2
@@ -30,6 +48,24 @@
       "writtenOn": "2012-08-06T21:44:05Z",
       "side": 1,
       "message": "space after \u0027if\u0027",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7JQ\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7RM\u003d",
       "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +123,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//7JI\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7RE\u003d",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7Qg\u003d",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 2
@@ -98,6 +152,24 @@
       "writtenOn": "2012-08-06T21:44:05Z",
       "side": 1,
       "message": "no \u0027+32\u0027 on the right/bottom edge?",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7I8\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "let me spend some more time on these three functions.. maybe a separate commit later.",
+      "parentUuid": "AAAAPH//7Qg\u003d",
       "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +193,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//7JA\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7Q8\u003d",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7QU\u003d",
         "filename": "vp8/decoder/decodemv.c",
         "patchSetId": 2
@@ -132,6 +222,24 @@
       "writtenOn": "2012-08-06T21:44:05Z",
       "side": 1,
       "message": "you could factorize \" VP8_COMMON *pc \u003d \u0026pbi-\u003ecommon\" too\n\n(and possibly \u0026xd-\u003emode_info_context-\u003embmi too)",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7I4\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7QU\u003d",
       "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -155,6 +263,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//7I0\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7QI\u003d",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7P4\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 2
@@ -172,6 +298,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//7Ig\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7P4\u003d",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7P0\u003d",
         "filename": "vp8/encoder/tokenize.c",
         "patchSetId": 2
@@ -183,6 +327,24 @@
       "writtenOn": "2012-08-06T21:44:05Z",
       "side": 1,
       "message": "here too\n\n(and below)",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7Ik\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T22:37:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7P0\u003d",
       "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
