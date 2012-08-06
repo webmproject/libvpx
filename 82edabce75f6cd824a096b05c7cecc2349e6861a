@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//7LI\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-06T22:30:09Z",
+      "side": 1,
+      "message": "FYI: we made this programmatic in master. it calls xcode-tools or something to locate the SDK",
+      "revId": "82edabce75f6cd824a096b05c7cecc2349e6861a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7Kc\u003d",
+        "filename": "vp8/decoder/decodemv.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-06T22:30:09Z",
+      "side": 1,
+      "message": "FYI: master made these static",
+      "revId": "82edabce75f6cd824a096b05c7cecc2349e6861a",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
