@@ -55,7 +55,7 @@ void vp8_ht_dequant_idct_add_c(TX_TYPE tx_type, short *input, short *dq,
     input[i] = dq[i] * input[i];
   }
 
-  vp8_iht4x4llm_c( input, output, 4 << 1, tx_type );
+  vp8_ihtllm_c(input, output, 4 << 1, tx_type, 4);
 
   vpx_memset(input, 0, 32);
 
@@ -95,7 +95,7 @@ void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
     input[i] = dq[1] * input[i];
   }
 
-  vp8_iht8x8llm_c(input, output, 16, tx_type);
+  vp8_ihtllm_c(input, output, 16, tx_type, 8);
 
   vpx_memset(input, 0, 128);
 
@@ -117,9 +117,10 @@ void vp8_ht_dequant_idct_add_8x8_c(TX_TYPE tx_type, short *input, short *dq,
       diff_ptr += 8;
       pred += pitch;
     }
-    diff_ptr = output + (b + 1) / 2 * 4 * 8 + (b + 1) % 2 * 4;
-    dest = origdest + (b + 1) / 2 * 4 * stride + (b + 1) % 2 * 4;
-    pred = origpred + (b + 1) / 2 * 4 * pitch + (b + 1) % 2 * 4;
+    // shift buffer pointers to next 4x4 block in the submacroblock
+    diff_ptr = output + (b + 1) / 2 * 4 * 8 + ((b + 1) % 2) * 4;
+    dest = origdest + (b + 1) / 2 * 4 * stride + ((b + 1) % 2) * 4;
+    pred = origpred + (b + 1) / 2 * 4 * pitch + ((b + 1) % 2) * 4;
   }
 }
 #endif

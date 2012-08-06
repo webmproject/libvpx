@@ -612,20 +612,20 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
         if((type == PLANE_TYPE_Y_WITH_DC) && active_ht) {
           switch (b->bmi.as_mode.tx_type) {
             case ADST_DCT:
-              pt_scan = vp8_row_scan;
+              scan = vp8_row_scan;
               break;
 
             case DCT_ADST:
-              pt_scan = vp8_col_scan;
+              scan = vp8_col_scan;
               break;
 
             default:
-              pt_scan = vp8_default_zig_zag1d;
+              scan = vp8_default_zig_zag1d;
               break;
           }
 
         } else
-          pt_scan = vp8_default_zig_zag1d;
+          scan = vp8_default_zig_zag1d;
       }
 #endif
       break;
@@ -937,8 +937,7 @@ static int64_t rd_pick_intra4x4block(
       if(active_ht) {
         b->bmi.as_mode.test = mode;
         txfm_map(b, mode);
-
-        vp8_fht4x4_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type);
+        vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
         vp8_ht_quantize_b(be, b);
       } else {
         x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
@@ -991,7 +990,7 @@ static int64_t rd_pick_intra4x4block(
 
   // inverse transform
   if(active_ht) {
-    vp8_iht4x4llm_c(best_dqcoeff, b->diff, 32, b->bmi.as_mode.tx_type );
+    vp8_ihtllm_c(best_dqcoeff, b->diff, 32, b->bmi.as_mode.tx_type, 4);
   } else {
     IDCT_INVOKE(IF_RTCD(&cpi->rtcd.common->idct), idct16)(best_dqcoeff,
                                                                 b->diff, 32);
@@ -1230,8 +1229,8 @@ static int64_t rd_pick_intra8x8block(
 
 #if CONFIG_HYBRIDTRANSFORM8X8
       txfm_map(b, pred_mode_conv(mode));
-      vp8_fht8x8_c(be->src_diff, (x->block + idx)->coeff, 32, b->bmi.as_mode.tx_type);
-//    x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
+      vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
+                b->bmi.as_mode.tx_type, 8);
       x->quantize_b_8x8(x->block + idx, xd->block + idx);
 
       // compute quantization mse of 8x8 block

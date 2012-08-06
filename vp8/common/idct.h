@@ -111,9 +111,10 @@ extern prototype_second_order(vp8_short_inv_walsh4x4_lossless_c);
 extern prototype_second_order(vp8_short_inv_walsh4x4_1_lossless_c);
 #endif
 
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
 #include "vp8/common/blockd.h"
-void vp8_iht4x4llm_c(short *input, short *output, int pitch, TX_TYPE tx_type);
+void vp8_ihtllm_c(short *input, short *output, int pitch,
+                  TX_TYPE tx_type, int tx_dim);
 #endif
 
 

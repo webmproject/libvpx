@@ -392,7 +392,6 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
       txfm_map(b, pred_mode_conv(i8x8mode));
       vp8_ht_dequant_idct_add_8x8_c(b->bmi.as_mode.tx_type,
                                     q, dq, pre, dst, 16, stride);
-      // vp8_dequant_idct_add_8x8_c(q, dq, pre, dst, 16, stride);
       q += 64;
 #else
       for (j = 0; j < 4; j++) {

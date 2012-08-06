@@ -91,8 +91,7 @@ void vp8_encode_intra4x4block(const VP8_ENCODER_RTCD *rtcd,
     if(active_ht) {
       b->bmi.as_mode.test = b->bmi.as_mode.first;
       txfm_map(b, b->bmi.as_mode.first);
-
-      vp8_fht4x4_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type);
+      vp8_fht_c(be->src_diff, be->coeff, 32, b->bmi.as_mode.tx_type, 4);
       vp8_ht_quantize_b(be, b);
       vp8_inverse_htransform_b(IF_RTCD(&rtcd->common->idct), b, 32) ;
     } else {
@@ -317,16 +316,11 @@ void vp8_encode_intra8x8(const VP8_ENCODER_RTCD *rtcd,
     vp8_subtract_4b_c(be, b, 16);
 
     txfm_map(b, pred_mode_conv(b->bmi.as_mode.first));
-
-    vp8_fht8x8_c(be->src_diff, (x->block + idx)->coeff, 32,
-                 b->bmi.as_mode.tx_type);
+    vp8_fht_c(be->src_diff, (x->block + idx)->coeff, 32,
+              b->bmi.as_mode.tx_type, 8);
     x->quantize_b_8x8(x->block + idx, xd->block + idx);
-    vp8_iht8x8llm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
-                    b->bmi.as_mode.tx_type);
-
-//    x->vp8_short_fdct8x8(be->src_diff, (x->block + idx)->coeff, 32);
-//    x->quantize_b_8x8(x->block + idx, xd->block + idx);
-//    vp8_short_idct8x8_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32);
+    vp8_ihtllm_c(xd->block[idx].dqcoeff, xd->block[ib].diff, 32,
+                 b->bmi.as_mode.tx_type, 8);
 
     // reconstruct submacroblock
     for (i = 0; i < 4; i++) {

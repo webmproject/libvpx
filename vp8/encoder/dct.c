@@ -329,114 +329,9 @@ void vp8_short_fhaar2x2_c(short *input, short *output, int pitch) { // pitch = 8
 
 }
 
-#if CONFIG_HYBRIDTRANSFORM
-void vp8_fht4x4_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
-  int i, j, k;
-  float bufa[16], bufb[16]; // buffers are for floating-point test purpose
-                             // the implementation could be simplified in
-                             // conjunction with integer transform
-  short *ip = input;
-  short *op = output;
-
-  float *pfa = &bufa[0];
-  float *pfb = &bufb[0];
-
-  // pointers to vertical and horizontal transforms
-  float *ptv, *pth;
-
-  // load and convert residual array into floating-point
-  for(j = 0; j < 4; j++) {
-    for(i = 0; i < 4; i++) {
-      pfa[i] = (float)ip[i];
-    }
-    pfa += 4;
-    ip  += pitch / 2;
-  }
-
-  // vertical transformation
-  pfa = &bufa[0];
-  pfb = &bufb[0];
-
-  switch(tx_type) {
-    case ADST_ADST :
-    case ADST_DCT  :
-      ptv = &adst_4[0];
-      break;
-
-    default :
-      ptv = &dct_4[0];
-      break;
-  }
-
-  for(j = 0; j < 4; j++) {
-    for(i = 0; i < 4; i++) {
-      pfb[i] = 0;
-      for(k = 0; k < 4; k++) {
-        pfb[i] += ptv[k] * pfa[(k<<2)];
-      }
-      pfa += 1;
-    }
-    pfb += 4;
-    ptv += 4;
-    pfa = &bufa[0];
-  }
-
-  // horizontal transformation
-  pfa = &bufa[0];
-  pfb = &bufb[0];
-
-  switch(tx_type) {
-    case ADST_ADST :
-    case  DCT_ADST :
-      pth = &adst_4[0];
-      break;
-
-    default :
-      pth = &dct_4[0];
-      break;
-  }
-
-  for(j = 0; j < 4; j++) {
-    for(i = 0; i < 4; i++) {
-      pfa[i] = 0;
-      for(k = 0; k < 4; k++) {
-        pfa[i] += pfb[k] * pth[k];
-      }
-      pth += 4;
-     }
-
-    pfa += 4;
-    pfb += 4;
-
-    switch(tx_type) {
-      case ADST_ADST :
-      case  DCT_ADST :
-        pth = &adst_4[0];
-        break;
-
-      default :
-        pth = &dct_4[0];
-        break;
-    }
-  }
-
-  // convert to short integer format and load BLOCKD buffer
-  op  = output ;
-  pfa = &bufa[0] ;
-
-  for(j = 0; j < 4; j++) {
-    for(i = 0; i < 4; i++) {
-      op[i] = (pfa[i] > 0 ) ? (short)( 8 * pfa[i] + 0.49) :
-                                   -(short)(- 8 * pfa[i] + 0.49);
-    }
-    op  += 4;
-    pfa += 4;
-  }
-}
-#endif
-
-#if CONFIG_HYBRIDTRANSFORM8X8
-void vp8_fht8x8_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
+void vp8_fht_c(short *input, short *output, int pitch,
+               TX_TYPE tx_type, int tx_dim) {
   int i, j, k;
   float bufa[64], bufb[64]; // buffers are for floating-point test purpose
                              // the implementation could be simplified in
@@ -451,11 +346,11 @@ void vp8_fht8x8_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
   float *ptv, *pth;
 
   // load and convert residual array into floating-point
-  for(j = 0; j < 8; j++) {
-    for(i = 0; i < 8; i++) {
+  for(j = 0; j < tx_dim; j++) {
+    for(i = 0; i < tx_dim; i++) {
       pfa[i] = (float)ip[i];
     }
-    pfa += 8;
+    pfa += tx_dim;
     ip  += pitch / 2;
   }
 
@@ -466,24 +361,24 @@ void vp8_fht8x8_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
   switch(tx_type) {
     case ADST_ADST :
     case ADST_DCT  :
-      ptv = &adst_8[0];
+      ptv = (tx_dim == 4) ? &adst_4[0] : &adst_8[0];
       break;
 
     default :
-      ptv = &dct_8[0];
+      ptv = (tx_dim == 4) ? &dct_4[0] : &dct_8[0];
       break;
   }
 
-  for(j = 0; j < 8; j++) {
-    for(i = 0; i < 8; i++) {
+  for(j = 0; j < tx_dim; j++) {
+    for(i = 0; i < tx_dim; i++) {
       pfb[i] = 0;
-      for(k = 0; k < 8; k++) {
-        pfb[i] += ptv[k] * pfa[(k<<3)];
+      for(k = 0; k < tx_dim; k++) {
+        pfb[i] += ptv[k] * pfa[(k * tx_dim)];
       }
       pfa += 1;
     }
-    pfb += 8;
-    ptv += 8;
+    pfb += tx_dim;
+    ptv += tx_dim;
     pfa = &bufa[0];
   }
 
@@ -494,34 +389,34 @@ void vp8_fht8x8_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
   switch(tx_type) {
     case ADST_ADST :
     case  DCT_ADST :
-      pth = &adst_8[0];
+      pth = (tx_dim == 4) ? &adst_4[0] : &adst_8[0];
       break;
 
     default :
-      pth = &dct_8[0];
+      pth = (tx_dim == 4) ? &dct_4[0] : &dct_8[0];
       break;
   }
 
-  for(j = 0; j < 8; j++) {
-    for(i = 0; i < 8; i++) {
+  for(j = 0; j < tx_dim; j++) {
+    for(i = 0; i < tx_dim; i++) {
       pfa[i] = 0;
-      for(k = 0; k < 8; k++) {
+      for(k = 0; k < tx_dim; k++) {
         pfa[i] += pfb[k] * pth[k];
       }
-      pth += 8;
+      pth += tx_dim;
      }
 
-    pfa += 8;
-    pfb += 8;
+    pfa += tx_dim;
+    pfb += tx_dim;
 
     switch(tx_type) {
       case ADST_ADST :
       case  DCT_ADST :
-        pth = &adst_8[0];
+        pth = (tx_dim == 4) ? &adst_4[0] : &adst_8[0];
         break;
 
       default :
-        pth = &dct_8[0];
+        pth = (tx_dim == 4) ? &dct_4[0] : &dct_8[0];
         break;
     }
   }
@@ -530,13 +425,13 @@ void vp8_fht8x8_c(short *input, short *output, int pitch, TX_TYPE tx_type) {
   op  = output ;
   pfa = &bufa[0] ;
 
-  for(j = 0; j < 8; j++) {
-    for(i = 0; i < 8; i++) {
+  for(j = 0; j < tx_dim; j++) {
+    for(i = 0; i < tx_dim; i++) {
       op[i] = (pfa[i] > 0 ) ? (short)( 8 * pfa[i] + 0.49) :
                                    -(short)(- 8 * pfa[i] + 0.49);
     }
-    op  += 8;
-    pfa += 8;
+    op  += tx_dim;
+    pfa += tx_dim;
   }
 }
 #endif
@@ -581,14 +476,6 @@ void vp8_short_fdct4x4_c(short *input, short *output, int pitch) {
     op++;
   }
 }
-
-#if CONFIG_HYBRIDTRANSFORM
-void vp8_fht8x4_c(short *input, short *output, int pitch,
-                  TX_TYPE tx_type) {
-  vp8_fht4x4_c(input,     output,      pitch, tx_type);
-  vp8_fht4x4_c(input + 4, output + 16, pitch, tx_type);
-}
-#endif
 
 void vp8_short_fdct8x4_c(short *input, short *output, int pitch)
 {

@@ -23,9 +23,9 @@
 #endif
 
 
-#if CONFIG_HYBRIDTRANSFORM
-void vp8_fht4x4_c(short *input, short *output, int pitch, TX_TYPE tx_type);
-void vp8_fht8x4_c(short *input, short *output, int pitch, TX_TYPE tx_type);
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
+void vp8_fht_c(short *input, short *output, int pitch,
+               TX_TYPE tx_type, int tx_dim);
 #endif
 
 #if CONFIG_TX16X16
