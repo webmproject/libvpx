@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//7iY\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "space after \u003d",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7iQ\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "i\u0027d put the \u0027++mv\u0027 as a separate instr before",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7iU\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "\u0027ref_mv[1].as_int\u0027 seems more readable, no?",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7iM\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "ref_mv[2].as_int...",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7iI\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "ref_mv[3]",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7gk\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "should be factored in a function, cf. 165 and seq",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7f0\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 658,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "space after \u0027+\u0027",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7fk\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 739,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "the mix of \"#if\" and \"if () {}\" makes the logic hard to follow.\n\nCan\u0027t you call vp8_find_near_mvs() first, at line 718, and then have a big \"#if CONFIG_NEWBESTREFMV\" block afterward?",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7fI\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1653,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "really looks like vp8_tokenize_mb() should take a \u0027update_stats\u0027 flag param. This modal \u0027xd-\u003edonotchyangestats\u0027 switches are risky...",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7es\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T18:57:25Z",
+      "side": 1,
+      "message": "an unbalanced \u0027if\u0027 is quite dangerous. You should just copy-paste line 53, for safety:\n\n#if XXX\nif (something)\n  do_something\n#else\n  do_something\n#endif\n\ninstead of:\n\n#if XXX\nif (something)\n#endif\ndo_something",
+      "revId": "0c0f5186eb008214acb223d4d1e9abf40bd820a4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
