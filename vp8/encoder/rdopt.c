@@ -576,15 +576,15 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, 
 
   if((type == PLANE_TYPE_Y_WITH_DC) && active_ht) {
     switch (b->bmi.as_mode.tx_type) {
-      case ADST_DCT :
+      case ADST_DCT:
         pt_scan = vp8_row_scan;
         break;
 
-      case DCT_ADST :
+      case DCT_ADST:
         pt_scan = vp8_col_scan;
         break;
 
-      default :
+      default:
         pt_scan = vp8_default_zig_zag1d;
         break;
     }
@@ -592,13 +592,12 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, 
   } else {
     pt_scan = vp8_default_zig_zag1d;
   }
-
 #define  QC(I)  ( qcoeff_ptr [pt_scan[I]] )
 #else
 #define QC(I)  ( qcoeff_ptr [vp8_default_zig_zag1d[I]] )
 #endif
 
-    VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
+  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
   for (; c < eob; c++) {
     int v = QC(c);
@@ -607,7 +606,6 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, 
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
-
 # undef QC
 
   if (c < 16)
@@ -702,8 +700,7 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   assert(eob <= 4);
 
-# define QC2X2( I)  ( qcoeff_ptr [vp8_default_zig_zag1d[I]] )
-
+#define QC2X2(I)  ( qcoeff_ptr [vp8_default_zig_zag1d[I]] )
   for (; c < eob; c++) {
     int v = QC2X2(c);
     int t = vp8_dct_value_tokens_ptr[v].Token;
@@ -711,8 +708,8 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
+#undef QC2X2
 
-# undef QC2X2
   if (c < 4)
     cost += mb->token_costs_8x8 [type][vp8_coef_bands[c]]
             [pt] [DCT_EOB_TOKEN];
@@ -734,8 +731,7 @@ static int cost_coeffs_8x8(MACROBLOCK *mb,
 
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
-# define QC8X8( I)  ( qcoeff_ptr [vp8_default_zig_zag1d_8x8[I]] )
-
+#define QC8X8(I)  ( qcoeff_ptr [vp8_default_zig_zag1d_8x8[I]] )
   for (; c < eob; c++) {
     int v = QC8X8(c);
     int t = vp8_dct_value_tokens_ptr[v].Token;
@@ -743,8 +739,8 @@ static int cost_coeffs_8x8(MACROBLOCK *mb,
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
+#undef QC8X8
 
-# undef QC8X8
   if (c < 64)
     cost += mb->token_costs_8x8 [type][vp8_coef_bands_8x8[c]]
             [pt] [DCT_EOB_TOKEN];
@@ -823,7 +819,6 @@ static int cost_coeffs_16x16(MACROBLOCK *mb, BLOCKD *b, int type,
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
 # define QC16X16(I)  ( qcoeff_ptr [vp8_default_zig_zag1d_16x16[I]] )
-
   for (; c < eob; c++) {
     int v = QC16X16(c);
     int t = vp8_dct_value_tokens_ptr[v].Token;
@@ -831,8 +826,8 @@ static int cost_coeffs_16x16(MACROBLOCK *mb, BLOCKD *b, int type,
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
-
 # undef QC16X16
+
   if (c < 256)
     cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]]
             [pt][DCT_EOB_TOKEN];
