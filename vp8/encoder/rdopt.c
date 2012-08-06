@@ -4050,33 +4050,6 @@ int vp8cx_pick_mode_inter_macroblock
         cpi->comp_pred_count[pred_context]++;
     }
 
-    /* test code: set transform size based on mode selection */
-#if CONFIG_TX16X16
-    if (xd->mode_info_context->mbmi.mode <= TM_PRED ||
-        xd->mode_info_context->mbmi.mode == NEWMV ||
-        xd->mode_info_context->mbmi.mode == ZEROMV ||
-        xd->mode_info_context->mbmi.mode == NEARMV ||
-        xd->mode_info_context->mbmi.mode == NEARESTMV) {
-      xd->mode_info_context->mbmi.txfm_size = TX_16X16;
-      cpi->t16x16_count++;
-    }
-    else if (cpi->common.txfm_mode == ALLOW_8X8
-        && xd->mode_info_context->mbmi.mode != I8X8_PRED
-        && xd->mode_info_context->mbmi.mode != B_PRED
-        && xd->mode_info_context->mbmi.mode != SPLITMV) {
-#else
-    if (cpi->common.txfm_mode == ALLOW_8X8
-        && xd->mode_info_context->mbmi.mode != I8X8_PRED
-        && xd->mode_info_context->mbmi.mode != B_PRED
-        && xd->mode_info_context->mbmi.mode != SPLITMV) {
-#endif
-      xd->mode_info_context->mbmi.txfm_size = TX_8X8;
-      cpi->t8x8_count++;
-    } else {
-      xd->mode_info_context->mbmi.txfm_size = TX_4X4;
-      cpi->t4x4_count++;
-    }
-
     /* restore cpi->zbin_mode_boost_enabled */
     cpi->zbin_mode_boost_enabled = zbin_mode_boost_enabled;
   }
