@@ -157,14 +157,8 @@ typedef struct {
   MV_CONTEXT *mvc;
   MV_CONTEXT_HP *mvc_hp;
 
-  unsigned int token_costs[BLOCK_TYPES] [COEF_BANDS]
+  unsigned int token_costs[TX_SIZE_MAX][BLOCK_TYPES][COEF_BANDS]
     [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-  unsigned int token_costs_8x8[BLOCK_TYPES_8X8] [COEF_BANDS]
-    [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-#if CONFIG_TX16X16
-  unsigned int token_costs_16x16[BLOCK_TYPES_16X16] [COEF_BANDS]
-    [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
-#endif
 
   int optimize;
   int q_index;

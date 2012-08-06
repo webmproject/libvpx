@@ -353,18 +353,18 @@ void vp8_initialize_rd_consts(VP8_COMP *cpi, int QIndex) {
   }
 
   fill_token_costs(
-    cpi->mb.token_costs,
+    cpi->mb.token_costs[TX_4X4],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs,
     BLOCK_TYPES);
 
   fill_token_costs(
-    cpi->mb.token_costs_8x8,
+    cpi->mb.token_costs[TX_8X8],
     (const vp8_prob( *)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_8x8,
     BLOCK_TYPES_8X8);
 
 #if CONFIG_TX16X16
   fill_token_costs(
-    cpi->mb.token_costs_16x16,
+    cpi->mb.token_costs[TX_16X16],
     (const vp8_prob(*)[8][PREV_COEF_CONTEXTS][11]) cpi->common.fc.coef_probs_16x16,
     BLOCK_TYPES_16X16);
 #endif
@@ -575,13 +575,13 @@ static int cost_coeffs_2x2(MACROBLOCK *mb,
   for (; c < eob; c++) {
     int v = qcoeff_ptr[vp8_default_zig_zag1d[c]];
     int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs_8x8[type] [vp8_coef_bands[c]] [pt] [t];
+    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands[c]][pt][t];
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
 
   if (c < 4)
-    cost += mb->token_costs_8x8 [type][vp8_coef_bands[c]]
+    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands[c]]
             [pt] [DCT_EOB_TOKEN];
 
   pt = (c != !type); // is eob first coefficient;
@@ -631,14 +631,15 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type, ENTROPY_CONTEXT *a, 
   for (; c < eob; c++) {
     int v = QC(c);
     int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs [type] [vp8_coef_bands[c]] [pt] [t];
+    cost += mb->token_costs[TX_4X4][type][vp8_coef_bands[c]][pt][t];
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
 # undef QC
 
   if (c < 16)
-    cost += mb->token_costs [type] [vp8_coef_bands[c]] [pt] [DCT_EOB_TOKEN];
+    cost += mb->token_costs[TX_4X4][type][vp8_coef_bands[c]]
+        [pt][DCT_EOB_TOKEN];
 
   pt = (c != !type); // is eob first coefficient;
   *a = *l = pt;
@@ -660,14 +661,14 @@ static int cost_coeffs_8x8(MACROBLOCK *mb,
   for (; c < eob; c++) {
     int v = qcoeff_ptr[vp8_default_zig_zag1d_8x8[c]];
     int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs_8x8[type] [vp8_coef_bands_8x8[c]] [pt] [t];
+    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands_8x8[c]][pt][t];
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
 
   if (c < 64)
-    cost += mb->token_costs_8x8 [type][vp8_coef_bands_8x8[c]]
-            [pt] [DCT_EOB_TOKEN];
+    cost += mb->token_costs[TX_8X8][type][vp8_coef_bands_8x8[c]]
+            [pt][DCT_EOB_TOKEN];
 
   pt = (c != !type); // is eob first coefficient;
   *a = *l = pt;
@@ -688,13 +689,13 @@ static int cost_coeffs_16x16(MACROBLOCK *mb, BLOCKD *b, int type,
   for (; c < eob; c++) {
     int v = qcoeff_ptr[vp8_default_zig_zag1d_16x16[c]];
     int t = vp8_dct_value_tokens_ptr[v].Token;
-    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]][pt][t];
+    cost += mb->token_costs[TX_16X16][type][vp8_coef_bands_16x16[c]][pt][t];
     cost += vp8_dct_value_cost_ptr[v];
     pt = vp8_prev_token_class[t];
   }
 
   if (c < 256)
-    cost += mb->token_costs_16x16[type][vp8_coef_bands_16x16[c]]
+    cost += mb->token_costs[TX_16X16][type][vp8_coef_bands_16x16[c]]
             [pt][DCT_EOB_TOKEN];
 
   pt = (c != !type); // is eob first coefficient;
