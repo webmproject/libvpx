@@ -588,6 +588,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
   // Make sure the MACROBLOCKD mode info pointer is pointed at the
   // correct entry for the current macroblock.
   xd->mode_info_context = mi;
+  xd->prev_mode_info_context = prev_mi;
 
   // Read the macroblock segment id.
   read_mb_segment_id(pbi, mb_row, mb_col);
@@ -976,8 +977,6 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi) {
 
     for (sb_col = 0; sb_col < sb_cols; sb_col++) {
       for (i = 0; i < 4; i++) {
-        int mb_to_top_edge;
-        int mb_to_bottom_edge;
 
         int dy = row_delta[i];
         int dx = col_delta[i];
@@ -996,13 +995,9 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi) {
         xd->mode_info_context = mi;
         xd->prev_mode_info_context = prev_mi;
 
-        pbi->mb.mb_to_top_edge = mb_to_top_edge = -((mb_row * 16)) << 3;
-        mb_to_top_edge -= LEFT_TOP_MARGIN;
-
+        pbi->mb.mb_to_top_edge = -((mb_row * 16)) << 3;
         pbi->mb.mb_to_bottom_edge =
-          mb_to_bottom_edge =
             ((pbi->common.mb_rows - 1 - mb_row) * 16) << 3;
-        mb_to_bottom_edge += RIGHT_BOTTOM_MARGIN;
 
         if (cm->frame_type == KEY_FRAME)
           vp8_kfread_modes(pbi, mi, mb_row, mb_col);
@@ -1021,4 +1016,23 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi) {
     mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
     prev_mi += cm->mode_info_stride + (1 - (cm->mb_cols & 0x1));
   }
+}
+
+void vpx_decode_mode_mvs_init(VP8D_COMP *pbi){
+  VP8_COMMON *cm = &pbi->common;
+  mb_mode_mv_init(pbi);
+  if (cm->frame_type == KEY_FRAME &&!cm->kf_ymode_probs_update)
+    cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
+}
+void vpx_decode_mb_mode_mv(VP8D_COMP *pbi,
+                           MACROBLOCKD *xd,
+                           int mb_row,
+                           int mb_col){
+  MODE_INFO *mi = xd->mode_info_context;
+  MODE_INFO *prev_mi = xd->prev_mode_info_context;
+
+  if (pbi->common.frame_type == KEY_FRAME)
+    vp8_kfread_modes(pbi, mi, mb_row, mb_col);
+  else
+    read_mb_modes_mv(pbi, mi, &mi->mbmi, prev_mi, mb_row, mb_col);
 }

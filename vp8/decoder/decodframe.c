@@ -604,6 +604,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
         mb_row += dy;
         mb_col += dx;
         xd->mode_info_context += offset_extended;
+        xd->prev_mode_info_context += offset_extended;
         continue;
       }
 
@@ -630,6 +631,9 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
 
       xd->up_available = (mb_row != 0);
       xd->left_available = (mb_col != 0);
+
+      if(pbi->interleaved_decoding)
+        vpx_decode_mb_mode_mv(pbi, xd, mb_row, mb_col);
 
       update_blockd_bmi(xd);
 
@@ -689,6 +693,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
 
       // skip to next MB
       xd->mode_info_context += offset_extended;
+      xd->prev_mode_info_context += offset_extended;
       mb_row += dy;
       mb_col += dx;
     }
@@ -696,6 +701,7 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
 
   /* skip prediction column */
   xd->mode_info_context += 1 - (pc->mb_cols & 0x1) + xd->mode_info_stride;
+  xd->prev_mode_info_context += 1 - (pc->mb_cols & 0x1) + xd->mode_info_stride;
 }
 
 static unsigned int read_partition_size(const unsigned char *cx_size) {
@@ -802,6 +808,7 @@ static void init_frame(VP8D_COMP *pbi) {
 
   xd->left_context = &pc->left_context;
   xd->mode_info_context = pc->mi;
+  xd->prev_mode_info_context = pc->prev_mi;
   xd->frame_type = pc->frame_type;
   xd->mode_info_context->mbmi.mode = DC_PRED;
   xd->mode_info_stride = pc->mode_info_stride;
@@ -1332,12 +1339,16 @@ int vp8_decode_frame(VP8D_COMP *pbi) {
   /* Read the mb_no_coeff_skip flag */
   pc->mb_no_coeff_skip = (int)vp8_read_bit(bc);
 
-  vp8_decode_mode_mvs(pbi);
+  if(pbi->interleaved_decoding)
+    vpx_decode_mode_mvs_init(pbi);
+  else
+    vp8_decode_mode_mvs(pbi);
 
   vpx_memset(pc->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) * pc->mb_cols);
 
   // Resset the macroblock mode info context to the start of the list
   xd->mode_info_context = pc->mi;
+  xd->prev_mode_info_context = pc->prev_mi;
 
   /* Decode a row of superblocks */
   for (mb_row = 0; mb_row < pc->mb_rows; mb_row += 2) {
