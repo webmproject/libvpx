@@ -1,0 +1,191 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//7RQ\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "extra space after \u0027++\u0027",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7RM\u003d",
+        "filename": "vp8/common/findnearmv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "space after \u0027if\u0027",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7Qs\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "all these three vp8_clamp_XXX() function looks pretty much the same except hard-to-spot diffs.\nThey could use a macro like:\n\n#define CLAMP(x, v, margin)  \\\n  if ((x) \u003c (v) - (margin)) x \u003d (v) - (margin);\netc...",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7Qo\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "why not \u0027+32\u0027 here?",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7RE\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "extra \u0027 \u0027 before \u0027)\u0027",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7Qg\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "no \u0027+32\u0027 on the right/bottom edge?",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7Q8\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "side-note: probably slower than:\n\nreturn (mv-\u003eas_mv.col \u003c mb_to_left_edge) ||\n         (mv-\u003eas_mv.col \u003e mb_to_right_edge) ||\n         (mv-\u003eas_mv.row \u003c mb_to_top_edge) ||\n         (mv-\u003eas_mv.row \u003e mb_to_bottom_edge);",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7QU\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "you could factorize \" VP8_COMMON *pc \u003d \u0026pbi-\u003ecommon\" too\n\n(and possibly \u0026xd-\u003emode_info_context-\u003embmi too)",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7QI\u003d",
+        "filename": "vp8/decoder/decodemv.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 719,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "space before \u0027{\u0027",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7P4\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "space before \u0027(\u0027",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//7P0\u003d",
+        "filename": "vp8/encoder/tokenize.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1000898
+      },
+      "writtenOn": "2012-08-06T21:44:05Z",
+      "side": 1,
+      "message": "here too\n\n(and below)",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
