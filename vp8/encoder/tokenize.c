@@ -1311,6 +1311,7 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi,
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
   int plane_type;
   int b;
+  TOKENEXTRA *t_backup = *t;
 
   stuff2nd_order_b_8x8(x->block + 24, t, 1, x->frame_type,
                        A + vp8_block2above_8x8[24],
@@ -1334,6 +1335,8 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi,
     *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
     *(L + vp8_block2left_8x8[b] + 1) = *(L + vp8_block2left_8x8[b]);
   }
+  if (dry_run)
+    *t = t_backup;
 }
 
 
@@ -1370,6 +1373,7 @@ void vp8_stuff_mb_16x16(VP8_COMP *cpi,
   ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
   ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
   int b, i;
+  TOKENEXTRA *t_backup = *t;
 
   stuff1st_order_b_16x16(x->block, t, x->frame_type, A, L, cpi, dry_run);
   for (i = 1; i < 16; i++) {
@@ -1386,6 +1390,8 @@ void vp8_stuff_mb_16x16(VP8_COMP *cpi,
   }
   vpx_memset(&A[8], 0, sizeof(A[8]));
   vpx_memset(&L[8], 0, sizeof(L[8]));
+  if (dry_run)
+    *t = t_backup;
 }
 #endif
 
@@ -1456,7 +1462,8 @@ void stuff1st_order_buv
   *a = *l = pt;
 }
 
-void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x, TOKENEXTRA **t, int dry_run) {
+void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x,
+                  TOKENEXTRA **t, int dry_run) {
   ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
   ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
   int plane_type;

@@ -653,7 +653,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       vp8_find_best_ref_mvs(xd,
                             xd->pre.y_buffer,
                             recon_y_stride,
-                            &best_mv);
+                            &best_mv, &nearest, &nearby);
     }
 #endif
 
@@ -732,7 +732,9 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         vp8_find_best_ref_mvs(xd,
                               xd->second_pre.y_buffer,
                               recon_y_stride,
-                              &best_mv_second);
+                              &best_mv_second,
+                              &nearest_second,
+                              &nearby_second);
       }
 #else
       vp8_find_near_mvs(xd, mi, prev_mi,

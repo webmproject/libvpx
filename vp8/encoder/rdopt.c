@@ -2652,7 +2652,10 @@ void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
   v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
 #if CONFIG_NEWBESTREFMV
   vp8_find_best_ref_mvs(&x->e_mbd, y_buffer[frame_type],
-                        yv12->y_stride, &frame_best_ref_mv[frame_type]);
+                        yv12->y_stride,
+                        &frame_best_ref_mv[frame_type],
+                        &frame_nearest_mv[frame_type],
+                        &frame_near_mv[frame_type]);
   ref_mv[frame_type].as_int = frame_best_ref_mv[frame_type].as_int;
 #endif
 }
