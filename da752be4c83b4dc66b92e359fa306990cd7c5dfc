@@ -106,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//69g\u003d",
+        "filename": "vp8/common/findnearmv.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-06T23:35:27Z",
+      "side": 1,
+      "message": "thanks for catching this, I was using 4 line of pixels from mb above and left, therefore only left and above need to clamp wit the additional offset. But as I changed from 4 lines in initial experiment to 2 lines now, 16 actually is the correct number..",
+      "parentUuid": "AAAAPH//7Qo\u003d",
+      "revId": "da752be4c83b4dc66b92e359fa306990cd7c5dfc",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7RE\u003d",
         "filename": "vp8/common/findnearmv.h",
         "patchSetId": 2
