@@ -631,10 +631,6 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
       xd->up_available = (mb_row != 0);
       xd->left_available = (mb_col != 0);
 
-      if(pbi->interleaved_decoding)
-        vpx_decode_mb_mode_mv(pbi, xd, mb_row, mb_col);
-
-      update_blockd_bmi(xd);
 
       recon_yoffset = (mb_row * recon_y_stride * 16) + (mb_col * 16);
       recon_uvoffset = (mb_row * recon_uv_stride * 8) + (mb_col * 8);
@@ -642,6 +638,11 @@ decode_sb_row(VP8D_COMP *pbi, VP8_COMMON *pc, int mbrow, MACROBLOCKD *xd) {
       xd->dst.y_buffer = pc->yv12_fb[dst_fb_idx].y_buffer + recon_yoffset;
       xd->dst.u_buffer = pc->yv12_fb[dst_fb_idx].u_buffer + recon_uvoffset;
       xd->dst.v_buffer = pc->yv12_fb[dst_fb_idx].v_buffer + recon_uvoffset;
+
+      if(pbi->interleaved_decoding)
+        vpx_decode_mb_mode_mv(pbi, xd, mb_row, mb_col);
+
+      update_blockd_bmi(xd);
 
       /* Select the appropriate reference frame for this MB */
       if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)

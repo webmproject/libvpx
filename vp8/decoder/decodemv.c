@@ -619,10 +619,44 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     int_mv nearest_second, nearby_second, best_mv_second;
     vp8_prob mv_ref_p [VP8_MVREFS - 1];
 
+#if CONFIG_NEWBESTREFMV
+    int recon_y_stride, recon_yoffset;
+    int recon_uv_stride, recon_uvoffset;
+#endif
+
     vp8_find_near_mvs(xd, mi,
                       prev_mi,
                       &nearest, &nearby, &best_mv, rct,
-                      mbmi->ref_frame, pbi->common.ref_frame_sign_bias);
+                      mbmi->ref_frame, cm->ref_frame_sign_bias);
+#if CONFIG_NEWBESTREFMV
+    {
+      int ref_fb_idx;
+
+      /* Select the appropriate reference frame for this MB */
+      if (mbmi->ref_frame == LAST_FRAME)
+        ref_fb_idx = cm->lst_fb_idx;
+      else if (mbmi->ref_frame == GOLDEN_FRAME)
+        ref_fb_idx = cm->gld_fb_idx;
+      else
+        ref_fb_idx = cm->alt_fb_idx;
+
+      recon_y_stride = cm->yv12_fb[ref_fb_idx].y_stride  ;
+      recon_uv_stride = cm->yv12_fb[ref_fb_idx].uv_stride;
+
+      recon_yoffset = (mb_row * recon_y_stride * 16) + (mb_col * 16);
+      recon_uvoffset = (mb_row * recon_uv_stride * 8) + (mb_col * 8);
+
+      xd->pre.y_buffer = cm->yv12_fb[ref_fb_idx].y_buffer + recon_yoffset;
+      xd->pre.u_buffer = cm->yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
+      xd->pre.v_buffer = cm->yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
+
+      vp8_find_best_ref_mvs(xd,
+                            xd->pre.y_buffer,
+                            recon_y_stride,
+                            &best_mv);
+    }
+#endif
+
     vp8_mv_ref_probs(&pbi->common, mv_ref_p, rct);
 
     // Is the segment level mode feature enabled for this segment
@@ -672,11 +706,41 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       mbmi->second_ref_frame = mbmi->ref_frame + 1;
       if (mbmi->second_ref_frame == 4)
         mbmi->second_ref_frame = 1;
+#if CONFIG_NEWBESTREFMV
+      if (mbmi->second_ref_frame) {
+        int second_ref_fb_idx;
+        /* Select the appropriate reference frame for this MB */
+        if (mbmi->second_ref_frame == LAST_FRAME)
+          second_ref_fb_idx = cm->lst_fb_idx;
+        else if (mbmi->second_ref_frame ==
+          GOLDEN_FRAME)
+          second_ref_fb_idx = cm->gld_fb_idx;
+        else
+          second_ref_fb_idx = cm->alt_fb_idx;
 
-      vp8_find_near_mvs(xd, mi,
-                        prev_mi,
-                        &nearest_second, &nearby_second, &best_mv_second, rct,
-                        mbmi->second_ref_frame, pbi->common.ref_frame_sign_bias);
+        xd->second_pre.y_buffer =
+          cm->yv12_fb[second_ref_fb_idx].y_buffer + recon_yoffset;
+        xd->second_pre.u_buffer =
+          cm->yv12_fb[second_ref_fb_idx].u_buffer + recon_uvoffset;
+        xd->second_pre.v_buffer =
+          cm->yv12_fb[second_ref_fb_idx].v_buffer + recon_uvoffset;
+        vp8_find_near_mvs(xd, mi, prev_mi,
+                          &nearest_second, &nearby_second, &best_mv_second,
+                          rct,
+                          mbmi->second_ref_frame,
+                          cm->ref_frame_sign_bias);
+        vp8_find_best_ref_mvs(xd,
+                              xd->second_pre.y_buffer,
+                              recon_y_stride,
+                              &best_mv_second);
+      }
+#else
+      vp8_find_near_mvs(xd, mi, prev_mi,
+                        &nearest_second, &nearby_second, &best_mv_second,
+                        rct,
+                        mbmi->second_ref_frame,
+                        pbi->common.ref_frame_sign_bias);
+#endif
     } else {
       mbmi->second_ref_frame = 0;
     }
@@ -941,7 +1005,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       }
     } else {
       mbmi->uv_mode = (MB_PREDICTION_MODE)vp8_read_uv_mode(
-		      bc, pbi->common.fc.uv_mode_prob[mbmi->mode]);
+        bc, pbi->common.fc.uv_mode_prob[mbmi->mode]);
       pbi->common.fc.uv_mode_counts[mbmi->mode][mbmi->uv_mode]++;
     }
 
@@ -1021,7 +1085,7 @@ void vp8_decode_mode_mvs(VP8D_COMP *pbi) {
 void vpx_decode_mode_mvs_init(VP8D_COMP *pbi){
   VP8_COMMON *cm = &pbi->common;
   mb_mode_mv_init(pbi);
-  if (cm->frame_type == KEY_FRAME &&!cm->kf_ymode_probs_update)
+  if (cm->frame_type == KEY_FRAME && !cm->kf_ymode_probs_update)
     cm->kf_ymode_probs_index = vp8_read_literal(&pbi->bc, 3);
 }
 void vpx_decode_mb_mode_mv(VP8D_COMP *pbi,

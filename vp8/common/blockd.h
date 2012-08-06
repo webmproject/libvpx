@@ -267,6 +267,9 @@ typedef struct {
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   TX_SIZE txfm_size;
   int_mv mv, second_mv;
+#if CONFIG_NEWBESTREFMV
+  int_mv ref_mv, second_ref_mv;
+#endif
   unsigned char partitioning;
   unsigned char mb_skip_coeff;                                /* does this mb has coefficients at all, 1=no coefficients, 0=need decode tokens */
   unsigned char need_to_clamp_mvs;
@@ -423,6 +426,9 @@ typedef struct MacroBlockD {
 #endif
 
   int mb_index;   // Index of the MB in the SB (0..3)
+#if CONFIG_NEWBESTREFMV
+  int_mv ref_mv[4];
+#endif
 
 #if CONFIG_HYBRIDTRANSFORM
   int q_index;

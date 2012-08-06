@@ -933,6 +933,9 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
 
             vp8_find_near_mvs(xd, m, prev_m, &n1, &n2, &best_mv, ct,
                               rf, cpi->common.ref_frame_sign_bias);
+#if CONFIG_NEWBESTREFMV
+            best_mv.as_int = mi->ref_mv.as_int;
+#endif
             vp8_mv_ref_probs(&cpi->common, mv_ref_p, ct);
 
 #ifdef ENTROPY_STATS
@@ -983,7 +986,11 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
             vp8_find_near_mvs(xd, m,
                               prev_m,
                               &n1, &n2, &best_second_mv, ct,
-                              mi->second_ref_frame, cpi->common.ref_frame_sign_bias);
+                              mi->second_ref_frame,
+                              cpi->common.ref_frame_sign_bias);
+#if CONFIG_NEWBESTREFMV
+            best_second_mv.as_int = mi->second_ref_mv.as_int;
+#endif
           }
 
           // does the feature use compound prediction or not

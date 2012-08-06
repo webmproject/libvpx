@@ -761,7 +761,7 @@ void vp8_activity_masking(VP8_COMP *cpi, MACROBLOCK *x);
 
 int rd_cost_intra_mb(MACROBLOCKD *x);
 
-void vp8_tokenize_mb(VP8_COMP *, MACROBLOCKD *, TOKENEXTRA **);
+void vp8_tokenize_mb(VP8_COMP *, MACROBLOCKD *, TOKENEXTRA **, int dry_run);
 
 void vp8_set_speed_features(VP8_COMP *cpi);
 

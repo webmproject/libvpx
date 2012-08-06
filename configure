@@ -226,6 +226,7 @@ EXPERIMENT_LIST="
     hybridtransform8x8
     switchable_interp
     tx16x16
+    newbestrefmv
 "
 CONFIG_LIST="
     external_build

@@ -2730,6 +2730,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 #if CONFIG_PRED_FILTER
   int best_filter_state;
 #endif
+#if CONFIG_NEWBESTREFMV
+  int_mv ref_mv[MAX_REF_FRAMES] = {0};
+#endif
+
   // int all_rds[MAX_MODES];        // Experimental debug code.
   // int all_rates[MAX_MODES];
   // int all_dist[MAX_MODES];
@@ -2789,6 +2793,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     y_buffer[LAST_FRAME] = lst_yv12->y_buffer + recon_yoffset;
     u_buffer[LAST_FRAME] = lst_yv12->u_buffer + recon_uvoffset;
     v_buffer[LAST_FRAME] = lst_yv12->v_buffer + recon_uvoffset;
+#if CONFIG_NEWBESTREFMV
+    vp8_find_best_ref_mvs(&x->e_mbd,
+                          y_buffer[LAST_FRAME],
+                          lst_yv12->y_stride,
+                          &frame_best_ref_mv[LAST_FRAME]);
+    ref_mv[LAST_FRAME].as_int = frame_best_ref_mv[LAST_FRAME].as_int;
+#endif
   }
 
   if (cpi->ref_frame_flags & VP8_GOLD_FLAG) {
@@ -2802,6 +2813,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     y_buffer[GOLDEN_FRAME] = gld_yv12->y_buffer + recon_yoffset;
     u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
     v_buffer[GOLDEN_FRAME] = gld_yv12->v_buffer + recon_uvoffset;
+#if CONFIG_NEWBESTREFMV
+    vp8_find_best_ref_mvs(&x->e_mbd,
+                          y_buffer[GOLDEN_FRAME],
+                          gld_yv12->y_stride,
+                          &frame_best_ref_mv[GOLDEN_FRAME]);
+    ref_mv[GOLDEN_FRAME].as_int = frame_best_ref_mv[GOLDEN_FRAME].as_int;
+#endif
   }
 
   if (cpi->ref_frame_flags & VP8_ALT_FLAG) {
@@ -2815,6 +2833,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
     u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;
     v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
+#if CONFIG_NEWBESTREFMV
+    vp8_find_best_ref_mvs(&x->e_mbd,
+                          y_buffer[ALTREF_FRAME],
+                          alt_yv12->y_stride,
+                          &frame_best_ref_mv[ALTREF_FRAME]);
+    ref_mv[ALTREF_FRAME].as_int = frame_best_ref_mv[ALTREF_FRAME].as_int;
+#endif
   }
 
   *returnintra = INT64_MAX;
@@ -2872,6 +2897,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       vp8_mode_order[mode_index].ref_frame;
     xd->mode_info_context->mbmi.second_ref_frame =
       vp8_mode_order[mode_index].second_ref_frame;
+#if CONFIG_NEWBESTREFMV
+    x->e_mbd.mode_info_context->mbmi.ref_mv =
+      ref_mv[x->e_mbd.mode_info_context->mbmi.ref_frame];
+    x->e_mbd.mode_info_context->mbmi.second_ref_mv =
+      ref_mv[x->e_mbd.mode_info_context->mbmi.second_ref_frame];
+#endif
 #if CONFIG_PRED_FILTER
     xd->mode_info_context->mbmi.pred_filter_enabled = 0;
 #endif
@@ -3851,8 +3882,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   }
 
   // macroblock modes
-  vpx_memcpy(&x->e_mbd.mode_info_context->mbmi, &best_mbmode, sizeof(MB_MODE_INFO));
-
+  vpx_memcpy(&x->e_mbd.mode_info_context->mbmi,
+             &best_mbmode, sizeof(MB_MODE_INFO));
+#if CONFIG_NEWBESTREFMV
+  x->e_mbd.mode_info_context->mbmi.ref_mv =
+    ref_mv[best_mbmode.ref_frame];
+  x->e_mbd.mode_info_context->mbmi.second_ref_mv =
+    ref_mv[best_mbmode.second_ref_frame];
+#endif
   if (best_mbmode.mode == B_PRED) {
     for (i = 0; i < 16; i++) {
       xd->mode_info_context->bmi[i].as_mode = best_bmodes[i].as_mode;
