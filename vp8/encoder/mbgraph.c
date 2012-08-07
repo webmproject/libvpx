@@ -38,10 +38,6 @@ static unsigned int do_16x16_motion_iteration
   int *mvcost_hp[2]    = { &dummy_cost_hp[mv_max_hp + 1], &dummy_cost_hp[mv_max_hp + 1] };
   int *mvsadcost_hp[2] = { &dummy_cost_hp[mv_max_hp + 1], &dummy_cost_hp[mv_max_hp + 1] };
 
-  int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.col & 7) ? 1 : 0);
-  int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL + ((ref_mv->as_mv.row & 7) ? 1 : 0);
-  int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
-  int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
   int tmp_col_min = x->mv_col_min;
   int tmp_col_max = x->mv_col_max;
   int tmp_row_min = x->mv_row_min;
@@ -57,15 +53,7 @@ static unsigned int do_16x16_motion_iteration
     further_steps = 0;
   }
 
-  /* Get intersection of UMV window and valid MV window to reduce # of checks in diamond search. */
-  if (x->mv_col_min < col_min)
-    x->mv_col_min = col_min;
-  if (x->mv_col_max > col_max)
-    x->mv_col_max = col_max;
-  if (x->mv_row_min < row_min)
-    x->mv_row_min = row_min;
-  if (x->mv_row_max > row_max)
-    x->mv_row_max = row_max;
+  vp8_clamp_mv_min_max(x, ref_mv);
 
   ref_full.as_mv.col = ref_mv->as_mv.col >> 3;
   ref_full.as_mv.row = ref_mv->as_mv.row >> 3;

@@ -9,6 +9,7 @@
  */
 
 
+#include "vp8/encoder/onyx_int.h"
 #include "mcomp.h"
 #include "vpx_mem/vpx_mem.h"
 #include "vpx_ports/config.h"
@@ -21,6 +22,25 @@
 static int mv_ref_ct [31] [4] [2];
 static int mv_mode_cts [4] [2];
 #endif
+
+void vp8_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv) {
+  int col_min = (ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL +
+      ((ref_mv->as_mv.col & 7) ? 1 : 0);
+  int row_min = (ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL +
+      ((ref_mv->as_mv.row & 7) ? 1 : 0);
+  int col_max = (ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
+  int row_max = (ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
+
+  /* Get intersection of UMV window and valid MV window to reduce # of checks in diamond search. */
+  if (x->mv_col_min < col_min)
+    x->mv_col_min = col_min;
+  if (x->mv_col_max > col_max)
+    x->mv_col_max = col_max;
+  if (x->mv_row_min < row_min)
+    x->mv_row_min = row_min;
+  if (x->mv_row_max > row_max)
+    x->mv_row_max = row_max;
+}
 
 int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2],
                     int Weight, int ishp) {

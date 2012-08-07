@@ -2017,23 +2017,6 @@ void vp8_cal_step_param(int sr, int *sp) {
   *sp = MAX_MVSEARCH_STEPS - 1 - step;
 }
 
-static void clamp_mv_min_max(MACROBLOCK *x, int_mv *best_ref_mv) {
-  int col_min = (best_ref_mv->as_mv.col >> 3) - MAX_FULL_PEL_VAL + ((best_ref_mv->as_mv.col & 7) ? 1 : 0);
-  int row_min = (best_ref_mv->as_mv.row >> 3) - MAX_FULL_PEL_VAL + ((best_ref_mv->as_mv.row & 7) ? 1 : 0);
-  int col_max = (best_ref_mv->as_mv.col >> 3) + MAX_FULL_PEL_VAL;
-  int row_max = (best_ref_mv->as_mv.row >> 3) + MAX_FULL_PEL_VAL;
-
-  /* Get intersection of UMV window and valid MV window to reduce # of checks in diamond search. */
-  if (x->mv_col_min < col_min)
-    x->mv_col_min = col_min;
-  if (x->mv_col_max > col_max)
-    x->mv_col_max = col_max;
-  if (x->mv_row_min < row_min)
-    x->mv_row_min = row_min;
-  if (x->mv_row_max > row_max)
-    x->mv_row_max = row_max;
-}
-
 static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
                                            int_mv *best_ref_mv, int_mv *second_best_ref_mv, int64_t best_rd,
                                            int *mdcounts, int *returntotrate,
@@ -2074,7 +2057,7 @@ static int vp8_rd_pick_best_mbsegmentation(VP8_COMP *cpi, MACROBLOCK *x,
       int tmp_row_min = x->mv_row_min;
       int tmp_row_max = x->mv_row_max;
 
-      clamp_mv_min_max(x, best_ref_mv);
+      vp8_clamp_mv_min_max(x, best_ref_mv);
 
       /* Get 8x8 result */
       bsi.sv_mvp[0].as_int = bsi.mvs[0].as_int;
@@ -3139,7 +3122,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           int tmp_row_min = x->mv_row_min;
           int tmp_row_max = x->mv_row_max;
 
-          clamp_mv_min_max(x, &best_ref_mv);
+          vp8_clamp_mv_min_max(x, &best_ref_mv);
 
           if (!saddone) {
             vp8_cal_sad(cpi, xd, x, recon_yoffset, &near_sadidx[0]);
