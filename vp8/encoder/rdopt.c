@@ -575,10 +575,12 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
                        int tx_type) {
   const int eob = b->eob;
   int c = !type;              /* start at coef 0, unless Y with Y2 */
-  int cost = 0, default_eob;
+  int cost = 0, default_eob, seg_eob;
   int pt;                     /* surrounding block/prev coef predictor */
   int const *scan, *band;
   short *qcoeff_ptr = b->qcoeff;
+
+  int segment_id = mb->e_mbd.mode_info_context->mbmi.segment_id;
 
   switch (tx_type) {
     case TX_4X4:
@@ -625,6 +627,11 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
     default:
       break;
   }
+  if (segfeature_active(&mb->e_mbd, segment_id, SEG_LVL_EOB))
+    seg_eob = get_segdata(&mb->e_mbd, segment_id, SEG_LVL_EOB);
+  else
+    seg_eob = default_eob;
+
 
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
 
@@ -636,7 +643,7 @@ static int cost_coeffs(MACROBLOCK *mb, BLOCKD *b, int type,
     pt = vp8_prev_token_class[t];
   }
 
-  if (c < default_eob)
+  if (c < seg_eob)
     cost += mb->token_costs[tx_type][type][band[c]]
             [pt][DCT_EOB_TOKEN];
 
