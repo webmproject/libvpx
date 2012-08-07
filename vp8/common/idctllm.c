@@ -722,27 +722,28 @@ void vp8_short_idct16x16_c(short *input, short *output, int pitch) {
 }
 #endif
 
+static const double C1 = 0.995184726672197;
+static const double C2 = 0.98078528040323;
+static const double C3 = 0.956940335732209;
+static const double C4 = 0.923879532511287;
+static const double C5 = 0.881921264348355;
+static const double C6 = 0.831469612302545;
+static const double C7 = 0.773010453362737;
+static const double C8 = 0.707106781186548;
+static const double C9 = 0.634393284163646;
+static const double C10 = 0.555570233019602;
+static const double C11 = 0.471396736825998;
+static const double C12 = 0.38268343236509;
+static const double C13 = 0.290284677254462;
+static const double C14 = 0.195090322016128;
+static const double C15 = 0.098017140329561;
+
+
 static void butterfly_16x16_idct_1d(double input[16], double output[16]) {
   double step[16];
   double intermediate[16];
   double temp1, temp2;
 
-  const double PI = M_PI;
-  const double C1 = cos(1*PI/(double)32);
-  const double C2 = cos(2*PI/(double)32);
-  const double C3 = cos(3*PI/(double)32);
-  const double C4 = cos(4*PI/(double)32);
-  const double C5 = cos(5*PI/(double)32);
-  const double C6 = cos(6*PI/(double)32);
-  const double C7 = cos(7*PI/(double)32);
-  const double C8 = cos(8*PI/(double)32);
-  const double C9 = cos(9*PI/(double)32);
-  const double C10 = cos(10*PI/(double)32);
-  const double C11 = cos(11*PI/(double)32);
-  const double C12 = cos(12*PI/(double)32);
-  const double C13 = cos(13*PI/(double)32);
-  const double C14 = cos(14*PI/(double)32);
-  const double C15 = cos(15*PI/(double)32);
 
   // step 1 and 2
   step[ 0] = input[0] + input[8];
