@@ -2931,6 +2931,59 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
     if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
       switch (this_mode) {
+        case DC_PRED:
+        case V_PRED:
+        case H_PRED:
+        case TM_PRED:
+        case D45_PRED:
+        case D135_PRED:
+        case D117_PRED:
+        case D153_PRED:
+        case D27_PRED:
+        case D63_PRED:
+#if CONFIG_TX16X16
+          // FIXME: breaks lossless since 4x4 isn't allowed
+          x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+          // FIXME compound intra prediction
+          RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+              (&x->e_mbd);
+          macro_block_yrd_16x16(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd));
+          rate2 += rate_y;
+          distortion2 += distortion;
+          rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
+          rate2 += uv_intra_rate_8x8;
+          rate_uv = uv_intra_rate_tokenonly_8x8;
+          distortion2 += uv_intra_distortion_8x8;
+          distortion_uv = uv_intra_distortion_8x8;
+          break;
+#else
+          x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+          // FIXME compound intra prediction
+          RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
+          (&x->e_mbd);
+          if (cpi->common.txfm_mode == ALLOW_8X8)
+            macro_block_yrd_8x8(x, &rate_y, &distortion,
+                                IF_RTCD(&cpi->rtcd));
+          else
+            macro_block_yrd(x, &rate_y, &distortion,
+                            IF_RTCD(&cpi->rtcd));
+          rate2 += rate_y;
+          distortion2 += distortion;
+          rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
+          if (cpi->common.txfm_mode == ALLOW_8X8) {
+            rate2 += uv_intra_rate_8x8;
+            rate_uv = uv_intra_rate_tokenonly_8x8;
+            distortion2 += uv_intra_distortion_8x8;
+            distortion_uv = uv_intra_distortion_8x8;
+          } else {
+            rate2 += uv_intra_rate;
+            rate_uv = uv_intra_rate_tokenonly;
+            distortion2 += uv_intra_distortion;
+            distortion_uv = uv_intra_distortion;
+          }
+          break;
+#endif
         case B_PRED: {
           int64_t tmp_rd;
 
@@ -3029,59 +3082,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 0);
         }
         break;
-        case DC_PRED:
-        case V_PRED:
-        case H_PRED:
-        case TM_PRED:
-        case D45_PRED:
-        case D135_PRED:
-        case D117_PRED:
-        case D153_PRED:
-        case D27_PRED:
-        case D63_PRED:
-#if CONFIG_TX16X16
-          // FIXME: breaks lossless since 4x4 isn't allowed
-          x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-          // FIXME compound intra prediction
-          RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
-              (&x->e_mbd);
-          macro_block_yrd_16x16(x, &rate_y, &distortion,
-                                IF_RTCD(&cpi->rtcd));
-          rate2 += rate_y;
-          distortion2 += distortion;
-          rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
-          rate2 += uv_intra_rate_8x8;
-          rate_uv = uv_intra_rate_tokenonly_8x8;
-          distortion2 += uv_intra_distortion_8x8;
-          distortion_uv = uv_intra_distortion_8x8;
-          break;
-#else
-          x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-          // FIXME compound intra prediction
-          RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
-          (&x->e_mbd);
-          if (cpi->common.txfm_mode == ALLOW_8X8)
-            macro_block_yrd_8x8(x, &rate_y, &distortion,
-                                IF_RTCD(&cpi->rtcd));
-          else
-            macro_block_yrd(x, &rate_y, &distortion,
-                            IF_RTCD(&cpi->rtcd));
-          rate2 += rate_y;
-          distortion2 += distortion;
-          rate2 += x->mbmode_cost[x->e_mbd.frame_type][x->e_mbd.mode_info_context->mbmi.mode];
-          if (cpi->common.txfm_mode == ALLOW_8X8) {
-            rate2 += uv_intra_rate_8x8;
-            rate_uv = uv_intra_rate_tokenonly_8x8;
-            distortion2 += uv_intra_distortion_8x8;
-            distortion_uv = uv_intra_distortion_8x8;
-          } else {
-            rate2 += uv_intra_rate;
-            rate_uv = uv_intra_rate_tokenonly;
-            distortion2 += uv_intra_distortion;
-            distortion_uv = uv_intra_distortion;
-          }
-          break;
-#endif
 
         case NEWMV: {
           int thissme, bestsme = INT_MAX;
