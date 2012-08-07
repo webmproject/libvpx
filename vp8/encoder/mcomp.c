@@ -1249,20 +1249,11 @@ cal_neighbors:
 #undef CHECK_POINT
 #undef CHECK_BETTER
 
-int vp8_diamond_search_sad
-(
-  MACROBLOCK *x,
-  BLOCK *b,
-  BLOCKD *d,
-  int_mv *ref_mv,
-  int_mv *best_mv,
-  int search_param,
-  int sad_per_bit,
-  int *num00,
-  vp8_variance_fn_ptr_t *fn_ptr,
-  int *mvcost[2],
-  int_mv *center_mv
-) {
+int vp8_diamond_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+                           int_mv *ref_mv, int_mv *best_mv,
+                           int search_param, int sad_per_bit, int *num00,
+                           vp8_variance_fn_ptr_t *fn_ptr, int *mvcost[2],
+                           int_mv *center_mv) {
   int i, j, step;
 
   unsigned char *what = (*(b->base_src) + b->src);
@@ -1278,10 +1269,8 @@ int vp8_diamond_search_sad
   int best_site = 0;
   int last_site = 0;
 
-  int ref_row;
-  int ref_col;
-  int this_row_offset;
-  int this_col_offset;
+  int ref_row, ref_col;
+  int this_row_offset, this_col_offset;
   search_site *ss;
 
   unsigned char *check_here;
@@ -1372,20 +1361,11 @@ int vp8_diamond_search_sad
                   xd->allow_high_precision_mv);
 }
 
-int vp8_diamond_search_sadx4
-(
-  MACROBLOCK *x,
-  BLOCK *b,
-  BLOCKD *d,
-  int_mv *ref_mv,
-  int_mv *best_mv,
-  int search_param,
-  int sad_per_bit,
-  int *num00,
-  vp8_variance_fn_ptr_t *fn_ptr,
-  int *mvcost[2],
-  int_mv *center_mv
-) {
+int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
+                             int_mv *ref_mv, int_mv *best_mv, int search_param,
+                             int sad_per_bit, int *num00,
+                             vp8_variance_fn_ptr_t *fn_ptr,
+                             int *mvcost[2], int_mv *center_mv) {
   int i, j, step;
 
   unsigned char *what = (*(b->base_src) + b->src);
@@ -1526,6 +1506,49 @@ int vp8_diamond_search_sadx4
                  (unsigned int *)(&thissad)) +
       mv_err_cost(&this_mv, center_mv, mvcost, x->errorperbit,
                   xd->allow_high_precision_mv);
+}
+
+#define XMVCOST (x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost)
+int vp8_full_pixel_diamond(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
+                           BLOCKD *d, int_mv *mvp_full, int step_param,
+                           int sadpb, int further_steps,
+                           int *do_refine, vp8_variance_fn_ptr_t *fn_ptr,
+                           int_mv *ref_mv, int_mv *dst_mv) {
+  int_mv temp_mv;
+  int thissme, n, num00;
+  int bestsme = cpi->diamond_search_sad(x, b, d, mvp_full, &temp_mv,
+                                        step_param, sadpb, &num00,
+                                        fn_ptr, XMVCOST, ref_mv);
+  dst_mv->as_int = temp_mv.as_int;
+
+  n = num00;
+  num00 = 0;
+
+  /* If there won't be more n-step search, check to see if refining search is needed. */
+  if (n > further_steps)
+    *do_refine = 0;
+
+  while (n < further_steps) {
+    n++;
+
+    if (num00)
+      num00--;
+    else {
+      thissme = cpi->diamond_search_sad(x, b, d, mvp_full, &temp_mv,
+                                        step_param + n, sadpb, &num00,
+                                        fn_ptr, XMVCOST, ref_mv);
+
+      /* check to see if refining search is needed. */
+      if (num00 > (further_steps - n))
+        *do_refine = 0;
+
+      if (thissme < bestsme) {
+        bestsme = thissme;
+        dst_mv->as_int = temp_mv.as_int;
+      }
+    }
+  }
+  return bestsme;
 }
 
 int vp8_full_search_sad(MACROBLOCK *x, BLOCK *b, BLOCKD *d, int_mv *ref_mv,

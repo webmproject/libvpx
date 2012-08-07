@@ -1818,11 +1818,10 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
 
       // motion search for newmv (single predictor case only)
       if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame && this_mode == NEW4X4) {
-        int sseshift, num00, n;
+        int sseshift, n;
         int step_param = 0;
         int further_steps;
         int thissme, bestsme = INT_MAX;
-        int_mv  temp_mv;
         BLOCK *c;
         BLOCKD *e;
 
@@ -1851,6 +1850,7 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
         further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
 
         {
+          int dummy;
           int sadpb = x->sadperbit4;
           int_mv mvp_full;
 
@@ -1863,36 +1863,11 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
           c = &x->block[n];
           e = &x->e_mbd.block[n];
 
-          {
-            bestsme = cpi->diamond_search_sad(x, c, e, &mvp_full,
-                                              &mode_mv[NEW4X4], step_param,
-                                              sadpb, &num00, v_fn_ptr,
-                                              XMVCOST,
-                                              bsi->ref_mv);
-
-            n = num00;
-            num00 = 0;
-
-            while (n < further_steps) {
-              n++;
-
-              if (num00)
-                num00--;
-              else {
-                thissme = cpi->diamond_search_sad(x, c, e,
-                                                  &mvp_full, &temp_mv,
-                                                  step_param + n, sadpb,
-                                                  &num00, v_fn_ptr,
-                                                  XMVCOST,
-                                                  bsi->ref_mv);
-
-                if (thissme < bestsme) {
-                  bestsme = thissme;
-                  mode_mv[NEW4X4].as_int = temp_mv.as_int;
-                }
-              }
-            }
-          }
+          // dummy takes the place of do_refine -- which is used in other places
+          bestsme = vp8_full_pixel_diamond(cpi, x, c, e, &mvp_full,
+                                           step_param, sadpb, further_steps,
+                                           &dummy, v_fn_ptr, bsi->ref_mv,
+                                           &mode_mv[NEW4X4]);
 
           sseshift = segmentation_to_sseshift[segmentation];
 
@@ -2664,8 +2639,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   int_mv best_ref_mv, second_best_ref_mv;
   int_mv mode_mv[MB_MODE_COUNT];
   MB_PREDICTION_MODE this_mode;
-  int num00, i;
-  int best_mode_index = 0;
+  int i, best_mode_index = 0;
   int mode8x8[2][4];
   unsigned char segment_id = xd->mode_info_context->mbmi.segment_id;
 
@@ -3117,7 +3091,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           int thissme, bestsme = INT_MAX;
           int step_param = cpi->sf.first_step;
           int further_steps;
-          int n;
           int do_refine = 1;   /* If last step (1-away) of n-step search doesn't pick the center point as the best match,
                                 we will do a final 1-away diamond refining search  */
 
@@ -3146,48 +3119,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           if (sr > step_param)
             step_param = sr;
 
-          // Initial step/diamond search
-          {
-            bestsme = cpi->diamond_search_sad(x, b, d, &mvp_full, &d->bmi.as_mv.first,
-                                              step_param, sadpb, &num00,
-                                              &cpi->fn_ptr[BLOCK_16X16],
-                                              XMVCOST, &best_ref_mv);
-            mode_mv[NEWMV].as_int = d->bmi.as_mv.first.as_int;
+          // Further step/diamond searches as necessary
+          further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
-            // Further step/diamond searches as necessary
-            further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
-
-            n = num00;
-            num00 = 0;
-
-            /* If there won't be more n-step search, check to see if refining search is needed. */
-            if (n > further_steps)
-              do_refine = 0;
-
-            while (n < further_steps) {
-              n++;
-
-              if (num00)
-                num00--;
-              else {
-                thissme = cpi->diamond_search_sad(x, b, d, &mvp_full,
-                                                  &d->bmi.as_mv.first, step_param + n, sadpb, &num00,
-                                                  &cpi->fn_ptr[BLOCK_16X16],
-                                                  XMVCOST, &best_ref_mv);
-
-                /* check to see if refining search is needed. */
-                if (num00 > (further_steps - n))
-                  do_refine = 0;
-
-                if (thissme < bestsme) {
-                  bestsme = thissme;
-                  mode_mv[NEWMV].as_int = d->bmi.as_mv.first.as_int;
-                } else {
-                  d->bmi.as_mv.first.as_int = mode_mv[NEWMV].as_int;
-                }
-              }
-            }
-          }
+          bestsme = vp8_full_pixel_diamond(cpi, x, b, d, &mvp_full, step_param, sadpb,
+                                 further_steps, &do_refine,
+                                 &cpi->fn_ptr[BLOCK_16X16], &best_ref_mv,
+                                 &mode_mv[NEWMV]);
+          d->bmi.as_mv.first.as_int = mode_mv[NEWMV].as_int;
 
           /* final 1-away diamond refining search */
           if (do_refine == 1) {

@@ -30,7 +30,13 @@ extern int vp8_mv_bit_cost(int_mv *mv, int_mv *ref, int *mvcost[2],
                            int Weight, int ishp);
 extern void vp8_init_dsmotion_compensation(MACROBLOCK *x, int stride);
 extern void vp8_init3smotion_compensation(MACROBLOCK *x,  int stride);
-
+// Runs sequence of diamond searches in smaller steps for RD
+struct VP8_COMP;
+int vp8_full_pixel_diamond(struct VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
+                           BLOCKD *d, int_mv *mvp_full, int step_param,
+                           int sadpb, int further_steps, int *do_refine,
+                           vp8_variance_fn_ptr_t *fn_ptr,
+                           int_mv *ref_mv, int_mv *dst_mv);
 
 extern int vp8_hex_search
 (
