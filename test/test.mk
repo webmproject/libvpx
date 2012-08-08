@@ -8,6 +8,7 @@ LIBVPX_TEST_SRCS-yes += util.h
 ##
 ## Black box tests only use the public API.
 ##
+LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += altref_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += config_test.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += encode_test_driver.cc
 LIBVPX_TEST_SRCS-$(CONFIG_VP8_ENCODER) += encode_test_driver.h
