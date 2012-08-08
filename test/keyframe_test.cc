@@ -27,7 +27,7 @@ class KeyframeTest : public ::libvpx_test::EncoderTest,
     set_cpu_used_ = 0;
   }
 
-  virtual bool Continue() {
+  virtual bool Continue() const {
     return !HasFatalFailure() && !abort_;
   }
 

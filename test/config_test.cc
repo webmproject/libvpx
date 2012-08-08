@@ -38,7 +38,7 @@ class ConfigTest : public ::libvpx_test::EncoderTest,
     ++frame_count_out_;
   }
 
-  virtual bool Continue() {
+  virtual bool Continue() const {
     return !HasFatalFailure() && !abort_;
   }
 
