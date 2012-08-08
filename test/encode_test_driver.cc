@@ -94,6 +94,8 @@ void EncoderTest::SetMode(TestMode mode) {
 
 void EncoderTest::RunLoop(VideoSource *video) {
   for (unsigned int pass = 0; pass < passes_; pass++) {
+    last_pts_ = 0;
+
     if (passes_ == 1)
       cfg_.g_pass = VPX_RC_ONE_PASS;
     else if (pass == 0)
@@ -120,6 +122,8 @@ void EncoderTest::RunLoop(VideoSource *video) {
         if (pkt->kind != VPX_CODEC_CX_FRAME_PKT)
           continue;
 
+        ASSERT_GE(pkt->data.frame.pts, last_pts_);
+        last_pts_ = pkt->data.frame.pts;
         FramePktHook(pkt);
       }
 

@@ -138,7 +138,7 @@ class Encoder {
 // classes directly, so that tests can be parameterized differently.
 class EncoderTest {
  protected:
-  EncoderTest() : abort_(false), flags_(0) {}
+  EncoderTest() : abort_(false), flags_(0), last_pts_(0) {}
 
   virtual ~EncoderTest() {}
 
@@ -177,6 +177,7 @@ class EncoderTest {
   unsigned long        deadline_;
   TwopassStatsStore    stats_;
   unsigned long        flags_;
+  vpx_codec_pts_t      last_pts_;
 };
 
 }  // namespace libvpx_test
