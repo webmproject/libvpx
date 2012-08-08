@@ -2625,6 +2625,34 @@ static void inter_mode_cost(VP8_COMP *cpi, MACROBLOCK *x, int this_mode,
 
 #define MIN(x,y) (((x)<(y))?(x):(y))
 #define MAX(x,y) (((x)>(y))?(x):(y))
+void setup_buffer_inter(VP8_COMP *cpi, MACROBLOCK *x, int idx, int frame_type,
+                        int recon_yoffset, int recon_uvoffset,
+                        int_mv frame_nearest_mv[4], int_mv frame_near_mv[4],
+                        int_mv frame_best_ref_mv[4],
+#if CONFIG_NEWBESTREFMV
+                        int_mv ref_mv[MAX_REF_FRAMES],
+#endif
+                        int frame_mdcounts[4][4],
+                        unsigned char *y_buffer[4], unsigned char *u_buffer[4],
+                        unsigned char *v_buffer[4]) {
+  YV12_BUFFER_CONFIG *yv12 = &cpi->common.yv12_fb[idx];
+
+  vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context,
+                    x->e_mbd.prev_mode_info_context,
+                    &frame_nearest_mv[frame_type], &frame_near_mv[frame_type],
+                    &frame_best_ref_mv[frame_type], frame_mdcounts[frame_type],
+                    frame_type, cpi->common.ref_frame_sign_bias);
+
+  y_buffer[frame_type] = yv12->y_buffer + recon_yoffset;
+  u_buffer[frame_type] = yv12->u_buffer + recon_uvoffset;
+  v_buffer[frame_type] = yv12->v_buffer + recon_uvoffset;
+#if CONFIG_NEWBESTREFMV
+  vp8_find_best_ref_mvs(&x->e_mbd, y_buffer[frame_type],
+                        yv12->y_stride, &frame_best_ref_mv[frame_type]);
+  ref_mv[frame_type].as_int = frame_best_ref_mv[frame_type].as_int;
+#endif
+}
+
 void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
                             int *returnrate, int *returndistortion, int64_t *returnintra,
                             int64_t *best_single_rd_diff, int64_t *best_comp_rd_diff,
@@ -2706,63 +2734,33 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   }
 
   if (cpi->ref_frame_flags & VP8_LAST_FLAG) {
-    YV12_BUFFER_CONFIG *lst_yv12 = &cpi->common.yv12_fb[cpi->common.lst_fb_idx];
-
-    vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context,
-                      x->e_mbd.prev_mode_info_context,
-                      &frame_nearest_mv[LAST_FRAME], &frame_near_mv[LAST_FRAME],
-                      &frame_best_ref_mv[LAST_FRAME], frame_mdcounts[LAST_FRAME], LAST_FRAME, cpi->common.ref_frame_sign_bias);
-
-    y_buffer[LAST_FRAME] = lst_yv12->y_buffer + recon_yoffset;
-    u_buffer[LAST_FRAME] = lst_yv12->u_buffer + recon_uvoffset;
-    v_buffer[LAST_FRAME] = lst_yv12->v_buffer + recon_uvoffset;
+    setup_buffer_inter(cpi, x, cpi->common.lst_fb_idx, LAST_FRAME,
+                       recon_yoffset, recon_uvoffset, frame_nearest_mv,
+                       frame_near_mv, frame_best_ref_mv,
 #if CONFIG_NEWBESTREFMV
-    vp8_find_best_ref_mvs(&x->e_mbd,
-                          y_buffer[LAST_FRAME],
-                          lst_yv12->y_stride,
-                          &frame_best_ref_mv[LAST_FRAME]);
-    ref_mv[LAST_FRAME].as_int = frame_best_ref_mv[LAST_FRAME].as_int;
+                       ref_mv,
 #endif
+                       frame_mdcounts, y_buffer, u_buffer, v_buffer);
   }
 
   if (cpi->ref_frame_flags & VP8_GOLD_FLAG) {
-    YV12_BUFFER_CONFIG *gld_yv12 = &cpi->common.yv12_fb[cpi->common.gld_fb_idx];
-
-    vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context,
-                      x->e_mbd.prev_mode_info_context,
-                      &frame_nearest_mv[GOLDEN_FRAME], &frame_near_mv[GOLDEN_FRAME],
-                      &frame_best_ref_mv[GOLDEN_FRAME], frame_mdcounts[GOLDEN_FRAME], GOLDEN_FRAME, cpi->common.ref_frame_sign_bias);
-
-    y_buffer[GOLDEN_FRAME] = gld_yv12->y_buffer + recon_yoffset;
-    u_buffer[GOLDEN_FRAME] = gld_yv12->u_buffer + recon_uvoffset;
-    v_buffer[GOLDEN_FRAME] = gld_yv12->v_buffer + recon_uvoffset;
+    setup_buffer_inter(cpi, x, cpi->common.gld_fb_idx, GOLDEN_FRAME,
+                       recon_yoffset, recon_uvoffset, frame_nearest_mv,
+                       frame_near_mv, frame_best_ref_mv,
 #if CONFIG_NEWBESTREFMV
-    vp8_find_best_ref_mvs(&x->e_mbd,
-                          y_buffer[GOLDEN_FRAME],
-                          gld_yv12->y_stride,
-                          &frame_best_ref_mv[GOLDEN_FRAME]);
-    ref_mv[GOLDEN_FRAME].as_int = frame_best_ref_mv[GOLDEN_FRAME].as_int;
+                       ref_mv,
 #endif
+                       frame_mdcounts, y_buffer, u_buffer, v_buffer);
   }
 
   if (cpi->ref_frame_flags & VP8_ALT_FLAG) {
-    YV12_BUFFER_CONFIG *alt_yv12 = &cpi->common.yv12_fb[cpi->common.alt_fb_idx];
-
-    vp8_find_near_mvs(&x->e_mbd, x->e_mbd.mode_info_context,
-                      x->e_mbd.prev_mode_info_context,
-                      &frame_nearest_mv[ALTREF_FRAME], &frame_near_mv[ALTREF_FRAME],
-                      &frame_best_ref_mv[ALTREF_FRAME], frame_mdcounts[ALTREF_FRAME], ALTREF_FRAME, cpi->common.ref_frame_sign_bias);
-
-    y_buffer[ALTREF_FRAME] = alt_yv12->y_buffer + recon_yoffset;
-    u_buffer[ALTREF_FRAME] = alt_yv12->u_buffer + recon_uvoffset;
-    v_buffer[ALTREF_FRAME] = alt_yv12->v_buffer + recon_uvoffset;
+    setup_buffer_inter(cpi, x, cpi->common.alt_fb_idx, ALTREF_FRAME,
+                       recon_yoffset, recon_uvoffset, frame_nearest_mv,
+                       frame_near_mv, frame_best_ref_mv,
 #if CONFIG_NEWBESTREFMV
-    vp8_find_best_ref_mvs(&x->e_mbd,
-                          y_buffer[ALTREF_FRAME],
-                          alt_yv12->y_stride,
-                          &frame_best_ref_mv[ALTREF_FRAME]);
-    ref_mv[ALTREF_FRAME].as_int = frame_best_ref_mv[ALTREF_FRAME].as_int;
+                       ref_mv,
 #endif
+                       frame_mdcounts, y_buffer, u_buffer, v_buffer);
   }
 
   *returnintra = INT64_MAX;
@@ -3295,22 +3293,19 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           x->e_mbd.mode_info_context->mbmi.second_mv.as_int = 0;
           break;
         case NEARMV:
-          if (frame_near_mv[ref1].as_int == 0 || frame_near_mv[ref2].as_int == 0) {
+          if (frame_near_mv[ref1].as_int == 0 || frame_near_mv[ref2].as_int == 0)
             continue;
-          }
           x->e_mbd.mode_info_context->mbmi.mv.as_int        = frame_near_mv[ref1].as_int;
           x->e_mbd.mode_info_context->mbmi.second_mv.as_int = frame_near_mv[ref2].as_int;
           break;
         case NEARESTMV:
-          if (frame_nearest_mv[ref1].as_int == 0 || frame_nearest_mv[ref2].as_int == 0) {
+          if (frame_nearest_mv[ref1].as_int == 0 || frame_nearest_mv[ref2].as_int == 0)
             continue;
-          }
           x->e_mbd.mode_info_context->mbmi.mv.as_int        = frame_nearest_mv[ref1].as_int;
           x->e_mbd.mode_info_context->mbmi.second_mv.as_int = frame_nearest_mv[ref2].as_int;
           break;
         case SPLITMV: {
-          int64_t tmp_rd;
-          int64_t this_rd_thresh;
+          int64_t tmp_rd, this_rd_thresh;
 
           this_rd_thresh =
               (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ?
