@@ -1740,6 +1740,15 @@ typedef struct {
 
 } BEST_SEG_INFO;
 
+static __inline
+int mv_check_bounds(MACROBLOCK *x, int_mv *mv) {
+  int r = 0;
+  r |= (mv->as_mv.row >> 3) < x->mv_row_min;
+  r |= (mv->as_mv.row >> 3) > x->mv_row_max;
+  r |= (mv->as_mv.col >> 3) < x->mv_col_min;
+  r |= (mv->as_mv.col >> 3) > x->mv_col_max;
+  return r;
+}
 
 static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
                              BEST_SEG_INFO *bsi, unsigned int segmentation,
@@ -1910,14 +1919,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
           ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) || ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
         continue;
       }
-      if (x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
-        if (((second_mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
-            ((second_mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
-            ((second_mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) ||
-            ((second_mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
-          continue;
-        }
-      }
+      if (x->e_mbd.mode_info_context->mbmi.second_ref_frame &&
+          mv_check_bounds(x, &second_mode_mv[this_mode]))
+        continue;
 
       distortion = vp8_encode_inter_mb_segment(
                      x, labels, i,
@@ -2844,7 +2848,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     xd->mode_info_context->mbmi.mode_rdopt = this_mode;
 #endif
 
-
 #if CONFIG_COMP_INTRA_PRED
     xd->mode_info_context->mbmi.second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
     xd->mode_info_context->mbmi.second_uv_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
@@ -2864,7 +2867,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
               get_segdata(xd, segment_id, SEG_LVL_MODE))) {
       continue;
     }
-
     // Disable this drop out case if either the mode or ref frame
     // segment level feature is enabled for this segment. This is to
     // prevent the possibility that the we end up unable to pick any mode.
@@ -2923,9 +2925,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       vp8_update_zbin_extra(cpi, x);
     }
 
-
-    if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+    // Intra
+    if (!x->e_mbd.mode_info_context->mbmi.ref_frame) {
       switch (this_mode) {
+        default:
         case DC_PRED:
         case V_PRED:
         case H_PRED:
@@ -2936,12 +2939,12 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         case D153_PRED:
         case D27_PRED:
         case D63_PRED:
-#if CONFIG_TX16X16
-          // FIXME: breaks lossless since 4x4 isn't allowed
           x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
           // FIXME compound intra prediction
           RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
               (&x->e_mbd);
+#if CONFIG_TX16X16
+          // FIXME: breaks lossless since 4x4 isn't allowed
           macro_block_yrd_16x16(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd));
           rate2 += rate_y;
@@ -2953,10 +2956,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           distortion_uv = uv_intra_distortion_8x8;
           break;
 #else
-          x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
-          // FIXME compound intra prediction
-          RECON_INVOKE(&cpi->common.rtcd.recon, build_intra_predictors_mby)
-          (&x->e_mbd);
           if (cpi->common.txfm_mode == ALLOW_8X8)
             macro_block_yrd_8x8(x, &rate_y, &distortion,
                                 IF_RTCD(&cpi->rtcd));
@@ -2982,7 +2981,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         case B_PRED: {
           int64_t tmp_rd;
 
-          // Note the rate value returned here includes the cost of coding the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
+          // Note the rate value returned here includes the cost of coding
+          // the BPRED mode : x->mbmode_cost[x->e_mbd.frame_type][BPRED];
           tmp_rd = rd_pick_intra4x4mby_modes(cpi, x, &rate, &rate_y, &distortion, best_yrd,
 #if CONFIG_COMP_INTRA_PRED
                                              0,
@@ -3034,10 +3034,13 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           }
         }
         break;
-
+      }
+    }
+    // Single prediction inter
+    else if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
+      switch (this_mode) {
         case SPLITMV: {
-          int64_t tmp_rd;
-          int64_t this_rd_thresh;
+          int64_t tmp_rd, this_rd_thresh;
 
           this_rd_thresh =
               (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ?
@@ -3064,7 +3067,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           // If even the 'Y' rd value of split is higher than best so far
           // then dont bother looking at UV
           if (tmp_rd < best_yrd) {
-            // Now work out UV cost and add it in
             rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
             rate2 += rate_uv;
             distortion2 += distortion_uv;
@@ -3101,14 +3103,14 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           }
 
           vp8_mv_pred(cpi, &x->e_mbd, x->e_mbd.mode_info_context, &mvp,
-                      x->e_mbd.mode_info_context->mbmi.ref_frame, cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
+                      x->e_mbd.mode_info_context->mbmi.ref_frame,
+                      cpi->common.ref_frame_sign_bias, &sr, &near_sadidx[0]);
 
           mvp_full.as_mv.col = mvp.as_mv.col >> 3;
           mvp_full.as_mv.row = mvp.as_mv.row >> 3;
 
           // adjust search range according to sr from mv prediction
-          if (sr > step_param)
-            step_param = sr;
+          step_param = MAX(step_param, sr);
 
           // Further step/diamond searches as necessary
           further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
@@ -3123,11 +3125,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           if (do_refine == 1) {
             int search_range;
 
-            // It seems not a good way to set search_range. Need further investigation.
-            // search_range = MAXF(abs((mvp.row>>3) - d->bmi.mv.as_mv.row), abs((mvp.col>>3) - d->bmi.mv.as_mv.col));
             search_range = 8;
-
-            // thissme = cpi->full_search_sad(x, b, d, &d->bmi.mv.as_mv, sadpb, search_range, &cpi->fn_ptr[BLOCK_16X16], x->mvcost, &best_ref_mv);
             thissme = cpi->refining_search_sad(x, b, d, &d->bmi.as_mv.first, sadpb,
                                                search_range, &cpi->fn_ptr[BLOCK_16X16],
                                                XMVCOST, &best_ref_mv);
@@ -3178,12 +3176,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           // Trap vectors that reach beyond the UMV borders
           // Note that ALL New MV, Nearest MV Near MV and Zero MV code drops through to this point
           // because of the lack of break statements in the previous two cases.
-          if (((mode_mv[this_mode].as_mv.row >> 3) < x->mv_row_min) ||
-              ((mode_mv[this_mode].as_mv.row >> 3) > x->mv_row_max) ||
-              ((mode_mv[this_mode].as_mv.col >> 3) < x->mv_col_min) ||
-              ((mode_mv[this_mode].as_mv.col >> 3) > x->mv_col_max)) {
+          if (mv_check_bounds(x, &mode_mv[this_mode]))
             continue;
-          }
 
           vp8_set_mbmode_and_mvs(x, this_mode, &mode_mv[this_mode]);
 
@@ -3206,6 +3200,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
           compmode_cost =
             vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 0);
+
+          // Add in the Mv/mode cost
+          rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
           if (cpi->active_map_enabled && x->active_ptr[0] == 0)
             x->skip = 1;
@@ -3246,10 +3243,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
               }
             }
           }
-          // intermodecost[mode_index] = vp8_cost_mv_ref(cpi, this_mode, mdcounts);   // Experimental debug code
-
-          // Add in the Mv/mode cost
-          rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
           vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
           inter_mode_cost(cpi, x, this_mode, &rate2, &distortion2,
@@ -3332,22 +3325,22 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           break;
       }
 
+      /* We don't include the cost of the second reference here, because there are only
+       * three options: Last/Golden, ARF/Last or Golden/ARF, or in other words if you
+       * present them in that order, the second one is always known if the first is known */
+      compmode_cost =
+        vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 1);
+
       if (this_mode != SPLITMV) {
         /* Add in the Mv/mode cost */
         rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
         vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.mv, xd);
         vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.second_mv, xd);
-        if (((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row >> 3) < x->mv_row_min) ||
-            ((x->e_mbd.mode_info_context->mbmi.mv.as_mv.row >> 3) > x->mv_row_max) ||
-            ((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col >> 3) < x->mv_col_min) ||
-            ((x->e_mbd.mode_info_context->mbmi.mv.as_mv.col >> 3) > x->mv_col_max) ||
-            ((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.row >> 3) < x->mv_row_min) ||
-            ((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.row >> 3) > x->mv_row_max) ||
-            ((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.col >> 3) < x->mv_col_min) ||
-            ((x->e_mbd.mode_info_context->mbmi.second_mv.as_mv.col >> 3) > x->mv_col_max)) {
+        if (mv_check_bounds(x, &x->e_mbd.mode_info_context->mbmi.mv))
           continue;
-        }
+        if (mv_check_bounds(x, &x->e_mbd.mode_info_context->mbmi.second_mv))
+          continue;
 
         /* build first and second prediction */
         vp8_build_inter16x16_predictors_mby(&x->e_mbd);
@@ -3363,12 +3356,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
 
       /* don't bother w/ skip, we would never have come here if skip were enabled */
       x->e_mbd.mode_info_context->mbmi.mode = this_mode;
-
-      /* We don't include the cost of the second reference here, because there are only
-       * three options: Last/Golden, ARF/Last or Golden/ARF, or in other words if you
-       * present them in that order, the second one is always known if the first is known */
-      compmode_cost =
-        vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 1);
     }
 
     if (cpi->common.comp_pred_mode == HYBRID_PREDICTION)
@@ -3599,23 +3586,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     cpi->rd_threshes[best_mode_index] =
         (cpi->rd_baseline_thresh[best_mode_index] >> 7) *
         cpi->rd_thresh_mult[best_mode_index];
-
-    // If we chose a split mode then reset the new MV thresholds as well
-    /*if ( vp8_mode_order[best_mode_index].mode == SPLITMV )
-    {
-        best_adjustment = 4; // (cpi->rd_thresh_mult[THR_NEWMV] >> 4);
-        cpi->rd_thresh_mult[THR_NEWMV] = (cpi->rd_thresh_mult[THR_NEWMV] >= (MIN_THRESHMULT+best_adjustment)) ? cpi->rd_thresh_mult[THR_NEWMV]-best_adjustment: MIN_THRESHMULT;
-        cpi->rd_threshes[THR_NEWMV] = (cpi->rd_baseline_thresh[THR_NEWMV] >> 7) * cpi->rd_thresh_mult[THR_NEWMV];
-
-        best_adjustment = 4; // (cpi->rd_thresh_mult[THR_NEWG] >> 4);
-        cpi->rd_thresh_mult[THR_NEWG] = (cpi->rd_thresh_mult[THR_NEWG] >= (MIN_THRESHMULT+best_adjustment)) ? cpi->rd_thresh_mult[THR_NEWG]-best_adjustment: MIN_THRESHMULT;
-        cpi->rd_threshes[THR_NEWG] = (cpi->rd_baseline_thresh[THR_NEWG] >> 7) * cpi->rd_thresh_mult[THR_NEWG];
-
-        best_adjustment = 4; // (cpi->rd_thresh_mult[THR_NEWA] >> 4);
-        cpi->rd_thresh_mult[THR_NEWA] = (cpi->rd_thresh_mult[THR_NEWA] >= (MIN_THRESHMULT+best_adjustment)) ? cpi->rd_thresh_mult[THR_NEWA]-best_adjustment: MIN_THRESHMULT;
-        cpi->rd_threshes[THR_NEWA] = (cpi->rd_baseline_thresh[THR_NEWA] >> 7) * cpi->rd_thresh_mult[THR_NEWA];
-    }*/
-
   }
 
   // This code force Altref,0,0 and skip for the frame that overlays a
