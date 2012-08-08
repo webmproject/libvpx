@@ -628,7 +628,12 @@ static void vp8_filter_block2d_8_c
     (kInterp_Extend - 1) +     output_height + kInterp_Extend;
   const unsigned int max_intermediate_height =
     (kInterp_Extend - 1) + filter_max_height + kInterp_Extend;
+#ifdef _MSC_VER
+  // MSVC does not support C99 style declaration
+  unsigned char intermediate_buffer[23 * 16];
+#else
   unsigned char intermediate_buffer[max_intermediate_height * filter_max_width];
+#endif
   const int intermediate_next_stride = 1 - intermediate_height * output_width;
 
   // Horizontal pass (src -> transposed intermediate).
