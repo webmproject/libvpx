@@ -10,6 +10,7 @@
 
 
 #include "vpx_ports/config.h"
+#include "vpx_rtcd.h"
 #include "vp8/common/g_common.h"
 #include "vp8/common/subpixel.h"
 #include "vp8/common/loopfilter.h"
@@ -140,4 +141,6 @@ void vp8_machine_specific_config(VP8_COMMON *ctx) {
 #if ARCH_ARM
   vp8_arch_arm_common_init(ctx);
 #endif
+
+  vpx_rtcd();
 }

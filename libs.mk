@@ -91,6 +91,7 @@ endif
 $(eval $(if $(filter universal%,$(TOOLCHAIN)),LIPO_LIBVPX,BUILD_LIBVPX):=yes)
 
 CODEC_SRCS-$(BUILD_LIBVPX) += build/make/version.sh
+CODEC_SRCS-$(BUILD_LIBVPX) += build/make/rtcd.sh
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx/vpx_integer.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/asm_offsets.h
 CODEC_SRCS-$(BUILD_LIBVPX) += vpx_ports/vpx_timer.h
@@ -185,6 +186,7 @@ vpx.vcproj: $(CODEC_SRCS) vpx.def
 PROJECTS-$(BUILD_LIBVPX) += vpx.vcproj
 
 vpx.vcproj: vpx_config.asm
+vpx.vcproj: vpx_rtcd.h
 
 endif
 else
@@ -350,6 +352,18 @@ endif
 
 $(shell $(SRC_PATH_BARE)/build/make/version.sh "$(SRC_PATH_BARE)" $(BUILD_PFX)vpx_version.h)
 CLEAN-OBJS += $(BUILD_PFX)vpx_version.h
+
+#
+# Rule to generate runtime cpu detection files
+#
+$(OBJS-yes:.o=.d): vpx_rtcd.h
+vpx_rtcd.h: $(sort $(filter %rtcd_defs.sh,$(CODEC_SRCS)))
+	@echo "    [CREATE] $@"
+	$(qexec)$(SRC_PATH_BARE)/build/make/rtcd.sh --arch=$(TGT_ISA) \
+		  --sym=vpx_rtcd \
+		  --config=$(target)$(if $(FAT_ARCHS),,-$(TOOLCHAIN)).mk \
+		  $(RTCD_OPTIONS) $^ > $@
+CLEAN-OBJS += $(BUILD_PFX)vpx_rtcd.h
 
 CODEC_DOC_SRCS += vpx/vpx_codec.h \
                   vpx/vpx_decoder.h \
