@@ -24,15 +24,19 @@ class KeyframeTest : public ::libvpx_test::EncoderTest,
     kf_count_ = 0;
     kf_count_max_ = INT_MAX;
     kf_do_force_kf_ = false;
+    set_cpu_used_ = 0;
   }
 
   virtual bool Continue() {
     return !HasFatalFailure() && !abort_;
   }
 
-  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video) {
+  virtual void PreEncodeFrameHook(::libvpx_test::VideoSource *video,
+                                  ::libvpx_test::Encoder *encoder) {
     if (kf_do_force_kf_)
       flags_ = (video->frame() % 3) ? 0 : VPX_EFLAG_FORCE_KF;
+    if (set_cpu_used_ && video->frame() == 1)
+      encoder->Control(VP8E_SET_CPUUSED, set_cpu_used_);
   }
 
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {
@@ -47,6 +51,7 @@ class KeyframeTest : public ::libvpx_test::EncoderTest,
   int kf_count_;
   int kf_count_max_;
   std::vector<vpx_codec_pts_t> kf_pts_list_;
+  int set_cpu_used_;
 };
 
 TEST_P(KeyframeTest, TestRandomVideoSource) {
@@ -100,6 +105,13 @@ TEST_P(KeyframeTest, TestKeyframeMaxDistance) {
 TEST_P(KeyframeTest, TestAutoKeyframe) {
   cfg_.kf_mode = VPX_KF_AUTO;
   kf_do_force_kf_ = false;
+
+  // Force a deterministic speed step in Real Time mode, as the faster modes
+  // may not produce a keyframe like we expect. This is necessary when running
+  // on very slow environments (like Valgrind). The step -11 was determined
+  // experimentally as the fastest mode that still throws the keyframe.
+  if (deadline_ == VPX_DL_REALTIME)
+    set_cpu_used_ = -11;
 
   // This clip has a cut scene every 30 frames -> Frame 0, 30, 60, 90, 120.
   // I check only the first 40 frames to make sure there's a keyframe at frame

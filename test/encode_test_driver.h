@@ -101,6 +101,11 @@ class Encoder {
     EncodeFrame(video, 0);
   }
 
+  void Control(int ctrl_id, int arg) {
+    const vpx_codec_err_t res = vpx_codec_control_(&encoder_, ctrl_id, arg);
+    ASSERT_EQ(VPX_CODEC_OK, res) << EncoderError();
+  }
+
   void set_deadline(unsigned long deadline) {
     deadline_ = deadline;
   }
@@ -158,6 +163,7 @@ class EncoderTest {
 
   // Hook to be called before encoding a frame.
   virtual void PreEncodeFrameHook(VideoSource *video) {}
+  virtual void PreEncodeFrameHook(VideoSource *video, Encoder *encoder) {}
 
   // Hook to be called on every compressed data packet.
   virtual void FramePktHook(const vpx_codec_cx_pkt_t *pkt) {}
