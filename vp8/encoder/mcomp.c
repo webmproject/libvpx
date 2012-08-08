@@ -1497,10 +1497,13 @@ int vp8_diamond_search_sadx4(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 }
 
 #define XMVCOST (x->e_mbd.allow_high_precision_mv?x->mvcost_hp:x->mvcost)
+/* do_refine: If last step (1-away) of n-step search doesn't pick the center
+              point as the best match, we will do a final 1-away diamond
+              refining search  */
 int vp8_full_pixel_diamond(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
                            BLOCKD *d, int_mv *mvp_full, int step_param,
                            int sadpb, int further_steps,
-                           int *do_refine, vp8_variance_fn_ptr_t *fn_ptr,
+                           int do_refine, vp8_variance_fn_ptr_t *fn_ptr,
                            int_mv *ref_mv, int_mv *dst_mv) {
   int_mv temp_mv;
   int thissme, n, num00;
@@ -1514,7 +1517,7 @@ int vp8_full_pixel_diamond(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
 
   /* If there won't be more n-step search, check to see if refining search is needed. */
   if (n > further_steps)
-    *do_refine = 0;
+    do_refine = 0;
 
   while (n < further_steps) {
     n++;
@@ -1528,12 +1531,26 @@ int vp8_full_pixel_diamond(VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
 
       /* check to see if refining search is needed. */
       if (num00 > (further_steps - n))
-        *do_refine = 0;
+        do_refine = 0;
 
       if (thissme < bestsme) {
         bestsme = thissme;
         dst_mv->as_int = temp_mv.as_int;
       }
+    }
+  }
+
+  /* final 1-away diamond refining search */
+  if (do_refine == 1) {
+    int search_range = 8;
+    int_mv best_mv;
+    best_mv.as_int = dst_mv->as_int;
+    thissme = cpi->refining_search_sad(x, b, d, &best_mv, sadpb, search_range,
+                                       fn_ptr, XMVCOST, ref_mv);
+
+    if (thissme < bestsme) {
+      bestsme = thissme;
+      dst_mv->as_int = best_mv.as_int;
     }
   }
   return bestsme;

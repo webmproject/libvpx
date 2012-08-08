@@ -1852,7 +1852,6 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
         further_steps = (MAX_MVSEARCH_STEPS - 1) - step_param;
 
         {
-          int dummy;
           int sadpb = x->sadperbit4;
           int_mv mvp_full;
 
@@ -1865,11 +1864,9 @@ static void rd_check_segment(VP8_COMP *cpi, MACROBLOCK *x,
           c = &x->block[n];
           e = &x->e_mbd.block[n];
 
-          // dummy takes the place of do_refine -- which is used in other places
-          bestsme = vp8_full_pixel_diamond(cpi, x, c, e, &mvp_full,
-                                           step_param, sadpb, further_steps,
-                                           &dummy, v_fn_ptr, bsi->ref_mv,
-                                           &mode_mv[NEW4X4]);
+          bestsme = vp8_full_pixel_diamond(cpi, x, c, e, &mvp_full, step_param,
+                                           sadpb, further_steps, 0, v_fn_ptr,
+                                           bsi->ref_mv, &mode_mv[NEW4X4]);
 
           sseshift = segmentation_to_sseshift[segmentation];
 
@@ -3088,12 +3085,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
     else if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
       switch (this_mode) {
         case NEWMV: {
-          int thissme, bestsme = INT_MAX;
-          int step_param = cpi->sf.first_step;
-          int further_steps;
-          int do_refine = 1;   /* If last step (1-away) of n-step search doesn't pick the center point as the best match,
-                                we will do a final 1-away diamond refining search  */
-
+          int bestsme = INT_MAX;
+          int further_steps, step_param = cpi->sf.first_step;
           int sadpb = x->sadperbit16;
           int_mv mvp_full;
 
@@ -3122,28 +3115,11 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           // Further step/diamond searches as necessary
           further_steps = (cpi->sf.max_step_search_steps - 1) - step_param;
 
-          bestsme = vp8_full_pixel_diamond(cpi, x, b, d, &mvp_full, step_param, sadpb,
-                                 further_steps, &do_refine,
-                                 &cpi->fn_ptr[BLOCK_16X16], &best_ref_mv,
-                                 &mode_mv[NEWMV]);
+          bestsme = vp8_full_pixel_diamond(cpi, x, b, d, &mvp_full, step_param,
+                                           sadpb, further_steps, 1,
+                                           &cpi->fn_ptr[BLOCK_16X16],
+                                           &best_ref_mv, &mode_mv[NEWMV]);
           d->bmi.as_mv.first.as_int = mode_mv[NEWMV].as_int;
-
-          /* final 1-away diamond refining search */
-          if (do_refine == 1) {
-            int search_range;
-
-            search_range = 8;
-            thissme = cpi->refining_search_sad(x, b, d, &d->bmi.as_mv.first, sadpb,
-                                               search_range, &cpi->fn_ptr[BLOCK_16X16],
-                                               XMVCOST, &best_ref_mv);
-
-            if (thissme < bestsme) {
-              bestsme = thissme;
-              mode_mv[NEWMV].as_int = d->bmi.as_mv.first.as_int;
-            } else {
-              d->bmi.as_mv.first.as_int = mode_mv[NEWMV].as_int;
-            }
-          }
 
           x->mv_col_min = tmp_col_min;
           x->mv_col_max = tmp_col_max;

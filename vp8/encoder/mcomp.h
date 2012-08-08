@@ -34,7 +34,7 @@ extern void vp8_init3smotion_compensation(MACROBLOCK *x,  int stride);
 struct VP8_COMP;
 int vp8_full_pixel_diamond(struct VP8_COMP *cpi, MACROBLOCK *x, BLOCK *b,
                            BLOCKD *d, int_mv *mvp_full, int step_param,
-                           int sadpb, int further_steps, int *do_refine,
+                           int sadpb, int further_steps, int do_refine,
                            vp8_variance_fn_ptr_t *fn_ptr,
                            int_mv *ref_mv, int_mv *dst_mv);
 
