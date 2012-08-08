@@ -72,6 +72,40 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//5JI\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1001261
+      },
+      "writtenOn": "2012-08-08T17:49:03Z",
+      "side": 1,
+      "message": "Using 16 instead of 8 bit parallel math through the function to avoid overflow?",
+      "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//5Is\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1001261
+      },
+      "writtenOn": "2012-08-08T17:49:03Z",
+      "side": 1,
+      "message": "Not sure if preload saves any cycles here. It did within loops in one of my assembly functions.",
+      "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//5uI\u003d",
         "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
         "patchSetId": 2
