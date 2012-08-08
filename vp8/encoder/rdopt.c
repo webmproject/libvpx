@@ -3036,50 +3036,57 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         break;
       }
     }
+    // Split MV. The code is very different from the other inter modes so
+    // special case it.
+    else if (this_mode == SPLITMV) {
+      int64_t tmp_rd, this_rd_thresh;
+      int is_comp_pred = x->e_mbd.mode_info_context->mbmi.second_ref_frame != 0;
+      int_mv *second_ref = is_comp_pred ? &second_best_ref_mv : NULL;
+
+      this_rd_thresh =
+          (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ?
+          cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
+      this_rd_thresh =
+          (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ?
+          cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
+
+      tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
+                                               second_ref, best_yrd, mdcounts,
+                                               &rate, &rate_y, &distortion,
+                                               this_rd_thresh, seg_mvs);
+      rate2 += rate;
+      distortion2 += distortion;
+
+#if CONFIG_SWITCHABLE_INTERP
+      if (cpi->common.mcomp_filter_type == SWITCHABLE)
+        rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
+            [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
+            [vp8_switchable_interp_map[
+            x->e_mbd.mode_info_context->mbmi.interp_filter]];
+#endif
+      // If even the 'Y' rd value of split is higher than best so far
+      // then dont bother looking at UV
+      if (tmp_rd < best_yrd) {
+        rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
+        rate2 += rate_uv;
+        distortion2 += distortion_uv;
+      } else {
+        this_rd = INT64_MAX;
+        disable_skip = 1;
+      }
+
+      if (is_comp_pred)
+        mode_excluded = cpi->common.comp_pred_mode == SINGLE_PREDICTION_ONLY;
+      else
+        mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
+
+      compmode_cost =
+        vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), is_comp_pred);
+      x->e_mbd.mode_info_context->mbmi.mode = this_mode;
+    }
     // Single prediction inter
     else if (!x->e_mbd.mode_info_context->mbmi.second_ref_frame) {
       switch (this_mode) {
-        case SPLITMV: {
-          int64_t tmp_rd, this_rd_thresh;
-
-          this_rd_thresh =
-              (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ?
-              cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
-          this_rd_thresh =
-              (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ?
-              cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
-
-          tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv, NULL,
-                                                   best_yrd, mdcounts,
-                                                   &rate, &rate_y, &distortion,
-                                                   this_rd_thresh, seg_mvs);
-
-          rate2 += rate;
-          distortion2 += distortion;
-
-#if CONFIG_SWITCHABLE_INTERP
-          if (cpi->common.mcomp_filter_type == SWITCHABLE)
-            rate2 += SWITCHABLE_INTERP_RATE_FACTOR * x->switchable_interp_costs
-                [get_pred_context(&cpi->common, xd, PRED_SWITCHABLE_INTERP)]
-                [vp8_switchable_interp_map[
-                x->e_mbd.mode_info_context->mbmi.interp_filter]];
-#endif
-          // If even the 'Y' rd value of split is higher than best so far
-          // then dont bother looking at UV
-          if (tmp_rd < best_yrd) {
-            rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
-            rate2 += rate_uv;
-            distortion2 += distortion_uv;
-          } else {
-            this_rd = INT64_MAX;
-            disable_skip = 1;
-          }
-          mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
-          compmode_cost =
-            vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 0);
-        }
-        break;
-
         case NEWMV: {
           int thissme, bestsme = INT_MAX;
           int step_param = cpi->sf.first_step;
@@ -3290,37 +3297,6 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
           x->e_mbd.mode_info_context->mbmi.mv.as_int        = frame_nearest_mv[ref1].as_int;
           x->e_mbd.mode_info_context->mbmi.second_mv.as_int = frame_nearest_mv[ref2].as_int;
           break;
-        case SPLITMV: {
-          int64_t tmp_rd, this_rd_thresh;
-
-          this_rd_thresh =
-              (x->e_mbd.mode_info_context->mbmi.ref_frame == LAST_FRAME) ?
-              cpi->rd_threshes[THR_NEWMV] : cpi->rd_threshes[THR_NEWA];
-          this_rd_thresh =
-              (x->e_mbd.mode_info_context->mbmi.ref_frame == GOLDEN_FRAME) ?
-              cpi->rd_threshes[THR_NEWG] : this_rd_thresh;
-
-          tmp_rd = vp8_rd_pick_best_mbsegmentation(cpi, x, &best_ref_mv,
-                                                   &second_best_ref_mv,
-                                                   best_yrd, mdcounts,
-                                                   &rate, &rate_y, &distortion,
-                                                   this_rd_thresh, seg_mvs);
-
-          rate2 += rate;
-          distortion2 += distortion;
-
-          // If even the 'Y' rd value of split is higher than best so far then dont bother looking at UV
-          if (tmp_rd < best_yrd) {
-            // Now work out UV cost and add it in
-            rd_inter4x4_uv(cpi, x, &rate_uv, &distortion_uv, cpi->common.full_pixel);
-            rate2 += rate_uv;
-            distortion2 += distortion_uv;
-          } else {
-            this_rd = INT64_MAX;
-            disable_skip = 1;
-          }
-        }
-        break;
         default:
           break;
       }
@@ -3331,28 +3307,26 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       compmode_cost =
         vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 1);
 
-      if (this_mode != SPLITMV) {
-        /* Add in the Mv/mode cost */
-        rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
+      /* Add in the Mv/mode cost */
+      rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
-        vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.mv, xd);
-        vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.second_mv, xd);
-        if (mv_check_bounds(x, &x->e_mbd.mode_info_context->mbmi.mv))
-          continue;
-        if (mv_check_bounds(x, &x->e_mbd.mode_info_context->mbmi.second_mv))
-          continue;
+      vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.mv, xd);
+      vp8_clamp_mv2(&x->e_mbd.mode_info_context->mbmi.second_mv, xd);
+      if (mv_check_bounds(x, &x->e_mbd.mode_info_context->mbmi.mv))
+        continue;
+      if (mv_check_bounds(x, &x->e_mbd.mode_info_context->mbmi.second_mv))
+        continue;
 
-        /* build first and second prediction */
-        vp8_build_inter16x16_predictors_mby(&x->e_mbd);
-        vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
-        /* do second round and average the results */
-        vp8_build_2nd_inter16x16_predictors_mb(&x->e_mbd, x->e_mbd.predictor,
-                                               &x->e_mbd.predictor[256],
-                                               &x->e_mbd.predictor[320], 16, 8);
+      /* build first and second prediction */
+      vp8_build_inter16x16_predictors_mby(&x->e_mbd);
+      vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
+      /* do second round and average the results */
+      vp8_build_2nd_inter16x16_predictors_mb(&x->e_mbd, x->e_mbd.predictor,
+                                             &x->e_mbd.predictor[256],
+                                             &x->e_mbd.predictor[320], 16, 8);
 
-        inter_mode_cost(cpi, x, this_mode, &rate2, &distortion2,
-                        &rate_y, &distortion, &rate_uv, &distortion_uv);
-      }
+      inter_mode_cost(cpi, x, this_mode, &rate2, &distortion2,
+                      &rate_y, &distortion, &rate_uv, &distortion_uv);
 
       /* don't bother w/ skip, we would never have come here if skip were enabled */
       x->e_mbd.mode_info_context->mbmi.mode = this_mode;
