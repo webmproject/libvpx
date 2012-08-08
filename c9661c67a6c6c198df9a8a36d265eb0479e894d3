@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//5QM\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-08T16:25:17Z",
+      "side": 1,
+      "message": "Historical reasons. The existing code uses lr throughout most of libvpx. Notable exceptions are idct_v6.asm and dequant_idct_v6.asm which I wrote early in my career at On2.",
+      "parentUuid": "AAAAPH//51E\u003d",
+      "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//5sE\u003d",
         "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//5QE\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-08T16:25:17Z",
+      "side": 1,
+      "message": "There is not. I tested them manually with a file that is known to exercise all of them. A test is on the \"todo\" list.",
+      "parentUuid": "AAAAPH//5sE\u003d",
+      "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//5uI\u003d",
         "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2012-08-07T23:52:20Z",
       "side": 1,
       "message": "Why are the offsets in the two lines different from last version?",
+      "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//5Pk\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-08T16:25:17Z",
+      "side": 1,
+      "message": "before, it did\n str rX, [rY]\n str rX, [rY, rZ]\n\nThis makes it more consistent throughout by always post incrementing. It also allowed removing an extraneous add in some cases.\n\nIt was not strictly necessary for this change. I changed it to make it match the set up code more closely at the top of each function (always post-increment), which was a necessary change.",
+      "parentUuid": "AAAAPH//5uI\u003d",
       "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
