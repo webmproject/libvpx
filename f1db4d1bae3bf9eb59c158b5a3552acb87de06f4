@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//46A\u003d",
+        "filename": "vp8/common/filter.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 631,
+      "author": {
+        "id": 1000893
+      },
+      "writtenOn": "2012-08-08T21:12:33Z",
+      "side": 1,
+      "message": "This causes compiling errors on VC2008. It looks like a C99 feature not supported by Microsoft compiler.",
+      "revId": "f1db4d1bae3bf9eb59c158b5a3552acb87de06f4",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
