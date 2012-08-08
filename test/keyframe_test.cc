@@ -26,7 +26,7 @@ class KeyframeTest : public ::libvpx_test::EncoderTest,
     kf_do_force_kf_ = false;
   }
 
-  virtual bool Continue() {
+  virtual bool Continue() const {
     return !HasFatalFailure() && !abort_;
   }
 
