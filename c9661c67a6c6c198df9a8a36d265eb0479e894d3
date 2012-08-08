@@ -89,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//5Ic\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-08T17:51:58Z",
+      "side": 1,
+      "message": "I believe so. Tero wrote this originally.",
+      "parentUuid": "AAAAPH//5JI\u003d",
+      "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//5Is\u003d",
         "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
         "patchSetId": 2
@@ -100,6 +118,24 @@
       "writtenOn": "2012-08-08T17:49:03Z",
       "side": 1,
       "message": "Not sure if preload saves any cycles here. It did within loops in one of my assembly functions.",
+      "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//5IU\u003d",
+        "filename": "vp8/common/arm/armv6/intra4x4_predict_v6.asm",
+        "patchSetId": 2
+      },
+      "lineNbr": 557,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-08T17:51:58Z",
+      "side": 1,
+      "message": "None of these are looped (it\u0027s a switch statement) but it might be worth investigating at the very start of the function. Which data is needed varies with which b_mode is called.",
+      "parentUuid": "AAAAPH//5Is\u003d",
       "revId": "c9661c67a6c6c198df9a8a36d265eb0479e894d3",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
