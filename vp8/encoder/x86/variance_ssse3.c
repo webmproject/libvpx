@@ -13,11 +13,7 @@
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
 
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 #define HALFNDX 8
-#else
-#define HALFNDX 4
-#endif
 
 extern unsigned int vp8_get16x16var_sse2
 (

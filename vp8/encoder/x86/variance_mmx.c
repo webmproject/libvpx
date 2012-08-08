@@ -198,7 +198,6 @@ unsigned int vp8_variance8x16_mmx(
 // the mmx function that does the bilinear filtering and var calculation //
 // int one pass                                                          //
 ///////////////////////////////////////////////////////////////////////////
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 DECLARE_ALIGNED(16, const short, vp8_vp7_bilinear_filters_mmx[16][8]) = {
   { 128, 128, 128, 128,  0,  0,  0,  0 },
   { 120, 120, 120, 120,  8,  8,  8,  8 },
@@ -217,18 +216,6 @@ DECLARE_ALIGNED(16, const short, vp8_vp7_bilinear_filters_mmx[16][8]) = {
   {  16, 16, 16, 16, 112, 112, 112, 112 },
   {   8,  8,  8,  8, 120, 120, 120, 120 }
 };
-#else
-DECLARE_ALIGNED(16, const short, vp8_vp7_bilinear_filters_mmx[8][8]) = {
-  { 128, 128, 128, 128,  0,  0,  0,  0 },
-  { 112, 112, 112, 112, 16, 16, 16, 16 },
-  {  96, 96, 96, 96, 32, 32, 32, 32 },
-  {  80, 80, 80, 80, 48, 48, 48, 48 },
-  {  64, 64, 64, 64, 64, 64, 64, 64 },
-  {  48, 48, 48, 48, 80, 80, 80, 80 },
-  {  32, 32, 32, 32, 96, 96, 96, 96 },
-  {  16, 16, 16, 16, 112, 112, 112, 112 }
-};
-#endif
 
 unsigned int vp8_sub_pixel_variance4x4_mmx
 (
@@ -392,13 +379,8 @@ unsigned int vp8_variance_halfpixvar16x16_h_mmx(
   const unsigned char *ref_ptr,
   int  recon_stride,
   unsigned int *sse) {
-#if CONFIG_SIXTEENTH_SUBPEL_UV
   return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 8, 0,
                                          ref_ptr, recon_stride, sse);
-#else
-  return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 4, 0,
-                                         ref_ptr, recon_stride, sse);
-#endif
 }
 
 
@@ -408,13 +390,8 @@ unsigned int vp8_variance_halfpixvar16x16_v_mmx(
   const unsigned char *ref_ptr,
   int  recon_stride,
   unsigned int *sse) {
-#if CONFIG_SIXTEENTH_SUBPEL_UV
   return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 0, 8,
                                          ref_ptr, recon_stride, sse);
-#else
-  return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 0, 4,
-                                         ref_ptr, recon_stride, sse);
-#endif
 }
 
 
@@ -424,11 +401,6 @@ unsigned int vp8_variance_halfpixvar16x16_hv_mmx(
   const unsigned char *ref_ptr,
   int  recon_stride,
   unsigned int *sse) {
-#if CONFIG_SIXTEENTH_SUBPEL_UV
   return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 8, 8,
                                          ref_ptr, recon_stride, sse);
-#else
-  return vp8_sub_pixel_variance16x16_mmx(src_ptr, source_stride, 4, 4,
-                                         ref_ptr, recon_stride, sse);
-#endif
 }

@@ -14,7 +14,6 @@
 #include "vpx_ports/mem.h"
 
 DECLARE_ALIGNED(16, const short, vp8_bilinear_filters[SUBPEL_SHIFTS][2]) = {
-#if SUBPEL_SHIFTS==16
   { 128,   0 },
   { 120,   8 },
   { 112,  16 },
@@ -31,22 +30,11 @@ DECLARE_ALIGNED(16, const short, vp8_bilinear_filters[SUBPEL_SHIFTS][2]) = {
   {  24, 104 },
   {  16, 112 },
   {   8, 120 }
-#else
-  { 128,   0 },
-  { 112,  16 },
-  {  96,  32 },
-  {  80,  48 },
-  {  64,  64 },
-  {  48,  80 },
-  {  32,  96 },
-  {  16, 112 }
-#endif  /* SUBPEL_SHIFTS==16 */
 };
 
 #define FILTER_ALPHA       0
 #define FILTER_ALPHA_SHARP 1
 DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8[SUBPEL_SHIFTS][8]) = {
-#if SUBPEL_SHIFTS==16
 #if FILTER_ALPHA == 0
   /* Lagrangian interpolation filter */
   { 0,   0,   0, 128,   0,   0,   0,  0},
@@ -90,32 +78,9 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8[SUBPEL_SHIFTS][8]) = {
   { 0,   2,  -6,  18, 122, -10,   2,  0},
   { 0,   1,  -3,   8, 126,  -5,   1,  0}
 #endif  /* FILTER_ALPHA */
-#else   /* SUBPEL_SHIFTS==16 */
-#if FILTER_ALPHA == 0
-  { 0,   0,   0, 128,   0,   0,   0,   0},
-  { -1,   3, -10, 122,  18,  -6,   2,   0},
-  { -1,   4, -16, 112,  37, -11,   4,  -1},
-  { -1,   5, -19,  97,  58, -16,   5,  -1},
-  { -1,   6, -19,  78,  78, -19,   6,  -1},
-  { -1,   5, -16,  58,  97, -19,   5,  -1},
-  { -1,   4, -11,  37, 112, -16,   4,  -1},
-  { 0,   2,  -6,  18, 122, -10,   3,  -1},
-#elif FILTER_ALPHA == 50
-  /* alpha = 0.50 */
-  { 0,   0,   0, 128,   0,   0,   0,  0},
-  { 0,   2, -10, 122,  18,  -6,   2,  0},
-  { -1,   4, -16, 112,  37, -11,   3,  0},
-  { -1,   5, -18,  96,  58, -16,   5, -1},
-  { -1,   5, -18,  78,  78, -18,   5, -1},
-  { -1,   5, -16,  58,  96, -18,   5, -1},
-  { 0,   3, -11,  37, 112, -16,   4, -1},
-  { 0,   2,  -6,  18, 122, -10,   2,  0}
-#endif  /* FILTER_ALPHA */
-#endif  /* SUBPEL_SHIFTS==16 */
 };
 
 DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][8]) = {
-#if SUBPEL_SHIFTS==16
 #if FILTER_ALPHA_SHARP == 1
   /* dct based filter */
   {0,   0,   0, 128,   0,   0,   0, 0},
@@ -152,62 +117,10 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_8s[SUBPEL_SHIFTS][8]) = {
   {-2,   5, -10,  28, 119, -16,   6, -2},
   {-1,   3,  -7,  18, 123, -11,   4, -1},
   {-1,   2,  -3,   9, 126,  -6,   2, -1}
-#elif FILTER_ALPHA_SHARP == 65
-  /* alpha = 0.65 */
-  { 0,   0,   0, 128,   0,   0,   0,  0},
-  { 0,   2,  -6, 126,   8,  -3,   1,  0},
-  { -1,   3, -10, 123,  18,  -6,   2, -1},
-  { -1,   5, -14, 118,  27, -10,   4, -1},
-  { -1,   5, -17, 112,  38, -13,   5, -1},
-  { -2,   6, -19, 106,  48, -15,   5, -1},
-  { -2,   7, -21,  98,  59, -17,   6, -2},
-  { -2,   7, -21,  89,  69, -19,   7, -2},
-  { -2,   7, -20,  79,  79, -20,   7, -2},
-  { -2,   7, -19,  69,  89, -21,   7, -2},
-  { -2,   6, -17,  59,  98, -21,   7, -2},
-  { -1,   5, -15,  48, 106, -19,   6, -2},
-  { -1,   5, -13,  38, 112, -17,   5, -1},
-  { -1,   4, -10,  27, 118, -14,   5, -1},
-  { -1,   2,  -6,  18, 123, -10,   3, -1},
-  { 0,   1,  -3,   8, 126,  -6,   2,  0}
 #endif  /* FILTER_ALPHA_SHARP */
-#else   /* SUBPEL_SHIFTS==16 */
-#if FILTER_ALPHA_SHARP == 1
-  /* dct based filter */
-  {0,   0,   0, 128,   0,   0,   0, 0},
-  {-2,   5, -13, 125,  17,  -6,   3, -1},
-  {-4,   9, -20, 115,  37, -13,   6, -2},
-  {-4,  10, -24, 100,  59, -19,   9, -3},
-  {-4,  10, -23,  81,  81, -23,  10, -4},
-  {-3,   9, -19,  59, 100, -24,  10, -4},
-  {-2,   6, -13,  37, 115, -20,   9, -4},
-  {-1,   3,  -6,  17, 125, -13,   5, -2}
-#elif FILTER_ALPHA_SHARP == 75
-  /* alpha = 0.75 */
-  {0,   0,   0, 128,   0,   0,   0, 0},
-  {-1,   4, -11, 123,  18,  -7,   3, -1},
-  {-2,   7, -19, 113,  38, -13,   6, -2},
-  {-3,   9, -22,  99,  59, -19,   8, -3},
-  {-3,   9, -22,  80,  80, -22,   9, -3},
-  {-3,   8, -19,  59,  99, -22,   9, -3},
-  {-2,   6, -13,  38, 113, -19,   7, -2},
-  {-1,   3,  -7,  18, 123, -11,   4, -1}
-#elif FILTER_ALPHA_SHARP == 65
-  /* alpha = 0.65 */
-  { 0,   0,   0, 128,   0,   0,   0, 0},
-  { -1,   3, -10, 123,  18,  -6,   2, -1},
-  { -1,   5, -17, 112,  38, -13,   5, -1},
-  { -2,   7, -21,  98,  59, -17,   6, -2},
-  { -2,   7, -20,  79,  79, -20,   7, -2},
-  { -2,   6, -17,  59,  98, -21,   7, -2},
-  { -1,   5, -13,  38, 112, -17,   5, -1},
-  { -1,   2,  -6,  18, 123, -10,   3, -1}
-#endif  /* FILTER_ALPHA_SHARP */
-#endif  /* SUBPEL_SHIFTS==16 */
 };
 
 DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_6[SUBPEL_SHIFTS][6]) = {
-#if SUBPEL_SHIFTS==16
   {0,   0, 128,   0,   0, 0},
   {1,  -5, 125,   8,  -2, 1},
   {1,  -8, 122,  17,  -5, 1},
@@ -224,16 +137,6 @@ DECLARE_ALIGNED(16, const short, vp8_sub_pel_filters_6[SUBPEL_SHIFTS][6]) = {
   {2,  -8,  27, 116, -11, 2},
   {1,  -5,  17, 122,  -8, 1},
   {1,  -2,   8, 125,  -5, 1}
-#else
-  { 0,  0,  128,    0,   0,  0 },         /* note that 1/8 pel positions are just as per alpha -0.5 bicubic */
-  { 0, -6,  123,   12,  -1,  0 },
-  { 2, -11, 108,   36,  -8,  1 },         /* New 1/4 pel 6 tap filter */
-  { 0, -9,   93,   50,  -6,  0 },
-  { 3, -16,  77,   77, -16,  3 },         /* New 1/2 pel 6 tap filter */
-  { 0, -6,   50,   93,  -9,  0 },
-  { 1, -8,   36,  108, -11,  2 },         /* New 1/4 pel 6 tap filter */
-  { 0, -1,   12,  123,  -6,  0 },
-#endif  /* SUBPEL_SHIFTS==16 */
 };
 
 static void filter_block2d_first_pass_6
@@ -255,8 +158,8 @@ static void filter_block2d_first_pass_6
              ((int)src_ptr[-1 * (int)pixel_step] * vp8_filter[1]) +
              ((int)src_ptr[0]                    * vp8_filter[2]) +
              ((int)src_ptr[pixel_step]           * vp8_filter[3]) +
-             ((int)src_ptr[2 * pixel_step]         * vp8_filter[4]) +
-             ((int)src_ptr[3 * pixel_step]         * vp8_filter[5]) +
+             ((int)src_ptr[2 * pixel_step]       * vp8_filter[4]) +
+             ((int)src_ptr[3 * pixel_step]       * vp8_filter[5]) +
              (VP8_FILTER_WEIGHT >> 1);      /* Rounding */
 
       /* Normalize back to 0-255 */

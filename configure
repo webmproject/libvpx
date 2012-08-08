@@ -217,7 +217,6 @@ HAVE_LIST="
 EXPERIMENT_LIST="
     csm
     featureupdates
-    sixteenth_subpel_uv
     comp_intra_pred
     superblocks
     pred_filter

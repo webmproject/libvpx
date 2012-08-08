@@ -13,11 +13,7 @@
 #include "vp8/common/filter.h"
 #include "vp8/common/arm/bilinearfilter_arm.h"
 
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 #define HALFNDX 8
-#else
-#define HALFNDX 4
-#endif
 
 #if HAVE_ARMV6
 
