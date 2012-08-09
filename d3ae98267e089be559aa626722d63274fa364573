@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//36Y\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-09T16:18:48Z",
+      "side": 1,
+      "message": "I don\u0027t like this, since it\u0027s not clear at the location where this is called that this macro will call \u0027continue\u0027. Can\u0027t this be an inline function or so that returns an int so you can call it as if (mv_check_out_of_bounds(mv)) continue?",
+      "revId": "d3ae98267e089be559aa626722d63274fa364573",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
