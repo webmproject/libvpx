@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//3Lc\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T23:32:59Z",
+      "side": 1,
+      "message": "diff should come after sys as it\u0027s local. it can be broken up with a newline in between",
+      "revId": "7aec4eaa1523ef8ceadd12a39a3d184d089f665e",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
