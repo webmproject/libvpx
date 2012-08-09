@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//3PA\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//4ME\u003d",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//4MI\u003d",
         "filename": "tools/lint-hunks.py",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-08-09T07:02:10Z",
       "side": 1,
       "message": "this one is local and should come last, separated from the other imports",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3O8\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//4MI\u003d",
       "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//3Ow\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//4L8\u003d",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//4L4\u003d",
         "filename": "tools/lint-hunks.py",
         "patchSetId": 1
@@ -64,6 +118,24 @@
       "writtenOn": "2012-08-09T07:02:10Z",
       "side": 1,
       "message": "add another blank line",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3Oo\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//4L4\u003d",
       "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//3Ok\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//4L0\u003d",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//4Ls\u003d",
         "filename": "tools/lint-hunks.py",
         "patchSetId": 1
@@ -98,6 +188,24 @@
       "writtenOn": "2012-08-09T07:02:10Z",
       "side": 1,
       "message": "args doesn\u0027t look like it\u0027s used",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3OQ\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "renamed _ to make this clear",
+      "parentUuid": "AAAAPH//4Ls\u003d",
       "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -121,6 +229,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//3OM\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//4Lo\u003d",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//4Lk\u003d",
         "filename": "tools/lint-hunks.py",
         "patchSetId": 1
@@ -132,6 +258,24 @@
       "writtenOn": "2012-08-09T07:02:10Z",
       "side": 1,
       "message": "anyway to avoid the unused \u0027a\u0027 variable?",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3OE\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1000856
+      },
+      "writtenOn": "2012-08-09T22:59:23Z",
+      "side": 1,
+      "message": "I don\u0027t think so.. this is idiomatic use of getopt. renamed _ to make this clear, I suspect that this script may take more options soon.",
+      "parentUuid": "AAAAPH//4Lk\u003d",
       "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
