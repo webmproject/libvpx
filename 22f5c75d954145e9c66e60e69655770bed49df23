@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//4Mw\u003d",
+        "filename": "tools/diff.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T06:46:52Z",
+      "side": 1,
+      "message": "should end in a \u0027.\u0027",
+      "revId": "22f5c75d954145e9c66e60e69655770bed49df23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4M0\u003d",
+        "filename": "tools/intersect-diffs.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T06:46:52Z",
+      "side": 1,
+      "message": "insert 2 blank lines after this",
+      "revId": "22f5c75d954145e9c66e60e69655770bed49df23",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
