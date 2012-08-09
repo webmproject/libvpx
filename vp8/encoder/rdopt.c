@@ -3179,7 +3179,8 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                 x->e_mbd.mode_info_context->mbmi.interp_filter]];
 #endif
 
-          vp8_build_inter16x16_predictors_mby(&x->e_mbd);
+          vp8_build_1st_inter16x16_predictors_mby(&x->e_mbd,
+                                                  xd->predictor, 16);
 
           compmode_cost =
             vp8_cost_bit(get_pred_prob(cm, xd, PRED_COMP), 0);
@@ -3227,7 +3228,9 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
             }
           }
 
-          vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
+          vp8_build_1st_inter16x16_predictors_mbuv(&x->e_mbd,
+                                                   &xd->predictor[256],
+                                                   &xd->predictor[320], 8);
           inter_mode_cost(cpi, x, this_mode, &rate2, &distortion2,
                           &rate_y, &distortion, &rate_uv, &distortion_uv);
           mode_excluded = cpi->common.comp_pred_mode == COMP_PREDICTION_ONLY;
@@ -3294,8 +3297,10 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
         continue;
 
       /* build first and second prediction */
-      vp8_build_inter16x16_predictors_mby(&x->e_mbd);
-      vp8_build_inter16x16_predictors_mbuv(&x->e_mbd);
+      vp8_build_1st_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor,
+                                              16);
+      vp8_build_1st_inter16x16_predictors_mbuv(&x->e_mbd, &xd->predictor[256],
+                                               &xd->predictor[320], 8);
       /* do second round and average the results */
       vp8_build_2nd_inter16x16_predictors_mb(&x->e_mbd, x->e_mbd.predictor,
                                              &x->e_mbd.predictor[256],

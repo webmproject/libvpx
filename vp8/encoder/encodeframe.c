@@ -1606,9 +1606,10 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
         xd->mode_info_context->mbmi.mb_skip_coeff = 0;
 
     } else {
-      vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
-                                         xd->dst.u_buffer, xd->dst.v_buffer,
-                                         xd->dst.y_stride, xd->dst.uv_stride);
+      vp8_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
+                                             xd->dst.u_buffer, xd->dst.v_buffer,
+                                             xd->dst.y_stride,
+                                             xd->dst.uv_stride);
     }
   }
 

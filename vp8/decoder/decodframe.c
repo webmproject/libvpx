@@ -179,9 +179,9 @@ static void skip_recon_mb(VP8D_COMP *pbi, MACROBLOCKD *xd) {
     RECON_INVOKE(&pbi->common.rtcd.recon,
                  build_intra_predictors_mby_s)(xd);
   } else {
-    vp8_build_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
-                                       xd->dst.u_buffer, xd->dst.v_buffer,
-                                       xd->dst.y_stride, xd->dst.uv_stride);
+    vp8_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
+                                           xd->dst.u_buffer, xd->dst.v_buffer,
+                                           xd->dst.y_stride, xd->dst.uv_stride);
 
     if (xd->mode_info_context->mbmi.second_ref_frame) {
       vp8_build_2nd_inter16x16_predictors_mb(xd, xd->dst.y_buffer,

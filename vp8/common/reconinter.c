@@ -478,78 +478,6 @@ void filter_mb(unsigned char *src, int src_stride,
 
 #endif  // CONFIG_PRED_FILTER
 
-void vp8_build_inter16x16_predictors_mbuv(MACROBLOCKD *xd) {
-  unsigned char *uptr, *vptr;
-  unsigned char *upred_ptr = &xd->predictor[256];
-  unsigned char *vpred_ptr = &xd->predictor[320];
-
-  int omv_row = xd->mode_info_context->mbmi.mv.as_mv.row;
-  int omv_col = xd->mode_info_context->mbmi.mv.as_mv.col;
-  int mv_row  = omv_row;
-  int mv_col  = omv_col;
-  int offset;
-  int pre_stride = xd->block[16].pre_stride;
-
-  /* calc uv motion vectors */
-  if (mv_row < 0)
-    mv_row -= 1;
-  else
-    mv_row += 1;
-
-  if (mv_col < 0)
-    mv_col -= 1;
-  else
-    mv_col += 1;
-
-  mv_row /= 2;
-  mv_col /= 2;
-
-  mv_row &= xd->fullpixel_mask;
-  mv_col &= xd->fullpixel_mask;
-
-  offset = (mv_row >> 3) * pre_stride + (mv_col >> 3);
-  uptr = xd->pre.u_buffer + offset;
-  vptr = xd->pre.v_buffer + offset;
-
-#if CONFIG_PRED_FILTER
-  if (xd->mode_info_context->mbmi.pred_filter_enabled) {
-    int i;
-    int len = 7 + (INTERP_EXTEND << 1);
-    unsigned char Temp[32 * 32]; // Input data required by sub-pel filter
-    unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
-    unsigned char *pSrc = uptr;
-    unsigned char *pDst = upred_ptr;
-
-    // U & V
-    for (i = 0; i < 2; i++) {
-      if ((omv_row | omv_col) & 15) {
-        // Copy extended MB into Temp array, applying the spatial filter
-        filter_mb(pSrc - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
-                  Temp, len, len, len);
-
-        // Sub-pel interpolation
-        xd->subpixel_predict8x8(pTemp, len, omv_col & 15,
-                                omv_row & 15, pDst, 8);
-      } else {
-        // Apply prediction filter as we copy from source to destination
-        filter_mb(pSrc, pre_stride, pDst, 8, 8, 8);
-      }
-
-      // V
-      pSrc = vptr;
-      pDst = vpred_ptr;
-    }
-  } else
-#endif
-    if ((omv_row | omv_col) & 15) {
-      xd->subpixel_predict8x8(uptr, pre_stride, omv_col & 15, omv_row & 15, upred_ptr, 8);
-      xd->subpixel_predict8x8(vptr, pre_stride, omv_col & 15, omv_row & 15, vpred_ptr, 8);
-    } else {
-      RECON_INVOKE(&xd->rtcd->recon, copy8x8)(uptr, pre_stride, upred_ptr, 8);
-      RECON_INVOKE(&xd->rtcd->recon, copy8x8)(vptr, pre_stride, vpred_ptr, 8);
-    }
-}
-
 /*encoder only*/
 void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x) {
   int i, j;
@@ -640,49 +568,6 @@ void vp8_build_inter4x4_predictors_mbuv(MACROBLOCKD *x) {
   }
 }
 
-
-/*encoder only*/
-void vp8_build_inter16x16_predictors_mby(MACROBLOCKD *xd) {
-  unsigned char *ptr_base;
-  unsigned char *ptr;
-  unsigned char *pred_ptr = xd->predictor;
-  int mv_row = xd->mode_info_context->mbmi.mv.as_mv.row;
-  int mv_col = xd->mode_info_context->mbmi.mv.as_mv.col;
-  int pre_stride = xd->block[0].pre_stride;
-
-  ptr_base = xd->pre.y_buffer;
-  ptr = ptr_base + (mv_row >> 3) * pre_stride + (mv_col >> 3);
-
-#if CONFIG_PRED_FILTER
-  if (xd->mode_info_context->mbmi.pred_filter_enabled) {
-    // Produce predictor from the filtered source
-    if ((mv_row | mv_col) & 7) {
-      // Sub-pel filter needs extended input
-      int len = 15 + (INTERP_EXTEND << 1);
-      unsigned char Temp[32 * 32]; // Data required by sub-pel filter
-      unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
-
-      // Copy extended MB into Temp array, applying the spatial filter
-      filter_mb(ptr - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
-                Temp, len, len, len);
-
-      // Sub-pel interpolation
-      xd->subpixel_predict16x16(pTemp, len, (mv_col & 7) << 1,
-                                (mv_row & 7) << 1, pred_ptr, 16);
-    } else {
-      // Apply spatial filter to create the prediction directly
-      filter_mb(ptr, pre_stride, pred_ptr, 16, 16, 16);
-    }
-  } else
-#endif
-    if ((mv_row | mv_col) & 7) {
-      xd->subpixel_predict16x16(ptr, pre_stride, (mv_col & 7) << 1,
-                                (mv_row & 7) << 1, pred_ptr, 16);
-    } else {
-      RECON_INVOKE(&xd->rtcd->recon, copy16x16)(ptr, pre_stride, pred_ptr, 16);
-    }
-}
-
 static void clamp_mv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
   /* If the MV points so far into the UMV border that no visible pixels
    * are used for reconstruction, the subpel part of the MV can be
@@ -717,64 +602,70 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
             (xd->mb_to_bottom_edge + (16 << 3)) >> 1 : mv->row;
 }
 
-
-
-void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
-                                        unsigned char *dst_y,
-                                        unsigned char *dst_u,
-                                        unsigned char *dst_v,
-                                        int dst_ystride,
-                                        int dst_uvstride) {
-  int offset;
+/*encoder only*/
+void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
+                                             unsigned char *dst_y,
+                                             int dst_ystride) {
+  unsigned char *ptr_base = xd->pre.y_buffer;
   unsigned char *ptr;
-  unsigned char *uptr, *vptr;
+  int pre_stride = xd->block[0].pre_stride;
+  int_mv ymv;
 
-  int_mv _o16x16mv;
-  int_mv _16x16mv;
+  ymv.as_int = xd->mode_info_context->mbmi.mv.as_int;
 
-  unsigned char *ptr_base = x->pre.y_buffer;
-  int pre_stride = x->block[0].pre_stride;
+  if (xd->mode_info_context->mbmi.need_to_clamp_mvs)
+    clamp_mv_to_umv_border(&ymv.as_mv, xd);
 
-  _16x16mv.as_int = x->mode_info_context->mbmi.mv.as_int;
-
-  if (x->mode_info_context->mbmi.need_to_clamp_mvs) {
-    clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
-  }
-
-  ptr = ptr_base + (_16x16mv.as_mv.row >> 3) * pre_stride +
-        (_16x16mv.as_mv.col >> 3);
+  ptr = ptr_base + (ymv.as_mv.row >> 3) * pre_stride + (ymv.as_mv.col >> 3);
 
 #if CONFIG_PRED_FILTER
-  if (x->mode_info_context->mbmi.pred_filter_enabled) {
-    if (_16x16mv.as_int & 0x00070007) {
+  if (xd->mode_info_context->mbmi.pred_filter_enabled) {
+    if ((ymv.as_mv.row | ymv.as_mv.col) & 7) {
       // Sub-pel filter needs extended input
       int len = 15 + (INTERP_EXTEND << 1);
-      unsigned char Temp[32 * 32]; // Data required by the sub-pel filter
+      unsigned char Temp[32 * 32]; // Data required by sub-pel filter
       unsigned char *pTemp = Temp + (INTERP_EXTEND - 1) * (len + 1);
 
       // Copy extended MB into Temp array, applying the spatial filter
       filter_mb(ptr - (INTERP_EXTEND - 1) * (pre_stride + 1), pre_stride,
                 Temp, len, len, len);
 
-      // Sub-pel filter
-      x->subpixel_predict16x16(pTemp, len,
-                               (_16x16mv.as_mv.col & 7) << 1,
-                               (_16x16mv.as_mv.row & 7) << 1,
-                               dst_y, dst_ystride);
+      // Sub-pel interpolation
+      xd->subpixel_predict16x16(pTemp, len,
+                                (ymv.as_mv.col & 7) << 1,
+                                (ymv.as_mv.row & 7) << 1,
+                                dst_y, dst_ystride);
     } else {
       // Apply spatial filter to create the prediction directly
       filter_mb(ptr, pre_stride, dst_y, dst_ystride, 16, 16);
     }
   } else
 #endif
-    if (_16x16mv.as_int & 0x00070007) {
-      x->subpixel_predict16x16(ptr, pre_stride, (_16x16mv.as_mv.col & 7) << 1,
-                               (_16x16mv.as_mv.row & 7) << 1,
-                               dst_y, dst_ystride);
+    if ((ymv.as_mv.row | ymv.as_mv.col) & 7) {
+      xd->subpixel_predict16x16(ptr, pre_stride,
+                                (ymv.as_mv.col & 7) << 1,
+                                (ymv.as_mv.row & 7) << 1,
+                                dst_y, dst_ystride);
     } else {
-      RECON_INVOKE(&x->rtcd->recon, copy16x16)(ptr, pre_stride, dst_y,
-                                               dst_ystride);
+      RECON_INVOKE(&xd->rtcd->recon, copy16x16)
+          (ptr, pre_stride, dst_y, dst_ystride);
     }
+}
+
+void vp8_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *x,
+                                              unsigned char *dst_u,
+                                              unsigned char *dst_v,
+                                              int dst_uvstride) {
+  int offset;
+  unsigned char *uptr, *vptr;
+  int pre_stride = x->block[0].pre_stride;
+  int_mv _o16x16mv;
+  int_mv _16x16mv;
+
+  _16x16mv.as_int = x->mode_info_context->mbmi.mv.as_int;
+
+  if (x->mode_info_context->mbmi.need_to_clamp_mvs)
+    clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
 
   _o16x16mv = _16x16mv;
   /* calc uv motion vectors */
@@ -837,12 +728,22 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
       RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, pre_stride, dst_u, dst_uvstride);
       RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, pre_stride, dst_v, dst_uvstride);
     }
+}
 
+
+
+void vp8_build_1st_inter16x16_predictors_mb(MACROBLOCKD *x,
+                                            unsigned char *dst_y,
+                                            unsigned char *dst_u,
+                                            unsigned char *dst_v,
+                                            int dst_ystride, int dst_uvstride) {
+  vp8_build_1st_inter16x16_predictors_mby(x, dst_y, dst_ystride);
+  vp8_build_1st_inter16x16_predictors_mbuv(x, dst_u, dst_v, dst_uvstride);
 }
 
 /*
- * This function should be called after an initial call to
- * vp8_build_inter16x16_predictors_mb() or _mby()/_mbuv().
+ * The following functions should be called after an initial
+ * call to vp8_build_inter16x16_predictors_mb() or _mby()/_mbuv().
  * It will run a second sixtap filter on a (different) ref
  * frame and average the result with the output of the
  * first sixtap filter. The second reference frame is stored
@@ -854,30 +755,22 @@ void vp8_build_inter16x16_predictors_mb(MACROBLOCKD *x,
  * which sometimes leads to better prediction than from a
  * single reference framer.
  */
-void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
-                                            unsigned char *dst_y,
-                                            unsigned char *dst_u,
-                                            unsigned char *dst_v,
-                                            int dst_ystride,
-                                            int dst_uvstride) {
-  int offset;
+void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *x,
+                                             unsigned char *dst_y,
+                                             int dst_ystride) {
   unsigned char *ptr;
-  unsigned char *uptr, *vptr;
 
   int_mv _16x16mv;
   int mv_row;
   int mv_col;
-
-  int omv_row, omv_col;
 
   unsigned char *ptr_base = x->second_pre.y_buffer;
   int pre_stride = x->block[0].pre_stride;
 
   _16x16mv.as_int = x->mode_info_context->mbmi.second_mv.as_int;
 
-  if (x->mode_info_context->mbmi.need_to_clamp_secondmv) {
+  if (x->mode_info_context->mbmi.need_to_clamp_secondmv)
     clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
-  }
 
   mv_row = _16x16mv.as_mv.row;
   mv_col = _16x16mv.as_mv.col;
@@ -916,6 +809,29 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
                                               dst_ystride);
     }
   }
+}
+
+void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *x,
+                                              unsigned char *dst_u,
+                                              unsigned char *dst_v,
+                                              int dst_uvstride) {
+  int offset;
+  unsigned char *uptr, *vptr;
+
+  int_mv _16x16mv;
+  int mv_row;
+  int mv_col;
+  int omv_row, omv_col;
+
+  int pre_stride = x->block[0].pre_stride;
+
+  _16x16mv.as_int = x->mode_info_context->mbmi.second_mv.as_int;
+
+  if (x->mode_info_context->mbmi.need_to_clamp_secondmv)
+    clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
+
+  mv_row = _16x16mv.as_mv.row;
+  mv_col = _16x16mv.as_mv.col;
 
   /* calc uv motion vectors */
   omv_row = mv_row;
@@ -970,6 +886,16 @@ void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
       RECON_INVOKE(&x->rtcd->recon, avg8x8)(uptr, pre_stride, dst_u, dst_uvstride);
       RECON_INVOKE(&x->rtcd->recon, avg8x8)(vptr, pre_stride, dst_v, dst_uvstride);
     }
+}
+
+void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
+                                            unsigned char *dst_y,
+                                            unsigned char *dst_u,
+                                            unsigned char *dst_v,
+                                            int dst_ystride,
+                                            int dst_uvstride) {
+  vp8_build_2nd_inter16x16_predictors_mby(x, dst_y, dst_ystride);
+  vp8_build_2nd_inter16x16_predictors_mbuv(x, dst_u, dst_v, dst_uvstride);
 }
 
 static void build_inter4x4_predictors_mb(MACROBLOCKD *x) {
@@ -1142,8 +1068,8 @@ void build_4x4uvmvs(MACROBLOCKD *x) {
 
 void vp8_build_inter_predictors_mb(MACROBLOCKD *x) {
   if (x->mode_info_context->mbmi.mode != SPLITMV) {
-    vp8_build_inter16x16_predictors_mb(x, x->predictor, &x->predictor[256],
-                                       &x->predictor[320], 16, 8);
+    vp8_build_1st_inter16x16_predictors_mb(x, x->predictor, &x->predictor[256],
+                                           &x->predictor[320], 16, 8);
 
     if (x->mode_info_context->mbmi.second_ref_frame) {
       /* 256 = offset of U plane in Y+U+V buffer;
