@@ -1143,7 +1143,7 @@ EOF
     # Almost every platform uses pthreads.
     if enabled multithread; then
         case ${toolchain} in
-            *-win*);;
+            *-win*-vs*);;
             *-android-gcc);;
             *) check_header pthread.h && add_extralibs -lpthread
         esac
