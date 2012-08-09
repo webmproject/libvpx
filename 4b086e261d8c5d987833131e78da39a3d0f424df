@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//4LI\u003d",
+        "filename": "tools/vpx-astyle.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:07:18Z",
+      "side": 1,
+      "message": "BSD sed won\u0027t get along with this, you want -i \u0027\u0027\n\nnote this could all be 1 sed command with multiple -e\u0027s",
+      "revId": "4b086e261d8c5d987833131e78da39a3d0f424df",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
