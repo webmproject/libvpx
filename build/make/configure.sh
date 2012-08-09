@@ -457,7 +457,8 @@ process_common_cmdline() {
         else
             echo "${CMDLINE_SELECT}" | grep "^ *$option\$" >/dev/null ||
                 die_unknown $opt
-        fi        $action $option
+        fi
+        $action $option
         ;;
         --require-?*)
         eval `echo "$opt" | sed 's/--/action=/;s/-/ option=/;s/-/_/g'`
