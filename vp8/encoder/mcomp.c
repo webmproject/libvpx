@@ -205,22 +205,14 @@ void vp8_init3smotion_compensation(MACROBLOCK *x, int stride) {
  */
 
 #define PRE(r,c) (y + (((r)>>2) * y_stride + ((c)>>2) -(offset))) // pointer to predictor base of a motionvector
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 #define SP(x) (((x)&3)<<2) // convert motion vector component to offset for svf calc
-#else
-#define SP(x) (((x)&3)<<1) // convert motion vector component to offset for svf calc
-#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
 #define MVC(r,c) (mvcost ? ((mvcost[0][(r)-rr] + mvcost[1][(c)-rc]) * error_per_bit + 128 )>>8 : 0) // estimated cost of a motion vector (r,c)
 #define DIST(r,c) vfp->svf( PRE(r,c), y_stride, SP(c),SP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
 #define ERR(r,c) (MVC(r,c)+DIST(r,c)) // returns distortion + motion vector cost
 #define IFMVCV(r,c,s,e) if ( c >= minc && c <= maxc && r >= minr && r <= maxr) s else e;
 
 #define PREHP(r,c) (y + (((r)>>3) * y_stride + ((c)>>3) -(offset))) // pointer to predictor base of a motionvector
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 #define SPHP(x) (((x)&7)<<1) // convert motion vector component to offset for svf calc
-#else /* CONFIG_SIXTEENTH_SUBPEL_UV */
-#define SPHP(x) ((x)&7) // convert motion vector component to offset for svf calc
-#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
 #define DISTHP(r,c) vfp->svf( PREHP(r,c), y_stride, SPHP(c),SPHP(r), z,b->src_stride,&sse) // returns subpixel variance error function.
 #define ERRHP(r,c) (MVC(r,c)+DISTHP(r,c)) // returns distortion + motion vector cost
 #define CHECK_BETTER(v,r,c) IFMVCV(r,c,{thismse = ((xd->allow_high_precision_mv)?DISTHP(r,c):DIST(r,c)); if((v = (MVC(r,c)+thismse)) < besterr) { besterr = v; br=r; bc=c; *distortion = thismse; *sse1 = sse; }}, v=INT_MAX;)// checks if (r,c) has better score than previous best
@@ -444,11 +436,7 @@ int vp8_find_best_sub_pixel_step_iteratively(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
 #undef DISTHP
 #undef ERRHP
 
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 #define SP(x) (((x)&7)<<1) // convert motion vector component to offset for svf calc
-#else
-#define SP(x) ((x)&7) // convert motion vector component to offset for svf calc
-#endif  /* CONFIG_SIXTEENTH_SUBPEL_UV */
 int vp8_find_best_sub_pixel_step(MACROBLOCK *x, BLOCK *b, BLOCKD *d,
                                  int_mv *bestmv, int_mv *ref_mv,
                                  int error_per_bit,

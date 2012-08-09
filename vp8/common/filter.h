@@ -18,11 +18,7 @@
 #define VP8_FILTER_WEIGHT 128
 #define VP8_FILTER_SHIFT  7
 
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 #define SUBPEL_SHIFTS 16
-#else
-#define SUBPEL_SHIFTS 8
-#endif
 
 extern const short vp8_bilinear_filters[SUBPEL_SHIFTS][2];
 extern const short vp8_sub_pel_filters_6[SUBPEL_SHIFTS][6];

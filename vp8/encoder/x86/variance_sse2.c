@@ -13,11 +13,7 @@
 #include "vp8/common/pragmas.h"
 #include "vpx_ports/mem.h"
 
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 #define HALFNDX 8
-#else
-#define HALFNDX 4
-#endif
 
 extern void filter_block1d_h6_mmx(const unsigned char *src_ptr, unsigned short *output_ptr, unsigned int src_pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
 extern void filter_block1d_v6_mmx(const short *src_ptr, unsigned char *output_ptr, unsigned int pixels_per_line, unsigned int pixel_step, unsigned int output_height, unsigned int output_width, short *vp7_filter);
@@ -141,11 +137,7 @@ void vp8_half_vert_variance16x_h_sse2
   unsigned int *sumsquared
 );
 
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[16][8]);
-#else
-DECLARE_ALIGNED(16, extern short, vp8_vp7_bilinear_filters_mmx[8][8]);
-#endif
 
 unsigned int vp8_variance4x4_wmt(
   const unsigned char *src_ptr,

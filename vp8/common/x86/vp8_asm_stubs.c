@@ -13,15 +13,8 @@
 #include "vpx_ports/mem.h"
 #include "vp8/common/subpixel.h"
 
-#if CONFIG_SIXTEENTH_SUBPEL_UV
 extern const short vp8_six_tap_mmx[16][6 * 8];
 extern const short vp8_bilinear_filters_mmx[16][2 * 8];
-#else
-extern const short vp8_six_tap_mmx[8][6 * 8];
-extern const short vp8_bilinear_filters_mmx[8][2 * 8];
-#endif
-
-// #define ANNOUNCE_FUNCTION
 
 extern void vp8_filter_block1d_h6_mmx
 (

@@ -518,17 +518,10 @@ int VP8_UVSSE(MACROBLOCK *x, const vp8_variance_rtcd_vtable_t *rtcd) {
   vptr = x->e_mbd.pre.v_buffer + offset;
 
   if ((mv_row | mv_col) & 7) {
-#if CONFIG_SIXTEENTH_SUBPEL_UV
     VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride,
                                         (mv_col & 7) << 1, (mv_row & 7) << 1, upred_ptr, uv_stride, &sse2);
     VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride,
                                         (mv_col & 7) << 1, (mv_row & 7) << 1, vpred_ptr, uv_stride, &sse1);
-#else
-    VARIANCE_INVOKE(rtcd, subpixvar8x8)(uptr, pre_stride,
-                                        mv_col & 7, mv_row & 7, upred_ptr, uv_stride, &sse2);
-    VARIANCE_INVOKE(rtcd, subpixvar8x8)(vptr, pre_stride,
-                                        mv_col & 7, mv_row & 7, vpred_ptr, uv_stride, &sse1);
-#endif
     sse2 += sse1;
   } else {
     VARIANCE_INVOKE(rtcd, var8x8)(uptr, pre_stride,
