@@ -1,0 +1,140 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//4ME\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "should end in a \u0027.\u0027",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4MI\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "this one is local and should come last, separated from the other imports",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4L8\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "whitespace around operators",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4L4\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "add another blank line",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4L0\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "add another blank line",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4Ls\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "args doesn\u0027t look like it\u0027s used",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4Lo\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "bad indent",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//4Lk\u003d",
+        "filename": "tools/lint-hunks.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T07:02:10Z",
+      "side": 1,
+      "message": "anyway to avoid the unused \u0027a\u0027 variable?",
+      "revId": "11f06baf6b43d83dde26d2c8c8bcef53481e0c95",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
