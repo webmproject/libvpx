@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//37g\u003d",
+        "filename": "vp8/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 790,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-09T16:13:19Z",
+      "side": 1,
+      "message": "can you rename these functions to build_1st_inter16x16... while you\u0027re at it, so it\u0027s clear they only do the first run (as opposed to vp8_build_inter_predictors(), which does both)?",
+      "revId": "d216d5876462c5b5900b351b260bb83614a31624",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//368\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 3188,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-09T16:13:19Z",
+      "side": 1,
+      "message": "xd-\u003epredictor",
+      "revId": "d216d5876462c5b5900b351b260bb83614a31624",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
