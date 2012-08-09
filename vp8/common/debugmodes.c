@@ -108,7 +108,8 @@ void vp8_print_modes_and_motion_vectors(MODE_INFO *mi, int rows, int cols, int f
 
   for (mb_row = 0; mb_row < rows; mb_row++) {
     for (mb_col = 0; mb_col < cols; mb_col++) {
-      fprintf(mvs, "%5d:%-5d", mi[mb_index].mbmi.mv.as_mv.row / 2, mi[mb_index].mbmi.mv.as_mv.col / 2);
+      fprintf(mvs, "%5d:%-5d", mi[mb_index].mbmi.mv[0].as_mv.row / 2,
+          mi[mb_index].mbmi.mv[0].as_mv.col / 2);
 
       mb_index++;
     }

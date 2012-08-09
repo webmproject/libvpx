@@ -68,9 +68,9 @@ void vp8_find_near_mvs
 
   /* Process above */
   if (above->mbmi.ref_frame != INTRA_FRAME) {
-    if (above->mbmi.mv.as_int) {
+    if (above->mbmi.mv[0].as_int) {
       ++ mv;
-      mv->as_int = above->mbmi.mv.as_int;
+      mv->as_int = above->mbmi.mv[0].as_int;
       mv_bias(ref_frame_sign_bias[above->mbmi.ref_frame],
               refframe, mv, ref_frame_sign_bias);
 #if CONFIG_NEWBESTREFMV
@@ -83,9 +83,9 @@ void vp8_find_near_mvs
 
   /* Process left */
   if (left->mbmi.ref_frame != INTRA_FRAME) {
-    if (left->mbmi.mv.as_int) {
+    if (left->mbmi.mv[0].as_int) {
       int_mv this_mv;
-      this_mv.as_int = left->mbmi.mv.as_int;
+      this_mv.as_int = left->mbmi.mv[0].as_int;
       mv_bias(ref_frame_sign_bias[left->mbmi.ref_frame],
               refframe, &this_mv, ref_frame_sign_bias);
 #if CONFIG_NEWBESTREFMV
@@ -103,14 +103,14 @@ void vp8_find_near_mvs
   /* Process above left or the one from last frame */
   if (aboveleft->mbmi.ref_frame != INTRA_FRAME ||
       (lf_here->mbmi.ref_frame == LAST_FRAME && refframe == LAST_FRAME)) {
-    if (aboveleft->mbmi.mv.as_int) {
+    if (aboveleft->mbmi.mv[0].as_int) {
       third = aboveleft;
 #if CONFIG_NEWBESTREFMV
       ref_mv[2].as_int = aboveleft->mbmi.mv.as_int;
       mv_bias(ref_frame_sign_bias[aboveleft->mbmi.ref_frame],
               refframe, (ref_mv+2), ref_frame_sign_bias);
 #endif
-    } else if (lf_here->mbmi.mv.as_int) {
+    } else if (lf_here->mbmi.mv[0].as_int) {
       third = lf_here;
     }
 #if CONFIG_NEWBESTREFMV
@@ -122,7 +122,7 @@ void vp8_find_near_mvs
 #endif
     if (third) {
       int_mv this_mv;
-      this_mv.as_int = third->mbmi.mv.as_int;
+      this_mv.as_int = third->mbmi.mv[0].as_int;
       mv_bias(ref_frame_sign_bias[third->mbmi.ref_frame],
               refframe, &this_mv, ref_frame_sign_bias);
 

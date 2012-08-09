@@ -96,7 +96,7 @@ static int left_block_mv(const MODE_INFO *cur_mb, int b) {
     --cur_mb;
 
     if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.mv.as_int;
+      return cur_mb->mbmi.mv[0].as_int;
     b += 4;
   }
 
@@ -109,7 +109,7 @@ static int left_block_second_mv(const MODE_INFO *cur_mb, int b) {
     --cur_mb;
 
     if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame ? cur_mb->mbmi.second_mv.as_int : cur_mb->mbmi.mv.as_int;
+      return cur_mb->mbmi.second_ref_frame ? cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
     b += 4;
   }
 
@@ -122,7 +122,7 @@ static int above_block_mv(const MODE_INFO *cur_mb, int b, int mi_stride) {
     cur_mb -= mi_stride;
 
     if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.mv.as_int;
+      return cur_mb->mbmi.mv[0].as_int;
     b += 16;
   }
 
@@ -135,7 +135,7 @@ static int above_block_second_mv(const MODE_INFO *cur_mb, int b, int mi_stride) 
     cur_mb -= mi_stride;
 
     if (cur_mb->mbmi.mode != SPLITMV)
-      return cur_mb->mbmi.second_ref_frame ? cur_mb->mbmi.second_mv.as_int : cur_mb->mbmi.mv.as_int;
+      return cur_mb->mbmi.second_ref_frame ? cur_mb->mbmi.mv[1].as_int : cur_mb->mbmi.mv[0].as_int;
     b += 16;
   }
 

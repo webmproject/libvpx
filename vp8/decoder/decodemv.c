@@ -867,7 +867,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       }
 
       mv->as_int = mi->bmi[15].as_mv.first.as_int;
-      mbmi->second_mv.as_int = mi->bmi[15].as_mv.second.as_int;
+      mbmi->mv[1].as_int = mi->bmi[15].as_mv.second.as_int;
 
       break;  /* done with SPLITMV */
 
@@ -877,8 +877,8 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
                      mb_to_top_edge, mb_to_bottom_edge);
         if (mbmi->second_ref_frame) {
-          mbmi->second_mv.as_int = nearby_second.as_int;
-          vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
+          mbmi->mv[1].as_int = nearby_second.as_int;
+          vp8_clamp_mv(&mbmi->mv[1], mb_to_left_edge, mb_to_right_edge,
                        mb_to_top_edge, mb_to_bottom_edge);
         }
         break;
@@ -889,8 +889,8 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
         vp8_clamp_mv(mv, mb_to_left_edge, mb_to_right_edge,
                      mb_to_top_edge, mb_to_bottom_edge);
         if (mbmi->second_ref_frame) {
-          mbmi->second_mv.as_int = nearest_second.as_int;
-          vp8_clamp_mv(&mbmi->second_mv, mb_to_left_edge, mb_to_right_edge,
+          mbmi->mv[1].as_int = nearest_second.as_int;
+          vp8_clamp_mv(&mbmi->mv[1], mb_to_left_edge, mb_to_right_edge,
                        mb_to_top_edge, mb_to_bottom_edge);
         }
         break;
@@ -898,7 +898,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
       case ZEROMV:
         mv->as_int = 0;
         if (mbmi->second_ref_frame)
-          mbmi->second_mv.as_int = 0;
+          mbmi->mv[1].as_int = 0;
         break;
 
       case NEWMV:
@@ -926,22 +926,20 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
                                                       mb_to_bottom_edge);
         if (mbmi->second_ref_frame) {
           if (xd->allow_high_precision_mv) {
-            read_mv_hp(bc, &mbmi->second_mv.as_mv,
-                       (const MV_CONTEXT_HP *) mvc_hp);
-            cm->fc.MVcount_hp[0][mv_max_hp + (mbmi->second_mv.as_mv.row)]++;
-            cm->fc.MVcount_hp[1][mv_max_hp + (mbmi->second_mv.as_mv.col)]++;
+            read_mv_hp(bc, &mbmi->mv[1].as_mv, (const MV_CONTEXT_HP *) mvc_hp);
+            cm->fc.MVcount_hp[0][mv_max_hp + (mbmi->mv[1].as_mv.row)]++;
+            cm->fc.MVcount_hp[1][mv_max_hp + (mbmi->mv[1].as_mv.col)]++;
           } else {
-            read_mv(bc, &mbmi->second_mv.as_mv, (const MV_CONTEXT *) mvc);
-            cm->fc.MVcount[0][mv_max + (mbmi->second_mv.as_mv.row >> 1)]++;
-            cm->fc.MVcount[1][mv_max + (mbmi->second_mv.as_mv.col >> 1)]++;
+            read_mv(bc, &mbmi->mv[1].as_mv, (const MV_CONTEXT *) mvc);
+            cm->fc.MVcount[0][mv_max + (mbmi->mv[1].as_mv.row >> 1)]++;
+            cm->fc.MVcount[1][mv_max + (mbmi->mv[1].as_mv.col >> 1)]++;
           }
-          mbmi->second_mv.as_mv.row += best_mv_second.as_mv.row;
-          mbmi->second_mv.as_mv.col += best_mv_second.as_mv.col;
-          mbmi->need_to_clamp_secondmv |= vp8_check_mv_bounds(&mbmi->second_mv,
-                                                              mb_to_left_edge,
-                                                              mb_to_right_edge,
-                                                              mb_to_top_edge,
-                                                              mb_to_bottom_edge);
+          mbmi->mv[1].as_mv.row += best_mv_second.as_mv.row;
+          mbmi->mv[1].as_mv.col += best_mv_second.as_mv.col;
+          mbmi->need_to_clamp_secondmv |=
+            vp8_check_mv_bounds(&mbmi->mv[1],
+                                mb_to_left_edge, mb_to_right_edge,
+                                mb_to_top_edge, mb_to_bottom_edge);
         }
         break;
       default:
@@ -952,7 +950,7 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
     }
   } else {
     /* required for left and above block mv */
-    mbmi->mv.as_int = 0;
+    mbmi->mv[0].as_int = 0;
 
     if (segfeature_active(xd, mbmi->segment_id, SEG_LVL_MODE))
       mbmi->mode = (MB_PREDICTION_MODE)

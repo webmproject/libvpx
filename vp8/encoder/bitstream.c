@@ -1007,20 +1007,16 @@ static void pack_inter_mode_mvs(VP8_COMP *const cpi) {
                 active_section = 5;
 #endif
 
-                if (xd->allow_high_precision_mv) {
-                  write_mv_hp(w, &mi->mv.as_mv, &best_mv, mvc_hp);
-                } else {
-                  write_mv(w, &mi->mv.as_mv, &best_mv, mvc);
-                }
+                if (xd->allow_high_precision_mv)
+                  write_mv_hp(w, &mi->mv[0].as_mv, &best_mv, mvc_hp);
+                else
+                  write_mv(w, &mi->mv[0].as_mv, &best_mv, mvc);
 
                 if (mi->second_ref_frame) {
-                  if (xd->allow_high_precision_mv) {
-                    write_mv_hp(w, &mi->second_mv.as_mv,
-                                &best_second_mv, mvc_hp);
-                  } else {
-                    write_mv(w, &mi->second_mv.as_mv,
-                             &best_second_mv, mvc);
-                  }
+                  if (xd->allow_high_precision_mv)
+                    write_mv_hp(w, &mi->mv[1].as_mv, &best_second_mv, mvc_hp);
+                  else
+                    write_mv(w, &mi->mv[1].as_mv, &best_second_mv, mvc);
                 }
                 break;
               case SPLITMV: {

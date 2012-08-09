@@ -30,6 +30,13 @@ extern void vp8_build_1st_inter16x16_predictors_mb(MACROBLOCKD *x,
                                                    int dst_ystride,
                                                    int dst_uvstride);
 
+extern void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *x,
+                                                    unsigned char *dst_y,
+                                                    int dst_ystride);
+extern void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *x,
+                                                     unsigned char *dst_u,
+                                                     unsigned char *dst_v,
+                                                     int dst_uvstride);
 extern void vp8_build_2nd_inter16x16_predictors_mb(MACROBLOCKD *x,
                                                    unsigned char *dst_y,
                                                    unsigned char *dst_u,

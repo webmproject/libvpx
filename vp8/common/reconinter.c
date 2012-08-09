@@ -611,7 +611,7 @@ void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
   int pre_stride = xd->block[0].pre_stride;
   int_mv ymv;
 
-  ymv.as_int = xd->mode_info_context->mbmi.mv.as_int;
+  ymv.as_int = xd->mode_info_context->mbmi.mv[0].as_int;
 
   if (xd->mode_info_context->mbmi.need_to_clamp_mvs)
     clamp_mv_to_umv_border(&ymv.as_mv, xd);
@@ -662,7 +662,7 @@ void vp8_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *x,
   int_mv _o16x16mv;
   int_mv _16x16mv;
 
-  _16x16mv.as_int = x->mode_info_context->mbmi.mv.as_int;
+  _16x16mv.as_int = x->mode_info_context->mbmi.mv[0].as_int;
 
   if (x->mode_info_context->mbmi.need_to_clamp_mvs)
     clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
@@ -767,7 +767,7 @@ void vp8_build_2nd_inter16x16_predictors_mby(MACROBLOCKD *x,
   unsigned char *ptr_base = x->second_pre.y_buffer;
   int pre_stride = x->block[0].pre_stride;
 
-  _16x16mv.as_int = x->mode_info_context->mbmi.second_mv.as_int;
+  _16x16mv.as_int = x->mode_info_context->mbmi.mv[1].as_int;
 
   if (x->mode_info_context->mbmi.need_to_clamp_secondmv)
     clamp_mv_to_umv_border(&_16x16mv.as_mv, x);
@@ -825,7 +825,7 @@ void vp8_build_2nd_inter16x16_predictors_mbuv(MACROBLOCKD *x,
 
   int pre_stride = x->block[0].pre_stride;
 
-  _16x16mv.as_int = x->mode_info_context->mbmi.second_mv.as_int;
+  _16x16mv.as_int = x->mode_info_context->mbmi.mv[1].as_int;
 
   if (x->mode_info_context->mbmi.need_to_clamp_secondmv)
     clamp_mv_to_umv_border(&_16x16mv.as_mv, x);

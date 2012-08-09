@@ -3574,7 +3574,7 @@ static void encode_frame_to_data_rate
       for (mb_row = 0; mb_row < cm->mb_rows + 1; mb_row ++) {
         for (mb_col = 0; mb_col < cm->mb_cols + 1; mb_col ++) {
           if (tmp->mbmi.ref_frame != INTRA_FRAME)
-            cpi->lfmv[mb_col + mb_row * (cm->mode_info_stride + 1)].as_int = tmp->mbmi.mv.as_int;
+            cpi->lfmv[mb_col + mb_row * (cm->mode_info_stride + 1)].as_int = tmp->mbmi.mv[0].as_int;
 
           cpi->lf_ref_frame_sign_bias[mb_col + mb_row * (cm->mode_info_stride + 1)] = cm->ref_frame_sign_bias[tmp->mbmi.ref_frame];
           cpi->lf_ref_frame[mb_col + mb_row * (cm->mode_info_stride + 1)] = tmp->mbmi.ref_frame;

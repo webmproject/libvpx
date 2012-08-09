@@ -266,7 +266,7 @@ typedef struct {
 #endif
   MV_REFERENCE_FRAME ref_frame, second_ref_frame;
   TX_SIZE txfm_size;
-  int_mv mv, second_mv;
+  int_mv mv[2]; // for each reference frame used
 #if CONFIG_NEWBESTREFMV
   int_mv ref_mv, second_ref_mv;
 #endif

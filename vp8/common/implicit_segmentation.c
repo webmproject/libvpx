@@ -139,7 +139,7 @@ void segment_via_mode_info(VP8_COMMON *oci, int how) {
           n = mi[mb_index].mbmi.mode;
           break;
         case SEGMENT_MV:
-          n = mi[mb_index].mbmi.mv.as_int;
+          n = mi[mb_index].mbmi.mv[0].as_int;
           if (mi[mb_index].mbmi.ref_frame == INTRA_FRAME)
             n = -9999999;
           break;
@@ -243,7 +243,8 @@ void segment_via_mode_info(VP8_COMMON *oci, int how) {
       printf("            ");
       for (j = 0; j < oci->mb_cols; j++, mb_index++) {
         // printf("%3d",mi[mb_index].mbmi.mode );
-        printf("%4d:%4d", mi[mb_index].mbmi.mv.as_mv.row, mi[mb_index].mbmi.mv.as_mv.col);
+        printf("%4d:%4d", mi[mb_index].mbmi.mv[0].as_mv.row,
+            mi[mb_index].mbmi.mv[0].as_mv.col);
       }
       printf("\n");
       ++mb_index;
