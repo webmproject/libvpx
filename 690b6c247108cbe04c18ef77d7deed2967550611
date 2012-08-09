@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//3MU\u003d",
+        "filename": "tools/ftfy.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T23:22:23Z",
+      "side": 1,
+      "message": "\"$f\" ?",
+      "revId": "690b6c247108cbe04c18ef77d7deed2967550611",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3MQ\u003d",
+        "filename": "tools/vpx-astyle.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T23:22:23Z",
+      "side": 1,
+      "message": "/bin/sh",
+      "revId": "690b6c247108cbe04c18ef77d7deed2967550611",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3Ls\u003d",
+        "filename": "tools/vpx-astyle.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T23:22:23Z",
+      "side": 1,
+      "message": "21-22 can be merged with some grouping on a character set",
+      "revId": "690b6c247108cbe04c18ef77d7deed2967550611",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3L4\u003d",
+        "filename": "tools/vpx-astyle.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T23:22:23Z",
+      "side": 1,
+      "message": "[[:space:]] ?",
+      "revId": "690b6c247108cbe04c18ef77d7deed2967550611",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3L0\u003d",
+        "filename": "tools/vpx-astyle.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T23:22:23Z",
+      "side": 1,
+      "message": "23-24 can be merged with some grouping and a \\1 in the replace",
+      "revId": "690b6c247108cbe04c18ef77d7deed2967550611",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//3L8\u003d",
+        "filename": "tools/vpx-astyle.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-09T23:22:23Z",
+      "side": 1,
+      "message": "should this allow for whitespace after the \u0027,\u0027?",
+      "revId": "690b6c247108cbe04c18ef77d7deed2967550611",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
