@@ -9,7 +9,6 @@
  */
 
 #include "vp8/encoder/denoising.h"
-
 #include "vp8/common/reconinter.h"
 #include "vpx/vpx_integer.h"
 #include "vpx_mem/vpx_mem.h"
@@ -19,7 +18,7 @@
 
 union sum_union {
     __m128i v;
-    short e[8];
+    signed char e[16];
 };
 
 int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
@@ -27,128 +26,94 @@ int vp8_denoiser_filter_sse2(YV12_BUFFER_CONFIG *mc_running_avg,
                              MACROBLOCK *signal, unsigned int motion_magnitude,
                              int y_offset, int uv_offset)
 {
-    unsigned char filtered_buf[16*16];
-    unsigned char *filtered = filtered_buf;
     unsigned char *sig = signal->thismb;
     int sig_stride = 16;
     unsigned char *mc_running_avg_y = mc_running_avg->y_buffer + y_offset;
     int mc_avg_y_stride = mc_running_avg->y_stride;
     unsigned char *running_avg_y = running_avg->y_buffer + y_offset;
     int avg_y_stride = running_avg->y_stride;
-    const union coeff_pair *LUT = vp8_get_filter_coeff_LUT(motion_magnitude);
-    int r, c;
-    __m128i acc_diff = { 0 };
+    int r;
+    __m128i acc_diff = _mm_setzero_si128();
+    const __m128i k_0 = _mm_setzero_si128();
+    const __m128i k_4 = _mm_set1_epi8(4);
+    const __m128i k_8 = _mm_set1_epi8(8);
+    const __m128i k_16 = _mm_set1_epi8(16);
+    /* Modify each level's adjustment according to motion_magnitude. */
+    const __m128i l3 = _mm_set1_epi8(
+                      (motion_magnitude <= MOTION_MAGNITUDE_THRESHOLD) ? 7 : 6);
+    /* Difference between level 3 and level 2 is 2. */
+    const __m128i l32 = _mm_set1_epi8(2);
+    /* Difference between level 2 and level 1 is 1. */
+    const __m128i l21 = _mm_set1_epi8(1);
 
     for (r = 0; r < 16; ++r)
     {
-        __m128i filter_coefficient_00, filter_coefficient_04;
-        __m128i filter_coefficient_08, filter_coefficient_12;
-        __m128i v_sig0, v_sig1;
-        __m128i v_mc_running_avg_y0, v_mc_running_avg_y1;
-        __m128i state0, state1, state2, state3;
-        __m128i res0, res1, res2, res3;
+        /* Calculate differences */
+        const __m128i v_sig = _mm_loadu_si128((__m128i *)(&sig[0]));
+        const __m128i v_mc_running_avg_y = _mm_loadu_si128(
+                                           (__m128i *)(&mc_running_avg_y[0]));
         __m128i v_running_avg_y;
-        __m128i diff0, diff1, diff0sq, diff1sq, diff_sq;
-        const __m128i kNOISE_DIFF2_THRESHOLD =
-                _mm_set1_epi8(NOISE_DIFF2_THRESHOLD);
-        __m128i take_running, p0, p1, p2;
-        const __m128i k_zero = _mm_set1_epi16(0);
-        const __m128i k_128 = _mm_set1_epi32(128);
+        const __m128i pdiff = _mm_subs_epu8(v_mc_running_avg_y, v_sig);
+        const __m128i ndiff = _mm_subs_epu8(v_sig, v_mc_running_avg_y);
+        /* Obtain the sign. FF if diff is negative. */
+        const __m128i diff_sign = _mm_cmpeq_epi8(pdiff, k_0);
+        /* Clamp absolute difference to 16 to be used to get mask. Doing this
+         * allows us to use _mm_cmpgt_epi8, which operates on signed byte. */
+        const __m128i clamped_absdiff = _mm_min_epu8(
+                                        _mm_or_si128(pdiff, ndiff), k_16);
+        /* Get masks for l2 l1 and l0 adjustments */
+        const __m128i mask2 = _mm_cmpgt_epi8(k_16, clamped_absdiff);
+        const __m128i mask1 = _mm_cmpgt_epi8(k_8, clamped_absdiff);
+        const __m128i mask0 = _mm_cmpgt_epi8(k_4, clamped_absdiff);
+        /* Get adjustments for l2, l1, and l0 */
+        __m128i adj2 = _mm_and_si128(mask2, l32);
+        const __m128i adj1 = _mm_and_si128(mask1, l21);
+        const __m128i adj0 = _mm_and_si128(mask0, clamped_absdiff);
+        __m128i adj,  padj, nadj;
 
-        /* Calculate absolute differences */
-        DECLARE_ALIGNED_ARRAY(16,unsigned char,abs_diff,16);
-        DECLARE_ALIGNED_ARRAY(16,uint32_t,filter_coefficient,16);
-        __m128i v_sig = _mm_loadu_si128((__m128i *)(&sig[0]));
-        __m128i v_mc_running_avg_y = _mm_loadu_si128(
-                                         (__m128i *)(&mc_running_avg_y[0]));
-        __m128i a_minus_b = _mm_subs_epu8(v_sig, v_mc_running_avg_y);
-        __m128i b_minus_a = _mm_subs_epu8(v_mc_running_avg_y, v_sig);
-        __m128i v_abs_diff = _mm_adds_epu8(a_minus_b, b_minus_a);
-        _mm_store_si128((__m128i *)(&abs_diff[0]), v_abs_diff);
+        /* Combine the adjustments and get absolute adjustments. */
+        adj2 = _mm_add_epi8(adj2, adj1);
+        adj = _mm_sub_epi8(l3, adj2);
+        adj = _mm_andnot_si128(mask0, adj);
+        adj = _mm_or_si128(adj, adj0);
 
-        /* Use LUT to get filter coefficients (two 16b value; f and 256-f) */
-        for (c = 0; c < 16; ++c)
-        {
-            filter_coefficient[c] = LUT[abs_diff[c]].as_int;
-        }
+        /* Restore the sign and get positive and negative adjustments. */
+        padj = _mm_andnot_si128(diff_sign, adj);
+        nadj = _mm_and_si128(diff_sign, adj);
 
-        /* Filtering... */
-        /* load filter coefficients (two 16b value; f and 256-f) */
-        filter_coefficient_00 = _mm_load_si128(
-                (__m128i *)(&filter_coefficient[ 0]));
-        filter_coefficient_04 = _mm_load_si128(
-                (__m128i *)(&filter_coefficient[ 4]));
-        filter_coefficient_08 = _mm_load_si128(
-                (__m128i *)(&filter_coefficient[ 8]));
-        filter_coefficient_12 = _mm_load_si128(
-                (__m128i *)(&filter_coefficient[12]));
+        /* Calculate filtered value. */
+        v_running_avg_y = _mm_adds_epu8(v_sig, padj);
+        v_running_avg_y = _mm_subs_epu8(v_running_avg_y, nadj);
+        _mm_storeu_si128((__m128i *)running_avg_y, v_running_avg_y);
 
-        /* expand sig from 8b to 16b */
-        v_sig0 = _mm_unpacklo_epi8(v_sig, k_zero);
-        v_sig1 = _mm_unpackhi_epi8(v_sig, k_zero);
-        /* expand mc_running_avg_y from 8b to 16b */
-        v_mc_running_avg_y0 = _mm_unpacklo_epi8(v_mc_running_avg_y, k_zero);
-        v_mc_running_avg_y1 = _mm_unpackhi_epi8(v_mc_running_avg_y, k_zero);
-        /* interleave sig and mc_running_avg_y for upcoming multiply-add */
-        state0 = _mm_unpacklo_epi16(v_mc_running_avg_y0, v_sig0);
-        state1 = _mm_unpackhi_epi16(v_mc_running_avg_y0, v_sig0);
-        state2 = _mm_unpacklo_epi16(v_mc_running_avg_y1, v_sig1);
-        state3 = _mm_unpackhi_epi16(v_mc_running_avg_y1, v_sig1);
-        /* blend values */
-        res0 = _mm_madd_epi16(filter_coefficient_00, state0);
-        res1 = _mm_madd_epi16(filter_coefficient_04, state1);
-        res2 = _mm_madd_epi16(filter_coefficient_08, state2);
-        res3 = _mm_madd_epi16(filter_coefficient_12, state3);
-        res0 = _mm_add_epi32(res0, k_128);
-        res1 = _mm_add_epi32(res1, k_128);
-        res2 = _mm_add_epi32(res2, k_128);
-        res3 = _mm_add_epi32(res3, k_128);
-        res0 = _mm_srai_epi32(res0, 8);
-        res1 = _mm_srai_epi32(res1, 8);
-        res2 = _mm_srai_epi32(res2, 8);
-        res3 = _mm_srai_epi32(res3, 8);
-        /* combine the 32b results into a single 8b vector */
-        res0 = _mm_packs_epi32(res0, res1);
-        res2 = _mm_packs_epi32(res2, res3);
-        v_running_avg_y = _mm_packus_epi16(res0, res2);
-
-        /* Depending on the magnitude of the difference between the signal and
-         * filtered version, either replace the signal by the filtered one or
-         * update the filter state with the signal when the change in a pixel
-         * isn't classified as noise.
+        /* Adjustments <=7, and each element in acc_diff can fit in signed
+         * char.
          */
-        diff0 = _mm_sub_epi16(v_sig0, res0);
-        diff1 = _mm_sub_epi16(v_sig1, res2);
-        acc_diff = _mm_add_epi16(acc_diff, _mm_add_epi16(diff0, diff1));
-
-        diff0sq = _mm_mullo_epi16(diff0, diff0);
-        diff1sq = _mm_mullo_epi16(diff1, diff1);
-        diff_sq = _mm_packus_epi16(diff0sq, diff1sq);
-        take_running = _mm_cmplt_epi8(diff_sq, kNOISE_DIFF2_THRESHOLD);
-        p0 = _mm_and_si128(take_running, v_running_avg_y);
-        p1 = _mm_andnot_si128(take_running, v_sig);
-        p2 = _mm_or_si128(p0, p1);
-        _mm_storeu_si128((__m128i *)(&running_avg_y[0]), p2);
-        _mm_storeu_si128((__m128i *)(&filtered[0]), p2);
+        acc_diff = _mm_adds_epi8(acc_diff, padj);
+        acc_diff = _mm_subs_epi8(acc_diff, nadj);
 
         /* Update pointers for next iteration. */
         sig += sig_stride;
-        filtered += 16;
         mc_running_avg_y += mc_avg_y_stride;
         running_avg_y += avg_y_stride;
     }
+
     {
         /* Compute the sum of all pixel differences of this MB. */
         union sum_union s;
-        int sum_diff;
+        int sum_diff = 0;
         s.v = acc_diff;
-        sum_diff = s.e[0] + s.e[1] + s.e[2] + s.e[3] +
-          s.e[4] + s.e[5] + s.e[6] + s.e[7];
+        sum_diff = s.e[0] + s.e[1] + s.e[2] + s.e[3] + s.e[4] + s.e[5]
+                 + s.e[6] + s.e[7] + s.e[8] + s.e[9] + s.e[10] + s.e[11]
+                 + s.e[12] + s.e[13] + s.e[14] + s.e[15];
+
         if (abs(sum_diff) > SUM_DIFF_THRESHOLD)
         {
             return COPY_BLOCK;
         }
     }
-    vp8_copy_mem16x16(filtered_buf, 16, signal->thismb, sig_stride);
+
+    vp8_copy_mem16x16(running_avg->y_buffer + y_offset, avg_y_stride,
+                      signal->thismb, sig_stride);
     return FILTER_BLOCK;
 }
