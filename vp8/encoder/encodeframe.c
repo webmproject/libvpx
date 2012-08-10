@@ -1146,7 +1146,7 @@ static void encode_frame_internal(VP8_COMP *cpi) {
   // re-initencode frame context.
   init_encode_frame_mb_context(cpi);
 
-  cpi->rd_single_diff = cpi->rd_comp_diff = cpi->rd_hybrid_diff = 0;
+  vpx_memset(cpi->rd_comp_pred_diff, 0, sizeof(cpi->rd_comp_pred_diff));
   vpx_memset(cpi->single_pred_count, 0, sizeof(cpi->single_pred_count));
   vpx_memset(cpi->comp_pred_count, 0, sizeof(cpi->comp_pred_count));
 
@@ -1211,8 +1211,7 @@ static int check_dual_ref_flags(VP8_COMP *cpi) {
 
 void vp8_encode_frame(VP8_COMP *cpi) {
   if (cpi->sf.RD) {
-    int frame_type, pred_type;
-    int single_diff, comp_diff, hybrid_diff;
+    int i, frame_type, pred_type;
 
     /*
      * This code does a single RD pass over the whole frame assuming
@@ -1250,20 +1249,15 @@ void vp8_encode_frame(VP8_COMP *cpi) {
     cpi->common.comp_pred_mode = pred_type;
     encode_frame_internal(cpi);
 
-    single_diff = cpi->rd_single_diff / cpi->common.MBs;
-    cpi->rd_prediction_type_threshes[frame_type][0] += single_diff;
-    cpi->rd_prediction_type_threshes[frame_type][0] >>= 1;
-    comp_diff   = cpi->rd_comp_diff   / cpi->common.MBs;
-    cpi->rd_prediction_type_threshes[frame_type][1] += comp_diff;
-    cpi->rd_prediction_type_threshes[frame_type][1] >>= 1;
-    hybrid_diff = cpi->rd_hybrid_diff / cpi->common.MBs;
-    cpi->rd_prediction_type_threshes[frame_type][2] += hybrid_diff;
-    cpi->rd_prediction_type_threshes[frame_type][2] >>= 1;
+    for (i = 0; i < NB_PREDICTION_TYPES; ++i) {
+      int diff = cpi->rd_comp_pred_diff[i] / cpi->common.MBs;
+      cpi->rd_prediction_type_threshes[frame_type][i] += diff;
+      cpi->rd_prediction_type_threshes[frame_type][i] >>= 1;
+    }
 
     if (cpi->common.comp_pred_mode == HYBRID_PREDICTION) {
       int single_count_zero = 0;
       int comp_count_zero = 0;
-      int i;
 
       for (i = 0; i < COMP_PRED_CONTEXTS; i++) {
         single_count_zero += cpi->single_pred_count[i];

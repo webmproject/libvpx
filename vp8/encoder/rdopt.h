@@ -17,8 +17,7 @@
 
 extern void vp8_initialize_rd_consts(VP8_COMP *cpi, int Qvalue);
 extern void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int recon_uvoffset,
-                                   int *returnrate, int *returndistortion, int64_t *returnintra,
-                                   int64_t *best_single_rd_diff, int64_t *best_comp_rd_diff, int64_t *best_hybrid_rd_diff);
+                                   int *returnrate, int *returndistortion, int64_t *returnintra);
 extern int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x);
 
 extern void vp8_mv_pred
