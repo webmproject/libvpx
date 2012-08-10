@@ -346,13 +346,23 @@ static const int plane_rd_mult[4] = {
   Y1_RD_MULT
 };
 
-static void optimize_b(MACROBLOCK *mb, int ib, int type,
-                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                       const VP8_ENCODER_RTCD *rtcd) {
+#define UPDATE_RD_COST()\
+{\
+  rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);\
+  rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
+  if (rd_cost0 == rd_cost1) {\
+    rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);\
+    rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);\
+  }\
+}
+
+void optimize_b(MACROBLOCK *mb, int i, int type,
+                ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
+                const VP8_ENCODER_RTCD *rtcd, int tx_type) {
   BLOCK *b;
   BLOCKD *d;
-  vp8_token_state tokens[17][2];
-  unsigned best_mask[2];
+  vp8_token_state tokens[65][2];
+  uint64_t best_mask[2];
   const short *dequant_ptr;
   const short *coeff_ptr;
   short *qcoeff_ptr;
@@ -366,22 +376,58 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
   int rdmult;
   int rddiv;
   int final_eob;
-  int64_t rd_cost0;
-  int64_t rd_cost1;
-  int rate0;
-  int rate1;
-  int error0;
-  int error1;
-  int t0;
-  int t1;
+  int64_t rd_cost0, rd_cost1;
+  int rate0, rate1;
+  int error0, error1;
+  int t0, t1;
   int best;
   int band;
   int pt;
-  int i;
   int err_mult = plane_rd_mult[type];
+  int default_eob;
+  int const *scan, *bands;
 
-  b = &mb->block[ib];
-  d = &mb->e_mbd.block[ib];
+  b = &mb->block[i];
+  d = &mb->e_mbd.block[i];
+  switch (tx_type) {
+    default:
+    case TX_4X4:
+      scan = vp8_default_zig_zag1d;
+      bands = vp8_coef_bands;
+      default_eob = 16;
+#if CONFIG_HYBRIDTRANSFORM
+      // TODO: this isn't called (for intra4x4 modes), but will be left in
+      // since it could be used later
+      {
+        int active_ht = (mb->q_index < ACTIVE_HT) &&
+                        (mb->e_mbd.mode_info_context->mbmi.mode == B_PRED);
+
+        if((type == PLANE_TYPE_Y_WITH_DC) && active_ht) {
+          switch (d->bmi.as_mode.tx_type) {
+            case ADST_DCT:
+              scan = vp8_row_scan;
+              break;
+
+            case DCT_ADST:
+              scan = vp8_col_scan;
+              break;
+
+            default:
+              scan = vp8_default_zig_zag1d;
+              break;
+          }
+
+        } else
+          scan = vp8_default_zig_zag1d;
+      }
+#endif
+      break;
+    case TX_8X8:
+      scan = vp8_default_zig_zag1d_8x8;
+      bands = vp8_coef_bands_8x8;
+      default_eob = 64;
+      break;
+  }
 
   dequant_ptr = d->dequant;
   coeff_ptr = b->coeff;
@@ -394,13 +440,12 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
   rdmult = mb->rdmult * err_mult;
   if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
     rdmult = (rdmult * 9) >> 4;
-
   rddiv = mb->rddiv;
   best_mask[0] = best_mask[1] = 0;
   /* Initialize the sentinel node of the trellis. */
   tokens[eob][0].rate = 0;
   tokens[eob][0].error = 0;
-  tokens[eob][0].next = 16;
+  tokens[eob][0].next = default_eob;
   tokens[eob][0].token = DCT_EOB_TOKEN;
   tokens[eob][0].qc = 0;
   *(tokens[eob] + 1) = *(tokens[eob] + 0);
@@ -410,7 +455,7 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
     int d2;
     int dx;
 
-    rc = vp8_default_zig_zag1d[i];
+    rc = scan[i];
     x = qcoeff_ptr[rc];
     /* Only add a trellis state for non-zero coefficients. */
     if (x) {
@@ -422,20 +467,15 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
       rate1 = tokens[next][1].rate;
       t0 = (vp8_dct_value_tokens_ptr + x)->Token;
       /* Consider both possible successor states. */
-      if (next < 16) {
-        band = vp8_coef_bands[i + 1];
+      if (next < default_eob) {
+        band = bands[i + 1];
         pt = vp8_prev_token_class[t0];
         rate0 +=
-          mb->token_costs[TX_4X4][type][band][pt][tokens[next][0].token];
+          mb->token_costs[tx_type][type][band][pt][tokens[next][0].token];
         rate1 +=
-          mb->token_costs[TX_4X4][type][band][pt][tokens[next][1].token];
+          mb->token_costs[tx_type][type][band][pt][tokens[next][1].token];
       }
-      rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);
-      rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);
-      if (rd_cost0 == rd_cost1) {
-        rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);
-        rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);
-      }
+      UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
       base_bits = *(vp8_dct_value_cost_ptr + x);
@@ -451,8 +491,8 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
       rate0 = tokens[next][0].rate;
       rate1 = tokens[next][1].rate;
 
-      if ((abs(x)*dequant_ptr[rc] > abs(coeff_ptr[rc])) &&
-          (abs(x)*dequant_ptr[rc] < abs(coeff_ptr[rc]) + dequant_ptr[rc]))
+      if ((abs(x)*dequant_ptr[rc != 0] > abs(coeff_ptr[rc])) &&
+          (abs(x)*dequant_ptr[rc != 0] < abs(coeff_ptr[rc]) + dequant_ptr[rc != 0]))
         shortcut = 1;
       else
         shortcut = 0;
@@ -474,32 +514,27 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
       } else {
         t0 = t1 = (vp8_dct_value_tokens_ptr + x)->Token;
       }
-      if (next < 16) {
-        band = vp8_coef_bands[i + 1];
+      if (next < default_eob) {
+        band = bands[i + 1];
         if (t0 != DCT_EOB_TOKEN) {
           pt = vp8_prev_token_class[t0];
-          rate0 += mb->token_costs[TX_4X4][type][band][pt]
-              [tokens[next][0].token];
+          rate0 += mb->token_costs[tx_type][type][band][pt][
+              tokens[next][0].token];
         }
         if (t1 != DCT_EOB_TOKEN) {
           pt = vp8_prev_token_class[t1];
-          rate1 += mb->token_costs[TX_4X4][type][band][pt]
-              [tokens[next][1].token];
+          rate1 += mb->token_costs[tx_type][type][band][pt][
+              tokens[next][1].token];
         }
       }
 
-      rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);
-      rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);
-      if (rd_cost0 == rd_cost1) {
-        rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);
-        rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);
-      }
+      UPDATE_RD_COST();
       /* And pick the best. */
       best = rd_cost1 < rd_cost0;
       base_bits = *(vp8_dct_value_cost_ptr + x);
 
       if (shortcut) {
-        dx -= (dequant_ptr[rc] + sz) ^ sz;
+        dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
         d2 = dx * dx;
       }
       tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
@@ -515,16 +550,16 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
      *  add a new trellis node, but we do need to update the costs.
      */
     else {
-      band = vp8_coef_bands[i + 1];
+      band = bands[i + 1];
       t0 = tokens[next][0].token;
       t1 = tokens[next][1].token;
       /* Update the cost of each path if we're past the EOB token. */
       if (t0 != DCT_EOB_TOKEN) {
-        tokens[next][0].rate += mb->token_costs[TX_4X4][type][band][0][t0];
+        tokens[next][0].rate += mb->token_costs[tx_type][type][band][0][t0];
         tokens[next][0].token = ZERO_TOKEN;
       }
       if (t1 != DCT_EOB_TOKEN) {
-        tokens[next][1].rate += mb->token_costs[TX_4X4][type][band][0][t1];
+        tokens[next][1].rate += mb->token_costs[tx_type][type][band][0][t1];
         tokens[next][1].token = ZERO_TOKEN;
       }
       /* Don't update next, because we didn't add a new node. */
@@ -532,7 +567,7 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
   }
 
   /* Now pick the best path through the whole trellis. */
-  band = vp8_coef_bands[i + 1];
+  band = bands[i + 1];
   VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
   rate0 = tokens[next][0].rate;
   rate1 = tokens[next][1].rate;
@@ -540,23 +575,19 @@ static void optimize_b(MACROBLOCK *mb, int ib, int type,
   error1 = tokens[next][1].error;
   t0 = tokens[next][0].token;
   t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[TX_4X4][type][band][pt][t0];
-  rate1 += mb->token_costs[TX_4X4][type][band][pt][t1];
-  rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);
-  rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);
-  if (rd_cost0 == rd_cost1) {
-    rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);
-    rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);
-  }
+  rate0 += mb->token_costs[tx_type][type][band][pt][t0];
+  rate1 += mb->token_costs[tx_type][type][band][pt][t1];
+  UPDATE_RD_COST();
   best = rd_cost1 < rd_cost0;
   final_eob = i0 - 1;
   for (i = next; i < eob; i = next) {
     x = tokens[i][best].qc;
     if (x)
       final_eob = i;
-    rc = vp8_default_zig_zag1d[i];
+    rc = scan[i];
     qcoeff_ptr[rc] = x;
-    dqcoeff_ptr[rc] = x * dequant_ptr[rc];
+    dqcoeff_ptr[rc] = (x * dequant_ptr[rc != 0]);
+
     next = tokens[i][best].next;
     best = (best_mask[best] >> i) & 1;
   }
@@ -632,8 +663,6 @@ static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *x, int type,
   }
 }
 
-
-
 static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   int b;
   int type;
@@ -654,18 +683,18 @@ static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
   for (b = 0; b < 16; b++) {
     optimize_b(x, b, type,
-               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
   }
 
   for (b = 16; b < 24; b++) {
     optimize_b(x, b, PLANE_TYPE_UV,
-               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
   }
 
   if (has_2nd_order) {
     b = 24;
     optimize_b(x, b, PLANE_TYPE_Y2,
-               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
     check_reset_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
                            ta + vp8_block2above[b], tl + vp8_block2left[b]);
   }
@@ -699,14 +728,14 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
   for (b = 0; b < 16; b++) {
     optimize_b(x, b, type,
-               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
   }
 
 
   if (has_2nd_order) {
     b = 24;
     optimize_b(x, b, PLANE_TYPE_Y2,
-               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
     check_reset_2nd_coeffs(&x->e_mbd, PLANE_TYPE_Y2,
                            ta + vp8_block2above[b], tl + vp8_block2left[b]);
   }
@@ -732,228 +761,8 @@ void vp8_optimize_mbuv(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
   for (b = 16; b < 24; b++) {
     optimize_b(x, b, PLANE_TYPE_UV,
-               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd);
+               ta + vp8_block2above[b], tl + vp8_block2left[b], rtcd, TX_4X4);
   }
-}
-
-void optimize_b_8x8(MACROBLOCK *mb, int i, int type,
-                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
-                    const VP8_ENCODER_RTCD *rtcd) {
-  BLOCK *b;
-  BLOCKD *d;
-  vp8_token_state tokens[65][2];
-  unsigned best_mask[2];
-  const short *dequant_ptr;
-  const short *coeff_ptr;
-  short *qcoeff_ptr;
-  short *dqcoeff_ptr;
-  int eob;
-  int i0;
-  int rc;
-  int x;
-  int sz = 0;
-  int next;
-  int rdmult;
-  int rddiv;
-  int final_eob;
-  int64_t rd_cost0;
-  int64_t rd_cost1;
-  int rate0;
-  int rate1;
-  int error0;
-  int error1;
-  int t0;
-  int t1;
-  int best;
-  int band;
-  int pt;
-  int err_mult = plane_rd_mult[type];
-
-  b = &mb->block[i];
-  d = &mb->e_mbd.block[i];
-
-  dequant_ptr = d->dequant;
-  coeff_ptr = b->coeff;
-  qcoeff_ptr = d->qcoeff;
-  dqcoeff_ptr = d->dqcoeff;
-  i0 = !type;
-  eob = d->eob;
-
-  /* Now set up a Viterbi trellis to evaluate alternative roundings. */
-  rdmult = mb->rdmult * err_mult;
-  if (mb->e_mbd.mode_info_context->mbmi.ref_frame == INTRA_FRAME)
-    rdmult = (rdmult * 9) >> 4;
-  rddiv = mb->rddiv;
-  best_mask[0] = best_mask[1] = 0;
-  /* Initialize the sentinel node of the trellis. */
-  tokens[eob][0].rate = 0;
-  tokens[eob][0].error = 0;
-  tokens[eob][0].next = 64;
-  tokens[eob][0].token = DCT_EOB_TOKEN;
-  tokens[eob][0].qc = 0;
-  *(tokens[eob] + 1) = *(tokens[eob] + 0);
-  next = eob;
-  for (i = eob; i-- > i0;) {
-    int base_bits;
-    int d2;
-    int dx;
-
-    rc = vp8_default_zig_zag1d_8x8[i];
-    x = qcoeff_ptr[rc];
-    /* Only add a trellis state for non-zero coefficients. */
-    if (x) {
-      int shortcut = 0;
-      error0 = tokens[next][0].error;
-      error1 = tokens[next][1].error;
-      /* Evaluate the first possibility for this state. */
-      rate0 = tokens[next][0].rate;
-      rate1 = tokens[next][1].rate;
-      t0 = (vp8_dct_value_tokens_ptr + x)->Token;
-      /* Consider both possible successor states. */
-      if (next < 64) {
-        band = vp8_coef_bands_8x8[i + 1];
-        pt = vp8_prev_token_class[t0];
-        rate0 +=
-          mb->token_costs[TX_8X8][type][band][pt][tokens[next][0].token];
-        rate1 +=
-          mb->token_costs[TX_8X8][type][band][pt][tokens[next][1].token];
-      }
-      rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
-      rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
-      if (rd_cost0 == rd_cost1) {
-        rd_cost0 = RDTRUNC_8x8(rdmult, rddiv, rate0, error0);
-        rd_cost1 = RDTRUNC_8x8(rdmult, rddiv, rate1, error1);
-      }
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
-      base_bits = *(vp8_dct_value_cost_ptr + x);
-      dx = dqcoeff_ptr[rc] - coeff_ptr[rc];
-      d2 = dx * dx;
-      tokens[i][0].rate = base_bits + (best ? rate1 : rate0);
-      tokens[i][0].error = d2 + (best ? error1 : error0);
-      tokens[i][0].next = next;
-      tokens[i][0].token = t0;
-      tokens[i][0].qc = x;
-      best_mask[0] |= best << i;
-      /* Evaluate the second possibility for this state. */
-      rate0 = tokens[next][0].rate;
-      rate1 = tokens[next][1].rate;
-
-      if ((abs(x)*dequant_ptr[rc != 0] > abs(coeff_ptr[rc])) &&
-          (abs(x)*dequant_ptr[rc != 0] < abs(coeff_ptr[rc]) + dequant_ptr[rc != 0]))
-        shortcut = 1;
-      else
-        shortcut = 0;
-
-      if (shortcut) {
-        sz = -(x < 0);
-        x -= 2 * sz + 1;
-      }
-
-      /* Consider both possible successor states. */
-      if (!x) {
-        /* If we reduced this coefficient to zero, check to see if
-         *  we need to move the EOB back here.
-         */
-        t0 = tokens[next][0].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
-        t1 = tokens[next][1].token == DCT_EOB_TOKEN ?
-             DCT_EOB_TOKEN : ZERO_TOKEN;
-      } else {
-        t0 = t1 = (vp8_dct_value_tokens_ptr + x)->Token;
-      }
-      if (next < 64) {
-        band = vp8_coef_bands_8x8[i + 1];
-        if (t0 != DCT_EOB_TOKEN) {
-          pt = vp8_prev_token_class[t0];
-          rate0 += mb->token_costs[TX_8X8][type][band][pt][
-              tokens[next][0].token];
-        }
-        if (t1 != DCT_EOB_TOKEN) {
-          pt = vp8_prev_token_class[t1];
-          rate1 += mb->token_costs[TX_8X8][type][band][pt][
-              tokens[next][1].token];
-        }
-      }
-
-      rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
-      rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
-      if (rd_cost0 == rd_cost1) {
-        rd_cost0 = RDTRUNC_8x8(rdmult, rddiv, rate0, error0);
-        rd_cost1 = RDTRUNC_8x8(rdmult, rddiv, rate1, error1);
-      }
-      /* And pick the best. */
-      best = rd_cost1 < rd_cost0;
-      base_bits = *(vp8_dct_value_cost_ptr + x);
-
-      if (shortcut) {
-        dx -= (dequant_ptr[rc != 0] + sz) ^ sz;
-        d2 = dx * dx;
-      }
-      tokens[i][1].rate = base_bits + (best ? rate1 : rate0);
-      tokens[i][1].error = d2 + (best ? error1 : error0);
-      tokens[i][1].next = next;
-      tokens[i][1].token = best ? t1 : t0;
-      tokens[i][1].qc = x;
-      best_mask[1] |= best << i;
-      /* Finally, make this the new head of the trellis. */
-      next = i;
-    }
-    /* There's no choice to make for a zero coefficient, so we don't
-     *  add a new trellis node, but we do need to update the costs.
-     */
-    else {
-      band = vp8_coef_bands_8x8[i + 1];
-      t0 = tokens[next][0].token;
-      t1 = tokens[next][1].token;
-      /* Update the cost of each path if we're past the EOB token. */
-      if (t0 != DCT_EOB_TOKEN) {
-        tokens[next][0].rate += mb->token_costs[TX_8X8][type][band][0][t0];
-        tokens[next][0].token = ZERO_TOKEN;
-      }
-      if (t1 != DCT_EOB_TOKEN) {
-        tokens[next][1].rate += mb->token_costs[TX_8X8][type][band][0][t1];
-        tokens[next][1].token = ZERO_TOKEN;
-      }
-      /* Don't update next, because we didn't add a new node. */
-    }
-  }
-
-  /* Now pick the best path through the whole trellis. */
-  band = vp8_coef_bands_8x8[i + 1];
-  VP8_COMBINEENTROPYCONTEXTS(pt, *a, *l);
-  rate0 = tokens[next][0].rate;
-  rate1 = tokens[next][1].rate;
-  error0 = tokens[next][0].error;
-  error1 = tokens[next][1].error;
-  t0 = tokens[next][0].token;
-  t1 = tokens[next][1].token;
-  rate0 += mb->token_costs[TX_8X8][type][band][pt][t0];
-  rate1 += mb->token_costs[TX_8X8][type][band][pt][t1];
-  rd_cost0 = RDCOST_8x8(rdmult, rddiv, rate0, error0);
-  rd_cost1 = RDCOST_8x8(rdmult, rddiv, rate1, error1);
-  if (rd_cost0 == rd_cost1) {
-    rd_cost0 = RDTRUNC_8x8(rdmult, rddiv, rate0, error0);
-    rd_cost1 = RDTRUNC_8x8(rdmult, rddiv, rate1, error1);
-  }
-  best = rd_cost1 < rd_cost0;
-  final_eob = i0 - 1;
-  for (i = next; i < eob; i = next) {
-    x = tokens[i][best].qc;
-    if (x)
-      final_eob = i;
-    rc = vp8_default_zig_zag1d_8x8[i];
-    qcoeff_ptr[rc] = x;
-    dqcoeff_ptr[rc] = (x * dequant_ptr[rc != 0]);
-
-    next = tokens[i][best].next;
-    best = (best_mask[best] >> i) & 1;
-  }
-  final_eob++;
-
-  d->eob = final_eob;
-  *a = *l = (d->eob != !type);
-
 }
 
 void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
@@ -971,17 +780,17 @@ void optimize_mb_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
   type = 0;
   for (b = 0; b < 16; b += 4) {
-    optimize_b_8x8(x, b, type,
-                   ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
-                   rtcd);
+    optimize_b(x, b, type,
+               ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
+               rtcd, TX_8X8);
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1)  = *(tl + vp8_block2left_8x8[b]);
   }
 
   for (b = 16; b < 24; b += 4) {
-    optimize_b_8x8(x, b, PLANE_TYPE_UV,
-                   ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
-                   rtcd);
+    optimize_b(x, b, PLANE_TYPE_UV,
+               ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
+               rtcd, TX_8X8);
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1) = *(tl + vp8_block2left_8x8[b]);
   }
@@ -1014,9 +823,9 @@ void vp8_optimize_mby_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   tl = (ENTROPY_CONTEXT *)&t_left;
   type = 0;
   for (b = 0; b < 16; b += 4) {
-    optimize_b_8x8(x, b, type,
-                   ta + vp8_block2above[b], tl + vp8_block2left[b],
-                   rtcd);
+    optimize_b(x, b, type,
+               ta + vp8_block2above[b], tl + vp8_block2left[b],
+               rtcd, TX_8X8);
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1)  = *(tl + vp8_block2left_8x8[b]);
   }
@@ -1045,9 +854,9 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   tl = (ENTROPY_CONTEXT *)&t_left;
 
   for (b = 16; b < 24; b += 4) {
-    optimize_b_8x8(x, b, PLANE_TYPE_UV,
-                   ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
-                   rtcd);
+    optimize_b(x, b, PLANE_TYPE_UV,
+               ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
+               rtcd, TX_8X8);
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1) = *(tl + vp8_block2left_8x8[b]);
   }
@@ -1057,16 +866,6 @@ void vp8_optimize_mbuv_8x8(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
 
 
 #if CONFIG_TX16X16
-#define UPDATE_RD_COST()\
-{\
-    rd_cost0 = RDCOST(rdmult, rddiv, rate0, error0);\
-    rd_cost1 = RDCOST(rdmult, rddiv, rate1, error1);\
-    if (rd_cost0 == rd_cost1) {\
-        rd_cost0 = RDTRUNC(rdmult, rddiv, rate0, error0);\
-        rd_cost1 = RDTRUNC(rdmult, rddiv, rate1, error1);\
-    }\
-}
-
 void optimize_b_16x16(MACROBLOCK *mb, int i, int type,
                       ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l,
                       const VP8_ENCODER_RTCD *rtcd) {
@@ -1276,9 +1075,9 @@ void optimize_mb_16x16(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   *(tl + 1) = *tl;
 
   for (b = 16; b < 24; b += 4) {
-    optimize_b_8x8(x, b, PLANE_TYPE_UV,
-                   ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
-                   rtcd);
+    optimize_b(x, b, PLANE_TYPE_UV,
+               ta + vp8_block2above_8x8[b], tl + vp8_block2left_8x8[b],
+               rtcd, TX_8X8);
     *(ta + vp8_block2above_8x8[b] + 1) = *(ta + vp8_block2above_8x8[b]);
     *(tl + vp8_block2left_8x8[b] + 1) = *(tl + vp8_block2left_8x8[b]);
   }
