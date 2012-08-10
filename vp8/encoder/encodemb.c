@@ -167,6 +167,7 @@ void vp8_transform_intra_mby(MACROBLOCK *x) {
 
 static void transform_mb(MACROBLOCK *x) {
   int i;
+  MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
 
   for (i = 0; i < 16; i += 2) {
     x->vp8_short_fdct8x4(&x->block[i].src_diff[0],
@@ -174,7 +175,7 @@ static void transform_mb(MACROBLOCK *x) {
   }
 
   // build dc block from 16 y dc values
-  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+  if (mode != SPLITMV)
     build_dcblock(x);
 
   for (i = 16; i < 24; i += 2) {
@@ -183,7 +184,7 @@ static void transform_mb(MACROBLOCK *x) {
   }
 
   // do 2nd order transform on the dc block
-  if (x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+  if (mode != SPLITMV)
     x->short_walsh4x4(&x->block[24].src_diff[0],
                       &x->block[24].coeff[0], 8);
 
@@ -239,6 +240,8 @@ void vp8_transform_intra_mby_8x8(MACROBLOCK *x) { // changed
 
 void vp8_transform_mb_8x8(MACROBLOCK *x) {
   int i;
+  MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
+
   for (i = 0; i < 9; i += 8) {
     x->vp8_short_fdct8x8(&x->block[i].src_diff[0],
                          &x->block[i].coeff[0], 32);
@@ -248,7 +251,7 @@ void vp8_transform_mb_8x8(MACROBLOCK *x) {
                          &x->block[i + 2].coeff[0], 32);
   }
   // build dc block from 16 y dc values
-  if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+  if (mode != B_PRED && mode != SPLITMV)
     vp8_build_dcblock_8x8(x);
   // vp8_build_dcblock(x);
 
@@ -258,7 +261,7 @@ void vp8_transform_mb_8x8(MACROBLOCK *x) {
   }
 
   // do 2nd order transform on the dc block
-  if (x->e_mbd.mode_info_context->mbmi.mode != B_PRED && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV)
+  if (mode != B_PRED && mode != SPLITMV)
     x->short_fhaar2x2(&x->block[24].src_diff[0],
                       &x->block[24].coeff[0], 8);
 }
@@ -638,6 +641,7 @@ static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
+  MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
 
   vpx_memcpy(&t_above, x->e_mbd.above_context, sizeof(ENTROPY_CONTEXT_PLANES));
   vpx_memcpy(&t_left, x->e_mbd.left_context, sizeof(ENTROPY_CONTEXT_PLANES));
@@ -645,9 +649,7 @@ static void optimize_mb(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                   && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-                   && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+  has_2nd_order = (mode != B_PRED && mode != I8X8_PRED && mode != SPLITMV);
   type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
   for (b = 0; b < 16; b++) {
@@ -678,6 +680,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ENTROPY_CONTEXT_PLANES t_above, t_left;
   ENTROPY_CONTEXT *ta;
   ENTROPY_CONTEXT *tl;
+  MB_PREDICTION_MODE mode = x->e_mbd.mode_info_context->mbmi.mode;
 
   if (!x->e_mbd.above_context)
     return;
@@ -691,9 +694,7 @@ void vp8_optimize_mby(MACROBLOCK *x, const VP8_ENCODER_RTCD *rtcd) {
   ta = (ENTROPY_CONTEXT *)&t_above;
   tl = (ENTROPY_CONTEXT *)&t_left;
 
-  has_2nd_order = (x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-                   && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-                   && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV);
+  has_2nd_order = (mode != B_PRED && mode != I8X8_PRED && mode != SPLITMV);
   type = has_2nd_order ? PLANE_TYPE_Y_NO_DC : PLANE_TYPE_Y_WITH_DC;
 
   for (b = 0; b < 16; b++) {

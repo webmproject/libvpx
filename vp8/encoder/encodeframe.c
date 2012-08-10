@@ -365,6 +365,7 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
+  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   int mb_mode = mi->mbmi.mode;
   int mb_mode_index = ctx->best_mode_index;
 
@@ -391,10 +392,8 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
     vpx_memcpy(x->partition_info, &ctx->partition_info,
                sizeof(PARTITION_INFO));
 
-    xd->mode_info_context->mbmi.mv.as_int =
-      x->partition_info->bmi[15].mv.as_int;
-    xd->mode_info_context->mbmi.second_mv.as_int =
-      x->partition_info->bmi[15].second_mv.as_int;
+    mbmi->mv.as_int = x->partition_info->bmi[15].mv.as_int;
+    mbmi->second_mv.as_int = x->partition_info->bmi[15].second_mv.as_int;
   }
 
   if (cpi->common.frame_type == KEY_FRAME) {
@@ -490,6 +489,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
     int dx = col_delta[i];
     int offset_unextended = dy * cm->mb_cols + dx;
     int offset_extended   = dy * xd->mode_info_stride + dx;
+    MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
 
     // TODO Many of the index items here can be computed more efficiently!
 
@@ -569,20 +569,19 @@ static void pick_mb_modes(VP8_COMP *cpi,
     if (xd->segmentation_enabled) {
       // Code to set segment id in xd->mbmi.segment_id
       if (cpi->segmentation_map[map_index] <= 3)
-        xd->mode_info_context->mbmi.segment_id =
-          cpi->segmentation_map[map_index];
+        mbmi->segment_id = cpi->segmentation_map[map_index];
       else
-        xd->mode_info_context->mbmi.segment_id = 0;
+        mbmi->segment_id = 0;
 
       vp8cx_mb_init_quantizer(cpi, x);
     } else
       // Set to Segment 0 by default
-      xd->mode_info_context->mbmi.segment_id = 0;
+      mbmi->segment_id = 0;
 
     x->active_ptr = cpi->active_map + map_index;
 
     /* force 4x4 transform for mode selection */
-    xd->mode_info_context->mbmi.txfm_size = TX_4X4; // TODO IS this right??
+    mbmi->txfm_size = TX_4X4; // TODO IS this right??
 
     cpi->update_context = 0;    // TODO Do we need this now??
 
@@ -621,7 +620,7 @@ static void pick_mb_modes(VP8_COMP *cpi,
       vp8cx_encode_inter_macroblock(cpi, x, tp,
                                     recon_yoffset, recon_uvoffset, 0);
 
-      seg_id = xd->mode_info_context->mbmi.segment_id;
+      seg_id = mbmi->segment_id;
       if (cpi->mb.e_mbd.segmentation_enabled && seg_id == 0) {
         cpi->seg0_idx++;
       }
@@ -700,6 +699,7 @@ static void encode_sb(VP8_COMP *cpi,
     int dx = col_delta[i];
     int offset_extended   = dy * xd->mode_info_stride + dx;
     int offset_unextended = dy * cm->mb_cols + dx;
+    MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
 
     if ((mb_row >= cm->mb_rows) || (mb_col >= cm->mb_cols)) {
       // MB lies outside frame, move on
@@ -798,15 +798,14 @@ static void encode_sb(VP8_COMP *cpi,
     if (xd->segmentation_enabled) {
       // Code to set segment id in xd->mbmi.segment_id
       if (cpi->segmentation_map[map_index] <= 3)
-        xd->mode_info_context->mbmi.segment_id =
-          cpi->segmentation_map[map_index];
+        mbmi->segment_id = cpi->segmentation_map[map_index];
       else
-        xd->mode_info_context->mbmi.segment_id = 0;
+        mbmi->segment_id = 0;
 
       vp8cx_mb_init_quantizer(cpi, x);
     } else
       // Set to Segment 0 by default
-      xd->mode_info_context->mbmi.segment_id = 0;
+      mbmi->segment_id = 0;
 
     x->active_ptr = cpi->active_map + map_index;
 
@@ -817,7 +816,7 @@ static void encode_sb(VP8_COMP *cpi,
       // Note the encoder may have changed the segment_id
 
 #ifdef MODE_STATS
-      y_modes[xd->mode_info_context->mbmi.mode]++;
+      y_modes[mbmi->mode]++;
 #endif
     } else {
       unsigned char *segment_id;
@@ -828,9 +827,9 @@ static void encode_sb(VP8_COMP *cpi,
       // Note the encoder may have changed the segment_id
 
 #ifdef MODE_STATS
-      inter_y_modes[xd->mode_info_context->mbmi.mode]++;
+      inter_y_modes[mbmi->mode]++;
 
-      if (xd->mode_info_context->mbmi.mode == SPLITMV) {
+      if (mbmi->mode == SPLITMV) {
         int b;
 
         for (b = 0; b < x->partition_info->count; b++) {
@@ -845,7 +844,7 @@ static void encode_sb(VP8_COMP *cpi,
       // probabilities. NOTE: At the moment we dont support custom trees
       // for the reference frame coding for each segment but this is a
       // possible future action.
-      segment_id = &xd->mode_info_context->mbmi.segment_id;
+      segment_id = &mbmi->segment_id;
       seg_ref_active = segfeature_active(xd, *segment_id, SEG_LVL_REF_FRAME);
       if (!seg_ref_active ||
           ((check_segref(xd, *segment_id, INTRA_FRAME) +
@@ -853,14 +852,12 @@ static void encode_sb(VP8_COMP *cpi,
             check_segref(xd, *segment_id, GOLDEN_FRAME) +
             check_segref(xd, *segment_id, ALTREF_FRAME)) > 1)) {
         {
-          cpi->count_mb_ref_frame_usage
-          [xd->mode_info_context->mbmi.ref_frame]++;
+          cpi->count_mb_ref_frame_usage[mbmi->ref_frame]++;
         }
       }
 
       // Count of last ref frame 0,0 usage
-      if ((xd->mode_info_context->mbmi.mode == ZEROMV) &&
-          (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME))
+      if ((mbmi->mode == ZEROMV) && (mbmi->ref_frame == LAST_FRAME))
         cpi->inter_zz_count++;
     }
 
@@ -1431,6 +1428,7 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
                                     MACROBLOCK *x,
                                     TOKENEXTRA **t,
                                     int output_enabled) {
+  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   if ((cpi->oxcf.tuning == VP8_TUNE_SSIM) && output_enabled) {
     adjust_act_zbin(cpi, x);
     vp8_update_zbin_extra(cpi, x);
@@ -1438,31 +1436,31 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
 
   /* test code: set transform size based on mode selection */
 #if CONFIG_TX16X16
-  if (x->e_mbd.mode_info_context->mbmi.mode <= TM_PRED) {
-    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_16X16;
+  if (mbmi->mode <= TM_PRED) {
+    mbmi->txfm_size = TX_16X16;
     cpi->t16x16_count++;
   }
   else
 #endif
   if (cpi->common.txfm_mode == ALLOW_8X8
-      && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-      && x->e_mbd.mode_info_context->mbmi.mode != B_PRED) {
-    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_8X8;
+      && mbmi->mode != I8X8_PRED
+      && mbmi->mode != B_PRED) {
+    mbmi->txfm_size = TX_8X8;
     cpi->t8x8_count++;
   } else {
-    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
+    mbmi->txfm_size = TX_4X4;
     cpi->t4x4_count++;
   }
 
-  if (x->e_mbd.mode_info_context->mbmi.mode == I8X8_PRED) {
+  if (mbmi->mode == I8X8_PRED) {
     vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
     vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
-  } else if (x->e_mbd.mode_info_context->mbmi.mode == B_PRED)
+  } else if (mbmi->mode == B_PRED)
     vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
   else
     vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
 
-  if (x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED)
+  if (mbmi->mode != I8X8_PRED)
     vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
 
   if (output_enabled) {
@@ -1470,7 +1468,7 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t, 0);
   }
-#if CONFIG_NEWBESTREFMV
+#if CONFIG_NEWBESTREFMVvp8_tokenize_mb
   else
     vp8_tokenize_mb(cpi, &x->e_mbd, t, 1);
 #endif
@@ -1486,14 +1484,15 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
                                     int recon_uvoffset, int output_enabled) {
   VP8_COMMON *cm = &cpi->common;
   MACROBLOCKD *const xd = &x->e_mbd;
-  unsigned char *segment_id = &xd->mode_info_context->mbmi.segment_id;
+  MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
+  unsigned char *segment_id = &mbmi->segment_id;
   int seg_ref_active;
   unsigned char ref_pred_flag;
 
   x->skip = 0;
 
 #if CONFIG_SWITCHABLE_INTERP
-  vp8_setup_interp_filters(xd, xd->mode_info_context->mbmi.interp_filter, cm);
+  vp8_setup_interp_filters(xd, mbmi->interp_filter, cm);
 #endif
   if (cpi->oxcf.tuning == VP8_TUNE_SSIM) {
     // Adjust the zbin based on this MB rate.
@@ -1505,13 +1504,13 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
     // Increase zbin size to suppress noise
     cpi->zbin_mode_boost = 0;
     if (cpi->zbin_mode_boost_enabled) {
-      if (xd->mode_info_context->mbmi.ref_frame != INTRA_FRAME) {
-        if (xd->mode_info_context->mbmi.mode == ZEROMV) {
-          if (xd->mode_info_context->mbmi.ref_frame != LAST_FRAME)
+      if (mbmi->ref_frame != INTRA_FRAME) {
+        if (mbmi->mode == ZEROMV) {
+          if (mbmi->ref_frame != LAST_FRAME)
             cpi->zbin_mode_boost = GF_ZEROMV_ZBIN_BOOST;
           else
             cpi->zbin_mode_boost = LF_ZEROMV_ZBIN_BOOST;
-        } else if (xd->mode_info_context->mbmi.mode == SPLITMV)
+        } else if (mbmi->mode == SPLITMV)
           cpi->zbin_mode_boost = 0;
         else
           cpi->zbin_mode_boost = MV_ZBIN_BOOST;
@@ -1526,37 +1525,33 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
   // SET VARIOUS PREDICTION FLAGS
 
   // Did the chosen reference frame match its predicted value.
-  ref_pred_flag = ((xd->mode_info_context->mbmi.ref_frame ==
-                    get_pred_ref(cm, xd)));
+  ref_pred_flag = ((mbmi->ref_frame == get_pred_ref(cm, xd)));
   set_pred_flag(xd, PRED_REF, ref_pred_flag);
 
   /* test code: set transform size based on mode selection */
 #if CONFIG_TX16X16
-  if (x->e_mbd.mode_info_context->mbmi.mode <= TM_PRED ||
-      x->e_mbd.mode_info_context->mbmi.mode == NEWMV ||
-      x->e_mbd.mode_info_context->mbmi.mode == ZEROMV ||
-      x->e_mbd.mode_info_context->mbmi.mode == NEARMV ||
-      x->e_mbd.mode_info_context->mbmi.mode == NEARESTMV) {
-    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_16X16;
+  if (mbmi->mode <= TM_PRED || mbmi->mode == NEWMV || mbmi->mode == ZEROMV ||
+      mbmi->mode == NEARMV ||  mbmi->mode == NEARESTMV) {
+    mbmi->txfm_size = TX_16X16;
     cpi->t16x16_count++;
   } else
 #endif
   if (cpi->common.txfm_mode == ALLOW_8X8
-      && x->e_mbd.mode_info_context->mbmi.mode != I8X8_PRED
-      && x->e_mbd.mode_info_context->mbmi.mode != B_PRED
-      && x->e_mbd.mode_info_context->mbmi.mode != SPLITMV) {
-    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_8X8;
+      && mbmi->mode != I8X8_PRED
+      && mbmi->mode != B_PRED
+      && mbmi->mode != SPLITMV) {
+    mbmi->txfm_size = TX_8X8;
     cpi->t8x8_count++;
   } else {
-    x->e_mbd.mode_info_context->mbmi.txfm_size = TX_4X4;
+    mbmi->txfm_size = TX_4X4;
     cpi->t4x4_count++;
   }
 
-  if (xd->mode_info_context->mbmi.ref_frame == INTRA_FRAME) {
-    if (xd->mode_info_context->mbmi.mode == B_PRED) {
+  if (mbmi->ref_frame == INTRA_FRAME) {
+    if (mbmi->mode == B_PRED) {
       vp8_encode_intra16x16mbuv(IF_RTCD(&cpi->rtcd), x);
       vp8_encode_intra4x4mby(IF_RTCD(&cpi->rtcd), x);
-    } else if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+    } else if (mbmi->mode == I8X8_PRED) {
       vp8_encode_intra8x8mby(IF_RTCD(&cpi->rtcd), x);
       vp8_encode_intra8x8mbuv(IF_RTCD(&cpi->rtcd), x);
     } else {
@@ -1569,9 +1564,9 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
   } else {
     int ref_fb_idx;
 
-    if (xd->mode_info_context->mbmi.ref_frame == LAST_FRAME)
+    if (mbmi->ref_frame == LAST_FRAME)
       ref_fb_idx = cpi->common.lst_fb_idx;
-    else if (xd->mode_info_context->mbmi.ref_frame == GOLDEN_FRAME)
+    else if (mbmi->ref_frame == GOLDEN_FRAME)
       ref_fb_idx = cpi->common.gld_fb_idx;
     else
       ref_fb_idx = cpi->common.alt_fb_idx;
@@ -1580,12 +1575,12 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
     xd->pre.u_buffer = cpi->common.yv12_fb[ref_fb_idx].u_buffer + recon_uvoffset;
     xd->pre.v_buffer = cpi->common.yv12_fb[ref_fb_idx].v_buffer + recon_uvoffset;
 
-    if (xd->mode_info_context->mbmi.second_ref_frame) {
+    if (mbmi->second_ref_frame) {
       int second_ref_fb_idx;
 
-      if (xd->mode_info_context->mbmi.second_ref_frame == LAST_FRAME)
+      if (mbmi->second_ref_frame == LAST_FRAME)
         second_ref_fb_idx = cpi->common.lst_fb_idx;
-      else if (xd->mode_info_context->mbmi.second_ref_frame == GOLDEN_FRAME)
+      else if (mbmi->second_ref_frame == GOLDEN_FRAME)
         second_ref_fb_idx = cpi->common.gld_fb_idx;
       else
         second_ref_fb_idx = cpi->common.alt_fb_idx;
@@ -1603,7 +1598,7 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
 
       // Clear mb_skip_coeff if mb_no_coeff_skip is not set
       if (!cpi->common.mb_no_coeff_skip)
-        xd->mode_info_context->mbmi.mb_skip_coeff = 0;
+        mbmi->mb_skip_coeff = 0;
 
     } else {
       vp8_build_1st_inter16x16_predictors_mb(xd, xd->dst.y_buffer,
@@ -1617,7 +1612,8 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
 #ifdef ENC_DEBUG
     if (enc_debug) {
       int i;
-      printf("Segment=%d [%d, %d]: %d %d:\n", x->e_mbd.mode_info_context->mbmi.segment_id, mb_col_debug, mb_row_debug, xd->mb_to_left_edge, xd->mb_to_top_edge);
+      printf("Segment=%d [%d, %d]: %d %d:\n", mbmi->segment_id, mb_col_debug,
+             mb_row_debug, xd->mb_to_left_edge, xd->mb_to_top_edge);
       for (i = 0; i < 400; i++) {
         printf("%3d ", xd->qcoeff[i]);
         if (i % 16 == 15) printf("\n");
@@ -1646,13 +1642,13 @@ void vp8cx_encode_inter_macroblock (VP8_COMP *cpi, MACROBLOCK *x,
       (x->e_mbd.mode_info_context - cpi->common.mode_info_stride)->mbmi.mb_skip_coeff :
       0;
     if (cpi->common.mb_no_coeff_skip) {
-      xd->mode_info_context->mbmi.mb_skip_coeff = 1;
+      mbmi->mb_skip_coeff = 1;
       if (output_enabled)
         cpi->skip_true_count[mb_skip_context]++;
       vp8_fix_contexts(xd);
     } else {
       vp8_stuff_mb(cpi, xd, t, !output_enabled);
-      xd->mode_info_context->mbmi.mb_skip_coeff = 0;
+      mbmi->mb_skip_coeff = 0;
       if (output_enabled)
         cpi->skip_false_count[mb_skip_context]++;
     }

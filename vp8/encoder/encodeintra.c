@@ -39,15 +39,16 @@ extern void vp8_ht_quantize_b(BLOCK *b, BLOCKD *d);
 int vp8_encode_intra(VP8_COMP *cpi, MACROBLOCK *x, int use_16x16_pred) {
   int i;
   int intra_pred_var = 0;
+  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
   (void) cpi;
 
   if (use_16x16_pred) {
-    x->e_mbd.mode_info_context->mbmi.mode = DC_PRED;
+    mbmi->mode = DC_PRED;
 #if CONFIG_COMP_INTRA_PRED
-    x->e_mbd.mode_info_context->mbmi.second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
+    mbmi->second_mode = (MB_PREDICTION_MODE)(DC_PRED - 1);
 #endif
-    x->e_mbd.mode_info_context->mbmi.uv_mode = DC_PRED;
-    x->e_mbd.mode_info_context->mbmi.ref_frame = INTRA_FRAME;
+    mbmi->uv_mode = DC_PRED;
+    mbmi->ref_frame = INTRA_FRAME;
 
     vp8_encode_intra16x16mby(IF_RTCD(&cpi->rtcd), x);
   } else {
