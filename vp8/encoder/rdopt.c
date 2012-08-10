@@ -3580,14 +3580,14 @@ int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x) {
   int mode16x16;
   int mode8x8[2][4];
 
-    mbmi->ref_frame = INTRA_FRAME;
+  mbmi->ref_frame = INTRA_FRAME;
 
-    rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
-    rate = rateuv;
+  rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
+  rate = rateuv;
 
-    // current macroblock under rate-distortion optimization test loop
+  // current macroblock under rate-distortion optimization test loop
 #if CONFIG_HYBRIDTRANSFORM
-    mbmi->mode_rdopt = DC_PRED;
+  mbmi->mode_rdopt = DC_PRED;
 #endif
 
   error16x16 = rd_pick_intra16x16mby_mode(cpi, x, &rate16x16,
