@@ -629,10 +629,10 @@ typedef struct VP8_COMP {
   vp8_refining_search_fn_t refining_search_sad;
   vp8_diamond_search_fn_t diamond_search_sad;
   vp8_variance_fn_ptr_t fn_ptr[BLOCK_MAX_SEGMENTS];
-  unsigned int time_receive_data;
-  unsigned int time_compress_data;
-  unsigned int time_pick_lpf;
-  unsigned int time_encode_mb_row;
+  uint64_t time_receive_data;
+  uint64_t time_compress_data;
+  uint64_t time_pick_lpf;
+  uint64_t time_encode_mb_row;
 
   int base_skip_false_prob[QINDEX_RANGE][3];
 
