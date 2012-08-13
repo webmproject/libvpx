@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//188\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-08-13T08:04:18Z",
+      "side": 1,
+      "message": "This should be cleaned up before committing.",
+      "revId": "edcd479b5a67ec67bf1bf5739d2664ee4c0fba4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//19E\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-08-13T08:04:18Z",
+      "side": 1,
+      "message": "running_avg-\u003ey_buffer + y_offset can be replaced with running_avg_y.",
+      "revId": "edcd479b5a67ec67bf1bf5739d2664ee4c0fba4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//19A\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1126892
+      },
+      "writtenOn": "2012-08-13T08:04:18Z",
+      "side": 1,
+      "message": "I assume this is a temporary thing for testing.",
+      "revId": "edcd479b5a67ec67bf1bf5739d2664ee4c0fba4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
