@@ -514,6 +514,8 @@ process_toolchain() {
         check_add_cflags -Wpointer-arith
         check_add_cflags -Wtype-limits
         check_add_cflags -Wcast-qual
+        check_add_cflags -Wundef
+        check_add_cflags -Wvla
         enabled extra_warnings || check_add_cflags -Wno-unused-function
     fi
 

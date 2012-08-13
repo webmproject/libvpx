@@ -3287,7 +3287,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
                       && this_mode != B_PRED
                       && this_mode != I8X8_PRED);
 
-#if CONFIGURE_TX16X16
+#if CONFIG_TX16X16
         if (this_mode <= TM_PRED ||
             this_mode == NEWMV ||
             this_mode == ZEROMV ||
