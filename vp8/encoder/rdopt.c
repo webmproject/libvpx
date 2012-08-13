@@ -3595,7 +3595,7 @@ int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x) {
   mode16x16 = mbmi->mode;
 
 #if CONFIG_HYBRIDTRANSFORM
-    mbmi->mode_rdopt = I8X8_PRED;
+  mbmi->mode_rdopt = I8X8_PRED;
 #endif
 
   error8x8 = rd_pick_intra8x8mby_modes(cpi, x, &rate8x8, &rate8x8_tokenonly,
@@ -3612,7 +3612,7 @@ int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x) {
 #endif
 
 #if CONFIG_HYBRIDTRANSFORM
-    mbmi->mode_rdopt = B_PRED;
+  mbmi->mode_rdopt = B_PRED;
 #endif
 
   error4x4 = rd_pick_intra4x4mby_modes(cpi, x,
