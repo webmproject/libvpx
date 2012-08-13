@@ -12,6 +12,8 @@
 #ifndef __INC_DCT_H
 #define __INC_DCT_H
 
+#include "vpx_config.h"
+
 #define prototype_fdct(sym) void (sym)(short *input, short *output, int pitch)
 
 #if ARCH_X86 || ARCH_X86_64

@@ -2605,7 +2605,7 @@ void write_yuv_frame_to_file(YV12_BUFFER_CONFIG *frame) {
 }
 #endif
 
-// #define WRITE_RECON_BUFFER 1
+#define WRITE_RECON_BUFFER 0
 #if WRITE_RECON_BUFFER
 void write_cx_frame_to_file(YV12_BUFFER_CONFIG *frame, int this_frame) {
 

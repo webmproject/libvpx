@@ -12,6 +12,8 @@
 #ifndef VARIANCE_H
 #define VARIANCE_H
 
+#include "vpx_config.h"
+
 #define prototype_sad(sym)\
   unsigned int (sym)\
   (\

@@ -22,6 +22,7 @@
  */
 #ifndef VP8CX_H
 #define VP8CX_H
+#include "vpx_config.h"
 #include "vpx_codec_impl_top.h"
 
 /*!\name Algorithm interface for VP8

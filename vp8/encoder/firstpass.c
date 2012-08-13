@@ -30,7 +30,7 @@
 #include "vp8/common/quant_common.h"
 #include "encodemv.h"
 
-// #define OUTPUT_FPF 1
+#define OUTPUT_FPF 0
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define IF_RTCD(x) (x)

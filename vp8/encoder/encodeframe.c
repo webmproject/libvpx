@@ -32,7 +32,7 @@
 #include "vpx_ports/vpx_timer.h"
 #include "vp8/common/pred_common.h"
 
-// #define DBG_PRNT_SEGMAP 1
+#define DBG_PRNT_SEGMAP 0
 
 #if CONFIG_RUNTIME_CPU_DETECT
 #define RTCD(x)     &cpi->common.rtcd.x
@@ -1462,7 +1462,7 @@ void vp8cx_encode_intra_macro_block(VP8_COMP *cpi,
     sum_intra_stats(cpi, x);
     vp8_tokenize_mb(cpi, &x->e_mbd, t, 0);
   }
-#if CONFIG_NEWBESTREFMVvp8_tokenize_mb
+#if CONFIG_NEWBESTREFMV
   else
     vp8_tokenize_mb(cpi, &x->e_mbd, t, 1);
 #endif

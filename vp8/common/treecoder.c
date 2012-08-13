@@ -9,6 +9,8 @@
  */
 
 
+#include "vpx_config.h"
+
 #if CONFIG_DEBUG
 #include <assert.h>
 #endif

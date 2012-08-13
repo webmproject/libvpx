@@ -319,9 +319,7 @@ void vp8_build_intra_predictors_mby_internal(MACROBLOCKD *xd,
       d63_predictor(ypred_ptr, y_stride, 16,  yabove_row, yleft_col);
     }
     break;
-#if CONIFG_I8X8
     case I8X8_PRED:
-#endif
     case B_PRED:
     case NEARESTMV:
     case NEARMV:
