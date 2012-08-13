@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//11g\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-13T16:18:59Z",
+      "side": 1,
+      "message": "Ok. I will change it.",
+      "parentUuid": "AAAAPH//188\u003d",
+      "revId": "edcd479b5a67ec67bf1bf5739d2664ee4c0fba4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//19E\u003d",
         "filename": "vp8/encoder/denoising.c",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPH//11U\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-13T16:18:59Z",
+      "side": 1,
+      "message": "running_avg_y was modified before this call.",
+      "parentUuid": "AAAAPH//19E\u003d",
+      "revId": "edcd479b5a67ec67bf1bf5739d2664ee4c0fba4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//19A\u003d",
         "filename": "vp8/encoder/denoising.c",
         "patchSetId": 2
@@ -47,6 +83,24 @@
       "writtenOn": "2012-08-13T08:04:18Z",
       "side": 1,
       "message": "I assume this is a temporary thing for testing.",
+      "revId": "edcd479b5a67ec67bf1bf5739d2664ee4c0fba4d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//11E\u003d",
+        "filename": "vp8/encoder/denoising.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1000884
+      },
+      "writtenOn": "2012-08-13T16:18:59Z",
+      "side": 1,
+      "message": "Yes. If you agree with the c code changes, I will update the x86 code. Please let me know if you think there is anything else we can do to make it faster.",
+      "parentUuid": "AAAAPH//19A\u003d",
       "revId": "edcd479b5a67ec67bf1bf5739d2664ee4c0fba4d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
