@@ -762,6 +762,8 @@ static void read_mb_modes_mv(VP8D_COMP *pbi, MODE_INFO *mi, MB_MODE_INFO *mbmi,
           int mv_contz;
           int blockmode;
 
+          second_leftmv.as_int = 0;
+          second_abovemv.as_int = 0;
           k = vp8_mbsplit_offset[s][j];
 
           leftmv.as_int = left_block_mv(mi, k);

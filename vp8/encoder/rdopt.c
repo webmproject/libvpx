@@ -1643,6 +1643,7 @@ static int labels2mode(MACROBLOCK *x, int const *labelings, int which_label,
       if (m == ABOVE4X4) { // replace above with left if same
         int_mv left_mv, left_second_mv;
 
+        left_second_mv.as_int = 0;
         left_mv.as_int = col ? d[-1].bmi.as_mv.first.as_int :
                          left_block_mv(mic, i);
         if (mbmi->second_ref_frame)
@@ -2717,6 +2718,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
   unsigned int ref_costs[MAX_REF_FRAMES];
   int_mv seg_mvs[BLOCK_MAX_SEGMENTS - 1][16 /* n_blocks */][MAX_REF_FRAMES - 1];
 
+  vpx_memset(mode8x8, 0, sizeof(mode8x8));
   vpx_memset(&frame_mv, 0, sizeof(frame_mv));
   vpx_memset(&best_mbmode, 0, sizeof(best_mbmode));
   vpx_memset(&best_bmodes, 0, sizeof(best_bmodes));

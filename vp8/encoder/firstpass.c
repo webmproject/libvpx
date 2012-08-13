@@ -1965,6 +1965,8 @@ void vp8_second_pass(VP8_COMP *cpi) {
 
   vp8_clear_system_state();
 
+  vpx_memset(&this_frame, 0, sizeof(FIRSTPASS_STATS));
+
   if (EOF == input_stats(cpi, &this_frame))
     return;
 
