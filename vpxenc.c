@@ -8,6 +8,7 @@
  *  be found in the AUTHORS file in the root of the source tree.
  */
 
+#include "vpx_config.h"
 
 /* This is a simple program that encodes YV12 files and generates ivf
  * files using the new interface.

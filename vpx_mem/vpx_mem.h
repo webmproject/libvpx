@@ -12,6 +12,7 @@
 #ifndef __VPX_MEM_H__
 #define __VPX_MEM_H__
 
+#include "vpx_config.h"
 #if defined(__uClinux__)
 # include <lddk.h>
 #endif

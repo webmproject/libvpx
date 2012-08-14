@@ -18,7 +18,7 @@
   static void assert_##name(void) UNUSED;\
   static void assert_##name(void) {switch(0){case 0:case !!(cond):;}}
 
-#if INLINE_ASM
+#if defined(INLINE_ASM) && INLINE_ASM
 #define DEFINE(sym, val) asm("\n" #sym " EQU %0" : : "i" (val));
 #define BEGIN int main(void) {
 #define END return 0; }

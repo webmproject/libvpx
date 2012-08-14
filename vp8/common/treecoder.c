@@ -11,7 +11,7 @@
 
 #include "vpx_config.h"
 
-#if CONFIG_DEBUG
+#if defined(CONFIG_DEBUG) && CONFIG_DEBUG
 #include <assert.h>
 #endif
 #include <stdio.h>
