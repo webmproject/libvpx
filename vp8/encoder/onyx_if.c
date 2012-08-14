@@ -56,7 +56,7 @@ extern void vp8_deblock_frame(YV12_BUFFER_CONFIG *source, YV12_BUFFER_CONFIG *po
 extern void print_parms(VP8_CONFIG *ocf, char *filenam);
 extern unsigned int vp8_get_processor_freq();
 extern void print_tree_update_probs();
-extern void vp8cx_create_encoder_threads(VP8_COMP *cpi);
+extern int vp8cx_create_encoder_threads(VP8_COMP *cpi);
 extern void vp8cx_remove_encoder_threads(VP8_COMP *cpi);
 
 int vp8_estimate_entropy_savings(VP8_COMP *cpi);
@@ -1954,7 +1954,11 @@ struct VP8_COMP* vp8_create_compressor(VP8_CONFIG *oxcf)
 #endif
 
 #if CONFIG_MULTITHREAD
-    vp8cx_create_encoder_threads(cpi);
+    if(vp8cx_create_encoder_threads(cpi))
+    {
+        vp8_remove_compressor(&cpi);
+        return 0;
+    }
 #endif
 
     cpi->fn_ptr[BLOCK_16X16].sdf            = vp8_sad16x16;
