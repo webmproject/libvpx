@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//0BA\u003d",
+        "filename": "vp8/common/predict_rotated.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-14T21:48:31Z",
+      "side": 1,
+      "message": "There should be a rotation experiment added to EXPERIMENT_LIST in configure.",
+      "revId": "a656d217102ea8776d3dfac911d059cabfb41e9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//0A8\u003d",
+        "filename": "vp8/common/treecoder.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-14T21:48:31Z",
+      "side": 1,
+      "message": "I\u0027m not sure about this one - John, should CONFIG_DEBUG always be defined in vpx_config.h?",
+      "revId": "a656d217102ea8776d3dfac911d059cabfb41e9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//0Aw\u003d",
+        "filename": "vp8/encoder/find_rotation.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-14T21:48:31Z",
+      "side": 1,
+      "message": "See earlier comment - add rotation to configure EXPERIMENT_LIST.",
+      "revId": "a656d217102ea8776d3dfac911d059cabfb41e9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//0As\u003d",
+        "filename": "vpx_ports/asm_offsets.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-14T21:48:31Z",
+      "side": 1,
+      "message": "John?",
+      "revId": "a656d217102ea8776d3dfac911d059cabfb41e9f",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
