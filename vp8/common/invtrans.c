@@ -68,25 +68,27 @@ void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD 
 }
 
 
-void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mb(const vp8_idct_rtcd_vtable_t *rtcd,
+                              MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
 
-  if (x->mode_info_context->mbmi.mode != B_PRED &&
-      x->mode_info_context->mbmi.mode != I8X8_PRED &&
-      x->mode_info_context->mbmi.mode != SPLITMV) {
+  if (xd->mode_info_context->mbmi.mode != B_PRED &&
+      xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+      xd->mode_info_context->mbmi.mode != SPLITMV) {
     /* do 2nd order transform on the dc block */
 
-    IDCT_INVOKE(rtcd, iwalsh16)(&x->block[24].dqcoeff[0], x->block[24].diff);
-    recon_dcblock(x);
+    IDCT_INVOKE(rtcd, iwalsh16)(&blockd[24].dqcoeff[0], blockd[24].diff);
+    recon_dcblock(xd);
   }
 
   for (i = 0; i < 16; i++) {
-    vp8_inverse_transform_b(rtcd, &x->block[i], 32);
+    vp8_inverse_transform_b(rtcd, &blockd[i], 32);
   }
 
 
   for (i = 16; i < 24; i++) {
-    vp8_inverse_transform_b(rtcd, &x->block[i], 16);
+    vp8_inverse_transform_b(rtcd, &blockd[i], 16);
   }
 
 }
@@ -102,53 +104,65 @@ void vp8_inverse_transform_b_8x8(const vp8_idct_rtcd_vtable_t *rtcd, short *inpu
 }
 
 
-void vp8_inverse_transform_mby_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mby_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
+                                   MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
 
   // do 2nd order transform on the dc block
-  IDCT_INVOKE(rtcd, ihaar2)(x->block[24].dqcoeff, x->block[24].diff, 8);
+  IDCT_INVOKE(rtcd, ihaar2)(blockd[24].dqcoeff, blockd[24].diff, 8);
 
-  recon_dcblock_8x8(x); // need to change for 8x8
+  recon_dcblock_8x8(xd); // need to change for 8x8
   for (i = 0; i < 9; i += 8) {
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 32);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i].dqcoeff[0],
+                                &blockd[i].diff[0], 32);
   }
   for (i = 2; i < 11; i += 8) {
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i + 2].dqcoeff[0], &x->block[i].diff[0], 32);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i + 2].dqcoeff[0],
+                                &blockd[i].diff[0], 32);
   }
 
 }
-void vp8_inverse_transform_mbuv_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mbuv_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
+                                    MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
 
   for (i = 16; i < 24; i += 4) {
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i].dqcoeff[0],
+                                &blockd[i].diff[0], 16);
   }
 
 }
 
 
-void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mb_8x8(const vp8_idct_rtcd_vtable_t *rtcd,
+                                  MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
 
-  if (x->mode_info_context->mbmi.mode != B_PRED &&
-      x->mode_info_context->mbmi.mode != SPLITMV) {
+  if (xd->mode_info_context->mbmi.mode != B_PRED &&
+      xd->mode_info_context->mbmi.mode != SPLITMV) {
     // do 2nd order transform on the dc block
 
-    IDCT_INVOKE(rtcd, ihaar2)(&x->block[24].dqcoeff[0], x->block[24].diff, 8);// dqcoeff[0]
-    recon_dcblock_8x8(x); // need to change for 8x8
+    IDCT_INVOKE(rtcd, ihaar2)(&blockd[24].dqcoeff[0],
+                              blockd[24].diff, 8);// dqcoeff[0]
+    recon_dcblock_8x8(xd); // need to change for 8x8
 
   }
 
   for (i = 0; i < 9; i += 8) {
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 32);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i].dqcoeff[0],
+                                &blockd[i].diff[0], 32);
   }
   for (i = 2; i < 11; i += 8) {
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i + 2].dqcoeff[0], &x->block[i].diff[0], 32);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i + 2].dqcoeff[0],
+                                &blockd[i].diff[0], 32);
   }
 
-
   for (i = 16; i < 24; i += 4) {
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i].dqcoeff[0],
+                                &blockd[i].diff[0], 16);
   }
 
 }
@@ -160,26 +174,36 @@ void vp8_inverse_transform_b_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
   IDCT_INVOKE(rtcd, idct16x16)(input_dqcoeff, output_coeff, pitch);
 }
 
-void vp8_inverse_transform_mby_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
-    vp8_inverse_transform_b_16x16(rtcd, &x->block[0].dqcoeff[0], &x->block[0].diff[0], 32);
+void vp8_inverse_transform_mby_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
+                                     MACROBLOCKD *xd) {
+    vp8_inverse_transform_b_16x16(rtcd, &xd->block[0].dqcoeff[0],
+                                  &xd->block[0].diff[0], 32);
 }
 
 // U,V blocks are 8x8 per macroblock, so just run 8x8
-void vp8_inverse_transform_mbuv_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mbuv_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
+                                      MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
+
   for (i = 16; i < 24; i += 4)
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i].dqcoeff[0],
+                                &blockd[i].diff[0], 16);
 }
 
-void vp8_inverse_transform_mb_16x16(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mb_16x16(const vp8_idct_rtcd_vtable_t *rtcd,
+                                    MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
 
   // Luma
-  vp8_inverse_transform_b_16x16(rtcd, &x->block[0].dqcoeff[0], &x->block[0].diff[0], 32);
+  vp8_inverse_transform_b_16x16(rtcd, &blockd[0].dqcoeff[0],
+                                &blockd[0].diff[0], 32);
 
   // U, V
   // Chroma blocks are downscaled, so run an 8x8 on them.
   for (i = 16; i < 24; i+= 4)
-    vp8_inverse_transform_b_8x8(rtcd, &x->block[i].dqcoeff[0], &x->block[i].diff[0], 16);
+    vp8_inverse_transform_b_8x8(rtcd, &blockd[i].dqcoeff[0],
+                                &blockd[i].diff[0], 16);
 }
 #endif

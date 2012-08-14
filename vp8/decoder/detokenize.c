@@ -100,20 +100,20 @@ DECLARE_ALIGNED(16, const int, coef_bands_x_16x16[256]) = {
 static const unsigned char cat6_prob[14] =
 { 254, 254, 252, 249, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0 };
 
-void vp8_reset_mb_tokens_context(MACROBLOCKD *x) {
+void vp8_reset_mb_tokens_context(MACROBLOCKD *xd) {
   /* Clear entropy contexts for Y2 blocks */
-  if ((x->mode_info_context->mbmi.mode != B_PRED &&
-      x->mode_info_context->mbmi.mode != I8X8_PRED &&
-      x->mode_info_context->mbmi.mode != SPLITMV)
+  if ((xd->mode_info_context->mbmi.mode != B_PRED &&
+      xd->mode_info_context->mbmi.mode != I8X8_PRED &&
+      xd->mode_info_context->mbmi.mode != SPLITMV)
 #if CONFIG_TX16X16
       || x->mode_info_context->mbmi.txfm_size == TX_16X16
 #endif
       ) {
-    vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
   } else {
-    vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
-    vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
+    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
+    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
   }
 }
 

@@ -365,7 +365,7 @@ static void update_state(VP8_COMP *cpi, MACROBLOCK *x, PICK_MODE_CONTEXT *ctx) {
   int i;
   MACROBLOCKD *xd = &x->e_mbd;
   MODE_INFO *mi = &ctx->mic;
-  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
+  MB_MODE_INFO * mbmi = &xd->mode_info_context->mbmi;
   int mb_mode = mi->mbmi.mode;
   int mb_mode_index = ctx->best_mode_index;
 

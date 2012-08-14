@@ -1581,7 +1581,7 @@ static int labels2mode(MACROBLOCK *x, int const *labelings, int which_label,
                        int_mv *second_best_ref_mv, int *mvcost[2]) {
   MACROBLOCKD *const xd = & x->e_mbd;
   MODE_INFO *const mic = xd->mode_info_context;
-  MB_MODE_INFO * mbmi = &x->e_mbd.mode_info_context->mbmi;
+  MB_MODE_INFO * mbmi = &mic->mbmi;
   const int mis = xd->mode_info_stride;
 
   int i, cost = 0, thismvcost = 0;
@@ -1695,6 +1695,7 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x,
                                                 const VP8_ENCODER_RTCD *rtcd) {
   int i;
   unsigned int distortion = 0;
+  MACROBLOCKD *xd = &x->e_mbd;
 
   for (i = 0; i < 16; i++) {
     if (labels[i] == which_label) {
@@ -1702,9 +1703,9 @@ static unsigned int vp8_encode_inter_mb_segment(MACROBLOCK *x,
       BLOCK *be = &x->block[i];
       int thisdistortion;
 
-      vp8_build_inter_predictors_b(bd, 16, x->e_mbd.subpixel_predict);
-      if (x->e_mbd.mode_info_context->mbmi.second_ref_frame)
-        vp8_build_2nd_inter_predictors_b(bd, 16, x->e_mbd.subpixel_predict_avg);
+      vp8_build_inter_predictors_b(bd, 16, xd->subpixel_predict);
+      if (xd->mode_info_context->mbmi.second_ref_frame)
+        vp8_build_2nd_inter_predictors_b(bd, 16, xd->subpixel_predict_avg);
       ENCODEMB_INVOKE(&rtcd->encodemb, subb)(be, bd, 16);
       x->vp8_short_fdct4x4(be->src_diff, be->coeff, 32);
 
@@ -3583,7 +3584,6 @@ int vp8_rd_pick_intra_mode(VP8_COMP *cpi, MACROBLOCK *x) {
   int mode8x8[2][4];
 
   mbmi->ref_frame = INTRA_FRAME;
-
   rd_pick_intra_mbuv_mode(cpi, x, &rateuv, &rateuv_tokenonly, &distuv);
   rate = rateuv;
 
