@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//1FE\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-14T02:23:47Z",
+      "side": 1,
+      "message": "delete this",
+      "revId": "ea90c1708955007cd065d90840929fa70760a897",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//1FA\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-14T02:23:47Z",
+      "side": 1,
+      "message": "delete this",
+      "revId": "ea90c1708955007cd065d90840929fa70760a897",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//1E8\u003d",
+        "filename": "vp8/encoder/firstpass.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-14T02:23:47Z",
+      "side": 1,
+      "message": "delete this",
+      "revId": "ea90c1708955007cd065d90840929fa70760a897",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//1E4\u003d",
+        "filename": "vp8/encoder/onyx_if.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2608,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-14T02:23:47Z",
+      "side": 1,
+      "message": "delete this",
+      "revId": "ea90c1708955007cd065d90840929fa70760a897",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
