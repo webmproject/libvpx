@@ -202,7 +202,9 @@ vp8_prob *vp8_mv_ref_probs(VP8_COMMON *pc,
 void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
                            unsigned char *ref_y_buffer,
                            int ref_y_stride,
-                           int_mv *best_mv){
+                           int_mv *best_mv,
+                           int_mv *nearest,
+                           int_mv *near) {
   int_mv *ref_mv = xd->ref_mv;
   int bestsad = INT_MAX;
   int i;
@@ -259,6 +261,13 @@ void vp8_find_best_ref_mvs(MACROBLOCKD *xd,
     lower_mv_precision(best_mv);
 
   vp8_clamp_mv2(best_mv, xd);
+
+  if (best_mv->as_int != 0 &&
+      (best_mv->as_mv.row >> 3) != (nearest->as_mv.row >>3 ) &&
+      (best_mv->as_mv.col >> 3) != (nearest->as_mv.col >>3 )) {
+    near->as_int = nearest->as_int;
+    nearest->as_int = best_mv->as_int;
+  }
 }
 
 #endif
