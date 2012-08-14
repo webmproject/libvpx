@@ -106,7 +106,7 @@ void vp8_reset_mb_tokens_context(MACROBLOCKD *xd) {
       xd->mode_info_context->mbmi.mode != I8X8_PRED &&
       xd->mode_info_context->mbmi.mode != SPLITMV)
 #if CONFIG_TX16X16
-      || x->mode_info_context->mbmi.txfm_size == TX_16X16
+      || xd->mode_info_context->mbmi.txfm_size == TX_16X16
 #endif
       ) {
     vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
