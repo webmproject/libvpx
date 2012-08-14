@@ -34,6 +34,24 @@
       "revId": "fd084b2489e5c80a19b72f9b6264bda5eec67fb6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//0PY\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-14T18:15:49Z",
+      "side": 1,
+      "message": "I think so. It\u0027s typical with this setup to make the config.h the first include to properly set any code that follows. Including what you need per-module helps reduce (unnecessary) includes in both public and private header files.",
+      "parentUuid": "AAAAPH//0Ps\u003d",
+      "revId": "fd084b2489e5c80a19b72f9b6264bda5eec67fb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
