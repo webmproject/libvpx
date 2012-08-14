@@ -16,6 +16,24 @@
       "revId": "fd084b2489e5c80a19b72f9b6264bda5eec67fb6",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//0Ps\u003d",
+        "filename": "vp8/decoder/onyxd_if.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1001793
+      },
+      "writtenOn": "2012-08-14T18:12:34Z",
+      "side": 1,
+      "message": "In a future patch, should I remove vpx_config.h from vp8/common/onyxc_int.h and include it directly where needed?",
+      "parentUuid": "AAAAPH//0V4\u003d",
+      "revId": "fd084b2489e5c80a19b72f9b6264bda5eec67fb6",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
