@@ -13,6 +13,7 @@
 #define __INC_DCT_H
 
 #include "vpx_config.h"
+#include "vp8/common/blockd.h"
 
 #define prototype_fdct(sym) void (sym)(short *input, short *output, int pitch)
 

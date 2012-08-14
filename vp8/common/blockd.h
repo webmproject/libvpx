@@ -136,7 +136,7 @@ typedef enum {
   TX_SIZE_MAX                  // Number of different transforms available
 } TX_SIZE;
 
-#if CONFIG_HYBRIDTRANSFORM
+#if CONFIG_HYBRIDTRANSFORM8X8 || CONFIG_HYBRIDTRANSFORM
 typedef enum {
   DCT_DCT   = 0,                      // DCT  in both horizontal and vertical
   ADST_DCT  = 1,                      // ADST in horizontal, DCT in vertical
