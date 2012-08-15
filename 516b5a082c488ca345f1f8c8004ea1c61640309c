@@ -34,6 +34,24 @@
       "revId": "516b5a082c488ca345f1f8c8004ea1c61640309c",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//y4c\u003d",
+        "filename": "libs.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1002219
+      },
+      "writtenOn": "2012-08-15T20:37:45Z",
+      "side": 1,
+      "message": "Changed to use BUILD_LIBVPX in patchset 3 to be more consistent with the OBJS variable",
+      "parentUuid": "AAAAPH//y5o\u003d",
+      "revId": "516b5a082c488ca345f1f8c8004ea1c61640309c",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
