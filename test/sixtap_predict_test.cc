@@ -156,33 +156,49 @@ TEST_P(SixtapPredictTest, TestWithRandomData) {
 }
 
 using std::tr1::make_tuple;
+
+const sixtap_predict_fn_t sixtap_16x16_c = vp8_sixtap_predict16x16_c;
+const sixtap_predict_fn_t sixtap_8x8_c = vp8_sixtap_predict8x8_c;
+const sixtap_predict_fn_t sixtap_8x4_c = vp8_sixtap_predict8x4_c;
+const sixtap_predict_fn_t sixtap_4x4_c = vp8_sixtap_predict4x4_c;
 INSTANTIATE_TEST_CASE_P(
     C, SixtapPredictTest, ::testing::Values(
-        make_tuple(16, 16, vp8_sixtap_predict16x16_c),
-        make_tuple(8, 8, vp8_sixtap_predict8x8_c),
-        make_tuple(8, 4, vp8_sixtap_predict8x4_c),
-        make_tuple(4, 4, vp8_sixtap_predict4x4_c)));
+        make_tuple(16, 16, sixtap_16x16_c),
+        make_tuple(8, 8, sixtap_8x8_c),
+        make_tuple(8, 4, sixtap_8x4_c),
+        make_tuple(4, 4, sixtap_4x4_c)));
 #if HAVE_MMX
+const sixtap_predict_fn_t sixtap_16x16_mmx = vp8_sixtap_predict16x16_mmx;
+const sixtap_predict_fn_t sixtap_8x8_mmx = vp8_sixtap_predict8x8_mmx;
+const sixtap_predict_fn_t sixtap_8x4_mmx = vp8_sixtap_predict8x4_mmx;
+const sixtap_predict_fn_t sixtap_4x4_mmx = vp8_sixtap_predict4x4_mmx;
 INSTANTIATE_TEST_CASE_P(
     MMX, SixtapPredictTest, ::testing::Values(
-        make_tuple(16, 16, vp8_sixtap_predict16x16_mmx),
-        make_tuple(8, 8, vp8_sixtap_predict8x8_mmx),
-        make_tuple(8, 4, vp8_sixtap_predict8x4_mmx),
-        make_tuple(4, 4, vp8_sixtap_predict4x4_mmx)));
+        make_tuple(16, 16, sixtap_16x16_mmx),
+        make_tuple(8, 8, sixtap_8x8_mmx),
+        make_tuple(8, 4, sixtap_8x4_mmx),
+        make_tuple(4, 4, sixtap_4x4_mmx)));
 #endif
 #if HAVE_SSE2
+const sixtap_predict_fn_t sixtap_16x16_sse2 = vp8_sixtap_predict16x16_sse2;
+const sixtap_predict_fn_t sixtap_8x8_sse2 = vp8_sixtap_predict8x8_sse2;
+const sixtap_predict_fn_t sixtap_8x4_sse2 = vp8_sixtap_predict8x4_sse2;
 INSTANTIATE_TEST_CASE_P(
     SSE2, SixtapPredictTest, ::testing::Values(
-        make_tuple(16, 16, vp8_sixtap_predict16x16_sse2),
-        make_tuple(8, 8, vp8_sixtap_predict8x8_sse2),
-        make_tuple(8, 4, vp8_sixtap_predict8x4_sse2)));
+        make_tuple(16, 16, sixtap_16x16_sse2),
+        make_tuple(8, 8, sixtap_8x8_sse2),
+        make_tuple(8, 4, sixtap_8x4_sse2)));
 #endif
 #if HAVE_SSSE3
+const sixtap_predict_fn_t sixtap_16x16_ssse3 = vp8_sixtap_predict16x16_ssse3;
+const sixtap_predict_fn_t sixtap_8x8_ssse3 = vp8_sixtap_predict8x8_ssse3;
+const sixtap_predict_fn_t sixtap_8x4_ssse3 = vp8_sixtap_predict8x4_ssse3;
+const sixtap_predict_fn_t sixtap_4x4_ssse3 = vp8_sixtap_predict4x4_ssse3;
 INSTANTIATE_TEST_CASE_P(
     SSSE3, SixtapPredictTest, ::testing::Values(
-        make_tuple(16, 16, vp8_sixtap_predict16x16_ssse3),
-        make_tuple(8, 8, vp8_sixtap_predict8x8_ssse3),
-        make_tuple(8, 4, vp8_sixtap_predict8x4_ssse3),
-        make_tuple(4, 4, vp8_sixtap_predict4x4_ssse3)));
+        make_tuple(16, 16, sixtap_16x16_ssse3),
+        make_tuple(8, 8, sixtap_8x8_ssse3),
+        make_tuple(8, 4, sixtap_8x4_ssse3),
+        make_tuple(4, 4, sixtap_4x4_ssse3)));
 #endif
 }  // namespace
