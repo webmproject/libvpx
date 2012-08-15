@@ -157,48 +157,72 @@ TEST_P(SADTest, MaxSAD) {
   CheckSad(128);
 }
 
+using std::tr1::make_tuple;
+
+const sad_m_by_n_fn_t sad_16x16_c = vp8_sad16x16_c;
+const sad_m_by_n_fn_t sad_8x16_c = vp8_sad8x16_c;
+const sad_m_by_n_fn_t sad_16x8_c = vp8_sad16x8_c;
+const sad_m_by_n_fn_t sad_8x8_c = vp8_sad8x8_c;
+const sad_m_by_n_fn_t sad_4x4_c = vp8_sad4x4_c;
 INSTANTIATE_TEST_CASE_P(C, SADTest, ::testing::Values(
-                        std::tr1::make_tuple(16, 16, vp8_sad16x16_c),
-                        std::tr1::make_tuple(8, 16, vp8_sad8x16_c),
-                        std::tr1::make_tuple(16, 8, vp8_sad16x8_c),
-                        std::tr1::make_tuple(8, 8, vp8_sad8x8_c),
-                        std::tr1::make_tuple(4, 4, vp8_sad4x4_c)));
+                        make_tuple(16, 16, sad_16x16_c),
+                        make_tuple(8, 16, sad_8x16_c),
+                        make_tuple(16, 8, sad_16x8_c),
+                        make_tuple(8, 8, sad_8x8_c),
+                        make_tuple(4, 4, sad_4x4_c)));
 
 // ARM tests
 #if HAVE_MEDIA
+const sad_m_by_n_fn_t sad_16x16_armv6 = vp8_sad16x16_armv6;
 INSTANTIATE_TEST_CASE_P(MEDIA, SADTest, ::testing::Values(
-                        std::tr1::make_tuple(16, 16, vp8_sad16x16_armv6)));
+                        make_tuple(16, 16, sad_16x16_armv6)));
 
 #endif
 #if HAVE_NEON
+const sad_m_by_n_fn_t sad_16x16_neon = vp8_sad16x16_neon;
+const sad_m_by_n_fn_t sad_8x16_neon = vp8_sad8x16_neon;
+const sad_m_by_n_fn_t sad_16x8_neon = vp8_sad16x8_neon;
+const sad_m_by_n_fn_t sad_8x8_neon = vp8_sad8x8_neon;
+const sad_m_by_n_fn_t sad_4x4_neon = vp8_sad4x4_neon;
 INSTANTIATE_TEST_CASE_P(NEON, SADTest, ::testing::Values(
-                        std::tr1::make_tuple(16, 16, vp8_sad16x16_neon),
-                        std::tr1::make_tuple(8, 16, vp8_sad8x16_neon),
-                        std::tr1::make_tuple(16, 8, vp8_sad16x8_neon),
-                        std::tr1::make_tuple(8, 8, vp8_sad8x8_neon),
-                        std::tr1::make_tuple(4, 4, vp8_sad4x4_neon)));
+                        make_tuple(16, 16, sad_16x16_neon),
+                        make_tuple(8, 16, sad_8x16_neon),
+                        make_tuple(16, 8, sad_16x8_neon),
+                        make_tuple(8, 8, sad_8x8_neon),
+                        make_tuple(4, 4, sad_4x4_neon)));
 #endif
 
 // X86 tests
 #if HAVE_MMX
+const sad_m_by_n_fn_t sad_16x16_mmx = vp8_sad16x16_mmx;
+const sad_m_by_n_fn_t sad_8x16_mmx = vp8_sad8x16_mmx;
+const sad_m_by_n_fn_t sad_16x8_mmx = vp8_sad16x8_mmx;
+const sad_m_by_n_fn_t sad_8x8_mmx = vp8_sad8x8_mmx;
+const sad_m_by_n_fn_t sad_4x4_mmx = vp8_sad4x4_mmx;
 INSTANTIATE_TEST_CASE_P(MMX, SADTest, ::testing::Values(
-                        std::tr1::make_tuple(16, 16, vp8_sad16x16_mmx),
-                        std::tr1::make_tuple(8, 16, vp8_sad8x16_mmx),
-                        std::tr1::make_tuple(16, 8, vp8_sad16x8_mmx),
-                        std::tr1::make_tuple(8, 8, vp8_sad8x8_mmx),
-                        std::tr1::make_tuple(4, 4, vp8_sad4x4_mmx)));
+                        make_tuple(16, 16, sad_16x16_mmx),
+                        make_tuple(8, 16, sad_8x16_mmx),
+                        make_tuple(16, 8, sad_16x8_mmx),
+                        make_tuple(8, 8, sad_8x8_mmx),
+                        make_tuple(4, 4, sad_4x4_mmx)));
 #endif
 #if HAVE_SSE2
+const sad_m_by_n_fn_t sad_16x16_wmt = vp8_sad16x16_wmt;
+const sad_m_by_n_fn_t sad_8x16_wmt = vp8_sad8x16_wmt;
+const sad_m_by_n_fn_t sad_16x8_wmt = vp8_sad16x8_wmt;
+const sad_m_by_n_fn_t sad_8x8_wmt = vp8_sad8x8_wmt;
+const sad_m_by_n_fn_t sad_4x4_wmt = vp8_sad4x4_wmt;
 INSTANTIATE_TEST_CASE_P(SSE2, SADTest, ::testing::Values(
-                        std::tr1::make_tuple(16, 16, vp8_sad16x16_wmt),
-                        std::tr1::make_tuple(8, 16, vp8_sad8x16_wmt),
-                        std::tr1::make_tuple(16, 8, vp8_sad16x8_wmt),
-                        std::tr1::make_tuple(8, 8, vp8_sad8x8_wmt),
-                        std::tr1::make_tuple(4, 4, vp8_sad4x4_wmt)));
+                        make_tuple(16, 16, sad_16x16_wmt),
+                        make_tuple(8, 16, sad_8x16_wmt),
+                        make_tuple(16, 8, sad_16x8_wmt),
+                        make_tuple(8, 8, sad_8x8_wmt),
+                        make_tuple(4, 4, sad_4x4_wmt)));
 #endif
 #if HAVE_SSSE3
+const sad_m_by_n_fn_t sad_16x16_sse3 = vp8_sad16x16_sse3;
 INSTANTIATE_TEST_CASE_P(SSE3, SADTest, ::testing::Values(
-                        std::tr1::make_tuple(16, 16, vp8_sad16x16_sse3)));
+                        make_tuple(16, 16, sad_16x16_sse3)));
 #endif
 
 }  // namespace
