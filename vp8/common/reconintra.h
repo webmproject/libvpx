@@ -26,6 +26,6 @@ void d27_predictor(unsigned char *ypred_ptr, int y_stride, int n,
 void d64_predictor(unsigned char *ypred_ptr, int y_stride, int n,
                    unsigned char *yabove_row, unsigned char *yleft_col);
 
-extern void init_intra_left_above_pixels(MACROBLOCKD *x);
+extern void init_intra_left_above_pixels(MACROBLOCKD *xd);
 
 #endif

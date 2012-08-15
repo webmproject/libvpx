@@ -463,8 +463,8 @@ static void txfm_map(BLOCKD *b, B_PREDICTION_MODE bmode) {
 }
 #endif
 
-extern void vp8_build_block_doffsets(MACROBLOCKD *x);
-extern void vp8_setup_block_dptrs(MACROBLOCKD *x);
+extern void vp8_build_block_doffsets(MACROBLOCKD *xd);
+extern void vp8_setup_block_dptrs(MACROBLOCKD *xd);
 
 static void update_blockd_bmi(MACROBLOCKD *xd) {
   int i;

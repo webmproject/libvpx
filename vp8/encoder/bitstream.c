@@ -138,7 +138,7 @@ static void update_mode(
 }
 
 static void update_mbintra_mode_probs(VP8_COMP *cpi) {
-  VP8_COMMON *const x = & cpi->common;
+  VP8_COMMON *const cm = & cpi->common;
 
   vp8_writer *const w = & cpi->bc;
 
@@ -148,7 +148,7 @@ static void update_mbintra_mode_probs(VP8_COMP *cpi) {
 
     update_mode(
       w, VP8_YMODES, vp8_ymode_encodings, vp8_ymode_tree,
-      Pnew, x->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
+      Pnew, cm->fc.ymode_prob, bct, (unsigned int *)cpi->ymode_count
     );
   }
 }
@@ -569,31 +569,31 @@ static void write_mv_hp
 // This function writes the current macro block's segnment id to the bitstream
 // It should only be called if a segment map update is indicated.
 static void write_mb_segid(vp8_writer *w,
-                           const MB_MODE_INFO *mi, const MACROBLOCKD *x) {
+                           const MB_MODE_INFO *mi, const MACROBLOCKD *xd) {
   // Encode the MB segment id.
-  if (x->segmentation_enabled && x->update_mb_segmentation_map) {
+  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
     switch (mi->segment_id) {
       case 0:
-        vp8_write(w, 0, x->mb_segment_tree_probs[0]);
-        vp8_write(w, 0, x->mb_segment_tree_probs[1]);
+        vp8_write(w, 0, xd->mb_segment_tree_probs[0]);
+        vp8_write(w, 0, xd->mb_segment_tree_probs[1]);
         break;
       case 1:
-        vp8_write(w, 0, x->mb_segment_tree_probs[0]);
-        vp8_write(w, 1, x->mb_segment_tree_probs[1]);
+        vp8_write(w, 0, xd->mb_segment_tree_probs[0]);
+        vp8_write(w, 1, xd->mb_segment_tree_probs[1]);
         break;
       case 2:
-        vp8_write(w, 1, x->mb_segment_tree_probs[0]);
-        vp8_write(w, 0, x->mb_segment_tree_probs[2]);
+        vp8_write(w, 1, xd->mb_segment_tree_probs[0]);
+        vp8_write(w, 0, xd->mb_segment_tree_probs[2]);
         break;
       case 3:
-        vp8_write(w, 1, x->mb_segment_tree_probs[0]);
-        vp8_write(w, 1, x->mb_segment_tree_probs[2]);
+        vp8_write(w, 1, xd->mb_segment_tree_probs[0]);
+        vp8_write(w, 1, xd->mb_segment_tree_probs[2]);
         break;
 
         // TRAP.. This should not happen
       default:
-        vp8_write(w, 0, x->mb_segment_tree_probs[0]);
-        vp8_write(w, 0, x->mb_segment_tree_probs[1]);
+        vp8_write(w, 0, xd->mb_segment_tree_probs[0]);
+        vp8_write(w, 0, xd->mb_segment_tree_probs[1]);
         break;
     }
   }

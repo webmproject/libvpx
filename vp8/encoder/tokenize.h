@@ -31,22 +31,25 @@ typedef struct {
 
 int rd_cost_mby(MACROBLOCKD *);
 
-extern int mby_is_skippable(MACROBLOCKD *x, int has_y2_block);
-extern int mbuv_is_skippable(MACROBLOCKD *x);
-extern int mb_is_skippable(MACROBLOCKD *x, int has_y2_block);
-extern int mby_is_skippable_8x8(MACROBLOCKD *x);
-extern int mbuv_is_skippable_8x8(MACROBLOCKD *x);
-extern int mb_is_skippable_8x8(MACROBLOCKD *x);
-extern int mb_is_skippable_16x16(MACROBLOCKD *x);
+extern int mby_is_skippable(MACROBLOCKD *xd, int has_y2_block);
+extern int mbuv_is_skippable(MACROBLOCKD *xd);
+extern int mb_is_skippable(MACROBLOCKD *xd, int has_y2_block);
+extern int mby_is_skippable_8x8(MACROBLOCKD *xd);
+extern int mbuv_is_skippable_8x8(MACROBLOCKD *xd);
+extern int mb_is_skippable_8x8(MACROBLOCKD *xd);
+extern int mb_is_skippable_16x16(MACROBLOCKD *xd);
 
 #ifdef ENTROPY_STATS
 void init_context_counters();
 void print_context_counters();
 
-extern INT64 context_counters[BLOCK_TYPES] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
-extern INT64 context_counters_8x8[BLOCK_TYPES_8X8] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+extern INT64 context_counters[BLOCK_TYPES][COEF_BANDS]
+                             [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
+extern INT64 context_counters_8x8[BLOCK_TYPES_8X8][COEF_BANDS]
+                                 [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 #if CONFIG_TX16X16
-extern INT64 context_counters_16x16[BLOCK_TYPES_16X16] [COEF_BANDS] [PREV_COEF_CONTEXTS] [MAX_ENTROPY_TOKENS];
+extern INT64 context_counters_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
+                                   [PREV_COEF_CONTEXTS][MAX_ENTROPY_TOKENS];
 #endif
 #endif
 

@@ -13,21 +13,21 @@
 
 
 
-static void recon_dcblock(MACROBLOCKD *x) {
-  BLOCKD *b = &x->block[24];
+static void recon_dcblock(MACROBLOCKD *xd) {
+  BLOCKD *b = &xd->block[24];
   int i;
 
   for (i = 0; i < 16; i++) {
-    x->block[i].dqcoeff[0] = b->diff[i];
+    xd->block[i].dqcoeff[0] = b->diff[i];
   }
 
 }
-static void recon_dcblock_8x8(MACROBLOCKD *x) {
-  BLOCKD *b = &x->block[24]; // for coeff 0, 2, 8, 10
-  x->block[0].dqcoeff[0] = b->diff[0];
-  x->block[4].dqcoeff[0] = b->diff[1];
-  x->block[8].dqcoeff[0] = b->diff[4];
-  x->block[12].dqcoeff[0] = b->diff[8];
+static void recon_dcblock_8x8(MACROBLOCKD *xd) {
+  BLOCKD *b = &xd->block[24]; // for coeff 0, 2, 8, 10
+  xd->block[0].dqcoeff[0] = b->diff[0];
+  xd->block[4].dqcoeff[0] = b->diff[1];
+  xd->block[8].dqcoeff[0] = b->diff[4];
+  xd->block[12].dqcoeff[0] = b->diff[8];
 
 }
 
@@ -45,24 +45,28 @@ void vp8_inverse_transform_b(const vp8_idct_rtcd_vtable_t *rtcd, BLOCKD *b, int 
 }
 
 
-void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mby(const vp8_idct_rtcd_vtable_t *rtcd,
+                               MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
 
   /* do 2nd order transform on the dc block */
-  IDCT_INVOKE(rtcd, iwalsh16)(x->block[24].dqcoeff, x->block[24].diff);
+  IDCT_INVOKE(rtcd, iwalsh16)(blockd[24].dqcoeff, blockd[24].diff);
 
-  recon_dcblock(x);
+  recon_dcblock(xd);
 
   for (i = 0; i < 16; i++) {
-    vp8_inverse_transform_b(rtcd, &x->block[i], 32);
+    vp8_inverse_transform_b(rtcd, &blockd[i], 32);
   }
 
 }
-void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd, MACROBLOCKD *x) {
+void vp8_inverse_transform_mbuv(const vp8_idct_rtcd_vtable_t *rtcd,
+                                MACROBLOCKD *xd) {
   int i;
+  BLOCKD *blockd = xd->block;
 
   for (i = 16; i < 24; i++) {
-    vp8_inverse_transform_b(rtcd, &x->block[i], 16);
+    vp8_inverse_transform_b(rtcd, &blockd[i], 16);
   }
 
 }

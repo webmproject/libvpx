@@ -61,14 +61,17 @@ static int vp8_read_uv_mode(vp8_reader *bc, const vp8_prob *p) {
 
 // This function reads the current macro block's segnent id from the bitstream
 // It should only be called if a segment map update is indicated.
-static void vp8_read_mb_segid(vp8_reader *r, MB_MODE_INFO *mi, MACROBLOCKD *x) {
+static void vp8_read_mb_segid(vp8_reader *r, MB_MODE_INFO *mi,
+                              MACROBLOCKD *xd) {
   /* Is segmentation enabled */
-  if (x->segmentation_enabled && x->update_mb_segmentation_map) {
+  if (xd->segmentation_enabled && xd->update_mb_segmentation_map) {
     /* If so then read the segment id. */
-    if (vp8_read(r, x->mb_segment_tree_probs[0]))
-      mi->segment_id = (unsigned char)(2 + vp8_read(r, x->mb_segment_tree_probs[2]));
+    if (vp8_read(r, xd->mb_segment_tree_probs[0]))
+      mi->segment_id =
+        (unsigned char)(2 + vp8_read(r, xd->mb_segment_tree_probs[2]));
     else
-      mi->segment_id = (unsigned char)(vp8_read(r, x->mb_segment_tree_probs[1]));
+      mi->segment_id =
+        (unsigned char)(vp8_read(r, xd->mb_segment_tree_probs[1]));
   }
 }
 

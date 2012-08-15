@@ -15,33 +15,34 @@
 #include "vpx_mem/vpx_mem.h"
 #include "onyxd_int.h"
 
-/* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *x) and
- * vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
+/* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *xd)
+ * and vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *xd).
  */
 
-void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row, int mb_col) {
-  unsigned char *yabove_row;    /* = x->dst.y_buffer - x->dst.y_stride; */
+void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                                      int mb_row, int mb_col) {
+  unsigned char *yabove_row;    /* = xd->dst.y_buffer - xd->dst.y_stride; */
   unsigned char *yleft_col;
   unsigned char yleft_buf[16];
   unsigned char ytop_left;      /* = yabove_row[-1]; */
-  unsigned char *ypred_ptr = x->predictor;
+  unsigned char *ypred_ptr = xd->predictor;
   int r, c, i;
 
   if (pbi->common.filter_level) {
     yabove_row = pbi->mt_yabove_row[mb_row] + mb_col * 16 + 32;
     yleft_col = pbi->mt_yleft_col[mb_row];
   } else {
-    yabove_row = x->dst.y_buffer - x->dst.y_stride;
+    yabove_row = xd->dst.y_buffer - xd->dst.y_stride;
 
     for (i = 0; i < 16; i++)
-      yleft_buf[i] = x->dst.y_buffer [i * x->dst.y_stride - 1];
+      yleft_buf[i] = xd->dst.y_buffer [i * xd->dst.y_stride - 1];
     yleft_col = yleft_buf;
   }
 
   ytop_left = yabove_row[-1];
 
   /* for Y */
-  switch (x->mode_info_context->mbmi.mode) {
+  switch (xd->mode_info_context->mbmi.mode) {
     case DC_PRED: {
       int expected_dc;
       int i;
@@ -49,14 +50,14 @@ void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row
       int average = 0;
 
 
-      if (x->up_available || x->left_available) {
-        if (x->up_available) {
+      if (xd->up_available || xd->left_available) {
+        if (xd->up_available) {
           for (i = 0; i < 16; i++) {
             average += yabove_row[i];
           }
         }
 
-        if (x->left_available) {
+        if (xd->left_available) {
 
           for (i = 0; i < 16; i++) {
             average += yleft_col[i];
@@ -66,7 +67,7 @@ void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row
 
 
 
-        shift = 3 + x->up_available + x->left_available;
+        shift = 3 + xd->up_available + xd->left_available;
         expected_dc = (average + (1 << (shift - 1))) >> shift;
       } else {
         expected_dc = 128;
@@ -128,32 +129,33 @@ void vp8mt_build_intra_predictors_mby(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row
   }
 }
 
-void vp8mt_build_intra_predictors_mby_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row, int mb_col) {
-  unsigned char *yabove_row;    /* = x->dst.y_buffer - x->dst.y_stride; */
+void vp8mt_build_intra_predictors_mby_s(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                                        int mb_row, int mb_col) {
+  unsigned char *yabove_row;    /* = xd->dst.y_buffer - xd->dst.y_stride; */
   unsigned char *yleft_col;
   unsigned char yleft_buf[16];
   unsigned char ytop_left;      /* = yabove_row[-1]; */
-  unsigned char *ypred_ptr = x->predictor;
+  unsigned char *ypred_ptr = xd->predictor;
   int r, c, i;
 
-  int y_stride = x->dst.y_stride;
-  ypred_ptr = x->dst.y_buffer; /*x->predictor;*/
+  int y_stride = xd->dst.y_stride;
+  ypred_ptr = xd->dst.y_buffer; /*xd->predictor;*/
 
   if (pbi->common.filter_level) {
     yabove_row = pbi->mt_yabove_row[mb_row] + mb_col * 16 + 32;
     yleft_col = pbi->mt_yleft_col[mb_row];
   } else {
-    yabove_row = x->dst.y_buffer - x->dst.y_stride;
+    yabove_row = xd->dst.y_buffer - xd->dst.y_stride;
 
     for (i = 0; i < 16; i++)
-      yleft_buf[i] = x->dst.y_buffer [i * x->dst.y_stride - 1];
+      yleft_buf[i] = xd->dst.y_buffer [i * xd->dst.y_stride - 1];
     yleft_col = yleft_buf;
   }
 
   ytop_left = yabove_row[-1];
 
   /* for Y */
-  switch (x->mode_info_context->mbmi.mode) {
+  switch (xd->mode_info_context->mbmi.mode) {
     case DC_PRED: {
       int expected_dc;
       int i;
@@ -161,14 +163,14 @@ void vp8mt_build_intra_predictors_mby_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_r
       int average = 0;
 
 
-      if (x->up_available || x->left_available) {
-        if (x->up_available) {
+      if (xd->up_available || xd->left_available) {
+        if (xd->up_available) {
           for (i = 0; i < 16; i++) {
             average += yabove_row[i];
           }
         }
 
-        if (x->left_available) {
+        if (xd->left_available) {
 
           for (i = 0; i < 16; i++) {
             average += yleft_col[i];
@@ -178,7 +180,7 @@ void vp8mt_build_intra_predictors_mby_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_r
 
 
 
-        shift = 3 + x->up_available + x->left_available;
+        shift = 3 + xd->up_available + xd->left_available;
         expected_dc = (average + (1 << (shift - 1))) >> shift;
       } else {
         expected_dc = 128;
@@ -244,17 +246,18 @@ void vp8mt_build_intra_predictors_mby_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_r
   }
 }
 
-void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row, int mb_col) {
-  unsigned char *uabove_row;   /* = x->dst.u_buffer - x->dst.uv_stride; */
+void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                                       int mb_row, int mb_col) {
+  unsigned char *uabove_row;   /* = xd->dst.u_buffer - xd->dst.uv_stride; */
   unsigned char *uleft_col;    /*[16];*/
   unsigned char uleft_buf[8];
   unsigned char utop_left;     /* = uabove_row[-1]; */
-  unsigned char *vabove_row;   /* = x->dst.v_buffer - x->dst.uv_stride; */
+  unsigned char *vabove_row;   /* = xd->dst.v_buffer - xd->dst.uv_stride; */
   unsigned char *vleft_col;    /*[20];*/
   unsigned char vleft_buf[8];
   unsigned char vtop_left;     /* = vabove_row[-1]; */
-  unsigned char *upred_ptr = &x->predictor[256];
-  unsigned char *vpred_ptr = &x->predictor[320];
+  unsigned char *upred_ptr = &xd->predictor[256];
+  unsigned char *vpred_ptr = &xd->predictor[320];
   int i, j;
 
   if (pbi->common.filter_level) {
@@ -263,12 +266,12 @@ void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_ro
     uleft_col = pbi->mt_uleft_col[mb_row];
     vleft_col = pbi->mt_vleft_col[mb_row];
   } else {
-    uabove_row = x->dst.u_buffer - x->dst.uv_stride;
-    vabove_row = x->dst.v_buffer - x->dst.uv_stride;
+    uabove_row = xd->dst.u_buffer - xd->dst.uv_stride;
+    vabove_row = xd->dst.v_buffer - xd->dst.uv_stride;
 
     for (i = 0; i < 8; i++) {
-      uleft_buf[i] = x->dst.u_buffer [i * x->dst.uv_stride - 1];
-      vleft_buf[i] = x->dst.v_buffer [i * x->dst.uv_stride - 1];
+      uleft_buf[i] = xd->dst.u_buffer [i * xd->dst.uv_stride - 1];
+      vleft_buf[i] = xd->dst.v_buffer [i * xd->dst.uv_stride - 1];
     }
     uleft_col = uleft_buf;
     vleft_col = vleft_buf;
@@ -276,7 +279,7 @@ void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_ro
   utop_left = uabove_row[-1];
   vtop_left = vabove_row[-1];
 
-  switch (x->mode_info_context->mbmi.uv_mode) {
+  switch (xd->mode_info_context->mbmi.uv_mode) {
     case DC_PRED: {
       int expected_udc;
       int expected_vdc;
@@ -285,25 +288,25 @@ void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_ro
       int Uaverage = 0;
       int Vaverage = 0;
 
-      if (x->up_available) {
+      if (xd->up_available) {
         for (i = 0; i < 8; i++) {
           Uaverage += uabove_row[i];
           Vaverage += vabove_row[i];
         }
       }
 
-      if (x->left_available) {
+      if (xd->left_available) {
         for (i = 0; i < 8; i++) {
           Uaverage += uleft_col[i];
           Vaverage += vleft_col[i];
         }
       }
 
-      if (!x->up_available && !x->left_available) {
+      if (!xd->up_available && !xd->left_available) {
         expected_udc = 128;
         expected_vdc = 128;
       } else {
-        shift = 2 + x->up_available + x->left_available;
+        shift = 2 + xd->up_available + xd->left_available;
         expected_udc = (Uaverage + (1 << (shift - 1))) >> shift;
         expected_vdc = (Vaverage + (1 << (shift - 1))) >> shift;
       }
@@ -380,18 +383,19 @@ void vp8mt_build_intra_predictors_mbuv(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_ro
   }
 }
 
-void vp8mt_build_intra_predictors_mbuv_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row, int mb_col) {
-  unsigned char *uabove_row;  /* = x->dst.u_buffer - x->dst.uv_stride; */
+void vp8mt_build_intra_predictors_mbuv_s(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                                         int mb_row, int mb_col) {
+  unsigned char *uabove_row;  /* = xd->dst.u_buffer - xd->dst.uv_stride; */
   unsigned char *uleft_col;   /*[16];*/
   unsigned char uleft_buf[8];
   unsigned char utop_left;    /* = uabove_row[-1]; */
-  unsigned char *vabove_row;  /* = x->dst.v_buffer - x->dst.uv_stride; */
+  unsigned char *vabove_row;  /* = xd->dst.v_buffer - xd->dst.uv_stride; */
   unsigned char *vleft_col;   /*[20];*/
   unsigned char vleft_buf[8];
   unsigned char vtop_left;    /* = vabove_row[-1]; */
-  unsigned char *upred_ptr = x->dst.u_buffer; /*&x->predictor[256];*/
-  unsigned char *vpred_ptr = x->dst.v_buffer; /*&x->predictor[320];*/
-  int uv_stride = x->dst.uv_stride;
+  unsigned char *upred_ptr = xd->dst.u_buffer; /*&xd->predictor[256];*/
+  unsigned char *vpred_ptr = xd->dst.v_buffer; /*&xd->predictor[320];*/
+  int uv_stride = xd->dst.uv_stride;
   int i, j;
 
   if (pbi->common.filter_level) {
@@ -400,12 +404,12 @@ void vp8mt_build_intra_predictors_mbuv_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_
     uleft_col = pbi->mt_uleft_col[mb_row];
     vleft_col = pbi->mt_vleft_col[mb_row];
   } else {
-    uabove_row = x->dst.u_buffer - x->dst.uv_stride;
-    vabove_row = x->dst.v_buffer - x->dst.uv_stride;
+    uabove_row = xd->dst.u_buffer - xd->dst.uv_stride;
+    vabove_row = xd->dst.v_buffer - xd->dst.uv_stride;
 
     for (i = 0; i < 8; i++) {
-      uleft_buf[i] = x->dst.u_buffer [i * x->dst.uv_stride - 1];
-      vleft_buf[i] = x->dst.v_buffer [i * x->dst.uv_stride - 1];
+      uleft_buf[i] = xd->dst.u_buffer [i * xd->dst.uv_stride - 1];
+      vleft_buf[i] = xd->dst.v_buffer [i * xd->dst.uv_stride - 1];
     }
     uleft_col = uleft_buf;
     vleft_col = vleft_buf;
@@ -413,7 +417,7 @@ void vp8mt_build_intra_predictors_mbuv_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_
   utop_left = uabove_row[-1];
   vtop_left = vabove_row[-1];
 
-  switch (x->mode_info_context->mbmi.uv_mode) {
+  switch (xd->mode_info_context->mbmi.uv_mode) {
     case DC_PRED: {
       int expected_udc;
       int expected_vdc;
@@ -422,25 +426,25 @@ void vp8mt_build_intra_predictors_mbuv_s(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_
       int Uaverage = 0;
       int Vaverage = 0;
 
-      if (x->up_available) {
+      if (xd->up_available) {
         for (i = 0; i < 8; i++) {
           Uaverage += uabove_row[i];
           Vaverage += vabove_row[i];
         }
       }
 
-      if (x->left_available) {
+      if (xd->left_available) {
         for (i = 0; i < 8; i++) {
           Uaverage += uleft_col[i];
           Vaverage += vleft_col[i];
         }
       }
 
-      if (!x->up_available && !x->left_available) {
+      if (!xd->up_available && !xd->left_available) {
         expected_udc = 128;
         expected_vdc = 128;
       } else {
-        shift = 2 + x->up_available + x->left_available;
+        shift = 2 + xd->up_available + xd->left_available;
         expected_udc = (Uaverage + (1 << (shift - 1))) >> shift;
         expected_vdc = (Vaverage + (1 << (shift - 1))) >> shift;
       }
@@ -531,26 +535,26 @@ void vp8mt_predict_intra4x4(VP8D_COMP *pbi,
                             int num) {
   int i, r, c;
 
-  unsigned char *Above;   /* = *(x->base_dst) + x->dst - x->dst_stride; */
+  unsigned char *Above;   /* = *(xd->base_dst) + xd->dst - xd->dst_stride; */
   unsigned char Left[4];
   unsigned char top_left; /* = Above[-1]; */
 
-  BLOCKD *x = &xd->block[num];
+  BLOCKD *blockd = &xd->block[num];
 
   /*Caution: For some b_mode, it needs 8 pixels (4 above + 4 above-right).*/
   if (num < 4 && pbi->common.filter_level)
     Above = pbi->mt_yabove_row[mb_row] + mb_col * 16 + num * 4 + 32;
   else
-    Above = *(x->base_dst) + x->dst - x->dst_stride;
+    Above = *(blockd->base_dst) + blockd->dst - blockd->dst_stride;
 
   if (num % 4 == 0 && pbi->common.filter_level) {
     for (i = 0; i < 4; i++)
       Left[i] = pbi->mt_yleft_col[mb_row][num + i];
   } else {
-    Left[0] = (*(x->base_dst))[x->dst - 1];
-    Left[1] = (*(x->base_dst))[x->dst - 1 + x->dst_stride];
-    Left[2] = (*(x->base_dst))[x->dst - 1 + 2 * x->dst_stride];
-    Left[3] = (*(x->base_dst))[x->dst - 1 + 3 * x->dst_stride];
+    Left[0] = (*(blockd->base_dst))[blockd->dst - 1];
+    Left[1] = (*(blockd->base_dst))[blockd->dst - 1 + blockd->dst_stride];
+    Left[2] = (*(blockd->base_dst))[blockd->dst - 1 + 2 * blockd->dst_stride];
+    Left[3] = (*(blockd->base_dst))[blockd->dst - 1 + 3 * blockd->dst_stride];
   }
 
   if ((num == 4 || num == 8 || num == 12) && pbi->common.filter_level)
@@ -808,8 +812,11 @@ void vp8mt_predict_intra4x4(VP8D_COMP *pbi,
 /* copy 4 bytes from the above right down so that the 4x4 prediction modes using pixels above and
  * to the right prediction have filled in pixels to use.
  */
-void vp8mt_intra_prediction_down_copy(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row, int mb_col) {
-  unsigned char *above_right;   /* = *(x->block[0].base_dst) + x->block[0].dst - x->block[0].dst_stride + 16; */
+void vp8mt_intra_prediction_down_copy(VP8D_COMP *pbi, MACROBLOCKD *xd,
+                                      int mb_row, int mb_col) {
+  unsigned char *above_right;   // = *(xd->block[0].base_dst) +
+                                //     xd->block[0].dst -
+                                //     xd->block[0].dst_stride + 16; */
   unsigned int *src_ptr;
   unsigned int *dst_ptr0;
   unsigned int *dst_ptr1;
@@ -818,15 +825,19 @@ void vp8mt_intra_prediction_down_copy(VP8D_COMP *pbi, MACROBLOCKD *x, int mb_row
   if (pbi->common.filter_level)
     above_right = pbi->mt_yabove_row[mb_row] + mb_col * 16 + 32 + 16;
   else
-    above_right = *(x->block[0].base_dst) + x->block[0].dst - x->block[0].dst_stride + 16;
+    above_right = *(xd->block[0].base_dst) + xd->block[0].dst -
+                  xd->block[0].dst_stride + 16;
 
   src_ptr = (unsigned int *)above_right;
-  /*dst_ptr0 = (unsigned int *)(above_right + 4 * x->block[0].dst_stride);
-  dst_ptr1 = (unsigned int *)(above_right + 8 * x->block[0].dst_stride);
-  dst_ptr2 = (unsigned int *)(above_right + 12 * x->block[0].dst_stride);*/
-  dst_ptr0 = (unsigned int *)(*(x->block[0].base_dst) + x->block[0].dst + 16 + 3 * x->block[0].dst_stride);
-  dst_ptr1 = (unsigned int *)(*(x->block[0].base_dst) + x->block[0].dst + 16 + 7 * x->block[0].dst_stride);
-  dst_ptr2 = (unsigned int *)(*(x->block[0].base_dst) + x->block[0].dst + 16 + 11 * x->block[0].dst_stride);
+  /*dst_ptr0 = (unsigned int *)(above_right + 4 * xd->block[0].dst_stride);
+  dst_ptr1 = (unsigned int *)(above_right + 8 * xd->block[0].dst_stride);
+  dst_ptr2 = (unsigned int *)(above_right + 12 * xd->block[0].dst_stride);*/
+  dst_ptr0 = (unsigned int *)(*(xd->block[0].base_dst) + xd->block[0].dst +
+                              16 + 3 * xd->block[0].dst_stride);
+  dst_ptr1 = (unsigned int *)(*(xd->block[0].base_dst) + xd->block[0].dst +
+                              16 + 7 * xd->block[0].dst_stride);
+  dst_ptr2 = (unsigned int *)(*(xd->block[0].base_dst) + xd->block[0].dst +
+                              16 + 11 * xd->block[0].dst_stride);
   *dst_ptr0 = *src_ptr;
   *dst_ptr1 = *src_ptr;
   *dst_ptr2 = *src_ptr;

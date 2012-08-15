@@ -295,7 +295,7 @@ void vp8_build_2nd_inter_predictors_b(BLOCKD *d, int pitch, vp8_subpix_fn_t sppf
   }
 }
 
-static void build_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch) {
+static void build_inter_predictors4b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
   unsigned char *ptr_base;
   unsigned char *ptr;
   unsigned char *pred_ptr = d->predictor;
@@ -303,12 +303,15 @@ static void build_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch) {
 
   ptr_base = *(d->base_pre);
   mv.as_int = d->bmi.as_mv.first.as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride + (mv.as_mv.col >> 3);
+  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
+        (mv.as_mv.col >> 3);
 
   if (mv.as_mv.row & 7 || mv.as_mv.col & 7) {
-    x->subpixel_predict8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1, (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
+    xd->subpixel_predict8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
+                            (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    RECON_INVOKE(&x->rtcd->recon, copy8x8)(ptr, d->pre_stride, pred_ptr, pitch);
+    RECON_INVOKE(&xd->rtcd->recon, copy8x8)
+      (ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
@@ -318,7 +321,8 @@ static void build_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch) {
  * come from an earlier call to build_inter_predictors_4b()) with the
  * predictor of the second reference frame / motion vector.
  */
-static void build_2nd_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch) {
+static void build_2nd_inter_predictors4b(MACROBLOCKD *xd,
+                                         BLOCKD *d, int pitch) {
   unsigned char *ptr_base;
   unsigned char *ptr;
   unsigned char *pred_ptr = d->predictor;
@@ -326,16 +330,19 @@ static void build_2nd_inter_predictors4b(MACROBLOCKD *x, BLOCKD *d, int pitch) {
 
   ptr_base = *(d->base_second_pre);
   mv.as_int = d->bmi.as_mv.second.as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride + (mv.as_mv.col >> 3);
+  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
+        (mv.as_mv.col >> 3);
 
   if (mv.as_mv.row & 7 || mv.as_mv.col & 7) {
-    x->subpixel_predict_avg8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1, (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
+    xd->subpixel_predict_avg8x8(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
+                               (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    RECON_INVOKE(&x->rtcd->recon, avg8x8)(ptr, d->pre_stride, pred_ptr, pitch);
+    RECON_INVOKE(&xd->rtcd->recon, avg8x8)
+                (ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 
-static void build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch) {
+static void build_inter_predictors2b(MACROBLOCKD *xd, BLOCKD *d, int pitch) {
   unsigned char *ptr_base;
   unsigned char *ptr;
   unsigned char *pred_ptr = d->predictor;
@@ -343,12 +350,14 @@ static void build_inter_predictors2b(MACROBLOCKD *x, BLOCKD *d, int pitch) {
 
   ptr_base = *(d->base_pre);
   mv.as_int = d->bmi.as_mv.first.as_int;
-  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride + (mv.as_mv.col >> 3);
+  ptr = ptr_base + d->pre + (mv.as_mv.row >> 3) * d->pre_stride +
+        (mv.as_mv.col >> 3);
 
   if (mv.as_mv.row & 7 || mv.as_mv.col & 7) {
-    x->subpixel_predict8x4(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1, (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
+    xd->subpixel_predict8x4(ptr, d->pre_stride, (mv.as_mv.col & 7) << 1,
+                           (mv.as_mv.row & 7) << 1, pred_ptr, pitch);
   } else {
-    RECON_INVOKE(&x->rtcd->recon, copy8x4)(ptr, d->pre_stride, pred_ptr, pitch);
+    RECON_INVOKE(&xd->rtcd->recon, copy8x4)(ptr, d->pre_stride, pred_ptr, pitch);
   }
 }
 

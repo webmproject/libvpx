@@ -607,11 +607,11 @@ fall between -65 and +65.
 **************************************************************************/
 #define SUM_2ND_COEFF_THRESH 65
 
-static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
+static void check_reset_2nd_coeffs(MACROBLOCKD *xd, int type,
                                    ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
   int sum = 0;
   int i;
-  BLOCKD *bd = &x->block[24];
+  BLOCKD *bd = &xd->block[24];
   if (bd->dequant[0] >= SUM_2ND_COEFF_THRESH
       && bd->dequant[1] >= SUM_2ND_COEFF_THRESH)
     return;
@@ -634,10 +634,10 @@ static void check_reset_2nd_coeffs(MACROBLOCKD *x, int type,
   }
 }
 #define SUM_2ND_COEFF_THRESH_8X8 32
-static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *x, int type,
+static void check_reset_8x8_2nd_coeffs(MACROBLOCKD *xd, int type,
                                        ENTROPY_CONTEXT *a, ENTROPY_CONTEXT *l) {
   int sum = 0;
-  BLOCKD *bd = &x->block[24];
+  BLOCKD *bd = &xd->block[24];
   int coef;
 
   coef = bd->dqcoeff[0];

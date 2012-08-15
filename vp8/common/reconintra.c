@@ -14,8 +14,8 @@
 #include "reconintra.h"
 #include "vpx_mem/vpx_mem.h"
 
-/* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *x) and
- * vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *x).
+/* For skip_recon_mb(), add vp8_build_intra_predictors_mby_s(MACROBLOCKD *xd)
+ * and vp8_build_intra_predictors_mbuv_s(MACROBLOCKD *xd).
  */
 
 void d27_predictor(unsigned char *ypred_ptr, int y_stride, int n,

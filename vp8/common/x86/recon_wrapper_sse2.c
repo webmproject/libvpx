@@ -28,15 +28,15 @@ extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_ve_mmx);
 extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_tm_sse2);
 extern build_intra_predictors_mbuv_prototype(vp8_intra_pred_uv_tm_ssse3);
 
-static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *x,
+static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *xd,
                                                 unsigned char *dst_u,
                                                 unsigned char *dst_v,
                                                 int dst_stride,
                                                 build_intra_predictors_mbuv_fn_t tm_func,
                                                 build_intra_predictors_mbuv_fn_t ho_func) {
-  int mode = x->mode_info_context->mbmi.uv_mode;
+  int mode = xd->mode_info_context->mbmi.uv_mode;
   build_intra_predictors_mbuv_fn_t fn;
-  int src_stride = x->dst.uv_stride;
+  int src_stride = xd->dst.uv_stride;
 
   switch (mode) {
     case  V_PRED:
@@ -49,15 +49,15 @@ static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *x,
       fn = tm_func;
       break;
     case DC_PRED:
-      if (x->up_available) {
-        if (x->left_available) {
+      if (xd->up_available) {
+        if (xd->left_available) {
           fn = vp8_intra_pred_uv_dc_mmx2;
           break;
         } else {
           fn = vp8_intra_pred_uv_dctop_mmx2;
           break;
         }
-      } else if (x->left_available) {
+      } else if (xd->left_available) {
         fn = vp8_intra_pred_uv_dcleft_mmx2;
         break;
       } else {
@@ -69,34 +69,34 @@ static void vp8_build_intra_predictors_mbuv_x86(MACROBLOCKD *x,
       return;
   }
 
-  fn(dst_u, dst_stride, x->dst.u_buffer, src_stride);
-  fn(dst_v, dst_stride, x->dst.v_buffer, src_stride);
+  fn(dst_u, dst_stride, xd->dst.u_buffer, src_stride);
+  fn(dst_v, dst_stride, xd->dst.v_buffer, src_stride);
 }
 
-void vp8_build_intra_predictors_mbuv_sse2(MACROBLOCKD *x) {
-  vp8_build_intra_predictors_mbuv_x86(x, &x->predictor[256],
-                                      &x->predictor[320], 8,
+void vp8_build_intra_predictors_mbuv_sse2(MACROBLOCKD *xd) {
+  vp8_build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
+                                      &xd->predictor[320], 8,
                                       vp8_intra_pred_uv_tm_sse2,
                                       vp8_intra_pred_uv_ho_mmx2);
 }
 
-void vp8_build_intra_predictors_mbuv_ssse3(MACROBLOCKD *x) {
-  vp8_build_intra_predictors_mbuv_x86(x, &x->predictor[256],
-                                      &x->predictor[320], 8,
+void vp8_build_intra_predictors_mbuv_ssse3(MACROBLOCKD *xd) {
+  vp8_build_intra_predictors_mbuv_x86(xd, &xd->predictor[256],
+                                      &xd->predictor[320], 8,
                                       vp8_intra_pred_uv_tm_ssse3,
                                       vp8_intra_pred_uv_ho_ssse3);
 }
 
-void vp8_build_intra_predictors_mbuv_s_sse2(MACROBLOCKD *x) {
-  vp8_build_intra_predictors_mbuv_x86(x, x->dst.u_buffer,
-                                      x->dst.v_buffer, x->dst.uv_stride,
+void vp8_build_intra_predictors_mbuv_s_sse2(MACROBLOCKD *xd) {
+  vp8_build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
+                                      xd->dst.v_buffer, xd->dst.uv_stride,
                                       vp8_intra_pred_uv_tm_sse2,
                                       vp8_intra_pred_uv_ho_mmx2);
 }
 
-void vp8_build_intra_predictors_mbuv_s_ssse3(MACROBLOCKD *x) {
-  vp8_build_intra_predictors_mbuv_x86(x, x->dst.u_buffer,
-                                      x->dst.v_buffer, x->dst.uv_stride,
+void vp8_build_intra_predictors_mbuv_s_ssse3(MACROBLOCKD *xd) {
+  vp8_build_intra_predictors_mbuv_x86(xd, xd->dst.u_buffer,
+                                      xd->dst.v_buffer, xd->dst.uv_stride,
                                       vp8_intra_pred_uv_tm_ssse3,
                                       vp8_intra_pred_uv_ho_ssse3);
 }

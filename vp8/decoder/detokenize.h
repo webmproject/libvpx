@@ -14,7 +14,7 @@
 
 #include "onyxd_int.h"
 
-void vp8_reset_mb_tokens_context(MACROBLOCKD *x);
+void vp8_reset_mb_tokens_context(MACROBLOCKD *xd);
 int vp8_decode_mb_tokens(VP8D_COMP *, MACROBLOCKD *);
 int vp8_decode_mb_tokens_8x8(VP8D_COMP *, MACROBLOCKD *);
 #if CONFIG_TX16X16

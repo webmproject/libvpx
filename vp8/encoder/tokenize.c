@@ -39,14 +39,14 @@ extern unsigned int tree_update_hist_16x16[BLOCK_TYPES_16X16][COEF_BANDS]
 #endif
 #endif
 void vp8_stuff_mb(VP8_COMP *cpi,
-                  MACROBLOCKD *x, TOKENEXTRA **t, int dry_run);
+                  MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 void vp8_stuff_mb_8x8(VP8_COMP *cpi,
-                      MACROBLOCKD *x, TOKENEXTRA **t, int dry_run);
+                      MACROBLOCKD *xd, TOKENEXTRA **t, int dry_run);
 #if CONFIG_TX16X16
-void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *x,
+void vp8_stuff_mb_16x16(VP8_COMP *cpi, MACROBLOCKD *xd,
                         TOKENEXTRA **t, int dry_run);
 #endif
-void vp8_fix_contexts(MACROBLOCKD *x);
+void vp8_fix_contexts(MACROBLOCKD *xd);
 
 static TOKENVALUE dct_value_tokens[DCT_MAX_VALUE * 2];
 const TOKENVALUE *vp8_dct_value_tokens_ptr;
@@ -717,100 +717,100 @@ static void tokenize1st_order_b
 }
 
 
-int mby_is_skippable(MACROBLOCKD *x, int has_y2_block) {
+int mby_is_skippable(MACROBLOCKD *xd, int has_y2_block) {
   int skip = 1;
   int i = 0;
 
   if (has_y2_block) {
     for (i = 0; i < 16; i++)
-      skip &= (x->block[i].eob < 2);
-    skip &= (!x->block[24].eob);
+      skip &= (xd->block[i].eob < 2);
+    skip &= (!xd->block[24].eob);
   } else {
     for (i = 0; i < 16; i++)
-      skip &= (!x->block[i].eob);
+      skip &= (!xd->block[i].eob);
   }
   return skip;
 }
 
-int mbuv_is_skippable(MACROBLOCKD *x) {
+int mbuv_is_skippable(MACROBLOCKD *xd) {
   int skip = 1;
   int i;
 
   for (i = 16; i < 24; i++)
-    skip &= (!x->block[i].eob);
+    skip &= (!xd->block[i].eob);
   return skip;
 }
 
-int mb_is_skippable(MACROBLOCKD *x, int has_y2_block) {
-  return (mby_is_skippable(x, has_y2_block) &
-          mbuv_is_skippable(x));
+int mb_is_skippable(MACROBLOCKD *xd, int has_y2_block) {
+  return (mby_is_skippable(xd, has_y2_block) &
+          mbuv_is_skippable(xd));
 }
 
-int mby_is_skippable_8x8(MACROBLOCKD *x) {
+int mby_is_skippable_8x8(MACROBLOCKD *xd) {
   int skip = 1;
   int i = 0;
 
   for (i = 0; i < 16; i += 4)
-    skip &= (x->block[i].eob < 2);
-  skip &= (!x->block[24].eob);
+    skip &= (xd->block[i].eob < 2);
+  skip &= (!xd->block[24].eob);
   return skip;
 }
 
-int mbuv_is_skippable_8x8(MACROBLOCKD *x) {
-  return (!x->block[16].eob) & (!x->block[20].eob);
+int mbuv_is_skippable_8x8(MACROBLOCKD *xd) {
+  return (!xd->block[16].eob) & (!xd->block[20].eob);
 }
 
-int mb_is_skippable_8x8(MACROBLOCKD *x) {
-  return (mby_is_skippable_8x8(x) & mbuv_is_skippable_8x8(x));
+int mb_is_skippable_8x8(MACROBLOCKD *xd) {
+  return (mby_is_skippable_8x8(xd) & mbuv_is_skippable_8x8(xd));
 }
 
 #if CONFIG_TX16X16
-int mby_is_skippable_16x16(MACROBLOCKD *x) {
+int mby_is_skippable_16x16(MACROBLOCKD *xd) {
   int skip = 1;
-  //skip &= (x->block[0].eob < 2); // I think this should be commented? No second order == DC must be coded
-  //skip &= (x->block[0].eob < 1);
-  //skip &= (!x->block[24].eob);
-  skip &= !x->block[0].eob;
+  //skip &= (xd->block[0].eob < 2); // I think this should be commented? No second order == DC must be coded
+  //skip &= (xd->block[0].eob < 1);
+  //skip &= (!xd->block[24].eob);
+  skip &= !xd->block[0].eob;
   return skip;
 }
 
-int mb_is_skippable_16x16(MACROBLOCKD *x) {
+int mb_is_skippable_16x16(MACROBLOCKD *xd) {
   return (mby_is_skippable_16x16(x) & mbuv_is_skippable_8x8(x));
 }
 #endif
 
 void vp8_tokenize_mb(VP8_COMP *cpi,
-                     MACROBLOCKD *x,
+                     MACROBLOCKD *xd,
                      TOKENEXTRA **t,
                      int dry_run) {
   int plane_type;
   int has_y2_block;
   int b;
-  int tx_type = x->mode_info_context->mbmi.txfm_size;
-  int mb_skip_context = get_pred_context(&cpi->common, x, PRED_MBSKIP);
+  int tx_type = xd->mode_info_context->mbmi.txfm_size;
+  int mb_skip_context = get_pred_context(&cpi->common, xd, PRED_MBSKIP);
   TOKENEXTRA *t_backup = *t;
 
   // If the MB is going to be skipped because of a segment level flag
   // exclude this from the skip count stats used to calculate the
   // transmitted skip probability;
   int skip_inc;
-  int segment_id = x->mode_info_context->mbmi.segment_id;
+  int segment_id = xd->mode_info_context->mbmi.segment_id;
 
 #if CONFIG_HYBRIDTRANSFORM
     int QIndex = cpi->mb.q_index;
     int active_ht = (QIndex < ACTIVE_HT) &&
-                    (x->mode_info_context->mbmi.mode == B_PRED);
+                    (xd->mode_info_context->mbmi.mode == B_PRED);
 #endif
 
-  if (!segfeature_active(x, segment_id, SEG_LVL_EOB) ||
-      (get_segdata(x, segment_id, SEG_LVL_EOB) != 0)) {
+  if (!segfeature_active(xd, segment_id, SEG_LVL_EOB) ||
+      (get_segdata(xd, segment_id, SEG_LVL_EOB) != 0)) {
     skip_inc = 1;
   } else
     skip_inc = 0;
 
-  has_y2_block = (x->mode_info_context->mbmi.mode != B_PRED
-                  && x->mode_info_context->mbmi.mode != I8X8_PRED
-                  && x->mode_info_context->mbmi.mode != SPLITMV);
+  has_y2_block = (xd->mode_info_context->mbmi.mode != B_PRED
+                  && xd->mode_info_context->mbmi.mode != I8X8_PRED
+                  && xd->mode_info_context->mbmi.mode != SPLITMV);
 #if CONFIG_TX16X16
   if (tx_type == TX_16X16) has_y2_block = 0; // Because of inter frames
 #endif
@@ -818,18 +818,18 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   switch (tx_type) {
 #if CONFIG_TX16X16
     case TX_16X16:
-      x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(x);
+      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(x);
       break;
 #endif
     case TX_8X8:
-      x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_8x8(x);
+      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_8x8(xd);
       break;
     default:
-      x->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(x, has_y2_block);
+      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable(xd, has_y2_block);
       break;
   }
 
-  if (x->mode_info_context->mbmi.mb_skip_coeff) {
+  if (xd->mode_info_context->mbmi.mb_skip_coeff) {
     if (!dry_run)
       cpi->skip_true_count[mb_skip_context] += skip_inc;
     if (!cpi->common.mb_no_coeff_skip) {
@@ -839,11 +839,11 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
       else
 #endif
       if (tx_type == TX_8X8)
-        vp8_stuff_mb_8x8(cpi, x, t, dry_run);
+        vp8_stuff_mb_8x8(cpi, xd, t, dry_run);
       else
-        vp8_stuff_mb(cpi, x, t, dry_run);
+        vp8_stuff_mb(cpi, xd, t, dry_run);
     } else {
-      vp8_fix_contexts(x);
+      vp8_fix_contexts(xd);
     }
     if (dry_run)
       *t = t_backup;
@@ -856,31 +856,31 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   plane_type = 3;
   if (has_y2_block) {
     if (tx_type == TX_8X8) {
-      ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
-      ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
-      tokenize2nd_order_b_8x8(x,
-                              x->block + 24, t, 1, x->frame_type,
+      ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
+      ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
+      tokenize2nd_order_b_8x8(xd,
+                              xd->block + 24, t, 1, xd->frame_type,
                               A + vp8_block2above_8x8[24],
                               L + vp8_block2left_8x8[24],
                               cpi, dry_run);
     } else
-      tokenize2nd_order_b(x, t, cpi, dry_run);
+      tokenize2nd_order_b(xd, t, cpi, dry_run);
 
     plane_type = 0;
   }
 
 #if CONFIG_TX16X16
   if (tx_type == TX_16X16) {
-    ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
-    ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
-    tokenize1st_order_b_16x16(x, x->block, t, 3,
-                              x->frame_type, A, L, cpi, dry_run);
+    ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)xd->above_context;
+    ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)xd->left_context;
+    tokenize1st_order_b_16x16(xd, xd->block, t, 3,
+                              xd->frame_type, A, L, cpi, dry_run);
     for (b = 1; b < 16; b++) {
       *(A + vp8_block2above[b]) = *(A);
       *(L + vp8_block2left[b] ) = *(L);
     }
     for (b = 16; b < 24; b += 4) {
-      tokenize1st_order_b_8x8(x, x->block + b, t, 2, x->frame_type,
+      tokenize1st_order_b_8x8(xd, xd->block + b, t, 2, xd->frame_type,
           A + vp8_block2above_8x8[b], L + vp8_block2left_8x8[b], cpi, dry_run);
       *(A + vp8_block2above_8x8[b]+1) = *(A + vp8_block2above_8x8[b]);
       *(L + vp8_block2left_8x8[b]+1 ) = *(L + vp8_block2left_8x8[b]);
@@ -891,11 +891,11 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   else
 #endif
   if (tx_type == TX_8X8) {
-    ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
-    ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
+    ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
+    ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
     for (b = 0; b < 16; b += 4) {
-      tokenize1st_order_b_8x8(x,
-                              x->block + b, t, plane_type, x->frame_type,
+      tokenize1st_order_b_8x8(xd,
+                              xd->block + b, t, plane_type, xd->frame_type,
                               A + vp8_block2above_8x8[b],
                               L + vp8_block2left_8x8[b],
                               cpi, dry_run);
@@ -903,8 +903,8 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
       *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
     }
     for (b = 16; b < 24; b += 4) {
-      tokenize1st_order_b_8x8(x,
-                              x->block + b, t, 2, x->frame_type,
+      tokenize1st_order_b_8x8(xd,
+                              xd->block + b, t, 2, xd->frame_type,
                               A + vp8_block2above_8x8[b],
                               L + vp8_block2left_8x8[b],
                               cpi, dry_run);
@@ -914,34 +914,34 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   } else {
 #if CONFIG_HYBRIDTRANSFORM
     if(active_ht) {
-      tokenize1st_order_ht(x, t, plane_type, cpi, dry_run);
+      tokenize1st_order_ht(xd, t, plane_type, cpi, dry_run);
     } else {
 
 #if CONFIG_HYBRIDTRANSFORM8X8
-      if (x->mode_info_context->mbmi.mode == I8X8_PRED) {
-        ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
-        ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
+      if (xd->mode_info_context->mbmi.mode == I8X8_PRED) {
+        ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
+        ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
         for (b = 0; b < 16; b += 4) {
-          tokenize1st_order_b_8x8(x,
-                                  x->block + b, t, PLANE_TYPE_Y_WITH_DC,
-                                  x->frame_type,
+          tokenize1st_order_b_8x8(xd,
+                                  xd->block + b, t, PLANE_TYPE_Y_WITH_DC,
+                                  xd->frame_type,
                                   A + vp8_block2above_8x8[b],
                                   L + vp8_block2left_8x8[b],
                                   cpi, dry_run);
           *(A + vp8_block2above_8x8[b] + 1) = *(A + vp8_block2above_8x8[b]);
           *(L + vp8_block2left_8x8[b] + 1)  = *(L + vp8_block2left_8x8[b]);
         }
-        tokenize1st_order_chroma(x, t, PLANE_TYPE_UV, cpi, dry_run);
+        tokenize1st_order_chroma(xd, t, PLANE_TYPE_UV, cpi, dry_run);
       } else {
-        tokenize1st_order_b(x, t, plane_type, cpi, dry_run);
+        tokenize1st_order_b(xd, t, plane_type, cpi, dry_run);
       }
 #else
-      tokenize1st_order_b(x, t, plane_type, cpi, dry_run);
+      tokenize1st_order_b(xd, t, plane_type, cpi, dry_run);
 #endif
 
     }
 #else
-    tokenize1st_order_b(x, t, plane_type, cpi, dry_run);
+    tokenize1st_order_b(xd, t, plane_type, cpi, dry_run);
 #endif
   }
   if (dry_run)
@@ -1304,22 +1304,22 @@ void stuff1st_order_buv_8x8
 }
 
 void vp8_stuff_mb_8x8(VP8_COMP *cpi,
-                      MACROBLOCKD *x,
+                      MACROBLOCKD *xd,
                       TOKENEXTRA **t,
                       int dry_run) {
-  ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
-  ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
+  ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
+  ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
   int plane_type;
   int b;
   TOKENEXTRA *t_backup = *t;
 
-  stuff2nd_order_b_8x8(x->block + 24, t, 1, x->frame_type,
+  stuff2nd_order_b_8x8(xd->block + 24, t, 1, xd->frame_type,
                        A + vp8_block2above_8x8[24],
                        L + vp8_block2left_8x8[24], cpi, dry_run);
   plane_type = 0;
 
   for (b = 0; b < 16; b += 4) {
-    stuff1st_order_b_8x8(x->block + b, t, plane_type, x->frame_type,
+    stuff1st_order_b_8x8(xd->block + b, t, plane_type, xd->frame_type,
                          A + vp8_block2above_8x8[b],
                          L + vp8_block2left_8x8[b],
                          cpi, dry_run);
@@ -1328,7 +1328,7 @@ void vp8_stuff_mb_8x8(VP8_COMP *cpi,
   }
 
   for (b = 16; b < 24; b += 4) {
-    stuff1st_order_buv_8x8(x->block + b, t, 2, x->frame_type,
+    stuff1st_order_buv_8x8(xd->block + b, t, 2, xd->frame_type,
                            A + vp8_block2above[b],
                            L + vp8_block2left[b],
                            cpi, dry_run);
@@ -1367,21 +1367,21 @@ void stuff1st_order_b_16x16(const BLOCKD *const b,
 }
 
 void vp8_stuff_mb_16x16(VP8_COMP *cpi,
-                        MACROBLOCKD *x,
+                        MACROBLOCKD *xd,
                         TOKENEXTRA **t,
                         int dry_run) {
-  ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)x->above_context;
-  ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)x->left_context;
+  ENTROPY_CONTEXT * A = (ENTROPY_CONTEXT *)xd->above_context;
+  ENTROPY_CONTEXT * L = (ENTROPY_CONTEXT *)xd->left_context;
   int b, i;
   TOKENEXTRA *t_backup = *t;
 
-  stuff1st_order_b_16x16(x->block, t, x->frame_type, A, L, cpi, dry_run);
+  stuff1st_order_b_16x16(xd->block, t, xd->frame_type, A, L, cpi, dry_run);
   for (i = 1; i < 16; i++) {
     *(A + vp8_block2above[i]) = *(A);
     *(L +  vp8_block2left[i]) = *(L);
   }
   for (b = 16; b < 24; b += 4) {
-    stuff1st_order_buv_8x8(x->block + b, t, 2, x->frame_type,
+    stuff1st_order_buv_8x8(xd->block + b, t, 2, xd->frame_type,
         A + vp8_block2above[b],
         L + vp8_block2left[b],
         cpi, dry_run);
@@ -1462,10 +1462,10 @@ void stuff1st_order_buv
   *a = *l = pt;
 }
 
-void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x,
+void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *xd,
                   TOKENEXTRA **t, int dry_run) {
-  ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)x->above_context;
-  ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)x->left_context;
+  ENTROPY_CONTEXT *A = (ENTROPY_CONTEXT *)xd->above_context;
+  ENTROPY_CONTEXT *L = (ENTROPY_CONTEXT *)xd->left_context;
   int plane_type;
   int b;
   TOKENEXTRA *t_backup = *t;
@@ -1491,19 +1491,19 @@ void vp8_stuff_mb(VP8_COMP *cpi, MACROBLOCKD *x,
   if (dry_run)
     *t = t_backup;
 }
-void vp8_fix_contexts(MACROBLOCKD *x) {
+void vp8_fix_contexts(MACROBLOCKD *xd) {
   /* Clear entropy contexts for Y2 blocks */
-  if ((x->mode_info_context->mbmi.mode != B_PRED
-      && x->mode_info_context->mbmi.mode != I8X8_PRED
-      && x->mode_info_context->mbmi.mode != SPLITMV)
+  if ((xd->mode_info_context->mbmi.mode != B_PRED
+      && xd->mode_info_context->mbmi.mode != I8X8_PRED
+      && xd->mode_info_context->mbmi.mode != SPLITMV)
 #if CONFIG_TX16X16
-      || x->mode_info_context->mbmi.txfm_size == TX_16X16
+      || xd->mode_info_context->mbmi.txfm_size == TX_16X16
 #endif
       ) {
-    vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
-    vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
+    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES));
   } else {
-    vpx_memset(x->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
-    vpx_memset(x->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
+    vpx_memset(xd->above_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
+    vpx_memset(xd->left_context, 0, sizeof(ENTROPY_CONTEXT_PLANES) - 1);
   }
 }

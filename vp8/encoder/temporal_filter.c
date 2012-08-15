@@ -39,7 +39,7 @@
 
 static void vp8_temporal_filter_predictors_mb_c
 (
-  MACROBLOCKD *x,
+  MACROBLOCKD *xd,
   unsigned char *y_mb_ptr,
   unsigned char *u_mb_ptr,
   unsigned char *v_mb_ptr,
@@ -56,10 +56,10 @@ static void vp8_temporal_filter_predictors_mb_c
   yptr = y_mb_ptr + (mv_row >> 3) * stride + (mv_col >> 3);
 
   if ((mv_row | mv_col) & 7) {
-    x->subpixel_predict16x16(yptr, stride,
+    xd->subpixel_predict16x16(yptr, stride,
                              (mv_col & 7) << 1, (mv_row & 7) << 1, &pred[0], 16);
   } else {
-    RECON_INVOKE(&x->rtcd->recon, copy16x16)(yptr, stride, &pred[0], 16);
+    RECON_INVOKE(&xd->rtcd->recon, copy16x16)(yptr, stride, &pred[0], 16);
   }
 
   // U & V
@@ -73,14 +73,14 @@ static void vp8_temporal_filter_predictors_mb_c
   vptr = v_mb_ptr + offset;
 
   if ((omv_row | omv_col) & 15) {
-    x->subpixel_predict8x8(uptr, stride,
+    xd->subpixel_predict8x8(uptr, stride,
                            (omv_col & 15), (omv_row & 15), &pred[256], 8);
-    x->subpixel_predict8x8(vptr, stride,
+    xd->subpixel_predict8x8(vptr, stride,
                            (omv_col & 15), (omv_row & 15), &pred[320], 8);
   }
   else {
-    RECON_INVOKE(&x->rtcd->recon, copy8x8)(uptr, stride, &pred[256], 8);
-    RECON_INVOKE(&x->rtcd->recon, copy8x8)(vptr, stride, &pred[320], 8);
+    RECON_INVOKE(&xd->rtcd->recon, copy8x8)(uptr, stride, &pred[256], 8);
+    RECON_INVOKE(&xd->rtcd->recon, copy8x8)(vptr, stride, &pred[320], 8);
   }
 }
 void vp8_temporal_filter_apply_c
