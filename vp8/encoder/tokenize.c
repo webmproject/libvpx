@@ -775,7 +775,7 @@ int mby_is_skippable_16x16(MACROBLOCKD *xd) {
 }
 
 int mb_is_skippable_16x16(MACROBLOCKD *xd) {
-  return (mby_is_skippable_16x16(x) & mbuv_is_skippable_8x8(x));
+  return (mby_is_skippable_16x16(xd) & mbuv_is_skippable_8x8(xd));
 }
 #endif
 
@@ -818,7 +818,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
   switch (tx_type) {
 #if CONFIG_TX16X16
     case TX_16X16:
-      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(x);
+      xd->mode_info_context->mbmi.mb_skip_coeff = mb_is_skippable_16x16(xd);
       break;
 #endif
     case TX_8X8:
@@ -835,7 +835,7 @@ void vp8_tokenize_mb(VP8_COMP *cpi,
     if (!cpi->common.mb_no_coeff_skip) {
 #if CONFIG_TX16X16
       if (tx_type == TX_16X16)
-        vp8_stuff_mb_16x16(cpi, x, t, dry_run);
+        vp8_stuff_mb_16x16(cpi, xd, t, dry_run);
       else
 #endif
       if (tx_type == TX_8X8)
