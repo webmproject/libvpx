@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//y/I\u003d",
+        "filename": "vp8/common/x86/filter_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-15T18:42:16Z",
+      "side": 1,
+      "message": "future suggestion: use movd, not pextrd(0).\n\nAlternatively, you could unroll this loop somewhat to handle 2 or 4 lines at a time, so that the packs_epi32() and the packus_epi16() handle a full register worth of data. Then again, you might have to specialcase the last line since you have 11 lines to handle here, and you don\u0027t want to handle a 12th dummy line, so overall I\u0027m not sure it\u0027s worth it. Use your best judgement. :-).",
+      "revId": "2f64220c14bb4246d32fd87603e394fcde946cef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//y9w\u003d",
+        "filename": "vp8/common/x86/filter_sse4.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-15T18:42:16Z",
+      "side": 1,
+      "message": "Future suggestion: I believe here, too, you can merge the packs_epi32() and pacus_epi16() for the 4 cols above, so that you get the data in a single register, and then use pshufb (shuffle_epi8()) instead of the unpacks here. Should be 2+3+2 instructions faster.",
+      "revId": "2f64220c14bb4246d32fd87603e394fcde946cef",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
