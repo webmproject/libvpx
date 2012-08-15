@@ -593,6 +593,15 @@ process_common_toolchain() {
 
         # detect tgt_isa
         case "$gcctarget" in
+            armv6*)
+                tgt_isa=armv6
+                ;;
+            armv7*)
+                tgt_isa=armv7
+                ;;
+            armv5te*)
+                tgt_isa=armv5te
+                ;;
             *x86_64*|*amd64*)
                 tgt_isa=x86_64
                 ;;
