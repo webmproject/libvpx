@@ -147,7 +147,7 @@ ifeq ($(CONFIG_MSVS),yes)
 obj_int_extract.vcproj: $(SRC_PATH_BARE)/build/make/obj_int_extract.c
 	@cp $(SRC_PATH_BARE)/build/x86-msvs/obj_int_extract.bat .
 	@echo "    [CREATE] $@"
-	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
     --exe \
     --target=$(TOOLCHAIN) \
     --name=obj_int_extract \
@@ -163,14 +163,14 @@ PROJECTS-$(BUILD_LIBVPX) += obj_int_extract.bat
 
 vpx.def: $(call enabled,CODEC_EXPORTS)
 	@echo "    [CREATE] $@"
-	$(SRC_PATH_BARE)/build/make/gen_msvs_def.sh\
+	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_def.sh\
             --name=vpx\
             --out=$@ $^
 CLEAN-OBJS += vpx.def
 
 vpx.vcproj: $(CODEC_SRCS) vpx.def
 	@echo "    [CREATE] $@"
-	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
 			--lib \
 			--target=$(TOOLCHAIN) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
@@ -385,7 +385,7 @@ ifeq ($(CONFIG_MSVS),yes)
 
 gtest.vcproj: $(SRC_PATH_BARE)/third_party/googletest/src/src/gtest-all.cc
 	@echo "    [CREATE] $@"
-	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
             --lib \
             --target=$(TOOLCHAIN) \
             $(if $(CONFIG_STATIC_MSVCRT),--static-crt) \
@@ -400,7 +400,7 @@ PROJECTS-$(CONFIG_MSVS) += gtest.vcproj
 
 test_libvpx.vcproj: $(LIBVPX_TEST_SRCS)
 	@echo "    [CREATE] $@"
-	$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
+	$(qexec)$(SRC_PATH_BARE)/build/make/gen_msvs_proj.sh \
             --exe \
             --target=$(TOOLCHAIN) \
             --name=test_libvpx \
