@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//zM0\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-15T16:19:16Z",
+      "side": 1,
+      "message": "it may be worth soft-enable\u0027ing RTCD if this is auto-detected, just to be safe",
+      "revId": "2b59e14a0023be9d084349d58ee156a49cc674bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
