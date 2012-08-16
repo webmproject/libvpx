@@ -3213,7 +3213,7 @@ void vp8_rd_pick_inter_mode(VP8_COMP *cpi, MACROBLOCK *x, int recon_yoffset, int
       rate2 += vp8_cost_mv_ref(cpi, this_mode, mdcounts);
 
       vp8_build_1st_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor,
-                                              16);
+                                              16, 0);
       if (is_comp_pred)
         vp8_build_2nd_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor,
                                                 16);

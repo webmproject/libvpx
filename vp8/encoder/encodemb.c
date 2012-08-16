@@ -1194,7 +1194,8 @@ void vp8_encode_inter16x16y(const VP8_ENCODER_RTCD *rtcd, MACROBLOCK *x) {
   x->e_mbd.mode_info_context->mbmi.pred_filter_enabled = 0;
 #endif
 
-  vp8_build_1st_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor, 16);
+  vp8_build_1st_inter16x16_predictors_mby(&x->e_mbd, x->e_mbd.predictor,
+                                          16, 0);
 
   ENCODEMB_INVOKE(&rtcd->encodemb, submby)(x->src_diff, *(b->base_src), x->e_mbd.predictor, b->src_stride);
 

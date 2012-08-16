@@ -619,7 +619,8 @@ static void clamp_uvmv_to_umv_border(MV *mv, const MACROBLOCKD *xd) {
 /*encoder only*/
 void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                              unsigned char *dst_y,
-                                             int dst_ystride) {
+                                             int dst_ystride,
+                                             int clamp_mvs) {
   unsigned char *ptr_base = xd->pre.y_buffer;
   unsigned char *ptr;
   int pre_stride = xd->block[0].pre_stride;
@@ -627,7 +628,7 @@ void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
 
   ymv.as_int = xd->mode_info_context->mbmi.mv[0].as_int;
 
-  if (xd->mode_info_context->mbmi.need_to_clamp_mvs)
+  if (clamp_mvs)
     clamp_mv_to_umv_border(&ymv.as_mv, xd);
 
   ptr = ptr_base + (ymv.as_mv.row >> 3) * pre_stride + (ymv.as_mv.col >> 3);
@@ -755,7 +756,8 @@ void vp8_build_1st_inter16x16_predictors_mb(MACROBLOCKD *xd,
                                             unsigned char *dst_u,
                                             unsigned char *dst_v,
                                             int dst_ystride, int dst_uvstride) {
-  vp8_build_1st_inter16x16_predictors_mby(xd, dst_y, dst_ystride);
+  vp8_build_1st_inter16x16_predictors_mby(xd, dst_y, dst_ystride,
+      xd->mode_info_context->mbmi.need_to_clamp_mvs);
   vp8_build_1st_inter16x16_predictors_mbuv(xd, dst_u, dst_v, dst_uvstride);
 }
 

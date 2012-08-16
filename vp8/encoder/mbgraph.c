@@ -88,7 +88,7 @@ static unsigned int do_16x16_motion_iteration
 #endif
 
   vp8_set_mbmode_and_mvs(x, NEWMV, dst_mv);
-  vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16);
+  vp8_build_1st_inter16x16_predictors_mby(xd, xd->predictor, 16, 0);
   // VARIANCE_INVOKE(&cpi->rtcd.variance, satd16x16)
   best_err = VARIANCE_INVOKE(&cpi->rtcd.variance, sad16x16)
              (xd->dst.y_buffer, xd->dst.y_stride,

@@ -18,7 +18,8 @@
 
 extern void vp8_build_1st_inter16x16_predictors_mby(MACROBLOCKD *xd,
                                                     unsigned char *dst_y,
-                                                    int dst_ystride);
+                                                    int dst_ystride,
+                                                    int clamp_mvs);
 extern void vp8_build_1st_inter16x16_predictors_mbuv(MACROBLOCKD *xd,
                                                      unsigned char *dst_u,
                                                      unsigned char *dst_v,
