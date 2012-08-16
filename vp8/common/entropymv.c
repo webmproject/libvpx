@@ -117,6 +117,8 @@ __inline static void calc_prob(vp8_prob *p, const unsigned int ct[2], int pbits)
   if (tot) {
     const vp8_prob x = ((ct[0] * 255) / tot) & -(1 << (8 - pbits));
     *p = x ? x : 1;
+  } else {
+    *p = 128;
   }
 }
 
