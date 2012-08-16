@@ -34,6 +34,24 @@
       "revId": "2b59e14a0023be9d084349d58ee156a49cc674bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xn8\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 1000768
+      },
+      "writtenOn": "2012-08-16T18:40:46Z",
+      "side": 1,
+      "message": "i thought of that, but doesn\u0027t the existing code already have this problem ?  that\u0027s why i didn\u0027t address that because this CL does change the (existing) bug.\n\n    # Process ARM architecture variants\n    case ${toolchain} in\n    arm*)\n        # on arm, isa versions are supersets\n        case ${tgt_isa} in\n        armv7)\n            soft_enable neon\n            soft_enable media\n            soft_enable edsp\n            soft_enable fast_unaligned\n            ;;\n\nso if someone runs `./configure --target\u003darmv7-linux-gcc`, they don\u0027t get a choice of neon being optional.\n\n(i can easily post another CL to hoist the existing \"soft_enable runtime_cpu_detect\" out of the android case and into the generic armv7 case)",
+      "parentUuid": "AAAAPH//xsA\u003d",
+      "revId": "2b59e14a0023be9d084349d58ee156a49cc674bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
