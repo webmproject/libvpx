@@ -16,6 +16,24 @@
       "revId": "2b59e14a0023be9d084349d58ee156a49cc674bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xsA\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-16T18:15:59Z",
+      "side": 1,
+      "message": "here, after setting tgt-isa\u003darmv7, it should have\n soft-enable runtime-cpu-detect\nbecause not all armv7 devices have neon (tegra2). this way it can be overridden with --disable-runtime-cpu-detect on the command line, but in the default configuration it will avoid making a library which will crash on devices without neon.",
+      "parentUuid": "AAAAPH//zM0\u003d",
+      "revId": "2b59e14a0023be9d084349d58ee156a49cc674bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
