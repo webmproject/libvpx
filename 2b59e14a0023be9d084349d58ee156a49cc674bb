@@ -52,6 +52,24 @@
       "revId": "2b59e14a0023be9d084349d58ee156a49cc674bb",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPH//xnA\u003d",
+        "filename": "build/make/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 600,
+      "author": {
+        "id": 1117029
+      },
+      "writtenOn": "2012-08-16T18:44:08Z",
+      "side": 1,
+      "message": "that is true. my thought was that one was explicitly configured and they should know what they\u0027re doing versus having a compiler automatically decide something. i\u0027ll submit this and it can be revisited if there are issues. it\u0027s probably safer to err on both doing the same thing.",
+      "parentUuid": "AAAAPH//xn8\u003d",
+      "revId": "2b59e14a0023be9d084349d58ee156a49cc674bb",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
