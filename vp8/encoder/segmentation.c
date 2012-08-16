@@ -111,7 +111,8 @@ static void calc_segtree_probs(MACROBLOCKD *xd,
   int i;
 
   // Blank the strtucture to start with
-  vpx_memset(segment_tree_probs, 0, sizeof(segment_tree_probs));
+  vpx_memset(segment_tree_probs, 0,
+             MB_FEATURE_TREE_PROBS * sizeof(*segment_tree_probs));
 
   // Total count for all segments
   count1 = segcounts[0] + segcounts[1];
