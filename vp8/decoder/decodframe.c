@@ -211,9 +211,13 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   int tx_type;
 
 #if CONFIG_HYBRIDTRANSFORM
-  int QIndex = xd->q_index;
-  int active_ht = (QIndex < ACTIVE_HT);
+  int QIndex;
+  int active_ht;
 #endif
+
+  // re-initialize macroblock dequantizer before detokenization
+  if (xd->segmentation_enabled)
+    mb_init_dequantizer(pbi, xd);
 
   if (pbi->common.frame_type == KEY_FRAME) {
 #if CONFIG_TX16X16
@@ -326,11 +330,14 @@ static void decode_macroblock(VP8D_COMP *pbi, MACROBLOCKD *xd,
   }
 #endif
 
-  if (xd->segmentation_enabled)
-    mb_init_dequantizer(pbi, xd);
+  // moved to be performed before detokenization
+//  if (xd->segmentation_enabled)
+//    mb_init_dequantizer(pbi, xd);
 
 #if CONFIG_HYBRIDTRANSFORM
   // parse transform types for intra 4x4 mode
+  QIndex = xd->q_index;
+  active_ht = (QIndex < ACTIVE_HT);
   if (mode == B_PRED) {
     for (i = 0; i < 16; i++) {
       BLOCKD *b = &xd->block[i];
