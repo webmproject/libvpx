@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPH//xIc\u003d",
+        "filename": "vp8/common/mvref_common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-16T23:20:37Z",
+      "side": 1,
+      "message": "is this similar to:\n../vp8/common/findnearmv.h:static void vp8_clamp_mv(int_mv *mv,\n../vp8/common/findnearmv.h:static void vp8_clamp_mv2(int_mv *mv, const MACROBLOCKD *xd)\n../vp8/encoder/mcomp.h:extern void vp8_clamp_mv_min_max(MACROBLOCK *x, int_mv *ref_mv);\n\n?",
+      "revId": "45a6f97c255e31f949bdf2b9e85047585bc31a63",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
