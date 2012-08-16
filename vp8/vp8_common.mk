@@ -114,6 +114,11 @@ VP8_COMMON_SRCS-yes += common/maskingmv.c
 VP8_COMMON_SRCS-$(HAVE_SSE3) += common/x86/mask_sse3.asm
 endif
 
+VP8_COMMON_SRCS-$(HAVE_SSE4_1) += common/x86/filter_sse4.c
+ifeq ($(HAVE_SSE4_1),yes)
+vp8/common/x86/filter_sse4.c.o: CFLAGS += -msse4
+endif
+
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/arm_systemdependent.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.c
 VP8_COMMON_SRCS-$(ARCH_ARM)  += common/arm/bilinearfilter_arm.h

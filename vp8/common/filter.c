@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "filter.h"
 #include "vpx_ports/mem.h"
+#include "vpx_rtcd.h"
 
 DECLARE_ALIGNED(16, const short, vp8_bilinear_filters[SUBPEL_SHIFTS][2]) = {
   { 128,   0 },
@@ -511,13 +512,10 @@ static const unsigned int filter_max_width = 16;
 
 static void vp8_filter_block2d_8_c
 (
- const unsigned char *src_ptr,
- const unsigned int   src_stride,
- const short *HFilter,
- const short *VFilter,
+ const unsigned char *src_ptr, const unsigned int   src_stride,
+ const short *HFilter, const short *VFilter,
  const filter_size_t filter_size,
- unsigned char *dst_ptr,
- unsigned int   dst_stride
+ unsigned char *dst_ptr, unsigned int   dst_stride
 ) {
   const unsigned int output_width = filter_size_to_wh[filter_size][0];
   const unsigned int output_height = filter_size_to_wh[filter_size][1];
@@ -609,6 +607,50 @@ static void vp8_filter_block2d_8_c
   }
 }
 
+void vp8_filter_block2d_4x4_8_c
+(
+ const unsigned char *src_ptr, const unsigned int src_stride,
+ const short *HFilter_aligned16, const short *VFilter_aligned16,
+ unsigned char *dst_ptr, unsigned int dst_stride
+) {
+  vp8_filter_block2d_8_c(src_ptr, src_stride,
+                         HFilter_aligned16, VFilter_aligned16,
+                         VPX_FILTER_4x4, dst_ptr, dst_stride);
+}
+
+void vp8_filter_block2d_8x4_8_c
+(
+ const unsigned char *src_ptr, const unsigned int src_stride,
+ const short *HFilter_aligned16, const short *VFilter_aligned16,
+ unsigned char *dst_ptr, unsigned int dst_stride
+) {
+  vp8_filter_block2d_8_c(src_ptr, src_stride,
+                         HFilter_aligned16, VFilter_aligned16,
+                         VPX_FILTER_8x4, dst_ptr, dst_stride);
+}
+
+void vp8_filter_block2d_8x8_8_c
+(
+ const unsigned char *src_ptr, const unsigned int src_stride,
+ const short *HFilter_aligned16, const short *VFilter_aligned16,
+ unsigned char *dst_ptr, unsigned int dst_stride
+) {
+  vp8_filter_block2d_8_c(src_ptr, src_stride,
+                         HFilter_aligned16, VFilter_aligned16,
+                         VPX_FILTER_8x8, dst_ptr, dst_stride);
+}
+
+void vp8_filter_block2d_16x16_8_c
+(
+ const unsigned char *src_ptr, const unsigned int src_stride,
+ const short *HFilter_aligned16, const short *VFilter_aligned16,
+ unsigned char *dst_ptr, unsigned int dst_stride
+) {
+  vp8_filter_block2d_8_c(src_ptr, src_stride,
+                         HFilter_aligned16, VFilter_aligned16,
+                         VPX_FILTER_16x16, dst_ptr, dst_stride);
+}
+
 static void vp8_block2d_average_c
 (
   unsigned char *src,
@@ -629,7 +671,6 @@ static void vp8_block2d_average_c
   }
 }
 
-#define vp8_filter_block2d_8 vp8_filter_block2d_8_c
 #define vp8_block2d_average vp8_block2d_average_c
 
 void vp8_eighttap_predict_c
@@ -647,9 +688,9 @@ void vp8_eighttap_predict_c
   HFilter = vp8_sub_pel_filters_8[xoffset];
   VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_4x4,
-                       dst_ptr, dst_pitch);
+  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           dst_ptr, dst_pitch);
 }
 
 void vp8_eighttap_predict_avg4x4_c
@@ -665,9 +706,9 @@ void vp8_eighttap_predict_avg4x4_c
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
   unsigned char tmp[4 * 4];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_4x4,
-                       tmp, 4);
+  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           tmp, 4);
   vp8_block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
 }
 
@@ -686,9 +727,9 @@ void vp8_eighttap_predict_sharp_c
   HFilter = vp8_sub_pel_filters_8s[xoffset];
   VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_4x4,
-                       dst_ptr, dst_pitch);
+  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           dst_ptr, dst_pitch);
 }
 
 void vp8_eighttap_predict_avg4x4_sharp_c
@@ -704,9 +745,9 @@ void vp8_eighttap_predict_avg4x4_sharp_c
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
   unsigned char tmp[4 * 4];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_4x4,
-                       tmp, 4);
+  vp8_filter_block2d_4x4_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           tmp, 4);
   vp8_block2d_average(tmp, 4, dst_ptr, dst_pitch, VPX_FILTER_4x4);
 }
 
@@ -722,9 +763,9 @@ void vp8_eighttap_predict8x8_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_8x8,
-                       dst_ptr, dst_pitch);
+  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           dst_ptr, dst_pitch);
 }
 
 void vp8_eighttap_predict8x8_sharp_c
@@ -739,9 +780,9 @@ void vp8_eighttap_predict8x8_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_8x8,
-                       dst_ptr, dst_pitch);
+  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           dst_ptr, dst_pitch);
 }
 
 void vp8_eighttap_predict_avg8x8_c
@@ -757,9 +798,9 @@ void vp8_eighttap_predict_avg8x8_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_8x8,
-                       tmp, 8);
+  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           tmp, 8);
   vp8_block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
 }
 
@@ -776,9 +817,9 @@ void vp8_eighttap_predict_avg8x8_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_8x8,
-                       tmp, 8);
+  vp8_filter_block2d_8x8_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           tmp, 8);
   vp8_block2d_average(tmp, 8, dst_ptr, dst_pitch, VPX_FILTER_8x8);
 }
 
@@ -795,9 +836,9 @@ void vp8_eighttap_predict8x4_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_8x4,
-                       dst_ptr, dst_pitch);
+  vp8_filter_block2d_8x4_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           dst_ptr, dst_pitch);
 }
 
 void vp8_eighttap_predict8x4_sharp_c
@@ -812,9 +853,9 @@ void vp8_eighttap_predict8x4_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_8x4,
-                       dst_ptr, dst_pitch);
+  vp8_filter_block2d_8x4_8(src_ptr, src_pixels_per_line,
+                           HFilter, VFilter,
+                           dst_ptr, dst_pitch);
 }
 
 void vp8_eighttap_predict16x16_c
@@ -829,8 +870,8 @@ void vp8_eighttap_predict16x16_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_16x16,
+  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+                       HFilter, VFilter,
                        dst_ptr, dst_pitch);
 }
 
@@ -846,8 +887,8 @@ void vp8_eighttap_predict16x16_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_16x16,
+  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+                       HFilter, VFilter,
                        dst_ptr, dst_pitch);
 }
 
@@ -865,8 +906,8 @@ void vp8_eighttap_predict_avg16x16_c
   const short  *HFilter = vp8_sub_pel_filters_8[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_16x16,
+  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+                       HFilter, VFilter,
                        tmp, 16);
   vp8_block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
 }
@@ -884,8 +925,8 @@ void vp8_eighttap_predict_avg16x16_sharp_c
   const short  *HFilter = vp8_sub_pel_filters_8s[xoffset];
   const short  *VFilter = vp8_sub_pel_filters_8s[yoffset];
 
-  vp8_filter_block2d_8(src_ptr, src_pixels_per_line,
-                       HFilter, VFilter, VPX_FILTER_16x16,
+  vp8_filter_block2d_16x16_8(src_ptr, src_pixels_per_line,
+                       HFilter, VFilter,
                        tmp, 16);
   vp8_block2d_average(tmp, 16, dst_ptr, dst_pitch, VPX_FILTER_16x16);
 }
