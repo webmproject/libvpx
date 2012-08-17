@@ -55,6 +55,37 @@ DECLARE_ALIGNED(16, static const unsigned int, rounding_c[4]) = {
   VP8_FILTER_WEIGHT >> 1,
   VP8_FILTER_WEIGHT >> 1,
 };
+DECLARE_ALIGNED(16, static const unsigned char, transpose_c[16]) = {
+  0, 4,  8, 12,
+  1, 5,  9, 13,
+  2, 6, 10, 14,
+  3, 7, 11, 15
+};
+
+// Creating a macro to do more than four pixels at once to hide instruction
+// latency is actually slower :-(
+#define DO_FOUR_PIXELS(result, offset)                                         \
+  {                                                                            \
+  /*load pixels*/                                                              \
+  __m128i src  = _mm_loadu_si128((const __m128i *)(src_ptr + offset));         \
+  /* extract the ones used for first column */                                 \
+  __m128i src0123 = _mm_shuffle_epi8(src, mask0123);                           \
+  __m128i src4567 = _mm_shuffle_epi8(src, mask4567);                           \
+  __m128i src01_16 = _mm_unpacklo_epi8(src0123, zero);                         \
+  __m128i src23_16 = _mm_unpackhi_epi8(src0123, zero);                         \
+  __m128i src45_16 = _mm_unpacklo_epi8(src4567, zero);                         \
+  __m128i src67_16 = _mm_unpackhi_epi8(src4567, zero);                         \
+  /* multiply accumulate them */                                               \
+  __m128i mad01 = _mm_madd_epi16(src01_16, fil01);                             \
+  __m128i mad23 = _mm_madd_epi16(src23_16, fil23);                             \
+  __m128i mad45 = _mm_madd_epi16(src45_16, fil45);                             \
+  __m128i mad67 = _mm_madd_epi16(src67_16, fil67);                             \
+  __m128i mad0123 = _mm_add_epi32(mad01, mad23);                               \
+  __m128i mad4567 = _mm_add_epi32(mad45, mad67);                               \
+  __m128i mad_all = _mm_add_epi32(mad0123, mad4567);                           \
+  mad_all = _mm_add_epi32(mad_all, rounding);                                  \
+  result = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);                          \
+  }
 
 void vp8_filter_block2d_4x4_8_sse4_1
 (
@@ -62,19 +93,16 @@ void vp8_filter_block2d_4x4_8_sse4_1
  const short *HFilter_aligned16, const short *VFilter_aligned16,
  unsigned char *dst_ptr, unsigned int dst_stride
 ) {
-  const unsigned int output_height_div4 = 1;
+  __m128i intermediateA, intermediateB, intermediateC;
 
-  DECLARE_ALIGNED(16, unsigned char, intermediate_buffer[4 * 12]);
   const int kInterp_Extend = 4;
-  const unsigned int output_height = output_height_div4 * 4 - 1 +
-                                     2 * kInterp_Extend;
 
   const __m128i zero = _mm_set1_epi16(0);
   const __m128i mask0123 = _mm_load_si128((const __m128i *)mask0123_c);
   const __m128i mask4567 = _mm_load_si128((const __m128i *)mask4567_c);
   const __m128i rounding = _mm_load_si128((const __m128i *)rounding_c);
+  const __m128i transpose = _mm_load_si128((const __m128i *)transpose_c);
 
-  unsigned int i;
   // check alignment
   assert(0 == ((long)HFilter_aligned16)%16);
   assert(0 == ((long)VFilter_aligned16)%16);
@@ -87,7 +115,6 @@ void vp8_filter_block2d_4x4_8_sse4_1
 
     // Horizontal pass (src -> intermediate).
     {
-      unsigned char *output_ptr = intermediate_buffer;
       const __m128i HFilter = _mm_load_si128((const __m128i *)HFilter_aligned16);
       // get first two columns filter coefficients
       __m128i fil01 = _mm_shuffle_epi32(HFilter, _MM_SHUFFLE(0, 0, 0, 0));
@@ -96,94 +123,71 @@ void vp8_filter_block2d_4x4_8_sse4_1
       __m128i fil67 = _mm_shuffle_epi32(HFilter, _MM_SHUFFLE(3, 3, 3, 3));
       src_ptr -= (kInterp_Extend - 1) * src_stride + (kInterp_Extend - 1);
 
-      for (i = 0; i < output_height; i++) {
-        //load pixels
-        __m128i src  = _mm_loadu_si128((const __m128i *)src_ptr);
-        // extract the ones used for first column
-        __m128i src0123 = _mm_shuffle_epi8(src, mask0123);
-        __m128i src4567 = _mm_shuffle_epi8(src, mask4567);
-        __m128i src01_16 = _mm_unpacklo_epi8(src0123, zero);
-        __m128i src23_16 = _mm_unpackhi_epi8(src0123, zero);
-        __m128i src45_16 = _mm_unpacklo_epi8(src4567, zero);
-        __m128i src67_16 = _mm_unpackhi_epi8(src4567, zero);
-        // multiply accumulate them
-        __m128i mad01 = _mm_madd_epi16(src01_16, fil01);
-        __m128i mad23 = _mm_madd_epi16(src23_16, fil23);
-        __m128i mad45 = _mm_madd_epi16(src45_16, fil45);
-        __m128i mad67 = _mm_madd_epi16(src67_16, fil67);
-        __m128i mad0123 = _mm_add_epi32(mad01, mad23);
-        __m128i mad4567 = _mm_add_epi32(mad45, mad67);
-        __m128i mad_all = _mm_add_epi32(mad0123, mad4567);
-        mad_all = _mm_add_epi32(mad_all, rounding);
-        mad_all = _mm_srai_epi32(mad_all, VP8_FILTER_SHIFT);
-        mad_all = _mm_packs_epi32(mad_all, mad_all);
-        mad_all = _mm_packus_epi16(mad_all, mad_all);
-        *((unsigned int *)output_ptr) = _mm_extract_epi32(mad_all, 0);
-        //TODO(cd): look into Ronald's comment:
-        //    future suggestion: use movd, not pextrd(0).
-        //
-        //    Alternatively, you could unroll this loop somewhat to handle 2
-        //    or 4 lines at a time, so that the packs_epi32() and the
-        //    packus_epi16() handle a full register worth of data. Then again,
-        //    you might have to specialcase the last line since you have 11
-        //    lines to handle here, and you don't want to handle a 12th dummy
-        //    line, so overall I'm not sure it's worth it. Use your best
-        //    judgement. :-).
-
-        // next row
-        src_ptr += src_stride;
-        output_ptr += 4;
+      {
+        __m128i mad_all0;
+        __m128i mad_all1;
+        __m128i mad_all2;
+        __m128i mad_all3;
+        DO_FOUR_PIXELS(mad_all0, 0*src_stride)
+        DO_FOUR_PIXELS(mad_all1, 1*src_stride)
+        DO_FOUR_PIXELS(mad_all2, 2*src_stride)
+        DO_FOUR_PIXELS(mad_all3, 3*src_stride)
+        mad_all0 = _mm_packs_epi32(mad_all0, mad_all1);
+        mad_all2 = _mm_packs_epi32(mad_all2, mad_all3);
+        intermediateA = _mm_packus_epi16(mad_all0, mad_all2);
+        // --
+        src_ptr += src_stride*4;
+        // --
+        DO_FOUR_PIXELS(mad_all0, 0*src_stride)
+        DO_FOUR_PIXELS(mad_all1, 1*src_stride)
+        DO_FOUR_PIXELS(mad_all2, 2*src_stride)
+        DO_FOUR_PIXELS(mad_all3, 3*src_stride)
+        mad_all0 = _mm_packs_epi32(mad_all0, mad_all1);
+        mad_all2 = _mm_packs_epi32(mad_all2, mad_all3);
+        intermediateB = _mm_packus_epi16(mad_all0, mad_all2);
+        // --
+        src_ptr += src_stride*4;
+        // --
+        DO_FOUR_PIXELS(mad_all0, 0*src_stride)
+        DO_FOUR_PIXELS(mad_all1, 1*src_stride)
+        DO_FOUR_PIXELS(mad_all2, 2*src_stride)
+        mad_all0 = _mm_packs_epi32(mad_all0, mad_all1);
+        mad_all2 = _mm_packs_epi32(mad_all2, mad_all2);
+        intermediateC = _mm_packus_epi16(mad_all0, mad_all2);
       }
     }
 
     // Transpose result (intermediate -> transpose3_x)
     {
-      const __m128i srcA  = _mm_load_si128((__m128i *)(&intermediate_buffer[ 0]));
-      const __m128i srcB  = _mm_load_si128((__m128i *)(&intermediate_buffer[16]));
-      const __m128i srcC  = _mm_load_si128((__m128i *)(&intermediate_buffer[32]));
       // 00 01 02 03 10 11 12 13 20 21 22 23 30 31 32 33
       // 40 41 42 43 50 51 52 53 60 61 62 63 70 71 72 73
       // 80 81 82 83 90 91 92 93 A0 A1 A2 A3 xx xx xx xx
-      const __m128i transpose0_0 = _mm_unpacklo_epi8(srcA, srcB);
-      const __m128i transpose0_1 = _mm_unpackhi_epi8(srcA, srcB);
-      const __m128i transpose0_2 = _mm_unpacklo_epi8(srcC, srcC);
-      const __m128i transpose0_3 = _mm_unpackhi_epi8(srcC, srcC);
-      // 00 40 01 41 02 42 03 43 10 50 11 51 12 52 13 53
-      // 20 60 21 61 22 62 23 63 30 70 31 71 32 72 33 73
-      // 80 xx 81 xx 82 xx 83 xx 90 xx 91 xx 92 xx 93 xx
-      // A0 xx A1 xx A2 xx A3 xx xx xx xx xx xx xx xx xx
-      const __m128i transpose1_0 = _mm_unpacklo_epi8(transpose0_0, transpose0_1);
-      const __m128i transpose1_1 = _mm_unpackhi_epi8(transpose0_0, transpose0_1);
-      const __m128i transpose1_2 = _mm_unpacklo_epi8(transpose0_2, transpose0_3);
-      const __m128i transpose1_3 = _mm_unpackhi_epi8(transpose0_2, transpose0_3);
-      // 00 20 40 60 01 21 41 61 02 22 42 62 03 23 43 63
-      // 10 30 50 70 11 31 51 71 12 32 52 72 13 33 53 73
-      // 80 A0 xx xx 81 A1 xx xx 82 A2 xx xx 83 A3 xx xx
-      // 90 xx xx xx 91 xx xx xx 92 xx xx xx 93 xx xx xx
-      const __m128i transpose2_0 = _mm_unpacklo_epi8(transpose1_0, transpose1_1);
-      const __m128i transpose2_1 = _mm_unpackhi_epi8(transpose1_0, transpose1_1);
-      const __m128i transpose2_2 = _mm_unpacklo_epi8(transpose1_2, transpose1_3);
-      const __m128i transpose2_3 = _mm_unpackhi_epi8(transpose1_2, transpose1_3);
+      const __m128i transpose1_0 = _mm_shuffle_epi8(intermediateA, transpose);
+      const __m128i transpose1_1 = _mm_shuffle_epi8(intermediateB, transpose);
+      const __m128i transpose1_2 = _mm_shuffle_epi8(intermediateC, transpose);
+      // 00 10 20 30 01 11 21 31 02 12 22 32 03 13 23 33
+      // 40 50 60 70 41 51 61 71 42 52 62 72 43 53 63 73
+      // 80 90 A0 xx 81 91 A1 xx 82 92 A2 xx 83 93 A3 xx
+      const __m128i transpose2_0 = _mm_unpacklo_epi32(transpose1_0, transpose1_1);
+      const __m128i transpose2_1 = _mm_unpackhi_epi32(transpose1_0, transpose1_1);
       // 00 10 20 30 40 50 60 70 01 11 21 31 41 51 61 71
       // 02 12 22 32 42 52 62 72 03 13 23 33 43 53 63 73
-      // 80 90 A0 xx xx xx xx xx 81 91 A1 xx xx xx xx xx
-      // 82 92 A2 xx xx xx xx xx 83 93 A3 xx xx xx xx xx
       transpose3_0 = _mm_castps_si128(
                             _mm_shuffle_ps(_mm_castsi128_ps(transpose2_0),
-                                           _mm_castsi128_ps(transpose2_2),
-                                           _MM_SHUFFLE(1, 0, 1, 0)));
+                                           _mm_castsi128_ps(transpose1_2),
+                                           _MM_SHUFFLE(0, 0, 1, 0)));
       transpose3_1 = _mm_castps_si128(
                             _mm_shuffle_ps(_mm_castsi128_ps(transpose2_0),
-                                           _mm_castsi128_ps(transpose2_2),
-                                           _MM_SHUFFLE(3, 2, 3, 2)));
+                                           _mm_castsi128_ps(transpose1_2),
+                                           _MM_SHUFFLE(1, 1, 3, 2)));
       transpose3_2 = _mm_castps_si128(
                             _mm_shuffle_ps(_mm_castsi128_ps(transpose2_1),
-                                           _mm_castsi128_ps(transpose2_3),
-                                           _MM_SHUFFLE(1, 0, 1, 0)));
+                                           _mm_castsi128_ps(transpose1_2),
+                                           _MM_SHUFFLE(2, 2, 1, 0)));
       transpose3_3 = _mm_castps_si128(
                             _mm_shuffle_ps(_mm_castsi128_ps(transpose2_1),
-                                           _mm_castsi128_ps(transpose2_3),
-                                           _MM_SHUFFLE(3, 2, 3, 2)));
+                                           _mm_castsi128_ps(transpose1_2),
+                                           _MM_SHUFFLE(3, 3, 3, 2)));
       // 00 10 20 30 40 50 60 70 80 90 A0 xx xx xx xx xx
       // 01 11 21 31 41 51 61 71 81 91 A1 xx xx xx xx xx
       // 02 12 22 32 42 52 62 72 82 92 A2 xx xx xx xx xx
