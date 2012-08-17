@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPX//+NA\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 403,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T23:02:40Z",
+      "side": 1,
+      "message": "EEEEEhw, how about the original code under if !CONFIG_HYBRIDTRANSFORM8X8?",
+      "revId": "3768b587c71f8ed7dfb5d96b0a2c2fa6bac06c88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+M0\u003d",
+        "filename": "vp8/encoder/sad_c.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T23:02:40Z",
+      "side": 1,
+      "message": "I think this should go in vp8/encoder/variance.h.",
+      "revId": "3768b587c71f8ed7dfb5d96b0a2c2fa6bac06c88",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
