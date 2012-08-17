@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///38\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Changed to its own I32X32. It doesn\u0027t use YMODES because that includes \"i8x8pred\" and \"bpred\" (4x4), whereas here we want to use only 32x32 modes. I\u0027m rewriting this into some more sane coding scheme as we speak.",
+      "parentUuid": "AAAAPH//7us\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7uo\u003d",
         "filename": "vp8/common/entropymode.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "kf_ymode \u003c-\u003e uv_mode ?? looks strange. Something\u0027s mixed? Or should the name be vp8_sb_kf_uvmode_encodings?",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///30\u003d",
+        "filename": "vp8/common/entropymode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "See above, y_mode tree includes bpred/i8x8pred so we don\u0027t want that here. I\u0027ve added a define to make that clearer.",
+      "parentUuid": "AAAAPH//7uo\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -70,6 +106,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///4M\u003d",
+        "filename": "vp8/common/pred_common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Yup, removed it.",
+      "parentUuid": "AAAAPH//7ug\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7uc\u003d",
         "filename": "vp8/common/recon.h",
         "patchSetId": 1
@@ -87,6 +141,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///3k\u003d",
+        "filename": "vp8/common/recon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Moved to a single line.",
+      "parentUuid": "AAAAPH//7uc\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7uY\u003d",
         "filename": "vp8/common/recon.h",
         "patchSetId": 1
@@ -98,6 +170,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "ditoo",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///3g\u003d",
+        "filename": "vp8/common/recon.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Moved to a single line also.",
+      "parentUuid": "AAAAPH//7uY\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -138,6 +228,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///3Q\u003d",
+        "filename": "vp8/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 944,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7uM\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7uQ\u003d",
         "filename": "vp8/common/reconinter.c",
         "patchSetId": 1
@@ -149,6 +257,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "general remark: this would all be much easier if the work was done in a small 32x32 cache (think \u0027fdec\u0027 ;)) instead of working in the frame buffers directly.",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///3U\u003d",
+        "filename": "vp8/common/reconinter.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 946,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Yes - I intend to add that in one of my next commits. That requires some more restructuring so I didn\u0027t want to do that in the same commit (it\u0027d get even bigger!).",
+      "parentUuid": "AAAAPH//7uQ\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -172,6 +298,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///3I\u003d",
+        "filename": "vp8/common/reconintra.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 236,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Hm, yeah, that\u0027s ugly - I\u0027ve added an assert on top and removed the abort-case.",
+      "parentUuid": "AAAAPH//7uI\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7uE\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -183,6 +327,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "remove \"if (1)\"",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///0Y\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 829,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7uE\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -206,6 +368,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///0U\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Debug left-overs, removed.",
+      "parentUuid": "AAAAPH//7uA\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7t8\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -217,6 +397,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "FIXME -\u003e TODO(rbultje)",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///0Q\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7t8\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -240,6 +438,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///zk\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 975,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Added {} to else.",
+      "parentUuid": "AAAAPH//7t4\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7t0\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -251,6 +467,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "urk!!!!",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///0M\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1126,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Haha - removed. :-).",
+      "parentUuid": "AAAAPH//7t0\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -274,6 +508,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///0E\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1202,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7tw\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7ts\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -285,6 +537,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "remove \"if (1)\"",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///0A\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7ts\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -308,6 +578,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///zY\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1242,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Added {} to else.",
+      "parentUuid": "AAAAPH//7to\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7tk\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -319,6 +607,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "this should be moved at top of file instead of hidden here",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///zI\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1973,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "It\u0027s unused - removed.",
+      "parentUuid": "AAAAPH//7tk\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -342,6 +648,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///y8\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1991,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Yeah, it\u0027s unused outside this context so I thought that\u0027d be OK. Do you prefer separate variables?",
+      "parentUuid": "AAAAPH//7tc\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7tg\u003d",
         "filename": "vp8/encoder/bitstream.c",
         "patchSetId": 1
@@ -353,6 +677,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "just remove the line",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///y0\u003d",
+        "filename": "vp8/encoder/bitstream.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2242,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7tg\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -376,6 +718,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///1s\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 629,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7tY\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7tU\u003d",
         "filename": "vp8/encoder/encodeframe.c",
         "patchSetId": 1
@@ -387,6 +747,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "trailing space (and below too)",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///1o\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 712,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7tU\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -410,6 +788,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///0o\u003d",
+        "filename": "vp8/encoder/encodeframe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1692,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Hm yeah that\u0027s unnecessary - removed.",
+      "parentUuid": "AAAAPH//7s8\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7sw\u003d",
         "filename": "vp8/encoder/encodemb.c",
         "patchSetId": 1
@@ -421,6 +817,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "just remove",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///0g\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7sw\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
@@ -444,6 +858,24 @@
     },
     {
       "key": {
+        "uuid": "AAAAPX///0k\u003d",
+        "filename": "vp8/encoder/encodemb.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "AAAAPH//7s0\u003d",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "AAAAPH//7so\u003d",
         "filename": "vp8/encoder/generic/csystemdependent.c",
         "patchSetId": 1
@@ -455,6 +887,24 @@
       "writtenOn": "2012-08-06T15:39:13Z",
       "side": 1,
       "message": "this could have be in a separate CL, just for introducing 32x32 functions.",
+      "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///0c\u003d",
+        "filename": "vp8/encoder/generic/csystemdependent.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000885
+      },
+      "writtenOn": "2012-08-17T00:50:44Z",
+      "side": 1,
+      "message": "OK I\u0027ll try to split that off (haven\u0027t done yet).",
+      "parentUuid": "AAAAPH//7so\u003d",
       "revId": "1eb5fa46b4d2dcf754adf02b6c5bb67ea83f483d",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
