@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "AAAAPX///IA\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-17T13:13:50Z",
+      "side": 1,
+      "message": "Comment is a little bit misleading because only top border is processed in this function. Same for U and V.",
+      "revId": "56eca795c482abcb8722458ba6fc01390601fa46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///H8\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 383,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-17T13:13:50Z",
+      "side": 1,
+      "message": "Comment is a little bit misleading because only bottom border is processed in this function. Same for U and V.",
+      "revId": "56eca795c482abcb8722458ba6fc01390601fa46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX///H4\u003d",
+        "filename": "vp8/decoder/decodframe.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1000917
+      },
+      "writtenOn": "2012-08-17T13:13:50Z",
+      "side": 1,
+      "message": "dest_ptr1 is not used in the loop. I think only one src_ptr and dest_ptr are needed here. Same for U and V...",
+      "revId": "56eca795c482abcb8722458ba6fc01390601fa46",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    }
+  ]
+}
