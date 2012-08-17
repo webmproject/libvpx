@@ -645,6 +645,363 @@
       "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
       "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+yg\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 853,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Bracket should be on prev line",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+w8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1715,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Indent incorrect on lines below",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+w4\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1729,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "brace should be on prev line \u0026 incorrect indents below",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+w0\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1765,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "4 space indent used throughout this function",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+ws\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3829,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "4 space indent used on lines below should be 2.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+wk\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3842,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Is the comment relevant anymore. Should it be changed to TODO?",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+wU\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4049,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "FIXME should be TODO",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+vg\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4054,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "You can remove 1 level of braces and shift indent for this code block",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+vQ\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4119,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "extraneous \"the\" should be deleted",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+u8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4234,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Remove this line",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+uU\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4295,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Last line should be indented",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+uE\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4323,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Previous 2 lines should be indented",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+tw\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4356,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Remove this line",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+tg\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4441,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Incorrect indent here and on lines below",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+tI\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4445,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "x-\u003ee_mbd.mode_info_context-\u003embmi is used so extensively throughout this function that a local version would help.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+s8\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4662,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Indent incorrect",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+s0\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4676,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Can this (and other) #if 0 blocks be removed? They make the code difficult to read.",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+ss\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4703,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "force -\u003e forces",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+so\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4723,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Remove commented out text",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+sk\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4733,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Remove this block",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "AAAAPX//+sc\u003d",
+        "filename": "vp8/encoder/rdopt.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 4764,
+      "author": {
+        "id": 1000952
+      },
+      "writtenOn": "2012-08-17T17:59:17Z",
+      "side": 1,
+      "message": "Remove commented out text",
+      "revId": "4f6d21a7f0452e9374115d9234cdb46cd567ad5b",
+      "serverId": "3ce6091f-6c88-37e8-8c75-72f92ae8dfba",
+      "unresolved": false
     }
   ]
 }
